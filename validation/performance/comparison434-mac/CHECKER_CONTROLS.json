@@ -1,0 +1,80 @@
+{
+  "scope": "actual16384 original/frontier/observer CLI guards and in-memory rejection controls; no performance/timing claim",
+  "actual": [
+    {
+      "mode": "off",
+      "fixture": "off.json",
+      "original": "/private/tmp/voteboat-mac434-04049e2-SFfZ8B/logs/cli-off.log",
+      "sha256": "0f0bd84d838b2997cb33ff206318384ec2d0aa5041f1b0f9f3ee5b30f2ad2277",
+      "result": "pass"
+    },
+    {
+      "mode": "on",
+      "fixture": "on.json",
+      "original": "/private/tmp/voteboat-mac434-04049e2-SFfZ8B/logs/cli-on.log",
+      "sha256": "0c3d2194febce4ff70cf0cbb92a777bac9328d4ea8d69c8991c08425da3c0918",
+      "result": "pass"
+    },
+    {
+      "mode": "openraft",
+      "fixture": "openraft.json",
+      "original": "/private/tmp/voteboat-mac434-04049e2-SFfZ8B/logs/cli-openraft.log",
+      "sha256": "dc82b3cc641bbb1afcc43d4689dc8e23c72a1fbfd4b8b18873823a923ffdb903",
+      "result": "pass"
+    }
+  ],
+  "cli_negative": [
+    {
+      "control": "missing_original",
+      "result": "correctly rejected",
+      "reason": "wrong original completion"
+    },
+    {
+      "control": "missing_frontier",
+      "result": "correctly rejected",
+      "reason": "wrong follower frontier"
+    },
+    {
+      "control": "missing_protected_phase",
+      "result": "correctly rejected",
+      "reason": "wrong phase count"
+    },
+    {
+      "control": "historical_gap_scope",
+      "result": "correctly rejected",
+      "reason": "historical gap scope reused"
+    }
+  ],
+  "artifact_negative": [
+    {
+      "control": "missing_dsym_file",
+      "result": "correctly rejected",
+      "reason": "changed dSYM inventory: original"
+    },
+    {
+      "control": "changed_dsym_hash",
+      "result": "correctly rejected",
+      "reason": "changed dSYM file: original/Contents/Info.plist"
+    },
+    {
+      "control": "reused_root_compilation",
+      "result": "correctly rejected",
+      "reason": "reused compiler record: voteboat"
+    },
+    {
+      "control": "missing_build_input",
+      "result": "correctly rejected",
+      "reason": "source inventory differs"
+    },
+    {
+      "control": "missing_original_buffer_module",
+      "result": "correctly rejected",
+      "reason": "434 private request/outcome modules absent"
+    },
+    {
+      "control": "missing_client_outcome_module",
+      "result": "correctly rejected",
+      "reason": "434 private request/outcome modules absent"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "scope": "Actual immutable431 saved20M requested /19988480 completed OFF fixture; profiler perturbed, no capacity/rerun/acceptance claim. Original raw unchanged; validates requested contract and all general invariants before434 timing. Actual434 CLI/ON negative controls still required after build.",
+  "fixture": "validation/performance/hotspot431/mac/bulk.stdout.json",
+  "fixture_sha256": "469bd95af94fcbab23246f7c052f32a2ca602813b0454da4cf3d9ff4f2d4368b",
+  "requested": 20000000,
+  "normalized_completed": 19988480,
+  "positive_pass": true,
+  "negative": [
+    {
+      "control": "requested",
+      "correctly_rejected": "wrong requested originals"
+    },
+    {
+      "control": "completed",
+      "correctly_rejected": "wrong original completion"
+    },
+    {
+      "control": "frontier",
+      "correctly_rejected": "wrong follower frontier"
+    }
+  ]
+}

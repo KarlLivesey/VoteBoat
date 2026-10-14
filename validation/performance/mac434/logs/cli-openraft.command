@@ -1,0 +1,1 @@
+/tmp/voteboat-mac434-04049e2-SFfZ8B/target-matched-release/release/voteboat-matched-framework --clients 4096 --batch 4 --operations 16384 --warmup 1024 --maintenance default-retention --envelopes upstream-default --campaign-timeout-secs 3600 --engine openraft 

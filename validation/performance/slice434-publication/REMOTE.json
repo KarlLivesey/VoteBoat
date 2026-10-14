@@ -1,0 +1,10 @@
+{
+  "command": [
+    "git",
+    "ls-remote",
+    "origin",
+    "refs/heads/main"
+  ],
+  "exit": 0,
+  "head": "04049e2b3f00ccfa7390cf92b0ace448b35ff62b"
+}

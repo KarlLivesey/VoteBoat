@@ -1,0 +1,39 @@
+{
+  "source_counts": [
+    1427,
+    1430
+  ],
+  "commits": [
+    "ebcacbbb755d8069a084837fdc0f4920426c61b7",
+    "04049e2b3f00ccfa7390cf92b0ace448b35ff62b"
+  ],
+  "config_sha256": "561c72e9a55ef3d9374a340bbc00ea3a193b4d081ed8932f395aee30e5f4cb85",
+  "build_original_session": 80626,
+  "build_actual_exit": 0,
+  "actual_small_cli_controls": 3,
+  "actual_rounding_cli": 1,
+  "checker_negatives": 10,
+  "rounding_negatives": 3,
+  "artifact_negatives": 8,
+  "all_setup_status": {
+    "linux-pair-prepare.status": "0",
+    "rounding.status": "0",
+    "checker-controls.status": "0",
+    "artifact-controls.status": "0",
+    "guard-final.status": "0",
+    "runner-syntax.status": "0"
+  },
+  "timing_not_started": true,
+  "bulk_plan": {
+    "requested": 20000000,
+    "actual": 19988480,
+    "requests": 4997120,
+    "warmup": 1024,
+    "clients": 4096,
+    "batch": 4,
+    "trials": 3,
+    "cases": 12
+  },
+  "singleton": "held untilrootbulkdecision; no automaticcontinuation",
+  "profile_source_flags": "withinhostidentical431 assertedprofile; no profiling/kernel/source changes"
+}

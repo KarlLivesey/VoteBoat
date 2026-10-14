@@ -1,0 +1,2 @@
+UUID: BEC866A0-8846-317B-868B-9F941D61719A (arm64) artifacts/matched/voteboat-matched-framework
+UUID: BEC866A0-8846-317B-868B-9F941D61719A (arm64) artifacts/symbols/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-99be8fed005ba8d1

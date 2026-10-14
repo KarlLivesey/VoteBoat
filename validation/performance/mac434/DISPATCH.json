@@ -1,0 +1,27 @@
+{
+  "commit": "04049e2b3f00ccfa7390cf92b0ace448b35ff62b",
+  "remote_job": "/tmp/voteboat-mac434-04049e2-SFfZ8B",
+  "original_remote_pid": 29097,
+  "source_setup_handle": 99028,
+  "setup_exit": 0,
+  "archive_sha256": "0714f3154142684b78a1ee22656e88811a2c14f8651b0b26548e775444053bfd",
+  "guarded_inputs": 1433,
+  "baseline_guarded_inputs": 1430,
+  "added": [
+    "benchmarks/matched/src/voteboat_engine/actor/tests/originals.rs",
+    "benchmarks/matched/src/voteboat_engine/client_requests.rs",
+    "tests/provider_conformance/log_store/entry_clone.rs"
+  ],
+  "removed": [],
+  "changed": [
+    "benchmarks/matched/src/voteboat_engine.rs",
+    "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs",
+    "tests/provider_conformance/log_store.rs"
+  ],
+  "mode_changes": [],
+  "root_reused_inputs": 1404,
+  "publication_verified_by": "GitHub git ls-remote returned exact04049e2b3f00ccfa7390cf92b0ace448b35ff62b",
+  "scope": "Actual434 changed provider+standalone checks planned, unchanged431 root functional only under exact inputs; no timing launched"
+}

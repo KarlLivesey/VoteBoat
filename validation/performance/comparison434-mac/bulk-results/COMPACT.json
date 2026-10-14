@@ -1,0 +1,139 @@
+{
+  "scope": "Repeated sustained one-cell20M-requested paired diagnostics, actual19,988,480 originals. Private matched host change; not full curve/margin/durable/P8 acceptance. Singleton not launched yet.",
+  "cases": 12,
+  "failures": [],
+  "variants": {
+    "baseline": {
+      "rates": [
+        4495750.908362842,
+        4301199.76637463,
+        4232929.187387326
+      ],
+      "p50_ms": [
+        3.754667,
+        3.901333,
+        3.931333
+      ],
+      "p99_ms": [
+        4.43775,
+        4.533666,
+        4.559791
+      ],
+      "median_rates": 4301199.76637463,
+      "median_p50_ms": 3.901333,
+      "median_p99_ms": 4.533666
+    },
+    "candidate": {
+      "rates": [
+        4512406.887284686,
+        4455123.544997843,
+        4409381.018560322
+      ],
+      "p50_ms": [
+        3.72725,
+        3.777792,
+        3.829875
+      ],
+      "p99_ms": [
+        4.300125,
+        4.405667,
+        4.430459
+      ],
+      "median_rates": 4455123.544997843,
+      "median_p50_ms": 3.777792,
+      "median_p99_ms": 4.405667
+    },
+    "on": {
+      "rates": [
+        4408741.809210498,
+        4404133.799893408,
+        4364326.4834325295
+      ],
+      "p50_ms": [
+        3.795,
+        3.800666,
+        3.837459
+      ],
+      "p99_ms": [
+        4.416792,
+        4.361792,
+        4.547125
+      ],
+      "median_rates": 4404133.799893408,
+      "median_p50_ms": 3.800666,
+      "median_p99_ms": 4.416792
+    },
+    "openraft": {
+      "rates": [
+        1920671.1617857306,
+        1944667.5762101242,
+        1921511.5016020911
+      ],
+      "p50_ms": [
+        8.564834,
+        8.43225,
+        8.538458
+      ],
+      "p99_ms": [
+        10.971709,
+        10.558333,
+        10.941917
+      ],
+      "median_rates": 1921511.5016020911,
+      "median_p50_ms": 8.538458,
+      "median_p99_ms": 10.941917
+    }
+  },
+  "paired_comparisons": [
+    {
+      "variant": "candidate",
+      "baseline": "baseline",
+      "trial": 1,
+      "throughput_ratio": 1.0037048269046358,
+      "p50_ratio": 0.9926978877221336,
+      "p99_ratio": 0.9689876626668921
+    },
+    {
+      "variant": "candidate",
+      "baseline": "baseline",
+      "trial": 2,
+      "throughput_ratio": 1.035786242672693,
+      "p50_ratio": 0.9683336439109401,
+      "p99_ratio": 0.9717669982746855
+    },
+    {
+      "variant": "candidate",
+      "baseline": "baseline",
+      "trial": 3,
+      "throughput_ratio": 1.041685514536544,
+      "p50_ratio": 0.9741924685596463,
+      "p99_ratio": 0.9716364193007969
+    },
+    {
+      "variant": "on",
+      "baseline": "candidate",
+      "trial": 1,
+      "throughput_ratio": 0.9770266554715398,
+      "p50_ratio": 1.0181769401032932,
+      "p99_ratio": 1.0271310717711692
+    },
+    {
+      "variant": "on",
+      "baseline": "candidate",
+      "trial": 2,
+      "throughput_ratio": 0.9885548078320554,
+      "p50_ratio": 1.0060548595581758,
+      "p99_ratio": 0.9900412355268794
+    },
+    {
+      "variant": "on",
+      "baseline": "candidate",
+      "trial": 3,
+      "throughput_ratio": 0.989782117957567,
+      "p50_ratio": 1.0019802212865956,
+      "p99_ratio": 1.026332711802547
+    }
+  ],
+  "all_actual_counts_frontiers_and_exits_verified": true,
+  "all_stderr_empty": true
+}

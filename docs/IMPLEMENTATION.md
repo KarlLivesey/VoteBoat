@@ -69,8 +69,8 @@ diagnostics do not qualify sustained floors. [Every Linux trial and scope](../va
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current434: co-locate each original and its completion sender | Remove one allocation/buffer from the sampled client request stage | Published433 rollback, retained431 client CPU contexts and reviewed private ownership/error contracts | One channel/outcome per original, exact duplicate/prefix/cancel/deferral/error order, bounded envelopes, all standalone checks and full enabled hook; checked publication | P9.0/P9.1/P9.3 |
-| Next: measure434 and remove the remaining limiting work | Decide the benefit of fewer request buffers, then select the next measured stage | Checked published434, fresh asserted identities, Mac qualification and immutable431 baselines | Both-host paired completed rates/p99/regressions; retained profiles guide one next ordering/ownership change, sustained acceptance remains separate | P9.0/P9.1/P9.3 |
+| Current: qualify singleton/profile retained434 | Finish the current performance decision and locate the next limiting work | Published434, exact outcomes/zero checks/fresh artifacts and three positive20M bulk pairs on each host | Separate1M singleton pairs/rates/p99/regressions, current source/artifact-bound CPU/text profiles; no browser or instruction/allocator-cause guesses | P9.0/P9.1/P9.3 |
+| Next: remove the next measured request/result or transition cost | Improve the remaining limiting stage with one ordering/ownership change | Current434 singleton/profile disposition and unchanged full outcome/durability contracts | Explicit schema, bounded tested checked publication and both-host completed rates/p99 before retention; full curve/memory-debt/durable acceptance remains separate | P9.0/P9.1/P9.3 |
 | Following: bounded durable batching/overlap under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Native421 barrier evidence and unchanged publication/ticket contracts; bounded fairness schema after current measured framework stage | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual placement/barriers before changing defaults | P9.1/P9.2/P9.3 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
@@ -158,6 +158,28 @@ untimed Linux flatOriginal48 vs oldProposal48+Reply8, requestheader24 vs48; all
 per-original channels/waits remain. Full enabled hook publication/fresh asserted
 artifacts/Mac checks and three20Mrequested bulk pairs remain;1M singleton only
 if bulk does not reject. No performance claim or narrowing of full P9 acceptance.
+Published04049e2, actual39911 exit0 with rootfmt/fourstrict/standalone zero and
+GitHub main verified. [Receipt](../validation/performance/slice434-publication/README.md).
+Fresh asserted Linux/Mac artifact setup proceeds; no next optimization is selected
+while this candidate's measured benefit remains unknown.
+
+434's [fresh Linux artifacts](../validation/performance/matched434-linux/README.md)
+80626 and [12 repeated20M bulk cases](../validation/performance/comparison434/linux/README.md)
+64385 end0 with source/compiler/fourfresh/rootbuildscript/profile/DWP guards:
+431OFF/434OFF/ON/OpenRaft medians5,656,655/6,655,276/5,867,874/3,600,842
+originals/s, request p99 4.455828/3.522436/4.603947/7.363881ms. All OFF pairs
+improve throughput/p99. ON trial3 4,808,779/s/p99 8.915094ms remains recorded.
+[Mac434 qualification](../validation/performance/mac434/README.md) original29097
+ends0 providers37/22, fmt/fourstrict, matched51/fmt/strict/fresh4+dSYM+CLI; exact
+unchanged431 root scopes separately reused. [12 Mac bulk cases](../validation/performance/comparison434-mac/README.md)
+original42715 ends0: medians4,301,200/4,455,124/4,404,134/1,921,512 originals/s,
+request p99 4.533666/4.405667/4.416792/10.941917ms; all OFF pairs improve rate/
+p99, all ON rates and ON p99 trials1/3 regress. Every case matches19,988,480
+originals/4,997,120 requests and frontiers19,989,505×3,1024 warmups, all guards0.
+Retain434; singleton/profile disposition remains next. Active checkpoint/catch-up/
+peak logical retention and queues reported; no physical memory/debt or allocator
+cause claim. Full8,422,500 minimum/all cells/both hosts/durable/headroom/fairness/
+placement/P8 acceptance stays open. No next source optimization yet.
 
 ### Slice433 schema — reject the forced clone inline hint
 

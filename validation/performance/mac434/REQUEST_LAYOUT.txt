@@ -1,0 +1,1 @@
+test voteboat_engine::client_requests::flat_request_layout_and_every_channel_capacity_are_reported_at_queue_boundary ... old_proposal_bytes=48 old_reply_bytes=8 old_element_sum=56 old_two_vec_header_bytes=48 flat_original_bytes=48 flat_request_header_bytes=24 originals=4 original_capacity=4 completion_channels=4

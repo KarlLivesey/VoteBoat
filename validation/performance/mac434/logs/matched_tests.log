@@ -1,0 +1,179 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling libc v0.2.190
+   Compiling syn v3.0.9
+   Compiling siphasher v1.0.4
+   Compiling cfg-if v1.0.5
+   Compiling serde_core v1.0.229
+   Compiling autocfg v1.5.1
+   Compiling num-traits v0.2.19
+   Compiling phf_shared v0.11.3
+   Compiling serde v1.0.229
+   Compiling regex-syntax v0.8.11
+   Compiling rand_core v0.6.4
+   Compiling version_check v0.9.5
+   Compiling core-foundation-sys v0.8.7
+   Compiling iana-time-zone v0.1.65
+   Compiling generic-array v0.14.7
+   Compiling rand v0.8.8
+   Compiling regex-automata v0.4.18
+   Compiling serde_derive v1.0.229
+   Compiling pin-project-lite v0.2.17
+   Compiling regex v1.13.1
+   Compiling phf_generator v0.11.3
+   Compiling futures-sink v0.3.34
+   Compiling memchr v2.8.3
+   Compiling typenum v1.20.1
+   Compiling futures-core v0.3.34
+   Compiling futures-channel v0.3.34
+   Compiling phf_codegen v0.11.3
+   Compiling parse-zoneinfo v0.3.1
+   Compiling phf v0.11.3
+   Compiling futures-macro v0.3.34
+   Compiling getrandom v0.4.3
+   Compiling slab v0.4.12
+   Compiling futures-io v0.3.34
+   Compiling futures-task v0.3.34
+   Compiling rand_core v0.10.1
+   Compiling futures-util v0.3.34
+   Compiling chrono-tz-build v0.2.1
+   Compiling syn v2.0.119
+   Compiling utf8parse v0.2.2
+   Compiling anstyle-parse v1.0.0
+   Compiling chrono-tz v0.8.6
+   Compiling chacha20 v0.10.2
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling chrono v0.4.45
+   Compiling unicode-segmentation v1.13.3
+   Compiling find-msvc-tools v0.1.14
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling anstyle-query v1.1.5
+   Compiling anstyle v1.0.14
+   Compiling shlex v2.0.1
+   Compiling colorchoice v1.0.5
+   Compiling semver v1.0.28
+   Compiling anstream v1.0.0
+   Compiling openraft-macros v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling cc v1.8.0
+   Compiling convert_case v0.10.0
+   Compiling digest v0.10.7
+   Compiling rand v0.10.3
+   Compiling anyerror v0.1.13
+   Compiling tokio-macros v2.7.2
+   Compiling cpufeatures v0.2.17
+   Compiling thiserror v2.0.21
+   Compiling bytecount v0.6.9
+   Compiling unicode-width v0.2.2
+   Compiling strsim v0.11.1
+   Compiling unicode-xid v0.2.6
+   Compiling once_cell v1.21.4
+   Compiling fnv v1.0.7
+   Compiling bytes v1.12.1
+   Compiling clap_lex v1.1.1
+   Compiling heck v0.5.0
+   Compiling clap_derive v4.6.7
+   Compiling tokio v1.53.2
+   Compiling clap_builder v4.6.7
+   Compiling papergrid v0.17.0
+   Compiling tracing-core v0.1.36
+   Compiling derive_more-impl v2.1.1
+   Compiling sha2 v0.10.9
+   Compiling validit v0.2.6
+   Compiling openraft-rt v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling ring v0.17.14
+   Compiling tracing-attributes v0.1.31
+   Compiling thiserror-impl v2.0.21
+   Compiling either v1.19.0
+   Compiling zmij v1.0.23
+   Compiling itertools v0.15.0
+   Compiling tracing v0.1.44
+   Compiling display-more v0.2.6
+   Compiling openraft-rt-tokio v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling derive_more v2.1.1
+   Compiling quorum-set v0.2.2
+   Compiling tabled v0.20.0
+   Compiling clap v4.6.7
+   Compiling futures-executor v0.3.34
+   Compiling serde_json v1.0.154
+   Compiling parse-size v1.1.0
+   Compiling anyhow v1.0.104
+   Compiling smallvec v1.16.3
+   Compiling maplit v1.0.2
+   Compiling peel-off v0.1.1
+   Compiling backoff-series v0.1.1
+   Compiling base2histogram v0.2.3
+   Compiling openraft v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling futures v0.3.34
+   Compiling getrandom v0.2.17
+   Compiling voteboat v0.1.0 (/tmp/voteboat-mac434-04049e2-SFfZ8B/source)
+   Compiling itoa v1.0.18
+   Compiling untrusted v0.9.0
+   Compiling openraft-legacy v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling bench-minimal v0.1.0 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling voteboat-matched-framework v0.1.0 (/tmp/voteboat-mac434-04049e2-SFfZ8B/source/benchmarks/matched)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 45.93s
+     Running unittests src/main.rs (/tmp/voteboat-mac434-04049e2-SFfZ8B/target-matched-checks/debug/deps/voteboat_matched_framework-ac1b8b9785f5c6ae)
+
+running 51 tests
+test application::tests::historical_noop_checkpoint_restores_only_its_exact_boundary ... ok
+test application::tests::partial_prefix_error_keeps_original_application_frontier ... ok
+test attribution::gaps::tests::complete_ordinals_produce_exact_gaps_and_actual_whole_gap_maxima ... ok
+test attribution::gaps::tests::disabled_mode_ignores_poisoned_marks_counters_and_missing_clock_inputs ... ok
+test attribution::gaps::tests::missing_prefix_extra_calls_or_failed_methods_cannot_certify_a_successful_helper ... ok
+test attribution::gaps::tests::missing_stale_and_backward_marks_invalidate_only_the_final_diagnostics ... ok
+test attribution::gaps::tests::overflow_is_checked_before_any_gap_counter_advances ... ok
+test attribution::gaps::tests::partial_helper_error_does_not_read_or_fabricate_a_completed_gap ... ok
+test attribution::tests::disabled_recorder_reads_no_clock_cells_or_snapshots ... ok
+test attribution::tests::exhausted_real_snapshot_observer_preserves_successful_provider_outcome ... ok
+test attribution::tests::interval_accounting_is_checked_and_overflow_is_atomic ... ok
+test attribution::tests::invalid_observation_does_not_interrupt_a_provider_and_is_rejected_at_report ... ok
+test attribution::tests::scoped_provider_deltas_exclude_setup_and_do_not_invent_maxima ... ok
+test budget_tests::campaign_cli_default_and_finite_bounds_are_validated ... ok
+test envelopes::tests::empty_owned_budget_is_derived_before_launch_without_changing_native_defaults ... ok
+test envelopes::tests::fixed_request_profiles_derive_equal_original_bounds_and_independent_replication ... ok
+test guard::tests::cleanup_expiry_is_finite_and_does_not_substitute_a_success_report ... ok
+test guard::tests::original_failure_type_and_cleanup_only_failure_are_preserved ... ok
+test guard::tests::timed_out_owned_clients_are_canceled_and_cleanup_still_runs ... ok
+test guard::tests::zero_budget_ready_result_succeeds_without_waiting ... ok
+test store::tests::completed_predicate_keeps_pending_before_missing_errors_and_exact_outcomes ... ok
+test store::tests::disabled_comparison_preserves_equality_without_touching_observer_cells ... ok
+test store::tests::protected_checkpoint_comparison_keeps_completed_gate_and_distinct_phase ... ok
+test tests::rounding_matches_equal_upstream_client_batches ... ok
+test voteboat_engine::actor::tests::checkpoint_scopes_observe_actual_helpers_and_nested_retention ... ok
+test voteboat_engine::actor::tests::originals::empty_and_oversized_shapes_precede_full_pending_budget_without_admission ... ok
+test voteboat_engine::actor::tests::originals::queued_boundary_empty_originals_commit_in_order_after_deferral ... ok
+test voteboat_engine::actor::tests::originals::queued_boundary_moves_mixed_originals_without_receipts_and_drop_cancels_them ... ok
+test voteboat_engine::actor::tests::partial_compact_helper_error_keeps_original_failure_without_gap_success ... ok
+test voteboat_engine::actor::tests::preloaded_actor_admits_the_exact_wide_bound_and_completes_all_originals ... ok
+test voteboat_engine::actor::tests::provider_failures_keep_original_outcomes_and_are_scoped ... ok
+test voteboat_engine::actor::tests::replies::actor_drop_cancels_all_admitted_and_deferred_original_waits ... ok
+test voteboat_engine::actor::tests::replies::bounded_churn_preserves_receipts_and_reuses_retained_capacity ... logical_bound=5 rounds=256 initial_capacity=7 minimum_available_capacity=7 high_water=7 final_available_capacity=7
+ok
+test voteboat_engine::actor::tests::replies::dropped_client_and_missing_result_stop_delivery_in_input_order ... ok
+test voteboat_engine::actor::tests::replies::duplicate_existing_replaces_old_wait_and_keeps_only_admitted_prefix ... ok
+test voteboat_engine::actor::tests::replies::duplicate_within_batch_replaces_first_wait_and_cancels_unvisited_tail ... ok
+test voteboat_engine::actor::tests::replies::near_bound_partial_rotation_completes_every_original_and_reports_capacity ... partial_rotation clients=1 logical_bound=5 rounds=1024 initial_capacity=7 minimum_available_capacity=7 high_water=7 final_available_capacity=7
+partial_rotation clients=4096 logical_bound=16385 rounds=65540 initial_capacity=28672 minimum_available_capacity=16384 high_water=57344 final_available_capacity=56692
+ok
+test voteboat_engine::actor::tests::replies::nonmonotonic_full_width_ids_commit_in_proposal_order_with_every_receipt ... ok
+test voteboat_engine::actor::tests::replies::shape_and_budget_gates_preserve_prior_pending_and_proposal_prefix ... clients=1 logical_bound=5 retained_capacity=7
+clients=4096 logical_bound=16385 retained_capacity=25528
+ok
+test voteboat_engine::cancellation_tests::canceled_cluster_shutdown_keeps_handles_owned_and_drop_aborts_every_actor ... ok
+test voteboat_engine::client_requests::first_closed_receipt_returns_without_waiting_for_the_tail ... ok
+test voteboat_engine::client_requests::first_wrong_receipt_returns_while_later_sender_remains_owned ... ok
+test voteboat_engine::client_requests::flat_request_layout_and_every_channel_capacity_are_reported_at_queue_boundary ... old_proposal_bytes=48 old_reply_bytes=8 old_element_sum=56 old_two_vec_header_bytes=48 flat_original_bytes=48 flat_request_header_bytes=24 originals=4 original_capacity=4 completion_channels=4
+ok
+test voteboat_engine::client_requests::queued_client_cancellation_drops_every_original_wait_without_losing_request ... ok
+test voteboat_engine::client_requests::zero_identity_never_publishes_a_partial_request_and_precedes_send_error ... ok
+test voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install ... ok
+test voteboat_engine::tests::queued_three_voter_originals_keep_every_receipt_and_respect_the_bound ... ok
+test workload::aggregation_tests::post_clock_aggregation_preserves_each_original_sample_and_rejects_malformed_counts ... ok
+test workload::tests::actual_maintenance_keeps_original_results_and_all_follower_prefixes ... ok
+test workload::tests::both_engines_finish_every_original_for_single_and_four_entry_requests ... ok
+test workload::tests::unavailable_upstream_attribution_is_rejected_explicitly ... ok
+
+test result: ok. 51 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.01s
+

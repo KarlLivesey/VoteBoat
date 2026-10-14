@@ -1,0 +1,3 @@
+# Slice434 checked publication
+
+Published04049e2b3f00ccfa7390cf92b0ace448b35ff62b, originalpush39911 actualexit0 after5.566s. Enabled rootfmt/fourstrict profiles +standalonefmt/strict allzero; every newmodule committed. Root1,403 selected inputs unchanged, cached strict checks reused byCargo as recorded, changedstandalone rechecked. GitHubmain verifiedexactly. Complements frozen qualification/main51 and preserved failedfixture attempt. No performance acceptance or service-path speedup claim. Fresh assertedartifact builds/actualCLI/Mac checks and bulk-first20M paired measurement are next; no furtheroptimizationwhile434 benefitunknown. P9 remains active and all full acceptance requirements open.

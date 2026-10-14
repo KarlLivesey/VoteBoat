@@ -1,0 +1,40 @@
+{
+  "actual_fixture": {
+    "requested": 16385,
+    "operations": 16384,
+    "completed_originals": 16384,
+    "completed_requests": 4096,
+    "frontiers": [
+      17409,
+      17409,
+      17409
+    ],
+    "sha256": "44edad4c03b2c5feb9f8c2715b87fed500737d42b198d30ade6d51cba807b57a",
+    "exit": 0
+  },
+  "checker_actual_rounded_case": "pass",
+  "negative_rounding_controls": [
+    {
+      "originals": 16384,
+      "requested": 16383,
+      "rejected": "wrong equal-client batch rounding"
+    },
+    {
+      "originals": 16383,
+      "requested": 16385,
+      "rejected": "wrong equal-client batch rounding"
+    },
+    {
+      "originals": 16384,
+      "requested": 20000000,
+      "rejected": "wrong equal-client batch rounding"
+    }
+  ],
+  "planned_bulk": {
+    "requested": 20000000,
+    "clients": 4096,
+    "batch": 4,
+    "expected": 19988480,
+    "scope": "countarithmetic only, no fabricated20Mreport or timing"
+  }
+}
