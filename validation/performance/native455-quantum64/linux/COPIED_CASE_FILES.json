@@ -1,0 +1,740 @@
+[
+  {
+    "case": "g1-tcp-r500-w64-t1-quantum16",
+    "original_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-quantum64/linux/campaign-wal/g1-tcp-r500-w64-t1-quantum16",
+    "copied_only_top_level_text_CSV": [
+      {
+        "name": "run.txt",
+        "sha256": "8aaa53261c14bbf20284a4135bd4c82402ef3c7c506ef2e9f115c56fdc3f7bb1",
+        "bytes": 88
+      },
+      {
+        "name": "offers.csv",
+        "sha256": "961078a8e32ec76fa8f26b46a7d24798e8005f99bf920d65954408ceca47ef2f",
+        "bytes": 1002984
+      },
+      {
+        "name": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "name": "maintenance.csv",
+        "sha256": "16d74051a9a89457ce536de157a736b17faa75e3a907da48eee06b4141c8c6be",
+        "bytes": 4955
+      },
+      {
+        "name": "bases.csv",
+        "sha256": "9b899784d3c0a517241ab9571e51d8d9a2aa642c1353e22e7ae75e0d5a616f00",
+        "bytes": 166
+      },
+      {
+        "name": "storage.csv",
+        "sha256": "1f4e14f365351a1efafdf468b0103e4ce62f69c3acae9e6e8b669d941eba4f81",
+        "bytes": 1775
+      },
+      {
+        "name": "summary.txt",
+        "sha256": "ab2fa254d83ae323c010603d1383596d12afdbf64e71b2579381f72a2d587fc8",
+        "bytes": 1406
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r500-w64-t1-quantum32",
+    "original_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-quantum64/linux/campaign-wal/g1-tcp-r500-w64-t1-quantum32",
+    "copied_only_top_level_text_CSV": [
+      {
+        "name": "run.txt",
+        "sha256": "8aaa53261c14bbf20284a4135bd4c82402ef3c7c506ef2e9f115c56fdc3f7bb1",
+        "bytes": 88
+      },
+      {
+        "name": "offers.csv",
+        "sha256": "b6124f2e505c50984df95098d00248e25667cd45535a1ee2f292fe3481a10bb5",
+        "bytes": 1000219
+      },
+      {
+        "name": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "name": "maintenance.csv",
+        "sha256": "ee27c0598a41d29b16bb66a88901eaf0a59619420a7484e7c0b1d4afaedc34f5",
+        "bytes": 4918
+      },
+      {
+        "name": "bases.csv",
+        "sha256": "b30350b54947a1ecfaf52804850bd80d2cb2037d8ccaae7641ff090100c17cb9",
+        "bytes": 166
+      },
+      {
+        "name": "storage.csv",
+        "sha256": "cefbdd38ffd40e9ef4630d2bb35b24648651be57264a31fc24f506d761cb4c09",
+        "bytes": 1757
+      },
+      {
+        "name": "summary.txt",
+        "sha256": "a1d6e184b46a5c34b72927e49558c8cd6b6f316f9c763082b079f78af16e13fd",
+        "bytes": 1407
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r500-w64-t1-quantum64",
+    "original_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-quantum64/linux/campaign-wal/g1-tcp-r500-w64-t1-quantum64",
+    "copied_only_top_level_text_CSV": [
+      {
+        "name": "run.txt",
+        "sha256": "8aaa53261c14bbf20284a4135bd4c82402ef3c7c506ef2e9f115c56fdc3f7bb1",
+        "bytes": 88
+      },
+      {
+        "name": "offers.csv",
+        "sha256": "82e04cb3bd79545148155366c880ec08590e15977a0e8daa360c8d17d88aa316",
+        "bytes": 1000798
+      },
+      {
+        "name": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "name": "maintenance.csv",
+        "sha256": "8219a95fada4c46039fa563d264e9c12f007ed1742b02873be328971e382c10a",
+        "bytes": 4917
+      },
+      {
+        "name": "bases.csv",
+        "sha256": "edd26e03680b903895ae4c9f7d2d7593748dfcb00ae6801eaf5642bdc9bffd4a",
+        "bytes": 166
+      },
+      {
+        "name": "storage.csv",
+        "sha256": "930de0f92a3a0bd5c04912e5e24029c0dadf06df1754c891cc382f9b9d42d397",
+        "bytes": 1764
+      },
+      {
+        "name": "summary.txt",
+        "sha256": "179cc8ba2d75f647ac1bb8a26aaa9a63c556b2b32e0cf6fcc3bc2ea8bf2c3394",
+        "bytes": 1404
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r500-w64-t2-quantum32",
+    "original_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-quantum64/linux/campaign-wal/g1-tcp-r500-w64-t2-quantum32",
+    "copied_only_top_level_text_CSV": [
+      {
+        "name": "run.txt",
+        "sha256": "8aaa53261c14bbf20284a4135bd4c82402ef3c7c506ef2e9f115c56fdc3f7bb1",
+        "bytes": 88
+      },
+      {
+        "name": "offers.csv",
+        "sha256": "3b5f3772278f9583e905d8b08adb14f9d3395935a6e548704688b5533c0ea5e6",
+        "bytes": 998804
+      },
+      {
+        "name": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "name": "maintenance.csv",
+        "sha256": "eefdad22c0328769e3ea8b7d55a484b630577f433f2a2af35d902a07f7e3192d",
+        "bytes": 4638
+      },
+      {
+        "name": "bases.csv",
+        "sha256": "486706ced683e74eee2fe91d458dd151f9729e9d1af23e5dde98087cfcb4ed3a",
+        "bytes": 166
+      },
+      {
+        "name": "storage.csv",
+        "sha256": "ca5dd2472a92b86cc5ecded8167fce8fbc561578524413fe9aa419a688a04f31",
+        "bytes": 1758
+      },
+      {
+        "name": "summary.txt",
+        "sha256": "4bd16e08d2be5557adf12f659c536ffc9383d5d4fa07fe6fb823657490bd45b8",
+        "bytes": 1407
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r500-w64-t2-quantum64",
+    "original_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-quantum64/linux/campaign-wal/g1-tcp-r500-w64-t2-quantum64",
+    "copied_only_top_level_text_CSV": [
+      {
+        "name": "run.txt",
+        "sha256": "8aaa53261c14bbf20284a4135bd4c82402ef3c7c506ef2e9f115c56fdc3f7bb1",
+        "bytes": 88
+      },
+      {
+        "name": "offers.csv",
+        "sha256": "735bcfc46889d9933d865ccf47713766833e7d504142375a94b83abe3a194230",
+        "bytes": 1001067
+      },
+      {
+        "name": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "name": "maintenance.csv",
+        "sha256": "87ce5e5a6f36a9af9e80fcaa340e0b81b9ba78239ce293ac5ce6842a51d3aa3b",
+        "bytes": 4912
+      },
+      {
+        "name": "bases.csv",
+        "sha256": "fe28ca6943bf532f1280fcbdb400e399ff90b2347b4de21105c920865bf4af0a",
+        "bytes": 166
+      },
+      {
+        "name": "storage.csv",
+        "sha256": "e9424ab440fcb5b774523f623ae1d6085ca6b9238fe6e3ed53dcc9207eca78c5",
+        "bytes": 1756
+      },
+      {
+        "name": "summary.txt",
+        "sha256": "618775461404236bbbb865b8668d0b6ad9deb05f6bba522972c1ea7d663a3296",
+        "bytes": 1404
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r500-w64-t2-quantum16",
+    "original_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-quantum64/linux/campaign-wal/g1-tcp-r500-w64-t2-quantum16",
+    "copied_only_top_level_text_CSV": [
+      {
+        "name": "run.txt",
+        "sha256": "8aaa53261c14bbf20284a4135bd4c82402ef3c7c506ef2e9f115c56fdc3f7bb1",
+        "bytes": 88
+      },
+      {
+        "name": "offers.csv",
+        "sha256": "bc2e429a76536ea909bf5219a235f5a92c1fb220c0b1edb7a737b82bf830c14d",
+        "bytes": 998089
+      },
+      {
+        "name": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "name": "maintenance.csv",
+        "sha256": "eb00b5ecb3a479c10587059002e2fd7e3458fbaa8c1d6b85e032845509288d53",
+        "bytes": 4631
+      },
+      {
+        "name": "bases.csv",
+        "sha256": "dafd55837d147f3a59efdb52d56c83a54252dd6c9c0df7c9c9d04a13a1496f4a",
+        "bytes": 166
+      },
+      {
+        "name": "storage.csv",
+        "sha256": "b740a9c4bf55b8eea7741b1e121e1f3714c6ff4ec41e02d280d12bbfe19bd222",
+        "bytes": 1775
+      },
+      {
+        "name": "summary.txt",
+        "sha256": "47972d0fa7aa744de9a5e00e537b484bcc75734cb7053f1ecb318699712fa72d",
+        "bytes": 1408
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r500-w64-t3-quantum64",
+    "original_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-quantum64/linux/campaign-wal/g1-tcp-r500-w64-t3-quantum64",
+    "copied_only_top_level_text_CSV": [
+      {
+        "name": "run.txt",
+        "sha256": "8aaa53261c14bbf20284a4135bd4c82402ef3c7c506ef2e9f115c56fdc3f7bb1",
+        "bytes": 88
+      },
+      {
+        "name": "offers.csv",
+        "sha256": "68a56f5ee7f00d6fac14589f3d8e0e6cb815e04eb6926405d557976f4f9c3455",
+        "bytes": 1000747
+      },
+      {
+        "name": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "name": "maintenance.csv",
+        "sha256": "a8dc489accacca5e8e9b1eab6ff0cec57568f40cea62dd588002a023b4506ba1",
+        "bytes": 4920
+      },
+      {
+        "name": "bases.csv",
+        "sha256": "cb4dea6b8b2b447389af27e39d18a8a5f20a2f473620f2bc101af0d8d31bbbc6",
+        "bytes": 166
+      },
+      {
+        "name": "storage.csv",
+        "sha256": "c47bcfda33d6b9bb4c71ef23944ac99c0d945d0964fcadf2b5ffd6a398cac704",
+        "bytes": 1761
+      },
+      {
+        "name": "summary.txt",
+        "sha256": "ba9acae03bddc95383ff725371e76a830f897ff68409cc57a7019907141d56dc",
+        "bytes": 1407
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r500-w64-t3-quantum16",
+    "original_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-quantum64/linux/campaign-wal/g1-tcp-r500-w64-t3-quantum16",
+    "copied_only_top_level_text_CSV": [
+      {
+        "name": "run.txt",
+        "sha256": "8aaa53261c14bbf20284a4135bd4c82402ef3c7c506ef2e9f115c56fdc3f7bb1",
+        "bytes": 88
+      },
+      {
+        "name": "offers.csv",
+        "sha256": "b4f44f91c1841fe63ccb33996c1743410869c78c22aa8befc82d68d2334c3be4",
+        "bytes": 997688
+      },
+      {
+        "name": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "name": "maintenance.csv",
+        "sha256": "4f9b1c3e8d30a661fb3b3445f53bb059e6142856b92577d4c86d7d87c6569b4b",
+        "bytes": 4909
+      },
+      {
+        "name": "bases.csv",
+        "sha256": "862d7627ffd040e2749d2513f34d1eae24c53c7a583cae25c5f7edf47de38db7",
+        "bytes": 166
+      },
+      {
+        "name": "storage.csv",
+        "sha256": "c693a51542aee227ba8fd533d852947e4e14e08cfd5c404bd91169f6a169971c",
+        "bytes": 1769
+      },
+      {
+        "name": "summary.txt",
+        "sha256": "9c7705ac346be7acf3cc7a8344963e27f9f2d6c22a32fd4f97a2cebcc13f9a74",
+        "bytes": 1408
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r500-w64-t3-quantum32",
+    "original_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-quantum64/linux/campaign-wal/g1-tcp-r500-w64-t3-quantum32",
+    "copied_only_top_level_text_CSV": [
+      {
+        "name": "run.txt",
+        "sha256": "8aaa53261c14bbf20284a4135bd4c82402ef3c7c506ef2e9f115c56fdc3f7bb1",
+        "bytes": 88
+      },
+      {
+        "name": "offers.csv",
+        "sha256": "b87023a4ab4285912ff5412e67b06ae76e5073e7922c97e719b6add3d9b5ae67",
+        "bytes": 999547
+      },
+      {
+        "name": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "name": "maintenance.csv",
+        "sha256": "a0211998d4708ac08ab62cc9ddbf5497a4aa00dab9bb5bc629cba6fb9dccb841",
+        "bytes": 4912
+      },
+      {
+        "name": "bases.csv",
+        "sha256": "275d394343ee735b6ab6d863e0a9350f379c4ecf8f130e2360c3e9284630a9f6",
+        "bytes": 166
+      },
+      {
+        "name": "storage.csv",
+        "sha256": "abd67550e3aac887a92fdae68afda7b21dbf41614d213ecaf9398788cd02c674",
+        "bytes": 1761
+      },
+      {
+        "name": "summary.txt",
+        "sha256": "b954eb90c2be6c52cb32328122c30435719588a1497f6b31f879bc48538c4d4a",
+        "bytes": 1408
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r500-w64-t1-quantum16",
+    "original_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-quantum64/linux/campaign-wal/g1-quic-r500-w64-t1-quantum16",
+    "copied_only_top_level_text_CSV": [
+      {
+        "name": "run.txt",
+        "sha256": "cfc3e54cb6ceb2e0273715de0174b52968631d45bc683fdff2bb42b1db174444",
+        "bytes": 86
+      },
+      {
+        "name": "offers.csv",
+        "sha256": "e6a538e5210f71e976d0086c018e6b26c693e415490b519fcaa50666f20d76bc",
+        "bytes": 996610
+      },
+      {
+        "name": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "name": "maintenance.csv",
+        "sha256": "16ae33404adc67ace5c410f9ac915b1010400bf940f850b776fce08cbb94f167",
+        "bytes": 4895
+      },
+      {
+        "name": "bases.csv",
+        "sha256": "4eec4168e28a89e352f619e96f4a35dadb19ce6b9794955cc7c4d8b2d3ed1de2",
+        "bytes": 166
+      },
+      {
+        "name": "storage.csv",
+        "sha256": "70bd65f8e42c01a94d1b6bdb957f0a1b1078aa9e66fd29bb887950a39cdac419",
+        "bytes": 1768
+      },
+      {
+        "name": "summary.txt",
+        "sha256": "9505c650a63e1baa0a087471c15e39255a0cd578b9b4d4d46633957674496599",
+        "bytes": 1405
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r500-w64-t1-quantum32",
+    "original_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-quantum64/linux/campaign-wal/g1-quic-r500-w64-t1-quantum32",
+    "copied_only_top_level_text_CSV": [
+      {
+        "name": "run.txt",
+        "sha256": "cfc3e54cb6ceb2e0273715de0174b52968631d45bc683fdff2bb42b1db174444",
+        "bytes": 86
+      },
+      {
+        "name": "offers.csv",
+        "sha256": "ed76d45d2a04777a19c12dcd2a015be6bdfb10dad842bb062dccc11dbe1d5483",
+        "bytes": 1000419
+      },
+      {
+        "name": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "name": "maintenance.csv",
+        "sha256": "c524ab7b83b3c2de87ecc4667b1595d7a629f48a3d7b8773354ab020f4bedbe1",
+        "bytes": 4913
+      },
+      {
+        "name": "bases.csv",
+        "sha256": "961b789266990d92209056c12732b641b9dc73a79baea49e0b3d441254bf7d3b",
+        "bytes": 166
+      },
+      {
+        "name": "storage.csv",
+        "sha256": "849b3966616cc43a93cd6c9bc51f850d887bda5e931796941e03a9464fa88563",
+        "bytes": 1763
+      },
+      {
+        "name": "summary.txt",
+        "sha256": "f1daf05db1f60d6cef29289d8d994ddc60a2b7b1cb15bf367ad147b262c39996",
+        "bytes": 1403
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r500-w64-t1-quantum64",
+    "original_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-quantum64/linux/campaign-wal/g1-quic-r500-w64-t1-quantum64",
+    "copied_only_top_level_text_CSV": [
+      {
+        "name": "run.txt",
+        "sha256": "cfc3e54cb6ceb2e0273715de0174b52968631d45bc683fdff2bb42b1db174444",
+        "bytes": 86
+      },
+      {
+        "name": "offers.csv",
+        "sha256": "8bfd53207cfeef9f5892b5bc4e026a64bebc95f6648c2b67c8b740379cd2dbc3",
+        "bytes": 999325
+      },
+      {
+        "name": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "name": "maintenance.csv",
+        "sha256": "38f87ab2ab9bd30703ae6dc845c275b8a20f3f4f258b01cc6ff63f8d78245510",
+        "bytes": 4903
+      },
+      {
+        "name": "bases.csv",
+        "sha256": "22c8f5b7da5f71e9f6051432a9fe094c770042b301c5c69d9053d466cd2a9c68",
+        "bytes": 166
+      },
+      {
+        "name": "storage.csv",
+        "sha256": "d65d16af18ddb259a88e50d629d1be21d19faf4bcfe7f23c84185af718927e27",
+        "bytes": 1767
+      },
+      {
+        "name": "summary.txt",
+        "sha256": "ee57ec1536e6060c433c474cbb67f285027577b45bc1b260e8b1fac7fe43e057",
+        "bytes": 1405
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r500-w64-t2-quantum32",
+    "original_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-quantum64/linux/campaign-wal/g1-quic-r500-w64-t2-quantum32",
+    "copied_only_top_level_text_CSV": [
+      {
+        "name": "run.txt",
+        "sha256": "cfc3e54cb6ceb2e0273715de0174b52968631d45bc683fdff2bb42b1db174444",
+        "bytes": 86
+      },
+      {
+        "name": "offers.csv",
+        "sha256": "88df6f500b77f80e46f896c6eb613270e746b84fce73937d51d90a3a8a03e436",
+        "bytes": 998680
+      },
+      {
+        "name": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "name": "maintenance.csv",
+        "sha256": "4c302c884ca9ed9e80e0ae79c8c6c42fa1af762891a94ea470f76e9984ee5afa",
+        "bytes": 4905
+      },
+      {
+        "name": "bases.csv",
+        "sha256": "a9de0c0ee9563f636030606ff97e32be4e712ce69268fc8a62e2c70a6a58c2e6",
+        "bytes": 166
+      },
+      {
+        "name": "storage.csv",
+        "sha256": "97f0abedfcdaa99230ee479337b65fa1d27ff977aef517f84d914c1c54041209",
+        "bytes": 1754
+      },
+      {
+        "name": "summary.txt",
+        "sha256": "51bfdbed600e8194a30a5671790baf5edcb0db4545e501b1baaf64eb90e8216e",
+        "bytes": 1406
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r500-w64-t2-quantum64",
+    "original_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-quantum64/linux/campaign-wal/g1-quic-r500-w64-t2-quantum64",
+    "copied_only_top_level_text_CSV": [
+      {
+        "name": "run.txt",
+        "sha256": "cfc3e54cb6ceb2e0273715de0174b52968631d45bc683fdff2bb42b1db174444",
+        "bytes": 86
+      },
+      {
+        "name": "offers.csv",
+        "sha256": "095319a09c2c337ec328e9201fa362a93b69011fea5a6fec5132e880673f13f6",
+        "bytes": 999376
+      },
+      {
+        "name": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "name": "maintenance.csv",
+        "sha256": "19e433b04b8307a600cbb6d92c3f1c24a279cd8b1b774f0ca1648df32f1dde9b",
+        "bytes": 4912
+      },
+      {
+        "name": "bases.csv",
+        "sha256": "d990f24ed1d81f8288115cc6078567db504bc3bd8f102179ae1712ba11d75ec7",
+        "bytes": 166
+      },
+      {
+        "name": "storage.csv",
+        "sha256": "52fda8fa8c9bb6debe9c31669ca01198b25b8c3ad04451004769849b562f7726",
+        "bytes": 1774
+      },
+      {
+        "name": "summary.txt",
+        "sha256": "a8b21755f6b07061db2bac63f5727e4d957c627e4ca868072a2419115ef97262",
+        "bytes": 1405
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r500-w64-t2-quantum16",
+    "original_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-quantum64/linux/campaign-wal/g1-quic-r500-w64-t2-quantum16",
+    "copied_only_top_level_text_CSV": [
+      {
+        "name": "run.txt",
+        "sha256": "cfc3e54cb6ceb2e0273715de0174b52968631d45bc683fdff2bb42b1db174444",
+        "bytes": 86
+      },
+      {
+        "name": "offers.csv",
+        "sha256": "984fa6557cdf5897bff19213536e4405d167766185f6bdbc53183e58ef5ae713",
+        "bytes": 997538
+      },
+      {
+        "name": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "name": "maintenance.csv",
+        "sha256": "0da733e27b32431813094cdf9259855ec11d7c833809a352efaf1c755292971a",
+        "bytes": 4896
+      },
+      {
+        "name": "bases.csv",
+        "sha256": "302a32c299811767cba0469d662ae4f7377f54f45700d0d6cd2be12dce4987ca",
+        "bytes": 166
+      },
+      {
+        "name": "storage.csv",
+        "sha256": "66cc1deb75f8eb2f6f8d1400b39f3bd1f66acfe417607e0b07d526d1398699a5",
+        "bytes": 1770
+      },
+      {
+        "name": "summary.txt",
+        "sha256": "773c5b6c872a90a88406d5c1b4359b409fec04ed44c016b433aaae004f4f831d",
+        "bytes": 1406
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r500-w64-t3-quantum64",
+    "original_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-quantum64/linux/campaign-wal/g1-quic-r500-w64-t3-quantum64",
+    "copied_only_top_level_text_CSV": [
+      {
+        "name": "run.txt",
+        "sha256": "cfc3e54cb6ceb2e0273715de0174b52968631d45bc683fdff2bb42b1db174444",
+        "bytes": 86
+      },
+      {
+        "name": "offers.csv",
+        "sha256": "8fdc7385f1b30cdecb58d4c50a33e4729bb0f1d22e055322af7c915731a498ee",
+        "bytes": 1000727
+      },
+      {
+        "name": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "name": "maintenance.csv",
+        "sha256": "44d2461e6bc81d17ee8ccd96ee091eb197dac5ba11dc9dd2425b588a9417080c",
+        "bytes": 4911
+      },
+      {
+        "name": "bases.csv",
+        "sha256": "4c183383917dc574fcd976ceb05f06ea58099ebd6f5331ad4c3090eefc5be17f",
+        "bytes": 166
+      },
+      {
+        "name": "storage.csv",
+        "sha256": "54db3c0ec84a9056221c0617b5a5f803a11f6bdfb77739af06caab2a23b17c14",
+        "bytes": 1760
+      },
+      {
+        "name": "summary.txt",
+        "sha256": "dd0b0681b361392ade47e9c5749d558f03a512e63c5d54d6dcab1991af3ccf92",
+        "bytes": 1403
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r500-w64-t3-quantum16",
+    "original_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-quantum64/linux/campaign-wal/g1-quic-r500-w64-t3-quantum16",
+    "copied_only_top_level_text_CSV": [
+      {
+        "name": "run.txt",
+        "sha256": "cfc3e54cb6ceb2e0273715de0174b52968631d45bc683fdff2bb42b1db174444",
+        "bytes": 86
+      },
+      {
+        "name": "offers.csv",
+        "sha256": "a0d0333e18b7afc8758213ab91bdf72e3f191f1a6cf1966d4afde6a0be2a319b",
+        "bytes": 998061
+      },
+      {
+        "name": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "name": "maintenance.csv",
+        "sha256": "bbc5850379e58d2ce6abe841824311405973d16aa843ac2ccd3f4ab3de170236",
+        "bytes": 4901
+      },
+      {
+        "name": "bases.csv",
+        "sha256": "dfc842c700c8fe0103095d53bb37c28e3ae43c6aa007636f4b68df5c835d3b80",
+        "bytes": 166
+      },
+      {
+        "name": "storage.csv",
+        "sha256": "2f9d0473261c6879f3b6d11b78f3f7c13c95e8a96ae1dfdf6337fc69da6e0157",
+        "bytes": 1767
+      },
+      {
+        "name": "summary.txt",
+        "sha256": "db53d699d3ea661df08dc9d0c777fd1490c2126fbf7af410996ad36c93604493",
+        "bytes": 1406
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r500-w64-t3-quantum32",
+    "original_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-quantum64/linux/campaign-wal/g1-quic-r500-w64-t3-quantum32",
+    "copied_only_top_level_text_CSV": [
+      {
+        "name": "run.txt",
+        "sha256": "cfc3e54cb6ceb2e0273715de0174b52968631d45bc683fdff2bb42b1db174444",
+        "bytes": 86
+      },
+      {
+        "name": "offers.csv",
+        "sha256": "5603f1bfcc9d935284507b85c4c47cb52fc143ac6b64f9d83a65e41f0d6eb10a",
+        "bytes": 1000384
+      },
+      {
+        "name": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "name": "maintenance.csv",
+        "sha256": "796035cb46ca09707c015293685d42ec4c3b673fd513da8d5b536dd5ab3565c3",
+        "bytes": 4921
+      },
+      {
+        "name": "bases.csv",
+        "sha256": "8116d3d818bad8cc64eac3a1ad5dabf8563641ac6e454d0c784e98eafabbdbd4",
+        "bytes": 166
+      },
+      {
+        "name": "storage.csv",
+        "sha256": "0b825dff43892ccc3db7aedd007b5ccf89fe52e906e204b1aeaa7476365d7084",
+        "bytes": 1764
+      },
+      {
+        "name": "summary.txt",
+        "sha256": "7aeed1a6987dee4342e883bffb986a5e479d6cebb93c6655d616234390809aa7",
+        "bytes": 1406
+      }
+    ]
+  }
+]

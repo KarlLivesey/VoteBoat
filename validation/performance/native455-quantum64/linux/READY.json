@@ -1,0 +1,18 @@
+{
+  "state": "SETUP_READY_AWAITING_ROOT_REVIEW_PUBLICATION_QUIET",
+  "candidate_source_commit": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "baseline_source_commit": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "same_artifact_both_identity_guard_roles": true,
+  "case_count": 18,
+  "common_window": 64,
+  "quantum_values": [
+    16,
+    32,
+    64
+  ],
+  "campaign_config_sha256": "c0a0b8154e98d581b29524d404a2c333ec16a3baf7b2a7c2f36a744619a5c6ad",
+  "campaign_driver_sha256": "ccf030dc00facd2db18e708fd80fc475779fb071966a1f7a8a47e75805b0f9ea",
+  "no_build_or_readiness_rerun": true,
+  "campaign_started": false,
+  "socket_preflight_exit": 0
+}

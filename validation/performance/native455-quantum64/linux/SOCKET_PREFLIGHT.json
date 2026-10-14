@@ -1,0 +1,18 @@
+{
+  "actual_require_escalated_bind_exit": 0,
+  "sockets": [
+    {
+      "protocol": "tcp",
+      "localhost_ephemeral_bind": true,
+      "closed_after_probe": true
+    },
+    {
+      "protocol": "udp",
+      "localhost_ephemeral_bind": true,
+      "closed_after_probe": true
+    }
+  ],
+  "common_wal_parent_is_directory": true,
+  "all_case_roots_nonexistent": true,
+  "no_workload_launched": true
+}

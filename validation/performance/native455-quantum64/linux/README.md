@@ -1,0 +1,24 @@
+# Native455 common-window64 ready-quantum diagnostics
+
+Original96883 exited0/ALL_TIMING_END: all18 native workload processes and18 independent validator processes succeeded. Existing byte-identical campaign.py and resource collectors, immutable455 executable/root/source7a99ae5e, pinned compiler/profile/locks/modes and frozen private7-file validator closure were guarded before and after. No build, source change, readiness rerun, default change, pause extension or case replacement. Both baseline/candidate identity guard roles point to the SAME455 artifact, not445 or latest evidence HEAD. READY/CONFIG_DIFF_PROOF/ROOT_REVIEW and actual escalated TCP+UDP bind preflight preserve setup identity; common parent existed and all18case roots were absent before timing.
+
+One group/three voters,8-byte increments,warmup64,15000 scheduled originals offered500/s,active2smaintenance,no pause,common window64. TCP/TLS and QUIC each rotate16/32/64;32/64/16;64/16/32. This compares ready quantum only within the common window64; older window32 results cannot be used as its unchanged baseline. Timing includes30-second horizon+drain/maintenance; raw recovered application, every operation outcome, retry checks and worker joins remain required. All18 recovered value=64+applied, retry_verified/workers_joined true, unknown/pending/no-leader/admission-refused/not-proposed0.
+
+| Transport | Quantum | Total completed/s median | During-horizon completed/s median | End-to-end p99ms median | Window refusals/15000 range |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| tcp | 16 | 137.069 | 136.100 | 2268.368 | 8361–11057 |
+| tcp | 32 | 161.603 | 160.367 | 1282.285 | 9784–10494 |
+| tcp | 64 | 182.476 | 181.367 | 805.219 | 9361–9528 |
+| quic | 16 | 128.245 | 126.800 | 2215.423 | 10861–11576 |
+| quic | 32 | 175.313 | 174.233 | 1105.202 | 9681–10561 |
+| quic | 64 | 159.092 | 157.867 | 1080.275 | 9538–10237 |
+
+Quantum64/16 TCP paired completed-rate ratios .831643/1.355734/1.385316 include a trial1 loss; p99 ratios .865690/.218376/.452263 improve allthree. QUIC ratios1.389891/1.240533/1.324844 and p99 .486823/.487616/.544257 improve allthree. Quantum32/16 TCP rates .788402/1.091454/1.236490 include a trial1 loss, and tails worsen in trials1+2; QUIC rates1.551200/1.145852/1.280879 improve allthree but trial2 p99ratio1.006308 is worse. Every trial's raw rate/latency/refusal/resource/maintenance history is retained. Higher quantum is a useful observed configuration tradeoff here, not a universally best value or default-change decision. No causal allocation/scheduler explanation is assigned.
+
+Leader aggregate commands/append-unit medians q16→32→64: TCP7.301→7.992→8.379,QUIC7.313→8.100→8.288. Leader barrier calls/appliedoriginal TCP.13697→.12513→.11935,QUIC.13675→.12345→.12065; inclusive barrier ms/appliedoriginal TCP6.094→5.287→4.773,QUIC6.611→5.030→5.315. These support better observed amortization; aggregate commands/unit and actual max-inflight64 do NOT certify any64-wide Core proposal. ready_visit_items requested/effective matches each configured quantum. Core capacity64 printed by the benchmark is a configured maximum. Exact proposal-width certification remains unavailable.
+
+OUTCOMES retains all per-replica counts/time, stage-to-stage reconciliation, histogram strings, per-original calls/elapsed and original summary/resource fields. Sync/publication/barrier elapsed scopes overlap/nest and are not CPU or additive critical-path percentages. For this common-window experiment leader median publication/wall53.29–57.29%, sync28.76–30.23%, barrier81.30–87.88%. All18 measured storage error deltas0. Every raw storage/bases/maintenance/offerCSV and validator stdout is preserved; after_create_join-minus-after_measurement counters distinguish in-flight cuts.
+
+All18 cases reached64inflight and refused8361–11576 scheduled offers, so no refusal-free headroom point or sustained capacity acceptance is established. Wholeprocess peakRSS16288–18432KiB covers startup/warmup/horizon/drain/recovery/cleanup, not a memory/debt plateau or measurement-only physical peak. RawKiB+normalizedbytes and CPU/context/block counters are kept, blockcounts are not bytes. Finite15k experiments do not replace20M sustained/all-seven-cell/1.5margin/durable-fairness/placement/sharedbarrier/P8 acceptance. The three prior four-group forced-pause failures remain unresolved and are not covered by this no-pause matrix. Mac455 qualification is separate; no Mac result is implied. Default remains16 and P9 remains active/incomplete.
+
+All regular files except rootSHA256SUMS are hashed, including nested manifests. Files above1MiB are losslessly gzip-compressed with original hash/size in COMPRESSED and every decompression verified. Only top-level case text/CSV files are copied; no binary/fullsource/build/source.tar/WAL/checkpointtree. Original ignored roots remain intact.

@@ -1,0 +1,36 @@
+START g1-tcp-r500-w64-t1-quantum16
+END g1-tcp-r500-w64-t1-quantum16 0
+START g1-tcp-r500-w64-t1-quantum32
+END g1-tcp-r500-w64-t1-quantum32 0
+START g1-tcp-r500-w64-t1-quantum64
+END g1-tcp-r500-w64-t1-quantum64 0
+START g1-tcp-r500-w64-t2-quantum32
+END g1-tcp-r500-w64-t2-quantum32 0
+START g1-tcp-r500-w64-t2-quantum64
+END g1-tcp-r500-w64-t2-quantum64 0
+START g1-tcp-r500-w64-t2-quantum16
+END g1-tcp-r500-w64-t2-quantum16 0
+START g1-tcp-r500-w64-t3-quantum64
+END g1-tcp-r500-w64-t3-quantum64 0
+START g1-tcp-r500-w64-t3-quantum16
+END g1-tcp-r500-w64-t3-quantum16 0
+START g1-tcp-r500-w64-t3-quantum32
+END g1-tcp-r500-w64-t3-quantum32 0
+START g1-quic-r500-w64-t1-quantum16
+END g1-quic-r500-w64-t1-quantum16 0
+START g1-quic-r500-w64-t1-quantum32
+END g1-quic-r500-w64-t1-quantum32 0
+START g1-quic-r500-w64-t1-quantum64
+END g1-quic-r500-w64-t1-quantum64 0
+START g1-quic-r500-w64-t2-quantum32
+END g1-quic-r500-w64-t2-quantum32 0
+START g1-quic-r500-w64-t2-quantum64
+END g1-quic-r500-w64-t2-quantum64 0
+START g1-quic-r500-w64-t2-quantum16
+END g1-quic-r500-w64-t2-quantum16 0
+START g1-quic-r500-w64-t3-quantum64
+END g1-quic-r500-w64-t3-quantum64 0
+START g1-quic-r500-w64-t3-quantum16
+END g1-quic-r500-w64-t3-quantum16 0
+START g1-quic-r500-w64-t3-quantum32
+END g1-quic-r500-w64-t3-quantum32 0

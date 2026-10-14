@@ -1,0 +1,30 @@
+{
+  "same_artifact_guard_roles_exact": true,
+  "source_commit": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "cases": 18,
+  "configuration_hash_exact": true,
+  "byte_identical_driver": true,
+  "only_ready_quantum_varies_within_common_settings": true,
+  "balanced_orders_exact": true,
+  "all_roots_absent_with_parents_existing": true,
+  "fresh_metadata_and_collector_hashes": true,
+  "socket_preflight": {
+    "actual_require_escalated_bind_exit": 0,
+    "sockets": [
+      {
+        "protocol": "tcp",
+        "localhost_ephemeral_bind": true,
+        "closed_after_probe": true
+      },
+      {
+        "protocol": "udp",
+        "localhost_ephemeral_bind": true,
+        "closed_after_probe": true
+      }
+    ],
+    "common_wal_parent_is_directory": true,
+    "all_case_roots_nonexistent": true,
+    "no_workload_launched": true
+  },
+  "source_or_default_changes": false
+}

@@ -1,0 +1,381 @@
+{
+  "previous_config_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/CAMPAIGN_CONFIG.json",
+  "previous_config_sha256": "45ffa5fd911c2e95b26d4c4d0ac91b0427bd92c37cd511b08f5f9a71f52b0a35",
+  "new_config_sha256": "c0a0b8154e98d581b29524d404a2c333ec16a3baf7b2a7c2f36a744619a5c6ad",
+  "both_identity_roles_exact_previous455candidate": true,
+  "source_artifact_compiler_private_closure_unchanged": true,
+  "same_byte_identical_driver_and_collectors": true,
+  "existing_identity_guard_exit": 0,
+  "common_parent_exists": true,
+  "all18case_roots_nonexistent": true,
+  "matrix_rotations": [
+    [
+      16,
+      32,
+      64
+    ],
+    [
+      32,
+      64,
+      16
+    ],
+    [
+      64,
+      16,
+      32
+    ]
+  ],
+  "common_case_settings": {
+    "operations": 15000,
+    "rate": 500,
+    "window": 64,
+    "groups": 1,
+    "maintenance": 2,
+    "pause": null,
+    "warmup_existing64": true
+  },
+  "case_changes": [
+    {
+      "case": "g1-tcp-r500-w64-t1-quantum16",
+      "template": "g1-tcp-r500-t1-candidate",
+      "allowed_changed_fields": [
+        "name",
+        "variant",
+        "trial",
+        "window",
+        "ready_items",
+        "wal_root",
+        "metadata",
+        "command[1]",
+        "command[4]",
+        "command[11]",
+        "resource_command paths/window/quantum"
+      ],
+      "quantum": 16,
+      "common_window": 64
+    },
+    {
+      "case": "g1-tcp-r500-w64-t1-quantum32",
+      "template": "g1-tcp-r500-t1-candidate",
+      "allowed_changed_fields": [
+        "name",
+        "variant",
+        "trial",
+        "window",
+        "ready_items",
+        "wal_root",
+        "metadata",
+        "command[1]",
+        "command[4]",
+        "command[11]",
+        "resource_command paths/window/quantum"
+      ],
+      "quantum": 32,
+      "common_window": 64
+    },
+    {
+      "case": "g1-tcp-r500-w64-t1-quantum64",
+      "template": "g1-tcp-r500-t1-candidate",
+      "allowed_changed_fields": [
+        "name",
+        "variant",
+        "trial",
+        "window",
+        "ready_items",
+        "wal_root",
+        "metadata",
+        "command[1]",
+        "command[4]",
+        "command[11]",
+        "resource_command paths/window/quantum"
+      ],
+      "quantum": 64,
+      "common_window": 64
+    },
+    {
+      "case": "g1-tcp-r500-w64-t2-quantum32",
+      "template": "g1-tcp-r500-t1-candidate",
+      "allowed_changed_fields": [
+        "name",
+        "variant",
+        "trial",
+        "window",
+        "ready_items",
+        "wal_root",
+        "metadata",
+        "command[1]",
+        "command[4]",
+        "command[11]",
+        "resource_command paths/window/quantum"
+      ],
+      "quantum": 32,
+      "common_window": 64
+    },
+    {
+      "case": "g1-tcp-r500-w64-t2-quantum64",
+      "template": "g1-tcp-r500-t1-candidate",
+      "allowed_changed_fields": [
+        "name",
+        "variant",
+        "trial",
+        "window",
+        "ready_items",
+        "wal_root",
+        "metadata",
+        "command[1]",
+        "command[4]",
+        "command[11]",
+        "resource_command paths/window/quantum"
+      ],
+      "quantum": 64,
+      "common_window": 64
+    },
+    {
+      "case": "g1-tcp-r500-w64-t2-quantum16",
+      "template": "g1-tcp-r500-t1-candidate",
+      "allowed_changed_fields": [
+        "name",
+        "variant",
+        "trial",
+        "window",
+        "ready_items",
+        "wal_root",
+        "metadata",
+        "command[1]",
+        "command[4]",
+        "command[11]",
+        "resource_command paths/window/quantum"
+      ],
+      "quantum": 16,
+      "common_window": 64
+    },
+    {
+      "case": "g1-tcp-r500-w64-t3-quantum64",
+      "template": "g1-tcp-r500-t1-candidate",
+      "allowed_changed_fields": [
+        "name",
+        "variant",
+        "trial",
+        "window",
+        "ready_items",
+        "wal_root",
+        "metadata",
+        "command[1]",
+        "command[4]",
+        "command[11]",
+        "resource_command paths/window/quantum"
+      ],
+      "quantum": 64,
+      "common_window": 64
+    },
+    {
+      "case": "g1-tcp-r500-w64-t3-quantum16",
+      "template": "g1-tcp-r500-t1-candidate",
+      "allowed_changed_fields": [
+        "name",
+        "variant",
+        "trial",
+        "window",
+        "ready_items",
+        "wal_root",
+        "metadata",
+        "command[1]",
+        "command[4]",
+        "command[11]",
+        "resource_command paths/window/quantum"
+      ],
+      "quantum": 16,
+      "common_window": 64
+    },
+    {
+      "case": "g1-tcp-r500-w64-t3-quantum32",
+      "template": "g1-tcp-r500-t1-candidate",
+      "allowed_changed_fields": [
+        "name",
+        "variant",
+        "trial",
+        "window",
+        "ready_items",
+        "wal_root",
+        "metadata",
+        "command[1]",
+        "command[4]",
+        "command[11]",
+        "resource_command paths/window/quantum"
+      ],
+      "quantum": 32,
+      "common_window": 64
+    },
+    {
+      "case": "g1-quic-r500-w64-t1-quantum16",
+      "template": "g1-quic-r500-t1-candidate",
+      "allowed_changed_fields": [
+        "name",
+        "variant",
+        "trial",
+        "window",
+        "ready_items",
+        "wal_root",
+        "metadata",
+        "command[1]",
+        "command[4]",
+        "command[11]",
+        "resource_command paths/window/quantum"
+      ],
+      "quantum": 16,
+      "common_window": 64
+    },
+    {
+      "case": "g1-quic-r500-w64-t1-quantum32",
+      "template": "g1-quic-r500-t1-candidate",
+      "allowed_changed_fields": [
+        "name",
+        "variant",
+        "trial",
+        "window",
+        "ready_items",
+        "wal_root",
+        "metadata",
+        "command[1]",
+        "command[4]",
+        "command[11]",
+        "resource_command paths/window/quantum"
+      ],
+      "quantum": 32,
+      "common_window": 64
+    },
+    {
+      "case": "g1-quic-r500-w64-t1-quantum64",
+      "template": "g1-quic-r500-t1-candidate",
+      "allowed_changed_fields": [
+        "name",
+        "variant",
+        "trial",
+        "window",
+        "ready_items",
+        "wal_root",
+        "metadata",
+        "command[1]",
+        "command[4]",
+        "command[11]",
+        "resource_command paths/window/quantum"
+      ],
+      "quantum": 64,
+      "common_window": 64
+    },
+    {
+      "case": "g1-quic-r500-w64-t2-quantum32",
+      "template": "g1-quic-r500-t1-candidate",
+      "allowed_changed_fields": [
+        "name",
+        "variant",
+        "trial",
+        "window",
+        "ready_items",
+        "wal_root",
+        "metadata",
+        "command[1]",
+        "command[4]",
+        "command[11]",
+        "resource_command paths/window/quantum"
+      ],
+      "quantum": 32,
+      "common_window": 64
+    },
+    {
+      "case": "g1-quic-r500-w64-t2-quantum64",
+      "template": "g1-quic-r500-t1-candidate",
+      "allowed_changed_fields": [
+        "name",
+        "variant",
+        "trial",
+        "window",
+        "ready_items",
+        "wal_root",
+        "metadata",
+        "command[1]",
+        "command[4]",
+        "command[11]",
+        "resource_command paths/window/quantum"
+      ],
+      "quantum": 64,
+      "common_window": 64
+    },
+    {
+      "case": "g1-quic-r500-w64-t2-quantum16",
+      "template": "g1-quic-r500-t1-candidate",
+      "allowed_changed_fields": [
+        "name",
+        "variant",
+        "trial",
+        "window",
+        "ready_items",
+        "wal_root",
+        "metadata",
+        "command[1]",
+        "command[4]",
+        "command[11]",
+        "resource_command paths/window/quantum"
+      ],
+      "quantum": 16,
+      "common_window": 64
+    },
+    {
+      "case": "g1-quic-r500-w64-t3-quantum64",
+      "template": "g1-quic-r500-t1-candidate",
+      "allowed_changed_fields": [
+        "name",
+        "variant",
+        "trial",
+        "window",
+        "ready_items",
+        "wal_root",
+        "metadata",
+        "command[1]",
+        "command[4]",
+        "command[11]",
+        "resource_command paths/window/quantum"
+      ],
+      "quantum": 64,
+      "common_window": 64
+    },
+    {
+      "case": "g1-quic-r500-w64-t3-quantum16",
+      "template": "g1-quic-r500-t1-candidate",
+      "allowed_changed_fields": [
+        "name",
+        "variant",
+        "trial",
+        "window",
+        "ready_items",
+        "wal_root",
+        "metadata",
+        "command[1]",
+        "command[4]",
+        "command[11]",
+        "resource_command paths/window/quantum"
+      ],
+      "quantum": 16,
+      "common_window": 64
+    },
+    {
+      "case": "g1-quic-r500-w64-t3-quantum32",
+      "template": "g1-quic-r500-t1-candidate",
+      "allowed_changed_fields": [
+        "name",
+        "variant",
+        "trial",
+        "window",
+        "ready_items",
+        "wal_root",
+        "metadata",
+        "command[1]",
+        "command[4]",
+        "command[11]",
+        "resource_command paths/window/quantum"
+      ],
+      "quantum": 32,
+      "common_window": 64
+    }
+  ]
+}

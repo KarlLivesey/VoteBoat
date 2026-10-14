@@ -1,0 +1,15 @@
+{
+  "original_session": 96883,
+  "actual_exit": 0,
+  "terminal_tool_chunk": "c630d8",
+  "stage": "ALL_TIMING_END",
+  "workload_processes": 18,
+  "validator_processes": 18,
+  "all_zero": true,
+  "require_escalated_localhost_access": true,
+  "no_case_reruns_or_tuning": true,
+  "all_workloads_ended_before_validation": true,
+  "post_workload_guard_succeeded": "Existing unchangedcontroller reached validation and ALL_TIMING_END after guards()",
+  "existing_455_source_commit": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "no_new_build_or_readiness_workload": true
+}
