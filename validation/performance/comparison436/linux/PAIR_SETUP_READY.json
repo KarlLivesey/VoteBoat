@@ -1,0 +1,22 @@
+{
+  "status": "PAIR_SETUP_READY",
+  "published_candidate": "62e9a1167d6f3d68cd60421579e75773d8588410",
+  "baseline": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "baseline_inputs": 1433,
+  "candidate_inputs": 1435,
+  "fresh_build_original70069": "actualterminal0/DONE",
+  "actualCLI3": "all0/countfrontier29/4/15pass",
+  "artifact_guard": "exactpair0/fourfresh:false/rootbuildscript/ELF_DWP/compiler/locks/modes/flags/currentdriverhashes",
+  "unchanged13_checkercontrols": "reusedexactcheckerhash+frozenactualfixtures; actual436CLI3checkednow",
+  "artifact_refusals": 8,
+  "candidate_exe": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched436-linux/artifacts/matched/voteboat-matched-framework",
+  "config_sha256": "8028bbcd6c311e37c2d27d652fceb604edc1af67aa672263d36b0b9db45b553b",
+  "launch": [
+    "bash",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison436/linux-run.sh"
+  ],
+  "allowed_scope_after_authorization": "12serialbulk20M3rotations435OFF/436OFF/436ON/OpenRaftOFF only",
+  "singleton": "HELD untilbothhostbulkretention",
+  "no_live_jobs": true,
+  "timing_started": false
+}

@@ -1,0 +1,96 @@
+{
+  "status": "PREPARED_UNPUBLISHED_REFUSED_NOT_BUILD_READY",
+  "schema": "docs/P9.md#fresh435-profile-decision-and436-schema",
+  "code_publication": null,
+  "baseline_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "linux_baseline_job": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched435-linux",
+  "linux_baseline_exe_sha256": "6b0309401476870859fc2d7e8e4fe5836c0c5530c0e84fcc81589185940147b3",
+  "linux_baseline_dwp_sha256": "fa2cdda8ef58486a5404dc1928987b77020327b682a852504eea7a8ce4289a40",
+  "baseline_config": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison436/BASELINE_CONFIG.linux.json",
+  "root_scope_reuse": "After436publication compare ALL435 ROOT/build/config/src/tests/examples/fixtures/contracts/locks/hooks selected inputs and Git modes exactly, excluding only benchmarks/matched/src. Include immutableMac435SOURCE+QUALIFICATION receipt hashes and Linux435 proof hashes. Reuse ONLY scoped root functional tests if exact; current perhost compiler/profile/pinnedlocks verified before use. New436 matched tests/fmt/Clippy/modulecompile/CLI/freshartifactproofs run.",
+  "new_inputs": "Actual frozen436 changed_inputs and new wait/test module path supplied after implementation; no assumed source/test count or candidate hash. Add essential new modules before readiness.",
+  "checks": "New standalone matched tests+fmt+strict Clippy sequential in distinct qualification target; actual off/on/OpenRaft16384+1024 maintenance CLI. Root full enabledhook stays required.",
+  "fresh_build": "New source directory/target; opt3/debug2/packed/thinLTO/cgu1/assertions+overflowtrue; unset inherited flags/wrappers/profile overrides; CargoJSON-vv fourfresh:false plus rootbuildscript releaseoracle, all source/locks/compiler/modes/original+copy ELF/DWP or MacdSYM.",
+  "pair": "12serialbulk20M3rotations baseline435OFF/candidate436OFF/candidateON/OpenRaftOFF; 19,988,480originals/4,997,120requests+1024; frontiers19,989,505. Singleton12serial1,048,576+1024 only after both-host bulk retention. Existing29phases/4scopes/15methods and comparison/timer/outcome contract unchanged.",
+  "before_publication": "Ignoredscript preparation/syntax/refusal only; no source copy, build, tests, CLI runs, timing, SSH or Mac activity.",
+  "execution": "Publication and root authorization required before source assembly/build; separate explicit quiet authorization after all same-host setup ends before capacity.",
+  "syntax_checks": [
+    {
+      "path": "target/p9/matched436-linux/guard.py",
+      "check": "AST parse",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/matched436-linux/cli.py",
+      "check": "AST parse",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/comparison436/artifact-guard.py",
+      "check": "AST parse",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/comparison436/phase-diagnostic-check.py",
+      "check": "AST parse",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/comparison436/prepare-pair.py",
+      "check": "AST parse",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/comparison436/summarize.py",
+      "check": "AST parse",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/comparison436/collect.py",
+      "check": "AST parse",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/comparison436/check-main-controls.py",
+      "check": "AST parse",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/comparison436/check-artifact-controls.py",
+      "check": "AST parse",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/matched436-linux/run.sh",
+      "check": "bash-n",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/matched436-linux/cli-run.sh",
+      "check": "bash-n",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/comparison436/phase-diagnostic.sh",
+      "check": "bash-n",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/comparison436/linux-run.sh",
+      "check": "bash-n",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/comparison436/prepare-controls.sh",
+      "check": "bash-n",
+      "exit": 0
+    }
+  ],
+  "readiness": "NOT_READY_FOR_BUILD_OR_TIMING",
+  "unpublished_refusal": {
+    "exit": 1,
+    "reason": "candidate not yet qualified/published",
+    "no_pair_output": true
+  },
+  "remaining": "Fill exact published commit, actual changed-input/newmodule inventory and essential modules; assemble source+ROOT_REUSE receipt only after publication/root authorization."
+}

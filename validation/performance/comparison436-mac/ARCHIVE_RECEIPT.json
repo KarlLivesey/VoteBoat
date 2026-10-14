@@ -1,0 +1,18 @@
+{
+  "remote_job": "/tmp/voteboat-comparison436-Ow1m8z",
+  "original_remote_pid": 47046,
+  "original_launch_handle": 77890,
+  "job_exit": 0,
+  "setup_handle": 14786,
+  "setup_exit": 0,
+  "bulk_raw_archive_sha256": "cf79b295f4701459c4108bc1a25b7a709b37b29bf9516aa01686b02362f81560",
+  "prepared_archive_sha256": "3af95c623e27628f02d29e1aea863d4270e55bf93e5032f3a6208d919f64d0c1",
+  "copy_exits": [
+    0,
+    0
+  ],
+  "cases": 12,
+  "failures": [],
+  "stderr": "all12empty",
+  "scope": "bulk only, every original/frontier intact; median gain with first paired throughput regression retained; no singleton/profile/newsource/helper/build rerun"
+}

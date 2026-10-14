@@ -1,0 +1,145 @@
+{
+  "scope": "Linux435 versus436 retainedcandidate bulk diagnostic;3rotations12cases each20Mrequested rounded19,988,480 applied originals/4,997,120 requests +1024; not full P9 acceptance",
+  "original_exec": 51125,
+  "actual_terminal_tool": "85a530",
+  "actual_terminal_exit": 0,
+  "cases": 12,
+  "all_counts_frontiers_requests_pass": true,
+  "frontiers": [
+    19989505,
+    19989505,
+    19989505
+  ],
+  "identity_before_after_exit": 0,
+  "output_checker_exit": 0,
+  "failures": [],
+  "nonempty_stderr": [],
+  "errors": "No reported CLI/stderr/checker errors; no separate refusalcounter exposed",
+  "median_variants": {
+    "baseline": {
+      "rates": [
+        6558384.616815091,
+        6560228.245982974,
+        6837807.479770846
+      ],
+      "median_completed_originals_per_second": 6560228.245982974,
+      "median_request_p50_ms": 2.437389,
+      "median_request_p99_ms": 3.874529
+    },
+    "candidate": {
+      "rates": [
+        6725491.061976455,
+        6748446.476845909,
+        7249524.950270171
+      ],
+      "median_completed_originals_per_second": 6748446.476845909,
+      "median_request_p50_ms": 2.348663,
+      "median_request_p99_ms": 3.696655
+    },
+    "on": {
+      "rates": [
+        6875913.757471043,
+        7011396.6157639595,
+        6699821.823207919
+      ],
+      "median_completed_originals_per_second": 6875913.757471043,
+      "median_request_p50_ms": 2.33179,
+      "median_request_p99_ms": 3.550831
+    },
+    "openraft": {
+      "rates": [
+        3518090.1316324454,
+        3499695.189611772,
+        3453612.0797214853
+      ],
+      "median_completed_originals_per_second": 3499695.189611772,
+      "median_request_p50_ms": 4.686955,
+      "median_request_p99_ms": 6.579079
+    }
+  },
+  "off_pairs": [
+    {
+      "trial": 1,
+      "baseline_originals_per_second": 6558384.616815091,
+      "candidate_originals_per_second": 6725491.061976455,
+      "rate_ratio": 1.025479817809544,
+      "baseline_p99_ms": 3.874529,
+      "candidate_p99_ms": 3.706453,
+      "rate_improved": true,
+      "p99_improved": true
+    },
+    {
+      "trial": 2,
+      "baseline_originals_per_second": 6560228.245982974,
+      "candidate_originals_per_second": 6748446.476845909,
+      "rate_ratio": 1.0286908052289472,
+      "baseline_p99_ms": 3.550781,
+      "candidate_p99_ms": 3.696655,
+      "rate_improved": true,
+      "p99_improved": false
+    },
+    {
+      "trial": 3,
+      "baseline_originals_per_second": 6837807.479770846,
+      "candidate_originals_per_second": 7249524.950270171,
+      "rate_ratio": 1.0602119132071737,
+      "baseline_p99_ms": 4.109881,
+      "candidate_p99_ms": 3.403604,
+      "rate_improved": true,
+      "p99_improved": true
+    }
+  ],
+  "on_tails": [
+    {
+      "trial": 1,
+      "completed_originals_per_second": 6875913.757471043,
+      "p99_ms": 3.550831
+    },
+    {
+      "trial": 2,
+      "completed_originals_per_second": 7011396.6157639595,
+      "p99_ms": 3.297936
+    },
+    {
+      "trial": 3,
+      "completed_originals_per_second": 6699821.823207919,
+      "p99_ms": 3.660967
+    }
+  ],
+  "candidate_logical_diagnostics": {
+    "retained_entries": {
+      "minimum": 1076,
+      "maximum": 5660
+    },
+    "peak_retained_entries": {
+      "minimum": 8016,
+      "maximum": 22320
+    },
+    "peak_peer_queue": {
+      "minimum": 7,
+      "maximum": 23
+    },
+    "peak_client_queue": {
+      "minimum": 0,
+      "maximum": 4096
+    },
+    "checkpoint_count": {
+      "minimum": 3852,
+      "maximum": 3874
+    },
+    "snapshot_installs": {
+      "minimum": 0,
+      "maximum": 1825
+    },
+    "maximum_proposal_width": {
+      "minimum": 0,
+      "maximum": 16384
+    }
+  },
+  "limits": [
+    "Logical retained/queue maxima are not physical RAM/debt proof.",
+    "Active checkpoint/snapshotcatch-up observed; no full fairness/skew/headroom/quorum-durable/P8/requiredcurve acceptance.",
+    "Attributioninclusivewall durations nest/overlap and cannot be summed as CPU.",
+    "ON can perturb work/scheduling and cannot replace OFFpair disposition."
+  ]
+}

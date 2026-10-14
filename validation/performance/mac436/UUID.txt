@@ -1,0 +1,2 @@
+UUID: E44C6285-3A09-3824-95CE-626E446F3CB5 (arm64) artifacts/matched/voteboat-matched-framework
+UUID: E44C6285-3A09-3824-95CE-626E446F3CB5 (arm64) artifacts/symbols/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-e40f495239eafab3

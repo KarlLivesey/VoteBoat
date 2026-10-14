@@ -1,0 +1,22 @@
+{
+  "commit": "62e9a1167d6f3d68cd60421579e75773d8588410",
+  "remote_job": "/tmp/voteboat-mac436-62e9a11-7Y7pAM",
+  "original_remote_pid": 35563,
+  "source_setup_handle": 42425,
+  "setup_exit": 0,
+  "archive_sha256": "0eb934f4345826b2cc9acaf6619a1eb561fccfe214e685fce8012cf57e9ba3ae",
+  "guarded_inputs": 1438,
+  "baseline_guarded_inputs": 1436,
+  "root_reuse_inputs": 1413,
+  "added": [
+    "benchmarks/matched/src/voteboat_engine/waits.rs",
+    "benchmarks/matched/src/voteboat_engine/waits/tests.rs"
+  ],
+  "changed": [
+    "benchmarks/matched/src/voteboat_engine.rs"
+  ],
+  "removed": [],
+  "mode_changes": [],
+  "publication_verified_by": "GitHubmain exact62e9a1167d6f3d68cd60421579e75773d8588410",
+  "scope": "fresh matched65+fmt/strict and assertedartifacts/CLI planned; unchangedrootfunctional/fmt/fourstrict onlysource/compiler/mode reuse; no timing or profiling"
+}

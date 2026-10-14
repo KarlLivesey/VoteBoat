@@ -54,6 +54,38 @@ no unrelated root suite or successful benchmark was repeated. Actual dev future
 Fresh artifacts and both-host comparisons follow publication;436 is unmeasured
 and the macro/current-plus-next-two plan remains active.
 
+436 publication is`62e9a116`, root push48290 actual0 with the full enabled strict
+hook at zero. [Fresh Linux artifact proof](../validation/performance/matched436-linux/README.md)
+original70069 ends0 with1,435 inputs, genuinely fresh four libraries/executable,
+root build-script/profile proof and current original/copied ELF+DWP. Exact
+functional inputs/receipts are reused; actual after-build off/on/OpenRaft controls
+finish16,384 originals/frontiers17,409×3 and observer29/four/15. The private fixture
+mode-only assembly repair and its failure remain; no successful run was repeated.
+
+[Linux436 bulk](../validation/performance/comparison436/linux/README.md) original51125
+ends0 with all12 cases/guards,19,988,480 originals each and equal frontiers.
+435→436 OFF medians6,560,228→6,748,446 originals/s and3.874529→3.696655ms p99;
+all three rates improve but trial2 p99 regresses3.550781→3.696655ms. Instrumented
+ON6,875,914/s and3.550831ms is retained without an instrumentation-cause claim.
+Active checkpoints/catch-up and logical bounded queues remain; no RSS/refusal or
+headroom proof is inferred. Mac qualification has completed65 matched tests,
+format/strict checks and fresh/current CLI guards; its bulk comparison is running.
+[Mac436 qualification](../validation/performance/mac436/README.md) original35563
+ends0 with1,438 source inputs,65 matched tests/fmt/strict, fresh four artifacts,
+root build-script/current complete dSYM and actual three CLI controls. Exact1,413
+root inputs and original435 command/tool/source/log proof permit only scoped root
+functional/fmt/four-strict reuse; no new root execution is claimed. Mac1.98.0 and
+Linux1.98.1 remain separately disclosed, matched within each host.
+
+[Mac436 bulk](../validation/performance/comparison436-mac/README.md) original47046
+ends0 with all12 exact counts/frontiers/guards.435→436 medians4,579,114→4,740,681
+originals/s and4.194375→4.008250ms p99; throughput ratios0.982577/1.044176/1.035205
+are mixed and trial1's−1.74% remains. All three p99 pairs improve; every observer
+regression, including4.596250ms trial2 p99, is retained. Both-host bulk medians
+improve but Mac lacks an all-three rate gain. Planned singleton diagnostics and
+retention remain pending. No physical RSS/debt/refusal/headroom or healthy-margin
+claim follows from logical counters. Full P9 stays active and incomplete.
+
 Slice425 is published and qualified on main: 32 controls, three actual
 16,384-original CLI histories and the complete strict hook pass. Linux's fresh
 asserted nine-case diagnostic also passes every original/frontier, source,

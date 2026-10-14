@@ -1,0 +1,13 @@
+{
+  "baseline": 1436,
+  "candidate": 1438,
+  "added": [
+    "benchmarks/matched/src/voteboat_engine/waits.rs",
+    "benchmarks/matched/src/voteboat_engine/waits/tests.rs"
+  ],
+  "removed": [],
+  "changed": [
+    "benchmarks/matched/src/voteboat_engine.rs"
+  ],
+  "scope": "actual completeMacsource inventories/fullpermissions and samecompiler/profile; no timing"
+}

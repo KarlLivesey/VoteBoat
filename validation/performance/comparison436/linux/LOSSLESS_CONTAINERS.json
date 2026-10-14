@@ -1,0 +1,9 @@
+[
+  {
+    "archive": "linux-results/RESULTS.json.gz",
+    "original": "linux-results/RESULTS.json",
+    "original_sha256": "ca6d7c3013af54ab9c8c09b245605256ac03a2004a0bc9113d73b1dc6d82367a",
+    "original_bytes": 1171091,
+    "encoding": "gzip lossless"
+  }
+]

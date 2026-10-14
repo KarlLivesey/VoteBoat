@@ -1,0 +1,524 @@
+{
+  "cases": 12,
+  "failures": [],
+  "completed_originals": 19988480,
+  "completed_requests": 4997120,
+  "frontiers": [
+    19989505,
+    19989505,
+    19989505
+  ],
+  "medians": {
+    "baseline": {
+      "rates": [
+        4904271.865271199,
+        4540115.26103233,
+        4579114.397450162
+      ],
+      "median_completed_originals_per_second": 4579114.397450162,
+      "median_request_p50_ms": 3.642375,
+      "median_request_p99_ms": 4.194375
+    },
+    "candidate": {
+      "rates": [
+        4818826.481349587,
+        4740681.102191716,
+        4740321.477861131
+      ],
+      "median_completed_originals_per_second": 4740681.102191716,
+      "median_request_p50_ms": 3.520458,
+      "median_request_p99_ms": 4.00825
+    },
+    "on": {
+      "rates": [
+        4698691.792041674,
+        4321128.9742224,
+        4644113.394220997
+      ],
+      "median_completed_originals_per_second": 4644113.394220997,
+      "median_request_p50_ms": 3.587042,
+      "median_request_p99_ms": 4.099166
+    },
+    "openraft": {
+      "rates": [
+        1972488.3882930942,
+        1916613.9381243354,
+        1883489.6725868632
+      ],
+      "median_completed_originals_per_second": 1916613.9381243354,
+      "median_request_p50_ms": 8.583875,
+      "median_request_p99_ms": 11.028583
+    }
+  },
+  "rows": [
+    {
+      "variant": "baseline",
+      "trial": 1,
+      "rate": 4904271.865271199,
+      "p99_ms": 4.008709
+    },
+    {
+      "variant": "candidate",
+      "trial": 1,
+      "rate": 4818826.481349587,
+      "p99_ms": 3.940667
+    },
+    {
+      "variant": "on",
+      "trial": 1,
+      "rate": 4698691.792041674,
+      "p99_ms": 4.013167
+    },
+    {
+      "variant": "openraft",
+      "trial": 1,
+      "rate": 1972488.3882930942,
+      "p99_ms": 10.738167
+    },
+    {
+      "variant": "baseline",
+      "trial": 2,
+      "rate": 4540115.26103233,
+      "p99_ms": 4.194375
+    },
+    {
+      "variant": "candidate",
+      "trial": 2,
+      "rate": 4740681.102191716,
+      "p99_ms": 4.047167
+    },
+    {
+      "variant": "on",
+      "trial": 2,
+      "rate": 4321128.9742224,
+      "p99_ms": 4.59625
+    },
+    {
+      "variant": "openraft",
+      "trial": 2,
+      "rate": 1916613.9381243354,
+      "p99_ms": 11.028583
+    },
+    {
+      "variant": "baseline",
+      "trial": 3,
+      "rate": 4579114.397450162,
+      "p99_ms": 4.225292
+    },
+    {
+      "variant": "candidate",
+      "trial": 3,
+      "rate": 4740321.477861131,
+      "p99_ms": 4.00825
+    },
+    {
+      "variant": "on",
+      "trial": 3,
+      "rate": 4644113.394220997,
+      "p99_ms": 4.099166
+    },
+    {
+      "variant": "openraft",
+      "trial": 3,
+      "rate": 1883489.6725868632,
+      "p99_ms": 11.69375
+    }
+  ],
+  "paired_off": [
+    {
+      "trial": 1,
+      "rate": 0.9825773557688189,
+      "p99": 0.9830264556494372
+    },
+    {
+      "trial": 2,
+      "rate": 1.0441763765076268,
+      "p99": 0.9649034719117866
+    },
+    {
+      "trial": 3,
+      "rate": 1.0352048598088608,
+      "p99": 0.9486326625473458
+    }
+  ],
+  "on_vs_off": [
+    {
+      "trial": 1,
+      "rate": 0.9750697208598663,
+      "p99": 1.0183979006599644
+    },
+    {
+      "trial": 2,
+      "rate": 0.9114996096709925,
+      "p99": 1.1356709520511508
+    },
+    {
+      "trial": 3,
+      "rate": 0.9797043124417917,
+      "p99": 1.0226822179255286
+    }
+  ],
+  "maintenance": [
+    {
+      "variant": "baseline",
+      "trial": 1,
+      "checkpoint_counts": [
+        3891,
+        3886,
+        3886
+      ],
+      "snapshot_installs": [
+        0,
+        1533,
+        1537
+      ],
+      "retained_entries": [
+        3432,
+        2384,
+        1384
+      ],
+      "peak_retained_entries": [
+        22204,
+        8028,
+        8028
+      ],
+      "peak_peer_queue": [
+        6,
+        4,
+        4
+      ],
+      "peak_client_queue": [
+        4096,
+        0,
+        0
+      ],
+      "persistence_units": [
+        61493,
+        21413,
+        21802
+      ],
+      "maximum_proposal_width": 16384
+    },
+    {
+      "variant": "candidate",
+      "trial": 1,
+      "checkpoint_counts": [
+        3896,
+        3888,
+        3890
+      ],
+      "snapshot_installs": [
+        0,
+        1640,
+        1338
+      ],
+      "retained_entries": [
+        4944,
+        5968,
+        1872
+      ],
+      "peak_retained_entries": [
+        22092,
+        8028,
+        8044
+      ],
+      "peak_peer_queue": [
+        6,
+        4,
+        5
+      ],
+      "peak_client_queue": [
+        4096,
+        0,
+        0
+      ],
+      "persistence_units": [
+        61135,
+        21455,
+        21545
+      ],
+      "maximum_proposal_width": 16384
+    },
+    {
+      "variant": "on",
+      "trial": 1,
+      "checkpoint_counts": [
+        3892,
+        3888,
+        3885
+      ],
+      "snapshot_installs": [
+        0,
+        1337,
+        1465
+      ],
+      "retained_entries": [
+        5988,
+        3940,
+        3916
+      ],
+      "peak_retained_entries": [
+        22100,
+        8040,
+        8040
+      ],
+      "peak_peer_queue": [
+        7,
+        5,
+        5
+      ],
+      "peak_client_queue": [
+        4096,
+        0,
+        0
+      ],
+      "persistence_units": [
+        61646,
+        21692,
+        21901
+      ],
+      "maximum_proposal_width": 16384
+    },
+    {
+      "variant": "baseline",
+      "trial": 2,
+      "checkpoint_counts": [
+        3892,
+        3887,
+        3886
+      ],
+      "snapshot_installs": [
+        0,
+        1476,
+        1532
+      ],
+      "retained_entries": [
+        5528,
+        4480,
+        2456
+      ],
+      "peak_retained_entries": [
+        22024,
+        8020,
+        8036
+      ],
+      "peak_peer_queue": [
+        6,
+        5,
+        4
+      ],
+      "peak_client_queue": [
+        4096,
+        0,
+        0
+      ],
+      "persistence_units": [
+        62235,
+        21451,
+        21642
+      ],
+      "maximum_proposal_width": 16384
+    },
+    {
+      "variant": "candidate",
+      "trial": 2,
+      "checkpoint_counts": [
+        3888,
+        3881,
+        3881
+      ],
+      "snapshot_installs": [
+        0,
+        1187,
+        1752
+      ],
+      "retained_entries": [
+        4604,
+        2556,
+        2532
+      ],
+      "peak_retained_entries": [
+        22080,
+        8032,
+        8032
+      ],
+      "peak_peer_queue": [
+        6,
+        5,
+        5
+      ],
+      "peak_client_queue": [
+        4096,
+        0,
+        0
+      ],
+      "persistence_units": [
+        61836,
+        21782,
+        21655
+      ],
+      "maximum_proposal_width": 16384
+    },
+    {
+      "variant": "on",
+      "trial": 2,
+      "checkpoint_counts": [
+        3894,
+        3888,
+        3888
+      ],
+      "snapshot_installs": [
+        0,
+        1269,
+        1400
+      ],
+      "retained_entries": [
+        3232,
+        2208,
+        2184
+      ],
+      "peak_retained_entries": [
+        22104,
+        8040,
+        8044
+      ],
+      "peak_peer_queue": [
+        6,
+        4,
+        5
+      ],
+      "peak_client_queue": [
+        4096,
+        0,
+        0
+      ],
+      "persistence_units": [
+        61811,
+        21993,
+        21983
+      ],
+      "maximum_proposal_width": 4284
+    },
+    {
+      "variant": "baseline",
+      "trial": 3,
+      "checkpoint_counts": [
+        3895,
+        3889,
+        3891
+      ],
+      "snapshot_installs": [
+        0,
+        2035,
+        949
+      ],
+      "retained_entries": [
+        1580,
+        5676,
+        4392
+      ],
+      "peak_retained_entries": [
+        22184,
+        8020,
+        8044
+      ],
+      "peak_peer_queue": [
+        5,
+        5,
+        4
+      ],
+      "peak_client_queue": [
+        4096,
+        0,
+        0
+      ],
+      "persistence_units": [
+        60962,
+        21184,
+        21833
+      ],
+      "maximum_proposal_width": 3316
+    },
+    {
+      "variant": "candidate",
+      "trial": 3,
+      "checkpoint_counts": [
+        3895,
+        3890,
+        3886
+      ],
+      "snapshot_installs": [
+        0,
+        1382,
+        1482
+      ],
+      "retained_entries": [
+        5260,
+        3188,
+        3212
+      ],
+      "peak_retained_entries": [
+        22100,
+        8028,
+        8044
+      ],
+      "peak_peer_queue": [
+        6,
+        5,
+        5
+      ],
+      "peak_client_queue": [
+        4096,
+        0,
+        0
+      ],
+      "persistence_units": [
+        61416,
+        22041,
+        21819
+      ],
+      "maximum_proposal_width": 3312
+    },
+    {
+      "variant": "on",
+      "trial": 3,
+      "checkpoint_counts": [
+        3893,
+        3888,
+        3888
+      ],
+      "snapshot_installs": [
+        0,
+        1597,
+        1452
+      ],
+      "retained_entries": [
+        1304,
+        1304,
+        5400
+      ],
+      "peak_retained_entries": [
+        22032,
+        8032,
+        8036
+      ],
+      "peak_peer_queue": [
+        8,
+        6,
+        4
+      ],
+      "peak_client_queue": [
+        4096,
+        0,
+        0
+      ],
+      "persistence_units": [
+        61612,
+        21566,
+        21549
+      ],
+      "maximum_proposal_width": 3672
+    }
+  ],
+  "counter_limits": "Logical entry/queue/checkpoint/snapshot counts only, not RSS/debt/physicalbarrier or offered-loadheadroom/refusal proof. No dedicated refusal counter in these successful closed-loop reports. Inclusive elapsed scopes overlap and are not CPU time."
+}

@@ -1,0 +1,44 @@
+{
+  "status": "SETUP_READY",
+  "source_commit": "62e9a1167d6f3d68cd60421579e75773d8588410",
+  "source_inputs": 1435,
+  "compiled_inputs": 1429,
+  "changed_inputs": [
+    "benchmarks/matched/src/voteboat_engine.rs",
+    "benchmarks/matched/src/voteboat_engine/waits.rs",
+    "benchmarks/matched/src/voteboat_engine/waits/tests.rs"
+  ],
+  "fresh_build_original_handle": 70069,
+  "fresh_build_actual_terminal_tool": "c2a27d",
+  "fresh_build_exit": 0,
+  "fresh_build_stage": "DONE",
+  "actual_cli_terminal_tool": "432bc9",
+  "actual_cli_exit": 0,
+  "same_linux435_compiler_tools_profile": true,
+  "four_fresh_false": true,
+  "root_buildscript_fresh_false": true,
+  "ordinary_assertions_overflow_enabled": true,
+  "release_reference_oracle_absent": true,
+  "source_derived_observer": [
+    29,
+    4,
+    15
+  ],
+  "original_copy_artifact_hashes_verified": true,
+  "symbols": {
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched436-linux/target-matched-release/release/voteboat-matched-framework.dwp",
+    "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched436-linux/artifacts/matched/voteboat-matched-framework.dwp",
+    "sha256": "22b9dac6aa423f5d33d4b81371b5e4572aed592c50e8f26486276a0d2ab4e4fc",
+    "bytes": 34686848,
+    "executable_sha256": "bf2ef58829df9dc9db91bd59478fa10bd0955d16ad2bdede287e615e299e368f",
+    "cargo_filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched436-linux/target-matched-release/release/voteboat-matched-framework",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched436-linux/target-matched-release/release/voteboat-matched-framework.dwp"
+    ]
+  },
+  "functional_reuse_metadata_sha256": "ba447d26a017019ac450bff47f3ed198473e838b73569250b6bb636f16db11d5",
+  "source_inventory_sha256": "c25a41562c64690caba2370ac3c9fe4323ec4004dfb9683a4c23e77ccf1a3e21",
+  "artifact_receipt_sha256": "a613bdfad8e52bc17715746c40afd930abd47edef60cb439da2a3329da474207",
+  "no_capacity_or_profile_run": true,
+  "next_action": "separate root quiet authorization required"
+}

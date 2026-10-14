@@ -1,0 +1,11 @@
+{
+  "remote_job": "/tmp/voteboat-mac436-62e9a11-7Y7pAM",
+  "original_remote_pid": 35563,
+  "original_launch_handle": 42425,
+  "job_exit": 0,
+  "raw_archive_sha256": "7cc263bd638b43b77a605b758df301a908bd867179d440010b348a0f004f0088",
+  "collection_exit": 0,
+  "failures": [],
+  "actual_root_tests_rerun": false,
+  "scope": "committedsource transfer, actualmatched65/fmt/strict/freshassertedrelease/CLI; oldrootfunctional/fmt/fourstrict reused only by exact435scope; regularmetadata/rawlogs no binaries/build/WALtree transfer"
+}

@@ -1,0 +1,1 @@
+/Users/karllivesey/.cargo/bin/cargo +stable fmt --manifest-path /tmp/voteboat-mac436-62e9a11-7Y7pAM/source/benchmarks/matched/Cargo.toml -- --check 

@@ -1,0 +1,1 @@
+Initial published Gitarchive content inventory/hash passed1435 but main seven privatefixturekeys use0600 while Git mode100644 extracts0644. Assertion stopped before anybuild. Restore only exact checked source physical modes; content bytes unchanged; Git executable bits still exact. No source reset/clean or test/build rerun. Originaltool93744c exit1.

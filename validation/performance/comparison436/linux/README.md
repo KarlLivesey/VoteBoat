@@ -1,0 +1,11 @@
+# Linux435 to436 bulk comparison
+
+Published435 5c2390cb baseline vs436 62e9a116 candidate, same compiler/flags/locks/source guards, empty payload/one group/three voters/volatile stores/in-process RPC/client1-server16. Original51125 ended0;12 rotating serial trials requested20M and each completed19,988,480 originals/4,997,120 requests +1024 warmups, frontiers[19,989,505;3]. Before/after identity and final output checker0, stderr empty; no separate refusal counter exposed. Throughput ends after client joins before latency sort, follower verification and shutdown.
+
+Medians completed originals/s and p99:435OFF6,560,228/3.874529ms;436OFF6,748,446/3.696655ms;436ON6,875,914/3.550831ms;OpenRaft3,499,695/6.579079ms. OFF paired rate ratios1.025480/1.028691/1.060212. Trial2 p99 regressed3.550781→3.696655ms despite rate gain; other tails3.874529→3.706453 and4.109881→3.403604. ON p99s3.550831/3.297936/3.660967ms preserved. No reruns or all-tail improvement claim; both-host retention remains pending and singleton held.
+
+Candidate replica/run checkpoint counts3852–3874, snapshot installations0–1825, final retained1076–5660, peak retained8016–22320, peer queue7–23, client queue0–4096 and maximum proposal0–16384. These are logical counts, not physical RAM or debt proof. All per-original channels and outcomes retained. Snapshot representations differ as documented in COMPARISON.md; upstream append capacity is a soft merge threshold. Nested attribution wall times cannot be summed as CPU or identify an allocator cause.
+
+Fresh4 artifacts/rootbuildscript/release-oracle and ELF/DWP proofs are in matched436-linux. Unchanged13 checker controls reused by exact checker/fixture hashes; actual candidate CLI3 and8 artifact refusals pass. Initial unpublished refusal and seven fixture0600 mode-repair failure preserved in prepared/build metadata. Linux436 functional64+final9/old56 reuse via exact hashes is separate from fresh artifact proof. Full P9 curve/margin/quorum-durable/fairness/skew/headroom/placement/P8 remains open; batch4 minimum8,422,500/s is not achieved.
+
+All raw cases, commands, exits, slowtails, config and guards retained. SHA256SUMS verifies current regular files; any large evidence container is lossless and independently decompress-hash checked. No binaries or build trees archived.
