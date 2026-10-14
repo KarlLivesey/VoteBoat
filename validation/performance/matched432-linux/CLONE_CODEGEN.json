@@ -1,0 +1,34 @@
+{
+  "artifacts": [
+    {
+      "slice": "431",
+      "artifact_sha256": "a2a6e905e2a478be1081265cfaa13879675e0c6227d5ce1a25be57df5a7d92d6",
+      "original_bytes": 11849296,
+      "copy_bytes": 11849296,
+      "text_section_bytes": 2847653,
+      "to_vec_symbol_rva": "0x0000000000173c20",
+      "to_vec_function_bytes": 320,
+      "standalone_LogEntry_Clone_present": true
+    },
+    {
+      "slice": "432",
+      "artifact_sha256": "7a1724610e95c093bb5bbb3fffb38a94d7d7e317326a07e6198d707f882b65ae",
+      "original_bytes": 11861616,
+      "copy_bytes": 11861616,
+      "text_section_bytes": 2851493,
+      "to_vec_symbol_rva": "0x0000000000173f70",
+      "to_vec_function_bytes": 1024,
+      "standalone_LogEntry_Clone_present": false
+    }
+  ],
+  "text_delta_bytes": 3840,
+  "ELF_delta_bytes": 12320,
+  "actual_codegen": {
+    "431": "173c8c standaloneLogEntryClone call\u2192stacktemporary rsp+0x30\u2192four16byte loads/fourdestinationstores at173c94..173cba.",
+    "432": "HotCommand body inline in to_vec; no standaloneLogEntryClone/EntryPayloadClone symbol. EmptyCommand1741cf lengthtest\u21921741d2\u2192174252\u21921740a9 direct destinationwrites1740ad..1740cb; no top-level64byte clone temporary/call. NonemptyCommand retains fullbyte malloc1741f0/memcpy174224 and fullheaders/128bitoperation; configuration retainsBoxmalloc174129+nestedConfigurationclone17419d/174271.",
+    "size_tradeoff": "The to_vec function expands because complete unchanged payload variant cloning is inlined; fullELF/text deltas recorded. No throughput conclusion from assembly."
+  },
+  "scope": "Fresh published asserted432 vsimmutablepublished431, same compiler/flags; staticcodegen only, no timings/newoptimization/sourcechanges",
+  "commands": "Actual objdump/nm/size commandJSON/exits/stdout/stderr underlogs/codegen{431,432}-*; stderr retained.",
+  "annotation_correction": "Initial broad mangled-name predicate matched Vec<LogEntry>Clone as top-levelClone. Corrected exactdemangledsymbol-name presence; initialJSON preserved. Raw nm/objdump/size output unchanged; no code/profile/guard changes."
+}

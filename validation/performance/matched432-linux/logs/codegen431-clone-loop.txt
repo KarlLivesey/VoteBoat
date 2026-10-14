@@ -1,0 +1,86 @@
+
+target/p9/matched431-linux/artifacts/matched/voteboat-matched-framework:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000173c20 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsbnXr5Sm8wZO_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_>:
+  173c20:	push   %rbp
+  173c21:	push   %r15
+  173c23:	push   %r14
+  173c25:	push   %r13
+  173c27:	push   %r12
+  173c29:	push   %rbx
+  173c2a:	sub    $0x78,%rsp
+  173c2e:	mov    %rdi,0x28(%rsp)
+  173c33:	test   %rdx,%rdx
+  173c36:	mov    %rdx,0x8(%rsp)
+  173c3b:	je     173ccb <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsbnXr5Sm8wZO_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0xab>
+  173c41:	mov    %rdx,%rbx
+  173c44:	mov    %rsi,%r15
+  173c47:	mov    %rdx,%r12
+  173c4a:	shl    $0x6,%r12
+  173c4e:	mov    %r12,%rdi
+  173c51:	call   *0x236fd9(%rip)        # 3aac30 <malloc@GLIBC_2.2.5>
+  173c57:	test   %rax,%rax
+  173c5a:	je     173d10 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsbnXr5Sm8wZO_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0xf0>
+  173c60:	mov    %rax,%r13
+  173c63:	mov    %rbx,0x10(%rsp)
+  173c68:	mov    %rax,0x18(%rsp)
+  173c6d:	xor    %ebx,%ebx
+  173c6f:	lea    0x30(%rsp),%rbp
+  173c74:	xor    %r14d,%r14d
+  173c77:	nopw   0x0(%rax,%rax,1)
+  173c80:	cmp    %rbx,%r12
+  173c83:	je     173cdd <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsbnXr5Sm8wZO_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0xbd>
+  173c85:	lea    (%r15,%rbx,1),%rsi
+  173c89:	mov    %rbp,%rdi
+  173c8c:	call   1b0500 <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat3logNtB5_8LogEntryNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone>
+  173c91:	inc    %r14
+  173c94:	movaps 0x30(%rsp),%xmm0
+  173c99:	movaps 0x40(%rsp),%xmm1
+  173c9e:	movaps 0x50(%rsp),%xmm2
+  173ca3:	movaps 0x60(%rsp),%xmm3
+  173ca8:	movaps %xmm3,0x30(%r13,%rbx,1)
+  173cae:	movaps %xmm2,0x20(%r13,%rbx,1)
+  173cb4:	movaps %xmm1,0x10(%r13,%rbx,1)
+  173cba:	movaps %xmm0,0x0(%r13,%rbx,1)
+  173cc0:	add    $0x40,%rbx
+  173cc4:	cmp    %rbx,%r12
+  173cc7:	jne    173c80 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsbnXr5Sm8wZO_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x60>
+  173cc9:	jmp    173cdd <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsbnXr5Sm8wZO_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0xbd>
+  173ccb:	movq   $0x0,0x10(%rsp)
+  173cd4:	movq   $0x10,0x18(%rsp)
+  173cdd:	mov    0x8(%rsp),%rax
+  173ce2:	mov    %rax,0x20(%rsp)
+  173ce7:	mov    0x28(%rsp),%rcx
+  173cec:	mov    %rax,0x10(%rcx)
+  173cf0:	mov    0x10(%rsp),%rax
+  173cf5:	mov    %rax,(%rcx)
+  173cf8:	mov    0x18(%rsp),%rax
+  173cfd:	mov    %rax,0x8(%rcx)
+  173d01:	add    $0x78,%rsp
+  173d05:	pop    %rbx
+  173d06:	pop    %r12
+  173d08:	pop    %r13
+  173d0a:	pop    %r14
+  173d0c:	pop    %r15
+  173d0e:	pop    %rbp
+  173d0f:	ret
+  173d10:	mov    $0x10,%edi
+  173d15:	mov    %r12,%rsi
+  173d18:	call   *0x236f5a(%rip)        # 3aac78 <_DYNAMIC+0x250>
+  173d1e:	cmp    0x8(%rsp),%r14
+  173d23:	ja     173d3f <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsbnXr5Sm8wZO_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x11f>
+  173d25:	mov    %rax,%r15
+  173d28:	mov    %r14,0x20(%rsp)
+  173d2d:	lea    0x10(%rsp),%rdi
+  173d32:	call   168430 <_RINvNtCsgxBkk5gSRhY_4core3ptr9drop_glueINtNtCs6i54tJFfzR_5alloc3vec3VecNtNtCsbnXr5Sm8wZO_8voteboat3log8LogEntryEEB1b_.llvm.7258382479559956366>
+  173d37:	mov    %r15,%rdi
+  173d3a:	call   38b310 <_Unwind_Resume@plt>
+  173d3f:	lea    -0x114348(%rip),%rdi        # 5f9fe <anon.36fdf33a2c2e5ce40cc2b01e13d98863.780.llvm.7258382479559956366+0x6ed>
+  173d46:	lea    0x22d993(%rip),%rcx        # 3a16e0 <anon.36fdf33a2c2e5ce40cc2b01e13d98863.18.llvm.7258382479559956366+0xd8>
+  173d4d:	mov    $0x18d,%esi
+  173d52:	xor    %edx,%edx
+  173d54:	call   *0x236fe6(%rip)        # 3aad40 <_DYNAMIC+0x318>
+  173d5a:	call   *0x236f90(%rip)        # 3aacf0 <_DYNAMIC+0x2c8>

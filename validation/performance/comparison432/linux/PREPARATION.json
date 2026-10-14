@@ -1,0 +1,18 @@
+{
+  "source_inputs": [
+    1427,
+    1428
+  ],
+  "commits": [
+    "ebcacbbb755d8069a084837fdc0f4920426c61b7",
+    "dcc14ef0488f3b0a98afd765b561a86fd3b6fa42"
+  ],
+  "strict_actual_guards": "Actualfourfresh records/rootbuildscript/profile/source+compiler/locks/originalcopies/DWP pass",
+  "actual_checker_fixtures": 3,
+  "checker_negative_controls": 10,
+  "artifact_negative_controls": 8,
+  "all_controls_exit": 0,
+  "driver_scope": "24rotatingcases only afterrootquietSTART; no extraoptimization/timing/profileflags",
+  "codegen_proof": "target/p9/matched432-linux/CLONE_CODEGEN.json",
+  "capacity_not_started": true
+}

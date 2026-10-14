@@ -1,0 +1,293 @@
+
+target/p9/matched432-linux/artifacts/matched/voteboat-matched-framework:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000173f70 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_>:
+  173f70:	push   %rbp
+  173f71:	push   %r15
+  173f73:	push   %r14
+  173f75:	push   %r13
+  173f77:	push   %r12
+  173f79:	push   %rbx
+  173f7a:	sub    $0x108,%rsp
+  173f81:	test   %rdx,%rdx
+  173f84:	mov    %rdx,0x28(%rsp)
+  173f89:	mov    %rdi,0x78(%rsp)
+  173f8e:	je     174287 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x317>
+  173f94:	mov    %rdx,%rbx
+  173f97:	mov    %rsi,0x8(%rsp)
+  173f9c:	mov    %rdx,%rdi
+  173f9f:	shl    $0x6,%rdi
+  173fa3:	mov    %rdi,(%rsp)
+  173fa7:	call   *0x237c33(%rip)        # 3abbe0 <malloc@GLIBC_2.2.5>
+  173fad:	test   %rax,%rax
+  173fb0:	je     17430c <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x39c>
+  173fb6:	mov    %rax,%r13
+  173fb9:	mov    %rbx,0x60(%rsp)
+  173fbe:	mov    %rax,0x68(%rsp)
+  173fc3:	xor    %r12d,%r12d
+  173fc6:	mov    0x8(%rsp),%rdx
+  173fcb:	mov    %rdx,%r14
+  173fce:	xor    %r15d,%r15d
+  173fd1:	mov    (%rsp),%rsi
+  173fd5:	jmp    1740e1 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x171>
+  173fda:	mov    0x18(%rbx),%rax
+  173fde:	mov    %rax,0x98(%rsp)
+  173fe6:	movq   $0x5,0x90(%rsp)
+  173ff2:	mov    0x8(%rsp),%rdx
+  173ff7:	mov    (%rsp),%rsi
+  173ffb:	mov    0x20(%rsp),%rdi
+  174000:	mov    0x18(%rsp),%r8
+  174005:	mov    0x48(%rsp),%r9
+  17400a:	movaps 0x50(%rsp),%xmm3
+  17400f:	mov    0x10(%rsp),%r10
+  174014:	mov    0x40(%rsp),%r11
+  174019:	mov    0x38(%rsp),%rax
+  17401e:	mov    0x30(%rsp),%rcx
+  174023:	mov    %rax,0x0(%rbp)
+  174027:	mov    %rcx,0x8(%rbp)
+  17402b:	mov    0x100(%rsp),%rax
+  174033:	mov    %rax,0x80(%rbp)
+  17403a:	mov    0x90(%rsp),%rax
+  174042:	mov    0x98(%rsp),%rcx
+  17404a:	movaps 0xa0(%rsp),%xmm0
+  174052:	movaps 0xb0(%rsp),%xmm1
+  17405a:	movaps 0xc0(%rsp),%xmm2
+  174062:	mov    %rax,0x10(%rbp)
+  174066:	mov    %rcx,0x18(%rbp)
+  17406a:	movaps %xmm0,0x20(%rbp)
+  17406e:	movaps %xmm1,0x30(%rbp)
+  174072:	movaps %xmm2,0x40(%rbp)
+  174076:	movaps 0xd0(%rsp),%xmm0
+  17407e:	movaps %xmm0,0x50(%rbp)
+  174082:	movaps 0xe0(%rsp),%xmm0
+  17408a:	movaps %xmm0,0x60(%rbp)
+  17408e:	movaps 0xf0(%rsp),%xmm0
+  174096:	movaps %xmm0,0x70(%rbp)
+  17409a:	mov    0x88(%rsp),%rax
+  1740a2:	mov    %rax,0x88(%rbp)
+  1740a9:	add    $0x40,%r14
+  1740ad:	mov    %r10,0x0(%r13,%r12,1)
+  1740b2:	mov    %rbp,0x8(%r13,%r12,1)
+  1740b7:	mov    %r9,0x10(%r13,%r12,1)
+  1740bc:	mov    %r11,0x18(%r13,%r12,1)
+  1740c1:	mov    %rdi,0x20(%r13,%r12,1)
+  1740c6:	mov    %r8,0x28(%r13,%r12,1)
+  1740cb:	movaps %xmm3,0x30(%r13,%r12,1)
+  1740d1:	add    $0x40,%r12
+  1740d5:	inc    %r15
+  1740d8:	cmp    %r12,%rsi
+  1740db:	je     174299 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x329>
+  1740e1:	cmp    %r12,%rsi
+  1740e4:	je     174299 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x329>
+  1740ea:	movaps 0x30(%r14),%xmm3
+  1740ef:	mov    (%r14),%r10
+  1740f2:	test   %r10,%r10
+  1740f5:	je     1740a9 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x139>
+  1740f7:	cmp    $0x1,%r10d
+  1740fb:	jne    1741c0 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x250>
+  174101:	mov    %r11,0x40(%rsp)
+  174106:	mov    %r10,0x10(%rsp)
+  17410b:	movaps %xmm3,0x50(%rsp)
+  174110:	mov    %r9,0x48(%rsp)
+  174115:	mov    %r8,0x18(%rsp)
+  17411a:	mov    %rdi,0x20(%rsp)
+  17411f:	mov    0x8(%rdx,%r12,1),%rbx
+  174124:	mov    $0x90,%edi
+  174129:	call   *0x237ab1(%rip)        # 3abbe0 <malloc@GLIBC_2.2.5>
+  17412f:	test   %rax,%rax
+  174132:	je     1742cf <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x35f>
+  174138:	mov    %rax,%rbp
+  17413b:	mov    (%rbx),%rax
+  17413e:	mov    %rax,0x38(%rsp)
+  174143:	mov    0x8(%rbx),%rax
+  174147:	mov    %rax,0x30(%rsp)
+  17414c:	mov    0x88(%rbx),%rdx
+  174153:	mov    0x10(%rbx),%rax
+  174157:	sub    $0x3,%rax
+  17415b:	mov    $0x1,%ecx
+  174160:	cmovb  %rcx,%rax
+  174164:	test   %rax,%rax
+  174167:	mov    %rdx,0x88(%rsp)
+  17416f:	je     174262 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x2f2>
+  174175:	cmp    $0x1,%rax
+  174179:	jne    173fda <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x6a>
+  17417f:	mov    0x80(%rbx),%rax
+  174186:	mov    %rax,0x80(%rsp)
+  17418e:	add    $0x10,%rbx
+  174192:	lea    0x90(%rsp),%rdi
+  17419a:	mov    %rbx,%rsi
+  17419d:	call   1aff30 <_RNvXs1_NtCsZ7D6q0gzNZ_8voteboat10membershipNtB5_13ConfigurationNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone>
+  1741a2:	mov    0x80(%rsp),%rax
+  1741aa:	mov    %rax,0x100(%rsp)
+  1741b2:	jmp    173ff2 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x82>
+  1741b7:	nopw   0x0(%rax,%rax,1)
+  1741c0:	mov    0x28(%rdx,%r12,1),%r8
+  1741c5:	mov    0x20(%rdx,%r12,1),%rdi
+  1741ca:	mov    0x18(%rdx,%r12,1),%rbp
+  1741cf:	test   %rbp,%rbp
+  1741d2:	je     174252 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x2e2>
+  1741d4:	mov    %r10,0x10(%rsp)
+  1741d9:	movaps %xmm3,0x50(%rsp)
+  1741de:	mov    %r8,0x18(%rsp)
+  1741e3:	mov    %rdi,0x20(%rsp)
+  1741e8:	mov    0x10(%rdx,%r12,1),%rbx
+  1741ed:	mov    %rbp,%rdi
+  1741f0:	call   *0x2379ea(%rip)        # 3abbe0 <malloc@GLIBC_2.2.5>
+  1741f6:	test   %rax,%rax
+  1741f9:	je     1742fc <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x38c>
+  1741ff:	mov    %rax,%rdi
+  174202:	mov    %rbx,%rax
+  174205:	sub    %rdi,%rax
+  174208:	mov    %rdi,%rcx
+  17420b:	sub    %rbx,%rcx
+  17420e:	cmovb  %rax,%rcx
+  174212:	cmp    %rbp,%rcx
+  174215:	jb     1742e1 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x371>
+  17421b:	mov    %rbx,%rsi
+  17421e:	mov    %rbp,%rdx
+  174221:	mov    %rdi,%rbx
+  174224:	call   *0x2379d6(%rip)        # 3abc00 <memcpy@GLIBC_2.14>
+  17422a:	mov    %rbx,%r9
+  17422d:	mov    %rbp,%r11
+  174230:	mov    0x8(%rsp),%rdx
+  174235:	mov    (%rsp),%rsi
+  174239:	mov    0x20(%rsp),%rdi
+  17423e:	mov    0x18(%rsp),%r8
+  174243:	movaps 0x50(%rsp),%xmm3
+  174248:	mov    0x10(%rsp),%r10
+  17424d:	jmp    1740a9 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x139>
+  174252:	mov    $0x1,%r9d
+  174258:	xor    %ebp,%ebp
+  17425a:	xor    %r11d,%r11d
+  17425d:	jmp    1740a9 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x139>
+  174262:	add    $0x18,%rbx
+  174266:	lea    0x98(%rsp),%rdi
+  17426e:	mov    %rbx,%rsi
+  174271:	call   1aff30 <_RNvXs1_NtCsZ7D6q0gzNZ_8voteboat10membershipNtB5_13ConfigurationNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone>
+  174276:	movq   $0x3,0x90(%rsp)
+  174282:	jmp    173ff2 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x82>
+  174287:	movq   $0x0,0x60(%rsp)
+  174290:	movq   $0x10,0x68(%rsp)
+  174299:	mov    0x28(%rsp),%rax
+  17429e:	mov    %rax,0x70(%rsp)
+  1742a3:	mov    0x78(%rsp),%rcx
+  1742a8:	mov    %rax,0x10(%rcx)
+  1742ac:	mov    0x60(%rsp),%rax
+  1742b1:	mov    %rax,(%rcx)
+  1742b4:	mov    0x68(%rsp),%rax
+  1742b9:	mov    %rax,0x8(%rcx)
+  1742bd:	add    $0x108,%rsp
+  1742c4:	pop    %rbx
+  1742c5:	pop    %r12
+  1742c7:	pop    %r13
+  1742c9:	pop    %r14
+  1742cb:	pop    %r15
+  1742cd:	pop    %rbp
+  1742ce:	ret
+  1742cf:	mov    $0x10,%edi
+  1742d4:	mov    $0x90,%esi
+  1742d9:	call   *0x2379a1(%rip)        # 3abc80 <_DYNAMIC+0x2a8>
+  1742df:	jmp    17430a <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x39a>
+  1742e1:	lea    -0x114753(%rip),%rdi        # 5fb95 <anon.a65a6ae4cabfdb9f7d4a297d455c3ae5.862.llvm.2821955088492707346+0x884>
+  1742e8:	lea    0x22e269(%rip),%rcx        # 3a2558 <anon.5da666268453821890c39fa7ceb612e4.1.llvm.8001201505681600112+0x18>
+  1742ef:	mov    $0x237,%esi
+  1742f4:	xor    %edx,%edx
+  1742f6:	call   *0x2379f4(%rip)        # 3abcf0 <_DYNAMIC+0x318>
+  1742fc:	mov    $0x1,%edi
+  174301:	mov    %rbp,%rsi
+  174304:	call   *0x23791e(%rip)        # 3abc28 <_DYNAMIC+0x250>
+  17430a:	ud2
+  17430c:	mov    $0x10,%edi
+  174311:	mov    (%rsp),%rsi
+  174315:	call   *0x23790d(%rip)        # 3abc28 <_DYNAMIC+0x250>
+  17431b:	jmp    17432b <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x3bb>
+  17431d:	mov    %rax,%rbx
+  174320:	mov    %rbp,%rdi
+  174323:	call   *0x2378c7(%rip)        # 3abbf0 <free@GLIBC_2.2.5>
+  174329:	jmp    17432e <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x3be>
+  17432b:	mov    %rax,%rbx
+  17432e:	mov    0x28(%rsp),%rax
+  174333:	cmp    %rax,%r15
+  174336:	ja     17434f <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x3df>
+  174338:	mov    %r15,0x70(%rsp)
+  17433d:	lea    0x60(%rsp),%rdi
+  174342:	call   168780 <_RINvNtCsgxBkk5gSRhY_4core3ptr9drop_glueINtNtCs6i54tJFfzR_5alloc3vec3VecNtNtCsZ7D6q0gzNZ_8voteboat3log8LogEntryEEB1b_.llvm.2821955088492707346>
+  174347:	mov    %rbx,%rdi
+  17434a:	call   38c2c0 <_Unwind_Resume@plt>
+  17434f:	lea    -0x114958(%rip),%rdi        # 5f9fe <anon.a65a6ae4cabfdb9f7d4a297d455c3ae5.862.llvm.2821955088492707346+0x6ed>
+  174356:	lea    0x22e333(%rip),%rcx        # 3a2690 <anon.a65a6ae4cabfdb9f7d4a297d455c3ae5.18.llvm.2821955088492707346+0xd8>
+  17435d:	mov    $0x18d,%esi
+  174362:	xor    %edx,%edx
+  174364:	call   *0x237986(%rip)        # 3abcf0 <_DYNAMIC+0x318>
+  17436a:	call   *0x237930(%rip)        # 3abca0 <_DYNAMIC+0x2c8>
+
+0000000000174370 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat6quorum13WeightedChildNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_>:
+  174370:	push   %rbp
+  174371:	push   %r15
+  174373:	push   %r14
+  174375:	push   %r13
+  174377:	push   %r12
+  174379:	push   %rbx
+  17437a:	sub    $0x68,%rsp
+  17437e:	test   %rdx,%rdx
+  174381:	mov    %rdx,0x10(%rsp)
+  174386:	mov    %rdi,0x48(%rsp)
+  17438b:	je     174484 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat6quorum13WeightedChildNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x114>
+  174391:	mov    %rdx,%rbx
+  174394:	mov    %rsi,%r15
+  174397:	lea    0x0(,%rdx,8),%rax
+  17439f:	lea    (%rax,%rax,4),%rdi
+  1743a3:	mov    %rdi,(%rsp)
+  1743a7:	call   *0x237833(%rip)        # 3abbe0 <malloc@GLIBC_2.2.5>
+  1743ad:	test   %rax,%rax
+  1743b0:	je     1744c9 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat6quorum13WeightedChildNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x159>
+  1743b6:	mov    %rax,%r13
+  1743b9:	mov    %rbx,0x18(%rsp)
+  1743be:	mov    %rax,0x20(%rsp)
+  1743c3:	lea    0x8(%r15),%rax
+  1743c7:	mov    %rax,0x8(%rsp)
+  1743cc:	add    $0x20,%r13
+  1743d0:	xor    %ebx,%ebx
+  1743d2:	xor    %ebp,%ebp
+  1743d4:	mov    (%rsp),%rcx
+  1743d8:	jmp    17441d <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat6quorum13WeightedChildNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0xad>
+  1743da:	nopw   0x0(%rax,%rax,1)
+  1743e0:	mov    0x8(%rsp),%rax
+  1743e5:	mov    (%rax,%rbx,1),%rax
+  1743e9:	add    $0x28,%r15
+  1743ed:	movaps 0x50(%rsp),%xmm0
+  1743f2:	movaps %xmm0,0x30(%rsp)
+  1743f7:	mov    %r12,-0x20(%r13,%rbx,1)
+  1743fc:	mov    %rax,-0x18(%r13,%rbx,1)
+  174401:	movaps 0x30(%rsp),%xmm0
+  174406:	movups %xmm0,-0x10(%r13,%rbx,1)
+  17440c:	mov    %r14,0x0(%r13,%rbx,1)
+  174411:	add    $0x28,%rbx
+  174415:	inc    %rbp
+  174418:	cmp    %rbx,%rcx
+  17441b:	je     174496 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat6quorum13WeightedChildNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x126>
+  17441d:	cmp    %rbx,%rcx
+  174420:	je     174496 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat6quorum13WeightedChildNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x126>
+  174422:	mov    0x20(%r15),%r14
+  174426:	mov    (%r15),%r12
+  174429:	test   %r12,%r12
+  17442c:	je     1743e0 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat6quorum13WeightedChildNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0x70>
+  17442e:	cmp    $0x1,%r12d
+  174432:	jne    174450 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat6quorum13WeightedChildNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0xe0>
+  174434:	mov    0x8(%rsp),%rax
+  174439:	lea    (%rax,%rbx,1),%rsi
+  17443d:	lea    0x30(%rsp),%rdi
+  174442:	call   1b19c0 <_RNvXsa_NtCs6i54tJFfzR_5alloc3vecINtB5_3VecNtNtCsZ7D6q0gzNZ_8voteboat6quorum4TreeENtNtCsgxBkk5gSRhY_4core5clone5Clone5cloneBI_>
+  174447:	jmp    174469 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat6quorum13WeightedChildNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_+0xf9>
+  174449:	nopl   0x0(%rax)
+  174450:	mov    0x8(%rsp),%rax
+  174455:	mov    0x8(%rax,%rbx,1),%rsi
+  17445a:	mov    0x10(%rax,%rbx,1),%rdx
+  17445f:	lea    0x30(%rsp),%rdi
+  174464:	call   174370 <_RINvXNvMNtCs6i54tJFfzR_5alloc5sliceSp9to_vec_inNtNtCsZ7D6q0gzNZ_8voteboat6quorum13WeightedChildNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBN_>
+  174469:	mov    0x30(%rsp),%rax
+  17446e:	rex.W
+  17446f:	.byte 0x8d

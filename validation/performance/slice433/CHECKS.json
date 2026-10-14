@@ -1,0 +1,38 @@
+[
+  {
+    "label": "clone-all",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "--all-features",
+      "--test",
+      "provider_conformance",
+      "entry_clone",
+      "--",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 16.125166177749634
+  },
+  {
+    "label": "clone-core",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--test",
+      "provider_conformance",
+      "entry_clone",
+      "--",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 8.336211442947388
+  }
+]

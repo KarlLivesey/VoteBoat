@@ -1,0 +1,19 @@
+{
+  "unix": 1791941996.874838,
+  "process_scope": "actual host namespace; selected known Cargo/rustc/VoteBoat/perf/Samply competing tasks absent; ordinary system activity remains",
+  "known_competing_jobs": [],
+  "kernel_readonly": {
+    "perf_event_paranoid": "2",
+    "kptr_restrict": "2",
+    "perf_event_mlock_kb": "516"
+  },
+  "loadavg": "6.17 6.98 6.91 9/3448 2637865",
+  "process_command": [
+    "ps",
+    "-eo",
+    "pid,ppid,comm"
+  ],
+  "exit": 0,
+  "root_authorization": "ROOT approvedSTART onceallsetupcodegenended andhostquietpreflight passes",
+  "no_source_profile_kernel_changes": true
+}

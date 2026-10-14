@@ -1,0 +1,99 @@
+{
+  "commit": "dcc14ef0488f3b0a98afd765b561a86fd3b6fa42",
+  "source_inputs": 1428,
+  "changed_inputs": [
+    "src/log.rs",
+    "tests/provider_conformance/log_store.rs",
+    "tests/provider_conformance/log_store/entry_clone.rs"
+  ],
+  "new_input": "tests/provider_conformance/log_store/entry_clone.rs",
+  "unchanged_existing_inputs": 1425,
+  "source_inventory_difference": "4311427\u21924321428 adds one independent derived Clone oracle module; LogEntry inline fieldwise Clone and module registration change, dependencies/profiles unchanged",
+  "original_build_handle": 27837,
+  "original_terminal_exit": 0,
+  "original_stage": "DONE",
+  "fresh_records": "four root/library/executable/pinned upstream records plus root buildscript fresh:false actualCargoJSON",
+  "profile": "unchanged431 opt3/debug2/assertions/overflow/thinLTO/codegen1/packed flagswrappersunset",
+  "within_host_compiler_cargo_protoc_profile_identical431": true,
+  "release_gate": "actualPROFILErelease omits only referencecfg; ordinaryassertions/overflowon",
+  "artifacts": [
+    {
+      "target": "voteboat",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched432-linux/target-matched-release/release/deps/libvoteboat-a5dd7a5076baab39.rlib",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched432-linux/artifacts/matched/libvoteboat-a5dd7a5076baab39.rlib",
+      "sha256": "d07180df814eba3369fcce9673dc536e4b80fbe90adb957355e40e797c2a0363"
+    },
+    {
+      "target": "voteboat-matched-framework",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched432-linux/target-matched-release/release/voteboat-matched-framework",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched432-linux/artifacts/matched/voteboat-matched-framework",
+      "sha256": "7a1724610e95c093bb5bbb3fffb38a94d7d7e317326a07e6198d707f882b65ae"
+    },
+    {
+      "target": "openraft",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched432-linux/target-matched-release/release/deps/libopenraft-5a9af487d2dbc148.rlib",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched432-linux/artifacts/matched/libopenraft-5a9af487d2dbc148.rlib",
+      "sha256": "330c52d7b3c2b6dea74a39b726b6885b8c890d725cbf8482380f0882ef886720"
+    },
+    {
+      "target": "bench_minimal",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched432-linux/target-matched-release/release/deps/libbench_minimal-6c87ebf8dbd5d8ad.rlib",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched432-linux/artifacts/matched/libbench_minimal-6c87ebf8dbd5d8ad.rlib",
+      "sha256": "d7111a6ec9686031e39765bd3f6c500a6cd8a7eecd2e8a04d8afbe77880aa9b8"
+    }
+  ],
+  "symbols": {
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched432-linux/target-matched-release/release/voteboat-matched-framework.dwp",
+    "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched432-linux/artifacts/matched/voteboat-matched-framework.dwp",
+    "sha256": "bf8aaedcc2c6a5c0782cfa2d0d989618c1ef1ac779f10a01395a9bff4c103185",
+    "bytes": 34698400,
+    "executable_sha256": "7a1724610e95c093bb5bbb3fffb38a94d7d7e317326a07e6198d707f882b65ae",
+    "cargo_filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched432-linux/target-matched-release/release/voteboat-matched-framework",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched432-linux/target-matched-release/release/voteboat-matched-framework.dwp"
+    ]
+  },
+  "controls": [
+    {
+      "case": "off",
+      "completed_originals": 16384,
+      "completed_requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "PUTS_per_second": 1853075.246459347,
+      "p99_ms": 5.055703,
+      "scope": "functional control only; no paired/sustained capacity"
+    },
+    {
+      "case": "on",
+      "completed_originals": 16384,
+      "completed_requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "PUTS_per_second": 3172274.813795368,
+      "p99_ms": 2.827796,
+      "scope": "functional control only; no paired/sustained capacity"
+    },
+    {
+      "case": "openraft",
+      "completed_originals": 16384,
+      "completed_requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "PUTS_per_second": 1832437.54456948,
+      "p99_ms": 5.407174,
+      "scope": "functional control only; no paired/sustained capacity"
+    }
+  ],
+  "cli_exit": 0,
+  "capacity_campaign": "not authorized/run; waitrootquiet"
+}

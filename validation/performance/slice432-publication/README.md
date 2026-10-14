@@ -1,0 +1,5 @@
+# Slice432 publication receipt
+
+Published commit dcc14ef0488f3b0a98afd765b561a86fd3b6fa42 to origin/main. Original push handle90533 actually terminated0 after the enabled full pre-push hook; coordinating agent verified remote main at this commit. PUSH.json retains exact plain git push origin main command, exit0 and elapsed38.013seconds. push.log retains formatting and four strict root Clippy profiles plus separate matched workspace checks, all successful, and remote main acceptance. No hook bypass, relaxed formatter/Clippy configuration or source change accompanies this archive.
+
+PUSH.json and push.log are byte-identical copies with original permissions retained. ARCHIVE.sha256 covers current regularfiles in this publication archive. The original [slice432 raw Git diff](../slice432/PATCH.diff) and source manifest remain unchanged. Diff whitespace/context markers are preserved as raw historical evidence; this archive does not rewrite those artifacts or alter production formatting checks. No checks or remote queries were rerun for this small receipt archive.

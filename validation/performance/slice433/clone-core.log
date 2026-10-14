@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.32s
+     Running tests/provider_conformance.rs (target/debug/deps/provider_conformance-b5f1fe56e0c02439)
+
+running 2 tests
+test cases::entry_clone::clone_from_matches_derived_replacement_and_independent_ownership ... ok
+test cases::entry_clone::fieldwise_clone_matches_independent_derived_top_level_for_every_payload ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 20 filtered out; finished in 0.00s
+

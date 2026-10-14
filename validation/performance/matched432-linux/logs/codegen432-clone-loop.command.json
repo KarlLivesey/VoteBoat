@@ -1,0 +1,10 @@
+[
+  "objdump",
+  "-WN",
+  "-WE",
+  "--no-show-raw-insn",
+  "-d",
+  "--start-address=0x173f70",
+  "--stop-address=0x174470",
+  "target/p9/matched432-linux/artifacts/matched/voteboat-matched-framework"
+]

@@ -9,7 +9,7 @@ hosts; crossing a diagnostic or individual floor does not close P9.
 
 The compact [experiment ledger and decisions](P9.md#experiment-ledger-and-decisions)
 records tried/rejected/held/retained changes, actual paired completed rates,
-regressions and the current unmeasured432 gate. Reviewed candidates and calibration
+regressions and432's measured rejection/433 rollback. Reviewed candidates and calibration
 stay separate from implemented improvements. It is the decision index for avoiding
 repeated experiments and extra prerequisites; detailed raw scopes remain below.
 
@@ -69,8 +69,8 @@ diagnostics do not qualify sustained floors. [Every Linux trial and scope](../va
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current432: inline exact LogEntry clone construction | Remove an intermediate copy in the hottest observed entry-clone loop across existing ownership paths | Both-host431 qualification/pairs/profiles; actual Linux call/temporary codegen and unchanged derived payload clone | Independent exact clone oracle/normalization/ownership controls, affected core/provider/snapshot/network checks and zero strict profiles; checked publication. No queue/API/storage changes or performance claim before measurement. | P9.1/P9.3 |
-| Next: qualify/measure/profile published432 on both hosts | Establish the actual effect of eliminating the clone temporary and select the next limiting stage | Checked published432, fresh asserted artifacts, immutable431 baselines and linked schema | Actual codegen, paired completed rates/p99, fresh Mac qualification/profiles and every regression/failure; separate original-driver calibration and full sustained acceptance | P9.0/P9.1/P9.3 |
+| Current433: restore the measured baseline clone | Reject432's repeatable Linux bulk regression without discarding evidence | Published432, fresh codegen and24 paired exact Linux cases; retained431 source/proofs | Exact production input restoration, independent clone oracle all/core, zero enabled full hook; preserve all source/raw regressions and publish rollback | P9.1/P9.3 |
+| Next: choose less request/result work from retained431 profiles | Target the remaining measured limiting stage without another hint-tuning loop | Checked published rollback, retained431 CPU/text data and Mac432 bulk disposition | Explicit ordering/ownership/bounds/error schema, one selected optimization, exact original outcomes and both-host paired rates/tails before retention | P9.0/P9.1/P9.3 |
 | Following: bounded durable batching/overlap under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Native421 barrier evidence and unchanged publication/ticket contracts; bounded fairness schema after current measured framework stage | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual placement/barriers before changing defaults | P9.1/P9.2/P9.3 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
@@ -124,6 +124,40 @@ provider/codec/recovery histories and actual network services, then fresh assert
 both-host measurements. Mac may gain less or regress; retain every result. Held427
 is an unqualified earlier experiment, not validation of429.
 
+### Slice433 schema — reject the forced clone inline hint
+
+Published432's fresh Linux comparison original96307 ends0 with24 exact outcomes
+and final guards. Every OFF bulk pair regresses in rate and p99: median431
+5,901,372 versus432 5,088,482 completed originals/s, p99 3.919355 versus4.428252ms.
+Ratios0.878191/0.770238/0.921934 and tails1.129842/1.297673/1.182801 reject the
+candidate. The actual clone call/temporary disappeared, with text +3,840 bytes;
+neither observation identifies the cause of the regression. Singleton medians
+108,842/108,377 originals/s and p99 0.017753/0.018605ms retain1 rate/2 tail
+regressions. The Mac candidate is qualified separately and gets only3 bulk pairs;
+another singleton campaign cannot qualify a candidate already rejected on Linux.
+
+Data/API: restore src/log.rs's already-qualified431 derived top-level Clone,
+removing432's manual implementation and forced inline hint. Keep the independent
+clone oracle module. Full payload cloning, ownership/normalization, layout, public
+contracts, wire/WAL/snapshot formats and all effect/error orders remain unchanged.
+No new state, restart reconstruction or cleanup path is introduced. This is a
+measured rollback, not a new optimization. Preserve all432 source/history/raw
+outputs and regressions. Macro acceptance is unchanged; the minimum is unmet.
+
+Checks: prove every production/build input matches431, with all other432 inputs
+unchanged. Run independent clone controls all/core and the enabled full formatting,
+four strict and standalone hook. Reuse431 production functional scopes only through
+exact hashes; keep its historical progress failures. Publish the checked rollback
+before selecting the next request/result optimization from retained431 profiles.
+The [schema and checks](../validation/performance/slice433/README.md) were recorded
+before the edit. Original72036 ends0: independent clone controls2 all-feature and2
+core, sequential. All1,428 hashes/modes are tracked; every651 production/build
+input matches431, and only src/log.rs differs from432. No broad unchanged suite
+rerun is needed. [Fresh Linux432 artifacts](../validation/performance/matched432-linux/README.md)
+and [all24 paired raw cases](../validation/performance/comparison432/linux/README.md)
+preserve the rejected candidate and every rate/tail regression. The actual enabled
+full push hook remains the publication gate.
+
 ### Slice432 schema — inline exact clone construction
 
 The current deliverable is432's [exact clone construction schema](P9.md#slice432-schema--exact-clone-construction-at-its-destination),
@@ -151,8 +185,10 @@ three-service histories2 and matched43. Exact hashes/modes reuse the isolated
 affected/strict checks; terminal dependency caches are not fresh performance proof.
 Source export's two mode-assumption failures before edits are kept in PREPARATION;
 physical permissions, Git modes and readonly frozen source are distinguished.
-No semantic/check failure. Independent review finds no correctness blocker; clone
-codegen and performance remain unproven until fresh published artifacts/measurements.
+No semantic/check failure. Published at dcc14ef through the enabled full hook,
+original90533 exit0 with formatting/four strict/standalone zero and GitHub main
+verified. Independent review finds no correctness blocker; clone codegen and
+performance remain unproven until fresh published artifacts/measurements.
 
 431 data was published ata5209f4 through the enabled full hook, original80805exit0;
 remote main was verified. Mac431 paired original56466 ends0/DONE,24 exact cases:

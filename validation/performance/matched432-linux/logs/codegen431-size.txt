@@ -1,0 +1,44 @@
+target/p9/matched431-linux/artifacts/matched/voteboat-matched-framework  :
+section                  size      addr
+.interp                    28       736
+.note.ABI-tag              32       764
+.note.gnu.build-id         36       796
+.dynsym                  2064       832
+.gnu.version              172      2896
+.gnu.version_r            352      3068
+.gnu.hash                  28      3424
+.dynstr                  1339      3452
+.rela.dyn              193128      4792
+.rela.plt                  24    197920
+.rodata                259152    197952
+.gcc_except_table      150720    457104
+.debug_gdb_scripts         34    607824
+.eh_frame_hdr           32044    607860
+.eh_frame              224124    639904
+.text                 2847653    868128
+.init                      27   3715784
+.fini                      13   3715812
+.plt                       32   3715840
+.tdata                    192   3719968
+.tbss                     256   3720160
+.fini_array                 8   3720160
+.init_array                16   3720168
+.data.rel.ro           124464   3720184
+.dynamic                  480   3844648
+.got                     8560   3845128
+.got.plt                   32   3853688
+.relro_padding            616   3853720
+.tm_clone_table             0   3857816
+.data                   13880   3857816
+.bss                      304   3871696
+.comment                  166         0
+.debug_abbrev            1881         0
+.debug_info              4649         0
+.debug_aranges          86496         0
+.debug_ranges         3474560         0
+.debug_str              22697         0
+.debug_addr           1198656         0
+.debug_line           1965399         0
+Total                10614314
+
+

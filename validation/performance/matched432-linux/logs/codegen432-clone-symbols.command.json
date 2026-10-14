@@ -1,0 +1,6 @@
+[
+  "nm",
+  "-S",
+  "--defined-only",
+  "target/p9/matched432-linux/artifacts/matched/voteboat-matched-framework"
+]

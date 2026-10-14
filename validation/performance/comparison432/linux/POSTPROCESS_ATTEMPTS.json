@@ -1,0 +1,11 @@
+{
+  "initial": {
+    "command": [
+      "python3",
+      "target/p9/comparison432/summarize.py"
+    ],
+    "exit": 1,
+    "cause": "Required results-directory argument omitted, IndexError rawstderr retained; follow-up mistakenlyread nonexistent PAIRED.json (actualtoolreported chunk4450cf).",
+    "no_benchmark_restart": true
+  }
+}

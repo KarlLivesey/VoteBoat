@@ -1,0 +1,16 @@
+[
+  {
+    "archive": "logs/codegen431-clone-symbols.txt.gz",
+    "original": "logs/codegen431-clone-symbols.txt",
+    "original_sha256": "1135f923e70c34e10ef11f0ea66e4538fadcd5a26e8915b69dd074745fbcc26f",
+    "original_bytes": 1278918,
+    "encoding": "gzip lossless"
+  },
+  {
+    "archive": "logs/codegen432-clone-symbols.txt.gz",
+    "original": "logs/codegen432-clone-symbols.txt",
+    "original_sha256": "f038b2409fe6d9b67c3736780fbbc70fd88e6c7a41937e7ebfe388c7c30b87be",
+    "original_bytes": 1278380,
+    "encoding": "gzip lossless"
+  }
+]
