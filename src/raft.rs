@@ -1474,27 +1474,31 @@ impl Raft {
                 reference,
             });
         }
-        let mut entries = Vec::new();
-        let mut bytes = 0usize;
-        // One bounded RPC can carry several entries; outer wire limits are
-        // negotiated by the later codec/transport assembly.
-        for entry in self
+        let remaining = self
             .durable
             .entries
+            .get((next - self.durable.base_index() - 1) as usize..)
+            .unwrap_or(&[]);
+        let mut count = 0usize;
+        let mut bytes = 0usize;
+        // One bounded RPC can carry several entries; outer wire limits are
+        // negotiated by the later codec/transport assembly. Select before
+        // copying so the owned range needs only one exact allocation.
+        for entry in remaining
             .iter()
-            .skip((next - self.durable.base_index() - 1) as usize)
             .take(self.batch_limits.max_replication_entries)
         {
             let size = 37 + entry.payload_bytes();
             if size > self.limits.max_batch_bytes.saturating_sub(bytes + 256) {
                 break;
             }
-            entries.push(entry.clone());
+            count += 1;
             bytes += size;
         }
-        if entries.is_empty() && next <= self.durable.last_index() {
+        if count == 0 && next <= self.durable.last_index() {
             return Err(StorageError::Rejected("entry exceeds replication batch budget").into());
         }
+        let entries = remaining[..count].to_vec();
         let end = entries.last().map_or(next - 1, |e| e.index);
         let context = self.context()?;
         self.requests.insert(
@@ -1886,6 +1890,9 @@ pub fn persist_effect<S: LogStore>(
     persist_effect_borrowed(raft, store, update).map(CompletionEffects::into_owned)
 }
 
+#[cfg(test)]
+#[path = "raft/append_prefix_tests.rs"]
+mod append_prefix_tests;
 #[cfg(test)]
 mod checkpoint_tests;
 #[cfg(test)]

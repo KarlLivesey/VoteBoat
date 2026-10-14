@@ -572,9 +572,39 @@ active; Pi remains stopped.
 [Linux448 evidence](../validation/performance/comparison448/linux/README.md),
 [Mac448 evidence](../validation/performance/comparison448-mac/MEASUREMENTS.md).
 
+449 is published asfc257e0c: original53692 ends0 with the complete enabled hook,
+all four root strict profiles and standalone formatting/strict zero. Worktree
+matched source is exactly446; all1438 selected non-comparison input hashes and
+all1439 physical modes match the checked restoration scope. Both-host448 raw
+results and qualification remain immutable. Independent review confirms the
+rejection and mixed-tail reporting. Macro acceptance remains open.
+
+450 selects an ordering change in ordinary replication: inspect the existing
+byte/count-limited contiguous range before allocating its owned copy. One exact
+slice clone replaces repeated Vec growth; the extra scan is bounded1024 and is
+an explicit potential regression. Original contexts, retry/snapshot/error order,
+payload ownership and actual-capacity charging stay. The [450 schema](../validation/performance/slice450/SCHEMA.md)
+precedes edits; no new profiling prerequisite or public log representation is
+introduced. Existing current446 profiles are applicable to the restored source.
+
+450 is implemented and Linux qualification79626 terminates0/DONE with unchanged
+frozen1440 source hashes/modes. The new3 focused controls pass; all-feature Raft
+library134, effect-owner203, Raft79, replication-scope7 and snapshot27 pass. Core
+configuration library115, effect-owner195, Raft29, replication-scope2 and snapshot12
+pass. Actual TCP/QUIC three-service retry/replacement/native-recovery2 pass;
+matched69, root formatting/all-feature strict and matched formatting/strict pass.
+The targeted fixtures narrow outbound message budgets privately after creating
+valid durable-fixture state; they are assembly/error-order controls, not public
+recovery or filesystem durability claims. Independent code/control review finds
+no functional blocker. Only raft.rs and new append_prefix_tests.rs change; the
+[main proof](../validation/performance/slice450/main/README.md) preserves commands,
+raw output and exact scopes. Full enabled-hook publication, fresh artifacts/Mac
+qualification and paired446/450 bulk/singleton measurements remain; no speedup or
+retention decision is claimed before those measurements.
+
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current:449 reject448 and restore retained446 | Remove the measured regression and preserve evidence | Both-host448 raw paired results, exact checked446 source and [449 schema](../validation/performance/slice449/SCHEMA.md) | Exact restored matched source; preserve all48 cases and metadata failures; enabled full hook zero and publish; no unchanged functional reruns | P9.0/P9.1 |
+| Current:450 allocate the exact selected replication prefix once | Remove repeated vector growth and copying in existing ordered replication | Current446 profiles, restored446 channels, exact byte/count/request contracts and [450 schema](../validation/performance/slice450/SCHEMA.md) | Differential prefix/error/capacity/retry controls and relevant core/durable-service tests; enabled strict hook zero, publish, then fresh asserted both-host bulk/singleton measurements before retention | P9.0/P9.1 |
 | Next: sustained mixed-load batching and headroom | Qualify batching without starving cold groups or concealing refusals | Qualified64-wide native measurements, retained446 profiles/decision and bounded hot/cold/skew workload/placement schema | Actual per-group completed rates/tails/refusals, bounded physical memory/debt, active maintenance/catch-up; fairness before changing defaults | P9.1/P9.2/P9.3 |
 | Following: bounded persistence overlap and full qualification | Reduce remaining serial waits and test all P9 requirements | Measured barrier/batching limits and typed partial-progress/durability plan | All seven framework cells on both hosts, real durable headroom/placement/shared barriers and P8 costs; original outcomes/crash/retry/fencing preserved | P9.0/P9.1/P9.2/P9.3/P9.4 |
 

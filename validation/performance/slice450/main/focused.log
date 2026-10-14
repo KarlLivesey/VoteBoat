@@ -1,0 +1,8 @@
+
+running 3 tests
+test raft::append_prefix_tests::command_byte_prefix_keeps_full_ids_and_first_oversize_error_before_context ... ok
+test raft::append_prefix_tests::full_configuration_and_nonempty_payload_copy_owns_independent_storage ... ok
+test raft::append_prefix_tests::old_prefix_matches_empty_byte_boundaries_counts_and_non_power_of_two_ranges ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 400 filtered out; finished in 0.01s
+

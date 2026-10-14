@@ -1,0 +1,92 @@
+{
+  "baseline_commit": "fc257e0ccfe148d990335af5ed9b8dac4f723d32",
+  "original_runner": 79626,
+  "actual_terminal_exit": 0,
+  "terminal_tool": "e7dabb",
+  "stage": "DONE",
+  "selected_inputs": 1440,
+  "changed": [
+    "src/raft.rs"
+  ],
+  "new": [
+    "src/raft/append_prefix_tests.rs"
+  ],
+  "source_sha256": "78cf177919637340b6f9668af54d9aa8863e6fa6f0d3751562fb4369cd878284",
+  "patch_sha256": "4b359c0b3bdb3dac7476639520592b8d13f8a4226205524ff0759d22cf5930a0",
+  "stages": {
+    "focused": {
+      "exit": 0,
+      "passed_counts": [
+        3
+      ]
+    },
+    "all-raft-lib": {
+      "exit": 0,
+      "passed_counts": [
+        134
+      ]
+    },
+    "all-integrations": {
+      "exit": 0,
+      "passed_counts": [
+        203,
+        79,
+        7,
+        27
+      ]
+    },
+    "core-raft-lib": {
+      "exit": 0,
+      "passed_counts": [
+        115
+      ]
+    },
+    "core-integrations": {
+      "exit": 0,
+      "passed_counts": [
+        195,
+        29,
+        2,
+        12
+      ]
+    },
+    "three-services": {
+      "exit": 0,
+      "passed_counts": [
+        2
+      ]
+    },
+    "matched-tests": {
+      "exit": 0,
+      "passed_counts": [
+        69
+      ]
+    },
+    "root-format": {
+      "exit": 0,
+      "passed_counts": []
+    },
+    "root-strict": {
+      "exit": 0,
+      "passed_counts": []
+    },
+    "matched-format": {
+      "exit": 0,
+      "passed_counts": []
+    },
+    "matched-strict": {
+      "exit": 0,
+      "passed_counts": []
+    },
+    "source-guard": {
+      "exit": 0,
+      "passed_counts": []
+    }
+  },
+  "source_hashes_and_physical_modes_unchanged_afterchecks": true,
+  "unchanged_baseline_inputs": 1438,
+  "root_scope": "Production Raft changed, so affected allfeature/core raft library and owner/raft/replication/snapshot integrations plus actualTCP/QUIC services andmatched were executed. Unrelated libraries not claimed tested; full four strict profiles remain enabled for root publication.",
+  "review": "Root read new3controls and exactproduction delta: no functional blocker; independent reviewer owns final read.",
+  "fixture_scope": "Existing deterministic core/durable helper installs valid histories using host-asserted tickets. Outbound byte-budget fields are narrowed privately after fixture installation to hit37/256 boundaries; this is not a filesystem durability claim, full public resource admission or native benchmark.",
+  "limits": "Onealgorithm only; unchanged retry/snapshot/durable/fencing/outcomes/defaults/contracts. No newperf artifact/capture/timing/variant/native throughput claim."
+}
