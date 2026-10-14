@@ -1,0 +1,11 @@
+# Slice432 exact clone construction
+
+Frozen1,428 selected source hashes/physical modes match the main promotion exactly; three changed paths include one new core-visible clone oracle. Manual exhaustive LogEntry Clone copies headers and delegates unchanged derived EntryPayload clone with an inline hint. Layout, payload ownership/normalization, clone_from, wire/WAL/snapshot, equality, effect order and public provider seams remain unchanged. This is a code-generation hypothesis, not a measured speedup.
+
+Original39814 ends0/DONE: independent derived oracle2, fmt and all four strict root profiles zero. Original82420 ends0/DONE: all-feature library392/log19/provider37/Raft79/snapshot27; core312/log0/provider22/Raft29/snapshot12. Selected owner held1/failure1/written-durable1/snapshot18 pass; no full203-owner-suite claim or relabeling of431's native progress failures. Actual TCP/QUIC three-service retry/replacement/native-recovery2 and matched43/fmt/strict pass. Feature configurations sequential; terminal429 dependency/check caches reused with changed432 source recompiled, not fresh performance provenance.
+
+Main original80636 ends0/DONE: provider metadata references checker0, actual services2 and matched43. Full1,428-source hash+mode proof reuses the isolated affected/strict scopes; main adds its actual executable boundaries. Source export first made two incorrect physical-mode assumptions; PREPARATION keeps tool-reported failures and focused correction, separating prior physical permissions/read-only frozen inputs from Git modes. No semantic/compile/test/formatter/Clippy failures.
+
+Schema was recorded in docs before edits. Read-only independent review finds no correctness blocker, with performance explicitly unproven. Publish through the enabled full hook, then genuinely fresh asserted libraries/executables and actual clone-loop codegen/text sizes plus paired431/432 Linux/Mac measurements decide benefit. Original independent per-original outcomes remain. P9 is active; all sustained/full-curve/durable/fairness/composition acceptance remains open.
+
+Raw commands/output/exits/source mappings/proof kept; no source checkout, build trees, executables or generated WAL transferred into this archive.

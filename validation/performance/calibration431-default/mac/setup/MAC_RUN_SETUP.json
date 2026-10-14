@@ -1,0 +1,23 @@
+{
+  "remote_job": "/tmp/voteboat-upstream-default431-XxW0Du",
+  "files": {
+    "CONFIG.mac.json": {
+      "sha256": "7d696edb6612b59a79bc439e668545a53109b7aaed10b73f56b31ad07fbc8e53",
+      "mode": "0o644"
+    },
+    "COMMANDS.mac.txt": {
+      "sha256": "0e01908e599f5fd61a2d57f02a39a50b693ca3b4c333055cf30429cbb1288672",
+      "mode": "0o644"
+    },
+    "run.mac.sh": {
+      "sha256": "dea56050b666037cf5dac100c4ca876426fcbde6d5b30a8e1f7ebf7772399a48",
+      "mode": "0o755"
+    },
+    "guard.py": {
+      "sha256": "4bd8878d906dda242b317ce4941a79b6f0d57ebf36caf9f133a887752a7069ae",
+      "mode": "0o644"
+    }
+  },
+  "exit": 0,
+  "20Mtiming_started": false
+}

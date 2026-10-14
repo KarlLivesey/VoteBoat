@@ -1,0 +1,59 @@
+{
+  "scope": "actual normalized sampled outcomes, no acceptance claim",
+  "cases": [
+    {
+      "case": "bulk",
+      "requested_originals": 20000000,
+      "normalized_completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ],
+      "profiled_originals_per_second": 4436426.982664574,
+      "profiled_request_p99_ms": 4.556041,
+      "profiled_rate_scope": "profiler perturbed, not paired capacity acceptance",
+      "checkpoint_counts": [
+        3895,
+        3889,
+        3887
+      ],
+      "raw_sha256": "469bd95af94fcbab23246f7c052f32a2ca602813b0454da4cf3d9ff4f2d4368b",
+      "normalization_formula": "requested // (clients*batch) * (clients*batch)",
+      "invariant_adapter_scope": "Raw requested/normalized completion verified; only deep-copy requested adjusted for frozen power-of-two checker; original bytes unchanged",
+      "correctly_rejected_controls": [
+        "requested",
+        "completed",
+        "frontier"
+      ]
+    },
+    {
+      "case": "singleton",
+      "requested_originals": 1048576,
+      "normalized_completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "profiled_originals_per_second": 54754.13082307589,
+      "profiled_request_p99_ms": 0.039292,
+      "profiled_rate_scope": "profiler perturbed, not paired capacity acceptance",
+      "checkpoint_counts": [
+        209,
+        209,
+        209
+      ],
+      "raw_sha256": "e1bbb017b3bd5ec3507f1497bd0b54fb15643c0ba30b22f6ba7e6b1a2ab5b991",
+      "normalization_formula": "requested // (clients*batch) * (clients*batch)",
+      "invariant_adapter_scope": "Raw requested/normalized completion verified; only deep-copy requested adjusted for frozen power-of-two checker; original bytes unchanged",
+      "correctly_rejected_controls": [
+        "requested",
+        "completed",
+        "frontier"
+      ]
+    }
+  ]
+}

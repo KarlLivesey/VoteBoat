@@ -1,0 +1,192 @@
+
+target/p9/matched431-linux/artifacts/matched/voteboat-matched-framework:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000001b0500 <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat3logNtB5_8LogEntryNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone>:
+  1b0500:	push   %rbp
+  1b0501:	push   %r15
+  1b0503:	push   %r14
+  1b0505:	push   %r13
+  1b0507:	push   %r12
+  1b0509:	push   %rbx
+  1b050a:	sub    $0xa8,%rsp
+  1b0511:	mov    %rdi,%rbx
+  1b0514:	movaps 0x30(%rsi),%xmm3
+  1b0518:	mov    (%rsi),%r13
+  1b051b:	test   %r13,%r13
+  1b051e:	je     1b05b4 <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat3logNtB5_8LogEntryNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone+0xb4>
+  1b0524:	cmp    $0x1,%r13d
+  1b0528:	jne    1b05b9 <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat3logNtB5_8LogEntryNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone+0xb9>
+  1b052e:	movaps %xmm3,0x10(%rsp)
+  1b0533:	mov    0x8(%rsi),%r15
+  1b0537:	mov    $0x90,%edi
+  1b053c:	call   *0x1fa6ee(%rip)        # 3aac30 <malloc@GLIBC_2.2.5>
+  1b0542:	test   %rax,%rax
+  1b0545:	je     1b070f <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat3logNtB5_8LogEntryNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone+0x20f>
+  1b054b:	mov    %rax,%r14
+  1b054e:	mov    (%r15),%rbp
+  1b0551:	mov    0x8(%r15),%r12
+  1b0555:	mov    0x88(%r15),%rdx
+  1b055c:	mov    0x10(%r15),%rcx
+  1b0560:	sub    $0x3,%rcx
+  1b0564:	mov    $0x1,%eax
+  1b0569:	cmovae %rcx,%rax
+  1b056d:	test   %rax,%rax
+  1b0570:	je     1b062f <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat3logNtB5_8LogEntryNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone+0x12f>
+  1b0576:	cmp    $0x1,%rax
+  1b057a:	jne    1b065a <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat3logNtB5_8LogEntryNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone+0x15a>
+  1b0580:	mov    %rdx,0x8(%rsp)
+  1b0585:	mov    0x80(%r15),%rax
+  1b058c:	mov    %rax,0x28(%rsp)
+  1b0591:	add    $0x10,%r15
+  1b0595:	lea    0x30(%rsp),%rdi
+  1b059a:	mov    %r15,%rsi
+  1b059d:	call   1af0d0 <_RNvXs1_NtCsbnXr5Sm8wZO_8voteboat10membershipNtB5_13ConfigurationNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone>
+  1b05a2:	mov    0x28(%rsp),%rax
+  1b05a7:	mov    %rax,0xa0(%rsp)
+  1b05af:	jmp    1b064e <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat3logNtB5_8LogEntryNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone+0x14e>
+  1b05b4:	jmp    1b06e2 <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat3logNtB5_8LogEntryNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone+0x1e2>
+  1b05b9:	mov    0x28(%rsi),%rax
+  1b05bd:	mov    0x20(%rsi),%rbp
+  1b05c1:	mov    0x18(%rsi),%r14
+  1b05c5:	test   %r14,%r14
+  1b05c8:	je     1b0624 <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat3logNtB5_8LogEntryNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone+0x124>
+  1b05ca:	mov    %rax,0x8(%rsp)
+  1b05cf:	movaps %xmm3,0x10(%rsp)
+  1b05d4:	mov    0x10(%rsi),%r12
+  1b05d8:	mov    %r14,%rdi
+  1b05db:	call   *0x1fa64f(%rip)        # 3aac30 <malloc@GLIBC_2.2.5>
+  1b05e1:	test   %rax,%rax
+  1b05e4:	je     1b073a <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat3logNtB5_8LogEntryNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone+0x23a>
+  1b05ea:	mov    %rax,%r15
+  1b05ed:	mov    %r12,%rax
+  1b05f0:	sub    %r15,%rax
+  1b05f3:	mov    %r15,%rcx
+  1b05f6:	sub    %r12,%rcx
+  1b05f9:	cmovb  %rax,%rcx
+  1b05fd:	cmp    %r14,%rcx
+  1b0600:	jb     1b071f <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat3logNtB5_8LogEntryNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone+0x21f>
+  1b0606:	mov    %r15,%rdi
+  1b0609:	mov    %r12,%rsi
+  1b060c:	mov    %r14,%rdx
+  1b060f:	call   *0x1fa63b(%rip)        # 3aac50 <memcpy@GLIBC_2.14>
+  1b0615:	movaps 0x10(%rsp),%xmm3
+  1b061a:	mov    0x8(%rsp),%rax
+  1b061f:	jmp    1b06e2 <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat3logNtB5_8LogEntryNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone+0x1e2>
+  1b0624:	mov    $0x1,%r15d
+  1b062a:	jmp    1b06e2 <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat3logNtB5_8LogEntryNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone+0x1e2>
+  1b062f:	mov    %rdx,0x8(%rsp)
+  1b0634:	add    $0x18,%r15
+  1b0638:	lea    0x38(%rsp),%rdi
+  1b063d:	mov    %r15,%rsi
+  1b0640:	call   1af0d0 <_RNvXs1_NtCsbnXr5Sm8wZO_8voteboat10membershipNtB5_13ConfigurationNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone>
+  1b0645:	movq   $0x3,0x30(%rsp)
+  1b064e:	movaps 0x10(%rsp),%xmm3
+  1b0653:	mov    0x8(%rsp),%rdx
+  1b0658:	jmp    1b0671 <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat3logNtB5_8LogEntryNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone+0x171>
+  1b065a:	mov    0x18(%r15),%rax
+  1b065e:	mov    %rax,0x38(%rsp)
+  1b0663:	movq   $0x5,0x30(%rsp)
+  1b066c:	movaps 0x10(%rsp),%xmm3
+  1b0671:	mov    %rbp,(%r14)
+  1b0674:	mov    %r12,0x8(%r14)
+  1b0678:	mov    0xa0(%rsp),%rax
+  1b0680:	mov    %rax,0x80(%r14)
+  1b0687:	mov    0x30(%rsp),%rax
+  1b068c:	mov    0x38(%rsp),%rcx
+  1b0691:	movaps 0x40(%rsp),%xmm0
+  1b0696:	movaps 0x50(%rsp),%xmm1
+  1b069b:	movaps 0x60(%rsp),%xmm2
+  1b06a0:	mov    %rax,0x10(%r14)
+  1b06a4:	mov    %rcx,0x18(%r14)
+  1b06a8:	movaps %xmm0,0x20(%r14)
+  1b06ad:	movaps %xmm1,0x30(%r14)
+  1b06b2:	movaps %xmm2,0x40(%r14)
+  1b06b7:	movaps 0x70(%rsp),%xmm0
+  1b06bc:	movaps %xmm0,0x50(%r14)
+  1b06c1:	movaps 0x80(%rsp),%xmm0
+  1b06c9:	movaps %xmm0,0x60(%r14)
+  1b06ce:	movaps 0x90(%rsp),%xmm0
+  1b06d6:	movaps %xmm0,0x70(%r14)
+  1b06db:	mov    %rdx,0x88(%r14)
+  1b06e2:	movaps %xmm3,0x30(%rbx)
+  1b06e6:	mov    %r13,(%rbx)
+  1b06e9:	mov    %r14,0x8(%rbx)
+  1b06ed:	mov    %r15,0x10(%rbx)
+  1b06f1:	mov    %r14,0x18(%rbx)
+  1b06f5:	mov    %rbp,0x20(%rbx)
+  1b06f9:	mov    %rax,0x28(%rbx)
+  1b06fd:	add    $0xa8,%rsp
+  1b0704:	pop    %rbx
+  1b0705:	pop    %r12
+  1b0707:	pop    %r13
+  1b0709:	pop    %r14
+  1b070b:	pop    %r15
+  1b070d:	pop    %rbp
+  1b070e:	ret
+  1b070f:	mov    $0x10,%edi
+  1b0714:	mov    $0x90,%esi
+  1b0719:	call   *0x1fa5b1(%rip)        # 3aacd0 <_DYNAMIC+0x2a8>
+  1b071f:	lea    -0x150b91(%rip),%rdi        # 5fb95 <anon.36fdf33a2c2e5ce40cc2b01e13d98863.780.llvm.7258382479559956366+0x884>
+  1b0726:	lea    0x1f0e7b(%rip),%rcx        # 3a15a8 <anon.5da666268453821890c39fa7ceb612e4.1.llvm.10149395887795788464+0x18>
+  1b072d:	mov    $0x237,%esi
+  1b0732:	xor    %edx,%edx
+  1b0734:	call   *0x1fa606(%rip)        # 3aad40 <_DYNAMIC+0x318>
+  1b073a:	mov    $0x1,%edi
+  1b073f:	mov    %r14,%rsi
+  1b0742:	call   *0x1fa530(%rip)        # 3aac78 <_DYNAMIC+0x250>
+  1b0748:	mov    %rax,%rbx
+  1b074b:	mov    %r14,%rdi
+  1b074e:	call   *0x1fa4ec(%rip)        # 3aac40 <free@GLIBC_2.2.5>
+  1b0754:	mov    %rbx,%rdi
+  1b0757:	call   38b310 <_Unwind_Resume@plt>
+  1b075c:	int3
+  1b075d:	int3
+  1b075e:	int3
+  1b075f:	int3
+
+00000000001b0760 <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat4raftNtB5_3RpcNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone>:
+  1b0760:	push   %r15
+  1b0762:	push   %r14
+  1b0764:	push   %r12
+  1b0766:	push   %rbx
+  1b0767:	sub    $0xd8,%rsp
+  1b076e:	mov    %rsi,%r14
+  1b0771:	movzbl (%rsi),%eax
+  1b0774:	lea    -0x151947(%rip),%rcx        # 5ee34 <anon.5da666268453821890c39fa7ceb612e4.3.llvm.10149395887795788464+0x260>
+  1b077b:	movslq (%rcx,%rax,4),%rax
+  1b077f:	add    %rcx,%rax
+  1b0782:	jmp    *%rax
+  1b0784:	movaps 0x20(%r14),%xmm0
+  1b0789:	movaps %xmm0,0x20(%rdi)
+  1b078d:	movups 0x8(%r14),%xmm0
+  1b0792:	movups %xmm0,0x8(%rdi)
+  1b0796:	movb   $0x0,(%rdi)
+  1b0799:	jmp    1b0adc <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat4raftNtB5_3RpcNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone+0x37c>
+  1b079e:	movaps 0x10(%r14),%xmm0
+  1b07a3:	movaps 0x20(%r14),%xmm1
+  1b07a8:	movaps 0x30(%r14),%xmm2
+  1b07ad:	movaps %xmm2,0x30(%rdi)
+  1b07b1:	movaps %xmm1,0x20(%rdi)
+  1b07b5:	movaps %xmm0,0x10(%rdi)
+  1b07b9:	mov    0x8(%r14),%rax
+  1b07bd:	mov    %rax,0x8(%rdi)
+  1b07c1:	movb   $0x10,(%rdi)
+  1b07c4:	jmp    1b0adc <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat4raftNtB5_3RpcNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone+0x37c>
+  1b07c9:	mov    0x8(%r14),%rax
+  1b07cd:	mov    %rax,0x8(%rdi)
+  1b07d1:	movb   $0xe,(%rdi)
+  1b07d4:	jmp    1b0adc <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat4raftNtB5_3RpcNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone+0x37c>
+  1b07d9:	movb   $0xb,(%rdi)
+  1b07dc:	jmp    1b0adc <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat4raftNtB5_3RpcNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone+0x37c>
+  1b07e1:	movzbl 0x1(%r14),%eax
+  1b07e6:	mov    %al,0x1(%rdi)
+  1b07e9:	movups 0x8(%r14),%xmm0
+  1b07ee:	movups %xmm0,0x8(%rdi)
+  1b07f2:	movb   $0x4,(%rdi)
+  1b07f5:	jmp    1b0adc <_RNvXs8_NtCsbnXr5Sm8wZO_8voteboat4raftNtB5_3RpcNtNtCsgxBkk5gSRhY_4core5clone5Clone5clone+0x37c>
+  1b07fa:	movb   $0xc,(%rdi)
+  1b07fd:	.byte 0xe9
+  1b07fe:	fiaddl (%rdx)

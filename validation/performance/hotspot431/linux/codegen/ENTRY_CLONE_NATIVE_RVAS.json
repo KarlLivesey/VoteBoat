@@ -1,0 +1,102 @@
+[
+  {
+    "sample_weight": 547,
+    "library": 2,
+    "address": 1522841,
+    "frame": 0,
+    "module_offset": "0x173c99",
+    "module": "voteboat-matched-framework",
+    "function": "<voteboat::log::LogEntry as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global>",
+    "function_offset": "0x79",
+    "function_size": "0x140",
+    "file": "git:github.com/rust-lang/rust:library/alloc/src/slice.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+    "line": 432,
+    "inlines": [
+      {
+        "function": "<core::mem::maybe_uninit::MaybeUninit<voteboat::log::LogEntry>>::write",
+        "file": "git:github.com/rust-lang/rust:library/core/src/mem/maybe_uninit.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+        "line": 575
+      }
+    ]
+  },
+  {
+    "sample_weight": 54,
+    "library": 2,
+    "address": 1522846,
+    "frame": 0,
+    "module_offset": "0x173c9e",
+    "module": "voteboat-matched-framework",
+    "function": "<voteboat::log::LogEntry as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global>",
+    "function_offset": "0x7e",
+    "function_size": "0x140",
+    "file": "git:github.com/rust-lang/rust:library/alloc/src/slice.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+    "line": 432,
+    "inlines": [
+      {
+        "function": "<core::mem::maybe_uninit::MaybeUninit<voteboat::log::LogEntry>>::write",
+        "file": "git:github.com/rust-lang/rust:library/core/src/mem/maybe_uninit.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+        "line": 575
+      }
+    ]
+  },
+  {
+    "sample_weight": 35,
+    "library": 2,
+    "address": 1522851,
+    "frame": 0,
+    "module_offset": "0x173ca3",
+    "module": "voteboat-matched-framework",
+    "function": "<voteboat::log::LogEntry as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global>",
+    "function_offset": "0x83",
+    "function_size": "0x140",
+    "file": "git:github.com/rust-lang/rust:library/alloc/src/slice.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+    "line": 432,
+    "inlines": [
+      {
+        "function": "<core::mem::maybe_uninit::MaybeUninit<voteboat::log::LogEntry>>::write",
+        "file": "git:github.com/rust-lang/rust:library/core/src/mem/maybe_uninit.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+        "line": 575
+      }
+    ]
+  },
+  {
+    "sample_weight": 6,
+    "library": 2,
+    "address": 1522868,
+    "frame": 0,
+    "module_offset": "0x173cb4",
+    "module": "voteboat-matched-framework",
+    "function": "<voteboat::log::LogEntry as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global>",
+    "function_offset": "0x94",
+    "function_size": "0x140",
+    "file": "git:github.com/rust-lang/rust:library/alloc/src/slice.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+    "line": 432,
+    "inlines": [
+      {
+        "function": "<core::mem::maybe_uninit::MaybeUninit<voteboat::log::LogEntry>>::write",
+        "file": "git:github.com/rust-lang/rust:library/core/src/mem/maybe_uninit.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+        "line": 575
+      }
+    ]
+  },
+  {
+    "sample_weight": 1,
+    "library": 2,
+    "address": 1522836,
+    "frame": 0,
+    "module_offset": "0x173c94",
+    "module": "voteboat-matched-framework",
+    "function": "<voteboat::log::LogEntry as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global>",
+    "function_offset": "0x74",
+    "function_size": "0x140",
+    "file": "git:github.com/rust-lang/rust:library/alloc/src/slice.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+    "line": 432,
+    "inlines": [
+      {
+        "function": "<core::mem::maybe_uninit::MaybeUninit<voteboat::log::LogEntry>>::write",
+        "file": "git:github.com/rust-lang/rust:library/core/src/mem/maybe_uninit.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+        "line": 575
+      }
+    ]
+  }
+]

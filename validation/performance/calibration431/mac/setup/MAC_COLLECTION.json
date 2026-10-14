@@ -1,0 +1,225 @@
+{
+  "original_ssh_handle": 24636,
+  "terminal_exit": 0,
+  "remote_job": "/tmp/voteboat-calibration431-velyOS",
+  "collection_exit": 0,
+  "tar_sha256": "98252abc5c7b7f7f6af0853d1e23cba78fac8835e04c2f8865eec138da0322e7",
+  "files": {
+    "COMMANDS.mac.txt": {
+      "sha256": "d1f5359c5f1413f6a6835f00779b36a32f585518d623c05343eb78078dcfc6cd",
+      "bytes": 1158
+    },
+    "CONFIG.mac.json": {
+      "sha256": "c1077a8e101fcf041e299de5bd653270c270af1738a7dca0f1b8b0256484d1a3",
+      "bytes": 162224
+    },
+    "MAC_BUILD_PROOF.json": {
+      "sha256": "b0b18fea4547413b468777ff28d17e16b7dc74c067a3c212d51fe201d8786fbb",
+      "bytes": 2037
+    },
+    "MAC_PREFLIGHT.json": {
+      "sha256": "ccdd5ce85e3f75eb0b39ad9b3f882f574fdb98b37128f195ccd7737a11c07f4b",
+      "bytes": 710
+    },
+    "ORIGINAL_RUSTC_COMMANDS.mac.txt": {
+      "sha256": "0626e7531ecb5e89bab5f7bab7e9c44adf70f8e4e884122f00e66852d42582eb",
+      "bytes": 10811
+    },
+    "SCHEMA.md": {
+      "sha256": "c2e28cdaced237ce9541469aa03f8b7eb7f82771d24f765ff0120d91d0a53cff",
+      "bytes": 1971
+    },
+    "SETUP_GUARD.json": {
+      "sha256": "db9229ca2e46ee928ede9c86ec4ede836073657a8575d819ff3a32de847eb529",
+      "bytes": 620
+    },
+    "guard.py": {
+      "sha256": "04e9df01955d8220969cfe935335d9d079060e019b3594ddae4cb4095bb81d82",
+      "bytes": 1435
+    },
+    "mac/DONE": {
+      "sha256": "ced8b5bf2554b5a1329f9a367946d83411a1a1f40acdb11b2cbb450cc5ce1f9e",
+      "bytes": 21
+    },
+    "mac/PID": {
+      "sha256": "b9b792fa705017834913d8a0567f136ee132ebebb876ef8411c7ffeef547162a",
+      "bytes": 6
+    },
+    "mac/POST_GUARD.json": {
+      "sha256": "ec2b72613166336e29f60faf07a6c55b2a8295cfcacdebd19a4687ba5ae93585",
+      "bytes": 620
+    },
+    "mac/POST_GUARD.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "mac/POST_GUARD.stdout": {
+      "sha256": "25d0eea0d8dca6b981d536c9075c04556a0a44a355027d5c1d99f973e459d40d",
+      "bytes": 53
+    },
+    "mac/PRE_GUARD.json": {
+      "sha256": "732c811484c58588c5def3abc8e54f1853ee1e519fb5006dbe5113ada25b32b7",
+      "bytes": 620
+    },
+    "mac/PRE_GUARD.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "mac/PRE_GUARD.stdout": {
+      "sha256": "25d0eea0d8dca6b981d536c9075c04556a0a44a355027d5c1d99f973e459d40d",
+      "bytes": 53
+    },
+    "mac/STATUS": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "mac/cases/trial1-latency-off/END": {
+      "sha256": "4793714a077b32f3a2c3d05978df607e139676242f9738bf5d4a2ca70e7ada11",
+      "bytes": 21
+    },
+    "mac/cases/trial1-latency-off/START": {
+      "sha256": "3a32154ef18b185bfea5ad46a68c6eb9e3aa4fdf91eccda2c9059d204adf04cf",
+      "bytes": 21
+    },
+    "mac/cases/trial1-latency-off/command.txt": {
+      "sha256": "32bb00ed40e00a71c693889f3ad1c41a0986e5d381a932f80dd7532c733b35d3",
+      "bytes": 188
+    },
+    "mac/cases/trial1-latency-off/exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "mac/cases/trial1-latency-off/stderr": {
+      "sha256": "1b3336c143d133b631e76499dbca3cac2c3173b6c14f362934d3c50aa2e519e0",
+      "bytes": 247013
+    },
+    "mac/cases/trial1-latency-off/stdout": {
+      "sha256": "2c7c0c7b3353ec8a0ae33fdb6e1beee42aa4d5563f3cfaf44cc24678dbc4578f",
+      "bytes": 154
+    },
+    "mac/cases/trial1-latency-on/END": {
+      "sha256": "a1496aba545bff2622de8110a92e1ec7bcd0b432f73eab65daed382356c9de4c",
+      "bytes": 21
+    },
+    "mac/cases/trial1-latency-on/START": {
+      "sha256": "4793714a077b32f3a2c3d05978df607e139676242f9738bf5d4a2ca70e7ada11",
+      "bytes": 21
+    },
+    "mac/cases/trial1-latency-on/command.txt": {
+      "sha256": "a21926bf50ca8300ee4180526fc145d0df9030a49aec7845dffd2e5de776b064",
+      "bytes": 198
+    },
+    "mac/cases/trial1-latency-on/exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "mac/cases/trial1-latency-on/stderr": {
+      "sha256": "55764e561d806d0fec188c553e3df86f52a0d63ca145c356b2f3aa620ca77c25",
+      "bytes": 434063
+    },
+    "mac/cases/trial1-latency-on/stdout": {
+      "sha256": "8e47046b3a7f12818981f3fa295f7526cbfc6b910c942861b4f3288702a3ad3e",
+      "bytes": 491
+    },
+    "mac/cases/trial2-latency-off/END": {
+      "sha256": "03284c38191299eb20f831dbf2834f4d54813c17377cc6c2e8ad81b7f34cbdd8",
+      "bytes": 21
+    },
+    "mac/cases/trial2-latency-off/START": {
+      "sha256": "68b41739062674cb14bf822e2663dee3ab7afcb88d89225dec912b2b0bd94b00",
+      "bytes": 21
+    },
+    "mac/cases/trial2-latency-off/command.txt": {
+      "sha256": "32bb00ed40e00a71c693889f3ad1c41a0986e5d381a932f80dd7532c733b35d3",
+      "bytes": 188
+    },
+    "mac/cases/trial2-latency-off/exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "mac/cases/trial2-latency-off/stderr": {
+      "sha256": "0865f85e1aaf26a9cceb246cfa137fbcc0d8c9c02f58fcbbbcf1a19da5ccbec6",
+      "bytes": 237722
+    },
+    "mac/cases/trial2-latency-off/stdout": {
+      "sha256": "93feb088105bebc448cc793b97daa57d28ae2afa9b67c3a66bdb7931a840dfc1",
+      "bytes": 154
+    },
+    "mac/cases/trial2-latency-on/END": {
+      "sha256": "68b41739062674cb14bf822e2663dee3ab7afcb88d89225dec912b2b0bd94b00",
+      "bytes": 21
+    },
+    "mac/cases/trial2-latency-on/START": {
+      "sha256": "a1496aba545bff2622de8110a92e1ec7bcd0b432f73eab65daed382356c9de4c",
+      "bytes": 21
+    },
+    "mac/cases/trial2-latency-on/command.txt": {
+      "sha256": "a21926bf50ca8300ee4180526fc145d0df9030a49aec7845dffd2e5de776b064",
+      "bytes": 198
+    },
+    "mac/cases/trial2-latency-on/exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "mac/cases/trial2-latency-on/stderr": {
+      "sha256": "09b88c11ee1237ff372cdbc2f3c22769bb64ffecc003a7c50f5725238f8e5337",
+      "bytes": 431354
+    },
+    "mac/cases/trial2-latency-on/stdout": {
+      "sha256": "0ad2a333af90af8de241ee1c6906dc86f577ebc4c4c1a2e6486c7088738fd755",
+      "bytes": 489
+    },
+    "mac/cases/trial3-latency-off/END": {
+      "sha256": "e95af299cba0167b6c47a9126b42b7853481659c0184abcd6f43b6c9112a7b2a",
+      "bytes": 21
+    },
+    "mac/cases/trial3-latency-off/START": {
+      "sha256": "03284c38191299eb20f831dbf2834f4d54813c17377cc6c2e8ad81b7f34cbdd8",
+      "bytes": 21
+    },
+    "mac/cases/trial3-latency-off/command.txt": {
+      "sha256": "32bb00ed40e00a71c693889f3ad1c41a0986e5d381a932f80dd7532c733b35d3",
+      "bytes": 188
+    },
+    "mac/cases/trial3-latency-off/exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "mac/cases/trial3-latency-off/stderr": {
+      "sha256": "8acad124d78878d6ae214346e0f0be30622cc6f996eba1ef0ac10a3a8d635aa0",
+      "bytes": 483574
+    },
+    "mac/cases/trial3-latency-off/stdout": {
+      "sha256": "cd4e15b90bbb420f3fd175c769c188d42b99f1df26c34e37c8f553957312eca2",
+      "bytes": 155
+    },
+    "mac/cases/trial3-latency-on/END": {
+      "sha256": "ced8b5bf2554b5a1329f9a367946d83411a1a1f40acdb11b2cbb450cc5ce1f9e",
+      "bytes": 21
+    },
+    "mac/cases/trial3-latency-on/START": {
+      "sha256": "e95af299cba0167b6c47a9126b42b7853481659c0184abcd6f43b6c9112a7b2a",
+      "bytes": 21
+    },
+    "mac/cases/trial3-latency-on/command.txt": {
+      "sha256": "a21926bf50ca8300ee4180526fc145d0df9030a49aec7845dffd2e5de776b064",
+      "bytes": 198
+    },
+    "mac/cases/trial3-latency-on/exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "mac/cases/trial3-latency-on/stderr": {
+      "sha256": "9f3a4dbbbbe27ecbdd1593d443c98c37c817fad7e6772c508dea16092066e110",
+      "bytes": 442831
+    },
+    "mac/cases/trial3-latency-on/stdout": {
+      "sha256": "8e32724144adac91796fedf3f09de662c83b734bf533b25b84b9471cdc3e8231",
+      "bytes": 491
+    },
+    "run.mac.sh": {
+      "sha256": "4c650cdbddb865a5e10d65d5dbf431ff4663377110eb59d58f7dcf11e2de076b",
+      "bytes": 5078
+    }
+  }
+}

@@ -1,0 +1,11 @@
+# Untouched upstream431 Mac calibration
+
+Original SSH24636 actually terminal0/DONE, sixcases0, original400s unchanged. Existing copied artifactb3f2878f4146b4cf03174617a82c979bb9aec8558f3ab8fb2e45918691be8a6f equals original230 executable. Before/after exact1357 source hashes, both binaries, compiler and original build-proof hashes passed. No rebuild, retries, dependency or security changes.
+
+20M requested =>19,988,480 completed originals plus1024 warmups per run;4096 clients/batch4, one group/three voters, client runtime1/server16, empty payload/volatile stores/in-process RPC. Independent196-package lockSHA3ef72b525fd94d0aa3d7f106b4e003a6c5e2a7ccc0ded39f776470d92787af0b, default runtime-stats/config{}/rate0/all delays0. Original OpenRaft/bench_minimal/executable fresh:false profiles are opt3/debug2/assertions/overflow/thinLTO/CGU1. Current and original rustc1.98.0/LLVM22.1.8 match within Mac; Linux uses1.98.1 separately.
+
+Rotating OFF/ON, ON/OFF, OFF/ON: OFF2,033,722 /2,027,371 /1,983,791 originals/s, median2,027,371. ON1,985,002 /1,991,491 /1,972,978, median1,985,002; request p99 10.710/10.524/10.692ms, median10.692. OFF median2.13% higher; no causal explanation for full published5.615M gap. OFF has no latency report. ON exact4,997,120 latency samples per run.
+
+Timer after warmup/client spawning immediately before ready barrier through all client joins, before final stats/flatten/sort. OFF rate derives source-certified rounded count after successful joins/exit0 divided by reported elapsed duration; ON uses original JSON count/time. No additional follower verification or whole-process-as-throughput claim. Separate upstream calibration, not matched sustained P9 acceptance; published floors remain unchanged. Raw commands/stdout/stderr/exits/UTC/PID/STATUS/DONE and proofs preserved.
+
+Initial read-only preflight automatic approval rejection cited completed initial audit no-SSH restriction. Re-scoped SAME action explicitly identified continuing user Mac authorization and subsequent calibration task superseding that restriction; re-review approved, actual preflight0. No workaround/proxy and no command ran on first rejection. All setup/copied8file hashes/modes/syntax/guards passed before quiet START; collection only after original terminal QUIET_END. Mac commands stopped before next CPU quiet window.

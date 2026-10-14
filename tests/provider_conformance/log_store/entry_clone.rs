@@ -1,0 +1,142 @@
+// SPDX-License-Identifier: RPL-1.5
+// Copyright (c) 2026 Karl Livesey
+//! Independent derived top-level clone oracle; the payload derive is unchanged.
+use super::*;
+use voteboat::membership::{Configuration, ConfigurationChange, ConfigurationRecord};
+
+#[derive(Clone)]
+struct DerivedEntry {
+    index: u64,
+    term: u64,
+    payload: EntryPayload,
+}
+
+fn oracle(entry: &LogEntry) -> DerivedEntry {
+    DerivedEntry {
+        index: entry.index,
+        term: entry.term,
+        payload: entry.payload.clone(),
+    }
+}
+
+fn assert_oracle(entry: &LogEntry, derived: &DerivedEntry) {
+    assert_eq!(
+        (entry.index, entry.term, &entry.payload),
+        (derived.index, derived.term, &derived.payload)
+    );
+    if let (
+        EntryPayload::Command { bytes, .. },
+        EntryPayload::Command {
+            bytes: expected, ..
+        },
+    ) = (&entry.payload, &derived.payload)
+    {
+        assert_eq!(bytes.capacity(), expected.capacity());
+    }
+}
+
+fn payloads() -> Vec<EntryPayload> {
+    let boot = bootstrap(1, 3);
+    let next = Configuration::new(
+        ConfigurationId::new(2).unwrap(),
+        boot.policy,
+        boot.voter_stores,
+        [(NodeId::new(4).unwrap(), identity(4))].into(),
+    )
+    .unwrap();
+    let mut payloads = vec![EntryPayload::Noop];
+    for change in [
+        ConfigurationChange::Learners(next.clone()),
+        ConfigurationChange::Joint {
+            id: ConfigurationId::new(2).unwrap(),
+            next,
+        },
+        ConfigurationChange::Final {
+            id: ConfigurationId::new(2).unwrap(),
+        },
+    ] {
+        payloads.push(EntryPayload::Configuration(Box::new(ConfigurationRecord {
+            operation: OperationId::new(u128::MAX).unwrap(),
+            expected: ConfigurationId::new(1).unwrap(),
+            change,
+        })));
+    }
+    for id in [1, (1 << 64) | 1, 1 << 127, u128::MAX] {
+        for length in [0, 1, 17, 257] {
+            for spare in [0, 31] {
+                let mut bytes = Vec::with_capacity(length + spare);
+                bytes.extend((0..length).map(|n| n as u8));
+                payloads.push(EntryPayload::Command {
+                    operation: OperationId::new(id).unwrap(),
+                    bytes,
+                });
+            }
+        }
+    }
+    payloads
+}
+
+#[test]
+fn fieldwise_clone_matches_independent_derived_top_level_for_every_payload() {
+    for (index, term) in [(0, 0), (1, 7), (u64::MAX, u64::MAX)] {
+        for payload in payloads() {
+            let entry = LogEntry {
+                index,
+                term,
+                payload,
+            };
+            let expected = oracle(&entry).clone();
+            let copied = entry.clone();
+            assert_oracle(&copied, &expected);
+            assert_independent(&entry, copied);
+        }
+    }
+}
+
+fn assert_independent(source: &LogEntry, mut copied: LogEntry) {
+    match (&source.payload, &mut copied.payload) {
+        (EntryPayload::Command { bytes, .. }, EntryPayload::Command { bytes: copy, .. }) => {
+            if !bytes.is_empty() {
+                assert_ne!(bytes.as_ptr(), copy.as_ptr());
+                copy[0] ^= 255;
+                assert_ne!(bytes[0], copy[0]);
+            }
+            copy.push(19);
+            assert_eq!(copy.len(), bytes.len() + 1);
+        }
+        (EntryPayload::Configuration(record), EntryPayload::Configuration(copy)) => {
+            assert!(!std::ptr::eq(record.as_ref(), copy.as_ref()));
+            copy.operation = OperationId::new(7).unwrap();
+            copy.expected = ConfigurationId::new(99).unwrap();
+            copy.change = ConfigurationChange::Final {
+                id: ConfigurationId::new(99).unwrap(),
+            };
+            assert_ne!(record.as_ref(), copy.as_ref());
+        }
+        (EntryPayload::Noop, EntryPayload::Noop) => {}
+        _ => panic!("clone changed payload variant"),
+    }
+}
+
+#[test]
+fn clone_from_matches_derived_replacement_and_independent_ownership() {
+    for payload in payloads() {
+        let source = LogEntry {
+            index: u64::MAX,
+            term: 9,
+            payload,
+        };
+        for previous in payloads() {
+            let mut target = LogEntry {
+                index: 3,
+                term: 2,
+                payload: previous,
+            };
+            let mut expected = oracle(&target);
+            expected.clone_from(&oracle(&source));
+            target.clone_from(&source);
+            assert_oracle(&target, &expected);
+            assert_independent(&source, target);
+        }
+    }
+}

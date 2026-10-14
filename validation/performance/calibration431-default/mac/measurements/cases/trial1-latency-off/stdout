@@ -1,0 +1,1 @@
+client_workers: 1, server_workers: 16, clients: 4096, n: 20m (20_000_000), batch: 4, raft_members: {0, 1, 2}: time: 6.281298291s, ns/op: 314, op/ms: 3182

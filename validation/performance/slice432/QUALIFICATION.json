@@ -1,0 +1,244 @@
+{
+  "original_focused_session": 39814,
+  "focused_terminal": 0,
+  "original_combined_session": 82420,
+  "combined_terminal": 0,
+  "stages": {
+    "focused": "DONE",
+    "combined": "DONE"
+  },
+  "source_inputs": 1428,
+  "source_before_after_all_hashes_and_modes_equal": true,
+  "patch_sha256": "08d1b07bc74c2ef5b4b5ad658ff09adf875cbddbea434feb68259227136d320b",
+  "scopes": {
+    "format-apply": {
+      "exit": 0,
+      "command": "cargo +stable fmt --all",
+      "test_results": []
+    },
+    "focused-clone": {
+      "exit": 0,
+      "command": "cargo +stable test --locked --offline --all-features --test provider_conformance entry_clone --message-format=json -vv -- --test-threads=1",
+      "test_results": [
+        {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 35
+        }
+      ]
+    },
+    "fmt-initial": {
+      "exit": 0,
+      "command": "cargo +stable fmt --all -- --check",
+      "test_results": []
+    },
+    "clippy-all": {
+      "exit": 0,
+      "command": "cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings",
+      "test_results": []
+    },
+    "clippy-default": {
+      "exit": 0,
+      "command": "cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings",
+      "test_results": []
+    },
+    "clippy-core": {
+      "exit": 0,
+      "command": "cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings",
+      "test_results": []
+    },
+    "clippy-native": {
+      "exit": 0,
+      "command": "cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features --features native -- -D warnings",
+      "test_results": []
+    },
+    "source-before": {
+      "exit": 0,
+      "command": "sha256sum -c /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice432/source.sha256",
+      "test_results": []
+    },
+    "compiler": {
+      "exit": 0,
+      "command": "rustc +stable -Vv",
+      "test_results": []
+    },
+    "cargo-version": {
+      "exit": 0,
+      "command": "cargo +stable -V",
+      "test_results": []
+    },
+    "protoc-version": {
+      "exit": 0,
+      "command": "/home/karllivesey/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/protobuf-build-0.14.1/bin/protoc-linux-x86_64 --version",
+      "test_results": []
+    },
+    "affected-all": {
+      "exit": 0,
+      "command": "cargo +stable test --locked --offline --all-features --lib --test log_store --test provider_conformance --test snapshot --test raft --message-format=json -vv -- --test-threads=1",
+      "test_results": [
+        {
+          "passed": 392,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 19,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 37,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 79,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 27,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        }
+      ]
+    },
+    "owner-held": {
+      "exit": 0,
+      "command": "cargo +stable test --locked --offline --all-features --test effect_owner held_effect_stops -- --test-threads=1",
+      "test_results": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 202
+        }
+      ]
+    },
+    "owner-failure": {
+      "exit": 0,
+      "command": "cargo +stable test --locked --offline --all-features --test effect_owner failure_keeps_external -- --test-threads=1",
+      "test_results": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 202
+        }
+      ]
+    },
+    "owner-durable": {
+      "exit": 0,
+      "command": "cargo +stable test --locked --offline --all-features --test effect_owner durable_before_written -- --test-threads=1",
+      "test_results": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 202
+        }
+      ]
+    },
+    "owner-snapshot": {
+      "exit": 0,
+      "command": "cargo +stable test --locked --offline --all-features --test effect_owner snapshot -- --test-threads=1",
+      "test_results": [
+        {
+          "passed": 18,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 185
+        }
+      ]
+    },
+    "affected-core": {
+      "exit": 0,
+      "command": "cargo +stable test --locked --offline --no-default-features --lib --test log_store --test provider_conformance --test snapshot --test raft -- --test-threads=1",
+      "test_results": [
+        {
+          "passed": 312,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 22,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 29,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 12,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        }
+      ]
+    },
+    "actual-services": {
+      "exit": 0,
+      "command": "cargo +stable test --locked --offline --all-features --test counter_service three_ -- --test-threads=1",
+      "test_results": [
+        {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 201
+        }
+      ]
+    },
+    "fmt-final": {
+      "exit": 0,
+      "command": "cargo +stable fmt --all -- --check",
+      "test_results": []
+    },
+    "matched-tests": {
+      "exit": 0,
+      "command": "cargo +stable test --manifest-path benchmarks/matched/Cargo.toml --locked --offline -- --test-threads=1",
+      "test_results": [
+        {
+          "passed": 43,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        }
+      ]
+    },
+    "matched-fmt": {
+      "exit": 0,
+      "command": "cargo +stable fmt --manifest-path benchmarks/matched/Cargo.toml --all -- --check",
+      "test_results": []
+    },
+    "matched-clippy": {
+      "exit": 0,
+      "command": "cargo +stable clippy --manifest-path benchmarks/matched/Cargo.toml --locked --offline --keep-going --all-targets -- -D warnings",
+      "test_results": []
+    },
+    "source-after": {
+      "exit": 0,
+      "command": "sha256sum -c /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice432/source.sha256",
+      "test_results": []
+    }
+  },
+  "root_dependency_cache_reuse": "Terminal429 debug/check dependency target reused; changed432 root source recompiled with current compiler. Feature configs serial. Fresh performance artifact is explicitly unbuilt; no throughput claim.",
+  "owner_scope": "Only selected existing held-effect, failure lease, written/durable fence and snapshot histories rerun, not full203effect_owner suite. Exact previous431 qualification link retained; no whole owner suite claim.",
+  "errors": "No compile/test/format/Clippy errors; two source-export physicalmode assumptions failed before edits, preserved as tool-reported in PREPARATION. CanonicalGitmode separate from mutablepriorphysicalmode and intentionally readonlyfrozen input."
+}

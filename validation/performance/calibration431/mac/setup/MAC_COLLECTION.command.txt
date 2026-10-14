@@ -1,0 +1,1 @@
+ssh karllivesey@192.168.192.76 'set -e; test "$(cat /tmp/voteboat-calibration431-velyOS/mac/STATUS)" = 0; test -f /tmp/voteboat-calibration431-velyOS/mac/DONE; tar -cf - -C /tmp/voteboat-calibration431-velyOS .'

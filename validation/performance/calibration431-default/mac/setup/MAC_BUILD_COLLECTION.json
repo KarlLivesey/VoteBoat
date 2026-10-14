@@ -1,0 +1,33 @@
+{
+  "remote_job": "/tmp/voteboat-upstream-default431-XxW0Du",
+  "tar_sha256": "af36c84052dd5df2bd272bdd5ba3e0e98507d0f89a9f077354eaaba214565a2b",
+  "files": {
+    "CONFIG.mac.json": "3e4f49210b4fa7d08cd69feb24532003ce173bc97794bc9485e422ee9ab29424",
+    "SCHEMA.md": "8bc35de09603a850ef792dd7959e9d96277f78b07305b1b24a893900f4b5d889",
+    "build.mac.sh": "f298d09c18892589425ded440499743d28b0cc6592510b5885d5a21066fc156e",
+    "mac/ARTIFACTS.json": "da99375e16cb8bf8aa5ecdbc674e85730f5d745e062da29e961800a16c9235d5",
+    "mac/CONTROL_VALIDATION.json": "f6aa1073e6d8e23eaa5503b08bf8e79571ba0edc6dfd1fcf0464c46d904a4ad3",
+    "mac/DONE": "5abadbe0f29eecfecfbcceab20169806fc117a6054938952ac976ba0ffe27764",
+    "mac/PID": "ddba74a616ab0146aabe7ddddae128b149ffd3abec220431aa34d9f9ad2571e8",
+    "mac/SOURCE_AFTER.json": "4ffddc4282b3bcb61ae093510173e0ee81f57a289fcd2d62f05b34340055c10d",
+    "mac/SOURCE_BEFORE.json": "9976ba56e310931f84c4903d23c80889198c82b06bb35509dab9ff267d03942a",
+    "mac/STATUS": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "mac/control/END": "2897152a5deb86f910fa9eb92fb98f07d073f0be96ede3fc6dbfbe8d1f22bd7d",
+    "mac/control/START": "391e586a5b027a6fde51f84b376f5196d0ddcb7b017f61e702bd9faf98bb35b3",
+    "mac/control/command.txt": "c88d32fda67fdb5395057a464a7e8b1c15ff9824784fe0837c79ef1394fb56b8",
+    "mac/control/exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "mac/control/stderr": "d7f7fc7da66ed87dbc0436d664df4c2ab64ac81695220af8f5ef2cbe66804e48",
+    "mac/control/stdout": "f936c05094afa240a0f18c608ce656b0b4f37e0798f457cd83b30ce84006ff6f",
+    "mac/logs/build.command.txt": "5158f88fd19fd9f2badfc8b359170c4ab7ac55623850b910175794cc3244f5cc",
+    "mac/logs/build.jsonl": "27a62103cdef4d523d340d69d71bf41de877ceca94592e9b31d0f71d9f835851",
+    "mac/logs/build.stderr": "ffebebb91faf59526b31575a6281dc0559230a583c06413df05e9bc9842c501f",
+    "mac/logs/cargo.txt": "fb3f25aefd6d5441842d285f5a9b125b3f0f0b0bf2013d9a32677f9e99c6c854",
+    "mac/logs/root-rustc-lines.txt": "79b5ab494dc0d677205057d2f4cacbc14da45e9a44780e5d2711b4305dd0f7e1",
+    "mac/logs/rustc.txt": "bd38eb565e393486255b35ff1f74e9dc7ca87425f1febb798b9dd042159a833a",
+    "qualify.py": "9d1c4c6b7e2e5806ce018b4b943aec8b3a19dfceb400d23a1153c2343767936c",
+    "source-guard.py": "f66dd003439a40125021fdc02da7d1de56691cdfd0eb9601ab40d65a3f0e326f"
+  },
+  "bytes": 1138970,
+  "binary_or_buildtree_transfer": false,
+  "exit": 0
+}

@@ -1,0 +1,749 @@
+Benchmark config: client_workers: 1, server_workers: 16, clients: 4096, n: 20m (20_000_000), batch: 4, raft_members: {0, 1, 2}
+[  5.00s] RuntimeStats:
+  apply_batch: [samples: 5042, P0.1: 1, P1: 1, P5: 1, P10: 1, P50: 1238, P90: 8480, P99: 10839, P99.9: 11830]
+  append_batch: [samples: 230844, P0.1: 1, P1: 4, P5: 4, P10: 4, P50: 9, P90: 105, P99: 1046, P99.9: 6322]
+  replicate_batch: [samples: 37111, P0.1: 0, P1: 0, P5: 0, P10: 0, P50: 1109, P90: 1245, P99: 1276, P99.9: 1279]
+  raft_msg_per_run: [samples: 247411, P0.1: 0, P1: 0, P5: 0, P10: 1, P50: 1, P90: 1, P99: 1, P99.9: 1]
+  write_batch: [samples: 230842, P0.1: 1, P1: 4, P5: 4, P10: 4, P50: 9, P90: 105, P99: 1046, P99.9: 6322]
+  raft_msg_budget: [samples: 16569, P0.1: 896, P1: 897, P5: 902, P10: 908, P50: 960, P90: 1011, P99: 1022, P99.9: 1023]
+  notification_budget: [samples: 16568, P0.1: 8194, P1: 8212, P5: 8294, P10: 8396, P50: 9216, P90: 10035, P99: 10219, P99.9: 10238]
+  raft_msg_usage_permille: [samples: 247411, P0.1: 0, P1: 0, P5: 0, P10: 1, P50: 1, P90: 1, P99: 1, P99.9: 1]
+  notification_usage_permille: [samples: 16568, P0.1: 0, P1: 0, P5: 0, P10: 0, P50: 0, P90: 2, P99: 6, P99.9: 7]
+  commands:
+    AppendEntries: 230844
+    ReplicateCommitted: 16663
+    BroadcastHeartbeat: 90
+    SaveCommittedAndApply: 5042
+    Replicate: 4
+    RebuildReplicationStreams: 1
+    SaveVote: 2
+    SendVote: 1
+    PurgeLog: 1638
+    SM::BuildSnapshot: 1639
+    Respond: 1
+  raft_msgs:
+    ClientWrite: 230842
+    Initialize: 1
+    GetRuntimeStats: 1
+  notifications:
+    Notify::VoteResponse: 3
+    Notify::LocalIO: 22503
+    Notify::ReplicationProgress: 37108
+    Notify::HeartbeatProgress: 37289
+    Notify::StateMachine: 6676
+    Notify::Tick: 503
+  log_stages(us):
+       1:proposed→received: n=37192 p50=168 p90=1169 p99=1268 p99.9=1278
+      2:received→submitted: n=37192 p50=4 p90=24 p99=27 p99.9=27
+     3:submitted→persisted: n=37192 p50=642 p90=1639 p99=2414 p99.9=2544
+     4:persisted→committed: n=37192 p50=2586 p90=3680 p99=4055 p99.9=4385
+       5:committed→applied: n=37192 p50=2140 p90=2877 p99=3050 p99.9=3069
+      1~5:proposed→applied: n=37192 p50=6112 p90=7260 p99=8009 p99.9=8169
+  log_stage_segments:
+    [14930590,14930598): 02:14:27.548033 +0.00ns; proposed +0.00ns (0.00ns), received +3.00µs (3.00µs), submitted +416.00ns (3.42µs), persisted +75.96µs (79.38µs), committed +2.56ms (2.64ms), applied +2.37ms (5.01ms)
+    [14930598,14930602): 02:14:27.548036 +2.88µs; proposed +0.00ns (0.00ns), received +2.50µs (2.50µs), submitted +458.00ns (2.96µs), persisted +73.54µs (76.50µs), committed +2.56ms (2.64ms), applied +2.37ms (5.01ms)
+    [14930602,14930610): 02:14:27.548038 +1.96µs; proposed +0.00ns (0.00ns), received +3.12µs (3.12µs), submitted +333.00ns (3.46µs), persisted +71.08µs (74.54µs), committed +2.56ms (2.64ms), applied +2.37ms (5.01ms)
+    [14930610,14930614): 02:14:27.548042 +3.88µs; proposed +0.00ns (0.00ns), received +1.71µs (1.71µs), submitted +500.00ns (2.21µs), persisted +68.46µs (70.67µs), committed +2.56ms (2.64ms), applied +2.37ms (5.00ms)
+    [14930614,14930618): 02:14:27.548044 +1.83µs; proposed +0.00ns (0.00ns), received +1.96µs (1.96µs), submitted +458.00ns (2.42µs), persisted +66.42µs (68.83µs), committed +2.56ms (2.63ms), applied +2.37ms (5.00ms)
+    [14930618,14930622): 02:14:27.548046 +1.96µs; proposed +0.00ns (0.00ns), received +2.00µs (2.00µs), submitted +458.00ns (2.46µs), persisted +64.42µs (66.88µs), committed +2.56ms (2.63ms), applied +2.37ms (5.00ms)
+    [14930622,14930630): 02:14:27.548047 +1.67µs; proposed +0.00ns (0.00ns), received +3.08µs (3.08µs), submitted +375.00ns (3.46µs), persisted +61.75µs (65.21µs), committed +2.56ms (2.63ms), applied +2.37ms (5.00ms)
+    [14930630,14930638): 02:14:27.548050 +2.50µs; proposed +0.00ns (0.00ns), received +3.29µs (3.29µs), submitted +375.00ns (3.67µs), persisted +59.04µs (62.71µs), committed +2.56ms (2.63ms), applied +2.37ms (5.00ms)
+    [14930638,14930650): 02:14:27.548052 +2.54µs; proposed +0.00ns (0.00ns), received +5.12µs (5.12µs), submitted +375.00ns (5.50µs), persisted +54.67µs (60.17µs), committed +2.56ms (2.62ms), applied +2.37ms (4.99ms)
+    [14930650,14930662): 02:14:27.548057 +4.12µs; proposed +0.00ns (0.00ns), received +4.88µs (4.88µs), submitted +375.00ns (5.25µs), persisted +50.79µs (56.04µs), committed +2.56ms (2.62ms), applied +2.37ms (4.99ms)
+    [14930662,14930674): 02:14:27.548061 +4.12µs; proposed +0.00ns (0.00ns), received +4.50µs (4.50µs), submitted +375.00ns (4.88µs), persisted +47.04µs (51.92µs), committed +2.56ms (2.62ms), applied +2.37ms (4.98ms)
+    [14930674,14930682): 02:14:27.548066 +4.54µs; proposed +0.00ns (0.00ns), received +3.75µs (3.75µs), submitted +333.00ns (4.08µs), persisted +43.29µs (47.38µs), committed +2.56ms (2.61ms), applied +2.37ms (4.98ms)
+    [14930682,14930690): 02:14:27.548068 +3.21µs; proposed +0.00ns (0.00ns), received +3.79µs (3.79µs), submitted +416.00ns (4.21µs), persisted +39.96µs (44.17µs), committed +2.56ms (2.61ms), applied +2.37ms (4.98ms)
+    [14930690,14930694): 02:14:27.548072 +3.71µs; proposed +0.00ns (0.00ns), received +2.67µs (2.67µs), submitted +375.00ns (3.04µs), persisted +37.42µs (40.46µs), committed +2.56ms (2.60ms), applied +2.37ms (4.97ms)
+    [14930694,14930702): 02:14:27.548074 +1.75µs; proposed +0.00ns (0.00ns), received +3.25µs (3.25µs), submitted +375.00ns (3.62µs), persisted +35.08µs (38.71µs), committed +2.56ms (2.60ms), applied +2.37ms (4.97ms)
+    [14930702,14930706): 02:14:27.548077 +3.21µs; proposed +0.00ns (0.00ns), received +2.33µs (2.33µs), submitted +458.00ns (2.79µs), persisted +32.71µs (35.50µs), committed +2.56ms (2.60ms), applied +2.37ms (4.97ms)
+    [14930706,14930710): 02:14:27.548082 +5.29µs; proposed +0.00ns (0.00ns), received +2.08µs (2.08µs), submitted +500.00ns (2.58µs), persisted +27.62µs (30.21µs), committed +2.56ms (2.59ms), applied +2.37ms (4.96ms)
+    [14930710,14930714): 02:14:27.548084 +2.00µs; proposed +0.00ns (0.00ns), received +2.33µs (2.33µs), submitted +500.00ns (2.83µs), persisted +25.38µs (28.21µs), committed +2.56ms (2.59ms), applied +2.37ms (4.96ms)
+    [14930714,14930722): 02:14:27.548086 +1.67µs; proposed +0.00ns (0.00ns), received +3.88µs (3.88µs), submitted +333.00ns (4.21µs), persisted +22.33µs (26.54µs), committed +2.56ms (2.59ms), applied +2.37ms (4.96ms)
+    [14930722,14930730): 02:14:27.548089 +3.00µs; proposed +0.00ns (0.00ns), received +3.38µs (3.38µs), submitted +458.00ns (3.83µs), persisted +19.71µs (23.54µs), committed +2.56ms (2.59ms), applied +2.37ms (4.96ms)
+    [14930730,14930738): 02:14:27.548092 +3.12µs; proposed +0.00ns (0.00ns), received +3.04µs (3.04µs), submitted +333.00ns (3.38µs), persisted +17.04µs (20.42µs), committed +2.56ms (2.58ms), applied +2.37ms (4.95ms)
+    [14930738,14930750): 02:14:27.548095 +2.71µs; proposed +0.00ns (0.00ns), received +4.71µs (4.71µs), submitted +375.00ns (5.08µs), persisted +12.62µs (17.71µs), committed +2.56ms (2.58ms), applied +2.37ms (4.95ms)
+    [14930750,14930758): 02:14:27.548100 +4.46µs; proposed +0.00ns (0.00ns), received +3.46µs (3.46µs), submitted +333.00ns (3.79µs), persisted +9.46µs (13.25µs), committed +2.56ms (2.58ms), applied +2.37ms (4.95ms)
+    [14930758,14930766): 02:14:27.548102 +2.62µs; proposed +0.00ns (0.00ns), received +3.50µs (3.50µs), submitted +333.00ns (3.83µs), persisted +6.79µs (10.62µs), committed +2.56ms (2.57ms), applied +2.37ms (4.94ms)
+    [14930766,14930814): 02:14:27.548122 +20.58µs; proposed +0.00ns (0.00ns), received +25.42µs (25.42µs), submitted +1.83µs (27.25µs), persisted +214.92µs (242.17µs), committed +2.31ms (2.55ms), applied +2.37ms (4.92ms)
+    [14930814,14930850): 02:14:27.548146 +23.88µs; proposed +0.00ns (0.00ns), received +15.04µs (15.04µs), submitted +500.00ns (15.54µs), persisted +202.75µs (218.29µs), committed +2.31ms (2.53ms), applied +2.37ms (4.90ms)
+    [14930850,14930870): 02:14:27.548161 +14.83µs; proposed +0.00ns (0.00ns), received +7.38µs (7.38µs), submitted +542.00ns (7.92µs), persisted +195.54µs (203.46µs), committed +2.31ms (2.52ms), applied +2.37ms (4.88ms)
+    [14930870,14930882): 02:14:27.548169 +7.42µs; proposed +0.00ns (0.00ns), received +5.17µs (5.17µs), submitted +500.00ns (5.67µs), persisted +190.38µs (196.04µs), committed +2.31ms (2.51ms), applied +2.37ms (4.88ms)
+    [14930882,14930894): 02:14:27.548173 +4.58µs; proposed +0.00ns (0.00ns), received +5.46µs (5.46µs), submitted +500.00ns (5.96µs), persisted +185.50µs (191.46µs), committed +2.31ms (2.50ms), applied +2.37ms (4.87ms)
+    [14930894,14930902): 02:14:27.548178 +4.79µs; proposed +0.00ns (0.00ns), received +5.00µs (5.00µs), submitted +417.00ns (5.42µs), persisted +181.25µs (186.67µs), committed +2.31ms (2.50ms), applied +2.37ms (4.87ms)
+    [14930902,14930910): 02:14:27.548182 +4.12µs; proposed +0.00ns (0.00ns), received +3.88µs (3.88µs), submitted +333.00ns (4.21µs), persisted +178.33µs (182.54µs), committed +2.31ms (2.49ms), applied +2.37ms (4.86ms)
+    [14930910,14930914): 02:14:27.548186 +3.75µs; proposed +0.00ns (0.00ns), received +2.67µs (2.67µs), submitted +458.00ns (3.12µs), persisted +175.67µs (178.79µs), committed +2.31ms (2.49ms), applied +2.37ms (4.86ms)
+    [14930914,14930922): 02:14:27.548188 +2.17µs; proposed +0.00ns (0.00ns), received +3.50µs (3.50µs), submitted +333.00ns (3.83µs), persisted +172.79µs (176.62µs), committed +2.31ms (2.49ms), applied +2.37ms (4.86ms)
+    [14930922,14930926): 02:14:27.548192 +4.00µs; proposed +0.00ns (0.00ns), received +1.88µs (1.88µs), submitted +458.00ns (2.33µs), persisted +170.29µs (172.62µs), committed +2.31ms (2.48ms), applied +2.37ms (4.85ms)
+    [14930926,14930930): 02:14:27.548194 +1.75µs; proposed +0.00ns (0.00ns), received +2.04µs (2.04µs), submitted +334.00ns (2.38µs), persisted +168.50µs (170.88µs), committed +2.31ms (2.48ms), applied +2.37ms (4.85ms)
+    [14930930,14930934): 02:14:27.548196 +2.17µs; proposed +0.00ns (0.00ns), received +2.21µs (2.21µs), submitted +583.00ns (2.79µs), persisted +165.92µs (168.71µs), committed +2.31ms (2.48ms), applied +2.37ms (4.85ms)
+    [14930934,14930942): 02:14:27.548198 +1.79µs; proposed +0.00ns (0.00ns), received +3.33µs (3.33µs), submitted +584.00ns (3.92µs), persisted +163.00µs (166.92µs), committed +2.31ms (2.48ms), applied +2.37ms (4.85ms)
+    [14930942,14930954): 02:14:27.548201 +3.29µs; proposed +0.00ns (0.00ns), received +4.67µs (4.67µs), submitted +375.00ns (5.04µs), persisted +158.58µs (163.62µs), committed +2.31ms (2.48ms), applied +2.37ms (4.84ms)
+    [14930954,14930958): 02:14:27.548206 +4.88µs; proposed +0.00ns (0.00ns), received +2.50µs (2.50µs), submitted +458.00ns (2.96µs), persisted +155.79µs (158.75µs), committed +2.31ms (2.47ms), applied +2.37ms (4.84ms)
+    [14930958,14930966): 02:14:27.548208 +1.79µs; proposed +0.00ns (0.00ns), received +3.58µs (3.58µs), submitted +458.00ns (4.04µs), persisted +152.92µs (156.96µs), committed +2.31ms (2.47ms), applied +2.37ms (4.84ms)
+    [14930966,14930978): 02:14:27.548211 +2.83µs; proposed +0.00ns (0.00ns), received +5.08µs (5.08µs), submitted +375.00ns (5.46µs), persisted +148.67µs (154.12µs), committed +2.31ms (2.47ms), applied +2.37ms (4.83ms)
+    [14930978,14930986): 02:14:27.548215 +4.33µs; proposed +0.00ns (0.00ns), received +4.38µs (4.38µs), submitted +333.00ns (4.71µs), persisted +145.08µs (149.79µs), committed +2.31ms (2.46ms), applied +2.37ms (4.83ms)
+    [14930986,14930994): 02:14:27.548219 +3.50µs; proposed +0.00ns (0.00ns), received +4.21µs (4.21µs), submitted +334.00ns (4.54µs), persisted +141.75µs (146.29µs), committed +2.31ms (2.46ms), applied +2.37ms (4.83ms)
+    [14930994,14931002): 02:14:27.548222 +3.54µs; proposed +0.00ns (0.00ns), received +3.42µs (3.42µs), submitted +459.00ns (3.88µs), persisted +138.88µs (142.75µs), committed +2.31ms (2.45ms), applied +2.37ms (4.82ms)
+    [14931002,14931006): 02:14:27.548226 +4.12µs; proposed +0.00ns (0.00ns), received +2.21µs (2.21µs), submitted +583.00ns (2.79µs), persisted +135.83µs (138.62µs), committed +2.31ms (2.45ms), applied +2.37ms (4.82ms)
+    [14931006,14931010): 02:14:27.548228 +1.75µs; proposed +0.00ns (0.00ns), received +2.83µs (2.83µs), submitted +458.00ns (3.29µs), persisted +133.58µs (136.88µs), committed +2.31ms (2.45ms), applied +2.37ms (4.82ms)
+    [14931010,14931014): 02:14:27.548230 +2.17µs; proposed +0.00ns (0.00ns), received +2.58µs (2.58µs), submitted +333.00ns (2.92µs), persisted +131.79µs (134.71µs), committed +2.31ms (2.45ms), applied +2.37ms (4.82ms)
+    [14931014,14931018): 02:14:27.548233 +2.21µs; proposed +0.00ns (0.00ns), received +2.50µs (2.50µs), submitted +500.00ns (3.00µs), persisted +129.50µs (132.50µs), committed +2.31ms (2.44ms), applied +2.37ms (4.81ms)
+    [14931018,14931022): 02:14:27.548234 +2.04µs; proposed +0.00ns (0.00ns), received +2.42µs (2.42µs), submitted +417.00ns (2.83µs), persisted +127.62µs (130.46µs), committed +2.31ms (2.44ms), applied +2.37ms (4.81ms)
+    [14931022,14931030): 02:14:27.548236 +1.92µs; proposed +0.00ns (0.00ns), received +3.62µs (3.62µs), submitted +333.00ns (3.96µs), persisted +124.58µs (128.54µs), committed +2.31ms (2.44ms), applied +2.37ms (4.81ms)
+    [14931030,14931038): 02:14:27.548240 +3.83µs; proposed +0.00ns (0.00ns), received +3.46µs (3.46µs), submitted +541.00ns (4.00µs), persisted +120.71µs (124.71µs), committed +2.31ms (2.44ms), applied +2.37ms (4.81ms)
+    [14931038,14931042): 02:14:27.548244 +3.67µs; proposed +0.00ns (0.00ns), received +2.29µs (2.29µs), submitted +458.00ns (2.75µs), persisted +118.29µs (121.04µs), committed +2.31ms (2.43ms), applied +2.37ms (4.80ms)
+    [14931042,14931050): 02:14:27.548245 +1.79µs; proposed +0.00ns (0.00ns), received +3.33µs (3.33µs), submitted +333.00ns (3.67µs), persisted +115.58µs (119.25µs), committed +2.31ms (2.43ms), applied +2.37ms (4.80ms)
+    [14931050,14931054): 02:14:27.548249 +3.42µs; proposed +0.00ns (0.00ns), received +2.29µs (2.29µs), submitted +458.00ns (2.75µs), persisted +113.08µs (115.83µs), committed +2.31ms (2.43ms), applied +2.37ms (4.80ms)
+    [14931054,14931058): 02:14:27.548251 +2.00µs; proposed +0.00ns (0.00ns), received +2.46µs (2.46µs), submitted +458.00ns (2.92µs), persisted +110.92µs (113.83µs), committed +2.31ms (2.43ms), applied +2.37ms (4.79ms)
+    [14931058,14931062): 02:14:27.548253 +1.96µs; proposed +0.00ns (0.00ns), received +2.46µs (2.46µs), submitted +500.00ns (2.96µs), persisted +108.92µs (111.88µs), committed +2.31ms (2.42ms), applied +2.37ms (4.79ms)
+    [14931062,14931066): 02:14:27.548255 +2.17µs; proposed +0.00ns (0.00ns), received +2.42µs (2.42µs), submitted +458.00ns (2.88µs), persisted +106.83µs (109.71µs), committed +2.31ms (2.42ms), applied +2.37ms (4.79ms)
+    [14931066,14931074): 02:14:27.548257 +1.88µs; proposed +0.00ns (0.00ns), received +3.88µs (3.88µs), submitted +375.00ns (4.25µs), persisted +103.58µs (107.83µs), committed +2.31ms (2.42ms), applied +2.37ms (4.79ms)
+    [14931074,14931078): 02:14:27.548261 +3.79µs; proposed +0.00ns (0.00ns), received +2.46µs (2.46µs), submitted +459.00ns (2.92µs), persisted +101.12µs (104.04µs), committed +2.31ms (2.42ms), applied +2.37ms (4.78ms)
+    [14931078,14931086): 02:14:27.548262 +1.79µs; proposed +0.00ns (0.00ns), received +3.62µs (3.62µs), submitted +333.00ns (3.96µs), persisted +98.29µs (102.25µs), committed +2.31ms (2.41ms), applied +2.37ms (4.78ms)
+    [14931086,14931094): 02:14:27.548266 +3.38µs; proposed +0.00ns (0.00ns), received +3.79µs (3.79µs), submitted +334.00ns (4.12µs), persisted +94.75µs (98.88µs), committed +2.31ms (2.41ms), applied +2.37ms (4.78ms)
+    [14931094,14931098): 02:14:27.548270 +3.75µs; proposed +0.00ns (0.00ns), received +2.38µs (2.38µs), submitted +416.00ns (2.79µs), persisted +92.33µs (95.12µs), committed +2.31ms (2.41ms), applied +2.37ms (4.78ms)
+    [14931098,14931102): 02:14:27.548272 +2.21µs; proposed +0.00ns (0.00ns), received +2.50µs (2.50µs), submitted +458.00ns (2.96µs), persisted +89.96µs (92.92µs), committed +2.31ms (2.41ms), applied +2.37ms (4.77ms)
+    [14931102,14931106): 02:14:27.548274 +2.08µs; proposed +0.00ns (0.00ns), received +2.46µs (2.46µs), submitted +458.00ns (2.92µs), persisted +87.92µs (90.83µs), committed +2.31ms (2.40ms), applied +2.37ms (4.77ms)
+    [14931106,14931110): 02:14:27.548276 +2.33µs; proposed +0.00ns (0.00ns), received +2.25µs (2.25µs), submitted +416.00ns (2.67µs), persisted +85.83µs (88.50µs), committed +2.31ms (2.40ms), applied +2.37ms (4.77ms)
+    [14931110,14931114): 02:14:27.548278 +1.75µs; proposed +0.00ns (0.00ns), received +2.58µs (2.58µs), submitted +458.00ns (3.04µs), persisted +83.71µs (86.75µs), committed +2.31ms (2.40ms), applied +2.37ms (4.77ms)
+    [14931114,14931118): 02:14:27.548280 +2.17µs; proposed +0.00ns (0.00ns), received +2.42µs (2.42µs), submitted +458.00ns (2.88µs), persisted +81.71µs (84.58µs), committed +2.31ms (2.40ms), applied +2.37ms (4.77ms)
+    [14931118,14931126): 02:14:27.548282 +1.83µs; proposed +0.00ns (0.00ns), received +3.50µs (3.50µs), submitted +458.00ns (3.96µs), persisted +78.79µs (82.75µs), committed +2.31ms (2.39ms), applied +2.37ms (4.76ms)
+    [14931126,14931130): 02:14:27.548286 +3.71µs; proposed +0.00ns (0.00ns), received +2.33µs (2.33µs), submitted +500.00ns (2.83µs), persisted +76.21µs (79.04µs), committed +2.31ms (2.39ms), applied +2.37ms (4.76ms)
+    [14931130,14931134): 02:14:27.548288 +1.88µs; proposed +0.00ns (0.00ns), received +2.46µs (2.46µs), submitted +500.00ns (2.96µs), persisted +74.21µs (77.17µs), committed +2.31ms (2.39ms), applied +2.37ms (4.76ms)
+    [14931134,14931142): 02:14:27.548290 +1.75µs; proposed +0.00ns (0.00ns), received +3.33µs (3.33µs), submitted +417.00ns (3.75µs), persisted +71.67µs (75.42µs), committed +2.31ms (2.39ms), applied +2.37ms (4.76ms)
+    [14931142,14931150): 02:14:27.548292 +2.92µs; proposed +0.00ns (0.00ns), received +3.83µs (3.83µs), submitted +458.00ns (4.29µs), persisted +68.21µs (72.50µs), committed +2.31ms (2.38ms), applied +2.37ms (4.75ms)
+    [14931150,14931154): 02:14:27.548296 +3.79µs; proposed +0.00ns (0.00ns), received +2.42µs (2.42µs), submitted +458.00ns (2.88µs), persisted +65.83µs (68.71µs), committed +2.31ms (2.38ms), applied +2.37ms (4.75ms)
+    [14931154,14931162): 02:14:27.548298 +1.83µs; proposed +0.00ns (0.00ns), received +3.58µs (3.58µs), submitted +375.00ns (3.96µs), persisted +62.92µs (66.88µs), committed +2.31ms (2.38ms), applied +2.37ms (4.75ms)
+    [14931162,14931166): 02:14:27.548301 +3.42µs; proposed +0.00ns (0.00ns), received +2.71µs (2.71µs), submitted +458.00ns (3.17µs), persisted +60.29µs (63.46µs), committed +2.31ms (2.38ms), applied +2.37ms (4.74ms)
+    [14931166,14931174): 02:14:27.548303 +2.00µs; proposed +0.00ns (0.00ns), received +3.21µs (3.21µs), submitted +333.00ns (3.54µs), persisted +57.92µs (61.46µs), committed +2.31ms (2.37ms), applied +2.37ms (4.74ms)
+    [14931174,14931182): 02:14:27.548306 +2.58µs; proposed +0.00ns (0.00ns), received +3.75µs (3.75µs), submitted +333.00ns (4.08µs), persisted +54.79µs (58.88µs), committed +2.31ms (2.37ms), applied +2.37ms (4.74ms)
+    [14931182,14931190): 02:14:27.548309 +2.92µs; proposed +0.00ns (0.00ns), received +3.67µs (3.67µs), submitted +458.00ns (4.12µs), persisted +51.83µs (55.96µs), committed +2.31ms (2.37ms), applied +2.37ms (4.74ms)
+    [14931190,14931198): 02:14:27.548312 +3.04µs; proposed +0.00ns (0.00ns), received +3.62µs (3.62µs), submitted +333.00ns (3.96µs), persisted +48.96µs (52.92µs), committed +2.31ms (2.37ms), applied +2.37ms (4.73ms)
+    [14931198,14931202): 02:14:27.548315 +2.79µs; proposed +0.00ns (0.00ns), received +3.04µs (3.04µs), submitted +459.00ns (3.50µs), persisted +46.62µs (50.12µs), committed +2.31ms (2.36ms), applied +2.37ms (4.73ms)
+    [14931202,14931206): 02:14:27.548318 +2.62µs; proposed +0.00ns (0.00ns), received +2.62µs (2.62µs), submitted +458.00ns (3.08µs), persisted +44.42µs (47.50µs), committed +2.31ms (2.36ms), applied +2.37ms (4.73ms)
+    [14931206,14931210): 02:14:27.548320 +2.33µs; proposed +0.00ns (0.00ns), received +2.33µs (2.33µs), submitted +542.00ns (2.88µs), persisted +42.29µs (45.17µs), committed +2.31ms (2.36ms), applied +2.37ms (4.73ms)
+    [14931210,14931214): 02:14:27.548321 +2.04µs; proposed +0.00ns (0.00ns), received +2.58µs (2.58µs), submitted +458.00ns (3.04µs), persisted +40.08µs (43.12µs), committed +2.31ms (2.36ms), applied +2.37ms (4.72ms)
+    [14931214,14931218): 02:14:27.548324 +2.33µs; proposed +0.00ns (0.00ns), received +2.38µs (2.38µs), submitted +542.00ns (2.92µs), persisted +211.17µs (214.08µs), committed +2.14ms (2.35ms), applied +2.37ms (4.72ms)
+    [14931218,14931242): 02:14:27.548326 +1.50µs; proposed +0.00ns (0.00ns), received +24.29µs (24.29µs), submitted +708.00ns (25.00µs), persisted +187.58µs (212.58µs), committed +2.14ms (2.35ms), applied +2.37ms (4.72ms)
+    [14931242,14931266): 02:14:27.548349 +22.96µs; proposed +0.00ns (0.00ns), received +8.83µs (8.83µs), submitted +541.00ns (9.38µs), persisted +180.25µs (189.62µs), committed +2.14ms (2.33ms), applied +2.37ms (4.70ms)
+    [14931266,14931274): 02:14:27.548357 +7.75µs; proposed +0.00ns (0.00ns), received +6.29µs (6.29µs), submitted +375.00ns (6.67µs), persisted +175.21µs (181.88µs), committed +2.14ms (2.32ms), applied +2.37ms (4.69ms)
+    [14931274,14931314): 02:14:27.548366 +9.42µs; proposed +0.00ns (0.00ns), received +17.17µs (17.17µs), submitted +750.00ns (17.92µs), persisted +154.54µs (172.46µs), committed +2.14ms (2.31ms), applied +2.37ms (4.68ms)
+    [14931314,14931338): 02:14:27.548383 +16.50µs; proposed +0.00ns (0.00ns), received +9.29µs (9.29µs), submitted +458.00ns (9.75µs), persisted +146.21µs (155.96µs), committed +2.14ms (2.29ms), applied +2.37ms (4.66ms)
+    [14931338,14931354): 02:14:27.548391 +9.00µs; proposed +0.00ns (0.00ns), received +5.96µs (5.96µs), submitted +417.00ns (6.38µs), persisted +140.58µs (146.96µs), committed +2.14ms (2.29ms), applied +2.37ms (4.65ms)
+    [14931354,14931366): 02:14:27.548397 +6.08µs; proposed +0.00ns (0.00ns), received +4.58µs (4.58µs), submitted +375.00ns (4.96µs), persisted +135.92µs (140.88µs), committed +2.14ms (2.28ms), applied +2.37ms (4.65ms)
+    [14931366,14931374): 02:14:27.548402 +4.71µs; proposed +0.00ns (0.00ns), received +3.38µs (3.38µs), submitted +375.00ns (3.75µs), persisted +132.42µs (136.17µs), committed +2.14ms (2.28ms), applied +2.37ms (4.64ms)
+    [14931374,14931382): 02:14:27.548405 +3.12µs; proposed +0.00ns (0.00ns), received +3.33µs (3.33µs), submitted +333.00ns (3.67µs), persisted +129.38µs (133.04µs), committed +2.14ms (2.27ms), applied +2.37ms (4.64ms)
+    [14931382,14931390): 02:14:27.548408 +2.75µs; proposed +0.00ns (0.00ns), received +3.50µs (3.50µs), submitted +333.00ns (3.83µs), persisted +126.46µs (130.29µs), committed +2.14ms (2.27ms), applied +2.37ms (4.64ms)
+    [14931390,14931398): 02:14:27.548411 +2.92µs; proposed +0.00ns (0.00ns), received +3.58µs (3.58µs), submitted +333.00ns (3.92µs), persisted +123.46µs (127.38µs), committed +2.14ms (2.27ms), applied +2.37ms (4.63ms)
+    [14931398,14931406): 02:14:27.548414 +3.04µs; proposed +0.00ns (0.00ns), received +4.00µs (4.00µs), submitted +333.00ns (4.33µs), persisted +120.00µs (124.33µs), committed +2.14ms (2.26ms), applied +2.37ms (4.63ms)
+    [14931406,14931410): 02:14:27.548417 +3.25µs; proposed +0.00ns (0.00ns), received +3.12µs (3.12µs), submitted +458.00ns (3.58µs), persisted +117.88µs (121.46µs), committed +2.14ms (2.26ms), applied +2.37ms (4.63ms)
+    [14931410,14931474): 02:14:27.548420 +2.42µs; proposed +0.00ns (0.00ns), received +24.42µs (24.42µs), submitted +875.00ns (25.29µs), persisted +93.75µs (119.04µs), committed +2.14ms (2.26ms), applied +2.37ms (4.63ms)
+    [14931474,14931514): 02:14:27.548442 +23.21µs; proposed +0.00ns (0.00ns), received +13.71µs (13.71µs), submitted +542.00ns (14.25µs), persisted +81.58µs (95.83µs), committed +2.14ms (2.23ms), applied +2.37ms (4.60ms)
+    [14931514,14931538): 02:14:27.548456 +13.54µs; proposed +0.00ns (0.00ns), received +8.42µs (8.42µs), submitted +500.00ns (8.92µs), persisted +427.62µs (436.54µs), committed +1.78ms (2.22ms), applied +2.37ms (4.59ms)
+    [14931538,14931666): 02:14:27.548464 +8.08µs; proposed +0.00ns (0.00ns), received +39.42µs (39.42µs), submitted +1.33µs (40.75µs), persisted +387.71µs (428.46µs), committed +1.78ms (2.21ms), applied +2.37ms (4.58ms)
+    [14931666,14931738): 02:14:27.548502 +37.54µs; proposed +0.00ns (0.00ns), received +24.29µs (24.29µs), submitted +709.00ns (25.00µs), persisted +365.92µs (390.92µs), committed +1.78ms (2.18ms), applied +2.37ms (4.54ms)
+    [14931738,14931746): 02:14:27.548525 +23.33µs; proposed +0.00ns (0.00ns), received +10.92µs (10.92µs), submitted +375.00ns (11.29µs), persisted +356.29µs (367.58µs), committed +1.78ms (2.15ms), applied +2.37ms (4.52ms)
+    [14931746,14931782): 02:14:27.548541 +16.08µs; proposed +0.00ns (0.00ns), received +12.71µs (12.71µs), submitted +666.00ns (13.38µs), persisted +338.83µs (352.21µs), committed +1.78ms (2.14ms), applied +2.37ms (4.50ms)
+    [14931782,14931846): 02:14:27.548554 +12.83µs; proposed +0.00ns (0.00ns), received +23.50µs (23.50µs), submitted +916.00ns (24.42µs), persisted +314.96µs (339.38µs), committed +1.78ms (2.12ms), applied +2.37ms (4.49ms)
+    [14931846,14931890): 02:14:27.548577 +22.83µs; proposed +0.00ns (0.00ns), received +14.62µs (14.62µs), submitted +750.00ns (15.38µs), persisted +301.17µs (316.54µs), committed +1.78ms (2.10ms), applied +2.37ms (4.47ms)
+    [14931890,14931934): 02:14:27.548591 +14.29µs; proposed +0.00ns (0.00ns), received +16.71µs (16.71µs), submitted +1.50µs (18.21µs), persisted +284.42µs (302.62µs), committed +1.78ms (2.09ms), applied +2.37ms (4.45ms)
+    [14931934,14932114): 02:14:27.548607 +16.08µs; proposed +0.00ns (0.00ns), received +59.67µs (59.67µs), submitted +2.29µs (61.96µs), persisted +225.21µs (287.17µs), committed +1.78ms (2.07ms), applied +2.37ms (4.44ms)
+    [14932114,14932262): 02:14:27.548665 +56.83µs; proposed +0.00ns (0.00ns), received +55.50µs (55.50µs), submitted +1.88µs (57.38µs), persisted +172.96µs (230.33µs), committed +1.78ms (2.01ms), applied +2.37ms (4.38ms)
+    [14932262,14932326): 02:14:27.548722 +57.42µs; proposed +0.00ns (0.00ns), received +19.00µs (19.00µs), submitted +708.00ns (19.71µs), persisted +153.21µs (172.92µs), committed +1.78ms (1.96ms), applied +2.37ms (4.32ms)
+    [14932326,14932358): 02:14:27.548740 +18.17µs; proposed +0.00ns (0.00ns), received +11.67µs (11.67µs), submitted +875.00ns (12.54µs), persisted +142.21µs (154.75µs), committed +1.78ms (1.94ms), applied +2.37ms (4.31ms)
+    [14932358,14932382): 02:14:27.548751 +10.96µs; proposed +0.00ns (0.00ns), received +7.50µs (7.50µs), submitted +625.00ns (8.12µs), persisted +1.72ms (1.73ms), committed +198.50µs (1.93ms), applied +2.37ms (4.29ms)
+    [14932382,14932582): 02:14:27.548758 +7.25µs; proposed +0.00ns (0.00ns), received +65.42µs (65.42µs), submitted +2.12µs (67.54µs), persisted +1.65ms (1.72ms), committed +198.50µs (1.92ms), applied +2.37ms (4.29ms)
+    [14932582,14932682): 02:14:27.548819 +61.88µs; proposed +0.00ns (0.00ns), received +34.79µs (34.79µs), submitted +1.12µs (35.92µs), persisted +1.62ms (1.66ms), committed +198.50µs (1.86ms), applied +2.37ms (4.23ms)
+    [14932682,14932734): 02:14:27.548853 +33.33µs; proposed +0.00ns (0.00ns), received +17.54µs (17.54µs), submitted +708.00ns (18.25µs), persisted +1.61ms (1.63ms), committed +198.50µs (1.82ms), applied +2.37ms (4.19ms)
+    [14932734,14932758): 02:14:27.548870 +16.46µs; proposed +0.00ns (0.00ns), received +10.29µs (10.29µs), submitted +500.00ns (10.79µs), persisted +1.60ms (1.61ms), committed +198.50µs (1.81ms), applied +2.37ms (4.18ms)
+    [14932758,14932774): 02:14:27.548879 +9.29µs; proposed +0.00ns (0.00ns), received +7.67µs (7.67µs), submitted +583.00ns (8.25µs), persisted +1.59ms (1.60ms), committed +198.50µs (1.80ms), applied +2.37ms (4.17ms)
+    [14932774,14932778): 02:14:27.548885 +6.50µs; proposed +0.00ns (0.00ns), received +5.08µs (5.08µs), submitted +708.00ns (5.79µs), persisted +1.59ms (1.59ms), committed +198.50µs (1.79ms), applied +2.37ms (4.16ms)
+    [14932778,14932798): 02:14:27.548901 +15.46µs; proposed +0.00ns (0.00ns), received +16.92µs (16.92µs), submitted +584.00ns (17.50µs), persisted +1.56ms (1.58ms), committed +198.50µs (1.78ms), applied +2.37ms (4.14ms)
+    [14932798,14932834): 02:14:27.548924 +23.33µs; proposed +0.00ns (0.00ns), received +14.00µs (14.00µs), submitted +958.00ns (14.96µs), persisted +1.54ms (1.55ms), committed +2.74ms (4.30ms), applied +1.89ms (6.19ms)
+    [14932834,14932858): 02:14:27.548938 +13.92µs; proposed +0.00ns (0.00ns), received +8.33µs (8.33µs), submitted +417.00ns (8.75µs), persisted +1.53ms (1.54ms), committed +2.74ms (4.28ms), applied +1.89ms (6.17ms)
+    [14932858,14932998): 02:14:27.548947 +8.54µs; proposed +0.00ns (0.00ns), received +46.38µs (46.38µs), submitted +1.42µs (47.79µs), persisted +1.48ms (1.53ms), committed +2.74ms (4.27ms), applied +1.89ms (6.17ms)
+    [14932998,14933078): 02:14:27.548991 +44.58µs; proposed +0.00ns (0.00ns), received +24.92µs (24.92µs), submitted +792.00ns (25.71µs), persisted +1.46ms (1.49ms), committed +2.74ms (4.23ms), applied +1.89ms (6.12ms)
+    [14933078,14933126): 02:14:27.549015 +24.17µs; proposed +0.00ns (0.00ns), received +14.50µs (14.50µs), submitted +959.00ns (15.46µs), persisted +1.45ms (1.46ms), committed +2.74ms (4.20ms), applied +1.89ms (6.10ms)
+    [14933126,14933166): 02:14:27.549028 +13.12µs; proposed +0.00ns (0.00ns), received +12.96µs (12.96µs), submitted +833.00ns (13.79µs), persisted +1.44ms (1.45ms), committed +2.74ms (4.19ms), applied +1.89ms (6.08ms)
+    [14933166,14933294): 02:14:27.549041 +12.00µs; proposed +0.00ns (0.00ns), received +50.38µs (50.38µs), submitted +2.08µs (52.46µs), persisted +1.39ms (1.44ms), committed +2.74ms (4.18ms), applied +1.89ms (6.07ms)
+    [14933294,14933506): 02:14:27.549089 +48.17µs; proposed +0.00ns (0.00ns), received +67.54µs (67.54µs), submitted +2.38µs (69.92µs), persisted +1.32ms (1.39ms), committed +2.74ms (4.13ms), applied +1.89ms (6.02ms)
+    [14933506,14933626): 02:14:27.549153 +64.50µs; proposed +0.00ns (0.00ns), received +37.50µs (37.50µs), submitted +1.21µs (38.71µs), persisted +1.29ms (1.33ms), committed +2.74ms (4.07ms), applied +1.89ms (5.96ms)
+    [14933626,14933822): 02:14:27.549188 +35.08µs; proposed +0.00ns (0.00ns), received +73.96µs (73.96µs), submitted +2.08µs (76.04µs), persisted +1.22ms (1.29ms), committed +2.74ms (4.03ms), applied +1.89ms (5.92ms)
+    [14933822,14934586): 02:14:27.549259 +70.12µs; proposed +0.00ns (0.00ns), received +248.21µs (248.21µs), submitted +4.54µs (252.75µs), persisted +971.88µs (1.22ms), committed +2.74ms (3.96ms), applied +1.89ms (5.85ms)
+    [14934586,14934894): 02:14:27.549494 +235.33µs; proposed +0.00ns (0.00ns), received +114.17µs (114.17µs), submitted +2.25µs (116.42µs), persisted +872.88µs (989.29µs), committed +2.74ms (3.73ms), applied +1.89ms (5.62ms)
+    [14934894,14935014): 02:14:27.549603 +109.54µs; proposed +0.00ns (0.00ns), received +50.96µs (50.96µs), submitted +1.33µs (52.29µs), persisted +828.04µs (880.33µs), committed +2.74ms (3.62ms), applied +1.89ms (5.51ms)
+    [14935014,14935174): 02:14:27.549652 +48.79µs; proposed +0.00ns (0.00ns), received +48.00µs (48.00µs), submitted +2.12µs (50.12µs), persisted +1.02ms (1.07ms), committed +2.50ms (3.57ms), applied +1.89ms (5.46ms)
+    [14935174,14936490): 02:14:27.549697 +45.25µs; proposed +0.00ns (0.00ns), received +422.00µs (422.00µs), submitted +7.96µs (429.96µs), persisted +591.42µs (1.02ms), committed +2.50ms (3.52ms), applied +1.89ms (5.42ms)
+    [14936490,14937102): 02:14:27.550100 +402.58µs; proposed +0.00ns (0.00ns), received +166.79µs (166.79µs), submitted +3.75µs (170.54µs), persisted +448.25µs (618.79µs), committed +2.50ms (3.12ms), applied +1.89ms (5.01ms)
+    [14937102,14937414): 02:14:27.550258 +158.21µs; proposed +0.00ns (0.00ns), received +83.46µs (83.46µs), submitted +2.17µs (85.62µs), persisted +374.96µs (460.58µs), committed +2.50ms (2.96ms), applied +1.89ms (4.85ms)
+    [14937414,14937570): 02:14:27.550337 +78.54µs; proposed +0.00ns (0.00ns), received +43.17µs (43.17µs), submitted +1.25µs (44.42µs), persisted +337.62µs (382.04µs), committed +2.50ms (2.88ms), applied +1.89ms (4.78ms)
+    [14937570,14937654): 02:14:27.550377 +40.62µs; proposed +0.00ns (0.00ns), received +22.75µs (22.75µs), submitted +875.00ns (23.62µs), persisted +317.79µs (341.42µs), committed +2.50ms (2.84ms), applied +1.89ms (4.74ms)
+    [14937654,14937710): 02:14:27.550398 +21.04µs; proposed +0.00ns (0.00ns), received +14.29µs (14.29µs), submitted +625.00ns (14.92µs), persisted +305.46µs (320.38µs), committed +2.50ms (2.82ms), applied +1.89ms (4.71ms)
+    [14937710,14937750): 02:14:27.550412 +13.17µs; proposed +0.00ns (0.00ns), received +10.42µs (10.42µs), submitted +584.00ns (11.00µs), persisted +296.21µs (307.21µs), committed +2.50ms (2.81ms), applied +1.89ms (4.70ms)
+    [14937750,14937782): 02:14:27.550421 +9.75µs; proposed +0.00ns (0.00ns), received +8.17µs (8.17µs), submitted +500.00ns (8.67µs), persisted +288.79µs (297.46µs), committed +2.50ms (2.80ms), applied +1.89ms (4.69ms)
+    [14937782,14937802): 02:14:27.550429 +7.79µs; proposed +0.00ns (0.00ns), received +5.92µs (5.92µs), submitted +417.00ns (6.33µs), persisted +283.33µs (289.67µs), committed +2.50ms (2.79ms), applied +1.89ms (4.68ms)
+    [14937802,14937818): 02:14:27.550434 +5.17µs; proposed +0.00ns (0.00ns), received +5.00µs (5.00µs), submitted +375.00ns (5.38µs), persisted +279.12µs (284.50µs), committed +2.50ms (2.79ms), applied +1.89ms (4.68ms)
+    [14937818,14937830): 02:14:27.550439 +4.54µs; proposed +0.00ns (0.00ns), received +3.96µs (3.96µs), submitted +375.00ns (4.33µs), persisted +275.62µs (279.96µs), committed +2.50ms (2.78ms), applied +1.89ms (4.67ms)
+    [14937830,14937838): 02:14:27.550443 +3.67µs; proposed +0.00ns (0.00ns), received +2.88µs (2.88µs), submitted +375.00ns (3.25µs), persisted +273.04µs (276.29µs), committed +2.50ms (2.78ms), applied +1.89ms (4.67ms)
+    [14937838,14937846): 02:14:27.550446 +2.75µs; proposed +0.00ns (0.00ns), received +2.38µs (2.38µs), submitted +334.00ns (2.71µs), persisted +270.83µs (273.54µs), committed +2.50ms (2.77ms), applied +1.89ms (4.67ms)
+    [14937846,14937854): 02:14:27.550447 +2.21µs; proposed +0.00ns (0.00ns), received +2.42µs (2.42µs), submitted +292.00ns (2.71µs), persisted +268.62µs (271.33µs), committed +2.50ms (2.77ms), applied +1.89ms (4.67ms)
+    [14937854,14937858): 02:14:27.550450 +2.33µs; proposed +0.00ns (0.00ns), received +2.08µs (2.08µs), submitted +292.00ns (2.38µs), persisted +266.62µs (269.00µs), committed +2.50ms (2.77ms), applied +1.89ms (4.66ms)
+    [14937858,14937866): 02:14:27.550451 +1.38µs; proposed +0.00ns (0.00ns), received +2.58µs (2.58µs), submitted +334.00ns (2.92µs), persisted +264.71µs (267.62µs), committed +2.50ms (2.77ms), applied +1.89ms (4.66ms)
+    [14937866,14937874): 02:14:27.550453 +2.33µs; proposed +0.00ns (0.00ns), received +2.42µs (2.42µs), submitted +333.00ns (2.75µs), persisted +262.54µs (265.29µs), committed +2.50ms (2.77ms), applied +1.89ms (4.66ms)
+    [14937874,14937878): 02:14:27.550456 +2.17µs; proposed +0.00ns (0.00ns), received +2.04µs (2.04µs), submitted +375.00ns (2.42µs), persisted +260.71µs (263.12µs), committed +2.50ms (2.76ms), applied +1.89ms (4.66ms)
+    [14937878,14937886): 02:14:27.550457 +1.58µs; proposed +0.00ns (0.00ns), received +2.29µs (2.29µs), submitted +333.00ns (2.62µs), persisted +258.92µs (261.54µs), committed +2.50ms (2.76ms), applied +1.89ms (4.66ms)
+    [14937886,14937894): 02:14:27.550460 +2.38µs; proposed +0.00ns (0.00ns), received +2.67µs (2.67µs), submitted +333.00ns (3.00µs), persisted +256.17µs (259.17µs), committed +2.50ms (2.76ms), applied +1.89ms (4.65ms)
+    [14937894,14937902): 02:14:27.550462 +2.42µs; proposed +0.00ns (0.00ns), received +2.54µs (2.54µs), submitted +333.00ns (2.88µs), persisted +253.88µs (256.75µs), committed +2.50ms (2.76ms), applied +1.89ms (4.65ms)
+    [14937902,14937910): 02:14:27.550464 +2.17µs; proposed +0.00ns (0.00ns), received +2.67µs (2.67µs), submitted +375.00ns (3.04µs), persisted +251.54µs (254.58µs), committed +2.50ms (2.76ms), applied +1.89ms (4.65ms)
+    [14937910,14937922): 02:14:27.550466 +2.29µs; proposed +0.00ns (0.00ns), received +3.12µs (3.12µs), submitted +375.00ns (3.50µs), persisted +248.79µs (252.29µs), committed +2.50ms (2.75ms), applied +1.89ms (4.65ms)
+    [14937922,14937934): 02:14:27.550469 +2.96µs; proposed +0.00ns (0.00ns), received +3.33µs (3.33µs), submitted +458.00ns (3.79µs), persisted +245.54µs (249.33µs), committed +2.50ms (2.75ms), applied +1.89ms (4.64ms)
+    [14937934,14937942): 02:14:27.550473 +3.29µs; proposed +0.00ns (0.00ns), received +3.21µs (3.21µs), submitted +416.00ns (3.62µs), persisted +242.42µs (246.04µs), committed +2.50ms (2.75ms), applied +1.89ms (4.64ms)
+    [14937942,14939022): 02:14:27.550478 +5.46µs; proposed +0.00ns (0.00ns), received +305.08µs (305.08µs), submitted +6.83µs (311.92µs), persisted +2.26ms (2.57ms), committed +2.18ms (4.74ms), applied +1.61ms (6.35ms)
+    [14939022,14942038): 02:14:27.550768 +289.38µs; proposed +0.00ns (0.00ns), received +1.12ms (1.12ms), submitted +20.54µs (1.14ms), persisted +1.14ms (2.28ms), committed +2.18ms (4.46ms), applied +1.61ms (6.06ms)
+    [14942038,14942906): 02:14:27.550768 +0.00ns; proposed +0.00ns (0.00ns), received +1.12ms (1.12ms), submitted +20.54µs (1.14ms), persisted +1.14ms (2.28ms), committed +2.21ms (4.49ms), applied +1.57ms (6.06ms)
+    [14942906,14943062): 02:14:27.551831 +1.06ms; proposed +0.00ns (0.00ns), received +488.75µs (488.75µs), submitted +10.17µs (498.92µs), persisted +718.62µs (1.22ms), committed +2.21ms (3.43ms), applied +1.57ms (5.00ms)
+    [14943062,14944742): 02:14:27.551832 +0.00ns; proposed +0.00ns (0.00ns), received +488.75µs (488.75µs), submitted +10.17µs (498.92µs), persisted +718.62µs (1.22ms), committed +3.87ms (5.08ms), applied +3.05ms (8.14ms)
+    [14944742,14945730): 02:14:27.552294 +462.33µs; proposed +0.00ns (0.00ns), received +267.12µs (267.12µs), submitted +5.62µs (272.75µs), persisted +482.46µs (755.21µs), committed +3.87ms (4.62ms), applied +3.05ms (7.68ms)
+    [14945730,14946326): 02:14:27.552547 +253.04µs; proposed +0.00ns (0.00ns), received +154.67µs (154.67µs), submitted +3.50µs (158.17µs), persisted +557.29µs (715.46µs), committed +3.65ms (4.37ms), applied +3.05ms (7.42ms)
+    [14946326,14946734): 02:14:27.552692 +145.12µs; proposed +0.00ns (0.00ns), received +104.88µs (104.88µs), submitted +2.79µs (107.67µs), persisted +462.67µs (570.33µs), committed +3.65ms (4.22ms), applied +3.05ms (7.28ms)
+    [14946734,14946954): 02:14:27.552790 +98.42µs; proposed +0.00ns (0.00ns), received +54.58µs (54.58µs), submitted +1.58µs (56.17µs), persisted +415.75µs (471.92µs), committed +3.65ms (4.13ms), applied +3.05ms (7.18ms)
+    [14946954,14947078): 02:14:27.552841 +51.50µs; proposed +0.00ns (0.00ns), received +30.58µs (30.58µs), submitted +1.04µs (31.62µs), persisted +388.79µs (420.42µs), committed +3.65ms (4.07ms), applied +3.05ms (7.13ms)
+    [14947078,14947150): 02:14:27.552870 +28.75µs; proposed +0.00ns (0.00ns), received +17.83µs (17.83µs), submitted +666.00ns (18.50µs), persisted +373.17µs (391.67µs), committed +3.65ms (4.04ms), applied +3.05ms (7.10ms)
+    [14947150,14947194): 02:14:27.552887 +17.17µs; proposed +0.00ns (0.00ns), received +11.79µs (11.79µs), submitted +666.00ns (12.46µs), persisted +362.04µs (374.50µs), committed +3.65ms (4.03ms), applied +3.05ms (7.08ms)
+    [14947194,14947226): 02:14:27.552899 +11.29µs; proposed +0.00ns (0.00ns), received +8.75µs (8.75µs), submitted +583.00ns (9.33µs), persisted +353.88µs (363.21µs), committed +3.65ms (4.02ms), applied +3.05ms (7.07ms)
+    [14947226,14947234): 02:14:27.552907 +8.38µs; proposed +0.00ns (0.00ns), received +5.08µs (5.08µs), submitted +375.00ns (5.46µs), persisted +349.38µs (354.83µs), committed +3.65ms (4.01ms), applied +3.05ms (7.06ms)
+    [14947234,14947242): 02:14:27.552912 +4.92µs; proposed +0.00ns (0.00ns), received +2.42µs (2.42µs), submitted +333.00ns (2.75µs), persisted +347.17µs (349.92µs), committed +3.65ms (4.00ms), applied +3.05ms (7.06ms)
+    [14947242,14947250): 02:14:27.552914 +1.96µs; proposed +0.00ns (0.00ns), received +2.54µs (2.54µs), submitted +334.00ns (2.88µs), persisted +345.08µs (347.96µs), committed +3.65ms (4.00ms), applied +3.05ms (7.06ms)
+    [14947250,14947262): 02:14:27.552916 +2.00µs; proposed +0.00ns (0.00ns), received +3.25µs (3.25µs), submitted +416.00ns (3.67µs), persisted +342.29µs (345.96µs), committed +3.65ms (4.00ms), applied +3.05ms (7.05ms)
+    [14947262,14947278): 02:14:27.552918 +2.79µs; proposed +0.00ns (0.00ns), received +3.71µs (3.71µs), submitted +375.00ns (4.08µs), persisted +339.08µs (343.17µs), committed +3.65ms (4.00ms), applied +3.05ms (7.05ms)
+    [14947278,14947290): 02:14:27.552923 +3.62µs; proposed +0.00ns (0.00ns), received +3.25µs (3.25µs), submitted +375.00ns (3.62µs), persisted +335.92µs (339.54µs), committed +3.65ms (3.99ms), applied +3.05ms (7.05ms)
+    [14947290,14947302): 02:14:27.552925 +2.92µs; proposed +0.00ns (0.00ns), received +3.25µs (3.25µs), submitted +375.00ns (3.62µs), persisted +333.00µs (336.62µs), committed +3.65ms (3.99ms), applied +3.05ms (7.04ms)
+    [14947302,14947314): 02:14:27.552928 +3.17µs; proposed +0.00ns (0.00ns), received +3.12µs (3.12µs), submitted +375.00ns (3.50µs), persisted +329.96µs (333.46µs), committed +3.65ms (3.99ms), applied +3.05ms (7.04ms)
+    [14947314,14947322): 02:14:27.552931 +3.00µs; proposed +0.00ns (0.00ns), received +2.71µs (2.71µs), submitted +333.00ns (3.04µs), persisted +327.42µs (330.46µs), committed +3.65ms (3.98ms), applied +3.05ms (7.04ms)
+    [14947322,14947330): 02:14:27.552934 +2.29µs; proposed +0.00ns (0.00ns), received +2.79µs (2.79µs), submitted +375.00ns (3.17µs), persisted +325.00µs (328.17µs), committed +3.65ms (3.98ms), applied +3.05ms (7.04ms)
+    [14947330,14947338): 02:14:27.552936 +2.33µs; proposed +0.00ns (0.00ns), received +2.62µs (2.62µs), submitted +375.00ns (3.00µs), persisted +322.83µs (325.83µs), committed +3.65ms (3.98ms), applied +3.05ms (7.03ms)
+    [14947338,14947346): 02:14:27.552938 +2.33µs; proposed +0.00ns (0.00ns), received +2.50µs (2.50µs), submitted +375.00ns (2.88µs), persisted +320.62µs (323.50µs), committed +3.65ms (3.98ms), applied +3.05ms (7.03ms)
+    [14947346,14947354): 02:14:27.552940 +2.25µs; proposed +0.00ns (0.00ns), received +2.54µs (2.54µs), submitted +333.00ns (2.88µs), persisted +318.38µs (321.25µs), committed +3.65ms (3.97ms), applied +3.05ms (7.03ms)
+    [14947354,14947362): 02:14:27.552943 +2.29µs; proposed +0.00ns (0.00ns), received +2.38µs (2.38µs), submitted +375.00ns (2.75µs), persisted +316.21µs (318.96µs), committed +3.65ms (3.97ms), applied +3.05ms (7.03ms)
+    [14947362,14947374): 02:14:27.552945 +1.79µs; proposed +0.00ns (0.00ns), received +3.12µs (3.12µs), submitted +375.00ns (3.50µs), persisted +313.67µs (317.17µs), committed +3.65ms (3.97ms), applied +3.05ms (7.02ms)
+    [14947374,14947386): 02:14:27.552947 +2.92µs; proposed +0.00ns (0.00ns), received +3.17µs (3.17µs), submitted +375.00ns (3.54µs), persisted +310.71µs (314.25µs), committed +3.65ms (3.97ms), applied +3.05ms (7.02ms)
+    [14947386,14947398): 02:14:27.552951 +3.04µs; proposed +0.00ns (0.00ns), received +3.00µs (3.00µs), submitted +375.00ns (3.38µs), persisted +307.83µs (311.21µs), committed +3.65ms (3.96ms), applied +3.05ms (7.02ms)
+    [14947398,14947410): 02:14:27.552954 +2.92µs; proposed +0.00ns (0.00ns), received +3.08µs (3.08µs), submitted +375.00ns (3.46µs), persisted +304.83µs (308.29µs), committed +3.65ms (3.96ms), applied +3.05ms (7.02ms)
+    [14947410,14947418): 02:14:27.552956 +3.21µs; proposed +0.00ns (0.00ns), received +2.33µs (2.33µs), submitted +333.00ns (2.67µs), persisted +302.42µs (305.08µs), committed +3.65ms (3.96ms), applied +3.05ms (7.01ms)
+    [14947418,14947426): 02:14:27.552959 +1.96µs; proposed +0.00ns (0.00ns), received +2.42µs (2.42µs), submitted +333.00ns (2.75µs), persisted +300.38µs (303.12µs), committed +3.65ms (3.96ms), applied +3.05ms (7.01ms)
+    [14947426,14947434): 02:14:27.552961 +2.21µs; proposed +0.00ns (0.00ns), received +2.25µs (2.25µs), submitted +334.00ns (2.58µs), persisted +298.33µs (300.92µs), committed +3.65ms (3.95ms), applied +3.05ms (7.01ms)
+    [14947434,14947442): 02:14:27.552964 +2.04µs; proposed +0.00ns (0.00ns), received +2.46µs (2.46µs), submitted +459.00ns (2.92µs), persisted +295.96µs (298.88µs), committed +3.65ms (3.95ms), applied +3.05ms (7.01ms)
+    [14947442,14947454): 02:14:27.552965 +2.08µs; proposed +0.00ns (0.00ns), received +3.12µs (3.12µs), submitted +375.00ns (3.50µs), persisted +293.29µs (296.79µs), committed +3.65ms (3.95ms), applied +3.05ms (7.00ms)
+    [14947454,14947466): 02:14:27.552968 +2.54µs; proposed +0.00ns (0.00ns), received +3.50µs (3.50µs), submitted +375.00ns (3.88µs), persisted +290.38µs (294.25µs), committed +3.65ms (3.95ms), applied +3.05ms (7.00ms)
+    [14947466,14947478): 02:14:27.552971 +2.92µs; proposed +0.00ns (0.00ns), received +3.38µs (3.38µs), submitted +333.00ns (3.71µs), persisted +287.62µs (291.33µs), committed +3.65ms (3.94ms), applied +3.05ms (7.00ms)
+    [14947478,14947494): 02:14:27.552973 +2.71µs; proposed +0.00ns (0.00ns), received +3.71µs (3.71µs), submitted +375.00ns (4.08µs), persisted +284.54µs (288.62µs), committed +3.65ms (3.94ms), applied +3.05ms (7.00ms)
+    [14947494,14947506): 02:14:27.552977 +3.67µs; proposed +0.00ns (0.00ns), received +3.29µs (3.29µs), submitted +375.00ns (3.67µs), persisted +281.29µs (284.96µs), committed +3.65ms (3.94ms), applied +3.05ms (6.99ms)
+    [14947506,14947518): 02:14:27.552980 +3.12µs; proposed +0.00ns (0.00ns), received +2.83µs (2.83µs), submitted +583.00ns (3.42µs), persisted +278.42µs (281.83µs), committed +3.65ms (3.94ms), applied +3.05ms (6.99ms)
+    [14947518,14947530): 02:14:27.552983 +3.00µs; proposed +0.00ns (0.00ns), received +2.88µs (2.88µs), submitted +375.00ns (3.25µs), persisted +275.58µs (278.83µs), committed +3.65ms (3.93ms), applied +3.05ms (6.99ms)
+    [14947530,14947538): 02:14:27.552986 +3.08µs; proposed +0.00ns (0.00ns), received +2.21µs (2.21µs), submitted +334.00ns (2.54µs), persisted +273.21µs (275.75µs), committed +3.65ms (3.93ms), applied +3.05ms (6.98ms)
+    [14947538,14947546): 02:14:27.552988 +2.00µs; proposed +0.00ns (0.00ns), received +2.29µs (2.29µs), submitted +375.00ns (2.67µs), persisted +271.08µs (273.75µs), committed +3.65ms (3.93ms), applied +3.05ms (6.98ms)
+    [14947546,14947558): 02:14:27.552990 +1.92µs; proposed +0.00ns (0.00ns), received +3.46µs (3.46µs), submitted +375.00ns (3.83µs), persisted +268.00µs (271.83µs), committed +3.65ms (3.93ms), applied +3.05ms (6.98ms)
+    [14947558,14947570): 02:14:27.552993 +3.17µs; proposed +0.00ns (0.00ns), received +3.17µs (3.17µs), submitted +375.00ns (3.54µs), persisted +265.12µs (268.67µs), committed +3.65ms (3.92ms), applied +3.05ms (6.98ms)
+    [14947570,14947586): 02:14:27.552996 +2.58µs; proposed +0.00ns (0.00ns), received +3.92µs (3.92µs), submitted +375.00ns (4.29µs), persisted +261.79µs (266.08µs), committed +3.65ms (3.92ms), applied +3.05ms (6.97ms)
+    [14947586,14947598): 02:14:27.553000 +3.62µs; proposed +0.00ns (0.00ns), received +3.46µs (3.46µs), submitted +375.00ns (3.83µs), persisted +258.62µs (262.46µs), committed +3.65ms (3.92ms), applied +3.05ms (6.97ms)
+    [14947598,14947610): 02:14:27.553003 +3.12µs; proposed +0.00ns (0.00ns), received +3.21µs (3.21µs), submitted +375.00ns (3.58µs), persisted +255.75µs (259.33µs), committed +3.65ms (3.91ms), applied +3.05ms (6.97ms)
+    [14947610,14947622): 02:14:27.553006 +2.96µs; proposed +0.00ns (0.00ns), received +3.38µs (3.38µs), submitted +458.00ns (3.83µs), persisted +252.54µs (256.38µs), committed +3.65ms (3.91ms), applied +3.05ms (6.96ms)
+    [14947622,14947630): 02:14:27.553009 +3.33µs; proposed +0.00ns (0.00ns), received +3.04µs (3.04µs), submitted +375.00ns (3.42µs), persisted +249.62µs (253.04µs), committed +3.65ms (3.91ms), applied +3.05ms (6.96ms)
+    [14947630,14947638): 02:14:27.553012 +2.75µs; proposed +0.00ns (0.00ns), received +2.83µs (2.83µs), submitted +416.00ns (3.25µs), persisted +247.04µs (250.29µs), committed +3.65ms (3.90ms), applied +3.05ms (6.96ms)
+    [14947638,14947646): 02:14:27.553014 +2.50µs; proposed +0.00ns (0.00ns), received +3.00µs (3.00µs), submitted +417.00ns (3.42µs), persisted +244.38µs (247.79µs), committed +3.65ms (3.90ms), applied +3.05ms (6.96ms)
+    [14947646,14947654): 02:14:27.553017 +2.42µs; proposed +0.00ns (0.00ns), received +3.08µs (3.08µs), submitted +417.00ns (3.50µs), persisted +241.88µs (245.38µs), committed +3.65ms (3.90ms), applied +3.05ms (6.95ms)
+    [14947654,14947666): 02:14:27.553020 +2.75µs; proposed +0.00ns (0.00ns), received +3.12µs (3.12µs), submitted +375.00ns (3.50µs), persisted +239.12µs (242.62µs), committed +3.65ms (3.90ms), applied +3.05ms (6.95ms)
+    [14947666,14947674): 02:14:27.553022 +3.12µs; proposed +0.00ns (0.00ns), received +2.46µs (2.46µs), submitted +375.00ns (2.83µs), persisted +236.67µs (239.50µs), committed +3.65ms (3.89ms), applied +3.05ms (6.95ms)
+    [14947674,14947682): 02:14:27.553025 +2.25µs; proposed +0.00ns (0.00ns), received +2.29µs (2.29µs), submitted +333.00ns (2.62µs), persisted +234.62µs (237.25µs), committed +3.65ms (3.89ms), applied +3.05ms (6.94ms)
+    [14947682,14947690): 02:14:27.553027 +2.04µs; proposed +0.00ns (0.00ns), received +2.25µs (2.25µs), submitted +375.00ns (2.62µs), persisted +232.58µs (235.21µs), committed +3.65ms (3.89ms), applied +3.05ms (6.94ms)
+    [14947690,14947702): 02:14:27.553029 +2.04µs; proposed +0.00ns (0.00ns), received +2.96µs (2.96µs), submitted +375.00ns (3.33µs), persisted +229.83µs (233.17µs), committed +3.65ms (3.89ms), applied +3.05ms (6.94ms)
+    [14947702,14947714): 02:14:27.553031 +2.92µs; proposed +0.00ns (0.00ns), received +3.04µs (3.04µs), submitted +375.00ns (3.42µs), persisted +226.83µs (230.25µs), committed +3.65ms (3.88ms), applied +3.05ms (6.94ms)
+    [14947714,14947726): 02:14:27.553035 +2.83µs; proposed +0.00ns (0.00ns), received +3.12µs (3.12µs), submitted +334.00ns (3.46µs), persisted +223.96µs (227.42µs), committed +3.65ms (3.88ms), applied +3.05ms (6.94ms)
+    [14947726,14947738): 02:14:27.553037 +2.92µs; proposed +0.00ns (0.00ns), received +3.00µs (3.00µs), submitted +375.00ns (3.38µs), persisted +221.12µs (224.50µs), committed +3.65ms (3.88ms), applied +3.05ms (6.93ms)
+    [14947738,14947746): 02:14:27.553041 +3.04µs; proposed +0.00ns (0.00ns), received +2.54µs (2.54µs), submitted +334.00ns (2.88µs), persisted +218.58µs (221.46µs), committed +3.65ms (3.87ms), applied +3.05ms (6.93ms)
+    [14947746,14948786): 02:14:27.553045 +4.67µs; proposed +0.00ns (0.00ns), received +272.71µs (272.71µs), submitted +6.75µs (279.46µs), persisted +1.79ms (2.07ms), committed +1.80ms (3.87ms), applied +3.05ms (6.92ms)
+    [14948786,14952278): 02:14:27.553303 +257.38µs; proposed +0.00ns (0.00ns), received +1.23ms (1.23ms), submitted +25.12µs (1.26ms), persisted +557.12µs (1.81ms), committed +1.80ms (3.61ms), applied +3.05ms (6.67ms)
+    [14952278,14953302): 02:14:27.553302 +0.00ns; proposed +0.00ns (0.00ns), received +1.23ms (1.23ms), submitted +25.12µs (1.26ms), persisted +557.12µs (1.81ms), committed +1.87ms (3.68ms), applied +2.98ms (6.67ms)
+    [14953302,14953490): 02:14:27.553303 +0.00ns; proposed +0.00ns (0.00ns), received +1.23ms (1.23ms), submitted +25.12µs (1.26ms), persisted +557.12µs (1.81ms), committed +2.13ms (3.94ms), applied +2.73ms (6.67ms)
+    [14953490,14954326): 02:14:27.554466 +1.16ms; proposed +0.00ns (0.00ns), received +537.12µs (537.12µs), submitted +5.00µs (542.12µs), persisted +249.83µs (791.96µs), committed +1.99ms (2.78ms), applied +2.73ms (5.51ms)
+    [14954326,14954366): 02:14:27.555329 +862.88µs; proposed +0.00ns (0.00ns), received +22.29µs (22.29µs), submitted +750.00ns (23.04µs), persisted +18.21µs (41.25µs), committed +4.76ms (4.80ms), applied +2.53ms (7.33ms)
+    [14954366,14954390): 02:14:27.555352 +22.04µs; proposed +0.00ns (0.00ns), received +10.04µs (10.04µs), submitted +792.00ns (10.83µs), persisted +8.38µs (19.21µs), committed +4.76ms (4.78ms), applied +2.53ms (7.31ms)
+    [14954390,14954398): 02:14:27.555361 +9.33µs; proposed +0.00ns (0.00ns), received +5.75µs (5.75µs), submitted +458.00ns (6.21µs), persisted +3.67µs (9.88µs), committed +4.76ms (4.77ms), applied +2.53ms (7.30ms)
+    [14954398,14954458): 02:14:27.555375 +14.50µs; proposed +0.00ns (0.00ns), received +20.50µs (20.50µs), submitted +1.17µs (21.67µs), persisted +1.43ms (1.45ms), committed +3.31ms (4.76ms), applied +2.53ms (7.28ms)
+    [14954458,14954482): 02:14:27.555394 +19.50µs; proposed +0.00ns (0.00ns), received +12.92µs (12.92µs), submitted +916.00ns (13.83µs), persisted +1.42ms (1.43ms), committed +3.30ms (4.74ms), applied +2.53ms (7.26ms)
+    [14954482,14954646): 02:14:27.555411 +16.71µs; proposed +0.00ns (0.00ns), received +51.83µs (51.83µs), submitted +1.88µs (53.71µs), persisted +1.36ms (1.42ms), committed +3.30ms (4.72ms), applied +2.53ms (7.25ms)
+    [14954646,14954774): 02:14:27.555461 +49.38µs; proposed +0.00ns (0.00ns), received +60.96µs (60.96µs), submitted +1.67µs (62.62µs), persisted +1.30ms (1.37ms), committed +3.30ms (4.67ms), applied +2.53ms (7.20ms)
+    [14954774,14954850): 02:14:27.555519 +58.62µs; proposed +0.00ns (0.00ns), received +25.25µs (25.25µs), submitted +834.00ns (26.08µs), persisted +1.28ms (1.31ms), committed +3.30ms (4.61ms), applied +2.53ms (7.14ms)
+    [14954850,14954894): 02:14:27.555544 +24.71µs; proposed +0.00ns (0.00ns), received +14.96µs (14.96µs), submitted +958.00ns (15.92µs), persisted +1.27ms (1.28ms), committed +3.30ms (4.59ms), applied +2.53ms (7.11ms)
+    [14954894,14955098): 02:14:27.555559 +14.33µs; proposed +0.00ns (0.00ns), received +62.12µs (62.12µs), submitted +1.83µs (63.96µs), persisted +1.21ms (1.27ms), committed +3.30ms (4.57ms), applied +2.53ms (7.10ms)
+    [14955098,14955338): 02:14:27.555617 +58.83µs; proposed +0.00ns (0.00ns), received +72.62µs (72.62µs), submitted +2.08µs (74.71µs), persisted +1.14ms (1.21ms), committed +3.30ms (4.51ms), applied +2.53ms (7.04ms)
+    [14955338,14955482): 02:14:27.555686 +69.29µs; proposed +0.00ns (0.00ns), received +43.46µs (43.46µs), submitted +1.21µs (44.67µs), persisted +1.10ms (1.14ms), committed +3.30ms (4.45ms), applied +2.53ms (6.97ms)
+    [14955482,14955698): 02:14:27.555728 +41.29µs; proposed +0.00ns (0.00ns), received +67.00µs (67.00µs), submitted +1.62µs (68.62µs), persisted +1.03ms (1.10ms), committed +3.30ms (4.40ms), applied +2.53ms (6.93ms)
+    [14955698,14955938): 02:14:27.555792 +64.21µs; proposed +0.00ns (0.00ns), received +68.25µs (68.25µs), submitted +1.67µs (69.92µs), persisted +967.46µs (1.04ms), committed +3.30ms (4.34ms), applied +2.53ms (6.87ms)
+    [14955938,14956158): 02:14:27.555856 +64.38µs; proposed +0.00ns (0.00ns), received +62.08µs (62.08µs), submitted +1.71µs (63.79µs), persisted +909.21µs (973.00µs), committed +3.30ms (4.28ms), applied +2.53ms (6.80ms)
+    [14956158,14956298): 02:14:27.555915 +58.92µs; proposed +0.00ns (0.00ns), received +46.50µs (46.50µs), submitted +1.17µs (47.67µs), persisted +867.08µs (914.75µs), committed +3.30ms (4.22ms), applied +2.53ms (6.74ms)
+    [14956298,14956438): 02:14:27.555959 +44.00µs; proposed +0.00ns (0.00ns), received +51.88µs (51.88µs), submitted +1.25µs (53.12µs), persisted +817.62µs (870.75µs), committed +3.30ms (4.17ms), applied +2.53ms (6.70ms)
+    [14956438,14956530): 02:14:27.556009 +49.83µs; proposed +0.00ns (0.00ns), received +26.04µs (26.04µs), submitted +958.00ns (27.00µs), persisted +793.92µs (820.92µs), committed +3.30ms (4.12ms), applied +2.53ms (6.65ms)
+    [14956530,14956586): 02:14:27.556034 +24.62µs; proposed +0.00ns (0.00ns), received +18.00µs (18.00µs), submitted +667.00ns (18.67µs), persisted +777.62µs (796.29µs), committed +3.30ms (4.10ms), applied +2.53ms (6.62ms)
+    [14956586,14956710): 02:14:27.556050 +17.17µs; proposed +0.00ns (0.00ns), received +35.67µs (35.67µs), submitted +1.96µs (37.62µs), persisted +741.75µs (779.38µs), committed +3.30ms (4.08ms), applied +2.53ms (6.61ms)
+    [14956710,14956970): 02:14:27.556084 +32.79µs; proposed +0.00ns (0.00ns), received +84.08µs (84.08µs), submitted +2.54µs (86.62µs), persisted +661.96µs (748.58µs), committed +3.30ms (4.05ms), applied +2.53ms (6.57ms)
+    [14956970,14957762): 02:14:27.556163 +79.04µs; proposed +0.00ns (0.00ns), received +243.75µs (243.75µs), submitted +4.83µs (248.58µs), persisted +420.96µs (669.54µs), committed +3.30ms (3.97ms), applied +2.53ms (6.50ms)
+    [14957762,14958274): 02:14:27.556397 +234.17µs; proposed +0.00ns (0.00ns), received +127.67µs (127.67µs), submitted +3.17µs (130.83µs), persisted +304.54µs (435.38µs), committed +3.30ms (3.74ms), applied +2.53ms (6.26ms)
+    [14958274,14958578): 02:14:27.556516 +119.88µs; proposed +0.00ns (0.00ns), received +79.79µs (79.79µs), submitted +1.92µs (81.71µs), persisted +233.79µs (315.50µs), committed +3.30ms (3.62ms), applied +2.53ms (6.14ms)
+    [14958578,14958782): 02:14:27.556592 +75.42µs; proposed +0.00ns (0.00ns), received +49.50µs (49.50µs), submitted +1.46µs (50.96µs), persisted +189.71µs (240.67µs), committed +3.30ms (3.54ms), applied +2.53ms (6.07ms)
+    [14958782,14959038): 02:14:27.556639 +46.58µs; proposed +0.00ns (0.00ns), received +65.04µs (65.04µs), submitted +1.79µs (66.83µs), persisted +127.25µs (194.08µs), committed +3.30ms (3.49ms), applied +2.53ms (6.02ms)
+    [14959038,14959230): 02:14:27.556700 +61.04µs; proposed +0.00ns (0.00ns), received +46.96µs (46.96µs), submitted +1.38µs (48.33µs), persisted +84.71µs (133.04µs), committed +3.30ms (3.43ms), applied +2.53ms (5.96ms)
+    [14959230,14959354): 02:14:27.556744 +44.46µs; proposed +0.00ns (0.00ns), received +30.50µs (30.50µs), submitted +1.04µs (31.54µs), persisted +211.17µs (242.71µs), committed +3.15ms (3.39ms), applied +2.53ms (5.91ms)
+    [14959354,14959446): 02:14:27.556773 +28.67µs; proposed +0.00ns (0.00ns), received +42.25µs (42.25µs), submitted +959.00ns (43.21µs), persisted +170.83µs (214.04µs), committed +3.15ms (3.36ms), applied +2.53ms (5.89ms)
+    [14959446,14959466): 02:14:27.557090 +316.42µs; proposed +0.00ns (0.00ns), received +9.92µs (9.92µs), submitted +1.54µs (11.46µs), persisted +142.75µs (154.21µs), committed +2.89ms (3.04ms), applied +2.53ms (5.57ms)
+    [14959466,14959494): 02:14:27.557097 +8.42µs; proposed +0.00ns (0.00ns), received +11.62µs (11.62µs), submitted +541.00ns (12.17µs), persisted +133.62µs (145.79µs), committed +2.89ms (3.03ms), applied +2.53ms (5.56ms)
+    [14959494,14959510): 02:14:27.557110 +12.00µs; proposed +0.00ns (0.00ns), received +6.67µs (6.67µs), submitted +500.00ns (7.17µs), persisted +126.62µs (133.79µs), committed +2.89ms (3.02ms), applied +2.53ms (5.55ms)
+    [14959510,14959526): 02:14:27.557116 +6.46µs; proposed +0.00ns (0.00ns), received +5.96µs (5.96µs), submitted +500.00ns (6.46µs), persisted +120.88µs (127.33µs), committed +2.89ms (3.02ms), applied +2.53ms (5.54ms)
+    [14959526,14959530): 02:14:27.557122 +6.58µs; proposed +0.00ns (0.00ns), received +2.42µs (2.42µs), submitted +500.00ns (2.92µs), persisted +225.54µs (228.46µs), committed +2.78ms (3.01ms), applied +2.53ms (5.54ms)
+    [14959530,14959686): 02:14:27.557124 +1.79µs; proposed +0.00ns (0.00ns), received +53.46µs (53.46µs), submitted +2.21µs (55.67µs), persisted +171.00µs (226.67µs), committed +2.78ms (3.01ms), applied +2.53ms (5.53ms)
+    [14959686,14959778): 02:14:27.557175 +50.67µs; proposed +0.00ns (0.00ns), received +26.71µs (26.71µs), submitted +833.00ns (27.54µs), persisted +148.46µs (176.00µs), committed +2.78ms (2.96ms), applied +2.53ms (5.48ms)
+    [14959778,14959834): 02:14:27.557200 +24.75µs; proposed +0.00ns (0.00ns), received +14.75µs (14.75µs), submitted +666.00ns (15.42µs), persisted +135.83µs (151.25µs), committed +2.78ms (2.93ms), applied +2.53ms (5.46ms)
+    [14959834,14959862): 02:14:27.557214 +14.17µs; proposed +0.00ns (0.00ns), received +8.79µs (8.79µs), submitted +583.00ns (9.38µs), persisted +127.71µs (137.08µs), committed +2.78ms (2.92ms), applied +2.53ms (5.44ms)
+    [14959862,14959874): 02:14:27.557222 +7.96µs; proposed +0.00ns (0.00ns), received +5.71µs (5.71µs), submitted +417.00ns (6.12µs), persisted +123.00µs (129.12µs), committed +2.78ms (2.91ms), applied +2.53ms (5.44ms)
+    [14959874,14959890): 02:14:27.557227 +4.83µs; proposed +0.00ns (0.00ns), received +4.25µs (4.25µs), submitted +458.00ns (4.71µs), persisted +119.58µs (124.29µs), committed +2.78ms (2.91ms), applied +2.53ms (5.43ms)
+    [14959890,14959898): 02:14:27.557232 +4.71µs; proposed +0.00ns (0.00ns), received +2.83µs (2.83µs), submitted +458.00ns (3.29µs), persisted +116.29µs (119.58µs), committed +2.78ms (2.90ms), applied +2.53ms (5.43ms)
+    [14959898,14959910): 02:14:27.557234 +2.50µs; proposed +0.00ns (0.00ns), received +3.12µs (3.12µs), submitted +417.00ns (3.54µs), persisted +113.54µs (117.08µs), committed +2.78ms (2.90ms), applied +2.53ms (5.42ms)
+    [14959910,14959918): 02:14:27.557237 +3.04µs; proposed +0.00ns (0.00ns), received +2.50µs (2.50µs), submitted +375.00ns (2.88µs), persisted +111.17µs (114.04µs), committed +2.78ms (2.89ms), applied +2.53ms (5.42ms)
+    [14959918,14959922): 02:14:27.557240 +2.17µs; proposed +0.00ns (0.00ns), received +2.12µs (2.12µs), submitted +333.00ns (2.46µs), persisted +109.42µs (111.88µs), committed +2.78ms (2.89ms), applied +2.53ms (5.42ms)
+    [14959922,14959930): 02:14:27.557255 +15.62µs; proposed +0.00ns (0.00ns), received +1.92µs (1.92µs), submitted +375.00ns (2.29µs), persisted +93.96µs (96.25µs), committed +2.78ms (2.88ms), applied +2.53ms (5.40ms)
+    [14959930,14959938): 02:14:27.557257 +2.12µs; proposed +0.00ns (0.00ns), received +2.04µs (2.04µs), submitted +375.00ns (2.42µs), persisted +91.71µs (94.12µs), committed +2.78ms (2.87ms), applied +2.53ms (5.40ms)
+    [14959938,14959946): 02:14:27.557259 +2.17µs; proposed +0.00ns (0.00ns), received +2.29µs (2.29µs), submitted +375.00ns (2.67µs), persisted +89.29µs (91.96µs), committed +2.78ms (2.87ms), applied +2.53ms (5.40ms)
+    [14959946,14959954): 02:14:27.557261 +2.17µs; proposed +0.00ns (0.00ns), received +2.38µs (2.38µs), submitted +333.00ns (2.71µs), persisted +87.08µs (89.79µs), committed +2.78ms (2.87ms), applied +2.53ms (5.40ms)
+    [14959954,14959962): 02:14:27.557263 +1.92µs; proposed +0.00ns (0.00ns), received +2.58µs (2.58µs), submitted +333.00ns (2.92µs), persisted +84.96µs (87.88µs), committed +2.78ms (2.87ms), applied +2.53ms (5.40ms)
+    [14959962,14959970): 02:14:27.557266 +2.04µs; proposed +0.00ns (0.00ns), received +2.62µs (2.62µs), submitted +334.00ns (2.96µs), persisted +82.88µs (85.83µs), committed +2.78ms (2.87ms), applied +2.53ms (5.39ms)
+    [14959970,14959974): 02:14:27.557269 +2.83µs; proposed +0.00ns (0.00ns), received +1.54µs (1.54µs), submitted +292.00ns (1.83µs), persisted +81.17µs (83.00µs), committed +2.78ms (2.86ms), applied +2.53ms (5.39ms)
+    [14959974,14959978): 02:14:27.557270 +1.46µs; proposed +0.00ns (0.00ns), received +1.58µs (1.58µs), submitted +334.00ns (1.92µs), persisted +79.62µs (81.54µs), committed +2.78ms (2.86ms), applied +2.53ms (5.39ms)
+    [14959978,14959986): 02:14:27.557271 +1.21µs; proposed +0.00ns (0.00ns), received +2.29µs (2.29µs), submitted +333.00ns (2.62µs), persisted +77.71µs (80.33µs), committed +2.78ms (2.86ms), applied +2.53ms (5.39ms)
+    [14959986,14959994): 02:14:27.557273 +2.42µs; proposed +0.00ns (0.00ns), received +2.17µs (2.17µs), submitted +333.00ns (2.50µs), persisted +75.42µs (77.92µs), committed +2.78ms (2.86ms), applied +2.53ms (5.39ms)
+    [14959994,14959998): 02:14:27.557275 +2.25µs; proposed +0.00ns (0.00ns), received +1.79µs (1.79µs), submitted +333.00ns (2.12µs), persisted +73.54µs (75.67µs), committed +2.78ms (2.86ms), applied +2.53ms (5.38ms)
+    [14959998,14960006): 02:14:27.557277 +1.25µs; proposed +0.00ns (0.00ns), received +2.46µs (2.46µs), submitted +375.00ns (2.83µs), persisted +71.58µs (74.42µs), committed +2.78ms (2.86ms), applied +2.53ms (5.38ms)
+    [14960006,14960014): 02:14:27.557279 +2.46µs; proposed +0.00ns (0.00ns), received +2.21µs (2.21µs), submitted +291.00ns (2.50µs), persisted +69.46µs (71.96µs), committed +2.78ms (2.85ms), applied +2.53ms (5.38ms)
+    [14960014,14960018): 02:14:27.557282 +2.42µs; proposed +0.00ns (0.00ns), received +1.54µs (1.54µs), submitted +291.00ns (1.83µs), persisted +67.71µs (69.54µs), committed +2.78ms (2.85ms), applied +2.53ms (5.38ms)
+    [14960018,14960026): 02:14:27.557283 +1.12µs; proposed +0.00ns (0.00ns), received +2.12µs (2.12µs), submitted +333.00ns (2.46µs), persisted +65.96µs (68.42µs), committed +2.78ms (2.85ms), applied +2.53ms (5.38ms)
+    [14960026,14960034): 02:14:27.557285 +2.42µs; proposed +0.00ns (0.00ns), received +1.92µs (1.92µs), submitted +375.00ns (2.29µs), persisted +63.71µs (66.00µs), committed +2.78ms (2.85ms), applied +2.53ms (5.37ms)
+    [14960034,14960042): 02:14:27.557288 +2.08µs; proposed +0.00ns (0.00ns), received +2.08µs (2.08µs), submitted +375.00ns (2.46µs), persisted +61.46µs (63.92µs), committed +2.78ms (2.84ms), applied +2.53ms (5.37ms)
+    [14960042,14960050): 02:14:27.557289 +2.17µs; proposed +0.00ns (0.00ns), received +2.00µs (2.00µs), submitted +333.00ns (2.33µs), persisted +59.42µs (61.75µs), committed +2.78ms (2.84ms), applied +2.53ms (5.37ms)
+    [14960050,14960054): 02:14:27.557292 +2.17µs; proposed +0.00ns (0.00ns), received +1.67µs (1.67µs), submitted +333.00ns (2.00µs), persisted +57.58µs (59.58µs), committed +2.78ms (2.84ms), applied +2.53ms (5.37ms)
+    [14960054,14960062): 02:14:27.557293 +1.17µs; proposed +0.00ns (0.00ns), received +2.33µs (2.33µs), submitted +334.00ns (2.67µs), persisted +55.75µs (58.42µs), committed +2.78ms (2.84ms), applied +2.53ms (5.37ms)
+    [14960062,14960066): 02:14:27.557295 +2.12µs; proposed +0.00ns (0.00ns), received +2.08µs (2.08µs), submitted +292.00ns (2.38µs), persisted +53.92µs (56.29µs), committed +2.78ms (2.84ms), applied +2.53ms (5.36ms)
+    [14960066,14960070): 02:14:27.557297 +1.67µs; proposed +0.00ns (0.00ns), received +1.83µs (1.83µs), submitted +292.00ns (2.12µs), persisted +52.50µs (54.62µs), committed +2.78ms (2.84ms), applied +2.53ms (5.36ms)
+    [14960070,14960074): 02:14:27.557298 +1.54µs; proposed +0.00ns (0.00ns), received +1.71µs (1.71µs), submitted +375.00ns (2.08µs), persisted +51.00µs (53.08µs), committed +2.78ms (2.83ms), applied +2.53ms (5.36ms)
+    [14960074,14960078): 02:14:27.557299 +1.42µs; proposed +0.00ns (0.00ns), received +1.75µs (1.75µs), submitted +333.00ns (2.08µs), persisted +49.58µs (51.67µs), committed +2.78ms (2.83ms), applied +2.53ms (5.36ms)
+    [14960078,14960082): 02:14:27.557301 +1.33µs; proposed +0.00ns (0.00ns), received +1.88µs (1.88µs), submitted +334.00ns (2.21µs), persisted +48.12µs (50.33µs), committed +2.78ms (2.83ms), applied +2.53ms (5.36ms)
+    [14960082,14960090): 02:14:27.557303 +1.50µs; proposed +0.00ns (0.00ns), received +2.17µs (2.17µs), submitted +375.00ns (2.54µs), persisted +46.29µs (48.83µs), committed +2.78ms (2.83ms), applied +2.53ms (5.36ms)
+    [14960090,14960094): 02:14:27.557305 +3.08µs; proposed +0.00ns (0.00ns), received +1.33µs (1.33µs), submitted +333.00ns (1.67µs), persisted +44.08µs (45.75µs), committed +2.78ms (2.83ms), applied +2.53ms (5.35ms)
+    [14960094,14960098): 02:14:27.557307 +1.25µs; proposed +0.00ns (0.00ns), received +1.54µs (1.54µs), submitted +334.00ns (1.88µs), persisted +42.62µs (44.50µs), committed +2.78ms (2.83ms), applied +2.53ms (5.35ms)
+    [14960098,14960106): 02:14:27.557308 +1.29µs; proposed +0.00ns (0.00ns), received +2.12µs (2.12µs), submitted +292.00ns (2.42µs), persisted +40.79µs (43.21µs), committed +2.78ms (2.82ms), applied +2.53ms (5.35ms)
+    [14960106,14960110): 02:14:27.557310 +2.46µs; proposed +0.00ns (0.00ns), received +1.38µs (1.38µs), submitted +291.00ns (1.67µs), persisted +39.08µs (40.75µs), committed +2.78ms (2.82ms), applied +2.53ms (5.35ms)
+    [14960110,14960118): 02:14:27.557311 +1.04µs; proposed +0.00ns (0.00ns), received +2.04µs (2.04µs), submitted +375.00ns (2.42µs), persisted +37.29µs (39.71µs), committed +2.78ms (2.82ms), applied +2.53ms (5.35ms)
+    [14960118,14960126): 02:14:27.557314 +2.00µs; proposed +0.00ns (0.00ns), received +2.21µs (2.21µs), submitted +375.00ns (2.58µs), persisted +35.12µs (37.71µs), committed +2.78ms (2.82ms), applied +2.53ms (5.34ms)
+    [14960126,14960134): 02:14:27.557316 +2.25µs; proposed +0.00ns (0.00ns), received +2.25µs (2.25µs), submitted +375.00ns (2.62µs), persisted +32.83µs (35.46µs), committed +2.78ms (2.82ms), applied +2.53ms (5.34ms)
+    [14960134,14960142): 02:14:27.557318 +2.12µs; proposed +0.00ns (0.00ns), received +2.38µs (2.38µs), submitted +334.00ns (2.71µs), persisted +30.62µs (33.33µs), committed +2.78ms (2.81ms), applied +2.53ms (5.34ms)
+    [14960142,14960150): 02:14:27.557320 +1.96µs; proposed +0.00ns (0.00ns), received +2.62µs (2.62µs), submitted +333.00ns (2.96µs), persisted +28.42µs (31.38µs), committed +2.78ms (2.81ms), applied +2.53ms (5.34ms)
+    [14960150,14960162): 02:14:27.557322 +2.08µs; proposed +0.00ns (0.00ns), received +3.08µs (3.08µs), submitted +375.00ns (3.46µs), persisted +25.83µs (29.29µs), committed +2.78ms (2.81ms), applied +2.53ms (5.34ms)
+    [14960162,14960170): 02:14:27.557324 +2.75µs; proposed +0.00ns (0.00ns), received +2.79µs (2.79µs), submitted +375.00ns (3.17µs), persisted +23.38µs (26.54µs), committed +2.78ms (2.81ms), applied +2.53ms (5.33ms)
+    [14960170,14960174): 02:14:27.557328 +3.25µs; proposed +0.00ns (0.00ns), received +1.33µs (1.33µs), submitted +334.00ns (1.67µs), persisted +21.62µs (23.29µs), committed +2.78ms (2.80ms), applied +2.53ms (5.33ms)
+    [14960174,14960178): 02:14:27.557329 +1.50µs; proposed +0.00ns (0.00ns), received +1.46µs (1.46µs), submitted +334.00ns (1.79µs), persisted +20.00µs (21.79µs), committed +2.78ms (2.80ms), applied +2.53ms (5.33ms)
+    [14960178,14960182): 02:14:27.557331 +1.38µs; proposed +0.00ns (0.00ns), received +1.50µs (1.50µs), submitted +333.00ns (1.83µs), persisted +18.58µs (20.42µs), committed +2.78ms (2.80ms), applied +2.53ms (5.33ms)
+    [14960182,14960190): 02:14:27.557332 +1.29µs; proposed +0.00ns (0.00ns), received +2.04µs (2.04µs), submitted +375.00ns (2.42µs), persisted +16.71µs (19.12µs), committed +2.78ms (2.80ms), applied +2.53ms (5.33ms)
+    [14960190,14960198): 02:14:27.557334 +2.04µs; proposed +0.00ns (0.00ns), received +2.25µs (2.25µs), submitted +334.00ns (2.58µs), persisted +14.50µs (17.08µs), committed +2.78ms (2.80ms), applied +2.53ms (5.32ms)
+    [14960198,14960206): 02:14:27.557336 +2.12µs; proposed +0.00ns (0.00ns), received +2.21µs (2.21µs), submitted +333.00ns (2.54µs), persisted +12.42µs (14.96µs), committed +2.78ms (2.80ms), applied +2.53ms (5.32ms)
+    [14960206,14960210): 02:14:27.557339 +2.29µs; proposed +0.00ns (0.00ns), received +1.71µs (1.71µs), submitted +334.00ns (2.04µs), persisted +10.62µs (12.67µs), committed +2.78ms (2.79ms), applied +2.53ms (5.32ms)
+    [14960210,14960218): 02:14:27.557339 +1.21µs; proposed +0.00ns (0.00ns), received +2.33µs (2.33µs), submitted +333.00ns (2.67µs), persisted +8.79µs (11.46µs), committed +2.78ms (2.79ms), applied +2.53ms (5.32ms)
+    [14960218,14960222): 02:14:27.557342 +2.33µs; proposed +0.00ns (0.00ns), received +1.75µs (1.75µs), submitted +333.00ns (2.08µs), persisted +7.04µs (9.12µs), committed +2.78ms (2.79ms), applied +2.53ms (5.32ms)
+    [14960222,14960226): 02:14:27.557344 +1.58µs; proposed +0.00ns (0.00ns), received +1.54µs (1.54µs), submitted +333.00ns (1.88µs), persisted +5.67µs (7.54µs), committed +2.78ms (2.79ms), applied +2.53ms (5.31ms)
+    [14960226,14960234): 02:14:27.557344 +1.17µs; proposed +0.00ns (0.00ns), received +2.17µs (2.17µs), submitted +334.00ns (2.50µs), persisted +3.88µs (6.38µs), committed +2.78ms (2.79ms), applied +2.53ms (5.31ms)
+    [14960234,14960298): 02:14:27.557358 +13.42µs; proposed +0.00ns (0.00ns), received +25.75µs (25.75µs), submitted +1.71µs (27.46µs), persisted +215.42µs (242.88µs), committed +2.53ms (2.77ms), applied +2.53ms (5.30ms)
+    [14960298,14960350): 02:14:27.557382 +24.12µs; proposed +0.00ns (0.00ns), received +16.50µs (16.50µs), submitted +584.00ns (17.08µs), persisted +201.67µs (218.75µs), committed +2.53ms (2.75ms), applied +2.53ms (5.28ms)
+    [14960350,14960374): 02:14:27.557399 +16.04µs; proposed +0.00ns (0.00ns), received +8.92µs (8.92µs), submitted +708.00ns (9.62µs), persisted +193.08µs (202.71µs), committed +2.53ms (2.73ms), applied +2.53ms (5.26ms)
+    [14960374,14960382): 02:14:27.557407 +9.17µs; proposed +0.00ns (0.00ns), received +4.25µs (4.25µs), submitted +458.00ns (4.71µs), persisted +188.83µs (193.54µs), committed +2.53ms (2.72ms), applied +2.53ms (5.25ms)
+    [14960382,14960390): 02:14:27.557411 +3.67µs; proposed +0.00ns (0.00ns), received +4.04µs (4.04µs), submitted +333.00ns (4.38µs), persisted +185.50µs (189.88µs), committed +2.53ms (2.72ms), applied +2.53ms (5.25ms)
+    [14960390,14960394): 02:14:27.557415 +3.96µs; proposed +0.00ns (0.00ns), received +2.38µs (2.38µs), submitted +458.00ns (2.83µs), persisted +183.08µs (185.92µs), committed +2.53ms (2.72ms), applied +2.53ms (5.24ms)
+    [14960394,14960398): 02:14:27.557417 +1.88µs; proposed +0.00ns (0.00ns), received +2.54µs (2.54µs), submitted +334.00ns (2.88µs), persisted +181.17µs (184.04µs), committed +2.53ms (2.71ms), applied +2.53ms (5.24ms)
+    [14960398,14960402): 02:14:27.557419 +2.00µs; proposed +0.00ns (0.00ns), received +2.42µs (2.42µs), submitted +500.00ns (2.92µs), persisted +179.12µs (182.04µs), committed +2.53ms (2.71ms), applied +2.53ms (5.24ms)
+    [14960402,14960406): 02:14:27.557421 +1.96µs; proposed +0.00ns (0.00ns), received +2.58µs (2.58µs), submitted +459.00ns (3.04µs), persisted +177.04µs (180.08µs), committed +2.53ms (2.71ms), applied +2.53ms (5.24ms)
+    [14960406,14960414): 02:14:27.557423 +1.79µs; proposed +0.00ns (0.00ns), received +3.33µs (3.33µs), submitted +500.00ns (3.83µs), persisted +174.46µs (178.29µs), committed +2.53ms (2.71ms), applied +2.53ms (5.24ms)
+    [14960414,14960426): 02:14:27.557425 +2.96µs; proposed +0.00ns (0.00ns), received +5.17µs (5.17µs), submitted +458.00ns (5.62µs), persisted +169.71µs (175.33µs), committed +2.53ms (2.71ms), applied +2.53ms (5.23ms)
+    [14960426,14960438): 02:14:27.557430 +4.50µs; proposed +0.00ns (0.00ns), received +5.17µs (5.17µs), submitted +458.00ns (5.62µs), persisted +165.21µs (170.83µs), committed +2.53ms (2.70ms), applied +2.53ms (5.23ms)
+    [14960438,14960446): 02:14:27.557436 +5.04µs; proposed +0.00ns (0.00ns), received +3.46µs (3.46µs), submitted +333.00ns (3.79µs), persisted +162.00µs (165.79µs), committed +2.53ms (2.70ms), applied +2.53ms (5.22ms)
+    [14960446,14960454): 02:14:27.557438 +2.71µs; proposed +0.00ns (0.00ns), received +3.46µs (3.46µs), submitted +334.00ns (3.79µs), persisted +159.29µs (163.08µs), committed +2.53ms (2.69ms), applied +2.53ms (5.22ms)
+    [14960454,14960462): 02:14:27.557442 +3.42µs; proposed +0.00ns (0.00ns), received +3.25µs (3.25µs), submitted +458.00ns (3.71µs), persisted +155.96µs (159.67µs), committed +2.53ms (2.69ms), applied +2.53ms (5.22ms)
+    [14960462,14960466): 02:14:27.557445 +3.29µs; proposed +0.00ns (0.00ns), received +2.92µs (2.92µs), submitted +417.00ns (3.33µs), persisted +153.04µs (156.38µs), committed +2.53ms (2.69ms), applied +2.53ms (5.21ms)
+    [14960466,14960474): 02:14:27.557446 +1.79µs; proposed +0.00ns (0.00ns), received +3.58µs (3.58µs), submitted +334.00ns (3.92µs), persisted +150.67µs (154.58µs), committed +2.53ms (2.69ms), applied +2.53ms (5.21ms)
+    [14960474,14960478): 02:14:27.557451 +4.00µs; proposed +0.00ns (0.00ns), received +1.67µs (1.67µs), submitted +458.00ns (2.12µs), persisted +148.46µs (150.58µs), committed +2.53ms (2.68ms), applied +2.53ms (5.21ms)
+    [14960478,14960482): 02:14:27.557452 +1.96µs; proposed +0.00ns (0.00ns), received +2.08µs (2.08µs), submitted +416.00ns (2.50µs), persisted +146.12µs (148.62µs), committed +2.53ms (2.68ms), applied +2.53ms (5.21ms)
+    [14960482,14960486): 02:14:27.557454 +1.79µs; proposed +0.00ns (0.00ns), received +2.21µs (2.21µs), submitted +459.00ns (2.67µs), persisted +144.17µs (146.83µs), committed +2.53ms (2.68ms), applied +2.53ms (5.20ms)
+    [14960486,14960490): 02:14:27.557457 +2.12µs; proposed +0.00ns (0.00ns), received +2.12µs (2.12µs), submitted +333.00ns (2.46µs), persisted +142.25µs (144.71µs), committed +2.53ms (2.68ms), applied +2.53ms (5.20ms)
+    [14960490,14960494): 02:14:27.557458 +1.83µs; proposed +0.00ns (0.00ns), received +2.25µs (2.25µs), submitted +417.00ns (2.67µs), persisted +140.21µs (142.88µs), committed +2.53ms (2.67ms), applied +2.53ms (5.20ms)
+    [14960494,14960502): 02:14:27.557460 +1.79µs; proposed +0.00ns (0.00ns), received +3.42µs (3.42µs), submitted +333.00ns (3.75µs), persisted +137.33µs (141.08µs), committed +2.53ms (2.67ms), applied +2.53ms (5.20ms)
+    [14960502,14960506): 02:14:27.557463 +3.46µs; proposed +0.00ns (0.00ns), received +2.29µs (2.29µs), submitted +458.00ns (2.75µs), persisted +134.88µs (137.62µs), committed +2.53ms (2.67ms), applied +2.53ms (5.20ms)
+    [14960506,14960510): 02:14:27.557466 +2.00µs; proposed +0.00ns (0.00ns), received +2.38µs (2.38µs), submitted +459.00ns (2.83µs), persisted +132.79µs (135.62µs), committed +2.53ms (2.67ms), applied +2.53ms (5.19ms)
+    [14960510,14960518): 02:14:27.557468 +1.83µs; proposed +0.00ns (0.00ns), received +3.92µs (3.92µs), submitted +459.00ns (4.38µs), persisted +129.42µs (133.79µs), committed +2.53ms (2.66ms), applied +2.53ms (5.19ms)
+    [14960518,14960526): 02:14:27.557470 +3.17µs; proposed +0.00ns (0.00ns), received +3.58µs (3.58µs), submitted +333.00ns (3.92µs), persisted +126.71µs (130.62µs), committed +2.53ms (2.66ms), applied +2.53ms (5.19ms)
+    [14960526,14960538): 02:14:27.557473 +2.71µs; proposed +0.00ns (0.00ns), received +4.50µs (4.50µs), submitted +375.00ns (4.88µs), persisted +123.04µs (127.92µs), committed +2.53ms (2.66ms), applied +2.53ms (5.19ms)
+    [14960538,14960546): 02:14:27.557478 +4.42µs; proposed +0.00ns (0.00ns), received +3.42µs (3.42µs), submitted +375.00ns (3.79µs), persisted +119.71µs (123.50µs), committed +2.53ms (2.65ms), applied +2.53ms (5.18ms)
+    [14960546,14960554): 02:14:27.557481 +3.00µs; proposed +0.00ns (0.00ns), received +3.17µs (3.17µs), submitted +375.00ns (3.54µs), persisted +116.96µs (120.50µs), committed +2.53ms (2.65ms), applied +2.53ms (5.18ms)
+    [14960554,14960558): 02:14:27.557484 +3.46µs; proposed +0.00ns (0.00ns), received +2.00µs (2.00µs), submitted +458.00ns (2.46µs), persisted +114.58µs (117.04µs), committed +2.53ms (2.65ms), applied +2.53ms (5.17ms)
+    [14960558,14960562): 02:14:27.557486 +1.79µs; proposed +0.00ns (0.00ns), received +2.21µs (2.21µs), submitted +500.00ns (2.71µs), persisted +112.54µs (115.25µs), committed +2.53ms (2.65ms), applied +2.53ms (5.17ms)
+    [14960562,14960570): 02:14:27.557488 +1.71µs; proposed +0.00ns (0.00ns), received +3.29µs (3.29µs), submitted +334.00ns (3.62µs), persisted +109.92µs (113.54µs), committed +2.53ms (2.64ms), applied +2.53ms (5.17ms)
+    [14960570,14960574): 02:14:27.557491 +3.58µs; proposed +0.00ns (0.00ns), received +1.96µs (1.96µs), submitted +417.00ns (2.38µs), persisted +107.58µs (109.96µs), committed +2.53ms (2.64ms), applied +2.53ms (5.17ms)
+    [14960574,14960578): 02:14:27.557494 +2.08µs; proposed +0.00ns (0.00ns), received +2.08µs (2.08µs), submitted +416.00ns (2.50µs), persisted +105.38µs (107.88µs), committed +2.53ms (2.64ms), applied +2.53ms (5.17ms)
+    [14960578,14960582): 02:14:27.557495 +2.21µs; proposed +0.00ns (0.00ns), received +1.96µs (1.96µs), submitted +458.00ns (2.42µs), persisted +103.25µs (105.67µs), committed +2.53ms (2.64ms), applied +2.53ms (5.16ms)
+    [14960582,14960590): 02:14:27.557497 +1.58µs; proposed +0.00ns (0.00ns), received +3.62µs (3.62µs), submitted +417.00ns (4.04µs), persisted +100.04µs (104.08µs), committed +2.53ms (2.63ms), applied +2.53ms (5.16ms)
+    [14960590,14960598): 02:14:27.557500 +3.46µs; proposed +0.00ns (0.00ns), received +3.88µs (3.88µs), submitted +334.00ns (4.21µs), persisted +96.42µs (100.62µs), committed +2.53ms (2.63ms), applied +2.53ms (5.16ms)
+    [14960598,14960602): 02:14:27.557505 +3.67µs; proposed +0.00ns (0.00ns), received +2.62µs (2.62µs), submitted +458.00ns (3.08µs), persisted +93.88µs (96.96µs), committed +2.53ms (2.63ms), applied +2.53ms (5.15ms)
+    [14960602,14960606): 02:14:27.557509 +5.42µs; proposed +0.00ns (0.00ns), received +2.67µs (2.67µs), submitted +500.00ns (3.17µs), persisted +88.38µs (91.54µs), committed +2.53ms (2.62ms), applied +2.53ms (5.15ms)
+    [14960606,14960614): 02:14:27.557511 +1.62µs; proposed +0.00ns (0.00ns), received +3.96µs (3.96µs), submitted +417.00ns (4.38µs), persisted +85.54µs (89.92µs), committed +2.53ms (2.62ms), applied +2.53ms (5.15ms)
+    [14960614,14960622): 02:14:27.557515 +3.75µs; proposed +0.00ns (0.00ns), received +3.62µs (3.62µs), submitted +291.00ns (3.92µs), persisted +82.25µs (86.17µs), committed +2.53ms (2.62ms), applied +2.53ms (5.14ms)
+    [14960622,14960630): 02:14:27.557518 +3.50µs; proposed +0.00ns (0.00ns), received +3.29µs (3.29µs), submitted +334.00ns (3.62µs), persisted +79.04µs (82.67µs), committed +2.53ms (2.61ms), applied +2.53ms (5.14ms)
+    [14960630,14960634): 02:14:27.557522 +3.29µs; proposed +0.00ns (0.00ns), received +2.29µs (2.29µs), submitted +375.00ns (2.67µs), persisted +76.71µs (79.38µs), committed +2.53ms (2.61ms), applied +2.53ms (5.14ms)
+    [14960634,14960642): 02:14:27.557523 +1.58µs; proposed +0.00ns (0.00ns), received +3.58µs (3.58µs), submitted +333.00ns (3.92µs), persisted +73.88µs (77.79µs), committed +2.53ms (2.61ms), applied +2.53ms (5.14ms)
+    [14960642,14960646): 02:14:27.557527 +3.38µs; proposed +0.00ns (0.00ns), received +2.33µs (2.33µs), submitted +458.00ns (2.79µs), persisted +71.62µs (74.42µs), committed +2.53ms (2.61ms), applied +2.53ms (5.13ms)
+    [14960646,14960650): 02:14:27.557529 +1.79µs; proposed +0.00ns (0.00ns), received +2.58µs (2.58µs), submitted +291.00ns (2.88µs), persisted +69.75µs (72.62µs), committed +2.53ms (2.60ms), applied +2.53ms (5.13ms)
+    [14960650,14960654): 02:14:27.557530 +1.88µs; proposed +0.00ns (0.00ns), received +2.54µs (2.54µs), submitted +458.00ns (3.00µs), persisted +67.75µs (70.75µs), committed +2.53ms (2.60ms), applied +2.53ms (5.13ms)
+    [14960654,14960662): 02:14:27.557532 +1.92µs; proposed +0.00ns (0.00ns), received +3.08µs (3.08µs), submitted +334.00ns (3.42µs), persisted +65.42µs (68.83µs), committed +2.53ms (2.60ms), applied +2.53ms (5.13ms)
+    [14960662,14960666): 02:14:27.557535 +2.88µs; proposed +0.00ns (0.00ns), received +2.25µs (2.25µs), submitted +458.00ns (2.71µs), persisted +63.25µs (65.96µs), committed +2.53ms (2.60ms), applied +2.53ms (5.12ms)
+    [14960666,14960674): 02:14:27.557537 +1.79µs; proposed +0.00ns (0.00ns), received +3.29µs (3.29µs), submitted +417.00ns (3.71µs), persisted +60.46µs (64.17µs), committed +2.53ms (2.60ms), applied +2.53ms (5.12ms)
+    [14960674,14960682): 02:14:27.557540 +3.08µs; proposed +0.00ns (0.00ns), received +3.08µs (3.08µs), submitted +334.00ns (3.42µs), persisted +57.67µs (61.08µs), committed +2.53ms (2.59ms), applied +2.53ms (5.12ms)
+    [14960682,14960686): 02:14:27.557542 +2.71µs; proposed +0.00ns (0.00ns), received +2.54µs (2.54µs), submitted +375.00ns (2.92µs), persisted +55.46µs (58.38µs), committed +2.53ms (2.59ms), applied +2.53ms (5.12ms)
+    [14960686,14960694): 02:14:27.557545 +1.88µs; proposed +0.00ns (0.00ns), received +3.21µs (3.21µs), submitted +333.00ns (3.54µs), persisted +52.96µs (56.50µs), committed +2.53ms (2.59ms), applied +2.53ms (5.11ms)
+    [14960694,14960702): 02:14:27.557548 +2.79µs; proposed +0.00ns (0.00ns), received +4.17µs (4.17µs), submitted +333.00ns (4.50µs), persisted +49.21µs (53.71µs), committed +2.53ms (2.58ms), applied +2.53ms (5.11ms)
+    [14960702,14960710): 02:14:27.557551 +3.62µs; proposed +0.00ns (0.00ns), received +3.58µs (3.58µs), submitted +334.00ns (3.92µs), persisted +46.17µs (50.08µs), committed +2.53ms (2.58ms), applied +2.53ms (5.11ms)
+    [14960710,14960718): 02:14:27.557554 +2.83µs; proposed +0.00ns (0.00ns), received +3.46µs (3.46µs), submitted +458.00ns (3.92µs), persisted +43.33µs (47.25µs), committed +2.53ms (2.58ms), applied +2.53ms (5.10ms)
+    [14960718,14960726): 02:14:27.557557 +3.04µs; proposed +0.00ns (0.00ns), received +3.17µs (3.17µs), submitted +333.00ns (3.50µs), persisted +40.71µs (44.21µs), committed +2.53ms (2.58ms), applied +2.53ms (5.10ms)
+    [14960726,14960730): 02:14:27.557559 +2.83µs; proposed +0.00ns (0.00ns), received +2.75µs (2.75µs), submitted +375.00ns (3.12µs), persisted +38.25µs (41.38µs), committed +2.53ms (2.57ms), applied +2.53ms (5.10ms)
+    [14960730,14960738): 02:14:27.557562 +2.17µs; proposed +0.00ns (0.00ns), received +3.29µs (3.29µs), submitted +500.00ns (3.79µs), persisted +35.42µs (39.21µs), committed +2.53ms (2.57ms), applied +2.53ms (5.10ms)
+    [14960738,14960742): 02:14:27.557566 +3.25µs; proposed +0.00ns (0.00ns), received +2.50µs (2.50µs), submitted +417.00ns (2.92µs), persisted +33.04µs (35.96µs), committed +2.53ms (2.57ms), applied +2.53ms (5.09ms)
+    [14960742,14960750): 02:14:27.557567 +1.83µs; proposed +0.00ns (0.00ns), received +3.12µs (3.12µs), submitted +292.00ns (3.42µs), persisted +30.71µs (34.12µs), committed +2.53ms (2.56ms), applied +2.53ms (5.09ms)
+    [14960750,14960754): 02:14:27.557570 +3.08µs; proposed +0.00ns (0.00ns), received +2.29µs (2.29µs), submitted +542.00ns (2.83µs), persisted +28.21µs (31.04µs), committed +2.53ms (2.56ms), applied +2.53ms (5.09ms)
+    [14960754,14960762): 02:14:27.557572 +1.62µs; proposed +0.00ns (0.00ns), received +3.38µs (3.38µs), submitted +458.00ns (3.83µs), persisted +25.58µs (29.42µs), committed +2.53ms (2.56ms), applied +2.53ms (5.09ms)
+    [14960762,14960774): 02:14:27.557574 +2.67µs; proposed +0.00ns (0.00ns), received +5.42µs (5.42µs), submitted +458.00ns (5.88µs), persisted +20.88µs (26.75µs), committed +2.53ms (2.56ms), applied +2.53ms (5.08ms)
+    [14960774,14960790): 02:14:27.557579 +4.42µs; proposed +0.00ns (0.00ns), received +5.46µs (5.46µs), submitted +375.00ns (5.83µs), persisted +16.50µs (22.33µs), committed +2.53ms (2.55ms), applied +2.53ms (5.08ms)
+    [14960790,14960802): 02:14:27.557584 +5.38µs; proposed +0.00ns (0.00ns), received +4.62µs (4.62µs), submitted +375.00ns (5.00µs), persisted +11.96µs (16.96µs), committed +2.53ms (2.55ms), applied +2.53ms (5.07ms)
+    [14960802,14960806): 02:14:27.557589 +4.54µs; proposed +0.00ns (0.00ns), received +2.67µs (2.67µs), submitted +459.00ns (3.12µs), persisted +9.29µs (12.42µs), committed +2.53ms (2.54ms), applied +2.53ms (5.07ms)
+    [14960806,14960814): 02:14:27.557591 +1.79µs; proposed +0.00ns (0.00ns), received +3.79µs (3.79µs), submitted +417.00ns (4.21µs), persisted +6.42µs (10.62µs), committed +2.53ms (2.54ms), applied +2.53ms (5.07ms)
+    [14960814,14960822): 02:14:27.557594 +3.12µs; proposed +0.00ns (0.00ns), received +3.33µs (3.33µs), submitted +458.00ns (3.79µs), persisted +3.71µs (7.50µs), committed +2.53ms (2.54ms), applied +2.53ms (5.06ms)
+    [14960822,14960826): 02:14:27.557601 +7.50µs; proposed +0.00ns (0.00ns), received +1.67µs (1.67µs), submitted +542.00ns (2.21µs), persisted +119.04µs (121.25µs), committed +2.41ms (2.53ms), applied +2.53ms (5.06ms)
+    [14960826,14960830): 02:14:27.557603 +1.79µs; proposed +0.00ns (0.00ns), received +2.58µs (2.58µs), submitted +459.00ns (3.04µs), persisted +116.42µs (119.46µs), committed +2.41ms (2.53ms), applied +2.53ms (5.06ms)
+    [14960830,14960838): 02:14:27.557605 +1.58µs; proposed +0.00ns (0.00ns), received +3.42µs (3.42µs), submitted +333.00ns (3.75µs), persisted +114.12µs (117.88µs), committed +2.41ms (2.53ms), applied +2.53ms (5.05ms)
+    [14960838,14960846): 02:14:27.557608 +2.83µs; proposed +0.00ns (0.00ns), received +2.96µs (2.96µs), submitted +375.00ns (3.33µs), persisted +111.71µs (115.04µs), committed +2.41ms (2.52ms), applied +2.53ms (5.05ms)
+    [14960846,14960854): 02:14:27.557609 +2.38µs; proposed +0.00ns (0.00ns), received +3.21µs (3.21µs), submitted +333.00ns (3.54µs), persisted +109.12µs (112.67µs), committed +2.41ms (2.52ms), applied +2.53ms (5.05ms)
+    [14960854,14960862): 02:14:27.557613 +2.96µs; proposed +0.00ns (0.00ns), received +2.83µs (2.83µs), submitted +334.00ns (3.17µs), persisted +106.54µs (109.71µs), committed +2.41ms (2.52ms), applied +2.53ms (5.05ms)
+    [14960862,14960870): 02:14:27.557616 +2.58µs; proposed +0.00ns (0.00ns), received +2.75µs (2.75µs), submitted +334.00ns (3.08µs), persisted +104.04µs (107.12µs), committed +2.41ms (2.52ms), applied +2.53ms (5.04ms)
+    [14960870,14960874): 02:14:27.557618 +2.67µs; proposed +0.00ns (0.00ns), received +2.38µs (2.38µs), submitted +458.00ns (2.83µs), persisted +101.62µs (104.46µs), committed +2.41ms (2.51ms), applied +2.53ms (5.04ms)
+    [14960874,14960882): 02:14:27.557620 +1.58µs; proposed +0.00ns (0.00ns), received +3.21µs (3.21µs), submitted +333.00ns (3.54µs), persisted +99.33µs (102.88µs), committed +2.41ms (2.51ms), applied +2.53ms (5.04ms)
+    [14960882,14960886): 02:14:27.557622 +2.83µs; proposed +0.00ns (0.00ns), received +2.54µs (2.54µs), submitted +417.00ns (2.96µs), persisted +97.08µs (100.04µs), committed +2.41ms (2.51ms), applied +2.53ms (5.04ms)
+    [14960886,14960894): 02:14:27.557624 +2.00µs; proposed +0.00ns (0.00ns), received +3.50µs (3.50µs), submitted +416.00ns (3.92µs), persisted +94.12µs (98.04µs), committed +2.41ms (2.51ms), applied +2.53ms (5.03ms)
+    [14960894,14960898): 02:14:27.557628 +3.42µs; proposed +0.00ns (0.00ns), received +2.62µs (2.62µs), submitted +459.00ns (3.08µs), persisted +91.54µs (94.62µs), committed +2.41ms (2.50ms), applied +2.53ms (5.03ms)
+    [14960898,14960906): 02:14:27.557632 +3.75µs; proposed +0.00ns (0.00ns), received +3.25µs (3.25µs), submitted +375.00ns (3.62µs), persisted +87.25µs (90.88µs), committed +2.41ms (2.50ms), applied +2.53ms (5.03ms)
+    [14960906,14960910): 02:14:27.557635 +3.12µs; proposed +0.00ns (0.00ns), received +2.25µs (2.25µs), submitted +459.00ns (2.71µs), persisted +85.04µs (87.75µs), committed +2.41ms (2.50ms), applied +2.53ms (5.02ms)
+    [14960910,14960914): 02:14:27.557636 +1.79µs; proposed +0.00ns (0.00ns), received +2.58µs (2.58µs), submitted +375.00ns (2.96µs), persisted +83.00µs (85.96µs), committed +2.41ms (2.50ms), applied +2.53ms (5.02ms)
+    [14960914,14960922): 02:14:27.557638 +1.88µs; proposed +0.00ns (0.00ns), received +3.33µs (3.33µs), submitted +459.00ns (3.79µs), persisted +80.29µs (84.08µs), committed +2.41ms (2.49ms), applied +2.53ms (5.02ms)
+    [14960922,14960934): 02:14:27.557642 +3.38µs; proposed +0.00ns (0.00ns), received +4.38µs (4.38µs), submitted +458.00ns (4.83µs), persisted +75.88µs (80.71µs), committed +2.41ms (2.49ms), applied +2.53ms (5.02ms)
+    [14960934,14960942): 02:14:27.557645 +4.04µs; proposed +0.00ns (0.00ns), received +3.46µs (3.46µs), submitted +333.00ns (3.79µs), persisted +72.88µs (76.67µs), committed +2.41ms (2.49ms), applied +2.53ms (5.01ms)
+    [14960942,14960950): 02:14:27.557649 +2.79µs; proposed +0.00ns (0.00ns), received +3.62µs (3.62µs), submitted +334.00ns (3.96µs), persisted +69.92µs (73.88µs), committed +2.41ms (2.48ms), applied +2.53ms (5.01ms)
+    [14960950,14960958): 02:14:27.557652 +2.79µs; proposed +0.00ns (0.00ns), received +3.46µs (3.46µs), submitted +334.00ns (3.79µs), persisted +67.29µs (71.08µs), committed +2.41ms (2.48ms), applied +2.53ms (5.01ms)
+    [14960958,14960966): 02:14:27.557654 +3.17µs; proposed +0.00ns (0.00ns), received +2.88µs (2.88µs), submitted +375.00ns (3.25µs), persisted +64.67µs (67.92µs), committed +2.41ms (2.48ms), applied +2.53ms (5.00ms)
+    [14960966,14960970): 02:14:27.557658 +2.92µs; proposed +0.00ns (0.00ns), received +2.29µs (2.29µs), submitted +458.00ns (2.75µs), persisted +62.25µs (65.00µs), committed +2.41ms (2.47ms), applied +2.53ms (5.00ms)
+    [14960970,14960974): 02:14:27.557660 +1.79µs; proposed +0.00ns (0.00ns), received +2.71µs (2.71µs), submitted +375.00ns (3.08µs), persisted +60.12µs (63.21µs), committed +2.41ms (2.47ms), applied +2.53ms (5.00ms)
+    [14960974,14960982): 02:14:27.557661 +1.79µs; proposed +0.00ns (0.00ns), received +3.29µs (3.29µs), submitted +334.00ns (3.62µs), persisted +57.79µs (61.42µs), committed +2.41ms (2.47ms), applied +2.53ms (5.00ms)
+    [14960982,14960990): 02:14:27.557664 +3.08µs; proposed +0.00ns (0.00ns), received +3.12µs (3.12µs), submitted +333.00ns (3.46µs), persisted +54.88µs (58.33µs), committed +2.41ms (2.47ms), applied +2.53ms (4.99ms)
+    [14960990,14960994): 02:14:27.557667 +3.21µs; proposed +0.00ns (0.00ns), received +2.33µs (2.33µs), submitted +416.00ns (2.75µs), persisted +52.38µs (55.12µs), committed +2.41ms (2.46ms), applied +2.53ms (4.99ms)
+    [14960994,14961002): 02:14:27.557669 +1.54µs; proposed +0.00ns (0.00ns), received +3.58µs (3.58µs), submitted +334.00ns (3.92µs), persisted +49.67µs (53.58µs), committed +2.41ms (2.46ms), applied +2.53ms (4.99ms)
+    [14961002,14961010): 02:14:27.557671 +2.79µs; proposed +0.00ns (0.00ns), received +3.79µs (3.79µs), submitted +334.00ns (4.12µs), persisted +46.67µs (50.79µs), committed +2.41ms (2.46ms), applied +2.53ms (4.99ms)
+    [14961010,14961018): 02:14:27.557675 +3.00µs; proposed +0.00ns (0.00ns), received +3.38µs (3.38µs), submitted +458.00ns (3.83µs), persisted +43.96µs (47.79µs), committed +2.41ms (2.46ms), applied +2.53ms (4.98ms)
+    [14961018,14961026): 02:14:27.557677 +3.17µs; proposed +0.00ns (0.00ns), received +3.46µs (3.46µs), submitted +333.00ns (3.79µs), persisted +40.83µs (44.62µs), committed +2.41ms (2.45ms), applied +2.53ms (4.98ms)
+    [14961026,14961034): 02:14:27.557681 +3.00µs; proposed +0.00ns (0.00ns), received +3.08µs (3.08µs), submitted +333.00ns (3.42µs), persisted +38.21µs (41.62µs), committed +2.41ms (2.45ms), applied +2.53ms (4.98ms)
+    [14961034,14961042): 02:14:27.557684 +2.83µs; proposed +0.00ns (0.00ns), received +3.17µs (3.17µs), submitted +375.00ns (3.54µs), persisted +35.25µs (38.79µs), committed +2.41ms (2.45ms), applied +2.53ms (4.97ms)
+    [14961042,14961050): 02:14:27.557686 +3.08µs; proposed +0.00ns (0.00ns), received +3.38µs (3.38µs), submitted +333.00ns (3.71µs), persisted +32.00µs (35.71µs), committed +2.41ms (2.45ms), applied +2.53ms (4.97ms)
+    [14961050,14961062): 02:14:27.557689 +2.58µs; proposed +0.00ns (0.00ns), received +4.62µs (4.62µs), submitted +500.00ns (5.12µs), persisted +28.00µs (33.12µs), committed +2.41ms (2.44ms), applied +2.53ms (4.97ms)
+    [14961062,14961066): 02:14:27.557694 +4.54µs; proposed +0.00ns (0.00ns), received +2.83µs (2.83µs), submitted +459.00ns (3.29µs), persisted +25.29µs (28.58µs), committed +2.41ms (2.44ms), applied +2.53ms (4.96ms)
+    [14961066,14961074): 02:14:27.557696 +2.25µs; proposed +0.00ns (0.00ns), received +3.54µs (3.54µs), submitted +333.00ns (3.88µs), persisted +22.46µs (26.33µs), committed +2.41ms (2.44ms), applied +2.53ms (4.96ms)
+    [14961074,14961082): 02:14:27.557699 +3.00µs; proposed +0.00ns (0.00ns), received +3.08µs (3.08µs), submitted +334.00ns (3.42µs), persisted +19.92µs (23.33µs), committed +2.41ms (2.43ms), applied +2.53ms (4.96ms)
+    [14961082,14961090): 02:14:27.557702 +2.71µs; proposed +0.00ns (0.00ns), received +3.04µs (3.04µs), submitted +375.00ns (3.42µs), persisted +17.21µs (20.62µs), committed +2.41ms (2.43ms), applied +2.53ms (4.96ms)
+    [14961090,14961098): 02:14:27.557704 +2.75µs; proposed +0.00ns (0.00ns), received +2.92µs (2.92µs), submitted +375.00ns (3.29µs), persisted +14.58µs (17.88µs), committed +2.41ms (2.43ms), applied +2.53ms (4.95ms)
+    [14961098,14961106): 02:14:27.557707 +2.50µs; proposed +0.00ns (0.00ns), received +3.33µs (3.33µs), submitted +375.00ns (3.71µs), persisted +11.67µs (15.38µs), committed +2.41ms (2.42ms), applied +2.53ms (4.95ms)
+    [14961106,14961114): 02:14:27.557710 +2.71µs; proposed +0.00ns (0.00ns), received +3.17µs (3.17µs), submitted +334.00ns (3.50µs), persisted +9.17µs (12.67µs), committed +2.41ms (2.42ms), applied +2.53ms (4.95ms)
+    [14961114,14961122): 02:14:27.557712 +2.88µs; proposed +0.00ns (0.00ns), received +3.29µs (3.29µs), submitted +375.00ns (3.67µs), persisted +6.12µs (9.79µs), committed +2.41ms (2.42ms), applied +2.53ms (4.95ms)
+    [14961122,14961138): 02:14:27.557719 +6.50µs; proposed +0.00ns (0.00ns), received +6.83µs (6.83µs), submitted +500.00ns (7.33µs), persisted +2.24ms (2.25ms), committed +163.96µs (2.41ms), applied +2.53ms (4.94ms)
+    [14961138,14961154): 02:14:27.557725 +5.79µs; proposed +0.00ns (0.00ns), received +6.67µs (6.67µs), submitted +375.00ns (7.04µs), persisted +2.24ms (2.24ms), committed +163.96µs (2.41ms), applied +2.53ms (4.93ms)
+    [14961154,14961166): 02:14:27.557731 +5.71µs; proposed +0.00ns (0.00ns), received +5.08µs (5.08µs), submitted +375.00ns (5.46µs), persisted +2.23ms (2.24ms), committed +163.96µs (2.40ms), applied +2.53ms (4.93ms)
+    [14961166,14961174): 02:14:27.557736 +4.88µs; proposed +0.00ns (0.00ns), received +3.29µs (3.29µs), submitted +334.00ns (3.62µs), persisted +2.23ms (2.23ms), committed +163.96µs (2.40ms), applied +2.53ms (4.92ms)
+    [14961174,14961182): 02:14:27.557738 +2.96µs; proposed +0.00ns (0.00ns), received +3.17µs (3.17µs), submitted +375.00ns (3.54µs), persisted +2.23ms (2.23ms), committed +163.96µs (2.39ms), applied +2.53ms (4.92ms)
+    [14961182,14961186): 02:14:27.557741 +2.88µs; proposed +0.00ns (0.00ns), received +2.62µs (2.62µs), submitted +375.00ns (3.00µs), persisted +2.22ms (2.23ms), committed +163.96µs (2.39ms), applied +2.53ms (4.92ms)
+    [14961186,14961194): 02:14:27.557743 +1.83µs; proposed +0.00ns (0.00ns), received +3.25µs (3.25µs), submitted +417.00ns (3.67µs), persisted +2.22ms (2.22ms), committed +163.96µs (2.39ms), applied +2.53ms (4.92ms)
+    [14961194,14961198): 02:14:27.557747 +3.29µs; proposed +0.00ns (0.00ns), received +2.21µs (2.21µs), submitted +459.00ns (2.67µs), persisted +2.22ms (2.22ms), committed +163.96µs (2.39ms), applied +2.53ms (4.91ms)
+    [14961198,14961206): 02:14:27.557748 +1.58µs; proposed +0.00ns (0.00ns), received +3.08µs (3.08µs), submitted +333.00ns (3.42µs), persisted +2.22ms (2.22ms), committed +163.96µs (2.38ms), applied +2.53ms (4.91ms)
+    [14961206,14961210): 02:14:27.557751 +3.33µs; proposed +0.00ns (0.00ns), received +1.96µs (1.96µs), submitted +500.00ns (2.46µs), persisted +2.21ms (2.22ms), committed +163.96µs (2.38ms), applied +2.53ms (4.91ms)
+    [14961210,14961218): 02:14:27.557753 +1.54µs; proposed +0.00ns (0.00ns), received +3.00µs (3.00µs), submitted +375.00ns (3.38µs), persisted +2.21ms (2.22ms), committed +163.96µs (2.38ms), applied +2.53ms (4.91ms)
+    [14961218,14961222): 02:14:27.557755 +2.88µs; proposed +0.00ns (0.00ns), received +2.38µs (2.38µs), submitted +459.00ns (2.83µs), persisted +2.21ms (2.21ms), committed +163.96µs (2.38ms), applied +2.53ms (4.90ms)
+    [14961222,14961230): 02:14:27.557757 +1.67µs; proposed +0.00ns (0.00ns), received +3.17µs (3.17µs), submitted +458.00ns (3.62µs), persisted +2.21ms (2.21ms), committed +163.96µs (2.37ms), applied +2.53ms (4.90ms)
+    [14961230,14961238): 02:14:27.557761 +2.96µs; proposed +0.00ns (0.00ns), received +2.96µs (2.96µs), submitted +333.00ns (3.29µs), persisted +2.20ms (2.21ms), committed +163.96µs (2.37ms), applied +2.53ms (4.90ms)
+    [14961238,14961242): 02:14:27.557763 +2.92µs; proposed +0.00ns (0.00ns), received +2.29µs (2.29µs), submitted +458.00ns (2.75µs), persisted +2.20ms (2.20ms), committed +163.96µs (2.37ms), applied +2.53ms (4.90ms)
+    [14961242,14961250): 02:14:27.557766 +1.79µs; proposed +0.00ns (0.00ns), received +3.08µs (3.08µs), submitted +333.00ns (3.42µs), persisted +2.20ms (2.20ms), committed +163.96µs (2.37ms), applied +2.53ms (4.89ms)
+    [14961250,14961258): 02:14:27.557768 +2.67µs; proposed +0.00ns (0.00ns), received +3.08µs (3.08µs), submitted +375.00ns (3.46µs), persisted +2.20ms (2.20ms), committed +163.96µs (2.36ms), applied +2.53ms (4.89ms)
+    [14961258,14961266): 02:14:27.557770 +2.50µs; proposed +0.00ns (0.00ns), received +3.29µs (3.29µs), submitted +333.00ns (3.62µs), persisted +2.19ms (2.20ms), committed +163.96µs (2.36ms), applied +2.53ms (4.89ms)
+    [14961266,14961274): 02:14:27.557773 +2.54µs; proposed +0.00ns (0.00ns), received +3.96µs (3.96µs), submitted +459.00ns (4.42µs), persisted +2.19ms (2.20ms), committed +163.96µs (2.36ms), applied +2.53ms (4.89ms)
+    [14961274,14961282): 02:14:27.557776 +3.33µs; proposed +0.00ns (0.00ns), received +3.54µs (3.54µs), submitted +333.00ns (3.88µs), persisted +2.19ms (2.19ms), committed +163.96µs (2.36ms), applied +2.53ms (4.88ms)
+    [14961282,14961290): 02:14:27.557779 +3.04µs; proposed +0.00ns (0.00ns), received +3.17µs (3.17µs), submitted +458.00ns (3.62µs), persisted +2.19ms (2.19ms), committed +163.96µs (2.35ms), applied +2.53ms (4.88ms)
+    [14961290,14961294): 02:14:27.557782 +3.17µs; proposed +0.00ns (0.00ns), received +2.54µs (2.54µs), submitted +459.00ns (3.00µs), persisted +2.18ms (2.19ms), committed +163.96µs (2.35ms), applied +2.53ms (4.88ms)
+    [14961294,14961306): 02:14:27.557784 +1.62µs; proposed +0.00ns (0.00ns), received +4.83µs (4.83µs), submitted +375.00ns (5.21µs), persisted +2.18ms (2.18ms), committed +163.96µs (2.35ms), applied +2.53ms (4.87ms)
+    [14961306,14961310): 02:14:27.557789 +4.62µs; proposed +0.00ns (0.00ns), received +3.00µs (3.00µs), submitted +458.00ns (3.46µs), persisted +2.18ms (2.18ms), committed +163.96µs (2.34ms), applied +2.53ms (4.87ms)
+    [14961310,14961318): 02:14:27.557791 +2.29µs; proposed +0.00ns (0.00ns), received +3.50µs (3.50µs), submitted +417.00ns (3.92µs), persisted +2.17ms (2.18ms), committed +163.96µs (2.34ms), applied +2.53ms (4.87ms)
+    [14961318,14961326): 02:14:27.557794 +2.92µs; proposed +0.00ns (0.00ns), received +3.67µs (3.67µs), submitted +416.00ns (4.08µs), persisted +2.17ms (2.17ms), committed +163.96µs (2.34ms), applied +2.53ms (4.86ms)
+    [14961326,14961334): 02:14:27.557796 +2.83µs; proposed +0.00ns (0.00ns), received +3.46µs (3.46µs), submitted +458.00ns (3.92µs), persisted +2.17ms (2.17ms), committed +163.96µs (2.34ms), applied +2.53ms (4.86ms)
+    [14961334,14961346): 02:14:27.557799 +2.75µs; proposed +0.00ns (0.00ns), received +4.75µs (4.75µs), submitted +500.00ns (5.25µs), persisted +2.16ms (2.17ms), committed +163.96µs (2.33ms), applied +2.53ms (4.86ms)
+    [14961346,14961358): 02:14:27.557804 +4.33µs; proposed +0.00ns (0.00ns), received +5.17µs (5.17µs), submitted +500.00ns (5.67µs), persisted +2.16ms (2.16ms), committed +163.96µs (2.33ms), applied +2.53ms (4.85ms)
+    [14961358,14961378): 02:14:27.557808 +4.29µs; proposed +0.00ns (0.00ns), received +7.21µs (7.21µs), submitted +500.00ns (7.71µs), persisted +2.15ms (2.16ms), committed +163.96µs (2.32ms), applied +2.53ms (4.85ms)
+    [14961378,14961394): 02:14:27.557815 +7.17µs; proposed +0.00ns (0.00ns), received +5.00µs (5.00µs), submitted +500.00ns (5.50µs), persisted +2.15ms (2.15ms), committed +163.96µs (2.32ms), applied +2.53ms (4.84ms)
+    [14961394,14961402): 02:14:27.557821 +5.38µs; proposed +0.00ns (0.00ns), received +3.38µs (3.38µs), submitted +417.00ns (3.79µs), persisted +2.14ms (2.15ms), committed +163.96µs (2.31ms), applied +2.53ms (4.84ms)
+    [14961402,14961410): 02:14:27.557823 +2.71µs; proposed +0.00ns (0.00ns), received +3.54µs (3.54µs), submitted +375.00ns (3.92µs), persisted +2.14ms (2.14ms), committed +163.96µs (2.31ms), applied +2.53ms (4.84ms)
+    [14961410,14961418): 02:14:27.557826 +3.29µs; proposed +0.00ns (0.00ns), received +3.46µs (3.46µs), submitted +334.00ns (3.79µs), persisted +2.14ms (2.14ms), committed +163.96µs (2.31ms), applied +2.53ms (4.83ms)
+    [14961418,14961426): 02:14:27.557829 +2.88µs; proposed +0.00ns (0.00ns), received +3.58µs (3.58µs), submitted +459.00ns (4.04µs), persisted +2.13ms (2.14ms), committed +163.96µs (2.30ms), applied +2.53ms (4.83ms)
+    [14961426,14961442): 02:14:27.557832 +2.79µs; proposed +0.00ns (0.00ns), received +5.83µs (5.83µs), submitted +375.00ns (6.21µs), persisted +2.13ms (2.14ms), committed +163.96µs (2.30ms), applied +2.53ms (4.83ms)
+    [14961442,14961450): 02:14:27.557838 +5.79µs; proposed +0.00ns (0.00ns), received +3.58µs (3.58µs), submitted +291.00ns (3.88µs), persisted +2.13ms (2.13ms), committed +163.96µs (2.29ms), applied +2.53ms (4.82ms)
+    [14961450,14961458): 02:14:27.557841 +3.08µs; proposed +0.00ns (0.00ns), received +3.04µs (3.04µs), submitted +334.00ns (3.38µs), persisted +2.12ms (2.13ms), committed +163.96µs (2.29ms), applied +2.53ms (4.82ms)
+    [14961458,14961466): 02:14:27.557844 +2.88µs; proposed +0.00ns (0.00ns), received +3.29µs (3.29µs), submitted +334.00ns (3.62µs), persisted +2.12ms (2.12ms), committed +163.96µs (2.29ms), applied +2.53ms (4.81ms)
+    [14961466,14961474): 02:14:27.557846 +2.54µs; proposed +0.00ns (0.00ns), received +3.33µs (3.33µs), submitted +375.00ns (3.71µs), persisted +2.12ms (2.12ms), committed +163.96µs (2.29ms), applied +2.53ms (4.81ms)
+    [14961474,14961482): 02:14:27.557850 +2.92µs; proposed +0.00ns (0.00ns), received +3.46µs (3.46µs), submitted +334.00ns (3.79µs), persisted +2.11ms (2.12ms), committed +163.96µs (2.28ms), applied +2.53ms (4.81ms)
+    [14961482,14961486): 02:14:27.557852 +3.04µs; proposed +0.00ns (0.00ns), received +2.79µs (2.79µs), submitted +542.00ns (3.33µs), persisted +2.11ms (2.12ms), committed +163.96µs (2.28ms), applied +2.53ms (4.81ms)
+    [14961486,14961494): 02:14:27.557854 +1.88µs; proposed +0.00ns (0.00ns), received +3.58µs (3.58µs), submitted +333.00ns (3.92µs), persisted +2.11ms (2.11ms), committed +163.96µs (2.28ms), applied +2.53ms (4.80ms)
+    [14961494,14961502): 02:14:27.557858 +2.92µs; proposed +0.00ns (0.00ns), received +3.38µs (3.38µs), submitted +334.00ns (3.71µs), persisted +2.11ms (2.11ms), committed +163.96µs (2.27ms), applied +2.53ms (4.80ms)
+    [14961502,14961510): 02:14:27.557860 +2.62µs; proposed +0.00ns (0.00ns), received +3.75µs (3.75µs), submitted +375.00ns (4.12µs), persisted +2.10ms (2.11ms), committed +163.96µs (2.27ms), applied +2.53ms (4.80ms)
+    [14961510,14961526): 02:14:27.557863 +2.88µs; proposed +0.00ns (0.00ns), received +5.71µs (5.71µs), submitted +458.00ns (6.17µs), persisted +2.10ms (2.11ms), committed +163.96µs (2.27ms), applied +2.53ms (4.80ms)
+    [14961526,14961542): 02:14:27.557869 +5.62µs; proposed +0.00ns (0.00ns), received +5.83µs (5.83µs), submitted +375.00ns (6.21µs), persisted +2.09ms (2.10ms), committed +163.96µs (2.26ms), applied +2.53ms (4.79ms)
+    [14961542,14961554): 02:14:27.557874 +5.50µs; proposed +0.00ns (0.00ns), received +4.58µs (4.58µs), submitted +375.00ns (4.96µs), persisted +2.09ms (2.09ms), committed +163.96µs (2.26ms), applied +2.53ms (4.78ms)
+    [14961554,14961570): 02:14:27.557878 +4.46µs; proposed +0.00ns (0.00ns), received +5.21µs (5.21µs), submitted +375.00ns (5.58µs), persisted +2.08ms (2.09ms), committed +163.96µs (2.25ms), applied +2.53ms (4.78ms)
+    [14961570,14961578): 02:14:27.557883 +5.33µs; proposed +0.00ns (0.00ns), received +3.50µs (3.50µs), submitted +375.00ns (3.88µs), persisted +2.08ms (2.08ms), committed +163.96µs (2.25ms), applied +2.53ms (4.77ms)
+    [14961578,14961586): 02:14:27.557886 +3.00µs; proposed +0.00ns (0.00ns), received +3.12µs (3.12µs), submitted +333.00ns (3.46µs), persisted +2.08ms (2.08ms), committed +163.96µs (2.25ms), applied +2.53ms (4.77ms)
+    [14961586,14961590): 02:14:27.557890 +3.00µs; proposed +0.00ns (0.00ns), received +2.46µs (2.46µs), submitted +417.00ns (2.88µs), persisted +2.08ms (2.08ms), committed +163.96µs (2.24ms), applied +2.53ms (4.77ms)
+    [14961590,14961598): 02:14:27.557892 +1.88µs; proposed +0.00ns (0.00ns), received +3.21µs (3.21µs), submitted +334.00ns (3.54µs), persisted +2.07ms (2.08ms), committed +163.96µs (2.24ms), applied +2.53ms (4.77ms)
+    [14961598,14961606): 02:14:27.557894 +2.75µs; proposed +0.00ns (0.00ns), received +3.29µs (3.29µs), submitted +375.00ns (3.67µs), persisted +2.07ms (2.07ms), committed +163.96µs (2.24ms), applied +2.53ms (4.76ms)
+    [14961606,14961618): 02:14:27.557897 +2.71µs; proposed +0.00ns (0.00ns), received +4.62µs (4.62µs), submitted +375.00ns (5.00µs), persisted +2.07ms (2.07ms), committed +163.96µs (2.24ms), applied +2.53ms (4.76ms)
+    [14961618,14961626): 02:14:27.557902 +4.92µs; proposed +0.00ns (0.00ns), received +3.58µs (3.58µs), submitted +417.00ns (4.00µs), persisted +2.06ms (2.07ms), committed +163.96µs (2.23ms), applied +2.53ms (4.76ms)
+    [14961626,14961634): 02:14:27.557905 +3.08µs; proposed +0.00ns (0.00ns), received +3.42µs (3.42µs), submitted +458.00ns (3.88µs), persisted +2.06ms (2.06ms), committed +163.96µs (2.23ms), applied +2.53ms (4.75ms)
+    [14961634,14961638): 02:14:27.557909 +3.46µs; proposed +0.00ns (0.00ns), received +2.21µs (2.21µs), submitted +417.00ns (2.62µs), persisted +2.06ms (2.06ms), committed +163.96µs (2.22ms), applied +2.53ms (4.75ms)
+    [14961638,14961642): 02:14:27.557913 +4.75µs; proposed +0.00ns (0.00ns), received +2.12µs (2.12µs), submitted +458.00ns (2.58µs), persisted +2.05ms (2.05ms), committed +2.89ms (4.94ms), applied +1.88ms (6.82ms)
+    [14961642,14961650): 02:14:27.557915 +1.50µs; proposed +0.00ns (0.00ns), received +3.67µs (3.67µs), submitted +334.00ns (4.00µs), persisted +2.05ms (2.05ms), committed +2.89ms (4.94ms), applied +1.88ms (6.82ms)
+    [14961650,14961654): 02:14:27.557919 +3.62µs; proposed +0.00ns (0.00ns), received +2.46µs (2.46µs), submitted +500.00ns (2.96µs), persisted +2.05ms (2.05ms), committed +2.89ms (4.94ms), applied +1.88ms (6.81ms)
+    [14961654,14961662): 02:14:27.557920 +1.83µs; proposed +0.00ns (0.00ns), received +3.88µs (3.88µs), submitted +458.00ns (4.33µs), persisted +2.04ms (2.05ms), committed +2.89ms (4.93ms), applied +1.88ms (6.81ms)
+    [14961662,14961674): 02:14:27.557923 +2.71µs; proposed +0.00ns (0.00ns), received +5.79µs (5.79µs), submitted +500.00ns (6.29µs), persisted +2.04ms (2.05ms), committed +2.89ms (4.93ms), applied +1.88ms (6.81ms)
+    [14961674,14961690): 02:14:27.557928 +5.33µs; proposed +0.00ns (0.00ns), received +6.12µs (6.12µs), submitted +500.00ns (6.62µs), persisted +2.03ms (2.04ms), committed +2.89ms (4.93ms), applied +1.88ms (6.80ms)
+    [14961690,14961702): 02:14:27.557934 +5.79µs; proposed +0.00ns (0.00ns), received +4.88µs (4.88µs), submitted +375.00ns (5.25µs), persisted +2.03ms (2.03ms), committed +2.89ms (4.92ms), applied +1.88ms (6.80ms)
+    [14961702,14961718): 02:14:27.557938 +4.46µs; proposed +0.00ns (0.00ns), received +5.75µs (5.75µs), submitted +500.00ns (6.25µs), persisted +2.02ms (2.03ms), committed +2.89ms (4.92ms), applied +1.88ms (6.79ms)
+    [14961718,14961726): 02:14:27.557945 +6.17µs; proposed +0.00ns (0.00ns), received +3.29µs (3.29µs), submitted +458.00ns (3.75µs), persisted +2.02ms (2.02ms), committed +2.89ms (4.91ms), applied +1.88ms (6.79ms)
+    [14961726,14961734): 02:14:27.557947 +2.54µs; proposed +0.00ns (0.00ns), received +3.67µs (3.67µs), submitted +416.00ns (4.08µs), persisted +2.02ms (2.02ms), committed +2.89ms (4.91ms), applied +1.88ms (6.78ms)
+    [14961734,14961742): 02:14:27.557950 +3.04µs; proposed +0.00ns (0.00ns), received +3.42µs (3.42µs), submitted +334.00ns (3.75µs), persisted +2.01ms (2.02ms), committed +2.89ms (4.90ms), applied +1.88ms (6.78ms)
+    [14961742,14961750): 02:14:27.557954 +2.83µs; proposed +0.00ns (0.00ns), received +3.38µs (3.38µs), submitted +417.00ns (3.79µs), persisted +2.01ms (2.02ms), committed +2.89ms (4.90ms), applied +1.88ms (6.78ms)
+    [14961750,14961758): 02:14:27.557956 +3.17µs; proposed +0.00ns (0.00ns), received +3.58µs (3.58µs), submitted +333.00ns (3.92µs), persisted +2.01ms (2.01ms), committed +2.89ms (4.90ms), applied +1.88ms (6.77ms)
+    [14961758,14961766): 02:14:27.557959 +2.79µs; proposed +0.00ns (0.00ns), received +3.62µs (3.62µs), submitted +375.00ns (4.00µs), persisted +2.01ms (2.01ms), committed +2.89ms (4.90ms), applied +1.88ms (6.77ms)
+    [14961766,14961778): 02:14:27.557962 +2.75µs; proposed +0.00ns (0.00ns), received +4.42µs (4.42µs), submitted +458.00ns (4.88µs), persisted +2.00ms (2.01ms), committed +2.89ms (4.89ms), applied +1.88ms (6.77ms)
+    [14961778,14961790): 02:14:27.557966 +4.17µs; proposed +0.00ns (0.00ns), received +4.67µs (4.67µs), submitted +458.00ns (5.12µs), persisted +2.00ms (2.00ms), committed +2.89ms (4.89ms), applied +1.88ms (6.76ms)
+    [14961790,14961798): 02:14:27.557971 +4.46µs; proposed +0.00ns (0.00ns), received +3.71µs (3.71µs), submitted +375.00ns (4.08µs), persisted +1.99ms (2.00ms), committed +2.89ms (4.88ms), applied +1.88ms (6.76ms)
+    [14961798,14961814): 02:14:27.557974 +3.46µs; proposed +0.00ns (0.00ns), received +5.79µs (5.79µs), submitted +375.00ns (6.17µs), persisted +1.99ms (1.99ms), committed +2.89ms (4.88ms), applied +1.88ms (6.76ms)
+    [14961814,14961818): 02:14:27.557980 +6.21µs; proposed +0.00ns (0.00ns), received +2.75µs (2.75µs), submitted +458.00ns (3.21µs), persisted +1.98ms (1.99ms), committed +2.89ms (4.87ms), applied +1.88ms (6.75ms)
+    [14961818,14961822): 02:14:27.557982 +2.17µs; proposed +0.00ns (0.00ns), received +2.62µs (2.62µs), submitted +500.00ns (3.12µs), persisted +1.98ms (1.99ms), committed +2.89ms (4.87ms), applied +1.88ms (6.75ms)
+    [14961822,14961830): 02:14:27.557984 +1.79µs; proposed +0.00ns (0.00ns), received +3.46µs (3.46µs), submitted +333.00ns (3.79µs), persisted +1.98ms (1.98ms), committed +2.89ms (4.87ms), applied +1.88ms (6.75ms)
+    [14961830,14961838): 02:14:27.557987 +3.04µs; proposed +0.00ns (0.00ns), received +3.04µs (3.04µs), submitted +458.00ns (3.50µs), persisted +1.98ms (1.98ms), committed +2.89ms (4.87ms), applied +1.88ms (6.74ms)
+    [14961838,14961846): 02:14:27.557990 +2.83µs; proposed +0.00ns (0.00ns), received +2.92µs (2.92µs), submitted +333.00ns (3.25µs), persisted +1.97ms (1.98ms), committed +2.89ms (4.86ms), applied +1.88ms (6.74ms)
+    [14961846,14961854): 02:14:27.557992 +2.62µs; proposed +0.00ns (0.00ns), received +3.33µs (3.33µs), submitted +291.00ns (3.62µs), persisted +1.97ms (1.98ms), committed +2.89ms (4.86ms), applied +1.88ms (6.74ms)
+    [14961854,14961866): 02:14:27.557996 +3.12µs; proposed +0.00ns (0.00ns), received +4.38µs (4.38µs), submitted +375.00ns (4.75µs), persisted +1.97ms (1.97ms), committed +2.89ms (4.86ms), applied +1.88ms (6.74ms)
+    [14961866,14961878): 02:14:27.558000 +4.00µs; proposed +0.00ns (0.00ns), received +4.96µs (4.96µs), submitted +375.00ns (5.33µs), persisted +1.96ms (1.97ms), committed +2.89ms (4.85ms), applied +1.88ms (6.73ms)
+    [14961878,14961890): 02:14:27.558004 +4.29µs; proposed +0.00ns (0.00ns), received +4.79µs (4.79µs), submitted +375.00ns (5.17µs), persisted +1.96ms (1.96ms), committed +2.89ms (4.85ms), applied +1.88ms (6.73ms)
+    [14961890,14961898): 02:14:27.558008 +4.50µs; proposed +0.00ns (0.00ns), received +3.79µs (3.79µs), submitted +375.00ns (4.17µs), persisted +1.96ms (1.96ms), committed +2.89ms (4.85ms), applied +1.88ms (6.72ms)
+    [14961898,14961910): 02:14:27.558011 +3.00µs; proposed +0.00ns (0.00ns), received +5.29µs (5.29µs), submitted +416.00ns (5.71µs), persisted +1.95ms (1.96ms), committed +2.89ms (4.84ms), applied +1.88ms (6.72ms)
+    [14961910,14961918): 02:14:27.558016 +4.96µs; proposed +0.00ns (0.00ns), received +3.71µs (3.71µs), submitted +375.00ns (4.08µs), persisted +1.95ms (1.95ms), committed +2.89ms (4.84ms), applied +1.88ms (6.71ms)
+    [14961918,14961922): 02:14:27.558019 +2.92µs; proposed +0.00ns (0.00ns), received +3.08µs (3.08µs), submitted +375.00ns (3.46µs), persisted +1.95ms (1.95ms), committed +2.89ms (4.83ms), applied +1.88ms (6.71ms)
+    [14961922,14961926): 02:14:27.558022 +2.21µs; proposed +0.00ns (0.00ns), received +2.71µs (2.71µs), submitted +375.00ns (3.08µs), persisted +1.94ms (1.95ms), committed +2.89ms (4.83ms), applied +1.88ms (6.71ms)
+    [14961926,14961938): 02:14:27.558023 +1.92µs; proposed +0.00ns (0.00ns), received +5.04µs (5.04µs), submitted +416.00ns (5.46µs), persisted +1.94ms (1.94ms), committed +2.89ms (4.83ms), applied +1.88ms (6.71ms)
+    [14961938,14961950): 02:14:27.558029 +4.96µs; proposed +0.00ns (0.00ns), received +4.83µs (4.83µs), submitted +458.00ns (5.29µs), persisted +1.93ms (1.94ms), committed +2.89ms (4.83ms), applied +1.88ms (6.70ms)
+    [14961950,14961966): 02:14:27.558033 +4.46µs; proposed +0.00ns (0.00ns), received +5.96µs (5.96µs), submitted +1.00µs (6.96µs), persisted +1.93ms (1.94ms), committed +2.89ms (4.82ms), applied +1.88ms (6.70ms)
+    [14961966,14961978): 02:14:27.558038 +5.54µs; proposed +0.00ns (0.00ns), received +5.33µs (5.33µs), submitted +458.00ns (5.79µs), persisted +1.92ms (1.93ms), committed +2.89ms (4.82ms), applied +1.88ms (6.69ms)
+    [14961978,14961998): 02:14:27.558043 +4.88µs; proposed +0.00ns (0.00ns), received +7.50µs (7.50µs), submitted +459.00ns (7.96µs), persisted +1.92ms (1.93ms), committed +2.89ms (4.81ms), applied +1.88ms (6.69ms)
+    [14961998,14962138): 02:14:27.558051 +6.92µs; proposed +0.00ns (0.00ns), received +52.50µs (52.50µs), submitted +2.12µs (54.62µs), persisted +1.86ms (1.92ms), committed +2.89ms (4.80ms), applied +1.88ms (6.68ms)
+    [14962138,14962214): 02:14:27.558100 +50.08µs; proposed +0.00ns (0.00ns), received +24.29µs (24.29µs), submitted +750.00ns (25.04µs), persisted +1.84ms (1.87ms), committed +2.89ms (4.75ms), applied +1.88ms (6.63ms)
+    [14962214,14962254): 02:14:27.558123 +23.21µs; proposed +0.00ns (0.00ns), received +13.08µs (13.08µs), submitted +542.00ns (13.62µs), persisted +1.83ms (1.85ms), committed +2.89ms (4.73ms), applied +1.88ms (6.61ms)
+    [14962254,14962270): 02:14:27.558139 +15.00µs; proposed +0.00ns (0.00ns), received +5.04µs (5.04µs), submitted +500.00ns (5.54µs), persisted +1.82ms (1.83ms), committed +2.89ms (4.72ms), applied +1.88ms (6.59ms)
+    [14962270,14962286): 02:14:27.558143 +4.38µs; proposed +0.00ns (0.00ns), received +4.29µs (4.29µs), submitted +417.00ns (4.71µs), persisted +1.82ms (1.83ms), committed +2.89ms (4.71ms), applied +1.88ms (6.59ms)
+    [14962286,14962298): 02:14:27.558148 +4.50µs; proposed +0.00ns (0.00ns), received +3.08µs (3.08µs), submitted +417.00ns (3.50µs), persisted +1.82ms (1.82ms), committed +2.89ms (4.71ms), applied +1.88ms (6.58ms)
+    [14962298,14962314): 02:14:27.558150 +2.92µs; proposed +0.00ns (0.00ns), received +4.42µs (4.42µs), submitted +417.00ns (4.83µs), persisted +1.81ms (1.82ms), committed +2.89ms (4.70ms), applied +1.88ms (6.58ms)
+    [14962314,14962330): 02:14:27.558154 +3.96µs; proposed +0.00ns (0.00ns), received +4.17µs (4.17µs), submitted +375.00ns (4.54µs), persisted +1.81ms (1.81ms), committed +2.89ms (4.70ms), applied +1.88ms (6.58ms)
+    [14962330,14962342): 02:14:27.558158 +4.04µs; proposed +0.00ns (0.00ns), received +3.50µs (3.50µs), submitted +375.00ns (3.88µs), persisted +1.81ms (1.81ms), committed +2.89ms (4.70ms), applied +1.88ms (6.57ms)
+    [14962342,14962354): 02:14:27.558162 +3.38µs; proposed +0.00ns (0.00ns), received +3.42µs (3.42µs), submitted +417.00ns (3.83µs), persisted +1.80ms (1.81ms), committed +2.89ms (4.69ms), applied +1.88ms (6.57ms)
+    [14962354,14962366): 02:14:27.558165 +3.38µs; proposed +0.00ns (0.00ns), received +3.17µs (3.17µs), submitted +417.00ns (3.58µs), persisted +1.80ms (1.80ms), committed +2.89ms (4.69ms), applied +1.88ms (6.57ms)
+    [14962366,14962374): 02:14:27.558168 +3.21µs; proposed +0.00ns (0.00ns), received +2.67µs (2.67µs), submitted +417.00ns (3.08µs), persisted +1.80ms (1.80ms), committed +2.89ms (4.69ms), applied +1.88ms (6.56ms)
+    [14962374,14962386): 02:14:27.558171 +2.00µs; proposed +0.00ns (0.00ns), received +3.25µs (3.25µs), submitted +375.00ns (3.62µs), persisted +1.79ms (1.80ms), committed +2.89ms (4.68ms), applied +1.88ms (6.56ms)
+    [14962386,14962398): 02:14:27.558173 +3.17µs; proposed +0.00ns (0.00ns), received +3.46µs (3.46µs), submitted +375.00ns (3.83µs), persisted +1.79ms (1.80ms), committed +2.89ms (4.68ms), applied +1.88ms (6.56ms)
+    [14962398,14962406): 02:14:27.558177 +3.29µs; proposed +0.00ns (0.00ns), received +2.54µs (2.54µs), submitted +333.00ns (2.88µs), persisted +1.79ms (1.79ms), committed +2.89ms (4.68ms), applied +1.88ms (6.55ms)
+    [14962406,14962418): 02:14:27.558179 +2.04µs; proposed +0.00ns (0.00ns), received +3.33µs (3.33µs), submitted +500.00ns (3.83µs), persisted +1.79ms (1.79ms), committed +2.89ms (4.68ms), applied +1.88ms (6.55ms)
+    [14962418,14962426): 02:14:27.558183 +3.54µs; proposed +0.00ns (0.00ns), received +2.58µs (2.58µs), submitted +375.00ns (2.96µs), persisted +1.78ms (1.79ms), committed +2.89ms (4.67ms), applied +1.88ms (6.55ms)
+    [14962426,14962434): 02:14:27.558184 +2.12µs; proposed +0.00ns (0.00ns), received +2.83µs (2.83µs), submitted +375.00ns (3.21µs), persisted +1.78ms (1.78ms), committed +2.89ms (4.67ms), applied +1.88ms (6.55ms)
+    [14962434,14962446): 02:14:27.558187 +2.25µs; proposed +0.00ns (0.00ns), received +3.67µs (3.67µs), submitted +1.00µs (4.67µs), persisted +1.78ms (1.78ms), committed +2.89ms (4.67ms), applied +1.88ms (6.54ms)
+    [14962446,14962466): 02:14:27.558190 +3.46µs; proposed +0.00ns (0.00ns), received +5.33µs (5.33µs), submitted +542.00ns (5.88µs), persisted +1.77ms (1.78ms), committed +2.89ms (4.66ms), applied +1.88ms (6.54ms)
+    [14962466,14962482): 02:14:27.558195 +5.04µs; proposed +0.00ns (0.00ns), received +4.71µs (4.71µs), submitted +583.00ns (5.29µs), persisted +1.77ms (1.77ms), committed +2.89ms (4.66ms), applied +1.88ms (6.54ms)
+    [14962482,14962498): 02:14:27.558200 +4.12µs; proposed +0.00ns (0.00ns), received +4.50µs (4.50µs), submitted +417.00ns (4.92µs), persisted +1.76ms (1.77ms), committed +2.89ms (4.66ms), applied +1.88ms (6.53ms)
+    [14962498,14962698): 02:14:27.558202 +3.71µs; proposed +0.00ns (0.00ns), received +58.25µs (58.25µs), submitted +2.08µs (60.33µs), persisted +1.71ms (1.77ms), committed +2.89ms (4.65ms), applied +1.88ms (6.53ms)
+    [14962698,14962906): 02:14:27.558258 +54.88µs; proposed +0.00ns (0.00ns), received +62.08µs (62.08µs), submitted +2.12µs (64.21µs), persisted +1.65ms (1.71ms), committed +2.89ms (4.60ms), applied +1.88ms (6.47ms)
+    [14962906,14963058): 02:14:27.558315 +57.08µs; proposed +0.00ns (0.00ns), received +42.88µs (42.88µs), submitted +1.38µs (44.25µs), persisted +1.61ms (1.65ms), committed +2.88ms (4.54ms), applied +1.88ms (6.42ms)
+    [14963058,14963314): 02:14:27.558356 +41.08µs; proposed +0.00ns (0.00ns), received +73.79µs (73.79µs), submitted +2.33µs (76.12µs), persisted +1.54ms (1.61ms), committed +2.88ms (4.50ms), applied +1.88ms (6.37ms)
+    [14963314,14963594): 02:14:27.558425 +69.17µs; proposed +0.00ns (0.00ns), received +73.25µs (73.25µs), submitted +2.62µs (75.88µs), persisted +1.47ms (1.55ms), committed +2.88ms (4.43ms), applied +1.88ms (6.31ms)
+    [14963594,14963878): 02:14:27.558493 +67.58µs; proposed +0.00ns (0.00ns), received +81.29µs (81.29µs), submitted +2.62µs (83.92µs), persisted +1.39ms (1.48ms), committed +2.88ms (4.36ms), applied +1.88ms (6.24ms)
+    [14963878,14964066): 02:14:27.558569 +76.38µs; proposed +0.00ns (0.00ns), received +48.75µs (48.75µs), submitted +1.33µs (50.08µs), persisted +1.35ms (1.40ms), committed +2.88ms (4.29ms), applied +1.88ms (6.16ms)
+    [14964066,14964194): 02:14:27.558615 +45.83µs; proposed +0.00ns (0.00ns), received +34.04µs (34.04µs), submitted +1.25µs (35.29µs), persisted +1.32ms (1.36ms), committed +2.88ms (4.24ms), applied +1.88ms (6.12ms)
+    [14964194,14965178): 02:14:27.558647 +32.17µs; proposed +0.00ns (0.00ns), received +264.71µs (264.71µs), submitted +6.12µs (270.83µs), persisted +1.05ms (1.33ms), committed +2.88ms (4.21ms), applied +1.88ms (6.08ms)
+    [14965178,14965778): 02:14:27.558896 +248.67µs; proposed +0.00ns (0.00ns), received +159.75µs (159.75µs), submitted +4.08µs (163.83µs), persisted +913.75µs (1.08ms), committed +2.88ms (3.96ms), applied +1.88ms (5.84ms)
+    [14965778,14966282): 02:14:27.559046 +150.08µs; proposed +0.00ns (0.00ns), received +143.08µs (143.08µs), submitted +3.58µs (146.67µs), persisted +780.83µs (927.50µs), committed +2.88ms (3.81ms), applied +1.88ms (5.69ms)
+    [14966282,14966582): 02:14:27.559183 +137.46µs; proposed +0.00ns (0.00ns), received +78.21µs (78.21µs), submitted +2.00µs (80.21µs), persisted +710.12µs (790.33µs), committed +2.88ms (3.67ms), applied +1.88ms (5.55ms)
+    [14966582,14966758): 02:14:27.559257 +74.00µs; proposed +0.00ns (0.00ns), received +85.83µs (85.83µs), submitted +2.12µs (87.96µs), persisted +628.38µs (716.33µs), committed +2.88ms (3.60ms), applied +1.88ms (5.47ms)
+    [14966758,14966906): 02:14:27.559257 +0.00ns; proposed +0.00ns (0.00ns), received +85.83µs (85.83µs), submitted +2.12µs (87.96µs), persisted +628.38µs (716.33µs), committed +2.92ms (3.64ms), applied +1.83ms (5.47ms)
+    [14966906,14967118): 02:14:27.559338 +80.50µs; proposed +0.00ns (0.00ns), received +53.12µs (53.12µs), submitted +1.46µs (54.58µs), persisted +581.54µs (636.12µs), committed +2.92ms (3.56ms), applied +1.83ms (5.39ms)
+    [14967118,14967294): 02:14:27.559388 +50.21µs; proposed +0.00ns (0.00ns), received +44.58µs (44.58µs), submitted +1.42µs (46.00µs), persisted +539.92µs (585.92µs), committed +2.92ms (3.51ms), applied +1.83ms (5.34ms)
+    [14967294,14967386): 02:14:27.559430 +41.96µs; proposed +0.00ns (0.00ns), received +26.29µs (26.29µs), submitted +1.04µs (27.33µs), persisted +516.62µs (543.96µs), committed +2.92ms (3.47ms), applied +1.83ms (5.30ms)
+    [14967386,14967442): 02:14:27.559455 +24.08µs; proposed +0.00ns (0.00ns), received +15.79µs (15.79µs), submitted +709.00ns (16.50µs), persisted +503.38µs (519.88µs), committed +2.92ms (3.44ms), applied +1.83ms (5.28ms)
+    [14967442,14967482): 02:14:27.559468 +14.46µs; proposed +0.00ns (0.00ns), received +10.08µs (10.08µs), submitted +542.00ns (10.62µs), persisted +494.79µs (505.42µs), committed +2.92ms (3.43ms), applied +1.83ms (5.26ms)
+    [14967482,14967510): 02:14:27.559478 +9.21µs; proposed +0.00ns (0.00ns), received +7.38µs (7.38µs), submitted +542.00ns (7.92µs), persisted +488.29µs (496.21µs), committed +2.92ms (3.42ms), applied +1.83ms (5.25ms)
+    [14967510,14967534): 02:14:27.559485 +6.67µs; proposed +0.00ns (0.00ns), received +6.12µs (6.12µs), submitted +542.00ns (6.67µs), persisted +482.88µs (489.54µs), committed +2.92ms (3.41ms), applied +1.83ms (5.25ms)
+    [14967534,14967550): 02:14:27.559490 +6.12µs; proposed +0.00ns (0.00ns), received +4.71µs (4.71µs), submitted +500.00ns (5.21µs), persisted +478.21µs (483.42µs), committed +2.92ms (3.41ms), applied +1.83ms (5.24ms)
+    [14967550,14967566): 02:14:27.559494 +4.08µs; proposed +0.00ns (0.00ns), received +4.62µs (4.62µs), submitted +375.00ns (5.00µs), persisted +474.33µs (479.33µs), committed +2.92ms (3.40ms), applied +1.83ms (5.24ms)
+    [14967566,14967582): 02:14:27.559499 +4.00µs; proposed +0.00ns (0.00ns), received +4.25µs (4.25µs), submitted +375.00ns (4.62µs), persisted +470.71µs (475.33µs), committed +2.92ms (3.40ms), applied +1.83ms (5.23ms)
+    [14967582,14967598): 02:14:27.559503 +4.00µs; proposed +0.00ns (0.00ns), received +3.92µs (3.92µs), submitted +375.00ns (4.29µs), persisted +467.04µs (471.33µs), committed +2.92ms (3.39ms), applied +1.83ms (5.23ms)
+    [14967598,14967614): 02:14:27.559506 +3.71µs; proposed +0.00ns (0.00ns), received +3.83µs (3.83µs), submitted +417.00ns (4.25µs), persisted +463.38µs (467.62µs), committed +2.92ms (3.39ms), applied +1.83ms (5.23ms)
+    [14967614,14967626): 02:14:27.559510 +3.92µs; proposed +0.00ns (0.00ns), received +3.00µs (3.00µs), submitted +417.00ns (3.42µs), persisted +460.29µs (463.71µs), committed +2.92ms (3.39ms), applied +1.83ms (5.22ms)
+    [14967626,14967638): 02:14:27.559512 +2.58µs; proposed +0.00ns (0.00ns), received +3.21µs (3.21µs), submitted +375.00ns (3.58µs), persisted +457.54µs (461.12µs), committed +2.92ms (3.38ms), applied +1.83ms (5.22ms)
+    [14967638,14967650): 02:14:27.559516 +3.17µs; proposed +0.00ns (0.00ns), received +2.96µs (2.96µs), submitted +458.00ns (3.42µs), persisted +454.54µs (457.96µs), committed +2.92ms (3.38ms), applied +1.83ms (5.22ms)
+    [14967650,14967662): 02:14:27.559519 +2.67µs; proposed +0.00ns (0.00ns), received +3.29µs (3.29µs), submitted +375.00ns (3.67µs), persisted +451.62µs (455.29µs), committed +2.92ms (3.38ms), applied +1.83ms (5.21ms)
+    [14967662,14967674): 02:14:27.559521 +3.12µs; proposed +0.00ns (0.00ns), received +2.96µs (2.96µs), submitted +334.00ns (3.29µs), persisted +448.88µs (452.17µs), committed +2.92ms (3.37ms), applied +1.83ms (5.21ms)
+    [14967674,14967686): 02:14:27.559524 +2.54µs; proposed +0.00ns (0.00ns), received +3.33µs (3.33µs), submitted +375.00ns (3.71µs), persisted +445.92µs (449.62µs), committed +2.92ms (3.37ms), applied +1.83ms (5.21ms)
+    [14967686,14967698): 02:14:27.559528 +2.83µs; proposed +0.00ns (0.00ns), received +3.38µs (3.38µs), submitted +458.00ns (3.83µs), persisted +442.96µs (446.79µs), committed +2.92ms (3.37ms), applied +1.83ms (5.20ms)
+    [14967698,14967710): 02:14:27.559530 +2.79µs; proposed +0.00ns (0.00ns), received +3.50µs (3.50µs), submitted +375.00ns (3.88µs), persisted +440.12µs (444.00µs), committed +2.92ms (3.37ms), applied +1.83ms (5.20ms)
+    [14967710,14967722): 02:14:27.559533 +2.92µs; proposed +0.00ns (0.00ns), received +3.50µs (3.50µs), submitted +375.00ns (3.88µs), persisted +437.21µs (441.08µs), committed +2.92ms (3.36ms), applied +1.83ms (5.20ms)
+    [14967722,14967730): 02:14:27.559536 +3.46µs; proposed +0.00ns (0.00ns), received +2.50µs (2.50µs), submitted +375.00ns (2.88µs), persisted +434.75µs (437.62µs), committed +2.92ms (3.36ms), applied +1.83ms (5.20ms)
+    [14967730,14967742): 02:14:27.559538 +1.92µs; proposed +0.00ns (0.00ns), received +3.25µs (3.25µs), submitted +459.00ns (3.71µs), persisted +432.00µs (435.71µs), committed +2.92ms (3.36ms), applied +1.83ms (5.19ms)
+    [14967742,14967754): 02:14:27.559541 +2.88µs; proposed +0.00ns (0.00ns), received +3.38µs (3.38µs), submitted +375.00ns (3.75µs), persisted +429.08µs (432.83µs), committed +2.92ms (3.36ms), applied +1.83ms (5.19ms)
+    [14967754,14967766): 02:14:27.559544 +3.00µs; proposed +0.00ns (0.00ns), received +3.25µs (3.25µs), submitted +334.00ns (3.58µs), persisted +426.25µs (429.83µs), committed +2.92ms (3.35ms), applied +1.83ms (5.19ms)
+    [14967766,14967778): 02:14:27.559547 +2.96µs; proposed +0.00ns (0.00ns), received +3.21µs (3.21µs), submitted +375.00ns (3.58µs), persisted +423.29µs (426.88µs), committed +2.92ms (3.35ms), applied +1.83ms (5.18ms)
+    [14967778,14967782): 02:14:27.559550 +3.21µs; proposed +0.00ns (0.00ns), received +3.04µs (3.04µs), submitted +458.00ns (3.50µs), persisted +420.17µs (423.67µs), committed +2.92ms (3.35ms), applied +1.83ms (5.18ms)
+
+[  6.75s] Final:
+Batch Sizes:
+╭─────────────┬──────────┬──────┬────┬────┬─────┬──────┬──────┬───────┬───────┬────────────────────────────────────╮
+│             │ #Samples │ P0.1 │ P1 │ P5 │ P10 │  P50 │  P90 │   P99 │ P99.9 │                                    │
+├─────────────┼──────────┼──────┼────┼────┼─────┼──────┼──────┼───────┼───────┼────────────────────────────────────┤
+│ Apply       │    6,471 │    1 │  1 │  1 │   1 │ 1257 │ 8516 │ 10861 │ 11851 │ Entries per state machine apply    │
+│ Append      │  307,844 │    1 │  4 │  4 │   4 │    9 │  105 │  1053 │  6311 │ Entries per storage append         │
+│ Replicate   │   48,437 │    0 │  0 │  0 │   0 │ 1113 │ 1246 │  1276 │  1279 │ Entries per replication RPC        │
+│ RaftMsg/run │  328,226 │    0 │  0 │  0 │   1 │    1 │    1 │     1 │     1 │ RaftMsgs per run_engine_commands() │
+│ Write       │  307,842 │    1 │  4 │  4 │   4 │    9 │  105 │  1053 │  6311 │ Client writes merged per batch     │
+╰─────────────┴──────────┴──────┴────┴────┴─────┴──────┴──────┴───────┴───────┴────────────────────────────────────╯
+Budget & Utilization:
+╭───────────────┬──────────┬──────┬──────┬──────┬──────┬──────┬───────┬───────┬───────┬─────────────────────────────────────╮
+│               │ #Samples │ P0.1 │   P1 │   P5 │  P10 │  P50 │   P90 │   P99 │ P99.9 │                                     │
+├───────────────┼──────────┼──────┼──────┼──────┼──────┼──────┼───────┼───────┼───────┼─────────────────────────────────────┤
+│ RaftMsgBudget │   20,383 │  896 │  897 │  902 │  908 │  960 │  1011 │  1022 │  1023 │ Max RaftMsgs allowed per loop       │
+│ NotifyBudget  │   20,382 │ 8194 │ 8212 │ 8294 │ 8396 │ 9216 │ 10035 │ 10219 │ 10237 │ Max Notifications allowed per loop  │
+│ RaftMsgUsage‰ │  328,226 │    0 │    0 │    0 │    1 │    1 │     1 │     1 │     1 │ RaftMsg budget utilization (‰)      │
+│ NotifyUsage‰  │   20,382 │    0 │    0 │    0 │    0 │    0 │     3 │     6 │     7 │ Notification budget utilization (‰) │
+╰───────────────┴──────────┴──────┴──────┴──────┴──────┴──────┴───────┴───────┴───────┴─────────────────────────────────────╯
+Commands:
+╭───────────────────────────┬─────────╮
+│ Command                   │   Count │
+├───────────────────────────┼─────────┤
+│ AppendEntries             │ 307,844 │
+│ ReplicateCommitted        │  22,025 │
+│ BroadcastHeartbeat        │     122 │
+│ SaveCommittedAndApply     │   6,471 │
+│ Replicate                 │       4 │
+│ RebuildReplicationStreams │       1 │
+│ SaveVote                  │       2 │
+│ SendVote                  │       1 │
+│ PurgeLog                  │   2,191 │
+│ SM::BuildSnapshot         │   2,191 │
+│ Respond                   │       1 │
+╰───────────────────────────┴─────────╯
+Raft Messages:
+╭─────────────────┬─────────╮
+│ Message         │   Count │
+├─────────────────┼─────────┤
+│ ClientWrite     │ 307,842 │
+│ Initialize      │       1 │
+│ GetRuntimeStats │       2 │
+╰─────────────────┴─────────╯
+Notifications:
+╭─────────────────────────────┬────────╮
+│ Notification                │  Count │
+├─────────────────────────────┼────────┤
+│ Notify::VoteResponse        │      3 │
+│ Notify::LocalIO             │ 29,727 │
+│ Notify::ReplicationProgress │ 48,437 │
+│ Notify::HeartbeatProgress   │ 48,681 │
+│ Notify::StateMachine        │  8,662 │
+│ Notify::Tick                │    679 │
+╰─────────────────────────────┴────────╯
+Log Stage Latencies (us):
+╭───────────────────────┬──────────┬──────┬──────┬──────┬──────┬──────┬──────┬──────┬───────╮
+│                       │ #Samples │ P0.1 │   P1 │   P5 │  P10 │  P50 │  P90 │  P99 │ P99.9 │
+├───────────────────────┼──────────┼──────┼──────┼──────┼──────┼──────┼──────┼──────┼───────┤
+│ 1:proposed→received   │   74,888 │    1 │    2 │    3 │   11 │  324 │ 1896 │ 2032 │  2046 │
+│ 2:received→submitted  │   74,888 │    0 │    0 │    0 │    0 │    6 │   35 │   39 │    39 │
+│ 3:submitted→persisted │   74,888 │    5 │   31 │  163 │  265 │  829 │ 1578 │ 3323 │  3554 │
+│ 4:persisted→committed │   74,888 │  141 │  598 │  787 │ 1073 │ 2405 │ 3856 │ 5442 │  6074 │
+│ 5:committed→applied   │   74,888 │ 1029 │ 1073 │ 1208 │ 1324 │ 2437 │ 3672 │ 4035 │  4089 │
+│ 1~5:proposed→applied  │   74,888 │ 2607 │ 3114 │ 4094 │ 4732 │ 6396 │ 8307 │ 9827 │ 10184 │
+╰───────────────────────┴──────────┴──────┴──────┴──────┴──────┴──────┴──────┴──────┴───────╯
+Log Stage Latency Distribution (us):
+       range | █ 1:proposed→received ▒ 2:received→submitted ░ 3:submitted→persisted ▓ 4:persisted→committed ▞ 5:committed→applied
+[   0,    1) | █▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  4 + 11612 + 0 + 0 + 0
+[   1,    2) | █▒▒▒▒▒▒▒▒▒▒▒▒▒▒  152 + 10860 + 0 + 0 + 0
+[   2,    3) | ██▒▒▒▒▒▒▒▒  1544 + 6448 + 0 + 0 + 0
+[   3,    4) | ███▒▒▒░  2224 + 2384 + 32 + 0 + 0
+[   4,    5) | █▒▒░  988 + 1876 + 28 + 0 + 0
+[   5,    6) | █▒▒▒░  540 + 2336 + 16 + 0 + 0
+[   6,    7) | █▒▒▒░  364 + 2784 + 32 + 0 + 0
+[   7,    8) | █  488 + 0 + 0 + 0 + 0
+[   8,   10) | █▒▒▒▒▒░  652 + 3892 + 72 + 0 + 0
+[  10,   12) | █▒▒░  564 + 1716 + 24 + 0 + 0
+[  12,   14) | █▒▒▒░  532 + 2088 + 156 + 0 + 0
+[  14,   16) | █░  500 + 0 + 28 + 0 + 0
+[  16,   20) | ██░  1372 + 0 + 92 + 0 + 0
+[  20,   24) | █▒▒▒▒▒▒▒▒▒▒▒▒░  1092 + 9476 + 136 + 0 + 0
+[  24,   28) | █▒▒▒▒▒▒░  1108 + 4480 + 84 + 0 + 0
+[  28,   32) | █▒▒▒░  952 + 2304 + 64 + 0 + 0
+[  32,   40) | ███▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░  2000 + 12632 + 140 + 0 + 0
+[  40,   48) | ███░  2284 + 0 + 136 + 0 + 0
+[  48,   56) | ███░  2348 + 0 + 144 + 0 + 0
+[  56,   64) | ███░  2444 + 0 + 164 + 0 + 0
+[  64,   80) | ███░  2416 + 0 + 344 + 0 + 0
+[  80,   96) | ███░  2076 + 0 + 408 + 0 + 0
+[  96,  112) | ██░  1356 + 0 + 316 + 0 + 0
+[ 112,  128) | █░  1104 + 0 + 304 + 0 + 0
+[ 128,  160) | ██░▓  1268 + 0 + 904 + 184 + 0
+[ 160,  192) | █░  488 + 0 + 1084 + 0 + 0
+[ 192,  224) | ███░░  2184 + 0 + 1400 + 0 + 0
+[ 224,  256) | █░  40 + 0 + 888 + 0 + 0
+[ 256,  320) | █████░░░░░  4164 + 0 + 3820 + 0 + 0
+[ 320,  384) | ███░░░░░  2224 + 0 + 3880 + 0 + 0
+[ 384,  448) | ███░░  2720 + 0 + 1244 + 0 + 0
+[ 448,  512) | ██░░░░  1716 + 0 + 3252 + 0 + 0
+[ 512,  640) | ░░░░░░░░░░░░░▓  0 + 0 + 10732 + 1024 + 0
+[ 640,  768) | █████░░░░░░░▓▓▓  4392 + 0 + 5348 + 2048 + 0
+[ 768,  896) | ████░░░░░▓▓▓▓  3088 + 0 + 4324 + 3072 + 0
+[ 896, 1024) | ████░░░░░▓  2984 + 0 + 3960 + 1036 + 0
+[1024, 1280) | ████░░░░░░░░░░░░░░░░░░░░░▓▓▞▞▞▞▞▞▞  3404 + 0 + 16580 + 1712 + 5888
+[1280, 1536) | ██████░░░░░░░░▓▓▓▓▓▓▓▓▞▞▞▞▞▞▞▞▞▞▞  4480 + 0 + 6692 + 6728 + 8648
+[1536, 1792) | ░░░▓▓▞▞▞▞  0 + 0 + 2488 + 1584 + 3072
+[1792, 2048) | ████████████████░░▓▓▓▓▓▓▓▓▞▞▞▞▞▞▞▞▞▞▞▞▞▞  12632 + 0 + 1924 + 6096 + 11304
+[2048, 2560) | ░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▞▞▞▞▞▞▞▞▞▞▞▞▞  0 + 0 + 296 + 19832 + 10168
+[2560, 3072) | ░░▓▓▓▓▓▓▓▓▓▓▓▓▓▞▞▞▞▞▞▞▞▞  0 + 0 + 1676 + 10304 + 7160
+[3072, 3584) | ░░▓▓▓▓▓▓▓▞▞▞▞▞▞▞▞▞▞▞▞▞▞▞▞▞▞▞▞▞▞▞▞  0 + 0 + 1676 + 5864 + 18948
+[3584, 4096) | ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▞▞▞▞▞▞▞▞▞▞▞▞  0 + 0 + 0 + 14312 + 9700
+[5120, 6144) | ▓  0 + 0 + 0 + 1092 + 0
+█     1:proposed→received  total: 74888  P50: 324  P90: 1896  P99: 2032
+▒    2:received→submitted  total: 74888  P50: 6  P90: 35  P99: 39
+░   3:submitted→persisted  total: 74888  P50: 829  P90: 1578  P99: 3323
+▓   4:persisted→committed  total: 74888  P50: 2405  P90: 3856  P99: 5442
+▞     5:committed→applied  total: 74888  P50: 2437  P90: 3672  P99: 4035

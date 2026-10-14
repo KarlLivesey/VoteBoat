@@ -1,0 +1,107 @@
+[
+  {
+    "sample_weight": 14,
+    "library": 2,
+    "address": 1771273,
+    "frame": 0,
+    "module_offset": "0x1b0709",
+    "module": "voteboat-matched-framework",
+    "function": "<voteboat::log::LogEntry as core::clone::Clone>::clone",
+    "function_offset": "0x209",
+    "function_size": "0x25c",
+    "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched431-linux/source/src/log.rs",
+    "line": 41
+  },
+  {
+    "sample_weight": 4,
+    "library": 2,
+    "address": 1770769,
+    "frame": 0,
+    "module_offset": "0x1b0511",
+    "module": "voteboat-matched-framework",
+    "function": "<voteboat::log::LogEntry as core::clone::Clone>::clone",
+    "function_offset": "0x11",
+    "function_size": "0x25c",
+    "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched431-linux/source/src/log.rs",
+    "line": 41
+  },
+  {
+    "sample_weight": 2,
+    "library": 2,
+    "address": 1771249,
+    "frame": 0,
+    "module_offset": "0x1b06f1",
+    "module": "voteboat-matched-framework",
+    "function": "<voteboat::log::LogEntry as core::clone::Clone>::clone",
+    "function_offset": "0x1f1",
+    "function_size": "0x25c",
+    "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched431-linux/source/src/log.rs",
+    "line": 41
+  },
+  {
+    "sample_weight": 2,
+    "library": 2,
+    "address": 1770945,
+    "frame": 0,
+    "module_offset": "0x1b05c1",
+    "module": "voteboat-matched-framework",
+    "function": "<voteboat::log::LogEntry as core::clone::Clone>::clone",
+    "function_offset": "0xc1",
+    "function_size": "0x25c",
+    "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched431-linux/source/src/log.rs",
+    "line": 45,
+    "inlines": [
+      {
+        "function": "<voteboat::log::EntryPayload as core::clone::Clone>::clone",
+        "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched431-linux/source/src/log.rs",
+        "line": 31
+      }
+    ]
+  },
+  {
+    "sample_weight": 2,
+    "library": 2,
+    "address": 1770776,
+    "frame": 0,
+    "module_offset": "0x1b0518",
+    "module": "voteboat-matched-framework",
+    "function": "<voteboat::log::LogEntry as core::clone::Clone>::clone",
+    "function_offset": "0x18",
+    "function_size": "0x25c",
+    "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched431-linux/source/src/log.rs",
+    "line": 45,
+    "inlines": [
+      {
+        "function": "<voteboat::log::EntryPayload as core::clone::Clone>::clone",
+        "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched431-linux/source/src/log.rs",
+        "line": 31
+      }
+    ]
+  },
+  {
+    "sample_weight": 1,
+    "library": 2,
+    "address": 1770752,
+    "frame": 0,
+    "module_offset": "0x1b0500",
+    "module": "voteboat-matched-framework",
+    "function": "<voteboat::log::LogEntry as core::clone::Clone>::clone",
+    "function_offset": "0x0",
+    "function_size": "0x25c",
+    "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched431-linux/source/src/log.rs",
+    "line": 41
+  },
+  {
+    "sample_weight": 1,
+    "library": 2,
+    "address": 1770753,
+    "frame": 0,
+    "module_offset": "0x1b0501",
+    "module": "voteboat-matched-framework",
+    "function": "<voteboat::log::LogEntry as core::clone::Clone>::clone",
+    "function_offset": "0x1",
+    "function_size": "0x25c",
+    "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched431-linux/source/src/log.rs",
+    "line": 41
+  }
+]

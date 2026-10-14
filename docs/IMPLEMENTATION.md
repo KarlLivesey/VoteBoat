@@ -7,6 +7,12 @@ bar, not a target or stopping ceiling. The user wants that capacity and
 substantially more. Keep profiling, removing measured work and comparing both
 hosts; crossing a diagnostic or individual floor does not close P9.
 
+The compact [experiment ledger and decisions](P9.md#experiment-ledger-and-decisions)
+records tried/rejected/held/retained changes, actual paired completed rates,
+regressions and the current unmeasured432 gate. Reviewed candidates and calibration
+stay separate from implemented improvements. It is the decision index for avoiding
+repeated experiments and extra prerequisites; detailed raw scopes remain below.
+
 Slice425 is published and qualified on main: 32 controls, three actual
 16,384-original CLI histories and the complete strict hook pass. Linux's fresh
 asserted nine-case diagnostic also passes every original/frontier, source,
@@ -63,8 +69,8 @@ diagnostics do not qualify sustained floors. [Every Linux trial and scope](../va
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: qualify/measure/profile published431 on both hosts | Establish actual benefit of transferring owned append input after existing checks | Published431 and fresh Linux artifacts; honest native replay scopes, immutable430 baselines and exported CPU data | Mac full root/standalone checks and fresh artifacts; rotating bulk/singleton rates/p99 and new profiles with every failure/regression retained. Linux paired timing is terminal without repeatable bulk gain. | P9.0/P9.1/P9.3 |
-| Next: reduce the next measured limiting stage | Remove remaining work while respecting asynchronous owners and effect order | Both-host431 measurements and compact profiles; synchronous completion exploration remains unselected | Small usable schema, owned asynchronous fallback, queue/preflight/error/receipt ordering and restart checks, strict publication and both-host measurement; sustained acceptance stays distinct | P9.1/P9.3 |
+| Current432: inline exact LogEntry clone construction | Remove an intermediate copy in the hottest observed entry-clone loop across existing ownership paths | Both-host431 qualification/pairs/profiles; actual Linux call/temporary codegen and unchanged derived payload clone | Independent exact clone oracle/normalization/ownership controls, affected core/provider/snapshot/network checks and zero strict profiles; checked publication. No queue/API/storage changes or performance claim before measurement. | P9.1/P9.3 |
+| Next: qualify/measure/profile published432 on both hosts | Establish the actual effect of eliminating the clone temporary and select the next limiting stage | Checked published432, fresh asserted artifacts, immutable431 baselines and linked schema | Actual codegen, paired completed rates/p99, fresh Mac qualification/profiles and every regression/failure; separate original-driver calibration and full sustained acceptance | P9.0/P9.1/P9.3 |
 | Following: bounded durable batching/overlap under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Native421 barrier evidence and unchanged publication/ticket contracts; bounded fairness schema after current measured framework stage | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual placement/barriers before changing defaults | P9.1/P9.2/P9.3 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
@@ -117,6 +123,57 @@ payload tuple oracle across all variants and differing fields, existing native/
 provider/codec/recovery histories and actual network services, then fresh asserted
 both-host measurements. Mac may gain less or regress; retain every result. Held427
 is an unqualified earlier experiment, not validation of429.
+
+### Slice432 schema — inline exact clone construction
+
+The current deliverable is432's [exact clone construction schema](P9.md#slice432-schema--exact-clone-construction-at-its-destination),
+recorded before source edits. Actual431 Linux Vec-clone call/temp-copy instructions
+bind the hottest loop to LogEntry's derived clone; existing empty bytes already
+skip allocator/memcpy. Fresh Mac431 clone/memmove contexts support investigating
+copy construction, with interval/alias bias explicitly retained. Replace only the
+derived top-level Clone with an exhaustive fieldwise implementation and inline
+hint; payload's full derived Clone, normalized capacities, independent ownership,
+layout/public interfaces and every protocol/application/provider order remain.
+No callback, shared intent/buffer or new seam is introduced. Independent derived
+clone controls and affected feature/provider/snapshot/network plus zero four
+strict/standalone checks precede publication; fresh codegen and both-host paired
+measurements precede any performance claim. The broader synchronous-completion,
+request-buffer co-location and immutable-intent candidates remain unselected.
+
+[432 source-frozen checks and main promotion](../validation/performance/slice432/README.md)
+match every1,428 source hash/physical mode,3 changed paths/1 new clone oracle.
+Original39814/82420 terminal0/DONE: oracle2 and root fmt/four strict0; all-feature
+library392/log19/provider37/Raft79/snapshot27, core312/log0/provider22/Raft29/
+snapshot12; selected owner held1/failure1/durable1/snapshot18, actual services2 and
+matched43/fmt/strict. No full203-owner assertion or erasure of431 progress failures.
+Main original80636 ends0/DONE with metadata references checker0, actual TCP/QUIC
+three-service histories2 and matched43. Exact hashes/modes reuse the isolated
+affected/strict checks; terminal dependency caches are not fresh performance proof.
+Source export's two mode-assumption failures before edits are kept in PREPARATION;
+physical permissions, Git modes and readonly frozen source are distinguished.
+No semantic/check failure. Independent review finds no correctness blocker; clone
+codegen and performance remain unproven until fresh published artifacts/measurements.
+
+431 data was published ata5209f4 through the enabled full hook, original80805exit0;
+remote main was verified. Mac431 paired original56466 ends0/DONE,24 exact cases:
+430OFF/431OFF/ON/OpenRaft bulk3,930,556/4,070,259/4,104,017/2,085,180 originals/s,
+p995.112458/4.642917/4.664542/9.721500ms; ratios0.976727/1.037013/1.032665 retain
+trial1 regression. Singleton56,083/56,042/51,420/10,121,p99
+0.031291/0.031125/0.032500/0.133917ms; trial2 regresses. All ON regressions retained
+in [Mac431 pairs](../validation/performance/comparison431-mac/README.md).
+[Mac431 CPU](../validation/performance/hotspot431/mac/README.md) original75637 ends0:
+bulk clone2.565%/memmove4.239% and complete contexts1.442%/2.013% overlap; strong
+wait/alias/unresolved-frame bias prevents instruction/allocator cause claims.
+Profiled4,436,427/s,p994.556041ms and singleton54,754,p990.039292ms qualify no floor.
+
+Untouched-driver calibration uses separate196-package locks: asserted Mac original
+24636 ends0, OFF2,027,371/ON1,985,002 originals/s,p9910.692ms. Fresh ordinary-release
+Mac original77870 ends0, OFF3,114,799/ON2,959,294,p996.922ms; default assertions/
+overflow false with actual fresh:false engine/library/driver, unchanged source and
+full guards. These separately timed profiles do not establish a paired flags cause
+or match qualified asserted framework acceptance. All strict configurations stay
+zero, required framework flags stay true; published floors and full P9 unchanged.
+Linux default-release setup is ready, timing still pending after432 local work.
 
 ### Slice431 schema — reuse owned ordinary append input
 

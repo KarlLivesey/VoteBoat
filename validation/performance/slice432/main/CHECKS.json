@@ -1,0 +1,45 @@
+[
+  {
+    "scope": "provider-metadata",
+    "command": [
+      "node",
+      "validation/check-provider-conformance.mjs"
+    ],
+    "exit": 0,
+    "seconds": 0.026034116744995117
+  },
+  {
+    "scope": "actual-services",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "--all-features",
+      "--test",
+      "counter_service",
+      "three_",
+      "--",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "seconds": 32.8838095664978
+  },
+  {
+    "scope": "matched-tests",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--manifest-path",
+      "benchmarks/matched/Cargo.toml",
+      "--locked",
+      "--offline",
+      "--",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "seconds": 13.67871356010437
+  }
+]

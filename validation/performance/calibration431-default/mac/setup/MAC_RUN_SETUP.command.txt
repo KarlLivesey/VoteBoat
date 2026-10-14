@@ -1,0 +1,8 @@
+ssh karllivesey@192.168.192.76 'set -e; export PATH=/Users/karllivesey/.cargo/bin:/tmp/voteboat-macos-CzK1if/reference-tools296/bin:/usr/bin:/bin:/usr/sbin:/sbin; tar -xpf - -C /tmp/voteboat-upstream-default431-XxW0Du; python3 -c '"'"'import pathlib,hashlib,json,sys
+root=pathlib.Path(sys.argv[1]);inv=json.loads(sys.argv[2]);bad=[]
+for n,v in inv.items():
+ p=root/n
+ if not p.is_file() or p.is_symlink() or hashlib.sha256(p.read_bytes()).hexdigest()!=v['"'"'"'"'"'"'"'"'sha256'"'"'"'"'"'"'"'"'] or oct(p.stat().st_mode&0o777)!=v['"'"'"'"'"'"'"'"'mode'"'"'"'"'"'"'"'"']:bad.append(n)
+print(json.dumps({'"'"'"'"'"'"'"'"'files'"'"'"'"'"'"'"'"':len(inv),'"'"'"'"'"'"'"'"'passed'"'"'"'"'"'"'"'"':not bad,'"'"'"'"'"'"'"'"'bad'"'"'"'"'"'"'"'"':bad}));sys.exit(bool(bad))
+'"'"' /tmp/voteboat-upstream-default431-XxW0Du '"'"'{"CONFIG.mac.json": {"sha256": "7d696edb6612b59a79bc439e668545a53109b7aaed10b73f56b31ad07fbc8e53", "mode": "0o644"}, "COMMANDS.mac.txt": {"sha256": "0e01908e599f5fd61a2d57f02a39a50b693ca3b4c333055cf30429cbb1288672", "mode": "0o644"}, "run.mac.sh": {"sha256": "dea56050b666037cf5dac100c4ca876426fcbde6d5b30a8e1f7ebf7772399a48", "mode": "0o755"}, "guard.py": {"sha256": "4bd8878d906dda242b317ce4941a79b6f0d57ebf36caf9f133a887752a7069ae", "mode": "0o644"}}'"'"'; bash -n /tmp/voteboat-upstream-default431-XxW0Du/run.mac.sh; python3 /tmp/voteboat-upstream-default431-XxW0Du/guard.py /tmp/voteboat-upstream-default431-XxW0Du/CONFIG.mac.json /tmp/voteboat-upstream-default431-XxW0Du/MAC_READY_GUARD.json'
+#stdin4filetar

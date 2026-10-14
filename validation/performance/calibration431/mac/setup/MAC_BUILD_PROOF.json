@@ -1,0 +1,71 @@
+{
+  "passed": true,
+  "original_cargo_json": "target/p9/matched-artifacts230/mac/logs/upstream-release.jsonl",
+  "compiler_artifacts": [
+    {
+      "name": "bench_minimal",
+      "fresh": false,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "runtime-stats"
+      ],
+      "target": "/tmp/voteboat-openraft230-mac/benchmarks/minimal/src/lib.rs",
+      "filenames": [
+        "/tmp/voteboat-matched230-mac/target-upstream/release/deps/libbench_minimal-3ac2219bbb6201af.rlib",
+        "/tmp/voteboat-matched230-mac/target-upstream/release/deps/libbench_minimal-3ac2219bbb6201af.rmeta"
+      ]
+    },
+    {
+      "name": "openraft",
+      "fresh": false,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "clap",
+        "default",
+        "runtime-stats",
+        "serde",
+        "tokio-rt",
+        "type-alias"
+      ],
+      "target": "/tmp/voteboat-openraft230-mac/openraft/src/lib.rs",
+      "filenames": [
+        "/tmp/voteboat-matched230-mac/target-upstream/release/deps/libopenraft-3b677fab336b069f.rlib",
+        "/tmp/voteboat-matched230-mac/target-upstream/release/deps/libopenraft-3b677fab336b069f.rmeta"
+      ]
+    },
+    {
+      "name": "bench",
+      "fresh": false,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "runtime-stats"
+      ],
+      "target": "/tmp/voteboat-openraft230-mac/benchmarks/minimal/src/bin/bench.rs",
+      "filenames": [
+        "/tmp/voteboat-matched230-mac/target-upstream/release/bench",
+        "/tmp/voteboat-matched230-mac/target-upstream/release/bench.dSYM"
+      ]
+    }
+  ],
+  "actual_root_invocations": 3
+}

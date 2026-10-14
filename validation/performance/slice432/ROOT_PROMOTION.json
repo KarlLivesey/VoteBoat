@@ -1,0 +1,19 @@
+{
+  "source_inputs": 1428,
+  "exact_all_hashes_and_physical_modes": true,
+  "changed_files": [
+    "src/log.rs",
+    "tests/provider_conformance/log_store/entry_clone.rs",
+    "tests/provider_conformance/log_store.rs"
+  ],
+  "new_files": [
+    "tests/provider_conformance/log_store/entry_clone.rs"
+  ],
+  "patch_sha256": "08d1b07bc74c2ef5b4b5ad658ff09adf875cbddbea434feb68259227136d320b",
+  "qualified_sessions": [
+    39814,
+    82420
+  ],
+  "main_before": "a5209f4b8fa8897cbf8b76984f9170a3a4a2525c",
+  "scope": "Exact promotion; no benchmark artifact/performance claim"
+}

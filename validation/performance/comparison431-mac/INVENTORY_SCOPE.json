@@ -1,0 +1,20 @@
+{
+  "baseline_inputs": 1429,
+  "candidate_inputs": 1430,
+  "added": [
+    "src/raft/owned_append_tests.rs"
+  ],
+  "removed": [],
+  "changed": [
+    "src/raft/membership_tests.rs",
+    "src/raft/receive.rs"
+  ],
+  "essential_committed_inputs": 1423,
+  "all_essential_exact_published_commit_sha256": true,
+  "actual_guards": 0,
+  "actual_cli_controls": 3,
+  "negative_cli_controls": 4,
+  "negative_artifact_controls": 4,
+  "same_rustc_binary_version_sha": true,
+  "scope": "Full actual Mac431 root/matched checks and fresh artifacts; exact source/build/fixture/config/contract inventory; no unchanged-root scope reuse"
+}

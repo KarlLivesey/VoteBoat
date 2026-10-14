@@ -1,0 +1,20 @@
+ssh karllivesey@192.168.192.76 'export PATH=/Users/karllivesey/.cargo/bin:/tmp/voteboat-macos-CzK1if/reference-tools296/bin:/usr/bin:/bin:/usr/sbin:/sbin; python3 -c '"'"'import sys,json,pathlib,hashlib,subprocess,datetime
+c=json.load(sys.stdin);root=pathlib.Path(c['"'"'"'"'"'"'"'"'source_root'"'"'"'"'"'"'"'"']);errors=[]
+for rel,expected in c['"'"'"'"'"'"'"'"'source_sha256'"'"'"'"'"'"'"'"'].items():
+ p=root/rel
+ actual=hashlib.sha256(p.read_bytes()).hexdigest() if p.is_file() else None
+ if actual!=expected: errors.append({'"'"'"'"'"'"'"'"'path'"'"'"'"'"'"'"'"':rel,'"'"'"'"'"'"'"'"'expected'"'"'"'"'"'"'"'"':expected,'"'"'"'"'"'"'"'"'actual'"'"'"'"'"'"'"'"':actual})
+art={}
+for f in [c['"'"'"'"'"'"'"'"'executable'"'"'"'"'"'"'"'"'],c['"'"'"'"'"'"'"'"'original_executable'"'"'"'"'"'"'"'"']]:
+ p=pathlib.Path(f);v=hashlib.sha256(p.read_bytes()).hexdigest() if p.is_file() else None;art[f]=v
+ if v!=c['"'"'"'"'"'"'"'"'artifact_sha256'"'"'"'"'"'"'"'"']:errors.append({'"'"'"'"'"'"'"'"'artifact'"'"'"'"'"'"'"'"':f,'"'"'"'"'"'"'"'"'expected'"'"'"'"'"'"'"'"':c['"'"'"'"'"'"'"'"'artifact_sha256'"'"'"'"'"'"'"'"'],'"'"'"'"'"'"'"'"'actual'"'"'"'"'"'"'"'"':v})
+r=subprocess.run(['"'"'"'"'"'"'"'"'rustc'"'"'"'"'"'"'"'"','"'"'"'"'"'"'"'"'+stable'"'"'"'"'"'"'"'"','"'"'"'"'"'"'"'"'-Vv'"'"'"'"'"'"'"'"'],text=True,capture_output=True);compiler=r.stdout.strip()
+if r.returncode or compiler!=c['"'"'"'"'"'"'"'"'compiler'"'"'"'"'"'"'"'"']:errors.append({'"'"'"'"'"'"'"'"'compiler'"'"'"'"'"'"'"'"':compiler,'"'"'"'"'"'"'"'"'exit'"'"'"'"'"'"'"'"':r.returncode,'"'"'"'"'"'"'"'"'stderr'"'"'"'"'"'"'"'"':r.stderr})
+git=None
+if (root/'"'"'"'"'"'"'"'"'.git'"'"'"'"'"'"'"'"').exists():
+ g=subprocess.run(['"'"'"'"'"'"'"'"'git'"'"'"'"'"'"'"'"','"'"'"'"'"'"'"'"'-C'"'"'"'"'"'"'"'"',str(root),'"'"'"'"'"'"'"'"'rev-parse'"'"'"'"'"'"'"'"','"'"'"'"'"'"'"'"'HEAD'"'"'"'"'"'"'"'"'],text=True,capture_output=True);git=g.stdout.strip()
+ if g.returncode or git!=c['"'"'"'"'"'"'"'"'pin'"'"'"'"'"'"'"'"']:errors.append({'"'"'"'"'"'"'"'"'git'"'"'"'"'"'"'"'"':git,'"'"'"'"'"'"'"'"'exit'"'"'"'"'"'"'"'"':g.returncode})
+print(json.dumps({'"'"'"'"'"'"'"'"'utc'"'"'"'"'"'"'"'"':datetime.datetime.now(datetime.timezone.utc).isoformat(),'"'"'"'"'"'"'"'"'source_root'"'"'"'"'"'"'"'"':str(root),'"'"'"'"'"'"'"'"'source_files_verified'"'"'"'"'"'"'"'"':len(c['"'"'"'"'"'"'"'"'source_sha256'"'"'"'"'"'"'"'"']),'"'"'"'"'"'"'"'"'git_head_if_present'"'"'"'"'"'"'"'"':git,'"'"'"'"'"'"'"'"'artifacts'"'"'"'"'"'"'"'"':art,'"'"'"'"'"'"'"'"'compiler'"'"'"'"'"'"'"'"':compiler,'"'"'"'"'"'"'"'"'errors'"'"'"'"'"'"'"'"':errors,'"'"'"'"'"'"'"'"'passed'"'"'"'"'"'"'"'"':not errors},indent=2))
+sys.exit(bool(errors))
+'"'"''
+# stdin: exact CONFIG.mac.json

@@ -1,0 +1,1 @@
+ssh karllivesey@192.168.192.76 'set -e; test "$(cat /tmp/voteboat-upstream-default431-XxW0Du/measurements/mac/STATUS)" = 0; test -f /tmp/voteboat-upstream-default431-XxW0Du/measurements/mac/DONE; tar -cf - -C /tmp/voteboat-upstream-default431-XxW0Du measurements/mac CONFIG.mac.json COMMANDS.mac.txt run.mac.sh guard.py MAC_READY_GUARD.json'

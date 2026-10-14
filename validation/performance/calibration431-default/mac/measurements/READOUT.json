@@ -1,0 +1,128 @@
+{
+  "scope": "Published-default untouched upstream release calibration; separate from asserted/matched P9 acceptance",
+  "host": "mac",
+  "original_exec_handle": 77870,
+  "terminal_exit": 0,
+  "completed_cases": 6,
+  "profile": {
+    "opt_level": "3",
+    "debuginfo": 2,
+    "debug_assertions": false,
+    "overflow_checks": false,
+    "test": false
+  },
+  "compiler": "rustc 1.98.0 (88d9e12ae 2026-08-18)\nbinary: rustc\ncommit-hash: 88d9e12ae178fab0fb5cc050a94da85685d449ea\ncommit-date: 2026-08-18\nhost: aarch64-apple-darwin\nrelease: 1.98.0\nLLVM version: 22.1.8",
+  "lock_packages": 196,
+  "upstream_pin": "e88bb40707f2e511d8ecc44d31edcb1d814a11a8",
+  "artifact_sha256": "7cf31d415412b1bae19130a6126448afc93c89cddca7a76f50003088fa7a7a5f",
+  "guards_before_after": "passed1357sourceSHA+modes/original-copydefaultartifacts/preservedassertedexe/compiler/proofs",
+  "trials_in_launch_order": [
+    {
+      "case": "trial1-latency-off",
+      "latency_enabled": false,
+      "requested_originals": 20000000,
+      "completed_originals": 19988480,
+      "warmup_originals": 1024,
+      "seconds": 6.281298291,
+      "completed_originals_per_second": 3182221.1068434673,
+      "printed_integer_ns_per_original": 314,
+      "printed_integer_originals_per_ms": 3182,
+      "count_evidence": "source-certified rounded count conditional on exit0/all successful client joins; no frontier verification",
+      "exit": 0
+    },
+    {
+      "case": "trial1-latency-on",
+      "latency_enabled": true,
+      "requested_originals": 20000000,
+      "completed_originals": 19988480,
+      "warmup_originals": 1024,
+      "seconds": 6.754475208,
+      "completed_originals_per_second": 2959294.302587068,
+      "request_p50_ms": 5.5015,
+      "request_p95_ms": 6.459458,
+      "request_p99_ms": 6.921958,
+      "request_mean_ms": 5.532713,
+      "samples": 4997120,
+      "count_evidence": "exact upstream latency JSON after all joins",
+      "exit": 0
+    },
+    {
+      "case": "trial2-latency-on",
+      "latency_enabled": true,
+      "requested_originals": 20000000,
+      "completed_originals": 19988480,
+      "warmup_originals": 1024,
+      "seconds": 6.673782666,
+      "completed_originals_per_second": 2995075.0571834696,
+      "request_p50_ms": 5.424958,
+      "request_p95_ms": 6.366625,
+      "request_p99_ms": 6.83375,
+      "request_mean_ms": 5.466789,
+      "samples": 4997120,
+      "count_evidence": "exact upstream latency JSON after all joins",
+      "exit": 0
+    },
+    {
+      "case": "trial2-latency-off",
+      "latency_enabled": false,
+      "requested_originals": 20000000,
+      "completed_originals": 19988480,
+      "warmup_originals": 1024,
+      "seconds": 6.606614291,
+      "completed_originals_per_second": 3025525.4990789657,
+      "printed_integer_ns_per_original": 330,
+      "printed_integer_originals_per_ms": 3025,
+      "count_evidence": "source-certified rounded count conditional on exit0/all successful client joins; no frontier verification",
+      "exit": 0
+    },
+    {
+      "case": "trial3-latency-off",
+      "latency_enabled": false,
+      "requested_originals": 20000000,
+      "completed_originals": 19988480,
+      "warmup_originals": 1024,
+      "seconds": 6.417261666,
+      "completed_originals_per_second": 3114798.965718223,
+      "printed_integer_ns_per_original": 321,
+      "printed_integer_originals_per_ms": 3114,
+      "count_evidence": "source-certified rounded count conditional on exit0/all successful client joins; no frontier verification",
+      "exit": 0
+    },
+    {
+      "case": "trial3-latency-on",
+      "latency_enabled": true,
+      "requested_originals": 20000000,
+      "completed_originals": 19988480,
+      "warmup_originals": 1024,
+      "seconds": 6.886119958,
+      "completed_originals_per_second": 2902720.2723615407,
+      "request_p50_ms": 5.603625,
+      "request_p95_ms": 6.646125,
+      "request_p99_ms": 7.143083,
+      "request_mean_ms": 5.640779,
+      "samples": 4997120,
+      "count_evidence": "exact upstream latency JSON after all joins",
+      "exit": 0
+    }
+  ],
+  "summary": {
+    "off": {
+      "median_completed_originals_per_second": 3114798.965718223,
+      "minimum_completed_originals_per_second": 3025525.4990789657,
+      "maximum_completed_originals_per_second": 3182221.1068434673
+    },
+    "on": {
+      "median_completed_originals_per_second": 2959294.302587068,
+      "minimum_completed_originals_per_second": 2902720.2723615407,
+      "maximum_completed_originals_per_second": 2995075.0571834696,
+      "median_request_p99_ms": 6.921958
+    }
+  },
+  "median_off_over_on_gain_percent": 5.254788717540171,
+  "limitations": [
+    "Published-default calibration separate from asserted/matched P9 acceptance. No VoteBoat/profile/check change.",
+    "OFF has no latency/directJSONcount; rounded count from unchanged source/exit0/all joins. No added follower frontier verification.",
+    "Independent196-package lock/default upstream runtime-stats/config/delays; original400s driver. Published hardware/compiler may differ.",
+    "Assertion/overflow settings both differ from prior asserted calibration; this is not CPU attribution for either setting individually."
+  ]
+}

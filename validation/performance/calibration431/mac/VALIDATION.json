@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "cases": 6,
+  "exits": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "on_exact_original_counts": [
+    19988480,
+    19988480,
+    19988480
+  ],
+  "on_exact_latency_sample_counts": [
+    4997120,
+    4997120,
+    4997120
+  ],
+  "before_after_guards": true,
+  "source_count": 1357,
+  "off_count_conditional_source_proof": true,
+  "no_new_follower_verification": true
+}

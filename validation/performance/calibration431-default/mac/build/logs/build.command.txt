@@ -1,0 +1,1 @@
+cargo +stable build --manifest-path Cargo.toml --locked --offline --release --bin bench --message-format=json-render-diagnostics -vv

@@ -1,0 +1,13 @@
+{
+  "remote_job": "/tmp/voteboat-samply431-yiZrL0",
+  "ready": true,
+  "recording_launched": false,
+  "samply_version": "0.13.1",
+  "samply_sha256": "dcf042115dd8a9e8582510f403365cbee1a2025405d0f3ebe95162f31943123b",
+  "converter_sha256": "b4d85920f686bd055816184afeae04dd6bc240737ed49c3d6947fd7ca1bf35a1",
+  "qualified_executable_sha256": "a211af458233d4d719298436ba4bb138af4230eddb1ef7b26615332307ccf400",
+  "new_exe_dsym_uuid": "DC3E912F-6F96-3C10-AFD4-78542A3D1CF3",
+  "guard_exit": 0,
+  "no_old_symbol_addresses_or_sidecar_reused": true,
+  "quiet_preparation_empty": true
+}

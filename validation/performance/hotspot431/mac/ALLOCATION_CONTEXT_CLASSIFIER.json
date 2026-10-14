@@ -1,0 +1,11 @@
+{
+  "scope": "Focused derived-classifier correction, no recording/reread change. Initial borrowed physical resolver omitted library names in unresolved label; first derived unresolved-malloc result zero was a classifier omission. Corrected allocation-contexts resolver retains actual raw frame library identity. Full final values checked against SUMMARY unresolved_malloc_library totals; no allocation/deallocation resolution claim.",
+  "initial_unresolved_malloc_library_leaf_cpu_us": {
+    "bulk": 0,
+    "singleton": 0
+  },
+  "final_unresolved_malloc_library_leaf_cpu_us": {
+    "bulk": 492329,
+    "singleton": 774219
+  }
+}

@@ -38,11 +38,26 @@ pub enum EntryPayload {
         bytes: Vec<u8>,
     },
 }
-#[derive(Clone, Debug, Eq)]
+#[derive(Debug, Eq)]
 pub struct LogEntry {
     pub index: u64,
     pub term: u64,
     pub payload: EntryPayload,
+}
+impl Clone for LogEntry {
+    #[inline(always)]
+    fn clone(&self) -> Self {
+        let Self {
+            index,
+            term,
+            payload,
+        } = self;
+        Self {
+            index: *index,
+            term: *term,
+            payload: payload.clone(),
+        }
+    }
 }
 impl PartialEq for LogEntry {
     #[inline]

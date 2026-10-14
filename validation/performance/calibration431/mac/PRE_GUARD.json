@@ -1,0 +1,11 @@
+{
+  "utc": "2026-10-14T01:01:07.855922+00:00",
+  "passed": true,
+  "source_count": 1357,
+  "artifacts": {
+    "/tmp/voteboat-mac415416-8a5840d/measurement-artifacts/upstream/bench": "b3f2878f4146b4cf03174617a82c979bb9aec8558f3ab8fb2e45918691be8a6f",
+    "/tmp/voteboat-matched230-mac/target-upstream/release/bench": "b3f2878f4146b4cf03174617a82c979bb9aec8558f3ab8fb2e45918691be8a6f"
+  },
+  "compiler": "rustc 1.98.0 (88d9e12ae 2026-08-18)\nbinary: rustc\ncommit-hash: 88d9e12ae178fab0fb5cc050a94da85685d449ea\ncommit-date: 2026-08-18\nhost: aarch64-apple-darwin\nrelease: 1.98.0\nLLVM version: 22.1.8",
+  "errors": []
+}

@@ -1,0 +1,37 @@
+{
+  "scope": "Only derived folded outputs compressed; raw profiles and symbol sidecars unchanged. Uncompressed originals remain in target/remote archive.",
+  "files": [
+    {
+      "path": "bulk-analysis/cpu.folded",
+      "original_bytes": 17588628,
+      "original_sha256": "3f1a9f5497525791c16cb7b952a1a45f71d3a1ea613f6a997f909a7614c4de84",
+      "container": "bulk-analysis/cpu.folded.gz",
+      "container_sha256": "fbe0482c48ff4822a66313b20c442f0d8fb791efc775001648fa95984049c15d",
+      "decompression_verified": true
+    },
+    {
+      "path": "bulk-analysis/wall-sample-weights.folded",
+      "original_bytes": 17585521,
+      "original_sha256": "654b4387aca3589fbb965bb753339f8e49b6f5668ecaf0511a8259268eb08e0e",
+      "container": "bulk-analysis/wall-sample-weights.folded.gz",
+      "container_sha256": "2fd1bf6d94cf2dc76939e3738bae4150892c913251dc0c916d8c434746e038d9",
+      "decompression_verified": true
+    },
+    {
+      "path": "singleton-analysis/cpu.folded",
+      "original_bytes": 25559007,
+      "original_sha256": "577026be6ae6e19de018cdf46a6df9463b03018e662550fb201ae3a0857839ca",
+      "container": "singleton-analysis/cpu.folded.gz",
+      "container_sha256": "26c791d8be9a6d621eecfab71343ebfe0bf8e5eaefbe77098d33bde95b092513",
+      "decompression_verified": true
+    },
+    {
+      "path": "singleton-analysis/wall-sample-weights.folded",
+      "original_bytes": 25552077,
+      "original_sha256": "c5fc58ce682b864125ba27c733394e5e78885a187f916cd4786e04896406662c",
+      "container": "singleton-analysis/wall-sample-weights.folded.gz",
+      "container_sha256": "8641d5dddb376510215f4fd53b03b0ed5932f7dc4187228ce369c64170de84ac",
+      "decompression_verified": true
+    }
+  ]
+}

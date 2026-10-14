@@ -1,0 +1,1 @@
+ssh karllivesey@192.168.192.76 'set -e; test "$(cat /tmp/voteboat-upstream-default431-XxW0Du/mac/STATUS)" = 0; tar -cf - -C /tmp/voteboat-upstream-default431-XxW0Du CONFIG.mac.json SCHEMA.md source-guard.py build.mac.sh qualify.py mac/logs mac/control mac/SOURCE_BEFORE.json mac/SOURCE_AFTER.json mac/ARTIFACTS.json mac/CONTROL_VALIDATION.json mac/PID mac/STATUS mac/DONE'

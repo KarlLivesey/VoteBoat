@@ -1,0 +1,83 @@
+{
+  "artifact_sha256": "a2a6e905e2a478be1081265cfaa13879675e0c6227d5ce1a25be57df5a7d92d6",
+  "current_source_commit": "ebcacbbb755d8069a084837fdc0f4920426c61b7",
+  "source_binding": "Actual431 per-RVA responses bind standalone LogEntry::clone to source/src/log.rs41 (derive) and45 (payload), with EntryPayloadClone inline source31. to_vec maps actual compiler rustrev48a229ceaefd4985c50990b14116b6d856af0985 alloc/slice.rs432 / MaybeUninit::write575.",
+  "native_to_vec_sample_weight": 643,
+  "selected_bulk_sample_weight": 6758,
+  "to_vec_sample_addresses": [
+    {
+      "module_offset": "0x173c99",
+      "weight": 547,
+      "source_line": 432
+    },
+    {
+      "module_offset": "0x173c9e",
+      "weight": 54,
+      "source_line": 432
+    },
+    {
+      "module_offset": "0x173ca3",
+      "weight": 35,
+      "source_line": 432
+    },
+    {
+      "module_offset": "0x173cb4",
+      "weight": 6,
+      "source_line": 432
+    },
+    {
+      "module_offset": "0x173c94",
+      "weight": 1,
+      "source_line": 432
+    }
+  ],
+  "actual_instructions": {
+    "outer_nonempty_allocation": "173c51 malloc for entrieslen<<6 bytes (64 bytes per entry); empty input173c3b\u2192173ccb avoids it.",
+    "clone_call": "173c8c call1b0500 perentry into stacktemporary at rsp+0x30; afterward4x16byte loads and4x16byte destinationstores.",
+    "command_branch": "1b05b9 loads upper64 operation,1b05bd loads lower64 operation,1b05c1 loadsbyte length; test1b05c5 thenje1b05c8\u21921b0624 initializesemptyVecdanglingptr1\u21921b06e2 sharedwrites.",
+    "nonempty_byte_fallback": "nonzero length reaches payloadmalloc1b05db and fullmemcpy1b060f (with asserted overlap check retained); same fullIDs/headerswritten.",
+    "configuration_fallback": "configuration branch1b052e allocatesrecord box0x90, retains complete nestedConfigurationclone call1b059d or1b0640, othervariants copied asoriginal; not eligibility shortcut.",
+    "noop": "zero variant branch1b051e\u21921b05b4\u21921b06e2 no byteclone malloc/memcpy."
+  },
+  "unselected_hypothesis": "ManualemptyClone cannot eliminate an emptybyte malloc/memcpy in this actualbinary because currentcode already skips both. A smaller inlineClone implementation could change out-of-line call/temporarycopy/codegen, but needs independently justified exactClone normalization/nonempty/configuration semantics and freshartifact pairedmeasurement. No implementation selected/performance claim.",
+  "limits": [
+    "Sample IPs at post-call movaps are observed addresses, not precise instruction cost: asynchronous cycles interrupts skid and return-boundary attribution may concentrate samples.",
+    "No arguments/byte lengths recorded per sample; emptyCommand control path is static machine-code evidence, not dynamiccallcounts.",
+    "Othercallers may inlineVecClone differently; audited hottest standalonefunction and currentloop only.",
+    "FewByteVecCloneleafsamples alone would not prove no setupcost; here actual zero-length branch provides codegen evidence.",
+    "OuterLogEntryVec allocation/copies remain required bycurrentindependentownership; no allocatorcausality inferred."
+  ],
+  "commands": [
+    {
+      "argv": [
+        "objdump",
+        "-WN",
+        "-WE",
+        "--no-show-raw-insn",
+        "-d",
+        "--start-address=0x173c20",
+        "--stop-address=0x173d60",
+        "target/p9/matched431-linux/artifacts/matched/voteboat-matched-framework"
+      ],
+      "exit": 0,
+      "stdout": "entry-clone-loop.disassembly.txt",
+      "stderr": "entry-clone-loop.disassembly.stderr"
+    },
+    {
+      "argv": [
+        "objdump",
+        "-WN",
+        "-WE",
+        "--no-show-raw-insn",
+        "-d",
+        "--start-address=0x1b0500",
+        "--stop-address=0x1b0800",
+        "target/p9/matched431-linux/artifacts/matched/voteboat-matched-framework"
+      ],
+      "exit": 0,
+      "stdout": "logentry-clone.disassembly.txt",
+      "stderr": "logentry-clone.disassembly.stderr"
+    }
+  ],
+  "no_new_build_recording_source_edit": true
+}

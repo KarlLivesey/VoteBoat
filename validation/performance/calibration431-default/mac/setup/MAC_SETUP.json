@@ -1,0 +1,29 @@
+{
+  "remote_job": "/tmp/voteboat-upstream-default431-XxW0Du",
+  "files": {
+    "CONFIG.mac.json": {
+      "sha256": "a41c6ace24bc85a537f5089b015b248d628c4d6da28aa2d5830785e8e5dcc07f",
+      "mode": "0o644",
+      "bytes": 159163
+    },
+    "SCHEMA.md": {
+      "sha256": "8bc35de09603a850ef792dd7959e9d96277f78b07305b1b24a893900f4b5d889",
+      "mode": "0o644",
+      "bytes": 2424
+    },
+    "source-guard.py": {
+      "sha256": "f66dd003439a40125021fdc02da7d1de56691cdfd0eb9601ab40d65a3f0e326f",
+      "mode": "0o644",
+      "bytes": 1425
+    },
+    "build.mac.sh": {
+      "sha256": "f298d09c18892589425ded440499743d28b0cc6592510b5885d5a21066fc156e",
+      "mode": "0o755",
+      "bytes": 1721
+    }
+  },
+  "exit": 0,
+  "source_copy": false,
+  "build_started": false,
+  "benchmark_started": false
+}
