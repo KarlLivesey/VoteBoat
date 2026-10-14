@@ -1,0 +1,2 @@
+dcf042115dd8a9e8582510f403365cbee1a2025405d0f3ebe95162f31943123b  /tmp/voteboat-samply0131-IDCfdm/extracted/samply-aarch64-apple-darwin/samply
+74422ec567d0bbe75efebe7537d36d97091ba7e132dfaa485d689f9636f18c22  /tmp/voteboat-mac435-5c2390c-2oTYYa/artifacts/matched/voteboat-matched-framework

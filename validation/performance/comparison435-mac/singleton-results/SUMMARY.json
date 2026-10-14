@@ -1,0 +1,153 @@
+{
+  "scope": "one selected cell twelve paired cases; bulk requested20M normalized19988480 or eligible singleton1M; not full sustained-curve/durable/minimum qualification",
+  "cases": 12,
+  "failures": [],
+  "cells": [
+    {
+      "clients": 1,
+      "batch": 1,
+      "variants": {
+        "baseline": {
+          "rates": [
+            58680.98375162422,
+            55759.28440110032,
+            55668.33108063996
+          ],
+          "median_completed_originals_per_second": 55759.28440110032,
+          "median_request_p50_ms": 0.0175,
+          "median_request_p99_ms": 0.031709
+        },
+        "candidate": {
+          "rates": [
+            60632.513039364465,
+            57915.60922732842,
+            57513.77615417299
+          ],
+          "median_completed_originals_per_second": 57915.60922732842,
+          "median_request_p50_ms": 0.016792,
+          "median_request_p99_ms": 0.030916
+        },
+        "on": {
+          "rates": [
+            55640.33387584456,
+            52696.709523170015,
+            53870.603838826115
+          ],
+          "median_completed_originals_per_second": 53870.603838826115,
+          "median_request_p50_ms": 0.018,
+          "median_request_p99_ms": 0.031625
+        },
+        "openraft": {
+          "rates": [
+            10425.648413160758,
+            10074.395995529534,
+            10121.953394063506
+          ],
+          "median_completed_originals_per_second": 10121.953394063506,
+          "median_request_p50_ms": 0.097833,
+          "median_request_p99_ms": 0.134708
+        }
+      },
+      "paired_ratios": [
+        1.0332565877900135,
+        1.0386720319205809,
+        1.0331507167128786
+      ],
+      "leader_on_phases_ms": [
+        {
+          "host_admission": 213.156091,
+          "core_direct": 1943.651712,
+          "persist_helper_inclusive": 2474.286903,
+          "store_append_nested": 1029.244849,
+          "store_barrier_nested": 73.66241,
+          "application": 41.356392,
+          "results": 1515.111582,
+          "send": 2024.768998,
+          "maintenance_tick_inclusive": 142.73113,
+          "snapshot_helpers_inclusive": 0.0,
+          "host_wait": 8734.969745,
+          "actor_lifetime_inclusive": 18879.959459,
+          "checkpoint_reserve_inclusive": 0.05925,
+          "checkpoint_publish_inclusive": 1.4915,
+          "checkpoint_compact_inclusive": 12.260259,
+          "checkpoint_effects_inclusive": 0.316333,
+          "store_state_clone_nested": 0.001792,
+          "snapshot_begin_nested": 0.377086,
+          "snapshot_write_chunk_nested": 0.046877,
+          "snapshot_seal_nested": 0.014336,
+          "snapshot_publish_nested": 0.104124,
+          "snapshot_abort_nested": 0.0,
+          "snapshot_load_nested": 0.0,
+          "snapshot_latest_reference_nested": 0.0,
+          "snapshot_pin_for_log_nested": 0.065361,
+          "snapshot_load_pinned_nested": 0.098013,
+          "snapshot_reconcile_log_inclusive_nested": 0.178537,
+          "store_matches_state_exact_nested": 0.0,
+          "store_checkpoint_state_protected_inclusive_nested": 2.848834
+        },
+        {
+          "host_admission": 208.363255,
+          "core_direct": 2027.438764,
+          "persist_helper_inclusive": 2607.448045,
+          "store_append_nested": 1087.027921,
+          "store_barrier_nested": 80.3973,
+          "application": 43.734498,
+          "results": 1628.578619,
+          "send": 2162.514674,
+          "maintenance_tick_inclusive": 149.386153,
+          "snapshot_helpers_inclusive": 0.0,
+          "host_wait": 9249.178295,
+          "actor_lifetime_inclusive": 19937.945291,
+          "checkpoint_reserve_inclusive": 0.072667,
+          "checkpoint_publish_inclusive": 1.572949,
+          "checkpoint_compact_inclusive": 12.83775,
+          "checkpoint_effects_inclusive": 0.332798,
+          "store_state_clone_nested": 0.001834,
+          "snapshot_begin_nested": 0.388714,
+          "snapshot_write_chunk_nested": 0.058166,
+          "snapshot_seal_nested": 0.012288,
+          "snapshot_publish_nested": 0.100091,
+          "snapshot_abort_nested": 0.0,
+          "snapshot_load_nested": 0.0,
+          "snapshot_latest_reference_nested": 0.0,
+          "snapshot_pin_for_log_nested": 0.069881,
+          "snapshot_load_pinned_nested": 0.119035,
+          "snapshot_reconcile_log_inclusive_nested": 0.193496,
+          "store_matches_state_exact_nested": 0.0,
+          "store_checkpoint_state_protected_inclusive_nested": 2.927768
+        },
+        {
+          "host_admission": 220.914768,
+          "core_direct": 2000.632749,
+          "persist_helper_inclusive": 2552.814764,
+          "store_append_nested": 1058.142162,
+          "store_barrier_nested": 80.445687,
+          "application": 40.173455,
+          "results": 1577.551571,
+          "send": 2112.531401,
+          "maintenance_tick_inclusive": 148.640446,
+          "snapshot_helpers_inclusive": 0.0,
+          "host_wait": 8985.21723,
+          "actor_lifetime_inclusive": 19500.508958,
+          "checkpoint_reserve_inclusive": 0.062383,
+          "checkpoint_publish_inclusive": 1.542671,
+          "checkpoint_compact_inclusive": 12.702165,
+          "checkpoint_effects_inclusive": 0.35475,
+          "store_state_clone_nested": 0.00175,
+          "snapshot_begin_nested": 0.406749,
+          "snapshot_write_chunk_nested": 0.044036,
+          "snapshot_seal_nested": 0.014493,
+          "snapshot_publish_nested": 0.102954,
+          "snapshot_abort_nested": 0.0,
+          "snapshot_load_nested": 0.0,
+          "snapshot_latest_reference_nested": 0.0,
+          "snapshot_pin_for_log_nested": 0.070958,
+          "snapshot_load_pinned_nested": 0.114341,
+          "snapshot_reconcile_log_inclusive_nested": 0.187873,
+          "store_matches_state_exact_nested": 0.0,
+          "store_checkpoint_state_protected_inclusive_nested": 2.896929
+        }
+      ]
+    }
+  ]
+}

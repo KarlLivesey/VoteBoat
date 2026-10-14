@@ -1,0 +1,10 @@
+{
+  "original_remote_pid": 3265,
+  "original_launch_handle": 82804,
+  "original_job_exit": 0,
+  "raw_archive_sha256": "e40551d48d558ff1d3ea6c268619d9e609bbd9f6f6f6cf6bb39ef3f5f8611ac1",
+  "collection_exit": 0,
+  "scope": "only separate selected singleton diagnostic; all old bulk bytes verified and sealed unchanged in BULK_SHA256SUMS",
+  "manifest_policy": "Top SHA256SUMS excludes every file named SHA256SUMS; nested preparation manifest identity is separately sealed here and its referenced files checked independently.",
+  "preparation_manifest_sha256": "9526ac187949025c6dd55076315c92b6037278357bebdadf3a5fe2939cfdde34"
+}

@@ -1,0 +1,52 @@
+{
+  "status": "SINGLETON_SETUP_READY",
+  "original_pair_config_sha256": "0e6e1760716df4f821b2b4e259ab717f52f5e3184930a6fa41a03800da866b99",
+  "copied_pair_config_sha256": "0e6e1760716df4f821b2b4e259ab717f52f5e3184930a6fa41a03800da866b99",
+  "source_counts": {
+    "baseline": 1430,
+    "candidate": 1433
+  },
+  "artifact_compiler_source_Oracle_ELF_DWP_guard": {
+    "baseline": {
+      "artifacts": [
+        "bench_minimal",
+        "openraft",
+        "voteboat",
+        "voteboat-matched-framework"
+      ],
+      "checks": "all frozen source, artifact, driver and applicable compiler guards pass",
+      "mode": "asserted_release",
+      "source_inputs": 1430
+    },
+    "candidate": {
+      "artifacts": [
+        "bench_minimal",
+        "openraft",
+        "voteboat",
+        "voteboat-matched-framework"
+      ],
+      "checks": "all frozen source, artifact, driver and applicable compiler guards pass",
+      "mode": "asserted_release",
+      "source_inputs": 1433
+    }
+  },
+  "unchanged_13_checker_controls_reused_by_hash": true,
+  "bulk_sealed_manifest_sha256": {
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/validation/performance/comparison435/linux/SHA256SUMS": "855799009bd187ca4df0d21f0a9151716bf17d399fb8f4fdbe9050b73fac5bee",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/validation/performance/matched435-linux/SHA256SUMS": "f3acf0bd1b230be2f711e672a6eb8b7a887f8c72b614823e80bf39b0522fc8d2"
+  },
+  "run_selector": "original435phase-diagnostic.sh singleton",
+  "runner_sha256": "d97a0819375e976325f63041a05ba846276400ee9e0fc6aed9a8b871db6aff84",
+  "cases": 12,
+  "requested_equals_actual_originals": 1048576,
+  "warmup": 1024,
+  "frontiers": [
+    1049601,
+    1049601,
+    1049601
+  ],
+  "syntax_exit": 0,
+  "no_builds_checksuites_artifact_execution_or_timing": true,
+  "no_live_jobs": true,
+  "requires": "rootpushactualterminal0 + separateQUIET_START"
+}

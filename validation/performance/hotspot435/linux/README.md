@@ -1,0 +1,13 @@
+# Linux435 CPU evidence
+
+Published435 5c2390cb98d11901163e143815f5fa17199dc0f2; fresh asserted ELF/DWP and1433 source inputs guarded against immutable matched435 proofs. Serial perf user-cycle1000Hz/DWARF16KiB/mmap128; kernel2/2/516 unchanged. Original55231 ended0 for both cases before processing. No known quiet-window overlap.
+
+Bulk completed19,988,480 originals/4,997,120 requests +1024 warmups, frontiers[19,989,505;3]: diagnostic6,533,213 originals/s, p99 3.849932ms. Singleton completed1,048,576 +1024, frontiers[1,049,601;3]:109,450/s, p99 19.446us. Profiled rates are diagnostics, not unprofiled capacity acceptance.
+
+Bulk selected6,498 on-CPU sample weights: physical self Clientwrite870(13.389%), oneshot send589(9.064%), entryto_vec356(5.479%), unknown FDE fun_1b7ac0 293(4.509%), schedulerworker241(3.709%). Inclusive apply_entries1026(15.789%), deliver_results937(14.420%), Actorpersist1592(24.500%) overlap. Remaining entry-clone context400(6.156%), plan_copy330(5.078%): followerplan177, leaderplan108, snapshotmaterialization45+44, suffixfallback20; no sampled committed-completion clone. Client receiver polling461(7.094%), channel construction414(6.371%), request send231(3.555%), flat originals Vec construction152(2.339%); these contexts overlap.
+
+No reported lost chunks or import timestamp warnings in either new435 capture. Perf records6504/16879 samples; selected matched threads6498/16873, null0/0, unresolved77(1.185%)/198(1.174%), shallow<=2 physical stacks44/41. Synthetic FDE names stay unknown; optimized missing frames limit interpretation. Whole-launch saved Samply sample counts include warmup, sorting, verification and cleanup; not CPU microseconds, cycle periods, leader CPU or allocator causes. Inclusive and inline/native views must not be added.
+
+All local API symbolization is headless JSON against current435 ELF/DWP; no browser/images/external symbol server. Owned server45243/PID1076045 verified and stopped, actual exit0. Original raw failures retained: lowercase metadata inspection; initial sandbox-localhost denial (same saved-data requests subsequently approved); nonexistent compact-output key. Old434 exact helper predicates were adapted to current435 extracted helpers; originals preserved. No captures repeated.
+
+READOUT.json, source guards, exact commands/exits/raw warnings, per-address responses and folded stacks are preserved. LOSSLESS_CONTAINERS.json records original/compressed SHA256 and size with independently verified decompressed hashes/lengths. SHA256SUMS describes current archived regular files, including containers; no binaries or build trees archived.

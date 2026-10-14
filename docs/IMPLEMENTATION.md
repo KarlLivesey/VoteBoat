@@ -13,6 +13,35 @@ regressions and432's measured rejection/433 rollback. Reviewed candidates and ca
 stay separate from implemented improvements. It is the decision index for avoiding
 repeated experiments and extra prerequisites; detailed raw scopes remain below.
 
+Latest retained source is435 (`5c2390cb`), with qualified both-host20M bulk
+measurements published in`fe7f28c6`: Linux6,546,243→7,061,531 originals/s,
+p99 3.729967→3.289318ms; Mac4,461,961→4,719,331 originals/s,
+p99 4.475917→4.043792ms. Every paired bulk trial improves on both hosts.
+The complete objective remains active; neither host reaches the8,422,500 minimum.
+
+The original435 singleton runners now end0 without retries: Linux59054 and
+Mac3265,12 cases each, exact1,048,576 originals plus1024 warmups and equal
+frontiers1,049,601×3. Linux median110,656→112,633 originals/s and
+p99 17.724→17.413µs has a trial2 rate/p99 regression; no repeatable Linux
+singleton gain is claimed. Mac55,759→57,916 originals/s and31.709→30.916µs
+improves in all three pairs. Observer slow tails and every raw outcome remain.
+[Linux singleton evidence](../validation/performance/comparison435-singleton/linux/README.md),
+[Mac singleton evidence](../validation/performance/comparison435-mac/SINGLETON_README.md).
+These1M diagnostics are separate from sustained acceptance. Current435 profiles
+use existing headless tools and exact current symbols, without a browser, build,
+kernel-policy change or recapture. Profile evidence and ownership/failure contracts
+must identify the next stage before editing it. Historical records below retain
+the scope and outstanding work known when each earlier slice was recorded.
+
+Fresh435 CPU evidence is now archived on both hosts. The selected next experiment
+is436's private receiver-only client wait buffer with inline storage through4 and
+a generic heap fallback. [Profile decision and schema](P9.md#fresh435-profile-decision-and436-schema)
+records the data shape, exact outcomes/ordering, error/cancellation ownership,
+restart scope and checks before editing. Larger async state is a measured risk;
+there is no claimed speedup yet. Current linked mini plan advances this bounded
+client stage, then the next measured stage, then durable batching/overlap. Macro
+scope remains unchanged and no acceptance milestone closes.
+
 Slice425 is published and qualified on main: 32 controls, three actual
 16,384-original CLI histories and the complete strict hook pass. Linux's fresh
 asserted nine-case diagnostic also passes every original/frontier, source,
@@ -69,8 +98,8 @@ diagnostics do not qualify sustained floors. [Every Linux trial and scope](../va
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current:435 singleton and fresh profile | Check latency debt and locate the remaining limiting work | Retained435 after all three20M bulk pairs improve on each host; immutable artifacts and unchanged outcome/FIFO contracts | Paired1M singleton diagnostics and current source/artifact-bound JSON/text CPU profiles; preserve all regressions, unknown/lost/wait biases before next selection | P9.0/P9.1/P9.3 |
-| Next: remaining measured copying/admission work | Reduce the next limiting stage after435's disposition | Current candidate qualified and measured; current source-bound profiles and public ownership contracts | One explicit schema and focused checked slice; publish and measure both hosts before selecting another change | P9.0/P9.1/P9.3 |
+| Current:436 client wait ownership | Remove duplicated IDs and a small-request wait-buffer allocation from measured client work | Both-host435 profiles and finished singleton diagnostics; immutable originals and every per-original channel/order retained | Explicit failure/cancellation schema, widths0/1/4/5/wider and strict checks; publish, fresh artifacts and paired both-host bulk/singleton rates/p99 before retention | P9.0/P9.1/P9.3 |
+| Next: remaining measured copying/admission work | Reduce the next limiting stage after436's measured disposition | 436 qualified, published and measured on both hosts; updated source-bound profiles and public ownership contracts | One explicit schema and focused checked slice; publish and measure both hosts before selecting another change | P9.0/P9.1/P9.3 |
 | Following: bounded durable batching/overlap under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Native421 barrier evidence and unchanged publication/ticket contracts; bounded fairness schema after current measured framework stage | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual placement/barriers before changing defaults | P9.1/P9.2/P9.3 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed

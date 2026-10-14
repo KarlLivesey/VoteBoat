@@ -1,0 +1,192 @@
+{
+  "scope": "singleton12cases1M+1024diagnostic, not20Msustained/fullacceptance",
+  "original_handle": 59054,
+  "terminal_exit": 0,
+  "cases": 12,
+  "allcounts_frontiers_exits_pass": true,
+  "variants": {
+    "baseline": {
+      "rates": [
+        110655.54522759844,
+        122229.38776061601,
+        105206.61512883843
+      ],
+      "median_completed_originals_per_second": 110655.54522759844,
+      "median_request_p50_ms": 0.008065,
+      "median_request_p99_ms": 0.017724
+    },
+    "candidate": {
+      "rates": [
+        112632.66831394716,
+        110407.76721236759,
+        115422.3073485026
+      ],
+      "median_completed_originals_per_second": 112632.66831394716,
+      "median_request_p50_ms": 0.007825,
+      "median_request_p99_ms": 0.017413
+    },
+    "on": {
+      "rates": [
+        93346.62181900085,
+        97396.94702007076,
+        85016.23252744925
+      ],
+      "median_completed_originals_per_second": 93346.62181900085,
+      "median_request_p50_ms": 0.009819,
+      "median_request_p99_ms": 0.019567
+    },
+    "openraft": {
+      "rates": [
+        21444.0426399953,
+        21963.135740710346,
+        21238.40090989022
+      ],
+      "median_completed_originals_per_second": 21444.0426399953,
+      "median_request_p50_ms": 0.041388,
+      "median_request_p99_ms": 0.113123
+    }
+  },
+  "paired_ratios": [
+    1.0178673656370507,
+    0.9032833202813644,
+    1.097101234624399
+  ],
+  "case_rates_p99": [
+    {
+      "variant": "baseline",
+      "trial": 1,
+      "originals_per_second": 110655.54522759844,
+      "p99_ms": 0.017724,
+      "stderr": false
+    },
+    {
+      "variant": "candidate",
+      "trial": 1,
+      "originals_per_second": 112632.66831394716,
+      "p99_ms": 0.017413,
+      "stderr": false
+    },
+    {
+      "variant": "on",
+      "trial": 1,
+      "originals_per_second": 93346.62181900085,
+      "p99_ms": 0.019567,
+      "stderr": false
+    },
+    {
+      "variant": "openraft",
+      "trial": 1,
+      "originals_per_second": 21444.0426399953,
+      "p99_ms": 0.109596,
+      "stderr": false
+    },
+    {
+      "variant": "baseline",
+      "trial": 2,
+      "originals_per_second": 122229.38776061601,
+      "p99_ms": 0.014968,
+      "stderr": false
+    },
+    {
+      "variant": "candidate",
+      "trial": 2,
+      "originals_per_second": 110407.76721236759,
+      "p99_ms": 0.018365,
+      "stderr": false
+    },
+    {
+      "variant": "on",
+      "trial": 2,
+      "originals_per_second": 97396.94702007076,
+      "p99_ms": 0.018886,
+      "stderr": false
+    },
+    {
+      "variant": "openraft",
+      "trial": 2,
+      "originals_per_second": 21963.135740710346,
+      "p99_ms": 0.113123,
+      "stderr": false
+    },
+    {
+      "variant": "baseline",
+      "trial": 3,
+      "originals_per_second": 105206.61512883843,
+      "p99_ms": 0.018525,
+      "stderr": false
+    },
+    {
+      "variant": "candidate",
+      "trial": 3,
+      "originals_per_second": 115422.3073485026,
+      "p99_ms": 0.017012,
+      "stderr": false
+    },
+    {
+      "variant": "on",
+      "trial": 3,
+      "originals_per_second": 85016.23252744925,
+      "p99_ms": 0.022933,
+      "stderr": false
+    },
+    {
+      "variant": "openraft",
+      "trial": 3,
+      "originals_per_second": 21238.40090989022,
+      "p99_ms": 0.118873,
+      "stderr": false
+    }
+  ],
+  "guards": {
+    "before": {
+      "baseline": {
+        "artifacts": [
+          "bench_minimal",
+          "openraft",
+          "voteboat",
+          "voteboat-matched-framework"
+        ],
+        "checks": "all frozen source, artifact, driver and applicable compiler guards pass",
+        "mode": "asserted_release",
+        "source_inputs": 1430
+      },
+      "candidate": {
+        "artifacts": [
+          "bench_minimal",
+          "openraft",
+          "voteboat",
+          "voteboat-matched-framework"
+        ],
+        "checks": "all frozen source, artifact, driver and applicable compiler guards pass",
+        "mode": "asserted_release",
+        "source_inputs": 1433
+      }
+    },
+    "after": {
+      "baseline": {
+        "artifacts": [
+          "bench_minimal",
+          "openraft",
+          "voteboat",
+          "voteboat-matched-framework"
+        ],
+        "checks": "all frozen source, artifact, driver and applicable compiler guards pass",
+        "mode": "asserted_release",
+        "source_inputs": 1430
+      },
+      "candidate": {
+        "artifacts": [
+          "bench_minimal",
+          "openraft",
+          "voteboat",
+          "voteboat-matched-framework"
+        ],
+        "checks": "all frozen source, artifact, driver and applicable compiler guards pass",
+        "mode": "asserted_release",
+        "source_inputs": 1433
+      }
+    }
+  },
+  "failures": [],
+  "refusals": "none reported; no separatecounter emitted"
+}

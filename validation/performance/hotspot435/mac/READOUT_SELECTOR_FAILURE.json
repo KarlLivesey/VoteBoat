@@ -1,0 +1,10 @@
+{
+  "original_ssh_handle": 59896,
+  "exit": 1,
+  "exception": "AssertionError",
+  "reason": "Compact readout searched underscored compiler target in profile debugName; actual profile name is hyphenated voteboat-matched-framework",
+  "focused_fix": "Select exact current hyphenated profile debugName and assert qualified UUID and executable path",
+  "unchanged_converter_exit": 0,
+  "recording_rerun": false,
+  "raw_profiles_modified": false
+}

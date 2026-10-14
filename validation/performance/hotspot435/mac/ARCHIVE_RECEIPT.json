@@ -1,0 +1,15 @@
+{
+  "remote": "/tmp/voteboat-samply435-lvy1Fd",
+  "original_remote_pid": 17123,
+  "launch_handle": 25313,
+  "original_job_exit": 0,
+  "offline_conversion_handle": 40602,
+  "offline_conversion_exit": 0,
+  "compact_selector_original_handle": 59896,
+  "compact_selector_original_exit": 1,
+  "compact_selector_focused_handle": 83270,
+  "compact_selector_focused_exit": 0,
+  "collection_exit": 0,
+  "raw_archive_sha256": "5d4558266e46043874dbe2e367334c3053e0c847751718e96141a6c60b0a0ac7",
+  "scope": "raw recorded gzipJSON/currentsymbolsidecars/losslessfolded+metadata only; no recapture/build/source/executable transfer"
+}

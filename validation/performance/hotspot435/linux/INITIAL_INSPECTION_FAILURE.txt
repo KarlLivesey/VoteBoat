@@ -1,0 +1,1 @@
+First post-capture read used lowercase recording.json; actual preserved file is perf-quiet/RECORDING.json. Read-only command exit1; no capture repeated.

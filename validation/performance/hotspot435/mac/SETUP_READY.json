@@ -1,0 +1,20 @@
+{
+  "source_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "source_inputs": 1436,
+  "candidate": "/tmp/voteboat-mac435-5c2390c-2oTYYa",
+  "pair": "/tmp/voteboat-comparison435-x3SbiM",
+  "executable_sha256": "74422ec567d0bbe75efebe7537d36d97091ba7e132dfaa485d689f9636f18c22",
+  "uuid": "2872CD3B-5BC0-3F36-BF69-6E14EC1C82A1",
+  "current_copied_dwarf_sha256": "4d26836f85dc98a7a114988d9ace01f126418aeb33c9beeeff64621202ae7c1c",
+  "samply_version": "0.13.1",
+  "samply_sha256": "dcf042115dd8a9e8582510f403365cbee1a2025405d0f3ebe95162f31943123b",
+  "converter_sha256": "b4d85920f686bd055816184afeae04dd6bc240737ed49c3d6947fd7ca1bf35a1",
+  "scripts": {
+    "allocation-contexts.py": "a91ca1e3e5a0a57f361ebd4c7ebaa8f1e36c2114d4c64d67c712c13a879b535d",
+    "validate-profiles.py": "ded750169e4409baa36a2b8364a606bec43943ba7e650020f16452cddcf66a51",
+    "samply-collapse.py": "b4d85920f686bd055816184afeae04dd6bc240737ed49c3d6947fd7ca1bf35a1",
+    "copy-contexts.py": "b1e4e9b7ea1fd5ac0cb68ec03f16692df4b5d1ccc245ec99dee95f95edd3f988"
+  },
+  "runner_sha256": "d80c385926b674a42a9333e1e11ab9f73178593cb0d74c066a1a8952b1b5afed",
+  "scope": "setup only: reuse immutable qualified435/asserted profile1.98.0, serial save-only1000Hz+presymbolicate 20Mbulk normalized19988480 then1Msingleton1048576, every original/frontier/control verified after actualEND; no capture launched/build/new tool or old symbols"
+}

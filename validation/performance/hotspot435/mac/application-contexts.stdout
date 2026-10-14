@@ -1,0 +1,18 @@
+bulk denom 8564928
+unresolved_malloc_library_leaf 412652 4.818 contexts {'workload_client_write': 2.765, 'client_loop': 3.21, 'Actor_requests': 0.794, 'Raft_append_for': 0.224, 'Actor_apply_entries': 0.206, 'Noop_apply_batch': 0.206}
+resolved_allocation_leaf 13698 0.16 contexts {'workload_client_write': 0.0, 'client_loop': 0.0, 'Actor_requests': 0.037, 'Raft_append_for': 0.041, 'Actor_apply_entries': 0.051, 'Noop_apply_batch': 0.051}
+Actor_apply_entries_leaf 352235 4.113 contexts {'workload_client_write': 0.0, 'client_loop': 0.0, 'Actor_requests': 0.0, 'Raft_append_for': 0.0, 'Actor_apply_entries': 4.113, 'Noop_apply_batch': 0.0}
+Actor_apply_entries_any 1530451 17.869 contexts {'workload_client_write': 0.0, 'client_loop': 0.0, 'Actor_requests': 0.0, 'Raft_append_for': 0.0, 'Actor_apply_entries': 17.869, 'Noop_apply_batch': 1.182}
+Noop_apply_batch_leaf 54482 0.636 contexts {'workload_client_write': 0.0, 'client_loop': 0.0, 'Actor_requests': 0.0, 'Raft_append_for': 0.0, 'Actor_apply_entries': 0.636, 'Noop_apply_batch': 0.636}
+Noop_apply_batch_any 101244 1.182 contexts {'workload_client_write': 0.0, 'client_loop': 0.0, 'Actor_requests': 0.0, 'Raft_append_for': 0.0, 'Actor_apply_entries': 1.182, 'Noop_apply_batch': 1.182}
+memmove_leaf 391334 4.569 contexts {'workload_client_write': 0.0, 'client_loop': 0.0, 'Actor_requests': 0.879, 'Raft_append_for': 0.624, 'Actor_apply_entries': 0.238, 'Noop_apply_batch': 0.238}
+OperationId_RawVec_grow_any 46762 0.546 contexts {'workload_client_write': 0.0, 'client_loop': 0.0, 'Actor_requests': 0.0, 'Raft_append_for': 0.0, 'Actor_apply_entries': 0.546, 'Noop_apply_batch': 0.546}
+singleton denom 34639599
+unresolved_malloc_library_leaf 708660 2.046 contexts {'workload_client_write': 0.024, 'client_loop': 0.026, 'Actor_requests': 0.484, 'Raft_append_for': 0.011, 'Actor_apply_entries': 0.072, 'Noop_apply_batch': 0.033}
+resolved_allocation_leaf 59070 0.171 contexts {'workload_client_write': 0.0, 'client_loop': 0.0, 'Actor_requests': 0.067, 'Raft_append_for': 0.049, 'Actor_apply_entries': 0.027, 'Noop_apply_batch': 0.027}
+Actor_apply_entries_leaf 5216 0.015 contexts {'workload_client_write': 0.0, 'client_loop': 0.0, 'Actor_requests': 0.0, 'Raft_append_for': 0.0, 'Actor_apply_entries': 0.015, 'Noop_apply_batch': 0.0}
+Actor_apply_entries_any 976322 2.819 contexts {'workload_client_write': 0.0, 'client_loop': 0.0, 'Actor_requests': 0.0, 'Raft_append_for': 0.0, 'Actor_apply_entries': 2.819, 'Noop_apply_batch': 0.108}
+Noop_apply_batch_leaf 16006 0.046 contexts {'workload_client_write': 0.0, 'client_loop': 0.0, 'Actor_requests': 0.0, 'Raft_append_for': 0.0, 'Actor_apply_entries': 0.046, 'Noop_apply_batch': 0.046}
+Noop_apply_batch_any 37343 0.108 contexts {'workload_client_write': 0.0, 'client_loop': 0.0, 'Actor_requests': 0.0, 'Raft_append_for': 0.0, 'Actor_apply_entries': 0.108, 'Noop_apply_batch': 0.108}
+memmove_leaf 860068 2.483 contexts {'workload_client_write': 0.0, 'client_loop': 0.0, 'Actor_requests': 0.454, 'Raft_append_for': 0.006, 'Actor_apply_entries': 0.0, 'Noop_apply_batch': 0.0}
+OperationId_RawVec_grow_any 21337 0.062 contexts {'workload_client_write': 0.0, 'client_loop': 0.0, 'Actor_requests': 0.0, 'Raft_append_for': 0.0, 'Actor_apply_entries': 0.062, 'Noop_apply_batch': 0.062}

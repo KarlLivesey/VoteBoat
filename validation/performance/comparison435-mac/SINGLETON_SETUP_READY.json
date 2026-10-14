@@ -1,0 +1,23 @@
+{
+  "scope": "singleton setup only, same sealed actual qualified pair; completed bulk guards and existing exact controls reused, no broad rerun",
+  "cell": {
+    "clients": 1,
+    "batch": 1,
+    "originals": 1048576,
+    "warmup": 1024,
+    "frontiers": [
+      1049601,
+      1049601,
+      1049601
+    ],
+    "cases": 12
+  },
+  "pair_sha256": "c32fe45d1a9a2a1cc03aa5c1a01e4391b70407a0080e7aecd6ff52b02063ec6d",
+  "guard_sha256": "303d62985c016fcbec7d22e42a302006d00db32704c58b7fda3d99d20cbe4b0d",
+  "runner_sha256": "cbc842c75ebaf5b9e9970ac461ba592578dd8a806e3f55983f017abd43b8fbcd",
+  "controls_sha256": "448f6b48dd8f604a8521274a713cb614a51ea2f9e2a8f92c61d2f126cd02c2d7",
+  "bulk_guard_after_sha256": "0e6643517128434884e531a1d543fcf900f2f51cd0d91bc61baa2ea524d379a8",
+  "unchanged_driver_hashes_modes": true,
+  "timing_launched": false,
+  "new_source_build_artifact_or_symbol_copy": false
+}

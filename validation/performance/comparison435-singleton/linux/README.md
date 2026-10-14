@@ -1,0 +1,5 @@
+435 Linux singleton diagnostic: original59054actually terminal0/DONE, all12cases/counts/frontiers/exit/checker/before-afterimmutable source/compiler/artifact/Oracle/ELF+DWP guards0.1,048,576originals/requests+1024warmups each, frontiers[1,049,601;3], allchannels/outcomes unchanged. Existing435 selector/config reused, oldbulk manifestssealed andnooverwrite; no builds/profiles/sourcechanges or benchmarkreruns.
+
+434OFFmedian110,656 originals/s,p9917.724us;435OFF112,633/s,p9917.413us. Pairedratios1.017867/.903283/1.097101: trial2regressed122,229→110,408/s andp9914.968→18.365us. Mixedresults, no repeatablegainclaim. ONmedian93,347/s,p9919.567us;slowtrialtail22.933us retained. OpenRaft21,444/s,p99113.123us. Noerror/stderr reported; no separate refusalcounter emitted.
+
+Raw12outputs/commands/exits/walltimes/slowtails/checker andCOMPACT_READOUT retained. Originalchecker rawscope stillcontains genericbulk wording; actualrun scope hereis onlysingleton1M, not20M sustained/fullcurve/durable/healthy-margin acceptance. Config/source/drivers identicalqualifiedpair, thirteenunchangedcheckercontrols reused byhash. No P9completionclaim.

@@ -1,0 +1,56 @@
+[
+  {
+    "archive": "perf-quiet/bulk.data.gz",
+    "original": "perf-quiet/bulk.data",
+    "original_bytes": 108604924,
+    "original_sha256": "4ffe639eff5a4b9375e2bd2dbec8c5edf9da6a27805a892a9c48fbf16b75cf78",
+    "encoding": "gzip lossless",
+    "compressed_bytes": 10023169,
+    "compressed_sha256": "e5a52dcbf27545399c7d5a9533bf6f9254fec71f8d35a0c74c6519e198ca25af"
+  },
+  {
+    "archive": "perf-quiet/singleton.data.gz",
+    "original": "perf-quiet/singleton.data",
+    "original_bytes": 280418980,
+    "original_sha256": "58e0c62ba4dbf260959cdde86727854b8f2e956d8c03ca8725f7bf0418d68e91",
+    "encoding": "gzip lossless",
+    "compressed_bytes": 23062264,
+    "compressed_sha256": "2fb8ff1c375b934f0591161d438b35004c982f053c9a7d3eb29d04cbc7250c2a"
+  },
+  {
+    "archive": "symbolication/bulk-symbolicated/ADDRESS_SYMBOLS.json.gz",
+    "original": "symbolication/bulk-symbolicated/ADDRESS_SYMBOLS.json",
+    "original_bytes": 2093858,
+    "original_sha256": "dfbb697874cc6bedc42b2d859710867e10006856795154fa600c9edddecdef07",
+    "encoding": "gzip lossless",
+    "compressed_bytes": 94134,
+    "compressed_sha256": "955e141a21dfd2d3225c76fdeaaeb5096f3943bec4cfb39146dfe316acb4216f"
+  },
+  {
+    "archive": "symbolication/bulk-symbolicated/full-inline.folded.gz",
+    "original": "symbolication/bulk-symbolicated/full-inline.folded",
+    "original_bytes": 19386218,
+    "original_sha256": "bc5fd0ee629efa251a41de9d448f523c2dc2a0463f774a636096811f0972ceec",
+    "encoding": "gzip lossless",
+    "compressed_bytes": 531808,
+    "compressed_sha256": "549bffe07cf3aaaf2eb5422c3a179dea8f095a52fb01dc38fbe9acb18a7fe6ab"
+  },
+  {
+    "archive": "symbolication/singleton-symbolicated/ADDRESS_SYMBOLS.json.gz",
+    "original": "symbolication/singleton-symbolicated/ADDRESS_SYMBOLS.json",
+    "original_bytes": 2843736,
+    "original_sha256": "8c650c5d7e4eaba242983ae968fc22e9f9e1ed5b2f917bf850e6b5f0e264746a",
+    "encoding": "gzip lossless",
+    "compressed_bytes": 113393,
+    "compressed_sha256": "8f957cd91e604d37924fd3d2154831bd5c190c0ccd109b001df856905f296ec6"
+  },
+  {
+    "archive": "symbolication/singleton-symbolicated/full-inline.folded.gz",
+    "original": "symbolication/singleton-symbolicated/full-inline.folded",
+    "original_bytes": 42197296,
+    "original_sha256": "a5927c5cde6599d03ea43317c375734f6b42adeab90018028ec41f1dbcd7d769",
+    "encoding": "gzip lossless",
+    "compressed_bytes": 1078182,
+    "compressed_sha256": "c34ec697105520cd2ee994084d6530bf4dea65f5397ff733cd72d5e3a38ca283"
+  }
+]

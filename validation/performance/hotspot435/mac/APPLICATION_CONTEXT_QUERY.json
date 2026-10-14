@@ -1,0 +1,6 @@
+{
+  "scope": "Focused in-memory label/group adaptation of unchanged existing physical stack query; no source/helper file added, recording or copied symbols. Exact native frames only; absent coalesced/inlined RawVec grow is not proof no allocation/resultVec work. Malloc-library leaves cannot identify allocate/free/cause. Contexts overlap.",
+  "existing_query_sha256": "a91ca1e3e5a0a57f361ebd4c7ebaa8f1e36c2114d4c64d67c712c13a879b535d",
+  "adapted_query_sha256": "079d6681a5313fdb25ac343eda25294cef46cd61cd33750b78a1cd0ecb8b324a",
+  "current_uuid": "2872CD3B-5BC0-3F36-BF69-6E14EC1C82A1"
+}

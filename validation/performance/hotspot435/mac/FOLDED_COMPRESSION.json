@@ -1,0 +1,37 @@
+{
+  "scope": "lossless derived folded containers only; raw gzip profiles/symbol sidecars unchanged",
+  "files": [
+    {
+      "original": "bulk-analysis/cpu.folded",
+      "original_sha256": "d108cf801d9945c456a01b4efdceab7c20c6a5dc862ef2fd7acc0aa1c1838900",
+      "original_bytes": 15615274,
+      "gzip": "bulk-analysis/cpu.folded.gz",
+      "gzip_sha256": "bb0eae0c4738d75acc5af394f6bc86bc238761a5423af22cfbbb9783f1d2fe07",
+      "lossless_verified": true
+    },
+    {
+      "original": "bulk-analysis/wall-sample-weights.folded",
+      "original_sha256": "8a9dec52ea3fb89afcebd880e8dc4ce4d6012b67d6b949caa6abd72a7483d209",
+      "original_bytes": 15612456,
+      "gzip": "bulk-analysis/wall-sample-weights.folded.gz",
+      "gzip_sha256": "d0fe073b180be7a9b0a929e44bd018c64ae89e2d1fa6606cbc456638270ed8fe",
+      "lossless_verified": true
+    },
+    {
+      "original": "singleton-analysis/cpu.folded",
+      "original_sha256": "2e8343353a447b7b8857e9dd959d22e250ee653a5e307385c2184aff20d24784",
+      "original_bytes": 26512507,
+      "gzip": "singleton-analysis/cpu.folded.gz",
+      "gzip_sha256": "d395d0f118fafe81aa2319628705667ef9ef931efd5ec8618ac537bd14a913e5",
+      "lossless_verified": true
+    },
+    {
+      "original": "singleton-analysis/wall-sample-weights.folded",
+      "original_sha256": "dbafb4395a4aa8bf347c60b20d7cea2704fcafb24a53e4aadcb0b8f80b516b30",
+      "original_bytes": 26505317,
+      "gzip": "singleton-analysis/wall-sample-weights.folded.gz",
+      "gzip_sha256": "5d35d05b8300e850f2fcd39831c747206090b78f98c33065e2347204f119d725",
+      "lossless_verified": true
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+[ perf record: Woken up 404 times to write data ]
+[ perf record: Captured and wrote 103.557 MB /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile435/linux/perf-quiet/bulk.data (6504 samples) ]

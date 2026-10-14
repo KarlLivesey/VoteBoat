@@ -1,0 +1,1 @@
+435 source extracted apply_entries/deliver_results and persist_effect_borrowed. Initial reused434 exact-name predicates omitted these current helpers; retained initial results, then extended those three exact function unions. All profiles/per-RVA responses unchanged. Zero initial matches did not establish zero work.
