@@ -473,6 +473,47 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
         self.check()?;
         self.shard.next_class(visit, now)
     }
+    // The joined producer cannot repair/re-register a timer after committing.
+    // Only the exact ordinary leader refresh no-op is eligible.
+    fn joined_timer_unchanged(&self, group: GroupIdentity) -> bool {
+        !self.closed
+            && !self.authorization.is_logical()
+            && self.failed.is_none()
+            && self.shard.core(group).is_some_and(|core| {
+                !core.is_fenced()
+                    && core.role() == Role::Leader
+                    && self.managed.get(&group).is_some_and(|managed| {
+                        managed.token.kind == TimerKind::Heartbeat
+                            && managed.reset == core.election_reset_sequence()
+                    })
+            })
+    }
+    pub(super) fn joined_reservation(
+        &mut self,
+        visit: VisitTicket,
+        now: MonoTime,
+        max: usize,
+    ) -> Result<Option<(usize, usize)>, RuntimeError> {
+        self.check()?;
+        if !self.joined_timer_unchanged(visit.group) {
+            return Ok(None);
+        }
+        self.shard.joined_reservation(visit, now, max)
+    }
+    pub(super) fn step_joined_checked(
+        &mut self,
+        visit: VisitTicket,
+        now: MonoTime,
+        max: usize,
+        check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
+    ) -> Result<Option<ready_batch::JoinedReady>, RuntimeError> {
+        self.check()?;
+        if !self.joined_timer_unchanged(visit.group) {
+            return Ok(None);
+        }
+        // The producer preserves leadership/reset and consumes no timer token.
+        self.shard.step_joined_checked(visit, now, max, check)
+    }
     pub(super) fn next_ready_effect_reservation(
         &mut self,
         visit: VisitTicket,

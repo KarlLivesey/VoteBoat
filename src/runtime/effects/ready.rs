@@ -11,13 +11,17 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         max_items: usize,
         control: bool,
     ) -> Result<Option<(usize, usize)>, EffectOwnerError> {
-        let max_items = max_items.min(
-            self.runtime
-                .core(visit.group)
-                .ok_or(EffectOwnerError::Runtime(RuntimeError::UnknownGroup))?
-                .batch_limits()
-                .max_proposal_entries,
-        );
+        let max_items = if control {
+            max_items
+        } else {
+            max_items.min(
+                self.runtime
+                    .core(visit.group)
+                    .ok_or(EffectOwnerError::Runtime(RuntimeError::UnknownGroup))?
+                    .batch_limits()
+                    .max_proposal_entries,
+            )
+        };
         let Some(full) = self
             .runtime
             .next_ready_effect_reservation(visit, now, max_items)
@@ -106,6 +110,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             Active {
                 visit,
                 received_from: None,
+                other_received_from: Vec::new(),
                 reserved,
                 continuation_bytes: reserved,
                 effects: VecDeque::new(),

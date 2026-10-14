@@ -103,7 +103,7 @@ impl Raft {
         self.persist_proposal_entries(index, vec![entry])
     }
 
-    fn validate_proposal_batch(
+    pub(super) fn validate_proposal_batch(
         &self,
         proposals: &[Proposal],
         capacity: usize,
@@ -154,7 +154,7 @@ impl Raft {
         }
         Ok(first)
     }
-    fn validate_conversion_peak(
+    pub(super) fn validate_conversion_peak(
         &self,
         proposals: &[Proposal],
         capacity: usize,

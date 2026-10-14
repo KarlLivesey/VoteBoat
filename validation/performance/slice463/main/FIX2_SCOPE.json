@@ -1,0 +1,8 @@
+{
+  "original_handle": 81605,
+  "terminal_exit": 0,
+  "changed_during_observation": [
+    "src/runtime/ready_batch/joined/owner.rs"
+  ],
+  "reason": "late test-local Noop drain helper extraction overlapped initial freeze; passes remain diagnostic and final full-suite reruns exact frozen source, no final-scope reuse claimed"
+}

@@ -46,7 +46,7 @@ impl Config {
                 offset,
                 groups,
                 lane: lane as u64 + 1,
-                ready_visit_items: 16,
+                ready: ready_items::Settings::default(),
             },
             count: share(self.count, self.lanes, lane),
             warmup: share(WARMUP, self.lanes, lane),

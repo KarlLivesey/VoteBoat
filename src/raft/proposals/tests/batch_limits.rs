@@ -10,6 +10,7 @@ fn wide() -> BatchLimits {
     BatchLimits {
         max_proposal_entries: 4096,
         max_replication_entries: 1024,
+        max_ready_reply_inputs: 2,
     }
 }
 
@@ -32,6 +33,10 @@ fn startup_limits_reject_invalid_settings_and_lock_on_the_first_refused_event() 
         },
         BatchLimits {
             max_replication_entries: 1025,
+            ..wide()
+        },
+        BatchLimits {
+            max_ready_reply_inputs: 65,
             ..wide()
         },
     ] {

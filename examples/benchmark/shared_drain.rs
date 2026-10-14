@@ -208,7 +208,7 @@ impl Harness {
                     bootstraps: &self.bootstraps,
                     addresses: &self.addresses,
                     lane: 1,
-                    ready_visit_items: 16,
+                    ready: ready_items::Settings::default(),
                 }
                 .open_profile(n, None, true)
                 .unwrap()

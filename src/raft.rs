@@ -37,6 +37,7 @@ use admitted_replication::{AdmittedRange, EmptyAppendAlias};
 mod log_staging;
 mod progress_broadcast;
 mod proposals;
+mod ready_replies;
 pub use proposals::{Proposal, MAX_PROPOSAL_BATCH_ENTRIES};
 mod readiness;
 mod receive;
@@ -648,7 +649,9 @@ impl Raft {
     /// Conservative output reservation for one event and its dependent durable
     /// completions. The owner must bound input retention by `input_bytes`, drain
     /// each output batch before another completion, and run only one event in
-    /// the visit. Core/log memory and host snapshot-worker buffers are separate.
+    /// the visit. The private ready-reply producer instead reserves all of its
+    /// ordered controls, proposals, temporary quorum plan and observations for
+    /// one atomic transition. Core/log memory and host snapshot buffers are separate.
     /// Covers the accepted head and every configuration reachable by truncating
     /// its uncommitted suffix. Use `event_effect_reservation` for incoming growth.
     pub fn effect_reservation(&self, input_bytes: usize) -> Option<usize> {
@@ -1176,7 +1179,7 @@ impl Raft {
         };
         let mut effects = Vec::new();
         effects.extend(retirement);
-        self.after_durable(p.after, p.reply, &mut effects)?;
+        self.after_durable(p.after, p.reply, previous_commit, &mut effects)?;
         if self.remember_granted_vote(&effects) {
             self.reset_election()?;
         }
@@ -1189,6 +1192,7 @@ impl Raft {
         &mut self,
         after: After,
         reply: Option<Message>,
+        previous_commit: u64,
         effects: &mut Vec<Effect>,
     ) -> Result<(), RaftError> {
         match after {
@@ -1228,7 +1232,11 @@ impl Raft {
             }
             After::LeaderAppend => {
                 self.progress.insert(self.node, self.durable.last_index());
-                effects.extend(self.broadcast_append_progress()?);
+                effects.extend(if previous_commit < self.durable.commit_index {
+                    self.broadcast_committed_append_progress()?
+                } else {
+                    self.broadcast_append_progress()?
+                });
                 effects.extend(self.maybe_commit()?);
             }
             After::Commit if self.role == Role::Leader => {

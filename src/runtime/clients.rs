@@ -494,7 +494,12 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
             .advance_batch_authorized(
                 now,
                 limit,
-                |group| application(group).is_some_and(ProposalAdmission::supports_ready_batch),
+                |group| {
+                    application(group).map_or((false, false), |app| {
+                        let batch = app.supports_ready_batch();
+                        (batch, batch && app.supports_ready_commit_batch())
+                    })
+                },
                 |core, event, prefix| {
                     self.check_ready_execution(
                         core,

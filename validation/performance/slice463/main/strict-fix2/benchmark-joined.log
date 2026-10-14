@@ -1,0 +1,7 @@
+
+running 2 tests
+test joined::tests::counts_actual_joined_visits_and_each_repeated_operation_original ... ok
+test joined::tests::ordinary_failed_and_reversed_steps_never_count_as_joined ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 50 filtered out; finished in 0.00s
+

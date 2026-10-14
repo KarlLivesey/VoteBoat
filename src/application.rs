@@ -40,6 +40,17 @@ where
         false
     }
 
+    /// Opt into joining ready proposal validation with an older ordinary
+    /// prefix's quorum commit. Context validation, command validation and
+    /// receipt bounds must be identical before and after that prefix is
+    /// durably applied and removed from the retained pending commands.
+    /// This also requires `supports_ready_batch`; neither capability grants
+    /// durability, quorum, authentication or result authority. Composite
+    /// applications must establish this property for their complete guards.
+    fn supports_ready_commit_batch(&self) -> bool {
+        false
+    }
+
     /// Optional deterministic check against the current consensus context.
     /// The owning client router calls this at admission and again immediately
     /// before execution. It may restrict proposals; it grants no consensus or
@@ -188,6 +199,10 @@ impl BoundedStateMachine for Counter {
 
 impl ProposalAdmission for Counter {
     fn supports_ready_batch(&self) -> bool {
+        true
+    }
+
+    fn supports_ready_commit_batch(&self) -> bool {
         true
     }
 

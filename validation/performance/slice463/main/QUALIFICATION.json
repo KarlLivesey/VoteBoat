@@ -1,0 +1,73 @@
+{
+  "time_utc": "2026-10-14T23:46:23.468516+00:00",
+  "final_original_handle": 68120,
+  "final_terminal_exit": 0,
+  "final_stage": "DONE",
+  "inputs": 1477,
+  "final_source_hashes_and_modes_unchanged": true,
+  "all_feature_library": 437,
+  "core_library": 349,
+  "integrations": {
+    "integrations-all": {
+      "application": 12,
+      "effect_owner": 203,
+      "log_store": 19,
+      "provider_conformance": 43,
+      "raft": 79,
+      "runtime": 55,
+      "snapshot": 27
+    },
+    "integrations-core": {
+      "application": 12,
+      "effect_owner": 195,
+      "log_store": 0,
+      "provider_conformance": 28,
+      "raft": 29,
+      "runtime": 38,
+      "snapshot": 12
+    }
+  },
+  "tcp_quic_three_service_recovery": 2,
+  "matched_harness": 70,
+  "benchmark_ready_controls": 5,
+  "benchmark_joined_controls": 2,
+  "enabled_hook_four_root_profiles_and_standalone_exit": 0,
+  "provider_metadata_exit": 0,
+  "joined_checker_exit": 0,
+  "rate_checker_exit": 0,
+  "reused_scope": "50593 integration/service/matched/JS passes; subsequent edits only cfg(test) notification helper and two benchmark function extractions. All production src/ inputs unchanged; final library and affected benchmark tests rerun with final strict hook.",
+  "prior_runs": [
+    {
+      "handle": 49460,
+      "exit": 101,
+      "path": "preflight/attempt1",
+      "reason": "five new controls failed and unused imports; original source exactly reconstructed and labeled"
+    },
+    {
+      "handle": 62520,
+      "exit": 101,
+      "path": "preflight/fix1",
+      "reason": "one new context fixture had not drained owed notification"
+    },
+    {
+      "handle": 81605,
+      "exit": 0,
+      "path": "preflight/fix2",
+      "reason": "diagnostic only: late test-only helper extraction overlapped freeze, see FIX2_SCOPE"
+    },
+    {
+      "handle": 50593,
+      "exit": 101,
+      "path": "main",
+      "reason": "all functional checks pass; strict size/complexity failures"
+    },
+    {
+      "handle": 13653,
+      "exit": 101,
+      "path": "strict-fix",
+      "reason": "remaining benchmark function length102/100"
+    }
+  ],
+  "performance_claim": "none; actual join frequency/rates/tails and both-host qualification pending",
+  "thresholds_or_hook_weakened": false
+}

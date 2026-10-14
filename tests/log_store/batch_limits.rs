@@ -15,6 +15,7 @@ fn setup(io: ModelIo) -> (NativeLogStore<ModelIo>, Raft) {
         BatchLimits {
             max_proposal_entries: 4096,
             max_replication_entries: 1024,
+            max_ready_reply_inputs: 2,
         },
     )
 }
@@ -94,6 +95,7 @@ fn check_recovery(
         .configure_batch_limits(BatchLimits {
             max_proposal_entries: 4096,
             max_replication_entries: 1024,
+            max_ready_reply_inputs: 2,
         })
         .unwrap();
     let originals: Vec<_> = restarted

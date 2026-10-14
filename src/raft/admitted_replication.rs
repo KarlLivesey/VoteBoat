@@ -111,12 +111,10 @@ impl Raft {
             || !pending.next.is_append()
             || pending.membership.is_some()
             || !matches!(pending.after, After::LeaderAppend)
-            || self.durable.last_index() != self.durable.commit_index
-            || self.durable.term_at(self.durable.commit_index) != Some(self.durable.hard_state.term)
+            || !self.early_committed_tip(pending)
             || pending.next.update().hard_state != self.durable.hard_state
             || next.ballot_origin != self.durable.ballot_origin
             || next.generation != self.durable.generation
-            || pending.next.update().commit_index != self.durable.commit_index
         {
             return None;
         }
@@ -137,6 +135,19 @@ impl Raft {
             sum.checked_add(37)?.checked_add(entry.payload_bytes())
         })?;
         (bytes <= self.limits.max_batch_bytes).then_some(suffix)
+    }
+    fn early_committed_tip(&self, pending: &Pending) -> bool {
+        let tip = self.durable.last_index();
+        if self.durable.term_at(tip) != Some(self.durable.hard_state.term) {
+            return false;
+        }
+        let commit = pending.next.update().commit_index;
+        (tip == self.durable.commit_index && commit == self.durable.commit_index)
+            || (tip > self.durable.commit_index
+                && commit == tip
+                && self.membership().joint().is_none()
+                && self.membership().last_configuration_index() <= self.durable.commit_index
+                && self.membership().frontier(&self.progress) >= tip)
     }
     fn early_peer(&self, peer: NodeId) -> bool {
         let tip = self.durable.last_index();

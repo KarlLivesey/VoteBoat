@@ -10,6 +10,9 @@ use super::*;
 pub struct BatchLimits {
     pub max_proposal_entries: usize,
     pub max_replication_entries: usize,
+    /// Already-ready successful replies considered before ordinary proposals.
+    /// Zero keeps the serialized input path.
+    pub max_ready_reply_inputs: usize,
 }
 impl BatchLimits {
     /// Opt-in original-entry ceiling; owned-byte and retained-history limits
@@ -18,12 +21,14 @@ impl BatchLimits {
     /// Fixed bounded ordinary receive ceiling, independent of outbound batching.
     /// A default64-entry sender can therefore receive a larger peer's chunks.
     pub const MAX_REPLICATION_ENTRIES: usize = 1024;
+    pub const MAX_READY_REPLY_INPUTS: usize = 64;
 
     pub fn validate(self) -> Result<Self, RaftError> {
         if self.max_proposal_entries == 0
             || self.max_proposal_entries > Self::MAX_PROPOSAL_ENTRIES
             || self.max_replication_entries == 0
             || self.max_replication_entries > Self::MAX_REPLICATION_ENTRIES
+            || self.max_ready_reply_inputs > Self::MAX_READY_REPLY_INPUTS
         {
             return Err(StorageError::Rejected("invalid core batch limits").into());
         }
@@ -35,6 +40,7 @@ impl Default for BatchLimits {
         Self {
             max_proposal_entries: MAX_PROPOSAL_BATCH_ENTRIES,
             max_replication_entries: 64,
+            max_ready_reply_inputs: 2,
         }
     }
 }

@@ -1,0 +1,15 @@
+
+running 10 tests
+test raft::ready_replies::tests::an_unconsumed_old_primary_reply_remains_scoped_until_its_later_notification ... ok
+test raft::ready_replies::tests::gates::actual_empty_collector_aliases_remain_distinct_from_primary_tip_replies ... ok
+test raft::ready_replies::tests::gates::altered_persistence_and_wrong_ticket_cannot_gain_joined_authority ... ok
+test raft::ready_replies::tests::gates::complete_reply_scope_and_success_are_required_before_any_mutation ... ok
+test raft::ready_replies::tests::gates::count_quorum_legacy_counters_and_proposal_budgets_refuse_without_pending ... ok
+test raft::ready_replies::tests::gates::read_transfer_checkpoint_and_existing_pending_dependencies_are_not_crossed ... ok
+test raft::ready_replies::tests::gates::ready_bound_is_startup_only_zero_disables_and_sixty_four_is_valid ... ok
+test raft::ready_replies::tests::native::native_power_loss_recovers_combined_transition_atomically_and_failed_publication_fences ... ok
+test raft::ready_replies::tests::three_five_and_weighted_histories_match_serialized_receipts_and_uncommitted_tail ... ok
+test raft::ready_replies::tests::written_sends_old_commit_exact_durable_notifies_same_context_and_new_tail_needs_quorum ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 427 filtered out; finished in 0.00s
+

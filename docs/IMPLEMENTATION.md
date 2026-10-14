@@ -743,9 +743,9 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: publish462 rejection and select the next structural change | Avoid retaining ineffective complexity; remove actual serial work | [All12 native results](../validation/performance/comparison461-native/linux/README.md), [exact rollback](../validation/performance/slice462/main/README.md), current455 CPU profile, original Mac455 qualification | Enabled-hook publication; complete data/API/ownership/input-order/partial-failure schema before editing; no inference of fusion hit rate or guard retuning; prefer complete usable batching/ordering path over helpers | P9.0/P9.1/P9.3 |
-| Next: implement and measure the selected bounded transition | Improve sustained useful work without changing original outcomes | Accepted complete schema for Core/owner/provider ownership, actual measured bottleneck, fresh qualified same-host artifacts | Crash/term/configuration/ticket/input-order/admission/bulk-control/fairness controls, exact per-original results, strict checks, both-host repeated completed rates/tails/refusals and actual stage reduction | P9.1/P9.2/P9.3 |
-| Following: full curve, sustainable headroom and composition qualification | Satisfy the entire performance objective beyond the current experiment | Retained measured improvements, qualified458 weighted fixture, source/artifact/host identities and stable maintenance | All seven required framework cells on both hosts with healthy margin; sustained memory/debt, durable applications/headroom/skew/fairness, independent placement/shared barriers and P8 composition; preserve every outcome/fence/retry | P9.0/P9.1/P9.2/P9.3/P9.4 |
+| Current: measure actual joined work and durable/fairness effects | Establish whether the implemented ordering removes the measured stage | Published checked463, actual join counters, fresh asserted artifacts, qualified458 workload, original Mac455 qualification | Repeated disabled/enabled completed originals/s, p99/refusals/physical barriers/join counts on both hosts; retain losses, no quantum/guard tuning; genuine weighted headroom/fairness follows useful improvement | P9.1/P9.2/P9.3 |
+| Next: remove the next measured limiting stage | Increase useful work after the candidate is retained or rejected | Actual disabled/enabled join counts, completed rates/tails/refusals/physical barriers and current profile; schema before editing | Choose from measured ordering, batching, ownership or waiting costs; preserve every original result and partial-progress/restart contract; checked published slice and repeated paired evidence without retuning rejected experiments | P9.1/P9.2/P9.3 |
+| Following: full curve, sustainable headroom and composition qualification | Satisfy the entire performance objective beyond the current experiment | Retained measured improvements, qualified weighted fixture, source/artifact/host identities and stable maintenance | All seven required framework cells on both hosts with healthy margin; sustained memory/debt, durable applications/headroom/skew/fairness, independent placement/shared barriers and P8 composition; preserve every outcome/fence/retry | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
 comparison or short diagnostics. All seven one-group healthy-margin cells on
@@ -34357,3 +34357,34 @@ unadmitted pending ownership, bulk/control reservation, preserved scheduling and
 a current-term full-old-tip quorum early-send case advertising only the old
 commit. No source implementation, passing checks or performance gain is claimed
 by this planning entry. Macro scope is reviewed and unchanged.
+
+
+463 before-edit planning selects a complete owned ready transition, not a461
+guard variant. Additional exact replies can owe commit notification after the
+old commit; the new producer must retain that dependency explicitly and keep
+all receive-source lifetimes, ordered observations, provider/timer/bulk bounds,
+application equivalence and finite-ID exhaustion in the same transaction plan.
+[Schema](../validation/performance/slice463/SCHEMA.md) precedes source changes;
+actual joining, performance benefit and both-host qualification are unproven.
+The linked macro plan is reviewed and remains active without narrowing scope.
+
+
+463 implementation is functionally qualified; [full evidence](../validation/performance/slice463/main/README.md)
+preserves all failures and focused fixes. Original68120 ends0/DONE: final frozen
+1477 inputs/modes unchanged, libraries437/349, benchmark controls5/2 and complete
+enabled formatting/four-strict/standalone hook0. Prior same-production all/core
+integrations, real TCP/QUIC service recovery2, matched70 and JS metadata/checkers
+pass; only reviewed test/example helper extractions follow, with affected tests
+rerun. Independent source/evidence audit agrees. Source comparison retains exact
+ordinary quorum/durability/ordering/authentication/outcome/cleanup contracts.
+Separate opt-in capability and startup bound gate the new producer; every joined
+source remains owned through completion and deferred snapshot accounting.
+
+The measured limiter motivating this slice is native durable barrier work; no
+performance improvement is claimed by functional checks. Current mini item is
+actual joining and same-source0/2 paired rates/p99/refusals/barriers on fresh
+asserted artifacts, then a measured next optimization and the full sustained
+curve/headroom/fairness/placement/P8 work. Mac455 original84206 is still live in
+protocol qualification; no Mac463 result is implied. The macro scope remains
+active, with every required one-group cell on both hosts and8.4225M batch4
+minimum unmet. Publication is recorded separately after the enabled push hook.

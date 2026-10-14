@@ -1,0 +1,31 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+warning: unused import: `JoinedControl`
+ --> src/runtime/ready_batch.rs:6:25
+  |
+6 | pub(crate) use joined::{JoinedControl, JoinedReady};
+  |                         ^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `StateMachine`
+ --> src/runtime/ready_batch/joined/owner.rs:6:59
+  |
+6 |     application::{BoundedStateMachine, ProposalAdmission, StateMachine},
+  |                                                           ^^^^^^^^^^^^
+
+warning: unused import: `BoundedStateMachine`
+ --> src/runtime/ready_batch/joined/owner.rs:6:19
+  |
+6 |     application::{BoundedStateMachine, ProposalAdmission, StateMachine},
+  |                   ^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `ProposalAdmission`
+ --> src/runtime/ready_batch/joined/owner.rs:6:40
+  |
+6 |     application::{BoundedStateMachine, ProposalAdmission, StateMachine},
+  |                                        ^^^^^^^^^^^^^^^^^
+
+warning: `voteboat` (lib test) generated 4 warnings (run `cargo fix --lib -p voteboat --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 14.89s
+     Running unittests src/lib.rs (target/p9/slice455/padded-target-checks/debug/deps/voteboat-ebeb84c4129d638f)
+error: test failed, to rerun pass `--lib`

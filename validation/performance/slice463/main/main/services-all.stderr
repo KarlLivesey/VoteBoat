@@ -1,0 +1,3 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.52s
+     Running tests/counter_service.rs (target/p9/slice455/padded-target-checks/debug/deps/counter_service-a30382866c6eb540)

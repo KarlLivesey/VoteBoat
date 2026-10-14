@@ -2,6 +2,8 @@
 // Copyright (c) 2026 Karl Livesey
 //! Opt-in collection of bounded already-ready ordinary original proposals.
 use super::*;
+mod joined;
+pub(crate) use joined::JoinedReady;
 pub(crate) struct ReadyProposal {
     pub(crate) admission: AdmissionTicket,
     pub(crate) command: Proposal,

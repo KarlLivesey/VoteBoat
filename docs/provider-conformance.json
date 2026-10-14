@@ -4332,6 +4332,68 @@
           ]
         }
       ]
+    },
+    {
+      "public_contract": "ProposalAdmission",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/provider_conformance/application/commit_batch.rs",
+          "symbol": "counter_admission_is_invariant_under_moving_pending_prefix_to_applied"
+        },
+        {
+          "file": "tests/provider_conformance/application/commit_batch.rs",
+          "symbol": "commit_batch_capability_is_separate_and_wrappers_default_to_serialized"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "supports_ready_batch",
+            "supports_ready_commit_batch"
+          ],
+          "obligation": "Separate default-false capability from ordinary ready batching. Native Counter opts in; a host wrapper accepting ordinary ready batching keeps serialization unless it separately asserts whole-context invariance. Capability grants no durability, quorum, authentication or outcome authority.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/application/commit_batch.rs",
+              "symbol": "commit_batch_capability_is_separate_and_wrappers_default_to_serialized"
+            }
+          ],
+          "remaining": [
+            "Arbitrary downstream context/error/receipt invariance is a trusted provider obligation, not certified by this selected wrapper."
+          ]
+        },
+        {
+          "names": [
+            "validate_proposal"
+          ],
+          "obligation": "Selected Counter pending-to-applied prefix transformations preserve command admission results and per-command receipt bound, including duplicate/conflicting operations, overflow and bounded dedup capacity.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/application/commit_batch.rs",
+              "symbol": "counter_admission_is_invariant_under_moving_pending_prefix_to_applied"
+            }
+          ],
+          "remaining": [
+            "Finite Counter cases do not certify every host application or full runtime lifecycle."
+          ]
+        },
+        {
+          "names": [
+            "validate_proposal_context"
+          ],
+          "obligation": "Repeat current-core context validation before admission and immediately before persistence; a changed context can refuse an already queued command without proposing it. This check grants no quorum or authentication authority.",
+          "assertions": [
+            {
+              "file": "tests/effect_owner.rs",
+              "symbol": "proposal_context_is_checked_before_admission_and_again_before_persistence"
+            }
+          ],
+          "remaining": [
+            "Selected application context refusal does not certify all composite translations or arbitrary host guards."
+          ]
+        }
+      ]
     }
   ]
 }

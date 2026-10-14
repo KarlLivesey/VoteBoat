@@ -1,0 +1,1403 @@
+diff --git a/benchmarks/matched/src/envelopes.rs b/benchmarks/matched/src/envelopes.rs
+index 4321311a..1aa370ab 100644
+--- a/benchmarks/matched/src/envelopes.rs
++++ b/benchmarks/matched/src/envelopes.rs
+@@ -29,6 +29,7 @@ impl Envelopes {
+                 Self::UpstreamDefault => 1024,
+                 Self::Common64 => COMMON_ENTRY_BATCH_CAPACITY,
+             },
++            max_ready_reply_inputs: 2,
+         }
+         .validate()
+         .map_err(|error| format!("{error:?}").into())
+diff --git a/docs/IMPLEMENTATION.md b/docs/IMPLEMENTATION.md
+index 5c6f3e96..9cb65b0c 100644
+--- a/docs/IMPLEMENTATION.md
++++ b/docs/IMPLEMENTATION.md
+@@ -743,9 +743,9 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
+ 
+ | Deliverable | Purpose | Dependencies | Completion checks | Advances |
+ | --- | --- | --- | --- | --- |
+-| Current: publish462 rejection and select the next structural change | Avoid retaining ineffective complexity; remove actual serial work | [All12 native results](../validation/performance/comparison461-native/linux/README.md), [exact rollback](../validation/performance/slice462/main/README.md), current455 CPU profile, original Mac455 qualification | Enabled-hook publication; complete data/API/ownership/input-order/partial-failure schema before editing; no inference of fusion hit rate or guard retuning; prefer complete usable batching/ordering path over helpers | P9.0/P9.1/P9.3 |
+-| Next: implement and measure the selected bounded transition | Improve sustained useful work without changing original outcomes | Accepted complete schema for Core/owner/provider ownership, actual measured bottleneck, fresh qualified same-host artifacts | Crash/term/configuration/ticket/input-order/admission/bulk-control/fairness controls, exact per-original results, strict checks, both-host repeated completed rates/tails/refusals and actual stage reduction | P9.1/P9.2/P9.3 |
+-| Following: full curve, sustainable headroom and composition qualification | Satisfy the entire performance objective beyond the current experiment | Retained measured improvements, qualified458 weighted fixture, source/artifact/host identities and stable maintenance | All seven required framework cells on both hosts with healthy margin; sustained memory/debt, durable applications/headroom/skew/fairness, independent placement/shared barriers and P8 composition; preserve every outcome/fence/retry | P9.0/P9.1/P9.2/P9.3/P9.4 |
++| Current: complete planned ready transition463 | Remove serial transitions while retaining every due input and source lifetime | [463 schema](../validation/performance/slice463/SCHEMA.md), [462 rejection](../validation/performance/slice462/main/README.md), existing Core policy/log/owner/client contracts | One readonly whole-intake plan before mutation/dequeue; exact control order, bulk/timer/source retention, admission/counter exhaustion and crash/result controls; full strict checks and publication, no helper-only milestone | P9.0/P9.1/P9.3 |
++| Next: measure actual joined work and durable/fairness effects | Establish whether the implemented ordering removes the measured stage | Published checked463, actual join counters, fresh asserted artifacts, qualified458 workload, original Mac455 qualification | Repeated disabled/enabled completed originals/s, p99/refusals/physical barriers/join counts on both hosts; retain losses, no quantum/guard tuning; genuine weighted headroom/fairness follows useful improvement | P9.1/P9.2/P9.3 |
++| Following: full curve, sustainable headroom and composition qualification | Satisfy the entire performance objective beyond the current experiment | Retained measured improvements, qualified weighted fixture, source/artifact/host identities and stable maintenance | All seven required framework cells on both hosts with healthy margin; sustained memory/debt, durable applications/headroom/skew/fairness, independent placement/shared barriers and P8 composition; preserve every outcome/fence/retry | P9.0/P9.1/P9.2/P9.3/P9.4 |
+ 
+ The macro plan is reviewed and unchanged: no milestone closes from borrowed
+ comparison or short diagnostics. All seven one-group healthy-margin cells on
+@@ -34357,3 +34357,13 @@ unadmitted pending ownership, bulk/control reservation, preserved scheduling and
+ a current-term full-old-tip quorum early-send case advertising only the old
+ commit. No source implementation, passing checks or performance gain is claimed
+ by this planning entry. Macro scope is reviewed and unchanged.
++
++
++463 before-edit planning selects a complete owned ready transition, not a461
++guard variant. Additional exact replies can owe commit notification after the
++old commit; the new producer must retain that dependency explicitly and keep
++all receive-source lifetimes, ordered observations, provider/timer/bulk bounds,
++application equivalence and finite-ID exhaustion in the same transaction plan.
++[Schema](../validation/performance/slice463/SCHEMA.md) precedes source changes;
++actual joining, performance benefit and both-host qualification are unproven.
++The linked macro plan is reviewed and remains active without narrowing scope.
+diff --git a/docs/P9.md b/docs/P9.md
+index 79cf3f87..dce870f9 100644
+--- a/docs/P9.md
++++ b/docs/P9.md
+@@ -1926,3 +1926,28 @@ causal code regression. No new restored-baseline build or unchanged broad suite
+ rerun is needed. The linked mini plan advances to publication and a complete
+ structural ownership/ordering schema; no second fusion variant is accepted.
+ Default16 and full P9 macro scope remain; original Mac455 continues.
++
++
++## Slice463 schema — plan the whole ordered ready transition
++
++[Before-edit complete schema](../validation/performance/slice463/SCHEMA.md) selects
++one readonly-planned reply-prefix plus ordinary-data transition, with all receive
++sources retained until retirement. This replaces neither a leased effect nor
++an existing Pending and does not bypass due controls. Owed commit notifications
++remain explicitly Durable-gated. Resource/observation/timer/error/exhaustion and
++application equivalence are part of the same integrated slice. Actual join counts
++will accompany physical barrier measurements; no benefit or previous gating cause
++is claimed. The full macro objective remains active.
++
++463 measurement contract: new shared-assembly --ready-replies0/2 changes only the
++startup joined-reply bound. The same-source disabled/enabled comparison keeps
++ready16/window64, barriers, maintenance and original outcomes. Cheap returned-step
++counts report actual joined transitions/reply inputs/originals per replica and
++phase in joined.csv; summary uses measurement only. They do not identify the
++opportunity denominator, fallback cause or CPU use. Startup convenience assembly
++and lanes reject an explicit reply switch; historical unmarked output keeps its
++original validation scope. New-counter arithmetic/disabled-zero/negative controls
++are distinct from still-pending actual run evidence.
++
++Joined originals count proposed positions, not completed writes or durable votes;
++the original outcome ledger remains authoritative for throughput and latency.
+diff --git a/docs/component-contracts.json b/docs/component-contracts.json
+index 39d16f09..01deaaa8 100644
+--- a/docs/component-contracts.json
++++ b/docs/component-contracts.json
+@@ -76,7 +76,7 @@
+         "tests/log_store/batch_limits.rs",
+         "benchmarks/matched/src/voteboat_engine.rs"
+       ],
+-      "scope": "Startup-only per-Core proposal/outbound ceilings, defaults64/64, hard maxima16384/1024. Count is independent of allocated staging and retained-history byte/entry limits; native defaults remain unchanged. First event locks settings; verified recovery starts at defaults and host reapplies its configuration. Fixed ordinary receive cap1024 permits asymmetric outbound batching; existing byte, identity, term, configuration and exact ticket checks remain. Repair RPCs retain64 independently. Every original retains its ordered position/result; larger-than-outbound proposal batches use durable chunked replication rather than early Written sends. Runtime visit/control/byte/output limits remain authoritative. Linux exact-original, short-tail, bounded-input, stale-completion, low-limit repair and actual modeled WAL publication cuts pass; paired capacity and Mac qualification remain separate. Slice455 retains raw Proposal Vec role/count/capacity/index/length/staging checks, then bounds source-plus-shared conversion peak before capture. The additional peak refusal is pre-admission; legacy singleton has no new batch ceiling. Original count envelopes, ordered outcomes and existing defaults remain."
++      "scope": "Startup-only per-Core proposal/outbound ceilings, defaults64/64, hard maxima16384/1024. Count is independent of allocated staging and retained-history byte/entry limits; native defaults remain unchanged. First event locks settings; verified recovery starts at defaults and host reapplies its configuration. Fixed ordinary receive cap1024 permits asymmetric outbound batching; existing byte, identity, term, configuration and exact ticket checks remain. Repair RPCs retain64 independently. Every original retains its ordered position/result; larger-than-outbound proposal batches use durable chunked replication rather than early Written sends. Runtime visit/control/byte/output limits remain authoritative. Linux exact-original, short-tail, bounded-input, stale-completion, low-limit repair and actual modeled WAL publication cuts pass; paired capacity and Mac qualification remain separate. Slice455 retains raw Proposal Vec role/count/capacity/index/length/staging checks, then bounds source-plus-shared conversion peak before capture. The additional peak refusal is pre-admission; legacy singleton has no new batch ceiling. Original count envelopes, ordered outcomes and existing defaults remain. Slice463 adds startup max_ready_reply_inputs (0 disables, default2, bounded64) for an internal whole-ordered-intake producer; public singleton/batch entry points and replication/repair count envelopes remain unchanged. New setting is reapplied after recovery, not persisted or quorum authority."
+     },
+     {
+       "design_id": "C10/C15",
+@@ -485,16 +485,18 @@
+       "operations": [
+         "validate_proposal",
+         "validate_proposal_context",
+-        "supports_ready_batch"
++        "supports_ready_batch",
++        "supports_ready_commit_batch"
+       ],
+       "native": "Counter",
+       "conformance": [
+         "tests/effect_owner.rs",
+         "tests/directory.rs",
+         "tests/routed.rs",
+-        "tests/leadership_maintenance.rs"
++        "tests/leadership_maintenance.rs",
++        "tests/provider_conformance/application/commit_batch.rs"
+       ],
+-      "scope": "Optional contract 1, deterministic syntax and dedup capacity validation over applied state, unapplied durable log and retained client commands, with per-command receipt bound. Repeated immediately before service proposal. No mutation or I/O; native and independent host applications use the same public contract. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Slice196b1 adds an optional deterministic current-core context check, repeated at admission and immediately before execution by ClientRouter. It restricts proposals without granting quorum or authentication authority. Composite applications must forward it for translated inner commands; low-level hosts retain the same obligation. A host test changes the accepted context after queuing and verifies rejection before persistence. Slice410 adds optional default-false supports_ready_batch for already-ready original commands sharing unchanged Core context and an exact admission-indexed pending prefix. Counter opts in; context-dependent host applications retain singleton validation. Per-original positions/outcomes and shared-visit credits remain distinct from commitment/application. Preview charges whole input and expanded observation metadata before dequeue; original poll/visit budgets and protected traffic boundaries remain. Admission scans skip the validated applied prefix by index rather than visiting retained history."
++      "scope": "Optional contract 1, deterministic syntax and dedup capacity validation over applied state, unapplied durable log and retained client commands, with per-command receipt bound. Repeated immediately before service proposal. No mutation or I/O; native and independent host applications use the same public contract. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Slice196b1 adds an optional deterministic current-core context check, repeated at admission and immediately before execution by ClientRouter. It restricts proposals without granting quorum or authentication authority. Composite applications must forward it for translated inner commands; low-level hosts retain the same obligation. A host test changes the accepted context after queuing and verifies rejection before persistence. Slice410 adds optional default-false supports_ready_batch for already-ready original commands sharing unchanged Core context and an exact admission-indexed pending prefix. Counter opts in; context-dependent host applications retain singleton validation. Per-original positions/outcomes and shared-visit credits remain distinct from commitment/application. Preview charges whole input and expanded observation metadata before dequeue; original poll/visit budgets and protected traffic boundaries remain. Admission scans skip the validated applied prefix by index rather than visiting retained history. Slice463 adds separate default-false supports_ready_commit_batch: context checks, validation errors and receipt bounds must be identical across durable application of the preceding ordinary committed prefix and removal of its pending reservations. Counter opts in; composite/context-sensitive applications remain serialized unless independently established. This grants no quorum, authentication or result authority. Selected finite downstream Counter histories and default-only wrapper controls are not universal host certification."
+     },
+     {
+       "design_id": "C05/C10/C15",
+diff --git a/docs/provider-conformance.json b/docs/provider-conformance.json
+index 5ad4df5e..c68449a9 100644
+--- a/docs/provider-conformance.json
++++ b/docs/provider-conformance.json
+@@ -4332,6 +4332,68 @@
+           ]
+         }
+       ]
++    },
++    {
++      "public_contract": "ProposalAdmission",
++      "status": "partial",
++      "runners": [
++        {
++          "file": "tests/provider_conformance/application/commit_batch.rs",
++          "symbol": "counter_admission_is_invariant_under_moving_pending_prefix_to_applied"
++        },
++        {
++          "file": "tests/provider_conformance/application/commit_batch.rs",
++          "symbol": "commit_batch_capability_is_separate_and_wrappers_default_to_serialized"
++        }
++      ],
++      "operations": [
++        {
++          "names": [
++            "supports_ready_batch",
++            "supports_ready_commit_batch"
++          ],
++          "obligation": "Separate default-false capability from ordinary ready batching. Native Counter opts in; a host wrapper accepting ordinary ready batching keeps serialization unless it separately asserts whole-context invariance. Capability grants no durability, quorum, authentication or outcome authority.",
++          "assertions": [
++            {
++              "file": "tests/provider_conformance/application/commit_batch.rs",
++              "symbol": "commit_batch_capability_is_separate_and_wrappers_default_to_serialized"
++            }
++          ],
++          "remaining": [
++            "Arbitrary downstream context/error/receipt invariance is a trusted provider obligation, not certified by this selected wrapper."
++          ]
++        },
++        {
++          "names": [
++            "validate_proposal"
++          ],
++          "obligation": "Selected Counter pending-to-applied prefix transformations preserve command admission results and per-command receipt bound, including duplicate/conflicting operations, overflow and bounded dedup capacity.",
++          "assertions": [
++            {
++              "file": "tests/provider_conformance/application/commit_batch.rs",
++              "symbol": "counter_admission_is_invariant_under_moving_pending_prefix_to_applied"
++            }
++          ],
++          "remaining": [
++            "Finite Counter cases do not certify every host application or full runtime lifecycle."
++          ]
++        },
++        {
++          "names": [
++            "validate_proposal_context"
++          ],
++          "obligation": "Repeat current-core context validation before admission and immediately before persistence; a changed context can refuse an already queued command without proposing it. This check grants no quorum or authentication authority.",
++          "assertions": [
++            {
++              "file": "tests/effect_owner.rs",
++              "symbol": "proposal_context_is_checked_before_admission_and_again_before_persistence"
++            }
++          ],
++          "remaining": [
++            "Selected application context refusal does not certify all composite translations or arbitrary host guards."
++          ]
++        }
++      ]
+     }
+   ]
+ }
+diff --git a/examples/benchmark/failure.rs b/examples/benchmark/failure.rs
+index 35a9f1cf..e6955718 100644
+--- a/examples/benchmark/failure.rs
++++ b/examples/benchmark/failure.rs
+@@ -50,6 +50,7 @@ pub(super) fn write_partial(
+     writeln!(output, "valid_measurement=false phase={phase} completed={} unresolved={} poll_rounds={} host_poll_ns={} max_host_poll_ns={} persistence_batches={} worker_events={} application_deliveries={}\noriginal_error={error}",
+         samples.len(), unresolved.len(), polls.rounds, polls.host_ns, polls.max_host_ns,
+         polls.persistence_batches, polls.worker_events, polls.application_deliveries)?;
++    writeln!(output, "{}", polls.joined.summary()?)?;
+     output.sync_all()?;
+     Ok(())
+ }
+diff --git a/examples/benchmark/lanes.rs b/examples/benchmark/lanes.rs
+index 1ddbd703..b30da3ca 100644
+--- a/examples/benchmark/lanes.rs
++++ b/examples/benchmark/lanes.rs
+@@ -46,7 +46,7 @@ impl Config {
+                 offset,
+                 groups,
+                 lane: lane as u64 + 1,
+-                ready_visit_items: 16,
++                ready: ready_items::Settings::default(),
+             },
+             count: share(self.count, self.lanes, lane),
+             warmup: share(WARMUP, self.lanes, lane),
+diff --git a/examples/benchmark/lanes/tests.rs b/examples/benchmark/lanes/tests.rs
+index cff6069d..6825b4f5 100644
+--- a/examples/benchmark/lanes/tests.rs
++++ b/examples/benchmark/lanes/tests.rs
+@@ -193,7 +193,7 @@ fn partial_replica_startup_joins_previously_opened_nodes() {
+             offset: 0,
+             groups: 2,
+             lane: 1,
+-            ready_visit_items: 16,
++            ready: ready_items::Settings::default(),
+         }
+     )
+     .is_err());
+diff --git a/examples/benchmark/offered.rs b/examples/benchmark/offered.rs
+index 5bc84df5..c90b021b 100644
+--- a/examples/benchmark/offered.rs
++++ b/examples/benchmark/offered.rs
+@@ -340,23 +340,11 @@ pub(super) fn run<L: LogStore + Send + 'static>(
+         ..
+     } = config;
+     std::fs::create_dir(root)?;
+-    std::fs::write(root.join("run.txt"), format!("mode=offered protocol={protocol:?} offers={count} offered_rate={rate} window={window} groups={groups} warmup={WARMUP}{}\n", config.group_schedule.as_ref().map_or_else(String::new, offered_groups::GroupSchedule::metadata)))?;
++    std::fs::write(root.join("run.txt"), format!("mode=offered protocol={protocol:?} offers={count} offered_rate={rate} window={window} groups={groups} warmup={WARMUP} ready_visit_items={} ready_reply_inputs={}{}\n", config.ready_visit_items, config.ready_reply_inputs, config.group_schedule.as_ref().map_or_else(String::new, offered_groups::GroupSchedule::metadata)))?;
+     let mut raw = exclusive(&root.join("offers.csv"))?;
+     let mut storage = Vec::new();
+-    let (mut replicas, traces) = open_cluster(NativeOpenMode::Create)?;
+-    // Any error after construction still attempts explicit worker shutdown/join.
+-    let preparation = prepare_offered(&mut replicas, clock, &config);
+-    let (warmup, placement) = match preparation {
+-        Ok(w) => w,
+-        Err(error) => {
+-            let cleanup = close(replicas, clock);
+-            std::fs::write(
+-                root.join("failure.txt"),
+-                format!("preparation={error}; cleanup={cleanup:?}\n"),
+-            )?;
+-            return Err(error);
+-        }
+-    };
++    let (replicas, traces) = open_cluster(NativeOpenMode::Create)?;
++    let (mut replicas, warmup, placement) = prepare_or_close(replicas, clock, &config)?;
+     let mut ledger = Ledger::new(count, rate, window, groups, config.group_schedule.as_ref());
+     let mut maintenance = prepare_maintenance(&config, ledger.horizon())?;
+     let mut totals = PollTotals::default();
+@@ -375,6 +363,7 @@ pub(super) fn run<L: LogStore + Send + 'static>(
+     observe::capture(&mut storage, "after_measurement", &traces);
+     // Preserve all observed rows before validation or cleanup can fail.
+     let persisted = ledger.write(&mut raw);
++    let joined_raw = joined::write(root, &[("warmup", &warmup.polls), ("measurement", &totals)]);
+     let maintenance_raw = if maintenance_config.is_some() {
+         maintenance.write(&mut exclusive(&root.join("maintenance.csv"))?)
+     } else {
+@@ -383,6 +372,7 @@ pub(super) fn run<L: LogStore + Send + 'static>(
+     let history = result
+         .and(persisted)
+         .and(maintenance_raw)
++        .and(joined_raw)
+         .and_then(|()| maintenance.validate(&replicas, &totals))
+         .and_then(|()| ledger.history(&warmup));
+     let (expected, last) = match history {
+@@ -434,6 +424,26 @@ pub(super) fn run<L: LogStore + Send + 'static>(
+     )
+ }
+ 
++// Preparation retains ownership so every failure attempts the original worker
++// shutdown/join and preserves its original preparation/cleanup diagnostic.
++fn prepare_or_close<L: LogStore + Send + 'static>(
++    mut replicas: Vec<Replica<L>>,
++    clock: &Instant,
++    config: &RunConfig<'_>,
++) -> Result<(Vec<Replica<L>>, Measurement, String), Failure> {
++    match prepare_offered(&mut replicas, clock, config) {
++        Ok((warmup, placement)) => Ok((replicas, warmup, placement)),
++        Err(error) => {
++            let cleanup = close(replicas, clock);
++            std::fs::write(
++                config.root.join("failure.txt"),
++                format!("preparation={error}; cleanup={cleanup:?}\n"),
++            )?;
++            Err(error)
++        }
++    }
++}
++
+ fn checked_stage<T>(
+     root: &Path,
+     stage: &str,
+@@ -568,12 +578,13 @@ fn report_offered(
+         .collect::<Vec<_>>();
+     let dispatch_p99 = percentile(&mut dispatch_lag, 99);
+     let maintenance_summary = maintenance.summary(totals);
+-    let ready_settings = ready_items::settings(config.ready_visit_items);
++    let ready_settings = ready_items::report(config.ready_visit_items, config.ready_reply_inputs);
++    let joined_settings = totals.joined.summary()?;
+     let group_settings = config
+         .group_schedule
+         .as_ref()
+         .map_or_else(String::new, offered_groups::GroupSchedule::metadata);
+-    let summary = format!("mode=offered protocol={protocol:?} replicas=3 groups={groups} assembly=shared leader_placement={placement} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000 payload_bytes=8 warmup={WARMUP} offers={count} offered_rate={rate} window={window} max_inflight={} admitted={admitted} admitted_during={admitted_during} late_decisions={late_decisions} dispatch_p99_us={dispatch_p99} applied={applied} applied_during={during} applied_drain={} window_refused={} no_leader={} admission_refused={} not_proposed={} unknown=0 pending=0 horizon_ns={horizon} elapsed_ns={} drain_ns={} backlog_at_horizon={backlog} offered_ops_s={:.3} admitted_ops_s={:.3} applied_during_ops_s={:.3} applied_total_ops_s={:.3} p99_us={p99} service_p99_us={service_p99} recovered_value={recovered_value} recovery_retries={retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3}{maintenance_summary} {ready_settings}{group_settings}\n", ledger.max_pending, applied-during, ledger.count_status("window_refused"), ledger.count_status("no_leader"), ledger.count_status("admission_refused"), ledger.count_status("not_proposed"), elapsed.as_nanos(), elapsed.as_nanos().saturating_sub(horizon), count as f64 * 1e9 / horizon as f64, admitted as f64 / elapsed.as_secs_f64(), during as f64 * 1e9 / horizon as f64, applied as f64 / elapsed.as_secs_f64(), totals.rounds, totals.host_ns as f64/1e6, totals.max_host_ns as f64/1e6);
++    let summary = format!("mode=offered protocol={protocol:?} replicas=3 groups={groups} assembly=shared leader_placement={placement} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000 payload_bytes=8 warmup={WARMUP} offers={count} offered_rate={rate} window={window} max_inflight={} admitted={admitted} admitted_during={admitted_during} late_decisions={late_decisions} dispatch_p99_us={dispatch_p99} applied={applied} applied_during={during} applied_drain={} window_refused={} no_leader={} admission_refused={} not_proposed={} unknown=0 pending=0 horizon_ns={horizon} elapsed_ns={} drain_ns={} backlog_at_horizon={backlog} offered_ops_s={:.3} admitted_ops_s={:.3} applied_during_ops_s={:.3} applied_total_ops_s={:.3} p99_us={p99} service_p99_us={service_p99} recovered_value={recovered_value} recovery_retries={retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3}{maintenance_summary} {ready_settings} {joined_settings}{group_settings}\n", ledger.max_pending, applied-during, ledger.count_status("window_refused"), ledger.count_status("no_leader"), ledger.count_status("admission_refused"), ledger.count_status("not_proposed"), elapsed.as_nanos(), elapsed.as_nanos().saturating_sub(horizon), count as f64 * 1e9 / horizon as f64, admitted as f64 / elapsed.as_secs_f64(), during as f64 * 1e9 / horizon as f64, applied as f64 / elapsed.as_secs_f64(), totals.rounds, totals.host_ns as f64/1e6, totals.max_host_ns as f64/1e6);
+     let mut file = exclusive(&root.join("summary.txt"))?;
+     file.write_all(summary.as_bytes())?;
+     file.sync_all()?;
+diff --git a/examples/benchmark/ready_items.rs b/examples/benchmark/ready_items.rs
+index 4656b5fe..a5573693 100644
+--- a/examples/benchmark/ready_items.rs
++++ b/examples/benchmark/ready_items.rs
+@@ -2,6 +2,40 @@
+ // Copyright (c) 2026 Karl Livesey
+ //! Explicit visit quantum selection; parse before opening benchmark resources.
+ use super::*;
++#[derive(Clone, Copy)]
++pub(super) struct Settings {
++    pub items: usize,
++    pub replies: usize,
++}
++impl Default for Settings {
++    fn default() -> Self {
++        Self {
++            items: 16,
++            replies: 2,
++        }
++    }
++}
++pub(super) fn extract_replies(args: &mut Vec<String>) -> Result<Option<usize>, Failure> {
++    let Some(position) = args.iter().position(|arg| arg == "--ready-replies") else {
++        return Ok(None);
++    };
++    if args
++        .iter()
++        .skip(position + 1)
++        .any(|arg| arg == "--ready-replies")
++    {
++        return Err("duplicate --ready-replies".into());
++    }
++    let selected = args
++        .get(position + 1)
++        .ok_or("missing --ready-replies value")?
++        .parse::<usize>()?;
++    if !matches!(selected, 0 | 2) {
++        return Err("--ready-replies must be 0 or 2".into());
++    }
++    args.drain(position..position + 2);
++    Ok(Some(selected))
++}
+ pub(super) fn extract(args: &mut Vec<String>) -> Result<Option<usize>, Failure> {
+     let Some(position) = args.iter().position(|arg| arg == "--ready-items") else {
+         return Ok(None);
+@@ -23,7 +57,10 @@ pub(super) fn extract(args: &mut Vec<String>) -> Result<Option<usize>, Failure>
+     args.drain(position..position + 2);
+     Ok(Some(selected))
+ }
+-pub(super) fn settings(items: usize) -> String {
++pub(super) fn report(items: usize, replies: usize) -> String {
++    format!("{} ready_reply_inputs_requested={replies} ready_reply_inputs_effective={replies} ready_commit_batch_capable=true", settings(items))
++}
++fn settings(items: usize) -> String {
+     let limits = ShardLimits::default();
+     format!("ready_visit_items_requested={items} ready_visit_items_effective={items} core_proposal_entries={} ready_visit_bytes={} ready_visit_ms={} ready_batch_capable=true",
+         voteboat::raft::BatchLimits::default().max_proposal_entries, limits.visit_bytes, limits.visit_ms)
+@@ -68,8 +105,18 @@ mod tests {
+             generation: RuntimeGeneration::new(1).unwrap(),
+         };
+         for selected in [1, 16, 32, 64] {
+-            let (_, timed) =
+-                shared::timed_shard(Vec::new(), owner, 1, 1, &clock, selected).unwrap();
++            let (_, timed) = shared::timed_shard(
++                Vec::new(),
++                owner,
++                1,
++                1,
++                &clock,
++                Settings {
++                    items: selected,
++                    ..Settings::default()
++                },
++            )
++            .unwrap();
+             let limits = timed.limits();
+             assert_eq!(limits.visit_items, selected);
+             assert_eq!(limits.visit_bytes, ShardLimits::default().visit_bytes);
+@@ -77,6 +124,58 @@ mod tests {
+         }
+     }
+     #[test]
++    fn shared_assembly_installs_reply_switch_in_recovered_core() {
++        let owner = RuntimeOwner {
++            store: StoreBinding {
++                identity: store(1),
++                session: StoreSession::new(1).unwrap(),
++            },
++            lane: ExecutionLaneId::new(1).unwrap(),
++            generation: RuntimeGeneration::new(1).unwrap(),
++        };
++        for replies in [0, 2] {
++            let bootstrap = Bootstrap {
++                group: group(),
++                configuration: ConfigurationId::new(1).unwrap(),
++                policy: Policy::new(
++                    Tree::Majority((1..=3).map(|n| Tree::Voter(node(n))).collect()),
++                    Limits::default(),
++                )
++                .unwrap(),
++                voter_stores: (1..=3).map(|n| (node(n), store(n))).collect(),
++            };
++            let mut states = BTreeMap::new();
++            apply_batch(
++                &mut states,
++                &[LogMutation::Create(bootstrap)],
++                LogLimits::default(),
++            )
++            .unwrap();
++            let core = voteboat::raft::Raft::recover(
++                node(1),
++                owner.store,
++                states.remove(&group()).unwrap(),
++                LogLimits::default(),
++            )
++            .unwrap();
++            let clock = Instant::now();
++            let (_, timed) = shared::timed_shard(
++                vec![core],
++                owner,
++                1,
++                1,
++                &clock,
++                Settings { items: 16, replies },
++            )
++            .unwrap();
++            let limits = timed.core(group()).unwrap().batch_limits();
++            assert_eq!(limits.max_ready_reply_inputs, replies);
++            assert_eq!(limits.max_proposal_entries, 64);
++            assert_eq!(limits.max_replication_entries, 64);
++            assert_eq!(timed.limits().visit_items, 16);
++        }
++    }
++    #[test]
+     fn invalid_duplicate_and_missing_choices_fail_without_mutating_arguments() {
+         for values in [
+             vec!["--ready-items"],
+@@ -92,3 +191,36 @@ mod tests {
+         }
+     }
+ }
++
++#[cfg(test)]
++mod reply_tests {
++    use super::*;
++    #[test]
++    fn reply_switch_is_explicit_bounded_and_preserves_other_arguments() {
++        for replies in [0, 2] {
++            let mut input = vec![
++                "root".to_owned(),
++                "--ready-replies".to_owned(),
++                replies.to_string(),
++                "--ready-items".to_owned(),
++                "16".to_owned(),
++            ];
++            assert_eq!(extract_replies(&mut input).unwrap(), Some(replies));
++            assert_eq!(input, ["root", "--ready-items", "16"]);
++            assert!(
++                report(16, replies).contains(&format!("ready_reply_inputs_effective={replies}"))
++            );
++        }
++        for values in [
++            vec!["--ready-replies"],
++            vec!["--ready-replies", "1"],
++            vec!["--ready-replies", "65"],
++            vec!["--ready-replies", "2", "--ready-replies", "0"],
++        ] {
++            let mut input: Vec<_> = values.iter().map(|v| (*v).to_owned()).collect();
++            let before = input.clone();
++            assert!(extract_replies(&mut input).is_err());
++            assert_eq!(input, before);
++        }
++    }
++}
+diff --git a/examples/benchmark/shared.rs b/examples/benchmark/shared.rs
+index 91048e11..002dedae 100644
+--- a/examples/benchmark/shared.rs
++++ b/examples/benchmark/shared.rs
+@@ -38,7 +38,7 @@ pub(super) fn open(
+     capacity: usize,
+     clock: &Instant,
+     groups: usize,
+-    ready_visit_items: usize,
++    ready: ready_items::Settings,
+ ) -> Result<(Vec<Replica<SharedLog>>, Vec<Trace>), Failure> {
+     open_partition(
+         root,
+@@ -50,7 +50,7 @@ pub(super) fn open(
+             offset: 0,
+             groups,
+             lane: 1,
+-            ready_visit_items,
++            ready,
+         },
+     )
+ }
+@@ -60,7 +60,7 @@ pub(super) struct Partition {
+     pub offset: usize,
+     pub groups: usize,
+     pub lane: u64,
+-    pub ready_visit_items: usize,
++    pub ready: ready_items::Settings,
+ }
+ 
+ pub(super) fn open_partition(
+@@ -72,7 +72,8 @@ pub(super) fn open_partition(
+     partition: Partition,
+ ) -> Result<(Vec<Replica<SharedLog>>, Vec<Trace>), Failure> {
+     if partition.groups == 0
+-        || !(1..=64).contains(&partition.ready_visit_items)
++        || !(1..=64).contains(&partition.ready.items)
++        || !matches!(partition.ready.replies, 0 | 2)
+         || partition.groups > 32
+         || partition.lane == 0
+         || partition.lane > 4
+@@ -125,7 +126,7 @@ pub(super) fn open_partition(
+             bootstraps: &bootstraps,
+             addresses: &addresses,
+             lane: partition.lane,
+-            ready_visit_items: partition.ready_visit_items,
++            ready: partition.ready,
+         };
+         let (replica, trace) = match setup.open_replica(n) {
+             Ok(opened) => opened,
+@@ -249,7 +250,7 @@ pub(super) fn timed_shard(
+     n: u64,
+     groups: usize,
+     clock: &Instant,
+-    ready_visit_items: usize,
++    ready: ready_items::Settings,
+ ) -> Result<
+     (
+         MonoTime,
+@@ -261,12 +262,16 @@ pub(super) fn timed_shard(
+         owner_id,
+         ShardLimits {
+             max_groups: groups,
+-            visit_items: ready_visit_items,
++            visit_items: ready.items,
+             ..ShardLimits::default()
+         },
+         checked(FairScheduler::new(groups))?,
+     ))?;
+-    for core in cores {
++    for mut core in cores {
++        checked(core.configure_batch_limits(voteboat::raft::BatchLimits {
++            max_ready_reply_inputs: ready.replies,
++            ..voteboat::raft::BatchLimits::default()
++        }))?;
+         checked(shard.register(core))?;
+     }
+     let now = MonoTime(clock.elapsed().as_millis() as u64);
+@@ -406,7 +411,7 @@ struct ClusterSetup<'a> {
+     bootstraps: &'a [Bootstrap],
+     addresses: &'a BTreeMap<u64, std::net::SocketAddr>,
+     lane: u64,
+-    ready_visit_items: usize,
++    ready: ready_items::Settings,
+ }
+ impl ClusterSetup<'_> {
+     fn open_replica(&self, n: u64) -> Result<(Replica<SharedLog>, Trace), Failure> {
+@@ -443,7 +448,7 @@ impl ClusterSetup<'_> {
+             bootstraps,
+             addresses,
+             lane,
+-            ready_visit_items,
++            ready,
+         } = *self;
+         let directory = root.join(format!("replica{n}"));
+         let create = mode == NativeOpenMode::Create;
+@@ -478,14 +483,7 @@ impl ClusterSetup<'_> {
+         ))?
+         .peers()
+         .collect::<BTreeMap<_, _>>();
+-        let (now, timed) = timed_shard(
+-            cores,
+-            owner_id,
+-            n,
+-            bootstraps.len(),
+-            clock,
+-            ready_visit_items,
+-        )?;
++        let (now, timed) = timed_shard(cores, owner_id, n, bootstraps.len(), clock, ready)?;
+         let (version, codec) = wire_profile(member)?;
+         let (outbound, roster) = peer_io(local, first, last, &remote, now, version)?;
+         let Routers {
+diff --git a/examples/benchmark/shared_drain.rs b/examples/benchmark/shared_drain.rs
+index 05bb8f06..a375509d 100644
+--- a/examples/benchmark/shared_drain.rs
++++ b/examples/benchmark/shared_drain.rs
+@@ -208,7 +208,7 @@ impl Harness {
+                     bootstraps: &self.bootstraps,
+                     addresses: &self.addresses,
+                     lane: 1,
+-                    ready_visit_items: 16,
++                    ready: ready_items::Settings::default(),
+                 }
+                 .open_profile(n, None, true)
+                 .unwrap()
+diff --git a/examples/benchmark/shared_recovery.rs b/examples/benchmark/shared_recovery.rs
+index c212a2cf..f686fe01 100644
+--- a/examples/benchmark/shared_recovery.rs
++++ b/examples/benchmark/shared_recovery.rs
+@@ -82,7 +82,7 @@ impl Harness {
+             bootstraps: &self.bootstraps,
+             addresses: &self.addresses,
+             lane: 1,
+-            ready_visit_items: 16,
++            ready: ready_items::Settings::default(),
+         }
+         .open_profile_with_ingress(n, self.recovery, false, self.ingress)
+         .unwrap()
+diff --git a/examples/native_benchmark.rs b/examples/native_benchmark.rs
+index 976890d5..60b79ed2 100644
+--- a/examples/native_benchmark.rs
++++ b/examples/native_benchmark.rs
+@@ -62,6 +62,8 @@ type Replica<
+ mod batching;
+ #[path = "benchmark/failure.rs"]
+ mod failure;
++#[path = "benchmark/joined.rs"]
++mod joined;
+ #[path = "benchmark/observe.rs"]
+ mod observe;
+ #[path = "benchmark/offered.rs"]
+@@ -232,6 +234,7 @@ fn open_recorded(
+ }
+ #[derive(Default)]
+ struct PollTotals {
++    joined: joined::Totals,
+     batching: Option<batching::Totals>,
+     rounds: usize,
+     host_ns: u128,
+@@ -272,6 +275,7 @@ fn poll_selected<L: LogStore + Send + 'static>(
+             .map(|_| batching::before(replica, now));
+         let progress = checked(replica.poll(now, NodePollBudget::default()))?;
+         if let Some(p) = progress.replica {
++            totals.joined.observe(i, &p.steps)?;
+             if let (Some(batches), Some(before)) = (&mut totals.batching, &batch_before) {
+                 batches.observe(i + 1, before, &p.steps)?;
+             }
+@@ -702,13 +706,22 @@ fn close<L: LogStore + Send + 'static>(
+ fn exclusive(path: &Path) -> Result<File, Failure> {
+     Ok(OpenOptions::new().create_new(true).write(true).open(path)?)
+ }
++fn selected_protocol(value: &str) -> Result<NativePeerProtocol, Failure> {
++    match value {
++        "tcp" => Ok(NativePeerProtocol::TcpTls),
++        #[cfg(feature = "quic")]
++        "quic" => Ok(NativePeerProtocol::Quic),
++        _ => Err("unsupported protocol".into()),
++    }
++}
+ fn main() -> Result<(), Failure> {
+     let mut args = std::env::args().skip(1).collect::<Vec<_>>();
+     let selected_ready_items = ready_items::extract(&mut args)?;
++    let selected_ready_replies = ready_items::extract_replies(&mut args)?;
+     let raw_group_weights = offered_groups::extract(&mut args)?;
+     if args.first().is_some_and(|arg| arg == "--lanes") {
+-        if selected_ready_items.is_some() {
+-            return Err("--ready-items is unsupported with --lanes".into());
++        if selected_ready_items.is_some() || selected_ready_replies.is_some() {
++            return Err("ready settings are unsupported with --lanes".into());
+         }
+         if raw_group_weights.is_some() {
+             return Err("--group-weights requires --offered".into());
+@@ -725,7 +738,7 @@ fn main() -> Result<(), Failure> {
+     }
+     if !matches!(args.len(), 4 | 5 | 7 | 9 | 11) {
+         return Err(
+-            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64) [--ready-items 1|16|32|64] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
++            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64) [--ready-items 1|16|32|64] [--ready-replies 0|2 (shared assembly)] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
+                 .into(),
+         );
+     }
+@@ -733,16 +746,15 @@ fn main() -> Result<(), Failure> {
+         unreachable!()
+     };
+     let shared = args.len() >= 5;
++    if selected_ready_replies.is_some() && !shared {
++        return Err("--ready-replies requires shared assembly (GROUPS)".into());
++    }
++    let ready_reply_inputs = selected_ready_replies.unwrap_or(2);
+     let groups = if shared { args[4].parse::<usize>()? } else { 1 };
+     if !(1..=32).contains(&groups) {
+         return Err("group count out of bounds".into());
+     }
+-    let protocol = match protocol.as_str() {
+-        "tcp" => NativePeerProtocol::TcpTls,
+-        #[cfg(feature = "quic")]
+-        "quic" => NativePeerProtocol::Quic,
+-        _ => return Err("unsupported protocol".into()),
+-    };
++    let protocol = selected_protocol(protocol)?;
+     let count = operations.parse::<usize>()?;
+     let window = window.parse::<usize>()?;
+     if !(1..=50000).contains(&count) || !(1..=64).contains(&window) {
+@@ -799,6 +811,7 @@ fn main() -> Result<(), Failure> {
+         group_schedule,
+         maintenance,
+         ready_visit_items,
++        ready_reply_inputs,
+     };
+     run_selected(config, &clock, capacity, journal_timings)
+ }
+@@ -812,17 +825,13 @@ fn run_selected(
+     let protocol = config.protocol;
+     let groups = config.groups;
+     let ready_visit_items = config.ready_visit_items;
++    let ready = ready_items::Settings {
++        items: ready_visit_items,
++        replies: config.ready_reply_inputs,
++    };
+     if config.shared {
+         run(config, clock, |mode| {
+-            shared::open(
+-                root,
+-                mode,
+-                protocol,
+-                capacity,
+-                clock,
+-                groups,
+-                ready_visit_items,
+-            )
++            shared::open(root, mode, protocol, capacity, clock, groups, ready)
+         })
+     } else {
+         run(config, clock, |mode| {
+@@ -849,6 +858,7 @@ struct RunConfig<'a> {
+     group_schedule: Option<offered_groups::GroupSchedule>,
+     maintenance: Option<offered::MaintenanceConfig>,
+     ready_visit_items: usize,
++    ready_reply_inputs: usize,
+ }
+ fn run<L: LogStore + Send + 'static>(
+     config: RunConfig<'_>,
+@@ -963,6 +973,10 @@ fn write_run_reports(
+     storage: &[(String, usize, observe::Totals)],
+     journal: bool,
+ ) -> Result<(), Failure> {
++    joined::write(
++        config.root,
++        &[("warmup", &warmup.polls), ("measurement", &measured.polls)],
++    )?;
+     batching::write(
+         config.root,
+         &[("warmup", &warmup.polls), ("measurement", &measured.polls)],
+@@ -1093,8 +1107,9 @@ fn report_run(
+     } else {
+         ""
+     };
+-    let ready_settings = ready_items::settings(config.ready_visit_items);
+-    let summary = format!("protocol={protocol:?} replicas=3 groups={groups} assembly={} leader_placement={} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms={election_ms} election_spread_ms={election_ms} payload_bytes=8 warmup={WARMUP} operations={count} window={window} max_inflight={} elapsed_s={:.6} applied_ops_s={:.3} p50_us={:.3} p95_us={:.3} p99_us={:.3} max_us={:.3} recovered_value={capacity} recovery_retries={recovery_retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3} persistence_batches={} worker_events={} application_deliveries={}{diagnostic} {ready_settings}\n",
++    let ready_settings = ready_items::report(config.ready_visit_items, config.ready_reply_inputs);
++    let joined_settings = measured.polls.joined.summary()?;
++    let summary = format!("protocol={protocol:?} replicas=3 groups={groups} assembly={} leader_placement={} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms={election_ms} election_spread_ms={election_ms} payload_bytes=8 warmup={WARMUP} operations={count} window={window} max_inflight={} elapsed_s={:.6} applied_ops_s={:.3} p50_us={:.3} p95_us={:.3} p99_us={:.3} max_us={:.3} recovered_value={capacity} recovery_retries={recovery_retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3} persistence_batches={} worker_events={} application_deliveries={}{diagnostic} {ready_settings} {joined_settings}\n",
+         if shared { "shared" } else { "startup" }, placement, measured.max_inflight, measured.elapsed.as_secs_f64(), count as f64 / measured.elapsed.as_secs_f64(), percentile(50), percentile(95), percentile(99), *latency.last().unwrap() as f64 / 1000., measured.polls.rounds, measured.polls.host_ns as f64 / 1e6, measured.polls.max_host_ns as f64 / 1e6, measured.polls.persistence_batches, measured.polls.worker_events, measured.polls.application_deliveries);
+     let mut output = exclusive(&root.join("summary.txt"))?;
+     output.write_all(summary.as_bytes())?;
+diff --git a/src/application.rs b/src/application.rs
+index 5119c6aa..e6b0ab41 100644
+--- a/src/application.rs
++++ b/src/application.rs
+@@ -40,6 +40,17 @@ where
+         false
+     }
+ 
++    /// Opt into joining ready proposal validation with an older ordinary
++    /// prefix's quorum commit. Context validation, command validation and
++    /// receipt bounds must be identical before and after that prefix is
++    /// durably applied and removed from the retained pending commands.
++    /// This also requires `supports_ready_batch`; neither capability grants
++    /// durability, quorum, authentication or result authority. Composite
++    /// applications must establish this property for their complete guards.
++    fn supports_ready_commit_batch(&self) -> bool {
++        false
++    }
++
+     /// Optional deterministic check against the current consensus context.
+     /// The owning client router calls this at admission and again immediately
+     /// before execution. It may restrict proposals; it grants no consensus or
+@@ -191,6 +202,10 @@ impl ProposalAdmission for Counter {
+         true
+     }
+ 
++    fn supports_ready_commit_batch(&self) -> bool {
++        true
++    }
++
+     fn validate_proposal<'a>(
+         &self,
+         operation: OperationId,
+diff --git a/src/raft.rs b/src/raft.rs
+index 27213c95..d095e507 100644
+--- a/src/raft.rs
++++ b/src/raft.rs
+@@ -37,6 +37,7 @@ use admitted_replication::{AdmittedRange, EmptyAppendAlias};
+ mod log_staging;
+ mod progress_broadcast;
+ mod proposals;
++mod ready_replies;
+ pub use proposals::{Proposal, MAX_PROPOSAL_BATCH_ENTRIES};
+ mod readiness;
+ mod receive;
+@@ -648,7 +649,9 @@ impl Raft {
+     /// Conservative output reservation for one event and its dependent durable
+     /// completions. The owner must bound input retention by `input_bytes`, drain
+     /// each output batch before another completion, and run only one event in
+-    /// the visit. Core/log memory and host snapshot-worker buffers are separate.
++    /// the visit. The private ready-reply producer instead reserves all of its
++    /// ordered controls, proposals, temporary quorum plan and observations for
++    /// one atomic transition. Core/log memory and host snapshot buffers are separate.
+     /// Covers the accepted head and every configuration reachable by truncating
+     /// its uncommitted suffix. Use `event_effect_reservation` for incoming growth.
+     pub fn effect_reservation(&self, input_bytes: usize) -> Option<usize> {
+@@ -1176,7 +1179,7 @@ impl Raft {
+         };
+         let mut effects = Vec::new();
+         effects.extend(retirement);
+-        self.after_durable(p.after, p.reply, &mut effects)?;
++        self.after_durable(p.after, p.reply, previous_commit, &mut effects)?;
+         if self.remember_granted_vote(&effects) {
+             self.reset_election()?;
+         }
+@@ -1189,6 +1192,7 @@ impl Raft {
+         &mut self,
+         after: After,
+         reply: Option<Message>,
++        previous_commit: u64,
+         effects: &mut Vec<Effect>,
+     ) -> Result<(), RaftError> {
+         match after {
+@@ -1228,7 +1232,11 @@ impl Raft {
+             }
+             After::LeaderAppend => {
+                 self.progress.insert(self.node, self.durable.last_index());
+-                effects.extend(self.broadcast_append_progress()?);
++                effects.extend(if previous_commit < self.durable.commit_index {
++                    self.broadcast_committed_append_progress()?
++                } else {
++                    self.broadcast_append_progress()?
++                });
+                 effects.extend(self.maybe_commit()?);
+             }
+             After::Commit if self.role == Role::Leader => {
+diff --git a/src/raft/admitted_replication.rs b/src/raft/admitted_replication.rs
+index f864e9d7..e40b0a69 100644
+--- a/src/raft/admitted_replication.rs
++++ b/src/raft/admitted_replication.rs
+@@ -111,12 +111,10 @@ impl Raft {
+             || !pending.next.is_append()
+             || pending.membership.is_some()
+             || !matches!(pending.after, After::LeaderAppend)
+-            || self.durable.last_index() != self.durable.commit_index
+-            || self.durable.term_at(self.durable.commit_index) != Some(self.durable.hard_state.term)
++            || !self.early_committed_tip(pending)
+             || pending.next.update().hard_state != self.durable.hard_state
+             || next.ballot_origin != self.durable.ballot_origin
+             || next.generation != self.durable.generation
+-            || pending.next.update().commit_index != self.durable.commit_index
+         {
+             return None;
+         }
+@@ -138,6 +136,19 @@ impl Raft {
+         })?;
+         (bytes <= self.limits.max_batch_bytes).then_some(suffix)
+     }
++    fn early_committed_tip(&self, pending: &Pending) -> bool {
++        let tip = self.durable.last_index();
++        if self.durable.term_at(tip) != Some(self.durable.hard_state.term) {
++            return false;
++        }
++        let commit = pending.next.update().commit_index;
++        (tip == self.durable.commit_index && commit == self.durable.commit_index)
++            || (tip > self.durable.commit_index
++                && commit == tip
++                && self.membership().joint().is_none()
++                && self.membership().last_configuration_index() <= self.durable.commit_index
++                && self.membership().frontier(&self.progress) >= tip)
++    }
+     fn early_peer(&self, peer: NodeId) -> bool {
+         let tip = self.durable.last_index();
+         if peer == self.node
+diff --git a/src/raft/batch_limits.rs b/src/raft/batch_limits.rs
+index 8e7c1eb0..a66bc59c 100644
+--- a/src/raft/batch_limits.rs
++++ b/src/raft/batch_limits.rs
+@@ -10,6 +10,9 @@ use super::*;
+ pub struct BatchLimits {
+     pub max_proposal_entries: usize,
+     pub max_replication_entries: usize,
++    /// Already-ready successful replies considered before ordinary proposals.
++    /// Zero keeps the serialized input path.
++    pub max_ready_reply_inputs: usize,
+ }
+ impl BatchLimits {
+     /// Opt-in original-entry ceiling; owned-byte and retained-history limits
+@@ -18,12 +21,14 @@ impl BatchLimits {
+     /// Fixed bounded ordinary receive ceiling, independent of outbound batching.
+     /// A default64-entry sender can therefore receive a larger peer's chunks.
+     pub const MAX_REPLICATION_ENTRIES: usize = 1024;
++    pub const MAX_READY_REPLY_INPUTS: usize = 64;
+ 
+     pub fn validate(self) -> Result<Self, RaftError> {
+         if self.max_proposal_entries == 0
+             || self.max_proposal_entries > Self::MAX_PROPOSAL_ENTRIES
+             || self.max_replication_entries == 0
+             || self.max_replication_entries > Self::MAX_REPLICATION_ENTRIES
++            || self.max_ready_reply_inputs > Self::MAX_READY_REPLY_INPUTS
+         {
+             return Err(StorageError::Rejected("invalid core batch limits").into());
+         }
+@@ -35,6 +40,7 @@ impl Default for BatchLimits {
+         Self {
+             max_proposal_entries: MAX_PROPOSAL_BATCH_ENTRIES,
+             max_replication_entries: 64,
++            max_ready_reply_inputs: 2,
+         }
+     }
+ }
+diff --git a/src/raft/progress_broadcast.rs b/src/raft/progress_broadcast.rs
+index 59ea4e57..0d9f4218 100644
+--- a/src/raft/progress_broadcast.rs
++++ b/src/raft/progress_broadcast.rs
+@@ -67,6 +67,28 @@ impl Raft {
+         self.broadcast_ready_peers()
+     }
+ 
++    /// A joined append also owes the newly durable old-prefix notification.
++    /// Early Written replication retains its original range/context and alias;
++    /// retrying it here changes only the now-durable advertised commit frontier.
++    pub(super) fn broadcast_committed_append_progress(&mut self) -> Result<Vec<Effect>, RaftError> {
++        let mut effects = Vec::new();
++        for peer in self.peers() {
++            if let Some(sent) = self
++                .requests
++                .get(&peer)
++                .copied()
++                .filter(|s| s.snapshot.is_none())
++            {
++                if sent.commit_at_start < self.durable.commit_index {
++                    effects.push(self.retry_replication(peer, sent)?);
++                }
++            } else {
++                effects.push(self.append_for(peer)?);
++            }
++        }
++        Ok(effects)
++    }
++
+     fn broadcast_ready_peers(&mut self) -> Result<Vec<Effect>, RaftError> {
+         let mut effects = Vec::new();
+         for peer in self.peers() {
+diff --git a/src/raft/progress_broadcast/tests.rs b/src/raft/progress_broadcast/tests.rs
+index f1897231..4a914a5c 100644
+--- a/src/raft/progress_broadcast/tests.rs
++++ b/src/raft/progress_broadcast/tests.rs
+@@ -158,6 +158,7 @@ fn partial_prefixes_commit_all_originals_without_replaying_other_peer() {
+         .configure_batch_limits(BatchLimits {
+             max_proposal_entries: 64,
+             max_replication_entries: 2,
++            ..BatchLimits::default()
+         })
+         .unwrap();
+     let mut counter = Counter::new(6).unwrap();
+diff --git a/src/raft/proposals.rs b/src/raft/proposals.rs
+index e638e697..96006acd 100644
+--- a/src/raft/proposals.rs
++++ b/src/raft/proposals.rs
+@@ -103,7 +103,7 @@ impl Raft {
+         self.persist_proposal_entries(index, vec![entry])
+     }
+ 
+-    fn validate_proposal_batch(
++    pub(super) fn validate_proposal_batch(
+         &self,
+         proposals: &[Proposal],
+         capacity: usize,
+@@ -154,7 +154,7 @@ impl Raft {
+         }
+         Ok(first)
+     }
+-    fn validate_conversion_peak(
++    pub(super) fn validate_conversion_peak(
+         &self,
+         proposals: &[Proposal],
+         capacity: usize,
+diff --git a/src/raft/proposals/tests/batch_limits.rs b/src/raft/proposals/tests/batch_limits.rs
+index 7b9561df..98b32feb 100644
+--- a/src/raft/proposals/tests/batch_limits.rs
++++ b/src/raft/proposals/tests/batch_limits.rs
+@@ -10,6 +10,7 @@ fn wide() -> BatchLimits {
+     BatchLimits {
+         max_proposal_entries: 4096,
+         max_replication_entries: 1024,
++        max_ready_reply_inputs: 2,
+     }
+ }
+ 
+@@ -34,6 +35,10 @@ fn startup_limits_reject_invalid_settings_and_lock_on_the_first_refused_event()
+             max_replication_entries: 1025,
+             ..wide()
+         },
++        BatchLimits {
++            max_ready_reply_inputs: 65,
++            ..wide()
++        },
+     ] {
+         assert!(core.configure_batch_limits(limits).is_err());
+         assert_eq!(core.batch_limits(), BatchLimits::default());
+diff --git a/src/runtime/clients.rs b/src/runtime/clients.rs
+index bde0c07b..9d80e2de 100644
+--- a/src/runtime/clients.rs
++++ b/src/runtime/clients.rs
+@@ -494,7 +494,12 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
+             .advance_batch_authorized(
+                 now,
+                 limit,
+-                |group| application(group).is_some_and(ProposalAdmission::supports_ready_batch),
++                |group| {
++                    application(group).map_or((false, false), |app| {
++                        let batch = app.supports_ready_batch();
++                        (batch, batch && app.supports_ready_commit_batch())
++                    })
++                },
+                 |core, event, prefix| {
+                     self.check_ready_execution(
+                         core,
+diff --git a/src/runtime/effects.rs b/src/runtime/effects.rs
+index 3adc5b5f..17ef3b69 100644
+--- a/src/runtime/effects.rs
++++ b/src/runtime/effects.rs
+@@ -21,6 +21,7 @@ use std::collections::BTreeSet;
+ mod inspection;
+ mod overlap;
+ mod ready;
++mod ready_joined;
+ pub use inspection::{EffectLeaseInspectionKind, EffectVisitInspection};
+ #[cfg(all(test, feature = "native"))]
+ #[path = "effects/peer_ingress_tests.rs"]
+@@ -99,6 +100,7 @@ pub struct OwnerStep {
+ struct Active {
+     visit: VisitTicket,
+     received_from: Option<NodeId>,
++    other_received_from: Vec<NodeId>,
+     reserved: usize,
+     continuation_bytes: usize,
+     effects: VecDeque<Effect>,
+@@ -318,12 +320,20 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+     /// A rejected snapshot attempt owns no prepared image or worker request.
+     /// Keep its actual queued/leased payload charged, and reacquire the original
+     /// continuation budget plus image allowance before any later preparation.
++    /// Joined receive-source capacity remains owned until this visit retires.
+     pub(super) fn defer_snapshot(&mut self, lease: &EffectLease) -> Result<(), EffectOwnerError> {
+         self.validate_lease(lease)?;
+         let a = self.active.get_mut(&lease.ticket.visit.group).unwrap();
+         let capacity = a.effects.capacity();
+         let retained = effect_bytes(a.effects.make_contiguous(), capacity)
+             .and_then(|n| n.checked_add(effect_bytes(std::slice::from_ref(&lease.effect), 1)?))
++            .and_then(|n| {
++                n.checked_add(
++                    a.other_received_from
++                        .capacity()
++                        .checked_mul(size_of::<NodeId>())?,
++                )
++            })
+             .ok_or(EffectOwnerError::ReservationTooLarge)?;
+         if retained > a.reserved {
+             return self.fail(EffectOwnerError::ProviderContract);
+@@ -347,10 +357,9 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+     /// Original queued inputs and dependent visits; no source authority.
+     pub(crate) fn has_pending_peer_ingress(&self, group: GroupIdentity, peer: NodeId) -> bool {
+         self.runtime.has_pending_peer_ingress(group, peer)
+-            || self
+-                .active
+-                .get(&group)
+-                .is_some_and(|a| a.received_from == Some(peer))
++            || self.active.get(&group).is_some_and(|a| {
++                a.received_from == Some(peer) || a.other_received_from.contains(&peer)
++            })
+     }
+     pub fn deadline(&self, group: GroupIdentity) -> Option<TimerToken> {
+         self.runtime.deadline(group)
+@@ -558,7 +567,12 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+         limit: usize,
+         mut check: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
+     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
+-        let result = self.advance_inner(now, limit, |_| false, |core, event, _| check(core, event));
++        let result = self.advance_inner(
++            now,
++            limit,
++            |_| (false, false),
++            |core, event, _| check(core, event),
++        );
+         match result {
+             Err(error @ (EffectOwnerError::Runtime(_) | EffectOwnerError::ReservationTooLarge)) => {
+                 self.fail(error)
+@@ -570,7 +584,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+         &mut self,
+         now: MonoTime,
+         limit: usize,
+-        eligible: impl FnMut(GroupIdentity) -> bool,
++        eligible: impl FnMut(GroupIdentity) -> (bool, bool),
+         check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
+     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
+         let result = self.advance_inner(now, limit, eligible, check);
+@@ -585,7 +599,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+         &mut self,
+         now: MonoTime,
+         limit: usize,
+-        mut eligible: impl FnMut(GroupIdentity) -> bool,
++        mut eligible: impl FnMut(GroupIdentity) -> (bool, bool),
+         mut check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
+     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
+         self.check()?;
+@@ -603,11 +617,8 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+             let Some(visit) = self.runtime.poll(now).map_err(EffectOwnerError::Runtime)? else {
+                 break;
+             };
+-            let max_items = if eligible(visit.group) {
+-                limit - steps.len()
+-            } else {
+-                1
+-            };
++            let (batch, joined) = eligible(visit.group);
++            let max_items = if batch { limit - steps.len() } else { 1 };
+             let control = self
+                 .runtime
+                 .next_class(visit, now)
+@@ -624,6 +635,12 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+             if !self.reserve_ready_visit(visit, reserved, control)? {
+                 continue;
+             }
++            if control
++                && joined
++                && self.try_joined_ready(visit, now, max_items, &mut check, &mut steps)?
++            {
++                continue;
++            }
+             let stepped = self
+                 .runtime
+                 .step_ready_checked(visit, now, max_items, &mut check)
+diff --git a/src/runtime/effects/peer_ingress_tests.rs b/src/runtime/effects/peer_ingress_tests.rs
+index 83ecabff..badf1663 100644
+--- a/src/runtime/effects/peer_ingress_tests.rs
++++ b/src/runtime/effects/peer_ingress_tests.rs
+@@ -155,3 +155,38 @@ fn original_receive_source_survives_queued_input_consumption_and_persistence_lea
+         Some(lease.ticket)
+     );
+ }
++
++#[test]
++fn deferred_payload_reservation_keeps_source_capacity_until_visit_retirement() {
++    let mut owner = owner();
++    owner.admit(group(1), vote(2, 1)).unwrap();
++    let steps = owner.advance(MonoTime(0), 1).unwrap();
++    let visit = steps[0].visit;
++    let lease = owner.take_effect().unwrap().unwrap();
++    assert!(matches!(lease.effect, Effect::Send(_)));
++    // Isolate deferred-payload accounting with a real live visit/lease. The
++    // joined transition/worker test separately proves actual source collection.
++    let active = owner.active.get_mut(&group(1)).unwrap();
++    active.other_received_from = Vec::with_capacity(7);
++    active.other_received_from.push(node(3));
++    let source_bytes = active.other_received_from.capacity() * size_of::<NodeId>();
++    let capacity = active.effects.capacity();
++    let payload = effect_bytes(active.effects.make_contiguous(), capacity).unwrap()
++        + effect_bytes(std::slice::from_ref(&lease.effect), 1).unwrap();
++    let original = owner.usage().reserved_bytes;
++    owner.defer_snapshot(&lease).unwrap();
++    assert_eq!(owner.usage().reserved_bytes, payload + source_bytes);
++    assert!(owner.usage().reserved_bytes < original);
++    assert!(owner.has_pending_peer_ingress(group(1), node(2)));
++    assert!(owner.has_pending_peer_ingress(group(1), node(3)));
++    assert_eq!(
++        owner.inspect_visit(group(1)).unwrap().unwrap().visit(),
++        visit
++    );
++    owner.defer_snapshot(&lease).unwrap();
++    assert_eq!(owner.usage().reserved_bytes, payload + source_bytes);
++    owner.release_transferred_send(lease.ticket).unwrap();
++    assert_eq!(owner.usage().reserved_bytes, 0);
++    assert!(!owner.has_pending_peer_ingress(group(1), node(2)));
++    assert!(!owner.has_pending_peer_ingress(group(1), node(3)));
++}
+diff --git a/src/runtime/effects/ready.rs b/src/runtime/effects/ready.rs
+index 479a43c3..0257be3d 100644
+--- a/src/runtime/effects/ready.rs
++++ b/src/runtime/effects/ready.rs
+@@ -11,13 +11,17 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+         max_items: usize,
+         control: bool,
+     ) -> Result<Option<(usize, usize)>, EffectOwnerError> {
+-        let max_items = max_items.min(
+-            self.runtime
+-                .core(visit.group)
+-                .ok_or(EffectOwnerError::Runtime(RuntimeError::UnknownGroup))?
+-                .batch_limits()
+-                .max_proposal_entries,
+-        );
++        let max_items = if control {
++            max_items
++        } else {
++            max_items.min(
++                self.runtime
++                    .core(visit.group)
++                    .ok_or(EffectOwnerError::Runtime(RuntimeError::UnknownGroup))?
++                    .batch_limits()
++                    .max_proposal_entries,
++            )
++        };
+         let Some(full) = self
+             .runtime
+             .next_ready_effect_reservation(visit, now, max_items)
+@@ -106,6 +110,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+             Active {
+                 visit,
+                 received_from: None,
++                other_received_from: Vec::new(),
+                 reserved,
+                 continuation_bytes: reserved,
+                 effects: VecDeque::new(),
+diff --git a/src/runtime/ready_batch.rs b/src/runtime/ready_batch.rs
+index 9d938b60..0fa172a4 100644
+--- a/src/runtime/ready_batch.rs
++++ b/src/runtime/ready_batch.rs
+@@ -2,6 +2,8 @@
+ // Copyright (c) 2026 Karl Livesey
+ //! Opt-in collection of bounded already-ready ordinary original proposals.
+ use super::*;
++mod joined;
++pub(crate) use joined::JoinedReady;
+ pub(crate) struct ReadyProposal {
+     pub(crate) admission: AdmissionTicket,
+     pub(crate) command: Proposal,
+diff --git a/src/runtime/timed.rs b/src/runtime/timed.rs
+index 9d74fe1d..cea0ecd6 100644
+--- a/src/runtime/timed.rs
++++ b/src/runtime/timed.rs
+@@ -473,6 +473,47 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
+         self.check()?;
+         self.shard.next_class(visit, now)
+     }
++    // The joined producer cannot repair/re-register a timer after committing.
++    // Only the exact ordinary leader refresh no-op is eligible.
++    fn joined_timer_unchanged(&self, group: GroupIdentity) -> bool {
++        !self.closed
++            && !self.authorization.is_logical()
++            && self.failed.is_none()
++            && self.shard.core(group).is_some_and(|core| {
++                !core.is_fenced()
++                    && core.role() == Role::Leader
++                    && self.managed.get(&group).is_some_and(|managed| {
++                        managed.token.kind == TimerKind::Heartbeat
++                            && managed.reset == core.election_reset_sequence()
++                    })
++            })
++    }
++    pub(super) fn joined_reservation(
++        &mut self,
++        visit: VisitTicket,
++        now: MonoTime,
++        max: usize,
++    ) -> Result<Option<(usize, usize)>, RuntimeError> {
++        self.check()?;
++        if !self.joined_timer_unchanged(visit.group) {
++            return Ok(None);
++        }
++        self.shard.joined_reservation(visit, now, max)
++    }
++    pub(super) fn step_joined_checked(
++        &mut self,
++        visit: VisitTicket,
++        now: MonoTime,
++        max: usize,
++        check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
++    ) -> Result<Option<ready_batch::JoinedReady>, RuntimeError> {
++        self.check()?;
++        if !self.joined_timer_unchanged(visit.group) {
++            return Ok(None);
++        }
++        // The producer preserves leadership/reset and consumes no timer token.
++        self.shard.step_joined_checked(visit, now, max, check)
++    }
+     pub(super) fn next_ready_effect_reservation(
+         &mut self,
+         visit: VisitTicket,
+diff --git a/tests/log_store/batch_limits.rs b/tests/log_store/batch_limits.rs
+index c6b6241a..ac24a6d1 100644
+--- a/tests/log_store/batch_limits.rs
++++ b/tests/log_store/batch_limits.rs
+@@ -15,6 +15,7 @@ fn setup(io: ModelIo) -> (NativeLogStore<ModelIo>, Raft) {
+         BatchLimits {
+             max_proposal_entries: 4096,
+             max_replication_entries: 1024,
++            max_ready_reply_inputs: 2,
+         },
+     )
+ }
+@@ -94,6 +95,7 @@ fn check_recovery(
+         .configure_batch_limits(BatchLimits {
+             max_proposal_entries: 4096,
+             max_replication_entries: 1024,
++            max_ready_reply_inputs: 2,
+         })
+         .unwrap();
+     let originals: Vec<_> = restarted
+diff --git a/tests/log_store/batch_limits/aggregate.rs b/tests/log_store/batch_limits/aggregate.rs
+index 2a851be8..24d44215 100644
+--- a/tests/log_store/batch_limits/aggregate.rs
++++ b/tests/log_store/batch_limits/aggregate.rs
+@@ -14,6 +14,7 @@ fn batch_limits() -> BatchLimits {
+     BatchLimits {
+         max_proposal_entries: ORIGINALS as usize,
+         max_replication_entries: 1024,
++        max_ready_reply_inputs: 2,
+     }
+ }
+ fn setup_aggregate(io: ModelIo) -> (NativeLogStore<ModelIo>, Raft) {
+diff --git a/tests/provider_conformance/application/commit_batch.rs b/tests/provider_conformance/application/commit_batch.rs
+index c93b7c4d..cc488895 100644
+--- a/tests/provider_conformance/application/commit_batch.rs
++++ b/tests/provider_conformance/application/commit_batch.rs
+@@ -58,3 +58,44 @@ fn counter_admission_is_invariant_under_moving_pending_prefix_to_applied() {
+         }
+     }
+ }
++
++struct BatchOnly(Counter);
++impl StateMachine for BatchOnly {
++    type Receipt = CounterReceipt;
++    fn applied_index(&self) -> u64 {
++        self.0.applied_index()
++    }
++    fn apply_batch(
++        &mut self,
++        entries: &[LogEntry],
++    ) -> Result<Vec<Self::Receipt>, ApplicationError> {
++        self.0.apply_batch(entries)
++    }
++}
++impl BoundedStateMachine for BatchOnly {
++    fn receipt_bytes_bound(&self, entries: &[LogEntry]) -> Result<usize, ApplicationError> {
++        self.0.receipt_bytes_bound(entries)
++    }
++}
++impl ProposalAdmission for BatchOnly {
++    fn supports_ready_batch(&self) -> bool {
++        true
++    }
++    fn validate_proposal<'a>(
++        &self,
++        operation: OperationId,
++        bytes: &[u8],
++        pending: impl Iterator<Item = (OperationId, &'a [u8])>,
++    ) -> Result<usize, ApplicationError> {
++        self.0.validate_proposal(operation, bytes, pending)
++    }
++}
++#[test]
++fn commit_batch_capability_is_separate_and_wrappers_default_to_serialized() {
++    let counter = Counter::new(8).unwrap();
++    assert!(counter.supports_ready_batch());
++    assert!(counter.supports_ready_commit_batch());
++    let wrapper = BatchOnly(counter);
++    assert!(wrapper.supports_ready_batch());
++    assert!(!wrapper.supports_ready_commit_batch());
++}
+diff --git a/validation/check-native-benchmark.mjs b/validation/check-native-benchmark.mjs
+index abcb1077..17aae720 100644
+--- a/validation/check-native-benchmark.mjs
++++ b/validation/check-native-benchmark.mjs
+@@ -9,6 +9,7 @@ import { validateLanes } from './check-lanes.mjs';
+ import { validateOffered } from './check-offered.mjs';
+ import { validateMaintenance } from './check-maintenance.mjs';
+ import { validateRoundedRate } from './check-rounded-rate.mjs';
++import { validateJoined } from './check-joined.mjs';
+ 
+ const requireStorage = process.argv.includes('--storage');
+ const directories = process.argv.slice(2).filter(arg => arg !== '--storage');
+@@ -28,6 +29,10 @@ for (const directory of directories) {
+         console.log(JSON.stringify({directory, ...result}));
+         continue;
+     }
++    if (summary.ready_reply_inputs_effective !== undefined) {
++        const joinedPath = runDirectory ? path.join(directory, 'joined.csv') : `${directory}.joined.csv`;
++        validateJoined(summary, fs.readFileSync(joinedPath, 'utf8'));
++    }
+     const groups = Number(summary.groups);
+     if (summary.mode === 'offered') {
+         const offers = runDirectory ? path.join(directory, 'offers.csv') : `${directory}.offers.csv`;

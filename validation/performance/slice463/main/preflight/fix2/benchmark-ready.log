@@ -1,0 +1,10 @@
+
+running 5 tests
+test ready_items::reply_tests::reply_switch_is_explicit_bounded_and_preserves_other_arguments ... ok
+test ready_items::tests::explicit_quantums_preserve_other_arguments_and_report_the_selected_settings ... ok
+test ready_items::tests::invalid_duplicate_and_missing_choices_fail_without_mutating_arguments ... ok
+test ready_items::tests::shared_assembly_installs_explicit_quantums_without_changing_other_visit_caps ... ok
+test ready_items::tests::shared_assembly_installs_reply_switch_in_recovered_core ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 47 filtered out; finished in 0.00s
+

@@ -155,3 +155,38 @@ fn original_receive_source_survives_queued_input_consumption_and_persistence_lea
         Some(lease.ticket)
     );
 }
+
+#[test]
+fn deferred_payload_reservation_keeps_source_capacity_until_visit_retirement() {
+    let mut owner = owner();
+    owner.admit(group(1), vote(2, 1)).unwrap();
+    let steps = owner.advance(MonoTime(0), 1).unwrap();
+    let visit = steps[0].visit;
+    let lease = owner.take_effect().unwrap().unwrap();
+    assert!(matches!(lease.effect, Effect::Send(_)));
+    // Isolate deferred-payload accounting with a real live visit/lease. The
+    // joined transition/worker test separately proves actual source collection.
+    let active = owner.active.get_mut(&group(1)).unwrap();
+    active.other_received_from = Vec::with_capacity(7);
+    active.other_received_from.push(node(3));
+    let source_bytes = active.other_received_from.capacity() * size_of::<NodeId>();
+    let capacity = active.effects.capacity();
+    let payload = effect_bytes(active.effects.make_contiguous(), capacity).unwrap()
+        + effect_bytes(std::slice::from_ref(&lease.effect), 1).unwrap();
+    let original = owner.usage().reserved_bytes;
+    owner.defer_snapshot(&lease).unwrap();
+    assert_eq!(owner.usage().reserved_bytes, payload + source_bytes);
+    assert!(owner.usage().reserved_bytes < original);
+    assert!(owner.has_pending_peer_ingress(group(1), node(2)));
+    assert!(owner.has_pending_peer_ingress(group(1), node(3)));
+    assert_eq!(
+        owner.inspect_visit(group(1)).unwrap().unwrap().visit(),
+        visit
+    );
+    owner.defer_snapshot(&lease).unwrap();
+    assert_eq!(owner.usage().reserved_bytes, payload + source_bytes);
+    owner.release_transferred_send(lease.ticket).unwrap();
+    assert_eq!(owner.usage().reserved_bytes, 0);
+    assert!(!owner.has_pending_peer_ingress(group(1), node(2)));
+    assert!(!owner.has_pending_peer_ingress(group(1), node(3)));
+}

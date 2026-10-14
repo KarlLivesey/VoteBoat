@@ -29,6 +29,7 @@ impl Envelopes {
                 Self::UpstreamDefault => 1024,
                 Self::Common64 => COMMON_ENTRY_BATCH_CAPACITY,
             },
+            max_ready_reply_inputs: 2,
         }
         .validate()
         .map_err(|error| format!("{error:?}").into())

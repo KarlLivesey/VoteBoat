@@ -1,0 +1,10 @@
+{
+  "scope": "Exact pre-fix bytes reconstructed by reversing the focused edits, all four hashes equal original SOURCE_BEFORE; native.rs unchanged copy. Not a contemporaneous source copy.",
+  "sha256": {
+    "src/raft/ready_replies.rs": "ec8cd3ae42e11c865082baff54b168976c13e06c43190e6c53d166d788632604",
+    "src/raft/ready_replies/tests.rs": "be8f02ca0356637ad5fa8651142e8bafd73b18fb60ce7b13f6c4fb06eacfef22",
+    "src/raft/ready_replies/gates.rs": "6d5b66e9495c475d4b9188cfdf0e4d30b54664d0827cf3ad1159b67a10c36afc",
+    "src/raft/ready_replies/native.rs": "e48c65239770b12b37429bea356601368b9f184ede942d19e4ed8bb4658eb2c5"
+  },
+  "all_match": true
+}

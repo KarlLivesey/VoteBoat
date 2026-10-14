@@ -67,6 +67,28 @@ impl Raft {
         self.broadcast_ready_peers()
     }
 
+    /// A joined append also owes the newly durable old-prefix notification.
+    /// Early Written replication retains its original range/context and alias;
+    /// retrying it here changes only the now-durable advertised commit frontier.
+    pub(super) fn broadcast_committed_append_progress(&mut self) -> Result<Vec<Effect>, RaftError> {
+        let mut effects = Vec::new();
+        for peer in self.peers() {
+            if let Some(sent) = self
+                .requests
+                .get(&peer)
+                .copied()
+                .filter(|s| s.snapshot.is_none())
+            {
+                if sent.commit_at_start < self.durable.commit_index {
+                    effects.push(self.retry_replication(peer, sent)?);
+                }
+            } else {
+                effects.push(self.append_for(peer)?);
+            }
+        }
+        Ok(effects)
+    }
+
     fn broadcast_ready_peers(&mut self) -> Result<Vec<Effect>, RaftError> {
         let mut effects = Vec::new();
         for peer in self.peers() {

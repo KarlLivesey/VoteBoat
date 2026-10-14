@@ -1,0 +1,1 @@
+cargo +stable test --locked --offline --all-features --test counter_service three_ -- --test-threads=1 

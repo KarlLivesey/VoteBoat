@@ -1,0 +1,23 @@
+{
+  "reviewer": "/root/review426",
+  "scope": "Read-only final source and terminal evidence audit; no extra builds/tests",
+  "source_inputs": 1477,
+  "exact_hashes_and_modes": true,
+  "changed_since_main": [
+    "examples/benchmark/offered.rs",
+    "examples/native_benchmark.rs",
+    "src/raft/ready_replies/tests.rs"
+  ],
+  "integration_services_matched_reuse_valid": true,
+  "final_hook_exit": 0,
+  "final_library_counts": [
+    437,
+    349
+  ],
+  "benchmark_controls": [
+    5,
+    2
+  ],
+  "thresholds_and_hook_unchanged": true,
+  "material_findings": []
+}

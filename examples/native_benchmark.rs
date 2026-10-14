@@ -62,6 +62,8 @@ type Replica<
 mod batching;
 #[path = "benchmark/failure.rs"]
 mod failure;
+#[path = "benchmark/joined.rs"]
+mod joined;
 #[path = "benchmark/observe.rs"]
 mod observe;
 #[path = "benchmark/offered.rs"]
@@ -232,6 +234,7 @@ fn open_recorded(
 }
 #[derive(Default)]
 struct PollTotals {
+    joined: joined::Totals,
     batching: Option<batching::Totals>,
     rounds: usize,
     host_ns: u128,
@@ -272,6 +275,7 @@ fn poll_selected<L: LogStore + Send + 'static>(
             .map(|_| batching::before(replica, now));
         let progress = checked(replica.poll(now, NodePollBudget::default()))?;
         if let Some(p) = progress.replica {
+            totals.joined.observe(i, &p.steps)?;
             if let (Some(batches), Some(before)) = (&mut totals.batching, &batch_before) {
                 batches.observe(i + 1, before, &p.steps)?;
             }
@@ -702,13 +706,22 @@ fn close<L: LogStore + Send + 'static>(
 fn exclusive(path: &Path) -> Result<File, Failure> {
     Ok(OpenOptions::new().create_new(true).write(true).open(path)?)
 }
+fn selected_protocol(value: &str) -> Result<NativePeerProtocol, Failure> {
+    match value {
+        "tcp" => Ok(NativePeerProtocol::TcpTls),
+        #[cfg(feature = "quic")]
+        "quic" => Ok(NativePeerProtocol::Quic),
+        _ => Err("unsupported protocol".into()),
+    }
+}
 fn main() -> Result<(), Failure> {
     let mut args = std::env::args().skip(1).collect::<Vec<_>>();
     let selected_ready_items = ready_items::extract(&mut args)?;
+    let selected_ready_replies = ready_items::extract_replies(&mut args)?;
     let raw_group_weights = offered_groups::extract(&mut args)?;
     if args.first().is_some_and(|arg| arg == "--lanes") {
-        if selected_ready_items.is_some() {
-            return Err("--ready-items is unsupported with --lanes".into());
+        if selected_ready_items.is_some() || selected_ready_replies.is_some() {
+            return Err("ready settings are unsupported with --lanes".into());
         }
         if raw_group_weights.is_some() {
             return Err("--group-weights requires --offered".into());
@@ -725,7 +738,7 @@ fn main() -> Result<(), Failure> {
     }
     if !matches!(args.len(), 4 | 5 | 7 | 9 | 11) {
         return Err(
-            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64) [--ready-items 1|16|32|64] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
+            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64) [--ready-items 1|16|32|64] [--ready-replies 0|2 (shared assembly)] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
                 .into(),
         );
     }
@@ -733,16 +746,15 @@ fn main() -> Result<(), Failure> {
         unreachable!()
     };
     let shared = args.len() >= 5;
+    if selected_ready_replies.is_some() && !shared {
+        return Err("--ready-replies requires shared assembly (GROUPS)".into());
+    }
+    let ready_reply_inputs = selected_ready_replies.unwrap_or(2);
     let groups = if shared { args[4].parse::<usize>()? } else { 1 };
     if !(1..=32).contains(&groups) {
         return Err("group count out of bounds".into());
     }
-    let protocol = match protocol.as_str() {
-        "tcp" => NativePeerProtocol::TcpTls,
-        #[cfg(feature = "quic")]
-        "quic" => NativePeerProtocol::Quic,
-        _ => return Err("unsupported protocol".into()),
-    };
+    let protocol = selected_protocol(protocol)?;
     let count = operations.parse::<usize>()?;
     let window = window.parse::<usize>()?;
     if !(1..=50000).contains(&count) || !(1..=64).contains(&window) {
@@ -799,6 +811,7 @@ fn main() -> Result<(), Failure> {
         group_schedule,
         maintenance,
         ready_visit_items,
+        ready_reply_inputs,
     };
     run_selected(config, &clock, capacity, journal_timings)
 }
@@ -812,17 +825,13 @@ fn run_selected(
     let protocol = config.protocol;
     let groups = config.groups;
     let ready_visit_items = config.ready_visit_items;
+    let ready = ready_items::Settings {
+        items: ready_visit_items,
+        replies: config.ready_reply_inputs,
+    };
     if config.shared {
         run(config, clock, |mode| {
-            shared::open(
-                root,
-                mode,
-                protocol,
-                capacity,
-                clock,
-                groups,
-                ready_visit_items,
-            )
+            shared::open(root, mode, protocol, capacity, clock, groups, ready)
         })
     } else {
         run(config, clock, |mode| {
@@ -849,6 +858,7 @@ struct RunConfig<'a> {
     group_schedule: Option<offered_groups::GroupSchedule>,
     maintenance: Option<offered::MaintenanceConfig>,
     ready_visit_items: usize,
+    ready_reply_inputs: usize,
 }
 fn run<L: LogStore + Send + 'static>(
     config: RunConfig<'_>,
@@ -963,6 +973,10 @@ fn write_run_reports(
     storage: &[(String, usize, observe::Totals)],
     journal: bool,
 ) -> Result<(), Failure> {
+    joined::write(
+        config.root,
+        &[("warmup", &warmup.polls), ("measurement", &measured.polls)],
+    )?;
     batching::write(
         config.root,
         &[("warmup", &warmup.polls), ("measurement", &measured.polls)],
@@ -1093,8 +1107,9 @@ fn report_run(
     } else {
         ""
     };
-    let ready_settings = ready_items::settings(config.ready_visit_items);
-    let summary = format!("protocol={protocol:?} replicas=3 groups={groups} assembly={} leader_placement={} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms={election_ms} election_spread_ms={election_ms} payload_bytes=8 warmup={WARMUP} operations={count} window={window} max_inflight={} elapsed_s={:.6} applied_ops_s={:.3} p50_us={:.3} p95_us={:.3} p99_us={:.3} max_us={:.3} recovered_value={capacity} recovery_retries={recovery_retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3} persistence_batches={} worker_events={} application_deliveries={}{diagnostic} {ready_settings}\n",
+    let ready_settings = ready_items::report(config.ready_visit_items, config.ready_reply_inputs);
+    let joined_settings = measured.polls.joined.summary()?;
+    let summary = format!("protocol={protocol:?} replicas=3 groups={groups} assembly={} leader_placement={} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms={election_ms} election_spread_ms={election_ms} payload_bytes=8 warmup={WARMUP} operations={count} window={window} max_inflight={} elapsed_s={:.6} applied_ops_s={:.3} p50_us={:.3} p95_us={:.3} p99_us={:.3} max_us={:.3} recovered_value={capacity} recovery_retries={recovery_retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3} persistence_batches={} worker_events={} application_deliveries={}{diagnostic} {ready_settings} {joined_settings}\n",
         if shared { "shared" } else { "startup" }, placement, measured.max_inflight, measured.elapsed.as_secs_f64(), count as f64 / measured.elapsed.as_secs_f64(), percentile(50), percentile(95), percentile(99), *latency.last().unwrap() as f64 / 1000., measured.polls.rounds, measured.polls.host_ns as f64 / 1e6, measured.polls.max_host_ns as f64 / 1e6, measured.polls.persistence_batches, measured.polls.worker_events, measured.polls.application_deliveries);
     let mut output = exclusive(&root.join("summary.txt"))?;
     output.write_all(summary.as_bytes())?;

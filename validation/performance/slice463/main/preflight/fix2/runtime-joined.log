@@ -1,0 +1,16 @@
+
+running 11 tests
+test raft::ready_replies::tests::gates::altered_persistence_and_wrong_ticket_cannot_gain_joined_authority ... ok
+test runtime::ready_batch::joined::tests::cursor_skips_only_nonfitting_controls_and_does_not_fish_past_fitting_reply ... ok
+test runtime::ready_batch::joined::tests::owner::both_receive_sources_live_through_lease_written_durable_and_final_retirement ... ok
+test runtime::ready_batch::joined::tests::owner::closed_timer_owner_serializes_existing_controls_without_a_joined_refresh ... ok
+test runtime::ready_batch::joined::tests::owner::context_sensitive_batch_host_default_false_waits_for_original_commit ... ok
+test runtime::ready_batch::joined::tests::owner::failed_join_checks_refund_to_identical_control_reservation_without_dequeue ... ok
+test runtime::ready_batch::joined::tests::owner::one_original_core_limit_does_not_hide_control_plus_original_output_room ... ok
+test runtime::ready_batch::joined::tests::owner::unavailable_bulk_or_capability_keeps_original_protected_control_and_queued_data ... ok
+test runtime::ready_batch::joined::tests::rejected_second_original_remains_queued_and_first_failure_preserves_all_inputs ... ok
+test runtime::ready_batch::joined::tests::selector_respects_reply_cap_protected_tail_background_timers_and_output_limit ... ok
+test runtime::ready_batch::joined::tests::two_replies_and_original_prefix_follow_real_cursor_and_keep_full_ids ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 426 filtered out; finished in 0.00s
+
