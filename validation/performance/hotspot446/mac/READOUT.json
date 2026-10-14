@@ -1,0 +1,397 @@
+{
+  "scope": "Current446 whole-launch physical native CPU-delta observations; wait/interval/optimizedalias/unresolved limitations; not pairedcapacity or throughputtimer attribution",
+  "cases": {
+    "bulk": {
+      "cpu_denominator_us": 6705487,
+      "totals": {
+        "samples": 15321,
+        "cpu_us": 6705487,
+        "wall_sample_weight": 57239,
+        "positive_cpu_samples": 14941,
+        "null_stack_cpu_us": 0,
+        "unresolved_leaf_cpu_us": 578965,
+        "any_unresolved_stack_cpu_us": 807107,
+        "malformed_stack_cpu_us": 0,
+        "zero_cpu_delta_samples": 380
+      },
+      "threadgroups": {
+        "voteboat-matched-framework": {
+          "cpu_us": 116466,
+          "samples": 124,
+          "threads": 1
+        },
+        "matched-client": {
+          "cpu_us": 1996583,
+          "samples": 3070,
+          "threads": 1
+        },
+        "matched-server": {
+          "cpu_us": 4592438,
+          "samples": 12127,
+          "threads": 16
+        }
+      },
+      "excluded_threads": [],
+      "profiled_originals_per_second": 6524438.700354731,
+      "profiled_request_p99_ms": 3.324917,
+      "completed_originals": 19988480,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ],
+      "top_self": [
+        {
+          "function": "__psynch_cvwait",
+          "cpu_us": 2569298,
+          "percent_of_observed_selected_thread_cpu": 38.31635196668042
+        },
+        {
+          "function": "__psynch_mutexwait",
+          "cpu_us": 323016,
+          "percent_of_observed_selected_thread_cpu": 4.817189266044361
+        },
+        {
+          "function": "_platform_memmove",
+          "cpu_us": 258957,
+          "percent_of_observed_selected_thread_cpu": 3.861867154466186
+        },
+        {
+          "function": "<voteboat_matched_framework::workload::Client>::write::{closure#0}",
+          "cpu_us": 228002,
+          "percent_of_observed_selected_thread_cpu": 3.400230289015548
+        },
+        {
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::pending_replies::PendingReplies<tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::remove",
+          "cpu_us": 198376,
+          "percent_of_observed_selected_thread_cpu": 2.9584130131040447
+        },
+        {
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::pending_replies::PendingReplies<tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::insert",
+          "cpu_us": 195459,
+          "percent_of_observed_selected_thread_cpu": 2.9149113256054333
+        },
+        {
+          "function": "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&u128>",
+          "cpu_us": 181005,
+          "percent_of_observed_selected_thread_cpu": 2.699356512062435
+        },
+        {
+          "function": "mach_absolute_time",
+          "cpu_us": 148632,
+          "percent_of_observed_selected_thread_cpu": 2.2165727858394177
+        },
+        {
+          "function": "<voteboat::log::LogEntry as core::clone::Clone>::clone",
+          "cpu_us": 129473,
+          "percent_of_observed_selected_thread_cpu": 1.9308515548535103
+        },
+        {
+          "function": "<tokio::runtime::scheduler::multi_thread::idle::Idle>::worker_to_notify",
+          "cpu_us": 115051,
+          "percent_of_observed_selected_thread_cpu": 1.7157739624280832
+        }
+      ],
+      "top_named_self": [
+        {
+          "function": "<voteboat_matched_framework::workload::Client>::write::{closure#0}",
+          "cpu_us": 228002,
+          "percent_of_observed_selected_thread_cpu": 3.400230289015548
+        },
+        {
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::pending_replies::PendingReplies<tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::remove",
+          "cpu_us": 198376,
+          "percent_of_observed_selected_thread_cpu": 2.9584130131040447
+        },
+        {
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::pending_replies::PendingReplies<tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::insert",
+          "cpu_us": 195459,
+          "percent_of_observed_selected_thread_cpu": 2.9149113256054333
+        },
+        {
+          "function": "<voteboat::log::LogEntry as core::clone::Clone>::clone",
+          "cpu_us": 129473,
+          "percent_of_observed_selected_thread_cpu": 1.9308515548535103
+        },
+        {
+          "function": "<voteboat::raft::Raft>::append_for",
+          "cpu_us": 77697,
+          "percent_of_observed_selected_thread_cpu": 1.1587077866231044
+        },
+        {
+          "function": "voteboat::log::validate_suffix_entries",
+          "cpu_us": 55967,
+          "percent_of_observed_selected_thread_cpu": 0.8346448214723255
+        }
+      ],
+      "top_named_inclusive": [
+        {
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+          "cpu_us": 1752343,
+          "percent_of_observed_selected_thread_cpu": 26.13297140088408
+        },
+        {
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "cpu_us": 1614492,
+          "percent_of_observed_selected_thread_cpu": 24.077177392186428
+        },
+        {
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::apply_entries",
+          "cpu_us": 1207461,
+          "percent_of_observed_selected_thread_cpu": 18.007058995118474
+        },
+        {
+          "function": "voteboat_matched_framework::workload::client_loop::{closure#0}",
+          "cpu_us": 901347,
+          "percent_of_observed_selected_thread_cpu": 13.44193195811132
+        },
+        {
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::requests",
+          "cpu_us": 736027,
+          "percent_of_observed_selected_thread_cpu": 10.976488359458456
+        },
+        {
+          "function": "<voteboat_matched_framework::workload::Client>::write::{closure#0}",
+          "cpu_us": 667070,
+          "percent_of_observed_selected_thread_cpu": 9.94812159057202
+        },
+        {
+          "function": "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+          "cpu_us": 604880,
+          "percent_of_observed_selected_thread_cpu": 9.020672174891995
+        },
+        {
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::pending_replies::PendingReplies<tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::remove",
+          "cpu_us": 441923,
+          "percent_of_observed_selected_thread_cpu": 6.590468373139788
+        }
+      ],
+      "top_inclusive": [
+        {
+          "function": "tokio::runtime::scheduler::multi_thread::worker::run",
+          "cpu_us": 6589021,
+          "percent_of_observed_selected_thread_cpu": 98.26312391627931
+        },
+        {
+          "function": "tokio::runtime::task::raw::poll::<tokio::runtime::blocking::task::BlockingTask<<tokio::runtime::scheduler::multi_thread::worker::Launch>::launch::{closure#0}>, tokio::runtime::blocking::schedule::BlockingSchedule>",
+          "cpu_us": 6589021,
+          "percent_of_observed_selected_thread_cpu": 98.26312391627931
+        },
+        {
+          "function": "std::sys::backtrace::__rust_begin_short_backtrace::<<tokio::runtime::blocking::pool::Spawner>::spawn_thread::{closure#0}, ()>",
+          "cpu_us": 6589021,
+          "percent_of_observed_selected_thread_cpu": 98.26312391627931
+        },
+        {
+          "function": "_pthread_start",
+          "cpu_us": 6589021,
+          "percent_of_observed_selected_thread_cpu": 98.26312391627931
+        }
+      ],
+      "limits": [
+        "Launch-to-exit profile includes setup, warmup, follower verification, latency sorting and shutdown; not the throughput timer boundary.",
+        "CPU deltas are interval observations assigned to sampled stacks, not instruction-level cost or elapsed wall percentages.",
+        "Samply 0.13.1 sidecar coalesces inline/source chains by native symbol start address; inline lines are representative, not per-RVA precise.",
+        "Sampled stack unwinder truncation not explicitly marked in these files cannot be quantified; null/malformed/unresolved observations are retained and counted.",
+        "matched-server thread names do not identify leader/follower ownership; no leader-specific CPU claim.",
+        "Inclusive function shares overlap and must not be summed; self native-function shares sum to the observed CPU denominator."
+      ]
+    },
+    "singleton": {
+      "cpu_denominator_us": 29388455,
+      "totals": {
+        "samples": 75959,
+        "cpu_us": 29388455,
+        "wall_sample_weight": 285624,
+        "positive_cpu_samples": 71953,
+        "null_stack_cpu_us": 0,
+        "unresolved_leaf_cpu_us": 692524,
+        "any_unresolved_stack_cpu_us": 1279018,
+        "malformed_stack_cpu_us": 0,
+        "zero_cpu_delta_samples": 4006
+      },
+      "threadgroups": {
+        "voteboat-matched-framework": {
+          "cpu_us": 17943,
+          "samples": 32,
+          "threads": 1
+        },
+        "matched-client": {
+          "cpu_us": 3767734,
+          "samples": 15844,
+          "threads": 1
+        },
+        "matched-server": {
+          "cpu_us": 25602778,
+          "samples": 60083,
+          "threads": 16
+        }
+      },
+      "excluded_threads": [],
+      "profiled_originals_per_second": 66199.61023503427,
+      "profiled_request_p99_ms": 0.034041,
+      "completed_originals": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "top_self": [
+        {
+          "function": "__psynch_cvwait",
+          "cpu_us": 21393287,
+          "percent_of_observed_selected_thread_cpu": 72.79486791667
+        },
+        {
+          "function": "__psynch_cvsignal",
+          "cpu_us": 1908281,
+          "percent_of_observed_selected_thread_cpu": 6.493301536266538
+        },
+        {
+          "function": "_platform_memmove",
+          "cpu_us": 679506,
+          "percent_of_observed_selected_thread_cpu": 2.3121528504986055
+        },
+        {
+          "function": "mach_absolute_time",
+          "cpu_us": 576887,
+          "percent_of_observed_selected_thread_cpu": 1.9629715138138428
+        },
+        {
+          "function": "<tokio::sync::notify::NotifiedProject>::poll_notified",
+          "cpu_us": 249885,
+          "percent_of_observed_selected_thread_cpu": 0.8502828746866754
+        },
+        {
+          "function": "tokio::runtime::scheduler::multi_thread::worker::run",
+          "cpu_us": 197608,
+          "percent_of_observed_selected_thread_cpu": 0.6724000972490728
+        },
+        {
+          "function": "<voteboat::log::transition::view::LogMetadata as core::cmp::PartialEq>::eq",
+          "cpu_us": 196708,
+          "percent_of_observed_selected_thread_cpu": 0.6693376701837507
+        },
+        {
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "cpu_us": 172966,
+          "percent_of_observed_selected_thread_cpu": 0.5885508442005543
+        },
+        {
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "cpu_us": 146725,
+          "percent_of_observed_selected_thread_cpu": 0.49926067906598015
+        },
+        {
+          "function": "<tokio::runtime::scheduler::multi_thread::worker::Context>::park_internal",
+          "cpu_us": 122729,
+          "percent_of_observed_selected_thread_cpu": 0.417609568111015
+        }
+      ],
+      "top_named_self": [
+        {
+          "function": "<voteboat::log::transition::view::LogMetadata as core::cmp::PartialEq>::eq",
+          "cpu_us": 196708,
+          "percent_of_observed_selected_thread_cpu": 0.6693376701837507
+        },
+        {
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "cpu_us": 172966,
+          "percent_of_observed_selected_thread_cpu": 0.5885508442005543
+        },
+        {
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "cpu_us": 146725,
+          "percent_of_observed_selected_thread_cpu": 0.49926067906598015
+        },
+        {
+          "function": "<voteboat::raft::Raft>::step",
+          "cpu_us": 113652,
+          "percent_of_observed_selected_thread_cpu": 0.3867232898088722
+        },
+        {
+          "function": "<voteboat::raft::Raft>::finish_completion",
+          "cpu_us": 74779,
+          "percent_of_observed_selected_thread_cpu": 0.25445025946413313
+        },
+        {
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "cpu_us": 72372,
+          "percent_of_observed_selected_thread_cpu": 0.24625996841276618
+        }
+      ],
+      "top_named_inclusive": [
+        {
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+          "cpu_us": 4150521,
+          "percent_of_observed_selected_thread_cpu": 14.122964272875182
+        },
+        {
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "cpu_us": 3628571,
+          "percent_of_observed_selected_thread_cpu": 12.346926709825338
+        },
+        {
+          "function": "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+          "cpu_us": 1806302,
+          "percent_of_observed_selected_thread_cpu": 6.146297925494893
+        },
+        {
+          "function": "<voteboat::raft::Raft>::step",
+          "cpu_us": 1246093,
+          "percent_of_observed_selected_thread_cpu": 4.240076587898207
+        },
+        {
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::requests",
+          "cpu_us": 1010592,
+          "percent_of_observed_selected_thread_cpu": 3.438738103108857
+        },
+        {
+          "function": "<voteboat::raft::Raft>::receive_inner",
+          "cpu_us": 911106,
+          "percent_of_observed_selected_thread_cpu": 3.1002174153081543
+        },
+        {
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "cpu_us": 871913,
+          "percent_of_observed_selected_thread_cpu": 2.966855522006856
+        },
+        {
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::apply_entries",
+          "cpu_us": 802542,
+          "percent_of_observed_selected_thread_cpu": 2.7308070465085694
+        }
+      ],
+      "top_inclusive": [
+        {
+          "function": "<std::thread::lifecycle::spawn_unchecked<<tokio::runtime::blocking::pool::Spawner>::spawn_thread::{closure#0}, ()>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}",
+          "cpu_us": 29370512,
+          "percent_of_observed_selected_thread_cpu": 99.93894541240769
+        },
+        {
+          "function": "tokio::runtime::task::raw::poll::<tokio::runtime::blocking::task::BlockingTask<<tokio::runtime::scheduler::multi_thread::worker::Launch>::launch::{closure#0}>, tokio::runtime::blocking::schedule::BlockingSchedule>",
+          "cpu_us": 29370512,
+          "percent_of_observed_selected_thread_cpu": 99.93894541240769
+        },
+        {
+          "function": "<std::sys::thread::unix::Thread>::new::thread_start",
+          "cpu_us": 29370512,
+          "percent_of_observed_selected_thread_cpu": 99.93894541240769
+        },
+        {
+          "function": "tokio::runtime::scheduler::multi_thread::worker::run",
+          "cpu_us": 29370512,
+          "percent_of_observed_selected_thread_cpu": 99.93894541240769
+        }
+      ],
+      "limits": [
+        "Launch-to-exit profile includes setup, warmup, follower verification, latency sorting and shutdown; not the throughput timer boundary.",
+        "CPU deltas are interval observations assigned to sampled stacks, not instruction-level cost or elapsed wall percentages.",
+        "Samply 0.13.1 sidecar coalesces inline/source chains by native symbol start address; inline lines are representative, not per-RVA precise.",
+        "Sampled stack unwinder truncation not explicitly marked in these files cannot be quantified; null/malformed/unresolved observations are retained and counted.",
+        "matched-server thread names do not identify leader/follower ownership; no leader-specific CPU claim.",
+        "Inclusive function shares overlap and must not be summed; self native-function shares sum to the observed CPU denominator."
+      ]
+    }
+  }
+}

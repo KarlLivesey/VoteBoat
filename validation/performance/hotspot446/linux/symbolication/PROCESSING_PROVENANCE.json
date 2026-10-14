@@ -1,0 +1,29 @@
+{
+  "capture_original_handle": 32690,
+  "capture_actual_terminal": 0,
+  "capture_terminal_tool": "0a2779",
+  "imports_actual_terminal": 0,
+  "imports_tool": "82e994",
+  "symbol_server_original_handle": 17420,
+  "symbol_server_PID": 838355,
+  "symbol_server_actual_terminal": 0,
+  "symbol_server_terminal_tool": "99c9bf",
+  "symbol_queries_actual_terminal": 0,
+  "symbol_queries_tool": "968899",
+  "subsets_original_handle": 70728,
+  "subsets_actual_terminal": 0,
+  "subsets_terminal_tool": "4dcb02",
+  "client_contexts_actual_terminal": 0,
+  "client_contexts_tool": "db3822",
+  "perf_text_and_guard_after_actual_terminal": 0,
+  "perf_text_and_guard_after_tool": "f812d7",
+  "initial_metadata_error": "PREP_INITIAL_FAILURE.json",
+  "initial_stop_error": {
+    "actual_tool": "eb16e9",
+    "actual_exit": 1,
+    "raw_exception": "FileNotFoundError /proc/838355/cmdline",
+    "cause": "Sandbox namespace did not expose owned escalated server; no signal issued. Escalated exactPID verification+SIGINT then originalterminal0."
+  },
+  "joint_quiet": "Root granted after both setups END; Linux actualEND held imports until Mac actualEND/release. No known competing host work during recording.",
+  "current_frame_predicate_validation": "Both new PendingReplies::insert/remove and HashMap<u128,usize> entry/get/remove resolved spellings present in new ADDRESS_SYMBOLS. Actor::include not observed; zero count does not prove zero execution."
+}

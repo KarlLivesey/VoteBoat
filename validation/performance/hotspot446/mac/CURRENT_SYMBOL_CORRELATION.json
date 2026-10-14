@@ -1,0 +1,38 @@
+{
+  "bulk": {
+    "raw_current_binary_library": {
+      "name": "voteboat-matched-framework",
+      "path": "/tmp/voteboat-mac446-6c7f09b-pTKRWg/artifacts/matched/voteboat-matched-framework",
+      "debugName": "voteboat-matched-framework",
+      "debugPath": "/tmp/voteboat-mac446-6c7f09b-pTKRWg/artifacts/matched/voteboat-matched-framework",
+      "breakpadId": "663BBAB1AE483165A8C38E9252D06BAA0",
+      "codeId": "663BBAB1AE483165A8C38E9252D06BAA",
+      "arch": "arm64"
+    },
+    "sidecar_current_binary_debug_name": "voteboat-matched-framework",
+    "sidecar_current_binary_debug_id": "663bbab1-ae48-3165-a8c3-8e9252d06baa",
+    "known_addresses": 1230,
+    "native_symbol_entries": 223,
+    "raw_sha256": "87e486f337814bec187a06b3bf0d58e34d8455a0b9f0621c680c04ce7d23fce2",
+    "sidecar_sha256": "74f2734e6638773175e86b6ea1ba28245998e301b89136f61cf64fa7e1dbff20",
+    "currentUUIDmatches": true
+  },
+  "singleton": {
+    "raw_current_binary_library": {
+      "name": "voteboat-matched-framework",
+      "path": "/tmp/voteboat-mac446-6c7f09b-pTKRWg/artifacts/matched/voteboat-matched-framework",
+      "debugName": "voteboat-matched-framework",
+      "debugPath": "/tmp/voteboat-mac446-6c7f09b-pTKRWg/artifacts/matched/voteboat-matched-framework",
+      "breakpadId": "663BBAB1AE483165A8C38E9252D06BAA0",
+      "codeId": "663BBAB1AE483165A8C38E9252D06BAA",
+      "arch": "arm64"
+    },
+    "sidecar_current_binary_debug_name": "voteboat-matched-framework",
+    "sidecar_current_binary_debug_id": "663bbab1-ae48-3165-a8c3-8e9252d06baa",
+    "known_addresses": 2646,
+    "native_symbol_entries": 176,
+    "raw_sha256": "24ccbad1852c3c9155b106f7f35ac69d12c00766adc2d82985526b3102844c12",
+    "sidecar_sha256": "77e3b98891ec4f9fa90b5d409e76065ed5a211a985d2cae33210e0e9751fb89d",
+    "currentUUIDmatches": true
+  }
+}

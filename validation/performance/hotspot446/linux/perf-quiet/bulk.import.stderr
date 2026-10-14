@@ -1,0 +1,3 @@
+cmd line: /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf
+event cycles:u
+bad timestamp ordering; 0 is earlier but arrived after 151741864475621

@@ -1,0 +1,22 @@
+{
+  "original_capture_handle": 76698,
+  "capture_actual_terminal_tool": "df5f8e",
+  "capture_actual_exit": 0,
+  "originalPID": 51699,
+  "validation_conversion_handle": 69524,
+  "validation_conversion_actual_exit": 0,
+  "compact_readout_handle": 85539,
+  "compact_readout_exit": 0,
+  "context_query_handle": 4871,
+  "context_query_exit": 0,
+  "package_handle": 93108,
+  "package_exit": 0,
+  "copy_handle": 59354,
+  "copy_exit": 0,
+  "archive_sha256": "4dea7505b53240129164c5446a055fee03a97056d0a7daa1747342e6672a4d4b",
+  "raw_remote_payloads_independently_verified": 73,
+  "all_four_folded_decompression_hashes_independently_verified_locally": true,
+  "no_recapture_build_browser_or_Pi": true,
+  "jointquietreleased_before_analysis_and_copy": true,
+  "owned_symbol_servers": 0
+}

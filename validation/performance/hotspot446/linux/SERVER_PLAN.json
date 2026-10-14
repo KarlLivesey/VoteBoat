@@ -1,0 +1,17 @@
+{
+  "after_joint_END_only": true,
+  "command": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply",
+    "load",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile447/linux/perf-quiet/bulk.json.gz",
+    "--no-open",
+    "--address",
+    "127.0.0.1",
+    "--port",
+    "38479",
+    "--symbol-dir",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched446-linux/target-matched-release/release"
+  ],
+  "ownership": "Track original process handle/PID, query localhost JSON only, stop verified owned server after both profiles symbolicated. No browser/remote server.",
+  "state": "NOTRUN"
+}

@@ -1,0 +1,8 @@
+{
+  "actual_tool": "79ed41",
+  "actual_exit": 1,
+  "stage": "metadata assembly AFTER actual tool versions, pair guard exit0, all selected current source hash/mode and kernel/process/CLI checks",
+  "cause": "Linux proof is SYMBOLS.json; copied Darwin filename SYMBOL_ARTIFACTS.json absent",
+  "raw_exception": "FileNotFoundError: target/p9/matched446-linux/SYMBOL_ARTIFACTS.json",
+  "focused_fix": "Reference actual existing SYMBOLS.json only; no build/test/tool/guard rerun"
+}

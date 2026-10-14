@@ -1,0 +1,22 @@
+{
+  "prior_proof": "/home/karllivesey/Documents/ChatGPT/VoteBoat/validation/performance/slice440/profile-selection/RESOLUTION.json",
+  "prior_proof_sha256": "004c2bdcb0bf696f2ea1e2479cef8cff2fb85071d22ce82fdb1e4ebcbc43bca1",
+  "current_saved_libc": {
+    "name": "libc.so.6",
+    "path": "/usr/lib/libc.so.6",
+    "debugName": "libc.so.6",
+    "debugPath": "/usr/lib/libc.so.6",
+    "breakpadId": "5FBA1A14655A49E9C59AEDB6FD3B267F0",
+    "codeId": "141aba5f5a65e949c59aedb6fd3b267fcad54abf",
+    "arch": null
+  },
+  "current_libc_sha256": "911cf3db7875760dc893b464ae89bddd4f697a377c710ffc13b84f67cbe1237b",
+  "exact_codeID_and_library_bytes_match": true,
+  "function_start_rva": "0x1b7ac0",
+  "resolved_family_aliases": [
+    "memcpy",
+    "memmove"
+  ],
+  "raw_placeholder_preserved": "fun_1b7ac0",
+  "limits": "Reuse only exact current unchanged libc build identity and RVA proof; this is a shared memcpy/memmove implementation, not allocator or byte/call counts. No new symbol resolver/build/profile run."
+}

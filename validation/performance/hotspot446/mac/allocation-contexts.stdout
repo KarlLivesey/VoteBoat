@@ -1,0 +1,6 @@
+bulk denom 6705487
+unresolved_malloc_library_leaf 472254 7.043 contexts {'workload_client_write': 4.172, 'client_loop': 4.99, 'Actor_requests': 1.081, 'Raft_append_for': 0.245}
+resolved_allocation_leaf 13425 0.2 contexts {'workload_client_write': 0.0, 'client_loop': 0.0, 'Actor_requests': 0.052, 'Raft_append_for': 0.086}
+singleton denom 29388455
+unresolved_malloc_library_leaf 523780 1.782 contexts {'workload_client_write': 0.02, 'client_loop': 0.023, 'Actor_requests': 0.392, 'Raft_append_for': 0.026}
+resolved_allocation_leaf 42341 0.144 contexts {'workload_client_write': 0.0, 'client_loop': 0.0, 'Actor_requests': 0.045, 'Raft_append_for': 0.035}

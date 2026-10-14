@@ -1,0 +1,109 @@
+{
+  "selected_sample_weight": 17715,
+  "contexts": {
+    "client_write_context": {
+      "sample_weight": 373,
+      "percent_of_selected": 2.105560259666949
+    },
+    "client_alloc_dealloc_context": {
+      "sample_weight": 94,
+      "percent_of_selected": 0.5306237651707593
+    },
+    "client_oneshot_construct_context": {
+      "sample_weight": 16,
+      "percent_of_selected": 0.09031893875246966
+    },
+    "client_oneshot_construct_alloc_context": {
+      "sample_weight": 0,
+      "percent_of_selected": 0.0
+    },
+    "client_receiver_poll_context": {
+      "sample_weight": 96,
+      "percent_of_selected": 0.541913632514818
+    },
+    "client_receiver_poll_alloc_context": {
+      "sample_weight": 0,
+      "percent_of_selected": 0.0
+    },
+    "client_oneshot_sender_context": {
+      "sample_weight": 0,
+      "percent_of_selected": 0.0
+    },
+    "client_mpsc_request_send_context": {
+      "sample_weight": 153,
+      "percent_of_selected": 0.8636748518204911
+    },
+    "client_flat_originals_vec_construction": {
+      "sample_weight": 94,
+      "percent_of_selected": 0.5306237651707593
+    },
+    "client_waits_vec_construction": {
+      "sample_weight": 0,
+      "percent_of_selected": 0.0
+    }
+  },
+  "per_RVA_engine_client_source_context": [
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched446-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 226,
+      "sample_weight": 153,
+      "percent_of_selected": 0.8636748518204911
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched446-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 228,
+      "sample_weight": 96,
+      "percent_of_selected": 0.541913632514818
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched446-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 214,
+      "sample_weight": 94,
+      "percent_of_selected": 0.5306237651707593
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched446-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 218,
+      "sample_weight": 16,
+      "percent_of_selected": 0.09031893875246966
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched446-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 231,
+      "sample_weight": 3,
+      "percent_of_selected": 0.01693480101608806
+    }
+  ],
+  "engine_client_source_in_native_leaf_RVA": [
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched446-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 226,
+      "sample_weight": 92,
+      "percent_of_selected": 0.5193338978267006
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched446-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 228,
+      "sample_weight": 67,
+      "percent_of_selected": 0.3782105560259667
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched446-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 218,
+      "sample_weight": 16,
+      "percent_of_selected": 0.09031893875246966
+    }
+  ],
+  "unresolved_classification": {
+    "wrapper_without_engine_inline": 11
+  },
+  "limits": [
+    "Inclusive context intersections overlap; do not add them or subtract to estimate CPU costs.",
+    "Current flat Original constructor and existing waits Vec are classified; absent constructor frames mean unknown cost, not zero allocation.",
+    "Source/inline attribution is actual current446 per-address response; optimized/missing frames prevent an exhaustive partition.",
+    "Allocation/deallocation and Vec constructor contexts are sampled work, not allocator call counts, bytes or causality.",
+    "Receiver polling includes ready, pending and error checks; no wake/re-poll counts or blocked duration inferred.",
+    "No channels/outcomes removed; changing await order still requires failure/cancel contract review.",
+    "Actual435 capture losses/import warnings retained separately; no missing samples reconstructed."
+  ]
+}

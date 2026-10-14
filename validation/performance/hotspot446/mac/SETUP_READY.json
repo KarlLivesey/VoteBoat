@@ -1,0 +1,45 @@
+{
+  "status": "SETUP_READY_NO_RECORDING",
+  "candidate": "/tmp/voteboat-mac446-6c7f09b-pTKRWg",
+  "pair": "/tmp/voteboat-comparison446-0LuWYB",
+  "source_commit": "6c7f09b2c7d14606bc1d4308b83b5a5974f3ab19",
+  "source_inputs": 1439,
+  "published_evidence_head": "f81ac21ad3273a00b4e2b8a5887fa13bc6db330f",
+  "all_current_compiled_projection_inputs_identical": true,
+  "current_tool_compiler_equal_qualified446": true,
+  "exe_sha256": "244f9ce1623e03e5bc9a2277b4afd22f48bade3b9a6505364d69fed5a78825f9",
+  "UUID": "663BBAB1-AE48-3165-A8C3-8E9252D06BAA",
+  "dSYM_files": [
+    {
+      "original": "/tmp/voteboat-mac446-6c7f09b-pTKRWg/target-matched-release/release/voteboat-matched-framework.dSYM/Contents/Info.plist",
+      "copy": "/private/tmp/voteboat-mac446-6c7f09b-pTKRWg/artifacts/symbols/voteboat-matched-framework.dSYM/Contents/Info.plist",
+      "sha256": "754692e1a72a62f1adc10a1c1cfe396c1b8fac3a518bbf775955418314c3f78c"
+    },
+    {
+      "original": "/tmp/voteboat-mac446-6c7f09b-pTKRWg/target-matched-release/release/voteboat-matched-framework.dSYM/Contents/Resources/Relocations/aarch64/voteboat_matched_framework-02dde9b640a44fba.yml",
+      "copy": "/private/tmp/voteboat-mac446-6c7f09b-pTKRWg/artifacts/symbols/voteboat-matched-framework.dSYM/Contents/Resources/Relocations/aarch64/voteboat_matched_framework-02dde9b640a44fba.yml",
+      "sha256": "256d5371e2363aece06b9d3daca8f5610f41a08a936895856b34f0efe05369aa"
+    },
+    {
+      "original": "/tmp/voteboat-mac446-6c7f09b-pTKRWg/target-matched-release/release/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-02dde9b640a44fba",
+      "copy": "/private/tmp/voteboat-mac446-6c7f09b-pTKRWg/artifacts/symbols/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-02dde9b640a44fba",
+      "sha256": "ad4e9123b0b98accdd4ef89f3cb34bdeb95ef9cb8482bfe6d8e4cece83df3dbe"
+    }
+  ],
+  "metadata_only_adjacent_symbol_symlink": {
+    "path": "/private/tmp/voteboat-mac446-6c7f09b-pTKRWg/artifacts/matched/voteboat-matched-framework.dSYM",
+    "target": "/private/tmp/voteboat-mac446-6c7f09b-pTKRWg/artifacts/symbols/voteboat-matched-framework.dSYM"
+  },
+  "samply_version": "samply 0.13.1",
+  "samply_sha256": "dcf042115dd8a9e8582510f403365cbee1a2025405d0f3ebe95162f31943123b",
+  "scripts_sha256": {
+    "allocation-contexts.py": "a91ca1e3e5a0a57f361ebd4c7ebaa8f1e36c2114d4c64d67c712c13a879b535d",
+    "validate-profiles.py": "865b5f0808ec345518b287c304c63384537037917728dc3eee7525248bd34b93",
+    "samply-collapse.py": "b4d85920f686bd055816184afeae04dd6bc240737ed49c3d6947fd7ca1bf35a1",
+    "run-recordings.sh": "a699351e2ca4fa4c7e5f09521df9a276e7beb5e3b9d35dd69851e1ab6fa02e0b",
+    "copy-contexts.py": "b1e4e9b7ea1fd5ac0cb68ec03f16692df4b5d1ccc245ec99dee95f95edd3f988"
+  },
+  "no_live_competing_jobs": true,
+  "capture": "20Mrequestedbulk19988480+1024warmups then1048576singleton+1024;attributionOFF/defaultmaintenance/upstreamenvelopes/runtime1+16;1000Hzsave-onlyunstable-presymbolicate",
+  "scope": "headlesswholelaunchMachCPUdelta interval/waitbias; no leaderCPU/timerCPU/wallpercent or allocatorcause; no build/newtools/settings/Pi/browser/SVG; no recording untiljointquietgrant"
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "original": "bulk-analysis/cpu.folded",
+    "gzip": "bulk-analysis/cpu.folded.gz",
+    "original_sha256": "48393a6190172356f87d1706ff2ed8e6e682c0e9605d9ee968bad37b32b46be5",
+    "original_bytes": 14113530,
+    "compressed_sha256": "7b0e123ee913ce30f2074bf56abdf7372469901e960974da6b986379221cc73b",
+    "compressed_bytes": 180450,
+    "independent_decompression_verified": true
+  },
+  {
+    "original": "bulk-analysis/wall-sample-weights.folded",
+    "gzip": "bulk-analysis/wall-sample-weights.folded.gz",
+    "original_sha256": "6a7344b02d211225973985ef3791bf5eeda194bdcc982dd4ab593a80587481af",
+    "original_bytes": 14110814,
+    "compressed_sha256": "b24c0cb452207ec0854fae633eaf3468797c13974debaf4144a1e035c56bc1d7",
+    "compressed_bytes": 177285,
+    "independent_decompression_verified": true
+  },
+  {
+    "original": "singleton-analysis/cpu.folded",
+    "gzip": "singleton-analysis/cpu.folded.gz",
+    "original_sha256": "bb4b200e7ff10276d7cde3caff0078a7d5dd50058d577c6b6a76b2ad43f034ab",
+    "original_bytes": 22356549,
+    "compressed_sha256": "a779c327bc7926c41b624796654159be283cea9003a4c3e7c4ceaac9c56bad53",
+    "compressed_bytes": 236998,
+    "independent_decompression_verified": true
+  },
+  {
+    "original": "singleton-analysis/wall-sample-weights.folded",
+    "gzip": "singleton-analysis/wall-sample-weights.folded.gz",
+    "original_sha256": "614251cc59b305bcb5a6c44d8cba579125673b2c5fe439200a4b817d16df05c3",
+    "original_bytes": 22350475,
+    "compressed_sha256": "5f5cd3e08a24071a9a528cf9d23eff83182690e5e16d1df47857f47397431b0e",
+    "compressed_bytes": 229965,
+    "independent_decompression_verified": true
+  }
+]

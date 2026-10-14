@@ -1,0 +1,10 @@
+{
+  "pid": 838355,
+  "verified_cmdline": "target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply load target/p9/profile447/linux/perf-quiet/bulk.json.gz --no-open --address 127.0.0.1 --port 38479 --symbol-dir target/p9/matched446-linux/target-matched-release/release ",
+  "signal": "SIGINT",
+  "request_unix": 1791980458.332326,
+  "original_exec_handle": 17420,
+  "actual_terminal_exit": 0,
+  "first_stop_attempt": "Sandbox proc namespace could not see owned escalated server PID; no signal issued in first attempt tool eb16e9 exit1.",
+  "terminal_tool": "99c9bf"
+}

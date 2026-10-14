@@ -1,0 +1,514 @@
+{
+  "denominator": 17715,
+  "unit": "saved Samply application-thread sample weights",
+  "predicates": {
+    "entry_eq": "<voteboat::log::LogEntry as core::slice::cmp::SlicePartialEq<voteboat::log::LogEntry>>::equal_same_length present in native/per-address-inline stack",
+    "compaction": "function starts voteboat::snapshot::compact_replica::<",
+    "matches_state": "<voteboat_matched_framework::store::MemoryStore as voteboat::log::LogStore>::matches_state or its closure present",
+    "entry_direct_eq": "LogEntry PartialEq::eq or ::ne exact native/per-RVA inline context; includes direct loop comparisons",
+    "entry_eq_any": "union of entry_eq SliceEq and entry_direct_eq contexts",
+    "checkpoint_provider": "MemoryStore LogStore matches_checkpoint_state native/per-RVA inline context",
+    "checkpoint_protected_comparison": "CheckpointComparison compare/compare_inner context",
+    "owned_next_matches_update": "OwnedNextLog matches_update context",
+    "suffix_eq": "Suffix PartialEq exact context",
+    "persist_helper_context": "persist_effect orpersist_effect_borrowed native/per-RVA inline context, inclusive overlapping",
+    "actor_include_admission_context": "Actor::include exact context, pending original admission",
+    "actor_requests_context": "Actor::requests exact context, includes proposal effects",
+    "actor_deliver_results_context": "Actor::deliver ordeliver_results exact context, pending map removal + original send",
+    "actor_apply_application_context": "Actor::apply orapply_entries exact context",
+    "actor_collect_context": "Actor::collect exact context, includes batched proposal admission; absent symbol does not imply no cost",
+    "pending_map_insert_context": "PendingReplies<original oneshot Sender>::insert resolved context",
+    "pending_map_remove_context": "PendingReplies<original oneshot Sender>::remove resolved context",
+    "pending_operation_map_context": "PendingReplies<original oneshot Sender> resolved method context; cohort dictionary HashMap<u128,usize> is separately overlapping",
+    "cohort_dictionary_context": "std HashMap<u128,usize> exact resolved context, overlapping PendingReplies/actor contexts; unresolved/optimized frames can hide execution",
+    "oneshot_result_send_context": "oneshot::Sender<OperationId>::send context",
+    "entry_clone_context": "LogEntry Clone::clone or LogEntry ConvertVec::to_vec exact context",
+    "entry_clone_receive_suffix": "take_append_suffix fallback clone frame intersection; not transfer fraction, call/byte count or all receive descendants",
+    "entry_clone_pending_plan": "entry clone plus independent OwnedNextLog::plan_copy context, retained intentionally",
+    "entry_clone_durable_completion": "entry clone plus Raft::complete committed-effect context",
+    "entry_clone_materialize": "entry clone plus LogView::materialize context; may also overlap pending plan",
+    "actor_collect_allocation": "collect intersect sampled allocation/deallocation context; not allocation count/cause",
+    "byte_vec_clone_context": "Vec<u8> Clone::clone exact per-RVA context; no byte-length inferred from stack",
+    "scheduler_native_self": "only native leaf in tokio::runtime::scheduler, not executor ancestor contexts",
+    "clone_related": "clone/to_vec function context present; not clone-call count",
+    "allocation_deallocation_related": "alloc::alloc/Global allocation, rust allocation shim or malloc/calloc/realloc/free context; not allocation count"
+  },
+  "subsets": {
+    "entry_eq": {
+      "sample_weight": 3,
+      "percent_of_all_selected_samples": 0.01693480101608806
+    },
+    "compaction": {
+      "sample_weight": 28,
+      "percent_of_all_selected_samples": 0.1580581428168219
+    },
+    "matches_state": {
+      "sample_weight": 0,
+      "percent_of_all_selected_samples": 0.0
+    },
+    "entry_eq_and_compaction": {
+      "sample_weight": 0,
+      "percent_of_all_selected_samples": 0.0
+    },
+    "entry_eq_without_compaction": {
+      "sample_weight": 3,
+      "percent_of_all_selected_samples": 0.01693480101608806
+    },
+    "matches_state_and_compaction": {
+      "sample_weight": 0,
+      "percent_of_all_selected_samples": 0.0
+    },
+    "matches_state_without_compaction": {
+      "sample_weight": 0,
+      "percent_of_all_selected_samples": 0.0
+    },
+    "compaction_without_entry_eq": {
+      "sample_weight": 28,
+      "percent_of_all_selected_samples": 0.1580581428168219
+    },
+    "clone_related": {
+      "sample_weight": 569,
+      "percent_of_all_selected_samples": 3.211967259384702
+    },
+    "allocation_deallocation_related": {
+      "sample_weight": 953,
+      "percent_of_all_selected_samples": 5.379621789443974
+    },
+    "clone_without_compaction": {
+      "sample_weight": 569,
+      "percent_of_all_selected_samples": 3.211967259384702
+    },
+    "entry_direct_eq": {
+      "sample_weight": 15,
+      "percent_of_all_selected_samples": 0.0846740050804403
+    },
+    "entry_eq_any": {
+      "sample_weight": 16,
+      "percent_of_all_selected_samples": 0.09031893875246966
+    },
+    "checkpoint_and_entry_direct_eq": {
+      "sample_weight": 13,
+      "percent_of_all_selected_samples": 0.0733841377363816
+    },
+    "checkpoint_without_entry_direct_eq": {
+      "sample_weight": 0,
+      "percent_of_all_selected_samples": 0.0
+    },
+    "entry_eq_any_without_compaction": {
+      "sample_weight": 3,
+      "percent_of_all_selected_samples": 0.01693480101608806
+    },
+    "entry_eq_any_and_compaction": {
+      "sample_weight": 13,
+      "percent_of_all_selected_samples": 0.0733841377363816
+    },
+    "checkpoint_provider": {
+      "sample_weight": 13,
+      "percent_of_all_selected_samples": 0.0733841377363816
+    },
+    "checkpoint_protected_comparison": {
+      "sample_weight": 13,
+      "percent_of_all_selected_samples": 0.0733841377363816
+    },
+    "checkpoint_and_entry_eq": {
+      "sample_weight": 0,
+      "percent_of_all_selected_samples": 0.0
+    },
+    "checkpoint_without_entry_eq": {
+      "sample_weight": 13,
+      "percent_of_all_selected_samples": 0.0733841377363816
+    },
+    "checkpoint_and_compaction": {
+      "sample_weight": 13,
+      "percent_of_all_selected_samples": 0.0733841377363816
+    },
+    "checkpoint_without_compaction": {
+      "sample_weight": 0,
+      "percent_of_all_selected_samples": 0.0
+    },
+    "owned_next_matches_update": {
+      "sample_weight": 9,
+      "percent_of_all_selected_samples": 0.05080440304826418
+    },
+    "suffix_eq": {
+      "sample_weight": 4,
+      "percent_of_all_selected_samples": 0.022579734688117414
+    },
+    "owned_next_and_entry_eq": {
+      "sample_weight": 3,
+      "percent_of_all_selected_samples": 0.01693480101608806
+    },
+    "owned_next_without_entry_eq": {
+      "sample_weight": 6,
+      "percent_of_all_selected_samples": 0.03386960203217612
+    },
+    "owned_next_and_suffix_eq": {
+      "sample_weight": 4,
+      "percent_of_all_selected_samples": 0.022579734688117414
+    },
+    "owned_next_without_compaction": {
+      "sample_weight": 9,
+      "percent_of_all_selected_samples": 0.05080440304826418
+    },
+    "persist_helper_context": {
+      "sample_weight": 4199,
+      "percent_of_all_selected_samples": 23.703076488851256
+    },
+    "actor_include_admission_context": {
+      "sample_weight": 0,
+      "percent_of_all_selected_samples": 0.0
+    },
+    "actor_requests_context": {
+      "sample_weight": 1934,
+      "percent_of_all_selected_samples": 10.91730172170477
+    },
+    "actor_deliver_results_context": {
+      "sample_weight": 323,
+      "percent_of_all_selected_samples": 1.8233135760654813
+    },
+    "actor_apply_application_context": {
+      "sample_weight": 440,
+      "percent_of_all_selected_samples": 2.4837708156929157
+    },
+    "pending_operation_map_context": {
+      "sample_weight": 77,
+      "percent_of_all_selected_samples": 0.4346598927462602
+    },
+    "cohort_dictionary_context": {
+      "sample_weight": 55,
+      "percent_of_all_selected_samples": 0.31047135196161446
+    },
+    "oneshot_result_send_context": {
+      "sample_weight": 277,
+      "percent_of_all_selected_samples": 1.563646627152131
+    },
+    "entry_clone_context": {
+      "sample_weight": 145,
+      "percent_of_all_selected_samples": 0.8185153824442563
+    },
+    "entry_clone_with_persist": {
+      "sample_weight": 1,
+      "percent_of_all_selected_samples": 0.005644933672029354
+    },
+    "entry_clone_without_persist": {
+      "sample_weight": 144,
+      "percent_of_all_selected_samples": 0.8128704487722269
+    },
+    "entry_clone_pending_plan": {
+      "sample_weight": 69,
+      "percent_of_all_selected_samples": 0.3895004233700254
+    },
+    "entry_clone_durable_completion": {
+      "sample_weight": 0,
+      "percent_of_all_selected_samples": 0.0
+    },
+    "entry_clone_receive_suffix": {
+      "sample_weight": 72,
+      "percent_of_all_selected_samples": 0.40643522438611346
+    },
+    "entry_clone_materialize": {
+      "sample_weight": 0,
+      "percent_of_all_selected_samples": 0.0
+    },
+    "actor_collect_allocation": {
+      "sample_weight": 3,
+      "percent_of_all_selected_samples": 0.01693480101608806
+    },
+    "scheduler_native_self": {
+      "sample_weight": 2417,
+      "percent_of_all_selected_samples": 13.643804685294947
+    },
+    "actor_collect_context": {
+      "sample_weight": 164,
+      "percent_of_all_selected_samples": 0.925769122212814
+    },
+    "pending_map_insert_context": {
+      "sample_weight": 34,
+      "percent_of_all_selected_samples": 0.19192774484899802
+    },
+    "pending_map_remove_context": {
+      "sample_weight": 43,
+      "percent_of_all_selected_samples": 0.24273214789726222
+    },
+    "byte_vec_clone_context": {
+      "sample_weight": 0,
+      "percent_of_all_selected_samples": 0.0
+    },
+    "entry_clone_with_byte_vec_clone": {
+      "sample_weight": 0,
+      "percent_of_all_selected_samples": 0.0
+    }
+  },
+  "entry_eq_outside_compaction_top5_project_ancestries": [
+    {
+      "root_to_eq_parent": [
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::persist",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}::{closure#0}",
+        "<voteboat::log::transition::incoming::OwnedNextLog>::matches_update",
+        "<voteboat::log::Suffix as core::cmp::PartialEq>::eq"
+      ],
+      "sample_weight": 3,
+      "percent_of_all_selected_samples": 0.01693480101608806,
+      "percent_of_entry_eq_without_compaction": 100.0
+    }
+  ],
+  "entry_clone_top5_project_ancestries": [
+    {
+      "root_to_clone_parent": [
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+        "<voteboat::raft::Raft>::step",
+        "<voteboat::raft::Raft>::receive",
+        "<voteboat::raft::Raft>::receive_inner",
+        "<voteboat::raft::Raft>::receive_append",
+        "<voteboat::raft::Raft>::receive_append::{closure#1}",
+        "<voteboat::raft::Raft>::take_append_suffix"
+      ],
+      "sample_weight": 72,
+      "percent_of_all_selected_samples": 0.40643522438611346
+    },
+    {
+      "root_to_clone_parent": [
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+        "<voteboat::raft::Raft>::step",
+        "<voteboat::raft::Raft>::receive",
+        "<voteboat::raft::Raft>::receive_inner",
+        "<voteboat::raft::Raft>::receive_append",
+        "<voteboat::raft::Raft>::persist",
+        "<voteboat::raft::Raft>::persist_update",
+        "<voteboat::log::transition::incoming::OwnedNextLog>::plan_copy",
+        "<voteboat::log::LogUpdate as core::clone::Clone>::clone",
+        "<voteboat::log::Suffix as core::clone::Clone>::clone"
+      ],
+      "sample_weight": 50,
+      "percent_of_all_selected_samples": 0.2822466836014677
+    },
+    {
+      "root_to_clone_parent": [
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::requests",
+        "<voteboat::raft::Raft>::step",
+        "<voteboat::raft::Raft>::propose",
+        "<voteboat::raft::Raft>::persist_proposal_entries",
+        "<voteboat::raft::Raft>::persist",
+        "<voteboat::raft::Raft>::persist_update",
+        "<voteboat::log::transition::incoming::OwnedNextLog>::plan_copy",
+        "<voteboat::log::LogUpdate as core::clone::Clone>::clone",
+        "<voteboat::log::Suffix as core::clone::Clone>::clone"
+      ],
+      "sample_weight": 19,
+      "percent_of_all_selected_samples": 0.10725373976855772
+    },
+    {
+      "root_to_clone_parent": [
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+        "<voteboat::raft::Raft>::step",
+        "<voteboat::raft::Raft>::receive",
+        "<voteboat::raft::Raft>::receive_inner",
+        "<voteboat::raft::Raft>::receive_appended",
+        "<voteboat::raft::Raft>::append_for"
+      ],
+      "sample_weight": 3,
+      "percent_of_all_selected_samples": 0.01693480101608806
+    },
+    {
+      "root_to_clone_parent": [
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::requests",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::persist",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+        "<voteboat::raft::Raft>::finish_completion",
+        "<voteboat::raft::Raft>::after_durable",
+        "<voteboat::raft::Raft>::broadcast_append_progress",
+        "<voteboat::raft::Raft>::broadcast_ready_peers",
+        "<voteboat::raft::Raft>::append_for"
+      ],
+      "sample_weight": 1,
+      "percent_of_all_selected_samples": 0.005644933672029354
+    }
+  ],
+  "synthetic_FDE_boundary_leaf_names": [
+    {
+      "function": "fun_1b7ac0",
+      "sample_weight": 2698,
+      "percent": 15.230031047135196
+    },
+    {
+      "function": "fun_be060",
+      "sample_weight": 744,
+      "percent": 4.199830651989839
+    },
+    {
+      "function": "fun_bc6d0",
+      "sample_weight": 726,
+      "percent": 4.098221845893311
+    },
+    {
+      "function": "fun_bc7d0",
+      "sample_weight": 69,
+      "percent": 0.3895004233700254
+    },
+    {
+      "function": "fun_1ae480",
+      "sample_weight": 61,
+      "percent": 0.34434095399379056
+    },
+    {
+      "function": "fun_acb60",
+      "sample_weight": 13,
+      "percent": 0.0733841377363816
+    },
+    {
+      "function": "fun_75450",
+      "sample_weight": 10,
+      "percent": 0.056449336720293536
+    },
+    {
+      "function": "fun_baf10",
+      "sample_weight": 10,
+      "percent": 0.056449336720293536
+    },
+    {
+      "function": "fun_bc430",
+      "sample_weight": 8,
+      "percent": 0.04515946937623483
+    },
+    {
+      "function": "fun_69700",
+      "sample_weight": 5,
+      "percent": 0.028224668360146768
+    },
+    {
+      "function": "fun_bb880",
+      "sample_weight": 4,
+      "percent": 0.022579734688117414
+    },
+    {
+      "function": "fun_1b8840",
+      "sample_weight": 3,
+      "percent": 0.01693480101608806
+    },
+    {
+      "function": "fun_9f1c0",
+      "sample_weight": 3,
+      "percent": 0.01693480101608806
+    },
+    {
+      "function": "fun_6b550",
+      "sample_weight": 3,
+      "percent": 0.01693480101608806
+    },
+    {
+      "function": "fun_bb5c0",
+      "sample_weight": 2,
+      "percent": 0.011289867344058707
+    },
+    {
+      "function": "fun_14cb90",
+      "sample_weight": 2,
+      "percent": 0.011289867344058707
+    },
+    {
+      "function": "fun_14c055",
+      "sample_weight": 1,
+      "percent": 0.005644933672029354
+    },
+    {
+      "function": "fun_241d0",
+      "sample_weight": 1,
+      "percent": 0.005644933672029354
+    },
+    {
+      "function": "fun_48a00",
+      "sample_weight": 1,
+      "percent": 0.005644933672029354
+    },
+    {
+      "function": "fun_5d780",
+      "sample_weight": 1,
+      "percent": 0.005644933672029354
+    },
+    {
+      "function": "fun_bf210",
+      "sample_weight": 1,
+      "percent": 0.005644933672029354
+    },
+    {
+      "function": "fun_be240",
+      "sample_weight": 1,
+      "percent": 0.005644933672029354
+    },
+    {
+      "function": "fun_baff0",
+      "sample_weight": 1,
+      "percent": 0.005644933672029354
+    }
+  ],
+  "clone_related_native_self": [
+    {
+      "function": "tokio::runtime::task::waker::clone_waker",
+      "sample_weight": 243,
+      "percent": 1.371718882303133
+    },
+    {
+      "function": "<voteboat::log::LogEntry as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global>",
+      "sample_weight": 80,
+      "percent": 0.4515946937623483
+    },
+    {
+      "function": "<voteboat::log::LogUpdate as core::clone::Clone>::clone",
+      "sample_weight": 80,
+      "percent": 0.4515946937623483
+    },
+    {
+      "function": "<voteboat::log::LogEntry as core::clone::Clone>::clone",
+      "sample_weight": 16,
+      "percent": 0.09031893875246966
+    },
+    {
+      "function": "<alloc::collections::btree::map::BTreeMap<_, _, _> as core::clone::Clone>::clone::clone_subtree::<voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::alloc::Global>",
+      "sample_weight": 1,
+      "percent": 0.005644933672029354
+    },
+    {
+      "function": "<voteboat::quorum::Policy as core::clone::Clone>::clone",
+      "sample_weight": 1,
+      "percent": 0.005644933672029354
+    }
+  ],
+  "allocation_related_native_self": [
+    {
+      "function": "malloc",
+      "sample_weight": 236,
+      "percent": 1.3322043465989275
+    },
+    {
+      "function": "realloc",
+      "sample_weight": 36,
+      "percent": 0.20321761219305673
+    }
+  ],
+  "limitations": [
+    "Subset intersections are explicit; matches_state and compaction overlap and must not be summed.",
+    "fun_<hex> names identify FDE boundaries, not known semantic symbols; raw names remain unchanged.",
+    "Source/inline locations are per-address API results rather than coalesced sidecar chains.",
+    "Allocation/clone contexts are sampled stacks, not actual call counts or allocated bytes.",
+    "Capture loss and launch-to-exit scope from SUMMARY.json remain applicable.",
+    "Zero context count means no exact resolved frame observed; absent optimized inline symbols do not establish zero execution cost."
+  ]
+}
