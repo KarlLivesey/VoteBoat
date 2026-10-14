@@ -1,0 +1,72 @@
+{
+  "scope": "443 normalnativeCLIwindow64 finitequalification; lanes32/defaultready16/publicationprotocol unchanged",
+  "original_runner": {
+    "handle": 73160,
+    "exit": 1,
+    "failed_stage": "native-window64",
+    "error": "no local TCP/UDP endpoint",
+    "all_prior_scopes_passed": true
+  },
+  "focused_loopback_retry": {
+    "handle": 70399,
+    "exit": 0,
+    "fresh_root": "window64-retry",
+    "same_source_binary_options_deadlines": true,
+    "sandbox_cause": "inference fromrestrictednetwork andsuccessfulauthorizedloopback retry; endpointselector suppressesoriginalbinderrors"
+  },
+  "dependent_resume": {
+    "exit": 0,
+    "terminal": "DONE",
+    "pid": 2
+  },
+  "actual_checks": {
+    "existing_ready_items": 3,
+    "existing_lanes_assignment_bounds": 1,
+    "existing_js_checker_files": 2,
+    "root_format": 0,
+    "root_allfeature_alltargets_strict": 0,
+    "native_debug_build": 0,
+    "invalid65_pre_fs": true,
+    "invalid_lanes33_pre_fs": true,
+    "actual_tcp_cli": 0,
+    "independent_native_result_checker": 0,
+    "independent_publication_checker": 0,
+    "final_source_guard": 0
+  },
+  "source_before": 1437,
+  "source_after": 1437,
+  "changed_paths": [
+    "docs/PERFORMANCE.md",
+    "examples/native_benchmark.rs",
+    "validation/check-native-benchmark.mjs",
+    "validation/check-offered.mjs"
+  ],
+  "unchanged_inputs": 1433,
+  "all_physical_modes_unchanged": true,
+  "new_deleted_modules": [],
+  "actual_cli": "CLI_GUARDS.json",
+  "artifact": "ARTIFACT.json",
+  "qualification_profile": "actualdebug opt0/debug2/assertions/overflowtrue; notnativeopt3debug0 orcapacityprofile",
+  "actual_completed_originals": 128,
+  "warmup_originals": 64,
+  "window": 64,
+  "max_inflight": 64,
+  "measured_width_histogram": [
+    {
+      "width": 64,
+      "batches": 2,
+      "originals": 128
+    }
+  ],
+  "recovered_value": 192,
+  "first_last_retry_verified": true,
+  "workers_joined": true,
+  "last_sample_applied_index": 193,
+  "frontier_limits": "Existingallreplica verificationrequiresapplicationfrontier>=193/exactvalue192 before+afterrecovery; no exactperreplicafrontier numericdump claimed",
+  "diagnostic_completed_puts_s": 812.554,
+  "diagnostic_p99_ms": 90.54437200000001,
+  "diagnostic_rate_scope": "finiteinstrumenteddebug pathqualification only; nosustainedcapacity/softwaregain/default-policy/nativeacceptance claim",
+  "failure_history_retained": true,
+  "fullroot_matchedsuite_release_profile_mac_or_oldbenchmark_repeated": false,
+  "publication_pending_parent_full_enabled_hook": true
+}

@@ -717,7 +717,7 @@ fn main() -> Result<(), Failure> {
     }
     if !matches!(args.len(), 4 | 5 | 7 | 9 | 11) {
         return Err(
-            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..32) [--ready-items 1|16|32|64] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
+            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64) [--ready-items 1|16|32|64] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
                 .into(),
         );
     }
@@ -737,7 +737,7 @@ fn main() -> Result<(), Failure> {
     };
     let count = operations.parse::<usize>()?;
     let window = window.parse::<usize>()?;
-    if !(1..=50000).contains(&count) || !(1..=32).contains(&window) {
+    if !(1..=50000).contains(&count) || !(1..=64).contains(&window) {
         return Err("count/window out of bounds".into());
     }
     let offered_rate = if args.len() >= 7 {

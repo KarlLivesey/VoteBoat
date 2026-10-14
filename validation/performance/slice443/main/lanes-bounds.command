@@ -1,0 +1,1 @@
+cargo +stable test --locked --offline --all-features --example native_benchmark lanes::tests::assignments_preserve_totals_and_never_overlap -- --test-threads=1 --nocapture 

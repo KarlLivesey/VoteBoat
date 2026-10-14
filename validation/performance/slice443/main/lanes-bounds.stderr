@@ -1,0 +1,2 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-38789566316d72a1)

@@ -31,8 +31,9 @@ synchronization (`FileLogIo::sync` calls `File::sync_all`); no durability bypass
 mock network is selected. Each replica has its own native store and workers.
 
 A 64-operation warm-up and quorum read complete before measurement. The bounded
-client window is 1–32; measured count is 1–50,000. Default Node queue and poll
-budgets are unchanged. The harness explicitly
+client window is 1–64 for startup, shared and offered modes; measured count is
+1–50,000. The separate `--lanes` mode retains its maximum window of32. Default
+Node queue and poll budgets are unchanged. The harness explicitly
 selects heartbeat 50 ms and election 1000–1999 ms through
 `NativeStartup::open_with_protocol_and_timers`, with 32 timer expirations per
 poll; the same choice is used on every replica and reopen. The service/default
@@ -142,7 +143,8 @@ node validation/check-native-benchmark.mjs --storage target/benchmark-runs/lanes
 
 Arguments after the directory/protocol are total operations, total window, total
 groups and lanes. Operations, groups and window must each be at least the lane
-count. The planner partitions all three totals and the total64-operation warm-up;
+count; the total window remains at most32. The planner partitions all three totals
+and the total64-operation warm-up;
 it does not multiply offered work or concurrency. Each lane owns contiguous,
 disjoint concrete group IDs and three distinct store identities/directories.
 Operation IDs are local to their concrete group. Changing the lane assignment
@@ -432,6 +434,19 @@ The summary includes `journal_timings=true`, and the fixed serial acceptance
 checker rejects that diagnostic in place of the uninstrumented reference.
 Parallel worker time sums overlap; these timings attribute file work, not every
 client critical-path dependency or separate-host capacity.
+
+The normal window can expose the existing configurable64-command ready quantum:
+
+```sh
+./target/release/examples/native_benchmark target/benchmark-runs/tcp-ready64 tcp 128 64 --ready-items 64 --journal-timings
+```
+
+This selects window64 and quantum64 explicitly; the default quantum remains16.
+Read actual proposal widths and journal publications from the retained diagnostics.
+A wider configured input window is not a software throughput or durability gain.
+Count, log-capacity/control reserves, receipt checks, recovery, retries, worker
+joins and deadlines remain unchanged. `--lanes` remains limited to window32 and
+does not accept `--ready-items`.
 
 Instrumented startup runs also retain `publication.csv`, with separate counters
 for staging-file open/write, file synchronization, rename and directory

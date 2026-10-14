@@ -11,7 +11,7 @@ export function validateOffered(label, summary, source) {
     assert.ok(Number.isSafeInteger(count) && count >= 1 && count <= 50000);
     assert.ok(Number.isSafeInteger(rate) && rate >= 1 && rate <= 100000);
     assert.ok(Number.isSafeInteger(groups) && groups >= 1 && groups <= 32);
-    assert.ok(Number.isSafeInteger(window) && window >= 1 && window <= 32);
+    assert.ok(Number.isSafeInteger(window) && window >= 1 && window <= 64);
     assert.equal(warmup, 64);
     assert.equal(horizon, Math.floor(count * 1e9 / rate));
     assert.ok(horizon > 0 && horizon <= 300e9 && Number.isSafeInteger(elapsed) && elapsed >= horizon);

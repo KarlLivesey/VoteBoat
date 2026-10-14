@@ -1,0 +1,7 @@
+{
+  "original_handle": 73160,
+  "original_exit": 1,
+  "original_stage": "native-window64",
+  "error": "no local TCP/UDP endpoint",
+  "scope": "All precedingfocusedchecks/build/invalidbounds passed0. Endpointreservation failed before nativeclusterstartup. Retry only actualCLI withsamecheckedsource/binary/options/deadlines underauthorizedloopback-capable execution,freshoutputroot; no passedscope repeated. Sandboxcause is inference fromrestrictednetwork andneedsretry evidence; no storage/source fix."
+}

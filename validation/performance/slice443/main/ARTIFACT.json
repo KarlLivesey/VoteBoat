@@ -1,0 +1,94 @@
+{
+  "scope": "Actual existingdebug qualificationbuild/CLI, notfreshassertedperformanceartifact ornativeopt3debug0 profile",
+  "example_record": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat#voteboat@0.1.0",
+    "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/Cargo.toml",
+    "target": {
+      "kind": [
+        "example"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "native_benchmark",
+      "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/examples/native_benchmark.rs",
+      "edition": "2021",
+      "required-features": [
+        "tls"
+      ],
+      "doc": false,
+      "doctest": false,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/examples/native_benchmark"
+    ],
+    "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/examples/native_benchmark",
+    "fresh": false
+  },
+  "root_record": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat#voteboat@0.1.0",
+    "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/Cargo.toml",
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "voteboat",
+      "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/src/lib.rs",
+      "edition": "2021",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libvoteboat-676f9e8fe1db37b5.rlib",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libvoteboat-676f9e8fe1db37b5.rmeta"
+    ],
+    "executable": null,
+    "fresh": true
+  },
+  "actual_verbose_root_example_commands": [
+    "     Running `CARGO=/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo CARGO_BIN_NAME=native_benchmark CARGO_CRATE_NAME=native_benchmark CARGO_MANIFEST_DIR=/home/karllivesey/Documents/ChatGPT/VoteBoat CARGO_MANIFEST_PATH=/home/karllivesey/Documents/ChatGPT/VoteBoat/Cargo.toml CARGO_PKG_AUTHORS='' CARGO_PKG_DESCRIPTION='Native-first composable consensus runtime, under development' CARGO_PKG_HOMEPAGE='' CARGO_PKG_LICENSE=RPL-1.5 CARGO_PKG_LICENSE_FILE='' CARGO_PKG_NAME=voteboat CARGO_PKG_README=README.md CARGO_PKG_REPOSITORY='https://github.com/KarlLivesey/VoteBoat' CARGO_PKG_RUST_VERSION=1.98 CARGO_PKG_VERSION=0.1.0 CARGO_PKG_VERSION_MAJOR=0 CARGO_PKG_VERSION_MINOR=1 CARGO_PKG_VERSION_PATCH=0 CARGO_PKG_VERSION_PRE='' CARGO_PRIMARY_PACKAGE=1 LD_LIBRARY_PATH='/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps:/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib:/opt/t3code-bin/usr/lib' OUT_DIR=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/build/voteboat-e18197108413e629/out /home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --crate-name native_benchmark --edition=2021 examples/native_benchmark.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --crate-type bin --emit=dep-info,link -C embed-bitcode=no -C debuginfo=2 '--warn=clippy::all' --forbid=unsafe_code '--deny=clippy::too_many_lines' '--deny=clippy::cognitive_complexity' --cfg 'feature=\"default\"' --cfg 'feature=\"native\"' --cfg 'feature=\"quic\"' --cfg 'feature=\"tls\"' --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values(\"default\", \"native\", \"quic\", \"tls\"))' -C metadata=43da1cdeb09e3d89 -C extra-filename=-4b018c19464c80aa --out-dir /home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/examples -C incremental=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/incremental -L dependency=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps --extern bytes=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libbytes-1678f1a459ca6695.rlib --extern quinn_proto=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libquinn_proto-aae25ca65f56ae20.rlib --extern raft_reference=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libraft-503497b9b87e2cb3.rlib --extern ring=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libring-cfeecdac9bfbaa6f.rlib --extern rustls=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/librustls-6fe15bb37ecaecea.rlib --extern slog=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libslog-d046fed07d0c9a0a.rlib --extern voteboat=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libvoteboat-676f9e8fe1db37b5.rlib -L native=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/build/ring-b4b4d2c63cd52e10/out --cfg voteboat_checkpoint_debug_oracle --check-cfg 'cfg(voteboat_checkpoint_debug_oracle)'`"
+  ],
+  "binary_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/examples/native_benchmark",
+  "binary_sha256": "749d827d35fc829e92a18cf0f36a05079bc30160877ae13bd4bc8b6be3947acc",
+  "binary_bytes": 145165664,
+  "original_failed_and_focused_success_attempt_use_same_build": true,
+  "compiler_record": "compiler.log",
+  "cargo_record": "cargo.log",
+  "actual_opt_level": "0",
+  "debug_assertions": true,
+  "overflow_checks": true,
+  "no_performance_profile_claim": true
+}

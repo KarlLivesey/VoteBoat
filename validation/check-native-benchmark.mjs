@@ -40,7 +40,7 @@ for (const directory of directories) {
         const warmup = Number(summary.warmup);
         assert.ok(Number.isSafeInteger(count) && count > 0);
         assert.ok(Number.isSafeInteger(groups) && groups > 0 && groups <= 32);
-        assert.ok(Number.isSafeInteger(window) && window > 0 && window <= 32);
+        assert.ok(Number.isSafeInteger(window) && window > 0 && window <= 64);
         assert.equal(summary.retry_verified, 'true');
         assert.equal(summary.workers_joined, 'true');
         assert.equal(Number(summary.recovered_value), warmup + count);
