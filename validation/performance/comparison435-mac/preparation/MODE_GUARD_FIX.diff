@@ -1,0 +1,21 @@
+--- attempt1/artifact-guard.py
++++ artifact-guard.py
+@@ -146,10 +146,14 @@
+     need("--check-cfg 'cfg(voteboat_checkpoint_debug_oracle)'" in root_line,'root cfg declaration absent')
+     if config['source_commit'] == REQUIRED_CANDIDATE_COMMIT:
+         need({'src/raft/completion.rs', 'src/raft/completion_tests.rs', 'benchmarks/matched/src/voteboat_engine/actor/tests/completion.rs', 'benchmarks/matched/src/voteboat_engine/client_requests.rs', 'benchmarks/matched/src/voteboat_engine/actor/tests/originals.rs'} <= set(config['source_sha256']), 'essential435 completion/request/outcome modules absent')
+-    need(set(inventory['git_modes']) == set(config['source_sha256']), 'source mode inventory differs')
+-    for relative, mode in inventory['git_modes'].items():
+-        need(mode in ('100644', '100755'), 'unsupported source mode')
+-        need(bool((root / relative).stat().st_mode & 0o111) == (mode == '100755'), 'changed source executable mode: ' + relative)
++    # Mac committed tar inventories retain full archive permissions, rather than
++    # the Git-only executable classes used by the Linux exported inventory.
++    modes = inventory['modes']
++    need(set(modes) == set(config['source_sha256']), 'source mode inventory differs')
++    for relative, source_mode in modes.items():
++        need(source_mode in ('0o664', '0o775'), 'unsupported committed Mac source mode')
++        need((root / relative).stat().st_mode & 0o777 == int(source_mode, 8),
++             'changed source permissions: ' + relative)
+     return {'source_inputs': len(config['source_sha256']), 'artifacts': sorted(artifacts),
+             'mode': mode, 'checks': 'all frozen source, artifact, driver and applicable compiler guards pass'}
+ 

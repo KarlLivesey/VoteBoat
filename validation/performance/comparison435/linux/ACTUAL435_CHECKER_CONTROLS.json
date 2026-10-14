@@ -1,0 +1,47 @@
+{
+  "actual": [
+    {
+      "mode": "off",
+      "path": "target/p9/matched435-linux/logs/off.json",
+      "sha256": "0f14284e78499116c67fe588a71a3b92372d86fa22c5685104e138bd0a55926b",
+      "result": "pass",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ]
+    },
+    {
+      "mode": "on",
+      "path": "target/p9/matched435-linux/logs/on.json",
+      "sha256": "62b75165c673da286a05b12c5a25c55a04decec0998e048b7b0065c1b64e76d6",
+      "result": "pass",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ]
+    },
+    {
+      "mode": "openraft",
+      "path": "target/p9/matched435-linux/logs/openraft.json",
+      "sha256": "575608be619ff0cbe61fc496b46bbbe3648f916bcccc386c1d78d261e4c75959",
+      "result": "pass",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ]
+    }
+  ],
+  "reused_checker_sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+  "unchanged_negative_controls_reused": 13,
+  "negative_controls_not_rerun": true,
+  "mode_report_fix": "OnlyGitloopvariable renamed; actualprofile/source checks unchanged; initialconfig/log retained"
+}

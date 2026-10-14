@@ -1,0 +1,27 @@
+{
+  "remote_job": "/tmp/voteboat-comparison435-x3SbiM",
+  "original_remote_pid": 95176,
+  "original_launch_handle": 32473,
+  "launch_exit": 0,
+  "job_exit": 0,
+  "bulk_archive_sha256": "34962ddc819cf41ce23f1b532eb2850226c29b3cfc738f0d02c829a1136f0c3a",
+  "prepared_archive_sha256": "10a5ee1a9b03f57573a7ef9c5f529480fbf7426e54f00af1d841bb02b2ee358b",
+  "copy_exit": 0,
+  "cases": 12,
+  "case_exits": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "stderr": "all12empty",
+  "scope": "only completed bulk campaign plus preparation failure/correction metadata; no singleton/profiling/binary/source/build tree transfer"
+}

@@ -1,0 +1,401 @@
+{
+  "cases": 12,
+  "failures": [],
+  "candidate_off_paired_ratios": [
+    {
+      "trial": 1,
+      "throughput": 1.0281814237075166,
+      "p99": 0.9376508684133058
+    },
+    {
+      "trial": 2,
+      "throughput": 1.0576808203919166,
+      "p99": 0.8956431276563087
+    },
+    {
+      "trial": 3,
+      "throughput": 1.0442748462662634,
+      "p99": 0.9070766951219158
+    }
+  ],
+  "observer_on_vs_candidate_off": [
+    {
+      "trial": 1,
+      "throughput": 0.9779056691660402,
+      "p99": 1.0170895391184227
+    },
+    {
+      "trial": 2,
+      "throughput": 0.9455109400615634,
+      "p99": 1.1506425157377036
+    },
+    {
+      "trial": 3,
+      "throughput": 0.9745217848684181,
+      "p99": 1.0688423645320198
+    }
+  ],
+  "maintenance": [
+    {
+      "trial": 1,
+      "variant": "baseline",
+      "checkpoint_counts": [
+        3896,
+        3887,
+        3888
+      ],
+      "snapshot_installs": [
+        0,
+        1388,
+        1472
+      ],
+      "retained_entries": [
+        4832,
+        2784,
+        3784
+      ],
+      "peak_retained_entries": [
+        22236,
+        8040,
+        8016
+      ],
+      "peak_peer_queue": [
+        6,
+        4,
+        4
+      ],
+      "peak_client_queue": [
+        4096,
+        0,
+        0
+      ],
+      "persistence_units": [
+        57685,
+        21065,
+        21213
+      ],
+      "maximum_proposal_width": 3524
+    },
+    {
+      "trial": 1,
+      "variant": "candidate",
+      "checkpoint_counts": [
+        3893,
+        3887,
+        3887
+      ],
+      "snapshot_installs": [
+        0,
+        1545,
+        1557
+      ],
+      "retained_entries": [
+        2908,
+        1860,
+        5980
+      ],
+      "peak_retained_entries": [
+        22096,
+        8040,
+        8044
+      ],
+      "peak_peer_queue": [
+        6,
+        5,
+        4
+      ],
+      "peak_client_queue": [
+        4096,
+        0,
+        0
+      ],
+      "persistence_units": [
+        60685,
+        21503,
+        21572
+      ],
+      "maximum_proposal_width": 16384
+    },
+    {
+      "trial": 1,
+      "variant": "on",
+      "checkpoint_counts": [
+        3893,
+        3885,
+        3887
+      ],
+      "snapshot_installs": [
+        0,
+        1420,
+        1645
+      ],
+      "retained_entries": [
+        5004,
+        2956,
+        1932
+      ],
+      "peak_retained_entries": [
+        22116,
+        8044,
+        8040
+      ],
+      "peak_peer_queue": [
+        7,
+        5,
+        5
+      ],
+      "peak_client_queue": [
+        4096,
+        0,
+        0
+      ],
+      "persistence_units": [
+        60844,
+        21766,
+        21675
+      ],
+      "maximum_proposal_width": 16384
+    },
+    {
+      "trial": 2,
+      "variant": "baseline",
+      "checkpoint_counts": [
+        3896,
+        3889,
+        3888
+      ],
+      "snapshot_installs": [
+        0,
+        1620,
+        1394
+      ],
+      "retained_entries": [
+        2188,
+        1164,
+        5260
+      ],
+      "peak_retained_entries": [
+        22232,
+        8032,
+        8032
+      ],
+      "peak_peer_queue": [
+        5,
+        5,
+        4
+      ],
+      "peak_client_queue": [
+        4096,
+        0,
+        0
+      ],
+      "persistence_units": [
+        57358,
+        20571,
+        21106
+      ],
+      "maximum_proposal_width": 16384
+    },
+    {
+      "trial": 2,
+      "variant": "candidate",
+      "checkpoint_counts": [
+        3894,
+        3889,
+        3888
+      ],
+      "snapshot_installs": [
+        0,
+        1150,
+        1565
+      ],
+      "retained_entries": [
+        4112,
+        3064,
+        3088
+      ],
+      "peak_retained_entries": [
+        22128,
+        8028,
+        8040
+      ],
+      "peak_peer_queue": [
+        6,
+        5,
+        4
+      ],
+      "peak_client_queue": [
+        4096,
+        0,
+        0
+      ],
+      "persistence_units": [
+        62481,
+        22011,
+        21699
+      ],
+      "maximum_proposal_width": 3608
+    },
+    {
+      "trial": 2,
+      "variant": "on",
+      "checkpoint_counts": [
+        3892,
+        3884,
+        3884
+      ],
+      "snapshot_installs": [
+        0,
+        1289,
+        1530
+      ],
+      "retained_entries": [
+        4616,
+        2544,
+        2544
+      ],
+      "peak_retained_entries": [
+        22176,
+        8044,
+        8044
+      ],
+      "peak_peer_queue": [
+        6,
+        5,
+        5
+      ],
+      "peak_client_queue": [
+        4096,
+        0,
+        0
+      ],
+      "persistence_units": [
+        62285,
+        21974,
+        21898
+      ],
+      "maximum_proposal_width": 3488
+    },
+    {
+      "trial": 3,
+      "variant": "baseline",
+      "checkpoint_counts": [
+        3896,
+        3890,
+        3891
+      ],
+      "snapshot_installs": [
+        0,
+        1640,
+        1376
+      ],
+      "retained_entries": [
+        3012,
+        3012,
+        1000
+      ],
+      "peak_retained_entries": [
+        22208,
+        8004,
+        8032
+      ],
+      "peak_peer_queue": [
+        6,
+        5,
+        5
+      ],
+      "peak_client_queue": [
+        4096,
+        0,
+        0
+      ],
+      "persistence_units": [
+        57653,
+        20663,
+        21067
+      ],
+      "maximum_proposal_width": 16384
+    },
+    {
+      "trial": 3,
+      "variant": "candidate",
+      "checkpoint_counts": [
+        3895,
+        3892,
+        3891
+      ],
+      "snapshot_installs": [
+        0,
+        1400,
+        1427
+      ],
+      "retained_entries": [
+        5480,
+        3432,
+        2408
+      ],
+      "peak_retained_entries": [
+        22172,
+        8044,
+        8032
+      ],
+      "peak_peer_queue": [
+        6,
+        4,
+        4
+      ],
+      "peak_client_queue": [
+        4096,
+        0,
+        0
+      ],
+      "persistence_units": [
+        61627,
+        21545,
+        21880
+      ],
+      "maximum_proposal_width": 3260
+    },
+    {
+      "trial": 3,
+      "variant": "on",
+      "checkpoint_counts": [
+        3894,
+        3886,
+        3888
+      ],
+      "snapshot_installs": [
+        0,
+        1399,
+        1465
+      ],
+      "retained_entries": [
+        3664,
+        5712,
+        3664
+      ],
+      "peak_retained_entries": [
+        22184,
+        8040,
+        8032
+      ],
+      "peak_peer_queue": [
+        6,
+        5,
+        4
+      ],
+      "peak_client_queue": [
+        4096,
+        0,
+        0
+      ],
+      "persistence_units": [
+        62246,
+        21759,
+        21551
+      ],
+      "maximum_proposal_width": 3640
+    }
+  ],
+  "counter_limits": "Successful completed originals and exact follower frontiers. Logical retained/queue peaks and checkpoint/catch-up counts are observed, not RSS bytes or physical traversal. No dedicated rejected/refused counter in report; successful no-error closed loop does not quantify offered-load refusal/headroom or bounded debt beyond these logical observations. Inclusive elapsed observer phases overlap and are not CPU time."
+}

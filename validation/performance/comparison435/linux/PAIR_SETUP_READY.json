@@ -1,0 +1,63 @@
+{
+  "status": "PAIR_SETUP_READY",
+  "scope": "12serialbulkcasesonly; singletonheld",
+  "baseline_commit": "04049e2b3f00ccfa7390cf92b0ace448b35ff62b",
+  "candidate_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "source_counts": {
+    "baseline": 1430,
+    "candidate": 1433
+  },
+  "guard": {
+    "baseline": {
+      "source_inputs": 1430,
+      "artifacts": [
+        "bench_minimal",
+        "openraft",
+        "voteboat",
+        "voteboat-matched-framework"
+      ],
+      "mode": "asserted_release",
+      "checks": "all frozen source, artifact, driver and applicable compiler guards pass"
+    },
+    "candidate": {
+      "source_inputs": 1433,
+      "artifacts": [
+        "bench_minimal",
+        "openraft",
+        "voteboat",
+        "voteboat-matched-framework"
+      ],
+      "mode": "asserted_release",
+      "checks": "all frozen source, artifact, driver and applicable compiler guards pass"
+    }
+  },
+  "config_sha256": "0e6e1760716df4f821b2b4e259ab717f52f5e3184930a6fa41a03800da866b99",
+  "actual435_cli_fixtures": "3checkedoff/on/OpenRaft source-derived29/4/15",
+  "reused_unchanged_checker_rounding_negatives": 13,
+  "new_actualpair_artifact_negatives": 8,
+  "runner_syntax": 0,
+  "artifact_guard_mode_label_fix": "Gitmode loopvariable shadowing fixed; no validation weakened; initialconfig/log retained",
+  "cases": 12,
+  "requested_originals": 20000000,
+  "actual_originals": 19988480,
+  "actual_requests": 4997120,
+  "warmup_originals": 1024,
+  "required_applied_frontiers": [
+    19989505,
+    19989505,
+    19989505
+  ],
+  "variants_rotating": [
+    "baseline434OFF",
+    "candidate435OFF",
+    "candidate435ON",
+    "OpenRaftOFF"
+  ],
+  "launch_command": [
+    "bash",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison435/linux-run.sh"
+  ],
+  "timing_started": false,
+  "active_jobs": false,
+  "requires": "rootseparateQUIET_START"
+}

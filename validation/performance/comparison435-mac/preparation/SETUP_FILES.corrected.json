@@ -1,0 +1,38 @@
+{
+  "BASELINE_CONFIG.mac.json": {
+    "sha256": "b2144f8c9d29202932f5940d5a97135e253d0a7e3cfacd1a07634918135d625b",
+    "mode": "644"
+  },
+  "SCHEMA.md": {
+    "sha256": "0e0ade4b2e2fb73568c0322ac08f5beaedde71ec51e9c54e3618d67c949e5e80",
+    "mode": "644"
+  },
+  "artifact-guard.py": {
+    "sha256": "303d62985c016fcbec7d22e42a302006d00db32704c58b7fda3d99d20cbe4b0d",
+    "mode": "644"
+  },
+  "check-controls.py": {
+    "sha256": "45fdf23b997c326223318545906db4baac05a59f1ec8c5a33427fe4f2b14579e",
+    "mode": "644"
+  },
+  "phase-diagnostic-check.py": {
+    "sha256": "a584d3df73a342494b4bb1400d904225132b54b82d1384d09acae665eacfb7b5",
+    "mode": "644"
+  },
+  "phase-diagnostic.sh": {
+    "sha256": "538bd8f11265c7b0cbe4b70c4a47d6a24ba0d0ee16995033e962fff14890cbfc",
+    "mode": "755"
+  },
+  "prepare-pair.py": {
+    "sha256": "d4491a63eb4eda03eef8e6f114d30798479ffdac46801124f653e8218dfd6dd3",
+    "mode": "644"
+  },
+  "run-paired.sh": {
+    "sha256": "cbc842c75ebaf5b9e9970ac461ba592578dd8a806e3f55983f017abd43b8fbcd",
+    "mode": "755"
+  },
+  "summarize.py": {
+    "sha256": "ef16280fadb50f727dc929b6f3d93e483e49b58dadffb24f4c1142beaa4b978d",
+    "mode": "644"
+  }
+}

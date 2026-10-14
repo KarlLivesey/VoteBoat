@@ -69,7 +69,7 @@ diagnostics do not qualify sustained floors. [Every Linux trial and scope](../va
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current:435 artifact/measurement qualification | Decide whether borrowed synchronous completion improves useful throughput | Checked435 ownership slice, exact tickets/late errors/FIFO outcomes, retained434 immutable baselines | Fresh asserted artifacts, Mac qualification and repeated paired completed rates/p99 on both hosts; retain or reject before another optimization | P9.0/P9.1/P9.3 |
+| Current:435 singleton and fresh profile | Check latency debt and locate the remaining limiting work | Retained435 after all three20M bulk pairs improve on each host; immutable artifacts and unchanged outcome/FIFO contracts | Paired1M singleton diagnostics and current source/artifact-bound JSON/text CPU profiles; preserve all regressions, unknown/lost/wait biases before next selection | P9.0/P9.1/P9.3 |
 | Next: remaining measured copying/admission work | Reduce the next limiting stage after435's disposition | Current candidate qualified and measured; current source-bound profiles and public ownership contracts | One explicit schema and focused checked slice; publish and measure both hosts before selecting another change | P9.0/P9.1/P9.3 |
 | Following: bounded durable batching/overlap under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Native421 barrier evidence and unchanged publication/ticket contracts; bounded fairness schema after current measured framework stage | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual placement/barriers before changing defaults | P9.1/P9.2/P9.3 |
 
@@ -227,6 +227,36 @@ both hosts. No repeatable singleton gain or20M/all-cell proof. Bulk archives are
 sealed unchanged. Retain434's repeatable bulk gain and profile actual fresh434
 artifacts next through headless JSON/text/folded/per-address data; no browser or
 system policy changes, no unknown/lost/wait-bias omissions or allocator cause guess.
+
+### Slice435 published, both-host qualified and bulk retained
+
+435 publication5c2390cb ends0 through the full enabled hook (original15850).
+[Linux fresh artifacts](../validation/performance/matched435-linux/README.md)
+original21308 and [Mac qualification](../validation/performance/mac435/README.md)
+original71276 end0: exact1,433/1,436 source inventories, original/copied ELF+DWP
+or complete current dSYM, four fresh:false artifacts, actual profile/build-script
+proofs and unchanged within-host compiler/locks. Mac runs library400/320, owner
+203/195, affected provider/log/Raft/snapshot histories, services2 and matched56;
+formatting/four strict/standalone zero. No new core functional reuse.
+
+[Linux repeated20M](../validation/performance/comparison435/linux/README.md)
+original6061 and [Mac repeated20M](../validation/performance/comparison435-mac/README.md)
+original95176 each complete all12 exact19,988,480-original/4,997,120-request cases,
+1024 warmups and equal frontiers19,989,505×3, with source/artifact/compiler/observer
+before/after guards0. Linux434OFF/435OFF/ON/OpenRaft medians6,546,243/7,061,531/
+6,239,637/3,555,542 originals/s; p99 3.729967/3.289318/4.025321/6.919226ms. Mac
+4,461,961/4,719,331/4,540,429/1,991,441 originals/s; p99 4.475917/4.043792/
+4.339500/10.478542ms. All three OFF pairs improve rate and p99 on both hosts:
+retain435. All ON tails, initial guard/reporting assumptions and postprocessor
+failures are kept; focused metadata repairs repeat no passed source checks or
+benchmark. The native queued Node still uses owned output; no Node speedup claim.
+
+Checkpoints/catch-up and logical retained/queue peaks remain recorded. They do not
+prove bounded physical memory/debt, refusals or headroom. Below8,422,500 on both
+hosts; all cells, real durable applications, fairness/skew, placement/shared
+barriers and P8 performance remain required. Macro scope is unchanged and active.
+The linked mini plans advance to435 singleton diagnostics/current profiles, then
+one remaining measured stage and bounded durable mixed-load work.
 
 ### Slice433 schema — reject the forced clone inline hint
 

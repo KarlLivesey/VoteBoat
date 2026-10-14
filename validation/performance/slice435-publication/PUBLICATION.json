@@ -1,0 +1,19 @@
+{
+  "commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "parent": "e51818c2",
+  "push_exit": 0,
+  "original_handle": 15850,
+  "hook_path": ".githooks",
+  "hook_profiles": [
+    "root formatting",
+    "default strict",
+    "all-feature strict",
+    "core-only strict",
+    "native-only strict",
+    "matched formatting",
+    "matched strict"
+  ],
+  "hook_zero": true,
+  "raw_log_sha256": "9b6a7e21f03c15a2c33c5e6d9e57cb9d05b50a2b8edc83d5bbd54b2fbb4eb6f5",
+  "goal": "P9 active;435 checked candidate, performance unmeasured"
+}

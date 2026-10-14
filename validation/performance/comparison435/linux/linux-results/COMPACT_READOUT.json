@@ -1,0 +1,905 @@
+{
+  "scope": "actual12bulkcases onecell4096/b4, singletonheld; frameworkdiagnosticnotfullacceptance",
+  "original_handle": 6061,
+  "terminal_exit": 0,
+  "cases": 12,
+  "reported_failures": [],
+  "completion_frontier_all_pass": true,
+  "guards_before_after": [
+    {
+      "baseline": {
+        "artifacts": [
+          "bench_minimal",
+          "openraft",
+          "voteboat",
+          "voteboat-matched-framework"
+        ],
+        "checks": "all frozen source, artifact, driver and applicable compiler guards pass",
+        "mode": "asserted_release",
+        "source_inputs": 1430
+      },
+      "candidate": {
+        "artifacts": [
+          "bench_minimal",
+          "openraft",
+          "voteboat",
+          "voteboat-matched-framework"
+        ],
+        "checks": "all frozen source, artifact, driver and applicable compiler guards pass",
+        "mode": "asserted_release",
+        "source_inputs": 1433
+      }
+    },
+    {
+      "baseline": {
+        "artifacts": [
+          "bench_minimal",
+          "openraft",
+          "voteboat",
+          "voteboat-matched-framework"
+        ],
+        "checks": "all frozen source, artifact, driver and applicable compiler guards pass",
+        "mode": "asserted_release",
+        "source_inputs": 1430
+      },
+      "candidate": {
+        "artifacts": [
+          "bench_minimal",
+          "openraft",
+          "voteboat",
+          "voteboat-matched-framework"
+        ],
+        "checks": "all frozen source, artifact, driver and applicable compiler guards pass",
+        "mode": "asserted_release",
+        "source_inputs": 1433
+      }
+    }
+  ],
+  "variants": {
+    "baseline": {
+      "rates": [
+        6579126.999816744,
+        6330741.868416969,
+        6546242.607105675
+      ],
+      "median_PUTS": 6546242.607105675,
+      "median_p99_ms": 3.729967,
+      "p99_trials_ms": [
+        3.489725,
+        4.076096,
+        3.729967
+      ]
+    },
+    "candidate": {
+      "rates": [
+        7153905.065821409,
+        7061530.760811081,
+        6745465.802167319
+      ],
+      "median_PUTS": 7061530.760811081,
+      "median_p99_ms": 3.289318,
+      "p99_trials_ms": [
+        3.277266,
+        3.289318,
+        3.663321
+      ]
+    },
+    "on": {
+      "rates": [
+        5837783.402128232,
+        6239637.477002651,
+        6513673.2269174475
+      ],
+      "median_PUTS": 6239637.477002651,
+      "median_p99_ms": 4.025321,
+      "p99_trials_ms": [
+        5.641727,
+        4.025321,
+        3.823071
+      ]
+    },
+    "openraft": {
+      "rates": [
+        3322980.603793596,
+        3555542.292222114,
+        3573444.2865835493
+      ],
+      "median_PUTS": 3555542.292222114,
+      "median_p99_ms": 6.919226,
+      "p99_trials_ms": [
+        7.488977,
+        6.459773,
+        6.919226
+      ]
+    }
+  },
+  "off_paired_ratios": [
+    1.0873638806517454,
+    1.1154349533725105,
+    1.0304332129159703
+  ],
+  "cases_compact": [
+    {
+      "variant": "baseline",
+      "trial": 1,
+      "PUTS": 6579126.999816744,
+      "p99_ms": 3.489725,
+      "logical_diagnostics": {
+        "retained_entries": {
+          "min": 1388,
+          "max": 2436,
+          "per_replica": [
+            2436,
+            1412,
+            1388
+          ]
+        },
+        "peak_retained_entries": {
+          "min": 8036,
+          "max": 22296,
+          "per_replica": [
+            22296,
+            8044,
+            8036
+          ]
+        },
+        "peak_peer_queue": {
+          "min": 7,
+          "max": 11,
+          "per_replica": [
+            8,
+            11,
+            7
+          ]
+        },
+        "peak_client_queue": {
+          "min": 0,
+          "max": 4096,
+          "per_replica": [
+            4096,
+            0,
+            0
+          ]
+        },
+        "persistence_units": {
+          "min": 21787,
+          "max": 63211,
+          "per_replica": [
+            63211,
+            21787,
+            22742
+          ]
+        },
+        "checkpoint_count": {
+          "min": 3863,
+          "max": 3880,
+          "per_replica": [
+            3880,
+            3865,
+            3863
+          ]
+        },
+        "snapshot_installs": {
+          "min": 0,
+          "max": 1851,
+          "per_replica": [
+            0,
+            1851,
+            1010
+          ]
+        },
+        "maximum_proposal_width": {
+          "min": 0,
+          "max": 16100,
+          "per_replica": [
+            16100,
+            0,
+            0
+          ]
+        }
+      },
+      "stderr_nonempty": false
+    },
+    {
+      "variant": "candidate",
+      "trial": 1,
+      "PUTS": 7153905.065821409,
+      "p99_ms": 3.277266,
+      "logical_diagnostics": {
+        "retained_entries": {
+          "min": 3604,
+          "max": 5652,
+          "per_replica": [
+            5652,
+            3604,
+            4628
+          ]
+        },
+        "peak_retained_entries": {
+          "min": 8028,
+          "max": 22008,
+          "per_replica": [
+            22008,
+            8028,
+            8044
+          ]
+        },
+        "peak_peer_queue": {
+          "min": 10,
+          "max": 26,
+          "per_replica": [
+            10,
+            26,
+            17
+          ]
+        },
+        "peak_client_queue": {
+          "min": 0,
+          "max": 4096,
+          "per_replica": [
+            4096,
+            0,
+            0
+          ]
+        },
+        "persistence_units": {
+          "min": 25694,
+          "max": 81058,
+          "per_replica": [
+            81058,
+            25694,
+            25865
+          ]
+        },
+        "checkpoint_count": {
+          "min": 3854,
+          "max": 3872,
+          "per_replica": [
+            3872,
+            3854,
+            3858
+          ]
+        },
+        "snapshot_installs": {
+          "min": 0,
+          "max": 1432,
+          "per_replica": [
+            0,
+            1341,
+            1432
+          ]
+        },
+        "maximum_proposal_width": {
+          "min": 0,
+          "max": 16016,
+          "per_replica": [
+            16016,
+            0,
+            0
+          ]
+        }
+      },
+      "stderr_nonempty": false
+    },
+    {
+      "variant": "on",
+      "trial": 1,
+      "PUTS": 5837783.402128232,
+      "p99_ms": 5.641727,
+      "logical_diagnostics": {
+        "retained_entries": {
+          "min": 2472,
+          "max": 5544,
+          "per_replica": [
+            5544,
+            3472,
+            2472
+          ]
+        },
+        "peak_retained_entries": {
+          "min": 8040,
+          "max": 22260,
+          "per_replica": [
+            22260,
+            8040,
+            8044
+          ]
+        },
+        "peak_peer_queue": {
+          "min": 7,
+          "max": 33,
+          "per_replica": [
+            32,
+            33,
+            7
+          ]
+        },
+        "peak_client_queue": {
+          "min": 0,
+          "max": 4096,
+          "per_replica": [
+            4096,
+            0,
+            0
+          ]
+        },
+        "persistence_units": {
+          "min": 26751,
+          "max": 84153,
+          "per_replica": [
+            84153,
+            26751,
+            27010
+          ]
+        },
+        "checkpoint_count": {
+          "min": 3852,
+          "max": 3868,
+          "per_replica": [
+            3868,
+            3852,
+            3852
+          ]
+        },
+        "snapshot_installs": {
+          "min": 0,
+          "max": 1492,
+          "per_replica": [
+            0,
+            1492,
+            1140
+          ]
+        },
+        "maximum_proposal_width": {
+          "min": 0,
+          "max": 16312,
+          "per_replica": [
+            16312,
+            0,
+            0
+          ]
+        }
+      },
+      "stderr_nonempty": false
+    },
+    {
+      "variant": "openraft",
+      "trial": 1,
+      "PUTS": 3322980.603793596,
+      "p99_ms": 7.488977,
+      "logical_diagnostics": {
+        "retained_entries": null,
+        "peak_retained_entries": null,
+        "peak_peer_queue": null,
+        "peak_client_queue": null,
+        "persistence_units": null,
+        "checkpoint_count": null,
+        "snapshot_installs": null,
+        "maximum_proposal_width": null
+      },
+      "stderr_nonempty": false
+    },
+    {
+      "variant": "baseline",
+      "trial": 2,
+      "PUTS": 6330741.868416969,
+      "p99_ms": 4.076096,
+      "logical_diagnostics": {
+        "retained_entries": {
+          "min": 1780,
+          "max": 4612,
+          "per_replica": [
+            4612,
+            1780,
+            3184
+          ]
+        },
+        "peak_retained_entries": {
+          "min": 8040,
+          "max": 22120,
+          "per_replica": [
+            22120,
+            8040,
+            8044
+          ]
+        },
+        "peak_peer_queue": {
+          "min": 11,
+          "max": 29,
+          "per_replica": [
+            18,
+            11,
+            29
+          ]
+        },
+        "peak_client_queue": {
+          "min": 0,
+          "max": 4096,
+          "per_replica": [
+            4096,
+            0,
+            0
+          ]
+        },
+        "persistence_units": {
+          "min": 22312,
+          "max": 62729,
+          "per_replica": [
+            62729,
+            22312,
+            22402
+          ]
+        },
+        "checkpoint_count": {
+          "min": 3874,
+          "max": 3885,
+          "per_replica": [
+            3885,
+            3874,
+            3874
+          ]
+        },
+        "snapshot_installs": {
+          "min": 0,
+          "max": 1639,
+          "per_replica": [
+            0,
+            1639,
+            1302
+          ]
+        },
+        "maximum_proposal_width": {
+          "min": 0,
+          "max": 16384,
+          "per_replica": [
+            16384,
+            0,
+            0
+          ]
+        }
+      },
+      "stderr_nonempty": false
+    },
+    {
+      "variant": "candidate",
+      "trial": 2,
+      "PUTS": 7061530.760811081,
+      "p99_ms": 3.289318,
+      "logical_diagnostics": {
+        "retained_entries": {
+          "min": 3192,
+          "max": 5716,
+          "per_replica": [
+            5716,
+            3192,
+            4096
+          ]
+        },
+        "peak_retained_entries": {
+          "min": 8040,
+          "max": 22036,
+          "per_replica": [
+            22036,
+            8040,
+            8044
+          ]
+        },
+        "peak_peer_queue": {
+          "min": 12,
+          "max": 13,
+          "per_replica": [
+            13,
+            13,
+            12
+          ]
+        },
+        "peak_client_queue": {
+          "min": 0,
+          "max": 4096,
+          "per_replica": [
+            4096,
+            0,
+            0
+          ]
+        },
+        "persistence_units": {
+          "min": 25889,
+          "max": 81203,
+          "per_replica": [
+            81203,
+            25889,
+            25958
+          ]
+        },
+        "checkpoint_count": {
+          "min": 3837,
+          "max": 3862,
+          "per_replica": [
+            3862,
+            3837,
+            3842
+          ]
+        },
+        "snapshot_installs": {
+          "min": 0,
+          "max": 1352,
+          "per_replica": [
+            0,
+            1352,
+            1317
+          ]
+        },
+        "maximum_proposal_width": {
+          "min": 0,
+          "max": 16384,
+          "per_replica": [
+            16384,
+            0,
+            0
+          ]
+        }
+      },
+      "stderr_nonempty": false
+    },
+    {
+      "variant": "on",
+      "trial": 2,
+      "PUTS": 6239637.477002651,
+      "p99_ms": 4.025321,
+      "logical_diagnostics": {
+        "retained_entries": {
+          "min": 2324,
+          "max": 5372,
+          "per_replica": [
+            2324,
+            4372,
+            5372
+          ]
+        },
+        "peak_retained_entries": {
+          "min": 8028,
+          "max": 22236,
+          "per_replica": [
+            22236,
+            8028,
+            8040
+          ]
+        },
+        "peak_peer_queue": {
+          "min": 8,
+          "max": 16,
+          "per_replica": [
+            16,
+            8,
+            15
+          ]
+        },
+        "peak_client_queue": {
+          "min": 0,
+          "max": 4096,
+          "per_replica": [
+            4096,
+            0,
+            0
+          ]
+        },
+        "persistence_units": {
+          "min": 23346,
+          "max": 68325,
+          "per_replica": [
+            68325,
+            23346,
+            23509
+          ]
+        },
+        "checkpoint_count": {
+          "min": 3855,
+          "max": 3874,
+          "per_replica": [
+            3874,
+            3859,
+            3855
+          ]
+        },
+        "snapshot_installs": {
+          "min": 0,
+          "max": 1583,
+          "per_replica": [
+            0,
+            1583,
+            1225
+          ]
+        },
+        "maximum_proposal_width": {
+          "min": 0,
+          "max": 16384,
+          "per_replica": [
+            16384,
+            0,
+            0
+          ]
+        }
+      },
+      "stderr_nonempty": false
+    },
+    {
+      "variant": "openraft",
+      "trial": 2,
+      "PUTS": 3555542.292222114,
+      "p99_ms": 6.459773,
+      "logical_diagnostics": {
+        "retained_entries": null,
+        "peak_retained_entries": null,
+        "peak_peer_queue": null,
+        "peak_client_queue": null,
+        "persistence_units": null,
+        "checkpoint_count": null,
+        "snapshot_installs": null,
+        "maximum_proposal_width": null
+      },
+      "stderr_nonempty": false
+    },
+    {
+      "variant": "baseline",
+      "trial": 3,
+      "PUTS": 6546242.607105675,
+      "p99_ms": 3.729967,
+      "logical_diagnostics": {
+        "retained_entries": {
+          "min": 3812,
+          "max": 5884,
+          "per_replica": [
+            4860,
+            5884,
+            3812
+          ]
+        },
+        "peak_retained_entries": {
+          "min": 8044,
+          "max": 22040,
+          "per_replica": [
+            22040,
+            8044,
+            8044
+          ]
+        },
+        "peak_peer_queue": {
+          "min": 6,
+          "max": 8,
+          "per_replica": [
+            8,
+            7,
+            6
+          ]
+        },
+        "peak_client_queue": {
+          "min": 0,
+          "max": 4096,
+          "per_replica": [
+            4096,
+            0,
+            0
+          ]
+        },
+        "persistence_units": {
+          "min": 22336,
+          "max": 65373,
+          "per_replica": [
+            65373,
+            22336,
+            22870
+          ]
+        },
+        "checkpoint_count": {
+          "min": 3859,
+          "max": 3872,
+          "per_replica": [
+            3872,
+            3863,
+            3859
+          ]
+        },
+        "snapshot_installs": {
+          "min": 0,
+          "max": 1568,
+          "per_replica": [
+            0,
+            1568,
+            1350
+          ]
+        },
+        "maximum_proposal_width": {
+          "min": 0,
+          "max": 16384,
+          "per_replica": [
+            16384,
+            0,
+            0
+          ]
+        }
+      },
+      "stderr_nonempty": false
+    },
+    {
+      "variant": "candidate",
+      "trial": 3,
+      "PUTS": 6745465.802167319,
+      "p99_ms": 3.663321,
+      "logical_diagnostics": {
+        "retained_entries": {
+          "min": 3400,
+          "max": 5448,
+          "per_replica": [
+            3400,
+            3400,
+            5448
+          ]
+        },
+        "peak_retained_entries": {
+          "min": 8044,
+          "max": 22264,
+          "per_replica": [
+            22264,
+            8044,
+            8044
+          ]
+        },
+        "peak_peer_queue": {
+          "min": 9,
+          "max": 15,
+          "per_replica": [
+            10,
+            15,
+            9
+          ]
+        },
+        "peak_client_queue": {
+          "min": 0,
+          "max": 4096,
+          "per_replica": [
+            4096,
+            0,
+            0
+          ]
+        },
+        "persistence_units": {
+          "min": 23752,
+          "max": 71928,
+          "per_replica": [
+            71928,
+            23752,
+            24119
+          ]
+        },
+        "checkpoint_count": {
+          "min": 3853,
+          "max": 3872,
+          "per_replica": [
+            3872,
+            3856,
+            3853
+          ]
+        },
+        "snapshot_installs": {
+          "min": 0,
+          "max": 1405,
+          "per_replica": [
+            0,
+            1370,
+            1405
+          ]
+        },
+        "maximum_proposal_width": {
+          "min": 0,
+          "max": 16384,
+          "per_replica": [
+            16384,
+            0,
+            0
+          ]
+        }
+      },
+      "stderr_nonempty": false
+    },
+    {
+      "variant": "on",
+      "trial": 3,
+      "PUTS": 6513673.2269174475,
+      "p99_ms": 3.823071,
+      "logical_diagnostics": {
+        "retained_entries": {
+          "min": 1976,
+          "max": 5820,
+          "per_replica": [
+            1976,
+            5820,
+            4568
+          ]
+        },
+        "peak_retained_entries": {
+          "min": 8020,
+          "max": 22132,
+          "per_replica": [
+            22132,
+            8040,
+            8020
+          ]
+        },
+        "peak_peer_queue": {
+          "min": 9,
+          "max": 16,
+          "per_replica": [
+            16,
+            15,
+            9
+          ]
+        },
+        "peak_client_queue": {
+          "min": 0,
+          "max": 4096,
+          "per_replica": [
+            4096,
+            0,
+            0
+          ]
+        },
+        "persistence_units": {
+          "min": 23304,
+          "max": 69566,
+          "per_replica": [
+            69566,
+            23304,
+            23842
+          ]
+        },
+        "checkpoint_count": {
+          "min": 3861,
+          "max": 3878,
+          "per_replica": [
+            3878,
+            3861,
+            3866
+          ]
+        },
+        "snapshot_installs": {
+          "min": 0,
+          "max": 1487,
+          "per_replica": [
+            0,
+            1487,
+            1379
+          ]
+        },
+        "maximum_proposal_width": {
+          "min": 0,
+          "max": 16384,
+          "per_replica": [
+            16384,
+            0,
+            0
+          ]
+        }
+      },
+      "stderr_nonempty": false
+    },
+    {
+      "variant": "openraft",
+      "trial": 3,
+      "PUTS": 3573444.2865835493,
+      "p99_ms": 6.919226,
+      "logical_diagnostics": {
+        "retained_entries": null,
+        "peak_retained_entries": null,
+        "peak_peer_queue": null,
+        "peak_client_queue": null,
+        "persistence_units": null,
+        "checkpoint_count": null,
+        "snapshot_installs": null,
+        "maximum_proposal_width": null
+      },
+      "stderr_nonempty": false
+    }
+  ],
+  "refusals": "NoCLIerror/refusalreported; no separaterefusalcounter, do notinventcounts. ON phase/provider/gapfailures validatedzero.",
+  "logical_resource_scope": "retainedentries/proposalwidth/queue highwaters are logicalcounts, not physicalmemory/RSS/allocation/debtproof. Allfollowerfrontiers equal; no forcedsnapshotcatchup claim."
+}

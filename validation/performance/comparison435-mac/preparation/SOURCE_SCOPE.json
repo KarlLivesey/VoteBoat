@@ -1,0 +1,17 @@
+{
+  "baseline": 1433,
+  "candidate": 1436,
+  "added": [
+    "benchmarks/matched/src/voteboat_engine/actor/tests/completion.rs",
+    "src/raft/completion.rs",
+    "src/raft/completion_tests.rs"
+  ],
+  "removed": [],
+  "changed": [
+    "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests.rs",
+    "docs/component-contracts.json",
+    "src/raft.rs"
+  ],
+  "scope": "actual complete matched committed source inventories; full Mac permissions checked against actual archive modes; no timing"
+}

@@ -1,0 +1,25 @@
+{
+  "commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "remote_job": "/tmp/voteboat-mac435-5c2390c-2oTYYa",
+  "original_remote_pid": 71276,
+  "source_setup_handle": 48054,
+  "setup_exit": 0,
+  "archive_sha256": "4799a324f7c1038e0711bfcd420829a95a88a7f17e27f0aa170ba3e9a4946288",
+  "guarded_inputs": 1436,
+  "baseline_guarded_inputs": 1433,
+  "added": [
+    "benchmarks/matched/src/voteboat_engine/actor/tests/completion.rs",
+    "src/raft/completion.rs",
+    "src/raft/completion_tests.rs"
+  ],
+  "removed": [],
+  "changed": [
+    "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests.rs",
+    "docs/component-contracts.json",
+    "src/raft.rs"
+  ],
+  "mode_changes": [],
+  "publication_verified_by": "GitHubmain exact5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "scope": "Actual435 affected root and matched tests/builds planned; no inheritedfunctionalreuse or timing/profiling"
+}

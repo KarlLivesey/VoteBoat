@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/private/tmp/voteboat-comparison435-x3SbiM/prepare-pair.py", line 132, in <module>
+    main()
+  File "/private/tmp/voteboat-comparison435-x3SbiM/prepare-pair.py", line 119, in main
+    guard.verify(baseline)
+  File "/private/tmp/voteboat-comparison435-x3SbiM/artifact-guard.py", line 149, in verify
+    need(set(inventory['git_modes']) == set(config['source_sha256']), 'source mode inventory differs')
+KeyError: 'git_modes'

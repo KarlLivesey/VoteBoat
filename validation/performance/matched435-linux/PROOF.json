@@ -1,0 +1,107 @@
+{
+  "commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "source_inputs": 1433,
+  "changed_inputs": [
+    "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests/completion.rs",
+    "docs/component-contracts.json",
+    "src/raft.rs",
+    "src/raft/completion.rs",
+    "src/raft/completion_tests.rs"
+  ],
+  "new_inputs": [
+    "benchmarks/matched/src/voteboat_engine/actor/tests/completion.rs",
+    "src/raft/completion.rs",
+    "src/raft/completion_tests.rs"
+  ],
+  "unchanged_existing_inputs": 1426,
+  "source_inventory_difference": "4341430\u21924351433: additive scoped completion API/common transition, guarded matched actor consumption, three new completion test/implementation modules, component contract; dependencies/profile unchanged",
+  "original_build_handle": 21308,
+  "original_terminal_exit": 0,
+  "original_stage": "DONE",
+  "fresh_records": "four root/library/executable/pinned upstream records plus root buildscript fresh:false actualCargoJSON",
+  "profile": "unchanged434 opt3/debug2/assertions/overflow/thinLTO/codegen1/packed flagswrappersunset",
+  "within_host_compiler_cargo_protoc_profile_identical434": true,
+  "release_gate": "actualPROFILErelease omits only referencecfg; ordinaryassertions/overflowon",
+  "artifacts": [
+    {
+      "target": "voteboat",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched435-linux/target-matched-release/release/deps/libvoteboat-4d0bd8f7aa541ed2.rlib",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched435-linux/artifacts/matched/libvoteboat-4d0bd8f7aa541ed2.rlib",
+      "sha256": "30d8aeded2ff79b3bad867716041e746e4361b8d942c134bad0d68aa2c24f07f"
+    },
+    {
+      "target": "voteboat-matched-framework",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched435-linux/target-matched-release/release/voteboat-matched-framework",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched435-linux/artifacts/matched/voteboat-matched-framework",
+      "sha256": "6b0309401476870859fc2d7e8e4fe5836c0c5530c0e84fcc81589185940147b3"
+    },
+    {
+      "target": "openraft",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched435-linux/target-matched-release/release/deps/libopenraft-5a9af487d2dbc148.rlib",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched435-linux/artifacts/matched/libopenraft-5a9af487d2dbc148.rlib",
+      "sha256": "6a98f3006ac04df29e65ab23d9a95d455c0e6a23378f4ffa10f78d9f717c9d91"
+    },
+    {
+      "target": "bench_minimal",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched435-linux/target-matched-release/release/deps/libbench_minimal-6c87ebf8dbd5d8ad.rlib",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched435-linux/artifacts/matched/libbench_minimal-6c87ebf8dbd5d8ad.rlib",
+      "sha256": "7f36be0ba978402020b27cc9d37f306e18837e2d9eacc1523e16df1f336579e8"
+    }
+  ],
+  "symbols": {
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched435-linux/target-matched-release/release/voteboat-matched-framework.dwp",
+    "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched435-linux/artifacts/matched/voteboat-matched-framework.dwp",
+    "sha256": "fa2cdda8ef58486a5404dc1928987b77020327b682a852504eea7a8ce4289a40",
+    "bytes": 34667824,
+    "executable_sha256": "6b0309401476870859fc2d7e8e4fe5836c0c5530c0e84fcc81589185940147b3",
+    "cargo_filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched435-linux/target-matched-release/release/voteboat-matched-framework",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched435-linux/target-matched-release/release/voteboat-matched-framework.dwp"
+    ]
+  },
+  "controls": [
+    {
+      "case": "off",
+      "completed_originals": 16384,
+      "completed_requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "PUTS_per_second": 2175218.467795973,
+      "p99_ms": 4.322168,
+      "scope": "functional control only; no paired/sustained capacity"
+    },
+    {
+      "case": "on",
+      "completed_originals": 16384,
+      "completed_requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "PUTS_per_second": 1788768.5337447734,
+      "p99_ms": 5.894641,
+      "scope": "functional control only; no paired/sustained capacity"
+    },
+    {
+      "case": "openraft",
+      "completed_originals": 16384,
+      "completed_requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "PUTS_per_second": 1761043.6591357256,
+      "p99_ms": 5.872951,
+      "scope": "functional control only; no paired/sustained capacity"
+    }
+  ],
+  "cli_exit": 0,
+  "capacity_campaign": "not authorized/run; waitrootquiet"
+}

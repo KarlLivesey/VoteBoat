@@ -1,0 +1,69 @@
+{
+  "scope": "prepared scripts/checker only; no artifact execution/build/timing; no435 candidate CONFIG_PAIR until fresh proofs",
+  "required_baseline_commit": "04049e2b3f00ccfa7390cf92b0ace448b35ff62b",
+  "required_candidate_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "observer": {
+    "phases": 29,
+    "scopes": 4,
+    "methods_per_scope": 15
+  },
+  "baseline_20M_checker_controls": [
+    {
+      "actual_baseline_campaign_variant": "baseline",
+      "path": "target/p9/comparison434/linux-results/baseline-c4096-b4-t1.json",
+      "sha256": "c3817046bb54dd8d453da8d44d6b08eab8dd5d4aec09cf77bba9c4ca7008a16e",
+      "requested": 20000000,
+      "actual": 19988480,
+      "requests": 4997120,
+      "result": "pass"
+    },
+    {
+      "actual_baseline_campaign_variant": "candidate",
+      "path": "target/p9/comparison434/linux-results/candidate-c4096-b4-t1.json",
+      "sha256": "cc17a51b11ece0f2103614304fc96cba289a8c576acf65c007e2180548f93119",
+      "requested": 20000000,
+      "actual": 19988480,
+      "requests": 4997120,
+      "result": "pass"
+    },
+    {
+      "actual_baseline_campaign_variant": "on",
+      "path": "target/p9/comparison434/linux-results/on-c4096-b4-t1.json",
+      "sha256": "13d4cf127509c2100fe75059ecfc88dfc848f14dee59f1bc2811adaae49bea31",
+      "requested": 20000000,
+      "actual": 19988480,
+      "requests": 4997120,
+      "result": "pass"
+    },
+    {
+      "actual_baseline_campaign_variant": "openraft",
+      "path": "target/p9/comparison434/linux-results/openraft-c4096-b4-t1.json",
+      "sha256": "c2c67a4643bef82d8de057886da9edab146f555ed084d5e18fa8bae753bf31ee",
+      "requested": 20000000,
+      "actual": 19988480,
+      "requests": 4997120,
+      "result": "pass"
+    }
+  ],
+  "rounding_negative_controls": [
+    {
+      "control": "invented_unrounded_actual",
+      "result": "correctly rejected",
+      "reason": "wrong equal-client batch rounding"
+    },
+    {
+      "control": "pretend_requested_equals_actual",
+      "result": "correctly rejected",
+      "reason": "wrong requested count"
+    },
+    {
+      "control": "one_extra_original",
+      "result": "correctly rejected",
+      "reason": "wrong equal-client batch rounding"
+    }
+  ],
+  "candidate_identity": "pending actual fresh metadata/CLI qualification",
+  "candidate_pair_configuration_created": false,
+  "singleton_timing": "held until bulk retain/reject decision",
+  "syntax": 0
+}

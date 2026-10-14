@@ -1,0 +1,40 @@
+{
+  "status": "SETUP_READY",
+  "source_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "source_inputs": 1433,
+  "compiled_inputs": 1427,
+  "new_modules": [
+    "benchmarks/matched/src/voteboat_engine/actor/tests/completion.rs",
+    "src/raft/completion.rs",
+    "src/raft/completion_tests.rs"
+  ],
+  "original_build_handle": 21308,
+  "build_exit": 0,
+  "build_stage": "DONE",
+  "cli_exit": 0,
+  "cli_stage": "DONE",
+  "four_fresh_false": true,
+  "root_build_script_fresh_false": true,
+  "ordinary_assertions_overflow_enabled": true,
+  "release_reference_oracle_absent": true,
+  "source_derived_observer": [
+    29,
+    4,
+    15
+  ],
+  "artifact_original_copy_hashes_verified": true,
+  "symbols": {
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched435-linux/target-matched-release/release/voteboat-matched-framework.dwp",
+    "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched435-linux/artifacts/matched/voteboat-matched-framework.dwp",
+    "sha256": "fa2cdda8ef58486a5404dc1928987b77020327b682a852504eea7a8ce4289a40",
+    "bytes": 34667824,
+    "executable_sha256": "6b0309401476870859fc2d7e8e4fe5836c0c5530c0e84fcc81589185940147b3",
+    "cargo_filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched435-linux/target-matched-release/release/voteboat-matched-framework",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched435-linux/target-matched-release/release/voteboat-matched-framework.dwp"
+    ]
+  },
+  "capacity_timing_started": false,
+  "profiling_started": false,
+  "next_action": "root separate quiet authorization required"
+}

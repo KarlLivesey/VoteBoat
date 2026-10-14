@@ -1,0 +1,2 @@
+UUID: 2872CD3B-5BC0-3F36-BF69-6E14EC1C82A1 (arm64) artifacts/matched/voteboat-matched-framework
+UUID: 2872CD3B-5BC0-3F36-BF69-6E14EC1C82A1 (arm64) artifacts/symbols/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-0f10278ab28b02ea

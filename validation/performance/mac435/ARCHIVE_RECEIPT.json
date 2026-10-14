@@ -1,0 +1,28 @@
+{
+  "remote": "/tmp/voteboat-mac435-5c2390c-2oTYYa/qualification.tgz",
+  "sha256": "ad15aca2e1dd825f41a8b314b6f318058d84ff872d71ad471c458dfb89c1e75d",
+  "collection_exit": 0,
+  "original_remote_pid": 71276,
+  "original_job_exit": 0,
+  "raw_stage_exits": {
+    "strict_core.exit": "0",
+    "affected_core.exit": "0",
+    "strict_native.exit": "0",
+    "services.exit": "0",
+    "effect_owner_core.exit": "0",
+    "cli-on.exit": "0",
+    "matched-release.exit": "0",
+    "strict_default.exit": "0",
+    "cli-off.exit": "0",
+    "root_fmt.exit": "0",
+    "effect_owner_all.exit": "0",
+    "affected_all.exit": "0",
+    "matched_tests.exit": "0",
+    "artifact_guards.exit": "0",
+    "strict_all.exit": "0",
+    "matched_fmt.exit": "0",
+    "cli-openraft.exit": "0",
+    "matched_strict.exit": "0"
+  },
+  "scope": "metadata/raw logs only; no executable, library, source tree, build tree or WAL transfer"
+}

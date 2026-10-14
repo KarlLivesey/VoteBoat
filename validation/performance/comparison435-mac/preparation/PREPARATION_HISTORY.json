@@ -1,0 +1,14 @@
+{
+  "original_setup_handle": 63472,
+  "original_setup_exit": 1,
+  "failure": "Mac SOURCE.modes full archive permissions exist; Linux-specific git_modes field absent",
+  "focused_retry_handle": 90377,
+  "focused_retry_exit": 0,
+  "source_scope_unchanged": true,
+  "qualification_rerun": false,
+  "build_rerun": false,
+  "mode_convention": "Mac434 and435 SOURCE.modes reflect exact committed archive permissions (0o664 or0o775); qualified source checks preserved these before/after compilation; current read-only pair freeze verifies complete full permissions and identical executable bits, not a fabricated git_modes record",
+  "collected_archive_sha256": "10a5ee1a9b03f57573a7ef9c5f529480fbf7426e54f00af1d841bb02b2ee358b",
+  "collection_exit": 0,
+  "timing_launched": false
+}
