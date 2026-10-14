@@ -1,0 +1,73 @@
+{
+  "source": "validation/performance/hotspot435/mac/ALLOCATION_CONTEXTS.json",
+  "source_sha256": "07ff0a3a0e4e2098734a5891aa7487e162a0e14d3d032f0e82251667f35f13a6",
+  "existing_group": {
+    "cpu_us": 412652,
+    "percent_observed_cpu": 4.817927249359247,
+    "physical_contexts_nonadditive": {
+      "workload_client_write": {
+        "cpu_us": 236858,
+        "percent_observed_cpu": 2.765440643517377,
+        "percent_group": 57.3989705611508
+      },
+      "client_loop": {
+        "cpu_us": 274942,
+        "percent_observed_cpu": 3.2100911998326196,
+        "percent_group": 66.62805463199015
+      },
+      "Actor_requests": {
+        "cpu_us": 67983,
+        "percent_observed_cpu": 0.7937369701181376,
+        "percent_group": 16.474656611381988
+      },
+      "Raft_append_for": {
+        "cpu_us": 19205,
+        "percent_observed_cpu": 0.22422838814290091,
+        "percent_group": 4.654042631563642
+      }
+    },
+    "top_immediate_leaf_callers": [
+      {
+        "function": "<voteboat_matched_framework::workload::Client>::write::{closure#0}",
+        "cpu_us": 210433,
+        "percent_group": 50.99526962186055
+      },
+      {
+        "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor<true>>::include",
+        "cpu_us": 45097,
+        "percent_group": 10.928579044812578
+      },
+      {
+        "function": "voteboat_matched_framework::workload::client_loop::{closure#0}",
+        "cpu_us": 24415,
+        "percent_group": 5.916607698496554
+      },
+      {
+        "function": "[unresolved] libsystem_malloc.dylib!0x339fb",
+        "cpu_us": 12996,
+        "percent_group": 3.1493849539078935
+      },
+      {
+        "function": "[unresolved] libsystem_malloc.dylib!0x3038f",
+        "cpu_us": 11632,
+        "percent_group": 2.8188400880160525
+      },
+      {
+        "function": "[unresolved] libsystem_malloc.dylib!0x4028b",
+        "cpu_us": 10626,
+        "percent_group": 2.575051132673536
+      },
+      {
+        "function": "[unresolved] libsystem_malloc.dylib!0x30413",
+        "cpu_us": 9390,
+        "percent_group": 2.2755251398272636
+      },
+      {
+        "function": "[unresolved] libsystem_malloc.dylib!0x359e3",
+        "cpu_us": 8877,
+        "percent_group": 2.1512073126993205
+      }
+    ]
+  },
+  "limit": "Mac libsystem_malloc unresolved physical leaf CPUdelta group is separate; CPUdelta observed sampledintervals differs from Linux onCPU sampleweights. No exact malloc/free names or allocation cause inferred."
+}

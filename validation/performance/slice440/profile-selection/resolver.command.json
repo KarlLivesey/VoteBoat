@@ -1,0 +1,8 @@
+[
+  "env",
+  "-u",
+  "DEBUGINFOD_URLS",
+  "python3",
+  "-c",
+  "import ctypes,json\nlib=ctypes.CDLL('/usr/lib/libc.so.6');dl=ctypes.CDLL(None)\nclass DlInfo(ctypes.Structure):\n _fields_=[('fname',ctypes.c_char_p),('fbase',ctypes.c_void_p),('sname',ctypes.c_char_p),('saddr',ctypes.c_void_p)]\ndl.dladdr.argtypes=[ctypes.c_void_p,ctypes.POINTER(DlInfo)];dl.dladdr.restype=ctypes.c_int\nfor name in ['memcpy','memmove','mempcpy','memset']:\n addr=ctypes.cast(getattr(lib,name),ctypes.c_void_p).value;d=DlInfo();assert dl.dladdr(addr,ctypes.byref(d));print(json.dumps({'symbol':name,'module':d.fname.decode(),'module_relative_resolved_address':hex(addr-d.fbase),'nearest_dynamic_symbol':d.sname.decode() if d.sname else None,'nearest_dynamic_symbol_offset':hex(addr-d.saddr) if d.saddr else None}))\n"
+]

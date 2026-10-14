@@ -232,9 +232,40 @@ selected. A representation change requires a complete public-view, bounded
 ownership, mutation/error and restart schema. The next stage is chosen from
 actual retained profiles and source contracts, without another reserve variant.
 
+440 selects a compact lossless private pending key: two64-bit words preserve
+all128 identity bits and the existing standard randomized hash input, intending
+to remove8 bytes of tuple padding (32→24 on both targets). The
+[schema](../validation/performance/slice440/SCHEMA.md) precedes source edits.
+Logical/physical reserveP, every channel, duplicate replacement, exact ID/receipt
+and cancellation outcomes stay. This tests actual unused bytes rather than another
+reserve factor; there is no predicted throughput or native-service gain. A single
+checked/published both-host paired experiment decides retention, with no layout
+retuning after failure. Macro scope and full acceptance remain unchanged.
+
+440 is implemented and locally checked: original97591 ends0 with67 full
+matched tests (64 existing plus3 independent Hash/equality/layout controls),
+formatting/strict and1,436 source/mode guards. Linux actual dev tuple is24 bytes
+versus32, key alignment8 versus16; all128 identity bits and exact Hasher method
+stream/default randomized output match. Existing ordered outcomes, duplicates,
+budget/churn, cancellation/FIFO and maintenance controls pass. Root independently
+verifies40 main and28 profile-selection payload hashes plus current1,436 inputs.
+[Main proof](../validation/performance/slice440/main/README.md); independent review
+finds no blocker. No performance rate or retention is inferred; checked publication,
+fresh artifacts, Mac67 qualification/layout and paired runs follow.
+
+The [saved-profile resolution](../validation/performance/slice440/profile-selection/README.md)
+binds Linux435 unknown fun_1b7ac0 to the exact libc buildID and the shared native
+memcpy/memmove RVA. Its293/6,498 weights are copy instructions, not allocator
+proof; canonical installation/drain contexts overlap. Mac's unresolved allocation
+library remains a separate group with different units. [Native admission audit](../validation/performance/slice440/ADMISSION_AUDIT.md)
+records per-candidate Counter pending-set rebuilding; a later optional batch
+session must preserve default fallback, per-candidate gates, errors/receipt minima
+and partial-prefix ownership. Neither audit is an implemented speedup or a new
+prerequisite for this complete private-key experiment. Full macro scope is unchanged.
+
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: remaining measured work decision | Remove material work rather than relocate it | Checked439 exact435 restoration, immutable435 profiles, completed438 rejection and canonical ownership audit | Select one viable schema with public views, bounded ownership and error/restart checks; implement, publish and measure both hosts before another selection | P9.0/P9.1/P9.3 |
+| Current:440 compact full-width pending key | Remove unused bucket padding in the measured admission table | Checked439 restoration, saved435 map profiles and [440 schema](../validation/performance/slice440/SCHEMA.md) | Full-ID/Hash/layout equivalence plus unchanged outcomes, strict publication, fresh artifacts and one paired bulk/singleton decision on both hosts | P9.0/P9.1/P9.3 |
 | Next: bounded durable batching under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Native421 evidence and existing publication/ticket contracts; explicit ready/admission/fairness schema | Real applications with sustained hot/cold/skew, retries/recovery, latency and bounded debt before changing defaults | P9.1/P9.2/P9.3 |
 | Following: bounded persistence overlap and placement | Expand sustained useful capacity across existing composition contracts | Measured batching/fairness and a typed partial-progress/durability dependency plan | Exact original outcomes, crash/retry/fencing and active maintenance; offered-load/headroom, shared barriers, placement and P8 costs remain required | P9.1/P9.2/P9.3/P9.4 |
 

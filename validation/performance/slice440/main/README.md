@@ -1,0 +1,9 @@
+# Slice440 main qualification
+
+Only the private Actor pending-reply map key changed to ReplyKey, a lossless transparent two-u64 array. Hash reconstructs the complete u128 and delegates to standard Hash; RandomState stays. Initial/logical P, OperationId proposals/receipts, per-original channels, insertion/replacement/error order and removal-before-send stay. The old OperationId tuple diagnostic is labeled legacy.
+
+Original runner97591 exited0/DONE: full standalone67tests (64 existing+3 new), formatting, strict all-target Clippy and source guards passed once. Commands, stdout/stderr/exits and actual compiler versions are retained. Exact Hasher method/byte traces and same RandomState hash_one outputs cover every one-hot128 bit, full values and same-low/different-upper IDs; independent equality/map replacement/removal controls preserve distinct IDs.
+
+Actual Linux dev layout: key16bytes with alignment8 versus old16/alignment16; key+Reply tuple24 versus old32bytes. These are measured layout facts, not a portable guarantee, allocated-table/RSS count or speed claim. Existing budget/churn/65,540-rotation/receipt/cancellation/FIFO/completion and maintenance controls remain in the full passing suite. No new rate, native-service gain or P9 acceptance is claimed.
+
+SOURCE_BEFORE records1434 inputs; SOURCE records1436 after two added modules. Two existing paths changed,1432 old selected inputs stay byte-exact, all existing physical modes stay. ROOT_REUSE records all1410 selected inputs outside matched/src unchanged; no root functional suite reran here. The four changed/new qualified inputs are frozen under source-final and old changed inputs under source-before. PATCH and its digest are retained. SHA256SUMS covers every regular file except itself; no binaries/build trees/WAL states/full source duplication. Parent owns publication through the enabled hook, fresh artifacts, Mac qualification and paired measurements before any retention decision.

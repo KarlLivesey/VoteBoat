@@ -1,0 +1,1 @@
+["readelf", "--string-dump=.gnu_debuglink", "/usr/lib/libc.so.6"]

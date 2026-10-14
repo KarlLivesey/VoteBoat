@@ -1,0 +1,69 @@
+{
+  "scope": "440 private compactlosslessReplyKey; alloriginals/channels/logicalcapacity/errorandcompletionorder unchanged",
+  "original_handle": 97591,
+  "original_pid": 2,
+  "exit": 0,
+  "terminal": "DONE",
+  "full_standalone_tests": {
+    "passed": 67,
+    "failed": 0,
+    "whole_suite_executed_once": true,
+    "nocapture": true,
+    "existing_controls": 64,
+    "new_key_controls": 3
+  },
+  "formatter": 0,
+  "strict_all_targets_clippy": 0,
+  "source_guard": 0,
+  "source_inputs": 1436,
+  "before_inputs": 1434,
+  "unchanged_inputs": 1432,
+  "changed_paths": [
+    "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs"
+  ],
+  "new_modules": [
+    "benchmarks/matched/src/voteboat_engine/actor/pending_key.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/pending_key/tests.rs"
+  ],
+  "deleted": [],
+  "existing_physical_modes_unchanged": true,
+  "root_selected_inputs_outside_matched_src_unchanged": 1410,
+  "root_functional_reuse": "ROOT_REUSE.json; onlyexactsource/projection scope, no rootfunctional test executedhere",
+  "failures_or_retries": [],
+  "hash_contract": "RecordingHasher overrideswrite andevery integerwrite method; exactoldOperationId/newkey method+byte streams andsameRandomStatehash_one match for128one-bit IDs,fullu128 andsame-low/differentupper96+127 values; allpairfullIDequality anddistinctmapreplacement/removal controls",
+  "actual_dev_layout": {
+    "target_arch": "x86_64",
+    "old_key_bytes": 16,
+    "old_key_alignment": 16,
+    "new_key_bytes": 16,
+    "new_key_alignment": 8,
+    "reply_bytes": 8,
+    "old_tuple_bytes": 32,
+    "old_tuple_alignment": 16,
+    "new_tuple_bytes": 24,
+    "new_tuple_alignment": 8,
+    "scope": "ActualstandaloneLinuxdevtestlayout; notportableAPIpromise,physicalallocation/RSS orrate"
+  },
+  "capacity_controls": {
+    "logical5": {
+      "initial": 7,
+      "churn_rounds": 256,
+      "churn_minimum": 7,
+      "churn_high_water": 7,
+      "partial_rotations": 1024,
+      "partial_minimum": 7,
+      "partial_high_water": 7
+    },
+    "logical16385": {
+      "initial": 28672,
+      "partial_rotations": 65540,
+      "partial_minimum": 14393,
+      "partial_high_water": 28672
+    },
+    "scope": "Availableinsertioncapacity undercurrentRandomState, notcausalbenchmark/probe count orphysicalbuckets"
+  },
+  "performance_or_native_service_gain_claim": false,
+  "no_release_cli_profile_benchmark_or_mac_work": true,
+  "publication_pending_parent_enabled_full_hook": true
+}

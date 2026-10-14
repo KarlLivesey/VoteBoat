@@ -1,0 +1,1 @@
+["readelf", "-n", "/usr/lib/libc.so.6"]

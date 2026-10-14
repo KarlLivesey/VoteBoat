@@ -1,0 +1,293 @@
+{
+  "saved_profile_sha256": "fd18c03af9e21d7b0b90f345b1fe2bf2aca6a4b3026688d421ac5f1fe1ae8acd",
+  "saved_library": {
+    "name": "libc.so.6",
+    "path": "/usr/lib/libc.so.6",
+    "debugName": "libc.so.6",
+    "debugPath": "/usr/lib/libc.so.6",
+    "breakpadId": "5FBA1A14655A49E9C59AEDB6FD3B267F0",
+    "codeId": "141aba5f5a65e949c59aedb6fd3b267fcad54abf",
+    "arch": null
+  },
+  "selected_weight": 293,
+  "total_selected_weight": 6498,
+  "unit": "Saved Samply on-CPU sample weights, not perf cycles, CPU microseconds, call counts or bytes",
+  "self_percent": 4.5090797168359495,
+  "resolved_public_aliases": [
+    "memcpy",
+    "memmove"
+  ],
+  "module_relative_function_start": "0x1b7ac0",
+  "placeholder_retained": "fun_1b7ac0",
+  "immediate_physical_callers": [
+    {
+      "function": "<alloc::vec::Vec<voteboat::log::LogEntry> as alloc::vec::spec_extend::SpecExtend<voteboat::log::LogEntry, alloc::vec::into_iter::IntoIter<voteboat::log::LogEntry>>>::spec_extend",
+      "sample_weight": 112,
+      "percent_of_group": 38.225255972696246
+    },
+    {
+      "function": "core::ptr::drop_glue::<alloc::vec::drain::Drain<voteboat::log::LogEntry>>",
+      "sample_weight": 67,
+      "percent_of_group": 22.866894197952217
+    },
+    {
+      "function": "fun_be580",
+      "sample_weight": 26,
+      "percent_of_group": 8.873720136518772
+    },
+    {
+      "function": "<voteboat::raft::Raft>::persist_update",
+      "sample_weight": 19,
+      "percent_of_group": 6.484641638225256
+    },
+    {
+      "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+      "sample_weight": 14,
+      "percent_of_group": 4.778156996587031
+    },
+    {
+      "function": "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+      "sample_weight": 13,
+      "percent_of_group": 4.436860068259386
+    },
+    {
+      "function": "<voteboat::raft::Raft>::finish_completion",
+      "sample_weight": 12,
+      "percent_of_group": 4.09556313993174
+    },
+    {
+      "function": "fun_6b550",
+      "sample_weight": 7,
+      "percent_of_group": 2.3890784982935154
+    },
+    {
+      "function": "voteboat_matched_framework::workload::run::{closure#0}",
+      "sample_weight": 3,
+      "percent_of_group": 1.023890784982935
+    },
+    {
+      "function": "<tokio::sync::mpsc::list::Rx<voteboat::raft::Message>>::pop",
+      "sample_weight": 2,
+      "percent_of_group": 0.6825938566552902
+    }
+  ],
+  "project_ancestries": [
+    {
+      "root_to_copy_parent": [
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::persist",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+        "<voteboat::raft::Raft>::finish_completion",
+        "<voteboat::log::transition::incoming::OwnedNextLog>::install",
+        "<voteboat::log::transition::incoming::PreparedOwnedLog>::install",
+        "voteboat::log::transition::incoming::install_append"
+      ],
+      "sample_weight": 43,
+      "percent_of_group": 14.675767918088738
+    },
+    {
+      "root_to_copy_parent": [
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::persist",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+        "<voteboat_matched_framework::store::MemoryStore as voteboat::log::LogStore>::append_batch",
+        "<voteboat_matched_framework::store::MemoryStore>::append",
+        "<voteboat::log::owned::OwnedLogState>::apply_batch",
+        "<voteboat::log::transition::incoming::PreparedOwnedLog>::install",
+        "voteboat::log::transition::incoming::install_append"
+      ],
+      "sample_weight": 37,
+      "percent_of_group": 12.627986348122867
+    },
+    {
+      "root_to_copy_parent": [
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::maintain",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::maintain_inner",
+        "voteboat::snapshot::compact_replica::<voteboat_matched_framework::application::Noop, voteboat_matched_framework::store::MemoryStore, voteboat_matched_framework::snapshots::MemorySnapshots>",
+        "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+        "<voteboat::raft::Raft>::finish_completion",
+        "<voteboat::log::transition::incoming::OwnedNextLog>::install",
+        "<voteboat::log::transition::incoming::PreparedOwnedLog>::install",
+        "<voteboat::log::transition::PreparedLog>::install",
+        "<voteboat::log::transition::compact::CompactDelta>::install"
+      ],
+      "sample_weight": 34,
+      "percent_of_group": 11.604095563139932
+    },
+    {
+      "root_to_copy_parent": [
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::maintain",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::maintain_inner",
+        "voteboat::snapshot::compact_replica::<voteboat_matched_framework::application::Noop, voteboat_matched_framework::store::MemoryStore, voteboat_matched_framework::snapshots::MemorySnapshots>",
+        "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+        "<voteboat_matched_framework::store::MemoryStore as voteboat::log::LogStore>::append_batch",
+        "<voteboat_matched_framework::store::MemoryStore>::append",
+        "<voteboat::log::owned::OwnedLogState>::apply_batch",
+        "<voteboat::log::transition::incoming::PreparedOwnedLog>::install",
+        "<voteboat::log::transition::PreparedLog>::install",
+        "<voteboat::log::transition::compact::CompactDelta>::install"
+      ],
+      "sample_weight": 33,
+      "percent_of_group": 11.262798634812286
+    },
+    {
+      "root_to_copy_parent": [
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::requests",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::persist",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+        "<voteboat::raft::Raft>::finish_completion",
+        "<voteboat::log::transition::incoming::OwnedNextLog>::install",
+        "<voteboat::log::transition::incoming::PreparedOwnedLog>::install",
+        "voteboat::log::transition::incoming::install_append"
+      ],
+      "sample_weight": 19,
+      "percent_of_group": 6.484641638225256
+    },
+    {
+      "root_to_copy_parent": [
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::requests",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::persist",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+        "<voteboat_matched_framework::store::MemoryStore as voteboat::log::LogStore>::append_batch",
+        "<voteboat_matched_framework::store::MemoryStore>::append",
+        "<voteboat::log::owned::OwnedLogState>::apply_batch",
+        "<voteboat::log::transition::incoming::PreparedOwnedLog>::install",
+        "voteboat::log::transition::incoming::install_append"
+      ],
+      "sample_weight": 13,
+      "percent_of_group": 4.436860068259386
+    },
+    {
+      "root_to_copy_parent": [],
+      "sample_weight": 7,
+      "percent_of_group": 2.3890784982935154
+    },
+    {
+      "root_to_copy_parent": [
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+        "<voteboat::raft::Raft>::step",
+        "<voteboat::raft::Raft>::receive",
+        "<voteboat::raft::Raft>::receive_inner",
+        "<voteboat::raft::Raft>::receive_appended",
+        "<voteboat::raft::Raft>::append_for"
+      ],
+      "sample_weight": 7,
+      "percent_of_group": 2.3890784982935154
+    },
+    {
+      "root_to_copy_parent": [
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::persist",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+        "<voteboat::raft::Raft>::finish_completion",
+        "<voteboat::raft::Raft>::after_durable",
+        "<voteboat::raft::Raft>::broadcast_commit_progress",
+        "<voteboat::raft::Raft>::broadcast_ready_peers",
+        "<voteboat::raft::Raft>::append_for"
+      ],
+      "sample_weight": 5,
+      "percent_of_group": 1.7064846416382253
+    },
+    {
+      "root_to_copy_parent": [
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+        "<voteboat::raft::Raft>::step",
+        "<voteboat::raft::Raft>::receive",
+        "<voteboat::raft::Raft>::receive_inner",
+        "<voteboat::raft::Raft>::receive_append",
+        "<voteboat::raft::Raft>::persist",
+        "<voteboat::raft::Raft>::persist_update"
+      ],
+      "sample_weight": 4,
+      "percent_of_group": 1.3651877133105803
+    }
+  ],
+  "top_sampled_addresses": [
+    {
+      "module_rva": "0x1b7cef",
+      "sample_weight": 84
+    },
+    {
+      "module_rva": "0x1b7cc6",
+      "sample_weight": 50
+    },
+    {
+      "module_rva": "0x1b7ad3",
+      "sample_weight": 25
+    },
+    {
+      "module_rva": "0x1b7cdb",
+      "sample_weight": 15
+    },
+    {
+      "module_rva": "0x1b7ccd",
+      "sample_weight": 13
+    },
+    {
+      "module_rva": "0x1b7bdd",
+      "sample_weight": 11
+    },
+    {
+      "module_rva": "0x1b7d94",
+      "sample_weight": 10
+    },
+    {
+      "module_rva": "0x1b7d6b",
+      "sample_weight": 10
+    },
+    {
+      "module_rva": "0x1b7cd4",
+      "sample_weight": 9
+    },
+    {
+      "module_rva": "0x1b7ac0",
+      "sample_weight": 6
+    }
+  ],
+  "input_hashes": {
+    "target/p9/profile435/linux/symbolication/bulk-symbolicated/ADDRESS_SYMBOLS.json": "dfbb697874cc6bedc42b2d859710867e10006856795154fa600c9edddecdef07",
+    "target/p9/profile435/linux/symbolication/bulk-symbolicated/SUMMARY.json": "d13d17579c8c3ae7c3672a7aaad5cc11131d7bbc6e109b7a6de88f15afcfc2d6",
+    "target/p9/profile435/linux/symbolication/bulk-symbolicated/batch-000.request.json": "bd704569937e2bd403cb95c6212df9a67ee64ecfc1e92c1bd6de4b05a1b98948",
+    "target/p9/profile435/linux/symbolication/bulk-symbolicated/batch-000.response.json": "fe9ba9cec21a2965d3174f1a3b33d6d42f83d80af32e30d3191fbe49f98bb607",
+    "target/p9/profile435/linux/perf-quiet/bulk.json.gz": "fd18c03af9e21d7b0b90f345b1fe2bf2aca6a4b3026688d421ac5f1fe1ae8acd",
+    "/usr/lib/libc.so.6": "911cf3db7875760dc893b464ae89bddd4f697a377c710ffc13b84f67cbe1237b"
+  },
+  "ancestry_provenance": {
+    "actual_tool_chunk": "363e4d",
+    "method": "Saved sample stack chain traversed through stackTable/frameTable/funcTable/resourceTable, exact library1 and leaf APIfunctionfun_1b7ac0 selected; per-RVA ADDRESS_SYMBOLS expansion supplies inline names. Project names filtered to direct voteboat/host namespace prefixes; no generic scheduler template containing project name counts as a project caller.",
+    "assertions": "293 selected physical-leaf weights and6498 denominator exactly match original SUMMARY; rawprofile/response records unchanged.",
+    "full_query_record": "Actual executed inline tool code is retained in conversation tool363e4d; this compact result records query inputs/method and returned counts, not a fabricated runner log."
+  }
+}

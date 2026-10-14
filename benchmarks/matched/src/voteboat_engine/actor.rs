@@ -12,6 +12,9 @@ use std::{
 };
 use voteboat::{application::StateMachine, snapshot::*};
 
+mod pending_key;
+use pending_key::ReplyKey;
+
 #[cfg(test)]
 mod tests;
 
@@ -39,7 +42,7 @@ pub(super) struct Parts<const TRACE: bool = false> {
 pub(super) struct Actor<const TRACE: bool = false> {
     parts: Parts<TRACE>,
     attribution: Recorder<TRACE>,
-    pending: HashMap<OperationId, Reply>,
+    pending: HashMap<ReplyKey, Reply>,
     deferred: Option<Request>,
     last_snapshot_at: u64,
     last_contact: Instant,
@@ -248,7 +251,7 @@ impl<const TRACE: bool> Actor<TRACE> {
             reply,
         } in request.originals
         {
-            if self.pending.insert(operation, reply).is_some() {
+            if self.pending.insert(operation.into(), reply).is_some() {
                 return Err("duplicate original admission".into());
             }
             proposals.push(Proposal { operation, bytes });
@@ -346,7 +349,7 @@ impl<const TRACE: bool> Actor<TRACE> {
     }
     fn apply_entries(
         application: &mut Noop,
-        pending: &mut HashMap<OperationId, Reply>,
+        pending: &mut HashMap<ReplyKey, Reply>,
         attribution: &Recorder<TRACE>,
         slot: usize,
         entries: &[LogEntry],
@@ -374,12 +377,12 @@ impl<const TRACE: bool> Actor<TRACE> {
         Self::deliver_results(&mut self.pending, results)
     }
     fn deliver_results(
-        pending: &mut HashMap<OperationId, Reply>,
+        pending: &mut HashMap<ReplyKey, Reply>,
         results: Vec<OperationId>,
     ) -> Result<(), Failure> {
         for operation in results {
             let reply = pending
-                .remove(&operation)
+                .remove(&ReplyKey::from(operation))
                 .ok_or("missing/duplicate original applied result")?;
             reply
                 .send(operation)

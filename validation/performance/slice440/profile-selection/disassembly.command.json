@@ -1,0 +1,1 @@
+["objdump", "--disassemble", "--start-address=0x1b7ac0", "--stop-address=0x1b7b30", "/usr/lib/libc.so.6"]

@@ -1,0 +1,1 @@
+["readelf", "--section-headers", "/usr/lib/libc.so.6"]

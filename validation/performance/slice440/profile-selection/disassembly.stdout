@@ -1,0 +1,42 @@
+
+/usr/lib/libc.so.6:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000001b7ac0 <memcpy@GLIBC_2.2.5+0x9110>:
+  1b7ac0:	f3 0f 1e fa          	endbr64
+  1b7ac4:	48 89 f8             	mov    %rdi,%rax
+  1b7ac7:	48 83 fa 40          	cmp    $0x40,%rdx
+  1b7acb:	72 43                	jb     1b7b10 <memcpy@GLIBC_2.2.5+0x9160>
+  1b7acd:	62 e1 fe 48 6f 06    	vmovdqu64 (%rsi),%zmm16
+  1b7ad3:	48 81 fa 80 00 00 00 	cmp    $0x80,%rdx
+  1b7ada:	0f 87 e0 00 00 00    	ja     1b7bc0 <memcpy@GLIBC_2.2.5+0x9210>
+  1b7ae0:	62 e1 fe 48 6f 4c 16 	vmovdqu64 -0x40(%rsi,%rdx,1),%zmm17
+  1b7ae7:	ff 
+  1b7ae8:	62 e1 fe 48 7f 07    	vmovdqu64 %zmm16,(%rdi)
+  1b7aee:	62 e1 fe 48 7f 4c 17 	vmovdqu64 %zmm17,-0x40(%rdi,%rdx,1)
+  1b7af5:	ff 
+  1b7af6:	c3                   	ret
+  1b7af7:	8b 0e                	mov    (%rsi),%ecx
+  1b7af9:	8b 34 16             	mov    (%rsi,%rdx,1),%esi
+  1b7afc:	89 0f                	mov    %ecx,(%rdi)
+  1b7afe:	89 34 17             	mov    %esi,(%rdi,%rdx,1)
+  1b7b01:	c3                   	ret
+  1b7b02:	0f 1f 00             	nopl   (%rax)
+  1b7b05:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+  1b7b0c:	00 00 00 00 
+  1b7b10:	83 fa 20             	cmp    $0x20,%edx
+  1b7b13:	73 40                	jae    1b7b55 <memcpy@GLIBC_2.2.5+0x91a5>
+  1b7b15:	83 fa 10             	cmp    $0x10,%edx
+  1b7b18:	73 26                	jae    1b7b40 <memcpy@GLIBC_2.2.5+0x9190>
+  1b7b1a:	83 fa 08             	cmp    $0x8,%edx
+  1b7b1d:	73 53                	jae    1b7b72 <memcpy@GLIBC_2.2.5+0x91c2>
+  1b7b1f:	48 83 ea 04          	sub    $0x4,%rdx
+  1b7b23:	73 d2                	jae    1b7af7 <memcpy@GLIBC_2.2.5+0x9147>
+  1b7b25:	83 fa fd             	cmp    $0xfffffffd,%edx
+  1b7b28:	7c 10                	jl     1b7b3a <memcpy@GLIBC_2.2.5+0x918a>
+  1b7b2a:	8a 0e                	mov    (%rsi),%cl
+  1b7b2c:	74 0a                	je     1b7b38 <memcpy@GLIBC_2.2.5+0x9188>
+  1b7b2e:	0f                   	.byte 0xf
+  1b7b2f:	b7                   	.byte 0xb7
