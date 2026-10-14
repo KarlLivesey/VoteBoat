@@ -1,0 +1,14 @@
+{
+  "original_exec": 22064,
+  "actual_start_tool": "55fbbb",
+  "actual_terminal_tool": "a0f164",
+  "actual_exit": 0,
+  "quiet": "Root and agents held allLinuxnon-runnerwork; no knownoverlap",
+  "postprocess_tool": "5edf45",
+  "postprocess_exit": 0,
+  "no_rerun_or_timeout_restart": true,
+  "bulk_archives_sealed_after_results": {
+    "matched436-linux": "154e9c53d40fc4afc5d5aebda400da562f1d594d0e0e5216349dcabc6448bd4b",
+    "comparison436/linux": "6d34a78639fc6893493e0fe1a89b1295e5ccead245628c32a0e9fc7bb46647c0"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "remote_job": "/tmp/voteboat-comparison436-Ow1m8z",
+  "original_remote_pid": 54468,
+  "original_launch_handle": 74723,
+  "job_exit": 0,
+  "raw_archive_sha256": "65efe57a297a5abdc95d03e34abf9a22a3b1411fbde5c464dd3fc394bf29533c",
+  "copy_exit": 0,
+  "cases": 12,
+  "stderr": "all12empty",
+  "scope": "selected singleton only; all immutable priorbulkfiles and originalbulkREADME verifiedunchanged by BULK_SHA256SUMS. No profiling/source/build/control rerun."
+}

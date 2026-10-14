@@ -1,0 +1,23 @@
+{
+  "scope": "singleton setup only; byte-identical qualified pairedconfig/artifacts/compiler/script guards, completed bulk afterguard and unchangedpassed controls reused by exactsha; no broad checks/upload/copy/build",
+  "cell": {
+    "clients": 1,
+    "batch": 1,
+    "originals": 1048576,
+    "requests": 1048576,
+    "warmup": 1024,
+    "frontiers": [
+      1049601,
+      1049601,
+      1049601
+    ],
+    "cases": 12
+  },
+  "pair_sha256": "53edcaed6246daf49a8ade1be6cc977b6c218dbbc89c422ffaa7a61ef371bd0e",
+  "runner_sha256": "cbc842c75ebaf5b9e9970ac461ba592578dd8a806e3f55983f017abd43b8fbcd",
+  "guard_sha256": "8f4f9fc3319fa7b550fd97ceb6ba17244f2397a1c89890fcaf075f818c5c87e0",
+  "controls_sha256": "22e2097c908c2acdf67c8ff7c6b27ff2f3c2d4eee6e5666c45913ef74f884e45",
+  "bulk_afterguard_sha256": "bca76d4484f275a54d7328ad619373fcfea7abbcf5b80bccf3c577c53759f263",
+  "source_artifact_compiler_unchanged": true,
+  "timing_launched": false
+}

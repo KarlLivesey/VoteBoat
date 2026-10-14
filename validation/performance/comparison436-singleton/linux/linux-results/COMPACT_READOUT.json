@@ -1,0 +1,145 @@
+{
+  "scope": "Linux435 versus436 singleton1M diagnostic;3rotations12cases each1,048,576 applied originals/requests +1024; not full P9 acceptance",
+  "original_exec": 22064,
+  "actual_terminal_tool": "a0f164",
+  "actual_terminal_exit": 0,
+  "cases": 12,
+  "all_counts_frontiers_requests_pass": true,
+  "frontiers": [
+    1049601,
+    1049601,
+    1049601
+  ],
+  "identity_before_after_exit": 0,
+  "output_checker_exit": 0,
+  "failures": [],
+  "nonempty_stderr": [],
+  "errors": "No reported CLI/stderr/checker errors; no separate refusalcounter exposed",
+  "median_variants": {
+    "baseline": {
+      "rates": [
+        109006.3791722854,
+        111884.22172387608,
+        113087.7819773169
+      ],
+      "median_completed_originals_per_second": 111884.22172387608,
+      "median_request_p50_ms": 0.007824,
+      "median_request_p99_ms": 0.017633
+    },
+    "candidate": {
+      "rates": [
+        98432.53357453966,
+        115737.4151715327,
+        113458.77409202744
+      ],
+      "median_completed_originals_per_second": 113458.77409202744,
+      "median_request_p50_ms": 0.007795,
+      "median_request_p99_ms": 0.016992
+    },
+    "on": {
+      "rates": [
+        88715.8119841787,
+        95075.46246028384,
+        93290.52777931916
+      ],
+      "median_completed_originals_per_second": 93290.52777931916,
+      "median_request_p50_ms": 0.009879,
+      "median_request_p99_ms": 0.019537
+    },
+    "openraft": {
+      "rates": [
+        19907.25229691854,
+        20973.35456994533,
+        20679.4354522089
+      ],
+      "median_completed_originals_per_second": 20679.4354522089,
+      "median_request_p50_ms": 0.042029,
+      "median_request_p99_ms": 0.124304
+    }
+  },
+  "off_pairs": [
+    {
+      "trial": 1,
+      "baseline_originals_per_second": 109006.3791722854,
+      "candidate_originals_per_second": 98432.53357453966,
+      "rate_ratio": 0.9029979192223815,
+      "baseline_p99_us": 18.174,
+      "candidate_p99_us": 19.927,
+      "rate_improved": false,
+      "p99_improved": false
+    },
+    {
+      "trial": 2,
+      "baseline_originals_per_second": 111884.22172387608,
+      "candidate_originals_per_second": 115737.4151715327,
+      "rate_ratio": 1.0344391138293485,
+      "baseline_p99_us": 17.633,
+      "candidate_p99_us": 16.901,
+      "rate_improved": true,
+      "p99_improved": true
+    },
+    {
+      "trial": 3,
+      "baseline_originals_per_second": 113087.7819773169,
+      "candidate_originals_per_second": 113458.77409202744,
+      "rate_ratio": 1.0032805676106102,
+      "baseline_p99_us": 17.112,
+      "candidate_p99_us": 16.992,
+      "rate_improved": true,
+      "p99_improved": true
+    }
+  ],
+  "on_tails": [
+    {
+      "trial": 1,
+      "completed_originals_per_second": 88715.8119841787,
+      "p99_us": 20.749
+    },
+    {
+      "trial": 2,
+      "completed_originals_per_second": 95075.46246028384,
+      "p99_us": 19.296
+    },
+    {
+      "trial": 3,
+      "completed_originals_per_second": 93290.52777931916,
+      "p99_us": 19.537
+    }
+  ],
+  "candidate_logical_diagnostics": {
+    "retained_entries": {
+      "minimum": 5601,
+      "maximum": 5601
+    },
+    "peak_retained_entries": {
+      "minimum": 6000,
+      "maximum": 6000
+    },
+    "peak_peer_queue": {
+      "minimum": 1,
+      "maximum": 4
+    },
+    "peak_client_queue": {
+      "minimum": 0,
+      "maximum": 1
+    },
+    "checkpoint_count": {
+      "minimum": 209,
+      "maximum": 209
+    },
+    "snapshot_installs": {
+      "minimum": 0,
+      "maximum": 0
+    },
+    "maximum_proposal_width": {
+      "minimum": 0,
+      "maximum": 1
+    }
+  },
+  "limits": [
+    "Logical queues/retention counts are not physical RAM/debt proof.",
+    "No full sustainedcurves/fairness/headroom/quorumdurable/P8 acceptance.",
+    "Attribution walltimes nested/overlap; not summed CPU.",
+    "Inherited raw checker scope label mentions20M bulk; actual commands/counts/thiscompactscope are1M singleton."
+  ]
+}

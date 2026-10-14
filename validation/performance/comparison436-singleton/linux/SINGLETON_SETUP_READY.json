@@ -1,0 +1,41 @@
+{
+  "status": "SINGLETON_SETUP_READY",
+  "candidate_source_commit": "62e9a1167d6f3d68cd60421579e75773d8588410",
+  "baseline_source_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "config_byte_identical_parent": true,
+  "config_sha256": "8028bbcd6c311e37c2d27d652fceb604edc1af67aa672263d36b0b9db45b553b",
+  "existing_guard_ready_exit": 0,
+  "immutable_inputs_guarded": "4351433 vs4361435, fourfresh/currentrootbuildscript/ELF_DWP/compiler/profile/locks/modes same qualifiedpair",
+  "unchanged_controls_reuse": {
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison436/phase-diagnostic.sh": "2c8033614b0a6a0f63ddf2e36c0b1c44acdea0368725dd55de404eec196c821e",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison436/phase-diagnostic-check.py": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison436/artifact-guard.py": "7e5a2ea1abcf115e03f174f4858d8953ce5c35a7d526edbe09d57ac64d0ee023",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison436/CONFIG_PAIR.linux.json": "8028bbcd6c311e37c2d27d652fceb604edc1af67aa672263d36b0b9db45b553b",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison436/ACTUAL436_CHECKER_CONTROLS.json": "313f2141e24dd6788e168fd829c4176fa0c432dd5ba13c0aa7087cf89ef8c415",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison436/ARTIFACT_GUARD_CONTROLS.json": "0aa909452c2037189153cc53e5d9e943854d4cb495c6b46b9acebc17f8a768d9"
+  },
+  "bulk_archive_manifests_sealed_before_after": {
+    "matched436-linux": "154e9c53d40fc4afc5d5aebda400da562f1d594d0e0e5216349dcabc6448bd4b",
+    "comparison436/linux": "6d34a78639fc6893493e0fe1a89b1295e5ccead245628c32a0e9fc7bb46647c0"
+  },
+  "prepared_cases": 12,
+  "clients": 1,
+  "batch": 1,
+  "originals": 1048576,
+  "warmup": 1024,
+  "frontiers": [
+    1049601,
+    1049601,
+    1049601
+  ],
+  "output_directory_absent": true,
+  "syntax_exit": 0,
+  "source_tests_build_cli_negative_controls_rerun": false,
+  "timing_started": false,
+  "no_live_local_jobs": true,
+  "launch": [
+    "bash",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison436-singleton/linux-run.sh"
+  ],
+  "next": "Awaitrootpublicationterminal andseparateQUIET_START"
+}

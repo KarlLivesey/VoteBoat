@@ -13,6 +13,19 @@ regressions and432's measured rejection/433 rollback. Reviewed candidates and ca
 stay separate from implemented improvements. It is the decision index for avoiding
 repeated experiments and extra prerequisites; detailed raw scopes remain below.
 
+436 is rejected after completed both-host singleton measurements. Linux median
+111,884→113,459 originals/s is mixed (trial1−9.7%); Mac57,423→56,581 originals/s
+has two throughput losses and all three p99 regressions, median30.583→32.625µs.
+[Linux](../validation/performance/comparison436-singleton/linux/README.md),
+[Mac](../validation/performance/comparison436-mac/SINGLETON_README.md).
+The small/mixed bulk gains do not justify this tradeoff; all raw outcomes remain.
+437's schema precedes editing: restore the exact435 client, remove unused private
+Waits storage, keep independent client outcome controls under cfg(test), qualify
+and publish the complete rollback. No representation tuning, broad unchanged root
+suite, old benchmark or old profile recapture. Immutable435 artifacts/profiles
+remain the measured baseline after source restoration; next selection follows
+current measured work and explicit ownership contracts. Macro scope is unchanged.
+
 Latest retained source is435 (`5c2390cb`), with qualified both-host20M bulk
 measurements published in`fe7f28c6`: Linux6,546,243→7,061,531 originals/s,
 p99 3.729967→3.289318ms; Mac4,461,961→4,719,331 originals/s,
@@ -142,8 +155,8 @@ diagnostics do not qualify sustained floors. [Every Linux trial and scope](../va
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current:436 client wait ownership | Remove duplicated IDs and a small-request wait-buffer allocation from measured client work | Both-host435 profiles and finished singleton diagnostics; immutable originals and every per-original channel/order retained | Explicit failure/cancellation schema, widths0/1/4/5/wider and strict checks; publish, fresh artifacts and paired both-host bulk/singleton rates/p99 before retention | P9.0/P9.1/P9.3 |
-| Next: remaining measured copying/admission work | Reduce the next limiting stage after436's measured disposition | 436 qualified, published and measured on both hosts; updated source-bound profiles and public ownership contracts | One explicit schema and focused checked slice; publish and measure both hosts before selecting another change | P9.0/P9.1/P9.3 |
+| Current:437 checked rollback | Restore the qualified435 client after436's measured tradeoff fails | Both-host436 bulk and singleton outcomes; exact435 implementation and immutable artifacts/profiles | Retain independent outcome controls, prove production restoration, standalone tests/format/strict and full enabled publication hook; preserve every regression | P9.0/P9.1/P9.3 |
+| Next: remaining measured copying/admission work | Reduce the next limiting stage after437 restores the measured baseline | 437 restores435 production; immutable435 profiles and exact remaining ownership contracts; confirm the measured stage before selection | One explicit schema and focused checked slice; publish and measure both hosts before selecting another change | P9.0/P9.1/P9.3 |
 | Following: bounded durable batching/overlap under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Native421 barrier evidence and unchanged publication/ticket contracts; bounded fairness schema after current measured framework stage | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual placement/barriers before changing defaults | P9.1/P9.2/P9.3 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
