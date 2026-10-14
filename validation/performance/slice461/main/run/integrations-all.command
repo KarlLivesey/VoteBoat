@@ -1,0 +1,1 @@
+cargo +stable test --locked --offline --all-features --test application --test provider_conformance --test raft --test runtime --test effect_owner --test log_store --test snapshot -- --test-threads=1 

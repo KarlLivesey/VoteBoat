@@ -3,6 +3,8 @@
 use voteboat::{application::*, identity::OperationId, log::*};
 #[path = "application/checks.rs"]
 mod checks;
+#[path = "application/commit_batch.rs"]
+mod commit_batch;
 #[path = "application/host.rs"]
 mod host;
 #[path = "application/mutants.rs"]

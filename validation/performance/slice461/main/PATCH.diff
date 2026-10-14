@@ -1,0 +1,1821 @@
+--- a/docs/component-contracts.json
++++ b/docs/component-contracts.json
+@@ -485,16 +485,19 @@
+       "operations": [
+         "validate_proposal",
+         "validate_proposal_context",
+-        "supports_ready_batch"
++        "supports_ready_batch",
++        "supports_commit_append_batch"
+       ],
+       "native": "Counter",
+       "conformance": [
+         "tests/effect_owner.rs",
+         "tests/directory.rs",
+         "tests/routed.rs",
+-        "tests/leadership_maintenance.rs"
+-      ],
+-      "scope": "Optional contract 1, deterministic syntax and dedup capacity validation over applied state, unapplied durable log and retained client commands, with per-command receipt bound. Repeated immediately before service proposal. No mutation or I/O; native and independent host applications use the same public contract. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Slice196b1 adds an optional deterministic current-core context check, repeated at admission and immediately before execution by ClientRouter. It restricts proposals without granting quorum or authentication authority. Composite applications must forward it for translated inner commands; low-level hosts retain the same obligation. A host test changes the accepted context after queuing and verifies rejection before persistence. Slice410 adds optional default-false supports_ready_batch for already-ready original commands sharing unchanged Core context and an exact admission-indexed pending prefix. Counter opts in; context-dependent host applications retain singleton validation. Per-original positions/outcomes and shared-visit credits remain distinct from commitment/application. Preview charges whole input and expanded observation metadata before dequeue; original poll/visit budgets and protected traffic boundaries remain. Admission scans skip the validated applied prefix by index rather than visiting retained history."
++        "tests/leadership_maintenance.rs",
++        "tests/provider_conformance/application/commit_batch.rs",
++        "tests/client_admission/ready_batch.rs"
++      ],
++      "scope": "Optional contract 1, deterministic syntax and dedup capacity validation over applied state, unapplied durable log and retained client commands, with per-command receipt bound. Repeated immediately before service proposal. No mutation or I/O; native and independent host applications use the same public contract. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Slice196b1 adds an optional deterministic current-core context check, repeated at admission and immediately before execution by ClientRouter. It restricts proposals without granting quorum or authentication authority. Composite applications must forward it for translated inner commands; low-level hosts retain the same obligation. A host test changes the accepted context after queuing and verifies rejection before persistence. Slice410 adds optional default-false supports_ready_batch for already-ready original commands sharing unchanged Core context and an exact admission-indexed pending prefix. Counter opts in; context-dependent host applications retain singleton validation. Per-original positions/outcomes and shared-visit credits remain distinct from commitment/application. Preview charges whole input and expanded observation metadata before dequeue; original poll/visit budgets and protected traffic boundaries remain. Admission scans skip the validated applied prefix by index rather than visiting retained history. Slice461 adds separate default-false supports_commit_append_batch: identical context results, validation errors and receipt bounds before versus after applying an older ordinary committed prefix and removing its pending reservations. Counter opts in; wrappers and context-sensitive providers retain serialization by default. The integrated runtime may only fuse exact local unadmitted full-old-tip commit work with already-ready commands under ordinary bulk/output/control bounds; Written grants no local durability or client outcome."
+     },
+     {
+       "design_id": "C05/C10/C15",
+@@ -902,7 +905,7 @@
+         "src/runtime/logical_intake/tests/reads.rs",
+         "tests/logical_activation_driver/owner_intake.rs"
+       ],
+-      "scope": "Pre-execution effect reservations, control reserves, one owned lease per group, exact worker binding/visit/stage checks, application catch-up and one-use reads, fenced failure and explicit drain. Tracked input identity and proposed position support ClientRouter's repeated application validation and exact outcomes. Three-node/100-group native-WAL/TCP/TLS history with native scheduler/timer providers, asynchronous checkpoints, decoded ingress and application/client results. ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit. Ordered groups_after uses the existing group map range for bounded maintenance cursor scans, with no ownership or scheduling state change. Slice198 exposes the existing ordered local assignments through an authenticated bounded command: at most256 source rows and eight output rows, exact group/incarnation and locally accepted/stable/joint target configurations, and SHA-256 cursor binding to node/store/incarnation/session and the complete view. Every local scope requires Inspect before output; data writes preserve cursors, configuration changes and store reopen invalidate them. This local view grants no durability, quorum, global placement or ownership evidence. TCP/QUIC executable histories and bounded parser/maximum-identity tests cover the command. Slice330C3A installs an immutable selected input profile only during original verified logical-owner construction. Declared whole tracked input windows validate before installation. Exact canonical Propose uses the original control queue and stored class; malformed, business, foreign and raw Read stay ordinary. Oversized original allocation refuses unchanged. Four private input controls pass all/core, real selected constructor refuses four short input profiles without modifying the original core, and five original native constructor/parent/client regressions pass. Typed owner-read linkage330C3B is a subsequent private correlated seam; whole effect reservation and full upstream terminal quota qualification remain pending. Slice330C3B implements private correlated typed-read owner admission. The exact installed profile, actual logical authorization, original checked request and one complete initialized query encoding drive identical owner output preflight and original input enqueue. Raw generic reads stay ordinary. Borrowed classification data is dropped after admission; original queue class governs visits and cleanup. Private root owner controls pass eight all/seven core, including physical-authority refusal; typed read controls pass eleven all/eleven core and twenty-two original physical regressions. Native read linkage regression and current full strict checks are tracked separately; complete terminal ordinary-byte/effect pressure, topology/recovery and macOS remain pending. Peer-ingress363 records the actual consumed Receive.from on Stepped and retains it with the SAME live Active until original Visit retirement. Private queued/active per-group source inspection plus original has_pending_send supports obsolete-session handback without draining unrelated work. This metadata grants no authentication, quorum or durability authority. Focused actual-core queued/leased/active source controls pass2/0; original runtime/effect controls and all four strict profiles are being closed on a guarded frozen cut. Guarded root363 final Linux qualification passes focused2 controls, original effect-owner187 (including8 real network cases) and runtime53 with zero failures; formatting and all four strict profiles0,1277 frozen inputs unchanged. Initial loopback sandbox refusals are separately recorded and authorised same-binary tests pass. Current C361/full platform qualification remains separate."
++      "scope": "Pre-execution effect reservations, control reserves, one owned lease per group, exact worker binding/visit/stage checks, application catch-up and one-use reads, fenced failure and explicit drain. Tracked input identity and proposed position support ClientRouter's repeated application validation and exact outcomes. Three-node/100-group native-WAL/TCP/TLS history with native scheduler/timer providers, asynchronous checkpoints, decoded ingress and application/client results. ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit. Ordered groups_after uses the existing group map range for bounded maintenance cursor scans, with no ownership or scheduling state change. Slice198 exposes the existing ordered local assignments through an authenticated bounded command: at most256 source rows and eight output rows, exact group/incarnation and locally accepted/stable/joint target configurations, and SHA-256 cursor binding to node/store/incarnation/session and the complete view. Every local scope requires Inspect before output; data writes preserve cursors, configuration changes and store reopen invalidate them. This local view grants no durability, quorum, global placement or ownership evidence. TCP/QUIC executable histories and bounded parser/maximum-identity tests cover the command. Slice330C3A installs an immutable selected input profile only during original verified logical-owner construction. Declared whole tracked input windows validate before installation. Exact canonical Propose uses the original control queue and stored class; malformed, business, foreign and raw Read stay ordinary. Oversized original allocation refuses unchanged. Four private input controls pass all/core, real selected constructor refuses four short input profiles without modifying the original core, and five original native constructor/parent/client regressions pass. Typed owner-read linkage330C3B is a subsequent private correlated seam; whole effect reservation and full upstream terminal quota qualification remain pending. Slice330C3B implements private correlated typed-read owner admission. The exact installed profile, actual logical authorization, original checked request and one complete initialized query encoding drive identical owner output preflight and original input enqueue. Raw generic reads stay ordinary. Borrowed classification data is dropped after admission; original queue class governs visits and cleanup. Private root owner controls pass eight all/seven core, including physical-authority refusal; typed read controls pass eleven all/eleven core and twenty-two original physical regressions. Native read linkage regression and current full strict checks are tracked separately; complete terminal ordinary-byte/effect pressure, topology/recovery and macOS remain pending. Peer-ingress363 records the actual consumed Receive.from on Stepped and retains it with the SAME live Active until original Visit retirement. Private queued/active per-group source inspection plus original has_pending_send supports obsolete-session handback without draining unrelated work. This metadata grants no authentication, quorum or durability authority. Focused actual-core queued/leased/active source controls pass2/0; original runtime/effect controls and all four strict profiles are being closed on a guarded frozen cut. Guarded root363 final Linux qualification passes focused2 controls, original effect-owner187 (including8 real network cases) and runtime53 with zero failures; formatting and all four strict profiles0,1277 frozen inputs unchanged. Initial loopback sandbox refusals are separately recorded and authorised same-binary tests pass. Current C361/full platform qualification remains separate. Slice461 permits opt-in ClientRouter fusion before installation/lease: a leading control observation plus all already-ready originals share one exact atomic persistence effect. The complete combined reservation is charged as bulk, including the leading observation and temporary copies. No data is consumed on fallback, no input priority is skipped, and no accepted effect is rewritten. Low-level owner advance and non-opted applications keep their original path. Qualification is recorded separately."
+     },
+     {
+       "design_id": "C10/C15",
+@@ -1001,7 +1004,7 @@
+         "tests/persistence_overlap/owner.rs",
+         "tests/worker.rs"
+       ],
+-      "scope": "Fixed consensus behavior, not a replaceable quorum or safety provider. An exact Written LogTicket may authorize bounded ordinary command Append frames under an already durable leader term/configuration. Core state, local matching, commit, application and replies remain gated on original durability. One exact prior empty request may survive as a bounded alias; bulk/snapshot requests are preserved. Logical owners and ineligible configuration/snapshot/transfer paths retain serialization. Physical owners reserve early output alongside terminal continuation, preserve queued and leased sends across completion, and fall back to serialization when extra space is unavailable. Public admitted and raw worker helpers retain their original behavior. No new durable token, disk format, authentication or quorum policy is introduced."
++      "scope": "Fixed consensus behavior, not a replaceable quorum or safety provider. An exact Written LogTicket may authorize bounded ordinary command Append frames under an already durable leader term/configuration. Core state, local matching, commit, application and replies remain gated on original durability. One exact prior empty request may survive as a bounded alias; bulk/snapshot requests are preserved. Logical owners and ineligible configuration/snapshot/transfer paths retain serialization. Physical owners reserve early output alongside terminal continuation, preserve queued and leased sends across completion, and fall back to serialization when extra space is unavailable. Public admitted and raw worker helpers retain their original behavior. No new durable token, disk format, authentication or quorum policy is introduced. Slice461 adds a private full-old-tip fusion case: an exact still-unadmitted commit-only transition may carry new ordinary commands when the old current-term tip already has quorum coverage. Early RPCs advertise only the old durable commit; no local Written vote, early application or new-tail commitment is inferred. Exact ticket/context, peer-match and bounded alias guards remain. Configured/logical/transfer/readiness and other ineligible paths retain serialization. Qualification is recorded separately."
+     },
+     {
+       "design_id": "C10",
+--- a/docs/provider-conformance.json
++++ b/docs/provider-conformance.json
+@@ -2,6 +2,62 @@
+   "version": 1,
+   "meaning": "Reviewed operation obligations and selected assertions, not a completion certificate or replacement-provider certification.",
+   "reviews": [
++    {
++      "public_contract": "ProposalAdmission",
++      "status": "partial",
++      "runners": [
++        {
++          "file": "tests/provider_conformance/application/commit_batch.rs",
++          "symbol": "unchanged_context_batch_opt_in_does_not_imply_commit_append_opt_in"
++        },
++        {
++          "file": "tests/provider_conformance/application/commit_batch.rs",
++          "symbol": "counter_admission_is_invariant_under_moving_pending_prefix_to_applied"
++        }
++      ],
++      "operations": [
++        {
++          "names": [
++            "supports_ready_batch",
++            "supports_commit_append_batch"
++          ],
++          "obligation": "Opt-in capabilities grant no consensus or durability authority. Unchanged-context batching alone does not authorize validation across commit/application advancement. Commit-and-append requires identical validation and receipt bounds after transferring the committed ordinary prefix from pending into applied state. Default false preserves serialization for host providers and wrappers.",
++          "assertions": [
++            {
++              "file": "tests/provider_conformance/application/commit_batch.rs",
++              "symbol": "unchanged_context_batch_opt_in_does_not_imply_commit_append_opt_in"
++            },
++            {
++              "file": "tests/provider_conformance/application/commit_batch.rs",
++              "symbol": "counter_admission_is_invariant_under_moving_pending_prefix_to_applied"
++            }
++          ],
++          "remaining": [
++            "Selected Counter histories cover finite capacities, duplicate/conflicting IDs, overflow, invalid syntax and queued reservations; arbitrary host capability assertions remain trusted. Runtime scheduling, exact tickets, resource budgets and crash/restart are separate controls."
++          ]
++        },
++        {
++          "names": [
++            "validate_proposal",
++            "validate_proposal_context"
++          ],
++          "obligation": "Checks are deterministic, non-mutating and repeated immediately before execution with all pending reservations and the live consensus context. Invalid syntax, exhausted dedup capacity and provider context rejection must preserve original errors and receipt bounds.",
++          "assertions": [
++            {
++              "file": "tests/provider_conformance/application/commit_batch.rs",
++              "symbol": "counter_admission_is_invariant_under_moving_pending_prefix_to_applied"
++            },
++            {
++              "file": "tests/client_admission/ready_batch/context.rs",
++              "symbol": "default_host_context_is_rechecked_after_original_singleton_durability"
++            }
++          ],
++          "remaining": [
++            "No certification of arbitrary application providers, all context combinations or durable application databases. Capability opt-in must be independently established by each composite application."
++          ]
++        }
++      ]
++    },
+     {
+       "public_contract": "CommandBytes",
+       "status": "partial",
+--- a/src/application.rs
++++ b/src/application.rs
+@@ -40,6 +40,21 @@
+         false
+     }
+ 
++    /// Opt into appending already-ready commands in the same persistence
++    /// transition that commits an older ordinary prefix. Requires
++    /// `supports_ready_batch` as well. Default preserves serialized validation.
++    ///
++    /// The application promises identical context-validation results,
++    /// proposal-validation errors and receipt bounds before versus after
++    /// applying that committed prefix and removing it from pending commands.
++    /// This includes retries, conflicts and exhausted application capacity.
++    /// Composite applications must establish this for their own context checks;
++    /// forwarding an inner application's opt-in alone is insufficient.
++    /// No application, commitment or durability authority is granted.
++    fn supports_commit_append_batch(&self) -> bool {
++        false
++    }
++
+     /// Optional deterministic check against the current consensus context.
+     /// The owning client router calls this at admission and again immediately
+     /// before execution. It may restrict proposals; it grants no consensus or
+@@ -188,6 +203,10 @@
+ 
+ impl ProposalAdmission for Counter {
+     fn supports_ready_batch(&self) -> bool {
++        true
++    }
++
++    fn supports_commit_append_batch(&self) -> bool {
+         true
+     }
+ 
+--- a/src/raft.rs
++++ b/src/raft.rs
+@@ -29,6 +29,7 @@
+ mod admitted_replication;
+ mod batch_limits;
+ pub use batch_limits::BatchLimits;
++mod combine_ready;
+ mod completion;
+ use completion::PreparedCompletion;
+ pub use completion::{persist_effect_borrowed, CompletionEffects};
+@@ -648,7 +649,10 @@
+     /// Conservative output reservation for one event and its dependent durable
+     /// completions. The owner must bound input retention by `input_bytes`, drain
+     /// each output batch before another completion, and run only one event in
+-    /// the visit. Core/log memory and host snapshot-worker buffers are separate.
++    /// the visit. The private combined-ready path instead reserves its leading
++    /// control input, bounded commands, temporary plans and every observation
++    /// for one atomic transition before consuming that ready prefix.
++    /// Core/log memory and host snapshot-worker buffers are separate.
+     /// Covers the accepted head and every configuration reachable by truncating
+     /// its uncommitted suffix. Use `event_effect_reservation` for incoming growth.
+     pub fn effect_reservation(&self, input_bytes: usize) -> Option<usize> {
+--- a/src/raft/admitted_replication.rs
++++ b/src/raft/admitted_replication.rs
+@@ -103,6 +103,11 @@
+     fn early_suffix(&self) -> Option<&Suffix> {
+         let pending = self.pending.as_ref()?;
+         let next = pending.next.metadata();
++        let old_commit = self.durable.commit_index;
++        let ordinary = self.durable.last_index() == old_commit
++            && self.durable.term_at(old_commit) == Some(self.durable.hard_state.term)
++            && pending.next.update().commit_index == old_commit;
++        let combined = self.ready_commit_tip(pending.next.update().commit_index);
+         if self.fenced
+             || self.role != Role::Leader
+             || !self.local_voter()
+@@ -111,12 +116,10 @@
+             || !pending.next.is_append()
+             || pending.membership.is_some()
+             || !matches!(pending.after, After::LeaderAppend)
+-            || self.durable.last_index() != self.durable.commit_index
+-            || self.durable.term_at(self.durable.commit_index) != Some(self.durable.hard_state.term)
++            || !(ordinary || combined)
+             || pending.next.update().hard_state != self.durable.hard_state
+             || next.ballot_origin != self.durable.ballot_origin
+             || next.generation != self.durable.generation
+-            || pending.next.update().commit_index != self.durable.commit_index
+         {
+             return None;
+         }
+--- /dev/null
++++ b/src/raft/combine_ready.rs
+@@ -0,0 +1,112 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Fuse only an exact, still-private commit request with ready ordinary input.
++use super::*;
++
++impl Raft {
++    // The old suffix is locally durable and already covered by a current-term
++    // quorum. This predicate grants no durable commit or new-entry authority.
++    pub(super) fn ready_commit_tip(&self, commit: u64) -> bool {
++        commit > self.durable.commit_index
++            && commit == self.durable.last_index()
++            && self.durable.term_at(commit) == Some(self.durable.hard_state.term)
++            && self.membership().frontier(&self.progress) >= commit
++    }
++
++    pub(crate) fn can_combine_ready_commit(&self, update: &LogUpdate) -> bool {
++        let Some(pending) = &self.pending else {
++            return false;
++        };
++        let metadata = pending.next.metadata();
++        !self.fenced
++            && self.role == Role::Leader
++            && self.local_voter()
++            && self.log_summary.is_plain()
++            && self.membership.joint().is_none()
++            && self.membership.last_configuration_index() <= self.durable.commit_index
++            && self.transfer.is_none()
++            && self.read.is_none()
++            && self.ready_read.is_none()
++            && self.readiness_check.is_none()
++            && self.learner_readiness.is_none()
++            && self.ready_learner.is_none()
++            && self.staged_snapshot.is_none()
++            && self.application_install.is_none()
++            && self.checkpoint_requested.is_none()
++            && self.checkpoint_reconcile.is_none()
++            && pending.ticket.is_none()
++            && pending.membership.is_none()
++            && pending.reply.is_none()
++            && matches!(pending.after, After::Commit)
++            && pending.next.is_append()
++            && pending.next.matches_update(update)
++            && update.expected_revision == self.durable.revision
++            && update.hard_state == self.durable.hard_state
++            && update.snapshot.is_none()
++            && update.snapshot_membership.is_none()
++            && update.suffix.is_none()
++            && metadata.generation == self.durable.generation
++            && metadata.ballot_origin == self.durable.ballot_origin
++            && self.ready_commit_tip(update.commit_index)
++    }
++
++    /// The caller still owns the sole exact commit effect and every queued
++    /// original. An error changes neither the pending request nor that effect;
++    /// the caller must immediately retain the original serialized path.
++    pub(crate) fn combine_ready_commit(
++        &mut self,
++        update: &LogUpdate,
++        proposals: Vec<Proposal>,
++    ) -> Result<Vec<Effect>, RaftError> {
++        if self.fenced {
++            return Err(RaftError::Fenced);
++        }
++        if !self.can_combine_ready_commit(update) {
++            return Err(RaftError::WrongCompletion);
++        }
++        let first = self.validate_proposal_batch(&proposals, proposals.capacity())?;
++        self.validate_conversion_peak(&proposals, proposals.capacity())?;
++        let entries = proposals
++            .into_iter()
++            .enumerate()
++            .map(|(offset, proposal)| LogEntry {
++                index: first + offset as u64,
++                term: self.durable.hard_state.term,
++                payload: EntryPayload::Command {
++                    operation: proposal.operation,
++                    bytes: proposal.bytes.into(),
++                },
++            })
++            .collect();
++        let combined = LogUpdate {
++            suffix: Some(Suffix {
++                from: first,
++                entries,
++            }),
++            ..update.clone()
++        };
++        // Plan against the original durable predecessor without taking or
++        // modifying the existing commit dependency, even on a late error.
++        let next = OwnedNextLog::plan_copy(
++            &LogView::new(&self.durable),
++            &self.log_summary,
++            &combined,
++            self.limits,
++        )?;
++        if !next.is_append() {
++            return Err(RaftError::WrongCompletion);
++        }
++        let effects = vec![Effect::Persist(combined)];
++        self.pending = Some(Pending {
++            next,
++            membership: None,
++            ticket: None,
++            after: After::LeaderAppend,
++            reply: None,
++        });
++        Ok(effects)
++    }
++}
++
++#[cfg(test)]
++mod tests;
+--- /dev/null
++++ b/src/raft/combine_ready/tests.rs
+@@ -0,0 +1,437 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Actual Core histories; fixture completion tokens do not model filesystem sync.
++use super::*;
++use crate::application::{Counter, StateMachine};
++use crate::raft::membership_tests::{core, durable};
++#[cfg(feature = "native")]
++mod native;
++
++fn node(id: u64) -> NodeId {
++    NodeId::new(id).unwrap()
++}
++fn proposal(id: u128) -> Proposal {
++    Proposal {
++        operation: OperationId::new(id).unwrap(),
++        bytes: 1i64.to_le_bytes().to_vec(),
++    }
++}
++fn update(effects: Vec<Effect>) -> LogUpdate {
++    let [Effect::Persist(update)] = effects.as_slice() else {
++        panic!("expected sole persistence effect")
++    };
++    update.clone()
++}
++fn sends(effects: Vec<Effect>) -> Vec<Message> {
++    effects
++        .into_iter()
++        .filter_map(|effect| match effect {
++            Effect::Send(message) => Some(message),
++            _ => None,
++        })
++        .collect()
++}
++fn ack(core: &Raft, request: &Message) -> Event {
++    let Rpc::Append {
++        previous_index,
++        entries,
++        ..
++    } = &request.rpc
++    else {
++        panic!("expected append")
++    };
++    Event::Receive(Message {
++        group: request.group,
++        configuration: request.configuration,
++        from: request.to,
++        to: request.from,
++        sender: StoreBinding {
++            identity: core.membership().replica_store(request.to).unwrap(),
++            session: StoreSession::new(1).unwrap(),
++        },
++        term: request.term,
++        context: request.context,
++        rpc: Rpc::Appended {
++            success: true,
++            matching_index: entries.last().map_or(*previous_index, |entry| entry.index),
++        },
++    })
++}
++fn commit_ready() -> (Raft, LogUpdate) {
++    let mut core = core();
++    let append = core
++        .propose_batch(vec![proposal(10), proposal(11)])
++        .unwrap();
++    let requests = sends(durable(&mut core, append));
++    let request = requests
++        .iter()
++        .find(|message| message.to == node(2))
++        .unwrap();
++    let response = ack(&core, request);
++    let commit = update(core.step(response).unwrap());
++    assert!(core.can_combine_ready_commit(&commit));
++    (core, commit)
++}
++fn ticket(core: &Raft) -> LogTicket {
++    let metadata = core.pending.as_ref().unwrap().next.metadata();
++    LogTicket {
++        binding: core.binding,
++        batch: core.last_batch + 1,
++        group: metadata.group,
++        revision: metadata.revision,
++        generation: metadata.generation,
++        last_index: metadata.last_index,
++        term: metadata.hard_state.term,
++    }
++}
++fn apply(counter: &mut Counter, effects: &[Effect]) -> Vec<crate::application::CounterReceipt> {
++    let mut receipts = Vec::new();
++    for effect in effects {
++        if let Effect::Committed(entries) = effect {
++            receipts.extend(counter.apply_batch(entries).unwrap());
++        }
++    }
++    receipts
++}
++
++#[test]
++fn fused_durability_matches_serialized_old_receipts_and_uncommitted_new_tail() {
++    let (mut serial, commit) = commit_ready();
++    let (mut fused, fused_commit) = commit_ready();
++    let mut serial_app = Counter::new(16).unwrap();
++    let mut fused_app = serial_app.clone();
++    serial_app
++        .apply_batch(&serial.state().entries[..1])
++        .unwrap();
++    fused_app.apply_batch(&fused.state().entries[..1]).unwrap();
++    let old_receipts = apply(
++        &mut serial_app,
++        &durable(&mut serial, vec![Effect::Persist(commit)]),
++    );
++    let append = serial
++        .propose_batch(vec![proposal(12), proposal(13)])
++        .unwrap();
++    assert!(apply(&mut serial_app, &durable(&mut serial, append)).is_empty());
++    let before = fused.state().clone();
++    let effects = fused
++        .combine_ready_commit(&fused_commit, vec![proposal(12), proposal(13)])
++        .unwrap();
++    assert_eq!(fused.state(), &before);
++    let combined = update(effects);
++    assert_eq!(combined.commit_index, 3);
++    assert_eq!(combined.suffix.as_ref().unwrap().from, 4);
++    let completion = durable(&mut fused, vec![Effect::Persist(combined)]);
++    assert!(matches!(completion.first(), Some(Effect::Committed(entries)) if entries.len() == 2));
++    assert_eq!(apply(&mut fused_app, &completion), old_receipts);
++    assert_eq!(fused_app.applied_index(), 3);
++    assert_eq!(fused.state().commit_index, 3);
++    assert_eq!(fused.state().last_index(), 5);
++    assert_eq!(fused.state().entries, serial.state().entries);
++    assert_eq!(fused.state().hard_state, serial.state().hard_state);
++    assert_eq!(fused.state().generation, serial.state().generation);
++    assert_eq!(
++        fused.state().revision.get() + 1,
++        serial.state().revision.get()
++    );
++}
++
++#[test]
++fn rejected_inputs_preserve_exact_commit_dependency_and_every_exported_field() {
++    let (mut core, commit) = commit_ready();
++    let state = core.state().clone();
++    let progress = core.progress.clone();
++    for variant in 0..5 {
++        let mut altered = commit.clone();
++        match variant {
++            0 => altered.commit_index -= 1,
++            1 => altered.expected_revision = LogRevision::new(999).unwrap(),
++            2 => altered.hard_state.term += 1,
++            3 => {
++                altered.suffix = Some(Suffix {
++                    from: 4,
++                    entries: Vec::new(),
++                })
++            }
++            _ => altered.group.incarnation = GroupIncarnation::new(99).unwrap(),
++        }
++        assert!(!core.can_combine_ready_commit(&altered));
++        assert_eq!(
++            core.combine_ready_commit(&altered, vec![proposal(12)]),
++            Err(RaftError::WrongCompletion)
++        );
++        assert_eq!(core.validate_persist_effect(&commit), Ok(()));
++    }
++    for input in [
++        Vec::new(),
++        vec![Proposal {
++            operation: OperationId::new(12).unwrap(),
++            bytes: vec![0; core.limits.max_command_bytes + 1],
++        }],
++    ] {
++        assert!(core.combine_ready_commit(&commit, input).is_err());
++        assert_eq!(core.validate_persist_effect(&commit), Ok(()));
++    }
++    assert_eq!(core.state(), &state);
++    assert_eq!(core.progress, progress);
++    assert_eq!(core.pending.as_ref().unwrap().next.update(), &commit);
++    let exact = ticket(&core);
++    core.admit_effect(&commit, exact).unwrap();
++    assert!(!core.can_combine_ready_commit(&commit));
++    assert_eq!(
++        core.combine_ready_commit(&commit, vec![proposal(12)]),
++        Err(RaftError::WrongCompletion)
++    );
++    assert_eq!(core.pending.as_ref().unwrap().ticket, Some(exact));
++}
++
++#[test]
++fn role_quorum_full_tip_continuation_and_transfer_gates_keep_serial_commit_intact() {
++    for gate in 0..5 {
++        let (mut core, mut commit) = commit_ready();
++        match gate {
++            0 => core.role = Role::Follower,
++            1 => {
++                core.progress.insert(node(2), 1);
++            }
++            2 => {
++                commit = update(
++                    core.persist(core.durable.hard_state, 2, None, After::Commit, None)
++                        .unwrap(),
++                );
++            }
++            3 => core.pending.as_mut().unwrap().after = After::Reply,
++            _ => {
++                core.transfer = Some(LeadershipTransfer {
++                    request: LeadershipTransferRequest {
++                        operation: OperationId::new(99).unwrap(),
++                        target: crate::secure::PeerIdentity {
++                            node: node(2),
++                            store: core.membership().replica_store(node(2)).unwrap(),
++                        },
++                        configuration: core.membership().id(),
++                    },
++                    context: RequestContext {
++                        origin: core.binding,
++                        sequence: 99,
++                    },
++                    term: core.durable.hard_state.term,
++                    index: 3,
++                    signal_sent: false,
++                });
++            }
++        }
++        let state = core.state().clone();
++        let transfer = core.transfer;
++        assert!(!core.can_combine_ready_commit(&commit));
++        assert_eq!(
++            core.combine_ready_commit(&commit, vec![proposal(12)]),
++            Err(RaftError::WrongCompletion)
++        );
++        assert_eq!(core.state(), &state);
++        assert_eq!(core.pending.as_ref().unwrap().next.update(), &commit);
++        assert_eq!(core.transfer, transfer);
++    }
++}
++
++#[test]
++fn written_uses_old_commit_and_old_prefix_waits_for_exact_durable_completion() {
++    let (mut core, commit) = commit_ready();
++    let effects = core
++        .combine_ready_commit(&commit, vec![proposal(12), proposal(13)])
++        .unwrap();
++    let combined = update(effects);
++    assert_eq!(
++        core.validate_persist_effect(&commit),
++        Err(RaftError::WrongCompletion)
++    );
++    let exact = ticket(&core);
++    let requests = sends(core.replicate_admitted(exact).unwrap());
++    assert_eq!(requests.len(), 1);
++    let request = &requests[0];
++    assert!(
++        matches!(&request.rpc, Rpc::Append { previous_index: 3, leader_commit: 1, entries, .. } if entries.len() == 2)
++    );
++    assert_eq!(core.state().commit_index, 1);
++    assert_eq!(core.state().last_index(), 3);
++    assert_eq!(core.progress[&node(1)], 3);
++    let response = ack(&core, request);
++    assert_eq!(core.step(response.clone()), Err(RaftError::Busy));
++    let mut stale = exact;
++    stale.last_index -= 1;
++    assert_eq!(
++        core.complete(&DurableLog {
++            tickets: vec![stale]
++        }),
++        Err(RaftError::WrongCompletion)
++    );
++    let effects = core
++        .complete(&DurableLog {
++            tickets: vec![exact],
++        })
++        .unwrap();
++    assert!(matches!(effects.first(), Some(Effect::Committed(entries)) if entries.len() == 2));
++    assert_eq!(core.state().commit_index, combined.commit_index);
++    assert_eq!(core.state().last_index(), 5);
++    // A heartbeat retries the same early range with the now-durable old commit.
++    let retry = sends(core.step(Event::Heartbeat).unwrap())
++        .into_iter()
++        .find(|message| message.to == request.to)
++        .unwrap();
++    assert_eq!(retry.context, request.context);
++    assert!(matches!(
++        retry.rpc,
++        Rpc::Append {
++            leader_commit: 3,
++            ..
++        }
++    ));
++    let commit_new = core.step(response).unwrap();
++    assert_eq!(core.state().commit_index, 3);
++    let committed = durable(&mut core, commit_new);
++    assert!(
++        matches!(committed.first(), Some(Effect::Committed(entries)) if entries.len() == 2 && entries[0].index == 4)
++    );
++    assert_eq!(core.state().commit_index, 5);
++}
++
++#[test]
++fn failure_fences_without_exposing_new_state_and_recovery_keeps_new_tail_uncommitted() {
++    let (mut core, commit) = commit_ready();
++    let before = core.state().clone();
++    let combined = update(
++        core.combine_ready_commit(&commit, vec![proposal(12)])
++            .unwrap(),
++    );
++    let exact = ticket(&core);
++    core.replicate_admitted(exact).unwrap();
++    core.storage_failed();
++    assert_eq!(core.state(), &before);
++    assert_eq!(
++        core.complete(&DurableLog {
++            tickets: vec![exact]
++        }),
++        Err(RaftError::Fenced)
++    );
++    for recovered in [
++        before.clone(),
++        stage_update(&before, &combined, core.limits).unwrap(),
++    ] {
++        let expected_commit = recovered.commit_index;
++        let mut restarted = Raft::recover(core.node, core.binding, recovered, core.limits).unwrap();
++        assert_eq!(restarted.state().commit_index, expected_commit);
++        assert!(restarted.pending.is_none());
++        assert_eq!(
++            restarted.complete(&DurableLog {
++                tickets: vec![exact]
++            }),
++            Err(RaftError::WrongCompletion)
++        );
++        if expected_commit == 3 {
++            assert_eq!(restarted.state().last_index(), 4);
++            let mut app = Counter::new(16).unwrap();
++            let receipts = app.apply_batch(restarted.replay_committed()).unwrap();
++            assert_eq!(receipts.len(), 2);
++            assert_eq!(app.applied_index(), 3);
++        }
++    }
++}
++
++fn commit_with_empty_collector() -> (Raft, LogUpdate, Message) {
++    use crate::quorum::{Limits, Policy, Tree};
++    let original = core();
++    let mut state = original.state().clone();
++    state.bootstrap.voter_stores = (1..=5)
++        .map(|id| {
++            (
++                node(id),
++                StoreIdentity {
++                    id: StoreId::new(u128::from(id)).unwrap(),
++                    incarnation: StoreIncarnation::new(1).unwrap(),
++                },
++            )
++        })
++        .collect();
++    state.bootstrap.policy = Policy::new(
++        Tree::Majority((1..=5).map(|id| Tree::Voter(node(id))).collect()),
++        Limits::default(),
++    )
++    .unwrap();
++    let mut core = Raft::recover(node(1), original.binding, state, original.limits).unwrap();
++    core.role = Role::Leader;
++    core.initialize_replication().unwrap();
++    let append = core
++        .propose_batch(vec![proposal(10), proposal(11)])
++        .unwrap();
++    let requests = sends(durable(&mut core, append));
++    let first = requests
++        .iter()
++        .find(|request| request.to == node(2))
++        .unwrap();
++    assert!(core.step(ack(&core, first)).unwrap().is_empty());
++    let collector = sends(core.step(Event::Heartbeat).unwrap())
++        .into_iter()
++        .find(|request| request.to == node(2))
++        .unwrap();
++    assert!(
++        matches!(&collector.rpc, Rpc::Append { entries, previous_index: 3, .. } if entries.is_empty())
++    );
++    let second = requests
++        .iter()
++        .find(|request| request.to == node(3))
++        .unwrap();
++    let commit = update(core.step(ack(&core, second)).unwrap());
++    (core, commit, collector)
++}
++
++#[test]
++fn combined_early_alias_and_old_commit_notification_preserve_later_quorum_progress() {
++    for old_first in [true, false] {
++        let (mut core, commit, collector) = commit_with_empty_collector();
++        core.combine_ready_commit(&commit, vec![proposal(12), proposal(13)])
++            .unwrap();
++        let exact = ticket(&core);
++        let early = sends(core.replicate_admitted(exact).unwrap());
++        assert_eq!(early.len(), 2);
++        let first = early.iter().find(|request| request.to == node(2)).unwrap();
++        let second = early.iter().find(|request| request.to == node(3)).unwrap();
++        assert_ne!(first.context, collector.context);
++        assert!(core.empty_append_aliases.contains_key(&node(2)));
++        core.complete(&DurableLog {
++            tickets: vec![exact],
++        })
++        .unwrap();
++        let retry = sends(core.step(Event::Heartbeat).unwrap())
++            .into_iter()
++            .find(|request| request.to == node(2))
++            .unwrap();
++        assert_eq!(retry.context, first.context);
++        assert!(matches!(
++            retry.rpc,
++            Rpc::Append {
++                leader_commit: 3,
++                ..
++            }
++        ));
++        if old_first {
++            assert!(core.step(ack(&core, &collector)).unwrap().is_empty());
++            assert_eq!(core.progress[&node(2)], 3);
++            assert_eq!(core.requests[&node(2)].context, first.context);
++        }
++        let effects = core.step(ack(&core, first)).unwrap();
++        assert!(!effects
++            .iter()
++            .any(|effect| matches!(effect, Effect::Persist(_))));
++        assert_eq!(core.state().commit_index, 3);
++        if !old_first {
++            assert!(core.step(ack(&core, &collector)).unwrap().is_empty());
++        }
++        let effects = core.step(ack(&core, second)).unwrap();
++        assert!(matches!(effects.as_slice(), [Effect::Persist(_)]));
++        assert_eq!(core.state().commit_index, 3);
++        let committed = durable(&mut core, effects);
++        assert!(
++            matches!(committed.first(), Some(Effect::Committed(entries)) if entries.len() == 2 && entries[0].index == 4)
++        );
++        assert_eq!(core.state().commit_index, 5);
++    }
++}
+--- /dev/null
++++ b/src/raft/combine_ready/tests/native.rs
+@@ -0,0 +1,149 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Native framing/recovery with the synced-image model from tests/support.
++use super::*;
++use crate::native::log_store::{JournalIo, NativeLogStore};
++use std::{cell::RefCell, io, rc::Rc};
++
++#[derive(Default)]
++struct Device {
++    log: Vec<u8>,
++    synced: Vec<u8>,
++    manifest: Option<Vec<u8>>,
++    publication_fault: u8,
++}
++#[derive(Clone, Default)]
++struct ModelIo(Rc<RefCell<Device>>);
++impl ModelIo {
++    fn power_loss(&self) {
++        let mut device = self.0.borrow_mut();
++        device.log = device.synced.clone();
++        device.publication_fault = 0;
++    }
++}
++impl JournalIo for ModelIo {
++    fn read_manifest(&mut self) -> io::Result<Vec<u8>> {
++        self.0
++            .borrow()
++            .manifest
++            .clone()
++            .ok_or(io::ErrorKind::NotFound.into())
++    }
++    fn read_log(&mut self, limit: usize) -> io::Result<Vec<u8>> {
++        let device = self.0.borrow();
++        if device.log.len() > limit {
++            return Err(io::Error::other("oversized WAL"));
++        }
++        Ok(device.log.clone())
++    }
++    fn append(&mut self, bytes: &[u8]) -> io::Result<()> {
++        self.0.borrow_mut().log.extend(bytes);
++        Ok(())
++    }
++    fn sync_log(&mut self) -> io::Result<()> {
++        let mut device = self.0.borrow_mut();
++        device.synced = device.log.clone();
++        Ok(())
++    }
++    fn truncate_log(&mut self, len: u64) -> io::Result<()> {
++        self.0.borrow_mut().log.truncate(len as usize);
++        Ok(())
++    }
++    fn publish_manifest(&mut self, bytes: &[u8]) -> io::Result<()> {
++        let mut device = self.0.borrow_mut();
++        if device.publication_fault == 1 {
++            return Err(io::Error::other("before publication"));
++        }
++        device.manifest = Some(bytes.to_vec());
++        if device.publication_fault == 2 {
++            return Err(io::Error::other("after publication"));
++        }
++        Ok(())
++    }
++}
++fn seed(core: &Raft) -> (ModelIo, NativeLogStore<ModelIo>) {
++    let io = ModelIo::default();
++    let mut store = NativeLogStore::create(io.clone(), core.binding.identity, core.limits).unwrap();
++    let group = core.state().bootstrap.group;
++    let tickets = store
++        .append_batch(vec![LogMutation::Create(core.state().bootstrap.clone())])
++        .unwrap();
++    store.barrier(&tickets).unwrap();
++    for (from, entries) in [
++        (1, core.state().entries[..1].to_vec()),
++        (2, core.state().entries[1..].to_vec()),
++    ] {
++        let current = store.state(group).unwrap();
++        let update = LogUpdate {
++            group,
++            expected_revision: current.revision,
++            hard_state: core.state().hard_state,
++            commit_index: 1,
++            suffix: Some(Suffix { from, entries }),
++            snapshot: None,
++            snapshot_membership: None,
++        };
++        let tickets = store
++            .append_batch(vec![LogMutation::Update(update)])
++            .unwrap();
++        store.barrier(&tickets).unwrap();
++    }
++    assert_eq!(store.state(group).unwrap(), *core.state());
++    (io, store)
++}
++
++#[test]
++fn native_power_loss_recovers_combined_transition_atomically_and_failed_publication_fences() {
++    for phase in 0..4 {
++        let (mut core, commit) = commit_ready();
++        let (io, mut store) = seed(&core);
++        let before = core.state().clone();
++        let combined = update(
++            core.combine_ready_commit(&commit, vec![proposal(12), proposal(13)])
++                .unwrap(),
++        );
++        let tickets = store
++            .append_batch(vec![LogMutation::Update(combined)])
++            .unwrap();
++        core.replicate_admitted(tickets[0]).unwrap();
++        if phase == 1 {
++            let effects = core.complete(&store.barrier(&tickets).unwrap()).unwrap();
++            assert!(
++                matches!(effects.first(), Some(Effect::Committed(entries)) if entries.len() == 2)
++            );
++        } else if phase >= 2 {
++            io.0.borrow_mut().publication_fault = phase - 1;
++            assert!(store.barrier(&tickets).is_err());
++            assert_eq!(
++                store.state(before.bootstrap.group),
++                Err(StorageError::Fenced)
++            );
++            core.storage_failed();
++            assert_eq!(core.state(), &before);
++            assert_eq!(
++                core.complete(&DurableLog {
++                    tickets: tickets.clone()
++                }),
++                Err(RaftError::Fenced)
++            );
++        } else {
++            assert_eq!(core.state(), &before);
++        }
++        drop(store);
++        io.power_loss();
++        let recovered = NativeLogStore::recover(io, core.binding.identity, core.limits).unwrap();
++        let state = recovered.state(before.bootstrap.group).unwrap();
++        assert_eq!(state.commit_index, if phase == 0 { 1 } else { 3 });
++        assert_eq!(state.last_index(), if phase == 0 { 3 } else { 5 });
++        let mut restarted =
++            Raft::recover(core.node, recovered.binding(), state, core.limits).unwrap();
++        assert_eq!(
++            restarted.complete(&DurableLog { tickets }),
++            Err(RaftError::WrongCompletion)
++        );
++        let mut app = Counter::new(16).unwrap();
++        let receipts = app.apply_batch(restarted.replay_committed()).unwrap();
++        assert_eq!(receipts.len(), if phase == 0 { 0 } else { 2 });
++        assert_eq!(app.applied_index(), if phase == 0 { 1 } else { 3 });
++    }
++}
+--- a/src/raft/proposals.rs
++++ b/src/raft/proposals.rs
+@@ -103,7 +103,7 @@
+         self.persist_proposal_entries(index, vec![entry])
+     }
+ 
+-    fn validate_proposal_batch(
++    pub(super) fn validate_proposal_batch(
+         &self,
+         proposals: &[Proposal],
+         capacity: usize,
+@@ -154,7 +154,7 @@
+         }
+         Ok(first)
+     }
+-    fn validate_conversion_peak(
++    pub(super) fn validate_conversion_peak(
+         &self,
+         proposals: &[Proposal],
+         capacity: usize,
+--- a/src/runtime.rs
++++ b/src/runtime.rs
+@@ -382,8 +382,10 @@
+     /// A consumed live expiration. Stale queued timers produce no core effects.
+     pub timer: Option<TimerToken>,
+     pub result: Result<Vec<Effect>, RaftError>,
+-    /// Later original invocations sharing this step's ordered persistence batch.
+-    /// The first invocation retains the singular fields above.
++    /// Original invocations sharing this step's ordered persistence batch.
++    /// An ordinary proposal step retains its first invocation in the singular
++    /// fields above. A fused commit retains the leading control observation
++    /// there (including received_from), with every proposal listed here.
+     pub batch_members: Vec<SteppedProposal>,
+ }
+ #[derive(Clone, Debug)]
+--- a/src/runtime/clients.rs
++++ b/src/runtime/clients.rs
+@@ -495,6 +495,11 @@
+                 now,
+                 limit,
+                 |group| application(group).is_some_and(ProposalAdmission::supports_ready_batch),
++                |group| {
++                    application(group).is_some_and(|app| {
++                        app.supports_ready_batch() && app.supports_commit_append_batch()
++                    })
++                },
+                 |core, event, prefix| {
+                     self.check_ready_execution(
+                         core,
+--- a/src/runtime/effects.rs
++++ b/src/runtime/effects.rs
+@@ -558,7 +558,13 @@
+         limit: usize,
+         mut check: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
+     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
+-        let result = self.advance_inner(now, limit, |_| false, |core, event, _| check(core, event));
++        let result = self.advance_inner(
++            now,
++            limit,
++            |_| false,
++            |_| false,
++            |core, event, _| check(core, event),
++        );
+         match result {
+             Err(error @ (EffectOwnerError::Runtime(_) | EffectOwnerError::ReservationTooLarge)) => {
+                 self.fail(error)
+@@ -571,9 +577,10 @@
+         now: MonoTime,
+         limit: usize,
+         eligible: impl FnMut(GroupIdentity) -> bool,
++        combine: impl FnMut(GroupIdentity) -> bool,
+         check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
+     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
+-        let result = self.advance_inner(now, limit, eligible, check);
++        let result = self.advance_inner(now, limit, eligible, combine, check);
+         match result {
+             Err(error @ (EffectOwnerError::Runtime(_) | EffectOwnerError::ReservationTooLarge)) => {
+                 self.fail(error)
+@@ -586,6 +593,7 @@
+         now: MonoTime,
+         limit: usize,
+         mut eligible: impl FnMut(GroupIdentity) -> bool,
++        mut combine: impl FnMut(GroupIdentity) -> bool,
+         mut check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
+     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
+         self.check()?;
+@@ -628,7 +636,16 @@
+                 .runtime
+                 .step_ready_checked(visit, now, max_items, &mut check)
+                 .map_err(EffectOwnerError::Runtime)?;
+-            if let Some(step) = stepped {
++            if let Some(mut step) = stepped {
++                if control && combine(visit.group) {
++                    self.try_combine_ready_commit(
++                        visit,
++                        now,
++                        (limit - steps.len()).saturating_sub(1),
++                        &mut step,
++                        &mut check,
++                    )?;
++                }
+                 self.install_ready_steps(visit, step, &mut steps)?;
+             } else {
+                 self.refresh(visit.group)?;
+--- a/src/runtime/effects/ready.rs
++++ b/src/runtime/effects/ready.rs
+@@ -4,6 +4,54 @@
+ use super::*;
+ 
+ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E> {
++    pub(super) fn try_combine_ready_commit(
++        &mut self,
++        visit: VisitTicket,
++        now: MonoTime,
++        max_items: usize,
++        step: &mut Stepped,
++        check: &mut impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
++    ) -> Result<(), EffectOwnerError> {
++        let Some(bytes) = self
++            .runtime
++            .ready_commit_reservation(visit, now, max_items, step)
++            .map_err(EffectOwnerError::Runtime)?
++        else {
++            return Ok(());
++        };
++        let old = self.active[&visit.group].reserved;
++        let bytes = bytes.max(old);
++        let bulk_count = self.active.values().filter(|a| !a.control).count();
++        let bulk_bytes = self
++            .active
++            .values()
++            .filter(|a| !a.control)
++            .map(|a| a.reserved)
++            .sum::<usize>();
++        if bulk_count >= self.limits.active_visits - self.limits.control_visits
++            || bytes > self.limits.reserved_bytes - (self.reserved - old)
++            || bytes
++                > (self.limits.reserved_bytes - self.limits.control_bytes)
++                    .saturating_sub(bulk_bytes)
++        {
++            return Ok(());
++        }
++        self.reserved += bytes - old;
++        self.active.get_mut(&visit.group).unwrap().reserved = bytes;
++        let combined = self
++            .runtime
++            .combine_ready_commit(visit, now, max_items, step, check);
++        let active = self.active.get_mut(&visit.group).unwrap();
++        if matches!(combined, Ok(true)) {
++            active.control = false;
++            active.continuation_bytes = bytes;
++        } else {
++            active.reserved = old;
++            self.reserved -= bytes - old;
++        }
++        combined.map(|_| ()).map_err(EffectOwnerError::Runtime)
++    }
++
+     pub(super) fn fit_ready_reservation(
+         &mut self,
+         visit: VisitTicket,
+--- a/src/runtime/ready_batch.rs
++++ b/src/runtime/ready_batch.rs
+@@ -2,6 +2,7 @@
+ // Copyright (c) 2026 Karl Livesey
+ //! Opt-in collection of bounded already-ready ordinary original proposals.
+ use super::*;
++mod commit;
+ pub(crate) struct ReadyProposal {
+     pub(crate) admission: AdmissionTicket,
+     pub(crate) command: Proposal,
+@@ -22,6 +23,15 @@
+     }
+ }
+ fn window(group: &Group, limits: ShardLimits, now: MonoTime, max_items: usize) -> Option<Window> {
++    window_at_least(group, limits, now, max_items, 2)
++}
++fn window_at_least(
++    group: &Group,
++    limits: ShardLimits,
++    now: MonoTime,
++    max_items: usize,
++    minimum: usize,
++) -> Option<Window> {
+     let (turn, class) = group.next_queued(limits, now)?;
+     if class != Class::Data as usize
+         // Inspect only: routine replies remain queued and untrusted until the
+@@ -84,7 +94,7 @@
+         cost = next_cost;
+         payload = next_payload;
+     }
+-    (count > 1).then(|| Window {
++    (count >= minimum).then(|| Window {
+         turn,
+         count,
+         input_bytes: proposal_input(count, payload).unwrap(),
+--- /dev/null
++++ b/src/runtime/ready_batch/commit.rs
+@@ -0,0 +1,131 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Fuse only an exact, still-local commit with an already-scheduled data prefix.
++use super::*;
++
++fn update(step: &Stepped) -> Option<&crate::log::LogUpdate> {
++    if step.admission.is_some()
++        || step.operation.is_some()
++        || step.received_from.is_none()
++        || step.timer.is_some()
++        || !step.batch_members.is_empty()
++    {
++        return None;
++    }
++    let [Effect::Persist(update)] = step.result.as_ref().ok()?.as_slice() else {
++        return None;
++    };
++    Some(update)
++}
++
++impl<Q: ReadyScheduler> Shard<Q> {
++    pub(in crate::runtime) fn ready_commit_reservation(
++        &mut self,
++        ticket: VisitTicket,
++        now: MonoTime,
++        max_items: usize,
++        step: &Stepped,
++    ) -> Result<Option<usize>, RuntimeError> {
++        self.observe(now)?;
++        let limits = self.limits;
++        let ordinary = self.control_profile.is_none();
++        let group = self.live(ticket)?;
++        let Some(update) = update(step) else {
++            return Ok(None);
++        };
++        if !ordinary || !group.core.can_combine_ready_commit(update) {
++            return Ok(None);
++        }
++        let Some(window) = window_at_least(group, limits, now, max_items, 1) else {
++            return Ok(None);
++        };
++        // Keep the original effect buffer alongside the replacement and the
++        // clone-staged original commands until the entire Core plan succeeds.
++        let reserved = group
++            .core
++            .effect_reservation(window.input_bytes.max(limits.max_event_bytes))
++            .and_then(|n| n.checked_add(selected_metadata(window.count)?))
++            .and_then(|n| {
++                n.checked_add(
++                    size_of::<SteppedProposal>()
++                        + 2 * size_of::<OwnerStep>()
++                        + size_of::<Vec<SteppedProposal>>(),
++                )
++            })
++            .and_then(|n| n.checked_add(window.input_bytes.checked_mul(2)?))
++            .and_then(|n| {
++                n.checked_add(
++                    step.result
++                        .as_ref()
++                        .ok()?
++                        .capacity()
++                        .checked_mul(4 * size_of::<Effect>())?,
++                )
++            });
++        Ok(reserved)
++    }
++
++    pub(in crate::runtime) fn combine_ready_commit(
++        &mut self,
++        ticket: VisitTicket,
++        now: MonoTime,
++        max_items: usize,
++        step: &mut Stepped,
++        check: &mut impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
++    ) -> Result<bool, RuntimeError> {
++        self.observe(now)?;
++        let limits = self.limits;
++        let group = self.live(ticket)?;
++        let Some(update) = update(step) else {
++            return Ok(false);
++        };
++        if !group.core.can_combine_ready_commit(update) {
++            return Ok(false);
++        }
++        let Some(window) = window_at_least(group, limits, now, max_items, 1) else {
++            return Ok(false);
++        };
++        let mut selected = Vec::with_capacity(window.count);
++        for queued in group.queues[1].iter().take(window.count) {
++            if check(&group.core, &queued.event, &selected).is_err() {
++                break;
++            }
++            let Event::Propose { operation, bytes } = &queued.event else {
++                unreachable!()
++            };
++            selected.push(ReadyProposal {
++                admission: queued.admission.unwrap(),
++                command: Proposal {
++                    operation: *operation,
++                    bytes: bytes.clone(),
++                },
++            });
++        }
++        if selected.is_empty() {
++            return Ok(false);
++        }
++        let proposals = selected.iter().map(|p| p.command.clone()).collect();
++        let Ok(effects) = group.core.combine_ready_commit(update, proposals) else {
++            return Ok(false);
++        };
++        let result = Ok(effects);
++        let members = selected
++            .iter()
++            .enumerate()
++            .map(|(offset, selected)| SteppedProposal {
++                admission: Some(selected.admission),
++                operation: selected.command.operation,
++                proposed: position(&result, offset, selected.command.operation),
++                error: None,
++            })
++            .collect();
++        for _ in &selected {
++            let queued = group.queues[1].pop_front().unwrap();
++            group.visit.as_mut().unwrap().used[1].add(queued.cost);
++        }
++        group.turn = (window.turn + 1) % 4;
++        step.result = result;
++        step.batch_members = members;
++        Ok(true)
++    }
++}
+--- a/src/runtime/timed.rs
++++ b/src/runtime/timed.rs
+@@ -513,6 +513,37 @@
+         }
+         Ok(step)
+     }
++    pub(super) fn ready_commit_reservation(
++        &mut self,
++        visit: VisitTicket,
++        now: MonoTime,
++        max_items: usize,
++        step: &Stepped,
++    ) -> Result<Option<usize>, RuntimeError> {
++        self.check()?;
++        if self.authorization.is_logical() {
++            return Ok(None);
++        }
++        self.shard
++            .ready_commit_reservation(visit, now, max_items, step)
++    }
++    pub(super) fn combine_ready_commit(
++        &mut self,
++        visit: VisitTicket,
++        now: MonoTime,
++        max_items: usize,
++        step: &mut Stepped,
++        check: &mut impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
++    ) -> Result<bool, RuntimeError> {
++        self.check()?;
++        if self.authorization.is_logical() {
++            return Ok(false);
++        }
++        // The leading control step already refreshed timers. Replacing only
++        // its pending ordinary log plan changes no timer or role state.
++        self.shard
++            .combine_ready_commit(visit, now, max_items, step, check)
++    }
+     pub fn next_effect_reservation(
+         &mut self,
+         visit: VisitTicket,
+--- a/tests/client_admission/ready_batch.rs
++++ b/tests/client_admission/ready_batch.rs
+@@ -2,6 +2,7 @@
+ // Copyright (c) 2026 Karl Livesey
+ use super::*;
+ mod budget;
++mod commit_append;
+ mod context;
+ mod wrapper;
+ 
+--- /dev/null
++++ b/tests/client_admission/ready_batch/commit_append.rs
+@@ -0,0 +1,424 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Three-voter host histories; deterministic fixture tokens are not disk sync.
++use super::*;
++
++struct App {
++    counter: Counter,
++    combine: bool,
++    reject: Option<OperationId>,
++    expected_commit: Option<u64>,
++}
++impl StateMachine for App {
++    type Receipt = CounterReceipt;
++    fn applied_index(&self) -> u64 {
++        self.counter.applied_index()
++    }
++    fn apply_batch(
++        &mut self,
++        entries: &[LogEntry],
++    ) -> Result<Vec<CounterReceipt>, ApplicationError> {
++        self.counter.apply_batch(entries)
++    }
++}
++impl BoundedStateMachine for App {
++    fn receipt_bytes_bound(&self, entries: &[LogEntry]) -> Result<usize, ApplicationError> {
++        self.counter.receipt_bytes_bound(entries)
++    }
++}
++impl ProposalAdmission for App {
++    fn supports_ready_batch(&self) -> bool {
++        true
++    }
++    fn supports_commit_append_batch(&self) -> bool {
++        self.combine
++    }
++    fn validate_proposal_context(
++        &self,
++        core: &Raft,
++        operation: OperationId,
++        _: &[u8],
++    ) -> Result<(), ApplicationError> {
++        if self.reject == Some(operation)
++            || self
++                .expected_commit
++                .is_some_and(|index| index != core.state().commit_index)
++        {
++            Err(ApplicationError::InvalidCommand)
++        } else {
++            Ok(())
++        }
++    }
++    fn validate_proposal<'a>(
++        &self,
++        operation: OperationId,
++        bytes: &[u8],
++        pending: impl Iterator<Item = (OperationId, &'a [u8])>,
++    ) -> Result<usize, ApplicationError> {
++        self.counter.validate_proposal(operation, bytes, pending)
++    }
++}
++struct Fixture {
++    owner: Owner,
++    worker: HostWorker,
++    clients: Clients,
++    results: ApplicationRouter<CounterReceipt>,
++    apps: BTreeMap<GroupIdentity, App>,
++}
++fn fixture(combine: bool) -> Fixture {
++    fixture_with_bulk_limit(combine, false)
++}
++fn fixture_with_bulk_limit(combine: bool, tight: bool) -> Fixture {
++    let mut store = HostLogStore::new(1);
++    let runtime = timed_with_visit_items(1, &mut store, 1, 3, 64);
++    let worker = HostWorker::new(store);
++    let mut limits = EffectOwnerLimits::default();
++    if tight {
++        let bulk = runtime
++            .core(group(1))
++            .unwrap()
++            .effect_reservation(runtime.limits().max_event_bytes)
++            .unwrap()
++            + 4096;
++        limits.control_bytes = limits.reserved_bytes - bulk;
++    }
++    let owner = EffectOwner::new(runtime, worker.binding(), limits).unwrap();
++    let clients = Clients::new(
++        ClientRouterBinding::new(
++            owner.authorization(),
++            ClientRouterGeneration::new(1).unwrap(),
++        ),
++        ClientRouterLimits::default(),
++    )
++    .unwrap();
++    let results = ApplicationRouter::new(
++        ApplicationRouterBinding::new(
++            owner.authorization(),
++            ApplicationRouterGeneration::new(1).unwrap(),
++        ),
++        ApplicationRouterLimits::default(),
++    )
++    .unwrap();
++    let apps = BTreeMap::from([(
++        group(1),
++        App {
++            counter: Counter::new(64).unwrap(),
++            combine,
++            reject: None,
++            expected_commit: None,
++        },
++    )]);
++    let mut f = Fixture {
++        owner,
++        worker,
++        clients,
++        results,
++        apps,
++    };
++    drain(&mut f);
++    assert_eq!(f.owner.core(group(1)).unwrap().role(), Role::Leader);
++    assert_eq!(f.apps[&group(1)].applied_index(), 1);
++    f
++}
++fn response(owner: &Owner, request: &Message) -> Option<Message> {
++    if request.to != node(2) {
++        return None;
++    }
++    let rpc = match &request.rpc {
++        Rpc::Vote { .. } => Rpc::Voted { granted: true },
++        Rpc::Append {
++            previous_index,
++            entries,
++            ..
++        } => Rpc::Appended {
++            success: true,
++            matching_index: entries.last().map_or(*previous_index, |entry| entry.index),
++        },
++        _ => return None,
++    };
++    Some(Message {
++        group: request.group,
++        configuration: request.configuration,
++        from: request.to,
++        to: request.from,
++        term: request.term,
++        context: request.context,
++        sender: StoreBinding {
++            identity: owner
++                .core(group(1))
++                .unwrap()
++                .membership()
++                .replica_store(request.to)
++                .unwrap(),
++            session: StoreSession::new(1).unwrap(),
++        },
++        rpc,
++    })
++}
++fn route(f: &mut Fixture, lease: EffectLease) {
++    match &lease.effect {
++        Effect::Persist(_) => {
++            f.owner
++                .submit_persists(&mut f.worker, vec![lease], MonoTime(400))
++                .unwrap();
++        }
++        Effect::Committed(_) => {
++            f.results
++                .submit(
++                    &mut f.owner,
++                    lease,
++                    f.apps.get_mut(&group(1)).unwrap(),
++                    MonoTime(400),
++                )
++                .unwrap();
++            let output = f.results.poll().unwrap();
++            f.clients
++                .deliver(&mut f.owner, &mut f.results, output)
++                .unwrap();
++        }
++        Effect::Send(message) => {
++            if let Some(reply) = response(&f.owner, message) {
++                f.owner.admit(group(1), Event::Receive(reply)).unwrap();
++            }
++            f.owner
++                .release(lease, f.apps[&group(1)].applied_index(), MonoTime(400))
++                .unwrap();
++        }
++        _ => panic!("unexpected ordinary fixture effect"),
++    }
++}
++fn drain(f: &mut Fixture) {
++    for _ in 0..1000 {
++        for event in f.worker.poll(1) {
++            f.owner.deliver_worker(event, MonoTime(400)).unwrap();
++        }
++        f.clients
++            .advance(&mut f.owner, MonoTime(400), 64, |g| f.apps.get(&g))
++            .unwrap();
++        while let Some(lease) = f.owner.take_effect().unwrap() {
++            route(f, lease);
++        }
++        f.clients.reconcile(&f.owner, 64).unwrap();
++        if f.owner.is_drained() && f.worker.is_drained() {
++            return;
++        }
++    }
++    panic!("three-voter fixture did not drain");
++}
++fn submit(f: &mut Fixture, id: u128, delta: i64) -> ClientTicket {
++    f.clients
++        .submit(&mut f.owner, &f.apps[&group(1)], request(1, id, delta))
++        .unwrap()
++}
++fn old_append(f: &mut Fixture) -> (Vec<ClientTicket>, Message) {
++    let tickets = vec![submit(f, 10, 1), submit(f, 11, 1)];
++    let steps = f
++        .clients
++        .advance(&mut f.owner, MonoTime(400), 8, |g| f.apps.get(&g))
++        .unwrap();
++    assert_eq!(steps.len(), 2);
++    let lease = f.owner.take_effect().unwrap().unwrap();
++    f.owner
++        .submit_persists(&mut f.worker, vec![lease], MonoTime(400))
++        .unwrap();
++    for _ in 0..2 {
++        let event = f.worker.poll(1).pop().unwrap();
++        f.owner.deliver_worker(event, MonoTime(400)).unwrap();
++    }
++    let mut ack = None;
++    while let Some(lease) = f.owner.take_effect().unwrap() {
++        let Effect::Send(message) = &lease.effect else {
++            panic!("append replication required")
++        };
++        ack = ack.or_else(|| response(&f.owner, message));
++        f.owner.release(lease, 1, MonoTime(400)).unwrap();
++    }
++    assert_eq!(f.owner.core(group(1)).unwrap().state().last_index(), 3);
++    assert_eq!(f.owner.core(group(1)).unwrap().state().commit_index, 1);
++    (tickets, ack.unwrap())
++}
++fn pending_effect(f: &mut Fixture, ack: Message, limit: usize) -> (Vec<OwnerStep>, EffectLease) {
++    f.owner.admit(group(1), Event::Receive(ack)).unwrap();
++    let steps = f
++        .clients
++        .advance(&mut f.owner, MonoTime(400), limit, |g| f.apps.get(&g))
++        .unwrap();
++    let lease = f.owner.take_effect().unwrap().unwrap();
++    assert!(matches!(lease.effect, Effect::Persist(_)));
++    (steps, lease)
++}
++
++#[test]
++fn fused_control_keeps_each_repeated_full_id_invocation_position_and_outcome() {
++    let mut f = fixture(true);
++    let (mut tickets, ack) = old_append(&mut f);
++    for delta in [7, 9, 7] {
++        tickets.push(submit(&mut f, u128::MAX - 1, delta));
++    }
++    let (steps, lease) = pending_effect(&mut f, ack, 8);
++    assert_eq!(steps.len(), 4);
++    assert!(steps[0].operation.is_none());
++    for (offset, step) in steps[1..].iter().enumerate() {
++        assert!(step.admission.is_some());
++        assert_eq!(step.operation, Some(tickets[offset + 2].operation));
++        assert_eq!(step.proposed.unwrap().index, offset as u64 + 4);
++        assert!(step.error.is_none());
++    }
++    let Effect::Persist(update) = &lease.effect else {
++        unreachable!()
++    };
++    assert_eq!(update.commit_index, 3);
++    assert_eq!(update.suffix.as_ref().unwrap().entries.len(), 3);
++    assert_eq!(f.apps[&group(1)].applied_index(), 1);
++    assert!(f.clients.poll().is_none());
++    route(&mut f, lease);
++    drain(&mut f);
++    let mut received = Vec::new();
++    while let Some(completion) = f.clients.poll() {
++        let ticket = completion.ticket();
++        let ClientOutcome::Applied { position, receipt } = f.clients.complete(completion).unwrap()
++        else {
++            panic!("original result required")
++        };
++        assert_eq!(position.index, receipt.index);
++        received.push((ticket, receipt));
++    }
++    assert_eq!(
++        received
++            .iter()
++            .map(|(ticket, _)| *ticket)
++            .collect::<Vec<_>>(),
++        tickets
++    );
++    assert_eq!(received[2].1.outcome, CounterOutcome::Value(9));
++    assert_eq!(received[3].1.outcome, CounterOutcome::OperationConflict);
++    assert_eq!(received[4].1.outcome, CounterOutcome::Value(9));
++    assert!(f.clients.is_drained());
++}
++
++#[test]
++fn one_ready_original_can_share_commit_without_expanding_poll_step_limit() {
++    for limit in [1, 2] {
++        let mut f = fixture(true);
++        let (_, ack) = old_append(&mut f);
++        submit(&mut f, 12, 1);
++        let (steps, lease) = pending_effect(&mut f, ack, limit);
++        let Effect::Persist(update) = &lease.effect else {
++            unreachable!()
++        };
++        assert_eq!(steps.len(), limit);
++        assert_eq!(update.suffix.is_some(), limit == 2);
++        route(&mut f, lease);
++        drain(&mut f);
++    }
++}
++
++#[test]
++fn context_sensitive_opt_out_rechecks_after_commit_and_protects_original_outcome() {
++    let mut f = fixture(false);
++    let (_, ack) = old_append(&mut f);
++    f.apps.get_mut(&group(1)).unwrap().expected_commit = Some(1);
++    let ticket = submit(&mut f, 12, 1);
++    let (steps, lease) = pending_effect(&mut f, ack, 8);
++    assert_eq!(steps.len(), 1);
++    assert!(matches!(&lease.effect, Effect::Persist(update) if update.suffix.is_none()));
++    route(&mut f, lease);
++    drain(&mut f);
++    let mut outcome = None;
++    while let Some(completion) = f.clients.poll() {
++        let current = completion.ticket();
++        let result = f.clients.complete(completion).unwrap();
++        if current == ticket {
++            outcome = Some(result);
++        }
++    }
++    assert!(matches!(
++        outcome,
++        Some(ClientOutcome::NotProposed(RaftError::Admission(
++            ApplicationError::InvalidCommand
++        )))
++    ));
++    assert_eq!(f.owner.core(group(1)).unwrap().state().last_index(), 3);
++}
++
++#[test]
++fn invalid_ready_prefix_never_consumes_rejected_tail_or_replaces_commit_on_first_error() {
++    for rejected in [12, 13] {
++        let mut f = fixture(true);
++        let (_, ack) = old_append(&mut f);
++        for id in [12, 13, 14] {
++            submit(&mut f, id, 1);
++        }
++        f.apps.get_mut(&group(1)).unwrap().reject = OperationId::new(rejected);
++        let (steps, lease) = pending_effect(&mut f, ack, 8);
++        let Effect::Persist(update) = &lease.effect else {
++            unreachable!()
++        };
++        let count = usize::from(rejected == 13);
++        assert_eq!(steps.len(), 1 + count);
++        assert_eq!(
++            update
++                .suffix
++                .as_ref()
++                .map_or(0, |suffix| suffix.entries.len()),
++            count
++        );
++        assert_eq!(f.clients.usage().requests, 5);
++        route(&mut f, lease);
++        drain(&mut f);
++        let mut not_proposed = 0;
++        while let Some(completion) = f.clients.poll() {
++            not_proposed += usize::from(matches!(
++                f.clients.complete(completion).unwrap(),
++                ClientOutcome::NotProposed(_)
++            ));
++        }
++        assert_eq!(not_proposed, 1);
++        assert!(f.clients.is_drained());
++    }
++}
++
++#[test]
++fn due_control_turn_keeps_commit_separate_from_ready_data() {
++    let mut f = fixture(true);
++    let (_, ack) = old_append(&mut f);
++    submit(&mut f, 12, 1);
++    f.owner.admit(group(1), Event::Receive(ack)).unwrap();
++    f.owner.admit(group(1), Event::Heartbeat).unwrap();
++    let steps = f
++        .clients
++        .advance(&mut f.owner, MonoTime(400), 8, |g| f.apps.get(&g))
++        .unwrap();
++    assert_eq!(steps.len(), 1);
++    let lease = f.owner.take_effect().unwrap().unwrap();
++    assert!(matches!(&lease.effect, Effect::Persist(update) if update.suffix.is_none()));
++    assert_eq!(f.clients.usage().requests, 3);
++    route(&mut f, lease);
++    drain(&mut f);
++    assert!(!f.owner.is_failed());
++}
++
++#[test]
++fn protected_control_reserve_never_pays_for_a_bulk_fusion() {
++    let mut f = fixture_with_bulk_limit(true, true);
++    let (_, ack) = old_append(&mut f);
++    for id in 12..28 {
++        submit(&mut f, id, 1);
++    }
++    let (steps, lease) = pending_effect(&mut f, ack, 32);
++    assert_eq!(steps.len(), 1);
++    assert!(matches!(&lease.effect, Effect::Persist(update) if update.suffix.is_none()));
++    assert_eq!(f.clients.usage().requests, 18);
++    assert!(!f.owner.is_failed());
++    route(&mut f, lease);
++    drain(&mut f);
++    let mut applied = 0;
++    while let Some(completion) = f.clients.poll() {
++        assert!(matches!(
++            f.clients.complete(completion).unwrap(),
++            ClientOutcome::Applied { .. }
++        ));
++        applied += 1;
++    }
++    assert_eq!(applied, 18);
++}
+--- a/tests/provider_conformance/application.rs
++++ b/tests/provider_conformance/application.rs
+@@ -3,6 +3,8 @@
+ use voteboat::{application::*, identity::OperationId, log::*};
+ #[path = "application/checks.rs"]
+ mod checks;
++#[path = "application/commit_batch.rs"]
++mod commit_batch;
+ #[path = "application/host.rs"]
+ mod host;
+ #[path = "application/mutants.rs"]
+--- /dev/null
++++ b/tests/provider_conformance/application/commit_batch.rs
+@@ -0,0 +1,99 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++
++struct BatchOnly(Counter);
++impl StateMachine for BatchOnly {
++    type Receipt = CounterReceipt;
++    fn applied_index(&self) -> u64 {
++        self.0.applied_index()
++    }
++    fn apply_batch(
++        &mut self,
++        entries: &[LogEntry],
++    ) -> Result<Vec<CounterReceipt>, ApplicationError> {
++        self.0.apply_batch(entries)
++    }
++}
++impl BoundedStateMachine for BatchOnly {
++    fn receipt_bytes_bound(&self, entries: &[LogEntry]) -> Result<usize, ApplicationError> {
++        self.0.receipt_bytes_bound(entries)
++    }
++}
++impl ProposalAdmission for BatchOnly {
++    fn supports_ready_batch(&self) -> bool {
++        true
++    }
++    fn validate_proposal<'a>(
++        &self,
++        operation: OperationId,
++        bytes: &[u8],
++        pending: impl Iterator<Item = (OperationId, &'a [u8])>,
++    ) -> Result<usize, ApplicationError> {
++        self.0.validate_proposal(operation, bytes, pending)
++    }
++}
++
++#[test]
++fn unchanged_context_batch_opt_in_does_not_imply_commit_append_opt_in() {
++    let app = BatchOnly(Counter::new(4).unwrap());
++    assert!(app.supports_ready_batch());
++    assert!(!app.supports_commit_append_batch());
++    assert!(app.0.supports_commit_append_batch());
++}
++
++fn pending(entries: &[LogEntry]) -> impl Iterator<Item = (OperationId, &[u8])> {
++    entries.iter().filter_map(|entry| match &entry.payload {
++        EntryPayload::Command { operation, bytes } => Some((*operation, bytes.as_slice())),
++        _ => None,
++    })
++}
++
++#[test]
++fn counter_admission_is_invariant_under_moving_pending_prefix_to_applied() {
++    for capacity in 1..=5 {
++        // Includes duplicate/conflicting operations and overflow outcomes.
++        let entries: Vec<_> = (0..8)
++            .map(|offset| {
++                CounterCase::command(
++                    offset + 1,
++                    (offset as usize % capacity + 1) as u128,
++                    if offset % 2 == 0 { i64::MAX } else { 1 },
++                )
++            })
++            .collect();
++        for applied in 0..=entries.len() {
++            let mut before = Counter::new(capacity).unwrap();
++            before.apply_batch(&entries[..applied]).unwrap();
++            for committed in applied..=entries.len() {
++                let mut after = before.clone();
++                after.apply_batch(&entries[applied..committed]).unwrap();
++                for queued_id in [1, capacity + 1] {
++                    let queued = [CounterCase::command(9, queued_id as u128, -1)];
++                    for operation in 1..=capacity + 2 {
++                        for bytes in [
++                            &1i64.to_le_bytes()[..],
++                            &i64::MAX.to_le_bytes()[..],
++                            &[0][..],
++                        ] {
++                            let operation = OperationId::new(operation as u128).unwrap();
++                            assert_eq!(
++                                before.validate_proposal(
++                                    operation,
++                                    bytes,
++                                    pending(&entries[applied..]).chain(pending(&queued)),
++                                ),
++                                after.validate_proposal(
++                                    operation,
++                                    bytes,
++                                    pending(&entries[committed..]).chain(pending(&queued)),
++                                ),
++                                "capacity={capacity} applied={applied} committed={committed} queued={queued_id}",
++                            );
++                        }
++                    }
++                }
++            }
++        }
++    }
++}

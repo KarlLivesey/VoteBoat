@@ -1,0 +1,4 @@
+{
+  "core_review": "Independent runtime agent found no material Core correctness issue; full-old-tip quorum, pending ownership, old-commit Written RPC and native uncertainty controls reviewed. No checks performed by reviewer.",
+  "runtime_review": "Independent Core agent found no material runtime/app correctness issue; input priority, bulk/control reserve, staging, per-original mapping, fallback and default-false capability reviewed. No checks performed by reviewer."
+}

@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 mod budget;
+mod commit_append;
 mod context;
 mod wrapper;
 

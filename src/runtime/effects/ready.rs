@@ -4,6 +4,54 @@
 use super::*;
 
 impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E> {
+    pub(super) fn try_combine_ready_commit(
+        &mut self,
+        visit: VisitTicket,
+        now: MonoTime,
+        max_items: usize,
+        step: &mut Stepped,
+        check: &mut impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
+    ) -> Result<(), EffectOwnerError> {
+        let Some(bytes) = self
+            .runtime
+            .ready_commit_reservation(visit, now, max_items, step)
+            .map_err(EffectOwnerError::Runtime)?
+        else {
+            return Ok(());
+        };
+        let old = self.active[&visit.group].reserved;
+        let bytes = bytes.max(old);
+        let bulk_count = self.active.values().filter(|a| !a.control).count();
+        let bulk_bytes = self
+            .active
+            .values()
+            .filter(|a| !a.control)
+            .map(|a| a.reserved)
+            .sum::<usize>();
+        if bulk_count >= self.limits.active_visits - self.limits.control_visits
+            || bytes > self.limits.reserved_bytes - (self.reserved - old)
+            || bytes
+                > (self.limits.reserved_bytes - self.limits.control_bytes)
+                    .saturating_sub(bulk_bytes)
+        {
+            return Ok(());
+        }
+        self.reserved += bytes - old;
+        self.active.get_mut(&visit.group).unwrap().reserved = bytes;
+        let combined = self
+            .runtime
+            .combine_ready_commit(visit, now, max_items, step, check);
+        let active = self.active.get_mut(&visit.group).unwrap();
+        if matches!(combined, Ok(true)) {
+            active.control = false;
+            active.continuation_bytes = bytes;
+        } else {
+            active.reserved = old;
+            self.reserved -= bytes - old;
+        }
+        combined.map(|_| ()).map_err(EffectOwnerError::Runtime)
+    }
+
     pub(super) fn fit_ready_reservation(
         &mut self,
         visit: VisitTicket,

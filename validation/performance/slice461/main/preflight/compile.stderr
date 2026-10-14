@@ -1,0 +1,37 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0624]: method `ready_commit_reservation` is private
+   --> src/runtime/timed.rs:528:14
+    |
+528 |               .ready_commit_reservation(visit, now, max_items, step)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^ private method
+    |
+   ::: src/runtime/ready_batch/commit.rs:22:5
+    |
+ 22 | /     pub(super) fn ready_commit_reservation(
+ 23 | |         &mut self,
+ 24 | |         ticket: VisitTicket,
+ 25 | |         now: MonoTime,
+ 26 | |         max_items: usize,
+ 27 | |         step: &Stepped,
+ 28 | |     ) -> Result<Option<usize>, RuntimeError> {
+    | |____________________________________________- private method defined here
+
+error[E0624]: method `combine_ready_commit` is private
+   --> src/runtime/timed.rs:545:14
+    |
+545 |               .combine_ready_commit(visit, now, max_items, step, check)
+    |                ^^^^^^^^^^^^^^^^^^^^ private method
+    |
+   ::: src/runtime/ready_batch/commit.rs:68:5
+    |
+ 68 | /     pub(super) fn combine_ready_commit(
+ 69 | |         &mut self,
+ 70 | |         ticket: VisitTicket,
+ 71 | |         now: MonoTime,
+...   |
+ 74 | |         check: &mut impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
+ 75 | |     ) -> Result<bool, RuntimeError> {
+    | |___________________________________- private method defined here
+
+For more information about this error, try `rustc --explain E0624`.
+error: could not compile `voteboat` (lib) due to 2 previous errors

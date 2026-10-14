@@ -3,6 +3,62 @@
   "meaning": "Reviewed operation obligations and selected assertions, not a completion certificate or replacement-provider certification.",
   "reviews": [
     {
+      "public_contract": "ProposalAdmission",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/provider_conformance/application/commit_batch.rs",
+          "symbol": "unchanged_context_batch_opt_in_does_not_imply_commit_append_opt_in"
+        },
+        {
+          "file": "tests/provider_conformance/application/commit_batch.rs",
+          "symbol": "counter_admission_is_invariant_under_moving_pending_prefix_to_applied"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "supports_ready_batch",
+            "supports_commit_append_batch"
+          ],
+          "obligation": "Opt-in capabilities grant no consensus or durability authority. Unchanged-context batching alone does not authorize validation across commit/application advancement. Commit-and-append requires identical validation and receipt bounds after transferring the committed ordinary prefix from pending into applied state. Default false preserves serialization for host providers and wrappers.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/application/commit_batch.rs",
+              "symbol": "unchanged_context_batch_opt_in_does_not_imply_commit_append_opt_in"
+            },
+            {
+              "file": "tests/provider_conformance/application/commit_batch.rs",
+              "symbol": "counter_admission_is_invariant_under_moving_pending_prefix_to_applied"
+            }
+          ],
+          "remaining": [
+            "Selected Counter histories cover finite capacities, duplicate/conflicting IDs, overflow, invalid syntax and queued reservations; arbitrary host capability assertions remain trusted. Runtime scheduling, exact tickets, resource budgets and crash/restart are separate controls."
+          ]
+        },
+        {
+          "names": [
+            "validate_proposal",
+            "validate_proposal_context"
+          ],
+          "obligation": "Checks are deterministic, non-mutating and repeated immediately before execution with all pending reservations and the live consensus context. Invalid syntax, exhausted dedup capacity and provider context rejection must preserve original errors and receipt bounds.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/application/commit_batch.rs",
+              "symbol": "counter_admission_is_invariant_under_moving_pending_prefix_to_applied"
+            },
+            {
+              "file": "tests/client_admission/ready_batch/context.rs",
+              "symbol": "default_host_context_is_rechecked_after_original_singleton_durability"
+            }
+          ],
+          "remaining": [
+            "No certification of arbitrary application providers, all context combinations or durable application databases. Capability opt-in must be independently established by each composite application."
+          ]
+        }
+      ]
+    },
+    {
       "public_contract": "CommandBytes",
       "status": "partial",
       "runners": [

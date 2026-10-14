@@ -495,6 +495,11 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
                 now,
                 limit,
                 |group| application(group).is_some_and(ProposalAdmission::supports_ready_batch),
+                |group| {
+                    application(group).is_some_and(|app| {
+                        app.supports_ready_batch() && app.supports_commit_append_batch()
+                    })
+                },
                 |core, event, prefix| {
                     self.check_ready_execution(
                         core,

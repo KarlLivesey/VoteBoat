@@ -1,0 +1,1 @@
+CARGO_TARGET_DIR=target/p9/slice455/padded-target-checks CARGO_BUILD_JOBS=2 cargo +stable test --locked --offline --all-features --test provider_conformance application_cases::commit_batch -- --test-threads=1

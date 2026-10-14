@@ -40,6 +40,21 @@ where
         false
     }
 
+    /// Opt into appending already-ready commands in the same persistence
+    /// transition that commits an older ordinary prefix. Requires
+    /// `supports_ready_batch` as well. Default preserves serialized validation.
+    ///
+    /// The application promises identical context-validation results,
+    /// proposal-validation errors and receipt bounds before versus after
+    /// applying that committed prefix and removing it from pending commands.
+    /// This includes retries, conflicts and exhausted application capacity.
+    /// Composite applications must establish this for their own context checks;
+    /// forwarding an inner application's opt-in alone is insufficient.
+    /// No application, commitment or durability authority is granted.
+    fn supports_commit_append_batch(&self) -> bool {
+        false
+    }
+
     /// Optional deterministic check against the current consensus context.
     /// The owning client router calls this at admission and again immediately
     /// before execution. It may restrict proposals; it grants no consensus or
@@ -188,6 +203,10 @@ impl BoundedStateMachine for Counter {
 
 impl ProposalAdmission for Counter {
     fn supports_ready_batch(&self) -> bool {
+        true
+    }
+
+    fn supports_commit_append_batch(&self) -> bool {
         true
     }
 
