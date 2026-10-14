@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 
+mod originals;
 mod replies;
 
 fn ready_actor<const TRACE: bool>(
@@ -81,19 +82,18 @@ fn ready_actor_clients<const TRACE: bool>(
 fn preload(sender: &mpsc::Sender<Request>) -> Vec<(OperationId, oneshot::Receiver<OperationId>)> {
     let mut waits = Vec::new();
     for start in (1..=16384).step_by(4) {
-        let mut proposals = Vec::new();
-        let mut replies = Vec::new();
+        let mut originals = Vec::new();
         for original in start..start + 4 {
             let operation = OperationId::new(original as u128).unwrap();
             let (reply, wait) = oneshot::channel();
-            proposals.push(Proposal {
+            originals.push(Original {
                 operation,
                 bytes: Vec::new(),
+                reply,
             });
-            replies.push(reply);
             waits.push((operation, wait));
         }
-        assert!(sender.try_send(Request { proposals, replies }).is_ok());
+        assert!(sender.try_send(Request { originals }).is_ok());
     }
     waits
 }
@@ -140,20 +140,19 @@ fn checkpoint_scopes_observe_actual_helpers_and_nested_retention() {
 fn checked_checkpoint_scopes<const TRACE: bool>() {
     let (mut actor, _sender) = ready_actor::<TRACE>(crate::Envelopes::UpstreamDefault);
     for start in (1..=12_000).step_by(4) {
-        let mut proposals = Vec::new();
-        let mut replies = Vec::new();
+        let mut originals = Vec::new();
         let mut waits = Vec::new();
         for original in start..start + 4 {
             let operation = OperationId::new(original as u128).unwrap();
             let (reply, wait) = oneshot::channel();
-            proposals.push(Proposal {
+            originals.push(Original {
                 operation,
                 bytes: Vec::new(),
+                reply,
             });
-            replies.push(reply);
             waits.push((operation, wait));
         }
-        actor.requests(Request { proposals, replies }).unwrap();
+        actor.requests(Request { originals }).unwrap();
         actor.maintain().unwrap();
         for (expected, mut wait) in waits {
             assert_eq!(wait.try_recv().unwrap(), expected);

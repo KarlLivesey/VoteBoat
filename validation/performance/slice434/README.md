@@ -1,0 +1,11 @@
+# Slice434 one owned original/request buffer
+
+The benchmark-owned VoteBoat host co-locates full operation ID, payload bytes and individual completion sender in one private flat Vec. Client waits/one channel per original, ordered admission/duplicate replacement/admitted prefix/cancellation/deferral, bounds/reservations and every result/error remain. No production/public/provider/wire/storage/security/durability/timer/observer change. Root1,403 selected inputs are unchanged; production functional evidence reused only via exact hashes, without relabeling431 progress failures. This is a framework-host optimization, not a production-service speed claim.
+
+Frozen1,430 inputs/modes,6 changed paths/2 new modules; exact main promotion, patch5a6b4eb21f302a53fb0da02376652e10fbce1061d8e373ad4a3f976186b919b3. Final original65691 terminal0/DONE: standalone51, focused ownership3/cancel1/layout1, formatting/strict/source guards all0. Main original31669 terminal0 adds actualmain standalone51. Full enabled hook remains the publication gate. Independent read-only review finds no blocker.
+
+Initial16787 actually terminal101,49pass/1fail: boundary fixture used nonempty bytes with unchanged Noop InvalidCommand validation. Initial source/PATCH/log/status preservedattempt1. Focused correction separates mixed buffer/deferral/no-early-receipt/drop lifetime from valid empty-business committed receipts; production validation remains. Cancel fixture uses deterministic onepoll. Tool-only substring locator failure recordedATTEMPTS, no fabricated raw file. No broad rewrite or unrelated test repeats.
+
+Actual untimed Linux layout: oldProposal48+Reply8=56, oldrequestheader48; flatOriginal48/newheader24. Four originals/capacity4/four channels each correct receipt. These are observed layout/capacity values, not portable guarantees, allocator measurements or physical memory proof.
+
+Schema/plans recorded before editing. No fresh performance artifact or speedup claim yet. After checked publication build fresh asserted identities and qualify Mac; rotate matched20Mrequested bulk (19,988,480 originals) first,1M singleton diagnostics only if candidate retained for testing. Reject repeatable bulk regressions without another long singleton campaign. P9 sustained/full-curve/durable/fairness/headroom/P8 acceptance remains open.

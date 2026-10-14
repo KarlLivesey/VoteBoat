@@ -1,0 +1,11 @@
+   Compiling voteboat-matched-framework v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice434/source/benchmarks/matched)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.65s
+     Running unittests src/main.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/matched-checks/debug/deps/voteboat_matched_framework-0229c7d61346ef28)
+
+running 3 tests
+test voteboat_engine::actor::tests::originals::empty_and_oversized_shapes_precede_full_pending_budget_without_admission ... ok
+test voteboat_engine::actor::tests::originals::queued_boundary_empty_originals_commit_in_order_after_deferral ... ok
+test voteboat_engine::actor::tests::originals::queued_boundary_moves_mixed_originals_without_receipts_and_drop_cancels_them ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 48 filtered out; finished in 0.00s
+

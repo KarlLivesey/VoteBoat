@@ -1,0 +1,115 @@
+{
+  "baseline": "3c6df169a46be527c4dc383be898cd4250baf390",
+  "original_attempt1": {
+    "session": 16787,
+    "exit": 101,
+    "passed": 49,
+    "failed": 1,
+    "cause": "IncorrectnonemptyNoop fixture, rawsource/PATCH/log/status retainedattempt1"
+  },
+  "original_final_session": 65691,
+  "actual_exit": 0,
+  "stage": "DONE",
+  "source_inputs": 1430,
+  "source_before_after_all_hashes_modes_equal": true,
+  "patch_sha256": "5a6b4eb21f302a53fb0da02376652e10fbce1061d8e373ad4a3f976186b919b3",
+  "new_modules": [
+    "benchmarks/matched/src/voteboat_engine/actor/tests/originals.rs",
+    "benchmarks/matched/src/voteboat_engine/client_requests.rs"
+  ],
+  "scopes": {
+    "format-apply": {
+      "exit": 0,
+      "command": "cargo +stable fmt --manifest-path benchmarks/matched/Cargo.toml --all",
+      "test_results": []
+    },
+    "freeze": {
+      "exit": 0,
+      "command": "python3 /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice434/freeze.py",
+      "test_results": []
+    },
+    "source-before": {
+      "exit": 0,
+      "command": "sha256sum -c /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice434/source.sha256",
+      "test_results": []
+    },
+    "matched-tests": {
+      "exit": 0,
+      "command": "cargo +stable test --manifest-path benchmarks/matched/Cargo.toml --locked --offline --message-format=json -vv -- --test-threads=1",
+      "test_results": [
+        {
+          "passed": 51,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        }
+      ]
+    },
+    "focused-originals": {
+      "exit": 0,
+      "command": "cargo +stable test --manifest-path benchmarks/matched/Cargo.toml --locked --offline voteboat_engine::actor::tests::originals -- --test-threads=1",
+      "test_results": [
+        {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 48
+        }
+      ]
+    },
+    "focused-cancel": {
+      "exit": 0,
+      "command": "cargo +stable test --manifest-path benchmarks/matched/Cargo.toml --locked --offline queued_client_cancellation -- --test-threads=1",
+      "test_results": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 50
+        }
+      ]
+    },
+    "layout-report": {
+      "exit": 0,
+      "command": "cargo +stable test --manifest-path benchmarks/matched/Cargo.toml --locked --offline flat_request_layout -- --nocapture --test-threads=1",
+      "test_results": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 50
+        }
+      ]
+    },
+    "matched-fmt": {
+      "exit": 0,
+      "command": "cargo +stable fmt --manifest-path benchmarks/matched/Cargo.toml --all -- --check",
+      "test_results": []
+    },
+    "matched-clippy": {
+      "exit": 0,
+      "command": "cargo +stable clippy --manifest-path benchmarks/matched/Cargo.toml --locked --offline --keep-going --all-targets -- -D warnings",
+      "test_results": []
+    },
+    "source-after": {
+      "exit": 0,
+      "command": "sha256sum -c /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice434/source.sha256",
+      "test_results": []
+    }
+  },
+  "layout": {
+    "old_proposal_bytes": 48,
+    "old_reply_bytes": 8,
+    "old_element_sum": 56,
+    "old_two_vec_header_bytes": 48,
+    "flat_original_bytes": 48,
+    "flat_request_header_bytes": 24,
+    "originals": 4,
+    "original_capacity": 4,
+    "completion_channels": 4
+  },
+  "production_scope": "ROOT_REUSE exactunchangedpublished433/431 rootproduction hashes+modes; no unchangedRootfunctionaltests rerun; fullenabledmainhook stillrequiredafterpromotion",
+  "ownership_scope": "Everyoriginalchannel+orderedwait retained; originalempty/oversize/budget/duplicatepartial/droperrororder andcollectedProposalreservation unchanged; no productiontrait/provider/format/network/security/durabilitychanges",
+  "qualification_only": "No performance artifact/build/timing/gain claim; nextpublishing/freshasserted artifacts/bothhost20Mrequestedbulk measurement afterrootreview",
+  "review": "review426 independentreadonly correction+runtime review no blockers, no checks/edits byreviewer"
+}

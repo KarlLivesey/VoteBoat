@@ -69,8 +69,8 @@ diagnostics do not qualify sustained floors. [Every Linux trial and scope](../va
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current433: restore the measured baseline clone | Reject432's repeatable Linux bulk regression without discarding evidence | Published432, fresh codegen and24 paired exact Linux cases; retained431 source/proofs | Exact production input restoration, independent clone oracle all/core, zero enabled full hook; preserve all source/raw regressions and publish rollback | P9.1/P9.3 |
-| Next: choose less request/result work from retained431 profiles | Target the remaining measured limiting stage without another hint-tuning loop | Checked published rollback, retained431 CPU/text data and Mac432 bulk disposition | Explicit ordering/ownership/bounds/error schema, one selected optimization, exact original outcomes and both-host paired rates/tails before retention | P9.0/P9.1/P9.3 |
+| Current434: co-locate each original and its completion sender | Remove one allocation/buffer from the sampled client request stage | Published433 rollback, retained431 client CPU contexts and reviewed private ownership/error contracts | One channel/outcome per original, exact duplicate/prefix/cancel/deferral/error order, bounded envelopes, all standalone checks and full enabled hook; checked publication | P9.0/P9.1/P9.3 |
+| Next: measure434 and remove the remaining limiting work | Decide the benefit of fewer request buffers, then select the next measured stage | Checked published434, fresh asserted identities, Mac qualification and immutable431 baselines | Both-host paired completed rates/p99/regressions; retained profiles guide one next ordering/ownership change, sustained acceptance remains separate | P9.0/P9.1/P9.3 |
 | Following: bounded durable batching/overlap under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Native421 barrier evidence and unchanged publication/ticket contracts; bounded fairness schema after current measured framework stage | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual placement/barriers before changing defaults | P9.1/P9.2/P9.3 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
@@ -123,6 +123,41 @@ payload tuple oracle across all variants and differing fields, existing native/
 provider/codec/recovery histories and actual network services, then fresh asserted
 both-host measurements. Mac may gain less or regress; retain every result. Held427
 is an unqualified earlier experiment, not validation of429.
+
+### Slice434 schema — one owned original/request buffer
+
+Selected from retained431 client CPU data, with overlapping/non-causal contexts:
+Client.write union20.213%, allocations6.822%, reply-vector2.279%. Private flat
+Original { operation, bytes, reply } and Request's single Vec remove one client
+allocation/buffer; waits and every original oneshot remain. Flat fields avoid
+nesting Proposal's padding, with actual sizes recorded per host/compiler. Old zip
+was a single loop with two streams. This is framework host work, not a production
+service-path gain. Production Core/provider contracts and every public format/API
+are unchanged; no dependency or unsafe code is introduced.
+
+Preserve empty/oversize before budget before duplicate; ordered pending.insert
+then Proposal push; exact duplicate replacement, admitted-prefix/unvisited-tail
+cancellation, deferred ownership and full128 IDs/bytes. Private length mismatch
+becomes unrepresentable. Same queue/envelope/pending bounds and actual output-Vec
+reservation, per-original result/error/wait order and existing quorum/apply release.
+Zero IDs fail before send, closed channel and wrong/missing receipt errors remain;
+drop/partial cleanup owns all remaining senders. No new restart or persistent state.
+The detailed schema is recorded in target/p9/slice434/SCHEMA.md before editing.
+All standalone outcomes/limits/cleanup/maintenance controls plus focused boundary/
+bytes/error tests and zero formatting/strict/full push hook precede publication.
+Reuse unchanged production checks only through exact input hashes. Fresh asserted
+artifacts and both-host paired rates/p99 decide retention; full sustained/durable/
+fairness/composition macro acceptance remains open.
+[434 qualification](../validation/performance/slice434/README.md):1,430 selected
+hashes/modes exactly promoted,6 changed/2 new benchmark-only modules. Original
+65691 terminal0/DONE, standalone51/fmt/strict/source guards; main31669 actual51
+pass. Root1,403 inputs unchanged; no unnecessary production suite reruns or whole
+Root green claim. Initial16787 terminal101/49pass1fixture failure is retained:
+nonempty Noop bytes reject as required; focused fixture split passes. Observed
+untimed Linux flatOriginal48 vs oldProposal48+Reply8, requestheader24 vs48; all
+per-original channels/waits remain. Full enabled hook publication/fresh asserted
+artifacts/Mac checks and three20Mrequested bulk pairs remain;1M singleton only
+if bulk does not reject. No performance claim or narrowing of full P9 acceptance.
 
 ### Slice433 schema — reject the forced clone inline hint
 

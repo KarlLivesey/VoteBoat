@@ -213,11 +213,11 @@ impl<const TRACE: bool> Actor<TRACE> {
     }
     fn collect(&mut self, first: Request) -> Result<Vec<Proposal>, Failure> {
         let capacity = self.parts.core.batch_limits().max_proposal_entries;
-        let mut proposals = Vec::with_capacity(first.proposals.len());
+        let mut proposals = Vec::with_capacity(first.originals.len());
         self.include(first, &mut proposals)?;
         while proposals.len() < capacity && self.parts.peer_receiver.is_empty() {
             match self.parts.receiver.try_recv() {
-                Ok(request) if proposals.len() + request.proposals.len() <= capacity => {
+                Ok(request) if proposals.len() + request.originals.len() <= capacity => {
                     self.include(request, &mut proposals)?;
                 }
                 Ok(request) => {
@@ -234,20 +234,24 @@ impl<const TRACE: bool> Actor<TRACE> {
         Ok(proposals)
     }
     fn include(&mut self, request: Request, proposals: &mut Vec<Proposal>) -> Result<(), Failure> {
-        if request.proposals.is_empty()
-            || request.proposals.len() > self.parts.core.batch_limits().max_proposal_entries
-            || request.proposals.len() != request.replies.len()
+        if request.originals.is_empty()
+            || request.originals.len() > self.parts.core.batch_limits().max_proposal_entries
         {
             return Err("original proposal/reply shape differs".into());
         }
-        if self.pending.len() + request.proposals.len() > self.parts.settings.clients * 4 + 1 {
+        if self.pending.len() + request.originals.len() > self.parts.settings.clients * 4 + 1 {
             return Err("original result budget exceeded".into());
         }
-        for (proposal, reply) in request.proposals.into_iter().zip(request.replies) {
-            if self.pending.insert(proposal.operation, reply).is_some() {
+        for Original {
+            operation,
+            bytes,
+            reply,
+        } in request.originals
+        {
+            if self.pending.insert(operation, reply).is_some() {
                 return Err("duplicate original admission".into());
             }
-            proposals.push(proposal);
+            proposals.push(Proposal { operation, bytes });
         }
         Ok(())
     }

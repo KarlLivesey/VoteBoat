@@ -9,19 +9,18 @@ fn operation(value: u128) -> OperationId {
 }
 
 fn request(ids: &[OperationId]) -> (Request, Vec<Wait>) {
-    let mut proposals = Vec::new();
-    let mut replies = Vec::new();
+    let mut originals = Vec::new();
     let mut waits = Vec::new();
     for &operation in ids {
         let (reply, wait) = oneshot::channel();
-        proposals.push(Proposal {
+        originals.push(Original {
             operation,
             bytes: Vec::new(),
+            reply,
         });
-        replies.push(reply);
         waits.push(wait);
     }
-    (Request { proposals, replies }, waits)
+    (Request { originals }, waits)
 }
 
 fn received(waits: Vec<Wait>, ids: &[OperationId]) {
@@ -143,7 +142,7 @@ fn checked_budget(clients: usize) {
     );
     canceled(&mut over_waits[0]);
     let (mut malformed, mut malformed_waits) = request(&[operation(3)]);
-    malformed.proposals.clear();
+    malformed.originals.clear();
     assert_eq!(
         actor
             .include(malformed, &mut proposals)

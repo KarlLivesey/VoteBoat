@@ -20,9 +20,13 @@ use tokio::{
 use voteboat::{identity::*, log::*, quorum::*, raft::*};
 
 type Reply = oneshot::Sender<OperationId>;
+struct Original {
+    operation: OperationId,
+    bytes: Vec<u8>,
+    reply: Reply,
+}
 struct Request {
-    proposals: Vec<Proposal>,
-    replies: Vec<Reply>,
+    originals: Vec<Original>,
 }
 #[derive(Clone)]
 pub(super) struct Client(mpsc::Sender<Request>);
@@ -207,20 +211,19 @@ impl Cluster {
 }
 impl Client {
     pub async fn write(&self, originals: &[u128]) -> Result<usize, Failure> {
-        let mut proposals = Vec::with_capacity(originals.len());
-        let mut replies = Vec::with_capacity(originals.len());
+        let mut entries = Vec::with_capacity(originals.len());
         let mut waits = Vec::with_capacity(originals.len());
         for &original in originals {
             let operation = OperationId::new(original).ok_or("zero original identity")?;
             let (reply, wait) = oneshot::channel();
-            proposals.push(Proposal {
+            entries.push(Original {
                 operation,
                 bytes: Vec::new(),
+                reply,
             });
-            replies.push(reply);
             waits.push((operation, wait));
         }
-        self.0.send(Request { proposals, replies }).await?;
+        self.0.send(Request { originals: entries }).await?;
         for (operation, wait) in waits {
             if wait.await? != operation {
                 return Err("VoteBoat original applied result differs".into());
@@ -267,22 +270,19 @@ mod tests {
     fn preload_originals(cluster: &Cluster) -> Vec<oneshot::Receiver<OperationId>> {
         let mut waits = Vec::new();
         for start in (1..=16384).step_by(4) {
-            let mut proposals = Vec::new();
-            let mut replies = Vec::new();
+            let mut originals = Vec::new();
             for original in start..start + 4 {
                 let operation = OperationId::new(original as u128).unwrap();
                 let (reply, wait) = oneshot::channel();
-                proposals.push(Proposal {
+                originals.push(Original {
                     operation,
                     bytes: Vec::new(),
+                    reply,
                 });
-                replies.push(reply);
                 waits.push(wait);
             }
             assert!(
-                cluster.senders[0]
-                    .try_send(Request { proposals, replies })
-                    .is_ok(),
+                cluster.senders[0].try_send(Request { originals }).is_ok(),
                 "preloaded requests must fit the bounded admission queue"
             );
         }
@@ -464,3 +464,6 @@ mod cancellation_tests {
         .unwrap();
     }
 }
+
+#[cfg(test)]
+mod client_requests;

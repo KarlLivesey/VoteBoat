@@ -1,0 +1,16 @@
+{
+  "attempt1": {
+    "original_session": 16787,
+    "actual_exit": 101,
+    "tests_passed": 49,
+    "tests_failed": 1,
+    "cause": "Mixedbyte ownership fixture incorrectlyran nonemptycommands through unchangedNoop application; InvalidCommand. Source/PATCH/raw/log/status retainedattempt1.",
+    "fix": "Split mixedbuffer movement/deferred/noearlyreceipt/drop cancellation from separateemptyNoopcommit/allreceipts history; no runtime/limits changes."
+  },
+  "edit_tool_error": {
+    "tool_chunk": "aeebe7",
+    "cause": "Cancellationassertion string differed afterRustfmt; substringlocator ValueError, rawtoolfailure only. Boundarysplitalreadywritten; focusedanchor correction completed.",
+    "raw_file_available": false
+  },
+  "deterministic_cancel": "Existingfutures::poll! drivesbufferedsend andfirstwaiting receipt once; timeouttimerremovedfromtest only."
+}
