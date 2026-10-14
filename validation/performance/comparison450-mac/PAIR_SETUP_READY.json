@@ -1,0 +1,18 @@
+{
+  "status": "BOTH_CELLS_SETUP_READY_NO_TIMING",
+  "baseline_commit": "6c7f09b2c7d14606bc1d4308b83b5a5974f3ab19",
+  "candidate_commit": "d6395be7ec56af68f346a72308e90a20200fb731",
+  "config_sha256": "3b7566940dc01fde35f5c46f70dfbac3b533f8a290e52310e00b1709c06e5e22",
+  "baseline_inputs": 1439,
+  "candidate_inputs": 1440,
+  "candidate_exe_sha256": "638c300235e19fdb5b7902b9e90ed6dc480a9f65ebad15ce09fd0efd13ff6bd4",
+  "candidate_UUID": "1AAB3496-5021-31A5-A00C-7BE7752C6848",
+  "baseline_exe_sha256": "244f9ce1623e03e5bc9a2277b4afd22f48bade3b9a6505364d69fed5a78825f9",
+  "positiveguards": 0,
+  "actualCLI3": 0,
+  "unchanged4CLI9artifactnegativecontrols": "reusedsealedpredicate/hashscope,notrerun",
+  "bulk_cases": 12,
+  "singleton_cases": 12,
+  "outputs_absent": true,
+  "no_live_build_benchmark_profiler": true
+}

@@ -1,0 +1,7 @@
+# Linux450 versus immutable446 setup
+
+Baseline6c7f09b2/e766…34ea/DWP5e69…09d9 vs published450d6395be7/fresh70ae…6945/DWP3749…e149. Actualfullsource/compiler/lock/profile/fourfresh/rootbuildscript-release/originalcopy/DWP/physicalmode guards0. Inputs1439→1440 add append_prefix_tests; commonRaft changesprefixmaterialization, COMPARISONhas449historicalrejectnote. Harness production restored446 exactly; no channel/observer/runtime/payload/upstream/default/timer changes. Rootchanged-core qualification executed and is linked, no additional rootsuite reruns.
+
+ThreeactualcurrentCLI outputs pass unchangedcomparisonchecker. Existing13negative/rounding controls reused only by exactcheckerbyte hash, not rerun/fabricated. Prepared `bash target/p9/comparison450/linux-run.sh` executesbulk12thensingleton12serial in oneoriginalcontroller with no interimanalysis/copy/archive. Threevariant rotations/cell baselineOFF/candidateOFF/candidateON/OpenRaft, bulk20Mrequested→19,988,480actual and singleton1,048,576,1024warmups/client1/server16/defaultenvelopes/activecheckpoints, all-client-joins clockbeforeflatten/sort/followerverify/shutdown. Identity/output guards outsideTimer unchanged. No pairedtiming beforeBOTHsetup END and rootJOINT_QUIET grant.
+
+This is setup, not gain/retention/native/fullP9 acceptance. Allrawfuturefailures/tails mustremain. Source/profile/CLI/identity artifacts referenced rather than duplicating priorproofs. SHA256SUMS covers eachregularfile exceptitself; no nestedmanifests/symlinks/binaries/fullsource/buildtrees.

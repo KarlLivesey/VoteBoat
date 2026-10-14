@@ -1,0 +1,14 @@
+{
+  "status": "PUBLISHED_SOURCE_ASSEMBLY_AUTHORIZED",
+  "required_commit": "d6395be7ec56af68f346a72308e90a20200fb731",
+  "expected_matched_tests": 69,
+  "source": "fresh committed450 only after publication; all selected modules/locks/config/contracts/fixtures and full hashes/modes; keys0600",
+  "root_actual": "allfeature/core raft unit and raft/replication_scope/snapshot/effect_owner integration; actual allfeature three_ TCP/QUIC; feature-isolated targets; root fmt/four strict profiles",
+  "matched_actual": "69full/fmt/strict once",
+  "fresh_profile": "opt3/debug2/packed/assertions/overflow/thinLTO/cgu1; fourfresh:false/rootbuildscript/CargoJSONvv/dSYM original-copy guards",
+  "controls": "threeactual CLI29/4/15; no old negative reruns",
+  "root_functional_reuse": "No changed-core functional reuse asserted. New core/protocol/service scopes execute; untouched independent functionality not rerun or newly claimed.",
+  "baseline_commit": "6c7f09b2c7d14606bc1d4308b83b5a5974f3ab19",
+  "baseline_sha256": "244f9ce1623e03e5bc9a2277b4afd22f48bade3b9a6505364d69fed5a78825f9",
+  "new_module_scope": "src/raft/append_prefix_tests.rs plus src/raft.rs test loader; guarded in committed source, collector and candidate artifact scope"
+}

@@ -1,0 +1,17 @@
+{
+  "commit": "d6395be7ec56af68f346a72308e90a20200fb731",
+  "source_inputs": 1440,
+  "compiled_inputs": 1431,
+  "changed_inputs": [
+    "benchmarks/matched/COMPARISON.md",
+    "src/raft.rs",
+    "src/raft/append_prefix_tests.rs"
+  ],
+  "publication_original_handle": 3076,
+  "publication_actual_exit": 0,
+  "qualification_reused_original": 79626,
+  "physical_modes_set_before_freeze": true,
+  "fresh_target_absent": true,
+  "build_started": false,
+  "profile": "same assertedopt3/debug2/packed/thinLTO/cgu1;flags/wrappersunset"
+}

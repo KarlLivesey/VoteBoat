@@ -1,0 +1,10 @@
+{
+  "status": "PREPARED_NO_COPY_BUILD_OR_TIMING",
+  "required_candidate_commit": "UNSET",
+  "baseline_commit": "6c7f09b2c7d14606bc1d4308b83b5a5974f3ab19",
+  "baseline_config_sha256": "342b4dcf5693e99a02a44bb5047121601aee5ab9357edd05f0008b5e932daeb7",
+  "phase_checker_sha256": "a584d3df73a342494b4bb1400d904225132b54b82d1384d09acae665eacfb7b5",
+  "cells": "12rotating bulk20M requested then12singleton1048576; same current446OFF/candidate450OFF/450ON/OpenRaft; original outcomes/1024warmup/runtime1+16/defaultmaintenance/upstreamenvelopes",
+  "launch": "run-paired.sh bulk then run-paired.sh singleton; never default bulk-only",
+  "scope": "syntax/refusal only; no actual candidate artifact or performance claim"
+}

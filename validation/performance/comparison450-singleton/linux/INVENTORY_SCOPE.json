@@ -1,0 +1,25 @@
+{
+  "baseline_inputs": 1439,
+  "candidate_inputs": 1440,
+  "candidate_only": [
+    "src/raft/append_prefix_tests.rs"
+  ],
+  "baseline_only": [],
+  "changed_common_inputs": [
+    "benchmarks/matched/COMPARISON.md",
+    "src/raft.rs"
+  ],
+  "candidate_compiled_inputs": 1431,
+  "candidate_supplemental_inputs": [
+    "AGENTS.md",
+    "benchmarks/matched/COMPARISON.md",
+    "benchmarks/matched/README.md",
+    "benchmarks/matched/SCHEMA.md",
+    "docs/component-contracts.json",
+    "docs/provider-conformance.json",
+    "docs/PERFORMANCE.md",
+    "validation/check-native-benchmark.mjs",
+    "validation/check-offered.mjs"
+  ],
+  "harness_production_restored446": "engine/actor/request/oneshot/timer/observer production identical to446; COMPARISON historicalrejectnote differs, newRaftprefixcontrol added"
+}

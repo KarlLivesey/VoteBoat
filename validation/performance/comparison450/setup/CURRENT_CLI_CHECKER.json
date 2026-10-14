@@ -1,0 +1,17 @@
+[
+  {
+    "case": "off",
+    "fixture_sha256": "4ff82826d94b623861dc908a196fec43775f9645df219a058fafc9bac96428ca",
+    "actual_checker_exit": 0
+  },
+  {
+    "case": "on",
+    "fixture_sha256": "a04db74763bfa2bc01b82e60151aadc1e025bdee870ea526930197fd99a119a4",
+    "actual_checker_exit": 0
+  },
+  {
+    "case": "openraft",
+    "fixture_sha256": "bd1430c55202d0a602d6a72234dc94dce8bc24aa1c4ee858231d39e5d2cdadde",
+    "actual_checker_exit": 0
+  }
+]

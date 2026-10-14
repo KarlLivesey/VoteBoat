@@ -1,0 +1,28 @@
+{
+  "build_original_live_handle": 96955,
+  "build": [
+    "bash",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/run.sh"
+  ],
+  "functional": [
+    "bash",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/cli-run.sh"
+  ],
+  "prepare_actual_pair": [
+    "python3",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison450/prepare-pair.py",
+    "--baseline-config",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison450/BASELINE_CONFIG.linux.json",
+    "--baseline-job",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched446-linux",
+    "--candidate-job",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux",
+    "--output",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison450/CONFIG_PAIR.linux.json"
+  ],
+  "combined24_after_actual_bothhost_setup_END_and_jointgrant_only": [
+    "bash",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison450/linux-run.sh"
+  ],
+  "timing_allowed": false
+}

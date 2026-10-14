@@ -1,0 +1,35 @@
+{
+  "baseline_commit": "6c7f09b2c7d14606bc1d4308b83b5a5974f3ab19",
+  "candidate_commit": "d6395be7ec56af68f346a72308e90a20200fb731",
+  "bulk": {
+    "clients": 4096,
+    "batch": 4,
+    "requested": 20000000,
+    "actual": 19988480
+  },
+  "singleton": {
+    "clients": 1,
+    "batch": 1,
+    "requested": 1048576,
+    "actual": 1048576
+  },
+  "warmup": 1024,
+  "trials": 3,
+  "variants": [
+    "baselineOFF",
+    "candidateOFF",
+    "candidateON",
+    "OpenRaft"
+  ],
+  "order": "unchanged3rotations/cell,20Mbulk first +1Msingle diagnostic",
+  "timers": "sameclientreadybarrier/alljoins beforelatencyflatten/sort/followerverify/shutdown",
+  "runtime": {
+    "client": 1,
+    "server": 16
+  },
+  "profile": "samewithinhost446 opt3debug2packed/assertoverflowthinLTOcgu1",
+  "provider": "empty/volatile/in-process/onegroupthreevoters",
+  "no_capacity_or_sustained_acceptance_claim": true,
+  "timing_unstarted": true,
+  "source_scope": "1439baseline vs1440candidate: new append_prefix_tests module +Raft fresh-prefix materialization; comparison449 historical rejected-channel note; harness production exact446"
+}

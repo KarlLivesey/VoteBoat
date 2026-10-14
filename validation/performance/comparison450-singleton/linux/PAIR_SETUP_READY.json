@@ -1,0 +1,33 @@
+{
+  "build_original_handle": 96955,
+  "build_actual_exit": 0,
+  "CLI_pair_original_handle": 18903,
+  "CLI_pair_actual_exit": 0,
+  "source_inputs": 1440,
+  "compiled_inputs": 1431,
+  "actual_four_fresh_false": true,
+  "phase_scope_method_counts": [
+    29,
+    4,
+    15
+  ],
+  "executable_sha256": "70ae8c2751b3c12e697bc93ee9c83bef5f833fe2b00f22cbb3623e31c9c76945",
+  "DWP_sha256": "3749253700f577b56dbe8baa7d0eef8633b0b339964b0fb934acdb904618e149",
+  "actual_pair_guards_exit": 0,
+  "candidate_commit": "d6395be7ec56af68f346a72308e90a20200fb731",
+  "baseline_commit": "6c7f09b2c7d14606bc1d4308b83b5a5974f3ab19",
+  "timing_started": false,
+  "publication_guard": "Originalparent3076 actual0/fullhook proof target/p9/slice450/publication",
+  "CONFIG_PAIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison450/CONFIG_PAIR.linux.json",
+  "bulk_requested": 20000000,
+  "bulk_actual": 19988480,
+  "singleton_requested_actual": 1048576,
+  "cases_per_cell": 12,
+  "combined_launcher": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison450/linux-run.sh",
+  "combined_command": [
+    "bash",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison450/linux-run.sh"
+  ],
+  "joint_quiet_authorization_pending": true,
+  "no_interim_analysis_or_collection": true
+}

@@ -1,0 +1,323 @@
+{
+  "cell": "bulk",
+  "cases": 12,
+  "failures": [],
+  "median_variants": {
+    "baseline": {
+      "rates": [
+        8261615.517862037,
+        7917409.763891233,
+        8149755.681304809
+      ],
+      "median_completed_originals_per_second": 8149755.681304809,
+      "median_request_p50_ms": 2.008063,
+      "median_request_p99_ms": 2.909777
+    },
+    "candidate": {
+      "rates": [
+        8061098.315466666,
+        8470640.935097994,
+        8167204.237393893
+      ],
+      "median_completed_originals_per_second": 8167204.237393893,
+      "median_request_p50_ms": 2.0014,
+      "median_request_p99_ms": 2.929563
+    },
+    "on": {
+      "rates": [
+        8091746.323981062,
+        8316770.72005002,
+        8189288.855374046
+      ],
+      "median_completed_originals_per_second": 8189288.855374046,
+      "median_request_p50_ms": 2.004316,
+      "median_request_p99_ms": 2.781095
+    },
+    "openraft": {
+      "rates": [
+        3732253.0756889605,
+        3665339.7743214895,
+        3444142.5701621803
+      ],
+      "median_completed_originals_per_second": 3665339.7743214895,
+      "median_request_p50_ms": 4.461262,
+      "median_request_p99_ms": 6.210207
+    }
+  },
+  "paired_candidate_OFF_rate_ratios": [
+    0.9757290566279873,
+    1.069875273316012,
+    1.0021409913096058
+  ],
+  "paired_candidate_OFF_p99_ratios": [
+    1.0756978971240752,
+    0.840662291979352,
+    1.022455494738106
+  ],
+  "paired_observer_ON_to_candidate_OFF_rate_ratios": [
+    1.0038019643620513,
+    0.981834879293441,
+    1.002704060941569
+  ],
+  "paired_observer_ON_to_candidate_OFF_p99_ratios": [
+    0.9826765847476119,
+    1.0398804834943969,
+    0.9493207690020662
+  ],
+  "trial_tails_ms": {
+    "baseline": [
+      2.909777,
+      3.094164,
+      2.865223
+    ],
+    "candidate": [
+      3.130041,
+      2.601147,
+      2.929563
+    ],
+    "on": [
+      3.075818,
+      2.704882,
+      2.781095
+    ],
+    "openraft": [
+      5.885978,
+      6.210207,
+      6.949406
+    ]
+  },
+  "per_case_completed_counts": [
+    {
+      "case": "baseline-c4096-b4-t1",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "candidate-c4096-b4-t1",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "on-c4096-b4-t1",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "openraft-c4096-b4-t1",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "baseline-c4096-b4-t2",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "candidate-c4096-b4-t2",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "on-c4096-b4-t2",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "openraft-c4096-b4-t2",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "baseline-c4096-b4-t3",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "candidate-c4096-b4-t3",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "on-c4096-b4-t3",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "openraft-c4096-b4-t3",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    }
+  ],
+  "maintenance_logical_ranges": {
+    "baseline": {
+      "retained_entries": {
+        "minimum": 1000,
+        "maximum": 5616
+      },
+      "peak_retained_entries": {
+        "minimum": 8024,
+        "maximum": 22344
+      },
+      "peak_peer_queue": {
+        "minimum": 12,
+        "maximum": 118
+      },
+      "peak_client_queue": {
+        "minimum": 0,
+        "maximum": 4096
+      },
+      "persistence_units": {
+        "minimum": 21919,
+        "maximum": 64094
+      },
+      "checkpoint_count": {
+        "minimum": 3861,
+        "maximum": 3892
+      },
+      "snapshot_installs": {
+        "minimum": 0,
+        "maximum": 1643
+      },
+      "maximum_proposal_width": {
+        "minimum": 0,
+        "maximum": 16384
+      }
+    },
+    "candidate": {
+      "retained_entries": {
+        "minimum": 3236,
+        "maximum": 5828
+      },
+      "peak_retained_entries": {
+        "minimum": 8016,
+        "maximum": 22184
+      },
+      "peak_peer_queue": {
+        "minimum": 13,
+        "maximum": 49
+      },
+      "peak_client_queue": {
+        "minimum": 0,
+        "maximum": 4096
+      },
+      "persistence_units": {
+        "minimum": 22910,
+        "maximum": 66212
+      },
+      "checkpoint_count": {
+        "minimum": 3869,
+        "maximum": 3884
+      },
+      "snapshot_installs": {
+        "minimum": 0,
+        "maximum": 1689
+      },
+      "maximum_proposal_width": {
+        "minimum": 0,
+        "maximum": 16384
+      }
+    },
+    "on": {
+      "retained_entries": {
+        "minimum": 1796,
+        "maximum": 5912
+      },
+      "peak_retained_entries": {
+        "minimum": 8040,
+        "maximum": 22348
+      },
+      "peak_peer_queue": {
+        "minimum": 10,
+        "maximum": 73
+      },
+      "peak_client_queue": {
+        "minimum": 0,
+        "maximum": 4096
+      },
+      "persistence_units": {
+        "minimum": 23058,
+        "maximum": 67419
+      },
+      "checkpoint_count": {
+        "minimum": 3866,
+        "maximum": 3882
+      },
+      "snapshot_installs": {
+        "minimum": 0,
+        "maximum": 1645
+      },
+      "maximum_proposal_width": {
+        "minimum": 0,
+        "maximum": 16384
+      }
+    }
+  },
+  "independent_Linux_disposition": "No repeatable Linux bulk/singleton gain: mixed three-pairrates/tails; essentiallyneutralbulkmedian+.214%. Rootbothhostretention decision pendingMacactuals. No variants/reruns or causalclaim.",
+  "limits": [
+    "Only two framework cells; no fullseven healthy-margin/native/P8/fairness/headroom acceptance.",
+    "Logical retained/queue counts do not establish physical byte memory/RSS or bounded maintenance debt. No explicit refusal/maxRSS counters in output; alloriginals/cleanupguards passed.",
+    "All observer phases are inclusiveelapsed wall, nested/overlapping; legacy SUMMARY leader_on_phases_ms is replica0 attribution rather than CPU.",
+    "Allobservereffects/trialregressions/rawtimes retained; no allocation/allocator/movementcausality inferred."
+  ],
+  "root_both_host_final_decision": "RETAIN450 as bounded Mac bulk benefit: allthree Mac bulk rate+p99pairs improve (6,133,083\u21926,505,466 PUTS/s;3.370250\u21923.280750ms; rate ratios1.003335/1.033145/1.065780). Linux bulk essentiallyneutral/mixed and Linux singleton mixed; no universal or allhostrepeatablegain. Macsingletonmixed (64,546\u219264,985/s;.030000\u2192.029792ms with trial1 slightdebt). Rootindependently confirmed; no allocationcause/RSS/refusal/fullfloorclaim or nextvariant."
+}

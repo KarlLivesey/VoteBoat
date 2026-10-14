@@ -1,0 +1,21 @@
+{
+  "files": [
+    {
+      "original": "/tmp/voteboat-mac450-d6395be-WjqDo4/target-matched-release/release/voteboat-matched-framework.dSYM/Contents/Info.plist",
+      "copy": "/private/tmp/voteboat-mac450-d6395be-WjqDo4/artifacts/symbols/voteboat-matched-framework.dSYM/Contents/Info.plist",
+      "sha256": "d180e71836bcd221989d693e0c3b0c127a5a7f6359e0c29342c023ca3198e29e"
+    },
+    {
+      "original": "/tmp/voteboat-mac450-d6395be-WjqDo4/target-matched-release/release/voteboat-matched-framework.dSYM/Contents/Resources/Relocations/aarch64/voteboat_matched_framework-03da1d82af3c7712.yml",
+      "copy": "/private/tmp/voteboat-mac450-d6395be-WjqDo4/artifacts/symbols/voteboat-matched-framework.dSYM/Contents/Resources/Relocations/aarch64/voteboat_matched_framework-03da1d82af3c7712.yml",
+      "sha256": "7ee3aad08c083840d9f05cfb6b6064e44611c718dd8db165fbddc513c7f0c77f"
+    },
+    {
+      "original": "/tmp/voteboat-mac450-d6395be-WjqDo4/target-matched-release/release/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-03da1d82af3c7712",
+      "copy": "/private/tmp/voteboat-mac450-d6395be-WjqDo4/artifacts/symbols/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-03da1d82af3c7712",
+      "sha256": "7470f900630ce11244738ca91a2f20f28d991357aef4e870434250cb53031ef5"
+    }
+  ],
+  "external_dsym_dwp_present": true,
+  "scope": "all executable-associated dSYM/DWP files present; no invented external symbols when DWARF is embedded"
+}

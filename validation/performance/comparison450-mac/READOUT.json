@@ -1,0 +1,1019 @@
+{
+  "scope": "Completed Mac450 versus immutable446 paired diagnostics, not full P9 acceptance",
+  "controller": {
+    "original_ssh": 3947,
+    "pid": 7438,
+    "start_utc": "2026-10-14T14:35:16Z",
+    "bulk_end_utc": "2026-10-14T14:36:16Z",
+    "all_end_utc": "2026-10-14T14:43:30Z",
+    "exit": 0
+  },
+  "cells": {
+    "bulk": {
+      "clients": 4096,
+      "batch": 4,
+      "variants": {
+        "baseline": {
+          "rates": [
+            6501929.733592465,
+            6133082.987233184,
+            6103947.844878518
+          ],
+          "median_completed_originals_per_second": 6133082.987233184,
+          "median_request_p50_ms": 2.648666,
+          "median_request_p99_ms": 3.37025,
+          "p99_ms": [
+            3.346625,
+            3.606084,
+            3.37025
+          ]
+        },
+        "candidate": {
+          "rates": [
+            6523615.075970499,
+            6336365.49946419,
+            6505466.480101693
+          ],
+          "median_completed_originals_per_second": 6505466.480101693,
+          "median_request_p50_ms": 2.49425,
+          "median_request_p99_ms": 3.28075,
+          "p99_ms": [
+            3.28075,
+            3.527792,
+            3.267792
+          ]
+        },
+        "on": {
+          "rates": [
+            6417142.960184519,
+            6298645.790587818,
+            6319599.891975882
+          ],
+          "median_completed_originals_per_second": 6319599.891975882,
+          "median_request_p50_ms": 2.581833,
+          "median_request_p99_ms": 3.414792,
+          "p99_ms": [
+            3.341083,
+            3.414792,
+            3.600083
+          ]
+        },
+        "openraft": {
+          "rates": [
+            2161784.557374348,
+            2138371.453877306,
+            2153803.491021093
+          ],
+          "median_completed_originals_per_second": 2153803.491021093,
+          "median_request_p50_ms": 7.670333,
+          "median_request_p99_ms": 9.8285,
+          "p99_ms": [
+            9.8285,
+            9.942792,
+            9.788417
+          ]
+        }
+      },
+      "paired_ratios": [
+        1.0033352163536922,
+        1.0331452407629516,
+        1.065780154979546
+      ],
+      "cases": 12,
+      "failures": [],
+      "reports": [
+        {
+          "case": null,
+          "variant": "baseline",
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "checkpoints": [
+            3902,
+            3901,
+            3902
+          ],
+          "snapshot_installs": [
+            0,
+            2605,
+            1217
+          ],
+          "retained": [
+            2120,
+            2120,
+            1096
+          ],
+          "peak_retained": [
+            22004,
+            7864,
+            8012
+          ],
+          "peak_peer_queue": [
+            15,
+            11,
+            14
+          ],
+          "peak_client_queue": [
+            4033,
+            0,
+            0
+          ]
+        },
+        {
+          "case": null,
+          "variant": "baseline",
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "checkpoints": [
+            3901,
+            3901,
+            3901
+          ],
+          "snapshot_installs": [
+            0,
+            2820,
+            990
+          ],
+          "retained": [
+            5748,
+            4724,
+            4700
+          ],
+          "peak_retained": [
+            22188,
+            8032,
+            8036
+          ],
+          "peak_peer_queue": [
+            13,
+            12,
+            13
+          ],
+          "peak_client_queue": [
+            3998,
+            0,
+            0
+          ]
+        },
+        {
+          "case": null,
+          "variant": "baseline",
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "checkpoints": [
+            3901,
+            3901,
+            3901
+          ],
+          "snapshot_installs": [
+            0,
+            83,
+            3783
+          ],
+          "retained": [
+            2604,
+            1580,
+            1556
+          ],
+          "peak_retained": [
+            21944,
+            8036,
+            7144
+          ],
+          "peak_peer_queue": [
+            21,
+            10,
+            20
+          ],
+          "peak_client_queue": [
+            3995,
+            0,
+            0
+          ]
+        },
+        {
+          "case": null,
+          "variant": "candidate",
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "checkpoints": [
+            3903,
+            3903,
+            3903
+          ],
+          "snapshot_installs": [
+            0,
+            1749,
+            2079
+          ],
+          "retained": [
+            5216,
+            4192,
+            4168
+          ],
+          "peak_retained": [
+            22036,
+            7944,
+            7424
+          ],
+          "peak_peer_queue": [
+            12,
+            15,
+            10
+          ],
+          "peak_client_queue": [
+            4022,
+            0,
+            0
+          ]
+        },
+        {
+          "case": null,
+          "variant": "candidate",
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "checkpoints": [
+            3903,
+            3903,
+            3902
+          ],
+          "snapshot_installs": [
+            0,
+            432,
+            3412
+          ],
+          "retained": [
+            4072,
+            2024,
+            3024
+          ],
+          "peak_retained": [
+            21824,
+            7952,
+            7596
+          ],
+          "peak_peer_queue": [
+            19,
+            9,
+            22
+          ],
+          "peak_client_queue": [
+            3987,
+            0,
+            0
+          ]
+        },
+        {
+          "case": null,
+          "variant": "candidate",
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "checkpoints": [
+            3903,
+            3903,
+            3903
+          ],
+          "snapshot_installs": [
+            0,
+            859,
+            3005
+          ],
+          "retained": [
+            4508,
+            3484,
+            3460
+          ],
+          "peak_retained": [
+            21864,
+            7860,
+            7144
+          ],
+          "peak_peer_queue": [
+            13,
+            13,
+            13
+          ],
+          "peak_client_queue": [
+            3995,
+            0,
+            0
+          ]
+        },
+        {
+          "case": null,
+          "variant": "on",
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "checkpoints": [
+            3903,
+            3902,
+            3902
+          ],
+          "snapshot_installs": [
+            0,
+            1484,
+            2358
+          ],
+          "retained": [
+            1460,
+            5556,
+            1460
+          ],
+          "peak_retained": [
+            21868,
+            8008,
+            7964
+          ],
+          "peak_peer_queue": [
+            10,
+            11,
+            9
+          ],
+          "peak_client_queue": [
+            3847,
+            0,
+            0
+          ]
+        },
+        {
+          "case": null,
+          "variant": "on",
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "checkpoints": [
+            3903,
+            3903,
+            3903
+          ],
+          "snapshot_installs": [
+            0,
+            2784,
+            1053
+          ],
+          "retained": [
+            4876,
+            2804,
+            3852
+          ],
+          "peak_retained": [
+            21996,
+            7172,
+            8008
+          ],
+          "peak_peer_queue": [
+            11,
+            12,
+            14
+          ],
+          "peak_client_queue": [
+            3967,
+            0,
+            0
+          ]
+        },
+        {
+          "case": null,
+          "variant": "on",
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "checkpoints": [
+            3902,
+            3901,
+            3901
+          ],
+          "snapshot_installs": [
+            0,
+            843,
+            2900
+          ],
+          "retained": [
+            3992,
+            1944,
+            1920
+          ],
+          "peak_retained": [
+            21936,
+            8016,
+            8024
+          ],
+          "peak_peer_queue": [
+            14,
+            11,
+            13
+          ],
+          "peak_client_queue": [
+            4049,
+            0,
+            0
+          ]
+        },
+        {
+          "case": null,
+          "variant": "openraft",
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "checkpoints": [],
+          "snapshot_installs": [],
+          "retained": [],
+          "peak_retained": [],
+          "peak_peer_queue": [],
+          "peak_client_queue": []
+        },
+        {
+          "case": null,
+          "variant": "openraft",
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "checkpoints": [],
+          "snapshot_installs": [],
+          "retained": [],
+          "peak_retained": [],
+          "peak_peer_queue": [],
+          "peak_client_queue": []
+        },
+        {
+          "case": null,
+          "variant": "openraft",
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "checkpoints": [],
+          "snapshot_installs": [],
+          "retained": [],
+          "peak_retained": [],
+          "peak_peer_queue": [],
+          "peak_client_queue": []
+        }
+      ],
+      "paired_p99_ratios": [
+        0.9803159899899152,
+        0.9782889139576337,
+        0.9695992878866553
+      ]
+    },
+    "singleton": {
+      "clients": 1,
+      "batch": 1,
+      "variants": {
+        "baseline": {
+          "rates": [
+            66676.96988263875,
+            64545.962925629065,
+            63738.19547877904
+          ],
+          "median_completed_originals_per_second": 64545.962925629065,
+          "median_request_p50_ms": 0.014917,
+          "median_request_p99_ms": 0.03,
+          "p99_ms": [
+            0.028875,
+            0.03,
+            0.030125
+          ]
+        },
+        "candidate": {
+          "rates": [
+            66576.6879510363,
+            64985.40892555906,
+            64241.393387647324
+          ],
+          "median_completed_originals_per_second": 64985.40892555906,
+          "median_request_p50_ms": 0.014834,
+          "median_request_p99_ms": 0.029792,
+          "p99_ms": [
+            0.029292,
+            0.029792,
+            0.029916
+          ]
+        },
+        "on": {
+          "rates": [
+            61201.28436165925,
+            60053.531107894174,
+            60030.849098431885
+          ],
+          "median_completed_originals_per_second": 60053.531107894174,
+          "median_request_p50_ms": 0.016125,
+          "median_request_p99_ms": 0.030584,
+          "p99_ms": [
+            0.030584,
+            0.030666,
+            0.030459
+          ]
+        },
+        "openraft": {
+          "rates": [
+            11338.182763792529,
+            11082.32658559058,
+            10968.136930097504
+          ],
+          "median_completed_originals_per_second": 11082.32658559058,
+          "median_request_p50_ms": 0.089292,
+          "median_request_p99_ms": 0.125208,
+          "p99_ms": [
+            0.122083,
+            0.125375,
+            0.125208
+          ]
+        }
+      },
+      "paired_ratios": [
+        0.9984960034659801,
+        1.0068082646847538,
+        1.0078947623962122
+      ],
+      "cases": 12,
+      "failures": [],
+      "reports": [
+        {
+          "case": null,
+          "variant": "baseline",
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "checkpoints": [
+            209,
+            209,
+            209
+          ],
+          "snapshot_installs": [
+            0,
+            0,
+            0
+          ],
+          "retained": [
+            5601,
+            5601,
+            5601
+          ],
+          "peak_retained": [
+            6000,
+            6000,
+            6000
+          ],
+          "peak_peer_queue": [
+            3,
+            2,
+            1
+          ],
+          "peak_client_queue": [
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "case": null,
+          "variant": "baseline",
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "checkpoints": [
+            209,
+            209,
+            209
+          ],
+          "snapshot_installs": [
+            0,
+            0,
+            0
+          ],
+          "retained": [
+            5601,
+            5601,
+            5601
+          ],
+          "peak_retained": [
+            6000,
+            6000,
+            6000
+          ],
+          "peak_peer_queue": [
+            3,
+            2,
+            2
+          ],
+          "peak_client_queue": [
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "case": null,
+          "variant": "baseline",
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "checkpoints": [
+            209,
+            209,
+            209
+          ],
+          "snapshot_installs": [
+            0,
+            0,
+            0
+          ],
+          "retained": [
+            5601,
+            5601,
+            5601
+          ],
+          "peak_retained": [
+            6000,
+            6000,
+            6000
+          ],
+          "peak_peer_queue": [
+            3,
+            1,
+            1
+          ],
+          "peak_client_queue": [
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "case": null,
+          "variant": "candidate",
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "checkpoints": [
+            209,
+            209,
+            209
+          ],
+          "snapshot_installs": [
+            0,
+            0,
+            0
+          ],
+          "retained": [
+            5601,
+            5601,
+            5601
+          ],
+          "peak_retained": [
+            6000,
+            6000,
+            6000
+          ],
+          "peak_peer_queue": [
+            3,
+            1,
+            2
+          ],
+          "peak_client_queue": [
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "case": null,
+          "variant": "candidate",
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "checkpoints": [
+            209,
+            209,
+            209
+          ],
+          "snapshot_installs": [
+            0,
+            0,
+            0
+          ],
+          "retained": [
+            5601,
+            5601,
+            5601
+          ],
+          "peak_retained": [
+            6000,
+            6000,
+            6000
+          ],
+          "peak_peer_queue": [
+            3,
+            2,
+            2
+          ],
+          "peak_client_queue": [
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "case": null,
+          "variant": "candidate",
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "checkpoints": [
+            209,
+            209,
+            209
+          ],
+          "snapshot_installs": [
+            0,
+            0,
+            0
+          ],
+          "retained": [
+            5601,
+            5601,
+            5601
+          ],
+          "peak_retained": [
+            6000,
+            6000,
+            6000
+          ],
+          "peak_peer_queue": [
+            3,
+            2,
+            2
+          ],
+          "peak_client_queue": [
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "case": null,
+          "variant": "on",
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "checkpoints": [
+            209,
+            209,
+            209
+          ],
+          "snapshot_installs": [
+            0,
+            0,
+            0
+          ],
+          "retained": [
+            5601,
+            5601,
+            5601
+          ],
+          "peak_retained": [
+            6000,
+            6000,
+            6000
+          ],
+          "peak_peer_queue": [
+            3,
+            1,
+            2
+          ],
+          "peak_client_queue": [
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "case": null,
+          "variant": "on",
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "checkpoints": [
+            209,
+            209,
+            209
+          ],
+          "snapshot_installs": [
+            0,
+            0,
+            0
+          ],
+          "retained": [
+            5601,
+            5601,
+            5601
+          ],
+          "peak_retained": [
+            6000,
+            6000,
+            6000
+          ],
+          "peak_peer_queue": [
+            3,
+            1,
+            1
+          ],
+          "peak_client_queue": [
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "case": null,
+          "variant": "on",
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "checkpoints": [
+            209,
+            209,
+            209
+          ],
+          "snapshot_installs": [
+            0,
+            0,
+            0
+          ],
+          "retained": [
+            5601,
+            5601,
+            5601
+          ],
+          "peak_retained": [
+            6000,
+            6000,
+            6000
+          ],
+          "peak_peer_queue": [
+            3,
+            1,
+            2
+          ],
+          "peak_client_queue": [
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "case": null,
+          "variant": "openraft",
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "checkpoints": [],
+          "snapshot_installs": [],
+          "retained": [],
+          "peak_retained": [],
+          "peak_peer_queue": [],
+          "peak_client_queue": []
+        },
+        {
+          "case": null,
+          "variant": "openraft",
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "checkpoints": [],
+          "snapshot_installs": [],
+          "retained": [],
+          "peak_retained": [],
+          "peak_peer_queue": [],
+          "peak_client_queue": []
+        },
+        {
+          "case": null,
+          "variant": "openraft",
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "checkpoints": [],
+          "snapshot_installs": [],
+          "retained": [],
+          "peak_retained": [],
+          "peak_peer_queue": [],
+          "peak_client_queue": []
+        }
+      ],
+      "paired_p99_ratios": [
+        1.0144415584415583,
+        0.9930666666666667,
+        0.9930622406639005
+      ]
+    }
+  },
+  "limits": [
+    "Logical queue and retention counts do not establish physical RSS or memory debt.",
+    "No offered-load refusal counter is emitted; successful completion is not a refusal experiment.",
+    "Attribution scopes are inclusive elapsed wall time and overlap; not CPU time.",
+    "Independent slice-copy removes Vec growth but retains owned entry/payload copies and adds bounded prefix scan; causal CPU impact not established by paired rates."
+  ]
+}

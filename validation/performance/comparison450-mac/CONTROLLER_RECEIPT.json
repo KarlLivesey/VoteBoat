@@ -1,0 +1,14 @@
+{
+  "original_ssh": 3947,
+  "pid": 7438,
+  "start_utc": "2026-10-14T14:35:16Z",
+  "bulk_end_utc": "2026-10-14T14:36:16Z",
+  "bulk_exit": 0,
+  "singleton_end_utc": "2026-10-14T14:43:30Z",
+  "singleton_exit": 0,
+  "whole_terminal_chunk": "5b9cb4",
+  "whole_exit": 0,
+  "summary_package_handle": 44465,
+  "copy_handle": 59797,
+  "no_workload_repeats": true
+}
