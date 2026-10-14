@@ -1,0 +1,96 @@
+{
+  "original_session": 50922,
+  "actual_exit": 1,
+  "cases": 48,
+  "all_case_exit1": true,
+  "existing_case_roots": 0,
+  "stderr_histogram": [
+    {
+      "stderr": "Error: Os { code: 2, kind: NotFound, message: \"No such file or directory\" }\n",
+      "cases": 48
+    }
+  ],
+  "source_path": "target/p9/native455-linux/source/examples/benchmark/offered.rs",
+  "source_sha256": "4d82dc8b4aff2d4f12fc975d4fbafdd6acf30ebbfa29a439027bb06825671060",
+  "source_excerpt": [
+    {
+      "line": 327,
+      "text": "        groups,"
+    },
+    {
+      "line": 328,
+      "text": "        maintenance: maintenance_config,"
+    },
+    {
+      "line": 329,
+      "text": "        .."
+    },
+    {
+      "line": 330,
+      "text": "    } = config;"
+    },
+    {
+      "line": 331,
+      "text": "    std::fs::create_dir(root)?;"
+    },
+    {
+      "line": 332,
+      "text": "    std::fs::write(root.join(\"run.txt\"), format!(\"mode=offered protocol={protocol:?} offers={count} offered_rate={rate} window={window} groups={groups} warmup={WARMUP}\\n\"))?;"
+    },
+    {
+      "line": 333,
+      "text": "    let mut raw = exclusive(&root.join(\"offers.csv\"))?;"
+    },
+    {
+      "line": 334,
+      "text": "    let mut storage = Vec::new();"
+    },
+    {
+      "line": 335,
+      "text": "    let (mut replicas, traces) = open_cluster(NativeOpenMode::Create)?;"
+    },
+    {
+      "line": 336,
+      "text": "    // Any error after construction still attempts explicit worker shutdown/join."
+    },
+    {
+      "line": 337,
+      "text": "    let preparation = prepare_offered(&mut replicas, clock, &config);"
+    },
+    {
+      "line": 338,
+      "text": "    let (warmup, placement) = match preparation {"
+    },
+    {
+      "line": 339,
+      "text": "        Ok(w) => w,"
+    },
+    {
+      "line": 340,
+      "text": "        Err(error) => {"
+    },
+    {
+      "line": 341,
+      "text": "            let cleanup = close(replicas, clock);"
+    },
+    {
+      "line": 342,
+      "text": "            std::fs::write("
+    },
+    {
+      "line": 343,
+      "text": "                root.join(\"failure.txt\"),"
+    },
+    {
+      "line": 344,
+      "text": "                format!(\"preparation={error}; cleanup={cleanup:?}\\n\"),"
+    },
+    {
+      "line": 345,
+      "text": "            )?;"
+    }
+  ],
+  "failure_before_run_txt_offers_and_open_cluster": true,
+  "sandbox_socket_failure_observed": false,
+  "archive_source_locator_attempt": "Toola2ec70 exit1 before writes used incorrect examples/native_benchmark/offered.rs path; corrected existing examples/benchmark/offered.rs, no workload impact"
+}

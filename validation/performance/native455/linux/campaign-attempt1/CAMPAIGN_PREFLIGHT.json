@@ -1,0 +1,11 @@
+{
+  "guards_exit": 0,
+  "existing_guard_function_only": true,
+  "campaign_driver_sha256": "ccf030dc00facd2db18e708fd80fc475779fb071966a1f7a8a47e75805b0f9ea",
+  "campaign_config_sha256": "b2dcdd5948313a7e54fbe43ac2c20e556cb8161b0fd37ff552f8690b80ca72fb",
+  "source_artifact_compiler_private_validators_resources_exact": true,
+  "case_count": 48,
+  "candidate_commit": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "root_quiet_grant": "460 publication2bd34e9b, parent task",
+  "no_build_copy_pilot_or_source_change": true
+}

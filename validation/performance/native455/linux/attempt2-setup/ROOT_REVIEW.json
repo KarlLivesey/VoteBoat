@@ -1,0 +1,34 @@
+{
+  "attempt2_config_normalizes_exactly_to_original": true,
+  "only_changed_case_fields": [
+    "command",
+    "metadata",
+    "resource_command",
+    "wal_root"
+  ],
+  "cases": 48,
+  "byte_identical_driver": true,
+  "fresh_case_roots_absent_shared_parent_present": true,
+  "collector_hashes_exact": true,
+  "original_archive_payloads_independently_verified": 347,
+  "socket_preflight": {
+    "socket_preflight_exit": 0,
+    "scope": "Actual AF_INET TCP and UDP localhost ephemeral bind, no workload",
+    "sockets": [
+      {
+        "protocol": "tcp",
+        "bind_host": "127.0.0.1",
+        "bind_succeeded": true,
+        "socket_closed": true
+      },
+      {
+        "protocol": "udp",
+        "bind_host": "127.0.0.1",
+        "bind_succeeded": true,
+        "socket_closed": true
+      }
+    ],
+    "wal_parent_is_directory": true,
+    "all_case_roots_nonexistent": true
+  }
+}

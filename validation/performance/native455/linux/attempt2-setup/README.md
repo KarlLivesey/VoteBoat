@@ -1,0 +1,5 @@
+# Native455 attempt2 setup, before timing
+
+Fresh attempt2 is prepared and reviewed after the original missing-parent failure. All configuration normalizes exactly to attempt1; only isolated output/WAL/metadata paths differ. The common WAL parent exists,48 case roots and campaign output do not. Driver SHA256ccf030dc00facd2db18e708fd80fc475779fb071966a1f7a8a47e75805b0f9ea is unchanged; new path-only config SHA25645ffa5fd911c2e95b26d4c4d0ac91b0427bd92c37cd511b08f5f9a71f52b0a35. Actual TCP/UDP ephemeral localhost binds pass with socket access and are closed afterward. No benchmark rerun/build/pilot occurs in setup.
+
+Both root and read-only review426 find no blocker. Original347 failure payloads independently hash-match; no original workload ran. Candidate remains published4557a99, baseline445ab091; no460 relabeling or source change. Whole-process RSS collector scope and all finite/uniform campaign limitations remain. This archive is a preparation snapshot: READY historical state and long_campaign_started=false are not a later live-status source. Poll the actual new controller handle after root publicationEND/quiet release.

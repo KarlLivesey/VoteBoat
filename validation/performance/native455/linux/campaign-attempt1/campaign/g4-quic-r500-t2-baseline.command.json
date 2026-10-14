@@ -1,0 +1,18 @@
+[
+  "python3",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g4-quic-r500-t2-baseline/resources.py",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g4-quic-r500-t2-baseline",
+  "quic",
+  "15000",
+  "32",
+  "4",
+  "--offered",
+  "500",
+  "--maintenance",
+  "2",
+  "--pause-follower",
+  "4:3",
+  "--ready-items",
+  "16"
+]

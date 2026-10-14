@@ -1,0 +1,20 @@
+{
+  "socket_preflight_exit": 0,
+  "scope": "Actual AF_INET TCP and UDP localhost ephemeral bind, no workload",
+  "sockets": [
+    {
+      "protocol": "tcp",
+      "bind_host": "127.0.0.1",
+      "bind_succeeded": true,
+      "socket_closed": true
+    },
+    {
+      "protocol": "udp",
+      "bind_host": "127.0.0.1",
+      "bind_succeeded": true,
+      "socket_closed": true
+    }
+  ],
+  "wal_parent_is_directory": true,
+  "all_case_roots_nonexistent": true
+}
