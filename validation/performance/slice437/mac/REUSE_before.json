@@ -1,0 +1,23 @@
+{
+  "stage": "before",
+  "source_inputs": 1437,
+  "unchanged_prior_inputs": 1435,
+  "engine_projection_exact": true,
+  "same_compiler_tool_protoc_hashes": true,
+  "old56_and_rootfunctional_reused": true,
+  "baseline_proof_command_hashes": {
+    "affected_all": "4d7d82ca1c17300c08fc01fecc2c53ffeb18325057bfe4be0d4af9b59b856808",
+    "affected_core": "ac5d0c707802f6ba3f652ad42bb46005b43a476c6463ae40980f15eadb80a2cf",
+    "effect_owner_all": "d9409831662f7dcd2539f64ad6c3a7dc01d73d6cb00f7bceca5d7212a9270a45",
+    "effect_owner_core": "66ec4a8b2ec1fcd108a2dcbca5f0281ffde0ecaab95776d9a31aa02b11f58a3e",
+    "services": "948e118eeafe8ca4c231bf0c4ca916f0f99c500b1fc8142f3b908167e97e2918",
+    "root_fmt": "c401ec0d5736d881d6c549cedccbeb273e018634cd7a8637f34efed083dee9f7",
+    "strict_default": "3074d6a52989740833c6dfbb8a4e9e9ec152fe9f1d8557912df8fd755da66a3b",
+    "strict_all": "1acb448d8d73e69a7fe9d4d753223901dd0bc19d05b3f885dc895be00a871503",
+    "strict_core": "35bfb207948881b4e101f63c2576a1ab832e8f6d81ede2eb92172d2d7eb184ee",
+    "strict_native": "54cf3b75adc0725b96c10052a747f625d966427e0632486a27cb69bed88af164",
+    "matched_tests": "c570c65a191a0483c8acb19ff1f6d7d5ae1a9003bb4ac5cee1abe67bebb509da"
+  },
+  "actual8_fmt_strict_pass": false,
+  "no_new_performance_claim": true
+}

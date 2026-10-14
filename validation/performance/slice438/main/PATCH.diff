@@ -1,0 +1,31 @@
+diff --git a/benchmarks/matched/src/voteboat_engine/actor.rs b/benchmarks/matched/src/voteboat_engine/actor.rs
+index 674f8700..68b299da 100644
+--- a/benchmarks/matched/src/voteboat_engine/actor.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor.rs
+@@ -46,7 +46,7 @@ pub(super) struct Actor<const TRACE: bool = false> {
+ }
+ impl<const TRACE: bool> Actor<TRACE> {
+     pub fn new(parts: Parts<TRACE>) -> Self {
+-        let pending = HashMap::with_capacity(parts.settings.clients * 4 + 1);
++        let pending = HashMap::with_capacity(2 * (parts.settings.clients * 4 + 1));
+         Self {
+             parts,
+             attribution: Recorder::default(),
+diff --git a/benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs b/benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs
+index 4fa3ba12..d116d10b 100644
+--- a/benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs
+@@ -160,8 +160,11 @@ fn checked_budget(clients: usize) {
+     received(admitted_waits, &ids);
+     assert!(actor.pending.is_empty());
+     println!(
+-        "clients={clients} logical_bound={bound} retained_capacity={}",
+-        actor.pending.capacity()
++        "layout_scope=actual_standalone_dev_test clients={clients} logical_bound={bound} available_insert_capacity={} key_bytes={} reply_bytes={} key_reply_tuple_bytes={}",
++        actor.pending.capacity(),
++        size_of::<OperationId>(),
++        size_of::<Reply>(),
++        size_of::<(OperationId, Reply)>()
+     );
+ }
+ 

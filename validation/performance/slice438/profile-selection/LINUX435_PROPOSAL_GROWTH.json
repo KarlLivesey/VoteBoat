@@ -1,0 +1,819 @@
+{
+  "scope": "Existingimmutable435 savedCPU sample weights, physical and expandedperRVA overlaps; typedproposal construction/growth may be optimized/missing. Genericalloc/memmove context is not allocatorcause/proposal attribution. No capture/newhelper/cache/source changes.",
+  "cases": {
+    "bulk": {
+      "selected_sample_weight": 6498,
+      "groups": {
+        "physical_any": {
+          "Proposal_growth": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "Proposal_push": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "memcpy_memmove": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "allocation_deallocation_or_RawVecInner": {
+            "all": {
+              "sample_weight": 192,
+              "percent_selected": 2.9547553093259467
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 36,
+              "percent_selected": 0.554016620498615
+            },
+            "collect_or_include": {
+              "sample_weight": 36,
+              "percent_selected": 0.554016620498615
+            },
+            "requests": {
+              "sample_weight": 41,
+              "percent_selected": 0.6309633733456448
+            }
+          },
+          "Actor_collect": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "Actor_include": {
+            "all": {
+              "sample_weight": 619,
+              "percent_selected": 9.526008002462296
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 619,
+              "percent_selected": 9.526008002462296
+            },
+            "collect_or_include": {
+              "sample_weight": 619,
+              "percent_selected": 9.526008002462296
+            },
+            "requests": {
+              "sample_weight": 619,
+              "percent_selected": 9.526008002462296
+            }
+          }
+        },
+        "expanded_perRVA_any": {
+          "Proposal_growth": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "Proposal_push": {
+            "all": {
+              "sample_weight": 52,
+              "percent_selected": 0.8002462296091105
+            },
+            "collect": {
+              "sample_weight": 52,
+              "percent_selected": 0.8002462296091105
+            },
+            "include": {
+              "sample_weight": 52,
+              "percent_selected": 0.8002462296091105
+            },
+            "collect_or_include": {
+              "sample_weight": 52,
+              "percent_selected": 0.8002462296091105
+            },
+            "requests": {
+              "sample_weight": 52,
+              "percent_selected": 0.8002462296091105
+            }
+          },
+          "memcpy_memmove": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "allocation_deallocation_or_RawVecInner": {
+            "all": {
+              "sample_weight": 590,
+              "percent_selected": 9.079716835949522
+            },
+            "collect": {
+              "sample_weight": 48,
+              "percent_selected": 0.7386888273314867
+            },
+            "include": {
+              "sample_weight": 44,
+              "percent_selected": 0.6771314250538627
+            },
+            "collect_or_include": {
+              "sample_weight": 48,
+              "percent_selected": 0.7386888273314867
+            },
+            "requests": {
+              "sample_weight": 71,
+              "percent_selected": 1.092643890427824
+            }
+          },
+          "Actor_collect": {
+            "all": {
+              "sample_weight": 765,
+              "percent_selected": 11.772853185595569
+            },
+            "collect": {
+              "sample_weight": 765,
+              "percent_selected": 11.772853185595569
+            },
+            "include": {
+              "sample_weight": 619,
+              "percent_selected": 9.526008002462296
+            },
+            "collect_or_include": {
+              "sample_weight": 765,
+              "percent_selected": 11.772853185595569
+            },
+            "requests": {
+              "sample_weight": 765,
+              "percent_selected": 11.772853185595569
+            }
+          },
+          "Actor_include": {
+            "all": {
+              "sample_weight": 619,
+              "percent_selected": 9.526008002462296
+            },
+            "collect": {
+              "sample_weight": 619,
+              "percent_selected": 9.526008002462296
+            },
+            "include": {
+              "sample_weight": 619,
+              "percent_selected": 9.526008002462296
+            },
+            "collect_or_include": {
+              "sample_weight": 619,
+              "percent_selected": 9.526008002462296
+            },
+            "requests": {
+              "sample_weight": 619,
+              "percent_selected": 9.526008002462296
+            }
+          }
+        },
+        "physical_leaf": {
+          "Proposal_growth": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "Proposal_push": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "memcpy_memmove": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "allocation_deallocation_or_RawVecInner": {
+            "all": {
+              "sample_weight": 114,
+              "percent_selected": 1.7543859649122806
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 17,
+              "percent_selected": 0.2616189596799015
+            },
+            "collect_or_include": {
+              "sample_weight": 17,
+              "percent_selected": 0.2616189596799015
+            },
+            "requests": {
+              "sample_weight": 21,
+              "percent_selected": 0.3231763619575254
+            }
+          },
+          "Actor_collect": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "Actor_include": {
+            "all": {
+              "sample_weight": 39,
+              "percent_selected": 0.6001846722068329
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 39,
+              "percent_selected": 0.6001846722068329
+            },
+            "collect_or_include": {
+              "sample_weight": 39,
+              "percent_selected": 0.6001846722068329
+            },
+            "requests": {
+              "sample_weight": 39,
+              "percent_selected": 0.6001846722068329
+            }
+          }
+        }
+      }
+    },
+    "singleton": {
+      "selected_sample_weight": 16873,
+      "groups": {
+        "physical_any": {
+          "Proposal_growth": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "Proposal_push": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "memcpy_memmove": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "allocation_deallocation_or_RawVecInner": {
+            "all": {
+              "sample_weight": 715,
+              "percent_selected": 4.23753926391276
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 192,
+              "percent_selected": 1.1379126414982517
+            }
+          },
+          "Actor_collect": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "Actor_include": {
+            "all": {
+              "sample_weight": 36,
+              "percent_selected": 0.21335862028092217
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 36,
+              "percent_selected": 0.21335862028092217
+            },
+            "collect_or_include": {
+              "sample_weight": 36,
+              "percent_selected": 0.21335862028092217
+            },
+            "requests": {
+              "sample_weight": 36,
+              "percent_selected": 0.21335862028092217
+            }
+          }
+        },
+        "expanded_perRVA_any": {
+          "Proposal_growth": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "Proposal_push": {
+            "all": {
+              "sample_weight": 2,
+              "percent_selected": 0.011853256682273454
+            },
+            "collect": {
+              "sample_weight": 2,
+              "percent_selected": 0.011853256682273454
+            },
+            "include": {
+              "sample_weight": 2,
+              "percent_selected": 0.011853256682273454
+            },
+            "collect_or_include": {
+              "sample_weight": 2,
+              "percent_selected": 0.011853256682273454
+            },
+            "requests": {
+              "sample_weight": 2,
+              "percent_selected": 0.011853256682273454
+            }
+          },
+          "memcpy_memmove": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "allocation_deallocation_or_RawVecInner": {
+            "all": {
+              "sample_weight": 1382,
+              "percent_selected": 8.190600367450957
+            },
+            "collect": {
+              "sample_weight": 2,
+              "percent_selected": 0.011853256682273454
+            },
+            "include": {
+              "sample_weight": 1,
+              "percent_selected": 0.005926628341136727
+            },
+            "collect_or_include": {
+              "sample_weight": 2,
+              "percent_selected": 0.011853256682273454
+            },
+            "requests": {
+              "sample_weight": 287,
+              "percent_selected": 1.7009423339062408
+            }
+          },
+          "Actor_collect": {
+            "all": {
+              "sample_weight": 140,
+              "percent_selected": 0.8297279677591418
+            },
+            "collect": {
+              "sample_weight": 140,
+              "percent_selected": 0.8297279677591418
+            },
+            "include": {
+              "sample_weight": 36,
+              "percent_selected": 0.21335862028092217
+            },
+            "collect_or_include": {
+              "sample_weight": 140,
+              "percent_selected": 0.8297279677591418
+            },
+            "requests": {
+              "sample_weight": 140,
+              "percent_selected": 0.8297279677591418
+            }
+          },
+          "Actor_include": {
+            "all": {
+              "sample_weight": 36,
+              "percent_selected": 0.21335862028092217
+            },
+            "collect": {
+              "sample_weight": 36,
+              "percent_selected": 0.21335862028092217
+            },
+            "include": {
+              "sample_weight": 36,
+              "percent_selected": 0.21335862028092217
+            },
+            "collect_or_include": {
+              "sample_weight": 36,
+              "percent_selected": 0.21335862028092217
+            },
+            "requests": {
+              "sample_weight": 36,
+              "percent_selected": 0.21335862028092217
+            }
+          }
+        },
+        "physical_leaf": {
+          "Proposal_growth": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "Proposal_push": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "memcpy_memmove": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "allocation_deallocation_or_RawVecInner": {
+            "all": {
+              "sample_weight": 313,
+              "percent_selected": 1.8550346707757956
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 110,
+              "percent_selected": 0.65192911752504
+            }
+          },
+          "Actor_collect": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "collect_or_include": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "requests": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "Actor_include": {
+            "all": {
+              "sample_weight": 5,
+              "percent_selected": 0.029633141705683638
+            },
+            "collect": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "include": {
+              "sample_weight": 5,
+              "percent_selected": 0.029633141705683638
+            },
+            "collect_or_include": {
+              "sample_weight": 5,
+              "percent_selected": 0.029633141705683638
+            },
+            "requests": {
+              "sample_weight": 5,
+              "percent_selected": 0.029633141705683638
+            }
+          }
+        }
+      }
+    }
+  }
+}

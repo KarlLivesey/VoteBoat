@@ -1,0 +1,55 @@
+{
+  "selected_experiment": "438 initial physical reserve2P only, P=clients*4+1 logicalbound unchanged",
+  "source_review": "No blocker: only Actor::new allocationrequest changes. RandomState/full128 key equality, all channels/admission/error/duplicate replacement/receipt/drop semantics and logicalP gate unchanged. Settingsclients1..4096=>P<=16385/reserve2P<=32770. No new API/provider/network/log/durability/observer state.",
+  "actual_dev_layout": {
+    "key_bytes": 16,
+    "reply_bytes": 8,
+    "key_reply_tuple_bytes": 32,
+    "scope": "Root438 actual existing test-only sizeof diagnostic, not portableconstant/releaseELF/RSS claim"
+  },
+  "capacity_semantics": "with_capacity requestsatleast2P insertions, notexactbuckets. Rawcapacity=items+growth_left, maydecline withtombstones while allocationretained.",
+  "inferred_hashbrown0171_large_layout": {
+    "group_width_bytes": 16,
+    "tuple_bytes": 32,
+    "clients4096": {
+      "logicalP": 16385,
+      "oldrequested": 16385,
+      "newrequested": 32770,
+      "oldbuckets": 32768,
+      "newbuckets": 65536,
+      "oldinitialcapacity": 28672,
+      "newinitialcapacity": 57344,
+      "oldallocationbytes": 1081360,
+      "newallocationbytes": 2162704,
+      "extra_per_actor_bytes": 1081344,
+      "extra_three_actor_bytes": 3244032
+    },
+    "clients1": {
+      "logicalP": 5,
+      "oldrequested": 5,
+      "newrequested": 10,
+      "oldbuckets": 8,
+      "newbuckets": 16,
+      "oldinitialcapacity": 7,
+      "newinitialcapacity": 14,
+      "oldallocationbytes": 280,
+      "newallocationbytes": 544,
+      "extra_per_actor_bytes": 264
+    },
+    "scope": "Derived from matching-versioncached hashbrown0.17.1 source and observedtuple32, notmeasuredRSS. Rust-srcnotinstalled; compiler-profile/executable identitiesremainarchived435. DifferentRandomState/old430sourcecapacitychurn isnotacausalpairedcomparison."
+  },
+  "profile_selection_limits": [
+    "Mac435 insertphysicalself6.970%/inclusive9.648%; Linux435 insertself221/6498=3.401%/nativeinclusive333=5.125%. Hashing isseparateoverlappingwork; reservingmore doesnotchangeSipHashcost.",
+    "Linux saved perRVA insertaddresses identify probe/search/control-byte matching, equality/insertionmetadata/payloadcopy alongside hash setup; neitherprobe count nor tablecleanupfrequency canbe inferred. Fourselectedselfsamples nameProbeSeqadvance; noresolvedcleanup labeldoesnotprovezerocleanup.",
+    "Proposalbufferhint rejected as nextlargestdrain: MacnoProposaltyped/collectnativeframe, memmoveunderinclude.506%/resolvedallocation.031%; LinuxProposalpushexpanded52/6498=.800%, genericallocundercollect/include.554%native/.739%expanded. Typesmay beoptimized/missing; zeroresolvedgrowth isnotzeroallocation.",
+    "MacMachdelta sampledinterval/waitbias; Linuxsamplecountweights; native/inline/inclusive views overlap andcannotbesummed/acrosshostcompared asCPUtime. Unresolved/FDE/alias/sourcecoalescing limitsremain.",
+    "Reserve2P isoneboundedprobe/maintenanceexperiment; largerallocation/cache/TLB/initfootprint mayoffsetanygain. No performanceclaim or variantretuning ifpairedresult fails."
+  ],
+  "query_ownership": {
+    "recapture": false,
+    "new_helper_file": false,
+    "old435_raw_profiles_modified": false,
+    "bytecode_disabled": true,
+    "scope": "Sixcompact existingtool in-memory query outputs only; immutable435baseline source/ELF+dSYM/per-addresssymbols reused; no cachedbytecode/binaries/build/source/fullprofile duplication."
+  }
+}

@@ -1,0 +1,2 @@
+{"archive_sha256": "c5f94f9d2f99c0c91ac0ebb556c3f175082ea5ff6207e803829348280f0ec948", "build_rs_present": true, "commit": "407d9942b3d8b3a22bcaca2ac698a78f2a1867a7", "exact_sha256_and_modes": true, "inputs": 1437, "source_inventory_scope": "Selected committed production/harness source, fixtures, locks, build/config/hooks and contract documents; no builds/WAL states; not a claim every input compiled."}
+focusedpermissionrepair 1437 allhashes+modes exact

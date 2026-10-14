@@ -1,0 +1,10 @@
+import hashlib,json,stat,subprocess
+from pathlib import Path
+j=Path('/tmp/voteboat-mac437-407d994-nVv1yY');s=json.loads((j/'SOURCE.json').read_text());changes=[]
+for rel,digest in s['sha256'].items():
+ p=j/'source'/rel;assert hashlib.sha256(p.read_bytes()).hexdigest()==digest,rel
+ got=oct(stat.S_IMODE(p.stat().st_mode));wanted=s['modes'][rel]
+ if got!=wanted:changes.append({'path':rel,'before':got,'after':wanted});p.chmod(int(wanted,8))
+(j/'TRANSFER_PERMISSION_REPAIR.json').write_text(json.dumps({'cause':'Mac tar extraction applies currentumask unless preservepermissions option; initialverify assertiongithook retained locally. Onlypermissionmodes restored exactlyto committedtarinventory afterallcontenthashverification.','content_bytes_unchanged':True,'changes':changes},indent=2)+'\n')
+subprocess.run(['/usr/bin/python3',str(j/'verify-source.py')],check=True)
+print('focusedpermissionrepair',len(changes),'allhashes+modes exact')

@@ -1,0 +1,24 @@
+bulk denom 8564928
+Proposal_growth_leaf 0 0.0 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.0, 'Actor_include': 0.0, 'Actor_requests': 0.0, 'collect_or_include_union': 0.0, 'plan_copy': 0.0}
+Proposal_growth_any 0 0.0 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.0, 'Actor_include': 0.0, 'Actor_requests': 0.0, 'collect_or_include_union': 0.0, 'plan_copy': 0.0}
+Proposal_push_leaf 0 0.0 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.0, 'Actor_include': 0.0, 'Actor_requests': 0.0, 'collect_or_include_union': 0.0, 'plan_copy': 0.0}
+Proposal_push_any 0 0.0 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.0, 'Actor_include': 0.0, 'Actor_requests': 0.0, 'collect_or_include_union': 0.0, 'plan_copy': 0.0}
+memmove_leaf 391334 4.569 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.506, 'Actor_include': 0.0, 'Actor_requests': 0.879, 'collect_or_include_union': 0.506, 'plan_copy': 0.0}
+resolved_allocation_leaf 13698 0.16 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.031, 'Actor_include': 0.0, 'Actor_requests': 0.037, 'collect_or_include_union': 0.031, 'plan_copy': 0.0}
+unresolved_malloc_library_leaf 0 0.0 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.0, 'Actor_include': 0.0, 'Actor_requests': 0.0, 'collect_or_include_union': 0.0, 'plan_copy': 0.0}
+Actor_collect_leaf 0 0.0 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.0, 'Actor_include': 0.0, 'Actor_requests': 0.0, 'collect_or_include_union': 0.0, 'plan_copy': 0.0}
+Actor_collect_any 0 0.0 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.0, 'Actor_include': 0.0, 'Actor_requests': 0.0, 'collect_or_include_union': 0.0, 'plan_copy': 0.0}
+Actor_include_leaf 63984 0.747 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.747, 'Actor_include': 0.0, 'Actor_requests': 0.747, 'collect_or_include_union': 0.747, 'plan_copy': 0.0}
+Actor_include_any 1028284 12.006 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 12.006, 'Actor_include': 0.0, 'Actor_requests': 12.006, 'collect_or_include_union': 12.006, 'plan_copy': 0.0}
+singleton denom 34639599
+Proposal_growth_leaf 0 0.0 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.0, 'Actor_include': 0.0, 'Actor_requests': 0.0, 'collect_or_include_union': 0.0, 'plan_copy': 0.0}
+Proposal_growth_any 0 0.0 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.0, 'Actor_include': 0.0, 'Actor_requests': 0.0, 'collect_or_include_union': 0.0, 'plan_copy': 0.0}
+Proposal_push_leaf 0 0.0 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.0, 'Actor_include': 0.0, 'Actor_requests': 0.0, 'collect_or_include_union': 0.0, 'plan_copy': 0.0}
+Proposal_push_any 0 0.0 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.0, 'Actor_include': 0.0, 'Actor_requests': 0.0, 'collect_or_include_union': 0.0, 'plan_copy': 0.0}
+memmove_leaf 860068 2.483 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.0, 'Actor_include': 0.0, 'Actor_requests': 0.454, 'collect_or_include_union': 0.0, 'plan_copy': 0.0}
+resolved_allocation_leaf 59070 0.171 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.0, 'Actor_include': 0.0, 'Actor_requests': 0.067, 'collect_or_include_union': 0.0, 'plan_copy': 0.0}
+unresolved_malloc_library_leaf 0 0.0 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.0, 'Actor_include': 0.0, 'Actor_requests': 0.0, 'collect_or_include_union': 0.0, 'plan_copy': 0.0}
+Actor_collect_leaf 0 0.0 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.0, 'Actor_include': 0.0, 'Actor_requests': 0.0, 'collect_or_include_union': 0.0, 'plan_copy': 0.0}
+Actor_collect_any 0 0.0 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.0, 'Actor_include': 0.0, 'Actor_requests': 0.0, 'collect_or_include_union': 0.0, 'plan_copy': 0.0}
+Actor_include_leaf 2269 0.007 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.007, 'Actor_include': 0.0, 'Actor_requests': 0.007, 'collect_or_include_union': 0.007, 'plan_copy': 0.0}
+Actor_include_any 22169 0.064 contexts {'Actor_collect': 0.0, 'Actor_include_true_alias': 0.064, 'Actor_include': 0.0, 'Actor_requests': 0.064, 'collect_or_include_union': 0.064, 'plan_copy': 0.0}

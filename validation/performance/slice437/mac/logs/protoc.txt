@@ -1,0 +1,2 @@
+/tmp/voteboat-macos-CzK1if/reference-tools296/bin/protoc: OK
+libprotoc 3.21.12

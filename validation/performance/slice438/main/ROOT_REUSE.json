@@ -1,0 +1,8 @@
+{
+  "baseline_commit": "407d9942b3d8b3a22bcaca2ac698a78f2a1867a7",
+  "unchanged_inputs": 1432,
+  "root_production_library_tests_examples_dependencies_profiles_changed": false,
+  "private_harness_production_change": "Actor::new initial requestedHashMapreserve2P; logicalgateP unchanged",
+  "test_only_change": "existingchecked_budget diagnostic printsdevkey/reply/tuplesizes; no newmirroringtest",
+  "scope": "rootfunctional scope reused only via exactsourcehash/modes; actualenabledhookpublication remainsrootowned"
+}

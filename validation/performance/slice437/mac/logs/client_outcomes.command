@@ -1,0 +1,1 @@
+/Users/karllivesey/.cargo/bin/cargo +stable test --locked --offline --manifest-path /tmp/voteboat-mac437-407d994-nVv1yY/source/benchmarks/matched/Cargo.toml client_outcomes -- --test-threads=1 --nocapture 

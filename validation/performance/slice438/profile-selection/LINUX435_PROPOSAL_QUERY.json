@@ -1,0 +1,7 @@
+{
+  "base_query_sha256": "d516365cf25ed4338a7c6d78573e172929c323a68267eb4b378432d33f3c40fa",
+  "inmemory_adaptation_sha256": "db5248b070424808eb0907b057e9fd53ce160a08d74c42e38cb391b69f5d1c0c",
+  "new_helper_file": false,
+  "recapture": false,
+  "dont_write_bytecode": true
+}

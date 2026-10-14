@@ -1,0 +1,1067 @@
+{
+  "scope": "Existingimmutable435 currentUUID2872CD3B physical stack query, allocation/Proposal frames may be inlined/coalesced or unresolved. Memmove contexts overlapping, not allocatorcause or futurebenefit. Unknownmalloc not reclassified from missinglibrarylabels; priorALLOCATION_CONTEXTS remains.",
+  "cases": {
+    "bulk": {
+      "cpu_denominator_us": 8564928,
+      "groups": {
+        "Proposal_growth_leaf": {
+          "cpu_us": 0,
+          "percent_observed_cpu": 0.0,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_requests": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "collect_or_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            }
+          },
+          "top_immediate_leaf_callers": []
+        },
+        "Proposal_growth_any": {
+          "cpu_us": 0,
+          "percent_observed_cpu": 0.0,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_requests": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "collect_or_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            }
+          },
+          "top_immediate_leaf_callers": []
+        },
+        "Proposal_push_leaf": {
+          "cpu_us": 0,
+          "percent_observed_cpu": 0.0,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_requests": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "collect_or_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            }
+          },
+          "top_immediate_leaf_callers": []
+        },
+        "Proposal_push_any": {
+          "cpu_us": 0,
+          "percent_observed_cpu": 0.0,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_requests": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "collect_or_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            }
+          },
+          "top_immediate_leaf_callers": []
+        },
+        "memmove_leaf": {
+          "cpu_us": 391334,
+          "percent_observed_cpu": 4.569028484536005,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 43369,
+              "percent_observed_cpu": 0.5063556868195506,
+              "percent_group": 11.082349093102057
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_requests": {
+              "cpu_us": 75289,
+              "percent_observed_cpu": 0.8790383293356349,
+              "percent_group": 19.239064328680872
+            },
+            "collect_or_include_union": {
+              "cpu_us": 43369,
+              "percent_observed_cpu": 0.5063556868195506,
+              "percent_group": 11.082349093102057
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "core::ptr::drop_glue::<alloc::vec::drain::Drain<voteboat::log::LogEntry>>",
+              "cpu_us": 172720,
+              "percent_group": 44.13621101156557
+            },
+            {
+              "function": "[unresolved] 0x303f3",
+              "cpu_us": 121088,
+              "percent_group": 30.94236636734861
+            },
+            {
+              "function": "<alloc::vec::Vec<voteboat::log::LogEntry> as alloc::vec::spec_extend::SpecExtend<voteboat::log::LogEntry, alloc::vec::into_iter::IntoIter<voteboat::log::LogEntry>>>::spec_extend",
+              "cpu_us": 57977,
+              "percent_group": 14.815221779860682
+            },
+            {
+              "function": "<voteboat::raft::Raft>::finish_completion",
+              "cpu_us": 8892,
+              "percent_group": 2.272227815625527
+            },
+            {
+              "function": "voteboat_matched_framework::workload::run::{closure#0}",
+              "cpu_us": 7655,
+              "percent_group": 1.956129546627689
+            },
+            {
+              "function": "<voteboat::raft::Raft>::persist_update",
+              "cpu_us": 7224,
+              "percent_group": 1.8459934480520477
+            },
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+              "cpu_us": 5186,
+              "percent_group": 1.3252106895899667
+            },
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+              "cpu_us": 5002,
+              "percent_group": 1.2781920303372567
+            }
+          ]
+        },
+        "resolved_allocation_leaf": {
+          "cpu_us": 13698,
+          "percent_observed_cpu": 0.15993129189177072,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 2666,
+              "percent_observed_cpu": 0.03112694000463285,
+              "percent_group": 19.462695283983063
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_requests": {
+              "cpu_us": 3134,
+              "percent_observed_cpu": 0.03659108401144762,
+              "percent_group": 22.879252445612497
+            },
+            "collect_or_include_union": {
+              "cpu_us": 2666,
+              "percent_observed_cpu": 0.03112694000463285,
+              "percent_group": 19.462695283983063
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<alloc::raw_vec::RawVec<voteboat::log::LogEntry>>::grow_one",
+              "cpu_us": 2671,
+              "percent_group": 19.4991969630603
+            },
+            {
+              "function": "<voteboat_matched_framework::application::Noop as voteboat::application::StateMachine>::apply_batch",
+              "cpu_us": 2432,
+              "percent_group": 17.754416703168346
+            },
+            {
+              "function": "<alloc::raw_vec::RawVec<voteboat::raft::Effect>>::grow_one",
+              "cpu_us": 2136,
+              "percent_group": 15.593517301795883
+            },
+            {
+              "function": "<alloc::raw_vec::RawVec<voteboat::identity::OperationId>>::grow_one",
+              "cpu_us": 1955,
+              "percent_group": 14.272156519199884
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor<true>>::include",
+              "cpu_us": 1737,
+              "percent_group": 12.680683311432325
+            },
+            {
+              "function": "<voteboat::raft::Raft>::broadcast",
+              "cpu_us": 973,
+              "percent_group": 7.103226748430428
+            },
+            {
+              "function": "<alloc::raw_vec::RawVec<voteboat_matched_framework::voteboat_engine::Original>>::grow_one",
+              "cpu_us": 929,
+              "percent_group": 6.7820119725507375
+            },
+            {
+              "function": "<voteboat::raft::Raft>::append_for",
+              "cpu_us": 865,
+              "percent_group": 6.314790480362096
+            }
+          ]
+        },
+        "unresolved_malloc_library_leaf": {
+          "cpu_us": 0,
+          "percent_observed_cpu": 0.0,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_requests": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "collect_or_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            }
+          },
+          "top_immediate_leaf_callers": []
+        },
+        "Actor_collect_leaf": {
+          "cpu_us": 0,
+          "percent_observed_cpu": 0.0,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_requests": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "collect_or_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            }
+          },
+          "top_immediate_leaf_callers": []
+        },
+        "Actor_collect_any": {
+          "cpu_us": 0,
+          "percent_observed_cpu": 0.0,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_requests": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "collect_or_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            }
+          },
+          "top_immediate_leaf_callers": []
+        },
+        "Actor_include_leaf": {
+          "cpu_us": 63984,
+          "percent_observed_cpu": 0.7470465601111883,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 63984,
+              "percent_observed_cpu": 0.7470465601111883,
+              "percent_group": 100.0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_requests": {
+              "cpu_us": 63984,
+              "percent_observed_cpu": 0.7470465601111883,
+              "percent_group": 100.0
+            },
+            "collect_or_include_union": {
+              "cpu_us": 63984,
+              "percent_observed_cpu": 0.7470465601111883,
+              "percent_group": 100.0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::requests",
+              "cpu_us": 63984,
+              "percent_group": 100.0
+            }
+          ]
+        },
+        "Actor_include_any": {
+          "cpu_us": 1028284,
+          "percent_observed_cpu": 12.005751828853668,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 1028284,
+              "percent_observed_cpu": 12.005751828853668,
+              "percent_group": 100.0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_requests": {
+              "cpu_us": 1028284,
+              "percent_observed_cpu": 12.005751828853668,
+              "percent_group": 100.0
+            },
+            "collect_or_include_union": {
+              "cpu_us": 1028284,
+              "percent_observed_cpu": 12.005751828853668,
+              "percent_group": 100.0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor<true>>::include",
+              "cpu_us": 667117,
+              "percent_group": 64.87672666306196
+            },
+            {
+              "function": "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&voteboat::identity::OperationId>",
+              "cpu_us": 128476,
+              "percent_group": 12.49421366081744
+            },
+            {
+              "function": "<hashbrown::map::HashMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, std::hash::random::RandomState>>::insert",
+              "cpu_us": 98766,
+              "percent_group": 9.60493404545826
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::requests",
+              "cpu_us": 63984,
+              "percent_group": 6.222405483310058
+            },
+            {
+              "function": "[unresolved] 0x303f3",
+              "cpu_us": 43369,
+              "percent_group": 4.217609142999405
+            },
+            {
+              "function": "[unresolved] 0x3038f",
+              "cpu_us": 4557,
+              "percent_group": 0.44316550680551287
+            },
+            {
+              "function": "_os_unfair_lock_lock_slow",
+              "cpu_us": 2988,
+              "percent_group": 0.2905812013023639
+            },
+            {
+              "function": "[unresolved] 0x3882b",
+              "cpu_us": 2568,
+              "percent_group": 0.24973645413134893
+            }
+          ]
+        }
+      }
+    },
+    "singleton": {
+      "cpu_denominator_us": 34639599,
+      "groups": {
+        "Proposal_growth_leaf": {
+          "cpu_us": 0,
+          "percent_observed_cpu": 0.0,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_requests": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "collect_or_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            }
+          },
+          "top_immediate_leaf_callers": []
+        },
+        "Proposal_growth_any": {
+          "cpu_us": 0,
+          "percent_observed_cpu": 0.0,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_requests": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "collect_or_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            }
+          },
+          "top_immediate_leaf_callers": []
+        },
+        "Proposal_push_leaf": {
+          "cpu_us": 0,
+          "percent_observed_cpu": 0.0,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_requests": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "collect_or_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            }
+          },
+          "top_immediate_leaf_callers": []
+        },
+        "Proposal_push_any": {
+          "cpu_us": 0,
+          "percent_observed_cpu": 0.0,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_requests": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "collect_or_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            }
+          },
+          "top_immediate_leaf_callers": []
+        },
+        "memmove_leaf": {
+          "cpu_us": 860068,
+          "percent_observed_cpu": 2.4829040313082147,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_requests": {
+              "cpu_us": 157205,
+              "percent_observed_cpu": 0.45383031137283086,
+              "percent_group": 18.278205909300194
+            },
+            "collect_or_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+              "cpu_us": 279747,
+              "percent_group": 32.526149095187826
+            },
+            {
+              "function": "<voteboat::raft::Raft>::persist_update",
+              "cpu_us": 222061,
+              "percent_group": 25.819005008906274
+            },
+            {
+              "function": "<voteboat::raft::Raft>::finish_completion",
+              "cpu_us": 148551,
+              "percent_group": 17.272006399493993
+            },
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+              "cpu_us": 122622,
+              "percent_group": 14.257244775994456
+            },
+            {
+              "function": "voteboat::log::transition::append_summary",
+              "cpu_us": 25029,
+              "percent_group": 2.9101187347977135
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove_leaf_kv::<<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove_kv::{closure#0}, alloc::alloc::Global>",
+              "cpu_us": 13332,
+              "percent_group": 1.5501099913030132
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+              "cpu_us": 8981,
+              "percent_group": 1.044219759367864
+            },
+            {
+              "function": "<alloc::collections::vec_deque::VecDeque<voteboat::raft::Effect> as alloc::collections::vec_deque::spec_extend::SpecExtend<voteboat::raft::Effect, alloc::vec::into_iter::IntoIter<voteboat::raft::Effect>>>::spec_extend",
+              "cpu_us": 8242,
+              "percent_group": 0.9582963207560332
+            }
+          ]
+        },
+        "resolved_allocation_leaf": {
+          "cpu_us": 59070,
+          "percent_observed_cpu": 0.17052737821820627,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_requests": {
+              "cpu_us": 23349,
+              "percent_observed_cpu": 0.06740551471164548,
+              "percent_group": 39.52767902488573
+            },
+            "collect_or_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<alloc::raw_vec::RawVec<voteboat::raft::Effect>>::grow_one",
+              "cpu_us": 18896,
+              "percent_group": 31.989165396986625
+            },
+            {
+              "function": "<voteboat::raft::Raft>::append_for",
+              "cpu_us": 11582,
+              "percent_group": 19.607245640765193
+            },
+            {
+              "function": "<alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global>",
+              "cpu_us": 6024,
+              "percent_group": 10.198070086338243
+            },
+            {
+              "function": "<alloc::raw_vec::RawVec<voteboat::identity::OperationId>>::grow_one",
+              "cpu_us": 5539,
+              "percent_group": 9.377010326730996
+            },
+            {
+              "function": "<alloc::raw_vec::RawVec<voteboat::log::LogEntry>>::grow_one",
+              "cpu_us": 5440,
+              "percent_group": 9.209412561367868
+            },
+            {
+              "function": "<voteboat::raft::Raft>::broadcast_ready_peers",
+              "cpu_us": 4188,
+              "percent_group": 7.089893346876587
+            },
+            {
+              "function": "<voteboat_matched_framework::application::Noop as voteboat::application::StateMachine>::apply_batch",
+              "cpu_us": 3709,
+              "percent_group": 6.27899102759438
+            },
+            {
+              "function": "<alloc::vec::Vec<voteboat::raft::Effect>>::push_mut",
+              "cpu_us": 3132,
+              "percent_group": 5.302183849669883
+            }
+          ]
+        },
+        "unresolved_malloc_library_leaf": {
+          "cpu_us": 0,
+          "percent_observed_cpu": 0.0,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_requests": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "collect_or_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            }
+          },
+          "top_immediate_leaf_callers": []
+        },
+        "Actor_collect_leaf": {
+          "cpu_us": 0,
+          "percent_observed_cpu": 0.0,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_requests": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "collect_or_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            }
+          },
+          "top_immediate_leaf_callers": []
+        },
+        "Actor_collect_any": {
+          "cpu_us": 0,
+          "percent_observed_cpu": 0.0,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_requests": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "collect_or_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            }
+          },
+          "top_immediate_leaf_callers": []
+        },
+        "Actor_include_leaf": {
+          "cpu_us": 2269,
+          "percent_observed_cpu": 0.006550306774625191,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 2269,
+              "percent_observed_cpu": 0.006550306774625191,
+              "percent_group": 100.0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_requests": {
+              "cpu_us": 2269,
+              "percent_observed_cpu": 0.006550306774625191,
+              "percent_group": 100.0
+            },
+            "collect_or_include_union": {
+              "cpu_us": 2269,
+              "percent_observed_cpu": 0.006550306774625191,
+              "percent_group": 100.0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::requests",
+              "cpu_us": 2269,
+              "percent_group": 100.0
+            }
+          ]
+        },
+        "Actor_include_any": {
+          "cpu_us": 22169,
+          "percent_observed_cpu": 0.06399900876450677,
+          "physical_contexts_nonadditive": {
+            "Actor_collect": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 22169,
+              "percent_observed_cpu": 0.06399900876450677,
+              "percent_group": 100.0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_requests": {
+              "cpu_us": 22169,
+              "percent_observed_cpu": 0.06399900876450677,
+              "percent_group": 100.0
+            },
+            "collect_or_include_union": {
+              "cpu_us": 22169,
+              "percent_observed_cpu": 0.06399900876450677,
+              "percent_group": 100.0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor<true>>::include",
+              "cpu_us": 12576,
+              "percent_group": 56.7278632324417
+            },
+            {
+              "function": "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&voteboat::identity::OperationId>",
+              "cpu_us": 4885,
+              "percent_group": 22.03527448238531
+            },
+            {
+              "function": "<hashbrown::map::HashMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, std::hash::random::RandomState>>::insert",
+              "cpu_us": 2439,
+              "percent_group": 11.001849429383373
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::requests",
+              "cpu_us": 2269,
+              "percent_group": 10.235012855789616
+            }
+          ]
+        }
+      }
+    }
+  }
+}

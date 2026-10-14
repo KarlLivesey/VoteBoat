@@ -1,0 +1,11 @@
+from pathlib import Path
+import hashlib,json,tarfile
+j=Path('/tmp/voteboat-mac437-407d994-nVv1yY');assert (j/'STATUS').read_text().strip()=='0' and (j/'STAGE').read_text().strip()=='DONE'
+for name in ['reuse_preflight','client_outcomes','matched_fmt','matched_strict','final_guards']:assert (j/'logs'/f'{name}.exit').read_text().strip()=='0',name
+assert '8 passed; 0 failed' in (j/'logs/client_outcomes.log').read_text();final=json.loads((j/'REUSE_final.json').read_text());assert final['actual8_fmt_strict_pass']
+q={'commit':(j/'REQUIRED_COMMIT').read_text().strip(),'source_inputs':1437,'actual_new_tests':8,'failed':0,'old56_and_rootfunctional_reused_by_exact_scope':True,'actual_standalone_fmt':0,'actual_standalone_alltargetstrict':0,'original_SSH_handle':78692,'actual_terminal_tool':'f11bb7','actual_terminal_exit':0,'stage':'DONE','new_performance_artifact_or_claim':False,'source_hash_modes_before_after':True,'same435_compiler_tools_protoc':True,'mode_repair_only':json.loads((j/'TRANSFER_PERMISSION_REPAIR.json').read_text())['content_bytes_unchanged'],'no_test_or_build_restart':True}
+(j/'QUALIFICATION.json').write_text(json.dumps(q,indent=2)+'\n')
+files=[p for p in j.rglob('*') if p.is_file() and p.relative_to(j).parts[0] not in {'source','target-matched-checks','test-tmp','__pycache__'} and p.name not in {'source.tar','qualification.tgz'} and '__pycache__' not in p.parts]
+with tarfile.open(j/'qualification.tgz','w:gz') as t:
+ for p in sorted(files):assert not p.is_symlink();t.add(p,arcname=str(p.relative_to(j)),recursive=False)
+print(json.dumps(q));print('archive_regularfiles',len(files))

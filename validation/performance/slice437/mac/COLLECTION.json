@@ -1,0 +1,12 @@
+{
+  "source_transport_tar_sha256": "c5f94f9d2f99c0c91ac0ebb556c3f175082ea5ff6207e803829348280f0ec948",
+  "collected_transport_sha256": "d1b0f28e32822ada4044a929ab1b9f0331c7d05e52e249eab1983640812977a6",
+  "original_qualification_handle": 78692,
+  "actual_qualification_terminal_tool": "f11bb7",
+  "collection_original_handle": 91301,
+  "collection_actual_terminal_tool": "0f47e9",
+  "collection_actual_exit": 0,
+  "source1437_before_after": "exacthashes/fullmodes",
+  "archive": "regularmetadata/logs/commands only; nosourcetree/binaries/buildtrees/WAL",
+  "failures_preserved": "initialMac tarumask modes stripped; sourcebytesexact, exactmodeonlyrepair beforetests; no qualificationretries"
+}

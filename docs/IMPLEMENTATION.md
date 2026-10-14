@@ -33,7 +33,19 @@ guards. Both unused Waits files/layout replica are removed,8 independent control
 retained,1,432 other435 inputs unchanged; independent review has no blocker.
 Immutable435 artifacts/profiles remain the measured baseline. No new437 rate,
 prototype win, native-service speedup or macro acceptance is inferred. Publication
-through the full enabled hook follows these checks.
+through the full enabled hook is407d9942 (actual38532 exit0).
+[Mac437](../validation/performance/slice437/mac/README.md) original78692
+ends0 with8 focused outcome controls, formatting/strict and1,437 source/mode
+guards; old56/root scopes are reused through exact435 projection/tool/command
+proof. The initial tar umask error and exact mode-only repair are retained.
+No unchanged performance build, CLI, profile or benchmark was repeated.
+
+438 now selects one bounded admission-table reserve experiment. The
+[schema](../validation/performance/slice438/SCHEMA.md) precedes source editing.
+LogicalP, randomized full-ID hashing and original outcomes stay; requested
+physical reserve becomes2P. This tests possible probing/maintenance cost, not
+a proven cause or predicted gain. Proposal-buffer growth is not selected from
+its smaller/uncertain saved-profile contribution. Macro scope stays unchanged.
 
 Latest retained source is435 (`5c2390cb`), with qualified both-host20M bulk
 measurements published in`fe7f28c6`: Linux6,546,243→7,061,531 originals/s,
@@ -162,10 +174,23 @@ no cross-host CPU or allocator cause is inferred; these1048576-original
 diagnostics do not qualify sustained floors. [Every Linux trial and scope](../validation/performance/comparison426/linux/README.md),
 [fresh asserted artifacts](../validation/performance/matched426-linux/README.md).
 
+438 is implemented and locally checked: original64404 ends0 with64 existing
+matched controls, formatting/strict and1,434 source/mode guards. The sole
+production edit is initial map reserveP→2P; existing test output additionally
+reports actual dev key16/reply8/tuple32-byte layouts. Near-bound65,540 rotations
+preserve all receipts with observed insertion capacity57,344 initially and
+57,328 minimum; these capacities are not physical RSS. Independent review finds
+no blocker. The implementation's calculated large-table allocation increases
+about1.03MiB per actor (three actors), without a memory-performance claim.
+[Main evidence](../validation/performance/slice438/main/README.md) and
+[saved-profile selection](../validation/performance/slice438/profile-selection/README.md)
+retain source, commands, limits and unknowns. Checked publication and fresh
+both-host paired measurements follow; no improvement is claimed from checks.
+
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current:437 checked rollback | Restore the qualified435 client after436's measured tradeoff fails | Both-host436 bulk and singleton outcomes; exact435 implementation and immutable artifacts/profiles | Retain independent outcome controls, prove production restoration, standalone tests/format/strict and full enabled publication hook; preserve every regression | P9.0/P9.1/P9.3 |
-| Next: remaining measured copying/admission work | Reduce the next limiting stage after437 restores the measured baseline | 437 restores435 production; immutable435 profiles and exact remaining ownership contracts; confirm the measured stage before selection | One explicit schema and focused checked slice; publish and measure both hosts before selecting another change | P9.0/P9.1/P9.3 |
+| Current:438 bounded admission-table reserve | Reduce possible probe/table-maintenance work in the measured admission stage | Published437 exact435 restoration, saved435 profiles and [438 schema](../validation/performance/slice438/SCHEMA.md) | Preserve logical budget/full IDs/hasher/outcomes; focused checks and enabled hook, fresh artifacts and paired bulk/singleton on both hosts; retain or reject once | P9.0/P9.1/P9.3 |
+| Next: remaining measured work after438 decision | Reduce the next limiting stage without repeating rejected paths | Actual438 paired decision; artifact-bound profiles of the retained source and exact ownership contracts | One explicit schema and checked slice; publish and measure both hosts before selecting another change | P9.0/P9.1/P9.3 |
 | Following: bounded durable batching/overlap under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Native421 barrier evidence and unchanged publication/ticket contracts; bounded fairness schema after current measured framework stage | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual placement/barriers before changing defaults | P9.1/P9.2/P9.3 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed

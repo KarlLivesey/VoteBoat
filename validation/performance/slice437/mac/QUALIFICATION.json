@@ -1,0 +1,18 @@
+{
+  "commit": "407d9942b3d8b3a22bcaca2ac698a78f2a1867a7",
+  "source_inputs": 1437,
+  "actual_new_tests": 8,
+  "failed": 0,
+  "old56_and_rootfunctional_reused_by_exact_scope": true,
+  "actual_standalone_fmt": 0,
+  "actual_standalone_alltargetstrict": 0,
+  "original_SSH_handle": 78692,
+  "actual_terminal_tool": "f11bb7",
+  "actual_terminal_exit": 0,
+  "stage": "DONE",
+  "new_performance_artifact_or_claim": false,
+  "source_hash_modes_before_after": true,
+  "same435_compiler_tools_protoc": true,
+  "mode_repair_only": true,
+  "no_test_or_build_restart": true
+}

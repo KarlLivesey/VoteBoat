@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/tmp/voteboat-mac437-407d994-nVv1yY/verify-source.py", line 13, in <module>
+    assert oct(stat.S_IMODE(path.stat().st_mode))==source['modes'][relative],relative
+AssertionError: .githooks/pre-push

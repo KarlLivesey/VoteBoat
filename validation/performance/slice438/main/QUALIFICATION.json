@@ -1,0 +1,60 @@
+{
+  "scope": "438 singleprivateActorinitialrequestedpendingreserve2P, logicalgateP unchanged; existinglayoutdiagnostic test-only",
+  "original_handle": 64404,
+  "exit": 0,
+  "terminal": "DONE",
+  "full_standalone_tests": {
+    "passed": 64,
+    "failed": 0,
+    "whole_suite_executed_once": true,
+    "test_command_uses_nocapture": true
+  },
+  "formatter": 0,
+  "strict_all_targets_clippy": 0,
+  "source_guard": 0,
+  "source_inputs": 1434,
+  "unchanged_baseline_inputs": 1432,
+  "source_identity": "SOURCE.json",
+  "physical_modes": "SOURCE.json physical_modes",
+  "changed_paths": [
+    "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs"
+  ],
+  "new_or_deleted_modules": [],
+  "root_library_core_tests_examples_dependencies_profiles_changed": false,
+  "failures_or_retries": [],
+  "actual_dev_layout": {
+    "key_bytes": 16,
+    "reply_bytes": 8,
+    "key_reply_tuple_bytes": 32,
+    "scope": "sizeof observedstandalone dev test only; notportable constants/bucketallocation/RSS"
+  },
+  "actual_capacity_controls": [
+    {
+      "clients": 1,
+      "logical_bound": 5,
+      "requested_reserve": 10,
+      "initial_available_capacity": 14,
+      "full_drain_refill_rounds": 256,
+      "full_churn_minimum": 14,
+      "full_churn_high_water": 14,
+      "full_churn_final": 14,
+      "partial_rotations": 1024,
+      "partial_minimum": 14,
+      "partial_high_water": 14,
+      "partial_final": 14
+    },
+    {
+      "clients": 4096,
+      "logical_bound": 16385,
+      "requested_reserve": 32770,
+      "initial_available_capacity": 57344,
+      "partial_rotations": 65540,
+      "partial_minimum": 57328,
+      "partial_high_water": 57344,
+      "partial_final": 57328
+    }
+  ],
+  "performance_or_physical_memory_claim": false,
+  "pending_acceptance": "checked publication/freshassertedartifacts/Macqualification/bothhostbulk+singletonmemorylatencytradeoff"
+}
