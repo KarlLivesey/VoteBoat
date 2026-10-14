@@ -1,0 +1,21 @@
+{
+  "commit": "d4f1d39be297bda49b85923c56dbc16228bf3273",
+  "original_push_handle": 13643,
+  "actual_terminal_exit": 0,
+  "enabled_hook": ".githooks/pre-push",
+  "format_and_four_root_strict_profiles_and_standalone_strict": 0,
+  "github_main_verified_exact": true,
+  "source_restored": "retained435 Actor/checked439 replies; only two compact-key modules removed",
+  "rejected_candidate": "fc4be25b63eac6620307ef0859284f1fd83bb594",
+  "completed_paired_cases": 48,
+  "performance_improvement_claim": false,
+  "full_P9_active_and_unmet": true,
+  "mac_targeted_restoration_check": {
+    "original_handle": 31738,
+    "terminal": 0,
+    "existing_reply_tests": 8,
+    "fmt_strict_source_projection": 0,
+    "source_inputs": 1437,
+    "root_verified_payloads": 52
+  }
+}

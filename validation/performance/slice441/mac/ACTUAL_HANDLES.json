@@ -1,0 +1,20 @@
+{
+  "source_commit": "d4f1d39be297bda49b85923c56dbc16228bf3273",
+  "original_qualification_ssh_handle": 31738,
+  "qualification_actual_terminal_tool": "615876",
+  "qualification_exit": 0,
+  "remote_pid": 39915,
+  "remote_job": "/tmp/voteboat-mac441-d4f1d39-cpLN4U",
+  "collector_handle": 69205,
+  "collector_actual_terminal_tool": "78a784",
+  "collector_exit": 0,
+  "collection_handle": 43891,
+  "collection_actual_terminal_tool": "7453af",
+  "collection_exit": 0,
+  "source_assembly_tool": "b8299d",
+  "source_assembly_exit": 0,
+  "source_transfer_handle": 80707,
+  "source_transfer_exit": 0,
+  "actual_failures": [],
+  "no_retries_reruns_or_performance_claim": true
+}

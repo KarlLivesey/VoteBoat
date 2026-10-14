@@ -1,0 +1,20 @@
+{
+  "status": "PREPARED_UNPUBLISHED_REFUSED",
+  "schema": "validation/performance/slice441/SCHEMA.md",
+  "required_commit": "UNSET",
+  "runner": "target/p9/mac441/run.sh",
+  "prepared_command": "ssh karllivesey@192.168.192.76 bash <fresh-committed-441-job>/run.sh (only after publication/source archive+hash/mode guard)",
+  "actual_checks": "existing actor::tests::replies8 --nocapture, standalone fmt and strict alltargets once",
+  "root_scope": "exact435 source/config/tool/command receipts and437client8; selected439 hashes/modes+reply diagnostic exact",
+  "collector": "corrected439 separate8pass/56filtered parsing retained, no root release artifact selector used",
+  "template_hashes": {
+    "run.sh": "2d7752b1fd37001e8eef59553db5c61aa757e6cdc186ba52ce198665d6c11f98",
+    "prepare-source.py": "deba580471337adb65e8c1f97fdc1469002488fd256bb4070d4238865b64ea26",
+    "verify-source.py": "c0fff0ab1c487cb8196ff5f083869cf82f6003bd9294a5940f822c702a548f71",
+    "collect.script.txt": "a7dad3e59907c7de8928d9c6a5680d0e8513afbe6479ab015e72538a3360f6d3",
+    "ROOT_REUSE.json": "743380ab42be810b0221d46789687b006add5c74dad62c18f8b5a7764ec690b4"
+  },
+  "syntax": "three Python AST and bash-n pass",
+  "unpublished_refusal_exit": 1,
+  "no_source_assembly_remote_commands_builds_or_timing": true
+}

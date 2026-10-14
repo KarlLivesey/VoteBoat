@@ -307,11 +307,25 @@ Unchanged root scopes and immutable435 performance artifacts/profiles are reused
 no441 rate or native-service gain is claimed. Full hook publication and focused
 Mac qualification remain the final rollback steps.
 
+441 restoration is published as`d4f1d39b`; original push13643 actually exits0
+through the full enabled formatting/four root strict profiles/standalone hook,
+and GitHub main matches exactly. [Publication receipt](../validation/performance/slice441/publication/RECEIPT.json).
+All completed440 evidence and the rejection ledger ship with the source restoration.
+
+[Mac441 qualification](../validation/performance/slice441/mac/README.md)
+original31738 actually ends0/DONE: existing replies8, formatting/strict and
+1,437 source hashes/modes pass; selected source equals checked439 and the exact435
+production projection. Root verifies all52 archived payloads. Compiler/protoc and
+unchanged root/old controls are reused through exact scope receipts, with no full
+suite, performance build, CLI, profile or benchmark rerun. This completes the
+checked restoration; immutable435 remains the measured baseline and no441 rate is
+claimed. Full P9 minimum margins/durable/headroom/fairness/placement/P8 remain open.
+
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current:441 checked restoration | Restore retained435 after440 has no useful both-host tradeoff | Completed48 paired cases and [441 schema](../validation/performance/slice441/SCHEMA.md) | Exact production/test projection, focused replies/strict/full hook and targeted Mac checks; preserve every440 result and failure | P9.0/P9.1/P9.3 |
-| Next: bounded Counter ready admission context | Build pending reservation state once per collected batch | Checked441 restoration and actual440 admission audit; separate optional/default-fallback application schema | Serial-equivalent errors/receipts/partial prefixes and conformance; checked publication and measured real durable/hot-cold workloads on both hosts | P9.1/P9.2/P9.3 |
-| Following: bounded persistence overlap and placement | Expand sustained useful capacity across existing composition contracts | Measured batching/fairness and a typed partial-progress/durability dependency plan | Exact original outcomes, crash/retry/fencing and active maintenance; offered-load/headroom, shared barriers, placement and P8 costs remain required | P9.1/P9.2/P9.3/P9.4 |
+| Current: measured Counter ready admission work | Remove repeated reservation scans if the native profile confirms material cost | Checked441 restoration, actual440 admission audit, compact native CPU data and separate optional/default-fallback application schema before editing | Serial-equivalent errors/receipts/partial prefixes and conformance; checked publication and paired real durable/hot-cold rates/latency on both hosts | P9.1/P9.2/P9.3 |
+| Next: bounded persistence overlap and placement | Expand sustained useful capacity across existing composition contracts | Measured batching/fairness and a typed partial-progress/durability dependency plan | Exact original outcomes, crash/retry/fencing and active maintenance; shared barriers, placement and P8 costs remain required | P9.1/P9.2/P9.3/P9.4 |
+| Following: full framework curve and offered-load qualification | Test remaining minimum cells and sustainable headroom | Qualified measured optimizations, immutable pinned reference, matching host/build/workload boundaries | All seven cells on both hosts, repeated sustained rates and p99, bounded physical memory/debt, refusals and hot/cold fairness; preserve raw losses | P9.0/P9.1/P9.3 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
 comparison or short diagnostics. All seven one-group healthy-margin cells on
