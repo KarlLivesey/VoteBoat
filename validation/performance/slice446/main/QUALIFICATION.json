@@ -1,0 +1,18 @@
+{
+  "original_handle": 45286,
+  "terminal_exit": 0,
+  "tests": {
+    "passed": 69,
+    "existing": 65,
+    "new": 4,
+    "seconds": 1.6
+  },
+  "fmt_exit": 0,
+  "strict_all_target_exit": 0,
+  "source_inputs": 1439,
+  "source_guard_exit": 0,
+  "unchanged_root_scope": 1413,
+  "patch_sha256": "3b88c2f13a6dc544adf383e6962a4f081c761803843758f3e279d42066598975",
+  "candidate_performance_unmeasured": true,
+  "Pi_campaign_stopped": true
+}

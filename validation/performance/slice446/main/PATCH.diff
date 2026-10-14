@@ -1,0 +1,90 @@
+diff --git a/benchmarks/matched/src/voteboat_engine/actor.rs b/benchmarks/matched/src/voteboat_engine/actor.rs
+index c00cd62c..8a80ca4c 100644
+--- a/benchmarks/matched/src/voteboat_engine/actor.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor.rs
+@@ -5,16 +5,15 @@ use crate::{
+     attribution::{Attribution, Phase, Recorder},
+     Maintenance,
+ };
+-use std::{
+-    collections::{HashMap, VecDeque},
+-    mem::size_of,
+-    time::Instant,
+-};
++use std::{collections::VecDeque, mem::size_of, time::Instant};
+ use voteboat::{application::StateMachine, snapshot::*};
+ 
+ #[cfg(test)]
+ mod tests;
+ 
++mod pending_replies;
++use pending_replies::PendingReplies;
++
+ pub(super) struct Parts<const TRACE: bool = false> {
+     pub slot: usize,
+     pub core: Raft,
+@@ -39,7 +38,7 @@ pub(super) struct Parts<const TRACE: bool = false> {
+ pub(super) struct Actor<const TRACE: bool = false> {
+     parts: Parts<TRACE>,
+     attribution: Recorder<TRACE>,
+-    pending: HashMap<OperationId, Reply>,
++    pending: PendingReplies<Reply>,
+     deferred: Option<Request>,
+     last_snapshot_at: u64,
+     last_contact: Instant,
+@@ -48,7 +47,7 @@ pub(super) struct Actor<const TRACE: bool = false> {
+ }
+ impl<const TRACE: bool> Actor<TRACE> {
+     pub fn new(parts: Parts<TRACE>) -> Self {
+-        let pending = HashMap::with_capacity(parts.settings.clients * 4 + 1);
++        let pending = PendingReplies::new(parts.settings.clients * 4 + 1);
+         Self {
+             parts,
+             attribution: Recorder::default(),
+@@ -360,7 +359,7 @@ impl<const TRACE: bool> Actor<TRACE> {
+     }
+     fn apply_entries(
+         application: &mut Noop,
+-        pending: &mut HashMap<OperationId, Reply>,
++        pending: &mut PendingReplies<Reply>,
+         attribution: &Recorder<TRACE>,
+         slot: usize,
+         entries: &[LogEntry],
+@@ -388,7 +387,7 @@ impl<const TRACE: bool> Actor<TRACE> {
+         Self::deliver_results(&mut self.pending, results)
+     }
+     fn deliver_results(
+-        pending: &mut HashMap<OperationId, Reply>,
++        pending: &mut PendingReplies<Reply>,
+         results: Vec<OperationId>,
+     ) -> Result<(), Failure> {
+         for operation in results {
+diff --git a/benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs b/benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs
+index d116d10b..76a63956 100644
+--- a/benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs
+@@ -160,7 +160,7 @@ fn checked_budget(clients: usize) {
+     received(admitted_waits, &ids);
+     assert!(actor.pending.is_empty());
+     println!(
+-        "layout_scope=actual_standalone_dev_test clients={clients} logical_bound={bound} available_insert_capacity={} key_bytes={} reply_bytes={} key_reply_tuple_bytes={}",
++        "layout_scope=actual_standalone_dev_test clients={clients} logical_bound={bound} cohort_available_insert_capacity={} key_bytes={} reply_bytes={} legacy_key_reply_tuple_bytes={}",
+         actor.pending.capacity(),
+         size_of::<OperationId>(),
+         size_of::<Reply>(),
+@@ -232,7 +232,7 @@ fn bounded_churn_preserves_receipts_and_reuses_retained_capacity() {
+         // Available insertion capacity may decrease with tombstones despite retained allocation.
+         minimum_capacity = minimum_capacity.min(actor.pending.capacity());
+     }
+-    println!("logical_bound=5 rounds=256 initial_capacity={initial_capacity} minimum_available_capacity={minimum_capacity} high_water={high_water} final_available_capacity={}", actor.pending.capacity());
++    println!("logical_bound=5 rounds=256 initial_cohort_capacity={initial_capacity} minimum_available_cohort_capacity={minimum_capacity} cohort_capacity_high_water={high_water} final_available_cohort_capacity={}", actor.pending.capacity());
+ }
+ 
+ #[test]
+@@ -278,5 +278,5 @@ fn checked_partial_rotation(clients: usize) {
+     }
+     assert!(actor.pending.is_empty());
+     minimum_capacity = minimum_capacity.min(actor.pending.capacity());
+-    println!("partial_rotation clients={clients} logical_bound={bound} rounds={rounds} initial_capacity={initial_capacity} minimum_available_capacity={minimum_capacity} high_water={high_water} final_available_capacity={}", actor.pending.capacity());
++    println!("partial_rotation clients={clients} logical_bound={bound} rounds={rounds} initial_cohort_capacity={initial_capacity} minimum_available_cohort_capacity={minimum_capacity} cohort_capacity_high_water={high_water} final_available_cohort_capacity={}", actor.pending.capacity());
+ }

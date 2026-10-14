@@ -450,10 +450,21 @@ at912cdf4 through the full enabled hook; it validates rounding intervals exactly
 with actual saved outputs rechecked and no workload/build repeat. No physical
 RSS/debt/refusal,20M acceptance or framework-floor claim follows.
 
+
+446 qualification completes69 matched controls in1.60s, with formatting, strict
+all-target Clippy and1439 source/hash/mode guards zero. The1413 inputs outside
+matched source are exact, so unrelated root functional suites are not repeated.
+AtP16385, sparse arena/free capacities remain16385 through eight churn rounds,
+reserving65540 reply slots; actual dev Block<Reply> is72 bytes. Dictionary
+available capacity is reported separately and is not physical RSS. Independent
+review finds no blocker; paired performance remains unmeasured.
+[Main proof](../validation/performance/slice446/main/README.md),
+[review](../validation/performance/slice446/REVIEW.md).
+
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: select and qualify the next measured stage | Use445 batching evidence and preserve the user-stopped Pi results | Checked444 pause/resume, partial singleton Pi evidence,36 native policy trials | Publish exact native rates/tails/physical counts; retain Linux variation/TCP regressions and all Pi partial outcomes; choose from measured remaining costs without restarting the cancelled test | P9.0/P9.1/P9.3 |
-| Next: sustained mixed-load batching and headroom | Qualify batching without starving cold groups or concealing refusals | Qualified64-wide measurements and bounded hot/cold/skew workload/placement schema | Actual per-group completed rates/tails/refusals, bounded physical memory/debt, active maintenance/catch-up; fairness before changing defaults | P9.1/P9.2/P9.3 |
+| Current:446 four-slot pending reply cohorts | Reduce measured per-original lookup work while preserving every outcome | Retained435 profiles and [446 ownership/bounds schema](../validation/performance/slice446/SCHEMA.md);445 and stopped Pi evidence published at5a5a866b | Independent HashMap oracle, full128-bit IDs, duplicates/error prefixes/cache reuse/drop ownership and sparse backing-capacity bounds; matched controls/strict checks zero; publish, then fresh Linux/Mac artifacts and paired20M bulk/1M singleton; retain or reject from measured tradeoffs | P9.0/P9.1 |
+| Next: sustained mixed-load batching and headroom | Qualify batching without starving cold groups or concealing refusals | Qualified64-wide native measurements,446 decision and bounded hot/cold/skew workload/placement schema | Actual per-group completed rates/tails/refusals, bounded physical memory/debt, active maintenance/catch-up; fairness before changing defaults | P9.1/P9.2/P9.3 |
 | Following: bounded persistence overlap and full qualification | Reduce remaining serial waits and test all P9 requirements | Measured barrier/batching limits and typed partial-progress/durability plan | All seven framework cells on both hosts, real durable headroom/placement/shared barriers and P8 costs; original outcomes/crash/retry/fencing preserved | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed

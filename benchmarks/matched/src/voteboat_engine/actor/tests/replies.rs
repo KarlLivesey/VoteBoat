@@ -160,7 +160,7 @@ fn checked_budget(clients: usize) {
     received(admitted_waits, &ids);
     assert!(actor.pending.is_empty());
     println!(
-        "layout_scope=actual_standalone_dev_test clients={clients} logical_bound={bound} available_insert_capacity={} key_bytes={} reply_bytes={} key_reply_tuple_bytes={}",
+        "layout_scope=actual_standalone_dev_test clients={clients} logical_bound={bound} cohort_available_insert_capacity={} key_bytes={} reply_bytes={} legacy_key_reply_tuple_bytes={}",
         actor.pending.capacity(),
         size_of::<OperationId>(),
         size_of::<Reply>(),
@@ -232,7 +232,7 @@ fn bounded_churn_preserves_receipts_and_reuses_retained_capacity() {
         // Available insertion capacity may decrease with tombstones despite retained allocation.
         minimum_capacity = minimum_capacity.min(actor.pending.capacity());
     }
-    println!("logical_bound=5 rounds=256 initial_capacity={initial_capacity} minimum_available_capacity={minimum_capacity} high_water={high_water} final_available_capacity={}", actor.pending.capacity());
+    println!("logical_bound=5 rounds=256 initial_cohort_capacity={initial_capacity} minimum_available_cohort_capacity={minimum_capacity} cohort_capacity_high_water={high_water} final_available_cohort_capacity={}", actor.pending.capacity());
 }
 
 #[test]
@@ -278,5 +278,5 @@ fn checked_partial_rotation(clients: usize) {
     }
     assert!(actor.pending.is_empty());
     minimum_capacity = minimum_capacity.min(actor.pending.capacity());
-    println!("partial_rotation clients={clients} logical_bound={bound} rounds={rounds} initial_capacity={initial_capacity} minimum_available_capacity={minimum_capacity} high_water={high_water} final_available_capacity={}", actor.pending.capacity());
+    println!("partial_rotation clients={clients} logical_bound={bound} rounds={rounds} initial_cohort_capacity={initial_capacity} minimum_available_cohort_capacity={minimum_capacity} cohort_capacity_high_water={high_water} final_available_cohort_capacity={}", actor.pending.capacity());
 }

@@ -1,0 +1,364 @@
+diff --git a/benchmarks/matched/src/voteboat_engine/actor.rs b/benchmarks/matched/src/voteboat_engine/actor.rs
+index c00cd62c..8a80ca4c 100644
+--- a/benchmarks/matched/src/voteboat_engine/actor.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor.rs
+@@ -5,16 +5,15 @@ use crate::{
+     attribution::{Attribution, Phase, Recorder},
+     Maintenance,
+ };
+-use std::{
+-    collections::{HashMap, VecDeque},
+-    mem::size_of,
+-    time::Instant,
+-};
++use std::{collections::VecDeque, mem::size_of, time::Instant};
+ use voteboat::{application::StateMachine, snapshot::*};
+ 
+ #[cfg(test)]
+ mod tests;
+ 
++mod pending_replies;
++use pending_replies::PendingReplies;
++
+ pub(super) struct Parts<const TRACE: bool = false> {
+     pub slot: usize,
+     pub core: Raft,
+@@ -39,7 +38,7 @@ pub(super) struct Parts<const TRACE: bool = false> {
+ pub(super) struct Actor<const TRACE: bool = false> {
+     parts: Parts<TRACE>,
+     attribution: Recorder<TRACE>,
+-    pending: HashMap<OperationId, Reply>,
++    pending: PendingReplies<Reply>,
+     deferred: Option<Request>,
+     last_snapshot_at: u64,
+     last_contact: Instant,
+@@ -48,7 +47,7 @@ pub(super) struct Actor<const TRACE: bool = false> {
+ }
+ impl<const TRACE: bool> Actor<TRACE> {
+     pub fn new(parts: Parts<TRACE>) -> Self {
+-        let pending = HashMap::with_capacity(parts.settings.clients * 4 + 1);
++        let pending = PendingReplies::new(parts.settings.clients * 4 + 1);
+         Self {
+             parts,
+             attribution: Recorder::default(),
+@@ -360,7 +359,7 @@ impl<const TRACE: bool> Actor<TRACE> {
+     }
+     fn apply_entries(
+         application: &mut Noop,
+-        pending: &mut HashMap<OperationId, Reply>,
++        pending: &mut PendingReplies<Reply>,
+         attribution: &Recorder<TRACE>,
+         slot: usize,
+         entries: &[LogEntry],
+@@ -388,7 +387,7 @@ impl<const TRACE: bool> Actor<TRACE> {
+         Self::deliver_results(&mut self.pending, results)
+     }
+     fn deliver_results(
+-        pending: &mut HashMap<OperationId, Reply>,
++        pending: &mut PendingReplies<Reply>,
+         results: Vec<OperationId>,
+     ) -> Result<(), Failure> {
+         for operation in results {
+diff --git a/benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs b/benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs
+index d116d10b..76a63956 100644
+--- a/benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs
+@@ -160,7 +160,7 @@ fn checked_budget(clients: usize) {
+     received(admitted_waits, &ids);
+     assert!(actor.pending.is_empty());
+     println!(
+-        "layout_scope=actual_standalone_dev_test clients={clients} logical_bound={bound} available_insert_capacity={} key_bytes={} reply_bytes={} key_reply_tuple_bytes={}",
++        "layout_scope=actual_standalone_dev_test clients={clients} logical_bound={bound} cohort_available_insert_capacity={} key_bytes={} reply_bytes={} legacy_key_reply_tuple_bytes={}",
+         actor.pending.capacity(),
+         size_of::<OperationId>(),
+         size_of::<Reply>(),
+@@ -232,7 +232,7 @@ fn bounded_churn_preserves_receipts_and_reuses_retained_capacity() {
+         // Available insertion capacity may decrease with tombstones despite retained allocation.
+         minimum_capacity = minimum_capacity.min(actor.pending.capacity());
+     }
+-    println!("logical_bound=5 rounds=256 initial_capacity={initial_capacity} minimum_available_capacity={minimum_capacity} high_water={high_water} final_available_capacity={}", actor.pending.capacity());
++    println!("logical_bound=5 rounds=256 initial_cohort_capacity={initial_capacity} minimum_available_cohort_capacity={minimum_capacity} cohort_capacity_high_water={high_water} final_available_cohort_capacity={}", actor.pending.capacity());
+ }
+ 
+ #[test]
+@@ -278,5 +278,5 @@ fn checked_partial_rotation(clients: usize) {
+     }
+     assert!(actor.pending.is_empty());
+     minimum_capacity = minimum_capacity.min(actor.pending.capacity());
+-    println!("partial_rotation clients={clients} logical_bound={bound} rounds={rounds} initial_capacity={initial_capacity} minimum_available_capacity={minimum_capacity} high_water={high_water} final_available_capacity={}", actor.pending.capacity());
++    println!("partial_rotation clients={clients} logical_bound={bound} rounds={rounds} initial_cohort_capacity={initial_capacity} minimum_available_cohort_capacity={minimum_capacity} cohort_capacity_high_water={high_water} final_available_cohort_capacity={}", actor.pending.capacity());
+ }
+diff --git a/benchmarks/matched/src/voteboat_engine/actor/pending_replies.rs b/benchmarks/matched/src/voteboat_engine/actor/pending_replies.rs
+new file mode 100644
+index 00000000..cbe81ca8
+--- /dev/null
++++ b/benchmarks/matched/src/voteboat_engine/actor/pending_replies.rs
+@@ -0,0 +1,110 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use std::collections::{hash_map::Entry, HashMap};
++use voteboat::identity::OperationId;
++
++#[cfg(test)]
++mod tests;
++
++struct Block<T> {
++    slots: [Option<T>; 4],
++    occupied: u8,
++}
++
++impl<T> Block<T> {
++    fn new() -> Self {
++        Self {
++            slots: std::array::from_fn(|_| None),
++            occupied: 0,
++        }
++    }
++}
++
++/// Actor-owned replies. The cohort and slot together retain every identity bit.
++pub(super) struct PendingReplies<T> {
++    index: HashMap<u128, usize>,
++    blocks: Vec<Block<T>>,
++    free: Vec<usize>,
++    cached: Option<(u128, usize)>,
++    occupied: usize,
++}
++
++impl<T> PendingReplies<T> {
++    pub fn new(maximum_originals: usize) -> Self {
++        Self {
++            index: HashMap::with_capacity(maximum_originals),
++            // Reserve the worst-case sparse shape; the actor retains its logical gate.
++            blocks: Vec::with_capacity(maximum_originals),
++            free: Vec::with_capacity(maximum_originals),
++            cached: None,
++            occupied: 0,
++        }
++    }
++
++    pub fn len(&self) -> usize {
++        self.occupied
++    }
++
++    #[cfg(test)]
++    pub fn is_empty(&self) -> bool {
++        self.occupied == 0
++    }
++
++    #[cfg(test)]
++    pub fn capacity(&self) -> usize {
++        // Dictionary available capacity counts cohorts, not individual reply slots.
++        self.index.capacity()
++    }
++
++    pub fn insert(&mut self, operation: OperationId, value: T) -> Option<T> {
++        let (key, slot) = location(operation);
++        let index = match self.cached {
++            Some((cached_key, index)) if cached_key == key => index,
++            _ => match self.index.entry(key) {
++                Entry::Occupied(entry) => *entry.get(),
++                Entry::Vacant(entry) => {
++                    let index = self.free.pop().unwrap_or_else(|| {
++                        let index = self.blocks.len();
++                        self.blocks.push(Block::new());
++                        index
++                    });
++                    debug_assert_eq!(self.blocks[index].occupied, 0);
++                    entry.insert(index);
++                    index
++                }
++            },
++        };
++        self.cached = Some((key, index));
++        let block = &mut self.blocks[index];
++        let previous = block.slots[slot].replace(value);
++        if previous.is_none() {
++            block.occupied |= 1 << slot;
++            self.occupied += 1;
++        }
++        previous
++    }
++
++    pub fn remove(&mut self, operation: &OperationId) -> Option<T> {
++        let (key, slot) = location(*operation);
++        let index = match self.cached {
++            Some((cached_key, index)) if cached_key == key => index,
++            _ => *self.index.get(&key)?,
++        };
++        let block = &mut self.blocks[index];
++        let value = block.slots[slot].take()?;
++        block.occupied &= !(1 << slot);
++        self.occupied -= 1;
++        self.cached = Some((key, index));
++        if block.occupied == 0 {
++            self.index.remove(&key);
++            self.cached = None;
++            self.free.push(index);
++        }
++        Some(value)
++    }
++}
++
++fn location(operation: OperationId) -> (u128, usize) {
++    let offset = operation.get() - 1;
++    (offset >> 2, (offset & 3) as usize)
++}
+diff --git a/benchmarks/matched/src/voteboat_engine/actor/pending_replies/tests.rs b/benchmarks/matched/src/voteboat_engine/actor/pending_replies/tests.rs
+new file mode 100644
+index 00000000..8a70a7ae
+--- /dev/null
++++ b/benchmarks/matched/src/voteboat_engine/actor/pending_replies/tests.rs
+@@ -0,0 +1,152 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use std::sync::{
++    atomic::{AtomicUsize, Ordering},
++    Arc,
++};
++
++fn operation(value: u128) -> OperationId {
++    OperationId::new(value).unwrap()
++}
++
++#[test]
++fn full_identity_trace_matches_independent_hash_map() {
++    let mut ids = vec![1, 4, 5, u128::MAX, u128::MAX - 1, u128::MAX - 2];
++    ids.extend((0..128).map(|bit| 1_u128 << ((bit * 73) % 128)));
++    for cohort in 1..=32_u128 {
++        let base = (cohort << 96) | (cohort << 32);
++        ids.extend((1..=4).rev().map(|slot| base + slot));
++    }
++    let mut replies = PendingReplies::new(ids.len());
++    let mut oracle = HashMap::new();
++    for turn in 0..8192_u64 {
++        let id = operation(ids[(turn as usize * 101) % ids.len()]);
++        if turn % 7 < 3 {
++            assert_eq!(replies.remove(&id), oracle.remove(&id));
++        } else {
++            assert_eq!(replies.insert(id, turn), oracle.insert(id, turn));
++        }
++        assert_eq!(replies.len(), oracle.len());
++        assert_eq!(replies.is_empty(), oracle.is_empty());
++    }
++    for value in ids.iter().rev() {
++        let id = operation(*value);
++        assert_eq!(replies.remove(&id), oracle.remove(&id));
++        assert_eq!(replies.len(), oracle.len());
++    }
++    assert!(oracle.is_empty());
++    assert!(replies.is_empty());
++}
++
++#[test]
++fn missing_slots_preserve_state_and_reused_indices_never_alias_old_identity() {
++    let mut replies = PendingReplies::new(5);
++    assert_eq!(replies.insert(operation(1), 10), None);
++    assert_eq!(replies.insert(operation(4), 40), None);
++    let cache = replies.cached;
++    assert_eq!(replies.remove(&operation(2)), None);
++    assert_eq!(replies.remove(&operation(5)), None);
++    assert_eq!(replies.cached, cache);
++    assert_eq!(replies.len(), 2);
++    assert_eq!(replies.remove(&operation(4)), Some(40));
++    assert_eq!(replies.remove(&operation(1)), Some(10));
++    assert_eq!(replies.cached, None);
++    assert_eq!(replies.index.len(), 0);
++    assert_eq!(replies.free.len(), 1);
++    assert_eq!(replies.insert(operation(u128::MAX), 90), None);
++    assert_eq!(replies.blocks.len(), 1);
++    assert!(replies.free.is_empty());
++    let cache = replies.cached;
++    assert_eq!(replies.remove(&operation(1)), None);
++    assert_eq!(replies.remove(&operation(4)), None);
++    assert_eq!(replies.cached, cache);
++    assert_eq!(replies.remove(&operation(u128::MAX)), Some(90));
++    assert!(replies.is_empty());
++}
++
++struct Value {
++    token: usize,
++    drops: Arc<Vec<AtomicUsize>>,
++}
++
++impl Drop for Value {
++    fn drop(&mut self) {
++        self.drops[self.token].fetch_add(1, Ordering::Relaxed);
++    }
++}
++
++#[test]
++fn replacement_removal_and_table_drop_transfer_each_value_exactly_once() {
++    let drops: Arc<Vec<_>> = Arc::new((0..4).map(|_| AtomicUsize::new(0)).collect());
++    let value = |token| Value {
++        token,
++        drops: drops.clone(),
++    };
++    let mut replies = PendingReplies::new(5);
++    assert!(replies.insert(operation(1), value(0)).is_none());
++    let replaced = replies.insert(operation(1), value(1)).unwrap();
++    assert_eq!(replaced.token, 0);
++    assert_eq!(replies.len(), 1);
++    assert!(drops.iter().all(|value| value.load(Ordering::Relaxed) == 0));
++    drop(replaced);
++    assert_eq!(drops[0].load(Ordering::Relaxed), 1);
++    assert!(replies.insert(operation(4), value(2)).is_none());
++    assert!(replies.insert(operation(5), value(3)).is_none());
++    let removed = replies.remove(&operation(4)).unwrap();
++    assert_eq!(removed.token, 2);
++    assert_eq!(drops[2].load(Ordering::Relaxed), 0);
++    assert!(replies.remove(&operation(4)).is_none());
++    drop(replies);
++    assert_eq!(drops[1].load(Ordering::Relaxed), 1);
++    assert_eq!(drops[3].load(Ordering::Relaxed), 1);
++    assert_eq!(drops[2].load(Ordering::Relaxed), 0);
++    drop(removed);
++    assert!(drops.iter().all(|value| value.load(Ordering::Relaxed) == 1));
++}
++
++#[test]
++fn maximum_sparse_occupancy_and_churn_keep_backing_slots_and_free_list_bounded() {
++    sparse_churn(5);
++    sparse_churn(16385);
++}
++
++fn sparse_churn(bound: usize) {
++    let mut replies = PendingReplies::new(bound);
++    let arena_capacity = replies.blocks.capacity();
++    let free_capacity = replies.free.capacity();
++    assert!(arena_capacity <= bound);
++    assert!(free_capacity <= bound);
++    let mut cohort_high_water = replies.index.capacity();
++    for round in 1..=8_u128 {
++        let ids: Vec<_> = (1..=bound)
++            .map(|value| operation((round << 112) | ((value as u128) << 64) | 1))
++            .collect();
++        for (value, &id) in ids.iter().enumerate() {
++            assert_eq!(replies.insert(id, value), None);
++            assert_eq!(replies.len(), value + 1);
++        }
++        assert_eq!(replies.index.len(), bound);
++        assert_eq!(replies.blocks.len(), bound);
++        assert!(replies.free.is_empty());
++        assert_eq!(replies.blocks.capacity(), arena_capacity);
++        cohort_high_water = cohort_high_water.max(replies.index.capacity());
++        for (value, id) in ids.iter().enumerate().rev() {
++            assert_eq!(replies.remove(id), Some(value));
++        }
++        assert!(replies.is_empty());
++        assert!(replies.index.is_empty());
++        assert_eq!(replies.free.len(), bound);
++        assert_eq!(replies.free.capacity(), free_capacity);
++        assert!(replies
++            .blocks
++            .iter()
++            .all(|block| { block.occupied == 0 && block.slots.iter().all(Option::is_none) }));
++    }
++    println!(
++        "pending_cohort_scope=actual_standalone_dev bound={bound} sparse_rounds=8 arena_capacity={arena_capacity} free_capacity={free_capacity} cohort_available_capacity_high_water={cohort_high_water} block_bytes={} reply_slots_reserved={} index_tuple_bytes={}",
++        std::mem::size_of::<Block<super::super::Reply>>(),
++        arena_capacity * 4,
++        std::mem::size_of::<(u128, usize)>(),
++    );
++}

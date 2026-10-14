@@ -5,15 +5,14 @@ use crate::{
     attribution::{Attribution, Phase, Recorder},
     Maintenance,
 };
-use std::{
-    collections::{HashMap, VecDeque},
-    mem::size_of,
-    time::Instant,
-};
+use std::{collections::VecDeque, mem::size_of, time::Instant};
 use voteboat::{application::StateMachine, snapshot::*};
 
 #[cfg(test)]
 mod tests;
+
+mod pending_replies;
+use pending_replies::PendingReplies;
 
 pub(super) struct Parts<const TRACE: bool = false> {
     pub slot: usize,
@@ -39,7 +38,7 @@ pub(super) struct Parts<const TRACE: bool = false> {
 pub(super) struct Actor<const TRACE: bool = false> {
     parts: Parts<TRACE>,
     attribution: Recorder<TRACE>,
-    pending: HashMap<OperationId, Reply>,
+    pending: PendingReplies<Reply>,
     deferred: Option<Request>,
     last_snapshot_at: u64,
     last_contact: Instant,
@@ -48,7 +47,7 @@ pub(super) struct Actor<const TRACE: bool = false> {
 }
 impl<const TRACE: bool> Actor<TRACE> {
     pub fn new(parts: Parts<TRACE>) -> Self {
-        let pending = HashMap::with_capacity(parts.settings.clients * 4 + 1);
+        let pending = PendingReplies::new(parts.settings.clients * 4 + 1);
         Self {
             parts,
             attribution: Recorder::default(),
@@ -360,7 +359,7 @@ impl<const TRACE: bool> Actor<TRACE> {
     }
     fn apply_entries(
         application: &mut Noop,
-        pending: &mut HashMap<OperationId, Reply>,
+        pending: &mut PendingReplies<Reply>,
         attribution: &Recorder<TRACE>,
         slot: usize,
         entries: &[LogEntry],
@@ -388,7 +387,7 @@ impl<const TRACE: bool> Actor<TRACE> {
         Self::deliver_results(&mut self.pending, results)
     }
     fn deliver_results(
-        pending: &mut HashMap<OperationId, Reply>,
+        pending: &mut PendingReplies<Reply>,
         results: Vec<OperationId>,
     ) -> Result<(), Failure> {
         for operation in results {
