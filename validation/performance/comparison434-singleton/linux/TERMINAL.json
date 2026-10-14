@@ -1,0 +1,38 @@
+{
+  "original_session": 99142,
+  "actual_exit": 0,
+  "driver_status": "0",
+  "driver_stage": "DONE",
+  "cases": 12,
+  "failures": [],
+  "requested_actual_originals_and_requests": 1048576,
+  "warmup": 1024,
+  "clients": 1,
+  "batch": 1,
+  "frontiers": [
+    1049601,
+    1049601,
+    1049601
+  ],
+  "case_exits": {
+    "baseline-c1-b1-t1.exit": 0,
+    "baseline-c1-b1-t2.exit": 0,
+    "baseline-c1-b1-t3.exit": 0,
+    "candidate-c1-b1-t1.exit": 0,
+    "candidate-c1-b1-t2.exit": 0,
+    "candidate-c1-b1-t3.exit": 0,
+    "on-c1-b1-t1.exit": 0,
+    "on-c1-b1-t2.exit": 0,
+    "on-c1-b1-t3.exit": 0,
+    "openraft-c1-b1-t1.exit": 0,
+    "openraft-c1-b1-t2.exit": 0,
+    "openraft-c1-b1-t3.exit": 0
+  },
+  "before_guard": "{\"baseline\": {\"artifacts\": [\"bench_minimal\", \"openraft\", \"voteboat\", \"voteboat-matched-framework\"], \"checks\": \"all frozen source, artifact, driver and applicable compiler guards pass\", \"mode\": \"asserted_release\", \"source_inputs\": 1427}, \"candidate\": {\"artifacts\": [\"bench_minimal\", \"openraft\", \"voteboat\", \"voteboat-matched-framework\"], \"checks\": \"all frozen source, artifact, driver and applicable compiler guards pass\", \"mode\": \"asserted_release\", \"source_inputs\": 1430}}\n",
+  "after_guard": "{\"baseline\": {\"artifacts\": [\"bench_minimal\", \"openraft\", \"voteboat\", \"voteboat-matched-framework\"], \"checks\": \"all frozen source, artifact, driver and applicable compiler guards pass\", \"mode\": \"asserted_release\", \"source_inputs\": 1427}, \"candidate\": {\"artifacts\": [\"bench_minimal\", \"openraft\", \"voteboat\", \"voteboat-matched-framework\"], \"checks\": \"all frozen source, artifact, driver and applicable compiler guards pass\", \"mode\": \"asserted_release\", \"source_inputs\": 1430}}\n",
+  "artifacts": "Immutableexistingfresh431baseline/434candidate, no rebuild/source/profilechange",
+  "root_data_push_actual_terminal": 21907,
+  "no_benchmark_reruns": true,
+  "no_production_or_bulk_archive_changes": true,
+  "source_optimization_or_profile_recording": false
+}

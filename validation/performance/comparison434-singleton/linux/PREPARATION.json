@@ -1,0 +1,22 @@
+{
+  "existing_artifacts/compiler/source/locks/profile_identical_bulk434": true,
+  "config_sha256": "c68e0d1d3ab639c2b146593df95b4810fe756d168c45bf073075b49b7d8099cd",
+  "driver_sha_scope": "Onlynewseparatecopiedrunner/checkerscope/hashnames, no mutableartifacts/sourcechanges",
+  "setup_exit": 0,
+  "requested_and_actual": 1048576,
+  "clients": 1,
+  "batch": 1,
+  "requests": 1048576,
+  "warmup": 1024,
+  "frontiers": [
+    1049601,
+    1049601,
+    1049601
+  ],
+  "cases": 12,
+  "root_data_push_actual_terminal": {
+    "session": 21907,
+    "exit": 0
+  },
+  "timing_started": false
+}

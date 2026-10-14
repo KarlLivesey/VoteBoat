@@ -1,0 +1,139 @@
+{
+  "scope": "Eligible singleton after bothhost bulk retained; three rotating one-million-original paired diagnostics. Private matched host change; not sustained full curve/margin/durable/P8 acceptance. Bulk archive unchanged.",
+  "cases": 12,
+  "failures": [],
+  "variants": {
+    "baseline": {
+      "rates": [
+        57791.33728893301,
+        55149.46524338562,
+        55641.841746091006
+      ],
+      "p50_ms": [
+        0.016875,
+        0.017667,
+        0.017584
+      ],
+      "p99_ms": [
+        0.030917,
+        0.033584,
+        0.03175
+      ],
+      "median_rates": 55641.841746091006,
+      "median_p50_ms": 0.017584,
+      "median_p99_ms": 0.03175
+    },
+    "candidate": {
+      "rates": [
+        58892.30948735326,
+        56386.79924285889,
+        55585.885605587006
+      ],
+      "p50_ms": [
+        0.016583,
+        0.017375,
+        0.017583
+      ],
+      "p99_ms": [
+        0.030292,
+        0.031333,
+        0.03175
+      ],
+      "median_rates": 56386.79924285889,
+      "median_p50_ms": 0.017375,
+      "median_p99_ms": 0.031333
+    },
+    "on": {
+      "rates": [
+        53690.445491768965,
+        51367.235717398,
+        50663.917881124005
+      ],
+      "p50_ms": [
+        0.018167,
+        0.018959,
+        0.019125
+      ],
+      "p99_ms": [
+        0.032,
+        0.033125,
+        0.035917
+      ],
+      "median_rates": 51367.235717398,
+      "median_p50_ms": 0.018959,
+      "median_p99_ms": 0.033125
+    },
+    "openraft": {
+      "rates": [
+        10398.522973683952,
+        10264.86313075627,
+        10123.452215703826
+      ],
+      "p50_ms": [
+        0.095958,
+        0.097,
+        0.098333
+      ],
+      "p99_ms": [
+        0.130584,
+        0.132625,
+        0.13375
+      ],
+      "median_rates": 10264.86313075627,
+      "median_p50_ms": 0.097,
+      "median_p99_ms": 0.132625
+    }
+  },
+  "paired_comparisons": [
+    {
+      "variant": "candidate",
+      "baseline": "baseline",
+      "trial": 1,
+      "throughput_ratio": 1.0190508171305301,
+      "p50_ratio": 0.9826962962962963,
+      "p99_ratio": 0.9797845845327813
+    },
+    {
+      "variant": "candidate",
+      "baseline": "baseline",
+      "trial": 2,
+      "throughput_ratio": 1.0224360108300719,
+      "p50_ratio": 0.9834720099620764,
+      "p99_ratio": 0.9329740352548832
+    },
+    {
+      "variant": "candidate",
+      "baseline": "baseline",
+      "trial": 3,
+      "throughput_ratio": 0.9989943513954957,
+      "p50_ratio": 0.9999431301182895,
+      "p99_ratio": 1.0
+    },
+    {
+      "variant": "on",
+      "baseline": "candidate",
+      "trial": 1,
+      "throughput_ratio": 0.911671591064002,
+      "p50_ratio": 1.0955195079298075,
+      "p99_ratio": 1.056384523966724
+    },
+    {
+      "variant": "on",
+      "baseline": "candidate",
+      "trial": 2,
+      "throughput_ratio": 0.9109798110043177,
+      "p50_ratio": 1.0911654676258993,
+      "p99_ratio": 1.0571920977882745
+    },
+    {
+      "variant": "on",
+      "baseline": "candidate",
+      "trial": 3,
+      "throughput_ratio": 0.9114529224309366,
+      "p50_ratio": 1.087698344992322,
+      "p99_ratio": 1.131244094488189
+    }
+  ],
+  "all_actual_counts_frontiers_and_exits_verified": true,
+  "all_stderr_empty": true
+}

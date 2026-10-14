@@ -69,7 +69,7 @@ diagnostics do not qualify sustained floors. [Every Linux trial and scope](../va
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: qualify singleton/profile retained434 | Finish the current performance decision and locate the next limiting work | Published434, exact outcomes/zero checks/fresh artifacts and three positive20M bulk pairs on each host | Separate1M singleton pairs/rates/p99/regressions, current source/artifact-bound CPU/text profiles; no browser or instruction/allocator-cause guesses | P9.0/P9.1/P9.3 |
+| Current: profile retained434 | Locate the current limiting work after fewer request buffers | Published434, exact outcomes/zero checks/fresh artifacts, positive20M bulk and mixed1M singleton pairs on each host | Current source/artifact-bound CPU/text/JSON profiles, unknown/lost/wait-bias limits preserved; no browser or instruction/allocator-cause guesses | P9.0/P9.1/P9.3 |
 | Next: remove the next measured request/result or transition cost | Improve the remaining limiting stage with one ordering/ownership change | Current434 singleton/profile disposition and unchanged full outcome/durability contracts | Explicit schema, bounded tested checked publication and both-host completed rates/p99 before retention; full curve/memory-debt/durable acceptance remains separate | P9.0/P9.1/P9.3 |
 | Following: bounded durable batching/overlap under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Native421 barrier evidence and unchanged publication/ticket contracts; bounded fairness schema after current measured framework stage | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual placement/barriers before changing defaults | P9.1/P9.2/P9.3 |
 
@@ -180,6 +180,19 @@ Retain434; singleton/profile disposition remains next. Active checkpoint/catch-u
 peak logical retention and queues reported; no physical memory/debt or allocator
 cause claim. Full8,422,500 minimum/all cells/both hosts/durable/headroom/fairness/
 placement/P8 acceptance stays open. No next source optimization yet.
+
+434 [Linux singleton](../validation/performance/comparison434-singleton/linux/README.md)
+original99142 and [Mac singleton](../validation/performance/comparison434-mac/SINGLETON_README.md)
+original47125 both end0 with12 exact1,048,576 originals/requests plus1024 warmups,
+frontiers1,049,601×3, source/compiler/artifact/count/observer guards0. Linux
+431OFF/434OFF/ON/OpenRaft medians111,848/112,507/93,210/21,085 originals/s,
+request p99 17.763/17.573/19.737/119.584µs; OFF trial3 rate/tail regressions stay.
+Mac55,642/56,387/51,367/10,265 originals/s, p99 31.750/31.333/33.125/132.625µs;
+two OFF gains, trial3−0.101% with equal p99. All observer rates/tails regress on
+both hosts. No repeatable singleton gain or20M/all-cell proof. Bulk archives are
+sealed unchanged. Retain434's repeatable bulk gain and profile actual fresh434
+artifacts next through headless JSON/text/folded/per-address data; no browser or
+system policy changes, no unknown/lost/wait-bias omissions or allocator cause guess.
 
 ### Slice433 schema — reject the forced clone inline hint
 

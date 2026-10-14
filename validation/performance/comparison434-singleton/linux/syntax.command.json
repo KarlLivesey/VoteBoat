@@ -1,0 +1,1 @@
+["bash", "-n", "target/p9/comparison434-singleton/phase-diagnostic.sh", "target/p9/comparison434-singleton/linux-run.sh"]

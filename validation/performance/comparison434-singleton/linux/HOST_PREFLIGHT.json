@@ -1,0 +1,14 @@
+{
+  "unix": 1791945418.0498934,
+  "known_competing_jobs": [],
+  "scope": "actualhostnamespace selectedbuild/benchmark/profiler processesabsent; ordinarysystemactivity remains",
+  "loadavg": "5.39 5.67 5.98 5/3355 3627877",
+  "kernel_readonly": {
+    "perf_event_paranoid": "2",
+    "kptr_restrict": "2",
+    "perf_event_mlock_kb": "516"
+  },
+  "actual_exit": 0,
+  "root_push_terminal": 21907,
+  "authorized_after_setup": true
+}
