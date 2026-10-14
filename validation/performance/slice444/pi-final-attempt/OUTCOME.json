@@ -1,0 +1,14 @@
+{
+  "original_handle": 38243,
+  "wrapper_exit": 1,
+  "snapshot_test_exit": 101,
+  "snapshot_seconds": 4.33,
+  "error": "VoteBoat final applied prefix differs",
+  "all_client_writes_completed": true,
+  "new_pause_control_started": false,
+  "fmt_started": false,
+  "clippy_started": false,
+  "restored_inputs": 1434,
+  "restoration_exit": 0,
+  "cause": "unestablished; await frontier/election diagnostic"
+}

@@ -1,0 +1,3 @@
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/mmcblk0p2   59G  6.7G   49G  13% /
+tmpfs           1.9G     0  1.9G   0% /tmp

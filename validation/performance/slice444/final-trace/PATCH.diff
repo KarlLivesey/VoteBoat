@@ -1,0 +1,76 @@
+--- a/benchmarks/matched/src/voteboat_engine.rs
++++ b/benchmarks/matched/src/voteboat_engine.rs
+@@ -395,7 +395,18 @@
+             cluster.pause_follower(2, false);
+             let result = cluster.verify(12_000, 0).await;
+             let installed = cluster.stats[2].snapshot_installs.load(Ordering::Relaxed);
++            let frontiers: Vec<_> = cluster
++                .frontiers
++                .iter()
++                .map(|value| value.load(Ordering::Acquire))
++                .collect();
+             let cleanup = cluster.shutdown().await;
++            if result.is_err() {
++                eprintln!(
++                    "voteboat_snapshot_verify_failure attribution={attribution} expected={:?} frontiers={frontiers:?} installed={installed} result={result:?} cleanup={cleanup:?}",
++                    [12_001; 3],
++                );
++            }
+             assert_eq!(result.unwrap(), vec![12_001; 3]);
+             assert!(
+                 installed > 0,
+--- a/benchmarks/matched/src/voteboat_engine/actor.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor.rs
+@@ -74,6 +74,11 @@
+         if self.parts.slot == 0 {
+             self.step(Event::Campaign)?;
+         }
++        #[cfg(test)]
++        let mut observed = (
++            self.parts.core.role(),
++            self.parts.core.state().hard_state.term,
++        );
+         loop {
+             // Keep stop and already-delivered peer progress ahead of more data.
+             if let Some(request) = self.deferred.take() {
+@@ -102,6 +107,23 @@
+                     }
+                 }
+             }
++            #[cfg(test)]
++            {
++                let current = (
++                    self.parts.core.role(),
++                    self.parts.core.state().hard_state.term,
++                );
++                if current != observed {
++                    eprintln!(
++                        "voteboat_actor_transition slot={} before={observed:?} after={current:?} paused_receiving={} pending={} applied={}",
++                        self.parts.slot,
++                        self.parts.paused[self.parts.slot].load(Ordering::Acquire),
++                        self.pending.len(),
++                        self.parts.application.applied,
++                    );
++                    observed = current;
++                }
++            }
+             let stats = &self.parts.stats[self.parts.slot];
+             let retained = self.parts.core.state().entries.len();
+             stats.peak_retained.fetch_max(retained, Ordering::Relaxed);
+@@ -149,6 +171,16 @@
+         let event = if self.parts.core.role() == Role::Leader {
+             Some(Event::Heartbeat)
+         } else if self.last_contact.elapsed() >= Duration::from_millis(2000) {
++            #[cfg(test)]
++            eprintln!(
++                "voteboat_actor_campaign slot={} role={:?} term={} paused_receiving={} pending={} applied={}",
++                self.parts.slot,
++                self.parts.core.role(),
++                self.parts.core.state().hard_state.term,
++                self.parts.paused[self.parts.slot].load(Ordering::Acquire),
++                self.pending.len(),
++                self.parts.application.applied,
++            );
+             self.last_contact = Instant::now();
+             Some(Event::Campaign)
+         } else {

@@ -1,0 +1,31 @@
+{
+  "scope": "444 test-onlycampaign/roleterm/stalltrace amendment; no causeassumed/fixselected",
+  "original_handle": 9651,
+  "exit": 0,
+  "terminal": "DONE",
+  "exact_focused_snapshot_test": {
+    "passed": 1,
+    "failed": 0,
+    "filtered": 63,
+    "linux_seconds": 0.63
+  },
+  "formatter": 0,
+  "strict_alltargets_clippy": 0,
+  "source_guard": 0,
+  "inputs": 1437,
+  "changed_paths": [
+    "benchmarks/matched/src/voteboat_engine.rs",
+    "benchmarks/matched/src/voteboat_engine/actor.rs"
+  ],
+  "other_inputs_unchanged": 1435,
+  "all_modes_unchanged": true,
+  "production_projection": "PRODUCTION_PROJECTION.json",
+  "initial444_archive_preserved": true,
+  "pi_baseline_cumulative_patch": "PI_BASELINE_PATCH.diff",
+  "diagnostic_write_budget_seconds": 10,
+  "timeout_policy": "Testfailure only; neveracceptedreceipts orproductiondeadlineextension",
+  "cleanup": "Sameexistingwatchstop+ownedCluster.shutdown joins; preservewrite result/frontiers+cleanup result; no unpause/pausefix",
+  "linux_observation": "Startuproletransitions only; test succeeds, no Pi stallcauseinferred",
+  "parent_original_pi_diagnostic": "Manuallyinterrupted after3m24 CPU6s alive/noActorErr; cleanbaseline restored; rawfailure remainsparentowned",
+  "new_broad_suite_performance_artifact_remoteoperation": false
+}

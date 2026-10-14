@@ -1,0 +1,22 @@
+{
+  "prior_commit": "590f6e787aa27e5d4752ee34109f09566c9b3fd9",
+  "current_commit": "6be136ae6c33e07e8358b7a6141030a573efd920",
+  "paths": {
+    "examples/native_benchmark.rs": {
+      "prior_sha256": "b5421db7836408b3766630b25b6e89748256f7c9a6480aa76cda4c379ac30fe3",
+      "current_sha256": "8df5fe9d97e933f186a66f42b54544c90438b0628541571899c4496f2a564820"
+    },
+    "docs/PERFORMANCE.md": {
+      "prior_sha256": "3942840368b5a1f9fc39f2839aa76fd8689ccf8a4f630108d5dc03c3e7099a25",
+      "current_sha256": "cacd28974b51e8a4077ac9afe19d98eecae6fb3d8d668347d25dec305e277f91"
+    },
+    "validation/check-native-benchmark.mjs": {
+      "prior_sha256": "eb69723699997c89f9be9f5b53a4192822f5fcff9f44b3d6c6ff335947454d08",
+      "current_sha256": "388fe4ff4577ae4185fbb74beee07d779127586e276ed7bf5f9a0b36273f2f5a"
+    },
+    "validation/check-offered.mjs": {
+      "prior_sha256": "e250e55a0307ce13d2bcf52fa3fd0430172090429dc18b14f571934c0c19ca17",
+      "current_sha256": "bd96046dc52ab2800b235c92fe69745c2f191b89251a7f7658012e241790f805"
+    }
+  }
+}

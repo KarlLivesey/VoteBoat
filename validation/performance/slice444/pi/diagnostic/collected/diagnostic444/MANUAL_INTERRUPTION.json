@@ -1,0 +1,6 @@
+{
+  "pid": 3596,
+  "verified_executable": "/home/karllivesey/voteboat-p9-pi443-2YkqdC/target-checks/debug/deps/voteboat_matched_framework-7aa86b0df8fb69cc",
+  "signal": "SIGTERM",
+  "reason": "root explicitly requested interruption of lowCPU stalled diagnostic after minutes with no actor error; no automatic rerun"
+}

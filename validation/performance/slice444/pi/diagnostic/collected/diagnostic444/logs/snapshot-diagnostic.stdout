@@ -1,0 +1,3 @@
+
+running 1 test
+test voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install ... 

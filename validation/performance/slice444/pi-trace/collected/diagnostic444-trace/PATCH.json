@@ -1,0 +1,5 @@
+{
+  "baseline": "6be136ae6c33e07e8358b7a6141030a573efd920",
+  "sha256": "77e53ad16a688000b761d972eafad6a4fa1a9d00d93cb65a225f718251fbbcba",
+  "scope": "cumulative2filecfgtesttrace+10s diagnostic write guard; one exactsnapshot test; unchanged protocol/election/capacity; restore1434baseline"
+}

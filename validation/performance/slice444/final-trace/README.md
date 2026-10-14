@@ -1,0 +1,3 @@
+# Resume diagnostic
+
+Pi tick-only correction completed all originals but failed exact final-prefix verification. This diagnostic retains that guard and expected12001, adding only test campaign/role-term logging and verification failure frontiers/snapshot count/cleanup context. Linux original48835 ended0: exact snapshot case passes (.47s), formatting and strict standalone Clippy pass. Three cumulative test-file changes are frozen against6be; source inventory matches all1437 selected inputs. Pi cause remains unestablished until its next trace. Temporary logs will be removed from final source. The existing checked final archive and all earlier failures remain separate.

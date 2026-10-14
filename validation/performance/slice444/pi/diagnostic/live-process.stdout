@@ -1,0 +1,9 @@
+    PID    PPID     ELAPSED     TIME STAT COMMAND
+   1059    1058    01:05:43 00:00:00 Ss+  bash
+   3533    3532       03:17 00:00:00 Ss   bash
+   3565    3533       03:16 00:00:00 Sl   cargo
+   3596    3565       02:09 00:00:04 Sl   voteboat_matche
+   3654    3653       00:00 00:00:00 Ss   bash
+   Compiling voteboat-matched-framework v0.1.0 (/home/karllivesey/voteboat-p9-pi443-2YkqdC/source/benchmarks/matched)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 07s
+     Running unittests src/main.rs (/home/karllivesey/voteboat-p9-pi443-2YkqdC/target-checks/debug/deps/voteboat_matched_framework-7aa86b0df8fb69cc)

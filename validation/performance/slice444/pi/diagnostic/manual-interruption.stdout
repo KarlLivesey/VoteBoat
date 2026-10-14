@@ -1,0 +1,8 @@
+    PID    PPID     ELAPSED     TIME STAT COMMAND
+   3596    3565       03:24 00:00:06 Sl   voteboat_matche
+
+running 1 test
+test voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install ...    Compiling voteboat-matched-framework v0.1.0 (/home/karllivesey/voteboat-p9-pi443-2YkqdC/source/benchmarks/matched)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 07s
+     Running unittests src/main.rs (/home/karllivesey/voteboat-p9-pi443-2YkqdC/target-checks/debug/deps/voteboat_matched_framework-7aa86b0df8fb69cc)
+{"pid": 3596, "verified_executable": "/home/karllivesey/voteboat-p9-pi443-2YkqdC/target-checks/debug/deps/voteboat_matched_framework-7aa86b0df8fb69cc", "signal": "SIGTERM", "reason": "root explicitly requested interruption of lowCPU stalled diagnostic after minutes with no actor error; no automatic rerun"}

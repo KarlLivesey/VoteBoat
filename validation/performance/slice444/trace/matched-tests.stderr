@@ -1,0 +1,9 @@
+   Compiling voteboat-matched-framework v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/benchmarks/matched)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.38s
+     Running unittests src/main.rs (benchmarks/matched/target/debug/deps/voteboat_matched_framework-8c2bbd72218e067a)
+voteboat_actor_transition slot=2 before=(Follower, 0) after=(Follower, 1) paused_receiving=false pending=0 applied=0 frontiers=[0, 0, 0]
+voteboat_actor_transition slot=1 before=(Follower, 0) after=(Follower, 1) paused_receiving=false pending=0 applied=0 frontiers=[0, 0, 0]
+voteboat_actor_transition slot=0 before=(Candidate, 1) after=(Leader, 1) paused_receiving=false pending=0 applied=0 frontiers=[0, 0, 0]
+voteboat_actor_transition slot=2 before=(Follower, 0) after=(Follower, 1) paused_receiving=false pending=0 applied=0 frontiers=[0, 0, 0]
+voteboat_actor_transition slot=1 before=(Follower, 0) after=(Follower, 1) paused_receiving=false pending=0 applied=0 frontiers=[0, 0, 0]
+voteboat_actor_transition slot=0 before=(Candidate, 1) after=(Leader, 1) paused_receiving=false pending=0 applied=0 frontiers=[0, 0, 0]

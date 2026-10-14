@@ -1,0 +1,11 @@
+
+running 1 test
+test voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install ... FAILED
+
+failures:
+
+failures:
+    voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 63 filtered out; finished in 12.11s
+

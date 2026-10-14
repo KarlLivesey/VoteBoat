@@ -1,0 +1,3 @@
+# Final pause/resume correction
+
+Root runner92564 ends0/DONE: deterministic pause/resume/ordinary campaign control and exact12000-original OFF/ON snapshot control pass (.63s snapshot), formatting and strict standalone Clippy pass. Actor owns a test-only pause flag; first resumed tick refreshes contact before ordinary election selection. No production timer/protocol/layout change. All temporary traces are removed, bounded write failure cleanup retained. Removing the three cfg(test) additions reproduces published6be Actor bytes exactly; all1437 source hashes/modes remain exact after checks. Pi/Mac qualification remains pending. Prior failures and trace evidence remain separate.

@@ -1,0 +1,21 @@
+78395
+0
+DONE
+cache_preflight 0
+snapshot 0
+paused_resume 0
+matched_fmt 0
+matched_strict 0
+source_final 0
+
+running 1 test
+test voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 64 filtered out; finished in 0.68s
+
+
+running 1 test
+test voteboat_engine::actor::tests::overdue_paused_follower_keeps_state_and_unpaused_tick_resumes_campaign ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 64 filtered out; finished in 0.00s
+

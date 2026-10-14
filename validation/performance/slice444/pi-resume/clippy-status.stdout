@@ -1,0 +1,4 @@
+    Checking anyhow v1.0.104
+    Checking bench-minimal v0.1.0 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+    Checking voteboat v0.1.0 (/home/karllivesey/voteboat-p9-pi443-2YkqdC/source)
+pinned_strict

@@ -1,0 +1,1 @@
+vcgencmd get_throttled

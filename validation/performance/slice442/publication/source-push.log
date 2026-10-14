@@ -1,0 +1,8 @@
+Checking formatting and strict Clippy before push...
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.03s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s
+To github.com:KarlLivesey/VoteBoat.git
+   590f6e78..313831c8  main -> main

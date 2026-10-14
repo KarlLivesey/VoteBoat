@@ -1,0 +1,1 @@
+/Users/karllivesey/.cargo/bin/cargo +stable test --locked --offline --manifest-path /tmp/voteboat-mac444-resume-Lgx0yZ/source/benchmarks/matched/Cargo.toml voteboat_engine::actor::tests::overdue_paused_follower_keeps_state_and_unpaused_tick_resumes_campaign -- --exact --test-threads=1 --nocapture 

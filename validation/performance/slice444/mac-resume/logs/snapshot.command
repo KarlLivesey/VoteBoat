@@ -1,0 +1,1 @@
+/Users/karllivesey/.cargo/bin/cargo +stable test --locked --offline --manifest-path /tmp/voteboat-mac444-resume-Lgx0yZ/source/benchmarks/matched/Cargo.toml voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install -- --exact --test-threads=1 --nocapture 

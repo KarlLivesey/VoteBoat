@@ -1,0 +1,12 @@
+import json,tarfile
+from pathlib import Path
+j=Path('/tmp/voteboat-mac444-resume-Lgx0yZ');assert(j/'STATUS').read_text().strip()=='0' and(j/'STAGE').read_text().strip()=='DONE'
+for n in ['cache_preflight','snapshot','paused_resume','matched_fmt','matched_strict','source_final']:assert(j/f'logs/{n}.exit').read_text().strip()=='0'
+for n in ['snapshot','paused_resume']:assert'1 passed; 0 failed;'in(j/f'logs/{n}.log').read_text()and'64 filtered out'in(j/f'logs/{n}.log').read_text()
+s=json.loads((j/'SOURCE.json').read_text());p=json.loads((j/'PRODUCTION_PROJECTION.json').read_text())
+q={'scope':'authorized6be publishedsource + reviewed unpublishedtest-onlyresumeoverlay; notperformanceartifact','base_commit':s['base_commit'],'overlay_sha256':s['overlay_sha256'],'source_inputs':s['inputs'],'source_fullhash_modes_beforeafter':True,'actualexactcontrols':{'snapshot_OFF_ON':1,'paused_resumed_then_ordinary_campaign':1},'each_failures':0,'each_filtered':64,'standalone_fmt_strict_exits':0,'production_projection':p,'originalSSH':93281,'actualterminaltool':'8d35e7','actualterminalexit':0,'remotePID':int((j/'PID').read_text()),'no65_root_CLI_perf_profile_or_rates':True,'failure_or_retry':False}
+(j/'QUALIFICATION.json').write_text(json.dumps(q,indent=2)+'\n')
+files=[f for f in j.rglob('*')if f.is_file()and f.relative_to(j).parts[0]not in{'source','test-tmp','__pycache__'}and f.name not in{'source.tar','qualification.tgz'}and'__pycache__'not in f.parts]
+with tarfile.open(j/'qualification.tgz','w:gz')as t:
+ for f in sorted(files):assert not f.is_symlink();t.add(f,arcname=str(f.relative_to(j)),recursive=False)
+print(json.dumps(q))

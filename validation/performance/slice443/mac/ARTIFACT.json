@@ -1,0 +1,94 @@
+[
+  {
+    "target": "voteboat",
+    "original": "/tmp/voteboat-mac443-6be136a-8vife2/target-debug-checks/debug/deps/libvoteboat-b8000f84805aea29.rlib",
+    "sha256": "205b522939a483b68e77730cfd34f0b34658205185b6a7616584ccc57a5a4f05",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///private/tmp/voteboat-mac443-6be136a-8vife2/source#voteboat@0.1.0",
+      "manifest_path": "/private/tmp/voteboat-mac443-6be136a-8vife2/source/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "voteboat",
+        "src_path": "/private/tmp/voteboat-mac443-6be136a-8vife2/source/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/tmp/voteboat-mac443-6be136a-8vife2/target-debug-checks/debug/deps/libvoteboat-b8000f84805aea29.rlib",
+        "/tmp/voteboat-mac443-6be136a-8vife2/target-debug-checks/debug/deps/libvoteboat-b8000f84805aea29.rmeta"
+      ],
+      "executable": null,
+      "fresh": true
+    },
+    "source_sha256": "b15e256c65fb95f0e83e052b0ee76bc5a03f2d4b20706ff7529959ae685d4e6a",
+    "scope": "actualdebug qualification; fresh flags reported honestly, root reused same-job earlier test compilation"
+  },
+  {
+    "target": "native_benchmark",
+    "original": "/tmp/voteboat-mac443-6be136a-8vife2/target-debug-checks/debug/examples/native_benchmark",
+    "sha256": "e8843917264f0bd16d9e3b4fce9e3ec48e48f48dcc4e5c476a30a6f7f93a6c9b",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///private/tmp/voteboat-mac443-6be136a-8vife2/source#voteboat@0.1.0",
+      "manifest_path": "/private/tmp/voteboat-mac443-6be136a-8vife2/source/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "native_benchmark",
+        "src_path": "/private/tmp/voteboat-mac443-6be136a-8vife2/source/examples/native_benchmark.rs",
+        "edition": "2021",
+        "required-features": [
+          "tls"
+        ],
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/tmp/voteboat-mac443-6be136a-8vife2/target-debug-checks/debug/examples/native_benchmark"
+      ],
+      "executable": "/tmp/voteboat-mac443-6be136a-8vife2/target-debug-checks/debug/examples/native_benchmark",
+      "fresh": false
+    },
+    "source_sha256": "8df5fe9d97e933f186a66f42b54544c90438b0628541571899c4496f2a564820",
+    "scope": "actualdebug qualification; fresh flags reported honestly, root reused same-job earlier test compilation"
+  }
+]

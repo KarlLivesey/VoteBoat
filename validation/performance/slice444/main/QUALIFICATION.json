@@ -1,0 +1,33 @@
+{
+  "scope": "444 diagnostic-only PiSnapshottest observation, no assumedfix",
+  "original_handle": 74230,
+  "original_pid": 2,
+  "exit": 0,
+  "terminal": "DONE",
+  "exact_focused_test": "voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install",
+  "passed": 1,
+  "failed": 0,
+  "filtered": 63,
+  "test_contains_existing_off_on_iterations": true,
+  "linux_elapsed_test_seconds": 0.57,
+  "formatter": 0,
+  "strict_alltargets_clippy": 0,
+  "source_guard": 0,
+  "source_inputs": 1437,
+  "changed_paths": [
+    "benchmarks/matched/src/voteboat_engine.rs",
+    "benchmarks/matched/src/voteboat_engine/actor.rs"
+  ],
+  "unchanged_inputs": 1435,
+  "all_physical_modes_unchanged": true,
+  "new_deleted_modules": [],
+  "production_projection": "PRODUCTION_PROJECTION.json",
+  "root_library_inputs_unchanged": true,
+  "actor_failure_report": "cfg(test)slot/role/durablehard_state.term/receivepause/error beforefailureescapes",
+  "failed_write_cleanup": "existingCluster.shutdown beforepanic; preservebothclienterrorandfirstjoinedActorErr, noupause/role/timer/queue modification",
+  "linux_failure_observation": "None; exactcase succeeded, so no Pi causeinferred",
+  "original_pi_qualification": "63pass/1RecvError failed retainedbyparent; diagnosticpatchtransfer/onefocusedPi rerun pendingparent",
+  "failure_history_this_linux_check": [],
+  "root_broad_suite_performance_artifact_benchmark_profile_mac_pi_operations": false,
+  "new_production_api_behavior_or_gain_claim": false
+}

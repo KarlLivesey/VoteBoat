@@ -1,0 +1,17 @@
+{
+  "baseline_commit": "6be136ae6c33e07e8358b7a6141030a573efd920",
+  "changed": {
+    "benchmarks/matched/src/voteboat_engine.rs": {
+      "baseline": "f8cb89cc31590efd7d527eb0b835bcebde69bd0e8b293d39531fba9dfbd0d9c6",
+      "diagnostic": "9ee133fd77bd81ae3d2f33b7d82caeff8270fdff74460fc7d731e8839c4e77be",
+      "physical_mode": "0o644"
+    },
+    "benchmarks/matched/src/voteboat_engine/actor.rs": {
+      "baseline": "6920665e97259926b36c7d2b1f4f2abe98882e31823d7840c2ebdec739593ff2",
+      "diagnostic": "272db8f9a832ec0e3422ca193c1888e23c4e9c64016492415a8383ac6a325d14",
+      "physical_mode": "0o644"
+    }
+  },
+  "unchanged_inputs": 1432,
+  "patch_sha256": "e890d968054c74a795de6574061599b50b1c0dd7f203d28b9e92f98606eec356"
+}

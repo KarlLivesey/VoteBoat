@@ -1,0 +1,24 @@
+STAGE=preserve_baseline
+COMMAND_END=source-before exit=0
+COMMAND_END=patch-hash exit=0
+COMMAND_END=cargo-version exit=0
+COMMAND_END=rustc-version exit=0
+COMMAND_END=fmt-version exit=0
+COMMAND_END=clippy-version exit=0
+STAGE=exact_diagnostic_patch
+COMMAND_END=patch-check exit=0
+COMMAND_END=patch-apply exit=0
+COMMAND_END=preserve-patch-modes exit=0
+COMMAND_END=patched-inventory exit=0
+STAGE=focused_snapshot_final
+COMMAND_END=snapshot-diagnostic exit=0
+STAGE=focused_paused_tick
+COMMAND_END=paused-tick exit=0
+STAGE=pinned_format
+COMMAND_END=matched-format exit=0
+STAGE=pinned_strict
+COMMAND_END=matched-clippy exit=0
+STAGE=FINAL_CHECKS_DONE
+STAGE=restore_baseline
+COMMAND_END=restored-source exit=0
+DIAGNOSTIC_END=0

@@ -1,0 +1,10 @@
+{
+  "actor": "Removing only newly insertedcfg(test) failurediagnostic reproduces priorbytesexact",
+  "actor_before_sha256": "6920665e97259926b36c7d2b1f4f2abe98882e31823d7840c2ebdec739593ff2",
+  "engine": "Restoring onlywrite-error cleanup fragment insideexistingcfg(test)modtests reproduces priorbytesexact",
+  "engine_before_sha256": "f8cb89cc31590efd7d527eb0b835bcebde69bd0e8b293d39531fba9dfbd0d9c6",
+  "diagnostic_block_cfg_test": true,
+  "new_public_api_or_production_logic": false,
+  "all_other1435_selected_hashes_modes_equal": true,
+  "root_library_inputs_unchanged": true
+}

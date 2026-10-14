@@ -1,0 +1,16 @@
+0
+exact1434 committed source/hash/Git/physicalmodespassed
+    Checking bench-minimal v0.1.0 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+    Checking voteboat v0.1.0 (/home/karllivesey/voteboat-p9-pi443-2YkqdC/source)
+    Checking voteboat-matched-framework v0.1.0 (/home/karllivesey/voteboat-p9-pi443-2YkqdC/source/benchmarks/matched)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2m 48s
+cargo 1.98.1 (797e8a9bc 2026-08-05)
+rustc 1.98.1 (48a229cea 2026-09-01)
+binary: rustc
+commit-hash: 48a229ceaefd4985c50990b14116b6d856af0985
+commit-date: 2026-09-01
+host: aarch64-unknown-linux-gnu
+release: 1.98.1
+LLVM version: 22.1.8
+rustfmt 1.9.0-stable (48a229ceae 2026-09-01)
+clippy 0.1.98 (48a229ceae 2026-09-01)

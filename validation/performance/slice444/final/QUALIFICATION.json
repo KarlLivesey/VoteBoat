@@ -1,0 +1,42 @@
+{
+  "scope": "444 finaltestfixturecorrection afterdirectPi causaltrace; no productionfix",
+  "original_handle": 7079,
+  "exit": 0,
+  "terminal": "DONE",
+  "focused_controls": {
+    "overdue_paused_follower_no_sleep": {
+      "passed": 1,
+      "failed": 0
+    },
+    "actual12000_original_snapshot_off_on": {
+      "passed": 1,
+      "failed": 0,
+      "filtered": 64,
+      "linux_seconds": 0.79
+    }
+  },
+  "formatter": 0,
+  "strict_alltargets_clippy": 0,
+  "source_guard": 0,
+  "selected_inputs": 1437,
+  "changed_relative_trace": [
+    "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests.rs"
+  ],
+  "changed_relative_clean_baseline": [
+    "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "benchmarks/matched/src/voteboat_engine.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests.rs"
+  ],
+  "new_deleted_modules": [],
+  "physical_modes_unchanged": true,
+  "temporary_actor_logging_removed": true,
+  "sole_actor_fixture_change": "cfgtest receivepausedflag suppresses heartbeat/campaign tick beforeeventselection",
+  "snapshot_guard": "10s perwrite diagnosticfailure only; exactoutcomes andownedwatchstop/cleanup retained",
+  "production_projection": "PRODUCTION_PROJECTION.json",
+  "actual_pi_cause": "Parenttrace20173:pausedfollower2campaign term1\u21922; leader0stepdown/pending4/frontiers11293,11293,1;terms3..6 noprogress;11293..11296 diagnostic10stimeout/cleanupOk",
+  "original_recv_error_branch": "Notreproduced; original63/64failure remains separatelyretained",
+  "parent_pi_mac_qualification_pending": true,
+  "no_broad_suite_performance_artifact_remote_gitoperation": true,
+  "failures_or_retries_in_final_linux_checks": []
+}

@@ -1,0 +1,9 @@
+[
+  "ssh",
+  "-o",
+  "BatchMode=yes",
+  "-o",
+  "ConnectTimeout=10",
+  "karllivesey@ups.local",
+  "tar -xf - -C '/home/karllivesey/voteboat-p9-pi443-2YkqdC' && python3 -c \"import json,pathlib; j=pathlib.Path('/home/karllivesey/voteboat-p9-pi443-2YkqdC'); m=json.loads((j/'SOURCE.json').read_text()); [(j/'source'/r).chmod(int(v,8)) for r,v in m['physical_modes'].items()]\""
+]

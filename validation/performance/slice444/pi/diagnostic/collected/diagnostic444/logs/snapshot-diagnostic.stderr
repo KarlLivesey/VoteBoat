@@ -1,0 +1,7 @@
+   Compiling voteboat-matched-framework v0.1.0 (/home/karllivesey/voteboat-p9-pi443-2YkqdC/source/benchmarks/matched)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 07s
+     Running unittests src/main.rs (/home/karllivesey/voteboat-p9-pi443-2YkqdC/target-checks/debug/deps/voteboat_matched_framework-7aa86b0df8fb69cc)
+error: test failed, to rerun pass `--bin voteboat-matched-framework`
+
+Caused by:
+  process didn't exit successfully: `/home/karllivesey/voteboat-p9-pi443-2YkqdC/target-checks/debug/deps/voteboat_matched_framework-7aa86b0df8fb69cc 'voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install' --exact --nocapture --test-threads=1` (signal: 15, SIGTERM: termination signal)

@@ -1,0 +1,1 @@
+cargo +stable test --manifest-path benchmarks/matched/Cargo.toml --locked --offline voteboat_engine::actor::tests::overdue_paused_follower_keeps_state_and_unpaused_tick_resumes_campaign -- --exact --test-threads=1 --nocapture 

@@ -1,0 +1,34 @@
+   Compiling voteboat-matched-framework v0.1.0 (/home/karllivesey/voteboat-p9-pi443-2YkqdC/source/benchmarks/matched)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 07s
+     Running unittests src/main.rs (/home/karllivesey/voteboat-p9-pi443-2YkqdC/target-checks/debug/deps/voteboat_matched_framework-7aa86b0df8fb69cc)
+voteboat_actor_transition slot=1 before=(Follower, 0) after=(Follower, 1) paused_receiving=false pending=0 applied=0
+voteboat_actor_transition slot=2 before=(Follower, 0) after=(Follower, 1) paused_receiving=false pending=0 applied=0
+voteboat_actor_transition slot=0 before=(Candidate, 1) after=(Leader, 1) paused_receiving=false pending=0 applied=0
+voteboat_actor_campaign slot=2 role=Follower term=1 paused_receiving=false pending=0 applied=1
+voteboat_actor_transition slot=2 before=(Follower, 1) after=(Candidate, 2) paused_receiving=false pending=0 applied=1
+voteboat_actor_transition slot=0 before=(Leader, 1) after=(Follower, 2) paused_receiving=false pending=0 applied=12001
+voteboat_actor_transition slot=1 before=(Follower, 1) after=(Follower, 2) paused_receiving=false pending=0 applied=12001
+voteboat_actor_campaign slot=1 role=Follower term=2 paused_receiving=false pending=0 applied=12001
+voteboat_actor_transition slot=1 before=(Follower, 2) after=(Candidate, 3) paused_receiving=false pending=0 applied=12001
+voteboat_actor_transition slot=2 before=(Candidate, 2) after=(Follower, 3) paused_receiving=false pending=0 applied=1
+voteboat_actor_transition slot=0 before=(Follower, 2) after=(Follower, 3) paused_receiving=false pending=0 applied=12001
+voteboat_actor_transition slot=1 before=(Candidate, 3) after=(Leader, 3) paused_receiving=false pending=0 applied=12001
+voteboat_snapshot_verify_failure attribution=false expected=[12001, 12001, 12001] frontiers=[12002, 12002, 12002] installed=1 result=Err("VoteBoat final applied prefix differs") cleanup=Ok(())
+
+thread 'voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install' (4127) panicked at src/voteboat_engine.rs:410:31:
+called `Result::unwrap()` on an `Err` value: "VoteBoat final applied prefix differs"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `--bin voteboat-matched-framework`
+
+running 1 test
+test voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install ... FAILED
+
+failures:
+
+failures:
+    voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 64 filtered out; finished in 4.33s
+
+101
+0

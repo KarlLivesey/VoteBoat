@@ -1,0 +1,16 @@
+{
+  "original_qualification_ssh_handle": 22422,
+  "actual_terminal_tool": "c5b72e",
+  "qualification_exit": 0,
+  "remote_pid": 68652,
+  "remote_job": "/tmp/voteboat-mac443-6be136a-8vife2",
+  "collector_handle": 66181,
+  "collector_terminal_tool": "965e4a",
+  "collector_exit": 0,
+  "collection_handle": 16124,
+  "collection_terminal_tool": "fab1b8",
+  "collection_exit": 0,
+  "actual_failures": [],
+  "no_scoped_or_broad_retries": true,
+  "no_performance_build_or_profile_or_Pi": true
+}

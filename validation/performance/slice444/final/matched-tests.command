@@ -1,0 +1,1 @@
+cargo +stable test --manifest-path benchmarks/matched/Cargo.toml --locked --offline voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install -- --exact --test-threads=1 --nocapture 

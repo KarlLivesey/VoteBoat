@@ -1,0 +1,6 @@
+{
+  "source": "target/p9/slice444/main/PATCH.diff",
+  "sha256": "e890d968054c74a795de6574061599b50b1c0dd7f203d28b9e92f98606eec356",
+  "baseline": "6be136ae6c33e07e8358b7a6141030a573efd920",
+  "scope": "Exactly2cfgtest-only files, failedcontrolonce, then restoreexactbaseline; no64suite/release/timing/timer/pause changes."
+}

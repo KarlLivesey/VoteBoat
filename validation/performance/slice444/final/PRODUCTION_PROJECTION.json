@@ -1,0 +1,9 @@
+{
+  "actor_non_test_projection_exact_retained435_clean443": true,
+  "clean_actor_sha256": "6920665e97259926b36c7d2b1f4f2abe98882e31823d7840c2ebdec739593ff2",
+  "sole_added_actor_cfg_test_guard": "        #[cfg(test)]\n        if self.parts.paused[self.parts.slot].load(Ordering::Acquire) {\n            return Ok(());\n        }\n",
+  "temporary_error_campaign_transition_logging_absent": true,
+  "new_actor_control_inside_existing_cfg_test_module": true,
+  "bounded_snapshot_write_failure_inside_existing_cfg_test_module": true,
+  "root_public_core_provider_library_inputs_unchanged": true
+}

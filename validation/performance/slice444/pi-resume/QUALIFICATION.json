@@ -1,0 +1,31 @@
+{
+  "original_handle": 2212,
+  "wrapper_exit": 0,
+  "patch_sha256": "bb5fd18ce76ae374fee52d97ffaa71c5af48e73c43b4078fad426aca46e402a5",
+  "snapshot": {
+    "exit": 0,
+    "passed": 1,
+    "filtered": 64,
+    "seconds": 5.6,
+    "attribution_modes": [
+      false,
+      true
+    ]
+  },
+  "paused_resume": {
+    "exit": 0,
+    "passed": 1,
+    "filtered": 64,
+    "seconds": 0.01
+  },
+  "fmt_exit": 0,
+  "all_target_strict_exit": 0,
+  "clippy_compile_seconds": 168,
+  "source_inputs_baseline": 1434,
+  "changed_existing_modules": 3,
+  "baseline_restore_exit": 0,
+  "rust": "1.98.1",
+  "LLVM": "22.1.8",
+  "full65_rerun": false,
+  "performance_build": false
+}

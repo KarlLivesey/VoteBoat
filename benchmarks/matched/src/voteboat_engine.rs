@@ -370,7 +370,26 @@ mod tests {
             let client = cluster.client();
             for start in (1..=12_000).step_by(4) {
                 let originals: Vec<_> = (start..start + 4).map(|n| n as u128).collect();
-                assert_eq!(client.write(&originals).await.unwrap(), 4);
+                let completed = match tokio::time::timeout(
+                    Duration::from_secs(10),
+                    client.write(&originals),
+                )
+                .await
+                {
+                    Ok(Ok(completed)) => completed,
+                    result => {
+                        let frontiers: Vec<_> = cluster
+                            .frontiers
+                            .iter()
+                            .map(|value| value.load(Ordering::Acquire))
+                            .collect();
+                        let cleanup = cluster.shutdown().await;
+                        panic!(
+                            "snapshot test client write failed attribution={attribution} originals={originals:?} result={result:?} frontiers={frontiers:?}; actor cleanup={cleanup:?}"
+                        );
+                    }
+                };
+                assert_eq!(completed, 4);
             }
             assert!(cluster.frontiers[2].load(Ordering::Acquire) < 4001);
             cluster.pause_follower(2, false);

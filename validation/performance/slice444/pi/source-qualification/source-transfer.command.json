@@ -1,0 +1,9 @@
+[
+  "ssh",
+  "-o",
+  "BatchMode=yes",
+  "-o",
+  "ConnectTimeout=10",
+  "karllivesey@ups.local",
+  "test -d '/home/karllivesey/voteboat-p9-pi443-2YkqdC/tools' && test ! -e '/home/karllivesey/voteboat-p9-pi443-2YkqdC/source' && mkdir '/home/karllivesey/voteboat-p9-pi443-2YkqdC/source' && tar -xf - -C '/home/karllivesey/voteboat-p9-pi443-2YkqdC/source'"
+]

@@ -80,6 +80,82 @@ fn ready_actor_clients<const TRACE: bool>(
     (actor, sender)
 }
 
+#[test]
+fn overdue_paused_follower_keeps_state_and_unpaused_tick_resumes_campaign() {
+    let (mut actor, _sender) = ready_actor_clients::<false>(crate::Envelopes::Common64, 1);
+    let group = actor.parts.application.group;
+    let limits = actor.parts.store.limits();
+    let batch_limits = actor.parts.core.batch_limits();
+    actor.parts.core = Raft::recover(
+        NodeId::new(1).unwrap(),
+        actor.parts.store.binding(),
+        actor.parts.store.state(group).unwrap(),
+        limits,
+    )
+    .unwrap();
+    actor
+        .parts
+        .core
+        .configure_batch_limits(batch_limits)
+        .unwrap();
+    assert_eq!(actor.parts.core.role(), Role::Follower);
+    let before = actor.parts.core.state().clone();
+    let applied = actor.parts.application.applied;
+    let persists = actor.parts.stats[0]
+        .persistence_units
+        .load(Ordering::Acquire);
+    actor.last_contact = Instant::now() - Duration::from_secs(3);
+    let overdue = actor.last_contact;
+    actor.parts.paused[0].store(true, Ordering::Release);
+    assert!(!actor.accepts_peer());
+    actor.tick().unwrap();
+    assert_eq!(actor.parts.core.role(), Role::Follower);
+    assert_eq!(actor.parts.core.state(), &before);
+    assert_eq!(actor.parts.store.state(group).unwrap(), before);
+    assert_eq!(actor.parts.application.applied, applied);
+    assert_eq!(actor.last_contact, overdue);
+    assert_eq!(
+        actor.parts.stats[0]
+            .persistence_units
+            .load(Ordering::Acquire),
+        persists
+    );
+    assert!(!actor.parts.core.has_pending_dependency());
+    actor.parts.paused[0].store(false, Ordering::Release);
+    assert!(actor.accepts_peer());
+    actor.tick().unwrap();
+    assert_eq!(actor.parts.core.role(), Role::Follower);
+    assert_eq!(actor.parts.core.state(), &before);
+    assert_eq!(actor.parts.store.state(group).unwrap(), before);
+    assert_eq!(actor.parts.application.applied, applied);
+    assert!(actor.last_contact > overdue);
+    assert!(!actor.tick_paused);
+    assert_eq!(
+        actor.parts.stats[0]
+            .persistence_units
+            .load(Ordering::Acquire),
+        persists
+    );
+    actor.last_contact = Instant::now() - Duration::from_secs(3);
+    actor.tick().unwrap();
+    assert_eq!(actor.parts.core.role(), Role::Leader);
+    assert_eq!(
+        actor.parts.core.state().hard_state.term,
+        before.hard_state.term + 1
+    );
+    assert_eq!(
+        actor.parts.core.state().last_index(),
+        before.last_index() + 1
+    );
+    assert_eq!(actor.parts.application.applied, applied + 1);
+    assert!(
+        actor.parts.stats[0]
+            .persistence_units
+            .load(Ordering::Acquire)
+            > persists
+    );
+}
+
 fn preload(sender: &mpsc::Sender<Request>) -> Vec<(OperationId, oneshot::Receiver<OperationId>)> {
     let mut waits = Vec::new();
     for start in (1..=16384).step_by(4) {

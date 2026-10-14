@@ -1,0 +1,102 @@
+101
+matched_tests
+   Compiling chrono-tz v0.8.6
+   Compiling chacha20 v0.10.2
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling chrono v0.4.45
+   Compiling anstyle-query v1.1.5
+   Compiling unicode-segmentation v1.13.3
+   Compiling find-msvc-tools v0.1.14
+   Compiling shlex v2.0.1
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling anstyle v1.0.14
+   Compiling colorchoice v1.0.5
+   Compiling semver v1.0.28
+   Compiling openraft-macros v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling anstream v1.0.0
+   Compiling cc v1.8.0
+   Compiling convert_case v0.10.0
+   Compiling digest v0.10.7
+   Compiling rand v0.10.3
+   Compiling anyerror v0.1.13
+   Compiling cpufeatures v0.2.17
+   Compiling tokio-macros v2.7.2
+   Compiling unicode-xid v0.2.6
+   Compiling clap_lex v1.1.1
+   Compiling strsim v0.11.1
+   Compiling once_cell v1.21.4
+   Compiling bytes v1.12.1
+   Compiling unicode-width v0.2.2
+   Compiling bytecount v0.6.9
+   Compiling heck v0.5.0
+   Compiling fnv v1.0.7
+   Compiling thiserror v2.0.21
+   Compiling papergrid v0.17.0
+   Compiling clap_derive v4.6.7
+   Compiling tokio v1.53.2
+   Compiling tracing-core v0.1.36
+   Compiling clap_builder v4.6.7
+   Compiling derive_more-impl v2.1.1
+   Compiling sha2 v0.10.9
+   Compiling validit v0.2.6
+   Compiling openraft-rt v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling ring v0.17.14
+   Compiling tracing-attributes v0.1.31
+   Compiling thiserror-impl v2.0.21
+   Compiling either v1.19.0
+   Compiling zmij v1.0.23
+   Compiling itertools v0.15.0
+   Compiling tracing v0.1.44
+   Compiling openraft-rt-tokio v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling quorum-set v0.2.2
+   Compiling display-more v0.2.6
+   Compiling derive_more v2.1.1
+   Compiling clap v4.6.7
+   Compiling tabled v0.20.0
+   Compiling futures-executor v0.3.34
+   Compiling backoff-series v0.1.1
+   Compiling smallvec v1.16.3
+   Compiling anyhow v1.0.104
+   Compiling peel-off v0.1.1
+   Compiling maplit v1.0.2
+   Compiling serde_json v1.0.154
+   Compiling base2histogram v0.2.3
+   Compiling parse-size v1.1.0
+   Compiling openraft v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling futures v0.3.34
+   Compiling getrandom v0.2.17
+   Compiling itoa v1.0.18
+   Compiling untrusted v0.9.0
+   Compiling voteboat v0.1.0 (/home/karllivesey/voteboat-p9-pi443-2YkqdC/source)
+   Compiling openraft-legacy v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling bench-minimal v0.1.0 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling voteboat-matched-framework v0.1.0 (/home/karllivesey/voteboat-p9-pi443-2YkqdC/source/benchmarks/matched)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7m 45s
+     Running unittests src/main.rs (voteboat-p9-pi443-2YkqdC/target-checks/debug/deps/voteboat_matched_framework-7aa86b0df8fb69cc)
+error: test failed, to rerun pass `--bin voteboat-matched-framework`
+test voteboat_engine::client_requests::first_wrong_receipt_returns_while_later_sender_remains_owned ... ok
+test voteboat_engine::client_requests::flat_request_layout_and_every_channel_capacity_are_reported_at_queue_boundary ... ok
+test voteboat_engine::client_requests::queued_client_cancellation_drops_every_original_wait_without_losing_request ... ok
+test voteboat_engine::client_requests::zero_identity_never_publishes_a_partial_request_and_precedes_send_error ... ok
+test voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install ... FAILED
+test voteboat_engine::tests::queued_three_voter_originals_keep_every_receipt_and_respect_the_bound ... ok
+test workload::aggregation_tests::post_clock_aggregation_preserves_each_original_sample_and_rejects_malformed_counts ... ok
+test workload::tests::actual_maintenance_keeps_original_results_and_all_follower_prefixes ... ok
+test workload::tests::both_engines_finish_every_original_for_single_and_four_entry_requests ... ok
+test workload::tests::unavailable_upstream_attribution_is_rejected_explicitly ... ok
+
+failures:
+
+---- voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install stdout ----
+
+thread 'voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install' (3294) panicked at src/voteboat_engine.rs:373:59:
+called `Result::unwrap()` on an `Err` value: RecvError(())
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install
+
+test result: FAILED. 63 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.55s
+

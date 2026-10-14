@@ -1,0 +1,21 @@
+{
+  "original_handle": 18543,
+  "actual_wrapper_exit": 101,
+  "test_exit": 101,
+  "termination": "manual SIGTERM authorized root, verified PID3596 ELF path, elapsed3m24s CPU6s stateSl",
+  "actor_error_observed": false,
+  "causal_result": "unestablished; stalled one-test diagnostic interrupted, not a natural failure or successful control",
+  "restoration_exit": 0,
+  "restoration_inputs": 1434,
+  "original_fullsuite_status": 101,
+  "original_suite_passed": 63,
+  "original_suite_failed": 1,
+  "setup_attempt": {
+    "handle": 68120,
+    "actual_wrapper_exit": 0,
+    "actual_metadata_exit": 1,
+    "reason": "git apply changed file mode; wrapper rc global clobbered receipt; both focused target-only fixes preserved",
+    "test_started": false,
+    "restored_source_exit": 0
+  }
+}

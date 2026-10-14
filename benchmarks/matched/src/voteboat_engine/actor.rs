@@ -43,6 +43,8 @@ pub(super) struct Actor<const TRACE: bool = false> {
     deferred: Option<Request>,
     last_snapshot_at: u64,
     last_contact: Instant,
+    #[cfg(test)]
+    tick_paused: bool,
 }
 impl<const TRACE: bool> Actor<TRACE> {
     pub fn new(parts: Parts<TRACE>) -> Self {
@@ -54,6 +56,8 @@ impl<const TRACE: bool> Actor<TRACE> {
             deferred: None,
             last_snapshot_at: 0,
             last_contact: Instant::now(),
+            #[cfg(test)]
+            tick_paused: false,
         }
     }
     pub async fn run(mut self) -> Result<Option<Attribution>, Failure> {
@@ -142,6 +146,16 @@ impl<const TRACE: bool> Actor<TRACE> {
         }
     }
     fn tick(&mut self) -> Result<(), Failure> {
+        #[cfg(test)]
+        {
+            if self.parts.paused[self.parts.slot].load(Ordering::Acquire) {
+                self.tick_paused = true;
+                return Ok(());
+            }
+            if std::mem::take(&mut self.tick_paused) {
+                self.last_contact = Instant::now();
+            }
+        }
         let event = if self.parts.core.role() == Role::Leader {
             Some(Event::Heartbeat)
         } else if self.last_contact.elapsed() >= Duration::from_millis(2000) {

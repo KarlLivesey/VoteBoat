@@ -1,0 +1,316 @@
+REMOTE_JOB=/home/karllivesey/voteboat-p9-pi443-2YkqdC
+START default-before
+stable-aarch64-unknown-linux-gnu (default)
+END default-before exit=0
+START toolchains-before
+stable-aarch64-unknown-linux-gnu (default)
+END toolchains-before exit=0
+START install-rust1981
+
+  1.98.1-aarch64-unknown-linux-gnu installed - rustc 1.98.1 (48a229cea 2026-09-01)
+
+END install-rust1981 exit=0
+START rustc1981
+rustc 1.98.1 (48a229cea 2026-09-01)
+binary: rustc
+commit-hash: 48a229ceaefd4985c50990b14116b6d856af0985
+commit-date: 2026-09-01
+host: aarch64-unknown-linux-gnu
+release: 1.98.1
+LLVM version: 22.1.8
+END rustc1981 exit=0
+START cargo1981
+cargo 1.98.1 (797e8a9bc 2026-08-05)
+END cargo1981 exit=0
+START rustc-path
+/home/karllivesey/.rustup/toolchains/1.98.1-aarch64-unknown-linux-gnu/bin/rustc
+END rustc-path exit=0
+START cargo-path
+/home/karllivesey/.rustup/toolchains/1.98.1-aarch64-unknown-linux-gnu/bin/cargo
+END cargo-path exit=0
+START default-after
+stable-aarch64-unknown-linux-gnu (default)
+END default-after exit=0
+TOOL_STAGE=protobuf
+START download-protobuf
+Get:1 http://deb.debian.org/debian trixie/main arm64 libprotoc32t64 arm64 3.21.12-11+deb13u1 [790 kB]
+Get:2 http://deb.debian.org/debian trixie/main arm64 protobuf-compiler arm64 3.21.12-11+deb13u1 [85.0 kB]
+Fetched 876 kB in 0s (5,399 kB/s)
+END download-protobuf exit=0
+START packages-sha
+protobuf-compiler_3.21.12-11+deb13u1_arm64.deb: OK
+libprotoc32t64_3.21.12-11+deb13u1_arm64.deb: OK
+END packages-sha exit=0
+START extract-compiler
+END extract-compiler exit=0
+START extract-library
+END extract-library exit=0
+START protoc-version
+libprotoc 3.21.12
+END protoc-version exit=0
+START protoc-elf
+ELF Header:
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00 
+  Class:                             ELF64
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              DYN (Position-Independent Executable file)
+  Machine:                           AArch64
+  Version:                           0x1
+  Entry point address:               0x1780
+  Start of program headers:          64 (bytes into file)
+  Start of section headers:          66152 (bytes into file)
+  Flags:                             0x0
+  Size of this header:               64 (bytes)
+  Size of program headers:           56 (bytes)
+  Number of program headers:         12
+  Size of section headers:           64 (bytes)
+  Number of section headers:         29
+  Section header string table index: 28
+END protoc-elf exit=0
+START protoc-dynamic
+
+Dynamic section at offset 0xfd70 contains 31 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libprotoc.so.32]
+ 0x0000000000000001 (NEEDED)             Shared library: [libstdc++.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libgcc_s.so.1]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [ld-linux-aarch64.so.1]
+ 0x000000000000000c (INIT)               0x1410
+ 0x000000000000000d (FINI)               0x25f8
+ 0x0000000000000019 (INIT_ARRAY)         0x1fd60
+ 0x000000000000001b (INIT_ARRAYSZ)       8 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x1fd68
+ 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x340
+ 0x0000000000000005 (STRTAB)             0x720
+ 0x0000000000000006 (SYMTAB)             0x360
+ 0x000000000000000a (STRSZ)              2006 (bytes)
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000015 (DEBUG)              0x0
+ 0x0000000000000003 (PLTGOT)             0x1ffe8
+ 0x0000000000000002 (PLTRELSZ)           744 (bytes)
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000017 (JMPREL)             0x1128
+ 0x0000000000000007 (RELA)               0x1008
+ 0x0000000000000008 (RELASZ)             288 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x0000000070000001 (AARCH64_BTI_PLT)    
+ 0x000000006ffffffb (FLAGS_1)            Flags: PIE
+ 0x000000006ffffffe (VERNEED)            0xf48
+ 0x000000006fffffff (VERNEEDNUM)         4
+ 0x000000006ffffff0 (VERSYM)             0xef6
+ 0x000000006ffffff9 (RELACOUNT)          4
+ 0x0000000000000000 (NULL)               0x0
+END protoc-dynamic exit=0
+START protoc-loader
+	linux-vdso.so.1 (0x0000007f98ccf000)
+	libprotoc.so.32 => /home/karllivesey/voteboat-p9-pi443-2YkqdC/tools/protobuf/usr/lib/aarch64-linux-gnu/libprotoc.so.32 (0x0000007f98950000)
+	libstdc++.so.6 => /lib/aarch64-linux-gnu/libstdc++.so.6 (0x0000007f986e0000)
+	libgcc_s.so.1 => /lib/aarch64-linux-gnu/libgcc_s.so.1 (0x0000007f986a0000)
+	libc.so.6 => /lib/aarch64-linux-gnu/libc.so.6 (0x0000007f984e0000)
+	/lib/ld-linux-aarch64.so.1 (0x0000007f98c80000)
+	libprotobuf.so.32 => /lib/aarch64-linux-gnu/libprotobuf.so.32 (0x0000007f98170000)
+	libm.so.6 => /lib/aarch64-linux-gnu/libm.so.6 (0x0000007f980c0000)
+	libz.so.1 => /lib/aarch64-linux-gnu/libz.so.1 (0x0000007f98080000)
+END protoc-loader exit=0
+START installed-protobuf
+libprotobuf32t64:arm64	3.21.12-11+deb13u1
+END installed-protobuf exit=0
+START tool-hashes
+d4217a981a778bfe445c0a29c408f5a25a92e9bb5222701579ad5a35bd913e8f  /home/karllivesey/.rustup/toolchains/1.98.1-aarch64-unknown-linux-gnu/bin/rustc
+2101d7104b91a013912c94275dcd31c2b41061ef7f6e8530df11cdad55b8fbc5  /home/karllivesey/.rustup/toolchains/1.98.1-aarch64-unknown-linux-gnu/bin/cargo
+3e6d9e59330ec98902f8f7a322d9e4167da678a9f369f0fbf01d5eb77e48041d  /home/karllivesey/voteboat-p9-pi443-2YkqdC/tools/protoc
+d02c5803d8497e2e322999a52429bcac677ebf5f4eff46faa3f2e7ddbbbdb892  /home/karllivesey/voteboat-p9-pi443-2YkqdC/tools/protobuf/usr/bin/protoc
+4e3b8a4cabf9cf8aeda9473f72cee5998e0d25dfa0cf707c8f05e7821983b675  /home/karllivesey/voteboat-p9-pi443-2YkqdC/tools/protobuf/usr/lib/aarch64-linux-gnu/libprotoc.so.32.0.12
+END tool-hashes exit=0
+START filesystem
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/mmcblk0p2   59G  6.7G   49G  13% /
+tmpfs           1.9G     0  1.9G   0% /tmp
+END filesystem exit=0
+START memory
+               total        used        free      shared  buff/cache   available
+Mem:           3.7Gi       325Mi       990Mi       9.0Mi       2.5Gi       3.4Gi
+Swap:          2.0Gi          0B       2.0Gi
+END memory exit=0
+START load
+ 09:34:21 up 19 min,  2 users,  load average: 1.05, 0.29, 0.21
+END load exit=0
+START selected-processes
+    PID USER         ELAPSED STAT COMMAND         %CPU
+    596 avahi          19:06 Ss   avahi-daemon     0.8
+   1342 root           00:09 I    kworker/u16:0-k  0.6
+   1344 root           00:07 Ssl  nm-dispatcher    0.2
+   1301 root           00:28 Ss   sshd-session     0.2
+      1 root           19:16 Ss   systemd          0.1
+    814 root           19:03 Ssl  containerd       0.1
+    845 root           18:54 Ssl  dockerd          0.1
+     52 root           19:16 I    kworker/u16:3-k  0.0
+     64 root           19:15 I<   kworker/0:1H-mm  0.0
+    643 root           19:06 Ssl  NetworkManager   0.0
+   1310 karlliv+       00:28 Ss   sh               0.0
+     75 root           19:15 I<   kworker/1:1H-kb  0.0
+    291 root           19:11 Ss   systemd-journal  0.0
+   1309 karlliv+       00:28 S    sshd-session     0.0
+     44 root           19:16 I    kworker/u16:1-w  0.0
+    599 message+       19:06 Ss   dbus-daemon      0.0
+    345 root           19:11 Ss   systemd-udevd    0.0
+   1031 karlliv+       18:26 Ss   systemd          0.0
+     54 root           19:16 I<   kworker/2:1H-kb  0.0
+   1058 karlliv+       18:25 S    sshd-session     0.0
+     96 root           19:15 I<   kworker/3:1H-kb  0.0
+    604 root           19:06 Ss   systemd-logind   0.0
+   1288 root           05:45 I    kworker/2:1-mm_  0.0
+    854 root           18:54 Ssl  apcupsd          0.0
+    171 root           19:14 S    jbd2/mmcblk0p2-  0.0
+   1287 root           08:11 I    kworker/1:0-eve  0.0
+   1298 root           02:52 I    kworker/0:0-eve  0.0
+   1299 root           01:28 I    kworker/1:1-eve  0.0
+    320 systemd+       19:11 Ssl  systemd-timesyn  0.0
+   1059 karlliv+       18:25 Ss+  bash             0.0
+     58 root           19:15 I    kworker/3:1-mm_  0.0
+     15 root           19:16 I    rcu_preempt      0.0
+    597 root           19:06 Ss   bluetoothd       0.0
+     46 root           19:16 S    kcompactd0       0.0
+    823 root           19:03 Ss   sshd             0.0
+     73 root           19:15 I    kworker/1:3-mm_  0.0
+     66 root           19:15 I    kworker/0:2-eve  0.0
+   1026 root           18:26 Ss   sshd-session     0.0
+    817 root           19:03 Ss+  agetty           0.0
+   1285 root           08:14 I    kworker/0:1-mld  0.0
+    646 root           19:06 Ss   wpa_supplicant   0.0
+     47 root           19:16 S    kcompactd1       0.0
+   1286 root           08:13 I    kworker/3:2-eve  0.0
+   1056 karlliv+       18:25 Ss   dbus-daemon      0.0
+   1051 karlliv+       18:26 Ss   mpris-proxy      0.0
+    598 root           19:06 Ss   cron             0.0
+     28 root           19:16 I    kworker/2:0-mm_  0.0
+    554 root           19:09 I<   kworker/u17:3-h  0.0
+    219 root           19:13 I<   kworker/0:2H-mm  0.0
+      2 root           19:16 S    kthreadd         0.0
+     14 root           19:16 S    ksoftirqd/0      0.0
+      3 root           19:16 S    pool_workqueue_  0.0
+      4 root           19:16 I<   kworker/R-rcu_g  0.0
+      5 root           19:16 I<   kworker/R-sync_  0.0
+      6 root           19:16 I<   kworker/R-kvfre  0.0
+      7 root           19:16 I<   kworker/R-slub_  0.0
+      8 root           19:16 I<   kworker/R-netns  0.0
+     13 root           19:16 I<   kworker/R-mm_pe  0.0
+     16 root           19:16 S    rcu_exp_par_gp_  0.0
+     17 root           19:16 S    rcu_exp_gp_kthr  0.0
+     18 root           19:16 S    migration/0      0.0
+     19 root           19:16 S    cpuhp/0          0.0
+     20 root           19:16 S    cpuhp/1          0.0
+     21 root           19:16 S    migration/1      0.0
+     22 root           19:16 S    ksoftirqd/1      0.0
+     25 root           19:16 S    cpuhp/2          0.0
+     26 root           19:16 S    migration/2      0.0
+     27 root           19:16 S    ksoftirqd/2      0.0
+     29 root           19:16 I<   kworker/2:0H-kb  0.0
+     30 root           19:16 S    cpuhp/3          0.0
+     31 root           19:16 S    migration/3      0.0
+     32 root           19:16 S    ksoftirqd/3      0.0
+     34 root           19:16 I<   kworker/3:0H-ev  0.0
+     35 root           19:16 S    kdevtmpfs        0.0
+     36 root           19:16 I<   kworker/R-inet_  0.0
+     37 root           19:16 I    rcu_tasks_kthre  0.0
+     38 root           19:16 I    rcu_tasks_rude_  0.0
+     39 root           19:16 I    rcu_tasks_trace  0.0
+     40 root           19:16 S    kauditd          0.0
+     42 root           19:16 S    khungtaskd       0.0
+     43 root           19:16 S    oom_reaper       0.0
+     45 root           19:16 I<   kworker/R-write  0.0
+     48 root           19:16 I<   kworker/R-kbloc  0.0
+     49 root           19:16 I<   kworker/R-blkcg  0.0
+     50 root           19:16 I<   kworker/R-kinte  0.0
+     53 root           19:16 S    watchdogd        0.0
+     55 root           19:15 I<   kworker/R-quota  0.0
+     56 root           19:15 I<   kworker/R-rpcio  0.0
+     57 root           19:15 I<   kworker/R-xprti  0.0
+     59 root           19:15 S    kswapd0          0.0
+     60 root           19:15 S    kswapd1          0.0
+     61 root           19:15 I<   kworker/R-nfsio  0.0
+     62 root           19:15 I<   kworker/R-kthro  0.0
+     65 root           19:15 I<   kworker/u17:0-b  0.0
+     76 root           19:15 S    irq/27-aerdrv    0.0
+     79 root           19:15 S    hwrng            0.0
+     80 root           19:15 I<   kworker/R-iscsi  0.0
+     81 root           19:15 I<   kworker/R-nvme-  0.0
+     82 root           19:15 I<   kworker/R-nvme-  0.0
+     83 root           19:15 I<   kworker/R-nvme-  0.0
+     85 root           19:15 I<   kworker/R-DWC N  0.0
+     86 root           19:15 I<   kworker/R-uas    0.0
+     87 root           19:15 S<   vchiq-slot/0     0.0
+     88 root           19:15 S<   vchiq-recy/0     0.0
+     89 root           19:15 S<   vchiq-sync/0     0.0
+     90 root           19:15 I<   kworker/R-kstrp  0.0
+     92 root           19:15 I    kworker/u16:4-k  0.0
+     93 root           19:15 I<   kworker/R-sdhci  0.0
+     94 root           19:15 S    irq/40-mmc0      0.0
+    124 root           19:14 I<   kworker/R-mmc_c  0.0
+    172 root           19:14 I<   kworker/R-ext4-  0.0
+    189 root           19:13 I<   kworker/R-mld    0.0
+    190 root           19:13 I<   kworker/R-ipv6_  0.0
+    214 root           19:13 I<   kworker/1:2H     0.0
+    430 root           19:10 S    vchiq-keep/0     0.0
+    444 root           19:09 S<   SMIO             0.0
+    445 root           19:09 I<   kworker/R-v3d_b  0.0
+    446 root           19:09 I<   kworker/R-v3d_r  0.0
+    447 root           19:09 I<   kworker/R-v3d_t  0.0
+    448 root           19:09 I<   kworker/R-v3d_c  0.0
+    449 root           19:09 I<   kworker/R-v3d_c  0.0
+    450 root           19:09 I<   kworker/R-v3d_c  0.0
+    451 root           19:09 I<   kworker/R-mmal-  0.0
+    452 root           19:09 S    irq/42-feb00000  0.0
+    453 root           19:09 I<   kworker/R-mmal-  0.0
+    464 root           19:09 I<   kworker/R-mmal-  0.0
+    465 root           19:09 I<   kworker/R-mmal-  0.0
+    467 root           19:09 I<   kworker/R-mmal-  0.0
+    469 root           19:09 I<   kworker/R-mmal-  0.0
+    470 root           19:09 I<   kworker/R-mmal-  0.0
+    481 root           19:09 I<   kworker/R-cfg80  0.0
+    497 root           19:09 S    irq/44-vc4 hdmi  0.0
+    498 root           19:09 S    irq/45-vc4 hdmi  0.0
+    499 root           19:09 S    cec-vc4-hdmi-0   0.0
+    500 root           19:09 S    irq/46-vc4 hdmi  0.0
+    502 root           19:09 S    irq/47-vc4 hdmi  0.0
+    505 root           19:09 S    irq/48-vc4 hdmi  0.0
+    506 root           19:09 S    irq/49-vc4 hdmi  0.0
+    507 root           19:09 S    cec-vc4-hdmi-1   0.0
+    508 root           19:09 S    irq/50-vc4 hdmi  0.0
+    509 root           19:09 S    irq/51-vc4 hdmi  0.0
+    511 root           19:09 S    card1-crtc0      0.0
+    512 root           19:09 S    card1-crtc1      0.0
+    513 root           19:09 S    card1-crtc2      0.0
+    514 root           19:09 S    card1-crtc3      0.0
+    515 root           19:09 S    card1-crtc4      0.0
+    516 root           19:09 S    card1-crtc5      0.0
+    538 root           19:09 I<   kworker/R-brcmf  0.0
+    539 root           19:09 S    brcmf_wdog/mmc1  0.0
+    616 avahi          19:06 S    avahi-daemon     0.0
+    693 root           19:06 S<   krfcommd         0.0
+   1033 karlliv+       18:26 S    (sd-pam)         0.0
+   1300 root           01:05 I    kworker/3:0-eve  0.0
+   1340 root           00:11 I<   kworker/0:0H     0.0
+   1341 root           00:10 I    kworker/2:2-eve  0.0
+   1343 root           00:08 I<   kworker/1:0H     0.0
+   1349 root           00:06 I<   kworker/2:2H     0.0
+   1434 karlliv+       00:00 R    ps               0.0
+END selected-processes exit=0
+START temperature
+temp=50.1'C
+END temperature exit=0
+START throttled
+throttled=0x0
+END throttled exit=0
+START arm-frequency
+frequency(48)=1500398464
+END arm-frequency exit=0
+START governor
+ondemand
+END governor exit=0
+TOOLS_SETUP_END job=/home/karllivesey/voteboat-p9-pi443-2YkqdC

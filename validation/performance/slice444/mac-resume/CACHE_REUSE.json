@@ -1,0 +1,12 @@
+{
+  "cache": "/tmp/voteboat-mac441-d4f1d39-cpLN4U/target-matched-checks",
+  "source_scope": "exact compiledroot/config/locks bytehashes; currentchangedtests execute, no test-result reuse claim",
+  "exact_inputs": 633,
+  "compiler_tools_same": true,
+  "old_command_receipts_sha256": {
+    "replies": "019cd3a38d1bb60fb0a1cfbc7748765c954b6b6bdb21aafc1397e1ef7fe222a0",
+    "matched_fmt": "f22486061c92dceb1000f8c63dab3f6d0780fca39446024eba9b5d6e094ccefb",
+    "matched_strict": "06a548af9fc13835473b3c22e2ab73745ebe6359c5c5efe47af3be4260dbc095"
+  },
+  "no_performance_library_freshness_claim": true
+}

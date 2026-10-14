@@ -1,0 +1,17 @@
+{
+  "published_base": "6be136ae6c33e07e8358b7a6141030a573efd920",
+  "reviewed_overlay_sha256": "bb5fd18ce76ae374fee52d97ffaa71c5af48e73c43b4078fad426aca46e402a5",
+  "only3_declared_changed_inputs": [
+    "benchmarks/matched/src/voteboat_engine.rs",
+    "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests.rs"
+  ],
+  "actor_remove_exact3_cfgtest_blocks_equals_committed_base": true,
+  "engine_prefix_before_cfgtest_module_exact": true,
+  "other_changed_file_cfgtest_only": true,
+  "frozen_reviewed_source_three_paths_hash_match": true,
+  "resume_contact_refresh_not_production_timer_change": true,
+  "Linux92564_status0_DONE_before_Mac_launch": true,
+  "not_committed_source_or_performance_artifact": true,
+  "prior_prepared_overlay_retained_unrun": "prepared-initial"
+}

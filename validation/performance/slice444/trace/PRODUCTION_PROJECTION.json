@@ -1,0 +1,8 @@
+{
+  "trace_actor_removed_cfg_test_blocks_reproduces_initial444_bytes": true,
+  "all_actor_diagnostics_removed_reproduces_clean443_production_bytes": true,
+  "snapshot_fragment_inside_existing_cfg_test_module": true,
+  "unchanged_outside_snapshot_fragment": true,
+  "root_library_inputs_unchanged": true,
+  "no_production_timers_queues_roles_protocol_outcomes_changed": true
+}

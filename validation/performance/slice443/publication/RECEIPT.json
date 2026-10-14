@@ -1,0 +1,9 @@
+{
+  "commit": "6be136ae6c33e07e8358b7a6141030a573efd920",
+  "original_push_handle": 75978,
+  "actual_terminal_exit": 0,
+  "enabled_full_hook": ".githooks/pre-push",
+  "format_four_root_strict_profiles_and_standalone": 0,
+  "github_main_verified_exact_at_publication": true,
+  "P9_active_incomplete": true
+}

@@ -39,7 +39,7 @@ use the same Pi/compiler/profile. Fresh asserted opt3/debug2/thinLTO/codegen1 bu
 unset inherited flags/wrappers, capture CargoJSON and actual verbose rustc flags,
 root/executable/upstream library/minimal fresh:false plus source/lock/tool/symbol
 identities. Native disk results/profile are separate, including the SD device.
-Initial cells1/batch1 and4096/batch4, three rotating trials,1,048,576 originals each,
+Cover all seven framework cells (batch1 clients1/64/256/512/1024/4096 and batch4 clients4096), three rotating trials,1,048,576 originals each,
 VoteBoat OFF/ON and OpenRaft. These are diagnostic baselines, not20M acceptance or
 hardware-normalized speedups. Batch4 equivalent envelopes and upstream soft merge
 threshold, snapshot representations and timer-after-client-joins-before-sorting/
