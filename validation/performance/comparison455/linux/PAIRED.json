@@ -1,0 +1,600 @@
+{
+  "cases": 12,
+  "failures": [],
+  "variants": {
+    "baseline": {
+      "rates": [
+        7179899.324761519,
+        6513642.196489719,
+        7362011.079873672
+      ],
+      "median_completed_originals_per_second": 7179899.324761519,
+      "median_request_p50_ms": 2.201997,
+      "median_request_p99_ms": 3.719268
+    },
+    "candidate": {
+      "rates": [
+        6515312.133803832,
+        7354066.415474132,
+        7027308.267487542
+      ],
+      "median_completed_originals_per_second": 7027308.267487542,
+      "median_request_p50_ms": 2.271387,
+      "median_request_p99_ms": 3.715712
+    },
+    "on": {
+      "rates": [
+        7342280.819768375,
+        7278910.462473986,
+        6823075.8249395285
+      ],
+      "median_completed_originals_per_second": 7278910.462473986,
+      "median_request_p50_ms": 2.195725,
+      "median_request_p99_ms": 3.50228
+    },
+    "openraft": {
+      "rates": [
+        2994515.705700781,
+        2881622.359293246,
+        3196237.5289140157
+      ],
+      "median_completed_originals_per_second": 2994515.705700781,
+      "median_request_p50_ms": 5.114239,
+      "median_request_p99_ms": 8.73393
+    }
+  },
+  "paired": [
+    {
+      "trial": 1,
+      "OFF_rate_ratio": 0.9074378120225577,
+      "OFF_p99_ratio": 1.258644174068661,
+      "baseline_rate": 7179899.324761519,
+      "candidate_rate": 6515312.133803832,
+      "baseline_p99_ms": 3.719268,
+      "candidate_p99_ms": 4.681235,
+      "ON_rate_ratio_to_candidate": 1.1269269482384312,
+      "ON_p99_ratio_to_candidate": 0.7245893444785404
+    },
+    {
+      "trial": 2,
+      "OFF_rate_ratio": 1.1290252355951218,
+      "OFF_p99_ratio": 0.7513457872467931,
+      "baseline_rate": 6513642.196489719,
+      "candidate_rate": 7354066.415474132,
+      "baseline_p99_ms": 4.645608,
+      "candidate_p99_ms": 3.490458,
+      "ON_rate_ratio_to_candidate": 0.9897803543299519,
+      "ON_p99_ratio_to_candidate": 1.003386948073863
+    },
+    {
+      "trial": 3,
+      "OFF_rate_ratio": 0.9545364970583726,
+      "OFF_p99_ratio": 1.020994381622655,
+      "baseline_rate": 7362011.079873672,
+      "candidate_rate": 7027308.267487542,
+      "baseline_p99_ms": 3.639307,
+      "candidate_p99_ms": 3.715712,
+      "ON_rate_ratio_to_candidate": 0.9709373155731743,
+      "ON_p99_ratio_to_candidate": 1.0445082934307073
+    }
+  ],
+  "counts": [
+    [
+      19988480,
+      4997120,
+      [
+        19989505,
+        19989505,
+        19989505
+      ]
+    ]
+  ],
+  "maintenance_scope": {
+    "logical_counts_only": true,
+    "physical_memory_or_debt_bound_proven": false,
+    "refusal_count_unavailable": true,
+    "cases": [
+      {
+        "variant": "baseline",
+        "trial": 1,
+        "completed_originals": 19988480,
+        "completed_requests": 4997120,
+        "applied_frontiers": [
+          19989505,
+          19989505,
+          19989505
+        ],
+        "maintenance": [
+          {
+            "retained_entries": 3280,
+            "peak_retained_entries": 22324,
+            "peak_peer_queue": 23,
+            "peak_client_queue": 4096,
+            "persistence_units": 79659,
+            "checkpoint_count": 3874,
+            "snapshot_installs": 0,
+            "proposal_batches": 47318,
+            "proposed_originals": 19989504,
+            "maximum_proposal_width": 16384
+          },
+          {
+            "retained_entries": 2256,
+            "peak_retained_entries": 8036,
+            "peak_peer_queue": 22,
+            "peak_client_queue": 0,
+            "persistence_units": 26044,
+            "checkpoint_count": 3850,
+            "snapshot_installs": 1249,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          },
+          {
+            "retained_entries": 2232,
+            "peak_retained_entries": 8036,
+            "peak_peer_queue": 21,
+            "peak_client_queue": 0,
+            "persistence_units": 26163,
+            "checkpoint_count": 3854,
+            "snapshot_installs": 1503,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          }
+        ],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "candidate",
+        "trial": 1,
+        "completed_originals": 19988480,
+        "completed_requests": 4997120,
+        "applied_frontiers": [
+          19989505,
+          19989505,
+          19989505
+        ],
+        "maintenance": [
+          {
+            "retained_entries": 4844,
+            "peak_retained_entries": 22084,
+            "peak_peer_queue": 37,
+            "peak_client_queue": 4096,
+            "persistence_units": 62524,
+            "checkpoint_count": 3889,
+            "snapshot_installs": 0,
+            "proposal_batches": 37123,
+            "proposed_originals": 19989504,
+            "maximum_proposal_width": 16384
+          },
+          {
+            "retained_entries": 3672,
+            "peak_retained_entries": 8036,
+            "peak_peer_queue": 30,
+            "peak_client_queue": 0,
+            "persistence_units": 22420,
+            "checkpoint_count": 3872,
+            "snapshot_installs": 1176,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          },
+          {
+            "retained_entries": 1624,
+            "peak_retained_entries": 8044,
+            "peak_peer_queue": 36,
+            "peak_client_queue": 0,
+            "persistence_units": 22043,
+            "checkpoint_count": 3871,
+            "snapshot_installs": 1799,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          }
+        ],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "on",
+        "trial": 1,
+        "completed_originals": 19988480,
+        "completed_requests": 4997120,
+        "applied_frontiers": [
+          19989505,
+          19989505,
+          19989505
+        ],
+        "maintenance": [
+          {
+            "retained_entries": 5500,
+            "peak_retained_entries": 22344,
+            "peak_peer_queue": 20,
+            "peak_client_queue": 4096,
+            "persistence_units": 63314,
+            "checkpoint_count": 3891,
+            "snapshot_installs": 0,
+            "proposal_batches": 38395,
+            "proposed_originals": 19989504,
+            "maximum_proposal_width": 16384
+          },
+          {
+            "retained_entries": 4476,
+            "peak_retained_entries": 8040,
+            "peak_peer_queue": 21,
+            "peak_client_queue": 0,
+            "persistence_units": 21753,
+            "checkpoint_count": 3879,
+            "snapshot_installs": 1679,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          },
+          {
+            "retained_entries": 4452,
+            "peak_retained_entries": 8040,
+            "peak_peer_queue": 18,
+            "peak_client_queue": 0,
+            "persistence_units": 22283,
+            "checkpoint_count": 3881,
+            "snapshot_installs": 1331,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          }
+        ],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "openraft",
+        "trial": 1,
+        "completed_originals": 19988480,
+        "completed_requests": 4997120,
+        "applied_frontiers": [
+          19989505,
+          19989505,
+          19989505
+        ],
+        "maintenance": [],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "baseline",
+        "trial": 2,
+        "completed_originals": 19988480,
+        "completed_requests": 4997120,
+        "applied_frontiers": [
+          19989505,
+          19989505,
+          19989505
+        ],
+        "maintenance": [
+          {
+            "retained_entries": 2232,
+            "peak_retained_entries": 22276,
+            "peak_peer_queue": 61,
+            "peak_client_queue": 4096,
+            "persistence_units": 74577,
+            "checkpoint_count": 3882,
+            "snapshot_installs": 0,
+            "proposal_batches": 46423,
+            "proposed_originals": 19989504,
+            "maximum_proposal_width": 16368
+          },
+          {
+            "retained_entries": 1208,
+            "peak_retained_entries": 8044,
+            "peak_peer_queue": 61,
+            "peak_client_queue": 0,
+            "persistence_units": 23336,
+            "checkpoint_count": 3863,
+            "snapshot_installs": 1767,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          },
+          {
+            "retained_entries": 2232,
+            "peak_retained_entries": 8036,
+            "peak_peer_queue": 92,
+            "peak_client_queue": 0,
+            "persistence_units": 24374,
+            "checkpoint_count": 3863,
+            "snapshot_installs": 1277,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          }
+        ],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "candidate",
+        "trial": 2,
+        "completed_originals": 19988480,
+        "completed_requests": 4997120,
+        "applied_frontiers": [
+          19989505,
+          19989505,
+          19989505
+        ],
+        "maintenance": [
+          {
+            "retained_entries": 3688,
+            "peak_retained_entries": 22228,
+            "peak_peer_queue": 26,
+            "peak_client_queue": 4094,
+            "persistence_units": 62692,
+            "checkpoint_count": 3890,
+            "snapshot_installs": 0,
+            "proposal_batches": 37957,
+            "proposed_originals": 19989504,
+            "maximum_proposal_width": 16384
+          },
+          {
+            "retained_entries": 5736,
+            "peak_retained_entries": 8036,
+            "peak_peer_queue": 17,
+            "peak_client_queue": 0,
+            "persistence_units": 21816,
+            "checkpoint_count": 3878,
+            "snapshot_installs": 1671,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          },
+          {
+            "retained_entries": 1616,
+            "peak_retained_entries": 7992,
+            "peak_peer_queue": 25,
+            "peak_client_queue": 0,
+            "persistence_units": 22150,
+            "checkpoint_count": 3880,
+            "snapshot_installs": 1443,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          }
+        ],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "on",
+        "trial": 2,
+        "completed_originals": 19988480,
+        "completed_requests": 4997120,
+        "applied_frontiers": [
+          19989505,
+          19989505,
+          19989505
+        ],
+        "maintenance": [
+          {
+            "retained_entries": 5880,
+            "peak_retained_entries": 22352,
+            "peak_peer_queue": 14,
+            "peak_client_queue": 4095,
+            "persistence_units": 64444,
+            "checkpoint_count": 3888,
+            "snapshot_installs": 0,
+            "proposal_batches": 38685,
+            "proposed_originals": 19989504,
+            "maximum_proposal_width": 15976
+          },
+          {
+            "retained_entries": 4856,
+            "peak_retained_entries": 8044,
+            "peak_peer_queue": 16,
+            "peak_client_queue": 0,
+            "persistence_units": 22511,
+            "checkpoint_count": 3874,
+            "snapshot_installs": 1474,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          },
+          {
+            "retained_entries": 3808,
+            "peak_retained_entries": 8044,
+            "peak_peer_queue": 13,
+            "peak_client_queue": 0,
+            "persistence_units": 22462,
+            "checkpoint_count": 3874,
+            "snapshot_installs": 1453,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          }
+        ],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "openraft",
+        "trial": 2,
+        "completed_originals": 19988480,
+        "completed_requests": 4997120,
+        "applied_frontiers": [
+          19989505,
+          19989505,
+          19989505
+        ],
+        "maintenance": [],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "baseline",
+        "trial": 3,
+        "completed_originals": 19988480,
+        "completed_requests": 4997120,
+        "applied_frontiers": [
+          19989505,
+          19989505,
+          19989505
+        ],
+        "maintenance": [
+          {
+            "retained_entries": 2152,
+            "peak_retained_entries": 22144,
+            "peak_peer_queue": 38,
+            "peak_client_queue": 4096,
+            "persistence_units": 65577,
+            "checkpoint_count": 3881,
+            "snapshot_installs": 0,
+            "proposal_batches": 38788,
+            "proposed_originals": 19989504,
+            "maximum_proposal_width": 16384
+          },
+          {
+            "retained_entries": 1104,
+            "peak_retained_entries": 8044,
+            "peak_peer_queue": 38,
+            "peak_client_queue": 0,
+            "persistence_units": 23231,
+            "checkpoint_count": 3853,
+            "snapshot_installs": 1497,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          },
+          {
+            "retained_entries": 4200,
+            "peak_retained_entries": 8044,
+            "peak_peer_queue": 58,
+            "peak_client_queue": 0,
+            "persistence_units": 23490,
+            "checkpoint_count": 3859,
+            "snapshot_installs": 1337,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          }
+        ],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "candidate",
+        "trial": 3,
+        "completed_originals": 19988480,
+        "completed_requests": 4997120,
+        "applied_frontiers": [
+          19989505,
+          19989505,
+          19989505
+        ],
+        "maintenance": [
+          {
+            "retained_entries": 3536,
+            "peak_retained_entries": 22108,
+            "peak_peer_queue": 26,
+            "peak_client_queue": 4096,
+            "persistence_units": 63814,
+            "checkpoint_count": 3887,
+            "snapshot_installs": 0,
+            "proposal_batches": 38276,
+            "proposed_originals": 19989504,
+            "maximum_proposal_width": 16384
+          },
+          {
+            "retained_entries": 2488,
+            "peak_retained_entries": 8044,
+            "peak_peer_queue": 24,
+            "peak_client_queue": 0,
+            "persistence_units": 22122,
+            "checkpoint_count": 3875,
+            "snapshot_installs": 1855,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          },
+          {
+            "retained_entries": 1488,
+            "peak_retained_entries": 8032,
+            "peak_peer_queue": 20,
+            "peak_client_queue": 0,
+            "persistence_units": 22880,
+            "checkpoint_count": 3875,
+            "snapshot_installs": 1171,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          }
+        ],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "on",
+        "trial": 3,
+        "completed_originals": 19988480,
+        "completed_requests": 4997120,
+        "applied_frontiers": [
+          19989505,
+          19989505,
+          19989505
+        ],
+        "maintenance": [
+          {
+            "retained_entries": 2904,
+            "peak_retained_entries": 22288,
+            "peak_peer_queue": 29,
+            "peak_client_queue": 4095,
+            "persistence_units": 65253,
+            "checkpoint_count": 3886,
+            "snapshot_installs": 0,
+            "proposal_batches": 39966,
+            "proposed_originals": 19989504,
+            "maximum_proposal_width": 16384
+          },
+          {
+            "retained_entries": 4928,
+            "peak_retained_entries": 8032,
+            "peak_peer_queue": 49,
+            "peak_client_queue": 0,
+            "persistence_units": 22744,
+            "checkpoint_count": 3871,
+            "snapshot_installs": 1406,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          },
+          {
+            "retained_entries": 1856,
+            "peak_retained_entries": 8016,
+            "peak_peer_queue": 16,
+            "peak_client_queue": 0,
+            "persistence_units": 22481,
+            "checkpoint_count": 3872,
+            "snapshot_installs": 1810,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          }
+        ],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "openraft",
+        "trial": 3,
+        "completed_originals": 19988480,
+        "completed_requests": 4997120,
+        "applied_frontiers": [
+          19989505,
+          19989505,
+          19989505
+        ],
+        "maintenance": [],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      }
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "baseline_commit": "8da7192125eee780752935d8e608b8379ec8a757",
+  "candidate_commit": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "guards_exit": 0,
+  "actual_cli_checker": [
+    {
+      "case": "off",
+      "fixture_sha256": "ea33ca98251fb2bdd67d89f4b6e205d020fd6ef7482400b9d99bfc6d13287403",
+      "actual_checker_exit": 0
+    },
+    {
+      "case": "on",
+      "fixture_sha256": "538377771a8f51fa64da2b9058ed38ed40160645501ef98f06d13c6e17119e0b",
+      "actual_checker_exit": 0
+    },
+    {
+      "case": "openraft",
+      "fixture_sha256": "b20f7eaee454413db9529b54bb98dc19c07863a56dcfacce1e2f741759ba74d5",
+      "actual_checker_exit": 0
+    }
+  ],
+  "bulk": {
+    "requested": 20000000,
+    "actual": 19988480,
+    "cases": 12
+  },
+  "singleton": {
+    "requested": 1048576,
+    "actual": 1048576,
+    "cases": 12
+  },
+  "combined_controller": "bash target/p9/comparison455/linux-run.sh",
+  "timing_authorized": false
+}

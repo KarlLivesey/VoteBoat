@@ -1,0 +1,21 @@
+{
+  "build_original": 87318,
+  "build_actual_exit": 0,
+  "setup_original": 92537,
+  "setup_actual_exit": 0,
+  "pair_positive_guards_exit0": true,
+  "source_inputs": 1448,
+  "functional_projection": 1445,
+  "CLI_counts": [
+    16384,
+    4096,
+    17409
+  ],
+  "phase_scope_methods": [
+    29,
+    4,
+    15
+  ],
+  "timing_authority": "Root exclusive Linux setup-to-timing grant after87318; no tracked/Git/source edits",
+  "no_setup_jobs_remaining": true
+}
