@@ -1,0 +1,89 @@
+
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched456-linux/artifacts/matched/voteboat-matched-framework:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000001a2640 <<voteboat::log::LogEntry>::retained_payload_bytes>:
+  1a2640:	push   %rbx
+  1a2641:	mov    (%rdi),%rax
+  1a2644:	test   %rax,%rax
+  1a2647:	je     1a26b2 <<voteboat::log::LogEntry>::retained_payload_bytes+0x72>
+  1a2649:	cmp    $0x1,%eax
+  1a264c:	jne    1a2682 <<voteboat::log::LogEntry>::retained_payload_bytes+0x42>
+  1a264e:	mov    0x8(%rdi),%rbx
+  1a2652:	test   $0xf,%bl
+  1a2655:	jne    1a2729 <<voteboat::log::LogEntry>::retained_payload_bytes+0xe9>
+  1a265b:	mov    0x10(%rbx),%rax
+  1a265f:	sub    $0x3,%rax
+  1a2663:	mov    $0x1,%ecx
+  1a2668:	cmovae %rax,%rcx
+  1a266c:	test   %rcx,%rcx
+  1a266f:	je     1a26b4 <<voteboat::log::LogEntry>::retained_payload_bytes+0x74>
+  1a2671:	mov    $0x90,%eax
+  1a2676:	cmp    $0x1,%rcx
+  1a267a:	jne    1a26b2 <<voteboat::log::LogEntry>::retained_payload_bytes+0x72>
+  1a267c:	add    $0x10,%rbx
+  1a2680:	jmp    1a26b8 <<voteboat::log::LogEntry>::retained_payload_bytes+0x78>
+  1a2682:	xor    %eax,%eax
+  1a2684:	cmpq   $0x0,0x8(%rdi)
+  1a2689:	je     1a26b2 <<voteboat::log::LogEntry>::retained_payload_bytes+0x72>
+  1a268b:	mov    0x10(%rdi),%rcx
+  1a268f:	test   %rcx,%rcx
+  1a2692:	je     1a26b2 <<voteboat::log::LogEntry>::retained_payload_bytes+0x72>
+  1a2694:	movabs $0x7fffffffffffffe8,%rax
+  1a269e:	cmp    %rax,%rcx
+  1a26a1:	ja     1a273e <<voteboat::log::LogEntry>::retained_payload_bytes+0xfe>
+  1a26a7:	add    $0x17,%rcx
+  1a26ab:	add    $0x10,%rax
+  1a26af:	and    %rcx,%rax
+  1a26b2:	pop    %rbx
+  1a26b3:	ret
+  1a26b4:	add    $0x18,%rbx
+  1a26b8:	mov    %rbx,%rdi
+  1a26bb:	call   1af160 <<voteboat::membership::Configuration>::retained_bytes::tree>
+  1a26c0:	mov    %rax,%rcx
+  1a26c3:	mov    0x30(%rbx),%rsi
+  1a26c7:	mov    %rsi,%rax
+  1a26ca:	shr    $0x39,%rax
+  1a26ce:	jne    1a2717 <<voteboat::log::LogEntry>::retained_payload_bytes+0xd7>
+  1a26d0:	shl    $0x7,%rsi
+  1a26d4:	mov    0x50(%rbx),%rax
+  1a26d8:	add    0x68(%rbx),%rax
+  1a26dc:	mov    $0xffffffffffffffff,%rdi
+  1a26e3:	cmovb  %rdi,%rax
+  1a26e7:	mov    $0xc0,%edx
+  1a26ec:	mul    %rdx
+  1a26ef:	jo     1a2720 <<voteboat::log::LogEntry>::retained_payload_bytes+0xe0>
+  1a26f1:	add    $0x70,%rcx
+  1a26f5:	cmovb  %rdi,%rcx
+  1a26f9:	add    %rsi,%rcx
+  1a26fc:	cmovb  %rdi,%rcx
+  1a2700:	add    %rax,%rcx
+  1a2703:	cmovb  %rdi,%rcx
+  1a2707:	add    $0x90,%rcx
+  1a270e:	cmovb  %rdi,%rcx
+  1a2712:	mov    %rcx,%rax
+  1a2715:	pop    %rbx
+  1a2716:	ret
+  1a2717:	mov    $0xffffffffffffffff,%rsi
+  1a271e:	jmp    1a26d4 <<voteboat::log::LogEntry>::retained_payload_bytes+0x94>
+  1a2720:	mov    $0xffffffffffffffff,%rax
+  1a2727:	jmp    1a26f1 <<voteboat::log::LogEntry>::retained_payload_bytes+0xb1>
+  1a2729:	lea    0x201538(%rip),%rdx        # 3a3c68 <anon.4cba47de58071a31fe0868ebcfc73917.887.llvm.14535463805153369507+0x78>
+  1a2730:	mov    $0x10,%edi
+  1a2735:	mov    %rbx,%rsi
+  1a2738:	call   *0x209f8a(%rip)        # 3ac6c8 <_DYNAMIC+0x360>
+  1a273e:	lea    -0x14339b(%rip),%rdi        # 5f3aa <anon.5da666268453821890c39fa7ceb612e4.3.llvm.16245212321365320453+0x4d6>
+  1a2745:	lea    0x200ba4(%rip),%rdx        # 3a32f0 <anon.4cba47de58071a31fe0868ebcfc73917.43.llvm.14535463805153369507+0x318>
+  1a274c:	mov    $0x23,%esi
+  1a2751:	call   *0x209f69(%rip)        # 3ac6c0 <_DYNAMIC+0x358>
+  1a2757:	int3
+  1a2758:	int3
+  1a2759:	int3
+  1a275a:	int3
+  1a275b:	int3
+  1a275c:	int3
+  1a275d:	int3
+  1a275e:	int3
+  1a275f:	int3

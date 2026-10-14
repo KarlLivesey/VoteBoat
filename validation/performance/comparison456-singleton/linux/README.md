@@ -1,0 +1,9 @@
+# Linux456 singleton paired diagnostics
+
+Originalcombined50626 actualexit0/ALL_TIMING_END: bulk12then singleton12serial, nointerimprocessing/competingLinuxwork. Samehostcompiler/locks/profile/runtimeclient1/server16/payload0/defaultmaintenance/peroriginalchannels/clientjointimer; publishedimmutable4557a99 baselineversus456b2dc. Eachsingleton exact1,048,576 completedoriginals/1,048,576requests/frontiers1,049,601,warmup1024. Bulkrequested20M→actual19,988,480; singletonactual1,048,576. All24source/artifact/output/count/frontierguards0/failures[], no reruns.
+
+OFFmedian455 103,256→456 105,911 originals/s;p990.019917→0.018675ms. Candidate/baselinewithintrial t1 rate1.007380/p990.943214; t2 rate1.025709/p990.946672; t3 rate1.099202/p990.864519. All3singletonOFFrateshigherandp99lower; everyobserverONrate/p99regressionpreserved. Singletongains do not erasebulkdebt. ONmedian89,984/p990.020448ms; pinnedOpenRaft19,664/p990.135756ms. Allslowtails/ratios/rawstderr/time/status kept. Staticmethodsymbol/edges alone notspeedwin. Rootdecision: REJECT456 afterall3Linuxbulk ratelosses/t2+t3tailsworse. Singletongainsretainedashonesttradeoffbutdonotresolvebulkcost. NoMac456campaign/result; noassignedcauseorretuning.
+
+Activecheckpoint/catch-up/retained/proposalwidth/queue reportskept; PAIREDlogicalcounts are not physicalRSS/memory/byte-debt bounds. NoRSS/refusalcounterfieldsexposed, nozerointernalrefusalclaim. Inclusiveobserverelapsedscopesoverlap/notCPUtime. Snapshotmodels differpercomparisoncontract. Volatileonegroupdiagnostic isseparatefromnativeTCP/TLS/QUIC/quorum-durable/perplacement/P8 acceptance. FullP9sevencells/healthy1.5margin/durable/headroom/fairness/boundedmemorydebt remainsopen.
+
+SHA256SUMS covers everyregularpayload exceptitself (no nestedmanifestexemptions). Files above1MiB are losslessgzip containers with originalhash/size/decompressionverification inCOMPRESSED.json. No symlinks,binaries,buildtrees,fullsource/source.tar,WAL states copied.

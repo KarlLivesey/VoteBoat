@@ -1,0 +1,1 @@
+{"source_inputs": 1448, "functional_projection": 1445, "added_build_configuration": [".gitignore", "README.md", "rust-toolchain.toml"], "changed_inputs": 1, "fresh_target_absent": true, "build_started": false}

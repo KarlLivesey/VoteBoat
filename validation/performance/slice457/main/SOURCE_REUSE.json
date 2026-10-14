@@ -1,0 +1,12 @@
+{
+  "source_equivalent_commit": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "inputs": 1445,
+  "all_hashes_and_modes_exact": true,
+  "reverted_only": "ordinary inline attribute src/log.rs",
+  "reference_inventory": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice455/crc/SOURCE.json",
+  "reference_inventory_sha256": "374f75ee94091155dcc13ecd962ffd89673fb4f2fa27ff12bdf0307a43afabb6",
+  "passed_checks_reused": "Final455 allfeature414/core334/log-store19/provider41/snapshot27/matched70, affectedformat/native50/striped9/parser8/wire18 and15deep histories; initial/preCRC failures remain archived, never reused as passes",
+  "new_functional_tests": false,
+  "performance_artifacts_reused_only_as": "Their real immutable7a99 source identity; no fresh457 build claim",
+  "enabled_hook_pending": true
+}

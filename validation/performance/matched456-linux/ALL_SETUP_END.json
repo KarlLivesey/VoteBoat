@@ -1,0 +1,14 @@
+{
+  "build_original": 9569,
+  "build_actual_exit": 0,
+  "setup_and_codegen_original": 70210,
+  "setup_actual_exit": 0,
+  "current_cli_and_pair_guards_exit0": true,
+  "source_inputs": 1448,
+  "functional_projection": 1445,
+  "whole_file_body_identity": "BODY_IDENTITY.json",
+  "codegen": "RETAINED_METHOD_CODEGEN.json",
+  "initial_codegen_zeroedge_extraction_retained_and_corrected": true,
+  "no_setup_jobs_remaining": true,
+  "quiet_authority": "Root granted exclusiveLinuxquiet afteractualsetupEND; Macremotequalification independent"
+}

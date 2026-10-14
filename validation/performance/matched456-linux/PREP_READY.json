@@ -1,0 +1,96 @@
+{
+  "state": "PREP_ONLY_READY",
+  "required_candidate_commit": "UNPUBLISHED_CANDIDATE_NOT_AUTHORIZED_FOR_TIMING",
+  "baseline_commit": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "baseline_executable_sha256": "d567532226a5e7fa7d150b9fd905ffcff4c97905143e4a15ed8e477cd032755f",
+  "baseline_dwp_sha256": "2c337bc1a579a5e7150c70346ee23f76ab02f02abfc9b286f7bcd8efadbcde75",
+  "syntax_checks": [
+    {
+      "path": "target/p9/matched456-linux/run.sh",
+      "check": "bash -n only",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/matched456-linux/guard.py",
+      "check": "Python syntax only",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/matched456-linux/cli.py",
+      "check": "Python syntax only",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/matched456-linux/cli-run.sh",
+      "check": "bash -n only",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/matched456-linux/setup-after-build.sh",
+      "check": "bash -n only",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/matched456-linux/export-source.sh",
+      "check": "bash -n only",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/comparison456/artifact-guard.py",
+      "check": "Python syntax only",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/comparison456/prepare-pair.py",
+      "check": "Python syntax only",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/comparison456/phase-diagnostic-check.py",
+      "check": "Python syntax only",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/comparison456/phase-diagnostic.sh",
+      "check": "bash -n only",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/comparison456/summarize.py",
+      "check": "Python syntax only",
+      "exit": 0
+    },
+    {
+      "path": "target/p9/comparison456/linux-run.sh",
+      "check": "bash -n only",
+      "exit": 0
+    }
+  ],
+  "checker_controls_exact_hash_reused_no_rerun": true,
+  "source_export_started": false,
+  "build_started": false,
+  "CLI_started": false,
+  "timing_started": false,
+  "after_publication_commands": [
+    "bash target/p9/matched456-linux/export-source.sh",
+    "bash target/p9/matched456-linux/run.sh",
+    "bash target/p9/matched456-linux/setup-after-build.sh"
+  ],
+  "prepared_combined_controller": "bash target/p9/comparison456/linux-run.sh",
+  "bulk_cases": 12,
+  "optional_singleton_cases": 12,
+  "driver_sha256": {
+    "target/p9/matched456-linux/run.sh": "1fbba9044c80b7d08d801af7b43a2cddb737d896d8fecaf81c69f7c84e3db4a4",
+    "target/p9/matched456-linux/guard.py": "36aa6850a83a8402c84bbae5fe2675115cacf632f052081e5eeec9c6a7e15e9d",
+    "target/p9/matched456-linux/cli.py": "647f2aafeae4c09c0e02581f7cf68a1adf63801b38ecdf6fd8f02e767aeca7b2",
+    "target/p9/matched456-linux/cli-run.sh": "7fa5e2a39233ab31dd59398ce7195e8e60523858e40480fcbc75df417605ea78",
+    "target/p9/matched456-linux/setup-after-build.sh": "fca9607b7362921821425a96fc64cf352b142f989a16c80c3231f0d2167e91fe",
+    "target/p9/matched456-linux/export-source.sh": "2b34bf0d91472cdf37fab2d49d43f1913708a495232271ae9b9fc1b79c59a4f3",
+    "target/p9/comparison456/artifact-guard.py": "3ea5c5ac1e29fb102533040be755cb3d87fc9cd92e634b473e69bb74977c5cb1",
+    "target/p9/comparison456/prepare-pair.py": "8ca100802b0b71f6faf2839964332226c14da4cf60909be43e60cc0391c4ee1d",
+    "target/p9/comparison456/phase-diagnostic-check.py": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "target/p9/comparison456/phase-diagnostic.sh": "9cec1f1ae2eb73d4a1fe0ab58f348910745c65911e141ccbc149062169a06e5b",
+    "target/p9/comparison456/summarize.py": "13eb3858fedb077357b867dc13aadab6658408baf74ed50b72e34a250b8fdc6e",
+    "target/p9/comparison456/linux-run.sh": "017c038211abc402c2455425ff54991150e7df2d65938335aae711f9407196fe"
+  }
+}

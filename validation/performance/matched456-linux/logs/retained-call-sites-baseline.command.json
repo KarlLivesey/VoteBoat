@@ -1,0 +1,14 @@
+{
+  "command": [
+    "objdump",
+    "-d",
+    "-C",
+    "--no-show-raw-insn",
+    "-WN",
+    "-WE",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/artifacts/matched/voteboat-matched-framework"
+  ],
+  "extraction_exact_target_substring": "<voteboat::log::LogEntry>::retained_payload_bytes",
+  "intra_function_offsetbranches_excluded": true,
+  "actual_exit": 0
+}

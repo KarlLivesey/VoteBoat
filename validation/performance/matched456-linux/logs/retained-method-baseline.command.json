@@ -1,0 +1,11 @@
+[
+  "objdump",
+  "-d",
+  "-C",
+  "--no-show-raw-insn",
+  "-WN",
+  "-WE",
+  "--start-address=0x1a1c50",
+  "--stop-address=0x1a1d70",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/artifacts/matched/voteboat-matched-framework"
+]

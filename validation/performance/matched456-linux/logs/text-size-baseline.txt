@@ -1,0 +1,44 @@
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/artifacts/matched/voteboat-matched-framework  :
+section                  size      addr
+.interp                    28       736
+.note.ABI-tag              32       764
+.note.gnu.build-id         36       796
+.dynsym                  2064       832
+.gnu.version              172      2896
+.gnu.version_r            352      3068
+.gnu.hash                  28      3424
+.dynstr                  1339      3452
+.rela.dyn              193536      4792
+.rela.plt                  24    198328
+.rodata                259856    198400
+.gcc_except_table      151180    458256
+.debug_gdb_scripts         34    609436
+.eh_frame_hdr           32148    609472
+.eh_frame              224908    641624
+.text                 2845941    870640
+.init                      27   3716584
+.fini                      13   3716612
+.plt                       32   3716640
+.tdata                    192   3720768
+.tbss                     256   3720960
+.fini_array                 8   3720960
+.init_array                16   3720968
+.data.rel.ro           124736   3720984
+.dynamic                  480   3845720
+.got                     8608   3846200
+.got.plt                   32   3854808
+.relro_padding           3592   3854840
+.tm_clone_table             0   3858936
+.data                   13880   3858936
+.bss                      304   3872816
+.comment                  166         0
+.debug_abbrev            1881         0
+.debug_info              4649         0
+.debug_aranges          86672         0
+.debug_ranges         3478336         0
+.debug_str              22697         0
+.debug_addr           1197744         0
+.debug_line           1966763         0
+Total                10622762
+
+

@@ -1,0 +1,51 @@
+{
+  "scope": "Actualimmutable455/fresh456 ELF static codegen only; symbol/call presence is not CPU work or throughput evidence. Sourcebody unchanged; only ordinaryinlineattribute.",
+  "variants": {
+    "baseline": {
+      "executable_sha256": "d567532226a5e7fa7d150b9fd905ffcff4c97905143e4a15ed8e477cd032755f",
+      "symbol": "00000000001a1c50 T <voteboat::log::LogEntry>::retained_payload_bytes",
+      "method_address_start": "0x1a1c50",
+      "next_text_symbol_address": "0x1a1d70",
+      "method_span_bytes": 288,
+      "direct_call_or_tail_jump_sites": 0,
+      "caller_sites": [],
+      "text_section_bytes": 2845941,
+      "size_command": [
+        "size",
+        "-A",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/artifacts/matched/voteboat-matched-framework"
+      ]
+    },
+    "candidate": {
+      "executable_sha256": "3d017b4888f6a872768dde5017379ae93cbf565ea7e5055b24e8f93959e11d40",
+      "symbol": "00000000001a2640 t <voteboat::log::LogEntry>::retained_payload_bytes",
+      "method_address_start": "0x1a2640",
+      "next_text_symbol_address": "0x1a2760",
+      "method_span_bytes": 288,
+      "direct_call_or_tail_jump_sites": 1,
+      "caller_sites": [
+        {
+          "caller_symbol": "00000000001a38c0 <<voteboat::raft::Raft>::configure>:",
+          "instruction": "  1a4bfd:\tcall   1a2640 <<voteboat::log::LogEntry>::retained_payload_bytes>"
+        }
+      ],
+      "text_section_bytes": 2851333,
+      "size_command": [
+        "size",
+        "-A",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched456-linux/artifacts/matched/voteboat-matched-framework"
+      ]
+    }
+  },
+  "limits": [
+    "Staticdirectcall/tailjump counts exclude indirectcalls/inlinedbodies and do notcountdynamicinvocations.",
+    "A local retainedmethodsymbol remains; symbolvisibility/change orfewer directedges doesnotprove CPUreduction.",
+    "Compiler maymovework or growcallerbodies; pairedmeasurements decide."
+  ],
+  "focused_extraction_fix": {
+    "initial_evidence": "target/p9/matched456-linux/codegen-attempt1-angle-extraction",
+    "initial_zero_counts_invalid": true,
+    "cause": "objdump wraps already angle-prefixedRustdemangledsymbol in anotherangle; leading-space single-angle targetpredicate missedcalls",
+    "change": "match exactinnerRustsymbolsubstring only; no ELF/source/profile change"
+  }
+}

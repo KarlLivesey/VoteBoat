@@ -1,0 +1,9 @@
+[
+  {
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison456/linux-results/RESULTS.json",
+    "archive": "RESULTS.json.gz",
+    "original_sha256": "8f5923c22c5fce3e1df5f1c4ea92e326b0149053547f7e1eb72bf14e8fd2a00f",
+    "original_bytes": 1068056,
+    "gzip_sha256": "081985a799938cf089daa8a4140f183d88d4b182b83e5e40aa4cf5c63d1b9df7"
+  }
+]

@@ -1,0 +1,12 @@
+diff --git a/src/log.rs b/src/log.rs
+index 92525aba..4ff49998 100644
+--- a/src/log.rs
++++ b/src/log.rs
+@@ -105,7 +105,6 @@ impl PartialEq for LogEntry {
+ impl LogEntry {
+     /// Conservative per-owner payload charge, excluding the inline LogEntry.
+     /// Shared commands are charged in full for each retained clone.
+-    #[inline]
+     pub fn retained_payload_bytes(&self) -> usize {
+         match &self.payload {
+             EntryPayload::Noop => 0,

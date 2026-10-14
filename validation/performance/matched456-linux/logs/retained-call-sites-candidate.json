@@ -1,0 +1,6 @@
+[
+  {
+    "caller_symbol": "00000000001a38c0 <<voteboat::raft::Raft>::configure>:",
+    "instruction": "  1a4bfd:\tcall   1a2640 <<voteboat::log::LogEntry>::retained_payload_bytes>"
+  }
+]

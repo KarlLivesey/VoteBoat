@@ -1,0 +1,10 @@
+{
+  "baseline_source_commit": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "candidate_source_commit": "b2dc8729b4c2ebb5c7b04aea3e5fa6c25ff82fde",
+  "baseline_log_rs_sha256": "b72bc2723147b1520397fcc0bfc2796e001d728eeef3c17921de8f806fca1f0a",
+  "candidate_log_rs_sha256": "178c443fde8f2afe29dedaaea770028670d39d0436800d4ca05102afb152bb9d",
+  "candidate_without_exact_one_inline_attribute_sha256": "b72bc2723147b1520397fcc0bfc2796e001d728eeef3c17921de8f806fca1f0a",
+  "whole_file_identical_after_removing_only_attribute": true,
+  "only_selected_changed_input": "src/log.rs",
+  "no_body_fields_gates_changes": true
+}
