@@ -102,7 +102,7 @@ fn compaction_preserves_surviving_payloads_origin_and_exact_charge() {
         let change = compact(&state, index);
         let expected = stage_update(&state, &change, LogLimits::default()).unwrap();
         let plan = NextLog::plan(
-            LogView::new(&state),
+            &LogView::new(&state),
             &LogSummary::from_validated(&state),
             &change,
             LogLimits::default(),
@@ -130,7 +130,7 @@ fn slack_capacity_falls_back_and_overflow_charge_recomputes_remaining_slice() {
     bytes.reserve(10000);
     let change = compact(&state, 1);
     let plan = NextLog::plan(
-        LogView::new(&state),
+        &LogView::new(&state),
         &LogSummary::from_validated(&state),
         &change,
         LogLimits::default(),
@@ -145,7 +145,7 @@ fn slack_capacity_falls_back_and_overflow_charge_recomputes_remaining_slice() {
     overflow.retained = None; // Exercise the otherwise impractically large cached-overflow branch.
     let change = compact(&state, 2);
     let plan = NextLog::plan(
-        LogView::new(&state),
+        &LogView::new(&state),
         &overflow,
         &change,
         LogLimits::default(),
@@ -162,7 +162,7 @@ fn compact_plan_rejects_stale_summary_predecessor_and_altered_reference() {
     let mut stale = state.clone();
     stale.revision = LogRevision::new(99).unwrap();
     assert!(NextLog::plan(
-        LogView::new(&state),
+        &LogView::new(&state),
         &LogSummary::from_validated(&stale),
         &change,
         LogLimits::default()
@@ -170,7 +170,7 @@ fn compact_plan_rejects_stale_summary_predecessor_and_altered_reference() {
     .is_err());
     for alteration in 0..11 {
         let plan = NextLog::plan(
-            LogView::new(&state),
+            &LogView::new(&state),
             &LogSummary::from_validated(&state),
             &change,
             LogLimits::default(),
@@ -206,7 +206,7 @@ fn trimmed_overlay_terms_materialization_and_configured_fallback_are_exact() {
     let base = committed();
     let change = compact(&base, 1);
     let plan = NextLog::plan(
-        LogView::new(&base),
+        &LogView::new(&base),
         &LogSummary::from_validated(&base),
         &change,
         LogLimits::default(),
@@ -232,7 +232,7 @@ fn trimmed_overlay_terms_materialization_and_configured_fallback_are_exact() {
     );
     next.commit_index = 1; // Replacement crossing commit remains rejected by the full oracle.
     assert_eq!(
-        NextLog::plan(view, &delta.summary, &next, LogLimits::default()).err(),
+        NextLog::plan(&view, &delta.summary, &next, LogLimits::default()).err(),
         stage_update(&expected, &next, LogLimits::default()).err()
     );
 }

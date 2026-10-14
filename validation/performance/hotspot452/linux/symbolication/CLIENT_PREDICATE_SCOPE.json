@@ -1,0 +1,8 @@
+{
+  "prior_reused451_sha256": "215b9338ac3f3e17b7d097995421204c9dc56631ade2b1e745fbf38e5b1b20f9",
+  "current452_sha256": "624c0755e8b38646d4cf36d5802c131b9ba6132cfde02086570df283733e171d",
+  "difference": "ONLYwaitVecconstructor exacttypename IDtuple\u2192Receiver-only and currentartifact/losscommentlabels; savedcurrentRVAinputsunchanged, rawprioroutput retained",
+  "actual_exit": 0,
+  "ad_hoc_query_initial_tool": "446ef8exit1 KeyErrorfunction for unresolvedrecord; focusedoptionalfieldreadfixed, no converter/capture error",
+  "capture_not_repeated": true
+}

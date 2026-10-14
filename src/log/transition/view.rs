@@ -95,13 +95,13 @@ impl<'a> LogView<'a> {
             removed,
         }
     }
-    pub(crate) fn metadata(self) -> LogMetadata {
-        self.metadata
+    pub(crate) fn metadata(&self) -> &LogMetadata {
+        &self.metadata
     }
-    pub(crate) fn bootstrap(self) -> &'a Bootstrap {
+    pub(crate) fn bootstrap(&self) -> &'a Bootstrap {
         &self.base.bootstrap
     }
-    pub(crate) fn term_at(self, index: u64) -> Option<u64> {
+    pub(crate) fn term_at(&self, index: u64) -> Option<u64> {
         if index == self.metadata.base_index {
             return Some(self.metadata.base_term);
         }
@@ -116,14 +116,14 @@ impl<'a> LogView<'a> {
         }
         self.base.term_at(index)
     }
-    pub(crate) fn materialize(self) -> GroupLog {
+    pub(crate) fn materialize(&self) -> GroupLog {
         let mut current = self.base.clone();
         current.entries.drain(..self.removed);
         current.entries.extend(self.tail.iter().cloned());
         self.metadata.install_header(&mut current);
         current
     }
-    pub(crate) fn entries(self) -> impl Iterator<Item = &'a LogEntry> {
+    pub(crate) fn entries(&self) -> impl Iterator<Item = &'a LogEntry> + use<'a> {
         self.base.entries[self.removed..].iter().chain(self.tail)
     }
 }

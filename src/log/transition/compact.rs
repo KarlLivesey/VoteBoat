@@ -50,7 +50,7 @@ impl CompactDelta {
         self.summary
     }
 }
-pub(super) fn eligible(view: LogView<'_>, summary: &LogSummary, update: &LogUpdate) -> bool {
+pub(super) fn eligible(view: &LogView<'_>, summary: &LogSummary, update: &LogUpdate) -> bool {
     summary.plain
         && summary.clone_stable
         && update.hard_state == view.metadata().hard_state
@@ -62,7 +62,7 @@ pub(super) fn eligible(view: LogView<'_>, summary: &LogSummary, update: &LogUpda
         })
 }
 pub(super) fn plan(
-    view: LogView<'_>,
+    view: &LogView<'_>,
     summary: &LogSummary,
     update: &LogUpdate,
     limits: LogLimits,
@@ -92,7 +92,7 @@ pub(super) fn plan(
     // Exact validated plain history has no configuration checkpoint to replay.
     let removed = usize::try_from(reference.index - current.base_index)
         .map_err(|_| StorageError::Rejected("snapshot index overflow"))?;
-    let mut next = current;
+    let mut next = *current;
     next.generation = current
         .generation
         .get()
@@ -120,7 +120,7 @@ pub(super) fn plan(
     next.commit_index = update.commit_index;
     let retained = retained_after(view, summary.retained, removed, next.entries_len);
     Ok(CompactDelta {
-        predecessor: current,
+        predecessor: *current,
         removed,
         summary: LogSummary {
             metadata: next,
@@ -130,7 +130,7 @@ pub(super) fn plan(
     })
 }
 fn retained_after(
-    view: LogView<'_>,
+    view: &LogView<'_>,
     retained: Option<usize>,
     removed: usize,
     left: usize,

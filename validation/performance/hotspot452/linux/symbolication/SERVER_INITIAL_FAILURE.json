@@ -1,0 +1,7 @@
+{
+  "actual_tool": "df0ef4",
+  "exit": 1,
+  "cause": "sandboxlocalhostbind Operationnotpermitted",
+  "capture_not_repeated": true,
+  "focused_action": "sameheadlesslocalhostserver launch with scoped escalation; no kernel/tool/source changes"
+}

@@ -1,0 +1,31 @@
+{
+  "generic_converters": {
+    "symbolize-full-json.py": {
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile451/linux/symbolication/symbolize-full-json.py",
+      "current": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile453/linux/symbolication/symbolize-full-json.py",
+      "sha256": "ebb87302b345e1485d0a02c64b5ccd9482eaf1644ead5274dcdb1a748dddd84a",
+      "exact_bytes_reused": true
+    },
+    "subsets.py": {
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile451/linux/symbolication/subsets.py",
+      "current": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile453/linux/symbolication/subsets.py",
+      "sha256": "1bd4c4897a3adc7e616cc2994c777f95d856588eddf57cc0d40e8135843f3a03",
+      "exact_bytes_reused": true
+    },
+    "client-contexts.py": {
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile451/linux/symbolication/client-contexts.py",
+      "current": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile453/linux/symbolication/client-contexts.reused451.py",
+      "sha256": "215b9338ac3f3e17b7d097995421204c9dc56631ade2b1e745fbf38e5b1b20f9",
+      "exact_bytes_reused": true,
+      "initial_current_before_exact_type_adaptation": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile453/linux/symbolication/client-contexts.py",
+      "adapted_current452": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile453/linux/symbolication/client-contexts.py",
+        "sha256": "624c0755e8b38646d4cf36d5802c131b9ba6132cfde02086570df283733e171d",
+        "scope": "ONLY IDtupleVec\u2192receiver-onlyVec typepredicate/currentlabels; historicalexactbytecopy remains atcurrentfield; actualcurrentRVA data unchanged",
+        "proof": "symbolication/CLIENT_PREDICATE_SCOPE.json"
+      }
+    }
+  },
+  "scope": "Exact generic451predicates; actual452module IDs/RVAs/per-address responses required; no oldsamples/response reuse",
+  "no_old_negative_controls_rerun": true
+}

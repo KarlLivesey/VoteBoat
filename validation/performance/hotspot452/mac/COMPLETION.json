@@ -1,0 +1,51 @@
+{
+  "scope": "actual normalized sampled outcomes, no acceptance claim",
+  "cases": [
+    {
+      "case": "bulk",
+      "requested_originals": 20000000,
+      "normalized_completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ],
+      "profiled_originals_per_second": 6629283.96372104,
+      "profiled_request_p99_ms": 3.3415,
+      "profiled_rate_scope": "profiler perturbed, not paired capacity acceptance",
+      "checkpoint_counts": [
+        3903,
+        3903,
+        3903
+      ],
+      "raw_sha256": "52e85fe008063ee8ce1add6fcb4b5a6f6c255cb648f6530db2cdcee74614cb48",
+      "normalization_formula": "requested // (clients*batch) * (clients*batch)",
+      "invariant_adapter_scope": "Raw requested/normalized completion verified directly by current checker requested argument; original bytes unchanged",
+      "correctly_rejected_controls": []
+    },
+    {
+      "case": "singleton",
+      "requested_originals": 1048576,
+      "normalized_completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "profiled_originals_per_second": 64830.57129674801,
+      "profiled_request_p99_ms": 0.0345,
+      "profiled_rate_scope": "profiler perturbed, not paired capacity acceptance",
+      "checkpoint_counts": [
+        209,
+        209,
+        209
+      ],
+      "raw_sha256": "0ac8c3c08ae35a359f094f69912a1a4286a88e0c1c8c342e1f3f6ba7c25b2a87",
+      "normalization_formula": "requested // (clients*batch) * (clients*batch)",
+      "invariant_adapter_scope": "Raw requested/normalized completion verified directly by current checker requested argument; original bytes unchanged",
+      "correctly_rejected_controls": []
+    }
+  ]
+}

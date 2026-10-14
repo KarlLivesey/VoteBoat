@@ -125,7 +125,7 @@ impl Accepted {
                 LogMutation::Update(update) => {
                     let (view, summary) = self.view(durable, group)?;
                     Plan::Update(Box::new(OwnedNextLog::plan_owned(
-                        view, &summary, update, limits,
+                        &view, &summary, update, limits,
                     )?))
                 }
             };
@@ -179,7 +179,7 @@ impl Accepted {
             match plan {
                 Plan::Create(state) => self.put_full(group, *state),
                 Plan::Update(next) => {
-                    let current = self.view(durable, group)?.0.metadata();
+                    let current = *self.view(durable, group)?.0.metadata();
                     match next.into_change() {
                         OwnedChange::Append(append) => {
                             append.check_install(current)?;
@@ -243,7 +243,7 @@ impl Accepted {
         next: NextLog,
         update: LogUpdate,
     ) -> Result<(), StorageError> {
-        let current = self.view(durable, group)?.0.metadata();
+        let current = *self.view(durable, group)?.0.metadata();
         match next {
             NextLog::Full {
                 predecessor,
@@ -341,7 +341,7 @@ impl Accepted {
     ) -> Result<(), StorageError> {
         for (&group, overlay) in &self.overlays {
             let (view, summary) = self.view(durable, group)?;
-            if !summary.matches_metadata(&view.metadata()) {
+            if !summary.matches_metadata(view.metadata()) {
                 return Err(StorageError::Rejected("stale log summary"));
             }
             if let Overlay::Plain(plain) = overlay {

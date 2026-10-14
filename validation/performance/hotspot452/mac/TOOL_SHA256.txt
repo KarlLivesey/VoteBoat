@@ -1,0 +1,1 @@
+/tmp/voteboat-samply0131-IDCfdm/extracted/samply-aarch64-apple-darwin/samply: OK

@@ -243,7 +243,7 @@ fn bulk_snapshot_unknown_peer_and_changed_ballot_keep_original_serialized_path()
             let mut update = core.pending.as_ref().unwrap().next.update().clone();
             update.hard_state.term += 1;
             let replacement = OwnedNextLog::plan_copy(
-                LogView::new(core.state()),
+                &LogView::new(core.state()),
                 &core.log_summary,
                 &update,
                 core.limits,

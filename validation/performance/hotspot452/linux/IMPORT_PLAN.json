@@ -1,0 +1,32 @@
+{
+  "commands": [
+    [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply",
+      "import",
+      "--save-only",
+      "--no-open",
+      "--symbol-dir",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched452-linux/target-matched-release/release",
+      "--output",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile453/linux/perf-quiet/bulk.json.gz",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile453/linux/perf-quiet/bulk.data"
+    ],
+    [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply",
+      "import",
+      "--save-only",
+      "--no-open",
+      "--symbol-dir",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched452-linux/target-matched-release/release",
+      "--output",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile453/linux/perf-quiet/singleton.json.gz",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile453/linux/perf-quiet/singleton.data"
+    ]
+  ],
+  "samply_sha256": "0ca59d520059aa2ee4db1860c732089829e75740ee75314e84d2b0ab8c90873e",
+  "symbolication": "After BOTH hosts actual capture END only: current452 ELF+DWP/moduleIDs/RVAs/fresh per-address responses; existing generic435 query/parser code",
+  "no_browser": true,
+  "no_svg": true,
+  "no_external_symbolserver": true,
+  "run_state": "NOTRUN"
+}

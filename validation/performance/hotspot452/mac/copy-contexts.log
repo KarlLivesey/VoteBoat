@@ -1,0 +1,8 @@
+bulk denom 6604339
+memmove_leaf 249519 3.778 contexts {'Raft_complete': 0.0, 'receive_append': 0.03, 'Owned_apply_batch': 1.518, 'PreparedOwnedLog_install': 2.801, 'plan_copy': 0.0}
+LogEntry_clone_leaf 130132 1.97 contexts {'Raft_complete': 0.0, 'receive_append': 0.313, 'Owned_apply_batch': 0.168, 'PreparedOwnedLog_install': 0.0, 'plan_copy': 0.0}
+LogEntry_clone_any 130132 1.97 contexts {'Raft_complete': 0.0, 'receive_append': 0.313, 'Owned_apply_batch': 0.168, 'PreparedOwnedLog_install': 0.0, 'plan_copy': 0.0}
+singleton denom 30233268
+memmove_leaf 731781 2.42 contexts {'Raft_complete': 0.0, 'receive_append': 0.429, 'Owned_apply_batch': 0.985, 'PreparedOwnedLog_install': 0.014, 'plan_copy': 0.0}
+LogEntry_clone_leaf 7203 0.024 contexts {'Raft_complete': 0.0, 'receive_append': 0.008, 'Owned_apply_batch': 0.0, 'PreparedOwnedLog_install': 0.0, 'plan_copy': 0.0}
+LogEntry_clone_any 7203 0.024 contexts {'Raft_complete': 0.0, 'receive_append': 0.008, 'Owned_apply_batch': 0.0, 'PreparedOwnedLog_install': 0.0, 'plan_copy': 0.0}

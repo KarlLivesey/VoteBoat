@@ -34,7 +34,7 @@ impl OwnedNextLog {
     /// Core needs one independent normalized copy while its original crosses
     /// the public owned provider boundary. Inspect the raw input first.
     pub(crate) fn plan_copy(
-        view: LogView<'_>,
+        view: &LogView<'_>,
         summary: &LogSummary,
         update: &LogUpdate,
         limits: LogLimits,
@@ -43,7 +43,7 @@ impl OwnedNextLog {
         if append_eligible(view, summary, update) {
             let metadata = validate_append_metadata(view, update, limits)?;
             Ok(Self(OwnedChange::Append(OwnedAppend::new(
-                view.metadata(),
+                *view.metadata(),
                 summary,
                 metadata,
                 update.clone(),
@@ -58,7 +58,7 @@ impl OwnedNextLog {
     /// A provider already owns this exact input. Only admitted new append
     /// allocations are normalized; no retained canonical history is copied.
     pub(crate) fn plan_owned(
-        view: LogView<'_>,
+        view: &LogView<'_>,
         summary: &LogSummary,
         mut update: LogUpdate,
         limits: LogLimits,
@@ -68,7 +68,7 @@ impl OwnedNextLog {
             let metadata = validate_append_metadata(view, &update, limits)?;
             normalize_append(&mut update);
             Ok(Self(OwnedChange::Append(OwnedAppend::new(
-                view.metadata(),
+                *view.metadata(),
                 summary,
                 metadata,
                 update,
@@ -170,7 +170,7 @@ impl OwnedNextLog {
         apply_update(&mut next, update, limits)?;
         Ok(Self(OwnedChange::Other {
             next: NextLog::Full {
-                predecessor: view.metadata(),
+                predecessor: *view.metadata(),
                 next: Box::new(next),
                 update: update.clone(),
             },
@@ -242,7 +242,7 @@ fn install_append(current: &mut GroupLog, update: LogUpdate, summary: LogSummary
     summary
 }
 fn validate_base(
-    view: LogView<'_>,
+    view: &LogView<'_>,
     summary: &LogSummary,
     update: &LogUpdate,
     limits: LogLimits,
@@ -251,7 +251,7 @@ fn validate_base(
     if view.metadata().group != update.group {
         return Err(StorageError::Rejected("group not bootstrapped"));
     }
-    if !summary.matches_metadata(&view.metadata()) {
+    if !summary.matches_metadata(view.metadata()) {
         return Err(StorageError::Rejected("stale log summary"));
     }
     Ok(limits)

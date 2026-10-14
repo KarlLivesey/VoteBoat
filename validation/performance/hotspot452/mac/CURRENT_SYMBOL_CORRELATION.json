@@ -1,0 +1,34 @@
+{
+  "bulk": {
+    "raw_libraries": [
+      {
+        "debugName": "voteboat-matched-framework",
+        "breakpadId": "66C3D051D5AF35BC855413473D79CA860"
+      }
+    ],
+    "symbol_sidecars": [
+      {
+        "debug_name": "voteboat-matched-framework",
+        "debug_id": "66c3d051-d5af-35bc-8554-13473d79ca86"
+      }
+    ],
+    "current_UUID": "66C3D051-D5AF-35BC-8554-13473D79CA86",
+    "match": true
+  },
+  "singleton": {
+    "raw_libraries": [
+      {
+        "debugName": "voteboat-matched-framework",
+        "breakpadId": "66C3D051D5AF35BC855413473D79CA860"
+      }
+    ],
+    "symbol_sidecars": [
+      {
+        "debug_name": "voteboat-matched-framework",
+        "debug_id": "66c3d051-d5af-35bc-8554-13473d79ca86"
+      }
+    ],
+    "current_UUID": "66C3D051-D5AF-35BC-8554-13473D79CA86",
+    "match": true
+  }
+}

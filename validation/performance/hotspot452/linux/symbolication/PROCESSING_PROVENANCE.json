@@ -1,0 +1,21 @@
+{
+  "capture_original_handle": 4448,
+  "capture_actual_terminal": 0,
+  "capture_terminal_tool": "a1e42c",
+  "imports_actual_terminal": 0,
+  "imports_tool": "1c7a42",
+  "symbol_server_original_handle": 53519,
+  "symbol_server_PID": 350886,
+  "symbol_server_actual_terminal": 0,
+  "symbol_server_terminal_tool": "eaee2d",
+  "symbol_queries_actual_terminal": 0,
+  "symbol_queries_tool": "591739",
+  "initial_server_failure": "df0ef4exit1 sandboxbind; preserved focusedscopedescalation same server0, no recapture",
+  "subsets_and_client_contexts_original_handle": 91870,
+  "subsets_and_client_contexts_actual_terminal": 0,
+  "subsets_terminal_tool": "7ec949",
+  "current452_RxVec_predicate": "e81994exit0 saveddata-only exacttypeadaptation; reused451prioroutput+code preserved",
+  "perf_text_afterguards": "061293exit0",
+  "jointquiet": "BothhostsetupactualENDbeforegrant; bothcapturesactualENDbeforerootrelease/processing",
+  "source_observation": "IndependentOwnedNextLog.plan_copy remainsbecausepublicownedEffect.Persist/LogUpdateinputcanmutate; removalneedsprotectedownershippluslegacyexactfallback. No newstage selected; emptyclonehypothesis notretuned."
+}

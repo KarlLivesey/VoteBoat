@@ -98,7 +98,7 @@ fn update(current: &GroupLog, term: u64, commit: u64, suffix: Option<Suffix>) ->
 fn compare(current: &GroupLog, update: LogUpdate, limits: LogLimits) {
     let expected = stage_update(current, &update, limits);
     let plan = NextLog::plan(
-        LogView::new(current),
+        &LogView::new(current),
         &LogSummary::from_validated(current),
         &update,
         limits,
@@ -147,7 +147,7 @@ fn plain_install_keeps_old_payloads_and_normalizes_only_new_allocations() {
         }),
     );
     let plan = NextLog::plan(
-        LogView::new(&state),
+        &LogView::new(&state),
         &LogSummary::from_validated(&state),
         &append,
         LogLimits::default(),
@@ -169,7 +169,7 @@ fn plain_install_keeps_old_payloads_and_normalizes_only_new_allocations() {
     let commit = update(&state, 1, 3, None);
     let before = state.entries.as_ptr();
     let plan = NextLog::plan(
-        LogView::new(&state),
+        &LogView::new(&state),
         &summary,
         &commit,
         LogLimits::default(),
@@ -195,7 +195,7 @@ fn stale_summary_or_wrong_install_payload_and_predecessor_cannot_mutate_log() {
     let mut other = state.clone();
     other.revision = LogRevision::new(other.revision.get() + 1).unwrap();
     assert!(NextLog::plan(
-        LogView::new(&state),
+        &LogView::new(&state),
         &LogSummary::from_validated(&other),
         &append,
         LogLimits::default()
@@ -203,7 +203,7 @@ fn stale_summary_or_wrong_install_payload_and_predecessor_cannot_mutate_log() {
     .is_err());
     for changed in [false, true] {
         let plan = NextLog::plan(
-            LogView::new(&state),
+            &LogView::new(&state),
             &summary,
             &append,
             LogLimits::default(),

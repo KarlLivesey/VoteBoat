@@ -1,0 +1,1 @@
+rustc +stable -Vv

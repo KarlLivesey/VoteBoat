@@ -1,0 +1,150 @@
+{
+  "baseline_commit": "5201bfeae8f891b8c3ea71aa75717c691a61fd50",
+  "original_focused_handle": 52160,
+  "focused_terminal_exit": 0,
+  "original_qualification_handle": 64088,
+  "qualification_terminal_exit": 0,
+  "terminal_tool": "496801",
+  "stage": "DONE",
+  "source_inputs": 1440,
+  "changed_paths": [
+    "src/log/owned.rs",
+    "src/log/transition.rs",
+    "src/log/transition/compact.rs",
+    "src/log/transition/incoming.rs",
+    "src/log/transition/tests.rs",
+    "src/log/transition/tests/compact.rs",
+    "src/log/transition/tests/configured.rs",
+    "src/log/transition/tests/incoming.rs",
+    "src/log/transition/tests/oracle.rs",
+    "src/log/transition/tests/overlay.rs",
+    "src/log/transition/view.rs",
+    "src/native/log_store/accepted.rs",
+    "src/raft.rs",
+    "src/raft/admitted_replication/tests.rs"
+  ],
+  "new_modules": [],
+  "source_hashes_and_modes_unchanged_after_checks": true,
+  "commands_exit0": [
+    "focused",
+    "all-lib",
+    "all-integrations",
+    "core-lib",
+    "core-integrations",
+    "three-services",
+    "matched-tests",
+    "root-format",
+    "strict-default",
+    "strict-all",
+    "strict-core",
+    "strict-native",
+    "matched-format",
+    "matched-strict",
+    "source-guard"
+  ],
+  "tests": {
+    "focused": [
+      {
+        "passed": 24,
+        "failed": 0,
+        "seconds": 0.01
+      }
+    ],
+    "all-lib": [
+      {
+        "passed": 403,
+        "failed": 0,
+        "seconds": 1.69
+      }
+    ],
+    "all-integrations": [
+      {
+        "passed": 203,
+        "failed": 0,
+        "seconds": 37.5
+      },
+      {
+        "passed": 5,
+        "failed": 0,
+        "seconds": 0.01
+      },
+      {
+        "passed": 19,
+        "failed": 0,
+        "seconds": 0.68
+      },
+      {
+        "passed": 37,
+        "failed": 0,
+        "seconds": 0.05
+      },
+      {
+        "passed": 79,
+        "failed": 0,
+        "seconds": 2.89
+      },
+      {
+        "passed": 27,
+        "failed": 0,
+        "seconds": 0.33
+      }
+    ],
+    "core-lib": [
+      {
+        "passed": 323,
+        "failed": 0,
+        "seconds": 0.33
+      }
+    ],
+    "core-integrations": [
+      {
+        "passed": 195,
+        "failed": 0,
+        "seconds": 0.11
+      },
+      {
+        "passed": 5,
+        "failed": 0,
+        "seconds": 0.01
+      },
+      {
+        "passed": 0,
+        "failed": 0,
+        "seconds": 0.0
+      },
+      {
+        "passed": 22,
+        "failed": 0,
+        "seconds": 0.02
+      },
+      {
+        "passed": 29,
+        "failed": 0,
+        "seconds": 0.01
+      },
+      {
+        "passed": 12,
+        "failed": 0,
+        "seconds": 0.0
+      }
+    ],
+    "three-services": [
+      {
+        "passed": 2,
+        "failed": 0,
+        "seconds": 16.53
+      }
+    ],
+    "matched-tests": [
+      {
+        "passed": 70,
+        "failed": 0,
+        "seconds": 1.76
+      }
+    ]
+  },
+  "independent_review": "/root/review426 readonly actual patch review complete, no blocker/nit; root alreadyreviewed candidate before qualification",
+  "scope": "Seven production private view/planning/caller files +seven existing unit-test caller files; borrowing only, owned LogUpdate clone/plans/summary captures and exact errororder unchanged; cfgtestfull_oracle remains independentownedview; no new testmirrors/API/dependency/default/budget changes",
+  "performance_not_built_or_measured": true,
+  "publication_full_enabled_hook_pending": true
+}

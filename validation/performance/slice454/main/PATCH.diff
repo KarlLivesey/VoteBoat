@@ -1,0 +1,547 @@
+diff --git a/src/log/owned.rs b/src/log/owned.rs
+index a7675e21..9dc7c70b 100644
+--- a/src/log/owned.rs
++++ b/src/log/owned.rs
+@@ -157,7 +157,7 @@ impl OwnedLogState {
+                         .get(&id)
+                         .ok_or(StorageError::Rejected("group not bootstrapped"))?;
+                     let next = OwnedNextLog::plan_owned(
+-                        LogView::new(&group.state),
++                        &LogView::new(&group.state),
+                         &group.summary,
+                         update,
+                         self.limits,
+diff --git a/src/log/transition.rs b/src/log/transition.rs
+index cc81048c..061ed56c 100644
+--- a/src/log/transition.rs
++++ b/src/log/transition.rs
+@@ -101,7 +101,7 @@ pub(crate) enum NextLog {
+ pub(crate) struct PreparedLog(NextLog);
+ impl NextLog {
+     pub(crate) fn plan(
+-        view: LogView<'_>,
++        view: &LogView<'_>,
+         summary: &LogSummary,
+         update: &LogUpdate,
+         limits: LogLimits,
+@@ -110,7 +110,7 @@ impl NextLog {
+         if view.metadata().group != update.group {
+             return Err(StorageError::Rejected("group not bootstrapped"));
+         }
+-        if !summary.matches_metadata(&view.metadata()) {
++        if !summary.matches_metadata(view.metadata()) {
+             return Err(StorageError::Rejected("stale log summary"));
+         }
+         if compact::eligible(view, summary, update) {
+@@ -125,7 +125,7 @@ impl NextLog {
+         let mut next = view.materialize();
+         apply_update(&mut next, update, limits)?;
+         Ok(Self::Full {
+-            predecessor: view.metadata(),
++            predecessor: *view.metadata(),
+             next: Box::new(next),
+             update: update.clone(),
+         })
+@@ -258,7 +258,7 @@ impl PlainDelta {
+     }
+ }
+ fn plan_append_metadata(
+-    view: LogView<'_>,
++    view: &LogView<'_>,
+     summary: &LogSummary,
+     update: &LogUpdate,
+     limits: LogLimits,
+@@ -266,12 +266,12 @@ fn plan_append_metadata(
+     let next = validate_append_metadata(view, update, limits)?;
+     let append = update.suffix.clone();
+     Ok(PlainDelta {
+-        predecessor: view.metadata(),
++        predecessor: *view.metadata(),
+         summary: append_summary(summary, next, append.as_ref()),
+         append,
+     })
+ }
+-fn append_eligible(view: LogView<'_>, summary: &LogSummary, update: &LogUpdate) -> bool {
++fn append_eligible(view: &LogView<'_>, summary: &LogSummary, update: &LogUpdate) -> bool {
+     (summary.is_plain() || update.hard_state == view.metadata().hard_state)
+         && update.snapshot.is_none()
+         && update.snapshot_membership.is_none()
+@@ -284,7 +284,7 @@ fn append_eligible(view: LogView<'_>, summary: &LogSummary, update: &LogUpdate)
+         })
+ }
+ fn validate_append_metadata(
+-    view: LogView<'_>,
++    view: &LogView<'_>,
+     update: &LogUpdate,
+     limits: LogLimits,
+ ) -> Result<LogMetadata, StorageError> {
+@@ -310,7 +310,7 @@ fn validate_append_metadata(
+             })
+         },
+     )?;
+-    let mut next = current;
++    let mut next = *current;
+     if let Some(suffix) = &update.suffix {
+         if suffix.entries.len()
+             > limits
+diff --git a/src/log/transition/compact.rs b/src/log/transition/compact.rs
+index dc104e59..6473a144 100644
+--- a/src/log/transition/compact.rs
++++ b/src/log/transition/compact.rs
+@@ -50,7 +50,7 @@ impl CompactDelta {
+         self.summary
+     }
+ }
+-pub(super) fn eligible(view: LogView<'_>, summary: &LogSummary, update: &LogUpdate) -> bool {
++pub(super) fn eligible(view: &LogView<'_>, summary: &LogSummary, update: &LogUpdate) -> bool {
+     summary.plain
+         && summary.clone_stable
+         && update.hard_state == view.metadata().hard_state
+@@ -62,7 +62,7 @@ pub(super) fn eligible(view: LogView<'_>, summary: &LogSummary, update: &LogUpda
+         })
+ }
+ pub(super) fn plan(
+-    view: LogView<'_>,
++    view: &LogView<'_>,
+     summary: &LogSummary,
+     update: &LogUpdate,
+     limits: LogLimits,
+@@ -92,7 +92,7 @@ pub(super) fn plan(
+     // Exact validated plain history has no configuration checkpoint to replay.
+     let removed = usize::try_from(reference.index - current.base_index)
+         .map_err(|_| StorageError::Rejected("snapshot index overflow"))?;
+-    let mut next = current;
++    let mut next = *current;
+     next.generation = current
+         .generation
+         .get()
+@@ -120,7 +120,7 @@ pub(super) fn plan(
+     next.commit_index = update.commit_index;
+     let retained = retained_after(view, summary.retained, removed, next.entries_len);
+     Ok(CompactDelta {
+-        predecessor: current,
++        predecessor: *current,
+         removed,
+         summary: LogSummary {
+             metadata: next,
+@@ -130,7 +130,7 @@ pub(super) fn plan(
+     })
+ }
+ fn retained_after(
+-    view: LogView<'_>,
++    view: &LogView<'_>,
+     retained: Option<usize>,
+     removed: usize,
+     left: usize,
+diff --git a/src/log/transition/incoming.rs b/src/log/transition/incoming.rs
+index fcfb11a2..41c1284d 100644
+--- a/src/log/transition/incoming.rs
++++ b/src/log/transition/incoming.rs
+@@ -34,7 +34,7 @@ impl OwnedNextLog {
+     /// Core needs one independent normalized copy while its original crosses
+     /// the public owned provider boundary. Inspect the raw input first.
+     pub(crate) fn plan_copy(
+-        view: LogView<'_>,
++        view: &LogView<'_>,
+         summary: &LogSummary,
+         update: &LogUpdate,
+         limits: LogLimits,
+@@ -43,7 +43,7 @@ impl OwnedNextLog {
+         if append_eligible(view, summary, update) {
+             let metadata = validate_append_metadata(view, update, limits)?;
+             Ok(Self(OwnedChange::Append(OwnedAppend::new(
+-                view.metadata(),
++                *view.metadata(),
+                 summary,
+                 metadata,
+                 update.clone(),
+@@ -58,7 +58,7 @@ impl OwnedNextLog {
+     /// A provider already owns this exact input. Only admitted new append
+     /// allocations are normalized; no retained canonical history is copied.
+     pub(crate) fn plan_owned(
+-        view: LogView<'_>,
++        view: &LogView<'_>,
+         summary: &LogSummary,
+         mut update: LogUpdate,
+         limits: LogLimits,
+@@ -68,7 +68,7 @@ impl OwnedNextLog {
+             let metadata = validate_append_metadata(view, &update, limits)?;
+             normalize_append(&mut update);
+             Ok(Self(OwnedChange::Append(OwnedAppend::new(
+-                view.metadata(),
++                *view.metadata(),
+                 summary,
+                 metadata,
+                 update,
+@@ -170,7 +170,7 @@ impl OwnedNextLog {
+         apply_update(&mut next, update, limits)?;
+         Ok(Self(OwnedChange::Other {
+             next: NextLog::Full {
+-                predecessor: view.metadata(),
++                predecessor: *view.metadata(),
+                 next: Box::new(next),
+                 update: update.clone(),
+             },
+@@ -242,7 +242,7 @@ fn install_append(current: &mut GroupLog, update: LogUpdate, summary: LogSummary
+     summary
+ }
+ fn validate_base(
+-    view: LogView<'_>,
++    view: &LogView<'_>,
+     summary: &LogSummary,
+     update: &LogUpdate,
+     limits: LogLimits,
+@@ -251,7 +251,7 @@ fn validate_base(
+     if view.metadata().group != update.group {
+         return Err(StorageError::Rejected("group not bootstrapped"));
+     }
+-    if !summary.matches_metadata(&view.metadata()) {
++    if !summary.matches_metadata(view.metadata()) {
+         return Err(StorageError::Rejected("stale log summary"));
+     }
+     Ok(limits)
+diff --git a/src/log/transition/tests.rs b/src/log/transition/tests.rs
+index 6a77f536..8aae7d81 100644
+--- a/src/log/transition/tests.rs
++++ b/src/log/transition/tests.rs
+@@ -98,7 +98,7 @@ fn update(current: &GroupLog, term: u64, commit: u64, suffix: Option<Suffix>) ->
+ fn compare(current: &GroupLog, update: LogUpdate, limits: LogLimits) {
+     let expected = stage_update(current, &update, limits);
+     let plan = NextLog::plan(
+-        LogView::new(current),
++        &LogView::new(current),
+         &LogSummary::from_validated(current),
+         &update,
+         limits,
+@@ -147,7 +147,7 @@ fn plain_install_keeps_old_payloads_and_normalizes_only_new_allocations() {
+         }),
+     );
+     let plan = NextLog::plan(
+-        LogView::new(&state),
++        &LogView::new(&state),
+         &LogSummary::from_validated(&state),
+         &append,
+         LogLimits::default(),
+@@ -169,7 +169,7 @@ fn plain_install_keeps_old_payloads_and_normalizes_only_new_allocations() {
+     let commit = update(&state, 1, 3, None);
+     let before = state.entries.as_ptr();
+     let plan = NextLog::plan(
+-        LogView::new(&state),
++        &LogView::new(&state),
+         &summary,
+         &commit,
+         LogLimits::default(),
+@@ -195,7 +195,7 @@ fn stale_summary_or_wrong_install_payload_and_predecessor_cannot_mutate_log() {
+     let mut other = state.clone();
+     other.revision = LogRevision::new(other.revision.get() + 1).unwrap();
+     assert!(NextLog::plan(
+-        LogView::new(&state),
++        &LogView::new(&state),
+         &LogSummary::from_validated(&other),
+         &append,
+         LogLimits::default()
+@@ -203,7 +203,7 @@ fn stale_summary_or_wrong_install_payload_and_predecessor_cannot_mutate_log() {
+     .is_err());
+     for changed in [false, true] {
+         let plan = NextLog::plan(
+-            LogView::new(&state),
++            &LogView::new(&state),
+             &summary,
+             &append,
+             LogLimits::default(),
+diff --git a/src/log/transition/tests/compact.rs b/src/log/transition/tests/compact.rs
+index 9f96c85a..ffea6374 100644
+--- a/src/log/transition/tests/compact.rs
++++ b/src/log/transition/tests/compact.rs
+@@ -102,7 +102,7 @@ fn compaction_preserves_surviving_payloads_origin_and_exact_charge() {
+         let change = compact(&state, index);
+         let expected = stage_update(&state, &change, LogLimits::default()).unwrap();
+         let plan = NextLog::plan(
+-            LogView::new(&state),
++            &LogView::new(&state),
+             &LogSummary::from_validated(&state),
+             &change,
+             LogLimits::default(),
+@@ -130,7 +130,7 @@ fn slack_capacity_falls_back_and_overflow_charge_recomputes_remaining_slice() {
+     bytes.reserve(10000);
+     let change = compact(&state, 1);
+     let plan = NextLog::plan(
+-        LogView::new(&state),
++        &LogView::new(&state),
+         &LogSummary::from_validated(&state),
+         &change,
+         LogLimits::default(),
+@@ -145,7 +145,7 @@ fn slack_capacity_falls_back_and_overflow_charge_recomputes_remaining_slice() {
+     overflow.retained = None; // Exercise the otherwise impractically large cached-overflow branch.
+     let change = compact(&state, 2);
+     let plan = NextLog::plan(
+-        LogView::new(&state),
++        &LogView::new(&state),
+         &overflow,
+         &change,
+         LogLimits::default(),
+@@ -162,7 +162,7 @@ fn compact_plan_rejects_stale_summary_predecessor_and_altered_reference() {
+     let mut stale = state.clone();
+     stale.revision = LogRevision::new(99).unwrap();
+     assert!(NextLog::plan(
+-        LogView::new(&state),
++        &LogView::new(&state),
+         &LogSummary::from_validated(&stale),
+         &change,
+         LogLimits::default()
+@@ -170,7 +170,7 @@ fn compact_plan_rejects_stale_summary_predecessor_and_altered_reference() {
+     .is_err());
+     for alteration in 0..11 {
+         let plan = NextLog::plan(
+-            LogView::new(&state),
++            &LogView::new(&state),
+             &LogSummary::from_validated(&state),
+             &change,
+             LogLimits::default(),
+@@ -206,7 +206,7 @@ fn trimmed_overlay_terms_materialization_and_configured_fallback_are_exact() {
+     let base = committed();
+     let change = compact(&base, 1);
+     let plan = NextLog::plan(
+-        LogView::new(&base),
++        &LogView::new(&base),
+         &LogSummary::from_validated(&base),
+         &change,
+         LogLimits::default(),
+@@ -232,7 +232,7 @@ fn trimmed_overlay_terms_materialization_and_configured_fallback_are_exact() {
+     );
+     next.commit_index = 1; // Replacement crossing commit remains rejected by the full oracle.
+     assert_eq!(
+-        NextLog::plan(view, &delta.summary, &next, LogLimits::default()).err(),
++        NextLog::plan(&view, &delta.summary, &next, LogLimits::default()).err(),
+         stage_update(&expected, &next, LogLimits::default()).err()
+     );
+ }
+diff --git a/src/log/transition/tests/configured.rs b/src/log/transition/tests/configured.rs
+index 45161d15..ca25c90d 100644
+--- a/src/log/transition/tests/configured.rs
++++ b/src/log/transition/tests/configured.rs
+@@ -122,7 +122,7 @@ fn checkpoint(state: &GroupLog, index: u64) -> GroupLog {
+ }
+ fn planned(state: &GroupLog, proposal: &LogUpdate) -> NextLog {
+     NextLog::plan(
+-        LogView::new(state),
++        &LogView::new(state),
+         &LogSummary::from_validated(state),
+         proposal,
+         LogLimits::default(),
+@@ -237,7 +237,7 @@ fn changed_ballots_use_accepted_electorate_and_full_fallback() {
+         incoming.hard_state.voted_for = candidate;
+         compare(&state, incoming.clone(), LogLimits::default());
+         if let Ok(plan) = NextLog::plan(
+-            LogView::new(&state),
++            &LogView::new(&state),
+             &LogSummary::from_validated(&state),
+             &incoming,
+             LogLimits::default(),
+@@ -312,7 +312,7 @@ fn configured_limits_stale_versions_and_exhaustion_keep_original_refusals() {
+     let summary = LogSummary::from_validated(&state);
+     state.revision = LogRevision::new(u64::MAX).unwrap();
+     assert!(NextLog::plan(
+-        LogView::new(&state),
++        &LogView::new(&state),
+         &summary,
+         &append(&state),
+         LogLimits::default()
+@@ -334,7 +334,7 @@ fn configured_overlay_tail_supports_unpublished_deltas_and_full_ballot_fallback(
+     let mut second = append(&accepted);
+     second.commit_index = second.suffix.as_ref().unwrap().from;
+     let view = LogView::overlay(&base, &tail, metadata);
+-    let plan = NextLog::plan(view, &delta.summary, &second, LogLimits::default()).unwrap();
++    let plan = NextLog::plan(&view, &delta.summary, &second, LogLimits::default()).unwrap();
+     assert!(plan.full().is_none());
+     let mut installed = accepted;
+     let summary = plan.install(&mut installed, second).unwrap();
+diff --git a/src/log/transition/tests/incoming.rs b/src/log/transition/tests/incoming.rs
+index e3ff6d69..c8730454 100644
+--- a/src/log/transition/tests/incoming.rs
++++ b/src/log/transition/tests/incoming.rs
+@@ -24,7 +24,7 @@ fn owned_append_moves_new_input_and_retains_canonical_prefix_and_exact_charge()
+     let expected = stage_update(&state, &change, LogLimits::default()).unwrap();
+     let original = change.clone();
+     let plan = OwnedNextLog::plan_owned(
+-        LogView::new(&state),
++        &LogView::new(&state),
+         &LogSummary::from_validated(&state),
+         change,
+         LogLimits::default(),
+@@ -64,7 +64,7 @@ fn copy_keeps_raw_external_capacity_and_seals_one_normalized_allocation() {
+     let raw_capacity = bytes.capacity();
+     let raw_pointer = bytes.as_ptr();
+     let plan = OwnedNextLog::plan_copy(
+-        LogView::new(&state),
++        &LogView::new(&state),
+         &LogSummary::from_validated(&state),
+         &change,
+         LogLimits::default(),
+@@ -112,7 +112,7 @@ fn owned_normalization_matches_old_clone_and_identical_headers_do_not_hide_paylo
+     let original = change.clone();
+     let expected = stage_update(&state, &change, LogLimits::default()).unwrap();
+     let plan = OwnedNextLog::plan_owned(
+-        LogView::new(&state),
++        &LogView::new(&state),
+         &LogSummary::from_validated(&state),
+         change,
+         LogLimits::default(),
+@@ -167,7 +167,7 @@ fn owned_validation_and_terms_match_borrowed_oracle_for_valid_invalid_and_compac
+ fn compare_owned(state: &GroupLog, change: LogUpdate) {
+     let expected = stage_update(state, &change, LogLimits::default());
+     let plan = OwnedNextLog::plan_owned(
+-        LogView::new(state),
++        &LogView::new(state),
+         &LogSummary::from_validated(state),
+         change,
+         LogLimits::default(),
+@@ -200,7 +200,7 @@ fn owned_preparation_rejects_stale_predecessor_without_installation() {
+         }),
+     );
+     let plan = OwnedNextLog::plan_owned(
+-        LogView::new(&state),
++        &LogView::new(&state),
+         &LogSummary::from_validated(&state),
+         change,
+         LogLimits::default(),
+diff --git a/src/log/transition/tests/oracle.rs b/src/log/transition/tests/oracle.rs
+index db5971dd..7340c51e 100644
+--- a/src/log/transition/tests/oracle.rs
++++ b/src/log/transition/tests/oracle.rs
+@@ -188,7 +188,7 @@ fn configuration_replacement_fall_back_and_plain_matching_snapshot_uses_compact(
+         ),
+     ] {
+         let plan = NextLog::plan(
+-            LogView::new(&state),
++            &LogView::new(&state),
+             &LogSummary::from_validated(&state),
+             &proposal,
+             LogLimits::default(),
+diff --git a/src/log/transition/tests/overlay.rs b/src/log/transition/tests/overlay.rs
+index 4c07c96b..b5250f1e 100644
+--- a/src/log/transition/tests/overlay.rs
++++ b/src/log/transition/tests/overlay.rs
+@@ -28,7 +28,7 @@ fn virtual_accepted_prefix_and_tail_preserve_multiple_unpublished_updates() {
+         }),
+     );
+     let plan = NextLog::plan(
+-        LogView::new(&base),
++        &LogView::new(&base),
+         &LogSummary::from_validated(&base),
+         &first,
+         LogLimits::default(),
+@@ -54,7 +54,7 @@ fn virtual_accepted_prefix_and_tail_preserve_multiple_unpublished_updates() {
+             entries: vec![entry(4, 2)],
+         }),
+     );
+-    let plan = NextLog::plan(view, &delta.summary, &second, LogLimits::default()).unwrap();
++    let plan = NextLog::plan(&view, &delta.summary, &second, LogLimits::default()).unwrap();
+     let expected = stage_update(&accepted, &second, LogLimits::default()).unwrap();
+     assert_eq!(plan.metadata(), LogMetadata::from_log(&expected));
+     let NextLog::Delta(next) = plan else {
+diff --git a/src/log/transition/view.rs b/src/log/transition/view.rs
+index 51654805..18b87613 100644
+--- a/src/log/transition/view.rs
++++ b/src/log/transition/view.rs
+@@ -95,13 +95,13 @@ impl<'a> LogView<'a> {
+             removed,
+         }
+     }
+-    pub(crate) fn metadata(self) -> LogMetadata {
+-        self.metadata
++    pub(crate) fn metadata(&self) -> &LogMetadata {
++        &self.metadata
+     }
+-    pub(crate) fn bootstrap(self) -> &'a Bootstrap {
++    pub(crate) fn bootstrap(&self) -> &'a Bootstrap {
+         &self.base.bootstrap
+     }
+-    pub(crate) fn term_at(self, index: u64) -> Option<u64> {
++    pub(crate) fn term_at(&self, index: u64) -> Option<u64> {
+         if index == self.metadata.base_index {
+             return Some(self.metadata.base_term);
+         }
+@@ -116,14 +116,14 @@ impl<'a> LogView<'a> {
+         }
+         self.base.term_at(index)
+     }
+-    pub(crate) fn materialize(self) -> GroupLog {
++    pub(crate) fn materialize(&self) -> GroupLog {
+         let mut current = self.base.clone();
+         current.entries.drain(..self.removed);
+         current.entries.extend(self.tail.iter().cloned());
+         self.metadata.install_header(&mut current);
+         current
+     }
+-    pub(crate) fn entries(self) -> impl Iterator<Item = &'a LogEntry> {
++    pub(crate) fn entries(&self) -> impl Iterator<Item = &'a LogEntry> + use<'a> {
+         self.base.entries[self.removed..].iter().chain(self.tail)
+     }
+ }
+diff --git a/src/native/log_store/accepted.rs b/src/native/log_store/accepted.rs
+index eed3d8c9..6be75345 100644
+--- a/src/native/log_store/accepted.rs
++++ b/src/native/log_store/accepted.rs
+@@ -125,7 +125,7 @@ impl Accepted {
+                 LogMutation::Update(update) => {
+                     let (view, summary) = self.view(durable, group)?;
+                     Plan::Update(Box::new(OwnedNextLog::plan_owned(
+-                        view, &summary, update, limits,
++                        &view, &summary, update, limits,
+                     )?))
+                 }
+             };
+@@ -179,7 +179,7 @@ impl Accepted {
+             match plan {
+                 Plan::Create(state) => self.put_full(group, *state),
+                 Plan::Update(next) => {
+-                    let current = self.view(durable, group)?.0.metadata();
++                    let current = *self.view(durable, group)?.0.metadata();
+                     match next.into_change() {
+                         OwnedChange::Append(append) => {
+                             append.check_install(current)?;
+@@ -243,7 +243,7 @@ impl Accepted {
+         next: NextLog,
+         update: LogUpdate,
+     ) -> Result<(), StorageError> {
+-        let current = self.view(durable, group)?.0.metadata();
++        let current = *self.view(durable, group)?.0.metadata();
+         match next {
+             NextLog::Full {
+                 predecessor,
+@@ -341,7 +341,7 @@ impl Accepted {
+     ) -> Result<(), StorageError> {
+         for (&group, overlay) in &self.overlays {
+             let (view, summary) = self.view(durable, group)?;
+-            if !summary.matches_metadata(&view.metadata()) {
++            if !summary.matches_metadata(view.metadata()) {
+                 return Err(StorageError::Rejected("stale log summary"));
+             }
+             if let Overlay::Plain(plain) = overlay {
+diff --git a/src/raft.rs b/src/raft.rs
+index 282fcbe9..27213c95 100644
+--- a/src/raft.rs
++++ b/src/raft.rs
+@@ -1283,7 +1283,7 @@ impl Raft {
+         reply: Option<Message>,
+     ) -> Result<Vec<Effect>, RaftError> {
+         let next = OwnedNextLog::plan_copy(
+-            LogView::new(&self.durable),
++            &LogView::new(&self.durable),
+             &self.log_summary,
+             &update,
+             self.limits,
+diff --git a/src/raft/admitted_replication/tests.rs b/src/raft/admitted_replication/tests.rs
+index 837675bb..56cf8b6e 100644
+--- a/src/raft/admitted_replication/tests.rs
++++ b/src/raft/admitted_replication/tests.rs
+@@ -243,7 +243,7 @@ fn bulk_snapshot_unknown_peer_and_changed_ballot_keep_original_serialized_path()
+             let mut update = core.pending.as_ref().unwrap().next.update().clone();
+             update.hard_state.term += 1;
+             let replacement = OwnedNextLog::plan_copy(
+-                LogView::new(core.state()),
++                &LogView::new(core.state()),
+                 &core.log_summary,
+                 &update,
+                 core.limits,

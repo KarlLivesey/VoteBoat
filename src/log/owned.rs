@@ -157,7 +157,7 @@ impl OwnedLogState {
                         .get(&id)
                         .ok_or(StorageError::Rejected("group not bootstrapped"))?;
                     let next = OwnedNextLog::plan_owned(
-                        LogView::new(&group.state),
+                        &LogView::new(&group.state),
                         &group.summary,
                         update,
                         self.limits,

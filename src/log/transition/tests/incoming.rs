@@ -24,7 +24,7 @@ fn owned_append_moves_new_input_and_retains_canonical_prefix_and_exact_charge() 
     let expected = stage_update(&state, &change, LogLimits::default()).unwrap();
     let original = change.clone();
     let plan = OwnedNextLog::plan_owned(
-        LogView::new(&state),
+        &LogView::new(&state),
         &LogSummary::from_validated(&state),
         change,
         LogLimits::default(),
@@ -64,7 +64,7 @@ fn copy_keeps_raw_external_capacity_and_seals_one_normalized_allocation() {
     let raw_capacity = bytes.capacity();
     let raw_pointer = bytes.as_ptr();
     let plan = OwnedNextLog::plan_copy(
-        LogView::new(&state),
+        &LogView::new(&state),
         &LogSummary::from_validated(&state),
         &change,
         LogLimits::default(),
@@ -112,7 +112,7 @@ fn owned_normalization_matches_old_clone_and_identical_headers_do_not_hide_paylo
     let original = change.clone();
     let expected = stage_update(&state, &change, LogLimits::default()).unwrap();
     let plan = OwnedNextLog::plan_owned(
-        LogView::new(&state),
+        &LogView::new(&state),
         &LogSummary::from_validated(&state),
         change,
         LogLimits::default(),
@@ -167,7 +167,7 @@ fn owned_validation_and_terms_match_borrowed_oracle_for_valid_invalid_and_compac
 fn compare_owned(state: &GroupLog, change: LogUpdate) {
     let expected = stage_update(state, &change, LogLimits::default());
     let plan = OwnedNextLog::plan_owned(
-        LogView::new(state),
+        &LogView::new(state),
         &LogSummary::from_validated(state),
         change,
         LogLimits::default(),
@@ -200,7 +200,7 @@ fn owned_preparation_rejects_stale_predecessor_without_installation() {
         }),
     );
     let plan = OwnedNextLog::plan_owned(
-        LogView::new(&state),
+        &LogView::new(&state),
         &LogSummary::from_validated(&state),
         change,
         LogLimits::default(),

@@ -1,0 +1,7 @@
+{
+  "invocation": "Pythonimport unchangedcomparison452 artifactguard.verify(actual CONFIG_PAIR candidate) only; no oldbaseline checks or build",
+  "module": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison452/artifact-guard.py",
+  "module_sha256": "0c2ed921900cd8f6bf7386d6bfaa612205d04dc5c5414b3b5dfc548608024b82",
+  "config": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison452/CONFIG_PAIR.linux.json",
+  "config_sha256": "9788333832e6f35a3cf2b417ce0318c62a206acc228d12285d16fcb2540dba2a"
+}

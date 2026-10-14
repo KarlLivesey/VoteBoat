@@ -188,7 +188,7 @@ fn configuration_replacement_fall_back_and_plain_matching_snapshot_uses_compact(
         ),
     ] {
         let plan = NextLog::plan(
-            LogView::new(&state),
+            &LogView::new(&state),
             &LogSummary::from_validated(&state),
             &proposal,
             LogLimits::default(),

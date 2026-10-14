@@ -122,7 +122,7 @@ fn checkpoint(state: &GroupLog, index: u64) -> GroupLog {
 }
 fn planned(state: &GroupLog, proposal: &LogUpdate) -> NextLog {
     NextLog::plan(
-        LogView::new(state),
+        &LogView::new(state),
         &LogSummary::from_validated(state),
         proposal,
         LogLimits::default(),
@@ -237,7 +237,7 @@ fn changed_ballots_use_accepted_electorate_and_full_fallback() {
         incoming.hard_state.voted_for = candidate;
         compare(&state, incoming.clone(), LogLimits::default());
         if let Ok(plan) = NextLog::plan(
-            LogView::new(&state),
+            &LogView::new(&state),
             &LogSummary::from_validated(&state),
             &incoming,
             LogLimits::default(),
@@ -312,7 +312,7 @@ fn configured_limits_stale_versions_and_exhaustion_keep_original_refusals() {
     let summary = LogSummary::from_validated(&state);
     state.revision = LogRevision::new(u64::MAX).unwrap();
     assert!(NextLog::plan(
-        LogView::new(&state),
+        &LogView::new(&state),
         &summary,
         &append(&state),
         LogLimits::default()
@@ -334,7 +334,7 @@ fn configured_overlay_tail_supports_unpublished_deltas_and_full_ballot_fallback(
     let mut second = append(&accepted);
     second.commit_index = second.suffix.as_ref().unwrap().from;
     let view = LogView::overlay(&base, &tail, metadata);
-    let plan = NextLog::plan(view, &delta.summary, &second, LogLimits::default()).unwrap();
+    let plan = NextLog::plan(&view, &delta.summary, &second, LogLimits::default()).unwrap();
     assert!(plan.full().is_none());
     let mut installed = accepted;
     let summary = plan.install(&mut installed, second).unwrap();

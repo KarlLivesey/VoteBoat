@@ -1,0 +1,5 @@
+START bulk
+END bulk 0
+START singleton
+END singleton 0
+SETTINGS {'perf_event_paranoid': 2, 'kptr_restrict': 2, 'perf_event_mlock_kb': 516}

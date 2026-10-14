@@ -1,0 +1,343 @@
+{
+  "scope": "Physical native caller frames from existing raw stacks; exact receive_append excludes receive_appended. Context shares overlap. Missing physical plan_copy does not mean absent inlined work or optimization eligibility. Native aliases and representative source/inline chains remain limited by symbol-address coalescing.",
+  "cases": {
+    "bulk": {
+      "cpu_denominator_us": 6604339,
+      "groups": {
+        "memmove_leaf": {
+          "cpu_us": 249519,
+          "percent_observed_cpu": 3.7781070898995344,
+          "physical_contexts_nonadditive": {
+            "Raft_complete": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "receive_append": {
+              "cpu_us": 1979,
+              "percent_observed_cpu": 0.029965148669685186,
+              "percent_group": 0.7931259743746969
+            },
+            "Owned_apply_batch": {
+              "cpu_us": 100281,
+              "percent_observed_cpu": 1.5184108508058112,
+              "percent_group": 40.189725030959565
+            },
+            "PreparedOwnedLog_install": {
+              "cpu_us": 184973,
+              "percent_observed_cpu": 2.8007799115096907,
+              "percent_group": 74.13182964022779
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "core::ptr::drop_glue::<alloc::vec::drain::Drain<voteboat::log::LogEntry>>",
+              "cpu_us": 136799,
+              "percent_group": 54.82508346057815
+            },
+            {
+              "function": "<alloc::vec::Vec<voteboat::log::LogEntry> as alloc::vec::spec_extend::SpecExtend<voteboat::log::LogEntry, alloc::vec::into_iter::IntoIter<voteboat::log::LogEntry>>>::spec_extend",
+              "cpu_us": 48174,
+              "percent_group": 19.306746179649647
+            },
+            {
+              "function": "[unresolved] 0x303f3",
+              "cpu_us": 31738,
+              "percent_group": 12.719672650178945
+            },
+            {
+              "function": "<voteboat::raft::Raft>::persist_update",
+              "cpu_us": 8398,
+              "percent_group": 3.365675559777011
+            },
+            {
+              "function": "voteboat_matched_framework::workload::run::{closure#0}",
+              "cpu_us": 6758,
+              "percent_group": 2.708410982730774
+            },
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+              "cpu_us": 3674,
+              "percent_group": 1.4724329610169966
+            },
+            {
+              "function": "<voteboat::raft::Raft>::finish_completion",
+              "cpu_us": 3595,
+              "percent_group": 1.4407720454153792
+            },
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+              "cpu_us": 3480,
+              "percent_group": 1.3946833708054296
+            }
+          ]
+        },
+        "LogEntry_clone_leaf": {
+          "cpu_us": 130132,
+          "percent_observed_cpu": 1.970401579931012,
+          "physical_contexts_nonadditive": {
+            "Raft_complete": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "receive_append": {
+              "cpu_us": 20668,
+              "percent_observed_cpu": 0.31294577701114373,
+              "percent_group": 15.882334859988319
+            },
+            "Owned_apply_batch": {
+              "cpu_us": 11085,
+              "percent_observed_cpu": 0.16784420060811536,
+              "percent_group": 8.518273752804845
+            },
+            "PreparedOwnedLog_install": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<voteboat::raft::Raft>::append_for",
+              "cpu_us": 55173,
+              "percent_group": 42.397719238926626
+            },
+            {
+              "function": "<voteboat::log::LogUpdate as core::clone::Clone>::clone",
+              "cpu_us": 54482,
+              "percent_group": 41.86671994590108
+            },
+            {
+              "function": "<voteboat::log::GroupLog as core::clone::Clone>::clone",
+              "cpu_us": 20477,
+              "percent_group": 15.735560815172287
+            }
+          ]
+        },
+        "LogEntry_clone_any": {
+          "cpu_us": 130132,
+          "percent_observed_cpu": 1.970401579931012,
+          "physical_contexts_nonadditive": {
+            "Raft_complete": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "receive_append": {
+              "cpu_us": 20668,
+              "percent_observed_cpu": 0.31294577701114373,
+              "percent_group": 15.882334859988319
+            },
+            "Owned_apply_batch": {
+              "cpu_us": 11085,
+              "percent_observed_cpu": 0.16784420060811536,
+              "percent_group": 8.518273752804845
+            },
+            "PreparedOwnedLog_install": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<voteboat::raft::Raft>::append_for",
+              "cpu_us": 55173,
+              "percent_group": 42.397719238926626
+            },
+            {
+              "function": "<voteboat::log::LogUpdate as core::clone::Clone>::clone",
+              "cpu_us": 54482,
+              "percent_group": 41.86671994590108
+            },
+            {
+              "function": "<voteboat::log::GroupLog as core::clone::Clone>::clone",
+              "cpu_us": 20477,
+              "percent_group": 15.735560815172287
+            }
+          ]
+        }
+      }
+    },
+    "singleton": {
+      "cpu_denominator_us": 30233268,
+      "groups": {
+        "memmove_leaf": {
+          "cpu_us": 731781,
+          "percent_observed_cpu": 2.420449552459893,
+          "physical_contexts_nonadditive": {
+            "Raft_complete": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "receive_append": {
+              "cpu_us": 129591,
+              "percent_observed_cpu": 0.4286370894472936,
+              "percent_group": 17.708986705038804
+            },
+            "Owned_apply_batch": {
+              "cpu_us": 297711,
+              "percent_observed_cpu": 0.9847132635479565,
+              "percent_group": 40.6830732145273
+            },
+            "PreparedOwnedLog_install": {
+              "cpu_us": 4160,
+              "percent_observed_cpu": 0.013759676922785853,
+              "percent_group": 0.5684760877912928
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+              "cpu_us": 230814,
+              "percent_group": 31.54140378063929
+            },
+            {
+              "function": "<voteboat::raft::Raft>::persist_update",
+              "cpu_us": 183003,
+              "percent_group": 25.007891705305276
+            },
+            {
+              "function": "<voteboat::raft::Raft>::finish_completion",
+              "cpu_us": 123260,
+              "percent_group": 16.84383715893143
+            },
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+              "cpu_us": 118379,
+              "percent_group": 16.176834326116694
+            },
+            {
+              "function": "voteboat::log::transition::append_summary",
+              "cpu_us": 14067,
+              "percent_group": 1.9222964247500276
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove_leaf_kv::<<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove_kv::{closure#0}, alloc::alloc::Global>",
+              "cpu_us": 12061,
+              "percent_group": 1.6481706958775917
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+              "cpu_us": 10940,
+              "percent_group": 1.4949827885665248
+            },
+            {
+              "function": "<voteboat::raft::Raft>::peers",
+              "cpu_us": 8527,
+              "percent_group": 1.1652393270664312
+            }
+          ]
+        },
+        "LogEntry_clone_leaf": {
+          "cpu_us": 7203,
+          "percent_observed_cpu": 0.02382474828721791,
+          "physical_contexts_nonadditive": {
+            "Raft_complete": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "receive_append": {
+              "cpu_us": 2550,
+              "percent_observed_cpu": 0.008434417344496136,
+              "percent_group": 35.40191586838817
+            },
+            "Owned_apply_batch": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "PreparedOwnedLog_install": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<voteboat::raft::Raft>::append_for",
+              "cpu_us": 4653,
+              "percent_group": 64.59808413161183
+            },
+            {
+              "function": "<voteboat::log::LogUpdate as core::clone::Clone>::clone",
+              "cpu_us": 2550,
+              "percent_group": 35.40191586838817
+            }
+          ]
+        },
+        "LogEntry_clone_any": {
+          "cpu_us": 7203,
+          "percent_observed_cpu": 0.02382474828721791,
+          "physical_contexts_nonadditive": {
+            "Raft_complete": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "receive_append": {
+              "cpu_us": 2550,
+              "percent_observed_cpu": 0.008434417344496136,
+              "percent_group": 35.40191586838817
+            },
+            "Owned_apply_batch": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "PreparedOwnedLog_install": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<voteboat::raft::Raft>::append_for",
+              "cpu_us": 4653,
+              "percent_group": 64.59808413161183
+            },
+            {
+              "function": "<voteboat::log::LogUpdate as core::clone::Clone>::clone",
+              "cpu_us": 2550,
+              "percent_group": 35.40191586838817
+            }
+          ]
+        }
+      }
+    }
+  }
+}

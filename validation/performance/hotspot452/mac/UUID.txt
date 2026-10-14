@@ -1,0 +1,2 @@
+UUID: 66C3D051-D5AF-35BC-8554-13473D79CA86 (arm64) /tmp/voteboat-mac452-5201bfe-3OiBls/artifacts/matched/voteboat-matched-framework
+UUID: 66C3D051-D5AF-35BC-8554-13473D79CA86 (arm64) /tmp/voteboat-mac452-5201bfe-3OiBls/artifacts/symbols/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-797de2657b1b8a66

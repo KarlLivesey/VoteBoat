@@ -1,0 +1,6 @@
+{
+  "baseline_source": "target/p9/matched452-linux/SOURCE.json",
+  "unchanged_selected_inputs": 1426,
+  "all_physical_modes_match_baseline": true,
+  "scope": "Unchangedinput equality is sourceevidence; affected core/native/raft/provider/snapshot/effectowner/realservices/matched tests actuallyrun forchangedproduction, not reused wholesale"
+}

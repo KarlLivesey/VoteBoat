@@ -1,0 +1,21 @@
+{
+  "status": "SCRIPTS_PREPARED_NO_RECORDING",
+  "candidate": "/tmp/voteboat-mac452-5201bfe-3OiBls",
+  "pair": "/tmp/voteboat-comparison452-jjuFZx",
+  "source_commit": "5201bfeae8f891b8c3ea71aa75717c691a61fd50",
+  "published_evidence_head": "a8d7d285581f463d72e6880a921efc55d33b24f8",
+  "exe_sha256": "9dd7ce1620057fbb3d6d4776e4a6a13c7b50eb33547cd227502e7e2fe707c2cb",
+  "UUID": "66C3D051-D5AF-35BC-8554-13473D79CA86",
+  "samply_sha256": "dcf042115dd8a9e8582510f403365cbee1a2025405d0f3ebe95162f31943123b",
+  "scripts_sha256": {
+    "run-recordings.sh": "a2bd1589449c4285312b5cce86b1b0ec839a6469a0f4a9cc1c8517f3c00e3754",
+    "samply-collapse.py": "b4d85920f686bd055816184afeae04dd6bc240737ed49c3d6947fd7ca1bf35a1",
+    "allocation-contexts.py": "a91ca1e3e5a0a57f361ebd4c7ebaa8f1e36c2114d4c64d67c712c13a879b535d",
+    "copy-contexts.py": "b1e4e9b7ea1fd5ac0cb68ec03f16692df4b5d1ccc245ec99dee95f95edd3f988",
+    "validate-profiles.py": "d2ef476907b68f8ea248baebfe2a3153495b16d8aa09ff74262c72a3b05e4264"
+  },
+  "converter_byteidentical435": true,
+  "schema": "validation/performance/hotspot452/SCHEMA.md",
+  "recording": "serial20Mrequestedbulk normalized19988480 then1048576singleton;1024warmups/runtime1+16/defaultretention/upstreamenvelopes/attributionOFF;Samply1000Hzsave-onlyunstable-presymbolicateallthreads",
+  "limits": "wholelaunchMachCPUdelta interval/waitbias optimizedcoalesced/unknownframes; notleaderCPU/timerCPU/wallpercent or allocatorcause; no browser/SVG/build/newtools/settings/Pi; waitquietgrant"
+}

@@ -101,7 +101,7 @@ pub(crate) enum NextLog {
 pub(crate) struct PreparedLog(NextLog);
 impl NextLog {
     pub(crate) fn plan(
-        view: LogView<'_>,
+        view: &LogView<'_>,
         summary: &LogSummary,
         update: &LogUpdate,
         limits: LogLimits,
@@ -110,7 +110,7 @@ impl NextLog {
         if view.metadata().group != update.group {
             return Err(StorageError::Rejected("group not bootstrapped"));
         }
-        if !summary.matches_metadata(&view.metadata()) {
+        if !summary.matches_metadata(view.metadata()) {
             return Err(StorageError::Rejected("stale log summary"));
         }
         if compact::eligible(view, summary, update) {
@@ -125,7 +125,7 @@ impl NextLog {
         let mut next = view.materialize();
         apply_update(&mut next, update, limits)?;
         Ok(Self::Full {
-            predecessor: view.metadata(),
+            predecessor: *view.metadata(),
             next: Box::new(next),
             update: update.clone(),
         })
@@ -258,7 +258,7 @@ impl PlainDelta {
     }
 }
 fn plan_append_metadata(
-    view: LogView<'_>,
+    view: &LogView<'_>,
     summary: &LogSummary,
     update: &LogUpdate,
     limits: LogLimits,
@@ -266,12 +266,12 @@ fn plan_append_metadata(
     let next = validate_append_metadata(view, update, limits)?;
     let append = update.suffix.clone();
     Ok(PlainDelta {
-        predecessor: view.metadata(),
+        predecessor: *view.metadata(),
         summary: append_summary(summary, next, append.as_ref()),
         append,
     })
 }
-fn append_eligible(view: LogView<'_>, summary: &LogSummary, update: &LogUpdate) -> bool {
+fn append_eligible(view: &LogView<'_>, summary: &LogSummary, update: &LogUpdate) -> bool {
     (summary.is_plain() || update.hard_state == view.metadata().hard_state)
         && update.snapshot.is_none()
         && update.snapshot_membership.is_none()
@@ -284,7 +284,7 @@ fn append_eligible(view: LogView<'_>, summary: &LogSummary, update: &LogUpdate) 
         })
 }
 fn validate_append_metadata(
-    view: LogView<'_>,
+    view: &LogView<'_>,
     update: &LogUpdate,
     limits: LogLimits,
 ) -> Result<LogMetadata, StorageError> {
@@ -310,7 +310,7 @@ fn validate_append_metadata(
             })
         },
     )?;
-    let mut next = current;
+    let mut next = *current;
     if let Some(suffix) = &update.suffix {
         if suffix.entries.len()
             > limits

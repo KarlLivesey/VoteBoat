@@ -1,0 +1,31 @@
+{
+  "capture_original_handle": 4448,
+  "capture_actual_terminal": 0,
+  "imports": 0,
+  "symbol_queries": 0,
+  "subsets": 0,
+  "client_contexts": 0,
+  "perf_script": 0,
+  "after_artifact_guard": 0,
+  "owned_server_actual_terminal": 0,
+  "kernel_settings_unchanged": {
+    "perf_event_paranoid": 2,
+    "kptr_restrict": 2,
+    "perf_event_mlock_kb": 516
+  },
+  "raw_perf_retained": [
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile453/linux/perf-quiet/bulk.data",
+      "bytes": 96729220,
+      "sha256": "9fa24b4dfa6d0331ff5d21109ce0ed2157f4198662fecf2253e1fc03dce94dad",
+      "retention": "Original unmodified ignored local perf.data; not duplicated into compact publication archive. Converted JSON, perf text, raw stderr, address queries and folded stacks are archived."
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile453/linux/perf-quiet/singleton.data",
+      "bytes": 290638444,
+      "sha256": "9d9bcec03f3eda91509b1ea3b5c38ddb0e3b2fb36784836e12dfa4f4317dda0a",
+      "retention": "Original unmodified ignored local perf.data; not duplicated into compact publication archive. Converted JSON, perf text, raw stderr, address queries and folded stacks are archived."
+    }
+  ],
+  "all_processing_end": true
+}

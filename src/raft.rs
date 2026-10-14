@@ -1283,7 +1283,7 @@ impl Raft {
         reply: Option<Message>,
     ) -> Result<Vec<Effect>, RaftError> {
         let next = OwnedNextLog::plan_copy(
-            LogView::new(&self.durable),
+            &LogView::new(&self.durable),
             &self.log_summary,
             &update,
             self.limits,

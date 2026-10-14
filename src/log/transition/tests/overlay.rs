@@ -28,7 +28,7 @@ fn virtual_accepted_prefix_and_tail_preserve_multiple_unpublished_updates() {
         }),
     );
     let plan = NextLog::plan(
-        LogView::new(&base),
+        &LogView::new(&base),
         &LogSummary::from_validated(&base),
         &first,
         LogLimits::default(),
@@ -54,7 +54,7 @@ fn virtual_accepted_prefix_and_tail_preserve_multiple_unpublished_updates() {
             entries: vec![entry(4, 2)],
         }),
     );
-    let plan = NextLog::plan(view, &delta.summary, &second, LogLimits::default()).unwrap();
+    let plan = NextLog::plan(&view, &delta.summary, &second, LogLimits::default()).unwrap();
     let expected = stage_update(&accepted, &second, LogLimits::default()).unwrap();
     assert_eq!(plan.metadata(), LogMetadata::from_log(&expected));
     let NextLog::Delta(next) = plan else {

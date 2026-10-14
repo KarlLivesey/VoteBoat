@@ -1,0 +1,19 @@
+{
+  "capture_original_ssh": 80487,
+  "outer_pid": 45637,
+  "start_utc": "2026-10-14T16:15:41Z",
+  "end_utc": "2026-10-14T16:16:07Z",
+  "capture_exit": 0,
+  "capture_terminal_chunk": "da2af7",
+  "converter_context_original_ssh": 83924,
+  "converter_context_terminal_chunk": "047eb2",
+  "converter_context_exit": 0,
+  "package_original_ssh": 65067,
+  "package_terminal_chunk": "6e3a9d",
+  "package_exit": 0,
+  "copy_original_ssh": 9942,
+  "copy_terminal_chunk": "72890d",
+  "copy_exit": 0,
+  "owned_symbol_server": "none",
+  "workload_repeats": 0
+}
