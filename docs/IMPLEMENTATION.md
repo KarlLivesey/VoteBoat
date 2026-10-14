@@ -42,6 +42,18 @@ there is no claimed speedup yet. Current linked mini plan advances this bounded
 client stage, then the next measured stage, then durable batching/overlap. Macro
 scope remains unchanged and no acceptance milestone closes.
 
+436 is now implemented and locally checked in the private matched client path:
+one changed file, two new modules,1,435 source hashes/modes; all1,432 other435
+inputs stay exact. [Evidence](../validation/performance/slice436/main/README.md)
+records actual72713 full64 tests and strict/format checks0, then a test-only
+follow-up with final79684 all9 Waits controls/56 filtered and strict/format/guards0.
+Independent review finds no blocker after full128 receipt and full-send-queue
+zero-ID controls. Unchanged production and existing56 test inputs permit reuse;
+no unrelated root suite or successful benchmark was repeated. Actual dev future
+336 versus labeled old-code replica304 bytes is a risk, not a claimed speedup.
+Fresh artifacts and both-host comparisons follow publication;436 is unmeasured
+and the macro/current-plus-next-two plan remains active.
+
 Slice425 is published and qualified on main: 32 controls, three actual
 16,384-original CLI histories and the complete strict hook pass. Linux's fresh
 asserted nine-case diagnostic also passes every original/frontier, source,

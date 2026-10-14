@@ -1,0 +1,35 @@
+
+running 9 tests
+test voteboat_engine::waits::tests::accepted_inline_and_heap_cancellation_closes_every_receiver_without_losing_request ... ok
+test voteboat_engine::waits::tests::canceling_full_queue_send_never_publishes_a_partial_request ... ok
+test voteboat_engine::waits::tests::empty_and_all_receiver_widths_preserve_closed_send_error ... ok
+test voteboat_engine::waits::tests::every_inline_and_heap_receipt_is_checked_in_original_order ... ok
+test voteboat_engine::waits::tests::invalid_inline_and_heap_ids_never_send_and_precede_closed_channel_error ... ok
+test voteboat_engine::waits::tests::observed_wait_and_future_layouts_are_reported_without_portable_size_assumptions ... ok
+test voteboat_engine::waits::tests::queued_wrong_tail_cannot_bypass_the_original_first_wait ... ok
+test voteboat_engine::waits::tests::wrong_or_closed_first_and_middle_receipts_cancel_all_unvisited_receivers ... ok
+test voteboat_engine::waits::tests::zero_identity_precedes_a_full_send_queue_on_both_storage_paths ... ok
+
+successes:
+
+---- voteboat_engine::waits::tests::observed_wait_and_future_layouts_are_reported_without_portable_size_assumptions stdout ----
+scope=actual_standalone_dev_test_layout_not_published_ELF width=0 storage=inline receiver_bytes=8 optional_receiver_bytes=16 old_tuple_bytes=32 old_wait_vec_header_bytes=24 wait_container_bytes=64 candidate_future_bytes=336 diagnostic435_replica_future_bytes=304 heap_available_capacity=0
+scope=actual_standalone_dev_test_layout_not_published_ELF width=1 storage=inline receiver_bytes=8 optional_receiver_bytes=16 old_tuple_bytes=32 old_wait_vec_header_bytes=24 wait_container_bytes=64 candidate_future_bytes=336 diagnostic435_replica_future_bytes=304 heap_available_capacity=0
+scope=actual_standalone_dev_test_layout_not_published_ELF width=4 storage=inline receiver_bytes=8 optional_receiver_bytes=16 old_tuple_bytes=32 old_wait_vec_header_bytes=24 wait_container_bytes=64 candidate_future_bytes=336 diagnostic435_replica_future_bytes=304 heap_available_capacity=0
+scope=actual_standalone_dev_test_layout_not_published_ELF width=5 storage=heap receiver_bytes=8 optional_receiver_bytes=16 old_tuple_bytes=32 old_wait_vec_header_bytes=24 wait_container_bytes=64 candidate_future_bytes=336 diagnostic435_replica_future_bytes=304 heap_available_capacity=5
+scope=actual_standalone_dev_test_layout_not_published_ELF width=17 storage=heap receiver_bytes=8 optional_receiver_bytes=16 old_tuple_bytes=32 old_wait_vec_header_bytes=24 wait_container_bytes=64 candidate_future_bytes=336 diagnostic435_replica_future_bytes=304 heap_available_capacity=17
+
+
+successes:
+    voteboat_engine::waits::tests::accepted_inline_and_heap_cancellation_closes_every_receiver_without_losing_request
+    voteboat_engine::waits::tests::canceling_full_queue_send_never_publishes_a_partial_request
+    voteboat_engine::waits::tests::empty_and_all_receiver_widths_preserve_closed_send_error
+    voteboat_engine::waits::tests::every_inline_and_heap_receipt_is_checked_in_original_order
+    voteboat_engine::waits::tests::invalid_inline_and_heap_ids_never_send_and_precede_closed_channel_error
+    voteboat_engine::waits::tests::observed_wait_and_future_layouts_are_reported_without_portable_size_assumptions
+    voteboat_engine::waits::tests::queued_wrong_tail_cannot_bypass_the_original_first_wait
+    voteboat_engine::waits::tests::wrong_or_closed_first_and_middle_receipts_cancel_all_unvisited_receivers
+    voteboat_engine::waits::tests::zero_identity_precedes_a_full_send_queue_on_both_storage_paths
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 56 filtered out; finished in 0.00s
+

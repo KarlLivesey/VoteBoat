@@ -1,0 +1,13 @@
+{
+  "baseline_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "unchanged_prior_inputs": 1432,
+  "changed": [
+    "benchmarks/matched/src/voteboat_engine.rs"
+  ],
+  "new": [
+    "benchmarks/matched/src/voteboat_engine/waits.rs",
+    "benchmarks/matched/src/voteboat_engine/waits/tests.rs"
+  ],
+  "production_inputs_changed": false,
+  "scope": "prior qualified435 source hashes/modes exact; no unchanged rootfunctional suite rerun; no performance claim"
+}

@@ -1,0 +1,72 @@
+{
+  "scope": "436 private matched Client waitbuffer only; no nativeNode/provider/storage/durability/public contract change",
+  "inputs": 1435,
+  "new_modules": [
+    "benchmarks/matched/src/voteboat_engine/waits.rs",
+    "benchmarks/matched/src/voteboat_engine/waits/tests.rs"
+  ],
+  "changed_prior_module": [
+    "benchmarks/matched/src/voteboat_engine.rs"
+  ],
+  "baseline_reuse": {
+    "source_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+    "unchanged_prior_inputs": 1432,
+    "production_root_source_changed": false
+  },
+  "attempts": [
+    {
+      "original_handle": 72713,
+      "exit": 0,
+      "terminal": "DONE",
+      "matched_full_passed": 64,
+      "failed": 0,
+      "source": "attempt1/SOURCE.json",
+      "fmt": 0,
+      "strict_all_targets": 0,
+      "source_guard": 0
+    },
+    {
+      "original_handle": 79684,
+      "exit": 0,
+      "terminal": "FINAL_STAGE_DONE",
+      "matched_focused_passed": 9,
+      "failed": 0,
+      "filtered": 56,
+      "source": "SOURCE.json",
+      "fmt": 0,
+      "strict_all_targets": 0,
+      "source_guard": 0,
+      "reused_existing_functional_controls": 56,
+      "unchanged_inputs_since_initial64": 1434,
+      "changed_input_since_initial64": "benchmarks/matched/src/voteboat_engine/waits/tests.rs"
+    }
+  ],
+  "test_only_followup": "upper96-only wrong receipt preserving low64, deterministic full-queue zero-ID priority, explicit dev layout scope",
+  "tool_only_failure": "TOOL_FAILURES.md; failed formatted test locator preserved as actual reported tool failure, no fabricated compiler/test failure",
+  "observed_dev_layout": {
+    "scope": "actualstandalone debug test; oldfuture literal435 replica notpublishedELF; not portable constants or performance proof",
+    "receiver_bytes": 8,
+    "optional_receiver_bytes": 16,
+    "old_tuple_bytes": 32,
+    "old_wait_vec_header_bytes": 24,
+    "wait_container_bytes": 64,
+    "candidate_future_bytes": 336,
+    "diagnostic435_replica_future_bytes": 304,
+    "widths": [
+      0,
+      1,
+      4,
+      5,
+      17
+    ],
+    "heap_available_capacity_by_width": {
+      "0": 0,
+      "1": 0,
+      "4": 0,
+      "5": 5,
+      "17": 17
+    }
+  },
+  "performance_claim": false,
+  "independent_read_only_review": "review426 no blocker after final upperbit/fullqueue controls"
+}

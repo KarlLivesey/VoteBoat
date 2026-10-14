@@ -1,0 +1,74 @@
+diff --git a/target/p9/slice436/main/attempt1/source/tests.rs b/benchmarks/matched/src/voteboat_engine/waits/tests.rs
+index a57ef539..ead145c9 100644
+--- a/target/p9/slice436/main/attempt1/source/tests.rs
++++ b/benchmarks/matched/src/voteboat_engine/waits/tests.rs
+@@ -119,6 +119,33 @@ async fn canceling_full_queue_send_never_publishes_a_partial_request() {
+     }
+ }
+ 
++#[tokio::test]
++async fn zero_identity_precedes_a_full_send_queue_on_both_storage_paths() {
++    for width in [1, 4, 5, 17] {
++        for index in [0, width - 1] {
++            let (sender, mut receiver) = mpsc::channel(1);
++            assert!(sender
++                .try_send(Request {
++                    originals: Vec::new()
++                })
++                .is_ok());
++            let client = Client(sender);
++            let mut originals = ids(width);
++            originals[index] = 0;
++            let mut write = Box::pin(client.write(&originals));
++            let std::task::Poll::Ready(result) = futures::poll!(&mut write) else {
++                panic!("invalid original must fail before waiting for queue capacity")
++            };
++            assert_eq!(result.unwrap_err().to_string(), "zero original identity");
++            assert!(receiver.try_recv().unwrap().originals.is_empty());
++            assert!(matches!(
++                receiver.try_recv(),
++                Err(mpsc::error::TryRecvError::Empty)
++            ));
++        }
++    }
++}
++
+ #[tokio::test]
+ async fn accepted_inline_and_heap_cancellation_closes_every_receiver_without_losing_request() {
+     for width in [1, 4, 5, 17] {
+@@ -158,7 +185,12 @@ async fn wrong_or_closed_first_and_middle_receipts_cancel_all_unvisited_receiver
+                 }
+                 let original = queued.next().unwrap();
+                 if wrong {
+-                    original.reply.send(OperationId::new(7).unwrap()).unwrap();
++                    let upper_only = original.operation.get() ^ (1u128 << 96);
++                    assert_eq!(upper_only as u64, original.operation.get() as u64);
++                    original
++                        .reply
++                        .send(OperationId::new(upper_only).unwrap())
++                        .unwrap();
+                 } else {
+                     drop(original);
+                 }
+@@ -194,7 +226,12 @@ async fn queued_wrong_tail_cannot_bypass_the_original_first_wait() {
+         let mut queued = request.originals.into_iter();
+         let first = queued.next().unwrap();
+         let second = queued.next().unwrap();
+-        second.reply.send(OperationId::new(7).unwrap()).unwrap();
++        let upper_only = second.operation.get() ^ (1u128 << 96);
++        assert_eq!(upper_only as u64, second.operation.get() as u64);
++        second
++            .reply
++            .send(OperationId::new(upper_only).unwrap())
++            .unwrap();
+         assert!(futures::poll!(&mut write).is_pending());
+         first.reply.send(first.operation).unwrap();
+         let std::task::Poll::Ready(result) = futures::poll!(&mut write) else {
+@@ -245,6 +282,6 @@ fn observed_wait_and_future_layouts_are_reported_without_portable_size_assumptio
+             Waits::Inline(_) => ("inline", 0),
+             Waits::Heap(slots) => ("heap", slots.capacity()),
+         };
+-        println!("width={width} storage={storage} receiver_bytes={} optional_receiver_bytes={} old_tuple_bytes={} old_wait_vec_header_bytes={} wait_container_bytes={} candidate_future_bytes={} diagnostic435_replica_future_bytes={} heap_available_capacity={heap_capacity}", size_of::<Receiver>(), size_of::<Option<Receiver>>(), size_of::<(OperationId, Receiver)>(), size_of::<Vec<(OperationId, Receiver)>>(), size_of::<Waits>(), size_of_val(&client.write(&originals)), size_of_val(&diagnostic435_write(&client, &originals)));
++        println!("scope=actual_standalone_dev_test_layout_not_published_ELF width={width} storage={storage} receiver_bytes={} optional_receiver_bytes={} old_tuple_bytes={} old_wait_vec_header_bytes={} wait_container_bytes={} candidate_future_bytes={} diagnostic435_replica_future_bytes={} heap_available_capacity={heap_capacity}", size_of::<Receiver>(), size_of::<Option<Receiver>>(), size_of::<(OperationId, Receiver)>(), size_of::<Vec<(OperationId, Receiver)>>(), size_of::<Waits>(), size_of_val(&client.write(&originals)), size_of_val(&diagnostic435_write(&client, &originals)));
+     }
+ }
