@@ -1,0 +1,46 @@
+{
+  "status": "SETUP_READY_NO_RECORDING",
+  "candidate": "/tmp/voteboat-mac450-d6395be-WjqDo4",
+  "pair": "/tmp/voteboat-comparison450-GUz9m1",
+  "source_commit": "d6395be7ec56af68f346a72308e90a20200fb731",
+  "source_inputs": 1440,
+  "published_evidence_head": "8813342b2ef7a15ddf4c981921f6ea9b552a4f20",
+  "all_current_compiled_projection_inputs_identical": true,
+  "current_tools_compiler_equal_qualified450": true,
+  "four_fresh_false_retained": true,
+  "exe_sha256": "638c300235e19fdb5b7902b9e90ed6dc480a9f65ebad15ce09fd0efd13ff6bd4",
+  "UUID": "1AAB3496-5021-31A5-A00C-7BE7752C6848",
+  "dSYM_files": [
+    {
+      "original": "/tmp/voteboat-mac450-d6395be-WjqDo4/target-matched-release/release/voteboat-matched-framework.dSYM/Contents/Info.plist",
+      "copy": "/private/tmp/voteboat-mac450-d6395be-WjqDo4/artifacts/symbols/voteboat-matched-framework.dSYM/Contents/Info.plist",
+      "sha256": "d180e71836bcd221989d693e0c3b0c127a5a7f6359e0c29342c023ca3198e29e"
+    },
+    {
+      "original": "/tmp/voteboat-mac450-d6395be-WjqDo4/target-matched-release/release/voteboat-matched-framework.dSYM/Contents/Resources/Relocations/aarch64/voteboat_matched_framework-03da1d82af3c7712.yml",
+      "copy": "/private/tmp/voteboat-mac450-d6395be-WjqDo4/artifacts/symbols/voteboat-matched-framework.dSYM/Contents/Resources/Relocations/aarch64/voteboat_matched_framework-03da1d82af3c7712.yml",
+      "sha256": "7ee3aad08c083840d9f05cfb6b6064e44611c718dd8db165fbddc513c7f0c77f"
+    },
+    {
+      "original": "/tmp/voteboat-mac450-d6395be-WjqDo4/target-matched-release/release/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-03da1d82af3c7712",
+      "copy": "/private/tmp/voteboat-mac450-d6395be-WjqDo4/artifacts/symbols/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-03da1d82af3c7712",
+      "sha256": "7470f900630ce11244738ca91a2f20f28d991357aef4e870434250cb53031ef5"
+    }
+  ],
+  "metadata_only_adjacent_symbol_symlink": {
+    "path": "/tmp/voteboat-mac450-d6395be-WjqDo4/artifacts/matched/voteboat-matched-framework.dSYM",
+    "target": "/private/tmp/voteboat-mac450-d6395be-WjqDo4/artifacts/symbols/voteboat-matched-framework.dSYM"
+  },
+  "samply_version": "samply 0.13.1",
+  "samply_sha256": "dcf042115dd8a9e8582510f403365cbee1a2025405d0f3ebe95162f31943123b",
+  "scripts_sha256": {
+    "allocation-contexts.py": "a91ca1e3e5a0a57f361ebd4c7ebaa8f1e36c2114d4c64d67c712c13a879b535d",
+    "validate-profiles.py": "f12c0f2043dcab0d203174f721e75ff0b1175dd661a79df270177d164d9016da",
+    "samply-collapse.py": "b4d85920f686bd055816184afeae04dd6bc240737ed49c3d6947fd7ca1bf35a1",
+    "run-recordings.sh": "c863936e32d3a06bffa17cb447a6c03f85daebad89aad5cece244f2e0311a6f4",
+    "copy-contexts.py": "b1e4e9b7ea1fd5ac0cb68ec03f16692df4b5d1ccc245ec99dee95f95edd3f988"
+  },
+  "no_live_competing_jobs": true,
+  "capture": "20Mrequestedbulk19988480+1024warmups then1048576singleton+1024;attributionOFF/defaultmaintenance/upstreamenvelopes/runtime1+16;1000Hzsave-onlyunstable-presymbolicate",
+  "scope": "wholelaunchMachCPUdelta interval/waitbias; notleaderCPU/timerCPU/wallpercent or allocatorcause; no build/newtools/settings/Pi/browser/SVG; no recordinguntilquietgrant"
+}

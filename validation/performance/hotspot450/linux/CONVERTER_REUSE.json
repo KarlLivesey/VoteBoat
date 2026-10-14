@@ -1,0 +1,24 @@
+{
+  "generic_converters": {
+    "symbolize-full-json.py": {
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile447/linux/symbolication/symbolize-full-json.py",
+      "current": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile451/linux/symbolication/symbolize-full-json.py",
+      "sha256": "ebb87302b345e1485d0a02c64b5ccd9482eaf1644ead5274dcdb1a748dddd84a",
+      "exact_bytes_reused": true
+    },
+    "subsets.py": {
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile447/linux/symbolication/subsets.py",
+      "current": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile451/linux/symbolication/subsets.py",
+      "sha256": "1bd4c4897a3adc7e616cc2994c777f95d856588eddf57cc0d40e8135843f3a03",
+      "exact_bytes_reused": true
+    },
+    "client-contexts.py": {
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile447/linux/symbolication/client-contexts.py",
+      "current": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile451/linux/symbolication/client-contexts.py",
+      "sha256": "215b9338ac3f3e17b7d097995421204c9dc56631ade2b1e745fbf38e5b1b20f9",
+      "exact_bytes_reused": true
+    }
+  },
+  "scope": "Exact current446 predicate code remains valid for unchanged450 privatehost/client/pending types and publicRootfunction names; newlycaptured450 moduleIDs/RVAs/per-addressresponses required, no prior samples/responses copied. Older446 comment labels identify reusable code origin, not captured artifact source. Actual zero/absent frames cannot prove zeroexecution.",
+  "no_old_negative_controls_rerun": true
+}

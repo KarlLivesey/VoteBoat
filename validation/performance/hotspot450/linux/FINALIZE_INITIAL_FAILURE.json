@@ -1,0 +1,8 @@
+{
+  "actual_tool": "47b680",
+  "actual_exit": 1,
+  "stage": "collector metadata assertion BEFORE archive creation; READOUT alreadygenerated",
+  "exception": "KeyError: 'actual_terminal_exit'",
+  "cause": "Copied447collector expects old server-stop field; current451stop receipt names actual_terminal and contains originalpoll0",
+  "focused_fix": "Use actual existing451field actual_terminal; no import/query/parse/capture/build/test rerun andrawdataunchanged"
+}

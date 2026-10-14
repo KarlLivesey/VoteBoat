@@ -1,0 +1,95 @@
+{
+  "decision": "HOLD/REJECT zero-length command-byte copy-call hypothesis; no manual Clone guard selected",
+  "artifact_source_commit": "d6395be7ec56af68f346a72308e90a20200fb731",
+  "artifact": "target/p9/matched450-linux/artifacts/matched/voteboat-matched-framework",
+  "artifact_sha256_observed": "70ae8c2751b3c12e697bc93ee9c83bef5f833fe2b00f22cbb3623e31c9c76945",
+  "profile": "actual450 Linux asserted release opt3/debug2/overflow/thinLTO/codegen1; no new build",
+  "address_units": "ELF relative virtual addresses in this exact binary, not transferable to another artifact",
+  "clone": {
+    "symbol": "<voteboat::log::LogEntry as core::clone::Clone>::clone",
+    "rva": "0x1b0be0",
+    "command_byte_count_load": "0x1b0ca1: mov 0x18(%rsi),%r14",
+    "zero_test": "0x1b0ca5: test %r14,%r14",
+    "zero_jump": "0x1b0ca8: je 0x1b0d04",
+    "zero_path": "0x1b0d04 sets dangling empty vector pointer1; 0x1b0d0a jumps to0x1b0dc2 output stores",
+    "bypassed_calls": {
+      "malloc": "0x1b0cbb",
+      "memcpy": "0x1b0cef"
+    },
+    "nonzero_copy_length": "0x1b0cec mov %r14,%rdx before memcpy"
+  },
+  "caller_confirmation": {
+    "append_for_rva": "0x18da90",
+    "append_for_to_vec_calls": [
+      "0x18e474",
+      "0x18e707"
+    ],
+    "to_vec_rva": "0x174200",
+    "to_vec_clone_call": "0x17426c calls0x1b0be0",
+    "scope": "Actual append_for hot owned-slice materialization invokes the inspected clone"
+  },
+  "separate_vec_clone": {
+    "rva": "0x3850e0",
+    "command_length_test": "0x38525f: test %rbp,%rbp",
+    "zero_jump": "0x385262: je0x385143",
+    "bypassed_calls": {
+      "malloc": "0x385289",
+      "memcpy": "0x3852bf"
+    }
+  },
+  "source": "Frozen450 src/log.rs derives Clone for EntryPayload and LogEntry; command bytes remain Vec<u8>.",
+  "missing_dwo_warning_history": "Initial objdump -dC emitted Unable to load dwo file warnings; instruction bytes/branches still decoded. Subsequent same-artifact inspection used --dwarf=no-follow-links and emitted no such warning. No DWO/DWP/artifact modified or copied.",
+  "command_output_scope": "Instruction excerpts copied from completed tool outputs, not a reconstructed full raw dump. Full initial warning stream was not captured as a local file and is not invented here.",
+  "completed_tool_chunks": [
+    "04fee1",
+    "e24ca3",
+    "0271f8",
+    "cb32aa",
+    "01cdb2",
+    "fc293c"
+  ],
+  "commands_observed": [
+    [
+      "nm",
+      "-nC",
+      "target/p9/matched450-linux/artifacts/matched/voteboat-matched-framework"
+    ],
+    [
+      "objdump",
+      "-dC",
+      "--start-address=0x1b0be0",
+      "--stop-address=0x1b0e60",
+      "target/p9/matched450-linux/artifacts/matched/voteboat-matched-framework"
+    ],
+    [
+      "objdump",
+      "--dwarf=no-follow-links",
+      "-dC",
+      "--start-address=0x1b0be0",
+      "--stop-address=0x1b0e40",
+      "target/p9/matched450-linux/artifacts/matched/voteboat-matched-framework"
+    ],
+    [
+      "objdump",
+      "--dwarf=no-follow-links",
+      "-dC",
+      "--start-address=0x18da90",
+      "--stop-address=0x18ec70",
+      "target/p9/matched450-linux/artifacts/matched/voteboat-matched-framework"
+    ],
+    [
+      "objdump",
+      "--dwarf=no-follow-links",
+      "-dC",
+      "--start-address=0x174200",
+      "--stop-address=0x174470",
+      "target/p9/matched450-linux/artifacts/matched/voteboat-matched-framework"
+    ],
+    [
+      "sha256sum",
+      "target/p9/matched450-linux/artifacts/matched/voteboat-matched-framework"
+    ]
+  ],
+  "limits": "Static path evidence rejects this particular proposed empty-byte copy call. It does not identify all libc-copy contexts, allocator cause, CPU cost per call, Mac instructions or expected speedup. Singleton libc-copy15.290% and Entryclone0.798% cannot establish a payload-clone cause.",
+  "no_new_build_test_benchmark_profile_code_changes": true
+}

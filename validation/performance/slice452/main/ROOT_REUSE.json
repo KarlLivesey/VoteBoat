@@ -1,0 +1,11 @@
+{
+  "baseline_source": "target/p9/slice450/main/SOURCE.json",
+  "baseline_scope": "450 affected root/core/native scopes plus published enabled hook; no repetition of unchanged root functional suites",
+  "unchanged_inputs": 1438,
+  "only_changed": [
+    "benchmarks/matched/src/voteboat_engine.rs",
+    "benchmarks/matched/src/voteboat_engine/client_outcomes.rs"
+  ],
+  "physical_modes_all_match": true,
+  "root_functional_inputs_unchanged": true
+}

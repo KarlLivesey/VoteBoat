@@ -1,0 +1,11 @@
+# Slice452 Linux main qualification
+
+Receiver-only heap waits retain every Tokio per-original channel, input-order await, full128-bit receipt comparison, validation/send/error/cancellation order and request shape. Only private Client::write and one layout diagnostic changed. Schema was written before edits in [../SCHEMA.md](../SCHEMA.md); the copied main schema preserves that scope.
+
+Original runner48609 actually terminated0/DONE. Full standalone suite passed70 tests (existing69 plus diagnostic),1.71s; matched formatter and strict all-target Clippy exited0. All1440 selected source hashes and physical modes were frozen before checks and unchanged afterward. Exactly two matched source files differ from450; the other1438 inputs, including root functional/native source, are reused by exact hash/mode scope rather than rerunning unrelated suites. Root publication's enabled full hook remains separate and pending.
+
+The initial bare diagnostic filter with --exact selected0 tests despite exit0; its receipt is preserved and does not count as focused coverage. The full70 run selected the diagnostic. A corrected fully qualified diagnostic then passed1/69filtered and captured layouts, without repeating the full suite. Root reported an earlier invalid apply_patch terminator with no source effect; the note identifies that report rather than fabricating raw tool output. There were no compilation/test/format/lint failures in this main runner.
+
+Actual x86_64 stable1.98.1 dev layouts: current future296 bytes versus literal450 source-replica304, receiver8 versus old wait tuple32, both Vec headers24. Requested capacities0/1/4/5/17 were observed exactly; receiver element capacity bytes0/8/32/40/136 versus tuple0/32/128/160/544. Old future is a clearly labeled diagnostic replica, not the published450 executable; no portable size assertions, allocator/RSS bound or performance gain is inferred. Iterator/access/codegen tradeoffs await fresh asserted artifacts and both-host measurements. No native Node, durable performance or full P9 acceptance claim.
+
+All files are regular; SHA256SUMS includes every regular payload recursively except itself. No nested manifests, full source export, binaries, build trees or WAL states are copied. Only the two changed source snapshots are included.

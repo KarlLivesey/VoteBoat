@@ -1,0 +1,1 @@
+Root reported initial apply_patch rejected for invalid patch terminator before any code effect; corrected patch implemented same selected schema. Original tool detail remains root conversation; no fabricated tool output.

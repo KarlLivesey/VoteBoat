@@ -1,0 +1,3392 @@
+{
+  "singleton": {
+    "selected_denominator": 17292,
+    "copy_family_weight": 2644,
+    "copy_family_percent": 15.29030765671987,
+    "physical_direct_callers": [
+      {
+        "context": "<voteboat::raft::Raft>::persist_update",
+        "weight": 758,
+        "percent_selected": 4.38352995604904,
+        "percent_family": 28.668683812405447
+      },
+      {
+        "context": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+        "weight": 661,
+        "percent_selected": 3.8225769141799675,
+        "percent_family": 25.0
+      },
+      {
+        "context": "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+        "weight": 419,
+        "percent_selected": 2.423085820032385,
+        "percent_family": 15.847201210287443
+      },
+      {
+        "context": "<voteboat::raft::Raft>::finish_completion",
+        "weight": 255,
+        "percent_selected": 1.4746703678001387,
+        "percent_family": 9.64447806354009
+      },
+      {
+        "context": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove_leaf_kv::<<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove_kv::{closure#0}, alloc::alloc::Global>",
+        "weight": 134,
+        "percent_selected": 0.7749248207263475,
+        "percent_family": 5.068078668683812
+      },
+      {
+        "context": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::insert",
+        "weight": 80,
+        "percent_selected": 0.4626416840157298,
+        "percent_family": 3.02571860816944
+      },
+      {
+        "context": "<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>> as core::future::future::Future>::poll",
+        "weight": 70,
+        "percent_selected": 0.40481147351376356,
+        "percent_family": 2.6475037821482603
+      },
+      {
+        "context": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove::<voteboat::identity::NodeId>",
+        "weight": 64,
+        "percent_selected": 0.3701133472125839,
+        "percent_family": 2.4205748865355523
+      }
+    ],
+    "innermost_direct_callers": [
+      {
+        "context": [
+          "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+          146
+        ],
+        "weight": 234,
+        "percent_selected": 1.3532269257460097,
+        "percent_family": 8.850226928895612
+      },
+      {
+        "context": [
+          "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          102
+        ],
+        "weight": 209,
+        "percent_selected": 1.2086513994910941,
+        "percent_family": 7.904689863842663
+      },
+      {
+        "context": [
+          "<core::result::Result<voteboat::log::transition::view::LogMetadata, voteboat::contracts::StorageError> as core::ops::try_trait::Try>::branch",
+          "git:github.com/rust-lang/rust:library/core/src/result.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          2177
+        ],
+        "weight": 179,
+        "percent_selected": 1.0351607679851955,
+        "percent_family": 6.770045385779123
+      },
+      {
+        "context": [
+          "<voteboat::log::transition::incoming::OwnedNextLog>::plan_owned",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+          70
+        ],
+        "weight": 178,
+        "percent_selected": 1.029377746934999,
+        "percent_family": 6.732223903177005
+      },
+      {
+        "context": [
+          "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+          144
+        ],
+        "weight": 177,
+        "percent_selected": 1.0235947258848022,
+        "percent_family": 6.694402420574886
+      },
+      {
+        "context": [
+          "<core::result::Result<voteboat::log::transition::incoming::OwnedNextLog, voteboat::contracts::StorageError> as core::ops::try_trait::Try>::branch",
+          "git:github.com/rust-lang/rust:library/core/src/result.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          2177
+        ],
+        "weight": 163,
+        "percent_selected": 0.9426324311820495,
+        "percent_family": 6.164901664145234
+      },
+      {
+        "context": [
+          "<voteboat::log::transition::incoming::OwnedAppend>::new",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+          188
+        ],
+        "weight": 154,
+        "percent_selected": 0.8905852417302799,
+        "percent_family": 5.8245083207261725
+      },
+      {
+        "context": [
+          "<voteboat::raft::Raft>::finish_completion",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          1127
+        ],
+        "weight": 143,
+        "percent_selected": 0.8269720101781171,
+        "percent_family": 5.408472012102875
+      }
+    ],
+    "project_ancestry": [
+      {
+        "context": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+          "<voteboat::raft::Raft>::step",
+          "<voteboat::raft::Raft>::receive",
+          "<voteboat::raft::Raft>::receive_inner",
+          "<voteboat::raft::Raft>::receive_append",
+          "<voteboat::raft::Raft>::persist",
+          "<voteboat::raft::Raft>::persist_update"
+        ],
+        "weight": 259,
+        "percent_selected": 1.4978024520009252,
+        "percent_family": 9.795763993948563
+      },
+      {
+        "context": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::persist",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+          "<voteboat_matched_framework::store::MemoryStore as voteboat::log::LogStore>::append_batch",
+          "<voteboat_matched_framework::store::MemoryStore>::append",
+          "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "<voteboat::log::owned::OwnedLogState>::plan",
+          "<voteboat::log::transition::incoming::OwnedNextLog>::plan_owned"
+        ],
+        "weight": 221,
+        "percent_selected": 1.2780476520934536,
+        "percent_family": 8.35854765506808
+      },
+      {
+        "context": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::persist",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+          "<voteboat_matched_framework::store::MemoryStore as voteboat::log::LogStore>::append_batch",
+          "<voteboat_matched_framework::store::MemoryStore>::append",
+          "<voteboat::log::owned::OwnedLogState>::apply_batch"
+        ],
+        "weight": 207,
+        "percent_selected": 1.197085357390701,
+        "percent_family": 7.829046898638427
+      },
+      {
+        "context": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+          "<voteboat::raft::Raft>::step",
+          "<voteboat::raft::Raft>::receive",
+          "<voteboat::raft::Raft>::receive_inner",
+          "<voteboat::raft::Raft>::receive_appended",
+          "<voteboat::raft::Raft>::retire_replication"
+        ],
+        "weight": 198,
+        "percent_selected": 1.1450381679389312,
+        "percent_family": 7.488653555219365
+      },
+      {
+        "context": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::persist",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+          "<voteboat::raft::Raft>::finish_completion",
+          "<voteboat::log::transition::incoming::OwnedNextLog>::install",
+          "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install"
+        ],
+        "weight": 182,
+        "percent_selected": 1.0525098311357854,
+        "percent_family": 6.883509833585476
+      },
+      {
+        "context": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::persist",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+          "<voteboat::raft::Raft>::finish_completion"
+        ],
+        "weight": 166,
+        "percent_selected": 0.9599814943326394,
+        "percent_family": 6.278366111951589
+      },
+      {
+        "context": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::persist",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+          "<voteboat_matched_framework::store::MemoryStore as voteboat::log::LogStore>::append_batch",
+          "<voteboat_matched_framework::store::MemoryStore>::append",
+          "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "<voteboat::log::owned::OwnedLogState>::plan",
+          "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install"
+        ],
+        "weight": 164,
+        "percent_selected": 0.9484154522322461,
+        "percent_family": 6.202723146747353
+      },
+      {
+        "context": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+          "<voteboat::raft::Raft>::step",
+          "<voteboat::raft::Raft>::receive",
+          "<voteboat::raft::Raft>::receive_inner",
+          "<voteboat::raft::Raft>::receive_append",
+          "<voteboat::raft::Raft>::persist",
+          "<voteboat::raft::Raft>::persist_update",
+          "<voteboat::log::transition::incoming::OwnedNextLog>::plan_copy",
+          "<voteboat::log::transition::incoming::OwnedAppend>::new"
+        ],
+        "weight": 109,
+        "percent_selected": 0.6303492944714318,
+        "percent_family": 4.122541603630863
+      }
+    ],
+    "direct_caller_address_records": {
+      "('core::ptr::copy_nonoverlapping::<u64>', 'git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985', 549)": [
+        {
+          "library": 2,
+          "address": 2820483,
+          "frame": 0,
+          "module_offset": "0x2b0983",
+          "module": "voteboat-matched-framework",
+          "function": "voteboat_matched_framework::workload::run::{closure#0}",
+          "function_offset": "0x4003",
+          "function_size": "0x4ad9",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/workload.rs",
+          "line": 150,
+          "inlines": [
+            {
+              "function": "core::ptr::copy_nonoverlapping::<u64>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 549
+            },
+            {
+              "function": "<alloc::vec::Vec<u64>>::append_elements",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 2946
+            },
+            {
+              "function": "<alloc::vec::Vec<u64> as alloc::vec::spec_extend::SpecExtend<u64, alloc::vec::into_iter::IntoIter<u64>>>::spec_extend",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/spec_extend.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 34
+            },
+            {
+              "function": "<alloc::vec::Vec<u64> as core::iter::traits::collect::Extend<u64>>::extend::<alloc::vec::Vec<u64>>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 4009
+            },
+            {
+              "function": "voteboat_matched_framework::workload::aggregate",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/workload.rs",
+              "line": 208
+            }
+          ]
+        }
+      ],
+      "('<voteboat::log::owned::OwnedLogState>::apply_batch', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs', 102)": [
+        {
+          "library": 2,
+          "address": 1551299,
+          "frame": 0,
+          "module_offset": "0x17abc3",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0x2533",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 102
+        },
+        {
+          "library": 2,
+          "address": 1551259,
+          "frame": 0,
+          "module_offset": "0x17ab9b",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0x250b",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 102
+        }
+      ],
+      "('<voteboat::raft::Raft>::finish_completion', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs', 1127)": [
+        {
+          "library": 2,
+          "address": 1653995,
+          "frame": 0,
+          "module_offset": "0x193ceb",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::finish_completion",
+          "function_offset": "0x47b",
+          "function_size": "0x232e",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1127
+        },
+        {
+          "library": 2,
+          "address": 1653649,
+          "frame": 0,
+          "module_offset": "0x193b91",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::finish_completion",
+          "function_offset": "0x321",
+          "function_size": "0x232e",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1127
+        }
+      ],
+      "('<voteboat::raft::Raft>::persist_update', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs', 1316)": [
+        {
+          "library": 2,
+          "address": 1643730,
+          "frame": 0,
+          "module_offset": "0x1914d2",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0xd02",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1316
+        },
+        {
+          "library": 2,
+          "address": 1643700,
+          "frame": 0,
+          "module_offset": "0x1914b4",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0xce4",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1316
+        },
+        {
+          "library": 2,
+          "address": 1643682,
+          "frame": 0,
+          "module_offset": "0x1914a2",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0xcd2",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1316
+        }
+      ],
+      "('<voteboat::raft::Raft>::persist_update', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs', 1318)": [
+        {
+          "library": 2,
+          "address": 1643659,
+          "frame": 0,
+          "module_offset": "0x19148b",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0xcbb",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1318
+        }
+      ],
+      "('<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs', 144)": [
+        {
+          "library": 2,
+          "address": 1616059,
+          "frame": 0,
+          "module_offset": "0x18a8bb",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+          "function_offset": "0xab",
+          "function_size": "0xd49",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+          "line": 144
+        }
+      ],
+      "('<voteboat::log::transition::incoming::OwnedAppend>::new', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs', 188)": [
+        {
+          "library": 2,
+          "address": 1643419,
+          "frame": 0,
+          "module_offset": "0x19139b",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0xbcb",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1285,
+          "inlines": [
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedAppend>::new",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 188
+            },
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_copy",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 45
+            }
+          ]
+        },
+        {
+          "library": 2,
+          "address": 1643401,
+          "frame": 0,
+          "module_offset": "0x191389",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0xbb9",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1285,
+          "inlines": [
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedAppend>::new",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 188
+            },
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_copy",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 45
+            }
+          ]
+        },
+        {
+          "library": 2,
+          "address": 1547492,
+          "frame": 0,
+          "module_offset": "0x179ce4",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0x1654",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 91,
+          "inlines": [
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedAppend>::new",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 188
+            },
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_owned",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 70
+            },
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::plan",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+              "line": 159
+            }
+          ]
+        }
+      ],
+      "('<voteboat::log::transition::incoming::OwnedNextLog>::plan_copy', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs', 45)": [
+        {
+          "library": 2,
+          "address": 1643463,
+          "frame": 0,
+          "module_offset": "0x1913c7",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0xbf7",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1285,
+          "inlines": [
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_copy",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 45
+            }
+          ]
+        }
+      ],
+      "('<core::result::Result<voteboat::log::transition::incoming::OwnedNextLog, voteboat::contracts::StorageError> as core::ops::try_trait::Try>::branch', 'git:github.com/rust-lang/rust:library/core/src/result.rs:48a229ceaefd4985c50990b14116b6d856af0985', 2177)": [
+        {
+          "library": 2,
+          "address": 1642023,
+          "frame": 0,
+          "module_offset": "0x190e27",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0x657",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1285,
+          "inlines": [
+            {
+              "function": "<core::result::Result<voteboat::log::transition::incoming::OwnedNextLog, voteboat::contracts::StorageError> as core::ops::try_trait::Try>::branch",
+              "file": "git:github.com/rust-lang/rust:library/core/src/result.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 2177
+            }
+          ]
+        },
+        {
+          "library": 2,
+          "address": 1545786,
+          "frame": 0,
+          "module_offset": "0x17963a",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0xfaa",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 91,
+          "inlines": [
+            {
+              "function": "<core::result::Result<voteboat::log::transition::incoming::OwnedNextLog, voteboat::contracts::StorageError> as core::ops::try_trait::Try>::branch",
+              "file": "git:github.com/rust-lang/rust:library/core/src/result.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 2177
+            },
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::plan",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+              "line": 159
+            }
+          ]
+        }
+      ],
+      "('<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs', 146)": [
+        {
+          "library": 2,
+          "address": 1617096,
+          "frame": 0,
+          "module_offset": "0x18acc8",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+          "function_offset": "0x4b8",
+          "function_size": "0xd49",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+          "line": 146
+        },
+        {
+          "library": 2,
+          "address": 1617069,
+          "frame": 0,
+          "module_offset": "0x18acad",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+          "function_offset": "0x49d",
+          "function_size": "0xd49",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+          "line": 146
+        }
+      ],
+      "('<voteboat::raft::Raft>::persist_update', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs', 1323)": [
+        {
+          "library": 2,
+          "address": 1643783,
+          "frame": 0,
+          "module_offset": "0x191507",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0xd37",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1323
+        },
+        {
+          "library": 2,
+          "address": 1643812,
+          "frame": 0,
+          "module_offset": "0x191524",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0xd54",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1323
+        }
+      ],
+      "('core::ptr::copy::<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Replication>>', 'git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985', 640)": [
+        {
+          "library": 2,
+          "address": 1464375,
+          "frame": 0,
+          "module_offset": "0x165837",
+          "module": "voteboat-matched-framework",
+          "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove_leaf_kv::<<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove_kv::{closure#0}, alloc::alloc::Global>",
+          "function_offset": "0xd7",
+          "function_size": "0x799",
+          "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/remove.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 31,
+          "inlines": [
+            {
+              "function": "core::ptr::copy::<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Replication>>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 640
+            },
+            {
+              "function": "alloc::collections::btree::node::slice_remove::<voteboat::raft::Replication>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1845
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1273
+            }
+          ]
+        },
+        {
+          "library": 2,
+          "address": 1731970,
+          "frame": 0,
+          "module_offset": "0x1a6d82",
+          "module": "voteboat-matched-framework",
+          "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::insert",
+          "function_offset": "0x1f2",
+          "function_size": "0xc89",
+          "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 1052,
+          "inlines": [
+            {
+              "function": "core::ptr::copy::<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Replication>>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 640
+            },
+            {
+              "function": "alloc::collections::btree::node::slice_insert::<voteboat::raft::Replication>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1828
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert_fit",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 939
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert::<alloc::alloc::Global>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 964
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert_recursing::<alloc::alloc::Global, <alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::insert_entry::{closure#0}>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1065
+            },
+            {
+              "function": "<alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::insert_entry",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 460
+            },
+            {
+              "function": "<alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::insert",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 426
+            }
+          ]
+        }
+      ],
+      "('<voteboat::log::transition::incoming::OwnedNextLog>::plan_owned', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs', 70)": [
+        {
+          "library": 2,
+          "address": 1547535,
+          "frame": 0,
+          "module_offset": "0x179d0f",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0x167f",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 91,
+          "inlines": [
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_owned",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 70
+            },
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::plan",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+              "line": 159
+            }
+          ]
+        }
+      ],
+      "('<voteboat::raft::Raft>::after_durable', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs', 1226)": [
+        {
+          "library": 2,
+          "address": 1656890,
+          "frame": 0,
+          "module_offset": "0x19483a",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::finish_completion",
+          "function_offset": "0xfca",
+          "function_size": "0x232e",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1179,
+          "inlines": [
+            {
+              "function": "<voteboat::raft::Raft>::after_durable",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+              "line": 1226
+            }
+          ]
+        }
+      ],
+      "('core::ptr::copy_nonoverlapping::<voteboat::raft::Effect>', 'git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985', 549)": [
+        {
+          "library": 2,
+          "address": 3486960,
+          "frame": 0,
+          "module_offset": "0x3534f0",
+          "module": "voteboat-matched-framework",
+          "function": "<alloc::collections::vec_deque::VecDeque<voteboat::raft::Effect> as alloc::collections::vec_deque::spec_extend::SpecExtend<voteboat::raft::Effect, alloc::vec::into_iter::IntoIter<voteboat::raft::Effect>>>::spec_extend",
+          "function_offset": "0x2f0",
+          "function_size": "0x431",
+          "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/vec_deque/spec_extend.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 86,
+          "inlines": [
+            {
+              "function": "core::ptr::copy_nonoverlapping::<voteboat::raft::Effect>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 549
+            },
+            {
+              "function": "<alloc::collections::vec_deque::VecDeque<voteboat::raft::Effect>>::copy_slice",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/vec_deque/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985"
+            }
+          ]
+        },
+        {
+          "library": 2,
+          "address": 1765472,
+          "frame": 0,
+          "module_offset": "0x1af060",
+          "module": "voteboat-matched-framework",
+          "function": "<alloc::vec::Vec<voteboat::raft::Effect> as alloc::vec::spec_extend::SpecExtend<voteboat::raft::Effect, alloc::vec::into_iter::IntoIter<voteboat::raft::Effect>>>::spec_extend",
+          "function_offset": "0xb0",
+          "function_size": "0x228",
+          "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/spec_extend.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 34,
+          "inlines": [
+            {
+              "function": "core::ptr::copy_nonoverlapping::<voteboat::raft::Effect>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 549
+            },
+            {
+              "function": "<alloc::vec::Vec<voteboat::raft::Effect>>::append_elements",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 2946
+            }
+          ]
+        }
+      ],
+      "('<core::result::Result<voteboat::log::transition::incoming::PreparedOwnedLog, voteboat::contracts::StorageError> as core::ops::try_trait::Try>::branch', 'git:github.com/rust-lang/rust:library/core/src/result.rs:48a229ceaefd4985c50990b14116b6d856af0985', 2177)": [
+        {
+          "library": 2,
+          "address": 1653774,
+          "frame": 0,
+          "module_offset": "0x193c0e",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::finish_completion",
+          "function_offset": "0x39e",
+          "function_size": "0x232e",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1127,
+          "inlines": [
+            {
+              "function": "<core::result::Result<voteboat::log::transition::incoming::PreparedOwnedLog, voteboat::contracts::StorageError> as core::ops::try_trait::Try>::branch",
+              "file": "git:github.com/rust-lang/rust:library/core/src/result.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 2177
+            },
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::install",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 157
+            }
+          ]
+        },
+        {
+          "library": 2,
+          "address": 1545918,
+          "frame": 0,
+          "module_offset": "0x1796be",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0x102e",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 91,
+          "inlines": [
+            {
+              "function": "<core::result::Result<voteboat::log::transition::incoming::PreparedOwnedLog, voteboat::contracts::StorageError> as core::ops::try_trait::Try>::branch",
+              "file": "git:github.com/rust-lang/rust:library/core/src/result.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 2177
+            },
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::plan",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+              "line": 165
+            }
+          ]
+        }
+      ],
+      "('<voteboat::raft::Raft>::persist_update', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs', 1317)": [
+        {
+          "library": 2,
+          "address": 1643636,
+          "frame": 0,
+          "module_offset": "0x191474",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0xca4",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1317
+        }
+      ],
+      "('<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Replication>>::write', 'git:github.com/rust-lang/rust:library/core/src/mem/maybe_uninit.rs:48a229ceaefd4985c50990b14116b6d856af0985', 575)": [
+        {
+          "library": 2,
+          "address": 1732036,
+          "frame": 0,
+          "module_offset": "0x1a6dc4",
+          "module": "voteboat-matched-framework",
+          "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::insert",
+          "function_offset": "0x234",
+          "function_size": "0xc89",
+          "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 1052,
+          "inlines": [
+            {
+              "function": "<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Replication>>::write",
+              "file": "git:github.com/rust-lang/rust:library/core/src/mem/maybe_uninit.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 575
+            },
+            {
+              "function": "alloc::collections::btree::node::slice_insert::<voteboat::raft::Replication>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1830
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert_fit",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 939
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert::<alloc::alloc::Global>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 964
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert_recursing::<alloc::alloc::Global, <alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::insert_entry::{closure#0}>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1065
+            },
+            {
+              "function": "<alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::insert_entry",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 460
+            },
+            {
+              "function": "<alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::insert",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 426
+            }
+          ]
+        }
+      ],
+      "('<voteboat::raft::Raft>::receive', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs', 1678)": [
+        {
+          "library": 2,
+          "address": 1686296,
+          "frame": 0,
+          "module_offset": "0x19bb18",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::step",
+          "function_offset": "0x4548",
+          "function_size": "0x4fa5",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 970,
+          "inlines": [
+            {
+              "function": "<voteboat::raft::Raft>::receive",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+              "line": 1678
+            }
+          ]
+        }
+      ],
+      "('<voteboat::log::owned::OwnedLogState>::apply_batch', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs', 99)": [
+        {
+          "library": 2,
+          "address": 1551187,
+          "frame": 0,
+          "module_offset": "0x17ab53",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0x24c3",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 99
+        }
+      ],
+      "('<core::result::Result<voteboat::log::transition::view::LogMetadata, voteboat::contracts::StorageError> as core::ops::try_trait::Try>::branch', 'git:github.com/rust-lang/rust:library/core/src/result.rs:48a229ceaefd4985c50990b14116b6d856af0985', 2177)": [
+        {
+          "library": 2,
+          "address": 1643261,
+          "frame": 0,
+          "module_offset": "0x1912fd",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0xb2d",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1285,
+          "inlines": [
+            {
+              "function": "<core::result::Result<voteboat::log::transition::view::LogMetadata, voteboat::contracts::StorageError> as core::ops::try_trait::Try>::branch",
+              "file": "git:github.com/rust-lang/rust:library/core/src/result.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 2177
+            },
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_copy",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 44
+            }
+          ]
+        },
+        {
+          "library": 2,
+          "address": 1546422,
+          "frame": 0,
+          "module_offset": "0x1798b6",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0x1226",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 91,
+          "inlines": [
+            {
+              "function": "<core::result::Result<voteboat::log::transition::view::LogMetadata, voteboat::contracts::StorageError> as core::ops::try_trait::Try>::branch",
+              "file": "git:github.com/rust-lang/rust:library/core/src/result.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 2177
+            },
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_owned",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 68
+            },
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::plan",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+              "line": 159
+            }
+          ]
+        }
+      ],
+      "('<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs', 147)": [
+        {
+          "library": 2,
+          "address": 1617051,
+          "frame": 0,
+          "module_offset": "0x18ac9b",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+          "function_offset": "0x48b",
+          "function_size": "0xd49",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+          "line": 147
+        }
+      ],
+      "('<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs', 86)": [
+        {
+          "library": 2,
+          "address": 3677211,
+          "frame": 0,
+          "module_offset": "0x381c1b",
+          "module": "voteboat-matched-framework",
+          "function": "<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>> as core::future::future::Future>::poll",
+          "function_offset": "0x58b",
+          "function_size": "0x29b1",
+          "file": "git:github.com/rust-lang/rust:library/core/src/future/future.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 133,
+          "inlines": [
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs",
+              "line": 86
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs",
+              "line": 64
+            }
+          ]
+        }
+      ],
+      "('fun_be580', None, None)": [
+        {
+          "library": 1,
+          "address": 780129,
+          "frame": 0,
+          "module_offset": "0xbe761",
+          "module": "libc.so.6",
+          "function": "fun_be580",
+          "function_offset": "0x1e1",
+          "function_size": "0x29b"
+        }
+      ],
+      "('<voteboat::log::transition::view::LogView>::metadata', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/view.rs', 99)": [
+        {
+          "library": 2,
+          "address": 1641482,
+          "frame": 0,
+          "module_offset": "0x190c0a",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0x43a",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1285,
+          "inlines": [
+            {
+              "function": "<voteboat::log::transition::view::LogView>::metadata",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/view.rs",
+              "line": 99
+            },
+            {
+              "function": "voteboat::log::transition::incoming::validate_base",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 254
+            },
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_copy",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 42
+            }
+          ]
+        },
+        {
+          "library": 2,
+          "address": 1545333,
+          "frame": 0,
+          "module_offset": "0x179475",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0xde5",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 91,
+          "inlines": [
+            {
+              "function": "<voteboat::log::transition::view::LogView>::metadata",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/view.rs",
+              "line": 99
+            },
+            {
+              "function": "voteboat::log::transition::incoming::validate_base",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 254
+            },
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_owned",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 66
+            },
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::plan",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+              "line": 159
+            }
+          ]
+        }
+      ],
+      "('<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove::<voteboat::identity::NodeId>::{closure#0}', 'git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map.rs:48a229ceaefd4985c50990b14116b6d856af0985', 1134)": [
+        {
+          "library": 2,
+          "address": 1474209,
+          "frame": 0,
+          "module_offset": "0x167ea1",
+          "module": "voteboat-matched-framework",
+          "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove::<voteboat::identity::NodeId>",
+          "function_offset": "0x2f1",
+          "function_size": "0x36b",
+          "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 1134,
+          "inlines": [
+            {
+              "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove::<voteboat::identity::NodeId>::{closure#0}",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1134
+            },
+            {
+              "function": "<core::option::Option<(voteboat::identity::NodeId, voteboat::raft::Replication)>>::map::<voteboat::raft::Replication, <alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove<voteboat::identity::NodeId>::{closure#0}>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/option.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1163
+            }
+          ]
+        }
+      ],
+      "('<voteboat::raft::Raft>::receive_inner', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft/receive.rs', 90)": [
+        {
+          "library": 2,
+          "address": 1594291,
+          "frame": 0,
+          "module_offset": "0x1853b3",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::receive_inner",
+          "function_offset": "0x1393",
+          "function_size": "0x1c73",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft/receive.rs",
+          "line": 90
+        }
+      ],
+      "('core::ptr::copy::<core::mem::maybe_uninit::MaybeUninit<voteboat::identity::NodeId>>', 'git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985', 640)": [
+        {
+          "library": 2,
+          "address": 1731927,
+          "frame": 0,
+          "module_offset": "0x1a6d57",
+          "module": "voteboat-matched-framework",
+          "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::insert",
+          "function_offset": "0x1c7",
+          "function_size": "0xc89",
+          "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 1052,
+          "inlines": [
+            {
+              "function": "core::ptr::copy::<core::mem::maybe_uninit::MaybeUninit<voteboat::identity::NodeId>>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 640
+            },
+            {
+              "function": "alloc::collections::btree::node::slice_insert::<voteboat::identity::NodeId>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1828
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert_fit",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 938
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert::<alloc::alloc::Global>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 964
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert_recursing::<alloc::alloc::Global, <alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::insert_entry::{closure#0}>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1065
+            },
+            {
+              "function": "<alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::insert_entry",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 460
+            },
+            {
+              "function": "<alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::insert",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 426
+            }
+          ]
+        },
+        {
+          "library": 2,
+          "address": 1464300,
+          "frame": 0,
+          "module_offset": "0x1657ec",
+          "module": "voteboat-matched-framework",
+          "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove_leaf_kv::<<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove_kv::{closure#0}, alloc::alloc::Global>",
+          "function_offset": "0x8c",
+          "function_size": "0x799",
+          "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/remove.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 31,
+          "inlines": [
+            {
+              "function": "core::ptr::copy::<core::mem::maybe_uninit::MaybeUninit<voteboat::identity::NodeId>>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 640
+            },
+            {
+              "function": "alloc::collections::btree::node::slice_remove::<voteboat::identity::NodeId>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1845
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1272
+            }
+          ]
+        }
+      ],
+      "('<core::option::Option<voteboat::raft::Pending>>::unwrap', 'git:github.com/rust-lang/rust:library/core/src/option.rs:48a229ceaefd4985c50990b14116b6d856af0985', 1013)": [
+        {
+          "library": 2,
+          "address": 1653425,
+          "frame": 0,
+          "module_offset": "0x193ab1",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::finish_completion",
+          "function_offset": "0x241",
+          "function_size": "0x232e",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1120,
+          "inlines": [
+            {
+              "function": "<core::option::Option<voteboat::raft::Pending>>::unwrap",
+              "file": "git:github.com/rust-lang/rust:library/core/src/option.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1013
+            }
+          ]
+        }
+      ],
+      "('voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft/completion.rs', 95)": [
+        {
+          "library": 2,
+          "address": 2088380,
+          "frame": 0,
+          "module_offset": "0x1fddbc",
+          "module": "voteboat-matched-framework",
+          "function": "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+          "function_offset": "0xec",
+          "function_size": "0x667",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft/completion.rs",
+          "line": 84,
+          "inlines": [
+            {
+              "function": "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft/completion.rs",
+              "line": 95
+            }
+          ]
+        }
+      ],
+      "('<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove_kv', 'git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985', 657)": [
+        {
+          "library": 2,
+          "address": 1474092,
+          "frame": 0,
+          "module_offset": "0x167e2c",
+          "module": "voteboat-matched-framework",
+          "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove::<voteboat::identity::NodeId>",
+          "function_offset": "0x27c",
+          "function_size": "0x36b",
+          "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 1134,
+          "inlines": [
+            {
+              "function": "<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove_kv",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 657
+            },
+            {
+              "function": "<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove_entry",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 526
+            },
+            {
+              "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove_entry::<voteboat::identity::NodeId>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1169
+            }
+          ]
+        }
+      ],
+      "('<voteboat::raft::Raft>::finish_completion', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs', 1179)": [
+        {
+          "library": 2,
+          "address": 1656073,
+          "frame": 0,
+          "module_offset": "0x194509",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::finish_completion",
+          "function_offset": "0xc99",
+          "function_size": "0x232e",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1179
+        }
+      ],
+      "('core::ptr::read::<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Message>>', 'git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985', 1731)": [
+        {
+          "library": 2,
+          "address": 3066258,
+          "frame": 0,
+          "module_offset": "0x2ec992",
+          "module": "voteboat-matched-framework",
+          "function": "<tokio::sync::mpsc::list::Rx<voteboat::raft::Message>>::pop",
+          "function_offset": "0x1b2",
+          "function_size": "0x218",
+          "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/list.rs",
+          "line": 337,
+          "inlines": [
+            {
+              "function": "core::ptr::read::<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Message>>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1731
+            },
+            {
+              "function": "<tokio::sync::mpsc::block::Block<voteboat::raft::Message>>::read::{closure#0}",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/block.rs",
+              "line": 171
+            },
+            {
+              "function": "<tokio::loom::std::unsafe_cell::UnsafeCell<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Message>>>::with::<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Message>, <tokio::sync::mpsc::block::Block<voteboat::raft::Message>>::read::{closure#0}>",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/loom/std/unsafe_cell.rs",
+              "line": 11
+            },
+            {
+              "function": "<tokio::sync::mpsc::block::Block<voteboat::raft::Message>>::read",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/block.rs",
+              "line": 171
+            }
+          ]
+        }
+      ],
+      "('<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove', 'git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985', 1275)": [
+        {
+          "library": 2,
+          "address": 1464413,
+          "frame": 0,
+          "module_offset": "0x16585d",
+          "module": "voteboat-matched-framework",
+          "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove_leaf_kv::<<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove_kv::{closure#0}, alloc::alloc::Global>",
+          "function_offset": "0xfd",
+          "function_size": "0x799",
+          "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/remove.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 31,
+          "inlines": [
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1275
+            }
+          ]
+        }
+      ],
+      "('voteboat::log::transition::append_summary', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition.rs', 367)": [
+        {
+          "library": 2,
+          "address": 1759729,
+          "frame": 0,
+          "module_offset": "0x1ad9f1",
+          "module": "voteboat-matched-framework",
+          "function": "voteboat::log::transition::append_summary",
+          "function_offset": "0x1c1",
+          "function_size": "0x1f5",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition.rs",
+          "line": 367
+        }
+      ],
+      "('<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove_leaf_kv::<<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove_kv::{closure#0}, alloc::alloc::Global>', 'git:github.com/rust-lang/rust:library/alloc/src/collections/btree/remove.rs:48a229ceaefd4985c50990b14116b6d856af0985', 74)": [
+        {
+          "library": 2,
+          "address": 1464852,
+          "frame": 0,
+          "module_offset": "0x165a14",
+          "module": "voteboat-matched-framework",
+          "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove_leaf_kv::<<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove_kv::{closure#0}, alloc::alloc::Global>",
+          "function_offset": "0x2b4",
+          "function_size": "0x799",
+          "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/remove.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 74
+        }
+      ],
+      "('<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs', 96)": [
+        {
+          "library": 2,
+          "address": 3677576,
+          "frame": 0,
+          "module_offset": "0x381d88",
+          "module": "voteboat-matched-framework",
+          "function": "<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>> as core::future::future::Future>::poll",
+          "function_offset": "0x6f8",
+          "function_size": "0x29b1",
+          "file": "git:github.com/rust-lang/rust:library/core/src/future/future.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 133,
+          "inlines": [
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs",
+              "line": 96
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs",
+              "line": 64
+            }
+          ]
+        }
+      ],
+      "('<voteboat::log::transition::incoming::OwnedNextLog>::plan_owned', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs', 74)": [
+        {
+          "library": 2,
+          "address": 1547412,
+          "frame": 0,
+          "module_offset": "0x179c94",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0x1604",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 91,
+          "inlines": [
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_owned",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 74
+            },
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::plan",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+              "line": 159
+            }
+          ]
+        }
+      ],
+      "('<voteboat_matched_framework::voteboat_engine::actor::Actor>::step', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs', 194)": [
+        {
+          "library": 2,
+          "address": 2952258,
+          "frame": 0,
+          "module_offset": "0x2d0c42",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+          "function_offset": "0x82",
+          "function_size": "0x1ab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs",
+          "line": 194
+        }
+      ],
+      "('<core::result::Result<voteboat::raft::Effect, voteboat::raft::RaftError> as core::ops::try_trait::Try>::branch', 'git:github.com/rust-lang/rust:library/core/src/result.rs:48a229ceaefd4985c50990b14116b6d856af0985', 2177)": [
+        {
+          "library": 2,
+          "address": 1582170,
+          "frame": 0,
+          "module_offset": "0x18245a",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::broadcast_ready_peers",
+          "function_offset": "0x1fa",
+          "function_size": "0x475",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft/progress_broadcast.rs",
+          "line": 82,
+          "inlines": [
+            {
+              "function": "<core::result::Result<voteboat::raft::Effect, voteboat::raft::RaftError> as core::ops::try_trait::Try>::branch",
+              "file": "git:github.com/rust-lang/rust:library/core/src/result.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 2177
+            }
+          ]
+        }
+      ],
+      "('<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs', 275)": [
+        {
+          "library": 2,
+          "address": 2953708,
+          "frame": 0,
+          "module_offset": "0x2d11ec",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "function_offset": "0x47c",
+          "function_size": "0x270c",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs",
+          "line": 275
+        }
+      ],
+      "('core::ptr::write::<voteboat::raft::Effect>', 'git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985', 1939)": [
+        {
+          "library": 2,
+          "address": 1581836,
+          "frame": 0,
+          "module_offset": "0x18230c",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::broadcast_ready_peers",
+          "function_offset": "0xac",
+          "function_size": "0x475",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft/progress_broadcast.rs",
+          "line": 82,
+          "inlines": [
+            {
+              "function": "core::ptr::write::<voteboat::raft::Effect>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1939
+            },
+            {
+              "function": "<alloc::vec::Vec<voteboat::raft::Effect>>::push_mut",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1043
+            },
+            {
+              "function": "<alloc::vec::Vec<voteboat::raft::Effect>>::push",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1002
+            }
+          ]
+        },
+        {
+          "library": 2,
+          "address": 1657493,
+          "frame": 0,
+          "module_offset": "0x194a95",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::finish_completion",
+          "function_offset": "0x1225",
+          "function_size": "0x232e",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1179,
+          "inlines": [
+            {
+              "function": "core::ptr::write::<voteboat::raft::Effect>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1939
+            },
+            {
+              "function": "<alloc::vec::Vec<voteboat::raft::Effect>>::push_mut",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1043
+            },
+            {
+              "function": "<alloc::vec::Vec<voteboat::raft::Effect>>::push",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1002
+            },
+            {
+              "function": "<voteboat::raft::Raft>::after_durable",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs"
+            }
+          ]
+        }
+      ],
+      "('<voteboat::log::owned::OwnedLogState>::plan', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs', 162)": [
+        {
+          "library": 2,
+          "address": 1545217,
+          "frame": 0,
+          "module_offset": "0x179401",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0xd71",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 91,
+          "inlines": [
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::plan",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+              "line": 162
+            }
+          ]
+        }
+      ],
+      "('core::ptr::read::<voteboat::raft::Replication>', 'git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985', 1731)": [
+        {
+          "library": 2,
+          "address": 1464337,
+          "frame": 0,
+          "module_offset": "0x165811",
+          "module": "voteboat-matched-framework",
+          "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove_leaf_kv::<<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove_kv::{closure#0}, alloc::alloc::Global>",
+          "function_offset": "0xb1",
+          "function_size": "0x799",
+          "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/remove.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 31,
+          "inlines": [
+            {
+              "function": "core::ptr::read::<voteboat::raft::Replication>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1731
+            },
+            {
+              "function": "<*const voteboat::raft::Replication>::read",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/const_ptr.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1153
+            },
+            {
+              "function": "<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Replication>>::assume_init_read",
+              "file": "git:github.com/rust-lang/rust:library/core/src/mem/maybe_uninit.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 799
+            },
+            {
+              "function": "alloc::collections::btree::node::slice_remove::<voteboat::raft::Replication>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1844
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1273
+            }
+          ]
+        }
+      ],
+      "('<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs', 276)": [
+        {
+          "library": 2,
+          "address": 2954007,
+          "frame": 0,
+          "module_offset": "0x2d1317",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "function_offset": "0x5a7",
+          "function_size": "0x270c",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs",
+          "line": 276
+        }
+      ],
+      "('<voteboat::raft::Raft>::step', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs', 970)": [
+        {
+          "library": 2,
+          "address": 1669826,
+          "frame": 0,
+          "module_offset": "0x197ac2",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::step",
+          "function_offset": "0x4f2",
+          "function_size": "0x4fa5",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 970
+        }
+      ],
+      "('<alloc::vec::Vec<voteboat::identity::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<voteboat::identity::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::map::Map<core::iter::adapters::map::Map<core::iter::adapters::chain::Chain<core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, core::iter::adapters::filter::Filter<core::iter::adapters::flatten::FlatMap<core::option::Iter<voteboat::membership::JointConfiguration>, core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, <voteboat::membership::Membership>::replicas::{closure#0}>, <voteboat::membership::Membership>::replicas::{closure#1}>>, <voteboat::membership::Membership>::replicas::{closure#2}>, <voteboat::raft::Raft>::peers::{closure#0}>, <voteboat::raft::Raft>::peers::{closure#1}>>>::from_iter', 'git:github.com/rust-lang/rust:library/alloc/src/vec/spec_from_iter_nested.rs:48a229ceaefd4985c50990b14116b6d856af0985', 41)": [
+        {
+          "library": 2,
+          "address": 1689429,
+          "frame": 0,
+          "module_offset": "0x19c755",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::peers",
+          "function_offset": "0x1d5",
+          "function_size": "0x2d5",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1335,
+          "inlines": [
+            {
+              "function": "<alloc::vec::Vec<voteboat::identity::NodeId> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<voteboat::identity::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::map::Map<core::iter::adapters::map::Map<core::iter::adapters::chain::Chain<core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, core::iter::adapters::filter::Filter<core::iter::adapters::flatten::FlatMap<core::option::Iter<voteboat::membership::JointConfiguration>, core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, <voteboat::membership::Membership>::replicas::{closure#0}>, <voteboat::membership::Membership>::replicas::{closure#1}>>, <voteboat::membership::Membership>::replicas::{closure#2}>, <voteboat::raft::Raft>::peers::{closure#0}>, <voteboat::raft::Raft>::peers::{closure#1}>>>::from_iter",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/spec_from_iter_nested.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 41
+            },
+            {
+              "function": "<alloc::vec::Vec<voteboat::identity::NodeId> as alloc::vec::spec_from_iter::SpecFromIter<voteboat::identity::NodeId, core::iter::adapters::filter::Filter<core::iter::adapters::map::Map<core::iter::adapters::map::Map<core::iter::adapters::chain::Chain<core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, core::iter::adapters::filter::Filter<core::iter::adapters::flatten::FlatMap<core::option::Iter<voteboat::membership::JointConfiguration>, core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, <voteboat::membership::Membership>::replicas::{closure#0}>, <voteboat::membership::Membership>::replicas::{closure#1}>>, <voteboat::membership::Membership>::replicas::{closure#2}>, <voteboat::raft::Raft>::peers::{closure#0}>, <voteboat::raft::Raft>::peers::{closure#1}>>>::from_iter",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/spec_from_iter.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 33
+            },
+            {
+              "function": "<alloc::vec::Vec<voteboat::identity::NodeId> as core::iter::traits::collect::FromIterator<voteboat::identity::NodeId>>::from_iter::<core::iter::adapters::filter::Filter<core::iter::adapters::map::Map<core::iter::adapters::map::Map<core::iter::adapters::chain::Chain<core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, core::iter::adapters::filter::Filter<core::iter::adapters::flatten::FlatMap<core::option::Iter<voteboat::membership::JointConfiguration>, core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, <voteboat::membership::Membership>::replicas::{closure#0}>, <voteboat::membership::Membership>::replicas::{closure#1}>>, <voteboat::membership::Membership>::replicas::{closure#2}>, <voteboat::raft::Raft>::peers::{closure#0}>, <voteboat::raft::Raft>::peers::{closure#1}>>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 3941
+            },
+            {
+              "function": "<core::iter::adapters::filter::Filter<core::iter::adapters::map::Map<core::iter::adapters::map::Map<core::iter::adapters::chain::Chain<core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, core::iter::adapters::filter::Filter<core::iter::adapters::flatten::FlatMap<core::option::Iter<voteboat::membership::JointConfiguration>, core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, <voteboat::membership::Membership>::replicas::{closure#0}>, <voteboat::membership::Membership>::replicas::{closure#1}>>, <voteboat::membership::Membership>::replicas::{closure#2}>, <voteboat::raft::Raft>::peers::{closure#0}>, <voteboat::raft::Raft>::peers::{closure#1}> as core::iter::traits::iterator::Iterator>::collect::<alloc::vec::Vec<voteboat::identity::NodeId>>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/iter/traits/iterator.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 2090
+            }
+          ]
+        }
+      ],
+      "('<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs', 273)": [
+        {
+          "library": 2,
+          "address": 2952859,
+          "frame": 0,
+          "module_offset": "0x2d0e9b",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "function_offset": "0x12b",
+          "function_size": "0x270c",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs",
+          "line": 273
+        }
+      ],
+      "('<core::mem::maybe_uninit::MaybeUninit<voteboat::log::owned::Plan>>::write', 'git:github.com/rust-lang/rust:library/core/src/mem/maybe_uninit.rs:48a229ceaefd4985c50990b14116b6d856af0985', 575)": [
+        {
+          "library": 2,
+          "address": 1546116,
+          "frame": 0,
+          "module_offset": "0x179784",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0x10f4",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 91,
+          "inlines": [
+            {
+              "function": "<core::mem::maybe_uninit::MaybeUninit<voteboat::log::owned::Plan>>::write",
+              "file": "git:github.com/rust-lang/rust:library/core/src/mem/maybe_uninit.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 575
+            },
+            {
+              "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::GroupIdentity, voteboat::log::owned::Plan, alloc::collections::btree::node::marker::Leaf>>::push_with_handle",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 674
+            },
+            {
+              "function": "<alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::GroupIdentity, voteboat::log::owned::Plan>>::insert_entry",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 457
+            },
+            {
+              "function": "<alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::GroupIdentity, voteboat::log::owned::Plan>>::insert",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 426
+            },
+            {
+              "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::GroupIdentity, voteboat::log::owned::Plan>>::insert",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1052
+            },
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::plan",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+              "line": 168
+            }
+          ]
+        }
+      ],
+      "('core::ptr::copy::<core::mem::maybe_uninit::MaybeUninit<usize>>', 'git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985', 640)": [
+        {
+          "library": 2,
+          "address": 1301677,
+          "frame": 0,
+          "module_offset": "0x13dcad",
+          "module": "voteboat-matched-framework",
+          "function": "std::sys::pal::unix::stack_overflow::thread_info::set_current_info",
+          "function_offset": "0x37d",
+          "function_size": "0xf8d",
+          "file": "git:github.com/rust-lang/rust:library/std/src/sys/pal/unix/stack_overflow/thread_info.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 122,
+          "inlines": [
+            {
+              "function": "core::ptr::copy::<core::mem::maybe_uninit::MaybeUninit<usize>>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 640
+            },
+            {
+              "function": "alloc::collections::btree::node::slice_insert::<usize>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1828
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, usize, std::sys::pal::unix::stack_overflow::thread_info::ThreadInfo, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert_fit",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 938
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, usize, std::sys::pal::unix::stack_overflow::thread_info::ThreadInfo, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert::<alloc::alloc::Global>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 964
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, usize, std::sys::pal::unix::stack_overflow::thread_info::ThreadInfo, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert_recursing::<alloc::alloc::Global, <alloc::collections::btree::map::entry::VacantEntry<usize, std::sys::pal::unix::stack_overflow::thread_info::ThreadInfo>>::insert_entry::{closure#0}>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1065
+            },
+            {
+              "function": "<alloc::collections::btree::map::entry::VacantEntry<usize, std::sys::pal::unix::stack_overflow::thread_info::ThreadInfo>>::insert_entry",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 460
+            },
+            {
+              "function": "<alloc::collections::btree::map::entry::VacantEntry<usize, std::sys::pal::unix::stack_overflow::thread_info::ThreadInfo>>::insert",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 426
+            },
+            {
+              "function": "<alloc::collections::btree::map::BTreeMap<usize, std::sys::pal::unix::stack_overflow::thread_info::ThreadInfo>>::insert",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1052
+            }
+          ]
+        }
+      ],
+      "('fun_6b550', None, None)": [
+        {
+          "library": 1,
+          "address": 439717,
+          "frame": 0,
+          "module_offset": "0x6b5a5",
+          "module": "libc.so.6",
+          "function": "fun_6b550",
+          "function_offset": "0x55",
+          "function_size": "0xca"
+        }
+      ],
+      "('core::ptr::write::<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Message>>', 'git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985', 1939)": [
+        {
+          "library": 2,
+          "address": 3329768,
+          "frame": 0,
+          "module_offset": "0x32cee8",
+          "module": "voteboat-matched-framework",
+          "function": "<tokio::sync::mpsc::bounded::Sender<voteboat::raft::Message>>::try_send",
+          "function_offset": "0x88",
+          "function_size": "0x1bd",
+          "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/bounded.rs",
+          "line": 932,
+          "inlines": [
+            {
+              "function": "core::ptr::write::<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Message>>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1939
+            },
+            {
+              "function": "<tokio::sync::mpsc::block::Block<voteboat::raft::Message>>::write::{closure#0}",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/block.rs",
+              "line": 205
+            },
+            {
+              "function": "<tokio::loom::std::unsafe_cell::UnsafeCell<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Message>>>::with_mut::<(), <tokio::sync::mpsc::block::Block<voteboat::raft::Message>>::write::{closure#0}>",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/loom/std/unsafe_cell.rs",
+              "line": 16
+            },
+            {
+              "function": "<tokio::sync::mpsc::block::Block<voteboat::raft::Message>>::write",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/block.rs",
+              "line": 202
+            },
+            {
+              "function": "<tokio::sync::mpsc::list::Tx<voteboat::raft::Message>>::push",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/list.rs",
+              "line": 90
+            },
+            {
+              "function": "<tokio::sync::mpsc::chan::Chan<voteboat::raft::Message, tokio::sync::mpsc::bounded::Semaphore>>::send",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/chan.rs",
+              "line": 553
+            },
+            {
+              "function": "<tokio::sync::mpsc::chan::Tx<voteboat::raft::Message, tokio::sync::mpsc::bounded::Semaphore>>::send",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/chan.rs",
+              "line": 197
+            }
+          ]
+        }
+      ],
+      "('<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}::{closure#0}', 'cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/macros/select.rs', 711)": [
+        {
+          "library": 2,
+          "address": 3676990,
+          "frame": 0,
+          "module_offset": "0x381b3e",
+          "module": "voteboat-matched-framework",
+          "function": "<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>> as core::future::future::Future>::poll",
+          "function_offset": "0x4ae",
+          "function_size": "0x29b1",
+          "file": "git:github.com/rust-lang/rust:library/core/src/future/future.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 133,
+          "inlines": [
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}::{closure#0}",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/macros/select.rs",
+              "line": 711
+            },
+            {
+              "function": "<core::future::poll_fn::PollFn<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}::{closure#0}> as core::future::future::Future>::poll",
+              "file": "git:github.com/rust-lang/rust:library/core/src/future/poll_fn.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 151
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs",
+              "line": 86
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs",
+              "line": 64
+            }
+          ]
+        }
+      ],
+      "('core::ptr::copy::<voteboat::log::LogEntry>', 'git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985', 640)": [
+        {
+          "library": 2,
+          "address": 1480751,
+          "frame": 0,
+          "module_offset": "0x16982f",
+          "module": "voteboat-matched-framework",
+          "function": "core::ptr::drop_glue::<alloc::vec::drain::Drain<voteboat::log::LogEntry>>",
+          "function_offset": "0xcf",
+          "function_size": "0x1bc",
+          "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 823,
+          "inlines": [
+            {
+              "function": "core::ptr::copy::<voteboat::log::LogEntry>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 640
+            },
+            {
+              "function": "<<alloc::vec::drain::Drain<_, _> as core::ops::drop::Drop>::drop::DropGuard<voteboat::log::LogEntry, alloc::alloc::Global> as core::ops::drop::Drop>::drop",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/drain.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 189
+            },
+            {
+              "function": "core::ptr::drop_glue::<<alloc::vec::drain::Drain<_, _> as core::ops::drop::Drop>::drop::DropGuard<voteboat::log::LogEntry, alloc::alloc::Global>>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 823
+            },
+            {
+              "function": "<alloc::vec::drain::Drain<voteboat::log::LogEntry> as core::ops::drop::Drop>::drop",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/drain.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 238
+            }
+          ]
+        }
+      ],
+      "('core::ptr::copy_nonoverlapping::<voteboat::log::LogEntry>', 'git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985', 549)": [
+        {
+          "library": 2,
+          "address": 1764930,
+          "frame": 0,
+          "module_offset": "0x1aee42",
+          "module": "voteboat-matched-framework",
+          "function": "<alloc::vec::Vec<voteboat::log::LogEntry> as alloc::vec::spec_extend::SpecExtend<voteboat::log::LogEntry, alloc::vec::into_iter::IntoIter<voteboat::log::LogEntry>>>::spec_extend",
+          "function_offset": "0xa2",
+          "function_size": "0x201",
+          "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/spec_extend.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 34,
+          "inlines": [
+            {
+              "function": "core::ptr::copy_nonoverlapping::<voteboat::log::LogEntry>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 549
+            },
+            {
+              "function": "<alloc::vec::Vec<voteboat::log::LogEntry>>::append_elements",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 2946
+            }
+          ]
+        }
+      ],
+      "('<tokio::sync::mpsc::chan::Rx<voteboat::raft::Message, tokio::sync::mpsc::bounded::Semaphore>>::recv::{closure#0}', 'cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/chan.rs', 322)": [
+        {
+          "library": 2,
+          "address": 2737278,
+          "frame": 0,
+          "module_offset": "0x29c47e",
+          "module": "voteboat-matched-framework",
+          "function": "<tokio::sync::mpsc::bounded::Receiver<voteboat::raft::Message>>::recv::{closure#0}",
+          "function_offset": "0x2ae",
+          "function_size": "0x411",
+          "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/bounded.rs",
+          "line": 245,
+          "inlines": [
+            {
+              "function": "<tokio::sync::mpsc::chan::Rx<voteboat::raft::Message, tokio::sync::mpsc::bounded::Semaphore>>::recv::{closure#0}",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/chan.rs",
+              "line": 322
+            },
+            {
+              "function": "<tokio::loom::std::unsafe_cell::UnsafeCell<tokio::sync::mpsc::chan::RxFields<voteboat::raft::Message>>>::with_mut::<core::task::poll::Poll<core::option::Option<voteboat::raft::Message>>, <tokio::sync::mpsc::chan::Rx<voteboat::raft::Message, tokio::sync::mpsc::bounded::Semaphore>>::recv::{closure#0}>",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/loom/std/unsafe_cell.rs",
+              "line": 16
+            },
+            {
+              "function": "<tokio::sync::mpsc::chan::Rx<voteboat::raft::Message, tokio::sync::mpsc::bounded::Semaphore>>::recv",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/chan.rs",
+              "line": 313
+            },
+            {
+              "function": "<tokio::sync::mpsc::bounded::Receiver<voteboat::raft::Message>>::recv::{closure#0}::{closure#0}",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/bounded.rs",
+              "line": 245
+            },
+            {
+              "function": "<core::future::poll_fn::PollFn<<tokio::sync::mpsc::bounded::Receiver<voteboat::raft::Message>>::recv::{closure#0}::{closure#0}> as core::future::future::Future>::poll",
+              "file": "git:github.com/rust-lang/rust:library/core/src/future/poll_fn.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 151
+            }
+          ]
+        }
+      ]
+    },
+    "inputs": {
+      "target/p9/profile451/linux/perf-quiet/singleton.json.gz": "586dfd7ed334977c3c79651e5b1ce89179d2208b561f2345494d9bd58ac42e16",
+      "target/p9/profile451/linux/symbolication/singleton-symbolicated/ADDRESS_SYMBOLS.json": "28c7d17489390e4f27012e6e093bd5697fcc2a3b0890f6cf2d4f4f07a2a35894"
+    }
+  },
+  "bulk": {
+    "selected_denominator": 5851,
+    "copy_family_weight": 269,
+    "copy_family_percent": 4.597504700051274,
+    "physical_direct_callers": [
+      {
+        "context": "<alloc::vec::Vec<voteboat::log::LogEntry> as alloc::vec::spec_extend::SpecExtend<voteboat::log::LogEntry, alloc::vec::into_iter::IntoIter<voteboat::log::LogEntry>>>::spec_extend",
+        "weight": 90,
+        "percent_selected": 1.5381985985301658,
+        "percent_family": 33.45724907063197
+      },
+      {
+        "context": "core::ptr::drop_glue::<alloc::vec::drain::Drain<voteboat::log::LogEntry>>",
+        "weight": 65,
+        "percent_selected": 1.1109212100495642,
+        "percent_family": 24.1635687732342
+      },
+      {
+        "context": "fun_be580",
+        "weight": 27,
+        "percent_selected": 0.46145957955904976,
+        "percent_family": 10.037174721189592
+      },
+      {
+        "context": "<voteboat::raft::Raft>::persist_update",
+        "weight": 17,
+        "percent_selected": 0.2905486241668091,
+        "percent_family": 6.319702602230484
+      },
+      {
+        "context": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+        "weight": 15,
+        "percent_selected": 0.256366433088361,
+        "percent_family": 5.5762081784386615
+      },
+      {
+        "context": "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+        "weight": 14,
+        "percent_selected": 0.2392753375491369,
+        "percent_family": 5.204460966542751
+      },
+      {
+        "context": "fun_6b550",
+        "weight": 9,
+        "percent_selected": 0.15381985985301658,
+        "percent_family": 3.345724907063197
+      },
+      {
+        "context": "voteboat_matched_framework::workload::run::{closure#0}",
+        "weight": 6,
+        "percent_selected": 0.10254657323534438,
+        "percent_family": 2.2304832713754648
+      }
+    ],
+    "innermost_direct_callers": [
+      {
+        "context": [
+          "core::ptr::copy_nonoverlapping::<voteboat::log::LogEntry>",
+          "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          549
+        ],
+        "weight": 90,
+        "percent_selected": 1.5381985985301658,
+        "percent_family": 33.45724907063197
+      },
+      {
+        "context": [
+          "core::ptr::copy::<voteboat::log::LogEntry>",
+          "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          640
+        ],
+        "weight": 65,
+        "percent_selected": 1.1109212100495642,
+        "percent_family": 24.1635687732342
+      },
+      {
+        "context": [
+          "fun_be580",
+          null,
+          null
+        ],
+        "weight": 27,
+        "percent_selected": 0.46145957955904976,
+        "percent_family": 10.037174721189592
+      },
+      {
+        "context": [
+          "fun_6b550",
+          null,
+          null
+        ],
+        "weight": 9,
+        "percent_selected": 0.15381985985301658,
+        "percent_family": 3.345724907063197
+      },
+      {
+        "context": [
+          "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+          146
+        ],
+        "weight": 8,
+        "percent_selected": 0.13672876431379252,
+        "percent_family": 2.973977695167286
+      },
+      {
+        "context": [
+          "core::ptr::copy_nonoverlapping::<u64>",
+          "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          549
+        ],
+        "weight": 6,
+        "percent_selected": 0.10254657323534438,
+        "percent_family": 2.2304832713754648
+      },
+      {
+        "context": [
+          "<voteboat::log::transition::incoming::OwnedAppend>::new",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+          188
+        ],
+        "weight": 4,
+        "percent_selected": 0.06836438215689626,
+        "percent_family": 1.486988847583643
+      },
+      {
+        "context": [
+          "<voteboat::log::transition::incoming::OwnedNextLog>::plan_copy",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+          45
+        ],
+        "weight": 4,
+        "percent_selected": 0.06836438215689626,
+        "percent_family": 1.486988847583643
+      }
+    ],
+    "project_ancestry": [
+      {
+        "context": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::persist",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+          "<voteboat::raft::Raft>::finish_completion",
+          "<voteboat::log::transition::incoming::OwnedNextLog>::install",
+          "<voteboat::log::transition::incoming::PreparedOwnedLog>::install",
+          "voteboat::log::transition::incoming::install_append"
+        ],
+        "weight": 46,
+        "percent_selected": 0.786190394804307,
+        "percent_family": 17.100371747211895
+      },
+      {
+        "context": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::maintain",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::maintain_inner",
+          "voteboat::snapshot::compact_replica::<voteboat_matched_framework::application::Noop, voteboat_matched_framework::store::MemoryStore, voteboat_matched_framework::snapshots::MemorySnapshots>",
+          "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+          "<voteboat::raft::Raft>::finish_completion",
+          "<voteboat::log::transition::incoming::OwnedNextLog>::install",
+          "<voteboat::log::transition::incoming::PreparedOwnedLog>::install",
+          "<voteboat::log::transition::PreparedLog>::install",
+          "<voteboat::log::transition::compact::CompactDelta>::install"
+        ],
+        "weight": 36,
+        "percent_selected": 0.6152794394120663,
+        "percent_family": 13.382899628252789
+      },
+      {
+        "context": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::maintain",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::maintain_inner",
+          "voteboat::snapshot::compact_replica::<voteboat_matched_framework::application::Noop, voteboat_matched_framework::store::MemoryStore, voteboat_matched_framework::snapshots::MemorySnapshots>",
+          "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+          "<voteboat_matched_framework::store::MemoryStore as voteboat::log::LogStore>::append_batch",
+          "<voteboat_matched_framework::store::MemoryStore>::append",
+          "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "<voteboat::log::transition::incoming::PreparedOwnedLog>::install",
+          "<voteboat::log::transition::PreparedLog>::install",
+          "<voteboat::log::transition::compact::CompactDelta>::install"
+        ],
+        "weight": 29,
+        "percent_selected": 0.49564177063749787,
+        "percent_family": 10.780669144981413
+      },
+      {
+        "context": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::persist",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+          "<voteboat_matched_framework::store::MemoryStore as voteboat::log::LogStore>::append_batch",
+          "<voteboat_matched_framework::store::MemoryStore>::append",
+          "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "<voteboat::log::transition::incoming::PreparedOwnedLog>::install",
+          "voteboat::log::transition::incoming::install_append"
+        ],
+        "weight": 28,
+        "percent_selected": 0.4785506750982738,
+        "percent_family": 10.408921933085502
+      },
+      {
+        "context": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::requests",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::persist",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+          "<voteboat_matched_framework::store::MemoryStore as voteboat::log::LogStore>::append_batch",
+          "<voteboat_matched_framework::store::MemoryStore>::append",
+          "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "<voteboat::log::transition::incoming::PreparedOwnedLog>::install",
+          "voteboat::log::transition::incoming::install_append"
+        ],
+        "weight": 14,
+        "percent_selected": 0.2392753375491369,
+        "percent_family": 5.204460966542751
+      },
+      {
+        "context": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::requests",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::persist",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+          "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+          "<voteboat::raft::Raft>::finish_completion",
+          "<voteboat::log::transition::incoming::OwnedNextLog>::install",
+          "<voteboat::log::transition::incoming::PreparedOwnedLog>::install",
+          "voteboat::log::transition::incoming::install_append"
+        ],
+        "weight": 13,
+        "percent_selected": 0.22218424200991282,
+        "percent_family": 4.83271375464684
+      },
+      {
+        "context": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::requests",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::collect",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor<true>>::include"
+        ],
+        "weight": 11,
+        "percent_selected": 0.18800205093146471,
+        "percent_family": 4.089219330855019
+      },
+      {
+        "context": [
+          "[no project ancestor]"
+        ],
+        "weight": 10,
+        "percent_selected": 0.17091095539224063,
+        "percent_family": 3.717472118959108
+      }
+    ],
+    "direct_caller_address_records": {
+      "('core::ptr::copy_nonoverlapping::<u64>', 'git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985', 549)": [
+        {
+          "library": 2,
+          "address": 2820483,
+          "frame": 0,
+          "module_offset": "0x2b0983",
+          "module": "voteboat-matched-framework",
+          "function": "voteboat_matched_framework::workload::run::{closure#0}",
+          "function_offset": "0x4003",
+          "function_size": "0x4ad9",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/workload.rs",
+          "line": 150,
+          "inlines": [
+            {
+              "function": "core::ptr::copy_nonoverlapping::<u64>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 549
+            },
+            {
+              "function": "<alloc::vec::Vec<u64>>::append_elements",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 2946
+            },
+            {
+              "function": "<alloc::vec::Vec<u64> as alloc::vec::spec_extend::SpecExtend<u64, alloc::vec::into_iter::IntoIter<u64>>>::spec_extend",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/spec_extend.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 34
+            },
+            {
+              "function": "<alloc::vec::Vec<u64> as core::iter::traits::collect::Extend<u64>>::extend::<alloc::vec::Vec<u64>>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 4009
+            },
+            {
+              "function": "voteboat_matched_framework::workload::aggregate",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/workload.rs",
+              "line": 208
+            }
+          ]
+        }
+      ],
+      "('<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs', 62)": [
+        {
+          "library": 2,
+          "address": 3675874,
+          "frame": 0,
+          "module_offset": "0x3816e2",
+          "module": "voteboat-matched-framework",
+          "function": "<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>> as core::future::future::Future>::poll",
+          "function_offset": "0x52",
+          "function_size": "0x29b1",
+          "file": "git:github.com/rust-lang/rust:library/core/src/future/future.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 133,
+          "inlines": [
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs",
+              "line": 62
+            }
+          ]
+        }
+      ],
+      "('<voteboat::raft::Raft>::finish_completion', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs', 1127)": [
+        {
+          "library": 2,
+          "address": 1653995,
+          "frame": 0,
+          "module_offset": "0x193ceb",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::finish_completion",
+          "function_offset": "0x47b",
+          "function_size": "0x232e",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1127
+        },
+        {
+          "library": 2,
+          "address": 1653649,
+          "frame": 0,
+          "module_offset": "0x193b91",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::finish_completion",
+          "function_offset": "0x321",
+          "function_size": "0x232e",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1127
+        }
+      ],
+      "('voteboat::log::transition::append_summary', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition.rs', 367)": [
+        {
+          "library": 2,
+          "address": 1759729,
+          "frame": 0,
+          "module_offset": "0x1ad9f1",
+          "module": "voteboat-matched-framework",
+          "function": "voteboat::log::transition::append_summary",
+          "function_offset": "0x1c1",
+          "function_size": "0x1f5",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition.rs",
+          "line": 367
+        }
+      ],
+      "('<voteboat::log::transition::incoming::OwnedAppend>::new', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs', 188)": [
+        {
+          "library": 2,
+          "address": 1643401,
+          "frame": 0,
+          "module_offset": "0x191389",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0xbb9",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1285,
+          "inlines": [
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedAppend>::new",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 188
+            },
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_copy",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 45
+            }
+          ]
+        },
+        {
+          "library": 2,
+          "address": 1547473,
+          "frame": 0,
+          "module_offset": "0x179cd1",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0x1641",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 91,
+          "inlines": [
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedAppend>::new",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 188
+            },
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_owned",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 70
+            },
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::plan",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+              "line": 159
+            }
+          ]
+        }
+      ],
+      "('core::ptr::copy_nonoverlapping::<voteboat::log::LogEntry>', 'git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985', 549)": [
+        {
+          "library": 2,
+          "address": 1764930,
+          "frame": 0,
+          "module_offset": "0x1aee42",
+          "module": "voteboat-matched-framework",
+          "function": "<alloc::vec::Vec<voteboat::log::LogEntry> as alloc::vec::spec_extend::SpecExtend<voteboat::log::LogEntry, alloc::vec::into_iter::IntoIter<voteboat::log::LogEntry>>>::spec_extend",
+          "function_offset": "0xa2",
+          "function_size": "0x201",
+          "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/spec_extend.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 34,
+          "inlines": [
+            {
+              "function": "core::ptr::copy_nonoverlapping::<voteboat::log::LogEntry>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 549
+            },
+            {
+              "function": "<alloc::vec::Vec<voteboat::log::LogEntry>>::append_elements",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 2946
+            }
+          ]
+        }
+      ],
+      "('core::ptr::copy::<voteboat::log::LogEntry>', 'git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985', 640)": [
+        {
+          "library": 2,
+          "address": 1480751,
+          "frame": 0,
+          "module_offset": "0x16982f",
+          "module": "voteboat-matched-framework",
+          "function": "core::ptr::drop_glue::<alloc::vec::drain::Drain<voteboat::log::LogEntry>>",
+          "function_offset": "0xcf",
+          "function_size": "0x1bc",
+          "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 823,
+          "inlines": [
+            {
+              "function": "core::ptr::copy::<voteboat::log::LogEntry>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 640
+            },
+            {
+              "function": "<<alloc::vec::drain::Drain<_, _> as core::ops::drop::Drop>::drop::DropGuard<voteboat::log::LogEntry, alloc::alloc::Global> as core::ops::drop::Drop>::drop",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/drain.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 189
+            },
+            {
+              "function": "core::ptr::drop_glue::<<alloc::vec::drain::Drain<_, _> as core::ops::drop::Drop>::drop::DropGuard<voteboat::log::LogEntry, alloc::alloc::Global>>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 823
+            },
+            {
+              "function": "<alloc::vec::drain::Drain<voteboat::log::LogEntry> as core::ops::drop::Drop>::drop",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/drain.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 238
+            }
+          ]
+        }
+      ],
+      "('<voteboat::log::transition::incoming::OwnedNextLog>::plan_copy', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs', 45)": [
+        {
+          "library": 2,
+          "address": 1643463,
+          "frame": 0,
+          "module_offset": "0x1913c7",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0xbf7",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1285,
+          "inlines": [
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_copy",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 45
+            }
+          ]
+        }
+      ],
+      "('fun_be580', None, None)": [
+        {
+          "library": 1,
+          "address": 780129,
+          "frame": 0,
+          "module_offset": "0xbe761",
+          "module": "libc.so.6",
+          "function": "fun_be580",
+          "function_offset": "0x1e1",
+          "function_size": "0x29b"
+        }
+      ],
+      "('<voteboat::raft::Raft>::persist_update', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs', 1318)": [
+        {
+          "library": 2,
+          "address": 1643659,
+          "frame": 0,
+          "module_offset": "0x19148b",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0xcbb",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1318
+        }
+      ],
+      "('<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}::{closure#0}', 'cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/macros/select.rs', 711)": [
+        {
+          "library": 2,
+          "address": 3676990,
+          "frame": 0,
+          "module_offset": "0x381b3e",
+          "module": "voteboat-matched-framework",
+          "function": "<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>> as core::future::future::Future>::poll",
+          "function_offset": "0x4ae",
+          "function_size": "0x29b1",
+          "file": "git:github.com/rust-lang/rust:library/core/src/future/future.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 133,
+          "inlines": [
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}::{closure#0}",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/macros/select.rs",
+              "line": 711
+            },
+            {
+              "function": "<core::future::poll_fn::PollFn<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}::{closure#0}> as core::future::future::Future>::poll",
+              "file": "git:github.com/rust-lang/rust:library/core/src/future/poll_fn.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 151
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs",
+              "line": 86
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs",
+              "line": 64
+            }
+          ]
+        }
+      ],
+      "('<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs', 146)": [
+        {
+          "library": 2,
+          "address": 1617096,
+          "frame": 0,
+          "module_offset": "0x18acc8",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+          "function_offset": "0x4b8",
+          "function_size": "0xd49",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+          "line": 146
+        }
+      ],
+      "('<voteboat::log::owned::OwnedLogState>::apply_batch', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs', 102)": [
+        {
+          "library": 2,
+          "address": 1551259,
+          "frame": 0,
+          "module_offset": "0x17ab9b",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0x250b",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 102
+        },
+        {
+          "library": 2,
+          "address": 1551299,
+          "frame": 0,
+          "module_offset": "0x17abc3",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0x2533",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 102
+        }
+      ],
+      "('<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs', 144)": [
+        {
+          "library": 2,
+          "address": 1616059,
+          "frame": 0,
+          "module_offset": "0x18a8bb",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+          "function_offset": "0xab",
+          "function_size": "0xd49",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+          "line": 144
+        }
+      ],
+      "('<voteboat::log::transition::incoming::OwnedNextLog>::plan_owned', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs', 74)": [
+        {
+          "library": 2,
+          "address": 1547412,
+          "frame": 0,
+          "module_offset": "0x179c94",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0x1604",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 91,
+          "inlines": [
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_owned",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 74
+            },
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::plan",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+              "line": 159
+            }
+          ]
+        }
+      ],
+      "('<core::result::Result<voteboat::log::transition::view::LogMetadata, voteboat::contracts::StorageError> as core::ops::try_trait::Try>::branch', 'git:github.com/rust-lang/rust:library/core/src/result.rs:48a229ceaefd4985c50990b14116b6d856af0985', 2177)": [
+        {
+          "library": 2,
+          "address": 1546422,
+          "frame": 0,
+          "module_offset": "0x1798b6",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0x1226",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 91,
+          "inlines": [
+            {
+              "function": "<core::result::Result<voteboat::log::transition::view::LogMetadata, voteboat::contracts::StorageError> as core::ops::try_trait::Try>::branch",
+              "file": "git:github.com/rust-lang/rust:library/core/src/result.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 2177
+            },
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_owned",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 68
+            },
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::plan",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+              "line": 159
+            }
+          ]
+        }
+      ],
+      "('core::ptr::write::<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Message>>', 'git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985', 1939)": [
+        {
+          "library": 2,
+          "address": 3329768,
+          "frame": 0,
+          "module_offset": "0x32cee8",
+          "module": "voteboat-matched-framework",
+          "function": "<tokio::sync::mpsc::bounded::Sender<voteboat::raft::Message>>::try_send",
+          "function_offset": "0x88",
+          "function_size": "0x1bd",
+          "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/bounded.rs",
+          "line": 932,
+          "inlines": [
+            {
+              "function": "core::ptr::write::<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Message>>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1939
+            },
+            {
+              "function": "<tokio::sync::mpsc::block::Block<voteboat::raft::Message>>::write::{closure#0}",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/block.rs",
+              "line": 205
+            },
+            {
+              "function": "<tokio::loom::std::unsafe_cell::UnsafeCell<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Message>>>::with_mut::<(), <tokio::sync::mpsc::block::Block<voteboat::raft::Message>>::write::{closure#0}>",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/loom/std/unsafe_cell.rs",
+              "line": 16
+            },
+            {
+              "function": "<tokio::sync::mpsc::block::Block<voteboat::raft::Message>>::write",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/block.rs",
+              "line": 202
+            },
+            {
+              "function": "<tokio::sync::mpsc::list::Tx<voteboat::raft::Message>>::push",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/list.rs",
+              "line": 90
+            },
+            {
+              "function": "<tokio::sync::mpsc::chan::Chan<voteboat::raft::Message, tokio::sync::mpsc::bounded::Semaphore>>::send",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/chan.rs",
+              "line": 553
+            },
+            {
+              "function": "<tokio::sync::mpsc::chan::Tx<voteboat::raft::Message, tokio::sync::mpsc::bounded::Semaphore>>::send",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/chan.rs",
+              "line": 197
+            }
+          ]
+        }
+      ],
+      "('<voteboat::log::transition::view::LogView>::metadata', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/view.rs', 99)": [
+        {
+          "library": 2,
+          "address": 1641482,
+          "frame": 0,
+          "module_offset": "0x190c0a",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0x43a",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1285,
+          "inlines": [
+            {
+              "function": "<voteboat::log::transition::view::LogView>::metadata",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/view.rs",
+              "line": 99
+            },
+            {
+              "function": "voteboat::log::transition::incoming::validate_base",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 254
+            },
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_copy",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 42
+            }
+          ]
+        },
+        {
+          "library": 2,
+          "address": 1545333,
+          "frame": 0,
+          "module_offset": "0x179475",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0xde5",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 91,
+          "inlines": [
+            {
+              "function": "<voteboat::log::transition::view::LogView>::metadata",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/view.rs",
+              "line": 99
+            },
+            {
+              "function": "voteboat::log::transition::incoming::validate_base",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 254
+            },
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_owned",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 66
+            },
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::plan",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+              "line": 159
+            }
+          ]
+        }
+      ],
+      "('<voteboat_matched_framework::voteboat_engine::actor::Actor>::step', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs', 194)": [
+        {
+          "library": 2,
+          "address": 2952258,
+          "frame": 0,
+          "module_offset": "0x2d0c42",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+          "function_offset": "0x82",
+          "function_size": "0x1ab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs",
+          "line": 194
+        }
+      ],
+      "('<voteboat::raft::Raft>::step', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs', 970)": [
+        {
+          "library": 2,
+          "address": 1669826,
+          "frame": 0,
+          "module_offset": "0x197ac2",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::step",
+          "function_offset": "0x4f2",
+          "function_size": "0x4fa5",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 970
+        }
+      ],
+      "('<voteboat::raft::Raft>::persist_update', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs', 1316)": [
+        {
+          "library": 2,
+          "address": 1643730,
+          "frame": 0,
+          "module_offset": "0x1914d2",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0xd02",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1316
+        }
+      ],
+      "('core::ptr::read::<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Message>>', 'git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985', 1731)": [
+        {
+          "library": 2,
+          "address": 3066258,
+          "frame": 0,
+          "module_offset": "0x2ec992",
+          "module": "voteboat-matched-framework",
+          "function": "<tokio::sync::mpsc::list::Rx<voteboat::raft::Message>>::pop",
+          "function_offset": "0x1b2",
+          "function_size": "0x218",
+          "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/list.rs",
+          "line": 337,
+          "inlines": [
+            {
+              "function": "core::ptr::read::<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Message>>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1731
+            },
+            {
+              "function": "<tokio::sync::mpsc::block::Block<voteboat::raft::Message>>::read::{closure#0}",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/block.rs",
+              "line": 171
+            },
+            {
+              "function": "<tokio::loom::std::unsafe_cell::UnsafeCell<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Message>>>::with::<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Message>, <tokio::sync::mpsc::block::Block<voteboat::raft::Message>>::read::{closure#0}>",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/loom/std/unsafe_cell.rs",
+              "line": 11
+            },
+            {
+              "function": "<tokio::sync::mpsc::block::Block<voteboat::raft::Message>>::read",
+              "file": "cargo:index.crates.io-1949cf8c6b5b557f:tokio-1.53.2:src/sync/mpsc/block.rs",
+              "line": 171
+            }
+          ]
+        }
+      ],
+      "('<core::result::Result<voteboat::log::transition::incoming::OwnedNextLog, voteboat::contracts::StorageError> as core::ops::try_trait::Try>::branch', 'git:github.com/rust-lang/rust:library/core/src/result.rs:48a229ceaefd4985c50990b14116b6d856af0985', 2177)": [
+        {
+          "library": 2,
+          "address": 1545786,
+          "frame": 0,
+          "module_offset": "0x17963a",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0xfaa",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 91,
+          "inlines": [
+            {
+              "function": "<core::result::Result<voteboat::log::transition::incoming::OwnedNextLog, voteboat::contracts::StorageError> as core::ops::try_trait::Try>::branch",
+              "file": "git:github.com/rust-lang/rust:library/core/src/result.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 2177
+            },
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::plan",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+              "line": 159
+            }
+          ]
+        }
+      ],
+      "('<voteboat::raft::Raft>::receive_append', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft/receive.rs', 326)": [
+        {
+          "library": 2,
+          "address": 1600793,
+          "frame": 0,
+          "module_offset": "0x186d19",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::receive_append",
+          "function_offset": "0xe19",
+          "function_size": "0xfc6",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft/receive.rs",
+          "line": 326
+        }
+      ],
+      "('fun_6b550', None, None)": [
+        {
+          "library": 1,
+          "address": 439717,
+          "frame": 0,
+          "module_offset": "0x6b5a5",
+          "module": "libc.so.6",
+          "function": "fun_6b550",
+          "function_offset": "0x55",
+          "function_size": "0xca"
+        }
+      ],
+      "('<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove_kv', 'git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985', 657)": [
+        {
+          "library": 2,
+          "address": 1474092,
+          "frame": 0,
+          "module_offset": "0x167e2c",
+          "module": "voteboat-matched-framework",
+          "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove::<voteboat::identity::NodeId>",
+          "function_offset": "0x27c",
+          "function_size": "0x36b",
+          "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 1134,
+          "inlines": [
+            {
+              "function": "<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove_kv",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 657
+            },
+            {
+              "function": "<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove_entry",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 526
+            },
+            {
+              "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove_entry::<voteboat::identity::NodeId>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1169
+            }
+          ]
+        }
+      ],
+      "('<voteboat::log::transition::incoming::OwnedNextLog>::plan_owned', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs', 70)": [
+        {
+          "library": 2,
+          "address": 1547535,
+          "frame": 0,
+          "module_offset": "0x179d0f",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "function_offset": "0x167f",
+          "function_size": "0x3bab",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+          "line": 91,
+          "inlines": [
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_owned",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 70
+            },
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::plan",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/owned.rs",
+              "line": 159
+            }
+          ]
+        }
+      ],
+      "('<voteboat_matched_framework::snapshots::MemorySnapshots as voteboat::snapshot::SnapshotStore>::begin::{closure#0}', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/snapshots.rs', 93)": [
+        {
+          "library": 2,
+          "address": 3601887,
+          "frame": 0,
+          "module_offset": "0x36f5df",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat_matched_framework::snapshots::MemorySnapshots as voteboat::snapshot::SnapshotStore>::begin",
+          "function_offset": "0x49f",
+          "function_size": "0x64a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/snapshots.rs",
+          "line": 68,
+          "inlines": [
+            {
+              "function": "<voteboat_matched_framework::snapshots::MemorySnapshots as voteboat::snapshot::SnapshotStore>::begin::{closure#0}",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/snapshots.rs",
+              "line": 93
+            }
+          ]
+        }
+      ],
+      "('<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs', 147)": [
+        {
+          "library": 2,
+          "address": 1617051,
+          "frame": 0,
+          "module_offset": "0x18ac9b",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+          "function_offset": "0x48b",
+          "function_size": "0xd49",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+          "line": 147
+        }
+      ],
+      "('<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Replication>>::write', 'git:github.com/rust-lang/rust:library/core/src/mem/maybe_uninit.rs:48a229ceaefd4985c50990b14116b6d856af0985', 575)": [
+        {
+          "library": 2,
+          "address": 1732036,
+          "frame": 0,
+          "module_offset": "0x1a6dc4",
+          "module": "voteboat-matched-framework",
+          "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::insert",
+          "function_offset": "0x234",
+          "function_size": "0xc89",
+          "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 1052,
+          "inlines": [
+            {
+              "function": "<core::mem::maybe_uninit::MaybeUninit<voteboat::raft::Replication>>::write",
+              "file": "git:github.com/rust-lang/rust:library/core/src/mem/maybe_uninit.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 575
+            },
+            {
+              "function": "alloc::collections::btree::node::slice_insert::<voteboat::raft::Replication>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1830
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert_fit",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 939
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert::<alloc::alloc::Global>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 964
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert_recursing::<alloc::alloc::Global, <alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::insert_entry::{closure#0}>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1065
+            },
+            {
+              "function": "<alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::insert_entry",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 460
+            },
+            {
+              "function": "<alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::insert",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 426
+            }
+          ]
+        }
+      ],
+      "('<voteboat::log::transition::incoming::OwnedNextLog>::plan_copy', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs', 52)": [
+        {
+          "library": 2,
+          "address": 1641996,
+          "frame": 0,
+          "module_offset": "0x190e0c",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0x63c",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1285,
+          "inlines": [
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_copy",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 52
+            }
+          ]
+        },
+        {
+          "library": 2,
+          "address": 1641978,
+          "frame": 0,
+          "module_offset": "0x190dfa",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0x62a",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1285,
+          "inlines": [
+            {
+              "function": "<voteboat::log::transition::incoming::OwnedNextLog>::plan_copy",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+              "line": 52
+            }
+          ]
+        }
+      ],
+      "('core::ptr::copy::<core::mem::maybe_uninit::MaybeUninit<std::sys::pal::unix::stack_overflow::thread_info::ThreadInfo>>', 'git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985', 640)": [
+        {
+          "library": 2,
+          "address": 1301714,
+          "frame": 0,
+          "module_offset": "0x13dcd2",
+          "module": "voteboat-matched-framework",
+          "function": "std::sys::pal::unix::stack_overflow::thread_info::set_current_info",
+          "function_offset": "0x3a2",
+          "function_size": "0xf8d",
+          "file": "git:github.com/rust-lang/rust:library/std/src/sys/pal/unix/stack_overflow/thread_info.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 122,
+          "inlines": [
+            {
+              "function": "core::ptr::copy::<core::mem::maybe_uninit::MaybeUninit<std::sys::pal::unix::stack_overflow::thread_info::ThreadInfo>>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 640
+            },
+            {
+              "function": "alloc::collections::btree::node::slice_insert::<std::sys::pal::unix::stack_overflow::thread_info::ThreadInfo>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1828
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, usize, std::sys::pal::unix::stack_overflow::thread_info::ThreadInfo, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert_fit",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 939
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, usize, std::sys::pal::unix::stack_overflow::thread_info::ThreadInfo, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert::<alloc::alloc::Global>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 964
+            },
+            {
+              "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, usize, std::sys::pal::unix::stack_overflow::thread_info::ThreadInfo, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert_recursing::<alloc::alloc::Global, <alloc::collections::btree::map::entry::VacantEntry<usize, std::sys::pal::unix::stack_overflow::thread_info::ThreadInfo>>::insert_entry::{closure#0}>",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/node.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1065
+            },
+            {
+              "function": "<alloc::collections::btree::map::entry::VacantEntry<usize, std::sys::pal::unix::stack_overflow::thread_info::ThreadInfo>>::insert_entry",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 460
+            },
+            {
+              "function": "<alloc::collections::btree::map::entry::VacantEntry<usize, std::sys::pal::unix::stack_overflow::thread_info::ThreadInfo>>::insert",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map/entry.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 426
+            },
+            {
+              "function": "<alloc::collections::btree::map::BTreeMap<usize, std::sys::pal::unix::stack_overflow::thread_info::ThreadInfo>>::insert",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1052
+            }
+          ]
+        }
+      ],
+      "('<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove::<voteboat::identity::NodeId>::{closure#0}', 'git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map.rs:48a229ceaefd4985c50990b14116b6d856af0985', 1134)": [
+        {
+          "library": 2,
+          "address": 1474209,
+          "frame": 0,
+          "module_offset": "0x167ea1",
+          "module": "voteboat-matched-framework",
+          "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove::<voteboat::identity::NodeId>",
+          "function_offset": "0x2f1",
+          "function_size": "0x36b",
+          "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 1134,
+          "inlines": [
+            {
+              "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove::<voteboat::identity::NodeId>::{closure#0}",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/collections/btree/map.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1134
+            },
+            {
+              "function": "<core::option::Option<(voteboat::identity::NodeId, voteboat::raft::Replication)>>::map::<voteboat::raft::Replication, <alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove<voteboat::identity::NodeId>::{closure#0}>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/option.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1163
+            }
+          ]
+        }
+      ],
+      "('<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs', 275)": [
+        {
+          "library": 2,
+          "address": 2953708,
+          "frame": 0,
+          "module_offset": "0x2d11ec",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "function_offset": "0x47c",
+          "function_size": "0x270c",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs",
+          "line": 275
+        }
+      ],
+      "('<voteboat::raft::Raft>::persist_update', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs', 1323)": [
+        {
+          "library": 2,
+          "address": 1643783,
+          "frame": 0,
+          "module_offset": "0x191507",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0xd37",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1323
+        }
+      ],
+      "('<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs', 86)": [
+        {
+          "library": 2,
+          "address": 3677211,
+          "frame": 0,
+          "module_offset": "0x381c1b",
+          "module": "voteboat-matched-framework",
+          "function": "<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>> as core::future::future::Future>::poll",
+          "function_offset": "0x58b",
+          "function_size": "0x29b1",
+          "file": "git:github.com/rust-lang/rust:library/core/src/future/future.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+          "line": 133,
+          "inlines": [
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs",
+              "line": 86
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/benchmarks/matched/src/voteboat_engine/actor.rs",
+              "line": 64
+            }
+          ]
+        }
+      ],
+      "('<voteboat::raft::Raft>::persist_update', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs', 1317)": [
+        {
+          "library": 2,
+          "address": 1643636,
+          "frame": 0,
+          "module_offset": "0x191474",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "function_offset": "0xca4",
+          "function_size": "0xe9a",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1317
+        }
+      ],
+      "('<voteboat::raft::Raft>::receive', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs', 1678)": [
+        {
+          "library": 2,
+          "address": 1686296,
+          "frame": 0,
+          "module_offset": "0x19bb18",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::step",
+          "function_offset": "0x4548",
+          "function_size": "0x4fa5",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 970,
+          "inlines": [
+            {
+              "function": "<voteboat::raft::Raft>::receive",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+              "line": 1678
+            }
+          ]
+        }
+      ],
+      "('<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install', '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs', 151)": [
+        {
+          "library": 2,
+          "address": 1615951,
+          "frame": 0,
+          "module_offset": "0x18a84f",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+          "function_offset": "0x3f",
+          "function_size": "0xd49",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/log/transition/incoming.rs",
+          "line": 151
+        }
+      ],
+      "('core::ptr::write::<voteboat::raft::Effect>', 'git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985', 1939)": [
+        {
+          "library": 2,
+          "address": 1657493,
+          "frame": 0,
+          "module_offset": "0x194a95",
+          "module": "voteboat-matched-framework",
+          "function": "<voteboat::raft::Raft>::finish_completion",
+          "function_offset": "0x1225",
+          "function_size": "0x232e",
+          "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs",
+          "line": 1179,
+          "inlines": [
+            {
+              "function": "core::ptr::write::<voteboat::raft::Effect>",
+              "file": "git:github.com/rust-lang/rust:library/core/src/ptr/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1939
+            },
+            {
+              "function": "<alloc::vec::Vec<voteboat::raft::Effect>>::push_mut",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1043
+            },
+            {
+              "function": "<alloc::vec::Vec<voteboat::raft::Effect>>::push",
+              "file": "git:github.com/rust-lang/rust:library/alloc/src/vec/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+              "line": 1002
+            },
+            {
+              "function": "<voteboat::raft::Raft>::after_durable",
+              "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/source/src/raft.rs"
+            }
+          ]
+        }
+      ]
+    },
+    "inputs": {
+      "target/p9/profile451/linux/perf-quiet/bulk.json.gz": "fd506795aefbf24944362f910ae6960b114460e8e6885f7db1ec7f6922206207",
+      "target/p9/profile451/linux/symbolication/bulk-symbolicated/ADDRESS_SYMBOLS.json": "8688ca81e09f2a7d4ceaacb3cfe358be62bf030c618e76effee7cc330e03c7cb"
+    }
+  },
+  "scope": "Saved451 selected-thread sample weights. libc codeId matched; direct parent physical frame plus saved innermost-first inline chain. No new symbol queries/captures. Source locations are per-address API bindings; sample context does not establish byte size, call count, allocator cause, or by-value type.",
+  "source_grounding": {
+    "metadata_specific_binding": "179 singleton weights: Result<LogMetadata,StorageError>::Try::branch; physical persist_update RVA0x1912fd inline plan_copy incoming.rs44, or apply_batch RVA0x1798b6 inline plan_owned incoming.rs68. This is exact saved type spelling, not type inferred from FDE.",
+    "other_top_bindings": [
+      "prepare_install incoming.rs146 constructs PreparedOwnedLog::Append moving update and summary; not proven exclusively metadata",
+      "apply_batch owned.rs102 assigns summary returned by prepared.install",
+      "plan_owned incoming.rs70 constructs OwnedChange::Append through OwnedAppend::new",
+      "prepare_install incoming.rs144 matches owned append variant",
+      "finish_completion raft.rs1127 installs p.next then assigns LogSummary"
+    ],
+    "limitations": "Copy-family aliases share code; direct caller records establish ancestry/source line, not argument size, copy count, allocation, or which value accounts for every instruction. Borrowing LogView may address some copies but owned result/plan construction and summary transfers remain; no projection of removed sample fraction. Bulk dominant copies are LogEntry Vec extension and Drain compaction, unlike singleton metadata/result paths."
+  }
+}

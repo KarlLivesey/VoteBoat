@@ -1,0 +1,3 @@
+# Supplemental current450 Linux copy callers
+
+Post-capture text analysis of the existing451 data and current450 symbol responses; no new recording, build or browser. Singleton copy-family samples are15.290% of selected weights. Direct parents persist_update4.3835%, OwnedLogState::apply_batch3.8226%, OwnedNextLog::prepare_install2.4231% and finish_completion1.4747% are separate caller observations, not evidence that LogView argument copies caused those costs. Inline source contexts include owned plan/result/summary transfers. Bulk copy movement differs. No byte count, call count, allocator cause or metadata-borrow optimization is inferred. Existing Linux archive remains sealed and unchanged.

@@ -1,0 +1,10 @@
+{
+  "qualified_source_commit": "d6395be7ec56af68f346a72308e90a20200fb731",
+  "published_evidence_head": "8813342b2ef7a15ddf4c981921f6ea9b552a4f20",
+  "current_selected_source_inputs": 1440,
+  "all_selected_source_bytes_identical_to_qualified450": true,
+  "qualified_source_inventory_sha256": "1b240746dee216e3f8358ca5bad388efb33aae3e030008628aa107d86476cba8",
+  "qualified_archive_manifest_sha256": "90ee23097b1607c28b6bc1b17c0ec2749ab5392763d83a4d1db4b123f493563a",
+  "physical_modes_scope": "remote full450 source mode/hash guard; seven protected fixture600 remain; current Gitprojection proves committed bytes",
+  "no_build_or_mutable_source_copy": true
+}

@@ -221,11 +221,13 @@ impl Client {
                 bytes: Vec::new(),
                 reply,
             });
-            waits.push((operation, wait));
+            waits.push(wait);
         }
         self.0.send(Request { originals: entries }).await?;
-        for (operation, wait) in waits {
-            if wait.await? != operation {
+        let mut expected = originals.iter();
+        for wait in waits {
+            let applied = wait.await?;
+            if expected.next().copied() != Some(applied.get()) {
                 return Err("VoteBoat original applied result differs".into());
             }
         }

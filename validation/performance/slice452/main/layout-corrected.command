@@ -1,0 +1,1 @@
+cargo +stable test --manifest-path benchmarks/matched/Cargo.toml --locked --offline voteboat_engine::client_outcomes::receiver_only_wait_layout_diagnostic_against_literal450_write -- --exact --nocapture --test-threads=1 

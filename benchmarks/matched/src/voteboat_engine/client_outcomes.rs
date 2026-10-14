@@ -244,3 +244,55 @@ async fn queued_wrong_tail_cannot_bypass_the_original_first_wait() {
         }
     }
 }
+
+#[test]
+fn receiver_only_wait_layout_diagnostic_against_literal450_write() {
+    // This is a literal source replica of450, not its published executable.
+    async fn literal450_write(client: &Client, originals: &[u128]) -> Result<usize, Failure> {
+        let mut entries = Vec::with_capacity(originals.len());
+        let mut waits = Vec::with_capacity(originals.len());
+        for &original in originals {
+            let operation = OperationId::new(original).ok_or("zero original identity")?;
+            let (reply, wait) = oneshot::channel();
+            entries.push(Original {
+                operation,
+                bytes: Vec::new(),
+                reply,
+            });
+            waits.push((operation, wait));
+        }
+        client.0.send(Request { originals: entries }).await?;
+        for (operation, wait) in waits {
+            if wait.await? != operation {
+                return Err("VoteBoat original applied result differs".into());
+            }
+        }
+        Ok(originals.len())
+    }
+
+    let (sender, _receiver) = mpsc::channel(1);
+    let client = Client(sender);
+    let originals = ids(4);
+    let current = client.write(&originals);
+    let literal450 = literal450_write(&client, &originals);
+    println!(
+        "scope=actual_current_dev_future_vs_literal450_source_replica unpolled_current_future_bytes={} unpolled_literal450_future_bytes={} receiver_bytes={} old_wait_tuple_bytes={} receiver_vec_header_bytes={} old_wait_vec_header_bytes={}",
+        std::mem::size_of_val(&current),
+        std::mem::size_of_val(&literal450),
+        std::mem::size_of::<oneshot::Receiver<OperationId>>(),
+        std::mem::size_of::<(OperationId, oneshot::Receiver<OperationId>)>(),
+        std::mem::size_of::<Vec<oneshot::Receiver<OperationId>>>(),
+        std::mem::size_of::<Vec<(OperationId, oneshot::Receiver<OperationId>)>>(),
+    );
+    for width in [0, 1, 4, 5, 17] {
+        let receivers = Vec::<oneshot::Receiver<OperationId>>::with_capacity(width);
+        let tuples = Vec::<(OperationId, oneshot::Receiver<OperationId>)>::with_capacity(width);
+        println!(
+            "scope=dev_requested_wait_reserve_not_allocator_or_RSS width={width} receiver_capacity={} tuple_capacity={} receiver_element_capacity_bytes={} tuple_element_capacity_bytes={}",
+            receivers.capacity(),
+            tuples.capacity(),
+            receivers.capacity() * std::mem::size_of::<oneshot::Receiver<OperationId>>(),
+            tuples.capacity() * std::mem::size_of::<(OperationId, oneshot::Receiver<OperationId>)>(),
+        );
+    }
+}

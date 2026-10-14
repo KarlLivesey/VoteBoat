@@ -1,0 +1,8 @@
+{
+  "initial": "focused.command",
+  "initial_result": "zero selected, exit0",
+  "corrected": "layout-corrected.command",
+  "result": "one passed, exit0",
+  "source_mutations": false,
+  "full_matched_repeat": false
+}

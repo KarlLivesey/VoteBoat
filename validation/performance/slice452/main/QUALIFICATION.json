@@ -1,0 +1,41 @@
+{
+  "original_runner": 48609,
+  "actual_runner_exit": 0,
+  "actual_stage": "DONE",
+  "full_matched_tests": {
+    "passed": 70,
+    "failed": 0,
+    "seconds": 1.71,
+    "includes_existing": 69,
+    "new_diagnostic": 1
+  },
+  "format_strict_source_guard_exits": 0,
+  "initial_focused_locator": {
+    "exit": 0,
+    "selected": 0,
+    "filtered": 70,
+    "scope": "bare name plus exact did not select qualified test; retained, no coverage claim"
+  },
+  "corrected_diagnostic": {
+    "tool_chunk": "252a8c",
+    "exit": 0,
+    "passed": 1,
+    "filtered": 69
+  },
+  "layout_scope": "current x86_64 stable1.98.1 dev compilation; old future is literal450 source replica, not actual published450 ELF",
+  "layout": {
+    "actual_future": 296,
+    "literal450_future": 304,
+    "receiver": 8,
+    "old_wait_tuple": 32,
+    "both_vec_headers": 24
+  },
+  "checked_inputs": 1440,
+  "unchanged_root_scope": 1438,
+  "changed": [
+    "benchmarks/matched/src/voteboat_engine.rs",
+    "benchmarks/matched/src/voteboat_engine/client_outcomes.rs"
+  ],
+  "benchmark_not_run": true,
+  "publication_hook_pending": true
+}

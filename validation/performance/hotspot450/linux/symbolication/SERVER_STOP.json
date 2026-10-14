@@ -1,0 +1,9 @@
+{
+  "PID": 3377209,
+  "verified_cmdline": "target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply load target/p9/profile451/linux/perf-quiet/bulk.json.gz --no-open --address 127.0.0.1 --port 38479 --symbol-dir target/p9/matched450-linux/target-matched-release/release ",
+  "signal": "SIGINT",
+  "request_unix": 1791990272.583838,
+  "original_exec_handle": 92474,
+  "actual_terminal": 0,
+  "terminal_tool": "487dee"
+}

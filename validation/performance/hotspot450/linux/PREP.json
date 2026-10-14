@@ -1,0 +1,129 @@
+{
+  "source_commit": "d6395be7ec56af68f346a72308e90a20200fb731",
+  "main_head_inspected": "8813342b2ef7a15ddf4c981921f6ea9b552a4f20",
+  "source_inputs": 1440,
+  "compiled_inputs": 1431,
+  "current_main_all_source_hashes_and_physical_modes_match": true,
+  "artifact_evidence": {
+    "SOURCE.json": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/SOURCE.json",
+      "sha256": "28a30c72430e3ea451b9f0eb797018e2e40903896a0603fa2b7cac25de0d34ad"
+    },
+    "ARTIFACTS.json": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/ARTIFACTS.json",
+      "sha256": "6456407841cb783098ae637343bad17b230380ab42ecc866c7b907e673e9ec03"
+    },
+    "SYMBOLS.json": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/SYMBOLS.json",
+      "sha256": "4f2daf11b84f35134afa87253c7bac06d8dfb6b2581104296dbc835434f4de26"
+    },
+    "RELEASE_ORACLE.json": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/RELEASE_ORACLE.json",
+      "sha256": "7adef87d00cc862b8843588ca14024114e3a58dc0588c1a7c1512b72dd8f5cc9"
+    },
+    "SETUP_READY.json": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/SETUP_READY.json",
+      "sha256": "8d66429fa6c38cd9397993325466c8e12f2360df47c71f6bfa1a5d5a20f495ce"
+    }
+  },
+  "binary": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/artifacts/matched/voteboat-matched-framework",
+  "binary_sha256": "70ae8c2751b3c12e697bc93ee9c83bef5f833fe2b00f22cbb3623e31c9c76945",
+  "dwp": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/artifacts/matched/voteboat-matched-framework.dwp",
+  "dwp_sha256": "3749253700f577b56dbe8baa7d0eef8633b0b339964b0fb934acdb904618e149",
+  "actual_four_fresh_false_reused": true,
+  "perf": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+  "perf_sha256": "f0fe2b92d280391fa7efa55616f098ba683b9682cf145275d5eda136125f2a64",
+  "perf_version": "perf version 7.2.10-1",
+  "samply": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply",
+  "samply_sha256": "0ca59d520059aa2ee4db1860c732089829e75740ee75314e84d2b0ab8c90873e",
+  "samply_version": "samply 0.13.1",
+  "settings": {
+    "perf_event_paranoid": 2,
+    "kptr_restrict": 2,
+    "perf_event_mlock_kb": 516
+  },
+  "guard_config": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison450/CONFIG_PAIR.linux.json",
+    "sha256": "9cdbb32d370c9399600878205e6413b9d3681e801fe95c22f116674019746cb8"
+  },
+  "actual_guard_pair": {
+    "baseline": {
+      "artifacts": [
+        "bench_minimal",
+        "openraft",
+        "voteboat",
+        "voteboat-matched-framework"
+      ],
+      "checks": "all frozen source, artifact, driver and applicable compiler guards pass",
+      "mode": "asserted_release",
+      "source_inputs": 1439
+    },
+    "candidate": {
+      "artifacts": [
+        "bench_minimal",
+        "openraft",
+        "voteboat",
+        "voteboat-matched-framework"
+      ],
+      "checks": "all frozen source, artifact, driver and applicable compiler guards pass",
+      "mode": "asserted_release",
+      "source_inputs": 1440
+    }
+  },
+  "actual_guard_exit": 0,
+  "current_CLI_reused_without_rerun": {
+    "off": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/logs/off.json",
+      "sha256": "4ff82826d94b623861dc908a196fec43775f9645df219a058fafc9bac96428ca",
+      "exit": 0,
+      "completed_originals": 16384,
+      "completed_requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ]
+    },
+    "on": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/logs/on.json",
+      "sha256": "a04db74763bfa2bc01b82e60151aadc1e025bdee870ea526930197fd99a119a4",
+      "exit": 0,
+      "completed_originals": 16384,
+      "completed_requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ]
+    },
+    "openraft": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched450-linux/logs/openraft.json",
+      "sha256": "bd1430c55202d0a602d6a72234dc94dce8bc24aa1c4ee858231d39e5d2cdadde",
+      "exit": 0,
+      "completed_originals": 16384,
+      "completed_requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ]
+    }
+  },
+  "schema": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/validation/performance/hotspot450/SCHEMA.md",
+    "sha256": "e88b3359b43d8933855223c01ab72f0c2eda75ea73b30b60f97a1cb69aba035a"
+  },
+  "script_hashes": {
+    "perf-run-quiet.py": "7a3832f93e92dcc24898459e9f5c7cca6868e3a947cab92d73c42f130d7f76ef",
+    "IMPORT_PLAN.json": "08a4e1363df0314bce0792a6ac08791c8fb73513a6768058bd6fa79ca3b9acb6",
+    "SERVER_PLAN.json": "8a5754d9cd3f4152d3b7cb4bced13a362fbeb1276851d100b145617d3f44e6d1",
+    "symbolication/symbolize-full-json.py": "ebb87302b345e1485d0a02c64b5ccd9482eaf1644ead5274dcdb1a748dddd84a",
+    "symbolication/subsets.py": "1bd4c4897a3adc7e616cc2994c777f95d856588eddf57cc0d40e8135843f3a03",
+    "symbolication/client-contexts.py": "215b9338ac3f3e17b7d097995421204c9dc56631ade2b1e745fbf38e5b1b20f9"
+  },
+  "setup_ready": true,
+  "capture_unstarted": true,
+  "quiet_grant_required": true,
+  "no_live_owned_jobs": true,
+  "scope": "Whole-launch usercycle counts; no exactthroughputclockCPU/leaderCPU/acceptance or allocatorcause. No sourcebuild/test/CLI rerun/install/browser/policy/Pi."
+}

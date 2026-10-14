@@ -1,0 +1,12 @@
+
+running 1 test
+test voteboat_engine::client_outcomes::receiver_only_wait_layout_diagnostic_against_literal450_write ... scope=actual_current_dev_future_vs_literal450_source_replica unpolled_current_future_bytes=296 unpolled_literal450_future_bytes=304 receiver_bytes=8 old_wait_tuple_bytes=32 receiver_vec_header_bytes=24 old_wait_vec_header_bytes=24
+scope=dev_requested_wait_reserve_not_allocator_or_RSS width=0 receiver_capacity=0 tuple_capacity=0 receiver_element_capacity_bytes=0 tuple_element_capacity_bytes=0
+scope=dev_requested_wait_reserve_not_allocator_or_RSS width=1 receiver_capacity=1 tuple_capacity=1 receiver_element_capacity_bytes=8 tuple_element_capacity_bytes=32
+scope=dev_requested_wait_reserve_not_allocator_or_RSS width=4 receiver_capacity=4 tuple_capacity=4 receiver_element_capacity_bytes=32 tuple_element_capacity_bytes=128
+scope=dev_requested_wait_reserve_not_allocator_or_RSS width=5 receiver_capacity=5 tuple_capacity=5 receiver_element_capacity_bytes=40 tuple_element_capacity_bytes=160
+scope=dev_requested_wait_reserve_not_allocator_or_RSS width=17 receiver_capacity=17 tuple_capacity=17 receiver_element_capacity_bytes=136 tuple_element_capacity_bytes=544
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 69 filtered out; finished in 0.00s
+

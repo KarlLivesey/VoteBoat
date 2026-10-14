@@ -1,0 +1,257 @@
+{
+  "scope": "Physical sampled stack contexts for unresolved malloc-library leaves or resolved allocation/growth functions. Library identity does not identify allocation vs deallocation, and these are not operation allocation counts or allocator causal costs. Contexts overlap; wait/delta/alias limitations remain.",
+  "cases": {
+    "bulk": {
+      "cpu_denominator_us": 6861164,
+      "groups": {
+        "unresolved_malloc_library_leaf": {
+          "cpu_us": 450427,
+          "percent_observed_cpu": 6.564877329852486,
+          "physical_contexts_nonadditive": {
+            "workload_client_write": {
+              "cpu_us": 274240,
+              "percent_observed_cpu": 3.996989432113851,
+              "percent_group": 60.88444964444849
+            },
+            "client_loop": {
+              "cpu_us": 312444,
+              "percent_observed_cpu": 4.553804573101591,
+              "percent_group": 69.36617920328932
+            },
+            "Actor_requests": {
+              "cpu_us": 84447,
+              "percent_observed_cpu": 1.2307969901317035,
+              "percent_group": 18.748210031814256
+            },
+            "Raft_append_for": {
+              "cpu_us": 2909,
+              "percent_observed_cpu": 0.042398053741318525,
+              "percent_group": 0.645831621994241
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<voteboat_matched_framework::workload::Client>::write::{closure#0}",
+              "cpu_us": 247765,
+              "percent_group": 55.00669364847134
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor<true>>::include",
+              "cpu_us": 67214,
+              "percent_group": 14.922284854149508
+            },
+            {
+              "function": "voteboat_matched_framework::workload::client_loop::{closure#0}",
+              "cpu_us": 25652,
+              "percent_group": 5.695040483807587
+            },
+            {
+              "function": "[unresolved] libsystem_malloc.dylib!0x339fb",
+              "cpu_us": 16084,
+              "percent_group": 3.57083389761271
+            },
+            {
+              "function": "[unresolved] libsystem_malloc.dylib!0x30413",
+              "cpu_us": 8443,
+              "percent_group": 1.8744435835329587
+            },
+            {
+              "function": "[unresolved] libsystem_malloc.dylib!0x3038f",
+              "cpu_us": 7235,
+              "percent_group": 1.6062536215635386
+            },
+            {
+              "function": "[unresolved] libsystem_malloc.dylib!0x33a1b",
+              "cpu_us": 6617,
+              "percent_group": 1.4690504787679246
+            },
+            {
+              "function": "[unresolved] libsystem_malloc.dylib!0x38adb",
+              "cpu_us": 5907,
+              "percent_group": 1.3114222726435139
+            }
+          ]
+        },
+        "resolved_allocation_leaf": {
+          "cpu_us": 2355,
+          "percent_observed_cpu": 0.034323622055966015,
+          "physical_contexts_nonadditive": {
+            "workload_client_write": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "client_loop": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_requests": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Raft_append_for": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<voteboat::raft::Raft>::broadcast_ready_peers",
+              "cpu_us": 953,
+              "percent_group": 40.467091295116774
+            },
+            {
+              "function": "<alloc::raw_vec::RawVec<voteboat::identity::OperationId>>::grow_one",
+              "cpu_us": 838,
+              "percent_group": 35.58386411889597
+            },
+            {
+              "function": "<alloc::raw_vec::RawVec<voteboat::raft::Effect>>::grow_one",
+              "cpu_us": 564,
+              "percent_group": 23.94904458598726
+            }
+          ]
+        }
+      }
+    },
+    "singleton": {
+      "cpu_denominator_us": 30269355,
+      "groups": {
+        "unresolved_malloc_library_leaf": {
+          "cpu_us": 547472,
+          "percent_observed_cpu": 1.8086675451128709,
+          "physical_contexts_nonadditive": {
+            "workload_client_write": {
+              "cpu_us": 7355,
+              "percent_observed_cpu": 0.024298502561418966,
+              "percent_group": 1.3434477014349593
+            },
+            "client_loop": {
+              "cpu_us": 8477,
+              "percent_observed_cpu": 0.028005221782888997,
+              "percent_group": 1.5483896893357103
+            },
+            "Actor_requests": {
+              "cpu_us": 122628,
+              "percent_observed_cpu": 0.4051226066759599,
+              "percent_group": 22.398953736446796
+            },
+            "Raft_append_for": {
+              "cpu_us": 8777,
+              "percent_observed_cpu": 0.02899632317900398,
+              "percent_group": 1.6031870123038257
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+              "cpu_us": 94386,
+              "percent_group": 17.240333752228423
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+              "cpu_us": 73171,
+              "percent_group": 13.365249729666541
+            },
+            {
+              "function": "<alloc::raw_vec::RawVecInner>::finish_grow",
+              "cpu_us": 67153,
+              "percent_group": 12.266015430926148
+            },
+            {
+              "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+              "cpu_us": 55541,
+              "percent_group": 10.144993716573634
+            },
+            {
+              "function": "<voteboat::raft::Raft>::persist_update",
+              "cpu_us": 43536,
+              "percent_group": 7.952187509132887
+            },
+            {
+              "function": "<alloc::collections::btree::map::IntoIter<voteboat::identity::GroupIdentity, voteboat::log::owned::Plan>>::dying_next",
+              "cpu_us": 41230,
+              "percent_group": 7.530978753251308
+            },
+            {
+              "function": "<voteboat::log::transition::incoming::PreparedOwnedLog>::install",
+              "cpu_us": 35342,
+              "percent_group": 6.455489961130432
+            },
+            {
+              "function": "voteboat::quorum::frontier",
+              "cpu_us": 33360,
+              "percent_group": 6.093462314054418
+            }
+          ]
+        },
+        "resolved_allocation_leaf": {
+          "cpu_us": 33578,
+          "percent_observed_cpu": 0.11093067559582952,
+          "physical_contexts_nonadditive": {
+            "workload_client_write": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "client_loop": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_requests": {
+              "cpu_us": 3266,
+              "percent_observed_cpu": 0.010789790532371767,
+              "percent_group": 9.72660670677229
+            },
+            "Raft_append_for": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<alloc::raw_vec::RawVec<voteboat::raft::Effect>>::grow_one",
+              "cpu_us": 19760,
+              "percent_group": 58.848055274286736
+            },
+            {
+              "function": "<alloc::raw_vec::RawVec<voteboat::identity::OperationId>>::grow_one",
+              "cpu_us": 7151,
+              "percent_group": 21.296682351539697
+            },
+            {
+              "function": "<alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global>",
+              "cpu_us": 2639,
+              "percent_group": 7.859312645184347
+            },
+            {
+              "function": "<voteboat::raft::Raft>::finish_completion",
+              "cpu_us": 1981,
+              "percent_group": 5.899696229674191
+            },
+            {
+              "function": "<alloc::vec::Vec<voteboat::raft::Effect>>::push_mut",
+              "cpu_us": 1223,
+              "percent_group": 3.642265769253678
+            },
+            {
+              "function": "<voteboat_matched_framework::application::Noop as voteboat::application::StateMachine>::apply_batch",
+              "cpu_us": 414,
+              "percent_group": 1.232950145928882
+            },
+            {
+              "function": "<voteboat::raft::Raft>::broadcast_ready_peers",
+              "cpu_us": 410,
+              "percent_group": 1.2210375841324677
+            }
+          ]
+        }
+      }
+    }
+  }
+}

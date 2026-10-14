@@ -1,0 +1,20 @@
+{
+  "capture_original_handle": 57929,
+  "capture_actual_terminal": 0,
+  "capture_terminal_tool": "f5f134",
+  "imports_actual_terminal": 0,
+  "imports_tool": "701bd6",
+  "symbol_server_original_handle": 92474,
+  "symbol_server_PID": 3377209,
+  "symbol_server_actual_terminal": 0,
+  "symbol_server_terminal_tool": "487dee",
+  "symbol_queries_actual_terminal": 0,
+  "symbol_queries_tool": "e934ad",
+  "subsets_and_client_contexts_original_handle": 69934,
+  "subsets_and_client_contexts_actual_terminal": 0,
+  "subsets_terminal_tool": "8d0f54",
+  "jointquiet": "Bothhostsetup END beforegrant; originalcaptures actualEND beforeBOTH_ENDrelease and processing. No known competing timedhostwork.",
+  "currentaddress_scope": "No oldsample/addressresponses reused; genericconverterbytes exact447hashes.",
+  "frame_shift_limit": "450 moves append_for cloned copies into genericto_vec; nativeframe labels/shares differ without establishing change in aggregate CPU or causation.",
+  "source_observation": "Independent OwnedNextLog::plan_copy still copies because publicownedEffect::Persist/update can mutate; any removal needs protectedownership plus legacyexactfallback. No newstage selected."
+}
