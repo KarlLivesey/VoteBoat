@@ -1,0 +1,5 @@
+# Linux452 versus454 paired setup
+
+Baseline immutable452source5201bfeae8f891b8c3ea71aa75717c691a61fd50/ELF4bf462/DWP0fdf actualcomparison452candidate config. Candidate published8da7192125eee780752935d8e608b8379ec8a757. Currentbothsource/mode/compiler/lock/profile/library/executable/DWP guards0; actual454CLI3/checker0; priorchecker/roundingnegativecontrols reusedbyexactdriverhash, no repeats/newcontrolframework. Freshcompilemetadata is separate matched454-linux proof.
+
+Preparedunchangedcombined24command: `bash target/p9/comparison454/linux-run.sh`, bulk12then singleton12 serially/nointerimprocessing. Three rotations baselineOFF/candidateOFF/candidateON/pinnedOpenRaft:requestedbulk20M/actual19,988,480 andsingleton1,048,576,1024warmups/defaultmaintenance/runtime1+16/emptyvolatileonegroupthreevoters/everyoriginaloutcome. No timinghasstarted; waitrootquietgrant. No gain/retention/fullacceptanceclaim. AllregularpayloadsSHAexceptmanifestitself, no nestedmanifests/binaries/fullsource/buildtrees/results.

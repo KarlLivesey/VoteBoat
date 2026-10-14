@@ -1,0 +1,243 @@
+{
+  "variants": {
+    "baseline": {
+      "rates": [
+        92674.87739846387,
+        129229.56283128136,
+        108967.6121620187
+      ],
+      "median_completed_originals_per_second": 108967.6121620187,
+      "median_request_p50_ms": 0.008206,
+      "median_request_p99_ms": 0.015629
+    },
+    "candidate": {
+      "rates": [
+        120473.30793683017,
+        130330.95777262263,
+        109555.73601272835
+      ],
+      "median_completed_originals_per_second": 120473.30793683017,
+      "median_request_p50_ms": 0.007575,
+      "median_request_p99_ms": 0.015289
+    },
+    "on": {
+      "rates": [
+        98401.79219309046,
+        101293.8128841162,
+        97248.15397844688
+      ],
+      "median_completed_originals_per_second": 98401.79219309046,
+      "median_request_p50_ms": 0.009618,
+      "median_request_p99_ms": 0.017553
+    },
+    "openraft": {
+      "rates": [
+        20944.105249039247,
+        20797.949513953452,
+        18819.746868863735
+      ],
+      "median_completed_originals_per_second": 20797.949513953452,
+      "median_request_p50_ms": 0.040546,
+      "median_request_p99_ms": 0.129473
+    }
+  },
+  "pairs": [
+    {
+      "trial": 1,
+      "baseline_originals_per_second": 92674.87739846387,
+      "candidate_originals_per_second": 120473.30793683017,
+      "rate_ratio": 1.2999564857134311,
+      "baseline_p99_ms": 0.023304,
+      "candidate_p99_ms": 0.015289,
+      "p99_ratio": 0.6560676278750429,
+      "on_originals_per_second": 98401.79219309046,
+      "on_p99_ms": 0.017703,
+      "on_vs_candidate_rate_ratio": 0.8167933119648972,
+      "on_vs_candidate_p99_ratio": 1.1578912943946629
+    },
+    {
+      "trial": 2,
+      "baseline_originals_per_second": 129229.56283128136,
+      "candidate_originals_per_second": 130330.95777262263,
+      "rate_ratio": 1.008522778512988,
+      "baseline_p99_ms": 0.013095,
+      "candidate_p99_ms": 0.013204,
+      "p99_ratio": 1.008323787705231,
+      "on_originals_per_second": 101293.8128841162,
+      "on_p99_ms": 0.016341,
+      "on_vs_candidate_rate_ratio": 0.7772045461434798,
+      "on_vs_candidate_p99_ratio": 1.2375795213571645
+    },
+    {
+      "trial": 3,
+      "baseline_originals_per_second": 108967.6121620187,
+      "candidate_originals_per_second": 109555.73601272835,
+      "rate_ratio": 1.0053972353715084,
+      "baseline_p99_ms": 0.015629,
+      "candidate_p99_ms": 0.016802,
+      "p99_ratio": 1.0750527864866595,
+      "on_originals_per_second": 97248.15397844688,
+      "on_p99_ms": 0.017553,
+      "on_vs_candidate_rate_ratio": 0.8876591725617036,
+      "on_vs_candidate_p99_ratio": 1.0446970598738246
+    }
+  ],
+  "counts": [
+    {
+      "label": "baseline-c1-b1-t1",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "candidate-c1-b1-t1",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "on-c1-b1-t1",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "openraft-c1-b1-t1",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "baseline-c1-b1-t2",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "candidate-c1-b1-t2",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "on-c1-b1-t2",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "openraft-c1-b1-t2",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "baseline-c1-b1-t3",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "candidate-c1-b1-t3",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "on-c1-b1-t3",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "openraft-c1-b1-t3",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    }
+  ],
+  "failures": [],
+  "original_handle": 4550,
+  "actual_terminal_exit": 0,
+  "scope": "Linux-only results; no final bothhostdecision yet; no RSS/refusal/allocator causality claim",
+  "candidate_OFF_logical_diagnostics": {
+    "retained_entries": {
+      "min": 5601,
+      "max": 5601
+    },
+    "peak_retained_entries": {
+      "min": 6000,
+      "max": 6000
+    },
+    "peak_peer_queue": {
+      "min": 1,
+      "max": 3
+    },
+    "peak_client_queue": {
+      "min": 0,
+      "max": 1
+    },
+    "checkpoint_count": {
+      "min": 209,
+      "max": 209
+    },
+    "snapshot_installs": {
+      "min": 0,
+      "max": 0
+    },
+    "maximum_proposal_width": {
+      "min": 0,
+      "max": 1
+    }
+  },
+  "diagnostic_limits": "Observed logical queue/retained/checkpoint counts, not physical RSS/refusal/maintenance-byte-debt fields. All outcomes/cleanup/processguards passed; no zero internal refusals or physical bounded debt claim.",
+  "Linux_disposition": "Provisional retain for three bulk p99 gains/two rates and allthree singleton rates, with bulktrial2rate/singletrial2+3tail debt and slowbaselines sensitivity; finalbothhostrootdecisionpendingMac."
+}

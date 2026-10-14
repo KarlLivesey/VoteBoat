@@ -1,0 +1,27 @@
+{
+  "commit": "8da7192125eee780752935d8e608b8379ec8a757",
+  "source_inputs": 1440,
+  "compiled_inputs": 1431,
+  "changed_inputs": [
+    "src/log/owned.rs",
+    "src/log/transition.rs",
+    "src/log/transition/compact.rs",
+    "src/log/transition/incoming.rs",
+    "src/log/transition/tests.rs",
+    "src/log/transition/tests/compact.rs",
+    "src/log/transition/tests/configured.rs",
+    "src/log/transition/tests/incoming.rs",
+    "src/log/transition/tests/oracle.rs",
+    "src/log/transition/tests/overlay.rs",
+    "src/log/transition/view.rs",
+    "src/native/log_store/accepted.rs",
+    "src/raft.rs",
+    "src/raft/admitted_replication/tests.rs"
+  ],
+  "publication_original_handle": 3676,
+  "publication_actual_exit": 0,
+  "qualification_reused_original": 64088,
+  "physical_modes_set_before_freeze": true,
+  "fresh_target_absent": true,
+  "build_started": false
+}

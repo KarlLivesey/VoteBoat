@@ -1,0 +1,3 @@
+Mac454 setup only: retained452baseline5201/exe9dd7ce1620057fbb3d6d4776e4a6a13c7b50eb33547cd227502e7e2fe707c2cb against published4548da/exe56909077bc0e818a5dc0ab29174f5b84a38eef20f25b64f4fc87e0158924f9db/UUID7054B882-FC0B-30D2-84FA-7956007024F5. Fullsource1440each, compiler/profile/currentdSYM/actualfresh artifacts guarded. Positiveguards and threesavedCLI fixtures0; unchangedfourCLI/nineartifact refusal scopes reused, none repeated.
+
+Explicit twelve20Mbulk(normalized19,988,480+1024warmup) then twelve1,048,576singleton+1024: threerotations452OFF/454OFF/454ON/OpenRaft, allotherknobs/outcomes unchanged. Outputs absent, originalsetup49068 actual0. No timing yet; separate Macquietgrant required. FullP9 remainsopen.

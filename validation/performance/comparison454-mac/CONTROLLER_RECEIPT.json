@@ -1,0 +1,17 @@
+{
+  "original_ssh": 73435,
+  "pid": 69420,
+  "start_utc": "2026-10-14T16:57:29Z",
+  "bulk_end_utc": "2026-10-14T16:58:28Z",
+  "bulk_exit": 0,
+  "singleton_end_utc": "2026-10-14T17:05:36Z",
+  "singleton_exit": 0,
+  "whole_terminal_chunk": "c91303",
+  "whole_exit": 0,
+  "summary_package_original_handle": 38013,
+  "summary_package_exit": 0,
+  "copy_original_handle": 25983,
+  "copy_exit": 0,
+  "workload_repeats": 0,
+  "decision": "FINALRETAIN modestmixedtradeoff afterindependentreview; allregressions/slowtails preserved, no repeatable/uniform gain/allocatorcause/fullP9floorclaim"
+}

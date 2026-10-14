@@ -1,0 +1,20 @@
+    Checking rand_core v0.10.1
+   Compiling getrandom v0.4.3
+    Checking once_cell v1.21.4
+   Compiling syn v3.0.6
+   Compiling thiserror v2.0.21
+    Checking tracing-core v0.1.36
+    Checking chacha20 v0.10.2
+    Checking pin-project-lite v0.2.17
+    Checking tracing v0.1.44
+    Checking rustls v0.23.45
+   Compiling thiserror-impl v2.0.21
+    Checking rand v0.10.3
+    Checking rand_pcg v0.10.2
+    Checking lru-slab v0.1.3
+    Checking rustc-hash v2.1.3
+    Checking tinyvec v1.13.3
+    Checking slab v0.4.12
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-mac454-8da7192-jrwVXF/source)
+    Checking quinn-proto v0.11.19
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 27.80s

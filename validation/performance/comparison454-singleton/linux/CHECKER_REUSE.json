@@ -1,0 +1,12 @@
+{
+  "scope": "samechecker+roundingcontrols retainedbyexactdriverhash; current454actualoutputscheckedlater,no oldnegative reruns",
+  "actual_driver_sha256": {
+    "phase-diagnostic-check.py": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "phase-diagnostic.sh": "388f3a20a9061df8b6bf213082abd53942c70dfd83678ce9f14f14b97f8d5ce1",
+    "summarize.py": "13eb3858fedb077357b867dc13aadab6658408baf74ed50b72e34a250b8fdc6e"
+  },
+  "prior_record": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison452/CHECKER_REUSE.json",
+    "sha256": "8f6228b47a3cc96f76564b23c7cb2ee9340023076a42306f387a10300f17ed6a"
+  }
+}

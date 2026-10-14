@@ -1,0 +1,10 @@
+{
+  "status": "PUBLISHED_ASSEMBLY_AUTHORIZED",
+  "required_commit": "8da7192125eee780752935d8e608b8379ec8a757",
+  "expected_matched_tests": 70,
+  "scopes": "actualall/core libraries,focusedlogtransition24,selectedlogowned/logstore/provider/Raft/snapshot/owner,actualthree_2 sequentialfeaturetargets; rootfmt/fourstrict+matched70/fmtstrict; no rootfunctionalreuse becausecore/nativechanged",
+  "profile": "freshassertedopt3/debug2/packed/assert+overflow/thinLTO/cgu1fourfresh:false/rootbuildscript/CargoJSONvv/currentdSYM/originalcopy+3CLI",
+  "source_inputs": 1440,
+  "baseline": "retained4525201/exe9dd7ce/UUID66C3D051",
+  "no_timing_until_quietgrant": true
+}
