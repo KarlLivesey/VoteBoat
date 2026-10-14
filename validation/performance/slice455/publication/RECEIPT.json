@@ -1,0 +1,14 @@
+{
+  "commit": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "origin_main": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "push_actual_exit": 0,
+  "original_handle": 2691,
+  "enabled_hooks_path": ".githooks",
+  "qualified_source_inputs": 1445,
+  "committed_and_current_hashes_exact": true,
+  "current_physical_modes_exact": true,
+  "CRC_runner_actual_exit": 0,
+  "remaining_deep_histories_exit": 0,
+  "full_P9_acceptance": false,
+  "raw_evidence_whitespace": "Original raw commands/logs/patches retain trailing whitespace/blank EOF as captured; production/test/docs diff check zero. No raw output rewritten to satisfy a whitespace presentation check."
+}
