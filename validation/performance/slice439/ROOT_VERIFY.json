@@ -1,0 +1,19 @@
+{
+  "current_source_hash_modes_verified": 1434,
+  "release_engine_projection_exact435": true,
+  "actual_actor_bytes_exact435": true,
+  "archive_payloads_verified": 27,
+  "attempts": [
+    {
+      "exit": 1,
+      "scope": "root-only independent mode-format assertion",
+      "cause": "stored0o755 comparedtoformatted0755; bytesidentical",
+      "original_error": "AssertionError: .githooks/pre-push",
+      "source_changed": false
+    },
+    {
+      "exit": 0,
+      "fix": "compare numeric permission modes, unchanged source and evidence"
+    }
+  ]
+}

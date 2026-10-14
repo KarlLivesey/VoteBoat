@@ -1,0 +1,16 @@
+{
+  "original_handle": 83860,
+  "actual_terminal_exit": 0,
+  "terminal_tool_chunk": "d8028e",
+  "terminal_raw_output": "SINGLETON_END actual0; COMBINED_DONE\n",
+  "bulk_end_and_singleton_start_original_poll_chunk": "bd5d05",
+  "bulk_end_raw_output": "BULK_END actual0; SINGLETON_START\n",
+  "combined_stage": "DONE\n",
+  "combined_status": "0\n",
+  "cell_stage": "DONE\n",
+  "cell_status": "0\n",
+  "selected_cell": "singleton",
+  "case_count": 12,
+  "launch": "One original bash process runs linux-run.sh then linux-singleton-run.sh serially; no inter-cell analysis/build/copy/archive. Built-in identity/output guards outside measured timer.",
+  "quiet_release": "Linux host analysis authorized after Linux terminal while separate Mac host still timing. No Mac commands/network copies."
+}

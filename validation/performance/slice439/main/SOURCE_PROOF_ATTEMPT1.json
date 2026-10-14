@@ -1,0 +1,7 @@
+{
+  "exit": 1,
+  "error": "AssertionError: 1431",
+  "scope": "metadata-only inventory arithmetic assertion before any checks; mistakenly expected1432 original435 inputs after excludingengine+diag",
+  "correction": "435originalinventory1433 minus2 =1431; existing437client_outcomes is one extra unchangedcurrentcontrol; currentinventory1434 minus2=1432",
+  "source_changes_due_to_correction": false
+}

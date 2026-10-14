@@ -1,0 +1,11 @@
+{
+  "collection_original": 23106,
+  "actual_terminal_tool": "581aac",
+  "collected_transport_sha256": "7c4b3d4d4f2f6a894babbdbc13fa403fb12f7db5fb9036efa5791d0233998547",
+  "prepared_manifest_before_sha256": "a96b88192be30d9695b399bbb06f17b213e247669cd58347d68104a3b8d0e4f1",
+  "all_original_prepared_files_byte_identical_except_lossless_manifest": true,
+  "global438rejected": true,
+  "actual24timingcases": 0,
+  "no_remeasure_or_newprofile": true,
+  "actual_archive_terminal_tool": "b808de"
+}

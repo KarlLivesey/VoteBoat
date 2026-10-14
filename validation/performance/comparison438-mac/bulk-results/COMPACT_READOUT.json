@@ -1,0 +1,126 @@
+{
+  "cell": "bulk",
+  "cases": 12,
+  "all_counts_frontiers_pass": true,
+  "completed_originals_each": 19988480,
+  "completed_requests_each": 4997120,
+  "warmup": 1024,
+  "frontiers": [
+    19989505,
+    19989505,
+    19989505
+  ],
+  "guard_before_after_and_output_checker": 0,
+  "stderr_nonempty": [],
+  "failures": [],
+  "no_separate_refusal_counter": true,
+  "median_variants": {
+    "baseline": {
+      "rates": [
+        4927088.165964391,
+        4708592.878477294,
+        4679280.0938175665
+      ],
+      "median_completed_originals_per_second": 4708592.878477294,
+      "median_request_p50_ms": 3.54025,
+      "median_request_p99_ms": 4.118208
+    },
+    "candidate": {
+      "rates": [
+        4886476.629894075,
+        4727965.960213783,
+        4684954.1825741725
+      ],
+      "median_completed_originals_per_second": 4727965.960213783,
+      "median_request_p50_ms": 3.518208,
+      "median_request_p99_ms": 4.030833
+    },
+    "on": {
+      "rates": [
+        4752404.532043859,
+        4738524.455154355,
+        4758963.756241221
+      ],
+      "median_completed_originals_per_second": 4752404.532043859,
+      "median_request_p50_ms": 3.514875,
+      "median_request_p99_ms": 3.994
+    },
+    "openraft": {
+      "rates": [
+        1963654.9664653137,
+        1974560.5675665305,
+        2018911.0378637493
+      ],
+      "median_completed_originals_per_second": 1974560.5675665305,
+      "median_request_p50_ms": 8.317667,
+      "median_request_p99_ms": 10.597667
+    }
+  },
+  "off_pairs": [
+    {
+      "trial": 1,
+      "baseline_originals_per_second": 4927088.165964391,
+      "candidate_originals_per_second": 4886476.629894075,
+      "rate_ratio": 0.9917574975924208,
+      "baseline_p99_ms": 3.971125,
+      "candidate_p99_ms": 3.877583
+    },
+    {
+      "trial": 2,
+      "baseline_originals_per_second": 4708592.878477294,
+      "candidate_originals_per_second": 4727965.960213783,
+      "rate_ratio": 1.004114410023649,
+      "baseline_p99_ms": 4.118208,
+      "candidate_p99_ms": 4.030833
+    },
+    {
+      "trial": 3,
+      "baseline_originals_per_second": 4679280.0938175665,
+      "candidate_originals_per_second": 4684954.1825741725,
+      "rate_ratio": 1.001212598656811,
+      "baseline_p99_ms": 4.1865,
+      "candidate_p99_ms": 4.092459
+    }
+  ],
+  "on_p99_ms": [
+    3.994,
+    3.994583,
+    3.988959
+  ],
+  "candidate_logical_diagnostics": {
+    "retained_entries": {
+      "min": 1268,
+      "max": 5584
+    },
+    "peak_retained_entries": {
+      "min": 8028,
+      "max": 22080
+    },
+    "peak_peer_queue": {
+      "min": 4,
+      "max": 6
+    },
+    "peak_client_queue": {
+      "min": 0,
+      "max": 4096
+    },
+    "checkpoint_count": {
+      "min": 3885,
+      "max": 3896
+    },
+    "snapshot_installs": {
+      "min": 0,
+      "max": 1564
+    },
+    "maximum_proposal_width": {
+      "min": 0,
+      "max": 16384
+    }
+  },
+  "disposition": "438globallyrejected fromLinuxdata; Macplatformdata retained regardlessrates",
+  "limits": [
+    "Logicalqueues/retention notphysicalmemory/debt proof.",
+    "Attributionnestedinclusivewall notsummedCPU.",
+    "No fullP9acceptance; no allocation/probing/hashcause isolated."
+  ]
+}

@@ -1,0 +1,8 @@
+from pathlib import Path
+import ast,json,subprocess,shutil
+j=Path('/tmp/voteboat-mac438-f2ef53f-S0yP1x');ast.parse((j/'collect.py.root-invocation-corrected').read_text());(j/'collect.py').rename(j/'collect.before-root-invocation438-fix.py');(j/'collect.py.root-invocation-corrected').replace(j/'collect.py')
+for suffix in ['log','exit']:shutil.copy2(j/'logs'/('artifact_guards.corrected.'+suffix),j/'logs'/('artifact_guards.before-root-invocation438-fix.'+suffix))
+with (j/'logs/artifact_guards.final.log').open('w') as o:v=subprocess.run(['/usr/bin/python3',str(j/'collect.py')],stdout=o,stderr=subprocess.STDOUT)
+(j/'logs/artifact_guards.final.exit').write_text(str(v.returncode)+'\n');print('finalfocusedcollector',v.returncode);assert v.returncode==0
+subprocess.run(['/usr/bin/python3',str(j/'verify-source.py')],check=True)
+(j/'STATUS').write_text('0\n');(j/'STAGE').write_text('DONE\n');q=json.loads((j/'FOCUSED_COLLECTOR_RECEIPT.json').read_text());q.update(collector_only_retry=0,failed_first_corrected_attempt=1,second_fix='Exactrootbuildscript executable fromactualCargoJSON; jobdirname substringmatches alldependencies');(j/'FOCUSED_COLLECTOR_RECEIPT.json').write_text(json.dumps(q,indent=2)+'\n')

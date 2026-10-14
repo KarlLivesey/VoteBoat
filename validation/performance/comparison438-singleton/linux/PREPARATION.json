@@ -1,0 +1,23 @@
+{
+  "status": "PAIR_SETUP_READY",
+  "baseline_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "candidate_commit": "f2ef53f35e7f22cdfc62031ec56fddc7985510a6",
+  "config_pair_sha256": "c85c405689a27754c210fc6322f87222a613702a6f5d7fc9a30d60690311880f",
+  "current_cli_controls": 3,
+  "negative_controls_reused_exactchecker_sha256": 13,
+  "checker_counts": [
+    29,
+    4,
+    15
+  ],
+  "bulk_requested": 20000000,
+  "bulk_actual": 19988480,
+  "bulk_requests": 4997120,
+  "singleton_requested_actual": 1048576,
+  "singleton_held": true,
+  "source_scope": {
+    "baseline": 1433,
+    "candidate": 1434
+  },
+  "timing_authorized": false
+}

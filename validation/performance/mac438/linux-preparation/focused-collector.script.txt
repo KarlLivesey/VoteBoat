@@ -1,0 +1,13 @@
+from pathlib import Path
+import json,subprocess,shutil
+j=Path('/tmp/voteboat-mac438-f2ef53f-S0yP1x');assert (j/'STATUS').read_text().strip()=='1' and (j/'STAGE').read_text().strip()=='artifact_guards'
+shutil.copy2(j/'STATUS',j/'STATUS.original15180');shutil.copy2(j/'STAGE',j/'STAGE.original15180')
+steps=['root_reuse_preflight','matched_fmt','matched_tests','matched_strict','matched-release','cli-off','cli-on','cli-openraft']
+for name in steps:assert (j/'logs'/f'{name}.exit').read_text().strip()=='0',name
+assert '64 passed; 0 failed' in (j/'logs/matched_tests.log').read_text();assert 'AssertionError' in (j/'logs/artifact_guards.before-essential438-fix.log').read_text()
+subprocess.run(['/usr/bin/python3',str(j/'verify-source.py')],check=True)
+(j/'FOCUSED_COLLECTOR_RECEIPT.json').write_text(json.dumps({'original_handle':15180,'actual_terminal_tool':'e22db9','actual_terminal_exit':1,'actual_cause':'stale deletedWaits essential assertion','successful_steps_not_rerun':steps,'tests':64,'collector_only_retry':'pending','sourcehash_modes_unchanged':True},indent=2)+'\n')
+with (j/'logs/artifact_guards.corrected.log').open('w') as o:
+ v=subprocess.run(['/usr/bin/python3',str(j/'collect.py')],stdout=o,stderr=subprocess.STDOUT)
+(j/'logs/artifact_guards.corrected.exit').write_text(str(v.returncode)+'\n');print('focusedcollector',v.returncode);assert v.returncode==0
+(j/'STATUS').write_text('0\n');(j/'STAGE').write_text('DONE\n');q=json.loads((j/'FOCUSED_COLLECTOR_RECEIPT.json').read_text());q['collector_only_retry']=0;(j/'FOCUSED_COLLECTOR_RECEIPT.json').write_text(json.dumps(q,indent=2)+'\n')

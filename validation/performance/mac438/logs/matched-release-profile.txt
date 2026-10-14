@@ -1,0 +1,1 @@
+opt3 debug2 debug_assertions=true overflow_checks=true lto=thin codegen_units=1

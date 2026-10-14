@@ -46,7 +46,7 @@ pub(super) struct Actor<const TRACE: bool = false> {
 }
 impl<const TRACE: bool> Actor<TRACE> {
     pub fn new(parts: Parts<TRACE>) -> Self {
-        let pending = HashMap::with_capacity(2 * (parts.settings.clients * 4 + 1));
+        let pending = HashMap::with_capacity(parts.settings.clients * 4 + 1);
         Self {
             parts,
             attribution: Recorder::default(),

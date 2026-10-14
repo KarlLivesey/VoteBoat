@@ -1,0 +1,11 @@
+{
+  "bulk_originalSSH": 75484,
+  "bulk_actual_terminal_tool": "4845fc",
+  "bulk_actual_exit": 0,
+  "singleton_originalSSH": 76675,
+  "singleton_actual_terminal_tool": "397f81",
+  "singleton_actual_exit": 0,
+  "all24_once": true,
+  "no_interimcopies_analysis_archive": true,
+  "globally_rejected": true
+}

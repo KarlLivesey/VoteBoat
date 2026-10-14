@@ -1,0 +1,23 @@
+{
+  "source_commit": "f2ef53f35e7f22cdfc62031ec56fddc7985510a6",
+  "inputs": 1434,
+  "compiled_inputs": 1428,
+  "changed_inputs_vs435": [
+    "benchmarks/matched/src/voteboat_engine.rs",
+    "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs",
+    "benchmarks/matched/src/voteboat_engine/client_outcomes.rs"
+  ],
+  "private_0600_keys": [
+    "tests/fixtures/four-node-tls/node1-key.der",
+    "tests/fixtures/four-node-tls/node2-key.der",
+    "tests/fixtures/four-node-tls/node3-key.der",
+    "tests/fixtures/four-node-tls/node4-key.der",
+    "tests/fixtures/tls/node1-key.der",
+    "tests/fixtures/tls/node2-key.der",
+    "tests/fixtures/tls/node3-key.der"
+  ],
+  "syntax": 0,
+  "fresh_target_absent": true,
+  "timing_authorized": false
+}

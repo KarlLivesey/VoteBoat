@@ -1,0 +1,7 @@
+{
+  "stage_before": "artifact_guards",
+  "status_before": "1",
+  "old_collector_sha256": "852033fe651a39da14d7ee7734daa229ea1fe504521ea407e4085c1c3d92f2c9",
+  "new_collector_sha256": "a90a155aa95e93a547ef064b07e23017424a547cbc06e52fb27a11cf652a1e79",
+  "source_or_build_changes": false
+}

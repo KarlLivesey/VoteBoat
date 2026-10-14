@@ -1,0 +1,44 @@
+{
+  "source_commit": "f2ef53f35e7f22cdfc62031ec56fddc7985510a6",
+  "source_inputs": 1434,
+  "compiled_inputs": 1428,
+  "changed_inputs_vs435": [
+    "benchmarks/matched/src/voteboat_engine.rs",
+    "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs",
+    "benchmarks/matched/src/voteboat_engine/client_outcomes.rs"
+  ],
+  "fresh_build_original_handle": 33065,
+  "fresh_build_actual_terminal_tool": "80dd08",
+  "fresh_build_exit": 0,
+  "fresh_build_stage": "DONE",
+  "actual_cli_terminal_tool": "017473",
+  "actual_cli_exit": 0,
+  "same_linux435_compiler_tools_profile": true,
+  "four_fresh_false": true,
+  "root_buildscript_fresh_false": true,
+  "ordinary_assertions_overflow_enabled": true,
+  "release_reference_oracle_absent": true,
+  "source_derived_observer": [
+    29,
+    4,
+    15
+  ],
+  "original_copy_artifact_hashes_verified": true,
+  "symbols": {
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched438-linux/target-matched-release/release/voteboat-matched-framework.dwp",
+    "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched438-linux/artifacts/matched/voteboat-matched-framework.dwp",
+    "sha256": "05b3f20f00bc24e358e60bb403f47dc2154126320b7d420c79a6b16bca08564e",
+    "bytes": 34685848,
+    "executable_sha256": "5b5b08ef982369d2a5864478675ada38eff8984125f9975cd3deafe3d7ec5543",
+    "cargo_filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched438-linux/target-matched-release/release/voteboat-matched-framework",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched438-linux/target-matched-release/release/voteboat-matched-framework.dwp"
+    ]
+  },
+  "functional_reuse_metadata_sha256": "e40de5f8a572767a9b3408dfc9054a6dc73900980f00a7de58815ba682f66ee2",
+  "source_inventory_sha256": "1e0b99228cff6f2848dda0ee94e078e06d217d142532a558e197e8f4716386b6",
+  "artifact_receipt_sha256": "a48ea6561bf61956e9602761be3405dfc51c231b9ac148036c72b75161d77ff2",
+  "physical_modes": "exactqualified1434modesincluding7privatekeys0600; no readonlychmod mutation",
+  "no_capacity_or_profile_run": true
+}

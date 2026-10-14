@@ -1,0 +1,1 @@
+Archive toolf3174f exited0 after verifyingallhashes; Python emitted SyntaxWarning invaliddecimal literal because compact lexical 1024*1024and lacked a space. Warningpreserved; actualarchive logic/comparisons ran correctly. No source/test/build/CLI/benchmark change or rerun.

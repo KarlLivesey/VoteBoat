@@ -1,0 +1,9 @@
+{
+  "scope": "metadata-only exact executable binding of actual rootbuildscript invocation tofresh:false CargoJSON record",
+  "cause": "Genericvoteboat- substring also matched every dependencyviajobdirectoryname; assertion refusedmanylines",
+  "original_failure": "actualcorrectedcollector57981exit1/guardlog preserved",
+  "old_sha256": "a90a155aa95e93a547ef064b07e23017424a547cbc06e52fb27a11cf652a1e79",
+  "new_sha256": "0fc243d6a06ab2536aa2df112f193a2b9451d6e73965e5e5dfa8e20ec06eef07",
+  "AST": 0,
+  "source_tests_build_CLI_unchanged": true
+}

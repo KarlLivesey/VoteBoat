@@ -1,0 +1,9 @@
+{
+  "actual_preparation_original_handle": 33065,
+  "included_in_fresh_build_terminal0": true,
+  "source_export": "actualgitarchivebytesextractedwithPythonTarFilefilter=data; nofulltar/buildtransfer",
+  "archive_sha256": "e2d4da17285f7c9be8fe662a33b19165173155de73e2979b4447d7879955b93e",
+  "physical_mode_application": "explicitchmodtoqualifiedSOURCE physical_modes immediatelyafterextract, thenhash/modeguardsbefore+afterfreshbuild; 7keys0600 preserved",
+  "source_file_commit_bytes": "allselectedfileSHA256matchesqualificationandgitshowcommit:path",
+  "scope": "commandreconstructionfromactualexecutedsetuparguments, notfabricatedrawstdout"
+}

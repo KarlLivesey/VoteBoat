@@ -1,0 +1,14 @@
+{
+  "scope": "COLLECTOR ONLY old436 essential-inputassertion corrected to437-restored source plus438reserve candidate; unchanged source/checks/build/CLI",
+  "old_sha256": "852033fe651a39da14d7ee7734daa229ea1fe504521ea407e4085c1c3d92f2c9",
+  "new_sha256": "a90a155aa95e93a547ef064b07e23017424a547cbc06e52fb27a11cf652a1e79",
+  "deleted_required_inputs": [
+    "benchmarks/matched/src/voteboat_engine/waits.rs",
+    "benchmarks/matched/src/voteboat_engine/waits/tests.rs"
+  ],
+  "current_required_input": "benchmarks/matched/src/voteboat_engine/client_outcomes.rs",
+  "deleted_inputs_explicitly_absent": true,
+  "AST_check": 0,
+  "actual_old_collector_failure": "Not yet observed; preserve if actually reached",
+  "no_qualification_restart": true
+}

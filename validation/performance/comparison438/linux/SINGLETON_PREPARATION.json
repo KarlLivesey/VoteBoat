@@ -1,0 +1,26 @@
+{
+  "scope": "preparedheldsingleton only; no binaryexecution/timing",
+  "baseline_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "candidate_commit": "f2ef53f35e7f22cdfc62031ec56fddc7985510a6",
+  "pair_config": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison438/CONFIG_PAIR.linux.json",
+  "pair_config_sha256": "c85c405689a27754c210fc6322f87222a613702a6f5d7fc9a30d60690311880f",
+  "runner_sha256": "c58a0c7f69ddf31b75ee037aca2ff0766752ab5a09e735676253f4f0f9c9ba10",
+  "phase_driver_sha256": "2c8033614b0a6a0f63ddf2e36c0b1c44acdea0368725dd55de404eec196c821e",
+  "checker_sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+  "clients": 1,
+  "batch": 1,
+  "requested_operations": 1048576,
+  "actual_originals": 1048576,
+  "requests": 1048576,
+  "warmup": 1024,
+  "expected_frontiers": [
+    1049601,
+    1049601,
+    1049601
+  ],
+  "cases": 12,
+  "same_immutable_artifacts_compiler_flags_timers_maintenance": true,
+  "separate_fresh_output": "linux-singleton-results",
+  "singleton_held_until_root_bulk_decision": true,
+  "syntax_exit": 0
+}

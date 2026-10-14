@@ -1,0 +1,18 @@
+
+running 8 tests
+test voteboat_engine::actor::tests::replies::actor_drop_cancels_all_admitted_and_deferred_original_waits ... ok
+test voteboat_engine::actor::tests::replies::bounded_churn_preserves_receipts_and_reuses_retained_capacity ... logical_bound=5 rounds=256 initial_capacity=7 minimum_available_capacity=7 high_water=7 final_available_capacity=7
+ok
+test voteboat_engine::actor::tests::replies::dropped_client_and_missing_result_stop_delivery_in_input_order ... ok
+test voteboat_engine::actor::tests::replies::duplicate_existing_replaces_old_wait_and_keeps_only_admitted_prefix ... ok
+test voteboat_engine::actor::tests::replies::duplicate_within_batch_replaces_first_wait_and_cancels_unvisited_tail ... ok
+test voteboat_engine::actor::tests::replies::near_bound_partial_rotation_completes_every_original_and_reports_capacity ... partial_rotation clients=1 logical_bound=5 rounds=1024 initial_capacity=7 minimum_available_capacity=7 high_water=7 final_available_capacity=7
+partial_rotation clients=4096 logical_bound=16385 rounds=65540 initial_capacity=28672 minimum_available_capacity=14264 high_water=28672 final_available_capacity=14264
+ok
+test voteboat_engine::actor::tests::replies::nonmonotonic_full_width_ids_commit_in_proposal_order_with_every_receipt ... ok
+test voteboat_engine::actor::tests::replies::shape_and_budget_gates_preserve_prior_pending_and_proposal_prefix ... layout_scope=actual_standalone_dev_test clients=1 logical_bound=5 available_insert_capacity=7 key_bytes=16 reply_bytes=8 key_reply_tuple_bytes=32
+layout_scope=actual_standalone_dev_test clients=4096 logical_bound=16385 available_insert_capacity=28025 key_bytes=16 reply_bytes=8 key_reply_tuple_bytes=32
+ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 56 filtered out; finished in 0.08s
+

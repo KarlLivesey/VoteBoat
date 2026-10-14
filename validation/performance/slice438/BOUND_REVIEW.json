@@ -1,0 +1,28 @@
+{
+  "scope": "conditional source-derived pending-map bucket-growth inference; no measurement or acceptance proof",
+  "source": "cached hashbrown0.17.1 raw.rs; saved std symbol paths/version match, rust-src absent; vendored std bytes not verified",
+  "conditions": [
+    "private map only insert/remove, no hot shrink or reserve",
+    "whole-request admission gate guarantees items+1<=P",
+    "initial requested reserve2P guarantees full_capacity>=2P"
+  ],
+  "algorithm": {
+    "reserve_slow_path": "additional > growth_left",
+    "in_place_rehash": "items+additional <= full_capacity/2",
+    "otherwise_resize": "max(new_items,full_capacity+1)"
+  },
+  "large_case": {
+    "P": 16385,
+    "baseline_initial_capacity": 28672,
+    "baseline_half": 14336,
+    "candidate_initial_capacity": 57344,
+    "candidate_half": 28672
+  },
+  "inference": "candidate inserts stay within in-place cleanup threshold; baseline can exceed threshold if growth_left exhausted",
+  "not_proven": [
+    "actual cleanup frequency",
+    "physical RSS",
+    "speedup",
+    "byte-identical std implementation"
+  ]
+}

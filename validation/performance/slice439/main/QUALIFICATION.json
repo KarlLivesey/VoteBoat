@@ -1,0 +1,52 @@
+{
+  "scope": "439 checkedrestoration of Actor initialreserveP; retained438 test-onlycapacity/layout diagnostic",
+  "original_handle": 70138,
+  "original_pid": 2,
+  "exit": 0,
+  "terminal": "DONE",
+  "focused_existing_replies": {
+    "passed": 8,
+    "failed": 0,
+    "filtered": 56,
+    "nocapture": true
+  },
+  "formatter": 0,
+  "strict_all_targets_clippy": 0,
+  "source_guard": 0,
+  "source_inputs": 1434,
+  "changed_paths": [
+    "benchmarks/matched/src/voteboat_engine/actor.rs"
+  ],
+  "physical_modes_unchanged": true,
+  "exact435_actor": true,
+  "exact435_engine_plus_only_cfg_test_client_outcomes_loader": true,
+  "original435_input_count": 1433,
+  "exact_original435_inputs_except_engine_diag": 1431,
+  "existing437_control_unchanged": true,
+  "current1432_scope": "1431 original435 selectedinputs excludingengine/testdiag, plus existing437client_outcomes; Actor restored exact435. Remaining currentbytes/modes unchanged438. Engine projection andretaineddiag separately verified.",
+  "actual_capacity_controls": {
+    "singleton": {
+      "initial": 7,
+      "partial_rotations": 1024,
+      "partial_minimum": 7,
+      "high_water": 7
+    },
+    "bulk": {
+      "initial": 28672,
+      "partial_rotations": 65540,
+      "partial_minimum": 14264,
+      "high_water": 28672
+    },
+    "scope": "actualdev available insertioncapacity underRandomState; notphysicalbucketcount/RSS/causalpairedbenchmark"
+  },
+  "failures_or_retries": [
+    {
+      "file": "SOURCE_PROOF_ATTEMPT1.json",
+      "exit": 1,
+      "kind": "metadata-only count assertion; no failed functional check/source rewrite"
+    }
+  ],
+  "root_functional_checks": "Existing435 and437 controls reused only by exactsource/projection scope; no root/full64 rerun here",
+  "new_performance_artifact_or_rate_claim": false,
+  "git_or_docs_edits": false
+}

@@ -1,0 +1,8 @@
+{
+  "published_source_commit": "f2ef53f35e7f22cdfc62031ec56fddc7985510a6",
+  "root_reported_original_handle": 28465,
+  "actual_exit": 0,
+  "enabled_full_hook": "actualfmt/fourrootstrict/standalonematchedfmtstrict0",
+  "raw_sha256": "8e2446b2f723dacababd30730041ff8ae2e7d0a05a958739c696f7fb6f14f670",
+  "scope": "actualrootpublishedpushreceipt copied; GitHubmain verifiedrootbeforebuild; no newpushbyagent"
+}

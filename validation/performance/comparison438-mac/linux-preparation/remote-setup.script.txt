@@ -1,0 +1,25 @@
+import hashlib,json,subprocess,tarfile
+from pathlib import Path
+j=Path('/tmp/voteboat-comparison438-PzNxvS');q=Path('/tmp/voteboat-mac438-f2ef53f-S0yP1x');h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+assert (q/'STATUS').read_text().strip()=='0' and(q/'STAGE').read_text().strip()=='DONE'
+steps=[('prepare-pair',['/usr/bin/python3',str(j/'prepare-pair.py'),'--baseline-config',str(j/'BASELINE_CONFIG.mac.json'),'--baseline-job','/tmp/voteboat-mac435-5c2390c-2oTYYa','--candidate-job',str(q),'--output',str(j/'CONFIG_PAIR.mac.json')]),('controls',['/usr/bin/python3',str(j/'check-controls.py'),str(q)]),('guard-ready',['/usr/bin/python3',str(j/'artifact-guard.py'),str(j/'CONFIG_PAIR.mac.json')])]
+for name,cmd in steps:
+ (j/(name+'.command.json')).write_text(json.dumps(cmd)+'\n')
+ with (j/(name+'.log')).open('w') as o,(j/(name+'.stderr')).open('w') as e:v=subprocess.run(cmd,stdout=o,stderr=e)
+ (j/(name+'.exit')).write_text(str(v.returncode)+'\n');assert v.returncode==0,name
+p=json.loads((j/'CONFIG_PAIR.mac.json').read_text());assert p['baseline']['source_commit']=='5c2390cb98d11901163e143815f5fa17199dc0f2' and p['candidate']['source_commit']=='f2ef53f35e7f22cdfc62031ec56fddc7985510a6'
+exe=Path(p['candidate']['executable']);dsym=Path(p['candidate']['symbols']['copy_bundle']);cmd=['/usr/bin/dwarfdump','--uuid',str(exe),str(dsym)]
+with(q/'UUID.txt').open('w') as o:subprocess.run(cmd,stdout=o,check=True)
+assert not(j/'bulk-results').exists() and not(j/'singleton-results').exists()
+for cell,clients,batch,operations in [('bulk',4096,4,20000000),('singleton',1,1,1048576)]:
+ rows=[]
+ for trial,variants in[(1,['baseline','candidate','on','openraft']),(2,['openraft','baseline','candidate','on']),(3,['on','openraft','baseline','candidate'])]:
+  for var in variants:
+   rows.append({'trial':trial,'variant':var,'command':[p['baseline' if var=='baseline' else 'candidate']['executable'],'--engine','openraft' if var=='openraft' else 'voteboat','--clients',str(clients),'--batch',str(batch),'--operations',str(operations),'--warmup','1024','--maintenance','default-retention','--envelopes','upstream-default','--attribution','true' if var=='on' else 'false','--campaign-timeout-secs','3600']})
+ (j/(cell+'-COMMANDS.json')).write_text(json.dumps(rows,indent=2)+'\n')
+ready={'status':'BOTH_CELLS_SETUP_READY_NO_TIMING','config_sha256':h(j/'CONFIG_PAIR.mac.json'),'baseline_inputs':len(p['baseline']['source_sha256']),'candidate_inputs':len(p['candidate']['source_sha256']),'candidate_exe_sha256':next(a['sha256']for a in p['candidate']['artifacts']if a['target']=='voteboat-matched-framework'),'candidate_UUID':(q/'UUID.txt').read_text(),'positiveguards':0,'actualCLI3_and_currentmodule_refusal':0,'unchanged4CLI9artifactnegativecontrols':'reusedsealed435hashscope, notrerun','bulk_cases':12,'singleton_cases':12,'outputs_absent':True,'next':'Waitrootquietauthorizationafterallarchives/copies/checksfinish'}
+(j/'PAIR_SETUP_READY.json').write_text(json.dumps(ready,indent=2)+'\n');print(json.dumps(ready))
+for directory,label in[(j,'prepared'),(q,'qualification')]:
+ files=[x for x in directory.rglob('*')if x.is_file()and x.relative_to(directory).parts[0]not in{'source','target-matched-checks','target-matched-release','artifacts','test-tmp','__pycache__'}and x.name not in{'source.tar',label+'.tgz'}and'__pycache__'not in x.parts]
+ with tarfile.open(directory/(label+'.tgz'),'w:gz')as archive:
+  for x in sorted(files):assert not x.is_symlink();archive.add(x,arcname=str(x.relative_to(directory)),recursive=False)

@@ -1,0 +1,15 @@
+{
+  "status": "PREPARED_UNPUBLISHED_REFUSED",
+  "schema": "validation/performance/slice438/SCHEMA.md",
+  "required_commit": "UNSET",
+  "baseline_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "baseline_remote": "/tmp/voteboat-mac435-5c2390c-2oTYYa",
+  "root_reuse": "ALLcompiledroot/config/locks/examples/fixtures/contracts/hash+modes plus435successfulcommand/toolreceipts, excludechangedmatchedsrc; exactscope only, before newtestexecution.",
+  "mac_actual_checks": "Fullcurrent64standalone tests/fmt/alltargetstrict once, freshassertedrelease4fresh:false/rootbuildscript/PROFILErelease/opt3debug2packedthinLTOcgu1ordinaryassertions+overflow,currentdSYM+UUID/originalcopyhash; actualoff/on/OR16384+1024CLI29/4/15.",
+  "source_scope": "Fresh committedsource+newclient_outcomes, deletedWaits absent; actualcounts andchangedmodules derived afterpublication, not guessed. Use tar -xpf to preservefullmodes thenexistingexacthashverifier. No sourcecopy untilpublished/rootauthorization.",
+  "comparison": "Immutable435baseline, existingqualifiedchecker/refusals reusedbyexacthashscope, newcandidate source/artifactmodule proofs actual; same12bulk20Mrotating3trials andsingleton1M once onlyafterseparatequietauthorization. No tuningprediction.",
+  "syntax": "4PythonAST/bash-n0",
+  "unpublished_refusal_exit": 1,
+  "no_remote_source_copy_build_or_timing": true,
+  "next": "Waitpublished438commit/rootauthorizequalificationandbuild; doNOTlaunchyet"
+}

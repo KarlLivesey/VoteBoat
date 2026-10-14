@@ -1,0 +1,21 @@
+{
+  "original_handle": 15180,
+  "actual_terminal_tool": "e22db9",
+  "actual_terminal_exit": 1,
+  "actual_cause": "stale deletedWaits essential assertion",
+  "successful_steps_not_rerun": [
+    "root_reuse_preflight",
+    "matched_fmt",
+    "matched_tests",
+    "matched_strict",
+    "matched-release",
+    "cli-off",
+    "cli-on",
+    "cli-openraft"
+  ],
+  "tests": 64,
+  "collector_only_retry": 0,
+  "sourcehash_modes_unchanged": true,
+  "failed_first_corrected_attempt": 1,
+  "second_fix": "Exactrootbuildscript executable fromactualCargoJSON; jobdirname substringmatches alldependencies"
+}

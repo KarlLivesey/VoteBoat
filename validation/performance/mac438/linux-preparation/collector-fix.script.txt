@@ -1,0 +1,11 @@
+import hashlib,json,shutil,ast
+from pathlib import Path
+j=Path('/tmp/voteboat-mac438-f2ef53f-S0yP1x');old=j/'collect.py';new=j/'collect.py.corrected'
+assert hashlib.sha256(old.read_bytes()).hexdigest()=='852033fe651a39da14d7ee7734daa229ea1fe504521ea407e4085c1c3d92f2c9'
+assert hashlib.sha256(new.read_bytes()).hexdigest()=='a90a155aa95e93a547ef064b07e23017424a547cbc06e52fb27a11cf652a1e79';ast.parse(new.read_text())
+state={'stage_before':(j/'STAGE').read_text().strip(),'status_before':(j/'STATUS').read_text().strip(),'old_collector_sha256':'852033fe651a39da14d7ee7734daa229ea1fe504521ea407e4085c1c3d92f2c9','new_collector_sha256':'a90a155aa95e93a547ef064b07e23017424a547cbc06e52fb27a11cf652a1e79','source_or_build_changes':False}
+for suffix in ['log','exit','command']:
+ p=j/'logs'/('artifact_guards.'+suffix)
+ if p.exists():shutil.copy2(p,j/'logs'/('artifact_guards.before-essential438-fix.'+suffix))
+old.rename(j/'collect.before-essential438-fix.py');new.replace(old)
+(j/'COLLECTOR_ESSENTIAL_FIX.json').write_text(json.dumps(state,indent=2)+'\n');print(json.dumps(state))

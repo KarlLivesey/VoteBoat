@@ -187,10 +187,41 @@ about1.03MiB per actor (three actors), without a memory-performance claim.
 retain source, commands, limits and unknowns. Checked publication and fresh
 both-host paired measurements follow; no improvement is claimed from checks.
 
+438 is globally rejected after all three Linux bulk and singleton rate pairs
+regress. Original83860 actually ends0 with24 cases and all identity/output guards.
+Bulk OFF median6,747,226→6,480,185 completed originals/s; p99 3.616→3.837ms,
+including trial2's3.558→6.406ms. Singleton115,903→112,581/s and
+16.961→17.373µs p99 also regresses in every rate pair. All raw observer/reference
+results and logical maintenance counters are preserved; no RSS/refusal proof or
+allocator/cache cause is inferred. [Bulk](../validation/performance/comparison438/linux/README.md),
+[singleton](../validation/performance/comparison438-singleton/linux/README.md).
+Mac's original75484 bulk and76675 singleton campaigns now end0 with24 exact
+cases/guards and no reruns. Mac bulk4,708,593→4,727,966 originals/s is mixed
+(pair ratios0.991757/1.004114/1.001213); p99 improves4.118208→4.030833ms.
+Singleton57,879→58,364/s is mixed (0.991497/1.009473/0.997583), p99
+30.791→30.292µs with trial3's30.791→30.875µs regression retained. These small
+mixed Mac rates do not offset the Linux losses. No probing/allocator/cache cause,
+physical RSS/debt or refusal proof is inferred. Full raw Mac evidence follows
+in[comparison438-mac](../validation/performance/comparison438-mac/RESULTS_README.md).
+439's schema precedes the exact reserve restoration; retain the independent test
+diagnostic. No reserve-factor retuning or unchanged benchmark/profile recapture.
+
+439 is implemented and checked before publication: original70138 ends0 with
+8 existing reply/budget/churn controls (56 filtered), formatter/strict and1,434
+source/mode guards. Actor bytes exactly match435; the engine remains435 plus
+only the cfg(test)client_outcomes loader. The438 test-only diagnostic is retained.
+[Evidence](../validation/performance/slice439/main/README.md) keeps the initial
+metadata count assertion and focused correction. Root independently verifies
+27 archived payload hashes, current1,434 inputs/modes and both production
+projections; a mode-string formatting mismatch and numeric fix are recorded.
+No full64/root suite, old performance build/CLI/profile/benchmark was repeated.
+Immutable435 artifacts/profiles remain the measured baseline; no439 rate is
+claimed. Targeted Mac restored controls follow checked source publication.
+
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current:438 bounded admission-table reserve | Reduce possible probe/table-maintenance work in the measured admission stage | Published437 exact435 restoration, saved435 profiles and [438 schema](../validation/performance/slice438/SCHEMA.md) | Preserve logical budget/full IDs/hasher/outcomes; focused checks and enabled hook, fresh artifacts and paired bulk/singleton on both hosts; retain or reject once | P9.0/P9.1/P9.3 |
-| Next: remaining measured work after438 decision | Reduce the next limiting stage without repeating rejected paths | Actual438 paired decision; artifact-bound profiles of the retained source and exact ownership contracts | One explicit schema and checked slice; publish and measure both hosts before selecting another change | P9.0/P9.1/P9.3 |
+| Current:439 checked restoration | Restore retained435 reserve after438 regresses | Original Linux24 cases and exact435 production; [439 schema](../validation/performance/slice439/SCHEMA.md); finish ongoing Mac raw campaign | Exact production projection, focused reply/churn controls and strict checks; enabled publication hook after Mac END, targeted Mac checks; preserve all438 evidence | P9.0/P9.1/P9.3 |
+| Next: remaining measured work after439 restoration | Reduce the next limiting stage without repeating rejected paths | Checked439 exact435 restoration and immutable435 profiles; completed438 decision and exact ownership contracts | One explicit schema and checked slice; publish and measure both hosts before selecting another change | P9.0/P9.1/P9.3 |
 | Following: bounded durable batching/overlap under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Native421 barrier evidence and unchanged publication/ticket contracts; bounded fairness schema after current measured framework stage | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual placement/barriers before changing defaults | P9.1/P9.2/P9.3 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed

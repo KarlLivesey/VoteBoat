@@ -1,0 +1,29 @@
+{
+  "scope": "existingoutput/rounding negativecontrols reused solelybybyte-identicalphasechecker; no newnegativecontrolframework/capacityruns",
+  "checker_sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+  "old_checker_sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+  "output_negative_controls": 10,
+  "rounding_negative_controls": 3,
+  "artifact_guards": "publishedcandidatecommit/essentialclientoutcome/modeupdates; currentpositiveactualartifactguardsrequired; priornegativefailurebranches retained, not falselybyte-identical wholeguard",
+  "proofs": [
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison435/BASELINE_CHECKER_CONTROLS.json",
+      "sha256": "d725499a1d4319846143d3b8c5793ea68aed454255a7a5459dfdd146d3d78a5c"
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison435/PREPARATION.json",
+      "sha256": "cb883c6738bb443afaf8725414484308863bd9445706b50bf151f1f1814bc669"
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison436/ACTUAL436_CHECKER_CONTROLS.json",
+      "sha256": "313f2141e24dd6788e168fd829c4176fa0c432dd5ba13c0aa7087cf89ef8c415"
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison436/ARTIFACT_GUARD_CONTROLS.json",
+      "sha256": "0aa909452c2037189153cc53e5d9e943854d4cb495c6b46b9acebc17f8a768d9"
+    }
+  ],
+  "current_cli_positive_controls": "pending fresh438CLIterminal",
+  "syntax": 0,
+  "timing_authorized": false
+}
