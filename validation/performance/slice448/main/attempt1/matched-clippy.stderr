@@ -1,0 +1,12 @@
+    Checking voteboat-matched-framework v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/benchmarks/matched)
+error: the variable `completed` is used as a loop counter
+   --> src/voteboat_engine/reply/tests.rs:303:13
+    |
+303 |             for _ in 0..257 {
+    |             ^^^^^^^^^^^^^^^ help: consider using: `for (completed, _) in (0..257).enumerate()`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#explicit_counter_loop
+    = note: `-D clippy::explicit-counter-loop` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::explicit_counter_loop)]`
+
+error: could not compile `voteboat-matched-framework` (bin "voteboat-matched-framework" test) due to 1 previous error

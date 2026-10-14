@@ -1,0 +1,37 @@
+{
+  "original_runner": 71143,
+  "actual_original_terminal": 101,
+  "actual_original_tests": {
+    "passed": 78,
+    "failed": 0,
+    "seconds": 1.86
+  },
+  "original_fmt": 0,
+  "original_strict": 101,
+  "strict_failure": "test-only explicit_counter_loop in original Tokio budget comparison control",
+  "final_runner": 27150,
+  "actual_final_terminal": 0,
+  "final_exact_focused_controls": [
+    "cooperative_budget_matches_tokio_for_ready_and_closed_receipts",
+    "actual_dev_reply_group_endpoint_and_client_future_layouts"
+  ],
+  "final_focused_passed": 2,
+  "final_fmt_strict_source_guard": 0,
+  "all_other_1440_inputs_hashes_and_modes_match_original_tested_source": true,
+  "test_only_delta_projection_matches_original_exact_bytes": true,
+  "remaining_76_passes_reused": "All69existing fixture/module bytes and production match; seven other new test bodies unchanged. Two modified test controls passed finalsource. Do not label the original whole78 as an exact finalfile-hash run.",
+  "private_error_type": "reply::RecvError implements Error/Display channel closed; Box conversion keeps original first-error text and outcomes, concrete private type differs from Tokio.",
+  "group_retention": "Consumed endpoint retains Arc until endpoint Drop; factory exhausted reference explicitly dropped beforesend; width0/firstinvalidID allocate no group.",
+  "memory": "Actualdev sizes only; no heap allocator/bucket/RSS/throughput claim. Original client_requests old-shape labels use current Reply type and are current-type counterfactual shapes, not actual immutable446 layouts.",
+  "unique_publication_invariant": "Private factory issues each index once and Sender is non-Clone/consumed on send, so slot.value is None before publication; no old T is dropped by assignment underguard.",
+  "gap_control": "Private poll_inner callback executes send/close in unlocked cloning gap; production callback is Waker::clone, not an unsafe custom RawWaker.",
+  "actual_dev_original_layout": {
+    "current_original_bytes": 64,
+    "current_sender_bytes": 16,
+    "legacy446_original_bytes": 48,
+    "legacy446_sender_bytes": 8,
+    "legacy_actual_raw": "validation/performance/slice446/main/matched-tests.log:70",
+    "current_actual_raw": "attempt1/matched-tests.log:70",
+    "scope": "Actualdev source layouts only; current old-shape labels use NEW Reply and must not be interpreted as old446 measurements or physical RSS."
+  }
+}

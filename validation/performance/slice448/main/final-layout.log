@@ -1,0 +1,12 @@
+
+running 1 test
+test voteboat_engine::reply::tests::actual_dev_reply_group_endpoint_and_client_future_layouts ... actual_dev Sender=16 Receiver=16 OptionSender=16 Slot=48 Group=224 MutexGroup=240 ArcHandle=8 CohortSlotsArray=64 Request=24 ClientFuture=320 scope=actual_current_dev_not_release_or_RSS
+width=0 group_allocated=false
+width=1 inline_slots=4 overflow_len=0 overflow_capacity=0 issued=1 group_strong_handles=3
+width=4 inline_slots=4 overflow_len=0 overflow_capacity=0 issued=1 group_strong_handles=3
+width=5 inline_slots=4 overflow_len=1 overflow_capacity=1 issued=1 group_strong_handles=3
+width=17 inline_slots=4 overflow_len=13 overflow_capacity=13 issued=1 group_strong_handles=3
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 77 filtered out; finished in 0.00s
+

@@ -1,0 +1,26 @@
+{
+  "sealed_main_source": {
+    "path": "validation/performance/slice448/main/SOURCE.json",
+    "sha256": "fd8aa85798decb2f183c785252fdff422fd49ed784170ef783a2ea1de659aeae"
+  },
+  "sealed_main_manifest": {
+    "path": "validation/performance/slice448/main/SHA256SUMS",
+    "sha256": "2de9382387411526025c35aff1f1d7936c8f30cbf39506dd90c5b06bc9730d1a"
+  },
+  "sealed_archive_unchanged": true,
+  "selected_inputs": 1441,
+  "documentation_only_selected_delta": {
+    "path": "benchmarks/matched/COMPARISON.md",
+    "qualified_sha256": "f47169e06bc7fc9ac1b04cec700164ef3a715ffeb71787ad46cd891c8cabe4a6",
+    "publication_sha256": "aab4d8795461196096f341a394c568a7067eb9b78950ca3c3a068220e8e6f4be",
+    "physical_mode": "0o644",
+    "purpose": "Disclose grouped allocation while retaining independent channels/outcomes and cooperative accounting on VoteBoat; pinned upstream remains unchanged."
+  },
+  "all_other_selected_inputs_exact_sha256_and_modes_match": true,
+  "unchanged_other_inputs": 1440,
+  "plan_documents_outside_selected_build_inputs": {
+    "docs/P9.md": "82e6196f79aa131b1f604b123850a5f18a30b60bef7a7c6e94da4a73f7523b14",
+    "docs/IMPLEMENTATION.md": "8be9f5ee3d564e39d49ca7f40b3afa8ecb1e8381ccbc6d6ce9c73969b655a833"
+  },
+  "qualification_reuse": "Source/API implementation unchanged; only comparison disclosure and linked actual-scope plans added after sealed proof. No tests/builds/profiles/timing were repeated."
+}
