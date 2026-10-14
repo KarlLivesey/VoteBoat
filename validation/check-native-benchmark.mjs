@@ -8,6 +8,7 @@ import { checkStorage } from './check-benchmark-storage.mjs';
 import { validateLanes } from './check-lanes.mjs';
 import { validateOffered } from './check-offered.mjs';
 import { validateMaintenance } from './check-maintenance.mjs';
+import { validateRoundedRate } from './check-rounded-rate.mjs';
 
 const requireStorage = process.argv.includes('--storage');
 const directories = process.argv.slice(2).filter(arg => arg !== '--storage');
@@ -92,7 +93,7 @@ for (const directory of directories) {
             assert.ok(Math.abs(actual - Number(summary[`p${percentile}_us`])) <= 0.00051);
         }
         assert.ok(Math.abs(latencies.at(-1) / 1000 - Number(summary.max_us)) <= 0.00051);
-        assert.ok(Math.abs(count / Number(summary.elapsed_s) - Number(summary.applied_ops_s)) < 0.001);
+        validateRoundedRate(count, summary.elapsed_s, summary.applied_ops_s);
         assert.ok(Number(summary.max_host_poll_ms) <= Number(summary.host_poll_ms));
         assert.ok(Number(summary.host_poll_ms) <= Number(summary.elapsed_s) * 1000);
         console.log(`${directory}: ${count} receipts, group routing/history, windows and latency/rate arithmetic pass`);
