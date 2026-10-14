@@ -1,0 +1,11 @@
+{
+  "source_inputs": 1448,
+  "artifacts": [
+    "bench_minimal",
+    "openraft",
+    "voteboat",
+    "voteboat-matched-framework"
+  ],
+  "mode": "asserted_release",
+  "checks": "all frozen source, artifact, driver and applicable compiler guards pass"
+}

@@ -1,0 +1,24 @@
+{
+  "scope": "Exact453 generic/headless converters including currentreceiver-onlyClient predicate; only current455 moduleIDs/RVAs/per-address responses allowed. Any unsupported source predicate becomes explicit limitation, no baseline samples/symbols reused.",
+  "files": [
+    {
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile453/linux/symbolication/symbolize-full-json.py",
+      "current": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile455/linux/symbolication/symbolize-full-json.py",
+      "sha256": "ebb87302b345e1485d0a02c64b5ccd9482eaf1644ead5274dcdb1a748dddd84a",
+      "exact_bytes_reused": true
+    },
+    {
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile453/linux/symbolication/subsets.py",
+      "current": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile455/linux/symbolication/subsets.py",
+      "sha256": "1bd4c4897a3adc7e616cc2994c777f95d856588eddf57cc0d40e8135843f3a03",
+      "exact_bytes_reused": true
+    },
+    {
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile453/linux/symbolication/client-contexts.py",
+      "current": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile455/linux/symbolication/client-contexts.py",
+      "sha256": "624c0755e8b38646d4cf36d5802c131b9ba6132cfde02086570df283733e171d",
+      "exact_bytes_reused": true
+    }
+  ],
+  "no_old_negative_controls_rerun": true
+}

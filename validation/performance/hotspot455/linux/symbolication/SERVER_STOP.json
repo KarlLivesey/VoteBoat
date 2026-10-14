@@ -1,0 +1,21 @@
+{
+  "original_handle": 84251,
+  "verified_pid": 225917,
+  "signal": "SIGINT",
+  "verified_exact_argv": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply",
+    "load",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile455/linux/perf-quiet/bulk.json.gz",
+    "--no-open",
+    "--address",
+    "127.0.0.1",
+    "--port",
+    "38483",
+    "--symbol-dir",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/target-matched-release/release"
+  ],
+  "reason": "All current bulk/singleton symbol queries completed; no browser",
+  "actual_terminal": 0,
+  "queries_actual_terminal": 0,
+  "queries_original_handle": 61005
+}

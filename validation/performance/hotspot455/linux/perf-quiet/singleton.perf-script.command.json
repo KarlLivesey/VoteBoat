@@ -1,0 +1,8 @@
+[
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+  "script",
+  "-i",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile455/linux/perf-quiet/singleton.data",
+  "-F",
+  "comm,pid,tid,time,event,ip,sym,dso"
+]

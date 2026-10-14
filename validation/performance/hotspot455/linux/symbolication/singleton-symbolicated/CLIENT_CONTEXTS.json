@@ -1,0 +1,175 @@
+{
+  "selected_sample_weight": 17308,
+  "contexts": {
+    "client_write_context": {
+      "sample_weight": 396,
+      "percent_of_selected": 2.2879593251675527
+    },
+    "client_alloc_dealloc_context": {
+      "sample_weight": 56,
+      "percent_of_selected": 0.32354980355904783
+    },
+    "client_oneshot_construct_context": {
+      "sample_weight": 40,
+      "percent_of_selected": 0.23110700254217703
+    },
+    "client_oneshot_construct_alloc_context": {
+      "sample_weight": 2,
+      "percent_of_selected": 0.011555350127108852
+    },
+    "client_receiver_poll_context": {
+      "sample_weight": 113,
+      "percent_of_selected": 0.6528772821816501
+    },
+    "client_receiver_poll_alloc_context": {
+      "sample_weight": 0,
+      "percent_of_selected": 0.0
+    },
+    "client_oneshot_sender_context": {
+      "sample_weight": 0,
+      "percent_of_selected": 0.0
+    },
+    "client_mpsc_request_send_context": {
+      "sample_weight": 166,
+      "percent_of_selected": 0.9590940605500347
+    },
+    "client_flat_originals_vec_construction": {
+      "sample_weight": 52,
+      "percent_of_selected": 0.30043910330483015
+    },
+    "client_waits_vec_construction": {
+      "sample_weight": 2,
+      "percent_of_selected": 0.011555350127108852
+    }
+  },
+  "per_RVA_engine_client_source_context": [
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 226,
+      "sample_weight": 166,
+      "percent_of_selected": 0.9590940605500347
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 229,
+      "sample_weight": 113,
+      "percent_of_selected": 0.6528772821816501
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 214,
+      "sample_weight": 52,
+      "percent_of_selected": 0.30043910330483015
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 218,
+      "sample_weight": 40,
+      "percent_of_selected": 0.23110700254217703
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 233,
+      "sample_weight": 5,
+      "percent_of_selected": 0.02888837531777213
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 235,
+      "sample_weight": 3,
+      "percent_of_selected": 0.01733302519066328
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 230,
+      "sample_weight": 2,
+      "percent_of_selected": 0.011555350127108852
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 215,
+      "sample_weight": 2,
+      "percent_of_selected": 0.011555350127108852
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 228,
+      "sample_weight": 1,
+      "percent_of_selected": 0.005777675063554426
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 213,
+      "sample_weight": 1,
+      "percent_of_selected": 0.005777675063554426
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 219,
+      "sample_weight": 1,
+      "percent_of_selected": 0.005777675063554426
+    }
+  ],
+  "engine_client_source_in_native_leaf_RVA": [
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 226,
+      "sample_weight": 90,
+      "percent_of_selected": 0.5199907557198983
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 229,
+      "sample_weight": 72,
+      "percent_of_selected": 0.41599260457591863
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 218,
+      "sample_weight": 38,
+      "percent_of_selected": 0.2195516524150682
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 235,
+      "sample_weight": 3,
+      "percent_of_selected": 0.01733302519066328
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 230,
+      "sample_weight": 2,
+      "percent_of_selected": 0.011555350127108852
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 228,
+      "sample_weight": 1,
+      "percent_of_selected": 0.005777675063554426
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 213,
+      "sample_weight": 1,
+      "percent_of_selected": 0.005777675063554426
+    },
+    {
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched455-linux/source/benchmarks/matched/src/voteboat_engine.rs",
+      "line": 219,
+      "sample_weight": 1,
+      "percent_of_selected": 0.005777675063554426
+    }
+  ],
+  "unresolved_classification": {
+    "wrapper_without_engine_inline": 10
+  },
+  "limits": [
+    "Inclusive context intersections overlap; do not add them or subtract to estimate CPU costs.",
+    "Current flat Original constructor and existing waits Vec are classified; absent constructor frames mean unknown cost, not zero allocation.",
+    "Source/inline attribution is actual current452 per-address response; optimized/missing frames prevent an exhaustive partition.",
+    "Allocation/deallocation and Vec constructor contexts are sampled work, not allocator call counts, bytes or causality.",
+    "Receiver polling includes ready, pending and error checks; no wake/re-poll counts or blocked duration inferred.",
+    "No channels/outcomes removed; changing await order still requires failure/cancel contract review.",
+    "Current453 capture losses/import warnings retained separately; no missing samples reconstructed."
+  ]
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile455/linux/perf-quiet/bulk.data",
+    "bytes": 140113108,
+    "sha256": "ea55c705f794eef59cb01a52c41163d96449e7846a18a852d6bbbb0881fc6eac",
+    "retention": "Original unmodified ignored local perf.data; compact publication retains convertedJSON/text/folded/addressresponses/rawstderr, not duplicateperfdata."
+  },
+  {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile455/linux/perf-quiet/singleton.data",
+    "bytes": 287663684,
+    "sha256": "225518e724ba36685022cedcf445cf38a30fe4a248f2225e9a84e070da334633",
+    "retention": "Original unmodified ignored local perf.data; compact publication retains convertedJSON/text/folded/addressresponses/rawstderr, not duplicateperfdata."
+  }
+]

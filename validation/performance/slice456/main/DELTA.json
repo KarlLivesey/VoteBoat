@@ -1,0 +1,9 @@
+{
+  "changed": [
+    "src/log.rs"
+  ],
+  "unchanged_inputs": 1444,
+  "method_body_unchanged": true,
+  "only_change": "ordinary #[inline] attribute",
+  "performance_unproven": true
+}

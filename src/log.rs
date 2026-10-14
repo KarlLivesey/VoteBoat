@@ -105,6 +105,7 @@ impl PartialEq for LogEntry {
 impl LogEntry {
     /// Conservative per-owner payload charge, excluding the inline LogEntry.
     /// Shared commands are charged in full for each retained clone.
+    #[inline]
     pub fn retained_payload_bytes(&self) -> usize {
         match &self.payload {
             EntryPayload::Noop => 0,

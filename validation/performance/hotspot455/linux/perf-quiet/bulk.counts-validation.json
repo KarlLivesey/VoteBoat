@@ -1,0 +1,12 @@
+{
+  "completed_originals": 19988480,
+  "completed_requests": 4997120,
+  "frontiers": [
+    19989505,
+    19989505,
+    19989505
+  ],
+  "warmup": 1024,
+  "all_originals_applied": true,
+  "profiled_diagnostic_only": true
+}

@@ -1,0 +1,3 @@
+codex
+python3
+ps

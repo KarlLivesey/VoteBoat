@@ -1,0 +1,5 @@
+{
+  "operation": "verify candidate only",
+  "script": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison455/artifact-guard.py",
+  "config": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison455/CONFIG_PAIR.linux.json"
+}

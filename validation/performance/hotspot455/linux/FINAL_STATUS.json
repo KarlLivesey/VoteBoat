@@ -1,0 +1,34 @@
+{
+  "capture_original_handle": 37162,
+  "capture_actual_terminal": 0,
+  "imports": 0,
+  "symbol_queries_original": 61005,
+  "symbol_queries_actual_terminal": 0,
+  "subsets": 0,
+  "client_contexts": 0,
+  "perf_script": 0,
+  "after_artifact_guard": 0,
+  "owned_server_original": 84251,
+  "owned_server_pid": 225917,
+  "owned_server_actual_terminal": 0,
+  "kernel_settings_unchanged": {
+    "perf_event_paranoid": 2,
+    "kptr_restrict": 2,
+    "perf_event_mlock_kb": 516
+  },
+  "raw_perf_retained": [
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile455/linux/perf-quiet/bulk.data",
+      "bytes": 140113108,
+      "sha256": "ea55c705f794eef59cb01a52c41163d96449e7846a18a852d6bbbb0881fc6eac",
+      "retention": "Original unmodified ignored local perf.data; compact publication retains convertedJSON/text/folded/addressresponses/rawstderr, not duplicateperfdata."
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile455/linux/perf-quiet/singleton.data",
+      "bytes": 287663684,
+      "sha256": "225518e724ba36685022cedcf445cf38a30fe4a248f2225e9a84e070da334633",
+      "retention": "Original unmodified ignored local perf.data; compact publication retains convertedJSON/text/folded/addressresponses/rawstderr, not duplicateperfdata."
+    }
+  ],
+  "all_processing_end": true
+}
