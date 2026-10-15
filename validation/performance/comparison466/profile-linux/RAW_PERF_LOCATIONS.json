@@ -1,0 +1,12 @@
+{
+  "bulk": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison466/profile-linux/perf-quiet/bulk.data",
+    "bytes": 104209156,
+    "sha256": "e5f12f14f2194e3e9f1bd15e686d87484fdd09ea1cc2f8b7a6832b6954389fd5"
+  },
+  "singleton": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison466/profile-linux/perf-quiet/singleton.data",
+    "bytes": 385243340,
+    "sha256": "5a5bd68c927b577a197e04ed12266ad6aa5884317c87c29f2b109072d3682e96"
+  }
+}

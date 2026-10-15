@@ -1,0 +1,36 @@
+{
+  "preserved_attempt1": "../processing-attempt1",
+  "failures": [
+    {
+      "operation": "initial local symbol queries",
+      "actual_exit": 1,
+      "cause": "sandbox denied localhost socket before any response",
+      "fix": "same existing parser/current profile, localhost-only require_escalated"
+    },
+    {
+      "operation": "initial perf script",
+      "actual_exit": 127,
+      "cause": "bundled libpfm not on loader path",
+      "fix": "existing extracted/usr/lib LD_LIBRARY_PATH for saved perf script only"
+    },
+    {
+      "operation": "initial server stop inspection",
+      "cause": "default sandbox PID namespace cannot see escalated owned server",
+      "signal_sent": false,
+      "fix": "verify exact server argv in escalated host namespace then SIGINT; original74816actual0"
+    },
+    {
+      "operation": "initial inline ownership query",
+      "actual_exit": 1,
+      "cause": "Python conditional whitespace SyntaxError before parsing/writes",
+      "fix": "saved focused query corrected; no raw data/source/recapture mutation"
+    },
+    {
+      "operation": "initial inline final readout assembly",
+      "actual_exit": 1,
+      "cause": "Python conditional whitespace SyntaxError before data/source/writes; corrected saved finite finish-readout script succeeds",
+      "capture_repeated": false
+    }
+  ],
+  "predicate_precision": "EntryIter next union requires both EntryIter and next in the SAME actual resolved function name; type mentions in unrelated generic callers do not qualify. Other predicates reuse saved physical/inline frames."
+}

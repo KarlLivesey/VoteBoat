@@ -1,0 +1,10 @@
+{
+  "commit": "ff8f9031f5d39f35e3bc39e1a0a0c1aaac768070",
+  "origin_main": "ff8f9031f5d39f35e3bc39e1a0a0c1aaac768070",
+  "worktree_clean": true,
+  "qualified_source_hashes_unchanged": 1441,
+  "original_push_handle": 96685,
+  "actual_push_exit": 0,
+  "enabled_hook_passed_during_push": true,
+  "scope": "467 restores465exactproduction; all466regressionsretained; P9active/unmet."
+}

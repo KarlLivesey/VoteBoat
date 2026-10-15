@@ -1,0 +1,28 @@
+{
+  "capture": 0,
+  "imports": [
+    0,
+    0
+  ],
+  "current_symbol_queries": [
+    0,
+    0
+  ],
+  "saved_perf_script": [
+    0,
+    0
+  ],
+  "subsets": 0,
+  "client_contexts": 0,
+  "ownership_contexts": 0,
+  "server_original": 74816,
+  "server_actual_exit": 0,
+  "policies": {
+    "perf_event_paranoid": 2,
+    "kptr_restrict": 2,
+    "perf_event_mlock_kb": 516
+  },
+  "original_failures_preserved": "../processing-attempt1 and PROCESSING_FAILURES.json",
+  "no_browser": true,
+  "no_new_capture_or_build": true
+}

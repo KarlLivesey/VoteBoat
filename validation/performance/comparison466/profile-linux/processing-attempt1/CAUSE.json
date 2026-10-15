@@ -1,0 +1,6 @@
+{
+  "symbolication": "Default sandbox PermissionDenied creating localhost socket; no symbol response received. Followup uses approved localhost-only escalation.",
+  "perf_script": "Bundled perf loader cannot find libpfm.so.4 without existing extracted/usr/lib LD_LIBRARY_PATH; followup sets that existing tool-only loader path.",
+  "symbols_changed": false,
+  "capture_repeated": false
+}

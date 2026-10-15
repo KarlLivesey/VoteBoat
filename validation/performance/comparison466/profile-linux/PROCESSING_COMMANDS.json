@@ -1,0 +1,60 @@
+{
+  "original_capture": {
+    "handle": 31284,
+    "actual_exit": 0
+  },
+  "imports": {
+    "execution_kind": "synchronous_exec",
+    "tool_chunk": "143696",
+    "actual_exit": 0,
+    "per_case_commands": "perf-quiet/*.import.command.json"
+  },
+  "initial_symbol_query": {
+    "execution_kind": "synchronous_exec",
+    "tool_chunk": "7114b0",
+    "actual_exit": 1,
+    "raw_error": "processing-attempt1/symbolication/bulk.symbolize.stderr"
+  },
+  "initial_perf_text": {
+    "execution_kind": "synchronous_exec",
+    "tool_chunk": "f7e7a5",
+    "wrapper_actual_exit": 1,
+    "subprocess_actual_exit": 127,
+    "raw_error": "processing-attempt1/perf-quiet/bulk.perf-script.stderr"
+  },
+  "symbol_server": {
+    "handle": 74816,
+    "verified_PID": 2103896,
+    "actual_exit": 0,
+    "command": "symbolication/server.command.json"
+  },
+  "symbol_queries": {
+    "handle": 3736,
+    "actual_exit": 0,
+    "commands": "symbolication/*.symbolize.command.json"
+  },
+  "perf_text_followup": {
+    "execution_kind": "synchronous_exec",
+    "tool_chunk": "3fbe6f",
+    "actual_exit": 0,
+    "commands": "perf-quiet/*.perf-script.command.json"
+  },
+  "existing_subsets_client_queries": {
+    "handle": 80668,
+    "actual_exit": 0
+  },
+  "focused_ownership_query": {
+    "handle": 14754,
+    "actual_exit": 0
+  },
+  "same_function_predicate_precision_followup": {
+    "handle": 52553,
+    "actual_exit": 0
+  },
+  "finish_readout": {
+    "execution_kind": "synchronous_exec",
+    "tool_chunk": "e98748",
+    "actual_exit": 0
+  },
+  "scope": "No tool chunk is relabeled as a live session handle; all actual data-processing jobs ended before collection; localhost-only server stopped."
+}

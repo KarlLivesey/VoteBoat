@@ -1,0 +1,42 @@
+[
+  {
+    "original_path": "perf-quiet/singleton.perf-script.txt",
+    "original_bytes": 1920789,
+    "original_sha256": "f99a94850413a6395e97476b95c28c5ac79be8e5458f174a926e58b4386376ec",
+    "archived_path": "perf-quiet/singleton.perf-script.txt.gz",
+    "gzip_bytes": 146613,
+    "gzip_sha256": "cdb13bd94815ec02885bd862857da06de6050efce0dc7f76c135a0c136b11b2e"
+  },
+  {
+    "original_path": "symbolication/bulk-symbolicated/ADDRESS_SYMBOLS.json",
+    "original_bytes": 2030684,
+    "original_sha256": "7c96d7c59b0dcc045b1aadd2a149d267cb62d16d42f1149fc0fd461cf7d08ff0",
+    "archived_path": "symbolication/bulk-symbolicated/ADDRESS_SYMBOLS.json.gz",
+    "gzip_bytes": 83531,
+    "gzip_sha256": "1f0d7d2c2980d757c8faaa76145211a7d06735b081313e0038a3d89e85958b29"
+  },
+  {
+    "original_path": "symbolication/bulk-symbolicated/full-inline.folded",
+    "original_bytes": 18453947,
+    "original_sha256": "eb4ab0334f902bade4e45b602e4529e767d771a02e5f6b52e264672ba2ac051f",
+    "archived_path": "symbolication/bulk-symbolicated/full-inline.folded.gz",
+    "gzip_bytes": 246817,
+    "gzip_sha256": "7522a3390371d59105414963fc178f665a1fd6dc831b6404e529bc6335acfb17"
+  },
+  {
+    "original_path": "symbolication/singleton-symbolicated/ADDRESS_SYMBOLS.json",
+    "original_bytes": 3357529,
+    "original_sha256": "79c43ba9bbd04b481e45fa09d6b6c0b580815e21a16de86ee0ac7f437d32c234",
+    "archived_path": "symbolication/singleton-symbolicated/ADDRESS_SYMBOLS.json.gz",
+    "gzip_bytes": 117657,
+    "gzip_sha256": "297d98a6f5674bc22d5afcffa94763589eaf559351ec43ed6dc90197daff256a"
+  },
+  {
+    "original_path": "symbolication/singleton-symbolicated/full-inline.folded",
+    "original_bytes": 66045537,
+    "original_sha256": "f7ec8db3ca59c6d0786e01547bd24ee4f45b68c1d71098b604e68a84a1d4b056",
+    "archived_path": "symbolication/singleton-symbolicated/full-inline.folded.gz",
+    "gzip_bytes": 741465,
+    "gzip_sha256": "3c77a7e8d8a9666ea104d486a4af0d241d0051efdade7add87dbb7c4d8bede0b"
+  }
+]

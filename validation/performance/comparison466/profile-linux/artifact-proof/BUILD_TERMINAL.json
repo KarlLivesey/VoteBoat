@@ -1,0 +1,17 @@
+{
+  "original_handle": 99290,
+  "actual_exit": 0,
+  "stage": "DONE",
+  "status_path": "target/p9/matched466-linux/STATUS",
+  "status_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+  "four_fresh_false": true,
+  "fresh_root_build_script": true,
+  "artifact_proofs_sha256": {
+    "ARTIFACTS.json": "534c3b7adff0b224c0b3578fff46f0b30bf8c660bc9ad37015c061a0f65ff58f",
+    "SYMBOLS.json": "bdd6ed051bd35b7041d98e792a3c2042898c6489a694db5aa15b4be7b8e0b791",
+    "RELEASE_ORACLE.json": "5120a1f1baf06f57cc21d389d421c8b44d25dd50b93586bc7cf0d53218d9269b",
+    "SOURCE.json": "7d939d015f9703ff88ac56993cfa460b8d9c8b10e7c65e3da1628b77aa62f623"
+  },
+  "compiled_source_commit": "92454c26cfe35aa65034eb3c306e990d42d88a80",
+  "next": "Three actual small CLI controls only; paired timing not authorized."
+}

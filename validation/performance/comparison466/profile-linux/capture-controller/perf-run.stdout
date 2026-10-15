@@ -1,0 +1,7 @@
+{"baseline": {"artifacts": ["bench_minimal", "openraft", "voteboat", "voteboat-matched-framework"], "checks": "all frozen source, artifact, driver and applicable compiler guards pass", "mode": "asserted_release", "source_inputs": 1448}, "candidate": {"artifacts": ["bench_minimal", "openraft", "voteboat", "voteboat-matched-framework"], "checks": "all frozen source, artifact, driver and applicable compiler guards pass", "mode": "asserted_release", "source_inputs": 1448}}
+START bulk
+END bulk 0
+START singleton
+END singleton 0
+{"baseline": {"artifacts": ["bench_minimal", "openraft", "voteboat", "voteboat-matched-framework"], "checks": "all frozen source, artifact, driver and applicable compiler guards pass", "mode": "asserted_release", "source_inputs": 1448}, "candidate": {"artifacts": ["bench_minimal", "openraft", "voteboat", "voteboat-matched-framework"], "checks": "all frozen source, artifact, driver and applicable compiler guards pass", "mode": "asserted_release", "source_inputs": 1448}}
+SETTINGS {'perf_event_paranoid': 2, 'kptr_restrict': 2, 'perf_event_mlock_kb': 516}

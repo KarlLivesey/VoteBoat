@@ -1,0 +1,11 @@
+{
+  "args": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+    "script",
+    "-i",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison466/profile-linux/perf-quiet/singleton.data",
+    "-F",
+    "comm,pid,tid,time,event,ip,sym,dso"
+  ],
+  "LD_LIBRARY_PATH": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/lib"
+}

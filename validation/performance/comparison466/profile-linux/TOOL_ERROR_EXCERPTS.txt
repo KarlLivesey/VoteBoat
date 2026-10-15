@@ -1,0 +1,4 @@
+Preserved tool-result excerpts; these are not reconstructed workload outputs.
+Initial inline ownership query: SyntaxError: expected else after if expression (else0 token). No parsing or writes started.
+Initial inline readout assembler: SyntaxError: expected else after if expression (else0 token). No parsing or writes started.
+Initial server stop inspection: AssertionError: [] because sandbox PID namespace did not expose host server. No signal sent. Exact host argv verified before subsequent successful SIGINT.

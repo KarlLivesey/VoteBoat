@@ -1,0 +1,7 @@
+[
+  "python3",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison466/profile-linux/symbolication/symbolize-full-json.py",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison466/profile-linux/perf-quiet/bulk.json.gz",
+  "http://127.0.0.1:38486/34x2w4jp249dsndv1jc4fbg1crgn661f7sv5x7f/symbolicate/v5",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison466/profile-linux/symbolication/bulk-symbolicated"
+]

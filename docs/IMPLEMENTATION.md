@@ -34494,13 +34494,19 @@ outcomes and timer scopes match. ON bulk5,868,409 and singleton63,826/s retain
 observer overhead/tails without a cause claim. Upstream medians3,327,889 and
 20,105/s remain separate. These selected1M cells are not sustained acceptance.
 
-Fresh headless CPU31284 also ends0, with20M requested/19,988,480 bulk originals
+[Fresh headless CPU31284](../validation/performance/comparison466/profile-linux/README.md)
+also ends0, with20M requested/19,988,480 bulk originals
 and1,048,576 singleton. Policies remain2/2/516, no browser/tool install/recapture;
 bulk lost1chunk remains. Initial physical-self analysis identifies singleton
 EntryHistory::get19.634%; bulk append_for8.067%, EntryIter::next3.320% and
 iterator-to-Vec2.422%. This is whole-launch CPU sampling, not the throughput
 clock or causal allocator attribution. Removing an old slice-copy symbol moved
-work into other paths; a representation win is not established.
+work into other paths; a representation win is not established. Completion
+coalescing has161/6235 inclusive weights (157 under borrow_completion→persist),
+and resolved entry-backing Arc contexts134/6235 bulk and1061/23174 singleton;
+these overlapping contexts are not additive costs or operation counts. All141
+profile payloads independently verify, including current symbols/JSON/folded
+stacks and original processing failures. No old address responses were reused.
 
 [467's before-edit restoration schema](../validation/performance/slice467/SCHEMA.md)
 rejects466 without retuning.171 changed source/test/example/contract/schema paths
@@ -34520,4 +34526,5 @@ The first mode-drift attempt's controlled stop/SSH255/raw STATUS0 is explicitly
 unqualified; no performance artifact or claim follows.
 No Mac466 performance campaign is needed after these Linux losses.
 The full both-host sustained, durable/headroom/fairness/placement/P8 acceptance
-remains unchanged and open; no macro milestone closes.
+remains unchanged and open; no macro milestone closes.467 is published asff8f9031
+through original96685/enabled hook0, all1441 qualified source hashes unchanged.

@@ -1,0 +1,4 @@
+{
+  "scope": "Default sandbox PID namespace could not see escalated server; verification assertion failed before any signal. Current stop verifies in the same escalated host namespace.",
+  "signals_sent": 0
+}

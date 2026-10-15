@@ -1,0 +1,17 @@
+{
+  "pid": 2103896,
+  "signal": "SIGINT",
+  "verified_args": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply",
+    "load",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison466/profile-linux/perf-quiet/bulk.json.gz",
+    "--no-open",
+    "--address",
+    "127.0.0.1",
+    "--port",
+    "38486",
+    "--symbol-dir",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched466-linux/target-matched-release/release"
+  ],
+  "all_current_address_queries_completed": true
+}

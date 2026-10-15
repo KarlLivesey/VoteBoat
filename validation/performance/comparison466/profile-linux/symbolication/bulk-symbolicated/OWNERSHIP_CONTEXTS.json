@@ -1,0 +1,522 @@
+{
+  "denominator": 6235,
+  "contexts_inclusive_unions": {
+    "entry_history_any": {
+      "sample_weight": 999,
+      "percent": 16.022453889334404
+    },
+    "entry_history_get": {
+      "sample_weight": 58,
+      "percent": 0.9302325581395349
+    },
+    "entry_iterator_next": {
+      "sample_weight": 718,
+      "percent": 11.515637530072173
+    },
+    "iterator_entry_materialization": {
+      "sample_weight": 161,
+      "percent": 2.5821972734562952
+    },
+    "slice_entry_materialization": {
+      "sample_weight": 3,
+      "percent": 0.048115477145148355
+    },
+    "entry_batch_capture": {
+      "sample_weight": 90,
+      "percent": 1.4434643143544508
+    },
+    "entry_backing_arc": {
+      "sample_weight": 134,
+      "percent": 2.14915797914996
+    },
+    "history_descriptor_clone": {
+      "sample_weight": 0,
+      "percent": 0.0
+    },
+    "history_descriptor_growth": {
+      "sample_weight": 0,
+      "percent": 0.0
+    },
+    "history_prefix_discard": {
+      "sample_weight": 47,
+      "percent": 0.7538091419406576
+    },
+    "range_coalescing": {
+      "sample_weight": 163,
+      "percent": 2.6142742582197274
+    },
+    "owned_history_materialization": {
+      "sample_weight": 0,
+      "percent": 0.0
+    },
+    "pending_plan_copy": {
+      "sample_weight": 92,
+      "percent": 1.475541299117883
+    },
+    "append_for": {
+      "sample_weight": 609,
+      "percent": 9.767441860465116
+    },
+    "canonical_completion": {
+      "sample_weight": 166,
+      "percent": 2.6623897353648758
+    }
+  },
+  "history_get_physical_self_direct_project_callers": [
+    {
+      "frames": [
+        "<voteboat::raft::Raft>::receive_append",
+        "<voteboat::raft::Raft>::receive_inner",
+        "<voteboat::raft::Raft>::step",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+        "<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>> as core::future::future::Future>::poll"
+      ],
+      "sample_weight": 14,
+      "percent": 0.22453889334402566
+    },
+    {
+      "frames": [
+        "<voteboat::log::transition::view::LogMetadata>::from_log",
+        "<voteboat::raft::Raft>::rollback_replicas",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor<true>>::reserve",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+        "<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>> as core::future::future::Future>::poll"
+      ],
+      "sample_weight": 7,
+      "percent": 0.11226944667201283
+    },
+    {
+      "frames": [
+        "<voteboat::log::transition::view::LogMetadata>::from_log",
+        "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+        "<voteboat::raft::Raft>::finish_completion",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects"
+      ],
+      "sample_weight": 6,
+      "percent": 0.09623095429029671
+    },
+    {
+      "frames": [
+        "<voteboat::log::transition::view::LogView>::term_at",
+        "voteboat::log::transition::validate_append_metadata",
+        "<voteboat::raft::Raft>::persist_update",
+        "<voteboat::raft::Raft>::persist",
+        "<voteboat::raft::Raft>::receive_append"
+      ],
+      "sample_weight": 4,
+      "percent": 0.06415396952686447
+    },
+    {
+      "frames": [
+        "<voteboat::log::transition::view::LogView>::term_at",
+        "voteboat::log::transition::validate_append_metadata",
+        "<voteboat::log::owned::OwnedLogState>::apply_batch",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects"
+      ],
+      "sample_weight": 4,
+      "percent": 0.06415396952686447
+    },
+    {
+      "frames": [
+        "<voteboat::log::GroupLog>::last_index",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+        "<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>> as core::future::future::Future>::poll"
+      ],
+      "sample_weight": 3,
+      "percent": 0.048115477145148355
+    },
+    {
+      "frames": [
+        "<voteboat::log::transition::view::LogMetadata>::from_log",
+        "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+        "<voteboat::log::owned::OwnedLogState>::apply_batch",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects"
+      ],
+      "sample_weight": 3,
+      "percent": 0.048115477145148355
+    },
+    {
+      "frames": [
+        "<voteboat::log::transition::view::LogMetadata>::from_log",
+        "<voteboat::raft::Raft>::persist_update",
+        "<voteboat::raft::Raft>::persist",
+        "<voteboat::raft::Raft>::receive_append",
+        "<voteboat::raft::Raft>::receive_inner"
+      ],
+      "sample_weight": 2,
+      "percent": 0.03207698476343224
+    }
+  ],
+  "history_get_physical_leaf_source_bindings": [
+    {
+      "frames": [
+        "<voteboat::log::entry_history::EntryHistory>::get",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched466-linux/source/src/log/entry_history.rs",
+        54
+      ],
+      "sample_weight": 37,
+      "percent": 0.5934242181234964
+    },
+    {
+      "frames": [
+        "<[voteboat::log::entry_history::Chunk]>::partition_point::<<voteboat::log::entry_history::EntryHistory>::get::{closure#0}>",
+        "git:github.com/rust-lang/rust:library/core/src/slice/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+        4865
+      ],
+      "sample_weight": 35,
+      "percent": 0.5613472333600642
+    },
+    {
+      "frames": [
+        "core::hint::select_unpredictable::<usize>",
+        "git:github.com/rust-lang/rust:library/core/src/hint.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+        879
+      ],
+      "sample_weight": 13,
+      "percent": 0.20850040096230954
+    },
+    {
+      "frames": [
+        "<[voteboat::log::entry_history::Chunk]>::binary_search_by::<<[voteboat::log::entry_history::Chunk]>::partition_point<<voteboat::log::entry_history::EntryHistory>::get::{closure#0}>::{closure#0}>",
+        "git:github.com/rust-lang/rust:library/core/src/slice/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+        3002
+      ],
+      "sample_weight": 13,
+      "percent": 0.20850040096230954
+    },
+    {
+      "frames": [
+        "<voteboat::log::entry_history::EntryHistory>::get",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched466-linux/source/src/log/entry_history.rs",
+        55
+      ],
+      "sample_weight": 13,
+      "percent": 0.20850040096230954
+    },
+    {
+      "frames": [
+        "<voteboat::log::entry_batch::EntryBatch>::as_slice",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched466-linux/source/src/log/entry_batch.rs",
+        28
+      ],
+      "sample_weight": 13,
+      "percent": 0.20850040096230954
+    },
+    {
+      "frames": [
+        "<voteboat::log::entry_batch::EntryBatch as core::ops::deref::Deref>::deref",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched466-linux/source/src/log/entry_batch.rs",
+        113
+      ],
+      "sample_weight": 13,
+      "percent": 0.20850040096230954
+    },
+    {
+      "frames": [
+        "<alloc::vec::Vec<voteboat::log::LogEntry>>::as_slice",
+        "git:github.com/rust-lang/rust:library/alloc/src/vec/mod.rs:48a229ceaefd4985c50990b14116b6d856af0985",
+        1873
+      ],
+      "sample_weight": 10,
+      "percent": 0.16038492381716118
+    }
+  ],
+  "iterator_materialization_callchains": [
+    {
+      "frames": [
+        "<alloc::vec::Vec<voteboat::log::LogEntry> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<voteboat::log::LogEntry, core::iter::adapters::cloned::Cloned<voteboat::log::entry_history::EntryIter>>>::from_iter",
+        "<voteboat::raft::Raft>::borrow_completion",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+        "<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>> as core::future::future::Future>::poll"
+      ],
+      "sample_weight": 157,
+      "percent": 2.5180433039294305
+    },
+    {
+      "frames": [
+        "<voteboat::log::EntryPayload as core::clone::Clone>::clone",
+        "<alloc::vec::Vec<voteboat::log::LogEntry> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<voteboat::log::LogEntry, core::iter::adapters::cloned::Cloned<voteboat::log::entry_history::EntryIter>>>::from_iter",
+        "<voteboat::raft::Raft>::borrow_completion",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step"
+      ],
+      "sample_weight": 3,
+      "percent": 0.048115477145148355
+    },
+    {
+      "frames": [
+        "<voteboat::log::entry_history::EntryIter as core::iter::traits::iterator::Iterator>::next",
+        "<alloc::vec::Vec<voteboat::log::LogEntry> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<voteboat::log::LogEntry, core::iter::adapters::cloned::Cloned<voteboat::log::entry_history::EntryIter>>>::from_iter",
+        "<voteboat::raft::Raft>::borrow_completion",
+        "voteboat::raft::completion::persist_effect_borrowed::<voteboat_matched_framework::store::MemoryStore>",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step"
+      ],
+      "sample_weight": 1,
+      "percent": 0.01603849238171612
+    }
+  ],
+  "top15_physical_self": [
+    {
+      "function": "<voteboat_matched_framework::workload::Client>::write::{closure#0}",
+      "sample_weight": 819,
+      "percent_of_selected_sample_weight": 13.135525260625501
+    },
+    {
+      "function": "<voteboat::raft::Raft>::append_for",
+      "sample_weight": 503,
+      "percent_of_selected_sample_weight": 8.067361668003208
+    },
+    {
+      "function": "<tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>::send",
+      "sample_weight": 452,
+      "percent_of_selected_sample_weight": 7.249398556535685
+    },
+    {
+      "function": "fun_bc6d0",
+      "sample_weight": 277,
+      "percent_of_selected_sample_weight": 4.442662389735365
+    },
+    {
+      "function": "tokio::runtime::scheduler::multi_thread::worker::run",
+      "sample_weight": 246,
+      "percent_of_selected_sample_weight": 3.9454691259021653
+    },
+    {
+      "function": "fun_be060",
+      "sample_weight": 221,
+      "percent_of_selected_sample_weight": 3.544506816359262
+    },
+    {
+      "function": "<voteboat::log::entry_history::EntryIter as core::iter::traits::iterator::Iterator>::next",
+      "sample_weight": 207,
+      "percent_of_selected_sample_weight": 3.3199679230152364
+    },
+    {
+      "function": "<alloc::vec::Vec<voteboat::log::LogEntry> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<voteboat::log::LogEntry, core::iter::adapters::cloned::Cloned<voteboat::log::entry_history::EntryIter>>>::from_iter",
+      "sample_weight": 151,
+      "percent_of_selected_sample_weight": 2.4218123496391337
+    },
+    {
+      "function": "clock_gettime",
+      "sample_weight": 148,
+      "percent_of_selected_sample_weight": 2.3736968724939858
+    },
+    {
+      "function": "<tokio::runtime::scheduler::multi_thread::worker::Context>::park_internal",
+      "sample_weight": 140,
+      "percent_of_selected_sample_weight": 2.245388933440257
+    },
+    {
+      "function": "fun_1b7ac0",
+      "sample_weight": 132,
+      "percent_of_selected_sample_weight": 2.117080994386528
+    },
+    {
+      "function": "<std::sys::sync::mutex::futex::Mutex>::lock_contended",
+      "sample_weight": 123,
+      "percent_of_selected_sample_weight": 1.9727345629510826
+    },
+    {
+      "function": "tokio::runtime::task::waker::wake_by_ref",
+      "sample_weight": 118,
+      "percent_of_selected_sample_weight": 1.892542101042502
+    },
+    {
+      "function": "<voteboat::log::owned::OwnedLogState>::matches_checkpoint_state",
+      "sample_weight": 109,
+      "percent_of_selected_sample_weight": 1.7481956696070569
+    },
+    {
+      "function": "fun_bc7d0",
+      "sample_weight": 106,
+      "percent_of_selected_sample_weight": 1.7000801924619087
+    }
+  ],
+  "threads": [
+    {
+      "name": "voteboat-matche",
+      "tid": "32.2",
+      "samples": 143,
+      "sample_weight": 143,
+      "null_stack_sample_weight": 0,
+      "unresolved_leaf_sample_weight": 5,
+      "any_unresolved_stack_sample_weight": 5
+    },
+    {
+      "name": "matched-server",
+      "tid": "33",
+      "samples": 994,
+      "sample_weight": 994,
+      "null_stack_sample_weight": 0,
+      "unresolved_leaf_sample_weight": 16,
+      "any_unresolved_stack_sample_weight": 16
+    },
+    {
+      "name": "matched-server",
+      "tid": "34",
+      "samples": 16,
+      "sample_weight": 16,
+      "null_stack_sample_weight": 0,
+      "unresolved_leaf_sample_weight": 3,
+      "any_unresolved_stack_sample_weight": 3
+    },
+    {
+      "name": "matched-server",
+      "tid": "35",
+      "samples": 18,
+      "sample_weight": 18,
+      "null_stack_sample_weight": 0,
+      "unresolved_leaf_sample_weight": 3,
+      "any_unresolved_stack_sample_weight": 3
+    },
+    {
+      "name": "matched-server",
+      "tid": "36",
+      "samples": 977,
+      "sample_weight": 977,
+      "null_stack_sample_weight": 0,
+      "unresolved_leaf_sample_weight": 16,
+      "any_unresolved_stack_sample_weight": 16
+    },
+    {
+      "name": "matched-server",
+      "tid": "37",
+      "samples": 6,
+      "sample_weight": 6,
+      "null_stack_sample_weight": 0,
+      "unresolved_leaf_sample_weight": 2,
+      "any_unresolved_stack_sample_weight": 2
+    },
+    {
+      "name": "matched-server",
+      "tid": "38",
+      "samples": 10,
+      "sample_weight": 10,
+      "null_stack_sample_weight": 0,
+      "unresolved_leaf_sample_weight": 1,
+      "any_unresolved_stack_sample_weight": 1
+    },
+    {
+      "name": "matched-server",
+      "tid": "39",
+      "samples": 16,
+      "sample_weight": 16,
+      "null_stack_sample_weight": 0,
+      "unresolved_leaf_sample_weight": 2,
+      "any_unresolved_stack_sample_weight": 2
+    },
+    {
+      "name": "matched-server",
+      "tid": "40",
+      "samples": 1086,
+      "sample_weight": 1086,
+      "null_stack_sample_weight": 0,
+      "unresolved_leaf_sample_weight": 12,
+      "any_unresolved_stack_sample_weight": 12
+    },
+    {
+      "name": "matched-server",
+      "tid": "41",
+      "samples": 11,
+      "sample_weight": 11,
+      "null_stack_sample_weight": 0,
+      "unresolved_leaf_sample_weight": 3,
+      "any_unresolved_stack_sample_weight": 3
+    },
+    {
+      "name": "matched-server",
+      "tid": "42",
+      "samples": 11,
+      "sample_weight": 11,
+      "null_stack_sample_weight": 0,
+      "unresolved_leaf_sample_weight": 3,
+      "any_unresolved_stack_sample_weight": 3
+    },
+    {
+      "name": "matched-server",
+      "tid": "43",
+      "samples": 11,
+      "sample_weight": 11,
+      "null_stack_sample_weight": 0,
+      "unresolved_leaf_sample_weight": 2,
+      "any_unresolved_stack_sample_weight": 2
+    },
+    {
+      "name": "matched-server",
+      "tid": "44",
+      "samples": 10,
+      "sample_weight": 10,
+      "null_stack_sample_weight": 0,
+      "unresolved_leaf_sample_weight": 2,
+      "any_unresolved_stack_sample_weight": 2
+    },
+    {
+      "name": "matched-server",
+      "tid": "45",
+      "samples": 11,
+      "sample_weight": 11,
+      "null_stack_sample_weight": 0,
+      "unresolved_leaf_sample_weight": 2,
+      "any_unresolved_stack_sample_weight": 2
+    },
+    {
+      "name": "matched-server",
+      "tid": "46",
+      "samples": 982,
+      "sample_weight": 982,
+      "null_stack_sample_weight": 0,
+      "unresolved_leaf_sample_weight": 10,
+      "any_unresolved_stack_sample_weight": 10
+    },
+    {
+      "name": "matched-server",
+      "tid": "47",
+      "samples": 10,
+      "sample_weight": 10,
+      "null_stack_sample_weight": 0,
+      "unresolved_leaf_sample_weight": 2,
+      "any_unresolved_stack_sample_weight": 2
+    },
+    {
+      "name": "matched-server",
+      "tid": "48",
+      "samples": 17,
+      "sample_weight": 17,
+      "null_stack_sample_weight": 0,
+      "unresolved_leaf_sample_weight": 5,
+      "any_unresolved_stack_sample_weight": 5
+    },
+    {
+      "name": "matched-client",
+      "tid": "49",
+      "samples": 1906,
+      "sample_weight": 1906,
+      "null_stack_sample_weight": 0,
+      "unresolved_leaf_sample_weight": 24,
+      "any_unresolved_stack_sample_weight": 24
+    }
+  ],
+  "null_unresolved": {
+    "samples": 6235,
+    "sample_weight": 6235,
+    "null_stack_sample_weight": 0,
+    "unresolved_leaf_sample_weight": 113,
+    "any_unresolved_stack_sample_weight": 113
+  },
+  "physical_depth_lte2_sample_weight": 38,
+  "synthetic_FDE_leaf_sample_weight": 827,
+  "limits": [
+    "Context rows are inclusive unions and overlap; do not add them as time or cycles.",
+    "Resolved Arc/descriptor/coalescing frames are not an exhaustive partition of optimized work; zero samples do not establish zero allocations/refcounts.",
+    "Whole-launch sample weights are not throughput-timer CPU costs or paired speedup evidence."
+  ]
+}

@@ -1,0 +1,7 @@
+[ perf record: Woken up 382 times to write data ]
+Warning:
+Processed 12066 events and lost 1 chunks!
+
+Check IO/CPU overload!
+
+[ perf record: Captured and wrote 99.365 MB /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison466/profile-linux/perf-quiet/bulk.data (6241 samples) ]

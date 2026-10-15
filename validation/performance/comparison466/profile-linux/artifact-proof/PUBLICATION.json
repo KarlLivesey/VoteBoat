@@ -1,0 +1,27 @@
+{
+  "commit": "92454c26cfe35aa65034eb3c306e990d42d88a80",
+  "exit": 0,
+  "original_handle": 33148,
+  "proof": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice466/PUBLICATION.json",
+    "sha256": "31641b09b94f0183ab495a4306b4abbb09e74c75ecc4f651b7f502713de66e31"
+  },
+  "actual_root_receipt": {
+    "commit": "92454c26cfe35aa65034eb3c306e990d42d88a80",
+    "origin_main": "92454c26cfe35aa65034eb3c306e990d42d88a80",
+    "branch": "main",
+    "push_original_handle": 33148,
+    "actual_push_exit": 0,
+    "enabled_hook_during_push": true,
+    "qualified_committed_inputs": 1446,
+    "all_qualified_blobs_equal": true,
+    "qualified_local_physical_modes_equal": true,
+    "working_tree": "",
+    "not_claimed": [
+      "performance benefit",
+      "fresh artifacts",
+      "Mac466 qualification",
+      "full P9 complete"
+    ]
+  }
+}
