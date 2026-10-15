@@ -1,0 +1,25 @@
+{
+  "scripts_syntax": "AST/bash-n passed, no execution",
+  "source_exported": false,
+  "build_started": false,
+  "publication_unset": true,
+  "sentinel_refusal_actual_exit": 1,
+  "tool_reference": "native455; native458 receipt identical SHA lines",
+  "files": {
+    "run.sh": "5bfc6430458d001cb68d6cf22a6795a9cca140b770407504f30dda399c464eb8",
+    "run.sh.adaptation.diff": "68ad42a41e18572b84398c456a77c56c8ad8486e36c52e194b9139c93dc202e0",
+    "guard.py": "6c155b8fb4fbb21e7211f3edc54fcad65e93ba089e03a0f17bdd1313ecc497fe",
+    "guard.py.adaptation.diff": "34313480927530cc8c86e86b9bfda627ab44ea05db98b2ca1c15d9a42b60debe",
+    "export-source.sh": "4278b4bc15ae169f0a1698f5dea49f005be35a18932551b9cddf6f655cb6e788",
+    "export-source.sh.adaptation.diff": "580b2c261a367f37723f4155acb9a5b071ad3680ef4b17fe67abd53945cbc1de",
+    "REQUIRED_COMMIT.txt": "40b89902447b27d3cbe5576f45105f082c8af7d789d6a61651b2afd30de4ba50",
+    "FUNCTIONAL_QUALIFICATION.template.json": "bdbb3468769f1c90b09658c83acc5d7f7703f7ca2c65dc7fb986f15cc18128f1",
+    "PUBLICATION.template.json": "5a8772b3306e92c83822c87612e684c384999cb6f221f002dda8bd652a22fcc2",
+    "PREPARATION_ONLY.md": "8c832a6a5b6bd658b000d5185488c17459bce8938fefd4870ce861c3fb73bc13",
+    "setup-after-build.sh": "a96a97e02c4e429b3f235467708eef1e5a304b78b621999d976fd8ee4d8fbc47",
+    "logs/unpublished-refusal.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "logs/unpublished-refusal.stderr": "f5d3206f32e7071ad127acd3f8dc19783e56f8760ac3d554bcfd7a772e027656",
+    "logs/unpublished-refusal.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "controls/run.py": "89ed9624603506739a67f33db7995cb0a978d1e88c6ea9caa1b1435c38a464aa"
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "actual_exit": 0,
+  "source_commit": "dfc195cd39196fc6f16e69ea74de34dabd359ef2",
+  "all_setup_end": true,
+  "measurement_started": false,
+  "source_inputs": 1475,
+  "qualified_inputs": 1469,
+  "original_handles": {
+    "export": 70872,
+    "build": 81974,
+    "release_controls": 10640
+  },
+  "controls": [
+    {
+      "protocol": "tcp",
+      "offers": "512",
+      "window": "4096",
+      "max_inflight": "107",
+      "admitted": "512",
+      "applied": "512",
+      "refused": {
+        "window_refused": "0",
+        "no_leader": "0",
+        "admission_refused": "0",
+        "not_proposed": "0"
+      },
+      "recovered": "576",
+      "retries": "0",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "readbacks": 6
+    },
+    {
+      "protocol": "quic",
+      "offers": "512",
+      "window": "4096",
+      "max_inflight": "118",
+      "admitted": "512",
+      "applied": "512",
+      "refused": {
+        "window_refused": "0",
+        "no_leader": "0",
+        "admission_refused": "0",
+        "not_proposed": "0"
+      },
+      "recovered": "576",
+      "retries": "0",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "readbacks": 6
+    }
+  ],
+  "proofs": {
+    "SOURCE.json": "c82e08f43e97d1099ccab087a7af81012f394af9fadab882d69576fa8415d90b",
+    "ARTIFACTS.json": "91662637acf624a4a9746167e071e2dcfb1d08c74b2a60f6da24e3df7641fbbc",
+    "SYMBOLS.json": "da4d55340bed97fa150cc0c056956d9c0e070a8563054a18eee1aa9dc6993fac",
+    "PROFILE_PROOF.json": "d71cbe2bfe28d5d922f50e8b19a08b340e1caa05a09ab07276add5d8206b457e",
+    "PUBLICATION.json": "7a0d12e9fc752b554d7b478198f80639bc07a6235804cdd43fd5a3390a2b7c0f",
+    "FUNCTIONAL_QUALIFICATION.json": "39ae6dfcf4acf8542d324862c97b55fca29dc22e0782edf555dfcb6166cde98f",
+    "BUILD_TERMINAL.json": "2f5fa7f8e39f37bfc148c3a4a638b13d84953db63b9afa7a5df1fb78043757c6",
+    "controls/BEFORE.json": "98345f07a867cff72f3b1f915b981ca1d539c7c41d6a9143eaa43c0d78bdd800",
+    "controls/AFTER.json": "98345f07a867cff72f3b1f915b981ca1d539c7c41d6a9143eaa43c0d78bdd800",
+    "controls/RUN.json": "4a7bc5c6ccfbb282450fab60cd5e8e46b77fbcba8e46227d260093b84d7a3182",
+    "controls/RESULTS.json": "951c1900bdc1c8abde912caf46f9d4c10f0cf210974a04b878b1639d52553572",
+    "controls/TERMINAL.json": "36f95053014fda474e6c02bed6c93034135239d7ba0c7134c72e0da6296bd019",
+    "control-tools/SOURCE.json": "d5b87b58d536f8a504a4d3f52da7b5169e8a84c8df90a6def300a3a1cb55dc75"
+  },
+  "end": "2026-10-15T08:19:49.925476+00:00"
+}

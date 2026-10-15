@@ -1,0 +1,36 @@
+{
+  "scope": "Fresh release functional controls only; offered window4096 is selected backlog ceiling, not achieved capacity/batch width.",
+  "start": "2026-10-15T08:19:24.840182+00:00",
+  "commands": [
+    [
+      "PROCESS",
+      "tcp",
+      512,
+      4096,
+      1,
+      "--offered",
+      128,
+      "--maintenance",
+      2,
+      "--ready-items",
+      16,
+      "--offered-capacity",
+      4096
+    ],
+    [
+      "PROCESS",
+      "quic",
+      512,
+      4096,
+      1,
+      "--offered",
+      128,
+      "--maintenance",
+      2,
+      "--ready-items",
+      16,
+      "--offered-capacity",
+      4096
+    ]
+  ]
+}

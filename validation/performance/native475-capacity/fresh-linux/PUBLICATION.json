@@ -1,0 +1,12 @@
+{
+  "commit": "dfc195cd39196fc6f16e69ea74de34dabd359ef2",
+  "exit": 0,
+  "proof": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/publication/RECEIPT.json",
+    "sha256": "0166269bb3c3ea135028abf03286225e2927453028d353aa0e0fab2fd89e5a55"
+  },
+  "hook": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/.githooks/pre-push",
+    "sha256": "e3e9d01c12837936819f7c6f5b4b8840af19e9cded729381599df0f0fc17ee92"
+  }
+}

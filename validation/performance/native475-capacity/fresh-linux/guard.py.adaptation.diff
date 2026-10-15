@@ -1,0 +1,58 @@
+--- native472/guard.py
++++ native475/guard.py
+@@ -1,35 +1,38 @@
+ import json,hashlib,shutil,sys,subprocess,re
+ from pathlib import Path
+ h=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
+-ESSENTIALS={'src/log/command_bytes.rs', 'tests/startup/append_window.rs', 'src/raft/append_window.rs', 'src/format_crc.rs', 'src/log/command_bytes/tests.rs', 'examples/benchmark/observe_barriers.rs', 'src/runtime/ready_batch/tests/append_window.rs', 'src/runtime/effects/append_window.rs', 'src/format_crc/tests.rs', 'src/native/startup/append_window.rs', 'examples/benchmark/append_window.rs', 'tests/provider_conformance/append_window.rs', 'tests/worker/append_window.rs', 'src/raft/connections/tests.rs', 'src/runtime/connections/tests.rs', 'rust-toolchain.toml', 'src/runtime/replica/pump.rs', 'src/runtime/ready_batch/tests/advance_budget.rs', 'tests/support/replica_driver/append_pump.rs', 'src/raft/append_window/tests.rs', 'src/runtime/append_window.rs'}
++ESSENTIALS={'Cargo.toml','Cargo.lock','build.rs','rust-toolchain.toml','src/log/command_bytes.rs','src/log/command_bytes/tests.rs','src/format_crc.rs','src/format_crc/tests.rs','examples/native_benchmark.rs','examples/benchmark/offered_capacity.rs','examples/benchmark/offered_capacity/tests.rs','validation/check-offered.mjs','validation/check-native-benchmark.mjs'}
+ def qualification(job):
+  commit=(job/'REQUIRED_COMMIT.txt').read_text().strip()
+- assert re.fullmatch('[0-9a-f]{40}',commit), '472 unpublished: source export/build/setup refused'
++ assert re.fullmatch('[0-9a-f]{40}',commit), '475 unpublished: source export/build/setup refused'
+  publication=json.loads((job/'PUBLICATION.json').read_text());assert publication['commit']==commit and publication['exit']==0
+  proof=publication['proof'];assert h(proof['path'])==proof['sha256']
+  published=json.loads(Path(proof['path']).read_text())
+  assert published['commit']==commit and published['exit']==0 and published['remote_exit']==0 and published['remote_main']==commit
+  hook=publication['hook'];assert subprocess.check_output(['git','config','--local','core.hooksPath'],text=True).strip()=='.githooks';assert h(hook['path'])==hook['sha256']
+  q=json.loads((job/'FUNCTIONAL_QUALIFICATION.json').read_text());assert q['source_commit']==commit
++ assert q['reuse_base_commit']=='4f88a3f223b76936be63f73b43662e769ccecd15'
++ assert not subprocess.check_output(['git','diff','--name-only',q['reuse_base_commit'],commit,'--','src','Cargo.toml','Cargo.lock','build.rs','clippy.toml','.cargo'],text=True).strip(), '475 production/build inputs changed beyond fixture scope'
+  inv=q['source_inventory'];assert h(inv['path'])==inv['sha256'];normalized=json.loads(Path(inv['path']).read_text());qualified=normalized['files']
+  assert (ESSENTIALS-{'rust-toolchain.toml'})<=set(qualified)
+- raw=normalized['derived_from'];assert h(raw['path'])==raw['sha256'];assert json.loads(Path(raw['path']).read_text())==qualified
+  evidence={}
+  for name,p in q['proofs'].items():
+   assert h(p['path'])==p['sha256'],name;evidence[name]=json.loads(Path(p['path']).read_text())
+- for name in ['focused','validation','selected','core_matched_metadata','strict']:
+-  assert evidence[name]['exit']==0,name
+-  if 'commands' in evidence[name]:assert all(c['exit']==0 for c in evidence[name]['commands']),name
+- for name in ['focused','validation','core_matched_metadata','strict']:assert evidence[name]['source_unchanged'],name
+- assert evidence['selected']['same_selected_inputs']
+- for name in ['attempt1','attempt2','baseline24','baseline27','baseline28']:assert evidence[name]['exit']==101,name
++ for name in ['example','network','strict']:
++  assert evidence[name]['exit']==0 and evidence[name]['source_exact'] is True,name
++ assert evidence['network']['cases']==2 and evidence['network']['negative']==11
++ for name in ['example_all','example_build']:assert evidence[name]['exit']==0,name
++ assert q['scope']=='475 fixture-only capacity profile; unchanged production reuse explicitly scoped'
++ assert len(q['final_source_guards'])>=1
+  for pair in q['final_source_guards']:
+   for p in pair.values():assert h(p['path'])==p['sha256']
+-  assert json.loads(Path(pair['before']['path']).read_text())==json.loads(Path(pair['after']['path']).read_text())
++  before=json.loads(Path(pair['before']['path']).read_text())['files']
++  after=json.loads(Path(pair['after']['path']).read_text())['files']
++  assert before==after==qualified
+  return commit,qualified
+ job=Path(sys.argv[1]).resolve();required_commit,qualified=qualification(job)
+ if sys.argv[2]=='qualification':
+- print(json.dumps({'commit':required_commit,'qualified_inputs':len(qualified),'scope':'Changed472 driver pump qualified by actual focused/broad/core/matched/strict scopes; three baseline-reproduced failures remain failures.'}));sys.exit(0)
++ print(json.dumps({'commit':required_commit,'qualified_inputs':len(qualified),'scope':'475 fixture-only profile: actual final example/network/strict receipts; no native or framework performance claim.'}));sys.exit(0)
+ source=(job/'source').resolve();m=json.loads((job/'SOURCE.json').read_text());expected=m['sha256'];assert m['commit']==required_commit
+ actual={p.relative_to(source).as_posix() for p in source.rglob('*') if p.is_file()};assert actual==set(expected),(actual-set(expected),set(expected)-actual)
+ assert ESSENTIALS<=set(expected)
+@@ -80,4 +83,4 @@
+ root_line=next(line for line in lines if '--crate-name voteboat ' in line)
+ assert '--cfg voteboat_checkpoint_debug_oracle' not in root_line
+ assert "--check-cfg 'cfg(voteboat_checkpoint_debug_oracle)'" in root_line
+-(job/'PROFILE_PROOF.json').write_text(json.dumps({'source_commit':m['commit'],'profile':'opt3/debug0/assert+overflow/nativeDEFAULTLTO+cgu','actual_rustc_lines':lines,'root_buildscript_record':root_scripts[0],'root_buildscript_compilation':script_artifacts[0],'actual_PROFILE_release_invocation':script_invocations[0],'build_rs_sha256':expected['build.rs'],'compiler_tools_sha256_file':h(job/'logs/tool-binaries.sha256'),'native458_tool_preflight_sha256':h(job/'logs/baseline-tool-preflight.log'),'scope':'Actual CargoJSON/vv source/flags/artifact guards, not functional reruns or benchmark results.'},indent=2)+'\n')
++(job/'PROFILE_PROOF.json').write_text(json.dumps({'source_commit':m['commit'],'profile':'opt3/debug0/assert+overflow/nativeDEFAULTLTO+cgu','actual_rustc_lines':lines,'root_buildscript_record':root_scripts[0],'root_buildscript_compilation':script_artifacts[0],'actual_PROFILE_release_invocation':script_invocations[0],'build_rs_sha256':expected['build.rs'],'compiler_tools_sha256_file':h(job/'logs/tool-binaries.sha256'),'native455_tool_preflight_sha256':h(job/'logs/baseline-tool-preflight.log'),'scope':'Actual CargoJSON/vv source/flags/artifact guards, not functional reruns or benchmark results.'},indent=2)+'\n')

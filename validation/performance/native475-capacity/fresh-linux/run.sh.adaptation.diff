@@ -1,0 +1,30 @@
+--- native472/run.sh
++++ native475/run.sh
+@@ -1,7 +1,16 @@
+ #!/usr/bin/env bash
+ set -euo pipefail
+-job=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native472-linux
+-trap 'rc=$?; printf "%s\n" "$rc" > "$job/STATUS"' EXIT
++job=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native475-linux
++finish(){
++ rc=$?
++ printf '%s\n' "$rc" > "$job/STATUS"
++ python3 - "$job" "$rc" <<'RECEIPT'
++from pathlib import Path
++import json,sys,datetime
++job=Path(sys.argv[1]);(job/'BUILD_TERMINAL.json').write_text(json.dumps({'actual_exit':int(sys.argv[2]),'stage':(job/'STAGE').read_text().strip() if (job/'STAGE').exists() else 'preflight','end':datetime.datetime.now(datetime.timezone.utc).isoformat()},indent=2)+'\n')
++RECEIPT
++}
++trap finish EXIT
+ stage(){ printf '%s\n' "$1" > "$job/STAGE"; }
+ printf '%s\n' "$$" > "$job/PID"
+ python3 "$job/guard.py" "$job" qualification > "$job/logs/qualification-preflight.log"
+@@ -16,7 +25,7 @@
+ rustc=$(rustup which --toolchain stable rustc)
+ export RUSTC="$rustc"
+ export PROTOC=/home/karllivesey/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/protobuf-build-0.14.1/bin/protoc-linux-x86_64
+-sha256sum -c /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native458-linux/logs/tool-binaries.sha256 > "$job/logs/baseline-tool-preflight.log"
++sha256sum -c /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/logs/tool-binaries.sha256 > "$job/logs/baseline-tool-preflight.log"
+ test "$("$PROTOC" --version)" = 'libprotoc 3.9.0'
+ export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
+ export CARGO_PROFILE_RELEASE_OPT_LEVEL=3

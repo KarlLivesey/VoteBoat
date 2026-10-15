@@ -35056,3 +35056,26 @@ query are retained; no sourcecopy/build/timing has started. Fresh artifact/input
 compiler/default-native-profile guards precede common-profile Btrfs/APFS sweeps.
 User's ext4/XFS target remains pending; no drive operation is inferred/authorized.
 All full P9 macro and three-filesystem native acceptance requirements stay open.
+
+
+475 is published at`dfc195cd39196fc6f16e69ea74de34dabd359ef2` through original88613,
+full enabled hook0 and exact remote main. The subsequent plan correction records
+473's complete restoration and470/472's rejection without erasing their history.
+[Fresh Linux native475 evidence](../validation/performance/native475-capacity/fresh-linux/README.md)
+now verifies111 payloads/seven lossless originals: source export70872, freshbuild81974
+and releasecontrols10640 all actually terminate0. All1475 source file hashes/modes
+include the1469 final qualified fixture inputs; native root/example/buildscript
+fresh:false, opt3/debug0/assertions/overflow/defaultLTO+codegen and original/copy
+hashes pass. TCP/QUIC each apply512/512, recover576, verify retries/joins and six
+Create/Recover readbacks with zero refusals. Observed inflight107/118 is not4096
+achieved width; these are readiness controls, not a measured improvement.
+
+The54-case Linux Btrfs sweep is prepared and independently reviewed, unstarted
+at this receipt. Three balanced window rotations at offered32/128/512/s use the
+same selected4096 profile,8192offers/64warm/ready16/active2smaintenance/noPause.
+Scheduled horizons total100.8minutes plus actual warmup/drain/recovery/cleanup;
+retain the existing120s drain guard, every failure and original handle. All setup
+must finish before a host's quiet timing window. Mac original8849 continues scoped
+qualification and fresh native setup; its1474 source files match the common Linux
+projection, omitting only the supplementary noncompiled sweep schema. Real ext4/XFS
+scratch remains pending the user; no partitioning/formatting is authorized.

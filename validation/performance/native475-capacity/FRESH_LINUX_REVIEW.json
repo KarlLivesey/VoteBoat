@@ -1,0 +1,8 @@
+{
+  "payloads": 111,
+  "gzip": 7,
+  "manifest_sha256": "84d1b6e59bcedae23c6b1cecd9073294b4ceb1587392024d0a25e67f14502832",
+  "exact_payload_hashes_lossless_originals": "PASS",
+  "source_artifact_proof": "ROOT_READY_REVIEW.json",
+  "scope": "Fresh native release qualification only; no capacity/gain claim"
+}

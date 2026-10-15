@@ -1,0 +1,68 @@
+{
+  "actual_exit": 0,
+  "source_exact": true,
+  "commands": [
+    {
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native475-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native475-linux/controls/wal/tcp",
+        "tcp",
+        "512",
+        "4096",
+        "1",
+        "--offered",
+        "128",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16",
+        "--offered-capacity",
+        "4096"
+      ],
+      "exit": 0,
+      "elapsed_s": 6.233408575993963
+    },
+    {
+      "command": [
+        "node",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native475-linux/control-tools/check-native-benchmark.mjs",
+        "--storage",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native475-linux/controls/wal/tcp"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.024515375000191852
+    },
+    {
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native475-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native475-linux/controls/wal/quic",
+        "quic",
+        "512",
+        "4096",
+        "1",
+        "--offered",
+        "128",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16",
+        "--offered-capacity",
+        "4096"
+      ],
+      "exit": 0,
+      "elapsed_s": 6.174760169000365
+    },
+    {
+      "command": [
+        "node",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native475-linux/control-tools/check-native-benchmark.mjs",
+        "--storage",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native475-linux/controls/wal/quic"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.022506870998768136
+    }
+  ],
+  "cases": 2,
+  "end": "2026-10-15T08:19:37.339081+00:00"
+}

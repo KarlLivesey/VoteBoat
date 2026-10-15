@@ -1,0 +1,1 @@
+/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo build --locked --offline --release --all-features --manifest-path /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native475-linux/source/Cargo.toml --example native_benchmark --message-format=json -vv 

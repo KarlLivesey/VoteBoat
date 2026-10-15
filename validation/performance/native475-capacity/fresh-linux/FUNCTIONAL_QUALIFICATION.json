@@ -1,0 +1,44 @@
+{
+  "source_commit": "dfc195cd39196fc6f16e69ea74de34dabd359ef2",
+  "source_inventory": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/root2/BEFORE.json",
+    "sha256": "ecfdb74de10d9967f8ab7d6b9a8b1dcf104e88716e322f5c7f204e09a7fa8644"
+  },
+  "proofs": {
+    "example": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/root2/TERMINAL.json",
+      "sha256": "868f1bdd0f29232c57cb6b8ade1d9f0342362c14cb1a6c0491ecf775f9391b4c"
+    },
+    "example_all": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/root2/example-all.exit.json",
+      "sha256": "d7c2cb6f5cbf49b0ff0efe4d7b0222f966b25ba43ddd189eee7c10c6e88a2384"
+    },
+    "example_build": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/root2/example-build.exit.json",
+      "sha256": "fb855cfadd1ecc43e3fd7613c66e7c18168b5dc06d46931288ff2700b52c8a78"
+    },
+    "network": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/network2/TERMINAL.json",
+      "sha256": "2b6fff30afef778fa44b1fc0deaf9e70dc7a89f6405e6a5bb827aaee89ea39af"
+    },
+    "strict": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/strict2/TERMINAL.json",
+      "sha256": "53402d73aacd7e22263820fc0c4392d028e7173086e1672c8fa19dd49c0b7d89"
+    }
+  },
+  "final_source_guards": [
+    {
+      "before": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/root2/BEFORE.json",
+        "sha256": "ecfdb74de10d9967f8ab7d6b9a8b1dcf104e88716e322f5c7f204e09a7fa8644"
+      },
+      "after": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/root2/AFTER.json",
+        "sha256": "08670d25fd55aa86b265ebc4d39a20dd7de57dc8d77b3734b2b509960afce0be"
+      }
+    }
+  ],
+  "scope": "475 fixture-only capacity profile; unchanged production reuse explicitly scoped",
+  "note": "Actual final-source51/debugbuild,wideTCPQUIC2/11CLI/strict receipts and source guards, assembled after published commit. JS11 retained with exact module/test hash reuse; see checked archive.",
+  "reuse_base_commit": "4f88a3f223b76936be63f73b43662e769ccecd15"
+}

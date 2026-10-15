@@ -1,0 +1,2 @@
+{"commit": "dfc195cd39196fc6f16e69ea74de34dabd359ef2", "qualified_inputs": 1469, "scope": "475 fixture-only profile: actual final example/network/strict receipts; no native or framework performance claim."}
+{"source_inputs": 1475, "functional_projection": 1469, "added_build_configuration": [".gitignore", "AGENTS.md", "docs/COMMAND_BYTES.md", "docs/PERFORMANCE.md", "rust-toolchain.toml", "validation/performance/native475-capacity/SCHEMA.md"], "changed_inputs": 65, "fresh_target_absent": true, "build_started": false}

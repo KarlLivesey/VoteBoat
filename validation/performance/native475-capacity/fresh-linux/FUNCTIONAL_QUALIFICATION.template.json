@@ -1,0 +1,44 @@
+{
+  "source_commit": null,
+  "source_inventory": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/root2/BEFORE.json",
+    "sha256": null
+  },
+  "proofs": {
+    "example": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/root2/TERMINAL.json",
+      "sha256": null
+    },
+    "example_all": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/root2/example-all.exit.json",
+      "sha256": null
+    },
+    "example_build": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/root2/example-build.exit.json",
+      "sha256": null
+    },
+    "network": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/network2/TERMINAL.json",
+      "sha256": null
+    },
+    "strict": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/strict2/TERMINAL.json",
+      "sha256": null
+    }
+  },
+  "final_source_guards": [
+    {
+      "before": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/root2/BEFORE.json",
+        "sha256": null
+      },
+      "after": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/root2/AFTER.json",
+        "sha256": null
+      }
+    }
+  ],
+  "scope": "475 fixture-only capacity profile; unchanged production reuse explicitly scoped",
+  "note": "TEMPLATE ONLY; no passed qualification flags; root assembles only terminal actual receipts after publication.",
+  "reuse_base_commit": "4f88a3f223b76936be63f73b43662e769ccecd15"
+}

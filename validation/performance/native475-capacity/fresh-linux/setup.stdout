@@ -1,0 +1,12 @@
+{"commit": "dfc195cd39196fc6f16e69ea74de34dabd359ef2", "qualified_inputs": 1469, "scope": "475 fixture-only profile: actual final example/network/strict receipts; no native or framework performance claim."}
+exact1475 committed inputs +1469 qualified input projection hashes/physical modes passed
+START tcp
+END tcp 0
+START tcp-check
+END tcp-check 0
+START quic
+END quic 0
+START quic-check
+END quic-check 0
+CONTROLS_EXIT=0
+exact1475 committed inputs +1469 qualified input projection hashes/physical modes passed
