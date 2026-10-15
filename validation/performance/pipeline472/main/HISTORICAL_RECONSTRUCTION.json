@@ -1,0 +1,14 @@
+{
+  "path": "src/runtime/replica/pump.rs",
+  "expected_initial_sha256": "0ff9ad85ef06aad90caa8775480d8a097a0da76b060eff273ad6e67e8ef8f8f1",
+  "actual_reconstructed_sha256": "0ff9ad85ef06aad90caa8775480d8a097a0da76b060eff273ad6e67e8ef8f8f1",
+  "verified": true,
+  "mechanism": "Reverse ONLY known postfreeze queue-empty condition; current production untouched. Root supplied exact inverse and SHA matched SOURCE_FROZEN1.",
+  "initial_test_fixture": {
+    "path": "tests/support/replica_driver/append_pump.rs",
+    "expected_sha256": "d6703377c40eee73f0bcd019974ed77d310d0d6c3e510b44602cfcbcca7b0d2f",
+    "actual_sha256": "d6703377c40eee73f0bcd019974ed77d310d0d6c3e510b44602cfcbcca7b0d2f",
+    "verified": true,
+    "mechanism": "Reverse only the two documented compile fixes, no current source mutation."
+  }
+}

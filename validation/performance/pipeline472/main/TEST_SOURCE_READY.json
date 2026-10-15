@@ -1,0 +1,25 @@
+{
+  "files": {
+    "tests/support/replica_driver.rs": {
+      "sha256": "0709f69d8319bbf6614b6e796620c958c3284e6153daeb5245759e18f923ed3c",
+      "mode": "0o644"
+    },
+    "tests/support/replica_driver/append_pump.rs": {
+      "sha256": "d6703377c40eee73f0bcd019974ed77d310d0d6c3e510b44602cfcbcca7b0d2f",
+      "mode": "0o644"
+    }
+  },
+  "focused_tests": 8,
+  "cargo_run": false,
+  "format_command": [
+    "rustfmt",
+    "+stable",
+    "--edition",
+    "2021",
+    "--config",
+    "skip_children=true",
+    "tests/support/replica_driver/append_pump.rs"
+  ],
+  "format_exit": 0,
+  "scope": "Independent actual ReplicaDriver with held public replacement worker+HostLogStore; Counter forwarding test adapter records context callback counts. No production/default worker edits."
+}

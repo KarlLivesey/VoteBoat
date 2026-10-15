@@ -42,6 +42,7 @@ mod peers;
 mod read_requests;
 mod reads;
 mod ready_batch;
+use ready_batch::ReadyAdvanceBudget;
 pub(crate) use ready_batch::ReadyProposal;
 mod replica;
 mod snapshot_send;

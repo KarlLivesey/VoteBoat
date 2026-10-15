@@ -1,0 +1,15 @@
+{
+  "command": [
+    "git",
+    "diff",
+    "--binary",
+    "a01d9d51e0b1e3a4e2e3fda10e303f5bd2d12f38",
+    "--",
+    "src",
+    "tests",
+    "examples",
+    "benchmarks/matched"
+  ],
+  "exit": 0,
+  "base": "a01d9d51e0b1e3a4e2e3fda10e303f5bd2d12f38"
+}

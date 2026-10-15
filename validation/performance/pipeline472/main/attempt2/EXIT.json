@@ -1,0 +1,7 @@
+{
+  "exit": 101,
+  "elapsed_s": 17.803431909007486,
+  "end": "2026-10-15T05:58:47.453721+00:00",
+  "source_unchanged": true,
+  "scope": "Agent may independently add non-selected hidden-budget test module; exact scopes/differences retained, no source mutations otherwise."
+}

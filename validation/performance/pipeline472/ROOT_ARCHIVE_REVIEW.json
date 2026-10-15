@@ -1,0 +1,8 @@
+{
+  "payloads": 201,
+  "gzip_originals": 15,
+  "manifest_sha256": "9c953e8eb95e30d155253cbbf06e3cb2ac35f569100aff4f394c0059701e9052",
+  "root_independent_payload_original_verification": "PASS",
+  "current_compiled_source_inputs_equal_strict7": 1453,
+  "scope": "No checks or workloads rerun. Documentation edits follow qualification and do not alter compiled inputs."
+}

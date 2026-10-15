@@ -2,6 +2,23 @@
 // Copyright (c) 2026 Karl Livesey
 //! Opt-in collection of bounded already-ready ordinary original proposals.
 use super::*;
+pub(super) struct ReadyAdvanceBudget {
+    pub(super) steps: usize,
+    pub(super) attempts: usize,
+    pub(super) initial_timers_polled: bool,
+}
+impl ReadyAdvanceBudget {
+    pub(super) fn new(limit: usize) -> Self {
+        Self {
+            steps: limit,
+            attempts: limit,
+            initial_timers_polled: false,
+        }
+    }
+    pub(super) fn available(&self) -> bool {
+        self.steps != 0 && self.attempts != 0
+    }
+}
 pub(crate) struct ReadyProposal {
     pub(crate) admission: AdmissionTicket,
     pub(crate) command: Proposal,

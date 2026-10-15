@@ -1,0 +1,48 @@
+{
+  "all_recorded_jobs_terminal": true,
+  "original_runs": [
+    {
+      "directory": "attempt1",
+      "terminal_record": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/attempt1/EXIT.json",
+      "original_handle": 14432,
+      "actual_exit": 101
+    },
+    {
+      "directory": "attempt2",
+      "terminal_record": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/attempt2/EXIT.json",
+      "original_handle": 40915,
+      "actual_exit": 101
+    },
+    {
+      "directory": "attempt3",
+      "terminal_record": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/attempt3/TERMINAL.json",
+      "original_handle": 53464,
+      "actual_exit": 0
+    },
+    {
+      "directory": "validation4",
+      "terminal_record": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/validation4/TERMINAL.json",
+      "original_handle": 99759,
+      "actual_exit": 0
+    },
+    {
+      "directory": "selected5",
+      "terminal_record": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/TERMINAL.json",
+      "original_handle": 21437,
+      "actual_exit": 0
+    },
+    {
+      "directory": "profiles6",
+      "terminal_record": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/profiles6/TERMINAL.json",
+      "original_handle": 64244,
+      "actual_exit": 0
+    },
+    {
+      "directory": "strict7",
+      "terminal_record": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/strict7/TERMINAL.json",
+      "original_handle": 35637,
+      "actual_exit": 0
+    }
+  ],
+  "scope": "Root authoritative original handle notifications plus actual terminal records. Original compile failures preserved; no run repeated by collector. Three baseline-reproduced native owner failures remain historical failures, not current passes."
+}

@@ -479,6 +479,15 @@ these as stage/replica observations separately from cumulative counter deltas;
 counter and histogram monotonicity, exact ticket conservation and physical barrier
 checks remain required. Nested elapsed times overlap and must not be added as CPU.
 
+An explicitly selected append window greater than one may fill within a single
+driver poll. All passes share the original step, scheduler-attempt, effect,
+retry, submission-attempt and worker-event allowances. The extra initial timer
+poll runs once; ordinary per-scheduler-attempt timer polling is retained. Available
+terminal worker events stop further filling, and cold/control work retains its
+scheduler order. Default depth1 retains its original single-pass cadence. Four
+queued units do not imply four units per physical barrier: actual synchronized
+grouping, completed originals/s, latency and refusals must be measured separately.
+
 Slice158 adds one successful60-second QUIC pause run with the original gate:
 group1's forced boundary11 is installed and retained across reopen, two new
 follower installs occur, and the source leader/term/binding is unchanged. All

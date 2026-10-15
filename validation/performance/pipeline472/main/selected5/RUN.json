@@ -1,0 +1,151 @@
+{
+  "pid": 2399378,
+  "start": "2026-10-15T06:05:25.485665+00:00",
+  "commands": [
+    [
+      "tcp-startup",
+      [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/checks/debug/examples/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/tcp-startup",
+        "tcp",
+        "128",
+        "64",
+        "--append-window",
+        "4",
+        "--journal-timings"
+      ]
+    ],
+    [
+      "tcp-startup-raw",
+      [
+        "node",
+        "validation/check-native-benchmark.mjs",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/tcp-startup"
+      ]
+    ],
+    [
+      "tcp-startup-selection",
+      [
+        "node",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/check-selection.mjs",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/tcp-startup"
+      ]
+    ],
+    [
+      "tcp-startup-journal",
+      [
+        "node",
+        "validation/check-journal-timings.mjs",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/tcp-startup/journal.csv"
+      ]
+    ],
+    [
+      "tcp-shared",
+      [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/checks/debug/examples/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/tcp-shared",
+        "tcp",
+        "128",
+        "64",
+        "1",
+        "--append-window",
+        "4"
+      ]
+    ],
+    [
+      "tcp-shared-raw",
+      [
+        "node",
+        "validation/check-native-benchmark.mjs",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/tcp-shared",
+        "--storage"
+      ]
+    ],
+    [
+      "tcp-shared-selection",
+      [
+        "node",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/check-selection.mjs",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/tcp-shared"
+      ]
+    ],
+    [
+      "quic-startup",
+      [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/checks/debug/examples/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/quic-startup",
+        "quic",
+        "128",
+        "64",
+        "--append-window",
+        "4",
+        "--journal-timings"
+      ]
+    ],
+    [
+      "quic-startup-raw",
+      [
+        "node",
+        "validation/check-native-benchmark.mjs",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/quic-startup"
+      ]
+    ],
+    [
+      "quic-startup-selection",
+      [
+        "node",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/check-selection.mjs",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/quic-startup"
+      ]
+    ],
+    [
+      "quic-startup-journal",
+      [
+        "node",
+        "validation/check-journal-timings.mjs",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/quic-startup/journal.csv"
+      ]
+    ],
+    [
+      "quic-shared",
+      [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/checks/debug/examples/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/quic-shared",
+        "quic",
+        "128",
+        "64",
+        "1",
+        "--append-window",
+        "4"
+      ]
+    ],
+    [
+      "quic-shared-raw",
+      [
+        "node",
+        "validation/check-native-benchmark.mjs",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/quic-shared",
+        "--storage"
+      ]
+    ],
+    [
+      "quic-shared-selection",
+      [
+        "node",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/check-selection.mjs",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/quic-shared"
+      ]
+    ]
+  ],
+  "environment": {
+    "CARGO_TARGET_DIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/checks",
+    "CARGO_BUILD_JOBS": "2",
+    "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/test-tmp",
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null,
+    "RUSTC_WRAPPER": null,
+    "RUSTC_WORKSPACE_WRAPPER": null,
+    "PROTOC": null
+  },
+  "runner_sha256": "d3ef621e7c2db420ad1a0209eec6fad86a9cfec55d42e34e5dac3844092f1505"
+}

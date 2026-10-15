@@ -1,0 +1,343 @@
+diff --git a/src/runtime.rs b/src/runtime.rs
+index 5b2e122b..e7fe2812 100644
+--- a/src/runtime.rs
++++ b/src/runtime.rs
+@@ -42,6 +42,7 @@ mod peers;
+ mod read_requests;
+ mod reads;
+ mod ready_batch;
++use ready_batch::ReadyAdvanceBudget;
+ pub(crate) use ready_batch::ReadyProposal;
+ mod replica;
+ mod snapshot_send;
+diff --git a/src/runtime/clients.rs b/src/runtime/clients.rs
+index 424e5966..ab351448 100644
+--- a/src/runtime/clients.rs
++++ b/src/runtime/clients.rs
+@@ -483,6 +483,28 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
+         now: MonoTime,
+         limit: usize,
+         application: impl Fn(GroupIdentity) -> Option<&'a A>,
++        configuration: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
++    ) -> Result<Vec<OwnerStep>, ClientError> {
++        self.advance_budgeted(
++            owner,
++            now,
++            &mut ReadyAdvanceBudget::new(limit),
++            application,
++            configuration,
++        )
++    }
++    pub(super) fn advance_budgeted<
++        'a,
++        A: ProposalAdmission<Receipt = R> + 'a,
++        Q: ReadyScheduler,
++        T: TimerService,
++        E: ElectionEntropy,
++    >(
++        &mut self,
++        owner: &mut EffectOwner<Q, T, E>,
++        now: MonoTime,
++        budget: &mut ReadyAdvanceBudget,
++        application: impl Fn(GroupIdentity) -> Option<&'a A>,
+         mut configuration: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
+     ) -> Result<Vec<OwnerStep>, ClientError> {
+         if owner.identity() != self.binding.owner
+@@ -491,9 +513,9 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
+             return Err(ClientError::WrongBinding);
+         }
+         let steps = owner
+-            .advance_batch_authorized(
++            .advance_batch_budgeted(
+                 now,
+-                limit,
++                budget,
+                 |group| application(group).is_some_and(ProposalAdmission::supports_ready_batch),
+                 |group| application(group).is_some_and(ProposalAdmission::supports_append_window),
+                 |core, event, prefix| {
+diff --git a/src/runtime/effects.rs b/src/runtime/effects.rs
+index 83117319..f8b93a8b 100644
+--- a/src/runtime/effects.rs
++++ b/src/runtime/effects.rs
+@@ -576,7 +576,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
+         let result = self.advance_inner(
+             now,
+-            limit,
++            &mut ReadyAdvanceBudget::new(limit),
+             |_| false,
+             |_| false,
+             |core, event, _| check(core, event),
+@@ -588,15 +588,15 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+             other => other,
+         }
+     }
+-    pub(super) fn advance_batch_authorized(
++    pub(super) fn advance_batch_budgeted(
+         &mut self,
+         now: MonoTime,
+-        limit: usize,
++        budget: &mut ReadyAdvanceBudget,
+         eligible: impl FnMut(GroupIdentity) -> bool,
+         append_eligible: impl FnMut(GroupIdentity) -> bool,
+         check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
+     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
+-        let result = self.advance_inner(now, limit, eligible, append_eligible, check);
++        let result = self.advance_inner(now, budget, eligible, append_eligible, check);
+         match result {
+             Err(error @ (EffectOwnerError::Runtime(_) | EffectOwnerError::ReservationTooLarge)) => {
+                 self.fail(error)
+@@ -607,23 +607,28 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+     fn advance_inner(
+         &mut self,
+         now: MonoTime,
+-        limit: usize,
++        budget: &mut ReadyAdvanceBudget,
+         mut eligible: impl FnMut(GroupIdentity) -> bool,
+         mut append_eligible: impl FnMut(GroupIdentity) -> bool,
+         mut check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
+     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
+         self.check()?;
+-        if limit > 4096 {
++        let limit = budget.steps;
++        if limit > 4096 || budget.attempts > 4096 {
+             return Err(EffectOwnerError::InvalidLimits);
+         }
+         let mut steps = Vec::new();
+-        self.runtime
+-            .poll_timers(now)
+-            .map_err(EffectOwnerError::Runtime)?;
+-        for _ in 0..limit {
++        if !budget.initial_timers_polled {
++            budget.initial_timers_polled = true;
++            self.runtime
++                .poll_timers(now)
++                .map_err(EffectOwnerError::Runtime)?;
++        }
++        for _ in 0..budget.attempts {
+             if steps.len() >= limit {
+                 break;
+             }
++            budget.attempts -= 1;
+             let Some(visit) = self.runtime.poll(now).map_err(EffectOwnerError::Runtime)? else {
+                 break;
+             };
+@@ -688,6 +693,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+                 self.refresh(visit)?;
+             }
+         }
++        budget.steps -= steps.len();
+         Ok(steps)
+     }
+     fn install_step(
+diff --git a/src/runtime/effects/append_window.rs b/src/runtime/effects/append_window.rs
+index 016bad9b..f5362af3 100644
+--- a/src/runtime/effects/append_window.rs
++++ b/src/runtime/effects/append_window.rs
+@@ -80,6 +80,16 @@ pub fn append_window_effect_reservation(core: &Raft, input_bytes: usize) -> Opti
+     budget(core, input_bytes).map(|bound| bound.total)
+ }
+ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E> {
++    pub(in crate::runtime) fn is_append_persist_lease(&self, ticket: EffectTicket) -> bool {
++        self.active
++            .get(&ticket.visit.sequence)
++            .is_some_and(|active| {
++                active.visit == ticket.visit
++                    && active.leased == Some(ticket)
++                    && matches!(active.kind, Some(LeaseKind::Persist))
++                    && active.append.is_some()
++            })
++    }
+     pub(crate) fn seal_append_windows(&mut self) {
+         self.append_closed = true;
+         self.runtime.seal_append_windows();
+diff --git a/src/runtime/ready_batch.rs b/src/runtime/ready_batch.rs
+index 650bf8fc..d225c73c 100644
+--- a/src/runtime/ready_batch.rs
++++ b/src/runtime/ready_batch.rs
+@@ -2,6 +2,23 @@
+ // Copyright (c) 2026 Karl Livesey
+ //! Opt-in collection of bounded already-ready ordinary original proposals.
+ use super::*;
++pub(super) struct ReadyAdvanceBudget {
++    pub(super) steps: usize,
++    pub(super) attempts: usize,
++    pub(super) initial_timers_polled: bool,
++}
++impl ReadyAdvanceBudget {
++    pub(super) fn new(limit: usize) -> Self {
++        Self {
++            steps: limit,
++            attempts: limit,
++            initial_timers_polled: false,
++        }
++    }
++    pub(super) fn available(&self) -> bool {
++        self.steps != 0 && self.attempts != 0
++    }
++}
+ pub(crate) struct ReadyProposal {
+     pub(crate) admission: AdmissionTicket,
+     pub(crate) command: Proposal,
+diff --git a/src/runtime/ready_batch/tests.rs b/src/runtime/ready_batch/tests.rs
+index 506ecdcc..1e91a32a 100644
+--- a/src/runtime/ready_batch/tests.rs
++++ b/src/runtime/ready_batch/tests.rs
+@@ -2,6 +2,8 @@
+ // Copyright (c) 2026 Karl Livesey
+ use super::*;
+ use crate::log::LogLimits;
++#[cfg(feature = "native")]
++mod advance_budget;
+ mod append_window;
+ mod fixture;
+ mod routine;
+diff --git a/src/runtime/ready_batch/tests/append_window.rs b/src/runtime/ready_batch/tests/append_window.rs
+index b2aa6ee7..d88250cc 100644
+--- a/src/runtime/ready_batch/tests/append_window.rs
++++ b/src/runtime/ready_batch/tests/append_window.rs
+@@ -385,9 +385,9 @@ fn opening_fallback_replays_the_full_checked_prefix_and_terminal_error_once() {
+         }
+         let mut calls = Vec::new();
+         let steps = owner
+-            .advance_batch_authorized(
++            .advance_batch_budgeted(
+                 MonoTime(0),
+-                3,
++                &mut ReadyAdvanceBudget::new(3),
+                 |_| true,
+                 |_| true,
+                 |_, event, prefix| {
+diff --git a/src/runtime/replica.rs b/src/runtime/replica.rs
+index f3b6449f..58c4180d 100644
+--- a/src/runtime/replica.rs
++++ b/src/runtime/replica.rs
+@@ -16,7 +16,9 @@
+ use super::snapshot_send::SnapshotSendRetries;
+ use super::*;
+ mod logical;
++mod pump;
+ use crate::{application::*, outbound::*, snapshot_worker::*, worker::*};
++use pump::PersistSubmission;
+ 
+ pub struct ReplicaSnapshots<'a> {
+     pub router: &'a mut SnapshotRouter,
+@@ -516,41 +518,27 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
+         let mut out = ReplicaProgress::default();
+         self.poll_reclaims(p.persistence)?;
+         self.poll_snapshots(p, now, b.snapshot_events, &mut out)?;
+-        let events = p.persistence.poll(b.worker_events);
+-        if events.len() > b.worker_events {
+-            return Err(ReplicaError::ProviderContract);
+-        }
+-        for event in events {
+-            out.worker_events += 1;
+-            p.owner
+-                .deliver_worker(event, now)
+-                .map_err(ReplicaError::Owner)?;
+-        }
+-        out.steps = p
+-            .clients
+-            .advance_authorized(
+-                p.owner,
+-                now,
+-                b.steps,
+-                |g| p.applications.get(&g),
+-                configuration,
+-            )
+-            .map_err(ReplicaError::Client)?;
+-        p.reads
+-            .observe_steps(p.owner, &out.steps)
+-            .map_err(ReplicaError::Read)?;
+-        self.collect_effects(p.owner, b.effects, &mut out)?;
+-        self.retry_effects(p, now, b.retries, &mut out)?;
+-        self.submit_batch(p.owner, p.persistence, now, true, &mut out)?;
+-        let submissions = if p.persistence.max_outstanding_units_per_group() > 1 {
+-            b.effects
++        Self::poll_worker_events(p.owner, p.persistence, now, b.worker_events, &mut out)?;
++        if p.persistence.max_outstanding_units_per_group() > 1 {
++            self.pump_ready(p, now, b, configuration, &mut out)?;
+         } else {
+-            1
+-        };
+-        for _ in 0..submissions {
+-            if !self.submit_batch(p.owner, p.persistence, now, false, &mut out)? {
+-                break;
+-            }
++            out.steps = p
++                .clients
++                .advance_authorized(
++                    p.owner,
++                    now,
++                    b.steps,
++                    |g| p.applications.get(&g),
++                    configuration,
++                )
++                .map_err(ReplicaError::Client)?;
++            p.reads
++                .observe_steps(p.owner, &out.steps)
++                .map_err(ReplicaError::Read)?;
++            self.collect_effects(p.owner, b.effects, &mut out)?;
++            self.retry_effects(p, now, b.retries, &mut out)?;
++            self.submit_batch(p.owner, p.persistence, now, true, &mut out)?;
++            self.submit_batch(p.owner, p.persistence, now, false, &mut out)?;
+         }
+         p.clients
+             .reconcile(p.owner, b.reconcile)
+@@ -907,7 +895,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
+         now: MonoTime,
+         control: bool,
+         out: &mut ReplicaProgress,
+-    ) -> Result<bool, ReplicaError> {
++    ) -> Result<PersistSubmission, ReplicaError> {
+         let queue = if control {
+             &mut self.control
+         } else {
+@@ -939,24 +927,31 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
+         }
+         if count == 0 {
+             return if queue.is_empty() {
+-                Ok(false)
++                Ok(PersistSubmission::Stopped)
+             } else {
+                 Err(ReplicaError::Worker(WorkerError::BatchTooLarge))
+             };
+         }
+         let mut leases = Vec::with_capacity(count);
+         leases.extend(queue.drain(..count));
++        let append = leases
++            .iter()
++            .any(|lease| owner.is_append_persist_lease(lease.ticket));
+         match owner.submit_persists(worker, leases, now) {
+             Ok(_) => {
+                 out.persistence_batches += 1;
+-                Ok(true)
++                Ok(if append {
++                    PersistSubmission::ParkedAppend
++                } else {
++                    PersistSubmission::Submitted
++                })
+             }
+             Err(rejected) => {
+                 for lease in rejected.leases.into_iter().rev() {
+                     queue.push_front(lease);
+                 }
+                 if rejected.reason == EffectOwnerError::Worker(WorkerError::Overloaded) {
+-                    Ok(false)
++                    Ok(PersistSubmission::Stopped)
+                 } else {
+                     Err(ReplicaError::Owner(rejected.reason))
+                 }
+diff --git a/tests/support/replica_driver.rs b/tests/support/replica_driver.rs
+index 3238456d..73e8ee75 100644
+--- a/tests/support/replica_driver.rs
++++ b/tests/support/replica_driver.rs
+@@ -14,6 +14,8 @@
+ // rights and limitations under the RPL.
+ 
+ use super::*;
++#[path = "replica_driver/append_pump.rs"]
++mod append_pump;
+ use support::outbound::HostOutbound;
+ use voteboat::outbound::*;
+ type Parts<'a> = ReplicaParts<'a, Ready, Timers, Entropy, Counter, HostWorker, HostOutbound>;

@@ -80,6 +80,16 @@ pub fn append_window_effect_reservation(core: &Raft, input_bytes: usize) -> Opti
     budget(core, input_bytes).map(|bound| bound.total)
 }
 impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E> {
+    pub(in crate::runtime) fn is_append_persist_lease(&self, ticket: EffectTicket) -> bool {
+        self.active
+            .get(&ticket.visit.sequence)
+            .is_some_and(|active| {
+                active.visit == ticket.visit
+                    && active.leased == Some(ticket)
+                    && matches!(active.kind, Some(LeaseKind::Persist))
+                    && active.append.is_some()
+            })
+    }
     pub(crate) fn seal_append_windows(&mut self) {
         self.append_closed = true;
         self.runtime.seal_append_windows();

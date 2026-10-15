@@ -385,9 +385,9 @@ fn opening_fallback_replays_the_full_checked_prefix_and_terminal_error_once() {
         }
         let mut calls = Vec::new();
         let steps = owner
-            .advance_batch_authorized(
+            .advance_batch_budgeted(
                 MonoTime(0),
-                3,
+                &mut ReadyAdvanceBudget::new(3),
                 |_| true,
                 |_| true,
                 |_, event, prefix| {

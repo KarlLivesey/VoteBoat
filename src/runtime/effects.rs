@@ -576,7 +576,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
         let result = self.advance_inner(
             now,
-            limit,
+            &mut ReadyAdvanceBudget::new(limit),
             |_| false,
             |_| false,
             |core, event, _| check(core, event),
@@ -588,15 +588,15 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             other => other,
         }
     }
-    pub(super) fn advance_batch_authorized(
+    pub(super) fn advance_batch_budgeted(
         &mut self,
         now: MonoTime,
-        limit: usize,
+        budget: &mut ReadyAdvanceBudget,
         eligible: impl FnMut(GroupIdentity) -> bool,
         append_eligible: impl FnMut(GroupIdentity) -> bool,
         check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
-        let result = self.advance_inner(now, limit, eligible, append_eligible, check);
+        let result = self.advance_inner(now, budget, eligible, append_eligible, check);
         match result {
             Err(error @ (EffectOwnerError::Runtime(_) | EffectOwnerError::ReservationTooLarge)) => {
                 self.fail(error)
@@ -607,23 +607,28 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     fn advance_inner(
         &mut self,
         now: MonoTime,
-        limit: usize,
+        budget: &mut ReadyAdvanceBudget,
         mut eligible: impl FnMut(GroupIdentity) -> bool,
         mut append_eligible: impl FnMut(GroupIdentity) -> bool,
         mut check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
         self.check()?;
-        if limit > 4096 {
+        let limit = budget.steps;
+        if limit > 4096 || budget.attempts > 4096 {
             return Err(EffectOwnerError::InvalidLimits);
         }
         let mut steps = Vec::new();
-        self.runtime
-            .poll_timers(now)
-            .map_err(EffectOwnerError::Runtime)?;
-        for _ in 0..limit {
+        if !budget.initial_timers_polled {
+            budget.initial_timers_polled = true;
+            self.runtime
+                .poll_timers(now)
+                .map_err(EffectOwnerError::Runtime)?;
+        }
+        for _ in 0..budget.attempts {
             if steps.len() >= limit {
                 break;
             }
+            budget.attempts -= 1;
             let Some(visit) = self.runtime.poll(now).map_err(EffectOwnerError::Runtime)? else {
                 break;
             };
@@ -688,6 +693,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                 self.refresh(visit)?;
             }
         }
+        budget.steps -= steps.len();
         Ok(steps)
     }
     fn install_step(

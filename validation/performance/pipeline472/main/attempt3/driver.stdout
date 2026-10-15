@@ -1,0 +1,13 @@
+
+running 8 tests
+test replica_driver::append_pump::available_written_then_durable_or_failure_precedes_the_next_ready_pass ... ok
+test replica_driver::append_pump::default_one_retains_single_submission_and_does_not_recheck_unstepped_originals ... ok
+test replica_driver::append_pump::exhausted_worker_events_stop_even_when_only_written_was_available ... ok
+test replica_driver::append_pump::overload_restores_exact_b_front_once_without_rechecking_or_losing_originals ... ok
+test replica_driver::append_pump::queued_control_seals_before_more_data_and_cold_group_keeps_fifo_priority ... ok
+test replica_driver::append_pump::residual_step_and_effect_allowances_do_not_multiply_across_passes ... ok
+test replica_driver::append_pump::retry_allowance_is_shared_with_a_cold_groups_ready_read ... ok
+test replica_driver::append_pump::selected_four_units_submit_in_one_poll_without_written_or_durable_success ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 203 filtered out; finished in 0.05s
+

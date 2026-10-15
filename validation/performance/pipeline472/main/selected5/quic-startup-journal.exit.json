@@ -1,0 +1,11 @@
+{
+  "command": [
+    "node",
+    "validation/check-journal-timings.mjs",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/quic-startup/journal.csv"
+  ],
+  "start": "2026-10-15T06:05:37.902764+00:00",
+  "end": "2026-10-15T06:05:37.927583+00:00",
+  "elapsed_s": 0.024844064988428727,
+  "exit": 0
+}

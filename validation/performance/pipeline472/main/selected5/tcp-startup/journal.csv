@@ -1,0 +1,13 @@
+stage,replica,append_calls,append_units,append_commands,append_ns,append_max_ns,barrier_calls,barrier_tickets,barrier_ns,barrier_max_ns,errors,encoded_bytes,io_append_calls,io_append_ns,sync_calls,sync_ns,publish_calls,publish_ns,batch_histogram,group_units,successful_barriers,barrier_known_originals,barrier_missing_tickets,barrier_dropped_tickets,barrier_pending_tickets,barrier_correlation_capacity_bytes,barrier_unit_histogram,barrier_original_histogram,barrier_same_group_unit_histogram,synchronized_barrier_calls,no_io_barrier_calls,ambiguous_io_barrier_calls,synchronized_same_group_multi_unit_calls,synchronized_same_group_multi_unit_known_originals
+before_measurement,1,0,0,0,0,0,0,0,0,0,0,0,10,71632,9,75741795,9,151760642,,,0,0,0,0,0,0,,,,0,0,0,0,0
+before_measurement,2,0,0,0,0,0,0,0,0,0,0,0,7,66634,8,62506140,8,216113562,,,0,0,0,0,0,0,,,,0,0,0,0,0
+before_measurement,3,0,0,0,0,0,0,0,0,0,0,0,7,50022,8,97863104,8,210654617,,,0,0,0,0,0,0,,,,0,0,0,0,0
+after_measurement,1,0,0,0,0,0,0,0,0,0,0,0,24,198271,21,357833470,21,774302853,,,0,0,0,0,0,0,,,,0,0,0,0,0
+after_measurement,2,0,0,0,0,0,0,0,0,0,0,0,12,104307,13,200967086,13,596442705,,,0,0,0,0,0,0,,,,0,0,0,0,0
+after_measurement,3,0,0,0,0,0,0,0,0,0,0,0,13,85747,14,307657626,14,646336681,,,0,0,0,0,0,0,,,,0,0,0,0,0
+after_create_join,1,0,0,0,0,0,0,0,0,0,0,0,24,198271,21,357833470,21,774302853,,,0,0,0,0,0,0,,,,0,0,0,0,0
+after_create_join,2,0,0,0,0,0,0,0,0,0,0,0,13,110098,14,261990250,14,898117470,,,0,0,0,0,0,0,,,,0,0,0,0,0
+after_create_join,3,0,0,0,0,0,0,0,0,0,0,0,14,93571,15,332446627,15,941188448,,,0,0,0,0,0,0,,,,0,0,0,0,0
+after_recover_join,1,0,0,0,0,0,0,0,0,0,0,0,7,107693,8,393085441,8,494668924,,,0,0,0,0,0,0,,,,0,0,0,0,0
+after_recover_join,2,0,0,0,0,0,0,0,0,0,0,0,7,58018,8,226587048,8,563177218,,,0,0,0,0,0,0,,,,0,0,0,0,0
+after_recover_join,3,0,0,0,0,0,0,0,0,0,0,0,7,35417,8,273881030,8,616710162,,,0,0,0,0,0,0,,,,0,0,0,0,0

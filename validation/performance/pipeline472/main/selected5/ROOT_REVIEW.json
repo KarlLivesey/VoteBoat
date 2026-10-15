@@ -1,0 +1,24 @@
+{
+  "actual_original_session": 21437,
+  "exit": 0,
+  "commands": 14,
+  "artifact_unchanged": true,
+  "source_unchanged": true,
+  "leader_physical_activation": [
+    {
+      "protocol": "tcp",
+      "leader_measurement_deltas": {
+        "synchronized_same_group_multi_unit_calls": 1,
+        "synchronized_same_group_multi_unit_known_originals": 48
+      }
+    },
+    {
+      "protocol": "quic",
+      "leader_measurement_deltas": {
+        "synchronized_same_group_multi_unit_calls": 1,
+        "synchronized_same_group_multi_unit_known_originals": 48
+      }
+    }
+  ],
+  "scope": "Actual current debug selected startup/shared TCP/QUIC functional histories128measurement+64warmup; no paired release capacity claim. Historical reusedrunner marker470 retained; actual command/executable/source hashes bind472."
+}

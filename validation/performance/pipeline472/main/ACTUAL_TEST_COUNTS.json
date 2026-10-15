@@ -1,0 +1,138 @@
+{
+  "attempt3/driver.stdout": [
+    {
+      "result": "ok",
+      "passed": "8",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "203"
+    }
+  ],
+  "attempt3/budgets.stdout": [
+    {
+      "result": "ok",
+      "passed": "2",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "444"
+    }
+  ],
+  "validation4/library.stdout": [
+    {
+      "result": "ok",
+      "passed": "446",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "validation4/driver.stdout": [
+    {
+      "result": "ok",
+      "passed": "15",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "196"
+    }
+  ],
+  "validation4/providers.stdout": [
+    {
+      "result": "ok",
+      "passed": "12",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "46",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "55",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "11",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "validation4/services.stdout": [
+    {
+      "result": "ok",
+      "passed": "2",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "201"
+    }
+  ],
+  "profiles6/core.stdout": [
+    {
+      "result": "ok",
+      "passed": "363",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "203",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "31",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "38",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "3",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "profiles6/matched.stdout": [
+    {
+      "result": "ok",
+      "passed": "70",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ]
+}

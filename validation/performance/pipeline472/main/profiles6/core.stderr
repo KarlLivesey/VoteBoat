@@ -1,0 +1,8 @@
+   Compiling ring v0.17.14
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 25.57s
+     Running unittests src/lib.rs (target/p9/slice472/checks/debug/deps/voteboat-2a5d52f7d7c87717)
+     Running tests/effect_owner.rs (target/p9/slice472/checks/debug/deps/effect_owner-32c31e5c4ab15e4b)
+     Running tests/provider_conformance.rs (target/p9/slice472/checks/debug/deps/provider_conformance-b5f1fe56e0c02439)
+     Running tests/runtime.rs (target/p9/slice472/checks/debug/deps/runtime-cbe559c94002ac8f)
+     Running tests/worker.rs (target/p9/slice472/checks/debug/deps/worker-65dddfff596d259c)

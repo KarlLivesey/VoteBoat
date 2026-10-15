@@ -1,0 +1,14 @@
+{
+  "archive": "/home/karllivesey/Documents/ChatGPT/VoteBoat/validation/performance/pipeline472/main",
+  "payloads": 201,
+  "regular_files_including_manifest": 202,
+  "gzip": 15,
+  "manifest_sha256": "9c953e8eb95e30d155253cbbf06e3cb2ac35f569100aff4f394c0059701e9052",
+  "exact_recursive_file_set_and_payload_sha": "PASS",
+  "container_and_original_length_sha": "PASS",
+  "no_links_binary_magic": "PASS",
+  "all7_original_statuses_preserved": "PASS",
+  "two_exact_historical_reconstructions": "PASS",
+  "four_selected128_recover192_retry_join": "PASS",
+  "scope": "Independent readback after synchronous collector chunk551aa9 actualexit0. No checks/workloads rerun; archive review intentionally outside sealed main."
+}

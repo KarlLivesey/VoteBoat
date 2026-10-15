@@ -1,0 +1,25 @@
+{
+  "files": {
+    "src/runtime/ready_batch/tests.rs": {
+      "sha256": "eb42347d06d45f287955cf08cb68f3553ff9f47abb16bb34a188e278bdc74cfa",
+      "mode": "0o644"
+    },
+    "src/runtime/ready_batch/tests/advance_budget.rs": {
+      "sha256": "b662a28d3f9a546acc554009501276b4a69b1cb48c4efb0900cef7f40f819267",
+      "mode": "0o644"
+    },
+    "tests/support/replica_driver.rs": {
+      "sha256": "0709f69d8319bbf6614b6e796620c958c3284e6153daeb5245759e18f923ed3c",
+      "mode": "0o644"
+    },
+    "tests/support/replica_driver/append_pump.rs": {
+      "sha256": "75266383839f7a51e3aa69ffa48ee7c8d175ee8e0bbd5cb4b7cc40fa798cf356",
+      "mode": "0o644"
+    }
+  },
+  "driver_tests": 8,
+  "hidden_budget_tests": 2,
+  "cargo_run_by_agent": false,
+  "format_exit": 0,
+  "scope": "Actual CountedReady pop backpressure and counted native DeadlineQueue timer polls across shared budget. Preserve per-attempt timer precedence; initial+attempt maximum. Focused compile fixes qualify worker batch_cost and owned Uncertain string only."
+}

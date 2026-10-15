@@ -20,6 +20,14 @@ Use a private per-poll remaining-budget record initialized ONCE from the existin
 ReplicaPollBudget. Share original step, effect-lease, retry, worker-event, snapshot
 event and submit-attempt allowances across all passes. Prefer existing progress
 counters; derive exact residuals, never grant a new full allowance per pass.
+Source review additionally found scheduler-poll attempts without an OwnerStep and
+the per-advance timer poll. Carry both original step and scheduler-attempt limits
+in one private ReadyAdvanceBudget through ClientRouter/EffectOwner, with a flag
+allowing the original extra initial timer poll only once. Each TimedShard::poll
+retains its original per-attempt timer poll and control precedence; the shared
+attempt allowance bounds these to the original maximum1+steps timer polls, rather
+than claiming all timer providers are polled only once. Single-call wrappers create
+their ordinary local budget; only the selected driver shares it across passes.
 The public budget/provider/Core authority/tickets need no change. A private
 submission result may expose whether a successful selected append actually parked
 and re-enqueued a visit, rather than treating arbitrary progress as permission.
@@ -69,6 +77,8 @@ and no control, snapshot or peer completion policy is weakened.
    original mappings/receipts and whole-window escrow/credits conserved.
 2. Default depth1 retains exact one-submit/callback cadence. Residual step/effect/
    event/retry/attempt bounds cannot multiply; zero/no-progress stops.
+   Zero-step scheduler visits still consume the original attempt allowance, and
+   due-timer work cannot receive a new poll allowance on each additional pass.
 3. Cold group/control/background priority and same supplied deadline hold; a
    control between A/B seals before B. Available Written then Durable/Failed
    precedes additional ready advancement; exhausted event allowance stops.
@@ -85,6 +95,19 @@ and no control, snapshot or peer completion policy is weakened.
    If the finite gate cannot be fixed within the existing budgets/contracts, or
    useful gain remains inconsistent, reject without another knob-tuning family.
 
-No production implementation or measured472 speedup exists at this schema stage.
+No production implementation or measured472 speedup existed at this schema stage.
 The both-host seven-cell healthy minimum, sustained physical memory/debt, durable
 application/headroom/fairness/placement/shared-barrier/P8 requirements remain open.
+
+## Implemented qualification, after the schema
+
+The private pump and shared ReadyAdvanceBudget are now implemented. The
+[Linux qualification archive](main/README.md) records actual selected-driver8,
+hidden-budget2, all-feature library446/core363, affected provider/runtime/worker/
+application checks, actual TCP/QUIC service2 and four selected debug histories,
+matched70 and the complete enabled strict hook0. Two earlier compile101 attempts
+remain archived with their exact source scopes. Existing baseline-reproduced
+native-owner timeout failures remain outstanding; a full all-feature owner suite
+pass is not claimed. No new authority, format, durable evidence or public API is
+introduced. Publication, fresh asserted artifacts and actual paired performance
+remain required; there is still no measured472 speedup.

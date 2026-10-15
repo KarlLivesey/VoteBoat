@@ -16,7 +16,9 @@
 use super::snapshot_send::SnapshotSendRetries;
 use super::*;
 mod logical;
+mod pump;
 use crate::{application::*, outbound::*, snapshot_worker::*, worker::*};
+use pump::PersistSubmission;
 
 pub struct ReplicaSnapshots<'a> {
     pub router: &'a mut SnapshotRouter,
@@ -516,41 +518,27 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         let mut out = ReplicaProgress::default();
         self.poll_reclaims(p.persistence)?;
         self.poll_snapshots(p, now, b.snapshot_events, &mut out)?;
-        let events = p.persistence.poll(b.worker_events);
-        if events.len() > b.worker_events {
-            return Err(ReplicaError::ProviderContract);
-        }
-        for event in events {
-            out.worker_events += 1;
-            p.owner
-                .deliver_worker(event, now)
-                .map_err(ReplicaError::Owner)?;
-        }
-        out.steps = p
-            .clients
-            .advance_authorized(
-                p.owner,
-                now,
-                b.steps,
-                |g| p.applications.get(&g),
-                configuration,
-            )
-            .map_err(ReplicaError::Client)?;
-        p.reads
-            .observe_steps(p.owner, &out.steps)
-            .map_err(ReplicaError::Read)?;
-        self.collect_effects(p.owner, b.effects, &mut out)?;
-        self.retry_effects(p, now, b.retries, &mut out)?;
-        self.submit_batch(p.owner, p.persistence, now, true, &mut out)?;
-        let submissions = if p.persistence.max_outstanding_units_per_group() > 1 {
-            b.effects
+        Self::poll_worker_events(p.owner, p.persistence, now, b.worker_events, &mut out)?;
+        if p.persistence.max_outstanding_units_per_group() > 1 {
+            self.pump_ready(p, now, b, configuration, &mut out)?;
         } else {
-            1
-        };
-        for _ in 0..submissions {
-            if !self.submit_batch(p.owner, p.persistence, now, false, &mut out)? {
-                break;
-            }
+            out.steps = p
+                .clients
+                .advance_authorized(
+                    p.owner,
+                    now,
+                    b.steps,
+                    |g| p.applications.get(&g),
+                    configuration,
+                )
+                .map_err(ReplicaError::Client)?;
+            p.reads
+                .observe_steps(p.owner, &out.steps)
+                .map_err(ReplicaError::Read)?;
+            self.collect_effects(p.owner, b.effects, &mut out)?;
+            self.retry_effects(p, now, b.retries, &mut out)?;
+            self.submit_batch(p.owner, p.persistence, now, true, &mut out)?;
+            self.submit_batch(p.owner, p.persistence, now, false, &mut out)?;
         }
         p.clients
             .reconcile(p.owner, b.reconcile)
@@ -907,7 +895,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         now: MonoTime,
         control: bool,
         out: &mut ReplicaProgress,
-    ) -> Result<bool, ReplicaError> {
+    ) -> Result<PersistSubmission, ReplicaError> {
         let queue = if control {
             &mut self.control
         } else {
@@ -939,24 +927,31 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         }
         if count == 0 {
             return if queue.is_empty() {
-                Ok(false)
+                Ok(PersistSubmission::Stopped)
             } else {
                 Err(ReplicaError::Worker(WorkerError::BatchTooLarge))
             };
         }
         let mut leases = Vec::with_capacity(count);
         leases.extend(queue.drain(..count));
+        let append = leases
+            .iter()
+            .any(|lease| owner.is_append_persist_lease(lease.ticket));
         match owner.submit_persists(worker, leases, now) {
             Ok(_) => {
                 out.persistence_batches += 1;
-                Ok(true)
+                Ok(if append {
+                    PersistSubmission::ParkedAppend
+                } else {
+                    PersistSubmission::Submitted
+                })
             }
             Err(rejected) => {
                 for lease in rejected.leases.into_iter().rev() {
                     queue.push_front(lease);
                 }
                 if rejected.reason == EffectOwnerError::Worker(WorkerError::Overloaded) {
-                    Ok(false)
+                    Ok(PersistSubmission::Stopped)
                 } else {
                     Err(ReplicaError::Owner(rejected.reason))
                 }

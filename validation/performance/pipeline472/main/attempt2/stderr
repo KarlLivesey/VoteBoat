@@ -1,0 +1,75 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0659]: `batch_cost` is ambiguous
+  --> tests/support/replica_driver/append_pump.rs:79:30
+   |
+79 |         if let Err(reason) = batch_cost(&units, units.capacity(), self.limits()) {
+   |                              ^^^^^^^^^^ ambiguous name
+   |
+   = note: ambiguous because of multiple glob imports of a name in the same module
+note: `batch_cost` could refer to the function imported here
+  --> tests/support/replica_driver.rs:20:5
+   |
+20 | use voteboat::outbound::*;
+   |     ^^^^^^^^^^^^^^^^^^^^^
+   = help: consider adding an explicit import of `batch_cost` to disambiguate
+note: `batch_cost` could also refer to the function imported here
+  --> tests/support/replica_driver.rs:16:5
+   |
+16 | use super::*;
+   |     ^^^^^^^^
+   = help: consider adding an explicit import of `batch_cost` to disambiguate
+
+error[E0061]: this function takes 4 arguments but 3 arguments were supplied
+   --> tests/support/replica_driver/append_pump.rs:79:30
+    |
+ 79 |         if let Err(reason) = batch_cost(&units, units.capacity(), self.limits()) {
+    |                              ^^^^^^^^^^         ----------------  ------------- expected `OutboundLimits`, found `WorkerLimits`
+    |                                                 |
+    |                                                 argument #2 of type `&[voteboat::raft::Message]` is missing
+    |
+note: expected `OutboundBinding`, found `&Vec<PersistUnit>`
+   --> tests/support/replica_driver/append_pump.rs:79:41
+    |
+ 79 |         if let Err(reason) = batch_cost(&units, units.capacity(), self.limits()) {
+    |                                         ^^^^^^
+    = note: expected struct `voteboat::outbound::OutboundBinding`
+            found reference `&Vec<voteboat::worker::PersistUnit>`
+note: function defined here
+   --> src/outbound.rs:387:8
+    |
+387 | pub fn batch_cost(
+    |        ^^^^^^^^^^
+help: provide the argument
+    |
+ 79 -         if let Err(reason) = batch_cost(&units, units.capacity(), self.limits()) {
+ 79 +         if let Err(reason) = batch_cost(/* voteboat::outbound::OutboundBinding */, /* &[voteboat::raft::Message] */, units.capacity(), /* voteboat::outbound::OutboundLimits */) {
+    |
+
+error[E0308]: mismatched types
+  --> tests/support/replica_driver/append_pump.rs:80:41
+   |
+80 |             return Err(WorkerRejected { reason, units });
+   |                                         ^^^^^^ expected `WorkerError`, found `OutboundError`
+
+error[E0308]: mismatched types
+   --> tests/support/replica_driver/append_pump.rs:137:77
+    |
+137 |                         error: voteboat::contracts::StorageError::Uncertain("pump failure"),
+    |                                -------------------------------------------- ^^^^^^^^^^^^^^ expected `String`, found `&str`
+    |                                |
+    |                                arguments to this enum variant are incorrect
+    |
+note: tuple variant defined here
+   --> src/contracts.rs:61:5
+    |
+ 61 |     Uncertain(String),
+    |     ^^^^^^^^^
+help: try using a conversion method
+    |
+137 |                         error: voteboat::contracts::StorageError::Uncertain("pump failure".to_string()),
+    |                                                                                           ++++++++++++
+
+Some errors have detailed explanations: E0061, E0308, E0659.
+For more information about an error, try `rustc --explain E0061`.
+error: could not compile `voteboat` (test "effect_owner") due to 4 previous errors
+warning: build failed, waiting for other jobs to finish...

@@ -1,0 +1,12 @@
+{
+  "command": [
+    "bash",
+    ".githooks/pre-push"
+  ],
+  "environment": {
+    "CARGO_TARGET_DIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/checks",
+    "CARGO_BUILD_JOBS": "2",
+    "PROTOC": "/home/karllivesey/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/protobuf-build-0.14.1/bin/protoc-linux-x86_64"
+  },
+  "start": "2026-10-15T06:09:55.707800+00:00"
+}

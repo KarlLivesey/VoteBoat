@@ -2,7 +2,21 @@
 
 ## Active P9 plan — 15 October 2026
 
-Latest checked publication is470 `a37f867a8a10359b35e754242b166c03b13813f3`.
+Latest production publication is470 `a37f867a8a10359b35e754242b166c03b13813f3`;
+native measurement/gauge evidence is published in `a01d9d51`.
+472's bounded driver pump is implemented and locally checked, awaiting publication.
+Its [qualification archive](../validation/performance/pipeline472/main/README.md)
+preserves the two compile failures, focused corrections, final source inventories,
+actual selected-driver/network controls and complete enabled strict hook0.
+The selected depth4 control submits four ordered units for64 already-queued
+originals in one poll while canonical/application state stays unchanged until
+exact completion. Steps, zero-step scheduler attempts, initial timer polling,
+effects, retries, submission attempts and worker events share the original whole-
+poll limits. Available terminal events and cold/control FIFO retain precedence;
+defaultdepth1 keeps its original cadence. These are functional checks, not a
+measured472 throughput or barrier-amortization improvement. Fresh published-source
+artifacts and paired measurements are next; no P9 milestone closes.
+
 The [publication receipt](../validation/performance/pipeline470/publication/README.md)
 records original77933/full enabled hook0 and exact remote main. Native fresh-build
 original45090 is terminal0/DONE with root/executable/build-script fresh:false,
@@ -786,8 +800,8 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: publish native470 results and design a bounded driver pump | Resolve the source-identified one-unit-per-poll gate after inconsistent measured benefit | [Original18-case evidence](../validation/performance/comparison470-native/linux/README.md), preserved failures/revalidation, current driver/owner/worker contracts | Verify/archive/push every raw outcome; before-edit shape shares residual step/effect/event/attempt budgets, preserves control/first-Durable/error priority, FIFO cold groups and exact default-one cadence; reject an infeasible design without another tuning campaign | P9.0/P9.1/P9.2/P9.3 |
-| Next: one focused ordering fix and actual comparisons | Test whether already-queued successors can reach a subsequent physical barrier usefully | Feasible bounded pump schema and deterministic queued/held-worker control; original Mac455 termination before new Mac work | Complete selected-path implementation with no renewed per-pass allowances or outcome shortcuts; exact partial/overload/failure/cleanup/FnMut histories and all strict checks; fresh paired native off/on, Linux20M bulk/singleton and Mac qualification/measurements; keep regressions and reject ineffective changes | P9.0/P9.1/P9.2/P9.3 |
+| Current: publish checked472 and build fresh asserted artifacts | Make the bounded ordering change reproducible before timing it | [Before-edit schema](../validation/performance/pipeline472/SCHEMA.md), [Linux qualification](../validation/performance/pipeline472/main/README.md), original470 results and existing native/framework builders | Archive exact source/failures/scopes; commit every compiled module and push through enabled hook; fresh root/executable/upstream libraries with actual Cargo JSON/rustc flags, matching within-host compiler/locks and original/copied hashes; actual native and framework CLI controls | P9.0/P9.1/P9.2/P9.3 |
+| Next: measure the ordering change and qualify Mac | Determine whether filling the selected window improves useful completions rather than merely grouping | Published472, fresh asserted artifacts and exact controls; original Mac455 termination before new Mac work | Same rotating native offered-load campaign with physical barriers/completions/refusals/tails; Linux20M bulk/singleton and Mac qualification/paired measurements; quiet hosts, exact timer/outcomes, retain failures and reject ineffective changes without retuning | P9.0/P9.1/P9.2/P9.3 |
 | Following: full curve, sustainable headroom and composition qualification | Satisfy the entire performance objective beyond the current experiment | Retained measured improvements, qualified weighted fixture, source/artifact/host identities and stable maintenance | All seven required framework cells on both hosts with healthy margin; sustained memory/debt, durable applications/headroom/skew/fairness, independent placement/shared barriers and P8 composition; preserve every outcome/fence/retry | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
@@ -34785,3 +34799,43 @@ syncing; queued units may amortize a subsequent barrier. This audit is not an
 implemented pipeline or a performance claim. The linked current-plus-next-two
 plan preserves all both-host seven-cell, durable/headroom/fairness/placement/P8
 requirements and the full goal remains active.
+
+472 implements the [bounded driver pump schema](../validation/performance/pipeline472/SCHEMA.md)
+after470's inconsistent native result. The selected depth>1 path may advance
+already-queued successors after an exact accepted append parks its visit. One
+private budget carries original steps and scheduler attempts (including zero-step
+visits), one extra initial timer poll, effects/retries/submission attempts and
+remaining worker events. Per-attempt timers and supplied deadlines retain their
+original precedence. Available terminal events stop filling; failed submission
+restores the exact front lease. Cold/control FIFO, callback ownership, canonical
+state, application completion and defaultdepth1 cadence stay covered by actual
+provider/driver controls. There is no public API, Core, storage format or durability
+change and no new persistent state to reconstruct.
+
+[Linux472 qualification](../validation/performance/pipeline472/main/README.md)
+contains201 sealed payloads/15 lossless gzip originals, independently reread.
+Attempt114432 and attempt240915 retain compile101; focused argument/type fixes
+lead to attempt353464 terminal0, eight actual public-driver and two hidden-budget
+controls. Validation499759 ends0: fmt/strict all-feature, library446, selected
+driver15, application12/provider46/runtime55/worker11, actual TCP/QUIC retry/
+replacement/native-recovery2 and native example build. Profiles664244 ends0:
+corelib363/owner203/provider31/runtime38/worker3, matched70 and metadata0.
+Strict735637 ends0/sourceexact: actual enabled formatting/default/all/core/native/
+standalone hook, zero diagnostics and unchanged configuration. These are separate
+captured source scopes, not a claim of one full all-feature owner-suite pass;
+the three inherited baseline-reproduced owner timeout failures remain outstanding.
+
+Selected521437 ends0 with14 commands and four actual debug TCP/QUIC startup/shared
+histories:128 measurement originals+64 warmups, recover192, exact retries and worker
+joins, actual create/recover depth4 on all replicas. Each shared leader records one
+synchronized multi-unit barrier with48 known command originals; missing/drop/
+storage-errors0. The held-worker public-driver control submits distinct units at
+indexes17/33/49/65 in one poll for64 originals, then verifies exact original outcomes
+and credit return only after completion. Hidden controls bound zero-step scheduler
+attempts and timer deltas2/1/1/0 across shared calls. These establish selected-path
+functionality, not release throughput, sustained debt, actual four-unit barriers
+or a measured472 gain. Publish this complete checked slice, build fresh asserted
+native/framework artifacts and compare useful rates/tails/refusals/physical barriers
+in quiet windows. Original Mac455 qualification remains the only Mac job; new Mac
+source work waits for its actual termination. Full P9 and all macro requirements
+remain active.
