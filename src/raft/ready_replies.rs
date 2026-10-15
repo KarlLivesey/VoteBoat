@@ -3,6 +3,11 @@
 //! Read-only planning of ordered ready replies and an ordinary command prefix.
 use super::*;
 
+struct ReadyReplyPlan {
+    progress: BTreeMap<NodeId, u64>,
+    commit_index: u64,
+}
+
 impl Raft {
     /// No queued input or Core field is changed on Err. The runtime retains its
     /// original inputs and executes the ordinary first event on any refusal.
@@ -12,7 +17,7 @@ impl Raft {
         proposals: Vec<Proposal>,
     ) -> Result<Vec<Effect>, RaftError> {
         self.ready_reply_state(replies.len())?;
-        let progress = self.ready_reply_progress(replies)?;
+        let plan = self.ready_reply_progress(replies)?;
         let first = self.validate_proposal_batch(&proposals, proposals.capacity())?;
         self.validate_conversion_peak(&proposals, proposals.capacity())?;
         let entries = proposals
@@ -31,7 +36,7 @@ impl Raft {
             group: self.durable.bootstrap.group,
             expected_revision: self.durable.revision,
             hard_state: self.durable.hard_state,
-            commit_index: self.durable.last_index(),
+            commit_index: plan.commit_index,
             suffix: Some(Suffix {
                 from: first,
                 entries,
@@ -51,10 +56,11 @@ impl Raft {
         // Allocate the outward container before the sole infallible promotion.
         let effects = vec![Effect::Persist(update)];
         self.batch_limits_locked = true;
-        self.progress = progress;
+        self.progress = plan.progress;
         for reply in replies {
             self.retire_replication(reply.from);
-            self.next_index.insert(reply.from, first);
+            self.next_index
+                .insert(reply.from, self.progress[&reply.from] + 1);
         }
         self.pending = Some(Pending {
             next,
@@ -111,14 +117,12 @@ impl Raft {
         Ok(())
     }
 
-    fn ready_reply_progress(
-        &self,
-        replies: &[Message],
-    ) -> Result<BTreeMap<NodeId, u64>, RaftError> {
+    fn ready_reply_progress(&self, replies: &[Message]) -> Result<ReadyReplyPlan, RaftError> {
         let tip = self.durable.last_index();
         let next = tip.checked_add(1).ok_or(RaftError::Exhausted)?;
         let mut progress = self.progress.clone();
         let mut peers = BTreeSet::new();
+        let mut commit_index = self.durable.commit_index;
         for (index, reply) in replies.iter().enumerate() {
             self.authenticated_message_source(reply)?;
             let sent = self
@@ -129,25 +133,45 @@ impl Raft {
                 || reply.rpc
                     != (Rpc::Appended {
                         success: true,
-                        matching_index: tip,
+                        matching_index: sent.end,
                     })
                 || sent.context != reply.context
                 || sent.configuration != reply.configuration
                 || sent.snapshot.is_some()
-                || sent.end != tip
+                || sent.end > tip
                 || sent.start == 0
-                || sent.start > next
+                || sent.start > sent.end.saturating_add(1)
                 || self.empty_append_aliases.contains_key(&reply.from)
                 || !peers.insert(reply.from)
             {
                 return Err(RaftError::InvalidMessage);
             }
-            progress.insert(reply.from, tip);
-            if index == 0 && self.membership.frontier(&progress) < tip {
+            let prefix = progress[&reply.from].max(sent.end);
+            progress.insert(reply.from, prefix);
+            let frontier = self.membership.frontier(&progress).min(tip);
+            if index == 0 {
+                if frontier <= commit_index
+                    || self.durable.term_at(frontier) != Some(self.durable.hard_state.term)
+                {
+                    return Err(RaftError::Busy);
+                }
+                commit_index = frontier;
+            } else if frontier != commit_index {
+                // Preserve the serialized application's commit-batch boundary.
                 return Err(RaftError::Busy);
             }
         }
-        Ok(progress)
+        // Also prove every installed catch-up cursor remains representable.
+        for reply in replies {
+            progress[&reply.from]
+                .checked_add(1)
+                .filter(|cursor| *cursor <= next)
+                .ok_or(RaftError::Exhausted)?;
+        }
+        Ok(ReadyReplyPlan {
+            progress,
+            commit_index,
+        })
     }
 }
 

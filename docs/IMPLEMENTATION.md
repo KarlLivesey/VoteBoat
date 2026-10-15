@@ -743,7 +743,7 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: measure actual joined work and durable/fairness effects | Establish whether the implemented ordering removes the measured stage | Published checked463, actual join counters, fresh asserted artifacts, qualified458 workload, original Mac455 qualification | Repeated disabled/enabled completed originals/s, p99/refusals/physical barriers/join counts on both hosts; retain losses, no quantum/guard tuning; genuine weighted headroom/fairness follows useful improvement | P9.1/P9.2/P9.3 |
+| Current: separate acknowledged commit and append frontiers, then measure actual joined work | Remove the concrete full-tip refusal found in463 diagnostics while retaining ordered commit batches | Published checked463, exact-primary traces, [464 schema](../validation/performance/slice464/SCHEMA.md), fresh asserted artifacts, original Mac455 qualification | Differential prefix/catch-up/durability/recovery controls, strict checks and publication; real activation before repeated disabled/enabled completed originals/s, p99/refusals/barriers on both hosts; retain losses | P9.1/P9.2/P9.3 |
 | Next: remove the next measured limiting stage | Increase useful work after the candidate is retained or rejected | Actual disabled/enabled join counts, completed rates/tails/refusals/physical barriers and current profile; schema before editing | Choose from measured ordering, batching, ownership or waiting costs; preserve every original result and partial-progress/restart contract; checked published slice and repeated paired evidence without retuning rejected experiments | P9.1/P9.2/P9.3 |
 | Following: full curve, sustainable headroom and composition qualification | Satisfy the entire performance objective beyond the current experiment | Retained measured improvements, qualified weighted fixture, source/artifact/host identities and stable maintenance | All seven required framework cells on both hosts with healthy margin; sustained memory/debt, durable applications/headroom/skew/fairness, independent placement/shared barriers and P8 composition; preserve every outcome/fence/retry | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
@@ -34388,3 +34388,25 @@ curve/headroom/fairness/placement/P8 work. Mac455 original84206 is still live in
 protocol qualification; no Mac463 result is implied. The macro scope remains
 active, with every required one-group cell on both hosts and8.4225M batch4
 minimum unmet. Publication is recorded separately after the enabled push hook.
+
+
+464 separates the acknowledged commit prefix from the old-tip append position
+and each peer's monotone catch-up cursor. The readonly plan refuses a later
+selected reply that would create a second commit batch; early Written still
+requires the unchanged full-old-tip quorum proof. Existing middle entries and
+all authentication/configuration/alias/durability/ticket gates remain.
+[Before-edit schema](../validation/performance/slice464/SCHEMA.md) and
+[qualification](../validation/performance/slice464/main/README.md) record final
+original36468 terminal0/DONE: all442/core353 library controls and full enabled
+strict hook0,1454 unchanged scoped source hashes/modes. Same-production all/core
+integration scopes, real TCP/QUIC recovery2 and matched70 pass; only cfg(test)
+helper extractions follow those runs. Socket-denied initial failures and strict
+test-helper failures remain, with no relaxed checks. Independent review finds no
+material correctness issue; finite controls do not prove the full engine.
+
+[Fresh463 artifact and zero-join diagnostics](../validation/performance/native463-linux/README.md)
+preserve all188 raw evidence payloads, including the failed initial debugger
+address calculation. This measured ordering refusal motivates464, not a claimed
+speedup. The current mini plan advances to publication, fresh asserted artifacts
+and real activation before paired durable measurements. Original Mac45584206
+continues; no464 Mac result, default change or completed macro milestone.

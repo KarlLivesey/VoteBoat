@@ -1,0 +1,160 @@
+{
+  "main/ready-replies.log": [
+    {
+      "result": "ok",
+      "passed": "15",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "427"
+    }
+  ],
+  "main/lib-all.log": [
+    {
+      "result": "FAILED",
+      "passed": "421",
+      "failed": "21",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "network/ready-replies.log": [
+    {
+      "result": "ok",
+      "passed": "15",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "427"
+    }
+  ],
+  "network/lib-all.log": [
+    {
+      "result": "ok",
+      "passed": "442",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "network/integrations-all.log": [
+    {
+      "result": "ok",
+      "passed": "203",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "43",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "79",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "55",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "network/services-all.log": [
+    {
+      "result": "ok",
+      "passed": "2",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "201"
+    }
+  ],
+  "network/lib-core.log": [
+    {
+      "result": "ok",
+      "passed": "353",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "network/integrations-core.log": [
+    {
+      "result": "ok",
+      "passed": "195",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "28",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "29",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "38",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "network/matched.log": [
+    {
+      "result": "ok",
+      "passed": "70",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "final/lib-all.log": [
+    {
+      "result": "ok",
+      "passed": "442",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "final/lib-core.log": [
+    {
+      "result": "ok",
+      "passed": "353",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ]
+}

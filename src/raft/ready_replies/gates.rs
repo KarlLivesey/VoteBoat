@@ -3,7 +3,7 @@
 //! Boundary refusals retain exact original receive scopes and canonical state.
 use super::*;
 
-fn rejected(core: &mut Raft, replies: &[Message], proposals: Vec<Proposal>) {
+pub(super) fn rejected(core: &mut Raft, replies: &[Message], proposals: Vec<Proposal>) {
     let before = core.state().clone();
     let progress = core.progress.clone();
     let next = core.next_index.clone();

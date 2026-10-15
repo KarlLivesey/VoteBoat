@@ -1,0 +1,60 @@
+{
+  "original_handle": 20105,
+  "terminal_exit": 0,
+  "all_four_processes_and_validators_exit0": true,
+  "scope": "128offer functionalcontrols; not sustained or capacity acceptance",
+  "rows": [
+    {
+      "case": "tcp-r0",
+      "applied": "65",
+      "window_refused": "63",
+      "unknown": "0",
+      "pending": "0",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "ready_reply_inputs_effective": "0",
+      "joined_transitions": "0",
+      "joined_reply_inputs": "0",
+      "joined_originals": "0"
+    },
+    {
+      "case": "tcp-r2",
+      "applied": "105",
+      "window_refused": "23",
+      "unknown": "0",
+      "pending": "0",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "ready_reply_inputs_effective": "2",
+      "joined_transitions": "0",
+      "joined_reply_inputs": "0",
+      "joined_originals": "0"
+    },
+    {
+      "case": "quic-r0",
+      "applied": "84",
+      "window_refused": "44",
+      "unknown": "0",
+      "pending": "0",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "ready_reply_inputs_effective": "0",
+      "joined_transitions": "0",
+      "joined_reply_inputs": "0",
+      "joined_originals": "0"
+    },
+    {
+      "case": "quic-r2",
+      "applied": "77",
+      "window_refused": "51",
+      "unknown": "0",
+      "pending": "0",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "ready_reply_inputs_effective": "2",
+      "joined_transitions": "0",
+      "joined_reply_inputs": "0",
+      "joined_originals": "0"
+    }
+  ]
+}

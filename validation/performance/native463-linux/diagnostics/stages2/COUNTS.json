@@ -1,0 +1,15 @@
+{
+  "counts": {
+    "::joined_reservation@00000000002cec50": 104,
+    "::joined_reservation@00000000003154a0": 136,
+    "::reservation@0000000000450330": 62,
+    "::copy_proposals@00000000004505d0": 62,
+    "::selection@0000000000450900": 166,
+    "::propose_after_ready_replies@0000000000457e70": 62
+  },
+  "inferior_exit_codes": [
+    0
+  ],
+  "load_bias": "0x556bc269c000",
+  "scope": "Instrumented stage entry counts on SAME published native ELF; debugger perturbs scheduling. Not capacity or unperturbed frequency. No inferred fallback predicate beyond stage reachability."
+}

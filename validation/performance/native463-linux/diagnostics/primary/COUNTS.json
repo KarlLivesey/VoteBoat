@@ -1,0 +1,181 @@
+{
+  "counts": {
+    "::joined_reservation@00000000002cec50": 115,
+    "::joined_reservation@00000000003154a0": 177,
+    "::reservation@0000000000450330": 11,
+    "::copy_proposals@00000000004505d0": 11,
+    "::selection@0000000000450900": 126,
+    "::propose_after_ready_replies@0000000000457e70": 11,
+    "Core_before_progress@45836b": 11,
+    "Core_tip_commit_compare@4580f4": 11,
+    "Core_rpc_equality_call@4584dc": 11,
+    "Core_rpc_equality_result@4584e1": 11
+  },
+  "observations": {
+    "tip_commit": [
+      {
+        "rsi_tip": 17,
+        "rax_commit": 1
+      },
+      {
+        "rsi_tip": 17,
+        "rax_commit": 1
+      },
+      {
+        "rsi_tip": 49,
+        "rax_commit": 1
+      },
+      {
+        "rsi_tip": 49,
+        "rax_commit": 17
+      },
+      {
+        "rsi_tip": 82,
+        "rax_commit": 65
+      },
+      {
+        "rsi_tip": 82,
+        "rax_commit": 66
+      },
+      {
+        "rsi_tip": 98,
+        "rax_commit": 66
+      },
+      {
+        "rsi_tip": 98,
+        "rax_commit": 66
+      },
+      {
+        "rsi_tip": 114,
+        "rax_commit": 66
+      },
+      {
+        "rsi_tip": 130,
+        "rax_commit": 82
+      },
+      {
+        "rsi_tip": 130,
+        "rax_commit": 82
+      }
+    ],
+    "rpc_compare": [
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 1,
+        "expected_tip_u64_at8": 17,
+        "request_start": 2,
+        "request_end": 17,
+        "exact_context_fields_equal": false,
+        "configuration_equal": true
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 1,
+        "expected_tip_u64_at8": 17,
+        "request_start": 2,
+        "request_end": 17,
+        "exact_context_fields_equal": false,
+        "configuration_equal": true
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 17,
+        "expected_tip_u64_at8": 49,
+        "request_start": 2,
+        "request_end": 17,
+        "exact_context_fields_equal": true,
+        "configuration_equal": true
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 17,
+        "expected_tip_u64_at8": 49,
+        "request_start": 2,
+        "request_end": 17,
+        "exact_context_fields_equal": true,
+        "configuration_equal": true
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 66,
+        "expected_tip_u64_at8": 82,
+        "request_start": 66,
+        "request_end": 66,
+        "exact_context_fields_equal": true,
+        "configuration_equal": true
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 66,
+        "expected_tip_u64_at8": 82,
+        "request_start": 66,
+        "request_end": 66,
+        "exact_context_fields_equal": true,
+        "configuration_equal": true
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 66,
+        "expected_tip_u64_at8": 98,
+        "request_start": 67,
+        "request_end": 82,
+        "exact_context_fields_equal": false,
+        "configuration_equal": true
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 66,
+        "expected_tip_u64_at8": 98,
+        "request_start": 67,
+        "request_end": 82,
+        "exact_context_fields_equal": false,
+        "configuration_equal": true
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 82,
+        "expected_tip_u64_at8": 114,
+        "request_start": 67,
+        "request_end": 82,
+        "exact_context_fields_equal": true,
+        "configuration_equal": true
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 82,
+        "expected_tip_u64_at8": 130,
+        "request_start": 67,
+        "request_end": 82,
+        "exact_context_fields_equal": true,
+        "configuration_equal": true
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 82,
+        "expected_tip_u64_at8": 130,
+        "request_start": 83,
+        "request_end": 114,
+        "exact_context_fields_equal": false,
+        "configuration_equal": true
+      }
+    ],
+    "rpc_equal": 0,
+    "rpc_unequal": 11
+  },
+  "inferior_exit_codes": [
+    0
+  ],
+  "load_bias": "0x557ddb6c9000",
+  "scope": "Instrumented exact-ELF Core stage/compare observations; scheduling perturbed, not capacity or unperturbed frequency. Raw compare operands are mapped from captured disassembly; no guard change. Also capture exact compiled primary request end/start and fieldwise context/config equality, excluding all padding/payload bytes."
+}

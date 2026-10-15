@@ -1,0 +1,29 @@
+{
+  "all_recorded_jobs_terminal": true,
+  "source_before": "INITIAL_BEFORE.json",
+  "source_after": "FINAL_AFTER.json",
+  "original_runs": [
+    {
+      "handle": 63216,
+      "actual_exit": 101,
+      "status_path": "main/STATUS"
+    },
+    {
+      "handle": 48578,
+      "actual_exit": 101,
+      "status_path": "network/STATUS"
+    },
+    {
+      "handle": 36468,
+      "actual_exit": 0,
+      "status_path": "final/STATUS"
+    }
+  ],
+  "scope_notes": [
+    "Initial sandbox library421pass/21socketPermissionDeniedfail retained; ready_replies15pass.",
+    "Network all442/core353, integrationsall203/43/79/55 core195/28/29/38, realTCPQUIC2, matched70, metadata0 passed before strict failures in testhelpers.",
+    "Only cfg(test) native.rs and partial.rs assertionhelper extractions after successful network checks; full exact production/integration/fixture/build input reuse justified in REUSE_SCOPE.json.",
+    "Final full all442/core353 and enabledhook default/all/core/native+standalone formatting/strict all0. All1454 scoped source/build/fixture/contract hashes and physical modes finalbefore/finalafter exact; independent review no materialfinding.",
+    "No performance acceptance from functional qualification. Native463 evidence archive separate; Mac455 original84206 continues."
+  ]
+}

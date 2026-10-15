@@ -1,0 +1,71 @@
+{
+  "same_ELF_and_root_hashes_unchanged": true,
+  "whole_launch_instrumented_only": true,
+  "runs": [
+    {
+      "name": "stages2",
+      "process_exit": 0,
+      "validator_exit": 0,
+      "Core_entry_calls": 62
+    },
+    {
+      "name": "branches",
+      "process_exit": 0,
+      "validator_exit": 0,
+      "Core_entry_calls": 56
+    },
+    {
+      "name": "primary",
+      "process_exit": 0,
+      "validator_exit": 0,
+      "Core_entry_calls": 11
+    }
+  ],
+  "primary_rpc_comparison_true": 0,
+  "primary_rpc_comparison_false": 11,
+  "exact_primary_partial_tip_examples": [
+    {
+      "ack_matching": 17,
+      "request_end": 17,
+      "durable_tip": 49,
+      "durable_commit": 1,
+      "advances_beyond_current_commit": true
+    },
+    {
+      "ack_matching": 17,
+      "request_end": 17,
+      "durable_tip": 49,
+      "durable_commit": 17,
+      "advances_beyond_current_commit": false
+    },
+    {
+      "ack_matching": 66,
+      "request_end": 66,
+      "durable_tip": 82,
+      "durable_commit": 65,
+      "advances_beyond_current_commit": true
+    },
+    {
+      "ack_matching": 66,
+      "request_end": 66,
+      "durable_tip": 82,
+      "durable_commit": 66,
+      "advances_beyond_current_commit": false
+    },
+    {
+      "ack_matching": 82,
+      "request_end": 82,
+      "durable_tip": 114,
+      "durable_commit": 66,
+      "advances_beyond_current_commit": true
+    },
+    {
+      "ack_matching": 82,
+      "request_end": 82,
+      "durable_tip": 130,
+      "durable_commit": 82,
+      "advances_beyond_current_commit": false
+    }
+  ],
+  "claim": "A concrete refusal mechanism is observed in debugger runs: full-tip RPC equality rejects exact successful primary ranges while newer local durable entries exist. This does not estimate frequency/cost in the four uninstrumented controls or prove later gates would accept. No guard changes or performance acceptance."
+}

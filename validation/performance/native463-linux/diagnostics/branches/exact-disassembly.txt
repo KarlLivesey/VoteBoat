@@ -1,0 +1,415 @@
+
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native463-linux/artifacts/native/native_benchmark:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000457e70 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies>:
+  457e70:	55                   	push   %rbp
+  457e71:	41 57                	push   %r15
+  457e73:	41 56                	push   %r14
+  457e75:	41 55                	push   %r13
+  457e77:	41 54                	push   %r12
+  457e79:	53                   	push   %rbx
+  457e7a:	48 81 ec 78 0a 00 00 	sub    $0xa78,%rsp
+  457e81:	4c 89 44 24 38       	mov    %r8,0x38(%rsp)
+  457e86:	49 bd 0e 00 00 00 00 	movabs $0x800000000000000e,%r13
+  457e8d:	00 00 80 
+  457e90:	bd 08 00 00 00       	mov    $0x8,%ebp
+  457e95:	80 be ee 15 00 00 00 	cmpb   $0x0,0x15ee(%rsi)
+  457e9c:	48 89 7c 24 08       	mov    %rdi,0x8(%rsp)
+  457ea1:	74 0c                	je     457eaf <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x3f>
+  457ea3:	49 83 c5 fc          	add    $0xfffffffffffffffc,%r13
+  457ea7:	4d 89 ec             	mov    %r13,%r12
+  457eaa:	e9 78 02 00 00       	jmp    458127 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x2b7>
+  457eaf:	4d 8d 65 fd          	lea    -0x3(%r13),%r12
+  457eb3:	80 be f0 15 00 00 02 	cmpb   $0x2,0x15f0(%rsi)
+  457eba:	0f 85 67 02 00 00    	jne    458127 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x2b7>
+  457ec0:	49 89 ce             	mov    %rcx,%r14
+  457ec3:	48 89 54 24 20       	mov    %rdx,0x20(%rsp)
+  457ec8:	66 0f 76 c0          	pcmpeqd %xmm0,%xmm0
+  457ecc:	66 0f 74 06          	pcmpeqb (%rsi),%xmm0
+  457ed0:	4c 8d be 90 00 00 00 	lea    0x90(%rsi),%r15
+  457ed7:	48 8d 8e 10 08 00 00 	lea    0x810(%rsi),%rcx
+  457ede:	48 83 be 90 00 00 00 	cmpq   $0xffffffffffffffff,0x90(%rsi)
+  457ee5:	ff 
+  457ee6:	4c 0f 44 f9          	cmove  %rcx,%r15
+  457eea:	66 0f d7 c0          	pmovmskb %xmm0,%eax
+  457eee:	3d ff ff 00 00       	cmp    $0xffff,%eax
+  457ef3:	48 89 4c 24 18       	mov    %rcx,0x18(%rsp)
+  457ef8:	4c 0f 44 f9          	cmove  %rcx,%r15
+  457efc:	0f 94 c3             	sete   %bl
+  457eff:	48 89 34 24          	mov    %rsi,(%rsp)
+  457f03:	48 8b 86 b0 14 00 00 	mov    0x14b0(%rsi),%rax
+  457f0a:	48 89 84 24 00 02 00 	mov    %rax,0x200(%rsp)
+  457f11:	00 
+  457f12:	49 8d 7f 40          	lea    0x40(%r15),%rdi
+  457f16:	48 8d b4 24 00 02 00 	lea    0x200(%rsp),%rsi
+  457f1d:	00 
+  457f1e:	e8 4d db f4 ff       	call   3a5a70 <_RINvMsi_NtNtNtCs6i54tJFfzR_5alloc11collections5btree3mapINtB6_8BTreeMapNtNtCsbwUD2yxLDlz_8voteboat13authorization11PrincipalIdTNtNtB1b_8identity6NodeIdNtB23_7StoreIdNtB23_16StoreIncarnationEE3getB17_EB1b_>
+  457f23:	48 85 c0             	test   %rax,%rax
+  457f26:	0f 84 cf 01 00 00    	je     4580fb <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x28b>
+  457f2c:	66 0f 6f 00          	movdqa (%rax),%xmm0
+  457f30:	48 8b 0c 24          	mov    (%rsp),%rcx
+  457f34:	66 0f 74 81 e0 0e 00 	pcmpeqb 0xee0(%rcx),%xmm0
+  457f3b:	00 
+  457f3c:	66 0f d7 d0          	pmovmskb %xmm0,%edx
+  457f40:	81 fa ff ff 00 00    	cmp    $0xffff,%edx
+  457f46:	48 8b 7c 24 08       	mov    0x8(%rsp),%rdi
+  457f4b:	0f 85 d6 01 00 00    	jne    458127 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x2b7>
+  457f51:	48 8b 91 f0 0e 00 00 	mov    0xef0(%rcx),%rdx
+  457f58:	48 39 50 10          	cmp    %rdx,0x10(%rax)
+  457f5c:	0f 85 c5 01 00 00    	jne    458127 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x2b7>
+  457f62:	49 8d 46 ff          	lea    -0x1(%r14),%rax
+  457f66:	48 3b 81 18 15 00 00 	cmp    0x1518(%rcx),%rax
+  457f6d:	0f 92 c0             	setb   %al
+  457f70:	80 b9 60 0c 00 00 ff 	cmpb   $0xff,0xc60(%rcx)
+  457f77:	0f 94 c2             	sete   %dl
+  457f7a:	20 c2                	and    %al,%dl
+  457f7c:	20 d3                	and    %dl,%bl
+  457f7e:	4d 8d 65 fb          	lea    -0x5(%r13),%r12
+  457f82:	80 fb 01             	cmp    $0x1,%bl
+  457f85:	0f 85 9c 01 00 00    	jne    458127 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x2b7>
+  457f8b:	80 b9 60 0b 00 00 ff 	cmpb   $0xff,0xb60(%rcx)
+  457f92:	0f 85 8f 01 00 00    	jne    458127 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x2b7>
+  457f98:	80 b9 e0 0d 00 00 ff 	cmpb   $0xff,0xde0(%rcx)
+  457f9f:	0f 85 82 01 00 00    	jne    458127 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x2b7>
+  457fa5:	48 8b 81 d8 10 00 00 	mov    0x10d8(%rcx),%rax
+  457fac:	48 0b 81 d0 10 00 00 	or     0x10d0(%rcx),%rax
+  457fb3:	0f 85 6e 01 00 00    	jne    458127 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x2b7>
+  457fb9:	48 8b 81 10 11 00 00 	mov    0x1110(%rcx),%rax
+  457fc0:	48 0b 81 18 11 00 00 	or     0x1118(%rcx),%rax
+  457fc7:	0f 85 5a 01 00 00    	jne    458127 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x2b7>
+  457fcd:	80 b9 00 08 00 00 00 	cmpb   $0x0,0x800(%rcx)
+  457fd4:	0f 84 4d 01 00 00    	je     458127 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x2b7>
+  457fda:	48 8b 81 80 08 00 00 	mov    0x880(%rcx),%rax
+  457fe1:	83 f8 ff             	cmp    $0xffffffff,%eax
+  457fe4:	0f 85 3d 01 00 00    	jne    458127 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x2b7>
+  457fea:	49 89 ff             	mov    %rdi,%r15
+  457fed:	48 8b 81 b8 0f 00 00 	mov    0xfb8(%rcx),%rax
+  457ff4:	48 8b b9 58 10 00 00 	mov    0x1058(%rcx),%rdi
+  457ffb:	4c 8b 81 98 11 00 00 	mov    0x1198(%rcx),%r8
+  458002:	48 8b 99 48 12 00 00 	mov    0x1248(%rcx),%rbx
+  458009:	31 d2                	xor    %edx,%edx
+  45800b:	48 0b 81 b0 0f 00 00 	or     0xfb0(%rcx),%rax
+  458012:	41 0f 95 c1          	setne  %r9b
+  458016:	31 f6                	xor    %esi,%esi
+  458018:	48 0b b9 50 10 00 00 	or     0x1050(%rcx),%rdi
+  45801f:	41 0f 95 c2          	setne  %r10b
+  458023:	31 ff                	xor    %edi,%edi
+  458025:	4c 0b 81 90 11 00 00 	or     0x1190(%rcx),%r8
+  45802c:	41 0f 95 c3          	setne  %r11b
+  458030:	45 31 c0             	xor    %r8d,%r8d
+  458033:	48 0b 99 40 12 00 00 	or     0x1240(%rcx),%rbx
+  45803a:	48 8b 81 98 0a 00 00 	mov    0xa98(%rcx),%rax
+  458041:	0f 95 c3             	setne  %bl
+  458044:	48 39 81 10 09 00 00 	cmp    %rax,0x910(%rcx)
+  45804b:	0f 87 3e 03 00 00    	ja     45838f <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x51f>
+  458051:	44 88 ca             	mov    %r9b,%dl
+  458054:	f7 da                	neg    %edx
+  458056:	44 88 d6             	mov    %r10b,%sil
+  458059:	f7 de                	neg    %esi
+  45805b:	44 88 df             	mov    %r11b,%dil
+  45805e:	f7 df                	neg    %edi
+  458060:	41 88 d8             	mov    %bl,%r8b
+  458063:	41 f7 d8             	neg    %r8d
+  458066:	66 41 0f 6e c0       	movd   %r8d,%xmm0
+  45806b:	66 0f 6e cf          	movd   %edi,%xmm1
+  45806f:	66 0f 62 c8          	punpckldq %xmm0,%xmm1
+  458073:	66 0f 6e c6          	movd   %esi,%xmm0
+  458077:	66 0f 6e d2          	movd   %edx,%xmm2
+  45807b:	66 0f 62 d0          	punpckldq %xmm0,%xmm2
+  45807f:	66 0f 6c d1          	punpcklqdq %xmm1,%xmm2
+  458083:	0f 50 d2             	movmskps %xmm2,%edx
+  458086:	84 d2                	test   %dl,%dl
+  458088:	0f 85 01 03 00 00    	jne    45838f <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x51f>
+  45808e:	48 8b 91 88 12 00 00 	mov    0x1288(%rcx),%rdx
+  458095:	48 0b 91 68 13 00 00 	or     0x1368(%rcx),%rdx
+  45809c:	48 8b b1 80 12 00 00 	mov    0x1280(%rcx),%rsi
+  4580a3:	48 0b b1 60 13 00 00 	or     0x1360(%rcx),%rsi
+  4580aa:	48 09 d6             	or     %rdx,%rsi
+  4580ad:	4c 89 ff             	mov    %r15,%rdi
+  4580b0:	75 75                	jne    458127 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x2b7>
+  4580b2:	80 b9 50 0b 00 00 02 	cmpb   $0x2,0xb50(%rcx)
+  4580b9:	75 6c                	jne    458127 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x2b7>
+  4580bb:	48 8b 91 80 0a 00 00 	mov    0xa80(%rcx),%rdx
+  4580c2:	48 85 d2             	test   %rdx,%rdx
+  4580c5:	0f 84 a7 01 00 00    	je     458272 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x402>
+  4580cb:	48 8b b1 78 0a 00 00 	mov    0xa78(%rcx),%rsi
+  4580d2:	48 c1 e2 06          	shl    $0x6,%rdx
+  4580d6:	48 8d 3c 16          	lea    (%rsi,%rdx,1),%rdi
+  4580da:	48 83 c7 c0          	add    $0xffffffffffffffc0,%rdi
+  4580de:	48 85 ff             	test   %rdi,%rdi
+  4580e1:	4c 89 ff             	mov    %r15,%rdi
+  4580e4:	0f 84 88 01 00 00    	je     458272 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x402>
+  4580ea:	48 01 d6             	add    %rdx,%rsi
+  4580ed:	48 8b 76 f0          	mov    -0x10(%rsi),%rsi
+  4580f1:	48 39 c6             	cmp    %rax,%rsi
+  4580f4:	76 31                	jbe    458127 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x2b7>
+  4580f6:	e9 9d 01 00 00       	jmp    458298 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x428>
+  4580fb:	41 83 7f 70 ff       	cmpl   $0xffffffff,0x70(%r15)
+  458100:	74 20                	je     458122 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x2b2>
+  458102:	49 81 c7 b0 00 00 00 	add    $0xb0,%r15
+  458109:	48 8d b4 24 00 02 00 	lea    0x200(%rsp),%rsi
+  458110:	00 
+  458111:	4c 89 ff             	mov    %r15,%rdi
+  458114:	e8 57 d9 f4 ff       	call   3a5a70 <_RINvMsi_NtNtNtCs6i54tJFfzR_5alloc11collections5btree3mapINtB6_8BTreeMapNtNtCsbwUD2yxLDlz_8voteboat13authorization11PrincipalIdTNtNtB1b_8identity6NodeIdNtB23_7StoreIdNtB23_16StoreIncarnationEE3getB17_EB1b_>
+  458119:	48 85 c0             	test   %rax,%rax
+  45811c:	0f 85 0a fe ff ff    	jne    457f2c <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0xbc>
+  458122:	48 8b 7c 24 08       	mov    0x8(%rsp),%rdi
+  458127:	4c 89 24 2f          	mov    %r12,(%rdi,%rbp,1)
+  45812b:	48 c7 07 01 00 00 00 	movq   $0x1,(%rdi)
+  458132:	48 8b 44 24 38       	mov    0x38(%rsp),%rax
+  458137:	4c 8b 78 08          	mov    0x8(%rax),%r15
+  45813b:	48 8b 58 10          	mov    0x10(%rax),%rbx
+  45813f:	48 85 db             	test   %rbx,%rbx
+  458142:	74 7c                	je     4581c0 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x350>
+  458144:	4d 8d 67 18          	lea    0x18(%r15),%r12
+  458148:	4c 8d ac 24 00 02 00 	lea    0x200(%rsp),%r13
+  45814f:	00 
+  458150:	48 8b 2d 69 fa 29 00 	mov    0x29fa69(%rip),%rbp        # 6f7bc0 <_DYNAMIC+0x278>
+  458157:	4c 8d b4 24 90 05 00 	lea    0x590(%rsp),%r14
+  45815e:	00 
+  45815f:	eb 18                	jmp    458179 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x309>
+  458161:	66 66 66 66 66 66 2e 	data16 data16 data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  458168:	0f 1f 84 00 00 00 00 
+  45816f:	00 
+  458170:	49 83 c4 30          	add    $0x30,%r12
+  458174:	48 ff cb             	dec    %rbx
+  458177:	74 47                	je     4581c0 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x350>
+  458179:	49 8b 44 24 f8       	mov    -0x8(%r12),%rax
+  45817e:	4c 89 e9             	mov    %r13,%rcx
+  458181:	48 85 c0             	test   %rax,%rax
+  458184:	74 19                	je     45819f <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x32f>
+  458186:	0f 88 cb 00 00 00    	js     458257 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x3e7>
+  45818c:	49 8b 3c 24          	mov    (%r12),%rdi
+  458190:	48 c7 84 24 00 02 00 	movq   $0x1,0x200(%rsp)
+  458197:	00 01 00 00 00 
+  45819c:	4c 89 f1             	mov    %r14,%rcx
+  45819f:	48 89 01             	mov    %rax,(%rcx)
+  4581a2:	48 8b 94 24 00 02 00 	mov    0x200(%rsp),%rdx
+  4581a9:	00 
+  4581aa:	48 85 d2             	test   %rdx,%rdx
+  4581ad:	74 c1                	je     458170 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x300>
+  4581af:	48 8b b4 24 90 05 00 	mov    0x590(%rsp),%rsi
+  4581b6:	00 
+  4581b7:	48 85 f6             	test   %rsi,%rsi
+  4581ba:	74 b4                	je     458170 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x300>
+  4581bc:	ff d5                	call   *%rbp
+  4581be:	eb b0                	jmp    458170 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x300>
+  4581c0:	48 8b 44 24 38       	mov    0x38(%rsp),%rax
+  4581c5:	48 8b 00             	mov    (%rax),%rax
+  4581c8:	48 85 c0             	test   %rax,%rax
+  4581cb:	74 40                	je     45820d <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x39d>
+  4581cd:	48 b9 56 55 55 55 55 	movabs $0x555555555555556,%rcx
+  4581d4:	55 55 05 
+  4581d7:	48 39 c8             	cmp    %rcx,%rax
+  4581da:	0f 83 3f 04 00 00    	jae    45861f <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x7af>
+  4581e0:	48 b9 aa aa aa aa aa 	movabs $0x2aaaaaaaaaaaaaa,%rcx
+  4581e7:	aa aa 02 
+  4581ea:	48 39 c8             	cmp    %rcx,%rax
+  4581ed:	77 68                	ja     458257 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x3e7>
+  4581ef:	48 c1 e0 04          	shl    $0x4,%rax
+  4581f3:	48 8d 04 40          	lea    (%rax,%rax,2),%rax
+  4581f7:	48 c7 84 24 00 02 00 	movq   $0x10,0x200(%rsp)
+  4581fe:	00 10 00 00 00 
+  458203:	48 8d 8c 24 90 05 00 	lea    0x590(%rsp),%rcx
+  45820a:	00 
+  45820b:	eb 0a                	jmp    458217 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x3a7>
+  45820d:	48 8d 8c 24 00 02 00 	lea    0x200(%rsp),%rcx
+  458214:	00 
+  458215:	31 c0                	xor    %eax,%eax
+  458217:	48 89 01             	mov    %rax,(%rcx)
+  45821a:	48 8b 94 24 00 02 00 	mov    0x200(%rsp),%rdx
+  458221:	00 
+  458222:	48 85 d2             	test   %rdx,%rdx
+  458225:	48 8b 5c 24 08       	mov    0x8(%rsp),%rbx
+  45822a:	74 16                	je     458242 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x3d2>
+  45822c:	48 8b b4 24 90 05 00 	mov    0x590(%rsp),%rsi
+  458233:	00 
+  458234:	48 85 f6             	test   %rsi,%rsi
+  458237:	74 09                	je     458242 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x3d2>
+  458239:	4c 89 ff             	mov    %r15,%rdi
+  45823c:	ff 15 7e f9 29 00    	call   *0x29f97e(%rip)        # 6f7bc0 <_DYNAMIC+0x278>
+  458242:	48 89 d8             	mov    %rbx,%rax
+  458245:	48 81 c4 78 0a 00 00 	add    $0xa78,%rsp
+  45824c:	5b                   	pop    %rbx
+  45824d:	41 5c                	pop    %r12
+  45824f:	41 5d                	pop    %r13
+  458251:	41 5e                	pop    %r14
+  458253:	41 5f                	pop    %r15
+  458255:	5d                   	pop    %rbp
+  458256:	c3                   	ret
+  458257:	48 8d 3d 9e a8 c3 ff 	lea    -0x3c5762(%rip),%rdi        # 92afc <anon.917a7ea8029fa0d100e97fd00a8ca7ee.176.llvm.9188417023351715766>
+  45825e:	48 8d 0d c3 61 28 00 	lea    0x2861c3(%rip),%rcx        # 6de428 <anon.917a7ea8029fa0d100e97fd00a8ca7ee.100.llvm.9188417023351715766>
+  458265:	be 33 02 00 00       	mov    $0x233,%esi
+  45826a:	31 d2                	xor    %edx,%edx
+  45826c:	ff 15 26 f9 29 00    	call   *0x29f926(%rip)        # 6f7b98 <_DYNAMIC+0x250>
+  458272:	48 8b 91 f0 09 00 00 	mov    0x9f0(%rcx),%rdx
+  458279:	48 8b b1 40 0a 00 00 	mov    0xa40(%rcx),%rsi
+  458280:	48 0b 91 f8 09 00 00 	or     0x9f8(%rcx),%rdx
+  458287:	0f 95 c2             	setne  %dl
+  45828a:	48 39 c6             	cmp    %rax,%rsi
+  45828d:	0f 97 c0             	seta   %al
+  458290:	84 c2                	test   %al,%dl
+  458292:	0f 84 8f fe ff ff    	je     458127 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x2b7>
+  458298:	48 8d 99 30 09 00 00 	lea    0x930(%rcx),%rbx
+  45829f:	48 89 df             	mov    %rbx,%rdi
+  4582a2:	ff 15 b0 fc 29 00    	call   *0x29fcb0(%rip)        # 6f7f58 <_DYNAMIC+0x610>
+  4582a8:	48 83 f8 01          	cmp    $0x1,%rax
+  4582ac:	0f 85 dd 00 00 00    	jne    45838f <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x51f>
+  4582b2:	48 8b 04 24          	mov    (%rsp),%rax
+  4582b6:	48 3b 90 b0 09 00 00 	cmp    0x9b0(%rax),%rdx
+  4582bd:	0f 85 cc 00 00 00    	jne    45838f <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x51f>
+  4582c3:	48 89 9c 24 98 00 00 	mov    %rbx,0x98(%rsp)
+  4582ca:	00 
+  4582cb:	48 83 b8 88 0a 00 00 	cmpq   $0xfffffffffffffffd,0xa88(%rax)
+  4582d2:	fd 
+  4582d3:	0f 87 61 03 00 00    	ja     45863a <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x7ca>
+  4582d9:	4d 8d 65 02          	lea    0x2(%r13),%r12
+  4582dd:	4c 89 a4 24 00 02 00 	mov    %r12,0x200(%rsp)
+  4582e4:	00 
+  4582e5:	48 8d bc 24 00 02 00 	lea    0x200(%rsp),%rdi
+  4582ec:	00 
+  4582ed:	e8 de b5 ff ff       	call   4538d0 <_RINvNtCsgxBkk5gSRhY_4core3ptr9drop_glueNtNtCsbwUD2yxLDlz_8voteboat4raft9RaftErrorEBF_.llvm.14628662787235539929>
+  4582f2:	4c 8d bc 24 00 02 00 	lea    0x200(%rsp),%r15
+  4582f9:	00 
+  4582fa:	4c 89 ff             	mov    %r15,%rdi
+  4582fd:	48 8b 74 24 18       	mov    0x18(%rsp),%rsi
+  458302:	ff 15 90 05 2a 00    	call   *0x2a0590(%rip)        # 6f8898 <_DYNAMIC+0xf50>
+  458308:	4c 89 ff             	mov    %r15,%rdi
+  45830b:	31 f6                	xor    %esi,%esi
+  45830d:	e8 ae 60 ff ff       	call   44e3c0 <_RINvXs_NtNtNtCsgxBkk5gSRhY_4core4iter8adapters5chainINtB5_5ChainIBP_INtNtNtNtCs6i54tJFfzR_5alloc11collections5btree3map4IterNtNtCsbwUD2yxLDlz_8voteboat8identity6NodeIdNtB20_13StoreIdentityEB14_EINtNtB7_6filter6FilterINtNtB7_7flatten7FlatMapINtNtBb_6option4IterNtNtB22_10membership18JointConfigurationEB10_NCNvMs0_B4c_NtB4c_10Membership8replicas0ENCB4V_s_0EENtNtNtB9_6traits8iterator8Iterator4foldjNCINvNtB7_3map8map_foldTRB1Y_RB2F_ETB1Y_B2F_EjNCB4V_s0_0NCNvYINtB6s_3MapBO_B77_EB5J_5count0E0EB22_>
+  458312:	49 89 c7             	mov    %rax,%r15
+  458315:	48 c1 e8 3e          	shr    $0x3e,%rax
+  458319:	0f 85 03 fe ff ff    	jne    458122 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x2b2>
+  45831f:	49 c1 e7 02          	shl    $0x2,%r15
+  458323:	4d 01 f7             	add    %r14,%r15
+  458326:	0f 82 f6 fd ff ff    	jb     458122 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x2b2>
+  45832c:	4d 8d 65 02          	lea    0x2(%r13),%r12
+  458330:	4c 89 a4 24 00 02 00 	mov    %r12,0x200(%rsp)
+  458337:	00 
+  458338:	48 8d bc 24 00 02 00 	lea    0x200(%rsp),%rdi
+  45833f:	00 
+  458340:	e8 8b b5 ff ff       	call   4538d0 <_RINvNtCsgxBkk5gSRhY_4core3ptr9drop_glueNtNtCsbwUD2yxLDlz_8voteboat4raft9RaftErrorEBF_.llvm.14628662787235539929>
+  458345:	48 8b 04 24          	mov    (%rsp),%rax
+  458349:	4c 03 b8 c8 15 00 00 	add    0x15c8(%rax),%r15
+  458350:	0f 82 e4 02 00 00    	jb     45863a <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x7ca>
+  458356:	4c 89 a4 24 00 02 00 	mov    %r12,0x200(%rsp)
+  45835d:	00 
+  45835e:	48 8d bc 24 00 02 00 	lea    0x200(%rsp),%rdi
+  458365:	00 
+  458366:	e8 65 b5 ff ff       	call   4538d0 <_RINvNtCsgxBkk5gSRhY_4core3ptr9drop_glueNtNtCsbwUD2yxLDlz_8voteboat4raft9RaftErrorEBF_.llvm.14628662787235539929>
+  45836b:	48 8b 0c 24          	mov    (%rsp),%rcx
+  45836f:	48 8b 81 80 0a 00 00 	mov    0xa80(%rcx),%rax
+  458376:	48 8b 91 f0 09 00 00 	mov    0x9f0(%rcx),%rdx
+  45837d:	48 0b 91 f8 09 00 00 	or     0x9f8(%rcx),%rdx
+  458384:	74 11                	je     458397 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x527>
+  458386:	48 8b b1 40 0a 00 00 	mov    0xa40(%rcx),%rsi
+  45838d:	eb 0a                	jmp    458399 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x529>
+  45838f:	4c 89 ff             	mov    %r15,%rdi
+  458392:	e9 90 fd ff ff       	jmp    458127 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x2b7>
+  458397:	31 f6                	xor    %esi,%esi
+  458399:	48 85 c0             	test   %rax,%rax
+  45839c:	74 1f                	je     4583bd <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x54d>
+  45839e:	48 8b 89 78 0a 00 00 	mov    0xa78(%rcx),%rcx
+  4583a5:	48 c1 e0 06          	shl    $0x6,%rax
+  4583a9:	48 8d 14 01          	lea    (%rcx,%rax,1),%rdx
+  4583ad:	48 83 c2 c0          	add    $0xffffffffffffffc0,%rdx
+  4583b1:	48 85 d2             	test   %rdx,%rdx
+  4583b4:	74 07                	je     4583bd <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x54d>
+  4583b6:	48 01 c1             	add    %rax,%rcx
+  4583b9:	48 8b 71 f0          	mov    -0x10(%rcx),%rsi
+  4583bd:	48 89 f5             	mov    %rsi,%rbp
+  4583c0:	48 ff c5             	inc    %rbp
+  4583c3:	0f 84 7d 02 00 00    	je     458646 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x7d6>
+  4583c9:	48 89 74 24 10       	mov    %rsi,0x10(%rsp)
+  4583ce:	4c 89 a4 24 00 02 00 	mov    %r12,0x200(%rsp)
+  4583d5:	00 
+  4583d6:	48 8d bc 24 00 02 00 	lea    0x200(%rsp),%rdi
+  4583dd:	00 
+  4583de:	e8 ed b4 ff ff       	call   4538d0 <_RINvNtCsgxBkk5gSRhY_4core3ptr9drop_glueNtNtCsbwUD2yxLDlz_8voteboat4raft9RaftErrorEBF_.llvm.14628662787235539929>
+  4583e3:	48 8b 04 24          	mov    (%rsp),%rax
+  4583e7:	48 8d b0 38 15 00 00 	lea    0x1538(%rax),%rsi
+  4583ee:	48 8d bc 24 10 01 00 	lea    0x110(%rsp),%rdi
+  4583f5:	00 
+  4583f6:	48 89 74 24 40       	mov    %rsi,0x40(%rsp)
+  4583fb:	e8 b0 4b f6 ff       	call   3bcfb0 <_RNvXs0_NtNtNtCs6i54tJFfzR_5alloc11collections5btree3mapINtB5_8BTreeMapNtNtCsbwUD2yxLDlz_8voteboat8identity6NodeIdyENtNtCsgxBkk5gSRhY_4core5clone5Clone5cloneB1a_>
+  458400:	48 c7 84 24 90 05 00 	movq   $0x0,0x590(%rsp)
+  458407:	00 00 00 00 00 
+  45840c:	48 c7 84 24 a0 05 00 	movq   $0x0,0x5a0(%rsp)
+  458413:	00 00 00 00 00 
+  458418:	48 8b 34 24          	mov    (%rsp),%rsi
+  45841c:	48 8b 86 b0 09 00 00 	mov    0x9b0(%rsi),%rax
+  458423:	48 89 44 24 28       	mov    %rax,0x28(%rsp)
+  458428:	48 8d bc 24 00 02 00 	lea    0x200(%rsp),%rdi
+  45842f:	00 
+  458430:	48 8b 54 24 20       	mov    0x20(%rsp),%rdx
+  458435:	ff 15 95 09 2a 00    	call   *0x2a0995(%rip)        # 6f8dd0 <_DYNAMIC+0x1488>
+  45843b:	48 8b 84 24 00 02 00 	mov    0x200(%rsp),%rax
+  458442:	00 
+  458443:	48 83 f8 ff          	cmp    $0xffffffffffffffff,%rax
+  458447:	74 18                	je     458461 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x5f1>
+  458449:	4c 8b bc 24 08 02 00 	mov    0x208(%rsp),%r15
+  458450:	00 
+  458451:	4c 8b a4 24 10 02 00 	mov    0x210(%rsp),%r12
+  458458:	00 
+  458459:	49 89 c5             	mov    %rax,%r13
+  45845c:	e9 76 04 00 00       	jmp    4588d7 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0xa67>
+  458461:	48 8b 04 24          	mov    (%rsp),%rax
+  458465:	48 8d 98 68 15 00 00 	lea    0x1568(%rax),%rbx
+  45846c:	48 8b 44 24 20       	mov    0x20(%rsp),%rax
+  458471:	48 8d b0 e8 00 00 00 	lea    0xe8(%rax),%rsi
+  458478:	48 89 df             	mov    %rbx,%rdi
+  45847b:	48 89 74 24 30       	mov    %rsi,0x30(%rsp)
+  458480:	e8 db e9 f4 ff       	call   3a6e60 <_RINvMsi_NtNtNtCs6i54tJFfzR_5alloc11collections5btree3mapINtB6_8BTreeMapNtNtCsbwUD2yxLDlz_8voteboat8identity6NodeIdNtNtB1b_4raft11ReplicationE3getB17_EB1b_>
+  458485:	49 89 c7             	mov    %rax,%r15
+  458488:	4c 89 ac 24 00 02 00 	mov    %r13,0x200(%rsp)
+  45848f:	00 
+  458490:	48 85 c0             	test   %rax,%rax
+  458493:	0f 84 3e 04 00 00    	je     4588d7 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0xa67>
+  458499:	48 8d bc 24 00 02 00 	lea    0x200(%rsp),%rdi
+  4584a0:	00 
+  4584a1:	e8 2a b4 ff ff       	call   4538d0 <_RINvNtCsgxBkk5gSRhY_4core3ptr9drop_glueNtNtCsbwUD2yxLDlz_8voteboat4raft9RaftErrorEBF_.llvm.14628662787235539929>
+  4584a6:	48 8b 7c 24 20       	mov    0x20(%rsp),%rdi
+  4584ab:	48 8b 44 24 28       	mov    0x28(%rsp),%rax
+  4584b0:	48 39 87 f8 00 00 00 	cmp    %rax,0xf8(%rdi)
+  4584b7:	0f 85 1a 04 00 00    	jne    4588d7 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0xa67>
+  4584bd:	48 8b 44 24 10       	mov    0x10(%rsp),%rax
+  4584c2:	48 89 84 24 08 02 00 	mov    %rax,0x208(%rsp)
+  4584c9:	00 
+  4584ca:	66 c7 84 24 00 02 00 	movw   $0x10a,0x200(%rsp)
+  4584d1:	00 0a 01 
+  4584d4:	48 8d b4 24 00 02 00 	lea    0x200(%rsp),%rsi
+  4584db:	00 
+  4584dc:	e8 af 28 02 00       	call   47ad90 <_RNvXsc_NtCsbwUD2yxLDlz_8voteboat4raftNtB5_3RpcNtNtCsgxBkk5gSRhY_4core3cmp9PartialEq2eq>
+  4584e1:	84 c0                	test   %al,%al
+  4584e3:	0f 84 e1 03 00 00    	je     4588ca <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0xa5a>
+  4584e9:	48 8d bc 24 00 02 00 	lea    0x200(%rsp),%rdi
+  4584f0:	00 
+  4584f1:	e8 3a a8 ff ff       	call   452d30 <_RINvNtCsgxBkk5gSRhY_4core3ptr9drop_glueNtNtCsbwUD2yxLDlz_8voteboat4raft3RpcEBF_.llvm.14628662787235539929>
+  4584f6:	49 8b 4f 30          	mov    0x30(%r15),%rcx
+  4584fa:	48 8b 44 24 20       	mov    0x20(%rsp),%rax
+  4584ff:	48 3b 88 d0 00 00 00 	cmp    0xd0(%rax),%rcx
+  458506:	0f 85 cb 03 00 00    	jne    4588d7 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0xa67>
+  45850c:	4c 89 fa             	mov    %r15,%rdx
+  45850f:	48 89 5c 24 68       	mov    %rbx,0x68(%rsp)
+  458514:	66 41 0f 6f 07       	movdqa (%r15),%xmm0
+  458519:	66 0f 74 80 a0 00 00 	pcmpeqb 0xa0(%rax),%xmm0
+  458520:	00 
+  458521:	66 0f d7 c8          	pmovmskb %xmm0,%ecx
+  458525:	81 f9 ff ff 00 00    	cmp    $0xffff,%ecx
+  45852b:	0f 85 a6 03 00 00    	jne    4588d7 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0xa67>
+  458531:	48 8b 4a 10          	mov    0x10(%rdx),%rcx
+  458535:	48 3b 88 b0 00 00 00 	cmp    0xb0(%rax),%rcx
+  45853c:	0f 85 95 03 00 00    	jne    4588d7 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0xa67>
+  458542:	49 8b 4f 20          	mov    0x20(%r15),%rcx
+  458546:	48 8b 44 24 20       	mov    0x20(%rsp),%rax
+  45854b:	48 3b 88 c0 00 00 00 	cmp    0xc0(%rax),%rcx
+  458552:	0f 85 7f 03 00 00    	jne    4588d7 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0xa67>
+  458558:	49 8b 8f c0 00 00 00 	mov    0xc0(%r15),%rcx
+  45855f:	48 8b 44 24 20       	mov    0x20(%rsp),%rax
+  458564:	48 3b 88 e0 00 00 00 	cmp    0xe0(%rax),%rcx
+  45856b:	0f                   	.byte 0xf
+  45856c:	85 66 03             	test   %esp,0x3(%rsi)
+	...

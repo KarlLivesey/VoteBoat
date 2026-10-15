@@ -1,0 +1,3 @@
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native463-linux/diagnostics/primary/tcp-storage: 128 scheduled offers, 81 admissions, 81 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=500.000 admitted_during=316.406 applied_during=66.406 applied_drain=532.461 applied_total=215.313 ops/s; window_refused=47 backlog_at_horizon=64
+storage measured deltas: append_calls=21 units=21 commands=243 mean_units=1.000 append_ms=0.415 barriers=21 mean_appends_per_barrier=1.000 mean_units_per_barrier=1.000 barrier_ms=634.576 sync_ms=211.271 publish_ms=423.102 histogram=1:21

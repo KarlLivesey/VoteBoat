@@ -1,0 +1,42 @@
+
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native463-linux/artifacts/native/native_benchmark:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000004584f0 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0x680>:
+  4584f0:	00 e8                	add    %ch,%al
+  4584f2:	3a a8 ff ff 49 8b    	cmp    -0x74b60001(%rax),%ch
+  4584f8:	4f 30 48 8b          	rex.WRXB xor %r9b,-0x75(%r8)
+  4584fc:	44 24 20             	rex.R and $0x20,%al
+  4584ff:	48 3b 88 d0 00 00 00 	cmp    0xd0(%rax),%rcx
+  458506:	0f 85 cb 03 00 00    	jne    4588d7 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0xa67>
+  45850c:	4c 89 fa             	mov    %r15,%rdx
+  45850f:	48 89 5c 24 68       	mov    %rbx,0x68(%rsp)
+  458514:	66 41 0f 6f 07       	movdqa (%r15),%xmm0
+  458519:	66 0f 74 80 a0 00 00 	pcmpeqb 0xa0(%rax),%xmm0
+  458520:	00 
+  458521:	66 0f d7 c8          	pmovmskb %xmm0,%ecx
+  458525:	81 f9 ff ff 00 00    	cmp    $0xffff,%ecx
+  45852b:	0f 85 a6 03 00 00    	jne    4588d7 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0xa67>
+  458531:	48 8b 4a 10          	mov    0x10(%rdx),%rcx
+  458535:	48 3b 88 b0 00 00 00 	cmp    0xb0(%rax),%rcx
+  45853c:	0f 85 95 03 00 00    	jne    4588d7 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0xa67>
+  458542:	49 8b 4f 20          	mov    0x20(%r15),%rcx
+  458546:	48 8b 44 24 20       	mov    0x20(%rsp),%rax
+  45854b:	48 3b 88 c0 00 00 00 	cmp    0xc0(%rax),%rcx
+  458552:	0f 85 7f 03 00 00    	jne    4588d7 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0xa67>
+  458558:	49 8b 8f c0 00 00 00 	mov    0xc0(%r15),%rcx
+  45855f:	48 8b 44 24 20       	mov    0x20(%rsp),%rax
+  458564:	48 3b 88 e0 00 00 00 	cmp    0xe0(%rax),%rcx
+  45856b:	0f 85 66 03 00 00    	jne    4588d7 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0xa67>
+  458571:	49 8b 47 40          	mov    0x40(%r15),%rax
+  458575:	49 0b 47 48          	or     0x48(%r15),%rax
+  458579:	0f 85 58 03 00 00    	jne    4588d7 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0xa67>
+  45857f:	48 8b 44 24 10       	mov    0x10(%rsp),%rax
+  458584:	49 39 87 d0 00 00 00 	cmp    %rax,0xd0(%r15)
+  45858b:	0f 85 46 03 00 00    	jne    4588d7 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0xa67>
+  458591:	49 8b 87 c8 00 00 00 	mov    0xc8(%r15),%rax
+  458598:	48 ff c8             	dec    %rax
+  45859b:	48 39 e8             	cmp    %rbp,%rax
+  45859e:	0f 83 33 03 00 00    	jae    4588d7 <_RNvMNtNtCsbwUD2yxLDlz_8voteboat4raft13ready_repliesNtB4_4Raft27propose_after_ready_replies+0xa67>

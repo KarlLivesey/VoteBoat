@@ -1,0 +1,370 @@
+diff --git a/docs/IMPLEMENTATION.md b/docs/IMPLEMENTATION.md
+index b2011315..ac2764e5 100644
+--- a/docs/IMPLEMENTATION.md
++++ b/docs/IMPLEMENTATION.md
+@@ -743,7 +743,7 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
+ 
+ | Deliverable | Purpose | Dependencies | Completion checks | Advances |
+ | --- | --- | --- | --- | --- |
+-| Current: measure actual joined work and durable/fairness effects | Establish whether the implemented ordering removes the measured stage | Published checked463, actual join counters, fresh asserted artifacts, qualified458 workload, original Mac455 qualification | Repeated disabled/enabled completed originals/s, p99/refusals/physical barriers/join counts on both hosts; retain losses, no quantum/guard tuning; genuine weighted headroom/fairness follows useful improvement | P9.1/P9.2/P9.3 |
++| Current: separate acknowledged commit and append frontiers, then measure actual joined work | Remove the concrete full-tip refusal found in463 diagnostics while retaining ordered commit batches | Published checked463, exact-primary traces, [464 schema](../validation/performance/slice464/SCHEMA.md), fresh asserted artifacts, original Mac455 qualification | Differential prefix/catch-up/durability/recovery controls, strict checks and publication; real activation before repeated disabled/enabled completed originals/s, p99/refusals/barriers on both hosts; retain losses | P9.1/P9.2/P9.3 |
+ | Next: remove the next measured limiting stage | Increase useful work after the candidate is retained or rejected | Actual disabled/enabled join counts, completed rates/tails/refusals/physical barriers and current profile; schema before editing | Choose from measured ordering, batching, ownership or waiting costs; preserve every original result and partial-progress/restart contract; checked published slice and repeated paired evidence without retuning rejected experiments | P9.1/P9.2/P9.3 |
+ | Following: full curve, sustainable headroom and composition qualification | Satisfy the entire performance objective beyond the current experiment | Retained measured improvements, qualified weighted fixture, source/artifact/host identities and stable maintenance | All seven required framework cells on both hosts with healthy margin; sustained memory/debt, durable applications/headroom/skew/fairness, independent placement/shared barriers and P8 composition; preserve every outcome/fence/retry | P9.0/P9.1/P9.2/P9.3/P9.4 |
+ 
+diff --git a/docs/P9.md b/docs/P9.md
+index e4b18f11..8547d12c 100644
+--- a/docs/P9.md
++++ b/docs/P9.md
+@@ -1961,3 +1961,18 @@ a diagnostic source-scope overlap and both strict failures remain. No performanc
+ result or Mac463 qualification is claimed. Next is fresh published-source artifact
+ setup and same-source --ready-replies0/2 actual joining/rates/tails/refusals/barriers;
+ no quantum, maintenance or guard tuning. Full macro acceptance remains open.
++
++## Slice464 schema — distinguish commit prefix and append base
++
++[Before-edit schema](../validation/performance/slice464/SCHEMA.md) follows actual
++463 disabled/enabled TCP/QUIC functional controls: all four processes/validators
++pass but every joined counter is zero. Same-ELF headless debugger data identifies
++full-tip reply equality refusing exact primary ranges behind the newer durable
++tip. Of six captured matching scopes, three exceed the paired commit; later
++gates and unperturbed opportunity frequency remain unproven. The selected fix
++keeps the acknowledged current-term policy frontier, old-tip append base and
++per-peer catch-up cursor distinct. Later selected replies cannot introduce a
++second commit batch. Full-old-tip early replication authority stays unchanged.
++No performance gain is inferred; the linked current mini plan now includes this
++concrete fix before actual activation and paired measurement. Macro scope is
++reviewed and unchanged; all sustained/both-host/composition requirements remain.
+diff --git a/src/raft/ready_replies.rs b/src/raft/ready_replies.rs
+index bdd48b78..ea7c8ef5 100644
+--- a/src/raft/ready_replies.rs
++++ b/src/raft/ready_replies.rs
+@@ -3,6 +3,11 @@
+ //! Read-only planning of ordered ready replies and an ordinary command prefix.
+ use super::*;
+ 
++struct ReadyReplyPlan {
++    progress: BTreeMap<NodeId, u64>,
++    commit_index: u64,
++}
++
+ impl Raft {
+     /// No queued input or Core field is changed on Err. The runtime retains its
+     /// original inputs and executes the ordinary first event on any refusal.
+@@ -12,7 +17,7 @@ impl Raft {
+         proposals: Vec<Proposal>,
+     ) -> Result<Vec<Effect>, RaftError> {
+         self.ready_reply_state(replies.len())?;
+-        let progress = self.ready_reply_progress(replies)?;
++        let plan = self.ready_reply_progress(replies)?;
+         let first = self.validate_proposal_batch(&proposals, proposals.capacity())?;
+         self.validate_conversion_peak(&proposals, proposals.capacity())?;
+         let entries = proposals
+@@ -31,7 +36,7 @@ impl Raft {
+             group: self.durable.bootstrap.group,
+             expected_revision: self.durable.revision,
+             hard_state: self.durable.hard_state,
+-            commit_index: self.durable.last_index(),
++            commit_index: plan.commit_index,
+             suffix: Some(Suffix {
+                 from: first,
+                 entries,
+@@ -51,10 +56,11 @@ impl Raft {
+         // Allocate the outward container before the sole infallible promotion.
+         let effects = vec![Effect::Persist(update)];
+         self.batch_limits_locked = true;
+-        self.progress = progress;
++        self.progress = plan.progress;
+         for reply in replies {
+             self.retire_replication(reply.from);
+-            self.next_index.insert(reply.from, first);
++            self.next_index
++                .insert(reply.from, self.progress[&reply.from] + 1);
+         }
+         self.pending = Some(Pending {
+             next,
+@@ -111,14 +117,12 @@ impl Raft {
+         Ok(())
+     }
+ 
+-    fn ready_reply_progress(
+-        &self,
+-        replies: &[Message],
+-    ) -> Result<BTreeMap<NodeId, u64>, RaftError> {
++    fn ready_reply_progress(&self, replies: &[Message]) -> Result<ReadyReplyPlan, RaftError> {
+         let tip = self.durable.last_index();
+         let next = tip.checked_add(1).ok_or(RaftError::Exhausted)?;
+         let mut progress = self.progress.clone();
+         let mut peers = BTreeSet::new();
++        let mut commit_index = self.durable.commit_index;
+         for (index, reply) in replies.iter().enumerate() {
+             self.authenticated_message_source(reply)?;
+             let sent = self
+@@ -129,25 +133,45 @@ impl Raft {
+                 || reply.rpc
+                     != (Rpc::Appended {
+                         success: true,
+-                        matching_index: tip,
++                        matching_index: sent.end,
+                     })
+                 || sent.context != reply.context
+                 || sent.configuration != reply.configuration
+                 || sent.snapshot.is_some()
+-                || sent.end != tip
++                || sent.end > tip
+                 || sent.start == 0
+-                || sent.start > next
++                || sent.start > sent.end.saturating_add(1)
+                 || self.empty_append_aliases.contains_key(&reply.from)
+                 || !peers.insert(reply.from)
+             {
+                 return Err(RaftError::InvalidMessage);
+             }
+-            progress.insert(reply.from, tip);
+-            if index == 0 && self.membership.frontier(&progress) < tip {
++            let prefix = progress[&reply.from].max(sent.end);
++            progress.insert(reply.from, prefix);
++            let frontier = self.membership.frontier(&progress).min(tip);
++            if index == 0 {
++                if frontier <= commit_index
++                    || self.durable.term_at(frontier) != Some(self.durable.hard_state.term)
++                {
++                    return Err(RaftError::Busy);
++                }
++                commit_index = frontier;
++            } else if frontier != commit_index {
++                // Preserve the serialized application's commit-batch boundary.
+                 return Err(RaftError::Busy);
+             }
+         }
+-        Ok(progress)
++        // Also prove every installed catch-up cursor remains representable.
++        for reply in replies {
++            progress[&reply.from]
++                .checked_add(1)
++                .filter(|cursor| *cursor <= next)
++                .ok_or(RaftError::Exhausted)?;
++        }
++        Ok(ReadyReplyPlan {
++            progress,
++            commit_index,
++        })
+     }
+ }
+ 
+diff --git a/src/raft/ready_replies/gates.rs b/src/raft/ready_replies/gates.rs
+index 5d5d7818..e2f83998 100644
+--- a/src/raft/ready_replies/gates.rs
++++ b/src/raft/ready_replies/gates.rs
+@@ -3,7 +3,7 @@
+ //! Boundary refusals retain exact original receive scopes and canonical state.
+ use super::*;
+ 
+-fn rejected(core: &mut Raft, replies: &[Message], proposals: Vec<Proposal>) {
++pub(super) fn rejected(core: &mut Raft, replies: &[Message], proposals: Vec<Proposal>) {
+     let before = core.state().clone();
+     let progress = core.progress.clone();
+     let next = core.next_index.clone();
+diff --git a/src/raft/ready_replies/native.rs b/src/raft/ready_replies/native.rs
+index e3cf2da4..eec65a51 100644
+--- a/src/raft/ready_replies/native.rs
++++ b/src/raft/ready_replies/native.rs
+@@ -61,7 +61,7 @@ impl JournalIo for ModelIo {
+         Ok(())
+     }
+ }
+-fn seed(core: &Raft) -> (ModelIo, NativeLogStore<ModelIo>) {
++fn seed(core: &Raft, partial_prefix: bool) -> (ModelIo, NativeLogStore<ModelIo>) {
+     let io = ModelIo::default();
+     let mut store = NativeLogStore::create(io.clone(), core.binding.identity, core.limits).unwrap();
+     let group = core.state().bootstrap.group;
+@@ -69,10 +69,12 @@ fn seed(core: &Raft) -> (ModelIo, NativeLogStore<ModelIo>) {
+         .append_batch(vec![LogMutation::Create(core.state().bootstrap.clone())])
+         .unwrap();
+     store.barrier(&tickets).unwrap();
+-    for (from, entries) in [
+-        (1, core.state().entries[..1].to_vec()),
+-        (2, core.state().entries[1..].to_vec()),
+-    ] {
++    let ends: &[usize] = if partial_prefix { &[1, 3, 5] } else { &[1, 3] };
++    let mut first = 0;
++    for &end in ends {
++        let from = first as u64 + 1;
++        let entries = core.state().entries[first..end].to_vec();
++        first = end;
+         let current = store.state(group).unwrap();
+         let update = LogUpdate {
+             group,
+@@ -94,56 +96,86 @@ fn seed(core: &Raft) -> (ModelIo, NativeLogStore<ModelIo>) {
+ 
+ #[test]
+ fn native_power_loss_recovers_combined_transition_atomically_and_failed_publication_fences() {
++    check_power_loss(false);
++}
++
++pub(super) fn check_power_loss(partial_prefix: bool) {
+     for phase in 0..4 {
+-        let (mut core, replies) = ready(0);
+-        let (io, mut store) = seed(&core);
+-        let before = core.state().clone();
+-        let combined = update(
+-            core.propose_after_ready_replies(&replies, vec![proposal(12), proposal(13)])
+-                .unwrap(),
++        check_phase(partial_prefix, phase);
++    }
++}
++
++fn check_phase(partial_prefix: bool, phase: u8) {
++    let (mut core, replies) = if partial_prefix { partial(0) } else { ready(0) };
++    let (io, mut store) = seed(&core, partial_prefix);
++    let before = core.state().clone();
++    let first_new = if partial_prefix { 14 } else { 12 };
++    let combined = update(
++        core.propose_after_ready_replies(
++            &replies,
++            vec![proposal(first_new), proposal(first_new + 1)],
++        )
++        .unwrap(),
++    );
++    assert_eq!(combined.commit_index, 3);
++    assert_eq!(
++        combined.suffix.as_ref().unwrap().from,
++        before.last_index() + 1
++    );
++    let tickets = store
++        .append_batch(vec![LogMutation::Update(combined)])
++        .unwrap();
++    let early = core.replicate_admitted(tickets[0]).unwrap();
++    if partial_prefix {
++        assert!(early.is_empty());
++    }
++    assert_eq!(core.state(), &before);
++    assert_eq!(core.progress[&core.node], before.last_index());
++    if phase == 1 {
++        let effects = core.complete(&store.barrier(&tickets).unwrap()).unwrap();
++        assert!(matches!(effects.first(), Some(Effect::Committed(entries)) if entries.len() == 2));
++    } else if phase >= 2 {
++        io.0.borrow_mut().publication_fault = phase - 1;
++        assert!(store.barrier(&tickets).is_err());
++        assert_eq!(
++            store.state(before.bootstrap.group),
++            Err(StorageError::Fenced)
+         );
+-        let tickets = store
+-            .append_batch(vec![LogMutation::Update(combined)])
+-            .unwrap();
+-        core.replicate_admitted(tickets[0]).unwrap();
+-        if phase == 1 {
+-            let effects = core.complete(&store.barrier(&tickets).unwrap()).unwrap();
+-            assert!(
+-                matches!(effects.first(), Some(Effect::Committed(entries)) if entries.len() == 2)
+-            );
+-        } else if phase >= 2 {
+-            io.0.borrow_mut().publication_fault = phase - 1;
+-            assert!(store.barrier(&tickets).is_err());
+-            assert_eq!(
+-                store.state(before.bootstrap.group),
+-                Err(StorageError::Fenced)
+-            );
+-            core.storage_failed();
+-            assert_eq!(core.state(), &before);
+-            assert_eq!(
+-                core.complete(&DurableLog {
+-                    tickets: tickets.clone()
+-                }),
+-                Err(RaftError::Fenced)
+-            );
+-        } else {
+-            assert_eq!(core.state(), &before);
+-        }
+-        drop(store);
+-        io.power_loss();
+-        let recovered = NativeLogStore::recover(io, core.binding.identity, core.limits).unwrap();
+-        let state = recovered.state(before.bootstrap.group).unwrap();
+-        assert_eq!(state.commit_index, if phase == 0 { 1 } else { 3 });
+-        assert_eq!(state.last_index(), if phase == 0 { 3 } else { 5 });
+-        let mut restarted =
+-            Raft::recover(core.node, recovered.binding(), state, core.limits).unwrap();
++        core.storage_failed();
++        assert_eq!(core.state(), &before);
+         assert_eq!(
+-            restarted.complete(&DurableLog { tickets }),
+-            Err(RaftError::WrongCompletion)
++            core.complete(&DurableLog {
++                tickets: tickets.clone()
++            }),
++            Err(RaftError::Fenced)
+         );
+-        let mut app = Counter::new(16).unwrap();
+-        let receipts = app.apply_batch(restarted.replay_committed()).unwrap();
+-        assert_eq!(receipts.len(), if phase == 0 { 0 } else { 2 });
+-        assert_eq!(app.applied_index(), if phase == 0 { 1 } else { 3 });
++    } else {
++        assert_eq!(core.state(), &before);
+     }
++    drop(store);
++    io.power_loss();
++    let recovered = NativeLogStore::recover(io, core.binding.identity, core.limits).unwrap();
++    let state = recovered.state(before.bootstrap.group).unwrap();
++    assert_eq!(state.commit_index, if phase == 0 { 1 } else { 3 });
++    assert_eq!(
++        state.last_index(),
++        before.last_index() + if phase == 0 { 0 } else { 2 }
++    );
++    assert_eq!(state.entries[..before.entries.len()], before.entries);
++    let mut restarted = Raft::recover(core.node, recovered.binding(), state, core.limits).unwrap();
++    assert_eq!(
++        restarted.complete(&DurableLog { tickets }),
++        Err(RaftError::WrongCompletion)
++    );
++    let mut app = Counter::new(16).unwrap();
++    let receipts = app.apply_batch(restarted.replay_committed()).unwrap();
++    assert_eq!(receipts.len(), if phase == 0 { 0 } else { 2 });
++    assert_eq!(app.applied_index(), if phase == 0 { 1 } else { 3 });
++    assert_eq!(
++        receipts
++            .iter()
++            .map(|receipt| receipt.operation.get())
++            .collect::<Vec<_>>(),
++        if phase == 0 { vec![] } else { vec![10, 11] }
++    );
+ }
+diff --git a/src/raft/ready_replies/tests.rs b/src/raft/ready_replies/tests.rs
+index beac3f5d..c0a6cc6f 100644
+--- a/src/raft/ready_replies/tests.rs
++++ b/src/raft/ready_replies/tests.rs
+@@ -10,6 +10,11 @@ mod gates;
+ #[cfg(feature = "native")]
+ #[path = "native.rs"]
+ mod native;
++#[path = "partial.rs"]
++mod partial;
++#[cfg(feature = "native")]
++#[path = "partial_native.rs"]
++mod partial_native;
+ 
+ fn node(id: u64) -> NodeId {
+     NodeId::new(id).unwrap()
+@@ -126,6 +131,23 @@ fn ready(kind: usize) -> (Raft, Vec<Message>) {
+         .collect();
+     (core, replies)
+ }
++fn partial(kind: usize) -> (Raft, Vec<Message>) {
++    let (mut core, replies) = ready(kind);
++    let append = core
++        .propose_batch(vec![proposal(12), proposal(13)])
++        .unwrap();
++    durable(&mut core, append);
++    assert_eq!(core.state().commit_index, 1);
++    assert_eq!(core.state().last_index(), 5);
++    assert!(replies.iter().all(|reply| matches!(
++        reply.rpc,
++        Rpc::Appended {
++            matching_index: 3,
++            ..
++        }
++    )));
++    (core, replies)
++}
+ fn apply(counter: &mut Counter, effects: &[Effect]) -> Vec<crate::application::CounterReceipt> {
+     let mut receipts = Vec::new();
+     for effect in effects {

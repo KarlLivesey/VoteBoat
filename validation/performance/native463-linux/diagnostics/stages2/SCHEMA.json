@@ -1,0 +1,29 @@
+{
+  "scope": "Instrumented stage entry counts on SAME published native ELF; debugger perturbs scheduling. Not capacity or unperturbed frequency. No inferred fallback predicate beyond stage reachability.",
+  "source_commit": "85eaf3e41ffe9488f78b75b02521ea2bbbc80c3a",
+  "executable_sha256": "9a49d4a320f1ad140663301fb886e4d9ba556a018f292e0f5235f5477a6b7752",
+  "rva": {
+    "::joined_reservation@00000000002cec50": 2944080,
+    "::joined_reservation@00000000003154a0": 3232928,
+    "::reservation@0000000000450330": 4522800,
+    "::copy_proposals@00000000004505d0": 4523472,
+    "::selection@0000000000450900": 4524288,
+    "::propose_after_ready_replies@0000000000457e70": 4554352
+  },
+  "command": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native463-linux/artifacts/native/native_benchmark",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native463-linux/diagnostics/stages2/tcp-storage",
+    "tcp",
+    "128",
+    "64",
+    "1",
+    "--offered",
+    "500",
+    "--ready-items",
+    "16",
+    "--ready-replies",
+    "2"
+  ],
+  "failure_cleanup": "GDB controls only its own child; no attach/kill of existing jobs, no overwrite/restart/policy change. Keep raw errors and original live handle; validate after actual END.",
+  "predecessor": "stages original exit1 before main/WAL creation: rejected incorrect assumption of equal map-start/file-offset bias across ELF segments"
+}

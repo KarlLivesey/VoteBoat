@@ -1,0 +1,347 @@
+{
+  "counts": {
+    "::joined_reservation@00000000002cec50": 98,
+    "::joined_reservation@00000000003154a0": 130,
+    "::reservation@0000000000450330": 56,
+    "::copy_proposals@00000000004505d0": 56,
+    "::selection@0000000000450900": 154,
+    "::propose_after_ready_replies@0000000000457e70": 56,
+    "Core_before_progress@45836b": 56,
+    "Core_tip_commit_compare@4580f4": 56,
+    "Core_rpc_equality_call@4584dc": 56,
+    "Core_rpc_equality_result@4584e1": 56
+  },
+  "observations": {
+    "tip_commit": [
+      {
+        "rsi_tip": 17,
+        "rax_commit": 1
+      },
+      {
+        "rsi_tip": 33,
+        "rax_commit": 1
+      },
+      {
+        "rsi_tip": 33,
+        "rax_commit": 17
+      },
+      {
+        "rsi_tip": 70,
+        "rax_commit": 65
+      },
+      {
+        "rsi_tip": 70,
+        "rax_commit": 66
+      },
+      {
+        "rsi_tip": 76,
+        "rax_commit": 66
+      },
+      {
+        "rsi_tip": 76,
+        "rax_commit": 66
+      },
+      {
+        "rsi_tip": 78,
+        "rax_commit": 66
+      },
+      {
+        "rsi_tip": 78,
+        "rax_commit": 70
+      },
+      {
+        "rsi_tip": 85,
+        "rax_commit": 70
+      },
+      {
+        "rsi_tip": 85,
+        "rax_commit": 78
+      },
+      {
+        "rsi_tip": 92,
+        "rax_commit": 78
+      },
+      {
+        "rsi_tip": 92,
+        "rax_commit": 85
+      },
+      {
+        "rsi_tip": 97,
+        "rax_commit": 85
+      },
+      {
+        "rsi_tip": 97,
+        "rax_commit": 92
+      },
+      {
+        "rsi_tip": 101,
+        "rax_commit": 92
+      },
+      {
+        "rsi_tip": 101,
+        "rax_commit": 92
+      },
+      {
+        "rsi_tip": 102,
+        "rax_commit": 92
+      },
+      {
+        "rsi_tip": 102,
+        "rax_commit": 97
+      },
+      {
+        "rsi_tip": 107,
+        "rax_commit": 97
+      },
+      {
+        "rsi_tip": 107,
+        "rax_commit": 102
+      },
+      {
+        "rsi_tip": 112,
+        "rax_commit": 102
+      },
+      {
+        "rsi_tip": 112,
+        "rax_commit": 107
+      },
+      {
+        "rsi_tip": 116,
+        "rax_commit": 107
+      },
+      {
+        "rsi_tip": 116,
+        "rax_commit": 112
+      },
+      {
+        "rsi_tip": 121,
+        "rax_commit": 112
+      },
+      {
+        "rsi_tip": 121,
+        "rax_commit": 116
+      },
+      {
+        "rsi_tip": 126,
+        "rax_commit": 116
+      },
+      {
+        "rsi_tip": 126,
+        "rax_commit": 121
+      },
+      {
+        "rsi_tip": 129,
+        "rax_commit": 121
+      },
+      {
+        "rsi_tip": 129,
+        "rax_commit": 121
+      },
+      {
+        "rsi_tip": 131,
+        "rax_commit": 121
+      }
+    ],
+    "rpc_compare": [
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 1,
+        "expected_tip_u64_at8": 17
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 17,
+        "expected_tip_u64_at8": 33
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 17,
+        "expected_tip_u64_at8": 33
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 66,
+        "expected_tip_u64_at8": 70
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 66,
+        "expected_tip_u64_at8": 70
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 66,
+        "expected_tip_u64_at8": 76
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 66,
+        "expected_tip_u64_at8": 76
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 70,
+        "expected_tip_u64_at8": 78
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 70,
+        "expected_tip_u64_at8": 78
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 78,
+        "expected_tip_u64_at8": 85
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 78,
+        "expected_tip_u64_at8": 85
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 85,
+        "expected_tip_u64_at8": 92
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 85,
+        "expected_tip_u64_at8": 92
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 92,
+        "expected_tip_u64_at8": 97
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 92,
+        "expected_tip_u64_at8": 97
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 92,
+        "expected_tip_u64_at8": 101
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 92,
+        "expected_tip_u64_at8": 101
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 97,
+        "expected_tip_u64_at8": 102
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 97,
+        "expected_tip_u64_at8": 102
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 102,
+        "expected_tip_u64_at8": 107
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 102,
+        "expected_tip_u64_at8": 107
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 107,
+        "expected_tip_u64_at8": 112
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 107,
+        "expected_tip_u64_at8": 112
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 112,
+        "expected_tip_u64_at8": 116
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 112,
+        "expected_tip_u64_at8": 116
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 116,
+        "expected_tip_u64_at8": 121
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 116,
+        "expected_tip_u64_at8": 121
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 121,
+        "expected_tip_u64_at8": 126
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 121,
+        "expected_tip_u64_at8": 126
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 121,
+        "expected_tip_u64_at8": 129
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 121,
+        "expected_tip_u64_at8": 129
+      },
+      {
+        "actual_tag_hex": "0a01",
+        "expected_tag_hex": "0a01",
+        "actual_u64_at8": 126,
+        "expected_tip_u64_at8": 131
+      }
+    ],
+    "rpc_equal": 0,
+    "rpc_unequal": 56
+  },
+  "inferior_exit_codes": [
+    0
+  ],
+  "load_bias": "0x56139fea6000",
+  "scope": "Instrumented exact-ELF Core stage/compare observations; scheduling perturbed, not capacity or unperturbed frequency. Raw compare operands are mapped from captured disassembly; no guard change."
+}

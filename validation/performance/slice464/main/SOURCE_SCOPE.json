@@ -1,0 +1,19 @@
+{
+  "initial_inventory": "INITIAL_BEFORE.json",
+  "final_inventory": "FINAL_AFTER.json",
+  "initial_inputs": 1454,
+  "final_inputs": 1454,
+  "changed_or_new_paths": [
+    "docs/IMPLEMENTATION.md",
+    "docs/P9.md",
+    "src/raft/ready_replies.rs",
+    "src/raft/ready_replies/gates.rs",
+    "src/raft/ready_replies/native.rs",
+    "src/raft/ready_replies/partial.rs",
+    "src/raft/ready_replies/partial_native.rs",
+    "src/raft/ready_replies/tests.rs"
+  ],
+  "unchanged_initial_final": 1452,
+  "historical_versions": 30,
+  "scope": "Raw statuses/counts remain per attempt; no aggregate is relabeled as one final-source passing run."
+}

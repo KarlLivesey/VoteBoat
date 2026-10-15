@@ -1,0 +1,11 @@
+{
+  "changed_after_passed_network_checks": [
+    "src/raft/ready_replies/native.rs",
+    "src/raft/ready_replies/partial.rs"
+  ],
+  "scope": "cfg(test) assertionhelper extraction only; production/integration/build/fixture inputs exact unchanged; affected final libraries+fullhook rerun",
+  "reused_original": 48578,
+  "original_network_exit": 101,
+  "reuse": "Only successful individual test commands; failed enabled-hook never reused",
+  "final_original_handle": 36468
+}

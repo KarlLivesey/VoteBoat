@@ -10,6 +10,11 @@ mod gates;
 #[cfg(feature = "native")]
 #[path = "native.rs"]
 mod native;
+#[path = "partial.rs"]
+mod partial;
+#[cfg(feature = "native")]
+#[path = "partial_native.rs"]
+mod partial_native;
 
 fn node(id: u64) -> NodeId {
     NodeId::new(id).unwrap()
@@ -124,6 +129,23 @@ fn ready(kind: usize) -> (Raft, Vec<Message>) {
         .into_iter()
         .map(|peer| ack(&core, requests.iter().find(|m| m.to == node(peer)).unwrap()))
         .collect();
+    (core, replies)
+}
+fn partial(kind: usize) -> (Raft, Vec<Message>) {
+    let (mut core, replies) = ready(kind);
+    let append = core
+        .propose_batch(vec![proposal(12), proposal(13)])
+        .unwrap();
+    durable(&mut core, append);
+    assert_eq!(core.state().commit_index, 1);
+    assert_eq!(core.state().last_index(), 5);
+    assert!(replies.iter().all(|reply| matches!(
+        reply.rpc,
+        Rpc::Appended {
+            matching_index: 3,
+            ..
+        }
+    )));
     (core, replies)
 }
 fn apply(counter: &mut Counter, effects: &[Effect]) -> Vec<crate::application::CounterReceipt> {

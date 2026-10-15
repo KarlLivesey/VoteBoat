@@ -1,0 +1,3 @@
+Python Exception <class 'AssertionError'>: [94242332954624, 94242332958720, 94242332962816, 94242332966912]
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native463-linux/diagnostics/stages/record.gdb:31: Error in sourced command file:
+Error occurred in Python: [94242332954624, 94242332958720, 94242332962816, 94242332966912]

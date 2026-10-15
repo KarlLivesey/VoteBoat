@@ -61,7 +61,7 @@ impl JournalIo for ModelIo {
         Ok(())
     }
 }
-fn seed(core: &Raft) -> (ModelIo, NativeLogStore<ModelIo>) {
+fn seed(core: &Raft, partial_prefix: bool) -> (ModelIo, NativeLogStore<ModelIo>) {
     let io = ModelIo::default();
     let mut store = NativeLogStore::create(io.clone(), core.binding.identity, core.limits).unwrap();
     let group = core.state().bootstrap.group;
@@ -69,10 +69,12 @@ fn seed(core: &Raft) -> (ModelIo, NativeLogStore<ModelIo>) {
         .append_batch(vec![LogMutation::Create(core.state().bootstrap.clone())])
         .unwrap();
     store.barrier(&tickets).unwrap();
-    for (from, entries) in [
-        (1, core.state().entries[..1].to_vec()),
-        (2, core.state().entries[1..].to_vec()),
-    ] {
+    let ends: &[usize] = if partial_prefix { &[1, 3, 5] } else { &[1, 3] };
+    let mut first = 0;
+    for &end in ends {
+        let from = first as u64 + 1;
+        let entries = core.state().entries[first..end].to_vec();
+        first = end;
         let current = store.state(group).unwrap();
         let update = LogUpdate {
             group,
@@ -94,56 +96,96 @@ fn seed(core: &Raft) -> (ModelIo, NativeLogStore<ModelIo>) {
 
 #[test]
 fn native_power_loss_recovers_combined_transition_atomically_and_failed_publication_fences() {
+    check_power_loss(false);
+}
+
+pub(super) fn check_power_loss(partial_prefix: bool) {
     for phase in 0..4 {
-        let (mut core, replies) = ready(0);
-        let (io, mut store) = seed(&core);
-        let before = core.state().clone();
-        let combined = update(
-            core.propose_after_ready_replies(&replies, vec![proposal(12), proposal(13)])
-                .unwrap(),
-        );
-        let tickets = store
-            .append_batch(vec![LogMutation::Update(combined)])
-            .unwrap();
-        core.replicate_admitted(tickets[0]).unwrap();
-        if phase == 1 {
-            let effects = core.complete(&store.barrier(&tickets).unwrap()).unwrap();
-            assert!(
-                matches!(effects.first(), Some(Effect::Committed(entries)) if entries.len() == 2)
-            );
-        } else if phase >= 2 {
-            io.0.borrow_mut().publication_fault = phase - 1;
-            assert!(store.barrier(&tickets).is_err());
-            assert_eq!(
-                store.state(before.bootstrap.group),
-                Err(StorageError::Fenced)
-            );
-            core.storage_failed();
-            assert_eq!(core.state(), &before);
-            assert_eq!(
-                core.complete(&DurableLog {
-                    tickets: tickets.clone()
-                }),
-                Err(RaftError::Fenced)
-            );
-        } else {
-            assert_eq!(core.state(), &before);
-        }
-        drop(store);
-        io.power_loss();
-        let recovered = NativeLogStore::recover(io, core.binding.identity, core.limits).unwrap();
-        let state = recovered.state(before.bootstrap.group).unwrap();
-        assert_eq!(state.commit_index, if phase == 0 { 1 } else { 3 });
-        assert_eq!(state.last_index(), if phase == 0 { 3 } else { 5 });
-        let mut restarted =
-            Raft::recover(core.node, recovered.binding(), state, core.limits).unwrap();
-        assert_eq!(
-            restarted.complete(&DurableLog { tickets }),
-            Err(RaftError::WrongCompletion)
-        );
-        let mut app = Counter::new(16).unwrap();
-        let receipts = app.apply_batch(restarted.replay_committed()).unwrap();
-        assert_eq!(receipts.len(), if phase == 0 { 0 } else { 2 });
-        assert_eq!(app.applied_index(), if phase == 0 { 1 } else { 3 });
+        check_phase(partial_prefix, phase);
     }
+}
+
+fn check_phase(partial_prefix: bool, phase: u8) {
+    let (mut core, replies) = if partial_prefix { partial(0) } else { ready(0) };
+    let (io, mut store) = seed(&core, partial_prefix);
+    let before = core.state().clone();
+    let first_new = if partial_prefix { 14 } else { 12 };
+    let combined = update(
+        core.propose_after_ready_replies(
+            &replies,
+            vec![proposal(first_new), proposal(first_new + 1)],
+        )
+        .unwrap(),
+    );
+    assert_eq!(combined.commit_index, 3);
+    assert_eq!(
+        combined.suffix.as_ref().unwrap().from,
+        before.last_index() + 1
+    );
+    let tickets = store
+        .append_batch(vec![LogMutation::Update(combined)])
+        .unwrap();
+    let early = core.replicate_admitted(tickets[0]).unwrap();
+    if partial_prefix {
+        assert!(early.is_empty());
+    }
+    assert_eq!(core.state(), &before);
+    assert_eq!(core.progress[&core.node], before.last_index());
+    if phase == 1 {
+        let effects = core.complete(&store.barrier(&tickets).unwrap()).unwrap();
+        assert!(matches!(effects.first(), Some(Effect::Committed(entries)) if entries.len() == 2));
+    } else if phase >= 2 {
+        io.0.borrow_mut().publication_fault = phase - 1;
+        assert!(store.barrier(&tickets).is_err());
+        assert_eq!(
+            store.state(before.bootstrap.group),
+            Err(StorageError::Fenced)
+        );
+        core.storage_failed();
+        assert_eq!(core.state(), &before);
+        assert_eq!(
+            core.complete(&DurableLog {
+                tickets: tickets.clone()
+            }),
+            Err(RaftError::Fenced)
+        );
+    } else {
+        assert_eq!(core.state(), &before);
+    }
+    drop(store);
+    io.power_loss();
+    check_recovered(io, &core, &before, tickets, phase);
+}
+
+fn check_recovered(
+    io: ModelIo,
+    core: &Raft,
+    before: &GroupLog,
+    tickets: Vec<LogTicket>,
+    phase: u8,
+) {
+    let recovered = NativeLogStore::recover(io, core.binding.identity, core.limits).unwrap();
+    let state = recovered.state(before.bootstrap.group).unwrap();
+    assert_eq!(state.commit_index, if phase == 0 { 1 } else { 3 });
+    assert_eq!(
+        state.last_index(),
+        before.last_index() + if phase == 0 { 0 } else { 2 }
+    );
+    assert_eq!(state.entries[..before.entries.len()], before.entries);
+    let mut restarted = Raft::recover(core.node, recovered.binding(), state, core.limits).unwrap();
+    assert_eq!(
+        restarted.complete(&DurableLog { tickets }),
+        Err(RaftError::WrongCompletion)
+    );
+    let mut app = Counter::new(16).unwrap();
+    let receipts = app.apply_batch(restarted.replay_committed()).unwrap();
+    assert_eq!(receipts.len(), if phase == 0 { 0 } else { 2 });
+    assert_eq!(app.applied_index(), if phase == 0 { 1 } else { 3 });
+    assert_eq!(
+        receipts
+            .iter()
+            .map(|receipt| receipt.operation.get())
+            .collect::<Vec<_>>(),
+        if phase == 0 { vec![] } else { vec![10, 11] }
+    );
 }

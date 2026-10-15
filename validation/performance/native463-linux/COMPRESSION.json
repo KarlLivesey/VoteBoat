@@ -1,0 +1,21 @@
+{
+  "format": "gzip lossless; mtime0",
+  "files": [
+    {
+      "original_relative_path": "logs/native-release.jsonl",
+      "archived_relative_path": "logs/native-release.jsonl.gz",
+      "original_bytes": 3232074,
+      "original_sha256": "0aad35002f391b4e8cb7a42eb5f6a06e9c8d72a27b1c04faaf753ace64bc5ec2",
+      "gzip_bytes": 106435,
+      "gzip_sha256": "9949c646afd526e6b38f128ab5398c54b72a00a1d1afaa03768893e4fd52b91b"
+    },
+    {
+      "original_relative_path": "logs/symbol-table.log",
+      "archived_relative_path": "logs/symbol-table.log.gz",
+      "original_bytes": 2176955,
+      "original_sha256": "4d77cba82e9fbb337938d1dd7d575c37a0bb3d981e3d0d0e0246beb32dff545a",
+      "gzip_bytes": 207820,
+      "gzip_sha256": "648c66048379d8dd88c7a89508d937f0f05c6010462019c1ccbb5c3c5dfbed1f"
+    }
+  ]
+}

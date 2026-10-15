@@ -1,0 +1,3 @@
+phase=warmup protocol=TcpTls mode=offered
+phase=offering operations=128 rate=500 groups=1 leaders=1:1
+phase=recovery-verification mode=offered

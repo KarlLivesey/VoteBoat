@@ -1,0 +1,9 @@
+{
+  "source_commit": "85eaf3e41ffe9488f78b75b02521ea2bbbc80c3a",
+  "selected_export_inputs": 1558,
+  "disclosure": "Export omitted committed rust-toolchain.toml; preserved separately without modifying frozen compiled source inventory. Builder explicitly selects cargo stable and absolute RUSTC; actual rustc1.98.1 and exact binary hashes match the committed1.98.1 pin and native458. No compiled code/profile/tool mismatch; no rebuild or complete-tree export claim.",
+  "committed_config_path": "committed-config/rust-toolchain.toml",
+  "sha256": "c910997cb152c6dc8ed13b1fdf9fa28a4ed30d6776123e27dd6170e5c66067a0",
+  "actual_compiler_matches_pin": true,
+  "source_inventory_unchanged": true
+}

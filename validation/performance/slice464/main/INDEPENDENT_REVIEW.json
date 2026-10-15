@@ -1,0 +1,13 @@
+{
+  "reviewer": "/root/linux426",
+  "scope": "Read-only production delta in src/raft/ready_replies.rs against ordinary receive_appended/maybe_commit, early replication and durable broadcast contracts; no builds/checks/workloads/edits by reviewer.",
+  "result": "No material correctness finding",
+  "findings": [
+    "Prospective frontier equals min(original validated policy frontier after max(previous, exact acknowledged end), old durable tip).",
+    "First reply must advance durable commit in current term; each later reply must preserve that frontier, retaining serialized application batch boundaries.",
+    "Exact authenticated primary context/configuration/range, alias and pending-dependency guards remain; no mutation before all fallible planning succeeds.",
+    "Each selected next_index uses its own checked progress+1; appended suffix remains strictly after full old durable tip and retains uncommitted middle.",
+    "Unchanged full-old-tip early replication proof excludes partial-prefix Written tail sends/local votes; exact Durable exposes old committed prefix and existing catch-up/commit notifications."
+  ],
+  "limitations": "Review is not execution, qualification, performance acceptance or proof of a real joined opportunity; actual terminal checks remain separate."
+}

@@ -1,0 +1,10 @@
+
+This GDB supports auto-downloading debuginfo from the following URLs:
+  <https://debuginfod.archlinux.org>
+  <https://debuginfod.cachyos.org>
+Enable debuginfod for this session? (y or [n]) [answered N; input not from terminal]
+Debuginfod has been disabled.
+To make this setting permanent, add 'set debuginfod enabled off' to .gdbinit.
+
+Program stopped.
+0x00007f3a6998fe80 in ?? () from /lib64/ld-linux-x86-64.so.2

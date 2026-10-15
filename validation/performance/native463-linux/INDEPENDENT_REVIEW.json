@@ -1,0 +1,14 @@
+{
+  "reviewer": "/root/linux426",
+  "selected_export_git_objects": 1558,
+  "exact_hashes_modes_and_seven0600": true,
+  "root_example_fresh_false": true,
+  "same_native_profile_and_tools": true,
+  "validator_closure_files": 8,
+  "pilot_cases": 4,
+  "original_copied_artifacts_match": true,
+  "roots_absent_parents_exist": true,
+  "workloads_or_writes_from_reviewer": false,
+  "material_execution_blockers": [],
+  "disclosure": "See BUILD_PROJECTION.json for separately preserved committed compiler pin"
+}
