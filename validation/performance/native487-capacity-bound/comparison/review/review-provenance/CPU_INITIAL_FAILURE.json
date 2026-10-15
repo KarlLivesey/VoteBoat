@@ -1,0 +1,5 @@
+{
+  "actual_exit": 1,
+  "tool_chunk": "aa0a22",
+  "cause": "Supplementary helper sha() expected Path but __file__ is str; failed before writing CPU_LINUX.json. Focused Path conversion only; raw data/frozen reader/workload unchanged."
+}

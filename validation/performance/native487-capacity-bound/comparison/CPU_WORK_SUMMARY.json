@@ -1,0 +1,1093 @@
+{
+  "scope": "Native quorum-durable8BCounter diagnostics. CPU is whole child user+system including startup/warmup/recovery/cleanup divided by measured completed originals; average busy cores uses the SAME whole-child elapsed. Native completed/s and p99 retain their distinct horizon+drain boundary. Configured workers unchanged; actual affinity/core isolation not imposed.",
+  "hosts": {
+    "linux": {
+      "valid_cases": 48,
+      "totals": {
+        "applied": 253450,
+        "window_refused": 138230,
+        "no_leader": 0,
+        "admission_refused": 0,
+        "not_proposed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "cells": {
+        "singleton-tcp-baseline": {
+          "native_completed_ops_s": 5.5624726712241115,
+          "native_p99_ms": 779.727918,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              19211.398058252427,
+              21021.53714285714,
+              19849.74719101124
+            ],
+            "median": 19849.74719101124
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.09656983028168536,
+              0.09721995455492602,
+              0.0883555222770782
+            ],
+            "median": 0.09656983028168536
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              5.026694568967245,
+              4.624778573243401,
+              4.451216503003581
+            ],
+            "median": 4.624778573243401
+          },
+          "window_refused": [
+            50,
+            81,
+            78
+          ]
+        },
+        "singleton-tcp-candidate": {
+          "native_completed_ops_s": 5.531228988071031,
+          "native_p99_ms": 754.867081,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              18761.079365079364,
+              21573.335195530723,
+              21621.61581920904
+            ],
+            "median": 21573.335195530723
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.092153096227564,
+              0.10044723628591302,
+              0.09925930863734213
+            ],
+            "median": 0.09925930863734213
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              4.911929342353921,
+              4.656082862269824,
+              4.590744256456464
+            ],
+            "median": 4.656082862269824
+          },
+          "window_refused": [
+            67,
+            77,
+            79
+          ]
+        },
+        "singleton-quic-baseline": {
+          "native_completed_ops_s": 5.937493081336187,
+          "native_p99_ms": 705.811548,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              18825.010050251258,
+              19490.06842105263,
+              21508.70857142857
+            ],
+            "median": 19490.06842105263
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.09082640493471354,
+              0.09544639344588823,
+              0.09551123657291137
+            ],
+            "median": 0.09544639344588823
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              4.8247732507054515,
+              4.897181035177367,
+              4.440584438425336
+            ],
+            "median": 4.8247732507054515
+          },
+          "window_refused": [
+            57,
+            66,
+            81
+          ]
+        },
+        "singleton-quic-candidate": {
+          "native_completed_ops_s": 5.999975844472249,
+          "native_p99_ms": 638.553055,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              18380.338541666668,
+              19282.171875,
+              18986.572164948455
+            ],
+            "median": 18986.572164948455
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.09047359762948125,
+              0.09931368346732342,
+              0.09520382566429084
+            ],
+            "median": 0.09520382566429084
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              4.922303113426627,
+              5.150544456876616,
+              5.014271393340226
+            ],
+            "median": 5.014271393340226
+          },
+          "window_refused": [
+            64,
+            64,
+            62
+          ]
+        },
+        "moderate-tcp-baseline": {
+          "native_completed_ops_s": 124.97357926278745,
+          "native_p99_ms": 3046.692785,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              925.5988008993255,
+              944.7041207771316,
+              969.5951588114754
+            ],
+            "median": 944.7041207771316
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.11333466910984487,
+              0.1159686117188852,
+              0.11356828350767902
+            ],
+            "median": 0.11356828350767902
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              122.44470174305242,
+              122.75654267654429,
+              117.12959009293158
+            ],
+            "median": 122.44470174305242
+          },
+          "window_refused": [
+            186,
+            111,
+            384
+          ]
+        },
+        "moderate-tcp-candidate": {
+          "native_completed_ops_s": 122.68715316475527,
+          "native_p99_ms": 3418.042053,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              958.6824873096447,
+              952.437681892952,
+              977.5884664131812
+            ],
+            "median": 958.6824873096447
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.11388003571208814,
+              0.11489466017989713,
+              0.1167547791113705
+            ],
+            "median": 0.11489466017989713
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              118.7880630130944,
+              120.63220761230924,
+              119.43142040100918
+            ],
+            "median": 119.43142040100918
+          },
+          "window_refused": [
+            312,
+            289,
+            302
+          ]
+        },
+        "moderate-quic-baseline": {
+          "native_completed_ops_s": 125.58983546567877,
+          "native_p99_ms": 2889.077674,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              1008.3920715794704,
+              970.3040242210168,
+              958.8428220858897
+            ],
+            "median": 970.3040242210168
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.12226209637292312,
+              0.11715981829978539,
+              0.11909823322519386
+            ],
+            "median": 0.11909823322519386
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              121.2446029860398,
+              120.74547293962229,
+              124.210382016632
+            ],
+            "median": 121.2446029860398
+          },
+          "window_refused": [
+            145,
+            265,
+            42
+          ]
+        },
+        "moderate-quic-candidate": {
+          "native_completed_ops_s": 127.47562619159801,
+          "native_p99_ms": 1759.513716,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              954.8871757219774,
+              1018.1927070457353,
+              902.6799316406249
+            ],
+            "median": 954.8871757219774
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.1180492447072641,
+              0.12462279204162555,
+              0.11303442083683325
+            ],
+            "median": 0.1180492447072641
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              123.62637985792263,
+              122.39607608584816,
+              125.2209303372821
+            ],
+            "median": 123.62637985792263
+          },
+          "window_refused": [
+            20,
+            102,
+            0
+          ]
+        },
+        "loaded-tcp-baseline": {
+          "native_completed_ops_s": 629.5695460846836,
+          "native_p99_ms": 7052.436228,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              434.85435111207084,
+              506.7185675360063,
+              479.21147962305713
+            ],
+            "median": 479.21147962305713
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.2908665651829765,
+              0.25597269614519924,
+              0.2699773823363338
+            ],
+            "median": 0.2699773823363338
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              668.8827292152683,
+              505.15752242887845,
+              563.3783701273084
+            ],
+            "median": 563.3783701273084
+          },
+          "window_refused": [
+            6738,
+            8293,
+            7829
+          ]
+        },
+        "loaded-tcp-candidate": {
+          "native_completed_ops_s": 753.8268578897834,
+          "native_p99_ms": 5949.939317,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              288.8348238336386,
+              264.31855321930493,
+              280.33960659223817
+            ],
+            "median": 280.33960659223817
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.17016931796417237,
+              0.17781522005397257,
+              0.18986109033254944
+            ],
+            "median": 0.17781522005397257
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              589.157898987227,
+              672.7307557046115,
+              677.2538944477715
+            ],
+            "median": 672.7307557046115
+          },
+          "window_refused": [
+            6719,
+            6821,
+            6595
+          ]
+        },
+        "loaded-quic-baseline": {
+          "native_completed_ops_s": 702.3309520209586,
+          "native_p99_ms": 6297.598433,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              484.2119418350277,
+              483.184009765029,
+              465.0149053009078
+            ],
+            "median": 483.184009765029
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.30032471331880395,
+              0.2204178056340034,
+              0.2661976535302175
+            ],
+            "median": 0.2661976535302175
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              620.2340078203305,
+              456.1777732280337,
+              572.4497225695656
+            ],
+            "median": 572.4497225695656
+          },
+          "window_refused": [
+            8229,
+            9446,
+            7077
+          ]
+        },
+        "loaded-quic-candidate": {
+          "native_completed_ops_s": 810.3060656680527,
+          "native_p99_ms": 5489.118056,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              261.5884045614409,
+              258.2209764549995,
+              255.09082950317355
+            ],
+            "median": 258.2209764549995
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.16843664736883388,
+              0.18133180226670773,
+              0.17950618911599983
+            ],
+            "median": 0.17950618911599983
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              643.8995170723331,
+              702.2349801171504,
+              703.695187575399
+            ],
+            "median": 702.2349801171504
+          },
+          "window_refused": [
+            6617,
+            6189,
+            6862
+          ]
+        },
+        "skew-tcp-baseline": {
+          "native_completed_ops_s": 398.8571586769745,
+          "native_p99_ms": 6824.550107,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              557.3559775341,
+              477.35335689045934,
+              529.7535310734463
+            ],
+            "median": 529.7535310734463
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.16335698815228036,
+              0.17776155492396892,
+              0.17579324700688564
+            ],
+            "median": 0.17579324700688564
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              293.092735588874,
+              372.3898708535965,
+              331.83968901665185
+            ],
+            "median": 331.83968901665185
+          },
+          "window_refused": [
+            4453,
+            3381,
+            3944
+          ]
+        },
+        "skew-tcp-candidate": {
+          "native_completed_ops_s": 402.54888097879456,
+          "native_p99_ms": 6567.673139,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              436.809756097561,
+              442.11583011583014,
+              513.6434611048478
+            ],
+            "median": 442.11583011583014
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.1474480428372255,
+              0.1463792965248728,
+              0.15363943722375978
+            ],
+            "median": 0.1474480428372255
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              337.55666117561066,
+              331.08811436704906,
+              299.11689500199446
+            ],
+            "median": 331.08811436704906
+          },
+          "window_refused": [
+            3887,
+            3789,
+            4644
+          ]
+        },
+        "skew-quic-baseline": {
+          "native_completed_ops_s": 443.63768867792754,
+          "native_p99_ms": 6249.932112,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              504.99344405594417,
+              597.4114173228346,
+              521.0310218978102
+            ],
+            "median": 521.0310218978102
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.18102336015813034,
+              0.17568985330837997,
+              0.17245067838733708
+            ],
+            "median": 0.17568985330837997
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              358.4667529625914,
+              294.0851952506945,
+              330.9796751817204
+            ],
+            "median": 330.9796751817204
+          },
+          "window_refused": [
+            3616,
+            4128,
+            3808
+          ]
+        },
+        "skew-quic-candidate": {
+          "native_completed_ops_s": 371.5980244844953,
+          "native_p99_ms": 6392.711033,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              548.5245901639345,
+              481.81085858585857,
+              370.0480032271077
+            ],
+            "median": 481.81085858585857
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.14750929687920125,
+              0.14602664932480125,
+              0.15290550861648625
+            ],
+            "median": 0.14750929687920125
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              268.9201168449276,
+              303.0787843872957,
+              413.20452288089854
+            ],
+            "median": 303.0787843872957
+          },
+          "window_refused": [
+            4715,
+            4232,
+            3234
+          ]
+        }
+      },
+      "native_rate_pair_losses": 10,
+      "native_p99_pair_losses": 8
+    },
+    "mac": {
+      "valid_cases": 48,
+      "totals": {
+        "applied": 323608,
+        "window_refused": 68072,
+        "no_leader": 0,
+        "admission_refused": 0,
+        "not_proposed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "cells": {
+        "singleton-tcp-baseline": {
+          "native_completed_ops_s": 7.4062127759117,
+          "native_p99_ms": 161.366417,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              14628.06329113924,
+              14653.364406779661,
+              14830.151898734177
+            ],
+            "median": 14653.364406779661
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.09744094236010871,
+              0.09768617534997263,
+              0.09902083898171948
+            ],
+            "median": 0.09768617534997263
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              6.661233303463507,
+              6.666467347578979,
+              6.676994251837122
+            ],
+            "median": 6.666467347578979
+          },
+          "window_refused": [
+            19,
+            20,
+            19
+          ]
+        },
+        "singleton-tcp-candidate": {
+          "native_completed_ops_s": 7.374999855957034,
+          "native_p99_ms": 167.152167,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              14672.6906779661,
+              14727.822784810127,
+              15073.588983050848
+            ],
+            "median": 14727.822784810127
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.0975029437825102,
+              0.09844808488382537,
+              0.0997185823082495
+            ],
+            "median": 0.09844808488382537
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              6.645198615747407,
+              6.684496841268489,
+              6.615450535395105
+            ],
+            "median": 6.645198615747407
+          },
+          "window_refused": [
+            20,
+            19,
+            20
+          ]
+        },
+        "singleton-quic-baseline": {
+          "native_completed_ops_s": 7.374996466224349,
+          "native_p99_ms": 165.098042,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              21035.5358649789,
+              21282.588983050846,
+              21558.313559322032
+            ],
+            "median": 21282.588983050846
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.13950039648311865,
+              0.14043246414109575,
+              0.13887988970799708
+            ],
+            "median": 0.13950039648311865
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              6.631654043830015,
+              6.5984671438674205,
+              6.442057228912696
+            ],
+            "median": 6.5984671438674205
+          },
+          "window_refused": [
+            19,
+            20,
+            20
+          ]
+        },
+        "singleton-quic-candidate": {
+          "native_completed_ops_s": 7.406243847494369,
+          "native_p99_ms": 166.15825,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              21386.641350210968,
+              21546.4641350211,
+              21815.7372881356
+            ],
+            "median": 21546.4641350211
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.14172494640771455,
+              0.14243631606802273,
+              0.14357465847572093
+            ],
+            "median": 0.14243631606802273
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              6.626797732609683,
+              6.610658490202586,
+              6.581242548873352
+            ],
+            "median": 6.610658490202586
+          },
+          "window_refused": [
+            19,
+            19,
+            20
+          ]
+        },
+        "moderate-tcp-baseline": {
+          "native_completed_ops_s": 126.66937248623938,
+          "native_p99_ms": 772.463167,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              1036.0164794921875,
+              1025.3125,
+              1035.262781815942
+            ],
+            "median": 1035.262781815942
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.12871010471396974,
+              0.12895029995870494,
+              0.1288992701738959
+            ],
+            "median": 0.1288992701738959
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              124.23557661655933,
+              125.76682714655769,
+              124.50874544895284
+            ],
+            "median": 124.50874544895284
+          },
+          "window_refused": [
+            0,
+            0,
+            75
+          ]
+        },
+        "moderate-tcp-candidate": {
+          "native_completed_ops_s": 127.85832481913883,
+          "native_p99_ms": 760.856875,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              1018.9908447265626,
+              1032.5120849609373,
+              1041.6439208984375
+            ],
+            "median": 1032.5120849609373
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.12818388127155259,
+              0.12973161353173027,
+              0.1308154399382275
+            ],
+            "median": 0.12973161353173027
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              125.7949293017933,
+              125.64658120843046,
+              125.58556461923833
+            ],
+            "median": 125.64658120843046
+          },
+          "window_refused": [
+            0,
+            0,
+            0
+          ]
+        },
+        "moderate-quic-baseline": {
+          "native_completed_ops_s": 127.8441177375954,
+          "native_p99_ms": 833.333,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              1465.797119140625,
+              1461.698974609375,
+              1467.919921875
+            ],
+            "median": 1465.797119140625
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.18217612402379013,
+              0.18172194009192325,
+              0.1822471755567316
+            ],
+            "median": 0.18217612402379013
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              124.28467872183928,
+              124.32241059790488,
+              124.15334981212331
+            ],
+            "median": 124.28467872183928
+          },
+          "window_refused": [
+            0,
+            0,
+            0
+          ]
+        },
+        "moderate-quic-candidate": {
+          "native_completed_ops_s": 127.67722549035129,
+          "native_p99_ms": 806.001,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              1480.3951416015625,
+              1474.8077534548122,
+              1467.3677978515625
+            ],
+            "median": 1474.8077534548122
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.18397264118204568,
+              0.1828864241191643,
+              0.18229644199433678
+            ],
+            "median": 0.1828864241191643
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              124.27265938134276,
+              124.00695866342143,
+              124.23363948782644
+            ],
+            "median": 124.23363948782644
+          },
+          "window_refused": [
+            0,
+            15,
+            0
+          ]
+        },
+        "loaded-tcp-baseline": {
+          "native_completed_ops_s": 1070.849493726156,
+          "native_p99_ms": 4854.186875,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              552.8516909998151,
+              586.6798460798461,
+              590.0444037070985
+            ],
+            "median": 586.6798460798461
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.5336295523062659,
+              0.5533310005441524,
+              0.5109479274050952
+            ],
+            "median": 0.5336295523062659
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              965.2309308147604,
+              943.1566539083823,
+              865.9482645627002
+            ],
+            "median": 943.1566539083823
+          },
+          "window_refused": [
+            5178,
+            5605,
+            6181
+          ]
+        },
+        "loaded-tcp-candidate": {
+          "native_completed_ops_s": 1297.3001635803068,
+          "native_p99_ms": 3455.130458,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              296.4527428439164,
+              268.44291012388544,
+              282.4460918491484
+            ],
+            "median": 282.4460918491484
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.3079809967673277,
+              0.3078637236357807,
+              0.33050767731399955
+            ],
+            "median": 0.3079809967673277
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              1038.8873242083007,
+              1146.849896291553,
+              1170.1619772828026
+            ],
+            "median": 1146.849896291553
+          },
+          "window_refused": [
+            3039,
+            3327,
+            2848
+          ]
+        },
+        "loaded-quic-baseline": {
+          "native_completed_ops_s": 1021.0433377255854,
+          "native_p99_ms": 4753.13525,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              618.482706615725,
+              566.1974528301886,
+              625.5379764705883
+            ],
+            "median": 618.482706615725
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.5009746359236913,
+              0.5104876143964445,
+              0.5436684368556265
+            ],
+            "median": 0.5104876143964445
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              810.0058911347321,
+              901.6070486448261,
+              869.1213919946374
+            ],
+            "median": 869.1213919946374
+          },
+          "window_refused": [
+            6054,
+            5400,
+            5375
+          ]
+        },
+        "loaded-quic-candidate": {
+          "native_completed_ops_s": 1332.9000544837218,
+          "native_p99_ms": 3357.463,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              318.2397429190643,
+              321.86682808716705,
+              307.42007915354174
+            ],
+            "median": 318.2397429190643
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.370896516503368,
+              0.34266357875758113,
+              0.30991333140406013
+            ],
+            "median": 0.34266357875758113
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              1165.4625946505228,
+              1064.612904641363,
+              1008.1102452949181
+            ],
+            "median": 1064.612904641363
+          },
+          "window_refused": [
+            2619,
+            2784,
+            3619
+          ]
+        },
+        "skew-tcp-baseline": {
+          "native_completed_ops_s": 773.2207219353319,
+          "native_p99_ms": 3127.943771,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              485.33714776140755,
+              487.16854582249204,
+              499.0301431801055
+            ],
+            "median": 487.16854582249204
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.33395253778453576,
+              0.3120061238790352,
+              0.32363150228387383
+            ],
+            "median": 0.32363150228387383
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              688.0836122371315,
+              640.4480062485803,
+              648.52094949918
+            ],
+            "median": 648.52094949918
+          },
+          "window_refused": [
+            1201,
+            1274,
+            1557
+          ]
+        },
+        "skew-tcp-candidate": {
+          "native_completed_ops_s": 776.6343430819239,
+          "native_p99_ms": 3247.518875,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              327.2455516014234,
+              328.10040567951313,
+              330.4711772278644
+            ],
+            "median": 328.10040567951313
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.22311764232997155,
+              0.22075777108786962,
+              0.22738374548405005
+            ],
+            "median": 0.22311764232997155
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              681.8049664483233,
+              672.8360199088103,
+              688.0592352756556
+            ],
+            "median": 681.8049664483233
+          },
+          "window_refused": [
+            1167,
+            1290,
+            1201
+          ]
+        },
+        "skew-quic-baseline": {
+          "native_completed_ops_s": 785.1726112200856,
+          "native_p99_ms": 3119.641584,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              538.5039705048214,
+              554.6379491805743,
+              540.827600849257
+            ],
+            "median": 540.827600849257
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.349490285242691,
+              0.33936484662474004,
+              0.3540777738772464
+            ],
+            "median": 0.349490285242691
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              649.0022439668566,
+              611.8673399938101,
+              654.6961976815554
+            ],
+            "median": 649.0022439668566
+          },
+          "window_refused": [
+            1140,
+            1541,
+            1127
+          ]
+        },
+        "skew-quic-candidate": {
+          "native_completed_ops_s": 740.8025843968401,
+          "native_p99_ms": 3201.880709,
+          "whole_child_cpu_us_per_completed": {
+            "trials": [
+              397.37132909476236,
+              388.1781797464749,
+              397.7587693222354
+            ],
+            "median": 397.37132909476236
+          },
+          "whole_child_average_busy_cores": {
+            "trials": [
+              0.24236338635310933,
+              0.2555673596490724,
+              0.24264832598394034
+            ],
+            "median": 0.24264832598394034
+          },
+          "whole_child_completed_ops_s": {
+            "trials": [
+              609.9166412061707,
+              658.376418313846,
+              610.0389097577989
+            ],
+            "median": 610.0389097577989
+          },
+          "window_refused": [
+            1586,
+            1171,
+            1464
+          ]
+        }
+      },
+      "native_rate_pair_losses": 8,
+      "native_p99_pair_losses": 12
+    }
+  }
+}

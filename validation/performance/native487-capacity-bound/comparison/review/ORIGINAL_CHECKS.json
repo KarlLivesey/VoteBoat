@@ -1,0 +1,50 @@
+{
+  "exit": 0,
+  "scope": "Central487 current numerical wrap-up only. Both immutable host archive seals unchanged. No workload/build/profile/validator rerun; frozen reader and independent raw recomputation retained.",
+  "independent96_sealed_payloads": 19,
+  "independent96_receipt_sha256": "37481c88c2684424c2812b2597987140b0982cd0dcabdfbee410e81589fe79c0",
+  "cores_supplement_sha256": "fa17e7f4327f70648cd7c4e48a291697ded2f9c89c73abb61aee1c2854cdfe7d",
+  "originals": 115,
+  "gzip": 50,
+  "all_original_sha_length_mode_and_gzip_roundtrips": "PASS",
+  "host_archive_verifications": {
+    "linux": {
+      "exit": 0,
+      "payloads": 1208,
+      "originals": 1205,
+      "lossless_gzip": 278,
+      "manifest_sha256": "e708cc614c13ed8053c9d99d5080d251e92a71cc92fdc54931efc31bbe265368",
+      "scope": "Independent root recursive exact path-set/seal/gzip/original byte/hash/length/mode comparison; actual artifact review is separately sealed in archive. No workload, check suite or build repeated."
+    },
+    "mac": {
+      "exit": 0,
+      "payloads": 1097,
+      "originals": 1094,
+      "lossless_gzip": 44,
+      "manifest_sha256": "6472f06225531557cefd85a5a04e0dd4b7e66f60debe36de4578551696f0743b",
+      "scope": "Independent root recursive exact path-set/seal/gzip/original byte/hash/length/mode comparison; actual artifact review is separately sealed in archive. No workload, check suite or build repeated."
+    }
+  },
+  "decision": {
+    "decision": "Retain486 only as a checked measured loaded Counter CPU/work reduction.",
+    "deciding_authority": "Parent/root explicit wrap-up decision in current session, following independent96 raw review.",
+    "evidence": {
+      "loaded_paired_cpu_per_completed_improvements": 12,
+      "loaded_paired_average_busy_core_reductions": 12,
+      "loaded_paired_native_rate_gains": 11,
+      "loaded_paired_same_childwall_rate_gains": 11,
+      "native_rate_gains_flagged_for_more_cpu_cost_or_more_average_cores": 11
+    },
+    "not_accepted": [
+      "Universal native throughput or latency improvement",
+      "Fairness/skew/cold-tail cure",
+      "Default-ready/provider promotion",
+      "Pinned/exclusive physical core constraint retroactively satisfied",
+      "Sustained framework floors/margins or fullP9/third-filesystem acceptance"
+    ],
+    "regressions": "Preserve all actual rate, p99, cold-tail, refusals, CPU and RSS losses in both frozen reader and independent per-pair/group outputs. No prior score splice or tail/allocator/filesystem causal claim.",
+    "CPU_scope": "CPU/completed includes whole-child startup/warmup/verification/recovery/cleanup. Averagecores uses matching child-wrapper wall; exact same-boundary decomposition retained. Native throughput uses a different timer, so no causal scaling attribution from multiplying native rate by child CPU/original.",
+    "worker_scope": "Both arms use same configured1WAL/1snapshot/1peer endpoint per replica. Affinity/exclusive physical cores were not imposed; actual historical eligible core count was not captured.",
+    "user_wrapup": "Archive current results, commit/push through enabled checks, then stop/pause. No new benchmark/profile/optimization/preparation."
+  }
+}

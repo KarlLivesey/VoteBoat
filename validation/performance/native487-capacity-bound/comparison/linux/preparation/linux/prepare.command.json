@@ -1,0 +1,22 @@
+[
+  "/usr/bin/python3.14",
+  "target/p9/native487-capacity-bound/comparison/common/prepare.py",
+  "--baseline",
+  "target/p9/native480-admission/linux",
+  "--candidate",
+  "target/p9/native486-capacity-bound/linux",
+  "--host",
+  "linux",
+  "--job",
+  "target/p9/native487-capacity-bound/comparison/linux/campaign",
+  "--wal-parent",
+  "target/p9/native487-capacity-bound/comparison/linux/wal",
+  "--source-commit",
+  "dcdcafe3f0c0a56d01e3c3095d3c276113cd7d69",
+  "--baseline-publication-authority",
+  "target/p9/native480-admission/publication2/RECEIPT.json",
+  "--publication-authority",
+  "target/p9/native486-capacity-bound/publication/RECEIPT.json",
+  "--schema",
+  "validation/performance/native487-capacity-bound/SCHEMA.md"
+]

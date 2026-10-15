@@ -1,0 +1,27 @@
+{
+  "time_utc": "2026-10-15T18:01:25.432575+00:00",
+  "linux": {
+    "original_handle": 44616,
+    "actual_terminal_exit": 0,
+    "completed_case_end_records": 48,
+    "terminal_tool_chunk": "8d63f2",
+    "markers": [
+      "ALL_TIMING_END",
+      "CAMPAIGN_EXIT0"
+    ],
+    "postguards_and_validators_complete": true
+  },
+  "mac": {
+    "original_handle": 67726,
+    "actual_terminal_exit": 0,
+    "completed_case_end_records": 48,
+    "terminal_tool_chunk": "148477",
+    "markers": [
+      "ALL_TIMING_END",
+      "CAMPAIGN_EXIT0",
+      "ORIGINAL_MAC487_CAMPAIGN_SSH_EXIT0"
+    ],
+    "postguards_and_validators_complete": true
+  },
+  "authorization": "Both original487 parents actually terminated0 after all48 fixed cases/validators/postguards. Collection/readout/archive GO for current results wrap-up only. User requested commit/push and stop afterward; no further profiling/optimization/preparation. Report whole-child CPU/completed original and average cores using same child wall boundary."
+}

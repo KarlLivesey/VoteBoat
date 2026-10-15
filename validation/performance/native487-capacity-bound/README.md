@@ -1,4 +1,9 @@
-# 487: fresh486 qualification and fixed paired retention
+# 487: qualified artifacts and completed paired CPU-work evidence
+
+**Completed and paused:** [all96 paired results](comparison/README.md) retain486
+as a loaded CPU-work reduction, with all low-load/cold-tail regressions explicit.
+Source remains486; no default or full P9 acceptance is claimed. No next work runs.
+The sections below preserve the premeasurement qualification/setup record.
 
 Candidate486 is published as dcdcafe3f0c0a56d01e3c3095d3c276113cd7d69.
 Its [checked exact-capacity algorithm](../native486-capacity-bound/README.md)

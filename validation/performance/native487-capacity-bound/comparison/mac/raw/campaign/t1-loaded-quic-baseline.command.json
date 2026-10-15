@@ -1,0 +1,21 @@
+[
+  "/Applications/Xcode-beta.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9",
+  "/private/tmp/voteboat-native487-pair-aoKAm5/campaign/resources.py",
+  "/private/tmp/voteboat-native487-pair-aoKAm5/campaign/campaign-metadata/t1-loaded-quic-baseline",
+  "/private/tmp/voteboat-mac480-f7b0ef1-mccmJS/artifacts/native/native_benchmark",
+  "/private/tmp/voteboat-native487-pair-aoKAm5/wal/t1-loaded-quic-baseline",
+  "quic",
+  "16000",
+  "4096",
+  "1",
+  "--offered",
+  "2000",
+  "--maintenance",
+  "2",
+  "--ready-items",
+  "64",
+  "--offered-capacity",
+  "4096",
+  "--publication",
+  "witness"
+]

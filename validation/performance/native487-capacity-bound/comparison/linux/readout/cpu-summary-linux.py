@@ -1,0 +1,27 @@
+"""Small same-boundary CPU supplement from actual487 raw whole-child resources."""
+from pathlib import Path
+import hashlib,json,statistics
+b=Path('target/p9/native487-capacity-bound');job=b/'comparison/linux/campaign';out=b/'review/CPU_LINUX.json';assert not out.exists()
+load=lambda p:json.loads(p.read_text());sha=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest();c=load(job/'CAMPAIGN_CONFIG.json');r=load(b/'review/actual487-linux/READOUT.json');records=[]
+def stats(values):return{'trials':values,'median':statistics.median(values),'min':min(values),'max':max(values)}
+for case in c['cases']:
+ p=Path(case['metadata'])/'RESOURCES.json';resource=load(p);raw=next(x for x in r['records']if x['case']==case['name']);completed=raw['completed']
+ assert resource['exit']==resource['helper_exit']==0 and resource['helper_error']is None and resource['elapsed_seconds']>0
+ cpu=resource['user_seconds']+resource['system_seconds'];cost=cpu*1000000/completed;cores=cpu/resource['elapsed_seconds']
+ assert cost==raw['wholechild_resources']['cpu_us_per_completed_original']
+ records.append({'case':case['name'],'pair':case['pair'],'cell':case['cell'],'protocol':case['protocol'],'arm':case['arm'],'trial':case['trial'],'completed':completed,'native_completed_ops_s':raw['rates']['completed_ops_s'],'whole_child_cpu_seconds':cpu,'whole_child_elapsed_seconds':resource['elapsed_seconds'],'cpu_us_per_completed_original':cost,'average_busy_cores_same_wholechild_boundary':cores,'max_rss_bytes':resource['max_rss_bytes'],'raw_resources':{'path':str(p),'sha256':sha(p)}})
+cells=[];pairs=[]
+for cell in ['singleton','moderate','loaded','skew']:
+ for protocol in ['tcp','quic']:
+  for arm in ['baseline','candidate']:
+   rows=sorted([x for x in records if(x['cell'],x['protocol'],x['arm'])==(cell,protocol,arm)],key=lambda x:x['trial']);assert len(rows)==3
+   cells.append({'cell':cell,'protocol':protocol,'arm':arm,**{k:stats([x[k]for x in rows])for k in ['cpu_us_per_completed_original','average_busy_cores_same_wholechild_boundary','whole_child_cpu_seconds','whole_child_elapsed_seconds','max_rss_bytes']}})
+  for trial in [1,2,3]:
+   a,z=[next(x for x in records if(x['cell'],x['protocol'],x['trial'],x['arm'])==(cell,protocol,trial,arm))for arm in ['baseline','candidate']]
+   pairs.append({'pair':a['pair'],'cell':cell,'protocol':protocol,'trial':trial,'cpu_us_per_completed_original_ratio':z['cpu_us_per_completed_original']/a['cpu_us_per_completed_original'],'average_busy_cores_same_wholechild_boundary_ratio':z['average_busy_cores_same_wholechild_boundary']/a['average_busy_cores_same_wholechild_boundary'],'native_completed_rate_ratio':z['native_completed_ops_s']/a['native_completed_ops_s']})
+v={'scope':'Raw whole-child CPU supplement only. CPUus/completed includes startup/warmup/maintenance/drain/refused offers/verification/recovery/cleanup; denominator counts measured completed originals. Average busy cores uses the SAME whole-child CPU and elapsed wall boundaries, never the native horizon+drain timer. No stage causation or memory/debt plateau implied. Fixed worker/thread configuration unchanged.','readout_sha256':sha(b/'review/actual487-linux/READOUT.json'),'script_sha256':sha(__file__),'records':records,'cells':cells,'pairs':pairs};out.write_text(json.dumps(v,indent=2)+'\n')
+for cell in ['singleton','moderate','loaded','skew']:
+ for protocol in ['tcp','quic']:
+  a,z=[next(x for x in r['cells']if(x['cell'],x['protocol'],x['arm'])==(cell,protocol,arm))for arm in ['baseline','candidate']];ac,zc=[next(x for x in cells if(x['cell'],x['protocol'],x['arm'])==(cell,protocol,arm))for arm in ['baseline','candidate']]
+  print(cell,protocol,'completed/s',*[round(x['rates']['completed_ops_s']['median'],3)for x in [a,z]],'p99ms',*[round(x['quantiles']['intended']['p99_ms']['median'],3)for x in [a,z]],'refusals',a['statuses']['window_refused']['trials'],z['statuses']['window_refused']['trials'],'CPUus/orig',*[round(x['cpu_us_per_completed_original']['median'],3)for x in [ac,zc]],'avgcores',*[round(x['average_busy_cores_same_wholechild_boundary']['median'],4)for x in [ac,zc]])
+print('PAIR_LOSSES','rate',sum(x['rate_loss']for x in r['pairs']),'p99',sum(x['p99_loss']for x in r['pairs']),'cpu',sum(x['cpu_us_per_completed_original_ratio']>1 for x in pairs),'avgcores',sum(x['average_busy_cores_same_wholechild_boundary_ratio']>1 for x in pairs))

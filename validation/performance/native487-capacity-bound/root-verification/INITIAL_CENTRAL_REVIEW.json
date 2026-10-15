@@ -1,0 +1,5 @@
+{
+  "actual_exit": 1,
+  "terminal_tool_chunk": "3bca24",
+  "reason": "Root reader used earlier PACKING container_bytes field absent from this manifest. Exact container SHA, recursive seal, original byte/hash/length/mode and gzip checks remain; focused format parser correction only, no artifact/raw change or workload rerun."
+}

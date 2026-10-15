@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native487-capacity-bound/review/cpu-summary-linux.py", line 22, in <module>
+    v={'scope':'Raw whole-child CPU supplement only. CPUus/completed includes startup/warmup/maintenance/drain/refused offers/verification/recovery/cleanup; denominator counts measured completed originals. Average busy cores uses the SAME whole-child CPU and elapsed wall boundaries, never the native horizon+drain timer. No stage causation or memory/debt plateau implied. Fixed worker/thread configuration unchanged.','readout_sha256':sha(b/'review/actual487-linux/READOUT.json'),'script_sha256':sha(__file__),'records':records,'cells':cells,'pairs':pairs};out.write_text(json.dumps(v,indent=2)+'\n')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ~~~^^^^^^^^^^
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native487-capacity-bound/review/cpu-summary-linux.py", line 5, in <lambda>
+    load=lambda p:json.loads(p.read_text());sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();c=load(job/'CAMPAIGN_CONFIG.json');r=load(b/'review/actual487-linux/READOUT.json');records=[]
+                                                                        ^^^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'read_bytes'

@@ -1,0 +1,75 @@
+"""Independent487 actual Linux preparation review; reads only, never invokes workload."""
+import ast,hashlib,json
+from pathlib import Path
+b=Path('target/p9/native487-capacity-bound');p=b/'comparison/linux/campaign';old=Path('target/p9/native484-ingress/comparison/linux/revision2/campaign')
+load=lambda x:json.loads(Path(x).read_text());sha=lambda x:hashlib.sha256(Path(x).read_bytes()).hexdigest()
+c=load(p/'CAMPAIGN_CONFIG.json');prior=load(old/'CAMPAIGN_CONFIG.json');ready=load(p/'READY.json');expected={'baseline':'f7b0ef12709bb7e7aad4f0279851aa035b508e9e','candidate':'dcdcafe3f0c0a56d01e3c3095d3c276113cd7d69'}
+assert c['source_commits']==expected and c['source_commit']==expected['candidate']
+assert sha(p/'CAMPAIGN_CONFIG.json')==ready['campaign_config_sha256']
+assert ready['cases']==48 and ready['pairs']==24 and len(c['cases'])==48
+assert c['python']==prior['python']and c['node']==prior['node']and c['runtime_tools']==prior['runtime_tools']
+assert c['existing_native_drain_guard_seconds']==prior['existing_native_drain_guard_seconds']==120
+assert c['all_workloads_end_before_validation']is True and c['failure_policy']==prior['failure_policy']
+assert sum(x['offers']for x in c['cases'])==391680 and sum(x['horizon_seconds']for x in c['cases'])==1344
+for a,z in zip(c['cases'],prior['cases']):
+ assert {k:v for k,v in a.items()if k not in ['command','resource_command','metadata','wal_root']}=={k:v for k,v in z.items()if k not in ['command','resource_command','metadata','wal_root']}
+ assert a['command'][2:]==z['command'][2:]
+ binary=next(x['copy']for x in c['candidates'][a['arm']]['artifacts']if x['target']=='native_benchmark')
+ assert a['command'][:2]==[binary,a['wal_root']]and a['wal_root']==c['wal_parent']+'/'+a['name']
+ assert a['metadata']==c['job']+'/campaign-metadata/'+a['name']
+ assert a['resource_command']==[c['python'],c['job']+'/resources.py',a['metadata'],*a['command']]
+ assert a['publication']=='witness'and a['retained_bound']<=16384
+for n in range(0,48,2):assert c['cases'][n]['pair']==c['cases'][n+1]['pair']and{c['cases'][n]['arm'],c['cases'][n+1]['arm']}=={'baseline','candidate'}
+assert(p/'ORDER.txt').read_text().splitlines()==[x['name']for x in c['cases']]
+def body(path):
+ tree=ast.parse(path.read_text().replace('published483','published486').replace('480/483','480/486').replace('484 paired','487 paired'))
+ if isinstance(tree.body[0],ast.Expr)and isinstance(tree.body[0].value,ast.Constant)and isinstance(tree.body[0].value.value,str):tree.body=tree.body[1:]
+ return ast.dump(tree,include_attributes=False)
+for n in ['plan.py','prepare.py','campaign.py']:assert body(p/n)==body(old/n),n
+assert sha(p/'resources.py')==sha(old/'resources.py')
+for n,d in c['scripts'].items():assert sha(p/n)==d
+assert(p/'REQUIRED_COMMIT').read_text().strip()==expected['candidate']
+assert c['validators']==prior['validators']and len(c['validators'])==8
+for n,d in c['validators'].items():assert sha(p/'control-tools'/n)==d and all(v['source']['files']['validation/'+n]==d for v in c['candidates'].values())
+assert sha(p/'SCHEMA.md')==c['schema_sha256']==sha('validation/performance/native487-capacity-bound/SCHEMA.md')
+setup=load(p/'setup-host.json');assert setup['device_identity']==c['device_identity']and setup['cpu_policy']==c['cpu_policy']
+assert not(p/'STARTED.json').exists()and not(p/'campaign').exists()
+base,cand=[c['candidates'][a]for a in ['baseline','candidate']]
+assert base['source']==prior['candidates']['baseline']['source']
+assert sorted(x['sha256']for x in base['compiler_tools'])==sorted(x['sha256']for x in cand['compiler_tools'])
+for n in ['Cargo.toml','Cargo.lock','build.rs','clippy.toml','LICENSE','benchmarks/matched/Cargo.toml','benchmarks/matched/Cargo.lock']:
+ assert base['source']['files'][n]==cand['source']['files'][n]
+fixtures=[n for n in base['source']['files']if n.startswith('tests/fixtures/')];keys=[n for n in fixtures if n.endswith('key.der')]
+assert len(keys)==7
+for n in fixtures:assert base['source']['files'][n]==cand['source']['files'][n]and base['source']['modes'][n]==cand['source']['modes'][n]
+assert all(cand['source']['modes'][n]=='0o600'for n in keys)
+changed=[n for n,d in cand['source']['files'].items()if n.startswith(('src/','tests/','examples/'))and base['source']['files'].get(n)!=d]
+assert set(changed)=={'src/application.rs','tests/application.rs','tests/application/capacity_bound.rs'}
+artifact_ids={}
+for arm,r in c['candidates'].items():
+ src=r['source'];root=Path(src['root']);assert sha(src['path'])==src['sha256']
+ assert {x.relative_to(root).as_posix()for x in root.rglob('*')if x.is_file()}==set(src['files'])
+ for n,d in src['files'].items():assert sha(root/n)==d and oct((root/n).stat().st_mode&0o777)==src['modes'][n]
+ for n,m in src['directories'].items():assert oct((root/n).stat().st_mode&0o777)==m
+ for item in r['proofs']+r['compiler_tools']+c['runtime_tools']:assert sha(item['path'])==item['sha256']
+ artifact_ids[arm]={}
+ for a in r['artifacts']:
+  assert sha(a['original'])==sha(a['copy'])==a['sha256'];record=a['compiler_record']
+  assert record['fresh']is False and record['profile']=={'opt_level':'3','debuginfo':0,'debug_assertions':True,'overflow_checks':True,'test':False}
+  assert record['features']==['default','native','quic','tls']and record['manifest_path']==str(root/'Cargo.toml')
+  artifact_ids[arm][a['target']]=a['sha256']
+ symbols=load(Path(src['path']).parent/'SYMBOLS.json');assert symbols['root_buildscript_fresh_record']['fresh']is False and symbols['reference_oracle_cfg_absent_PROFILErelease']
+ assert ready['artifacts_sha256'][arm]==artifact_ids[arm]['native_benchmark']
+# Verify the adapted common guard only changes candidate qualification shapes/scopes.
+trees={name:ast.parse((folder/'common.py').read_text())for name,folder in [('old',old),('new',p)]}
+funcs={name:{x.name:ast.dump(x,include_attributes=False)for x in tree.body if isinstance(x,ast.FunctionDef)}for name,tree in trees.items()}
+assert funcs['old'].keys()==funcs['new'].keys()
+changed_helpers=[n for n in funcs['old']if funcs['old'][n]!=funcs['new'][n]]
+assert set(changed_helpers)=={'required_commit','candidate_record'}
+job=Path(cand['source']['path']).parent;q=load(job/'FUNCTIONAL_QUALIFICATION.json');qualified=load(q['source_inventory']['path']);canonical=load(job.parent/'ROOT_FINAL_INPUTS.json')
+assert len(qualified)==1496 and qualified==canonical['files']and canonical['published_commit']==expected['candidate']
+assert all(srcname in cand['source']['files']and cand['source']['files'][srcname]==v['sha256']and cand['source']['modes'][srcname]==v['mode']for srcname,v in qualified.items())
+publication_guards=[load(x['path'])for x in q['publication_source_guards']]
+assert publication_guards[0]==publication_guards[1]=={'exact_selected_inputs':1496,'source_inputs_sha256':hashlib.sha256(json.dumps(qualified,sort_keys=True).encode()).hexdigest()}
+receipt={'exit':0,'host':'linux','config_sha256':sha(p/'CAMPAIGN_CONFIG.json'),'ready_sha256':sha(p/'READY.json'),'source_commits':expected,'cases':48,'pairs':24,'offers':391680,'horizon_seconds':1344,'same484_all_semantic_case_fields_native_argv_order':True,'controller_plan_prepare_AST_same_except_slice_identity_text':True,'resources_byte_exact484':True,'common_changed_functions':changed_helpers,'common_delta_review':'Only required candidate identity and actual486 qualification/controls scope shape adaptation. Existing source/artifact/compiler/profile/fixtures/lifecycle/outcome/timer/validator guards remain. Old483 Node/ingress/full-library fields replaced with actual486 Counter/unit/client/provider/service/matched/strict/metadata receipts, never claimed as still run. Both actual publication digest guards match canonical1496.','actual_source_diff_from480':changed,'actual_source_files':{a:len(r['source']['files'])for a,r in c['candidates'].items()},'artifact_sha256':artifact_ids,'withinhost_compiler_tools_equal':True,'fixtures':len(fixtures),'seven_private_keys_0600':True,'scripts':c['scripts'],'validators':c['validators'],'schema_sha256':c['schema_sha256'],'setup_host_sha256':sha(p/'setup-host.json'),'guard_adaptation_diff_sha256':sha(b/'comparison/guard-adaptation.diff'),'review_script_sha256':sha(__file__),'no_blockers':True,'limitations':['Read-only actual Linux prepared config only; Mac config needs actual post-qualification review later.','No environment fingerprint is claimed: same serial inherited controller environment, with no per-arm overrides.','No workload, build, check suite or actual timing/readout invoked. This is not timing authorization.','Ready16 singleton/moderate and ready64 loaded/skew are benchmark settings; no default promotion or fullP9 acceptance.']}
+(b/'review/INDEPENDENT_LINUX_CONFIG_REVIEW.json').write_text(json.dumps(receipt,indent=2)+'\n');print(json.dumps({'exit':0,'config_sha256':receipt['config_sha256'],'cases':48,'pairs':24,'no_blockers':True},indent=2))

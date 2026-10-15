@@ -1,0 +1,5 @@
+/private/tmp/voteboat-native487-pair-aoKAm5/wal/t1-skew-quic-baseline: 8192 scheduled offers, 7052 admissions, 7052 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=1024.000 admitted_during=881.500 applied_during=631.375 applied_drain=2038.790 applied_total=785.173 ops/s; window_refused=1140 backlog_at_horizon=2001
+/private/tmp/voteboat-native487-pair-aoKAm5/wal/t1-skew-quic-baseline: 3 durable checkpoint boundaries, 9 exact-scope reclamation rows, 0 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=446.362 reclaim_ms=823.961 reclaimed_bytes=291767 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=1027 units=1028 commands=21156 mean_units=1.001 append_ms=935.156 barriers=1023 mean_appends_per_barrier=1.004 mean_units_per_barrier=1.005 barrier_ms=15844.376 sync_ms=8199.642 publish_ms=7636.850 histogram=1:1026|2:1

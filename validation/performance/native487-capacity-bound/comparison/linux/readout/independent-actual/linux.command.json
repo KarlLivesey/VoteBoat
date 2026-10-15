@@ -1,0 +1,12 @@
+[
+  "python3",
+  "target/p9/native487-capacity-bound/review/independent-actual/recompute.py",
+  "--host",
+  "linux",
+  "--job",
+  "target/p9/native487-capacity-bound/comparison/linux/campaign",
+  "--readout",
+  "target/p9/native487-capacity-bound/review/actual487-linux/READOUT.json",
+  "--output",
+  "target/p9/native487-capacity-bound/review/independent-actual/linux.json"
+]

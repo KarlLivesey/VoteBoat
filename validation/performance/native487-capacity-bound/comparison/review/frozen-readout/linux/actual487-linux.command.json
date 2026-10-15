@@ -1,0 +1,16 @@
+[
+  "/usr/bin/python3.14",
+  "target/p9/native487-capacity-bound/comparison/readout/raw_readout.py",
+  "--phase",
+  "campaign487",
+  "--host",
+  "linux",
+  "--job",
+  "target/p9/native487-capacity-bound/comparison/linux/campaign",
+  "--quiet-go",
+  "target/p9/native487-capacity-bound/ROOT_QUIET_GO.json",
+  "--both-end",
+  "target/p9/native487-capacity-bound/ROOT_QUIET_END.json",
+  "--output",
+  "target/p9/native487-capacity-bound/review/actual487-linux"
+]

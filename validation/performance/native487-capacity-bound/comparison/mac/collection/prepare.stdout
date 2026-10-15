@@ -1,0 +1,25 @@
+Now drawing from 'AC Power'
+ -InternalBattery-0 (id=7602275)	80%; AC attached; not charging present: true
+{
+  "exit": 0,
+  "scope": "Actual fresh486 and immutable480 Mac guard only; no campaign/timing.",
+  "source_commits": {
+    "baseline": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+    "candidate": "dcdcafe3f0c0a56d01e3c3095d3c276113cd7d69"
+  },
+  "artifacts_sha256": {
+    "baseline": {
+      "voteboat": "fa3ea343d31fd2a69f05e38bf02c0a3c1f574ef6d59000d4e70320d02e9916b1",
+      "native_benchmark": "fef05adc73179359ea2acc0d9b92978c57c4795410a727aefc30f1aac422fa52"
+    },
+    "candidate": {
+      "voteboat": "c59f42db67306856518582d37c26a40f988e66b32631ff2b9423cc520de2f561",
+      "native_benchmark": "c7d84b4414d578ac67dfbc5dc6bfb45625bb8e5cb06519d5ce745333d23b3567"
+    }
+  },
+  "proof_counts": {
+    "baseline": 52,
+    "candidate": 48
+  }
+}
+PREPARED48_NO_TIMING /private/tmp/voteboat-native487-pair-aoKAm5/campaign

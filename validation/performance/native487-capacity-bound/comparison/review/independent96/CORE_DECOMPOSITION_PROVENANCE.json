@@ -1,0 +1,12 @@
+{
+  "actual_tool_chunk": "db9f74",
+  "actual_exit": 0,
+  "execution": "Inline Python numerical derivation from the already verified independent linux.json/mac.json; no workload, profiler, source edit or new measurement.",
+  "formulae": {
+    "wholechild_average_cores": "(user_seconds+system_seconds)/wholechild_wall_seconds",
+    "same_childwall_completed_rate": "measurement_applied_count/wholechild_wall_seconds",
+    "identity": "same_childwall_completed_rate = average_cores*1e6/wholechild_cpu_us_per_measurement_completed_original"
+  },
+  "gains_flag": "Native completed rate improves but wholechild CPU/original OR average busy cores rises: flagged, not counted as a CPU-efficiency win under user criterion.",
+  "raw_stdout_provenance": "Actual structured tool output db9f74 in transcript; not reconstructed as raw stdout."
+}

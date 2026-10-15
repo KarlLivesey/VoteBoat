@@ -1,0 +1,17 @@
+{
+  "phase": "campaign487",
+  "host": "mac",
+  "valid_cases": 48,
+  "failures": 0,
+  "totals": {
+    "applied": 323608,
+    "window_refused": 68072,
+    "no_leader": 0,
+    "admission_refused": 0,
+    "not_proposed": 0,
+    "unknown": 0,
+    "pending": 0
+  },
+  "pairs": 24,
+  "regressions": 14
+}

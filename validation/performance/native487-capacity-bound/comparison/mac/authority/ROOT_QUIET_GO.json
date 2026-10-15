@@ -1,0 +1,27 @@
+{
+  "time_utc": "2026-10-15T17:34:26.331693+00:00",
+  "authorization": "Start original fixed487 campaigns on each host once. Both actual fresh qualification/build/control terminals, exact source/artifact/compiler/profile/fixture/device guards, independent actual config and archive reviews and checked publication complete. All owned setup work stopped. No same-host builds/checks/copies/archive/profile while timing. Poll original handles to actual terminal including validators/postguards; never restart for observation timeout or replace cases. Collect/readout/archive only after both actual END/root collectionGO.",
+  "published_evidence_commit": "391aee30acf86f77f6ff6f9f3d44e2d608c6a318",
+  "candidate_source_commit": "dcdcafe3f0c0a56d01e3c3095d3c276113cd7d69",
+  "baseline_source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "schema_sha256": "606906af33ef76f6fa54d641fad901d7161ceeeb04a35e9875f9368e81536662",
+  "cases_per_host": 48,
+  "offers_per_host": 391680,
+  "scope": "Native8BCounter/Witness diagnostics only; no fullP9/default/thirdfilesystem acceptance.",
+  "linux": {
+    "job": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native487-capacity-bound/comparison/linux/campaign",
+    "config_sha256": "e93c56179fdaad3ad55217cee19ee10c964411efbe76d6be311da98e9228038f",
+    "ready_sha256": "f249426f5e8a2ac351763043aaa1acde5e095984564a0c8cf386fbaa3cbfa0a1"
+  },
+  "mac": {
+    "job": "/private/tmp/voteboat-native487-pair-aoKAm5/campaign",
+    "config_sha256": "d62834423aad8430f997f1566b315b9c10a6d62420e7b2122c1d3723260a5a61",
+    "ready_sha256": "a1abbbb86013e5e8f479073f1ab2ba919d90c055475d609ba476959449033898"
+  },
+  "linux_policy_unchanged": {
+    "perf_event_paranoid": "2",
+    "kptr_restrict": "2",
+    "perf_event_mlock_kb": "516"
+  },
+  "mac_actual_power_source": "AC Power80% recorded in actual terminal487preparation9290; no settingschanged."
+}

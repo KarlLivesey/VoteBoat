@@ -1,0 +1,60 @@
+"""487 Linux wrap-up only, reusing484 lossless packing and original inventories."""
+from pathlib import Path
+import gzip,hashlib,json,shutil,statistics
+b=Path('target/p9/native487-capacity-bound');cmp=b/'comparison';job=cmp/'linux/campaign';review=b/'review';out=Path('validation/performance/native487-capacity-bound/comparison/linux');assert not out.exists()
+load=lambda p:json.loads(Path(p).read_text());sha=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def save(p,v):Path(p).write_text(json.dumps(v,indent=2)+'\n')
+c=load(job/'CAMPAIGN_CONFIG.json');r=load(review/'actual487-linux/READOUT.json');cpu=load(review/'CPU_LINUX.json');end=load(b/'ROOT_QUIET_END.json')
+assert r['valid_cases']==48 and not r['failures']and len(r['pairs'])==24 and len(cpu['records'])==48
+assert r['actual_terminal']['exit']==0 and r['actual_terminal']['cases_terminated']==48 and(job/'controller.exit').read_text().strip()=='0'
+assert all(all(v==0 for v in x['actual_exits'].values())for x in r['records'])
+assert all(end[h]['actual_terminal_exit']==0 for h in ['linux','mac'])
+assert sha(cmp/'readout/raw_readout.py')=='31fcaed6b5fe68df4bd450bbf337ea1e6338af91804522857e86101bb62701c6'
+proof={'scope':'Current original487 Linux48-case paired480/486 native campaign wrap-up only, after both real host terminals. No workload/build/check suite/profile rerun or next-task preparation.','original_handle':44616,'actual_terminal_exit':0,'terminal_tool_chunk':'8d63f2','reader_original_handle':89777,'reader_actual_exit':0,'reader_terminal_tool_chunk':'7d1357','CPU_supplement_actual_exit':0,'CPU_supplement_tool_chunk':'421063','source_commits':c['source_commits'],'config_sha256':sha(job/'CAMPAIGN_CONFIG.json'),'totals':r['totals'],'actual_processes_validators_readbacks':48,'pairs':24,'source_inputs':{a:len(v['source']['files'])for a,v in c['candidates'].items()},'limits':r['limits'],'resource_boundary':'CPUus/completed uses whole-child user+sys including startup/warmup/maintenance/drain/refused offers/verification/recovery/cleanup over measured completed originals. Average busy cores uses the SAME whole-child CPU and elapsed walltime. Never divide that CPU by the native benchmark timer.','excluded':'No full production source, binaries, buildtrees, generated WAL/snapshot states, caches or bytecode.'};save(review/'LINUX_ARCHIVE_PROOF.json',proof)
+selected={}
+def add(p,rel):
+ p=Path(p);rel=str(rel);assert p.is_file()and not p.is_symlink()and rel not in selected;selected[rel]=p
+for p in job.rglob('*'):
+ if p.is_file()and'__pycache__'not in p.parts:add(p,Path('campaign-job')/p.relative_to(job))
+for case in c['cases']:
+ for p in Path(case['wal_root']).iterdir():
+  if p.is_file():assert p.suffix in ['.csv','.txt','.json'];add(p,Path('case-results')/case['name']/p.name)
+for p in(cmp/'linux').iterdir():
+ if p.is_file():add(p,Path('preparation/linux')/p.name)
+for p in cmp.iterdir():
+ if p.is_file():add(p,Path('preparation')/p.name)
+for folder in ['common','readout']:
+ for p in(cmp/folder).rglob('*'):
+  if p.is_file()and'__pycache__'not in p.parts:add(p,Path('preparation')/folder/p.relative_to(cmp/folder))
+for p in review.rglob('*'):
+ if p.is_file()and'__pycache__'not in p.parts and p.name not in ['LINUX_ARCHIVE_RECEIPT.json','archive-linux.stdout','archive-linux.stderr','archive-linux.exit']and not p.is_relative_to(review/'actual487-mac'):
+  add(p,Path('readout')/p.relative_to(review))
+for n in ['ROOT_QUIET_GO.json','ROOT_QUIET_END.json']:add(b/n,Path('authority')/n)
+for arm,record in c['candidates'].items():
+ for n,item in enumerate(record['proofs']):
+  p=Path(item['path']);assert sha(p)==item['sha256'];add(p,Path('candidate-proof')/arm/(str(n).zfill(2)+'-'+p.name))
+out.mkdir(parents=True);selection=[];packing=[]
+for rel,p in sorted(selected.items()):
+ data=p.read_bytes();assert not data.startswith((b'\x7fELF',b'!<arch>\n'))
+ whitespace=any(line.endswith((b' ',b'\t',b'\r'))for line in data.split(b'\n'))or data.endswith(b'\n\n')
+ packed=(len(data)>65536 or whitespace or p.suffix in ['.stdout','.stderr','.log','.patch'])and p.suffix!='.gz';saved=rel+('.gz'if packed else'');t=out/saved;t.parent.mkdir(parents=True,exist_ok=True)
+ if packed:
+  t.write_bytes(gzip.compress(data,compresslevel=9,mtime=0));t.chmod(p.stat().st_mode&0o777);assert gzip.decompress(t.read_bytes())==data;packing.append({'original_path':rel,'archived_path':saved,'original_bytes':len(data),'original_sha256':sha(p),'container_bytes':t.stat().st_size,'container_sha256':sha(t)})
+ else:shutil.copy2(p,t);assert t.read_bytes()==data
+ selection.append({'source_path':str(p),'archived_path':saved,'original_sha256':sha(p),'original_bytes':len(data),'source_mode':oct(p.stat().st_mode&0o777),'archived_mode':oct(t.stat().st_mode&0o777)})
+save(out/'SELECTION.json',selection);save(out/'PACKING.json',packing)
+lines=['# Linux487 paired Counter capacity-bound results','','Original controller44616 actually terminated with exit0/tool8d63f2 after all48 END records and ALL_TIMING_END/CAMPAIGN_EXIT0. Both hosts actually terminated before readout. All48 native processes, frozen validators and physical readbacks pass; no case was replaced/retried. Baseline480 f7b0ef1 versus candidate486 dcdcafe3, fixed three durable voters, Witness provider,8B payload and unchanged within-host compiler/profile/runtime/worker settings.','','| Cell | Protocol | Baseline completed/s | Candidate completed/s | Baseline p99 ms | Candidate p99 ms | Baseline CPU us/original | Candidate CPU us/original | Baseline avg busy cores | Candidate avg busy cores |','| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |']
+for cell in ['singleton','moderate','loaded','skew']:
+ for protocol in ['tcp','quic']:
+  a,z=[next(x for x in r['cells']if(x['cell'],x['protocol'],x['arm'])==(cell,protocol,arm))for arm in ['baseline','candidate']];ac,zc=[next(x for x in cpu['cells']if(x['cell'],x['protocol'],x['arm'])==(cell,protocol,arm))for arm in ['baseline','candidate']]
+  lines.append(f"| {cell} | {protocol} | {a['rates']['completed_ops_s']['median']:.3f} | {z['rates']['completed_ops_s']['median']:.3f} | {a['quantiles']['intended']['p99_ms']['median']:.3f} | {z['quantiles']['intended']['p99_ms']['median']:.3f} | {ac['cpu_us_per_completed_original']['median']:.3f} | {zc['cpu_us_per_completed_original']['median']:.3f} | {ac['average_busy_cores_same_wholechild_boundary']['median']:.4f} | {zc['average_busy_cores_same_wholechild_boundary']['median']:.4f} |")
+lines+=['','Three-trial medians; READOUT preserves all individual trials/ranges,24pairs and every regression. All391680 offers conserve to253450 completed originals+138230 window refusals. All other refusal classes, unknown and pending are zero. Completed rate uses the native original horizon+drain timer; during/drain rates and nearest-rank intended/service/dispatch p50/p95/p99/max remain in JSON. Intended/service cover applied originals, dispatch covers all offers. Every case recovers64+applied, verifies original retries and joins workers;624 completed checkpoints/1872 reclaims/zero maintenance skips are retained.','','CPU_LINUX.json recomputes raw user+system CPU us/completed original and average busy cores=(user+system)/SAME whole-child elapsed seconds. The CPU and elapsed boundaries include startup/warmup/maintenance/drain/refused-offer work/verification/recovery/cleanup; they are wider than the native throughput timer. No CPU-wider/native-timer division, CPU-stage causality or continuous memory/debt plateau is claimed. Fixed worker/thread settings did not change.','','Loaded TCP median CPU/original falls479.211→280.340us and QUIC483.184→258.221us, with same-boundary average busy cores falling0.2700→0.1778 and0.2662→0.1795. Loaded TCP paired throughput ratios0.859/1.325/1.197 retain the first-trial loss; QUIC1.081/1.603/1.154. Across all24 pairs,10 lose throughput,8 worsen p99,7 increase CPU/original and6 increase average busy cores. Singleton TCP and moderate TCP medians regress on CPU/original; no universal improvement is asserted. Skew QUIC median throughput443.638→371.598/s regresses despite lower CPU/original.','','All256 cold offers apply in every skew case with zero cold refusals. Median cold intended p99 TCP1298.238→1287.555ms and QUIC1256.863→1201.789ms; all trial cold/hot tails/backlogs/refusals remain. The fixture caps each group at2048 pending and leads both groups on replica1, so this is not unrestricted fairness or independent placement. Three voters share one Btrfs volume/device; aggregate skew cannot replace a one-group floor.','','All per-replica barrier/WAL-sync/publication/cold-maintenance counters and physical readbacks are retained. Nested elapsed wall scopes overlap and cannot be summed as CPU; append units include metadata and are not literal proposal width. Encoded codec bytes and process block counters are not physical I/O bytes. Peak RSS has whole-child scope; raw Linux KiB is converted to bytes.','','Fixed matrix: singleton q16/256@8/window1; moderate q16/8192@128/window256; loaded q64/16000@2000/window4096; skew q64/8192@1024/window4096/groups2/31:1.64 warmups, active2s maintenance, original120s drain and retained-entry limit unchanged. This finite diagnostic is not maximum/sustained20M acceptance or a debt plateau. Before/after exact source/modes/artifacts/tool/validator/device/CPU-policy guards and all raw errors remain.','','The initial supplementary CPU helper failed before writing output because its SHA helper expected Path while __file__ was str; only Path conversion changed. Initial helper/error/exit and successful same-raw corrected output are preserved. Frozen raw reader was unchanged. No workload/build/check suite/profile was rerun during collection.','','Raw stdout/stderr/patches and whitespace-sensitive/large text are reversibly gzip-packed. SELECTION records exact original hashes/lengths/modes; PACKING records containers; SHA256SUMS seals all payloads. No binaries/full production source/buildtrees/generated WAL/snapshot/cache states are archived. The earlier fresh486 qualification archive remains separately sealed. This completes only current487 wrap-up before the requested pause. FullP9 and ext4/XFS/sustained/composition acceptance remain incomplete; no next optimization/profile/preparation was started.']
+for i,line in enumerate(lines):
+ for a,z in [('controller44616','controller 44616'),('exit0/tool8','exit 0/tool 8'),('all48','all 48'),('All48','All 48'),('provider,8B','provider, 8B'),('ranges,24pairs','ranges, 24 pairs'),('All391680','All 391680'),('to253450','to 253450'),('originals+138230','originals + 138230'),('recovers64','recovers 64'),('workers;624','workers; 624'),('falls479','falls 479'),('QUIC483','QUIC 483'),('falling0.2700','falling 0.2700'),('and0.2662','and 0.2662'),('ratios0.859','ratios 0.859'),('QUIC1.081','QUIC 1.081'),('all24','all 24'),('pairs,10','pairs, 10'),('throughput,8','throughput, 8'),('p99,7','p99, 7'),('and6','and 6'),('throughput443','throughput 443'),('All256','All 256'),('TCP1298','TCP 1298'),('QUIC1256','QUIC 1256'),('at2048','at 2048'),('replica1','replica 1'),('31:1.64','31:1. 64'),('active2s','active 2s'),('original120s','original 120s')]:line=line.replace(a,z)
+ lines[i]=line
+(out/'README.md').write_text('\n'.join(lines)+'\n')
+for item in selection:
+ p=out/item['archived_path'];data=p.read_bytes()
+ if p.suffix=='.gz'and not item['source_path'].endswith('.gz'):data=gzip.decompress(data)
+ assert len(data)==item['original_bytes']and hashlib.sha256(data).hexdigest()==item['original_sha256']and item['source_mode']==item['archived_mode']==oct(p.stat().st_mode&0o777)
+files=sorted(p for p in out.rglob('*')if p.is_file());(out/'SHA256SUMS').write_text(''.join(sha(p)+'  '+str(p.relative_to(out))+'\n'for p in files));receipt={**proof,'payloads':len(files),'originals':len(selection),'gzip':len(packing),'archive_bytes':sum(p.stat().st_size for p in out.rglob('*')if p.is_file()),'manifest_sha256':sha(out/'SHA256SUMS'),'all_original_SHA_length_mode_gzip_roundtrip':True,'archive':str(out)};save(review/'LINUX_ARCHIVE_RECEIPT.json',receipt);print(json.dumps(receipt,indent=2))

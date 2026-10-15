@@ -1,0 +1,6 @@
+{
+  "candidate": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux",
+  "source_commit": "dcdcafe3f0c0a56d01e3c3095d3c276113cd7d69",
+  "host": "linux",
+  "scope": "Setup only; no timing authorization, workload, build or dependency update."
+}

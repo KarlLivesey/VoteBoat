@@ -1,0 +1,11 @@
+{
+  "campaign_config_sha256": "e93c56179fdaad3ad55217cee19ee10c964411efbe76d6be311da98e9228038f",
+  "source_commit": "dcdcafe3f0c0a56d01e3c3095d3c276113cd7d69",
+  "cases": 48,
+  "pairs": 24,
+  "artifacts_sha256": {
+    "baseline": "8d3530a6e801ebb857d8dff3fc1a0fb4ef5af865c3aed89d1450271f2054b84d",
+    "candidate": "f3c6e797c3ea1e4af255210b8cbb63fa23505f0d0af22735dba286a50bffd8e7"
+  },
+  "scope": "PREPARED ONLY: no workload launched. Requires root review, completed all-host setup/publication and separate explicit quiet-window grant."
+}

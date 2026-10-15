@@ -1,0 +1,179 @@
+{
+  "actual_exit": 0,
+  "scope": "Minimal prepared487 exact484matrix/control/timer helpers and readout binding; actual Linux config prepared, Mac config withheld until actual fresh qualification. No workload/timing authority.",
+  "static": {
+    "actual_exit": 0,
+    "argv_normalized_records_exact484": true,
+    "all48_order_fields_exact484": true,
+    "controller_plan_prepare_only_identity_text_changes": true,
+    "resources_byte_exact484": true,
+    "readout_only_change_add487_source_commit_binding": true,
+    "reader_reference_phases_retained": [
+      "reference481",
+      "campaign484"
+    ],
+    "cases": 48,
+    "pairs": 24,
+    "offers": 391680,
+    "scheduled_horizon_s": 1344,
+    "candidate": "dcdcafe3f0c0a56d01e3c3095d3c276113cd7d69",
+    "baseline": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+    "scripts": {
+      "common.py": "22255b08f6010a0b5bd1a91d9080a81724f476b0b2f426d7d3d668b560a40c8a",
+      "prepare.py": "64d529b70c4786bd639ab6e157145efcc58c3c63ce7ee4d2cb3206cc5cd234bb",
+      "campaign.py": "ad894c6543ec8055bc1a37fbc03531f979d74079d10327fc95bced2722b3eac0",
+      "plan.py": "8a0e6bdddd3871298ec2746d08cc276112f7a309ac745c1fb010026715e1fc66",
+      "resources.py": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+      "test_plan.py": "5d6bb3fa5aab9e9de364c6c06609aa23d830fe00cd180c8a4758677495ff4cad",
+      "REQUIRED_COMMIT": "1cae45f474891ce78a7aed80d28d9eb80efaa47919e27d0ae74541b9acb5ff53"
+    },
+    "schema_sha256": "606906af33ef76f6fa54d641fad901d7161ceeeb04a35e9875f9368e81536662",
+    "readout_sha256": "31fcaed6b5fe68df4bd450bbf337ea1e6338af91804522857e86101bb62701c6",
+    "actual_config_assembled": false,
+    "timing_started": false
+  },
+  "readout_reference484": {
+    "linux": {
+      "actual_exit": 0,
+      "valid_cases": 48,
+      "readout_sha256": "80239fd7c77865836f52c1fa7d715b0dee8005bbb34c3abab10e531c1d1acaea",
+      "original_readout_sha256": "80239fd7c77865836f52c1fa7d715b0dee8005bbb34c3abab10e531c1d1acaea",
+      "data_exact": true
+    },
+    "mac": {
+      "actual_exit": 0,
+      "valid_cases": 48,
+      "readout_sha256": "226993454dac2d1d270557bdba66990b9a96401416c9927585ce29b019e25260",
+      "original_readout_sha256": "226993454dac2d1d270557bdba66990b9a96401416c9927585ce29b019e25260",
+      "data_exact": true
+    }
+  },
+  "reference_reader_original_handle": 8948,
+  "reference_reader_actual_exit": 0,
+  "reference_reader_terminal_chunk": "8cd2b1",
+  "missing_candidate_refusal": {
+    "expected_actual_exit": 1,
+    "no_job_or_wal_created": true,
+    "terminal_tool_chunk": "cb25c0"
+  },
+  "actual_linux_guard": {
+    "actual_exit": 0,
+    "terminal_tool_chunk": "e5d9b3"
+  },
+  "actual_linux_config": {
+    "actual_exit": 0,
+    "preparation_terminal_tool_chunk": "d73758",
+    "live_handle": null,
+    "reason_no_handle": "Preparation finished in original tool return with exit0; no pending process.",
+    "config_sha256": "e93c56179fdaad3ad55217cee19ee10c964411efbe76d6be311da98e9228038f",
+    "ready_sha256": "f249426f5e8a2ac351763043aaa1acde5e095984564a0c8cf386fbaa3cbfa0a1",
+    "schema_sha256": "606906af33ef76f6fa54d641fad901d7161ceeeb04a35e9875f9368e81536662",
+    "scripts": {
+      "common.py": "22255b08f6010a0b5bd1a91d9080a81724f476b0b2f426d7d3d668b560a40c8a",
+      "plan.py": "8a0e6bdddd3871298ec2746d08cc276112f7a309ac745c1fb010026715e1fc66",
+      "prepare.py": "64d529b70c4786bd639ab6e157145efcc58c3c63ce7ee4d2cb3206cc5cd234bb",
+      "campaign.py": "ad894c6543ec8055bc1a37fbc03531f979d74079d10327fc95bced2722b3eac0",
+      "resources.py": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+      "REQUIRED_COMMIT": "1cae45f474891ce78a7aed80d28d9eb80efaa47919e27d0ae74541b9acb5ff53"
+    },
+    "source_commits": {
+      "baseline": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+      "candidate": "dcdcafe3f0c0a56d01e3c3095d3c276113cd7d69"
+    },
+    "artifacts": {
+      "baseline": "8d3530a6e801ebb857d8dff3fc1a0fb4ef5af865c3aed89d1450271f2054b84d",
+      "candidate": "f3c6e797c3ea1e4af255210b8cbb63fa23505f0d0af22735dba286a50bffd8e7"
+    },
+    "root_artifacts": {
+      "baseline": "f3233aad647806aeab594775cff9f894775099256e564982b84a1a1b08f60435",
+      "candidate": "ea3678c2cbdf0d5f715bb60b2817b9edbba0c0aa66f397f1ae022878fb286cd2"
+    },
+    "source_inputs": {
+      "baseline": 1495,
+      "candidate": 1497
+    },
+    "proof_counts": {
+      "baseline": 20,
+      "candidate": 50
+    },
+    "cases": 48,
+    "pairs": 24,
+    "offers": 391680,
+    "scheduled_horizon_s": 1344.0,
+    "exact484_actual_normalized_order_and_argv": true,
+    "validators": {
+      "check-benchmark-storage.mjs": "f46a15656e91d9c6d32f3f268dde74a2a2e7425f9d5027da4c7cc0a8a69d9856",
+      "check-lanes.mjs": "cb49a5d3cee377cf3154d9a9f092ea90e9af64b87ba98272cae50765c51dc920",
+      "check-maintenance.mjs": "99fd718641c95a0412ef2e98e33b23da717470613bdc496d6313c8b58d0ce658",
+      "check-native-benchmark.mjs": "8c3f8a31270aa52ff4cdadd75479185dbfe33c0f2adecef0739dc43b008e54d7",
+      "check-offered.mjs": "13f0c1f45df5bbc20802e21883bf7157ef0272210df1269f0e8fddb739d90015",
+      "check-publication-profile.mjs": "425f3f905db3e368260095bc8eb78d92aa9753b9d9cf3995a78040a5b7a72b41",
+      "check-publication-timings.mjs": "9d69d025335612afbef911377d2e15654e2186c1e0cb36884fa5fa8ee6b9d5a1",
+      "check-rounded-rate.mjs": "262f06cfb0e878bfa7ce02741f51d7cd6e7e8df6b07b8973df4a7d89502c662d"
+    },
+    "device_identity": {
+      "st_dev": 55,
+      "mount": {
+        "target": "/home",
+        "source": "/dev/nvme1n1p2[/@home]",
+        "fstype": "btrfs",
+        "options": "rw,noatime,compress=zstd:1,ssd,discard=async,space_cache=v2,subvolid=257,subvol=/@home",
+        "uuid": "5fd67d14-d948-4cdc-93a9-30d6b676d3dd"
+      },
+      "physical_chain": {
+        "blockdevices": [
+          {
+            "name": "/dev/nvme1n1p2",
+            "type": "part",
+            "fstype": "btrfs",
+            "uuid": "5fd67d14-d948-4cdc-93a9-30d6b676d3dd",
+            "model": null,
+            "serial": null,
+            "tran": "nvme",
+            "children": [
+              {
+                "name": "/dev/nvme1n1",
+                "type": "disk",
+                "fstype": null,
+                "uuid": null,
+                "model": "Sabrent SB-ROCKET-NVMe4-2TB",
+                "serial": "48790459603318",
+                "tran": "nvme"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "cpu_policy": {
+      "scaling_driver": {
+        "amd-pstate-epp": 16
+      },
+      "scaling_governor": {
+        "powersave": 16
+      },
+      "energy_performance_preference": {
+        "balance_performance": 16
+      },
+      "scaling_min_freq": {
+        "603379": 16
+      },
+      "scaling_max_freq": {
+        "5271622": 16
+      }
+    },
+    "launch": [
+      "/usr/bin/python3.14",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native487-capacity-bound/comparison/linux/campaign/campaign.py",
+      "--authorized-quiet"
+    ],
+    "timing_started": false,
+    "scope": "Prepared only using actual terminal486 fresh qualification+immutable480. Read-only host device access; no workload/settings/filesystem change. Requires independent review, checked evidence publication and separate root quietGO."
+  },
+  "all_baseline_example_sources_exact_candidate": 47,
+  "actual_mac_guard": null,
+  "actual_mac_config": null,
+  "candidate_publication": "target/p9/native486-capacity-bound/publication/RECEIPT.json",
+  "no_new_rust_build_tests_profile_or_workload": true,
+  "static_plan_tests": 4
+}

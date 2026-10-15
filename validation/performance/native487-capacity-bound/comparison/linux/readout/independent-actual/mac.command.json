@@ -1,0 +1,16 @@
+[
+  "python3",
+  "target/p9/native487-capacity-bound/review/independent-actual/recompute.py",
+  "--host",
+  "mac",
+  "--job",
+  "target/p9/native487-capacity-bound/comparison/mac/collected",
+  "--readout",
+  "target/p9/native487-capacity-bound/review/actual487-mac/READOUT.json",
+  "--case-root",
+  "target/p9/native487-capacity-bound/comparison/mac/collected/results",
+  "--resource-root",
+  "target/p9/native487-capacity-bound/comparison/mac/collected/campaign-metadata",
+  "--output",
+  "target/p9/native487-capacity-bound/review/independent-actual/mac.json"
+]

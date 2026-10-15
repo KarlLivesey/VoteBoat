@@ -1,0 +1,18 @@
+[
+  "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/artifacts/native/native_benchmark",
+  "/private/tmp/voteboat-native487-pair-aoKAm5/wal/t1-moderate-quic-candidate",
+  "quic",
+  "8192",
+  "256",
+  "1",
+  "--offered",
+  "128",
+  "--maintenance",
+  "2",
+  "--ready-items",
+  "16",
+  "--offered-capacity",
+  "4096",
+  "--publication",
+  "witness"
+]

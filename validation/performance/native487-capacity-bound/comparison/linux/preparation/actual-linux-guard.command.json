@@ -1,0 +1,5 @@
+[
+  "python3",
+  "-c",
+  "import sys,json\nfrom pathlib import Path\nsys.dont_write_bytecode=True\nsys.path.insert(0,'target/p9/native487-capacity-bound/comparison/common')\nfrom common import candidate_record,required_commit\nr=candidate_record(Path('target/p9/native486-capacity-bound/linux').resolve(),'linux',required_commit(),Path('target/p9/native486-capacity-bound/publication/RECEIPT.json').resolve())\nprint(json.dumps({'actual_exit':0,'source_commit':r['source']['commit'],'source_files':len(r['source']['files']),'artifacts':{a['target']:a['sha256']for a in r['artifacts']},'proofs':len(r['proofs']),'scope':'Actual terminal fresh Linux486 guard only; no setup/config or workload.'},indent=2))\n"
+]

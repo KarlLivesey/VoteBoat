@@ -1,0 +1,861 @@
+{
+  "exit": 0,
+  "cases": 48,
+  "totals": {
+    "applied": 323608,
+    "window_refused": 68072,
+    "no_leader": 0,
+    "admission_refused": 0,
+    "not_proposed": 0,
+    "unknown": 0,
+    "pending": 0
+  },
+  "cells": [
+    {
+      "cell": "singleton",
+      "protocol": "tcp",
+      "baseline": {
+        "completed_s": 7.4062127759117,
+        "during_s": 7.40625,
+        "p99_ms": 161.366417,
+        "window_refused": [
+          19,
+          20,
+          19
+        ],
+        "cpu_us_per_completed": 14653.364406779661,
+        "average_busy_cores": 0.09768617534997263,
+        "rss_bytes": 11976704,
+        "per_trial_resources": [
+          {
+            "case": "t1-singleton-tcp-baseline",
+            "cpu_seconds": 3.466851,
+            "same_child_wall_seconds": 35.578997042,
+            "completed": 237,
+            "average_busy_cores": 0.09744094236010871,
+            "cpu_us_per_completed": 14628.06329113924
+          },
+          {
+            "case": "t2-singleton-tcp-baseline",
+            "cpu_seconds": 3.458194,
+            "same_child_wall_seconds": 35.401058416,
+            "completed": 236,
+            "average_busy_cores": 0.09768617534997263,
+            "cpu_us_per_completed": 14653.364406779661
+          },
+          {
+            "case": "t3-singleton-tcp-baseline",
+            "cpu_seconds": 3.514746,
+            "same_child_wall_seconds": 35.495013334,
+            "completed": 237,
+            "average_busy_cores": 0.09902083898171948,
+            "cpu_us_per_completed": 14830.151898734177
+          }
+        ]
+      },
+      "candidate": {
+        "completed_s": 7.374999855957034,
+        "during_s": 7.375,
+        "p99_ms": 167.152167,
+        "window_refused": [
+          20,
+          19,
+          20
+        ],
+        "cpu_us_per_completed": 14727.822784810127,
+        "average_busy_cores": 0.09844808488382537,
+        "rss_bytes": 12025856,
+        "per_trial_resources": [
+          {
+            "case": "t1-singleton-tcp-candidate",
+            "cpu_seconds": 3.4627549999999996,
+            "same_child_wall_seconds": 35.514363624999994,
+            "completed": 236,
+            "average_busy_cores": 0.0975029437825102,
+            "cpu_us_per_completed": 14672.6906779661
+          },
+          {
+            "case": "t2-singleton-tcp-candidate",
+            "cpu_seconds": 3.490494,
+            "same_child_wall_seconds": 35.455174208,
+            "completed": 237,
+            "average_busy_cores": 0.09844808488382537,
+            "cpu_us_per_completed": 14727.822784810127
+          },
+          {
+            "case": "t3-singleton-tcp-candidate",
+            "cpu_seconds": 3.557367,
+            "same_child_wall_seconds": 35.674063124999996,
+            "completed": 236,
+            "average_busy_cores": 0.0997185823082495,
+            "cpu_us_per_completed": 15073.588983050848
+          }
+        ]
+      },
+      "rate_ratios": [
+        0.995780681519594,
+        1.0042394953530052,
+        0.9957834432241004
+      ],
+      "p99_ratios": [
+        0.9825906222909779,
+        1.0358547342598552,
+        1.0560807832877432
+      ],
+      "cpu_per_completed_ratios": [
+        1.0030508062440426,
+        1.0050813162058547,
+        1.0164150095008433
+      ]
+    },
+    {
+      "cell": "singleton",
+      "protocol": "quic",
+      "baseline": {
+        "completed_s": 7.374996466224349,
+        "during_s": 7.375,
+        "p99_ms": 165.098042,
+        "window_refused": [
+          19,
+          20,
+          20
+        ],
+        "cpu_us_per_completed": 21282.588983050846,
+        "average_busy_cores": 0.13950039648311865,
+        "rss_bytes": 12681216,
+        "per_trial_resources": [
+          {
+            "case": "t1-singleton-quic-baseline",
+            "cpu_seconds": 4.985422,
+            "same_child_wall_seconds": 35.737690542,
+            "completed": 237,
+            "average_busy_cores": 0.13950039648311865,
+            "cpu_us_per_completed": 21035.5358649789
+          },
+          {
+            "case": "t2-singleton-quic-baseline",
+            "cpu_seconds": 5.022691,
+            "same_child_wall_seconds": 35.765882417,
+            "completed": 236,
+            "average_busy_cores": 0.14043246414109575,
+            "cpu_us_per_completed": 21282.588983050846
+          },
+          {
+            "case": "t3-singleton-quic-baseline",
+            "cpu_seconds": 5.087762,
+            "same_child_wall_seconds": 36.634260084,
+            "completed": 236,
+            "average_busy_cores": 0.13887988970799708,
+            "cpu_us_per_completed": 21558.313559322032
+          }
+        ]
+      },
+      "candidate": {
+        "completed_s": 7.406243847494369,
+        "during_s": 7.40625,
+        "p99_ms": 166.15825,
+        "window_refused": [
+          19,
+          19,
+          20
+        ],
+        "cpu_us_per_completed": 21546.4641350211,
+        "average_busy_cores": 0.14243631606802273,
+        "rss_bytes": 12517376,
+        "per_trial_resources": [
+          {
+            "case": "t1-singleton-quic-candidate",
+            "cpu_seconds": 5.068633999999999,
+            "same_child_wall_seconds": 35.763880166999996,
+            "completed": 237,
+            "average_busy_cores": 0.14172494640771455,
+            "cpu_us_per_completed": 21386.641350210968
+          },
+          {
+            "case": "t2-singleton-quic-candidate",
+            "cpu_seconds": 5.106512,
+            "same_child_wall_seconds": 35.851194,
+            "completed": 237,
+            "average_busy_cores": 0.14243631606802273,
+            "cpu_us_per_completed": 21546.4641350211
+          },
+          {
+            "case": "t3-singleton-quic-candidate",
+            "cpu_seconds": 5.1485140000000005,
+            "same_child_wall_seconds": 35.859489792,
+            "completed": 236,
+            "average_busy_cores": 0.14357465847572093,
+            "cpu_us_per_completed": 21815.7372881356
+          }
+        ]
+      },
+      "rate_ratios": [
+        1.0000003281559775,
+        1.0042375339539944,
+        1.0000011184975388
+      ],
+      "p99_ratios": [
+        1.0655448899872477,
+        0.9882036782101905,
+        1.0256162453201136
+      ],
+      "cpu_per_completed_ratios": [
+        1.0166910644675615,
+        1.0123986396664615,
+        1.0119408101243732
+      ]
+    },
+    {
+      "cell": "moderate",
+      "protocol": "tcp",
+      "baseline": {
+        "completed_s": 126.66937248623938,
+        "during_s": 127.796875,
+        "p99_ms": 772.463167,
+        "window_refused": [
+          0,
+          0,
+          75
+        ],
+        "cpu_us_per_completed": 1035.262781815942,
+        "average_busy_cores": 0.1288992701738959,
+        "rss_bytes": 26050560,
+        "per_trial_resources": [
+          {
+            "case": "t1-moderate-tcp-baseline",
+            "cpu_seconds": 8.487047,
+            "same_child_wall_seconds": 65.939244,
+            "completed": 8192,
+            "average_busy_cores": 0.12871010471396974,
+            "cpu_us_per_completed": 1036.0164794921875
+          },
+          {
+            "case": "t2-moderate-tcp-baseline",
+            "cpu_seconds": 8.39936,
+            "same_child_wall_seconds": 65.136413042,
+            "completed": 8192,
+            "average_busy_cores": 0.12895029995870494,
+            "cpu_us_per_completed": 1025.3125
+          },
+          {
+            "case": "t3-moderate-tcp-baseline",
+            "cpu_seconds": 8.403228,
+            "same_child_wall_seconds": 65.19220775,
+            "completed": 8117,
+            "average_busy_cores": 0.1288992701738959,
+            "cpu_us_per_completed": 1035.262781815942
+          }
+        ]
+      },
+      "candidate": {
+        "completed_s": 127.85832481913883,
+        "during_s": 127.78125,
+        "p99_ms": 760.856875,
+        "window_refused": [
+          0,
+          0,
+          0
+        ],
+        "cpu_us_per_completed": 1032.5120849609373,
+        "average_busy_cores": 0.12973161353173027,
+        "rss_bytes": 26116096,
+        "per_trial_resources": [
+          {
+            "case": "t1-moderate-tcp-candidate",
+            "cpu_seconds": 8.347573,
+            "same_child_wall_seconds": 65.121861791,
+            "completed": 8192,
+            "average_busy_cores": 0.12818388127155259,
+            "cpu_us_per_completed": 1018.9908447265626
+          },
+          {
+            "case": "t2-moderate-tcp-candidate",
+            "cpu_seconds": 8.458338999999999,
+            "same_child_wall_seconds": 65.198749709,
+            "completed": 8192,
+            "average_busy_cores": 0.12973161353173027,
+            "cpu_us_per_completed": 1032.5120849609373
+          },
+          {
+            "case": "t3-moderate-tcp-candidate",
+            "cpu_seconds": 8.533147,
+            "same_child_wall_seconds": 65.230426959,
+            "completed": 8192,
+            "average_busy_cores": 0.1308154399382275,
+            "cpu_us_per_completed": 1041.6439208984375
+          }
+        ]
+      },
+      "rate_ratios": [
+        1.0113002956824515,
+        1.0000358983785564,
+        1.0092405349828415
+      ],
+      "p99_ratios": [
+        2.4393334629728978,
+        0.9456174173803681,
+        0.33894961285136127
+      ],
+      "cpu_per_completed_ratios": [
+        0.9835662510175802,
+        1.0070218445214871,
+        1.0061637868129505
+      ]
+    },
+    {
+      "cell": "moderate",
+      "protocol": "quic",
+      "baseline": {
+        "completed_s": 127.8441177375954,
+        "during_s": 127.78125,
+        "p99_ms": 833.333,
+        "window_refused": [
+          0,
+          0,
+          0
+        ],
+        "cpu_us_per_completed": 1465.797119140625,
+        "average_busy_cores": 0.18217612402379013,
+        "rss_bytes": 27967488,
+        "per_trial_resources": [
+          {
+            "case": "t1-moderate-quic-baseline",
+            "cpu_seconds": 12.00781,
+            "same_child_wall_seconds": 65.913192875,
+            "completed": 8192,
+            "average_busy_cores": 0.18217612402379013,
+            "cpu_us_per_completed": 1465.797119140625
+          },
+          {
+            "case": "t2-moderate-quic-baseline",
+            "cpu_seconds": 11.974238,
+            "same_child_wall_seconds": 65.893188208,
+            "completed": 8192,
+            "average_busy_cores": 0.18172194009192325,
+            "cpu_us_per_completed": 1461.698974609375
+          },
+          {
+            "case": "t3-moderate-quic-baseline",
+            "cpu_seconds": 12.0252,
+            "same_child_wall_seconds": 65.982915583,
+            "completed": 8192,
+            "average_busy_cores": 0.1822471755567316,
+            "cpu_us_per_completed": 1467.919921875
+          }
+        ]
+      },
+      "candidate": {
+        "completed_s": 127.67722549035129,
+        "during_s": 127.796875,
+        "p99_ms": 806.001,
+        "window_refused": [
+          0,
+          15,
+          0
+        ],
+        "cpu_us_per_completed": 1474.8077534548122,
+        "average_busy_cores": 0.1828864241191643,
+        "rss_bytes": 28573696,
+        "per_trial_resources": [
+          {
+            "case": "t1-moderate-quic-candidate",
+            "cpu_seconds": 12.127397,
+            "same_child_wall_seconds": 65.91956783399999,
+            "completed": 8192,
+            "average_busy_cores": 0.18397264118204568,
+            "cpu_us_per_completed": 1480.3951416015625
+          },
+          {
+            "case": "t2-moderate-quic-candidate",
+            "cpu_seconds": 12.059503,
+            "same_child_wall_seconds": 65.939847958,
+            "completed": 8177,
+            "average_busy_cores": 0.1828864241191643,
+            "cpu_us_per_completed": 1474.8077534548122
+          },
+          {
+            "case": "t3-moderate-quic-candidate",
+            "cpu_seconds": 12.020677,
+            "same_child_wall_seconds": 65.940272166,
+            "completed": 8192,
+            "average_busy_cores": 0.18229644199433678,
+            "cpu_us_per_completed": 1467.3677978515625
+          }
+        ]
+      },
+      "rate_ratios": [
+        0.9985828488955817,
+        0.9980378871623997,
+        1.0005912304899849
+      ],
+      "p99_ratios": [
+        1.0446693339089532,
+        2.3040506712202684,
+        0.6106270394245586
+      ],
+      "cpu_per_completed_ratios": [
+        1.0099591016180303,
+        1.0089681795452723,
+        0.9996238731996141
+      ]
+    },
+    {
+      "cell": "loaded",
+      "protocol": "tcp",
+      "baseline": {
+        "completed_s": 1070.849493726156,
+        "during_s": 787.375,
+        "p99_ms": 4854.186875,
+        "window_refused": [
+          5178,
+          5605,
+          6181
+        ],
+        "cpu_us_per_completed": 586.6798460798461,
+        "average_busy_cores": 0.5336295523062659,
+        "rss_bytes": 42024960,
+        "per_trial_resources": [
+          {
+            "case": "t1-loaded-tcp-baseline",
+            "cpu_seconds": 5.9829609999999995,
+            "same_child_wall_seconds": 11.211824709,
+            "completed": 10822,
+            "average_busy_cores": 0.5336295523062659,
+            "cpu_us_per_completed": 552.8516909998151
+          },
+          {
+            "case": "t2-loaded-tcp-baseline",
+            "cpu_seconds": 6.098537,
+            "same_child_wall_seconds": 11.021498875,
+            "completed": 10395,
+            "average_busy_cores": 0.5533310005441524,
+            "cpu_us_per_completed": 586.6798460798461
+          },
+          {
+            "case": "t3-loaded-tcp-baseline",
+            "cpu_seconds": 5.793646,
+            "same_child_wall_seconds": 11.339014583,
+            "completed": 9819,
+            "average_busy_cores": 0.5109479274050952,
+            "cpu_us_per_completed": 590.0444037070985
+          }
+        ]
+      },
+      "candidate": {
+        "completed_s": 1297.3001635803068,
+        "during_s": 1108.25,
+        "p99_ms": 3455.130458,
+        "window_refused": [
+          3039,
+          3327,
+          2848
+        ],
+        "cpu_us_per_completed": 282.4460918491484,
+        "average_busy_cores": 0.3079809967673277,
+        "rss_bytes": 47513600,
+        "per_trial_resources": [
+          {
+            "case": "t1-loaded-tcp-candidate",
+            "cpu_seconds": 3.842324,
+            "same_child_wall_seconds": 12.475847667,
+            "completed": 12961,
+            "average_busy_cores": 0.3079809967673277,
+            "cpu_us_per_completed": 296.4527428439164
+          },
+          {
+            "case": "t2-loaded-tcp-candidate",
+            "cpu_seconds": 3.401977,
+            "same_child_wall_seconds": 11.050269125,
+            "completed": 12673,
+            "average_busy_cores": 0.3078637236357807,
+            "cpu_us_per_completed": 268.44291012388544
+          },
+          {
+            "case": "t3-loaded-tcp-candidate",
+            "cpu_seconds": 3.7147309999999996,
+            "same_child_wall_seconds": 11.239469625,
+            "completed": 13152,
+            "average_busy_cores": 0.33050767731399955,
+            "cpu_us_per_completed": 282.4460918491484
+          }
+        ]
+      },
+      "rate_ratios": [
+        1.0533454388916597,
+        1.2114682513097028,
+        1.3669614011419156
+      ],
+      "p99_ratios": [
+        0.9483865828958823,
+        0.7042587075925049,
+        0.6700818187434792
+      ],
+      "cpu_per_completed_ratios": [
+        0.5362247193416209,
+        0.4575628631486189,
+        0.47868616340501097
+      ]
+    },
+    {
+      "cell": "loaded",
+      "protocol": "quic",
+      "baseline": {
+        "completed_s": 1021.0433377255854,
+        "during_s": 816.125,
+        "p99_ms": 4753.13525,
+        "window_refused": [
+          6054,
+          5400,
+          5375
+        ],
+        "cpu_us_per_completed": 618.482706615725,
+        "average_busy_cores": 0.5104876143964445,
+        "rss_bytes": 43089920,
+        "per_trial_resources": [
+          {
+            "case": "t1-loaded-quic-baseline",
+            "cpu_seconds": 6.151429,
+            "same_child_wall_seconds": 12.278923041,
+            "completed": 9946,
+            "average_busy_cores": 0.5009746359236913,
+            "cpu_us_per_completed": 618.482706615725
+          },
+          {
+            "case": "t2-loaded-quic-baseline",
+            "cpu_seconds": 6.0016929999999995,
+            "same_child_wall_seconds": 11.75678475,
+            "completed": 10600,
+            "average_busy_cores": 0.5104876143964445,
+            "cpu_us_per_completed": 566.1974528301886
+          },
+          {
+            "case": "t3-loaded-quic-baseline",
+            "cpu_seconds": 6.6463410000000005,
+            "same_child_wall_seconds": 12.224989625,
+            "completed": 10625,
+            "average_busy_cores": 0.5436684368556265,
+            "cpu_us_per_completed": 625.5379764705883
+          }
+        ]
+      },
+      "candidate": {
+        "completed_s": 1332.9000544837218,
+        "during_s": 1140.0,
+        "p99_ms": 3357.463,
+        "window_refused": [
+          2619,
+          2784,
+          3619
+        ],
+        "cpu_us_per_completed": 318.2397429190643,
+        "average_busy_cores": 0.34266357875758113,
+        "rss_bytes": 48824320,
+        "per_trial_resources": [
+          {
+            "case": "t1-loaded-quic-candidate",
+            "cpu_seconds": 4.258366,
+            "same_child_wall_seconds": 11.481277959000002,
+            "completed": 13381,
+            "average_busy_cores": 0.370896516503368,
+            "cpu_us_per_completed": 318.2397429190643
+          },
+          {
+            "case": "t2-loaded-quic-candidate",
+            "cpu_seconds": 4.253792,
+            "same_child_wall_seconds": 12.41390175,
+            "completed": 13216,
+            "average_busy_cores": 0.34266357875758113,
+            "cpu_us_per_completed": 321.86682808716705
+          },
+          {
+            "case": "t3-loaded-quic-candidate",
+            "cpu_seconds": 3.8061680000000004,
+            "same_child_wall_seconds": 12.281394875,
+            "completed": 12381,
+            "average_busy_cores": 0.30991333140406013,
+            "cpu_us_per_completed": 307.42007915354174
+          }
+        ]
+      },
+      "rate_ratios": [
+        1.3462721642225337,
+        1.251697718929923,
+        1.25354120582796
+      ],
+      "p99_ratios": [
+        0.6635611530715092,
+        0.73118890315608,
+        0.666664820721631
+      ],
+      "cpu_per_completed_ratios": [
+        0.5145491369685017,
+        0.5684709927222155,
+        0.4914491057570444
+      ]
+    },
+    {
+      "cell": "skew",
+      "protocol": "tcp",
+      "baseline": {
+        "completed_s": 773.2207219353319,
+        "during_s": 615.25,
+        "p99_ms": 3127.943771,
+        "window_refused": [
+          1201,
+          1274,
+          1557
+        ],
+        "cpu_us_per_completed": 487.16854582249204,
+        "average_busy_cores": 0.32363150228387383,
+        "rss_bytes": 31408128,
+        "per_trial_resources": [
+          {
+            "case": "t1-skew-tcp-baseline",
+            "cpu_seconds": 3.392992,
+            "same_child_wall_seconds": 10.160102458,
+            "completed": 6991,
+            "average_busy_cores": 0.33395253778453576,
+            "cpu_us_per_completed": 485.33714776140755
+          },
+          {
+            "case": "t2-skew-tcp-baseline",
+            "cpu_seconds": 3.370232,
+            "same_child_wall_seconds": 10.801813625,
+            "completed": 6918,
+            "average_busy_cores": 0.3120061238790352,
+            "cpu_us_per_completed": 487.16854582249204
+          },
+          {
+            "case": "t3-skew-tcp-baseline",
+            "cpu_seconds": 3.311065,
+            "same_child_wall_seconds": 10.2309725,
+            "completed": 6635,
+            "average_busy_cores": 0.32363150228387383,
+            "cpu_us_per_completed": 499.0301431801055
+          }
+        ],
+        "cold": {
+          "p99_ms": [
+            456.493438,
+            460.325729,
+            887.317146
+          ],
+          "completed": [
+            256,
+            256,
+            256
+          ],
+          "refusals": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "candidate": {
+        "completed_s": 776.6343430819239,
+        "during_s": 617.125,
+        "p99_ms": 3247.518875,
+        "window_refused": [
+          1167,
+          1290,
+          1201
+        ],
+        "cpu_us_per_completed": 328.10040567951313,
+        "average_busy_cores": 0.22311764232997155,
+        "rss_bytes": 31768576,
+        "per_trial_resources": [
+          {
+            "case": "t1-skew-tcp-candidate",
+            "cpu_seconds": 2.2988999999999997,
+            "same_child_wall_seconds": 10.303533042,
+            "completed": 7025,
+            "average_busy_cores": 0.22311764232997155,
+            "cpu_us_per_completed": 327.2455516014234
+          },
+          {
+            "case": "t2-skew-tcp-candidate",
+            "cpu_seconds": 2.2645489999999997,
+            "same_child_wall_seconds": 10.258071500000002,
+            "completed": 6902,
+            "average_busy_cores": 0.22075777108786962,
+            "cpu_us_per_completed": 328.10040567951313
+          },
+          {
+            "case": "t3-skew-tcp-candidate",
+            "cpu_seconds": 2.310324,
+            "same_child_wall_seconds": 10.160462416,
+            "completed": 6991,
+            "average_busy_cores": 0.22738374548405005,
+            "cpu_us_per_completed": 330.4711772278644
+          }
+        ],
+        "cold": {
+          "p99_ms": [
+            863.911563,
+            809.464229,
+            425.099438
+          ],
+          "completed": [
+            256,
+            256,
+            256
+          ],
+          "refusals": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rate_ratios": [
+        0.9895272327485632,
+        0.9923140394938066,
+        1.0619393524995364
+      ],
+      "p99_ratios": [
+        1.044916198196781,
+        1.0736848283964884,
+        1.0233825268779357
+      ],
+      "cpu_per_completed_ratios": [
+        0.6742643811849692,
+        0.6734843792625765,
+        0.662226884977154
+      ]
+    },
+    {
+      "cell": "skew",
+      "protocol": "quic",
+      "baseline": {
+        "completed_s": 785.1726112200856,
+        "during_s": 627.875,
+        "p99_ms": 3119.641584,
+        "window_refused": [
+          1140,
+          1541,
+          1127
+        ],
+        "cpu_us_per_completed": 540.827600849257,
+        "average_busy_cores": 0.349490285242691,
+        "rss_bytes": 32178176,
+        "per_trial_resources": [
+          {
+            "case": "t1-skew-quic-baseline",
+            "cpu_seconds": 3.79753,
+            "same_child_wall_seconds": 10.865910042,
+            "completed": 7052,
+            "average_busy_cores": 0.349490285242691,
+            "cpu_us_per_completed": 538.5039705048214
+          },
+          {
+            "case": "t2-skew-quic-baseline",
+            "cpu_seconds": 3.688897,
+            "same_child_wall_seconds": 10.870003292000002,
+            "completed": 6651,
+            "average_busy_cores": 0.33936484662474004,
+            "cpu_us_per_completed": 554.6379491805743
+          },
+          {
+            "case": "t3-skew-quic-baseline",
+            "cpu_seconds": 3.8209470000000003,
+            "same_child_wall_seconds": 10.79126475,
+            "completed": 7065,
+            "average_busy_cores": 0.3540777738772464,
+            "cpu_us_per_completed": 540.827600849257
+          }
+        ],
+        "cold": {
+          "p99_ms": [
+            387.447605,
+            877.606563,
+            480.638938
+          ],
+          "completed": [
+            256,
+            256,
+            256
+          ],
+          "refusals": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "candidate": {
+        "completed_s": 740.8025843968401,
+        "during_s": 590.875,
+        "p99_ms": 3201.880709,
+        "window_refused": [
+          1586,
+          1171,
+          1464
+        ],
+        "cpu_us_per_completed": 397.37132909476236,
+        "average_busy_cores": 0.24264832598394034,
+        "rss_bytes": 31604736,
+        "per_trial_resources": [
+          {
+            "case": "t1-skew-quic-candidate",
+            "cpu_seconds": 2.625035,
+            "same_child_wall_seconds": 10.830988292,
+            "completed": 6606,
+            "average_busy_cores": 0.24236338635310933,
+            "cpu_us_per_completed": 397.37132909476236
+          },
+          {
+            "case": "t2-skew-quic-candidate",
+            "cpu_seconds": 2.725399,
+            "same_child_wall_seconds": 10.664112208,
+            "completed": 7021,
+            "average_busy_cores": 0.2555673596490724,
+            "cpu_us_per_completed": 388.1781797464749
+          },
+          {
+            "case": "t3-skew-quic-candidate",
+            "cpu_seconds": 2.676121,
+            "same_child_wall_seconds": 11.028804708000001,
+            "completed": 6728,
+            "average_busy_cores": 0.24264832598394034,
+            "cpu_us_per_completed": 397.7587693222354
+          }
+        ],
+        "cold": {
+          "p99_ms": [
+            884.601313,
+            458.587896,
+            1079.28698
+          ],
+          "completed": [
+            256,
+            256,
+            256
+          ],
+          "refusals": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "rate_ratios": [
+        0.9397987138582896,
+        1.0577920192669221,
+        0.9348862730318712
+      ],
+      "p99_ratios": [
+        1.026361722263797,
+        0.9325320780992373,
+        1.1625405858395197
+      ],
+      "cpu_per_completed_ratios": [
+        0.7379171758422617,
+        0.6998767039290619,
+        0.735463147031768
+      ]
+    }
+  ],
+  "raw_readout_sha256": "435ccb3c5324af037ea9c247946f5ba0a4d64528bcbb8b94a442ea286a8f8f6a",
+  "scope": "Fixed configured workers, no affinity restriction/one-core claim. Whole-child user+sys includes warmup/drain/recovery/cleanup; CPU/completed denominator counts measured applied originals. Average busy cores uses exactly the same resource-helper child wall, never native timer elapsed. Finite offered workloads, not full P9 acceptance."
+}

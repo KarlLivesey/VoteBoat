@@ -1,0 +1,38 @@
+{
+  "commit": "dcdcafe3f0c0a56d01e3c3095d3c276113cd7d69",
+  "exit": 0,
+  "proof": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/RECEIPT.json",
+    "sha256": "44ac62f8b44978dd9b6c89d61b17024aef4082c796450d69eeddda3925f1a044"
+  },
+  "hook": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/.githooks/pre-push",
+    "sha256": "e3e9d01c12837936819f7c6f5b4b8840af19e9cded729381599df0f0fc17ee92"
+  },
+  "actual_exit_files": {
+    "whitespace": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/whitespace.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "stage": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/stage.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "staged-whitespace": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/staged-whitespace.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "commit": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/commit.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "push": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/push.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "remote": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/remote.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    }
+  }
+}

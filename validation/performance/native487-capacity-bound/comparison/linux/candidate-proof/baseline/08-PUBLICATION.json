@@ -1,0 +1,12 @@
+{
+  "commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "exit": 0,
+  "proof": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/publication2/RECEIPT.json",
+    "sha256": "de881eea62a689e4c5789d407dc9805213cfb8e5155458bfa0bf1133621a7ae8"
+  },
+  "hook": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/.githooks/pre-push",
+    "sha256": "e3e9d01c12837936819f7c6f5b4b8840af19e9cded729381599df0f0fc17ee92"
+  }
+}

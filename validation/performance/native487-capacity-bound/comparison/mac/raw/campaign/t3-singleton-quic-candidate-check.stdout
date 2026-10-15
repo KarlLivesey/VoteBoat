@@ -1,0 +1,5 @@
+/private/tmp/voteboat-native487-pair-aoKAm5/wal/t3-singleton-quic-candidate: 256 scheduled offers, 236 admissions, 236 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=8.000 admitted_during=7.375 applied_during=7.375 applied_drain=0.000 applied_total=7.375 ops/s; window_refused=20 backlog_at_horizon=0
+/private/tmp/voteboat-native487-pair-aoKAm5/wal/t3-singleton-quic-candidate: 15 durable checkpoint boundaries, 45 exact-scope reclamation rows, 0 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=1509.583 reclaim_ms=3014.023 reclaimed_bytes=207062 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=1430 units=1430 commands=708 mean_units=1.000 append_ms=604.950 barriers=1430 mean_appends_per_barrier=1.000 mean_units_per_barrier=1.000 barrier_ms=24102.822 sync_ms=11762.396 publish_ms=12329.784 histogram=1:1430

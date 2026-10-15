@@ -1,0 +1,901 @@
+{
+  "actual_exit": 0,
+  "pairs": [
+    {
+      "host": "linux",
+      "pair": "t1-singleton-tcp",
+      "cell": "singleton",
+      "native_completed_rate_ratio": 0.9174766950285668,
+      "wholechild_cpu_us_per_completed_ratio": 0.9765598166355403,
+      "matching_childwall_average_cores_ratio": 0.9542638312479358,
+      "same_childwall_completed_ops_s": {
+        "baseline": 5.026694568967245,
+        "candidate": 4.911929342353921
+      },
+      "same_childwall_completed_rate_ratio": 0.9771688482284487,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t1-singleton-quic",
+      "cell": "singleton",
+      "native_completed_rate_ratio": 0.9604107771363157,
+      "wholechild_cpu_us_per_completed_ratio": 0.9763786841336292,
+      "matching_childwall_average_cores_ratio": 0.996115586590861,
+      "same_childwall_completed_ops_s": {
+        "baseline": 4.8247732507054515,
+        "candidate": 4.922303113426627
+      },
+      "same_childwall_completed_rate_ratio": 1.0202143930197993,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t1-moderate-quic",
+      "cell": "moderate",
+      "native_completed_rate_ratio": 1.0150154725414429,
+      "wholechild_cpu_us_per_completed_ratio": 0.9469403842359778,
+      "matching_childwall_average_cores_ratio": 0.9655424551791669,
+      "same_childwall_completed_ops_s": {
+        "baseline": 121.2446029860398,
+        "candidate": 123.62637985792263
+      },
+      "same_childwall_completed_rate_ratio": 1.0196443949934586,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t1-moderate-tcp",
+      "cell": "moderate",
+      "native_completed_rate_ratio": 0.9795458254603573,
+      "wholechild_cpu_us_per_completed_ratio": 1.0357430091505895,
+      "matching_childwall_average_cores_ratio": 1.0048120015395703,
+      "same_childwall_completed_ops_s": {
+        "baseline": 122.44470174305242,
+        "candidate": 118.7880630130944
+      },
+      "same_childwall_completed_rate_ratio": 0.9701364070645425,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t1-loaded-tcp",
+      "cell": "loaded",
+      "native_completed_rate_ratio": 0.8588714018021407,
+      "wholechild_cpu_us_per_completed_ratio": 0.6642104950657375,
+      "matching_childwall_average_cores_ratio": 0.585042553299735,
+      "same_childwall_completed_ops_s": {
+        "baseline": 668.8827292152683,
+        "candidate": 589.157898987227
+      },
+      "same_childwall_completed_rate_ratio": 0.8808089568681579,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t1-loaded-quic",
+      "cell": "loaded",
+      "native_completed_rate_ratio": 1.081254690469594,
+      "wholechild_cpu_us_per_completed_ratio": 0.5402353431641815,
+      "matching_childwall_average_cores_ratio": 0.560848441366972,
+      "same_childwall_completed_ops_s": {
+        "baseline": 620.2340078203305,
+        "candidate": 643.8995170723331
+      },
+      "same_childwall_completed_rate_ratio": 1.0381557750036468,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t1-skew-quic",
+      "cell": "skew",
+      "native_completed_rate_ratio": 0.7379381024424307,
+      "wholechild_cpu_us_per_completed_ratio": 1.08620140839525,
+      "matching_childwall_average_cores_ratio": 0.8148633234426024,
+      "same_childwall_completed_ops_s": {
+        "baseline": 358.4667529625914,
+        "candidate": 268.9201168449276
+      },
+      "same_childwall_completed_rate_ratio": 0.7501954215346475,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t1-skew-tcp",
+      "cell": "skew",
+      "native_completed_rate_ratio": 1.1564527843152579,
+      "wholechild_cpu_us_per_completed_ratio": 0.7837177202801888,
+      "matching_childwall_average_cores_ratio": 0.9026123981900019,
+      "same_childwall_completed_ops_s": {
+        "baseline": 293.092735588874,
+        "candidate": 337.55666117561066
+      },
+      "same_childwall_completed_rate_ratio": 1.151705996729673,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t2-moderate-tcp",
+      "cell": "moderate",
+      "native_completed_rate_ratio": 0.9782773562874216,
+      "wholechild_cpu_us_per_completed_ratio": 1.0081862256612775,
+      "matching_childwall_average_cores_ratio": 0.9907392912351888,
+      "same_childwall_completed_ops_s": {
+        "baseline": 122.75654267654429,
+        "candidate": 120.63220761230924
+      },
+      "same_childwall_completed_rate_ratio": 0.9826947304158563,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t2-moderate-quic",
+      "cell": "moderate",
+      "native_completed_rate_ratio": 1.0174707981778768,
+      "wholechild_cpu_us_per_completed_ratio": 1.049354307133957,
+      "matching_childwall_average_cores_ratio": 1.0636990894159983,
+      "same_childwall_completed_ops_s": {
+        "baseline": 120.74547293962229,
+        "candidate": 122.39607608584816
+      },
+      "same_childwall_completed_rate_ratio": 1.0136701037814582,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "linux",
+      "pair": "t2-loaded-quic",
+      "cell": "loaded",
+      "native_completed_rate_ratio": 1.602545045599015,
+      "wholechild_cpu_us_per_completed_ratio": 0.5344154012475943,
+      "matching_childwall_average_cores_ratio": 0.822673112751169,
+      "same_childwall_completed_ops_s": {
+        "baseline": 456.1777732280337,
+        "candidate": 702.2349801171504
+      },
+      "same_childwall_completed_rate_ratio": 1.53938885524376,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t2-loaded-tcp",
+      "cell": "loaded",
+      "native_completed_rate_ratio": 1.32453335986849,
+      "wholechild_cpu_us_per_completed_ratio": 0.5216279215987543,
+      "matching_childwall_average_cores_ratio": 0.6946647932836859,
+      "same_childwall_completed_ops_s": {
+        "baseline": 505.15752242887845,
+        "candidate": 672.7307557046115
+      },
+      "same_childwall_completed_rate_ratio": 1.3317247112742459,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t2-skew-tcp",
+      "cell": "skew",
+      "native_completed_rate_ratio": 0.8327631056088203,
+      "wholechild_cpu_us_per_completed_ratio": 0.9261814622941568,
+      "matching_childwall_average_cores_ratio": 0.8234586864830321,
+      "same_childwall_completed_ops_s": {
+        "baseline": 372.3898708535965,
+        "candidate": 331.08811436704906
+      },
+      "same_childwall_completed_rate_ratio": 0.8890900109826428,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t2-skew-quic",
+      "cell": "skew",
+      "native_completed_rate_ratio": 0.9630071569172709,
+      "wholechild_cpu_us_per_completed_ratio": 0.8064975737239606,
+      "matching_childwall_average_cores_ratio": 0.8311615416314776,
+      "same_childwall_completed_ops_s": {
+        "baseline": 294.0851952506945,
+        "candidate": 303.0787843872957
+      },
+      "same_childwall_completed_rate_ratio": 1.0305815773178741,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t2-singleton-quic",
+      "cell": "singleton",
+      "native_completed_rate_ratio": 1.010523425001112,
+      "wholechild_cpu_us_per_completed_ratio": 0.9893332059405155,
+      "matching_childwall_average_cores_ratio": 1.0405179272030607,
+      "same_childwall_completed_ops_s": {
+        "baseline": 4.897181035177367,
+        "candidate": 5.150544456876616
+      },
+      "same_childwall_completed_rate_ratio": 1.0517365847574947,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "linux",
+      "pair": "t2-singleton-tcp",
+      "cell": "singleton",
+      "native_completed_rate_ratio": 1.00276608443616,
+      "wholechild_cpu_us_per_completed_ratio": 1.0262491771616746,
+      "matching_childwall_average_cores_ratio": 1.0331956720794773,
+      "same_childwall_completed_ops_s": {
+        "baseline": 4.624778573243401,
+        "candidate": 4.656082862269824
+      },
+      "same_childwall_completed_rate_ratio": 1.0067688189889854,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "linux",
+      "pair": "t3-loaded-tcp",
+      "cell": "loaded",
+      "native_completed_rate_ratio": 1.197368682424143,
+      "wholechild_cpu_us_per_completed_ratio": 0.5850018593309794,
+      "matching_childwall_average_cores_ratio": 0.7032481339345061,
+      "same_childwall_completed_ops_s": {
+        "baseline": 563.3783701273084,
+        "candidate": 677.2538944477715
+      },
+      "same_childwall_completed_rate_ratio": 1.2021297414998917,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t3-loaded-quic",
+      "cell": "loaded",
+      "native_completed_rate_ratio": 1.1537382246025119,
+      "wholechild_cpu_us_per_completed_ratio": 0.5485648451163219,
+      "matching_childwall_average_cores_ratio": 0.6743342277268538,
+      "same_childwall_completed_ops_s": {
+        "baseline": 572.4497225695656,
+        "candidate": 703.695187575399
+      },
+      "same_childwall_completed_rate_ratio": 1.2292698552052912,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t3-skew-quic",
+      "cell": "skew",
+      "native_completed_rate_ratio": 1.1224523367227786,
+      "wholechild_cpu_us_per_completed_ratio": 0.710222592657228,
+      "matching_childwall_average_cores_ratio": 0.8866622621979432,
+      "same_childwall_completed_ops_s": {
+        "baseline": 330.9796751817204,
+        "candidate": 413.20452288089854
+      },
+      "same_childwall_completed_rate_ratio": 1.2484286917437863,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t3-skew-tcp",
+      "cell": "skew",
+      "native_completed_rate_ratio": 0.921766295205532,
+      "wholechild_cpu_us_per_completed_ratio": 0.9695894996000225,
+      "matching_childwall_average_cores_ratio": 0.8739780386316084,
+      "same_childwall_completed_ops_s": {
+        "baseline": 331.83968901665185,
+        "candidate": 299.11689500199446
+      },
+      "same_childwall_completed_rate_ratio": 0.9013897520467621,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t3-singleton-tcp",
+      "cell": "singleton",
+      "native_completed_rate_ratio": 0.994383130488944,
+      "wholechild_cpu_us_per_completed_ratio": 1.0892640400478337,
+      "matching_childwall_average_cores_ratio": 1.1234080913026605,
+      "same_childwall_completed_ops_s": {
+        "baseline": 4.451216503003581,
+        "candidate": 4.590744256456464
+      },
+      "same_childwall_completed_rate_ratio": 1.03134598224075,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t3-singleton-quic",
+      "cell": "singleton",
+      "native_completed_rate_ratio": 1.1085682742588288,
+      "wholechild_cpu_us_per_completed_ratio": 0.8827388265499847,
+      "matching_childwall_average_cores_ratio": 0.9967814163060713,
+      "same_childwall_completed_ops_s": {
+        "baseline": 4.440584438425336,
+        "candidate": 5.014271393340226
+      },
+      "same_childwall_completed_rate_ratio": 1.1291917680813932,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t3-moderate-quic",
+      "cell": "moderate",
+      "native_completed_rate_ratio": 1.0043751321901278,
+      "wholechild_cpu_us_per_completed_ratio": 0.9414263848551458,
+      "matching_childwall_average_cores_ratio": 0.9490856226481966,
+      "same_childwall_completed_ops_s": {
+        "baseline": 124.210382016632,
+        "candidate": 125.2209303372821
+      },
+      "same_childwall_completed_rate_ratio": 1.0081357798296988,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "linux",
+      "pair": "t3-moderate-tcp",
+      "cell": "moderate",
+      "native_completed_rate_ratio": 1.0074158516112215,
+      "wholechild_cpu_us_per_completed_ratio": 1.0082439640184508,
+      "matching_childwall_average_cores_ratio": 1.0280579709869087,
+      "same_childwall_completed_ops_s": {
+        "baseline": 117.12959009293158,
+        "candidate": 119.43142040100918
+      },
+      "same_childwall_completed_rate_ratio": 1.0196519966154693,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "mac",
+      "pair": "t1-singleton-tcp",
+      "cell": "singleton",
+      "native_completed_rate_ratio": 0.995780681519594,
+      "wholechild_cpu_us_per_completed_ratio": 1.0030508062440426,
+      "matching_childwall_average_cores_ratio": 1.0006362974423253,
+      "same_childwall_completed_ops_s": {
+        "baseline": 6.661233303463507,
+        "candidate": 6.645198615747407
+      },
+      "same_childwall_completed_rate_ratio": 0.9975928349923184,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "mac",
+      "pair": "t1-singleton-quic",
+      "cell": "singleton",
+      "native_completed_rate_ratio": 1.0000003281559775,
+      "wholechild_cpu_us_per_completed_ratio": 1.0166910644675615,
+      "matching_childwall_average_cores_ratio": 1.0159465491186979,
+      "same_childwall_completed_ops_s": {
+        "baseline": 6.631654043830015,
+        "candidate": 6.626797732609683
+      },
+      "same_childwall_completed_rate_ratio": 0.9992677073942283,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "mac",
+      "pair": "t1-moderate-quic",
+      "cell": "moderate",
+      "native_completed_rate_ratio": 0.9985828488955817,
+      "wholechild_cpu_us_per_completed_ratio": 1.0099591016180303,
+      "matching_childwall_average_cores_ratio": 1.0098614303486935,
+      "same_childwall_completed_ops_s": {
+        "baseline": 124.28467872183928,
+        "candidate": 124.27265938134276
+      },
+      "same_childwall_completed_rate_ratio": 0.9999032918568875,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "mac",
+      "pair": "t1-moderate-tcp",
+      "cell": "moderate",
+      "native_completed_rate_ratio": 1.0113002956824515,
+      "wholechild_cpu_us_per_completed_ratio": 0.9835662510175802,
+      "matching_childwall_average_cores_ratio": 0.995911560762175,
+      "same_childwall_completed_ops_s": {
+        "baseline": 124.23557661655933,
+        "candidate": 125.7949293017933
+      },
+      "same_childwall_completed_rate_ratio": 1.0125515792472777,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "mac",
+      "pair": "t1-loaded-tcp",
+      "cell": "loaded",
+      "native_completed_rate_ratio": 1.0533454388916597,
+      "wholechild_cpu_us_per_completed_ratio": 0.5362247193416209,
+      "matching_childwall_average_cores_ratio": 0.5771438171598268,
+      "same_childwall_completed_ops_s": {
+        "baseline": 965.2309308147604,
+        "candidate": 1038.8873242083007
+      },
+      "same_childwall_completed_rate_ratio": 1.076309607413188,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "mac",
+      "pair": "t1-loaded-quic",
+      "cell": "loaded",
+      "native_completed_rate_ratio": 1.3462721642225337,
+      "wholechild_cpu_us_per_completed_ratio": 0.5145491369685017,
+      "matching_childwall_average_cores_ratio": 0.7403498898093179,
+      "same_childwall_completed_ops_s": {
+        "baseline": 810.0058911347321,
+        "candidate": 1165.4625946505228
+      },
+      "same_childwall_completed_rate_ratio": 1.4388322448097675,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "mac",
+      "pair": "t1-skew-quic",
+      "cell": "skew",
+      "native_completed_rate_ratio": 0.9397987138582896,
+      "wholechild_cpu_us_per_completed_ratio": 0.7379171758422617,
+      "matching_childwall_average_cores_ratio": 0.6934767476721385,
+      "same_childwall_completed_ops_s": {
+        "baseline": 649.0022439668566,
+        "candidate": 609.9166412061707
+      },
+      "same_childwall_completed_rate_ratio": 0.9397758588294158,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "mac",
+      "pair": "t1-skew-tcp",
+      "cell": "skew",
+      "native_completed_rate_ratio": 0.9895272327485632,
+      "wholechild_cpu_us_per_completed_ratio": 0.6742643811849692,
+      "matching_childwall_average_cores_ratio": 0.6681118335262533,
+      "same_childwall_completed_ops_s": {
+        "baseline": 688.0836122371315,
+        "candidate": 681.8049664483233
+      },
+      "same_childwall_completed_rate_ratio": 0.990875170288688,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "mac",
+      "pair": "t2-moderate-tcp",
+      "cell": "moderate",
+      "native_completed_rate_ratio": 1.0000358983785564,
+      "wholechild_cpu_us_per_completed_ratio": 1.0070218445214871,
+      "matching_childwall_average_cores_ratio": 1.006059028736463,
+      "same_childwall_completed_ops_s": {
+        "baseline": 125.76682714655769,
+        "candidate": 125.64658120843046
+      },
+      "same_childwall_completed_rate_ratio": 0.9990438978158597,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "mac",
+      "pair": "t2-moderate-quic",
+      "cell": "moderate",
+      "native_completed_rate_ratio": 0.9980378871623997,
+      "wholechild_cpu_us_per_completed_ratio": 1.0089681795452723,
+      "matching_childwall_average_cores_ratio": 1.0064080541218745,
+      "same_childwall_completed_ops_s": {
+        "baseline": 124.32241059790488,
+        "candidate": 124.00695866342143
+      },
+      "same_childwall_completed_rate_ratio": 0.9974626301648565,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "mac",
+      "pair": "t2-loaded-quic",
+      "cell": "loaded",
+      "native_completed_rate_ratio": 1.251697718929923,
+      "wholechild_cpu_us_per_completed_ratio": 0.5684709927222155,
+      "matching_childwall_average_cores_ratio": 0.6712475858257918,
+      "same_childwall_completed_ops_s": {
+        "baseline": 901.6070486448261,
+        "candidate": 1064.612904641363
+      },
+      "same_childwall_completed_rate_ratio": 1.1807947888623378,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "mac",
+      "pair": "t2-loaded-tcp",
+      "cell": "loaded",
+      "native_completed_rate_ratio": 1.2114682513097028,
+      "wholechild_cpu_us_per_completed_ratio": 0.4575628631486189,
+      "matching_childwall_average_cores_ratio": 0.5563825690825632,
+      "same_childwall_completed_ops_s": {
+        "baseline": 943.1566539083823,
+        "candidate": 1146.849896291553
+      },
+      "same_childwall_completed_rate_ratio": 1.215969681748073,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "mac",
+      "pair": "t2-skew-tcp",
+      "cell": "skew",
+      "native_completed_rate_ratio": 0.9923140394938066,
+      "wholechild_cpu_us_per_completed_ratio": 0.6734843792625765,
+      "matching_childwall_average_cores_ratio": 0.7075430710887503,
+      "same_childwall_completed_ops_s": {
+        "baseline": 640.4480062485803,
+        "candidate": 672.8360199088103
+      },
+      "same_childwall_completed_rate_ratio": 1.0505708712404969,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "mac",
+      "pair": "t2-skew-quic",
+      "cell": "skew",
+      "native_completed_rate_ratio": 1.0577920192669221,
+      "wholechild_cpu_us_per_completed_ratio": 0.6998767039290619,
+      "matching_childwall_average_cores_ratio": 0.7530755238525677,
+      "same_childwall_completed_ops_s": {
+        "baseline": 611.8673399938101,
+        "candidate": 658.376418313846
+      },
+      "same_childwall_completed_rate_ratio": 1.0760117026682718,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "mac",
+      "pair": "t2-singleton-quic",
+      "cell": "singleton",
+      "native_completed_rate_ratio": 1.0042375339539944,
+      "wholechild_cpu_us_per_completed_ratio": 1.0123986396664615,
+      "matching_childwall_average_cores_ratio": 1.0142691502223706,
+      "same_childwall_completed_ops_s": {
+        "baseline": 6.5984671438674205,
+        "candidate": 6.610658490202586
+      },
+      "same_childwall_completed_rate_ratio": 1.0018476027946122,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "mac",
+      "pair": "t2-singleton-tcp",
+      "cell": "singleton",
+      "native_completed_rate_ratio": 1.0042394953530052,
+      "wholechild_cpu_us_per_completed_ratio": 1.0050813162058547,
+      "matching_childwall_average_cores_ratio": 1.0077995635628387,
+      "same_childwall_completed_ops_s": {
+        "baseline": 6.666467347578979,
+        "candidate": 6.684496841268489
+      },
+      "same_childwall_completed_rate_ratio": 1.0027045049123442,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "mac",
+      "pair": "t3-loaded-tcp",
+      "cell": "loaded",
+      "native_completed_rate_ratio": 1.3669614011419156,
+      "wholechild_cpu_us_per_completed_ratio": 0.47868616340501097,
+      "matching_childwall_average_cores_ratio": 0.6468519776418682,
+      "same_childwall_completed_ops_s": {
+        "baseline": 865.9482645627002,
+        "candidate": 1170.1619772828026
+      },
+      "same_childwall_completed_rate_ratio": 1.3513070297262262,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "mac",
+      "pair": "t3-loaded-quic",
+      "cell": "loaded",
+      "native_completed_rate_ratio": 1.25354120582796,
+      "wholechild_cpu_us_per_completed_ratio": 0.4914491057570444,
+      "matching_childwall_average_cores_ratio": 0.570041058841823,
+      "same_childwall_completed_ops_s": {
+        "baseline": 869.1213919946374,
+        "candidate": 1008.1102452949181
+      },
+      "same_childwall_completed_rate_ratio": 1.1599188037257955,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "mac",
+      "pair": "t3-skew-quic",
+      "cell": "skew",
+      "native_completed_rate_ratio": 0.9348862730318712,
+      "wholechild_cpu_us_per_completed_ratio": 0.735463147031768,
+      "matching_childwall_average_cores_ratio": 0.685296688710156,
+      "same_childwall_completed_ops_s": {
+        "baseline": 654.6961976815554,
+        "candidate": 610.0389097577989
+      },
+      "same_childwall_completed_rate_ratio": 0.9317892969565132,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "mac",
+      "pair": "t3-skew-tcp",
+      "cell": "skew",
+      "native_completed_rate_ratio": 1.0619393524995364,
+      "wholechild_cpu_us_per_completed_ratio": 0.662226884977154,
+      "matching_childwall_average_cores_ratio": 0.70260077859973,
+      "same_childwall_completed_ops_s": {
+        "baseline": 648.52094949918,
+        "candidate": 688.0592352756556
+      },
+      "same_childwall_completed_rate_ratio": 1.060966859755277,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "mac",
+      "pair": "t3-singleton-tcp",
+      "cell": "singleton",
+      "native_completed_rate_ratio": 0.9957834432241004,
+      "wholechild_cpu_us_per_completed_ratio": 1.0164150095008433,
+      "matching_childwall_average_cores_ratio": 1.0070464291527446,
+      "same_childwall_completed_ops_s": {
+        "baseline": 6.676994251837122,
+        "candidate": 6.615450535395105
+      },
+      "same_childwall_completed_rate_ratio": 0.9907827213682139,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": false
+    },
+    {
+      "host": "mac",
+      "pair": "t3-singleton-quic",
+      "cell": "singleton",
+      "native_completed_rate_ratio": 1.0000011184975388,
+      "wholechild_cpu_us_per_completed_ratio": 1.0119408101243732,
+      "matching_childwall_average_cores_ratio": 1.0338045254614967,
+      "same_childwall_completed_ops_s": {
+        "baseline": 6.442057228912696,
+        "candidate": 6.581242548873352
+      },
+      "same_childwall_completed_rate_ratio": 1.021605725471667,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "mac",
+      "pair": "t3-moderate-quic",
+      "cell": "moderate",
+      "native_completed_rate_ratio": 1.0005912304899849,
+      "wholechild_cpu_us_per_completed_ratio": 0.9996238731996141,
+      "matching_childwall_average_cores_ratio": 1.0002703275782172,
+      "same_childwall_completed_ops_s": {
+        "baseline": 124.15334981212331,
+        "candidate": 124.23363948782644
+      },
+      "same_childwall_completed_rate_ratio": 1.0006466976189095,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "mac",
+      "pair": "t3-moderate-tcp",
+      "cell": "moderate",
+      "native_completed_rate_ratio": 1.0092405349828415,
+      "wholechild_cpu_us_per_completed_ratio": 1.0061637868129505,
+      "matching_childwall_average_cores_ratio": 1.0148656370338367,
+      "same_childwall_completed_ops_s": {
+        "baseline": 124.50874544895284,
+        "candidate": 125.58556461923833
+      },
+      "same_childwall_completed_rate_ratio": 1.008648542448988,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    }
+  ],
+  "flagged_gains": [
+    {
+      "host": "linux",
+      "pair": "t2-moderate-quic",
+      "cell": "moderate",
+      "native_completed_rate_ratio": 1.0174707981778768,
+      "wholechild_cpu_us_per_completed_ratio": 1.049354307133957,
+      "matching_childwall_average_cores_ratio": 1.0636990894159983,
+      "same_childwall_completed_ops_s": {
+        "baseline": 120.74547293962229,
+        "candidate": 122.39607608584816
+      },
+      "same_childwall_completed_rate_ratio": 1.0136701037814582,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "linux",
+      "pair": "t2-singleton-quic",
+      "cell": "singleton",
+      "native_completed_rate_ratio": 1.010523425001112,
+      "wholechild_cpu_us_per_completed_ratio": 0.9893332059405155,
+      "matching_childwall_average_cores_ratio": 1.0405179272030607,
+      "same_childwall_completed_ops_s": {
+        "baseline": 4.897181035177367,
+        "candidate": 5.150544456876616
+      },
+      "same_childwall_completed_rate_ratio": 1.0517365847574947,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "linux",
+      "pair": "t2-singleton-tcp",
+      "cell": "singleton",
+      "native_completed_rate_ratio": 1.00276608443616,
+      "wholechild_cpu_us_per_completed_ratio": 1.0262491771616746,
+      "matching_childwall_average_cores_ratio": 1.0331956720794773,
+      "same_childwall_completed_ops_s": {
+        "baseline": 4.624778573243401,
+        "candidate": 4.656082862269824
+      },
+      "same_childwall_completed_rate_ratio": 1.0067688189889854,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "linux",
+      "pair": "t3-moderate-tcp",
+      "cell": "moderate",
+      "native_completed_rate_ratio": 1.0074158516112215,
+      "wholechild_cpu_us_per_completed_ratio": 1.0082439640184508,
+      "matching_childwall_average_cores_ratio": 1.0280579709869087,
+      "same_childwall_completed_ops_s": {
+        "baseline": 117.12959009293158,
+        "candidate": 119.43142040100918
+      },
+      "same_childwall_completed_rate_ratio": 1.0196519966154693,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "mac",
+      "pair": "t1-singleton-quic",
+      "cell": "singleton",
+      "native_completed_rate_ratio": 1.0000003281559775,
+      "wholechild_cpu_us_per_completed_ratio": 1.0166910644675615,
+      "matching_childwall_average_cores_ratio": 1.0159465491186979,
+      "same_childwall_completed_ops_s": {
+        "baseline": 6.631654043830015,
+        "candidate": 6.626797732609683
+      },
+      "same_childwall_completed_rate_ratio": 0.9992677073942283,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "mac",
+      "pair": "t2-moderate-tcp",
+      "cell": "moderate",
+      "native_completed_rate_ratio": 1.0000358983785564,
+      "wholechild_cpu_us_per_completed_ratio": 1.0070218445214871,
+      "matching_childwall_average_cores_ratio": 1.006059028736463,
+      "same_childwall_completed_ops_s": {
+        "baseline": 125.76682714655769,
+        "candidate": 125.64658120843046
+      },
+      "same_childwall_completed_rate_ratio": 0.9990438978158597,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "mac",
+      "pair": "t2-singleton-quic",
+      "cell": "singleton",
+      "native_completed_rate_ratio": 1.0042375339539944,
+      "wholechild_cpu_us_per_completed_ratio": 1.0123986396664615,
+      "matching_childwall_average_cores_ratio": 1.0142691502223706,
+      "same_childwall_completed_ops_s": {
+        "baseline": 6.5984671438674205,
+        "candidate": 6.610658490202586
+      },
+      "same_childwall_completed_rate_ratio": 1.0018476027946122,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "mac",
+      "pair": "t2-singleton-tcp",
+      "cell": "singleton",
+      "native_completed_rate_ratio": 1.0042394953530052,
+      "wholechild_cpu_us_per_completed_ratio": 1.0050813162058547,
+      "matching_childwall_average_cores_ratio": 1.0077995635628387,
+      "same_childwall_completed_ops_s": {
+        "baseline": 6.666467347578979,
+        "candidate": 6.684496841268489
+      },
+      "same_childwall_completed_rate_ratio": 1.0027045049123442,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "mac",
+      "pair": "t3-singleton-quic",
+      "cell": "singleton",
+      "native_completed_rate_ratio": 1.0000011184975388,
+      "wholechild_cpu_us_per_completed_ratio": 1.0119408101243732,
+      "matching_childwall_average_cores_ratio": 1.0338045254614967,
+      "same_childwall_completed_ops_s": {
+        "baseline": 6.442057228912696,
+        "candidate": 6.581242548873352
+      },
+      "same_childwall_completed_rate_ratio": 1.021605725471667,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "mac",
+      "pair": "t3-moderate-quic",
+      "cell": "moderate",
+      "native_completed_rate_ratio": 1.0005912304899849,
+      "wholechild_cpu_us_per_completed_ratio": 0.9996238731996141,
+      "matching_childwall_average_cores_ratio": 1.0002703275782172,
+      "same_childwall_completed_ops_s": {
+        "baseline": 124.15334981212331,
+        "candidate": 124.23363948782644
+      },
+      "same_childwall_completed_rate_ratio": 1.0006466976189095,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    },
+    {
+      "host": "mac",
+      "pair": "t3-moderate-tcp",
+      "cell": "moderate",
+      "native_completed_rate_ratio": 1.0092405349828415,
+      "wholechild_cpu_us_per_completed_ratio": 1.0061637868129505,
+      "matching_childwall_average_cores_ratio": 1.0148656370338367,
+      "same_childwall_completed_ops_s": {
+        "baseline": 124.50874544895284,
+        "candidate": 125.58556461923833
+      },
+      "same_childwall_completed_rate_ratio": 1.008648542448988,
+      "same_boundary_identity_verified": true,
+      "native_rate_gain_with_higher_cpu_cost_or_more_average_cores": true
+    }
+  ],
+  "loaded_checks": {
+    "pairs": 12,
+    "cpu_us_per_completed_improves": 12,
+    "average_busy_cores_falls": 12,
+    "same_childwall_completed_rate_improves": 11,
+    "native_completed_rate_improves": 11
+  },
+  "interpretation": "Flagged native rate gains use more CPU/completed original or more average busy cores, so they are not counted as CPU-efficiency wins under the user criterion. CPU and average-cores decomposition uses matching whole child/wrapper wall. Native measurement elapsed differs; no causal/core-scaling inference from mixing native throughput with whole-child CPU. Per-replica1WAL/1snapshot/1peer topology matches; actual affinity/fixedphysicalcores were not imposed.",
+  "retention": "Root decision retain486 only as checked measured loadedCPU/work reduction with every guard/refusal/tail/core regression retained, not universal native/fairness/latency/default/fullP9 acceptance. User request finish archives/commit/push then stop, no further work."
+}

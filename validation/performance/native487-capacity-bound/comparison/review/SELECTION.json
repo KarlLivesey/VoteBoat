@@ -1,0 +1,922 @@
+[
+  {
+    "source_path": "target/p9/native487-capacity-bound/ROOT_QUIET_END.json",
+    "archived_path": "authority/ROOT_QUIET_END.json",
+    "original_sha256": "39d5b70d6d95dfbcedfb06638006bed9317e2815e73a96cdf13f6b1192db9e15",
+    "original_bytes": 1004,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/ROOT_QUIET_GO.json",
+    "archived_path": "authority/ROOT_QUIET_GO.json",
+    "original_sha256": "26b3d5104e984984178f75930d62a08fee9c9edbc1d38750fbcd00333e565861",
+    "original_bytes": 1893,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "validation/performance/native487-capacity-bound/comparison/linux/SHA256SUMS",
+    "archived_path": "campaign-archive-verification/linux-SHA256SUMS.gz",
+    "original_sha256": "e708cc614c13ed8053c9d99d5080d251e92a71cc92fdc54931efc31bbe265368",
+    "original_bytes": 145686,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/root/LINUX_PAIRED_ARCHIVE_VERIFIED.json",
+    "archived_path": "campaign-archive-verification/linux.json",
+    "original_sha256": "0d1219ea8fa9c428c383d7c09b53b9e03f190633590127d0a01efe4be4d46731",
+    "original_bytes": 379,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "validation/performance/native487-capacity-bound/comparison/mac/SHA256SUMS",
+    "archived_path": "campaign-archive-verification/mac-SHA256SUMS.gz",
+    "original_sha256": "6472f06225531557cefd85a5a04e0dd4b7e66f60debe36de4578551696f0743b",
+    "original_bytes": 126487,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/root/MAC_PAIRED_ARCHIVE_VERIFIED.json",
+    "archived_path": "campaign-archive-verification/mac.json",
+    "original_sha256": "735e35102b164abaa9379d510ea6f6d5b46a596699ec90ca2875425fdaf2f141",
+    "original_bytes": 378,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/root/verify-linux-paired.py",
+    "archived_path": "campaign-archive-verification/verify-linux-paired.py",
+    "original_sha256": "4ad80be81fe66c63678fd1c8603ef6aa0df497a9345aced66c87ac096b8a25dc",
+    "original_bytes": 1802,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/root/verify-mac-paired.py",
+    "archived_path": "campaign-archive-verification/verify-mac-paired.py",
+    "original_sha256": "354d12a713de26b6667fcc63342cb7bc0a0f481171aee630a77a950b399d7c95",
+    "original_bytes": 1761,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/actual487-linux/PROVENANCE.json",
+    "archived_path": "frozen-readout/linux/PROVENANCE.json.gz",
+    "original_sha256": "96afeb68df717964951a515fb1fef0852a49b9a447961b43d05d674f10d2d510",
+    "original_bytes": 210140,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/actual487-linux/READOUT.json",
+    "archived_path": "frozen-readout/linux/READOUT.json.gz",
+    "original_sha256": "694969ba160867aae4cb107ea323eba84d38c6af3e9eb9bc77a4b0a4ecbbdb02",
+    "original_bytes": 2108093,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/actual487-linux.command.json",
+    "archived_path": "frozen-readout/linux/actual487-linux.command.json",
+    "original_sha256": "8f66bfe0f842849b4d8ca7a6793f764ea1bd0db62433636175363d4074f31861",
+    "original_bytes": 460,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/actual487-linux.exit",
+    "archived_path": "frozen-readout/linux/actual487-linux.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/actual487-linux.stderr",
+    "archived_path": "frozen-readout/linux/actual487-linux.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/actual487-linux.stdout",
+    "archived_path": "frozen-readout/linux/actual487-linux.stdout.gz",
+    "original_sha256": "7c861c9e8a2c467e2f3aa097b1fe77d1af70cd6d88a254e5de198fc27ff8a04d",
+    "original_bytes": 300,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/actual487-mac/PROVENANCE.json",
+    "archived_path": "frozen-readout/mac/PROVENANCE.json.gz",
+    "original_sha256": "f52284e7a3db358f57c2800392ee577433d0520e099075ea6213465c2c0eebaf",
+    "original_bytes": 213980,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/actual487-mac/READOUT.json",
+    "archived_path": "frozen-readout/mac/READOUT.json.gz",
+    "original_sha256": "435ccb3c5324af037ea9c247946f5ba0a4d64528bcbb8b94a442ea286a8f8f6a",
+    "original_bytes": 2127033,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/actual487-mac.command.json",
+    "archived_path": "frozen-readout/mac/actual487-mac.command.json",
+    "original_sha256": "747a8e6523f8838a513978c6338d5908250856c27ccfe096ad7ac549afb64c51",
+    "original_bytes": 649,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/actual487-mac.exit",
+    "archived_path": "frozen-readout/mac/actual487-mac.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/actual487-mac.stderr",
+    "archived_path": "frozen-readout/mac/actual487-mac.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/actual487-mac.stdout",
+    "archived_path": "frozen-readout/mac/actual487-mac.stdout.gz",
+    "original_sha256": "7035f29c971c5d8c3d4a1c006121671a9e7f5dcfac02f010751c22c635add65d",
+    "original_bytes": 297,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/readout/raw_readout.py",
+    "archived_path": "frozen-readout/raw_readout.py",
+    "original_sha256": "31fcaed6b5fe68df4bd450bbf337ea1e6338af91804522857e86101bb62701c6",
+    "original_bytes": 27680,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/CORE_DECOMPOSITION.json",
+    "archived_path": "independent96/CORE_DECOMPOSITION.json",
+    "original_sha256": "fa17e7f4327f70648cd7c4e48a291697ded2f9c89c73abb61aee1c2854cdfe7d",
+    "original_bytes": 36443,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/CORE_DECOMPOSITION_PROVENANCE.json",
+    "archived_path": "independent96/CORE_DECOMPOSITION_PROVENANCE.json",
+    "original_sha256": "2c1df76ab4cd84acb3c09b23b900b723d62cfb94ac429850e439c941de16fd1f",
+    "original_bytes": 833,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/FILES-before-cores.json",
+    "archived_path": "independent96/FILES-before-cores.json",
+    "original_sha256": "abe497bd487c83e8188a74e72857dd1f77efbdf136f6ce1ee3ab7406020a2c2b",
+    "original_bytes": 1970,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/FILES.json",
+    "archived_path": "independent96/FILES.json",
+    "original_sha256": "15fc7b3beaeae6353d663481ef21f2d851c6eb77cb7685a2918a6273a609e764",
+    "original_bytes": 2389,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/RECEIPT.json",
+    "archived_path": "independent96/RECEIPT.json.gz",
+    "original_sha256": "37481c88c2684424c2812b2597987140b0982cd0dcabdfbee410e81589fe79c0",
+    "original_bytes": 68322,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/linux.command.json",
+    "archived_path": "independent96/linux.command.json",
+    "original_sha256": "3c317b5370de499975daf0abbe4889aebe2dc85325e5b4377ce16a027ae61b20",
+    "original_bytes": 377,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/linux.exit",
+    "archived_path": "independent96/linux.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/linux.json",
+    "archived_path": "independent96/linux.json.gz",
+    "original_sha256": "305ecf2f1c2c50b7ec3ac77350aa405046a131779c3b940eb89d5f219e8e8bca",
+    "original_bytes": 251540,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/linux.stderr",
+    "archived_path": "independent96/linux.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/linux.stdout",
+    "archived_path": "independent96/linux.stdout.gz",
+    "original_sha256": "c1484aa9c1b90d9a76fd8c719f4aad22a89f60c7c4d977ccfaddafb7a92358aa",
+    "original_bytes": 258,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/mac.command.json",
+    "archived_path": "independent96/mac.command.json",
+    "original_sha256": "969ac1d64c3c4d9b8185193f0bf8a9fb0bf591e182c03ebcbfd1d6769bae376a",
+    "original_bytes": 564,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/mac.exit",
+    "archived_path": "independent96/mac.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/mac.json",
+    "archived_path": "independent96/mac.json.gz",
+    "original_sha256": "90c907afdc31571965911ad074eef11a2e078955414e24d14f2a668b7d4ca913",
+    "original_bytes": 239172,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/mac.stderr",
+    "archived_path": "independent96/mac.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/mac.stdout",
+    "archived_path": "independent96/mac.stdout.gz",
+    "original_sha256": "4d2b1e96b46b94432ac888e5a2d51ec8892628cbeb7e81b7ecf7107f3d5bfc6a",
+    "original_bytes": 256,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/recompute.py",
+    "archived_path": "independent96/recompute.py",
+    "original_sha256": "f7cc0321ab654d260a3cffe9de33852f5c99b584cf1d33fc25802a98a7c61270",
+    "original_bytes": 13915,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/seal.exit",
+    "archived_path": "independent96/seal.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/seal.py",
+    "archived_path": "independent96/seal.py",
+    "original_sha256": "1df960ae4a98b417a6f71323c2777ef1ecae3cc85228a4a9970994c5e3fdfc63",
+    "original_bytes": 5893,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/seal.stderr",
+    "archived_path": "independent96/seal.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/independent-actual/seal.stdout",
+    "archived_path": "independent96/seal.stdout.gz",
+    "original_sha256": "8357b575534b66aa6c50abde765f39a945481cdcf477a89b6803e52e702b563c",
+    "original_bytes": 156,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/COMPACT_READOUT.json",
+    "archived_path": "mac-owner-provenance/COMPACT_READOUT.json",
+    "original_sha256": "1360d00babe0fc42e1843c7503cbbfedc8e1a33935d7778ba49576b47c393b2b",
+    "original_bytes": 26099,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/LOCAL_TRANSFER_PROOF.json",
+    "archived_path": "mac-owner-provenance/LOCAL_TRANSFER_PROOF.json",
+    "original_sha256": "f25611277ac9a21de1a1a767ca4264684a10ac51132592330bde7754b30657c7",
+    "original_bytes": 533,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/collect.command.json",
+    "archived_path": "mac-owner-provenance/collect.command.json",
+    "original_sha256": "d0b4dc36bc4674afbfc39a5c7086481950bdb6d1a4bf540fcfd035b7b5050b10",
+    "original_bytes": 384,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/collect.exit",
+    "archived_path": "mac-owner-provenance/collect.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/collect.stderr",
+    "archived_path": "mac-owner-provenance/collect.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/collect.stdout",
+    "archived_path": "mac-owner-provenance/collect.stdout.gz",
+    "original_sha256": "fd0b704021c56c4e10cc9a1a01ca9eb83af0fd1fe27787b68e53057415a0cb0d",
+    "original_bytes": 243,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/compact.exit",
+    "archived_path": "mac-owner-provenance/compact.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/compact.py",
+    "archived_path": "mac-owner-provenance/compact.py",
+    "original_sha256": "998ac5d72ee83ff0da5815fbbd29b8792a4f1215721be193362e821f797eeb77",
+    "original_bytes": 3593,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/compact.stderr",
+    "archived_path": "mac-owner-provenance/compact.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/compact.stdout",
+    "archived_path": "mac-owner-provenance/compact.stdout.gz",
+    "original_sha256": "66694772869cde0b008a93cf3bf5a67111e04e8d92ba40c97e66176e4d165720",
+    "original_bytes": 3429,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/transfer-raw.command.json",
+    "archived_path": "mac-owner-provenance/transfer-raw.command.json",
+    "original_sha256": "c4f07cf2ae6ee6a67d99489484558572ed4105db6cfca59440f1bb8d2ad15bc0",
+    "original_bytes": 223,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/transfer-raw.exit",
+    "archived_path": "mac-owner-provenance/transfer-raw.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/transfer-raw.stderr",
+    "archived_path": "mac-owner-provenance/transfer-raw.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/linux/campaign/campaign/CAMPAIGN.json",
+    "archived_path": "original-campaign/linux/CAMPAIGN.json.gz",
+    "original_sha256": "1bf5c1c8d18e11da15b8bf2d6d1001485e71c6dd2608a85d9a66c46b2490fded",
+    "original_bytes": 113705,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/linux/campaign/CAMPAIGN_CONFIG.json",
+    "archived_path": "original-campaign/linux/CAMPAIGN_CONFIG.json.gz",
+    "original_sha256": "e93c56179fdaad3ad55217cee19ee10c964411efbe76d6be311da98e9228038f",
+    "original_bytes": 693760,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/linux/campaign/CAMPAIGN_STAGE",
+    "archived_path": "original-campaign/linux/CAMPAIGN_STAGE",
+    "original_sha256": "0c1fdee0b8301ec702b059d0fc124736909d7878ba512f9171ecc9e6aa180d84",
+    "original_bytes": 15,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/linux/campaign/CAMPAIGN_STATUS",
+    "archived_path": "original-campaign/linux/CAMPAIGN_STATUS",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/linux/campaign/READY.json",
+    "archived_path": "original-campaign/linux/READY.json",
+    "original_sha256": "f249426f5e8a2ac351763043aaa1acde5e095984564a0c8cf386fbaa3cbfa0a1",
+    "original_bytes": 541,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/linux/campaign/STARTED.json",
+    "archived_path": "original-campaign/linux/STARTED.json",
+    "original_sha256": "edf5976f5b8ae8be5bef6144a6b871d73982a011a877ba5d81b5de4a4438c6d2",
+    "original_bytes": 271,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/linux/campaign/TERMINAL.json",
+    "archived_path": "original-campaign/linux/TERMINAL.json",
+    "original_sha256": "1de866b205a3a0d5cfe2c476b870567cd988320d8c3aa7ae22e68edabe45f99a",
+    "original_bytes": 186,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/linux/campaign/controller.exit",
+    "archived_path": "original-campaign/linux/controller.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/linux/campaign/controller.stderr",
+    "archived_path": "original-campaign/linux/controller.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/linux/campaign/controller.stdout",
+    "archived_path": "original-campaign/linux/controller.stdout.gz",
+    "original_sha256": "4171d645604f379cf09b8ddc1642db50c25c36bc1aa1ed3079119f66d049459c",
+    "original_bytes": 2983,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/mac-campaign-owner/original.EXIT.json",
+    "archived_path": "original-campaign/mac-outer/original.EXIT.json",
+    "original_sha256": "084c477a3b15f3c58ae97f7ad608800b069eb9c53bc5ff327471a1b2321c9c87",
+    "original_bytes": 73,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/mac-campaign-owner/original.START.json",
+    "archived_path": "original-campaign/mac-outer/original.START.json",
+    "original_sha256": "b4b1e492e1d95215441f37c7755ac1cda232c836e1eea0d57423ced198ae8a71",
+    "original_bytes": 219,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/mac-campaign-owner/original.command.json",
+    "archived_path": "original-campaign/mac-outer/original.command.json",
+    "original_sha256": "3f4c053d8e575af86c39935e784cd8b3c0069e5c988cc1b4fe66113b373cb1de",
+    "original_bytes": 403,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/mac-campaign-owner/original.stderr",
+    "archived_path": "original-campaign/mac-outer/original.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/mac-campaign-owner/original.stdout",
+    "archived_path": "original-campaign/mac-outer/original.stdout.gz",
+    "original_sha256": "4171d645604f379cf09b8ddc1642db50c25c36bc1aa1ed3079119f66d049459c",
+    "original_bytes": 2983,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/collected/campaign/CAMPAIGN.json",
+    "archived_path": "original-campaign/mac/CAMPAIGN.json.gz",
+    "original_sha256": "af6cc17eb9115c46150e172625ffa09099f8a0b7deb05ebc4a8b5ba44aa3817a",
+    "original_bytes": 99017,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/collected/CAMPAIGN_CONFIG.json",
+    "archived_path": "original-campaign/mac/CAMPAIGN_CONFIG.json.gz",
+    "original_sha256": "d62834423aad8430f997f1566b315b9c10a6d62420e7b2122c1d3723260a5a61",
+    "original_bytes": 680568,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/collected/CAMPAIGN_STAGE",
+    "archived_path": "original-campaign/mac/CAMPAIGN_STAGE",
+    "original_sha256": "0c1fdee0b8301ec702b059d0fc124736909d7878ba512f9171ecc9e6aa180d84",
+    "original_bytes": 15,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/collected/CAMPAIGN_STATUS",
+    "archived_path": "original-campaign/mac/CAMPAIGN_STATUS",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/collected/COLLECTED.json",
+    "archived_path": "original-campaign/mac/COLLECTED.json.gz",
+    "original_sha256": "1733261df6c1443038afb68320e9c6308238e4db2470fc8b39e050e412a12314",
+    "original_bytes": 195738,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/collected/READY.json",
+    "archived_path": "original-campaign/mac/READY.json",
+    "original_sha256": "a1abbbb86013e5e8f479073f1ab2ba919d90c055475d609ba476959449033898",
+    "original_bytes": 541,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/collected/STARTED.json",
+    "archived_path": "original-campaign/mac/STARTED.json",
+    "original_sha256": "5022fcd8c4d94fcf2906c6acafd928ca153f0d495877d88f76a6405d095e6eba",
+    "original_bytes": 269,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/comparison/mac/collected/TERMINAL.json",
+    "archived_path": "original-campaign/mac/TERMINAL.json",
+    "original_sha256": "4f1fe59ce65147cb2a327e8c7a366f6b2018e3da8db2dd0a543b15d0f6a470f8",
+    "original_bytes": 184,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/AFTER.json",
+    "archived_path": "premeasurement-publication/AFTER.json",
+    "original_sha256": "6e1dda98aa5b539c3cf66a3ac186b386a778b8968323efacda83b4182037d837",
+    "original_bytes": 130,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/BEFORE.json",
+    "archived_path": "premeasurement-publication/BEFORE.json",
+    "original_sha256": "6e1dda98aa5b539c3cf66a3ac186b386a778b8968323efacda83b4182037d837",
+    "original_bytes": 130,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/ORIGINAL_JOB.json",
+    "archived_path": "premeasurement-publication/ORIGINAL_JOB.json",
+    "original_sha256": "9417418f0a15ea548d1823e5fe3c494bd1068d477a70226baaf0811f2d47e6af",
+    "original_bytes": 364,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/RECEIPT.json",
+    "archived_path": "premeasurement-publication/RECEIPT.json",
+    "original_sha256": "0850c32c1006a68b24aff3cefd6c883b11670285c0cb9d8f6cc0f4d366296dbb",
+    "original_bytes": 391,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/commit.exit",
+    "archived_path": "premeasurement-publication/commit.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/commit.stderr",
+    "archived_path": "premeasurement-publication/commit.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/commit.stdout",
+    "archived_path": "premeasurement-publication/commit.stdout.gz",
+    "original_sha256": "a99c7ec5bfb3533fa9011c19fe6604a315a43c699aad446609fb2538b1cdabe3",
+    "original_bytes": 75798,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/push.exit",
+    "archived_path": "premeasurement-publication/push.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/push.stderr",
+    "archived_path": "premeasurement-publication/push.stderr.gz",
+    "original_sha256": "65189e068164bf8d71bd7603bbce0ba1fa24009ed1c34dfde67772c4235e7c68",
+    "original_bytes": 435,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/push.stdout",
+    "archived_path": "premeasurement-publication/push.stdout.gz",
+    "original_sha256": "282487865beabbd0ea2ef111759ccb2c9a9900dc45af8a1f98f9bf9ff4fdaaf3",
+    "original_bytes": 53,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/remote.exit",
+    "archived_path": "premeasurement-publication/remote.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/remote.stderr",
+    "archived_path": "premeasurement-publication/remote.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/remote.stdout",
+    "archived_path": "premeasurement-publication/remote.stdout.gz",
+    "original_sha256": "408dc3b282cce43299441fb7abfb3b96e8e39dbbe4701dd5be9ae216cbf00ef7",
+    "original_bytes": 57,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/stage.exit",
+    "archived_path": "premeasurement-publication/stage.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/stage.stderr",
+    "archived_path": "premeasurement-publication/stage.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/stage.stdout",
+    "archived_path": "premeasurement-publication/stage.stdout.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/staged-whitespace.exit",
+    "archived_path": "premeasurement-publication/staged-whitespace.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/staged-whitespace.stderr",
+    "archived_path": "premeasurement-publication/staged-whitespace.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/staged-whitespace.stdout",
+    "archived_path": "premeasurement-publication/staged-whitespace.stdout.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/whitespace.exit",
+    "archived_path": "premeasurement-publication/whitespace.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/whitespace.stderr",
+    "archived_path": "premeasurement-publication/whitespace.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/publication/whitespace.stdout",
+    "archived_path": "premeasurement-publication/whitespace.stdout.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/CPU_INITIAL_FAILURE.json",
+    "archived_path": "review-provenance/CPU_INITIAL_FAILURE.json",
+    "original_sha256": "59329f3879f033916c85c321feb35a7b791f88214ae41a119e43ce8f64f08c2f",
+    "original_bytes": 236,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/CPU_LINUX.json",
+    "archived_path": "review-provenance/CPU_LINUX.json.gz",
+    "original_sha256": "8ac2c0abfb154e49f9f735456cb64a6a5da0ec2c8999bb1c51498e97becf944b",
+    "original_bytes": 69306,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/FINAL_RETENTION_DECISION.json",
+    "archived_path": "review-provenance/FINAL_RETENTION_DECISION.json",
+    "original_sha256": "532ad7cccfafcd76043497eca82be3dc654fad950faf78e1cebbb29c8a68654c",
+    "original_bytes": 1710,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/archive-central.command.json",
+    "archived_path": "review-provenance/archive-central.command.json",
+    "original_sha256": "92a44d33d6c7bc95e4275a9a17b81f502c3374a5ea57b5da547e0a0ef365f390",
+    "original_bytes": 82,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/archive-central.py",
+    "archived_path": "review-provenance/archive-central.py",
+    "original_sha256": "8057be37eda4a8d6ce2cfe0f105bfd8ccd4bfcfc99ea309846ce23c88f8eeff0",
+    "original_bytes": 7496,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/cpu-summary-linux-attempt2.exit",
+    "archived_path": "review-provenance/cpu-summary-linux-attempt2.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/cpu-summary-linux-attempt2.stderr",
+    "archived_path": "review-provenance/cpu-summary-linux-attempt2.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/cpu-summary-linux-attempt2.stdout",
+    "archived_path": "review-provenance/cpu-summary-linux-attempt2.stdout.gz",
+    "original_sha256": "a9c57e2deccf2c4bfa300b687979715b86a8c20b628bb4a3b36c0377f08fb056",
+    "original_bytes": 1280,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/cpu-summary-linux.exit",
+    "archived_path": "review-provenance/cpu-summary-linux.exit",
+    "original_sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/cpu-summary-linux.exit.initial",
+    "archived_path": "review-provenance/cpu-summary-linux.exit.initial",
+    "original_sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/cpu-summary-linux.py",
+    "archived_path": "review-provenance/cpu-summary-linux.py",
+    "original_sha256": "5bad5d7918196ceda266b3c9b7702a8efa0f125771c7863f13367635710bfbb6",
+    "original_bytes": 4364,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/cpu-summary-linux.py.initial",
+    "archived_path": "review-provenance/cpu-summary-linux.py.initial",
+    "original_sha256": "c35ac2ee9a5ea4859343711e02700ee80d0c0e3b85f35b2969d82340a2b86b59",
+    "original_bytes": 4358,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/cpu-summary-linux.stderr",
+    "archived_path": "review-provenance/cpu-summary-linux.stderr.gz",
+    "original_sha256": "6fc722430337fc2bcaadbee5eab45ce920b79d5613a29b74df80610110b646e2",
+    "original_bytes": 1763,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/cpu-summary-linux.stderr.initial",
+    "archived_path": "review-provenance/cpu-summary-linux.stderr.initial",
+    "original_sha256": "6fc722430337fc2bcaadbee5eab45ce920b79d5613a29b74df80610110b646e2",
+    "original_bytes": 1763,
+    "source_mode": "0o644",
+    "gzip": false
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/cpu-summary-linux.stdout",
+    "archived_path": "review-provenance/cpu-summary-linux.stdout.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": true
+  },
+  {
+    "source_path": "target/p9/native487-capacity-bound/review/cpu-summary-linux.stdout.initial",
+    "archived_path": "review-provenance/cpu-summary-linux.stdout.initial",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "gzip": false
+  }
+]

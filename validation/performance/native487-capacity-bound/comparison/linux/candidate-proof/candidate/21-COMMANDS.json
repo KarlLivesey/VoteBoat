@@ -1,0 +1,226 @@
+[
+  {
+    "name": "fmt",
+    "argv": [
+      "cargo",
+      "+stable",
+      "fmt",
+      "--all"
+    ],
+    "start_utc": "2026-10-15T17:15:30.820968+00:00",
+    "end_utc": "2026-10-15T17:15:33.150895+00:00",
+    "actual_exit": 0
+  },
+  {
+    "name": "application-all",
+    "argv": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "--all-features",
+      "--test",
+      "application",
+      "--",
+      "--test-threads=1"
+    ],
+    "start_utc": "2026-10-15T17:15:33.180083+00:00",
+    "end_utc": "2026-10-15T17:15:36.625278+00:00",
+    "actual_exit": 0
+  },
+  {
+    "name": "application-unit-all",
+    "argv": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "--all-features",
+      "--lib",
+      "application::",
+      "--",
+      "--test-threads=1"
+    ],
+    "start_utc": "2026-10-15T17:15:36.625391+00:00",
+    "end_utc": "2026-10-15T17:15:43.913445+00:00",
+    "actual_exit": 0
+  },
+  {
+    "name": "clients-all",
+    "argv": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "--all-features",
+      "--test",
+      "effect_owner",
+      "client_admission::",
+      "--",
+      "--test-threads=1"
+    ],
+    "start_utc": "2026-10-15T17:15:43.913570+00:00",
+    "end_utc": "2026-10-15T17:15:46.003655+00:00",
+    "actual_exit": 0
+  },
+  {
+    "name": "providers-all",
+    "argv": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "--all-features",
+      "--test",
+      "provider_conformance",
+      "--",
+      "--test-threads=1"
+    ],
+    "start_utc": "2026-10-15T17:15:46.003774+00:00",
+    "end_utc": "2026-10-15T17:15:46.694882+00:00",
+    "actual_exit": 0
+  },
+  {
+    "name": "application-core",
+    "argv": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--test",
+      "application",
+      "--",
+      "--test-threads=1"
+    ],
+    "start_utc": "2026-10-15T17:15:46.695002+00:00",
+    "end_utc": "2026-10-15T17:15:49.853669+00:00",
+    "actual_exit": 0
+  },
+  {
+    "name": "application-unit-core",
+    "argv": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--lib",
+      "application::",
+      "--",
+      "--test-threads=1"
+    ],
+    "start_utc": "2026-10-15T17:15:49.853812+00:00",
+    "end_utc": "2026-10-15T17:15:57.961492+00:00",
+    "actual_exit": 0
+  },
+  {
+    "name": "clients-core",
+    "argv": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--test",
+      "effect_owner",
+      "client_admission::",
+      "--",
+      "--test-threads=1"
+    ],
+    "start_utc": "2026-10-15T17:15:57.961631+00:00",
+    "end_utc": "2026-10-15T17:15:59.763154+00:00",
+    "actual_exit": 0
+  },
+  {
+    "name": "providers-core",
+    "argv": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "--no-default-features",
+      "--test",
+      "provider_conformance",
+      "--",
+      "--test-threads=1"
+    ],
+    "start_utc": "2026-10-15T17:15:59.763360+00:00",
+    "end_utc": "2026-10-15T17:16:00.353108+00:00",
+    "actual_exit": 0
+  },
+  {
+    "name": "services",
+    "argv": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "--all-features",
+      "--test",
+      "counter_service",
+      "three_",
+      "--",
+      "--test-threads=1"
+    ],
+    "start_utc": "2026-10-15T17:16:00.353270+00:00",
+    "end_utc": "2026-10-15T17:16:17.713605+00:00",
+    "actual_exit": 0
+  },
+  {
+    "name": "matched",
+    "argv": [
+      "cargo",
+      "+stable",
+      "test",
+      "--manifest-path",
+      "benchmarks/matched/Cargo.toml",
+      "--locked",
+      "--offline",
+      "--",
+      "--test-threads=1"
+    ],
+    "start_utc": "2026-10-15T17:16:17.713754+00:00",
+    "end_utc": "2026-10-15T17:16:23.919145+00:00",
+    "actual_exit": 0
+  },
+  {
+    "name": "metadata",
+    "argv": [
+      "node",
+      "validation/check-provider-conformance.mjs"
+    ],
+    "start_utc": "2026-10-15T17:16:23.919318+00:00",
+    "end_utc": "2026-10-15T17:16:23.951006+00:00",
+    "actual_exit": 0
+  },
+  {
+    "name": "metadata-negative",
+    "argv": [
+      "node",
+      "validation/check-provider-conformance.test.mjs"
+    ],
+    "start_utc": "2026-10-15T17:16:23.951216+00:00",
+    "end_utc": "2026-10-15T17:16:24.105360+00:00",
+    "actual_exit": 0
+  },
+  {
+    "name": "strict",
+    "argv": [
+      "sh",
+      ".githooks/pre-push"
+    ],
+    "start_utc": "2026-10-15T17:16:24.105633+00:00",
+    "end_utc": "2026-10-15T17:16:45.138730+00:00",
+    "actual_exit": 0
+  }
+]

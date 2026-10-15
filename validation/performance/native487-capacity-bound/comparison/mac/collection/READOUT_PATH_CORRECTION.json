@@ -1,0 +1,5 @@
+{
+  "scope": "Initial read-only location query used old review/PREPARED_READOUT.json path (absent, cat exit1). Frozen487 reader actual path is comparison/readout/raw_readout.py, reused unchanged. No reader/data/workload failure or rerun.",
+  "initial_tool_chunk": "bf7476",
+  "initial_exit": 1
+}

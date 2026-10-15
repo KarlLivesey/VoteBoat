@@ -1,0 +1,44 @@
+{
+  "scope": "Current original487 Linux48-case paired480/486 native campaign wrap-up only, after both real host terminals. No workload/build/check suite/profile rerun or next-task preparation.",
+  "original_handle": 44616,
+  "actual_terminal_exit": 0,
+  "terminal_tool_chunk": "8d63f2",
+  "reader_original_handle": 89777,
+  "reader_actual_exit": 0,
+  "reader_terminal_tool_chunk": "7d1357",
+  "CPU_supplement_actual_exit": 0,
+  "CPU_supplement_tool_chunk": "421063",
+  "source_commits": {
+    "baseline": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+    "candidate": "dcdcafe3f0c0a56d01e3c3095d3c276113cd7d69"
+  },
+  "config_sha256": "e93c56179fdaad3ad55217cee19ee10c964411efbe76d6be311da98e9228038f",
+  "totals": {
+    "applied": 253450,
+    "window_refused": 138230,
+    "no_leader": 0,
+    "admission_refused": 0,
+    "not_proposed": 0,
+    "unknown": 0,
+    "pending": 0
+  },
+  "actual_processes_validators_readbacks": 48,
+  "pairs": 24,
+  "source_inputs": {
+    "baseline": 1495,
+    "candidate": 1497
+  },
+  "limits": [
+    "This exact phase uses the source commits above; reference481 is retained context only and must never be spliced into484 scores.",
+    "Intended/service quantiles cover applied originals; dispatch covers all offers. Nearest-rank ceil(n*p/100)-1. No estimated or reconstructed outcomes.",
+    "Whole-child CPU/RSS includes startup, warmup, measurement, drain, verification, recovery and cleanup. CPUus/completed has that wider numerator; it is not native timer CPU or causal attribution.",
+    "Inclusive/nested storage and publication/cold elapsed scopes overlap; do not sum them as CPU or per-original waiting.",
+    "Append units include metadata transitions; histogram width and commands/unit are not literal proposal width. Encoded bytes and process block counters are not device-I/O bytes.",
+    "All voters/groups share the same physical device. Per-group skew is7936hot/256cold with2048pending ceiling, not an engine fairness guarantee or one-group floor.",
+    "After-recover counters have a new observer lifetime and are absolute; no counter subtraction across reopen.",
+    "Reported catch-up counts and before-close/recovered bases do not locate individual delayed originals. No missed-timer count exists; late decisions are not timer misses.",
+    "Cap-limited/small finite horizons do not establish maximum/sustained capacity, memory/debt plateau or fullP9/three-filesystem acceptance."
+  ],
+  "resource_boundary": "CPUus/completed uses whole-child user+sys including startup/warmup/maintenance/drain/refused offers/verification/recovery/cleanup over measured completed originals. Average busy cores uses the SAME whole-child CPU and elapsed walltime. Never divide that CPU by the native benchmark timer.",
+  "excluded": "No full production source, binaries, buildtrees, generated WAL/snapshot states, caches or bytecode."
+}

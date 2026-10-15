@@ -1,0 +1,34 @@
+{
+  "actual_exit": 0,
+  "source_inputs": 1496,
+  "source_hashes_modes_unchanged": true,
+  "functional": {
+    "application": {
+      "all": 23,
+      "core": 23,
+      "new_controls": 6,
+      "oracle_comparisons_per_configuration": 880968
+    },
+    "application_unit": {
+      "all": 39,
+      "core": 39
+    },
+    "client_admission": {
+      "all": 28,
+      "core": 28
+    },
+    "provider": {
+      "all": 42,
+      "core": 27
+    },
+    "actual_tcp_quic_three_service_recovery_retry": 2,
+    "standalone_matched": 70
+  },
+  "metadata": {
+    "partial_contracts": 44,
+    "reviewed_operations": 415,
+    "negative_checks": 42
+  },
+  "strict": "Root formatter/four profiles and standalone formatter/all-target strict0; lintlevels/thresholdsunchanged",
+  "performance": "Not measured; freshpublishedroot/exe/artifacts/Macqualification/pairedretentionrequired."
+}

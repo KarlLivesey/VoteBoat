@@ -1,0 +1,7 @@
+stage,replica,group,base_index
+before_close,1,1,7556
+before_close,2,1,6828
+before_close,3,1,7076
+after_recover,1,1,7556
+after_recover,2,1,6828
+after_recover,3,1,7076
