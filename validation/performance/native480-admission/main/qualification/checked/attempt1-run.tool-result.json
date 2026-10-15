@@ -1,0 +1,8 @@
+{
+  "tool_chunk": "ea01c9",
+  "actual_exit": 1,
+  "recorded_error": "SyntaxError: expected else after if expression, runner line31 else1 typo",
+  "commands_executed": 0,
+  "source_snapshot": "attempt1-run.py",
+  "availability": "Original exception returned by exec tool; this receipt records provenance, not a fabricated subprocess stderr file."
+}

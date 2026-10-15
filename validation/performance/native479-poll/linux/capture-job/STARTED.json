@@ -1,0 +1,5 @@
+{
+  "pid": 1008398,
+  "start_unix": 1792071225.6502643,
+  "scope": "479 Linux cycles:u CPU sampling diagnostic, whole perf launch including Python resource owner, startup/warmup/native measurement/drain/maintenance/verification/recovery/cleanup. Native476 debug0 limits inline/source resolution; raw addresses/unresolved/truncated samples retained. Not unprofiled throughput or an acceptance result. No browser/SVG/sudo/sysctl/install/rebuild."
+}

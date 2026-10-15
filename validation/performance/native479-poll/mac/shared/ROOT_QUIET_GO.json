@@ -1,0 +1,11 @@
+{
+  "time_utc": "2026-10-15T13:33:26.809117+00:00",
+  "published_schema_evidence_commit": "82e78df96731dbb15ed18822a1af9884a455e354",
+  "artifact_source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "linux_config_sha256": "74b5fba490aeeaa403cadd7fe8eef712b616c0b80bef1339a10feb03859cc606",
+  "mac_config_sha256": "ee1eba4395b124281a538d3a05ce3fc275fdc6e4c4238b1d285e6ca9b2c4d94f",
+  "mac_ready_sha256": "3ca14658192037d516c96fce43f5c535f5fbfcd0891f790b41afd5d7c30b744a",
+  "independent_both_final_preflight": "PASS; exact frozen guards, commands and owned cleanup reviewed before launch. All setup/tools stopped.",
+  "authorization": "Launch the one original prepared headless native capture per host once. No same-host builds/checks/copies/archive/competing benchmarks/profiles; no browser or policy changes. Retain original handles and actual terminal markers. All validation/conversion/collection waits until BOTH captures terminate and root END/GO.",
+  "workload_scope": "Linux one-group bulk; Mac two-group31:1 skew; workload-specific diagnostics, not cross-host or unprofiled capacity acceptance."
+}

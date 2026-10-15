@@ -1,0 +1,5 @@
+/private/tmp/voteboat-native479-H1KVVh/workload: 8192 scheduled offers, 6587 admissions, 6587 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=1024.000 admitted_during=823.375 applied_during=569.625 applied_drain=2063.791 applied_total=733.223 ops/s; window_refused=1605 backlog_at_horizon=2030
+/private/tmp/voteboat-native479-H1KVVh/workload: 3 durable checkpoint boundaries, 9 exact-scope reclamation rows, 0 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=803.708 reclaim_ms=792.372 reclaimed_bytes=283869 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=976 units=977 commands=19761 mean_units=1.001 append_ms=858.620 barriers=973 mean_appends_per_barrier=1.003 mean_units_per_barrier=1.004 barrier_ms=15676.391 sync_ms=8121.641 publish_ms=7547.584 histogram=1:975|2:1

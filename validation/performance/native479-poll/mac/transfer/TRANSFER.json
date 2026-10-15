@@ -1,0 +1,65 @@
+{
+  "remote_base": "/private/tmp/voteboat-native479-H1KVVh",
+  "files": {
+    "CONFIG.json": {
+      "sha256": "ee1eba4395b124281a538d3a05ce3fc275fdc6e4c4238b1d285e6ca9b2c4d94f",
+      "bytes": 5358,
+      "mode": "0o644"
+    },
+    "SCHEMA.md": {
+      "sha256": "ad1e34d4f05bd75a8786acfbb0ce67de782856bdc91371e060e46f6ef2840d7f",
+      "bytes": 5833,
+      "mode": "0o644"
+    },
+    "control-tools/check-benchmark-storage.mjs": {
+      "sha256": "f46a15656e91d9c6d32f3f268dde74a2a2e7425f9d5027da4c7cc0a8a69d9856",
+      "bytes": 11797,
+      "mode": "0o644"
+    },
+    "control-tools/check-lanes.mjs": {
+      "sha256": "cb49a5d3cee377cf3154d9a9f092ea90e9af64b87ba98272cae50765c51dc920",
+      "bytes": 4733,
+      "mode": "0o644"
+    },
+    "control-tools/check-maintenance.mjs": {
+      "sha256": "99fd718641c95a0412ef2e98e33b23da717470613bdc496d6313c8b58d0ce658",
+      "bytes": 6918,
+      "mode": "0o644"
+    },
+    "control-tools/check-native-benchmark.mjs": {
+      "sha256": "8c3f8a31270aa52ff4cdadd75479185dbfe33c0f2adecef0739dc43b008e54d7",
+      "bytes": 6595,
+      "mode": "0o644"
+    },
+    "control-tools/check-offered.mjs": {
+      "sha256": "13f0c1f45df5bbc20802e21883bf7157ef0272210df1269f0e8fddb739d90015",
+      "bytes": 9264,
+      "mode": "0o644"
+    },
+    "control-tools/check-publication-profile.mjs": {
+      "sha256": "425f3f905db3e368260095bc8eb78d92aa9753b9d9cf3995a78040a5b7a72b41",
+      "bytes": 1361,
+      "mode": "0o644"
+    },
+    "control-tools/check-publication-timings.mjs": {
+      "sha256": "9d69d025335612afbef911377d2e15654e2186c1e0cb36884fa5fa8ee6b9d5a1",
+      "bytes": 4526,
+      "mode": "0o644"
+    },
+    "control-tools/check-rounded-rate.mjs": {
+      "sha256": "262f06cfb0e878bfa7ce02741f51d7cd6e7e8df6b07b8973df4a7d89502c662d",
+      "bytes": 760,
+      "mode": "0o644"
+    },
+    "record.py": {
+      "sha256": "920ac657f8031d311886312bf8e196fb273d5bed7a6a1eebf977ef961bc01041",
+      "bytes": 6665,
+      "mode": "0o644"
+    }
+  },
+  "directories": {
+    "control-tools": "0o755"
+  },
+  "scope": "Small recording script,config,schema and eight frozen validator modules only; no production source/binaries/buildtrees/generated WAL copied.",
+  "schema_publication_commit": "82e78df96731dbb15ed18822a1af9884a455e354"
+}

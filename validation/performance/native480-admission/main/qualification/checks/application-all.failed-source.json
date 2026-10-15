@@ -1,0 +1,10 @@
+{
+  "compile_exit": 101,
+  "cause": "Returned pending iterator filter borrowed local Copy group; capture that group by value.",
+  "files": {
+    "src/runtime/clients/ready.rs": "206e5cb5a8c8fb40cbe70458caabe2822f84034845f733e2f41e2d1ebd2ecfcf",
+    "src/runtime/clients.rs": "37b983a1b67f7f5496b74ee65332c702b7a1e74554077af100e170fdfae07c6c",
+    "src/application.rs": "d6075051efcc4693a59075b12a20b7e7ed11bd2111e0d1c2adb961213744fa36",
+    "src/application/ready_admission.rs": "cd10eaa9a55cf97055287d2882b0b2930ce3fa2d6172698dac5cd374f95d15fd"
+  }
+}

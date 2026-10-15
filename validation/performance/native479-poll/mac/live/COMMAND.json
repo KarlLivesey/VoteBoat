@@ -1,0 +1,12 @@
+{
+  "start_utc": "2026-10-15T13:33:49.286203+00:00",
+  "command": [
+    "ssh",
+    "karllivesey@192.168.192.76",
+    "/Applications/Xcode-beta.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9 /private/tmp/voteboat-native479-H1KVVh/record.py --authorized-quiet"
+  ],
+  "config_sha256": "ee1eba4395b124281a538d3a05ce3fc275fdc6e4c4238b1d285e6ca9b2c4d94f",
+  "ready_sha256": "3ca14658192037d516c96fce43f5c535f5fbfcd0891f790b41afd5d7c30b744a",
+  "root_go_sha256": "4c9f1cd40030ba61d3c8f21bdb16ba2b4c65bbac182cadb21a5c247bb1acb531",
+  "scope": "One original root-authorized Mac479 skew capture; no restart, competing host work, presymbolication, browser or conversion."
+}

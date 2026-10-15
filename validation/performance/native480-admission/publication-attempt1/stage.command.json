@@ -1,0 +1,20 @@
+[
+  "git",
+  "add",
+  "src/application.rs",
+  "src/application",
+  "src/bin/support/counter_application.rs",
+  "src/runtime/clients.rs",
+  "src/runtime/clients/ready.rs",
+  "tests/application.rs",
+  "tests/application",
+  "tests/client_admission/ready_batch.rs",
+  "tests/client_admission/ready_batch/temporary_context.rs",
+  "docs/component-contracts.json",
+  "docs/provider-conformance.json",
+  "validation/check-provider-conformance.test.mjs",
+  "docs/P9.md",
+  "docs/IMPLEMENTATION.md",
+  "validation/performance/native479-poll",
+  "validation/performance/native480-admission"
+]

@@ -13,6 +13,10 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 use voteboat::{application::*, identity::OperationId, log::*};
+
+#[path = "application/ready_admission.rs"]
+mod ready_admission;
+
 fn command(index: u64, id: u128, delta: i64) -> LogEntry {
     LogEntry {
         index,

@@ -1,0 +1,27 @@
+{
+  "exit": 0,
+  "source_exact": true,
+  "inputs": 1494,
+  "original_final_handle": 31691,
+  "actual_terminal_exit": 0,
+  "terminal_tool_chunk": "2e33ba",
+  "legacy_oracle": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/LEGACY_ORACLE_PROOF.json",
+    "sha256": "95dae3e9bbefe58b7de7f261a1fc569ab84784195a67e5eb10b4c0fe90b0556d"
+  },
+  "proofs": {
+    "functional": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/final/functional.json",
+      "sha256": "7d63c73cf0b409ff6eb9869ded9af842c2432fe2e5ce9910c0ce616d223ea72a"
+    },
+    "strict": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/final/strict.json",
+      "sha256": "940e81abb34de8c4669d1a3687acda2ed6e5ba3bca29a4e3e4af2dc589793dc9"
+    },
+    "metadata": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/final/metadata.json",
+      "sha256": "fcd50d1ac09b14c93bd8008fc98f399e9e95bfdd296534942644e641a2d2f4b4"
+    }
+  },
+  "scope": "Locally checked480 implementation, no new candidate performance artifact or throughput gain yet."
+}

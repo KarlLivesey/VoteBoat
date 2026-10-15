@@ -1,0 +1,83 @@
+{
+  "scope": "Read-only existing tool/path preflight only; no recording, install, build, source transfer or policy change.",
+  "files": [
+    {
+      "requested": "/tmp/voteboat-samply0131-IDCfdm/extracted/samply-aarch64-apple-darwin/samply",
+      "realpath": "/private/tmp/voteboat-samply0131-IDCfdm/extracted/samply-aarch64-apple-darwin/samply",
+      "sha256": "dcf042115dd8a9e8582510f403365cbee1a2025405d0f3ebe95162f31943123b",
+      "bytes": 15360512,
+      "mode": "0o755"
+    },
+    {
+      "requested": "/private/tmp/voteboat-mac476-7e90682-kN01PT/artifacts/native/native_benchmark",
+      "realpath": "/private/tmp/voteboat-mac476-7e90682-kN01PT/artifacts/native/native_benchmark",
+      "sha256": "2fd48262a655debafaf7f04496bf34c867dc17b92f1e5890969819333cbcae84",
+      "bytes": 8034944,
+      "mode": "0o555"
+    },
+    {
+      "requested": "/private/tmp/voteboat-native478-esZLG7/campaign/common.py",
+      "realpath": "/private/tmp/voteboat-native478-esZLG7/campaign/common.py",
+      "sha256": "832254521d6a3860f35fef26bf41c72bed3f11ec89f154e0e93566d53e9e696b",
+      "bytes": 15501,
+      "mode": "0o644"
+    },
+    {
+      "requested": "/Applications/Xcode-beta.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9",
+      "realpath": "/Applications/Xcode-beta.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9",
+      "sha256": "c76ab5392d173b293f0ff63375294dc6004623286e235a0673a0e3cfb25fd9bf",
+      "bytes": 102352,
+      "mode": "0o755"
+    },
+    {
+      "requested": "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+      "realpath": "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+      "sha256": "f75a79e4c96954709a130427e452d6720b35c90318ca8293727a4c6376198453",
+      "bytes": 132848,
+      "mode": "0o555"
+    }
+  ],
+  "commands": [
+    {
+      "command": [
+        "/tmp/voteboat-samply0131-IDCfdm/extracted/samply-aarch64-apple-darwin/samply",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": "samply 0.13.1\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/tmp/voteboat-samply0131-IDCfdm/extracted/samply-aarch64-apple-darwin/samply",
+        "record",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "Record a profile and display it\n\nUsage: samply record [OPTIONS] [COMMAND]...\n\nArguments:\n  [COMMAND]...  Profile the execution of this command\n\nOptions:\n  -r, --rate <RATE>\n          Sampling rate, in Hz [default: 1000]\n  -d, --duration <DURATION>\n          Limit the recorded time to the specified number of seconds\n      --iteration-count <ITERATION_COUNT>\n          How many times to run the profiled command [default: 1]\n      --profile-name <PROFILE_NAME>\n          Set a custom name for the recorded profile. By default it is either the command that was run or the process pid\n      --main-thread-only\n          Only include the main thread of each process in order to reduce profile size, only respected on Windows and macOS\n      --reuse-threads\n          Merge non-overlapping threads of the same name\n      --fold-recursive-prefix\n          Fold repeated frames at the base of the stack\n      --unlink-aux-files\n          If a process produces jitdump or marker files, unlink them after opening. This ensures that the files will not be left in /tmp, but it will also be impossible to look at JIT disassembly, and line numbers will be missing for JIT frames\n      --per-cpu-threads\n          Create a separate thread for each CPU. Not supported on macOS\n      --jit-markers\n          Emit a JitFunctionAdd markers when a JIT function is added\n      --cswitch-markers\n          Emit context switch markers\n      --include-args[=<INCLUDE_ARGS>]\n          Include up to <INCLUDE_ARGS> command line arguments in the process name. This can help differentiate processes if the same executable is used for different types of programs. And in --reuse-threads mode it allows more control over which processes are matched up [default: 0]\n      --unstable-presymbolicate\n          Emit .syms.json sidecar file containing gathered symbol info for all frames referenced by this profile. With this file along with the profile, samply can load the profile and provide symbols to the front end without needing debug files to be available. (Unstable: will probably change to include the full information in the profile.json, instead of a sidecar file.)\n  -s, --save-only\n          Do not run a local server after recording\n  -o, --output <OUTPUT>\n          Output filename [default: profile.json.gz]\n  -n, --no-open\n          Do not open the profiler UI\n      --address <ADDRESS>\n          The address to use for the local web server [default: 127.0.0.1]\n  -P, --port <PORT>\n          The port to use for the local web server [default: 3000+]\n  -v, --verbose\n          Print debugging output\n      --symbol-dir <SYMBOL_DIR>\n          Extra directories containing symbol files\n      --windows-symbol-server <WINDOWS_SYMBOL_SERVER>\n          Additional URLs of symbol servers serving PDB / DLL / EXE files\n      --windows-symbol-cache <WINDOWS_SYMBOL_CACHE>\n          Overrides the default cache directory for Windows symbol files which were downloaded from a symbol server\n      --breakpad-symbol-server <BREAKPAD_SYMBOL_SERVER>\n          Additional URLs of symbol servers serving Breakpad .sym files\n      --breakpad-symbol-dir <BREAKPAD_SYMBOL_DIR>\n          Additional local directories containing Breakpad .sym files\n      --breakpad-symbol-cache <BREAKPAD_SYMBOL_CACHE>\n          Overrides the default cache directory for Breakpad symbol files\n      --simpleperf-binary-cache <SIMPLEPERF_BINARY_CACHE>\n          Extra directory containing symbol files, with the directory structure used by simpleperf's scripts\n  -p, --pid <PID>\n          Process ID of existing process to attach to\n  -a, --all\n          Profile entire system (all processes). Not supported on macOS\n      --coreclr[=<FLAG>...]\n          Enable CoreCLR event capture [possible values: enabled]\n      --gfx\n          Enable Graphics-related event capture\n      --browsers\n          Enable browser-related event capture (JavaScript stacks and trace events)\n  -h, --help\n          Print help\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/sbin/sysctl",
+        "-n",
+        "machdep.cpu.brand_string",
+        "hw.ncpu",
+        "hw.memsize"
+      ],
+      "exit": 0,
+      "stdout": "Apple M2 Max\n12\n103079215104\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/pmset",
+        "-g",
+        "custom"
+      ],
+      "exit": 0,
+      "stdout": "Battery Power:\n Sleep On Power Button 1\n lowpowermode         1\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         0\n womp                 0\n networkoversleep     0\n sleep                1\n lessbright           1\n tcpkeepalive         1\n disksleep            10\nAC Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         0\n womp                 1\n networkoversleep     0\n sleep                0\n tcpkeepalive         1\n disksleep            10\n",
+      "stderr": ""
+    }
+  ]
+}

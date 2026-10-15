@@ -1,0 +1,4 @@
+Actual tool transcript copy; original source-inspection command only, no profiling or source mutation. Tool chunk29f958 exit1:
+zsh:1: no matches found: src/application/counter*.rs
+
+Corrected scoped query of src/application.rs chunk1177de exit0 found field dedup. Compact human-readable alias corrected from Counter.applied to Counter.dedup. Original full symbols and all weights unchanged.

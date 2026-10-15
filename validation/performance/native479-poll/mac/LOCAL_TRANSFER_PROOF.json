@@ -1,0 +1,8 @@
+{
+  "exit": 0,
+  "files": 41,
+  "sha256_lengths_modes_exact": true,
+  "archive_sha256": "581b97ea1f10e80c377a82ef0534d6a3666073e81aa0f8a5e0388a857a4004c3",
+  "manifest_sha256": "6f9ab375af8e57d9c87e4dd5825d74547035b4f07a5df45cf773d31fe07b42b6",
+  "scope": "Original Mac479 after both actual terminal/root GO; no binaries/source/generated WAL."
+}

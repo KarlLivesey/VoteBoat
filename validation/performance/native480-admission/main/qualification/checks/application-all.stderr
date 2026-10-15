@@ -1,0 +1,24 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0373]: closure may outlive the current function, but it borrows `group`, which is owned by the current function
+   --> src/runtime/clients/ready.rs:110:21
+    |
+ 91 |     fn ready_pending<'a>(
+    |                      -- lifetime `'a` defined here
+...
+110 |             .filter(|p| p.ticket.group == group)
+    |                     ^^^                   ----- `group` is borrowed here
+    |                     |
+    |                     may outlive borrowed value `group`
+    |
+note: function requires argument type to outlive `'a`
+   --> src/runtime/clients/ready.rs:128:9
+    |
+128 |         log.chain(pending).chain(selected)
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: to force the closure to take ownership of `group` (and any other referenced variables), use the `move` keyword
+    |
+110 |             .filter(move |p| p.ticket.group == group)
+    |                     ++++
+
+For more information about this error, try `rustc --explain E0373`.
+error: could not compile `voteboat` (lib) due to 1 previous error

@@ -14,9 +14,9 @@ const review = (value, name = 'LogStore') => value.reviews.find(row => row.publi
 
 test('review counts only audited operations and retains unreviewed contracts', () => {
     const report = checkObligations(inventory, ledger, read);
-    assert.equal(report.reviewed_contracts, 43);
-    assert.equal(report.reviewed_operations, 411);
-    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 43);
+    assert.equal(report.reviewed_contracts, 44);
+    assert.equal(report.reviewed_operations, 415);
+    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 44);
     for (const name of ['DiagnosticClock / DiagnosticWallTime', 'WireCodec', 'StateMachine', 'ReadableStateMachine', 'CheckpointStateMachine', 'BoundedStateMachine + ApplicationReceipt', 'PeerTransport', 'TimerService', 'ReadyScheduler', 'LogStore', 'SnapshotStore', 'SnapshotRetention', 'SnapshotWorker', 'CredentialJournal / CredentialRecordIo', 'AdmissionPolicy / AdmissionRequest / AdmissionLease', 'BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits']) {
         assert.ok(!report.unreviewed_contracts.includes(name));
     }
@@ -78,7 +78,10 @@ for (const [name, mutate] of [
     ['missing wire limitation', d => { review(d, 'WireCodec').operations[0].remaining = []; }],
     ['missing buffer operation', d => { review(d, 'BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits').operations.pop(); }],
     ['missing buffer assertion', d => { review(d, 'BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits').operations[0].assertions = []; }],
-    ['missing buffer limitation', d => { review(d, 'BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits').operations[0].remaining = []; }]
+    ['missing buffer limitation', d => { review(d, 'BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits').operations[0].remaining = []; }],
+    ['missing ready context operation', d => { review(d, 'ProposalAdmission').operations.pop(); }],
+    ['missing ready context assertion', d => { review(d, 'ProposalAdmission').operations.find(o => o.names.includes('prepare_ready_admission')).assertions = []; }],
+    ['missing ready context limitation', d => { review(d, 'ProposalAdmission').operations.find(o => o.names.includes('prepare_ready_admission')).remaining = []; }]
 ]) {
     test(`rejects ${name}`, () => {
         const changed = structuredClone(ledger);

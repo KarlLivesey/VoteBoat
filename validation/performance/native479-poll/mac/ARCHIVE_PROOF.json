@@ -1,0 +1,28 @@
+{
+  "original_handle": 11837,
+  "actual_exit": 0,
+  "validation_exit": 0,
+  "headless_symbol_server_exit": 0,
+  "headless_symbol_server_joined": true,
+  "profile_sha256": "e12e06a30191f71fffd68b02198809fa4d60dda5991ed7fe272e6bf4bafc26f2",
+  "source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "schema_publication_commit": "82e78df96731dbb15ed18822a1af9884a455e354",
+  "native_executable_sha256": "2fd48262a655debafaf7f04496bf34c867dc17b92f1e5890969819333cbcae84",
+  "native_uuid": "1D656ECA-0526-35FD-B6B1-B19CE2F04F74",
+  "raw_original_files": 41,
+  "cpu_delta_us": 4238938,
+  "sample_rows": 20707,
+  "wall_sample_weight": 99901,
+  "addresses_queried": 1263,
+  "known_address_functions": 1177,
+  "unknown_address_functions": 86,
+  "scope": "Single profiled diagnostic, existing476 native debug0 binary, Mac skew TCP q64 Witness8192@1024/window4096/groups2/31:1. No recapture/rebuild/default/policy change, browser, SVG, old maps or production source/binary/buildtree/WAL transfer. All symbol conversion after both captures actually terminated. Saved JSON was serialized by samply record without presymbolication.",
+  "sampling_limits": [
+    "Whole-launch sample scope cannot be cropped precisely to native throughput timer with these raw files.",
+    "CPU deltas are interval observations assigned to sampled stacks; first intervals/startup, coalesced waits and unknown frames limit attribution.",
+    "No explicit lost/truncated warning appears in captured stderr; unmarked stack truncation/capture loss cannot be quantified from this profile.",
+    "Mac threadCPUDelta is not Linux cycles:u; host workloads also differ.",
+    "Native debug0 limits source/inline attribution. All raw addresses/query responses and unknowns retained."
+  ],
+  "transfer_scope": "Original saved profile, JSON requests/responses, helpers, text/CSV logs/commands/guards and numerical readout only. Large text is losslessly packed; original hashes/lengths retained."
+}

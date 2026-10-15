@@ -1,0 +1,12 @@
+{
+  "archive_sha256": "9d68cc865690823da0a598789eb9048f19bef0caa9cb645a00e224de637fc710",
+  "manifest_sha256": "cafba4d8173bde262f57c1cc983eb89362f4a0aff18e933a7f90e91555099a89",
+  "config_sha256": "ee1eba4395b124281a538d3a05ce3fc275fdc6e4c4238b1d285e6ca9b2c4d94f",
+  "record_sha256": "920ac657f8031d311886312bf8e196fb273d5bed7a6a1eebf977ef961bc01041",
+  "schema_sha256": "ad1e34d4f05bd75a8786acfbb0ce67de782856bdc91371e060e46f6ef2840d7f",
+  "files": 11,
+  "remote_base": "/private/tmp/voteboat-native479-H1KVVh",
+  "schema_publication_commit": "82e78df96731dbb15ed18822a1af9884a455e354",
+  "prepared_not_recorded": true,
+  "focused_review_fix": "Catch ProcessLookupError if owned group disappears between existence probe and signal, preserving terminal write. No capture or benchmark pilot."
+}

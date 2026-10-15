@@ -1,0 +1,21 @@
+{
+  "archives": [
+    {
+      "archive": "native479-poll/linux",
+      "payloads": 170,
+      "gzip": 22,
+      "manifest_sha256": "7979c3c1f728c710d9712f372e6e0e3ea3893b461bcb7fa92c3d1b0a26cc1930",
+      "all_exact": true
+    },
+    {
+      "archive": "native479-poll/mac",
+      "payloads": 144,
+      "gzip": 13,
+      "manifest_sha256": "99e42fc6df408039db423234b4b536c7e1c632288fa1a65e24f4aa39f39e904b",
+      "all_exact": true
+    }
+  ],
+  "source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "scope": "One original profile per host, existing476 artifacts, no recapture/browser/policy change. Native diagnostic and weighting limitations retained; full P9 incomplete.",
+  "repacked_reported_whitespace_logs_losslessly": true
+}

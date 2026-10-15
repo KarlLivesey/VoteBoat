@@ -1,0 +1,239 @@
+{
+  "native_exec_branch": "1008406.1",
+  "sample_count": 2452,
+  "period_weight": 5017802056,
+  "join": "Native-exec Samply branch2452 samples maps1:1 to nativePID perf leaves excluding5 preexec Python samples(period668), by perTID ordinal plus every timestamp difference<=1.1us. No sample/cycle weights invented.",
+  "maximum_timestamp_difference_ms": 0.0007990002632141113,
+  "contexts": {
+    "core_raft": {
+      "count": 143,
+      "sample_count_percent": 5.831973898858075,
+      "period_weight": 374403183,
+      "period_percent": 7.461497660161985,
+      "self_count": 36,
+      "self_period_weight": 109363734
+    },
+    "ready_collect": {
+      "count": 21,
+      "sample_count_percent": 0.8564437194127243,
+      "period_weight": 44956177,
+      "period_percent": 0.895933647805895,
+      "self_count": 1,
+      "self_period_weight": 3041346
+    },
+    "pending_client_btree": {
+      "count": 232,
+      "sample_count_percent": 9.461663947797716,
+      "period_weight": 595253087,
+      "period_percent": 11.862825204279043,
+      "self_count": 225,
+      "self_period_weight": 580581129
+    },
+    "pending_intersection_pending_client_btree": {
+      "count": 232,
+      "sample_count_percent": 9.461663947797716,
+      "period_weight": 595253087,
+      "period_percent": 11.862825204279043,
+      "self_count": 0,
+      "self_period_weight": 0
+    },
+    "client_reconcile": {
+      "count": 290,
+      "sample_count_percent": 11.827079934747145,
+      "period_weight": 717823322,
+      "period_percent": 14.305532860581218,
+      "self_count": 33,
+      "self_period_weight": 68897611
+    },
+    "pending_intersection_client_reconcile": {
+      "count": 216,
+      "sample_count_percent": 8.809135399673735,
+      "period_weight": 558899730,
+      "period_percent": 11.13833753827933,
+      "self_count": 0,
+      "self_period_weight": 0
+    },
+    "Counter_validate_proposal": {
+      "count": 62,
+      "sample_count_percent": 2.528548123980424,
+      "period_weight": 147389412,
+      "period_percent": 2.937330136882546,
+      "self_count": 8,
+      "self_period_weight": 17643664
+    },
+    "pending_intersection_Counter_validate_proposal": {
+      "count": 2,
+      "sample_count_percent": 0.08156606851549755,
+      "period_weight": 5139565,
+      "period_percent": 0.10242661911811374,
+      "self_count": 0,
+      "self_period_weight": 0
+    }
+  },
+  "quality": {
+    "synthetic_fun_leaf_count": 200,
+    "synthetic_fun_leaf_period": 357889843,
+    "any_synthetic_fun_count": 1997,
+    "any_synthetic_fun_period": 3890141183,
+    "unresolved_leaf_count": 114,
+    "unresolved_leaf_period": 147377063,
+    "any_unresolved_count": 114,
+    "any_unresolved_period": 147377063,
+    "single_frame_count": 7,
+    "single_frame_period": 10913212
+  },
+  "direct_caller_period_weights": {
+    "core_raft": [
+      {
+        "function": "<voteboat::transport::membership::PeerAssignments>::from_cores::<core::iter::adapters::map::Map<core::iter::adapters::copied::Copied<alloc::collections::btree::map::Keys<voteboat::identity::GroupIdentity, voteboat::runtime::Group>>, <voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>::reconcile_planned_membership<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::native::outbound::NativeOutbound>::{closure#0}>>",
+        "period_weight": 40099351,
+        "percent_of_context_leaf_period": 36.66604049931214
+      },
+      {
+        "function": "<voteboat::runtime::timed::TimedShard<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>>::step_ready_checked::<&mut <voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::advance_authorized<voteboat::application::Counter, voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, <voteboat::runtime::replica::ReplicaDriver<voteboat::application::CounterReceipt>>::poll_inner<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, <voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_inner<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>::{closure#1}>::{closure#0}, <voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_inner<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>::{closure#1}>::{closure#1}>",
+        "period_weight": 18898969,
+        "percent_of_context_leaf_period": 17.28083735692492
+      },
+      {
+        "function": "<voteboat::raft::Raft>::event_effect_reservation",
+        "period_weight": 15021371,
+        "percent_of_context_leaf_period": 13.735239691066145
+      },
+      {
+        "function": "<voteboat::raft::Raft>::complete",
+        "period_weight": 7737473,
+        "percent_of_context_leaf_period": 7.074989776775544
+      },
+      {
+        "function": "<voteboat::raft::Raft>::persist_proposal_entries",
+        "period_weight": 5308700,
+        "percent_of_context_leaf_period": 4.854168567433881
+      },
+      {
+        "function": "<voteboat::runtime::Shard<voteboat::native::runtime::FairScheduler>>::retain_connection_history",
+        "period_weight": 4260943,
+        "percent_of_context_leaf_period": 3.8961206280685334
+      },
+      {
+        "function": "<voteboat::raft::Raft>::finish_completion",
+        "period_weight": 3365297,
+        "percent_of_context_leaf_period": 3.0771599294515677
+      },
+      {
+        "function": "<voteboat::runtime::Shard<voteboat::native::runtime::FairScheduler>>::reserved_connections::{closure#0}",
+        "period_weight": 3335630,
+        "percent_of_context_leaf_period": 3.0500330210012763
+      },
+      {
+        "function": "<voteboat::runtime::effects::EffectOwner<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>>::check_input_reservation_scoped",
+        "period_weight": 2795699,
+        "percent_of_context_leaf_period": 2.5563309679971242
+      },
+      {
+        "function": "<voteboat::raft::Raft>::receive_append",
+        "period_weight": 2729444,
+        "percent_of_context_leaf_period": 2.4957487278186754
+      },
+      {
+        "function": "<voteboat::runtime::timed::TimedShard<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>>::next_ready_effect_reservation",
+        "period_weight": 2308334,
+        "percent_of_context_leaf_period": 2.110694208740166
+      },
+      {
+        "function": "<voteboat::raft::Raft>::receive_inner",
+        "period_weight": 1932591,
+        "percent_of_context_leaf_period": 1.7671223625191876
+      },
+      {
+        "function": "<voteboat::raft::Raft>::maybe_commit",
+        "period_weight": 1413988,
+        "percent_of_context_leaf_period": 1.2929222039913157
+      },
+      {
+        "function": "voteboat::runtime::ready_batch::collect::<&mut <voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::advance_authorized<voteboat::application::Counter, voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, <voteboat::runtime::replica::ReplicaDriver<voteboat::application::CounterReceipt>>::poll_inner<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, <voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_inner<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>::{closure#1}>::{closure#0}, <voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_inner<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>::{closure#1}>::{closure#1}>",
+        "period_weight": 155944,
+        "percent_of_context_leaf_period": 0.14259205889952514
+      }
+    ],
+    "pending_client_btree": [
+      {
+        "function": "<voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::reconcile::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>",
+        "period_weight": 395313257,
+        "percent_of_context_leaf_period": 68.08923632790001
+      },
+      {
+        "function": "<voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::cleanup",
+        "period_weight": 127770560,
+        "percent_of_context_leaf_period": 22.0073567013922
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>, alloc::collections::btree::node::marker::LeafOrInternal>>::find_leaf_edges_spanning_range::<u64, (core::ops::range::Bound<u64>, core::ops::range::Bound<u64>)>",
+        "period_weight": 38395249,
+        "percent_of_context_leaf_period": 6.613244399819272
+      },
+      {
+        "function": "<core::iter::adapters::map::Map<core::iter::adapters::filter::Filter<alloc::collections::btree::map::Values<u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>>, <voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::check_ready_execution<voteboat::application::Counter, <voteboat::runtime::replica::ReplicaDriver<voteboat::application::CounterReceipt>>::poll_inner<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, <voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_inner<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>::{closure#1}>::{closure#0}, <voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_inner<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>::{closure#1}>::{closure#5}>, <voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::check_ready_execution<voteboat::application::Counter, <voteboat::runtime::replica::ReplicaDriver<voteboat::application::CounterReceipt>>::poll_inner<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, <voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_inner<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>::{closure#1}>::{closure#0}, <voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_inner<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>::{closure#1}>::{closure#6}> as core::iter::traits::iterator::Iterator>::reduce::<core::iter::traits::iterator::Iterator::min_by::fold<usize, <usize as core::cmp::Ord>::cmp>::{closure#0}>",
+        "period_weight": 5891652,
+        "percent_of_context_leaf_period": 1.0147853083251006
+      },
+      {
+        "function": "<voteboat::application::Counter as voteboat::application::ProposalAdmission>::validate_proposal::<core::iter::adapters::chain::Chain<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::skip::Skip<core::slice::iter::Iter<voteboat::log::LogEntry>>, <voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::check_submit<voteboat::application::Counter, voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>::{closure#0}>, core::iter::adapters::map::Map<core::iter::adapters::filter::Filter<alloc::collections::btree::map::Values<u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>>, <voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::check_submit<voteboat::application::Counter, voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>::{closure#1}>, <voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::check_submit<voteboat::application::Counter, voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>::{closure#2}>>>",
+        "period_weight": 5139565,
+        "percent_of_context_leaf_period": 0.8852449284482341
+      },
+      {
+        "function": "<voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::deliver::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>",
+        "period_weight": 2691984,
+        "percent_of_context_leaf_period": 0.46367059925573295
+      },
+      {
+        "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>, alloc::collections::btree::node::marker::LeafOrInternal>, alloc::collections::btree::node::marker::KV>>::remove_kv_tracking::<<alloc::collections::btree::map::entry::OccupiedEntry<u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>>>::remove_kv::{closure#0}, alloc::alloc::Global>",
+        "period_weight": 1994127,
+        "percent_of_context_leaf_period": 0.34347086055564857
+      },
+      {
+        "function": "<alloc::collections::btree::map::entry::OccupiedEntry<u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>>>::remove_kv",
+        "period_weight": 1860204,
+        "percent_of_context_leaf_period": 0.32040380010353386
+      },
+      {
+        "function": "<voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::submit::<voteboat::application::Counter, voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>",
+        "period_weight": 1524531,
+        "percent_of_context_leaf_period": 0.26258707420027083
+      }
+    ],
+    "Counter_validate_proposal": [
+      {
+        "function": "<&mut <voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::advance_authorized<voteboat::application::Counter, voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, <voteboat::runtime::replica::ReplicaDriver<voteboat::application::CounterReceipt>>::poll_inner<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, <voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_inner<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>::{closure#1}>::{closure#0}, <voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_inner<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>::{closure#1}>::{closure#1} as core::ops::function::FnMut<(&voteboat::raft::Raft, &voteboat::raft::Event, &[voteboat::runtime::ready_batch::ReadyProposal])>>::call_mut",
+        "period_weight": 10711182,
+        "percent_of_context_leaf_period": 60.708376672781796
+      },
+      {
+        "function": "<voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::submit::<voteboat::application::Counter, voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>",
+        "period_weight": 6932482,
+        "percent_of_context_leaf_period": 39.291623327218204
+      }
+    ],
+    "client_reconcile": [
+      {
+        "function": "<voteboat::runtime::replica::ReplicaDriver<voteboat::application::CounterReceipt>>::poll_inner::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, <voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_inner<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>::{closure#1}>",
+        "period_weight": 68897611,
+        "percent_of_context_leaf_period": 100.0
+      }
+    ],
+    "ready_collect": [
+      {
+        "function": "<voteboat::runtime::timed::TimedShard<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>>::step_ready_checked::<&mut <voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::advance_authorized<voteboat::application::Counter, voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, <voteboat::runtime::replica::ReplicaDriver<voteboat::application::CounterReceipt>>::poll_inner<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, <voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_inner<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>::{closure#1}>::{closure#0}, <voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_inner<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>::{closure#1}>::{closure#1}>",
+        "period_weight": 3041346,
+        "percent_of_context_leaf_period": 100.0
+      }
+    ]
+  },
+  "limits": [
+    "Physical full-frame exact-name unions only; no function/type-name substring is promoted to a caller. Inclusive/intersection contexts overlap.",
+    "Samply importer unwinds saved16KiB stacks much more deeply than this perf/libdw conversion; debug0 alone was not an adequate explanation for perf ancestry loss.",
+    "fun_<hex> functions are synthetic/unnamed and retained separately; debug0 still limits source/inlines. No complete-stack or zero-truncation claim.",
+    "This native capture was offer-capped(max65pending), not478 thousands-pending. Thread names do not identify leader ownership.",
+    "Sample-count shares differ from perf-period shares. Both provided; neither is elapsed CPU time or blocked disk waiting."
+  ]
+}

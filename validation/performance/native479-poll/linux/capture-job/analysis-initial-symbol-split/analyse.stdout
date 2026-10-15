@@ -1,0 +1,161 @@
+{
+  "all_samples": 2506,
+  "native_samples": 2457,
+  "all_weight": 5123877853,
+  "native_weight": 5017802724,
+  "quality": {
+    "samples": 2457,
+    "period_weight": 5017802724,
+    "unresolved_leaf_samples": 316,
+    "unresolved_leaf_weight": 505267520,
+    "any_unresolved_frame_samples": 416,
+    "any_unresolved_frame_weight": 552776071,
+    "max_frames": 11,
+    "single_frame_samples": 2020,
+    "single_frame_weight": 4664594503,
+    "known_entry_context_samples": 2,
+    "known_entry_context_weight": 9494,
+    "raw_callchain_empty_samples": 1690,
+    "raw_callchain_empty_weight": 4087261495
+  },
+  "contexts": {
+    "pending_client_btree": {
+      "self_samples": 225,
+      "self_weight": 580581129,
+      "self_native_percent": 11.570425561433451,
+      "inclusive_samples": 226,
+      "inclusive_weight": 580738916,
+      "inclusive_native_percent": 11.573570105144691
+    },
+    "Counter_validate": {
+      "self_samples": 0,
+      "self_weight": 0,
+      "self_native_percent": 0.0,
+      "inclusive_samples": 0,
+      "inclusive_weight": 0,
+      "inclusive_native_percent": 0.0
+    },
+    "ready_execution_or_collection": {
+      "self_samples": 8,
+      "self_weight": 19847433,
+      "self_native_percent": 0.39554032096699066,
+      "inclusive_samples": 8,
+      "inclusive_weight": 19847433,
+      "inclusive_native_percent": 0.39554032096699066
+    },
+    "pending_receipt": {
+      "self_samples": 0,
+      "self_weight": 0,
+      "self_native_percent": 0.0,
+      "inclusive_samples": 0,
+      "inclusive_weight": 0,
+      "inclusive_native_percent": 0.0
+    },
+    "client_reconcile": {
+      "self_samples": 33,
+      "self_weight": 68897611,
+      "self_native_percent": 1.373063366370798,
+      "inclusive_samples": 33,
+      "inclusive_weight": 68897611,
+      "inclusive_native_percent": 1.373063366370798
+    },
+    "peer_poll": {
+      "self_samples": 52,
+      "self_weight": 146970094,
+      "self_native_percent": 2.9289731399173276,
+      "inclusive_samples": 53,
+      "inclusive_weight": 148948454,
+      "inclusive_native_percent": 2.968399958961798
+    },
+    "peer_reconcile": {
+      "self_samples": 20,
+      "self_weight": 47695924,
+      "self_native_percent": 0.9505340608922671,
+      "inclusive_samples": 20,
+      "inclusive_weight": 47695924,
+      "inclusive_native_percent": 0.9505340608922671
+    },
+    "LogEntry_clone_drop": {
+      "self_samples": 54,
+      "self_weight": 204348021,
+      "self_native_percent": 4.072460242859082,
+      "inclusive_samples": 54,
+      "inclusive_weight": 204348021,
+      "inclusive_native_percent": 4.072460242859082
+    },
+    "allocator_named": {
+      "self_samples": 80,
+      "self_weight": 186395907,
+      "self_native_percent": 3.7146918133802664,
+      "inclusive_samples": 90,
+      "inclusive_weight": 212851869,
+      "inclusive_native_percent": 4.241933784720867
+    },
+    "core_raft": {
+      "self_samples": 36,
+      "self_weight": 109363734,
+      "self_native_percent": 2.179514421260855,
+      "inclusive_samples": 36,
+      "inclusive_weight": 109363734,
+      "inclusive_native_percent": 2.179514421260855
+    },
+    "native_log_worker": {
+      "self_samples": 0,
+      "self_weight": 0,
+      "self_native_percent": 0.0,
+      "inclusive_samples": 0,
+      "inclusive_weight": 0,
+      "inclusive_native_percent": 0.0
+    }
+  },
+  "top_self": [
+    {
+      "native_percent": 7.1316983684590145,
+      "symbol": "[unknown]"
+    },
+    {
+      "native_percent": 4.860469879245894,
+      "symbol": "<alloc::collections::btree::map::BTreeMap<u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>>>::get::<u64>"
+    },
+    {
+      "native_percent": 4.397197959670126,
+      "symbol": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, u64, ...tree::node::marker::LeafOrInternal>>::find_leaf_edges_spanning_range::<u64,"
+    },
+    {
+      "native_percent": 2.9370966956332656,
+      "symbol": "[unknown]"
+    },
+    {
+      "native_percent": 2.7572117440621806,
+      "symbol": "<alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::insert_entry"
+    },
+    {
+      "native_percent": 2.3037462682042262,
+      "symbol": "malloc"
+    },
+    {
+      "native_percent": 2.0440969014069994,
+      "symbol": "core::ptr::drop_glue::<voteboat::log::LogEntry>"
+    },
+    {
+      "native_percent": 2.0283633414520823,
+      "symbol": "<alloc::vec::Vec<voteboat::log::LogEntry> as core::clone::Clone>::clone"
+    },
+    {
+      "native_percent": 1.8171200227520143,
+      "symbol": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Owned, voteb...nectDirection<core::net::socket_addr::SocketAddr>)>>, alloc::alloc::Global>"
+    },
+    {
+      "native_percent": 1.7066899539592182,
+      "symbol": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::GroupIdentity, voteboat::runtime::Group>>::get::<voteboat::identity::GroupIdentity>"
+    },
+    {
+      "native_percent": 1.6145067364350214,
+      "symbol": "<voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, votebo...iveWireCodec>>>::poll_peer_io::<voteboat::native::outbound::NativeOutbound>"
+    },
+    {
+      "native_percent": 1.5299596102654593,
+      "symbol": "<voteboat::native::connect::NativePeerConnector as voteboat::connect::PeerConnector>::poll"
+    }
+  ]
+}

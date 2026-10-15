@@ -1,0 +1,7 @@
+{
+  "exit": 0,
+  "files": 11,
+  "exact_sha256_lengths_modes": true,
+  "schema_publication_commit": "82e78df96731dbb15ed18822a1af9884a455e354",
+  "scope": "Small recording script,config,schema and eight frozen validator modules only; no production source/binaries/buildtrees/generated WAL copied."
+}

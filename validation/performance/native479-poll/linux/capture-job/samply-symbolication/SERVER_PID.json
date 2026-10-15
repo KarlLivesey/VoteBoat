@@ -1,0 +1,15 @@
+{
+  "pid": 1157648,
+  "owned_command": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply",
+    "load",
+    "--no-open",
+    "--address",
+    "127.0.0.1",
+    "--port",
+    "38579",
+    "--symbol-dir",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native479-poll/linux/readouts/native.json.gz"
+  ]
+}

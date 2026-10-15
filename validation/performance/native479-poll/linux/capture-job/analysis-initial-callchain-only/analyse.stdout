@@ -1,0 +1,161 @@
+{
+  "all_samples": 2506,
+  "native_samples": 2457,
+  "all_weight": 5123877853,
+  "native_weight": 5017802724,
+  "quality": {
+    "samples": 2457,
+    "period_weight": 5017802724,
+    "unresolved_leaf_samples": 2006,
+    "unresolved_leaf_weight": 4592529015,
+    "any_unresolved_frame_samples": 416,
+    "any_unresolved_frame_weight": 552776071,
+    "max_frames": 11,
+    "single_frame_samples": 330,
+    "single_frame_weight": 577333008,
+    "known_entry_context_samples": 2,
+    "known_entry_context_weight": 9494,
+    "no_captured_frame_samples": 1690,
+    "no_captured_frame_weight": 4087261495
+  },
+  "contexts": {
+    "pending_client_btree": {
+      "self_samples": 7,
+      "self_weight": 13290503,
+      "self_native_percent": 0.26486698921884516,
+      "inclusive_samples": 8,
+      "inclusive_weight": 13448290,
+      "inclusive_native_percent": 0.2680115329300857
+    },
+    "Counter_validate": {
+      "self_samples": 0,
+      "self_weight": 0,
+      "self_native_percent": 0.0,
+      "inclusive_samples": 0,
+      "inclusive_weight": 0,
+      "inclusive_native_percent": 0.0
+    },
+    "ready_execution_or_collection": {
+      "self_samples": 0,
+      "self_weight": 0,
+      "self_native_percent": 0.0,
+      "inclusive_samples": 0,
+      "inclusive_weight": 0,
+      "inclusive_native_percent": 0.0
+    },
+    "pending_receipt": {
+      "self_samples": 0,
+      "self_weight": 0,
+      "self_native_percent": 0.0,
+      "inclusive_samples": 0,
+      "inclusive_weight": 0,
+      "inclusive_native_percent": 0.0
+    },
+    "client_reconcile": {
+      "self_samples": 0,
+      "self_weight": 0,
+      "self_native_percent": 0.0,
+      "inclusive_samples": 0,
+      "inclusive_weight": 0,
+      "inclusive_native_percent": 0.0
+    },
+    "peer_poll": {
+      "self_samples": 7,
+      "self_weight": 20371856,
+      "self_native_percent": 0.4059915688307558,
+      "inclusive_samples": 8,
+      "inclusive_weight": 22350216,
+      "inclusive_native_percent": 0.4454183878752265
+    },
+    "peer_reconcile": {
+      "self_samples": 0,
+      "self_weight": 0,
+      "self_native_percent": 0.0,
+      "inclusive_samples": 0,
+      "inclusive_weight": 0,
+      "inclusive_native_percent": 0.0
+    },
+    "LogEntry_clone_drop": {
+      "self_samples": 0,
+      "self_weight": 0,
+      "self_native_percent": 0.0,
+      "inclusive_samples": 0,
+      "inclusive_weight": 0,
+      "inclusive_native_percent": 0.0
+    },
+    "allocator_named": {
+      "self_samples": 78,
+      "self_weight": 183245198,
+      "self_native_percent": 3.6519012021645194,
+      "inclusive_samples": 88,
+      "inclusive_weight": 209701160,
+      "inclusive_native_percent": 4.179143173505121
+    },
+    "core_raft": {
+      "self_samples": 1,
+      "self_weight": 155944,
+      "self_native_percent": 0.0031078144872879222,
+      "inclusive_samples": 1,
+      "inclusive_weight": 155944,
+      "inclusive_native_percent": 0.0031078144872879222
+    },
+    "native_log_worker": {
+      "self_samples": 0,
+      "self_weight": 0,
+      "self_native_percent": 0.0,
+      "inclusive_samples": 0,
+      "inclusive_weight": 0,
+      "inclusive_native_percent": 0.0
+    }
+  },
+  "top_self": [
+    {
+      "native_percent": 81.45520499342771,
+      "symbol": "[no captured frame]"
+    },
+    {
+      "native_percent": 7.1316983684590145,
+      "symbol": "[unknown]"
+    },
+    {
+      "native_percent": 2.9370966956332656,
+      "symbol": "[unknown]"
+    },
+    {
+      "native_percent": 2.3037462682042262,
+      "symbol": "malloc"
+    },
+    {
+      "native_percent": 1.0401797733170508,
+      "symbol": "__vdso_clock_gettime"
+    },
+    {
+      "native_percent": 0.7651389285666146,
+      "symbol": "cfree"
+    },
+    {
+      "native_percent": 0.58252688692191,
+      "symbol": "realloc"
+    },
+    {
+      "native_percent": 0.559941642695796,
+      "symbol": "clock_gettime"
+    },
+    {
+      "native_percent": 0.29070537050471734,
+      "symbol": "<voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, votebo...iveWireCodec>>>::poll_peer_io::<voteboat::native::outbound::NativeOutbound>"
+    },
+    {
+      "native_percent": 0.2605450576498192,
+      "symbol": "<alloc::vec::into_iter::IntoIter<(voteboat::identity::NodeId, voteboat::identity::StoreIdentity)> as core::ops::drop::Drop>::drop"
+    },
+    {
+      "native_percent": 0.2466796659979652,
+      "symbol": "<std::sync::mpmc::array::Channel<voteboat::worker::ReclaimEvent>>::try_recv"
+    },
+    {
+      "native_percent": 0.2310782754479608,
+      "symbol": "<alloc::collections::btree::map::entry::VacantEntry<u64, u64>>::insert_entry"
+    }
+  ]
+}

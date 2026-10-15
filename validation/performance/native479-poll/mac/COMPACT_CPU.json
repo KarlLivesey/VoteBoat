@@ -1,0 +1,622 @@
+{
+  "cpu_unit": "threadCPUDelta microseconds attributed to sampled stack",
+  "cpu_us": 4238938,
+  "totals": {
+    "samples": 20707,
+    "cpu_us": 4238938,
+    "wall_sample_weight": 99901,
+    "positive_cpu_samples": 15991,
+    "null_stack_cpu_us": 0,
+    "unresolved_leaf_cpu_us": 48185,
+    "any_unresolved_stack_cpu_us": 1183255,
+    "malformed_stack_cpu_us": 0,
+    "zero_cpu_delta_samples": 4716
+  },
+  "contexts_nonadditive": {
+    "ready_admission": {
+      "cpu_us": 1119504,
+      "percent": 26.410011186764233,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 485813,
+        "reserved_set_insert": 569385,
+        "pending_receipt_get": 1910
+      }
+    },
+    "submission_admission": {
+      "cpu_us": 652682,
+      "percent": 15.39729998409979,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 277947,
+        "reserved_set_insert": 330560,
+        "pending_receipt_get": 0
+      }
+    },
+    "all_counter_admission": {
+      "cpu_us": 1772186,
+      "percent": 41.807311170864025,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 763760,
+        "reserved_set_insert": 899945,
+        "pending_receipt_get": 1910
+      }
+    },
+    "ready_batch_collect": {
+      "cpu_us": 1141180,
+      "percent": 26.921365681687252,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 481883,
+        "reserved_set_insert": 564163,
+        "pending_receipt_get": 1910
+      }
+    },
+    "pending_receipt_get": {
+      "cpu_us": 292486,
+      "percent": 6.899982967431937,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 0,
+        "reserved_set_insert": 0,
+        "pending_receipt_get": 292486
+      }
+    },
+    "outcome_lookup": {
+      "cpu_us": 765868,
+      "percent": 18.06744991316221,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 765868,
+        "reserved_set_insert": 0,
+        "pending_receipt_get": 0
+      }
+    },
+    "reserved_set_insert": {
+      "cpu_us": 899945,
+      "percent": 21.230435547771634,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 0,
+        "reserved_set_insert": 899945,
+        "pending_receipt_get": 0
+      }
+    }
+  },
+  "top_self": [
+    {
+      "function": "semaphore_timedwait_trap",
+      "cpu_us": 1121775,
+      "percent": 26.46358592647498
+    },
+    {
+      "function": "reserved OperationId BTreeSet::insert",
+      "cpu_us": 857597,
+      "percent": 20.231411735675305
+    },
+    {
+      "function": "Counter.dedup BTreeMap::get",
+      "cpu_us": 764313,
+      "percent": 18.030766196627553
+    },
+    {
+      "function": "write",
+      "cpu_us": 348978,
+      "percent": 8.232675259699482
+    },
+    {
+      "function": "ClientRouter.pending BTreeMap::get",
+      "cpu_us": 292486,
+      "percent": 6.899982967431937
+    },
+    {
+      "function": "__fcntl",
+      "cpu_us": 199090,
+      "percent": 4.696695257161109
+    },
+    {
+      "function": "::find_lower_bound_index::",
+      "cpu_us": 149089,
+      "percent": 3.517130941759469
+    },
+    {
+      "function": "::next",
+      "cpu_us": 48264,
+      "percent": 1.1385870706294832
+    },
+    {
+      "function": "__recvfrom",
+      "cpu_us": 37856,
+      "percent": 0.8930538733994222
+    },
+    {
+      "function": "::find_leaf_edges_spanning_range::",
+      "cpu_us": 29528,
+      "percent": 0.6965895703121867
+    },
+    {
+      "function": "::insert_recursing::",
+      "cpu_us": 29375,
+      "percent": 0.69298017569495
+    },
+    {
+      "function": "::dying_next",
+      "cpu_us": 22830,
+      "percent": 0.5385782948464922
+    },
+    {
+      "function": "__open",
+      "cpu_us": 22379,
+      "percent": 0.5279388375107161
+    },
+    {
+      "function": "::get::",
+      "cpu_us": 20687,
+      "percent": 0.488023179390687
+    },
+    {
+      "function": "Counter::validate_proposal[ready]",
+      "cpu_us": 20077,
+      "percent": 0.4736327825507238
+    },
+    {
+      "function": "__sendto",
+      "cpu_us": 16977,
+      "percent": 0.40050125762632055
+    },
+    {
+      "function": "::reconcile::",
+      "cpu_us": 15141,
+      "percent": 0.35718852221948044
+    },
+    {
+      "function": "Counter::validate_proposal[submit]",
+      "cpu_us": 13640,
+      "percent": 0.3217787096673742
+    },
+    {
+      "function": "::reduce::",
+      "cpu_us": 13190,
+      "percent": 0.3111628431460899
+    },
+    {
+      "function": "::find_upper_bound_index::",
+      "cpu_us": 12719,
+      "percent": 0.30005156952047896
+    },
+    {
+      "function": "::perform_next_checked::",
+      "cpu_us": 9793,
+      "percent": 0.231024846317639
+    },
+    {
+      "function": "__accept",
+      "cpu_us": 9608,
+      "percent": 0.22666054563666654
+    },
+    {
+      "function": "semaphore_wait_trap",
+      "cpu_us": 8711,
+      "percent": 0.2054995850375731
+    },
+    {
+      "function": "::connection_replicas",
+      "cpu_us": 6935,
+      "percent": 0.16360229850023755
+    },
+    {
+      "function": "[unresolved] libsystem_malloc.dylib!0x3c97c",
+      "cpu_us": 6214,
+      "percent": 0.14659332125169086
+    },
+    {
+      "function": "::dying_next",
+      "cpu_us": 4421,
+      "percent": 0.10429499086799571
+    },
+    {
+      "function": "::from_cores::",
+      "cpu_us": 4394,
+      "percent": 0.10365803887671865
+    },
+    {
+      "function": "[unresolved] native_benchmark!0x43e324",
+      "cpu_us": 3721,
+      "percent": 0.08778142072377562
+    },
+    {
+      "function": "::encode_into",
+      "cpu_us": 3719,
+      "percent": 0.08773423909479214
+    },
+    {
+      "function": "::cleanup",
+      "cpu_us": 3542,
+      "percent": 0.08355866492975363
+    }
+  ],
+  "top_inclusive": [
+    {
+      "function": "native_benchmark::run_selected",
+      "cpu_us": 4046897,
+      "percent": 95.46959639419119
+    },
+    {
+      "function": "std::sys::backtrace::__rust_begin_short_backtrace:: core::result::Result, core::result::Result>",
+      "cpu_us": 4046897,
+      "percent": 95.46959639419119
+    },
+    {
+      "function": "main",
+      "cpu_us": 4046897,
+      "percent": 95.46959639419119
+    },
+    {
+      "function": "native_benchmark::main",
+      "cpu_us": 4046897,
+      "percent": 95.46959639419119
+    },
+    {
+      "function": "start",
+      "cpu_us": 4046897,
+      "percent": 95.46959639419119
+    },
+    {
+      "function": "native_benchmark::offered::run::",
+      "cpu_us": 4046897,
+      "percent": 95.46959639419119
+    },
+    {
+      "function": "std::rt::lang_start_internal",
+      "cpu_us": 4046897,
+      "percent": 95.46959639419119
+    },
+    {
+      "function": "std::rt::lang_start::::{closure#0}",
+      "cpu_us": 4046897,
+      "percent": 95.46959639419119
+    },
+    {
+      "function": "native_benchmark::offered::measure::",
+      "cpu_us": 3577983,
+      "percent": 84.40753320761002
+    },
+    {
+      "function": "native_benchmark::poll_selected::",
+      "cpu_us": 1857631,
+      "percent": 43.823028315111
+    },
+    {
+      "function": "::poll_with_configuration_authorization::",
+      "cpu_us": 1854204,
+      "percent": 43.7421825938478
+    },
+    {
+      "function": "::poll_authorized::",
+      "cpu_us": 1698923,
+      "percent": 40.07897732875546
+    },
+    {
+      "function": "::poll_inner::",
+      "cpu_us": 1696792,
+      "percent": 40.02870530307355
+    },
+    {
+      "function": "::advance_authorized::",
+      "cpu_us": 1159131,
+      "percent": 27.34484439262853
+    },
+    {
+      "function": "::advance_batch_authorized::",
+      "cpu_us": 1156129,
+      "percent": 27.27402476752432
+    },
+    {
+      "function": "::step_ready_checked::",
+      "cpu_us": 1154097,
+      "percent": 27.226088232477096
+    },
+    {
+      "function": "::call_mut",
+      "cpu_us": 1152429,
+      "percent": 27.18673875390487
+    },
+    {
+      "function": "ready_batch::collect",
+      "cpu_us": 1141180,
+      "percent": 26.921365681687252
+    },
+    {
+      "function": "std::thread::functions::park_timeout",
+      "cpu_us": 1123613,
+      "percent": 26.506945843510803
+    },
+    {
+      "function": "[unresolved] libdispatch.dylib!0x3aef",
+      "cpu_us": 1122098,
+      "percent": 26.471205759555815
+    },
+    {
+      "function": "semaphore_timedwait_trap",
+      "cpu_us": 1121775,
+      "percent": 26.46358592647498
+    },
+    {
+      "function": "[unresolved] libdispatch.dylib!0x37327",
+      "cpu_us": 1121775,
+      "percent": 26.46358592647498
+    },
+    {
+      "function": "Counter::validate_proposal[ready]",
+      "cpu_us": 1119504,
+      "percent": 26.410011186764233
+    },
+    {
+      "function": "reserved OperationId BTreeSet::insert",
+      "cpu_us": 899945,
+      "percent": 21.230435547771634
+    },
+    {
+      "function": "Counter.dedup BTreeMap::get",
+      "cpu_us": 764313,
+      "percent": 18.030766196627553
+    },
+    {
+      "function": "::propose_maintenance",
+      "cpu_us": 653950,
+      "percent": 15.427213136875322
+    },
+    {
+      "function": "::submit::",
+      "cpu_us": 653950,
+      "percent": 15.427213136875322
+    },
+    {
+      "function": "Counter::validate_proposal[submit]",
+      "cpu_us": 652682,
+      "percent": 15.39729998409979
+    },
+    {
+      "function": "::reconcile::",
+      "cpu_us": 529413,
+      "percent": 12.489283872517126
+    },
+    {
+      "function": "::write",
+      "cpu_us": 349682,
+      "percent": 8.249283193101668
+    },
+    {
+      "function": "::write_all",
+      "cpu_us": 349682,
+      "percent": 8.249283193101668
+    },
+    {
+      "function": "write",
+      "cpu_us": 348978,
+      "percent": 8.232675259699482
+    },
+    {
+      "function": "::write_fmt",
+      "cpu_us": 339523,
+      "percent": 8.009624108680052
+    },
+    {
+      "function": "core::fmt::write",
+      "cpu_us": 339523,
+      "percent": 8.009624108680052
+    },
+    {
+      "function": "::write_str",
+      "cpu_us": 338687,
+      "percent": 7.9899021877649545
+    }
+  ],
+  "top_callers": [
+    {
+      "caller": "native_benchmark::run_selected",
+      "callee": "native_benchmark::offered::run::",
+      "cpu_us": 4046897,
+      "percent": 95.46959639419119
+    },
+    {
+      "caller": "std::rt::lang_start::::{closure#0}",
+      "callee": "std::sys::backtrace::__rust_begin_short_backtrace:: core::result::Result, core::result::Result>",
+      "cpu_us": 4046897,
+      "percent": 95.46959639419119
+    },
+    {
+      "caller": "std::sys::backtrace::__rust_begin_short_backtrace:: core::result::Result, core::result::Result>",
+      "callee": "native_benchmark::main",
+      "cpu_us": 4046897,
+      "percent": 95.46959639419119
+    },
+    {
+      "caller": "start",
+      "callee": "main",
+      "cpu_us": 4046897,
+      "percent": 95.46959639419119
+    },
+    {
+      "caller": "native_benchmark::main",
+      "callee": "native_benchmark::run_selected",
+      "cpu_us": 4046897,
+      "percent": 95.46959639419119
+    },
+    {
+      "caller": "std::rt::lang_start_internal",
+      "callee": "std::rt::lang_start::::{closure#0}",
+      "cpu_us": 4046897,
+      "percent": 95.46959639419119
+    },
+    {
+      "caller": "main",
+      "callee": "std::rt::lang_start_internal",
+      "cpu_us": 4046897,
+      "percent": 95.46959639419119
+    },
+    {
+      "caller": "native_benchmark::offered::run::",
+      "callee": "native_benchmark::offered::measure::",
+      "cpu_us": 3577983,
+      "percent": 84.40753320761002
+    },
+    {
+      "caller": "native_benchmark::poll_selected::",
+      "callee": "::poll_with_configuration_authorization::",
+      "cpu_us": 1854204,
+      "percent": 43.7421825938478
+    },
+    {
+      "caller": "native_benchmark::offered::measure::",
+      "callee": "native_benchmark::poll_selected::",
+      "cpu_us": 1832925,
+      "percent": 43.240193652278
+    },
+    {
+      "caller": "::poll_with_configuration_authorization::",
+      "callee": "::poll_authorized::",
+      "cpu_us": 1698923,
+      "percent": 40.07897732875546
+    },
+    {
+      "caller": "::poll_authorized::",
+      "callee": "::poll_inner::",
+      "cpu_us": 1696792,
+      "percent": 40.02870530307355
+    },
+    {
+      "caller": "::poll_inner::",
+      "callee": "::advance_authorized::",
+      "cpu_us": 1159131,
+      "percent": 27.34484439262853
+    },
+    {
+      "caller": "::advance_authorized::",
+      "callee": "::advance_batch_authorized::",
+      "cpu_us": 1156129,
+      "percent": 27.27402476752432
+    },
+    {
+      "caller": "::advance_batch_authorized::",
+      "callee": "::step_ready_checked::",
+      "cpu_us": 1154097,
+      "percent": 27.226088232477096
+    },
+    {
+      "caller": "ready_batch::collect",
+      "callee": "::call_mut",
+      "cpu_us": 1141180,
+      "percent": 26.921365681687252
+    },
+    {
+      "caller": "::step_ready_checked::",
+      "callee": "ready_batch::collect",
+      "cpu_us": 1141180,
+      "percent": 26.921365681687252
+    },
+    {
+      "caller": "std::thread::functions::park_timeout",
+      "callee": "[unresolved] libdispatch.dylib!0x3aef",
+      "cpu_us": 1122098,
+      "percent": 26.471205759555815
+    },
+    {
+      "caller": "[unresolved] libdispatch.dylib!0x3aef",
+      "callee": "[unresolved] libdispatch.dylib!0x37327",
+      "cpu_us": 1121775,
+      "percent": 26.46358592647498
+    },
+    {
+      "caller": "[unresolved] libdispatch.dylib!0x37327",
+      "callee": "semaphore_timedwait_trap",
+      "cpu_us": 1121775,
+      "percent": 26.46358592647498
+    },
+    {
+      "caller": "::call_mut",
+      "callee": "Counter::validate_proposal[ready]",
+      "cpu_us": 1119504,
+      "percent": 26.410011186764233
+    },
+    {
+      "caller": "native_benchmark::offered::measure::",
+      "callee": "std::thread::functions::park_timeout",
+      "cpu_us": 1088848,
+      "percent": 25.68681117770536
+    },
+    {
+      "caller": "native_benchmark::offered::measure::",
+      "callee": "::propose_maintenance",
+      "cpu_us": 653950,
+      "percent": 15.427213136875322
+    },
+    {
+      "caller": "::propose_maintenance",
+      "callee": "::submit::",
+      "cpu_us": 653950,
+      "percent": 15.427213136875322
+    },
+    {
+      "caller": "::submit::",
+      "callee": "Counter::validate_proposal[submit]",
+      "cpu_us": 652682,
+      "percent": 15.39729998409979
+    },
+    {
+      "caller": "Counter::validate_proposal[ready]",
+      "callee": "reserved OperationId BTreeSet::insert",
+      "cpu_us": 569385,
+      "percent": 13.432255909381077
+    },
+    {
+      "caller": "::poll_inner::",
+      "callee": "::reconcile::",
+      "cpu_us": 529413,
+      "percent": 12.489283872517126
+    },
+    {
+      "caller": "Counter::validate_proposal[ready]",
+      "callee": "Counter.dedup BTreeMap::get",
+      "cpu_us": 485813,
+      "percent": 11.460724360677132
+    },
+    {
+      "caller": "::write_all",
+      "callee": "::write",
+      "cpu_us": 349682,
+      "percent": 8.249283193101668
+    },
+    {
+      "caller": "::write",
+      "callee": "write",
+      "cpu_us": 348978,
+      "percent": 8.232675259699482
+    },
+    {
+      "caller": "::write_fmt",
+      "callee": "core::fmt::write",
+      "cpu_us": 339523,
+      "percent": 8.009624108680052
+    },
+    {
+      "caller": "::write_str",
+      "callee": "::write_all",
+      "cpu_us": 338687,
+      "percent": 7.9899021877649545
+    },
+    {
+      "caller": "native_benchmark::offered::run::",
+      "callee": "::write",
+      "cpu_us": 336593,
+      "percent": 7.940503022219245
+    },
+    {
+      "caller": "::write",
+      "callee": "::write_fmt",
+      "cpu_us": 335267,
+      "percent": 7.909221602203194
+    },
+    {
+      "caller": "Counter::validate_proposal[submit]",
+      "callee": "reserved OperationId BTreeSet::insert",
+      "cpu_us": 330560,
+      "percent": 7.798179638390559
+    }
+  ],
+  "scope": "Each threadCPUDelta counted once, never multiplied by sample weight. Interval observations assigned to sampled stacks include startup/warmup/recovery/cleanup; wait-stack attribution is not an instruction cost. Inclusive contexts overlap. Wall coalesced sample weights are separate from CPU. Native debug0 limits source/inline; full exact labels and addresses remain in SUMMARY and original query responses."
+}

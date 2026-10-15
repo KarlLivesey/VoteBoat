@@ -490,22 +490,32 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         {
             return Err(ClientError::WrongBinding);
         }
+        let mut ready_validation = ready::ReadyValidation::default();
         let steps = owner
             .advance_batch_authorized(
                 now,
                 limit,
                 |group| application(group).is_some_and(ProposalAdmission::supports_ready_batch),
                 |core, event, prefix| {
-                    self.check_ready_execution(
+                    if prefix.is_empty() {
+                        ready_validation = ready::ReadyValidation::default();
+                    }
+                    let checked = self.check_ready_execution(
                         core,
                         event,
                         prefix,
                         &application,
                         &mut configuration,
-                    )
+                        &mut ready_validation,
+                    );
+                    if checked.is_err() {
+                        ready_validation = ready::ReadyValidation::default();
+                    }
+                    checked
                 },
             )
             .map_err(ClientError::Owner)?;
+        drop(ready_validation);
         for step in &steps {
             let Some(admission) = step.admission else {
                 continue;

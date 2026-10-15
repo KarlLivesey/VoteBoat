@@ -1,0 +1,12 @@
+{
+  "archive_payloads": 136,
+  "lossless_gzip": 21,
+  "manifest_sha256": "e5514299bda72f301932be2f516bb4ad8ef06a380b2a305c87e79edda9d824fd",
+  "all_recursive_members_and_lossless_originals_verified": true,
+  "current_qualified_inputs": 1494,
+  "current_hashes_modes_exact": true,
+  "actual_final_original_handle": 31691,
+  "actual_final_exit": 0,
+  "scope": "Checked temporary admission implementation and preserved profile-driven rationale; no fresh candidate artifact or performance gain yet. Full P9 incomplete.",
+  "reported_whitespace_raw_logs_losslessly_repacked": true
+}

@@ -1,0 +1,28 @@
+{
+  "scope": "One original headless user-space native Counter diagnostic, not an unprofiled gain or full P9 acceptance. No recapture/browser/SVG/sysctl/sudo/install/rebuild. Both original captures actually ended before validation/conversion.",
+  "source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "schema_publication_commit": "82e78df96731dbb15ed18822a1af9884a455e354",
+  "original_handle": 28000,
+  "actual_terminal_tool_chunk": "c31e0c",
+  "actual_terminal_exit": 0,
+  "frozen_validation_exit": 0,
+  "same_native476_artifact": "0bf40f6b4547c446f9db2a86a4bffe6d9ab223640d470154ec266a0d7cc2d064",
+  "source_inputs": 1492,
+  "source_directories": 326,
+  "recording_post_source_artifact_compiler_runtime_tool_policy_guard_exit": 0,
+  "raw_perf_ignored_location": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native479-poll/linux/capture/perf.data",
+    "sha256": "8e9546d08c2f77aa81f441be6155a94c924a4c7a63ade374651299e9edd2f9e5",
+    "bytes": 41611836
+  },
+  "native_pid_view_samples": 2457,
+  "native_exec_samples": 2452,
+  "native_exec_period_weight": 5017802056,
+  "whole_launch_samples": 2506,
+  "whole_launch_period_weight": 5123877853,
+  "reported_lost_samples": 0,
+  "profiler_resource_owner_native_all_terminated": true,
+  "symbol_server_exit": 0,
+  "raw_source_native_WAL_binary_buildtrees_excluded": true,
+  "independent_review": "Focused saved-data Samply review by mac475_collect passed native-exec selection, perTID lengths/unit weights, ordinal+timestamp binding, exact physical predicates/intersections, unknown placeholders and lowpending limits. Parent will independently review archive before publication."
+}

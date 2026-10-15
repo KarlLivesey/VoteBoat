@@ -1,0 +1,161 @@
+{
+  "exit": 0,
+  "scope": "Independent raw numerical/profile conversion review only; no captures, tools, production/source edits or policy changes. Whole-launch platform sampling scopes differ.",
+  "inputs": {
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native479-poll/mac/raw/profile.json.gz": {
+      "sha256": "e12e06a30191f71fffd68b02198809fa4d60dda5991ed7fe272e6bf4bafc26f2",
+      "bytes": 189855
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native479-poll/mac/symbolication/ADDRESS_SYMBOLS.json": {
+      "sha256": "88e6edc907050a005b19f2ca1393f00cbca50be08ade27c5511183f243047adf",
+      "bytes": 1076553
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native479-poll/mac/analysis/SUMMARY.json": {
+      "sha256": "3b30a8535fbd8b1085bfc3cf8f13f5a771082812dc899cde622adbf9b6f63000",
+      "bytes": 4508893
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native479-poll/linux/readouts/ANALYSIS.json": {
+      "sha256": "bfd0f4537c58229a283e5a0c186ab662e82cb903445056985cba0cdaa9ad6c31",
+      "bytes": 508988
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native479-poll/linux/capture/metadata/RESOURCES.json": {
+      "sha256": "dd6163db78c39a9d42944a27388a4f54a146b80f3bfa8ebca18e3e74dd69c510",
+      "bytes": 587
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native479-poll/linux/readouts/stacks.stdout": {
+      "sha256": "13306e1fe434cfcc6c64865b8078f9d563880e7e2235501b8d8a50327d4261e9",
+      "bytes": 447862
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native479-poll/linux/readouts/leaves.stdout": {
+      "sha256": "4033cd3c134377cba769fd5267bde25c35f63a59a0a6326c0f9a24bb83f6dafb",
+      "bytes": 1023588
+    }
+  },
+  "mac": {
+    "raw_cpu_and_resolved_leaf_match_owner": true,
+    "weights": {
+      "all_us": 4238938,
+      "rows": 20707,
+      "wall_weight": 99901,
+      "any_unknown_us": 1183255,
+      "unknown_leaf_us": 48185,
+      "counter_admission_union_us": 1772186,
+      "counter_ready_us": 1119504,
+      "counter_submit_us": 652682
+    },
+    "threads": [
+      {
+        "name": "native_benchmark",
+        "tid": "29296353",
+        "cpu_us": 4046897
+      },
+      {
+        "name": "voteboat-snapshot",
+        "tid": "29296377",
+        "cpu_us": 13100
+      },
+      {
+        "name": "voteboat-wal",
+        "tid": "29296376",
+        "cpu_us": 80112
+      },
+      {
+        "name": "voteboat-dial",
+        "tid": "29296378",
+        "cpu_us": 569
+      },
+      {
+        "name": "voteboat-snapshot",
+        "tid": "29296384",
+        "cpu_us": 2593
+      },
+      {
+        "name": "voteboat-wal",
+        "tid": "29296383",
+        "cpu_us": 40921
+      },
+      {
+        "name": "voteboat-dial",
+        "tid": "29296385",
+        "cpu_us": 210
+      },
+      {
+        "name": "voteboat-snapshot",
+        "tid": "29296387",
+        "cpu_us": 6697
+      },
+      {
+        "name": "voteboat-wal",
+        "tid": "29296386",
+        "cpu_us": 43103
+      },
+      {
+        "name": "voteboat-dial",
+        "tid": "29296388",
+        "cpu_us": 69
+      },
+      {
+        "name": "voteboat-dial",
+        "tid": "29296473",
+        "cpu_us": 153
+      },
+      {
+        "name": "voteboat-snapshot",
+        "tid": "29296472",
+        "cpu_us": 10
+      },
+      {
+        "name": "voteboat-wal",
+        "tid": "29296471",
+        "cpu_us": 1211
+      },
+      {
+        "name": "voteboat-dial",
+        "tid": "29296476",
+        "cpu_us": 64
+      },
+      {
+        "name": "voteboat-snapshot",
+        "tid": "29296475",
+        "cpu_us": 8
+      },
+      {
+        "name": "voteboat-wal",
+        "tid": "29296474",
+        "cpu_us": 1512
+      },
+      {
+        "name": "voteboat-dial",
+        "tid": "29296479",
+        "cpu_us": 8
+      },
+      {
+        "name": "voteboat-snapshot",
+        "tid": "29296478",
+        "cpu_us": 14
+      },
+      {
+        "name": "voteboat-wal",
+        "tid": "29296477",
+        "cpu_us": 1687
+      }
+    ],
+    "counter_admission_percent": 41.807311170864025,
+    "ready_execution_percent": 26.410011186764233,
+    "submission_percent": 15.39729998409979,
+    "interval_wait_stack_cpu_us": 1121775,
+    "limits": "threadCPUDelta is an interval attributed to one sampled stack, not instruction-level CPU. Coalesced wall weights are separate and never multiplied. Debug0 inline detail and27.914% any-unresolved ancestry limit caller certainty;1.137% leaf unresolved. No null/malformed stacks observed; implicit truncation cannot be counted."
+  },
+  "linux": {
+    "raw_join_denominator_quality_resolved_leaf_match_owner": true,
+    "all_period": 5123877853,
+    "quality": {
+      "native_samples": 2457,
+      "native_period": 5017802724,
+      "unresolved_leaf_period": 505267520,
+      "single_frame_period": 4664594503
+    },
+    "limits": "Offer-capped maximum65 pending,1022.769 completed/s; not478 backlog.92.961% native period single-frame and10.069% unresolved leaf. Pending-map leaf callers mostly missing; no admission-vs-reconcile attribution. Corrected final-DSO symbol parser preserves full Rust tuple names."
+  },
+  "decision": "Mac sampled Counter reservation/dedup validation confirms the source-grounded repeated-work target. A lazy batch-local context can reduce ready-prefix validation; submission remains separate. Do not change defaults or claim universal/fullP9 gain before fresh paired outcome/tail/refusal/skew measurements."
+}

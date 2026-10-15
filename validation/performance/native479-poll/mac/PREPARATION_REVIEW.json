@@ -1,0 +1,16 @@
+{
+  "exit": 0,
+  "actual_prepare_handle": 90502,
+  "actual_prepare_exit": 0,
+  "prepare_terminal_tool_chunk": "0f67cf",
+  "job": "/private/tmp/voteboat-native479-H1KVVh",
+  "files": 11,
+  "config_sha256": "ee1eba4395b124281a538d3a05ce3fc275fdc6e4c4238b1d285e6ca9b2c4d94f",
+  "record_sha256": "920ac657f8031d311886312bf8e196fb273d5bed7a6a1eebf977ef961bc01041",
+  "schema_sha256": "ad1e34d4f05bd75a8786acfbb0ce67de782856bdc91371e060e46f6ef2840d7f",
+  "ready_sha256": "3ca14658192037d516c96fce43f5c535f5fbfcd0891f790b41afd5d7c30b744a",
+  "prepared_tar_sha256": "1a7ccff556667858b963fb3ddca53e5860112c0dd75ddbb130ac17008c646ee8",
+  "exact_transfer_hashes_lengths_modes": true,
+  "record_not_started": true,
+  "scope": "Actual Mac479 preparation only; no benchmark pilot, capture, build, tool install or policy change. READY requires separate root GO."
+}

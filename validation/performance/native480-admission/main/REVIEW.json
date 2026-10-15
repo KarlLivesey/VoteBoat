@@ -1,0 +1,30 @@
+{
+  "exit": 0,
+  "reviewer": "mac475_collect",
+  "final_original_handle": 31691,
+  "actual_terminal_exit": 0,
+  "inputs": 1494,
+  "reviewed": "Public optional default-None callback lifetime/owned input, exact legacy oracle, temporary Counter identity reservation/error order, lazy router prefix reset/error cleanup/drop-before-application, wrapper receipt bound, independent downstream runtime tests and partial contract metadata.",
+  "checks": "Final normalized proof references and all final command exits rechecked; actual tests/formatter/strict hook were executed by root, not rerun by reviewer.",
+  "scope": "Selected finite tests and source review, not a complete provider/Raft proof, fresh performance artifact, measured speedup or full P9 acceptance.",
+  "source_reuse": "checked2 successful unchanged application/provider/library/service/matched scopes retained; checked4 reruns affected client tests after a test-only named type alias plus metadata and complete enabled hook. Exact reuse/input records and every failed attempt retained.",
+  "metadata_reporting": "44 contracts/415 operations in positive metadata receipt. Original final negative-command one-file summary is retained. The separate explicit canonical-Node TAP diagnostic executes42tests/42pass/0fail with identity/environment and original command retained.",
+  "proofs": {
+    "CHECKED": {
+      "sha256": "8d27aeabb5a3fe9f01a2a43f627376c751f04a2b1fd431973a5b9aa2eebc5080",
+      "archive_path": "qualification/final/CHECKED.json"
+    },
+    "functional": {
+      "sha256": "7d63c73cf0b409ff6eb9869ded9af842c2432fe2e5ce9910c0ce616d223ea72a",
+      "archive_path": "qualification/final/functional.json"
+    },
+    "strict": {
+      "sha256": "940e81abb34de8c4669d1a3687acda2ed6e5ba3bca29a4e3e4af2dc589793dc9",
+      "archive_path": "qualification/final/strict.json"
+    },
+    "metadata": {
+      "sha256": "fcd50d1ac09b14c93bd8008fc98f399e9e95bfdd296534942644e641a2d2f4b4",
+      "archive_path": "qualification/final/metadata.json"
+    }
+  }
+}

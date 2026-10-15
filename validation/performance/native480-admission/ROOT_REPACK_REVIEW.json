@@ -1,0 +1,187 @@
+{
+  "scope": "Precommit staged whitespace check actually failed2 on original raw logs; no commit/push occurred. Reported outputs losslessly packed, no byte stripping or configuration bypass. Source1494 unchanged; original check output retained gzipped.",
+  "archives": [
+    {
+      "archive": "native479-poll/linux",
+      "payloads": 170,
+      "gzip": 22,
+      "manifest_sha256": "7979c3c1f728c710d9712f372e6e0e3ea3893b461bcb7fa92c3d1b0a26cc1930",
+      "all_exact": true
+    },
+    {
+      "archive": "native479-poll/mac",
+      "payloads": 144,
+      "gzip": 13,
+      "manifest_sha256": "99e42fc6df408039db423234b4b536c7e1c632288fa1a65e24f4aa39f39e904b",
+      "all_exact": true
+    },
+    {
+      "archive": "native480-admission/main",
+      "payloads": 136,
+      "gzip": 21,
+      "manifest_sha256": "e5514299bda72f301932be2f516bb4ad8ef06a380b2a305c87e79edda9d824fd",
+      "all_exact": true
+    }
+  ],
+  "linux_repack": {
+    "exit": 0,
+    "time_utc": "2026-10-15T14:07:09.170921+00:00",
+    "reason": "git diff --cached --check reported whitespace in two raw Linux479 stdout files before any commit/push. Compress only those files; preserve originals losslessly without weakening checks.",
+    "old_manifest_sha256": "35998e4ba4e4997690a6b6be3f425c7f5c194f442936555ba78d3de7e5c77e55",
+    "new_manifest_sha256": "7979c3c1f728c710d9712f372e6e0e3ea3893b461bcb7fa92c3d1b0a26cc1930",
+    "old_payloads": 170,
+    "new_payloads": 170,
+    "old_gzip": 20,
+    "new_gzip": 22,
+    "changes": [
+      {
+        "original_path": "capture-job/prepare.stdout",
+        "archived_path": "capture-job/prepare.stdout.gz",
+        "original_sha256": "0dc69e71e9e2219a94e6c965d50cd727596bf8105143604061076ff530e1b36a",
+        "original_bytes": 1732,
+        "container_sha256": "927eec678db428bbe7a86b1444d43d38d8acf4e3fbd01f46d0957df0ac556682",
+        "container_bytes": 894
+      },
+      {
+        "original_path": "capture-job/readouts/header.stdout",
+        "archived_path": "capture-job/readouts/header.stdout.gz",
+        "original_sha256": "94939b87712be54af5667ce1d8dc026eb84383f35732ce60b44dc2597941f3ab",
+        "original_bytes": 2727,
+        "container_sha256": "af1a2b78c303427855672cf01f4bad8547267647d2b9a06611c542220e90f201",
+        "container_bytes": 1360
+      }
+    ],
+    "prior_metadata_and_originals": "target/p9/native479-poll/linux/whitespace-repack",
+    "every_selected_original_SHA_length_gzip_roundtrip": "PASS",
+    "no_source_workload_or_policy_change": true
+  },
+  "main_repack": {
+    "exit": 0,
+    "before": {
+      "exit": 0,
+      "archive": "validation/performance/native480-admission/main",
+      "payloads": 135,
+      "selected_originals": 131,
+      "gzip": 9,
+      "manifest_sha256": "7e31ac8be0c15b0d645d0edd741e4dafec40d70158f9dcb26ad3943f2520bbad",
+      "bytes": 914886,
+      "all_original_hashes_lengths_modes_roundtrip": true,
+      "final_checked_sha256": "8d27aeabb5a3fe9f01a2a43f627376c751f04a2b1fd431973a5b9aa2eebc5080",
+      "no_tests_or_workloads_launched": true
+    },
+    "after": {
+      "exit": 0,
+      "archive": "validation/performance/native480-admission/main",
+      "payloads": 136,
+      "selected_originals": 131,
+      "gzip": 21,
+      "manifest_sha256": "e5514299bda72f301932be2f516bb4ad8ef06a380b2a305c87e79edda9d824fd",
+      "bytes": 863346,
+      "all_original_hashes_lengths_modes_roundtrip": true,
+      "final_checked_sha256": "8d27aeabb5a3fe9f01a2a43f627376c751f04a2b1fd431973a5b9aa2eebc5080",
+      "no_tests_or_workloads_launched": true
+    },
+    "changed_originals": [
+      {
+        "original_path": "qualification/checked2/application-all.stdout",
+        "archived_path": "qualification/checked2/application-all.stdout.gz",
+        "original_sha256": "5c39ed97c039fac1246472332b8d32b435eae1b885d0a8d175079f049d53855d",
+        "original_bytes": 1581,
+        "container_sha256": "da81060d78b675c8213a220e557c2b6bcfd4f1ee3fd8483565a6b68659b91eaa",
+        "container_bytes": 692
+      },
+      {
+        "original_path": "qualification/checked2/application-core.stdout",
+        "archived_path": "qualification/checked2/application-core.stdout.gz",
+        "original_sha256": "f74a64dd78be54565a8d586e3924aac1df5fe29f03a56b33de9d851e896a5e9a",
+        "original_bytes": 1581,
+        "container_sha256": "e8873d553fd8d9868399c6c57918f5693c335a26325ec6f403fbf5023733d45c",
+        "container_bytes": 692
+      },
+      {
+        "original_path": "qualification/checked2/client-all.stdout",
+        "archived_path": "qualification/checked2/client-all.stdout.gz",
+        "original_sha256": "e6356c25c3a2773c715a51998996f7339268b498b90427a3d35ee09c64c63865",
+        "original_bytes": 3341,
+        "container_sha256": "46f5bbe665ae718e1bbaa04e3e5834f1b5d6a1ff412118069d36f7b0c1198249",
+        "container_bytes": 1091
+      },
+      {
+        "original_path": "qualification/checked2/client-core.stdout",
+        "archived_path": "qualification/checked2/client-core.stdout.gz",
+        "original_sha256": "1b483901100bf7d31ecd68ba9e52f4621d2fe56f2a393d864014da83079e4b0c",
+        "original_bytes": 3341,
+        "container_sha256": "3438aa0426ee953ffb1c0ac1e393e2b677fc65e693e2cc7594fd145583b2050a",
+        "container_bytes": 1092
+      },
+      {
+        "original_path": "qualification/checked2/library-all.stdout",
+        "archived_path": "qualification/checked2/library-all.stdout.gz",
+        "original_sha256": "df2bc6f2648d6d59c3ffea6ccbe196cac9ccdca2fe1d8c08f1059659514820ee",
+        "original_bytes": 50233,
+        "container_sha256": "b6708ec1dbd9fd60e3109ffde85b1ae9850c4984e98b74648e4dc88ae4202346",
+        "container_bytes": 11113
+      },
+      {
+        "original_path": "qualification/checked2/matched.stdout",
+        "archived_path": "qualification/checked2/matched.stdout.gz",
+        "original_sha256": "6a01d84d66fd4438be3182001f2d0571c9ffe4748cba9ab298ff18148fe311d1",
+        "original_bytes": 7658,
+        "container_sha256": "1587df0debed9ff2e3d61eccdc46acd58de1460ff47ec4b54b830c849adc62b1",
+        "container_bytes": 2185
+      },
+      {
+        "original_path": "qualification/checked2/metadata-negative.stdout",
+        "archived_path": "qualification/checked2/metadata-negative.stdout.gz",
+        "original_sha256": "42b64146ce6edb4232d0b056d84e88f6e7313b283939688fa3a69e1d92408de4",
+        "original_bytes": 2980,
+        "container_sha256": "f4b82034fb134857945be1d86e2a9051488d6c8056fae088e741c8145dd6a1f4",
+        "container_bytes": 1061
+      },
+      {
+        "original_path": "qualification/checked2/provider-all.stdout",
+        "archived_path": "qualification/checked2/provider-all.stdout.gz",
+        "original_sha256": "def28007d9fb2403d06018d0c59be5a5c0159d0d1dc0d058173ddc3315d46f24",
+        "original_bytes": 4186,
+        "container_sha256": "d1ba2a844703693650caa3375e3a856af2adfef26a8e6d1bb81258732015efdf",
+        "container_bytes": 1253
+      },
+      {
+        "original_path": "qualification/checked2/provider-core.stdout",
+        "archived_path": "qualification/checked2/provider-core.stdout.gz",
+        "original_sha256": "6d6828cea2752e88b59a91b6110a963a8459992ab8eaff2d7c2208f9c45a54e6",
+        "original_bytes": 2749,
+        "container_sha256": "9d0ec000f3c32c6b9caa660e234718d4446731b3b4f2b6c8b112963c6271c37d",
+        "container_bytes": 977
+      },
+      {
+        "original_path": "qualification/checked2/service.stdout",
+        "archived_path": "qualification/checked2/service.stdout.gz",
+        "original_sha256": "a4deb738845f13575b7ed7a7df0e7e60d2119dbfd4aa35e444ab143d6a1d0dbb",
+        "original_bytes": 285,
+        "container_sha256": "b0f607b09ac070cf1e93a96e716414a7708435d382bfd6f464074f3da25f21b4",
+        "container_bytes": 169
+      },
+      {
+        "original_path": "qualification/checked4/client-all.stdout",
+        "archived_path": "qualification/checked4/client-all.stdout.gz",
+        "original_sha256": "101a4c8e2d6d669c491312d859024d63d6c5d310e06ac171db6ac47dd3369c81",
+        "original_bytes": 3341,
+        "container_sha256": "9c4b91db16e16d8447ff3d8e9fa102ec2eaa11d1dc5cec533264f339d1733128",
+        "container_bytes": 1090
+      },
+      {
+        "original_path": "qualification/checked4/client-core.stdout",
+        "archived_path": "qualification/checked4/client-core.stdout.gz",
+        "original_sha256": "1b483901100bf7d31ecd68ba9e52f4621d2fe56f2a393d864014da83079e4b0c",
+        "original_bytes": 3341,
+        "container_sha256": "3438aa0426ee953ffb1c0ac1e393e2b677fc65e693e2cc7594fd145583b2050a",
+        "container_bytes": 1092
+      }
+    ],
+    "reported_raw_files": 12,
+    "all_original_hashes_lengths_modes_roundtrip": true,
+    "source_test_configuration_changes": false,
+    "checks_rerun": false
+  }
+}

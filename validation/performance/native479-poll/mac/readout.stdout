@@ -1,0 +1,83 @@
+{
+  "exit": 0,
+  "all_counter_admission": {
+    "cpu_us": 1772186,
+    "percent": 41.807311170864025,
+    "child_context_us_nonadditive": {
+      "outcome_lookup": 763760,
+      "reserved_set_insert": 899945,
+      "pending_receipt_get": 1910
+    }
+  },
+  "groups": {
+    "1": {
+      "offers": 7936,
+      "applied": 6331,
+      "refusals": {
+        "window_refused": 1605,
+        "no_leader": 0,
+        "admission_refused": 0,
+        "not_proposed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "completed_originals_s": 704.7265246736015,
+      "during_originals_s": 538.375,
+      "backlog_at_horizon": 2024,
+      "intended_latency": {
+        "p50_ms": 2270.34873,
+        "p95_ms": 3461.005208,
+        "p99_ms": 3565.098105,
+        "max_ms": 3617.803521
+      },
+      "service_latency": {
+        "p50_ms": 2270.181709,
+        "p95_ms": 3456.716417,
+        "p99_ms": 3564.927542,
+        "max_ms": 3617.703375
+      },
+      "dispatch_latency": {
+        "p50_ms": 0.111292,
+        "p95_ms": 8.493833,
+        "p99_ms": 13.506792,
+        "max_ms": 20.683042
+      }
+    },
+    "2": {
+      "offers": 256,
+      "applied": 256,
+      "refusals": {
+        "window_refused": 0,
+        "no_leader": 0,
+        "admission_refused": 0,
+        "not_proposed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "completed_originals_s": 28.496286576598006,
+      "during_originals_s": 31.25,
+      "backlog_at_horizon": 6,
+      "intended_latency": {
+        "p50_ms": 191.84373,
+        "p95_ms": 677.46473,
+        "p99_ms": 862.228021,
+        "max_ms": 893.476188
+      },
+      "service_latency": {
+        "p50_ms": 190.114334,
+        "p95_ms": 677.415625,
+        "p99_ms": 862.174708,
+        "max_ms": 893.411
+      },
+      "dispatch_latency": {
+        "p50_ms": 0.111438,
+        "p95_ms": 7.26048,
+        "p99_ms": 12.623105,
+        "max_ms": 14.859313
+      }
+    }
+  },
+  "sample_rows": 20707,
+  "cpu_us": 4238938,
+  "wall_sample_weight": 99901
+}

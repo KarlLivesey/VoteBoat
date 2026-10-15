@@ -1,0 +1,554 @@
+{
+  "42b52a5fe823b82c": {
+    "symbol": "[unknown]",
+    "dso": "[unknown]"
+  },
+  "550637608dabac6d": {
+    "symbol": "[unknown]",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "67da35aac6d4a7ce": {
+    "symbol": "[unknown]",
+    "dso": "/usr/lib/ld-linux-x86-64.so.2"
+  },
+  "b6abf87a0c06c61e": {
+    "symbol": "<std::fs::File>::sync_all",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "b83cb9ec99f5a4ca": {
+    "symbol": "<voteboat::native::log_store::witness::WitnessLogIo>::select_with::<<voteboat::native::log_store::witness::WitnessLogIo as voteboat::native::log_store::JournalIo>::replace_log::{closure#0}>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "1c83a4e8eaf90f5a": {
+    "symbol": "<std::path::Path>::_join",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "ba662eb09ee30d31": {
+    "symbol": "[unknown]",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "e34c5ab96f9144ec": {
+    "symbol": "<voteboat::native::snapshot_store::FileSnapshotIo as voteboat::native::snapshot_store::SnapshotIo>::publish_manifest",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "ae04f5c9fc61f4a6": {
+    "symbol": "<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>::create_with_codec",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "51a5b2b8501c1acc": {
+    "symbol": "malloc",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "f5cca5e7095456df": {
+    "symbol": "core::ptr::drop_glue::<voteboat::quorum::Tree>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "e78849f1644b4e7b": {
+    "symbol": "snprintf",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "d89fce7f379f84e6": {
+    "symbol": "strchrnul@plt",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "aab3014605fec35a": {
+    "symbol": "__ctype_init",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "b03ec6b7b4edae42": {
+    "symbol": "<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo> as voteboat::snapshot::SnapshotRetention>::reconcile_log",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "f905adfa3ecc099d": {
+    "symbol": "<alloc::collections::btree::map::IntoIter<voteboat::identity::FailureDomainId, alloc::collections::btree::set_val::SetValZST>>::dying_next",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "c176b5eff5694c84": {
+    "symbol": "<std::sys::thread::unix::Thread>::new::thread_start",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "41fa8494ac2c4021": {
+    "symbol": "prctl",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "fc597bc0821f121d": {
+    "symbol": "pthread_setname_np",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "4943620328810a94": {
+    "symbol": "<voteboat::native::snapshot_store::FileSnapshotIo>::create::<std::path::PathBuf>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "e7003316c39a6ed8": {
+    "symbol": "core::ptr::drop_glue::<std::fs::File>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "b04cd2d02d861c40": {
+    "symbol": "fcntl64",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "7b9db9edbe181cb1": {
+    "symbol": "<voteboat::native::log_store::witness::WitnessLogIo as voteboat::native::log_store::JournalIo>::sync_log",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "8ff52468139be23b": {
+    "symbol": "<std::time::Instant>::elapsed",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "a84bbb0cdcc20247": {
+    "symbol": "clock_gettime",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "83d93d01daec316e": {
+    "symbol": "<std::sys::pal::unix::time::Timespec>::now",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "bdcd91eddd3fa833": {
+    "symbol": "<std::thread::thread::Thread>::park",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "9648d8665edf1c07": {
+    "symbol": "<std::sync::mpmc::array::Channel<voteboat::native::snapshot_worker::Accepted>>::recv::{closure#1}",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "5343cd979a759613": {
+    "symbol": "<std::sync::mpmc::array::Channel<voteboat::native::worker::Work>>::recv",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "c21d2452b59779f4": {
+    "symbol": "voteboat::worker::batch_cost",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "e357edfbbd927416": {
+    "symbol": "__cxa_thread_atexit_impl",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "055d74ed1239094c": {
+    "symbol": "syscall",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "c8f3b213517302d7": {
+    "symbol": "std::sys::pal::unix::futex::futex_wake",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "cdedba4a46e428c3": {
+    "symbol": "std::sys::backtrace::__rust_begin_short_backtrace::<<voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>>::spawn::{closure#0}, native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "ec937ac4d45afa5c": {
+    "symbol": "<std::thread::lifecycle::spawn_unchecked<<voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>>::spawn::{closure#0}, native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>::{closure#1} as core::ops::function::FnOnce<()>>::call_once::{shim:vtable#0}",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "ece423e0f8ed07d2": {
+    "symbol": "voteboat::native::worker::ready_window",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "33e3f64453c3bd15": {
+    "symbol": "<voteboat::native::log_store::witness::WitnessLogIo as voteboat::native::log_store::JournalIo>::publish_barrier",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "e3b87ea7be20a689": {
+    "symbol": "<std::sys::pal::unix::time::Timespec>::sub_timespec",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "281bfba85d808a7b": {
+    "symbol": "__vdso_clock_gettime",
+    "dso": "[vdso]"
+  },
+  "ac16084c7a09cd33": {
+    "symbol": "<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>> as voteboat::log::LogStore>::append_batch",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "cb130d8b6994f6ea": {
+    "symbol": "fsync",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "4c04d44731b6c199": {
+    "symbol": "<voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>> as voteboat::runtime::peer_network::PeerNetwork>::poll::<voteboat::native::outbound::NativeOutbound, voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "570aaefadb0761c9": {
+    "symbol": "<voteboat::log_format::NativeLogCodec as voteboat::log_format::LogCodec>::encode_batch",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "2ccfc942f0766441": {
+    "symbol": "std::thread::functions::park_timeout",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "12fd8a8910970794": {
+    "symbol": "native_benchmark::verify_expected::<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "8dd128d36ae09ca4": {
+    "symbol": "native_benchmark::poll_selected::<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "e10c6732aaf9d94b": {
+    "symbol": "<voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>::poll_peer_io::<voteboat::native::outbound::NativeOutbound>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "bce54029276fc6e9": {
+    "symbol": "<voteboat::raft::Raft>::propose_batch",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "c7e5e60d232b2e5b": {
+    "symbol": "recv",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "eb4a5cc32bbfffd3": {
+    "symbol": "<std::net::tcp::TcpStream as std::io::Read>::read",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "6da1b4f9b30be907": {
+    "symbol": "<voteboat::native::tls::LimitedIo<std::net::tcp::TcpStream> as std::io::Read>::read",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "9b5f1c73a938b3d4": {
+    "symbol": "<rustls::msgs::deframer::buffers::DeframerVecBuffer>::read",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "b836786371a0c631": {
+    "symbol": "<voteboat::runtime::Shard<voteboat::native::runtime::FairScheduler>>::reserved_connections",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "dc1fe5d206015c44": {
+    "symbol": "native_benchmark::offered::measure::<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "9df98964fd946a7d": {
+    "symbol": "<native_benchmark::offered::maintenance::Maintenance>::paused::<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "22274e64f3c8877f": {
+    "symbol": "<alloc::vec::Vec<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>)> as alloc::vec::spec_from_iter::SpecFromIter<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>), core::iter::adapters::GenericShunt<core::iter::adapters::map::Map<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, <voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>::reconcile_planned_membership<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::native::outbound::NativeOutbound>::{closure#1}>, core::result::Result<core::convert::Infallible, voteboat::runtime::peers::PeerDriverError>>>>::from_iter",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "7b533daad09bdfca": {
+    "symbol": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::GroupIdentity, voteboat::native::log_store::accepted::Overlay>>::get::<voteboat::identity::GroupIdentity>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "721aa4b4f420cbd4": {
+    "symbol": "<voteboat::native::log_store::accepted::Accepted>::view",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "610f40fb082e8217": {
+    "symbol": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert_recursing::<alloc::alloc::Global, <alloc::collections::btree::map::entry::VacantEntry<u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>>>::insert_entry::{closure#0}>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "78ab377b63167147": {
+    "symbol": "<alloc::vec::Vec<u8>>::extend_trusted::<core::array::iter::IntoIter<u8, 16>>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "b9e9ba2f2788b044": {
+    "symbol": "voteboat::native::log_store::manifest",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "80595a73a8ae9f1e": {
+    "symbol": "<std::sync::mpmc::Sender<voteboat::worker::WorkerEvent>>::send",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "95ca506cd56fcb07": {
+    "symbol": "<alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::GroupIdentity, alloc::collections::btree::set_val::SetValZST>>::insert_entry",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "3a35d8f73ea98f0d": {
+    "symbol": "<voteboat::transport::peers::PeerRoster<voteboat::native::transport::NativePeerTransport<alloc::boxed::Box<dyn voteboat::secure::SecureSession>, voteboat::wire_format::NativeWireCodec>>>::poll",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "117c58e086fde06d": {
+    "symbol": "__errno_location",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "d2c841597efda83d": {
+    "symbol": "__rustc::__rust_dealloc",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "6b19e721f5f15eb6": {
+    "symbol": "<voteboat::transport::peers::PeerRoster<voteboat::native::transport::NativePeerTransport<alloc::boxed::Box<dyn voteboat::secure::SecureSession>, voteboat::wire_format::NativeWireCodec>>>::due_connections_filtered::<<voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>::start_connections::{closure#0}>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "99607f5e28715170": {
+    "symbol": "<voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>::start_connections",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "2c2326b6a38d4f47": {
+    "symbol": "<voteboat::worker::Task>::apply",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "c94577606289f2c8": {
+    "symbol": "<alloc::vec::into_iter::IntoIter<voteboat::runtime::effects::EffectLease> as core::iter::traits::iterator::Iterator>::try_fold::<alloc::vec::in_place_drop::InPlaceDrop<voteboat::worker::PersistUnit>, core::iter::adapters::map::map_try_fold<voteboat::runtime::effects::EffectLease, voteboat::worker::PersistUnit, alloc::vec::in_place_drop::InPlaceDrop<voteboat::worker::PersistUnit>, core::result::Result<alloc::vec::in_place_drop::InPlaceDrop<voteboat::worker::PersistUnit>, !>, <voteboat::runtime::effects::EffectOwner<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>>::submit_persists<voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>>::{closure#2}, alloc::vec::in_place_collect::write_in_place_with_drop<voteboat::worker::PersistUnit>::{closure#0}>::{closure#0}, core::result::Result<alloc::vec::in_place_drop::InPlaceDrop<voteboat::worker::PersistUnit>, !>>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "0e7528248a55ac70": {
+    "symbol": "<alloc::collections::btree::map::IntoIter<voteboat::identity::GroupIdentity, voteboat::native::log_store::accepted::Plan> as core::ops::drop::Drop>::drop",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "457f95f423c26c7e": {
+    "symbol": "<std::sync::mpmc::Receiver<voteboat::dial::DialCompletion<std::net::tcp::TcpStream>>>::try_recv",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "c4877f04af7ab915": {
+    "symbol": "<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity> as core::iter::traits::iterator::Iterator>::next",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "66afc805794ee4be": {
+    "symbol": "<alloc::vec::Vec<(voteboat::identity::NodeId, voteboat::identity::StoreIdentity)> as alloc::vec::spec_from_iter::SpecFromIter<(voteboat::identity::NodeId, voteboat::identity::StoreIdentity), core::iter::adapters::map::Map<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, <voteboat::transport::membership::PeerAssignments>::peers::{closure#0}>>>::from_iter",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "29fa527abed3b5ff": {
+    "symbol": "<alloc::collections::btree::map::BTreeMap<u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>>>::get::<u64>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "8d3debb9facb8c57": {
+    "symbol": "realloc",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "be2f0def51d8e80e": {
+    "symbol": "<alloc::raw_vec::RawVecInner>::finish_grow",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "7674d2af3625b1ec": {
+    "symbol": "<voteboat::transport::membership::PeerAssignments>::from_cores::<core::iter::adapters::map::Map<core::iter::adapters::copied::Copied<alloc::collections::btree::map::Keys<voteboat::identity::GroupIdentity, voteboat::runtime::Group>>, <voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>::reconcile_planned_membership<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::native::outbound::NativeOutbound>::{closure#0}>>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "ebae5d29e3ae2f4c": {
+    "symbol": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::OperationId, alloc::collections::btree::set_val::SetValZST>>::insert",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "1091e4a633223dea": {
+    "symbol": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::get::<voteboat::identity::NodeId>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "390f3b3542f9b952": {
+    "symbol": "__rustc::__rust_no_alloc_shim_is_unstable_v2",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "93815f7618388742": {
+    "symbol": "<alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::insert_entry",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "e55ad77b97300087": {
+    "symbol": "<alloc::collections::btree::map::BTreeMap<voteboat::authorization::PrincipalId,",
+    "dso": "voteboat::identity::NodeId, voteboat::identity::StoreId, voteboat::identity::StoreIncarnation)>>::get::<voteboat::authorization::PrincipalId> (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "f4ced719aedee8f7": {
+    "symbol": "<alloc::vec::into_iter::IntoIter<(voteboat::identity::NodeId, voteboat::identity::StoreIdentity)> as core::ops::drop::Drop>::drop",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "fa0d1e5af4455682": {
+    "symbol": "voteboat::worker::apply_to_timed_with_replication::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, <voteboat::runtime::effects::EffectOwner<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>>::deliver_worker::{closure#4}>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "9d9857bb3f617280": {
+    "symbol": "<voteboat::native::log_store::witness::format::Record>::encode",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "ec88acb759f638ed": {
+    "symbol": "<voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>> as voteboat::snapshot_worker::SnapshotWorker>::binding",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "2aff5fe84fbb0bdb": {
+    "symbol": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::GroupIdentity, voteboat::log::transition::LogSummary>>::insert",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "55557b47da83930b": {
+    "symbol": "__rustc::__rdl_alloc",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "666788311257cdad": {
+    "symbol": "__rustc::__rust_alloc",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "47ec430a323e964b": {
+    "symbol": "<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal> as voteboat::log::LogStore>::append_batch",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "d4589c83d6e7ee54": {
+    "symbol": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::insert",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "a6d1d188f7a55785": {
+    "symbol": "core::ptr::drop_glue::<alloc::vec::Vec<u8>>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "6b5b2467f0d8f85d": {
+    "symbol": "accept4",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "d5fbc564d229dc71": {
+    "symbol": "<std::sys::net::connection::socket::unix::Socket>::accept",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "e71c2c83335666a4": {
+    "symbol": "<std::net::tcp::TcpListener>::accept",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "e9fd75dfb049655b": {
+    "symbol": "<voteboat::native::connect::NativePeerConnector as voteboat::connect::PeerConnector>::poll",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "09b932aea5780431": {
+    "symbol": "std::sys::io::error::unix::is_interrupted",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "d640be0fe98160da": {
+    "symbol": "<voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::poll",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "00c97afda330f0de": {
+    "symbol": "llseek",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "cdfd225894d4dc8c": {
+    "symbol": "<std::fs::File as std::io::Seek>::seek",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "dd7951b1c07185c6": {
+    "symbol": "<voteboat::native::tls::NativeTlsSession<std::net::tcp::TcpStream> as voteboat::secure::SecureSession>::binding",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "2b6d49a0da43360e": {
+    "symbol": "<voteboat::runtime::replica::ReplicaDriver<voteboat::application::CounterReceipt>>::bindings::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "39aeb7f00402b22d": {
+    "symbol": "<std::sync::mpmc::array::Channel<voteboat::worker::WorkerEvent>>::try_recv",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "5882a5d02329ab92": {
+    "symbol": "<voteboat::transport::peers::PeerRoster<voteboat::native::transport::NativePeerTransport<alloc::boxed::Box<dyn voteboat::secure::SecureSession>, voteboat::wire_format::NativeWireCodec>>>::take_send",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "828072d16941a886": {
+    "symbol": "<voteboat::transport::peers::PeerRoster<voteboat::native::transport::NativePeerTransport<alloc::boxed::Box<dyn voteboat::secure::SecureSession>, voteboat::wire_format::NativeWireCodec>>>::keys_after",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "8da50006b3b04e3f": {
+    "symbol": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Owned, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::LeafOrInternal>>::bulk_push::<alloc::collections::btree::dedup_sorted_iter::DedupSortedIter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::vec::into_iter::IntoIter<(voteboat::identity::NodeId, voteboat::identity::StoreIdentity)>>, alloc::alloc::Global>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "42e64c71aa466daf": {
+    "symbol": "<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_with_configuration_authorization::<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<native_benchmark::observe::ObservedLog<voteboat::native::log_store::NativeLogStore<native_benchmark::publication::BenchJournal>>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "cad1563f4d07e95f": {
+    "symbol": "<alloc::collections::btree::map::IntoIter<voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>>>::dying_next",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "ee29afd04e7e75ad": {
+    "symbol": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>> as core::ops::drop::Drop>::drop",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "0ab4e2b74e5934ae": {
+    "symbol": "<alloc::collections::btree::node::BalancingContext<(usize, u64),",
+    "dso": "voteboat::runtime::clients::ClientTicket, usize)>>::bulk_steal_right (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "4867b77d7f0e08da": {
+    "symbol": "<std::sync::mpmc::array::Channel<voteboat::worker::WorkerEvent>>::send",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "a4c83f13998f32b6": {
+    "symbol": "<std::sync::mpmc::array::Channel<voteboat::worker::ReclaimEvent>>::try_recv",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "0ab322d847b1c15e": {
+    "symbol": "<voteboat::runtime::replica::ReplicaDriver<voteboat::application::CounterReceipt>>::collect_effects::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "f91b7a745ba30472": {
+    "symbol": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::get::<voteboat::identity::NodeId>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "e01313604f15ea59": {
+    "symbol": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>, alloc::collections::btree::node::marker::LeafOrInternal>>::find_leaf_edges_spanning_range::<u64,",
+    "dso": "core::ops::range::Bound<u64>, core::ops::range::Bound<u64>)> (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "403d96a262bef962": {
+    "symbol": "voteboat::runtime::connections::add",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "b2cbe4814774816f": {
+    "symbol": "<voteboat::runtime::Shard<voteboat::native::runtime::FairScheduler>>::reserved_connections::{closure#0}",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "9fc7c0d68b894fba": {
+    "symbol": "<alloc::collections::btree::map::entry::VacantEntry<u64, u64>>::insert_entry",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "42931c344fe438f2": {
+    "symbol": "<alloc::collections::btree::navigate::LeafRange<alloc::collections::btree::node::marker::Immut, u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>>>::perform_next_checked::<<alloc::collections::btree::navigate::LeafRange<alloc::collections::btree::node::marker::Immut, u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>>>::next_checked::{closure#0},",
+    "dso": "&u64, &voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>)> (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "4f0190f7268b13f8": {
+    "symbol": "<voteboat::native::transport::NativePeerTransport<alloc::boxed::Box<dyn voteboat::secure::SecureSession>, voteboat::wire_format::NativeWireCodec>>::finish_send",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "d41873e5038da3c4": {
+    "symbol": "voteboat::runtime::event_cost",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "0080e19691e06b7b": {
+    "symbol": "<voteboat::runtime::connections::ConnectionBudget>::retain",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "a73d2f85793e3daf": {
+    "symbol": "<voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::cleanup",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "5de594136e7380e3": {
+    "symbol": "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "28c22274fea258b7": {
+    "symbol": "<core::iter::adapters::map::Map<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, <voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>::reconcile_planned_membership<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::native::outbound::NativeOutbound>::{closure#1}> as core::iter::traits::iterator::Iterator>::try_fold::<(), <core::iter::adapters::GenericShunt<core::iter::adapters::map::Map<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, <voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>::reconcile_planned_membership<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::native::outbound::NativeOutbound>::{closure#1}>, core::result::Result<core::convert::Infallible, voteboat::runtime::peers::PeerDriverError>> as core::iter::traits::iterator::Iterator>::try_fold<(), core::iter::traits::iterator::Iterator::try_for_each::call<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>), core::ops::control_flow::ControlFlow<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>)>, core::ops::control_flow::ControlFlow<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>)>::Break>::{closure#0}, core::ops::control_flow::ControlFlow<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>)>>::{closure#0}, core::ops::control_flow::ControlFlow<core::ops::control_flow::ControlFlow<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>)>>>",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "6dd51af911706548": {
+    "symbol": "ring_core_0_17_14__aes_gcm_enc_update_vaes_avx2",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "dde1acdcf991616a": {
+    "symbol": "voteboat::worker::persist_payload_cost",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "cfce18eb182f0995": {
+    "symbol": "voteboat::native::log_store::read_manifest",
+    "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark"
+  },
+  "c1f1d5f93f6af7c9": {
+    "symbol": "[no captured frame]",
+    "dso": "[none]"
+  },
+  "77e4e3834807f9ba": {
+    "symbol": "send",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "b90bab05823dab68": {
+    "symbol": "__close",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "3a1398814bdb2f82": {
+    "symbol": "cfree",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "328426e5ebf3b4c0": {
+    "symbol": "write",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "cbecd71e0a3cccba": {
+    "symbol": "__call_tls_dtors",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "a668fc5608579168": {
+    "symbol": "pthread_create",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "a03d8742ec0ac157": {
+    "symbol": "pthread_attr_setaffinity_np",
+    "dso": "/usr/lib/libc.so.6"
+  },
+  "56bec92566bb1ac4": {
+    "symbol": "pthread_getattr_np",
+    "dso": "/usr/lib/libc.so.6"
+  }
+}

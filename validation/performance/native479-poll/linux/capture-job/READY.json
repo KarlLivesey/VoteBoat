@@ -1,0 +1,33 @@
+{
+  "config_sha256": "74b5fba490aeeaa403cadd7fe8eef712b616c0b80bef1339a10feb03859cc606",
+  "scripts": {
+    "prepare.py": "68d1dc9ed5dfab1b967500713cd1c660832742918c24124dfbb9d5290e37787e",
+    "record.py": "3b17d7757bbc5f911700e5214b142945d0dbef186c07aab388dff962d8fe329a",
+    "validate.py": "bf93439c8e8d93fcfa5d8a7018bdf5021786a23e483b513a7c0544f37a8b1440",
+    "common.py": "832254521d6a3860f35fef26bf41c72bed3f11ec89f154e0e93566d53e9e696b",
+    "resources.py": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0"
+  },
+  "schema_sha256": "ad1e34d4f05bd75a8786acfbb0ce67de782856bdc91371e060e46f6ef2840d7f",
+  "native_artifact_sha256": "0bf40f6b4547c446f9db2a86a4bffe6d9ab223640d470154ec266a0d7cc2d064",
+  "perf_tools": [
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+      "sha256": "f0fe2b92d280391fa7efa55616f098ba683b9682cf145275d5eda136125f2a64"
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/lib/libpfm.so.4.14.1",
+      "sha256": "807641ee5d1dc4a2e5617686783313caaaca15f989f142e06c0508b9733d207e"
+    }
+  ],
+  "record_command": [
+    "/usr/bin/python3.14",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native479-poll/linux/record.py",
+    "--authorized-quiet"
+  ],
+  "postterminal_validation_command": [
+    "/usr/bin/python3.14",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native479-poll/linux/validate.py",
+    "--authorized-postterminal"
+  ],
+  "scope": "PREPARED ONLY. No recording, benchmark pilot, conversion or symbol server started. Root publication/all-host setup completion and separate quiet GO required."
+}

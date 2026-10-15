@@ -3,6 +3,7 @@
 use super::*;
 mod budget;
 mod context;
+mod temporary_context;
 mod wrapper;
 
 #[test]

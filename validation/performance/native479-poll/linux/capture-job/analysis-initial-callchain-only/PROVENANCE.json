@@ -1,0 +1,26 @@
+{
+  "analyse_sha256": "ae96233675675c41bd39fdc4da85cfe3d58481b1eac3f25a082cee2b73e13ebc",
+  "inputs": {
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native479-poll/linux/readouts/stacks.stdout": {
+      "sha256": "13306e1fe434cfcc6c64865b8078f9d563880e7e2235501b8d8a50327d4261e9",
+      "bytes": 447862
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native479-poll/linux/readouts/self.stdout": {
+      "sha256": "9514b7d502f7b0ca28a9cd073a031b989f92692cd6b0212823a237d320c59cd8",
+      "bytes": 12977011
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native479-poll/linux/VALIDATION.json": {
+      "sha256": "e69739ca0eb965f22aec7b43f9a6f862dd198bccf32d0d64dd16ac8fab902e71",
+      "bytes": 6604
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native479-poll/linux/capture/metadata/RESOURCES.json": {
+      "sha256": "dd6163db78c39a9d42944a27388a4f54a146b80f3bfa8ebca18e3e74dd69c510",
+      "bytes": 587
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native479-poll/linux/capture/perf.data": {
+      "sha256": "8e9546d08c2f77aa81f441be6155a94c924a4c7a63ade374651299e9edd2f9e5",
+      "bytes": 41611836
+    }
+  },
+  "folded_format": "Root-to-leaf frame IDs (full exact symbol+DSO in SYMBOLS.json); native.folded uses raw period weights and native.samples.folded sample counts. No SVG/browser required."
+}

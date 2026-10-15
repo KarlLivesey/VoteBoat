@@ -1,0 +1,20 @@
+{
+  "previous_original_handle": 12587,
+  "previous_job": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/checked2",
+  "actual_successful_scopes": [
+    "application-all",
+    "client-all",
+    "provider-all",
+    "library-all",
+    "application-core",
+    "client-core",
+    "provider-core",
+    "service",
+    "matched",
+    "metadata"
+  ],
+  "changed_inputs": [
+    "validation/check-provider-conformance.test.mjs"
+  ],
+  "justification": "Only metadata negative-control expectation totals changed43/411 to44/415 and three new strict omission controls added. Every Rust/application/service/standalone source, fixture, lock, compiler/configuration and positive metadata input is exact; retain successful checks without rerunning broad unchanged scopes. Prior expected-count failure retained."
+}

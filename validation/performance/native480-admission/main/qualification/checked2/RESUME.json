@@ -1,0 +1,7 @@
+{
+  "prior_original_handle": 29278,
+  "actual_exit": 101,
+  "prior_terminal": "../checked/TERMINAL.json",
+  "cause": "Integration crate loader needs explicit application/ready_admission.rs path. Only that loader changed; no test executed before compile failure.",
+  "preserve_original_logs_and_source_inventory": true
+}

@@ -10,9 +10,14 @@ singleton/moderate regressions.478's96 original ready16/64 cases are now complet
 bulk completed medians improve Linux TCP260.799→591.381 and QUIC310.957→667.779/s,
 Mac TCP491.279→1015.083 and QUIC492.916→1011.578/s. Singleton/moderate/cold-tail
 losses prevent default promotion. Native barriers remain the largest elapsed
-stage, with a newly exposed host-poll cost. [479's before-capture schema](../validation/performance/native479-poll/SCHEMA.md)
-profiles the current Counter ready64 path headlessly before selecting the next
-bounded change. FileLogIo and ready16 stay defaults. The user's real ext4/XFS
+stage, with a newly exposed host-poll cost. [479's headless profiles](../validation/performance/native479-poll/README.md)
+identify repeated exact Counter reservation work in the Mac backlog regime;
+Linux's low-backlog capture separately identifies reconciliation. [480's pre-edit
+schema](../validation/performance/native480-admission/SCHEMA.md) scopes one optional
+temporary ready-admission context. Its local functional checks and full enabled
+strict hook pass, with no performance gain claimed. Checked publication, fresh
+Linux/Mac artifacts and paired measurements follow. FileLogIo and
+ready16 stay defaults. The user's real ext4/XFS
 scratch and all-three-filesystem native acceptance remain pending; available-host
 results do not close that acceptance. Full P9 remains incomplete. The linked
 current-plus-next-two plan below governs work; historical entries retain their
@@ -876,9 +881,9 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current479: reduce the next measured native cost | Locate removable work inside larger ready batches without hiding sync latency | Complete478 raw paired results/regressions; unchanged476 artifacts; [headless capture and ordering schema](../validation/performance/native479-poll/SCHEMA.md) | One guarded native Counter ready64 capture/host; numerical self/inclusive/caller evidence and quality limits; choose a bounded source-grounded change, sketch exact API/ownership/error-prefix/restart contracts before editing, then relevant controls and enabled strict hook0 | P9.0/P9.1/P9.2/P9.3 |
-| Next480: qualify and compare the selected change | Retain useful measured improvement rather than unchecked code or a CPU-only claim | Current479 profile decision, checked published source, exact fresh native artifacts and preserved478 reference | Both-host paired completed/during rates, latency/refusals, cold fairness and physical barrier work; default/singleton/moderate regressions explicit; no rejected-family replay without new cause; third-filesystem native acceptance remains open until supplied | P9.0/P9.1/P9.2/P9.3 |
-| Next481: sustained curve and composed service qualification | Complete full P9 acceptance without narrowing the objective | Retained measured improvements, both-host qualified artifacts/workloads and supplied third filesystem for native acceptance | All seven one-group cells with healthy sustained margin, bounded memory/debt, durable headroom/fairness/skew, placement/shared physical barriers and P8 relays/striped/recursive/logical voters; preserve all outcomes/failures and exclude P10 | P9.0/P9.1/P9.2/P9.3/P9.4 |
+| Current480: qualify exact temporary admission reuse | Remove measured repeated ready-stage set construction without changing outcomes | Complete479 raw profiles/quality; [accepted API/ownership/error-prefix/restart schema](../validation/performance/native480-admission/SCHEMA.md); unchanged per-command Counter oracle | Differential Counter and independent downstream context controls; singleton/fallback/receipt/error-prefix/cancellation/service recovery; exact source scope; zero-diagnostic enabled hook and checked publication including every new module | P9.0/P9.1/P9.2/P9.3 |
+| Next481: fresh artifacts and paired retention decision | Retain useful measured improvement rather than checked code or a CPU-only claim | Published480 source, scoped Mac qualification, genuinely fresh native root/executable proofs and preserved476/478 references | Both-host rotating pairs at the same selected settings; completed/during rates, latency/refusals, cold fairness and physical barrier work; all regressions retained; no rejected-family replay or default promotion; third-filesystem acceptance remains open until supplied | P9.0/P9.1/P9.2/P9.3 |
+| Next482: sustained curve and composed service qualification | Complete full P9 acceptance without narrowing the objective | Retained measured improvements, both-host qualified artifacts/workloads and supplied third filesystem for native acceptance | All seven one-group cells with healthy sustained margin, bounded memory/debt, durable headroom/fairness/skew, placement/shared physical barriers and P8 relays/striped/recursive/logical voters; preserve all outcomes/failures and exclude P10 | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
 comparison or short diagnostics. All seven one-group healthy-margin cells on
@@ -35268,3 +35273,58 @@ Counter admission work is source-grounded but not yet sampled attribution. All14
 qualified input hashes/modes remain exact, so no broad unchanged suite or rebuild
 is repeated; the enabled strict publication hook remains required. The macro
 review leaves every full P9 and third-filesystem acceptance requirement open.
+
+[479 headless profiles](../validation/performance/native479-poll/README.md)
+complete on originals28000/11837, both actual terminal0 before validation or
+conversion. Existing476 artifacts/tools are unchanged; no recapture, browser or
+policy change. Linux's profiled8192-original history is offer-capped at1022.769/s,
+p9945.110ms, maxpending65 and zero refusals. Its initial perf text unwinding loses
+most ancestry, but saved-data Samply import recovers2452 native stacks without
+another workload. Reconciliation has14.306% native perf-period weight, overlapping
+Pending B-tree11.863%; Counter admission2.937% is specific to this small backlog.
+Both methods/failures/quality limits remain, not a debug0-only causal explanation.
+
+Mac's skew capture retains2024 hot/six cold pending at horizon:6587 applied+1605
+hot refusals, all256 cold applied/refused0,733.223 total/s, hot/cold p993565.098/
+862.228ms. Independently traversed4,238,938µs observed threadCPUDelta assigns
+41.807% to exact Counter validation frames (ready26.410%, submission15.397%).
+Reserved-set insertion and applied dedup lookup dominate resolved admission.
+Interval/current-stack attribution also assigns26.464% to a wait frame; these
+are sampled contexts, not CPU timers or an expected elapsed gain. Unknown
+ancestry27.914%, inline/unwind/whole-launch limitations and different Linux
+period weighting remain explicit. Root verifies170 Linux/144 Mac sealed payloads
+and all losslessly packed originals.480 targets ready-stage repetition; submission
+and low-backlog reconciliation remain separate measured costs.
+
+[480's accepted pre-edit schema](../validation/performance/native480-admission/SCHEMA.md)
+implements optional public prepare_ready_admission/ReadyAdmission, default None,
+with a lazy context only after the first successful selected command. Counter
+owns one exact reservation set against immutable application state; the service
+wrapper preserves its actual receipt bound. Every per-original Core/configuration,
+applied-boundary and receipt check remains. Empty-prefix/error reset and explicit
+drop before returned-step processing prevent reuse across transitions/application.
+No new persistent revision, default, timer, payload copy or outcome removal.
+The old Counter validator's full signature/body is byte-identical to82e78df9.
+
+[Local480 checks](../validation/performance/native480-admission/main/README.md)
+complete: application17/client-admission28/provider42 in all-feature,17/28/27 core;
+all-feature library426; actual TCP/QUIC three-service2 and matched70 pass. Five
+new Counter controls include148,750 finite oracle cases; five independent host
+controls cover lazy preparation, fallback, all pending reservations, multi-group
+reset, error prefixes, receipt bounds and drop-before-application. Partial metadata
+records44 contracts/415 operations and42 negative controls pass. Full enabled
+formatter/four strict profiles/standalone checks0, final original31691 terminal0,
+1494 before/after hashes/modes exact. Independent source/contract review finds
+no blocker; it is selected finite evidence, not arbitrary-provider certification.
+Root verifies136 sealed payloads/21 lossless containers and all1494 current
+qualified hashes/modes before publication.
+
+Original E0373 borrowed iterator capture, integration-module path error, runner
+pre-launch syntax error, stale43/411 metadata expectation and strict test-helper
+type-complexity failure are retained. Each receives a focused fix; unchanged
+successful Rust scopes are reused by exact input projection and affected client/
+metadata/strict checks rerun. No threshold is weakened and no failed result is
+relabeled successful. Publish this complete checked source/evidence, then activate
+the prepared unpublished-sentinel fresh runners using the actual commit. Next481
+qualifies Mac and measures both-host matched retention;482 preserves full sustained
+curve/composed scope. Macro requirements, defaults and pending ext4/XFS stay open.

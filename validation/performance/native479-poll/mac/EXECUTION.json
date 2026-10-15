@@ -1,0 +1,61 @@
+{
+  "scope": "Actual original capture and completed post-both-terminal validation/symbolication/conversion. No workload rerun, browser, SVG, policy changes, old maps or binary/source/WAL transfer.",
+  "capture": {
+    "original_handle": 11837,
+    "actual_exit": 0,
+    "terminal_tool_chunk": "3aa7cc",
+    "markers": [
+      "MAC479_RECORD_EXIT 0",
+      "ORIGINAL_MAC479_SSH_EXIT=0"
+    ],
+    "command_receipt": "live/COMMAND.json"
+  },
+  "validation_collection": {
+    "original_handle": 86951,
+    "actual_exit": 0,
+    "terminal_tool_chunk": "220755",
+    "command": [
+      "ssh",
+      "karllivesey@192.168.192.76",
+      "/Applications/Xcode-beta.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9 -"
+    ],
+    "stdin_source_sha256": "b4d6ba4153ceb367c508b3515b32b4be7ad58e4f7d1b90e2435cff3948cee181"
+  },
+  "symbolication": {
+    "original_handle": 14024,
+    "actual_exit": 0,
+    "terminal_tool_chunk": "8dc47e",
+    "stdin_source_sha256": "2537d2f20ed43096ee5bbaef9ccf1ab4030c53dd9b0f4f976230457d21b73717",
+    "server_exit": 0,
+    "server_joined": true
+  },
+  "collapse": {
+    "command": [
+      "python3",
+      "target/p9/native479-poll/mac/collapse.py",
+      "target/p9/native479-poll/mac/raw/profile.json.gz",
+      "target/p9/native479-poll/mac/symbolication/ADDRESS_SYMBOLS.json",
+      "target/p9/native479-poll/mac/analysis"
+    ],
+    "actual_exit": 0,
+    "tool_chunk": "76f591",
+    "source_sha256": "ec8326c4a7a11632501caed67e4e837101b74a0072630e9c6d374df33f32040a"
+  },
+  "formal_readout": {
+    "command": [
+      "python3",
+      "target/p9/native479-poll/mac/readout.py"
+    ],
+    "actual_exit": 0,
+    "tool_chunk": "7b266d",
+    "source_sha256": "0a831cc5ff5959bf5cf3115e7896363f0bf709b07e2a8ca0f4a3b9d58c72009e",
+    "initial_success_tool_chunk": "b0419a",
+    "focused_alias_fix": "Use actual Counter.dedup field name; original symbols, weights and raw inputs unchanged."
+  },
+  "early_inline_readout_warning": {
+    "actual_exit": 0,
+    "tool_chunk": "6960a4",
+    "available_warning_text": "<stdin>:6: SyntaxWarning: invalid decimal literal",
+    "provenance": "Available actual tool-result warning text copied; no original separate stderr stream file. Missing whitespace before for produced a nonfatal Python warning; formal persisted readout.py has proper whitespace."
+  }
+}

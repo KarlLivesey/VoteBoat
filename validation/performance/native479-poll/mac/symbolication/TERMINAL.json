@@ -1,0 +1,9 @@
+{
+  "exit": 0,
+  "server_exit": 0,
+  "failure": null,
+  "addresses": 1263,
+  "server_joined": true,
+  "profile_sha256": "e12e06a30191f71fffd68b02198809fa4d60dda5991ed7fe272e6bf4bafc26f2",
+  "scope": "All localhost request/response bodies retained; owned server interrupted and waited; no UI."
+}

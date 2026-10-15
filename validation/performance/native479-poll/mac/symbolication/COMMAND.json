@@ -1,0 +1,17 @@
+{
+  "command": [
+    "/private/tmp/voteboat-samply0131-IDCfdm/extracted/samply-aarch64-apple-darwin/samply",
+    "load",
+    "--no-open",
+    "--address",
+    "127.0.0.1",
+    "--port",
+    "47937",
+    "--symbol-dir",
+    "/private/tmp/voteboat-mac476-7e90682-kN01PT/artifacts/native",
+    "--symbol-dir",
+    "/private/tmp/voteboat-mac476-7e90682-kN01PT/target-native-release/release/examples",
+    "/private/tmp/voteboat-native479-H1KVVh/profile.json.gz"
+  ],
+  "scope": "Existing samply headless localhost only, exact476 Mach-O UUID verified; no browser/old maps/recapture."
+}

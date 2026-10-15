@@ -4463,6 +4463,96 @@
           ]
         }
       ]
+    },
+    {
+      "public_contract": "ProposalAdmission",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/client_admission/ready_batch/temporary_context.rs",
+          "symbol": "singleton_never_prepares_and_fallback_is_attempted_once_per_prefix"
+        },
+        {
+          "file": "tests/client_admission/ready_batch/temporary_context.rs",
+          "symbol": "lazy_context_sees_all_pending_and_drops_before_application"
+        },
+        {
+          "file": "tests/client_admission/ready_batch/temporary_context.rs",
+          "symbol": "contexts_reset_between_groups_without_cross_group_reservations"
+        },
+        {
+          "file": "tests/client_admission/ready_batch/temporary_context.rs",
+          "symbol": "later_capacity_or_receipt_refusal_keeps_successful_prefix_and_drops_context"
+        },
+        {
+          "file": "tests/client_admission/ready_batch/temporary_context.rs",
+          "symbol": "per_original_context_guard_precedes_prepared_validation"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "validate_proposal",
+            "supports_ready_batch"
+          ],
+          "obligation": "The unchanged per-original path validates the first candidate and providers without a prepared capability. Opting into a ready prefix retains every original position/outcome and does not grant commitment or application authority.",
+          "assertions": [
+            {
+              "file": "tests/client_admission/ready_batch/temporary_context.rs",
+              "symbol": "singleton_never_prepares_and_fallback_is_attempted_once_per_prefix"
+            },
+            {
+              "file": "tests/client_admission/ready_batch/temporary_context.rs",
+              "symbol": "lazy_context_sees_all_pending_and_drops_before_application"
+            }
+          ],
+          "remaining": [
+            "Selected finite independent-host histories do not certify arbitrary application providers, allocation failures or concurrent external mutation. Existing protected-control, cancellation, retry and native recovery histories remain separate checks."
+          ]
+        },
+        {
+          "names": [
+            "validate_proposal_context"
+          ],
+          "obligation": "Every original retains current Core-context validation before temporary application validation; a later guard failure does not consume that queued candidate or bypass its original error precedence.",
+          "assertions": [
+            {
+              "file": "tests/client_admission/ready_batch/temporary_context.rs",
+              "symbol": "per_original_context_guard_precedes_prepared_validation"
+            }
+          ],
+          "remaining": [
+            "Selected finite independent-host histories do not certify arbitrary application providers, allocation failures or concurrent external mutation. Existing protected-control, cancellation, retry and native recovery histories remain separate checks."
+          ]
+        },
+        {
+          "names": [
+            "prepare_ready_admission"
+          ],
+          "obligation": "Optional immutable-application-borrowed, owned-pending context prepares lazily once per nonempty ready prefix, includes all retained group pending commands, resets across groups/prefixes and errors, and drops before application execution. Capacity/receipt refusal retains exactly the successful proposed prefix and original individual outcomes.",
+          "assertions": [
+            {
+              "file": "tests/client_admission/ready_batch/temporary_context.rs",
+              "symbol": "singleton_never_prepares_and_fallback_is_attempted_once_per_prefix"
+            },
+            {
+              "file": "tests/client_admission/ready_batch/temporary_context.rs",
+              "symbol": "lazy_context_sees_all_pending_and_drops_before_application"
+            },
+            {
+              "file": "tests/client_admission/ready_batch/temporary_context.rs",
+              "symbol": "contexts_reset_between_groups_without_cross_group_reservations"
+            },
+            {
+              "file": "tests/client_admission/ready_batch/temporary_context.rs",
+              "symbol": "later_capacity_or_receipt_refusal_keeps_successful_prefix_and_drops_context"
+            }
+          ],
+          "remaining": [
+            "Selected finite independent-host histories do not certify arbitrary application providers, allocation failures or concurrent external mutation. Existing protected-control, cancellation, retry and native recovery histories remain separate checks."
+          ]
+        }
+      ]
     }
   ]
 }

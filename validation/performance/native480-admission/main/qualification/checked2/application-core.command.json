@@ -1,0 +1,12 @@
+[
+  "cargo",
+  "+stable",
+  "test",
+  "--locked",
+  "--offline",
+  "--no-default-features",
+  "--test",
+  "application",
+  "--",
+  "--test-threads=1"
+]
