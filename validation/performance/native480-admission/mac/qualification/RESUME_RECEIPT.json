@@ -1,0 +1,14 @@
+{
+  "initial_exit": 101,
+  "reason": "Correct Cargo test target client_admission to admission; no Rust compile or tests ran before target selection failure.",
+  "preserved": {
+    "selected_tests.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "selected_tests.stderr": "8e8321c11f0fe937e0e56a05ff93721a8ac6c9d8d2bb346f104891eb09d742fa",
+    "selected_tests.exit": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c",
+    "selected_tests.command": "8f4e8bec91fe383eba6dd33c724954fa9139cd50136adeb4b476eab6f438839a",
+    "source-final.log": "20590907799aa769b20ad0fa35ad5f3e69be12b3a206058ad7cbf93bbfdff92b"
+  },
+  "source_unchanged": true,
+  "reuse": "Passed original tool identity and exact1494 source transfer; resume only unexecuted qualification/build/control steps.",
+  "resume_sha256": "e2944a736d78949e12fb5aba3bdc930351c2a0e8a99360fb07a9d1da2436a8c2"
+}

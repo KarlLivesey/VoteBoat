@@ -1,0 +1,81 @@
+{
+  "exit": 0,
+  "actual_terminal_exit": 0,
+  "original_handle": 36268,
+  "terminal_tool_chunk": "0eed35",
+  "source_exact": true,
+  "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "checks": [
+    {
+      "name": "client_runtime_all",
+      "command": [
+        "/Users/karllivesey/.cargo/bin/cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "effect_owner",
+        "client_admission",
+        "--",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "elapsed_s": 11.0714695
+    },
+    {
+      "name": "client_runtime_core",
+      "command": [
+        "/Users/karllivesey/.cargo/bin/cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--test",
+        "effect_owner",
+        "client_admission",
+        "--",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "elapsed_s": 7.514942040999999
+    }
+  ],
+  "actual_rust_passed_counts": {
+    "client_runtime_all": [
+      28
+    ],
+    "client_runtime_core": [
+      28
+    ]
+  },
+  "proof_sha256": {
+    "APPEND_ONLY_RUNTIME_TESTS.json": "2f8ddc009fc7e41757f6c0fc6c5ab6e3d6274feaea65bc8f7d62128b262ea8fe",
+    "client_runtime_before.json": "e6976334a9a40cf989f67d059625f243ea8516fcb76b0845e6b1640621f3ebd7",
+    "client_runtime_after.json": "e6976334a9a40cf989f67d059625f243ea8516fcb76b0845e6b1640621f3ebd7",
+    "SOURCE.json": "2f8b7b395ca1ff2dcfe40bf447a7f917024f4b260167cab9120780e5f6b06f95",
+    "ARTIFACTS.json": "1e38f4afa7198acb3de39cfd4cf492fdc2fcbb21edfc578f0a7034017011d89a",
+    "SYMBOLS.json": "72022c6c2dce81b519442fa2f2a7c65541a4f3441a3a88b8f5d0cd218f485f54",
+    "logs/client_runtime_all.stdout": "99f8cff765d37d1a0911f61b33bca1e2c52493a1f26f9110915e40581540a838",
+    "logs/client_runtime_all.stderr": "71adead9aedd30878cb3a5e1882e1168998631caefa7d305da42d9f96618bd41",
+    "logs/client_runtime_all.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "logs/client_runtime_all.command.json": "0a712940b154437488b52713c63ed8a11e498984da387d0f3b7de5041b4d38e0",
+    "logs/client_runtime_core.stdout": "319dd7197fb262d4bbebfdd266a693cc98b2e3a612aa913f06cfaff265e06909",
+    "logs/client_runtime_core.stderr": "ca4972cbfb8f154784873f0cbebba78e68fbf52d929d2632b608302254112fff",
+    "logs/client_runtime_core.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "logs/client_runtime_core.command.json": "edf896bf1c311deca8084c930cfad801399b8295dda5666babdb7c9b4923e5dc"
+  },
+  "prior_scope": {
+    "original_initial_handle": 59191,
+    "initial_exit": 101,
+    "original_resume_handle": 27421,
+    "resume_exit": 0,
+    "outbound_admission_all_core_counts": [
+      8,
+      1
+    ]
+  },
+  "scope": "Append-only correction of missing effect_owner client_admission all/core scopes. All old logs,STATUS,STAGE,READINESS preserved. No production/source change,native build/workload,broad rerun or timed campaign."
+}

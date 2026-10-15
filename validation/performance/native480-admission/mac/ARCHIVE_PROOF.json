@@ -1,0 +1,29 @@
+{
+  "exit": 0,
+  "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "source_files": 1494,
+  "source_directories": 325,
+  "protected_private_fixture_keys_0600": 7,
+  "artifacts_sha256": {
+    "voteboat": "fa3ea343d31fd2a69f05e38bf02c0a3c1f574ef6d59000d4e70320d02e9916b1",
+    "native_benchmark": "fef05adc73179359ea2acc0d9b92978c57c4795410a727aefc30f1aac422fa52"
+  },
+  "original_initial_handle": 59191,
+  "initial_actual_exit": 101,
+  "original_resume_handle": 27421,
+  "resume_actual_exit": 0,
+  "append_only_missing_runtime_handle": 36268,
+  "append_only_actual_exit": 0,
+  "client_runtime_counts": {
+    "client_runtime_all": [
+      28
+    ],
+    "client_runtime_core": [
+      28
+    ]
+  },
+  "original_four_native_controls": 4,
+  "final_readiness_sha256": "d1d0f3dbc31aa37291314e34b57780c056fccf7fc09da060d50428d208e81573",
+  "append_receipt_sha256": "cd3e1f43c66cbd821100d44c21d34afd4b429023d4b35dff17cbb382b52a5816",
+  "scope": "Functional fresh artifact/readiness qualification only, not a measured gain or fullP9 acceptance. Original failed helper and missing-scope correction remain distinct; no performance case rerun or source change."
+}

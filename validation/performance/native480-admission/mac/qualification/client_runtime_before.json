@@ -1,0 +1,11 @@
+{
+  "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "inputs": 1494,
+  "directories": 325,
+  "source_sha256_modes_exact": true,
+  "source_inventory_sha256": "2f8b7b395ca1ff2dcfe40bf447a7f917024f4b260167cab9120780e5f6b06f95",
+  "artifacts_sha256": {
+    "voteboat": "fa3ea343d31fd2a69f05e38bf02c0a3c1f574ef6d59000d4e70320d02e9916b1",
+    "native_benchmark": "fef05adc73179359ea2acc0d9b92978c57c4795410a727aefc30f1aac422fa52"
+  }
+}

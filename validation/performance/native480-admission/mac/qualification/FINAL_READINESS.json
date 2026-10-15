@@ -1,0 +1,8 @@
+{
+  "exit": 0,
+  "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "source_exact": true,
+  "original_readiness_sha256": "cda58da7727998f8c131c9c5c9b34a894df2961b8d8d65392e04d49bc475fee2",
+  "append_qualification_sha256": "cd3e1f43c66cbd821100d44c21d34afd4b429023d4b35dff17cbb382b52a5816",
+  "scope": "Combined final qualified scopes; original READINESS and actual27421 terminal remain unchanged and the separate actual36268 client runtime correction is bound."
+}

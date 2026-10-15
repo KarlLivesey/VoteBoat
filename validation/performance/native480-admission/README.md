@@ -15,7 +15,14 @@ same-raw correction0 verifies the uninstrumented default FileLogIo case.
 and144 selected original hashes/lengths/modes, including seven lossless gzip
 files. No workload repeats or measured gain are claimed.
 
-Mac qualification continues separately. [481's fixed paired comparison](../native481-admission/SCHEMA.md)
+[Fresh Mac qualification](mac/README.md) passes with exact1494 source files and325
+directory modes, fresh native root/executable/build-script evidence and four
+explicit provider/transport recovery controls. Initial target-selection101,
+resumed qualification0 and a separate missing-client-runtime28/28 correction0
+remain distinct. [Root archive verification](ROOT_FRESH_MAC_REVIEW.json) checks
+all213 payloads/209 selected originals, including38 lossless gzip files.
+
+[481's fixed paired comparison](../native481-admission/SCHEMA.md)
 will decide retention using actual completed rates, latency, refusals, fairness
 and physical work. FileLogIo/ready16 remain defaults. Full P9 and the forthcoming
 real ext4/XFS native acceptance remain incomplete.

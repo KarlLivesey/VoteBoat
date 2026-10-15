@@ -1,0 +1,38 @@
+{
+  "exit": 0,
+  "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "old193_payloads_unchanged": 193,
+  "source_files": 1494,
+  "source_directories": 325,
+  "protected_private_fixture_keys": 7,
+  "artifact_sha256": {
+    "voteboat": "fa3ea343d31fd2a69f05e38bf02c0a3c1f574ef6d59000d4e70320d02e9916b1",
+    "native_benchmark": "fef05adc73179359ea2acc0d9b92978c57c4795410a727aefc30f1aac422fa52"
+  },
+  "original_initial_handle": 59191,
+  "original_initial_exit": 101,
+  "original_resume_handle": 27421,
+  "actual_resume_exit": 0,
+  "append_only_runtime_handle": 36268,
+  "append_only_runtime_actual_exit": 0,
+  "new_client_runtime_counts": {
+    "client_runtime_all": [
+      28
+    ],
+    "client_runtime_core": [
+      28
+    ]
+  },
+  "controls": 4,
+  "proofs": {
+    "FINAL_READINESS.json": "d1d0f3dbc31aa37291314e34b57780c056fccf7fc09da060d50428d208e81573",
+    "READINESS.json": "cda58da7727998f8c131c9c5c9b34a894df2961b8d8d65392e04d49bc475fee2",
+    "APPEND_ONLY_RUNTIME_QUALIFICATION.json": "cd3e1f43c66cbd821100d44c21d34afd4b429023d4b35dff17cbb382b52a5816",
+    "SOURCE.json": "2f8b7b395ca1ff2dcfe40bf447a7f917024f4b260167cab9120780e5f6b06f95",
+    "ARTIFACTS.json": "1e38f4afa7198acb3de39cfd4cf492fdc2fcbb21edfc578f0a7034017011d89a",
+    "SYMBOLS.json": "72022c6c2dce81b519442fa2f2a7c65541a4f3441a3a88b8f5d0cd218f485f54",
+    "CONTROLS.json": "0a89894859581d5aed7642b4e206199106d3a93a3e8336bd7a2ddc8a84e2fba7"
+  },
+  "checks": "Original collected file hashes/bytes/modes, appended14refs, same source/artifact beforeafter, native fresh:false profiles/actualflags, qualified sourceprojection, seven600keys, actual effect_owner/client_admission28all+28core including newhostcontext tests, fouroriginalcontrols+sixcapacity/provider readbacks, retries/recovery/joins and actual42Nodecontrols.",
+  "scope": "Independent read-only review of transferred original proofs; excluded remote source/artifact bytes are bound by original remote guards/transfer receipts, not newly copied or rehashed here. No remote actions/build/tests/workloads; functional readiness only, not a gain or fullP9 qualification. Original helper selection101 and earlier omission/resumes remain distinct."
+}

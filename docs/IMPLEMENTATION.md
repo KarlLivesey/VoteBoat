@@ -16,8 +16,9 @@ Linux's low-backlog capture separately identifies reconciliation. [480's pre-edi
 schema](../validation/performance/native480-admission/SCHEMA.md) scopes one optional
 temporary ready-admission context. Its local functional checks and full enabled
 strict hook pass, with no performance gain claimed.480 is published as
-`f7b0ef12709bb7e7aad4f0279851aa035b508e9e`; fresh Linux artifacts and functional
-controls pass, while scoped Mac qualification continues. [481's premeasurement
+`f7b0ef12709bb7e7aad4f0279851aa035b508e9e`; fresh Linux/Mac native artifacts and
+functional controls pass. Mac's separate missing client-runtime28/28 check closes
+the runner's scope gap without changing source or repeating workloads. [481's premeasurement
 schema](../validation/performance/native481-admission/SCHEMA.md) compares the
 immutable476 baseline with480, using2000/s loaded demand to avoid the earlier
 Mac offer ceiling. FileLogIo and

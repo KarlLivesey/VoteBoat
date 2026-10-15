@@ -1,0 +1,8 @@
+{
+  "exit": 0,
+  "helpers": 8,
+  "exact_source_archive_sha256": true,
+  "exact_helper_sha256_modes_lengths": true,
+  "published_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "scope": "Fresh1494 exact committed source files, fixtures, locks, build/config/hooks and contracts plus small qualification metadata/runner; no binaries/buildtrees/generated WAL."
+}

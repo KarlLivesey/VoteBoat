@@ -1,0 +1,24 @@
+{
+  "command": [
+    "/private/tmp/voteboat-mac480-f7b0ef1-mccmJS/artifacts/native/native_benchmark",
+    "/private/tmp/voteboat-mac480-f7b0ef1-mccmJS/control-wal/atomic-quic-q64-g2-w4096",
+    "quic",
+    "512",
+    "4096",
+    "2",
+    "--offered",
+    "128",
+    "--maintenance",
+    "2",
+    "--ready-items",
+    "64",
+    "--offered-capacity",
+    "4096",
+    "--publication",
+    "atomic",
+    "--group-weights",
+    "31,1"
+  ],
+  "exit": 0,
+  "elapsed_s": 5.848169832999999
+}

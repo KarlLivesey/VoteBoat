@@ -1,0 +1,48 @@
+{
+  "remote_job": "/private/tmp/voteboat-mac480-f7b0ef1-mccmJS",
+  "published_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "source_tar_sha256": "572c3caf449ce266aba24e4a63860f29d907bf6c5c576ce0648fe2401c9e321c",
+  "helpers": {
+    "run.sh": {
+      "sha256": "eda2ec75ca04f85bb40053c84a65f05edfb1097e2ebc39155df880bd71828e55",
+      "bytes": 5480,
+      "mode": "0o755"
+    },
+    "verify-source.py": {
+      "sha256": "88f32f5f7c36dd8ad72cd9e099a16a2c3da2695d7a6fca1915557ae19485cf63",
+      "bytes": 1661,
+      "mode": "0o644"
+    },
+    "collect-artifacts.py": {
+      "sha256": "5cddf62aba9de8d5db01f8abdd358a21b677f8bc3988e3ab39cb1324d4227e5b",
+      "bytes": 4981,
+      "mode": "0o644"
+    },
+    "controls.py": {
+      "sha256": "1115e0c423b2bc29cc382c0e777a24719995554304ab11cdbeef100976d1cc02",
+      "bytes": 5123,
+      "mode": "0o644"
+    },
+    "SOURCE.json": {
+      "sha256": "2f8b7b395ca1ff2dcfe40bf447a7f917024f4b260167cab9120780e5f6b06f95",
+      "bytes": 351750,
+      "mode": "0o644"
+    },
+    "source.sha256": {
+      "sha256": "a1bc5ef804401ab72b30b45403576e8da9e6ec8b1f168d229b06cd6fd00192ac",
+      "bytes": 152269,
+      "mode": "0o644"
+    },
+    "REQUIRED_COMMIT": {
+      "sha256": "ce2c16fdeb330cccc10dc1e2fca06cc41944d3159f908d3eb640dc53f0e87e1d",
+      "bytes": 41,
+      "mode": "0o644"
+    },
+    "ROOT_FINAL_INPUTS.json": {
+      "sha256": "80257fb3d5548da31e8f20980101e889d6a04fdccfe0c545b3c57cfaf8e5ad80",
+      "bytes": 236945,
+      "mode": "0o644"
+    }
+  },
+  "scope": "Fresh1494 exact committed source files, fixtures, locks, build/config/hooks and contracts plus small qualification metadata/runner; no binaries/buildtrees/generated WAL."
+}

@@ -1,0 +1,48 @@
+{
+  "exit": 0,
+  "failure": null,
+  "source_before_after_exact": true,
+  "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "source_inventory_sha256": "2f8b7b395ca1ff2dcfe40bf447a7f917024f4b260167cab9120780e5f6b06f95",
+  "before_sha256": "e6976334a9a40cf989f67d059625f243ea8516fcb76b0845e6b1640621f3ebd7",
+  "after_sha256": "e6976334a9a40cf989f67d059625f243ea8516fcb76b0845e6b1640621f3ebd7",
+  "checks": [
+    {
+      "name": "client_runtime_all",
+      "command": [
+        "/Users/karllivesey/.cargo/bin/cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "effect_owner",
+        "client_admission",
+        "--",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "elapsed_s": 11.0714695
+    },
+    {
+      "name": "client_runtime_core",
+      "command": [
+        "/Users/karllivesey/.cargo/bin/cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--test",
+        "effect_owner",
+        "client_admission",
+        "--",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "elapsed_s": 7.514942040999999
+    }
+  ],
+  "scope": "Only missing effect_owner client_admission all/core filters, sequential existing target-checks. Original27421 terminal0 remains its original scope; outbound admission8/core1 is separate. No source/native performance rebuild/workload/broad suite rerun."
+}

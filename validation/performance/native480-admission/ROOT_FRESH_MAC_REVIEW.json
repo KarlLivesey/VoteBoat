@@ -1,0 +1,7 @@
+{
+  "exit": 0,
+  "payloads": 213,
+  "selected": 209,
+  "manifest_sha256": "3d7f42d44e7512620ab7e2af8247630904064dfd5e25b59ef2fb0955589e563d",
+  "scope": "Root independent exact recursive archive seal and all original source bytes/hashes/lengths/modes/gzip roundtrips. Initial59191exit101,resume27421exit0,append36268exit0 remain distinct; no workload repeats or gain claim."
+}
