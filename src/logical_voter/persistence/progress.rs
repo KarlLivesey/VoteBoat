@@ -58,7 +58,7 @@ impl LogicalPersistencePort {
                 self.fenced = true;
                 self.held.push_back(WorkerEvent::Failed {
                     request: batch.ticket,
-                    units: batch.units.iter().map(|u| u.id).collect(),
+                    visits: batch.units.iter().map(|u| u.visit).collect(),
                     error: error.clone(),
                 });
                 return Err(error);
@@ -76,7 +76,7 @@ impl LogicalPersistencePort {
             return Err(StorageError::StaleTicket);
         };
         if origin.request != pending.batch.ticket
-            || origin.visit != unit.id.visit()
+            || origin.visit != unit.visit
             || update != &unit.update
             || generation != self.parent.generation
             || Some(observation.receipt().operation) != pending.operation
@@ -90,7 +90,7 @@ impl LogicalPersistencePort {
             self.fenced = true;
             self.held.push_back(WorkerEvent::Failed {
                 request: pending.batch.ticket,
-                units: pending.batch.units.iter().map(|u| u.id).collect(),
+                visits: pending.batch.units.iter().map(|u| u.visit).collect(),
                 error: StorageError::Rejected("committed logical mutation refusal"),
             });
             self.pending = None;
@@ -114,11 +114,11 @@ impl LogicalPersistencePort {
         };
         self.held.push_back(WorkerEvent::Written {
             request: pending.batch.ticket,
-            admissions: vec![(unit.id, ticket)],
+            admissions: vec![(unit.visit, ticket)],
         });
         self.held.push_back(WorkerEvent::Durable {
             request: pending.batch.ticket,
-            units: vec![unit.id],
+            visits: vec![unit.visit],
             completion: DurableLog {
                 tickets: vec![ticket],
             },

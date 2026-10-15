@@ -466,27 +466,20 @@ result checker refuses. Per-replica durations overlap, and adding them does not
 reconstruct client latency. Keep `--journal-timings` off for the original fixed
 serial acceptance gate.
 
-Current shared `storage.csv` records exact ticket dependencies and distinguishes
-synchronized1/1 sync/publication pairs,0/0 barriers and ambiguous I/O. Command
-counts include replica/retry observations; they are not completed client originals.
-Histogram bin65 is overflow. The checker also accepts the historical21-column
-format, whose missing dependency fields remain unavailable.
+The retained implementation emits the21-column `storage.csv` format. Archived
+470–472 experiments also contain an extended35-column format with exact ticket
+dependencies and synchronized1/1,0/0 and ambiguous I/O classifications. The checker
+accepts both; missing dependency fields in21-column data remain unavailable.
+Command counts include replica/retry observations, not completed client originals.
+Histogram bin65 is overflow.
 
-`barrier_pending_tickets` and `barrier_correlation_capacity_bytes` are snapshot
+In archived35-column data, `barrier_pending_tickets` and
+`barrier_correlation_capacity_bytes` are snapshot
 gauges and may decrease. Capacity belongs to the cloned pending-vector snapshot,
 not retained live-observer allocation or whole-process memory. The checker returns
 these as stage/replica observations separately from cumulative counter deltas;
 counter and histogram monotonicity, exact ticket conservation and physical barrier
 checks remain required. Nested elapsed times overlap and must not be added as CPU.
-
-An explicitly selected append window greater than one may fill within a single
-driver poll. All passes share the original step, scheduler-attempt, effect,
-retry, submission-attempt and worker-event allowances. The extra initial timer
-poll runs once; ordinary per-scheduler-attempt timer polling is retained. Available
-terminal worker events stop further filling, and cold/control work retains its
-scheduler order. Default depth1 retains its original single-pass cadence. Four
-queued units do not imply four units per physical barrier: actual synchronized
-grouping, completed originals/s, latency and refusals must be measured separately.
 
 Slice158 adds one successful60-second QUIC pause run with the original gate:
 group1's forced boundary11 is installed and retained across reopen, two new

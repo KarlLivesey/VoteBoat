@@ -858,9 +858,9 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current473: reject470+472 and restore the retained implementation | Remove an experiment that failed its measured retention checks | Completed both-host framework and native campaigns; [473 schema](../validation/performance/slice473/SCHEMA.md) and exact84-path plan | Publish complete Linux raw results; restore exact469 production/tests/examples/contracts and conformance assertions; preserve471 gauge checks and all experimental evidence; source/mode equality, scoped providers/matched/metadata/JS controls and full enabled strict hook | P9.0/P9.1/P9.2/P9.3 |
-| Next: reduce a remaining measured cost | Improve useful throughput by removing work or changing ownership/order | Checked473 restoration, existing current455 machine-readable CPU profile and rejection ledger | Review current symbols/contracts and unavoidable ownership; before-edit schema; focused checked implementation; fresh paired actual rates/latency before retention; no unsupported tuning or unchanged recapture | P9.0/P9.1/P9.2/P9.3 |
-| Following: full curve, sustainable headroom and composition qualification | Satisfy the entire performance objective beyond the current experiment | Retained measured improvements, qualified weighted fixture, source/artifact/host identities and stable maintenance | All seven required framework cells on both hosts with healthy margin; sustained memory/debt, durable applications/headroom/skew/fairness, independent placement/shared barriers and P8 composition; preserve every outcome/fence/retry | P9.0/P9.1/P9.2/P9.3/P9.4 |
+| Current474: isolate filesystem policy in the real durable service | Determine whether the current deployment amplifies sync/publication latency before changing formats | Checked473 restoration; [filesystem schema](../validation/performance/native474-filesystem/SCHEMA.md), immutable native455 artifact/proofs and fresh same-device default/NoCoW parents | Publish restoration, finish setup/independent review and quiet window; twelve actual TCP/QUIC paired cases with exact outcomes/recovery/maintenance, completed rates, latency/refusals and physical barrier data; archive every result | P9.0/P9.2/P9.3 |
+| Next475: bounded larger-window offered-load capacity sweep | Distinguish admission/backlog limits from actual durable capacity and batching | Filesystem results, explicit common client/shard budgets, current fixture window64 cap and independent validator | Before-edit schema; checked offered-only windows32/256/4096 with common budgets/readbacks and ready16; actual recovery/budget controls, fresh native artifacts; rotated low/mid/overload measurements including latency/refusals/drain and real observed widths | P9.0/P9.2/P9.3 |
+| Following476: select and qualify durable publication improvement | Remove measured sync/publication work while preserving acknowledged-prefix damage detection and recovery | Current filesystem/load/counter evidence; precise journal authority, corruption/crash model and public JournalIo contract | Explicit format/API/ownership/migration/old-new cleanup plan before edits; no silent latest-authority fallback; modeled write/sync/reclaim/restart/corruption cuts, native recovery and actual paired durable gain; keep full framework curve and all P8 performance obligations linked in the macro plan | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
 comparison or short diagnostics. All seven one-group healthy-margin cells on
@@ -34928,3 +34928,40 @@ full enabled strict hook, then publish; no baseline rebuild or profile recapture
 is needed. Full P9 remains active,8,422,500/s is a minimum not target, and no macro
 milestone closes. The previous goal turn only answered status and changed no
 source/evidence; this turn resumes the next available implementation action.
+
+
+[473 restoration qualification](../validation/performance/slice473/main/README.md)
+now passes:84 paths restored/removed together, whole1445 selected baseline inputs
+byte/mode exact before one focused inherited test-count correction. Actual ledger
+has42 reviewed contracts/402 operations, so three obsolete41/389 literals change;
+no production/inventory assertion is weakened. Provider42/27 and resumedmatched70
+pass; metadata39/storage9 and complete enabled strict hook0 pass with exact final
+source. The user pause interrupts the original matched build130; it is resumed
+only after the new native-service direction. All73 archived payloads/5 compressed
+originals independently match; original errors and inherited owner timeouts stay.
+Checked restoration publication is next, not a new performance claim.
+
+The user redirects the next measured work to real quorum-durable service costs.
+[474 schema](../validation/performance/native474-filesystem/SCHEMA.md) compares
+fresh default Btrfs with NoCoW on the SAME physical NVMe using one already-published
+455 native executable and fixed window64/ready16/500offers/s/active2smaintenance.
+Both parents are empty; chattr+ C succeeds only on the new NoCoW parent, and actual
+attributes are verified. Btrfs mount compress=zstd:1 and all3 replicas sharing one
+disk are recorded. No ext4/XFS filesystem is mounted for a controlled test; no
+device formatting/mount/global governor/sysctl change or tmpfs substitute occurs.
+NoCoW changes compression eligibility too, so no isolated-CoW claim follows.
+All twelve paired TCP/QUIC cases are prepared, not timed; no build/copy/check or
+publication competes with timing. Later windows256/4096 need explicit fixture,
+client64/group and shard240-data-item cap changes, not a bare CLI edit. Native
+32/128/512 offered-rate points will seek headroom; current rates include drain
+and refusals and are not an established device or engine capacity ceiling.
+
+The format audit rejects naive newest-valid acknowledgement-slot and last-valid
+WAL-marker fallback: both can hide damage to the final acknowledged authority.
+A duplex publication with both records durable before acknowledgement is only a
+candidate under an explicit crash/corruption model, costs two metadata syncs and
+has no assumed gain. Preserve independent high-water validation, valid complete
+unacknowledged suffix behavior, fencing, old/new cleanup and migration. Choose
+implementation only from the actual filesystem/load evidence. Framework
+throughput ratios are not CPU attribution or comparable durable capacity; full
+seven-cell/both-host sustained healthy margin and all P9 macro scope stay open.

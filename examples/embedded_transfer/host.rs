@@ -110,7 +110,6 @@ pub fn open(root: &str, tls: &Path, mode: NativeOpenMode) -> Result<HostNode, Fa
             entropy_seed: 17,
             limits: NodeLimits::default(),
             ready_visit_items: 16,
-            append_window: None,
             tls: check(
                 check(NativeTlsConfig::new(TlsCredentials {
                     roots: vec![material(&tls.join("ca.der"))?],

@@ -17,15 +17,11 @@ pub struct NativeMultiStartup {
 /// ordinary startup cleanup contract before reopening any returned files.
 pub type NativeMultiStartupRejected<A> = NativeStartupRejected<BTreeMap<GroupIdentity, A>>;
 impl NativeMultiStartup {
-    pub fn validate<A: ProposalAdmission + CheckpointStateMachine>(
+    pub fn validate<A: CheckpointStateMachine>(
         &self,
         applications: &BTreeMap<GroupIdentity, A>,
-    ) -> Result<(), NativeStartupError>
-    where
-        A::Receipt: ApplicationReceipt,
-    {
+    ) -> Result<(), NativeStartupError> {
         self.startup.validate_stores(&self.provisioned_stores)?;
-        validate_storage_selection(&self.startup, LogLimits::default())?;
         if self.startup.tls.wire_version() < 2
             || self.additional_groups.len() >= MAX_NATIVE_STARTUP_GROUPS
             || self.additional_groups.capacity() > MAX_NATIVE_STARTUP_GROUPS
@@ -63,7 +59,6 @@ impl NativeMultiStartup {
                 ));
             }
             let app = &applications[&bootstrap.group];
-            self.startup.validate_append_application(app)?;
             checked(app.validate_group(bootstrap.group))?;
             if app.applied_index() != 0 {
                 return Err(error(

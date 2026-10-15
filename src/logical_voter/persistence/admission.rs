@@ -27,21 +27,17 @@ impl LogicalPersistenceWorker {
         if units.len() != 1
             || units.iter().any(|u| {
                 u.update.group != self.mapping.parent
-                    || u.id.visit().group != self.mapping.parent
-                    || u.id.visit().owner.store != self.binding.store
-                    || u.id.visit().sequence == 0
-                    || u.id.effect.sequence == 0
+                    || u.visit.group != self.mapping.parent
+                    || u.visit.owner.store != self.binding.store
+                    || u.visit.sequence == 0
             })
         {
             return Err(WorkerError::WrongBinding);
         }
-        if units.iter().any(|unit| unit.id.append.is_some()) {
-            return Err(WorkerError::Unsupported);
-        }
         let (bytes, control) = batch_cost(units, capacity, self.limits)?;
         let reserved = bytes
             .checked_add(std::mem::size_of::<RetainedPersist>())
-            .and_then(|n| n.checked_add(std::mem::size_of::<PersistUnitId>()))
+            .and_then(|n| n.checked_add(std::mem::size_of::<crate::runtime::VisitTicket>()))
             .ok_or(WorkerError::BatchTooLarge)?;
         let ceiling = if control {
             self.limits.max_bytes
@@ -63,25 +59,25 @@ impl LogicalPersistenceWorker {
             && match &event {
                 WorkerEvent::Written { admissions, .. } => {
                     retained.written.is_none()
-                        && admissions.len() == retained.units.len()
+                        && admissions.len() == retained.visits.len()
                         && admissions
                             .iter()
-                            .zip(&retained.units)
+                            .zip(&retained.visits)
                             .all(|((v, t), original)| {
                                 v == original
                                     && t.binding == self.binding.store
-                                    && t.group == v.visit().group
+                                    && t.group == v.group
                             })
                 }
                 WorkerEvent::Durable {
-                    units, completion, ..
+                    visits, completion, ..
                 } => {
-                    units == &retained.units
+                    visits == &retained.visits
                         && retained.written.as_ref().is_some_and(|ticket| {
                             completion.tickets.as_slice() == std::slice::from_ref(ticket)
                         })
                 }
-                WorkerEvent::Failed { units, .. } => units == &retained.units,
+                WorkerEvent::Failed { visits, .. } => visits == &retained.visits,
             };
         if !valid {
             self.fenced = true;
@@ -105,7 +101,7 @@ impl LogicalPersistenceWorker {
         self.fenced = true;
         WorkerEvent::Failed {
             request: retained.ticket,
-            units: retained.units,
+            visits: retained.visits,
             error: StorageError::Uncertain(message.to_owned()),
         }
     }
@@ -137,7 +133,7 @@ impl PersistenceWorker for LogicalPersistenceWorker {
             binding: self.binding,
             sequence,
         };
-        let ids = units.iter().map(|u| u.id).collect();
+        let visits = units.iter().map(|u| u.visit).collect();
         self.outstanding.store(true, Ordering::Release);
         match self
             .sender
@@ -149,7 +145,7 @@ impl PersistenceWorker for LogicalPersistenceWorker {
                 self.sequence = sequence;
                 self.retained = Some(RetainedPersist {
                     ticket,
-                    units: ids,
+                    visits,
                     usage,
                     written: None,
                 });

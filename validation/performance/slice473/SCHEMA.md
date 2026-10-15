@@ -91,3 +91,12 @@ Full P9 stays active: all seven required one-group cells on both hosts, at least
 1.5×larger published/matched sustained floors (8,422,500/s batch4 is a minimum,
 not target), physical memory/debt, durable applications/headroom/fairness/skew,
 placement/shared barriers and P8 composition remain open. P10/Windows/Pi excluded.
+
+Post-restoration qualification finds a pre-existing stale count assertion in469:
+the actual restored ledger has42 reviewed contracts/402 operations, while its
+checker test expects41/389. The metadata checker succeeds;38 negative controls
+pass and only the count assertion fails. Correct the three literal expectations
+to42/402/42. This is the sole baseline-source exception, with all Rust/tests/
+examples/contracts byte-exact and471 preserved. Keep the prior exact-baseline
+proof and failed check; qualify the corrected snapshot without repeating passed
+provider42/27 or matched70 scopes.

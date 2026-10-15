@@ -1,0 +1,146 @@
+{
+  "commands": [
+    {
+      "command": [
+        "findmnt",
+        "-T",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux",
+        "--json",
+        "-o",
+        "TARGET,SOURCE,FSTYPE,OPTIONS"
+      ],
+      "exit": 0,
+      "stdout": "{\n   \"filesystems\": [\n      {\n         \"target\": \"/home/karllivesey/Documents/ChatGPT/VoteBoat\",\n         \"source\": \"/dev/nvme1n1p2[/@home/karllivesey/Documents/ChatGPT/VoteBoat]\",\n         \"fstype\": \"btrfs\",\n         \"options\": \"rw,nosuid,nodev,noatime,compress=zstd:1,ssd,discard=async,space_cache=v2,subvolid=257,subvol=/@home\"\n      }\n   ]\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "lsblk",
+        "-o",
+        "NAME,TYPE,FSTYPE,SIZE,MOUNTPOINTS"
+      ],
+      "exit": 0,
+      "stdout": "NAME        TYPE FSTYPE  SIZE MOUNTPOINTS\nsda         disk         3.7T \nsdb         disk           0B \nsdc         disk           0B \nsdd         disk           0B \nzram0       disk swap   60.5G [SWAP]\nnvme1n1     disk         1.8T \n\u251c\u2500nvme1n1p1 part vfat      4G /boot\n\u2514\u2500nvme1n1p2 part btrfs   1.8T /home/karllivesey/Documents/ChatGPT/VoteBoat/.git\n                              /home/karllivesey/Documents/ChatGPT/VoteBoat\n                              /home\n                              /root\n                              /var/cache\n                              /var/log\n                              /srv\n                              /var/tmp\n                              /\nnvme0n1     disk         1.8T \n\u2514\u2500nvme0n1p1 part btrfs   1.8T /mnt/storage\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "uname",
+        "-a"
+      ],
+      "exit": 0,
+      "stdout": "Linux core-karl 7.2.9-2-cachyos #1 SMP PREEMPT_DYNAMIC Thu, 08 Oct 2026 15:06:16 +0000 x86_64 GNU/Linux\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "lscpu"
+      ],
+      "exit": 0,
+      "stdout": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           48 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  16\nOn-line CPU(s) list:                     0-15\nVendor ID:                               AuthenticAMD\nModel name:                              AMD Ryzen 7 9800X3D 8-Core Processor\nCPU family:                              26\nModel:                                   68\nThread(s) per core:                      2\nCore(s) per socket:                      8\nSocket(s):                               1\nStepping:                                0\nMicrocode version:                       0xb404038\nFrequency boost:                         enabled\nCPU(s) scaling MHz:                      99%\nCPU max MHz:                             5271.6221\nCPU min MHz:                             603.3790\nBogoMIPS:                                9381.84\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd cppc arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid bus_lock_detect movdiri movdir64b overflow_recov succor smca fsrm avx512_vp2intersect flush_l1d amd_lbr_pmc_freeze\nVirtualization:                          AMD-V\nL1d cache:                               384 KiB (8 instances)\nL1i cache:                               256 KiB (8 instances)\nL2 cache:                                8 MiB (8 instances)\nL3 cache:                                96 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-15\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Mitigation; IBPB on VMEXIT only\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; STIBP always-on; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Mitigation; IBPB on VMEXIT\n",
+      "stderr": ""
+    }
+  ],
+  "settings": {
+    "/proc/sys/kernel/perf_event_paranoid": "2",
+    "/proc/sys/kernel/kptr_restrict": "2",
+    "/proc/sys/kernel/perf_event_mlock_kb": "516",
+    "/sys/devices/system/cpu/cpufreq/policy11": {
+      "scaling_governor": "powersave",
+      "energy_performance_preference": "balance_performance",
+      "scaling_driver": "amd-pstate-epp",
+      "affected_cpus": "11"
+    },
+    "/sys/devices/system/cpu/cpufreq/policy8": {
+      "scaling_governor": "powersave",
+      "energy_performance_preference": "balance_performance",
+      "scaling_driver": "amd-pstate-epp",
+      "affected_cpus": "8"
+    },
+    "/sys/devices/system/cpu/cpufreq/policy6": {
+      "scaling_governor": "powersave",
+      "energy_performance_preference": "balance_performance",
+      "scaling_driver": "amd-pstate-epp",
+      "affected_cpus": "6"
+    },
+    "/sys/devices/system/cpu/cpufreq/policy4": {
+      "scaling_governor": "powersave",
+      "energy_performance_preference": "balance_performance",
+      "scaling_driver": "amd-pstate-epp",
+      "affected_cpus": "4"
+    },
+    "/sys/devices/system/cpu/cpufreq/policy2": {
+      "scaling_governor": "powersave",
+      "energy_performance_preference": "balance_performance",
+      "scaling_driver": "amd-pstate-epp",
+      "affected_cpus": "2"
+    },
+    "/sys/devices/system/cpu/cpufreq/policy14": {
+      "scaling_governor": "powersave",
+      "energy_performance_preference": "balance_performance",
+      "scaling_driver": "amd-pstate-epp",
+      "affected_cpus": "14"
+    },
+    "/sys/devices/system/cpu/cpufreq/policy0": {
+      "scaling_governor": "powersave",
+      "energy_performance_preference": "balance_performance",
+      "scaling_driver": "amd-pstate-epp",
+      "affected_cpus": "0"
+    },
+    "/sys/devices/system/cpu/cpufreq/policy12": {
+      "scaling_governor": "powersave",
+      "energy_performance_preference": "balance_performance",
+      "scaling_driver": "amd-pstate-epp",
+      "affected_cpus": "12"
+    },
+    "/sys/devices/system/cpu/cpufreq/policy9": {
+      "scaling_governor": "powersave",
+      "energy_performance_preference": "balance_performance",
+      "scaling_driver": "amd-pstate-epp",
+      "affected_cpus": "9"
+    },
+    "/sys/devices/system/cpu/cpufreq/policy10": {
+      "scaling_governor": "powersave",
+      "energy_performance_preference": "balance_performance",
+      "scaling_driver": "amd-pstate-epp",
+      "affected_cpus": "10"
+    },
+    "/sys/devices/system/cpu/cpufreq/policy7": {
+      "scaling_governor": "powersave",
+      "energy_performance_preference": "balance_performance",
+      "scaling_driver": "amd-pstate-epp",
+      "affected_cpus": "7"
+    },
+    "/sys/devices/system/cpu/cpufreq/policy5": {
+      "scaling_governor": "powersave",
+      "energy_performance_preference": "balance_performance",
+      "scaling_driver": "amd-pstate-epp",
+      "affected_cpus": "5"
+    },
+    "/sys/devices/system/cpu/cpufreq/policy3": {
+      "scaling_governor": "powersave",
+      "energy_performance_preference": "balance_performance",
+      "scaling_driver": "amd-pstate-epp",
+      "affected_cpus": "3"
+    },
+    "/sys/devices/system/cpu/cpufreq/policy15": {
+      "scaling_governor": "powersave",
+      "energy_performance_preference": "balance_performance",
+      "scaling_driver": "amd-pstate-epp",
+      "affected_cpus": "15"
+    },
+    "/sys/devices/system/cpu/cpufreq/policy1": {
+      "scaling_governor": "powersave",
+      "energy_performance_preference": "balance_performance",
+      "scaling_driver": "amd-pstate-epp",
+      "affected_cpus": "1"
+    },
+    "/sys/devices/system/cpu/cpufreq/policy13": {
+      "scaling_governor": "powersave",
+      "energy_performance_preference": "balance_performance",
+      "scaling_driver": "amd-pstate-epp",
+      "affected_cpus": "13"
+    }
+  },
+  "topology": "All3 replica WALs on same physical NVMe; no deployment extrapolation. CPU policy remains unchanged acrosspairs; no causal attribution tofrequency."
+}

@@ -1,0 +1,13 @@
+{
+  "payloads": 73,
+  "gzip": 5,
+  "manifest_sha256": "caee3ccb282d71fccbb2b29c79dfec8c99bdf93aae6d40217be684d5aaec4e32",
+  "exactset_hashes_lossless_originals": "PASS",
+  "qualified1445source_bytes_modes": "PASS",
+  "all_rust_contracts_exact469": "PASS",
+  "single_exception": "validation/check-provider-conformance.test.mjs literal counts42/402",
+  "provider_all42_core27": "PASS",
+  "matched70": "PASS",
+  "metadata39_storage9": "PASS",
+  "strict_full_hook": "PASS"
+}

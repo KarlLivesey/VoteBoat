@@ -1,0 +1,59 @@
+{
+  "pid": 2,
+  "commands": [
+    [
+      "matched",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--manifest-path",
+        "benchmarks/matched/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "metadata",
+      [
+        "node",
+        "validation/check-provider-conformance.mjs"
+      ]
+    ],
+    [
+      "metadata-tests",
+      [
+        "node",
+        "--test",
+        "validation/check-provider-conformance.test.mjs"
+      ]
+    ],
+    [
+      "storage-tests",
+      [
+        "node",
+        "--test",
+        "validation/check-benchmark-storage.test.mjs"
+      ]
+    ],
+    [
+      "strict-hook",
+      [
+        ".githooks/pre-push"
+      ]
+    ]
+  ],
+  "start": "2026-10-15T07:27:30.992477+00:00",
+  "env": {
+    "CARGO_TARGET_DIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/checks",
+    "CARGO_BUILD_JOBS": "2",
+    "PROTOC": "/home/karllivesey/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/protobuf-build-0.14.1/bin/protoc-linux-x86_64",
+    "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice473/checks-resume/tmp",
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null,
+    "RUSTC_WRAPPER": null,
+    "RUSTC_WORKSPACE_WRAPPER": null
+  }
+}

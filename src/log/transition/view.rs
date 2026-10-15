@@ -77,9 +77,11 @@ impl<'a> LogView<'a> {
     }
     /// Prefix/tail were admitted by this owner; metadata describes their exact
     /// accepted version. This is not an unchecked public storage admission API.
+    #[cfg(test)]
     pub(crate) fn overlay(base: &'a GroupLog, tail: &'a [LogEntry], metadata: LogMetadata) -> Self {
         Self::trimmed_overlay(base, tail, metadata, 0)
     }
+    #[cfg(any(feature = "native", test))]
     pub(crate) fn trimmed_overlay(
         base: &'a GroupLog,
         tail: &'a [LogEntry],

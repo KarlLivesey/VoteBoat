@@ -27,7 +27,12 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         };
         let mut room = self.limits.reserved_bytes - self.reserved;
         if !control {
-            let bulk = self.bulk_reserved();
+            let bulk = self
+                .active
+                .values()
+                .filter(|a| !a.control)
+                .map(|a| a.reserved)
+                .sum::<usize>();
             room = room
                 .min((self.limits.reserved_bytes - self.limits.control_bytes).saturating_sub(bulk));
         }
@@ -77,9 +82,13 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             if reserved > self.limits.reserved_bytes - self.limits.control_bytes {
                 return self.fail(EffectOwnerError::ReservationTooLarge);
             }
-            let bulk_count =
-                self.visit_slots() - self.active.values().filter(|a| a.control).count();
-            let bulk_bytes = self.bulk_reserved();
+            let bulk_count = self.active.values().filter(|a| !a.control).count();
+            let bulk_bytes = self
+                .active
+                .values()
+                .filter(|a| !a.control)
+                .map(|a| a.reserved)
+                .sum::<usize>();
             fits &= bulk_count < self.limits.active_visits - self.limits.control_visits
                 && reserved
                     <= (self.limits.reserved_bytes - self.limits.control_bytes)
@@ -93,7 +102,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         }
         self.reserved += reserved;
         self.active.insert(
-            visit.sequence,
+            visit.group,
             Active {
                 visit,
                 received_from: None,
@@ -107,7 +116,6 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                 ready: false,
                 control,
                 read_captured: false,
-                append: None,
             },
         );
         Ok(true)

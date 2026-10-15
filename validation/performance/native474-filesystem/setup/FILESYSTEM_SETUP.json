@@ -1,0 +1,38 @@
+{
+  "commands": [
+    {
+      "command": [
+        "lsattr",
+        "-d",
+        "target/p9/native474-filesystem/linux/storage-default"
+      ],
+      "exit": 0,
+      "stdout": "---------------------- target/p9/native474-filesystem/linux/storage-default\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "chattr",
+        "+C",
+        "target/p9/native474-filesystem/linux/storage-nocow"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "default": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default",
+    "exit": 0,
+    "attributes": "---------------------- target/p9/native474-filesystem/linux/storage-default\n",
+    "stderr": "",
+    "empty": true
+  },
+  "nocow": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow",
+    "exit": 0,
+    "attributes": "---------------C------ target/p9/native474-filesystem/linux/storage-nocow\n",
+    "stderr": "",
+    "empty": true
+  }
+}

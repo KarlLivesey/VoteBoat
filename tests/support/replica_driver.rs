@@ -14,8 +14,6 @@
 // rights and limitations under the RPL.
 
 use super::*;
-#[path = "replica_driver/append_pump.rs"]
-mod append_pump;
 use support::outbound::HostOutbound;
 use voteboat::outbound::*;
 type Parts<'a> = ReplicaParts<'a, Ready, Timers, Entropy, Counter, HostWorker, HostOutbound>;

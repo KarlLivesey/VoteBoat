@@ -1,0 +1,23 @@
+storage measured deltas: append_calls=12 units=24 commands=36 mean_units=2.000 append_ms=0.000 barriers=12 mean_appends_per_barrier=1.000 mean_units_per_barrier=2.000 barrier_ms=0.000 sync_ms=0.000 publish_ms=0.000 histogram=2:12
+storage measured deltas: append_calls=12 units=24 commands=36 mean_units=2.000 append_ms=0.000 barriers=12 mean_appends_per_barrier=1.000 mean_units_per_barrier=2.000 barrier_ms=0.000 sync_ms=0.000 publish_ms=0.000 histogram=2:12 synchronized=6 no_io=6 ambiguous_io=0 dependency_correlation_complete=true
+storage measured deltas: append_calls=12 units=24 commands=36 mean_units=2.000 append_ms=0.000 barriers=12 mean_appends_per_barrier=1.000 mean_units_per_barrier=2.000 barrier_ms=0.000 sync_ms=0.000 publish_ms=0.000 histogram=2:12 synchronized=6 no_io=6 ambiguous_io=0 dependency_correlation_complete=true
+storage measured deltas: append_calls=12 units=24 commands=36 mean_units=2.000 append_ms=0.000 barriers=12 mean_appends_per_barrier=1.000 mean_units_per_barrier=2.000 barrier_ms=0.000 sync_ms=0.000 publish_ms=0.000 histogram=2:12 synchronized=6 no_io=3 ambiguous_io=3 dependency_correlation_complete=true
+storage measured deltas: append_calls=12 units=24 commands=36 mean_units=2.000 append_ms=0.000 barriers=12 mean_appends_per_barrier=1.000 mean_units_per_barrier=2.000 barrier_ms=0.000 sync_ms=0.000 publish_ms=0.000 histogram=2:12 synchronized=6 no_io=6 ambiguous_io=0 dependency_correlation_complete=false
+storage measured deltas: append_calls=0 units=0 commands=0 mean_units=NaN append_ms=0.000 barriers=0 mean_appends_per_barrier=NaN mean_units_per_barrier=NaN barrier_ms=0.000 sync_ms=0.000 publish_ms=0.000 histogram=1:0 synchronized=0 no_io=0 ambiguous_io=0 dependency_correlation_complete=true
+✔ historical21 remains supported with original physical barrier rules (5.629296ms)
+✔ current35 distinguishes logical barriers from physical synchronization (1.222106ms)
+✔ snapshot gauges may drain and remain observations rather than cumulative deltas (1.486071ms)
+✔ cumulative counters still cannot decline across valid local snapshots (0.963139ms)
+✔ ambiguous I/O remains explicit without inventing exact per-call pairs (1.206657ms)
+✔ missing/dropped metadata is visible and cannot establish full original correlation (1.392777ms)
+✔ overflow65 bins provide lower bounds rather than false exact widths (4.185673ms)
+✔ schema, bins, integer fields, classifications and exact conservation reject mutations (6.635696ms)
+✔ a histogram cannot lose an earlier bin across measurement snapshots (0.669818ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 26.81104

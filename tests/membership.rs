@@ -1702,23 +1702,6 @@ mod configuration_snapshots {
             .append_batch(vec![LogMutation::Update(mutation)])
             .is_err());
     }
-    fn snapshot_cost_unit_id(sender: StoreBinding) -> PersistUnitId {
-        PersistUnitId {
-            effect: EffectTicket {
-                visit: VisitTicket {
-                    owner: RuntimeOwner {
-                        store: sender,
-                        lane: ExecutionLaneId::new(1).unwrap(),
-                        generation: RuntimeGeneration::new(1).unwrap(),
-                    },
-                    group: group(1),
-                    sequence: 1,
-                },
-                sequence: 1,
-            },
-            append: None,
-        }
-    }
     #[test]
     fn snapshot_membership_cost_is_retained_by_worker_and_ingress_reservations() {
         let state = snapshot_cost_state();
@@ -1753,7 +1736,15 @@ mod configuration_snapshots {
         let (_, cost) = voteboat::outbound::message_cost(&message, 65536).unwrap();
         assert!(voteboat::outbound::message_cost(&message, cost - 1).is_err());
         let unit = PersistUnit {
-            id: snapshot_cost_unit_id(sender),
+            visit: VisitTicket {
+                owner: RuntimeOwner {
+                    store: sender,
+                    lane: ExecutionLaneId::new(1).unwrap(),
+                    generation: RuntimeGeneration::new(1).unwrap(),
+                },
+                group: group(1),
+                sequence: 1,
+            },
             update: LogUpdate {
                 group: group(1),
                 expected_revision: state.revision,
@@ -1778,7 +1769,7 @@ mod configuration_snapshots {
             batch_cost(std::slice::from_ref(&unit), 1, WorkerLimits::default()).unwrap();
         assert!(!control);
         let mut plain = PersistUnit {
-            id: unit.id,
+            visit: unit.visit,
             update: unit.update.clone(),
         };
         plain.update.snapshot_membership = None;
@@ -1793,7 +1784,7 @@ mod configuration_snapshots {
                 .retained_bytes()
         );
         let mut journal = PersistUnit {
-            id: unit.id,
+            visit: unit.visit,
             update: unit.update.clone(),
         };
         journal.update.snapshot = None;

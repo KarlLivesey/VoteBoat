@@ -127,7 +127,6 @@ fn configuration(root: &Path, g: u128, voters: &[u64], mode: NativeOpenMode) -> 
             entropy_seed: *n + g as u64,
             limits: NodeLimits::default(),
             ready_visit_items: 16,
-            append_window: None,
         })
         .collect()
 }

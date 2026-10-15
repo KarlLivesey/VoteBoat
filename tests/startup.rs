@@ -27,8 +27,6 @@ use voteboat::{
     quorum::*,
     runtime::*,
 };
-#[path = "startup/append_window.rs"]
-mod append_window;
 #[path = "startup/discovery.rs"]
 mod discovery;
 #[path = "startup/log_limits.rs"]
@@ -146,7 +144,6 @@ fn config(directory: PathBuf, mode: NativeOpenMode) -> NativeStartup {
         entropy_seed: 17,
         limits: NodeLimits::default(),
         ready_visit_items: 16,
-        append_window: None,
         tls: NativeTlsConfig::new(TlsCredentials {
             roots: vec![include_bytes!("fixtures/tls/ca.der").to_vec()],
             certificate_chain: vec![include_bytes!("fixtures/tls/node1.der").to_vec()],

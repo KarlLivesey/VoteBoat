@@ -1,0 +1,14 @@
+{
+  "command": [
+    "git",
+    "add",
+    "docs/IMPLEMENTATION.md",
+    "docs/P9.md",
+    "validation/performance/comparison472/linux",
+    "validation/performance/comparison472/LINUX_ARCHIVE_REVIEW.json",
+    "validation/performance/comparison472/LINUX_ROOT_ARCHIVE_REVIEW.json",
+    "validation/performance/slice473"
+  ],
+  "exit": 0,
+  "seconds": 0.04060367398778908
+}

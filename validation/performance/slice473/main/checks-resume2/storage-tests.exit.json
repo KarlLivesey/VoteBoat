@@ -1,0 +1,8 @@
+{
+  "command": [
+    "node",
+    "validation/check-benchmark-storage.test.mjs"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.04684585900395177
+}

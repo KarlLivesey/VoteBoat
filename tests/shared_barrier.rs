@@ -167,20 +167,14 @@ impl<L: LogStore> LogStore for Gated<L> {
 }
 fn unit<L: LogStore + Send + 'static>(w: &NativeLogWorker<L>, g: u64) -> Vec<PersistUnit> {
     vec![PersistUnit {
-        id: PersistUnitId {
-            effect: EffectTicket {
-                visit: VisitTicket {
-                    owner: RuntimeOwner {
-                        store: w.binding().store,
-                        lane: ExecutionLaneId::new(1).unwrap(),
-                        generation: RuntimeGeneration::new(1).unwrap(),
-                    },
-                    group: group(g.into()),
-                    sequence: g,
-                },
-                sequence: 1,
+        visit: VisitTicket {
+            owner: RuntimeOwner {
+                store: w.binding().store,
+                lane: ExecutionLaneId::new(1).unwrap(),
+                generation: RuntimeGeneration::new(1).unwrap(),
             },
-            append: None,
+            group: group(g.into()),
+            sequence: g,
         },
         update: LogUpdate {
             group: group(g.into()),
@@ -284,11 +278,11 @@ fn collect(
 fn queued_requests_share_one_barrier_but_keep_exact_results_and_credits() {
     let (mut w, g, _release) = host(WorkerLimits::default(), Reply::Reverse, false);
     let first = unit(&w, 2);
-    let first_unit_id = first[0].id;
+    let first_visit = first[0].visit;
     let mut second = unit(&w, 3);
-    second[0].id.effect.visit.owner.lane = ExecutionLaneId::new(2).unwrap();
-    second[0].id.effect.visit.owner.generation = RuntimeGeneration::new(2).unwrap();
-    let second_unit_id = second[0].id;
+    second[0].visit.owner.lane = ExecutionLaneId::new(2).unwrap();
+    second[0].visit.owner.generation = RuntimeGeneration::new(2).unwrap();
+    let second_visit = second[0].visit;
     let a = w.submit(first).unwrap();
     let b = w.submit(second).unwrap();
     release(&g, 1);
@@ -308,9 +302,9 @@ fn queued_requests_share_one_barrier_but_keep_exact_results_and_credits() {
         assert_eq!(
             actual[0].0,
             if request == a {
-                first_unit_id
+                first_visit
             } else {
-                second_unit_id
+                second_visit
             }
         );
         admissions.insert(request.sequence, actual[0].1);
@@ -323,7 +317,7 @@ fn queued_requests_share_one_barrier_but_keep_exact_results_and_credits() {
     for expected in [a, b] {
         let WorkerEvent::Durable {
             request,
-            units,
+            visits,
             completion,
         } = event(&mut w)
         else {
@@ -331,15 +325,15 @@ fn queued_requests_share_one_barrier_but_keep_exact_results_and_credits() {
         };
         assert_eq!(request, expected);
         assert_eq!(
-            units,
+            visits,
             vec![if request == a {
-                first_unit_id
+                first_visit
             } else {
-                second_unit_id
+                second_visit
             }]
         );
         assert_eq!(completion.tickets, vec![admissions[&request.sequence]]);
-        assert_eq!(units[0].visit().group, completion.tickets[0].group);
+        assert_eq!(visits[0].group, completion.tickets[0].group);
     }
     assert!(w.is_drained());
     let store = finish(w);
@@ -422,7 +416,7 @@ fn ready_window_unit_and_byte_bounds_cut_fifo_without_losing_deferred_work() {
         let mut limits = WorkerLimits::default();
         if bytes {
             limits.batch_bytes = std::mem::size_of::<PersistUnit>()
-                + 3 * std::mem::size_of::<PersistUnitId>()
+                + 3 * std::mem::size_of::<VisitTicket>()
                 + 2 * std::mem::size_of::<LogTicket>();
         } else {
             limits.batch_units = 2;

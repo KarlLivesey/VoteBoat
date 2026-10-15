@@ -2,9 +2,6 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 use crate::log::LogLimits;
-#[cfg(feature = "native")]
-mod advance_budget;
-mod append_window;
 mod fixture;
 mod routine;
 use fixture::*;

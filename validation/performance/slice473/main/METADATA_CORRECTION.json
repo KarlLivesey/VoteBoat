@@ -1,0 +1,8 @@
+{
+  "prior_resume_handle": 42795,
+  "terminal_exit": 1,
+  "matched70": 0,
+  "metadata_checker": 0,
+  "metadata_test_failure": "Inherited469 test expected41contracts/389operations; actual restored469 ledger has42/402.38negative controls pass, sole count assertion fails. Original --test wrapper hides nested details; direct diagnostic f407a2 exposes42!=41. Correct three constants only, preserve baseline byte-exact evidence as historical pre-correction.",
+  "production_source_changes": false
+}

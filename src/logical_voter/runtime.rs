@@ -98,7 +98,7 @@ impl<R: ApplicationReceipt, V> LogicalReplicaDriver<R, V> {
         S: ReadyScheduler,
         T: TimerService,
         E: ElectionEntropy,
-        A: ProposalAdmission<Receipt = R> + ReadableStateMachine<ReadResult = V>,
+        A: StateMachine<Receipt = R> + ReadableStateMachine<ReadResult = V>,
         W: PersistenceWorker,
         O: OutboundQueue,
     >(

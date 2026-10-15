@@ -40,20 +40,8 @@ pub struct ReclaimEvent {
 }
 #[derive(Debug)]
 pub struct PersistUnit {
-    pub id: PersistUnitId,
+    pub visit: VisitTicket,
     pub update: LogUpdate,
-}
-/// Exact host continuation and optional Core append-window correlation.
-/// Neither identity is durability evidence.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct PersistUnitId {
-    pub effect: EffectTicket,
-    pub append: Option<AppendUnitId>,
-}
-impl PersistUnitId {
-    pub fn visit(self) -> VisitTicket {
-        self.effect.visit
-    }
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum WorkerError {
@@ -77,16 +65,16 @@ pub struct WorkerRejected {
 pub enum WorkerEvent {
     Written {
         request: WorkerTicket,
-        admissions: Vec<(PersistUnitId, LogTicket)>,
+        admissions: Vec<(VisitTicket, LogTicket)>,
     },
     Durable {
         request: WorkerTicket,
-        units: Vec<PersistUnitId>,
+        visits: Vec<VisitTicket>,
         completion: DurableLog,
     },
     Failed {
         request: WorkerTicket,
-        units: Vec<PersistUnitId>,
+        visits: Vec<VisitTicket>,
         error: StorageError,
     },
 }
@@ -163,9 +151,7 @@ pub trait WorkerWake: Send + Sync {
     fn wake(&self);
 }
 /// Submit transfers an owned batch only on success. Rejection returns it whole.
-/// The default permits one outstanding accepted unit per group. An explicit
-/// immutable capability permits bounded successive requests; each atomic submit
-/// still contains at most one unit per group. Poll delivers
+/// At most one accepted unit per group remains outstanding. Poll delivers
 /// Written before Durable/Failed, with exact visit and store scopes. A terminal
 /// poll releases input/output credits; polling Written alone does not. Worker
 /// tickets are admissions, never durable prefixes. Closing drains accepted work;
@@ -176,12 +162,6 @@ pub trait PersistenceWorker {
     fn binding(&self) -> WorkerBinding;
     fn limits(&self) -> WorkerLimits;
     fn usage(&self) -> WorkerUsage;
-    /// Immutable same-group outstanding-unit bound in 1..=64, defaulting to one.
-    /// Successive requests remain subject to ordinary resource/admission limits;
-    /// this capability reserves no capacity and grants no durability evidence.
-    fn max_outstanding_units_per_group(&self) -> usize {
-        1
-    }
     fn submit(&mut self, units: Vec<PersistUnit>) -> Result<WorkerTicket, WorkerRejected>;
     fn poll(&mut self, limit: usize) -> Vec<WorkerEvent>;
     /// Immutable replacement-image ceiling for automatic maintenance, or None
@@ -209,7 +189,7 @@ pub trait PersistenceWorker {
 /// selected LogStore's separate budgets. Vector capacity is charged. Fixed
 /// completion/correlation metadata is reserved per unit before submission.
 pub(crate) const PERSIST_UNIT_METADATA: usize =
-    size_of::<PersistUnit>() + 3 * size_of::<PersistUnitId>() + 2 * size_of::<LogTicket>();
+    size_of::<PersistUnit>() + 3 * size_of::<VisitTicket>() + 2 * size_of::<LogTicket>();
 
 pub(crate) fn persist_payload_cost(update: &LogUpdate) -> Result<(usize, bool), WorkerError> {
     let mut bytes = 0usize;
@@ -256,7 +236,7 @@ pub fn batch_cost(
     let mut control = true;
     let mut groups = BTreeSet::new();
     for unit in units {
-        if unit.id.visit().group != unit.update.group || !groups.insert(unit.update.group) {
+        if unit.visit.group != unit.update.group || !groups.insert(unit.update.group) {
             return Err(WorkerError::WrongBinding);
         }
         let (payload, is_control) = persist_payload_cost(&unit.update)?;
@@ -282,15 +262,14 @@ pub fn submit_for_shard<Q: ReadyScheduler, W: PersistenceWorker>(
     units: Vec<PersistUnit>,
 ) -> Result<WorkerTicket, WorkerRejected> {
     for unit in &units {
-        if worker.binding().store != unit.id.visit().owner.store {
+        if worker.binding().store != unit.visit.owner.store {
             return Err(WorkerRejected {
                 reason: WorkerError::WrongBinding,
                 units,
             });
         }
-        let result = shard.with_persist_unit(unit.id, |core| match unit.id.append {
-            Some(id) => core.validate_append_effect(id, &unit.update),
-            None => core.validate_persist_effect(&unit.update),
+        let result = shard.with_core(unit.visit, |core| {
+            core.validate_persist_effect(&unit.update)
         });
         let error = match result {
             Err(e) => Some(WorkerError::Runtime(e)),
@@ -315,15 +294,14 @@ pub fn submit_for_timed<
     now: MonoTime,
 ) -> Result<WorkerTicket, WorkerRejected> {
     for unit in &units {
-        if worker.binding().store != unit.id.visit().owner.store {
+        if worker.binding().store != unit.visit.owner.store {
             return Err(WorkerRejected {
                 reason: WorkerError::WrongBinding,
                 units,
             });
         }
-        let result = shard.with_persist_unit(unit.id, now, |core| match unit.id.append {
-            Some(id) => core.validate_append_effect(id, &unit.update),
-            None => core.validate_persist_effect(&unit.update),
+        let result = shard.with_core(unit.visit, now, |core| {
+            core.validate_persist_effect(&unit.update)
         });
         let error = match result {
             Err(e) => Some(WorkerError::Runtime(e)),
@@ -341,123 +319,86 @@ pub fn submit_for_timed<
 /// queue admission or a wake into a durable Raft response. Failures fence before
 /// any further service; callers retain the error for outcome/recovery reporting.
 pub struct WorkerDelivery {
-    pub id: PersistUnitId,
+    pub visit: VisitTicket,
     pub result: Result<Vec<Effect>, WorkerError>,
-    pub retired_units: Option<Vec<AppendUnitId>>,
 }
 enum Task<'a> {
     Written(LogTicket),
     Durable(&'a DurableLog),
     Failed(&'a StorageError),
 }
-struct Applied {
-    effects: Vec<Effect>,
-    retired: Option<Vec<AppendUnitId>>,
-}
 impl Task<'_> {
-    fn apply(
-        self,
-        raft: &mut Raft,
-        id: PersistUnitId,
-        replicate: bool,
-    ) -> Result<Applied, RaftError> {
-        let mut retired = None;
-        let effects = match (self, id.append) {
-            (Self::Written(ticket), Some(unit)) if replicate => {
-                raft.replicate_admitted_append(unit, ticket)?
-            }
-            (Self::Written(ticket), Some(unit)) => {
-                raft.admitted_append(unit, ticket)?;
-                Vec::new()
-            }
-            (Self::Durable(completion), Some(unit)) => {
-                match raft.complete_append_unit(unit, completion)? {
-                    AppendCompletion::Waiting => Vec::new(),
-                    AppendCompletion::Retired { units, effects } => {
-                        retired = Some(units);
-                        effects
-                    }
-                }
-            }
-            (Self::Written(ticket), None) if replicate => raft.replicate_admitted(ticket)?,
-            (Self::Written(ticket), None) => {
+    fn apply(self, raft: &mut Raft) -> Result<Vec<Effect>, RaftError> {
+        match self {
+            Self::Written(ticket) => {
                 raft.admitted(ticket)?;
-                Vec::new()
+                Ok(vec![])
             }
-            (Self::Durable(completion), None) => raft.complete(completion)?,
-            (Self::Failed(error), _) => {
+            Self::Durable(completion) => raft.complete(completion),
+            Self::Failed(error) => {
                 raft.storage_failed();
-                return Err(RaftError::Storage(error.clone()));
+                Err(RaftError::Storage(error.clone()))
             }
-        };
-        Ok(Applied { effects, retired })
+        }
     }
 }
 fn deliver(
     event: WorkerEvent,
-    mut core: impl FnMut(PersistUnitId, Task<'_>) -> Result<Result<Applied, RaftError>, RuntimeError>,
+    mut core: impl FnMut(VisitTicket, Task<'_>) -> Result<Result<Vec<Effect>, RaftError>, RuntimeError>,
 ) -> Vec<WorkerDelivery> {
     let binding = event.request().binding.store;
     let mut results = Vec::new();
     match event {
         WorkerEvent::Written { admissions, .. } => {
-            for (id, ticket) in admissions {
-                if ticket.binding != binding || ticket.group != id.visit().group {
-                    results.push(WorkerDelivery {
-                        id,
-                        result: Err(WorkerError::WrongBinding),
-                        retired_units: None,
-                    });
+            for (visit, ticket) in admissions {
+                let result = if visit.owner.store != binding
+                    || ticket.binding != binding
+                    || ticket.group != visit.group
+                {
+                    Err(WorkerError::WrongBinding)
                 } else {
-                    results.push(delivery(id, Task::Written(ticket), binding, &mut core));
-                }
+                    core(visit, Task::Written(ticket))
+                        .map_err(WorkerError::Runtime)
+                        .and_then(|r| r.map_err(WorkerError::Consensus))
+                };
+                results.push(WorkerDelivery { visit, result });
             }
         }
         WorkerEvent::Durable {
-            units, completion, ..
+            visits, completion, ..
         } => {
-            for id in units {
-                results.push(delivery(id, Task::Durable(&completion), binding, &mut core));
+            for visit in visits {
+                let result = if visit.owner.store != binding {
+                    Err(WorkerError::WrongBinding)
+                } else {
+                    core(visit, Task::Durable(&completion))
+                        .map_err(WorkerError::Runtime)
+                        .and_then(|r| r.map_err(WorkerError::Consensus))
+                };
+                results.push(WorkerDelivery { visit, result });
             }
         }
-        WorkerEvent::Failed { units, error, .. } => {
-            for id in units {
-                results.push(delivery(id, Task::Failed(&error), binding, &mut core));
+        WorkerEvent::Failed { visits, error, .. } => {
+            for visit in visits {
+                let result = if visit.owner.store != binding {
+                    Err(WorkerError::WrongBinding)
+                } else {
+                    core(visit, Task::Failed(&error))
+                        .map_err(WorkerError::Runtime)
+                        .and_then(|r| r.map_err(WorkerError::Consensus))
+                };
+                results.push(WorkerDelivery { visit, result });
             }
         }
     }
     results
 }
-fn delivery(
-    id: PersistUnitId,
-    task: Task<'_>,
-    binding: StoreBinding,
-    core: &mut impl FnMut(PersistUnitId, Task<'_>) -> Result<Result<Applied, RaftError>, RuntimeError>,
-) -> WorkerDelivery {
-    let valid = id.visit().owner.store == binding && id.effect.sequence != 0;
-    let result = if valid {
-        core(id, task)
-            .map_err(WorkerError::Runtime)
-            .and_then(|r| r.map_err(WorkerError::Consensus))
-    } else {
-        Err(WorkerError::WrongBinding)
-    };
-    let (result, retired_units) = match result {
-        Ok(v) => (Ok(v.effects), v.retired),
-        Err(e) => (Err(e), None),
-    };
-    WorkerDelivery {
-        id,
-        result,
-        retired_units,
-    }
-}
 pub fn apply_to_shard<Q: ReadyScheduler>(
     shard: &mut Shard<Q>,
     event: WorkerEvent,
 ) -> Vec<WorkerDelivery> {
-    deliver(event, |id, task| {
-        shard.with_persist_unit(id, |core| task.apply(core, id, false))
+    deliver(event, |visit, task| {
+        shard.with_core(visit, |core| task.apply(core))
     })
 }
 pub fn apply_to_timed<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
@@ -465,10 +406,13 @@ pub fn apply_to_timed<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
     event: WorkerEvent,
     now: MonoTime,
 ) -> Vec<WorkerDelivery> {
-    deliver(event, |id, task| {
-        shard.with_persist_unit(id, now, |core| task.apply(core, id, false))
+    deliver(event, |visit, task| {
+        shard.with_core(visit, now, |core| task.apply(core))
     })
 }
+
+/// Physical owner continuation after independently reserving early output.
+/// The public helpers retain their original Written-only admission behavior.
 pub(crate) fn apply_to_timed_with_replication<
     Q: ReadyScheduler,
     T: TimerService,
@@ -477,9 +421,12 @@ pub(crate) fn apply_to_timed_with_replication<
     shard: &mut TimedShard<Q, T, E>,
     event: WorkerEvent,
     now: MonoTime,
-    mut replicate: impl FnMut(PersistUnitId) -> bool,
+    mut replicate: impl FnMut(VisitTicket) -> bool,
 ) -> Vec<WorkerDelivery> {
-    deliver(event, |id, task| {
-        shard.with_persist_unit(id, now, |core| task.apply(core, id, replicate(id)))
+    deliver(event, |visit, task| {
+        shard.with_core(visit, now, |core| match task {
+            Task::Written(ticket) if replicate(visit) => core.replicate_admitted(ticket),
+            other => other.apply(core),
+        })
     })
 }

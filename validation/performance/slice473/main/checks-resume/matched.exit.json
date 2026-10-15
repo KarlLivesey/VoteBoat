@@ -1,0 +1,15 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--manifest-path",
+    "benchmarks/matched/Cargo.toml",
+    "--locked",
+    "--offline",
+    "--",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "elapsed_s": 7.325438926985953
+}

@@ -1,0 +1,16 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--test",
+    "provider_conformance",
+    "--",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "elapsed_s": 9.282770788995549
+}

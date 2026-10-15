@@ -1,0 +1,10 @@
+{
+  "command": [
+    "git",
+    "push",
+    "origin",
+    "main"
+  ],
+  "exit": 0,
+  "seconds": 6.102405090990942
+}

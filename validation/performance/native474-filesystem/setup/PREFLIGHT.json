@@ -1,0 +1,26 @@
+{
+  "time": "2026-10-15T07:33:21.274406+00:00",
+  "actual_tcp_udp_binds": [
+    {
+      "kind": "1",
+      "bound": [
+        "127.0.0.1",
+        36787
+      ],
+      "passed": true
+    },
+    {
+      "kind": "2",
+      "bound": [
+        "127.0.0.1",
+        34148
+      ],
+      "passed": true
+    }
+  ],
+  "full_original_artifact_source_modes_compiler_validator_guards": "PASS",
+  "all12case_roots_absent": true,
+  "no_competing_build_check_benchmark_profile_processes": true,
+  "source_or_artifact_mutation": false,
+  "campaign_not_started": true
+}

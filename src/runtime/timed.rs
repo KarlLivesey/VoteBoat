@@ -571,49 +571,6 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
         self.check()?;
         self.shard.finish(visit)
     }
-    pub(crate) fn with_persist_unit<R>(
-        &mut self,
-        unit: crate::worker::PersistUnitId,
-        now: MonoTime,
-        f: impl FnOnce(&mut Raft) -> R,
-    ) -> Result<R, RuntimeError> {
-        self.check()?;
-        self.shard.observe(now)?;
-        let result = self.shard.with_persist_unit(unit, f)?;
-        self.refresh(unit.visit().group, now, false)?;
-        Ok(result)
-    }
-    pub(super) fn park_append_visit(&mut self, visit: VisitTicket) -> Result<(), RuntimeError> {
-        self.shard.park_append_visit(visit)
-    }
-    pub(super) fn seal_append_windows(&mut self) {
-        self.shard.seal_append_windows();
-    }
-    pub(super) fn activate_append_anchor(
-        &mut self,
-        visit: VisitTicket,
-    ) -> Result<(), RuntimeError> {
-        self.shard.activate_append_anchor(visit)
-    }
-    pub(super) fn finish_append_visits(&mut self, visit: VisitTicket) -> Result<(), RuntimeError> {
-        self.shard.finish_append_visits(visit)
-    }
-    pub(super) fn cancel_append_candidate(
-        &mut self,
-        visit: VisitTicket,
-    ) -> Result<(), RuntimeError> {
-        self.shard.cancel_append_candidate(visit)
-    }
-    pub(super) fn step_append_checked(
-        &mut self,
-        visit: VisitTicket,
-        now: MonoTime,
-        max_items: usize,
-        check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
-    ) -> Result<Option<(Stepped, AppendUnitId)>, RuntimeError> {
-        self.check()?;
-        self.shard.step_append_checked(visit, now, max_items, check)
-    }
     pub fn stop_group(&mut self, group: GroupIdentity) -> Result<Stopped, RuntimeError> {
         // Cleanup remains available after a provider fault. Invalidate queued
         // tokens before returning unresolved work even if cancellation fails.

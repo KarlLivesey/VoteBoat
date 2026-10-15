@@ -80,17 +80,6 @@ impl ConnectionBudget {
     fn retain(&mut self, node: NodeId, store: StoreIdentity) -> Result<(), RuntimeError> {
         add(&mut self.history, self.local, self.limit, node, store)
     }
-    fn covers(&self, node: NodeId, store: StoreIdentity) -> bool {
-        if node == self.local.node {
-            store == self.local.store.identity
-        } else {
-            self.history.get(&node) == Some(&store)
-                && self
-                    .provisioned
-                    .as_ref()
-                    .is_none_or(|peers| peers.get(&node) == Some(&store))
-        }
-    }
 }
 fn add(
     peers: &mut BTreeMap<NodeId, StoreIdentity>,
@@ -243,51 +232,9 @@ impl<Q: ReadyScheduler> Shard<Q> {
         event: &Event,
     ) -> Result<(), RuntimeError> {
         if let Some(budget) = &self.connection_budget {
-            if !self.covered_connection_event(budget, group, event) {
-                self.reserved_connections(budget, Some((group, event)), None)?;
-            }
+            self.reserved_connections(budget, Some((group, event)), None)?;
         }
         Ok(())
-    }
-    fn covered_connection_event(
-        &self,
-        budget: &ConnectionBudget,
-        group: GroupIdentity,
-        event: &Event,
-    ) -> bool {
-        let valid_core = |core: &Raft| {
-            core.local_node() == budget.local.node
-                && core.storage_binding() == budget.local.store
-                && !core.is_fenced()
-        };
-        if budget.local.store != self.owner.store
-            || !self
-                .groups
-                .values()
-                .filter(|group| !group.fenced)
-                .all(|group| !group.connection_validation_pending && valid_core(&group.core))
-        {
-            return false;
-        }
-        let Some(group) = self.groups.get(&group) else {
-            return false;
-        };
-        if group.fenced
-            || group.connection_validation_pending
-            || !valid_core(&group.core)
-            || matches!(event, Event::Receive(message)
-                if message.group != group.core.state().bootstrap.group
-                    || message.to != budget.local.node)
-        {
-            return false;
-        }
-        // Admission and every mutable Core access preserve the owned union.
-        // Exact history plus current provisioning means this input cannot add
-        // a reservation. Any uncertain guard uses the complete original path.
-        crate::raft::visit_event_connection_stores(event, |node, store| {
-            budget.covers(node, store).then_some(()).ok_or(())
-        })
-        .is_ok()
     }
     pub(super) fn retain_connection_history(
         &mut self,
@@ -305,8 +252,6 @@ impl<Q: ReadyScheduler> Shard<Q> {
         Ok(())
     }
 }
-#[cfg(test)]
-mod tests;
 pub(super) fn changes_connections(event: &Event) -> bool {
     matches!(event, Event::Configure(_))
         || matches!(event, Event::Receive(Message { rpc: Rpc::Append { entries, .. }, .. })

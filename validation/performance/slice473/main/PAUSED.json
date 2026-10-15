@@ -1,0 +1,51 @@
+{
+  "paused_at_user_request": true,
+  "time": "2026-10-15T07:18:39.218347+00:00",
+  "published_evidence_commit": "fa5abbbda8b2600907e6e78ecfada06ca0c4cd3a",
+  "restoration": "84 paths applied; whole1445 input byte/mode projection exact469; not committed",
+  "validation": {
+    "provider-all": {
+      "command": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "provider_conformance",
+        "--",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "elapsed_s": 27.79328527097823
+    },
+    "provider-core": {
+      "command": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--test",
+        "provider_conformance",
+        "--",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "elapsed_s": 9.282770788995549
+    },
+    "matched": "not completed",
+    "metadata": "not completed",
+    "metadata-tests": "not completed",
+    "storage-tests": "not completed",
+    "strict-hook": "not completed"
+  },
+  "interruption": {
+    "original_handle": 97350,
+    "actual_terminal_exit": 130,
+    "stage": "matched"
+  },
+  "resume": "Inspect original records; reuse successful provider scopes if hashes unchanged; finish interrupted matched check, metadata/storage controls and full strict hook; archive and publish restoration. Then select a source-level reduction from existing455 CPU evidence; do not recapture or retune rejected experiment."
+}

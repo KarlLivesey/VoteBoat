@@ -57,7 +57,7 @@ struct PersistBatch {
 }
 struct RetainedPersist {
     ticket: WorkerTicket,
-    units: Vec<PersistUnitId>,
+    visits: Vec<crate::runtime::VisitTicket>,
     usage: WorkerUsage,
     written: Option<LogTicket>,
 }
@@ -133,7 +133,7 @@ impl LogicalPersistencePort {
             update: unit.update.clone(),
             origin: PersistOrigin {
                 request: pending.batch.ticket,
-                visit: unit.id.visit(),
+                visit: unit.visit,
             },
         })
     }

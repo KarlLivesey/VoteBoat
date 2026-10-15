@@ -27,10 +27,6 @@ use crate::{
 use std::collections::{BTreeMap, BTreeSet};
 
 mod admitted_replication;
-mod append_window;
-pub use append_window::{
-    AppendCompletion, AppendRejected, AppendUnitId, AppendWindowLimits, StagedAppend,
-};
 mod batch_limits;
 pub use batch_limits::BatchLimits;
 mod completion;
@@ -351,9 +347,6 @@ pub struct Raft {
     request_sequence: u64,
     last_batch: u64,
     pending: Option<Pending>,
-    append_window_limits: Option<AppendWindowLimits>,
-    append_window: Option<append_window::Window>,
-    append_window_sequence: u64,
     read: Option<PendingRead>,
     ready_read: Option<ReadBarrier>,
     last_read_request: u64,
@@ -478,9 +471,6 @@ impl Raft {
             request_sequence: 0,
             last_batch: 0,
             pending: None,
-            append_window_limits: None,
-            append_window: None,
-            append_window_sequence: 0,
             read: None,
             ready_read: None,
             last_read_request: 0,
@@ -802,7 +792,6 @@ impl Raft {
     }
     fn has_persistence_dependency(&self) -> bool {
         self.pending.is_some()
-            || self.append_window.is_some()
             || self.staged_snapshot.is_some()
             || self.application_install.is_some()
             || self.checkpoint_requested.is_some()
@@ -822,7 +811,6 @@ impl Raft {
         self.clear_replication_authority();
         self.fenced = true;
         self.pending = None;
-        self.append_window = None;
         self.staged_snapshot = None;
         self.staged_snapshot_repair = false;
         self.application_install = None;
@@ -1093,9 +1081,6 @@ impl Raft {
         self.admitted(ticket)
     }
     pub fn admitted(&mut self, ticket: LogTicket) -> Result<(), RaftError> {
-        if self.append_window.is_some() {
-            return Err(RaftError::Busy);
-        }
         if self.fenced {
             return Err(RaftError::Fenced);
         }
@@ -1124,9 +1109,6 @@ impl Raft {
         &mut self,
         completion: &DurableLog,
     ) -> Result<PreparedCompletion, RaftError> {
-        if self.append_window.is_some() {
-            return Err(RaftError::Busy);
-        }
         if self.fenced {
             return Err(RaftError::Fenced);
         }
@@ -1924,7 +1906,6 @@ mod authority;
 mod batched_repair;
 #[path = "raft/connections.rs"]
 mod connections;
-pub(crate) use connections::visit_event_connection_stores;
 mod joint_repair;
 #[cfg(feature = "native")]
 pub(crate) mod request_window;

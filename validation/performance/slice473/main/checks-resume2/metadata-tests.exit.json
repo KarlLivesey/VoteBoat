@@ -1,0 +1,8 @@
+{
+  "command": [
+    "node",
+    "validation/check-provider-conformance.test.mjs"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.16423562800628133
+}

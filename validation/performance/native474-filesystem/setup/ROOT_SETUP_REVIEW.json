@@ -1,0 +1,9 @@
+{
+  "same_source_artifact_all12cases": true,
+  "all_case_roots_absent": true,
+  "prepared_actual_file_attributes": "default noC/nocowC;noexistingdatachanged",
+  "post_review_fix": "Post-run parse every captured regular file C flag, require >=3 WAL files perarm, fail certification without rerun on mismatch. Frozen READY driverSHAupdated.",
+  "combined_policy_scope": "NoCoW disables CoW/filesystemdataCRC/compression; engine WALCRC/recovery/syncprotocolunchanged.",
+  "preflight": "768a0e actual0 fulloriginalguards/socketbinds/nojobs",
+  "timing_started": false
+}

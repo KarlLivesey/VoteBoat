@@ -6,13 +6,13 @@ use std::mem::size_of;
 
 #[derive(Clone, Copy)]
 pub(super) struct AdmittedRange {
-    pub(super) ticket: LogTicket,
-    pub(super) context: RequestContext,
+    ticket: LogTicket,
+    context: RequestContext,
 }
 #[derive(Clone, Copy)]
 pub(super) struct EmptyAppendAlias {
-    pub(super) original: Replication,
-    pub(super) successor: RequestContext,
+    original: Replication,
+    successor: RequestContext,
 }
 impl Raft {
     /// Additional bounded early-output reservation before exact append admission.
@@ -138,7 +138,7 @@ impl Raft {
         })?;
         (bytes <= self.limits.max_batch_bytes).then_some(suffix)
     }
-    pub(super) fn early_peer(&self, peer: NodeId) -> bool {
+    fn early_peer(&self, peer: NodeId) -> bool {
         let tip = self.durable.last_index();
         if peer == self.node
             || self.progress.get(&peer).is_none_or(|index| *index < tip)
@@ -183,16 +183,6 @@ impl Raft {
         index: u64,
     ) -> Option<&LogEntry> {
         let range = self.admitted_ranges.get(&peer)?;
-        if let Some(window) = &self.append_window {
-            let unit = window
-                .units
-                .iter()
-                .find(|unit| unit.ticket == Some(range.ticket))?;
-            if range.context != sent.context {
-                return None;
-            }
-            return unit.next.entry_at(index);
-        }
         let pending = self.pending.as_ref()?;
         let metadata = pending.next.metadata();
         if range.context != sent.context

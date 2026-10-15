@@ -1,0 +1,7 @@
+{
+  "command": [
+    ".githooks/pre-push"
+  ],
+  "exit": 0,
+  "elapsed_s": 86.23985227997764
+}

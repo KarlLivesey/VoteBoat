@@ -148,7 +148,6 @@ pub fn configuration(
         entropy_seed: id * 17,
         limits: NodeLimits::default(),
         ready_visit_items: 16,
-        append_window: None,
     };
     let mut config = NativeMemberStartup {
         startup: config,

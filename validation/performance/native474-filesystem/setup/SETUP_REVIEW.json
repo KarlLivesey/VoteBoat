@@ -1,0 +1,63 @@
+{
+  "scope": "Read-only setup audit; no campaign/guard imported or executed and no workload/build/test/attribute change",
+  "config_sha256": "3d7ac8dd59ed5cdfcd1b44285a8c68ba0b546690e490fd6765b33ce221ee7f6a",
+  "driver_sha256": "b13933ea469fd874eba57511ece48f1ed38dbeee631ccd0c5c826c8820b4781f",
+  "reviewed_inputs": {
+    "prepare.py": "c662411fd8e024201a0a8103bde972279477b363cc112ed51c709113db2f290f",
+    "READY.json": "ea42db7611faba5db65fcbdcb821f9f422bfda3eaa2174bba8cf35e37d8bcafb",
+    "FILESYSTEM_SETUP.json": "dca946b957b1db414e7ef881cd2a4d4d9dcd35fd9f6cd62be41bbebb41b2f752",
+    "HOST_SETUP.json": "0e0786d997a1fc4db327fef2de13fcdc06a45bdee0062ecd801128e3f2577dd6"
+  },
+  "passed": {
+    "same_full_artifact_roles": true,
+    "source_files_sha_physical_modes": 1420,
+    "fresh_native_root_and_example_profiles_original_copy": true,
+    "compiler_profile_control_hashes": true,
+    "exact12_commands_and_absent_unique_case_roots": true,
+    "same_stat_device": true,
+    "orders": {
+      "tcp1": [
+        "default",
+        "nocow"
+      ],
+      "tcp2": [
+        "nocow",
+        "default"
+      ],
+      "tcp3": [
+        "default",
+        "nocow"
+      ],
+      "quic1": [
+        "nocow",
+        "default"
+      ],
+      "quic2": [
+        "default",
+        "nocow"
+      ],
+      "quic3": [
+        "nocow",
+        "default"
+      ]
+    },
+    "python_ast_parse": true,
+    "current_parent_directories_empty": {
+      "default": true,
+      "nocow": true
+    }
+  },
+  "findings": [
+    {
+      "severity": "focused_completion_required",
+      "issue": "After workloads campaign captures recursive lsattr and checks its exit, but does not assert each actual log.wal/MANIFEST has role-appropriate C attribute. Parent C alone is insufficient final certification. Parse captured attributes and fail filesystem certification if inherited policy differs; preserve workloads/no rerun. No extra pilot needed."
+    },
+    {
+      "severity": "reporting_scope",
+      "issue": "NoCoW changes combined CoW/compression/filesystem data-checksumming behavior; native WAL/application integrity checks remain unchanged. Do not call this isolated CoW, equivalent filesystem checksumming, engine improvement or three-device capacity."
+    }
+  ],
+  "launch_gate": "Only after473 fullhook/publication actualEND and all other owned checks/copies ended plus root explicit quiet grant; no timing performed by review",
+  "measurement_limits": "Single offered500/s point; refusals and drain/maintenance retained. Nested publication/sync/barrier are wall intervals not additive CPU; whole-command RSS is not memory plateau. Exact width not implied by64configuredwindow.",
+  "controls_note": "Frozen455 legacy21-field storage validator matches the same455 executable legacy CSV. Current471 gauge correction applies to the newer extended observer; no need to substitute it or rerun old controls for this legacy artifact."
+}

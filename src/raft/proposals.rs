@@ -108,20 +108,6 @@ impl Raft {
         proposals: &[Proposal],
         capacity: usize,
     ) -> Result<u64, RaftError> {
-        self.validate_proposal_batch_at(
-            proposals,
-            capacity,
-            self.durable.entries.len(),
-            self.durable.last_index(),
-        )
-    }
-    pub(super) fn validate_proposal_batch_at(
-        &self,
-        proposals: &[Proposal],
-        capacity: usize,
-        entries_len: usize,
-        last_index: u64,
-    ) -> Result<u64, RaftError> {
         let count = proposals.len();
         if count == 0 || count > self.batch_limits.max_proposal_entries {
             return Err(StorageError::Rejected("proposal count budget").into());
@@ -129,13 +115,20 @@ impl Raft {
         if capacity > self.batch_limits.max_proposal_entries {
             return Err(StorageError::Rejected("proposal allocation count budget").into());
         }
-        if entries_len
+        if self
+            .durable
+            .entries
+            .len()
             .checked_add(count)
             .is_none_or(|n| n > self.limits.max_entries_per_group)
         {
             return Err(StorageError::Rejected("proposal retained entry budget").into());
         }
-        let first = last_index.checked_add(1).ok_or(RaftError::Exhausted)?;
+        let first = self
+            .durable
+            .last_index()
+            .checked_add(1)
+            .ok_or(RaftError::Exhausted)?;
         first
             .checked_add(count as u64 - 1)
             .ok_or(RaftError::Exhausted)?;
@@ -161,7 +154,7 @@ impl Raft {
         }
         Ok(first)
     }
-    pub(super) fn validate_conversion_peak(
+    fn validate_conversion_peak(
         &self,
         proposals: &[Proposal],
         capacity: usize,

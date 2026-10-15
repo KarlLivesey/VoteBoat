@@ -2,8 +2,6 @@
 // Copyright (c) 2026 Karl Livesey
 #[path = "provider_conformance/admission.rs"]
 mod admission_cases;
-#[path = "provider_conformance/append_window.rs"]
-mod append_window_cases;
 #[path = "provider_conformance/application.rs"]
 mod application_cases;
 #[path = "provider_conformance/buffer.rs"]

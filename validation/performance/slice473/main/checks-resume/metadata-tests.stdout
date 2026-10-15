@@ -1,0 +1,15 @@
+✖ validation/check-provider-conformance.test.mjs (158.816006ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 163.411771
+
+✖ failing tests:
+
+test at validation/check-provider-conformance.test.mjs:1:1
+✖ validation/check-provider-conformance.test.mjs (158.816006ms)
+  'test failed'

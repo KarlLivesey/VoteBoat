@@ -483,28 +483,6 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         now: MonoTime,
         limit: usize,
         application: impl Fn(GroupIdentity) -> Option<&'a A>,
-        configuration: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
-    ) -> Result<Vec<OwnerStep>, ClientError> {
-        self.advance_budgeted(
-            owner,
-            now,
-            &mut ReadyAdvanceBudget::new(limit),
-            application,
-            configuration,
-        )
-    }
-    pub(super) fn advance_budgeted<
-        'a,
-        A: ProposalAdmission<Receipt = R> + 'a,
-        Q: ReadyScheduler,
-        T: TimerService,
-        E: ElectionEntropy,
-    >(
-        &mut self,
-        owner: &mut EffectOwner<Q, T, E>,
-        now: MonoTime,
-        budget: &mut ReadyAdvanceBudget,
-        application: impl Fn(GroupIdentity) -> Option<&'a A>,
         mut configuration: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
     ) -> Result<Vec<OwnerStep>, ClientError> {
         if owner.identity() != self.binding.owner
@@ -513,11 +491,10 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
             return Err(ClientError::WrongBinding);
         }
         let steps = owner
-            .advance_batch_budgeted(
+            .advance_batch_authorized(
                 now,
-                budget,
+                limit,
                 |group| application(group).is_some_and(ProposalAdmission::supports_ready_batch),
-                |group| application(group).is_some_and(ProposalAdmission::supports_append_window),
                 |core, event, prefix| {
                     self.check_ready_execution(
                         core,
