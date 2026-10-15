@@ -1,0 +1,16 @@
+{
+  "reviewer": "root",
+  "manifest_sha256": "f4abb2001914efe0ed95afc4f9d05979d6d2a5ced7dfe6be300e25f8e95bdbdb",
+  "exact_recursive_payloads": 253,
+  "all_payload_hashes": "PASS",
+  "lossless_container_original_hashes_and_lengths": 15,
+  "raw_reports_results_exact": 24,
+  "actual_counts_requests_all_three_frontiers_exits": "PASS",
+  "all_variant_medians_recomputed": "PASS",
+  "initial_inspection_failure": {
+    "tool_chunk": "4dfd86",
+    "exit": 1,
+    "reason": "Readback asked for plain RESULTS.json; archive losslessly gzip-packs it. Reader now resolves packed paths. No workload/data mutation."
+  },
+  "scope": "Independent readback of archived actual data; no workload or setup rerun."
+}

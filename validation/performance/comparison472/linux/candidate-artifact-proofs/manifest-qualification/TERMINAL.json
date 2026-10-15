@@ -1,0 +1,14 @@
+{
+  "actual_exit": 0,
+  "source_unchanged": true,
+  "source_inputs": 1467,
+  "elapsed_s": 32.1927289290179,
+  "end": "2026-10-15T06:28:07.110609+00:00",
+  "scope": "Narrow frozen-source standalone matched suite covers previously omitted manifest/lock under full source+mode inventory; no root suite or release artifact rebuilt.",
+  "original_handle": 75425,
+  "tests_passed": 70,
+  "tests_failed": 0,
+  "full_source_before_after_equal": true,
+  "source_before_sha256": "048e6cb6b4f17c384fb4df410e9b28b32bdbbe8d7cd000f3733837cd293a7e54",
+  "source_after_sha256": "048e6cb6b4f17c384fb4df410e9b28b32bdbbe8d7cd000f3733837cd293a7e54"
+}

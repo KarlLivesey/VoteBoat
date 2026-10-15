@@ -1,0 +1,11 @@
+--- comparison468/phase-diagnostic.sh
++++ comparison472/phase-diagnostic.sh
+@@ -1,6 +1,7 @@
+ #!/usr/bin/env bash
+-# Exact455 baseline versus qualified468; never builds or changes source.
++# Exact455 baseline versus whole470+472 release; not isolated native pump; never builds or changes source.
+ set -euo pipefail
++export PYTHONDONTWRITEBYTECODE=1
+ job=${MATCHED_JOB:?prepared identity/driver directory required}
+ config=${1:?CONFIG_PAIR.json required}
+ out=${2:?fresh diagnostic directory required}

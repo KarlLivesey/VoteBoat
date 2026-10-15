@@ -1,0 +1,11 @@
+{
+  "original_handle": 66317,
+  "actual_exit": 0,
+  "original_terminal_tool_chunk": "650570",
+  "stage": "ALL_TIMING_END",
+  "bulk_cases": 12,
+  "singleton_cases": 12,
+  "failures": 0,
+  "observed_end": "2026-10-15T07:03:14.507670+00:00",
+  "scope": "Both original cells and before/after artifact/source/observer/outcome checks ended. All24 original cases preserved; no workload repeated. Linux quiet released for analysis/collection."
+}

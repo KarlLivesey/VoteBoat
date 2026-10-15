@@ -1,0 +1,93 @@
+{
+  "state": "PREPARATION_ONLY_CANDIDATE_ARTIFACT_CLI_PENDING",
+  "candidate_required_commit": "de5a7221e49c89771dd3cd22a0b904966b1f4789",
+  "candidate_expected_job": "target/p9/matched472-linux-attempt2",
+  "failed_first_job": "target/p9/matched472-linux",
+  "failed_first_exit": 101,
+  "baseline_commit": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "baseline_executable_sha256": "d567532226a5e7fa7d150b9fd905ffcff4c97905143e4a15ed8e477cd032755f",
+  "scope": "retained455 versus whole470+472 framework release, not isolated native pump; only two selected cells, no full P9 acceptance",
+  "syntax": {
+    "python_AST_actual_exit": 0,
+    "python_files": [
+      "prepare-pair.py",
+      "artifact-guard.py",
+      "phase-diagnostic-check.py",
+      "summarize.py"
+    ],
+    "bash_n_actual_exit": 0,
+    "bash_files": [
+      "linux-run.sh",
+      "phase-diagnostic.sh"
+    ]
+  },
+  "checker_reuse": {
+    "byte_identical_comparison468": true,
+    "sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "phases": 29,
+    "scopes": 4,
+    "methods": 15,
+    "actual472CLI_validated": false
+  },
+  "cases": {
+    "bulk": {
+      "trials": 3,
+      "clients": 4096,
+      "batch": 4,
+      "requested": 20000000,
+      "actual": 19988480,
+      "cases": 12
+    },
+    "singleton": {
+      "trials": 3,
+      "clients": 1,
+      "batch": 1,
+      "requested": 1048576,
+      "actual": 1048576,
+      "cases": 12
+    },
+    "warmup": 1024,
+    "rotations": [
+      [
+        "baseline",
+        "candidate",
+        "on",
+        "openraft"
+      ],
+      [
+        "openraft",
+        "baseline",
+        "candidate",
+        "on"
+      ],
+      [
+        "on",
+        "openraft",
+        "baseline",
+        "candidate"
+      ]
+    ]
+  },
+  "scripts_sha256": {
+    "target/p9/comparison472/SCHEMA.md": "0b52703a68dfa45456e66e8b74b7f88c57d38b995673c712314b431dd419bac6",
+    "target/p9/comparison472/BASELINE_CONFIG.linux.json": "29f795229f57170052916d4c77a1b599b00ef15ee5d01af6a8cb7094b8f40d75",
+    "target/p9/comparison472/REQUIRED_COMMIT.txt": "1b2016231d3824c376e88de10be3881782aae90fbc7eea9191a2366fd4f541e3",
+    "target/p9/comparison472/prepare-pair.py": "657552046e04714aa2ce8fe69f714fa0fb2f61696638b7ab29614bff27344564",
+    "target/p9/comparison472/artifact-guard.py": "47a10d85c1439158ad985db7358b5b666255e1c93531b5537b86f184e0773555",
+    "target/p9/comparison472/phase-diagnostic.sh": "db41e2519163994d50bc0a299774810450c4e6b343a0d01a7b7d681018ef38a5",
+    "target/p9/comparison472/phase-diagnostic-check.py": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "target/p9/comparison472/linux-run.sh": "5f0c59a73e1d582b2718f0b52d56626e3724cb4cac601a4961358ccdcd9ec4b1",
+    "target/p9/comparison472/summarize.py": "13eb3858fedb077357b867dc13aadab6658408baf74ed50b72e34a250b8fdc6e"
+  },
+  "deferred": [
+    "actual passed fresh attempt2 build and4 compiler records/rootbuildscript/DWP/source/compiler hashes",
+    "original OFF/ON/OpenRaft CLI controls +currentcheckerproof +required frozen-source standalone70",
+    "CURRENT_CLI_CHECKER.json bound to actual original evidence",
+    "prepare-pair.py execution and CONFIG_PAIR/PAIR_SETUP_READY creation",
+    "actual artifact guard/CLI output validation and separate root quiet grant"
+  ],
+  "timing_authorized": false,
+  "actual_prepare_pair_executed": false,
+  "actual_build_test_CLI_or_workload_executed_by_this_preparation": false,
+  "refusal_execution": "Not executed: AST/bash checks only. Source preconditions refuse missing/failed build/CLI evidence before CONFIG creation."
+}

@@ -1,0 +1,12 @@
+[
+  "python3",
+  "target/p9/comparison472/prepare-pair.py",
+  "--baseline-config",
+  "target/p9/comparison472/BASELINE_CONFIG.linux.json",
+  "--baseline-job",
+  "target/p9/matched455-linux",
+  "--candidate-job",
+  "target/p9/matched472-linux-attempt2",
+  "--output",
+  "target/p9/comparison472/CONFIG_PAIR.linux.json"
+]

@@ -858,8 +858,8 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: publish fresh/native evidence and finish framework comparisons | Resolve the measured tradeoff using useful completions and common-path controls | Published472, [fresh Linux proof](../validation/performance/pipeline472/fresh-linux/README.md), [native24-case results](../validation/performance/comparison472-native/linux/README.md), completed Mac472 qualification and prepared framework drivers | Archive every failure/raw tail with exact identities; push through enabled hook; finish original Linux/Mac20M bulk and1M singleton campaigns in quiet windows; exact original outcomes/frontiers/observer scopes and source/artifact guards | P9.0/P9.1/P9.2/P9.3 |
-| Next: retain or reject the complete measured change and target the remaining cost | Increase useful capacity without another unsupported tuning family | Both-host framework outcomes plus native mixed rates/tails/rare sharing, preserved experiment ledger and typed contracts | Make an explicit source retention/restoration decision; if further optimization is justified, use current machine-readable CPU/wait/algorithm evidence and a before-edit ownership/restart/budget schema; checked focused implementation, fresh paired actual rates/latency and all strict checks | P9.0/P9.1/P9.2/P9.3 |
+| Current473: reject470+472 and restore the retained implementation | Remove an experiment that failed its measured retention checks | Completed both-host framework and native campaigns; [473 schema](../validation/performance/slice473/SCHEMA.md) and exact84-path plan | Publish complete Linux raw results; restore exact469 production/tests/examples/contracts and conformance assertions; preserve471 gauge checks and all experimental evidence; source/mode equality, scoped providers/matched/metadata/JS controls and full enabled strict hook | P9.0/P9.1/P9.2/P9.3 |
+| Next: reduce a remaining measured cost | Improve useful throughput by removing work or changing ownership/order | Checked473 restoration, existing current455 machine-readable CPU profile and rejection ledger | Review current symbols/contracts and unavoidable ownership; before-edit schema; focused checked implementation; fresh paired actual rates/latency before retention; no unsupported tuning or unchanged recapture | P9.0/P9.1/P9.2/P9.3 |
 | Following: full curve, sustainable headroom and composition qualification | Satisfy the entire performance objective beyond the current experiment | Retained measured improvements, qualified weighted fixture, source/artifact/host identities and stable maintenance | All seven required framework cells on both hosts with healthy margin; sustained memory/debt, durable applications/headroom/skew/fairness, independent placement/shared barriers and P8 composition; preserve every outcome/fence/retry | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
@@ -34897,3 +34897,34 @@ native/framework artifacts and compare useful rates/tails/refusals/physical barr
 in quiet windows. Original Mac455 qualification remains the only Mac job; new Mac
 source work waits for its actual termination. Full P9 and all macro requirements
 remain active.
+
+
+[Linux framework472](../validation/performance/comparison472/linux/README.md)
+original66317 ends0/ALL_TIMING_END, all24 actual cases/checkers/identity guards0.
+Root independently verifies253 payloads/15 lossless originals and recomputes all
+raw-report counts/frontiers/medians. Whole455→470+472 OFF bulk medians
+6,731,603→7,042,200 completed originals/s,p993.930724→3.886041ms, but paired
+rates.920159/1.136369/.990162 and tails1.278944/.802192/1.108382 lose twice.
+Singleton115,060→113,614/s,p99.017643→.017903ms; paired rates
+.983001/1.028354/1.249392 and tails1.040552/.956300/.696100 retain a slow
+baseline trial3 without a cause or rerun. ON bulk6,759,882/s,3.934903ms and
+singleton84,771/s,.023895ms; upstream3,121,720/s,7.774936ms and21,390/s,
+.125054ms remain separate. Bulk19,988,480/singleton1,048,576 exact originals,
+all three frontiers and individual outcomes pass with active maintenance.
+
+The complete470+472 experiment is REJECTED: both-host framework pairs and native
+rare/mixed physical amortization do not establish the required retained benefit.
+[473 before-edit schema](../validation/performance/slice473/SCHEMA.md) restores
+exact4692d53b4c4 (production/framework455), including the independent but
+unretained covered-event shortcut rather than creating an unmeasured composition.
+Its callback guard repaired a shortcut-introduced gap; baseline full checks were
+already conservative. Restore coupled window/worker/owner/application/startup/
+pump APIs and inventories together. Independent review adds the conformance
+checker count assertions as84th path. Preserve471 gauge correction/tests and all
+raw failures/artifacts; no durability/wire format changed. Restoration has not
+yet been applied. Existing baseline-reproduced three native owner timeouts remain
+outstanding. Reuse exact unchanged scopes, run affected focused checks and the
+full enabled strict hook, then publish; no baseline rebuild or profile recapture
+is needed. Full P9 remains active,8,422,500/s is a minimum not target, and no macro
+milestone closes. The previous goal turn only answered status and changed no
+source/evidence; this turn resumes the next available implementation action.

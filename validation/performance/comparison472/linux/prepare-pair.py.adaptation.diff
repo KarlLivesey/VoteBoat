@@ -1,0 +1,52 @@
+--- comparison468/prepare-pair.py
++++ comparison472/prepare-pair.py
+@@ -50,8 +50,19 @@
+     args = parser.parse_args()
+     guard.need(guard.REQUIRED_CANDIDATE_COMMIT != 'UNPUBLISHED_CANDIDATE_NOT_AUTHORIZED_FOR_TIMING', 'candidate not yet qualified/published')
+     here = Path(__file__).resolve().parent
+-    drivers = [here / name for name in ['artifact-guard.py', 'phase-diagnostic-check.py', 'phase-diagnostic.sh', 'prepare-pair.py']]
++    drivers = [here / name for name in ['artifact-guard.py', 'phase-diagnostic-check.py', 'phase-diagnostic.sh', 'prepare-pair.py', 'linux-run.sh', 'summarize.py']]
+     base_job, job = Path(args.baseline_job).resolve(), Path(args.candidate_job).resolve()
++    # Refuse before artifact assumptions or CONFIG output on incomplete/failed jobs.
++    for name in ['SOURCE.json', 'ARTIFACTS.json', 'SYMBOLS.json', 'RELEASE_ORACLE.json',
++                 'BUILD_TERMINAL.json', 'CLI_TERMINAL.json', 'CLI.json', 'PUBLICATION.json',
++                 'FUNCTIONAL_QUALIFICATION.json', 'STATUS', 'STAGE', 'CLI_STATUS', 'CLI_STAGE']:
++        guard.need((job / name).is_file(), 'fresh candidate evidence absent: ' + name)
++    guard.need((job / 'STATUS').read_text().strip() == '0' and (job / 'STAGE').read_text().strip() == 'DONE', 'fresh build incomplete')
++    guard.need(json.loads((job / 'BUILD_TERMINAL.json').read_text())['actual_exit'] == 0, 'original fresh build failed')
++    guard.need(json.loads((job / 'CLI_TERMINAL.json').read_text())['actual_exit'] == 0
++               and (job / 'CLI_STATUS').read_text().strip() == '0'
++               and (job / 'CLI_STAGE').read_text().strip() == 'DONE', 'original CLI controls incomplete')
++    guard.need((here / 'CURRENT_CLI_CHECKER.json').is_file(), 'original candidate CLI receipt pending')
+     baseline = json.loads(Path(args.baseline_config).read_text())
+     baseline = enrich(baseline, base_job / 'logs/matched-release.stderr', drivers)
+     baseline['source_inventory_evidence']=proof(base_job/'SOURCE.json')
+@@ -71,10 +82,11 @@
+         'executable': str(job / 'artifacts/matched/voteboat-matched-framework'),
+         'artifacts': artifacts,
+         'compiler_evidence': {'rustc': proof(rustc_path), 'rustc_version': proof(job / 'logs/rustc.txt')},
+-        'comparison_scope': 'published468 candidate versus immutable455 on same host/compiler; opt3/debug2/assertions/overflow/thinLTO/codegen1; full source inventory and four fresh:false compiler artifacts; 20M-requested bulk/19,988,480 actual and1,048,576 singleton originals; not full acceptance',
++        'comparison_scope': 'published whole470+472 release versus immutable455 on same host/compiler; not isolated native pump; opt3/debug2/assertions/overflow/thinLTO/codegen1; full source inventory and four fresh:false compiler artifacts; 20M-requested bulk/19,988,480 actual and1,048,576 singleton originals; not full acceptance',
+     }
+-    candidate['api_documentation']=json.loads((here/'API_DOCUMENTATION.json').read_text())
+     candidate['source_inventory_evidence']=proof(job/'SOURCE.json')
++    candidate['setup_evidence']={name:proof(job/name) for name in
++        ['BUILD_TERMINAL.json', 'CLI_TERMINAL.json', 'CLI.json', 'PUBLICATION.json', 'FUNCTIONAL_QUALIFICATION.json']}
+     candidate['release_oracle_evidence']=proof(job/'RELEASE_ORACLE.json')
+     candidate['symbols']=json.loads((job/'SYMBOLS.json').read_text())
+     candidate = enrich(candidate, job / 'logs/matched-release.stderr', drivers)
+@@ -91,7 +103,13 @@
+     output = Path(args.output)
+     guard.need(not output.exists(), 'refuse existing CONFIG_PAIR')
+     output.write_text(json.dumps(pair, indent=2) + '\n')
+-    print(json.dumps(guard.verify_pair(output), sort_keys=True))
++    verified = guard.verify_pair(output)
++    receipt = here / 'PAIR_SETUP_READY.json'
++    guard.need(not receipt.exists(), 'refuse existing pair readiness')
++    receipt.write_text(json.dumps({'scope':'Actual pair guard only; separate root quiet authorization required',
++        'timing_authorized':False,'config':proof(output),'candidate_job':str(job),
++        'actual_guard_exit':0,'proof':verified},indent=2)+'\n')
++    print(json.dumps(verified, sort_keys=True))
+ 
+ 
+ if __name__ == '__main__':

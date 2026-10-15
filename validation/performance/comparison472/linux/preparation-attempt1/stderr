@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison472/prepare-pair.py", line 123, in <module>
+    main()
+    ~~~~^^
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison472/prepare-pair.py", line 105, in main
+    guard.verify(candidate)
+    ~~~~~~~~~~~~^^^^^^^^^^^
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison472/artifact-guard.py", line 146, in verify
+    need(set(config['setup_evidence']) == required_setup, 'candidate original setup proofs absent')
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison472/artifact-guard.py", line 15, in need
+    raise ValueError(label)
+ValueError: candidate original setup proofs absent

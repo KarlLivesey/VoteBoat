@@ -1,0 +1,41 @@
+{
+  "scope": "Independent pre-edit restoration plan review; no production/test edits, builds, checks or workloads executed by reviewer.",
+  "baseline_commit": "2d53b4c43b71a63d63c96b7a3d0062da8d7643ff",
+  "reviewed_plan_head": "78658672d2ada8948633d51f6e4bc11b9b713c50",
+  "decision": "Restore the complete experimental production/test/example/contract delta to retained469, including the unretained covered-connection shortcut. Preserve independent471 storage-validator gauge correction and historical evidence.",
+  "original_plan_review": {
+    "paths": 83,
+    "unique_paths": 83,
+    "restore_baseline_blobs": 67,
+    "remove_experiment_added_modules": 16,
+    "source_test_example_contract_delta_missing_from_original_plan": [],
+    "unexpected_original_plan_paths": [],
+    "baseline_blob_sha256_mismatches": [],
+    "current_pre_edit_sha256_or_physical_mode_mismatches": [],
+    "additional_matched_workspace_or_root_build_configuration_delta": [],
+    "untracked_compiled_scope_inputs": []
+  },
+  "required_scope_correction": {
+    "path": "validation/check-provider-conformance.test.mjs",
+    "reason": "This independent metadata test was outside the original83-path selector. Its470 assertions changed reviewed contracts/operations from41/389 to46/432. Restoring the contract inventories while retaining those newer expectations would leave an inconsistent metadata test.",
+    "action": "Restore the exact469 test blob as the84th path; preserve the original83-path plan as PLAN.initial.json and record the revised final plan before implementation.",
+    "parent_accepted": true,
+    "final_plan_expected_paths": 84,
+    "final_plan_expected_restore_blobs": 68,
+    "final_plan_expected_removed_modules": 16
+  },
+  "intentional_non_restoration_scope": [
+    "validation/check-benchmark-storage.mjs: independent471 counter/gauge classification and snapshot-capacity scope correction",
+    "validation/check-benchmark-storage.test.mjs: independent471 focused validator controls",
+    "docs/IMPLEMENTATION.md and docs/P9.md: current decision, evidence and full objective remain current",
+    "docs/PERFORMANCE.md: root will mark35-column observer historical and remove current pipeline instructions",
+    "validation/performance evidence, frozen sources, artifacts and synthetic WAL histories remain untouched"
+  ],
+  "ownership_and_compatibility": {
+    "pipeline_restore_is_coupled": "Core append windows, worker unit/depth APIs, startup/application capabilities, parked ownership, logical-provider plumbing and pump/shared-budget paths restore together.",
+    "connection_shortcut": "Baseline469 already performs conservative full-union validation. Its replacement shortcut and shortcut-specific incomplete-callback guard are both unretained; no pre469 correctness repair is silently removed.",
+    "formats": "The experiment used ordinary LogUpdates and volatile window/unit identities; no storage/wire format migration is introduced by restoration.",
+    "baseline_assertions": "Restore baseline tests byte-for-byte rather than weakening assertions for removed APIs.",
+    "qualification_limit": "This receipt reviews the pre-edit plan and its84-path correction. It does not claim the eventual restored tree is byte-exact, that qualification has run, or that outstanding baseline native-owner timeouts passed. Root must record actual post-restoration equality and exits."
+  }
+}

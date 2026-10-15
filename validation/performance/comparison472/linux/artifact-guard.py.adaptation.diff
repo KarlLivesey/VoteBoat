@@ -1,0 +1,57 @@
+--- comparison468/artifact-guard.py
++++ comparison472/artifact-guard.py
+@@ -141,11 +141,30 @@
+               'src/format_crc.rs', 'src/format_crc/tests.rs'} <= set(config['source_sha256']),
+              'essential455 command-byte/configuration inputs absent')
+     if config['source_commit'] == REQUIRED_CANDIDATE_COMMIT:
+-        need({'benchmarks/matched/src/voteboat_engine/wait_cache.rs', 'benchmarks/matched/src/voteboat_engine/wait_cache/tests.rs'} <= set(config['source_sha256']), 'essential468 cache/cleanup controls absent')
+-        for name in ['docs/COMMAND_BYTES.md', 'benchmarks/matched/COMPARISON.md', 'validation/performance/slice468/SCHEMA.md']:
+-            doc = config['api_documentation'][name]
+-            need(doc['source_commit'] == config['source_commit'], 'wrong committed control document: ' + name)
+-            need(digest(doc['path']) == doc['sha256'], 'changed committed control document: ' + name)
++        required_setup = {'BUILD_TERMINAL.json', 'CLI_TERMINAL.json', 'CLI.json',
++                          'PUBLICATION.json', 'FUNCTIONAL_QUALIFICATION.json'}
++        need(set(config['setup_evidence']) == required_setup, 'candidate original setup proofs absent')
++        setup = {}
++        for name, receipt in config['setup_evidence'].items():
++            need(digest(receipt['path']) == receipt['sha256'], 'changed candidate setup proof: ' + name)
++            setup[name] = json.loads(Path(receipt['path']).read_text())
++        need(setup['BUILD_TERMINAL.json']['actual_exit'] == 0
++             and setup['CLI_TERMINAL.json']['actual_exit'] == 0, 'candidate original jobs not terminal0')
++        need(setup['PUBLICATION.json']['commit'] == REQUIRED_CANDIDATE_COMMIT
++             and setup['PUBLICATION.json']['exit'] == 0, 'candidate publication differs')
++        need(setup['FUNCTIONAL_QUALIFICATION.json']['source_commit'] == REQUIRED_CANDIDATE_COMMIT,
++             'candidate qualification source differs')
++        need({'src/raft/append_window.rs', 'src/raft/append_window/tests.rs',
++              'src/runtime/append_window.rs', 'src/runtime/effects/append_window.rs',
++              'src/runtime/replica.rs', 'src/runtime/replica/pump.rs',
++              'src/runtime/ready_batch.rs', 'src/runtime/clients.rs',
++              'src/worker.rs', 'src/native/worker.rs',
++              'tests/provider_conformance/append_window.rs',
++              'tests/worker/append_window.rs',
++              'tests/support/replica_driver/append_pump.rs'} <= set(config['source_sha256']),
++             'essential470/472 window/worker/pump inputs absent')
++        need(not any('/wait_cache' in n or n.endswith('/waits.rs') for n in config['source_sha256']),
++             'rejected468/436 receiver storage restored')
+     need(set(inventory['git_modes']) == set(config['source_sha256']), 'source mode inventory differs')
+     for relative, git_mode in inventory['git_modes'].items():
+         need(git_mode in ('100644', '100755'), 'unsupported source mode')
+@@ -165,9 +184,18 @@
+     need(cli_receipt.is_file(), 'fresh candidate CLI/observer validation is not yet supplied')
+     cli = json.loads(cli_receipt.read_text())
+     need(cli['commit'] == REQUIRED_CANDIDATE_COMMIT and cli['actual_exit'] == 0, 'fresh candidate CLI/observer validation incomplete')
++    need([r['case'] for r in cli['actual_cli_positive']] == ['off', 'on', 'openraft'], 'three original CLI records absent')
++    for row in cli['actual_cli_positive']:
++        need(row['actual_exit'] == 0 and row['completed_originals'] == 16384 and row['completed_requests'] == 4096
++             and row['applied_frontiers'] == [17409] * 3, 'actual original CLI completion differs')
++        need(row['phase_scope_method_counts'] == ([29, 4, 15] if row['case'] == 'on' else None), 'actual original CLI scope differs')
+     for proof in cli['proofs']:
+         need(digest(proof['path']) == proof['sha256'], 'changed actual CLI/control proof')
+     baseline, candidate = pair['baseline'], pair['candidate']
++    need(json.loads(Path(candidate['setup_evidence']['CLI.json']['path']).read_text()) == cli['actual_cli_positive'],
++         'receipt does not describe original candidate CLI records')
++    need(next(a for a in baseline['artifacts'] if a['target'] == 'voteboat-matched-framework')['sha256'] ==
++         'd567532226a5e7fa7d150b9fd905ffcff4c97905143e4a15ed8e477cd032755f', 'wrong immutable455 executable')
+     need(baseline['source_commit'] == REQUIRED_BASELINE_COMMIT,
+          'wrong baseline source')
+     need(candidate['source_commit'] == REQUIRED_CANDIDATE_COMMIT, 'wrong candidate source')

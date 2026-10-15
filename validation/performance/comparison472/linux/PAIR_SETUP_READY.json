@@ -1,0 +1,34 @@
+{
+  "scope": "Actual pair guard only; separate root quiet authorization required",
+  "timing_authorized": false,
+  "config": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison472/CONFIG_PAIR.linux.json",
+    "sha256": "6ee45d89ba46956e6288757a2d8b94b835b036ccf8431ff7ef6ab67c43d0dbcf"
+  },
+  "candidate_job": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched472-linux-attempt2",
+  "actual_guard_exit": 0,
+  "proof": {
+    "baseline": {
+      "source_inputs": 1448,
+      "artifacts": [
+        "bench_minimal",
+        "openraft",
+        "voteboat",
+        "voteboat-matched-framework"
+      ],
+      "mode": "asserted_release",
+      "checks": "all frozen source, artifact, driver and applicable compiler guards pass"
+    },
+    "candidate": {
+      "source_inputs": 1467,
+      "artifacts": [
+        "bench_minimal",
+        "openraft",
+        "voteboat",
+        "voteboat-matched-framework"
+      ],
+      "mode": "asserted_release",
+      "checks": "all frozen source, artifact, driver and applicable compiler guards pass"
+    }
+  }
+}

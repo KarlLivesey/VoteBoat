@@ -1,0 +1,8 @@
+{
+  "original_tool_chunk": "84b661",
+  "actual_exit": 1,
+  "failure": "ValueError: candidate original setup proofs absent",
+  "cause": "Root added three mandatory frozen-manifest proofs to preparer; guard still required exact original five-proof set. No CONFIG_PAIR written or workloads launched.",
+  "fix": "Require all eight original+new proofs, validate actual matched70 terminal and source equality; keep all existing checks.",
+  "raw_output_source": "Original tool output retained in conversation; terminal traceback transcribed in stderr without a replacement run."
+}

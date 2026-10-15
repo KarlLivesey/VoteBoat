@@ -1,0 +1,43 @@
+{
+  "root_quiet_grant": "2026-10-15T06:58:01.335703+00:00",
+  "config_and_driver_proofs": [
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison472/CONFIG_PAIR.linux.json",
+      "sha256": "6ee45d89ba46956e6288757a2d8b94b835b036ccf8431ff7ef6ab67c43d0dbcf"
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison472/PAIR_SETUP_READY.json",
+      "sha256": "898f2511dcc16714bc340fbfe80f4ef120dd536e2bb4bf82c8b3ed57e6968315"
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison472/CURRENT_CLI_CHECKER.json",
+      "sha256": "6c31353384bda74484bb830ad88efe6e79329a53a71402ef96a22d70fc00a68d"
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison472/artifact-guard.py",
+      "sha256": "f8d02985a4dc3af21ddf46c8eafd17aaaba467ba5ab0c7bb1776d5e7a188cc8b"
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison472/phase-diagnostic-check.py",
+      "sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0"
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison472/phase-diagnostic.sh",
+      "sha256": "db41e2519163994d50bc0a299774810450c4e6b343a0d01a7b7d681018ef38a5"
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison472/linux-run.sh",
+      "sha256": "5f0c59a73e1d582b2718f0b52d56626e3724cb4cac601a4961358ccdcd9ec4b1"
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison472/prepare-pair.py",
+      "sha256": "2e12a5a0f96bc4931ec443f772c28ffc19bf3f422b989192534ae0d040d51731"
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison472/summarize.py",
+      "sha256": "13eb3858fedb077357b867dc13aadab6658408baf74ed50b72e34a250b8fdc6e"
+    }
+  ],
+  "competing_owned_build_benchmark_profile_processes": [],
+  "scope": "One Linux bulk12 then singleton12 controller. All Linux/Mac collection/build/check/archive work ended; agents instructed HOLD. Per-original outcomes, raw errors/regressions/tails retained, no replacement or retuning."
+}
