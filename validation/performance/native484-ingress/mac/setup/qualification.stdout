@@ -1,0 +1,34 @@
+STAGE preflight
+STAGE tool_rustc_identity
+STAGE tool_cargo_identity
+STAGE tool_hash_identity
+STAGE tool_protoc_identity
+STAGE source_before
+STAGE application_all
+STAGE client_all
+STAGE node_all
+STAGE provider_all
+STAGE all_library
+STAGE counter_service
+STAGE native_scoped
+STAGE application_core
+STAGE client_core
+STAGE node_core
+STAGE provider_core
+STAGE provider_metadata
+STAGE provider_metadata_controls
+STAGE root_fmt
+STAGE strict_default
+STAGE strict_all
+STAGE strict_core
+STAGE strict_native
+STAGE matched_tests
+STAGE matched_fmt
+STAGE matched_strict
+STAGE native_release
+STAGE artifact_guard
+STAGE positive_controls
+STAGE source_after
+STAGE DONE
+MAC484_SETUP_READY; no measurement campaign launched
+MAC484_EXIT=0

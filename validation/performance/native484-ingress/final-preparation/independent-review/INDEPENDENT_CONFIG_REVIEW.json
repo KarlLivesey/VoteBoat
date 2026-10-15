@@ -1,0 +1,101 @@
+{
+  "exit": 0,
+  "hosts": {
+    "linux": {
+      "config_sha256": "09a6749d635c657d1cdcb9b605be1df67f3c08475c7123cc50e2a38db2fa2c29",
+      "ready_sha256": "1b0771ad29828b2373c474911b5e513c0ce90111ea2b337e16a373ab0563e172",
+      "job": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/linux/revision2/campaign",
+      "cases": 48,
+      "pairs": 24,
+      "offers": 391680,
+      "horizon_seconds": 1344,
+      "same481_native_argv_order_except_binary_and_root_paths": true,
+      "artifacts": {
+        "baseline": {
+          "voteboat": "f3233aad647806aeab594775cff9f894775099256e564982b84a1a1b08f60435",
+          "native_benchmark": "8d3530a6e801ebb857d8dff3fc1a0fb4ef5af865c3aed89d1450271f2054b84d"
+        },
+        "candidate": {
+          "voteboat": "8643d5a310e63ff5a1de9d311054e005d4b5841237e8b647cd66710f2a86366b",
+          "native_benchmark": "0ff042c1ade83771217ed96af4a0f24912d79917eb4f95cb0d8230808780963d"
+        }
+      },
+      "withinhost_compiler_protoc_hashes_equal": true,
+      "seven_private_fixtures_0600": true,
+      "fixtures_count": 19,
+      "scripts": {
+        "common.py": "9ef38f48fc67d63dd8d2b26b525be3ec20d6d8c1c1a454c9f3963de97d612512",
+        "plan.py": "396e5f8f72e98fa295ae4bdfbef9dc9da17363ce3630724960f7b285b400b332",
+        "prepare.py": "9753881ecc2c76b4080bba762396f7d5cc74ef31e7828d5951638b7c1d6fd788",
+        "campaign.py": "8e36f1865f131d04c80a028a85f737b0b1e84a1bf58dd55a3686617a80804fe8",
+        "resources.py": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+        "REQUIRED_COMMIT": "4bc0eb7091dcea93fddeddd4b2966aedf7ae2fe76f67a7a2baa3dc76016186c5"
+      },
+      "validators": {
+        "check-benchmark-storage.mjs": "f46a15656e91d9c6d32f3f268dde74a2a2e7425f9d5027da4c7cc0a8a69d9856",
+        "check-lanes.mjs": "cb49a5d3cee377cf3154d9a9f092ea90e9af64b87ba98272cae50765c51dc920",
+        "check-maintenance.mjs": "99fd718641c95a0412ef2e98e33b23da717470613bdc496d6313c8b58d0ce658",
+        "check-native-benchmark.mjs": "8c3f8a31270aa52ff4cdadd75479185dbfe33c0f2adecef0739dc43b008e54d7",
+        "check-offered.mjs": "13f0c1f45df5bbc20802e21883bf7157ef0272210df1269f0e8fddb739d90015",
+        "check-publication-profile.mjs": "425f3f905db3e368260095bc8eb78d92aa9753b9d9cf3995a78040a5b7a72b41",
+        "check-publication-timings.mjs": "9d69d025335612afbef911377d2e15654e2186c1e0cb36884fa5fa8ee6b9d5a1",
+        "check-rounded-rate.mjs": "262f06cfb0e878bfa7ce02741f51d7cd6e7e8df6b07b8973df4a7d89502c662d"
+      },
+      "setup_host_sha256": "5041e586b3c6691c46a004c0ed247b58f904af5d12dbc8445b3c8aba5528465e"
+    },
+    "mac": {
+      "config_sha256": "da49a6d4c41587326d296f8ed78de54143f7234dbbb75a29f82fa609748025b8",
+      "ready_sha256": "174f29da296e25fbb9fc09ab308618e9ad2f95eb2af8bde79a35db108442b7f4",
+      "job": "/private/tmp/voteboat-native484-pair-NB2I6n/campaign",
+      "cases": 48,
+      "pairs": 24,
+      "offers": 391680,
+      "horizon_seconds": 1344,
+      "same481_native_argv_order_except_binary_and_root_paths": true,
+      "artifacts": {
+        "baseline": {
+          "voteboat": "fa3ea343d31fd2a69f05e38bf02c0a3c1f574ef6d59000d4e70320d02e9916b1",
+          "native_benchmark": "fef05adc73179359ea2acc0d9b92978c57c4795410a727aefc30f1aac422fa52"
+        },
+        "candidate": {
+          "voteboat": "45fdda6571c0335f1c14ab3c1f5447fc3e48df703050339ad80a64c9596b577d",
+          "native_benchmark": "0c78b8db72ab496cdbce2c38c8673511013a89f4f1f44b24ee167ad8878f2f44"
+        }
+      },
+      "withinhost_compiler_protoc_hashes_equal": true,
+      "seven_private_fixtures_0600": true,
+      "fixtures_count": 19,
+      "scripts": {
+        "common.py": "9ef38f48fc67d63dd8d2b26b525be3ec20d6d8c1c1a454c9f3963de97d612512",
+        "plan.py": "396e5f8f72e98fa295ae4bdfbef9dc9da17363ce3630724960f7b285b400b332",
+        "prepare.py": "9753881ecc2c76b4080bba762396f7d5cc74ef31e7828d5951638b7c1d6fd788",
+        "campaign.py": "8e36f1865f131d04c80a028a85f737b0b1e84a1bf58dd55a3686617a80804fe8",
+        "resources.py": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+        "REQUIRED_COMMIT": "4bc0eb7091dcea93fddeddd4b2966aedf7ae2fe76f67a7a2baa3dc76016186c5"
+      },
+      "validators": {
+        "check-benchmark-storage.mjs": "f46a15656e91d9c6d32f3f268dde74a2a2e7425f9d5027da4c7cc0a8a69d9856",
+        "check-offered.mjs": "13f0c1f45df5bbc20802e21883bf7157ef0272210df1269f0e8fddb739d90015",
+        "check-publication-timings.mjs": "9d69d025335612afbef911377d2e15654e2186c1e0cb36884fa5fa8ee6b9d5a1",
+        "check-maintenance.mjs": "99fd718641c95a0412ef2e98e33b23da717470613bdc496d6313c8b58d0ce658",
+        "check-rounded-rate.mjs": "262f06cfb0e878bfa7ce02741f51d7cd6e7e8df6b07b8973df4a7d89502c662d",
+        "check-lanes.mjs": "cb49a5d3cee377cf3154d9a9f092ea90e9af64b87ba98272cae50765c51dc920",
+        "check-native-benchmark.mjs": "8c3f8a31270aa52ff4cdadd75479185dbfe33c0f2adecef0739dc43b008e54d7",
+        "check-publication-profile.mjs": "425f3f905db3e368260095bc8eb78d92aa9753b9d9cf3995a78040a5b7a72b41"
+      },
+      "setup_host_sha256": "d6cded0cd78d8c3106875074d67a80c7102122aca9868fc894b519b0e341373f"
+    }
+  },
+  "mac_remote27_exact_original_metadata": true,
+  "no_blockers": true,
+  "review_script_sha256": "65b7ac6c344fc09cbc7e655babf87ec51e2644240f371e3705c039649b6f2bc2",
+  "boundaries": [
+    "Both config native argv/order match actual481 except binary/WAL/resource paths; four cells, three rotating adjacent pairs, q16/q64/group ceilings unchanged.",
+    "Controller body and resources are unchanged from481. One serial inherited environment per host; no per-arm environment overrides. No environment fingerprint was added or claimed.",
+    "Author common.py strengthening binds Mac ROOT_FINAL_INPUTS1502 source/modes; published source and both compiled artifacts are untouched.",
+    "Committed offered.rs diff only extracts the same at-most64 per-original clock/window/leader/admit loop into three nested synchronous ingress scopes. Sorting, maintenance, warmup64, drain120 and completion timer boundaries unchanged; every outcome remains.",
+    "Actual Mac binaries stay remote; actual remote guards and27-file exact collection bind their hashes, fresh native profile/UUID/compiler/source/qualification proof. No binary was copied or build/guard/workload repeated remotely.",
+    "All setup/readout/copy/build tools must stop before separate root quiet GO. No timing authorization from this review; raw readout waits BOTHEND."
+  ],
+  "raw_reader_sha256": "02209e3306d1fc1c1685dec733f7633b146154834df2a414b768ada03baaa516"
+}

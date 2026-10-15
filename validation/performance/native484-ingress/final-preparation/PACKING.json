@@ -1,0 +1,157 @@
+{
+  "actual-linux/CAMPAIGN_CONFIG.json.gz": {
+    "original": "actual-linux/CAMPAIGN_CONFIG.json",
+    "sha256": "09a6749d635c657d1cdcb9b605be1df67f3c08475c7123cc50e2a38db2fa2c29",
+    "bytes": 695345
+  },
+  "actual-linux/setup-host.json.gz": {
+    "original": "actual-linux/setup-host.json",
+    "sha256": "5041e586b3c6691c46a004c0ed247b58f904af5d12dbc8445b3c8aba5528465e",
+    "bytes": 41026
+  },
+  "actual-mac/CAMPAIGN_CONFIG.json.gz": {
+    "original": "actual-mac/CAMPAIGN_CONFIG.json",
+    "sha256": "da49a6d4c41587326d296f8ed78de54143f7234dbbb75a29f82fa609748025b8",
+    "bytes": 681967
+  },
+  "actual-mac/setup-host.json.gz": {
+    "original": "actual-mac/setup-host.json",
+    "sha256": "d6cded0cd78d8c3106875074d67a80c7102122aca9868fc894b519b0e341373f",
+    "bytes": 159641
+  },
+  "actual-setup/comparison/linux/prepare.stderr.gz": {
+    "original": "actual-setup/comparison/linux/prepare.stderr",
+    "sha256": "bbadf7dbff1998c0df2f5415067e65a92c421ea05839a591ea3d9b78424d4cd9",
+    "bytes": 1023
+  },
+  "actual-setup/comparison/linux/prepare.stdout.gz": {
+    "original": "actual-setup/comparison/linux/prepare.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "actual-setup/comparison/linux/revision2/prepare.stderr.gz": {
+    "original": "actual-setup/comparison/linux/revision2/prepare.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "actual-setup/comparison/linux/revision2/prepare.stdout.gz": {
+    "original": "actual-setup/comparison/linux/revision2/prepare.stdout",
+    "sha256": "a6fab7db85db97a59b2e10785f0d6f2ca89734b4249c6cb9c1a2c4980a921277",
+    "bytes": 130
+  },
+  "actual-setup/comparison/mac/prepare.stderr.gz": {
+    "original": "actual-setup/comparison/mac/prepare.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "actual-setup/comparison/mac/prepare.stdout.gz": {
+    "original": "actual-setup/comparison/mac/prepare.stdout",
+    "sha256": "2e66b0702d91fad00a885a99891aebf8e3f86fa199248a3706cd983eeb282cf0",
+    "bytes": 822
+  },
+  "final-owner-review/check-config.stderr.gz": {
+    "original": "final-owner-review/check-config.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "final-owner-review/check-config.stdout.gz": {
+    "original": "final-owner-review/check-config.stdout",
+    "sha256": "b1dd3c7cd40a2ae18b604b37a8a111381b9b7c9a452d68b6c5cd73e8cdaee1cc",
+    "bytes": 127
+  },
+  "independent-review/REFERENCE481_CONTEXT.json.gz": {
+    "original": "independent-review/REFERENCE481_CONTEXT.json",
+    "sha256": "510f53e2a3213a9f19872ea6033bccf398e15b8bf6dccc811c98374782017e45",
+    "bytes": 1556180
+  },
+  "independent-review/config-review.stderr.gz": {
+    "original": "independent-review/config-review.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "independent-review/config-review.stdout.gz": {
+    "original": "independent-review/config-review.stdout",
+    "sha256": "8c6f30d86aecf65e37fbf042c9cae844da0ccfa3f8df15a5816d0de314cd05c9",
+    "bytes": 268
+  },
+  "independent-review/reference481-initial-linux.stderr.gz": {
+    "original": "independent-review/reference481-initial-linux.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "independent-review/reference481-initial-linux.stdout.gz": {
+    "original": "independent-review/reference481-initial-linux.stdout",
+    "sha256": "aee1baa6b098d6cb6899e26562faf4887ffa0cd5d1296ba4b83844be6473894f",
+    "bytes": 301
+  },
+  "independent-review/reference481-initial-linux/PROVENANCE.json.gz": {
+    "original": "independent-review/reference481-initial-linux/PROVENANCE.json",
+    "sha256": "3f1640eff92e7f2911d12524bd090ff27cf301b342358f111b960afd67902161",
+    "bytes": 194463
+  },
+  "independent-review/reference481-initial-linux/READOUT.json.gz": {
+    "original": "independent-review/reference481-initial-linux/READOUT.json",
+    "sha256": "8f9d308fa92f6cacb61f75eda0d8cf86992f844c4b0fdda5fa12592ae8388fd9",
+    "bytes": 1773702
+  },
+  "independent-review/reference481-initial-mac.stderr.gz": {
+    "original": "independent-review/reference481-initial-mac.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "independent-review/reference481-initial-mac.stdout.gz": {
+    "original": "independent-review/reference481-initial-mac.stdout",
+    "sha256": "6c7c97329fe98cf6d10e8ffb11d3c1c83c2a1b657ee9a597a5196a15a9c79ac2",
+    "bytes": 298
+  },
+  "independent-review/reference481-initial-mac/PROVENANCE.json.gz": {
+    "original": "independent-review/reference481-initial-mac/PROVENANCE.json",
+    "sha256": "10f44b3791778cf6400275976e6144f5ef33c62c5bdc5781869e82ff350eb81d",
+    "bytes": 205407
+  },
+  "independent-review/reference481-initial-mac/READOUT.json.gz": {
+    "original": "independent-review/reference481-initial-mac/READOUT.json",
+    "sha256": "cbd4a5bfb0997348897cd59048fe7170ad7eb4aee5007fb50689299471a576f6",
+    "bytes": 1764334
+  },
+  "independent-review/reference481-linux.stderr.gz": {
+    "original": "independent-review/reference481-linux.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "independent-review/reference481-linux.stdout.gz": {
+    "original": "independent-review/reference481-linux.stdout",
+    "sha256": "aee1baa6b098d6cb6899e26562faf4887ffa0cd5d1296ba4b83844be6473894f",
+    "bytes": 301
+  },
+  "independent-review/reference481-linux/PROVENANCE.json.gz": {
+    "original": "independent-review/reference481-linux/PROVENANCE.json",
+    "sha256": "8872a913cdad20a6a074cfa06d81293fa3edf84cb9660b027298df3af6ff7ac2",
+    "bytes": 194946
+  },
+  "independent-review/reference481-linux/READOUT.json.gz": {
+    "original": "independent-review/reference481-linux/READOUT.json",
+    "sha256": "e4440289cf9335a11bb5418e9ac507eade717600485724cc25a5cf5b9985d254",
+    "bytes": 2127832
+  },
+  "independent-review/reference481-mac.stderr.gz": {
+    "original": "independent-review/reference481-mac.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "independent-review/reference481-mac.stdout.gz": {
+    "original": "independent-review/reference481-mac.stdout",
+    "sha256": "6c7c97329fe98cf6d10e8ffb11d3c1c83c2a1b657ee9a597a5196a15a9c79ac2",
+    "bytes": 298
+  },
+  "independent-review/reference481-mac/PROVENANCE.json.gz": {
+    "original": "independent-review/reference481-mac/PROVENANCE.json",
+    "sha256": "708782cef244a4078a13ff8f733b5f03fd15b727ab37074da5a76e7fd781863e",
+    "bytes": 205918
+  },
+  "independent-review/reference481-mac/READOUT.json.gz": {
+    "original": "independent-review/reference481-mac/READOUT.json",
+    "sha256": "ac912167c6bdfa28cbbc7e23005c168b68cc0150df37ec036e96ea4039ab2d17",
+    "bytes": 2106499
+  }
+}

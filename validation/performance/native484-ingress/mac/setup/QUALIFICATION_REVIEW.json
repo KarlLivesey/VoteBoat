@@ -1,0 +1,203 @@
+{
+  "exit": 0,
+  "actual_qualification_handle": 41196,
+  "actual_qualification_exit": 0,
+  "terminal_tool_chunk": "be4435",
+  "source_commit": "efd383dc36b4b9edf8f66021b90115824440b468",
+  "source_files": 1502,
+  "source_directories": 327,
+  "source_inventory_sha256": "6340955866a41c8b887926533ce2bdce31a8b589c3a9c7b5d9889356ed4fdf55",
+  "private_fixture_keys_0600": 7,
+  "checks": {
+    "application_all": {
+      "exit": 0,
+      "actual_rust_passed_counts": [
+        23
+      ]
+    },
+    "application_core": {
+      "exit": 0,
+      "actual_rust_passed_counts": [
+        23
+      ]
+    },
+    "client_all": {
+      "exit": 0,
+      "actual_rust_passed_counts": [
+        37
+      ]
+    },
+    "client_core": {
+      "exit": 0,
+      "actual_rust_passed_counts": [
+        37
+      ]
+    },
+    "node_all": {
+      "exit": 0,
+      "actual_rust_passed_counts": [
+        2
+      ]
+    },
+    "node_core": {
+      "exit": 0,
+      "actual_rust_passed_counts": [
+        2
+      ]
+    },
+    "provider_all": {
+      "exit": 0,
+      "actual_rust_passed_counts": [
+        42
+      ]
+    },
+    "provider_core": {
+      "exit": 0,
+      "actual_rust_passed_counts": [
+        27
+      ]
+    },
+    "all_library": {
+      "exit": 0,
+      "actual_rust_passed_counts": [
+        426
+      ]
+    },
+    "counter_service": {
+      "exit": 0,
+      "actual_rust_passed_counts": [
+        2
+      ]
+    },
+    "native_scoped": {
+      "exit": 0,
+      "actual_rust_passed_counts": [
+        2
+      ]
+    },
+    "matched_tests": {
+      "exit": 0,
+      "actual_rust_passed_counts": [
+        70
+      ]
+    },
+    "tool_rustc_identity": {
+      "exit": 0,
+      "actual_rust_passed_counts": []
+    },
+    "tool_cargo_identity": {
+      "exit": 0,
+      "actual_rust_passed_counts": []
+    },
+    "tool_hash_identity": {
+      "exit": 0,
+      "actual_rust_passed_counts": []
+    },
+    "tool_protoc_identity": {
+      "exit": 0,
+      "actual_rust_passed_counts": []
+    },
+    "provider_metadata": {
+      "exit": 0,
+      "actual_rust_passed_counts": []
+    },
+    "provider_metadata_controls": {
+      "exit": 0,
+      "actual_rust_passed_counts": [],
+      "actual_node_tests": 42,
+      "actual_node_pass": 42,
+      "actual_node_fail": 0,
+      "actual_node_skipped": 0
+    },
+    "root_fmt": {
+      "exit": 0,
+      "actual_rust_passed_counts": []
+    },
+    "strict_default": {
+      "exit": 0,
+      "actual_rust_passed_counts": []
+    },
+    "strict_all": {
+      "exit": 0,
+      "actual_rust_passed_counts": []
+    },
+    "strict_core": {
+      "exit": 0,
+      "actual_rust_passed_counts": []
+    },
+    "strict_native": {
+      "exit": 0,
+      "actual_rust_passed_counts": []
+    },
+    "matched_fmt": {
+      "exit": 0,
+      "actual_rust_passed_counts": []
+    },
+    "matched_strict": {
+      "exit": 0,
+      "actual_rust_passed_counts": []
+    },
+    "native-release": {
+      "exit": 0,
+      "actual_rust_passed_counts": []
+    },
+    "artifact_guard": {
+      "exit": 0,
+      "actual_rust_passed_counts": []
+    },
+    "positive_controls": {
+      "exit": 0,
+      "actual_rust_passed_counts": []
+    },
+    "source_before": {
+      "exit": 0,
+      "actual_rust_passed_counts": []
+    },
+    "source_after": {
+      "exit": 0,
+      "actual_rust_passed_counts": []
+    }
+  },
+  "native_artifact_sha256": {
+    "voteboat": "45fdda6571c0335f1c14ab3c1f5447fc3e48df703050339ad80a64c9596b577d",
+    "native_benchmark": "0c78b8db72ab496cdbce2c38c8673511013a89f4f1f44b24ee167ad8878f2f44"
+  },
+  "native_uuid": "F533C5E8-2481-3FFD-A2D0-86851E6599E9",
+  "fresh_root_executable_buildscript": true,
+  "native_profile": "opt3/debug0/assertions/overflow/native defaultLTO+codegen; actual CargoJSON/vv/profile +newUUID retained",
+  "within_host_tool_identity": "Exact byte/version compare to Mac480 rustc/cargo/protoc passed; Mac stable1.98.0,protoc3.21.12,LLVM22.1.8; Linux1.98.1 differs.",
+  "controls": "Default provider only (omitted publication), not omitted quantum: all four explicitly q64/g2/31:1/window4096/512@128,64warm,active2smaintenance. Default FileLogIo TCP/QUIC6capacity+0pub and exactCURRENT/MANIFESTCRC/length; Witness TCP/QUIC6capacity+6pub. All512applied/576recovered,0allrefusals/unknown/pending,retries/joins/maintenance0. Functional qualification, not performance acceptance.",
+  "preconnection_failures": [
+    {
+      "attempt": "remote-create",
+      "ssh_exit": 255,
+      "observed_local_wrapper_exit": 1,
+      "observed_tool_chunk": "7aa5f6",
+      "wrapper_error": "AssertionError after preserving SSH stdout/stderr/exit; before any remote source/job/qualification process existed",
+      "raw_stderr": "remote-create.stderr",
+      "raw_stderr_sha256": "f57ca62a7959305d4ae47832f835d0c977fc2295805c546b9b70a48c36235f18"
+    },
+    {
+      "attempt": "remote-create-attempt2",
+      "ssh_exit": 255,
+      "observed_local_wrapper_exit": 1,
+      "observed_tool_chunk": "739b02",
+      "wrapper_error": "AssertionError after preserving SSH stdout/stderr/exit; before any remote source/job/qualification process existed",
+      "raw_stderr": "remote-create-attempt2.stderr",
+      "raw_stderr_sha256": "6d38c4077b2d7b0e35572e2193f76e0b1c34764edf827a1f203e9198f31b55ef"
+    },
+    {
+      "attempt": "remote-create-attempt3",
+      "ssh_exit": 255,
+      "observed_local_wrapper_exit": 1,
+      "observed_tool_chunk": "556058",
+      "wrapper_error": "AssertionError after preserving SSH stdout/stderr/exit; before any remote source/job/qualification process existed",
+      "raw_stderr": "remote-create-attempt3.stderr",
+      "raw_stderr_sha256": "28f33fd696ad090a75652052e0cef7f8875a72b50a9c65c52c5b75e3ae2cb1a2"
+    }
+  ],
+  "successful_connection": "remote-create-attempt4 uses existing configured IdentityAgent explicitly with -F /dev/null; no SSH/system config or kernel policy changed; no private keys read.",
+  "transfer_proof_sha256": "db38f44c44dd7d893f2135cbc522a595e4a288783d998968afc6f15e3d8cfb3d",
+  "readiness_sha256": "a2926b2f1713cd3cf68d57e30592185228e2ec9ebd402f7c7ab1e5e81d7b1f98",
+  "scope": "Owner review of original commands and transferred proofs, not an independent remote source/binary rehash or full safety proof. Original source/artifacts remain remote under before/after guards. No qualification/control rerun or source change."
+}

@@ -1,0 +1,10 @@
+{
+  "exit": 0,
+  "commit": "fec6d6ddfde4ec57a36cb3a3ba4af34d1eca09c2",
+  "remote_exit": 0,
+  "remote_main": "fec6d6ddfde4ec57a36cb3a3ba4af34d1eca09c2",
+  "enabled_hook": ".githooks/pre-push",
+  "same_full_selected_source": true,
+  "selected_inputs": 1502,
+  "scope": "Fresh published483 Linux artifact qualification and fixed484 paired plan only. No engine/build input changed; actual enabled strict hook. Candidate source remains efd383dc36b4b9edf8f66021b90115824440b468. No paired timing or performance acceptance claim."
+}

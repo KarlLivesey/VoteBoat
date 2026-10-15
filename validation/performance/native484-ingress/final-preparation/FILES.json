@@ -1,0 +1,410 @@
+{
+  "ORIGINALS.json": {
+    "sha256": "3adc6e1cc66503289337248ad08f84d333ccbb3c5d36fc7b49d4d94439772965",
+    "bytes": 26161
+  },
+  "PACKING.json": {
+    "sha256": "9afd163f215ecbdc0a93f7e9e945b6c455db2c16e77408dd04faca4a8d750a80",
+    "bytes": 7030
+  },
+  "actual-linux/CAMPAIGN_CONFIG.json.gz": {
+    "sha256": "f935a8853948f4afb435292d17d7f270b1a7175ff5ee6d81a85d5def15f93e55",
+    "bytes": 173778
+  },
+  "actual-linux/ORDER.txt": {
+    "sha256": "3c8a4ec966ce03acb8c26ec246ce7097c4a9fd1e518f7e54da428b321ccea1e1",
+    "bytes": 1188
+  },
+  "actual-linux/PREPARING.json": {
+    "sha256": "1da00f74b2a4a45821a34363a843dcf0fc0b18ab8d580c22e6e99c3cc91760b4",
+    "bytes": 271
+  },
+  "actual-linux/READY.json": {
+    "sha256": "1b0771ad29828b2373c474911b5e513c0ce90111ea2b337e16a373ab0563e172",
+    "bytes": 541
+  },
+  "actual-linux/REQUIRED_COMMIT": {
+    "sha256": "4bc0eb7091dcea93fddeddd4b2966aedf7ae2fe76f67a7a2baa3dc76016186c5",
+    "bytes": 41
+  },
+  "actual-linux/SCHEMA.md": {
+    "sha256": "81a09d3b2d73f789db7519d0045f45704314e06aa091f580a26a3902cb586a4a",
+    "bytes": 8170
+  },
+  "actual-linux/campaign.py": {
+    "sha256": "8e36f1865f131d04c80a028a85f737b0b1e84a1bf58dd55a3686617a80804fe8",
+    "bytes": 6406
+  },
+  "actual-linux/common.py": {
+    "sha256": "9ef38f48fc67d63dd8d2b26b525be3ec20d6d8c1c1a454c9f3963de97d612512",
+    "bytes": 25922
+  },
+  "actual-linux/control-tools/check-benchmark-storage.mjs": {
+    "sha256": "f46a15656e91d9c6d32f3f268dde74a2a2e7425f9d5027da4c7cc0a8a69d9856",
+    "bytes": 11797
+  },
+  "actual-linux/control-tools/check-lanes.mjs": {
+    "sha256": "cb49a5d3cee377cf3154d9a9f092ea90e9af64b87ba98272cae50765c51dc920",
+    "bytes": 4733
+  },
+  "actual-linux/control-tools/check-maintenance.mjs": {
+    "sha256": "99fd718641c95a0412ef2e98e33b23da717470613bdc496d6313c8b58d0ce658",
+    "bytes": 6918
+  },
+  "actual-linux/control-tools/check-native-benchmark.mjs": {
+    "sha256": "8c3f8a31270aa52ff4cdadd75479185dbfe33c0f2adecef0739dc43b008e54d7",
+    "bytes": 6595
+  },
+  "actual-linux/control-tools/check-offered.mjs": {
+    "sha256": "13f0c1f45df5bbc20802e21883bf7157ef0272210df1269f0e8fddb739d90015",
+    "bytes": 9264
+  },
+  "actual-linux/control-tools/check-publication-profile.mjs": {
+    "sha256": "425f3f905db3e368260095bc8eb78d92aa9753b9d9cf3995a78040a5b7a72b41",
+    "bytes": 1361
+  },
+  "actual-linux/control-tools/check-publication-timings.mjs": {
+    "sha256": "9d69d025335612afbef911377d2e15654e2186c1e0cb36884fa5fa8ee6b9d5a1",
+    "bytes": 4526
+  },
+  "actual-linux/control-tools/check-rounded-rate.mjs": {
+    "sha256": "262f06cfb0e878bfa7ce02741f51d7cd6e7e8df6b07b8973df4a7d89502c662d",
+    "bytes": 760
+  },
+  "actual-linux/plan.py": {
+    "sha256": "396e5f8f72e98fa295ae4bdfbef9dc9da17363ce3630724960f7b285b400b332",
+    "bytes": 2439
+  },
+  "actual-linux/prepare.py": {
+    "sha256": "9753881ecc2c76b4080bba762396f7d5cc74ef31e7828d5951638b7c1d6fd788",
+    "bytes": 6562
+  },
+  "actual-linux/resources.py": {
+    "sha256": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+    "bytes": 2177
+  },
+  "actual-linux/setup-host.json.gz": {
+    "sha256": "de8c4e07626bd45b0e6bff3141a008111fa8f5335934f3166d7c45bab6c3c34c",
+    "bytes": 8615
+  },
+  "actual-mac/CAMPAIGN_CONFIG.json.gz": {
+    "sha256": "94a0d528bc3e6d4454e64ac22ce9c9a0fbe11cf930d059610208848080e82e9d",
+    "bytes": 172519
+  },
+  "actual-mac/ORDER.txt": {
+    "sha256": "3c8a4ec966ce03acb8c26ec246ce7097c4a9fd1e518f7e54da428b321ccea1e1",
+    "bytes": 1188
+  },
+  "actual-mac/PREPARING.json": {
+    "sha256": "389c527aee62f93468eba269bebec8565be04caa1df4a25dcab8879e3eb64c97",
+    "bytes": 234
+  },
+  "actual-mac/READY.json": {
+    "sha256": "174f29da296e25fbb9fc09ab308618e9ad2f95eb2af8bde79a35db108442b7f4",
+    "bytes": 541
+  },
+  "actual-mac/REQUIRED_COMMIT": {
+    "sha256": "4bc0eb7091dcea93fddeddd4b2966aedf7ae2fe76f67a7a2baa3dc76016186c5",
+    "bytes": 41
+  },
+  "actual-mac/SCHEMA.md": {
+    "sha256": "81a09d3b2d73f789db7519d0045f45704314e06aa091f580a26a3902cb586a4a",
+    "bytes": 8170
+  },
+  "actual-mac/campaign.py": {
+    "sha256": "8e36f1865f131d04c80a028a85f737b0b1e84a1bf58dd55a3686617a80804fe8",
+    "bytes": 6406
+  },
+  "actual-mac/common.py": {
+    "sha256": "9ef38f48fc67d63dd8d2b26b525be3ec20d6d8c1c1a454c9f3963de97d612512",
+    "bytes": 25922
+  },
+  "actual-mac/control-tools/check-benchmark-storage.mjs": {
+    "sha256": "f46a15656e91d9c6d32f3f268dde74a2a2e7425f9d5027da4c7cc0a8a69d9856",
+    "bytes": 11797
+  },
+  "actual-mac/control-tools/check-lanes.mjs": {
+    "sha256": "cb49a5d3cee377cf3154d9a9f092ea90e9af64b87ba98272cae50765c51dc920",
+    "bytes": 4733
+  },
+  "actual-mac/control-tools/check-maintenance.mjs": {
+    "sha256": "99fd718641c95a0412ef2e98e33b23da717470613bdc496d6313c8b58d0ce658",
+    "bytes": 6918
+  },
+  "actual-mac/control-tools/check-native-benchmark.mjs": {
+    "sha256": "8c3f8a31270aa52ff4cdadd75479185dbfe33c0f2adecef0739dc43b008e54d7",
+    "bytes": 6595
+  },
+  "actual-mac/control-tools/check-offered.mjs": {
+    "sha256": "13f0c1f45df5bbc20802e21883bf7157ef0272210df1269f0e8fddb739d90015",
+    "bytes": 9264
+  },
+  "actual-mac/control-tools/check-publication-profile.mjs": {
+    "sha256": "425f3f905db3e368260095bc8eb78d92aa9753b9d9cf3995a78040a5b7a72b41",
+    "bytes": 1361
+  },
+  "actual-mac/control-tools/check-publication-timings.mjs": {
+    "sha256": "9d69d025335612afbef911377d2e15654e2186c1e0cb36884fa5fa8ee6b9d5a1",
+    "bytes": 4526
+  },
+  "actual-mac/control-tools/check-rounded-rate.mjs": {
+    "sha256": "262f06cfb0e878bfa7ce02741f51d7cd6e7e8df6b07b8973df4a7d89502c662d",
+    "bytes": 760
+  },
+  "actual-mac/plan.py": {
+    "sha256": "396e5f8f72e98fa295ae4bdfbef9dc9da17363ce3630724960f7b285b400b332",
+    "bytes": 2439
+  },
+  "actual-mac/prepare.py": {
+    "sha256": "9753881ecc2c76b4080bba762396f7d5cc74ef31e7828d5951638b7c1d6fd788",
+    "bytes": 6562
+  },
+  "actual-mac/resources.py": {
+    "sha256": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+    "bytes": 2177
+  },
+  "actual-mac/setup-host.json.gz": {
+    "sha256": "8d8cdb401f830533470b6b9d82b55be2a96a0e5b56f44109f49ed9d553a28792",
+    "bytes": 22299
+  },
+  "actual-setup/comparison/linux/prepare.exit": {
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "bytes": 2
+  },
+  "actual-setup/comparison/linux/prepare.stderr.gz": {
+    "sha256": "5d1205bb944d2d3e8290f5a46be5376c9347ec83a8bb8dff90af3d66eea31c5f",
+    "bytes": 500
+  },
+  "actual-setup/comparison/linux/prepare.stdout.gz": {
+    "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "bytes": 20
+  },
+  "actual-setup/comparison/linux/revision2/prepare.command.json": {
+    "sha256": "1a043a3e4e2d60065fcf66411afe52b23ce918e7a56c46c95576ae05eb8d1d78",
+    "bytes": 699
+  },
+  "actual-setup/comparison/linux/revision2/prepare.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2
+  },
+  "actual-setup/comparison/linux/revision2/prepare.stderr.gz": {
+    "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "bytes": 20
+  },
+  "actual-setup/comparison/linux/revision2/prepare.stdout.gz": {
+    "sha256": "9091279e7ce7b7fd4db2f69ef9c797465a086755e20699fa36dd446f9a808f0f",
+    "bytes": 138
+  },
+  "actual-setup/comparison/mac/prepare.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2
+  },
+  "actual-setup/comparison/mac/prepare.sh": {
+    "sha256": "023a7f9ba4ab12d82ad74d9ffbf1c9fc636fe47181fe2493f3c80463f58ab629",
+    "bytes": 2500
+  },
+  "actual-setup/comparison/mac/prepare.stderr.gz": {
+    "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "bytes": 20
+  },
+  "actual-setup/comparison/mac/prepare.stdout.gz": {
+    "sha256": "bdb3b3b6d0e2e2a2763ab9c0107488770c0d885416aa0b54c70ebefd9a8de511",
+    "bytes": 500
+  },
+  "actual-setup/linux/ROOT_ARCHIVE_VERIFIED.json": {
+    "sha256": "a0d2cef03cadb673093686d0ef6e52cd5446e0db414721a7e1dc2627a60edc72",
+    "bytes": 376
+  },
+  "actual-setup/mac/ROOT_ARCHIVE_VERIFIED.json": {
+    "sha256": "f08790d16f8cd69d6f63188af6daeaaa08dac288e16d27d4e219dd347d31b1e8",
+    "bytes": 376
+  },
+  "actual-setup/mac/verify-archive-root.py": {
+    "sha256": "2ba77c7e05af428de826250e69902a64143d775b541d6c9212774eb0a98a74d5",
+    "bytes": 1763
+  },
+  "actual-setup/publication-linux/ORIGINAL_JOB.json": {
+    "sha256": "5bde34ac442fc70adfa4728fe49fbcdeb26d3e17a14ab048872727bc2919d2c9",
+    "bytes": 368
+  },
+  "actual-setup/publication-linux/RECEIPT.json": {
+    "sha256": "63fe2a5fc5c135eae47ec570bd139a273554e1fbea1265f019de63ebd91caaef",
+    "bytes": 526
+  },
+  "final-owner-review/CONFIG_CHECK.json": {
+    "sha256": "19be51ebb764576f0d1980d0b5a2aee9b5d01b3bdd02c1d93190bc29ceeae19b",
+    "bytes": 7177
+  },
+  "final-owner-review/FILES.json": {
+    "sha256": "9eccbb62db1e42432c3181ab60a4c7de303d83398de848720a46e9759606c08b",
+    "bytes": 2133
+  },
+  "final-owner-review/FINAL_CONFIG_REVIEW.json": {
+    "sha256": "d6f061edc7549b7c8d80b16b5ed74d37c919320bfcea2173b14b611e12df109e",
+    "bytes": 10516
+  },
+  "final-owner-review/check-config.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2
+  },
+  "final-owner-review/check-config.py": {
+    "sha256": "9a5b7d4ea0b8474c01eb085758ff7eda31c89609f89f940efb296747aed048f7",
+    "bytes": 3679
+  },
+  "final-owner-review/check-config.stderr.gz": {
+    "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "bytes": 20
+  },
+  "final-owner-review/check-config.stdout.gz": {
+    "sha256": "310d6694d807a8a8bf593afe374a91511a6311f07cc3d37652a7932b7c628cde",
+    "bytes": 133
+  },
+  "final-owner-review/common-strengthening.diff": {
+    "sha256": "572415522ca8b974942924dac485dff6b9def91f181c17a3a8fe5c78ed9dfdcd",
+    "bytes": 1260
+  },
+  "final-owner-review/frozen/REQUIRED_COMMIT": {
+    "sha256": "4bc0eb7091dcea93fddeddd4b2966aedf7ae2fe76f67a7a2baa3dc76016186c5",
+    "bytes": 41
+  },
+  "final-owner-review/frozen/campaign.py": {
+    "sha256": "8e36f1865f131d04c80a028a85f737b0b1e84a1bf58dd55a3686617a80804fe8",
+    "bytes": 6406
+  },
+  "final-owner-review/frozen/common.py": {
+    "sha256": "9ef38f48fc67d63dd8d2b26b525be3ec20d6d8c1c1a454c9f3963de97d612512",
+    "bytes": 25922
+  },
+  "final-owner-review/frozen/plan.py": {
+    "sha256": "396e5f8f72e98fa295ae4bdfbef9dc9da17363ce3630724960f7b285b400b332",
+    "bytes": 2439
+  },
+  "final-owner-review/frozen/prepare.py": {
+    "sha256": "9753881ecc2c76b4080bba762396f7d5cc74ef31e7828d5951638b7c1d6fd788",
+    "bytes": 6562
+  },
+  "final-owner-review/frozen/resources.py": {
+    "sha256": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+    "bytes": 2177
+  },
+  "final-owner-review/frozen/test_plan.py": {
+    "sha256": "5d6bb3fa5aab9e9de364c6c06609aa23d830fe00cd180c8a4758677495ff4cad",
+    "bytes": 2601
+  },
+  "independent-review/INDEPENDENT_CONFIG_REVIEW.json": {
+    "sha256": "50effcec4580ee38f1d7e81aec805d205a10d2915220114b5daf64e3c36d13bc",
+    "bytes": 6613
+  },
+  "independent-review/PREPARED_READOUT.json": {
+    "sha256": "9ca5587b70030d1be67e62e35f0fa442b78c5c5ec3f69c0afa40dd783a7039da",
+    "bytes": 1899
+  },
+  "independent-review/REFERENCE481_CONTEXT.json.gz": {
+    "sha256": "bd3bb41abf1191743760ea4e7dee687be924581485ce887d005dbb432355a9b6",
+    "bytes": 158076
+  },
+  "independent-review/REFERENCE_VALIDATION.json": {
+    "sha256": "9e03ec7697dd3cb611c708e1361439f9c13a9e5642418ce255ee4b07000eac4b",
+    "bytes": 1580
+  },
+  "independent-review/config-review.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2
+  },
+  "independent-review/config-review.stderr.gz": {
+    "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "bytes": 20
+  },
+  "independent-review/config-review.stdout.gz": {
+    "sha256": "511c967f45dad1379d48d2843b86708e5f435040c5eff6d88d6ad6047ef489d5",
+    "bytes": 211
+  },
+  "independent-review/config_review.py": {
+    "sha256": "65b7ac6c344fc09cbc7e655babf87ec51e2644240f371e3705c039649b6f2bc2",
+    "bytes": 10181
+  },
+  "independent-review/raw_readout.py": {
+    "sha256": "02209e3306d1fc1c1685dec733f7633b146154834df2a414b768ada03baaa516",
+    "bytes": 27550
+  },
+  "independent-review/reference481-initial-linux/PROVENANCE.json.gz": {
+    "sha256": "4020f172e3270d11996a516b9ec664fcea2aeedd35e6d40ab87fb10e5ee0079e",
+    "bytes": 27179
+  },
+  "independent-review/reference481-initial-linux/READOUT.json.gz": {
+    "sha256": "3f2e68caa564ad4fc980d3cd953cc8519461ab76410bebbb8634f991e0aa8efe",
+    "bytes": 133476
+  },
+  "independent-review/reference481-initial-linux.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2
+  },
+  "independent-review/reference481-initial-linux.stderr.gz": {
+    "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "bytes": 20
+  },
+  "independent-review/reference481-initial-linux.stdout.gz": {
+    "sha256": "377e399de106d72df14681098cd5e07132c4c4781589daccfde19f348f5a4367",
+    "bytes": 194
+  },
+  "independent-review/reference481-initial-mac/PROVENANCE.json.gz": {
+    "sha256": "b321a09f426f3c753f4a7e04199d8c496c38a3c2749a6769253f24e57ed899de",
+    "bytes": 27044
+  },
+  "independent-review/reference481-initial-mac/READOUT.json.gz": {
+    "sha256": "5cd39d1f30a07fd29d5ac9d87179cdae7730f10adf01cfa3081442710cc634e2",
+    "bytes": 125581
+  },
+  "independent-review/reference481-initial-mac.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2
+  },
+  "independent-review/reference481-initial-mac.stderr.gz": {
+    "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "bytes": 20
+  },
+  "independent-review/reference481-initial-mac.stdout.gz": {
+    "sha256": "9bc2ce8dc181e340e04335d184a434bbbf9f98ec58554fba05a110498753521a",
+    "bytes": 194
+  },
+  "independent-review/reference481-linux/PROVENANCE.json.gz": {
+    "sha256": "e8ddde113381b23af353d3dc585315ad2999270471086cdbafbcfcd6507e2080",
+    "bytes": 27295
+  },
+  "independent-review/reference481-linux/READOUT.json.gz": {
+    "sha256": "0b428d358119b5ff933e74ac9ecbf7ae97602cc9a7b80b825e08511728784813",
+    "bytes": 172168
+  },
+  "independent-review/reference481-linux.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2
+  },
+  "independent-review/reference481-linux.stderr.gz": {
+    "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "bytes": 20
+  },
+  "independent-review/reference481-linux.stdout.gz": {
+    "sha256": "377e399de106d72df14681098cd5e07132c4c4781589daccfde19f348f5a4367",
+    "bytes": 194
+  },
+  "independent-review/reference481-mac/PROVENANCE.json.gz": {
+    "sha256": "e35d1e2fc54733ff03050a5b70d9517c2fcaad19adf53026900d6026b4391847",
+    "bytes": 27192
+  },
+  "independent-review/reference481-mac/READOUT.json.gz": {
+    "sha256": "cf8ba67d7234fc1adc8df96961aa806ee59034a11de752c03f289a64ee20a43e",
+    "bytes": 161636
+  },
+  "independent-review/reference481-mac.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2
+  },
+  "independent-review/reference481-mac.stderr.gz": {
+    "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "bytes": 20
+  },
+  "independent-review/reference481-mac.stdout.gz": {
+    "sha256": "9bc2ce8dc181e340e04335d184a434bbbf9f98ec58554fba05a110498753521a",
+    "bytes": 194
+  }
+}

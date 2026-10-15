@@ -1,0 +1,94 @@
+{
+  "state": "PREPARED_ONLY_REQUIRED_COMMIT_UNSET",
+  "purpose": "Fresh scoped Mac qualification and asserted native483 artifact, after publication; no performance timing campaign.",
+  "data_shape": {
+    "REQUIRED_COMMIT": "empty until parent successful published483 GO",
+    "ROOT_FINAL_INPUTS.json": "Parent-supplied actual published_commit, dynamic files sha256/mode map, actual exit0 receipt references",
+    "SOURCE.json": "Dynamically selected committed source bytes + actual source/directory modes, seven fixture keys0600; exact rootqualifiedprojection required",
+    "ARTIFACTS.json": "Fresh native executable+rootlibrary CargoJSON records fresh:false, opt3/debug0/assertions/overflow, original/copy hashes, actual-vv flags; native defaultLTO/CGU",
+    "SYMBOLS.json": "New executable actual original/copy Mach UUID and nm/otool metadata; no480symbol reuse",
+    "ORIGINAL_TERMINAL.json": "Filled only after original SSH qualification actually terminates; actual_exit,original_handle,terminal_tool_chunk",
+    "READINESS.json": "Generated only after exact scope checks/actual control ledgers/originalterminal0"
+  },
+  "ownership_and_transitions": [
+    "Parent publishes483 and supplies matched source/receipt projection, then sets REQUIRED_COMMIT. No source archive/copy/build before that GO.",
+    "Local prepare-source.py checks commit ancestor of origin/main, exact committed archive versus qualified source hash/modes, then writes a fresh source tar. Source extraction is into one new remote job, source root mode must match SOURCE.source_root_mode.",
+    "One original run.sh performs explicit sequential offline all/core scopes, fourstrict and separate matched target; no configuration overlaps. A brand new target-native-release builds asserted native artifact with actual CargoJSON/vv; no reused476/480 libraries.",
+    "Before Cargo work same480 compiler/cargo/protoc path bytes and version are checked; exact source hash/modes are checked before/after/final EXIT. Tool PATH and flags are explicit.",
+    "Four finite release functional controls use defaultFileLogIo/Witness \u00d7TCP/QUIC, q64,2groups31:1,512offers128/s,window4096,64warm,active2smaintenance. No timing acceptance; all original outcomes/readbacks/errors retained.",
+    "Failures stop original runner, retain original commands/stdout/stderr/exit/stage; never restart because tool handle or polling timeout disappears. Missing dependencies can only trigger later explicit focused lock-preserving fetch/resume after actual original END, not automatic dependency updates.",
+    "After actual original termination0, parent/owner records ORIGINAL_TERMINAL. collect-evidence.py verifies raw counts/proofs and packages text/CSV only, no source/buildtrees/binaries/WAL. All setup finishes before timing."
+  ],
+  "expected_actual_test_counts": {
+    "application_all": 23,
+    "application_core": 23,
+    "client_all": 37,
+    "client_core": 37,
+    "node_all": 2,
+    "node_core": 2,
+    "provider_all": 42,
+    "provider_core": 27,
+    "all_library": 426,
+    "counter_service": 2,
+    "native_scoped": 2,
+    "matched_tests": 70,
+    "metadata_TAP_tests_pass": 42
+  },
+  "scope_corrections_from480": [
+    "Use real effect_owner client_admission::, never substitute outbound admission target.",
+    "Use exact scoped Node filter node_facade::submission_batches:: and startup multi::ingress::.",
+    "Explicit TAP/no-isolation metadata count; no file-reporter count promoted to42controls.",
+    "Default FileLogIo has zero publication_readback and no publication.csv; exact CURRENT/MANIFEST CRC/length proof, full storage validator and six capacity readbacks. Witness requires six publication readbacks/native primitive diagnostics.",
+    "Dynamic source inventory includes all new ingress modules and source/config/lock/contract/testfixture inputs; no static1494 assumption and no historical59191/27421 success claims."
+  ],
+  "baseline_tools": "ExistingMac480 job /private/tmp/voteboat-mac480-f7b0ef1-mccmJS, stable1.98.0 aarch64-apple-darwin LLVM22.1.8; compatible libprotoc3.21.12. Must verify actual bytes before reuse; no new toolchain installed.",
+  "validation_performed_now": {
+    "python_ASTs": 5,
+    "bash_n_exit": 0,
+    "no_remote_action": true,
+    "no_source_package_created": true,
+    "no_build_test_control_or_capture": true
+  },
+  "files": {
+    "REQUIRED_COMMIT": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": "0o644"
+    },
+    "bash-n.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "mode": "0o644"
+    },
+    "bash-n.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": "0o644"
+    },
+    "bash-n.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": "0o644"
+    },
+    "collect-artifacts.py": {
+      "sha256": "5cddf62aba9de8d5db01f8abdd358a21b677f8bc3988e3ab39cb1324d4227e5b",
+      "mode": "0o644"
+    },
+    "collect-evidence.py": {
+      "sha256": "f221496903e82f3731c14038b8f281efc2a44d2e04cdb4ad9acb2b88f64f05f3",
+      "mode": "0o644"
+    },
+    "controls.py": {
+      "sha256": "5dc078d001e1b20e7a9df87ff205a16cc236ddd3f12fd6b4fe45ff9c28c280b1",
+      "mode": "0o644"
+    },
+    "prepare-source.py": {
+      "sha256": "bcc62058c437c8c98285ca332694282f89c0fe144536e8b3a46bfd18114297d6",
+      "mode": "0o644"
+    },
+    "run.sh": {
+      "sha256": "0c6596f4b7891b34ff1bf00557ef6c799845a23ac538b1dfe9ea33e913179e20",
+      "mode": "0o755"
+    },
+    "verify-source.py": {
+      "sha256": "88f32f5f7c36dd8ad72cd9e099a16a2c3da2695d7a6fca1915557ae19485cf63",
+      "mode": "0o644"
+    }
+  }
+}

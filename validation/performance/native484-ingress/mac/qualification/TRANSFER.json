@@ -1,0 +1,52 @@
+{
+  "run.sh": {
+    "sha256": "0c6596f4b7891b34ff1bf00557ef6c799845a23ac538b1dfe9ea33e913179e20",
+    "bytes": 6788,
+    "mode": "0o755"
+  },
+  "prepare-source.py": {
+    "sha256": "bcc62058c437c8c98285ca332694282f89c0fe144536e8b3a46bfd18114297d6",
+    "bytes": 6481,
+    "mode": "0o644"
+  },
+  "verify-source.py": {
+    "sha256": "88f32f5f7c36dd8ad72cd9e099a16a2c3da2695d7a6fca1915557ae19485cf63",
+    "bytes": 1661,
+    "mode": "0o644"
+  },
+  "collect-artifacts.py": {
+    "sha256": "5cddf62aba9de8d5db01f8abdd358a21b677f8bc3988e3ab39cb1324d4227e5b",
+    "bytes": 4981,
+    "mode": "0o644"
+  },
+  "controls.py": {
+    "sha256": "5dc078d001e1b20e7a9df87ff205a16cc236ddd3f12fd6b4fe45ff9c28c280b1",
+    "bytes": 6962,
+    "mode": "0o644"
+  },
+  "collect-evidence.py": {
+    "sha256": "f221496903e82f3731c14038b8f281efc2a44d2e04cdb4ad9acb2b88f64f05f3",
+    "bytes": 5730,
+    "mode": "0o644"
+  },
+  "REQUIRED_COMMIT": {
+    "sha256": "4bc0eb7091dcea93fddeddd4b2966aedf7ae2fe76f67a7a2baa3dc76016186c5",
+    "bytes": 41,
+    "mode": "0o644"
+  },
+  "ROOT_FINAL_INPUTS.json": {
+    "sha256": "be5147c7a81cdcf6d71576bd21deeef5f00f54751f6766364d81952bebea26e1",
+    "bytes": 238208,
+    "mode": "0o644"
+  },
+  "SOURCE.json": {
+    "sha256": "6340955866a41c8b887926533ce2bdce31a8b589c3a9c7b5d9889356ed4fdf55",
+    "bytes": 353688,
+    "mode": "0o644"
+  },
+  "source.sha256": {
+    "sha256": "5ece5a2b05567005ad7f8099e0e80e0f5124bb453e08c7bfcf5582ae03cb7152",
+    "bytes": 153093,
+    "mode": "0o644"
+  }
+}

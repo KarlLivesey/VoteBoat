@@ -1,0 +1,6 @@
+{
+  "candidate": "/private/tmp/voteboat-mac484-efd383d-JuSJyd",
+  "source_commit": "efd383dc36b4b9edf8f66021b90115824440b468",
+  "host": "mac",
+  "scope": "Setup only; no timing authorization, workload, build or dependency update."
+}

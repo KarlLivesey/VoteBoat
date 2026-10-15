@@ -35486,3 +35486,34 @@ original41196 qualification/build is still live; no campaign/config/timing has
 started. Both-host actual readiness plus separate quietGO remain required.
 Current484/next485/next486 and the complete macro scope stay active and unchanged;
 no native speedup, default promotion or full P9 acceptance is claimed.
+
+
+### 484: fresh Mac qualification and actual paired configurations ready
+
+[484 final premeasurement evidence](../validation/performance/native484-ingress/README.md)
+records originalMac41196 actualterminal0/be4435: all/core app23/client37/scopedNode2/
+provider42/27; library426, actual services2/native scoped2/matched70, TAP42 and all
+format/fourstrict/standalone checks0. Fresh native root/exe/buildscript are false
+in actual CargoJSON; native opt3/debug0/assertions/overflow/defaultLTO+codegen,
+source1502/327dirs/7keys600 and same480compiler/protoc bytes. Root45fdda65…,
+exe0c78b8db…,UUIDF533C5E8-2481-3FFD-A2D0-86851E6599E9. Four original controls
+apply512/recover576/retry/join/maintain with zero refusals. Macdefault-provider
+controls explicitly choose ready64/groups2/31:1; they do not prove an omitted
+quantum16flag. Root independently verifies223 collected originals plus304archive
+payloads/300originals/52gzip exact hashes/lengths/modes. Initial preconnection255
+and archive-only reseal scopes remain; no repeated workload or changed settings.
+
+Final actual configs Linux09a6749d…/Macda49a6d4… retain48cases,24adjacent rotating
+pairs and391680offers/1344scheduled seconds perhost. Independent review verifies
+exact481 workload/order/argv,8validators,unchanged resources/controller body and
+withinhostcompiler/source/fixture/profile proof. Common9ef38f48… adds complete
+actual Mac ROOT_FINAL_INPUTS1502 hash/mode binding; original published54e0e59b…
+remains unchanged. OriginalLinux38282 preflight fails only sandbox device visibility
+before config/workloads; unchanged guards pass in fresh revision2 with authorized
+readonlyhost access, failuretree/raw retained. Macprepared83620/collection31848
+end0. The independent numerical reader validates all96saved481cases and keeps
+oldlosses separate; actual484 results require matchingquietGO/config andbothEND.
+Provider/outer-unwind tests are executed; direct lookup-panic injection is not,
+with lookup cleanup supported by static RAII review. No gain, default promotion,
+third-filesystem or fullP9 acceptance follows. Current484 timing/retention remains;
+next485 measured bounded change/next486 full sustained/composed gates stay linked.

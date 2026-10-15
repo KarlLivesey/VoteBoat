@@ -1,0 +1,67 @@
+{
+  "stage": "all_library",
+  "status": "running",
+  "runner_pid": 37032,
+  "time_unix": 1792080564.637114,
+  "logs": {
+    "all_library.stdout": {
+      "bytes": 3216886,
+      "mtime": 1792080563.4991145,
+      "tail": [
+        "test native::log_store::accepted::tests::original_prefix_and_accepted_tail_allocations_survive_appends_and_subset_barriers ... ok",
+        "test native::log_store::accepted::tests::replacement_materializes_the_exact_accepted_tail_and_invalidates_old_generation ... ok",
+        "test native::log_store::accepted::tests::uncertain_append_sync_or_publication_does_not_promote_an_overlay ... ok",
+        "test native::log_store::file::tests::every_file_replacement_boundary_recovers_selected_pair_without_dual_writer ... ok",
+        "test native::log_store::file::tests::every_manifest_publication_boundary_preserves_selected_state_and_lock ... ok",
+        "test native::log_store::file::tests::initial_publication_never_selects_a_partial_manifest ... ok",
+        "test native::log_store::striped::file::tests::actual_file_catalog_every_publication_primitive_cut_keeps_exact_acknowledged_prefix ... ok",
+        "test native::log_store::striped::file::tests::actual_file_catalog_reclaim_cuts_preserve_original_frames_through_next_parity_reuse ... ok",
+        "test native::log_store::timing::tests::publication_step_totals_saturate_independently ... ok",
+        "test native::log_store::timing::tests::totals_saturate_and_reader_clone_has_no_close_effect ... ok",
+        "test native::log_store::witness::tests::crash::every_cold_repair_byte_cut_keeps_the_other_witness_and_restarts_again ... ok",
+        "test native::log_store::witness::tests::crash::every_replacement_primitive_cut_selects_exact_old_or_new_pair_with_parity_reuse ... "
+      ]
+    },
+    "all_library.stderr": {
+      "bytes": 6175,
+      "mtime": 1792080405.110189,
+      "tail": [
+        "       Fresh getset v0.1.7",
+        "       Fresh rand_pcg v0.10.2",
+        "       Fresh slab v0.4.12",
+        "       Fresh tinyvec v1.13.3",
+        "       Fresh rustc-hash v2.1.3",
+        "       Fresh lru-slab v0.1.3",
+        "       Fresh quinn-proto v0.11.19",
+        "       Fresh raft v0.7.0",
+        "   Compiling voteboat v0.1.0 (/private/tmp/voteboat-mac484-efd383d-JuSJyd/source)",
+        "     Running `CARGO=/Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo CARGO_CRATE_NAME=voteboat CARGO_MANIFEST_DIR=/private/tmp/voteboat-mac484-efd383d-JuSJyd/source CARGO_MANIFEST_PATH=/private/tmp/voteboat-mac484-efd383d-JuSJyd/source/Cargo.toml CARGO_PKG_AUTHORS='' CARGO_PKG_DESCRIPTION='Native-first composable consensus runtime, under development' CARGO_PKG_HOMEPAGE='' CARGO_PKG_LICENSE=RPL-1.5 CARGO_PKG_LICENSE_FILE='' CARGO_PKG_NAME=voteboat CARGO_PKG_README=README.md CARGO_PKG_REPOSITORY='https://github.com/KarlLivesey/VoteBoat' CARGO_PKG_RUST_VERSION=1.98 CARGO_PKG_VERSION=0.1.0 CARGO_PKG_VERSION_MAJOR=0 CARGO_PKG_VERSION_MINOR=1 CARGO_PKG_VERSION_PATCH=0 CARGO_PKG_VERSION_PRE='' CARGO_PRIMARY_PACKAGE=1 DYLD_FALLBACK_LIBRARY_PATH='/private/tmp/voteboat-mac484-efd383d-JuSJyd/target-checks/debug/deps:/Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/lib:/Users/karllivesey/lib:/usr/local/lib:/usr/lib' OUT_DIR=/private/tmp/voteboat-mac484-efd383d-JuSJyd/target-checks/debug/build/voteboat-ed1fbeded1a988b1/out /Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/bin/rustc --crate-name voteboat --edition=2021 src/lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --emit=dep-info,link -C embed-bitcode=no -C debuginfo=2 -C split-debuginfo=unpacked '--warn=clippy::all' --forbid=unsafe_code '--deny=clippy::too_many_lines' '--deny=clippy::cognitive_complexity' --test --cfg 'feature=\"default\"' --cfg 'feature=\"native\"' --cfg 'feature=\"quic\"' --cfg 'feature=\"tls\"' --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values(\"default\", \"native\", \"quic\", \"tls\"))' -C metadata=1e9605c2b8646b27 -C extra-filename=-5698d7e8eff70be4 --out-dir /private/tmp/voteboat-mac484-efd383d-JuSJyd/target-checks/debug/deps -C incremental=/private/tmp/voteboat-mac484-efd383d-JuSJyd/target-checks/debug/incremental -L dependency=/private/tmp/voteboat-mac484-efd383d-JuSJyd/target-checks/debug/deps --extern bytes=/private/tmp/voteboat-mac484-efd383d-JuSJyd/target-checks/debug/deps/libbytes-258f462c5e906be1.rlib --extern quinn_proto=/private/tmp/voteboat-mac484-efd383d-JuSJyd/target-checks/debug/deps/libquinn_proto-7d3879aa6559bd3e.rlib --extern raft_reference=/private/tmp/voteboat-mac484-efd383d-JuSJyd/target-checks/debug/deps/libraft-c67ea08fcc94a4c1.rlib --extern ring=/private/tmp/voteboat-mac484-efd383d-JuSJyd/target-checks/debug/deps/libring-c93c07d860c9eb55.rlib --extern rustls=/private/tmp/voteboat-mac484-efd383d-JuSJyd/target-checks/debug/deps/librustls-ae6e512e6408936c.rlib --extern slog=/private/tmp/voteboat-mac484-efd383d-JuSJyd/target-checks/debug/deps/libslog-1b7d309eae38daac.rlib -L native=/private/tmp/voteboat-mac484-efd383d-JuSJyd/target-checks/debug/build/ring-183463d49f6a6c5d/out --cfg voteboat_checkpoint_debug_oracle --check-cfg 'cfg(voteboat_checkpoint_debug_oracle)'`",
+        "    Finished `test` profile [unoptimized + debuginfo] target(s) in 20.45s",
+        "     Running `CARGO=/Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo CARGO_MANIFEST_DIR=/private/tmp/voteboat-mac484-efd383d-JuSJyd/source CARGO_MANIFEST_PATH=/private/tmp/voteboat-mac484-efd383d-JuSJyd/source/Cargo.toml CARGO_PKG_AUTHORS='' CARGO_PKG_DESCRIPTION='Native-first composable consensus runtime, under development' CARGO_PKG_HOMEPAGE='' CARGO_PKG_LICENSE=RPL-1.5 CARGO_PKG_LICENSE_FILE='' CARGO_PKG_NAME=voteboat CARGO_PKG_README=README.md CARGO_PKG_REPOSITORY='https://github.com/KarlLivesey/VoteBoat' CARGO_PKG_RUST_VERSION=1.98 CARGO_PKG_VERSION=0.1.0 CARGO_PKG_VERSION_MAJOR=0 CARGO_PKG_VERSION_MINOR=1 CARGO_PKG_VERSION_PATCH=0 CARGO_PKG_VERSION_PRE='' DYLD_FALLBACK_LIBRARY_PATH='/private/tmp/voteboat-mac484-efd383d-JuSJyd/target-checks/debug/build/ring-183463d49f6a6c5d/out:/private/tmp/voteboat-mac484-efd383d-JuSJyd/target-checks/debug:/private/tmp/voteboat-mac484-efd383d-JuSJyd/target-checks/debug/deps:/Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/aarch64-apple-darwin/lib:/Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/lib:/Users/karllivesey/lib:/usr/local/lib:/usr/lib' OUT_DIR=/private/tmp/voteboat-mac484-efd383d-JuSJyd/target-checks/debug/build/voteboat-ed1fbeded1a988b1/out /private/tmp/voteboat-mac484-efd383d-JuSJyd/target-checks/debug/deps/voteboat-5698d7e8eff70be4 --test-threads=1`"
+      ]
+    }
+  },
+  "owned_processes": [
+    {
+      "pid": 37032,
+      "ppid": 37031,
+      "state": "Ss",
+      "elapsed": "04:00",
+      "command": "bash /private/tmp/voteboat-mac484-efd383d-JuSJyd/run.sh"
+    },
+    {
+      "pid": 38444,
+      "ppid": 37032,
+      "state": "S",
+      "elapsed": "03:00",
+      "command": "/Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo test --locked --offline --all-features --lib --message-format=json -vv -- --test-threads=1"
+    },
+    {
+      "pid": 38460,
+      "ppid": 38444,
+      "state": "U",
+      "elapsed": "02:39",
+      "command": "/private/tmp/voteboat-mac484-efd383d-JuSJyd/target-checks/debug/deps/voteboat-5698d7e8eff70be4 --test-threads=1"
+    }
+  ]
+}

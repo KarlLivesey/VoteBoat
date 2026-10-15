@@ -1,0 +1,11 @@
+[
+  "ssh",
+  "-F",
+  "/dev/null",
+  "-o",
+  "IdentityAgent=/home/karllivesey/.1password/agent.sock",
+  "-o",
+  "BatchMode=yes",
+  "karllivesey@192.168.192.76",
+  "/usr/bin/python3 -c 'from pathlib import Path; import hashlib,json,stat; b=Path('\"'\"'/private/tmp/voteboat-mac484-efd383d-JuSJyd'\"'\"'); m=json.loads((b/\"TRANSFER.json\").read_text()); assert all(hashlib.sha256((b/n).read_bytes()).hexdigest()==r[\"sha256\"] and (b/n).stat().st_size==r[\"bytes\"] and oct(stat.S_IMODE((b/n).stat().st_mode))==r[\"mode\"] for n,r in m.items()); (b/\"HELPERS_TRANSFER_PROOF.json\").write_text(json.dumps({\"exit\":0,\"files\":len(m),\"exact_hashes_lengths_modes\":True})+\"\\n\"); print(\"HELPERS_EXACT\",len(m))'"
+]

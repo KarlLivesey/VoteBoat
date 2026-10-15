@@ -40,3 +40,38 @@ remain open. No profiled793ms Mac run is a cure. Full P9 sustained framework
 margins, durable headroom/fairness/skew, bounded memory/debt, independent placement/
 shared barriers and P8 composition remain required; real ext4/XFS is pending.
 8,422,500 originals/s is a framework minimum, not a native target or stopping ceiling.
+
+
+Mac qualification is now complete: [the sealed304-payload archive](mac/README.md)
+retains original41196 actual0/be4435, all/core application23/client37/scopedNode2/
+provider42/27, library426, actual services2, scoped native ingress2, matched70,
+TAP42 and every format/four strict/standalone check0. Fresh root/executable/
+buildscript are fresh:false under the separate native profile. Actual executable
+0c78b8db… and root45fdda65… have UUIDF533C5E8-2481-3FFD-A2D0-86851E6599E9;
+compiler/protoc bytes match480. All1502source files/327directories/seven0600keys
+match. All four controls apply512/recover576 with retries/joins/maintenance and
+zero refusals. Their default names mean default FileLogIo provider; quantum64 is
+explicitly selected onMac, unlike Linux's genuinely omitted-ready default16 case.
+Root verifies all223 collected originals and300 archived originals/52gzip files,
+exact recursive seals/bytes/lengths/modes. Collection contains proof/text payloads;
+committed source was copied earlier for qualification.
+Initial preconnection SSH255 errors and the initial archive-only seal remain
+preserved; no successful qualification/workload is restarted.
+
+[Final actual configurations and reviews](final-preparation/FILES.json) bind
+Linux09a6749d… and Macda49a6d4… to48cases/24adjacent rotatingpairs each. Final
+common9ef38f48… strengthens Mac's full1502-root-input hash/mode binding; the
+original published54e0e59b… preparation remains unchanged. Both owner and independent
+reviews verify exact481 workload/order/native argv, unchanged resources/controller
+body, eight validators and same within-host compiler/fixtures/profiles. The first
+Linux preparation38282 failed on sandbox-only device visibility before config or
+workload; unchanged guards pass with authorized read-only host access in fresh
+revision2 paths. Raw failure and failed tree remain. Mac setup83620/collection31848
+end0. Direct lookup-panic injection was not executed: provider panic/outer unwind
+are tested and lookup cleanup is supported by static review of the same RAII guard.
+
+The frozen independent readout passes all96 saved481 cases and preserves their
+losses as reference context only. It requires matching484 quietGO/config and both
+actual terminals before reading new results. No timing has started at this final
+premeasurement publication. All setup/check/copy/archive work must stop before
+root's separate quiet GO. Full P9 and prior regressions remain incomplete.

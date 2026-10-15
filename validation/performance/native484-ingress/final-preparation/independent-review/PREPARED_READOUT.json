@@ -1,0 +1,37 @@
+{
+  "scope": "PREPARED ONLY for484 readout; no484 timing data exists or was fabricated. Frozen helper and saved481 context prepared before quietGO. Do not run during timing; actual484 requires both-terminalEND/rootcollectionGO plus matchingGO/configsourcecommits.",
+  "helper": {
+    "path": "target/p9/native484-ingress/review/raw_readout.py",
+    "sha256": "02209e3306d1fc1c1685dec733f7633b146154834df2a414b768ada03baaa516"
+  },
+  "reference_validation": {
+    "path": "target/p9/native484-ingress/review/REFERENCE_VALIDATION.json",
+    "sha256": "9e03ec7697dd3cb611c708e1361439f9c13a9e5642418ce255ee4b07000eac4b"
+  },
+  "retained_reference_context": {
+    "path": "target/p9/native484-ingress/review/REFERENCE481_CONTEXT.json",
+    "sha256": "510f53e2a3213a9f19872ea6033bccf398e15b8bf6dccc811c98374782017e45"
+  },
+  "future_linux_command": [
+    "/usr/bin/python3.14",
+    "target/p9/native484-ingress/review/raw_readout.py",
+    "--phase",
+    "campaign484",
+    "--host",
+    "linux",
+    "--job",
+    "ACTUAL_FROZEN_LINUX_CAMPAIGN_JOB",
+    "--quiet-go",
+    "ACTUAL_ROOT_QUIET_GO.json",
+    "--both-end",
+    "ACTUAL_ROOT_QUIET_END.json",
+    "--output",
+    "target/p9/native484-ingress/review/actual484-linux"
+  ],
+  "future_mac_collection_arguments": "Same flags hostmac, --job actual collected rawjob; --case-root localresults --resource-root localcampaign-metadata; no remote address reads or symbolization.",
+  "bound_current484_commits": {
+    "baseline": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+    "candidate": "efd383dc36b4b9edf8f66021b90115824440b468"
+  },
+  "readout_boundary": "Native completed/during/drain originals/s from exact applied outcomes+original timers; wholechild CPUus/completedoriginal clearly separate; all24 pairs preserve full trial ratios/losses and perreplica counters/primitives, hot/cold256 outcomes/backlog/quantiles, metadata-inclusive appendunits."
+}

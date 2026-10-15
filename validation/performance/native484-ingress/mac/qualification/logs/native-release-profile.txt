@@ -1,0 +1,1 @@
+opt3 debug0 assertions/overflow true; native default LTO/codegen/split; inherited flags/wrappers/profile overrides unset

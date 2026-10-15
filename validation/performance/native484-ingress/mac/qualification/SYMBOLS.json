@@ -1,0 +1,55 @@
+{
+  "executable_sha256": "0c78b8db72ab496cdbce2c38c8673511013a89f4f1f44b24ee167ad8878f2f44",
+  "uuid": "F533C5E8-2481-3FFD-A2D0-86851E6599E9",
+  "symbol_form": "NativeMacMachO debug0 acceptance/symbol table; no forced dSYM, native defaultLTO/codegen preserved.",
+  "uuid_output_sha256": "119193c00d0af603c8db20f3ec69c82ab83ff59833a1a5abeb1778dd56cce759",
+  "macho_sections_sha256": "a4c7a516d1d652ef9ed87a3fa66aa430ab0c7217d9668959c0e5bc54187844a7",
+  "symbol_table_sha256": "2e91673ab3ec60a975160a9d79a173f1bc780e70b168d6e65cf838c48f188c5e",
+  "reference_oracle_cfg_absent_PROFILErelease": true,
+  "root_buildscript_record": {
+    "reason": "build-script-executed",
+    "package_id": "path+file:///private/tmp/voteboat-mac484-efd383d-JuSJyd/source#voteboat@0.1.0",
+    "linked_libs": [],
+    "linked_paths": [],
+    "cfgs": [],
+    "env": [],
+    "out_dir": "/private/tmp/voteboat-mac484-efd383d-JuSJyd/target-native-release/release/build/voteboat-edca44d51d6e8b81/out"
+  },
+  "root_buildscript_fresh_record": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///private/tmp/voteboat-mac484-efd383d-JuSJyd/source#voteboat@0.1.0",
+    "manifest_path": "/private/tmp/voteboat-mac484-efd383d-JuSJyd/source/Cargo.toml",
+    "target": {
+      "kind": [
+        "custom-build"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "build-script-build",
+      "src_path": "/private/tmp/voteboat-mac484-efd383d-JuSJyd/source/build.rs",
+      "edition": "2021",
+      "doc": false,
+      "doctest": false,
+      "test": false
+    },
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "filenames": [
+      "/private/tmp/voteboat-mac484-efd383d-JuSJyd/target-native-release/release/build/voteboat-22116cc996987efa/build-script-build"
+    ],
+    "executable": null,
+    "fresh": false
+  }
+}

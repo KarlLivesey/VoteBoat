@@ -1,0 +1,6 @@
+{
+  "candidate": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux",
+  "source_commit": "efd383dc36b4b9edf8f66021b90115824440b468",
+  "host": "linux",
+  "scope": "Setup only; no timing authorization, workload, build or dependency update."
+}

@@ -1,0 +1,22 @@
+[
+  "python3",
+  "target/p9/native484-ingress/comparison/common/prepare.py",
+  "--baseline",
+  "target/p9/native480-admission/linux",
+  "--candidate",
+  "target/p9/native484-ingress/linux",
+  "--host",
+  "linux",
+  "--job",
+  "target/p9/native484-ingress/comparison/linux/revision2/campaign",
+  "--wal-parent",
+  "target/p9/native484-ingress/comparison/linux/revision2/wal",
+  "--source-commit",
+  "efd383dc36b4b9edf8f66021b90115824440b468",
+  "--baseline-publication-authority",
+  "target/p9/native480-admission/publication2/RECEIPT.json",
+  "--publication-authority",
+  "target/p9/native483-ingress/publication/RECEIPT.json",
+  "--schema",
+  "validation/performance/native484-ingress/SCHEMA.md"
+]

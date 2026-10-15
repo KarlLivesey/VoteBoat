@@ -1,0 +1,72 @@
+{
+  "check-config.py": {
+    "sha256": "9a5b7d4ea0b8474c01eb085758ff7eda31c89609f89f940efb296747aed048f7",
+    "bytes": 3679,
+    "mode": "0o644"
+  },
+  "check-config.stdout": {
+    "sha256": "b1dd3c7cd40a2ae18b604b37a8a111381b9b7c9a452d68b6c5cd73e8cdaee1cc",
+    "bytes": 127,
+    "mode": "0o644"
+  },
+  "check-config.stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "mode": "0o644"
+  },
+  "CONFIG_CHECK.json": {
+    "sha256": "19be51ebb764576f0d1980d0b5a2aee9b5d01b3bdd02c1d93190bc29ceeae19b",
+    "bytes": 7177,
+    "mode": "0o644"
+  },
+  "check-config.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2,
+    "mode": "0o644"
+  },
+  "common-strengthening.diff": {
+    "sha256": "572415522ca8b974942924dac485dff6b9def91f181c17a3a8fe5c78ed9dfdcd",
+    "bytes": 1260,
+    "mode": "0o644"
+  },
+  "FINAL_CONFIG_REVIEW.json": {
+    "sha256": "d6f061edc7549b7c8d80b16b5ed74d37c919320bfcea2173b14b611e12df109e",
+    "bytes": 10516,
+    "mode": "0o644"
+  },
+  "frozen/common.py": {
+    "sha256": "9ef38f48fc67d63dd8d2b26b525be3ec20d6d8c1c1a454c9f3963de97d612512",
+    "bytes": 25922,
+    "mode": "0o644"
+  },
+  "frozen/campaign.py": {
+    "sha256": "8e36f1865f131d04c80a028a85f737b0b1e84a1bf58dd55a3686617a80804fe8",
+    "bytes": 6406,
+    "mode": "0o644"
+  },
+  "frozen/resources.py": {
+    "sha256": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+    "bytes": 2177,
+    "mode": "0o644"
+  },
+  "frozen/plan.py": {
+    "sha256": "396e5f8f72e98fa295ae4bdfbef9dc9da17363ce3630724960f7b285b400b332",
+    "bytes": 2439,
+    "mode": "0o644"
+  },
+  "frozen/prepare.py": {
+    "sha256": "9753881ecc2c76b4080bba762396f7d5cc74ef31e7828d5951638b7c1d6fd788",
+    "bytes": 6562,
+    "mode": "0o644"
+  },
+  "frozen/test_plan.py": {
+    "sha256": "5d6bb3fa5aab9e9de364c6c06609aa23d830fe00cd180c8a4758677495ff4cad",
+    "bytes": 2601,
+    "mode": "0o644"
+  },
+  "frozen/REQUIRED_COMMIT": {
+    "sha256": "4bc0eb7091dcea93fddeddd4b2966aedf7ae2fe76f67a7a2baa3dc76016186c5",
+    "bytes": 41,
+    "mode": "0o644"
+  }
+}

@@ -1,0 +1,5 @@
+/private/tmp/voteboat-mac484-efd383d-JuSJyd/control-wal/default-tcp-q64-g2-w4096: 512 scheduled offers, 512 admissions, 512 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=128.000 admitted_during=128.000 applied_during=119.000 applied_drain=191.568 applied_total=122.256 ops/s; window_refused=0 backlog_at_horizon=36
+/private/tmp/voteboat-mac484-efd383d-JuSJyd/control-wal/default-tcp-q64-g2-w4096: 1 durable checkpoint boundaries, 3 exact-scope reclamation rows, 0 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=149.433 reclaim_ms=204.808 reclaimed_bytes=30325 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=277 units=277 commands=1536 mean_units=1.000 append_ms=372.928 barriers=277 mean_appends_per_barrier=1.000 mean_units_per_barrier=1.000 barrier_ms=8722.680 sync_ms=2464.062 publish_ms=6257.862 histogram=1:277|2:0

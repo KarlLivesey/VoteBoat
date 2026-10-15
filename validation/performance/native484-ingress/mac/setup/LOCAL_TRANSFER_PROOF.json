@@ -1,0 +1,21 @@
+{
+  "exit": 0,
+  "raw_members": 224,
+  "original_payloads": 223,
+  "all_hashes_lengths_modes_exact": true,
+  "archive_sha256": "48f511f606ab339f6f41fca0a69d7a8464263666a98f61d67306b386d8a60d87",
+  "manifest_sha256": "53824ea734d21ce7c1fd9692a774328012466dc1257b11f2b44158ba6bded59c",
+  "readiness_sha256": "a2926b2f1713cd3cf68d57e30592185228e2ec9ebd402f7c7ab1e5e81d7b1f98",
+  "source_commit": "efd383dc36b4b9edf8f66021b90115824440b468",
+  "source_files": 1502,
+  "directories": 327,
+  "original_handle": 41196,
+  "actual_original_exit": 0,
+  "terminal_tool_chunk": "be4435",
+  "artifact_sha256": {
+    "voteboat": "45fdda6571c0335f1c14ab3c1f5447fc3e48df703050339ad80a64c9596b577d",
+    "native_benchmark": "0c78b8db72ab496cdbce2c38c8673511013a89f4f1f44b24ee167ad8878f2f44"
+  },
+  "native_uuid": "F533C5E8-2481-3FFD-A2D0-86851E6599E9",
+  "scope": "Post-terminal text/CSV/proofs only. No source/buildtree/binary/WAL transfer, no rerun."
+}

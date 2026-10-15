@@ -1,0 +1,14 @@
+{
+  "actual_exit": 0,
+  "original_handle": 41196,
+  "terminal_tool_chunk": "be4435",
+  "remote_job": "/private/tmp/voteboat-mac484-efd383d-JuSJyd",
+  "source_commit": "efd383dc36b4b9edf8f66021b90115824440b468",
+  "observed_terminal_markers": [
+    "MAC484_EXIT=0",
+    "ORIGINAL_MAC484_SSH_EXIT0"
+  ],
+  "qualification_exit_sha256": "61ca78e28dd51dae2cd4786b7f278e97a78b0ab0ea1fcbb419fdfbcdf1539569",
+  "qualification_stdout_sha256": "2e857fb7d80e52e7711668625d84a37246b862b25d28fc9ee72f4ac6b1d34c9c",
+  "recorded_utc": "2026-10-15T16:16:21.217084+00:00"
+}
