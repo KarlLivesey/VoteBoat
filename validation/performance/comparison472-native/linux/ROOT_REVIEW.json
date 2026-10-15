@@ -1,0 +1,16 @@
+{
+  "cases": 24,
+  "config_sha256": "26484d2b168d35e34d80f97c68e15dae7e8ddf1db196074e8589917e90f9b3d2",
+  "driver_sha256": "02c09e83ce6301acb9eaabc71515b24a1074d55ac45cc6fc63390c1158a69230",
+  "source_bytes_and_physical_modes": "PASS",
+  "fresh_root_and_exe_actual_profiles": "PASS",
+  "original_copy_hashes": "PASS",
+  "compiler_proof_hashes_equal": {
+    "rustc.txt": true,
+    "cargo.txt": true,
+    "tool-binaries.sha256": true
+  },
+  "exact_argv_rotation_absent_case_roots": "PASS",
+  "scope": "Independent root setup review; no socket preflight or quiet timing grant yet.",
+  "compiler_proof_paths_equal": false
+}

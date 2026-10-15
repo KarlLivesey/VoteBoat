@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--manifest-path",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched472-linux-attempt2/source/benchmarks/matched/Cargo.toml",
+    "--",
+    "--test-threads=1",
+    "--nocapture"
+  ],
+  "cwd": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched472-linux-attempt2/source/benchmarks/matched",
+  "environment": {
+    "CARGO_TARGET_DIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched472-linux-attempt2/target-matched-checks",
+    "CARGO_BUILD_JOBS": "2",
+    "CARGO_INCREMENTAL": "0",
+    "RUSTC": "/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc",
+    "PROTOC": "/home/karllivesey/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/protobuf-build-0.14.1/bin/protoc-linux-x86_64",
+    "RUSTFLAGS": null,
+    "RUSTC_WRAPPER": null,
+    "RUSTC_WORKSPACE_WRAPPER": null
+  },
+  "start": "2026-10-15T06:27:34.917856+00:00"
+}

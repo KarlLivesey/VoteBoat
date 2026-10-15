@@ -1,0 +1,7 @@
+{
+  "payloads": 662,
+  "gzip_originals": 31,
+  "manifest_sha256": "2be9130a96bb190ecbe0ebbf923cb56a113b0a3d328c1e11decd0a0cb128a5e8",
+  "root_independent_exact_set_payload_and_original_container_hashes": "PASS",
+  "scope": "Actual native33407terminal0, no workload/check rerun. Initial derived maxima classification retained; corrected rate/tail/pair bytes unchanged. Full physical-memory/headroom/fairness/P9 acceptance remains open."
+}

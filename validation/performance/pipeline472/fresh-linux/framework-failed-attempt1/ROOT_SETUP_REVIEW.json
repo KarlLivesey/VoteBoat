@@ -1,0 +1,30 @@
+{
+  "source_commit": "de5a7221e49c89771dd3cd22a0b904966b1f4789",
+  "review": "Root read actual guard/export/run/setup scripts, compared prior470 source/profile controls, verified actual publication and final1453-source qualification. Fresh targets absent at review. Native debug0/default LTO+CGU and framework debug2/thin/CGU1 stay separate. No timing grant.",
+  "files": {
+    "run.sh": "8ea1dcad0b65f4b168b4a6a33c7c38a8b6b2c2ea5d72d25478ba79d50cba91c2",
+    "run.sh.adaptation.diff": "77cb93d811316ff704db203d944a36195b91432924bf2bef1b9a64b24d8f8aef",
+    "guard.py": "2bddc305e1a0c22081ecb38634c031753cc643c4b315792bfbca61f5d632095a",
+    "guard.py.adaptation.diff": "83a97047a7720785f95e12f5ee01ff99160f53bb36bf55c61fc220e196a03abe",
+    "export-source.sh": "1603ab68839f854bf122fbb077d63d840741897f7bab8ba85d3dd59f8f305cda",
+    "export-source.sh.adaptation.diff": "25d62540d66d5cd24805c75ce8b99c3f0c440fea4208a0c4a30cc7c3f357d63c",
+    "artifact-guard.py": "da1ff215533fb8bfdb41c4622022af6365700770676bd18c711b19dfcbd6f1ac",
+    "artifact-guard.py.adaptation.diff": "b7b145b5c5ac6f2d29a579c819d1412d01d4f47cadf1408fd65113ef54f66acb",
+    "phase-diagnostic-check.py": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "phase-diagnostic-check.py.adaptation.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cli.py": "087742b9f5e12308c822b52bf95a77b8dd4c352308ae052a147a2068ee020024",
+    "cli.py.adaptation.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cli-run.sh": "f21b9d031886ee516b01bcb3a9ba71ae5ad62a5d829bbabe8242437d6b0bc894",
+    "cli-run.sh.adaptation.diff": "6d3adf16746320b3fe7a90a25a5a00087f8b0b5bd86aaea38dbf7e19c0139cec",
+    "setup-after-build.sh": "d72043e1934efba90983b4dea1b8376be2b289d6ec3e15e4febf1fde6c643202",
+    "setup-after-build.sh.adaptation.diff": "95f109654242303391e1a740ae02ea490e3affb0d8e6eeede9bde46198133b1c",
+    "QUALIFIED_SOURCE.json": "b757c869fa021edc433ecbc2f8443f732456086e7dd81205e82a6ee399bbf857",
+    "FUNCTIONAL_QUALIFICATION.json": "422c027dfa41a545974530237a16660ce2d040a6e0fc3e7be1b1c244854503d0",
+    "PUBLICATION.json": "9364e36008b56fcf265f1a879ec3fbb67ba49abe8f4dcdf0699f66b5173cdafa",
+    "REQUIRED_COMMIT.txt": "1b2016231d3824c376e88de10be3881782aae90fbc7eea9191a2366fd4f541e3",
+    "PREPARATION.json": "d0a22f533eb08477109e14aa1103743de373ff4df760b01335916b7c4cbd6587",
+    "SETUP_READY_FOR_REVIEW.json": "0407ca316cb719bb7a13623d8431ebc444b332df23187bd8ac2e4eab07d9dbb3",
+    "logs/prepared-qualification.stdout": "d3ca3fdee4c8409105e14c5225debdc03068c79d0397e3720c42c05c0be03fb2",
+    "logs/prepared-qualification.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

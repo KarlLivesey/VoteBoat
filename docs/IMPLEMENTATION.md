@@ -6,7 +6,8 @@ Latest production publication is472 `de5a7221e49c89771dd3cd22a0b904966b1f4789`;
 native470 measurement/gauge evidence is published in `a01d9d51`.
 The [472 publication receipt](../validation/performance/pipeline472/publication/README.md)
 records original48079/full enabled hook0 and exact remote main.472's bounded
-driver pump is implemented and locally checked; fresh Linux builds are in progress.
+driver pump is implemented and locally checked. Both fresh Linux artifacts and
+their actual controls are now complete; the native comparison is terminal0.
 Its [qualification archive](../validation/performance/pipeline472/main/README.md)
 preserves the two compile failures, focused corrections, final source inventories,
 actual selected-driver/network controls and complete enabled strict hook0.
@@ -52,10 +53,10 @@ p992845.982801→1356.184179ms, but trial3 loses both rate and tail. Actual phys
 grouping exists in every ON run, yet median leader barriers per applied original
 slightly increase on both protocols. No consistent useful gain or default change
 is justified. Large window refusals and whole-process resources do not establish
-headroom or physical debt. The next bounded investigation is an identified driver
+headroom or physical debt. Those results motivated the identified driver
 ordering gate: ready advancement ends before successful submission parks the first
-visit, so this poll cannot create queued successors. Audit residual budgets,
-control/first-Durable priority and fairness before any focused change; do not
+visit, so this poll cannot create queued successors.472 audits residual budgets,
+control/first-Durable priority and fairness in the focused change above; do not
 retune quantum, window, checkpoints or storage durability. Full P9 remains active.
 The [472 before-edit schema](../validation/performance/pipeline472/SCHEMA.md)
 records the private residual-budget shape, authority/lease transitions, terminal
@@ -78,6 +79,36 @@ uses24 cases:470/472 at both default1 and selected4, TCP/QUIC and three paired
 trials. This isolates selected-path usefulness while checking default-path cost
 in the same campaign. Exact original outcomes, refusals, latency and physical
 barriers remain required; four queued units alone do not establish amortization.
+
+[Fresh472 Linux proof](../validation/performance/pipeline472/fresh-linux/README.md)
+retains357 verified payloads. Native root/example/buildscript are fresh:false
+under their original debug0 profile;14 controls pass. The first framework export
+omitted its separate manifest/lock and build101 stopped before compilation.
+Corrected fresh attempt2 includes both, proves four fresh:false artifacts under
+the separate debug2/thin/CGU1 profile, and passes the original three16K CLI controls.
+A focused frozen-workspace70 check with full1467 hashes/modes closes the omitted
+input scope; the original1453 qualification and failed export remain unchanged.
+
+[Native472 results](../validation/performance/comparison472-native/linux/README.md)
+original33407 ends0: all24 workloads/48 validators pass. Selected470→472 TCP
+medians148.735150→134.986591 completed originals/s, p992159.825357→1552.317153ms;
+QUIC122.190528→150.639131/s, p992498.553566→1276.462611ms. TCP retains one rate
+loss/large tail loss; QUIC all rate pairs improve but one tail worsens. Default
+QUIC p99 worsens in all three pairs. Grouping remains rare and median leader
+barriers/applied move .138998→.140683 TCP and .141319→.139857 QUIC. This does not
+establish consistent intended publication amortization. Every case has14checkpoints/
+42reclaims, exact outcomes/recovery/retries/joins and zero missing/drop/errors;
+window refusals remain10047–11471. Whole-process RSS is not a physical debt bound.
+No cause or retention claim follows; whole-release framework measurements remain.
+
+Mac472's original21485 is terminal0 after scoped functional/strict/matched checks,
+fresh asserted framework artifact and three actual CLI controls. Its1471 source
+files and322 directory modes are verified, including the1453 final Linux input
+projection and exact within-host compiler hashes. Raw evidence remains on the
+Mac while its original paired framework78197 runs. Linux framework setup is ready
+and follows local collection; no timing overlaps build/check/archive work on its
+own host. Both framework campaigns compare retained455 to the whole470+472 release,
+not isolated pump CPU. Full P9 remains active.
 
 The1.5× larger published/matched sustained requirement is a minimum acceptance
 bar, not a target or stopping ceiling. The user wants that capacity and
@@ -820,8 +851,8 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: publish checked472 and build fresh asserted artifacts | Make the bounded ordering change reproducible before timing it | [Before-edit schema](../validation/performance/pipeline472/SCHEMA.md), [Linux qualification](../validation/performance/pipeline472/main/README.md), original470 results and existing native/framework builders | Archive exact source/failures/scopes; commit every compiled module and push through enabled hook; fresh root/executable/upstream libraries with actual Cargo JSON/rustc flags, matching within-host compiler/locks and original/copied hashes; actual native and framework CLI controls | P9.0/P9.1/P9.2/P9.3 |
-| Next: measure the ordering change and qualify Mac | Determine whether filling the selected window improves useful completions rather than merely grouping | Published472, fresh asserted artifacts and exact controls; original Mac455 termination before new Mac work | Same rotating native offered-load campaign with physical barriers/completions/refusals/tails; Linux20M bulk/singleton and Mac qualification/paired measurements; quiet hosts, exact timer/outcomes, retain failures and reject ineffective changes without retuning | P9.0/P9.1/P9.2/P9.3 |
+| Current: publish fresh/native evidence and finish framework comparisons | Resolve the measured tradeoff using useful completions and common-path controls | Published472, [fresh Linux proof](../validation/performance/pipeline472/fresh-linux/README.md), [native24-case results](../validation/performance/comparison472-native/linux/README.md), completed Mac472 qualification and prepared framework drivers | Archive every failure/raw tail with exact identities; push through enabled hook; finish original Linux/Mac20M bulk and1M singleton campaigns in quiet windows; exact original outcomes/frontiers/observer scopes and source/artifact guards | P9.0/P9.1/P9.2/P9.3 |
+| Next: retain or reject the complete measured change and target the remaining cost | Increase useful capacity without another unsupported tuning family | Both-host framework outcomes plus native mixed rates/tails/rare sharing, preserved experiment ledger and typed contracts | Make an explicit source retention/restoration decision; if further optimization is justified, use current machine-readable CPU/wait/algorithm evidence and a before-edit ownership/restart/budget schema; checked focused implementation, fresh paired actual rates/latency and all strict checks | P9.0/P9.1/P9.2/P9.3 |
 | Following: full curve, sustainable headroom and composition qualification | Satisfy the entire performance objective beyond the current experiment | Retained measured improvements, qualified weighted fixture, source/artifact/host identities and stable maintenance | All seven required framework cells on both hosts with healthy margin; sustained memory/debt, durable applications/headroom/skew/fairness, independent placement/shared barriers and P8 composition; preserve every outcome/fence/retry | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed

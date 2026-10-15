@@ -1,0 +1,9 @@
+{
+  "original_handle": 50166,
+  "actual_exit": 0,
+  "command": [
+    "bash",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched472-linux-attempt2/export-source.sh"
+  ],
+  "source_inventory_sha256": "1cb59334bf1f19615408ac48f923529151cce400c38d67477b93048337121603"
+}

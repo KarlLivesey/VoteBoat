@@ -1,0 +1,15 @@
+{
+  "kind": "matched",
+  "qualification_exit": 0,
+  "qualification_summary": "{\"commit\": \"de5a7221e49c89771dd3cd22a0b904966b1f4789\", \"qualified_inputs\": 1453, \"scope\": \"Changed472 driver pump qualified by actual focused/broad/core/matched/strict scopes; three baseline-reproduced failures remain failures.\"}",
+  "python_AST": "PASS",
+  "bash_syntax": [
+    "run.sh",
+    "export-source.sh",
+    "cli-run.sh",
+    "setup-after-build.sh"
+  ],
+  "source_export_absent": true,
+  "fresh_build_target_absent": true,
+  "build_launched": false
+}

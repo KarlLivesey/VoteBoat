@@ -1,0 +1,34 @@
+{
+  "commands": [
+    {
+      "command": [
+        "findmnt",
+        "-T",
+        "target/p9/comparison472-native/linux/campaign-wal",
+        "-n",
+        "-o",
+        "SOURCE,TARGET,FSTYPE"
+      ],
+      "exit": 0,
+      "stdout": "/dev/nvme1n1p2[/@home/karllivesey/Documents/ChatGPT/VoteBoat] /home/karllivesey/Documents/ChatGPT/VoteBoat btrfs\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "uname",
+        "-a"
+      ],
+      "exit": 0,
+      "stdout": "Linux core-karl 7.2.9-2-cachyos #1 SMP PREEMPT_DYNAMIC Thu, 08 Oct 2026 15:06:16 +0000 x86_64 GNU/Linux\n",
+      "stderr": ""
+    }
+  ],
+  "cpu_model": "Model name:                              AMD Ryzen 7 9800X3D 8-Core Processor",
+  "native_build_cpu_log_sha256": "da6de5a8777a73ab6de78d5c68a2212d570e23132f285f89e20a2d0cdf32bdad",
+  "profiling_policies_unchanged_by_work": {
+    "perf_event_paranoid": "2",
+    "kptr_restrict": "2",
+    "perf_event_mlock_kb": "516"
+  },
+  "scope": "Read-only pre-timing host/filesystem context. Same campaign WAL parent for every arm; no policy or hardware settings changed. Filesystem information does not establish a causal cost."
+}

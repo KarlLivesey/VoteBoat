@@ -1,0 +1,33 @@
+{
+  "all_owned_jobs_terminal": true,
+  "native": {
+    "job": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native472-linux",
+    "build_original_handle": 48082,
+    "build_actual_exit": 0,
+    "controls_original_handle": 87376,
+    "controls_actual_exit": 0,
+    "commands": 14
+  },
+  "framework": {
+    "job": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched472-linux-attempt2",
+    "export_original_handle": 50166,
+    "build_original_handle": 23097,
+    "build_actual_exit": 0,
+    "CLI_synchronous_tool_chunk": "a490e4",
+    "CLI_actual_exit": 0,
+    "controls": 3,
+    "executable_sha256": "3318a42a0570a543a78fcb3d2a8bfa9456ff983cb4a3fe4b56b87c8c728c1419",
+    "DWP_sha256": "c352b7dcce2359b8a8b76b7bce0d8e260ea821110e886aa2b7118e804c877ebd",
+    "frozen_test_original_handle": 75425,
+    "frozen_test_actual_exit": 0,
+    "frozen_test_count": 70,
+    "full1467source_hash_mode_equal": true
+  },
+  "first_framework_failure": {
+    "job": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched472-linux",
+    "synchronous_tool_chunk": "56b6bd",
+    "actual_exit": 101,
+    "scope": "Missing matched manifest/lock failed before compilation; original incomplete source/scripts/logs retained. Attempt2 fully new source/target."
+  },
+  "scope": "All export/build/control/check work END; no timing launched, no archival prerequisite. Root and pairing agent own next guards/quiet campaign."
+}

@@ -1,0 +1,48 @@
+START g1-tcp-r500-w64-q16-t1-baseline-off
+END g1-tcp-r500-w64-q16-t1-baseline-off 0
+START g1-tcp-r500-w64-q16-t1-candidate-off
+END g1-tcp-r500-w64-q16-t1-candidate-off 0
+START g1-tcp-r500-w64-q16-t1-baseline-on
+END g1-tcp-r500-w64-q16-t1-baseline-on 0
+START g1-tcp-r500-w64-q16-t1-candidate-on
+END g1-tcp-r500-w64-q16-t1-candidate-on 0
+START g1-tcp-r500-w64-q16-t2-candidate-off
+END g1-tcp-r500-w64-q16-t2-candidate-off 0
+START g1-tcp-r500-w64-q16-t2-baseline-off
+END g1-tcp-r500-w64-q16-t2-baseline-off 0
+START g1-tcp-r500-w64-q16-t2-candidate-on
+END g1-tcp-r500-w64-q16-t2-candidate-on 0
+START g1-tcp-r500-w64-q16-t2-baseline-on
+END g1-tcp-r500-w64-q16-t2-baseline-on 0
+START g1-tcp-r500-w64-q16-t3-baseline-on
+END g1-tcp-r500-w64-q16-t3-baseline-on 0
+START g1-tcp-r500-w64-q16-t3-candidate-on
+END g1-tcp-r500-w64-q16-t3-candidate-on 0
+START g1-tcp-r500-w64-q16-t3-baseline-off
+END g1-tcp-r500-w64-q16-t3-baseline-off 0
+START g1-tcp-r500-w64-q16-t3-candidate-off
+END g1-tcp-r500-w64-q16-t3-candidate-off 0
+START g1-quic-r500-w64-q16-t1-baseline-off
+END g1-quic-r500-w64-q16-t1-baseline-off 0
+START g1-quic-r500-w64-q16-t1-candidate-off
+END g1-quic-r500-w64-q16-t1-candidate-off 0
+START g1-quic-r500-w64-q16-t1-baseline-on
+END g1-quic-r500-w64-q16-t1-baseline-on 0
+START g1-quic-r500-w64-q16-t1-candidate-on
+END g1-quic-r500-w64-q16-t1-candidate-on 0
+START g1-quic-r500-w64-q16-t2-candidate-off
+END g1-quic-r500-w64-q16-t2-candidate-off 0
+START g1-quic-r500-w64-q16-t2-baseline-off
+END g1-quic-r500-w64-q16-t2-baseline-off 0
+START g1-quic-r500-w64-q16-t2-candidate-on
+END g1-quic-r500-w64-q16-t2-candidate-on 0
+START g1-quic-r500-w64-q16-t2-baseline-on
+END g1-quic-r500-w64-q16-t2-baseline-on 0
+START g1-quic-r500-w64-q16-t3-baseline-on
+END g1-quic-r500-w64-q16-t3-baseline-on 0
+START g1-quic-r500-w64-q16-t3-candidate-on
+END g1-quic-r500-w64-q16-t3-candidate-on 0
+START g1-quic-r500-w64-q16-t3-baseline-off
+END g1-quic-r500-w64-q16-t3-baseline-off 0
+START g1-quic-r500-w64-q16-t3-candidate-off
+END g1-quic-r500-w64-q16-t3-candidate-off 0

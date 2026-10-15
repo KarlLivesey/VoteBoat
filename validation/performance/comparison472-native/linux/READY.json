@@ -1,0 +1,30 @@
+{
+  "campaign_config_sha256": "26484d2b168d35e34d80f97c68e15dae7e8ddf1db196074e8589917e90f9b3d2",
+  "campaign_driver_sha256": "02c09e83ce6301acb9eaabc71515b24a1074d55ac45cc6fc63390c1158a69230",
+  "root_quiet_authorized_utc": "2026-10-15T06:30:32.056111+00:00",
+  "proofs": [
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison472-native/linux/ROOT_REVIEW.json",
+      "sha256": "33b4031b5a1842490b3b5d52d60e338a4c17ae7af31bb255cb024355acadf035"
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison472-native/linux/SOCKET_PREFLIGHT.json",
+      "sha256": "166973b05255d65908669dbeec3779630e0a2b4a85d9e958950d240624ef994e"
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison472-native/linux/HOST_CONTEXT.json",
+      "sha256": "a60b3a626a75813e0a9aad32c5a4b973f1b25ac5de8840245db1ba216aa57a5e"
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/ALL_ARTIFACT_SETUP_END.json",
+      "sha256": "5c6a68e907383c3b3022997355241df6ea99368d5c7fed71436c7ebb59d2cb31"
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison472/PAIR_SETUP_READY.json",
+      "sha256": "898f2511dcc16714bc340fbfe80f4ef120dd536e2bb4bf82c8b3ed57e6968315"
+    }
+  ],
+  "competing_build_or_benchmark_processes": [],
+  "coordination": "All Linux build/control/check/copy/archive jobs ended; Mac agent instructed to defer Linux collection/archive work; framework comparison prepared but will run separately. No other agent owns a Linux timing launch.",
+  "scope": "One original24-case native controller; no restart/replacement/retuning; all raw outputs after actual terminal."
+}

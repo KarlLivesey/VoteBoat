@@ -1,0 +1,13 @@
+{
+  "commit": "de5a7221e49c89771dd3cd22a0b904966b1f4789",
+  "exit": 0,
+  "proof": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/publication/TERMINAL.json",
+    "sha256": "c59385dc6c4d87c634319a0221a81d4ab67a8c645fa237955161ff8a410ac809"
+  },
+  "hook": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/.githooks/pre-push",
+    "sha256": "e3e9d01c12837936819f7c6f5b4b8840af19e9cded729381599df0f0fc17ee92"
+  },
+  "scope": "Actual root push48079terminal0/remote main exact; actual fullenabledhook separately source-qualified strict7 and publication rawlogs."
+}

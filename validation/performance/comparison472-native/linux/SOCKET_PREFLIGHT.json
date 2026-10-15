@@ -1,0 +1,22 @@
+{
+  "time": "2026-10-15T06:25:58.129927+00:00",
+  "actual_local_bind_results": [
+    {
+      "type": 1,
+      "address": [
+        "127.0.0.1",
+        33447
+      ],
+      "exit": 0
+    },
+    {
+      "type": 2,
+      "address": [
+        "127.0.0.1",
+        58336
+      ],
+      "exit": 0
+    }
+  ],
+  "no_workload_started": true
+}

@@ -1,0 +1,13 @@
+{
+  "original_handle": 33407,
+  "actual_exit": 0,
+  "original_terminal_tool_chunk": "8dab96",
+  "stage": "ALL_TIMING_END",
+  "workloads": 24,
+  "workload_failures": 0,
+  "validator_commands": 48,
+  "validator_failures": 0,
+  "observed_end": "2026-10-15T06:44:10.504125+00:00",
+  "config_sha256": "26484d2b168d35e34d80f97c68e15dae7e8ddf1db196074e8589917e90f9b3d2",
+  "scope": "All workload processes and post-campaign validators/source guards actually ended. Linux quiet released for collection/analysis; no replacement or retuning."
+}

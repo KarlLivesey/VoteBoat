@@ -1,0 +1,55 @@
+--- /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/guard.py
++++ /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native472-linux/guard.py
+@@ -1,35 +1,35 @@
+ import json,hashlib,shutil,sys,subprocess,re
+ from pathlib import Path
+ h=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
+-ESSENTIALS={'src/log/command_bytes.rs', 'tests/startup/append_window.rs', 'src/raft/append_window.rs', 'src/format_crc.rs', 'src/log/command_bytes/tests.rs', 'examples/benchmark/observe_barriers.rs', 'src/runtime/ready_batch/tests/append_window.rs', 'src/runtime/effects/append_window.rs', 'src/format_crc/tests.rs', 'src/native/startup/append_window.rs', 'examples/benchmark/append_window.rs', 'tests/provider_conformance/append_window.rs', 'tests/worker/append_window.rs', 'src/raft/connections/tests.rs', 'src/runtime/connections/tests.rs', 'rust-toolchain.toml', 'src/raft/append_window/tests.rs', 'src/runtime/append_window.rs'}
++ESSENTIALS={'src/log/command_bytes.rs', 'tests/startup/append_window.rs', 'src/raft/append_window.rs', 'src/format_crc.rs', 'src/log/command_bytes/tests.rs', 'examples/benchmark/observe_barriers.rs', 'src/runtime/ready_batch/tests/append_window.rs', 'src/runtime/effects/append_window.rs', 'src/format_crc/tests.rs', 'src/native/startup/append_window.rs', 'examples/benchmark/append_window.rs', 'tests/provider_conformance/append_window.rs', 'tests/worker/append_window.rs', 'src/raft/connections/tests.rs', 'src/runtime/connections/tests.rs', 'rust-toolchain.toml', 'src/runtime/replica/pump.rs', 'src/runtime/ready_batch/tests/advance_budget.rs', 'tests/support/replica_driver/append_pump.rs', 'src/raft/append_window/tests.rs', 'src/runtime/append_window.rs'}
+ def qualification(job):
+  commit=(job/'REQUIRED_COMMIT.txt').read_text().strip()
+- assert re.fullmatch('[0-9a-f]{40}',commit), '470 unpublished: source export/build/setup refused'
+- publication=json.loads((job/'PUBLICATION.json').read_text())
+- assert publication['commit']==commit and publication['exit']==0
++ assert re.fullmatch('[0-9a-f]{40}',commit), '472 unpublished: source export/build/setup refused'
++ publication=json.loads((job/'PUBLICATION.json').read_text());assert publication['commit']==commit and publication['exit']==0
+  proof=publication['proof'];assert h(proof['path'])==proof['sha256']
+  published=json.loads(Path(proof['path']).read_text())
+- assert published['commit']==commit and published['exit']==0 and published['hook_enabled'] and published['remote_commit']==commit
++ assert published['commit']==commit and published['exit']==0 and published['remote_exit']==0 and published['remote_main']==commit
++ hook=publication['hook'];assert subprocess.check_output(['git','config','--local','core.hooksPath'],text=True).strip()=='.githooks';assert h(hook['path'])==hook['sha256']
+  q=json.loads((job/'FUNCTIONAL_QUALIFICATION.json').read_text());assert q['source_commit']==commit
+- inv=q['source_inventory'];assert h(inv['path'])==inv['sha256'];qualified=json.loads(Path(inv['path']).read_text())['files'];assert qualified and ESSENTIALS<=set(qualified)
+- required={'doc29','integration23','focused22','controls12','baseline24','baseline27','baseline28','doc_only','integration23_source','affected_remaining','core_regressions','matched','native_benchmark','services'}
+- assert required<=set(q['proofs'])
++ inv=q['source_inventory'];assert h(inv['path'])==inv['sha256'];normalized=json.loads(Path(inv['path']).read_text());qualified=normalized['files']
++ assert (ESSENTIALS-{'rust-toolchain.toml'})<=set(qualified)
++ raw=normalized['derived_from'];assert h(raw['path'])==raw['sha256'];assert json.loads(Path(raw['path']).read_text())==qualified
+  evidence={}
+  for name,p in q['proofs'].items():
+   assert h(p['path'])==p['sha256'],name;evidence[name]=json.loads(Path(p['path']).read_text())
+- for name in ['doc29','integration23','focused22','controls12','affected_remaining','core_regressions','matched','native_benchmark','services']:
++ for name in ['focused','validation','selected','core_matched_metadata','strict']:
+   assert evidence[name]['exit']==0,name
+- for name in ['doc29','integration23','focused22','controls12']:assert evidence[name]['same_selected_inputs'],name
+- for name in ['baseline24','baseline27','baseline28']:assert evidence[name]['exit']==101,name
+- doc=evidence['doc_only'];assert doc['doc_stripped_bytes_equal'] and doc['only_changed_lines_are_trait_method_rustdoc']
+- prior=evidence['integration23_source']['files'];assert set(prior)==set(qualified)
+- changed={n for n in qualified if qualified[n]!=prior[n]};assert changed=={'src/worker.rs'},changed
+- assert prior['src/worker.rs']['sha256']==doc['before_sha256'] and qualified['src/worker.rs']['sha256']==doc['after_sha256']
+- assert prior['src/worker.rs']['mode']==qualified['src/worker.rs']['mode']
++  if 'commands' in evidence[name]:assert all(c['exit']==0 for c in evidence[name]['commands']),name
++ for name in ['focused','validation','core_matched_metadata','strict']:assert evidence[name]['source_unchanged'],name
++ assert evidence['selected']['same_selected_inputs']
++ for name in ['attempt1','attempt2','baseline24','baseline27','baseline28']:assert evidence[name]['exit']==101,name
++ for pair in q['final_source_guards']:
++  for p in pair.values():assert h(p['path'])==p['sha256']
++  assert json.loads(Path(pair['before']['path']).read_text())==json.loads(Path(pair['after']['path']).read_text())
+  return commit,qualified
+ job=Path(sys.argv[1]).resolve();required_commit,qualified=qualification(job)
+ if sys.argv[2]=='qualification':
+- print(json.dumps({'commit':required_commit,'qualified_inputs':len(qualified),'scope':'Changed root Core/runtime qualification plus exact doc-only reuse; three baseline-reproduced failures remain recorded, not passing tests.'}));sys.exit(0)
++ print(json.dumps({'commit':required_commit,'qualified_inputs':len(qualified),'scope':'Changed472 driver pump qualified by actual focused/broad/core/matched/strict scopes; three baseline-reproduced failures remain failures.'}));sys.exit(0)
+ source=(job/'source').resolve();m=json.loads((job/'SOURCE.json').read_text());expected=m['sha256'];assert m['commit']==required_commit
+ actual={p.relative_to(source).as_posix() for p in source.rglob('*') if p.is_file()};assert actual==set(expected),(actual-set(expected),set(expected)-actual)
+ assert ESSENTIALS<=set(expected)

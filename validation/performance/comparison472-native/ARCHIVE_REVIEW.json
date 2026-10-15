@@ -1,0 +1,16 @@
+{
+  "archive": "/home/karllivesey/Documents/ChatGPT/VoteBoat/validation/performance/comparison472-native/linux",
+  "payloads": 662,
+  "gzip": 31,
+  "manifest_sha256": "2be9130a96bb190ecbe0ebbf923cb56a113b0a3d328c1e11decd0a0cb128a5e8",
+  "exact_recursive_set_all_SHA": "PASS",
+  "gzip_original_container_hashes_lengths": "PASS",
+  "no_links_or_binary_magic": "PASS",
+  "actual24workloads_and48validators_zero": "PASS",
+  "all24actual_recovered_completed_plus64_retry_join": "PASS",
+  "initial_summary_paired_exact_unchanged_after_classification_fix": "PASS",
+  "sealed_fresh_manifest_reference": "PASS",
+  "collector_original_handle": 60491,
+  "collector_actual_exit": 0,
+  "scope": "Independent reread of sealed archive only; no tests/builds/workloads/Mac copies. Review outside sealed linux/."
+}

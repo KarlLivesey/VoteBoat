@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native472-linux/artifacts/native/native_benchmark",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native472-linux/controls/tcp-shared",
+    "tcp",
+    "128",
+    "64",
+    "1",
+    "--append-window",
+    "4"
+  ],
+  "start": "2026-10-15T06:22:52.212029+00:00",
+  "end": "2026-10-15T06:22:54.171758+00:00",
+  "elapsed_s": 1.959734814998228,
+  "exit": 0
+}

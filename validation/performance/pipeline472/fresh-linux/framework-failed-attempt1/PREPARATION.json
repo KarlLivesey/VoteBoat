@@ -1,0 +1,57 @@
+{
+  "original_scripts": [
+    {
+      "name": "run.sh",
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched470-linux/run.sh",
+      "original_sha256": "d423293f89c4e40aedbd856ac7212577ab63c311a583ed4ffcdcc355b81887bd",
+      "prepared_sha256": "8ea1dcad0b65f4b168b4a6a33c7c38a8b6b2c2ea5d72d25478ba79d50cba91c2"
+    },
+    {
+      "name": "guard.py",
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched470-linux/guard.py",
+      "original_sha256": "36bfc9e52411de108001d0ec57723771adc87d5683b24a034acb6d5c31f7bd86",
+      "prepared_sha256": "2bddc305e1a0c22081ecb38634c031753cc643c4b315792bfbca61f5d632095a"
+    },
+    {
+      "name": "export-source.sh",
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched470-linux/export-source.sh",
+      "original_sha256": "0450046b59b6a8bf6d3e63eb389292cb3c49ec65e0c50ec87af986e736da38b8",
+      "prepared_sha256": "1603ab68839f854bf122fbb077d63d840741897f7bab8ba85d3dd59f8f305cda"
+    },
+    {
+      "name": "artifact-guard.py",
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched470-linux/artifact-guard.py",
+      "original_sha256": "9ff349c4da1924de0966345eb5119411c39a4af9fd62eb8731b336c36b1b79f8",
+      "prepared_sha256": "da1ff215533fb8bfdb41c4622022af6365700770676bd18c711b19dfcbd6f1ac"
+    },
+    {
+      "name": "phase-diagnostic-check.py",
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched470-linux/phase-diagnostic-check.py",
+      "original_sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+      "prepared_sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0"
+    },
+    {
+      "name": "cli.py",
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched470-linux/cli.py",
+      "original_sha256": "087742b9f5e12308c822b52bf95a77b8dd4c352308ae052a147a2068ee020024",
+      "prepared_sha256": "087742b9f5e12308c822b52bf95a77b8dd4c352308ae052a147a2068ee020024"
+    },
+    {
+      "name": "cli-run.sh",
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched470-linux/cli-run.sh",
+      "original_sha256": "e573e731f4e1b6c04d42b986e901fda9dc264bd7d3d80a5da7ef55284ce82412",
+      "prepared_sha256": "f21b9d031886ee516b01bcb3a9ba71ae5ad62a5d829bbabe8242437d6b0bc894"
+    },
+    {
+      "name": "setup-after-build.sh",
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched470-linux/setup-after-build.sh",
+      "original_sha256": "788d6b63d036020b5bf50a7368b01650ec1e54c396c619a20e11b468604fb9cc",
+      "prepared_sha256": "d72043e1934efba90983b4dea1b8376be2b289d6ec3e15e4febf1fde6c643202"
+    }
+  ],
+  "required_commit": "de5a7221e49c89771dd3cd22a0b904966b1f4789",
+  "source_exports_started": false,
+  "build_started": false,
+  "timing_started": false,
+  "scope": "Minimal470runner adaptation; root review required before export/build. No build/provenance receipts fabricated."
+}

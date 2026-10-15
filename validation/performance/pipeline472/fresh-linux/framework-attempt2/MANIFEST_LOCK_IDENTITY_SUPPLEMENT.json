@@ -1,0 +1,32 @@
+{
+  "source_commit": "de5a7221e49c89771dd3cd22a0b904966b1f4789",
+  "published_parent": "a01d9d51e0b1e3a4e2e3fda10e303f5bd2d12f38",
+  "files": {
+    "benchmarks/matched/Cargo.toml": {
+      "published_parent_sha256": "44755b3e8f1eb6614a3326dffb46405ed9aab976408ee68537a54c2298db1431",
+      "published472_sha256": "44755b3e8f1eb6614a3326dffb46405ed9aab976408ee68537a54c2298db1431",
+      "prior470_export_sha256": "44755b3e8f1eb6614a3326dffb46405ed9aab976408ee68537a54c2298db1431",
+      "actual_attempt2_frozen_sha256": "44755b3e8f1eb6614a3326dffb46405ed9aab976408ee68537a54c2298db1431",
+      "physical_mode": "0o644",
+      "in_original1453_qualification": false
+    },
+    "benchmarks/matched/Cargo.lock": {
+      "published_parent_sha256": "e046ca2e60f1da749c7dec66c2c5e0a8b978b10b53863d61ddf50f2b06e1684d",
+      "published472_sha256": "e046ca2e60f1da749c7dec66c2c5e0a8b978b10b53863d61ddf50f2b06e1684d",
+      "prior470_export_sha256": "e046ca2e60f1da749c7dec66c2c5e0a8b978b10b53863d61ddf50f2b06e1684d",
+      "actual_attempt2_frozen_sha256": "e046ca2e60f1da749c7dec66c2c5e0a8b978b10b53863d61ddf50f2b06e1684d",
+      "physical_mode": "0o644",
+      "in_original1453_qualification": false
+    }
+  },
+  "original1453_scope_unchanged": true,
+  "prior_frozen470_inventory": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched470-linux/SOURCE.json",
+    "sha256": "d4fa4183780d5bad13794385d2867a5a7ae98ac1ec5fb4fd8bd6d08aa379aeb1"
+  },
+  "actual_attempt2_inventory": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched472-linux-attempt2/SOURCE.json",
+    "sha256": "1cb59334bf1f19615408ac48f923529151cce400c38d67477b93048337121603"
+  },
+  "scope": "Retrospective byte identity only. Original qualification did NOT capture these two files; separate full frozen-source standalone70 must pass before timing. No claim of original before/after coverage."
+}

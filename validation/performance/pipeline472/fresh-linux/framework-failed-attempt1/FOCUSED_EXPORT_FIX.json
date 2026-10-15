@@ -1,0 +1,11 @@
+{
+  "original_synchronous_tool_chunk": "56b6bd",
+  "actual_exit": 101,
+  "cause": "Frozen strict7 projection omitted matched workspace manifests; export extras inherited from470 assumed those were qualified. Cargo failed manifest lookup before any compilation or target creation.",
+  "preserved_attempt": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched472-linux/preparation-attempt1",
+  "change": "Only add committed benchmarks/matched/Cargo.toml and Cargo.lock to supplemental export inputs. Native artifact/source untouched.",
+  "old_export_script_sha256": "1603ab68839f854bf122fbb077d63d840741897f7bab8ba85d3dd59f8f305cda",
+  "new_export_script_sha256": "386c6c0c461c1cfd53166689b17d807690014eae107179e49ca1676bdfafe0e8",
+  "original_build_target_absent": true,
+  "retry_launched": false
+}

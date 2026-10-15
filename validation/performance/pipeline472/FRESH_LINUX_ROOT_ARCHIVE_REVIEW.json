@@ -1,0 +1,7 @@
+{
+  "payloads": 357,
+  "compressed_originals": 22,
+  "manifest_sha256": "af2b60150a81a0e9757a4ae10ac2c451058b6bf25384cfc5f6b5a318fa973cb7",
+  "root_independent_exact_set_payload_and_original_container_hashes": "PASS",
+  "scope": "Reread all archived evidence after collector termination. No workload/check/build rerun; omission/failed export and supplement scopes retained."
+}

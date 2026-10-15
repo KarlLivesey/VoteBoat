@@ -1,0 +1,11 @@
+--- /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched470-linux/setup-after-build.sh
++++ /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched472-linux/setup-after-build.sh
+@@ -1,7 +1,7 @@
+ #!/usr/bin/env bash
+ # Actual functional controls only; no comparison/timing launch.
+ set -euo pipefail
+-job=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched470-linux
++job=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched472-linux
+ trap 'rc=$?; printf "%s\n" "$rc" > "$job/SETUP_STATUS"' EXIT
+ python3 "$job/guard.py" "$job" qualification > "$job/logs/setup-qualification-preflight.log"
+ bash "$job/cli-run.sh"

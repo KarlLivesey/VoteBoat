@@ -1,0 +1,27 @@
+{
+  "original_scripts": [
+    {
+      "name": "run.sh",
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/run.sh",
+      "original_sha256": "5e4f27557d7a566efd939c333c2de51a1739db8fd5378a2efa85d9d3fb7123a6",
+      "prepared_sha256": "cf9caacb1397c24dd292f98e6cdba6210109d35b091e4429c3296016768cf133"
+    },
+    {
+      "name": "guard.py",
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/guard.py",
+      "original_sha256": "a3c4cdc5c60d4e3b37c79673576e043ccd099485b04fbe6a649d9b15edd1b201",
+      "prepared_sha256": "431e9b2bbf6d0a62bc3812db0dd0557146f882bbbd9d2b450e7c31a733dd5c5c"
+    },
+    {
+      "name": "export-source.sh",
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/export-source.sh",
+      "original_sha256": "d231f3cad4de4b057d4c4ea4ac52ea5e21b05328f4f3a0124b36f26035f70d88",
+      "prepared_sha256": "5db30785ba6b63d35fb94d1afadc4ad254ff05bf821b44be232e9c03c64370e4"
+    }
+  ],
+  "required_commit": "de5a7221e49c89771dd3cd22a0b904966b1f4789",
+  "source_exports_started": false,
+  "build_started": false,
+  "timing_started": false,
+  "scope": "Minimal470runner adaptation; root review required before export/build. No build/provenance receipts fabricated."
+}

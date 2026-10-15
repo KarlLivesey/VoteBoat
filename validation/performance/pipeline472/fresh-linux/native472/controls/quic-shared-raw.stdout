@@ -1,0 +1,2 @@
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native472-linux/controls/quic-shared: 128 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=22 units=22 commands=384 mean_units=1.000 append_ms=0.427 barriers=20 mean_appends_per_barrier=1.100 mean_units_per_barrier=1.100 barrier_ms=700.214 sync_ms=231.649 publish_ms=468.380 histogram=1:22 synchronized=20 no_io=0 ambiguous_io=0 dependency_correlation_complete=true

@@ -1,0 +1,13 @@
+--- /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched470-linux/artifact-guard.py
++++ /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched472-linux/artifact-guard.py
+@@ -141,8 +141,8 @@
+               'src/format_crc.rs', 'src/format_crc/tests.rs'} <= set(config['source_sha256']),
+              'essential455 command-byte/configuration inputs absent')
+     if config['source_commit'] == REQUIRED_CANDIDATE_COMMIT:
+-        need({'src/log/command_bytes.rs', 'tests/startup/append_window.rs', 'src/raft/append_window.rs', 'src/format_crc.rs', 'src/log/command_bytes/tests.rs', 'examples/benchmark/observe_barriers.rs', 'src/runtime/ready_batch/tests/append_window.rs', 'src/runtime/effects/append_window.rs', 'src/format_crc/tests.rs', 'src/native/startup/append_window.rs', 'examples/benchmark/append_window.rs', 'tests/provider_conformance/append_window.rs', 'tests/worker/append_window.rs', 'src/raft/connections/tests.rs', 'src/runtime/connections/tests.rs', 'rust-toolchain.toml', 'src/raft/append_window/tests.rs', 'src/runtime/append_window.rs'} <= set(config['source_sha256']), 'essential470 pipeline source/controls absent')
+-        for name in ['docs/COMMAND_BYTES.md', 'benchmarks/matched/COMPARISON.md', 'validation/performance/pipeline470/SCHEMA.md']:
++        need({'src/log/command_bytes.rs', 'tests/startup/append_window.rs', 'src/raft/append_window.rs', 'src/format_crc.rs', 'src/log/command_bytes/tests.rs', 'examples/benchmark/observe_barriers.rs', 'src/runtime/ready_batch/tests/append_window.rs', 'src/runtime/effects/append_window.rs', 'src/format_crc/tests.rs', 'src/native/startup/append_window.rs', 'examples/benchmark/append_window.rs', 'tests/provider_conformance/append_window.rs', 'tests/worker/append_window.rs', 'src/raft/connections/tests.rs', 'src/runtime/connections/tests.rs', 'rust-toolchain.toml', 'src/raft/append_window/tests.rs', 'src/runtime/append_window.rs', 'src/runtime/replica/pump.rs', 'src/runtime/ready_batch/tests/advance_budget.rs', 'tests/support/replica_driver/append_pump.rs'} <= set(config['source_sha256']), 'essential472 pump/pipeline source/controls absent')
++        for name in ['docs/COMMAND_BYTES.md', 'benchmarks/matched/COMPARISON.md', 'validation/performance/pipeline470/SCHEMA.md', 'validation/performance/pipeline472/SCHEMA.md']:
+             doc = config['api_documentation'][name]
+             need(doc['source_commit'] == config['source_commit'], 'wrong committed control document: ' + name)
+             need(digest(doc['path']) == doc['sha256'], 'changed committed control document: ' + name)

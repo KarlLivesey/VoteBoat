@@ -1,0 +1,28 @@
+--- /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/export-source.sh
++++ /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native472-linux/export-source.sh
+@@ -4,7 +4,7 @@
+ python3 - <<'PY'
+ from pathlib import Path
+ import hashlib,json,subprocess,tarfile
+-root=Path.cwd();job=root/'target/p9/native470-linux';h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
++root=Path.cwd();job=root/'target/p9/native472-linux';h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+ subprocess.run(['python3',str(job/'guard.py'),str(job),'qualification'],check=True)
+ commit=(job/'REQUIRED_COMMIT.txt').read_text().strip()
+ q=json.loads((job/'FUNCTIONAL_QUALIFICATION.json').read_text())
+@@ -14,7 +14,7 @@
+ tracked={}
+ for line in tree.splitlines():
+  meta,name=line.split('\t',1);mode,kind,blob=meta.split();assert kind=='blob';tracked[name]=(mode,blob)
+-extras={'.gitignore','README.md','rust-toolchain.toml','LICENSE','AGENTS.md','docs/COMMAND_BYTES.md','docs/PERFORMANCE.md','docs/component-contracts.md','validation/performance/pipeline470/SCHEMA.md','benchmarks/matched/README.md','benchmarks/matched/SCHEMA.md','benchmarks/matched/COMPARISON.md'}|{name for name in tracked if name.startswith('.cargo/')}
++extras={'.gitignore','README.md','rust-toolchain.toml','LICENSE','AGENTS.md','docs/COMMAND_BYTES.md','docs/PERFORMANCE.md','docs/component-contracts.md','validation/performance/pipeline470/SCHEMA.md','validation/performance/pipeline472/SCHEMA.md','benchmarks/matched/README.md','benchmarks/matched/SCHEMA.md','benchmarks/matched/COMPARISON.md'}|{name for name in tracked if name.startswith('.cargo/')}
+ extras={name for name in extras if name in tracked}
+ inputs=sorted(set(qualified)|extras)
+ assert set(inputs)<=set(tracked)
+@@ -39,6 +39,6 @@
+ source={'commit':commit,'source_root':str(job/'source'),'inputs':len(inputs),'compiled_inputs':len(inputs)-len(supplemental),'supplemental_inputs':supplemental,'changed_inputs':changed,'sha256':expected,'git_modes':{name:tracked[name][0] for name in inputs},'git_blob_ids':{name:tracked[name][1] for name in inputs},'physical_modes':physical,'archive_sha256':h(job/'source.tar'),'functional_projection_inputs':len(qualified),'added_artifact_configuration_inputs':sorted(set(inputs)-set(qualified)),'scope_note':'compiled_inputs preserves historical input projection label; Cargo JSON records prove actual compiled roots; added toolchain/config inputs captured without claiming extra functional test coverage'}
+ (job/'SOURCE.json').write_text(json.dumps(source,indent=2)+'\n')
+ (job/'source.sha256').write_text(''.join(digest+'  '+name+'\n' for name,digest in sorted(expected.items())))
+-(job/'slice470-source.sha256').write_text(''.join(expected[name]+'  '+name+'\n' for name in changed))
++(job/'slice472-source.sha256').write_text(''.join(expected[name]+'  '+name+'\n' for name in changed))
+ print(json.dumps({'source_inputs':len(inputs),'functional_projection':len(qualified),'added_build_configuration':source['added_artifact_configuration_inputs'],'changed_inputs':len(changed),'fresh_target_absent':True,'build_started':False}))
+ PY

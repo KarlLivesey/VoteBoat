@@ -1,0 +1,11 @@
+{
+  "command": [
+    "bash",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched472-linux/run.sh"
+  ],
+  "controller_pid": 2,
+  "build_pid": 3,
+  "start": "2026-10-15T06:23:35.190376+00:00",
+  "run_script_sha256": "8ea1dcad0b65f4b168b4a6a33c7c38a8b6b2c2ea5d72d25478ba79d50cba91c2",
+  "source_inventory_sha256": "ac62bbcb0cf7b4cf6aaca7ba254c4d9ac6810b41586c349eb27043a4bdfd50b7"
+}

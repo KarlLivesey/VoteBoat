@@ -1,0 +1,11 @@
+{
+  "command": [
+    "node",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native472-linux/control-tools/check-native-benchmark.mjs",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native472-linux/controls/quic-startup"
+  ],
+  "start": "2026-10-15T06:22:57.784839+00:00",
+  "end": "2026-10-15T06:22:57.805612+00:00",
+  "elapsed_s": 0.020782693987712264,
+  "exit": 0
+}

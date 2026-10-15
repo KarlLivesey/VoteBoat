@@ -1,0 +1,20 @@
+{
+  "archive": "/home/karllivesey/Documents/ChatGPT/VoteBoat/validation/performance/pipeline472/fresh-linux",
+  "payloads": 357,
+  "gzip": 22,
+  "manifest_sha256": "af2b60150a81a0e9757a4ae10ac2c451058b6bf25384cfc5f6b5a318fa973cb7",
+  "exact_set_all_payload_SHA": "PASS",
+  "all_gzip_original_and_container_SHA_lengths": "PASS",
+  "no_links_binary_magic": "PASS",
+  "actual_original_copy_artifact_and_DWP_hashes": "PASS",
+  "all6_freshfalse_compilerrecords": "PASS",
+  "three_attempt_statuses": [
+    0,
+    101,
+    0
+  ],
+  "native1465_framework1467_inventory_scope": "PASS",
+  "four_native128recover192_retryjoin_and_shared_nomissing_drop_errors": "PASS",
+  "three_CLI_and_frozen70_full_source_equal": "PASS",
+  "scope": "Independent reread after synchronous collector chunkb8a323 actual0; review outside sealed fresh-linux, no checks/workloads rerun."
+}

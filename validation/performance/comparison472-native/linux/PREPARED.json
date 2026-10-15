@@ -1,0 +1,8 @@
+{
+  "cases": 24,
+  "config_sha256": "26484d2b168d35e34d80f97c68e15dae7e8ddf1db196074e8589917e90f9b3d2",
+  "driver_sha256": "02c09e83ce6301acb9eaabc71515b24a1074d55ac45cc6fc63390c1158a69230",
+  "schema_sha256": "b48fa7f5fb035e782f1667b327f235283f99f2b3b97d2c1b4a268fbdca0c5979",
+  "setup_sha256": "db76def594d67dce1fcd1641c63c935e86c483fe3b410816e3f4b49f6f99a3ba",
+  "scope": "Setup complete; no READY/quiet grant or workload launch."
+}

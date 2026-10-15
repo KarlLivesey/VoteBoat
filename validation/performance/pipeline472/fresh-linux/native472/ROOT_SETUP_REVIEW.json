@@ -1,0 +1,24 @@
+{
+  "source_commit": "de5a7221e49c89771dd3cd22a0b904966b1f4789",
+  "review": "Root read actual guard/export/run/setup scripts, compared prior470 source/profile controls, verified actual publication and final1453-source qualification. Fresh targets absent at review. Native debug0/default LTO+CGU and framework debug2/thin/CGU1 stay separate. No timing grant.",
+  "files": {
+    "run.sh": "cf9caacb1397c24dd292f98e6cdba6210109d35b091e4429c3296016768cf133",
+    "run.sh.adaptation.diff": "85d7e74b6cfc778b164313dcff220f5d5d34f585d0661dfb66d420f02c2cee23",
+    "guard.py": "431e9b2bbf6d0a62bc3812db0dd0557146f882bbbd9d2b450e7c31a733dd5c5c",
+    "guard.py.adaptation.diff": "cebab5e5b9ec8698ac86edb9ea4b3d98fef35ebaa2f44c663fd3d018e4364253",
+    "export-source.sh": "5db30785ba6b63d35fb94d1afadc4ad254ff05bf821b44be232e9c03c64370e4",
+    "export-source.sh.adaptation.diff": "d382ee4003567578f29619295b1241e90277e2eef8f4a2648a1a7c1d33d4e824",
+    "QUALIFIED_SOURCE.json": "b757c869fa021edc433ecbc2f8443f732456086e7dd81205e82a6ee399bbf857",
+    "FUNCTIONAL_QUALIFICATION.json": "18bbf908277fbe62ea78ba9ed9bec8e6b501a42db0facc7d3898d83edd3e63a2",
+    "PUBLICATION.json": "9364e36008b56fcf265f1a879ec3fbb67ba49abe8f4dcdf0699f66b5173cdafa",
+    "REQUIRED_COMMIT.txt": "1b2016231d3824c376e88de10be3881782aae90fbc7eea9191a2366fd4f541e3",
+    "PREPARATION.json": "6e8457d4315eed2a7cc4eedc7c0697c201abf9dadba59c3ec1216c991af85e9f",
+    "setup-after-build.sh": "869bc4fe8cd692666c092c56d51bec8290b396591ed30108bdfac6584bd8a294",
+    "SETUP_READY_FOR_REVIEW.json": "bc84aefd3a7c0b9f9e93ea81367c0996e4b10391c2d84d5255b68615f914c110",
+    "logs/prepared-qualification.stdout": "d3ca3fdee4c8409105e14c5225debdc03068c79d0397e3720c42c05c0be03fb2",
+    "logs/prepared-qualification.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "controls/run.py": "23309603b962b714158821d67840b09b3fd4dbbc39d7aef349581842243efdbd",
+    "controls/check-selection.mjs": "3a46282cab0bca6b771f547f0578b598172f54e01fe57ea51dadfae2e80c4092",
+    "controls/run.py.adaptation.diff": "3be788aecdbba93cd0e99c9dcc602ba95a317fda154e59c3c3c87c535e2de98e"
+  }
+}

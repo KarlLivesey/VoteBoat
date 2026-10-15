@@ -1,0 +1,90 @@
+{
+  "source_commit": "de5a7221e49c89771dd3cd22a0b904966b1f4789",
+  "source_inventory": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native472-linux/QUALIFIED_SOURCE.json",
+    "sha256": "b757c869fa021edc433ecbc2f8443f732456086e7dd81205e82a6ee399bbf857"
+  },
+  "proofs": {
+    "attempt1": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/attempt1/EXIT.json",
+      "sha256": "7452d4648fb3e8dde34ebdbac8e97008bfc4c937e35bcb0a009e6a9d3f75d2c4"
+    },
+    "attempt2": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/attempt2/EXIT.json",
+      "sha256": "9e25b6378dfb9c842f20a6aab5eaf8665ad9d71760c234c461748ee04eb2dce7"
+    },
+    "focused": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/attempt3/TERMINAL.json",
+      "sha256": "bd13ec7e39b8f856c1e3818fab269a952eef998f7733098bddd882ef0f2ff537"
+    },
+    "validation": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/validation4/TERMINAL.json",
+      "sha256": "5ae990f1bf5eef78ad57012a0d70fb7eb57d97fffdf93807e0464184105c582c"
+    },
+    "selected": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/selected5/TERMINAL.json",
+      "sha256": "9734d5de1942d4785f27d8270862f4e69a9690779d0d7bade5d590dfbad45319"
+    },
+    "core_matched_metadata": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/profiles6/TERMINAL.json",
+      "sha256": "13a4d1f468fedefb1bc0e84d55c0e2a4277f86bc256ef93f234776541379085d"
+    },
+    "strict": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/strict7/TERMINAL.json",
+      "sha256": "2364562f282109a6826194ce75460ad71dec788abde86b81215cec8ab81c33c0"
+    },
+    "baseline24": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline24/TERMINAL.json",
+      "sha256": "1ed3faec1b2e0d32ee5157a15f4e395d68a9c99f712c6ecb2d88228b02a1971e"
+    },
+    "baseline27": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline27/TERMINAL.json",
+      "sha256": "5adf03abd25a86360155046042e3bb0ef0d3d021871d05bfb8cb693fba61e3bc"
+    },
+    "baseline28": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline28/TERMINAL.json",
+      "sha256": "f5816abc4a2b64fe1d71011698ab2b567fbb90c411e467999f86728b8a66fff1"
+    }
+  },
+  "final_source_guards": [
+    {
+      "before": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/validation4/BEFORE.json",
+        "sha256": "d2d1273b22d5dd1af22defc8e1dfbb7373bc6d56d1b3281a2ddaf10b0c89ecba"
+      },
+      "after": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/validation4/AFTER.json",
+        "sha256": "d2d1273b22d5dd1af22defc8e1dfbb7373bc6d56d1b3281a2ddaf10b0c89ecba"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/profiles6/BEFORE.json",
+        "sha256": "d2d1273b22d5dd1af22defc8e1dfbb7373bc6d56d1b3281a2ddaf10b0c89ecba"
+      },
+      "after": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/profiles6/AFTER.json",
+        "sha256": "d2d1273b22d5dd1af22defc8e1dfbb7373bc6d56d1b3281a2ddaf10b0c89ecba"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/strict7/BEFORE.json",
+        "sha256": "d2d1273b22d5dd1af22defc8e1dfbb7373bc6d56d1b3281a2ddaf10b0c89ecba"
+      },
+      "after": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice472/strict7/AFTER.json",
+        "sha256": "d2d1273b22d5dd1af22defc8e1dfbb7373bc6d56d1b3281a2ddaf10b0c89ecba"
+      }
+    }
+  ],
+  "scopes": {
+    "focused": "driver8+hidden2",
+    "validation": "all-featurelib446,driver15,application12/provider46/runtime55/worker11,TCPQUICservices2,debugexamplebuild",
+    "core": "lib363/owner203/provider31/runtime38/worker3",
+    "matched": "70",
+    "strict": "actual enabled full hook0",
+    "selected": "14commands/four debug128+recover192/retry/join histories; physical activation only"
+  },
+  "limitations": "Three inherited baseline-reproduced native failures remain failures; no whole all-feature owner acceptance or measured472 speedup."
+}

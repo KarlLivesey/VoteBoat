@@ -1,0 +1,15 @@
+{
+  "scope": "Fresh attempt2 after observed first missing workspace manifest failure; no compilation had started. Not timeout restart.",
+  "prior_job": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched472-linux",
+  "prior_actual_exit": 101,
+  "change": [
+    "supplemental committed benchmarks/matched/Cargo.toml",
+    "supplemental committed benchmarks/matched/Cargo.lock",
+    "require full two-workspace manifests/locks before compile",
+    "all new setup/source/artifact paths identify actual attempt2"
+  ],
+  "syntax": "PASS",
+  "qualification_exit": 0,
+  "source_and_target_absent": true,
+  "native_source_untouched": true
+}

@@ -1,0 +1,10 @@
+{
+  "initial_readout_exit": 0,
+  "corrected_readout_exit": 0,
+  "cause": "Inherited readout subtracted lifetime append_max_ns/barrier_max_ns under generic measurement_deltas. Those are changes of lifetime maxima, not interval tails.",
+  "fix": "Remove lifetime maxima from counter deltas/replica-inclusive sums; retain every raw maximum in all_numeric_snapshots and lifetime_maxima_by_stage.",
+  "initial_derived_files_preserved": "analysis-attempt1/",
+  "raw_outputs_changed": false,
+  "summary_and_paired_bytes_unchanged": true,
+  "scope": "Derived classification only; no validator or workload rerun. Actual p99 remains independently computed from all original offer rows."
+}

@@ -1,0 +1,10 @@
+--- /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/run.sh
++++ /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native472-linux/run.sh
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env bash
+ set -euo pipefail
+-job=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux
++job=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native472-linux
+ trap 'rc=$?; printf "%s\n" "$rc" > "$job/STATUS"' EXIT
+ stage(){ printf '%s\n' "$1" > "$job/STAGE"; }
+ printf '%s\n' "$$" > "$job/PID"

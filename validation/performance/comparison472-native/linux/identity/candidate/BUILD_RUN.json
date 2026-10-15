@@ -1,0 +1,11 @@
+{
+  "command": [
+    "bash",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native472-linux/run.sh"
+  ],
+  "controller_pid": 2,
+  "build_pid": 3,
+  "start": "2026-10-15T06:20:47.132843+00:00",
+  "run_script_sha256": "cf9caacb1397c24dd292f98e6cdba6210109d35b091e4429c3296016768cf133",
+  "source_inventory_sha256": "05e2e64e659c51d18e8477718181452f3e843412e50eb7429b72046dd08c722b"
+}

@@ -1,0 +1,3 @@
+replica=1 group=1 worker_units=4 append_window_enabled=true append_window_units=4 append_window_originals=64 append_window_core_bytes=1048576
+replica=2 group=1 worker_units=4 append_window_enabled=true append_window_units=4 append_window_originals=64 append_window_core_bytes=1048576
+replica=3 group=1 worker_units=4 append_window_enabled=true append_window_units=4 append_window_originals=64 append_window_core_bytes=1048576

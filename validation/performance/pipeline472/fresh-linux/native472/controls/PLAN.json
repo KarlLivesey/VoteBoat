@@ -1,0 +1,10 @@
+{
+  "source_commit": "de5a7221e49c89771dd3cd22a0b904966b1f4789",
+  "case_count": 4,
+  "actual_command_count": 14,
+  "originals_per_case": 128,
+  "warmup": 64,
+  "recovered_value": 192,
+  "append_window_units": 4,
+  "scope": "Fresh assertednative472 startup/shared TCP/QUIC functional activation controls; not paired throughput or physical memory acceptance."
+}

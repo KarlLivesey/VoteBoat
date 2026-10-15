@@ -1,0 +1,27 @@
+--- /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched470-linux/run.sh
++++ /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched472-linux/run.sh
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env bash
+ set -euo pipefail
+-job=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched470-linux
++job=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched472-linux
+ trap 'rc=$?; printf "%s\n" "$rc" > "$job/STATUS"' EXIT
+ stage(){ printf '%s\n' "$1" > "$job/STAGE"; }
+ printf '%s\n' "$$" > "$job/PID"
+@@ -44,14 +44,14 @@
+ printf '%s\n' 'opt3 debug_assertions=true overflow_checks=true debuginfo=2 split-debuginfo=packed lto=thin codegen_units=1; rustflags/wrappers unset' > "$job/logs/matched-release-profile.txt"
+ stage source_before
+ python3 "$job/guard.py" "$job" source > "$job/logs/source-before.log"
+-(cd "$job/source" && sha256sum -c "$job/source.sha256" && sha256sum -c "$job/slice470-source.sha256") > "$job/logs/source-before-full.log"
++(cd "$job/source" && sha256sum -c "$job/source.sha256" && sha256sum -c "$job/slice472-source.sha256") > "$job/logs/source-before-full.log"
+ stage matched_release
+ printf '%q ' "$cargo" build --locked --offline --release --manifest-path "$job/source/benchmarks/matched/Cargo.toml" --bin voteboat-matched-framework --message-format=json -vv > "$job/logs/matched-release.command"
+ printf '\n' >> "$job/logs/matched-release.command"
+ "$cargo" build --locked --offline --release --manifest-path "$job/source/benchmarks/matched/Cargo.toml" --bin voteboat-matched-framework --message-format=json -vv > "$job/logs/matched-release.jsonl" 2> "$job/logs/matched-release.stderr"
+ stage source_after
+ python3 "$job/guard.py" "$job" source > "$job/logs/source-after.log"
+-(cd "$job/source" && sha256sum -c "$job/source.sha256" && sha256sum -c "$job/slice470-source.sha256") > "$job/logs/source-after-full.log"
++(cd "$job/source" && sha256sum -c "$job/source.sha256" && sha256sum -c "$job/slice472-source.sha256") > "$job/logs/source-after-full.log"
+ stage artifact_guards
+ python3 "$job/guard.py" "$job" artifacts > "$job/logs/artifact-guards.log"
+ # Keep exact qualified physical modes, including seven0600 fixture keys; sourceguards detect changes.

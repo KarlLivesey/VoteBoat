@@ -1,0 +1,52 @@
+{
+  "original_build_handle": 48082,
+  "build_actual_exit": 0,
+  "original_control_handle": 87376,
+  "control_actual_exit": 0,
+  "commands": 14,
+  "same_selected_inputs": true,
+  "original_copy_executable_sha256": "44358562bda889e0c7b907f396c532130f39361cab112f3709ac60b4f5e79034",
+  "cases": [
+    {
+      "case": "tcp-startup",
+      "operations": 128,
+      "recovered_value": 192,
+      "retry_verified": true,
+      "workers_joined": true,
+      "scope": "Asserted native release functional control, not paired capacity"
+    },
+    {
+      "case": "tcp-shared",
+      "operations": 128,
+      "recovered_value": 192,
+      "retry_verified": true,
+      "workers_joined": true,
+      "scope": "Asserted native release functional control, not paired capacity",
+      "leader_measurement_deltas": {
+        "synchronized_same_group_multi_unit_calls": 1,
+        "synchronized_same_group_multi_unit_known_originals": 48
+      }
+    },
+    {
+      "case": "quic-startup",
+      "operations": 128,
+      "recovered_value": 192,
+      "retry_verified": true,
+      "workers_joined": true,
+      "scope": "Asserted native release functional control, not paired capacity"
+    },
+    {
+      "case": "quic-shared",
+      "operations": 128,
+      "recovered_value": 192,
+      "retry_verified": true,
+      "workers_joined": true,
+      "scope": "Asserted native release functional control, not paired capacity",
+      "leader_measurement_deltas": {
+        "synchronized_same_group_multi_unit_calls": 1,
+        "synchronized_same_group_multi_unit_known_originals": 48
+      }
+    }
+  ],
+  "scope": "Fresh asserted native472 root/exe/buildscript false plus actual14 functional controls; physical sharing activation only, no performance acceptance."
+}

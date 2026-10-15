@@ -1,0 +1,3 @@
+replica=1 group=1 worker_units=1 append_window_enabled=false append_window_units=1
+replica=2 group=1 worker_units=1 append_window_enabled=false append_window_units=1
+replica=3 group=1 worker_units=1 append_window_enabled=false append_window_units=1

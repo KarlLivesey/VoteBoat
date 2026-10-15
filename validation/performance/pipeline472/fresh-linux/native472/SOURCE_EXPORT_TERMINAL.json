@@ -1,0 +1,9 @@
+{
+  "original_handle": 83325,
+  "actual_exit": 0,
+  "command": [
+    "bash",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native472-linux/export-source.sh"
+  ],
+  "source_inventory_sha256": "05e2e64e659c51d18e8477718181452f3e843412e50eb7429b72046dd08c722b"
+}

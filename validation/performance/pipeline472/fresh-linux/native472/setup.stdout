@@ -1,0 +1,29 @@
+START tcp-startup
+END tcp-startup exit=0
+START tcp-startup-raw
+END tcp-startup-raw exit=0
+START tcp-startup-selection
+END tcp-startup-selection exit=0
+START tcp-startup-journal
+END tcp-startup-journal exit=0
+START tcp-shared
+END tcp-shared exit=0
+START tcp-shared-raw
+END tcp-shared-raw exit=0
+START tcp-shared-selection
+END tcp-shared-selection exit=0
+START quic-startup
+END quic-startup exit=0
+START quic-startup-raw
+END quic-startup-raw exit=0
+START quic-startup-selection
+END quic-startup-selection exit=0
+START quic-startup-journal
+END quic-startup-journal exit=0
+START quic-shared
+END quic-shared exit=0
+START quic-shared-raw
+END quic-shared-raw exit=0
+START quic-shared-selection
+END quic-shared-selection exit=0
+INTEGRATION472_EXIT=0
