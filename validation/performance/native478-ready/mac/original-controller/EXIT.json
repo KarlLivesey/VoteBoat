@@ -1,0 +1,10 @@
+{
+  "original_handle": 14036,
+  "exit": 0,
+  "terminal_tool_chunk": "b771be",
+  "all48_END_exit0": true,
+  "ALL_TIMING_END": true,
+  "CAMPAIGN_EXIT": 0,
+  "ORIGINAL_MAC478_SSH_EXIT": 0,
+  "provenance": "Actual original tools.write_stdin terminal, not a reconstructed rerun."
+}

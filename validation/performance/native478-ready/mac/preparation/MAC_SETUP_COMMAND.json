@@ -1,0 +1,12 @@
+{
+  "time_utc": "2026-10-15T12:48:29.510658+00:00",
+  "remote_base": "/private/tmp/voteboat-native478-esZLG7",
+  "command": [
+    "ssh",
+    "karllivesey@192.168.192.76",
+    "bash -s"
+  ],
+  "stdin_path": "target/p9/native478-ready/mac-setup.sh",
+  "stdin_sha256": "cd409d4d1abbdafca8ae1db40e7c8f69b9b554d14ec8539ac4de941cc9f741b3",
+  "scope": "Two functional q64/groups2 controls then preparation only. Stop READY; no timed campaign."
+}

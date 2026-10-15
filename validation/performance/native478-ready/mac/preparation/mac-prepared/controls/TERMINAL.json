@@ -1,0 +1,79 @@
+{
+  "exit": 0,
+  "source_exact": true,
+  "cases": 2,
+  "artifact_sha256": "2fd48262a655debafaf7f04496bf34c867dc17b92f1e5890969819333cbcae84",
+  "results_sha256": "d0bb9306d614c09852afb0ae92f899acf290d6361b616bb1dce716532f0453d9",
+  "commands": [
+    {
+      "command": [
+        "/private/tmp/voteboat-mac476-7e90682-kN01PT/artifacts/native/native_benchmark",
+        "/private/tmp/voteboat-native478-esZLG7/controls/tcp-wal",
+        "tcp",
+        "512",
+        "4096",
+        "2",
+        "--offered",
+        "128",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "64",
+        "--offered-capacity",
+        "4096",
+        "--publication",
+        "witness",
+        "--group-weights",
+        "31,1"
+      ],
+      "exit": 0,
+      "elapsed_s": 5.044628125
+    },
+    {
+      "command": [
+        "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+        "/private/tmp/voteboat-native478-esZLG7/controls/control-tools/check-native-benchmark.mjs",
+        "--storage",
+        "/private/tmp/voteboat-native478-esZLG7/controls/tcp-wal"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.12159533300000014
+    },
+    {
+      "command": [
+        "/private/tmp/voteboat-mac476-7e90682-kN01PT/artifacts/native/native_benchmark",
+        "/private/tmp/voteboat-native478-esZLG7/controls/quic-wal",
+        "quic",
+        "512",
+        "4096",
+        "2",
+        "--offered",
+        "128",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "64",
+        "--offered-capacity",
+        "4096",
+        "--publication",
+        "witness",
+        "--group-weights",
+        "31,1"
+      ],
+      "exit": 0,
+      "elapsed_s": 5.442931333000001
+    },
+    {
+      "command": [
+        "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+        "/private/tmp/voteboat-native478-esZLG7/controls/control-tools/check-native-benchmark.mjs",
+        "--storage",
+        "/private/tmp/voteboat-native478-esZLG7/controls/quic-wal"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.11913499999999999
+    }
+  ],
+  "end": "2026-10-15T12:48:45.102373+00:00",
+  "scope": "Actual functional combination controls only; all raw files/failures retained."
+}

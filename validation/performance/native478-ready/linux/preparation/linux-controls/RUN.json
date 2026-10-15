@@ -1,0 +1,9 @@
+{
+  "source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "artifact_sha256": "0bf40f6b4547c446f9db2a86a4bffe6d9ab223640d470154ec266a0d7cc2d064",
+  "node": {
+    "path": "/home/karllivesey/.nvm/versions/node/v24.21.0/bin/node",
+    "sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c"
+  },
+  "scope": "Two new-combination q64/groups2/skew functional controls only; no build, broad tests or performance acceptance."
+}

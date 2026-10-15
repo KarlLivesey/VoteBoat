@@ -1,0 +1,10 @@
+{
+  "commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "exit": 0,
+  "remote_exit": 0,
+  "remote_main": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "enabled_hook": ".githooks/pre-push",
+  "enabled_hook_sha256": "e3e9d01c12837936819f7c6f5b4b8840af19e9cded729381599df0f0fc17ee92",
+  "qualified_inputs": 1491,
+  "source_exact": true
+}

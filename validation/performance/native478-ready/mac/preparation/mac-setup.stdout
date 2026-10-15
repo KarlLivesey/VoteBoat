@@ -1,0 +1,12 @@
+TRANSFER_VERIFIED8
+START tcp
+END tcp 0
+START tcp-check
+END tcp-check 0
+START quic
+END quic 0
+START quic-check
+END quic-check 0
+MAC478_CONTROLS_EXIT=0
+PREPARED48_NO_TIMING /private/tmp/voteboat-native478-esZLG7/campaign
+MAC478_PREPARE_EXIT=0

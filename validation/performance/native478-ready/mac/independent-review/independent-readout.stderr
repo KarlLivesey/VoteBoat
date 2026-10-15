@@ -1,0 +1,4 @@
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/independent-readout.py", line 38
+    first=16 if (trial+ci+['tcp','quic'].index(protocol))%2==0 else64
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: expected 'else' after 'if' expression

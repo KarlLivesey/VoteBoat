@@ -1,0 +1,10 @@
+{
+  "time_utc": "2026-10-15T12:51:00.050539+00:00",
+  "candidate_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "schema_and_prior_evidence_commit": "7c3795e5f155479ab703b1a4ed12a1a3772f399e",
+  "linux_config_sha256": "47c1e59f5f4a57b6814342dc165f7cd740008680fba857924d69f4eef950d573",
+  "mac_config_sha256": "ab20105d72d9bb23fe67179a6dbe36cbaa13a1aec7951240e02bc7067a5bcb9d",
+  "both_host_setup_controls_and_final_independent_binding_review_passed": true,
+  "authorization": "Launch both original48-case ready16/64 campaigns once. All setup/tools/copies/checks/publication are stopped. No same-host competing jobs, builds, checks, copies, archive or profiling during timing. Record original handles and raw durable terminal markers; never restart on observation timeout. Collection waits until both actually terminate.",
+  "scope": "Existing WitnessLogIo configuration diagnostic. No source or default change; fullP9 and third-filesystem acceptance remain open."
+}

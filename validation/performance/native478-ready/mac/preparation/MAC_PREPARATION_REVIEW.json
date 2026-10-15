@@ -1,0 +1,17 @@
+{
+  "exit": 0,
+  "remote_base": "/private/tmp/voteboat-native478-esZLG7",
+  "files": 77,
+  "collection_sha256": "89179065734ef9a48c883cb9157a67748d4c0fadf04b36d4ae8fdd6a55270bd6",
+  "tar_sha256": "db2109e5814dc64c17ae36ce1a5cfae6145e9af0e11c4c4409fffdb4c850be26",
+  "config_sha256": "ab20105d72d9bb23fe67179a6dbe36cbaa13a1aec7951240e02bc7067a5bcb9d",
+  "ready_sha256": "830f871a7aabbde8b8260ee40dbe2ef8c5555b76fa64300f517709bdfa4e0795",
+  "controls_terminal_sha256": "adee28580eee2ede64ea60b265f3e2823bf937cf1798495330de9f27873a0d7d",
+  "source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "artifact_sha256": "2fd48262a655debafaf7f04496bf34c867dc17b92f1e5890969819333cbcae84",
+  "actual_original_setup_handle": 41226,
+  "actual_original_setup_exit": 0,
+  "cases": 48,
+  "functional_cases": 2,
+  "scope": "Preparation and functional controls only; no timed campaign. Exact collected bytes/modes/lengths and frozen script/schema hashes checked."
+}

@@ -1,0 +1,1 @@
+cat: /private/tmp/voteboat-native478-esZLG7/campaign/STAGE: No such file or directory

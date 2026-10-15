@@ -1,0 +1,21 @@
+[
+  "/usr/bin/python3.14",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux/resources.py",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux/campaign-metadata/t1-moderate-tcp-q16",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-moderate-tcp-q16",
+  "tcp",
+  "8192",
+  "256",
+  "1",
+  "--offered",
+  "128",
+  "--maintenance",
+  "2",
+  "--ready-items",
+  "16",
+  "--offered-capacity",
+  "4096",
+  "--publication",
+  "witness"
+]

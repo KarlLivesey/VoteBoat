@@ -1,0 +1,47 @@
+{
+  "kind": "native",
+  "target": "native_benchmark",
+  "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/target-native-release/release/examples/native_benchmark",
+  "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark",
+  "sha256": "0bf40f6b4547c446f9db2a86a4bffe6d9ab223640d470154ec266a0d7cc2d064",
+  "compiler_record": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/source#voteboat@0.1.0",
+    "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/source/Cargo.toml",
+    "target": {
+      "kind": [
+        "example"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "native_benchmark",
+      "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/source/examples/native_benchmark.rs",
+      "edition": "2021",
+      "required-features": [
+        "tls"
+      ],
+      "doc": false,
+      "doctest": false,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/target-native-release/release/examples/native_benchmark"
+    ],
+    "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/target-native-release/release/examples/native_benchmark",
+    "fresh": false
+  }
+}

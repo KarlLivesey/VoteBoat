@@ -1,0 +1,5 @@
+/private/tmp/voteboat-native478-esZLG7/wal/t1-bulk-quic-q64: 8192 scheduled offers, 8192 admissions, 8192 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=1024.000 admitted_during=1024.000 applied_during=1005.625 applied_drain=1496.377 applied_total=1011.578 ops/s; window_refused=0 backlog_at_horizon=147
+/private/tmp/voteboat-native478-esZLG7/wal/t1-bulk-quic-q64: 3 durable checkpoint boundaries, 9 exact-scope reclamation rows, 0 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=262.905 reclaim_ms=586.758 reclaimed_bytes=591627 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=804 units=804 commands=24429 mean_units=1.000 append_ms=844.196 barriers=804 mean_appends_per_barrier=1.000 mean_units_per_barrier=1.000 barrier_ms=12613.026 sync_ms=6384.688 publish_ms=6222.632 histogram=1:804

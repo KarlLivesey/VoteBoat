@@ -6,10 +6,13 @@ The default remains the retained469/455 implementation restored in473;
 470/472 are rejected experiments.476's opt-in two-sync WitnessLogIo is published
 and qualified on both hosts.477's paired Btrfs/APFS measurements are complete:
 all96 original cases and validators pass, with useful bulk gains and explicit
-singleton/moderate regressions. Native barriers remain the largest elapsed stage.
-[478's before-measurement schema](../validation/performance/native478-ready/SCHEMA.md)
-compares existing ready16/64 using the same476 binaries, with singleton/moderate
-and hot/cold guards. FileLogIo and ready16 stay defaults. The user's real ext4/XFS
+singleton/moderate regressions.478's96 original ready16/64 cases are now complete:
+bulk completed medians improve Linux TCP260.799→591.381 and QUIC310.957→667.779/s,
+Mac TCP491.279→1015.083 and QUIC492.916→1011.578/s. Singleton/moderate/cold-tail
+losses prevent default promotion. Native barriers remain the largest elapsed
+stage, with a newly exposed host-poll cost. [479's before-capture schema](../validation/performance/native479-poll/SCHEMA.md)
+profiles the current Counter ready64 path headlessly before selecting the next
+bounded change. FileLogIo and ready16 stay defaults. The user's real ext4/XFS
 scratch and all-three-filesystem native acceptance remain pending; available-host
 results do not close that acceptance. Full P9 remains incomplete. The linked
 current-plus-next-two plan below governs work; historical entries retain their
@@ -873,9 +876,9 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current478: amortize remaining native barriers | Reduce measured barrier frequency using existing bounded ready batches | Complete477 raw readout/regressions; fresh476 artifacts and unchanged source controls; [before-measurement schema](../validation/performance/native478-ready/SCHEMA.md) | Rotated Witness ready16/64 pairs on singleton/moderate/one-group load/two-group skew; actual outcomes/recovery/refusals, cold latency and shared physical work; retain all regressions and default16 | P9.0/P9.1/P9.2/P9.3 |
-| Next479: reduce the remaining measured limiting stage | Continue the profile/measure/design/change/compare loop after actual batching results | Complete478 raw readout, rejected-experiment ledger and source-grounded ownership/order/restart schema | A bounded usable algorithm/batching/ordering change only when supported by data; relevant correctness/crash/fairness controls, zero-diagnostic enabled hook and fresh paired evidence; no rejected-family replay without new context | P9.0/P9.1/P9.2/P9.3 |
-| Next480: sustained curve and composed service qualification | Complete full P9 acceptance without narrowing the objective | Retained measured improvements, both-host qualified artifacts/workloads and supplied third filesystem for native acceptance | All seven one-group cells with healthy sustained margin, bounded memory/debt, durable headroom/fairness/skew, placement/shared physical barriers and P8 relays/striped/recursive/logical voters; preserve all outcomes/failures and exclude P10 | P9.0/P9.1/P9.2/P9.3/P9.4 |
+| Current479: reduce the next measured native cost | Locate removable work inside larger ready batches without hiding sync latency | Complete478 raw paired results/regressions; unchanged476 artifacts; [headless capture and ordering schema](../validation/performance/native479-poll/SCHEMA.md) | One guarded native Counter ready64 capture/host; numerical self/inclusive/caller evidence and quality limits; choose a bounded source-grounded change, sketch exact API/ownership/error-prefix/restart contracts before editing, then relevant controls and enabled strict hook0 | P9.0/P9.1/P9.2/P9.3 |
+| Next480: qualify and compare the selected change | Retain useful measured improvement rather than unchecked code or a CPU-only claim | Current479 profile decision, checked published source, exact fresh native artifacts and preserved478 reference | Both-host paired completed/during rates, latency/refusals, cold fairness and physical barrier work; default/singleton/moderate regressions explicit; no rejected-family replay without new cause; third-filesystem native acceptance remains open until supplied | P9.0/P9.1/P9.2/P9.3 |
+| Next481: sustained curve and composed service qualification | Complete full P9 acceptance without narrowing the objective | Retained measured improvements, both-host qualified artifacts/workloads and supplied third filesystem for native acceptance | All seven one-group cells with healthy sustained margin, bounded memory/debt, durable headroom/fairness/skew, placement/shared physical barriers and P8 relays/striped/recursive/logical voters; preserve all outcomes/failures and exclude P10 | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
 comparison or short diagnostics. All seven one-group healthy-margin cells on
@@ -35234,3 +35237,34 @@ real ext4/XFS remains pending the user. Full healthy-margin framework curve,
 sustained memory/debt, fairness/skew, independent placement/shared barriers and P8
 composition remain open.8,422,500 originals/s is a framework minimum, not a ceiling
 or a score for these disk-backed Counter histories.
+
+[478 Linux](../validation/performance/native478-ready/linux/README.md) original21706
+and [Mac](../validation/performance/native478-ready/mac/README.md) original14036
+terminate0 with all96 processes/validators/readback checks0. Same476 binary, only
+ready16/64 changes; both hosts are actually terminal before collection. All12
+paired bulk completed rates improve, with medians TCP/QUIC Linux260.799/310.957→
+591.381/667.779 originals/s, Mac491.279/492.916→1015.083/1011.578. Corresponding
+p99ms15213.510/13500.698→5708.929/4796.659 and7987.827/8335.050→337.077/864.550.
+Barriers/original fall while mean barrier duration is nearly unchanged. This
+supports actual sync amortization; the physical histogram does not expose exact
+command-bearing proposal width. Mac q64 bulk refuses none, but finite horizons
+and drain-inclusive rates do not establish sustained offered headroom.
+
+Linux223474applied+74510windowrefused and Mac265041+32943 each conserve297984offers;
+other refusals/unknown/pending0. All recovery64+applied/retry/join controls pass;
+Linux623checkpoints/1869reclaims/1skip and Mac624/1872 remain active. Every skew
+case applies all256 cold originals without refusal, but cold tails still regress
+in individual pairs and Mac coldTCP median453.489→841.038ms. The2048/group fixture
+ceiling is explicit, all leaders share replica1 and all voters share one device.
+Singleton/moderate losses and Linux bulkQUICt2 during-rate loss remain material;
+[full figures and decisions](P9.md#478-larger-ready-batches-on-the-two-sync-native-path)
+retain all failures, slow tails, original outputs and scope limitations. Root
+independently recomputes all96 raw rates/quantiles and exact original conservation.
+
+No provider or quantum default changes. The next schema targets the exposed
+native polling work with numerical headless CPU samples, before a bounded change.
+The nominal2ms Shard deadline is not the whole-fixture host-poll scope. Repeated
+Counter admission work is source-grounded but not yet sampled attribution. All1491
+qualified input hashes/modes remain exact, so no broad unchanged suite or rebuild
+is repeated; the enabled strict publication hook remains required. The macro
+review leaves every full P9 and third-filesystem acceptance requirement open.

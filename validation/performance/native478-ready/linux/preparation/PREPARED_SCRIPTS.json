@@ -1,0 +1,17 @@
+{
+  "time_utc": "2026-10-15T12:47:29.575339+00:00",
+  "source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "schema_evidence_commit": "7c3795e5f155479ab703b1a4ed12a1a3772f399e",
+  "script_sha256": {
+    "campaign.py": "086dd656f044deff4634a030a3741df97765dd0716dce00962cdbcf04ecbb96a",
+    "common.py": "832254521d6a3860f35fef26bf41c72bed3f11ec89f154e0e93566d53e9e696b",
+    "controls.py": "971c90cefbbd60da4b21b0bfa351d251080ca9a06986af9c24ffc0ea6da9f261",
+    "plan.py": "be771aa5ef3b1df04ad3b5b7223b87d2c85cc716c461bd38fe06d10fbceb47b2",
+    "prepare.py": "0065e4ec34f59e0ceda6f04451f3bbda0d266db9dcb8e561ed47d306d4047552",
+    "resources.py": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+    "test_plan.py": "cae7f2782e7cc121552608a21e13f0d4b5f3e259eda404623204f2344894379f"
+  },
+  "schema_sha256": "e55b2cf3441870d1d61a2fc1cad4a3d79a05968c0af6598b1ef28594d04593de",
+  "no_build_or_timed_campaign": true,
+  "functional_controls_not_started_yet": true
+}

@@ -1,0 +1,9 @@
+{
+  "source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "artifact_sha256": "2fd48262a655debafaf7f04496bf34c867dc17b92f1e5890969819333cbcae84",
+  "node": {
+    "path": "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+    "sha256": "f75a79e4c96954709a130427e452d6720b35c90318ca8293727a4c6376198453"
+  },
+  "scope": "Two new-combination q64/groups2/skew functional controls only; no build, broad tests or performance acceptance."
+}

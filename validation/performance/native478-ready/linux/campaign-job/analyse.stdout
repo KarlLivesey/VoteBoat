@@ -1,0 +1,815 @@
+{
+  "totals": {
+    "applied": 223474,
+    "window_refused": 74510
+  },
+  "maintenance": {
+    "('checkpoint', 'completed')": 623,
+    "('reclaim', 'completed')": 1869,
+    "('skip', 'skipped')": 1
+  },
+  "regressions": [
+    {
+      "cell": "singleton",
+      "protocol": "tcp",
+      "trial": 1,
+      "q16_case": "t1-singleton-tcp-q16",
+      "q64_case": "t1-singleton-tcp-q64",
+      "completed_rate_ratio": 0.8484868566327449,
+      "during_rate_ratio": 0.8484848484848485,
+      "latency_ratios": {
+        "intended": {
+          "p50_ms": 1.987643461874501,
+          "p95_ms": 1.9875454841975637,
+          "p99_ms": 1.252325167175142,
+          "max_ms": 1.079825561977904
+        },
+        "service": {
+          "p50_ms": 1.9913126979982634,
+          "p95_ms": 1.9886098553633,
+          "p99_ms": 1.2525116136511694,
+          "max_ms": 1.0797547673341505
+        },
+        "dispatch": {
+          "p50_ms": 1.0591587715239046,
+          "p95_ms": 1.0266893883924813,
+          "p99_ms": 1.0948563094670127,
+          "max_ms": 1.6920216529279166
+        }
+      },
+      "barriers_per_original_ratio": 1.0056154537286612,
+      "commands_per_append_unit_ratio": 0.9944159035068125,
+      "per_group": {
+        "1": {
+          "completed_rate_ratio": 0.8484868566327449,
+          "latency_ratios": {
+            "intended": {
+              "p50_ms": 1.987643461874501,
+              "p95_ms": 1.9875454841975637,
+              "p99_ms": 1.252325167175142,
+              "max_ms": 1.079825561977904
+            },
+            "service": {
+              "p50_ms": 1.9913126979982634,
+              "p95_ms": 1.9886098553633,
+              "p99_ms": 1.2525116136511694,
+              "max_ms": 1.0797547673341505
+            },
+            "dispatch": {
+              "p50_ms": 1.0591587715239046,
+              "p95_ms": 1.0266893883924813,
+              "p99_ms": 1.0948563094670127,
+              "max_ms": 1.6920216529279166
+            }
+          },
+          "during_rate_ratio": 0.8484848484848485,
+          "during_q16": 7.21875,
+          "during_q64": 6.125,
+          "p99_q16_ms": 448.41894,
+          "p99_q64_ms": 561.566324,
+          "statuses_q16": {
+            "applied": 231,
+            "window_refused": 25,
+            "no_leader": 0,
+            "admission_refused": 0,
+            "not_proposed": 0,
+            "unknown": 0,
+            "pending": 0
+          },
+          "statuses_q64": {
+            "applied": 196,
+            "window_refused": 60,
+            "no_leader": 0,
+            "admission_refused": 0,
+            "not_proposed": 0,
+            "unknown": 0,
+            "pending": 0
+          },
+          "backlog_q16": 0,
+          "backlog_q64": 0
+        }
+      },
+      "mean_barrier_ratio": 1.8851680756958984,
+      "mean_wal_sync_ratio": 1.8429576939421677,
+      "mean_publication_ratio": 1.9236222398350622,
+      "during_rate_regression": true,
+      "rate_regression": true,
+      "p99_regression": true,
+      "window_refusals_q16": 25,
+      "window_refusals_q64": 60
+    },
+    {
+      "cell": "singleton",
+      "protocol": "tcp",
+      "trial": 2,
+      "q16_case": "t2-singleton-tcp-q16",
+      "q64_case": "t2-singleton-tcp-q64",
+      "completed_rate_ratio": 0.9386504138389066,
+      "during_rate_ratio": 0.935,
+      "latency_ratios": {
+        "intended": {
+          "p50_ms": 1.086596575529578,
+          "p95_ms": 1.246272651748054,
+          "p99_ms": 1.0823158836345756,
+          "max_ms": 0.9305135158909861
+        },
+        "service": {
+          "p50_ms": 1.0869674272625724,
+          "p95_ms": 1.2462800531600282,
+          "p99_ms": 1.0823948338064204,
+          "max_ms": 0.9305624582998053
+        },
+        "dispatch": {
+          "p50_ms": 1.2613006283994297,
+          "p95_ms": 0.968704558386546,
+          "p99_ms": 0.6558043167783074,
+          "max_ms": 0.6516872166419301
+        }
+      },
+      "barriers_per_original_ratio": 1.0023071007433992,
+      "commands_per_append_unit_ratio": 0.9976982097186701,
+      "per_group": {
+        "1": {
+          "completed_rate_ratio": 0.9386504138389066,
+          "latency_ratios": {
+            "intended": {
+              "p50_ms": 1.086596575529578,
+              "p95_ms": 1.246272651748054,
+              "p99_ms": 1.0823158836345756,
+              "max_ms": 0.9305135158909861
+            },
+            "service": {
+              "p50_ms": 1.0869674272625724,
+              "p95_ms": 1.2462800531600282,
+              "p99_ms": 1.0823948338064204,
+              "max_ms": 0.9305624582998053
+            },
+            "dispatch": {
+              "p50_ms": 1.2613006283994297,
+              "p95_ms": 0.968704558386546,
+              "p99_ms": 0.6558043167783074,
+              "max_ms": 0.6516872166419301
+            }
+          },
+          "during_rate_ratio": 0.935,
+          "during_q16": 6.25,
+          "during_q64": 5.84375,
+          "p99_q16_ms": 645.329937,
+          "p99_q64_ms": 698.450841,
+          "statuses_q16": {
+            "applied": 200,
+            "window_refused": 56,
+            "no_leader": 0,
+            "admission_refused": 0,
+            "not_proposed": 0,
+            "unknown": 0,
+            "pending": 0
+          },
+          "statuses_q64": {
+            "applied": 188,
+            "window_refused": 68,
+            "no_leader": 0,
+            "admission_refused": 0,
+            "not_proposed": 0,
+            "unknown": 0,
+            "pending": 0
+          },
+          "backlog_q16": 0,
+          "backlog_q64": 1
+        }
+      },
+      "mean_barrier_ratio": 1.150727586789128,
+      "mean_wal_sync_ratio": 1.1498822765155285,
+      "mean_publication_ratio": 1.1515734587381818,
+      "during_rate_regression": true,
+      "rate_regression": true,
+      "p99_regression": true,
+      "window_refusals_q16": 56,
+      "window_refusals_q64": 68
+    },
+    {
+      "cell": "singleton",
+      "protocol": "tcp",
+      "trial": 3,
+      "q16_case": "t3-singleton-tcp-q16",
+      "q64_case": "t3-singleton-tcp-q64",
+      "completed_rate_ratio": 0.976510615092691,
+      "during_rate_ratio": 0.9723756906077348,
+      "latency_ratios": {
+        "intended": {
+          "p50_ms": 1.3157251710558082,
+          "p95_ms": 1.1353536127928723,
+          "p99_ms": 0.7467436760680106,
+          "max_ms": 0.7098764970821494
+        },
+        "service": {
+          "p50_ms": 1.316346440066567,
+          "p95_ms": 1.1355842292756329,
+          "p99_ms": 0.7466615025017262,
+          "max_ms": 0.7098624390995582
+        },
+        "dispatch": {
+          "p50_ms": 0.8584413985554825,
+          "p95_ms": 0.9921956032280097,
+          "p99_ms": 0.8822196403525299,
+          "max_ms": 0.9523688055098207
+        }
+      },
+      "barriers_per_original_ratio": 1.0008991592860677,
+      "commands_per_append_unit_ratio": 0.9991016484750483,
+      "per_group": {
+        "1": {
+          "completed_rate_ratio": 0.976510615092691,
+          "latency_ratios": {
+            "intended": {
+              "p50_ms": 1.3157251710558082,
+              "p95_ms": 1.1353536127928723,
+              "p99_ms": 0.7467436760680106,
+              "max_ms": 0.7098764970821494
+            },
+            "service": {
+              "p50_ms": 1.316346440066567,
+              "p95_ms": 1.1355842292756329,
+              "p99_ms": 0.7466615025017262,
+              "max_ms": 0.7098624390995582
+            },
+            "dispatch": {
+              "p50_ms": 0.8584413985554825,
+              "p95_ms": 0.9921956032280097,
+              "p99_ms": 0.8822196403525299,
+              "max_ms": 0.9523688055098207
+            }
+          },
+          "during_rate_ratio": 0.9723756906077348,
+          "during_q16": 5.65625,
+          "during_q64": 5.5,
+          "p99_q16_ms": 920.358451,
+          "p99_q64_ms": 687.271853,
+          "statuses_q16": {
+            "applied": 181,
+            "window_refused": 75,
+            "no_leader": 0,
+            "admission_refused": 0,
+            "not_proposed": 0,
+            "unknown": 0,
+            "pending": 0
+          },
+          "statuses_q64": {
+            "applied": 177,
+            "window_refused": 79,
+            "no_leader": 0,
+            "admission_refused": 0,
+            "not_proposed": 0,
+            "unknown": 0,
+            "pending": 0
+          },
+          "backlog_q16": 0,
+          "backlog_q64": 1
+        }
+      },
+      "mean_barrier_ratio": 1.1457942808178403,
+      "mean_wal_sync_ratio": 1.1765773307896183,
+      "mean_publication_ratio": 1.1220785339505661,
+      "during_rate_regression": true,
+      "rate_regression": true,
+      "p99_regression": false,
+      "window_refusals_q16": 75,
+      "window_refusals_q64": 79
+    },
+    {
+      "cell": "singleton",
+      "protocol": "quic",
+      "trial": 2,
+      "q16_case": "t2-singleton-quic-q16",
+      "q64_case": "t2-singleton-quic-q64",
+      "completed_rate_ratio": 0.994504001694521,
+      "during_rate_ratio": 0.9945054945054945,
+      "latency_ratios": {
+        "intended": {
+          "p50_ms": 1.152891554417162,
+          "p95_ms": 0.921100664776328,
+          "p99_ms": 1.310460384327263,
+          "max_ms": 1.7397954955280537
+        },
+        "service": {
+          "p50_ms": 1.152526050410305,
+          "p95_ms": 0.9213777530773121,
+          "p99_ms": 1.310280405896159,
+          "max_ms": 1.7397351409052588
+        },
+        "dispatch": {
+          "p50_ms": 1.1282213395274683,
+          "p95_ms": 0.9731909590652894,
+          "p99_ms": 0.6831975766259657,
+          "max_ms": 0.7289704688558102
+        }
+      },
+      "barriers_per_original_ratio": 1.000218662079622,
+      "commands_per_append_unit_ratio": 0.9997813857230302,
+      "per_group": {
+        "1": {
+          "completed_rate_ratio": 0.994504001694521,
+          "latency_ratios": {
+            "intended": {
+              "p50_ms": 1.152891554417162,
+              "p95_ms": 0.921100664776328,
+              "p99_ms": 1.310460384327263,
+              "max_ms": 1.7397954955280537
+            },
+            "service": {
+              "p50_ms": 1.152526050410305,
+              "p95_ms": 0.9213777530773121,
+              "p99_ms": 1.310280405896159,
+              "max_ms": 1.7397351409052588
+            },
+            "dispatch": {
+              "p50_ms": 1.1282213395274683,
+              "p95_ms": 0.9731909590652894,
+              "p99_ms": 0.6831975766259657,
+              "max_ms": 0.7289704688558102
+            }
+          },
+          "during_rate_ratio": 0.9945054945054945,
+          "during_q16": 5.6875,
+          "during_q64": 5.65625,
+          "p99_q16_ms": 644.059175,
+          "p99_q64_ms": 844.014034,
+          "statuses_q16": {
+            "applied": 182,
+            "window_refused": 74,
+            "no_leader": 0,
+            "admission_refused": 0,
+            "not_proposed": 0,
+            "unknown": 0,
+            "pending": 0
+          },
+          "statuses_q64": {
+            "applied": 181,
+            "window_refused": 75,
+            "no_leader": 0,
+            "admission_refused": 0,
+            "not_proposed": 0,
+            "unknown": 0,
+            "pending": 0
+          },
+          "backlog_q16": 0,
+          "backlog_q64": 0
+        }
+      },
+      "mean_barrier_ratio": 1.0459904300161558,
+      "mean_wal_sync_ratio": 1.0543441433733605,
+      "mean_publication_ratio": 1.0395570158830736,
+      "during_rate_regression": true,
+      "rate_regression": true,
+      "p99_regression": true,
+      "window_refusals_q16": 74,
+      "window_refusals_q64": 75
+    },
+    {
+      "cell": "moderate",
+      "protocol": "tcp",
+      "trial": 1,
+      "q16_case": "t1-moderate-tcp-q16",
+      "q64_case": "t1-moderate-tcp-q64",
+      "completed_rate_ratio": 0.9879015191997788,
+      "during_rate_ratio": 0.9907839764069796,
+      "latency_ratios": {
+        "intended": {
+          "p50_ms": 0.8542282216766344,
+          "p95_ms": 1.1732512103170056,
+          "p99_ms": 1.4064788737152905,
+          "max_ms": 1.244144424311042
+        },
+        "service": {
+          "p50_ms": 0.854261720137894,
+          "p95_ms": 1.173233801402713,
+          "p99_ms": 1.406463482653767,
+          "max_ms": 1.2441555567797427
+        },
+        "dispatch": {
+          "p50_ms": 1.000264108812831,
+          "p95_ms": 0.9944419949201696,
+          "p99_ms": 1.0419564074095717,
+          "max_ms": 1.1656364011350464
+        }
+      },
+      "barriers_per_original_ratio": 0.9924247908303113,
+      "commands_per_append_unit_ratio": 1.0076330309759303,
+      "per_group": {
+        "1": {
+          "completed_rate_ratio": 0.9879015191997788,
+          "latency_ratios": {
+            "intended": {
+              "p50_ms": 0.8542282216766344,
+              "p95_ms": 1.1732512103170056,
+              "p99_ms": 1.4064788737152905,
+              "max_ms": 1.244144424311042
+            },
+            "service": {
+              "p50_ms": 0.854261720137894,
+              "p95_ms": 1.173233801402713,
+              "p99_ms": 1.406463482653767,
+              "max_ms": 1.2441555567797427
+            },
+            "dispatch": {
+              "p50_ms": 1.000264108812831,
+              "p95_ms": 0.9944419949201696,
+              "p99_ms": 1.0419564074095717,
+              "max_ms": 1.1656364011350464
+            }
+          },
+          "during_rate_ratio": 0.9907839764069796,
+          "during_q16": 127.15625,
+          "during_q64": 125.984375,
+          "p99_q16_ms": 1797.806241,
+          "p99_q64_ms": 2528.576497,
+          "statuses_q16": {
+            "applied": 8164,
+            "window_refused": 28,
+            "no_leader": 0,
+            "admission_refused": 0,
+            "not_proposed": 0,
+            "unknown": 0,
+            "pending": 0
+          },
+          "statuses_q64": {
+            "applied": 8095,
+            "window_refused": 97,
+            "no_leader": 0,
+            "admission_refused": 0,
+            "not_proposed": 0,
+            "unknown": 0,
+            "pending": 0
+          },
+          "backlog_q16": 26,
+          "backlog_q64": 32
+        }
+      },
+      "mean_barrier_ratio": 1.0112110298706516,
+      "mean_wal_sync_ratio": 1.006336587747307,
+      "mean_publication_ratio": 1.0166172209978515,
+      "during_rate_regression": true,
+      "rate_regression": true,
+      "p99_regression": true,
+      "window_refusals_q16": 28,
+      "window_refusals_q64": 97
+    },
+    {
+      "cell": "moderate",
+      "protocol": "tcp",
+      "trial": 3,
+      "q16_case": "t3-moderate-tcp-q16",
+      "q64_case": "t3-moderate-tcp-q64",
+      "completed_rate_ratio": 0.9962559614668055,
+      "during_rate_ratio": 0.9982832618025751,
+      "latency_ratios": {
+        "intended": {
+          "p50_ms": 0.9288403567200245,
+          "p95_ms": 1.1234709229410629,
+          "p99_ms": 1.2181468598748633,
+          "max_ms": 1.2616815453001136
+        },
+        "service": {
+          "p50_ms": 0.9286228677715659,
+          "p95_ms": 1.1234823270810625,
+          "p99_ms": 1.2181367270210688,
+          "max_ms": 1.261679169603487
+        },
+        "dispatch": {
+          "p50_ms": 0.9974390287279323,
+          "p95_ms": 1.0004614703442942,
+          "p99_ms": 0.9770750988142293,
+          "max_ms": 1.4432160743408975
+        }
+      },
+      "barriers_per_original_ratio": 0.9463581657604195,
+      "commands_per_append_unit_ratio": 1.0566823811326003,
+      "per_group": {
+        "1": {
+          "completed_rate_ratio": 0.9962559614668055,
+          "latency_ratios": {
+            "intended": {
+              "p50_ms": 0.9288403567200245,
+              "p95_ms": 1.1234709229410629,
+              "p99_ms": 1.2181468598748633,
+              "max_ms": 1.2616815453001136
+            },
+            "service": {
+              "p50_ms": 0.9286228677715659,
+              "p95_ms": 1.1234823270810625,
+              "p99_ms": 1.2181367270210688,
+              "max_ms": 1.261679169603487
+            },
+            "dispatch": {
+              "p50_ms": 0.9974390287279323,
+              "p95_ms": 1.0004614703442942,
+              "p99_ms": 0.9770750988142293,
+              "max_ms": 1.4432160743408975
+            }
+          },
+          "during_rate_ratio": 0.9982832618025751,
+          "during_q16": 127.421875,
+          "during_q64": 127.203125,
+          "p99_q16_ms": 1448.079281,
+          "p99_q64_ms": 1763.973229,
+          "statuses_q16": {
+            "applied": 8192,
+            "window_refused": 0,
+            "no_leader": 0,
+            "admission_refused": 0,
+            "not_proposed": 0,
+            "unknown": 0,
+            "pending": 0
+          },
+          "statuses_q64": {
+            "applied": 8164,
+            "window_refused": 28,
+            "no_leader": 0,
+            "admission_refused": 0,
+            "not_proposed": 0,
+            "unknown": 0,
+            "pending": 0
+          },
+          "backlog_q16": 37,
+          "backlog_q64": 23
+        }
+      },
+      "mean_barrier_ratio": 1.0602803734895434,
+      "mean_wal_sync_ratio": 1.0611596911857357,
+      "mean_publication_ratio": 1.0591682309786117,
+      "during_rate_regression": true,
+      "rate_regression": true,
+      "p99_regression": true,
+      "window_refusals_q16": 0,
+      "window_refusals_q64": 28
+    },
+    {
+      "cell": "moderate",
+      "protocol": "quic",
+      "trial": 1,
+      "q16_case": "t1-moderate-quic-q16",
+      "q64_case": "t1-moderate-quic-q64",
+      "completed_rate_ratio": 0.9852035707697573,
+      "during_rate_ratio": 0.9904667574594528,
+      "latency_ratios": {
+        "intended": {
+          "p50_ms": 1.1044488656036928,
+          "p95_ms": 1.402729618932565,
+          "p99_ms": 1.5345177648849935,
+          "max_ms": 1.3926143161943632
+        },
+        "service": {
+          "p50_ms": 1.104346470600987,
+          "p95_ms": 1.4027112304626637,
+          "p99_ms": 1.5344711341005914,
+          "max_ms": 1.3925591500508014
+        },
+        "dispatch": {
+          "p50_ms": 1.0114564497141956,
+          "p95_ms": 1.0072161151582113,
+          "p99_ms": 1.0558036821993946,
+          "max_ms": 0.804791089424297
+        }
+      },
+      "barriers_per_original_ratio": 0.8692866279795332,
+      "commands_per_append_unit_ratio": 1.1503685525731386,
+      "per_group": {
+        "1": {
+          "completed_rate_ratio": 0.9852035707697573,
+          "latency_ratios": {
+            "intended": {
+              "p50_ms": 1.1044488656036928,
+              "p95_ms": 1.402729618932565,
+              "p99_ms": 1.5345177648849935,
+              "max_ms": 1.3926143161943632
+            },
+            "service": {
+              "p50_ms": 1.104346470600987,
+              "p95_ms": 1.4027112304626637,
+              "p99_ms": 1.5344711341005914,
+              "max_ms": 1.3925591500508014
+            },
+            "dispatch": {
+              "p50_ms": 1.0114564497141956,
+              "p95_ms": 1.0072161151582113,
+              "p99_ms": 1.0558036821993946,
+              "max_ms": 0.804791089424297
+            }
+          },
+          "during_rate_ratio": 0.9904667574594528,
+          "during_q16": 126.203125,
+          "during_q64": 125.0,
+          "p99_q16_ms": 1908.666761,
+          "p99_q64_ms": 2928.883052,
+          "statuses_q16": {
+            "applied": 8135,
+            "window_refused": 57,
+            "no_leader": 0,
+            "admission_refused": 0,
+            "not_proposed": 0,
+            "unknown": 0,
+            "pending": 0
+          },
+          "statuses_q64": {
+            "applied": 8013,
+            "window_refused": 179,
+            "no_leader": 0,
+            "admission_refused": 0,
+            "not_proposed": 0,
+            "unknown": 0,
+            "pending": 0
+          },
+          "backlog_q16": 58,
+          "backlog_q64": 13
+        }
+      },
+      "mean_barrier_ratio": 1.1086682489638637,
+      "mean_wal_sync_ratio": 1.1480522417767636,
+      "mean_publication_ratio": 1.0680925044271703,
+      "during_rate_regression": true,
+      "rate_regression": true,
+      "p99_regression": true,
+      "window_refusals_q16": 57,
+      "window_refusals_q64": 179
+    },
+    {
+      "cell": "moderate",
+      "protocol": "quic",
+      "trial": 2,
+      "q16_case": "t2-moderate-quic-q16",
+      "q64_case": "t2-moderate-quic-q64",
+      "completed_rate_ratio": 0.9874499332798586,
+      "during_rate_ratio": 0.9801001251564455,
+      "latency_ratios": {
+        "intended": {
+          "p50_ms": 1.037893237501419,
+          "p95_ms": 1.1177549853280704,
+          "p99_ms": 1.182388276824369,
+          "max_ms": 1.2054684015531139
+        },
+        "service": {
+          "p50_ms": 1.0382373079612666,
+          "p95_ms": 1.1177767169619661,
+          "p99_ms": 1.1824357029809274,
+          "max_ms": 1.205470853634974
+        },
+        "dispatch": {
+          "p50_ms": 0.9801477485928706,
+          "p95_ms": 0.9957286416584525,
+          "p99_ms": 1.0516314971680618,
+          "max_ms": 1.2792008882913535
+        }
+      },
+      "barriers_per_original_ratio": 0.8886476703529202,
+      "commands_per_append_unit_ratio": 1.1253053750794813,
+      "per_group": {
+        "1": {
+          "completed_rate_ratio": 0.9874499332798586,
+          "latency_ratios": {
+            "intended": {
+              "p50_ms": 1.037893237501419,
+              "p95_ms": 1.1177549853280704,
+              "p99_ms": 1.182388276824369,
+              "max_ms": 1.2054684015531139
+            },
+            "service": {
+              "p50_ms": 1.0382373079612666,
+              "p95_ms": 1.1177767169619661,
+              "p99_ms": 1.1824357029809274,
+              "max_ms": 1.205470853634974
+            },
+            "dispatch": {
+              "p50_ms": 0.9801477485928706,
+              "p95_ms": 0.9957286416584525,
+              "p99_ms": 1.0516314971680618,
+              "max_ms": 1.2792008882913535
+            }
+          },
+          "during_rate_ratio": 0.9801001251564455,
+          "during_q16": 124.84375,
+          "during_q64": 122.359375,
+          "p99_q16_ms": 3189.564703,
+          "p99_q64_ms": 3771.303913,
+          "statuses_q16": {
+            "applied": 8001,
+            "window_refused": 191,
+            "no_leader": 0,
+            "admission_refused": 0,
+            "not_proposed": 0,
+            "unknown": 0,
+            "pending": 0
+          },
+          "statuses_q64": {
+            "applied": 7910,
+            "window_refused": 282,
+            "no_leader": 0,
+            "admission_refused": 0,
+            "not_proposed": 0,
+            "unknown": 0,
+            "pending": 0
+          },
+          "backlog_q16": 11,
+          "backlog_q64": 79
+        }
+      },
+      "mean_barrier_ratio": 1.1064676418509585,
+      "mean_wal_sync_ratio": 1.1116314620876084,
+      "mean_publication_ratio": 1.1010934262498462,
+      "during_rate_regression": true,
+      "rate_regression": true,
+      "p99_regression": true,
+      "window_refusals_q16": 191,
+      "window_refusals_q64": 282
+    },
+    {
+      "cell": "bulk",
+      "protocol": "quic",
+      "trial": 2,
+      "q16_case": "t2-bulk-quic-q16",
+      "q64_case": "t2-bulk-quic-q64",
+      "completed_rate_ratio": 1.3074128394800404,
+      "during_rate_ratio": 0.5940357852882704,
+      "latency_ratios": {
+        "intended": {
+          "p50_ms": 0.9833842411866094,
+          "p95_ms": 0.6034978565876821,
+          "p99_ms": 0.5988084448185228,
+          "max_ms": 0.5981017895263016
+        },
+        "service": {
+          "p50_ms": 0.9833886977174606,
+          "p95_ms": 0.6034944611500667,
+          "p99_ms": 0.5989528843760731,
+          "max_ms": 0.5980994880369502
+        },
+        "dispatch": {
+          "p50_ms": 1.0162594723100762,
+          "p95_ms": 9.917296232290404,
+          "p99_ms": 5.517068686989342,
+          "max_ms": 5.89681429700587
+        }
+      },
+      "barriers_per_original_ratio": 0.31156646721362036,
+      "commands_per_append_unit_ratio": 3.209588018066035,
+      "per_group": {
+        "1": {
+          "completed_rate_ratio": 1.3074128394800404,
+          "latency_ratios": {
+            "intended": {
+              "p50_ms": 0.9833842411866094,
+              "p95_ms": 0.6034978565876821,
+              "p99_ms": 0.5988084448185228,
+              "max_ms": 0.5981017895263016
+            },
+            "service": {
+              "p50_ms": 0.9833886977174606,
+              "p95_ms": 0.6034944611500667,
+              "p99_ms": 0.5989528843760731,
+              "max_ms": 0.5980994880369502
+            },
+            "dispatch": {
+              "p50_ms": 1.0162594723100762,
+              "p95_ms": 9.917296232290404,
+              "p99_ms": 5.517068686989342,
+              "max_ms": 5.89681429700587
+            }
+          },
+          "during_rate_ratio": 0.5940357852882704,
+          "during_q16": 314.375,
+          "during_q64": 186.75,
+          "p99_q16_ms": 13500.698457,
+          "p99_q64_ms": 8084.332247,
+          "statuses_q16": {
+            "applied": 6611,
+            "window_refused": 1581,
+            "no_leader": 0,
+            "admission_refused": 0,
+            "not_proposed": 0,
+            "unknown": 0,
+            "pending": 0
+          },
+          "statuses_q64": {
+            "applied": 5590,
+            "window_refused": 2602,
+            "no_leader": 0,
+            "admission_refused": 0,
+            "not_proposed": 0,
+            "unknown": 0,
+            "pending": 0
+          },
+          "backlog_q16": 4096,
+          "backlog_q64": 4096
+        }
+      },
+      "mean_barrier_ratio": 1.6093354699027722,
+      "mean_wal_sync_ratio": 1.6824422892274629,
+      "mean_publication_ratio": 1.5351237757157765,
+      "during_rate_regression": true,
+      "rate_regression": false,
+      "p99_regression": false,
+      "window_refusals_q16": 1581,
+      "window_refusals_q64": 2602
+    }
+  ],
+  "raw_cases": 48
+}

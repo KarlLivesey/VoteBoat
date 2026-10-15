@@ -1,0 +1,3504 @@
+{
+  "scope": "Root recomputation directly from all96 original raw offer ledgers and summaries after both actual terminals. No workloads rerun. Successful intended latency nearest rank; refusals retained separately.",
+  "inputs": {
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux/TERMINAL.json": {
+      "sha256": "a59a011d850c6c41c3aabbc7ff57af624d088b3d0509bbda301f50c61fc44e08",
+      "bytes": 186
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux/campaign/CAMPAIGN.json": {
+      "sha256": "8f518e61833120a8bd2cd683894894dd455cd761b91b74e716c43a6425743951",
+      "bytes": 100998
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-singleton-tcp-q16/summary.txt": {
+      "sha256": "92d025ef11ea36c49ed10d347c0be599b7df116a040ec35f25d18057fc1ef591",
+      "bytes": 1865
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-singleton-tcp-q16/offers.csv": {
+      "sha256": "35c1528609fb6ca132021f61829c170223b4647fc23f2c32f5ee60a666effff9",
+      "bytes": 16354
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-singleton-tcp-q64/summary.txt": {
+      "sha256": "552c5d10e063353703a987fce7b42bb1eca899bcb3e7eed5f2ce4664d964d9ee",
+      "bytes": 1864
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-singleton-tcp-q64/offers.csv": {
+      "sha256": "e38edfadf22dc3d50e93dbdbf921de03fd7a0ef50f9a414d45772a4d9d01a943",
+      "bytes": 16390
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-singleton-quic-q64/summary.txt": {
+      "sha256": "52023d20a58273fe2eb187d6481e47915b439c12c592469a89b985086caee6e0",
+      "bytes": 1863
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-singleton-quic-q64/offers.csv": {
+      "sha256": "6f5449466c9d58682e441d24a86d63c18f3af3bc0226af6ffd6cf1a483f6affd",
+      "bytes": 16386
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-singleton-quic-q16/summary.txt": {
+      "sha256": "d5ceec426de030a6ca431db44b76904a6d99a34b3b671293e5d4e379001a78a2",
+      "bytes": 1863
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-singleton-quic-q16/offers.csv": {
+      "sha256": "d4d9908ecef6f7f929fa66599228c6d02506d157a30061fe6753d8818f9c8831",
+      "bytes": 16408
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-moderate-quic-q16/summary.txt": {
+      "sha256": "3226f0fc8a86242fba550779b7ab70ce377de64deace121eec8b8dde38e08aa5",
+      "bytes": 1895
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-moderate-quic-q16/offers.csv": {
+      "sha256": "3c441a32e41a4b050f8a19dafe71a59cfe486f9cdcaa6f15402898623557d856",
+      "bytes": 557139
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-moderate-quic-q64/summary.txt": {
+      "sha256": "fbd572a86a7ec32e7d916bc732c397789d197a50ca44b1cb8978775b0a13f8de",
+      "bytes": 1896
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-moderate-quic-q64/offers.csv": {
+      "sha256": "715e1597c8c5809871e50cfa3b9597936ad14f67e54de4feab438ce8fb92bc20",
+      "bytes": 556936
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-moderate-tcp-q64/summary.txt": {
+      "sha256": "f538f99870438057d061e8304c0f6613ebe0a1b13b6fdbbcf54c558f8c735218",
+      "bytes": 1897
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-moderate-tcp-q64/offers.csv": {
+      "sha256": "e78f05a01fa03e275d573dc2356516e5ee3fd47ca409d50c160d30e28747e21c",
+      "bytes": 557124
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-moderate-tcp-q16/summary.txt": {
+      "sha256": "fec9dd8e25890ec2e99c602777554ba139ff515b7d59ec21c427fa6a6881c8f0",
+      "bytes": 1896
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-moderate-tcp-q16/offers.csv": {
+      "sha256": "76378ceeb01652abb7f7b5414990a3596b827be35744b1387686000ede7d35f1",
+      "bytes": 557192
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-bulk-tcp-q16/summary.txt": {
+      "sha256": "91a5f021e0e98513bfc52a65a306cf76d5c0a2ac457eb586df6313cb651e2302",
+      "bytes": 1905
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-bulk-tcp-q16/offers.csv": {
+      "sha256": "211eb3b38439148fde7c5330d12c57d8b8d715d368700434cdcf915fd8c5b38a",
+      "bytes": 533149
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-bulk-tcp-q64/summary.txt": {
+      "sha256": "6c4da4ca3387f44b997e7bf2209c675fb7209608186b95ccca2e3fb0f0c31993",
+      "bytes": 1903
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-bulk-tcp-q64/offers.csv": {
+      "sha256": "07213812061c5b6d2e22645bdc3e1656191f996fb942a6ad420ffa7f4c9aa1f4",
+      "bytes": 534296
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-bulk-quic-q64/summary.txt": {
+      "sha256": "5601dde85e62e256d33be7ce095f236c3789b81ca8a5ab59f948bde8ddfb56e6",
+      "bytes": 1901
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-bulk-quic-q64/offers.csv": {
+      "sha256": "74931e0aa9edc7a557358a25821f4c7016c6dbe0b22172c14a2841cb4687af59",
+      "bytes": 535121
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-bulk-quic-q16/summary.txt": {
+      "sha256": "82daf33d981c24feb6cbe833d58749e3fa6b50313c9ee24451cbe187b6b86a60",
+      "bytes": 1903
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-bulk-quic-q16/offers.csv": {
+      "sha256": "917295b3cc87303bc33efb5881af6596dbfef844356542cd3d9221859769b6dd",
+      "bytes": 533593
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-skew-quic-q16/summary.txt": {
+      "sha256": "e2602d928f1ecbc6eef9af0528e4789dabf286800234a94cbf85d9118f8aab6a",
+      "bytes": 1980
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-skew-quic-q16/offers.csv": {
+      "sha256": "11663a61b01ec13cfc559550f8245ec5542cf75262eb8c036744df64d1d6cb40",
+      "bytes": 524604
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-skew-quic-q64/summary.txt": {
+      "sha256": "2f0b8036f4ce37bde67bfd8e62a87d306fc3e78aa004072f578238d76decd87d",
+      "bytes": 1981
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-skew-quic-q64/offers.csv": {
+      "sha256": "9d1e2eda4e6e81022f4837893e3bc30c48fb20505cc9bd95c96857bcbc14c51c",
+      "bytes": 526862
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-skew-tcp-q64/summary.txt": {
+      "sha256": "42c97785b09896f13dbab089a6d23377209567d410f9988d9912f769fd76bf57",
+      "bytes": 1984
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-skew-tcp-q64/offers.csv": {
+      "sha256": "85fed394a8f9f05c69066cf0a855369c1c5b56a156af5b54be5e09b90ff0ba61",
+      "bytes": 526364
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-skew-tcp-q16/summary.txt": {
+      "sha256": "2b7634b83554dfcbfd8987146cba4669103771498a34e06d658bbd86dc43c422",
+      "bytes": 1982
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t1-skew-tcp-q16/offers.csv": {
+      "sha256": "6c4869cc7aff2e874926b1187c290367e39d2d93293633acdf42077e1c2ae665",
+      "bytes": 525392
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-moderate-tcp-q16/summary.txt": {
+      "sha256": "2ab4d55629d73f1925eaa8ddefd74719a29d77230845b20d5d935bfa003cddc9",
+      "bytes": 1899
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-moderate-tcp-q16/offers.csv": {
+      "sha256": "54acc9d2e279f1637f24ee5a33c06ffdd56d02e84d6b75360dcbdb2b247a893e",
+      "bytes": 557257
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-moderate-tcp-q64/summary.txt": {
+      "sha256": "f81acde856ed7b24559e91655d9f0b16e51c767b456368467fc7be68127de8d6",
+      "bytes": 1895
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-moderate-tcp-q64/offers.csv": {
+      "sha256": "49372ede9209cb467056c5d4b3f063c125586e8b5d1204b050c29ec16c98ca14",
+      "bytes": 557242
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-moderate-quic-q64/summary.txt": {
+      "sha256": "4eb3fc49da63a0246312b13fe94ffb1db50654dd6b365956f55d7bf348ba95d8",
+      "bytes": 1896
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-moderate-quic-q64/offers.csv": {
+      "sha256": "45eac758dcb6015b2c17ce39515fe8944edeb9e19f3dde86f6fb7d5f8a1c4b57",
+      "bytes": 556764
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-moderate-quic-q16/summary.txt": {
+      "sha256": "591cf7b1b4e88c5e84eb71458a19b7dcfa79286e928e231f1e747c86fdc2d2be",
+      "bytes": 1895
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-moderate-quic-q16/offers.csv": {
+      "sha256": "d247463c09150d4784c9116646b3f8eb91d55175b5e9caa177b862d2247dcbad",
+      "bytes": 556921
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-bulk-quic-q16/summary.txt": {
+      "sha256": "59b47f29070681f2a2db45c8048768e846775094dce2834acd3d15765d835cc7",
+      "bytes": 1903
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-bulk-quic-q16/offers.csv": {
+      "sha256": "fe2db963a0bd5355c633b3a4908797cc1e5f98135a107f94164619518c3a2a37",
+      "bytes": 534555
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-bulk-quic-q64/summary.txt": {
+      "sha256": "6a0ab941f8e2b37c285980c0d7898ce7a7260342b06e380b402bbdc2c6c9e039",
+      "bytes": 1899
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-bulk-quic-q64/offers.csv": {
+      "sha256": "b711ba9c3558185bb97211b54d6100ff66f5d6a2e385810ad60d1d9389a560c6",
+      "bytes": 532269
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-bulk-tcp-q64/summary.txt": {
+      "sha256": "6824da42d7c751d9010319bd21594a35a609fb0bdd1eb4670cfd0bb8b4c7329b",
+      "bytes": 1903
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-bulk-tcp-q64/offers.csv": {
+      "sha256": "bc9be8b1baccc415d93c9a883be52f18c909d0f4db061cc0941734282d0bdd51",
+      "bytes": 533645
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-bulk-tcp-q16/summary.txt": {
+      "sha256": "f75632a0af12098daf5c6d0caf8784c9e7f510d001740dc26003df27098e0779",
+      "bytes": 1905
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-bulk-tcp-q16/offers.csv": {
+      "sha256": "8c6dc28f707ac07394cd17e7bd7dc3b865a32fa4199824bce6b8a1bcf4bf5242",
+      "bytes": 532882
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-skew-tcp-q16/summary.txt": {
+      "sha256": "ced461e688fad0956f7aab4c9986c19769a5293e12a7807e740560a837b08ace",
+      "bytes": 1984
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-skew-tcp-q16/offers.csv": {
+      "sha256": "22e447f714853e10001aec2890c71085c71b30ccb1e721683707a26240603486",
+      "bytes": 525171
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-skew-tcp-q64/summary.txt": {
+      "sha256": "6945c188e86cffc55d7efe3933a05683e277c319fdc8064cda79cdf566e356b4",
+      "bytes": 1983
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-skew-tcp-q64/offers.csv": {
+      "sha256": "c967e31d3050c1634adc590723b64338a363a74bc2e0184868f0648c39a38716",
+      "bytes": 526462
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-skew-quic-q64/summary.txt": {
+      "sha256": "11174d1139690a5977d103fb2c237132edc447983e49fe48e563f781e073602c",
+      "bytes": 1981
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-skew-quic-q64/offers.csv": {
+      "sha256": "8c72d3daa9ed200fd35aff11db1d3379887ca1ea97afb72e2952a2c3b1be228a",
+      "bytes": 526491
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-skew-quic-q16/summary.txt": {
+      "sha256": "5b3eecdc4436d30cd05c7d90344b22978e526c350938387e489886b2cf441119",
+      "bytes": 1981
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-skew-quic-q16/offers.csv": {
+      "sha256": "ea91e24426f26bbbb5abb006fb66bf40c724d007d89ebd21eeb23e6477ccfd26",
+      "bytes": 525420
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-singleton-quic-q16/summary.txt": {
+      "sha256": "a4bfc1fa7f1a106d60cb52c633671e427d75010dd4dc8e12f9e98fb04254cf7d",
+      "bytes": 1863
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-singleton-quic-q16/offers.csv": {
+      "sha256": "674b6481a253aa5dd2077552df715b5e9f07deaf6fa00aa88c5a6e7f1c847c00",
+      "bytes": 16404
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-singleton-quic-q64/summary.txt": {
+      "sha256": "eab96134b8e4937061ed16debe74739cdd95e26fb738128fb1c157daa731aee2",
+      "bytes": 1863
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-singleton-quic-q64/offers.csv": {
+      "sha256": "4e0d2d95e60ec725dd8d4bd7a00a9148c1b5ec3e4899857c0d976202e9e9c07a",
+      "bytes": 16405
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-singleton-tcp-q64/summary.txt": {
+      "sha256": "74216ac7374ca8d07c12070900f5512b77fa102bc6a88eef809a912d3660ea9c",
+      "bytes": 1867
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-singleton-tcp-q64/offers.csv": {
+      "sha256": "fe62094a0dfba658865c24c1654bbe5af36914effd3bd16c082bbe171ccddc39",
+      "bytes": 16398
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-singleton-tcp-q16/summary.txt": {
+      "sha256": "61a31b232bb99172dd5bdb6963e5bed953e1ad25cb12973f9c3175939c8a4e9b",
+      "bytes": 1865
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t2-singleton-tcp-q16/offers.csv": {
+      "sha256": "ff6b62a7d3fce9c36195f5b87160138166cc457681d3a30f1898ba6f6e6b73c0",
+      "bytes": 16387
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-bulk-tcp-q16/summary.txt": {
+      "sha256": "62eb9addc15126952f4211df9cc64e6db63035fc22a4d4a8235689fc7bee68bf",
+      "bytes": 1905
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-bulk-tcp-q16/offers.csv": {
+      "sha256": "34e0cc51a74a575e0c4c6b43eec06a0afb231b00fd65c6658eb85b4a21a4155a",
+      "bytes": 534223
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-bulk-tcp-q64/summary.txt": {
+      "sha256": "e5a42937e5110dcd4dec9ee0c2a607cd235c9810992609bd959662c9ecd9369d",
+      "bytes": 1902
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-bulk-tcp-q64/offers.csv": {
+      "sha256": "405d024ff7dcb78933a0e78a3054523fe199b736a4d2a2ec2146511f5f5ebea2",
+      "bytes": 534970
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-bulk-quic-q64/summary.txt": {
+      "sha256": "ba3aee3ee72e13cd97f7463048869ca0545198c5d9a12a6e3fbd4149893f7a6c",
+      "bytes": 1900
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-bulk-quic-q64/offers.csv": {
+      "sha256": "9e533fc2a5f144ab2b158839e65c5d0e88a6f1d42639ac79abafc87fe81f8e41",
+      "bytes": 535272
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-bulk-quic-q16/summary.txt": {
+      "sha256": "1e616f1847aabf7c205599ace5b1494ee564a2ecbd58a98da374a163e5f388a9",
+      "bytes": 1903
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-bulk-quic-q16/offers.csv": {
+      "sha256": "7e04a94ddb6a12e6ad2e30b8381db859c0421a520552e2cae2bb934e00b39bb8",
+      "bytes": 533822
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-skew-quic-q16/summary.txt": {
+      "sha256": "96203bd42f408bab8c4f4a6868b9ad6f74fdfa486286f485ca3af32a9893efba",
+      "bytes": 1979
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-skew-quic-q16/offers.csv": {
+      "sha256": "c21ac87b3a4d4e01ba5084ad543d524b3e259566dbc2c8c649fc8f52c3998b54",
+      "bytes": 524554
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-skew-quic-q64/summary.txt": {
+      "sha256": "fe58a2ffdd96bc9e4f94db5833b94e8563af625d2853bc1fce25fe4fcd307179",
+      "bytes": 1981
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-skew-quic-q64/offers.csv": {
+      "sha256": "bc97f4a9b72599efcb9a382872baa19e3febb37eb38f08d7cdf00d622ac6b33d",
+      "bytes": 525396
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-skew-tcp-q64/summary.txt": {
+      "sha256": "9e60b5bf8185d7258075b77e9b63bd5549787c8c9d4864263226cf7d20f1f23c",
+      "bytes": 1982
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-skew-tcp-q64/offers.csv": {
+      "sha256": "905e07de9b6938bcadc285ce8966fba5cc03bfac7b6785bc9e4129d95764b4ca",
+      "bytes": 526295
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-skew-tcp-q16/summary.txt": {
+      "sha256": "fb10495bb95e603a422e20e4f06bbcd07d6e6eb330f716fd4f98d54879f4307f",
+      "bytes": 1982
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-skew-tcp-q16/offers.csv": {
+      "sha256": "eef95a9dcb4c9b7a5d42cd2a45526cf672b7e8416cf41546ade21d03a6bba4ba",
+      "bytes": 525562
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-singleton-tcp-q16/summary.txt": {
+      "sha256": "7ad7a8b2b4fdc8347855cbdc5969978764213f903326f90a6b1aff34cd629c8c",
+      "bytes": 1865
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-singleton-tcp-q16/offers.csv": {
+      "sha256": "a0b91e5e463c8b07d457740db13c9fbdd3251872886a0398e187deb48cb05cdf",
+      "bytes": 16407
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-singleton-tcp-q64/summary.txt": {
+      "sha256": "0d38b6df5ebe4c6ae8f570a4415a8e0a8516eb80d62c4150601e9fa5d28300da",
+      "bytes": 1867
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-singleton-tcp-q64/offers.csv": {
+      "sha256": "cdde7e9926b84f920365744d182d788df4639a4d2b1a9d3dda00c19834b84ac9",
+      "bytes": 16410
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-singleton-quic-q64/summary.txt": {
+      "sha256": "0fb68d02694d8e7ede0d64e13cdd7f860e11c84f10c0fa7803df0ab4592fb16a",
+      "bytes": 1862
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-singleton-quic-q64/offers.csv": {
+      "sha256": "ad1b0e17ff5818b212cd531bb78a12af4b96c2fa7438c3b31d80cd6e869301fb",
+      "bytes": 16391
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-singleton-quic-q16/summary.txt": {
+      "sha256": "4ae977259fd31fb8c4ea91e240055c183cf372d0f03bbbc0cb5d44b465a5dd72",
+      "bytes": 1864
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-singleton-quic-q16/offers.csv": {
+      "sha256": "8c63ff63824bafde075ccd6daeb5dbd5d40ce48bf8c0e72360067e7a32918d6e",
+      "bytes": 16402
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-moderate-quic-q16/summary.txt": {
+      "sha256": "2e82a55a5bd693401e27be9d1e88c3c8c12f44602ae247f9024420ba8705367c",
+      "bytes": 1896
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-moderate-quic-q16/offers.csv": {
+      "sha256": "c5f75668239a6ee01b5dd2706c7016ba2a142ca21c8b11cc91682629189fd35f",
+      "bytes": 556822
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-moderate-quic-q64/summary.txt": {
+      "sha256": "c4c3d7c6f5a69ac42de8f0a810c09447cd55f8d13c85e9e5797dea2ef6db3b63",
+      "bytes": 1895
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-moderate-quic-q64/offers.csv": {
+      "sha256": "df2519054dfa45d65a377a5dbfc93eb9389d845e7b57758cbe02d16d8f51d049",
+      "bytes": 557079
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-moderate-tcp-q64/summary.txt": {
+      "sha256": "00e17c0d8d7599d59cba12bec06d4f6c8b09d63ce79f05c75c919e0215ee8cdb",
+      "bytes": 1897
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-moderate-tcp-q64/offers.csv": {
+      "sha256": "9c8a74aa7520c05551c98c1e3a1d09ff889a4b9fbe603cddcc4a3fb78a67fe2d",
+      "bytes": 557240
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-moderate-tcp-q16/summary.txt": {
+      "sha256": "8fab0a256f6a5e00f69c3677153b30a950d20d1fdf956325e5c8b708f093b5e2",
+      "bytes": 1896
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-moderate-tcp-q16/offers.csv": {
+      "sha256": "ac6b09bf713025509fd2bbe8bebfac1dd57b62369d7d236b39f30c042f106142",
+      "bytes": 557252
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/TERMINAL.json": {
+      "sha256": "7c2296b583bb68f8e2f6087db9de142b535de8d15f6b79f6dc682f4d2d5115ca",
+      "bytes": 185
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/campaign/CAMPAIGN.json": {
+      "sha256": "c7a8e45e9c5ac020226c0a7032959412e9486b3b504b1dfb859efb8f60ae9d09",
+      "bytes": 93122
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-singleton-tcp-q16/summary.txt": {
+      "sha256": "a896fd5601479158fb1e4bc8bd5285fe2ec0f5f8db9bcd913b1c4d676fa0f3e7",
+      "bytes": 1865
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-singleton-tcp-q16/offers.csv": {
+      "sha256": "96760b4d40bf678b70bd7a295d3cb8e129204688bcf5dd5e84e3b79512685550",
+      "bytes": 16349
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-singleton-tcp-q64/summary.txt": {
+      "sha256": "34f72b2693252e2c00ea234e944e767a3669b816d57a56cc6e22e6f4b669d336",
+      "bytes": 1864
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-singleton-tcp-q64/offers.csv": {
+      "sha256": "aaba682edfe017bdbb25935ccc803b0aa1f2663c5156fe3d10f2b7ffff80c44b",
+      "bytes": 16349
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-singleton-quic-q64/summary.txt": {
+      "sha256": "e57416960199fe73d26927e7dcd845024c1a0849b3b1aec68c89ca30ef44e897",
+      "bytes": 1862
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-singleton-quic-q64/offers.csv": {
+      "sha256": "2a9f58830b97bcef6544b0be515fc3286d52e695f3b67a273a57f0799d664053",
+      "bytes": 16349
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-singleton-quic-q16/summary.txt": {
+      "sha256": "729fa3d2fab11f0931720b218e45a6e96d3a4da94b6a76c65be244a8ae57dff1",
+      "bytes": 1862
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-singleton-quic-q16/offers.csv": {
+      "sha256": "c43ee11906850a3eeb4056cb0531bba0888c4130489dab15135242d2871e379d",
+      "bytes": 16349
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-moderate-quic-q16/summary.txt": {
+      "sha256": "eeae6c89fc165df7ba66a81fb79b508c6386ef05f34c757ece2b8b934dc75458",
+      "bytes": 1891
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-moderate-quic-q16/offers.csv": {
+      "sha256": "1b68bf4cacfa3c719fa171d0d0225b8a2ffcd1c038694bb39f47c0ee9eef8182",
+      "bytes": 557235
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-moderate-quic-q64/summary.txt": {
+      "sha256": "4540fae0ffc60e66e148ff8bdad59d1ef4876ddb2804af6fd20f53cdec16a18c",
+      "bytes": 1893
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-moderate-quic-q64/offers.csv": {
+      "sha256": "b5fc15866a9908534d01a160b4fc0c5d28c66a094fd73a4efcf4ed17035e4045",
+      "bytes": 557240
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-moderate-tcp-q64/summary.txt": {
+      "sha256": "11a074b9a776edf1b22b46ce1ef9c8d79a6944e9b97356cd8512794866e0edff",
+      "bytes": 1893
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-moderate-tcp-q64/offers.csv": {
+      "sha256": "34999f84e44a5fab9d90c8da94fdda1e8d921a2a7985d46af3b5448a3ef009d3",
+      "bytes": 557237
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-moderate-tcp-q16/summary.txt": {
+      "sha256": "37c843facf3bca192ed4713b0972c5f2e2947676607e99dbb1ea0db87d7a0354",
+      "bytes": 1893
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-moderate-tcp-q16/offers.csv": {
+      "sha256": "e02eaff7ea2e48d77e867da74329c2b20ffd8c9956cfbfb3031f7ede4e47d281",
+      "bytes": 557296
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-bulk-tcp-q16/summary.txt": {
+      "sha256": "1104b91a00c07c0f68c20bd7b1f11bc2e41b9ab0db42e56e5442c7779f830fef",
+      "bytes": 1900
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-bulk-tcp-q16/offers.csv": {
+      "sha256": "8b7212c4c2c01c96f99cc0525240a8b0ed7363bc9d1c6d62001726f561923133",
+      "bytes": 536794
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-bulk-tcp-q64/summary.txt": {
+      "sha256": "c61fcdd82048f7655736a5a6636481c4c6b339f07706bb862dca08a77248ec4a",
+      "bytes": 1891
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-bulk-tcp-q64/offers.csv": {
+      "sha256": "959993e821b14e1097e167bad851a5bba54fe647ff3835eda881c77f18174b7e",
+      "bytes": 533694
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-bulk-quic-q64/summary.txt": {
+      "sha256": "756a2838963259f2de26e91c358ffa6ea0bc11e71d758577595bf4a2b618994d",
+      "bytes": 1891
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-bulk-quic-q64/offers.csv": {
+      "sha256": "49fb33c196fe2e0b1af82cbbfb64dd527488c47328881a3e9d0d4c1137127c40",
+      "bytes": 533690
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-bulk-quic-q16/summary.txt": {
+      "sha256": "b0a1f2a158f9fd05257c5ce4d6aacd93e66260bd4b7f27e9217c5d16c04b29e5",
+      "bytes": 1898
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-bulk-quic-q16/offers.csv": {
+      "sha256": "32e09a5c0e7fe373835b4e289831e0c5d9a9604a9f902336aa908f7ce14619ac",
+      "bytes": 536965
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-skew-quic-q16/summary.txt": {
+      "sha256": "cd61872a6d272c20e0c623e68753cfec5fca54db928588f471dfe075e3309176",
+      "bytes": 1981
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-skew-quic-q16/offers.csv": {
+      "sha256": "b63299732a380348cc573fe668988efccd26be035b050fe7b1d63ad858e66747",
+      "bytes": 527778
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-skew-quic-q64/summary.txt": {
+      "sha256": "7c4b783c00724edcacc2d3d5ed3387a596653de9f963cd2940cc0e411d103b72",
+      "bytes": 1981
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-skew-quic-q64/offers.csv": {
+      "sha256": "de609dfd4c33249c2df34670661618faf4ab90da9730dff7c8f63d65af313e0b",
+      "bytes": 530487
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-skew-tcp-q64/summary.txt": {
+      "sha256": "a413106d1d13b1cc14109bf357c285977edd63fd5833b8cc63f166a4528aea60",
+      "bytes": 1983
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-skew-tcp-q64/offers.csv": {
+      "sha256": "19742cf466c821477ebe6b4b1b622899eee8574cc8f0460b74bf09e11f5dea9b",
+      "bytes": 527929
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-skew-tcp-q16/summary.txt": {
+      "sha256": "179b591b525f33c05ae596c51710cf0326d19e72a601ddffd388ef93f3430264",
+      "bytes": 1983
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t1-skew-tcp-q16/offers.csv": {
+      "sha256": "2aed7b2ce718415d66b300849530a09363c96741d14b43f15bda022d36a83105",
+      "bytes": 527597
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-moderate-tcp-q16/summary.txt": {
+      "sha256": "d69868fa6096d5fc94a523fd1e45755f36c8d320bac413390038b6c5be7831e4",
+      "bytes": 1893
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-moderate-tcp-q16/offers.csv": {
+      "sha256": "95eb0c1570aeee9566266267b730d41515eba57de5d94dbb4f16fa00ac1ede41",
+      "bytes": 557239
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-moderate-tcp-q64/summary.txt": {
+      "sha256": "419f10371c87d05061deb59ea056597fb0fbbe5f52ab5a828c2ee7e78b514f96",
+      "bytes": 1893
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-moderate-tcp-q64/offers.csv": {
+      "sha256": "807a903116dbbe21fb57f5ed4cef8114d86228af5e04eb02b59c97c46824e2c9",
+      "bytes": 557257
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-moderate-quic-q64/summary.txt": {
+      "sha256": "4aba6130d8faa395d54bb00945592e2dbabb1c9872dd801f62a32ceb5cde5a59",
+      "bytes": 1893
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-moderate-quic-q64/offers.csv": {
+      "sha256": "ba088dedbb919144c93856148e6c279a854ccda1fdd91c65ac3db5d04bfa9376",
+      "bytes": 557339
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-moderate-quic-q16/summary.txt": {
+      "sha256": "e65d4855f251f2538903ded4afd52482e75d8829187efbf96381e5f2da7ae547",
+      "bytes": 1891
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-moderate-quic-q16/offers.csv": {
+      "sha256": "90d703ea8dbba5be578948b2cc5e1220cf4b0ec73f6ac0cc8358fcefcdc4f4db",
+      "bytes": 557236
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-bulk-quic-q16/summary.txt": {
+      "sha256": "1f431e14d9962b8232b44d3c739efdeff01ddde9f0ff1c86906cbba033b2e865",
+      "bytes": 1898
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-bulk-quic-q16/offers.csv": {
+      "sha256": "eba247c41fc6373d861934dce931d40ce67b243b9e300f8a39fc23339d84d110",
+      "bytes": 536748
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-bulk-quic-q64/summary.txt": {
+      "sha256": "fd50daf04f9daa8e02991d4fd1d3c1584369a4540418c98b86de5bba0ed14a72",
+      "bytes": 1892
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-bulk-quic-q64/offers.csv": {
+      "sha256": "ffebc1b0a0fb481ea06c58bc45c6b3a036958c2501e587695869245749f81c5b",
+      "bytes": 533829
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-bulk-tcp-q64/summary.txt": {
+      "sha256": "f9981135cb6d8899f18829dbbbd1a65ffccbe861f32e180a173b07e01cd866c7",
+      "bytes": 1891
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-bulk-tcp-q64/offers.csv": {
+      "sha256": "4a3709c00b39052de0ecfe152477c07c358960d3bea36122bbe4c26dcf5b12b7",
+      "bytes": 533685
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-bulk-tcp-q16/summary.txt": {
+      "sha256": "1b99cc73339df08a44cdcbd5b0e6c839d87025347d2a2201833aa6c71fc5fb2f",
+      "bytes": 1900
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-bulk-tcp-q16/offers.csv": {
+      "sha256": "1c7c09ad851fd146715b9470baf754eb9a6a7826b29ab824d0c3bc0fb69925dd",
+      "bytes": 536089
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-skew-tcp-q16/summary.txt": {
+      "sha256": "8b9d233df212c3bb78d7fb583954163f71d96db9dc2f72c4c04ce2d48277af64",
+      "bytes": 1983
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-skew-tcp-q16/offers.csv": {
+      "sha256": "60427506dee5265627a81546b6a11d3d4a7e4b59cd809407314d4b2a06196756",
+      "bytes": 527297
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-skew-tcp-q64/summary.txt": {
+      "sha256": "64ee62e25f2b3faaedc37cc139dff0af2dac764e69f88ce5f7ef8cd427ff2940",
+      "bytes": 1983
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-skew-tcp-q64/offers.csv": {
+      "sha256": "e74b86cfaa7f29c7bab28c95a3c9c1784a418e6e7853e5f4830f4de5d9de30b0",
+      "bytes": 530226
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-skew-quic-q64/summary.txt": {
+      "sha256": "584c5b571701c2a3faf77ce6aedaff78d071002eb6b4c2f2c7c269d9a7442812",
+      "bytes": 1981
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-skew-quic-q64/offers.csv": {
+      "sha256": "898e69f88b63ca696da1e4d4715d6b855a45374f2f8a97a8e9232dc592c74137",
+      "bytes": 530982
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-skew-quic-q16/summary.txt": {
+      "sha256": "a6911239cc9cf35886c1dd8cff496889bfebb8d7e9ed1d16231ded5cd17fcb74",
+      "bytes": 1981
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-skew-quic-q16/offers.csv": {
+      "sha256": "ab47d18b390e7b3eabfa1b9484fcfecc704214755bb0154588df48ef1f79f9ac",
+      "bytes": 527022
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-singleton-quic-q16/summary.txt": {
+      "sha256": "b7afe1e72a47d3655b3645878a019fdcc44f92a0fb7a26ea8f1b342d94f95261",
+      "bytes": 1862
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-singleton-quic-q16/offers.csv": {
+      "sha256": "66e30aee9dcb22511f8ba66f768cc8b92e61fe35eec7faee34c30b0883db1451",
+      "bytes": 16349
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-singleton-quic-q64/summary.txt": {
+      "sha256": "4de8e04174e4ce2235be401904111a20c79acf7af05cdd5ac38c4910fe6290e5",
+      "bytes": 1862
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-singleton-quic-q64/offers.csv": {
+      "sha256": "9470c4cb840102d8520bdbd9b533374d391fc19f165c3608fa7c871f785c973c",
+      "bytes": 16349
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-singleton-tcp-q64/summary.txt": {
+      "sha256": "b50617c4ccff75b95e5eb60e7558885abc5fd7cb50f7f825cfff1fa6c0e2da44",
+      "bytes": 1864
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-singleton-tcp-q64/offers.csv": {
+      "sha256": "dffaf8fbd1227820bc58620cd3523a685456611f5680f0ea62edd0f0fae326e4",
+      "bytes": 16349
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-singleton-tcp-q16/summary.txt": {
+      "sha256": "c834f8e73a3dcb645499d99008b49045a505e29d3ebe942b13752b36bac07fe3",
+      "bytes": 1865
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t2-singleton-tcp-q16/offers.csv": {
+      "sha256": "65dd2ccd693f9b225af8accfffe3a042365dcbff949156330b97a30f1a9a3622",
+      "bytes": 16345
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-bulk-tcp-q16/summary.txt": {
+      "sha256": "4644524370c4491f3dd1be85348d8efa48125a0a40e9f03338e65d0d2b4f0995",
+      "bytes": 1900
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-bulk-tcp-q16/offers.csv": {
+      "sha256": "9f139b422d55de30abc2a7164c4582890a98fb37cf82e72c820b31a84cabcda1",
+      "bytes": 536382
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-bulk-tcp-q64/summary.txt": {
+      "sha256": "ed073a5b26c6c00f48a93635b9d550f71b75f047bc8939c5cf2496556ecee248",
+      "bytes": 1893
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-bulk-tcp-q64/offers.csv": {
+      "sha256": "94d1d6868221d6fb752e75e467559f537b281d6417a0ded8127958d2d919c398",
+      "bytes": 533679
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-bulk-quic-q64/summary.txt": {
+      "sha256": "c3da6b130b1cf384d620e8f83cf1a48026179c8b88060bbf54055d6f42b6d43c",
+      "bytes": 1890
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-bulk-quic-q64/offers.csv": {
+      "sha256": "368dd1c10fb9151223e1d4f7b1d4db30c66966f432838a951673eec362a911fc",
+      "bytes": 533692
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-bulk-quic-q16/summary.txt": {
+      "sha256": "a962b6c997c1b39f2085b7c7890c8afa1935eb11afe42c274ebed0d329dd721e",
+      "bytes": 1898
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-bulk-quic-q16/offers.csv": {
+      "sha256": "5a58aac100a6c5bff94f9a32f84928d3019d16a9a6101ae3f67bf8f5ddb879fc",
+      "bytes": 536460
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-skew-quic-q16/summary.txt": {
+      "sha256": "2f44a59f522b061eeb5cc8797ecaa6e9a59c772f723075f83d960f409c521439",
+      "bytes": 1980
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-skew-quic-q16/offers.csv": {
+      "sha256": "d805e39a62b2b886df992e113afe62d3e8684f7c5fd6bdb7dbcec5ee0b73e85a",
+      "bytes": 527334
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-skew-quic-q64/summary.txt": {
+      "sha256": "1d69f7cd5dc2a82bad15c291e5daf7acc9f1132005ada8cc9547f576c32540eb",
+      "bytes": 1982
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-skew-quic-q64/offers.csv": {
+      "sha256": "ea2e014fb4560f6a19d22ffc3fe4ca1c6446da8eac57a387e87b53595954a306",
+      "bytes": 529732
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-skew-tcp-q64/summary.txt": {
+      "sha256": "56937d0b7d2e6933f8dcb1b30caa6001aef0cc2b7c76a497555ca09b8d560d4e",
+      "bytes": 1984
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-skew-tcp-q64/offers.csv": {
+      "sha256": "6c44355e69e4d517c78e7f0d06377cbce465fd0de689fb63da3e28bd87042904",
+      "bytes": 531073
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-skew-tcp-q16/summary.txt": {
+      "sha256": "840c5815b2c51857b2782030b4217ce87ceae6a97d8ca679c3ec526b3ff5eceb",
+      "bytes": 1983
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-skew-tcp-q16/offers.csv": {
+      "sha256": "b3d10edc49be178dc363d1b6605c98b791ec53121132702d27d11ed1beb42837",
+      "bytes": 527663
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-singleton-tcp-q16/summary.txt": {
+      "sha256": "3274e3f28277e17acdb4d4e90f23acf129163ae2e5057fd399780359799ad9e9",
+      "bytes": 1863
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-singleton-tcp-q16/offers.csv": {
+      "sha256": "3b04a7f428584ea98f29093e3db2234fa9d4fc9d7862c4207b5c8a56de0cd6fc",
+      "bytes": 16345
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-singleton-tcp-q64/summary.txt": {
+      "sha256": "b08c4f0fe1ceb21cd7b8df6b3ae9aa1a3f0d27b73595a2d97aa3d4417e636b87",
+      "bytes": 1864
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-singleton-tcp-q64/offers.csv": {
+      "sha256": "b3e3bacab07478d88baa194865258a672da389c66bddc9959e90c5ee04bfdbd7",
+      "bytes": 16349
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-singleton-quic-q64/summary.txt": {
+      "sha256": "5dc7d1255c84235e9a3b01177ea6ee39863df616c7286fa6d2cf9f2e7a46a482",
+      "bytes": 1863
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-singleton-quic-q64/offers.csv": {
+      "sha256": "e748b2df57f4e6a80518da7beae0d58e3b547f322837cda955b5442e06eefaf6",
+      "bytes": 16349
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-singleton-quic-q16/summary.txt": {
+      "sha256": "5fad392be280ab9c824d0404d3c29b3ad41d3dd750c7eb48f5212c84ab8fcc05",
+      "bytes": 1863
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-singleton-quic-q16/offers.csv": {
+      "sha256": "908c801dbaca95133e18fb9eda2a82787e7506c23e099814bcde39ff62d6ac96",
+      "bytes": 16350
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-moderate-quic-q16/summary.txt": {
+      "sha256": "6df2ce5054bc02b902924a4aa3e8f148f584e92be6efdfebf6a0c23ad30bd292",
+      "bytes": 1891
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-moderate-quic-q16/offers.csv": {
+      "sha256": "a3ef3f82d6aded2a0c1ac8eff5b6682cc42405658559d7c42ed7706ed5d4d8be",
+      "bytes": 557263
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-moderate-quic-q64/summary.txt": {
+      "sha256": "7e062c96c77e001c13e3cafff264ec1615f5a54ea90e69eb5d0576650736abab",
+      "bytes": 1891
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-moderate-quic-q64/offers.csv": {
+      "sha256": "9e04f20ce0fab638e22f12ba1d6141a554bb09a329bbcd2cd375921ff1f5e9c5",
+      "bytes": 557234
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-moderate-tcp-q64/summary.txt": {
+      "sha256": "45870e15bc0c8cbeb22d89cf13ec1a4212cafc8316f5a60678b5b886d138628c",
+      "bytes": 1893
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-moderate-tcp-q64/offers.csv": {
+      "sha256": "8ae9e601267188b731637f62ec7b5b44642ed1a04e180a4fc7eb25e6fd5295df",
+      "bytes": 557274
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-moderate-tcp-q16/summary.txt": {
+      "sha256": "c2166c055687b16753d8262b041a7485c6598ebadd8396d7f5db6afdfdb29cd4",
+      "bytes": 1893
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/mac-collection/raw/results/t3-moderate-tcp-q16/offers.csv": {
+      "sha256": "48bafdf6a971c63e717702cc9f47542e70b8780b8bc66afa4f89cd8751d1f782",
+      "bytes": 557238
+    }
+  },
+  "records": [
+    {
+      "host": "linux",
+      "case": "t1-singleton-tcp-q16",
+      "ready_items": 16,
+      "offers": 256,
+      "applied": 231,
+      "refused": 25,
+      "completed_ops_s": 7.218719906735804,
+      "quantiles": {
+        "p50_ms": 27.184313,
+        "p95_ms": 160.92677,
+        "p99_ms": 448.41894,
+        "max_ms": 567.207532
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 231,
+          "refused": 25,
+          "p50_ms": 27.184313,
+          "p95_ms": 160.92677,
+          "p99_ms": 448.41894,
+          "max_ms": 567.207532
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t1-singleton-tcp-q64",
+      "ready_items": 64,
+      "offers": 256,
+      "applied": 196,
+      "refused": 60,
+      "completed_ops_s": 6.124988962578484,
+      "quantiles": {
+        "p50_ms": 54.032722,
+        "p95_ms": 319.849275,
+        "p99_ms": 561.566324,
+        "max_ms": 612.485192
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 196,
+          "refused": 60,
+          "p50_ms": 54.032722,
+          "p95_ms": 319.849275,
+          "p99_ms": 561.566324,
+          "max_ms": 612.485192
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t1-singleton-quic-q64",
+      "ready_items": 64,
+      "offers": 256,
+      "applied": 200,
+      "refused": 56,
+      "completed_ops_s": 6.249976011420197,
+      "quantiles": {
+        "p50_ms": 55.001151,
+        "p95_ms": 250.77333,
+        "p99_ms": 528.323018,
+        "max_ms": 615.252914
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 200,
+          "refused": 56,
+          "p50_ms": 55.001151,
+          "p95_ms": 250.77333,
+          "p99_ms": 528.323018,
+          "max_ms": 615.252914
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t1-singleton-quic-q16",
+      "ready_items": 16,
+      "offers": 256,
+      "applied": 178,
+      "refused": 78,
+      "completed_ops_s": 5.5624838201251885,
+      "quantiles": {
+        "p50_ms": 51.891724,
+        "p95_ms": 376.457601,
+        "p99_ms": 799.023768,
+        "max_ms": 1123.535212
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 178,
+          "refused": 78,
+          "p50_ms": 51.891724,
+          "p95_ms": 376.457601,
+          "p99_ms": 799.023768,
+          "max_ms": 1123.535212
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t1-moderate-quic-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 8135,
+      "refused": 57,
+      "completed_ops_s": 126.87936076355976,
+      "quantiles": {
+        "p50_ms": 273.091774,
+        "p95_ms": 1060.180806,
+        "p99_ms": 1908.666761,
+        "max_ms": 2437.775956
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8135,
+          "refused": 57,
+          "p50_ms": 273.091774,
+          "p95_ms": 1060.180806,
+          "p99_ms": 1908.666761,
+          "max_ms": 2437.775956
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t1-moderate-quic-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 8013,
+      "refused": 179,
+      "completed_ops_s": 125.00199928124331,
+      "quantiles": {
+        "p50_ms": 301.6159,
+        "p95_ms": 1487.147018,
+        "p99_ms": 2928.883052,
+        "max_ms": 3394.881696
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8013,
+          "refused": 179,
+          "p50_ms": 301.6159,
+          "p95_ms": 1487.147018,
+          "p99_ms": 2928.883052,
+          "max_ms": 3394.881696
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t1-moderate-tcp-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 8095,
+      "refused": 97,
+      "completed_ops_s": 125.82743901620046,
+      "quantiles": {
+        "p50_ms": 272.391451,
+        "p95_ms": 1483.101546,
+        "p99_ms": 2528.576497,
+        "max_ms": 2751.849884
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8095,
+          "refused": 97,
+          "p50_ms": 272.391451,
+          "p95_ms": 1483.101546,
+          "p99_ms": 2528.576497,
+          "max_ms": 2751.849884
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t1-moderate-tcp-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 8164,
+      "refused": 28,
+      "completed_ops_s": 127.36840319683218,
+      "quantiles": {
+        "p50_ms": 318.874329,
+        "p95_ms": 1264.095475,
+        "p99_ms": 1797.806241,
+        "max_ms": 2211.84119
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8164,
+          "refused": 28,
+          "p50_ms": 318.874329,
+          "p95_ms": 1264.095475,
+          "p99_ms": 1797.806241,
+          "max_ms": 2211.84119
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t1-bulk-tcp-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 5836,
+      "refused": 2356,
+      "completed_ops_s": 275.9342961223842,
+      "quantiles": {
+        "p50_ms": 8784.514128,
+        "p95_ms": 14248.584855,
+        "p99_ms": 14536.279716,
+        "max_ms": 14645.138656
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 5836,
+          "refused": 2356,
+          "p50_ms": 8784.514128,
+          "p95_ms": 14248.584855,
+          "p99_ms": 14536.279716,
+          "max_ms": 14645.138656
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t1-bulk-tcp-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 6977,
+      "refused": 1215,
+      "completed_ops_s": 591.3808497499556,
+      "quantiles": {
+        "p50_ms": 4936.119185,
+        "p95_ms": 5606.322467,
+        "p99_ms": 5708.928655,
+        "max_ms": 5747.5271
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 6977,
+          "refused": 1215,
+          "p50_ms": 4936.119185,
+          "p95_ms": 5606.322467,
+          "p99_ms": 5708.928655,
+          "max_ms": 5747.5271
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t1-bulk-quic-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 8039,
+      "refused": 153,
+      "completed_ops_s": 672.5002395302134,
+      "quantiles": {
+        "p50_ms": 3667.844068,
+        "p95_ms": 4399.863488,
+        "p99_ms": 4464.453826,
+        "max_ms": 4493.276068
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8039,
+          "refused": 153,
+          "p50_ms": 3667.844068,
+          "p95_ms": 4399.863488,
+          "p99_ms": 4464.453826,
+          "max_ms": 4493.276068
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t1-bulk-quic-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 6146,
+      "refused": 2046,
+      "completed_ops_s": 315.41383916055634,
+      "quantiles": {
+        "p50_ms": 7726.861794,
+        "p95_ms": 12367.678256,
+        "p99_ms": 12813.860217,
+        "max_ms": 12897.956515
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 6146,
+          "refused": 2046,
+          "p50_ms": 7726.861794,
+          "p95_ms": 12367.678256,
+          "p99_ms": 12813.860217,
+          "max_ms": 12897.956515
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t1-skew-quic-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 2967,
+      "refused": 5225,
+      "completed_ops_s": 212.20957569567136,
+      "quantiles": {
+        "p50_ms": 8247.398985,
+        "p95_ms": 10325.404162,
+        "p99_ms": 10511.851568,
+        "max_ms": 10558.727972
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 2711,
+          "refused": 5225,
+          "p50_ms": 8325.831535,
+          "p95_ms": 10365.332901,
+          "p99_ms": 10513.80319,
+          "max_ms": 10558.727972
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 1123.728157,
+          "p95_ms": 1880.53431,
+          "p99_ms": 2005.529921,
+          "max_ms": 2068.024652
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t1-skew-quic-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 4561,
+      "refused": 3631,
+      "completed_ops_s": 437.3255991283162,
+      "quantiles": {
+        "p50_ms": 4056.253191,
+        "p95_ms": 6088.228902,
+        "p99_ms": 6132.31403,
+        "max_ms": 6161.951621
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 4305,
+          "refused": 3631,
+          "p50_ms": 4106.034153,
+          "p95_ms": 6091.205673,
+          "p99_ms": 6133.176621,
+          "max_ms": 6161.951621
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 583.869158,
+          "p95_ms": 1092.55136,
+          "p99_ms": 1240.662808,
+          "max_ms": 1303.157798
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t1-skew-tcp-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 3993,
+      "refused": 4199,
+      "completed_ops_s": 368.3754521089429,
+      "quantiles": {
+        "p50_ms": 4720.951601,
+        "p95_ms": 7407.137103,
+        "p99_ms": 7444.38051,
+        "max_ms": 7455.941423
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 3737,
+          "refused": 4199,
+          "p50_ms": 5319.802937,
+          "p95_ms": 7409.959074,
+          "p99_ms": 7445.207772,
+          "max_ms": 7455.941423
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 625.670464,
+          "p95_ms": 1274.65673,
+          "p99_ms": 1431.11983,
+          "max_ms": 1493.615332
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t1-skew-tcp-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 3370,
+      "refused": 4822,
+      "completed_ops_s": 212.95813625241098,
+      "quantiles": {
+        "p50_ms": 7346.391114,
+        "p95_ms": 9708.91661,
+        "p99_ms": 9927.979451,
+        "max_ms": 9955.609525
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 3114,
+          "refused": 4822,
+          "p50_ms": 7660.735722,
+          "p95_ms": 9731.467581,
+          "p99_ms": 9929.931855,
+          "max_ms": 9955.609525
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 490.957109,
+          "p95_ms": 1516.083142,
+          "p99_ms": 1828.573373,
+          "max_ms": 1891.068384
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t2-moderate-tcp-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 8187,
+      "refused": 5,
+      "completed_ops_s": 124.46033334177147,
+      "quantiles": {
+        "p50_ms": 338.954021,
+        "p95_ms": 1079.274421,
+        "p99_ms": 2360.998845,
+        "max_ms": 2581.717613
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8187,
+          "refused": 5,
+          "p50_ms": 338.954021,
+          "p95_ms": 1079.274421,
+          "p99_ms": 2360.998845,
+          "max_ms": 2581.717613
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t2-moderate-tcp-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 127.60744262593784,
+      "quantiles": {
+        "p50_ms": 235.71682,
+        "p95_ms": 871.479395,
+        "p99_ms": 1728.45928,
+        "max_ms": 1996.220702
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 235.71682,
+          "p95_ms": 871.479395,
+          "p99_ms": 1728.45928,
+          "max_ms": 1996.220702
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t2-moderate-quic-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 7910,
+      "refused": 282,
+      "completed_ops_s": 123.29520264184931,
+      "quantiles": {
+        "p50_ms": 275.070113,
+        "p95_ms": 1647.280649,
+        "p99_ms": 3771.303913,
+        "max_ms": 4202.768584
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 7910,
+          "refused": 282,
+          "p50_ms": 275.070113,
+          "p95_ms": 1647.280649,
+          "p99_ms": 3771.303913,
+          "max_ms": 4202.768584
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t2-moderate-quic-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 8001,
+      "refused": 191,
+      "completed_ops_s": 124.86223198407522,
+      "quantiles": {
+        "p50_ms": 265.027368,
+        "p95_ms": 1473.740373,
+        "p99_ms": 3189.564703,
+        "max_ms": 3486.419535
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8001,
+          "refused": 191,
+          "p50_ms": 265.027368,
+          "p95_ms": 1473.740373,
+          "p99_ms": 3189.564703,
+          "max_ms": 3486.419535
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t2-bulk-quic-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 6611,
+      "refused": 1581,
+      "completed_ops_s": 310.9569345373619,
+      "quantiles": {
+        "p50_ms": 7480.089197,
+        "p95_ms": 13318.467362,
+        "p99_ms": 13500.698457,
+        "max_ms": 13557.561059
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 6611,
+          "refused": 1581,
+          "p50_ms": 7480.089197,
+          "p95_ms": 13318.467362,
+          "p99_ms": 13500.698457,
+          "max_ms": 13557.561059
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t2-bulk-quic-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 5590,
+      "refused": 2602,
+      "completed_ops_s": 406.54908873950137,
+      "quantiles": {
+        "p50_ms": 7355.801839,
+        "p95_ms": 8037.666506,
+        "p99_ms": 8084.332247,
+        "max_ms": 8108.801531
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 5590,
+          "refused": 2602,
+          "p50_ms": 7355.801839,
+          "p95_ms": 8037.666506,
+          "p99_ms": 8084.332247,
+          "max_ms": 8108.801531
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t2-bulk-tcp-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 6516,
+      "refused": 1676,
+      "completed_ops_s": 425.929284864181,
+      "quantiles": {
+        "p50_ms": 6330.131282,
+        "p95_ms": 7693.068115,
+        "p99_ms": 7891.862331,
+        "max_ms": 8006.93549
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 6516,
+          "refused": 1676,
+          "p50_ms": 6330.131282,
+          "p95_ms": 7693.068115,
+          "p99_ms": 7891.862331,
+          "max_ms": 8006.93549
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t2-bulk-tcp-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 5614,
+      "refused": 2578,
+      "completed_ops_s": 246.01033000381798,
+      "quantiles": {
+        "p50_ms": 9771.488134,
+        "p95_ms": 14970.389824,
+        "p99_ms": 15213.51048,
+        "max_ms": 15312.836833
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 5614,
+          "refused": 2578,
+          "p50_ms": 9771.488134,
+          "p95_ms": 14970.389824,
+          "p99_ms": 15213.51048,
+          "max_ms": 15312.836833
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t2-skew-tcp-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 3016,
+      "refused": 5176,
+      "completed_ops_s": 157.0443333689129,
+      "quantiles": {
+        "p50_ms": 11999.095364,
+        "p95_ms": 14774.921229,
+        "p99_ms": 14870.517199,
+        "max_ms": 14914.022006
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 2760,
+          "refused": 5176,
+          "p50_ms": 12786.129317,
+          "p95_ms": 14782.09106,
+          "p99_ms": 14874.420994,
+          "max_ms": 14914.022006
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 711.084183,
+          "p95_ms": 1632.993277,
+          "p99_ms": 1820.486625,
+          "max_ms": 1882.982046
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t2-skew-tcp-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 4030,
+      "refused": 4162,
+      "completed_ops_s": 339.9912984533725,
+      "quantiles": {
+        "p50_ms": 5133.11903,
+        "p95_ms": 7191.844663,
+        "p99_ms": 7216.095898,
+        "max_ms": 7244.400882
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 3774,
+          "refused": 4162,
+          "p50_ms": 5232.517459,
+          "p95_ms": 7193.831657,
+          "p99_ms": 7216.418723,
+          "max_ms": 7244.400882
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 533.382457,
+          "p95_ms": 1084.434041,
+          "p99_ms": 1240.677779,
+          "max_ms": 1303.172579
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t2-skew-quic-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 4382,
+      "refused": 3810,
+      "completed_ops_s": 425.4341800077266,
+      "quantiles": {
+        "p50_ms": 3937.789385,
+        "p95_ms": 6074.30264,
+        "p99_ms": 6138.23625,
+        "max_ms": 6172.929636
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 4126,
+          "refused": 3810,
+          "p50_ms": 4214.250094,
+          "p95_ms": 6080.653382,
+          "p99_ms": 6139.212411,
+          "max_ms": 6172.929636
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 443.086798,
+          "p95_ms": 1388.66601,
+          "p99_ms": 1598.423515,
+          "max_ms": 1660.916882
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t2-skew-quic-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 3271,
+      "refused": 4921,
+      "completed_ops_s": 219.38534042163752,
+      "quantiles": {
+        "p50_ms": 7762.078713,
+        "p95_ms": 10353.998045,
+        "p99_ms": 10516.739876,
+        "max_ms": 10592.286622
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 3015,
+          "refused": 4921,
+          "p50_ms": 7949.877128,
+          "p95_ms": 10361.807349,
+          "p99_ms": 10518.69242,
+          "max_ms": 10592.286622
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 513.152211,
+          "p95_ms": 956.837817,
+          "p99_ms": 1050.577237,
+          "max_ms": 1105.775104
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t2-singleton-quic-q16",
+      "ready_items": 16,
+      "offers": 256,
+      "applied": 182,
+      "refused": 74,
+      "completed_ops_s": 5.687493563001426,
+      "quantiles": {
+        "p50_ms": 70.298677,
+        "p95_ms": 322.483655,
+        "p99_ms": 644.059175,
+        "max_ms": 689.82159
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 182,
+          "refused": 74,
+          "p50_ms": 70.298677,
+          "p95_ms": 322.483655,
+          "p99_ms": 644.059175,
+          "max_ms": 689.82159
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t2-singleton-quic-q64",
+      "ready_items": 64,
+      "offers": 256,
+      "applied": 181,
+      "refused": 75,
+      "completed_ops_s": 5.656235108016747,
+      "quantiles": {
+        "p50_ms": 81.046751,
+        "p95_ms": 297.039909,
+        "p99_ms": 844.014034,
+        "max_ms": 1200.148495
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 181,
+          "refused": 75,
+          "p50_ms": 81.046751,
+          "p95_ms": 297.039909,
+          "p99_ms": 844.014034,
+          "max_ms": 1200.148495
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t2-singleton-tcp-q64",
+      "ready_items": 64,
+      "offers": 256,
+      "applied": 188,
+      "refused": 68,
+      "completed_ops_s": 5.8665389184296615,
+      "quantiles": {
+        "p50_ms": 57.451486,
+        "p95_ms": 318.793056,
+        "p99_ms": 698.450841,
+        "max_ms": 756.8909
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 188,
+          "refused": 68,
+          "p50_ms": 57.451486,
+          "p95_ms": 318.793056,
+          "p99_ms": 698.450841,
+          "max_ms": 756.8909
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t2-singleton-tcp-q16",
+      "ready_items": 16,
+      "offers": 256,
+      "applied": 200,
+      "refused": 56,
+      "completed_ops_s": 6.249972121608728,
+      "quantiles": {
+        "p50_ms": 52.872876,
+        "p95_ms": 255.797201,
+        "p99_ms": 645.329937,
+        "max_ms": 813.412043
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 200,
+          "refused": 56,
+          "p50_ms": 52.872876,
+          "p95_ms": 255.797201,
+          "p99_ms": 645.329937,
+          "max_ms": 813.412043
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t3-bulk-tcp-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 6317,
+      "refused": 1875,
+      "completed_ops_s": 260.7988795646804,
+      "quantiles": {
+        "p50_ms": 7759.719849,
+        "p95_ms": 15831.61946,
+        "p99_ms": 16361.545116,
+        "max_ms": 16410.355247
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 6317,
+          "refused": 1875,
+          "p50_ms": 7759.719849,
+          "p95_ms": 15831.61946,
+          "p99_ms": 16361.545116,
+          "max_ms": 16410.355247
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t3-bulk-tcp-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 7862,
+      "refused": 330,
+      "completed_ops_s": 649.0155155711275,
+      "quantiles": {
+        "p50_ms": 3982.977137,
+        "p95_ms": 4826.986078,
+        "p99_ms": 4903.963542,
+        "max_ms": 4936.241879
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 7862,
+          "refused": 330,
+          "p50_ms": 3982.977137,
+          "p95_ms": 4826.986078,
+          "p99_ms": 4903.963542,
+          "max_ms": 4936.241879
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t3-bulk-quic-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 7650,
+      "refused": 542,
+      "completed_ops_s": 667.7793665625203,
+      "quantiles": {
+        "p50_ms": 4224.508546,
+        "p95_ms": 4709.213698,
+        "p99_ms": 4796.658919,
+        "max_ms": 4830.549396
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 7650,
+          "refused": 542,
+          "p50_ms": 4224.508546,
+          "p95_ms": 4709.213698,
+          "p99_ms": 4796.658919,
+          "max_ms": 4830.549396
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t3-bulk-quic-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 6299,
+      "refused": 1893,
+      "completed_ops_s": 295.4011549668172,
+      "quantiles": {
+        "p50_ms": 7988.064531,
+        "p95_ms": 13519.534356,
+        "p99_ms": 13595.025915,
+        "max_ms": 13643.128269
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 6299,
+          "refused": 1893,
+          "p50_ms": 7988.064531,
+          "p95_ms": 13519.534356,
+          "p99_ms": 13595.025915,
+          "max_ms": 13643.128269
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t3-skew-quic-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 2861,
+      "refused": 5331,
+      "completed_ops_s": 210.30434988754772,
+      "quantiles": {
+        "p50_ms": 8084.586221,
+        "p95_ms": 10129.849129,
+        "p99_ms": 10163.179826,
+        "max_ms": 10229.131714
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 2605,
+          "refused": 5331,
+          "p50_ms": 8238.252236,
+          "p95_ms": 10133.695641,
+          "p99_ms": 10165.13223,
+          "max_ms": 10229.131714
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 735.359643,
+          "p95_ms": 1772.240703,
+          "p99_ms": 2084.727077,
+          "max_ms": 2147.221296
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t3-skew-quic-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 4113,
+      "refused": 4079,
+      "completed_ops_s": 426.9370646861055,
+      "quantiles": {
+        "p50_ms": 3978.476836,
+        "p95_ms": 6601.176555,
+        "p99_ms": 6649.401177,
+        "max_ms": 6669.45883
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 3857,
+          "refused": 4079,
+          "p50_ms": 4458.288303,
+          "p95_ms": 6605.474891,
+          "p99_ms": 6650.37749,
+          "max_ms": 6669.45883
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 579.034265,
+          "p95_ms": 1614.357063,
+          "p99_ms": 1770.602554,
+          "max_ms": 1833.091573
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t3-skew-tcp-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 4560,
+      "refused": 3632,
+      "completed_ops_s": 476.68443406355277,
+      "quantiles": {
+        "p50_ms": 3365.309498,
+        "p95_ms": 5927.211289,
+        "p99_ms": 6198.295419,
+        "max_ms": 6224.64883
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 4304,
+          "refused": 3632,
+          "p50_ms": 3485.326779,
+          "p95_ms": 5939.900329,
+          "p99_ms": 6199.271219,
+          "max_ms": 6224.64883
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 404.377092,
+          "p95_ms": 961.988397,
+          "p99_ms": 1067.774679,
+          "max_ms": 1120.554395
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t3-skew-tcp-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 3454,
+      "refused": 4738,
+      "completed_ops_s": 246.54577634291468,
+      "quantiles": {
+        "p50_ms": 6839.821879,
+        "p95_ms": 9533.692067,
+        "p99_ms": 9833.019778,
+        "max_ms": 9861.956947
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 3198,
+          "refused": 4738,
+          "p50_ms": 7213.850045,
+          "p95_ms": 9544.827982,
+          "p99_ms": 9835.947822,
+          "max_ms": 9861.956947
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 396.849531,
+          "p95_ms": 1119.799238,
+          "p99_ms": 1264.336571,
+          "max_ms": 1326.831381
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t3-singleton-tcp-q16",
+      "ready_items": 16,
+      "offers": 256,
+      "applied": 181,
+      "refused": 75,
+      "completed_ops_s": 5.6562263403587325,
+      "quantiles": {
+        "p50_ms": 55.469616,
+        "p95_ms": 291.189154,
+        "p99_ms": 920.358451,
+        "max_ms": 1061.063433
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 181,
+          "refused": 75,
+          "p50_ms": 55.469616,
+          "p95_ms": 291.189154,
+          "p99_ms": 920.358451,
+          "max_ms": 1061.063433
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t3-singleton-tcp-q64",
+      "ready_items": 64,
+      "offers": 256,
+      "applied": 177,
+      "refused": 79,
+      "completed_ops_s": 5.523365062727186,
+      "quantiles": {
+        "p50_ms": 72.98277,
+        "p95_ms": 330.602658,
+        "p99_ms": 687.271853,
+        "max_ms": 753.223993
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 177,
+          "refused": 79,
+          "p50_ms": 72.98277,
+          "p95_ms": 330.602658,
+          "p99_ms": 687.271853,
+          "max_ms": 753.223993
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t3-singleton-quic-q64",
+      "ready_items": 64,
+      "offers": 256,
+      "applied": 196,
+      "refused": 60,
+      "completed_ops_s": 6.124988439084321,
+      "quantiles": {
+        "p50_ms": 51.868365,
+        "p95_ms": 309.244988,
+        "p99_ms": 424.77179,
+        "max_ms": 657.791455
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 196,
+          "refused": 60,
+          "p50_ms": 51.868365,
+          "p95_ms": 309.244988,
+          "p99_ms": 424.77179,
+          "max_ms": 657.791455
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t3-singleton-quic-q16",
+      "ready_items": 16,
+      "offers": 256,
+      "applied": 184,
+      "refused": 72,
+      "completed_ops_s": 5.748850627623078,
+      "quantiles": {
+        "p50_ms": 52.382706,
+        "p95_ms": 311.292179,
+        "p99_ms": 678.59146,
+        "max_ms": 755.751334
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 184,
+          "refused": 72,
+          "p50_ms": 52.382706,
+          "p95_ms": 311.292179,
+          "p99_ms": 678.59146,
+          "max_ms": 755.751334
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t3-moderate-quic-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 7980,
+      "refused": 212,
+      "completed_ops_s": 124.29410775453239,
+      "quantiles": {
+        "p50_ms": 282.209227,
+        "p95_ms": 1098.182975,
+        "p99_ms": 3209.979665,
+        "max_ms": 3648.73003
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 7980,
+          "refused": 212,
+          "p50_ms": 282.209227,
+          "p95_ms": 1098.182975,
+          "p99_ms": 3209.979665,
+          "max_ms": 3648.73003
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t3-moderate-quic-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 8112,
+      "refused": 80,
+      "completed_ops_s": 126.11729254002675,
+      "quantiles": {
+        "p50_ms": 268.519838,
+        "p95_ms": 1270.309345,
+        "p99_ms": 2064.530127,
+        "max_ms": 2618.768046
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8112,
+          "refused": 80,
+          "p50_ms": 268.519838,
+          "p95_ms": 1270.309345,
+          "p99_ms": 2064.530127,
+          "max_ms": 2618.768046
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t3-moderate-tcp-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 8164,
+      "refused": 28,
+      "completed_ops_s": 127.2150620991136,
+      "quantiles": {
+        "p50_ms": 255.675737,
+        "p95_ms": 1101.593231,
+        "p99_ms": 1763.973229,
+        "max_ms": 2217.887822
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8164,
+          "refused": 28,
+          "p50_ms": 255.675737,
+          "p95_ms": 1101.593231,
+          "p99_ms": 1763.973229,
+          "max_ms": 2217.887822
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "case": "t3-moderate-tcp-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 127.69315017378925,
+      "quantiles": {
+        "p50_ms": 275.263381,
+        "p95_ms": 980.526695,
+        "p99_ms": 1448.079281,
+        "max_ms": 1757.882431
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 275.263381,
+          "p95_ms": 980.526695,
+          "p99_ms": 1448.079281,
+          "max_ms": 1757.882431
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t1-singleton-tcp-q16",
+      "ready_items": 16,
+      "offers": 256,
+      "applied": 237,
+      "refused": 19,
+      "completed_ops_s": 7.4062217059186395,
+      "quantiles": {
+        "p50_ms": 31.531709,
+        "p95_ms": 144.789209,
+        "p99_ms": 156.844917,
+        "max_ms": 548.44925
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 237,
+          "refused": 19,
+          "p50_ms": 31.531709,
+          "p95_ms": 144.789209,
+          "p99_ms": 156.844917,
+          "max_ms": 548.44925
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t1-singleton-tcp-q64",
+      "ready_items": 64,
+      "offers": 256,
+      "applied": 237,
+      "refused": 19,
+      "completed_ops_s": 7.406231378419867,
+      "quantiles": {
+        "p50_ms": 31.654542,
+        "p95_ms": 146.941667,
+        "p99_ms": 157.886,
+        "max_ms": 603.19475
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 237,
+          "refused": 19,
+          "p50_ms": 31.654542,
+          "p95_ms": 146.941667,
+          "p99_ms": 157.886,
+          "max_ms": 603.19475
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t1-singleton-quic-q64",
+      "ready_items": 64,
+      "offers": 256,
+      "applied": 237,
+      "refused": 19,
+      "completed_ops_s": 7.4062419283535235,
+      "quantiles": {
+        "p50_ms": 31.114167,
+        "p95_ms": 150.985875,
+        "p99_ms": 162.444875,
+        "max_ms": 707.860833
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 237,
+          "refused": 19,
+          "p50_ms": 31.114167,
+          "p95_ms": 150.985875,
+          "p99_ms": 162.444875,
+          "max_ms": 707.860833
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t1-singleton-quic-q16",
+      "ready_items": 16,
+      "offers": 256,
+      "applied": 237,
+      "refused": 19,
+      "completed_ops_s": 7.40623142656025,
+      "quantiles": {
+        "p50_ms": 31.083,
+        "p95_ms": 148.663042,
+        "p99_ms": 157.41025,
+        "max_ms": 588.9045
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 237,
+          "refused": 19,
+          "p50_ms": 31.083,
+          "p95_ms": 148.663042,
+          "p99_ms": 157.41025,
+          "max_ms": 588.9045
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t1-moderate-quic-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 127.81757694077825,
+      "quantiles": {
+        "p50_ms": 106.069375,
+        "p95_ms": 272.847542,
+        "p99_ms": 681.900917,
+        "max_ms": 808.79375
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 106.069375,
+          "p95_ms": 272.847542,
+          "p99_ms": 681.900917,
+          "max_ms": 808.79375
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t1-moderate-quic-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 127.87862503606654,
+      "quantiles": {
+        "p50_ms": 107.498667,
+        "p95_ms": 716.010667,
+        "p99_ms": 1283.472042,
+        "max_ms": 1719.289375
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 107.498667,
+          "p95_ms": 716.010667,
+          "p99_ms": 1283.472042,
+          "max_ms": 1719.289375
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t1-moderate-tcp-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 127.83250762267018,
+      "quantiles": {
+        "p50_ms": 105.749583,
+        "p95_ms": 291.909958,
+        "p99_ms": 792.174292,
+        "max_ms": 1018.718375
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 105.749583,
+          "p95_ms": 291.909958,
+          "p99_ms": 792.174292,
+          "max_ms": 1018.718375
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t1-moderate-tcp-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 127.85962919022073,
+      "quantiles": {
+        "p50_ms": 106.79575,
+        "p95_ms": 430.054208,
+        "p99_ms": 797.266166,
+        "max_ms": 1006.48375
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 106.79575,
+          "p95_ms": 430.054208,
+          "p99_ms": 797.266166,
+          "max_ms": 1006.48375
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t1-bulk-tcp-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 7985,
+      "refused": 207,
+      "completed_ops_s": 491.27907228407474,
+      "quantiles": {
+        "p50_ms": 4297.638438,
+        "p95_ms": 8172.934604,
+        "p99_ms": 8315.118458,
+        "max_ms": 8333.342729
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 7985,
+          "refused": 207,
+          "p50_ms": 4297.638438,
+          "p95_ms": 8172.934604,
+          "p99_ms": 8315.118458,
+          "max_ms": 8333.342729
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t1-bulk-tcp-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 1015.0826417383253,
+      "quantiles": {
+        "p50_ms": 112.440375,
+        "p95_ms": 244.37575,
+        "p99_ms": 270.056292,
+        "max_ms": 294.450063
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 112.440375,
+          "p95_ms": 244.37575,
+          "p99_ms": 270.056292,
+          "max_ms": 294.450063
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t1-bulk-quic-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 1011.578162707606,
+      "quantiles": {
+        "p50_ms": 120.459208,
+        "p95_ms": 809.676063,
+        "p99_ms": 864.549771,
+        "max_ms": 892.054813
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 120.459208,
+          "p95_ms": 809.676063,
+          "p99_ms": 864.549771,
+          "max_ms": 892.054813
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t1-bulk-quic-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 8065,
+      "refused": 127,
+      "completed_ops_s": 488.11939681854733,
+      "quantiles": {
+        "p50_ms": 4187.705188,
+        "p95_ms": 8270.801083,
+        "p99_ms": 8540.955229,
+        "max_ms": 8555.156438
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8065,
+          "refused": 127,
+          "p50_ms": 4187.705188,
+          "p95_ms": 8270.801083,
+          "p99_ms": 8540.955229,
+          "max_ms": 8555.156438
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t1-skew-quic-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 4821,
+      "refused": 3371,
+      "completed_ops_s": 389.1070381999232,
+      "quantiles": {
+        "p50_ms": 4479.841896,
+        "p95_ms": 5716.256291,
+        "p99_ms": 5803.419416,
+        "max_ms": 5845.50625
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 4565,
+          "refused": 3371,
+          "p50_ms": 4608.350188,
+          "p95_ms": 5720.848791,
+          "p99_ms": 5805.074104,
+          "max_ms": 5845.50625
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 189.979729,
+          "p95_ms": 285.556396,
+          "p99_ms": 466.010229,
+          "max_ms": 497.258146
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t1-skew-quic-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 6782,
+      "refused": 1410,
+      "completed_ops_s": 754.2228821567904,
+      "quantiles": {
+        "p50_ms": 2004.443022,
+        "p95_ms": 3327.685605,
+        "p99_ms": 3398.159625,
+        "max_ms": 3433.553375
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 6526,
+          "refused": 1410,
+          "p50_ms": 2055.245605,
+          "p95_ms": 3330.926792,
+          "p99_ms": 3398.480084,
+          "max_ms": 3433.553375
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 201.665897,
+          "p95_ms": 310.172813,
+          "p99_ms": 467.772522,
+          "max_ms": 499.44773
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t1-skew-tcp-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 5505,
+      "refused": 2687,
+      "completed_ops_s": 617.0848718455339,
+      "quantiles": {
+        "p50_ms": 2503.1195,
+        "p95_ms": 4675.725417,
+        "p99_ms": 4736.911042,
+        "max_ms": 4772.22
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 5249,
+          "refused": 2687,
+          "p50_ms": 2574.7915,
+          "p95_ms": 4679.990688,
+          "p99_ms": 4737.974771,
+          "max_ms": 4772.22
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 233.364563,
+          "p95_ms": 1472.774646,
+          "p99_ms": 1695.135146,
+          "max_ms": 1757.630855
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t1-skew-tcp-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 4780,
+      "refused": 3412,
+      "completed_ops_s": 396.2471567075956,
+      "quantiles": {
+        "p50_ms": 4262.277459,
+        "p95_ms": 5687.464397,
+        "p99_ms": 5757.416167,
+        "max_ms": 5787.54775
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 4524,
+          "refused": 3412,
+          "p50_ms": 4402.654584,
+          "p95_ms": 5692.344125,
+          "p99_ms": 5759.049542,
+          "max_ms": 5787.54775
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 181.898688,
+          "p95_ms": 274.836188,
+          "p99_ms": 441.053897,
+          "max_ms": 472.30098
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t2-moderate-tcp-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 127.81932405615267,
+      "quantiles": {
+        "p50_ms": 107.063334,
+        "p95_ms": 295.822417,
+        "p99_ms": 715.332167,
+        "max_ms": 869.568459
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 107.063334,
+          "p95_ms": 295.822417,
+          "p99_ms": 715.332167,
+          "max_ms": 869.568459
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t2-moderate-tcp-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 127.82946642189309,
+      "quantiles": {
+        "p50_ms": 105.925375,
+        "p95_ms": 288.265791,
+        "p99_ms": 758.348666,
+        "max_ms": 942.002041
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 105.925375,
+          "p95_ms": 288.265791,
+          "p99_ms": 758.348666,
+          "max_ms": 942.002041
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t2-moderate-quic-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 127.83924065675802,
+      "quantiles": {
+        "p50_ms": 109.266792,
+        "p95_ms": 664.87225,
+        "p99_ms": 1230.672125,
+        "max_ms": 1699.8985
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 109.266792,
+          "p95_ms": 664.87225,
+          "p99_ms": 1230.672125,
+          "max_ms": 1699.8985
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t2-moderate-quic-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 127.83981986774376,
+      "quantiles": {
+        "p50_ms": 107.372542,
+        "p95_ms": 301.588417,
+        "p99_ms": 776.264333,
+        "max_ms": 941.610208
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 107.372542,
+          "p95_ms": 301.588417,
+          "p99_ms": 776.264333,
+          "max_ms": 941.610208
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t2-bulk-quic-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 7954,
+      "refused": 238,
+      "completed_ops_s": 492.91638999738296,
+      "quantiles": {
+        "p50_ms": 4464.276542,
+        "p95_ms": 8076.528105,
+        "p99_ms": 8335.049647,
+        "max_ms": 8384.644542
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 7954,
+          "refused": 238,
+          "p50_ms": 4464.276542,
+          "p95_ms": 8076.528105,
+          "p99_ms": 8335.049647,
+          "max_ms": 8384.644542
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t2-bulk-quic-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 787.4672611339305,
+      "quantiles": {
+        "p50_ms": 124.844605,
+        "p95_ms": 1896.730688,
+        "p99_ms": 2264.471563,
+        "max_ms": 2412.727
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 124.844605,
+          "p95_ms": 1896.730688,
+          "p99_ms": 2264.471563,
+          "max_ms": 2412.727
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t2-bulk-tcp-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 1015.4000061851148,
+      "quantiles": {
+        "p50_ms": 120.582105,
+        "p95_ms": 285.041333,
+        "p99_ms": 337.077355,
+        "max_ms": 369.96498
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 120.582105,
+          "p95_ms": 285.041333,
+          "p99_ms": 337.077355,
+          "max_ms": 369.96498
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t2-bulk-tcp-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 7632,
+      "refused": 560,
+      "completed_ops_s": 481.40225309792,
+      "quantiles": {
+        "p50_ms": 4842.373625,
+        "p95_ms": 7946.827959,
+        "p99_ms": 7987.826647,
+        "max_ms": 8010.127542
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 7632,
+          "refused": 560,
+          "p50_ms": 4842.373625,
+          "p95_ms": 7946.827959,
+          "p99_ms": 7987.826647,
+          "max_ms": 8010.127542
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t2-skew-tcp-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 4581,
+      "refused": 3611,
+      "completed_ops_s": 390.42194929896925,
+      "quantiles": {
+        "p50_ms": 4144.271272,
+        "p95_ms": 6155.529188,
+        "p99_ms": 6287.277459,
+        "max_ms": 6334.367709
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 4325,
+          "refused": 3611,
+          "p50_ms": 4247.916313,
+          "p95_ms": 6166.264334,
+          "p99_ms": 6288.253647,
+          "max_ms": 6334.367709
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 199.10798,
+          "p95_ms": 651.424022,
+          "p99_ms": 870.16473,
+          "max_ms": 929.941105
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t2-skew-tcp-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 6636,
+      "refused": 1556,
+      "completed_ops_s": 738.8319924607072,
+      "quantiles": {
+        "p50_ms": 1970.349605,
+        "p95_ms": 3564.977313,
+        "p99_ms": 3622.39923,
+        "max_ms": 3653.22573
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 6380,
+          "refused": 1556,
+          "p50_ms": 2013.146355,
+          "p95_ms": 3567.905958,
+          "p99_ms": 3623.319417,
+          "max_ms": 3653.22573
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 195.154855,
+          "p95_ms": 659.237271,
+          "p99_ms": 841.037688,
+          "max_ms": 872.284271
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t2-skew-quic-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 6976,
+      "refused": 1216,
+      "completed_ops_s": 775.1127187810135,
+      "quantiles": {
+        "p50_ms": 2005.652875,
+        "p95_ms": 3112.453125,
+        "p99_ms": 3149.132188,
+        "max_ms": 3175.4825
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 6720,
+          "refused": 1216,
+          "p50_ms": 2058.727208,
+          "p95_ms": 3113.615729,
+          "p99_ms": 3149.658916,
+          "max_ms": 3175.4825
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 184.999646,
+          "p95_ms": 273.838896,
+          "p99_ms": 394.802646,
+          "max_ms": 457.299896
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t2-skew-quic-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 4488,
+      "refused": 3704,
+      "completed_ops_s": 385.8882813658661,
+      "quantiles": {
+        "p50_ms": 4178.878791,
+        "p95_ms": 6030.536333,
+        "p99_ms": 6164.332729,
+        "max_ms": 6210.39975
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 4232,
+          "refused": 3704,
+          "p50_ms": 4326.377875,
+          "p95_ms": 6038.345166,
+          "p99_ms": 6166.285146,
+          "max_ms": 6210.39975
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 195.618313,
+          "p95_ms": 638.069271,
+          "p99_ms": 840.179813,
+          "max_ms": 868.503563
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t2-singleton-quic-q16",
+      "ready_items": 16,
+      "offers": 256,
+      "applied": 237,
+      "refused": 19,
+      "completed_ops_s": 7.406238022724447,
+      "quantiles": {
+        "p50_ms": 31.539541,
+        "p95_ms": 151.745083,
+        "p99_ms": 163.834833,
+        "max_ms": 434.983708
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 237,
+          "refused": 19,
+          "p50_ms": 31.539541,
+          "p95_ms": 151.745083,
+          "p99_ms": 163.834833,
+          "max_ms": 434.983708
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t2-singleton-quic-q64",
+      "ready_items": 64,
+      "offers": 256,
+      "applied": 237,
+      "refused": 19,
+      "completed_ops_s": 7.406243123997594,
+      "quantiles": {
+        "p50_ms": 31.569334,
+        "p95_ms": 148.827584,
+        "p99_ms": 159.98075,
+        "max_ms": 604.694042
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 237,
+          "refused": 19,
+          "p50_ms": 31.569334,
+          "p95_ms": 148.827584,
+          "p99_ms": 159.98075,
+          "max_ms": 604.694042
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t2-singleton-tcp-q64",
+      "ready_items": 64,
+      "offers": 256,
+      "applied": 237,
+      "refused": 19,
+      "completed_ops_s": 7.406229237562111,
+      "quantiles": {
+        "p50_ms": 31.828166,
+        "p95_ms": 148.597791,
+        "p99_ms": 163.373791,
+        "max_ms": 432.891625
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 237,
+          "refused": 19,
+          "p50_ms": 31.828166,
+          "p95_ms": 148.597791,
+          "p99_ms": 163.373791,
+          "max_ms": 432.891625
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t2-singleton-tcp-q16",
+      "ready_items": 16,
+      "offers": 256,
+      "applied": 241,
+      "refused": 15,
+      "completed_ops_s": 7.531222709202409,
+      "quantiles": {
+        "p50_ms": 31.70425,
+        "p95_ms": 143.51,
+        "p99_ms": 163.801458,
+        "max_ms": 232.782
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 241,
+          "refused": 15,
+          "p50_ms": 31.70425,
+          "p95_ms": 143.51,
+          "p99_ms": 163.801458,
+          "max_ms": 232.782
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t3-bulk-tcp-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 7803,
+      "refused": 389,
+      "completed_ops_s": 494.18054854332973,
+      "quantiles": {
+        "p50_ms": 4597.560916,
+        "p95_ms": 7802.464479,
+        "p99_ms": 7844.649479,
+        "max_ms": 7864.393229
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 7803,
+          "refused": 389,
+          "p50_ms": 4597.560916,
+          "p95_ms": 7802.464479,
+          "p99_ms": 7844.649479,
+          "max_ms": 7864.393229
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t3-bulk-tcp-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 1013.0662868308513,
+      "quantiles": {
+        "p50_ms": 156.021521,
+        "p95_ms": 847.629875,
+        "p99_ms": 902.21923,
+        "max_ms": 930.082542
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 156.021521,
+          "p95_ms": 847.629875,
+          "p99_ms": 902.21923,
+          "max_ms": 930.082542
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t3-bulk-quic-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 1014.9157953472811,
+      "quantiles": {
+        "p50_ms": 104.030021,
+        "p95_ms": 229.163896,
+        "p99_ms": 261.37575,
+        "max_ms": 280.940188
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 104.030021,
+          "p95_ms": 229.163896,
+          "p99_ms": 261.37575,
+          "max_ms": 280.940188
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t3-bulk-quic-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 7845,
+      "refused": 347,
+      "completed_ops_s": 497.0110282597493,
+      "quantiles": {
+        "p50_ms": 4517.437188,
+        "p95_ms": 7796.815333,
+        "p99_ms": 7866.055292,
+        "max_ms": 7886.277521
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 7845,
+          "refused": 347,
+          "p50_ms": 4517.437188,
+          "p95_ms": 7796.815333,
+          "p99_ms": 7866.055292,
+          "max_ms": 7886.277521
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t3-skew-quic-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 4687,
+      "refused": 3505,
+      "completed_ops_s": 409.4225687845211,
+      "quantiles": {
+        "p50_ms": 3965.202272,
+        "p95_ms": 5718.268375,
+        "p99_ms": 5787.0875,
+        "max_ms": 5813.656542
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 4431,
+          "refused": 3505,
+          "p50_ms": 4056.899355,
+          "p95_ms": 5721.233959,
+          "p99_ms": 5788.280125,
+          "max_ms": 5813.656542
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 195.92748,
+          "p95_ms": 651.667855,
+          "p99_ms": 879.274147,
+          "max_ms": 932.904938
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t3-skew-quic-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 6383,
+      "refused": 1809,
+      "completed_ops_s": 705.6817124730334,
+      "quantiles": {
+        "p50_ms": 2152.179897,
+        "p95_ms": 3625.4715,
+        "p99_ms": 3746.453605,
+        "max_ms": 3794.278125
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 6127,
+          "refused": 1809,
+          "p50_ms": 2432.229938,
+          "p95_ms": 3631.965105,
+          "p99_ms": 3747.429792,
+          "max_ms": 3794.278125
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 205.70998,
+          "p95_ms": 905.954688,
+          "p99_ms": 1155.945355,
+          "max_ms": 1187.193397
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t3-skew-tcp-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 7046,
+      "refused": 1146,
+      "completed_ops_s": 725.5178370974353,
+      "quantiles": {
+        "p50_ms": 2186.567604,
+        "p95_ms": 3233.163416,
+        "p99_ms": 3447.975458,
+        "max_ms": 3512.230896
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 6790,
+          "refused": 1146,
+          "p50_ms": 2229.515563,
+          "p95_ms": 3245.849854,
+          "p99_ms": 3449.775729,
+          "max_ms": 3512.230896
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 182.692063,
+          "p95_ms": 254.425063,
+          "p99_ms": 441.918438,
+          "max_ms": 504.415479
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t3-skew-tcp-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 4765,
+      "refused": 3427,
+      "completed_ops_s": 406.1813527967609,
+      "quantiles": {
+        "p50_ms": 4060.437416,
+        "p95_ms": 5655.961416,
+        "p99_ms": 5753.543416,
+        "max_ms": 5787.148291
+      },
+      "groups": {
+        "1": {
+          "offers": 7936,
+          "applied": 4509,
+          "refused": 3427,
+          "p50_ms": 4128.926958,
+          "p95_ms": 5662.692416,
+          "p99_ms": 5754.519604,
+          "max_ms": 5787.148291
+        },
+        "2": {
+          "offers": 256,
+          "applied": 256,
+          "refused": 0,
+          "p50_ms": 188.970854,
+          "p95_ms": 298.793854,
+          "p99_ms": 453.488521,
+          "max_ms": 490.963438
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t3-singleton-tcp-q16",
+      "ready_items": 16,
+      "offers": 256,
+      "applied": 241,
+      "refused": 15,
+      "completed_ops_s": 7.531248215329525,
+      "quantiles": {
+        "p50_ms": 31.513458,
+        "p95_ms": 150.814542,
+        "p99_ms": 158.824667,
+        "max_ms": 159.668083
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 241,
+          "refused": 15,
+          "p50_ms": 31.513458,
+          "p95_ms": 150.814542,
+          "p99_ms": 158.824667,
+          "max_ms": 159.668083
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t3-singleton-tcp-q64",
+      "ready_items": 64,
+      "offers": 256,
+      "applied": 237,
+      "refused": 19,
+      "completed_ops_s": 7.406246104083104,
+      "quantiles": {
+        "p50_ms": 31.686083,
+        "p95_ms": 143.697833,
+        "p99_ms": 160.021417,
+        "max_ms": 491.188208
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 237,
+          "refused": 19,
+          "p50_ms": 31.686083,
+          "p95_ms": 143.697833,
+          "p99_ms": 160.021417,
+          "max_ms": 491.188208
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t3-singleton-quic-q64",
+      "ready_items": 64,
+      "offers": 256,
+      "applied": 237,
+      "refused": 19,
+      "completed_ops_s": 7.406212901585244,
+      "quantiles": {
+        "p50_ms": 31.591375,
+        "p95_ms": 148.755041,
+        "p99_ms": 163.210166,
+        "max_ms": 539.381291
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 237,
+          "refused": 19,
+          "p50_ms": 31.591375,
+          "p95_ms": 148.755041,
+          "p99_ms": 163.210166,
+          "max_ms": 539.381291
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t3-singleton-quic-q16",
+      "ready_items": 16,
+      "offers": 256,
+      "applied": 236,
+      "refused": 20,
+      "completed_ops_s": 7.37496991427117,
+      "quantiles": {
+        "p50_ms": 31.556917,
+        "p95_ms": 150.321167,
+        "p99_ms": 158.018,
+        "max_ms": 712.70625
+      },
+      "groups": {
+        "1": {
+          "offers": 256,
+          "applied": 236,
+          "refused": 20,
+          "p50_ms": 31.556917,
+          "p95_ms": 150.321167,
+          "p99_ms": 158.018,
+          "max_ms": 712.70625
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t3-moderate-quic-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 127.8635723972337,
+      "quantiles": {
+        "p50_ms": 105.366459,
+        "p95_ms": 335.598375,
+        "p99_ms": 803.851417,
+        "max_ms": 933.272375
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 105.366459,
+          "p95_ms": 335.598375,
+          "p99_ms": 803.851417,
+          "max_ms": 933.272375
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t3-moderate-quic-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 127.85231525956738,
+      "quantiles": {
+        "p50_ms": 106.608292,
+        "p95_ms": 283.440959,
+        "p99_ms": 773.437625,
+        "max_ms": 982.525834
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 106.608292,
+          "p95_ms": 283.440959,
+          "p99_ms": 773.437625,
+          "max_ms": 982.525834
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t3-moderate-tcp-q64",
+      "ready_items": 64,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 127.84873679983336,
+      "quantiles": {
+        "p50_ms": 108.879458,
+        "p95_ms": 611.777708,
+        "p99_ms": 950.594833,
+        "max_ms": 1219.962208
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 108.879458,
+          "p95_ms": 611.777708,
+          "p99_ms": 950.594833,
+          "max_ms": 1219.962208
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "case": "t3-moderate-tcp-q16",
+      "ready_items": 16,
+      "offers": 8192,
+      "applied": 8192,
+      "refused": 0,
+      "completed_ops_s": 127.82527849091592,
+      "quantiles": {
+        "p50_ms": 106.682958,
+        "p95_ms": 295.771166,
+        "p99_ms": 762.654291,
+        "max_ms": 1025.336583
+      },
+      "groups": {
+        "1": {
+          "offers": 8192,
+          "applied": 8192,
+          "refused": 0,
+          "p50_ms": 106.682958,
+          "p95_ms": 295.771166,
+          "p99_ms": 762.654291,
+          "max_ms": 1025.336583
+        }
+      }
+    }
+  ],
+  "independent_all96_rates_quantiles_conservation_match": true
+}

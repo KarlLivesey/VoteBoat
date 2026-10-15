@@ -1,0 +1,20 @@
+[
+  "/private/tmp/voteboat-mac476-7e90682-kN01PT/artifacts/native/native_benchmark",
+  "/private/tmp/voteboat-native478-esZLG7/wal/t1-skew-quic-q16",
+  "quic",
+  "8192",
+  "4096",
+  "2",
+  "--offered",
+  "1024",
+  "--maintenance",
+  "2",
+  "--ready-items",
+  "16",
+  "--offered-capacity",
+  "4096",
+  "--publication",
+  "witness",
+  "--group-weights",
+  "31,1"
+]

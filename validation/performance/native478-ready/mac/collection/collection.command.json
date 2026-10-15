@@ -1,0 +1,38 @@
+{
+  "scope": "Actual completed postterminal collection commands; no workloads rerun. Remote collector freshly validates all frozen guards and original48 validators/readbacks before export.",
+  "collector": {
+    "command": [
+      "ssh",
+      "karllivesey@192.168.192.76",
+      "/Applications/Xcode-beta.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9 /private/tmp/voteboat-native478-esZLG7/campaign/collect478.py /private/tmp/voteboat-native478-esZLG7/campaign"
+    ],
+    "original_handle": 74549,
+    "actual_exit": 0,
+    "terminal_tool_chunk": "b6ed9c",
+    "source_sha256": "4fc76d261c72cfbf538daf12d47752c4a52bf9f635bd472ae9b3d04f5ae3deb1"
+  },
+  "collector_copy": {
+    "command": [
+      "scp",
+      "target/p9/native478-ready/mac-collection/collect.py",
+      "karllivesey@192.168.192.76:/private/tmp/voteboat-native478-esZLG7/campaign/collect478.py"
+    ],
+    "actual_exit": 0,
+    "tool_chunk": "a95438"
+  },
+  "raw_transfer": {
+    "command": [
+      "scp",
+      "karllivesey@192.168.192.76:/private/tmp/voteboat-native478-esZLG7/campaign/COLLECTED.tar.gz",
+      "target/p9/native478-ready/mac-collection/COLLECTED.tar.gz"
+    ],
+    "original_handle": 33181,
+    "actual_exit": 0,
+    "terminal_tool_chunk": "38f064"
+  },
+  "local_extraction_verification": {
+    "actual_exit": 0,
+    "tool_chunk": "ca6c11",
+    "receipt": "LOCAL_TRANSFER_PROOF.json"
+  }
+}

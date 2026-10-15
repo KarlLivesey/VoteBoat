@@ -1,0 +1,9 @@
+{
+  "source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "schema_evidence_commit": "7c3795e5f155479ab703b1a4ed12a1a3772f399e",
+  "files": 8,
+  "exact_sha256_modes_lengths": true,
+  "exact_directory_modes": true,
+  "python_version": "3.9.6 (default, May 25 2026, 19:03:31) \n[Clang 21.0.0 (clang-2100.3.20.101)]",
+  "scope": "Eight runner/schema/authority text files only. No production source, binaries, build trees or generated WAL transfer."
+}

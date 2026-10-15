@@ -1,0 +1,98 @@
+START t1-singleton-tcp-q16
+END t1-singleton-tcp-q16 0
+START t1-singleton-tcp-q64
+END t1-singleton-tcp-q64 0
+START t1-singleton-quic-q64
+END t1-singleton-quic-q64 0
+START t1-singleton-quic-q16
+END t1-singleton-quic-q16 0
+START t1-moderate-quic-q16
+END t1-moderate-quic-q16 0
+START t1-moderate-quic-q64
+END t1-moderate-quic-q64 0
+START t1-moderate-tcp-q64
+END t1-moderate-tcp-q64 0
+START t1-moderate-tcp-q16
+END t1-moderate-tcp-q16 0
+START t1-bulk-tcp-q16
+END t1-bulk-tcp-q16 0
+START t1-bulk-tcp-q64
+END t1-bulk-tcp-q64 0
+START t1-bulk-quic-q64
+END t1-bulk-quic-q64 0
+START t1-bulk-quic-q16
+END t1-bulk-quic-q16 0
+START t1-skew-quic-q16
+END t1-skew-quic-q16 0
+START t1-skew-quic-q64
+END t1-skew-quic-q64 0
+START t1-skew-tcp-q64
+END t1-skew-tcp-q64 0
+START t1-skew-tcp-q16
+END t1-skew-tcp-q16 0
+START t2-moderate-tcp-q16
+END t2-moderate-tcp-q16 0
+START t2-moderate-tcp-q64
+END t2-moderate-tcp-q64 0
+START t2-moderate-quic-q64
+END t2-moderate-quic-q64 0
+START t2-moderate-quic-q16
+END t2-moderate-quic-q16 0
+START t2-bulk-quic-q16
+END t2-bulk-quic-q16 0
+START t2-bulk-quic-q64
+END t2-bulk-quic-q64 0
+START t2-bulk-tcp-q64
+END t2-bulk-tcp-q64 0
+START t2-bulk-tcp-q16
+END t2-bulk-tcp-q16 0
+START t2-skew-tcp-q16
+END t2-skew-tcp-q16 0
+START t2-skew-tcp-q64
+END t2-skew-tcp-q64 0
+START t2-skew-quic-q64
+END t2-skew-quic-q64 0
+START t2-skew-quic-q16
+END t2-skew-quic-q16 0
+START t2-singleton-quic-q16
+END t2-singleton-quic-q16 0
+START t2-singleton-quic-q64
+END t2-singleton-quic-q64 0
+START t2-singleton-tcp-q64
+END t2-singleton-tcp-q64 0
+START t2-singleton-tcp-q16
+END t2-singleton-tcp-q16 0
+START t3-bulk-tcp-q16
+END t3-bulk-tcp-q16 0
+START t3-bulk-tcp-q64
+END t3-bulk-tcp-q64 0
+START t3-bulk-quic-q64
+END t3-bulk-quic-q64 0
+START t3-bulk-quic-q16
+END t3-bulk-quic-q16 0
+START t3-skew-quic-q16
+END t3-skew-quic-q16 0
+START t3-skew-quic-q64
+END t3-skew-quic-q64 0
+START t3-skew-tcp-q64
+END t3-skew-tcp-q64 0
+START t3-skew-tcp-q16
+END t3-skew-tcp-q16 0
+START t3-singleton-tcp-q16
+END t3-singleton-tcp-q16 0
+START t3-singleton-tcp-q64
+END t3-singleton-tcp-q64 0
+START t3-singleton-quic-q64
+END t3-singleton-quic-q64 0
+START t3-singleton-quic-q16
+END t3-singleton-quic-q16 0
+START t3-moderate-quic-q16
+END t3-moderate-quic-q16 0
+START t3-moderate-quic-q64
+END t3-moderate-quic-q64 0
+START t3-moderate-tcp-q64
+END t3-moderate-tcp-q64 0
+START t3-moderate-tcp-q16
+END t3-moderate-tcp-q16 0
+ALL_TIMING_END
+CAMPAIGN_EXIT 0

@@ -1,0 +1,10 @@
+{
+  "command": [
+    "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+    "/private/tmp/voteboat-native478-esZLG7/controls/control-tools/check-native-benchmark.mjs",
+    "--storage",
+    "/private/tmp/voteboat-native478-esZLG7/controls/tcp-wal"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.12159533300000014
+}

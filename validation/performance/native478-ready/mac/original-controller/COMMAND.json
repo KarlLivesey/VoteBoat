@@ -1,0 +1,11 @@
+{
+  "start_utc": "2026-10-15T12:51:18.336544+00:00",
+  "command": [
+    "ssh",
+    "karllivesey@192.168.192.76",
+    "/Applications/Xcode-beta.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9 /private/tmp/voteboat-native478-esZLG7/campaign/campaign.py --authorized-quiet"
+  ],
+  "config_sha256": "ab20105d72d9bb23fe67179a6dbe36cbaa13a1aec7951240e02bc7067a5bcb9d",
+  "root_go_sha256": "f77236233922ff1604e4f4ddc40da1b4899c8dbcc34bc8919db09b65ec3d7dd5",
+  "scope": "Original authorized Mac478 campaign. No restart or concurrent setup/copy/check/profile; original handle polling only."
+}

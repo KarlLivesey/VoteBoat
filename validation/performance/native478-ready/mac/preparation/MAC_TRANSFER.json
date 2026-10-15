@@ -1,0 +1,8 @@
+{
+  "archive": "target/p9/native478-ready/mac-transfer.tar",
+  "sha256": "9a871f1a31a0de35831320701173f04d4fc2659d47d9c0180eccf2acc2056395",
+  "bytes": 71680,
+  "manifest_sha256": "4c9c6c536241554924df28fa9ee0af11e15c81bfa847a9818fa2311ffa75bd2c",
+  "files": 8,
+  "remote_base": "/private/tmp/voteboat-native478-esZLG7"
+}

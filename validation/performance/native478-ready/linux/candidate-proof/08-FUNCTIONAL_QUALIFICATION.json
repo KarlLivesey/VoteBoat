@@ -1,0 +1,68 @@
+{
+  "source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "source_inventory": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-publication/checked/BEFORE.json",
+    "sha256": "9d948342c3a9e508204b01df637c43d187b18f2fad38376ccd2b164b055f5b75"
+  },
+  "proofs": {
+    "core": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-publication/core/TERMINAL.json",
+      "sha256": "3c2dfc71561cad4177ffed25e0c481b27908807797dd661f32bc643b6611ae2b"
+    },
+    "strict": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-publication/strict/TERMINAL.json",
+      "sha256": "8ce152771b343cecc79c8f0f4a928cdc4101d14122f8dfab0ad83a8f9fcdceee"
+    },
+    "network": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-publication/network/TERMINAL.json",
+      "sha256": "adebfe5530a8d423dfe7459b211504c7aee4efbeb62bd1fd8f68d349b65a4c8b"
+    },
+    "example": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-publication/promotion/EXAMPLE_RECEIPT.json",
+      "sha256": "e69640b82706995f93620a70ae13dfbef464fecd5196547d91118693a47567bb"
+    }
+  },
+  "final_source_guards": [
+    {
+      "before": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-publication/core/BEFORE.json",
+        "sha256": "6a0fce58bd866c5aedd3d0eee42c9b8ea563bf184856ea6df69ea7af802641d0"
+      },
+      "after": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-publication/core/AFTER.json",
+        "sha256": "e47e3dced10434b31e785ed323976abda1f6a8c0312bff24df35ce704f450d79"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-publication/checked/BEFORE.json",
+        "sha256": "9d948342c3a9e508204b01df637c43d187b18f2fad38376ccd2b164b055f5b75"
+      },
+      "after": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-publication/checked/AFTER.json",
+        "sha256": "2ffa3ba3c2bc04724044a5fa9bf3c0570d4f3abfefff5d204ed4f2d6921906ca"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-publication/strict/BEFORE.json",
+        "sha256": "2ffa3ba3c2bc04724044a5fa9bf3c0570d4f3abfefff5d204ed4f2d6921906ca"
+      },
+      "after": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-publication/strict/AFTER.json",
+        "sha256": "2ffa3ba3c2bc04724044a5fa9bf3c0570d4f3abfefff5d204ed4f2d6921906ca"
+      }
+    },
+    {
+      "before": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-publication/network/BEFORE.json",
+        "sha256": "2ffa3ba3c2bc04724044a5fa9bf3c0570d4f3abfefff5d204ed4f2d6921906ca"
+      },
+      "after": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-publication/network/AFTER.json",
+        "sha256": "2ffa3ba3c2bc04724044a5fa9bf3c0570d4f3abfefff5d204ed4f2d6921906ca"
+      }
+    }
+  ],
+  "scope": "476 two-sync witness provider; final core/strict/example/actual four-arm controls"
+}

@@ -1,0 +1,15 @@
+{
+  "original_handle": 21706,
+  "command": [
+    "/usr/bin/python3.14",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux/campaign.py",
+    "--authorized-quiet"
+  ],
+  "stdout": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux/controller.stdout",
+  "stderr": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux/controller.stderr",
+  "exit_file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux/controller.exit",
+  "actual_exit": 0,
+  "terminal_tool_chunk": "689e12",
+  "permission": "Authorized host device discovery and localhost TCP/QUIC access; no sudo or policy change.",
+  "scope": "Recorded after actual terminal from the original launch tool receipt; no relaunch."
+}

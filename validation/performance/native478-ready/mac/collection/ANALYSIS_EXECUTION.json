@@ -1,0 +1,14 @@
+{
+  "command": [
+    "python3",
+    "target/p9/native478-ready/mac-collection/analyse.py"
+  ],
+  "exit": 0,
+  "actual_tool_chunk": "a2416c",
+  "source_sha256": "f0b5ca6d3a9b35851b17c0d99ed85749f56e15034c37a96c1d50ee30469c4305",
+  "stdout_sha256": "08085ec5ae668ab1a87d937f2127878a29046104b51e45eebf6a788ae0bdf801",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "analysis_sha256": "308e4253e2299bc0aa0cc0198138e48fa826901e8291eb46cf3cb89bed519665",
+  "time_utc": "2026-10-15T13:22:28.924491+00:00",
+  "scope": "One actual successful full48 raw recomputation, no failure/retry or workload."
+}

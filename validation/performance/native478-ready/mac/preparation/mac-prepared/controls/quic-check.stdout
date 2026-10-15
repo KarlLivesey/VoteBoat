@@ -1,0 +1,5 @@
+/private/tmp/voteboat-native478-esZLG7/controls/quic-wal: 512 scheduled offers, 512 admissions, 512 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=128.000 admitted_during=128.000 applied_during=125.250 applied_drain=115.096 applied_total=125.013 ops/s; window_refused=0 backlog_at_horizon=11
+/private/tmp/voteboat-native478-esZLG7/controls/quic-wal: 1 durable checkpoint boundaries, 3 exact-scope reclamation rows, 0 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=112.106 reclaim_ms=203.852 reclaimed_bytes=42557 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=473 units=473 commands=1536 mean_units=1.000 append_ms=427.513 barriers=471 mean_appends_per_barrier=1.004 mean_units_per_barrier=1.000 barrier_ms=7770.523 sync_ms=4039.141 publish_ms=3751.881 histogram=1:473|2:0

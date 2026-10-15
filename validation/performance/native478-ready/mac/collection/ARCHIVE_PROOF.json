@@ -1,0 +1,31 @@
+{
+  "scope": "48 original Mac478 ready16/64 paired processes, frozen validators and readback checks all actually ended0. Original14036; no retries/replacements. Not fullP9, sustained20M, default promotion or three-filesystem acceptance.",
+  "source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "schema_evidence_commit": "7c3795e5f155479ab703b1a4ed12a1a3772f399e",
+  "native_executable_sha256": "2fd48262a655debafaf7f04496bf34c867dc17b92f1e5890969819333cbcae84",
+  "native_profile": "Same fresh476 native opt3/debug0/assertions+overflow/defaultLTO+codegen executable for both arms. No rebuild.",
+  "common_source_files": 1491,
+  "source_device_cpu_guards_before_after_exact": true,
+  "raw_transfer_members": 1035,
+  "totals": {
+    "offers": 297984,
+    "applied": 265041,
+    "window_refused": 32943,
+    "no_leader": 0,
+    "admission_refused": 0,
+    "not_proposed": 0,
+    "unknown": 0,
+    "pending": 0
+  },
+  "maintenance_status_counts": {
+    "('checkpoint', 'completed')": 624,
+    "('reclaim', 'completed')": 1872
+  },
+  "timer_metric_limit": "No explicit missed-timer count is exposed. Dispatch distributions and late offer decisions are retained; late decisions are not timer misses.",
+  "latency_convention": "Nearest rank ceil(n*p/100)-1; intended/service successful originals, dispatch all offered rows. Per-group completed rates share the original whole-case elapsed boundary; during rates use the fixed offered horizon.",
+  "counter_scope": "Ordinary provider primitives exclude cold repair, initial selectors and reclamation. Metadata-inclusive command/unit mean is not a proposal-width maximum; codec bytes are not drive I/O; nested wall durations are not additive CPU.",
+  "resource_scope": "Whole child process including warmup/recovery/cleanup; Mac RSS raw bytes. No continuous memory/debt plateau claim.",
+  "host": "M2 Max; macOS/APFS Data volume/container/internal SSD shared by all three voters and both skew groups; stable1.98.0/LLVM22.1.8/protoc3.21.12. Linux1.98.1 is a separate within-host comparison.",
+  "transfer_scope": "Post-terminal text/CSV/JSON only; no binaries, source/buildtrees or generated WAL transferred. Original stores remain on Mac.",
+  "observation_failures": "Three absent-path status probes returned1; actual available tool-output text and commands/provenance retained. These were observations only; all48 native processes/validators/readbacks ended0 with no replacement."
+}

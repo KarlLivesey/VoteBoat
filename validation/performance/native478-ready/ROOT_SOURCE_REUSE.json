@@ -1,0 +1,8 @@
+{
+  "time_utc": "2026-10-15T13:26:15.584068+00:00",
+  "qualified_input_inventory": "target/p9/native476-publication/checked/BEFORE.json",
+  "inventory_sha256": "9d948342c3a9e508204b01df637c43d187b18f2fad38376ccd2b164b055f5b75",
+  "exact_current_source_hashes_modes": 1491,
+  "changed_qualified_inputs": [],
+  "reused_scope": "All476 root/provider/storage/service/standalone checks remain scoped to exact unchanged inputs.478 is only supported existing configuration; no broad unchanged suite rerun. Enabled pre-push formatter and strict profiles still required for publication."
+}

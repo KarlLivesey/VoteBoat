@@ -1,0 +1,22 @@
+{
+  "time_utc": "2026-10-15T13:19:37.836862+00:00",
+  "linux": {
+    "original_handle": 21706,
+    "actual_terminal_exit": 0,
+    "completed_case_end_records": 48,
+    "terminal_tool_chunk": "689e12",
+    "durable_stage": "ALL_TIMING_END"
+  },
+  "mac": {
+    "original_handle": 14036,
+    "actual_terminal_exit": 0,
+    "completed_case_end_records": 48,
+    "terminal_tool_chunk": "b771be",
+    "markers": [
+      "ALL_TIMING_END",
+      "CAMPAIGN_EXIT0",
+      "ORIGINAL_MAC478_SSH_EXIT0"
+    ]
+  },
+  "authorization": "Both original campaigns actually terminated. Collection, frozen validation, independent raw recomputation and lossless archiving may begin. Process success alone does not establish a batching gain, three-filesystem acceptance or full P9 completion."
+}

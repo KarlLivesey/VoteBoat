@@ -1,0 +1,26 @@
+{
+  "scope": "Exploratory path/key read failures only. No workload, validator, readiness or guard failed. Original tool outputs were conversation results, not redirected files; these exact error excerpts/exit codes retain the observations without inventing raw output files.",
+  "observations": [
+    {
+      "tool_chunk": "c014cf",
+      "phase": "before quiet launch, Mac preparation receipt lookup",
+      "exit": 1,
+      "error": "cat: target/p9/native478-ready/mac-prepared/READY.json: No such file or directory",
+      "resolution": "Actual Mac file is mac-prepared/campaign/READY.json; independent reviewer used actual config."
+    },
+    {
+      "tool_chunk": "f5b99b",
+      "phase": "post-terminal collection",
+      "exit": 1,
+      "error": "cat: target/p9/native478-ready/linux-wal/t1-skew-quic-q16/groups.csv: No such file or directory",
+      "resolution": "No groups.csv contract exists; per-group metrics independently recomputed from offers.csv."
+    },
+    {
+      "tool_chunk": "a17226",
+      "phase": "post-terminal collection",
+      "exit": 1,
+      "error": "Traceback (most recent call last):\n  File \"<stdin>\", line 4, in <module>\nKeyError: 'artifact'",
+      "resolution": "Actual candidate config contains artifacts plural; archive uses actual schema."
+    }
+  ]
+}

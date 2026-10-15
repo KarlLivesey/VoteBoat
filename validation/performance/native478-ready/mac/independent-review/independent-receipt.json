@@ -1,0 +1,43 @@
+{
+  "exit": 0,
+  "actual_analysis_exit": 0,
+  "cases": 96,
+  "hosts": [
+    "linux",
+    "mac"
+  ],
+  "input_files": 612,
+  "initial_attempt_exit": 1,
+  "initial_failure": "Parser SyntaxError in analysis only; original stderr retained, focused correction passed.",
+  "files": {
+    "independent-readout.py": {
+      "sha256": "d18883315a22f65e3113b3a87041d3599a5cb824f6bcdcfd08c6c53f93321b44",
+      "bytes": 10846
+    },
+    "independent-readout.json": {
+      "sha256": "c091dd0fb8e33c067406118403a7b41b7fffbe66371116d6eda0a6e77989e746",
+      "bytes": 625504
+    },
+    "independent-readout.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "independent-readout.stderr": {
+      "sha256": "2eb923d1afac95de344a7a05d8f821edb11639cefb92dcf54d2a0a4ec8624610",
+      "bytes": 296
+    },
+    "independent-readout-attempt2.stdout": {
+      "sha256": "3057e86bf3d42b00fc90def98060f99161d11de36ee39e9f259c39e522d958f5",
+      "bytes": 8370
+    },
+    "independent-readout-attempt2.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "independent-source-review.md": {
+      "sha256": "71584efd2746d199d8ad34c0247b58680a64d26caf28c493600060288589f32a",
+      "bytes": 7575
+    }
+  },
+  "scope": "Independent read-only post-terminal arithmetic/source review; no workload, production/document edit, remote command or profiler capture."
+}

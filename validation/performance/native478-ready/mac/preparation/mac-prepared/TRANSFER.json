@@ -1,0 +1,51 @@
+{
+  "source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "schema_evidence_commit": "7c3795e5f155479ab703b1a4ed12a1a3772f399e",
+  "remote_base": "/private/tmp/voteboat-native478-esZLG7",
+  "files": {
+    "PUBLICATION_AUTHORITY.json": {
+      "sha256": "40d2b93945e1d3cb15bf1c8a0c282aad490dc8a344af1900f3bb3fd6cd9ee31d",
+      "mode": "0o644",
+      "bytes": 338
+    },
+    "SCHEMA.md": {
+      "sha256": "e55b2cf3441870d1d61a2fc1cad4a3d79a05968c0af6598b1ef28594d04593de",
+      "mode": "0o644",
+      "bytes": 6321
+    },
+    "common/campaign.py": {
+      "sha256": "086dd656f044deff4634a030a3741df97765dd0716dce00962cdbcf04ecbb96a",
+      "mode": "0o644",
+      "bytes": 6406
+    },
+    "common/common.py": {
+      "sha256": "832254521d6a3860f35fef26bf41c72bed3f11ec89f154e0e93566d53e9e696b",
+      "mode": "0o644",
+      "bytes": 15501
+    },
+    "common/controls.py": {
+      "sha256": "971c90cefbbd60da4b21b0bfa351d251080ca9a06986af9c24ffc0ea6da9f261",
+      "mode": "0o644",
+      "bytes": 4552
+    },
+    "common/plan.py": {
+      "sha256": "be771aa5ef3b1df04ad3b5b7223b87d2c85cc716c461bd38fe06d10fbceb47b2",
+      "mode": "0o644",
+      "bytes": 1928
+    },
+    "common/prepare.py": {
+      "sha256": "0065e4ec34f59e0ceda6f04451f3bbda0d266db9dcb8e561ed47d306d4047552",
+      "mode": "0o644",
+      "bytes": 4970
+    },
+    "common/resources.py": {
+      "sha256": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+      "mode": "0o644",
+      "bytes": 2177
+    }
+  },
+  "directories": {
+    "common": "0o755"
+  },
+  "scope": "Eight runner/schema/authority text files only. No production source, binaries, build trees or generated WAL transfer."
+}

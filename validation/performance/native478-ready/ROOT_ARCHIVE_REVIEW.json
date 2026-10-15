@@ -1,0 +1,21 @@
+{
+  "archives": [
+    {
+      "host": "linux",
+      "payloads": 1138,
+      "gzip": 46,
+      "manifest_sha256": "e765ee007f6b13dbd053e7ca712faa0431684c93fd8e525aeb507933c1bc4fb7",
+      "exact_set_hashes_lossless_originals": true
+    },
+    {
+      "host": "mac",
+      "payloads": 1188,
+      "gzip": 49,
+      "manifest_sha256": "8965110254025e7e6144127da51e8014517c7e331be2ca3d8b03e191ceaca68e",
+      "exact_set_hashes_lossless_originals": true
+    }
+  ],
+  "root_raw_recomputation": "ROOT_DATA_REVIEW.json",
+  "independent_input_hashes_verified": 612,
+  "performance_scope": "Finite native offered diagnostics; FileLogIo and ready16 defaults unchanged, real ext4/XFS and full P9 remain open."
+}

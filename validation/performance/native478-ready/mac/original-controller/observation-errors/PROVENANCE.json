@@ -1,0 +1,45 @@
+{
+  "scope": "Three observation-only absent-path errors; no campaign errors/restart/mutation. Original available tool-result text copied verbatim from this agent transcript after both hosts terminal; stdout/stderr separation/original on-disk raw streams unavailable. Ledger exact remote argv is included; original shell quoting remains in the tool transcript. No failure rerun. Later polling used correct CAMPAIGN_STAGE and original streaming END lines.",
+  "records": [
+    {
+      "name": "stage-json",
+      "original_session": 5147,
+      "terminal_tool_chunk": "c58967",
+      "actual_exit": 1,
+      "command_display": "ssh karllivesey@192.168.192.76 'cat /private/tmp/voteboat-native478-esZLG7/campaign/STAGE.json'",
+      "output_file": "stage-json.tool-transcript.txt",
+      "sha256": "495b5efd053d8b6775ca6f6a3a5f63db1519283a54cae92722aa3243199ff32d",
+      "raw_stream_file_available": false
+    },
+    {
+      "name": "stage-text",
+      "original_session": 63938,
+      "terminal_tool_chunk": "b6f470",
+      "actual_exit": 1,
+      "command_display": "ssh karllivesey@192.168.192.76 'cat /private/tmp/voteboat-native478-esZLG7/campaign/STAGE'",
+      "output_file": "stage-text.tool-transcript.txt",
+      "sha256": "8e08a206d3c547850927e7b7cbb45405a64fea38ec3b1abbb9de83c52481255d",
+      "raw_stream_file_available": false
+    },
+    {
+      "name": "campaign-ledger",
+      "original_session": 62811,
+      "terminal_tool_chunk": "38cca7",
+      "actual_exit": 1,
+      "command_display": "ssh karllivesey@192.168.192.76 Python3.9 -c [read CAMPAIGN_STAGE then CAMPAIGN.json cases length]",
+      "output_file": "campaign-ledger.tool-transcript.txt",
+      "sha256": "7fc1ea0945778faef3a03478f0a91cd87229f8a6d140423b01c64e484c16174b",
+      "raw_stream_file_available": false,
+      "exact_remote_argv": [
+        "/Applications/Xcode-beta.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9",
+        "-c",
+        "import json; from pathlib import Path; p=Path(\"/private/tmp/voteboat-native478-esZLG7/campaign\"); print(p.joinpath(\"CAMPAIGN_STAGE\").read_text().strip()); print(\"completed_cases=\"+str(len(json.loads(p.joinpath(\"CAMPAIGN.json\").read_text())[\"cases\"])))"
+      ],
+      "transport": [
+        "ssh",
+        "karllivesey@192.168.192.76",
+        "remote shell with above argv"
+      ]
+    }
+  ]
+}

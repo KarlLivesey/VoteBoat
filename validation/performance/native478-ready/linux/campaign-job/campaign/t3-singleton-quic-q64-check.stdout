@@ -1,0 +1,5 @@
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-singleton-quic-q64: 256 scheduled offers, 196 admissions, 196 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=8.000 admitted_during=6.125 applied_during=6.125 applied_drain=0.000 applied_total=6.125 ops/s; window_refused=60 backlog_at_horizon=0
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native478-ready/linux-wal/t3-singleton-quic-q64: 15 durable checkpoint boundaries, 45 exact-scope reclamation rows, 0 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=2338.746 reclaim_ms=5231.069 reclaimed_bytes=180765 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=1189 units=1189 commands=588 mean_units=1.000 append_ms=18.035 barriers=1189 mean_appends_per_barrier=1.000 mean_units_per_barrier=1.000 barrier_ms=39495.829 sync_ms=19023.086 publish_ms=20461.494 histogram=1:1189
