@@ -1,0 +1,44 @@
+{
+  "scope": "Collector-only failures, no workload rerun. Raw benchmark outputs are unchanged.",
+  "attempts": [
+    {
+      "action": "Poll original interactive handles29711 and8849",
+      "result": "Unknown process id; did not restart. Remote persisted STATUS/STAGE/CAMPAIGN_STATUS/CAMPAIGN_STAGE plus54process/checkexitfiles establish terminal outcome."
+    },
+    {
+      "action": "Sandbox normal SSH",
+      "exit": 255,
+      "stderr": "Bad owner or permissions on /etc/ssh/ssh_config.d/20-systemd-ssh-proxy.conf"
+    },
+    {
+      "action": "Sandbox SSH -F /dev/null",
+      "exit": 255,
+      "stderr": "socket: Operation not permitted; ssh: connect to host192.168.192.76 port22: failure"
+    },
+    {
+      "action": "Escalated SSH -F /dev/null",
+      "exit": 255,
+      "stderr": "Permission denied (publickey,password,keyboard-interactive). Normal configured SSH succeeded."
+    },
+    {
+      "action": "Read-only status discovery commands",
+      "exit": 1,
+      "reason": "No owned process matched grep; later optional tail paths absent. Original terminalmarkers0/DONE and0/ALL_TIMING_END read successfully."
+    },
+    {
+      "action": "First remote collection inventory",
+      "exit": 0,
+      "correction": "Control-wal directory selector typo included21 WAL/snapshot/lock files in a temporary remote tar. Only inventory transferred; archive itself never transferred. Corrected text/CSV selector regenerated the remote tar before transfer. First inventory retained as attempt1.manifest.json."
+    },
+    {
+      "action": "Independent analysis attempt1",
+      "exit": 1,
+      "reason": "Case-sensitive Linux resources.json lookup; actual remote file is RESOURCES.json. Corrected filename."
+    },
+    {
+      "action": "Independent analysis attempt2",
+      "exit": 1,
+      "reason": "Copied Linux readout used floor(n*99/100), but fixture uses ceil(n*99/100)-1. Mac QUICr128w32t2 appliedcount divisible100 exposed mismatch901.372958ms vs actual899.151042ms. Corrected analysis convention and recomputed all54; raw/fixture unchanged."
+    }
+  ]
+}

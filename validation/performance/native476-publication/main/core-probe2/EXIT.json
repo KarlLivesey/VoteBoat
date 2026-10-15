@@ -1,0 +1,17 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--all-features",
+    "--test",
+    "journal_barrier",
+    "-vv",
+    "--",
+    "--test-threads=1"
+  ],
+  "exit": 101,
+  "elapsed_s": 0.34703424098552205
+}

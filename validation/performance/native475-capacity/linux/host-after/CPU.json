@@ -1,0 +1,20 @@
+{
+  "scaling_driver": {
+    "amd-pstate-epp": 16
+  },
+  "scaling_governor": {
+    "powersave": 16
+  },
+  "energy_performance_preference": {
+    "balance_performance": 16
+  },
+  "scaling_min_freq": {
+    "603379": 16
+  },
+  "scaling_max_freq": {
+    "5271622": 16
+  },
+  "online": "0-15",
+  "time_utc": "2026-10-15T10:13:59.923632+00:00",
+  "scope": "Read-only policy observations; frequencies are configured kHz bounds, not sampled workload frequencies. No settings changed."
+}

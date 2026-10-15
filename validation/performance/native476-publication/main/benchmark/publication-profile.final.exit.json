@@ -1,0 +1,11 @@
+{
+  "command": [
+    "node",
+    "validation/check-publication-profile.test.mjs"
+  ],
+  "exit": 0,
+  "inputs": {
+    "validation/check-publication-profile.test.mjs": "02edea8be0f8182e602ca8fe4e8dd8fe836bbda7299e2a798c484666ece77c4f",
+    "validation/check-publication-profile.mjs": "19874fb31de660af3d2ac47c6fd80639df38c974e07f27f1826bf5214a5fc60d"
+  }
+}

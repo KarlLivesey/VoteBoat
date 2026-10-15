@@ -1,0 +1,20 @@
+
+running 15 tests
+test corruption::a_ahead_counter_gap_remains_candidate_with_b_mandatory ... ok
+test corruption::both_bad_witnesses_or_corruption_inside_acknowledged_frames_reject ... ok
+test corruption::checksum_valid_invalid_fields_are_errors_instead_of_fallback_candidates ... ok
+test corruption::contradictory_pairs_reject_b_ahead_equal_counter_metadata_and_crossed_identity ... ok
+test corruption::every_acknowledged_wal_truncation_rejects_with_either_witness_crc_damaged ... ok
+test corruption::exhausted_publication_counter_or_session_never_wraps_or_rewrites_the_witnesses ... ok
+test corruption::sole_crc_valid_witness_recovers_exact_history_and_repairs_its_counterpart ... ok
+test history::actual_histories_keep_pending_visibility_suffix_outcomes_and_stale_sessions ... ok
+test history::persisted_ballot_and_wrong_recovery_identity_preserve_the_original_binding ... ok
+test history::public_timing_reader_observes_two_syncs_without_per_barrier_namespace_work ... ok
+test history::snapshot_binding_and_three_reclamations_preserve_the_exact_state ... ok
+test selection::complete_unacknowledged_suffix_is_recovered_and_only_incomplete_tail_is_discarded ... ok
+test selection::exclusive_lifetime_and_explicit_legacy_provider_incompatibility ... ok
+test selection::failed_or_partial_initialization_is_never_opened_as_an_empty_voter ... ok
+test selection::selected_missing_files_and_invalid_current_never_fall_back_to_old_pairs ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

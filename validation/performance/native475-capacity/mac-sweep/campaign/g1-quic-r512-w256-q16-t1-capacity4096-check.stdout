@@ -1,0 +1,5 @@
+/private/tmp/voteboat-mac475-dfc195c-Fz9Ivq/sweep/campaign-wal/g1-quic-r512-w256-q16-t1-capacity4096: 8192 scheduled offers, 5586 admissions, 5586 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=512.000 admitted_during=349.125 applied_during=334.188 applied_drain=437.693 applied_total=337.603 ops/s; window_refused=2606 backlog_at_horizon=239
+/private/tmp/voteboat-mac475-dfc195c-Fz9Ivq/sweep/campaign-wal/g1-quic-r512-w256-q16-t1-capacity4096: 7 durable checkpoint boundaries, 21 exact-scope reclamation rows, 0 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=819.084 reclaim_ms=1467.036 reclaimed_bytes=595913 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=1036 units=1036 commands=16758 mean_units=1.000 append_ms=1085.025 barriers=1036 mean_appends_per_barrier=1.000 mean_units_per_barrier=1.000 barrier_ms=26663.014 sync_ms=7842.443 publish_ms=18818.027 histogram=1:1036

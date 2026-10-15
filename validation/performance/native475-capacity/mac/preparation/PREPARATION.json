@@ -1,0 +1,83 @@
+{
+  "status": "PREPARED_PLAN_ONLY",
+  "required_commit": "UNSET",
+  "publication_gate": "No committed-source assembly, remote copy, build, test or workload until root supplies published475 commit.",
+  "preflight": {
+    "raw": "PREFLIGHT.stdout",
+    "exit": 0,
+    "tool_identity": "rustc/cargo/protoc byte-exact original455 tool records",
+    "dependencies": "82 root-lock registry packages cached; not a new offline-build pass",
+    "owned_jobs": "none"
+  },
+  "filesystem": {
+    "raw": "APFS_PREFLIGHT.stdout",
+    "exit": 0,
+    "initial_invalid_selector": "APFS_PREFLIGHT.attempt1.stdout; diskutil does not accept /private/tmp as disk selector",
+    "scratch": "/private/tmp",
+    "volume_device": "/dev/disk3s1",
+    "volume": "Macintosh HD - Data",
+    "mount": "/System/Volumes/Data",
+    "format": "APFS",
+    "container": "disk3",
+    "physical_stores": [
+      "disk0s2"
+    ],
+    "media": "Apple Fabric internal SSD",
+    "voter_placement": "All three voter roots beneath this scratch share one volume, container and physical store.",
+    "coverage": "APFS plus Linux Btrfs are two filesystem types; CoW/NoCoW are Btrfs policies. ext4/XFS pending user's real scratch volume."
+  },
+  "reuse": {
+    "source_export": "Corrected target/p9/mac472/prepare-source.py and verify-source.py: dynamic committed inventory, exact Linux physical file+directory modes, seven0600 keys, tar -xpf",
+    "native_build": "target/p9/native455-linux/run.sh: native profile only",
+    "unchanged_scope": "Production src, locks/configs/fixtures and unrelated functional tests reuse only by final exact selected SHA+mode/tool/receipt comparison; no blanket reuse based on label."
+  },
+  "source_scope": {
+    "essential_new": [
+      "examples/benchmark/offered_capacity.rs",
+      "examples/benchmark/offered_capacity/tests.rs"
+    ],
+    "full_closure": "Committed src/tests/examples/fixtures/locks/config/.cargo(if tracked)/toolchain/hooks/contracts and exact native/offered/publication/rounded-rate validator dependency closure; final file count derived, not assumed.",
+    "exclude": "Evolving P9/IMPLEMENTATION plans are not compile inputs; no binaries/build trees/WAL transfer; do not inherit472 pipeline module requirements."
+  },
+  "qualification": {
+    "commands": [
+      "cargo +stable test --locked --offline --all-features --example native_benchmark -- --test-threads=1 --nocapture",
+      "cargo +stable fmt --all -- --check",
+      "cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings",
+      "cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings",
+      "cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings",
+      "cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features --features native -- -D warnings",
+      "node --test validation/check-offered.test.mjs"
+    ],
+    "expected_example_tests": "Final actual count from published checked source; currently root reports51; derive receipts.",
+    "scope": "Native fixture changes only. No broad unchanged root suite, framework build or matched functional rerun. Feature configurations sequential."
+  },
+  "fresh_native_build": {
+    "target": "Fresh absent remote target-native-release",
+    "command": "cargo +stable build --locked --offline --release --all-features --example native_benchmark --message-format=json -vv",
+    "profile": {
+      "opt_level": 3,
+      "debug": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "lto": "native Cargo default; no override",
+      "codegen_units": "native Cargo default; no override",
+      "split_debuginfo": "native Cargo default; no framework packed override"
+    },
+    "environment": "Unset inherited Cargo profile overrides, Rust flags, wrappers, RUSTC/RUSTDOC and target flags; set only native opt3/debug0/assertion+overflow overrides; same verified1.98.0 toolchain/compatible protoc.",
+    "proof": "Actual CargoJSON root-library+example fresh:false, actual verbose rustc lines and build-script cfg/profile; current source/lock/compiler before+after; original+copy MachO SHA/UUID. No requirement to fabricate dSYM for debug0; record actual symbols."
+  },
+  "readiness_controls": {
+    "reference": "Mirror final checked target/p9/slice475/network/run.py after publication, preserving exact nine parser-before-root refusals and TCP/QUIC×w64/256/4096 functional histories; no source changes.",
+    "cases": "512 originals,64 warmups, offered128/s, ready16, maintenance2s. Legacyw64; explicitselected4096 atw256/4096. Use actual validators, six Create/Recover readbacks in wide cases, recovery64+applied/retries/joins and no full-window inference.",
+    "timing_scope": "Functional readiness only, not acceptance or fresh-artifact capacity rate claim."
+  },
+  "future_campaign": "One common selected4096 profile/artifact for windows32/256/4096×rates32/128/512×TCP/QUIC×3rotations;8192offers/64warmups/ready16/maintenance2s. No launch without root quiet grant after ALL build/copy/check setup ends.",
+  "open_prerequisites": [
+    "Published475 exact commit and final51/fullstrict/network-control receipts",
+    "Fresh Mac source+mode/tool guard, scoped qualification and native artifact proof",
+    "Actual six readiness histories/parser refusals/independent validators",
+    "Root-approved quiet campaign setup and host background disclosures",
+    "Actual ext4/XFS scratch from user before any three-filesystem acceptance claim"
+  ]
+}

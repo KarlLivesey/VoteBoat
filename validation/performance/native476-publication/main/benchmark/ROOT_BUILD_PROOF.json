@@ -1,0 +1,50 @@
+{
+  "root_library_record": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat#voteboat@0.1.0",
+    "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/Cargo.toml",
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "voteboat",
+      "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/src/lib.rs",
+      "edition": "2021",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libvoteboat-676f9e8fe1db37b5.rlib",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libvoteboat-676f9e8fe1db37b5.rmeta"
+    ],
+    "executable": null,
+    "fresh": false
+  },
+  "dep_info_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/voteboat-676f9e8fe1db37b5.d",
+  "dep_info_sha256": "40cbc10ffa116e7c8964efc842ce224ddfc9c9734ba46b2e7ea023ed0de15aa5",
+  "actual_native_source_watched": true,
+  "actual_witness_source_watched": true,
+  "old_frozen454_source_absent": true,
+  "source_before_after_equal": true,
+  "test_footer": [
+    "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 51 filtered out; finished in 0.00s",
+    ""
+  ]
+}

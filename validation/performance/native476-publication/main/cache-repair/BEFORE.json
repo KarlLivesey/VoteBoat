@@ -1,0 +1,13 @@
+{
+  "scope": "Generated root-target voteboat package cache has dep-info bound to old frozen454 source instead of current main. Actual newtrait probe E0407 is preserved; dependency caches and all p9 immutable source/artifact/evidence remain untouched.",
+  "proofs": {
+    "lib-voteboat.json": {
+      "sha256": "6a316a99bcc29293c1aa08490573610f803b68c6ac379e76a11bc2cc49559d3f",
+      "bytes": 737
+    },
+    "dep-lib-voteboat": {
+      "sha256": "db14bc662c481323e84a30384ab38c2f242d4477f9aec61430260636dac9fdb1",
+      "bytes": 27065
+    }
+  }
+}

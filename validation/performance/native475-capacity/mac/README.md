@@ -1,0 +1,9 @@
+#475 Mac qualification and fresh native artifact
+
+Published source dfc195cd39196fc6f16e69ea74de34dabd359ef2. Original qualification8849 persisted STATUS0/STAGEDONE; its interactive handle is unavailable and was never restarted. Actual command/exits, source-before/source-after/final guards, native example51 tests, offered JS11 tests, formatting/four strict profiles and separate matched formatting/strict all pass. No broad unchanged production or P8 suite is claimed here.
+
+Source1474 files and318 directories preserve exact hashes/permissions, all1469 final checked inputs and seven private-key fixtures0600. Linux includes one extra noncompiled measurement schema; all1474 common files match. Cargo JSON/vv prove fresh root library, executable and root buildscript with native opt3/debug0/assertions+overflow/default LTO/codegen. Mac stable1.98.0/LLVM22.1.8/protoc3.21.12 match the retained within-host baseline; Linux1.98.1 remains distinct. Current Mach-O original/copy SHA and UUID/symbol evidence are retained; no debug2/framework profile or invented dSYM requirement applies.
+
+Two actual release TCP/QUIC controls each apply512 originals, recover576 including64 warmups, verify retries and join workers. Six exact capacity readbacks per protocol cover three Create and three Recover assemblies. Observed max inflight52 is separate from the selected4096 bound. These are functional checks, not a throughput gain claim.
+
+The source-only prebuild transfer and post-terminal evidence collection are separately recorded. The latter excludes binaries/buildtrees/fullsource/WAL state. Read-only collection failures and the narrowed first remote export inventory are preserved; no failed benchmark was replaced. Original raw WAL remains on the Mac. Large originals are losslessly gzip-packed according to PACKING.json; SHA256SUMS seals this archive. The separate mac-sweep archive contains all54 original cases. P9 and real ext4/XFS acceptance remain open.

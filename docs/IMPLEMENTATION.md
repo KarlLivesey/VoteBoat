@@ -2,16 +2,17 @@
 
 ## Active P9 plan — 15 October 2026
 
-Current source is published475 `dfc195cd39196fc6f16e69ea74de34dabd359ef2`.
-473 restored the retained469/455 implementation;470/472 are rejected experiments,
-not active pipeline improvements.474 completed the mixed same-device Btrfs policy
-comparison.475 adds only the checked private offered-capacity measurement profile.
-Linux fresh native artifact and actual TCP/QUIC release recovery controls are
-complete; Mac scoped qualification is running. Common-profile Btrfs/APFS capacity
-sweeps follow setup; the user's real ext4/XFS scratch volume remains pending.
-The current-plus-next-two plan below and final475 record govern the next work.
-Earlier slice entries retain their historical state and are superseded where
-later results reject or restore them. Full P9 remains incomplete.
+The default remains the retained469/455 implementation restored in473;
+475 adds the capacity fixture.470/472 are rejected experiments.
+Both475 offered-load sweeps are complete:54 workloads and54 validators pass on
+Btrfs and APFS. Larger queues improve batching but expose severe overload tails;
+manifest publication remains the largest measured elapsed stage. The current476
+candidate introduces a separate opt-in two-sync WitnessLogIo behind JournalIo,
+with independent fixed acknowledged-boundary witnesses. Linux qualification is complete; published-source Mac qualification and paired
+measurements follow. FileLogIo remains the default; no candidate gain is claimed.
+The user's real ext4/XFS scratch volume remains pending. The linked current-plus-
+next-two plan below governs work. Historical entries retain their original state
+and are superseded by later rejection/restoration/results. Full P9 is incomplete.
 
 ### Earlier experiment and qualification record
 
@@ -871,10 +872,9 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Completed474: isolate filesystem policy in the real durable service | Determine whether the current deployment amplifies sync/publication latency before changing formats | Checked473 restoration; [filesystem schema](../validation/performance/native474-filesystem/SCHEMA.md), immutable native455 artifact/proofs and fresh same-device default/NoCoW parents | Publish restoration, finish setup/independent review and quiet window; twelve actual TCP/QUIC paired cases with exact outcomes/recovery/maintenance, completed rates, latency/refusals and physical barrier data; archive every result | P9.0/P9.2/P9.3 |
-| Current475: bounded larger-window offered-load capacity sweep | Distinguish admission/backlog limits from actual durable capacity and batching | Filesystem results, explicit common client/shard budgets, current fixture window64 cap and independent validator | Before-edit schema; checked offered-only windows32/256/4096 with common budgets/readbacks and ready16; actual recovery/budget controls, fresh native artifacts; rotated low/mid/overload measurements including latency/refusals/drain and real observed widths | P9.0/P9.2/P9.3 |
-| Next476: select and qualify durable publication improvement | Remove measured sync/publication work while preserving acknowledged-prefix damage detection and recovery | Current filesystem/load/counter evidence; precise journal authority, corruption/crash model and public JournalIo contract | Explicit format/API/ownership/migration/old-new cleanup plan before edits; no silent latest-authority fallback; modeled write/sync/reclaim/restart/corruption cuts, native recovery and actual paired durable gain; keep full framework curve and all P8 performance obligations linked in the macro plan | P9.0/P9.1/P9.2/P9.3/P9.4 |
-| Next477: full sustained curve and composed service qualification | Complete remaining full P9 acceptance beyond this native sequence | Retained measured improvements and both-host qualified artifacts/workloads | All seven one-group floors with healthy margin, sustained bounded memory/debt, durable headroom/fairness/skew, placement/shared barriers and P8 relays/striped/recursive/logical voters; preserve outcomes and every failure | P9.0/P9.1/P9.2/P9.3/P9.4 |
+| Current476: qualify portable two-sync publication | Remove measured per-batch namespace/sync work while preserving acknowledged-prefix recovery | Completed475 both-host load/counter evidence; [before-edit format/schema](../validation/performance/native476-publication/SCHEMA.md), compound JournalIo default and independent fixed witnesses | Byte/crash/restart/repair/reclaim controls, exact public-provider and combined-dispatch tests, actual selected TCP/QUIC histories, metadata and zero-diagnostic full hook; explicitly selected fresh stores only, no implicit migration/default promotion | P9.0/P9.1/P9.3 |
+| Next477: measure paired native publication and headroom | Establish useful completed-rate/tail/barrier improvements rather than fewer source calls | Published checked476, fresh native artifacts/compiler/source guards, common explicit diagnostics and admission profile | Rotated same-volume/device baseline/candidate measurements on Btrfs/APFS plus user's ext4/XFS when supplied; exact outcomes/recovery/refusals, latency/drain, physical work and cold maintenance; no universal acceptance before all three pass | P9.0/P9.1/P9.2/P9.3 |
+| Next478: sustained curve and composed service qualification | Complete remaining full P9 scope and choose subsequent measured bottlenecks | Retained measured improvements and both-host qualified artifacts/workloads | All seven one-group cells with healthy sustained margin, bounded memory/debt, durable headroom/fairness/skew, placement/shared physical barriers and P8 relays/striped/recursive/logical voters; preserve every original outcome/failure and do not start P10 | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
 comparison or short diagnostics. All seven one-group healthy-margin cells on
@@ -35079,3 +35079,80 @@ must finish before a host's quiet timing window. Mac original8849 continues scop
 qualification and fresh native setup; its1474 source files match the common Linux
 projection, omitting only the supplementary noncompiled sweep schema. Real ext4/XFS
 scratch remains pending the user; no partitioning/formatting is authorized.
+
+
+475 offered capacity collection is complete without a workload rerun.
+[Linux54](../validation/performance/native475-capacity/linux/README.md) original31476
+ends0; [Mac54](../validation/performance/native475-capacity/mac-sweep/README.md)
+original29711 persisted0/ALL_TIMING_END, with unavailable interactive handles
+reported honestly. All108 processes and108 validators pass. Each host accounts
+for442368 offered originals: Linux333153 applied+109215 window refusals;
+Mac384624+57744, other refusal/unknown/pending0. Recovery64+applied/retries/joins
+hold throughout, with Linux2948checkpoints/8844reclaims and Mac2970/8910.
+
+At512offered/s, windows32→4096 increase Linux TCP83.426→200.436 completed/s,
+QUIC92.010→205.054; p99 grows1.343→18.965s and1.152→20.052s. MacTCP160.609→
+364.009/s andQUIC160.915→363.740, p99 .792→6.499s and .642→6.535s. Linuxwide
+runs hit4096pending/refusals; Macwide admitsall but leaves median2601/2638 queued
+at horizon. Neither establishes healthy512/s headroom. Mean leader barrier/WALsync/
+publication: LinuxTCP42.594/14.552/27.835ms,QUIC42.136/14.345/27.916;
+MacTCP22.226/5.872/16.351,QUIC21.857/5.628/16.227. These are nested elapsed
+contexts, never additiveCPU. WholeprocessRSS is not a plateau/debt proof; three
+replicas share each host's physical device.
+
+Root independently verifies exact archives: Linux1021payloads/61lossless originals,
+Macqualification151/10 and Maccampaign992/60. The [Mac qualification](../validation/performance/native475-capacity/mac/README.md)
+preserves native51/JS11/strict/freshsource1474files+318directories/tool identities
+and actualreleasecontrols. An analysis-only percentile floor-versus-ceil reference
+was corrected to the fixture's nearest rank; original analysis attempts remain.
+Linux numerical results are unchanged; all54 saved p99 assertions match on each
+host. Original errors, all36cells/108trials, slow tails and actual raw output stay.
+
+476's before-edit schema selects two fixed witnesses, not a last-valid WAL marker:
+A shares the WAL's first sync, B's independent fixed file follows with a second
+sync. Both match after acknowledgement; when A is a newer candidate and B remains
+old, B is mandatory. Invalid final authority cannot silently expose an older
+historical marker. Sole-survivor repair, explicit initialization and bounded
+old/new generation reclamation are cold-path dependencies. Default FileLogIo,
+codec bytes, quorum/ordering/application/authentication and original outcomes stay.
+The separate provider is opt-in on fresh stores; legacy migration is not silently
+claimed. Current independent ordinal model, internal byte-cut tests and public
+controls are selected finite evidence, not device power-loss certification.
+
+The first476 main seam probe exposed a stale generated library: root Cargo
+fingerprint dep-info referenced frozen matched454 sources rather than current
+src, producing missing-new-method compile errors. Original probes and dep-info
+are retained. Targeted cargo clean --package voteboat invalidated only generated
+root-package outputs (50842files/43.5GiB), preserving dependency caches, source,
+Git, immutable p9 artifacts and evidence. A new actual CargoJSON/verbose build
+proves current-root library fresh:false and dep-info watches current log_store/
+witness sources. Unchanged historical root-cache hits are not reused as476 proof.
+
+
+[476 final Linux qualification](../validation/performance/native476-publication/main/README.md)
+is locally complete: root197 integration/35 native-library tests pass; native-only
+public15 and independent byte-cut/model controls pass. Four strict root profiles,
+root/matched formatting and standalone strict are zero. All1491 selected source/
+mode inputs match, with current-root fresh compilation/dep-info proof after the
+stale-cache correction. Metadata now records43 partially reviewed contracts and
+411 operations, including the new JournalIo compound method, without weakening
+negative controls. Default FileLogIo source and compiler/locks/config are unchanged.
+
+Actual atomic/witness TCP/TLS+QUIC controls each apply512/512, recover576,
+verify retries and worker joins, complete1checkpoint/3reclaims and record six
+capacity plus six provider Create/Recover readbacks. Seven original invalid CLI
+invocations reject before resources; a corrected lanes-first refusal separately
+covers that intended branch while preserving the original malformed invocation.
+No successful case repeats. Two independent observer defects are fixed: selected
+encoded bytes retain exact append-attempt accounting; error counters preserve
+upper and primitive observations with explicit overlap metadata. Five focused
+benchmark/observer tests and timing/profile/offered/storage JS controls pass.
+
+Root verifies278 archived payloads/26 lossless originals, preserving failed
+compilation/assertion/lint/probe outputs and their exact availability limits.
+Current checks establish a usable opt-in Rust provider and actual service path,
+not a native release gain. Publish checked source through the enabled hook, then
+activate the prepared fresh Linux/Mac native runners using the actual published
+commit and final receipts. Paired same-volume measurements follow artifact setup;
+all-three-filesystem acceptance still awaits the user's ext4/XFS scratch. No full
+P9 milestone closes and no default publication provider changes.

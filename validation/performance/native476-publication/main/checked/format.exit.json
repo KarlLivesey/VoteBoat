@@ -1,0 +1,12 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "fmt",
+    "--all",
+    "--",
+    "--check"
+  ],
+  "exit": 0,
+  "elapsed_s": 2.3500642580038402
+}

@@ -1,0 +1,16 @@
+[
+  "cargo",
+  "+stable",
+  "clippy",
+  "--locked",
+  "--offline",
+  "--keep-going",
+  "--all-features",
+  "--example",
+  "native_benchmark",
+  "--message-format=json",
+  "-vv",
+  "--",
+  "-D",
+  "warnings"
+]

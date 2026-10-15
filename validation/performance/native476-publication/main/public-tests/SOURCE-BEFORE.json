@@ -1,0 +1,17 @@
+{
+  "time_utc": "2026-10-15T11:21:17.739628+00:00",
+  "sha256": {
+    "tests/witness_log_store/corruption.rs": "113b82c667122d3ec37b6068f418e361342aeb3a8fd63f806243bbafaaab6b21",
+    "tests/witness_log_store/fixture.rs": "88150d70ec14e115e6ceee2932fecff01ee34792e66e6f5431f3027aa30b3655",
+    "tests/witness_log_store/history.rs": "f055f40bca87e71778f747bd85cf8858709a8e6f429b014694af0320b944fa4d",
+    "tests/witness_log_store/selection.rs": "01eeb8552a0e527ca7d033c4b8d4114724a036276edc21dbb33e1912fc9dcecf",
+    "tests/witness_log_store.rs": "a0a4ea0144fb5028d7d864b317886d79bc2c1358a2532431f388302e348463dd",
+    "src/native/log_store/witness/format.rs": "85b52aa801070a165b5b3e90317bbf2381ad7cfaec5444bafe55991c4cb5d342",
+    "src/native/log_store/witness/publication.rs": "9ae1b79dc15c27f046076c31788c2ab74be93ef129f120478ab739b9408dc58e",
+    "src/native/log_store/witness/tests/crash.rs": "8a7e9e5ba925813d383c3044973f461795e107b8f8082fef1d89521b895d8286",
+    "src/native/log_store/witness/tests/selection.rs": "2772a0ed719c3752445fe5b68994a235458f6ba7de7916e88196271f13e43a18",
+    "src/native/log_store/witness/tests.rs": "56446fced78c0555bfcf3faf6aaf6e8b6647d8ccc582cdb2ff12f58dc1ffc513",
+    "src/native/log_store/witness.rs": "be69d259d8e2083dedc73bc52d24f6befda0f05be5530c0c411243d933241931",
+    "src/native/log_store.rs": "b30e32fa84b07337bd373b91ad201cc91788979f66da8c2164402a6234713e04"
+  }
+}

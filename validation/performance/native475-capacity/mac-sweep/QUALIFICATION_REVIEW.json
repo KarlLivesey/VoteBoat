@@ -1,0 +1,30 @@
+{
+  "scope": "Post-terminal exact archive and selected-source qualification. No rerun. Interactive terminal handles unavailable; actual persisted original terminalmarkers/logs/exits retained.",
+  "source_commit": "dfc195cd39196fc6f16e69ea74de34dabd359ef2",
+  "selected_source_files": 1474,
+  "selected_source_directories": 318,
+  "qualified_files": 1469,
+  "qualified_sha256_and_modes_exact": true,
+  "private_key_fixtures0600": 7,
+  "source_before_after_final_guard_passed": true,
+  "tests": {
+    "native_example": 51,
+    "offered_js": 11,
+    "format_and_four_strict_profiles": 0,
+    "standalone_matched_format_and_strict": 0
+  },
+  "qualification_handle": 8849,
+  "qualification_actual_remote_status": 0,
+  "qualification_stage": "DONE",
+  "campaign_handle": 29711,
+  "campaign_actual_remote_status": 0,
+  "campaign_stage": "ALL_TIMING_END",
+  "campaign_processes": 54,
+  "campaign_validators": 54,
+  "artifact_sha256": "9aeff0f157f21773a42b4fc825cb6d00cea8a074fb0cccce09e5aa34855ee436",
+  "root_artifact_sha256": "962a305ae34fc9ba490b7921c48cce77cee0d1fc08990d52ce91c6a8f1e0c827",
+  "native_profile": "opt3/debug0/assertions+overflow/native defaultLTO+codegen; root+executable+buildscriptfresh:false; debugcheckpointoracle absent",
+  "compiler": "stable1.98.0 aarch64-apple-darwin LLVM22.1.8; protoc3.21.12; tools identical retainedMac455. Linux stable1.98.1 remains distinct.",
+  "source_transfer_scope": "No binaries/buildtrees/fullsource/WAL transfer in this collection. Initial source-only transfer before build is proved in SOURCE_TRANSFER.json.",
+  "wholeprocess_resources_unit": "Mac ru_maxrss raw bytes retained without Linux KiB conversion."
+}

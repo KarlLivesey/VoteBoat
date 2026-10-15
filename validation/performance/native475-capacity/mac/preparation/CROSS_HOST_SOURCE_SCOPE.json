@@ -1,0 +1,13 @@
+{
+  "mac_selected_files": 1474,
+  "linux_selected_files": 1475,
+  "common_files": 1474,
+  "common_sha256_and_physical_modes_exact": true,
+  "checked_final_source_files": 1469,
+  "checked_final_source_sha256_and_modes_exact": true,
+  "linux_only": [
+    "validation/performance/native475-capacity/SCHEMA.md"
+  ],
+  "mac_only": [],
+  "scope": "Only Linux includes measurement SCHEMA as supplemental noncompiled input; no byte/build/profile difference; do not re-export/rebuild/retest."
+}

@@ -1,0 +1,15 @@
+{
+  "prepared_only": true,
+  "quiet_go_received": false,
+  "case_count": 54,
+  "campaign_config_sha256": "74b1e556cbbfc33aa35f08a628d2d19ec18668020089cba10d7320a7bb18ca88",
+  "campaign_driver_sha256": "81e76b22316a528344238cd3b245df3dbfc0d352a52cf889bc4a2440f25fd743",
+  "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+  "source_inputs": 1475,
+  "artifact_sha256": "a3a062ff2a8ab9cb36f22a66737e5c0c52088b5a67f61b87897a5a7527072457",
+  "wal_parent_exists": true,
+  "all_case_roots_absent": true,
+  "script_syntax": "AST parsed",
+  "ordered_horizon_total_s": 6048.0,
+  "scope": "Data/source/identity/path preflight only. Actual localhost operation proof reused successful release controls; no new socket/workload/checker execution. Await explicit rootGO."
+}

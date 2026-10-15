@@ -1,0 +1,362 @@
+[
+  {
+    "original_path": "CAMPAIGN_CONFIG.json",
+    "archived_path": "CAMPAIGN_CONFIG.json.gz",
+    "original_bytes": 104694,
+    "original_sha256": "220e8b7f53714220d8515ec85e31502549db4c0041708d8630974a47250aed45"
+  },
+  {
+    "original_path": "INDEPENDENT_ANALYSIS.json",
+    "archived_path": "INDEPENDENT_ANALYSIS.json.gz",
+    "original_bytes": 284488,
+    "original_sha256": "0ec718d97db8b782e7ee01ca45437209a0ab00ba5893a10674b79ad39e4aee45"
+  },
+  {
+    "original_path": "LINUX_CAMPAIGN_CONFIG.template.json",
+    "archived_path": "LINUX_CAMPAIGN_CONFIG.template.json.gz",
+    "original_bytes": 113775,
+    "original_sha256": "74b1e556cbbfc33aa35f08a628d2d19ec18668020089cba10d7320a7bb18ca88"
+  },
+  {
+    "original_path": "after-host.json",
+    "archived_path": "after-host.json.gz",
+    "original_bytes": 153757,
+    "original_sha256": "0f559071f47c535b9d1cb8310a3c6fd0740c72b198c5bee26336f0a332528fc0"
+  },
+  {
+    "original_path": "before-host.json",
+    "archived_path": "before-host.json.gz",
+    "original_bytes": 153639,
+    "original_sha256": "135b6cb3da145260c023e417a570aafa5c9bc8675193605937abebd87dfd8455"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r128-w256-q16-t1-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r128-w256-q16-t1-capacity4096/offers.csv.gz",
+    "original_bytes": 557253,
+    "original_sha256": "875389790b049bbc4d3dc643c89bb649aa133969ea657053f52966133b4e36a0"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r128-w256-q16-t2-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r128-w256-q16-t2-capacity4096/offers.csv.gz",
+    "original_bytes": 557137,
+    "original_sha256": "239a9fcbcf45abba2da4ddd543abbb5cea4ea01fc3e7463340cb50033a53cdcd"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r128-w256-q16-t3-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r128-w256-q16-t3-capacity4096/offers.csv.gz",
+    "original_bytes": 557257,
+    "original_sha256": "c35d5f095f321a94744cd67d9a3ff8ab2af5c4dbf0e98c433c319ae76075b4af"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r128-w32-q16-t1-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r128-w32-q16-t1-capacity4096/offers.csv.gz",
+    "original_bytes": 554564,
+    "original_sha256": "436486a8746fa3dce5c7d29f2bda695f303ef62c0005b554cfc0a9d16caf53ab"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r128-w32-q16-t2-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r128-w32-q16-t2-capacity4096/offers.csv.gz",
+    "original_bytes": 555277,
+    "original_sha256": "ddc437fa49bc508031c24c6e233fa4d2c1f7e40de883a767eef3e740a9d6f6a0"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r128-w32-q16-t3-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r128-w32-q16-t3-capacity4096/offers.csv.gz",
+    "original_bytes": 555352,
+    "original_sha256": "e444b00bcd42fffe187a3ba935d7fa542b4638930bef3cf8f4de538ca084d3f3"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r128-w4096-q16-t1-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r128-w4096-q16-t1-capacity4096/offers.csv.gz",
+    "original_bytes": 557252,
+    "original_sha256": "db5365e74811cf65025fd08a9f7a325e4b719a34dec1e8a2dad64a85cef4ab84"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r128-w4096-q16-t2-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r128-w4096-q16-t2-capacity4096/offers.csv.gz",
+    "original_bytes": 557253,
+    "original_sha256": "4375ddd8a5f732e5f1b5463920f3e0749b1a6d84bc4a0c351f8d021952722c4c"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r128-w4096-q16-t3-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r128-w4096-q16-t3-capacity4096/offers.csv.gz",
+    "original_bytes": 557322,
+    "original_sha256": "6171b15b4883cf566a45b6285996131d8b77912580ae6bd47d126d5740644c98"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r32-w256-q16-t1-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r32-w256-q16-t1-capacity4096/offers.csv.gz",
+    "original_bytes": 575409,
+    "original_sha256": "428b5e7f8236f2dae124009bf5641996f7ea05a28c0a19d2be6468c27250cee4"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r32-w256-q16-t2-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r32-w256-q16-t2-capacity4096/offers.csv.gz",
+    "original_bytes": 575402,
+    "original_sha256": "f1b1c6657597c77539a52b328cff66200845429b20581b0a4f20d5ea1cec9523"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r32-w256-q16-t3-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r32-w256-q16-t3-capacity4096/offers.csv.gz",
+    "original_bytes": 575391,
+    "original_sha256": "5cbd8ad8e7189e4a8b571469cb995a72b62bbe73d98e0463779e5457acb73ddf"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r32-w32-q16-t1-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r32-w32-q16-t1-capacity4096/offers.csv.gz",
+    "original_bytes": 575301,
+    "original_sha256": "09e7aa6a664c916f5b5ad044a2b4002666db7fcd070c02fee867085f8ac3a848"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r32-w32-q16-t2-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r32-w32-q16-t2-capacity4096/offers.csv.gz",
+    "original_bytes": 575292,
+    "original_sha256": "8ee2d9ec29eed1be520c48ffc37b85fdb5dbc0d5b4c154d19807f8ac99534fb3"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r32-w32-q16-t3-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r32-w32-q16-t3-capacity4096/offers.csv.gz",
+    "original_bytes": 575298,
+    "original_sha256": "40d51dd85cbc84bac5248bdda0b41772dc2fd23b9781a1572d861cf7b2f7e990"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r32-w4096-q16-t1-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r32-w4096-q16-t1-capacity4096/offers.csv.gz",
+    "original_bytes": 575400,
+    "original_sha256": "d5f92f3a2ad1884cb8ca0a5ece3831c144b061496074db2374e2c60378260b20"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r32-w4096-q16-t2-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r32-w4096-q16-t2-capacity4096/offers.csv.gz",
+    "original_bytes": 575415,
+    "original_sha256": "344cd57d3296e595e1432f6cce3e7cac80dfc1b2d6f70de26b1862c92eee962e"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r32-w4096-q16-t3-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r32-w4096-q16-t3-capacity4096/offers.csv.gz",
+    "original_bytes": 575402,
+    "original_sha256": "efc06d5e6c8ea07c0e2244396df712f64d2e857e0e0f1d4ccea8c9a7aa4e4a73"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r512-w256-q16-t1-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r512-w256-q16-t1-capacity4096/offers.csv.gz",
+    "original_bytes": 539675,
+    "original_sha256": "50f6d78317653d53b44d57ec2bc448084670c7c49781f499545bffe14993a16a"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r512-w256-q16-t2-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r512-w256-q16-t2-capacity4096/offers.csv.gz",
+    "original_bytes": 538249,
+    "original_sha256": "53e8b340d51de75c935c516b4875b8ca6ddffbcd1eeba62eda05833d667ee609"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r512-w256-q16-t3-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r512-w256-q16-t3-capacity4096/offers.csv.gz",
+    "original_bytes": 537904,
+    "original_sha256": "6e8cafe7ccb94744ac8c843851ccfd52e9baffa127f0ca75fdf0408dd2d3f897"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r512-w32-q16-t1-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r512-w32-q16-t1-capacity4096/offers.csv.gz",
+    "original_bytes": 533366,
+    "original_sha256": "9e6c943b3cd598dd80c07c442ab54facd5ddfe9683becabeb832eb8202d09ce9"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r512-w32-q16-t2-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r512-w32-q16-t2-capacity4096/offers.csv.gz",
+    "original_bytes": 533307,
+    "original_sha256": "3b06756e5784f32ddda9fc749e04a05c867b0b18a64f0dacc4a626920553d81b"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r512-w32-q16-t3-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r512-w32-q16-t3-capacity4096/offers.csv.gz",
+    "original_bytes": 533197,
+    "original_sha256": "e4f2614e0ddc4002689e4fd7e56a0fb7c53d60ed9e526d0dcae9f1bcf516a7e3"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r512-w4096-q16-t1-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r512-w4096-q16-t1-capacity4096/offers.csv.gz",
+    "original_bytes": 546124,
+    "original_sha256": "c5d8d23f4934b43b2955c677717ad7e428cf06c5dc851ce98985f3416108aba9"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r512-w4096-q16-t2-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r512-w4096-q16-t2-capacity4096/offers.csv.gz",
+    "original_bytes": 546165,
+    "original_sha256": "c9cf7c489b3e4a305c07c1320981c33b7d27f612176cedf1a5bb24ec0f178221"
+  },
+  {
+    "original_path": "campaign-wal/g1-quic-r512-w4096-q16-t3-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-quic-r512-w4096-q16-t3-capacity4096/offers.csv.gz",
+    "original_bytes": 546374,
+    "original_sha256": "9cc01ba4ce3061765e8135a25c8ff620209c96c3e102462fbfab70f7989567d3"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r128-w256-q16-t1-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r128-w256-q16-t1-capacity4096/offers.csv.gz",
+    "original_bytes": 557252,
+    "original_sha256": "b43adc7f0b13db0ac936cb6a4eb22bbfc0fbda74bf7f5028d189f702166ba2e1"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r128-w256-q16-t2-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r128-w256-q16-t2-capacity4096/offers.csv.gz",
+    "original_bytes": 556988,
+    "original_sha256": "35c96fa50ecc1063ba34534d53bf0ece9a97e16e1ca28597e982359585eb7f8d"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r128-w256-q16-t3-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r128-w256-q16-t3-capacity4096/offers.csv.gz",
+    "original_bytes": 557262,
+    "original_sha256": "6ed26578dcc599a2a84045a330839148b9f8b16ecafc177fbb72a284fe4f9cbb"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r128-w32-q16-t1-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r128-w32-q16-t1-capacity4096/offers.csv.gz",
+    "original_bytes": 555136,
+    "original_sha256": "3389c244c2c318e91aa56eb9dc49e3843161c76fe4cd5dcd73988e3870f60a5a"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r128-w32-q16-t2-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r128-w32-q16-t2-capacity4096/offers.csv.gz",
+    "original_bytes": 555399,
+    "original_sha256": "707fdfd464532608da7ac3166d29a20138ae14c12bcb1de8e1393ef44c53f690"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r128-w32-q16-t3-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r128-w32-q16-t3-capacity4096/offers.csv.gz",
+    "original_bytes": 555241,
+    "original_sha256": "b2f3a1e3ed6d406fa09eee49034b6793a711887927ea99fd61a80b77fbd07b7c"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r128-w4096-q16-t1-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r128-w4096-q16-t1-capacity4096/offers.csv.gz",
+    "original_bytes": 557350,
+    "original_sha256": "eddcdb46ea6c6f130dc0e878a22aac72de163cdbc81fe060abc3bb70fcd699f9"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r128-w4096-q16-t2-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r128-w4096-q16-t2-capacity4096/offers.csv.gz",
+    "original_bytes": 557256,
+    "original_sha256": "d637201a9ecbe409c9ca7130a2d9c2d56d52c8d067da7aa7078ed79141f39cd1"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r128-w4096-q16-t3-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r128-w4096-q16-t3-capacity4096/offers.csv.gz",
+    "original_bytes": 557522,
+    "original_sha256": "cb417bd1b89f82ae465f532bfb3d76caaf74dfcd7e47b8fb0fe0fe0f49f59512"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r32-w256-q16-t1-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r32-w256-q16-t1-capacity4096/offers.csv.gz",
+    "original_bytes": 575392,
+    "original_sha256": "734b057052d601cd95b0a87ca3a9cfd8d23535e2a1039edd6afd2522e0ab5060"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r32-w256-q16-t2-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r32-w256-q16-t2-capacity4096/offers.csv.gz",
+    "original_bytes": 575417,
+    "original_sha256": "f057635d0eb0be3571962cbe8ac9b176d6bc8d6d480e1eeb33208e7697f188fb"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r32-w256-q16-t3-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r32-w256-q16-t3-capacity4096/offers.csv.gz",
+    "original_bytes": 575391,
+    "original_sha256": "d1b5160771481334cb290ad13ad162eb1cf4b8911d9b1bc699c7fd31d82d94da"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r32-w32-q16-t1-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r32-w32-q16-t1-capacity4096/offers.csv.gz",
+    "original_bytes": 575369,
+    "original_sha256": "0817e25cfa69ee0b2ca8f2d4c38e32a8ef6c9d102f66a3735b37bc13bf9d8b99"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r32-w32-q16-t2-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r32-w32-q16-t2-capacity4096/offers.csv.gz",
+    "original_bytes": 575258,
+    "original_sha256": "801e1cedeab3ffc2fab5b5d34d7525f6424aa2d8ecb85314a458e2ef8675df77"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r32-w32-q16-t3-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r32-w32-q16-t3-capacity4096/offers.csv.gz",
+    "original_bytes": 575298,
+    "original_sha256": "9aac248e89c360202db036e7ea442ad20abf8894ec344ae8b92b9a756e1fddfb"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r32-w4096-q16-t1-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r32-w4096-q16-t1-capacity4096/offers.csv.gz",
+    "original_bytes": 575392,
+    "original_sha256": "d70148c3006c2569fcbbdc63b4b174d9404c879ce19ef1d80e18d6827a7e6086"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r32-w4096-q16-t2-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r32-w4096-q16-t2-capacity4096/offers.csv.gz",
+    "original_bytes": 575394,
+    "original_sha256": "956ede59f3f2130dd0efdcc599462762ffeed7d59dfa02f50035a8c54879ccb5"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r32-w4096-q16-t3-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r32-w4096-q16-t3-capacity4096/offers.csv.gz",
+    "original_bytes": 575393,
+    "original_sha256": "d2928270b259ef6645d02f151646728445ed0db8b0355da8a5f0bc4983d7ff3e"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r512-w256-q16-t1-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r512-w256-q16-t1-capacity4096/offers.csv.gz",
+    "original_bytes": 539621,
+    "original_sha256": "f9546eb815eda793dc673d99afdc2ce6acb618c9e5c2169d2a71e979420f4785"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r512-w256-q16-t2-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r512-w256-q16-t2-capacity4096/offers.csv.gz",
+    "original_bytes": 539649,
+    "original_sha256": "14821da41d670a464768eb2e0d49668448ee491fe85c43ceec7a4c2aa03a3b6e"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r512-w256-q16-t3-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r512-w256-q16-t3-capacity4096/offers.csv.gz",
+    "original_bytes": 539768,
+    "original_sha256": "b35a751faa2a08f600ddac69835ec08e1f4a805538bb024b3c355cbc03f06d9d"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r512-w32-q16-t1-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r512-w32-q16-t1-capacity4096/offers.csv.gz",
+    "original_bytes": 533072,
+    "original_sha256": "eb92b2d144ed0cd93c3f22d08a9cc1f3a82748210666c02ec4c08502bf802bee"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r512-w32-q16-t2-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r512-w32-q16-t2-capacity4096/offers.csv.gz",
+    "original_bytes": 533253,
+    "original_sha256": "a763ac7c7e29c86d395a40c59c01638c35a8e720fa3d6501546e25da4ed5df1e"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r512-w32-q16-t3-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r512-w32-q16-t3-capacity4096/offers.csv.gz",
+    "original_bytes": 533382,
+    "original_sha256": "b8d582680f336ee78318d24f1d8344ea2852ce8b3a372157555107d15b991ac1"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r512-w4096-q16-t1-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r512-w4096-q16-t1-capacity4096/offers.csv.gz",
+    "original_bytes": 546073,
+    "original_sha256": "3e9c9295a73bddfd9a784f4e7f4353493b1c21fa7371410ce5302a47bfa5599f"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r512-w4096-q16-t2-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r512-w4096-q16-t2-capacity4096/offers.csv.gz",
+    "original_bytes": 546353,
+    "original_sha256": "266260fbe576089a83397cfaa44e563a5e5c2f610355408a6b94d0675b079009"
+  },
+  {
+    "original_path": "campaign-wal/g1-tcp-r512-w4096-q16-t3-capacity4096/offers.csv",
+    "archived_path": "campaign-wal/g1-tcp-r512-w4096-q16-t3-capacity4096/offers.csv.gz",
+    "original_bytes": 546197,
+    "original_sha256": "582dc50d0125490dca45a6a28ea6c538128f7f247d5d0ce4593a5c8e0cb99e44"
+  },
+  {
+    "original_path": "campaign/CAMPAIGN.json",
+    "archived_path": "campaign/CAMPAIGN.json.gz",
+    "original_bytes": 101483,
+    "original_sha256": "b088e1d5a869d7c1e58f1a77ca83bdadd12e7927e357ecea5be2935730eef2d3"
+  }
+]

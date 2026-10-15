@@ -1,0 +1,5 @@
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-publication/network/wal/witness-tcp: 512 scheduled offers, 512 admissions, 512 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=128.000 admitted_during=128.000 applied_during=123.000 applied_drain=102.335 applied_total=122.037 ops/s; window_refused=0 backlog_at_horizon=20
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-publication/network/wal/witness-tcp: 1 durable checkpoint boundaries, 3 exact-scope reclamation rows, 0 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=77.368 reclaim_ms=169.227 reclaimed_bytes=29930 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=255 units=255 commands=1536 mean_units=1.000 append_ms=12.419 barriers=255 mean_appends_per_barrier=1.000 mean_units_per_barrier=1.000 barrier_ms=7048.701 sync_ms=3594.420 publish_ms=3443.574 histogram=1:255

@@ -1,0 +1,18 @@
+[
+  "python3",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native475-linux/sweep/campaign-metadata/g1-quic-r512-w32-q16-t1-capacity4096/resources.py",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native475-linux/artifacts/native/native_benchmark",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native475-linux/sweep/campaign-wal/g1-quic-r512-w32-q16-t1-capacity4096",
+  "quic",
+  "8192",
+  "32",
+  "1",
+  "--offered",
+  "512",
+  "--maintenance",
+  "2",
+  "--ready-items",
+  "16",
+  "--offered-capacity",
+  "4096"
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "original_path": "COLLECTED.json",
+    "archived_path": "COLLECTED.json.gz",
+    "original_bytes": 227692,
+    "original_sha256": "476f4c239b8245435a9fe93e49ce274dbb7f97476ab00db106c1a0e98f815351"
+  },
+  {
+    "original_path": "SOURCE.json",
+    "archived_path": "SOURCE.json.gz",
+    "original_bytes": 346557,
+    "original_sha256": "1cb670129b36fdd48bb640e62503d040621a1d7e94b90cfed9d53291425f4e14"
+  },
+  {
+    "original_path": "collection/attempt1.manifest.json",
+    "archived_path": "collection/attempt1.manifest.json.gz",
+    "original_bytes": 231582,
+    "original_sha256": "3dba1133c00019d2cc07ae173b28575d366aa6780c97071cfa255a559a8e38d1"
+  },
+  {
+    "original_path": "logs/native-release.jsonl",
+    "archived_path": "logs/native-release.jsonl.gz",
+    "original_bytes": 3217075,
+    "original_sha256": "55d7a7b3b3a17bd385cea4313940cbe51b87fc42e8ac88aa74a44317987220dd"
+  },
+  {
+    "original_path": "logs/native-release.stderr",
+    "archived_path": "logs/native-release.stderr.gz",
+    "original_bytes": 209253,
+    "original_sha256": "964fcd81b3655e1b93079f3bb810e22db81874687c0d1d95903d30e95b8fc189"
+  },
+  {
+    "original_path": "logs/native_tests.stderr",
+    "archived_path": "logs/native_tests.stderr.gz",
+    "original_bytes": 205852,
+    "original_sha256": "e55515ca720f5b4b0b84b12fecbd9ccf97abcd218022e7ce184ccadf864a3ee0"
+  },
+  {
+    "original_path": "logs/native_tests.stdout",
+    "archived_path": "logs/native_tests.stdout.gz",
+    "original_bytes": 3222606,
+    "original_sha256": "792ddc675cbb59e8777c197a37e6590e07f82872d12c2429de7318fd3468c8ee"
+  },
+  {
+    "original_path": "logs/symbol-table.log",
+    "archived_path": "logs/symbol-table.log.gz",
+    "original_bytes": 2142519,
+    "original_sha256": "072babb45d5de83298cccb5f887c44dea1914639b9ffeb776d4e4f0ddbb4edb1"
+  },
+  {
+    "original_path": "preparation/ROOT_FINAL_INPUTS.json",
+    "archived_path": "preparation/ROOT_FINAL_INPUTS.json.gz",
+    "original_bytes": 232095,
+    "original_sha256": "ecfdb74de10d9967f8ab7d6b9a8b1dcf104e88716e322f5c7f204e09a7fa8644"
+  },
+  {
+    "original_path": "source.sha256",
+    "archived_path": "source.sha256.gz",
+    "original_bytes": 150170,
+    "original_sha256": "e445a063eda22528170300461ded54c01c06014af193a65e0d8044445d3677a4"
+  }
+]

@@ -1,0 +1,55 @@
+{
+  "executable_sha256": "9aeff0f157f21773a42b4fc825cb6d00cea8a074fb0cccce09e5aa34855ee436",
+  "uuid": "6F4BDECA-F5D9-32A5-8010-DF9BB23F40F3",
+  "symbol_form": "NativeMacMachO debug0 acceptance/symbol table; no forced dSYM, native defaultLTO/codegen preserved.",
+  "uuid_output_sha256": "88207e2a77b0f5526a28b67c27b3127770d7fab4eebdbddc4a3f24954137762f",
+  "macho_sections_sha256": "c989747079caa2f4de508a2604f18b2676855829f5da3dd5e5c7ee5738176ca3",
+  "symbol_table_sha256": "072babb45d5de83298cccb5f887c44dea1914639b9ffeb776d4e4f0ddbb4edb1",
+  "reference_oracle_cfg_absent_PROFILErelease": true,
+  "root_buildscript_record": {
+    "reason": "build-script-executed",
+    "package_id": "path+file:///private/tmp/voteboat-mac475-dfc195c-Fz9Ivq/source#voteboat@0.1.0",
+    "linked_libs": [],
+    "linked_paths": [],
+    "cfgs": [],
+    "env": [],
+    "out_dir": "/tmp/voteboat-mac475-dfc195c-Fz9Ivq/target-native-release/release/build/voteboat-edca44d51d6e8b81/out"
+  },
+  "root_buildscript_fresh_record": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///private/tmp/voteboat-mac475-dfc195c-Fz9Ivq/source#voteboat@0.1.0",
+    "manifest_path": "/private/tmp/voteboat-mac475-dfc195c-Fz9Ivq/source/Cargo.toml",
+    "target": {
+      "kind": [
+        "custom-build"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "build-script-build",
+      "src_path": "/private/tmp/voteboat-mac475-dfc195c-Fz9Ivq/source/build.rs",
+      "edition": "2021",
+      "doc": false,
+      "doctest": false,
+      "test": false
+    },
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "filenames": [
+      "/tmp/voteboat-mac475-dfc195c-Fz9Ivq/target-native-release/release/build/voteboat-22116cc996987efa/build-script-build"
+    ],
+    "executable": null,
+    "fresh": false
+  }
+}

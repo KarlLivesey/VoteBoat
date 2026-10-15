@@ -1,0 +1,8 @@
+{
+  "command": [
+    "node",
+    "validation/check-publication-timings.test.mjs"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 0.03903884001192637
+}

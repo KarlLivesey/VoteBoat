@@ -1,0 +1,103 @@
+{
+  "scope": "read-only Mac475 preflight only; no source copy/build/test/timing or settings changes",
+  "commands": [
+    {
+      "command": [
+        "/usr/bin/sw_vers"
+      ],
+      "exit": 0,
+      "stdout": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0\nBuildVersion:\t\t26A428\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/uname",
+        "-sm"
+      ],
+      "exit": 0,
+      "stdout": "Darwin arm64\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/sbin/sysctl",
+        "-n",
+        "machdep.cpu.brand_string",
+        "hw.physicalcpu",
+        "hw.logicalcpu",
+        "hw.memsize"
+      ],
+      "exit": 0,
+      "stdout": "Apple M2 Max\n12\n12\n103079215104\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/Users/karllivesey/.cargo/bin/cargo",
+        "+stable",
+        "-V"
+      ],
+      "exit": 0,
+      "stdout": "cargo 1.98.0 (797e8a9bc 2026-08-05)\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/Users/karllivesey/.cargo/bin/rustc",
+        "+stable",
+        "-Vv"
+      ],
+      "exit": 0,
+      "stdout": "rustc 1.98.0 (88d9e12ae 2026-08-18)\nbinary: rustc\ncommit-hash: 88d9e12ae178fab0fb5cc050a94da85685d449ea\ncommit-date: 2026-08-18\nhost: aarch64-apple-darwin\nrelease: 1.98.0\nLLVM version: 22.1.8\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/Users/karllivesey/.cargo/bin/rustup",
+        "which",
+        "--toolchain",
+        "stable",
+        "cargo"
+      ],
+      "exit": 0,
+      "stdout": "/Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/Users/karllivesey/.cargo/bin/rustup",
+        "which",
+        "--toolchain",
+        "stable",
+        "rustc"
+      ],
+      "exit": 0,
+      "stdout": "/Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/bin/rustc\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/tmp/voteboat-macos-CzK1if/reference-tools296/bin/protoc",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": "libprotoc 3.21.12\n",
+      "stderr": ""
+    }
+  ],
+  "tool_sha256": {
+    "/Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/bin/rustc": "a11618eca0956a8aa4372c2bc898690b513cbdfa2cb9125b2a5301e360ed5b49",
+    "/Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo": "1de2e84c15443b70444eecfa959ff9099dd8c1a5606b6d9ef5bc0ea9c25bc7f9",
+    "/tmp/voteboat-macos-CzK1if/reference-tools296/bin/protoc": "9f40368c858666e7036df0b9b58a4acd085fed58ab531294c3e5b5820f8af360"
+  },
+  "tool_bytes_equal_original455": true,
+  "same_root_lock_as_current475": true,
+  "cache": {
+    "lock_registry_packages": 82,
+    "available": 82,
+    "missing": [],
+    "scope": "archive or unpacked source presence for full lock incl target-excluded packages; existing472 allfeature build used same lock. Availability is not a new offline-build pass."
+  },
+  "live_owned_build_benchmark_profile_jobs": [],
+  "ssh_exit": 0
+}

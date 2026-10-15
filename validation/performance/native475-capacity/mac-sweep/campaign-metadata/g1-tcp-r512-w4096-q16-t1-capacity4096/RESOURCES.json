@@ -1,0 +1,15 @@
+{
+  "pid": 14591,
+  "exit": 0,
+  "elapsed_seconds": 23.867834333,
+  "user_seconds": 4.418491,
+  "system_seconds": 1.527592,
+  "max_rss_raw": 30785536,
+  "max_rss_unit": "bytes",
+  "max_rss_bytes": 30785536,
+  "voluntary_context_switches": 32299,
+  "involuntary_context_switches": 129123,
+  "block_inputs": 0,
+  "block_outputs": 0,
+  "scope": "Mac APFS native benchmark wholeprocess and children; includes campaign/warmup/horizon/drain/maintenance/recovery/cleanup; not measurement-only or continuous RSS plateau. Block I/O counts are not bytes."
+}

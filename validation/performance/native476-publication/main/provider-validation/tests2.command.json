@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--lib",
+    "--all-features",
+    "native::log_store::witness",
+    "--",
+    "--test-threads=1"
+  ],
+  "CARGO_TARGET_DIR": "target/p9/native476-publication/provider-checks",
+  "sources": {
+    "src/native/log_store/witness.rs": "be69d259d8e2083dedc73bc52d24f6befda0f05be5530c0c411243d933241931",
+    "src/native/log_store/witness/format.rs": "85b52aa801070a165b5b3e90317bbf2381ad7cfaec5444bafe55991c4cb5d342",
+    "src/native/log_store/witness/publication.rs": "9ae1b79dc15c27f046076c31788c2ab74be93ef129f120478ab739b9408dc58e",
+    "src/native/log_store/witness/tests.rs": "aeaf8770edd74780df5c686313432625cb109c89ca678e76d35296bf59315e77",
+    "src/native/log_store/witness/tests/selection.rs": "3fef43d3996e17fb93ff11ed4bcebae6856c62b22a9cacdda0d7644f272e7c33",
+    "src/native/log_store/witness/tests/crash.rs": "c8af16e4a5946e364d36dd6dcaf9f939215e3154132f8efad491a9f915c51c71"
+  }
+}

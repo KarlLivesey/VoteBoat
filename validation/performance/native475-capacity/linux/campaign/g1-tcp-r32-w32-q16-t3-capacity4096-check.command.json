@@ -1,0 +1,6 @@
+[
+  "node",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native475-linux/sweep/control-tools/check-native-benchmark.mjs",
+  "--storage",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native475-linux/sweep/campaign-wal/g1-tcp-r32-w32-q16-t3-capacity4096"
+]

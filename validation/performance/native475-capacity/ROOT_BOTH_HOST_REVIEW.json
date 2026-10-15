@@ -1,0 +1,26 @@
+{
+  "archives": [
+    {
+      "archive": "linux",
+      "payloads": 1021,
+      "gzip": 61,
+      "manifest_sha256": "b6ea2b40352d57a45399d535d2f49a10b753b6f67023448cc0644c85149c1145",
+      "exact_set_hashes_lossless_originals": true
+    },
+    {
+      "archive": "mac",
+      "payloads": 151,
+      "gzip": 10,
+      "manifest_sha256": "86d01e0bb6876ffc71fc94259809410a32f090c55365cfd90c17225b178010a0",
+      "exact_set_hashes_lossless_originals": true
+    },
+    {
+      "archive": "mac-sweep",
+      "payloads": 992,
+      "gzip": 60,
+      "manifest_sha256": "564d3508e868210f1eb1b3d4a86ce7ee30470f22ccb09ab9400e18c07fd80ff3",
+      "exact_set_hashes_lossless_originals": true
+    }
+  ],
+  "performance_scope": "Complete finite offered-load diagnostic; no improvement or full P9 acceptance claim."
+}

@@ -1,0 +1,81 @@
+{
+  "checks": [
+    {
+      "command": [
+        "node",
+        "validation/check-publication-timings.test.mjs"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.03903884001192637
+    },
+    {
+      "command": [
+        "node",
+        "validation/check-publication-profile.test.mjs"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.030777334002777934
+    },
+    {
+      "command": [
+        "node",
+        "validation/check-offered.test.mjs"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.03691218598396517
+    },
+    {
+      "command": [
+        "node",
+        "validation/check-benchmark-storage.test.mjs"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.044961022009374574
+    },
+    {
+      "command": [
+        "node",
+        "validation/check-native-benchmark.mjs",
+        "--storage",
+        "target/p9/mac475/collection/raw/control-wal/tcp-w4096",
+        "target/p9/mac475/collection/raw/control-wal/quic-w4096"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 0.04733801700058393
+    }
+  ],
+  "source_sha256": {
+    "examples/benchmark/batching.rs": "726023d35b1ba22323754ffb5042f3e6f219f96c03222fb938258250d3d202a9",
+    "examples/benchmark/checkpoint_steps.rs": "b3986c7f87cf884738712d710fb1c808e8e571b965ac149d1c07d88e60c9307d",
+    "examples/benchmark/failure.rs": "fce3c15c3c979512055f0f641a6a2511e685af2fe8f818ddc28565a0b6ad2f10",
+    "examples/benchmark/lanes/report.rs": "7084a1746bbd0a6277777fcec511329783154cc7931c8ffea05dc9b811ff638b",
+    "examples/benchmark/lanes/tests.rs": "a2d2c1f34b28dd4003b9159e5a741b2cb7328b48ffeb694134caea78dcc6879c",
+    "examples/benchmark/lanes/worker.rs": "ddf195bc98b40c0cbef2488ff1897631db235435227cac26e5e8ae1fd3a8be4e",
+    "examples/benchmark/lanes.rs": "a2808d14f59115601c33a3c3a6f69416002f7c9b316bd564205caf1778178a2d",
+    "examples/benchmark/maintenance.rs": "16b76428132c84001c208a1035c55ab40354eff69790519f0903f31d6ff4a4b6",
+    "examples/benchmark/observe.rs": "e2680e409388ea855f49f4adb60407bcfd72c33be1a73a1b1fce117a5d677ac4",
+    "examples/benchmark/offered.rs": "e30b98c520443ecff7f107ca0a3efa12d9d24018c673a5a89fc73fe49439dc74",
+    "examples/benchmark/offered_capacity/tests.rs": "9334ffc1d2b1939b5aaa0fbd0e6f32a0b98e701080ac0352de0c478afa8ad662",
+    "examples/benchmark/offered_capacity.rs": "26a17ed9d112b4d1b23e2a69b3fdd47dc3b21ee391633917b2be8cb6ba51c733",
+    "examples/benchmark/offered_groups/tests.rs": "f6b11e7f49729f2cec871a31c7246d425eba1c2c42c52bb3f97b7b0a1e730fea",
+    "examples/benchmark/offered_groups.rs": "733385a73228c0aa66903251f2a7bb1ece773cd6d30054f93871caca45031df1",
+    "examples/benchmark/publication/tests.rs": "564f298c0f525ab9800a7ba17bc468f9cccc2bce1de571aefa88dd5d0a431fe9",
+    "examples/benchmark/publication.rs": "96c54a5c67da26b1ba7c17b5e7ee694e78b6025ea629d1ffb0781daa9327d589",
+    "examples/benchmark/ready_items.rs": "7ee8336f76b5b9534745bbf437a40a744fe120655ac3b3b78e66bd72804a8123",
+    "examples/benchmark/shared.rs": "e316ab0557ba58e2cbf74fbc28c87de0fcaae5dcaa8ccf9b7773af22357244b5",
+    "examples/benchmark/shared_drain/recovery.rs": "437bafabe45767122c8807ff51dc44673df876b47c6dbc71d0910dc477178d8f",
+    "examples/benchmark/shared_drain.rs": "708cc49134145287068475b7f21ab6db0f63958b9f11b98b912bcc37e3fde3ad",
+    "examples/benchmark/shared_recovery/maintenance.rs": "1c6186a95d101f08737c0c5995d8077718aba33b81fbe68d39b8e42151bebc30",
+    "examples/benchmark/shared_recovery/receive_pressure.rs": "33da83874d113a72f1ba5b041abc3d5df65b580b6365444ef689f948e9398afa",
+    "examples/benchmark/shared_recovery.rs": "2a1921747806a9822b3da2fec47033633eb7b93316bc182e89084547de0427e3",
+    "examples/native_benchmark.rs": "f0c559a293fb721b1e657df1fbc89cd64723c8a6411de106dea690b07952d6d2",
+    "validation/check-benchmark-storage.mjs": "f46a15656e91d9c6d32f3f268dde74a2a2e7425f9d5027da4c7cc0a8a69d9856",
+    "validation/check-native-benchmark.mjs": "8c3f8a31270aa52ff4cdadd75479185dbfe33c0f2adecef0739dc43b008e54d7",
+    "validation/check-offered.mjs": "13f0c1f45df5bbc20802e21883bf7157ef0272210df1269f0e8fddb739d90015",
+    "validation/check-publication-profile.mjs": "e4a3bd4a86a997406b3aa4b03ae2980a80581f7cdf97f01c5cb6e1ec74c7071d",
+    "validation/check-publication-profile.test.mjs": "eec7089dfd0048e36486cea1186f4db3d9f5aa8754c1dc61a1b5163b957e8a9f",
+    "validation/check-publication-timings.mjs": "9d69d025335612afbef911377d2e15654e2186c1e0cb36884fa5fa8ee6b9d5a1",
+    "validation/check-publication-timings.test.mjs": "22978c7ff4a84630a6251d1c4a1705f0f8211a26e0f2ce5dac864dfef06fbc52"
+  },
+  "scope": "Five focusedJS/legacyrawvalidatorchecks only; no Rust/CLIcandidate or broadqualification claimed. Initial unrecorded quickJS4file-level run and directcount logs also retained."
+}

@@ -67,6 +67,9 @@ mod observe;
 #[path = "benchmark/offered_capacity.rs"]
 mod offered_capacity;
 use offered_capacity::CapacityProfile;
+#[path = "benchmark/publication.rs"]
+mod publication;
+use publication::Publication;
 #[path = "benchmark/offered.rs"]
 mod offered;
 #[path = "benchmark/offered_groups.rs"]
@@ -709,9 +712,11 @@ fn main() -> Result<(), Failure> {
     let mut args = std::env::args().skip(1).collect::<Vec<_>>();
     let selected_ready_items = ready_items::extract(&mut args)?;
     let capacity_profile = CapacityProfile::extract(&mut args)?;
+    let publication = Publication::extract(&mut args)?;
     let raw_group_weights = offered_groups::extract(&mut args)?;
     if args.first().is_some_and(|arg| arg == "--lanes") {
         capacity_profile.validate(false, 1)?;
+        publication.validate(false)?;
         if selected_ready_items.is_some() {
             return Err("--ready-items is unsupported with --lanes".into());
         }
@@ -730,18 +735,14 @@ fn main() -> Result<(), Failure> {
     }
     if !matches!(args.len(), 4 | 5 | 7 | 9 | 11) {
         return Err(
-            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64; offered-capacity 4096 enables 1..4096) [--offered-capacity 4096 (offered only)] [--ready-items 1|16|32|64] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
+            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64; offered-capacity 4096 enables 1..4096) [--offered-capacity 4096 (offered only)] [--publication atomic|witness (offered only)] [--ready-items 1|16|32|64] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
                 .into(),
         );
     }
     let [root, protocol, operations, window] = &args[..4] else {
         unreachable!()
     };
-    let shared = args.len() >= 5;
-    let groups = if shared { args[4].parse::<usize>()? } else { 1 };
-    if !(1..=32).contains(&groups) {
-        return Err("group count out of bounds".into());
-    }
+    let (shared, groups) = benchmark_groups(&args)?;
     let protocol = match protocol.as_str() {
         "tcp" => NativePeerProtocol::TcpTls,
         #[cfg(feature = "quic")]
@@ -761,6 +762,7 @@ fn main() -> Result<(), Failure> {
         None
     };
     capacity_profile.validate_workload(count, offered_rate.is_some(), window)?;
+    publication.validate(offered_rate.is_some())?;
     let maintenance = if args.len() >= 9 {
         if args[7] != "--maintenance" {
             return Err("expected --maintenance SECONDS".into());
@@ -803,8 +805,17 @@ fn main() -> Result<(), Failure> {
         maintenance,
         ready_visit_items,
         capacity_profile,
+        publication,
     };
     run_selected(config, &clock, capacity, journal_timings)
+}
+fn benchmark_groups(args: &[String]) -> Result<(bool, usize), Failure> {
+    let shared = args.len() >= 5;
+    let groups = if shared { args[4].parse::<usize>()? } else { 1 };
+    if !(1..=32).contains(&groups) {
+        return Err("group count out of bounds".into());
+    }
+    Ok((shared, groups))
 }
 fn run_selected(
     config: RunConfig<'_>,
@@ -817,6 +828,7 @@ fn run_selected(
     let groups = config.groups;
     let ready_visit_items = config.ready_visit_items;
     let capacity_profile = config.capacity_profile;
+    let publication = config.publication;
     if config.shared {
         run(config, clock, |mode| {
             shared::open_partition(
@@ -831,6 +843,7 @@ fn run_selected(
                     lane: 1,
                     ready_visit_items,
                     capacity_profile,
+                    publication,
                 },
             )
         })
@@ -860,6 +873,7 @@ struct RunConfig<'a> {
     maintenance: Option<offered::MaintenanceConfig>,
     ready_visit_items: usize,
     capacity_profile: CapacityProfile,
+    publication: Publication,
 }
 fn run<L: LogStore + Send + 'static>(
     config: RunConfig<'_>,

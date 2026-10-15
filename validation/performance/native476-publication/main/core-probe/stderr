@@ -1,0 +1,34 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0407]: method `publish_barrier` is not a member of trait `JournalIo`
+  --> tests/journal_barrier.rs:50:5
+   |
+50 | /     fn publish_barrier(&mut self, manifest: &[u8]) -> io::Result<()> {
+51 | |         self.calls.set(self.calls.get() + 1);
+52 | |         if self.fail.get() { return Err(io::Error::other("combined publication")); }
+53 | |         self.inner.publish_barrier(manifest)
+54 | |     }
+   | |_____^ not a member of trait `JournalIo`
+
+error[E0599]: no method named `publish_barrier` found for struct `Ordered` in the current scope
+  --> tests/journal_barrier.rs:33:25
+   |
+10 | struct Ordered {
+   | -------------- method `publish_barrier` not found for this struct
+...
+33 |         let result = io.publish_barrier(b"original manifest");
+   |                         ^^^^^^^^^^^^^^^ method not found in `Ordered`
+
+error[E0599]: no method named `publish_barrier` found for struct `support::ModelIo` in the current scope
+   --> tests/journal_barrier.rs:53:20
+    |
+ 53 |         self.inner.publish_barrier(manifest)
+    |                    ^^^^^^^^^^^^^^^ method not found in `support::ModelIo`
+    |
+   ::: tests/support/mod.rs:118:1
+    |
+118 | pub struct ModelIo(pub Rc<RefCell<Device>>);
+    | ------------------ method `publish_barrier` not found for this struct
+
+Some errors have detailed explanations: E0407, E0599.
+For more information about an error, try `rustc --explain E0407`.
+error: could not compile `voteboat` (test "journal_barrier") due to 3 previous errors

@@ -1,0 +1,27 @@
+{
+  "actual_exit": 0,
+  "original_handle": 31476,
+  "original_terminal_chunk": "9f9a56",
+  "case_count": 54,
+  "process_exits": {
+    "0": 54
+  },
+  "validator_exits": {
+    "0": 54
+  },
+  "measurement_storage_errors": 0,
+  "configuration_sha256": "74b1e556cbbfc33aa35f08a628d2d19ec18668020089cba10d7320a7bb18ca88",
+  "driver_sha256": "81e76b22316a528344238cd3b245df3dbfc0d352a52cf889bc4a2440f25fd743",
+  "readout_sha256": "c3679638477d1c89fd7ad0f1c775b1e610f17361215696a722c217f740b70add",
+  "summary_sha256": "a855409655c3612c4d9b398681a964b1106ba54f9ea4c2aaa66d448228594bdd",
+  "source_commit": "dfc195cd39196fc6f16e69ea74de34dabd359ef2",
+  "before_host_receipt_sha256": "fb2e78dc745ce9c66a7dfe95317e4ad15fff02ea354977be0add4d5d92d3e16d",
+  "after_host_receipt_sha256": "36a91c46abd878faad5fbc373346ae481b1405de86eba4292c32b0ad6d709cbe",
+  "policy_unchanged": true,
+  "raw_wholeprocess_max_rss_bytes_min": 13344768,
+  "raw_wholeprocess_max_rss_bytes_max": 27389952,
+  "snapshot_after_tool_chunk": "2e686c",
+  "readout_tool_chunk": "6cf818",
+  "scope": "Original wholecampaign completed once. No repeated/retuned case, source/default/filesystem-policy change, capture, build or profiling. Wholeprocess resource and nested wall counters have distinct denominators. Native Btrfs only; APFS/ext4/XFS universal optimization acceptance remains open.",
+  "end": "2026-10-15T10:15:21.551677+00:00"
+}

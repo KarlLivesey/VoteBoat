@@ -1,0 +1,61 @@
+{
+  "scope": "Private benchmark integration only. No default provider promotion, no measurements or performance build, no public durability change owned here. Actual TCP/QUIC selected runs and full hook remain root follow-up.",
+  "owned_files": {
+    "examples/native_benchmark.rs": "f0c559a293fb721b1e657df1fbc89cd64723c8a6411de106dea690b07952d6d2",
+    "examples/benchmark/lanes.rs": "a2808d14f59115601c33a3c3a6f69416002f7c9b316bd564205caf1778178a2d",
+    "examples/benchmark/lanes/tests.rs": "a2d2c1f34b28dd4003b9159e5a741b2cb7328b48ffeb694134caea78dcc6879c",
+    "examples/benchmark/observe.rs": "ea94beaa2cb8300ac794f268cfc52717106cc881717fcfdf3c6f421041f34d8d",
+    "examples/benchmark/offered.rs": "6fd3edb07a6459b3cba5a501a8d98e8e87a31e9134801096c7b87527ff9430c6",
+    "examples/benchmark/shared.rs": "e316ab0557ba58e2cbf74fbc28c87de0fcaae5dcaa8ccf9b7773af22357244b5",
+    "examples/benchmark/shared_drain.rs": "708cc49134145287068475b7f21ab6db0f63958b9f11b98b912bcc37e3fde3ad",
+    "examples/benchmark/shared_recovery.rs": "2a1921747806a9822b3da2fec47033633eb7b93316bc182e89084547de0427e3",
+    "examples/benchmark/publication.rs": "9613c07f01ec0d6307fd5cd2dd3c22c49155279b270e5475d2bb6cebb59e3c02",
+    "examples/benchmark/publication/tests.rs": "eab1d5720202cb645efdf4408f02a02842440ecce4d69157bc8b5d74fd06b6ac",
+    "validation/check-native-benchmark.mjs": "8c3f8a31270aa52ff4cdadd75479185dbfe33c0f2adecef0739dc43b008e54d7",
+    "validation/check-publication-timings.mjs": "9d69d025335612afbef911377d2e15654e2186c1e0cb36884fa5fa8ee6b9d5a1",
+    "validation/check-publication-timings.test.mjs": "22978c7ff4a84630a6251d1c4a1705f0f8211a26e0f2ce5dac864dfef06fbc52",
+    "validation/check-publication-profile.mjs": "425f3f905db3e368260095bc8eb78d92aa9753b9d9cf3995a78040a5b7a72b41",
+    "validation/check-publication-profile.test.mjs": "3bd660dcbc0756fa1723bfbac448ce0a54c4317a12a9e5b3f39727563172ec4a",
+    "examples/benchmark/observe/publication_tests.rs": "e696b568534e5f6fd45b6429a2e22be15ad5970b4613d3acf40c986eefb706ab"
+  },
+  "checks": {
+    "initial_focused_handle": 54412,
+    "initial_focused_exit": 0,
+    "initial_strict_handle": 88533,
+    "initial_strict_exit": 101,
+    "focused_fix": "offered::run103/100; exact storage/publication writes moved into Publication::write_storage, no thresholds changed. Failed source retained.",
+    "final_handle": 59715,
+    "final_focused_exit": 0,
+    "final_strict_exit": 0,
+    "focused_tests_passed": 3,
+    "filtered": 51,
+    "js_tests": {
+      "publication_timings": 5,
+      "publication_profile": 2,
+      "offered": 11,
+      "storage": 9
+    },
+    "legacy_actual475_controls_validated": 2,
+    "diagnostic_fix": {
+      "original_handle": 12164,
+      "publication_tests": 5,
+      "test_exit": 0,
+      "strict_exit": 0,
+      "profile_js_tests": 2,
+      "profile_js_exit": 0,
+      "legacy_actual_controls": 2,
+      "legacy_validator_exit": 0,
+      "source_before_after_exact": true,
+      "terminal": "diagnostic-fix/TERMINAL.json"
+    }
+  },
+  "root_current_source_matches_fresh_build_proof": true,
+  "new_validator_dependency_closure": [
+    "check-publication-profile.mjs",
+    "check-publication-timings.mjs"
+  ],
+  "diagnostic_scope": "Ordinary publication primitive counters; cold repair, initialization selector and reclaim excluded. Initial Bpublication is counted. Full LogStore barrier elapsed remains inclusive.",
+  "source_before_after_final_exact": true,
+  "no_generated_or_immutable_artifact_mutation": true,
+  "diagnostics": "Encoded bytes count every append attempt, including failed attempts, matching legacy; this is not a synchronized-byte/partial-write count. Errors are saturating overlapping upper-layer plus primitive observations, never a unique-failure count. Plain legacy trace default is unchanged."
+}

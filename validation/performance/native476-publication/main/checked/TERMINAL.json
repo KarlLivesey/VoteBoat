@@ -1,0 +1,69 @@
+{
+  "exit": 0,
+  "source_exact": true,
+  "inputs": 1491,
+  "commands": [
+    {
+      "command": [
+        "cargo",
+        "+stable",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit": 0,
+      "elapsed_s": 2.3500642580038402
+    },
+    {
+      "command": [
+        "cargo",
+        "+stable",
+        "clippy",
+        "--locked",
+        "--offline",
+        "--keep-going",
+        "--all-targets",
+        "--all-features",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "elapsed_s": 11.356978664989583
+    },
+    {
+      "command": [
+        "cargo",
+        "+stable",
+        "build",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--example",
+        "native_benchmark",
+        "--message-format=json",
+        "-vv"
+      ],
+      "exit": 0,
+      "elapsed_s": 2.8042044379981235
+    },
+    {
+      "command": [
+        "node",
+        "validation/check-provider-conformance.mjs"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.028925697988597676
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "validation/check-provider-conformance.test.mjs"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.15922820000560023
+    }
+  ]
+}

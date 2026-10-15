@@ -1,0 +1,25 @@
+{
+  "files": {
+    "CPU.json": {
+      "sha256": "3bba16a65188c64cd76649e265cd818b11ea5793c61b6c4e932b71e81f5cc989",
+      "bytes": 478
+    },
+    "directory-attributes.txt": {
+      "sha256": "d8cdff676bd962e4480a3f239ad5c6ff64db9e6ba7c79e9bbfa1d9b4efd04388",
+      "bytes": 113
+    },
+    "filesystem-stat.txt": {
+      "sha256": "ce21c66b6c4c2eaeb25d986f8083baad8abdbed0a89cdab92567f5392b16c9e7",
+      "bytes": 302
+    },
+    "filesystem.json": {
+      "sha256": "07b197a8c8e5a09152da2b168f0e626a483366b0b06203b4d1d4b97140c95dc4",
+      "bytes": 346
+    },
+    "processes.txt": {
+      "sha256": "944a3c0ae57d9b2cda3010e630129a84407f90b557020ef725dd4d98cf031f5f",
+      "bytes": 276
+    }
+  },
+  "scope": "Read-only snapshot outside campaign timing; no settings, source, artifacts or case configuration changed. Process CPU percentages are lifetime observations, not attribution to measured cases."
+}

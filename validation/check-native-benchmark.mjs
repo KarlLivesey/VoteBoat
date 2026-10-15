@@ -9,6 +9,8 @@ import { validateLanes } from './check-lanes.mjs';
 import { validateOffered } from './check-offered.mjs';
 import { validateMaintenance } from './check-maintenance.mjs';
 import { validateRoundedRate } from './check-rounded-rate.mjs';
+import { validatePublication } from './check-publication-timings.mjs';
+import { validatePublicationProfile } from './check-publication-profile.mjs';
 
 const requireStorage = process.argv.includes('--storage');
 const directories = process.argv.slice(2).filter(arg => arg !== '--storage');
@@ -19,6 +21,12 @@ for (const directory of directories) {
     const samplesPath = runDirectory ? path.join(directory, 'samples.csv') : `${directory}.csv`;
     const summary = Object.fromEntries(fs.readFileSync(summaryPath, 'utf8')
         .trim().split(/\s+/).map(token => token.split('=')));
+    const runPath = runDirectory ? path.join(directory, 'run.txt') : `${directory}.run.txt`;
+    const run = fs.existsSync(runPath) ? Object.fromEntries(fs.readFileSync(runPath, 'utf8').trim().split(/\s+/).map(token => token.split('='))) : {};
+    if (validatePublicationProfile(summary, run)) {
+        const publicationPath = runDirectory ? path.join(directory, 'publication.csv') : `${directory}.publication.csv`;
+        validatePublication(fs.readFileSync(publicationPath, 'utf8'), summary.publication_effective);
+    }
     if (summary.assembly === 'static_lanes') {
         const result = validateLanes(directory, summary, samplesPath);
         for (const [lane, first, groups] of result.partitions) {

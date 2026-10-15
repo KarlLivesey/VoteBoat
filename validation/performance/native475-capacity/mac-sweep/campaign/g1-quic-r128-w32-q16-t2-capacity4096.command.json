@@ -1,0 +1,18 @@
+[
+  "/usr/bin/python3",
+  "/private/tmp/voteboat-mac475-dfc195c-Fz9Ivq/sweep/campaign-metadata/g1-quic-r128-w32-q16-t2-capacity4096/resources.py",
+  "/private/tmp/voteboat-mac475-dfc195c-Fz9Ivq/artifacts/native/native_benchmark",
+  "/private/tmp/voteboat-mac475-dfc195c-Fz9Ivq/sweep/campaign-wal/g1-quic-r128-w32-q16-t2-capacity4096",
+  "quic",
+  "8192",
+  "32",
+  "1",
+  "--offered",
+  "128",
+  "--maintenance",
+  "2",
+  "--ready-items",
+  "16",
+  "--offered-capacity",
+  "4096"
+]

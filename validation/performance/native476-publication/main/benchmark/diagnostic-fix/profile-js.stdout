@@ -1,0 +1,10 @@
+✔ unchanged legacy results need no publication profile; explicit choices match run metadata (0.431731ms)
+✔ partial or forged selected providers, scope and recovery metadata are refused (7.144569ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10.238259

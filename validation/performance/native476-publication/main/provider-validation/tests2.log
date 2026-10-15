@@ -1,0 +1,17 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.66s
+     Running unittests src/lib.rs (target/p9/native476-publication/provider-checks/debug/deps/voteboat-ebeb84c4129d638f)
+
+running 9 tests
+test native::log_store::witness::tests::crash::every_cold_repair_byte_cut_keeps_the_other_witness_and_restarts_again ... ok
+test native::log_store::witness::tests::crash::every_replacement_primitive_cut_selects_exact_old_or_new_pair_with_parity_reuse ... ok
+test native::log_store::witness::tests::crash::every_torn_candidate_header_with_partial_unsynced_data_preserves_old_boundary ... ok
+test native::log_store::witness::tests::crash::initialization_primitive_cuts_never_turn_partial_creation_into_empty_recovery ... ok
+test native::log_store::witness::tests::ordinary_barrier_has_exact_state_two_syncs_and_no_namespace_steps ... ok
+test native::log_store::witness::tests::selection::checked_counters_bounds_and_lock_survive_errors ... ok
+test native::log_store::witness::tests::selection::fixed_format_rejects_checksum_valid_invalid_metadata_and_contradictions ... ok
+test native::log_store::witness::tests::selection::selected_missing_corrupt_or_legacy_files_never_fall_back ... ok
+test native::log_store::witness::tests::standalone_manifest_publication_is_a_complete_safe_barrier ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 416 filtered out; finished in 0.01s
+

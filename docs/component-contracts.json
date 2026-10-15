@@ -417,19 +417,22 @@
         "sync_log",
         "truncate_log",
         "publish_manifest",
+        "publish_barrier",
         "supports_replacement",
         "replace_log"
       ],
-      "native": "FileLogIo",
+      "native": "FileLogIo (default); explicitly selected WitnessLogIo",
       "conformance": [
         "tests/log_store.rs",
         "tests/raft.rs",
         "tests/log_reclaim.rs",
         "src/native/log_store/file.rs",
         "examples/wal_benchmark.rs",
-        "examples/benchmark/observe.rs"
+        "examples/benchmark/observe.rs",
+        "tests/journal_barrier.rs",
+        "tests/witness_log_store.rs"
       ],
-      "scope": "Dedicated native journal contract with optional atomic old/new pair replacement. FileLogIo retains exclusive lock across two bounded slots; replacement data and manifest plus directory sync precede atomic CURRENT selection and its directory sync, which precede old deletion. Legacy files open unchanged. Missing/corrupt selected pairs cannot fall back. Twenty-six native primitive-boundary failure cuts plus downstream crashable-journal and actual 100-group file-cleanup/restart histories. A downstream local WAL timing wrapper forwards real FileLogIo through this same seam, verifies exact reopen/replay/retry state and reports primitive barrier costs without changing durability or claiming quorum throughput. Slice 102 uses transparent benchmark-owned LogStore/JournalIo wrappers in actual shared three-replica TCP/QUIC runs, preserving original tickets/results/capabilities while reporting bounded per-WAL append/barrier/unit/histogram and primitive timing totals. A real-file observer test checks no early durable state and exact stale-barrier rejection/reopen; joined raw checks reconcile counts. This adds neither a production provider/API nor a durability token."
+      "scope": "Dedicated native journal contract with optional atomic old/new pair replacement. FileLogIo retains exclusive lock across two bounded slots; replacement data and manifest plus directory sync precede atomic CURRENT selection and its directory sync, which precede old deletion. Legacy files open unchanged. Missing/corrupt selected pairs cannot fall back. Twenty-six native primitive-boundary failure cuts plus downstream crashable-journal and actual 100-group file-cleanup/restart histories. A downstream local WAL timing wrapper forwards real FileLogIo through this same seam, verifies exact reopen/replay/retry state and reports primitive barrier costs without changing durability or claiming quorum throughput. Slice 102 uses transparent benchmark-owned LogStore/JournalIo wrappers in actual shared three-replica TCP/QUIC runs, preserving original tickets/results/capabilities while reporting bounded per-WAL append/barrier/unit/histogram and primitive timing totals. A real-file observer test checks no early durable state and exact stale-barrier rejection/reopen; joined raw checks reconcile counts. This adds neither a production provider/API nor a durability token. Slice476 adds compound publish_barrier with the original sync-then-manifest default and native-store creation/recovery/barrier dispatch. The separately selected WitnessLogIo uses fixed independent WAL-header/acknowledgement witnesses and two ordered syncs, with mandatory-prefix recovery, sole-survivor repair, explicit initialization and bounded parity reclamation. FileLogIo defaults and existing formats stay unchanged; the candidate supports fresh stores and its own reopen only, not implicit legacy migration. Primitive timing excludes cold selector/reclamation/repair work and is not whole-process namespace accounting. Byte/crash/model and actual histories are recorded separately; no power-loss or performance qualification is inferred from metadata."
     },
     {
       "design_id": "C08",

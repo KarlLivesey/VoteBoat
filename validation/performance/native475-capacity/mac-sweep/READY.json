@@ -1,0 +1,11 @@
+{
+  "scope": "SETUP_ONLY no workloads launched; rootquietgrant required",
+  "cases": 54,
+  "campaign_config_sha256": "220e8b7f53714220d8515ec85e31502549db4c0041708d8630974a47250aed45",
+  "campaign_driver_sha256": "91d3236bf4221a46d965b32e841f90a75b94eb1aae11a8b03204c6296a5a7e17",
+  "artifact_sha256": "9aeff0f157f21773a42b4fc825cb6d00cea8a074fb0cccce09e5aa34855ee436",
+  "source_files": 1474,
+  "source_directories": 318,
+  "mac_ru_maxrss_unit": "bytes",
+  "all_setup_ended": true
+}

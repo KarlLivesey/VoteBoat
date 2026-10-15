@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "node",
+    "target/p9/native476-publication/design/witness-model.mjs"
+  ],
+  "cwd": "/home/karllivesey/Documents/ChatGPT/VoteBoat",
+  "exit": 0,
+  "utc": "2026-10-15T11:14:20.994004+00:00",
+  "source_sha256": "21c2ffe261001f50d0d804f5370342954c07ab164c7449c165bb5441ffe0369c"
+}

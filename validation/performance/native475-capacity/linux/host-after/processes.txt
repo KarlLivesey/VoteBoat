@@ -1,0 +1,6 @@
+    PID COMMAND         %CPU %MEM     ELAPSED
+      2 zsh             25.0  0.0       00:00
+      1 codex            0.0  0.0       00:00
+      3 bash             0.0  0.0       00:00
+      6 ps               0.0  0.0       00:00
+      7 head             0.0  0.0       00:00

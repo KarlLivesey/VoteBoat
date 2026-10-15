@@ -1,0 +1,1 @@
+mode=offered protocol=TcpTls offers=8192 offered_rate=128 window=256 groups=1 warmup=64 offered_capacity_requested=4096 offered_capacity_effective=4096 client_requests=4096 client_group_requests=4096 client_bytes=33554432 client_receipt_bytes=1048576 shard_max_items=8192 shard_control_items=1024 shard_group_items=4112 shard_group_control_items=16 shard_group_bytes=4194304

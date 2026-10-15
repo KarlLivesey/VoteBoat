@@ -1,0 +1,10 @@
+target/p9/mac475/collection/raw/control-wal/tcp-w4096: 512 scheduled offers, 512 admissions, 512 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=128.000 admitted_during=128.000 applied_during=122.750 applied_drain=141.530 applied_total=123.422 ops/s; window_refused=0 backlog_at_horizon=21
+target/p9/mac475/collection/raw/control-wal/tcp-w4096: 1 durable checkpoint boundaries, 3 exact-scope reclamation rows, 0 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=70.674 reclaim_ms=185.290 reclaimed_bytes=31862 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=287 units=287 commands=1536 mean_units=1.000 append_ms=283.017 barriers=286 mean_appends_per_barrier=1.003 mean_units_per_barrier=1.000 barrier_ms=6992.764 sync_ms=2102.425 publish_ms=4898.505 histogram=1:287
+target/p9/mac475/collection/raw/control-wal/quic-w4096: 512 scheduled offers, 512 admissions, 512 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=128.000 admitted_during=128.000 applied_during=122.750 applied_drain=154.684 applied_total=123.798 ops/s; window_refused=0 backlog_at_horizon=21
+target/p9/mac475/collection/raw/control-wal/quic-w4096: 1 durable checkpoint boundaries, 3 exact-scope reclamation rows, 0 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=70.723 reclaim_ms=200.319 reclaimed_bytes=31386 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=273 units=273 commands=1536 mean_units=1.000 append_ms=190.951 barriers=272 mean_appends_per_barrier=1.004 mean_units_per_barrier=1.000 barrier_ms=7082.514 sync_ms=2155.682 publish_ms=4931.350 histogram=1:273

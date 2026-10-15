@@ -1,0 +1,8 @@
+{
+  "time_utc": "2026-10-15T11:15:11.846601+00:00",
+  "reason": "Independent reviewer identified fixture percentile isceil(n*99/100)-1, rather thanfloor(n*99/100). All54 previous raw-summary assertions passed because their relevant samples do not differ under the two conventions. Correct reference formula for future reproducibility and verify exact equality after same-raw recomputation.",
+  "scope": "Analysis reference only; all original workload/validator/raw outputs unchanged. Original first archive retained locally in initial-archive-percentile-reference; its manifest, initial analyser/readout and receipt retained here. Final archive recomputed, not claimed to be initial seal.",
+  "original_manifest_sha256": "122c476151e25cb62813db82b66a93329c5fdaf671ce3a783d6eb123812cab0c",
+  "all54_summary_percentiles_exact_correct_fixture_convention": true,
+  "all_numeric_records_cells_unchanged": true
+}

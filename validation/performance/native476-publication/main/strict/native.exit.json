@@ -1,0 +1,19 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "clippy",
+    "--locked",
+    "--offline",
+    "--keep-going",
+    "--all-targets",
+    "--no-default-features",
+    "--features",
+    "native",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "exit": 0,
+  "elapsed_s": 9.237950871989597
+}

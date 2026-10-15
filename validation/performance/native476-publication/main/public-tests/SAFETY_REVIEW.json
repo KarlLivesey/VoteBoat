@@ -1,0 +1,33 @@
+{
+  "time_utc": "2026-10-15T11:26:33.583134+00:00",
+  "review": "Independent read-only production review by public-test author, not provider author.",
+  "source_sha256": {
+    "src/native/log_store.rs": "dfcb96f3284ae17c787d24ecef14b40337ec1c00ee0505f69bd48874270bdb67",
+    "src/native/log_store/witness.rs": "be69d259d8e2083dedc73bc52d24f6befda0f05be5530c0c411243d933241931",
+    "src/native/log_store/witness/format.rs": "85b52aa801070a165b5b3e90317bbf2381ad7cfaec5444bafe55991c4cb5d342",
+    "src/native/log_store/witness/publication.rs": "9ae1b79dc15c27f046076c31788c2ab74be93ef129f120478ab739b9408dc58e",
+    "examples/benchmark/publication.rs": "bccff82d45f9cfa587b727fc50c7818d0f0d718fdab0137de0ee7b7a1e900e55",
+    "examples/benchmark/observe.rs": "e2680e409388ea855f49f4adb60407bcfd72c33be1a73a1b1fce117a5d677ac4",
+    "src/native/log_store/file.rs": "689c2ddc8d10ddb86c061253bbd99626d2243a9eb4ba2a4d388b5218bb4cd553",
+    "src/native/log_store/striped/journal.rs": "e1093406d11de6623bd6b5ed8ea2b5376c8695abf0cc8d45bf26f97fd362908f"
+  },
+  "blockers": [],
+  "findings": [
+    "Recovery: bothvalid Aahead chooses B mandatory; equalcounter mismatch, Bahead, crossedbinding/generation/session reject; counter gaps allowed and checked maximum+1.",
+    "Malformed checksum-valid records reject rather than become fallback candidates; missing selected files or malformed/missing selector fail closed. CRC-invalid128B record alone can use the surviving fixed witness; B length is structurally exactly128B.",
+    "Sole surviving witness is protected until counterpart repair sync succeeds; Native recovery validates complete mandatory prefix before publication/repair.",
+    "Fresh initialization exposes no manifest until compound publication succeeds; selector only follows synced witnesses. Leaf+parent namespace syncs precede successful fresh store creation/publication.",
+    "Inactive parity generation WAL+A and B are synchronized and directory synchronized before selector write/sync/rename/directory sync; selected generation switches before old files cleanup. No historical generation fallback.",
+    "Healthy steady publication writes A, syncs WAL, writes B, syncs B; no ordinary file create, truncate, rename or directory sync. Repair/init/reclaim have additional cold path work.",
+    "Native creation/recovery/barrier invoke combined seam. Default implementation retains prior sync_log then publish_manifest order for legacy FileLogIo/StripedJournal. BenchJournal forwards combined operation directly. Deliberate FileLogIo observer remains concrete, so cannot accidentally add third sync to WitnessLogIo.",
+    "File creation follows existing legacy OpenOptions and caller umask/parent directory permissions; no new permission widening or chmod policy."
+  ],
+  "confidence": "No concrete blocker found by invariant/call-order/source inspection combined with15 passed public realfile tests. Finite test/model evidence, not a complete proof or physical device power-loss qualification.",
+  "limitations": [
+    "CRC is accidental-damage detection, not protection against adversarial checksum-forged coherent metadata or CRC collisions.",
+    "Exclusive binding assumes no concurrent external file mutation; live prefix bytes are not re-read on every barrier, as with legacy provider. Offline damage is checked during recovery.",
+    "Primitive injected errors/constructed durable byte images are not actual power cuts or exhaustive filesystem/device persistence order experiments.",
+    "Extra syncs on repair/initialization/reclamation and caller wrappers that fail to forward combined operation must remain separately disclosed.",
+    "Cross-filesystem gains and fullP9 remain open; FileLogIo stays default."
+  ]
+}

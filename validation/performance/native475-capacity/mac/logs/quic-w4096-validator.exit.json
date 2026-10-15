@@ -1,0 +1,10 @@
+{
+  "command": [
+    "node",
+    "/private/tmp/voteboat-mac475-dfc195c-Fz9Ivq/source/validation/check-native-benchmark.mjs",
+    "--storage",
+    "/private/tmp/voteboat-mac475-dfc195c-Fz9Ivq/control-wal/quic-w4096"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.11758441700000155
+}

@@ -1,0 +1,15 @@
+[
+  "cargo",
+  "+stable",
+  "clippy",
+  "--locked",
+  "--offline",
+  "--no-default-features",
+  "--features",
+  "native",
+  "--test",
+  "witness_log_store",
+  "--",
+  "-D",
+  "warnings"
+]

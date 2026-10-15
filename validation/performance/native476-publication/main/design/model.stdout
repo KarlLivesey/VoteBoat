@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "counts": {
+    "ordinary_crash": 48,
+    "corruption_truncation": 90,
+    "restart_repair": 136,
+    "mismatch": 8
+  },
+  "counterexamples": [
+    "max-primary-secondary",
+    "historical-marker-fallback",
+    "overwrite-sole-survivor"
+  ],
+  "scope": "Finite ordinal model only. Does not model byte CRC framing, actual synchronization, failures inside directory publication, initialization, reclamation, counters at u64 exhaustion, codec transition validity, runtime tickets, or actual power loss."
+}

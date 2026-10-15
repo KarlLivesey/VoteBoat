@@ -1,0 +1,11 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "clean",
+    "--package",
+    "voteboat"
+  ],
+  "exit": 0,
+  "elapsed_s": 6.223282013001153
+}

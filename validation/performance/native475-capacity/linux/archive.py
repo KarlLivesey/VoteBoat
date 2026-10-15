@@ -1,0 +1,45 @@
+"""Archive the terminal475 Linux sweep without copying binaries, build trees or WAL state."""
+from pathlib import Path
+import datetime,gzip,hashlib,json,shutil
+job=Path(__file__).resolve().parent;out=Path('validation/performance/native475-capacity/linux');assert not out.exists()
+load=lambda p:json.loads(Path(p).read_text());sha=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
+config=load(job/'CAMPAIGN_CONFIG.json');candidate=config['candidate'];source=load(candidate['source_inventory']);root=Path(source['source_root'])
+assert all(sha(root/p)==h and oct((root/p).stat().st_mode&0o777)==source['physical_modes'][p] for p,h in source['sha256'].items())
+for a in [candidate['artifact'],candidate['root_artifact']]:assert sha(a['copy'])==sha(a['original'])==a['sha256'] and a['compiler_record']['fresh'] is False
+assert all(sha(r['path'])==r['sha256']for r in config['setup_dependencies'])
+assert all(sha(r['path'])==r['sha256']for r in candidate['compiler'].values())
+assert sha(candidate['profile_proof']['path'])==candidate['profile_proof']['sha256']
+readout=load(job/'INDEPENDENT_ANALYSIS.json');assert readout['workloads']==readout['validators']==54
+proof={'collection_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'source_files':len(source['sha256']),'current_file_SHA_modes_exact':True,'original_copy_root_example_artifacts_exact':True,'compiler_profile_setup_dependency_SHA_exact':True,'original_terminal':31476,'actual_workload_validator_exits_zero':54,'existing_host_after_snapshot_preserved':True,'host_after_delay_seconds_from_last_workload_end':datetime.datetime.fromisoformat(readout['host_after_observed_utc']).timestamp()-readout['campaign_last_process_end_unix'],'scope':'Post-terminal read-only source/artifact guard and archive. No workloads/builds/check suites, policy changes or host snapshot replacement. Compiler freshness/profile proof is the recorded original build, not a new compilation. Source file modes exact; no added directory-mode preservation claim.'}
+(job/'COLLECTION.json').write_text(json.dumps(proof,indent=2)+'\n')
+selected={}
+def add(p,relative):
+ p=Path(p);assert p.is_file() and not p.is_symlink();assert str(relative)not in selected;selected[str(relative)]=p
+for p in job.iterdir():
+ if p.is_file():add(p,p.name)
+for directory in ['campaign','campaign-metadata','control-tools','host-before','host-after','percentile-correction']:
+ for p in (job/directory).rglob('*'):
+  if p.is_file():add(p,p.relative_to(job))
+for c in config['cases']:
+ for p in Path(c['wal_root']).iterdir():
+  if p.is_file():assert p.suffix in ['.csv','.txt','.json'];add(p,Path('case-results')/c['name']/p.name)
+out.mkdir(parents=True);packing=[];selection=[]
+for rel,p in sorted(selected.items()):
+ b=p.read_bytes();assert not b.startswith((b'\x7fELF',b'!<arch>\n'));name=rel+('.gz'if len(b)>65536 else '');target=out/name;target.parent.mkdir(parents=True,exist_ok=True)
+ if name!=rel:
+  target.write_bytes(gzip.compress(b,compresslevel=9,mtime=0));packing.append({'original_path':rel,'archived_path':name,'original_bytes':len(b),'original_sha256':sha(p),'container_bytes':target.stat().st_size,'container_sha256':sha(target)})
+ else:shutil.copy2(p,target)
+ selection.append({'source_path':str(p),'archived_path':name,'original_sha256':sha(p),'original_bytes':len(b),'source_mode':oct(p.stat().st_mode&0o7777)})
+for name,value in [('PACKING.json',packing),('SELECTION.json',selection)]: (out/name).write_text(json.dumps(value,indent=2)+'\n')
+lines=['#475 Linux native offered-load sweep','','Original31476 completed once with actual exit0/ALL_TIMING_END; all54 native processes and all54 independent validators pass. Published source dfc195cd39196fc6f16e69ea74de34dabd359ef2; same native executable a3a062ff2a8ab9cb36f22a66737e5c0c52088b5a67f61b87897a5a7527072457 in every cell. Fresh artifact/compiler/profile proof is separately sealed in ../fresh-linux. This sweep changes the private admission fixture only; no production code, storage format or filesystem policy changed.','','One group, three voters,8B Counter,64 warmups,8192 scheduled originals/case, ready16, active maintenance every2s, no pause. All cells use the common selected4096 admission profile. Rates32/128/512 originals/s have256/64/16s offered horizons; windows32/256/4096 rotate over three trials. Completed throughput includes drain; during throughput ends at the offered horizon. Latency below is intended-to-completed p99 among successful originals.','','| Protocol | Offered/s | Window | Completed originals/s median | During/s median | p99 ms median | Window refusals, trials1/2/3 |','| --- | ---: | ---: | ---: | ---: | ---: | --- |']
+for c in readout['cells']:
+ m=c['metrics'];lines.append(f"| {c['protocol']} | {c['offered_rate']} | {c['window']} | {m['completed_originals_per_second']['median']:.3f} | {m['during_originals_per_second']['median']:.3f} | {m['p99_ms']['median']:.3f} | {', '.join(str(x)for x in m['window_refused']['trials'])} |")
+lines+=['','All442368 offers reconcile to333153 applied+109215 explicit window refusals. Other refusal classes, unknown and pending are zero. Every case recovers64+applied, verifies retry outcomes and joins workers;2948 completed checkpoints,8844 completed reclaims and22 explicit maintenance skips are retained. All measurement storage error deltas are zero. Raw maintenance, bases, original offers and storage stage snapshots are retained; no failed/slow case replaced.','','At512/s, widening32→4096 raises completed medians TCP83.426→200.436 originals/s and QUIC92.010→205.054, while p99 grows1.343→18.965s and1.152→20.052s. Every wide512 cell reaches4096 inflight with roughly4000 outstanding at the horizon; this is queueing, not refusal-free headroom. At128/s/window4096 all offers are admitted, but p99 medians5.709s TCP/5.969s QUIC are still poor. No latency SLO or healthy-headroom claim follows from eventual completion.','','At512/window4096 leader mean barrier/WALsync/manifestpublication medians are TCP42.594/14.552/27.835ms and QUIC42.136/14.345/27.916ms. Physical commands/appendunit medians9.286/9.403 do not demonstrate ready64 batching or a4096-wide proposal. Leader barrier wall91–92% and manifestpublication60% remain nested elapsed contexts; never sum as CPU or infer per-original service latency. Per-trial/min/max counts, latency, width, barriers and all three replica deltas are in INDEPENDENT_ANALYSIS. Lifetime maximum counters are not subtracted.','','All voters share the same Sabrent NVMe and Btrfs compress=zstd:1 volume. Before/after configured CPU policies match:16 CPUs amd-pstate-epp/powersave/balance_performance. The existing host-after snapshot was observed12.768s after the final workload ended, before this collection; it is preserved without replacement. There were no setting changes. Wholeprocess RSS peaks range13.3–27.4MB and include warmup, drain, recovery and cleanup; this is not a continuous-memory plateau or bounded-debt proof.','','Original commands/stdout/stderr/exits, validator receipts, controller/configuration, resource collectors/readings, host snapshots, all raw result tables and derived readouts are retained. READOUT/SUMMARY pre-existed collection and were independently checked against every original ledger/storage/resource. PACKING preserves large originals losslessly; SHA256SUMS seals the exact recursive payload set. Source/build trees, binaries and generated WAL states remain local under target and are excluded. No workload was rerun.','','The initial independently checked analysis reference usedfloor(n*99/100); it was corrected to the fixture conventionceil(n*99/100)-1. All54 original summary-percentile assertions and all numerical records/cells remain exactly equal. The initial script/readout/seal receipt and original manifest are preserved under percentile-correction; no workload reran.','','This finite Btrfs baseline does not close sustained20M framework acceptance, APFS or pending ext4/XFS acceptance, any engine gain, independent physical placement, hot/cold fairness, skew or P8 composition requirements. A publication redesign must retain independent acknowledged-damage detection; eventual WALmarker validity cannot silently substitute for that contract.']
+(out/'README.md').write_text('\n'.join(lines)+'\n')
+files=sorted(p for p in out.rglob('*')if p.is_file());(out/'SHA256SUMS').write_text(''.join(sha(p)+'  '+str(p.relative_to(out))+'\n'for p in files))
+manifest={line[66:]:line[:64]for line in(out/'SHA256SUMS').read_text().splitlines()};assert set(manifest)=={str(p.relative_to(out))for p in out.rglob('*')if p.is_file()and p.name!='SHA256SUMS'}
+assert all(sha(out/p)==h for p,h in manifest.items())
+for r in packing:
+ b=gzip.decompress((out/r['archived_path']).read_bytes());assert hashlib.sha256(b).hexdigest()==r['original_sha256']and len(b)==r['original_bytes']
+receipt={**proof,'payloads':len(manifest),'gzip':len(packing),'manifest_sha256':sha(out/'SHA256SUMS'),'all_payload_SHA_exact_original_gzip_roundtrip':'PASS','archive':str(out)}
+(job/'ARCHIVE_RECEIPT.json').write_text(json.dumps(receipt,indent=2)+'\n');print(json.dumps(receipt))

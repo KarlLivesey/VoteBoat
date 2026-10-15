@@ -52,6 +52,9 @@ impl Trace {
     fn update(&self, f: impl FnOnce(&mut Totals)) {
         f(&mut self.0.lock().expect("benchmark trace poisoned"));
     }
+    pub(super) fn encoded_append(&self, bytes: usize) {
+        self.update(|totals| totals.encoded_bytes += bytes as u64);
+    }
     pub(super) fn snapshot(&self) -> Totals {
         let mut totals = self.0.lock().expect("benchmark trace poisoned").clone();
         if let Some(timing) = &self.1 {
@@ -62,21 +65,26 @@ impl Trace {
             totals.sync_ns = snapshot.log_sync.elapsed_ns.into();
             totals.publish_calls = snapshot.manifest.calls;
             totals.publish_ns = snapshot.manifest.elapsed_ns.into();
-            totals.errors = snapshot
-                .append
-                .errors
-                .saturating_add(snapshot.log_sync.errors)
-                .saturating_add(snapshot.manifest.errors);
+            // Counts are overlapping error observations, not unique failures:
+            // the upper LogStore and an underlying primitive may see one error.
+            totals.errors = totals.errors.saturating_add(
+                snapshot
+                    .append
+                    .errors
+                    .saturating_add(snapshot.log_sync.errors)
+                    .saturating_add(snapshot.manifest.errors),
+            );
             totals.publication = Some(snapshot);
         }
         totals
     }
 }
-pub(super) struct ObservedIo<I> {
-    pub(super) inner: I,
+pub(super) struct ObservedIo {
+    pub(super) inner: voteboat::native::log_store::FileLogIo,
     pub(super) trace: Trace,
 }
-impl<I: JournalIo> JournalIo for ObservedIo<I> {
+// Deliberately FileLogIo-only: its default barrier runs these observed primitives.
+impl JournalIo for ObservedIo {
     fn read_manifest(&mut self) -> io::Result<Vec<u8>> {
         self.inner.read_manifest()
     }
@@ -266,7 +274,10 @@ pub(super) fn write_journal(
     write_csv(&mut exclusive(&root.join("journal.csv"))?, snapshots)?;
     write_publication(root, snapshots)
 }
-fn write_publication(root: &Path, snapshots: &[(String, usize, Totals)]) -> Result<(), Failure> {
+pub(super) fn write_publication(
+    root: &Path,
+    snapshots: &[(String, usize, Totals)],
+) -> Result<(), Failure> {
     let mut file = exclusive(&root.join("publication.csv"))?;
     writeln!(file, "stage,replica,step,calls,errors,elapsed_ns,max_ns,manifest_calls,manifest_errors,manifest_ns")?;
     for (stage, replica, totals) in snapshots {
@@ -303,6 +314,9 @@ pub(super) fn capture(snapshots: &mut Vec<(String, usize, Totals)>, stage: &str,
     }
 }
 
+#[cfg(test)]
+#[path = "observe/publication_tests.rs"]
+mod publication_tests;
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/private/tmp/voteboat-mac475-dfc195c-Fz9Ivq/artifacts/native/native_benchmark",
+    "/private/tmp/voteboat-mac475-dfc195c-Fz9Ivq/control-wal/tcp-w4096",
+    "tcp",
+    "512",
+    "4096",
+    "1",
+    "--offered",
+    "128",
+    "--maintenance",
+    "2",
+    "--ready-items",
+    "16",
+    "--offered-capacity",
+    "4096"
+  ],
+  "exit": 0,
+  "elapsed_s": 5.500847125
+}

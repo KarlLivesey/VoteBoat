@@ -1,0 +1,12 @@
+{
+  "collection_utc": "2026-10-15T11:15:22.364717+00:00",
+  "source_files": 1475,
+  "current_file_SHA_modes_exact": true,
+  "original_copy_root_example_artifacts_exact": true,
+  "compiler_profile_setup_dependency_SHA_exact": true,
+  "original_terminal": 31476,
+  "actual_workload_validator_exits_zero": 54,
+  "existing_host_after_snapshot_preserved": true,
+  "host_after_delay_seconds_from_last_workload_end": 12.768105745315552,
+  "scope": "Post-terminal read-only source/artifact guard and archive. No workloads/builds/check suites, policy changes or host snapshot replacement. Compiler freshness/profile proof is the recorded original build, not a new compilation. Source file modes exact; no added directory-mode preservation claim."
+}

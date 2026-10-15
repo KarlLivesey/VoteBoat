@@ -1,0 +1,8 @@
+{
+  "command": [
+    "node",
+    "validation/check-publication-profile.test.mjs"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 0.030777334002777934
+}

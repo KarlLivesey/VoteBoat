@@ -1,0 +1,31 @@
+fixture: 2 scheduled offers, 1 admissions, 1 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=2 admitted_during=1.000 applied_during=1 applied_drain=NA applied_total=1 ops/s; window_refused=1 backlog_at_horizon=0
+fixture: 2 scheduled offers, 1 admissions, 1 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=2 admitted_during=1.000 applied_during=1 applied_drain=NA applied_total=1 ops/s; window_refused=1 backlog_at_horizon=0
+fixture: 6 scheduled offers, 6 admissions, 6 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=6 admitted_during=6.000 applied_during=6 applied_drain=NA applied_total=6 ops/s; window_refused=0 backlog_at_horizon=0
+fixture: 6 scheduled offers, 6 admissions, 6 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=6 admitted_during=6.000 applied_during=6 applied_drain=NA applied_total=6 ops/s; window_refused=0 backlog_at_horizon=0
+fixture: 6 scheduled offers, 6 admissions, 6 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=6 admitted_during=6.000 applied_during=6 applied_drain=NA applied_total=6 ops/s; window_refused=0 backlog_at_horizon=0
+fixture: 6 scheduled offers, 6 admissions, 6 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=6 admitted_during=6.000 applied_during=6 applied_drain=NA applied_total=6 ops/s; window_refused=0 backlog_at_horizon=0
+✔ one actual retained request explains a refused scheduled offer (2.174133ms)
+✔ reject coordinated omission from shifted intended start (0.737725ms)
+✔ reject phantom window refusal after earlier completion (0.400362ms)
+✔ reject falsely certified unknown outcome (2.464408ms)
+✔ reject unaccounted applied value and altered pending maximum (0.492385ms)
+✔ explicit all-one weights retain historical uniform phase and validation (0.311084ms)
+✔ weighted rows retain absolute phase and uniform warmup application history (0.492735ms)
+✔ reject altered weighted phase, mapping and applied history (0.859174ms)
+✔ reject invalid or undisclosed workload schedule metadata (0.585049ms)
+✔ reject a hot-group retained bound that the old uniform ceiling would admit (0.892436ms)
+✔ wide windows require the complete explicit profile without changing outcome conservation (2.581038ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 15.300506

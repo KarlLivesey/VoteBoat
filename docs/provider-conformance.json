@@ -4332,6 +4332,137 @@
           ]
         }
       ]
+    },
+    {
+      "public_contract": "JournalIo",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/journal_barrier.rs",
+          "symbol": "default_combined_barrier_keeps_order_exact_bytes_and_error_short_circuit"
+        },
+        {
+          "file": "tests/journal_barrier.rs",
+          "symbol": "native_creation_barrier_and_recovery_use_the_selected_combined_provider"
+        },
+        {
+          "file": "tests/journal_barrier.rs",
+          "symbol": "combined_publication_error_fences_without_a_durable_result"
+        },
+        {
+          "file": "tests/journal_barrier.rs",
+          "symbol": "optional_replacement_default_remains_explicitly_unsupported"
+        },
+        {
+          "file": "tests/witness_log_store/history.rs",
+          "symbol": "actual_histories_keep_pending_visibility_suffix_outcomes_and_stale_sessions"
+        },
+        {
+          "file": "tests/witness_log_store/selection.rs",
+          "symbol": "complete_unacknowledged_suffix_is_recovered_and_only_incomplete_tail_is_discarded"
+        },
+        {
+          "file": "tests/witness_log_store/corruption.rs",
+          "symbol": "every_acknowledged_wal_truncation_rejects_with_either_witness_crc_damaged"
+        },
+        {
+          "file": "tests/witness_log_store/history.rs",
+          "symbol": "snapshot_binding_and_three_reclamations_preserve_the_exact_state"
+        },
+        {
+          "file": "tests/witness_log_store/history.rs",
+          "symbol": "public_timing_reader_observes_two_syncs_without_per_barrier_namespace_work"
+        },
+        {
+          "file": "tests/witness_log_store/corruption.rs",
+          "symbol": "sole_crc_valid_witness_recovers_exact_history_and_repairs_its_counterpart"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "read_manifest",
+            "read_log",
+            "append",
+            "truncate_log"
+          ],
+          "obligation": "Return exact selected logical journal bytes and canonical acknowledged manifest, preserve complete bounded writes and logical truncation; native recovery retains identity/session/transition validation. Compound dispatch does not bypass those reads or append admission.",
+          "assertions": [
+            {
+              "file": "tests/journal_barrier.rs",
+              "symbol": "native_creation_barrier_and_recovery_use_the_selected_combined_provider"
+            },
+            {
+              "file": "tests/witness_log_store/history.rs",
+              "symbol": "actual_histories_keep_pending_visibility_suffix_outcomes_and_stale_sessions"
+            },
+            {
+              "file": "tests/witness_log_store/selection.rs",
+              "symbol": "complete_unacknowledged_suffix_is_recovered_and_only_incomplete_tail_is_discarded"
+            },
+            {
+              "file": "tests/witness_log_store/corruption.rs",
+              "symbol": "every_acknowledged_wal_truncation_rejects_with_either_witness_crc_damaged"
+            }
+          ],
+          "remaining": [
+            "These selected dispatch controls use a crashable downstream journal, not byte-level certification of every platform provider. Native witness corruption/reclamation and actual service histories are separate evidence."
+          ]
+        },
+        {
+          "names": [
+            "sync_log",
+            "publish_manifest",
+            "publish_barrier"
+          ],
+          "obligation": "The default compound operation synchronizes data before publishing the exact supplied manifest, short-circuits on sync failure and returns publication failure unchanged. Native creation, recovery and barriers invoke the selected combined override; failed publication fences without a durability result.",
+          "assertions": [
+            {
+              "file": "tests/journal_barrier.rs",
+              "symbol": "default_combined_barrier_keeps_order_exact_bytes_and_error_short_circuit"
+            },
+            {
+              "file": "tests/journal_barrier.rs",
+              "symbol": "native_creation_barrier_and_recovery_use_the_selected_combined_provider"
+            },
+            {
+              "file": "tests/journal_barrier.rs",
+              "symbol": "combined_publication_error_fences_without_a_durable_result"
+            },
+            {
+              "file": "tests/witness_log_store/history.rs",
+              "symbol": "public_timing_reader_observes_two_syncs_without_per_barrier_namespace_work"
+            },
+            {
+              "file": "tests/witness_log_store/corruption.rs",
+              "symbol": "sole_crc_valid_witness_recovers_exact_history_and_repairs_its_counterpart"
+            }
+          ],
+          "remaining": [
+            "Default dispatch checks do not establish physical sync semantics. Witness byte-level cuts, both-host actual histories and all three filesystem performance acceptance remain required."
+          ]
+        },
+        {
+          "names": [
+            "supports_replacement",
+            "replace_log"
+          ],
+          "obligation": "Optional replacement defaults reject unsupported capability without mutation; supporting providers must preserve a selected entire old or new pair and cleanup only after durable selection.",
+          "assertions": [
+            {
+              "file": "tests/journal_barrier.rs",
+              "symbol": "optional_replacement_default_remains_explicitly_unsupported"
+            },
+            {
+              "file": "tests/witness_log_store/history.rs",
+              "symbol": "snapshot_binding_and_three_reclamations_preserve_the_exact_state"
+            }
+          ],
+          "remaining": [
+            "The default refusal does not certify implemented replacement. FileLogIo and WitnessLogIo replacement/parity interruption controls are separately selected and their device assumptions remain explicit."
+          ]
+        }
+      ]
     }
   ]
 }

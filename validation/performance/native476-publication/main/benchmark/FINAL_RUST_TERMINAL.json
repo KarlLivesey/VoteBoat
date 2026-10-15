@@ -1,0 +1,47 @@
+{
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--example",
+        "native_benchmark",
+        "--message-format=json",
+        "-vv",
+        "publication::tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "start_unix": 1792063472.1792068,
+      "end_unix": 1792063473.7071967
+    },
+    {
+      "command": [
+        "cargo",
+        "+stable",
+        "clippy",
+        "--locked",
+        "--offline",
+        "--keep-going",
+        "--all-features",
+        "--example",
+        "native_benchmark",
+        "--message-format=json",
+        "-vv",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "start_unix": 1792063473.7075489,
+      "end_unix": 1792063474.177666
+    }
+  ],
+  "source_unchanged": true,
+  "scope": "Three focused publication wrapper/parser tests and all-feature native-example strict only; root library proof from initial fresh rebuild remains exact for unchanged src."
+}

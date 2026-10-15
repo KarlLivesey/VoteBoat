@@ -195,6 +195,7 @@ fn partial_replica_startup_joins_previously_opened_nodes() {
             lane: 1,
             ready_visit_items: 16,
             capacity_profile: CapacityProfile::Legacy,
+            publication: Publication::Legacy,
         }
     )
     .is_err());

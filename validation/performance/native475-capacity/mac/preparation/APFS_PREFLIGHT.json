@@ -1,0 +1,112 @@
+{
+  "summary": {
+    "scope": "read-only prospective scratch backing; no files/source copied and no benchmark",
+    "scratch": "/private/tmp",
+    "df_device": "/dev/disk3s1",
+    "volume": {
+      "DeviceIdentifier": "disk3s1",
+      "MountPoint": "/System/Volumes/Data",
+      "VolumeName": "Macintosh HD - Data",
+      "FilesystemType": "apfs",
+      "FilesystemName": "APFS",
+      "Content": "41504653-0000-11AA-AA11-00306543ECAC",
+      "APFSContainerReference": "disk3",
+      "TotalSize": 1995218165760,
+      "VolumeFreeSpace": null,
+      "BusProtocol": "Apple Fabric",
+      "SolidState": true
+    },
+    "container": "disk3",
+    "physical_stores": [
+      {
+        "DeviceIdentifier": "disk0s2",
+        "DiskUUID": "2EECCAB9-EF76-4A6A-BE9F-1A7603B8F536",
+        "Size": 1995218165760
+      }
+    ],
+    "physical_store_info": [
+      {
+        "DeviceIdentifier": "disk0s2",
+        "ParentWholeDisk": "disk0",
+        "PartOfWhole": null,
+        "BusProtocol": "Apple Fabric",
+        "MediaName": "",
+        "SolidState": true,
+        "DiskSize": null,
+        "TotalSize": 1995218165760
+      }
+    ],
+    "mount_lines": [
+      "/dev/disk3s1 on /System/Volumes/Data (apfs, local, journaled, nobrowse, protect, root data)"
+    ],
+    "initial_path_selector_exit": 1,
+    "selector_resolution": "diskutil does not accept /private/tmp as disk selector; df resolves actual backing device, then diskutil accepts device. Read-only failed command stdout/exit retained.",
+    "topology": "Future three voter WAL roots share this one APFS Data volume/container/physical store; not independent-device or three-machine placement. BtrfsCoW/NoCoW are policies on one FS type; APFS is another. No ext4/XFS scratch assumed."
+  },
+  "commands": [
+    {
+      "command": [
+        "/usr/sbin/diskutil",
+        "info",
+        "-plist",
+        "/private/tmp"
+      ],
+      "exit": 1,
+      "stdout": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n\t<key>Error</key>\n\t<true/>\n\t<key>ErrorMessage</key>\n\t<string>Could not find disk: /private/tmp</string>\n\t<key>ExitCode</key>\n\t<integer>1</integer>\n</dict>\n</plist>\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/bin/df",
+        "-P",
+        "/private/tmp"
+      ],
+      "exit": 0,
+      "stdout": "Filesystem   512-blocks       Used Available Capacity  Mounted on\n/dev/disk3s1 3896910480 2907888768 899685352    77%    /System/Volumes/Data\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/sbin/diskutil",
+        "info",
+        "-plist",
+        "/dev/disk3s1"
+      ],
+      "exit": 0,
+      "stdout": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n\t<key>AESHardware</key>\n\t<true/>\n\t<key>APFSContainerFree</key>\n\t<integer>460638900224</integer>\n\t<key>APFSContainerReference</key>\n\t<string>disk3</string>\n\t<key>APFSContainerSize</key>\n\t<integer>1995218165760</integer>\n\t<key>APFSPhysicalStores</key>\n\t<array>\n\t\t<dict>\n\t\t\t<key>APFSPhysicalStore</key>\n\t\t\t<string>disk0s2</string>\n\t\t</dict>\n\t</array>\n\t<key>APFSSnapshot</key>\n\t<false/>\n\t<key>APFSVolumeGroupID</key>\n\t<string>9E7B008F-06D2-4473-A147-7FE27468C88A</string>\n\t<key>Bootable</key>\n\t<true/>\n\t<key>BooterDeviceIdentifier</key>\n\t<string>disk3s4</string>\n\t<key>BusProtocol</key>\n\t<string>Apple Fabric</string>\n\t<key>CanBeMadeBootable</key>\n\t<false/>\n\t<key>CanBeMadeBootableRequiresDestroy</key>\n\t<false/>\n\t<key>CapacityInUse</key>\n\t<integer>1488839049216</integer>\n\t<key>Content</key>\n\t<string>41504653-0000-11AA-AA11-00306543ECAC</string>\n\t<key>DeviceBlockSize</key>\n\t<integer>4096</integer>\n\t<key>DeviceIdentifier</key>\n\t<string>disk3s1</string>\n\t<key>DeviceNode</key>\n\t<string>/dev/disk3s1</string>\n\t<key>DeviceTreePath</key>\n\t<string>IODeviceTree:/arm-io/ans@47400000/iop-ans-nub/AppleANS3CGv2Controller</string>\n\t<key>DiskUUID</key>\n\t<string>9E7B008F-06D2-4473-A147-7FE27468C88A</string>\n\t<key>Ejectable</key>\n\t<false/>\n\t<key>EjectableMediaAutomaticUnderSoftwareControl</key>\n\t<false/>\n\t<key>EjectableOnly</key>\n\t<false/>\n\t<key>Encryption</key>\n\t<true/>\n\t<key>EncryptionThisVolumeProper</key>\n\t<true/>\n\t<key>FileVault</key>\n\t<true/>\n\t<key>FilesystemName</key>\n\t<string>APFS</string>\n\t<key>FilesystemType</key>\n\t<string>apfs</string>\n\t<key>FilesystemUserVisibleName</key>\n\t<string>APFS</string>\n\t<key>FreeSpace</key>\n\t<integer>0</integer>\n\t<key>GlobalPermissionsEnabled</key>\n\t<true/>\n\t<key>IOKitSize</key>\n\t<integer>1995218165760</integer>\n\t<key>IORegistryEntryName</key>\n\t<string>Macintosh HD - Data</string>\n\t<key>Internal</key>\n\t<true/>\n\t<key>Locked</key>\n\t<false/>\n\t<key>MediaName</key>\n\t<string></string>\n\t<key>MediaType</key>\n\t<string>Generic</string>\n\t<key>MountPoint</key>\n\t<string>/System/Volumes/Data</string>\n\t<key>OSInternalMedia</key>\n\t<false/>\n\t<key>ParentWholeDisk</key>\n\t<string>disk3</string>\n\t<key>PartitionMapPartition</key>\n\t<false/>\n\t<key>RAIDMaster</key>\n\t<false/>\n\t<key>RAIDSlice</key>\n\t<false/>\n\t<key>RecoveryDeviceIdentifier</key>\n\t<string>disk3s5</string>\n\t<key>Removable</key>\n\t<false/>\n\t<key>RemovableMedia</key>\n\t<false/>\n\t<key>RemovableMediaOrExternalDevice</key>\n\t<false/>\n\t<key>SMARTDeviceSpecificKeysMayVaryNotGuaranteed</key>\n\t<dict>\n\t\t<key>AVAILABLE_SPARE</key>\n\t\t<integer>100</integer>\n\t\t<key>AVAILABLE_SPARE_THRESHOLD</key>\n\t\t<integer>99</integer>\n\t\t<key>CONTROLLER_BUSY_TIME_0</key>\n\t\t<integer>0</integer>\n\t\t<key>CONTROLLER_BUSY_TIME_1</key>\n\t\t<integer>0</integer>\n\t\t<key>DATA_UNITS_READ_0</key>\n\t\t<integer>559122654</integer>\n\t\t<key>DATA_UNITS_READ_1</key>\n\t\t<integer>0</integer>\n\t\t<key>DATA_UNITS_WRITTEN_0</key>\n\t\t<integer>260320323</integer>\n\t\t<key>DATA_UNITS_WRITTEN_1</key>\n\t\t<integer>0</integer>\n\t\t<key>HOST_READ_COMMANDS_0</key>\n\t\t<integer>4202729139</integer>\n\t\t<key>HOST_READ_COMMANDS_1</key>\n\t\t<integer>0</integer>\n\t\t<key>HOST_WRITE_COMMANDS_0</key>\n\t\t<integer>5818651992</integer>\n\t\t<key>HOST_WRITE_COMMANDS_1</key>\n\t\t<integer>0</integer>\n\t\t<key>MEDIA_ERRORS_0</key>\n\t\t<integer>0</integer>\n\t\t<key>MEDIA_ERRORS_1</key>\n\t\t<integer>0</integer>\n\t\t<key>NUM_ERROR_INFO_LOG_ENTRIES_0</key>\n\t\t<integer>0</integer>\n\t\t<key>NUM_ERROR_INFO_LOG_ENTRIES_1</key>\n\t\t<integer>0</integer>\n\t\t<key>PERCENTAGE_USED</key>\n\t\t<integer>3</integer>\n\t\t<key>POWER_CYCLES_0</key>\n\t\t<integer>611</integer>\n\t\t<key>POWER_CYCLES_1</key>\n\t\t<integer>0</integer>\n\t\t<key>POWER_ON_HOURS_0</key>\n\t\t<integer>2639</integer>\n\t\t<key>POWER_ON_HOURS_1</key>\n\t\t<integer>0</integer>\n\t\t<key>TEMPERATURE</key>\n\t\t<integer>310</integer>\n\t\t<key>UNSAFE_SHUTDOWNS_0</key>\n\t\t<integer>25</integer>\n\t\t<key>UNSAFE_SHUTDOWNS_1</key>\n\t\t<integer>0</integer>\n\t</dict>\n\t<key>SMARTStatus</key>\n\t<string>Verified</string>\n\t<key>Sealed</key>\n\t<string>No</string>\n\t<key>Size</key>\n\t<integer>1995218165760</integer>\n\t<key>SolidState</key>\n\t<true/>\n\t<key>SupportsGlobalPermissionsDisable</key>\n\t<true/>\n\t<key>SystemImage</key>\n\t<false/>\n\t<key>TotalSize</key>\n\t<integer>1995218165760</integer>\n\t<key>VolumeAllocationBlockSize</key>\n\t<integer>4096</integer>\n\t<key>VolumeName</key>\n\t<string>Macintosh HD - Data</string>\n\t<key>VolumeSize</key>\n\t<integer>0</integer>\n\t<key>VolumeUUID</key>\n\t<string>9E7B008F-06D2-4473-A147-7FE27468C88A</string>\n\t<key>WholeDisk</key>\n\t<false/>\n\t<key>Writable</key>\n\t<true/>\n\t<key>WritableMedia</key>\n\t<true/>\n\t<key>WritableVolume</key>\n\t<true/>\n</dict>\n</plist>\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/sbin/diskutil",
+        "apfs",
+        "list",
+        "-plist",
+        "disk3"
+      ],
+      "exit": 0,
+      "stdout": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n\t<key>Containers</key>\n\t<array>\n\t\t<dict>\n\t\t\t<key>APFSContainerUUID</key>\n\t\t\t<string>E02A7823-62C8-4041-B77F-5906E8CCFFB3</string>\n\t\t\t<key>CapacityCeiling</key>\n\t\t\t<integer>1995218165760</integer>\n\t\t\t<key>CapacityFree</key>\n\t\t\t<integer>460638900224</integer>\n\t\t\t<key>ContainerReference</key>\n\t\t\t<string>disk3</string>\n\t\t\t<key>DesignatedPhysicalStore</key>\n\t\t\t<string>disk0s2</string>\n\t\t\t<key>PhysicalStores</key>\n\t\t\t<array>\n\t\t\t\t<dict>\n\t\t\t\t\t<key>DeviceIdentifier</key>\n\t\t\t\t\t<string>disk0s2</string>\n\t\t\t\t\t<key>DiskUUID</key>\n\t\t\t\t\t<string>2EECCAB9-EF76-4A6A-BE9F-1A7603B8F536</string>\n\t\t\t\t\t<key>Size</key>\n\t\t\t\t\t<integer>1995218165760</integer>\n\t\t\t\t</dict>\n\t\t\t</array>\n\t\t\t<key>Volumes</key>\n\t\t\t<array>\n\t\t\t\t<dict>\n\t\t\t\t\t<key>APFSVolumeUUID</key>\n\t\t\t\t\t<string>9E7B008F-06D2-4473-A147-7FE27468C88A</string>\n\t\t\t\t\t<key>CapacityInUse</key>\n\t\t\t\t\t<integer>1488839049216</integer>\n\t\t\t\t\t<key>CapacityQuota</key>\n\t\t\t\t\t<integer>0</integer>\n\t\t\t\t\t<key>CapacityReserve</key>\n\t\t\t\t\t<integer>0</integer>\n\t\t\t\t\t<key>CryptoMigrationOn</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>DeviceIdentifier</key>\n\t\t\t\t\t<string>disk3s1</string>\n\t\t\t\t\t<key>Encryption</key>\n\t\t\t\t\t<true/>\n\t\t\t\t\t<key>FileVault</key>\n\t\t\t\t\t<true/>\n\t\t\t\t\t<key>Locked</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>Name</key>\n\t\t\t\t\t<string>Macintosh HD - Data</string>\n\t\t\t\t\t<key>Roles</key>\n\t\t\t\t\t<array>\n\t\t\t\t\t\t<string>Data</string>\n\t\t\t\t\t</array>\n\t\t\t\t</dict>\n\t\t\t\t<dict>\n\t\t\t\t\t<key>APFSVolumeUUID</key>\n\t\t\t\t\t<string>CB245CDE-DA46-47E7-91DE-5237EF2C9AC6</string>\n\t\t\t\t\t<key>CapacityInUse</key>\n\t\t\t\t\t<integer>1242456064</integer>\n\t\t\t\t\t<key>CapacityQuota</key>\n\t\t\t\t\t<integer>0</integer>\n\t\t\t\t\t<key>CapacityReserve</key>\n\t\t\t\t\t<integer>0</integer>\n\t\t\t\t\t<key>CryptoMigrationOn</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>DeviceIdentifier</key>\n\t\t\t\t\t<string>disk3s2</string>\n\t\t\t\t\t<key>Encryption</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>FileVault</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>Locked</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>Name</key>\n\t\t\t\t\t<string>Update</string>\n\t\t\t\t\t<key>Roles</key>\n\t\t\t\t\t<array>\n\t\t\t\t\t\t<string>Update</string>\n\t\t\t\t\t</array>\n\t\t\t\t</dict>\n\t\t\t\t<dict>\n\t\t\t\t\t<key>APFSVolumeUUID</key>\n\t\t\t\t\t<string>3F3DD636-DE3F-4DB7-981D-48C02BD24324</string>\n\t\t\t\t\t<key>CapacityInUse</key>\n\t\t\t\t\t<integer>14087249920</integer>\n\t\t\t\t\t<key>CapacityQuota</key>\n\t\t\t\t\t<integer>0</integer>\n\t\t\t\t\t<key>CapacityReserve</key>\n\t\t\t\t\t<integer>0</integer>\n\t\t\t\t\t<key>CryptoMigrationOn</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>DeviceIdentifier</key>\n\t\t\t\t\t<string>disk3s3</string>\n\t\t\t\t\t<key>Encryption</key>\n\t\t\t\t\t<true/>\n\t\t\t\t\t<key>FileVault</key>\n\t\t\t\t\t<true/>\n\t\t\t\t\t<key>Locked</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>Name</key>\n\t\t\t\t\t<string>Macintosh HD</string>\n\t\t\t\t\t<key>Roles</key>\n\t\t\t\t\t<array>\n\t\t\t\t\t\t<string>System</string>\n\t\t\t\t\t</array>\n\t\t\t\t</dict>\n\t\t\t\t<dict>\n\t\t\t\t\t<key>APFSVolumeUUID</key>\n\t\t\t\t\t<string>E0A656A4-4DF4-4BFB-8E5C-59BE86F1785D</string>\n\t\t\t\t\t<key>CapacityInUse</key>\n\t\t\t\t\t<integer>21676023808</integer>\n\t\t\t\t\t<key>CapacityQuota</key>\n\t\t\t\t\t<integer>0</integer>\n\t\t\t\t\t<key>CapacityReserve</key>\n\t\t\t\t\t<integer>0</integer>\n\t\t\t\t\t<key>CryptoMigrationOn</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>DeviceIdentifier</key>\n\t\t\t\t\t<string>disk3s4</string>\n\t\t\t\t\t<key>Encryption</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>FileVault</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>Locked</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>Name</key>\n\t\t\t\t\t<string>Preboot</string>\n\t\t\t\t\t<key>Roles</key>\n\t\t\t\t\t<array>\n\t\t\t\t\t\t<string>Preboot</string>\n\t\t\t\t\t</array>\n\t\t\t\t</dict>\n\t\t\t\t<dict>\n\t\t\t\t\t<key>APFSVolumeUUID</key>\n\t\t\t\t\t<string>29A7F58F-ADB2-4E97-80E3-DFC20F93FDC2</string>\n\t\t\t\t\t<key>CapacityInUse</key>\n\t\t\t\t\t<integer>3066339328</integer>\n\t\t\t\t\t<key>CapacityQuota</key>\n\t\t\t\t\t<integer>0</integer>\n\t\t\t\t\t<key>CapacityReserve</key>\n\t\t\t\t\t<integer>0</integer>\n\t\t\t\t\t<key>CryptoMigrationOn</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>DeviceIdentifier</key>\n\t\t\t\t\t<string>disk3s5</string>\n\t\t\t\t\t<key>Encryption</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>FileVault</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>Locked</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>Name</key>\n\t\t\t\t\t<string>Recovery</string>\n\t\t\t\t\t<key>Roles</key>\n\t\t\t\t\t<array>\n\t\t\t\t\t\t<string>Recovery</string>\n\t\t\t\t\t</array>\n\t\t\t\t</dict>\n\t\t\t\t<dict>\n\t\t\t\t\t<key>APFSVolumeUUID</key>\n\t\t\t\t\t<string>9759BC28-942F-4CB7-99E0-B47DBC7B0002</string>\n\t\t\t\t\t<key>CapacityInUse</key>\n\t\t\t\t\t<integer>5368729600</integer>\n\t\t\t\t\t<key>CapacityQuota</key>\n\t\t\t\t\t<integer>0</integer>\n\t\t\t\t\t<key>CapacityReserve</key>\n\t\t\t\t\t<integer>0</integer>\n\t\t\t\t\t<key>CryptoMigrationOn</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>DeviceIdentifier</key>\n\t\t\t\t\t<string>disk3s6</string>\n\t\t\t\t\t<key>Encryption</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>FileVault</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>Locked</key>\n\t\t\t\t\t<false/>\n\t\t\t\t\t<key>Name</key>\n\t\t\t\t\t<string>VM</string>\n\t\t\t\t\t<key>Roles</key>\n\t\t\t\t\t<array>\n\t\t\t\t\t\t<string>VM</string>\n\t\t\t\t\t</array>\n\t\t\t\t</dict>\n\t\t\t</array>\n\t\t</dict>\n\t</array>\n</dict>\n</plist>\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/sbin/diskutil",
+        "info",
+        "-plist",
+        "disk0s2"
+      ],
+      "exit": 0,
+      "stdout": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n\t<key>AESHardware</key>\n\t<true/>\n\t<key>APFSContainerReference</key>\n\t<string>disk3</string>\n\t<key>Bootable</key>\n\t<true/>\n\t<key>BusProtocol</key>\n\t<string>Apple Fabric</string>\n\t<key>CanBeMadeBootable</key>\n\t<false/>\n\t<key>CanBeMadeBootableRequiresDestroy</key>\n\t<false/>\n\t<key>Content</key>\n\t<string>Apple_APFS</string>\n\t<key>DeviceBlockSize</key>\n\t<integer>4096</integer>\n\t<key>DeviceIdentifier</key>\n\t<string>disk0s2</string>\n\t<key>DeviceNode</key>\n\t<string>/dev/disk0s2</string>\n\t<key>DeviceTreePath</key>\n\t<string>IODeviceTree:/arm-io/ans@47400000/iop-ans-nub/AppleANS3CGv2Controller</string>\n\t<key>DiskUUID</key>\n\t<string>2EECCAB9-EF76-4A6A-BE9F-1A7603B8F536</string>\n\t<key>Ejectable</key>\n\t<false/>\n\t<key>EjectableMediaAutomaticUnderSoftwareControl</key>\n\t<false/>\n\t<key>EjectableOnly</key>\n\t<false/>\n\t<key>FreeSpace</key>\n\t<integer>0</integer>\n\t<key>GlobalPermissionsEnabled</key>\n\t<false/>\n\t<key>IOKitSize</key>\n\t<integer>1995218165760</integer>\n\t<key>IORegistryEntryName</key>\n\t<string>Untitled 2</string>\n\t<key>Internal</key>\n\t<true/>\n\t<key>MediaName</key>\n\t<string></string>\n\t<key>MediaType</key>\n\t<string>Generic</string>\n\t<key>MountPoint</key>\n\t<string></string>\n\t<key>OSInternalMedia</key>\n\t<false/>\n\t<key>ParentWholeDisk</key>\n\t<string>disk0</string>\n\t<key>PartitionMapPartition</key>\n\t<true/>\n\t<key>PartitionMapPartitionOffset</key>\n\t<integer>524312576</integer>\n\t<key>RAIDMaster</key>\n\t<false/>\n\t<key>RAIDSlice</key>\n\t<false/>\n\t<key>Removable</key>\n\t<false/>\n\t<key>RemovableMedia</key>\n\t<false/>\n\t<key>RemovableMediaOrExternalDevice</key>\n\t<false/>\n\t<key>SMARTDeviceSpecificKeysMayVaryNotGuaranteed</key>\n\t<dict>\n\t\t<key>AVAILABLE_SPARE</key>\n\t\t<integer>100</integer>\n\t\t<key>AVAILABLE_SPARE_THRESHOLD</key>\n\t\t<integer>99</integer>\n\t\t<key>CONTROLLER_BUSY_TIME_0</key>\n\t\t<integer>0</integer>\n\t\t<key>CONTROLLER_BUSY_TIME_1</key>\n\t\t<integer>0</integer>\n\t\t<key>DATA_UNITS_READ_0</key>\n\t\t<integer>559122656</integer>\n\t\t<key>DATA_UNITS_READ_1</key>\n\t\t<integer>0</integer>\n\t\t<key>DATA_UNITS_WRITTEN_0</key>\n\t\t<integer>260320324</integer>\n\t\t<key>DATA_UNITS_WRITTEN_1</key>\n\t\t<integer>0</integer>\n\t\t<key>HOST_READ_COMMANDS_0</key>\n\t\t<integer>4202729305</integer>\n\t\t<key>HOST_READ_COMMANDS_1</key>\n\t\t<integer>0</integer>\n\t\t<key>HOST_WRITE_COMMANDS_0</key>\n\t\t<integer>5818651993</integer>\n\t\t<key>HOST_WRITE_COMMANDS_1</key>\n\t\t<integer>0</integer>\n\t\t<key>MEDIA_ERRORS_0</key>\n\t\t<integer>0</integer>\n\t\t<key>MEDIA_ERRORS_1</key>\n\t\t<integer>0</integer>\n\t\t<key>NUM_ERROR_INFO_LOG_ENTRIES_0</key>\n\t\t<integer>0</integer>\n\t\t<key>NUM_ERROR_INFO_LOG_ENTRIES_1</key>\n\t\t<integer>0</integer>\n\t\t<key>PERCENTAGE_USED</key>\n\t\t<integer>3</integer>\n\t\t<key>POWER_CYCLES_0</key>\n\t\t<integer>611</integer>\n\t\t<key>POWER_CYCLES_1</key>\n\t\t<integer>0</integer>\n\t\t<key>POWER_ON_HOURS_0</key>\n\t\t<integer>2639</integer>\n\t\t<key>POWER_ON_HOURS_1</key>\n\t\t<integer>0</integer>\n\t\t<key>TEMPERATURE</key>\n\t\t<integer>310</integer>\n\t\t<key>UNSAFE_SHUTDOWNS_0</key>\n\t\t<integer>25</integer>\n\t\t<key>UNSAFE_SHUTDOWNS_1</key>\n\t\t<integer>0</integer>\n\t</dict>\n\t<key>SMARTStatus</key>\n\t<string>Verified</string>\n\t<key>Size</key>\n\t<integer>1995218165760</integer>\n\t<key>SolidState</key>\n\t<true/>\n\t<key>SupportsGlobalPermissionsDisable</key>\n\t<false/>\n\t<key>SystemImage</key>\n\t<false/>\n\t<key>TotalSize</key>\n\t<integer>1995218165760</integer>\n\t<key>VolumeName</key>\n\t<string></string>\n\t<key>VolumeSize</key>\n\t<integer>0</integer>\n\t<key>WholeDisk</key>\n\t<false/>\n\t<key>Writable</key>\n\t<true/>\n\t<key>WritableMedia</key>\n\t<true/>\n\t<key>WritableVolume</key>\n\t<false/>\n</dict>\n</plist>\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/sbin/mount"
+      ],
+      "exit": 0,
+      "stdout": "/dev/disk3s3s1 on / (apfs, sealed, local, read-only, journaled)\ndevfs on /dev (devfs, local, nobrowse)\n/dev/disk3s6 on /System/Volumes/VM (apfs, local, noexec, journaled, noatime, nobrowse)\n/dev/disk3s4 on /System/Volumes/Preboot (apfs, local, journaled, nobrowse)\n/dev/disk3s2 on /System/Volumes/Update (apfs, local, journaled, nobrowse)\n/dev/disk1s2 on /System/Volumes/xarts (apfs, local, noexec, journaled, noatime, nobrowse)\n/dev/disk1s1 on /System/Volumes/iSCPreboot (apfs, local, journaled, nobrowse)\n/dev/disk1s3 on /System/Volumes/Hardware (apfs, local, journaled, nobrowse)\n/dev/disk3s1 on /System/Volumes/Data (apfs, local, journaled, nobrowse, protect, root data)\nmap auto_home on /System/Volumes/Data/home (autofs, automounted, nobrowse)\n/dev/disk3s5 on /Volumes/Recovery (apfs, local, journaled, nobrowse)\n/Applications/Kingshot.app/Wrapper on /private/var/folders/xk/vb061tws5wv3z_00cskjqtwr0000gn/X/E452787D-9710-5F08-9B9D-F7759FA6EBA3 (nullfs, local, nodev, nosuid, read-only, nobrowse, mounted by karllivesey)\n/dev/disk5s2 on /Volumes/Shadow (apfs, local, nodev, nosuid, journaled, noowners)\n/dev/disk2s1 on /System/Volumes/Update/SFR/mnt1 (apfs, local, journaled, nobrowse)\n/dev/disk3s3 on /System/Volumes/Update/mnt1 (apfs, sealed, local, journaled, nobrowse)\n",
+      "stderr": ""
+    }
+  ],
+  "ssh_exit": 0
+}

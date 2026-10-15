@@ -1,0 +1,36 @@
+{
+  "command": "CARGO_TARGET_DIR=target/p9/native476-publication/provider-checks cargo +stable test --locked --offline --lib --all-features native::log_store::witness -- --test-threads=1",
+  "cwd": "/home/karllivesey/Documents/ChatGPT/VoteBoat",
+  "original_session_id": 23842,
+  "actual_terminal_exit": 101,
+  "output_provenance": "Copied the actually available text output from the two original unified-exec tool responses visible in this agent conversation, not from a rerun. Original start response chunk7766e1; terminal response chunkc6df98. These files are transcript copies of merged tool output, not an original on-disk stdout/stderr capture. The original independent byte stream/logger file is unavailable for hash comparison.",
+  "original_tool_chunks": [
+    {
+      "chunk_id": "7766e1",
+      "session_id": 23842,
+      "terminal": false,
+      "output_copy": "initial-compile23842.start.txt"
+    },
+    {
+      "chunk_id": "c6df98",
+      "exit_code": 101,
+      "terminal": true,
+      "output_copy": "initial-compile23842.terminal.txt"
+    }
+  ],
+  "unavailable_raw_file": true,
+  "source_snapshot": "No exact source checkpoint or pre-run source inventory was captured for this first invocation. Do not infer one from later hashes. Rustc had captured the old test paths before the concurrent focused path correction.",
+  "diagnostic_summary": "Six E0425 test-only manifest helper references used one ancestor module too many (three crash.rs, two selection.rs, one tests.rs). Fixed to crate::native::log_store::manifest. No test execution occurred in this compiler-failed invocation.",
+  "rerun_to_reproduce_failure": false,
+  "reconstructed_failed_source": false,
+  "copies": {
+    "initial-compile23842.start.txt": {
+      "sha256": "11f9942f1582976325142a03223bde5a48b8df29a129841e366df6e4a2f0debc",
+      "bytes": 1295
+    },
+    "initial-compile23842.terminal.txt": {
+      "sha256": "7beafae8d242ff5cea77057b8f4b092761e4b94e60284fd0f7c8cbf87f6767e6",
+      "bytes": 6568
+    }
+  }
+}

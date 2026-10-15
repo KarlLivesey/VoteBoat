@@ -1,0 +1,3 @@
+{"archive_sha256": "f0a8ab14c8afe79c4036d664a183d3fa6ed7daf933507381b2607575e6c88dea", "build_rs_present": true, "commit": "dfc195cd39196fc6f16e69ea74de34dabd359ef2", "directories": 318, "exact_directory_modes": true, "exact_sha256_and_modes": true, "inputs": 1474, "source_inventory_scope": "Selected committed production/harness source, fixtures, locks, build/config/hooks and contract documents; no builds/WAL states; not a claim every input compiled."}
+fresh source/compiler/native profile and original/copied artifact guards passed
+native debug0 MachO/UUID/release-profile guards passed

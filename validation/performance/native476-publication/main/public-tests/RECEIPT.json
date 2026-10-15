@@ -1,0 +1,39 @@
+{
+  "time_utc": "2026-10-15T11:22:04.815122+00:00",
+  "test_command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--features",
+    "native",
+    "--test",
+    "witness_log_store",
+    "--",
+    "--test-threads=1"
+  ],
+  "test_exit": 0,
+  "actual_tests": 15,
+  "failures": 0,
+  "test_seconds": 0.02,
+  "compile_seconds": 13.63,
+  "strict_clippy_original_handle": 27216,
+  "strict_clippy_exit": 0,
+  "format_exit": 0,
+  "owned_test_source_sha256": {
+    "tests/witness_log_store/corruption.rs": "113b82c667122d3ec37b6068f418e361342aeb3a8fd63f806243bbafaaab6b21",
+    "tests/witness_log_store/fixture.rs": "88150d70ec14e115e6ceee2932fecff01ee34792e66e6f5431f3027aa30b3655",
+    "tests/witness_log_store/history.rs": "f055f40bca87e71778f747bd85cf8858709a8e6f429b014694af0320b944fa4d",
+    "tests/witness_log_store/selection.rs": "01eeb8552a0e527ca7d033c4b8d4114724a036276edc21dbb33e1912fc9dcecf",
+    "tests/witness_log_store.rs": "a0a4ea0144fb5028d7d864b317886d79bc2c1358a2532431f388302e348463dd"
+  },
+  "only_source_changes_during_public_test": [
+    "src/native/log_store/witness/tests/crash.rs",
+    "src/native/log_store/witness/tests/selection.rs",
+    "src/native/log_store/witness/tests.rs"
+  ],
+  "source_change_scope": "Only provider unit-test cfg(test) modules, notcompiled in this integration library invocation; all publicintegration and productionprovider/trait bytes exact before/after. No unchanged publictest rerun.",
+  "scope": "15 finite public NativeLogStore+WitnessLogIo realfile contract histories/corruption controls, not physical powerloss, crashmodel proof, broadroot/allfeature qualification or benchmarkgain."
+}

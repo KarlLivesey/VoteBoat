@@ -23,10 +23,12 @@ mod checkpoint;
 mod file;
 pub mod striped;
 mod timing;
+mod witness;
 pub use file::FileLogIo;
 pub use timing::{
     JournalCallTiming, JournalTimingSnapshot, JournalTimings, ManifestPublicationTiming,
 };
+pub use witness::WitnessLogIo;
 
 use crate::log_format::{Decoder, HEADER, TRAILER};
 pub use crate::log_format::{LogCodec, NativeLogCodec};
@@ -42,6 +44,13 @@ pub trait JournalIo {
     fn sync_log(&mut self) -> io::Result<()>;
     fn truncate_log(&mut self, length: u64) -> io::Result<()>;
     fn publish_manifest(&mut self, bytes: &[u8]) -> io::Result<()>;
+    /// Synchronize accepted WAL bytes and their acknowledged recovery boundary.
+    /// Success covers both dependencies; failure must not release durability.
+    /// Providers may combine their physical work while preserving that order.
+    fn publish_barrier(&mut self, manifest: &[u8]) -> io::Result<()> {
+        self.sync_log()?;
+        self.publish_manifest(manifest)
+    }
     fn supports_replacement(&self) -> bool {
         false
     }
@@ -132,8 +141,7 @@ impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
             identity,
             session: StoreSession::new(1).unwrap(),
         };
-        io.sync_log().map_err(uncertain)?;
-        io.publish_manifest(&manifest(binding, 0))
+        io.publish_barrier(&manifest(binding, 0))
             .map_err(uncertain)?;
         Ok(Self {
             io,
@@ -225,8 +233,7 @@ impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
             .ok_or(StorageError::Corrupt("session exhausted"))?;
         let binding = StoreBinding { identity, session };
         io.truncate_log(offset as u64).map_err(uncertain)?;
-        io.sync_log().map_err(uncertain)?;
-        io.publish_manifest(&manifest(binding, offset as u64))
+        io.publish_barrier(&manifest(binding, offset as u64))
             .map_err(uncertain)?;
         let accepted = accepted::Accepted::recovered(&state);
         Ok(Self {
@@ -397,12 +404,9 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
             return Err(StorageError::StaleTicket);
         }
         self.accepted.check_promotion(&self.durable)?;
-        if let Err(e) = self.io.sync_log() {
-            return Err(self.failed(e));
-        }
         if let Err(e) = self
             .io
-            .publish_manifest(&manifest(self.binding, self.length as u64))
+            .publish_barrier(&manifest(self.binding, self.length as u64))
         {
             return Err(self.failed(e));
         }

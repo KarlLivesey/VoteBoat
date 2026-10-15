@@ -1,0 +1,11 @@
+{
+  "payloads": 278,
+  "gzip": 26,
+  "manifest_sha256": "e8b2f9a3b11ce2fc18f6d94de3b202b7506cb473d5e36f3600390c183413a3f5",
+  "exact_set_hashes_lossless_originals": true,
+  "root_qualified_inputs": 1491,
+  "core_integration": 197,
+  "native_library": 35,
+  "selected_protocol_histories": 4,
+  "performance_claim": false
+}

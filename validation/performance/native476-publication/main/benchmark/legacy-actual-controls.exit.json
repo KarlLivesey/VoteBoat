@@ -1,0 +1,11 @@
+{
+  "command": [
+    "node",
+    "validation/check-native-benchmark.mjs",
+    "--storage",
+    "target/p9/mac475/collection/raw/control-wal/tcp-w4096",
+    "target/p9/mac475/collection/raw/control-wal/quic-w4096"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 0.04733801700058393
+}

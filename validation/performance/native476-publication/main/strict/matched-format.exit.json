@@ -1,0 +1,13 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "fmt",
+    "--manifest-path",
+    "benchmarks/matched/Cargo.toml",
+    "--",
+    "--check"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.09102435200475156
+}

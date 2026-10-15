@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "<stdin>", line 8, in <module>
+  File "<stdin>", line 6, in run
+AssertionError: (['/usr/sbin/diskutil', 'info', '-plist', '/private/tmp'], '')

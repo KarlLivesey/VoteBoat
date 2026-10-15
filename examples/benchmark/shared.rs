@@ -13,9 +13,10 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Benchmark assembly: one WAL, snapshot worker and peer endpoint per replica.
-use super::observe::{ObservedIo, ObservedLog, Trace};
+use super::observe::{ObservedLog, Trace};
+use super::publication::BenchJournal;
 use super::*;
-pub(super) type SharedLog = ObservedLog<NativeLogStore<ObservedIo<FileLogIo>>>;
+pub(super) type SharedLog = ObservedLog<NativeLogStore<BenchJournal>>;
 use voteboat::{
     connect::*,
     dial::*,
@@ -38,6 +39,7 @@ pub(super) struct Partition {
     pub lane: u64,
     pub ready_visit_items: usize,
     pub capacity_profile: CapacityProfile,
+    pub publication: Publication,
 }
 
 pub(super) fn open_partition(
@@ -104,6 +106,7 @@ pub(super) fn open_partition(
             lane: partition.lane,
             ready_visit_items: partition.ready_visit_items,
             capacity_profile: partition.capacity_profile,
+            publication: partition.publication,
         };
         let (replica, trace) = match setup.open_replica(n) {
             Ok(opened) => opened,
@@ -116,7 +119,7 @@ pub(super) fn open_partition(
 }
 
 fn open_log(
-    directory: &Path,
+    journal: BenchJournal,
     identity: StoreIdentity,
     create: bool,
     bootstraps: &[Bootstrap],
@@ -125,10 +128,7 @@ fn open_log(
     let log = if create {
         let mut log = ObservedLog {
             inner: checked(NativeLogStore::create(
-                ObservedIo {
-                    inner: FileLogIo::create(directory)?,
-                    trace: trace.clone(),
-                },
+                journal,
                 identity,
                 LogLimits::default(),
             ))?,
@@ -147,14 +147,7 @@ fn open_log(
         log
     } else {
         ObservedLog {
-            inner: NativeLogStore::recover(
-                ObservedIo {
-                    inner: FileLogIo::open(directory)?,
-                    trace: trace.clone(),
-                },
-                identity,
-                LogLimits::default(),
-            )?,
+            inner: NativeLogStore::recover(journal, identity, LogLimits::default())?,
             trace: trace.clone(),
         }
     };
@@ -412,6 +405,7 @@ struct ClusterSetup<'a> {
     lane: u64,
     ready_visit_items: usize,
     capacity_profile: CapacityProfile,
+    publication: Publication,
 }
 impl ClusterSetup<'_> {
     fn check_capacity(
@@ -471,12 +465,13 @@ impl ClusterSetup<'_> {
             lane,
             ready_visit_items,
             capacity_profile,
+            publication,
         } = *self;
         let directory = root.join(format!("replica{n}"));
         let create = mode == NativeOpenMode::Create;
-        let trace = Trace::default();
         let identity = bootstraps.first().ok_or("empty lane")?.voter_stores[&node(n)];
-        let log = open_log(&directory, identity, create, bootstraps, &trace)?;
+        let (journal, trace) = publication.open(&directory, mode, n)?;
+        let log = open_log(journal, identity, create, bootstraps, &trace)?;
         let RecoveredGroups {
             cores,
             applications,

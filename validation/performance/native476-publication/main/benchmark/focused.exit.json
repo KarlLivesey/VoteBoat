@@ -1,0 +1,20 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--all-features",
+    "--example",
+    "native_benchmark",
+    "--message-format=json",
+    "-vv",
+    "publication::tests",
+    "--",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "start_unix": 1792063395.9478257,
+  "end_unix": 1792063413.9341805
+}

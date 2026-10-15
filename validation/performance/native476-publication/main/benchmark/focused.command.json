@@ -1,0 +1,15 @@
+[
+  "cargo",
+  "+stable",
+  "test",
+  "--locked",
+  "--offline",
+  "--all-features",
+  "--example",
+  "native_benchmark",
+  "--message-format=json",
+  "-vv",
+  "publication::tests",
+  "--",
+  "--test-threads=1"
+]

@@ -1,0 +1,56 @@
+{
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--example",
+        "native_benchmark",
+        "--message-format=json",
+        "-vv",
+        "publication",
+        "--",
+        "--test-threads=1"
+      ],
+      "exit": 0,
+      "start_unix": 1792063685.291059,
+      "end_unix": 1792063688.4736063
+    },
+    {
+      "command": [
+        "cargo",
+        "+stable",
+        "clippy",
+        "--locked",
+        "--offline",
+        "--keep-going",
+        "--all-features",
+        "--example",
+        "native_benchmark",
+        "--message-format=json",
+        "-vv",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "start_unix": 1792063688.4738386,
+      "end_unix": 1792063690.7909164
+    },
+    {
+      "command": [
+        "node",
+        "validation/check-publication-profile.test.mjs"
+      ],
+      "exit": 0,
+      "start_unix": 1792063690.791099,
+      "end_unix": 1792063690.8203993
+    }
+  ],
+  "source_before_after_exact": true,
+  "scope": "Diagnostic-accounting focused tests and native-example strict; no provider or performance changes."
+}

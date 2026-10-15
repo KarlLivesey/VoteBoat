@@ -1,0 +1,14 @@
+[
+  "cargo",
+  "+stable",
+  "test",
+  "--locked",
+  "--offline",
+  "--no-default-features",
+  "--features",
+  "native",
+  "--test",
+  "witness_log_store",
+  "--",
+  "--test-threads=1"
+]

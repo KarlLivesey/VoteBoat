@@ -1,0 +1,9 @@
+{
+  "command": [
+    "node",
+    "validation/check-publication-profile.test.mjs"
+  ],
+  "exit": 0,
+  "start_unix": 1792063690.791099,
+  "end_unix": 1792063690.8203993
+}

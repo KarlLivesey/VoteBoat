@@ -1,0 +1,5 @@
+  File: /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native475-linux/sweep/campaign-wal
+    ID: cc7f4dc26f3e9e00 Namelen: 255     Type: btrfs
+Block size: 4096       Fundamental block size: 4096
+Blocks: Total: 487329549  Free: 205203261  Available: 188034400
+Inodes: Total: 0          Free: 0

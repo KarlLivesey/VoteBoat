@@ -1,0 +1,91 @@
+{
+  "exit": 0,
+  "source_exact": true,
+  "inputs": 1491,
+  "allfeature_reuse": "../checked/strict-all.exit.json exact shared checked/BEFORE guard",
+  "commands": [
+    {
+      "command": [
+        "cargo",
+        "+stable",
+        "clippy",
+        "--locked",
+        "--offline",
+        "--keep-going",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "elapsed_s": 10.416067346988712
+    },
+    {
+      "command": [
+        "cargo",
+        "+stable",
+        "clippy",
+        "--locked",
+        "--offline",
+        "--keep-going",
+        "--all-targets",
+        "--no-default-features",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "elapsed_s": 7.092207331006648
+    },
+    {
+      "command": [
+        "cargo",
+        "+stable",
+        "clippy",
+        "--locked",
+        "--offline",
+        "--keep-going",
+        "--all-targets",
+        "--no-default-features",
+        "--features",
+        "native",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "elapsed_s": 9.237950871989597
+    },
+    {
+      "command": [
+        "cargo",
+        "+stable",
+        "fmt",
+        "--manifest-path",
+        "benchmarks/matched/Cargo.toml",
+        "--",
+        "--check"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.09102435200475156
+    },
+    {
+      "command": [
+        "cargo",
+        "+stable",
+        "clippy",
+        "--manifest-path",
+        "benchmarks/matched/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--keep-going",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.46053629799280316
+    }
+  ]
+}

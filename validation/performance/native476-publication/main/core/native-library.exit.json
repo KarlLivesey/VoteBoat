@@ -1,0 +1,18 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--all-features",
+    "--lib",
+    "native::log_store::",
+    "--message-format=json",
+    "-vv",
+    "--",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "elapsed_s": 16.056340153998462
+}

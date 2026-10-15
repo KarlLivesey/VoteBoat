@@ -47,3 +47,29 @@ test('live snapshot can end inside a call without inventing an atomic observatio
     rows[31] = joined.join(',');
     assert.doesNotThrow(() => validatePublication(rows.join('\n') + '\n'));
 });
+function witnessFixture() {
+    return fixture().trimEnd().split('\n').map((line, index) => {
+        if (!index) return line;
+        const row = line.split(',');
+        if (['open', 'rename', 'directory_sync'].includes(row[2])) {
+            for (const field of [3, 4, 5, 6]) row[field] = '0';
+        }
+        return row.join(',');
+    }).join('\n') + '\n';
+}
+test('explicit witness scope requires fixed-file write and sync without ordinary namespace work', () => {
+    const result = validatePublication(witnessFixture(), 'witness');
+    assert.equal(result.provider, 'witness');
+    assert.equal(result.measurement_deltas.length, 15);
+    for (const delta of result.measurement_deltas) {
+        assert.equal(delta.calls, ['write', 'file_sync'].includes(delta.step) ? '10' : '0');
+    }
+    assert.throws(() => validatePublication(witnessFixture()));
+    assert.throws(() => validatePublication(fixture(), 'witness'));
+    assert.throws(() => validatePublication(fixture(), 'unknown'));
+    for (const field of [3, 5, 6]) {
+        const rows = witnessFixture().trimEnd().split('\n');
+        const row = rows[1].split(','); row[field] = '1'; rows[1] = row.join(',');
+        assert.throws(() => validatePublication(rows.join('\n') + '\n', 'witness'));
+    }
+});

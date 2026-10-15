@@ -1,0 +1,181 @@
+   Compiling getrandom v0.2.17
+   Compiling regex-automata v0.4.18
+   Compiling rand_core v0.6.4
+   Compiling rand v0.10.3
+   Compiling thiserror-impl v2.0.21
+   Compiling thiserror-impl v1.0.69
+   Compiling getset v0.1.7
+   Compiling protobuf-codegen v2.28.0
+   Compiling ppv-lite86 v0.2.21
+   Compiling rand_chacha v0.3.1
+   Compiling regex v1.13.1
+   Compiling rand v0.8.8
+   Compiling protobuf-build v0.14.1
+   Compiling raft-proto v0.7.0
+   Compiling raft v0.7.0
+   Compiling rustls-webpki v0.103.15
+   Compiling quinn-proto v0.11.19
+error[E0425]: cannot find function `manifest` in module `super::super::super::super`
+   --> src/native/log_store/witness/tests/crash.rs:117:52
+    |
+117 |         let manifest = super::super::super::super::manifest(binding, 0);
+    |                                                    ^^^^^^^^ not found in `super::super::super::super`
+    |
+note: function `crate::native::snapshot_store::manifest` exists but is inaccessible
+   --> src/native/snapshot_store.rs:718:1
+    |
+718 | / fn manifest(
+719 | |     identity: SnapshotIdentity,
+720 | |     binding: StoreBinding,
+721 | |     root: Option<&Root>,
+...   |
+742 | |     b
+743 | | }
+    | |_^ not accessible
+help: consider importing this function
+    |
+  3 + use crate::native::log_store::manifest;
+    |
+help: if you import `manifest`, refer to it directly
+    |
+117 -         let manifest = super::super::super::super::manifest(binding, 0);
+117 +         let manifest = manifest(binding, 0);
+    |
+
+error[E0425]: cannot find function `manifest` in module `super::super::super::super`
+   --> src/native/log_store/witness/tests/crash.rs:147:49
+    |
+147 |                     super::super::super::super::manifest(store.binding(), store.length as u64);
+    |                                                 ^^^^^^^^ not found in `super::super::super::super`
+    |
+note: function `crate::native::snapshot_store::manifest` exists but is inaccessible
+   --> src/native/snapshot_store.rs:718:1
+    |
+718 | / fn manifest(
+719 | |     identity: SnapshotIdentity,
+720 | |     binding: StoreBinding,
+721 | |     root: Option<&Root>,
+...   |
+742 | |     b
+743 | | }
+    | |_^ not accessible
+help: consider importing this function
+    |
+  3 + use crate::native::log_store::manifest;
+    |
+help: if you import `manifest`, refer to it directly
+    |
+147 -                     super::super::super::super::manifest(store.binding(), store.length as u64);
+147 +                     manifest(store.binding(), store.length as u64);
+    |
+
+error[E0425]: cannot find function `manifest` in module `super::super::super::super`
+   --> src/native/log_store/witness/tests/crash.rs:154:45
+    |
+154 |                 super::super::super::super::manifest(store.binding(), bytes.len() as u64);
+    |                                             ^^^^^^^^ not found in `super::super::super::super`
+    |
+note: function `crate::native::snapshot_store::manifest` exists but is inaccessible
+   --> src/native/snapshot_store.rs:718:1
+    |
+718 | / fn manifest(
+719 | |     identity: SnapshotIdentity,
+720 | |     binding: StoreBinding,
+721 | |     root: Option<&Root>,
+...   |
+742 | |     b
+743 | | }
+    | |_^ not accessible
+help: consider importing this function
+    |
+  3 + use crate::native::log_store::manifest;
+    |
+help: if you import `manifest`, refer to it directly
+    |
+154 -                 super::super::super::super::manifest(store.binding(), bytes.len() as u64);
+154 +                 manifest(store.binding(), bytes.len() as u64);
+    |
+
+error[E0425]: cannot find function `manifest` in module `super::super::super::super`
+   --> src/native/log_store/witness/tests/selection.rs:84:48
+    |
+ 84 |     let metadata = super::super::super::super::manifest(store.binding(), store.length as u64);
+    |                                                ^^^^^^^^ not found in `super::super::super::super`
+    |
+note: function `crate::native::snapshot_store::manifest` exists but is inaccessible
+   --> src/native/snapshot_store.rs:718:1
+    |
+718 | / fn manifest(
+719 | |     identity: SnapshotIdentity,
+720 | |     binding: StoreBinding,
+721 | |     root: Option<&Root>,
+...   |
+742 | |     b
+743 | | }
+    | |_^ not accessible
+help: consider importing this function
+    |
+  3 + use crate::native::log_store::manifest;
+    |
+help: if you import `manifest`, refer to it directly
+    |
+ 84 -     let metadata = super::super::super::super::manifest(store.binding(), store.length as u64);
+ 84 +     let metadata = manifest(store.binding(), store.length as u64);
+    |
+
+error[E0425]: cannot find function `manifest` in module `super::super::super::super`
+   --> src/native/log_store/witness/tests/selection.rs:95:42
+    |
+ 95 |             &super::super::super::super::manifest(store.binding(), 0)
+    |                                          ^^^^^^^^ not found in `super::super::super::super`
+    |
+note: function `crate::native::snapshot_store::manifest` exists but is inaccessible
+   --> src/native/snapshot_store.rs:718:1
+    |
+718 | / fn manifest(
+719 | |     identity: SnapshotIdentity,
+720 | |     binding: StoreBinding,
+721 | |     root: Option<&Root>,
+...   |
+742 | |     b
+743 | | }
+    | |_^ not accessible
+help: consider importing this function
+    |
+  3 + use crate::native::log_store::manifest;
+    |
+help: if you import `manifest`, refer to it directly
+    |
+ 95 -             &super::super::super::super::manifest(store.binding(), 0)
+ 95 +             &manifest(store.binding(), 0)
+    |
+
+error[E0425]: cannot find function `manifest` in module `super::super::super`
+   --> src/native/log_store/witness/tests.rs:118:38
+    |
+118 |     let bytes = super::super::super::manifest(store.binding(), store.length as u64);
+    |                                      ^^^^^^^^ not found in `super::super::super`
+    |
+note: function `crate::native::snapshot_store::manifest` exists but is inaccessible
+   --> src/native/snapshot_store.rs:718:1
+    |
+718 | / fn manifest(
+719 | |     identity: SnapshotIdentity,
+720 | |     binding: StoreBinding,
+721 | |     root: Option<&Root>,
+...   |
+742 | |     b
+743 | | }
+    | |_^ not accessible
+help: consider importing this function
+    |
+  3 + use crate::native::log_store::manifest;
+    |
+help: if you import `manifest`, refer to it directly
+    |
+118 -     let bytes = super::super::super::manifest(store.binding(), store.length as u64);
+118 +     let bytes = manifest(store.binding(), store.length as u64);
+    |
+
+For more information about this error, try `rustc --explain E0425`.
+error: could not compile `voteboat` (lib test) due to 6 previous errors

@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/examples/native_benchmark",
+    "--lanes",
+    "target/p9/native476-publication/network/wal/invalid-lanes-corrected",
+    "tcp",
+    "8",
+    "1",
+    "--publication",
+    "witness"
+  ],
+  "exit": 1,
+  "elapsed_s": 0.0008109630143735558,
+  "root_created": false,
+  "scope": "Corrected argv exercises actual first-argument --lanes branch. Original invalid-6 rejected earlier as unsupported protocol and remains preserved; no successful workload repeated."
+}

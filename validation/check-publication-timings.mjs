@@ -10,7 +10,8 @@ export const steps = ['open', 'write', 'file_sync', 'rename', 'directory_sync'];
 const stages = ['before_measurement', 'after_measurement', 'after_create_join', 'after_recover_join'];
 const fields = ['stage', 'replica', 'step', 'calls', 'errors', 'elapsed_ns', 'max_ns', 'manifest_calls', 'manifest_errors', 'manifest_ns'];
 
-export function validatePublication(csv) {
+export function validatePublication(csv, provider = 'atomic') {
+    assert.ok(['atomic', 'witness'].includes(provider), 'unknown publication provider');
     const lines = csv.trimEnd().split('\n');
     assert.deepEqual(lines.shift().split(','), fields);
     assert.equal(lines.length, 60, 'need all replica/stage/step snapshots');
@@ -43,9 +44,13 @@ export function validatePublication(csv) {
             assert.equal(row.manifest_calls, first.manifest_calls);
             assert.equal(row.manifest_ns, first.manifest_ns);
             if (key.includes('_join:')) {
-                assert.equal(row.calls, row.manifest_calls);
+                const namespace = ['open', 'rename', 'directory_sync'].includes(row.step);
+                assert.equal(row.calls, provider === 'witness' && namespace ? 0n : row.manifest_calls);
                 assert.ok(row.max_ns <= row.elapsed_ns);
-                assert.ok(row.calls > 0n);
+                if (provider !== 'witness' || !namespace) assert.ok(row.calls > 0n);
+            }
+            if (provider === 'witness' && ['open', 'rename', 'directory_sync'].includes(row.step)) {
+                for (const field of ['calls', 'errors', 'elapsed_ns', 'max_ns']) assert.equal(row[field], 0n, 'ordinary witness publication performs no namespace operation');
             }
             elapsed += row.elapsed_ns;
         }
@@ -62,14 +67,15 @@ export function validatePublication(csv) {
             }
             const calls = rows[1].calls - rows[0].calls;
             const elapsed = rows[1].elapsed_ns - rows[0].elapsed_ns;
-            assert.ok(calls > 0n);
+            if (provider === 'witness' && ['open', 'rename', 'directory_sync'].includes(step)) assert.equal(calls, 0n);
+            else assert.ok(calls > 0n);
             deltas.push({ replica, step, calls: calls.toString(), elapsed_ns: elapsed.toString() });
         }
     }
-    return { scope: 'finite diagnostic; live snapshots may cut calls; joined totals stable; parallel times are not client critical path', measurement_deltas: deltas };
+    return { scope: 'finite ordinary-barrier diagnostic; cold repair, initialization selector and reclamation namespace work excluded; live snapshots may cut calls; joined totals stable; parallel times are not client critical path', provider, measurement_deltas: deltas };
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-    assert.equal(process.argv.length, 3, 'usage: node check-publication-timings.mjs PUBLICATION_CSV');
-    process.stdout.write(JSON.stringify(validatePublication(fs.readFileSync(process.argv[2], 'utf8')), null, 2) + '\n');
+    assert.ok([3, 4].includes(process.argv.length), 'usage: node check-publication-timings.mjs PUBLICATION_CSV [atomic|witness]');
+    process.stdout.write(JSON.stringify(validatePublication(fs.readFileSync(process.argv[2], 'utf8'), process.argv[3] ?? 'atomic'), null, 2) + '\n');
 }

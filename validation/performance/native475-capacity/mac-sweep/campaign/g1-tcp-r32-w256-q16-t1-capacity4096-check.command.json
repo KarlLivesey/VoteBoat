@@ -1,0 +1,6 @@
+[
+  "node",
+  "/private/tmp/voteboat-mac475-dfc195c-Fz9Ivq/source/validation/check-native-benchmark.mjs",
+  "--storage",
+  "/private/tmp/voteboat-mac475-dfc195c-Fz9Ivq/sweep/campaign-wal/g1-tcp-r32-w256-q16-t1-capacity4096"
+]

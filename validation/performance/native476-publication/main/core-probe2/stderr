@@ -1,0 +1,108 @@
+warning: failed to save last-use data
+This may prevent cargo from accurately tracking what is being used in its global cache. This information is used for automatically removing unused data in the cache.
+
+attempt to write a readonly database
+
+Caused by:
+  Error code 8: attempt to write a readonly database
+   0.035407239s  INFO prepare_target{force=false package_id=voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat) target="journal_barrier"}: cargo::core::compiler::fingerprint: fingerprint error for voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)/Test/TargetInner { kind: "test", name: "journal_barrier", benched: false, ..: with_path("/home/karllivesey/Documents/ChatGPT/VoteBoat/tests/journal_barrier.rs", Edition2021) }
+   0.035525151s  INFO prepare_target{force=false package_id=voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat) target="journal_barrier"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/.fingerprint/voteboat-f8d88df347cd4909/test-integration-test-journal_barrier`
+
+Caused by:
+    No such file or directory (os error 2)
+       Fresh cfg-if v1.0.5
+       Fresh libc v0.2.190
+       Fresh unicode-ident v1.0.26
+       Fresh proc-macro2 v1.0.107
+       Fresh quote v1.0.47
+       Fresh bytes v1.12.1
+       Fresh find-msvc-tools v0.1.14
+       Fresh shlex v2.0.1
+       Fresh cc v1.6.0
+       Fresh getrandom v0.2.17
+       Fresh rand_core v0.10.1
+       Fresh untrusted v0.9.0
+       Fresh memchr v2.8.3
+       Fresh zeroize v1.9.1
+       Fresh once_cell v1.21.4
+       Fresh rustls-pki-types v1.15.1
+       Fresh aho-corasick v1.1.5
+       Fresh ring v0.17.14
+       Fresh syn v3.0.6
+       Fresh cpufeatures v0.3.1
+       Fresh regex-syntax v0.8.11
+       Fresh regex-automata v0.4.18
+       Fresh chacha20 v0.10.2
+       Fresh thiserror-impl v2.0.21
+       Fresh rustls-webpki v0.103.15
+       Fresh getrandom v0.4.3
+       Fresh tracing-core v0.1.36
+       Fresh subtle v2.6.1
+       Fresh pin-project-lite v0.2.17
+       Fresh tracing v0.1.44
+       Fresh rustls v0.23.45
+       Fresh rand v0.10.3
+       Fresh protobuf-codegen v2.28.0
+       Fresh thiserror v2.0.21
+       Fresh regex v1.13.1
+       Fresh rand_pcg v0.10.2
+       Fresh tinyvec v1.13.3
+       Fresh rustc-hash v2.1.3
+       Fresh slab v0.4.12
+       Fresh lru-slab v0.1.3
+       Fresh bitflags v1.3.2
+       Fresh syn v2.0.119
+       Fresh rand_core v0.6.4
+       Fresh protobuf-build v0.14.1
+       Fresh zerocopy v0.8.62
+       Fresh quinn-proto v0.11.19
+       Fresh thiserror-impl v1.0.69
+       Fresh byteorder v1.5.0
+       Fresh getset v0.1.7
+       Fresh ppv-lite86 v0.2.21
+       Fresh protobuf v2.28.0
+       Fresh fxhash v0.2.1
+       Fresh rand_chacha v0.3.1
+       Fresh thiserror v1.0.69
+       Fresh slog v2.7.0
+       Fresh raft-proto v0.7.0
+       Fresh rand v0.8.8
+       Fresh raft v0.7.0
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+     Running `CARGO=/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo CARGO_BIN_EXE_voteboat-counter=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/voteboat-counter CARGO_BIN_EXE_voteboat-directory=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/voteboat-directory CARGO_BIN_EXE_voteboat-transfer=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/voteboat-transfer CARGO_CRATE_NAME=journal_barrier CARGO_MANIFEST_DIR=/home/karllivesey/Documents/ChatGPT/VoteBoat CARGO_MANIFEST_PATH=/home/karllivesey/Documents/ChatGPT/VoteBoat/Cargo.toml CARGO_PKG_AUTHORS='' CARGO_PKG_DESCRIPTION='Native-first composable consensus runtime, under development' CARGO_PKG_HOMEPAGE='' CARGO_PKG_LICENSE=RPL-1.5 CARGO_PKG_LICENSE_FILE='' CARGO_PKG_NAME=voteboat CARGO_PKG_README=README.md CARGO_PKG_REPOSITORY='https://github.com/KarlLivesey/VoteBoat' CARGO_PKG_RUST_VERSION=1.98 CARGO_PKG_VERSION=0.1.0 CARGO_PKG_VERSION_MAJOR=0 CARGO_PKG_VERSION_MINOR=1 CARGO_PKG_VERSION_PATCH=0 CARGO_PKG_VERSION_PRE='' CARGO_PRIMARY_PACKAGE=1 CARGO_TARGET_TMPDIR=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/tmp LD_LIBRARY_PATH='/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps:/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib:/opt/t3code-bin/usr/lib' OUT_DIR=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/build/voteboat-e18197108413e629/out /home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --crate-name journal_barrier --edition=2021 tests/journal_barrier.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --emit=dep-info,link -C embed-bitcode=no -C debuginfo=2 '--warn=clippy::all' --forbid=unsafe_code '--deny=clippy::too_many_lines' '--deny=clippy::cognitive_complexity' --test --cfg 'feature="default"' --cfg 'feature="native"' --cfg 'feature="quic"' --cfg 'feature="tls"' --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values("default", "native", "quic", "tls"))' -C metadata=b465351fba6036c8 -C extra-filename=-f8d88df347cd4909 --out-dir /home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps -C incremental=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/incremental -L dependency=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps --extern bytes=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libbytes-1678f1a459ca6695.rlib --extern quinn_proto=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libquinn_proto-aae25ca65f56ae20.rlib --extern raft_reference=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libraft-503497b9b87e2cb3.rlib --extern ring=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libring-cfeecdac9bfbaa6f.rlib --extern rustls=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/librustls-6fe15bb37ecaecea.rlib --extern slog=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libslog-d046fed07d0c9a0a.rlib --extern voteboat=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libvoteboat-676f9e8fe1db37b5.rlib -L native=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/build/ring-b4b4d2c63cd52e10/out --cfg voteboat_checkpoint_debug_oracle --check-cfg 'cfg(voteboat_checkpoint_debug_oracle)'`
+error[E0407]: method `publish_barrier` is not a member of trait `JournalIo`
+  --> tests/journal_barrier.rs:50:5
+   |
+50 | /     fn publish_barrier(&mut self, manifest: &[u8]) -> io::Result<()> {
+51 | |         self.calls.set(self.calls.get() + 1);
+52 | |         if self.fail.get() { return Err(io::Error::other("combined publication")); }
+53 | |         self.inner.publish_barrier(manifest)
+54 | |     }
+   | |_____^ not a member of trait `JournalIo`
+
+error[E0599]: no method named `publish_barrier` found for struct `Ordered` in the current scope
+  --> tests/journal_barrier.rs:33:25
+   |
+10 | struct Ordered {
+   | -------------- method `publish_barrier` not found for this struct
+...
+33 |         let result = io.publish_barrier(b"original manifest");
+   |                         ^^^^^^^^^^^^^^^ method not found in `Ordered`
+
+error[E0599]: no method named `publish_barrier` found for struct `support::ModelIo` in the current scope
+   --> tests/journal_barrier.rs:53:20
+    |
+ 53 |         self.inner.publish_barrier(manifest)
+    |                    ^^^^^^^^^^^^^^^ method not found in `support::ModelIo`
+    |
+   ::: tests/support/mod.rs:118:1
+    |
+118 | pub struct ModelIo(pub Rc<RefCell<Device>>);
+    | ------------------ method `publish_barrier` not found for this struct
+
+Some errors have detailed explanations: E0407, E0599.
+For more information about an error, try `rustc --explain E0407`.
+error: could not compile `voteboat` (test "journal_barrier") due to 3 previous errors
+
+Caused by:
+  process didn't exit successfully: `CARGO=/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo CARGO_BIN_EXE_voteboat-counter=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/voteboat-counter CARGO_BIN_EXE_voteboat-directory=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/voteboat-directory CARGO_BIN_EXE_voteboat-transfer=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/voteboat-transfer CARGO_CRATE_NAME=journal_barrier CARGO_MANIFEST_DIR=/home/karllivesey/Documents/ChatGPT/VoteBoat CARGO_MANIFEST_PATH=/home/karllivesey/Documents/ChatGPT/VoteBoat/Cargo.toml CARGO_PKG_AUTHORS='' CARGO_PKG_DESCRIPTION='Native-first composable consensus runtime, under development' CARGO_PKG_HOMEPAGE='' CARGO_PKG_LICENSE=RPL-1.5 CARGO_PKG_LICENSE_FILE='' CARGO_PKG_NAME=voteboat CARGO_PKG_README=README.md CARGO_PKG_REPOSITORY='https://github.com/KarlLivesey/VoteBoat' CARGO_PKG_RUST_VERSION=1.98 CARGO_PKG_VERSION=0.1.0 CARGO_PKG_VERSION_MAJOR=0 CARGO_PKG_VERSION_MINOR=1 CARGO_PKG_VERSION_PATCH=0 CARGO_PKG_VERSION_PRE='' CARGO_PRIMARY_PACKAGE=1 CARGO_TARGET_TMPDIR=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/tmp LD_LIBRARY_PATH='/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps:/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib:/opt/t3code-bin/usr/lib' OUT_DIR=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/build/voteboat-e18197108413e629/out /home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --crate-name journal_barrier --edition=2021 tests/journal_barrier.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --emit=dep-info,link -C embed-bitcode=no -C debuginfo=2 '--warn=clippy::all' --forbid=unsafe_code '--deny=clippy::too_many_lines' '--deny=clippy::cognitive_complexity' --test --cfg 'feature="default"' --cfg 'feature="native"' --cfg 'feature="quic"' --cfg 'feature="tls"' --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values("default", "native", "quic", "tls"))' -C metadata=b465351fba6036c8 -C extra-filename=-f8d88df347cd4909 --out-dir /home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps -C incremental=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/incremental -L dependency=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps --extern bytes=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libbytes-1678f1a459ca6695.rlib --extern quinn_proto=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libquinn_proto-aae25ca65f56ae20.rlib --extern raft_reference=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libraft-503497b9b87e2cb3.rlib --extern ring=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libring-cfeecdac9bfbaa6f.rlib --extern rustls=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/librustls-6fe15bb37ecaecea.rlib --extern slog=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libslog-d046fed07d0c9a0a.rlib --extern voteboat=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/libvoteboat-676f9e8fe1db37b5.rlib -L native=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/build/ring-b4b4d2c63cd52e10/out --cfg voteboat_checkpoint_debug_oracle --check-cfg 'cfg(voteboat_checkpoint_debug_oracle)'` (exit status: 1)

@@ -1,0 +1,21 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "clippy",
+    "--locked",
+    "--offline",
+    "--keep-going",
+    "--all-features",
+    "--example",
+    "native_benchmark",
+    "--message-format=json",
+    "-vv",
+    "--",
+    "-D",
+    "warnings"
+  ],
+  "exit": 0,
+  "start_unix": 1792063473.7075489,
+  "end_unix": 1792063474.177666
+}

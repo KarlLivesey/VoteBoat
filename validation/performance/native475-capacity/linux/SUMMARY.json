@@ -1,0 +1,1838 @@
+[
+  {
+    "protocol": "tcp",
+    "offered_rate": 32,
+    "window": 32,
+    "trials": 3,
+    "during_ops_s": {
+      "median": 30.125,
+      "min": 29.54296875,
+      "max": 30.453125
+    },
+    "total_ops_s": {
+      "median": 30.143094055527097,
+      "min": 29.584705169984336,
+      "max": 30.465221867896474
+    },
+    "intended_p99_ms": {
+      "median": 1569.4002320000002,
+      "min": 1499.192304,
+      "max": 2003.988398
+    },
+    "service_p99_ms": {
+      "median": 1569.295814,
+      "min": 1499.113513,
+      "max": 2003.916636
+    },
+    "dispatch_p99_ms": {
+      "median": 0.182709,
+      "min": 0.174568,
+      "max": 0.36538299999999996
+    },
+    "applied": {
+      "median": 7724,
+      "min": 7586,
+      "max": 7817
+    },
+    "admitted": {
+      "median": 7724,
+      "min": 7586,
+      "max": 7817
+    },
+    "max_inflight": {
+      "median": 32,
+      "min": 32,
+      "max": 32
+    },
+    "backlog_at_horizon": {
+      "median": 21,
+      "min": 12,
+      "max": 23
+    },
+    "drain_ns": {
+      "median": 416278493,
+      "min": 244431503,
+      "max": 587660313
+    },
+    "checkpoints": {
+      "median": 127,
+      "min": 127,
+      "max": 127
+    },
+    "maintenance_skips": {
+      "median": 0,
+      "min": 0,
+      "max": 0
+    },
+    "host_poll_wall_over_measured_elapsed": {
+      "median": 0.09206569543378058,
+      "min": 0.08437645990268815,
+      "max": 0.11068486678336611
+    },
+    "refusals": {
+      "window_refused": [
+        375,
+        606,
+        468
+      ],
+      "no_leader": [
+        0,
+        0,
+        0
+      ],
+      "admission_refused": [
+        0,
+        0,
+        0
+      ],
+      "not_proposed": [
+        0,
+        0,
+        0
+      ]
+    },
+    "leader_barriers_per_applied_original": 0.675322963353546,
+    "leader_physical_commands_per_append_unit": 1.480772984579348,
+    "leader_barrier_wall_over_measured_elapsed": 0.8648411422489993,
+    "leader_sync_wall_over_measured_elapsed": 0.2915465947223036,
+    "leader_publish_wall_over_measured_elapsed": 0.5696172280929787,
+    "wholeprocess_peak_rss_bytes": {
+      "median": 19173376,
+      "max": 19222528
+    }
+  },
+  {
+    "protocol": "tcp",
+    "offered_rate": 32,
+    "window": 256,
+    "trials": 3,
+    "during_ops_s": {
+      "median": 31.94921875,
+      "min": 31.45703125,
+      "max": 31.96875
+    },
+    "total_ops_s": {
+      "median": 31.970460308113918,
+      "min": 31.874589819061807,
+      "max": 31.981159128361575
+    },
+    "intended_p99_ms": {
+      "median": 3525.289347,
+      "min": 3505.41176,
+      "max": 3541.205736
+    },
+    "service_p99_ms": {
+      "median": 3525.1876970000003,
+      "min": 3505.3563480000003,
+      "max": 3541.097798
+    },
+    "dispatch_p99_ms": {
+      "median": 0.185538,
+      "min": 0.179198,
+      "max": 0.343412
+    },
+    "applied": {
+      "median": 8192,
+      "min": 8192,
+      "max": 8192
+    },
+    "admitted": {
+      "median": 8192,
+      "min": 8192,
+      "max": 8192
+    },
+    "max_inflight": {
+      "median": 140,
+      "min": 139,
+      "max": 150
+    },
+    "backlog_at_horizon": {
+      "median": 13,
+      "min": 8,
+      "max": 139
+    },
+    "drain_ns": {
+      "median": 236535885,
+      "min": 150815770,
+      "max": 1007228846
+    },
+    "checkpoints": {
+      "median": 125,
+      "min": 125,
+      "max": 127
+    },
+    "maintenance_skips": {
+      "median": 2,
+      "min": 0,
+      "max": 2
+    },
+    "host_poll_wall_over_measured_elapsed": {
+      "median": 0.09247749584084801,
+      "min": 0.08548992798525555,
+      "max": 0.10820129116548313
+    },
+    "refusals": {
+      "window_refused": [
+        0,
+        0,
+        0
+      ],
+      "no_leader": [
+        0,
+        0,
+        0
+      ],
+      "admission_refused": [
+        0,
+        0,
+        0
+      ],
+      "not_proposed": [
+        0,
+        0,
+        0
+      ]
+    },
+    "leader_barriers_per_applied_original": 0.62548828125,
+    "leader_physical_commands_per_append_unit": 1.5987509758001561,
+    "leader_barrier_wall_over_measured_elapsed": 0.8549077344521471,
+    "leader_sync_wall_over_measured_elapsed": 0.2895006849542041,
+    "leader_publish_wall_over_measured_elapsed": 0.5601479249507213,
+    "wholeprocess_peak_rss_bytes": {
+      "median": 20238336,
+      "max": 20787200
+    }
+  },
+  {
+    "protocol": "tcp",
+    "offered_rate": 32,
+    "window": 4096,
+    "trials": 3,
+    "during_ops_s": {
+      "median": 31.96875,
+      "min": 31.8515625,
+      "max": 31.98046875
+    },
+    "total_ops_s": {
+      "median": 31.975046941033334,
+      "min": 31.97379762497167,
+      "max": 31.991904356375958
+    },
+    "intended_p99_ms": {
+      "median": 3159.952084,
+      "min": 2914.737652,
+      "max": 3286.582146
+    },
+    "service_p99_ms": {
+      "median": 3159.8082280000003,
+      "min": 2914.634994,
+      "max": 3286.4751579999997
+    },
+    "dispatch_p99_ms": {
+      "median": 0.194862,
+      "min": 0.183958,
+      "max": 0.6052580000000001
+    },
+    "applied": {
+      "median": 8192,
+      "min": 8192,
+      "max": 8192
+    },
+    "admitted": {
+      "median": 8192,
+      "min": 8192,
+      "max": 8192
+    },
+    "max_inflight": {
+      "median": 127,
+      "min": 120,
+      "max": 129
+    },
+    "backlog_at_horizon": {
+      "median": 8,
+      "min": 5,
+      "max": 38
+    },
+    "drain_ns": {
+      "median": 199780257,
+      "min": 64781538,
+      "max": 209790782
+    },
+    "checkpoints": {
+      "median": 126,
+      "min": 124,
+      "max": 126
+    },
+    "maintenance_skips": {
+      "median": 1,
+      "min": 1,
+      "max": 3
+    },
+    "host_poll_wall_over_measured_elapsed": {
+      "median": 0.09770740580831361,
+      "min": 0.0860616398226933,
+      "max": 0.11510507530653616
+    },
+    "refusals": {
+      "window_refused": [
+        0,
+        0,
+        0
+      ],
+      "no_leader": [
+        0,
+        0,
+        0
+      ],
+      "admission_refused": [
+        0,
+        0,
+        0
+      ],
+      "not_proposed": [
+        0,
+        0,
+        0
+      ]
+    },
+    "leader_barriers_per_applied_original": 0.6175537109375,
+    "leader_physical_commands_per_append_unit": 1.6192923502668513,
+    "leader_barrier_wall_over_measured_elapsed": 0.8605871373575306,
+    "leader_sync_wall_over_measured_elapsed": 0.28966408819928074,
+    "leader_publish_wall_over_measured_elapsed": 0.5706644701698778,
+    "wholeprocess_peak_rss_bytes": {
+      "median": 20267008,
+      "max": 20365312
+    }
+  },
+  {
+    "protocol": "tcp",
+    "offered_rate": 128,
+    "window": 32,
+    "trials": 3,
+    "during_ops_s": {
+      "median": 68.46875,
+      "min": 65.25,
+      "max": 76.53125
+    },
+    "total_ops_s": {
+      "median": 68.79752882578241,
+      "min": 65.24368885705105,
+      "max": 76.73761050718136
+    },
+    "intended_p99_ms": {
+      "median": 1571.855004,
+      "min": 1062.218922,
+      "max": 2298.22655
+    },
+    "service_p99_ms": {
+      "median": 1571.762371,
+      "min": 1062.106155,
+      "max": 2298.153052
+    },
+    "dispatch_p99_ms": {
+      "median": 0.17746,
+      "min": 0.174475,
+      "max": 0.177911
+    },
+    "applied": {
+      "median": 4414,
+      "min": 4205,
+      "max": 4925
+    },
+    "admitted": {
+      "median": 4414,
+      "min": 4205,
+      "max": 4925
+    },
+    "max_inflight": {
+      "median": 32,
+      "min": 32,
+      "max": 32
+    },
+    "backlog_at_horizon": {
+      "median": 29,
+      "min": 27,
+      "max": 32
+    },
+    "drain_ns": {
+      "median": 179741426,
+      "min": 159281232,
+      "max": 450678275
+    },
+    "checkpoints": {
+      "median": 31,
+      "min": 30,
+      "max": 31
+    },
+    "maintenance_skips": {
+      "median": 0,
+      "min": 0,
+      "max": 1
+    },
+    "host_poll_wall_over_measured_elapsed": {
+      "median": 0.08575378174990961,
+      "min": 0.08471836365635207,
+      "max": 0.08677451601174359
+    },
+    "refusals": {
+      "window_refused": [
+        3987,
+        3267,
+        3778
+      ],
+      "no_leader": [
+        0,
+        0,
+        0
+      ],
+      "admission_refused": [
+        0,
+        0,
+        0
+      ],
+      "not_proposed": [
+        0,
+        0,
+        0
+      ]
+    },
+    "leader_barriers_per_applied_original": 0.28418549346016647,
+    "leader_physical_commands_per_append_unit": 3.518828451882845,
+    "leader_barrier_wall_over_measured_elapsed": 0.860648541219306,
+    "leader_sync_wall_over_measured_elapsed": 0.2985504968431937,
+    "leader_publish_wall_over_measured_elapsed": 0.5582896008057948,
+    "wholeprocess_peak_rss_bytes": {
+      "median": 16355328,
+      "max": 16756736
+    }
+  },
+  {
+    "protocol": "tcp",
+    "offered_rate": 128,
+    "window": 256,
+    "trials": 3,
+    "during_ops_s": {
+      "median": 119.859375,
+      "min": 118.265625,
+      "max": 120.140625
+    },
+    "total_ops_s": {
+      "median": 119.9633541673234,
+      "min": 118.94264857667689,
+      "max": 121.00119648090632
+    },
+    "intended_p99_ms": {
+      "median": 5030.248261,
+      "min": 4757.270781,
+      "max": 5351.975784
+    },
+    "service_p99_ms": {
+      "median": 5030.177333,
+      "min": 4757.231474,
+      "max": 5351.96403
+    },
+    "dispatch_p99_ms": {
+      "median": 0.181739,
+      "min": 0.17761600000000002,
+      "max": 0.19105699999999998
+    },
+    "applied": {
+      "median": 7768,
+      "min": 7691,
+      "max": 7792
+    },
+    "admitted": {
+      "median": 7768,
+      "min": 7691,
+      "max": 7792
+    },
+    "max_inflight": {
+      "median": 256,
+      "min": 256,
+      "max": 256
+    },
+    "backlog_at_horizon": {
+      "median": 79,
+      "min": 20,
+      "max": 223
+    },
+    "drain_ns": {
+      "median": 197712303,
+      "min": 111245083,
+      "max": 1510564068
+    },
+    "checkpoints": {
+      "median": 31,
+      "min": 30,
+      "max": 31
+    },
+    "maintenance_skips": {
+      "median": 0,
+      "min": 0,
+      "max": 1
+    },
+    "host_poll_wall_over_measured_elapsed": {
+      "median": 0.09379287275899631,
+      "min": 0.08810558885086753,
+      "max": 0.09723924383062918
+    },
+    "refusals": {
+      "window_refused": [
+        424,
+        400,
+        501
+      ],
+      "no_leader": [
+        0,
+        0,
+        0
+      ],
+      "admission_refused": [
+        0,
+        0,
+        0
+      ],
+      "not_proposed": [
+        0,
+        0,
+        0
+      ]
+    },
+    "leader_barriers_per_applied_original": 0.18073072422311792,
+    "leader_physical_commands_per_append_unit": 5.533093525179856,
+    "leader_barrier_wall_over_measured_elapsed": 0.8581889273055034,
+    "leader_sync_wall_over_measured_elapsed": 0.29594777660980276,
+    "leader_publish_wall_over_measured_elapsed": 0.5621247472318412,
+    "wholeprocess_peak_rss_bytes": {
+      "median": 18284544,
+      "max": 18378752
+    }
+  },
+  {
+    "protocol": "tcp",
+    "offered_rate": 128,
+    "window": 4096,
+    "trials": 3,
+    "during_ops_s": {
+      "median": 127.5625,
+      "min": 122.984375,
+      "max": 127.671875
+    },
+    "total_ops_s": {
+      "median": 127.72398787546904,
+      "min": 124.67058301513707,
+      "max": 127.74349866739
+    },
+    "intended_p99_ms": {
+      "median": 5709.109941,
+      "min": 4075.3293280000003,
+      "max": 6069.681313
+    },
+    "service_p99_ms": {
+      "median": 5708.957937,
+      "min": 4075.238185,
+      "max": 6069.59931
+    },
+    "dispatch_p99_ms": {
+      "median": 0.185224,
+      "min": 0.181232,
+      "max": 0.189502
+    },
+    "applied": {
+      "median": 8192,
+      "min": 8192,
+      "max": 8192
+    },
+    "admitted": {
+      "median": 8192,
+      "min": 8192,
+      "max": 8192
+    },
+    "max_inflight": {
+      "median": 765,
+      "min": 560,
+      "max": 831
+    },
+    "backlog_at_horizon": {
+      "median": 28,
+      "min": 21,
+      "max": 321
+    },
+    "drain_ns": {
+      "median": 138304294,
+      "min": 128508186,
+      "max": 1709165722
+    },
+    "checkpoints": {
+      "median": 30,
+      "min": 30,
+      "max": 31
+    },
+    "maintenance_skips": {
+      "median": 1,
+      "min": 0,
+      "max": 1
+    },
+    "host_poll_wall_over_measured_elapsed": {
+      "median": 0.09579382358595258,
+      "min": 0.09567254325822622,
+      "max": 0.10089449777682019
+    },
+    "refusals": {
+      "window_refused": [
+        0,
+        0,
+        0
+      ],
+      "no_leader": [
+        0,
+        0,
+        0
+      ],
+      "admission_refused": [
+        0,
+        0,
+        0
+      ],
+      "not_proposed": [
+        0,
+        0,
+        0
+      ]
+    },
+    "leader_barriers_per_applied_original": 0.1651611328125,
+    "leader_physical_commands_per_append_unit": 6.054693274205469,
+    "leader_barrier_wall_over_measured_elapsed": 0.8454276378970712,
+    "leader_sync_wall_over_measured_elapsed": 0.2971225886141985,
+    "leader_publish_wall_over_measured_elapsed": 0.5599486592189138,
+    "wholeprocess_peak_rss_bytes": {
+      "median": 19865600,
+      "max": 20639744
+    }
+  },
+  {
+    "protocol": "tcp",
+    "offered_rate": 512,
+    "window": 32,
+    "trials": 3,
+    "during_ops_s": {
+      "median": 82.1875,
+      "min": 58.5625,
+      "max": 83.9375
+    },
+    "total_ops_s": {
+      "median": 83.42586738133203,
+      "min": 57.39857289793149,
+      "max": 85.04590980265071
+    },
+    "intended_p99_ms": {
+      "median": 1343.261112,
+      "min": 1039.316329,
+      "max": 1923.179062
+    },
+    "service_p99_ms": {
+      "median": 1343.129212,
+      "min": 1039.2658860000001,
+      "max": 1923.130764
+    },
+    "dispatch_p99_ms": {
+      "median": 0.174547,
+      "min": 0.174488,
+      "max": 0.175874
+    },
+    "applied": {
+      "median": 1347,
+      "min": 969,
+      "max": 1369
+    },
+    "admitted": {
+      "median": 1347,
+      "min": 969,
+      "max": 1369
+    },
+    "max_inflight": {
+      "median": 32,
+      "min": 32,
+      "max": 32
+    },
+    "backlog_at_horizon": {
+      "median": 32,
+      "min": 26,
+      "max": 32
+    },
+    "drain_ns": {
+      "median": 146071264,
+      "min": 97188015,
+      "max": 881952827
+    },
+    "checkpoints": {
+      "median": 7,
+      "min": 7,
+      "max": 7
+    },
+    "maintenance_skips": {
+      "median": 0,
+      "min": 0,
+      "max": 0
+    },
+    "host_poll_wall_over_measured_elapsed": {
+      "median": 0.08467286328083558,
+      "min": 0.08381080165898275,
+      "max": 0.08910576303523492
+    },
+    "refusals": {
+      "window_refused": [
+        6845,
+        6823,
+        7223
+      ],
+      "no_leader": [
+        0,
+        0,
+        0
+      ],
+      "admission_refused": [
+        0,
+        0,
+        0
+      ],
+      "not_proposed": [
+        0,
+        0,
+        0
+      ]
+    },
+    "leader_barriers_per_applied_original": 0.2218782249742002,
+    "leader_physical_commands_per_append_unit": 4.506976744186047,
+    "leader_barrier_wall_over_measured_elapsed": 0.8305209888363837,
+    "leader_sync_wall_over_measured_elapsed": 0.2875832839809416,
+    "leader_publish_wall_over_measured_elapsed": 0.5424876165863681,
+    "wholeprocess_peak_rss_bytes": {
+      "median": 13455360,
+      "max": 13635584
+    }
+  },
+  {
+    "protocol": "tcp",
+    "offered_rate": 512,
+    "window": 256,
+    "trials": 3,
+    "during_ops_s": {
+      "median": 151.5,
+      "min": 118.8125,
+      "max": 194.75
+    },
+    "total_ops_s": {
+      "median": 160.90801356781216,
+      "min": 120.22701484327747,
+      "max": 175.26174022151042
+    },
+    "intended_p99_ms": {
+      "median": 4649.845597,
+      "min": 3304.369429,
+      "max": 7923.101181
+    },
+    "service_p99_ms": {
+      "median": 4649.814505,
+      "min": 3304.284425,
+      "max": 7922.947677
+    },
+    "dispatch_p99_ms": {
+      "median": 0.184983,
+      "min": 0.18440399999999998,
+      "max": 0.185184
+    },
+    "applied": {
+      "median": 2670,
+      "min": 2157,
+      "max": 3372
+    },
+    "admitted": {
+      "median": 2670,
+      "min": 2157,
+      "max": 3372
+    },
+    "max_inflight": {
+      "median": 256,
+      "min": 256,
+      "max": 256
+    },
+    "backlog_at_horizon": {
+      "median": 256,
+      "min": 246,
+      "max": 256
+    },
+    "drain_ns": {
+      "median": 1941059277,
+      "min": 593331437,
+      "max": 3239795267
+    },
+    "checkpoints": {
+      "median": 7,
+      "min": 7,
+      "max": 7
+    },
+    "maintenance_skips": {
+      "median": 0,
+      "min": 0,
+      "max": 0
+    },
+    "host_poll_wall_over_measured_elapsed": {
+      "median": 0.10163046561220809,
+      "min": 0.09800405741500451,
+      "max": 0.10228654683464485
+    },
+    "refusals": {
+      "window_refused": [
+        6035,
+        4820,
+        5522
+      ],
+      "no_leader": [
+        0,
+        0,
+        0
+      ],
+      "admission_refused": [
+        0,
+        0,
+        0
+      ],
+      "not_proposed": [
+        0,
+        0,
+        0
+      ]
+    },
+    "leader_barriers_per_applied_original": 0.11910112359550562,
+    "leader_physical_commands_per_append_unit": 8.39622641509434,
+    "leader_barrier_wall_over_measured_elapsed": 0.870156265655263,
+    "leader_sync_wall_over_measured_elapsed": 0.30755703311195737,
+    "leader_publish_wall_over_measured_elapsed": 0.5565148139215101,
+    "wholeprocess_peak_rss_bytes": {
+      "median": 14266368,
+      "max": 15540224
+    }
+  },
+  {
+    "protocol": "tcp",
+    "offered_rate": 512,
+    "window": 4096,
+    "trials": 3,
+    "during_ops_s": {
+      "median": 183.875,
+      "min": 157.5,
+      "max": 188.75
+    },
+    "total_ops_s": {
+      "median": 200.43602258850575,
+      "min": 197.10346838750016,
+      "max": 221.17742112555896
+    },
+    "intended_p99_ms": {
+      "median": 18964.726623,
+      "min": 17217.661557,
+      "max": 20225.106059
+    },
+    "service_p99_ms": {
+      "median": 18964.680213,
+      "min": 17217.578541000003,
+      "max": 20224.944663
+    },
+    "dispatch_p99_ms": {
+      "median": 2.163893,
+      "min": 1.93661,
+      "max": 2.2858490000000002
+    },
+    "applied": {
+      "median": 7011,
+      "min": 6616,
+      "max": 7097
+    },
+    "admitted": {
+      "median": 7011,
+      "min": 6616,
+      "max": 7097
+    },
+    "max_inflight": {
+      "median": 4096,
+      "min": 4096,
+      "max": 4096
+    },
+    "backlog_at_horizon": {
+      "median": 4077,
+      "min": 4069,
+      "max": 4096
+    },
+    "drain_ns": {
+      "median": 17566126736,
+      "min": 16087362100,
+      "max": 18978742391
+    },
+    "checkpoints": {
+      "median": 7,
+      "min": 7,
+      "max": 7
+    },
+    "maintenance_skips": {
+      "median": 0,
+      "min": 0,
+      "max": 0
+    },
+    "host_poll_wall_over_measured_elapsed": {
+      "median": 0.1471888621185834,
+      "min": 0.14651144237016947,
+      "max": 0.15262847050926634
+    },
+    "refusals": {
+      "window_refused": [
+        1095,
+        1576,
+        1181
+      ],
+      "no_leader": [
+        0,
+        0,
+        0
+      ],
+      "admission_refused": [
+        0,
+        0,
+        0
+      ],
+      "not_proposed": [
+        0,
+        0,
+        0
+      ]
+    },
+    "leader_barriers_per_applied_original": 0.107687918984453,
+    "leader_physical_commands_per_append_unit": 9.286092715231788,
+    "leader_barrier_wall_over_measured_elapsed": 0.9111184162097481,
+    "leader_sync_wall_over_measured_elapsed": 0.31409031992033004,
+    "leader_publish_wall_over_measured_elapsed": 0.6046349205813961,
+    "wholeprocess_peak_rss_bytes": {
+      "median": 26050560,
+      "max": 26357760
+    }
+  },
+  {
+    "protocol": "quic",
+    "offered_rate": 32,
+    "window": 32,
+    "trials": 3,
+    "during_ops_s": {
+      "median": 29.9375,
+      "min": 28.19921875,
+      "max": 30.17578125
+    },
+    "total_ops_s": {
+      "median": 29.935449332213544,
+      "min": 28.208280996354784,
+      "max": 30.183849046478223
+    },
+    "intended_p99_ms": {
+      "median": 1946.3935279999998,
+      "min": 1908.901261,
+      "max": 2500.889482
+    },
+    "service_p99_ms": {
+      "median": 1946.251786,
+      "min": 1908.759863,
+      "max": 2500.744769
+    },
+    "dispatch_p99_ms": {
+      "median": 0.18087,
+      "min": 0.1775,
+      "max": 0.426465
+    },
+    "applied": {
+      "median": 7674,
+      "min": 7227,
+      "max": 7730
+    },
+    "admitted": {
+      "median": 7674,
+      "min": 7227,
+      "max": 7730
+    },
+    "max_inflight": {
+      "median": 32,
+      "min": 32,
+      "max": 32
+    },
+    "backlog_at_horizon": {
+      "median": 8,
+      "min": 5,
+      "max": 10
+    },
+    "drain_ns": {
+      "median": 201361612,
+      "min": 97225642,
+      "max": 351588875
+    },
+    "checkpoints": {
+      "median": 126,
+      "min": 126,
+      "max": 127
+    },
+    "maintenance_skips": {
+      "median": 1,
+      "min": 0,
+      "max": 1
+    },
+    "host_poll_wall_over_measured_elapsed": {
+      "median": 0.08640238075414394,
+      "min": 0.08578568381414321,
+      "max": 0.11360046227058908
+    },
+    "refusals": {
+      "window_refused": [
+        518,
+        462,
+        965
+      ],
+      "no_leader": [
+        0,
+        0,
+        0
+      ],
+      "admission_refused": [
+        0,
+        0,
+        0
+      ],
+      "not_proposed": [
+        0,
+        0,
+        0
+      ]
+    },
+    "leader_barriers_per_applied_original": 0.6924680740161585,
+    "leader_physical_commands_per_append_unit": 1.4441098983816334,
+    "leader_barrier_wall_over_measured_elapsed": 0.8592195804934232,
+    "leader_sync_wall_over_measured_elapsed": 0.2901768361820925,
+    "leader_publish_wall_over_measured_elapsed": 0.5686881407086789,
+    "wholeprocess_peak_rss_bytes": {
+      "median": 20172800,
+      "max": 20377600
+    }
+  },
+  {
+    "protocol": "quic",
+    "offered_rate": 32,
+    "window": 256,
+    "trials": 3,
+    "during_ops_s": {
+      "median": 31.953125,
+      "min": 31.94921875,
+      "max": 31.984375
+    },
+    "total_ops_s": {
+      "median": 31.966231816836345,
+      "min": 31.94941379150483,
+      "max": 31.98827620355556
+    },
+    "intended_p99_ms": {
+      "median": 3720.2120440000003,
+      "min": 2915.852116,
+      "max": 4434.940257
+    },
+    "service_p99_ms": {
+      "median": 3720.1312239999997,
+      "min": 2915.704347,
+      "max": 4434.807581
+    },
+    "dispatch_p99_ms": {
+      "median": 0.292788,
+      "min": 0.179626,
+      "max": 0.371975
+    },
+    "applied": {
+      "median": 8192,
+      "min": 8192,
+      "max": 8192
+    },
+    "admitted": {
+      "median": 8192,
+      "min": 8192,
+      "max": 8192
+    },
+    "max_inflight": {
+      "median": 151,
+      "min": 147,
+      "max": 188
+    },
+    "backlog_at_horizon": {
+      "median": 12,
+      "min": 4,
+      "max": 13
+    },
+    "drain_ns": {
+      "median": 270430839,
+      "min": 93824746,
+      "max": 405330422
+    },
+    "checkpoints": {
+      "median": 126,
+      "min": 125,
+      "max": 127
+    },
+    "maintenance_skips": {
+      "median": 1,
+      "min": 0,
+      "max": 2
+    },
+    "host_poll_wall_over_measured_elapsed": {
+      "median": 0.09972230304783594,
+      "min": 0.08759442096580664,
+      "max": 0.10233958458200809
+    },
+    "refusals": {
+      "window_refused": [
+        0,
+        0,
+        0
+      ],
+      "no_leader": [
+        0,
+        0,
+        0
+      ],
+      "admission_refused": [
+        0,
+        0,
+        0
+      ],
+      "not_proposed": [
+        0,
+        0,
+        0
+      ]
+    },
+    "leader_barriers_per_applied_original": 0.603271484375,
+    "leader_physical_commands_per_append_unit": 1.6576284904896803,
+    "leader_barrier_wall_over_measured_elapsed": 0.8517298885060559,
+    "leader_sync_wall_over_measured_elapsed": 0.2904543049086615,
+    "leader_publish_wall_over_measured_elapsed": 0.5610942213601516,
+    "wholeprocess_peak_rss_bytes": {
+      "median": 21508096,
+      "max": 21684224
+    }
+  },
+  {
+    "protocol": "quic",
+    "offered_rate": 32,
+    "window": 4096,
+    "trials": 3,
+    "during_ops_s": {
+      "median": 31.95703125,
+      "min": 31.953125,
+      "max": 31.9609375
+    },
+    "total_ops_s": {
+      "median": 31.97089139507293,
+      "min": 31.96970225834672,
+      "max": 31.990375679356717
+    },
+    "intended_p99_ms": {
+      "median": 3862.248334,
+      "min": 2500.9189300000003,
+      "max": 4465.130643
+    },
+    "service_p99_ms": {
+      "median": 3862.219383,
+      "min": 2500.887797,
+      "max": 4465.115192
+    },
+    "dispatch_p99_ms": {
+      "median": 0.18581,
+      "min": 0.17948,
+      "max": 0.201854
+    },
+    "applied": {
+      "median": 8192,
+      "min": 8192,
+      "max": 8192
+    },
+    "admitted": {
+      "median": 8192,
+      "min": 8192,
+      "max": 8192
+    },
+    "max_inflight": {
+      "median": 176,
+      "min": 123,
+      "max": 177
+    },
+    "backlog_at_horizon": {
+      "median": 11,
+      "min": 10,
+      "max": 12
+    },
+    "drain_ns": {
+      "median": 233080860,
+      "min": 77017729,
+      "max": 242611639
+    },
+    "checkpoints": {
+      "median": 126,
+      "min": 125,
+      "max": 127
+    },
+    "maintenance_skips": {
+      "median": 1,
+      "min": 0,
+      "max": 2
+    },
+    "host_poll_wall_over_measured_elapsed": {
+      "median": 0.0929308979786237,
+      "min": 0.08818152523119897,
+      "max": 0.09362113166452132
+    },
+    "refusals": {
+      "window_refused": [
+        0,
+        0,
+        0
+      ],
+      "no_leader": [
+        0,
+        0,
+        0
+      ],
+      "admission_refused": [
+        0,
+        0,
+        0
+      ],
+      "not_proposed": [
+        0,
+        0,
+        0
+      ]
+    },
+    "leader_barriers_per_applied_original": 0.6092529296875,
+    "leader_physical_commands_per_append_unit": 1.641354437988379,
+    "leader_barrier_wall_over_measured_elapsed": 0.8537661439940738,
+    "leader_sync_wall_over_measured_elapsed": 0.28924991531236505,
+    "leader_publish_wall_over_measured_elapsed": 0.564393018276546,
+    "wholeprocess_peak_rss_bytes": {
+      "median": 20934656,
+      "max": 21381120
+    }
+  },
+  {
+    "protocol": "quic",
+    "offered_rate": 128,
+    "window": 32,
+    "trials": 3,
+    "during_ops_s": {
+      "median": 71.734375,
+      "min": 71.15625,
+      "max": 78.046875
+    },
+    "total_ops_s": {
+      "median": 71.9202757659081,
+      "min": 71.38888806390993,
+      "max": 78.24401372126898
+    },
+    "intended_p99_ms": {
+      "median": 1218.970159,
+      "min": 1164.7618870000001,
+      "max": 1544.541347
+    },
+    "service_p99_ms": {
+      "median": 1218.969079,
+      "min": 1164.748453,
+      "max": 1544.482
+    },
+    "dispatch_p99_ms": {
+      "median": 0.179948,
+      "min": 0.17509899999999998,
+      "max": 0.181202
+    },
+    "applied": {
+      "median": 4623,
+      "min": 4581,
+      "max": 5025
+    },
+    "admitted": {
+      "median": 4623,
+      "min": 4581,
+      "max": 5025
+    },
+    "max_inflight": {
+      "median": 32,
+      "min": 32,
+      "max": 32
+    },
+    "backlog_at_horizon": {
+      "median": 30,
+      "min": 27,
+      "max": 32
+    },
+    "drain_ns": {
+      "median": 222165518,
+      "min": 169650547,
+      "max": 279508814
+    },
+    "checkpoints": {
+      "median": 31,
+      "min": 31,
+      "max": 31
+    },
+    "maintenance_skips": {
+      "median": 0,
+      "min": 0,
+      "max": 0
+    },
+    "host_poll_wall_over_measured_elapsed": {
+      "median": 0.08747051667738502,
+      "min": 0.0867739206928284,
+      "max": 0.08755042223402994
+    },
+    "refusals": {
+      "window_refused": [
+        3167,
+        3611,
+        3569
+      ],
+      "no_leader": [
+        0,
+        0,
+        0
+      ],
+      "admission_refused": [
+        0,
+        0,
+        0
+      ],
+      "not_proposed": [
+        0,
+        0,
+        0
+      ]
+    },
+    "leader_barriers_per_applied_original": 0.2840147090633788,
+    "leader_physical_commands_per_append_unit": 3.520944402132521,
+    "leader_barrier_wall_over_measured_elapsed": 0.85778950528465,
+    "leader_sync_wall_over_measured_elapsed": 0.29097367836410826,
+    "leader_publish_wall_over_measured_elapsed": 0.5667072624053758,
+    "wholeprocess_peak_rss_bytes": {
+      "median": 17006592,
+      "max": 17448960
+    }
+  },
+  {
+    "protocol": "quic",
+    "offered_rate": 128,
+    "window": 256,
+    "trials": 3,
+    "during_ops_s": {
+      "median": 121.375,
+      "min": 116.640625,
+      "max": 125.671875
+    },
+    "total_ops_s": {
+      "median": 121.42563928711796,
+      "min": 116.80075872250869,
+      "max": 125.95096010248753
+    },
+    "intended_p99_ms": {
+      "median": 4885.058069,
+      "min": 2554.467498,
+      "max": 6659.7655939999995
+    },
+    "service_p99_ms": {
+      "median": 4885.032883999999,
+      "min": 2554.465216,
+      "max": 6659.665546
+    },
+    "dispatch_p99_ms": {
+      "median": 0.186196,
+      "min": 0.182377,
+      "max": 0.190022
+    },
+    "applied": {
+      "median": 7789,
+      "min": 7490,
+      "max": 8080
+    },
+    "admitted": {
+      "median": 7789,
+      "min": 7490,
+      "max": 8080
+    },
+    "max_inflight": {
+      "median": 256,
+      "min": 256,
+      "max": 256
+    },
+    "backlog_at_horizon": {
+      "median": 25,
+      "min": 21,
+      "max": 37
+    },
+    "drain_ns": {
+      "median": 146254825,
+      "min": 126295770,
+      "max": 151952422
+    },
+    "checkpoints": {
+      "median": 31,
+      "min": 30,
+      "max": 31
+    },
+    "maintenance_skips": {
+      "median": 0,
+      "min": 0,
+      "max": 1
+    },
+    "host_poll_wall_over_measured_elapsed": {
+      "median": 0.09440601437066291,
+      "min": 0.09313609993753832,
+      "max": 0.09530363097574751
+    },
+    "refusals": {
+      "window_refused": [
+        403,
+        702,
+        112
+      ],
+      "no_leader": [
+        0,
+        0,
+        0
+      ],
+      "admission_refused": [
+        0,
+        0,
+        0
+      ],
+      "not_proposed": [
+        0,
+        0,
+        0
+      ]
+    },
+    "leader_barriers_per_applied_original": 0.16034712950600802,
+    "leader_physical_commands_per_append_unit": 6.23646960865945,
+    "leader_barrier_wall_over_measured_elapsed": 0.8768513821804405,
+    "leader_sync_wall_over_measured_elapsed": 0.30056182716509827,
+    "leader_publish_wall_over_measured_elapsed": 0.5687616422799199,
+    "wholeprocess_peak_rss_bytes": {
+      "median": 20037632,
+      "max": 20144128
+    }
+  },
+  {
+    "protocol": "quic",
+    "offered_rate": 128,
+    "window": 4096,
+    "trials": 3,
+    "during_ops_s": {
+      "median": 126.203125,
+      "min": 122.84375,
+      "max": 127.703125
+    },
+    "total_ops_s": {
+      "median": 125.5499075683128,
+      "min": 125.34836575629438,
+      "max": 127.60763478215438
+    },
+    "intended_p99_ms": {
+      "median": 5968.6272180000005,
+      "min": 5184.442674,
+      "max": 7342.409127
+    },
+    "service_p99_ms": {
+      "median": 5968.453834,
+      "min": 5184.367658,
+      "max": 7342.389792
+    },
+    "dispatch_p99_ms": {
+      "median": 0.18872999999999998,
+      "min": 0.183464,
+      "max": 0.189268
+    },
+    "applied": {
+      "median": 8192,
+      "min": 8192,
+      "max": 8192
+    },
+    "admitted": {
+      "median": 8192,
+      "min": 8192,
+      "max": 8192
+    },
+    "max_inflight": {
+      "median": 813,
+      "min": 706,
+      "max": 973
+    },
+    "backlog_at_horizon": {
+      "median": 115,
+      "min": 19,
+      "max": 330
+    },
+    "drain_ns": {
+      "median": 1248952856,
+      "min": 196785827,
+      "max": 1353863615
+    },
+    "checkpoints": {
+      "median": 31,
+      "min": 31,
+      "max": 31
+    },
+    "maintenance_skips": {
+      "median": 0,
+      "min": 0,
+      "max": 0
+    },
+    "host_poll_wall_over_measured_elapsed": {
+      "median": 0.10194551066252214,
+      "min": 0.09587931646668141,
+      "max": 0.10384314283217953
+    },
+    "refusals": {
+      "window_refused": [
+        0,
+        0,
+        0
+      ],
+      "no_leader": [
+        0,
+        0,
+        0
+      ],
+      "admission_refused": [
+        0,
+        0,
+        0
+      ],
+      "not_proposed": [
+        0,
+        0,
+        0
+      ]
+    },
+    "leader_barriers_per_applied_original": 0.14990234375,
+    "leader_physical_commands_per_append_unit": 6.671009771986971,
+    "leader_barrier_wall_over_measured_elapsed": 0.850536279575703,
+    "leader_sync_wall_over_measured_elapsed": 0.2894995397913444,
+    "leader_publish_wall_over_measured_elapsed": 0.5631465133692999,
+    "wholeprocess_peak_rss_bytes": {
+      "median": 20832256,
+      "max": 21295104
+    }
+  },
+  {
+    "protocol": "quic",
+    "offered_rate": 512,
+    "window": 32,
+    "trials": 3,
+    "during_ops_s": {
+      "median": 91.0625,
+      "min": 60.0625,
+      "max": 106.3125
+    },
+    "total_ops_s": {
+      "median": 92.01042729887757,
+      "min": 60.42759812401294,
+      "max": 106.79742549203444
+    },
+    "intended_p99_ms": {
+      "median": 1152.0544380000001,
+      "min": 847.34525,
+      "max": 4464.689202
+    },
+    "service_p99_ms": {
+      "median": 1151.950391,
+      "min": 847.2873989999999,
+      "max": 4464.6841540000005
+    },
+    "dispatch_p99_ms": {
+      "median": 0.176705,
+      "min": 0.174663,
+      "max": 0.177872
+    },
+    "applied": {
+      "median": 1489,
+      "min": 993,
+      "max": 1733
+    },
+    "admitted": {
+      "median": 1489,
+      "min": 993,
+      "max": 1733
+    },
+    "max_inflight": {
+      "median": 32,
+      "min": 32,
+      "max": 32
+    },
+    "backlog_at_horizon": {
+      "median": 32,
+      "min": 32,
+      "max": 32
+    },
+    "drain_ns": {
+      "median": 226982926,
+      "min": 182948430,
+      "max": 432888793
+    },
+    "checkpoints": {
+      "median": 7,
+      "min": 7,
+      "max": 7
+    },
+    "maintenance_skips": {
+      "median": 0,
+      "min": 0,
+      "max": 0
+    },
+    "host_poll_wall_over_measured_elapsed": {
+      "median": 0.08418465051557414,
+      "min": 0.08361973425299456,
+      "max": 0.08561437404271577
+    },
+    "refusals": {
+      "window_refused": [
+        6459,
+        7199,
+        6703
+      ],
+      "no_leader": [
+        0,
+        0,
+        0
+      ],
+      "admission_refused": [
+        0,
+        0,
+        0
+      ],
+      "not_proposed": [
+        0,
+        0,
+        0
+      ]
+    },
+    "leader_barriers_per_applied_original": 0.22498321020819342,
+    "leader_physical_commands_per_append_unit": 4.444776119402985,
+    "leader_barrier_wall_over_measured_elapsed": 0.8481907920162606,
+    "leader_sync_wall_over_measured_elapsed": 0.29603400255907764,
+    "leader_publish_wall_over_measured_elapsed": 0.5496615613326774,
+    "wholeprocess_peak_rss_bytes": {
+      "median": 13500416,
+      "max": 13918208
+    }
+  },
+  {
+    "protocol": "quic",
+    "offered_rate": 512,
+    "window": 256,
+    "trials": 3,
+    "during_ops_s": {
+      "median": 129.8125,
+      "min": 116.625,
+      "max": 190.6875
+    },
+    "total_ops_s": {
+      "median": 138.03628092322114,
+      "min": 126.33553044470412,
+      "max": 197.75454536229358
+    },
+    "intended_p99_ms": {
+      "median": 5869.475606999999,
+      "min": 2143.7819640000002,
+      "max": 7739.989855000001
+    },
+    "service_p99_ms": {
+      "median": 5869.320283,
+      "min": 2143.7709449999998,
+      "max": 7739.966351
+    },
+    "dispatch_p99_ms": {
+      "median": 0.182261,
+      "min": 0.18153,
+      "max": 0.18939799999999998
+    },
+    "applied": {
+      "median": 2333,
+      "min": 2122,
+      "max": 3283
+    },
+    "admitted": {
+      "median": 2333,
+      "min": 2122,
+      "max": 3283
+    },
+    "max_inflight": {
+      "median": 256,
+      "min": 256,
+      "max": 256
+    },
+    "backlog_at_horizon": {
+      "median": 256,
+      "min": 232,
+      "max": 256
+    },
+    "drain_ns": {
+      "median": 796541658,
+      "min": 601388322,
+      "max": 901353647
+    },
+    "checkpoints": {
+      "median": 7,
+      "min": 7,
+      "max": 7
+    },
+    "maintenance_skips": {
+      "median": 0,
+      "min": 0,
+      "max": 0
+    },
+    "host_poll_wall_over_measured_elapsed": {
+      "median": 0.10014496044778601,
+      "min": 0.09834336555019249,
+      "max": 0.10398142411453677
+    },
+    "refusals": {
+      "window_refused": [
+        5859,
+        6070,
+        4909
+      ],
+      "no_leader": [
+        0,
+        0,
+        0
+      ],
+      "admission_refused": [
+        0,
+        0,
+        0
+      ],
+      "not_proposed": [
+        0,
+        0,
+        0
+      ]
+    },
+    "leader_barriers_per_applied_original": 0.11498586239396795,
+    "leader_physical_commands_per_append_unit": 8.69672131147541,
+    "leader_barrier_wall_over_measured_elapsed": 0.8127608615205968,
+    "leader_sync_wall_over_measured_elapsed": 0.2801078078331165,
+    "leader_publish_wall_over_measured_elapsed": 0.5354047223670877,
+    "wholeprocess_peak_rss_bytes": {
+      "median": 14860288,
+      "max": 15835136
+    }
+  },
+  {
+    "protocol": "quic",
+    "offered_rate": 512,
+    "window": 4096,
+    "trials": 3,
+    "during_ops_s": {
+      "median": 187.3125,
+      "min": 164.9375,
+      "max": 193.5625
+    },
+    "total_ops_s": {
+      "median": 205.05373173463417,
+      "min": 188.20895134243918,
+      "max": 207.31578820622835
+    },
+    "intended_p99_ms": {
+      "median": 20051.893586,
+      "min": 19200.212046,
+      "max": 21089.679142
+    },
+    "service_p99_ms": {
+      "median": 20051.809302999998,
+      "min": 19200.176019000002,
+      "max": 21089.528401
+    },
+    "dispatch_p99_ms": {
+      "median": 2.597803,
+      "min": 2.279131,
+      "max": 2.831883
+    },
+    "applied": {
+      "median": 7093,
+      "min": 6709,
+      "max": 7193
+    },
+    "admitted": {
+      "median": 7093,
+      "min": 6709,
+      "max": 7193
+    },
+    "max_inflight": {
+      "median": 4096,
+      "min": 4096,
+      "max": 4096
+    },
+    "backlog_at_horizon": {
+      "median": 4096,
+      "min": 4070,
+      "max": 4096
+    },
+    "drain_ns": {
+      "median": 18695862106,
+      "min": 18590933508,
+      "max": 19646551092
+    },
+    "checkpoints": {
+      "median": 7,
+      "min": 7,
+      "max": 7
+    },
+    "maintenance_skips": {
+      "median": 0,
+      "min": 0,
+      "max": 0
+    },
+    "host_poll_wall_over_measured_elapsed": {
+      "median": 0.1493356344027349,
+      "min": 0.14641012496637526,
+      "max": 0.15084807473611994
+    },
+    "refusals": {
+      "window_refused": [
+        999,
+        1099,
+        1483
+      ],
+      "no_leader": [
+        0,
+        0,
+        0
+      ],
+      "admission_refused": [
+        0,
+        0,
+        0
+      ],
+      "not_proposed": [
+        0,
+        0,
+        0
+      ]
+    },
+    "leader_barriers_per_applied_original": 0.10635339913805088,
+    "leader_physical_commands_per_append_unit": 9.402614379084968,
+    "leader_barrier_wall_over_measured_elapsed": 0.9168836976302897,
+    "leader_sync_wall_over_measured_elapsed": 0.3075456700062174,
+    "leader_publish_wall_over_measured_elapsed": 0.6020539162721228,
+    "wholeprocess_peak_rss_bytes": {
+      "median": 27095040,
+      "max": 27389952
+    }
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "command": [
+    "node",
+    "target/p9/native476-publication/design/witness-model.mjs"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.01934794898261316
+}
