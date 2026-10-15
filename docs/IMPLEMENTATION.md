@@ -2,6 +2,19 @@
 
 ## Active P9 plan — 15 October 2026
 
+Current source is published475 `dfc195cd39196fc6f16e69ea74de34dabd359ef2`.
+473 restored the retained469/455 implementation;470/472 are rejected experiments,
+not active pipeline improvements.474 completed the mixed same-device Btrfs policy
+comparison.475 adds only the checked private offered-capacity measurement profile.
+Linux fresh native artifact and actual TCP/QUIC release recovery controls are
+complete; Mac scoped qualification is running. Common-profile Btrfs/APFS capacity
+sweeps follow setup; the user's real ext4/XFS scratch volume remains pending.
+The current-plus-next-two plan below and final475 record govern the next work.
+Earlier slice entries retain their historical state and are superseded where
+later results reject or restore them. Full P9 remains incomplete.
+
+### Earlier experiment and qualification record
+
 Latest production publication is472 `de5a7221e49c89771dd3cd22a0b904966b1f4789`;
 native470 measurement/gauge evidence is published in `a01d9d51`.
 The [472 publication receipt](../validation/performance/pipeline472/publication/README.md)
@@ -861,7 +874,7 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 | Completed474: isolate filesystem policy in the real durable service | Determine whether the current deployment amplifies sync/publication latency before changing formats | Checked473 restoration; [filesystem schema](../validation/performance/native474-filesystem/SCHEMA.md), immutable native455 artifact/proofs and fresh same-device default/NoCoW parents | Publish restoration, finish setup/independent review and quiet window; twelve actual TCP/QUIC paired cases with exact outcomes/recovery/maintenance, completed rates, latency/refusals and physical barrier data; archive every result | P9.0/P9.2/P9.3 |
 | Current475: bounded larger-window offered-load capacity sweep | Distinguish admission/backlog limits from actual durable capacity and batching | Filesystem results, explicit common client/shard budgets, current fixture window64 cap and independent validator | Before-edit schema; checked offered-only windows32/256/4096 with common budgets/readbacks and ready16; actual recovery/budget controls, fresh native artifacts; rotated low/mid/overload measurements including latency/refusals/drain and real observed widths | P9.0/P9.2/P9.3 |
 | Next476: select and qualify durable publication improvement | Remove measured sync/publication work while preserving acknowledged-prefix damage detection and recovery | Current filesystem/load/counter evidence; precise journal authority, corruption/crash model and public JournalIo contract | Explicit format/API/ownership/migration/old-new cleanup plan before edits; no silent latest-authority fallback; modeled write/sync/reclaim/restart/corruption cuts, native recovery and actual paired durable gain; keep full framework curve and all P8 performance obligations linked in the macro plan | P9.0/P9.1/P9.2/P9.3/P9.4 |
-| Following: full sustained curve and composed service qualification | Complete remaining full P9 acceptance beyond this native sequence | Retained measured improvements and both-host qualified artifacts/workloads | All seven one-group floors with healthy margin, sustained bounded memory/debt, durable headroom/fairness/skew, placement/shared barriers and P8 relays/striped/recursive/logical voters; preserve outcomes and every failure | P9.0/P9.1/P9.2/P9.3/P9.4 |
+| Next477: full sustained curve and composed service qualification | Complete remaining full P9 acceptance beyond this native sequence | Retained measured improvements and both-host qualified artifacts/workloads | All seven one-group floors with healthy margin, sustained bounded memory/debt, durable headroom/fairness/skew, placement/shared barriers and P8 relays/striped/recursive/logical voters; preserve outcomes and every failure | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
 comparison or short diagnostics. All seven one-group healthy-margin cells on
