@@ -1,0 +1,1264 @@
+{
+  "original_session": 78197,
+  "original_terminal_exit": 0,
+  "all24_raw_outcomes_rechecked": true,
+  "post_review_guard_exit": 0,
+  "cases": [
+    {
+      "cell": "bulk",
+      "trial": 1,
+      "variant": "baseline",
+      "raw": "bulk-results/baseline-c4096-b4-t1.json",
+      "sha256": "5c42e0ab7f5163b0ae26e4ad331fdbebc24717794fd537d8be32c77715679246",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ],
+      "diagnostics": [
+        {
+          "retained_entries": 1900,
+          "peak_retained_entries": 21700,
+          "peak_peer_queue": 7,
+          "peak_client_queue": 3380,
+          "persistence_units": 49889,
+          "checkpoint_count": 3904,
+          "snapshot_installs": 0,
+          "proposal_batches": 29167,
+          "proposed_originals": 19989504,
+          "maximum_proposal_width": 5704
+        },
+        {
+          "retained_entries": 1900,
+          "peak_retained_entries": 7168,
+          "peak_peer_queue": 5,
+          "peak_client_queue": 0,
+          "persistence_units": 20935,
+          "checkpoint_count": 3903,
+          "snapshot_installs": 473,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        },
+        {
+          "retained_entries": 5996,
+          "peak_retained_entries": 7168,
+          "peak_peer_queue": 10,
+          "peak_client_queue": 0,
+          "persistence_units": 18511,
+          "checkpoint_count": 3903,
+          "snapshot_installs": 3387,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        }
+      ],
+      "observer_shapes": null
+    },
+    {
+      "cell": "bulk",
+      "trial": 1,
+      "variant": "candidate",
+      "raw": "bulk-results/candidate-c4096-b4-t1.json",
+      "sha256": "6cbba263f4d8e818d37759b525b59d6fd75d739d81c161b50d9ba1b53c9bc8d9",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ],
+      "diagnostics": [
+        {
+          "retained_entries": 1832,
+          "peak_retained_entries": 21504,
+          "peak_peer_queue": 7,
+          "peak_client_queue": 3425,
+          "persistence_units": 48996,
+          "checkpoint_count": 3904,
+          "snapshot_installs": 0,
+          "proposal_batches": 28225,
+          "proposed_originals": 19989504,
+          "maximum_proposal_width": 5064
+        },
+        {
+          "retained_entries": 4880,
+          "peak_retained_entries": 7168,
+          "peak_peer_queue": 8,
+          "peak_client_queue": 0,
+          "persistence_units": 19792,
+          "checkpoint_count": 3903,
+          "snapshot_installs": 1804,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        },
+        {
+          "retained_entries": 5904,
+          "peak_retained_entries": 7168,
+          "peak_peer_queue": 8,
+          "peak_client_queue": 0,
+          "persistence_units": 19730,
+          "checkpoint_count": 3903,
+          "snapshot_installs": 2032,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        }
+      ],
+      "observer_shapes": null
+    },
+    {
+      "cell": "bulk",
+      "trial": 1,
+      "variant": "on",
+      "raw": "bulk-results/on-c4096-b4-t1.json",
+      "sha256": "ce0ded8a0487391f311e8b7aaecb5516b9d43eae93fe9d4875554f7d0a85f089",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ],
+      "diagnostics": [
+        {
+          "retained_entries": 1788,
+          "peak_retained_entries": 21964,
+          "peak_peer_queue": 8,
+          "peak_client_queue": 3612,
+          "persistence_units": 48530,
+          "checkpoint_count": 3904,
+          "snapshot_installs": 0,
+          "proposal_batches": 27700,
+          "proposed_originals": 19989504,
+          "maximum_proposal_width": 4100
+        },
+        {
+          "retained_entries": 1788,
+          "peak_retained_entries": 7168,
+          "peak_peer_queue": 7,
+          "peak_client_queue": 0,
+          "persistence_units": 20607,
+          "checkpoint_count": 3903,
+          "snapshot_installs": 877,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        },
+        {
+          "retained_entries": 5884,
+          "peak_retained_entries": 7168,
+          "peak_peer_queue": 11,
+          "peak_client_queue": 0,
+          "persistence_units": 18897,
+          "checkpoint_count": 3903,
+          "snapshot_installs": 2944,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        }
+      ],
+      "observer_shapes": [
+        {
+          "replica_slot": 0,
+          "phases": 29,
+          "scopes": 4,
+          "methods_per_scope": [
+            15,
+            15,
+            15,
+            15
+          ]
+        },
+        {
+          "replica_slot": 1,
+          "phases": 29,
+          "scopes": 4,
+          "methods_per_scope": [
+            15,
+            15,
+            15,
+            15
+          ]
+        },
+        {
+          "replica_slot": 2,
+          "phases": 29,
+          "scopes": 4,
+          "methods_per_scope": [
+            15,
+            15,
+            15,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "cell": "bulk",
+      "trial": 1,
+      "variant": "openraft",
+      "raw": "bulk-results/openraft-c4096-b4-t1.json",
+      "sha256": "3bf819182c4c8856bd220211c0e053b9d6ecb7b8d61999ce1c1f7c104385ec4d",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ],
+      "diagnostics": null,
+      "observer_shapes": null
+    },
+    {
+      "cell": "bulk",
+      "trial": 2,
+      "variant": "baseline",
+      "raw": "bulk-results/baseline-c4096-b4-t2.json",
+      "sha256": "3d8a736f83129ba417c91921a5fbb1d33626ad7525392d4ed3235b1a8720f698",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ],
+      "diagnostics": [
+        {
+          "retained_entries": 1000,
+          "peak_retained_entries": 21996,
+          "peak_peer_queue": 10,
+          "peak_client_queue": 4079,
+          "persistence_units": 48297,
+          "checkpoint_count": 3904,
+          "snapshot_installs": 0,
+          "proposal_batches": 27493,
+          "proposed_originals": 19989504,
+          "maximum_proposal_width": 4600
+        },
+        {
+          "retained_entries": 5060,
+          "peak_retained_entries": 7920,
+          "peak_peer_queue": 5,
+          "peak_client_queue": 0,
+          "persistence_units": 20690,
+          "checkpoint_count": 3903,
+          "snapshot_installs": 765,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        },
+        {
+          "retained_entries": 5036,
+          "peak_retained_entries": 7168,
+          "peak_peer_queue": 9,
+          "peak_client_queue": 0,
+          "persistence_units": 18815,
+          "checkpoint_count": 3903,
+          "snapshot_installs": 3059,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        }
+      ],
+      "observer_shapes": null
+    },
+    {
+      "cell": "bulk",
+      "trial": 2,
+      "variant": "candidate",
+      "raw": "bulk-results/candidate-c4096-b4-t2.json",
+      "sha256": "f0b6ec69d79350d7aa08278832a155efd4d61396f5fc601d9195f132905a3045",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ],
+      "diagnostics": [
+        {
+          "retained_entries": 1940,
+          "peak_retained_entries": 22044,
+          "peak_peer_queue": 8,
+          "peak_client_queue": 3459,
+          "persistence_units": 48790,
+          "checkpoint_count": 3904,
+          "snapshot_installs": 0,
+          "proposal_batches": 27882,
+          "proposed_originals": 19989504,
+          "maximum_proposal_width": 3856
+        },
+        {
+          "retained_entries": 1000,
+          "peak_retained_entries": 7168,
+          "peak_peer_queue": 9,
+          "peak_client_queue": 0,
+          "persistence_units": 19727,
+          "checkpoint_count": 3904,
+          "snapshot_installs": 1907,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        },
+        {
+          "retained_entries": 1000,
+          "peak_retained_entries": 7168,
+          "peak_peer_queue": 9,
+          "peak_client_queue": 0,
+          "persistence_units": 19815,
+          "checkpoint_count": 3904,
+          "snapshot_installs": 1899,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        }
+      ],
+      "observer_shapes": null
+    },
+    {
+      "cell": "bulk",
+      "trial": 2,
+      "variant": "on",
+      "raw": "bulk-results/on-c4096-b4-t2.json",
+      "sha256": "40e35ab068ad7af71e787c9b4f4d15b4b6838f879d8847563bcdae34ed10be42",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ],
+      "diagnostics": [
+        {
+          "retained_entries": 1672,
+          "peak_retained_entries": 21832,
+          "peak_peer_queue": 8,
+          "peak_client_queue": 3530,
+          "persistence_units": 48668,
+          "checkpoint_count": 3904,
+          "snapshot_installs": 0,
+          "proposal_batches": 27773,
+          "proposed_originals": 19989504,
+          "maximum_proposal_width": 5052
+        },
+        {
+          "retained_entries": 5768,
+          "peak_retained_entries": 7168,
+          "peak_peer_queue": 7,
+          "peak_client_queue": 0,
+          "persistence_units": 20737,
+          "checkpoint_count": 3903,
+          "snapshot_installs": 692,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        },
+        {
+          "retained_entries": 5744,
+          "peak_retained_entries": 7168,
+          "peak_peer_queue": 9,
+          "peak_client_queue": 0,
+          "persistence_units": 18755,
+          "checkpoint_count": 3903,
+          "snapshot_installs": 3116,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        }
+      ],
+      "observer_shapes": [
+        {
+          "replica_slot": 0,
+          "phases": 29,
+          "scopes": 4,
+          "methods_per_scope": [
+            15,
+            15,
+            15,
+            15
+          ]
+        },
+        {
+          "replica_slot": 1,
+          "phases": 29,
+          "scopes": 4,
+          "methods_per_scope": [
+            15,
+            15,
+            15,
+            15
+          ]
+        },
+        {
+          "replica_slot": 2,
+          "phases": 29,
+          "scopes": 4,
+          "methods_per_scope": [
+            15,
+            15,
+            15,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "cell": "bulk",
+      "trial": 2,
+      "variant": "openraft",
+      "raw": "bulk-results/openraft-c4096-b4-t2.json",
+      "sha256": "956910cbe1fe910aa5ed9e7d3d9753996cf6b6c32df3009d15242e27a567065d",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ],
+      "diagnostics": null,
+      "observer_shapes": null
+    },
+    {
+      "cell": "bulk",
+      "trial": 3,
+      "variant": "baseline",
+      "raw": "bulk-results/baseline-c4096-b4-t3.json",
+      "sha256": "fd696538a1e7d4d59799a3e104a3066016fe1e6248a325a1bb560f16b6f61067",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ],
+      "diagnostics": [
+        {
+          "retained_entries": 1876,
+          "peak_retained_entries": 21788,
+          "peak_peer_queue": 8,
+          "peak_client_queue": 3453,
+          "persistence_units": 49023,
+          "checkpoint_count": 3904,
+          "snapshot_installs": 0,
+          "proposal_batches": 28046,
+          "proposed_originals": 19989504,
+          "maximum_proposal_width": 3640
+        },
+        {
+          "retained_entries": 5972,
+          "peak_retained_entries": 7168,
+          "peak_peer_queue": 9,
+          "peak_client_queue": 0,
+          "persistence_units": 19710,
+          "checkpoint_count": 3903,
+          "snapshot_installs": 1902,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        },
+        {
+          "retained_entries": 5948,
+          "peak_retained_entries": 7168,
+          "peak_peer_queue": 8,
+          "peak_client_queue": 0,
+          "persistence_units": 19824,
+          "checkpoint_count": 3903,
+          "snapshot_installs": 1887,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        }
+      ],
+      "observer_shapes": null
+    },
+    {
+      "cell": "bulk",
+      "trial": 3,
+      "variant": "candidate",
+      "raw": "bulk-results/candidate-c4096-b4-t3.json",
+      "sha256": "f80db7e3ae069efd5da403ac41bf44c42ca46b2987bb0341539470222addaa53",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ],
+      "diagnostics": [
+        {
+          "retained_entries": 1112,
+          "peak_retained_entries": 21872,
+          "peak_peer_queue": 9,
+          "peak_client_queue": 3736,
+          "persistence_units": 48445,
+          "checkpoint_count": 3904,
+          "snapshot_installs": 0,
+          "proposal_batches": 27707,
+          "proposed_originals": 19989504,
+          "maximum_proposal_width": 5724
+        },
+        {
+          "retained_entries": 5208,
+          "peak_retained_entries": 7168,
+          "peak_peer_queue": 8,
+          "peak_client_queue": 0,
+          "persistence_units": 20635,
+          "checkpoint_count": 3903,
+          "snapshot_installs": 775,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        },
+        {
+          "retained_entries": 5184,
+          "peak_retained_entries": 7940,
+          "peak_peer_queue": 8,
+          "peak_client_queue": 0,
+          "persistence_units": 18743,
+          "checkpoint_count": 3903,
+          "snapshot_installs": 3063,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        }
+      ],
+      "observer_shapes": null
+    },
+    {
+      "cell": "bulk",
+      "trial": 3,
+      "variant": "on",
+      "raw": "bulk-results/on-c4096-b4-t3.json",
+      "sha256": "9b65af67e08a2280b97e880295bb5b4d360ce0fb6729538f88b8461df3db4c94",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ],
+      "diagnostics": [
+        {
+          "retained_entries": 1804,
+          "peak_retained_entries": 21504,
+          "peak_peer_queue": 9,
+          "peak_client_queue": 3709,
+          "persistence_units": 48949,
+          "checkpoint_count": 3904,
+          "snapshot_installs": 0,
+          "proposal_batches": 28022,
+          "proposed_originals": 19989504,
+          "maximum_proposal_width": 4800
+        },
+        {
+          "retained_entries": 5900,
+          "peak_retained_entries": 7168,
+          "peak_peer_queue": 9,
+          "peak_client_queue": 0,
+          "persistence_units": 20154,
+          "checkpoint_count": 3903,
+          "snapshot_installs": 1317,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        },
+        {
+          "retained_entries": 1804,
+          "peak_retained_entries": 7168,
+          "peak_peer_queue": 9,
+          "peak_client_queue": 0,
+          "persistence_units": 19331,
+          "checkpoint_count": 3903,
+          "snapshot_installs": 2477,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        }
+      ],
+      "observer_shapes": [
+        {
+          "replica_slot": 0,
+          "phases": 29,
+          "scopes": 4,
+          "methods_per_scope": [
+            15,
+            15,
+            15,
+            15
+          ]
+        },
+        {
+          "replica_slot": 1,
+          "phases": 29,
+          "scopes": 4,
+          "methods_per_scope": [
+            15,
+            15,
+            15,
+            15
+          ]
+        },
+        {
+          "replica_slot": 2,
+          "phases": 29,
+          "scopes": 4,
+          "methods_per_scope": [
+            15,
+            15,
+            15,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "cell": "bulk",
+      "trial": 3,
+      "variant": "openraft",
+      "raw": "bulk-results/openraft-c4096-b4-t3.json",
+      "sha256": "9b50190fc2010fc2a8e50ae10a6a72b24a1fac15efb6d405e66c64ca38a3c81c",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ],
+      "diagnostics": null,
+      "observer_shapes": null
+    },
+    {
+      "cell": "singleton",
+      "trial": 1,
+      "variant": "baseline",
+      "raw": "singleton-results/baseline-c1-b1-t1.json",
+      "sha256": "8ef7aaf05208d49f9aa53caa45321e9383d1cb92a678ab8ee8b11cf5e76e199a",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "diagnostics": [
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 3,
+          "peak_client_queue": 1,
+          "persistence_units": 2099203,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 1049600,
+          "proposed_originals": 1049600,
+          "maximum_proposal_width": 1
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 2,
+          "peak_client_queue": 0,
+          "persistence_units": 1863948,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 2,
+          "peak_client_queue": 0,
+          "persistence_units": 2002926,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        }
+      ],
+      "observer_shapes": null
+    },
+    {
+      "cell": "singleton",
+      "trial": 1,
+      "variant": "candidate",
+      "raw": "singleton-results/candidate-c1-b1-t1.json",
+      "sha256": "aa15eac432449003af605bc850360786d53abc05219a55fb85e8c0b972f4fd49",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "diagnostics": [
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 3,
+          "peak_client_queue": 1,
+          "persistence_units": 2099203,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 1049600,
+          "proposed_originals": 1049600,
+          "maximum_proposal_width": 1
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 1,
+          "peak_client_queue": 0,
+          "persistence_units": 1867373,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 2,
+          "peak_client_queue": 0,
+          "persistence_units": 2002081,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        }
+      ],
+      "observer_shapes": null
+    },
+    {
+      "cell": "singleton",
+      "trial": 1,
+      "variant": "on",
+      "raw": "singleton-results/on-c1-b1-t1.json",
+      "sha256": "9ab1e3bafed5947c703fcf611b369bfafd375524854b73262a9061c033ad7d70",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "diagnostics": [
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 3,
+          "peak_client_queue": 1,
+          "persistence_units": 2099203,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 1049600,
+          "proposed_originals": 1049600,
+          "maximum_proposal_width": 1
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 2,
+          "peak_client_queue": 0,
+          "persistence_units": 1814034,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 2,
+          "peak_client_queue": 0,
+          "persistence_units": 1985609,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        }
+      ],
+      "observer_shapes": [
+        {
+          "replica_slot": 0,
+          "phases": 29,
+          "scopes": 4,
+          "methods_per_scope": [
+            15,
+            15,
+            15,
+            15
+          ]
+        },
+        {
+          "replica_slot": 1,
+          "phases": 29,
+          "scopes": 4,
+          "methods_per_scope": [
+            15,
+            15,
+            15,
+            15
+          ]
+        },
+        {
+          "replica_slot": 2,
+          "phases": 29,
+          "scopes": 4,
+          "methods_per_scope": [
+            15,
+            15,
+            15,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "cell": "singleton",
+      "trial": 1,
+      "variant": "openraft",
+      "raw": "singleton-results/openraft-c1-b1-t1.json",
+      "sha256": "cc209ac3d666450860569475a72ad3d9a7e76e455e31d1d011e2c5130950bd03",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "diagnostics": null,
+      "observer_shapes": null
+    },
+    {
+      "cell": "singleton",
+      "trial": 2,
+      "variant": "baseline",
+      "raw": "singleton-results/baseline-c1-b1-t2.json",
+      "sha256": "d673fe2bf5962fbfbc58cd8bd92e35c323bf927b142de5aa882f99cc3d15bc7a",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "diagnostics": [
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 4,
+          "peak_client_queue": 1,
+          "persistence_units": 2099203,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 1049600,
+          "proposed_originals": 1049600,
+          "maximum_proposal_width": 1
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 2,
+          "peak_client_queue": 0,
+          "persistence_units": 1869064,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 2,
+          "peak_client_queue": 0,
+          "persistence_units": 1996992,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        }
+      ],
+      "observer_shapes": null
+    },
+    {
+      "cell": "singleton",
+      "trial": 2,
+      "variant": "candidate",
+      "raw": "singleton-results/candidate-c1-b1-t2.json",
+      "sha256": "9b36e0985b7ebc7402c37b3b3234dbd2eda0ba862f020a669a26e3a4ba730c75",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "diagnostics": [
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 3,
+          "peak_client_queue": 1,
+          "persistence_units": 2099203,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 1049600,
+          "proposed_originals": 1049600,
+          "maximum_proposal_width": 1
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 2,
+          "peak_client_queue": 0,
+          "persistence_units": 1870540,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 1,
+          "peak_client_queue": 0,
+          "persistence_units": 2004888,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        }
+      ],
+      "observer_shapes": null
+    },
+    {
+      "cell": "singleton",
+      "trial": 2,
+      "variant": "on",
+      "raw": "singleton-results/on-c1-b1-t2.json",
+      "sha256": "c43cfbdf47083f9dd5b9dd286a01358f520584a50e7409db6fc01c2562e1a49b",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "diagnostics": [
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 3,
+          "peak_client_queue": 1,
+          "persistence_units": 2099203,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 1049600,
+          "proposed_originals": 1049600,
+          "maximum_proposal_width": 1
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 2,
+          "peak_client_queue": 0,
+          "persistence_units": 1820492,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 1,
+          "peak_client_queue": 0,
+          "persistence_units": 1979805,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        }
+      ],
+      "observer_shapes": [
+        {
+          "replica_slot": 0,
+          "phases": 29,
+          "scopes": 4,
+          "methods_per_scope": [
+            15,
+            15,
+            15,
+            15
+          ]
+        },
+        {
+          "replica_slot": 1,
+          "phases": 29,
+          "scopes": 4,
+          "methods_per_scope": [
+            15,
+            15,
+            15,
+            15
+          ]
+        },
+        {
+          "replica_slot": 2,
+          "phases": 29,
+          "scopes": 4,
+          "methods_per_scope": [
+            15,
+            15,
+            15,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "cell": "singleton",
+      "trial": 2,
+      "variant": "openraft",
+      "raw": "singleton-results/openraft-c1-b1-t2.json",
+      "sha256": "ae6124a73e74ca013b45c0a2d7ea7a3f60b0ebf5a120bb0a8266e1a79cac5a95",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "diagnostics": null,
+      "observer_shapes": null
+    },
+    {
+      "cell": "singleton",
+      "trial": 3,
+      "variant": "baseline",
+      "raw": "singleton-results/baseline-c1-b1-t3.json",
+      "sha256": "1d953a1df7bd1a821461d54bb9d90a7732ba0eade76371ffee837872e671312b",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "diagnostics": [
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 4,
+          "peak_client_queue": 1,
+          "persistence_units": 2099203,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 1049600,
+          "proposed_originals": 1049600,
+          "maximum_proposal_width": 1
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 2,
+          "peak_client_queue": 0,
+          "persistence_units": 1873008,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 1,
+          "peak_client_queue": 0,
+          "persistence_units": 1996326,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        }
+      ],
+      "observer_shapes": null
+    },
+    {
+      "cell": "singleton",
+      "trial": 3,
+      "variant": "candidate",
+      "raw": "singleton-results/candidate-c1-b1-t3.json",
+      "sha256": "26598b76ab675d4a52d4db941042c8508665daef41bd1470dc707f8deee8183a",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "diagnostics": [
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 3,
+          "peak_client_queue": 1,
+          "persistence_units": 2099203,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 1049600,
+          "proposed_originals": 1049600,
+          "maximum_proposal_width": 1
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 2,
+          "peak_client_queue": 0,
+          "persistence_units": 1868270,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 2,
+          "peak_client_queue": 0,
+          "persistence_units": 2000975,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        }
+      ],
+      "observer_shapes": null
+    },
+    {
+      "cell": "singleton",
+      "trial": 3,
+      "variant": "on",
+      "raw": "singleton-results/on-c1-b1-t3.json",
+      "sha256": "43d7cdccf794bb82d82e8d1a8c64e3534591d3c5c262bf96abb81b21da6136c2",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "diagnostics": [
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 3,
+          "peak_client_queue": 1,
+          "persistence_units": 2099203,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 1049600,
+          "proposed_originals": 1049600,
+          "maximum_proposal_width": 1
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 1,
+          "peak_client_queue": 0,
+          "persistence_units": 1817155,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 2,
+          "peak_client_queue": 0,
+          "persistence_units": 1979765,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0
+        }
+      ],
+      "observer_shapes": [
+        {
+          "replica_slot": 0,
+          "phases": 29,
+          "scopes": 4,
+          "methods_per_scope": [
+            15,
+            15,
+            15,
+            15
+          ]
+        },
+        {
+          "replica_slot": 1,
+          "phases": 29,
+          "scopes": 4,
+          "methods_per_scope": [
+            15,
+            15,
+            15,
+            15
+          ]
+        },
+        {
+          "replica_slot": 2,
+          "phases": 29,
+          "scopes": 4,
+          "methods_per_scope": [
+            15,
+            15,
+            15,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "cell": "singleton",
+      "trial": 3,
+      "variant": "openraft",
+      "raw": "singleton-results/openraft-c1-b1-t3.json",
+      "sha256": "2fe098ab5a0ceecfaf4d52c82bdba7653a8587220664986f6e4bf5edfeba8aed",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "diagnostics": null,
+      "observer_shapes": null
+    }
+  ],
+  "limits": "logical queue/retained-entry peaks only; no physical RSS or offered-load refusal measurement; nested observer wall intervals are not CPU and cannot be added",
+  "baseline455_mode_caveat": true
+}

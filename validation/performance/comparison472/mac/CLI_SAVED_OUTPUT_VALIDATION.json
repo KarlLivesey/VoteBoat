@@ -1,0 +1,108 @@
+[
+  {
+    "source_job": "/tmp/voteboat-mac455-7a99ae5-fENMzQ",
+    "fixture": "/tmp/voteboat-mac455-7a99ae5-fENMzQ/logs/cli-off.log",
+    "sha256": "3a5b0cccb3b03465f2beb43f696bbaac277b4b8058d0a2bef5aa8c4c4a45948c",
+    "mode": "off",
+    "completed_originals": 16384,
+    "requests": 4096,
+    "frontiers": [
+      17409,
+      17409,
+      17409
+    ],
+    "checkpoints": [
+      3,
+      3,
+      3
+    ],
+    "data_only_revalidation": true
+  },
+  {
+    "source_job": "/tmp/voteboat-mac455-7a99ae5-fENMzQ",
+    "fixture": "/tmp/voteboat-mac455-7a99ae5-fENMzQ/logs/cli-on.log",
+    "sha256": "a375b7aa8a78facb66666f97d37717df26a580991e3202bc35703b6b12c32046",
+    "mode": "on",
+    "completed_originals": 16384,
+    "requests": 4096,
+    "frontiers": [
+      17409,
+      17409,
+      17409
+    ],
+    "checkpoints": [
+      3,
+      3,
+      3
+    ],
+    "data_only_revalidation": true
+  },
+  {
+    "source_job": "/tmp/voteboat-mac455-7a99ae5-fENMzQ",
+    "fixture": "/tmp/voteboat-mac455-7a99ae5-fENMzQ/logs/cli-openraft.log",
+    "sha256": "4f0cdfe9464852a2329186b41303b55715ec8976334819a72edc4b77eeb16fd0",
+    "mode": "openraft",
+    "completed_originals": 16384,
+    "requests": 4096,
+    "frontiers": [
+      17409,
+      17409,
+      17409
+    ],
+    "checkpoints": null,
+    "data_only_revalidation": true
+  },
+  {
+    "source_job": "/tmp/voteboat-mac472-de5a722-pxgyh9",
+    "fixture": "/tmp/voteboat-mac472-de5a722-pxgyh9/logs/cli-off.log",
+    "sha256": "9f65124c68df97dce95660f8662af73d2456115d196dd77284be7ef90ad0144d",
+    "mode": "off",
+    "completed_originals": 16384,
+    "requests": 4096,
+    "frontiers": [
+      17409,
+      17409,
+      17409
+    ],
+    "checkpoints": [
+      3,
+      3,
+      3
+    ],
+    "data_only_revalidation": true
+  },
+  {
+    "source_job": "/tmp/voteboat-mac472-de5a722-pxgyh9",
+    "fixture": "/tmp/voteboat-mac472-de5a722-pxgyh9/logs/cli-on.log",
+    "sha256": "fb564b3ea211b5890749136bc7441b87a22af0e6d605db44b05c5c0a9d8e7b8a",
+    "mode": "on",
+    "completed_originals": 16384,
+    "requests": 4096,
+    "frontiers": [
+      17409,
+      17409,
+      17409
+    ],
+    "checkpoints": [
+      3,
+      3,
+      3
+    ],
+    "data_only_revalidation": true
+  },
+  {
+    "source_job": "/tmp/voteboat-mac472-de5a722-pxgyh9",
+    "fixture": "/tmp/voteboat-mac472-de5a722-pxgyh9/logs/cli-openraft.log",
+    "sha256": "be19b15fe18bfa72a8a07902bd5a54b189c8d0daa8377c669c70934d51151531",
+    "mode": "openraft",
+    "completed_originals": 16384,
+    "requests": 4096,
+    "frontiers": [
+      17409,
+      17409,
+      17409
+    ],
+    "checkpoints": null,
+    "data_only_revalidation": true
+  }
+]

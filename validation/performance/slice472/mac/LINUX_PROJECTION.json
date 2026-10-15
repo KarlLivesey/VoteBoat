@@ -1,0 +1,31 @@
+{
+  "candidate_commit": "de5a7221e49c89771dd3cd22a0b904966b1f4789",
+  "export_inputs": 1471,
+  "export_directories": 322,
+  "strict7_inputs": 1453,
+  "common_inputs": 1453,
+  "all_strict7_inputs_present": true,
+  "all_common_sha_and_modes_exact": true,
+  "strict7_inventory_sha256": "d2d1273b22d5dd1af22defc8e1dfbb7373bc6d56d1b3281a2ddaf10b0c89ecba",
+  "scope": "Exact final Linux472 enabled strict7 source inventory common projection; extra export inputs explicit in SOURCE selectors",
+  "extra_export_inputs": [
+    ".githooks/pre-push",
+    ".gitignore",
+    "AGENTS.md",
+    "LICENSE",
+    "README.md",
+    "benchmarks/matched/COMPARISON.md",
+    "benchmarks/matched/Cargo.lock",
+    "benchmarks/matched/Cargo.toml",
+    "benchmarks/matched/README.md",
+    "benchmarks/matched/SCHEMA.md",
+    "docs/COMMAND_BYTES.md",
+    "docs/PERFORMANCE.md",
+    "docs/REPLICA_DRIVER.md",
+    "docs/WORKER_MAINTENANCE.md",
+    "rust-toolchain.toml",
+    "validation/check-native-benchmark.mjs",
+    "validation/check-offered.mjs",
+    "validation/check-provider-conformance.mjs"
+  ]
+}

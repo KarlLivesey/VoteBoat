@@ -1,0 +1,30 @@
+{
+  "status": "PAIR_SETUP_READY_remote_only_all_setup_ended",
+  "job": "/tmp/voteboat-comparison472-e2w7mr31",
+  "source_commits": {
+    "baseline": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+    "candidate": "de5a7221e49c89771dd3cd22a0b904966b1f4789"
+  },
+  "executables": {
+    "baseline": "15a329c75d941abdd72185071dd54654ee73d55b39d3b22adcad0385f68dd0e9",
+    "candidate": "3938a63e4cbdb2bbb14b3294c0dc1ca1dce50d73822f733c1529f5e9fbd8c075"
+  },
+  "candidate_files": 1471,
+  "candidate_directories": 322,
+  "baseline_mode_caveat": "old455ordinary664/775,key600; bytes exact but not requested Linux physical-mode-preserved transfer",
+  "source_projection": "all1453 Linux final strict7 inputs SHA+mode exact",
+  "guards_exit": 0,
+  "saved_cli_six_data_only_checks": 6,
+  "checker_sha256_unchanged_from_454": true,
+  "quiet_owned_bench_build_profile_inventory": [],
+  "planned_cases": 24,
+  "controller": "run-paired.sh bulk12 then singleton12",
+  "workload_executed": false,
+  "timing_authorization": "await root Mac quiet grant",
+  "uuid_outputs": [
+    "UUID: A9FF22D4-2B60-38A7-83F2-7BB90A2E9EA1 (arm64) /tmp/voteboat-mac455-7a99ae5-fENMzQ/target-matched-release/release/voteboat-matched-framework",
+    "UUID: A9FF22D4-2B60-38A7-83F2-7BB90A2E9EA1 (arm64) /tmp/voteboat-mac455-7a99ae5-fENMzQ/target-matched-release/release/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-53c8132cd40e5351",
+    "UUID: 15D6558B-F841-31DA-9533-7D6AECBF463C (arm64) /tmp/voteboat-mac472-de5a722-pxgyh9/target-matched-release/release/voteboat-matched-framework",
+    "UUID: 15D6558B-F841-31DA-9533-7D6AECBF463C (arm64) /tmp/voteboat-mac472-de5a722-pxgyh9/target-matched-release/release/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-15ed4717242589b3"
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "scope": "Current whole470+472 framework versus455 on same Mac;20Mbulk/1Msingle diagnostics, not full acceptance;455physical-mode transfer caveat retained",
+  "cases": 24,
+  "failures": []
+}

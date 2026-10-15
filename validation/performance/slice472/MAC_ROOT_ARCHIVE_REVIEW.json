@@ -1,0 +1,7 @@
+{
+  "payloads": 112,
+  "gzip_originals": 0,
+  "manifest_sha256": "c62e3dce0fdd69d708cc8a87a8fefec67ddfb4f74ed3516c5ee1627c2bb57bdf",
+  "root_independent_recursive_payload_and_decompression_readback": "PASS",
+  "scope": "Raw terminal qualification/framework evidence reread after all collection ended; baseline455 mode caveat retained; full P9 remains open."
+}

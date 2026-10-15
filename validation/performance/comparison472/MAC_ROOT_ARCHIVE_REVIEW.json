@@ -1,0 +1,13 @@
+{
+  "payloads": 179,
+  "gzip_originals": 1,
+  "manifest_sha256": "c77f7887b33f366515ea9d061aabfa0a5f497d88ec58ae170010a17cc9ca042a",
+  "root_independent_recursive_payload_and_decompression_readback": "PASS",
+  "scope": "Raw terminal qualification/framework evidence reread after all collection ended; baseline455 mode caveat retained; full P9 remains open.",
+  "root_saved_report_validation": {
+    "cases": 24,
+    "actual_exit": 0,
+    "checker": "current byte-identical29/4/15 schema; exact completion/frontier/envelope/maintenance/outcome/observer and rate arithmetic",
+    "initial_inspection_keyerror": "Root first numeric inspection used nonexistent operations key; corrected to actual completed_originals. Original tool dfc504 exit1 retained in conversation; no input or workload modified."
+  }
+}

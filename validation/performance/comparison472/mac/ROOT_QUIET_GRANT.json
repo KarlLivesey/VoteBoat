@@ -1,0 +1,28 @@
+{
+  "authorized_by": "root Mac QUIET GRANT after independent remote guard44388 exit0",
+  "utc": "2026-10-15T06:41:05.852000+00:00",
+  "remote_launch_pid": 81924,
+  "scope": "once whole470+472 framework bulk12 then singleton12, baseline455 physical-mode caveat explicit; no acceptance claim",
+  "command": [
+    "/bin/bash",
+    "/tmp/voteboat-comparison472-e2w7mr31/run-paired.sh"
+  ],
+  "guarded_sha256": {
+    "CONFIG_PAIR.mac.json": "2897ab4c1b9ddfe8fc4d58f0e35525880efc2189ec96a8cfe8f0025f45cc94c5",
+    "artifact-guard.py": "94acade734f1ea6d7cc14ec5b39d18ad7a9d1b8747fc855441abbac7a90e9690",
+    "phase-diagnostic-check.py": "a584d3df73a342494b4bb1400d904225132b54b82d1384d09acae665eacfb7b5",
+    "prepare-pair.py": "9d73a3b88b0ca5e81f72ef788e58260bb9ed3aa79953e3cd95dc48b44e68289c",
+    "summarize.py": "ef16280fadb50f727dc929b6f3d93e483e49b58dadffb24f4c1142beaa4b978d",
+    "phase-diagnostic.sh": "9df30a9b1bdccd24ceff5d59e65e0405889e37c34128ccc493396a1a0413404a",
+    "run-cell.sh": "cbc842c75ebaf5b9e9970ac461ba592578dd8a806e3f55983f017abd43b8fbcd",
+    "run-paired.sh": "069c8ec61533ca4c07b8be42f59bfab834fb87ba6b06e7701661a6d530948dea"
+  },
+  "fresh_output_directories_absent": true,
+  "owned_competing_jobs": [],
+  "declared_cell_environment": {
+    "PATH": "/Users/karllivesey/.cargo/bin:/tmp/voteboat-macos-CzK1if/reference-tools296/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    "MATCHED_JOB": "/tmp/voteboat-comparison472-e2w7mr31",
+    "nofile": 4096
+  },
+  "collection_hold": "No Mac processing until terminal and root release; no Linux copies/hash/archive until Linux native33407 quiet release"
+}

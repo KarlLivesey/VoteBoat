@@ -1,0 +1,11 @@
+[
+  {
+    "original_path": "RESULTS.json",
+    "original_bytes": 1147481,
+    "original_sha256": "fd09e97326f3ffe862e405736363faf0f917ef457304f795d0aedb2e1dfb0ac8",
+    "compressed_path": "RESULTS.json.gz",
+    "compressed_bytes": 63867,
+    "compressed_sha256": "88d27079f6572a27e8f5de18dff1a8a5520b195afe1c289041fac04fa0d3c96b",
+    "decompression_verified": true
+  }
+]

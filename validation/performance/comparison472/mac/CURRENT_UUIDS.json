@@ -1,0 +1,54 @@
+[
+  {
+    "job": "/tmp/voteboat-mac455-7a99ae5-fENMzQ",
+    "kind": "executable",
+    "command": [
+      "/usr/bin/xcrun",
+      "dwarfdump",
+      "--uuid",
+      "/tmp/voteboat-mac455-7a99ae5-fENMzQ/target-matched-release/release/voteboat-matched-framework"
+    ],
+    "exit": 0,
+    "stdout": "UUID: A9FF22D4-2B60-38A7-83F2-7BB90A2E9EA1 (arm64) /tmp/voteboat-mac455-7a99ae5-fENMzQ/target-matched-release/release/voteboat-matched-framework\n",
+    "stderr": ""
+  },
+  {
+    "job": "/tmp/voteboat-mac455-7a99ae5-fENMzQ",
+    "kind": "dSYM",
+    "command": [
+      "/usr/bin/xcrun",
+      "dwarfdump",
+      "--uuid",
+      "/tmp/voteboat-mac455-7a99ae5-fENMzQ/target-matched-release/release/voteboat-matched-framework.dSYM"
+    ],
+    "exit": 0,
+    "stdout": "UUID: A9FF22D4-2B60-38A7-83F2-7BB90A2E9EA1 (arm64) /tmp/voteboat-mac455-7a99ae5-fENMzQ/target-matched-release/release/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-53c8132cd40e5351\n",
+    "stderr": ""
+  },
+  {
+    "job": "/tmp/voteboat-mac472-de5a722-pxgyh9",
+    "kind": "executable",
+    "command": [
+      "/usr/bin/xcrun",
+      "dwarfdump",
+      "--uuid",
+      "/tmp/voteboat-mac472-de5a722-pxgyh9/target-matched-release/release/voteboat-matched-framework"
+    ],
+    "exit": 0,
+    "stdout": "UUID: 15D6558B-F841-31DA-9533-7D6AECBF463C (arm64) /tmp/voteboat-mac472-de5a722-pxgyh9/target-matched-release/release/voteboat-matched-framework\n",
+    "stderr": ""
+  },
+  {
+    "job": "/tmp/voteboat-mac472-de5a722-pxgyh9",
+    "kind": "dSYM",
+    "command": [
+      "/usr/bin/xcrun",
+      "dwarfdump",
+      "--uuid",
+      "/tmp/voteboat-mac472-de5a722-pxgyh9/target-matched-release/release/voteboat-matched-framework.dSYM"
+    ],
+    "exit": 0,
+    "stdout": "UUID: 15D6558B-F841-31DA-9533-7D6AECBF463C (arm64) /tmp/voteboat-mac472-de5a722-pxgyh9/target-matched-release/release/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-15ed4717242589b3\n",
+    "stderr": ""
+  }
+]

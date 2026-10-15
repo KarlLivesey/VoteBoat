@@ -1,0 +1,7 @@
+{
+  "remote_package_sha256": "8a6a4c66ad7522ad6258732237aace42addee1c81d75d721cb411609981fc0c3",
+  "bytes": 713111,
+  "original_metadata_inventory_verified": true,
+  "original_scp_exit": 0,
+  "scope": "regular logs/metadata/data only; no binaries/dSYM bytes/source exports/WAL"
+}

@@ -104,9 +104,16 @@ No cause or retention claim follows; whole-release framework measurements remain
 Mac472's original21485 is terminal0 after scoped functional/strict/matched checks,
 fresh asserted framework artifact and three actual CLI controls. Its1471 source
 files and322 directory modes are verified, including the1453 final Linux input
-projection and exact within-host compiler hashes. Raw evidence remains on the
-Mac while its original paired framework78197 runs. Linux framework setup is ready
-and follows local collection; no timing overlaps build/check/archive work on its
+projection and exact within-host compiler hashes. Its original paired framework
+78197 now terminates0 with all24 cases/checkers0. Bulk455→472 OFF medians
+6,261,950→6,405,981 originals/s,p993.348125→3.315583ms; trial1 regresses both
+rate and tail. Singleton66,933→66,871/s,p99.028750→.028667ms is mixed/effectively
+neutral. This does not meet8,422,500/s or establish universal benefit. The
+[Mac qualification](../validation/performance/slice472/mac/README.md) and
+[Mac comparison](../validation/performance/comparison472/mac/README.md) retain112
+and179 verified payloads; root independently validates all24 saved reports.
+Linux framework setup is
+ready and follows local collection; no timing overlaps build/check/archive work on its
 own host. Both framework campaigns compare retained455 to the whole470+472 release,
 not isolated pump CPU. Full P9 remains active.
 

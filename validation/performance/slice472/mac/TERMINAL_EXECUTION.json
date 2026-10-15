@@ -1,0 +1,13 @@
+{
+  "original_session": 21485,
+  "actual_terminal_exit": 0,
+  "remote_pid": 60829,
+  "source_commit": "de5a7221e49c89771dd3cd22a0b904966b1f4789",
+  "scope": "scoped472qualification/fresh asserted framework/3CLI; no native workload or broad P8 routed histories repeated",
+  "source_files": 1471,
+  "source_directories": 322,
+  "exact_linux_file_directory_modes_verified_before_after": true,
+  "tool_identity_vs_original455_three_receipts_exit0": true,
+  "qualification_source": "QUALIFICATION.json",
+  "uuid_source": "CURRENT_UUIDS.json"
+}

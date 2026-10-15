@@ -1,0 +1,11 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-mac472-de5a722-pxgyh9/source)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.24s
+     Running tests/startup.rs (/tmp/voteboat-mac472-de5a722-pxgyh9/target-root-all/debug/deps/startup-61217856e12fd16f)
+
+running 3 tests
+test append_window::explicit_window_requires_application_opt_in_before_listeners_or_files ... ok
+test append_window::invalid_window_or_ordinary_request_capacity_refuses_before_resources ... ok
+test append_window::selected_native_window_applies_individual_outcomes_and_recovers_into_serial_default ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 60 filtered out; finished in 0.33s
+
