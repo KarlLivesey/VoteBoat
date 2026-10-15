@@ -1,0 +1,21 @@
+{
+  "actual_tool_exit": 1,
+  "error": "AssertionError at initial proof expected only two test-helper paths in entire integration2\u2192final inventory; it also includes three separately tested matched-workspace source paths.",
+  "failed_expected_full_difference_set": [
+    "tests/counter_service.rs",
+    "tests/membership.rs"
+  ],
+  "actual_full_differences": [
+    "benchmarks/matched/src/store/tests.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests/completion.rs",
+    "benchmarks/matched/src/workload.rs",
+    "tests/counter_service.rs",
+    "tests/membership.rs"
+  ],
+  "already_passed_before_failure": [
+    "Final1446 SHA/modes match checks2",
+    "All src/config/lock library inputs unchanged from attempt2",
+    "Matched+root library inputs unchanged from checks1"
+  ],
+  "correction": "Report all full-inventory differences; root integration scope excludes separate benchmarks/matched workspace. Preserve all differences and qualify matched independently using checks1."
+}

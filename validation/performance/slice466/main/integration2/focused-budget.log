@@ -1,0 +1,7 @@
+
+running 2 tests
+test client_admission::ready_batch::budget::held_visit_reduces_current_global_or_bulk_room_without_blocking_a_fitting_singleton ... ok
+test client_admission::ready_batch::budget::tight_bulk_output_budget_shrinks_ready_prefix_instead_of_fencing_or_starving ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 201 filtered out; finished in 0.00s
+

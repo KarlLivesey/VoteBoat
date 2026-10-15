@@ -10,7 +10,7 @@ fn received_append_payload_moves_into_accepted_tail_and_canonical_after_subset_b
         1,
         Some(Suffix {
             from: 1,
-            entries: vec![entry(1, 1)],
+            entries: vec![entry(1, 1)].into(),
         }),
     );
     let LogMutation::Update(update) = &change else {
@@ -42,4 +42,93 @@ fn owned_preparation_retains_original_mutation_ticket_order() {
         vec![group(2), group(1)]
     );
     assert_eq!(store.barrier(&tickets).unwrap().tickets, tickets);
+}
+
+#[test]
+fn entry_backing_reaches_accepted_and_durable_history_through_other_group_subset_barrier() {
+    let mut store = open(2);
+    let first: EntryBatch = vec![entry(1, 1), entry(2, 1), entry(3, 1)].into();
+    let first_pointer = first.as_ptr();
+    let update = mutation(
+        &store,
+        1,
+        3,
+        Some(Suffix {
+            from: 1,
+            entries: first.clone(),
+        }),
+    );
+    let first_tickets = store.append_batch(vec![update]).unwrap();
+    assert_eq!(
+        tail(&store).get(0).unwrap() as *const LogEntry,
+        first_pointer
+    );
+    assert!(store.durable[&group(1)].entries.is_empty());
+    let second: EntryBatch = vec![entry(4, 1), entry(5, 1)].into();
+    let second_pointer = second.as_ptr();
+    let update = mutation(
+        &store,
+        1,
+        5,
+        Some(Suffix {
+            from: 4,
+            entries: second.clone(),
+        }),
+    );
+    let second_tickets = store.append_batch(vec![update]).unwrap();
+    assert_eq!(
+        tail(&store).get(0).unwrap() as *const LogEntry,
+        first_pointer
+    );
+    assert_eq!(
+        tail(&store).get(3).unwrap() as *const LogEntry,
+        second_pointer
+    );
+    assert!(tail(&store).view(..).as_contiguous().is_none());
+    assert!(
+        tail(&store).allocation_bytes().unwrap()
+            >= first.allocation_bytes().unwrap() + second.allocation_bytes().unwrap()
+    );
+    let update = mutation(&store, 2, 0, None);
+    let other_tickets = store.append_batch(vec![update]).unwrap();
+    assert_eq!(
+        store.barrier(&other_tickets).unwrap().tickets,
+        other_tickets
+    );
+    assert!(store.accepted.is_clean());
+    let canonical = &store.durable[&group(1)].entries;
+    assert_eq!(
+        canonical,
+        &vec![
+            entry(1, 1),
+            entry(2, 1),
+            entry(3, 1),
+            entry(4, 1),
+            entry(5, 1)
+        ]
+    );
+    assert_eq!(canonical.get(0).unwrap() as *const LogEntry, first_pointer);
+    assert_eq!(canonical.get(3).unwrap() as *const LogEntry, second_pointer);
+    assert_eq!(
+        store.barrier(&first_tickets).unwrap().tickets,
+        first_tickets
+    );
+    assert_eq!(
+        store.barrier(&second_tickets).unwrap().tickets,
+        second_tickets
+    );
+    let mut replacement = first.to_vec();
+    replacement[0].term = 2;
+    assert_ne!(first, replacement);
+    assert_eq!(store.durable[&group(1)].entries[0], entry(1, 1));
+    drop(first);
+    drop(second);
+    assert_eq!(
+        store.durable[&group(1)].entries.get(0).unwrap() as *const LogEntry,
+        first_pointer
+    );
+    assert_eq!(
+        store.durable[&group(1)].entries.get(3).unwrap() as *const LogEntry,
+        second_pointer
+    );
 }

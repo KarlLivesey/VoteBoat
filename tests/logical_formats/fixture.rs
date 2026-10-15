@@ -54,7 +54,7 @@ pub fn mutations() -> Vec<LogMutation> {
         commit_index: 2,
         suffix: Some(Suffix {
             from: 1,
-            entries: entries(),
+            entries: entries().into(),
         }),
         snapshot: None,
         snapshot_membership: None,

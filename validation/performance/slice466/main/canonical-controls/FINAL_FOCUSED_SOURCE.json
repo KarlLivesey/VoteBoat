@@ -1,0 +1,17 @@
+{
+  "source_after": {
+    "src/log/entry_history/tests.rs": {
+      "sha256": "9110039a3515413a59ab80fba5b3f3d64a4ce450121d1d314c3b2f0686a6b2fb",
+      "mode": "0o644"
+    },
+    "src/raft/completion_tests.rs": {
+      "sha256": "5a0a370ae48f4a2adf046248d9600a3ef9341f55bbd783ca28b5faf6266c5cde",
+      "mode": "0o644"
+    }
+  },
+  "new_test": "repeated_suffix_cuts_keep_each_interior_partial_batch_fully_charged",
+  "extended_test": "fragmented_canonical_commit_coalesces_once_without_splitting_application_batch",
+  "coverage": "A100 truncate1, append B100 truncate2, append C100 truncate3. Exact Vec values; three pinned full backings plus descriptor capacity; shared clone isolation under replacement and later truncation. Cross-chunk completion valid and invalid-later cases compare single full Counter apply call with independent Vec one-call reference, including error/no partial state and receipt frontier.",
+  "format_actual_exit": 0,
+  "builds_tests_run": false
+}

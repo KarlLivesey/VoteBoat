@@ -72,7 +72,7 @@ fn snapshot_boundary_ballot_commit_and_overflow_errors_match_full_oracle() {
                 8 => {
                     change.suffix = Some(Suffix {
                         from: 3,
-                        entries: vec![],
+                        entries: vec![].into(),
                     })
                 }
                 _ => change.hard_state.voted_for = Some(node(4)),
@@ -126,12 +126,14 @@ fn compaction_preserves_surviving_payloads_origin_and_exact_charge() {
 #[test]
 fn immutable_command_shape_compacts_and_overflow_charge_recomputes_remaining_slice() {
     let mut state = committed();
-    let EntryPayload::Command { bytes, .. } = &mut state.entries[1].payload else {
+    let mut replacement = state.entries[1].clone();
+    let EntryPayload::Command { bytes, .. } = &mut replacement.payload else {
         unreachable!()
     };
     let mut raw = bytes.to_vec();
     raw.reserve(10000);
     *bytes = raw.into();
+    state.entries.replace(1, replacement).unwrap();
     let change = compact(&state, 1);
     let plan = NextLog::plan(
         &LogView::new(&state),
@@ -144,7 +146,7 @@ fn immutable_command_shape_compacts_and_overflow_charge_recomputes_remaining_sli
     let expected = stage_update(&state, &change, LogLimits::default()).unwrap();
     let summary = plan.install(&mut state, change).unwrap();
     assert_eq!(state, expected);
-    assert_eq!(summary, LogSummary::from_validated(&expected));
+    assert_eq!(summary, LogSummary::from_validated(&state));
     let mut overflow = LogSummary::from_validated(&state);
     overflow.retained = None; // Exercise the otherwise impractically large cached-overflow branch.
     let change = compact(&state, 2);
@@ -156,7 +158,7 @@ fn immutable_command_shape_compacts_and_overflow_charge_recomputes_remaining_sli
     )
     .unwrap();
     let summary = plan.install(&mut state, change).unwrap();
-    assert_eq!(summary.retained_bytes(), Some(0));
+    assert_eq!(summary.retained_bytes(), state.entries.allocation_bytes());
     assert_eq!(summary, LogSummary::from_validated(&state));
 }
 #[test]
@@ -193,7 +195,7 @@ fn compact_plan_rejects_stale_summary_predecessor_and_altered_reference() {
             7 => {
                 wrong.suffix = Some(Suffix {
                     from: 3,
-                    entries: vec![],
+                    entries: vec![].into(),
                 })
             }
             8 => wrong.snapshot_membership = Some(Box::new(state.membership().unwrap())),
@@ -219,7 +221,8 @@ fn trimmed_overlay_terms_materialization_and_configured_fallback_are_exact() {
     let NextLog::Compact(delta) = plan else {
         panic!("compact required")
     };
-    let view = LogView::trimmed_overlay(&base, &[], delta.metadata(), delta.removed);
+    let tail = EntryHistory::default();
+    let view = LogView::trimmed_overlay(&base, &tail, delta.metadata(), delta.removed);
     let expected = stage_update(&base, &change, LogLimits::default()).unwrap();
     assert_eq!(view.materialize(), expected);
     for index in 0..=3 {
@@ -231,7 +234,7 @@ fn trimmed_overlay_terms_materialization_and_configured_fallback_are_exact() {
         2,
         Some(Suffix {
             from: 2,
-            entries: vec![entry(2, 2)],
+            entries: vec![entry(2, 2)].into(),
         }),
     );
     next.commit_index = 1; // Replacement crossing commit remains rejected by the full oracle.

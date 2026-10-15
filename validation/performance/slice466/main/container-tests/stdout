@@ -1,0 +1,16 @@
+
+running 11 tests
+test log::entry_batch::tests::accounting_charges_raw_backing_header_spare_slots_and_each_owner_payloads ... ok
+test log::entry_batch::tests::capture_sharing_full_equality_and_explicit_mutable_ownership ... ok
+test log::entry_batch::tests::independent_changes_to_every_header_and_payload_component_are_detected ... ok
+test log::entry_batch::tests::normalization_preserves_raw_capacity_validation_and_configuration_fallback ... ok
+test log::entry_history::tests::capture_append_and_unique_extraction_move_entries_without_materialization ... ok
+test log::entry_history::tests::chunked_edits_and_lookups_match_independent_vec_history ... ok
+test log::entry_history::tests::composite_projection_covers_descriptor_capacity_pinned_by_concat_before_cut ... ok
+test log::entry_history::tests::composite_view_projections_bound_cuts_concat_and_append_without_discount ... ok
+test log::entry_history::tests::every_subrange_and_mixed_direction_iterator_matches_vec ... ok
+test log::entry_history::tests::preflight_charges_match_growth_concatenation_trimming_and_capacity_preserving_clone ... ok
+test log::entry_history::tests::retained_boundaries_charge_full_backing_and_clones_keep_values_alive ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 416 filtered out; finished in 0.00s
+

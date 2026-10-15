@@ -1,0 +1,63 @@
+{
+  "full_final_vs_checks2_exact_sha256_and_modes": true,
+  "selected_final_inputs": 1446,
+  "root_library_reuse": {
+    "passing_scope": "attempt2 all437/core355",
+    "all_library_source_config_lock_inputs_unchanged": true,
+    "full_inventory_differences": [
+      "benchmarks/matched/src/attribution.rs",
+      "benchmarks/matched/src/attribution/tests.rs",
+      "benchmarks/matched/src/store.rs",
+      "benchmarks/matched/src/store/tests.rs",
+      "benchmarks/matched/src/voteboat_engine/actor.rs",
+      "benchmarks/matched/src/voteboat_engine/actor/tests/completion.rs",
+      "benchmarks/matched/src/workload.rs",
+      "tests/client_admission/ready_batch/budget.rs",
+      "tests/counter_service.rs",
+      "tests/membership.rs"
+    ]
+  },
+  "matched_reuse": {
+    "passing_scope": "checks1 matched71",
+    "all_benchmark_and_library_sources_configs_locks_unchanged": true,
+    "full_inventory_differences": [
+      "tests/counter_service.rs",
+      "tests/membership.rs"
+    ]
+  },
+  "integration2_followup": {
+    "full_inventory_differences": [
+      "benchmarks/matched/src/store/tests.rs",
+      "benchmarks/matched/src/voteboat_engine/actor/tests/completion.rs",
+      "benchmarks/matched/src/workload.rs",
+      "tests/counter_service.rs",
+      "tests/membership.rs"
+    ],
+    "root_integration_differences": [
+      "tests/counter_service.rs",
+      "tests/membership.rs"
+    ],
+    "actual_checks2_followups": [
+      "membership all32",
+      "TCP/QUIC joint/final member-service recovery2"
+    ],
+    "separate_matched_changes": "checks1 matched71 and strict standalone cover final benchmark source",
+    "final_effect_owner": "original83140 full203 passed current final source"
+  },
+  "strict_final_scope": "original74996 checks2 terminal0/DONE; formatting/default/all/core/native plus standalone0 on exact final1446 inputs",
+  "unchanged_lint_formatter_build_lock_hook_configs": [
+    "Cargo.toml",
+    "Cargo.lock",
+    "clippy.toml",
+    "rust-toolchain.toml",
+    ".githooks/pre-push",
+    "benchmarks/matched/Cargo.toml",
+    "benchmarks/matched/Cargo.lock"
+  ],
+  "not_claimed": [
+    "fresh builds",
+    "performance benefit",
+    "Mac466 qualification",
+    "full P9 acceptance"
+  ]
+}

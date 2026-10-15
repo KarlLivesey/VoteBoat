@@ -339,7 +339,10 @@ impl Raft {
         } else {
             entries[offset..].to_vec()
         };
-        Suffix { from, entries }
+        Suffix {
+            from,
+            entries: entries.into(),
+        }
     }
     fn validate_append_entries(
         &self,

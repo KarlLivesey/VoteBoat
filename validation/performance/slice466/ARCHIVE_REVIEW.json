@@ -1,0 +1,479 @@
+{
+  "status": "PASS",
+  "scope": "Independent file-set/SHA/decompression/source-version/mode/current-source/status/count verification; no build/test/workload run, no sealed-main mutation.",
+  "manifest_sha256": "e85e3b36b3fc2f09bce7d933e70875a6a9f7979f34843a7fa5128a92b54433af",
+  "payloads": 600,
+  "regular_files_including_manifest": 601,
+  "outer_bytes": 19939503,
+  "gzip_originals_verified": 2,
+  "historical_source_versions": 6247,
+  "unique_source_objects": 401,
+  "full_inventory_versions_checked": 21,
+  "changed_source_paths": 172,
+  "final_inputs": 1446,
+  "current_hash_mode_mismatches": [],
+  "terminal_runs": [
+    {
+      "handle": 39392,
+      "actual_exit": 101,
+      "status_path": "diagnostic1/STATUS"
+    },
+    {
+      "handle": 9373,
+      "actual_exit": 0,
+      "status_path": "diagnostic2/STATUS"
+    },
+    {
+      "handle": 19402,
+      "actual_exit": 101,
+      "status_path": "diagnostic3/STATUS"
+    },
+    {
+      "handle": 41142,
+      "actual_exit": 101,
+      "status_path": "diagnostic4/STATUS"
+    },
+    {
+      "handle": 17964,
+      "actual_exit": 101,
+      "status_path": "diagnostic5/STATUS"
+    },
+    {
+      "handle": 14127,
+      "actual_exit": 0,
+      "status_path": "diagnostic6/STATUS"
+    },
+    {
+      "handle": 14737,
+      "actual_exit": 0,
+      "status_path": "container-tests/STATUS"
+    },
+    {
+      "handle": 62366,
+      "actual_exit": 0,
+      "status_path": "public-container-tests/STATUS"
+    },
+    {
+      "handle": 1736,
+      "actual_exit": 101,
+      "status_path": "attempt1/STATUS"
+    },
+    {
+      "handle": 72651,
+      "actual_exit": 0,
+      "status_path": "attempt2/STATUS"
+    },
+    {
+      "handle": 72468,
+      "actual_exit": 101,
+      "status_path": "matched-diagnostic/STATUS"
+    },
+    {
+      "handle": 63034,
+      "actual_exit": 101,
+      "status_path": "integration1/STATUS"
+    },
+    {
+      "handle": 94606,
+      "actual_exit": 101,
+      "status_path": "integration2/STATUS"
+    },
+    {
+      "handle": 98884,
+      "actual_exit": 101,
+      "status_path": "checks1/STATUS"
+    },
+    {
+      "handle": 74996,
+      "actual_exit": 0,
+      "status_path": "checks2/STATUS"
+    },
+    {
+      "handle": 83140,
+      "actual_exit": 0,
+      "status_path": "final-owner/STATUS"
+    }
+  ],
+  "test_count_logs_verified": 14,
+  "actual_test_results": {
+    "checks2/membership-helper.log": [
+      {
+        "result": "ok",
+        "passed": "32",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      }
+    ],
+    "checks2/member-service-helper.log": [
+      {
+        "result": "ok",
+        "passed": "2",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "201"
+      }
+    ],
+    "integration2/service-recovery.log": [
+      {
+        "result": "ok",
+        "passed": "2",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "201"
+      }
+    ],
+    "attempt2/library-core.log": [
+      {
+        "result": "ok",
+        "passed": "355",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      }
+    ],
+    "integration1/integration-all.log": [
+      {
+        "result": "FAILED",
+        "passed": "201",
+        "failed": "2",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      }
+    ],
+    "integration2/integration-core.log": [
+      {
+        "result": "ok",
+        "passed": "195",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "14",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "5",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "2",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "18",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "31",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "29",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "38",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "12",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "5",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "3",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      }
+    ],
+    "attempt1/library-all.log": [
+      {
+        "result": "FAILED",
+        "passed": "411",
+        "failed": "25",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      }
+    ],
+    "integration2/integration-all.log": [
+      {
+        "result": "ok",
+        "passed": "24",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "5",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "11",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "2",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "19",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "9",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "44",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "32",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "46",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "79",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "55",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "27",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "14",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "9",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      },
+      {
+        "result": "ok",
+        "passed": "9",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      }
+    ],
+    "final-owner/stdout": [
+      {
+        "result": "ok",
+        "passed": "203",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      }
+    ],
+    "attempt2/library-all.log": [
+      {
+        "result": "ok",
+        "passed": "437",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      }
+    ],
+    "checks1/matched.log": [
+      {
+        "result": "ok",
+        "passed": "71",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "0"
+      }
+    ],
+    "container-tests/stdout": [
+      {
+        "result": "ok",
+        "passed": "11",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "416"
+      }
+    ],
+    "integration2/focused-budget.log": [
+      {
+        "result": "ok",
+        "passed": "2",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "201"
+      }
+    ],
+    "public-container-tests/stdout": [
+      {
+        "result": "ok",
+        "passed": "4",
+        "failed": "0",
+        "ignored": "0",
+        "measured": "0",
+        "filtered": "42"
+      }
+    ]
+  },
+  "issues": [],
+  "limitations": [
+    {
+      "kind": "collector_progress_stdout",
+      "sealed_bytes": 0,
+      "explanation": "Sealed zero-byte collector progress stdout is not a terminal exit. Independently read sibling completed stdout and COLLECTION_RESULT.json: matching600 payloads/601regular files/outer manifest, recorded original53616 actual0. They preserve completion without rewriting sealed main."
+    },
+    {
+      "kind": "source_object_permissions",
+      "explanation": "Objects are archival data mode0600; original per-version physical source modes are verified against inventories/snapshots and retained in SOURCE_VERSIONS.json."
+    },
+    {
+      "kind": "acceptance",
+      "explanation": "Passing qualification logs and exact reuse scope do not establish performance benefit, native durability acceptance or full P9 completion."
+    }
+  ],
+  "selection_source_mismatches": [
+    "target/p9/slice466/COLLECTION.stdout"
+  ],
+  "collector_completion_siblings": {
+    "COLLECTION.stdout": {
+      "sha256": "ac20632eeea7816c94f3a2ca837df9543de1ed24913f6f20fb60edb800e5e047",
+      "bytes": 223,
+      "contents": {
+        "payloads": 600,
+        "regular_files": 601,
+        "manifest_sha256": "e85e3b36b3fc2f09bce7d933e70875a6a9f7979f34843a7fa5128a92b54433af",
+        "archive": "/home/karllivesey/Documents/ChatGPT/VoteBoat/validation/performance/slice466/main"
+      }
+    },
+    "COLLECTION_RESULT.json": {
+      "sha256": "2224284874e3bbd9bfe16f3b2519b7679c03c612a8ceddb6b19227445cdffcc2",
+      "bytes": 688,
+      "contents": {
+        "original_handle": 53616,
+        "actual_exit": 0,
+        "result": {
+          "payloads": 600,
+          "regular_files": 601,
+          "manifest_sha256": "e85e3b36b3fc2f09bce7d933e70875a6a9f7979f34843a7fa5128a92b54433af",
+          "archive": "/home/karllivesey/Documents/ChatGPT/VoteBoat/validation/performance/slice466/main"
+        },
+        "scope": "All16 qualification jobs were terminal before collection. The sealed archive includes empty collector progress stdout/stderr selected while collection itself ran; they are not final completion records. These sibling raw files preserve the actual final collector output without rewriting the sealed archive. No workload/test/compiler raw log was collected while live."
+      }
+    }
+  },
+  "terminal_status_receipts_verified": 16
+}

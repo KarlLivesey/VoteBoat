@@ -45,9 +45,9 @@ impl CompactDelta {
         Ok(())
     }
     pub(crate) fn install(self, current: &mut GroupLog) -> LogSummary {
-        current.entries.drain(..self.removed);
+        current.entries.discard_prefix(self.removed);
         self.metadata().install_header(current);
-        self.summary
+        self.summary.with_actual_retained(current)
     }
 }
 pub(super) fn eligible(view: &LogView<'_>, summary: &LogSummary, update: &LogUpdate) -> bool {
@@ -118,7 +118,7 @@ pub(super) fn plan(
     next.base_term = reference.term;
     next.entries_len -= removed;
     next.commit_index = update.commit_index;
-    let retained = retained_after(view, summary.retained, removed, next.entries_len);
+    let retained = view.projected_retained_bytes(removed, None);
     Ok(CompactDelta {
         predecessor: *current,
         removed,
@@ -128,27 +128,4 @@ pub(super) fn plan(
             ..*summary
         },
     })
-}
-fn retained_after(
-    view: &LogView<'_>,
-    retained: Option<usize>,
-    removed: usize,
-    left: usize,
-) -> Option<usize> {
-    let removed_bytes = removed
-        .checked_mul(size_of::<LogEntry>())
-        .and_then(|bytes| {
-            view.entries().take(removed).try_fold(bytes, |sum, entry| {
-                sum.checked_add(entry.retained_payload_bytes())
-            })
-        });
-    if let Some(bytes) = retained.and_then(|bytes| bytes.checked_sub(removed_bytes?)) {
-        return Some(bytes);
-    }
-    // Trimming can turn a previous accounting overflow into a representable charge.
-    view.entries()
-        .skip(removed)
-        .try_fold(left.checked_mul(size_of::<LogEntry>())?, |sum, entry| {
-            sum.checked_add(entry.retained_payload_bytes())
-        })
 }

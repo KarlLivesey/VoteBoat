@@ -1,0 +1,11 @@
+{
+  "original_handle": 53616,
+  "actual_exit": 0,
+  "result": {
+    "payloads": 600,
+    "regular_files": 601,
+    "manifest_sha256": "e85e3b36b3fc2f09bce7d933e70875a6a9f7979f34843a7fa5128a92b54433af",
+    "archive": "/home/karllivesey/Documents/ChatGPT/VoteBoat/validation/performance/slice466/main"
+  },
+  "scope": "All16 qualification jobs were terminal before collection. The sealed archive includes empty collector progress stdout/stderr selected while collection itself ran; they are not final completion records. These sibling raw files preserve the actual final collector output without rewriting the sealed archive. No workload/test/compiler raw log was collected while live."
+}

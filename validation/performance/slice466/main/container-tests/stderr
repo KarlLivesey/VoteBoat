@@ -1,0 +1,31 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+warning: this creates a dangling pointer because temporary `Vec<log::LogEntry>` is dropped at end of statement
+  --> src/log/entry_batch/tests.rs:73:34
+   |
+73 |     assert_eq!(unique.into_vec().as_ptr(), unique_pointer);
+   |                ----------------- ^^^^^^ pointer created here
+   |                |
+   |                this `Vec<log::LogEntry>` is dropped at end of statement
+   |
+   = help: bind the `Vec<log::LogEntry>` to a variable such that it outlives the pointer returned by `as_ptr`
+   = note: a dangling pointer is safe, but dereferencing one is undefined behavior
+   = note: returning a pointer to a local variable will always result in a dangling pointer
+   = note: for more information, see <https://doc.rust-lang.org/reference/destructors.html>
+   = note: `#[warn(dangling_pointers_from_temporaries)]` on by default
+
+warning: this creates a dangling pointer because temporary `Vec<log::LogEntry>` is dropped at end of statement
+   --> src/log/entry_history/tests.rs:251:36
+    |
+251 |     assert_eq!(combined.into_vec().as_ptr(), pointer);
+    |                ------------------- ^^^^^^ pointer created here
+    |                |
+    |                this `Vec<log::LogEntry>` is dropped at end of statement
+    |
+    = help: bind the `Vec<log::LogEntry>` to a variable such that it outlives the pointer returned by `as_ptr`
+    = note: a dangling pointer is safe, but dereferencing one is undefined behavior
+    = note: returning a pointer to a local variable will always result in a dangling pointer
+    = note: for more information, see <https://doc.rust-lang.org/reference/destructors.html>
+
+warning: `voteboat` (lib test) generated 2 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 20.25s
+     Running unittests src/lib.rs (target/p9/slice455/padded-target-checks/debug/deps/voteboat-ebeb84c4129d638f)

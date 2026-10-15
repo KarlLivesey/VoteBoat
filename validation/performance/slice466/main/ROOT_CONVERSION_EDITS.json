@@ -1,0 +1,122 @@
+[
+  {
+    "path": "src/logical_voter/application/tests.rs",
+    "edits": 3,
+    "before_sha256": "8b10ee5474624af86bfd77544db0edd3a34f280ba9bafc1323f8696a37e09473",
+    "after_sha256": "3f9aa7ce026b784a8880f29386fc16465317e8f2accfbeb455be5f5ca964247a"
+  },
+  {
+    "path": "src/logical_voter/application/tests/authority/promotion.rs",
+    "edits": 2,
+    "before_sha256": "bfe0b273386e568b4e42d797e0168cd8f580d8a6fdee9866586d7d870dec518b",
+    "after_sha256": "586bfa42af1cd2e837221267da351d7eb4d5146226201840ae185be614a1b7fd"
+  },
+  {
+    "path": "src/logical_voter/application/tests/control_profile.rs",
+    "edits": 2,
+    "before_sha256": "4d65b5a046d3d0b0b522c0d9ed3f15fba7810af0a43d0b28059eb6a8de3fc33d",
+    "after_sha256": "5faafeab9a5a291b71732a88186d05b4e7cf70881380e7d84b6a7073d5bf6eef"
+  },
+  {
+    "path": "src/logical_voter/application/tests/eligibility.rs",
+    "edits": 3,
+    "before_sha256": "079764b54e60e3f346b0b1ffd9c52121ea95e18dff097472de1d0f6a78449156",
+    "after_sha256": "0b2675c1efc71957cca9a91432879ff1f8d94991e84ba060b73514c74104f8e0"
+  },
+  {
+    "path": "src/logical_voter/application/tests/enrollment/recovery.rs",
+    "edits": 2,
+    "before_sha256": "a65ccfbd913f3593674526f812d2e13058d5d16a595e5585384279517c8c247c",
+    "after_sha256": "aa131d6c3cbafa175f35044a005bfb65f37044d5f17e66f7710eff73f77af565"
+  },
+  {
+    "path": "src/logical_voter/application/tests/reads.rs",
+    "edits": 1,
+    "before_sha256": "76641eaf12bf8339b6d4ed194a9df2428792a48025c51d5b08538e19adbabddc",
+    "after_sha256": "bcff913bca4a8e0fc8dc35b3ec3a0bfde7024c23b7e92c9c9ff679bf526b721c"
+  },
+  {
+    "path": "src/logical_voter/application/tests/snapshots.rs",
+    "edits": 1,
+    "before_sha256": "068c1e212a8efec5743bdfcf0577765f07e5821fb75a009b1ab01fcb44f72738",
+    "after_sha256": "13d21bf0fc1b73a5890e085faf7a574e8b6b991c3216eb1824f5d8bdb4bcc77a"
+  },
+  {
+    "path": "src/logical_voter/response/tests/limits.rs",
+    "edits": 1,
+    "before_sha256": "5ce300cd74b68d0f4a6986adaabb601d493698a5ae4cb0034590ad567d198d4b",
+    "after_sha256": "9cdd3812cc2c4b22d2d6d725dbae76f2ef2c1a498df828563e339eaf4969ca0e"
+  },
+  {
+    "path": "src/logical_voter/response/tests/reads.rs",
+    "edits": 1,
+    "before_sha256": "392bda8a58284c969960b0e1932e6553f5cc1e5fb0b817060384a29cf1bc7e0e",
+    "after_sha256": "1741d8bbac8b5e072fb72fa0b78e6b82c7ba7a6a474e20dcb2aa502ef7e52924"
+  },
+  {
+    "path": "src/native/log_store/accepted/tests.rs",
+    "edits": 8,
+    "before_sha256": "7750e72b7c5f68504332662f7264122b9261768dcaa2c5b3377eb3d6b2bf40b9",
+    "after_sha256": "621770d75cbb07a9d338711c3921882213d74ecca2a5bfb74e9383d1ac0711c9"
+  },
+  {
+    "path": "src/native/log_store/accepted/tests/checkpoint.rs",
+    "edits": 5,
+    "before_sha256": "84d546bfc934489e3c48fc865aae83229ed88f7e15ba7d8f696768657b22f220",
+    "after_sha256": "538b8ae6414a0709f932ee62acea52d0faf6d218506ea307db48e442de2952a4"
+  },
+  {
+    "path": "src/native/log_store/accepted/tests/compact.rs",
+    "edits": 5,
+    "before_sha256": "f6487de641490587b934588fe82798a9ed365b8a4e5a63798d0326143f8e8dae",
+    "after_sha256": "6aeeb92331c674ac007ba90a05cd4d7f477e0681846ed2d197acdf68b07af1f6"
+  },
+  {
+    "path": "src/native/log_store/accepted/tests/configured.rs",
+    "edits": 6,
+    "before_sha256": "a4cf49eb50cf2fe881be429dc4e5d60d23af5c190fbc453d1d52e435752248d2",
+    "after_sha256": "43bd035f8287d3c095edf3d9df7847945c9cd4222dda8e3556312bd3530a3818"
+  },
+  {
+    "path": "src/native/log_store/accepted/tests/incoming.rs",
+    "edits": 1,
+    "before_sha256": "c9592d21ed568bc3f8aacf5a6982e28e497b4de0b3f42625f46c2e01c9dbe4b5",
+    "after_sha256": "5bebb61f5c1ef7db99037f020caf96652be63076a070f4ae1981bc19e5d82230"
+  },
+  {
+    "path": "src/native/log_store/accepted/tests/incoming_codec.rs",
+    "edits": 1,
+    "before_sha256": "ea09541157ab49b910715bbe64da2ba6665830fb01adb5fd93f01d2a75a99ec9",
+    "after_sha256": "ef7a74ce59eae9faf66c8d095ea05061acd22ae6798134c1c7c9af1bb59cf57e"
+  },
+  {
+    "path": "src/native/log_store/striped/file/tests/fixture.rs",
+    "edits": 1,
+    "before_sha256": "76a51900df95ed7f42e4d03025107907fafd70e7a777564b719b2edc3678486f",
+    "after_sha256": "d9aef1574274f8c6e3af36eb513e95c6cdb76b616f5e732d531fd4facab74d08"
+  },
+  {
+    "path": "src/runtime/logical_intake/tests.rs",
+    "edits": 1,
+    "before_sha256": "4402c0e14672133686699fca6df18fdc7f51aec240f46a5e0646b221b17b7077",
+    "after_sha256": "1e4c238ba93cd3a4426d31c456ff363c8d7f30561b8e6dfb9b4897de3c6134e0"
+  },
+  {
+    "path": "src/runtime/ready_batch/tests/fixture.rs",
+    "edits": 1,
+    "before_sha256": "cab4b491ebfbd52991688fbdd277f2891ec8df48d438ca35185a2d16bd0aad11",
+    "after_sha256": "4da0d280a88b2dd013db10166c5129743ee0edc976be933e7805087d5f8d916f"
+  },
+  {
+    "path": "src/runtime/ready_batch/tests/routine/outcomes.rs",
+    "edits": 1,
+    "before_sha256": "50bfa05863d11d1d9a0855879c116f2762a8b0e91bceeba45115b900424b2d2d",
+    "after_sha256": "3675bac0715df256da3922d36ed7019db2e5aed2b13c42e07fcf9f35b24a402f"
+  },
+  {
+    "path": "tests/support/retirement_storage.rs",
+    "edits": 3,
+    "before_sha256": "14f686633b68ed611c3d5baf7af79efac0a5b5a9f23bf7ddfef235168cae313d",
+    "after_sha256": "af68ad41e80115780849cf97c429d7f3ebe2aa3638b583988ece02d1ce7c87a3"
+  }
+]

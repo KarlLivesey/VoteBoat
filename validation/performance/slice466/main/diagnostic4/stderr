@@ -1,0 +1,47 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error: could not compile `voteboat` (test "reparenting") due to 4 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `voteboat` (test "reparent_guards") due to 5 previous errors
+error: could not compile `voteboat` (example "journal_attribution" test) due to 7 previous errors
+error: could not compile `voteboat` (test "leadership_maintenance") due to 11 previous errors
+error: could not compile `voteboat` (example "log_staging_benchmark") due to 2 previous errors
+error: could not compile `voteboat` (test "provider_conformance") due to 15 previous errors; 1 warning emitted
+error: could not compile `voteboat` (test "metadata_transfer") due to 12 previous errors
+error: could not compile `voteboat` (test "snapshot_worker") due to 3 previous errors
+error: could not compile `voteboat` (test "worker") due to 3 previous errors
+error: could not compile `voteboat` (test "deletion") due to 2 previous errors
+error: could not compile `voteboat` (lib test) due to 1 previous error
+error: could not compile `voteboat` (test "log_staging") due to 4 previous errors
+error: could not compile `voteboat` (test "native_member_startup") due to 5 previous errors
+error: could not compile `voteboat` (test "runtime") due to 4 previous errors
+error: could not compile `voteboat` (test "logical_formats") due to 1 previous error
+error: could not compile `voteboat` (test "logical_nested_native") due to 1 previous error
+error: could not compile `voteboat` (test "retained_insertion") due to 18 previous errors
+error: could not compile `voteboat` (test "learners") due to 10 previous errors
+error: could not compile `voteboat` (test "imported_parent") due to 2 previous errors
+error: could not compile `voteboat` (test "namespace_creation") due to 14 previous errors
+error: could not compile `voteboat` (test "snapshot_exports") due to 3 previous errors
+error: could not compile `voteboat` (test "logical_activation_driver") due to 1 previous error
+error: could not compile `voteboat` (test "scoped_source") due to 2 previous errors
+error: could not compile `voteboat` (test "striped_log_store") due to 5 previous errors
+error: could not compile `voteboat` (example "log_staging_benchmark" test) due to 2 previous errors
+error: could not compile `voteboat` (test "routed") due to 3 previous errors
+error: could not compile `voteboat` (test "group_creation") due to 1 previous error
+error: could not compile `voteboat` (test "child_slots") due to 2 previous errors
+error: could not compile `voteboat` (test "membership") due to 40 previous errors
+error: could not compile `voteboat` (test "counter_service") due to 4 previous errors
+error: could not compile `voteboat` (example "framework_benchmark" test) due to 1 previous error
+error: could not compile `voteboat` (test "parser_campaign") due to 2 previous errors
+error: could not compile `voteboat` (test "raft") due to 3 previous errors
+error: could not compile `voteboat` (test "log_store") due to 25 previous errors
+error: could not compile `voteboat` (test "log_owned") due to 9 previous errors
+error: could not compile `voteboat` (test "directory") due to 2 previous errors
+error: could not compile `voteboat` (test "logical_activation_nested") due to 1 previous error
+error: could not compile `voteboat` (test "log_reclaim") due to 3 previous errors
+error: could not compile `voteboat` (test "member_recovery") due to 26 previous errors
+error: could not compile `voteboat` (test "ballots") due to 9 previous errors
+error: could not compile `voteboat` (test "effect_owner") due to 7 previous errors
+error: could not compile `voteboat` (test "maintenance") due to 1 previous error
+error: could not compile `voteboat` (example "wal_benchmark") due to 1 previous error
+error: could not compile `voteboat` (test "insertion") due to 4 previous errors
+error: could not compile `voteboat` (test "snapshot") due to 7 previous errors; 1 warning emitted

@@ -308,7 +308,7 @@ fn mixed_retained_and_parent_journal_cuts_preserve_exports_and_later_full_fence(
             boundary,
             Some(Suffix {
                 from: boundary,
-                entries: vec![entries[boundary as usize - 1].clone()],
+                entries: vec![entries[boundary as usize - 1].clone()].into(),
             }),
         );
         let frame = NativeLogCodec
@@ -797,7 +797,7 @@ fn seed_moved_parent(
             boundary - 1,
             Some(Suffix {
                 from: 1,
-                entries: entries[..boundary as usize - 1].to_vec(),
+                entries: entries[..boundary as usize - 1].to_vec().into(),
             }),
         )],
     );

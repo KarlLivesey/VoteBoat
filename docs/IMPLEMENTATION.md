@@ -743,8 +743,8 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: reject measured ready-reply joining and select a distinct measured limiter | Remove unearned complexity after active same-source comparison worsens tails | Complete twelve-case464 evidence, [465 rollback schema](../validation/performance/slice465/SCHEMA.md), exact462 baseline, current profiles and original Mac455 qualification | Preserve all raw losses; exact baseline source/contracts restored, retained oracle and strict hook clean, checked publication; choose next structural ownership/order/waiting change from measured cost without retuning fusion | P9.1/P9.2/P9.3 |
-| Next: remove the next measured limiting stage | Increase useful work after the candidate is retained or rejected | Actual disabled/enabled join counts, completed rates/tails/refusals/physical barriers and current profile; schema before editing | Choose from measured ordering, batching, ownership or waiting costs; preserve every original result and partial-progress/restart contract; checked published slice and repeated paired evidence without retuning rejected experiments | P9.1/P9.2/P9.3 |
+| Current: publish and qualify immutable canonical entry ownership | Establish net useful gain from the checked integrated466 path | [Linux466 qualification](../validation/performance/slice466/main/README.md), published source, fresh asserted artifacts, original Mac455 qualification | Enabled-hook publication, Mac qualification, actual clone/coalescing profiles, repeated same-host paired completed rates/tails/refusals and retained backing debt; reject unearned complexity | P9.1/P9.2/P9.3 |
+| Next: optimize the largest remaining measured stage | Improve sustained useful throughput through less work or better ordering | Current466 disposition and both-host CPU/waiting/materialization evidence, original comparison contract | Before-edit ownership/transition schema, focused correctness/recovery checks, checked publication and repeated paired rates/tails/debt; preserve all rejected paths and raw regressions | P9.1/P9.2/P9.3 |
 | Following: full curve, sustainable headroom and composition qualification | Satisfy the entire performance objective beyond the current experiment | Retained measured improvements, qualified weighted fixture, source/artifact/host identities and stable maintenance | All seven required framework cells on both hosts with healthy margin; sustained memory/debt, durable applications/headroom/skew/fairness, independent placement/shared barriers and P8 composition; preserve every outcome/fence/retry | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
@@ -34451,3 +34451,35 @@ Independent review confirms exact2485 baseline blobs and physical1441 compiled
 inputs with no ignored/untracked extras; all190 rollback payloads verify. The
 current deliverable is publication of this measured rejection, then distinct
 profile-led work; neither the one-group floors nor wider P9 qualification close.
+
+
+Slice466 implements shared immutable entry batches through pending and canonical
+Core/native/host-owned histories. See [ownership APIs](ENTRY_BATCHES.md),
+[before-edit schema](../validation/performance/slice466/SCHEMA.md),
+[TRACE-only backing observations](../validation/performance/slice466/OBSERVATION_SCHEMA.md)
+and [Linux qualification](../validation/performance/slice466/main/README.md).
+All437/core355 library,385 all-feature/352 core integration, final203 owner,
+TCP/QUIC static-service recovery2 and joint/final member-service recovery2,
+standalone matched71 and metadata pass. Final1446 scoped hashes/modes match the
+complete enabled strict hook0/DONE (default/all/core/native and standalone).
+Initial failures, actual permission-qualified retries and focused source versions
+remain; no broad old result is silently upgraded to a different source scope.
+
+Source review corrected trim/concatenate projection and raw Delta normalization;
+actual tests exposed small outgoing Vec overcapacity and obsolete logical-only
+fixture charges. Exact preallocation, physical accounting and two test-helper
+extractions fix causes while retaining assertions and thresholds. New controls
+check full LogEntry backing identity through wrong/delayed Durable and subset
+barriers, configuration/content replacement, full hidden/spare/descriptor debt,
+repeated suffix cuts, one whole coalesced application batch including late error,
+and staged conversion/capture peaks with ready-prefix/legacy singleton behavior.
+TRACE-only observations report full per-owner entry allocation at named success
+points without changing the existing phase/counter semantics or OFF inspection.
+These counters are not whole-process RSS, a continuous peak or transient debt.
+
+Publication and fresh performance qualification follow. No466 speedup, sustained
+memory plateau, Mac qualification or macro completion is claimed. The macro plan
+is reviewed for the new physical bound: interior partial backings are bounded
+by retained chunks and admitted batches, not merely two boundary spans, and must
+be measured under conflict/maintenance pressure. The full both-host sustained,
+durable/headroom/fairness/placement/P8 acceptance remains unchanged and open.

@@ -789,7 +789,7 @@ pub fn finish_snapshot_install<A: CheckpointStateMachine, L: LogStore, S: Snapsh
             reference.index,
             &snapshot.application,
         )?;
-        next.apply_batch(raft.replay_committed())?;
+        next.apply_batch(&raft.replay_committed())?;
         store.reconcile_log(Some(reference))?;
         let effects = raft.snapshot_applied(reference, next.applied_index())?;
         *application = next;

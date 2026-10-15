@@ -74,7 +74,7 @@ fn current() -> GroupLog {
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1), entry(2, 1)],
+                entries: vec![entry(1, 1), entry(2, 1)].into(),
             }),
         ),
         LogLimits::default(),
@@ -145,7 +145,7 @@ fn plain_install_keeps_old_payloads_and_normalizes_only_new_allocations() {
         1,
         Some(Suffix {
             from: 3,
-            entries: vec![new],
+            entries: vec![new].into(),
         }),
     );
     let plan = NextLog::plan(
@@ -173,7 +173,7 @@ fn plain_install_keeps_old_payloads_and_normalizes_only_new_allocations() {
     );
     assert_eq!(summary, LogSummary::from_validated(&state));
     let commit = update(&state, 1, 3, None);
-    let before = state.entries.as_ptr();
+    let before: Vec<_> = state.entries.iter().map(std::ptr::from_ref).collect();
     let plan = NextLog::plan(
         &LogView::new(&state),
         &summary,
@@ -182,7 +182,14 @@ fn plain_install_keeps_old_payloads_and_normalizes_only_new_allocations() {
     )
     .unwrap();
     plan.install(&mut state, commit).unwrap();
-    assert_eq!(state.entries.as_ptr(), before);
+    assert_eq!(
+        state
+            .entries
+            .iter()
+            .map(std::ptr::from_ref)
+            .collect::<Vec<_>>(),
+        before
+    );
 }
 
 #[test]
@@ -194,7 +201,7 @@ fn stale_summary_or_wrong_install_payload_and_predecessor_cannot_mutate_log() {
         1,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 1)],
+            entries: vec![entry(3, 1)].into(),
         }),
     );
     let summary = LogSummary::from_validated(&state);
@@ -220,7 +227,10 @@ fn stale_summary_or_wrong_install_payload_and_predecessor_cannot_mutate_log() {
         if changed {
             installed.revision = other.revision;
         } else {
-            wrong.suffix.as_mut().unwrap().entries[0] = entry(3, 2);
+            let suffix = wrong.suffix.as_mut().unwrap();
+            let mut entries = suffix.entries.to_vec();
+            entries[0] = entry(3, 2);
+            suffix.entries = entries.into();
         }
         let before = installed.clone();
         assert!(plan.install(&mut installed, wrong).is_err());

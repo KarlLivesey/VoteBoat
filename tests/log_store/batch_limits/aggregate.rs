@@ -39,7 +39,7 @@ fn exact_persist(effects: Vec<Effect>) -> LogUpdate {
 }
 fn replay_counter(core: &Raft) -> Counter {
     let mut app = Counter::new(ORIGINALS as usize + 1).unwrap();
-    app.apply_batch(core.replay_committed()).unwrap();
+    app.apply_batch(&core.replay_committed()).unwrap();
     app
 }
 fn retry_after_recovery(mut store: NativeLogStore<ModelIo>, retained: bool) {

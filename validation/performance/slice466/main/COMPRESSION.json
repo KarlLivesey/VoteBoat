@@ -1,0 +1,18 @@
+[
+  {
+    "original_path": "diagnostic4/cargo.jsonl",
+    "original_bytes": 1227255,
+    "original_sha256": "b1817880a8c69c0564ccf9b33f2ce16cc6f946ea7599b44aeff54bc35c368800",
+    "archived_path": "diagnostic4/cargo.jsonl.gz",
+    "gzip_bytes": 60473,
+    "gzip_sha256": "94c97663f607ae3c07e55a61aafc7ef483078a55084964e2f6215a6b3ddc723b"
+  },
+  {
+    "original_path": "diagnostic4/errors.json",
+    "original_bytes": 1278219,
+    "original_sha256": "f2d2fe6a7ff35b9b719163a5eeb7a592daf8065142e11a5087efb39034787e5e",
+    "archived_path": "diagnostic4/errors.json.gz",
+    "gzip_bytes": 51884,
+    "gzip_sha256": "290a3ebb5b7d26f09839032545cb90a255fbce083dfd14ef07c0f9942a1cc60c"
+  }
+]

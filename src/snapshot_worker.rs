@@ -377,7 +377,7 @@ pub fn complete_snapshot_work<A: CheckpointStateMachine>(
                     loaded.index,
                     &snapshot.application,
                 )?;
-                next.apply_batch(raft.replay_committed())?;
+                next.apply_batch(&raft.replay_committed())?;
                 let effects = raft.snapshot_applied(loaded, next.applied_index())?;
                 *application = next;
                 Ok(effects)

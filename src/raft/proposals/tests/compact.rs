@@ -55,8 +55,16 @@ fn compact_pending_and_durable_keep_exact_terms_pointers_membership_and_charge()
         generation: SnapshotGeneration::new(2).unwrap(),
         ..reference
     };
+    // Clear the independent descriptor owner as a physical-allocation oracle:
+    // all batch backing is released, while its descriptor allocation remains.
+    let mut empty_owner = core.state().entries.clone();
+    empty_owner.clear();
+    let empty_charge = empty_owner.allocation_bytes().unwrap();
+    assert!(empty_charge > 0);
     core.begin_compact(final_reference).unwrap();
     complete_exact(&mut core);
     assert!(core.state().entries.is_empty());
-    assert_eq!(core.retained_log_bytes(), Some(0));
+    assert!(core.state().snapshot_membership.is_none());
+    assert_eq!(core.state().entries.allocation_bytes(), Some(empty_charge));
+    assert_eq!(core.retained_log_bytes(), Some(empty_charge));
 }

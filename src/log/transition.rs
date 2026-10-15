@@ -15,7 +15,6 @@
 //! Consensus log transitions and the host-replaceable storage contract.
 //! Private planned transitions; neither cached summaries nor plans are receipts.
 use super::*;
-use std::mem::size_of;
 
 mod compact;
 mod incoming;
@@ -36,23 +35,7 @@ pub(crate) struct LogSummary {
 impl LogSummary {
     /// Caller has validated this canonical state and exclusively owns its mutations.
     pub(crate) fn from_validated(state: &GroupLog) -> Self {
-        let retained = state
-            .entries
-            .len()
-            .checked_mul(size_of::<LogEntry>())
-            .and_then(|bytes| {
-                state.entries.iter().try_fold(bytes, |sum, entry| {
-                    sum.checked_add(entry.retained_payload_bytes())
-                })
-            })
-            .and_then(|bytes| {
-                bytes.checked_add(
-                    state
-                        .snapshot_membership
-                        .as_ref()
-                        .map_or(0, |base| base.retained_bytes()),
-                )
-            });
+        let retained = Self::actual_retained(state);
         Self {
             metadata: LogMetadata::from_log(state),
             plain: state.snapshot_membership.is_none()
@@ -79,6 +62,20 @@ impl LogSummary {
     }
     pub(crate) fn retained_bytes(&self) -> Option<usize> {
         self.retained
+    }
+    /// Installation can change descriptor capacity without changing logical content.
+    /// Refresh only immutable allocation accounting, preserving validated classification.
+    pub(crate) fn with_actual_retained(mut self, state: &GroupLog) -> Self {
+        self.retained = Self::actual_retained(state);
+        self
+    }
+    fn actual_retained(state: &GroupLog) -> Option<usize> {
+        state.entries.allocation_bytes()?.checked_add(
+            state
+                .snapshot_membership
+                .as_ref()
+                .map_or(0, |base| base.retained_bytes()),
+        )
     }
 }
 
@@ -223,10 +220,10 @@ impl PreparedLog {
             NextLog::Delta(delta) => {
                 let metadata = delta.metadata();
                 if let Some(suffix) = delta.append {
-                    current.entries.extend(suffix.entries);
+                    current.entries.append_batch(suffix.entries);
                 }
                 metadata.install_header(current);
-                delta.summary
+                delta.summary.with_actual_retained(current)
             }
             NextLog::Compact(delta) => delta.install(current),
         }
@@ -264,10 +261,13 @@ fn plan_append_metadata(
     limits: LogLimits,
 ) -> Result<PlainDelta, StorageError> {
     let next = validate_append_metadata(view, update, limits)?;
-    let append = update.suffix.clone();
+    let append = update.suffix.as_ref().map(|suffix| Suffix {
+        from: suffix.from,
+        entries: suffix.entries.normalized_clone(),
+    });
     Ok(PlainDelta {
         predecessor: *view.metadata(),
-        summary: append_summary(summary, next, append.as_ref()),
+        summary: append_summary(view, summary, next, append.as_ref()),
         append,
     })
 }
@@ -351,19 +351,13 @@ fn validate_append_metadata(
     next.commit_index = update.commit_index;
     Ok(next)
 }
-fn append_summary(summary: &LogSummary, next: LogMetadata, append: Option<&Suffix>) -> LogSummary {
-    let extra = append.map_or(Some(0), |suffix| {
-        suffix
-            .entries
-            .len()
-            .checked_mul(size_of::<LogEntry>())
-            .and_then(|bytes| {
-                suffix.entries.iter().try_fold(bytes, |sum, entry| {
-                    sum.checked_add(entry.retained_payload_bytes())
-                })
-            })
-    });
-    let retained = summary.retained.and_then(|bytes| bytes.checked_add(extra?));
+fn append_summary(
+    view: &LogView<'_>,
+    summary: &LogSummary,
+    next: LogMetadata,
+    append: Option<&Suffix>,
+) -> LogSummary {
+    let retained = view.projected_retained_bytes(0, append);
     LogSummary {
         metadata: next,
         plain: summary.plain,

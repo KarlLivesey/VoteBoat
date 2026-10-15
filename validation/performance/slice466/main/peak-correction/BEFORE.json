@@ -1,0 +1,22 @@
+[
+  {
+    "path": "src/raft/proposals.rs",
+    "sha256": "ae383ffa79b41a754ca3b93b65ab1d0030c4097da0d61130c5e1816b4d985028",
+    "mode": "0o644"
+  },
+  {
+    "path": "src/raft/proposals/tests.rs",
+    "sha256": "68f2890a78eafd21555d22ec9effaaeb2723ed8f940475f56b6734a08815c3c7",
+    "mode": "0o644"
+  },
+  {
+    "path": "src/runtime/ready_batch.rs",
+    "sha256": "8d44a4165d7b8bdd8dde46ffa0b175c708b4ef400d5c6ec20c1697b5f38f96de",
+    "mode": "0o644"
+  },
+  {
+    "path": "src/runtime/ready_batch/tests.rs",
+    "sha256": "69587bd47ad1573e5efcfe5bb86c889ebd2ec08a798be878767fa5ae22a7f78a",
+    "mode": "0o644"
+  }
+]

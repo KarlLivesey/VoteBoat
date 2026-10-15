@@ -1,0 +1,148 @@
+// SPDX-License-Identifier: RPL-1.5
+// Copyright (c) 2026 Karl Livesey
+use super::*;
+impl Encoder {
+    pub fn enrollment_plan(&mut self, p: LogicalEnrollmentPlan) -> Result<(), ApplicationError> {
+        self.group(p.parent)?;
+        self.u64(p.target.node.get())?;
+        self.store(p.target.store)?;
+        self.u128(p.operation.get())?;
+        self.u64(p.expected.get())?;
+        self.u64(p.configuration.get())?;
+        self.u64(p.source_application_schema)
+    }
+    pub fn enrollment_origin(
+        &mut self,
+        o: LogicalEnrollmentOrigin,
+    ) -> Result<(), ApplicationError> {
+        self.mapping(o.mapping)?;
+        self.representative(o.representative)?;
+        self.owner(o.export.owner)?;
+        self.snapshot_origin(SnapshotOrigin {
+            request: o.export.request,
+            visit: o.export.visit,
+        })?;
+        self.reference(o.export.reference)
+    }
+}
+impl Decoder<'_> {
+    pub fn enrollment_plan(&mut self) -> Result<LogicalEnrollmentPlan, ApplicationError> {
+        Ok(LogicalEnrollmentPlan {
+            parent: self.group()?,
+            target: crate::secure::PeerIdentity {
+                node: self.id(NodeId::new)?,
+                store: self.store()?,
+            },
+            operation: self.id128(OperationId::new)?,
+            expected: self.id(ConfigurationId::new)?,
+            configuration: self.id(ConfigurationId::new)?,
+            source_application_schema: self.sequence()?,
+        })
+    }
+    pub fn enrollment_origin(&mut self) -> Result<LogicalEnrollmentOrigin, ApplicationError> {
+        let mapping = self.mapping()?;
+        let representative = self.representative()?;
+        let owner = self.owner()?;
+        let origin = self.snapshot_origin()?;
+        Ok(LogicalEnrollmentOrigin {
+            mapping,
+            representative,
+            export: crate::runtime::SnapshotExportTicket {
+                owner,
+                request: origin.request,
+                visit: origin.visit,
+                reference: self.reference()?,
+            },
+        })
+    }
+}
+impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
+    LogicalApplication<C, S, W>
+{
+    pub(in crate::logical_voter) fn enrollment_entry_bytes(
+        &self,
+        entry: &LogEntry,
+    ) -> Result<Vec<u8>, ApplicationError> {
+        self.log_codec
+            .encode_batch(
+                1,
+                &[LogMutation::Update(LogUpdate {
+                    group: self.mapping.parent,
+                    expected_revision: LogRevision::new(1).unwrap(),
+                    hard_state: crate::contracts::HardState::default(),
+                    commit_index: 0,
+                    suffix: Some(Suffix {
+                        from: entry.index,
+                        entries: vec![entry.clone()].into(),
+                    }),
+                    snapshot: None,
+                    snapshot_membership: None,
+                })],
+                self.journal_limits(),
+            )
+            .map_err(|_| ApplicationError::InvalidCommand)
+    }
+    fn enrollment_entry(&self, bytes: &[u8]) -> Result<LogEntry, ApplicationError> {
+        let (sequence, mut batch) = self
+            .log_codec
+            .decode_batch(bytes, self.journal_limits())
+            .map_err(|_| ApplicationError::InvalidCommand)?;
+        if sequence != 1 || batch.len() != 1 {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let LogMutation::Update(update) = batch.remove(0) else {
+            return Err(ApplicationError::InvalidCommand);
+        };
+        let Some(suffix) = update.suffix else {
+            return Err(ApplicationError::InvalidCommand);
+        };
+        if update.group != self.mapping.parent || suffix.entries.len() != 1 {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let entry = suffix.entries.into_vec().remove(0);
+        if self.enrollment_entry_bytes(&entry)? != bytes {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        Ok(entry)
+    }
+    pub(super) fn encode_import(
+        &self,
+        e: &mut Encoder,
+        i: &LogicalLearnerImport,
+    ) -> Result<(), ApplicationError> {
+        e.enrollment_plan(i.plan)?;
+        e.enrollment_origin(i.origin)?;
+        e.blob(&self.enrollment_entry_bytes(&i.learners)?)?;
+        e.blob(&self.snapshot_bytes(&i.snapshot)?)
+    }
+    pub(super) fn decode_import(
+        &self,
+        d: &mut Decoder<'_>,
+    ) -> Result<LogicalLearnerImport, ApplicationError> {
+        Ok(LogicalLearnerImport {
+            plan: d.enrollment_plan()?,
+            origin: d.enrollment_origin()?,
+            learners: self.enrollment_entry(d.blob(self.journal_limits().max_batch_bytes)?)?,
+            snapshot: self
+                .snapshot_codec
+                .decode(
+                    d.blob(self.limits.max_command_bytes)?,
+                    self.limits.parent_snapshots,
+                )
+                .map_err(|_| ApplicationError::InvalidCommand)?,
+        })
+    }
+    pub(in crate::logical_voter) fn encode_enrollment(
+        &self,
+        e: &mut Encoder,
+        r: &LogicalEnrollmentRecord,
+    ) -> Result<(), ApplicationError> {
+        e.enrollment_plan(r.plan)?;
+        e.enrollment_origin(r.origin)?;
+        e.blob(&self.enrollment_entry_bytes(&r.learners)?)?;
+        e.reference(r.target_reference)?;
+        e.u128(r.operation.get())?;
+        e.u64(r.first_index)?;
+        e.u64(r.first_term)
+    }
+}

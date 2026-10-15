@@ -349,7 +349,7 @@ impl<W: PersistenceWorker> WorkerNode<W> {
             )
             .unwrap();
             let mut app = Counter::new(10).unwrap();
-            app.apply_batch(core.replay_committed()).unwrap();
+            app.apply_batch(&core.replay_committed()).unwrap();
             apps.insert(group(g), app);
             shard.register(core).unwrap();
         }
@@ -1054,7 +1054,7 @@ mod native {
         for unit in [&mut first, &mut second] {
             unit.update.suffix = Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 7)],
+                entries: vec![entry(1, 1, 7)].into(),
             });
         }
         let duplicate = PersistUnit {
@@ -1095,7 +1095,7 @@ mod native {
         let mut fourth = rejected.units.into_iter().next().unwrap();
         fourth.update.suffix = Some(Suffix {
             from: 1,
-            entries: vec![entry(1, 1, 9)],
+            entries: vec![entry(1, 1, 9)].into(),
         });
         assert_eq!(
             worker.submit(vec![fourth]).unwrap_err().reason,

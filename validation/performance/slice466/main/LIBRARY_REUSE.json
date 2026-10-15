@@ -1,0 +1,15 @@
+{
+  "attempt2_actual_status": 0,
+  "root_library_all_actual_exit": 0,
+  "root_library_core_actual_exit": 0,
+  "compared_inventories": [
+    "ATTEMPT2_BEFORE.json",
+    "INTEGRATION1_BEFORE.json"
+  ],
+  "full_scoped_differences": [
+    "benchmarks/matched/src/store/tests.rs",
+    "benchmarks/matched/src/voteboat_engine/actor.rs"
+  ],
+  "root_sources_unchanged": true,
+  "scope": "Root library all/core test results reused only for unchanged root source+lock+config inputs. Matched API migration is separately tested; these are not fresh artifact proofs."
+}

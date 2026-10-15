@@ -23,11 +23,15 @@ use std::collections::BTreeMap;
 
 mod command_bytes;
 mod comparison;
+mod entry_batch;
+mod entry_history;
 mod owned;
 pub(crate) mod transition;
 pub use command_bytes::CommandBytes;
 pub(crate) use comparison::CheckpointComparison;
 pub use comparison::{CheckpointLineage, CheckpointLog};
+pub use entry_batch::EntryBatch;
+pub use entry_history::{EntryHistory, EntryIter, EntryRange};
 pub use owned::OwnedLogState;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -149,7 +153,7 @@ pub struct GroupLog {
     pub commit_index: u64,
     pub snapshot: Option<SnapshotRef>,
     pub snapshot_membership: Option<Box<crate::membership::Membership>>,
-    pub entries: Vec<LogEntry>,
+    pub entries: EntryHistory,
 }
 impl GroupLog {
     /// Structural recovery validation of a historical promise, not proof that
@@ -186,7 +190,7 @@ impl GroupLog {
             self.snapshot_membership.as_deref(),
             self.base_index(),
             self.entries
-                .get(..count)
+                .range(..count)
                 .ok_or(crate::membership::MembershipError::InvalidHistory)?,
             self.commit_index.min(index),
         )
@@ -228,7 +232,7 @@ impl GroupLog {
 pub struct Suffix {
     /// First index removed/replaced; last_index+1 is a pure append.
     pub from: u64,
-    pub entries: Vec<LogEntry>,
+    pub entries: EntryBatch,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LogUpdate {
@@ -481,7 +485,7 @@ fn stage_create(b: &Bootstrap) -> Result<GroupLog, StorageError> {
         ballot_origin: None,
         commit_index: 0,
         snapshot: None,
-        entries: Vec::new(),
+        entries: EntryHistory::default(),
     })
 }
 fn validate_ballot_fields(
@@ -669,7 +673,7 @@ fn apply_snapshot(
     if matching {
         let removed = usize::try_from(reference.index - current.base_index())
             .map_err(|_| StorageError::Rejected("snapshot index overflow"))?;
-        current.entries.drain(..removed);
+        current.entries.discard_prefix(removed);
     } else {
         current.entries.clear();
     }
@@ -721,7 +725,9 @@ fn apply_suffix(
             .ok_or(StorageError::Rejected("generation exhausted"))?;
     }
     current.entries.truncate(start);
-    current.entries.extend(suffix.entries.iter().cloned());
+    current
+        .entries
+        .append_batch(suffix.entries.normalized_clone());
     Ok(())
 }
 

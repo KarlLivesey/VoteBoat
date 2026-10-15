@@ -809,7 +809,7 @@ fn seed_reparent_log(
             4,
             Some(Suffix {
                 from: 1,
-                entries: prefix.to_vec(),
+                entries: prefix.to_vec().into(),
             }),
         )],
     );
@@ -845,7 +845,7 @@ fn journal_cuts_never_publish_only_one_parent_or_lose_the_original_result() {
         5,
         Some(Suffix {
             from: 5,
-            entries: vec![entry(5, 200, command.clone())],
+            entries: vec![entry(5, 200, command.clone())].into(),
         }),
     );
     let frame = NativeLogCodec

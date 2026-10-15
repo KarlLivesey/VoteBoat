@@ -1,0 +1,345 @@
+// SPDX-License-Identifier: RPL-1.5
+// Copyright (c) 2026 Karl Livesey
+use super::*;
+use crate::{identity::OperationId, log::EntryPayload};
+use std::mem::size_of;
+
+fn entry(index: u64) -> LogEntry {
+    LogEntry {
+        index,
+        term: index % 7 + 1,
+        payload: if index.is_multiple_of(3) {
+            EntryPayload::Noop
+        } else {
+            EntryPayload::Command {
+                operation: OperationId::new(u128::MAX - u128::from(index)).unwrap(),
+                bytes: vec![index as u8; index as usize % 5].into(),
+            }
+        },
+    }
+}
+fn assert_values(history: &EntryHistory, reference: &[LogEntry]) {
+    assert_eq!(history.len(), reference.len());
+    assert_eq!(history.is_empty(), reference.is_empty());
+    assert_eq!(history.first(), reference.first());
+    assert_eq!(history.last(), reference.last());
+    assert_eq!(history.iter().cloned().collect::<Vec<_>>(), reference);
+    assert_eq!(
+        history.iter().rev().cloned().collect::<Vec<_>>(),
+        reference.iter().rev().cloned().collect::<Vec<_>>()
+    );
+    assert_eq!(history, &EntryHistory::from(reference.to_vec()));
+    assert_eq!(history, &reference.to_vec());
+    for (index, value) in reference.iter().enumerate() {
+        assert_eq!(&history[index], value);
+    }
+    assert!(history.get(reference.len()).is_none());
+    let mut mixed = history.iter();
+    let mut front = 0;
+    let mut back = reference.len();
+    while front < back {
+        assert_eq!(mixed.len(), back - front);
+        assert_eq!(mixed.next(), Some(&reference[front]));
+        front += 1;
+        if front < back {
+            back -= 1;
+            assert_eq!(mixed.next_back(), Some(&reference[back]));
+        }
+    }
+    assert_eq!(mixed.next(), None);
+    assert_eq!(mixed.next_back(), None);
+}
+
+#[test]
+fn chunked_edits_and_lookups_match_independent_vec_history() {
+    let mut history = EntryHistory::default();
+    let mut reference = Vec::new();
+    for round in 0..97u64 {
+        match round % 7 {
+            0 | 1 => {
+                let values = (0..round % 5 + 1)
+                    .map(|offset| entry(round * 17 + offset))
+                    .collect::<Vec<_>>();
+                history.append_batch(values.clone().into());
+                reference.extend(values);
+            }
+            2 => {
+                let values = [entry(round * 17), entry(round * 17 + 1)];
+                let mut tail = EntryHistory::from(vec![values[0].clone()]);
+                tail.push(values[1].clone());
+                history.append_history(tail);
+                reference.extend(values);
+            }
+            3 => {
+                let count = reference.len() / 3;
+                history.discard_prefix(count);
+                reference.drain(..count);
+            }
+            4 => {
+                let keep = reference.len().saturating_sub(2);
+                history.truncate(keep);
+                reference.truncate(keep);
+            }
+            5 if !reference.is_empty() => {
+                let index = reference.len() / 2;
+                let replacement = entry(round * 37);
+                assert_eq!(
+                    history.replace(index, replacement.clone()),
+                    Some(reference[index].clone())
+                );
+                reference[index] = replacement;
+            }
+            _ => {
+                history.extend([entry(round * 17)]);
+                reference.push(entry(round * 17));
+            }
+        }
+        assert_values(&history, &reference);
+    }
+    assert_eq!(history.replace(reference.len(), entry(1)), None);
+    history.truncate(usize::MAX);
+    assert_values(&history, &reference);
+    history.discard_prefix(usize::MAX);
+    assert_values(&history, &[]);
+    history.extend_from_slice(&reference);
+    assert_values(&history, &reference);
+    history.clear();
+    assert_values(&history, &[]);
+}
+
+#[test]
+fn every_subrange_and_mixed_direction_iterator_matches_vec() {
+    let reference = (0..19).map(entry).collect::<Vec<_>>();
+    let mut history = EntryHistory::default();
+    for part in reference.chunks(4) {
+        history.append_batch(part.to_vec().into());
+    }
+    for start in 0..=reference.len() {
+        for end in start..=reference.len() {
+            let range = history.range(start..end).unwrap();
+            assert_eq!(range.len(), end - start);
+            assert_eq!(range.is_empty(), start == end);
+            assert_eq!(range.to_vec(), reference[start..end]);
+            assert_eq!(range.to_cow().as_ref(), &reference[start..end]);
+            assert_eq!(
+                range.into_iter().rev().cloned().collect::<Vec<_>>(),
+                reference[start..end]
+                    .iter()
+                    .rev()
+                    .cloned()
+                    .collect::<Vec<_>>()
+            );
+            let mut iterator = range.iter();
+            let mut expected = reference[start..end].iter();
+            while !expected.as_slice().is_empty() {
+                assert_eq!(iterator.next(), expected.next());
+                assert_eq!(iterator.next_back(), expected.next_back());
+                assert_eq!(iterator.len(), expected.len());
+            }
+            assert!(iterator.next().is_none());
+        }
+    }
+    assert!(history.range(20..).is_none());
+    assert!(history
+        .range((Bound::Excluded(usize::MAX), Bound::Unbounded))
+        .is_none());
+    assert!(history.range(..=usize::MAX).is_none());
+    assert!(history
+        .range((Bound::Included(7), Bound::Excluded(3)))
+        .is_none());
+    assert_eq!(history.view(..=3).as_contiguous(), Some(&reference[..4]));
+    assert!(matches!(history.view(3..5).to_cow(), Cow::Owned(_)));
+    assert!(matches!(history.view(4..8).to_cow(), Cow::Borrowed(_)));
+}
+
+#[test]
+fn retained_boundaries_charge_full_backing_and_clones_keep_values_alive() {
+    let mut raw = Vec::with_capacity(37);
+    raw.extend((0..11).map(entry));
+    let capacity = raw.capacity();
+    let batch = EntryBatch::from(raw);
+    let batch_charge = batch.allocation_bytes().unwrap();
+    let pointer = batch.as_ptr();
+    let mut history = EntryHistory::from(batch.clone());
+    let original_charge = history.allocation_bytes().unwrap();
+    assert_eq!(
+        original_charge,
+        history.chunks.capacity() * size_of::<Chunk>() + batch_charge
+    );
+    let untouched = history.clone();
+    history.discard_prefix(4);
+    history.truncate(2);
+    assert_eq!(history.capacity(), capacity);
+    assert_eq!(history.allocation_bytes(), Some(original_charge));
+    assert!(std::ptr::eq(history.get(0).unwrap(), &batch[4]));
+    drop(batch);
+    assert_eq!(untouched.get(0).unwrap() as *const LogEntry, pointer);
+    assert_values(&history, &(4..6).map(entry).collect::<Vec<_>>());
+    let before = history.clone();
+    history.replace(0, entry(100));
+    assert_eq!(before[0], entry(4));
+    assert_eq!(untouched[4], entry(4));
+    assert_eq!(history[0], entry(100));
+    let original_descriptors = history.chunks.capacity();
+    history.clear();
+    assert_eq!(history.capacity(), 0);
+    assert_eq!(
+        history.allocation_bytes(),
+        Some(original_descriptors * size_of::<Chunk>())
+    );
+    assert!(history.chunks.is_empty());
+}
+
+#[test]
+fn preflight_charges_match_growth_concatenation_trimming_and_capacity_preserving_clone() {
+    let mut history = EntryHistory::default();
+    for index in 0..33 {
+        let batch = EntryBatch::from(vec![entry(index)]);
+        let projected = history.projected_append_allocation_bytes(&batch);
+        let pointer = batch.as_ptr();
+        history.append_batch(batch);
+        assert_eq!(history.allocation_bytes(), projected);
+        assert_eq!(history.last().unwrap() as *const LogEntry, pointer);
+        assert_eq!(history.chunk_count(), index as usize + 1);
+        let clone = history.clone();
+        assert_eq!(clone.chunks.capacity(), history.chunks.capacity());
+        assert_eq!(clone.allocation_bytes(), history.allocation_bytes());
+        let independent = history.chunks.capacity() * size_of::<Chunk>()
+            + history
+                .chunks
+                .iter()
+                .map(|chunk| chunk.batch.allocation_bytes().unwrap())
+                .sum::<usize>();
+        assert_eq!(history.allocation_bytes(), Some(independent));
+    }
+    let tail = EntryHistory::from(vec![entry(101), entry(102)]);
+    let projected = history.projected_concat_allocation_bytes(&tail);
+    history.append_history(tail);
+    assert_eq!(history.allocation_bytes(), projected);
+    for count in 0..=history.len() + 1 {
+        let mut prefix_cut = history.clone();
+        let projected = history.allocation_after_discard_prefix(count);
+        prefix_cut.discard_prefix(count);
+        assert_eq!(prefix_cut.allocation_bytes(), projected);
+        let mut suffix_cut = history.clone();
+        let projected = history.allocation_after_truncate(count);
+        suffix_cut.truncate(count);
+        assert_eq!(suffix_cut.allocation_bytes(), projected);
+    }
+    // Simulate an earlier checked-sum overflow: removing its owners must permit
+    // recovery of a representable summary rather than permanently poisoning it.
+    let mut overflowed = history.clone();
+    overflowed.batch_bytes = None;
+    assert_eq!(overflowed.allocation_bytes(), None);
+    let projected = overflowed.allocation_after_discard_prefix(1);
+    overflowed.discard_prefix(1);
+    assert_eq!(overflowed.allocation_bytes(), projected);
+    assert!(overflowed.allocation_bytes().is_some());
+}
+
+#[test]
+fn capture_append_and_unique_extraction_move_entries_without_materialization() {
+    let raw = (0..5).map(entry).collect::<Vec<_>>();
+    let pointer = raw.as_ptr();
+    let batch = EntryBatch::from(raw);
+    let mut first = EntryHistory::default();
+    first.append_batch(batch);
+    assert_eq!(first.first().unwrap() as *const LogEntry, pointer);
+    let mut combined = EntryHistory::default();
+    combined.append_history(first);
+    assert_eq!(combined.first().unwrap() as *const LogEntry, pointer);
+    assert_eq!(combined.into_vec().as_ptr(), pointer);
+    let original = (0..9).map(entry).collect::<Vec<_>>();
+    let history = EntryHistory::from(original.clone());
+    let shared = history.clone();
+    let copied = history.into_vec();
+    assert_ne!(copied.as_ptr(), shared.first().unwrap() as *const LogEntry);
+    assert_eq!(copied, original);
+    assert_eq!(shared.into_iter().collect::<Vec<_>>(), original);
+    let array = [entry(1), entry(2)];
+    assert_eq!(EntryHistory::from(array.to_vec()), array);
+}
+
+#[test]
+fn composite_view_projections_bound_cuts_concat_and_append_without_discount() {
+    let mut base = EntryHistory::default();
+    let mut tail = EntryHistory::default();
+    for index in 0..11 {
+        base.append_batch(vec![entry(index), entry(index + 100)].into());
+    }
+    base.truncate(17);
+    for index in 0..3 {
+        tail.append_batch(vec![entry(index + 200); 3].into());
+    }
+    let append = EntryBatch::from(vec![entry(777), entry(778)]);
+    for base_cut in [0, 1, 4, 16, 17, usize::MAX] {
+        for tail_cut in [0, 1, 3, 8, 9, usize::MAX] {
+            for extra in [None, Some(&append)] {
+                let projected =
+                    base.projected_view_allocation_bytes(base_cut, Some((&tail, tail_cut)), extra);
+                let mut actual = base.clone();
+                actual.discard_prefix(base_cut);
+                let mut kept_tail = tail.clone();
+                kept_tail.discard_prefix(tail_cut);
+                actual.append_history(kept_tail);
+                if let Some(batch) = extra {
+                    actual.append_batch(batch.clone());
+                }
+                assert!(
+                    projected.unwrap() >= actual.allocation_bytes().unwrap(),
+                    "base={base_cut} tail={tail_cut}"
+                );
+            }
+        }
+    }
+    assert_eq!(
+        base.projected_view_allocation_bytes(0, None, Some(&append)),
+        base.projected_append_allocation_bytes(&append)
+    );
+    assert_eq!(
+        base.projected_view_allocation_bytes(0, None, None),
+        base.allocation_bytes()
+    );
+}
+
+#[test]
+fn composite_projection_covers_descriptor_capacity_pinned_by_concat_before_cut() {
+    let mut base = EntryHistory::default();
+    let mut tail = EntryHistory::default();
+    for index in 0..4 {
+        base.push(entry(index));
+    }
+    for index in 4..37 {
+        tail.push(entry(index));
+    }
+    let append = EntryBatch::from(vec![entry(100)]);
+    for removed in [0, 1, 4, 5, 17, 36, 37] {
+        let base_removed = removed.min(base.len());
+        let tail_removed = removed.saturating_sub(base.len());
+        for extra in [None, Some(&append)] {
+            let projected = base
+                .projected_view_allocation_bytes(base_removed, Some((&tail, tail_removed)), extra)
+                .unwrap();
+            let mut late_cut = base.clone();
+            late_cut.append_history(tail.clone());
+            late_cut.discard_prefix(removed);
+            if let Some(batch) = extra {
+                late_cut.append_batch(batch.clone());
+            }
+            let mut early_cut = base.clone();
+            early_cut.discard_prefix(base_removed);
+            let mut kept_tail = tail.clone();
+            kept_tail.discard_prefix(tail_removed);
+            early_cut.append_history(kept_tail);
+            if let Some(batch) = extra {
+                early_cut.append_batch(batch.clone());
+            }
+            assert_eq!(early_cut, late_cut);
+            assert_eq!(projected, late_cut.allocation_bytes().unwrap());
+            assert!(projected >= early_cut.allocation_bytes().unwrap());
+            if removed == 36 {
+                assert!(projected > early_cut.allocation_bytes().unwrap());
+            }
+        }
+    }
+}

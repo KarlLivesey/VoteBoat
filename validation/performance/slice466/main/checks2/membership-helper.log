@@ -1,0 +1,37 @@
+
+running 32 tests
+test accepted_log_activation_uses_both_policies_before_joint_commit ... ok
+test arbitrary_weighted_policy_changes_require_joint_rules_even_with_same_voters ... ok
+test configuration_ingress_charges_owned_metadata_to_data_budget ... ok
+test configuration_snapshots::checkpoint_validation_rejects_bad_boundaries_operations_and_joint_identity ... ok
+test configuration_snapshots::compacted_joint_status_does_not_invent_the_discarded_entry_term ... ok
+test configuration_snapshots::host_snapshot_base_preserves_joint_rollback_final_and_application_dedup ... ok
+test configuration_snapshots::matching_snapshot_cannot_forge_configuration_or_drop_operation_history ... ok
+test configuration_snapshots::native::actual_files_preserve_joint_and_final_configuration_bases ... ok
+test configuration_snapshots::native::every_torn_wal_snapshot_switch_retains_the_selected_pinned_membership ... ok
+test configuration_snapshots::native::interrupted_snapshot_publication_never_exposes_a_partial_membership_base ... ok
+test configuration_snapshots::native::legacy_codec_capability_cannot_drop_membership_metadata ... ok
+test configuration_snapshots::native::native_configuration_snapshot_recovery_and_physical_reclaim_conformance ... ok
+test configuration_snapshots::snapshot_membership_cost_is_retained_by_worker_and_ingress_reservations ... ok
+test crash::actual_files_reopen_resumable_joint_then_committed_final_status ... ok
+test crash::configuration_range_and_admission_charge_owned_metadata ... ok
+test crash::every_torn_configuration_and_replacement_frame_recovers_one_complete_state ... ok
+test crash::failed_configuration_barriers_fence_and_recover_without_fabricated_receipts ... ok
+test crash::final_commit_status_requires_recovered_barrier_not_written_or_uncertain_reply ... ok
+test crash::physical_reclamation_preserves_joint_final_and_operation_reuse_guards ... ok
+test host_configuration_status_distinguishes_durable_and_committed_phases ... ok
+test host_store_configuration_journal_conformance ... ok
+test joint_frontier_matches_exhaustive_prefix_evaluation ... ok
+test native_configuration_status_distinguishes_durable_and_committed_phases ... ok
+test native_store_configuration_journal_conformance ... ok
+test promotion_requires_committed_matching_learner_identity_and_no_hot_voter_edit ... ok
+test replacement_removes_uncommitted_joint_and_reconstructs_previous_learners ... ok
+test replay_rejects_index_overflow_without_panicking ... ok
+test replica_and_voter_identity_views_follow_activation_rollback_and_compaction ... ok
+test snapshots_cannot_erase_the_only_recoverable_configuration ... ok
+test static_core_refuses_journal_recovery_and_host_injected_configuration_rpc ... ok
+test transition_grammar_rejects_overlap_early_final_and_operation_reuse ... ok
+test wire_capability_does_not_bypass_live_core_configuration_refusal ... ok
+
+test result: ok. 32 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s
+

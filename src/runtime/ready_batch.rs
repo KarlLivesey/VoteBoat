@@ -49,6 +49,7 @@ fn window(group: &Group, limits: ShardLimits, now: MonoTime, max_items: usize) -
         .saturating_sub(group.core.state().entries.len());
     let mut cost = 0usize;
     let mut payload = 0usize;
+    let mut shared = 0usize;
     let mut count = 0usize;
     for queued in group.queues[1]
         .iter()
@@ -65,10 +66,12 @@ fn window(group: &Group, limits: ShardLimits, now: MonoTime, max_items: usize) -
         }
         let next_cost = cost.checked_add(queued.cost)?;
         let next_payload = payload.checked_add(bytes.capacity())?;
+        let next_shared = shared.checked_add(crate::log::CommandBytes::retained_bytes_for_len(
+            bytes.len(),
+        )?)?;
         let next_count = count + 1;
-        let input = proposal_input(next_count, next_payload)?;
         let staged =
-            input.checked_add(next_count.checked_mul(size_of::<crate::log::LogEntry>())?)?;
+            Raft::proposal_batch_staging_bytes(next_count, next_count, next_payload, next_shared)?;
         if next_cost > byte_limit
             || staged > log.max_batch_bytes
             || group
@@ -83,6 +86,7 @@ fn window(group: &Group, limits: ShardLimits, now: MonoTime, max_items: usize) -
         count = next_count;
         cost = next_cost;
         payload = next_payload;
+        shared = next_shared;
     }
     (count > 1).then(|| Window {
         turn,

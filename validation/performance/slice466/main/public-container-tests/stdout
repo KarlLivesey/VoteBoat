@@ -1,0 +1,9 @@
+
+running 4 tests
+test cases::entry_batches::batch_capture_clone_export_and_consumption_preserve_independent_values ... ok
+test cases::entry_batches::cross_chunk_coalescing_preserves_one_ordered_complete_interval ... ok
+test cases::entry_batches::every_owner_charges_full_backing_including_hidden_entries_and_spare_capacity ... ok
+test cases::entry_batches::history_ranges_and_edits_match_vec_without_mutating_shared_owners ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 42 filtered out; finished in 0.00s
+

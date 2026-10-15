@@ -1,0 +1,5 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Checking voteboat-matched-framework v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/benchmarks/matched)
+error: could not compile `voteboat-matched-framework` (bin "voteboat-matched-framework") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `voteboat-matched-framework` (bin "voteboat-matched-framework" test) due to 2 previous errors

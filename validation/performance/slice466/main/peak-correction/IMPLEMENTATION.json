@@ -1,0 +1,21 @@
+{
+  "scope": [
+    "src/raft/proposals.rs",
+    "src/raft/proposals/tests.rs",
+    "src/runtime/ready_batch.rs",
+    "src/runtime/ready_batch/tests.rs"
+  ],
+  "shared_api": "Raft::proposal_batch_staging_bytes(count, capacity, raw_payload, shared_payload) -> Option<usize>",
+  "batch_layout_helper": "EntryBatch::allocation_bytes_for_shape(capacity,payload_bytes) -> Option<usize>, owned by linux426",
+  "ordering": "All original validate_proposal_batch raw errors precede conversion/capture peak. Peak=max(conversion while Proposal Vec/raw payloads live,capture after Proposal Vec release). Canonical descriptor allocation not summed into this earlier stage. Legacy Event::Propose unchanged, no new singleton batch ceiling.",
+  "ready_window": "Accumulate padded CommandBytes retained allocation per ready candidate. Same shared projection limits the already-ready prefix before queue removal; no waiting/lookahead/reordering and untouched tail ownership.",
+  "new_tests": 4,
+  "controls": [
+    "Core actual stages using real converted values across length0..9 and outer/payload spare capacity; at limit vs one below retains raw-error precedence, no state/pending on failure",
+    "Checked arithmetic overflow and legacy256-byte singleton with max_batch256",
+    "Ready2-of3 prefix for byte lengths1..8 at exact projection boundary, full IDs/admissions/tail/value/credit handling",
+    "Pair whose raw shape fits but conversion does not uses unchanged legacy singleton path"
+  ],
+  "formatter_exit": 0,
+  "builds_or_tests_run": false
+}

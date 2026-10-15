@@ -209,7 +209,7 @@ impl Native {
         let state = store.state(group(1)).map_err(|_| Mismatch::Action(id))?;
         let core = Raft::recover(node(id), store.binding(), state, store.limits())
             .map_err(|_| Mismatch::NativeRecovery(id, first_operation))?;
-        preserve_commands(id, &acknowledged, core.replay_committed())?;
+        preserve_commands(id, &acknowledged, &core.replay_committed())?;
         self.cluster
             .applied
             .insert(id, core.replay_committed().to_vec());

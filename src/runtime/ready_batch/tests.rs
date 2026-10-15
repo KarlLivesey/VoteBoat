@@ -7,6 +7,100 @@ mod routine;
 use fixture::*;
 
 #[test]
+fn conversion_peak_preview_preserves_exact_ready_prefix_and_tail_ownership() {
+    for length in 1..=8 {
+        let shared = crate::log::CommandBytes::from(vec![7; length]).retained_bytes();
+        let boundary = Raft::proposal_batch_staging_bytes(2, 2, 2 * length, 2 * shared)
+            .unwrap()
+            .max(256);
+        let log = LogLimits {
+            max_command_bytes: length,
+            max_batch_bytes: boundary,
+            ..LogLimits::default()
+        };
+        let mut shard = shard(ShardLimits::default(), log);
+        let events: Vec<_> = (1..=3)
+            .map(|id| Event::Propose {
+                operation: OperationId::new((1 << 127) | id).unwrap(),
+                bytes: vec![7; length],
+            })
+            .collect();
+        let admissions: Vec<_> = events
+            .iter()
+            .map(|event| shard.admit_tracked(group(), event.clone()).unwrap())
+            .collect();
+        let visit = shard.poll(MonoTime(0)).unwrap().unwrap();
+        shard
+            .next_ready_effect_reservation(visit, MonoTime(0), 3)
+            .unwrap()
+            .unwrap();
+        assert_eq!(shard.groups[&group()].queues[1].len(), 3);
+        let step = shard
+            .step_ready_checked(visit, MonoTime(0), 3, |_, _, _| Ok(()))
+            .unwrap()
+            .unwrap();
+        assert_eq!(step.admission, Some(admissions[0]));
+        assert_eq!(step.batch_members.len(), 1);
+        assert_eq!(step.batch_members[0].admission, Some(admissions[1]));
+        assert!(step.batch_members[0].error.is_none());
+        let effects = step.result.unwrap();
+        let [Effect::Persist(update)] = effects.as_slice() else {
+            panic!("ready prefix must be one persistence transition")
+        };
+        assert_eq!(update.suffix.as_ref().unwrap().entries.len(), 2);
+        let queued = shard.groups[&group()].queues[1].front().unwrap();
+        assert_eq!(queued.admission, Some(admissions[2]));
+        assert_eq!(queued.event, events[2]);
+        assert_eq!(shard.usage().items, 3);
+        shard
+            .with_core(visit, |core| finish(core, effects))
+            .unwrap();
+        shard.finish(visit).unwrap();
+        assert_eq!(shard.usage().items, 1);
+    }
+}
+
+#[test]
+fn conversion_peak_that_disallows_a_pair_retains_the_original_singleton_path() {
+    let length = 128;
+    let raw_pair = size_of::<Vec<Proposal>>()
+        + 2 * size_of::<Proposal>()
+        + 2 * size_of::<crate::log::LogEntry>()
+        + 2 * length;
+    let log = LogLimits {
+        max_command_bytes: length,
+        max_batch_bytes: raw_pair.max(256),
+        ..LogLimits::default()
+    };
+    let mut shard = shard(ShardLimits::default(), log);
+    let events = [1u128, 2].map(|id| Event::Propose {
+        operation: OperationId::new((1 << 127) | id).unwrap(),
+        bytes: vec![7; length],
+    });
+    for event in &events {
+        shard.admit_tracked(group(), event.clone()).unwrap();
+    }
+    let visit = shard.poll(MonoTime(0)).unwrap().unwrap();
+    let group_state = &shard.groups[&group()];
+    assert!(window(group_state, shard.limits, MonoTime(0), 2).is_none());
+    let step = shard
+        .step_ready_checked(visit, MonoTime(0), 2, |_, _, _| Ok(()))
+        .unwrap()
+        .unwrap();
+    assert!(step.batch_members.is_empty());
+    assert_eq!(
+        step.operation,
+        Some(OperationId::new((1 << 127) | 1).unwrap())
+    );
+    assert!(step.result.is_ok());
+    assert_eq!(
+        shard.groups[&group()].queues[1].front().unwrap().event,
+        events[1]
+    );
+    assert_eq!(shard.usage().items, 2);
+}
+
+#[test]
 fn four_ready_originals_share_one_suffix_keep_positions_and_hold_all_credits() {
     let mut shard = shard(ShardLimits::default(), LogLimits::default());
     let admissions: Vec<_> = (1..=4)

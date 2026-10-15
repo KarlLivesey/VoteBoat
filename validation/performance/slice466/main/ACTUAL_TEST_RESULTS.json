@@ -1,0 +1,334 @@
+{
+  "container-tests/stdout": [
+    {
+      "result": "ok",
+      "passed": "11",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "416"
+    }
+  ],
+  "public-container-tests/stdout": [
+    {
+      "result": "ok",
+      "passed": "4",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "42"
+    }
+  ],
+  "attempt1/library-all.log": [
+    {
+      "result": "FAILED",
+      "passed": "411",
+      "failed": "25",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "attempt2/library-all.log": [
+    {
+      "result": "ok",
+      "passed": "437",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "attempt2/library-core.log": [
+    {
+      "result": "ok",
+      "passed": "355",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "integration1/integration-all.log": [
+    {
+      "result": "FAILED",
+      "passed": "201",
+      "failed": "2",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "integration2/focused-budget.log": [
+    {
+      "result": "ok",
+      "passed": "2",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "201"
+    }
+  ],
+  "integration2/integration-all.log": [
+    {
+      "result": "ok",
+      "passed": "24",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "5",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "11",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "2",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "19",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "9",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "44",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "32",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "46",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "79",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "55",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "27",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "14",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "9",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "9",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "integration2/integration-core.log": [
+    {
+      "result": "ok",
+      "passed": "195",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "14",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "5",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "2",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "18",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "31",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "29",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "38",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "12",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "5",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    },
+    {
+      "result": "ok",
+      "passed": "3",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "integration2/service-recovery.log": [
+    {
+      "result": "ok",
+      "passed": "2",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "201"
+    }
+  ],
+  "checks1/matched.log": [
+    {
+      "result": "ok",
+      "passed": "71",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "checks2/membership-helper.log": [
+    {
+      "result": "ok",
+      "passed": "32",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "checks2/member-service-helper.log": [
+    {
+      "result": "ok",
+      "passed": "2",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "201"
+    }
+  ],
+  "final-owner/stdout": [
+    {
+      "result": "ok",
+      "passed": "203",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "all_recorded_jobs_terminal": true,
+  "source_before": "COMMITTED_BASE.json",
+  "source_after": "FINAL_AFTER.json",
+  "original_runs": [
+    {
+      "handle": 39392,
+      "actual_exit": 101,
+      "status_path": "diagnostic1/STATUS"
+    },
+    {
+      "handle": 9373,
+      "actual_exit": 0,
+      "status_path": "diagnostic2/STATUS"
+    },
+    {
+      "handle": 19402,
+      "actual_exit": 101,
+      "status_path": "diagnostic3/STATUS"
+    },
+    {
+      "handle": 41142,
+      "actual_exit": 101,
+      "status_path": "diagnostic4/STATUS"
+    },
+    {
+      "handle": 17964,
+      "actual_exit": 101,
+      "status_path": "diagnostic5/STATUS"
+    },
+    {
+      "handle": 14127,
+      "actual_exit": 0,
+      "status_path": "diagnostic6/STATUS"
+    },
+    {
+      "handle": 14737,
+      "actual_exit": 0,
+      "status_path": "container-tests/STATUS"
+    },
+    {
+      "handle": 62366,
+      "actual_exit": 0,
+      "status_path": "public-container-tests/STATUS"
+    },
+    {
+      "handle": 1736,
+      "actual_exit": 101,
+      "status_path": "attempt1/STATUS"
+    },
+    {
+      "handle": 72651,
+      "actual_exit": 0,
+      "status_path": "attempt2/STATUS"
+    },
+    {
+      "handle": 72468,
+      "actual_exit": 101,
+      "status_path": "matched-diagnostic/STATUS"
+    },
+    {
+      "handle": 63034,
+      "actual_exit": 101,
+      "status_path": "integration1/STATUS"
+    },
+    {
+      "handle": 94606,
+      "actual_exit": 101,
+      "status_path": "integration2/STATUS"
+    },
+    {
+      "handle": 98884,
+      "actual_exit": 101,
+      "status_path": "checks1/STATUS"
+    },
+    {
+      "handle": 74996,
+      "actual_exit": 0,
+      "status_path": "checks2/STATUS"
+    },
+    {
+      "handle": 83140,
+      "actual_exit": 0,
+      "status_path": "final-owner/STATUS"
+    }
+  ],
+  "scope_notes": [
+    "Base main9798ed44091d932faebb51e62c69afed513a87a9; final1446 scoped inputs match checks2 SHA256 and physical modes exactly. Original Mac45584206 remains live and is outside this Linux slice466 archive; no Mac466 qualification is claimed.",
+    "Initial diagnostics1/3/4/5 and matched diagnostic fail on typed constructor/immutable mutation/Cow migration. Diagnostic2 library and diagnostic6 all-target compile succeed, but final tests/hooks supersede diagnostics for qualification. Every original raw failure is retained.",
+    "Initial container11 and public4 controls pass; two temporary Vec-pointer warnings are corrected without allows and covered by later full library/hook checks.",
+    "Attempt1 full library has411 pass/25 failures:21 sandbox-denied socket tests,2 real small-RPC capacity regressions and2 obsolete visible-only charge expectations. Production exact preallocation restores tight RPC capacity, physical accounting fixtures are corrected, and actual permission-qualified attempt2 passes all437/core355 controls. Raw socket errors and original capacity/accounting failures remain.",
+    "Integration1 stops at effect_owner201 pass/2 obsolete physical-budget fixture failures. Independent physical Noop/singleton-history charge arithmetic preserves original tight-budget/outcome assertions; integration2 focused2 pass. Final original83140 runs the entire final-source effect_owner203 with zero failures, including real network/maintenance hundred-group paths.",
+    "Integration2 separately passes385 all-feature tests across15 targets and352 core tests across11 targets, including models, storage, configuration, Raft, application snapshots, workers and runtime. Both actual TCP/QUIC three-service retry/replacement/native-recovery tests pass. Its later matched compiler error is retained and focused immutable fixture replacement fixes it.",
+    "Checks1 standalone matched71 and metadata pass on final benchmark/library inputs, including TRACE-only per-owner entry-allocation observations and actual maintained/catch-up/original-outcome controls. Hook then fails only two fixtures103/100 lines. Small test-only helper extractions preserve their bodies; checks2 passes membership32 plus TCP/QUIC joint/final member recovery2, metadata and the full enabled strict hook0/DONE (default/all/core/native and standalone).",
+    "FINAL_SCOPE_REUSE records exact source/lock/config/hash/mode projections. Library inputs are unchanged from attempt2; matched inputs unchanged from checks1. The initial whole-inventory reuse assertion failure is retained and corrected by explicitly reporting all separate-workspace changes, with root helper followups separately executed. No altered source is silently relabeled as an earlier whole-tree pass.",
+    "No lint, formatter, build/lock or hook configuration changes. Compiler Linux stable1.98.1 LLVM22.1.8 recorded; system PATH protoc probe36.1 is not claimed to regenerate cached dependencies. Policy reads remain2/2/516; no browser, sudo, policy change, Pi test, new dependency or concurrent timing occurred.",
+    "Ownership/restart/safety/source review is finite evidence. No fresh release artifact, reduction in actual materializations, useful-throughput gain, physical RSS/headroom plateau, both-host repeated acceptance or full P9 completion is claimed. Next work is publication, fresh asserted artifacts, Mac qualification, profiles and paired rates/tails/debt."
+  ]
+}

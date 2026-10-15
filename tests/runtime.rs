@@ -1050,7 +1050,7 @@ fn hundred_groups_share_native_wals_and_recover_acknowledged_state() {
             )
             .unwrap();
             let mut app = Counter::new(10).unwrap();
-            app.apply_batch(core.replay_committed()).unwrap();
+            app.apply_batch(&core.replay_committed()).unwrap();
             assert_eq!(app.read_applied(core.state().commit_index), Ok(10));
             shard.register(core).unwrap();
         }
@@ -1112,7 +1112,7 @@ fn hundred_group_history_uses_actual_shared_files_on_three_nodes() {
             )
             .unwrap();
             let mut app = Counter::new(10).unwrap();
-            app.apply_batch(core.replay_committed()).unwrap();
+            app.apply_batch(&core.replay_committed()).unwrap();
             assert_eq!(app.read_applied(core.state().commit_index), Ok(10));
         }
     }
@@ -1563,7 +1563,7 @@ impl<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> AutoNo
             )
             .unwrap();
             let mut app = Counter::new(10).unwrap();
-            app.apply_batch(core.replay_committed()).unwrap();
+            app.apply_batch(&core.replay_committed()).unwrap();
             shard.register(core).unwrap();
             apps.insert(group(g), app);
         }
@@ -2186,7 +2186,8 @@ fn enrolled_learner_log() -> HostLogStore {
                             .unwrap(),
                         ),
                     })),
-                }],
+                }]
+                .into(),
             }),
         )],
     );

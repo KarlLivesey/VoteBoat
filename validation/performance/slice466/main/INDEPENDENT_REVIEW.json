@@ -1,0 +1,431 @@
+{
+  "scope": "Independent source review against slice466 schema; no tests/builds/workloads executed by reviewer. Authored projection/peak code is explicitly included, not represented as independent authorship. Qualification remains pending.",
+  "schema": "validation/performance/slice466/SCHEMA.md",
+  "source_sha256": {
+    "src/log.rs": "a944ad4a7f0f9eb21ca30a7b509caf4af9d5289965a4822c9c55f6c669a3f501",
+    "src/log/entry_batch.rs": "20cd9d54010dd0f0fdc76abbcb15947cf6366e630382abedfd1b470035acc69f",
+    "src/log/entry_history.rs": "9b688156db6a2a9e94e7f37806e671f5ca025b261ac2b7b2e54cff99d5f2b9fe",
+    "src/log/transition.rs": "df25283a2ea64756e873bff8dc5219dad69cc170343ba9ec7e878d523dc59418",
+    "src/log/transition/compact.rs": "8b9b558b68a34499f0f1a7f4bedc8a22bd8fa09a617bbe2b405b0666aa6ec0e2",
+    "src/log/transition/incoming.rs": "42fdeb3d54cc0299c7546d6e932aeba5e66de33df20e900ce7b89f50a32f7a08",
+    "src/log/transition/view.rs": "f58eefa738e9c45090e84c5623a081328abe2d4b0343a20a7c630d7274fe502c",
+    "src/log/comparison.rs": "fa3ded100ff9acbf4c9eb8827626206762bebd75a70526d9b81db677b11f8828",
+    "src/log/owned.rs": "8f23b50b3ffc20154e04cc6f9ac6e361ffadd38f04f0ea83bc640b42a4c3cb13",
+    "src/native/log_store/accepted.rs": "b6b4e9d26a1cf35de2351d506d9507da97f37e95f33f035e3126c32daee37758",
+    "src/native/log_store/checkpoint.rs": "0a1503d19931d374a4c4dbf9fa9302a49240875005796acb9ddcf3b6c64af803",
+    "src/native/log_store/striped/record.rs": "6ec3ed0c14d82b3f3e0d4442fa3a9e4d4a8d5688dac5dd464a07b2e56a166bb9",
+    "src/raft.rs": "44d4996ec8eaf77d3fd3fc018a2083aea0a3131f32cb82e3983b5a38d9d3262e",
+    "src/raft/completion.rs": "afe1ce6da24345490d61d41cac08644c2b8fa02bf0224a14ca70a453277a12cf",
+    "src/raft/receive.rs": "869913bde6ae3829365be263d0d37738400b857166656be70c1a8ae73fde63a4",
+    "src/raft/proposals.rs": "7662c4b3b145628390b68515f7629027b0734f8986d0b21c8ad4eb7ebb110e38",
+    "src/runtime/ready_batch.rs": "edf73e0b47fd7780e58f57efad5f75896b07669dd2603e2be1c2dbc2514121c1",
+    "src/runtime/effects.rs": "d6d0a5e51b1ae7dac9ffe54b709dc89ef1f03671cf2b101937dea3f8c979e214",
+    "src/worker.rs": "6a529f8cd5df11adafba44f15540ed617ebbf351fa3200c46362aa88dcbe3cd7",
+    "src/log_format.rs": "a1c22e9ef8783d44942e4b1cb6bc4af9720ac60d718456ac873f4ed0907516de",
+    "src/log_format/checkpoint.rs": "4811b12759907d89679eec4d7cb65926cee144ad5fd5ce66988a73070c273698",
+    "src/membership.rs": "fcaf2f7ca39e953001b3e19363b7f425a74947935ebd80316806ec2e74b79d0d",
+    "src/snapshot.rs": "13cccc91a078743d094b8c544743ab31ca1ca60f2c35a01eaaa5d70998a422df",
+    "src/snapshot_worker.rs": "e7c8f1d71dd402208406cd3e6cdde205468c9be47493117991f0030c26142581",
+    "src/logical_voter/checkpoint.rs": "bb8dd9fa0603f23cbe5a3d51406a128cd1cbc0c01e525d96bd1cc074b0d78aa2",
+    "src/logical_voter/codec/enrollment.rs": "8cd4385766c76e23fd8853c37c30f0fd757d840c80892a276321fc5af85cd86b",
+    "src/logical_voter/query.rs": "452bef16074288d22a7b294df67bd335c83c02b7fb4998e79608e8e3c4590bd1"
+  },
+  "findings": [
+    {
+      "severity": "focused_correction",
+      "path": "src/log/transition.rs",
+      "function": "plan_append_metadata",
+      "finding": "Suffix.clone now shares EntryBatch raw spare capacity; former Vec clone normalized it. Direct NextLog Delta therefore diverges from documented spare-capacity fallback, although OwnedNextLog normalizes independently.",
+      "correction": "After existing validate_append_metadata, construct append Suffix with entries.normalized_clone(), retaining from. Keep external raw value and exact Eq checks unchanged.",
+      "status": "Addressed by root: normalization now occurs only after validate_append_metadata; direct-delta raw capacity/content/source/oracle test added. Read-only inspection confirms source correction; test execution not certified by this review."
+    },
+    {
+      "severity": "qualification_found_fixed",
+      "path": "src/raft.rs",
+      "function": "append_for",
+      "finding": "New EntryIter collect produced capacity4 for selected singleton vs required exact1, detected by retained existing capacity assertions.",
+      "correction": "Root changed to Vec::with_capacity(count) then extend selected cloned entries. Count selection, byte boundary, empty/oversize error and context order unchanged.",
+      "status": "Read-only code inspection confirms bounded exact requested allocation; root reruns qualification. Original failure retained."
+    }
+  ],
+  "reviewed_contracts": {
+    "immutable_api": "Backing and Arc private; readonly references only; independent mutation via explicit Vec export/replacement; Eq checks complete content and whole immutable batch identity is scoped to that same exact batch. History Eq ignores segmentation.",
+    "canonical_ownership": "Core Pending, provider accepted overlay, durable GroupLog retain immutable batches. Default full validator and configured paths still validate full values; normalized paths explicitly clone configured/spare shapes. Native promotion follows sync+manifest/tickets, partial other-group barriers do not certify target.",
+    "accounting": "Per-owner full batch layout, raw entry capacity and all payload allocations plus history descriptor capacity; hidden spans never receive visible-length discount. Cached sums only immutable data; checked overflow remains unknown/error. Constructor does not claim validation or durability.",
+    "projection": "Descriptor forecast now bounds both cut-before-concat and materialize-before-cut; kept backing charge exact, refresh actual owner allocation on install. Normal zero-trim/no-tail projection cached O1; cut/overlay paths may inspect chunks.",
+    "completion": "Cow coalesces cross-chunk intervals once after all fallible completion transitions. Application still receives one complete ordered batch, and owned Effect::Committed preserves order; snapshot/replay semantic boundaries unchanged.",
+    "peaks": "Core raw validation precedes shared max(conversion,capture) projection; no new legacy singleton gate. Ready prefix uses same padded CommandBytes accounting before dequeue. Canonical memory and effect-output reservations remain distinct documented scopes.",
+    "restart": "Wire/WAL/checkpoint semantic entry encoding unchanged; decode reconstructs new backing with no recovered pointer authority. Full historical metadata, configurations, snapshots and operation IDs remain exact.",
+    "stale_and_partial": "Existing exact update equality, ticket incarnation/revision/generation fields, Pending fences, checkpoint lineage preservation/reset and uncertain native publication behavior remain in place.",
+    "configurations": "Arbitrary configuration entries supported, immutable Arc does not expose mutable nested Box; configured normalization retains deep-copy fallback. Striped rewriting and single-entry extraction explicitly materialize independent mutable ownership."
+  },
+  "physical_bound_caveat": "Repeated suffix trim then append can retain several interior partial backing batches; bound is not merely two global boundary batches. Full retained allocation charge exposes it, but visible max_entries by itself does not preserve former Vec physical-memory magnitude. Must retain this debt in measurement/inspection; no new memory plateau claim before evidence.",
+  "qualification_required_not_findings": [
+    "All/core library and affected integration histories including provider/storage/runtime/app/raft/snapshot",
+    "Actual TCP/QUIC retry/replacement/recovery and modeled native publication failure/crash/restart",
+    "Exact source/mode hashes for qualified scope; zero fmt/four strict/standalone checks",
+    "Existing independent Vec/value/error/reference oracles plus new pointer-through-admission/Durable, partial-span charge and Cow late-error controls",
+    "Fresh committed asserted artifacts, matched Linux/Mac sustained completed originals/s/tails/refusals and physical memory/debt; no speed/removable-percent claim from old overlapping profiles"
+  ],
+  "config_or_threshold_changes": [],
+  "disposition": "Read-only whole-source and observation follow-up found no remaining concrete correctness blocker after focused normalization/capacity fixes. Actual scoped checks pass as recorded, but full enabled hook/final changed-source qualification and performance are incomplete; no approval/signoff/P9 completion claim.",
+  "previous_review_source_sha256": {
+    "src/log.rs": "a944ad4a7f0f9eb21ca30a7b509caf4af9d5289965a4822c9c55f6c669a3f501",
+    "src/log/entry_batch.rs": "20cd9d54010dd0f0fdc76abbcb15947cf6366e630382abedfd1b470035acc69f",
+    "src/log/entry_history.rs": "9b688156db6a2a9e94e7f37806e671f5ca025b261ac2b7b2e54cff99d5f2b9fe",
+    "src/log/transition.rs": "df25283a2ea64756e873bff8dc5219dad69cc170343ba9ec7e878d523dc59418",
+    "src/log/transition/compact.rs": "8b9b558b68a34499f0f1a7f4bedc8a22bd8fa09a617bbe2b405b0666aa6ec0e2",
+    "src/log/transition/incoming.rs": "42fdeb3d54cc0299c7546d6e932aeba5e66de33df20e900ce7b89f50a32f7a08",
+    "src/log/transition/view.rs": "f58eefa738e9c45090e84c5623a081328abe2d4b0343a20a7c630d7274fe502c",
+    "src/log/comparison.rs": "fa3ded100ff9acbf4c9eb8827626206762bebd75a70526d9b81db677b11f8828",
+    "src/log/owned.rs": "8f23b50b3ffc20154e04cc6f9ac6e361ffadd38f04f0ea83bc640b42a4c3cb13",
+    "src/native/log_store/accepted.rs": "b6b4e9d26a1cf35de2351d506d9507da97f37e95f33f035e3126c32daee37758",
+    "src/native/log_store/checkpoint.rs": "0a1503d19931d374a4c4dbf9fa9302a49240875005796acb9ddcf3b6c64af803",
+    "src/native/log_store/striped/record.rs": "6ec3ed0c14d82b3f3e0d4442fa3a9e4d4a8d5688dac5dd464a07b2e56a166bb9",
+    "src/raft.rs": "44d4996ec8eaf77d3fd3fc018a2083aea0a3131f32cb82e3983b5a38d9d3262e",
+    "src/raft/completion.rs": "afe1ce6da24345490d61d41cac08644c2b8fa02bf0224a14ca70a453277a12cf",
+    "src/raft/receive.rs": "869913bde6ae3829365be263d0d37738400b857166656be70c1a8ae73fde63a4",
+    "src/raft/proposals.rs": "7662c4b3b145628390b68515f7629027b0734f8986d0b21c8ad4eb7ebb110e38",
+    "src/runtime/ready_batch.rs": "edf73e0b47fd7780e58f57efad5f75896b07669dd2603e2be1c2dbc2514121c1",
+    "src/runtime/effects.rs": "d6d0a5e51b1ae7dac9ffe54b709dc89ef1f03671cf2b101937dea3f8c979e214",
+    "src/worker.rs": "6a529f8cd5df11adafba44f15540ed617ebbf351fa3200c46362aa88dcbe3cd7",
+    "src/log_format.rs": "a1c22e9ef8783d44942e4b1cb6bc4af9720ac60d718456ac873f4ed0907516de",
+    "src/log_format/checkpoint.rs": "4811b12759907d89679eec4d7cb65926cee144ad5fd5ce66988a73070c273698",
+    "src/membership.rs": "fcaf2f7ca39e953001b3e19363b7f425a74947935ebd80316806ec2e74b79d0d",
+    "src/snapshot.rs": "13cccc91a078743d094b8c544743ab31ca1ca60f2c35a01eaaa5d70998a422df",
+    "src/snapshot_worker.rs": "e7c8f1d71dd402208406cd3e6cdde205468c9be47493117991f0030c26142581",
+    "src/logical_voter/checkpoint.rs": "bb8dd9fa0603f23cbe5a3d51406a128cd1cbc0c01e525d96bd1cc074b0d78aa2",
+    "src/logical_voter/codec/enrollment.rs": "8cd4385766c76e23fd8853c37c30f0fd757d840c80892a276321fc5af85cd86b",
+    "src/logical_voter/query.rs": "452bef16074288d22a7b294df67bd335c83c02b7fb4998e79608e8e3c4590bd1"
+  },
+  "followup_test_sha256": {
+    "src/log/transition/tests/incoming.rs": "ca641aebc4442a1db3bb69c982c969f231ea6b7f1aa10f5ee75a68a03c4ae257",
+    "src/raft/append_prefix_tests.rs": "480f102db090221f124191e7c4e55a9f8d1bd671bba8d4995f63ddfc8330f8b1",
+    "src/raft/completion_tests.rs": "5a0a370ae48f4a2adf046248d9600a3ef9341f55bbd783ca28b5faf6266c5cde",
+    "src/native/log_store/accepted/tests/compact.rs": "06ec98ef6e641b3339b796315a63752495f8c784db7f9dbeb15482d39a7b1f44",
+    "src/native/log_store/accepted/tests/incoming.rs": "7b8f0ccf463ced9d0a122261b3af911831e1f8412069978d0e806249f412ab1d"
+  },
+  "qualification_observation": "Verified raw attempt2 all-feature library437/core355; integration2 fifteen all-feature target groups385 tests, eleven core groups352, actual three-serviceTCP/QUIC recovery2, focused corrected effect-ownerbudget2; integration1 unchanged effect-owner201 passed/2 failed retained and scoped reuse only. checks1 matched71+metadata0; enabled hook101 with ONLY two fixture functions103/100 reported in counter_service and membership; parent extracting helpers. This is not final whole-repository clean. Earlier library411/25 and integration/matched failures remain retained.",
+  "observation_addition_review": {
+    "sha256": {
+      "validation/performance/slice466/OBSERVATION_SCHEMA.md": "8f0ebc0d6ea35178593aadab268d620fc192239fa34a78592544d763d510e6e7",
+      "benchmarks/matched/src/attribution.rs": "02e33a9746b6eeb4351004cb91a9a1e51d25c2a23fecae0355a8da3d28a13c22",
+      "benchmarks/matched/src/attribution/tests.rs": "8bb0b561661da5b31829e4f506e6fe50bbe4607c311f2e05932bda39d9a05472",
+      "benchmarks/matched/src/store.rs": "fc7e47aa1b8faf6f6d753f46a36b3f98015395f1d01339569716a817c835e68e",
+      "benchmarks/matched/src/voteboat_engine/actor.rs": "3cd3fff9b8d51fa091580030c222cfe821160abb19f998111198184afa534f1c",
+      "benchmarks/matched/src/voteboat_engine/actor/tests/completion.rs": "1984dc7229908f8555465dd9f92fca7fc21b4b9842f329fed7232c05f546d2cf",
+      "benchmarks/matched/src/workload.rs": "6c18e73b7f360f9fb1881189684ceb3b1678a6dd10ece0ef3e127c443bfe9399"
+    },
+    "finding": "No concrete correctness blocker found in this addition. Readonly review only, not a qualification signoff.",
+    "disabled": "Compile-time ENABLED=false returns without calling charge closure, reading/updating counter cells, or reading clocks. Poison/lazy panic control retained. Recorder object itself gains a constant-size diagnostic Cell; no zero object-size overhead claim. Stats/atomics/phases/provider methods unchanged.",
+    "enabled": "Checked observation increment and charge both must succeed before counter update; None/overflow preserves prior diagnostic cells and marks invalid report only. Store observes after successful apply/ticket construction including pending; Core observes after successful persist/application handoff and each successful maintain call, including a no-op maintain. These counts are named observation points, not counts of checkpoint work.",
+    "scope": "Per-owner complete history backing/payload/hidden-span/descriptor allocation; maximum only among named points over existing actor/provider lifetime. Not RSS, continuous peak, whole Core memory or allocator cause. Shared owners individually charged; totals must not be summed as actual physical RSS.",
+    "ordering": "All original admission, result channels, application and following-effect orders retained. No new timing phase/capture/start or timer boundary. Existing invalid-report path used without replacing storage/app outcomes. Cow application call now borrows the already-created value as required by466 shape.",
+    "controls": "Disabled lazy panic+poison, diagnostic overflow/None, distinct Core/store count/last/max serialization, exact actual fixture final charges and maintained three-replica nonzero observations retain29 phases/four scopes/fifteen provider methods."
+  },
+  "qualification_scoped_raw_statuses": {
+    "attempt1": {
+      "status": "101",
+      "stage": "library-all",
+      "commands": {
+        "library-all": {
+          "exit": 101,
+          "log": "target/p9/slice466/attempt1/library-all.log",
+          "results": [
+            {
+              "kind": "FAILED",
+              "passed": 411,
+              "failed": 25
+            }
+          ],
+          "test_targets": 1,
+          "passed": 411,
+          "failed": 25,
+          "stderr_sha256": "8aa784027e0bb505d722d69087ee48c629302d829348a4198e3b0a65d6ee84d7"
+        }
+      }
+    },
+    "attempt2": {
+      "status": "0",
+      "stage": "DONE",
+      "commands": {
+        "library-all": {
+          "exit": 0,
+          "log": "target/p9/slice466/attempt2/library-all.log",
+          "results": [
+            {
+              "kind": "ok",
+              "passed": 437,
+              "failed": 0
+            }
+          ],
+          "test_targets": 1,
+          "passed": 437,
+          "failed": 0,
+          "stderr_sha256": "164b92bab72cebe742508a312e082ecc522ae4817d919e0ed9cbe36c11f938da"
+        },
+        "library-core": {
+          "exit": 0,
+          "log": "target/p9/slice466/attempt2/library-core.log",
+          "results": [
+            {
+              "kind": "ok",
+              "passed": 355,
+              "failed": 0
+            }
+          ],
+          "test_targets": 1,
+          "passed": 355,
+          "failed": 0,
+          "stderr_sha256": "3e9f7a9c0a46cf9f0673901468443ce191c991753b989ca163ec579be50d5250"
+        }
+      }
+    },
+    "integration1": {
+      "status": "101",
+      "stage": "integration-all",
+      "commands": {
+        "integration-all": {
+          "exit": 101,
+          "log": "target/p9/slice466/integration1/integration-all.log",
+          "results": [
+            {
+              "kind": "FAILED",
+              "passed": 201,
+              "failed": 2
+            }
+          ],
+          "test_targets": 1,
+          "passed": 201,
+          "failed": 2,
+          "stderr_sha256": "5cb65b27caaeb91caf1aa61fbfaead30234b4f7e0042859343b600761e3841c7"
+        }
+      }
+    },
+    "integration2": {
+      "status": "101",
+      "stage": "matched",
+      "commands": {
+        "focused-budget": {
+          "exit": 0,
+          "log": "target/p9/slice466/integration2/focused-budget.log",
+          "results": [
+            {
+              "kind": "ok",
+              "passed": 2,
+              "failed": 0
+            }
+          ],
+          "test_targets": 1,
+          "passed": 2,
+          "failed": 0,
+          "stderr_sha256": "b39854a7a945ead74c5ed3d942c1a362cfb8fdcaf51359e6733f7a434b7ecd28"
+        },
+        "integration-all": {
+          "exit": 0,
+          "log": "target/p9/slice466/integration2/integration-all.log",
+          "results": [
+            {
+              "kind": "ok",
+              "passed": 24,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 5,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 11,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 2,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 19,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 9,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 44,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 32,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 46,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 79,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 55,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 27,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 14,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 9,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 9,
+              "failed": 0
+            }
+          ],
+          "test_targets": 15,
+          "passed": 385,
+          "failed": 0,
+          "stderr_sha256": "cfb118d08dd84da7af4320fd5d76aa1ca913be7244681a5709f60b54f5bcf882"
+        },
+        "integration-core": {
+          "exit": 0,
+          "log": "target/p9/slice466/integration2/integration-core.log",
+          "results": [
+            {
+              "kind": "ok",
+              "passed": 195,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 14,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 5,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 2,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 18,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 31,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 29,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 38,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 12,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 5,
+              "failed": 0
+            },
+            {
+              "kind": "ok",
+              "passed": 3,
+              "failed": 0
+            }
+          ],
+          "test_targets": 11,
+          "passed": 352,
+          "failed": 0,
+          "stderr_sha256": "5d7c322a1b1bbd076ba14a2a8215f424d18cbb4a3dff023cf386c8a43bed764c"
+        },
+        "service-recovery": {
+          "exit": 0,
+          "log": "target/p9/slice466/integration2/service-recovery.log",
+          "results": [
+            {
+              "kind": "ok",
+              "passed": 2,
+              "failed": 0
+            }
+          ],
+          "test_targets": 1,
+          "passed": 2,
+          "failed": 0,
+          "stderr_sha256": "c32300d354b0178e48b726769434d4c4e784e2a3c3db3f2ab3594d8163147c9a"
+        },
+        "matched": {
+          "exit": 101,
+          "log": "target/p9/slice466/integration2/matched.log",
+          "results": [],
+          "stderr_sha256": "3dcfb6ac4b8c3efe4e0d1281ce5e37518509f496d64794292f56d8a6c8a54d11"
+        }
+      }
+    },
+    "checks1": {
+      "status": "101",
+      "stage": "enabled-hook",
+      "commands": {
+        "matched": {
+          "exit": 0,
+          "log": "target/p9/slice466/checks1/matched.log",
+          "results": [
+            {
+              "kind": "ok",
+              "passed": 71,
+              "failed": 0
+            }
+          ],
+          "test_targets": 1,
+          "passed": 71,
+          "failed": 0,
+          "stderr_sha256": "10787e7e4f4f762778a4a8379e7fb3e45a7b9ccc5c370b5d57bfc002fdbd57db"
+        },
+        "metadata": {
+          "exit": 0,
+          "log": "target/p9/slice466/checks1/metadata.log",
+          "results": [],
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "enabled-hook": {
+          "exit": 101,
+          "log": "target/p9/slice466/checks1/enabled-hook.log",
+          "results": [],
+          "stderr_sha256": "01d76c832238415da8b2a778454a4776693cb58748a88af63e5b8e60fba4b6fb"
+        }
+      }
+    }
+  }
+}

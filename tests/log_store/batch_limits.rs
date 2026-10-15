@@ -85,7 +85,7 @@ fn check_recovery(
             2
         }
     );
-    assert_eq!(&state.entries[..2], &before.entries);
+    assert_eq!(state.entries.view(..2).to_vec(), before.entries.to_vec());
     assert_ne!(recovered.binding().session, old_binding.session);
     let mut restarted =
         Raft::recover(node(1), recovered.binding(), state, recovered.limits()).unwrap();

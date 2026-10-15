@@ -1,0 +1,32 @@
+{
+  "finding": "Cut-before-concat projection undercharges descriptor capacity retained by materialize-before-later-cut fallback. Full batch charges are unchanged.",
+  "fix": "Take maximum descriptor capacity for trim-before-concat and materialize-base-plus-full-tail before later trim; then project optional append. Cache bytes remain exact kept full backings. No-tail zero-trim path stays O(1).",
+  "tests": [
+    "composite_view_projections_bound_cuts_concat_and_append_without_discount",
+    "composite_projection_covers_descriptor_capacity_pinned_by_concat_before_cut"
+  ],
+  "reviewer": "/root/review426 confirms these are both actual native orders, with no extra order found.",
+  "format_actual_exit": 0,
+  "builds_tests_run": false,
+  "diagnostic4": "No Raft test errors or primary new-container errors; no additional Raft fixture edits justified.",
+  "before": {
+    "src/log/entry_history.rs": {
+      "sha256": "665e6273378ebc61a121aec7427bd7cf43864854b80b5270d58d85d0833404b4",
+      "mode": "0o644"
+    },
+    "src/log/entry_history/tests.rs": {
+      "sha256": "995b84aac5c9d592098e3208c2e1fe3069bd5c47663a531cc1e40046a205fab8",
+      "mode": "0o644"
+    }
+  },
+  "after": {
+    "src/log/entry_history.rs": {
+      "sha256": "9b688156db6a2a9e94e7f37806e671f5ca025b261ac2b7b2e54cff99d5f2b9fe",
+      "mode": "0o644"
+    },
+    "src/log/entry_history/tests.rs": {
+      "sha256": "ba34fe169d5adef6b0de2d41719e6a219f2f3627e897cf392531293c0319f624",
+      "mode": "0o644"
+    }
+  }
+}

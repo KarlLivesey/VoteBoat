@@ -1,0 +1,226 @@
+// SPDX-License-Identifier: RPL-1.5
+// Copyright (c) 2026 Karl Livesey
+// Unless explicitly acquired and licensed from Licensor under another license,
+// the contents of this file are subject to the Reciprocal Public License
+// ("RPL") Version 1.5, or subsequent versions as allowed by the RPL, and You may
+// not copy or use this file in either source code or executable form, except
+// in compliance with the terms and conditions of the RPL.
+//
+// All software distributed under the RPL is provided strictly on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND LICENSOR
+// HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY
+// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
+// ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
+// rights and limitations under the RPL.
+use super::*;
+use crate::membership::{Configuration, ConfigurationChange, ConfigurationRecord};
+fn config(index: u64, operation: u128, expected: u64, change: ConfigurationChange) -> LogEntry {
+    LogEntry {
+        index,
+        term: 1,
+        payload: EntryPayload::Configuration(Box::new(ConfigurationRecord {
+            operation: OperationId::new(operation).unwrap(),
+            expected: ConfigurationId::new(expected).unwrap(),
+            change,
+        })),
+    }
+}
+fn learner() -> Configuration {
+    Configuration::new(
+        ConfigurationId::new(2).unwrap(),
+        Policy::new(
+            Tree::Voter(NodeId::new(2).unwrap()),
+            PolicyLimits::default(),
+        )
+        .unwrap(),
+        BTreeMap::from([(NodeId::new(2).unwrap(), store(2))]),
+        BTreeMap::from([(NodeId::new(3).unwrap(), store(3))]),
+    )
+    .unwrap()
+}
+fn core(a: &LogicalApplication, entries: Vec<LogEntry>, commit: u64) -> crate::raft::Raft {
+    let mut groups = BTreeMap::new();
+    apply_batch(
+        &mut groups,
+        &[LogMutation::Create(a.child_bootstrap.clone())],
+        a.limits.parent_log,
+    )
+    .unwrap();
+    apply_batch(
+        &mut groups,
+        &[LogMutation::Update(LogUpdate {
+            group: a.mapping.child,
+            expected_revision: LogRevision::new(1).unwrap(),
+            hard_state: HardState {
+                term: 1,
+                voted_for: None,
+            },
+            commit_index: commit,
+            suffix: Some(Suffix { from: 1, entries: entries.into() }),
+            snapshot: None,
+            snapshot_membership: None,
+        })],
+        a.limits.parent_log,
+    )
+    .unwrap();
+    crate::raft::Raft::recover_member(
+        NodeId::new(2).unwrap(),
+        StoreBinding {
+            identity: store(2),
+            session: StoreSession::new(1).unwrap(),
+        },
+        groups.remove(&a.mapping.child).unwrap(),
+        a.limits.parent_log,
+    )
+    .unwrap()
+}
+#[test]
+fn original_admission_configuration_is_not_current_eligibility() {
+    let mut a = app();
+    let c = command(
+        1,
+        1,
+        CommandBody::Claim {
+            expected_epoch: None,
+        },
+    );
+    let bytes = a.encode_command(&c, usize::MAX).unwrap();
+    let change = config(1, 100, 1, ConfigurationChange::Learners(learner()));
+    let latest = core(&a, vec![change.clone()], 0);
+    assert_eq!(latest.membership().id(), ConfigurationId::new(2).unwrap());
+    assert!(a
+        .validate_proposal_context(&latest, c.operation, &bytes)
+        .is_ok());
+    a.apply_batch(&[change]).unwrap();
+    assert_eq!(apply(&mut a, &c).outcome, LogicalOutcome::Claimed);
+    assert_eq!(
+        a.state.records[&c.operation].preceding_configuration,
+        ConfigurationId::new(2).unwrap()
+    );
+    let old = core(&app(), vec![], 0);
+    assert!(a
+        .validate_proposal_context(&old, c.operation, &bytes)
+        .is_ok());
+    let checkpoint = a.checkpoint(usize::MAX).unwrap();
+    let mut restored = app();
+    restored.restore_checkpoint(1, 2, &checkpoint).unwrap();
+    assert_eq!(restored.state, a.state);
+}
+#[test]
+fn removed_representative_cannot_new_work_but_original_retry_survives() {
+    let mut a = app();
+    claim(&mut a);
+    let change = config(2, 100, 1, ConfigurationChange::Learners(learner()));
+    a.apply_batch(&[change]).unwrap();
+    let next = Configuration::new(
+        ConfigurationId::new(4).unwrap(),
+        Policy::new(
+            Tree::Voter(NodeId::new(3).unwrap()),
+            PolicyLimits::default(),
+        )
+        .unwrap(),
+        BTreeMap::from([(NodeId::new(3).unwrap(), store(3))]),
+        BTreeMap::new(),
+    )
+    .unwrap();
+    let joint = config(
+        3,
+        101,
+        2,
+        ConfigurationChange::Joint {
+            id: ConfigurationId::new(3).unwrap(),
+            next,
+        },
+    );
+    let final_entry = config(
+        4,
+        101,
+        3,
+        ConfigurationChange::Final {
+            id: ConfigurationId::new(4).unwrap(),
+        },
+    );
+    a.apply_batch(&[joint, final_entry]).unwrap();
+    let c = mutate(&a, 2, update(&a, 0, None));
+    assert_eq!(
+        apply(&mut a, &c).outcome,
+        LogicalOutcome::Refused(LogicalRefusal::Ineligible)
+    );
+    let r = apply(
+        &mut a,
+        &command(
+            1,
+            1,
+            CommandBody::Claim {
+                expected_epoch: None,
+            },
+        ),
+    );
+    assert!(r.duplicate);
+    assert_eq!(r.outcome, LogicalOutcome::Claimed);
+    let checkpoint = a.checkpoint(usize::MAX).unwrap();
+    let mut restored = app();
+    restored.restore_checkpoint(1, 6, &checkpoint).unwrap();
+    assert_eq!(restored.state, a.state);
+}
+
+#[test]
+fn child_journal_does_not_inherit_parent_batch_limit() {
+    let limits = LogicalLimits::default();
+    let mut a = app_with_limits(LogicalLimits {
+        parent_log: LogLimits {
+            max_command_bytes: 1024,
+            max_batch_bytes: 4096,
+            ..limits.parent_log
+        },
+        ..limits
+    });
+    let next = Configuration::new(
+        ConfigurationId::new(2).unwrap(),
+        a.child_bootstrap.policy.clone(),
+        a.child_bootstrap.voter_stores.clone(),
+        (3..203)
+            .map(|n| (NodeId::new(n).unwrap(), store(n as u128)))
+            .collect(),
+    )
+    .unwrap();
+    let e = config(1, 100, 1, ConfigurationChange::Learners(next));
+    let mutation = LogMutation::Update(LogUpdate {
+        group: a.mapping.child,
+        expected_revision: LogRevision::new(1).unwrap(),
+        hard_state: HardState {
+            term: 1,
+            voted_for: None,
+        },
+        commit_index: 1,
+        suffix: Some(Suffix {
+            from: 1,
+            entries: vec![e.clone()].into(),
+        }),
+        snapshot: None,
+        snapshot_membership: None,
+    });
+    assert!(a
+        .log_codec
+        .encode_batch(1, std::slice::from_ref(&mutation), a.limits.parent_log)
+        .is_err());
+    let frame = a
+        .log_codec
+        .encode_batch(1, std::slice::from_ref(&mutation), a.journal_limits())
+        .unwrap();
+    assert!(frame.len() > 4096);
+    let mut child = BTreeMap::new();
+    apply_batch(
+        &mut child,
+        &[LogMutation::Create(a.child_bootstrap.clone())],
+        LogLimits::default(),
+    )
+    .unwrap();
+    apply_batch(&mut child, &[mutation], LogLimits::default()).unwrap();
+    assert!(a.apply_batch(&[e]).unwrap().is_empty());
+    claim(&mut a);
+    let bytes = a.checkpoint(usize::MAX).unwrap();
+    let mut restored = app_with_limits(a.limits);
+    restored.restore_checkpoint(1, 2, &bytes).unwrap();
+    assert_eq!(restored.state, a.state);
+}

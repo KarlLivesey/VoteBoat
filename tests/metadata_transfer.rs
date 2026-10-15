@@ -315,7 +315,7 @@ fn interrupted_native_metadata_fence_recovers_old_or_complete_image() {
                 2,
                 Some(Suffix {
                     from: 1,
-                    entries: entries[..2].to_vec(),
+                    entries: entries[..2].to_vec().into(),
                 }),
             )],
         );
@@ -328,7 +328,7 @@ fn interrupted_native_metadata_fence_recovers_old_or_complete_image() {
         3,
         Some(Suffix {
             from: 3,
-            entries: entries[2..].to_vec(),
+            entries: entries[2..].to_vec().into(),
         }),
     );
     let frame = NativeLogCodec

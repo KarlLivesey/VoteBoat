@@ -466,7 +466,7 @@ fn slot_journal_cuts_recover_original_or_complete_grant_and_immutable_export() {
             boundary,
             Some(Suffix {
                 from: boundary,
-                entries: vec![entries[boundary as usize - 1].clone()],
+                entries: vec![entries[boundary as usize - 1].clone()].into(),
             }),
         );
         let frame = NativeLogCodec
@@ -741,7 +741,7 @@ fn seed_slot_journal(
             boundary - 1,
             Some(Suffix {
                 from: 1,
-                entries: entries[..boundary as usize - 1].to_vec(),
+                entries: entries[..boundary as usize - 1].to_vec().into(),
             }),
         )],
     );

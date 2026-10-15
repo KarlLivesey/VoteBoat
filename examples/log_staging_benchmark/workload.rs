@@ -103,7 +103,7 @@ fn initialize(
             &initial,
             Suffix {
                 from: 1,
-                entries: history::entries(&initial, config)?,
+                entries: history::entries(&initial, config)?.into(),
             },
         );
         let mutations = vec![mutation];
@@ -134,7 +134,7 @@ fn replacement(original: &GroupLog, config: Workload, step: usize) -> LogMutatio
         original,
         Suffix {
             from: index as u64,
-            entries: vec![entry(index, config.history as u128 + step as u128)],
+            entries: vec![entry(index, config.history as u128 + step as u128)].into(),
         },
     );
     let LogMutation::Update(value) = &mut mutation else {

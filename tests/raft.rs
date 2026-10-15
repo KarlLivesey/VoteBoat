@@ -641,12 +641,13 @@ fn persistence_driver_rejects_a_different_body_with_identical_ticket_metadata() 
     let [Effect::Persist(mut update)] = effects else {
         panic!("expected persistence")
     };
-    let EntryPayload::Command { bytes, .. } =
-        &mut update.suffix.as_mut().unwrap().entries[0].payload
-    else {
+    let suffix = update.suffix.as_mut().unwrap();
+    let mut entries = suffix.entries.to_vec();
+    let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
         unreachable!()
     };
     *bytes = vec![2].into();
+    suffix.entries = entries.into();
     let before = io.0.borrow().log.clone();
     assert_eq!(
         persist_effect(&mut replica.core, &mut replica.store, update),

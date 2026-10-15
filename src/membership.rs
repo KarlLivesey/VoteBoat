@@ -170,11 +170,11 @@ impl Membership {
     ) -> Result<Self, MembershipError> {
         Self::replay_from(bootstrap, None, 0, entries, committed_prefix)
     }
-    pub fn replay_from(
+    pub fn replay_from<'a>(
         bootstrap: &Bootstrap,
         base: Option<&Self>,
         base_index: u64,
-        entries: &[LogEntry],
+        entries: impl IntoIterator<Item = &'a LogEntry>,
         committed_prefix: u64,
     ) -> Result<Self, MembershipError> {
         if committed_prefix < base_index {

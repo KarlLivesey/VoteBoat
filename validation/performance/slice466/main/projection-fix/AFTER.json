@@ -1,0 +1,10 @@
+{
+  "src/log/entry_history.rs": {
+    "sha256": "9b688156db6a2a9e94e7f37806e671f5ca025b261ac2b7b2e54cff99d5f2b9fe",
+    "mode": "0o644"
+  },
+  "src/log/entry_history/tests.rs": {
+    "sha256": "ba34fe169d5adef6b0de2d41719e6a219f2f3627e897cf392531293c0319f624",
+    "mode": "0o644"
+  }
+}

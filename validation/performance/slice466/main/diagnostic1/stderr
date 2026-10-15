@@ -1,0 +1,169 @@
+    Checking ring v0.17.14
+    Checking rustls-webpki v0.103.15
+    Checking rustls v0.23.45
+    Checking quinn-proto v0.11.19
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0308]: mismatched types
+   --> src/log_format/checkpoint.rs:116:26
+    |
+116 |                 entries: s.entries.clone(),
+    |                          ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `EntryHistory`
+
+error[E0308]: mismatched types
+   --> src/log_format.rs:454:37
+    |
+454 |                 Some(Suffix { from, entries })
+    |                                     ^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `EntryBatch`
+    |
+454 |                 Some(Suffix { from, entries: entries.into() })
+    |                                     ++++++++        +++++++
+
+error[E0308]: mismatched types
+  --> src/logical_voter/codec/enrollment.rs:76:34
+   |
+76 |                         entries: vec![entry.clone()],
+   |                                  ^^^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `EntryBatch`
+   |
+76 |                         entries: vec![entry.clone()].into(),
+   |                                                     +++++++
+
+error[E0308]: mismatched types
+   --> src/logical_voter/checkpoint.rs:147:34
+    |
+147 |                         entries: vec![entry.clone()],
+    |                                  ^^^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `EntryBatch`
+    |
+147 |                         entries: vec![entry.clone()].into(),
+    |                                                     +++++++
+
+error[E0308]: mismatched types
+  --> src/logical_voter/response/configurations.rs:45:26
+   |
+45 |                 entries: vec![entry.clone()],
+   |                          ^^^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `EntryBatch`
+   |
+45 |                 entries: vec![entry.clone()].into(),
+   |                                             +++++++
+
+error[E0599]: no method named `drain` found for struct `entry_history::EntryHistory` in the current scope
+   --> src/native/log_store/accepted.rs:321:28
+    |
+321 |                 plain.tail.drain(..delta.removed - durable_removed);
+    |                            ^^^^^ method not found in `entry_history::EntryHistory`
+    |
+   ::: src/log/entry_history.rs:22:1
+    |
+ 22 | pub struct EntryHistory {
+    | ----------------------- method `drain` not found for this struct
+    |
+    = help: items from traits can only be used if the trait is implemented and in scope
+note: `peer_network::PeerNetwork` defines an item `drain`, perhaps you need to implement it
+   --> src/runtime/peer_network.rs:40:1
+    |
+ 40 | pub trait PeerNetwork: Sized {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> src/native/log_store/accepted.rs:332:31
+    |
+332 |                         tail: Vec::new(),
+    |                               ^^^^^^^^^^ expected `EntryHistory`, found `Vec<_>`
+    |
+    = note: expected struct `entry_history::EntryHistory`
+               found struct `Vec<_>`
+help: call `Into::into` on this expression to convert `Vec<_>` into `entry_history::EntryHistory`
+    |
+332 |                         tail: Vec::new().into(),
+    |                                         +++++++
+
+error[E0308]: mismatched types
+  --> src/native/log_store/checkpoint.rs:84:30
+   |
+84 |                     entries: s.entries.clone(),
+   |                              ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `EntryHistory`
+
+error[E0308]: mismatched types
+   --> src/raft/configuration.rs:155:26
+    |
+155 |                 entries: vec![entry],
+    |                          ^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `EntryBatch`
+    |
+155 |                 entries: vec![entry].into(),
+    |                                     +++++++
+
+error[E0308]: mismatched types
+    --> src/raft.rs:1436:26
+     |
+1436 |                 entries: vec![entry],
+     |                          ^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+     |
+     = note: expected struct `EntryBatch`
+                found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `EntryBatch`
+     |
+1436 |                 entries: vec![entry].into(),
+     |                                     +++++++
+
+error[E0308]: mismatched types
+   --> src/snapshot.rs:792:26
+    |
+792 |         next.apply_batch(raft.replay_committed())?;
+    |              ----------- ^^^^^^^^^^^^^^^^^^^^^^^ expected `&[LogEntry]`, found `Cow<'_, [LogEntry]>`
+    |              |
+    |              arguments to this method are incorrect
+    |
+    = note: expected reference `&[log::LogEntry]`
+                    found enum `Cow<'_, [log::LogEntry]>`
+note: method defined here
+   --> src/application.rs:139:8
+    |
+139 |     fn apply_batch(&mut self, entries: &[LogEntry])
+    |        ^^^^^^^^^^^            -------
+help: consider borrowing here
+    |
+792 |         next.apply_batch(&raft.replay_committed())?;
+    |                          +
+
+error[E0308]: mismatched types
+   --> src/snapshot_worker.rs:380:34
+    |
+380 |                 next.apply_batch(raft.replay_committed())?;
+    |                      ----------- ^^^^^^^^^^^^^^^^^^^^^^^ expected `&[LogEntry]`, found `Cow<'_, [LogEntry]>`
+    |                      |
+    |                      arguments to this method are incorrect
+    |
+    = note: expected reference `&[log::LogEntry]`
+                    found enum `Cow<'_, [log::LogEntry]>`
+note: method defined here
+   --> src/application.rs:139:8
+    |
+139 |     fn apply_batch(&mut self, entries: &[LogEntry])
+    |        ^^^^^^^^^^^            -------
+help: consider borrowing here
+    |
+380 |                 next.apply_batch(&raft.replay_committed())?;
+    |                                  +
+
+Some errors have detailed explanations: E0308, E0599.
+For more information about an error, try `rustc --explain E0308`.
+error: could not compile `voteboat` (lib) due to 12 previous errors

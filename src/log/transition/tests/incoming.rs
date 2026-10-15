@@ -17,7 +17,7 @@ fn owned_append_moves_new_input_and_retains_canonical_prefix_and_exact_charge() 
         2,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 1)],
+            entries: vec![entry(3, 1)].into(),
         }),
     );
     let incoming = pointer(&change.suffix.as_ref().unwrap().entries[0]);
@@ -52,13 +52,15 @@ fn copy_keeps_raw_external_capacity_and_seals_one_normalized_allocation() {
         1,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 1)],
+            entries: vec![entry(3, 1)].into(),
         }),
     );
     let suffix = change.suffix.as_mut().unwrap();
-    suffix.entries.reserve(100);
+    let mut entries = suffix.entries.to_vec();
+    entries.reserve(100);
+    suffix.entries = entries.into();
     let raw_capacity = suffix.entries.capacity();
-    let EntryPayload::Command { bytes, .. } = &mut suffix.entries[0].payload else {
+    let EntryPayload::Command { bytes, .. } = &suffix.entries[0].payload else {
         unreachable!()
     };
     let raw_charge = bytes.retained_bytes();
@@ -92,7 +94,7 @@ fn copy_keeps_raw_external_capacity_and_seals_one_normalized_allocation() {
     let mut canonical = state;
     let summary = plan.install(&mut canonical).unwrap();
     assert_eq!(canonical, expected);
-    assert_eq!(summary, LogSummary::from_validated(&expected));
+    assert_eq!(summary, LogSummary::from_validated(&canonical));
 }
 #[test]
 fn owned_normalization_matches_old_clone_and_identical_headers_do_not_hide_payload_changes() {
@@ -103,17 +105,17 @@ fn owned_normalization_matches_old_clone_and_identical_headers_do_not_hide_paylo
         1,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 1)],
+            entries: vec![entry(3, 1)].into(),
         }),
     );
-    let EntryPayload::Command { bytes, .. } =
-        &mut change.suffix.as_mut().unwrap().entries[0].payload
-    else {
+    let mut entries = change.suffix.as_ref().unwrap().entries.to_vec();
+    let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
         unreachable!()
     };
     let mut raw = bytes.to_vec();
     raw.reserve(10000);
     *bytes = raw.into();
+    change.suffix.as_mut().unwrap().entries = entries.into();
     let original = change.clone();
     let expected = stage_update(&state, &change, LogLimits::default()).unwrap();
     let plan = OwnedNextLog::plan_owned(
@@ -125,10 +127,11 @@ fn owned_normalization_matches_old_clone_and_identical_headers_do_not_hide_paylo
     .unwrap();
     for operation in [false, true] {
         let mut wrong = original.clone();
+        let mut entries = wrong.suffix.as_ref().unwrap().entries.to_vec();
         let EntryPayload::Command {
             operation: id,
             bytes,
-        } = &mut wrong.suffix.as_mut().unwrap().entries[0].payload
+        } = &mut entries[0].payload
         else {
             unreachable!()
         };
@@ -139,12 +142,13 @@ fn owned_normalization_matches_old_clone_and_identical_headers_do_not_hide_paylo
             raw[0] ^= 1;
             *bytes = raw.into();
         }
+        wrong.suffix.as_mut().unwrap().entries = entries.into();
         assert!(!plan.matches_update(&wrong));
     }
     let mut canonical = state;
     let summary = plan.install(&mut canonical).unwrap();
     assert_eq!(canonical, expected);
-    assert_eq!(summary, LogSummary::from_validated(&expected));
+    assert_eq!(summary, LogSummary::from_validated(&canonical));
 }
 #[test]
 fn owned_validation_and_terms_match_borrowed_oracle_for_valid_invalid_and_compact_updates() {
@@ -161,7 +165,7 @@ fn owned_validation_and_terms_match_borrowed_oracle_for_valid_invalid_and_compac
                         commit,
                         Some(Suffix {
                             from,
-                            entries: vec![entry(from, term)],
+                            entries: vec![entry(from, term)].into(),
                         }),
                     );
                     compare_owned(&state, change);
@@ -203,7 +207,7 @@ fn owned_preparation_rejects_stale_predecessor_without_installation() {
         1,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 1)],
+            entries: vec![entry(3, 1)].into(),
         }),
     );
     let plan = OwnedNextLog::plan_owned(
@@ -218,4 +222,56 @@ fn owned_preparation_rejects_stale_predecessor_without_installation() {
     let before = wrong.clone();
     assert!(plan.install(&mut wrong).is_err());
     assert_eq!(wrong, before);
+}
+
+#[test]
+fn direct_delta_normalizes_raw_entry_capacity_after_validation_and_keeps_source() {
+    let state = current();
+    let mut raw = Vec::with_capacity(101);
+    raw.push(entry(3, 1));
+    let change = update(
+        &state,
+        1,
+        1,
+        Some(Suffix {
+            from: 3,
+            entries: raw.into(),
+        }),
+    );
+    let source = change.suffix.as_ref().unwrap().entries.clone();
+    let plan = NextLog::plan(
+        &LogView::new(&state),
+        &LogSummary::from_validated(&state),
+        &change,
+        LogLimits::default(),
+    )
+    .unwrap();
+    let NextLog::Delta(delta) = &plan else {
+        panic!("plain append delta")
+    };
+    let normalized = &delta.append.as_ref().unwrap().entries;
+    assert_eq!(normalized, &source);
+    assert_eq!(normalized.capacity(), normalized.len());
+    assert_ne!(normalized.as_ptr(), source.as_ptr());
+    assert_eq!(source.capacity(), 101);
+    let original = change.clone();
+    let mut installed = state.clone();
+    let summary = plan.install(&mut installed, change).unwrap();
+    assert_eq!(original.suffix.as_ref().unwrap().entries.capacity(), 101);
+    assert_eq!(source[0], installed.entries[2]);
+    assert_eq!(summary, LogSummary::from_validated(&installed));
+    let mut invalid = original;
+    invalid.suffix.as_mut().unwrap().from = 9;
+    let limits = LogLimits::default();
+    assert_eq!(
+        NextLog::plan(
+            &LogView::new(&state),
+            &LogSummary::from_validated(&state),
+            &invalid,
+            limits
+        )
+        .err(),
+        stage_update(&state, &invalid, limits).err()
+    );
+    assert_eq!(source.capacity(), 101);
 }

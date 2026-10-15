@@ -63,7 +63,7 @@ fn certified_append_and_compaction_compare_only_unverified_survivors() {
     assert!(cache.compare(&state, &CheckpointLog::new(&state, &lineage)));
     work(&cache, false, 1, 3);
     state.snapshot = Some(snapshot(&state, 2));
-    state.entries.drain(..2);
+    state.entries.discard_prefix(2);
     state.revision = LogRevision::new(3).unwrap();
     state.generation = LogGeneration::new(2).unwrap();
     cache.preserve(&state);
@@ -107,7 +107,9 @@ fn false_tail_and_uncertified_versions_clear_or_refuse_cached_evidence() {
     state.revision = LogRevision::new(2).unwrap();
     cache.preserve(&state);
     let mut different = state.clone();
-    different.entries[3].payload = EntryPayload::Noop;
+    let mut replacement = different.entries[3].clone();
+    replacement.payload = EntryPayload::Noop;
+    different.entries.replace(3, replacement).unwrap();
     assert!(!cache.compare(&state, &CheckpointLog::new(&different, &lineage)));
     work(&cache, false, 1, 3);
     assert_eq!(cache.verified_interval(), None);
@@ -153,7 +155,7 @@ fn every_header_field_stays_exact_and_false_clears_the_previous_interval() {
             ))
         },
         |s| {
-            s.entries.pop();
+            s.entries.truncate(s.entries.len() - 1);
         },
     ];
     for change in changes {
@@ -199,7 +201,9 @@ fn reference_oracle_detects_test_only_violation_of_private_mutation_ownership() 
     let mut cache = CheckpointComparison::default();
     assert!(cache.compare(&state, &CheckpointLog::new(&state, &lineage)));
     let mut rewritten = state.clone();
-    rewritten.entries[0].payload = EntryPayload::Noop;
+    let mut replacement = rewritten.entries[0].clone();
+    replacement.payload = EntryPayload::Noop;
+    rewritten.entries.replace(0, replacement).unwrap();
     // No public API can attach this existing lineage to rewritten public data.
     cache.compare(&state, &CheckpointLog::new(&rewritten, &lineage));
 }

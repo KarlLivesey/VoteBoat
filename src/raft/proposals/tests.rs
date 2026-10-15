@@ -68,7 +68,8 @@ fn leader() -> Raft {
                 index: 1,
                 term: 1,
                 payload: EntryPayload::Noop,
-            }],
+            }]
+            .into(),
         }),
         snapshot: None,
         snapshot_membership: None,
@@ -167,14 +168,23 @@ fn plain_append_and_commit_preserve_historical_payloads_and_exact_accounting() {
     assert_eq!(payload_pointers(&core), all);
     assert_eq!(core.state().commit_index, 69);
     assert_eq!(core.membership() as *const Membership, membership);
-    let old_charge = core.state().entries.len() * std::mem::size_of::<LogEntry>()
+    let logical_entry_charge = core.state().entries.len() * std::mem::size_of::<LogEntry>()
         + core
             .state()
             .entries
             .iter()
             .map(LogEntry::retained_payload_bytes)
             .sum::<usize>();
-    assert_eq!(core.retained_log_bytes(), Some(old_charge));
+    // The physical owner also retains complete batch headers, spare backing
+    // slots and descriptor capacity. Do not substitute a logical-length sum.
+    let physical_charge = core.state().entries.allocation_bytes().unwrap()
+        + core
+            .state()
+            .snapshot_membership
+            .as_ref()
+            .map_or(0, |base| base.retained_bytes());
+    assert!(physical_charge > logical_entry_charge);
+    assert_eq!(core.retained_log_bytes(), Some(physical_charge));
     assert!(core.log_summary.matches(core.state()));
     assert_eq!(core.rollback_replicas(), 3);
 }
@@ -430,7 +440,10 @@ fn direct_batch_uses_the_same_fence_dependency_and_transfer_guards() {
 #[test]
 fn index_exhaustion_is_rejected_before_pending_state() {
     let mut core = leader();
-    core.durable.entries.last_mut().unwrap().index = u64::MAX - 1;
+    let last = core.durable.entries.len() - 1;
+    let mut entry = core.durable.entries[last].clone();
+    entry.index = u64::MAX - 1;
+    core.durable.entries.replace(last, entry).unwrap();
     assert_eq!(
         core.propose_batch(vec![proposal(1), proposal(2)]),
         Err(RaftError::Exhausted)
@@ -493,4 +506,120 @@ fn shared_conversion_peak_refuses_after_raw_checks_without_pending_or_log_change
     );
     assert!(core.pending.is_none());
     assert_eq!(core.state(), &before);
+}
+
+fn shaped_proposals(length: usize, spare: usize) -> Vec<Proposal> {
+    let mut input = Vec::with_capacity(4 + spare);
+    for id in 1..=4 {
+        let mut bytes = Vec::with_capacity(length + spare);
+        bytes.resize(length, 7);
+        input.push(Proposal {
+            operation: OperationId::new((1 << 127) | id).unwrap(),
+            bytes,
+        });
+    }
+    input
+}
+
+fn actual_proposal_stages(input: &[Proposal], capacity: usize) -> (usize, usize, usize) {
+    let converted = input
+        .iter()
+        .enumerate()
+        .map(|(offset, proposal)| LogEntry {
+            index: offset as u64 + 2,
+            term: 1,
+            payload: EntryPayload::Command {
+                operation: proposal.operation,
+                bytes: proposal.bytes.as_slice().into(),
+            },
+        })
+        .collect::<Vec<_>>();
+    let shared = converted
+        .iter()
+        .map(LogEntry::retained_payload_bytes)
+        .sum::<usize>();
+    let raw = input
+        .iter()
+        .map(|proposal| proposal.bytes.capacity())
+        .sum::<usize>();
+    let conversion = size_of::<Vec<Proposal>>()
+        + capacity * size_of::<Proposal>()
+        + converted.capacity() * size_of::<LogEntry>()
+        + raw
+        + shared;
+    let captured = EntryBatch::from(converted).allocation_bytes().unwrap();
+    assert_eq!(
+        Raft::proposal_batch_staging_bytes(input.len(), capacity, raw, shared),
+        Some(conversion.max(captured))
+    );
+    (conversion.max(captured), raw, shared)
+}
+
+#[test]
+fn staged_peak_boundaries_preserve_raw_errors_padding_and_spare_capacity() {
+    for length in 0..=9 {
+        for spare in [0, 4] {
+            for below in [false, true] {
+                let input = shaped_proposals(length, spare);
+                let (peak, _, _) = actual_proposal_stages(&input, input.capacity());
+                let mut core = leader();
+                core.limits.max_batch_bytes = peak - usize::from(below);
+                core.limits.max_command_bytes = length.max(1);
+                core.limits.validate().unwrap();
+                let raw_result = core.validate_proposal_batch(&input, input.capacity());
+                let before = core.state().clone();
+                let result = core.propose_batch(input);
+                if below {
+                    let error = raw_result.err().unwrap_or_else(|| {
+                        StorageError::Rejected("proposal shared conversion peak budget").into()
+                    });
+                    assert_eq!(result, Err(error));
+                    assert!(core.pending.is_none());
+                    assert_eq!(core.state(), &before);
+                } else {
+                    assert!(raw_result.is_ok());
+                    let effects = result.unwrap();
+                    let [Effect::Persist(update)] = effects.as_slice() else {
+                        panic!("one exact persistence transition required")
+                    };
+                    let entries = &update.suffix.as_ref().unwrap().entries;
+                    assert_eq!(entries.len(), 4);
+                    assert_eq!(entries[3].index, 5);
+                    assert!(core.pending.is_some());
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn staging_overflows_are_checked_and_legacy_singletons_acquire_no_batch_ceiling() {
+    assert_eq!(
+        Raft::proposal_batch_staging_bytes(usize::MAX, 1, 0, 0),
+        None
+    );
+    assert_eq!(
+        Raft::proposal_batch_staging_bytes(1, usize::MAX, 0, 0),
+        None
+    );
+    assert_eq!(
+        Raft::proposal_batch_staging_bytes(1, 1, usize::MAX, 0),
+        None
+    );
+    assert_eq!(
+        Raft::proposal_batch_staging_bytes(1, 1, 0, usize::MAX),
+        None
+    );
+    let mut core = leader();
+    core.limits.max_batch_bytes = 256;
+    core.limits.max_command_bytes = 256;
+    core.limits.validate().unwrap();
+    let effects = core
+        .step(Event::Propose {
+            operation: OperationId::new(u128::MAX).unwrap(),
+            bytes: vec![7; 256],
+        })
+        .unwrap();
+    assert!(matches!(effects.as_slice(), [Effect::Persist(_)]));
+    assert!(core.pending.is_some());
 }

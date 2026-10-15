@@ -164,3 +164,26 @@ state_to_pin begins after the entire protected verification call and cannot be
 compared directly to426's old exact-call scope. Ordinary asserted-release
 assertions/overflow checks remain enabled; its fast path omits the debug-profile
 reference scan. No observer interval is CPU time or an additive phase total.
+
+
+Slice466 changes production suffix/canonical entry ownership to immutable batches
+and chunk descriptors. The actor borrows the completion Cow as one contiguous
+application slice, retaining every original channel and the same following FIFO
+effects. A single-chunk commit borrows; a commit crossing chunks coalesces one
+whole interval inside the existing persistence-helper boundary. No observer
+phase, envelope, maintenance schedule, payload, outcome, runtime or completion/
+timer boundary changes. RPC vectors still materialize selected entries. Physical
+retained charges include complete pinned backing and descriptor capacity; raw
+performance/profile evidence must establish whether copies were removed rather
+than moved into coalescing. This schema is not a measured improvement claim.
+
+The existing TRACE-only recorder also reports checked per-owner retained entry
+allocation observations after successful Core persistence/maintenance and
+volatile-store application. Last and maximum observed charges include full
+backing, spare/hidden entries, payloads and descriptor capacity. They are named
+point observations, not a continuous peak or RSS, and exclude pending outputs,
+coalescing, app/snapshot/queue memory and other Core metadata. Owners charge
+shared backing in full; do not sum these counters as physical RSS. OFF neither
+inspects history nor updates the cells; errors poison only the final diagnostic
+report after preserving provider outcomes. Existing29 phases/four scopes/15
+provider methods remain unchanged. See slice466/OBSERVATION_SCHEMA.md.

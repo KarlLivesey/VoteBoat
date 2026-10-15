@@ -144,7 +144,7 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
                     commit_index: 0,
                     suffix: Some(Suffix {
                         from: entry.index,
-                        entries: vec![entry.clone()],
+                        entries: vec![entry.clone()].into(),
                     }),
                     snapshot: None,
                     snapshot_membership: None,
@@ -197,13 +197,13 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
             let LogMutation::Update(update) = mutations.remove(0) else {
                 return Err(ApplicationError::InvalidCheckpoint);
             };
-            let Some(mut suffix) = update.suffix else {
+            let Some(suffix) = update.suffix else {
                 return Err(ApplicationError::InvalidCheckpoint);
             };
             if update.group != self.mapping.child || suffix.entries.len() != 1 {
                 return Err(ApplicationError::InvalidCheckpoint);
             }
-            let entry = suffix.entries.remove(0);
+            let entry = suffix.entries.into_vec().remove(0);
             if !matches!(entry.payload, EntryPayload::Configuration(_))
                 || entries.insert(entry.index, entry).is_some()
             {

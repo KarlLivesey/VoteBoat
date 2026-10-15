@@ -409,7 +409,7 @@ fn every_torn_created_source_fence_frame_recovers_serving_or_fenced_exact_export
         4,
         Some(Suffix {
             from: 4,
-            entries: vec![entry(4, 10, freeze.clone())],
+            entries: vec![entry(4, 10, freeze.clone())].into(),
         }),
     );
     let frame = NativeLogCodec
@@ -438,7 +438,7 @@ fn every_torn_created_source_fence_frame_recovers_serving_or_fenced_exact_export
         )
         .unwrap();
         let mut app = source(&p, 65536);
-        app.apply_batch(core.replay_committed()).unwrap();
+        app.apply_batch(&core.replay_committed()).unwrap();
         assert_eq!(app.status().ready_index, Some(1));
         assert_eq!(app.status().activation_index, Some(2));
         match core.state().commit_index {
@@ -621,7 +621,8 @@ fn seed_created_fence_log(
                     entry(1, 3, init.to_vec()),
                     entry(2, 4, activate.to_vec()),
                     entry(3, 20, write.to_vec()),
-                ],
+                ]
+                .into(),
             }),
         )],
     );
@@ -645,7 +646,7 @@ fn retry_created_fence(
             index,
             Some(Suffix {
                 from: index,
-                entries: vec![entry(index, 10, freeze.to_vec())],
+                entries: vec![entry(index, 10, freeze.to_vec())].into(),
             }),
         )],
     );
@@ -657,7 +658,7 @@ fn retry_created_fence(
     )
     .unwrap();
     let mut retried = source(p, 65536);
-    retried.apply_batch(core.replay_committed()).unwrap();
+    retried.apply_batch(&core.replay_committed()).unwrap();
     let fence = retried.owner().fence().unwrap();
     assert_eq!(fence.index, 4);
     let image = retried.owner().export_target(group(101), 65536).unwrap();

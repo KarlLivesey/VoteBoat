@@ -62,7 +62,7 @@ impl LogMetadata {
 #[derive(Clone, Copy)]
 pub(crate) struct LogView<'a> {
     base: &'a GroupLog,
-    tail: &'a [LogEntry],
+    tail: Option<&'a EntryHistory>,
     metadata: LogMetadata,
     removed: usize,
 }
@@ -70,7 +70,7 @@ impl<'a> LogView<'a> {
     pub(crate) fn new(base: &'a GroupLog) -> Self {
         Self {
             base,
-            tail: &[],
+            tail: None,
             metadata: LogMetadata::from_log(base),
             removed: 0,
         }
@@ -78,19 +78,23 @@ impl<'a> LogView<'a> {
     /// Prefix/tail were admitted by this owner; metadata describes their exact
     /// accepted version. This is not an unchecked public storage admission API.
     #[cfg(test)]
-    pub(crate) fn overlay(base: &'a GroupLog, tail: &'a [LogEntry], metadata: LogMetadata) -> Self {
+    pub(crate) fn overlay(
+        base: &'a GroupLog,
+        tail: &'a EntryHistory,
+        metadata: LogMetadata,
+    ) -> Self {
         Self::trimmed_overlay(base, tail, metadata, 0)
     }
     #[cfg(any(feature = "native", test))]
     pub(crate) fn trimmed_overlay(
         base: &'a GroupLog,
-        tail: &'a [LogEntry],
+        tail: &'a EntryHistory,
         metadata: LogMetadata,
         removed: usize,
     ) -> Self {
         Self {
             base,
-            tail,
+            tail: Some(tail),
             metadata,
             removed,
         }
@@ -101,6 +105,34 @@ impl<'a> LogView<'a> {
     pub(crate) fn bootstrap(&self) -> &'a Bootstrap {
         &self.base.bootstrap
     }
+    /// Project the physical owner produced by materializing this view, trimming
+    /// its prefix and optionally appending a batch. Hidden boundary entries and
+    /// descriptor capacity remain charged; no entries or headers are copied.
+    pub(crate) fn projected_retained_bytes(
+        &self,
+        removed: usize,
+        append: Option<&Suffix>,
+    ) -> Option<usize> {
+        if removed > self.metadata.entries_len {
+            return None;
+        }
+        let removed = self.removed.checked_add(removed)?;
+        let base_removed = removed.min(self.base.entries.len());
+        let tail_removed = removed.saturating_sub(self.base.entries.len());
+        self.base
+            .entries
+            .projected_view_allocation_bytes(
+                base_removed,
+                self.tail.map(|tail| (tail, tail_removed)),
+                append.map(|suffix| &suffix.entries),
+            )?
+            .checked_add(
+                self.base
+                    .snapshot_membership
+                    .as_ref()
+                    .map_or(0, |base| base.retained_bytes()),
+            )
+    }
     pub(crate) fn term_at(&self, index: u64) -> Option<u64> {
         if index == self.metadata.base_index {
             return Some(self.metadata.base_term);
@@ -109,21 +141,20 @@ impl<'a> LogView<'a> {
             return None;
         }
         if index > self.base.last_index() {
-            return self
-                .tail
-                .get(usize::try_from(index.checked_sub(self.tail.first()?.index)?).ok()?)
+            let tail = self.tail?;
+            return tail
+                .get(usize::try_from(index.checked_sub(tail.first()?.index)?).ok()?)
                 .map(|entry| entry.term);
         }
         self.base.term_at(index)
     }
     pub(crate) fn materialize(&self) -> GroupLog {
         let mut current = self.base.clone();
-        current.entries.drain(..self.removed);
-        current.entries.extend(self.tail.iter().cloned());
+        current.entries.discard_prefix(self.removed);
+        if let Some(tail) = self.tail {
+            current.entries.append_history(tail.clone());
+        }
         self.metadata.install_header(&mut current);
         current
-    }
-    pub(crate) fn entries(&self) -> impl Iterator<Item = &'a LogEntry> + use<'a> {
-        self.base.entries[self.removed..].iter().chain(self.tail)
     }
 }

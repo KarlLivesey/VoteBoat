@@ -49,10 +49,12 @@ fn persist_effect_captures_raw_proposal_once_and_pending_shares_exact_immutable_
     assert_eq!(core.validate_persist_effect(&original), Ok(()));
     for operation in [false, true] {
         let mut wrong = original.clone();
+        let suffix = wrong.suffix.as_mut().unwrap();
+        let mut entries = suffix.entries.to_vec();
         let EntryPayload::Command {
             operation: id,
             bytes,
-        } = &mut wrong.suffix.as_mut().unwrap().entries[0].payload
+        } = &mut entries[0].payload
         else {
             unreachable!()
         };
@@ -63,6 +65,7 @@ fn persist_effect_captures_raw_proposal_once_and_pending_shares_exact_immutable_
             raw[0] ^= 1;
             *bytes = raw.into();
         }
+        suffix.entries = entries.into();
         assert_eq!(
             core.validate_persist_effect(&wrong),
             Err(RaftError::WrongCompletion)

@@ -1,0 +1,14 @@
+{
+  "src/raft/completion_tests.rs": {
+    "sha256": "dc1e9193b4938958a2e4acdcb53cea2f826b02c3bfabed4635e7b8942b7cc34e",
+    "mode": "0o644"
+  },
+  "src/native/log_store/accepted/tests/incoming.rs": {
+    "sha256": "5bebb61f5c1ef7db99037f020caf96652be63076a070f4ae1981bc19e5d82230",
+    "mode": "0o644"
+  },
+  "src/native/log_store/accepted/tests/compact.rs": {
+    "sha256": "6aeeb92331c674ac007ba90a05cd4d7f477e0681846ed2d197acdf68b07af1f6",
+    "mode": "0o644"
+  }
+}

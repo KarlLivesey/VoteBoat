@@ -1,0 +1,78 @@
+{
+  "scope": "Assigned transition/owned/comparison tests only; no new helper modules",
+  "changed_files": [
+    {
+      "path": "src/log/comparison/tests.rs",
+      "before_sha256": "3c758e328d9b75325e3a53edf2a1f2f107ead38eaac7da02384934d262d5439a",
+      "after_sha256": "77b1803233470ff72a1281455bd417dbabccb0da8e7751c4cd06bd6cced9b868",
+      "mode": "0o644"
+    },
+    {
+      "path": "src/log/owned/tests/checkpoint.rs",
+      "before_sha256": "9cfdbbb5ba4ceea4d4c09225ee63a57a7b16225dd3af54bdc14ca0633d918f14",
+      "after_sha256": "7d744d1b10ce16ceeff0402e69770e49b4f3ab0e06d550ca1d1a591864359ef3",
+      "mode": "0o644"
+    },
+    {
+      "path": "src/log/owned/tests/incoming.rs",
+      "before_sha256": "0fef8f034d553b8bf1e3c3a981673cdefb600c9de161255c5237f53752207b99",
+      "after_sha256": "9e6e9e009ae1bc56512a0b2d67d693e6be8e8117bf21fb4cb65c348addd03cff",
+      "mode": "0o644"
+    },
+    {
+      "path": "src/log/transition/tests.rs",
+      "before_sha256": "a3cfd080de9eccb0aa073c1616801b6fd56b95d9c448fb2d84a02e7057e4e00d",
+      "after_sha256": "f3809fd42dac0243fc0feae6e56131919bd30ffa63552992be55e1afda39c4cd",
+      "mode": "0o644"
+    },
+    {
+      "path": "src/log/transition/tests/compact.rs",
+      "before_sha256": "5f1437070d2fa1d72a6ac9db07b745a1be30dc1e73ca55986d3ea897c0b31556",
+      "after_sha256": "ce895b5c564af813cdd986e29f0aadc52698f5bcfbcdbb7a70c4a92f7a6eb552",
+      "mode": "0o644"
+    },
+    {
+      "path": "src/log/transition/tests/compact/smaller.rs",
+      "before_sha256": "016b893587aa0aa68ff6ff03f5f577a3041eec8dcfbf22d656825012fc32d678",
+      "after_sha256": "39f5d481b11c2d57a8109c714edfc67e96321b40fc94d860589f1256fbbaafe8",
+      "mode": "0o644"
+    },
+    {
+      "path": "src/log/transition/tests/configured.rs",
+      "before_sha256": "79054cc575543f5acad3b0995b7edb4ee37df72db69b60949bbed7ae96041be0",
+      "after_sha256": "620621431d71978399a867026f8392be0090925f130f132de8c061125d754edf",
+      "mode": "0o644"
+    },
+    {
+      "path": "src/log/transition/tests/incoming.rs",
+      "before_sha256": "e2d012c44a8b31732b96ddd6418877049b430e66058ad4ca2ae3c1fcbcde00c4",
+      "after_sha256": "3ac5a8f7963e77a191746cfa94930feabc03ab090c32e551f97dd5cfe6d7d4f7",
+      "mode": "0o644"
+    },
+    {
+      "path": "src/log/transition/tests/oracle.rs",
+      "before_sha256": "6bb26f7b6a3582db34ecdb46b3c94eccdfad216339dd4ad1ce477fb3224ee937",
+      "after_sha256": "f6f635083e11e0caa1a9a11ab2a33d6de2794e5b188ca08871fb40e611b211f2",
+      "mode": "0o644"
+    },
+    {
+      "path": "src/log/transition/tests/overlay.rs",
+      "before_sha256": "49add8e61c74d96108f792d6a4b9a1c19909e19a7a8d9ddb702fb5b12494083e",
+      "after_sha256": "08cfc0fe057669ba59d7d4174bd6c691ef2f30f49ea700be1cd614a6a8fd0563",
+      "mode": "0o644"
+    }
+  ],
+  "actual_format_exit": 0,
+  "checks_run": false,
+  "preserved_assertions": [
+    "All independent logical stage_update/apply_batch state and exact error comparisons retained",
+    "Full operation IDs, payload mutations, headers, altered-effect and checkpoint cache work counts retained",
+    "Mutation tests explicitly replace independent EntryBatch or EntryHistory content; no shared mutable escape",
+    "Commit-only pointer checks now compare every logical LogEntry address, preserving every backing rather than one contiguous Vec pointer"
+  ],
+  "semantic_assertion_updates": [
+    "Physical summary checks now compare installed owner against LogSummary::from_validated(installed), never equal logical state with potentially different chunks",
+    "Empty compaction keeps descriptor capacity: retained_bytes must equal actual history allocation_bytes, not assume zero",
+    "Overlay tails explicitly own EntryHistory; batch constructor .into preserves raw Vec capacity; raw spare-capacity fixture materializes mutable Vec before capture"
+  ]
+}

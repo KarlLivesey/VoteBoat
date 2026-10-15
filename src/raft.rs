@@ -798,8 +798,11 @@ impl Raft {
             || self.checkpoint_reconcile.is_some()
     }
     /// Host replays these through its application checkpoint/dedup contract.
-    pub fn replay_committed(&self) -> &[LogEntry] {
-        &self.durable.entries[..(self.durable.commit_index - self.durable.base_index()) as usize]
+    pub fn replay_committed(&self) -> std::borrow::Cow<'_, [LogEntry]> {
+        self.durable
+            .entries
+            .view(..(self.durable.commit_index - self.durable.base_index()) as usize)
+            .to_cow()
     }
     pub fn storage_failed(&mut self) {
         self.checkpoint_lineage = CheckpointLineage::new();
@@ -1430,7 +1433,7 @@ impl Raft {
             self.durable.commit_index,
             Some(Suffix {
                 from: next,
-                entries: vec![entry],
+                entries: vec![entry].into(),
             }),
             After::LeaderAppend,
             None,
@@ -1477,8 +1480,7 @@ impl Raft {
         let remaining = self
             .durable
             .entries
-            .get((next - self.durable.base_index() - 1) as usize..)
-            .unwrap_or(&[]);
+            .view((next - self.durable.base_index() - 1) as usize..);
         let mut count = 0usize;
         let mut bytes = 0usize;
         // One bounded RPC can carry several entries; outer wire limits are
@@ -1498,7 +1500,8 @@ impl Raft {
         if count == 0 && next <= self.durable.last_index() {
             return Err(StorageError::Rejected("entry exceeds replication batch budget").into());
         }
-        let entries = remaining[..count].to_vec();
+        let mut entries = Vec::with_capacity(count);
+        entries.extend(remaining.iter().take(count).cloned());
         let end = entries.last().map_or(next - 1, |e| e.index);
         let context = self.context()?;
         self.requests.insert(

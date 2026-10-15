@@ -787,7 +787,8 @@ fn constructor_requires_connections_for_rollback_reachable_recovered_learners() 
                     change: ConfigurationChange::Learners(config(3, Default::default())),
                 })),
             },
-        ];
+        ]
+        .into();
         state.hard_state.term = 1;
         state.commit_index = 1;
         let core = Raft::recover_member(node(1), id.store, state, LogLimits::default()).unwrap();

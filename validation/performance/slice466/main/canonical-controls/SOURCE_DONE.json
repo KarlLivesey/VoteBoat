@@ -1,0 +1,41 @@
+{
+  "source_after": {
+    "src/raft/completion_tests.rs": {
+      "sha256": "4e59ac33ac3771808d349dbe380558397a67cfabd23c18c27fff52a3f47f0cda",
+      "mode": "0o644"
+    },
+    "src/native/log_store/accepted/tests/incoming.rs": {
+      "sha256": "7b8f0ccf463ced9d0a122261b3af911831e1f8412069978d0e806249f412ab1d",
+      "mode": "0o644"
+    },
+    "src/native/log_store/accepted/tests/compact.rs": {
+      "sha256": "06ec98ef6e641b3339b796315a63752495f8c784db7f9dbeb15482d39a7b1f44",
+      "mode": "0o644"
+    },
+    "src/log/entry_batch.rs": {
+      "sha256": "20cd9d54010dd0f0fdc76abbcb15947cf6366e630382abedfd1b470035acc69f",
+      "mode": "0o644"
+    },
+    "src/log/entry_batch/tests.rs": {
+      "sha256": "acf50c4aeff7ebc070d3dffa85945820b5d34b5f519e1fe6b9799157ce8f797d",
+      "mode": "0o644"
+    },
+    "src/log/entry_history/tests.rs": {
+      "sha256": "c52f04e3545e08e07346fe4dfad62e4fe5b34adb74e99359829892837903eac4",
+      "mode": "0o644"
+    }
+  },
+  "format_actual_exit": 0,
+  "builds_or_tests_run": false,
+  "new_controls": [
+    "exact_entry_backing_survives_pending_admission_delayed_durable_and_canonical_install",
+    "fragmented_canonical_commit_coalesces_once_without_splitting_application_batch",
+    "entry_backing_reaches_accepted_and_durable_history_through_other_group_subset_barrier",
+    "repeated_accepted_batches_and_partial_compaction_keep_full_boundary_backing_charged"
+  ],
+  "scope": "Core uses existing modeled provider tokens; native accepted tests use existing in-memory JournalIo and actual NativeLogStore transitions, not filesystem crash-durability claims. Full LogEntry pointers, not just CommandBytes pointers, remain checked while independent handles pin backing.",
+  "other_changes": [
+    "Bind two consumed Vec values before pointer assertions to fix dangling_pointers_from_temporaries diagnostics without allows.",
+    "Reviewer-requested allocation_bytes_for_shape checked pure helper for actual padded Arc<Backing> layout and capacity/payload preflight; actual allocation delegates. Independent layout/overflow assertions added."
+  ]
+}

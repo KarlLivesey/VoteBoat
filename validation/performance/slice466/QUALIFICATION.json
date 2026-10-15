@@ -1,0 +1,26 @@
+{
+  "containing_commit": "Candidate source belongs to this containing commit; no self-referential candidate SHA is embedded. Published commit is recorded separately after actual push.",
+  "committed_base": "9798ed44091d932faebb51e62c69afed513a87a9",
+  "final_inputs": 1446,
+  "linux_qualification": {
+    "library_all": 437,
+    "library_core": 355,
+    "integration_all_15_targets": 385,
+    "integration_core_11_targets": 352,
+    "final_effect_owner_all": 203,
+    "static_service_tcp_quic": 2,
+    "member_service_tcp_quic": 2,
+    "matched": 71,
+    "metadata_actual_exit": 0,
+    "full_enabled_hook_actual_exit": 0
+  },
+  "count_scope": "Counts remain separate overlapping configurations/attempts, not one aggregate or a claim every repository test ran. Refer to original logs and FINAL_SCOPE_REUSE.",
+  "archive": {
+    "manifest_sha256": "e85e3b36b3fc2f09bce7d933e70875a6a9f7979f34843a7fa5128a92b54433af",
+    "payloads": 600,
+    "review_sha256": "a5371a1170bf0e892cd49d7058989eab1cc89c48303d9be1ebbc02217a04f52b"
+  },
+  "performance_qualification": "Unproven; fresh release artifacts, Mac qualification, repeated paired profiles/rates/tails/backing-debt and full sustained seven-cell/durable/headroom/fairness/placement/P8 scope remain.",
+  "configuration": "Existing Cargo/locks, formatter, Clippy thresholds and enabled hook unchanged.",
+  "provenance": "Linux stable1.98.1/LLVM22.1.8. Recorded system protoc36.1 is a PATH probe, not fresh-dependency provenance. Policy2/2/516 unchanged; no browser/Pi/sudo/sysctl work."
+}

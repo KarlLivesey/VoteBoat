@@ -1,0 +1,158 @@
+{
+  "scope": "Only src/raft test fixtures; no builds run",
+  "before": {
+    "src/raft/progress_broadcast/tests.rs": {
+      "sha256": "e84f7c6245cce16d7ee682e133c709373288faa581323a5edb530f7f5193e5b0",
+      "mode": "0o644"
+    },
+    "src/raft/proposals/tests/batch_limits/aggregate/flow.rs": {
+      "sha256": "79dac9b319932e294bdd9e97b185243200099a1434bbceec3d40927168cf54a4",
+      "mode": "0o644"
+    },
+    "src/raft/membership_tests.rs": {
+      "sha256": "e4a39c2737a0bb1c902da29beee8c04411e5d7ac0a4961e6f0b61063fd2b2afd",
+      "mode": "0o644"
+    },
+    "src/raft/proposals/tests.rs": {
+      "sha256": "4a58b54f1ab4c77bd864f39ca697995a20406097b8309a6f02837fa50c58e4df",
+      "mode": "0o644"
+    },
+    "src/raft/append_prefix_tests.rs": {
+      "sha256": "132c4d91ce20d198f4c3b080705e2ac998888fb4cd37f87be1cb19eeb81a2325",
+      "mode": "0o644"
+    },
+    "src/raft/completion_tests.rs": {
+      "sha256": "9bd82f55bf83b6401487f6a9a2776d34cdd2d119c808bb05f301424cf51d42e8",
+      "mode": "0o644"
+    },
+    "src/raft/owned_append_tests.rs": {
+      "sha256": "c16084e23295a0be3d6b6c3aee8e11d682c2ab01213f26ef0d73b3a3009ebd45",
+      "mode": "0o644"
+    },
+    "src/raft/source_tests.rs": {
+      "sha256": "1a0c3caa8b465bb9c44812083bdecffbaddc9cf1769bef0e3624b1aca90ba20e",
+      "mode": "0o644"
+    },
+    "src/raft/configured_delta_tests.rs": {
+      "sha256": "fde52eda50ee32286f7fc38685b7e71939899a2e4f8cdcdc7e698e4baf88be1c",
+      "mode": "0o644"
+    },
+    "src/raft/proposals/tests/incoming.rs": {
+      "sha256": "99edd84fa364c7b98839d53625030f88751e6c2fdeef16568b0c6de39c0026d8",
+      "mode": "0o644"
+    }
+  },
+  "compiler_suggestion_edits": {
+    "src/raft/progress_broadcast/tests.rs": 1,
+    "src/raft/proposals/tests/batch_limits/aggregate/flow.rs": 1,
+    "src/raft/membership_tests.rs": 1
+  },
+  "semantic_assertion_updates": [
+    {
+      "path": "src/raft/owned_append_tests.rs",
+      "change": "Tight plain pending batch now asserts same immutable entry pointer. Wrong full128 operation or payload is built in an independent Vec and recaptured; WrongCompletion and exact original/pending equality remain asserted. Configuration/spare ingress fallback pointer checks unchanged."
+    },
+    {
+      "path": "src/raft/append_prefix_tests.rs",
+      "change": "Canonical fixture replacement explicit via EntryHistory.replace; ordinary outbound RPC stays owned Vec with independent entry pointer, configuration box copy and mutation isolation checks preserved."
+    },
+    {
+      "path": "src/raft/completion_tests.rs",
+      "change": "Borrowed contiguous completion pointer remains canonical; owned committed Vec remains independent. Altered update recaptures independent Vec; wrong tickets, barrier failure/fencing and late error checks unchanged."
+    },
+    {
+      "path": "src/raft/membership_tests.rs",
+      "change": "Former fixture pop is last().clone plus truncate; logical range comparison uses view().to_vec; all repair/index/term/commit/assertions preserved."
+    },
+    {
+      "path": "src/raft/proposals/tests.rs",
+      "change": "Exhaustion fixture replaces last entry explicitly with same u64::MAX-1 index."
+    }
+  ],
+  "format": {
+    "command": [
+      "rustfmt",
+      "+stable",
+      "--edition",
+      "2021",
+      "--config",
+      "skip_children=true",
+      "src/raft/append_prefix_tests.rs",
+      "src/raft/completion_tests.rs",
+      "src/raft/configured_delta_tests.rs",
+      "src/raft/membership_tests.rs",
+      "src/raft/owned_append_tests.rs",
+      "src/raft/progress_broadcast/tests.rs",
+      "src/raft/proposals/tests.rs",
+      "src/raft/proposals/tests/batch_limits/aggregate/flow.rs",
+      "src/raft/proposals/tests/incoming.rs",
+      "src/raft/source_tests.rs"
+    ],
+    "actual_exit": 0
+  },
+  "after": {
+    "src/raft/append_prefix_tests.rs": {
+      "sha256": "480f102db090221f124191e7c4e55a9f8d1bd671bba8d4995f63ddfc8330f8b1",
+      "mode": "0o644"
+    },
+    "src/raft/completion_tests.rs": {
+      "sha256": "dc1e9193b4938958a2e4acdcb53cea2f826b02c3bfabed4635e7b8942b7cc34e",
+      "mode": "0o644"
+    },
+    "src/raft/configured_delta_tests.rs": {
+      "sha256": "608b541f6ed274e498728cde7653027b401738c30d99b245aaf1bf5487d6c5f8",
+      "mode": "0o644"
+    },
+    "src/raft/membership_tests.rs": {
+      "sha256": "340be356829e46632b494f355101d23c50a7b281932c6c64b37850aae314e1da",
+      "mode": "0o644"
+    },
+    "src/raft/owned_append_tests.rs": {
+      "sha256": "8a5079939149e89d5904d7e5ac10024eb9f328c51a6427a09210150904b2cb27",
+      "mode": "0o644"
+    },
+    "src/raft/progress_broadcast/tests.rs": {
+      "sha256": "f24062f11ba7f966742d17833c703e48cf1fbb6514614d435d0dd22437a1809d",
+      "mode": "0o644"
+    },
+    "src/raft/proposals/tests.rs": {
+      "sha256": "68f2890a78eafd21555d22ec9effaaeb2723ed8f940475f56b6734a08815c3c7",
+      "mode": "0o644"
+    },
+    "src/raft/proposals/tests/batch_limits/aggregate/flow.rs": {
+      "sha256": "94fb78797202e8a1529635609db5b0b14dd0be69d7798f521e465a97d0ffa151",
+      "mode": "0o644"
+    },
+    "src/raft/proposals/tests/incoming.rs": {
+      "sha256": "7716d743aa12e516d7c6a33ce78601f469a6f4175a18533622d0531fb1d39108",
+      "mode": "0o644"
+    },
+    "src/raft/source_tests.rs": {
+      "sha256": "c48b3aa83d89ac2e9dbca943dbf3568ed4adf95f2186e849c480f179cc53f440",
+      "mode": "0o644"
+    }
+  },
+  "changed_files": [
+    "src/raft/append_prefix_tests.rs",
+    "src/raft/completion_tests.rs",
+    "src/raft/configured_delta_tests.rs",
+    "src/raft/membership_tests.rs",
+    "src/raft/owned_append_tests.rs",
+    "src/raft/progress_broadcast/tests.rs",
+    "src/raft/proposals/tests.rs",
+    "src/raft/proposals/tests/batch_limits/aggregate/flow.rs",
+    "src/raft/proposals/tests/incoming.rs",
+    "src/raft/source_tests.rs"
+  ],
+  "diagnostic_input": {
+    "path": "target/p9/slice466/diagnostic3/errors.json",
+    "sha256": "a0e9d438a0dfff7d3de39b18f98f9703d18ff484d2dec194f59b3433d2bb52e5"
+  },
+  "checks": "No cargo build/check/test or workload run. Only owned-file rustfmt executed.",
+  "diagnostic4_followup": {
+    "path": "target/p9/slice466/diagnostic4/cargo.jsonl",
+    "sha256": "b1817880a8c69c0564ccf9b33f2ce16cc6f946ea7599b44aeff54bc35c368800",
+    "owned_scope_errors": 0,
+    "additional_raft_fixture_changes": []
+  }
+}

@@ -117,22 +117,22 @@ fn delayed_completion(receiver: &mut Raft, effects: &[Effect]) -> Vec<Effect> {
         .unwrap()
 }
 
-fn check_independent_pending(receiver: &Raft, effects: &[Effect]) {
+fn check_pending_isolation(receiver: &Raft, effects: &[Effect]) {
     let original = update(effects);
     let pending = receiver.pending.as_ref().unwrap().next.update();
     assert_eq!(original, pending);
     let raw = original.suffix.as_ref().unwrap();
     let owned = pending.suffix.as_ref().unwrap();
-    assert_ne!(raw.entries.as_ptr(), owned.entries.as_ptr());
+    assert_eq!(raw.entries.as_ptr(), owned.entries.as_ptr());
     assert_eq!(
         bytes(&raw.entries[1]).as_ptr(),
         bytes(&owned.entries[1]).as_ptr()
     );
     for change_id in [false, true] {
         let mut wrong = original.clone();
-        let EntryPayload::Command { operation, bytes } =
-            &mut wrong.suffix.as_mut().unwrap().entries[1].payload
-        else {
+        let suffix = wrong.suffix.as_mut().unwrap();
+        let mut entries = suffix.entries.to_vec();
+        let EntryPayload::Command { operation, bytes } = &mut entries[1].payload else {
             unreachable!()
         };
         if change_id {
@@ -142,11 +142,13 @@ fn check_independent_pending(receiver: &Raft, effects: &[Effect]) {
             replacement[0] ^= 1;
             *bytes = replacement.into();
         }
+        suffix.entries = entries.into();
         assert_eq!(
             receiver.validate_persist_effect(&wrong),
             Err(RaftError::WrongCompletion)
         );
         assert_eq!(receiver.validate_persist_effect(original), Ok(()));
+        assert_eq!(original, pending);
     }
 }
 
@@ -174,8 +176,8 @@ fn tight_owned_append_matches_forced_clone_with_independent_delayed_completion()
     );
     assert_eq!(optimized.state(), &before);
     assert_eq!(cloned.state(), &before);
-    check_independent_pending(&optimized, &effects);
-    check_independent_pending(&cloned, &reference);
+    check_pending_isolation(&optimized, &effects);
+    check_pending_isolation(&cloned, &reference);
     let completed = delayed_completion(&mut optimized, &effects);
     let oracle = delayed_completion(&mut cloned, &reference);
     assert_eq!(completed, oracle);
@@ -321,7 +323,7 @@ fn uncommitted_rewrite_has_the_same_atomic_term_commit_and_reply_as_clone() {
             1,
             Some(Suffix {
                 from: 2,
-                entries: plain_entries(),
+                entries: plain_entries().into(),
             }),
             After::Reply,
             None,
@@ -403,6 +405,9 @@ fn failed_ownership_fences_without_install_and_restart_retries_original() {
         assert_eq!(recovered.admitted(stale), Err(RaftError::WrongCompletion));
         delayed_completion(&mut recovered, &effects);
         assert_eq!(recovered.state().commit_index, 5);
-        assert_eq!(recovered.state().entries[1..], plain_entries());
+        assert_eq!(
+            recovered.state().entries.view(1..).to_vec(),
+            plain_entries()
+        );
     }
 }

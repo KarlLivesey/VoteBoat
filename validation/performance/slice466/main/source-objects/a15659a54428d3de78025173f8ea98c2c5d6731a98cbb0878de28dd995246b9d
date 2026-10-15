@@ -1,0 +1,170 @@
+// SPDX-License-Identifier: RPL-1.5
+// Copyright (c) 2026 Karl Livesey
+// Unless explicitly acquired and licensed from Licensor under another license,
+// the contents of this file are subject to the Reciprocal Public License
+// ("RPL") Version 1.5, or subsequent versions as allowed by the RPL, and You may
+// not copy or use this file in either source code or executable form, except
+// in compliance with the terms and conditions of the RPL.
+//
+// All software distributed under the RPL is provided strictly on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND LICENSOR
+// HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY
+// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
+// ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
+// rights and limitations under the RPL.
+use super::*;
+use voteboat::{
+    membership::*,
+    quorum::{Limits, Policy, Tree},
+};
+fn configuration(id: u64, voters: &[u64], learners: &[u64]) -> Configuration {
+    Configuration::new(
+        ConfigurationId::new(id).unwrap(),
+        Policy::new(
+            Tree::Majority(voters.iter().map(|id| Tree::Voter(node(*id))).collect()),
+            Limits::default(),
+        )
+        .unwrap(),
+        voters
+            .iter()
+            .map(|id| (node(*id), identity(*id as u128)))
+            .collect(),
+        learners
+            .iter()
+            .map(|id| (node(*id), identity(*id as u128)))
+            .collect(),
+    )
+    .unwrap()
+}
+fn configure(store: &mut impl LogStore, expected: u64, change: ConfigurationChange) {
+    let s = store.state(group(1)).unwrap();
+    let index = s.last_index() + 1;
+    let record = ConfigurationRecord {
+        operation: if matches!(change, ConfigurationChange::Final { .. }) {
+            s.membership().unwrap().joint().unwrap().operation
+        } else {
+            OperationId::new(1000 + index as u128).unwrap()
+        },
+        expected: ConfigurationId::new(expected).unwrap(),
+        change,
+    };
+    append(
+        store,
+        vec![update(
+            &s,
+            1,
+            index,
+            Some(Suffix {
+                from: index,
+                entries: vec![LogEntry {
+                    index,
+                    term: 1,
+                    payload: EntryPayload::Configuration(Box::new(record)),
+                }].into(),
+            }),
+        )],
+    );
+}
+#[test]
+fn mirrored_membership_ballot_origin_and_snapshot_configuration_survive_reclaim_and_device_loss() {
+    let (io, mut store) = seeded();
+    configure(
+        &mut store,
+        1,
+        ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[4])),
+    );
+    configure(
+        &mut store,
+        2,
+        ConfigurationChange::Joint {
+            id: ConfigurationId::new(3).unwrap(),
+            next: configuration(4, &[1, 2, 4], &[]),
+        },
+    );
+    configure(
+        &mut store,
+        3,
+        ConfigurationChange::Final {
+            id: ConfigurationId::new(4).unwrap(),
+        },
+    );
+    let expected = install_snapshot(&mut store);
+    store.reclaim(store.limits().max_wal_bytes).unwrap();
+    drop(store);
+    io.crash();
+    assert_eq!(
+        recover(io.clone()).unwrap().state(group(1)).unwrap(),
+        expected
+    );
+    for lane in 0..2 {
+        let d = io.fork();
+        d.lose(lane);
+        let image = StripedJournal::inspect_control(
+            &mut d.clone(),
+            identity(1),
+            LogLimits::default(),
+            stripes(),
+        )
+        .unwrap();
+        let c = &image.groups[&group(1)];
+        assert_eq!(c.hard_state, expected.hard_state);
+        assert_eq!(c.ballot_origin, expected.ballot_origin);
+        assert_eq!(c.bootstrap, expected.bootstrap);
+        assert_eq!(c.membership, expected.membership().unwrap());
+        assert_eq!(c.snapshot, expected.snapshot);
+        assert_eq!(c.commit_index, 3);
+        assert!(recover(d).is_err());
+    }
+}
+fn install_snapshot(store: &mut impl LogStore) -> GroupLog {
+    let s = store.state(group(1)).unwrap();
+    append(
+        store,
+        vec![LogMutation::Update(LogUpdate {
+            group: group(1),
+            expected_revision: s.revision,
+            hard_state: HardState {
+                term: 2,
+                voted_for: Some(node(4)),
+            },
+            commit_index: 3,
+            suffix: None,
+            snapshot: None,
+            snapshot_membership: None,
+        })],
+    );
+    let s = store.state(group(1)).unwrap();
+    let reference = voteboat::snapshot::SnapshotRef {
+        store: identity(1),
+        group: group(1),
+        configuration: ConfigurationId::new(4).unwrap(),
+        generation: SnapshotGeneration::new(1).unwrap(),
+        index: 3,
+        term: 1,
+        application_schema: 1,
+        file_bytes: 100,
+        checksum: 39,
+    };
+    // The caller must supply its actual durable snapshot pin before raw storage.
+    append(
+        store,
+        vec![LogMutation::Update(LogUpdate {
+            group: group(1),
+            expected_revision: s.revision,
+            hard_state: s.hard_state,
+            commit_index: 3,
+            suffix: None,
+            snapshot: Some(reference),
+            snapshot_membership: s.checkpoint_membership(3).unwrap(),
+        })],
+    );
+    let expected = store.state(group(1)).unwrap();
+    assert_eq!(
+        expected.ballot_origin,
+        Some(BallotOrigin {
+            configuration: ConfigurationId::new(4).unwrap(),
+            candidate_store: identity(4)
+        })
+    );
+    expected
+}

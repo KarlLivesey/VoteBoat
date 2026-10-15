@@ -269,6 +269,13 @@ mod tests {
                 .unwrap()
                 .contains("not_cpu_or_critical_path"));
             assert!(value["nesting"].as_str().unwrap().contains("do_not_sum"));
+            for owner in ["core_entry_allocations", "store_entry_allocations"] {
+                assert!(value[owner]["observations"].as_u64().unwrap() > 0);
+                assert!(
+                    value[owner]["maximum_observed_bytes"].as_u64().unwrap()
+                        >= value[owner]["last_bytes"].as_u64().unwrap()
+                );
+            }
             let phases = value["phases"].as_array().unwrap();
             assert_eq!(phases.len(), 29);
             assert_eq!(

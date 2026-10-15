@@ -1,0 +1,432 @@
+[
+  {
+    "rendered": "error[E0308]: mismatched types\n   --> src/voteboat_engine/actor.rs:318:21\n    |\n313 |                 Self::apply_entries(\n    |                 ------------------- arguments to this function are incorrect\n...\n318 |                     entries,\n    |                     ^^^^^^^ expected `&[LogEntry]`, found `Cow<'_, [LogEntry]>`\n    |\n    = note: expected reference `&[voteboat::log::LogEntry]`\n                    found enum `Cow<'_, [voteboat::log::LogEntry]>`\nnote: associated function defined here\n   --> src/voteboat_engine/actor.rs:360:8\n    |\n360 |     fn apply_entries(\n    |        ^^^^^^^^^^^^^\n...\n365 |         entries: &[LogEntry],\n    |         --------------------\nhelp: consider borrowing here\n    |\n318 |                     &entries,\n    |                     +\n\n",
+    "$message_type": "diagnostic",
+    "children": [
+      {
+        "children": [],
+        "code": null,
+        "level": "note",
+        "message": "expected reference `&[voteboat::log::LogEntry]`\n        found enum `Cow<'_, [voteboat::log::LogEntry]>`",
+        "rendered": null,
+        "spans": []
+      },
+      {
+        "children": [],
+        "code": null,
+        "level": "note",
+        "message": "associated function defined here",
+        "rendered": null,
+        "spans": [
+          {
+            "byte_end": 13812,
+            "byte_start": 13792,
+            "column_end": 29,
+            "column_start": 9,
+            "expansion": null,
+            "file_name": "src/voteboat_engine/actor.rs",
+            "is_primary": false,
+            "label": "",
+            "line_end": 365,
+            "line_start": 365,
+            "suggested_replacement": null,
+            "suggestion_applicability": null,
+            "text": [
+              {
+                "highlight_end": 29,
+                "highlight_start": 9,
+                "text": "        entries: &[LogEntry],"
+              }
+            ]
+          },
+          {
+            "byte_end": 13645,
+            "byte_start": 13632,
+            "column_end": 21,
+            "column_start": 8,
+            "expansion": null,
+            "file_name": "src/voteboat_engine/actor.rs",
+            "is_primary": true,
+            "label": null,
+            "line_end": 360,
+            "line_start": 360,
+            "suggested_replacement": null,
+            "suggestion_applicability": null,
+            "text": [
+              {
+                "highlight_end": 21,
+                "highlight_start": 8,
+                "text": "    fn apply_entries("
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "children": [],
+        "code": null,
+        "level": "help",
+        "message": "consider borrowing here",
+        "rendered": null,
+        "spans": [
+          {
+            "byte_end": 12169,
+            "byte_start": 12169,
+            "column_end": 21,
+            "column_start": 21,
+            "expansion": null,
+            "file_name": "src/voteboat_engine/actor.rs",
+            "is_primary": true,
+            "label": null,
+            "line_end": 318,
+            "line_start": 318,
+            "suggested_replacement": "&",
+            "suggestion_applicability": "MachineApplicable",
+            "text": [
+              {
+                "highlight_end": 21,
+                "highlight_start": 21,
+                "text": "                    entries,"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "level": "error",
+    "message": "mismatched types",
+    "spans": [
+      {
+        "byte_end": 12176,
+        "byte_start": 12169,
+        "column_end": 28,
+        "column_start": 21,
+        "expansion": null,
+        "file_name": "src/voteboat_engine/actor.rs",
+        "is_primary": true,
+        "label": "expected `&[LogEntry]`, found `Cow<'_, [LogEntry]>`",
+        "line_end": 318,
+        "line_start": 318,
+        "suggested_replacement": null,
+        "suggestion_applicability": null,
+        "text": [
+          {
+            "highlight_end": 28,
+            "highlight_start": 21,
+            "text": "                    entries,"
+          }
+        ]
+      },
+      {
+        "byte_end": 11983,
+        "byte_start": 11964,
+        "column_end": 36,
+        "column_start": 17,
+        "expansion": null,
+        "file_name": "src/voteboat_engine/actor.rs",
+        "is_primary": false,
+        "label": "arguments to this function are incorrect",
+        "line_end": 313,
+        "line_start": 313,
+        "suggested_replacement": null,
+        "suggestion_applicability": null,
+        "text": [
+          {
+            "highlight_end": 36,
+            "highlight_start": 17,
+            "text": "                Self::apply_entries("
+          }
+        ]
+      }
+    ],
+    "code": {
+      "code": "E0308",
+      "explanation": "Expected type did not match the received type.\n\nErroneous code examples:\n\n```compile_fail,E0308\nfn plus_one(x: i32) -> i32 {\n    x + 1\n}\n\nplus_one(\"Not a number\");\n//       ^^^^^^^^^^^^^^ expected `i32`, found `&str`\n\nif \"Not a bool\" {\n// ^^^^^^^^^^^^ expected `bool`, found `&str`\n}\n\nlet x: f32 = \"Not a float\";\n//     ---   ^^^^^^^^^^^^^ expected `f32`, found `&str`\n//     |\n//     expected due to this\n```\n\nThis error occurs when an expression was used in a place where the compiler\nexpected an expression of a different type. It can occur in several cases, the\nmost common being when calling a function and passing an argument which has a\ndifferent type than the matching type in the function declaration.\n"
+    }
+  },
+  {
+    "rendered": "error[E0308]: mismatched types\n  --> src/store/tests.rs:43:26\n   |\n43 |                   entries: vec![LogEntry {\n   |  __________________________^\n44 | |                     index: 1,\n45 | |                     term: 1,\n46 | |                     payload: EntryPayload::Command {\n...  |\n49 | |                     },\n50 | |                 }],\n   | |__________________^ expected `EntryBatch`, found `Vec<LogEntry>`\n   |\n   = note: expected struct `EntryBatch`\n              found struct `Vec<voteboat::log::LogEntry>`\nhelp: call `Into::into` on this expression to convert `Vec<voteboat::log::LogEntry>` into `EntryBatch`\n   |\n50 |                 }].into(),\n   |                   +++++++\n\n",
+    "$message_type": "diagnostic",
+    "children": [
+      {
+        "children": [],
+        "code": null,
+        "level": "note",
+        "message": "expected struct `EntryBatch`\n   found struct `Vec<voteboat::log::LogEntry>`",
+        "rendered": null,
+        "spans": []
+      },
+      {
+        "children": [],
+        "code": null,
+        "level": "help",
+        "message": "call `Into::into` on this expression to convert `Vec<voteboat::log::LogEntry>` into `EntryBatch`",
+        "rendered": null,
+        "spans": [
+          {
+            "byte_end": 1885,
+            "byte_start": 1885,
+            "column_end": 19,
+            "column_start": 19,
+            "expansion": null,
+            "file_name": "src/store/tests.rs",
+            "is_primary": true,
+            "label": null,
+            "line_end": 50,
+            "line_start": 50,
+            "suggested_replacement": ".into()",
+            "suggestion_applicability": "MaybeIncorrect",
+            "text": [
+              {
+                "highlight_end": 19,
+                "highlight_start": 19,
+                "text": "                }],"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "level": "error",
+    "message": "mismatched types",
+    "spans": [
+      {
+        "byte_end": 2422,
+        "byte_start": 2269,
+        "column_end": 10,
+        "column_start": 9,
+        "expansion": {
+          "def_site_span": {
+            "byte_end": 1447,
+            "byte_start": 1431,
+            "column_end": 17,
+            "column_start": 1,
+            "expansion": null,
+            "file_name": "/rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/alloc/src/macros.rs",
+            "is_primary": false,
+            "label": null,
+            "line_end": 42,
+            "line_start": 42,
+            "suggested_replacement": null,
+            "suggestion_applicability": null,
+            "text": []
+          },
+          "macro_decl_name": "vec!",
+          "span": {
+            "byte_end": 1885,
+            "byte_start": 1604,
+            "column_end": 19,
+            "column_start": 26,
+            "expansion": null,
+            "file_name": "src/store/tests.rs",
+            "is_primary": false,
+            "label": null,
+            "line_end": 50,
+            "line_start": 43,
+            "suggested_replacement": null,
+            "suggestion_applicability": null,
+            "text": [
+              {
+                "highlight_end": 41,
+                "highlight_start": 26,
+                "text": "                entries: vec![LogEntry {"
+              },
+              {
+                "highlight_end": 30,
+                "highlight_start": 1,
+                "text": "                    index: 1,"
+              },
+              {
+                "highlight_end": 29,
+                "highlight_start": 1,
+                "text": "                    term: 1,"
+              },
+              {
+                "highlight_end": 53,
+                "highlight_start": 1,
+                "text": "                    payload: EntryPayload::Command {"
+              },
+              {
+                "highlight_end": 65,
+                "highlight_start": 1,
+                "text": "                        operation: OperationId::new(1).unwrap(),"
+              },
+              {
+                "highlight_end": 47,
+                "highlight_start": 1,
+                "text": "                        bytes: vec![7].into(),"
+              },
+              {
+                "highlight_end": 23,
+                "highlight_start": 1,
+                "text": "                    },"
+              },
+              {
+                "highlight_end": 19,
+                "highlight_start": 1,
+                "text": "                }],"
+              }
+            ]
+          }
+        },
+        "file_name": "/rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/alloc/src/macros.rs",
+        "is_primary": true,
+        "label": "expected `EntryBatch`, found `Vec<LogEntry>`",
+        "line_end": 60,
+        "line_start": 58,
+        "suggested_replacement": null,
+        "suggestion_applicability": null,
+        "text": []
+      }
+    ],
+    "code": {
+      "code": "E0308",
+      "explanation": "Expected type did not match the received type.\n\nErroneous code examples:\n\n```compile_fail,E0308\nfn plus_one(x: i32) -> i32 {\n    x + 1\n}\n\nplus_one(\"Not a number\");\n//       ^^^^^^^^^^^^^^ expected `i32`, found `&str`\n\nif \"Not a bool\" {\n// ^^^^^^^^^^^^ expected `bool`, found `&str`\n}\n\nlet x: f32 = \"Not a float\";\n//     ---   ^^^^^^^^^^^^^ expected `f32`, found `&str`\n//     |\n//     expected due to this\n```\n\nThis error occurs when an expression was used in a place where the compiler\nexpected an expression of a different type. It can occur in several cases, the\nmost common being when calling a function and passing an argument which has a\ndifferent type than the matching type in the function declaration.\n"
+    }
+  },
+  {
+    "rendered": "error[E0308]: mismatched types\n   --> src/voteboat_engine/actor.rs:318:21\n    |\n313 |                 Self::apply_entries(\n    |                 ------------------- arguments to this function are incorrect\n...\n318 |                     entries,\n    |                     ^^^^^^^ expected `&[LogEntry]`, found `Cow<'_, [LogEntry]>`\n    |\n    = note: expected reference `&[voteboat::log::LogEntry]`\n                    found enum `Cow<'_, [voteboat::log::LogEntry]>`\nnote: associated function defined here\n   --> src/voteboat_engine/actor.rs:360:8\n    |\n360 |     fn apply_entries(\n    |        ^^^^^^^^^^^^^\n...\n365 |         entries: &[LogEntry],\n    |         --------------------\nhelp: consider borrowing here\n    |\n318 |                     &entries,\n    |                     +\n\n",
+    "$message_type": "diagnostic",
+    "children": [
+      {
+        "children": [],
+        "code": null,
+        "level": "note",
+        "message": "expected reference `&[voteboat::log::LogEntry]`\n        found enum `Cow<'_, [voteboat::log::LogEntry]>`",
+        "rendered": null,
+        "spans": []
+      },
+      {
+        "children": [],
+        "code": null,
+        "level": "note",
+        "message": "associated function defined here",
+        "rendered": null,
+        "spans": [
+          {
+            "byte_end": 13812,
+            "byte_start": 13792,
+            "column_end": 29,
+            "column_start": 9,
+            "expansion": null,
+            "file_name": "src/voteboat_engine/actor.rs",
+            "is_primary": false,
+            "label": "",
+            "line_end": 365,
+            "line_start": 365,
+            "suggested_replacement": null,
+            "suggestion_applicability": null,
+            "text": [
+              {
+                "highlight_end": 29,
+                "highlight_start": 9,
+                "text": "        entries: &[LogEntry],"
+              }
+            ]
+          },
+          {
+            "byte_end": 13645,
+            "byte_start": 13632,
+            "column_end": 21,
+            "column_start": 8,
+            "expansion": null,
+            "file_name": "src/voteboat_engine/actor.rs",
+            "is_primary": true,
+            "label": null,
+            "line_end": 360,
+            "line_start": 360,
+            "suggested_replacement": null,
+            "suggestion_applicability": null,
+            "text": [
+              {
+                "highlight_end": 21,
+                "highlight_start": 8,
+                "text": "    fn apply_entries("
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "children": [],
+        "code": null,
+        "level": "help",
+        "message": "consider borrowing here",
+        "rendered": null,
+        "spans": [
+          {
+            "byte_end": 12169,
+            "byte_start": 12169,
+            "column_end": 21,
+            "column_start": 21,
+            "expansion": null,
+            "file_name": "src/voteboat_engine/actor.rs",
+            "is_primary": true,
+            "label": null,
+            "line_end": 318,
+            "line_start": 318,
+            "suggested_replacement": "&",
+            "suggestion_applicability": "MachineApplicable",
+            "text": [
+              {
+                "highlight_end": 21,
+                "highlight_start": 21,
+                "text": "                    entries,"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "level": "error",
+    "message": "mismatched types",
+    "spans": [
+      {
+        "byte_end": 12176,
+        "byte_start": 12169,
+        "column_end": 28,
+        "column_start": 21,
+        "expansion": null,
+        "file_name": "src/voteboat_engine/actor.rs",
+        "is_primary": true,
+        "label": "expected `&[LogEntry]`, found `Cow<'_, [LogEntry]>`",
+        "line_end": 318,
+        "line_start": 318,
+        "suggested_replacement": null,
+        "suggestion_applicability": null,
+        "text": [
+          {
+            "highlight_end": 28,
+            "highlight_start": 21,
+            "text": "                    entries,"
+          }
+        ]
+      },
+      {
+        "byte_end": 11983,
+        "byte_start": 11964,
+        "column_end": 36,
+        "column_start": 17,
+        "expansion": null,
+        "file_name": "src/voteboat_engine/actor.rs",
+        "is_primary": false,
+        "label": "arguments to this function are incorrect",
+        "line_end": 313,
+        "line_start": 313,
+        "suggested_replacement": null,
+        "suggestion_applicability": null,
+        "text": [
+          {
+            "highlight_end": 36,
+            "highlight_start": 17,
+            "text": "                Self::apply_entries("
+          }
+        ]
+      }
+    ],
+    "code": {
+      "code": "E0308",
+      "explanation": "Expected type did not match the received type.\n\nErroneous code examples:\n\n```compile_fail,E0308\nfn plus_one(x: i32) -> i32 {\n    x + 1\n}\n\nplus_one(\"Not a number\");\n//       ^^^^^^^^^^^^^^ expected `i32`, found `&str`\n\nif \"Not a bool\" {\n// ^^^^^^^^^^^^ expected `bool`, found `&str`\n}\n\nlet x: f32 = \"Not a float\";\n//     ---   ^^^^^^^^^^^^^ expected `f32`, found `&str`\n//     |\n//     expected due to this\n```\n\nThis error occurs when an expression was used in a place where the compiler\nexpected an expression of a different type. It can occur in several cases, the\nmost common being when calling a function and passing an argument which has a\ndifferent type than the matching type in the function declaration.\n"
+    }
+  }
+]

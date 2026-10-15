@@ -62,7 +62,7 @@ impl Raft {
         for peer in peers {
             let suffix = self.early_suffix().ok_or(RaftError::WrongCompletion)?;
             let start = suffix.from;
-            let entries = suffix.entries.clone();
+            let entries = suffix.entries.to_vec();
             let end = entries.last().unwrap().index;
             let context = self.context()?;
             if let Some(original) = self.requests.get(&peer).copied() {

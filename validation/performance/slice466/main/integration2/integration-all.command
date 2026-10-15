@@ -1,0 +1,1 @@
+cargo +stable test --locked --offline --all-features --test log_store --test log_owned --test log_staging --test provider_conformance --test snapshot --test snapshot_worker --test raft --test runtime --test worker --test membership --test learners --test member_recovery --test log_reclaim --test striped_log_store --test logical_formats -- --test-threads=1 

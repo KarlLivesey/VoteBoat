@@ -60,6 +60,25 @@ fn check_immediate<const TRACE: bool>() {
     for (wait, id) in waits.iter_mut().zip(ids) {
         assert_eq!(wait.try_recv().unwrap(), id);
     }
+    let report = actor
+        .attribution
+        .report(
+            0,
+            &actor.parts.store.attribution,
+            &actor.parts.snapshots.attribution,
+        )
+        .unwrap();
+    if TRACE {
+        let report = serde_json::to_value(report.unwrap()).unwrap();
+        let exact = actor.parts.core.state().entries.allocation_bytes().unwrap();
+        for owner in ["core_entry_allocations", "store_entry_allocations"] {
+            assert!(report[owner]["observations"].as_u64().unwrap() > 0);
+            assert_eq!(report[owner]["last_bytes"], exact);
+            assert!(report[owner]["maximum_observed_bytes"].as_u64().unwrap() >= exact as u64);
+        }
+    } else {
+        assert!(report.is_none());
+    }
 }
 
 #[test]

@@ -1,0 +1,45 @@
+[
+  {
+    "rendered": "error[E0594]: cannot assign to data in dereference of `EntryBatch`\n    --> tests/membership.rs:1799:9\n     |\n1799 |         journal.update.suffix.as_mut().unwrap().entries[0].payload = EntryPayload::Noop;\n     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ cannot assign\n     |\n     = help: trait `DerefMut` is required to modify through a dereference, but it is not implemented for `EntryBatch`\n\n",
+    "$message_type": "diagnostic",
+    "children": [
+      {
+        "children": [],
+        "code": null,
+        "level": "help",
+        "message": "trait `DerefMut` is required to modify through a dereference, but it is not implemented for `EntryBatch`",
+        "rendered": null,
+        "spans": []
+      }
+    ],
+    "level": "error",
+    "message": "cannot assign to data in dereference of `EntryBatch`",
+    "spans": [
+      {
+        "byte_end": 58898,
+        "byte_start": 58840,
+        "column_end": 67,
+        "column_start": 9,
+        "expansion": null,
+        "file_name": "tests/membership.rs",
+        "is_primary": true,
+        "label": "cannot assign",
+        "line_end": 1799,
+        "line_start": 1799,
+        "suggested_replacement": null,
+        "suggestion_applicability": null,
+        "text": [
+          {
+            "highlight_end": 67,
+            "highlight_start": 9,
+            "text": "        journal.update.suffix.as_mut().unwrap().entries[0].payload = EntryPayload::Noop;"
+          }
+        ]
+      }
+    ],
+    "code": {
+      "code": "E0594",
+      "explanation": "A non-mutable value was assigned a value.\n\nErroneous code example:\n\n```compile_fail,E0594\nstruct SolarSystem {\n    earth: i32,\n}\n\nlet ss = SolarSystem { earth: 3 };\nss.earth = 2; // error!\n```\n\nTo fix this error, declare `ss` as mutable by using the `mut` keyword:\n\n```\nstruct SolarSystem {\n    earth: i32,\n}\n\nlet mut ss = SolarSystem { earth: 3 }; // declaring `ss` as mutable\nss.earth = 2; // ok!\n```\n"
+    }
+  }
+]

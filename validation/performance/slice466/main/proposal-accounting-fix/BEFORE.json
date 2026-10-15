@@ -1,0 +1,10 @@
+{
+  "src/raft/proposals/tests.rs": {
+    "sha256": "5d61db7c54c4806409d7f5f574346ea027ad5e969ae375e12b1f30bbf2e90dd8",
+    "mode": "0o644"
+  },
+  "src/raft/proposals/tests/compact.rs": {
+    "sha256": "acc798d7228df3570f425af3e0f7797739311cea80f0b0bba1c3cacbc8cc07b7",
+    "mode": "0o644"
+  }
+}

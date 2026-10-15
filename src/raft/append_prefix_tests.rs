@@ -206,14 +206,19 @@ fn full_configuration_and_nonempty_payload_copy_owns_independent_storage() {
         64,
         LogLimits::default().max_batch_bytes,
     );
-    if let EntryPayload::Command { bytes, .. } = &mut core.durable.entries[2].payload {
+    let mut command = core.durable.entries[2].clone();
+    if let EntryPayload::Command { bytes, .. } = &mut command.payload {
         let mut raw = bytes.to_vec();
         raw.reserve(257);
         *bytes = raw.into();
     }
+    core.durable.entries.replace(2, command).unwrap();
     let state = core.state().clone();
     let mut entries = differential(&mut core);
-    assert_ne!(entries.as_ptr(), core.state().entries[1..].as_ptr());
+    assert_ne!(
+        entries.as_ptr(),
+        core.state().entries.get(1).unwrap() as *const LogEntry
+    );
     let EntryPayload::Command { bytes, .. } = &mut entries[1].payload else {
         unreachable!()
     };

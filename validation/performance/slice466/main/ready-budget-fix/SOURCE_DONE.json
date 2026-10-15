@@ -1,0 +1,21 @@
+{
+  "before": {
+    "path": "target/p9/slice466/integration1_before-source/tests/client_admission/ready_batch/budget.rs",
+    "sha256": "4a51cacebb5dda8ed42dbe65d21435478dd5b603b08b1f84bc8827cbc645dd22",
+    "mode": "0o644"
+  },
+  "after": {
+    "path": "tests/client_admission/ready_batch/budget.rs",
+    "sha256": "ad4cc67ae91b576f0334ef0fcbdd53b7892c8d6e44cc8c7ca5035cf79819018d",
+    "mode": "0o644"
+  },
+  "format_actual_exit": 0,
+  "builds_tests_run": false,
+  "preserved_invariants": [
+    "Exact campaign-only single reservation checked after pump.",
+    "Full four serialized command-backing growth measured by independent owner.",
+    "4*sizeof(OwnerStep)>growth unchanged: any multi-command selection metadata exceeds available slack.",
+    "Both bulk/global held controls still require exactly one fitting original and all four final outcomes."
+  ],
+  "tool_error": "Initial before-copy inline Python had mismatched parentheses; no source or evidence write from that command. Subsequent patch and rustfmt succeeded. Frozen integration1 source used as authoritative before version."
+}

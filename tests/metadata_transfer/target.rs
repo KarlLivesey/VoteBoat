@@ -279,7 +279,7 @@ fn interrupted_native_metadata_import_recovers_only_stage_or_complete_history() 
                 1,
                 Some(Suffix {
                     from: 1,
-                    entries: entries[..1].to_vec(),
+                    entries: entries[..1].to_vec().into(),
                 }),
             )],
         );
@@ -292,7 +292,7 @@ fn interrupted_native_metadata_import_recovers_only_stage_or_complete_history() 
         2,
         Some(Suffix {
             from: 2,
-            entries: entries[1..].to_vec(),
+            entries: entries[1..].to_vec().into(),
         }),
     );
     let frame = NativeLogCodec

@@ -84,7 +84,7 @@ fn aggregate_partial1024_quorum_prefixes_keep_all_results_delayed_peer_and_finit
     let mut cores = aggregate_replicas();
     let mut core = cores.remove(&node(1)).unwrap();
     let mut app = Counter::new(16384).unwrap();
-    app.apply_batch(core.replay_committed()).unwrap();
+    app.apply_batch(&core.replay_committed()).unwrap();
     let effects = core
         .propose_batch(
             (1..=16384)

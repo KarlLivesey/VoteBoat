@@ -1,0 +1,77 @@
+{
+  "scope": "Read-only schema/accounting/ownership audit of current455 production; no implementation, checks, builds or workloads",
+  "schema": "validation/performance/slice466/SCHEMA.md",
+  "verdict": "Canonical EntryHistory is necessary to remove rather than postpone pending/store copies. Schema is feasible if the following accounting and ordering sites migrate coherently.",
+  "must_change": [
+    {
+      "paths": [
+        "src/log/transition.rs",
+        "src/log/transition/compact.rs",
+        "src/raft/log_staging.rs"
+      ],
+      "requirement": "Replace visible len*sizeofEntry+visible payload summaries and prefix-byte subtraction with full retained EntryHistory backing/payload/Arc/descriptor capacity charge. Partial cuts retain complete boundary allocations. Append/trim summaries must reflect actual descriptor capacity, not assumed Vec growth. Unknown/overflow must stay conservative; metadata-only changes cannot reduce charge."
+    },
+    {
+      "paths": [
+        "src/log/transition/view.rs",
+        "src/native/log_store/accepted.rs",
+        "src/log/transition/incoming.rs"
+      ],
+      "requirement": "Base history, overlay tail, materialize, append, promotion and full fallback all transfer/share immutable batches; no hidden Vec tail materialization. Accepted summary describes eventual canonical view while outstanding durable base and pending overlays remain separately charged until successful publication. Plan all fallible range/capacity validation before per-group or multi-group installation; publication/uncertainty fencing unchanged."
+    },
+    {
+      "paths": [
+        "src/worker.rs",
+        "src/runtime/effects.rs",
+        "src/raft.rs",
+        "src/raft/proposals.rs",
+        "src/runtime/ready_batch.rs",
+        "src/outbound.rs"
+      ],
+      "requirement": "Persist payload/effect and Core reservation/staging inspections must use new retained backing/layout charges including descriptor capacity and temporary conversions. RPC Vec costs remain Vec costs. Preserve existing raw role/shape/byte validation and singleton gates, no new unrelated fixed batch ceiling. Full-owner charge even when physically shared; never divide by Arc refcount."
+    },
+    {
+      "paths": [
+        "src/raft/completion.rs",
+        "src/raft.rs",
+        "src/runtime/clients.rs",
+        "src/runtime/clients/ready.rs",
+        "src/application.rs"
+      ],
+      "requirement": "Completion/replay contiguous borrow or single Cow coalescing; application sees the same complete ordered commit batch once. Reserve worst-case visible-entry Vec plus payload/config clone charge and live history backing before accepted work, not after Durable mutation. Keep following effects/error behavior and owned Committed Vec semantics. Borrowed history range iteration must not allocate just to inspect."
+    },
+    {
+      "paths": [
+        "src/log/comparison.rs",
+        "src/log.rs",
+        "src/logical_voter/query.rs",
+        "src/logical_voter/query/configurations.rs"
+      ],
+      "requirement": "Equality ignores chunk segmentation/capacity; pointer equality certifies only identical immutable content/span, never different boundary offsets. Protected checkpoint comparison ranges must iterate without coalescing or traversing certified prefix. Full arbitrary GroupLog comparison remains exact. Logical-voter inspections of canonical histories must charge backing metadata/hidden entries rather than Vec-style visible entry cost."
+    },
+    {
+      "paths": [
+        "src/log_format.rs",
+        "src/log_format/checkpoint.rs",
+        "src/native/log_store/checkpoint.rs",
+        "src/native/log_store/striped/record.rs",
+        "src/snapshot.rs",
+        "src/logical_voter/checkpoint.rs",
+        "src/logical_voter/codec/enrollment.rs"
+      ],
+      "requirement": "Wire/WAL/checkpoint iteration encodes visible entries only with unchanged semantic byte formats/count/error priority. Codec capture charges new allocation layout before allocation where bounded; snapshots/recovery rebuild fresh histories. Striped payload stripping and logical-voter single-entry removal create explicit independent replacements; no mutable backing escape."
+    }
+  ],
+  "boundary_pin_rule": "For each owner charge every full backing reachable from its visible spans plus descriptor allocation. Removing every span drops backing handles; partial trim cannot subtract invisible elements/payloads still pinned. Repeated trim/append/replacement must stay bounded by admitted physical allocations, not merely visible max_entries. Raw imported/recovered spare capacity and descriptor spare capacity remain observable and fully charged.",
+  "conversion_rule": "Arc<Vec> capture can move the existing Vec without copying elements, but has its own checked padded allocation; empty Vec with spare capacity requires explicit raw-shape policy before normalization. IntoVec when shared and cross-chunk Cow materialization may clone configuration payloads; worst-case old+new memory must be reserved, no unbounded hidden materialization from Debug/Index/AsRef.",
+  "failure_rule": "Allocation planning and validation do not move the original error gates or mutate canonical state before all fallible checks finish. Native sync+manifest remains the sole durable promotion boundary; failure/cancellation/shutdown drops only its own handles, never invalidates another owner. Restart never treats Arc identity as ticket or persisted authority.",
+  "essential_existing_schema_controls": [
+    "Independent Vec oracle across chunk splits and both trim boundaries",
+    "Partial-span hidden payload plus descriptor/backing charge, overflow and spare capacity",
+    "Altered update replacement including configuration and identical header/different bytes",
+    "Core/provider retain same backing through admitted and exact Durable, with failed/stale completions",
+    "Cross-chunk application one-batch error/partial outcome and following-effect ordering",
+    "Modeled native publication/recovery and exact checkpoint lineage histories"
+  ],
+  "implementation_review_pending": true
+}

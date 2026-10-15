@@ -161,7 +161,7 @@ fn partial_prefixes_commit_all_originals_without_replaying_other_peer() {
         })
         .unwrap();
     let mut counter = Counter::new(6).unwrap();
-    counter.apply_batch(leader.replay_committed()).unwrap();
+    counter.apply_batch(&leader.replay_committed()).unwrap();
     let appended = append(&mut leader, 6);
     let delayed = message(&appended, 3);
     let mut request = message(&appended, 2);

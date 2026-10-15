@@ -31,8 +31,9 @@ impl OwnedNextLog {
                 }
         )
     }
-    /// Core needs one independent normalized copy while its original crosses
-    /// the public owned provider boundary. Inspect the raw input first.
+    /// Core retains a sealed normalized value while the original crosses the
+    /// public provider boundary. Tight plain batches share immutable backing;
+    /// other inputs capture independent normalized backing after raw inspection.
     pub(crate) fn plan_copy(
         view: &LogView<'_>,
         summary: &LogSummary,
@@ -43,15 +44,16 @@ impl OwnedNextLog {
         if append_eligible(view, summary, update) {
             let metadata = validate_append_metadata(view, update, limits)?;
             Ok(Self(OwnedChange::Append(OwnedAppend::new(
+                view,
                 *view.metadata(),
                 summary,
                 metadata,
-                update.clone(),
+                normalized_update(update),
             ))))
         } else {
             Ok(Self(OwnedChange::Other {
                 next: NextLog::plan(view, summary, update, limits)?,
-                update: update.clone(),
+                update: normalized_update(update),
             }))
         }
     }
@@ -68,6 +70,7 @@ impl OwnedNextLog {
             let metadata = validate_append_metadata(view, &update, limits)?;
             normalize_append(&mut update);
             Ok(Self(OwnedChange::Append(OwnedAppend::new(
+                view,
                 *view.metadata(),
                 summary,
                 metadata,
@@ -180,6 +183,7 @@ impl OwnedNextLog {
 }
 impl OwnedAppend {
     fn new(
+        view: &LogView<'_>,
         predecessor: LogMetadata,
         summary: &LogSummary,
         metadata: LogMetadata,
@@ -187,7 +191,7 @@ impl OwnedAppend {
     ) -> Self {
         Self {
             predecessor,
-            summary: append_summary(summary, metadata, update.suffix.as_ref()),
+            summary: append_summary(view, summary, metadata, update.suffix.as_ref()),
             update,
         }
     }
@@ -236,10 +240,10 @@ impl PreparedOwnedLog {
 }
 fn install_append(current: &mut GroupLog, update: LogUpdate, summary: LogSummary) -> LogSummary {
     if let Some(suffix) = update.suffix {
-        current.entries.extend(suffix.entries);
+        current.entries.append_batch(suffix.entries);
     }
     summary.metadata.install_header(current);
-    summary
+    summary.with_actual_retained(current)
 }
 fn validate_base(
     view: &LogView<'_>,
@@ -258,10 +262,12 @@ fn validate_base(
 }
 fn normalize_append(update: &mut LogUpdate) {
     if let Some(suffix) = &mut update.suffix {
-        if suffix.entries.capacity() != suffix.entries.len() {
-            suffix.entries = std::mem::take(&mut suffix.entries)
-                .into_boxed_slice()
-                .into_vec();
-        }
+        suffix.entries = suffix.entries.normalized_clone();
     }
+}
+
+fn normalized_update(update: &LogUpdate) -> LogUpdate {
+    let mut owned = update.clone();
+    normalize_append(&mut owned);
+    owned
 }

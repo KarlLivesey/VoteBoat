@@ -1,0 +1,816 @@
+error[E0308]: mismatched types
+   --> src/logical_voter/application/tests.rs:254:26
+    |
+254 |                   entries: vec![LogEntry {
+    |  __________________________^
+255 | |                     index: 1,
+256 | |                     term: 1,
+257 | |                     payload: EntryPayload::Noop,
+258 | |                 }],
+    | |__________________^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+258 |                 }].into(),
+    |                   +++++++
+
+
+error[E0308]: mismatched types
+   --> src/logical_voter/application/tests.rs:308:26
+    |
+308 |                   entries: vec![LogEntry {
+    |  __________________________^
+309 | |                     index: 1,
+310 | |                     term: 1,
+311 | |                     payload: EntryPayload::Command {
+...   |
+314 | |                     },
+315 | |                 }],
+    | |__________________^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+315 |                 }].into(),
+    |                   +++++++
+
+
+error[E0308]: mismatched types
+   --> src/logical_voter/application/tests.rs:333:26
+    |
+333 |                   entries: vec![LogEntry {
+    |  __________________________^
+334 | |                     index: 2,
+335 | |                     term: 1,
+336 | |                     payload: EntryPayload::Command {
+...   |
+339 | |                     },
+340 | |                 }],
+    | |__________________^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+340 |                 }].into(),
+    |                   +++++++
+
+
+error[E0308]: mismatched types
+  --> src/logical_voter/application/tests/authority/promotion.rs:45:62
+   |
+45 |     let c = mutate(a, 2, update(a, 3, Some(Suffix { from: 1, entries })));
+   |                                                              ^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `entry_batch::EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+   |
+45 |     let c = mutate(a, 2, update(a, 3, Some(Suffix { from: 1, entries: entries.into() })));
+   |                                                              ++++++++        +++++++
+
+
+error[E0308]: mismatched types
+  --> src/logical_voter/application/tests/control_profile.rs:95:17
+   |
+95 |                 entries,
+   |                 ^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `entry_batch::EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+   |
+95 |                 entries: entries.into(),
+   |                 ++++++++        +++++++
+
+
+error[E0308]: mismatched types
+   --> src/logical_voter/application/tests/control_profile.rs:184:50
+    |
+184 |         a.state.parent.as_ref().unwrap().entries[1..],
+    |                                                  ^^^ expected `usize`, found `RangeFrom<{integer}>`
+    |
+    = note: expected type `usize`
+             found struct `std::ops::RangeFrom<{integer}>`
+
+
+error[E0308]: mismatched types
+   --> src/logical_voter/application/tests/control_profile.rs:185:9
+    |
+185 |         update.suffix.as_ref().unwrap().entries
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `LogEntry`, found `EntryBatch`
+
+
+error[E0308]: mismatched types
+  --> src/logical_voter/application/tests/eligibility.rs:59:44
+   |
+59 |             suffix: Some(Suffix { from: 1, entries }),
+   |                                            ^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `entry_batch::EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+   |
+59 |             suffix: Some(Suffix { from: 1, entries: entries.into() }),
+   |                                            ++++++++        +++++++
+
+
+error[E0308]: mismatched types
+   --> src/logical_voter/application/tests/eligibility.rs:198:22
+    |
+198 |             entries: vec![e.clone()],
+    |                      ^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+198 |             entries: vec![e.clone()].into(),
+    |                                     +++++++
+
+
+error[E0308]: mismatched types
+  --> src/logical_voter/application/tests/enrollment/recovery.rs:47:22
+   |
+47 |             entries: vec![joint],
+   |                      ^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `entry_batch::EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+   |
+47 |             entries: vec![joint].into(),
+   |                                 +++++++
+
+
+error[E0308]: mismatched types
+  --> src/logical_voter/application/tests/enrollment/recovery.rs:69:22
+   |
+69 |             entries: vec![final_entry],
+   |                      ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `entry_batch::EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+   |
+69 |             entries: vec![final_entry].into(),
+   |                                       +++++++
+
+
+error[E0308]: mismatched types
+  --> src/logical_voter/application/tests/reads.rs:31:26
+   |
+31 |                   entries: vec![LogEntry {
+   |  __________________________^
+32 | |                     index: 1,
+33 | |                     term: 1,
+34 | |                     payload: EntryPayload::Command {
+...  |
+37 | |                     },
+38 | |                 }],
+   | |__________________^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `entry_batch::EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+   |
+38 |                 }].into(),
+   |                   +++++++
+
+
+error[E0308]: mismatched types
+  --> src/logical_voter/application/tests/snapshots.rs:82:26
+   |
+82 |                   entries: vec![
+   |  __________________________^
+83 | |                     LogEntry {
+84 | |                         index: 1,
+85 | |                         term: 1,
+...  |
+92 | |                     },
+93 | |                 ],
+   | |_________________^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `entry_batch::EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+   |
+93 |                 ].into(),
+   |                  +++++++
+
+
+error[E0308]: mismatched types
+   --> src/logical_voter/response/tests/limits.rs:169:22
+    |
+169 |               entries: vec![LogEntry {
+    |  ______________________^
+170 | |                 index: 1,
+171 | |                 term: 1,
+172 | |                 payload: EntryPayload::Noop,
+173 | |             }],
+    | |______________^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+173 |             }].into(),
+    |               +++++++
+
+
+error[E0308]: mismatched types
+   --> src/logical_voter/response/tests/reads.rs:134:26
+    |
+134 |                   entries: vec![LogEntry {
+    |  __________________________^
+135 | |                     index: 1,
+136 | |                     term: 1,
+137 | |                     payload: EntryPayload::Command {
+...   |
+140 | |                     },
+141 | |                 }],
+    | |__________________^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+141 |                 }].into(),
+    |                   +++++++
+
+
+error[E0308]: mismatched types
+   --> src/native/log_store/accepted/tests/checkpoint.rs:161:22
+    |
+161 |             entries: vec![entry(4, 1), entry(5, 1)],
+    |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+161 |             entries: vec![entry(4, 1), entry(5, 1)].into(),
+    |                                                    +++++++
+
+
+error[E0308]: mismatched types
+   --> src/native/log_store/accepted/tests/checkpoint.rs:194:22
+    |
+194 |             entries: vec![entry(6, 1)],
+    |                      ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+194 |             entries: vec![entry(6, 1)].into(),
+    |                                       +++++++
+
+
+error[E0308]: mismatched types
+   --> src/native/log_store/accepted/tests/checkpoint.rs:254:22
+    |
+254 |             entries: vec![entry(3, 2)],
+    |                      ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+254 |             entries: vec![entry(3, 2)].into(),
+    |                                       +++++++
+
+
+error[E0308]: mismatched types
+   --> src/native/log_store/accepted/tests/checkpoint.rs:265:22
+    |
+265 |             entries: vec![entry(4, 2)],
+    |                      ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+265 |             entries: vec![entry(4, 2)].into(),
+    |                                       +++++++
+
+
+error[E0308]: mismatched types
+   --> src/native/log_store/accepted/tests/checkpoint.rs:322:26
+    |
+322 |                 entries: vec![entry(1, 1)],
+    |                          ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+322 |                 entries: vec![entry(1, 1)].into(),
+    |                                           +++++++
+
+
+error[E0308]: mismatched types
+  --> src/native/log_store/accepted/tests/compact.rs:69:22
+   |
+69 |             entries: vec![entry(4, 1), entry(5, 1)],
+   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `entry_batch::EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+   |
+69 |             entries: vec![entry(4, 1), entry(5, 1)].into(),
+   |                                                    +++++++
+
+
+error[E0308]: mismatched types
+  --> src/native/log_store/accepted/tests/compact.rs:87:22
+   |
+87 |             entries: vec![entry(6, 1)],
+   |                      ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `entry_batch::EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+   |
+87 |             entries: vec![entry(6, 1)].into(),
+   |                                       +++++++
+
+
+error[E0308]: mismatched types
+   --> src/native/log_store/accepted/tests/compact.rs:100:22
+    |
+100 |             entries: vec![entry(7, 1)],
+    |                      ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+100 |             entries: vec![entry(7, 1)].into(),
+    |                                       +++++++
+
+
+error[E0308]: mismatched types
+   --> src/native/log_store/accepted/tests/compact.rs:129:22
+    |
+129 |             entries: vec![entry(1, 1), entry(2, 1)],
+    |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+129 |             entries: vec![entry(1, 1), entry(2, 1)].into(),
+    |                                                    +++++++
+
+
+error[E0308]: mismatched types
+   --> src/native/log_store/accepted/tests/compact.rs:194:26
+    |
+194 |                 entries: vec![payload],
+    |                          ^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+194 |                 entries: vec![payload].into(),
+    |                                       +++++++
+
+
+error[E0308]: mismatched types
+  --> src/native/log_store/accepted/tests/configured.rs:36:22
+   |
+36 |             entries: vec![record],
+   |                      ^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `entry_batch::EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+   |
+36 |             entries: vec![record].into(),
+   |                                  +++++++
+
+
+error[E0308]: mismatched types
+  --> src/native/log_store/accepted/tests/configured.rs:53:22
+   |
+53 |             entries: vec![entry(2, 1)],
+   |                      ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `entry_batch::EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+   |
+53 |             entries: vec![entry(2, 1)].into(),
+   |                                       +++++++
+
+
+error[E0308]: mismatched types
+  --> src/native/log_store/accepted/tests/configured.rs:65:22
+   |
+65 |             entries: vec![entry(3, 1)],
+   |                      ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `entry_batch::EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+   |
+65 |             entries: vec![entry(3, 1)].into(),
+   |                                       +++++++
+
+
+error[E0308]: mismatched types
+  --> src/native/log_store/accepted/tests/configured.rs:85:22
+   |
+85 |             entries: vec![entry(3, 2)],
+   |                      ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `entry_batch::EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+   |
+85 |             entries: vec![entry(3, 2)].into(),
+   |                                       +++++++
+
+
+error[E0308]: mismatched types
+   --> src/native/log_store/accepted/tests/configured.rs:120:22
+    |
+120 |             entries: vec![entry(4, 2)],
+    |                      ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+120 |             entries: vec![entry(4, 2)].into(),
+    |                                       +++++++
+
+
+error[E0308]: mismatched types
+   --> src/native/log_store/accepted/tests/configured.rs:151:26
+    |
+151 |                 entries: vec![entry(2, 1)],
+    |                          ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+151 |                 entries: vec![entry(2, 1)].into(),
+    |                                           +++++++
+
+
+error[E0308]: mismatched types
+  --> src/native/log_store/accepted/tests/incoming.rs:13:22
+   |
+13 |             entries: vec![entry(1, 1)],
+   |                      ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `entry_batch::EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+   |
+13 |             entries: vec![entry(1, 1)].into(),
+   |                                       +++++++
+
+
+error[E0308]: mismatched types
+  --> src/native/log_store/accepted/tests/incoming_codec.rs:74:22
+   |
+74 |             entries: vec![input],
+   |                      ^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `entry_batch::EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+   |
+74 |             entries: vec![input].into(),
+   |                                 +++++++
+
+
+error[E0308]: mismatched types
+  --> src/native/log_store/accepted/tests.rs:22:5
+   |
+18 | fn tail(store: &Store) -> &Vec<LogEntry> {
+   |                           -------------- expected `&Vec<log::LogEntry>` because of return type
+...
+22 |     &plain.tail
+   |     ^^^^^^^^^^^ expected `&Vec<LogEntry>`, found `&EntryHistory`
+   |
+   = note: expected reference `&Vec<log::LogEntry>`
+              found reference `&entry_history::EntryHistory`
+
+
+error[E0308]: mismatched types
+  --> src/native/log_store/accepted/tests.rs:45:22
+   |
+45 |             entries: vec![input],
+   |                      ^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `entry_batch::EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+   |
+45 |             entries: vec![input].into(),
+   |                                 +++++++
+
+
+error[E0308]: mismatched types
+  --> src/native/log_store/accepted/tests.rs:65:22
+   |
+65 |             entries: vec![entry(130, 1)],
+   |                      ^^^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `entry_batch::EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+   |
+65 |             entries: vec![entry(130, 1)].into(),
+   |                                         +++++++
+
+
+error[E0308]: mismatched types
+  --> src/native/log_store/accepted/tests.rs:93:22
+   |
+93 |             entries: vec![entry(131, 1)],
+   |                      ^^^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+   |
+   = note: expected struct `entry_batch::EntryBatch`
+              found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+   |
+93 |             entries: vec![entry(131, 1)].into(),
+   |                                         +++++++
+
+
+error[E0308]: mismatched types
+   --> src/native/log_store/accepted/tests.rs:117:22
+    |
+117 |             entries: vec![entry(1, 1)],
+    |                      ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+117 |             entries: vec![entry(1, 1)].into(),
+    |                                       +++++++
+
+
+error[E0308]: mismatched types
+   --> src/native/log_store/accepted/tests.rs:146:22
+    |
+146 |             entries: vec![entry(1, 1)],
+    |                      ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+146 |             entries: vec![entry(1, 1)].into(),
+    |                                       +++++++
+
+
+error[E0308]: mismatched types
+   --> src/native/log_store/accepted/tests.rs:184:26
+    |
+184 |                 entries: vec![entry(1, 1)],
+    |                          ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+184 |                 entries: vec![entry(1, 1)].into(),
+    |                                           +++++++
+
+
+error[E0308]: mismatched types
+   --> src/native/log_store/accepted/tests.rs:213:22
+    |
+213 |             entries: vec![entry(1, 1), entry(2, 1)],
+    |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+213 |             entries: vec![entry(1, 1), entry(2, 1)].into(),
+    |                                                    +++++++
+
+
+error[E0308]: mismatched types
+   --> src/native/log_store/accepted/tests.rs:225:22
+    |
+225 |             entries: vec![entry(2, 2)],
+    |                      ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+225 |             entries: vec![entry(2, 2)].into(),
+    |                                       +++++++
+
+
+error[E0308]: mismatched types
+   --> src/native/log_store/striped/file/tests/fixture.rs:98:22
+    |
+ 98 |               entries: vec![LogEntry {
+    |  ______________________^
+ 99 | |                 index,
+100 | |                 term,
+101 | |                 payload: EntryPayload::Command {
+...   |
+104 | |                 },
+105 | |             }],
+    | |______________^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `entry_batch::EntryBatch`
+               found struct `Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<log::LogEntry>` into `entry_batch::EntryBatch`
+    |
+105 |             }].into(),
+    |               +++++++
+
+
+error[E0277]: can't compare `Vec<log::LogEntry>` with `entry_history::EntryHistory`
+   --> src/native/log_store/striped/file/tests/fixture.rs:148:5
+    |
+148 | /     assert_eq!(
+149 | |         store
+150 | |             .fetch_range(group(), state.generation, 1, 16, 32768)
+151 | |             .unwrap(),
+152 | |         state.entries
+153 | |     );
+    | |_____^ no implementation for `Vec<log::LogEntry> == entry_history::EntryHistory`
+    |
+    = help: the trait `PartialEq<entry_history::EntryHistory>` is not implemented for `Vec<log::LogEntry>`
+    = help: the following other types implement trait `PartialEq<Rhs>`:
+              `Vec<T, A1>` implements `PartialEq<Vec<U, A2>>`
+              `Vec<T, A>` implements `PartialEq<&[U; N]>`
+              `Vec<T, A>` implements `PartialEq<&[U]>`
+              `Vec<T, A>` implements `PartialEq<&mut [U]>`
+              `Vec<T, A>` implements `PartialEq<[U; N]>`
+              `Vec<T, A>` implements `PartialEq<[U]>`
+              `Vec<u8>` implements `PartialEq<ByteStr>`
+              `Vec<u8>` implements `PartialEq<ByteString>`
+            and 2 others
+
+
+error[E0308]: mismatched types
+  --> src/native/log_store/striped/file/tests.rs:40:56
+   |
+40 |             &recovered.state(group()).unwrap().entries[..old.entries.len()],
+   |                                                        ^^^^^^^^^^^^^^^^^^^ expected `usize`, found `RangeTo<usize>`
+   |
+   = note: expected type `usize`
+            found struct `RangeTo<usize>`
+
+
+error[E0277]: can't compare `&log::LogEntry` with `entry_history::EntryHistory`
+  --> src/native/log_store/striped/file/tests.rs:39:9
+   |
+39 | /         assert_eq!(
+40 | |             &recovered.state(group()).unwrap().entries[..old.entries.len()],
+41 | |             old.entries
+42 | |         );
+   | |_________^ no implementation for `&log::LogEntry == entry_history::EntryHistory`
+   |
+   = help: the trait `PartialEq<entry_history::EntryHistory>` is not implemented for `&log::LogEntry`
+help: the trait `PartialEq` is implemented for `log::LogEntry`
+  --> src/log.rs:53:1
+   |
+53 | impl PartialEq for LogEntry {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+error[E0308]: mismatched types
+   --> src/native/log_store/striped/file/tests.rs:101:38
+    |
+101 |         assert_eq!(&expected.entries[..next.entries.len()], next.entries);
+    |                                      ^^^^^^^^^^^^^^^^^^^^ expected `usize`, found `RangeTo<usize>`
+    |
+    = note: expected type `usize`
+             found struct `RangeTo<usize>`
+
+
+error[E0277]: can't compare `&log::LogEntry` with `entry_history::EntryHistory`
+   --> src/native/log_store/striped/file/tests.rs:101:9
+    |
+101 |         assert_eq!(&expected.entries[..next.entries.len()], next.entries);
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no implementation for `&log::LogEntry == entry_history::EntryHistory`
+    |
+    = help: the trait `PartialEq<entry_history::EntryHistory>` is not implemented for `&log::LogEntry`
+help: the trait `PartialEq` is implemented for `log::LogEntry`
+   --> src/log.rs:53:1
+    |
+ 53 | impl PartialEq for LogEntry {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+error[E0308]: mismatched types
+   --> src/runtime/logical_intake/tests.rs:120:18
+    |
+120 |         entries: vec![],
+    |                  ^^^^^^ expected `EntryHistory`, found `Vec<_>`
+    |
+    = note: expected struct `entry_history::EntryHistory`
+               found struct `Vec<_>`
+help: call `Into::into` on this expression to convert `Vec<_>` into `entry_history::EntryHistory`
+    |
+120 |         entries: vec![].into(),
+    |                        +++++++
+
+
+error[E0308]: mismatched types
+  --> src/runtime/ready_batch/tests/fixture.rs:76:18
+   |
+76 |         entries: Vec::new(),
+   |                  ^^^^^^^^^^ expected `EntryHistory`, found `Vec<_>`
+   |
+   = note: expected struct `entry_history::EntryHistory`
+              found struct `Vec<_>`
+help: call `Into::into` on this expression to convert `Vec<_>` into `entry_history::EntryHistory`
+   |
+76 |         entries: Vec::new().into(),
+   |                            +++++++
+
+
+error[E0308]: mismatched types
+   --> src/runtime/ready_batch/tests/routine/outcomes.rs:38:22
+    |
+ 38 |         .apply_batch(shard.core(group()).unwrap().replay_committed())
+    |          ----------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `&[LogEntry]`, found `Cow<'_, [LogEntry]>`
+    |          |
+    |          arguments to this method are incorrect
+    |
+    = note: expected reference `&[log::LogEntry]`
+                    found enum `std::borrow::Cow<'_, [log::LogEntry]>`
+note: method defined here
+   --> src/application.rs:139:8
+    |
+139 |     fn apply_batch(&mut self, entries: &[LogEntry])
+    |        ^^^^^^^^^^^            -------
+help: consider borrowing here
+    |
+ 38 |         .apply_batch(&shard.core(group()).unwrap().replay_committed())
+    |                      +
+
+
+error[E0594]: cannot assign to data in dereference of `entry_batch::EntryBatch`
+  --> src/logical_voter/response/tests/providers.rs:62:21
+   |
+62 |                     suffix.entries[0].term += 1;
+   |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ cannot assign
+   |
+   = help: trait `DerefMut` is required to modify through a dereference, but it is not implemented for `entry_batch::EntryBatch`
+
+
+error[E0308]: mismatched types
+   --> tests/support/retirement_storage.rs:134:26
+    |
+134 |                 entries: prefix.to_vec(),
+    |                          ^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `EntryBatch`
+               found struct `Vec<voteboat::log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<voteboat::log::LogEntry>` into `EntryBatch`
+    |
+134 |                 entries: prefix.to_vec().into(),
+    |                                         +++++++
+
+
+error[E0308]: mismatched types
+   --> tests/support/retirement_storage.rs:161:26
+    |
+161 |                 entries: vec![retirement.clone()],
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `EntryBatch`
+               found struct `Vec<voteboat::log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<voteboat::log::LogEntry>` into `EntryBatch`
+    |
+161 |                 entries: vec![retirement.clone()].into(),
+    |                                                  +++++++
+
+
+error[E0308]: mismatched types
+   --> tests/support/retirement_storage.rs:348:30
+    |
+348 |                     entries: vec![noop(index)],
+    |                              ^^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `EntryBatch`
+               found struct `Vec<voteboat::log::LogEntry>`
+help: call `Into::into` on this expression to convert `Vec<voteboat::log::LogEntry>` into `EntryBatch`
+    |
+348 |                     entries: vec![noop(index)].into(),
+    |                                               +++++++
+

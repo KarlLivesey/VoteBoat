@@ -92,7 +92,8 @@ pub(super) fn core() -> Raft {
                 index: 1,
                 term: 1,
                 payload: EntryPayload::Noop,
-            }],
+            }]
+            .into(),
         }),
         snapshot: None,
         snapshot_membership: None,
@@ -157,7 +158,7 @@ fn accept(core: &mut Raft, op: u128, change: ConfigurationChange) -> Vec<Effect>
         core.durable.commit_index,
         Some(Suffix {
             from: entry.index,
-            entries: vec![entry],
+            entries: vec![entry].into(),
         }),
         After::LeaderAppend,
         None,
@@ -512,7 +513,7 @@ fn recursive_joint_recovery_catches_up_old_voter_and_commits_after_election() {
     for peer in peers.values() {
         let mut app = crate::application::Counter::new(100).unwrap();
         use crate::application::StateMachine;
-        app.apply_batch(peer.replay_committed()).unwrap();
+        app.apply_batch(&peer.replay_committed()).unwrap();
         assert_eq!(app.read_applied(5), Ok(7));
     }
 }
@@ -625,7 +626,8 @@ fn joint_repair_rejects_overwrite_commit_claims_and_foreign_authority_before_mut
 
 fn retained_repair_pair(gap: u64, overlap: usize) -> (Raft, Raft) {
     let mut state = joint(false).state().clone();
-    let mut joint = state.entries.pop().unwrap();
+    let mut joint = state.entries.last().unwrap().clone();
+    state.entries.truncate(state.entries.len() - 1);
     let prefix = (3..3 + gap)
         .map(|index| LogEntry {
             index,
@@ -826,7 +828,10 @@ fn joint_repair_trims_only_a_verified_compacted_overlap() {
             assert!(receiver.local_voter());
             assert_eq!(receiver.state().commit_index, 4);
             assert_eq!(receiver.state().base_index(), 4);
-            assert_eq!(receiver.state().entries, source.state().entries[4..]);
+            assert_eq!(
+                receiver.state().entries,
+                source.state().entries.view(4..).to_vec()
+            );
         } else {
             assert_eq!(effects, Err(RaftError::InvalidMessage));
             assert_eq!(receiver.state(), &before);
@@ -1373,7 +1378,8 @@ fn accepted_final_clears_prior_authority_and_rollback_restores_joint_base() {
                     index: 4,
                     term: 2,
                     payload: EntryPayload::Noop,
-                }],
+                }]
+                .into(),
             }),
             After::Reply,
             None,
@@ -1621,7 +1627,8 @@ fn older_request_scope_can_roll_back_uncommitted_final_without_early_reply() {
                     index: 4,
                     term: 2,
                     payload: EntryPayload::Noop,
-                }],
+                }]
+                .into(),
             }),
             After::LeaderAppend,
             None,
@@ -2852,7 +2859,7 @@ fn connection_retention_includes_pending_and_rollback_views_until_exact_commit()
             2,
             Some(Suffix {
                 from: 3,
-                entries: vec![],
+                entries: vec![].into(),
             }),
             After::Reply,
             None,
@@ -2964,7 +2971,7 @@ fn owner_connection_budget_retains_pending_and_rollback_history_and_fences_unres
                 2,
                 Some(Suffix {
                     from: 3,
-                    entries: vec![],
+                    entries: vec![].into(),
                 }),
                 After::Reply,
                 None,
@@ -3076,7 +3083,7 @@ fn finalized_repair_pair() -> (Raft, Raft) {
             joint_index + 1,
             Some(Suffix {
                 from: entry.index,
-                entries: vec![entry],
+                entries: vec![entry].into(),
             }),
             After::Commit,
             None,

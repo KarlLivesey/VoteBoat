@@ -151,10 +151,12 @@ fn failed_owner_changes_lineage_and_arbitrary_same_revision_mutations_remain_vis
     assert_ne!(lineage, *core.checkpoint_log().lineage());
     check(&core, &mut owned, 1, 0);
     let mut arbitrary = core.state().clone();
-    arbitrary.entries[0].payload = EntryPayload::Command {
+    let mut replacement = arbitrary.entries[0].clone();
+    replacement.payload = EntryPayload::Command {
         operation: OperationId::new(u128::MAX).unwrap(),
         bytes: Vec::new().into(),
     };
+    arbitrary.entries.replace(0, replacement).unwrap();
     assert_eq!(arbitrary.revision, core.state().revision);
     assert_ne!(arbitrary, *owned.get(first).unwrap());
     let other = Raft::recover(NodeId::new(1).unwrap(), binding, arbitrary, owned.limits()).unwrap();
