@@ -1,0 +1,42 @@
+{
+  "scope": "Read-only final lint extraction delta against strict/failed-source; no tests, builds, workloads or remote operations; original INDEPENDENT_REVIEW.json unchanged",
+  "findings": [],
+  "changed_files": {
+    "examples/native_benchmark.rs": {
+      "strict_failed_sha256": "d246acfd790928d619b1742505f28fb8d75d38d71bb28fec5d9434af17523e6a",
+      "final_sha256": "da4cf6a8acaa6b679a1023e3e89a7eb769c9a2154787c457b5a894946ef1f308"
+    },
+    "examples/benchmark/shared.rs": {
+      "strict_failed_sha256": "30bf11e5f8fcb3b84d2b0d132a1b7c9257db23b22a422cd78045fb72606f8918",
+      "final_sha256": "3d0e6bd6a1d47cf67c1bd0f2e8a23436ccebdc8598b1481ff5b97bd3d228915d"
+    },
+    "examples/benchmark/offered_capacity.rs": {
+      "strict_failed_sha256": "1d84835502b466d7dbaaf58f79850d7ea7971a58eb53831e95a939380b975c08",
+      "final_sha256": "26a17ed9d112b4d1b23e2a69b3fdd47dc3b21ee391633917b2be8cb6ba51c733"
+    },
+    "examples/benchmark/offered_capacity/tests.rs": {
+      "strict_failed_sha256": "22234836f821f3c9ac4e8166b6866642a04c7684125cfb51e8c25eed8a45d699",
+      "final_sha256": "9334ffc1d2b1939b5aaa0fbd0e6f32a0b98e701080ac0352de0c478afa8ad662"
+    }
+  },
+  "observations": [
+    {
+      "area": "validate_workload",
+      "result": "Existing count1..50000 rejection moves into private helper, before existing profile/window validation. Same window/profile bounds and error strings remain. main invokes it before maintenance parsing/run_selected/root/socket/worker. For doubly-invalid count plus malformed offered-rate arguments, offered parsing may now report first; all such paths remain pre-resource failures, no valid-input or acceptance-bound change."
+    },
+    {
+      "area": "check_capacity",
+      "result": "Exact same actual timed.limits/clients.limits values, selected profile, ready_visit_items and bootstraps.len feed unchanged complete readback. Diagnostic format uses self.mode equivalent to destructured mode. Guard and diagnostic remain at the same call point before ingress reconstruction/transport factory/worker creation, for both Create and Recover. Error propagation/partial-startup cleanup unchanged."
+    },
+    {
+      "area": "controls",
+      "result": "Adds explicit count0/count50001 rejection and valid8192 acceptance alongside unchanged selected/legacy window, parser, real Shard admission/control-reserve and readback-drift tests. No removed assertions, relaxed caps or lint configuration."
+    }
+  ],
+  "qualification_receipts_reported_by_root": {
+    "final_full_native_example": "51 pass; original17312 exit0,230.32s",
+    "strict": "37703 allfour+standalone0",
+    "final_network": "73521 selectedTCP/QUIC4096+11 pre-root invalids exit0"
+  },
+  "conclusion": "No correctness blocker in focused extraction/count-control delta; no source-backed performance claim or new verification run."
+}

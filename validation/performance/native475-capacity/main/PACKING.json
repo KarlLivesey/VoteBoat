@@ -1,0 +1,42 @@
+[
+  {
+    "original_path": "ROOT_FINAL_INPUTS.json",
+    "archived_path": "ROOT_FINAL_INPUTS.json.gz",
+    "original_sha256": "ecfdb74de10d9967f8ab7d6b9a8b1dcf104e88716e322f5c7f204e09a7fa8644",
+    "original_bytes": 232095,
+    "container_sha256": "0f858a9cba95c4c20794a448b90415c042575713d4aea0f6561591c5557d934d",
+    "container_bytes": 71301
+  },
+  {
+    "original_path": "root/AFTER.json",
+    "archived_path": "root/AFTER.json.gz",
+    "original_sha256": "3bb780812f9d38bdab75ed0287a4fabb62d04b79b4f6ec840d08a47efe4ac40d",
+    "original_bytes": 232065,
+    "container_sha256": "d87757a9e83e541c707e6929e1ed306f587f5a79ea075923f569cde805508fa4",
+    "container_bytes": 71277
+  },
+  {
+    "original_path": "root/BEFORE.json",
+    "archived_path": "root/BEFORE.json.gz",
+    "original_sha256": "d2150ec7521026882ca4a223a7c2541a88c159914499bf0514c1050b4f12154a",
+    "original_bytes": 232095,
+    "container_sha256": "a7975666f9ccfdf1c6c33cf87ba15d9fdae2ffa89eedd5e794c5de1fd42b3c61",
+    "container_bytes": 71294
+  },
+  {
+    "original_path": "root2/AFTER.json",
+    "archived_path": "root2/AFTER.json.gz",
+    "original_sha256": "08670d25fd55aa86b265ebc4d39a20dd7de57dc8d77b3734b2b509960afce0be",
+    "original_bytes": 232065,
+    "container_sha256": "adc971feb677584be4e664de228ff57625ef02041b30b995117e077d2a5f1c94",
+    "container_bytes": 71284
+  },
+  {
+    "original_path": "root2/BEFORE.json",
+    "archived_path": "root2/BEFORE.json.gz",
+    "original_sha256": "ecfdb74de10d9967f8ab7d6b9a8b1dcf104e88716e322f5c7f204e09a7fa8644",
+    "original_bytes": 232095,
+    "container_sha256": "0f858a9cba95c4c20794a448b90415c042575713d4aea0f6561591c5557d934d",
+    "container_bytes": 71301
+  }
+]

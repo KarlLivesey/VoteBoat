@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/checks/debug/examples/native_benchmark",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/network2/wal/invalid-count-too-large",
+    "tcp",
+    "50001",
+    "64",
+    "1"
+  ],
+  "exit": 1,
+  "elapsed_s": 0.0005712129932362586
+}

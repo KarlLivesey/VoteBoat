@@ -1,0 +1,391 @@
+diff --git a/examples/benchmark/lanes.rs b/examples/benchmark/lanes.rs
+index 1ddbd703..5a674482 100644
+--- a/examples/benchmark/lanes.rs
++++ b/examples/benchmark/lanes.rs
+@@ -47,6 +47,7 @@ impl Config {
+                 groups,
+                 lane: lane as u64 + 1,
+                 ready_visit_items: 16,
++                capacity_profile: CapacityProfile::Legacy,
+             },
+             count: share(self.count, self.lanes, lane),
+             warmup: share(WARMUP, self.lanes, lane),
+diff --git a/examples/benchmark/lanes/tests.rs b/examples/benchmark/lanes/tests.rs
+index cff6069d..ba70df11 100644
+--- a/examples/benchmark/lanes/tests.rs
++++ b/examples/benchmark/lanes/tests.rs
+@@ -194,6 +194,7 @@ fn partial_replica_startup_joins_previously_opened_nodes() {
+             groups: 2,
+             lane: 1,
+             ready_visit_items: 16,
++            capacity_profile: CapacityProfile::Legacy,
+         }
+     )
+     .is_err());
+diff --git a/examples/benchmark/offered.rs b/examples/benchmark/offered.rs
+index 5bc84df5..e74caa98 100644
+--- a/examples/benchmark/offered.rs
++++ b/examples/benchmark/offered.rs
+@@ -573,7 +573,8 @@ fn report_offered(
+         .group_schedule
+         .as_ref()
+         .map_or_else(String::new, offered_groups::GroupSchedule::metadata);
+-    let summary = format!("mode=offered protocol={protocol:?} replicas=3 groups={groups} assembly=shared leader_placement={placement} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000 payload_bytes=8 warmup={WARMUP} offers={count} offered_rate={rate} window={window} max_inflight={} admitted={admitted} admitted_during={admitted_during} late_decisions={late_decisions} dispatch_p99_us={dispatch_p99} applied={applied} applied_during={during} applied_drain={} window_refused={} no_leader={} admission_refused={} not_proposed={} unknown=0 pending=0 horizon_ns={horizon} elapsed_ns={} drain_ns={} backlog_at_horizon={backlog} offered_ops_s={:.3} admitted_ops_s={:.3} applied_during_ops_s={:.3} applied_total_ops_s={:.3} p99_us={p99} service_p99_us={service_p99} recovered_value={recovered_value} recovery_retries={retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3}{maintenance_summary} {ready_settings}{group_settings}\n", ledger.max_pending, applied-during, ledger.count_status("window_refused"), ledger.count_status("no_leader"), ledger.count_status("admission_refused"), ledger.count_status("not_proposed"), elapsed.as_nanos(), elapsed.as_nanos().saturating_sub(horizon), count as f64 * 1e9 / horizon as f64, admitted as f64 / elapsed.as_secs_f64(), during as f64 * 1e9 / horizon as f64, applied as f64 / elapsed.as_secs_f64(), totals.rounds, totals.host_ns as f64/1e6, totals.max_host_ns as f64/1e6);
++    let capacity_settings = config.capacity_profile.settings();
++    let summary = format!("mode=offered protocol={protocol:?} replicas=3 groups={groups} assembly=shared leader_placement={placement} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000 payload_bytes=8 warmup={WARMUP} offers={count} offered_rate={rate} window={window} max_inflight={} admitted={admitted} admitted_during={admitted_during} late_decisions={late_decisions} dispatch_p99_us={dispatch_p99} applied={applied} applied_during={during} applied_drain={} window_refused={} no_leader={} admission_refused={} not_proposed={} unknown=0 pending=0 horizon_ns={horizon} elapsed_ns={} drain_ns={} backlog_at_horizon={backlog} offered_ops_s={:.3} admitted_ops_s={:.3} applied_during_ops_s={:.3} applied_total_ops_s={:.3} p99_us={p99} service_p99_us={service_p99} recovered_value={recovered_value} recovery_retries={retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3}{maintenance_summary} {ready_settings}{group_settings}{capacity_settings}\n", ledger.max_pending, applied-during, ledger.count_status("window_refused"), ledger.count_status("no_leader"), ledger.count_status("admission_refused"), ledger.count_status("not_proposed"), elapsed.as_nanos(), elapsed.as_nanos().saturating_sub(horizon), count as f64 * 1e9 / horizon as f64, admitted as f64 / elapsed.as_secs_f64(), during as f64 * 1e9 / horizon as f64, applied as f64 / elapsed.as_secs_f64(), totals.rounds, totals.host_ns as f64/1e6, totals.max_host_ns as f64/1e6);
+     let mut file = exclusive(&root.join("summary.txt"))?;
+     file.write_all(summary.as_bytes())?;
+     file.sync_all()?;
+diff --git a/examples/benchmark/shared.rs b/examples/benchmark/shared.rs
+index 91048e11..978568c4 100644
+--- a/examples/benchmark/shared.rs
++++ b/examples/benchmark/shared.rs
+@@ -31,36 +31,13 @@ use voteboat::{
+     worker::*,
+ };
+ 
+-pub(super) fn open(
+-    root: &Path,
+-    mode: NativeOpenMode,
+-    protocol: NativePeerProtocol,
+-    capacity: usize,
+-    clock: &Instant,
+-    groups: usize,
+-    ready_visit_items: usize,
+-) -> Result<(Vec<Replica<SharedLog>>, Vec<Trace>), Failure> {
+-    open_partition(
+-        root,
+-        mode,
+-        protocol,
+-        capacity,
+-        clock,
+-        Partition {
+-            offset: 0,
+-            groups,
+-            lane: 1,
+-            ready_visit_items,
+-        },
+-    )
+-}
+-
+ #[derive(Clone, Copy)]
+ pub(super) struct Partition {
+     pub offset: usize,
+     pub groups: usize,
+     pub lane: u64,
+     pub ready_visit_items: usize,
++    pub capacity_profile: CapacityProfile,
+ }
+ 
+ pub(super) fn open_partition(
+@@ -126,6 +103,7 @@ pub(super) fn open_partition(
+             addresses: &addresses,
+             lane: partition.lane,
+             ready_visit_items: partition.ready_visit_items,
++            capacity_profile: partition.capacity_profile,
+         };
+         let (replica, trace) = match setup.open_replica(n) {
+             Ok(opened) => opened,
+@@ -243,6 +221,7 @@ fn recover_groups(
+         snapshots,
+     })
+ }
++#[cfg(test)]
+ pub(super) fn timed_shard(
+     cores: Vec<voteboat::raft::Raft>,
+     owner_id: RuntimeOwner,
+@@ -256,14 +235,35 @@ pub(super) fn timed_shard(
+         TimedShard<FairScheduler, DeadlineQueue, JitterEntropy>,
+     ),
+     Failure,
++> {
++    timed_shard_profile(
++        cores,
++        owner_id,
++        n,
++        groups,
++        clock,
++        ready_visit_items,
++        CapacityProfile::Legacy,
++    )
++}
++pub(super) fn timed_shard_profile(
++    cores: Vec<voteboat::raft::Raft>,
++    owner_id: RuntimeOwner,
++    n: u64,
++    groups: usize,
++    clock: &Instant,
++    ready_visit_items: usize,
++    profile: CapacityProfile,
++) -> Result<
++    (
++        MonoTime,
++        TimedShard<FairScheduler, DeadlineQueue, JitterEntropy>,
++    ),
++    Failure,
+ > {
+     let mut shard = checked(Shard::new(
+         owner_id,
+-        ShardLimits {
+-            max_groups: groups,
+-            visit_items: ready_visit_items,
+-            ..ShardLimits::default()
+-        },
++        profile.shard(ready_visit_items, groups),
+         checked(FairScheduler::new(groups))?,
+     ))?;
+     for core in cores {
+@@ -290,7 +290,11 @@ struct Routers {
+     clients: ClientRouter<CounterReceipt>,
+     reads: ReadRequests<(), i64>,
+ }
+-fn application_routers(owner_id: RuntimeOwner, local: LocalIdentity) -> Result<Routers, Failure> {
++fn application_routers(
++    owner_id: RuntimeOwner,
++    local: LocalIdentity,
++    profile: CapacityProfile,
++) -> Result<Routers, Failure> {
+     let ingress = checked(IngressRouter::new(
+         IngressBinding {
+             owner: owner_id,
+@@ -311,7 +315,7 @@ fn application_routers(owner_id: RuntimeOwner, local: LocalIdentity) -> Result<R
+             RuntimeAuthorization::physical(owner_id),
+             ClientRouterGeneration::new(1).unwrap(),
+         ),
+-        ClientRouterLimits::default(),
++        profile.clients(),
+     ))?;
+     let reads = checked(ReadRequests::new(
+         ReadInvocationBinding::new(
+@@ -407,6 +411,7 @@ struct ClusterSetup<'a> {
+     addresses: &'a BTreeMap<u64, std::net::SocketAddr>,
+     lane: u64,
+     ready_visit_items: usize,
++    capacity_profile: CapacityProfile,
+ }
+ impl ClusterSetup<'_> {
+     fn open_replica(&self, n: u64) -> Result<(Replica<SharedLog>, Trace), Failure> {
+@@ -444,6 +449,7 @@ impl ClusterSetup<'_> {
+             addresses,
+             lane,
+             ready_visit_items,
++            capacity_profile,
+         } = *self;
+         let directory = root.join(format!("replica{n}"));
+         let create = mode == NativeOpenMode::Create;
+@@ -478,13 +484,14 @@ impl ClusterSetup<'_> {
+         ))?
+         .peers()
+         .collect::<BTreeMap<_, _>>();
+-        let (now, timed) = timed_shard(
++        let (now, timed) = timed_shard_profile(
+             cores,
+             owner_id,
+             n,
+             bootstraps.len(),
+             clock,
+             ready_visit_items,
++            capacity_profile,
+         )?;
+         let (version, codec) = wire_profile(member)?;
+         let (outbound, roster) = peer_io(local, first, last, &remote, now, version)?;
+@@ -493,7 +500,19 @@ impl ClusterSetup<'_> {
+             results,
+             clients,
+             reads,
+-        } = application_routers(owner_id, local)?;
++        } = application_routers(owner_id, local, capacity_profile)?;
++        capacity_profile.readback(
++            timed.limits(),
++            clients.limits(),
++            ready_visit_items,
++            bootstraps.len(),
++        )?;
++        if capacity_profile != CapacityProfile::Legacy {
++            eprintln!(
++                "capacity_readback replica={n} mode={mode:?}{}",
++                capacity_profile.settings()
++            );
++        }
+         let ingress = checked(IngressRouter::new(ingress.binding(), ingress_limits))?;
+         let factory = checked(NativeTransportFactory::new(codec, Default::default()))?;
+         let wake: Arc<dyn WorkerWake> = Arc::new(ThreadWake::current());
+diff --git a/examples/benchmark/shared_drain.rs b/examples/benchmark/shared_drain.rs
+index 05bb8f06..bfa06b96 100644
+--- a/examples/benchmark/shared_drain.rs
++++ b/examples/benchmark/shared_drain.rs
+@@ -209,6 +209,7 @@ impl Harness {
+                     addresses: &self.addresses,
+                     lane: 1,
+                     ready_visit_items: 16,
++                    capacity_profile: CapacityProfile::Legacy,
+                 }
+                 .open_profile(n, None, true)
+                 .unwrap()
+diff --git a/examples/benchmark/shared_recovery.rs b/examples/benchmark/shared_recovery.rs
+index c212a2cf..49feb495 100644
+--- a/examples/benchmark/shared_recovery.rs
++++ b/examples/benchmark/shared_recovery.rs
+@@ -83,6 +83,7 @@ impl Harness {
+             addresses: &self.addresses,
+             lane: 1,
+             ready_visit_items: 16,
++            capacity_profile: CapacityProfile::Legacy,
+         }
+         .open_profile_with_ingress(n, self.recovery, false, self.ingress)
+         .unwrap()
+diff --git a/examples/native_benchmark.rs b/examples/native_benchmark.rs
+index 976890d5..1fc39f56 100644
+--- a/examples/native_benchmark.rs
++++ b/examples/native_benchmark.rs
+@@ -64,6 +64,9 @@ mod batching;
+ mod failure;
+ #[path = "benchmark/observe.rs"]
+ mod observe;
++#[path = "benchmark/offered_capacity.rs"]
++mod offered_capacity;
++use offered_capacity::CapacityProfile;
+ #[path = "benchmark/offered.rs"]
+ mod offered;
+ #[path = "benchmark/offered_groups.rs"]
+@@ -705,8 +708,10 @@ fn exclusive(path: &Path) -> Result<File, Failure> {
+ fn main() -> Result<(), Failure> {
+     let mut args = std::env::args().skip(1).collect::<Vec<_>>();
+     let selected_ready_items = ready_items::extract(&mut args)?;
++    let capacity_profile = CapacityProfile::extract(&mut args)?;
+     let raw_group_weights = offered_groups::extract(&mut args)?;
+     if args.first().is_some_and(|arg| arg == "--lanes") {
++        capacity_profile.validate(false, 1)?;
+         if selected_ready_items.is_some() {
+             return Err("--ready-items is unsupported with --lanes".into());
+         }
+@@ -725,7 +730,7 @@ fn main() -> Result<(), Failure> {
+     }
+     if !matches!(args.len(), 4 | 5 | 7 | 9 | 11) {
+         return Err(
+-            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64) [--ready-items 1|16|32|64] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
++            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64; offered-capacity 4096 enables 1..4096) [--offered-capacity 4096 (offered only)] [--ready-items 1|16|32|64] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
+                 .into(),
+         );
+     }
+@@ -745,7 +750,7 @@ fn main() -> Result<(), Failure> {
+     };
+     let count = operations.parse::<usize>()?;
+     let window = window.parse::<usize>()?;
+-    if !(1..=50000).contains(&count) || !(1..=64).contains(&window) {
++    if !(1..=50000).contains(&count) {
+         return Err("count/window out of bounds".into());
+     }
+     let offered_rate = if args.len() >= 7 {
+@@ -758,6 +763,7 @@ fn main() -> Result<(), Failure> {
+     } else {
+         None
+     };
++    capacity_profile.validate(offered_rate.is_some(), window)?;
+     let maintenance = if args.len() >= 9 {
+         if args[7] != "--maintenance" {
+             return Err("expected --maintenance SECONDS".into());
+@@ -799,6 +805,7 @@ fn main() -> Result<(), Failure> {
+         group_schedule,
+         maintenance,
+         ready_visit_items,
++        capacity_profile,
+     };
+     run_selected(config, &clock, capacity, journal_timings)
+ }
+@@ -812,16 +819,22 @@ fn run_selected(
+     let protocol = config.protocol;
+     let groups = config.groups;
+     let ready_visit_items = config.ready_visit_items;
++    let capacity_profile = config.capacity_profile;
+     if config.shared {
+         run(config, clock, |mode| {
+-            shared::open(
++            shared::open_partition(
+                 root,
+                 mode,
+                 protocol,
+                 capacity,
+                 clock,
+-                groups,
+-                ready_visit_items,
++                shared::Partition {
++                    offset: 0,
++                    groups,
++                    lane: 1,
++                    ready_visit_items,
++                    capacity_profile,
++                },
+             )
+         })
+     } else {
+@@ -849,6 +862,7 @@ struct RunConfig<'a> {
+     group_schedule: Option<offered_groups::GroupSchedule>,
+     maintenance: Option<offered::MaintenanceConfig>,
+     ready_visit_items: usize,
++    capacity_profile: CapacityProfile,
+ }
+ fn run<L: LogStore + Send + 'static>(
+     config: RunConfig<'_>,
+diff --git a/validation/check-offered.mjs b/validation/check-offered.mjs
+index 457bb265..b2891757 100644
+--- a/validation/check-offered.mjs
++++ b/validation/check-offered.mjs
+@@ -33,6 +33,22 @@ function workloadSchedule(summary, groups, count, warmup) {
+     return groupOf;
+ }
+ 
++function capacityWindow(summary) {
++    const limits = {
++        offered_capacity_effective:4096, client_requests:4096, client_group_requests:4096,
++        client_bytes:33554432, client_receipt_bytes:1048576,
++        shard_max_items:8192, shard_control_items:1024, shard_group_items:4112,
++        shard_group_control_items:16, shard_group_bytes:4194304,
++    };
++    if (summary.offered_capacity_requested === undefined) {
++        for (const key of Object.keys(limits)) assert.equal(summary[key], undefined, `undisclosed capacity ${key}`);
++        return 64;
++    }
++    assert.equal(String(summary.offered_capacity_requested), '4096');
++    for (const [key,value] of Object.entries(limits)) assert.equal(String(summary[key]), String(value), key);
++    return 4096;
++}
++
+ export function validateOffered(label, summary, source) {
+     const n = key => Number(summary[key]);
+     const count = n('offers'), groups = n('groups'), window = n('window'), warmup = n('warmup');
+@@ -40,7 +56,7 @@ export function validateOffered(label, summary, source) {
+     assert.ok(Number.isSafeInteger(count) && count >= 1 && count <= 50000);
+     assert.ok(Number.isSafeInteger(rate) && rate >= 1 && rate <= 100000);
+     assert.ok(Number.isSafeInteger(groups) && groups >= 1 && groups <= 32);
+-    assert.ok(Number.isSafeInteger(window) && window >= 1 && window <= 64);
++    assert.ok(Number.isSafeInteger(window) && window >= 1 && window <= capacityWindow(summary));
+     assert.equal(warmup, 64);
+     const groupOf = workloadSchedule(summary, groups, count, warmup);
+     assert.equal(horizon, Math.floor(count * 1e9 / rate));
+diff --git a/validation/check-offered.test.mjs b/validation/check-offered.test.mjs
+index 7a5f4669..4da9aa58 100644
+--- a/validation/check-offered.test.mjs
++++ b/validation/check-offered.test.mjs
+@@ -86,3 +86,21 @@ test('reject a hot-group retained bound that the old uniform ceiling would admit
+     assert.throws(()=>check(original,{...metadata,offers:20000,groups:2,
+         workload_group_weights:'255,1',workload_group_phase:phase}),/weighted workload exceeds/);
+ });
++
++const capacity4096={offered_capacity_requested:4096,offered_capacity_effective:4096,
++    client_requests:4096,client_group_requests:4096,client_bytes:33554432,client_receipt_bytes:1048576,
++    shard_max_items:8192,shard_control_items:1024,shard_group_items:4112,
++    shard_group_control_items:16,shard_group_bytes:4194304};
++test('wide windows require the complete explicit profile without changing outcome conservation',()=>{
++    const {rows,summary}=weightedFixture();
++    for(const window of [32,256,4096]) check(rows,{...summary,...capacity4096,window});
++    assert.throws(()=>check(rows,{...summary,window:256}));
++    assert.throws(()=>check(rows,{...summary,...capacity4096,window:4097}));
++    for(const key of Object.keys(capacity4096)) {
++        const bad={...summary,...capacity4096,window:256};delete bad[key];
++        assert.throws(()=>check(rows,bad),key);
++        assert.throws(()=>check(rows,{...summary,...capacity4096,window:256,[key]:1}),key);
++    }
++    assert.throws(()=>check(rows,{...summary,...capacity4096,window:256,recovered_value:71}));
++    assert.throws(()=>check(rows,{...summary,...capacity4096,window:256,max_inflight:4096}));
++});

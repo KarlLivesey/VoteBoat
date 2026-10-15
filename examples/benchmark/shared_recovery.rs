@@ -83,6 +83,7 @@ impl Harness {
             addresses: &self.addresses,
             lane: 1,
             ready_visit_items: 16,
+            capacity_profile: CapacityProfile::Legacy,
         }
         .open_profile_with_ingress(n, self.recovery, false, self.ingress)
         .unwrap()

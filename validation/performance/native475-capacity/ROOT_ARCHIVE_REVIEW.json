@@ -1,0 +1,13 @@
+{
+  "payloads": 263,
+  "gzip": 5,
+  "manifest_sha256": "0140b8697ef1d4b4c5d7159e5c43a63deb278d28b9fbcec03797902b37bdb31e",
+  "exact_set_payload_hashes_lossless_original_lengths": "PASS",
+  "guarded_final_inputs": 1469,
+  "native_example51_debugbuild": "PASS",
+  "finalTCP_QUIC_wide_recovery_readbacks": "PASS",
+  "invalidCLI_before_root": 11,
+  "full_strict_hook": "PASS",
+  "JS11_exact_input_reuse": "PASS",
+  "native_performance_claim": false
+}

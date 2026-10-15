@@ -1,0 +1,14 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "build",
+    "--locked",
+    "--offline",
+    "--all-features",
+    "--example",
+    "native_benchmark"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.6373910319816787
+}

@@ -1,0 +1,8 @@
+
+running 3 tests
+test offered_capacity::tests::actual_readback_rejects_changed_independent_bounds_and_profile_drift ... ok
+test offered_capacity::tests::parser_refuses_invalid_modes_and_keeps_legacy_windows ... ok
+test offered_capacity::tests::selected_queue_retains_4096_originals_and_separate_control_reserve ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 48 filtered out; finished in 0.00s
+

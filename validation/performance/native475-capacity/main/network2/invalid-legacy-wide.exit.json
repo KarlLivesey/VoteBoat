@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/checks/debug/examples/native_benchmark",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/network2/wal/invalid-legacy-wide",
+    "tcp",
+    "512",
+    "65",
+    "1",
+    "--offered",
+    "128"
+  ],
+  "exit": 1,
+  "elapsed_s": 0.0005441720131784678
+}

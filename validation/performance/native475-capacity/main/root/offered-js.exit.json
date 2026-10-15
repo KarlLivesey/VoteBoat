@@ -1,0 +1,8 @@
+{
+  "command": [
+    "node",
+    "validation/check-offered.test.mjs"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.06659910900634713
+}

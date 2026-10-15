@@ -1,0 +1,9 @@
+{
+  "pid": 256677,
+  "binary": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/checks/debug/examples/native_benchmark",
+  "binary_sha256": "ebc39d1f2c8407590957b0f781f28fdea21a1661fb1f39f1fdc3f0fe3f2fef8a",
+  "start": "2026-10-15T08:12:50.867373+00:00",
+  "scope": "Unoptimized debug functional controls, not speed/fresh-performance artifact proof",
+  "invalid": [],
+  "cases": []
+}

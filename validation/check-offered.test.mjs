@@ -86,3 +86,21 @@ test('reject a hot-group retained bound that the old uniform ceiling would admit
     assert.throws(()=>check(original,{...metadata,offers:20000,groups:2,
         workload_group_weights:'255,1',workload_group_phase:phase}),/weighted workload exceeds/);
 });
+
+const capacity4096={offered_capacity_requested:4096,offered_capacity_effective:4096,
+    client_requests:4096,client_group_requests:4096,client_bytes:33554432,client_receipt_bytes:1048576,
+    shard_max_items:8192,shard_control_items:1024,shard_group_items:4112,
+    shard_group_control_items:16,shard_group_bytes:4194304};
+test('wide windows require the complete explicit profile without changing outcome conservation',()=>{
+    const {rows,summary}=weightedFixture();
+    for(const window of [32,256,4096]) check(rows,{...summary,...capacity4096,window});
+    assert.throws(()=>check(rows,{...summary,window:256}));
+    assert.throws(()=>check(rows,{...summary,...capacity4096,window:4097}));
+    for(const key of Object.keys(capacity4096)) {
+        const bad={...summary,...capacity4096,window:256};delete bad[key];
+        assert.throws(()=>check(rows,bad),key);
+        assert.throws(()=>check(rows,{...summary,...capacity4096,window:256,[key]:1}),key);
+    }
+    assert.throws(()=>check(rows,{...summary,...capacity4096,window:256,recovered_value:71}));
+    assert.throws(()=>check(rows,{...summary,...capacity4096,window:256,max_inflight:4096}));
+});

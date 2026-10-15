@@ -1,0 +1,49 @@
+{
+  "scope": "Independent read-only source/validator review versus4f88; no tests/builds/workloads/SSH/source edits executed",
+  "baseline": "4f88",
+  "reviewed_sha256": {
+    "examples/native_benchmark.rs": "d246acfd790928d619b1742505f28fb8d75d38d71bb28fec5d9434af17523e6a",
+    "examples/benchmark/offered_capacity.rs": "1d84835502b466d7dbaaf58f79850d7ea7971a58eb53831e95a939380b975c08",
+    "examples/benchmark/offered_capacity/tests.rs": "22234836f821f3c9ac4e8166b6866642a04c7684125cfb51e8c25eed8a45d699",
+    "examples/benchmark/shared.rs": "30bf11e5f8fcb3b84d2b0d132a1b7c9257db23b22a422cd78045fb72606f8918",
+    "examples/benchmark/offered.rs": "69371c1b043f383e7bd58e78cdb8a6ab4df1cfdf2e63f9d2a43d829af86662ec",
+    "examples/benchmark/lanes.rs": "ba53327022a83ae37b6a01f3e751f1945b246ea3d9c28e99e3c4994b94684c43",
+    "examples/benchmark/lanes/tests.rs": "a693ff463d96f8a7293ec0c5cee71d3f4096cbaf9c24780108dc5a240eda5004",
+    "examples/benchmark/shared_drain.rs": "9b577b07615915e691c2aedacc143e5d26b04465461c36e10f1a02a96d582b75",
+    "examples/benchmark/shared_recovery.rs": "8e7fe75682b9bed8fd882b89040ef69736845ea6fcbc2479fb1b67737edb88be",
+    "validation/check-offered.mjs": "13f0c1f45df5bbc20802e21883bf7157ef0272210df1269f0e8fddb739d90015",
+    "validation/check-offered.test.mjs": "52e44b192a7a2f8091aa58ffb3a0ebe5750e080b33f0b9c3fe2af3bed1cbc8ad",
+    "validation/performance/native475-capacity/SCHEMA.md": "bdee4bd46951f4b91119005468dd3d9566656fbb6f1bd4894c3c109a51ad6504",
+    "docs/PERFORMANCE.md": "6406928f8bbb193065a4c9518b89c1928ba1a42c070d15676cf2caa21e1d91b8"
+  },
+  "production_and_build_configuration_diff_empty": true,
+  "findings": [],
+  "checks": [
+    {
+      "area": "parse/pre-resource failure",
+      "evidence": "CapacityProfile extraction rejects missing/non4096/duplicate values before draining args; validate rejects nonoffered/startup/lanes and windows0/>selected bound before run_selected/root/socket/worker creation. Existing count/rate/horizon/group/log-capacity checks retained."
+    },
+    {
+      "area": "legacy isolation",
+      "evidence": "DefaultLegacy installs original Shard and ClientRouter settings, emits no new capacity fields; static lanes/drain/recovery fixtures explicitly Legacy. Startup ordinary mode cannot select Offered4096."
+    },
+    {
+      "area": "actual create/recovery configuration",
+      "evidence": "RunConfig captured once by shared open_partition closure for both NativeOpenMode states. Partition\u2192ClusterSetup\u2192timed_shard_profile and application_routers apply same immutable profile. Before worker creation readback compares all actual Shard/ClientRouter Debug fields against requested ready/groups/profile; tests mutate ready/groups/client bytes and profile pairing to reject drift. settings() uses16/1 only to obtain fields independent of ready/groups; effective ready/groups checked through caller readback and separately reported."
+    },
+    {
+      "area": "bounded ownership/control",
+      "evidence": "Only per-group client requests64\u21924096 and Shard items256\u21924112 change. Global4096router/8192Shard,16groupControl/1024globalControl, all byte/receipt/background bounds unchanged. Unit fixture uses real Shard admissions at240legacy/4096selected, one-more data refusal and all16reservedControl admissions then refusal. No unsafe/cache/hidden retry queue/protocol/batch/worker change."
+    },
+    {
+      "area": "outcomes/restart/cleanup",
+      "evidence": "Existing per-offer original IDs/tickets/outcomes/partial CSV/cancellation/maintenance/recovery/retry/join machinery unchanged. Selected profile recorded in run.txt before construction so failed runs retain declared selection; both create/recover use same closure. Readback precedes workers; existing partial startup cleanup remains."
+    },
+    {
+      "area": "independent validator controls",
+      "evidence": "Legacy remainswindow<=64 and rejects stray selected-capacity fields; wide summary requires complete exact requested/effective bound declarations. Tests validate actual weighted six-row CSV under32/256/4096 then reject omitted/mutated profile fields, window4097, corrupted recovery value and phantom max_inflight. Existing CSV identity/history/refusal/time/rate conservation still executes, not just constant assertions."
+    }
+  ],
+  "pending_acceptance_scope": "Root original96011 nativeexample51 tests is ongoing; this review makes no pass claim. Schema-required actual smallTCP/QUIC wide-selection Create/Recover/readback and refused-before-root checks, JS checks and enabled strict publication must finish before fresh performance artifacts/timing. This restates existing planned gates, not new prerequisites.",
+  "measurement_limits": "Capacity4096 is host backlog bound, not4096pending successes or Core/write width. 4MiBgroup/32MiBclient bytes remain independent real caps; actual occupancy/refusals and120sdrain guard retained. No speed/headroom/fullP9 claim."
+}

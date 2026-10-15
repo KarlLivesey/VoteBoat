@@ -1,0 +1,40 @@
+{
+  "pid": 160943,
+  "commands": [
+    [
+      "example-all",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--example",
+        "native_benchmark",
+        "--",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "example-build",
+      [
+        "cargo",
+        "+stable",
+        "build",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--example",
+        "native_benchmark"
+      ]
+    ]
+  ],
+  "env": {
+    "CARGO_TARGET_DIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/checks",
+    "CARGO_BUILD_JOBS": "2",
+    "PROTOC": "/home/karllivesey/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/protobuf-build-0.14.1/bin/protoc-linux-x86_64",
+    "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/root2/tmp"
+  },
+  "start": "2026-10-15T08:06:44.596452+00:00"
+}

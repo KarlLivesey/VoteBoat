@@ -47,6 +47,7 @@ impl Config {
                 groups,
                 lane: lane as u64 + 1,
                 ready_visit_items: 16,
+                capacity_profile: CapacityProfile::Legacy,
             },
             count: share(self.count, self.lanes, lane),
             warmup: share(WARMUP, self.lanes, lane),

@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/checks/debug/examples/native_benchmark",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/network2/wal/quic-w4096",
+    "quic",
+    "512",
+    "4096",
+    "1",
+    "--offered",
+    "128",
+    "--maintenance",
+    "2",
+    "--ready-items",
+    "16",
+    "--offered-capacity",
+    "4096"
+  ],
+  "exit": 0,
+  "elapsed_s": 6.958496700011892
+}

@@ -1,0 +1,60 @@
+{
+  "head": "4f88a3f223b76936be63f73b43662e769ccecd15",
+  "files": {
+    "examples/native_benchmark.rs": {
+      "sha256": "d246acfd790928d619b1742505f28fb8d75d38d71bb28fec5d9434af17523e6a",
+      "bytes": 39174,
+      "mode": "0o644"
+    },
+    "examples/benchmark/shared.rs": {
+      "sha256": "30bf11e5f8fcb3b84d2b0d132a1b7c9257db23b22a422cd78045fb72606f8918",
+      "bytes": 21585,
+      "mode": "0o644"
+    },
+    "examples/benchmark/shared_recovery.rs": {
+      "sha256": "8e7fe75682b9bed8fd882b89040ef69736845ea6fcbc2479fb1b67737edb88be",
+      "bytes": 12229,
+      "mode": "0o644"
+    },
+    "examples/benchmark/shared_drain.rs": {
+      "sha256": "9b577b07615915e691c2aedacc143e5d26b04465461c36e10f1a02a96d582b75",
+      "bytes": 24128,
+      "mode": "0o644"
+    },
+    "examples/benchmark/lanes.rs": {
+      "sha256": "ba53327022a83ae37b6a01f3e751f1945b246ea3d9c28e99e3c4994b94684c43",
+      "bytes": 6230,
+      "mode": "0o644"
+    },
+    "examples/benchmark/lanes/tests.rs": {
+      "sha256": "a693ff463d96f8a7293ec0c5cee71d3f4096cbaf9c24780108dc5a240eda5004",
+      "bytes": 6625,
+      "mode": "0o644"
+    },
+    "examples/benchmark/offered.rs": {
+      "sha256": "fa4802ad98d838de7c01148eff0440f92535761ce77a708977f2d128ab65771a",
+      "bytes": 33882,
+      "mode": "0o644"
+    },
+    "validation/check-offered.mjs": {
+      "sha256": "13f0c1f45df5bbc20802e21883bf7157ef0272210df1269f0e8fddb739d90015",
+      "bytes": 9264,
+      "mode": "0o644"
+    },
+    "validation/check-offered.test.mjs": {
+      "sha256": "52e44b192a7a2f8091aa58ffb3a0ebe5750e080b33f0b9c3fe2af3bed1cbc8ad",
+      "bytes": 6021,
+      "mode": "0o644"
+    },
+    "examples/benchmark/offered_capacity.rs": {
+      "sha256": "1d84835502b466d7dbaaf58f79850d7ea7971a58eb53831e95a939380b975c08",
+      "bytes": 3291,
+      "mode": "0o644"
+    },
+    "examples/benchmark/offered_capacity/tests.rs": {
+      "sha256": "22234836f821f3c9ac4e8166b6866642a04c7684125cfb51e8c25eed8a45d699",
+      "bytes": 5093,
+      "mode": "0o644"
+    }
+  }
+}

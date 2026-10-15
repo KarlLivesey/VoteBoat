@@ -31,36 +31,13 @@ use voteboat::{
     worker::*,
 };
 
-pub(super) fn open(
-    root: &Path,
-    mode: NativeOpenMode,
-    protocol: NativePeerProtocol,
-    capacity: usize,
-    clock: &Instant,
-    groups: usize,
-    ready_visit_items: usize,
-) -> Result<(Vec<Replica<SharedLog>>, Vec<Trace>), Failure> {
-    open_partition(
-        root,
-        mode,
-        protocol,
-        capacity,
-        clock,
-        Partition {
-            offset: 0,
-            groups,
-            lane: 1,
-            ready_visit_items,
-        },
-    )
-}
-
 #[derive(Clone, Copy)]
 pub(super) struct Partition {
     pub offset: usize,
     pub groups: usize,
     pub lane: u64,
     pub ready_visit_items: usize,
+    pub capacity_profile: CapacityProfile,
 }
 
 pub(super) fn open_partition(
@@ -126,6 +103,7 @@ pub(super) fn open_partition(
             addresses: &addresses,
             lane: partition.lane,
             ready_visit_items: partition.ready_visit_items,
+            capacity_profile: partition.capacity_profile,
         };
         let (replica, trace) = match setup.open_replica(n) {
             Ok(opened) => opened,
@@ -243,6 +221,7 @@ fn recover_groups(
         snapshots,
     })
 }
+#[cfg(test)]
 pub(super) fn timed_shard(
     cores: Vec<voteboat::raft::Raft>,
     owner_id: RuntimeOwner,
@@ -257,13 +236,34 @@ pub(super) fn timed_shard(
     ),
     Failure,
 > {
+    timed_shard_profile(
+        cores,
+        owner_id,
+        n,
+        groups,
+        clock,
+        ready_visit_items,
+        CapacityProfile::Legacy,
+    )
+}
+pub(super) fn timed_shard_profile(
+    cores: Vec<voteboat::raft::Raft>,
+    owner_id: RuntimeOwner,
+    n: u64,
+    groups: usize,
+    clock: &Instant,
+    ready_visit_items: usize,
+    profile: CapacityProfile,
+) -> Result<
+    (
+        MonoTime,
+        TimedShard<FairScheduler, DeadlineQueue, JitterEntropy>,
+    ),
+    Failure,
+> {
     let mut shard = checked(Shard::new(
         owner_id,
-        ShardLimits {
-            max_groups: groups,
-            visit_items: ready_visit_items,
-            ..ShardLimits::default()
-        },
+        profile.shard(ready_visit_items, groups),
         checked(FairScheduler::new(groups))?,
     ))?;
     for core in cores {
@@ -290,7 +290,11 @@ struct Routers {
     clients: ClientRouter<CounterReceipt>,
     reads: ReadRequests<(), i64>,
 }
-fn application_routers(owner_id: RuntimeOwner, local: LocalIdentity) -> Result<Routers, Failure> {
+fn application_routers(
+    owner_id: RuntimeOwner,
+    local: LocalIdentity,
+    profile: CapacityProfile,
+) -> Result<Routers, Failure> {
     let ingress = checked(IngressRouter::new(
         IngressBinding {
             owner: owner_id,
@@ -311,7 +315,7 @@ fn application_routers(owner_id: RuntimeOwner, local: LocalIdentity) -> Result<R
             RuntimeAuthorization::physical(owner_id),
             ClientRouterGeneration::new(1).unwrap(),
         ),
-        ClientRouterLimits::default(),
+        profile.clients(),
     ))?;
     let reads = checked(ReadRequests::new(
         ReadInvocationBinding::new(
@@ -407,8 +411,30 @@ struct ClusterSetup<'a> {
     addresses: &'a BTreeMap<u64, std::net::SocketAddr>,
     lane: u64,
     ready_visit_items: usize,
+    capacity_profile: CapacityProfile,
 }
 impl ClusterSetup<'_> {
+    fn check_capacity(
+        &self,
+        n: u64,
+        shard: ShardLimits,
+        clients: ClientRouterLimits,
+    ) -> Result<(), Failure> {
+        self.capacity_profile.readback(
+            shard,
+            clients,
+            self.ready_visit_items,
+            self.bootstraps.len(),
+        )?;
+        if self.capacity_profile != CapacityProfile::Legacy {
+            eprintln!(
+                "capacity_readback replica={n} mode={:?}{}",
+                self.mode,
+                self.capacity_profile.settings()
+            );
+        }
+        Ok(())
+    }
     fn open_replica(&self, n: u64) -> Result<(Replica<SharedLog>, Trace), Failure> {
         self.open_replica_with_recovery(n, None)
     }
@@ -444,6 +470,7 @@ impl ClusterSetup<'_> {
             addresses,
             lane,
             ready_visit_items,
+            capacity_profile,
         } = *self;
         let directory = root.join(format!("replica{n}"));
         let create = mode == NativeOpenMode::Create;
@@ -478,13 +505,14 @@ impl ClusterSetup<'_> {
         ))?
         .peers()
         .collect::<BTreeMap<_, _>>();
-        let (now, timed) = timed_shard(
+        let (now, timed) = timed_shard_profile(
             cores,
             owner_id,
             n,
             bootstraps.len(),
             clock,
             ready_visit_items,
+            capacity_profile,
         )?;
         let (version, codec) = wire_profile(member)?;
         let (outbound, roster) = peer_io(local, first, last, &remote, now, version)?;
@@ -493,7 +521,8 @@ impl ClusterSetup<'_> {
             results,
             clients,
             reads,
-        } = application_routers(owner_id, local)?;
+        } = application_routers(owner_id, local, capacity_profile)?;
+        self.check_capacity(n, timed.limits(), clients.limits())?;
         let ingress = checked(IngressRouter::new(ingress.binding(), ingress_limits))?;
         let factory = checked(NativeTransportFactory::new(codec, Default::default()))?;
         let wake: Arc<dyn WorkerWake> = Arc::new(ThreadWake::current());

@@ -1,0 +1,16 @@
+{
+  "old_before": "root/BEFORE.json",
+  "final_before": "root2/BEFORE.json",
+  "files": {
+    "validation/check-offered.mjs": {
+      "sha256": "13f0c1f45df5bbc20802e21883bf7157ef0272210df1269f0e8fddb739d90015",
+      "mode": "0o644"
+    },
+    "validation/check-offered.test.mjs": {
+      "sha256": "52e44b192a7a2f8091aa58ffb3a0ebe5750e080b33f0b9c3fe2af3bed1cbc8ad",
+      "mode": "0o644"
+    }
+  },
+  "actual11tests_pass": "root/offered-js.exit.json",
+  "scope": "Exact independent JS input hashes unchanged by subsequent Rust-only lint extractions; reuse11 actual controls, not Node file-level wrapper count."
+}

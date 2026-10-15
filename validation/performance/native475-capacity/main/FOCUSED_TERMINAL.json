@@ -1,0 +1,72 @@
+{
+  "rust": {
+    "argv": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "--all-features",
+      "--example",
+      "native_benchmark",
+      "offered_capacity",
+      "--",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "environment": {
+      "CARGO_TARGET_DIR": "target/p9/slice475/checks",
+      "CARGO_BUILD_JOBS": "2",
+      "PROTOC": "/home/karllivesey/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/protobuf-build-0.14.1/bin/protoc-linux-x86_64"
+    },
+    "attempts": [
+      {
+        "handle": 86100,
+        "actual_exit": 0,
+        "stdout": "focused-attempt1.stdout",
+        "stderr": "focused-attempt1.stderr",
+        "note": "3 controls passed; obsolete shared::open warning"
+      },
+      {
+        "handle": 83038,
+        "actual_exit": 0,
+        "stdout": "focused-attempt2.stdout",
+        "stderr": "focused-attempt2.stderr",
+        "note": "3 controls passed after obsolete wrapper deletion and usage correction"
+      },
+      {
+        "synchronous_chunk": "db2203",
+        "actual_exit": 0,
+        "stdout": "focused-final.stdout",
+        "stderr": "focused-final.stderr",
+        "note": "3 controls passed after independent requested-ready/group readback controls"
+      }
+    ]
+  },
+  "javascript": [
+    {
+      "argv": [
+        "node",
+        "--test",
+        "validation/check-offered.test.mjs"
+      ],
+      "synchronous_chunk": "dc48be",
+      "actual_exit": 0,
+      "stdout": "js.stdout",
+      "stderr": "js.stderr",
+      "scope": "file-level1 reported; not counted as actual test assertions"
+    },
+    {
+      "argv": [
+        "node",
+        "validation/check-offered.test.mjs"
+      ],
+      "synchronous_chunk": "48b6c8",
+      "actual_exit": 0,
+      "stdout": "js-direct.stdout",
+      "stderr": "js-direct.stderr",
+      "tests_passed": 11
+    }
+  ],
+  "scope": "Fixture/example and validator only; no production, network workload, full hook or fresh artifact build. Queue control admits into actual TimedShard without executing consensus; runtime create/recover readbacks await parent-selected network qualification."
+}

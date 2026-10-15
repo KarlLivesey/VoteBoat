@@ -31,7 +31,8 @@ synchronization (`FileLogIo::sync` calls `File::sync_all`); no durability bypass
 mock network is selected. Each replica has its own native store and workers.
 
 A 64-operation warm-up and quorum read complete before measurement. The bounded
-client window is 1–64 for startup, shared and offered modes; measured count is
+client window is 1–64 by default for startup, shared and offered modes; the
+explicit offered capacity profile below permits up to4096. Measured count is
 1–50,000. The separate `--lanes` mode retains its maximum window of32. Default
 Node queue and poll budgets are unchanged. The harness explicitly
 selects heartbeat 50 ms and election 1000–1999 ms through
@@ -300,7 +301,27 @@ cargo +stable build --release --example native_benchmark --all-features --locked
 ```
 
 These commands schedule 120 offers over 30 seconds and 240 over 5 seconds.
-RATE is 1–100000 offers/second, count/window/groups retain existing bounds, and
+
+For a wider offered-load sweep, select one common admission profile for every
+cell, independently of the window:
+
+```sh
+./target/release/examples/native_benchmark FRESH_WIDE_ROOT tcp 8192 256 1 --offered 128 --maintenance 2 --offered-capacity 4096
+```
+
+This explicit offered-only profile allows windows1–4096, sets the client
+per-group request budget to4096 and the shard per-group queue to4112 items,
+including its original16 control slots. Global/byte/control/background budgets,
+ready quantum, Core proposal limits and persistence ordering stay unchanged.
+Create and recovery check the actual installed limits before workers start;
+`run.txt`, stderr readbacks and the successful summary identify the profile.
+The independent validator requires its complete consistent declaration. Selected
+capacity is a bound, not a claim of4096 admissions or4096-wide writes: observed
+occupancy, byte/receipt caps and every refusal remain reported. Without the flag,
+the original64-window bounds and legacy output remain in effect.
+
+RATE is 1–100000 offers/second; count/groups retain existing bounds, windows
+follow the selected capacity profile, and
 the intended offering horizon is capped at 300 seconds. Warm-up is separate.
 A reactor turn handles at most 64 due offers. Lateness never resets the schedule:
 `offers.csv` records every ID's intended start, actual dispatch/decision and

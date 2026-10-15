@@ -33,6 +33,22 @@ function workloadSchedule(summary, groups, count, warmup) {
     return groupOf;
 }
 
+function capacityWindow(summary) {
+    const limits = {
+        offered_capacity_effective:4096, client_requests:4096, client_group_requests:4096,
+        client_bytes:33554432, client_receipt_bytes:1048576,
+        shard_max_items:8192, shard_control_items:1024, shard_group_items:4112,
+        shard_group_control_items:16, shard_group_bytes:4194304,
+    };
+    if (summary.offered_capacity_requested === undefined) {
+        for (const key of Object.keys(limits)) assert.equal(summary[key], undefined, `undisclosed capacity ${key}`);
+        return 64;
+    }
+    assert.equal(String(summary.offered_capacity_requested), '4096');
+    for (const [key,value] of Object.entries(limits)) assert.equal(String(summary[key]), String(value), key);
+    return 4096;
+}
+
 export function validateOffered(label, summary, source) {
     const n = key => Number(summary[key]);
     const count = n('offers'), groups = n('groups'), window = n('window'), warmup = n('warmup');
@@ -40,7 +56,7 @@ export function validateOffered(label, summary, source) {
     assert.ok(Number.isSafeInteger(count) && count >= 1 && count <= 50000);
     assert.ok(Number.isSafeInteger(rate) && rate >= 1 && rate <= 100000);
     assert.ok(Number.isSafeInteger(groups) && groups >= 1 && groups <= 32);
-    assert.ok(Number.isSafeInteger(window) && window >= 1 && window <= 64);
+    assert.ok(Number.isSafeInteger(window) && window >= 1 && window <= capacityWindow(summary));
     assert.equal(warmup, 64);
     const groupOf = workloadSchedule(summary, groups, count, warmup);
     assert.equal(horizon, Math.floor(count * 1e9 / rate));

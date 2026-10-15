@@ -1,0 +1,1 @@
+mode=offered protocol=Quic offers=512 offered_rate=128 window=64 groups=1 warmup=64

@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/checks/debug/examples/native_benchmark",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/network2/wal/invalid-missing",
+    "tcp",
+    "512",
+    "64",
+    "1",
+    "--offered",
+    "128",
+    "--offered-capacity"
+  ],
+  "exit": 1,
+  "elapsed_s": 0.0010556330089457333
+}

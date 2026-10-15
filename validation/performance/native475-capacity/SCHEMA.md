@@ -66,3 +66,15 @@ migration plan. Naive highest-valid-slot or last-valid-WAL-marker fallback canno
 hide final acknowledged damage. Full P9 seven-cell/both-host healthy margin,
 8,422,500/s batch4 minimum (not target), durable/headroom/fairness/memory/debt,
 placement/shared barriers and P8 performance remain open. Windows/P10/Pi excluded.
+
+User refinement: native optimization acceptance requires a measured gain on all
+three filesystem environments: current Linux Btrfs, a real ext4/XFS partition,
+and Mac APFS. Pair baseline/candidate on the SAME volume/device/compiler/profile
+within each environment; a different drive is coverage, not isolation of CoW
+versus hardware flush latency. No loopback-on-Btrfs substitute or automatic disk
+formatting. No ext4/XFS scratch volume is currently identified; user will provide
+one and explicitly directs continuation on Btrfs/APFS meanwhile. Keep that cell
+pending. The common capacity sweep applies to each available environment; no
+future engine change is accepted universally before all three pass. The normal
+path target is portable reduction of publication work, with an explicit proof
+for final acknowledged-authority damage before any WAL-marker implementation.

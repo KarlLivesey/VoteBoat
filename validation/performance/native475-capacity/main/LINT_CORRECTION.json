@@ -1,0 +1,9 @@
+{
+  "first_strict_handle": 49154,
+  "actual_exit": 101,
+  "errors": [
+    "main102/100lines",
+    "sharedopen_profile_with_ingress109/100lines"
+  ],
+  "fix": "Move existing count+profile workload validation and preworker capacity readback/diagnostic into named private helpers. Add count-range controls. No lint/formatter threshold/config or production change. Preserve original source, checked raw tests/control runs and failed strict logs; qualify final source."
+}

@@ -1,0 +1,10 @@
+{
+  "command": [
+    "node",
+    "validation/check-native-benchmark.mjs",
+    "--storage",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/network2/wal/tcp-w4096"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.024064564000582322
+}

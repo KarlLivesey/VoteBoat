@@ -34997,3 +34997,49 @@ control reserves, production/defaults and all original outcomes. It is a necessa
 measurement capability, not a gain. Checked small wide TCP/QUIC recovery controls
 and fresh published native artifacts precede the54-case/host offered-rate sweep.
 The default Btrfs path remains the reference. Full P9 macro scope is unchanged.
+
+
+475 implementation now has an explicit immutable offered-capacity4096 profile,
+pre-worker actual router/shard readbacks in every Create/Recover and legacy
+constructors,4096 ordinary queue admissions plus preserved16-control reserve,
+strict negative CSV/profile/conservation checks and failed-run profile metadata.
+No src/provider/default/format change. Initial source passes3focused controls,
+JS11, fullnativeexample51 (225.52s), debugbuild and six actual TCP/QUIC64/256/4096
+controls with exact outcomes/recovery/retries/joins and nine pre-root CLI refusals.
+These are functional debug runs, not capacity measurements; wide controls observe
+at most143 pending originals, never claimed4096 achieved. Strict hook then finds
+main102/100 and shared-open109/100 lines; two private workload-validation/readback
+extractions fix causes without changing thresholds. Original source/logs stay;
+final exact-source strict/affected checks precede publication/fresh artifacts.
+
+User adds three-filesystem native acceptance: Btrfs, real ext4/XFS partition and
+APFS. Each future candidate must gain against its paired same-volume/device
+baseline. Cross-drive raw differences cannot isolate CoW from drive flush cost.
+Current mounted Linux volumes are Btrfs; the detected USB Predator4TB is not an
+authorized disposable target. User will provide ext4/XFS scratch soon and directs
+continued Btrfs/APFS work meanwhile. No disk is formatted/partitioned/mounted for
+this task. Preserve the pending third cell and all original full P9 obligations;
+WAL-marker choice still requires final-acknowledged-damage/recovery proof first.
+
+
+[475 final Linux qualification](../validation/performance/native475-capacity/main/README.md)
+now completes: finalroot2 nativeexample51 pass230.32s/debugbuild0, finalwide
+TCP/QUIC original512offer/recovery/retry/join/maintenance/storage/readback checks0,
+11 invalid CLI cases reject before root creation, exact1469 source/mode guards.
+JS11 reuse exact unchanged validator/test hashes; strict2 formatter/fourprofiles/
+standalone hook0. Independent final extraction review finds no blocker; a doubly
+invalid count/rate can report rate parsing first, still before resources. Original
+51/225.52s and six64/256/4096 control runs, warning/fixes and failed101 lint gates
+remain in263 sealed payloads/5 lossless originals. No source default/production/
+provider/format change or achieved4096-width/native speed claim follows.
+
+Publish this checked fixture through the enabled hook, then use prepared guarded
+fresh native475 runners. Linux export/build refuses an unpublished sentinel;
+Mac readonly preflight verifies original455 tool hashes, compatibleprotoc3.21.12,
+all82 lock registry packages available and no owned jobs. Actual /private/tmp
+maps APFS disk3s1→disk3→internalSSD disk0s2 (~1.995TB), all3 replicas sharing the
+same volume/store. Failed initial directory diskutil query and corrected device
+query are retained; no sourcecopy/build/timing has started. Fresh artifact/input/
+compiler/default-native-profile guards precede common-profile Btrfs/APFS sweeps.
+User's ext4/XFS target remains pending; no drive operation is inferred/authorized.
+All full P9 macro and three-filesystem native acceptance requirements stay open.

@@ -1,0 +1,41 @@
+{
+  "head": "4f88a3f223b76936be63f73b43662e769ccecd15",
+  "files": {
+    "examples/native_benchmark.rs": {
+      "sha256": "d6c061a854ea6b722e9a4f3ed5c167d65d5b9cc1fd3f180e7a5278eaa0460326",
+      "mode": "0o644"
+    },
+    "examples/benchmark/shared.rs": {
+      "sha256": "d316232fac7c89bf2ddc1d7ef458312cccb537d22c2102e04401d53a606c7903",
+      "mode": "0o644"
+    },
+    "examples/benchmark/shared_recovery.rs": {
+      "sha256": "0bf0f9bf95a29fd11963dc67e46ed6ec849a2eeb93c1cf67c4d2f437c204fe71",
+      "mode": "0o644"
+    },
+    "examples/benchmark/shared_drain.rs": {
+      "sha256": "3698bb9a92fb9b91f8abb5df6adb52b1aed93a1cedb2ee0133940d34f0b8048e",
+      "mode": "0o644"
+    },
+    "examples/benchmark/lanes.rs": {
+      "sha256": "0ca14fbca422b4eab7c9b06d2c43891e4bd87f399e86d6af09131bcfdcc79b65",
+      "mode": "0o644"
+    },
+    "examples/benchmark/lanes/tests.rs": {
+      "sha256": "5f5bcb63159a64bca264ebf229e6c3aef8f018055d5459085d2ff4eab5db606f",
+      "mode": "0o644"
+    },
+    "examples/benchmark/offered.rs": {
+      "sha256": "6edb9bcf72d25a4b1a979a86f9142fee241ec6c55148d39a1c81f347d5a17743",
+      "mode": "0o644"
+    },
+    "validation/check-offered.mjs": {
+      "sha256": "c11ca7957c50f9ad2763e724905af82516bd8b253ae828a4df797ed17bd3129a",
+      "mode": "0o644"
+    },
+    "validation/check-offered.test.mjs": {
+      "sha256": "f0a1ada7dde8b91e0484533797b469f840a7916760e3e4c89409972522aa5b63",
+      "mode": "0o644"
+    }
+  }
+}

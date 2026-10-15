@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/checks/debug/examples/native_benchmark",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice475/network/wal/invalid-duplicate",
+    "tcp",
+    "512",
+    "64",
+    "1",
+    "--offered",
+    "128",
+    "--offered-capacity",
+    "4096",
+    "--offered-capacity",
+    "4096"
+  ],
+  "exit": 1,
+  "elapsed_s": 0.0011941330158151686
+}

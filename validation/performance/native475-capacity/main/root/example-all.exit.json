@@ -1,0 +1,16 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--all-features",
+    "--example",
+    "native_benchmark",
+    "--",
+    "--test-threads=1"
+  ],
+  "exit": 0,
+  "elapsed_s": 226.02756854199106
+}
