@@ -1,0 +1,89 @@
+
+running 70 tests
+test application::tests::historical_noop_checkpoint_restores_only_its_exact_boundary ... ok
+test application::tests::partial_prefix_error_keeps_original_application_frontier ... ok
+test attribution::gaps::tests::complete_ordinals_produce_exact_gaps_and_actual_whole_gap_maxima ... ok
+test attribution::gaps::tests::disabled_mode_ignores_poisoned_marks_counters_and_missing_clock_inputs ... ok
+test attribution::gaps::tests::missing_prefix_extra_calls_or_failed_methods_cannot_certify_a_successful_helper ... ok
+test attribution::gaps::tests::missing_stale_and_backward_marks_invalidate_only_the_final_diagnostics ... ok
+test attribution::gaps::tests::overflow_is_checked_before_any_gap_counter_advances ... ok
+test attribution::gaps::tests::partial_helper_error_does_not_read_or_fabricate_a_completed_gap ... ok
+test attribution::tests::disabled_recorder_reads_no_clock_cells_or_snapshots ... ok
+test attribution::tests::exhausted_real_snapshot_observer_preserves_successful_provider_outcome ... ok
+test attribution::tests::interval_accounting_is_checked_and_overflow_is_atomic ... ok
+test attribution::tests::invalid_observation_does_not_interrupt_a_provider_and_is_rejected_at_report ... ok
+test attribution::tests::scoped_provider_deltas_exclude_setup_and_do_not_invent_maxima ... ok
+test budget_tests::campaign_cli_default_and_finite_bounds_are_validated ... ok
+test envelopes::tests::empty_owned_budget_is_derived_before_launch_without_changing_native_defaults ... ok
+test envelopes::tests::fixed_request_profiles_derive_equal_original_bounds_and_independent_replication ... ok
+test guard::tests::cleanup_expiry_is_finite_and_does_not_substitute_a_success_report ... ok
+test guard::tests::original_failure_type_and_cleanup_only_failure_are_preserved ... ok
+test guard::tests::timed_out_owned_clients_are_canceled_and_cleanup_still_runs ... ok
+test guard::tests::zero_budget_ready_result_succeeds_without_waiting ... ok
+test store::tests::completed_predicate_keeps_pending_before_missing_errors_and_exact_outcomes ... ok
+test store::tests::disabled_comparison_preserves_equality_without_touching_observer_cells ... ok
+test store::tests::protected_checkpoint_comparison_keeps_completed_gate_and_distinct_phase ... ok
+test tests::rounding_matches_equal_upstream_client_batches ... ok
+test voteboat_engine::actor::pending_replies::tests::full_identity_trace_matches_independent_hash_map ... ok
+test voteboat_engine::actor::pending_replies::tests::maximum_sparse_occupancy_and_churn_keep_backing_slots_and_free_list_bounded ... pending_cohort_scope=actual_standalone_dev bound=5 sparse_rounds=8 arena_capacity=5 free_capacity=5 cohort_available_capacity_high_water=7 block_bytes=72 reply_slots_reserved=20 index_tuple_bytes=32
+pending_cohort_scope=actual_standalone_dev bound=16385 sparse_rounds=8 arena_capacity=16385 free_capacity=16385 cohort_available_capacity_high_water=28672 block_bytes=72 reply_slots_reserved=65540 index_tuple_bytes=32
+ok
+test voteboat_engine::actor::pending_replies::tests::missing_slots_preserve_state_and_reused_indices_never_alias_old_identity ... ok
+test voteboat_engine::actor::pending_replies::tests::replacement_removal_and_table_drop_transfer_each_value_exactly_once ... ok
+test voteboat_engine::actor::tests::checkpoint_scopes_observe_actual_helpers_and_nested_retention ... ok
+test voteboat_engine::actor::tests::completion::borrowed_and_fifo_owned_delivery_stop_after_same_dropped_wait ... ok
+test voteboat_engine::actor::tests::completion::borrowed_application_failure_preserves_frontier_and_all_original_waits ... ok
+test voteboat_engine::actor::tests::completion::empty_fifo_applies_borrowed_commit_and_delivers_every_original ... ok
+test voteboat_engine::actor::tests::completion::existing_fifo_application_error_precedes_new_commit_application ... ok
+test voteboat_engine::actor::tests::completion::existing_fifo_send_error_precedes_new_commit_receipt ... ok
+test voteboat_engine::actor::tests::originals::empty_and_oversized_shapes_precede_full_pending_budget_without_admission ... ok
+test voteboat_engine::actor::tests::originals::queued_boundary_empty_originals_commit_in_order_after_deferral ... ok
+test voteboat_engine::actor::tests::originals::queued_boundary_moves_mixed_originals_without_receipts_and_drop_cancels_them ... ok
+test voteboat_engine::actor::tests::overdue_paused_follower_keeps_state_and_unpaused_tick_resumes_campaign ... ok
+test voteboat_engine::actor::tests::partial_compact_helper_error_keeps_original_failure_without_gap_success ... ok
+test voteboat_engine::actor::tests::preloaded_actor_admits_the_exact_wide_bound_and_completes_all_originals ... ok
+test voteboat_engine::actor::tests::provider_failures_keep_original_outcomes_and_are_scoped ... ok
+test voteboat_engine::actor::tests::replies::actor_drop_cancels_all_admitted_and_deferred_original_waits ... ok
+test voteboat_engine::actor::tests::replies::bounded_churn_preserves_receipts_and_reuses_retained_capacity ... logical_bound=5 rounds=256 initial_cohort_capacity=7 minimum_available_cohort_capacity=7 cohort_capacity_high_water=7 final_available_cohort_capacity=7
+ok
+test voteboat_engine::actor::tests::replies::dropped_client_and_missing_result_stop_delivery_in_input_order ... ok
+test voteboat_engine::actor::tests::replies::duplicate_existing_replaces_old_wait_and_keeps_only_admitted_prefix ... ok
+test voteboat_engine::actor::tests::replies::duplicate_within_batch_replaces_first_wait_and_cancels_unvisited_tail ... ok
+test voteboat_engine::actor::tests::replies::near_bound_partial_rotation_completes_every_original_and_reports_capacity ... partial_rotation clients=1 logical_bound=5 rounds=1024 initial_cohort_capacity=7 minimum_available_cohort_capacity=7 cohort_capacity_high_water=7 final_available_cohort_capacity=7
+partial_rotation clients=4096 logical_bound=16385 rounds=65540 initial_cohort_capacity=28672 minimum_available_cohort_capacity=14756 cohort_capacity_high_water=28672 final_available_cohort_capacity=14756
+ok
+test voteboat_engine::actor::tests::replies::nonmonotonic_full_width_ids_commit_in_proposal_order_with_every_receipt ... ok
+test voteboat_engine::actor::tests::replies::shape_and_budget_gates_preserve_prior_pending_and_proposal_prefix ... layout_scope=actual_standalone_dev_test clients=1 logical_bound=5 cohort_available_insert_capacity=7 key_bytes=16 reply_bytes=8 legacy_key_reply_tuple_bytes=32
+layout_scope=actual_standalone_dev_test clients=4096 logical_bound=16385 cohort_available_insert_capacity=28019 key_bytes=16 reply_bytes=8 legacy_key_reply_tuple_bytes=32
+ok
+test voteboat_engine::cancellation_tests::canceled_cluster_shutdown_keeps_handles_owned_and_drop_aborts_every_actor ... ok
+test voteboat_engine::client_outcomes::accepted_request_cancellation_closes_every_receiver_without_losing_request ... ok
+test voteboat_engine::client_outcomes::canceling_full_queue_send_never_publishes_a_partial_request ... ok
+test voteboat_engine::client_outcomes::empty_and_all_request_widths_preserve_closed_send_error ... ok
+test voteboat_engine::client_outcomes::every_request_receipt_is_checked_in_original_order ... ok
+test voteboat_engine::client_outcomes::invalid_ids_never_send_and_precede_closed_channel_error ... ok
+test voteboat_engine::client_outcomes::queued_wrong_tail_cannot_bypass_the_original_first_wait ... ok
+test voteboat_engine::client_outcomes::receiver_only_wait_layout_diagnostic_against_literal450_write ... scope=actual_current_dev_future_vs_literal450_source_replica unpolled_current_future_bytes=296 unpolled_literal450_future_bytes=304 receiver_bytes=8 old_wait_tuple_bytes=32 receiver_vec_header_bytes=24 old_wait_vec_header_bytes=24
+scope=dev_requested_wait_reserve_not_allocator_or_RSS width=0 receiver_capacity=0 tuple_capacity=0 receiver_element_capacity_bytes=0 tuple_element_capacity_bytes=0
+scope=dev_requested_wait_reserve_not_allocator_or_RSS width=1 receiver_capacity=1 tuple_capacity=1 receiver_element_capacity_bytes=8 tuple_element_capacity_bytes=32
+scope=dev_requested_wait_reserve_not_allocator_or_RSS width=4 receiver_capacity=4 tuple_capacity=4 receiver_element_capacity_bytes=32 tuple_element_capacity_bytes=128
+scope=dev_requested_wait_reserve_not_allocator_or_RSS width=5 receiver_capacity=5 tuple_capacity=5 receiver_element_capacity_bytes=40 tuple_element_capacity_bytes=160
+scope=dev_requested_wait_reserve_not_allocator_or_RSS width=17 receiver_capacity=17 tuple_capacity=17 receiver_element_capacity_bytes=136 tuple_element_capacity_bytes=544
+ok
+test voteboat_engine::client_outcomes::wrong_or_closed_first_and_middle_receipts_cancel_all_unvisited_receivers ... ok
+test voteboat_engine::client_outcomes::zero_identity_precedes_a_full_send_queue_for_every_request_width ... ok
+test voteboat_engine::client_requests::first_closed_receipt_returns_without_waiting_for_the_tail ... ok
+test voteboat_engine::client_requests::first_wrong_receipt_returns_while_later_sender_remains_owned ... ok
+test voteboat_engine::client_requests::flat_request_layout_and_every_channel_capacity_are_reported_at_queue_boundary ... old_proposal_bytes=48 old_reply_bytes=8 old_element_sum=56 old_two_vec_header_bytes=48 flat_original_bytes=48 flat_request_header_bytes=24 originals=4 original_capacity=4 completion_channels=4
+ok
+test voteboat_engine::client_requests::queued_client_cancellation_drops_every_original_wait_without_losing_request ... ok
+test voteboat_engine::client_requests::zero_identity_never_publishes_a_partial_request_and_precedes_send_error ... ok
+test voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install ... ok
+test voteboat_engine::tests::queued_three_voter_originals_keep_every_receipt_and_respect_the_bound ... ok
+test workload::aggregation_tests::post_clock_aggregation_preserves_each_original_sample_and_rejects_malformed_counts ... ok
+test workload::tests::actual_maintenance_keeps_original_results_and_all_follower_prefixes ... ok
+test workload::tests::both_engines_finish_every_original_for_single_and_four_entry_requests ... ok
+test workload::tests::unavailable_upstream_attribution_is_rejected_explicitly ... ok
+
+test result: ok. 70 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.31s
+

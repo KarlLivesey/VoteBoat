@@ -1,0 +1,61 @@
+{
+  "parent": "6e91e6ecefda652da42c6130354263484378f6f6",
+  "base": "39da70a749788e193f49f95955b69024a9da0b51",
+  "schema_sha256": "c88929338ed19d2d1565c15cdfa83b749b3ad211fce2e9f0553098305ba71705",
+  "paths": [
+    {
+      "path": "benchmarks/matched/COMPARISON.md",
+      "status": "M",
+      "before_sha256": "8a08b3c6f7b181201affa7615fd07e35df4b3f29b30fbae315d479eb7c7c1bda",
+      "physical_mode": "0o644",
+      "action": "restore",
+      "after_sha256": "33ba7e5e2eafb694c034663e88c6476c7d8ee746dd52c3676da999c4b565b507"
+    },
+    {
+      "path": "benchmarks/matched/src/voteboat_engine.rs",
+      "status": "M",
+      "before_sha256": "7939ec8ba9e5e2096432e64586017cfa70de2fd63281a16825949e37001879ea",
+      "physical_mode": "0o644",
+      "action": "restore",
+      "after_sha256": "2f87dc9d2da035ac9ed23afc03b757a59c694b3d56c5e8c43d194a2e442cb269"
+    },
+    {
+      "path": "benchmarks/matched/src/voteboat_engine/client_outcomes.rs",
+      "status": "M",
+      "before_sha256": "ed1be5f125404da990c58267986da34c5015b4b9450d0bcbd23e901379aca487",
+      "physical_mode": "0o644",
+      "action": "restore",
+      "after_sha256": "c4eaf5ebf2c9102aa0d7a9f5aeec55d460fa6e7d720386679c4cdcea3d86248f"
+    },
+    {
+      "path": "benchmarks/matched/src/voteboat_engine/client_requests.rs",
+      "status": "M",
+      "before_sha256": "c7d45726fbff52683768d7f90655f0d92cb68d709ae963cd6cebfb08c4159f12",
+      "physical_mode": "0o644",
+      "action": "restore",
+      "after_sha256": "fd7af81d4ebf9def440117186dc1ea4607eb2e73d9306c04fae55b21b72ffaa5"
+    },
+    {
+      "path": "benchmarks/matched/src/voteboat_engine/wait_cache.rs",
+      "status": "A",
+      "before_sha256": "74d496ce4f3b7c42b1f1dbf8aeb2d841a12d2db9348df1251b19c20427a3abf3",
+      "physical_mode": "0o644",
+      "action": "remove_experiment_added"
+    },
+    {
+      "path": "benchmarks/matched/src/voteboat_engine/wait_cache/tests.rs",
+      "status": "A",
+      "before_sha256": "dc6a447cfabab4ce3eae9c92dae287bd52198b11a1cf95054f3ca5b0766eeb31",
+      "physical_mode": "0o644",
+      "action": "remove_experiment_added"
+    },
+    {
+      "path": "benchmarks/matched/src/workload.rs",
+      "status": "M",
+      "before_sha256": "4138f4bff2131c126fc74f1a852199f9234d3d816f4b5f53bf6b675acc3a9469",
+      "physical_mode": "0o644",
+      "action": "restore",
+      "after_sha256": "15fb771a6ba26a00e077e6f768174c8bfb476b7c697bbe4937a93b7e08401709"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "actual_exit": 0,
+  "original_handle": 6185,
+  "utc": "2026-10-15T02:14:36.477342+00:00",
+  "scope": "Fresh asserted framework artifact build and source/profile/original-copy guards only; no CLI or timing",
+  "source_commit": "6e91e6ecefda652da42c6130354263484378f6f6",
+  "source_inventory_sha256": "188c2d88f1b06bfd8526f6f321f7ad7896815bfa7c5728884b02b89cb21029c3",
+  "actual_fresh_false_targets": [
+    "voteboat",
+    "voteboat-matched-framework",
+    "openraft",
+    "bench_minimal"
+  ],
+  "root_buildscript_fresh": false,
+  "source_guard_before_after_exit0": true,
+  "CLI_started": false,
+  "timing_started": false
+}

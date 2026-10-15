@@ -1,0 +1,15 @@
+{
+  "all_recorded_jobs_terminal": true,
+  "original_runs": [
+    {
+      "handle": 72709,
+      "actual_exit": 0,
+      "stage": "DONE",
+      "status_path": "main/STATUS"
+    }
+  ],
+  "functional_reuse": "root467/465/455 exact production/build/contracts, unchanged root source; current77matched controls and full enabled hook cover private harness delta",
+  "source_before": "CHECKS_BEFORE.json",
+  "source_after": "CHECKS_AFTER.json",
+  "performance_claim": false
+}

@@ -1,0 +1,22 @@
+{
+  "setup_original_handle": 82977,
+  "actual_setup_terminal_exit": 0,
+  "actual_setup_stage": "ALL_SETUP_END",
+  "candidate_commit": "6e91e6ecefda652da42c6130354263484378f6f6",
+  "candidate_and_baseline_guards_exit": 0,
+  "driver_sha256": "a60089e789a5e1ce3d0989f88c42ae15ae6aa17f40dc07a511c10427e11cd828",
+  "controller_sha256": "e5502228a3a5e9a9c5169d04b81515b1ca5b8fc236008e4621f92e1591f1b570",
+  "config_sha256": "a10be179a3a856c6d4120242c9b35bb8e2bb8fe09e330cbe9373082c1b9fd147",
+  "compiled_four_fresh_false": true,
+  "three_cli_controls_passed": true,
+  "phase_scope_methods": [
+    29,
+    4,
+    15
+  ],
+  "bulk_requested": 20000000,
+  "bulk_completed": 19988480,
+  "singleton_completed": 1048576,
+  "cases": 24,
+  "scope": "Selected two-cell repeated diagnostics only; no complete sustained/fullcurve/durable/physical-memoryplateau acceptance."
+}

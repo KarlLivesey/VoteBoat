@@ -1,0 +1,1 @@
+Reject468; restore the checked467/465/455 private client and shared driver in slice469, retain all raw evidence and existing outcome controls. No tuning variants or Mac468 performance run. Root owns schema/implementation/qualification/publication. Full P9 sustained seven-cell, both-host margin and durable/headroom/fairness/P8 objective remains incomplete.

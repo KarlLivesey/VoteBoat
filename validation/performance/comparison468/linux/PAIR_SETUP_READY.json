@@ -1,0 +1,18 @@
+{
+  "baseline_commit": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "candidate_commit": "6e91e6ecefda652da42c6130354263484378f6f6",
+  "guards_exit": 0,
+  "current_cli_checker_sha256": "cd18eea07f68b2aa27ab42f8326a8ec33bd606ba9fd6b14a122915e76ae85f29",
+  "bulk": {
+    "requested": 20000000,
+    "actual": 19988480,
+    "cases": 12
+  },
+  "singleton": {
+    "requested": 1048576,
+    "actual": 1048576,
+    "cases": 12
+  },
+  "combined_controller": "bash target/p9/comparison468/linux-run.sh",
+  "timing_authorized": false
+}

@@ -743,8 +743,8 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: checked exclusive-client heap wait-buffer reuse | Remove one repeated receiver-Vec allocation/free per request after first use, preserving every original channel | Published467 restoration/466 forensic closure, saved455 client profile and [before-edit468 schema](../validation/performance/slice468/SCHEMA.md); original Mac455 qualification | Cold-clone/bounded-cache/cancellation/oversized controls, all matched outcomes, exact source/modes, full enabled strict hook and publication; fresh asserted artifacts, actual layouts and repeated paired rate/p99/memory disposition | P9.1/P9.3 |
-| Next: optimize the largest remaining measured stage | Improve sustained useful throughput through less work or better ordering | Current468 disposition, both-host CPU/waiting/materialization evidence and original comparison contract | Before-edit ownership/transition/restart schema; profile-backed structural reduction or bounded-persistence design, correctness/recovery checks, checked publication and repeated paired results; no hint/parameter retuning or rejected-path repetition | P9.1/P9.2/P9.3 |
+| Current: publish measured468 rejection and checked469 restoration | Close the heap-buffer experiment without carrying unproven complexity | [All24 paired results](../validation/performance/comparison468/linux/MEASUREMENTS.md), fresh artifact/provenance and [before-edit469 schema](../validation/performance/slice469/SCHEMA.md) | Preserve every mixed trial/setup proof, exact39da source/build/contract equality and no extra modules; original70 matched controls/full enabled hook0, commit/push; no Mac468 or buffer/frame retuning | P9.1/P9.3 |
+| Next: integrated bounded same-group persistence pipeline | Amortize the dominant durable barrier context through actual overlap and queued units | Retained455 source, native elapsed evidence, Core/owner/shard/worker/provider contract audit and original Mac455 qualification | Before-edit accepted/durable/unit/visit/admission/control/credit/restart schema; complete usable opt-in path with unchanged aggregate limits and physical durability protocol, exact failures/recovery/outcomes, actual units/barrier and paired useful rates/tails; no isolated unused API milestone | P9.1/P9.2/P9.3 |
 | Following: full curve, sustainable headroom and composition qualification | Satisfy the entire performance objective beyond the current experiment | Retained measured improvements, qualified weighted fixture, source/artifact/host identities and stable maintenance | All seven required framework cells on both hosts with healthy margin; sustained memory/debt, durable applications/headroom/skew/fairness, independent placement/shared barriers and P8 composition; preserve every outcome/fence/retry | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
@@ -34556,3 +34556,38 @@ and actual rate/tail/memory evidence decide. Checked publication and fresh
 asserted artifacts precede repeated20M bulk/1M singleton comparisons; no useful
 gain, native speed or P9 milestone is established yet. Original Mac455's broad
 P8 history matrix continues with actual per-case progress and no restart.
+
+468 publishes6e91e6ec through original55225/full enabled hook0. Fresh Linux
+build6185 ends0 with root/executable/pinned upstream and root buildscript
+fresh:false, exact455 compiler/protoc/tool hashes,1452 source inputs/1443 checked
+projection, original/copied ELF+DWP and physical modes. Actual setup82977 ends0
+with three16K OFF/ON/OpenRaft controls,29/four/15 observer and pair guards0.
+[Paired1699](../validation/performance/comparison468/linux/MEASUREMENTS.md)
+ends0/ALL_TIMING_END, all24 cases/validators0, active maintenance and exact
+19,988,480 bulk/1,048,576 singleton completions. Bulk medians7,051,115→7,100,720/s,
+p993.950913→3.816851ms retain trial2−9.1% rate and two p99 losses. Singleton
+101,930→104,893/s,.020408→.020017ms has two rate losses. Higher medians do not
+establish useful repeatable gain; all329 archived raw/provenance payloads verify,
+including ON/upstream tails and the initial unpublished-source refusals.
+
+[469 before-edit schema](../validation/performance/slice469/SCHEMA.md) rejects
+the cache without frame/Drain/retention tuning or Mac468 work. Five files return
+to39da70a7 and two new modules are removed; all2485 baseline bytes/modes and1441
+compiled inputs/no extras match independently. [Original52057](../validation/performance/slice469/main/README.md)
+ends0/DONE with matched70 and complete enabled formatting/four-profile/standalone
+strict hook0, before/after hashes/modes exact. Root production/native/provider/
+network/recovery scopes remain exact465/455 and are reused. Publication follows;
+no useful cache speedup or full macro acceptance is claimed.
+
+The [next material design audit](../validation/performance/pipeline470/AUDIT.md)
+is coordinated bounded same-group persistence
+pipelining, preserving the physical sync/manifest protocol. Existing native
+accepted-state/ticket staging supports successive revisions, but Core.pending,
+per-group visits/continuations and worker group-only correlation currently
+serialize them. An accepted unit must not become durable/quorum authority early;
+all original admission/receipt/control-credit ownership must survive partial
+completion, cancellation and fencing. Scheduling cannot join a barrier already
+syncing; queued units may amortize a subsequent barrier. This audit is not an
+implemented pipeline or a performance claim. The linked current-plus-next-two
+plan preserves all both-host seven-cell, durable/headroom/fairness/placement/P8
+requirements and the full goal remains active.

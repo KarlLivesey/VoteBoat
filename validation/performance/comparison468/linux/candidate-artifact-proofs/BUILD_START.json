@@ -1,0 +1,8 @@
+{
+  "utc": "2026-10-15T02:12:57.908293+00:00",
+  "command": "bash target/p9/matched468-linux/run.sh",
+  "published_commit": "6e91e6ecefda652da42c6130354263484378f6f6",
+  "source_inventory_sha256": "188c2d88f1b06bfd8526f6f321f7ad7896815bfa7c5728884b02b89cb21029c3",
+  "actual_original_handle": 6185,
+  "target_previously_absent": true
+}

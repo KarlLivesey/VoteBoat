@@ -1,0 +1,87 @@
+{
+  "scope": "Preparation only; no committed source export/build/CLI/performance run",
+  "candidate_required_commit": "UNPUBLISHED_CANDIDATE_NOT_AUTHORIZED_FOR_TIMING",
+  "baseline_commit": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "baseline_executable_sha256": "d567532226a5e7fa7d150b9fd905ffcff4c97905143e4a15ed8e477cd032755f",
+  "baseline_dwp_sha256": "2c337bc1a579a5e7150c70346ee23f76ab02f02abfc9b286f7bcd8efadbcde75",
+  "refusals": [
+    {
+      "control": "export_unpublished",
+      "command": [
+        "bash",
+        "target/p9/matched468-linux/export-source.sh"
+      ],
+      "actual_exit": 1,
+      "expected_refusal": true
+    },
+    {
+      "control": "build_guard_unpublished",
+      "command": [
+        "python3",
+        "target/p9/matched468-linux/guard.py",
+        "target/p9/matched468-linux",
+        "source"
+      ],
+      "actual_exit": 1,
+      "expected_refusal": true
+    },
+    {
+      "control": "pair_prepare_unpublished",
+      "command": [
+        "python3",
+        "target/p9/comparison468/prepare-pair.py",
+        "--baseline-config",
+        "target/p9/comparison468/BASELINE_CONFIG.linux.json",
+        "--baseline-job",
+        "target/p9/matched455-linux",
+        "--candidate-job",
+        "target/p9/matched468-linux",
+        "--output",
+        "target/p9/comparison468/CONFIG_PAIR.linux.json"
+      ],
+      "actual_exit": 1,
+      "expected_refusal": true
+    }
+  ],
+  "syntax": "Python AST and shell bash -n0",
+  "unchanged_checker": {
+    "path": "target/p9/comparison468/phase-diagnostic-check.py",
+    "sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "origin": "target/p9/comparison456/phase-diagnostic-check.py",
+    "identical": true
+  },
+  "scripts_sha256": {
+    "target/p9/matched468-linux/REQUIRED_COMMIT.txt": "d103c47bf2e0b1d72c7f4e88abc5b2c79edce491175b180e29593a5573670b82",
+    "target/p9/matched468-linux/artifact-guard.py": "16704b5298c041cd80e9ff2d90f17d40d87e8f2aed6e6979a986b2bd111e0d32",
+    "target/p9/matched468-linux/cli-run.sh": "9b99c07d038f898b6f22a8f26fe51d35518775b741c2ddb071c2efd5dba8c8ee",
+    "target/p9/matched468-linux/cli.py": "087742b9f5e12308c822b52bf95a77b8dd4c352308ae052a147a2068ee020024",
+    "target/p9/matched468-linux/export-source.sh": "38ce50c50f621301855c34a66835595b5ad2ed6f339cdeb1fe9362c5dd29f07c",
+    "target/p9/matched468-linux/guard.py": "ab20137678d91ee47e0bd94d13503c0e1e301e0b98f9458a79d6bdafcee48c50",
+    "target/p9/matched468-linux/phase-diagnostic-check.py": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "target/p9/matched468-linux/run.sh": "a8d3fdc7937ff577cd4067fe3ca4785fffea959305e9204ae633916299c97831",
+    "target/p9/matched468-linux/setup-after-build.sh": "d1cd5992f6091f696a6ad10d383c35f8a4155b38f0ab0ebb684c1e7578e0abf2",
+    "target/p9/comparison468/BASELINE_CONFIG.linux.json": "29f795229f57170052916d4c77a1b599b00ef15ee5d01af6a8cb7094b8f40d75",
+    "target/p9/comparison468/REQUIRED_COMMIT.txt": "d103c47bf2e0b1d72c7f4e88abc5b2c79edce491175b180e29593a5573670b82",
+    "target/p9/comparison468/artifact-guard.py": "16704b5298c041cd80e9ff2d90f17d40d87e8f2aed6e6979a986b2bd111e0d32",
+    "target/p9/comparison468/linux-run.sh": "e5502228a3a5e9a9c5169d04b81515b1ca5b8fc236008e4621f92e1591f1b570",
+    "target/p9/comparison468/phase-diagnostic-check.py": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "target/p9/comparison468/phase-diagnostic.sh": "a60089e789a5e1ce3d0989f88c42ae15ae6aa17f40dc07a511c10427e11cd828",
+    "target/p9/comparison468/prepare-pair.py": "5042f9fd5289c43b74feed7e0c436858bb43b1ccdc985d1cba1a9748f09ce2e5",
+    "target/p9/comparison468/summarize.py": "13eb3858fedb077357b867dc13aadab6658408baf74ed50b72e34a250b8fdc6e"
+  },
+  "bulk": {
+    "requested": 20000000,
+    "actual": 19988480,
+    "cases": 12
+  },
+  "singleton": {
+    "requested": 1048576,
+    "actual": 1048576,
+    "cases": 12
+  },
+  "timing_authorized": false,
+  "preparation_guide": {
+    "path": "target/p9/matched468-linux/PREPARATION_ONLY.md",
+    "sha256": "4867b9300724d5006121a21cfc244553290dabd826d098e0feeba5fe63a38664"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "reviewer": "/root/review426",
+  "source_review": "Independent directGit batch-read compares2485 blobs+currentphysicalmodes;1441physicalcompiledsetmatchesBEFORE/noextras;5restored+2removed",
+  "source_blockers": [],
+  "observed_matched_tests": 70,
+  "observed_hook_exit": 0,
+  "scope": "Finite source/rawresult review only; no additional tests or performance claim."
+}

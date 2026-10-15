@@ -1,0 +1,21 @@
+{
+  "original_handle": 15333,
+  "actual_exit": 0,
+  "command": "bash target/p9/matched468-linux/export-source.sh",
+  "source_inputs": 1452,
+  "qualified_projection": 1443,
+  "committed_supplemental_inputs": [
+    ".gitignore",
+    "AGENTS.md",
+    "LICENSE",
+    "README.md",
+    "benchmarks/matched/COMPARISON.md",
+    "benchmarks/matched/README.md",
+    "benchmarks/matched/SCHEMA.md",
+    "docs/COMMAND_BYTES.md",
+    "docs/PERFORMANCE.md"
+  ],
+  "source_inventory_sha256": "188c2d88f1b06bfd8526f6f321f7ad7896815bfa7c5728884b02b89cb21029c3",
+  "source_archive_sha256": "c23c821fe62f378ef9b4163d09cb056466bb3d66d2405b03501c64a515ef4af8",
+  "source_and_target_fresh_before_export": true
+}

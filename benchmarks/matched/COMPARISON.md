@@ -60,17 +60,6 @@ OpenRaft's result stream consumes those individual receivers. VoteBoat additiona
 uses its operation-ID pending map, while upstream indexes responders by log position.
 Removing results is not parity. Any cheaper ownership structure must preserve exact
 IDs, partial-prefix outcomes, failure/cancellation and the original completion boundary.
-468 experiments with reusing VoteBoat's heap receiver-handle Vec between writes
-on one exclusively borrowed client. Every Tokio per-original channel is still
-created and consumed independently. Clones begin with no allocated cache; first
-worker allocation stays inside timing. Only empty storage with actual capacity
-at most configured request batch width is retained; wider requests remain
-supported with temporary storage. Error/cancellation drops all receivers before
-reuse. The private client API and shared enum/future layouts change; actual
-layout diagnostics and same-campaign upstream results must be disclosed. The
-OpenRaft engine, ID generation, latency/timer and completion boundaries are
-unchanged. This is an unmeasured engine-host experiment, not a native-service
-speed claim or a reopening of the rejected channel-allocation experiment below.
 448 experimentally shared backing allocation across independent per-original
 channels. It regressed every bulk rate trial on Linux and Mac and was rejected
 in449; the retained446 path uses pinned Tokio oneshots per original. Keep the

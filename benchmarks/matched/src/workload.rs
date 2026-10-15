@@ -49,7 +49,7 @@ impl Cluster {
     }
 }
 impl Client {
-    async fn write(&mut self, originals: &[u128]) -> Result<usize, Failure> {
+    async fn write(&self, originals: &[u128]) -> Result<usize, Failure> {
         match self {
             Self::Openraft(c) => c.write(originals).await,
             Self::Voteboat(c) => c.write(originals).await,
@@ -103,7 +103,7 @@ struct Completed {
     latencies: Vec<u64>,
 }
 async fn client_loop(
-    mut client: Client,
+    client: Client,
     id: usize,
     settings: Settings,
     start: Arc<Barrier>,
@@ -128,7 +128,7 @@ async fn client_loop(
     })
 }
 pub(super) async fn run(cluster: &mut Cluster, settings: Settings) -> Result<Report, Failure> {
-    let mut client = cluster.client();
+    let client = cluster.client();
     for original in 1..=settings.warmup {
         if client.write(&[original as u128]).await? != 1 {
             return Err("warmup original completion differs".into());
@@ -234,34 +234,6 @@ mod tests {
         }
         .validate()
         .unwrap()
-    }
-    #[tokio::test(flavor = "multi_thread", worker_threads = 16)]
-    async fn current_client_and_unpolled_future_layout_diagnostic() {
-        let settings = settings(4, 128);
-        for engine in ["voteboat", "openraft"] {
-            let mut cluster = Cluster::new(engine, settings).await.unwrap();
-            let mut client = cluster.client();
-            let originals = [u128::MAX, 1 << 127, (1 << 64) | 1, 19];
-            let (engine_client, engine_write) = match &mut client {
-                Client::Voteboat(c) => (
-                    std::mem::size_of_val(c),
-                    std::mem::size_of_val(&c.write(&originals)),
-                ),
-                Client::Openraft(c) => (
-                    std::mem::size_of_val(c),
-                    std::mem::size_of_val(&c.write(&originals)),
-                ),
-            };
-            let shared_write = std::mem::size_of_val(&client.write(&originals));
-            let loop_future = client_loop(client.clone(), 0, settings, Arc::new(Barrier::new(1)));
-            println!(
-                "layout_scope=current_test_executable_see_recorded_profile engine={engine} engine_client_bytes={engine_client} shared_client_bytes={} engine_write_future_bytes={engine_write} shared_write_future_bytes={shared_write} client_loop_future_bytes={}",
-                std::mem::size_of::<Client>(),
-                std::mem::size_of_val(&loop_future)
-            );
-            drop(loop_future);
-            cluster.shutdown().await.unwrap();
-        }
     }
     async fn checked_run(engine: &str, settings: Settings) -> Report {
         let mut cluster = Cluster::new(engine, settings).await.unwrap();

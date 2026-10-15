@@ -1,0 +1,7 @@
+{
+  "before_sha256": "38ce50c50f621301855c34a66835595b5ad2ed6f339cdeb1fe9362c5dd29f07c",
+  "after_sha256": "6c9482de5063ef8366d6336add1c95e56b56adca82a7741bd2bf18494f322d4d",
+  "before": "extras={'.gitignore','README.md','rust-toolchain.toml'}|{name for name in tracked if name.startswith('.cargo/')}",
+  "after": "extras={'.gitignore','README.md','rust-toolchain.toml','LICENSE','AGENTS.md','docs/COMMAND_BYTES.md','docs/PERFORMANCE.md','benchmarks/matched/README.md','benchmarks/matched/SCHEMA.md','benchmarks/matched/COMPARISON.md'}|{name for name in tracked if name.startswith('.cargo/')}",
+  "scope": "Additional committed documentation inventory only; no negative-control reruns"
+}

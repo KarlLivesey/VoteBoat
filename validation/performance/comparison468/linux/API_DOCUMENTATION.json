@@ -1,0 +1,17 @@
+{
+  "docs/COMMAND_BYTES.md": {
+    "source_commit": "6e91e6ecefda652da42c6130354263484378f6f6",
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison468/control-documents/docs/COMMAND_BYTES.md",
+    "sha256": "5f50be51db841f4e781f6e187b47880a25705a884aead2f9016a8b27b6154a30"
+  },
+  "benchmarks/matched/COMPARISON.md": {
+    "source_commit": "6e91e6ecefda652da42c6130354263484378f6f6",
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison468/control-documents/benchmarks/matched/COMPARISON.md",
+    "sha256": "8a08b3c6f7b181201affa7615fd07e35df4b3f29b30fbae315d479eb7c7c1bda"
+  },
+  "validation/performance/slice468/SCHEMA.md": {
+    "source_commit": "6e91e6ecefda652da42c6130354263484378f6f6",
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison468/control-documents/validation/performance/slice468/SCHEMA.md",
+    "sha256": "336b5c12538ed8f41f69b56249607e52fba6698435971cf40c3fe5df49a6ab8b"
+  }
+}

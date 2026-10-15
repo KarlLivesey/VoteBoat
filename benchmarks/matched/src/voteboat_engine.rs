@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Karl Livesey
 mod actor;
 mod stats;
-mod wait_cache;
 use super::{application::Noop, snapshots::MemorySnapshots, store::MemoryStore, Failure, Settings};
 use crate::{attribution::Attribution, CHANNEL_CAPACITY};
 pub(crate) use stats::Diagnostics;
@@ -29,15 +28,8 @@ struct Original {
 struct Request {
     originals: Vec<Original>,
 }
-pub(super) struct Client {
-    sender: mpsc::Sender<Request>,
-    waits: wait_cache::WaitCache,
-}
-impl Clone for Client {
-    fn clone(&self) -> Self {
-        Self::new(self.sender.clone(), self.waits.retain_limit())
-    }
-}
+#[derive(Clone)]
+pub(super) struct Client(mpsc::Sender<Request>);
 pub(super) struct Cluster {
     senders: Vec<mpsc::Sender<Request>>,
     actors: Vec<JoinHandle<Result<Option<Attribution>, Failure>>>,
@@ -47,7 +39,6 @@ pub(super) struct Cluster {
     stop: watch::Sender<bool>,
     stats: Arc<[stats::Stats; 3]>,
     batch_limits: BatchLimits,
-    client_batch: usize,
     #[cfg(test)]
     paused: Arc<[AtomicBool; 3]>,
     #[cfg(test)]
@@ -143,7 +134,6 @@ impl Cluster {
             stop,
             stats,
             batch_limits,
-            client_batch: settings.batch,
             #[cfg(test)]
             paused,
             #[cfg(test)]
@@ -169,7 +159,7 @@ impl Cluster {
         self.batch_limits
     }
     pub fn client(&self) -> Client {
-        Client::new(self.senders[0].clone(), self.client_batch)
+        Client(self.senders[0].clone())
     }
     async fn wait_frontier(&self, expected: u64) -> Result<(), Failure> {
         tokio::time::timeout(Duration::from_secs(10), async {
@@ -220,15 +210,9 @@ impl Cluster {
     }
 }
 impl Client {
-    fn new(sender: mpsc::Sender<Request>, retain_limit: usize) -> Self {
-        Self {
-            sender,
-            waits: wait_cache::WaitCache::new(retain_limit),
-        }
-    }
-    pub async fn write(&mut self, originals: &[u128]) -> Result<usize, Failure> {
+    pub async fn write(&self, originals: &[u128]) -> Result<usize, Failure> {
         let mut entries = Vec::with_capacity(originals.len());
-        let mut waits = self.waits.lease(originals.len());
+        let mut waits = Vec::with_capacity(originals.len());
         for &original in originals {
             let operation = OperationId::new(original).ok_or("zero original identity")?;
             let (reply, wait) = oneshot::channel();
@@ -239,9 +223,9 @@ impl Client {
             });
             waits.push(wait);
         }
-        self.sender.send(Request { originals: entries }).await?;
+        self.0.send(Request { originals: entries }).await?;
         let mut expected = originals.iter();
-        for wait in waits.drain() {
+        for wait in waits {
             let applied = wait.await?;
             if expected.next().copied() != Some(applied.get()) {
                 return Err("VoteBoat original applied result differs".into());
@@ -385,7 +369,7 @@ mod tests {
             .unwrap();
             let mut cluster = Cluster::new(settings).await.unwrap();
             cluster.pause_follower(2, true);
-            let mut client = cluster.client();
+            let client = cluster.client();
             for start in (1..=12_000).step_by(4) {
                 let originals: Vec<_> = (start..start + 4).map(|n| n as u128).collect();
                 let completed = match tokio::time::timeout(

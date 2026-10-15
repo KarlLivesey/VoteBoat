@@ -1,0 +1,13 @@
+{
+  "original_handle": 52057,
+  "actual_terminal_exit": 0,
+  "stage": "DONE",
+  "matched_tests": 70,
+  "matched_failures": 0,
+  "full_enabled_format_four_profiles_standalone_hook_exit": 0,
+  "source_inputs": 1441,
+  "before_after_bytes_modes_exact": true,
+  "complete_baseline_scope_files": 2485,
+  "no_extra_compiled_source": true,
+  "root_functional_reuse": "Exact39da/467/465/455 production/build/contracts/native/network/recovery scope; restoration matched70+fullhookchecked, no performance/P9acceptance."
+}
