@@ -1,0 +1,15 @@
+P9: add opt-in two-sync native publication with fixed witnesses
+
+Replace per-barrier manifest namespace publication in the explicitly selected
+WitnessLogIo provider with a fixed WAL-header witness and independent fixed
+acknowledgement record, synchronized in order. Keep FileLogIo as the default;
+retain mandatory acknowledged-prefix checks, repair and atomic reclamation.
+
+Add the JournalIo compound barrier default, actual atomic/witness benchmark
+selection and readbacks, exact diagnostic/error accounting and public/byte-cut
+controls. Preserve the complete Btrfs/APFS offered-load baseline and all failures.
+
+Validation:197 affected integration checks,35 native log-store checks, five
+benchmark/observer controls, all four strict root profiles and matched checks;
+four actual TCP/QUIC512-offer recovery/retry histories. No performance win or
+all-three-filesystem acceptance claimed before fresh paired measurements.

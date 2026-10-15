@@ -8,8 +8,13 @@ Both475 offered-load sweeps are complete:54 workloads and54 validators pass on
 Btrfs and APFS. Larger queues improve batching but expose severe overload tails;
 manifest publication remains the largest measured elapsed stage. The current476
 candidate introduces a separate opt-in two-sync WitnessLogIo behind JournalIo,
-with independent fixed acknowledged-boundary witnesses. Linux qualification is complete; published-source Mac qualification and paired
-measurements follow. FileLogIo remains the default; no candidate gain is claimed.
+with independent fixed acknowledged-boundary witnesses.476 is published as
+`7e906829` through the full enabled hook. Linux's fresh published-source native
+artifact and four selected release/recovery controls pass; published-source Mac
+qualification and fresh artifact/recovery controls also pass.
+[477's before-measurement schema](../validation/performance/native477-publication/SCHEMA.md)
+uses the same476 binary for both explicit provider arms, with matched diagnostics
+and rotated offered-load pairs. FileLogIo remains the default; no gain is claimed.
 The user's real ext4/XFS scratch volume remains pending. The linked current-plus-
 next-two plan below governs work. Historical entries retain their original state
 and are superseded by later rejection/restoration/results. Full P9 is incomplete.
@@ -872,9 +877,9 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current476: qualify portable two-sync publication | Remove measured per-batch namespace/sync work while preserving acknowledged-prefix recovery | Completed475 both-host load/counter evidence; [before-edit format/schema](../validation/performance/native476-publication/SCHEMA.md), compound JournalIo default and independent fixed witnesses | Byte/crash/restart/repair/reclaim controls, exact public-provider and combined-dispatch tests, actual selected TCP/QUIC histories, metadata and zero-diagnostic full hook; explicitly selected fresh stores only, no implicit migration/default promotion | P9.0/P9.1/P9.3 |
-| Next477: measure paired native publication and headroom | Establish useful completed-rate/tail/barrier improvements rather than fewer source calls | Published checked476, fresh native artifacts/compiler/source guards, common explicit diagnostics and admission profile | Rotated same-volume/device baseline/candidate measurements on Btrfs/APFS plus user's ext4/XFS when supplied; exact outcomes/recovery/refusals, latency/drain, physical work and cold maintenance; no universal acceptance before all three pass | P9.0/P9.1/P9.2/P9.3 |
-| Next478: sustained curve and composed service qualification | Complete remaining full P9 scope and choose subsequent measured bottlenecks | Retained measured improvements and both-host qualified artifacts/workloads | All seven one-group cells with healthy sustained margin, bounded memory/debt, durable headroom/fairness/skew, placement/shared physical barriers and P8 relays/striped/recursive/logical voters; preserve every original outcome/failure and do not start P10 | P9.0/P9.1/P9.2/P9.3/P9.4 |
+| Current477: measure paired native publication and headroom | Establish useful completed-rate/tail/barrier improvements rather than fewer source calls | Published checked476; completed fresh Linux/Mac native artifacts and release controls; [before-measurement schema](../validation/performance/native477-publication/SCHEMA.md), common explicit diagnostics/admission | Rotated same-volume/device baseline/candidate measurements on Btrfs/APFS plus user's ext4/XFS when supplied; exact outcomes/recovery/refusals, latency/drain, physical work and cold maintenance; no universal acceptance before all three pass | P9.0/P9.1/P9.2/P9.3 |
+| Next478: reduce the remaining measured limiting stage | Continue the profile/measure/design/change/compare loop using actual retained costs | Complete477 raw readout including regressions; existing rejected-experiment ledger; source-grounded ownership/order/restart schema before a new change | A bounded usable algorithm, batching or ordering change only when the data supports it; relevant correctness/crash/fairness controls and zero-diagnostic enabled hook, then fresh paired artifacts and actual completed-rate/tail comparison; no repeated rejected family without new evidence | P9.0/P9.1/P9.2/P9.3 |
+| Next479: sustained curve and composed service qualification | Complete remaining full P9 acceptance without narrowing the objective | Retained measured improvements, both-host qualified artifacts/workloads and supplied third filesystem for native acceptance | All seven one-group cells with healthy sustained margin, bounded memory/debt, durable headroom/fairness/skew, placement/shared physical barriers and P8 relays/striped/recursive/logical voters; preserve every original outcome/failure and do not start P10 | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
 comparison or short diagnostics. All seven one-group healthy-margin cells on
@@ -35156,3 +35161,30 @@ activate the prepared fresh Linux/Mac native runners using the actual published
 commit and final receipts. Paired same-volume measurements follow artifact setup;
 all-three-filesystem acceptance still awaits the user's ext4/XFS scratch. No full
 P9 milestone closes and no default publication provider changes.
+
+
+476 published-source native setup is complete on both hosts without a timing
+campaign or an inferred gain. [Linux](../validation/performance/native476-publication/linux/README.md)
+export97792/build26237/controls30285 terminate0; [Mac](../validation/performance/native476-publication/mac/README.md)
+original91880 terminates0/DONE. Mac197 integration/35 native-library/5 focused
+example controls, metadata/negative controls, formatting/four strict profiles and
+standalone matched formatting/strict pass; no matched functional tests are
+claimed. Fresh native root/example/buildscript compile fresh:false with actual
+Cargo JSON/verbose flags, original/copy hashes and ELF/Mach-O identity. Linux
+stable1.98.1/protoc3.9.0 and Mac1.98.0/protoc3.21.12 match each retained within-host
+reference; cross-host compiler differences remain explicit.
+
+Root independently checks Linux226payloads/19lossless originals and Mac232/12,
+including every archive hash, exact recursive file set and decompressed original
+hash/length. Both share all1491 qualified source bytes/modes. Linux's supplementary
+noncompiled476 schema is not relabeled as a Mac build input. Every provider/
+transport release control applies512, recovers576 and verifies retries, joins,
+maintenance, six capacity and six provider Create/Recover readbacks. Linux's
+original sandbox socket denial and Mac's unpublished-sentinel refusals stay raw;
+only failed Linux functional socket setup retries, with no build or timed-case
+replacement. The default FileLogIo remains unchanged.
+
+The mini plan advances to477's same-binary explicit atomic/witness comparison,
+then the remaining measured limiting stage and full sustained/composed scope.
+The macro plan is reviewed and unchanged: these checks qualify portable opt-in
+functionality, not a throughput gain, three-filesystem acceptance or a P9 milestone.

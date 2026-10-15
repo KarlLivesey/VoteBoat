@@ -1,0 +1,5 @@
+{"commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185", "qualified_inputs": 1491, "scope": "476 actual final core/example/four-armnetwork/strict receipts; no native or framework performance claim."}
+exact1492 committed inputs +1491 qualified input projection hashes/physical modes passed
+START tcp-atomic
+END tcp-atomic 1
+CONTROLS_EXIT=1

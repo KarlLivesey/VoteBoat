@@ -1,0 +1,12 @@
+{
+  "commit": null,
+  "exit": null,
+  "proof": {
+    "path": null,
+    "sha256": null
+  },
+  "hook": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/.githooks/pre-push",
+    "sha256": null
+  }
+}

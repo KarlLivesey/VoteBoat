@@ -1,0 +1,10 @@
+{
+  "command": [
+    "node",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/control-tools/check-native-benchmark.mjs",
+    "--storage",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/controls/wal/tcp-atomic"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.03272336200461723
+}

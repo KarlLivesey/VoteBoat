@@ -1,0 +1,14 @@
+{
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "karllivesey@192.168.192.76",
+    "/usr/bin/tail",
+    "-n",
+    "14",
+    "/private/tmp/voteboat-mac476-7e90682-kN01PT/logs/native_library.stdout"
+  ],
+  "exit": 0,
+  "scope": "Read-only live diagnostic; original job91880 is still running, no restart."
+}

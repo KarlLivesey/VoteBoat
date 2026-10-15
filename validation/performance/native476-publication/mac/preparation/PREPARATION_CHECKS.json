@@ -1,0 +1,37 @@
+[
+  {
+    "source": "target/p9/mac476/collect-artifacts.py",
+    "sha256": "40bb3729f245865b67b17654027460d0d0a33f344841beb529d253446cbcf08a",
+    "syntax": "PASS"
+  },
+  {
+    "source": "target/p9/mac476/controls.py",
+    "sha256": "ff8692bcba2f57ada9cb64563b653a74dbd4e523f9da34ad1d9c4ac5ad80600b",
+    "syntax": "PASS"
+  },
+  {
+    "source": "target/p9/mac476/preflight.py",
+    "sha256": "c2f5507e3c18b49694fcc96f06d25516aeb49afd3cc0ccfd3a622cfe964c33b6",
+    "syntax": "PASS"
+  },
+  {
+    "source": "target/p9/mac476/prepare-source.py",
+    "sha256": "06265a2ea25ac88c6c4ba7ac804a475d59464635452e6e78992d8d52b83e920f",
+    "syntax": "PASS"
+  },
+  {
+    "source": "target/p9/mac476/verify-source.py",
+    "sha256": "89696040f9c4af442cbca31a8c17058e56a35d4faefcadc829f25b7764ce0233",
+    "syntax": "PASS"
+  },
+  {
+    "guard": "prepare-sentinel",
+    "exit": 1,
+    "no_source_archive_or_logs": true
+  },
+  {
+    "guard": "run-sentinel",
+    "exit": 103,
+    "no_source_archive_or_logs": true
+  }
+]

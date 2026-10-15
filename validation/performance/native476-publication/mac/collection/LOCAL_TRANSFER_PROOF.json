@@ -1,0 +1,43 @@
+{
+  "scope": "Post-terminal exact evidence transfer. No source tree, binary, build tree or generated WAL transferred. Initial source-only copy recorded separately.",
+  "original_qualification_handle": 91880,
+  "actual_qualification_exit": 0,
+  "actual_steps": [
+    {
+      "command": [
+        "scp",
+        "-p",
+        "target/p9/mac476/collect-evidence.py",
+        "karllivesey@192.168.192.76:/private/tmp/voteboat-mac476-7e90682-kN01PT/collect-evidence.py"
+      ],
+      "exit": 0,
+      "elapsed_s": 1.6439534170203842
+    },
+    {
+      "command": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "karllivesey@192.168.192.76",
+        "/usr/bin/python3",
+        "/private/tmp/voteboat-mac476-7e90682-kN01PT/collect-evidence.py"
+      ],
+      "exit": 0,
+      "elapsed_s": 2.1635107840120327
+    },
+    {
+      "command": [
+        "scp",
+        "-p",
+        "karllivesey@192.168.192.76:/private/tmp/voteboat-mac476-7e90682-kN01PT/COLLECTED.tar.gz",
+        "target/p9/mac476/collection/COLLECTED.tar.gz"
+      ],
+      "exit": 0,
+      "elapsed_s": 1.4026895400020294
+    }
+  ],
+  "received_archive_sha256": "98c4581572fd0edfe51e38914afbb8edf3b6f43d68a36adf4b2783e75b7c5e34",
+  "received_manifest_sha256": "917f1eeb6191585c9c691e6252bcdaf04324bcd0d40c459fac6835b51c399a6b",
+  "files": 174,
+  "exact_members_bytes_sha256_modes": true
+}

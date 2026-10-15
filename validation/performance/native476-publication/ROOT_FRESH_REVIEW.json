@@ -1,0 +1,33 @@
+{
+  "archives": [
+    {
+      "archive": "linux",
+      "payloads": 226,
+      "gzip": 19,
+      "manifest_sha256": "25dd57354ae3d36307b30cac3d2db7052fd03fe3766ac4f7bfcbbf2a807f5e0b",
+      "exact_set_hashes_lossless_originals": true,
+      "release_controls": 4,
+      "applied_originals": 2048,
+      "performance_claim": false,
+      "actual_frozen_source_file_modes": 1492,
+      "actual_directory_modes": 326,
+      "qualified_source_projection": 1491,
+      "actual_original_copy_root_executable_hashes": true,
+      "native_profile_and_fresh_root_executable_buildscript": true
+    },
+    {
+      "archive": "mac",
+      "payloads": 232,
+      "gzip": 12,
+      "manifest_sha256": "a1eab9696ba1a3104be3a6910fd91119f31da264b22fe5ab2a9f2825f949303d",
+      "exact_set_hashes_lossless_originals": true,
+      "qualified_source_projection": 1491,
+      "release_controls": 4,
+      "applied_originals": 2048,
+      "capacity_readbacks": 24,
+      "publication_readbacks": 24,
+      "native_root_executable_fresh_profile": true,
+      "performance_claim": false
+    }
+  ]
+}

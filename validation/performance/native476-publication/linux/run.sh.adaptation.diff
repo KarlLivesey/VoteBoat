@@ -1,0 +1,19 @@
+--- target/p9/native475-linux/run.sh
++++ target/p9/native476-linux/run.sh
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env bash
+ set -euo pipefail
+-job=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native475-linux
++job=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux
+ finish(){
+  rc=$?
+  printf '%s\n' "$rc" > "$job/STATUS"
+@@ -25,7 +25,7 @@
+ rustc=$(rustup which --toolchain stable rustc)
+ export RUSTC="$rustc"
+ export PROTOC=/home/karllivesey/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/protobuf-build-0.14.1/bin/protoc-linux-x86_64
+-sha256sum -c /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/logs/tool-binaries.sha256 > "$job/logs/baseline-tool-preflight.log"
++sha256sum -c /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native475-linux/logs/tool-binaries.sha256 > "$job/logs/baseline-tool-preflight.log"
+ test "$("$PROTOC" --version)" = 'libprotoc 3.9.0'
+ export CARGO_BUILD_JOBS=2 CARGO_INCREMENTAL=0
+ export CARGO_PROFILE_RELEASE_OPT_LEVEL=3

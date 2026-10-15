@@ -1,0 +1,10 @@
+{
+  "command": [
+    "scp",
+    "-p",
+    "karllivesey@192.168.192.76:/private/tmp/voteboat-mac476-7e90682-kN01PT/COLLECTED.tar.gz",
+    "target/p9/mac476/collection/COLLECTED.tar.gz"
+  ],
+  "exit": 0,
+  "elapsed_s": 1.4026895400020294
+}

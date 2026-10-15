@@ -1,0 +1,80 @@
+{
+  "time_utc": "2026-10-15T11:44:41.702692+00:00",
+  "source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "source_files": 1492,
+  "directory_modes": 326,
+  "qualified_inputs": 1491,
+  "actual_source_export_original_handle": 97792,
+  "actual_source_export_exit": 0,
+  "actual_build_original_handle": 26237,
+  "actual_build_exit": 0,
+  "first_socket_denied_setup_terminal_chunk": "fb360c",
+  "actual_network_control_original_handle": 30285,
+  "actual_network_controls_exit": 0,
+  "controls": [
+    {
+      "protocol": "tcp",
+      "publication": "atomic",
+      "applied": 512,
+      "recovered": 576,
+      "max_inflight": 144,
+      "checkpoints": 1,
+      "reclaims": 3,
+      "capacity_readbacks": 6,
+      "publication_readbacks": 6,
+      "physical_replicas": 3
+    },
+    {
+      "protocol": "tcp",
+      "publication": "witness",
+      "applied": 512,
+      "recovered": 576,
+      "max_inflight": 116,
+      "checkpoints": 1,
+      "reclaims": 3,
+      "capacity_readbacks": 6,
+      "publication_readbacks": 6,
+      "physical_replicas": 3
+    },
+    {
+      "protocol": "quic",
+      "publication": "atomic",
+      "applied": 512,
+      "recovered": 576,
+      "max_inflight": 91,
+      "checkpoints": 1,
+      "reclaims": 3,
+      "capacity_readbacks": 6,
+      "publication_readbacks": 6,
+      "physical_replicas": 3
+    },
+    {
+      "protocol": "quic",
+      "publication": "witness",
+      "applied": 512,
+      "recovered": 576,
+      "max_inflight": 95,
+      "checkpoints": 1,
+      "reclaims": 3,
+      "capacity_readbacks": 6,
+      "publication_readbacks": 6,
+      "physical_replicas": 3
+    }
+  ],
+  "proof_sha256": {
+    "PUBLICATION.json": "7fe4dd94cf17e653913861cc6f38310c4669087699b4975d868b3afde738f7fd",
+    "FUNCTIONAL_QUALIFICATION.json": "0b125b96e228a77e3c14a725eb495f51c155e25601f877d088bed53c8a630670",
+    "SOURCE.json": "df9aeb3b7881647658f681bfea86797ff3f85cc98a5fe56776cb980f5801bcfb",
+    "ARTIFACTS.json": "951ecc087a66b340576c16458cd7e40e1796581040efa9c85a3e9427bd402734",
+    "PROFILE_PROOF.json": "5110ed253c352d36609a99a3de822a39fb85565acbb9f9b5a6f07261ca021400",
+    "SYMBOLS.json": "291805a7a2b5b701b304374816b054cbae1e895876b5ecf59b921a2adcefa635",
+    "BUILD_TERMINAL.json": "4afa443a0c6a42508f8468fac5c87f48bcab6458c4dd62f41e4dc48231188651",
+    "controls/TERMINAL.json": "b2235f28675b94c8764c85cb711a2102c7ff0affb4ce403dba9b9a560f225739",
+    "controls/RESULTS.json": "5af1663584acc31ecf37b787c71dabae765bf720920e2224608ba5f9d08127fe",
+    "controls/BEFORE.json": "6993ea382717abeae49a5d9391777ae74897e45c027db24aa6edc20e97a3b262",
+    "controls/AFTER.json": "6993ea382717abeae49a5d9391777ae74897e45c027db24aa6edc20e97a3b262",
+    "SANDBOX_CONTROL_RETRY.json": "e1c41963063c007b53db52829741bbd02f345fb451d0cac0c6cd1b17354d2d0e"
+  },
+  "performance_campaign_started": false,
+  "scope": "Fresh published476 native artifact and four actualreleasefunctional provider/recovery controls ready only. Samebinary/profile/native diagnostics both explicit atomic/witness arms. Originalfirstsocketdenial preserved separately. No failed measurement replacement, capacity/gain/threefilesystem acceptance or fullP9completion claim."
+}

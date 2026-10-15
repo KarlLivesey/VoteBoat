@@ -1,0 +1,28 @@
+{
+  "command": [
+    "git",
+    "add",
+    "docs/IMPLEMENTATION.md",
+    "docs/P9.md",
+    "docs/component-contracts.json",
+    "docs/provider-conformance.json",
+    "examples/benchmark",
+    "examples/native_benchmark.rs",
+    "src/native/log_store.rs",
+    "src/native/log_store/witness.rs",
+    "src/native/log_store/witness",
+    "tests/journal_barrier.rs",
+    "tests/witness_log_store.rs",
+    "tests/witness_log_store",
+    "validation/check-native-benchmark.mjs",
+    "validation/check-provider-conformance.test.mjs",
+    "validation/check-publication-timings.mjs",
+    "validation/check-publication-timings.test.mjs",
+    "validation/check-publication-profile.mjs",
+    "validation/check-publication-profile.test.mjs",
+    "validation/performance/native475-capacity",
+    "validation/performance/native476-publication"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.29520892299478874
+}

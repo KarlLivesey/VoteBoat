@@ -1,0 +1,10 @@
+{
+  "command": [
+    "python3",
+    "target/p9/native476-linux/guard.py",
+    "target/p9/native476-linux",
+    "qualification"
+  ],
+  "exit": 1,
+  "expected_refusal": true
+}

@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/guard.py", line 33, in <module>
+    job=Path(sys.argv[1]).resolve();required_commit,qualified=qualification(job)
+                                                              ~~~~~~~~~~~~~^^^^^
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/guard.py", line 7, in qualification
+    assert re.fullmatch('[0-9a-f]{40}',commit), '476 unpublished: source export/build/setup refused'
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 476 unpublished: source export/build/setup refused

@@ -1,0 +1,7 @@
+{
+  "argv": [
+    "python3",
+    "target/p9/mac476/prepare-source.py"
+  ],
+  "exit": 1
+}

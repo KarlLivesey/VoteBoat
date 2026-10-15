@@ -1,0 +1,96 @@
+{
+  "scope": "finite ordinary-barrier diagnostic; cold repair, initialization selector and reclamation namespace work excluded; live snapshots may cut calls; joined totals stable; parallel times are not client critical path",
+  "provider": "atomic",
+  "measurement_deltas": [
+    {
+      "replica": "1",
+      "step": "open",
+      "calls": "118",
+      "elapsed_ns": "3650449"
+    },
+    {
+      "replica": "1",
+      "step": "write",
+      "calls": "118",
+      "elapsed_ns": "1084769"
+    },
+    {
+      "replica": "1",
+      "step": "file_sync",
+      "calls": "118",
+      "elapsed_ns": "1133774299"
+    },
+    {
+      "replica": "1",
+      "step": "rename",
+      "calls": "118",
+      "elapsed_ns": "16948431"
+    },
+    {
+      "replica": "1",
+      "step": "directory_sync",
+      "calls": "118",
+      "elapsed_ns": "1347863914"
+    },
+    {
+      "replica": "2",
+      "step": "open",
+      "calls": "38",
+      "elapsed_ns": "1263309"
+    },
+    {
+      "replica": "2",
+      "step": "write",
+      "calls": "38",
+      "elapsed_ns": "397896"
+    },
+    {
+      "replica": "2",
+      "step": "file_sync",
+      "calls": "38",
+      "elapsed_ns": "438787940"
+    },
+    {
+      "replica": "2",
+      "step": "rename",
+      "calls": "38",
+      "elapsed_ns": "7331460"
+    },
+    {
+      "replica": "2",
+      "step": "directory_sync",
+      "calls": "38",
+      "elapsed_ns": "477949130"
+    },
+    {
+      "replica": "3",
+      "step": "open",
+      "calls": "36",
+      "elapsed_ns": "1323217"
+    },
+    {
+      "replica": "3",
+      "step": "write",
+      "calls": "36",
+      "elapsed_ns": "329279"
+    },
+    {
+      "replica": "3",
+      "step": "file_sync",
+      "calls": "36",
+      "elapsed_ns": "384023574"
+    },
+    {
+      "replica": "3",
+      "step": "rename",
+      "calls": "36",
+      "elapsed_ns": "4234348"
+    },
+    {
+      "replica": "3",
+      "step": "directory_sync",
+      "calls": "36",
+      "elapsed_ns": "437596172"
+    }
+  ]
+}

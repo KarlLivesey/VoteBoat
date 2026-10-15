@@ -1,0 +1,28 @@
+{"commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185", "qualified_inputs": 1491, "scope": "476 actual final core/example/four-armnetwork/strict receipts; no native or framework performance claim."}
+exact1492 committed inputs +1491 qualified input projection hashes/physical modes passed
+START tcp-atomic
+END tcp-atomic 0
+START tcp-atomic-check
+END tcp-atomic-check 0
+START tcp-atomic-publication-check
+END tcp-atomic-publication-check 0
+START tcp-witness
+END tcp-witness 0
+START tcp-witness-check
+END tcp-witness-check 0
+START tcp-witness-publication-check
+END tcp-witness-publication-check 0
+START quic-atomic
+END quic-atomic 0
+START quic-atomic-check
+END quic-atomic-check 0
+START quic-atomic-publication-check
+END quic-atomic-publication-check 0
+START quic-witness
+END quic-witness 0
+START quic-witness-check
+END quic-witness-check 0
+START quic-witness-publication-check
+END quic-witness-publication-check 0
+CONTROLS_EXIT=0
+exact1492 committed inputs +1491 qualified input projection hashes/physical modes passed

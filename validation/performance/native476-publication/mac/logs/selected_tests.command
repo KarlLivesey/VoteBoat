@@ -1,0 +1,1 @@
+/Users/karllivesey/.cargo/bin/cargo +stable test --locked --offline --all-features --test journal_barrier --test witness_log_store --test log_store --test log_reclaim --test provider_conformance --test snapshot --test raft --message-format=json -vv -- --test-threads=1 

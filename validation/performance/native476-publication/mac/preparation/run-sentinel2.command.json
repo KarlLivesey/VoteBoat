@@ -1,0 +1,7 @@
+{
+  "argv": [
+    "bash",
+    "target/p9/mac476/run.sh"
+  ],
+  "exit": 103
+}

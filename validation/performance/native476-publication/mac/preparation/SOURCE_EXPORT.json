@@ -1,0 +1,14 @@
+{
+  "command": [
+    "python3",
+    "target/p9/mac476/prepare-source.py"
+  ],
+  "actual_exit": 0,
+  "executor": "Original tools.exec_command completed response chunkd96678, not a rerun",
+  "commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "inputs": 1491,
+  "archive_sha256": "1251d7d7a27acf8bb65a50bb9e7701651890e128580e17b99947682772fec73b",
+  "seven_private_keys_0600": true,
+  "directories": 323,
+  "source_root_mode": "0o755"
+}

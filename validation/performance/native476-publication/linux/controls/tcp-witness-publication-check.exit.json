@@ -1,0 +1,10 @@
+{
+  "command": [
+    "node",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/control-tools/check-publication-timings.mjs",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/controls/wal/tcp-witness/publication.csv",
+    "witness"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.016546662984183058
+}

@@ -1,0 +1,59 @@
+{
+  "source_commit": null,
+  "source_inventory": {
+    "path": null,
+    "sha256": null
+  },
+  "proofs": {
+    "core": {
+      "path": null,
+      "sha256": null
+    },
+    "strict": {
+      "path": null,
+      "sha256": null
+    },
+    "example": {
+      "path": null,
+      "sha256": null
+    },
+    "network": {
+      "path": null,
+      "sha256": null
+    }
+  },
+  "final_source_guards": [
+    {
+      "before": {
+        "path": null,
+        "sha256": null
+      },
+      "after": {
+        "path": null,
+        "sha256": null
+      }
+    },
+    {
+      "before": {
+        "path": null,
+        "sha256": null
+      },
+      "after": {
+        "path": null,
+        "sha256": null
+      }
+    },
+    {
+      "before": {
+        "path": null,
+        "sha256": null
+      },
+      "after": {
+        "path": null,
+        "sha256": null
+      }
+    }
+  ],
+  "scope": "476 two-sync witness provider; final core/strict/example/actual four-arm controls",
+  "note": "TEMPLATE ONLY: no successful qualification asserted. Root supplies union inventory and actual successful final proof hashes only after terminal qualification/publishing. Each source guard files map must be an exact subset of union; union must be fully covered."
+}

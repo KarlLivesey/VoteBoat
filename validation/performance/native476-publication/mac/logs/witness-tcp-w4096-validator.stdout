@@ -1,0 +1,5 @@
+/private/tmp/voteboat-mac476-7e90682-kN01PT/control-wal/witness-tcp-w4096: 512 scheduled offers, 512 admissions, 512 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=128.000 admitted_during=128.000 applied_during=125.250 applied_drain=179.111 applied_total=126.064 ops/s; window_refused=0 backlog_at_horizon=11
+/private/tmp/voteboat-mac476-7e90682-kN01PT/control-wal/witness-tcp-w4096: 1 durable checkpoint boundaries, 3 exact-scope reclamation rows, 0 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=77.386 reclaim_ms=227.089 reclaimed_bytes=43694 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=460 units=460 commands=1536 mean_units=1.000 append_ms=208.648 barriers=460 mean_appends_per_barrier=1.000 mean_units_per_barrier=1.000 barrier_ms=7003.815 sync_ms=3526.228 publish_ms=3474.506 histogram=1:460

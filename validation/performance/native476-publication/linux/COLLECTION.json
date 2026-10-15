@@ -1,0 +1,45 @@
+{
+  "collection_utc": "2026-10-15T11:46:35.474484+00:00",
+  "source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "current_HEAD_origin_main_equal": true,
+  "source_files": 1492,
+  "qualified_inputs": 1491,
+  "directory_modes": 326,
+  "source_files_directory_modes_exact": true,
+  "original_copy_root_example_SHA_exact": true,
+  "root_library_example_buildscript_fresh_false": true,
+  "actual_source_export_handle": 97792,
+  "actual_build_handle": 26237,
+  "actual_release_controls_handle": 30285,
+  "all_actual_successful_phase_exits": 0,
+  "actual_socket_denied_phase_exit": 1,
+  "failed_case_completed": 0,
+  "successful_release_cases": 4,
+  "successful_native_and_publication_validators": 8,
+  "physical_replica_records": 12,
+  "capacity_readbacks": 24,
+  "publication_readbacks": 24,
+  "elf_build_id": "8dff134c977ac4292c24183a6bd4404bdfcb4727",
+  "collection_guards": [
+    {
+      "command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/guard.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux",
+        "qualification"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/guard.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux",
+        "source"
+      ],
+      "exit": 0
+    }
+  ],
+  "performance_campaign_started": false,
+  "scope": "Original terminal proof re-read and packed without rebuilding, rerunning tests/controls or generating WAL. Source/locks/compiler/native profile and actual failures retained; no sustained throughput/gain/cross-filesystem acceptance claim."
+}

@@ -1,0 +1,12 @@
+{
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "karllivesey@192.168.192.76",
+    "mktemp -d /private/tmp/voteboat-mac476-7e90682-XXXXXX"
+  ],
+  "exit": 0,
+  "elapsed_s": 1.5057809549907688,
+  "stdin_sha256": null
+}

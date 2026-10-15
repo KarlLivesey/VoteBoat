@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/controls/run.py", line 36, in <module>
+    run(name,[artifact['copy'],str(root),protocol,'512','4096','1','--offered','128','--maintenance','2','--ready-items','16','--offered-capacity','4096','--publication',publication])
+    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/controls/run.py", line 31, in run
+    receipt={'command':cmd,'exit':r.returncode,'elapsed_s':time.monotonic()-clock};write(controls/(name+'.exit.json'),receipt);commands.append(receipt);print('END '+name+' '+str(r.returncode),flush=True);assert r.returncode==0
+                                                                                                                                                                                                                   ^^^^^^^^^^^^^^^
+AssertionError

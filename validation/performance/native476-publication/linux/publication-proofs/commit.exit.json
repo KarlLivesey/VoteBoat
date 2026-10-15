@@ -1,0 +1,10 @@
+{
+  "command": [
+    "git",
+    "commit",
+    "--file",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-publication/publication/COMMIT_MESSAGE.txt"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.1378114499966614
+}

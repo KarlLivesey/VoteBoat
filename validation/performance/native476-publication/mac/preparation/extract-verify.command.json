@@ -1,0 +1,15 @@
+{
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "karllivesey@192.168.192.76",
+    "/bin/bash",
+    "-s",
+    "--",
+    "/private/tmp/voteboat-mac476-7e90682-kN01PT"
+  ],
+  "exit": 0,
+  "elapsed_s": 1.71560732202488,
+  "stdin_sha256": "fb3a0dc0a7a2853d726a7810d4aa30233a227b7abe65538206fb45d12349a900"
+}

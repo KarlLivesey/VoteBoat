@@ -1,0 +1,13 @@
+{
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "karllivesey@192.168.192.76",
+    "/bin/bash",
+    "/private/tmp/voteboat-mac476-7e90682-kN01PT/run.sh"
+  ],
+  "remote_job": "/private/tmp/voteboat-mac476-7e90682-kN01PT",
+  "start_utc": "2026-10-15T11:43:11.013155+00:00",
+  "scope": "Scoped qualification, fresh native-only artifact and four release readiness histories; no measurement campaign."
+}

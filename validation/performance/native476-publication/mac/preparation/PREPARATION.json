@@ -1,0 +1,59 @@
+{
+  "status": "PREPARED_ONLY_UNPUBLISHED",
+  "required_commit": "UNPUBLISHED",
+  "scope": "No source archive/copy/build/test or benchmark before published476 commit and actual root final receipts. Local script syntax/guard controls are preparation only.",
+  "reuse": "Adapt corrected Mac475 source file+directory modes, seven fixture keys0600, source guard before/after, native CargoJSON/verbose-rustc/MachO proof.",
+  "root_gate": {
+    "file": "ROOT_FINAL_INPUTS.json",
+    "required_fields": [
+      "published_commit",
+      "files:{path:{sha256,mode}}",
+      "receipts:[{path,sha256,exit:0}]"
+    ],
+    "meaning": "References actual final root qualification/publication receipts; all bytes rehashed before source assembly. Root must supply, not asserted before checks."
+  },
+  "qualification": {
+    "integration_tests": [
+      "journal_barrier",
+      "witness_log_store",
+      "log_store",
+      "log_reclaim",
+      "provider_conformance",
+      "snapshot",
+      "raft"
+    ],
+    "library_filter": "native::log_store::",
+    "example_filter": "publication (five current tests; derive actual count from published source/output)",
+    "strict": "fmt and four strict root profiles sequential; standalone matched fmt/strict; no broad unchanged P8 histories or framework performance build",
+    "javascript": [
+      "offered",
+      "publication profile",
+      "publication timings",
+      "benchmark storage",
+      "provider metadata/negative controls"
+    ]
+  },
+  "artifacts": {
+    "profile": "Fresh absent target-native-release, opt3/debug0/assertions+overflow/native default LTO+CGU+split, inherited flags/wrappers/profile overrides unset",
+    "proof": "Actual CargoJSON root library/executable/build-script fresh:false, rustc invocations, source/lock/compiler identities, MachO UUID/no embeddedDWARF and original/copied hashes",
+    "compiler": "Require byte-identical original455 Mac stable1.98.0+protoc3.21.12 tools, no update/fallback"
+  },
+  "readiness": "Four selected Atomic/Witness x TCP/QUIC,512offers,w4096,offered128/s,ready16,maintenance2; six capacity and six publication Create/Recover readbacks, original recovery/retries/joins, frozen validator closure. Functional controls only, not capacity acceptance.",
+  "permissions": "Fresh remote job; source-only transfer preserving all sourcefiles+directorymodes; no binaries/buildtrees/WAL transfer. No system changes.",
+  "pending": "Real ext4/XFS scratch from user; all3filesystem improvement remains unqualified. No default provider promotion.",
+  "preflight": {
+    "actual_exit": 0,
+    "original_handle": 43412,
+    "raw": "PREFLIGHT.stdout",
+    "tool_bytes_equal_original455": true,
+    "compiler": "stable1.98.0",
+    "protoc": "3.21.12",
+    "filesystem": "APFS Data disk3s1/containerdisk3/physicaldisk0s2",
+    "live_owned_build_benchmark_profile_jobs": []
+  },
+  "current_guard_results": {
+    "prepare_exit": 1,
+    "runner_exit": 103,
+    "no_source_archive_or_logs_created": true
+  }
+}

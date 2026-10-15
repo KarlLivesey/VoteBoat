@@ -1,0 +1,66 @@
+{
+  "time_utc": "2026-10-15T11:29:46.027178+00:00",
+  "prepared_only": true,
+  "required_commit": "UNPUBLISHED",
+  "source_export_started": false,
+  "build_started": false,
+  "controls_started": false,
+  "campaign_started": false,
+  "sentinel_actual_exit": 1,
+  "syntax_checks": [
+    {
+      "command": [
+        "ast.parse",
+        "target/p9/native476-linux/guard.py"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "ast.parse",
+        "target/p9/native476-linux/controls/run.py"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "target/p9/native476-linux/run.sh"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "target/p9/native476-linux/export-source.sh"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "target/p9/native476-linux/setup-after-build.sh"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "script_sha256": {
+    "guard.py": "6f6448b8e6cbe10745cbf24be1b2527ab09347723499c30ebccc5f2eb86d37e7",
+    "run.sh": "1d50a237920398ec67b2fa61d7ee6008499c6e9b57193d355ba4d14cbfbd0c65",
+    "export-source.sh": "48848d620c50d8cb2ff91bb2b6c267bc55c3d63b6c8e59ae713097a054479104",
+    "setup-after-build.sh": "ade727e36cd2aca1d92fc8d3ac6334939eecb0875b9803fd12dde107719d54a0",
+    "controls/run.py": "914a84367c1207e04da2981cf947e918f95f0d76e050a87629a24977e0e138c9"
+  },
+  "scope": "Preparation/syntax/actualunpublishedguard refusal only; no rootqualification/provenance/successfulbuild asserted.",
+  "preparation_readme_sha256": "df7e43d742997d27f86df9de55acf5adc81412eb77556b104254f7bdc70dab0e",
+  "initial_preparation_parse_failure": "SyntaxError before execution; corrected spacing before else. No side effects/build/source export."
+}

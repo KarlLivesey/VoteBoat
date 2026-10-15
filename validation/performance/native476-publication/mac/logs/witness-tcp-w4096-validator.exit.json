@@ -1,0 +1,10 @@
+{
+  "command": [
+    "node",
+    "/private/tmp/voteboat-mac476-7e90682-kN01PT/source/validation/check-native-benchmark.mjs",
+    "--storage",
+    "/private/tmp/voteboat-mac476-7e90682-kN01PT/control-wal/witness-tcp-w4096"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.11958570800000068
+}

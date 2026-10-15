@@ -1,0 +1,76 @@
+{
+  "scope": "Published476 Mac qualification and fresh native artifact. Functional controls only, not throughput improvement or physical power-loss proof.",
+  "source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "source_files": 1491,
+  "source_directories": 323,
+  "source_sha256_and_file_directory_modes_exact": true,
+  "source_root_mode": "0o755",
+  "private_keys at 0600": 7,
+  "original_qualification_handle": 91880,
+  "original_source_transfer_handle": 20500,
+  "actual_qualification_exit": 0,
+  "actual_remote_status": 0,
+  "actual_remote_stage": "DONE",
+  "restarted": false,
+  "integration_counts_in_cargo_order": [
+    4,
+    11,
+    19,
+    42,
+    79,
+    27,
+    15
+  ],
+  "integration_total": 197,
+  "integration_counts_match_exact_linux_source_command": true,
+  "native_log_library_count": 35,
+  "publication_example_count": 5,
+  "format_four_strict_profiles_and_matched_format_strict_exit": 0,
+  "fresh_root_executable_buildscript": true,
+  "root_artifact_sha256": "b53a9fb2f66f9269617fb7f3e2dd98d1f52ef6e5094db5a696b040bbf93e146b",
+  "executable_sha256": "2fd48262a655debafaf7f04496bf34c867dc17b92f1e5890969819333cbcae84",
+  "native_profile": "opt3/debug0/assertions+overflow; native defaultLTO/codegen/split; actualCargo JSON and verbose rustc output; rootbuildscript PROFILE=release; no debugcheckpointoracle",
+  "compiler": "stable1.98.0 aarch64-apple-darwin LLVM22.1.8; protoc3.21.12; byte-identical retainedMac455 tools; Linux 1.98.1 distinct",
+  "macho_uuid": "1D656ECA-0526-35FD-B6B1-B19CE2F04F74",
+  "cases": [
+    {
+      "protocol": "TcpTls",
+      "publication_effective": "atomic",
+      "offers": "512",
+      "applied": "512",
+      "recovered_value": "576",
+      "retry_verified": "true",
+      "workers_joined": "true"
+    },
+    {
+      "protocol": "Quic",
+      "publication_effective": "atomic",
+      "offers": "512",
+      "applied": "512",
+      "recovered_value": "576",
+      "retry_verified": "true",
+      "workers_joined": "true"
+    },
+    {
+      "protocol": "TcpTls",
+      "publication_effective": "witness",
+      "offers": "512",
+      "applied": "512",
+      "recovered_value": "576",
+      "retry_verified": "true",
+      "workers_joined": "true"
+    },
+    {
+      "protocol": "Quic",
+      "publication_effective": "witness",
+      "offers": "512",
+      "applied": "512",
+      "recovered_value": "576",
+      "retry_verified": "true",
+      "workers_joined": "true"
+    }
+  ],
+  "diagnostic_scope": "Ordinary publication primitives only; cold repair/initial selector/reclamation excluded. Upper+primitive errors are overlapping observations.",
+  "transfer_scope": "Initial source-only transfer and later post-terminal metadata/plainresults collection are separate. No binaries/buildtrees/fullsource/WAL in this archive.",
+  "open_acceptance": "Paired native gains on Btrfs/APFS/real ext4-or-XFS, all fullP9 requirements and default promotion remain open."
+}

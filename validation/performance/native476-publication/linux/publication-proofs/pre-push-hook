@@ -1,0 +1,32 @@
+#!/bin/sh
+# SPDX-License-Identifier: RPL-1.5
+set -eu
+
+cd "$(git rev-parse --show-toplevel)"
+# Git supplies remote arguments for a push. A direct no-argument invocation is
+# also used to qualify work before committing; only an actual push requires the
+# checked source inputs to be committed, so untracked modules cannot mask a
+# broken published tree.
+if [ "$#" -ne 0 ]; then
+    pending_inputs=$(git status --porcelain --untracked-files=all -- \
+        Cargo.toml Cargo.lock clippy.toml build.rs .cargo src tests examples \
+        benchmarks/matched/Cargo.toml benchmarks/matched/Cargo.lock \
+        benchmarks/matched/src)
+    if [ -n "$pending_inputs" ]; then
+        printf '%s\n' 'Commit all build inputs before pushing:' "$pending_inputs" >&2
+        exit 1
+    fi
+fi
+printf '%s\n' 'Checking formatting and strict Clippy before push...'
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features --features native -- -D warnings
+
+# The comparison workspace has its own lock and comparison-only dependencies.
+# Root --all-targets does not lint it, so check it explicitly when present.
+if [ -f benchmarks/matched/Cargo.toml ]; then
+    cargo +stable fmt --manifest-path benchmarks/matched/Cargo.toml -- --check
+    cargo +stable clippy --manifest-path benchmarks/matched/Cargo.toml --locked --offline --keep-going --all-targets -- -D warnings
+fi

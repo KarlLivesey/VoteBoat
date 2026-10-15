@@ -1,0 +1,25 @@
+STAGE preflight
+STAGE tool_rustc_identity
+STAGE tool_cargo_identity
+STAGE tool_hash_identity
+STAGE source_before
+STAGE selected_tests
+STAGE native_library
+STAGE publication_example
+STAGE selected_js
+STAGE provider_metadata
+STAGE provider_metadata_controls
+STAGE root_fmt
+STAGE strict_default
+STAGE strict_all
+STAGE strict_core
+STAGE strict_native
+STAGE matched_fmt
+STAGE matched_strict
+STAGE native_release
+STAGE artifact_guard
+STAGE wide_controls
+STAGE source_after
+STAGE DONE
+MAC476_SETUP_READY; no measurement campaign launched
+MAC476_EXIT=0

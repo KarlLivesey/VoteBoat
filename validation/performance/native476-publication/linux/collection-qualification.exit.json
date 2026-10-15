@@ -1,0 +1,9 @@
+{
+  "command": [
+    "python3",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/guard.py",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux",
+    "qualification"
+  ],
+  "exit": 0
+}

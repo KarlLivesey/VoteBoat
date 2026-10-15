@@ -1,0 +1,62 @@
+{
+  "utc": "2026-10-15T11:42:53.869755+00:00",
+  "job": "/private/tmp/voteboat-mac476-7e90682-kN01PT",
+  "files": [
+    "source.tar",
+    "SOURCE.json",
+    "source.sha256",
+    "REQUIRED_COMMIT",
+    "verify-source.py",
+    "run.sh",
+    "collect-artifacts.py",
+    "controls.py"
+  ],
+  "actual_steps": [
+    {
+      "command": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "karllivesey@192.168.192.76",
+        "mktemp -d /private/tmp/voteboat-mac476-7e90682-XXXXXX"
+      ],
+      "exit": 0,
+      "elapsed_s": 1.5057809549907688,
+      "stdin_sha256": null
+    },
+    {
+      "command": [
+        "scp",
+        "-p",
+        "target/p9/mac476/source.tar",
+        "target/p9/mac476/SOURCE.json",
+        "target/p9/mac476/source.sha256",
+        "target/p9/mac476/REQUIRED_COMMIT",
+        "target/p9/mac476/verify-source.py",
+        "target/p9/mac476/run.sh",
+        "target/p9/mac476/collect-artifacts.py",
+        "target/p9/mac476/controls.py",
+        "karllivesey@192.168.192.76:/private/tmp/voteboat-mac476-7e90682-kN01PT/"
+      ],
+      "exit": 0,
+      "elapsed_s": 1.9059680509963073,
+      "stdin_sha256": null
+    },
+    {
+      "command": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "karllivesey@192.168.192.76",
+        "/bin/bash",
+        "-s",
+        "--",
+        "/private/tmp/voteboat-mac476-7e90682-kN01PT"
+      ],
+      "exit": 0,
+      "elapsed_s": 1.71560732202488,
+      "stdin_sha256": "fb3a0dc0a7a2853d726a7810d4aa30233a227b7abe65538206fb45d12349a900"
+    }
+  ],
+  "scope": "Source archive + setup scripts only; no binaries, build trees or generated WAL transferred."
+}

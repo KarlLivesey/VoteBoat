@@ -1,0 +1,18 @@
+{
+  "command": [
+    "scp",
+    "-p",
+    "target/p9/mac476/source.tar",
+    "target/p9/mac476/SOURCE.json",
+    "target/p9/mac476/source.sha256",
+    "target/p9/mac476/REQUIRED_COMMIT",
+    "target/p9/mac476/verify-source.py",
+    "target/p9/mac476/run.sh",
+    "target/p9/mac476/collect-artifacts.py",
+    "target/p9/mac476/controls.py",
+    "karllivesey@192.168.192.76:/private/tmp/voteboat-mac476-7e90682-kN01PT/"
+  ],
+  "exit": 0,
+  "elapsed_s": 1.9059680509963073,
+  "stdin_sha256": null
+}

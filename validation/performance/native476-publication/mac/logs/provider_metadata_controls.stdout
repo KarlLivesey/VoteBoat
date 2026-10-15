@@ -1,0 +1,47 @@
+✔ review counts only audited operations and retains unreviewed contracts (35.746625ms)
+✔ rejects unknown contract (8.527667ms)
+✔ rejects unknown operation (7.552041ms)
+✔ rejects missing operation (7.901ms)
+✔ rejects duplicate operation (7.315417ms)
+✔ rejects missing assertion (7.636083ms)
+✔ rejects missing function (7.558ms)
+✔ rejects missing test (7.061209ms)
+✔ rejects escaping path (6.946666ms)
+✔ rejects false completion claim (7.180875ms)
+✔ rejects missing limitation (7.371167ms)
+✔ rejects missing snapshot operation (8.228875ms)
+✔ rejects missing logical tracked cancellation (2.594167ms)
+✔ rejects missing logical session retirement assertion (2.672917ms)
+✔ rejects missing logical attachment limitation (2.428459ms)
+✔ rejects missing original channel retirement (12.8455ms)
+✔ rejects missing delegated receiving access assertion (12.106625ms)
+✔ rejects missing delegated path limitation (12.257708ms)
+✔ rejects missing retention assertion (8.387542ms)
+✔ rejects missing admission operation (10.32775ms)
+✔ rejects missing admission assertion (9.392417ms)
+✔ rejects missing timer operation (6.787416ms)
+✔ rejects missing timer assertion (6.384791ms)
+✔ rejects missing timer limitation (6.497875ms)
+✔ rejects missing exact owner isolation assertion (6.416583ms)
+✔ rejects missing poll preservation assertion (6.724917ms)
+✔ rejects missing timer defective-provider runner (6.104708ms)
+✔ rejects missing transport operation (6.343333ms)
+✔ rejects missing transport assertion (5.403625ms)
+✔ rejects missing transport limitation (5.92075ms)
+✔ rejects missing transport inspection (6.09875ms)
+✔ rejects missing inspection assertion (5.354958ms)
+✔ rejects missing inspection limitation (5.532084ms)
+✔ rejects missing wire operation (4.1375ms)
+✔ rejects missing wire assertion (4.069167ms)
+✔ rejects missing wire limitation (4.314292ms)
+✔ rejects missing buffer operation (10.152166ms)
+✔ rejects missing buffer assertion (10.25125ms)
+✔ rejects missing buffer limitation (10.242209ms)
+ℹ tests 39
+ℹ suites 0
+ℹ pass 39
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 440.393208
