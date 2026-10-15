@@ -1,0 +1,43 @@
+{
+  "state": "SOURCE_EXPORT_SETUP_READY_FOR_ROOT_RUNNER_REVIEW",
+  "required_commit": "a37f867a8a10359b35e754242b166c03b13813f3",
+  "source_inputs": 1464,
+  "qualified_projection": 1454,
+  "supplementary_inputs": [
+    ".gitignore",
+    "AGENTS.md",
+    "LICENSE",
+    "README.md",
+    "benchmarks/matched/COMPARISON.md",
+    "benchmarks/matched/README.md",
+    "benchmarks/matched/SCHEMA.md",
+    "docs/COMMAND_BYTES.md",
+    "docs/PERFORMANCE.md",
+    "validation/performance/pipeline470/SCHEMA.md"
+  ],
+  "derived_historical_compiled_projection_label": 1448,
+  "scope_note": "compiled_inputs preserves historical input projection label; Cargo JSON records prove actual compiled roots; added toolchain/config inputs captured without claiming extra functional test coverage",
+  "source_guard_actual_exit": 0,
+  "source_export_actual_exit": 0,
+  "source_export_original_handle": 25945,
+  "source_and_target_status": {
+    "source_exists": true,
+    "fresh_target_exists": false,
+    "build_started": false,
+    "CLI_started": false,
+    "timing_started": false
+  },
+  "physical_private_fixture600": 7,
+  "driver_sha256": {
+    "artifact-guard.py": "9ff349c4da1924de0966345eb5119411c39a4af9fd62eb8731b336c36b1b79f8",
+    "cli-run.sh": "e573e731f4e1b6c04d42b986e901fda9dc264bd7d3d80a5da7ef55284ce82412",
+    "cli.py": "087742b9f5e12308c822b52bf95a77b8dd4c352308ae052a147a2068ee020024",
+    "export-source.sh": "0450046b59b6a8bf6d3e63eb389292cb3c49ec65e0c50ec87af986e736da38b8",
+    "guard.py": "36bfc9e52411de108001d0ec57723771adc87d5683b24a034acb6d5c31f7bd86",
+    "phase-diagnostic-check.py": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "run.sh": "d423293f89c4e40aedbd856ac7212577ab63c311a583ed4ffcdcc355b81887bd",
+    "setup-after-build.sh": "788d6b63d036020b5bf50a7368b01650ec1e54c396c619a20e11b468604fb9cc"
+  },
+  "publication_sha256": "11c679d0784967d021fea7853a26ebf63c37a5694f6a7ce1a1adae59146c058c",
+  "functional_qualification_sha256": "08ecf3cfcac8babd400021448d11768fc7c528ced47c1b43efbf1154befc7851"
+}

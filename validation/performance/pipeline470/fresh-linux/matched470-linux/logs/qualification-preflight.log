@@ -1,0 +1,1 @@
+{"commit": "a37f867a8a10359b35e754242b166c03b13813f3", "qualified_inputs": 1454, "scope": "Changed root Core/runtime qualification plus exact doc-only reuse; three baseline-reproduced failures remain recorded, not passing tests."}

@@ -2,6 +2,24 @@
 
 ## Active P9 plan — 15 October 2026
 
+Latest checked publication is470 `a37f867a8a10359b35e754242b166c03b13813f3`.
+The [publication receipt](../validation/performance/pipeline470/publication/README.md)
+records original77933/full enabled hook0 and exact remote main. Native fresh-build
+original45090 is terminal0/DONE with root/executable/build-script fresh:false,
+native opt3/debug0/assertions/overflow/default LTO/codegen and exact baseline458
+tool identities; framework fresh-build original81534 also terminates0/DONE.
+[Fresh Linux evidence](../validation/performance/pipeline470/fresh-linux/README.md)
+records all242 verified payloads, three actual16K framework controls and native
+release controls52319: four128-original TCP/QUIC histories, recover192, retries,
+joins and actual selected settings. Shared leader measurement has two synchronized
+same-group multi-unit barriers per protocol, TCP80/QUIC64 known command originals,
+with no missing/dropped correlations or storage errors. No paired release
+pipeline benefit is established by these build and functional checks. The three
+baseline-reproduced native timeouts remain failures. The current mini plan below
+has advanced from implementation/publication to actual native off/on measurement;
+the [measurement boundaries and observer caveats](P9.md) keep sustained headroom,
+fairness, physical debt and all both-host acceptance separate from this experiment.
+
 The1.5× larger published/matched sustained requirement is a minimum acceptance
 bar, not a target or stopping ceiling. The user wants that capacity and
 substantially more. Keep profiling, removing measured work and comparing both
@@ -743,8 +761,8 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: integrated470 bounded same-group persistence pipeline | Amortize the dominant durable barrier context through actual overlap and queued units | Published469 restoration, retained455 source, [audit](../validation/performance/pipeline470/AUDIT.md), [unified before-edit schema](../validation/performance/pipeline470/SCHEMA.md) and original Mac455 qualification | Complete usable opt-in Core→runtime/owner→worker→native service path; exact sealed-window completion/order/credits, default-false application and default-one worker capabilities, protected bounds, failures/recovery/outcomes and all strict checks; commit/push through enabled hook, no isolated unused API milestone | P9.1/P9.2/P9.3 |
-| Next: measure actual pipeline amortization and useful performance | Retain this redesign only if it reduces the measured limiting stage without losing outcomes or tails | Complete checked published470, exact source/artifact/compiler guards and quiet within-host configurations | Fresh asserted native artifacts; real same-group successors share a subsequent physical barrier; exact units/originals per barrier, repeated paired off/on completed originals/s, latency/refusals/drain/maintenance/recovery and bounded memory/debt; preserve every failure/regression, reject or retain from actual evidence | P9.1/P9.2/P9.3 |
+| Current: measure published470 pipeline amortization | Test whether bounded overlap reduces the measured durable barrier cost | [Published470](../validation/performance/pipeline470/publication/README.md), checked Core→owner→worker→native path, fresh asserted artifacts and quiet host | Rotating TCP/QUIC same-ELF470 off/on plus retained458 context; actual create/recover selection, synchronized same-group multi-unit barriers, completed originals/s, p99/refusals/horizon/drain/maintenance/retries/joins and whole-process resources; keep all failures and observer caveats | P9.1/P9.2/P9.3 |
+| Next: resolve measured limits and qualify both-host behavior | Retain or reject470 from useful performance, then reduce the largest remaining demonstrated cost | Terminal native comparison, fresh framework controls and original Mac455 termination before new Mac work | Source-grounded ordering/ownership design before any further edit; Linux20M bulk and singleton regression controls; fresh Mac qualification and matched measurements; sustained physical memory/debt and offered-load expansion remain explicit requirements | P9.0/P9.1/P9.2/P9.3 |
 | Following: full curve, sustainable headroom and composition qualification | Satisfy the entire performance objective beyond the current experiment | Retained measured improvements, qualified weighted fixture, source/artifact/host identities and stable maintenance | All seven required framework cells on both hosts with healthy margin; sustained memory/debt, durable applications/headroom/skew/fairness, independent placement/shared barriers and P8 composition; preserve every outcome/fence/retry | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed

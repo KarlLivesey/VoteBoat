@@ -1,0 +1,6 @@
+{
+  "scope": "Actual root publication30 receipt uses exit/hook_enabled/remote_commit; guard now checks those realfields instead of unfilled template actual_push_exit/enabled_hook_during_push. Earlier sentinel failure proof remains original.",
+  "before_guard_sha256": "c4ef253846a800c3259b4a00950eba94c89ef3f3f9501748e8f7236447d6909e",
+  "after_guard_sha256": "36bfc9e52411de108001d0ec57723771adc87d5683b24a034acb6d5c31f7bd86",
+  "publication_sha256": "82e12dbf485a9301296dab211605bd7d22b8bd68520f811f9502c0720d58ba28"
+}

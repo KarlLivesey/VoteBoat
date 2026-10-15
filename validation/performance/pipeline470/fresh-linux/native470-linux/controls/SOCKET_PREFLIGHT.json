@@ -1,0 +1,17 @@
+{
+  "artifact_hashes_match": true,
+  "sockets": [
+    {
+      "socket_type": 1,
+      "bind": "127.0.0.1",
+      "bound_port": 41643,
+      "exit": 0
+    },
+    {
+      "socket_type": 2,
+      "bind": "127.0.0.1",
+      "bound_port": 35964,
+      "exit": 0
+    }
+  ]
+}

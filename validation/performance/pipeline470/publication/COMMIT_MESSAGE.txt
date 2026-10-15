@@ -1,0 +1,7 @@
+P9: add bounded same-group persistence windows
+
+Add opt-in Core, owner, worker and native startup composition for exact scoped append units. Hold canonical progress and original credits until sealed units are durable, preserve default serial behavior, and retain the existing WAL publication protocol. Restore refused persistence prefixes at the FIFO front.
+
+Avoid reconstructing the complete connection union for exactly covered inputs, with full fallback and guarded normal/error/unwind callback paths. Add public conformance, recovery and physical-barrier controls and preserve all raw profiles, failures and qualification scopes.
+
+Validation: full enabled strict hook and metadata pass; 17 focused controls, 404 affected integrations, actual TCP/QUIC services, core regressions, matched70 and native benchmark51 pass. Four selected-pipeline command/recovery histories pass with actual same-group barrier sharing. Three hundred-group timeout histories also fail on exact published469 and remain documented. Sustained P9 performance acceptance is still open.

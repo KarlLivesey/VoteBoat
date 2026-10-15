@@ -1,0 +1,65 @@
+{
+  "observed_utc": "2026-10-15T05:21:50.565230+00:00",
+  "original_session_id": 52319,
+  "actual_exit": 0,
+  "source_guard_before_and_after": 0,
+  "original_copied_artifact_hashes": true,
+  "cases": [
+    {
+      "case": "tcp-startup",
+      "operations": "128",
+      "recovered_value": "192",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "applied_ops_s": "1787.417",
+      "p99_us": "46562.871",
+      "scope": "Short release functional control only; not paired capacity"
+    },
+    {
+      "case": "tcp-shared",
+      "operations": "128",
+      "recovered_value": "192",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "applied_ops_s": "3787.133",
+      "p99_us": "16934.358",
+      "scope": "Short release functional control only; not paired capacity",
+      "leader_replica": "1",
+      "leader_measurement_deltas": {
+        "synchronized_same_group_multi_unit_calls": 2,
+        "synchronized_same_group_multi_unit_known_originals": 80,
+        "barrier_missing_tickets": 0,
+        "barrier_dropped_tickets": 0,
+        "errors": 0
+      }
+    },
+    {
+      "case": "quic-startup",
+      "operations": "128",
+      "recovered_value": "192",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "applied_ops_s": "2654.700",
+      "p99_us": "32525.494",
+      "scope": "Short release functional control only; not paired capacity"
+    },
+    {
+      "case": "quic-shared",
+      "operations": "128",
+      "recovered_value": "192",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "applied_ops_s": "2941.745",
+      "p99_us": "26778.570",
+      "scope": "Short release functional control only; not paired capacity",
+      "leader_replica": "1",
+      "leader_measurement_deltas": {
+        "synchronized_same_group_multi_unit_calls": 2,
+        "synchronized_same_group_multi_unit_known_originals": 64,
+        "barrier_missing_tickets": 0,
+        "barrier_dropped_tickets": 0,
+        "errors": 0
+      }
+    }
+  ]
+}

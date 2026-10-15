@@ -1,0 +1,12 @@
+{
+  "command": [
+    "node",
+    "validation/check-native-benchmark.mjs",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/controls/tcp-shared",
+    "--storage"
+  ],
+  "start": "2026-10-15T05:21:17.858047+00:00",
+  "end": "2026-10-15T05:21:17.881107+00:00",
+  "elapsed_s": 0.023073640011716634,
+  "exit": 0
+}

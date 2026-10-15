@@ -1,0 +1,13 @@
+{
+  "commit": null,
+  "exit": null,
+  "proof": {
+    "path": null,
+    "sha256": null
+  },
+  "actual_root_receipt_required_fields": [
+    "commit",
+    "actual_push_exit",
+    "enabled_hook_during_push"
+  ]
+}

@@ -1,0 +1,72 @@
+[
+  {
+    "command": [
+      "ast.parse",
+      "target/p9/matched470-linux/artifact-guard.py"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "ast.parse",
+      "target/p9/matched470-linux/cli.py"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "ast.parse",
+      "target/p9/matched470-linux/guard.py"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "ast.parse",
+      "target/p9/matched470-linux/phase-diagnostic-check.py"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "bash",
+      "-n",
+      "target/p9/matched470-linux/cli-run.sh"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "bash",
+      "-n",
+      "target/p9/matched470-linux/export-source.sh"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "bash",
+      "-n",
+      "target/p9/matched470-linux/run.sh"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "bash",
+      "-n",
+      "target/p9/matched470-linux/setup-after-build.sh"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "python3",
+      "target/p9/matched470-linux/guard.py",
+      "target/p9/matched470-linux",
+      "qualification"
+    ],
+    "exit": 1,
+    "expected": "sentinel refuses before receipts/source/build"
+  }
+]

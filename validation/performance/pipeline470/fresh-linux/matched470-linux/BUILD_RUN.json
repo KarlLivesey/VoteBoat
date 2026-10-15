@@ -1,0 +1,7 @@
+{
+  "recorded_utc": "2026-10-15T05:19:31.140202+00:00",
+  "original_session_id": 81534,
+  "command": "bash target/p9/matched470-linux/run.sh > target/p9/matched470-linux/runner.stdout 2> target/p9/matched470-linux/runner.stderr",
+  "state_at_recording": "live",
+  "scope": "Fresh serial framework build only, no CLI or performance campaign."
+}

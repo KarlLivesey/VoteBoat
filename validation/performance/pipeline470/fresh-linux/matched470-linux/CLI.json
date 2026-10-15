@@ -1,0 +1,51 @@
+[
+  {
+    "case": "off",
+    "actual_exit": 0,
+    "completed_originals": 16384,
+    "completed_requests": 4096,
+    "applied_frontiers": [
+      17409,
+      17409,
+      17409
+    ],
+    "phase_scope_method_counts": null,
+    "guarded_output_sha256": "9c9269065e750d43673dd3a376c1da1c01e6fab2e9bbadbd8f8808f39597d6e0",
+    "checker_sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "scope": "Functional control only; rates are not paired capacity evidence; no466 entry-allocation observer fields."
+  },
+  {
+    "case": "on",
+    "actual_exit": 0,
+    "completed_originals": 16384,
+    "completed_requests": 4096,
+    "applied_frontiers": [
+      17409,
+      17409,
+      17409
+    ],
+    "phase_scope_method_counts": [
+      29,
+      4,
+      15
+    ],
+    "guarded_output_sha256": "d24df5b6154901d4bbd79c6945427bc5bbf7abbf8895ceb8dcfaf4a561e78d4f",
+    "checker_sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "scope": "Functional control only; rates are not paired capacity evidence; no466 entry-allocation observer fields."
+  },
+  {
+    "case": "openraft",
+    "actual_exit": 0,
+    "completed_originals": 16384,
+    "completed_requests": 4096,
+    "applied_frontiers": [
+      17409,
+      17409,
+      17409
+    ],
+    "phase_scope_method_counts": null,
+    "guarded_output_sha256": "9f81e623b503c2a5e7ef6291b5aaeb49b65adbe98cd76c014c73bf417348dd2e",
+    "checker_sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "scope": "Functional control only; rates are not paired capacity evidence; no466 entry-allocation observer fields."
+  }
+]

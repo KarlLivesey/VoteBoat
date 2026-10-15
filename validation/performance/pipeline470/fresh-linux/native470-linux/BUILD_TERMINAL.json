@@ -1,0 +1,9 @@
+{
+  "observed_utc": "2026-10-15T05:19:31.140202+00:00",
+  "original_session_id": 45090,
+  "command": "bash target/p9/native470-linux/run.sh > target/p9/native470-linux/runner.stdout 2> target/p9/native470-linux/runner.stderr",
+  "tool_exit": 0,
+  "stage": "DONE",
+  "status": 0,
+  "scope": "Original handle polled to actual terminal exit0; not a new build or performance measurement."
+}

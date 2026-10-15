@@ -1,0 +1,10 @@
+{
+  "time": "2026-10-15T05:16:12.632528+00:00",
+  "reviewed_setup_sha256": "6066b6a6bf21d3be5b403cdd436a6336c5bfaa52babf1624564fa7df31bd46b5",
+  "source_guard_exit": 0,
+  "fresh_target_absent": true,
+  "approved_for_serial_build_only": true,
+  "no_performance_run_started": true,
+  "profile": "Native opt3/debug0/assertions+overflow/defaultLTO+codegen; framework opt3/debug2/packed/thinLTO/codegen1; original baseline tool hashes, compiler JSON/vv/freshFalse root/exe/buildscript plus upstream guards preserved.",
+  "scope": "Actual publication, source, physical fixtures, lock/config, doc-only functional qualification and known baseline failures reviewed. Native build first; framework only after actual native termination. CLI controls remain separate."
+}

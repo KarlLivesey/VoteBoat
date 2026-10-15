@@ -1,0 +1,11 @@
+{
+  "command": [
+    "node",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/controls/check-selection.mjs",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/controls/quic-shared"
+  ],
+  "start": "2026-10-15T05:21:18.758863+00:00",
+  "end": "2026-10-15T05:21:18.778940+00:00",
+  "elapsed_s": 0.02009938398259692,
+  "exit": 0
+}

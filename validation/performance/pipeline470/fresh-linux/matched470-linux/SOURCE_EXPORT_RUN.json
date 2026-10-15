@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "bash",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched470-linux/export-source.sh"
+  ],
+  "cwd": "/home/karllivesey/Documents/ChatGPT/VoteBoat",
+  "start": 1792041202.4126132,
+  "scope": "Authorized committed source export only; build held for root runner review."
+}

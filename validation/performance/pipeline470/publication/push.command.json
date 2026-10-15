@@ -1,0 +1,19 @@
+{
+  "args": [
+    "git",
+    "push",
+    "origin",
+    "main"
+  ],
+  "commit": "a37f867a8a10359b35e754242b166c03b13813f3",
+  "hook": ".githooks/pre-push",
+  "hook_sha256": "e3e9d01c12837936819f7c6f5b4b8840af19e9cded729381599df0f0fc17ee92",
+  "environment": {
+    "CARGO_TARGET_DIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks",
+    "CARGO_BUILD_JOBS": "2",
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null,
+    "RUSTC_WRAPPER": null,
+    "RUSTC_WORKSPACE_WRAPPER": null
+  }
+}

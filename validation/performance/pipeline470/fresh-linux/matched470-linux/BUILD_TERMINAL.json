@@ -1,0 +1,7 @@
+{
+  "observed_utc": "2026-10-15T05:20:22.542733+00:00",
+  "original_session_id": 81534,
+  "actual_exit": 0,
+  "stage": "DONE",
+  "scope": "Original fresh framework build handle polled to terminal0; no CLI or performance result."
+}
