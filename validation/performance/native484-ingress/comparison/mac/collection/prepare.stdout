@@ -1,0 +1,23 @@
+{
+  "exit": 0,
+  "scope": "Actual fresh483 and immutable480 Mac guard only; no campaign/timing.",
+  "source_commits": {
+    "baseline": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+    "candidate": "efd383dc36b4b9edf8f66021b90115824440b468"
+  },
+  "artifacts_sha256": {
+    "baseline": {
+      "voteboat": "fa3ea343d31fd2a69f05e38bf02c0a3c1f574ef6d59000d4e70320d02e9916b1",
+      "native_benchmark": "fef05adc73179359ea2acc0d9b92978c57c4795410a727aefc30f1aac422fa52"
+    },
+    "candidate": {
+      "voteboat": "45fdda6571c0335f1c14ab3c1f5447fc3e48df703050339ad80a64c9596b577d",
+      "native_benchmark": "0c78b8db72ab496cdbce2c38c8673511013a89f4f1f44b24ee167ad8878f2f44"
+    }
+  },
+  "proof_counts": {
+    "baseline": 52,
+    "candidate": 50
+  }
+}
+PREPARED48_NO_TIMING /private/tmp/voteboat-native484-pair-NB2I6n/campaign

@@ -1,0 +1,49 @@
+{
+  "scope": "Original Linux484 48-case paired480/483 finite offered native campaign; no workload, source, build, profiling or validator rerun during collection. Both actual host terminals preceded readout. Not sustained P9 acceptance.",
+  "original_handle": 84364,
+  "actual_terminal_exit": 0,
+  "terminal_tool_chunk": "52f183",
+  "readout_original_handle": 19859,
+  "readout_actual_exit": 0,
+  "readout_terminal_tool_chunk": "d4a3d9",
+  "exact_launch_command": [
+    "/usr/bin/python3.14",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/linux/revision2/campaign/campaign.py",
+    "--authorized-quiet"
+  ],
+  "source_commits": {
+    "baseline": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+    "candidate": "efd383dc36b4b9edf8f66021b90115824440b468"
+  },
+  "config_sha256": "09a6749d635c657d1cdcb9b605be1df67f3c08475c7123cc50e2a38db2fa2c29",
+  "readout_sha256": "02209e3306d1fc1c1685dec733f7633b146154834df2a414b768ada03baaa516",
+  "totals": {
+    "applied": 263904,
+    "window_refused": 127776,
+    "no_leader": 0,
+    "admission_refused": 0,
+    "not_proposed": 0,
+    "unknown": 0,
+    "pending": 0
+  },
+  "actual_processes": 48,
+  "actual_native_validators": 48,
+  "actual_physical_readbacks": 48,
+  "source_inputs": {
+    "baseline": 1495,
+    "candidate": 1503
+  },
+  "time_utc": "2026-10-15T17:04:29.931374+00:00",
+  "limits": [
+    "This exact phase uses the source commits above; reference481 is retained context only and must never be spliced into484 scores.",
+    "Intended/service quantiles cover applied originals; dispatch covers all offers. Nearest-rank ceil(n*p/100)-1. No estimated or reconstructed outcomes.",
+    "Whole-child CPU/RSS includes startup, warmup, measurement, drain, verification, recovery and cleanup. CPUus/completed has that wider numerator; it is not native timer CPU or causal attribution.",
+    "Inclusive/nested storage and publication/cold elapsed scopes overlap; do not sum them as CPU or per-original waiting.",
+    "Append units include metadata transitions; histogram width and commands/unit are not literal proposal width. Encoded bytes and process block counters are not device-I/O bytes.",
+    "All voters/groups share the same physical device. Per-group skew is7936hot/256cold with2048pending ceiling, not an engine fairness guarantee or one-group floor.",
+    "After-recover counters have a new observer lifetime and are absolute; no counter subtraction across reopen.",
+    "Reported catch-up counts and before-close/recovered bases do not locate individual delayed originals. No missed-timer count exists; late decisions are not timer misses.",
+    "Cap-limited/small finite horizons do not establish maximum/sustained capacity, memory/debt plateau or fullP9/three-filesystem acceptance."
+  ],
+  "exclusions": "No binaries, build trees, full production source, generated WAL/snapshot states, caches or bytecode. Source inventories and hashes remain."
+}

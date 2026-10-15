@@ -1,0 +1,1 @@
+["ssh", "-F", "/dev/null", "-o", "IdentityAgent=/home/karllivesey/.1password/agent.sock", "-o", "BatchMode=yes", "karllivesey@192.168.192.76", "/usr/bin/python3 -c 'from pathlib import Path; import sys; p=Path('\"'\"'/private/tmp/voteboat-native484-pair-NB2I6n/campaign/collect484.py'\"'\"'); assert not p.exists(); p.write_bytes(sys.stdin.buffer.read())'"]

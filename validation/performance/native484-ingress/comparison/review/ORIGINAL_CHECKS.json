@@ -1,0 +1,60 @@
+{
+  "scope": "Distinct central484 numerical reviews only; original Linux/Mac campaign seals unchanged. No workload/build/profile/validator rerun.",
+  "original_campaigns": {
+    "time_utc": "2026-10-15T17:02:30.779582+00:00",
+    "linux": {
+      "original_handle": 84364,
+      "actual_terminal_exit": 0,
+      "completed_case_end_records": 48,
+      "terminal_tool_chunk": "52f183",
+      "markers": [
+        "ALL_TIMING_END",
+        "CAMPAIGN_EXIT0"
+      ],
+      "postguards_and_validators_complete": true
+    },
+    "mac": {
+      "original_handle": 2749,
+      "actual_terminal_exit": 0,
+      "completed_case_end_records": 48,
+      "terminal_tool_chunk": "1812fd",
+      "markers": [
+        "ALL_TIMING_END",
+        "CAMPAIGN_EXIT0",
+        "ORIGINAL_MAC484_CAMPAIGN_SSH_EXIT0"
+      ],
+      "postguards_and_validators_complete": true
+    },
+    "authorization": "Both original fixed484 campaign parents actually terminated. Collection, raw readout and archive authorized now; preserve every original case, failure, regression and boundary. No replacement workloads."
+  },
+  "independent96_sealed_payloads": 19,
+  "independent96_files_manifest_sha256": "25e8fa138688506022ed2a7ba16fa028e527e3b69bc0d04d9f57c69333e58368",
+  "independent96_receipt_sha256": "a20e5c20e0c195e097fbdfd71cbc64eee6687fe68d86c553e402b873dfcd77e6",
+  "all_original_SHA_length_gzip_roundtrip": "PASS",
+  "source_modes_recorded": true,
+  "campaign_archive_verifications": {
+    "linux": {
+      "exit": 0,
+      "payloads": 1210,
+      "originals": 1207,
+      "lossless_gzip": 280,
+      "manifest_sha256": "2b40eb8244e14c97dd73ed29c33e1397353c45f00eedf1f1ef293af574d8e73a",
+      "scope": "Independent root recursive exact path-set/seal/gzip/original byte/hash/length/mode comparison; actual artifact review is separately sealed in archive. No workload, check suite or build repeated."
+    },
+    "mac": {
+      "exit": 0,
+      "payloads": 1120,
+      "originals": 1117,
+      "lossless_gzip": 46,
+      "manifest_sha256": "f616a893697dada493c6e257f88d9a0db8a35dbe290277f0cf69d38685931c6d",
+      "scope": "Independent root recursive exact path-set/seal/gzip/original byte/hash/length/mode comparison; actual artifact review is separately sealed in archive. No workload, check suite or build repeated."
+    }
+  },
+  "host_manifest_sha256": {
+    "linux": "2b40eb8244e14c97dd73ed29c33e1397353c45f00eedf1f1ef293af574d8e73a",
+    "mac": "f616a893697dada493c6e257f88d9a0db8a35dbe290277f0cf69d38685931c6d"
+  },
+  "originals": 152,
+  "gzip": 69,
+  "time_utc": "2026-10-15T17:10:47.616038+00:00"
+}

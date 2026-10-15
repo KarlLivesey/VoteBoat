@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux/artifacts/native/native_benchmark",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux/controls/wal/tcp-default-atomic",
+    "tcp",
+    "512",
+    "4096",
+    "1",
+    "--offered",
+    "128",
+    "--maintenance",
+    "2",
+    "--offered-capacity",
+    "4096"
+  ],
+  "exit": 0,
+  "elapsed_s": 7.392803663999075,
+  "error": null,
+  "received_signals": []
+}

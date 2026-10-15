@@ -1,0 +1,13 @@
+{
+  "commit": "efd383dc36b4b9edf8f66021b90115824440b468",
+  "sha256": {
+    "validation/check-native-benchmark.mjs": "8c3f8a31270aa52ff4cdadd75479185dbfe33c0f2adecef0739dc43b008e54d7",
+    "validation/check-publication-profile.mjs": "425f3f905db3e368260095bc8eb78d92aa9753b9d9cf3995a78040a5b7a72b41",
+    "validation/check-publication-timings.mjs": "9d69d025335612afbef911377d2e15654e2186c1e0cb36884fa5fa8ee6b9d5a1",
+    "validation/check-rounded-rate.mjs": "262f06cfb0e878bfa7ce02741f51d7cd6e7e8df6b07b8973df4a7d89502c662d",
+    "validation/check-maintenance.mjs": "99fd718641c95a0412ef2e98e33b23da717470613bdc496d6313c8b58d0ce658",
+    "validation/check-offered.mjs": "13f0c1f45df5bbc20802e21883bf7157ef0272210df1269f0e8fddb739d90015",
+    "validation/check-lanes.mjs": "cb49a5d3cee377cf3154d9a9f092ea90e9af64b87ba98272cae50765c51dc920",
+    "validation/check-benchmark-storage.mjs": "f46a15656e91d9c6d32f3f268dde74a2a2e7425f9d5027da4c7cc0a8a69d9856"
+  }
+}

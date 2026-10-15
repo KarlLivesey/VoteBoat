@@ -1,0 +1,17 @@
+{
+  "time_unix": 1792081967.845532,
+  "power_command": [
+    "/usr/bin/pmset",
+    "-g",
+    "batt"
+  ],
+  "power_exit": 0,
+  "power_stdout": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=7602275)\t80%; AC attached; not charging present: true\n",
+  "power_stderr": "",
+  "candidate_setup_status": "0",
+  "candidate_setup_stage": "DONE",
+  "campaign_started": false,
+  "ready_sha256": "174f29da296e25fbb9fc09ab308618e9ad2f95eb2af8bde79a35db108442b7f4",
+  "config_sha256": "da49a6d4c41587326d296f8ed78de54143f7234dbbb75a29f82fa609748025b8",
+  "possibly_owned_build_benchmark_processes": []
+}

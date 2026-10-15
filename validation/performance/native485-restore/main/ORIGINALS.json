@@ -1,0 +1,19 @@
+{
+  "initial": {
+    "actual_exit": 101,
+    "terminal_tool_chunk": "5d567d",
+    "reason": "Cargo rejected nonexistent top-level client_admission target before any test; actual module is effect_owner::client_admission. Original runner/logs preserved."
+  },
+  "checked": {
+    "original_handle": 37696,
+    "actual_exit": 1,
+    "terminal_tool_chunk": "fd93db",
+    "reason": "All/core client/application/provider and metadata pass; metadata negative checker expected48345/420counts against restored48044/415. Focused20thpath restored exactly480; strict not executed in this attempt."
+  },
+  "final": {
+    "original_handle": 51066,
+    "actual_exit": 0,
+    "terminal_tool_chunk": "94c430",
+    "reason": "Focused metadata negatives42 and full enabled formatter/four rootstrict/standalone checks0; prior production scopes reused unchanged."
+  }
+}

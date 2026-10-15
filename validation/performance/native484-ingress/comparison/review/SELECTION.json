@@ -1,0 +1,1066 @@
+[
+  {
+    "source_path": "target/p9/native484-ingress/ROOT_PUBLISHED_GO.json",
+    "archived_path": "authority/ROOT_PUBLISHED_GO.json",
+    "original_sha256": "c8b2b1c97af1235594fbcb8188add1531a497b15c2044715b83f791fc2b0b0d7",
+    "original_bytes": 620,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/ROOT_QUIET_END.json",
+    "archived_path": "authority/ROOT_QUIET_END.json",
+    "original_sha256": "7057ee38e1afd2e7ea965e9ac6f028b6f0e841c0412f9c69a644ad0a59b7352c",
+    "original_bytes": 863,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/ROOT_QUIET_GO.json",
+    "archived_path": "authority/ROOT_QUIET_GO.json",
+    "original_sha256": "a78aa90ee9c28796b543e6930c00cd8ca6874e0d2ca45e2d90f8394e6f07a388",
+    "original_bytes": 1747,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "validation/performance/native484-ingress/comparison/linux/SHA256SUMS",
+    "archived_path": "campaign-archive-verification/linux-SHA256SUMS.gz",
+    "original_sha256": "2b40eb8244e14c97dd73ed29c33e1397353c45f00eedf1f1ef293af574d8e73a",
+    "original_bytes": 146336,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/LINUX_PAIRED_ROOT_ARCHIVE_VERIFIED.json",
+    "archived_path": "campaign-archive-verification/linux.json",
+    "original_sha256": "2f429bcd17ac9d58045e9d54047edfb86ca5f496cc93fc9fa5cbceda404a71f4",
+    "original_bytes": 379,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "validation/performance/native484-ingress/comparison/mac/SHA256SUMS",
+    "archived_path": "campaign-archive-verification/mac-SHA256SUMS.gz",
+    "original_sha256": "f616a893697dada493c6e257f88d9a0db8a35dbe290277f0cf69d38685931c6d",
+    "original_bytes": 128802,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/mac/ARCHIVE_RECEIPT.json",
+    "archived_path": "campaign-archive-verification/mac-owner-archive-receipt.json",
+    "original_sha256": "ae1c3f54a3511d519b80477bcc0e2bfe347c12f70d5d44ae028205fbd4fd8d1b",
+    "original_bytes": 633,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/MAC_PAIRED_ROOT_ARCHIVE_VERIFIED.json",
+    "archived_path": "campaign-archive-verification/mac.json",
+    "original_sha256": "f4f764eaf8f96fffee9e3fd55a148248647b88255fad5b49dde68f5b34d49f8d",
+    "original_bytes": 378,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/AFTER.json",
+    "archived_path": "checked-publication/linux/AFTER.json.gz",
+    "original_sha256": "560e9b4ed1c752aff56c549d350926e6861ab94115a733fb11040f8e5f8db3fd",
+    "original_bytes": 237225,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/BEFORE.json",
+    "archived_path": "checked-publication/linux/BEFORE.json.gz",
+    "original_sha256": "560e9b4ed1c752aff56c549d350926e6861ab94115a733fb11040f8e5f8db3fd",
+    "original_bytes": 237225,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/ORIGINAL_JOB.json",
+    "archived_path": "checked-publication/linux/ORIGINAL_JOB.json",
+    "original_sha256": "5bde34ac442fc70adfa4728fe49fbcdeb26d3e17a14ab048872727bc2919d2c9",
+    "original_bytes": 368,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/RECEIPT.json",
+    "archived_path": "checked-publication/linux/RECEIPT.json",
+    "original_sha256": "63fe2a5fc5c135eae47ec570bd139a273554e1fbea1265f019de63ebd91caaef",
+    "original_bytes": 526,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/commit.command.json",
+    "archived_path": "checked-publication/linux/commit.command.json",
+    "original_sha256": "cd58dd4df2accbe187d70917134cfca17ae59e584f69befc2ebc2b08ec857756",
+    "original_bytes": 102,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/commit.exit.json",
+    "archived_path": "checked-publication/linux/commit.exit.json",
+    "original_sha256": "3e7c12b5a1c18c81a791d5998fc394ebc11f176ffd40139f64e9732d55047ab2",
+    "original_bytes": 66,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/commit.stderr",
+    "archived_path": "checked-publication/linux/commit.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/commit.stdout",
+    "archived_path": "checked-publication/linux/commit.stdout.gz",
+    "original_sha256": "c7be4147385f9b60a64ae08b20b5a5a1311aea06b31981d3e7796b7c15e821a1",
+    "original_bytes": 22834,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/prestage-whitespace.command.json",
+    "archived_path": "checked-publication/linux/prestage-whitespace.command.json",
+    "original_sha256": "2cf4c873959d31c535d46af34b5521e1be742aba3eda3d28e63a815163114c66",
+    "original_bytes": 35,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/prestage-whitespace.exit.json",
+    "archived_path": "checked-publication/linux/prestage-whitespace.exit.json",
+    "original_sha256": "c2cfe8d576608e37b0814ae3fc8650c7dc5cb89f5014853eb4f4af3868114496",
+    "original_bytes": 66,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/prestage-whitespace.stderr",
+    "archived_path": "checked-publication/linux/prestage-whitespace.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/prestage-whitespace.stdout",
+    "archived_path": "checked-publication/linux/prestage-whitespace.stdout.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/push.command.json",
+    "archived_path": "checked-publication/linux/push.command.json",
+    "original_sha256": "df28fb7fc3a24d03071b8ddacdca92676aaf782a19dcac742c06243d05edd318",
+    "original_bytes": 44,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/push.exit.json",
+    "archived_path": "checked-publication/linux/push.exit.json",
+    "original_sha256": "f66c5da5f25b0cc9a7f9cb8f5cd23815cf5b875d3823b5e30a5eec92ab8380f9",
+    "original_bytes": 66,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/push.stderr",
+    "archived_path": "checked-publication/linux/push.stderr.gz",
+    "original_sha256": "31f67238b91eefd8b6997e578345213fbdc0d19ad5163293dde2ad3ecfe07ac9",
+    "original_bytes": 435,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/push.stdout",
+    "archived_path": "checked-publication/linux/push.stdout.gz",
+    "original_sha256": "282487865beabbd0ea2ef111759ccb2c9a9900dc45af8a1f98f9bf9ff4fdaaf3",
+    "original_bytes": 53,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/remote.command.json",
+    "archived_path": "checked-publication/linux/remote.command.json",
+    "original_sha256": "c268b06d515630574a6f88645d288e043c6e7a23608c5422d621657db3e20b0a",
+    "original_bytes": 73,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/remote.exit.json",
+    "archived_path": "checked-publication/linux/remote.exit.json",
+    "original_sha256": "9748572692bcdbaa0aef3215705744ffd8bc5fc74d12e35eb91e2bccb48946ab",
+    "original_bytes": 66,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/remote.stderr",
+    "archived_path": "checked-publication/linux/remote.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/remote.stdout",
+    "archived_path": "checked-publication/linux/remote.stdout.gz",
+    "original_sha256": "fbd2b117ad2cb017a8f818a3f78444d98e893a42f0c7c17628447bb92f26f39d",
+    "original_bytes": 57,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/run.py",
+    "archived_path": "checked-publication/linux/run.py",
+    "original_sha256": "6b1ecaf6a4dcfaff8d0cdaf07bfbc705728b4070157f4bb19e107415c98fed5c",
+    "original_bytes": 2199,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/runner.stderr",
+    "archived_path": "checked-publication/linux/runner.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/runner.stdout",
+    "archived_path": "checked-publication/linux/runner.stdout.gz",
+    "original_sha256": "41ff7a9f1533bd26b49ceb6f7b58fa6bc7c1fbdb71e1f5f7231c5c2d4d9beb19",
+    "original_bytes": 121,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/stage.command.json",
+    "archived_path": "checked-publication/linux/stage.command.json",
+    "original_sha256": "40e444a4b3b14d1b13ab2d78f78cba740b2ccff95cb5361de4213de4c47b7f48",
+    "original_bytes": 119,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/stage.exit.json",
+    "archived_path": "checked-publication/linux/stage.exit.json",
+    "original_sha256": "700e901c030951f2c73a4252cc656903480267cc7c16312513a05224d7c135ec",
+    "original_bytes": 66,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/stage.stderr",
+    "archived_path": "checked-publication/linux/stage.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/stage.stdout",
+    "archived_path": "checked-publication/linux/stage.stdout.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/staged-whitespace.command.json",
+    "archived_path": "checked-publication/linux/staged-whitespace.command.json",
+    "original_sha256": "fd37919acd73083de57a814886586752f7f2443955bdcf29115ec6b6fb56d62f",
+    "original_bytes": 49,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/staged-whitespace.exit.json",
+    "archived_path": "checked-publication/linux/staged-whitespace.exit.json",
+    "original_sha256": "1c4ef1f70a05fa8e43a18975e6f811d8f4e9ed9f02edca0fd10b1bbe19907ccb",
+    "original_bytes": 66,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/staged-whitespace.stderr",
+    "archived_path": "checked-publication/linux/staged-whitespace.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-linux/staged-whitespace.stdout",
+    "archived_path": "checked-publication/linux/staged-whitespace.stdout.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/AFTER.json",
+    "archived_path": "checked-publication/mac/AFTER.json.gz",
+    "original_sha256": "560e9b4ed1c752aff56c549d350926e6861ab94115a733fb11040f8e5f8db3fd",
+    "original_bytes": 237225,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/BEFORE.json",
+    "archived_path": "checked-publication/mac/BEFORE.json.gz",
+    "original_sha256": "560e9b4ed1c752aff56c549d350926e6861ab94115a733fb11040f8e5f8db3fd",
+    "original_bytes": 237225,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/ORIGINAL_JOB.json",
+    "archived_path": "checked-publication/mac/ORIGINAL_JOB.json",
+    "original_sha256": "12188ae6f2228a005467d02af91efc9a85c536abed9e2591d0851b472da17b21",
+    "original_bytes": 377,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/RECEIPT.json",
+    "archived_path": "checked-publication/mac/RECEIPT.json",
+    "original_sha256": "69c7d2582db9f7c458923887462194f2021adb47bd0bcb71e5dd99398a736106",
+    "original_bytes": 545,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/commit.command.json",
+    "archived_path": "checked-publication/mac/commit.command.json",
+    "original_sha256": "72be81b03e751d30e8592991051734bc3ce7717e762403eb9f82eeabe0903e37",
+    "original_bytes": 108,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/commit.exit.json",
+    "archived_path": "checked-publication/mac/commit.exit.json",
+    "original_sha256": "5af463bba3105773a010b237d6e45d19fbc9c78d96df3b9b7cf8849882b9a050",
+    "original_bytes": 66,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/commit.stderr",
+    "archived_path": "checked-publication/mac/commit.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/commit.stdout",
+    "archived_path": "checked-publication/mac/commit.stdout.gz",
+    "original_sha256": "de993611a568630dd3cc5a852a0c2a685de39551490250c64d4eee636c46f782",
+    "original_bytes": 45089,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/prestage-whitespace.command.json",
+    "archived_path": "checked-publication/mac/prestage-whitespace.command.json",
+    "original_sha256": "2cf4c873959d31c535d46af34b5521e1be742aba3eda3d28e63a815163114c66",
+    "original_bytes": 35,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/prestage-whitespace.exit.json",
+    "archived_path": "checked-publication/mac/prestage-whitespace.exit.json",
+    "original_sha256": "48596e0ea6944fa7204e0be03cf52ea0fa3446200d6f6697aca34a8e23a222bc",
+    "original_bytes": 66,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/prestage-whitespace.stderr",
+    "archived_path": "checked-publication/mac/prestage-whitespace.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/prestage-whitespace.stdout",
+    "archived_path": "checked-publication/mac/prestage-whitespace.stdout.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/push.command.json",
+    "archived_path": "checked-publication/mac/push.command.json",
+    "original_sha256": "df28fb7fc3a24d03071b8ddacdca92676aaf782a19dcac742c06243d05edd318",
+    "original_bytes": 44,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/push.exit.json",
+    "archived_path": "checked-publication/mac/push.exit.json",
+    "original_sha256": "0ed44d1bd717d56cc9b329ac62b2d699e8628d9b2684e8dae515bb0149c6409f",
+    "original_bytes": 66,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/push.stderr",
+    "archived_path": "checked-publication/mac/push.stderr.gz",
+    "original_sha256": "51ed6137f2cf87b3b994da492421af3aa9c02faeed1fe7142658b124dee56099",
+    "original_bytes": 435,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/push.stdout",
+    "archived_path": "checked-publication/mac/push.stdout.gz",
+    "original_sha256": "282487865beabbd0ea2ef111759ccb2c9a9900dc45af8a1f98f9bf9ff4fdaaf3",
+    "original_bytes": 53,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/remote.command.json",
+    "archived_path": "checked-publication/mac/remote.command.json",
+    "original_sha256": "c268b06d515630574a6f88645d288e043c6e7a23608c5422d621657db3e20b0a",
+    "original_bytes": 73,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/remote.exit.json",
+    "archived_path": "checked-publication/mac/remote.exit.json",
+    "original_sha256": "2a520252f22b87d66355e193988de16dfd2a262af0b6a8267397b8823794a8c4",
+    "original_bytes": 66,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/remote.stderr",
+    "archived_path": "checked-publication/mac/remote.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/remote.stdout",
+    "archived_path": "checked-publication/mac/remote.stdout.gz",
+    "original_sha256": "ce25d7bfd20413446ec751af9c0c3b4168351eb3bf0c0e60249bd74e835a605c",
+    "original_bytes": 57,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/run.py",
+    "archived_path": "checked-publication/mac/run.py",
+    "original_sha256": "04ebb20d645bda88accc1d629fc55b311994cb897cf51fa49906ae2c6115078e",
+    "original_bytes": 2222,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/runner.stderr",
+    "archived_path": "checked-publication/mac/runner.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/runner.stdout",
+    "archived_path": "checked-publication/mac/runner.stdout.gz",
+    "original_sha256": "e39aa935ed29ac1815a35478371c0f5eaab1035340e48d0fba4d7b4d02789716",
+    "original_bytes": 121,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/stage.command.json",
+    "archived_path": "checked-publication/mac/stage.command.json",
+    "original_sha256": "40e444a4b3b14d1b13ab2d78f78cba740b2ccff95cb5361de4213de4c47b7f48",
+    "original_bytes": 119,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/stage.exit.json",
+    "archived_path": "checked-publication/mac/stage.exit.json",
+    "original_sha256": "ab5de5e54bd79992ad20b7c86844231612dfe49bcd1fafce3454b113d0ff3c06",
+    "original_bytes": 66,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/stage.stderr",
+    "archived_path": "checked-publication/mac/stage.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/stage.stdout",
+    "archived_path": "checked-publication/mac/stage.stdout.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/staged-whitespace.command.json",
+    "archived_path": "checked-publication/mac/staged-whitespace.command.json",
+    "original_sha256": "fd37919acd73083de57a814886586752f7f2443955bdcf29115ec6b6fb56d62f",
+    "original_bytes": 49,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/staged-whitespace.exit.json",
+    "archived_path": "checked-publication/mac/staged-whitespace.exit.json",
+    "original_sha256": "9d92fd0d78716ca31209c11d951a4d660ed227d325fb22e28705f554befa02e9",
+    "original_bytes": 66,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/staged-whitespace.stderr",
+    "archived_path": "checked-publication/mac/staged-whitespace.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/publication-mac/staged-whitespace.stdout",
+    "archived_path": "checked-publication/mac/staged-whitespace.stdout.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/actual484-linux/PROVENANCE.json",
+    "archived_path": "frozen-readout/linux/PROVENANCE.json.gz",
+    "original_sha256": "ce3fc0f6563e27cda51255f189127d8ea90e5a53b008118ee2171247fb0b03a2",
+    "original_bytes": 212266,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/actual484-linux/READOUT.json",
+    "archived_path": "frozen-readout/linux/READOUT.json.gz",
+    "original_sha256": "80239fd7c77865836f52c1fa7d715b0dee8005bbb34c3abab10e531c1d1acaea",
+    "original_bytes": 2191893,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/actual484-linux.exit",
+    "archived_path": "frozen-readout/linux/readout.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/actual484-linux.stderr",
+    "archived_path": "frozen-readout/linux/readout.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/actual484-linux.stdout",
+    "archived_path": "frozen-readout/linux/readout.stdout.gz",
+    "original_sha256": "0b13df0d97980e83aa5700e3687a3850ac6269ae4abeed066b4fca223e5ab8da",
+    "original_bytes": 300,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/actual484-mac/PROVENANCE.json",
+    "archived_path": "frozen-readout/mac/PROVENANCE.json.gz",
+    "original_sha256": "23b990e6315bc26924b8441bdbaca02f961ab9ac961d35393e0a9267664fae0c",
+    "original_bytes": 208822,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/actual484-mac/READOUT.json",
+    "archived_path": "frozen-readout/mac/READOUT.json.gz",
+    "original_sha256": "226993454dac2d1d270557bdba66990b9a96401416c9927585ce29b019e25260",
+    "original_bytes": 2130633,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/actual484-mac.exit",
+    "archived_path": "frozen-readout/mac/readout.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/actual484-mac.stderr",
+    "archived_path": "frozen-readout/mac/readout.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/actual484-mac.stdout",
+    "archived_path": "frozen-readout/mac/readout.stdout.gz",
+    "original_sha256": "13409963ab0e417f69dc6a3eca8b025fd79d062d396bebffe42ea37e30ff6464",
+    "original_bytes": 297,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/FILES.json",
+    "archived_path": "independent96/FILES.json",
+    "original_sha256": "25e8fa138688506022ed2a7ba16fa028e527e3b69bc0d04d9f57c69333e58368",
+    "original_bytes": 2367,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/RECEIPT.json",
+    "archived_path": "independent96/RECEIPT.json",
+    "original_sha256": "a20e5c20e0c195e097fbdfd71cbc64eee6687fe68d86c553e402b873dfcd77e6",
+    "original_bytes": 58615,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/linux-attempt2.exit",
+    "archived_path": "independent96/linux-attempt2.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/linux-attempt2.stderr",
+    "archived_path": "independent96/linux-attempt2.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/linux-attempt2.stdout",
+    "archived_path": "independent96/linux-attempt2.stdout.gz",
+    "original_sha256": "43e32eea971ee053a4ad7666dba7e840eee791010e9a5bbe7ecf2b6d341c243a",
+    "original_bytes": 261,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/linux.exit",
+    "archived_path": "independent96/linux.exit",
+    "original_sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "original_bytes": 2,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/linux.json",
+    "archived_path": "independent96/linux.json.gz",
+    "original_sha256": "18d8fd9c884d4c6d91bc8eb059ecffcdfa930606d2091dda7b17f32ac42ff5e4",
+    "original_bytes": 242895,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/linux.stderr",
+    "archived_path": "independent96/linux.stderr.gz",
+    "original_sha256": "10347baebe823a3b0925adbe6d6f7d1f97c60357a158284826daac285e83deb5",
+    "original_bytes": 661,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/linux.stdout",
+    "archived_path": "independent96/linux.stdout.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/mac.command.json",
+    "archived_path": "independent96/mac.command.json",
+    "original_sha256": "c4546257c978213bde3bee401cc21471c32eda0f9e0d4e95185acff5a9526099",
+    "original_bytes": 522,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/mac.exit",
+    "archived_path": "independent96/mac.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/mac.json",
+    "archived_path": "independent96/mac.json.gz",
+    "original_sha256": "a58b68d4a9890c1eb65d00f3a5d6720d3bf1419eb115ac5f7da4a6f26227eb68",
+    "original_bytes": 225171,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/mac.stderr",
+    "archived_path": "independent96/mac.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/mac.stdout",
+    "archived_path": "independent96/mac.stdout.gz",
+    "original_sha256": "f56093524a47914ec381e8a9d94422a6b09fcb1bb5d70b1ebd6222a416023a45",
+    "original_bytes": 258,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/recompute-initial.py",
+    "archived_path": "independent96/recompute-initial.py",
+    "original_sha256": "e733a3e9952d1f2680193b614860ef4128b630061700b6416fc47bb0dfa91ad2",
+    "original_bytes": 13335,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/recompute.py",
+    "archived_path": "independent96/recompute.py",
+    "original_sha256": "d977ce69d9b2609e336663a2ede91d9afd87a9818d244ddb37bc347da71ce26b",
+    "original_bytes": 13244,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/seal.exit",
+    "archived_path": "independent96/seal.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/seal.py",
+    "archived_path": "independent96/seal.py",
+    "original_sha256": "e03c396eb35d32f35d0368296c8a81effa303fbd1f15b5b2d8a36502856d4cf9",
+    "original_bytes": 5507,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/seal.stderr",
+    "archived_path": "independent96/seal.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/independent-actual/seal.stdout",
+    "archived_path": "independent96/seal.stdout.gz",
+    "original_sha256": "b032c2ff63f10a51da6f4e60325739370dcefa9a14d8f1e129f0a77d801dd2ed",
+    "original_bytes": 115,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/mac/COMPACT_READOUT.json",
+    "archived_path": "mac-owner-provenance/COMPACT_READOUT.json",
+    "original_sha256": "38391a323321a5e4c419bfa54705a65e164c543bc40b5a4bcbcabedb3c674b93",
+    "original_bytes": 9269,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/mac/LOCAL_TRANSFER_PROOF.json",
+    "archived_path": "mac-owner-provenance/LOCAL_TRANSFER_PROOF.json",
+    "original_sha256": "98e7d8ebd46d185be82baff958cc4cc148a374512d7f706eb3349605830e58b7",
+    "original_bytes": 605,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/mac/collect.command.json",
+    "archived_path": "mac-owner-provenance/collect.command.json",
+    "original_sha256": "a1c1e7a08eed846e7c991fc886f9c643ed44ee851124abc8e2c9e7bf9b7a1a85",
+    "original_bytes": 408,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/mac/collect.exit",
+    "archived_path": "mac-owner-provenance/collect.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/mac/collect.stderr",
+    "archived_path": "mac-owner-provenance/collect.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/mac/collect.stdout",
+    "archived_path": "mac-owner-provenance/collect.stdout.gz",
+    "original_sha256": "db85ca1c3c10b2e23fd0eeade96a2d63907d09e0aff6d8ceabf4838cf42f4a6b",
+    "original_bytes": 243,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/mac/compact-attempt1-error.json",
+    "archived_path": "mac-owner-provenance/compact-attempt1-error.json",
+    "original_sha256": "0d2a50b0789d2bd670d17b7bb1fd51ef94fb1afc5f16d05622f31c9807172256",
+    "original_bytes": 356,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/mac/transfer-raw.command.json",
+    "archived_path": "mac-owner-provenance/transfer-raw.command.json",
+    "original_sha256": "128aa138ce1915d0da0376e995130c1fd2e28cfba3b361906de320ede33fe199",
+    "original_bytes": 220,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/mac/transfer-raw.exit",
+    "archived_path": "mac-owner-provenance/transfer-raw.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/mac/transfer-raw.stderr",
+    "archived_path": "mac-owner-provenance/transfer-raw.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/linux/revision2/campaign/campaign/CAMPAIGN.json",
+    "archived_path": "original-campaign/linux/CAMPAIGN.json.gz",
+    "original_sha256": "c729e8879af23310d58d3c9d8a76566f011a5db639a08e316818f6da8533409d",
+    "original_bytes": 114240,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/linux/revision2/campaign/CAMPAIGN_CONFIG.json",
+    "archived_path": "original-campaign/linux/CAMPAIGN_CONFIG.json.gz",
+    "original_sha256": "09a6749d635c657d1cdcb9b605be1df67f3c08475c7123cc50e2a38db2fa2c29",
+    "original_bytes": 695345,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/linux/revision2/campaign/CAMPAIGN_STAGE",
+    "archived_path": "original-campaign/linux/CAMPAIGN_STAGE",
+    "original_sha256": "0c1fdee0b8301ec702b059d0fc124736909d7878ba512f9171ecc9e6aa180d84",
+    "original_bytes": 15,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/linux/revision2/campaign/CAMPAIGN_STATUS",
+    "archived_path": "original-campaign/linux/CAMPAIGN_STATUS",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/linux/revision2/campaign/READY.json",
+    "archived_path": "original-campaign/linux/READY.json",
+    "original_sha256": "1b0771ad29828b2373c474911b5e513c0ce90111ea2b337e16a373ab0563e172",
+    "original_bytes": 541,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/linux/revision2/campaign/STARTED.json",
+    "archived_path": "original-campaign/linux/STARTED.json",
+    "original_sha256": "9bcdcd2217b2853ca28e437d660aba5cac8ef2bf02dc62d4ffce433582089386",
+    "original_bytes": 272,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/linux/revision2/campaign/TERMINAL.json",
+    "archived_path": "original-campaign/linux/TERMINAL.json",
+    "original_sha256": "bc1aee93a1dccacb0ba14650c24121a691c77ce486ae9d8ef5dfa531b74cb77e",
+    "original_bytes": 187,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/linux/revision2/campaign/controller.exit",
+    "archived_path": "original-campaign/linux/controller.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/linux/revision2/campaign/controller.stderr",
+    "archived_path": "original-campaign/linux/controller.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/linux/revision2/campaign/controller.stdout",
+    "archived_path": "original-campaign/linux/controller.stdout.gz",
+    "original_sha256": "4171d645604f379cf09b8ddc1642db50c25c36bc1aa1ed3079119f66d049459c",
+    "original_bytes": 2983,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/mac-campaign-owner/original.EXIT.json",
+    "archived_path": "original-campaign/mac-outer/original.EXIT.json",
+    "original_sha256": "0e4e848fc51d8b3209084c87a2ceec435891bb64288c7d44fe1e27abaa7f8dd9",
+    "original_bytes": 137,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/mac-campaign-owner/original.START.json",
+    "archived_path": "original-campaign/mac-outer/original.START.json",
+    "original_sha256": "674095db68f3bedad4f9abe405b2cb903d1f2c52b0ad5db3e38b13a10b383060",
+    "original_bytes": 209,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/mac-campaign-owner/original.command.json",
+    "archived_path": "original-campaign/mac-outer/original.command.json",
+    "original_sha256": "3cfcfd4605cbb4e5bfcecef71ff8fd885dddabc9fc11a2b4a714d5631ec729f9",
+    "original_bytes": 372,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/mac-campaign-owner/original.stderr",
+    "archived_path": "original-campaign/mac-outer/original.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/mac-campaign-owner/original.stdout",
+    "archived_path": "original-campaign/mac-outer/original.stdout.gz",
+    "original_sha256": "4171d645604f379cf09b8ddc1642db50c25c36bc1aa1ed3079119f66d049459c",
+    "original_bytes": 2983,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/mac-campaign-owner/prequiet.command.json",
+    "archived_path": "original-campaign/mac-outer/prequiet.command.json",
+    "original_sha256": "9e534ef0526bfbe5af5233a5328b81a6fd77de260431d78d1afb9b9f9dd49120",
+    "original_bytes": 1628,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/mac-campaign-owner/prequiet.exit",
+    "archived_path": "original-campaign/mac-outer/prequiet.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/mac-campaign-owner/prequiet.stderr",
+    "archived_path": "original-campaign/mac-outer/prequiet.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/mac-campaign-owner/prequiet.stdout",
+    "archived_path": "original-campaign/mac-outer/prequiet.stdout.gz",
+    "original_sha256": "28e583c3d47c8ad2c72106c84c70ec5ee0156f2e1313a3219ac25d35e956cc64",
+    "original_bytes": 598,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/mac/collected/campaign/CAMPAIGN.json",
+    "archived_path": "original-campaign/mac/CAMPAIGN.json.gz",
+    "original_sha256": "ecf2b256144072bdbd3d8d41d21e61fff69fab43d450dccac3e343c5f5c582e9",
+    "original_bytes": 99008,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/mac/collected/CAMPAIGN_CONFIG.json",
+    "archived_path": "original-campaign/mac/CAMPAIGN_CONFIG.json.gz",
+    "original_sha256": "da49a6d4c41587326d296f8ed78de54143f7234dbbb75a29f82fa609748025b8",
+    "original_bytes": 681967,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/mac/collected/CAMPAIGN_STAGE",
+    "archived_path": "original-campaign/mac/CAMPAIGN_STAGE",
+    "original_sha256": "0c1fdee0b8301ec702b059d0fc124736909d7878ba512f9171ecc9e6aa180d84",
+    "original_bytes": 15,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/mac/collected/CAMPAIGN_STATUS",
+    "archived_path": "original-campaign/mac/CAMPAIGN_STATUS",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/mac/collected/COLLECTED.json",
+    "archived_path": "original-campaign/mac/COLLECTED.json.gz",
+    "original_sha256": "e9d6a6e770d9dfc6021ccfa498d61a136304a89c010270e892102e8c7a5f3a05",
+    "original_bytes": 195736,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/mac/collected/READY.json",
+    "archived_path": "original-campaign/mac/READY.json",
+    "original_sha256": "174f29da296e25fbb9fc09ab308618e9ad2f95eb2af8bde79a35db108442b7f4",
+    "original_bytes": 541,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/mac/collected/STARTED.json",
+    "archived_path": "original-campaign/mac/STARTED.json",
+    "original_sha256": "7dd6a8b1f2bb42f204610a6d7481e912fcb946500ed85762766a2304a80ec775",
+    "original_bytes": 270,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/comparison/mac/collected/TERMINAL.json",
+    "archived_path": "original-campaign/mac/TERMINAL.json",
+    "original_sha256": "6ee4703de081bf865fa0cccff20e3337481d914f59f6ee87e0dc5d8f86a2e318",
+    "original_bytes": 184,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/LINUX_ARCHIVE_PROOF.json",
+    "archived_path": "review-provenance/LINUX_ARCHIVE_PROOF.json",
+    "original_sha256": "8841afe3d51a52a5e2c7ba6ae1b82f5b7c129d3aecbf878204e0d5e6ae3567de",
+    "original_bytes": 2947,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/LINUX_ARCHIVE_RECEIPT.json",
+    "archived_path": "review-provenance/LINUX_ARCHIVE_RECEIPT.json",
+    "original_sha256": "bfa9135bb355e632f9ef6f02949a0cbbd65a4f34d6345ef48c7e437cedd9cbce",
+    "original_bytes": 3247,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/PREPARED_READOUT.json",
+    "archived_path": "review-provenance/PREPARED_READOUT.json",
+    "original_sha256": "9ca5587b70030d1be67e62e35f0fa442b78c5c5ec3f69c0afa40dd783a7039da",
+    "original_bytes": 1899,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/REFERENCE481_CONTEXT.json",
+    "archived_path": "review-provenance/REFERENCE481_CONTEXT.json.gz",
+    "original_sha256": "510f53e2a3213a9f19872ea6033bccf398e15b8bf6dccc811c98374782017e45",
+    "original_bytes": 1556180,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/REFERENCE_VALIDATION.json",
+    "archived_path": "review-provenance/REFERENCE_VALIDATION.json",
+    "original_sha256": "9e03ec7697dd3cb611c708e1361439f9c13a9e5642418ce255ee4b07000eac4b",
+    "original_bytes": 1580,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/actual484-mac.command.json",
+    "archived_path": "review-provenance/actual484-mac.command.json",
+    "original_sha256": "3f5279b89d53165215892e5d80797bee0a3044dc6774f718ca5180a5fd6e404f",
+    "original_bytes": 588,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/archive-central.command.json",
+    "archived_path": "review-provenance/archive-central.command.json",
+    "original_sha256": "242e26a49bfc83623783468d4ddeb3f5aa0fd17ef8ad6ed72b2de96190c198ed",
+    "original_bytes": 277,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/archive-central.py",
+    "archived_path": "review-provenance/archive-central.py",
+    "original_sha256": "ce3a52ec23fa36ca6177ea868691329119f15306825ccd957ccccf17a350b3c1",
+    "original_bytes": 9967,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/archive-linux.exit",
+    "archived_path": "review-provenance/archive-linux.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/archive-linux.py",
+    "archived_path": "review-provenance/archive-linux.py",
+    "original_sha256": "1b9ded01c57de26ee471d4c7e76177de50ffa163563f3115c3b4587d3415697e",
+    "original_bytes": 13237,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/archive-linux.stderr",
+    "archived_path": "review-provenance/archive-linux.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/archive-linux.stdout",
+    "archived_path": "review-provenance/archive-linux.stdout.gz",
+    "original_sha256": "bfa9135bb355e632f9ef6f02949a0cbbd65a4f34d6345ef48c7e437cedd9cbce",
+    "original_bytes": 3247,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/raw_readout.py",
+    "archived_path": "review-provenance/raw_readout.py",
+    "original_sha256": "02209e3306d1fc1c1685dec733f7633b146154834df2a414b768ada03baaa516",
+    "original_bytes": 27550,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/verify-linux-paired-root.py",
+    "archived_path": "review-provenance/verify-linux-paired-root.py",
+    "original_sha256": "e5f36f9ec7e6f9ca09db84a5b9f04f5237027b7e70ff6a468de87b57664ed636",
+    "original_bytes": 1795,
+    "source_mode": "0o644"
+  },
+  {
+    "source_path": "target/p9/native484-ingress/review/verify-mac-paired-root.py",
+    "archived_path": "review-provenance/verify-mac-paired-root.py",
+    "original_sha256": "5c0ddb61f9ace853f6fa16429940c65b40aa2bbe5cf0739a433a3b1d1a049601",
+    "original_bytes": 1754,
+    "source_mode": "0o644"
+  }
+]

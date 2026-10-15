@@ -1,0 +1,23 @@
+[
+  "/Applications/Xcode-beta.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9",
+  "/private/tmp/voteboat-native484-pair-NB2I6n/campaign/resources.py",
+  "/private/tmp/voteboat-native484-pair-NB2I6n/campaign/campaign-metadata/t2-skew-quic-baseline",
+  "/private/tmp/voteboat-mac480-f7b0ef1-mccmJS/artifacts/native/native_benchmark",
+  "/private/tmp/voteboat-native484-pair-NB2I6n/wal/t2-skew-quic-baseline",
+  "quic",
+  "8192",
+  "4096",
+  "2",
+  "--offered",
+  "1024",
+  "--maintenance",
+  "2",
+  "--ready-items",
+  "64",
+  "--offered-capacity",
+  "4096",
+  "--publication",
+  "witness",
+  "--group-weights",
+  "31,1"
+]

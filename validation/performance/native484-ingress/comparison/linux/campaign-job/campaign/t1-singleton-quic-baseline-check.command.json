@@ -1,0 +1,6 @@
+[
+  "/home/karllivesey/.nvm/versions/node/v24.21.0/bin/node",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/linux/revision2/campaign/control-tools/check-native-benchmark.mjs",
+  "--storage",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/linux/revision2/wal/t1-singleton-quic-baseline"
+]

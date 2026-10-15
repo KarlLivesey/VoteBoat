@@ -1,0 +1,8 @@
+{
+  "exit": 0,
+  "linux_config": "09a6749d635c657d1cdcb9b605be1df67f3c08475c7123cc50e2a38db2fa2c29",
+  "mac_config": "da49a6d4c41587326d296f8ed78de54143f7234dbbb75a29f82fa609748025b8",
+  "cases_per_host": 48,
+  "mac_remote_files_verified": 27,
+  "no_blockers": true
+}

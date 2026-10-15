@@ -1,0 +1,11 @@
+{
+  "exit": 0,
+  "source_exact": true,
+  "proofs": {
+    "strict": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/checked3/strict.exit.json",
+      "sha256": "1fe0014801f61a5500a5bdd6e6ad3f1ca6459fbe390732f72e39d728ab7be1ea"
+    }
+  },
+  "scope": "Enabled hook formatter/four strict root profiles/standalone zero diagnostics."
+}

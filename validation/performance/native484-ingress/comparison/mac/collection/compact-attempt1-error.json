@@ -1,0 +1,6 @@
+{
+  "actual_helper_exit": 1,
+  "error": "KeyError: 'values'",
+  "cause": "Compact display helper used values rather than actual stats.trials field; no output score file was created. Frozen raw reader had already passed48cases0failures and is unchanged.",
+  "scope": "Display-only focused field correction, no raw/source/workload change or reader rerun."
+}

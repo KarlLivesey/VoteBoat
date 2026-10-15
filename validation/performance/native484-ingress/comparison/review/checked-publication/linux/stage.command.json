@@ -1,0 +1,8 @@
+[
+  "git",
+  "add",
+  "--",
+  "docs/IMPLEMENTATION.md",
+  "docs/P9.md",
+  "validation/performance/native484-ingress"
+]

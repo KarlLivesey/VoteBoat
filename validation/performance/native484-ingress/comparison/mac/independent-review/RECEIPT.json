@@ -1,0 +1,1920 @@
+{
+  "actual_exit": 0,
+  "cases": 96,
+  "hosts": {
+    "linux": {
+      "cases": 48,
+      "totals": {
+        "applied": 263904,
+        "window_refused": 127776
+      },
+      "all_regression_pairs": [
+        "t1-singleton-tcp",
+        "t1-singleton-quic",
+        "t1-moderate-quic",
+        "t1-moderate-tcp",
+        "t1-loaded-tcp",
+        "t1-loaded-quic",
+        "t1-skew-quic",
+        "t1-skew-tcp",
+        "t2-moderate-tcp",
+        "t2-moderate-quic",
+        "t2-loaded-quic",
+        "t2-loaded-tcp",
+        "t2-skew-quic",
+        "t2-singleton-quic",
+        "t2-singleton-tcp",
+        "t3-loaded-quic",
+        "t3-skew-quic",
+        "t3-singleton-tcp",
+        "t3-moderate-quic",
+        "t3-moderate-tcp"
+      ],
+      "group_p99_losses": [
+        {
+          "pair": "t1-singleton-tcp",
+          "group": "1",
+          "baseline_ms": 548.310999,
+          "candidate_ms": 1082.799809
+        },
+        {
+          "pair": "t1-singleton-quic",
+          "group": "1",
+          "baseline_ms": 480.929954,
+          "candidate_ms": 656.745849
+        },
+        {
+          "pair": "t1-moderate-quic",
+          "group": "1",
+          "baseline_ms": 1820.61282,
+          "candidate_ms": 3272.070534
+        },
+        {
+          "pair": "t1-moderate-tcp",
+          "group": "1",
+          "baseline_ms": 2747.462005,
+          "candidate_ms": 4182.106932
+        },
+        {
+          "pair": "t1-loaded-tcp",
+          "group": "1",
+          "baseline_ms": 5763.106042,
+          "candidate_ms": 9443.150087
+        },
+        {
+          "pair": "t1-loaded-quic",
+          "group": "1",
+          "baseline_ms": 3129.962921,
+          "candidate_ms": 3402.56528
+        },
+        {
+          "pair": "t1-skew-quic",
+          "group": "2",
+          "baseline_ms": 1064.944215,
+          "candidate_ms": 1437.005667
+        },
+        {
+          "pair": "t1-skew-tcp",
+          "group": "1",
+          "baseline_ms": 6468.013844,
+          "candidate_ms": 7658.506582
+        },
+        {
+          "pair": "t1-skew-tcp",
+          "group": "2",
+          "baseline_ms": 1299.018619,
+          "candidate_ms": 1686.402789
+        },
+        {
+          "pair": "t2-moderate-tcp",
+          "group": "1",
+          "baseline_ms": 1999.152624,
+          "candidate_ms": 4370.734168
+        },
+        {
+          "pair": "t2-moderate-quic",
+          "group": "1",
+          "baseline_ms": 2112.987961,
+          "candidate_ms": 4286.294391
+        },
+        {
+          "pair": "t2-loaded-tcp",
+          "group": "1",
+          "baseline_ms": 5649.704476,
+          "candidate_ms": 8149.859443
+        },
+        {
+          "pair": "t2-skew-quic",
+          "group": "2",
+          "baseline_ms": 1053.152811,
+          "candidate_ms": 1264.328074
+        },
+        {
+          "pair": "t2-singleton-quic",
+          "group": "1",
+          "baseline_ms": 442.809979,
+          "candidate_ms": 618.535425
+        },
+        {
+          "pair": "t2-singleton-tcp",
+          "group": "1",
+          "baseline_ms": 426.39902,
+          "candidate_ms": 526.050714
+        },
+        {
+          "pair": "t3-loaded-quic",
+          "group": "1",
+          "baseline_ms": 6844.566723,
+          "candidate_ms": 8064.74902
+        },
+        {
+          "pair": "t3-skew-quic",
+          "group": "1",
+          "baseline_ms": 6202.630997,
+          "candidate_ms": 6353.709773
+        },
+        {
+          "pair": "t3-singleton-tcp",
+          "group": "1",
+          "baseline_ms": 421.695915,
+          "candidate_ms": 712.196676
+        },
+        {
+          "pair": "t3-moderate-tcp",
+          "group": "1",
+          "baseline_ms": 1999.863919,
+          "candidate_ms": 2569.157288
+        }
+      ],
+      "loss_counts": {
+        "rate": 17,
+        "during": 18,
+        "p99": 16,
+        "cpu": 15,
+        "rss": 10,
+        "cold_p99": 3
+      },
+      "cells": [
+        {
+          "cell": "singleton",
+          "protocol": "tcp",
+          "loss_counts": {
+            "rate": 3,
+            "during": 3,
+            "p99": 3,
+            "cpu": 3,
+            "rss": 2,
+            "cold_p99": 0
+          },
+          "arms": {
+            "baseline": {
+              "completed_ops_s": {
+                "median": 6.3391825688399885,
+                "min": 6.1826979022103306,
+                "max": 6.437493032620822
+              },
+              "during_ops_s": {
+                "median": 6.3125,
+                "min": 6.15625,
+                "max": 6.4375
+              },
+              "p99_ms": {
+                "median": 426.39902,
+                "min": 421.695915,
+                "max": 548.310999
+              },
+              "cpu_us_per_completed": {
+                "median": 18312.64563106796,
+                "min": 17195.724137931033,
+                "max": 21225.39898989899
+              },
+              "wholechild_cpu_s": {
+                "median": 3.772405,
+                "min": 3.4907319999999995,
+                "max": 4.202629
+              },
+              "max_rss_bytes": {
+                "median": 15433728,
+                "min": 15093760,
+                "max": 15646720
+              },
+              "backlog": {
+                "median": 1,
+                "min": 0,
+                "max": 1
+              },
+              "refused_total": 161
+            },
+            "candidate": {
+              "completed_ops_s": {
+                "median": 5.749981964462821,
+                "min": 5.218734895676528,
+                "max": 6.156221372608708
+              },
+              "during_ops_s": {
+                "median": 5.75,
+                "min": 5.21875,
+                "max": 6.15625
+              },
+              "p99_ms": {
+                "median": 712.196676,
+                "min": 526.050714,
+                "max": 1082.799809
+              },
+              "cpu_us_per_completed": {
+                "median": 19296.728260869564,
+                "min": 18333.55837563452,
+                "max": 25545.994011976047
+              },
+              "wholechild_cpu_s": {
+                "median": 3.611711,
+                "min": 3.550598,
+                "max": 4.266181
+              },
+              "max_rss_bytes": {
+                "median": 15568896,
+                "min": 15450112,
+                "max": 15601664
+              },
+              "backlog": {
+                "median": 0,
+                "min": 0,
+                "max": 0
+              },
+              "refused_total": 220
+            }
+          }
+        },
+        {
+          "cell": "singleton",
+          "protocol": "quic",
+          "loss_counts": {
+            "rate": 2,
+            "during": 2,
+            "p99": 2,
+            "cpu": 2,
+            "rss": 0,
+            "cold_p99": 0
+          },
+          "arms": {
+            "baseline": {
+              "completed_ops_s": {
+                "median": 6.374995679944334,
+                "min": 5.703282342900273,
+                "max": 6.4999951826910705
+              },
+              "during_ops_s": {
+                "median": 6.375,
+                "min": 5.6875,
+                "max": 6.5
+              },
+              "p99_ms": {
+                "median": 480.929954,
+                "min": 442.809979,
+                "max": 660.457751
+              },
+              "cpu_us_per_completed": {
+                "median": 18285.833333333332,
+                "min": 17769.701923076922,
+                "max": 20021.464480874318
+              },
+              "wholechild_cpu_s": {
+                "median": 3.696098,
+                "min": 3.663928,
+                "max": 3.73031
+              },
+              "max_rss_bytes": {
+                "median": 15650816,
+                "min": 15577088,
+                "max": 15671296
+              },
+              "backlog": {
+                "median": 0,
+                "min": 0,
+                "max": 1
+              },
+              "refused_total": 173
+            },
+            "candidate": {
+              "completed_ops_s": {
+                "median": 5.843726584187577,
+                "min": 5.593725332195697,
+                "max": 6.187485586252327
+              },
+              "during_ops_s": {
+                "median": 5.84375,
+                "min": 5.59375,
+                "max": 6.1875
+              },
+              "p99_ms": {
+                "median": 618.535425,
+                "min": 567.92574,
+                "max": 656.745849
+              },
+              "cpu_us_per_completed": {
+                "median": 19824.47058823529,
+                "min": 19126.368686868685,
+                "max": 23202.351955307266
+              },
+              "wholechild_cpu_s": {
+                "median": 3.7870209999999997,
+                "min": 3.7071759999999996,
+                "max": 4.153221
+              },
+              "max_rss_bytes": {
+                "median": 15417344,
+                "min": 15368192,
+                "max": 15572992
+              },
+              "backlog": {
+                "median": 0,
+                "min": 0,
+                "max": 0
+              },
+              "refused_total": 204
+            }
+          }
+        },
+        {
+          "cell": "moderate",
+          "protocol": "tcp",
+          "loss_counts": {
+            "rate": 3,
+            "during": 3,
+            "p99": 3,
+            "cpu": 2,
+            "rss": 1,
+            "cold_p99": 0
+          },
+          "arms": {
+            "baseline": {
+              "completed_ops_s": {
+                "median": 127.00099632994198,
+                "min": 125.78085398031014,
+                "max": 127.3836576026984
+              },
+              "during_ops_s": {
+                "median": 126.203125,
+                "min": 125.765625,
+                "max": 126.90625
+              },
+              "p99_ms": {
+                "median": 1999.863919,
+                "min": 1999.152624,
+                "max": 2747.462005
+              },
+              "cpu_us_per_completed": {
+                "median": 924.3797421731124,
+                "min": 909.464036270065,
+                "max": 946.8612179089669
+              },
+              "wholechild_cpu_s": {
+                "median": 7.529073,
+                "min": 7.422136,
+                "max": 7.634542
+              },
+              "max_rss_bytes": {
+                "median": 19660800,
+                "min": 19599360,
+                "max": 20889600
+              },
+              "backlog": {
+                "median": 39,
+                "min": 14,
+                "max": 68
+              },
+              "refused_total": 207
+            },
+            "candidate": {
+              "completed_ops_s": {
+                "median": 123.06650814128422,
+                "min": 122.05654642515086,
+                "max": 125.84852969394115
+              },
+              "during_ops_s": {
+                "median": 122.9375,
+                "min": 121.34375,
+                "max": 125.609375
+              },
+              "p99_ms": {
+                "median": 4182.106932,
+                "min": 2569.157288,
+                "max": 4370.734168
+              },
+              "cpu_us_per_completed": {
+                "median": 933.5606582472254,
+                "min": 908.7925439682933,
+                "max": 987.5267630644342
+              },
+              "wholechild_cpu_s": {
+                "median": 7.337591,
+                "min": 7.318182,
+                "max": 7.785661
+              },
+              "max_rss_bytes": {
+                "median": 20037632,
+                "min": 19472384,
+                "max": 20127744
+              },
+              "backlog": {
+                "median": 35,
+                "min": 16,
+                "max": 73
+              },
+              "refused_total": 779
+            }
+          }
+        },
+        {
+          "cell": "moderate",
+          "protocol": "quic",
+          "loss_counts": {
+            "rate": 3,
+            "during": 3,
+            "p99": 2,
+            "cpu": 2,
+            "rss": 1,
+            "cold_p99": 0
+          },
+          "arms": {
+            "baseline": {
+              "completed_ops_s": {
+                "median": 126.7396676060799,
+                "min": 126.5707049920107,
+                "max": 127.01714062143395
+              },
+              "during_ops_s": {
+                "median": 126.78125,
+                "min": 126.65625,
+                "max": 126.9375
+              },
+              "p99_ms": {
+                "median": 2112.987961,
+                "min": 1820.61282,
+                "max": 2205.218177
+              },
+              "cpu_us_per_completed": {
+                "median": 931.8702252693438,
+                "min": 929.5796460176991,
+                "max": 935.9794537401576
+              },
+              "wholechild_cpu_s": {
+                "median": 7.607641000000001,
+                "min": 7.56306,
+                "max": 7.611516
+              },
+              "max_rss_bytes": {
+                "median": 21393408,
+                "min": 21368832,
+                "max": 22114304
+              },
+              "backlog": {
+                "median": 22,
+                "min": 22,
+                "max": 44
+              },
+              "refused_total": 144
+            },
+            "candidate": {
+              "completed_ops_s": {
+                "median": 123.57018261178783,
+                "min": 121.749832855441,
+                "max": 126.60556884015308
+              },
+              "during_ops_s": {
+                "median": 123.53125,
+                "min": 122.046875,
+                "max": 126.59375
+              },
+              "p99_ms": {
+                "median": 3272.070534,
+                "min": 2188.782722,
+                "max": 4286.294391
+              },
+              "cpu_us_per_completed": {
+                "median": 952.2416115912557,
+                "min": 918.3295132470732,
+                "max": 957.451938865732
+              },
+              "wholechild_cpu_s": {
+                "median": 7.492237,
+                "min": 7.452243999999999,
+                "max": 7.580147
+              },
+              "max_rss_bytes": {
+                "median": 20692992,
+                "min": 20447232,
+                "max": 21626880
+              },
+              "backlog": {
+                "median": 13,
+                "min": 11,
+                "max": 57
+              },
+              "refused_total": 676
+            }
+          }
+        },
+        {
+          "cell": "loaded",
+          "protocol": "tcp",
+          "loss_counts": {
+            "rate": 2,
+            "during": 2,
+            "p99": 2,
+            "cpu": 2,
+            "rss": 2,
+            "cold_p99": 0
+          },
+          "arms": {
+            "baseline": {
+              "completed_ops_s": {
+                "median": 807.0921337294023,
+                "min": 454.5962619050685,
+                "max": 834.3346131858272
+              },
+              "during_ops_s": {
+                "median": 632.125,
+                "min": 437.0,
+                "max": 667.375
+              },
+              "p99_ms": {
+                "median": 5763.106042,
+                "min": 5649.704476,
+                "max": 10832.594882
+              },
+              "cpu_us_per_completed": {
+                "median": 439.9323718999235,
+                "min": 428.0817323001804,
+                "max": 573.0554531085353
+              },
+              "wholechild_cpu_s": {
+                "median": 4.032958,
+                "min": 4.026701,
+                "max": 4.350637
+              },
+              "max_rss_bytes": {
+                "median": 29007872,
+                "min": 28659712,
+                "max": 29491200
+              },
+              "backlog": {
+                "median": 4096,
+                "min": 4082,
+                "max": 4096
+              },
+              "refused_total": 21834
+            },
+            "candidate": {
+              "completed_ops_s": {
+                "median": 629.3741170702501,
+                "min": 528.7535978215329,
+                "max": 685.7163708746086
+              },
+              "during_ops_s": {
+                "median": 547.375,
+                "min": 414.5,
+                "max": 592.125
+              },
+              "p99_ms": {
+                "median": 8149.859443,
+                "min": 6497.415843,
+                "max": 9443.150087
+              },
+              "cpu_us_per_completed": {
+                "median": 480.8904109589041,
+                "min": 439.1111504424778,
+                "max": 488.8734484619535
+              },
+              "wholechild_cpu_s": {
+                "median": 3.7214669999999996,
+                "min": 3.6235299999999997,
+                "max": 4.247705
+              },
+              "max_rss_bytes": {
+                "median": 29908992,
+                "min": 28651520,
+                "max": 30453760
+              },
+              "backlog": {
+                "median": 4096,
+                "min": 4096,
+                "max": 4096
+              },
+              "refused_total": 23280
+            }
+          }
+        },
+        {
+          "cell": "loaded",
+          "protocol": "quic",
+          "loss_counts": {
+            "rate": 2,
+            "during": 2,
+            "p99": 2,
+            "cpu": 1,
+            "rss": 0,
+            "cold_p99": 0
+          },
+          "arms": {
+            "baseline": {
+              "completed_ops_s": {
+                "median": 765.7325039306236,
+                "min": 685.1022040177032,
+                "max": 1537.1336646230823
+              },
+              "during_ops_s": {
+                "median": 603.5,
+                "min": 454.25,
+                "max": 1487.375
+              },
+              "p99_ms": {
+                "median": 6125.799265,
+                "min": 3129.962921,
+                "max": 6844.566723
+              },
+              "cpu_us_per_completed": {
+                "median": 421.66618108471545,
+                "min": 226.3431697405439,
+                "max": 468.87963202902307
+              },
+              "wholechild_cpu_s": {
+                "median": 3.620359,
+                "min": 3.618813,
+                "max": 3.7629490000000003
+              },
+              "max_rss_bytes": {
+                "median": 30715904,
+                "min": 30584832,
+                "max": 36728832
+              },
+              "backlog": {
+                "median": 4096,
+                "min": 4084,
+                "max": 4096
+              },
+              "refused_total": 15363
+            },
+            "candidate": {
+              "completed_ops_s": {
+                "median": 764.0982054339888,
+                "min": 633.4853593062314,
+                "max": 1582.3512172433905
+              },
+              "during_ops_s": {
+                "median": 571.625,
+                "min": 520.125,
+                "max": 1203.375
+              },
+              "p99_ms": {
+                "median": 5747.768377,
+                "min": 3402.56528,
+                "max": 8064.74902
+              },
+              "cpu_us_per_completed": {
+                "median": 458.40922853336565,
+                "min": 218.6106749207308,
+                "max": 461.47138554216866
+              },
+              "wholechild_cpu_s": {
+                "median": 3.785085,
+                "min": 2.895717,
+                "max": 3.983421
+              },
+              "max_rss_bytes": {
+                "median": 30191616,
+                "min": 29585408,
+                "max": 36524032
+              },
+              "backlog": {
+                "median": 4059,
+                "min": 3619,
+                "max": 4096
+              },
+              "refused_total": 17865
+            }
+          }
+        },
+        {
+          "cell": "skew",
+          "protocol": "tcp",
+          "loss_counts": {
+            "rate": 1,
+            "during": 1,
+            "p99": 1,
+            "cpu": 1,
+            "rss": 2,
+            "cold_p99": 1
+          },
+          "arms": {
+            "baseline": {
+              "completed_ops_s": {
+                "median": 359.7149355502201,
+                "min": 333.39742582328245,
+                "max": 436.56348431957633
+              },
+              "during_ops_s": {
+                "median": 251.625,
+                "min": 203.25,
+                "max": 304.625
+              },
+              "p99_ms": {
+                "median": 7475.87106,
+                "min": 6467.037553,
+                "max": 7506.170351
+              },
+              "cpu_us_per_completed": {
+                "median": 565.2691266912669,
+                "min": 473.8532947462155,
+                "max": 590.7344465391866
+              },
+              "wholechild_cpu_s": {
+                "median": 2.193397,
+                "min": 2.128549,
+                "max": 2.297819
+              },
+              "max_rss_bytes": {
+                "median": 20172800,
+                "min": 19742720,
+                "max": 20471808
+              },
+              "backlog": {
+                "median": 2055,
+                "min": 2052,
+                "max": 2087
+              },
+              "refused_total": 12306,
+              "cold": {
+                "p99_median_ms": 1777.797566,
+                "applied_total": 768,
+                "refused_total": 0
+              }
+            },
+            "candidate": {
+              "completed_ops_s": {
+                "median": 404.95740881491406,
+                "min": 358.67126276576454,
+                "max": 482.25647083214363
+              },
+              "during_ops_s": {
+                "median": 269.5,
+                "min": 230.75,
+                "max": 324.375
+              },
+              "p99_ms": {
+                "median": 6741.002296,
+                "min": 5669.528851,
+                "max": 7655.577787
+              },
+              "cpu_us_per_completed": {
+                "median": 516.0613017751479,
+                "min": 479.47899159663865,
+                "max": 634.9227642276421
+              },
+              "wholechild_cpu_s": {
+                "median": 2.225262,
+                "min": 2.1803589999999997,
+                "max": 2.4990559999999995
+              },
+              "max_rss_bytes": {
+                "median": 20545536,
+                "min": 20119552,
+                "max": 21647360
+              },
+              "backlog": {
+                "median": 2069,
+                "min": 2046,
+                "max": 2090
+              },
+              "refused_total": 11774,
+              "cold": {
+                "p99_median_ms": 1512.052289,
+                "applied_total": 768,
+                "refused_total": 0
+              }
+            }
+          }
+        },
+        {
+          "cell": "skew",
+          "protocol": "quic",
+          "loss_counts": {
+            "rate": 1,
+            "during": 2,
+            "p99": 1,
+            "cpu": 2,
+            "rss": 2,
+            "cold_p99": 2
+          },
+          "arms": {
+            "baseline": {
+              "completed_ops_s": {
+                "median": 422.70508357074846,
+                "min": 412.3646024977913,
+                "max": 471.92226715416865
+              },
+              "during_ops_s": {
+                "median": 279.125,
+                "min": 273.0,
+                "max": 321.875
+              },
+              "p99_ms": {
+                "median": 6201.336938,
+                "min": 6033.773791,
+                "max": 6361.958364
+              },
+              "cpu_us_per_completed": {
+                "median": 505.5012968639472,
+                "min": 496.1686197916667,
+                "max": 525.3978093684456
+              },
+              "wholechild_cpu_s": {
+                "median": 2.254482,
+                "min": 2.143831,
+                "max": 2.286345
+              },
+              "max_rss_bytes": {
+                "median": 21155840,
+                "min": 20959232,
+                "max": 21778432
+              },
+              "backlog": {
+                "median": 2057,
+                "min": 2033,
+                "max": 2058
+              },
+              "refused_total": 11436,
+              "cold": {
+                "p99_median_ms": 1064.944215,
+                "applied_total": 768,
+                "refused_total": 0
+              }
+            },
+            "candidate": {
+              "completed_ops_s": {
+                "median": 429.684442092777,
+                "min": 408.8215029681262,
+                "max": 463.6049164778995
+              },
+              "during_ops_s": {
+                "median": 286.75,
+                "min": 269.0,
+                "max": 321.5
+              },
+              "p99_ms": {
+                "median": 5980.634305,
+                "min": 5924.508744,
+                "max": 6352.133395
+              },
+              "cpu_us_per_completed": {
+                "median": 531.9943396226415,
+                "min": 479.1404725774984,
+                "max": 560.0547035934997
+              },
+              "wholechild_cpu_s": {
+                "median": 2.255656,
+                "min": 2.2102749999999998,
+                "max": 2.446879
+              },
+              "max_rss_bytes": {
+                "median": 21426176,
+                "min": 20869120,
+                "max": 21868544
+              },
+              "backlog": {
+                "median": 2075,
+                "min": 2041,
+                "max": 2088
+              },
+              "refused_total": 11354,
+              "cold": {
+                "p99_median_ms": 1264.328074,
+                "applied_total": 768,
+                "refused_total": 0
+              }
+            }
+          }
+        }
+      ],
+      "source_config_go_end_bound": true,
+      "device_cpu_policy_before_after_exact": true
+    },
+    "mac": {
+      "cases": 48,
+      "totals": {
+        "applied": 330860,
+        "window_refused": 60820
+      },
+      "all_regression_pairs": [
+        "t1-singleton-tcp",
+        "t1-singleton-quic",
+        "t1-moderate-quic",
+        "t1-skew-quic",
+        "t1-skew-tcp",
+        "t2-moderate-tcp",
+        "t2-moderate-quic",
+        "t2-skew-tcp",
+        "t2-skew-quic",
+        "t2-singleton-quic",
+        "t2-singleton-tcp",
+        "t3-skew-quic",
+        "t3-skew-tcp",
+        "t3-singleton-quic"
+      ],
+      "group_p99_losses": [
+        {
+          "pair": "t1-singleton-tcp",
+          "group": "1",
+          "baseline_ms": 158.306709,
+          "candidate_ms": 162.030375
+        },
+        {
+          "pair": "t1-singleton-quic",
+          "group": "1",
+          "baseline_ms": 157.976709,
+          "candidate_ms": 159.252291
+        },
+        {
+          "pair": "t1-moderate-quic",
+          "group": "1",
+          "baseline_ms": 775.851291,
+          "candidate_ms": 1108.711291
+        },
+        {
+          "pair": "t1-skew-quic",
+          "group": "1",
+          "baseline_ms": 3101.413458,
+          "candidate_ms": 3305.064563
+        },
+        {
+          "pair": "t1-skew-quic",
+          "group": "2",
+          "baseline_ms": 382.441938,
+          "candidate_ms": 809.077313
+        },
+        {
+          "pair": "t1-skew-tcp",
+          "group": "1",
+          "baseline_ms": 3110.422729,
+          "candidate_ms": 3653.829354
+        },
+        {
+          "pair": "t1-skew-tcp",
+          "group": "2",
+          "baseline_ms": 425.330563,
+          "candidate_ms": 854.009354
+        },
+        {
+          "pair": "t2-moderate-tcp",
+          "group": "1",
+          "baseline_ms": 735.061625,
+          "candidate_ms": 2036.214291
+        },
+        {
+          "pair": "t2-moderate-quic",
+          "group": "1",
+          "baseline_ms": 726.816125,
+          "candidate_ms": 811.11325
+        },
+        {
+          "pair": "t2-skew-tcp",
+          "group": "1",
+          "baseline_ms": 2980.062209,
+          "candidate_ms": 3251.011666
+        },
+        {
+          "pair": "t2-skew-tcp",
+          "group": "2",
+          "baseline_ms": 383.172563,
+          "candidate_ms": 834.267479
+        },
+        {
+          "pair": "t2-skew-quic",
+          "group": "1",
+          "baseline_ms": 3106.915313,
+          "candidate_ms": 3629.060522
+        },
+        {
+          "pair": "t2-skew-quic",
+          "group": "2",
+          "baseline_ms": 411.648729,
+          "candidate_ms": 887.812438
+        },
+        {
+          "pair": "t3-skew-quic",
+          "group": "1",
+          "baseline_ms": 3085.804459,
+          "candidate_ms": 3086.775813
+        },
+        {
+          "pair": "t3-skew-quic",
+          "group": "2",
+          "baseline_ms": 437.723647,
+          "candidate_ms": 444.813897
+        },
+        {
+          "pair": "t3-skew-tcp",
+          "group": "1",
+          "baseline_ms": 3184.898583,
+          "candidate_ms": 3439.35075
+        },
+        {
+          "pair": "t3-skew-tcp",
+          "group": "2",
+          "baseline_ms": 368.795354,
+          "candidate_ms": 1152.488938
+        }
+      ],
+      "loss_counts": {
+        "rate": 11,
+        "during": 10,
+        "p99": 11,
+        "cpu": 15,
+        "rss": 19,
+        "cold_p99": 6
+      },
+      "cells": [
+        {
+          "cell": "singleton",
+          "protocol": "tcp",
+          "loss_counts": {
+            "rate": 2,
+            "during": 1,
+            "p99": 1,
+            "cpu": 3,
+            "rss": 3,
+            "cold_p99": 0
+          },
+          "arms": {
+            "baseline": {
+              "completed_ops_s": {
+                "median": 7.406243211020872,
+                "min": 7.406216864817191,
+                "max": 7.468714241429994
+              },
+              "during_ops_s": {
+                "median": 7.40625,
+                "min": 7.40625,
+                "max": 7.46875
+              },
+              "p99_ms": {
+                "median": 165.05325,
+                "min": 158.306709,
+                "max": 165.725917
+              },
+              "cpu_us_per_completed": {
+                "median": 14576.573839662447,
+                "min": 14532.661087866109,
+                "max": 14798.337552742616
+              },
+              "wholechild_cpu_s": {
+                "median": 3.473306,
+                "min": 3.454648,
+                "max": 3.507206
+              },
+              "max_rss_bytes": {
+                "median": 11878400,
+                "min": 11550720,
+                "max": 11927552
+              },
+              "backlog": {
+                "median": 0,
+                "min": 0,
+                "max": 0
+              },
+              "refused_total": 55
+            },
+            "candidate": {
+              "completed_ops_s": {
+                "median": 7.406234647338466,
+                "min": 7.406229449796279,
+                "max": 7.406234830642398
+              },
+              "during_ops_s": {
+                "median": 7.40625,
+                "min": 7.40625,
+                "max": 7.40625
+              },
+              "p99_ms": {
+                "median": 160.91475,
+                "min": 156.151625,
+                "max": 162.030375
+              },
+              "cpu_us_per_completed": {
+                "median": 14760.067510548522,
+                "min": 14690.632911392406,
+                "max": 14803.215189873417
+              },
+              "wholechild_cpu_s": {
+                "median": 3.498136,
+                "min": 3.48168,
+                "max": 3.508362
+              },
+              "max_rss_bytes": {
+                "median": 12009472,
+                "min": 11993088,
+                "max": 12189696
+              },
+              "backlog": {
+                "median": 0,
+                "min": 0,
+                "max": 0
+              },
+              "refused_total": 57
+            }
+          }
+        },
+        {
+          "cell": "singleton",
+          "protocol": "quic",
+          "loss_counts": {
+            "rate": 3,
+            "during": 3,
+            "p99": 1,
+            "cpu": 3,
+            "rss": 3,
+            "cold_p99": 0
+          },
+          "arms": {
+            "baseline": {
+              "completed_ops_s": {
+                "median": 7.406231214325969,
+                "min": 7.40621425136103,
+                "max": 7.531224846885765
+              },
+              "during_ops_s": {
+                "median": 7.40625,
+                "min": 7.40625,
+                "max": 7.53125
+              },
+              "p99_ms": {
+                "median": 163.256042,
+                "min": 157.976709,
+                "max": 170.1625
+              },
+              "cpu_us_per_completed": {
+                "median": 21223.063291139242,
+                "min": 21073.20253164557,
+                "max": 21502.90041493776
+              },
+              "wholechild_cpu_s": {
+                "median": 5.029866,
+                "min": 4.994349,
+                "max": 5.182199000000001
+              },
+              "max_rss_bytes": {
+                "median": 12500992,
+                "min": 12484608,
+                "max": 12779520
+              },
+              "backlog": {
+                "median": 0,
+                "min": 0,
+                "max": 0
+              },
+              "refused_total": 53
+            },
+            "candidate": {
+              "completed_ops_s": {
+                "median": 7.3749861910297625,
+                "min": 7.374969338334508,
+                "max": 7.406226662748341
+              },
+              "during_ops_s": {
+                "median": 7.375,
+                "min": 7.375,
+                "max": 7.40625
+              },
+              "p99_ms": {
+                "median": 162.872125,
+                "min": 159.252291,
+                "max": 163.9875
+              },
+              "cpu_us_per_completed": {
+                "median": 21807.565400843883,
+                "min": 21711.927966101695,
+                "max": 21947.292372881355
+              },
+              "wholechild_cpu_s": {
+                "median": 5.168393,
+                "min": 5.124015,
+                "max": 5.179561
+              },
+              "max_rss_bytes": {
+                "median": 12828672,
+                "min": 12795904,
+                "max": 12926976
+              },
+              "backlog": {
+                "median": 0,
+                "min": 0,
+                "max": 0
+              },
+              "refused_total": 59
+            }
+          }
+        },
+        {
+          "cell": "moderate",
+          "protocol": "tcp",
+          "loss_counts": {
+            "rate": 1,
+            "during": 1,
+            "p99": 1,
+            "cpu": 2,
+            "rss": 0,
+            "cold_p99": 0
+          },
+          "arms": {
+            "baseline": {
+              "completed_ops_s": {
+                "median": 127.8315520535389,
+                "min": 127.77193269456832,
+                "max": 127.85536727762482
+              },
+              "during_ops_s": {
+                "median": 127.78125,
+                "min": 127.671875,
+                "max": 127.8125
+              },
+              "p99_ms": {
+                "median": 1306.882333,
+                "min": 735.061625,
+                "max": 1720.747458
+              },
+              "cpu_us_per_completed": {
+                "median": 1036.266845703125,
+                "min": 1029.4032987171656,
+                "max": 1065.30224609375
+              },
+              "wholechild_cpu_s": {
+                "median": 8.489098,
+                "min": 8.425666,
+                "max": 8.726956
+              },
+              "max_rss_bytes": {
+                "median": 27656192,
+                "min": 27262976,
+                "max": 27836416
+              },
+              "backlog": {
+                "median": 14,
+                "min": 12,
+                "max": 14
+              },
+              "refused_total": 7
+            },
+            "candidate": {
+              "completed_ops_s": {
+                "median": 127.84505711831584,
+                "min": 126.82267714418815,
+                "max": 127.87896555626425
+              },
+              "during_ops_s": {
+                "median": 127.796875,
+                "min": 126.765625,
+                "max": 127.828125
+              },
+              "p99_ms": {
+                "median": 830.697666,
+                "min": 793.310166,
+                "max": 2036.214291
+              },
+              "cpu_us_per_completed": {
+                "median": 1048.556640625,
+                "min": 1036.9761962890625,
+                "max": 1054.3924923076922
+              },
+              "wholechild_cpu_s": {
+                "median": 8.566939,
+                "min": 8.494909,
+                "max": 8.589776
+              },
+              "max_rss_bytes": {
+                "median": 26951680,
+                "min": 25559040,
+                "max": 27344896
+              },
+              "backlog": {
+                "median": 12,
+                "min": 11,
+                "max": 13
+              },
+              "refused_total": 67
+            }
+          }
+        },
+        {
+          "cell": "moderate",
+          "protocol": "quic",
+          "loss_counts": {
+            "rate": 0,
+            "during": 0,
+            "p99": 2,
+            "cpu": 3,
+            "rss": 3,
+            "cold_p99": 0
+          },
+          "arms": {
+            "baseline": {
+              "completed_ops_s": {
+                "median": 127.8228270762061,
+                "min": 127.65615076184474,
+                "max": 127.83844266996908
+              },
+              "during_ops_s": {
+                "median": 127.796875,
+                "min": 126.515625,
+                "max": 127.8125
+              },
+              "p99_ms": {
+                "median": 775.851291,
+                "min": 726.816125,
+                "max": 816.199583
+              },
+              "cpu_us_per_completed": {
+                "median": 1463.660888671875,
+                "min": 1450.8182373046875,
+                "max": 1468.1359863281248
+              },
+              "wholechild_cpu_s": {
+                "median": 11.990310000000001,
+                "min": 11.885103,
+                "max": 12.026969999999999
+              },
+              "max_rss_bytes": {
+                "median": 28164096,
+                "min": 27492352,
+                "max": 28295168
+              },
+              "backlog": {
+                "median": 13,
+                "min": 12,
+                "max": 95
+              },
+              "refused_total": 0
+            },
+            "candidate": {
+              "completed_ops_s": {
+                "median": 127.87331010143897,
+                "min": 127.87247185274981,
+                "max": 127.88853506647092
+              },
+              "during_ops_s": {
+                "median": 127.828125,
+                "min": 127.828125,
+                "max": 127.828125
+              },
+              "p99_ms": {
+                "median": 811.11325,
+                "min": 734.904917,
+                "max": 1108.711291
+              },
+              "cpu_us_per_completed": {
+                "median": 1479.9169921875,
+                "min": 1478.5712890625,
+                "max": 1502.1495361328125
+              },
+              "wholechild_cpu_s": {
+                "median": 12.12348,
+                "min": 12.112456,
+                "max": 12.305609
+              },
+              "max_rss_bytes": {
+                "median": 28753920,
+                "min": 28360704,
+                "max": 28884992
+              },
+              "backlog": {
+                "median": 11,
+                "min": 11,
+                "max": 11
+              },
+              "refused_total": 0
+            }
+          }
+        },
+        {
+          "cell": "loaded",
+          "protocol": "tcp",
+          "loss_counts": {
+            "rate": 0,
+            "during": 0,
+            "p99": 0,
+            "cpu": 0,
+            "rss": 3,
+            "cold_p99": 0
+          },
+          "arms": {
+            "baseline": {
+              "completed_ops_s": {
+                "median": 1078.5701758058062,
+                "min": 990.077852102848,
+                "max": 1159.7826042457245
+              },
+              "during_ops_s": {
+                "median": 827.375,
+                "min": 699.375,
+                "max": 909.75
+              },
+              "p99_ms": {
+                "median": 4709.463459,
+                "min": 4385.0685,
+                "max": 5196.335875
+              },
+              "cpu_us_per_completed": {
+                "median": 535.6343290157723,
+                "min": 534.4691553896407,
+                "max": 600.6134557837167
+              },
+              "wholechild_cpu_s": {
+                "median": 5.820544999999999,
+                "min": 5.726837,
+                "max": 6.078914
+              },
+              "max_rss_bytes": {
+                "median": 42237952,
+                "min": 40321024,
+                "max": 44728320
+              },
+              "backlog": {
+                "median": 4096,
+                "min": 4062,
+                "max": 4096
+              },
+              "refused_total": 16245
+            },
+            "candidate": {
+              "completed_ops_s": {
+                "median": 1342.6815758300095,
+                "min": 1237.6293607164034,
+                "max": 1416.9401609686895
+              },
+              "during_ops_s": {
+                "median": 1216.125,
+                "min": 1016.125,
+                "max": 1237.0
+              },
+              "p99_ms": {
+                "median": 3067.394583,
+                "min": 3039.826875,
+                "max": 3932.709833
+              },
+              "cpu_us_per_completed": {
+                "median": 459.3535591766724,
+                "min": 456.1288525538996,
+                "max": 475.9523770558874
+              },
+              "wholechild_cpu_s": {
+                "median": 6.304613,
+                "min": 5.816614,
+                "max": 6.427275
+              },
+              "max_rss_bytes": {
+                "median": 47316992,
+                "min": 45563904,
+                "max": 49070080
+              },
+              "backlog": {
+                "median": 4093,
+                "min": 4092,
+                "max": 4096
+              },
+              "refused_total": 7965
+            }
+          }
+        },
+        {
+          "cell": "loaded",
+          "protocol": "quic",
+          "loss_counts": {
+            "rate": 0,
+            "during": 0,
+            "p99": 0,
+            "cpu": 0,
+            "rss": 3,
+            "cold_p99": 0
+          },
+          "arms": {
+            "baseline": {
+              "completed_ops_s": {
+                "median": 1110.7545545506996,
+                "min": 999.9068631747706,
+                "max": 1148.414493103497
+              },
+              "during_ops_s": {
+                "median": 843.25,
+                "min": 724.625,
+                "max": 899.625
+              },
+              "p99_ms": {
+                "median": 4625.422917,
+                "min": 4420.180292,
+                "max": 5133.236375
+              },
+              "cpu_us_per_completed": {
+                "median": 586.3077845415975,
+                "min": 551.0366598778003,
+                "max": 655.4210313447927
+              },
+              "wholechild_cpu_s": {
+                "median": 6.356749,
+                "min": 6.222856999999999,
+                "max": 6.482114
+              },
+              "max_rss_bytes": {
+                "median": 41484288,
+                "min": 39927808,
+                "max": 45383680
+              },
+              "backlog": {
+                "median": 4092,
+                "min": 4077,
+                "max": 4096
+              },
+              "refused_total": 15975
+            },
+            "candidate": {
+              "completed_ops_s": {
+                "median": 1499.465741637849,
+                "min": 1273.6442405903222,
+                "max": 1508.8418709040777
+              },
+              "during_ops_s": {
+                "median": 1331.75,
+                "min": 1187.75,
+                "max": 1332.125
+              },
+              "p99_ms": {
+                "median": 2676.933125,
+                "min": 2674.623291,
+                "max": 3893.227875
+              },
+              "cpu_us_per_completed": {
+                "median": 469.93993220338984,
+                "min": 443.2958214624881,
+                "max": 496.8938835666912
+              },
+              "wholechild_cpu_s": {
+                "median": 6.74285,
+                "min": 6.535067,
+                "max": 6.931614
+              },
+              "max_rss_bytes": {
+                "median": 50348032,
+                "min": 46940160,
+                "max": 51953664
+              },
+              "backlog": {
+                "median": 4085,
+                "min": 4064,
+                "max": 4096
+              },
+              "refused_total": 4938
+            }
+          }
+        },
+        {
+          "cell": "skew",
+          "protocol": "tcp",
+          "loss_counts": {
+            "rate": 3,
+            "during": 3,
+            "p99": 3,
+            "cpu": 2,
+            "rss": 2,
+            "cold_p99": 3
+          },
+          "arms": {
+            "baseline": {
+              "completed_ops_s": {
+                "median": 797.1699722584225,
+                "min": 792.8680534044596,
+                "max": 810.7918876802233
+              },
+              "during_ops_s": {
+                "median": 639.0,
+                "min": 631.25,
+                "max": 656.75
+              },
+              "p99_ms": {
+                "median": 3109.446541,
+                "min": 2979.129813,
+                "max": 3184.04525
+              },
+              "cpu_us_per_completed": {
+                "median": 473.43216840946616,
+                "min": 467.63518052057094,
+                "max": 474.71184043004666
+              },
+              "wholechild_cpu_s": {
+                "median": 3.355738,
+                "min": 3.341721,
+                "max": 3.440905
+              },
+              "max_rss_bytes": {
+                "median": 29016064,
+                "min": 28721152,
+                "max": 32014336
+              },
+              "backlog": {
+                "median": 2019,
+                "min": 2014,
+                "max": 2034
+              },
+              "refused_total": 3093,
+              "cold": {
+                "p99_median_ms": 383.172563,
+                "applied_total": 768,
+                "refused_total": 0
+              }
+            },
+            "candidate": {
+              "completed_ops_s": {
+                "median": 738.9052274866467,
+                "min": 728.4226172305836,
+                "max": 758.4310132325609
+              },
+              "during_ops_s": {
+                "median": 566.5,
+                "min": 566.375,
+                "max": 598.875
+              },
+              "p99_ms": {
+                "median": 3438.681833,
+                "min": 3250.5395,
+                "max": 3653.198541
+              },
+              "cpu_us_per_completed": {
+                "median": 483.67685787800815,
+                "min": 462.41874449985335,
+                "max": 493.1822637463623
+              },
+              "wholechild_cpu_s": {
+                "median": 3.195653,
+                "min": 3.152771,
+                "max": 3.2199869999999997
+              },
+              "max_rss_bytes": {
+                "median": 30556160,
+                "min": 28868608,
+                "max": 30818304
+              },
+              "backlog": {
+                "median": 2027,
+                "min": 1998,
+                "max": 2075
+              },
+              "refused_total": 4622,
+              "cold": {
+                "p99_median_ms": 854.009354,
+                "applied_total": 768,
+                "refused_total": 0
+              }
+            }
+          }
+        },
+        {
+          "cell": "skew",
+          "protocol": "quic",
+          "loss_counts": {
+            "rate": 2,
+            "during": 2,
+            "p99": 3,
+            "cpu": 2,
+            "rss": 2,
+            "cold_p99": 3
+          },
+          "arms": {
+            "baseline": {
+              "completed_ops_s": {
+                "median": 785.0043182216559,
+                "min": 736.2132483619405,
+                "max": 799.5063403347666
+              },
+              "during_ops_s": {
+                "median": 625.75,
+                "min": 623.0,
+                "max": 633.125
+              },
+              "p99_ms": {
+                "median": 3099.940104,
+                "min": 3085.275063,
+                "max": 3106.466396
+              },
+              "cpu_us_per_completed": {
+                "median": 545.2402560455192,
+                "min": 542.3531394858828,
+                "max": 553.5142166619277
+              },
+              "wholechild_cpu_s": {
+                "median": 3.8610119999999997,
+                "min": 3.833039,
+                "max": 3.8934189999999997
+              },
+              "max_rss_bytes": {
+                "median": 31424512,
+                "min": 29900800,
+                "max": 31932416
+              },
+              "backlog": {
+                "median": 2050,
+                "min": 2024,
+                "max": 2054
+              },
+              "refused_total": 3393,
+              "cold": {
+                "p99_median_ms": 411.648729,
+                "applied_total": 768,
+                "refused_total": 0
+              }
+            },
+            "candidate": {
+              "completed_ops_s": {
+                "median": 732.4707246213549,
+                "min": 729.5902171507116,
+                "max": 788.1585013566411
+              },
+              "during_ops_s": {
+                "median": 576.75,
+                "min": 569.125,
+                "max": 625.0
+              },
+              "p99_ms": {
+                "median": 3304.539125,
+                "min": 3085.812459,
+                "max": 3628.248605
+              },
+              "cpu_us_per_completed": {
+                "median": 551.7188912322988,
+                "min": 531.2059824213212,
+                "max": 558.9807371454573
+              },
+              "wholechild_cpu_s": {
+                "median": 3.6853599999999997,
+                "min": 3.6623099999999997,
+                "max": 3.747127
+              },
+              "max_rss_bytes": {
+                "median": 31129600,
+                "min": 31080448,
+                "max": 33980416
+              },
+              "backlog": {
+                "median": 2040,
+                "min": 2024,
+                "max": 2054
+              },
+              "refused_total": 4291,
+              "cold": {
+                "p99_median_ms": 809.077313,
+                "applied_total": 768,
+                "refused_total": 0
+              }
+            }
+          }
+        }
+      ],
+      "source_config_go_end_bound": true,
+      "device_cpu_policy_before_after_exact": true
+    }
+  },
+  "analysis_scope": "Independent standard-library raw CSV/summary/resource recomputation; no workload invoked and no frozen reader import. All96 native boundary counts/rates, nearest-rank applied intended/service and all-offer dispatch quantiles, groups/pending/backlog, recovery/retry/join, CPU/RSS and physical deltas agree. Every full/group-tail regression set exactly matches frozen reader.",
+  "decision": "Reject483 ingress optimization and restore exact480 production/tests/contracts/native-offered source. Mac one-group loaded improves all6 pairs, but Linux17/24 rate losses, singleton/moderate regressions, and all6 Mac skew cold-tail losses fail a portable useful-throughput/fairness improvement.",
+  "retained_oracles": "Existing480 Counter ready-admission differential oracle remains. New483 general/ingress/Node/provider controls depend on the rejectedAPI and remain available in immutable483 commit and qualification evidence; no independent new retained API is required.",
+  "failures_preserved": [
+    {
+      "command": "Initial Linux recompute invocation in tool d2971d",
+      "actual_exit": 1,
+      "script": "recompute-initial.py",
+      "stdout": "linux.stdout",
+      "stderr": "linux.stderr",
+      "cause": "Analysis parser expected semicolon histogram separator; actual native raw uses |. Focused parser delimiter correction only; all original data untouched."
+    },
+    {
+      "corrected_linux_original_handle": 48474,
+      "actual_exit": 0,
+      "terminal_chunk": "0e8c2c"
+    },
+    {
+      "mac_original_handle": 90675,
+      "actual_exit": 0,
+      "terminal_chunk": "f4db46"
+    }
+  ],
+  "limits": [
+    "CPU/RSS are whole child including startup/warmup/verification/recovery/cleanup, not native timer CPU or per-original causal evidence. RSS is peak process observation, not a memory/debt plateau.",
+    "Finite offered-cap/window cases with3 pairs do not prove maximum sustainable capacity, causation of tails, full fairness, original framework floors, fullP9 or third-filesystem acceptance.",
+    "Native storage elapsed is inclusive/nested; append-unit histogram includes metadata and is not proposal width; encoded bytes/block counts are not physical device-I/O bytes."
+  ],
+  "inputs": {
+    "target/p9/native484-ingress/ROOT_QUIET_GO.json": {
+      "sha256": "a78aa90ee9c28796b543e6930c00cd8ca6874e0d2ca45e2d90f8394e6f07a388",
+      "bytes": 1747
+    },
+    "target/p9/native484-ingress/ROOT_QUIET_END.json": {
+      "sha256": "7057ee38e1afd2e7ea965e9ac6f028b6f0e841c0412f9c69a644ad0a59b7352c",
+      "bytes": 863
+    },
+    "target/p9/native484-ingress/review/independent-actual/linux.json": {
+      "sha256": "18d8fd9c884d4c6d91bc8eb059ecffcdfa930606d2091dda7b17f32ac42ff5e4",
+      "bytes": 242895
+    },
+    "target/p9/native484-ingress/review/actual484-linux/READOUT.json": {
+      "sha256": "80239fd7c77865836f52c1fa7d715b0dee8005bbb34c3abab10e531c1d1acaea",
+      "bytes": 2191893
+    },
+    "target/p9/native484-ingress/comparison/linux/revision2/campaign/CAMPAIGN_CONFIG.json": {
+      "sha256": "09a6749d635c657d1cdcb9b605be1df67f3c08475c7123cc50e2a38db2fa2c29",
+      "bytes": 695345
+    },
+    "target/p9/native484-ingress/comparison/linux/revision2/campaign/TERMINAL.json": {
+      "sha256": "bc1aee93a1dccacb0ba14650c24121a691c77ce486ae9d8ef5dfa531b74cb77e",
+      "bytes": 187
+    },
+    "target/p9/native484-ingress/comparison/linux/revision2/campaign/before-host.json": {
+      "sha256": "e1b087da27494f95f6b10d6f2f6279480a6f6fd9428c7999851f39e6e8197a95",
+      "bytes": 41061
+    },
+    "target/p9/native484-ingress/comparison/linux/revision2/campaign/after-host.json": {
+      "sha256": "651b0dde1f96c0683c96ff90ece3f9b6e366eedd22fbb069c26d589173fb9f19",
+      "bytes": 40595
+    },
+    "target/p9/native484-ingress/review/independent-actual/mac.json": {
+      "sha256": "a58b68d4a9890c1eb65d00f3a5d6720d3bf1419eb115ac5f7da4a6f26227eb68",
+      "bytes": 225171
+    },
+    "target/p9/native484-ingress/review/actual484-mac/READOUT.json": {
+      "sha256": "226993454dac2d1d270557bdba66990b9a96401416c9927585ce29b019e25260",
+      "bytes": 2130633
+    },
+    "target/p9/native484-ingress/comparison/mac/collected/CAMPAIGN_CONFIG.json": {
+      "sha256": "da49a6d4c41587326d296f8ed78de54143f7234dbbb75a29f82fa609748025b8",
+      "bytes": 681967
+    },
+    "target/p9/native484-ingress/comparison/mac/collected/TERMINAL.json": {
+      "sha256": "6ee4703de081bf865fa0cccff20e3337481d914f59f6ee87e0dc5d8f86a2e318",
+      "bytes": 184
+    },
+    "target/p9/native484-ingress/comparison/mac/collected/before-host.json": {
+      "sha256": "80077b539bf39537a73cf34bc1047fee7decc45cb864191ffd438e3e94e2b660",
+      "bytes": 159260
+    },
+    "target/p9/native484-ingress/comparison/mac/collected/after-host.json": {
+      "sha256": "36b3fc90e73cfa297b370ea644e636ff0a66f132fa4db0bd18a74059201e4904",
+      "bytes": 159208
+    },
+    "target/p9/native484-ingress/comparison/mac/collected/COLLECTED.json": {
+      "sha256": "e9d6a6e770d9dfc6021ccfa498d61a136304a89c010270e892102e8c7a5f3a05",
+      "bytes": 195736
+    },
+    "target/p9/native484-ingress/review/independent-actual/recompute.py": {
+      "sha256": "d977ce69d9b2609e336663a2ede91d9afd87a9818d244ddb37bc347da71ce26b",
+      "bytes": 13244
+    },
+    "target/p9/native484-ingress/review/independent-actual/recompute-initial.py": {
+      "sha256": "e733a3e9952d1f2680193b614860ef4128b630061700b6416fc47bb0dfa91ad2",
+      "bytes": 13335
+    },
+    "target/p9/native484-ingress/review/independent-actual/linux.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "target/p9/native484-ingress/review/independent-actual/linux.stderr": {
+      "sha256": "10347baebe823a3b0925adbe6d6f7d1f97c60357a158284826daac285e83deb5",
+      "bytes": 661
+    },
+    "target/p9/native484-ingress/review/independent-actual/linux.exit": {
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "bytes": 2
+    },
+    "target/p9/native484-ingress/review/independent-actual/linux-attempt2.stdout": {
+      "sha256": "43e32eea971ee053a4ad7666dba7e840eee791010e9a5bbe7ecf2b6d341c243a",
+      "bytes": 261
+    },
+    "target/p9/native484-ingress/review/independent-actual/linux-attempt2.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "target/p9/native484-ingress/review/independent-actual/linux-attempt2.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native484-ingress/review/independent-actual/mac.command.json": {
+      "sha256": "c4546257c978213bde3bee401cc21471c32eda0f9e0d4e95185acff5a9526099",
+      "bytes": 522
+    },
+    "target/p9/native484-ingress/review/independent-actual/mac.stdout": {
+      "sha256": "f56093524a47914ec381e8a9d94422a6b09fcb1bb5d70b1ebd6222a416023a45",
+      "bytes": 258
+    },
+    "target/p9/native484-ingress/review/independent-actual/mac.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "target/p9/native484-ingress/review/independent-actual/mac.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    }
+  }
+}

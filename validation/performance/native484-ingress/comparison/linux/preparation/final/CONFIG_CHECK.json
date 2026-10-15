@@ -1,0 +1,153 @@
+{
+  "actual_exit": 0,
+  "hosts": {
+    "linux": {
+      "config": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/linux/revision2/campaign/CAMPAIGN_CONFIG.json",
+      "remote_job": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/linux/revision2/campaign",
+      "config_sha256": "09a6749d635c657d1cdcb9b605be1df67f3c08475c7123cc50e2a38db2fa2c29",
+      "ready_sha256": "1b0771ad29828b2373c474911b5e513c0ce90111ea2b337e16a373ab0563e172",
+      "setup_sha256": "5041e586b3c6691c46a004c0ed247b58f904af5d12dbc8445b3c8aba5528465e",
+      "scripts": {
+        "common.py": "9ef38f48fc67d63dd8d2b26b525be3ec20d6d8c1c1a454c9f3963de97d612512",
+        "plan.py": "396e5f8f72e98fa295ae4bdfbef9dc9da17363ce3630724960f7b285b400b332",
+        "prepare.py": "9753881ecc2c76b4080bba762396f7d5cc74ef31e7828d5951638b7c1d6fd788",
+        "campaign.py": "8e36f1865f131d04c80a028a85f737b0b1e84a1bf58dd55a3686617a80804fe8",
+        "resources.py": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+        "REQUIRED_COMMIT": "4bc0eb7091dcea93fddeddd4b2966aedf7ae2fe76f67a7a2baa3dc76016186c5"
+      },
+      "cases": 48,
+      "pairs": 24,
+      "offers": 391680,
+      "scheduled_horizons_s": 1344,
+      "validators": 8,
+      "launch": [
+        "/usr/bin/python3.14",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/linux/revision2/campaign/campaign.py",
+        "--authorized-quiet"
+      ],
+      "source_commits": {
+        "baseline": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+        "candidate": "efd383dc36b4b9edf8f66021b90115824440b468"
+      },
+      "artifacts": {
+        "baseline": "8d3530a6e801ebb857d8dff3fc1a0fb4ef5af865c3aed89d1450271f2054b84d",
+        "candidate": "0ff042c1ade83771217ed96af4a0f24912d79917eb4f95cb0d8230808780963d"
+      },
+      "device_identity": {
+        "st_dev": 55,
+        "mount": {
+          "target": "/home",
+          "source": "/dev/nvme1n1p2[/@home]",
+          "fstype": "btrfs",
+          "options": "rw,noatime,compress=zstd:1,ssd,discard=async,space_cache=v2,subvolid=257,subvol=/@home",
+          "uuid": "5fd67d14-d948-4cdc-93a9-30d6b676d3dd"
+        },
+        "physical_chain": {
+          "blockdevices": [
+            {
+              "name": "/dev/nvme1n1p2",
+              "type": "part",
+              "fstype": "btrfs",
+              "uuid": "5fd67d14-d948-4cdc-93a9-30d6b676d3dd",
+              "model": null,
+              "serial": null,
+              "tran": "nvme",
+              "children": [
+                {
+                  "name": "/dev/nvme1n1",
+                  "type": "disk",
+                  "fstype": null,
+                  "uuid": null,
+                  "model": "Sabrent SB-ROCKET-NVMe4-2TB",
+                  "serial": "48790459603318",
+                  "tran": "nvme"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "cpu_policy": {
+        "scaling_driver": {
+          "amd-pstate-epp": 16
+        },
+        "scaling_governor": {
+          "powersave": 16
+        },
+        "energy_performance_preference": {
+          "balance_performance": 16
+        },
+        "scaling_min_freq": {
+          "603379": 16
+        },
+        "scaling_max_freq": {
+          "5271622": 16
+        }
+      }
+    },
+    "mac": {
+      "config": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/prepared/campaign/CAMPAIGN_CONFIG.json",
+      "remote_job": "/private/tmp/voteboat-native484-pair-NB2I6n/campaign",
+      "config_sha256": "da49a6d4c41587326d296f8ed78de54143f7234dbbb75a29f82fa609748025b8",
+      "ready_sha256": "174f29da296e25fbb9fc09ab308618e9ad2f95eb2af8bde79a35db108442b7f4",
+      "setup_sha256": "d6cded0cd78d8c3106875074d67a80c7102122aca9868fc894b519b0e341373f",
+      "scripts": {
+        "common.py": "9ef38f48fc67d63dd8d2b26b525be3ec20d6d8c1c1a454c9f3963de97d612512",
+        "plan.py": "396e5f8f72e98fa295ae4bdfbef9dc9da17363ce3630724960f7b285b400b332",
+        "prepare.py": "9753881ecc2c76b4080bba762396f7d5cc74ef31e7828d5951638b7c1d6fd788",
+        "campaign.py": "8e36f1865f131d04c80a028a85f737b0b1e84a1bf58dd55a3686617a80804fe8",
+        "resources.py": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+        "REQUIRED_COMMIT": "4bc0eb7091dcea93fddeddd4b2966aedf7ae2fe76f67a7a2baa3dc76016186c5"
+      },
+      "cases": 48,
+      "pairs": 24,
+      "offers": 391680,
+      "scheduled_horizons_s": 1344,
+      "validators": 8,
+      "launch": [
+        "/Applications/Xcode-beta.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9",
+        "/private/tmp/voteboat-native484-pair-NB2I6n/campaign/campaign.py",
+        "--authorized-quiet"
+      ],
+      "source_commits": {
+        "baseline": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+        "candidate": "efd383dc36b4b9edf8f66021b90115824440b468"
+      },
+      "artifacts": {
+        "baseline": "fef05adc73179359ea2acc0d9b92978c57c4795410a727aefc30f1aac422fa52",
+        "candidate": "0c78b8db72ab496cdbce2c38c8673511013a89f4f1f44b24ee167ad8878f2f44"
+      },
+      "device_identity": {
+        "st_dev": 16777231,
+        "device": "/dev/disk3s1",
+        "volume": {
+          "DeviceIdentifier": "disk3s1",
+          "VolumeUUID": "9E7B008F-06D2-4473-A147-7FE27468C88A",
+          "DiskUUID": "9E7B008F-06D2-4473-A147-7FE27468C88A",
+          "MountPoint": "/System/Volumes/Data",
+          "FilesystemType": "apfs",
+          "APFSContainerReference": "disk3"
+        },
+        "physical_stores": [
+          {
+            "DeviceIdentifier": "disk0s2",
+            "DiskUUID": "2EECCAB9-EF76-4A6A-BE9F-1A7603B8F536",
+            "ParentWholeDisk": "disk0",
+            "MediaName": "",
+            "Internal": true,
+            "SolidState": true,
+            "DeviceTreePath": "IODeviceTree:/arm-io/ans@47400000/iop-ans-nub/AppleANS3CGv2Controller",
+            "Protocol": null,
+            "TotalSize": 1995218165760
+          }
+        ]
+      },
+      "cpu_policy": {
+        "pmset_custom": "Battery Power:\n Sleep On Power Button 1\n lowpowermode         1\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         0\n womp                 0\n networkoversleep     0\n sleep                1\n lessbright           1\n tcpkeepalive         1\n disksleep            10\nAC Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         0\n womp                 1\n networkoversleep     0\n sleep                0\n tcpkeepalive         1\n disksleep            10\n"
+      }
+    }
+  },
+  "schema_sha256": "81a09d3b2d73f789db7519d0045f45704314e06aa091f580a26a3902cb586a4a",
+  "timing_started": false,
+  "scope": "Prepared configs reviewed only; actual source/artifact/tool guards ran on each host during setup. Requires independent review, publication, and separate root quiet GO."
+}

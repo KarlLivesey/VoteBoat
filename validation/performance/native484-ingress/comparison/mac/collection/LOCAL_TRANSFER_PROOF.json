@@ -1,0 +1,13 @@
+{
+  "exit": 0,
+  "original_handle": 2749,
+  "actual_original_exit": 0,
+  "terminal_tool_chunk": "1812fd",
+  "collected_originals": 1036,
+  "members_including_manifest": 1037,
+  "all_hashes_lengths_modes_exact": true,
+  "manifest_sha256": "e9d6a6e770d9dfc6021ccfa498d61a136304a89c010270e892102e8c7a5f3a05",
+  "archive_sha256": "4f949f0114782192b84d45c31350f9618d9a52098cafa5cb9be2cacf01739b4c",
+  "source_commit": "efd383dc36b4b9edf8f66021b90115824440b468",
+  "scope": "Only original post-terminal text/CSV/resources/validators/config/host/terminal. No source/buildtrees/binaries/WAL transfer or rerun."
+}

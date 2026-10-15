@@ -1,0 +1,4 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.80s
+     Running tests/application.rs (target/debug/deps/application-7c068b5008356b3b)
+     Running tests/provider_conformance.rs (target/debug/deps/provider_conformance-a6834a5dbc2f6607)

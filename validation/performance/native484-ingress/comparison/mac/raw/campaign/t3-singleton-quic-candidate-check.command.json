@@ -1,0 +1,6 @@
+[
+  "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+  "/private/tmp/voteboat-native484-pair-NB2I6n/campaign/control-tools/check-native-benchmark.mjs",
+  "--storage",
+  "/private/tmp/voteboat-native484-pair-NB2I6n/wal/t3-singleton-quic-candidate"
+]

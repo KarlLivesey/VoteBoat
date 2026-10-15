@@ -1,0 +1,83 @@
+[
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native485-restore/checked/logs/metadata.stdout",
+    "archived_path": "checked/logs/metadata.stdout.gz",
+    "original_sha256": "f554155a8d842742f7f9565547d9bda4255a944177041d5288f6d14348d82516",
+    "original_bytes": 8700,
+    "source_mode": "0o644",
+    "container_sha256": "efb3697c2f4bfc7387de85db664e102ec54bd7e3b600e98c8a2d6950427a96ca",
+    "container_bytes": 2753
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native485-restore/review/INPUT_PROOF.json",
+    "archived_path": "review/INPUT_PROOF.json.gz",
+    "original_sha256": "d09eb8b8a517e6ec2d1930214aab1fe87039316130560d73e4824cc603d67e97",
+    "original_bytes": 813246,
+    "source_mode": "0o644",
+    "container_sha256": "d79e457ff32855c84ac5bc2b95ba5c272e62d94ae1f3692b812a25d5d219c0de",
+    "container_bytes": 120145
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native485-restore/review/INPUT_PROOF.json.attempt2",
+    "archived_path": "review/INPUT_PROOF.json.attempt2.gz",
+    "original_sha256": "008ad83c9055e644ee31fec5414c4bf528a5e44402ec908680bf6597284008af",
+    "original_bytes": 813246,
+    "source_mode": "0o644",
+    "container_sha256": "86817bd9bcdf4570f4291fb40489154c7576978a37aeca1141c2f9b8403d01d2",
+    "container_bytes": 120162
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native485-restore/review/RESTORATION_REVIEW.json.attempt2",
+    "archived_path": "review/RESTORATION_REVIEW.json.attempt2.gz",
+    "original_sha256": "4e94a180bec8ddfb44b9152d825a4986af5fe10ccf8ce1cce58949f0c2885bc5",
+    "original_bytes": 105930,
+    "source_mode": "0o644",
+    "container_sha256": "73d1abab0b687f08b85e276ffcf711c4d0cfad342a75bb5bec36c3e1bd5ce7c1",
+    "container_bytes": 6074
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native485-restore/review/verify-attempt2.stdout",
+    "archived_path": "review/verify-attempt2.stdout.gz",
+    "original_sha256": "4e94a180bec8ddfb44b9152d825a4986af5fe10ccf8ce1cce58949f0c2885bc5",
+    "original_bytes": 105930,
+    "source_mode": "0o644",
+    "container_sha256": "73d1abab0b687f08b85e276ffcf711c4d0cfad342a75bb5bec36c3e1bd5ce7c1",
+    "container_bytes": 6074
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native485-restore/checked/logs/all.stdout",
+    "archived_path": "checked/logs/all.stdout.gz",
+    "original_sha256": "7406a1cda3d93c838b22bb2380fac5f6fe8446b355fae2f06c8fbaf531092386",
+    "original_bytes": 5767,
+    "source_mode": "0o644",
+    "container_sha256": "384ab0f10337941c5b1f2d22093083c1ca989661ad1db006ca0d1d6e1953b6fc",
+    "container_bytes": 1772
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native485-restore/checked/logs/clients-all.stdout",
+    "archived_path": "checked/logs/clients-all.stdout.gz",
+    "original_sha256": "101a4c8e2d6d669c491312d859024d63d6c5d310e06ac171db6ac47dd3369c81",
+    "original_bytes": 3341,
+    "source_mode": "0o644",
+    "container_sha256": "9c4b91db16e16d8447ff3d8e9fa102ec2eaa11d1dc5cec533264f339d1733128",
+    "container_bytes": 1090
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native485-restore/checked/logs/clients-core.stdout",
+    "archived_path": "checked/logs/clients-core.stdout.gz",
+    "original_sha256": "1b483901100bf7d31ecd68ba9e52f4621d2fe56f2a393d864014da83079e4b0c",
+    "original_bytes": 3341,
+    "source_mode": "0o644",
+    "container_sha256": "3438aa0426ee953ffb1c0ac1e393e2b677fc65e693e2cc7594fd145583b2050a",
+    "container_bytes": 1092
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native485-restore/checked/logs/core.stdout",
+    "archived_path": "checked/logs/core.stdout.gz",
+    "original_sha256": "7b7cefa6edfb462a7a897d53248f0634a901aa752381ed8802de1ac4a913f9cf",
+    "original_bytes": 4330,
+    "source_mode": "0o644",
+    "container_sha256": "fb9ebc41372f48aeffa6793d92ac3d2b17c9df0d428614406b6f088ffcc8e713",
+    "container_bytes": 1495
+  }
+]

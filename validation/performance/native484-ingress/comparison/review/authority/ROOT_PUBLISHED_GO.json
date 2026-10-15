@@ -1,0 +1,12 @@
+{
+  "commit": "efd383dc36b4b9edf8f66021b90115824440b468",
+  "publication": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/publication/RECEIPT.json",
+    "sha256": "8a57eb2613a182996045a550deebb04109839de5e106b98b9548d7c0013d456c"
+  },
+  "actual_publication_handle": 60703,
+  "actual_terminal": 0,
+  "terminal_chunk": "a017de",
+  "source_inputs": 1502,
+  "scope": "GO for fresh Linux native artifacts/functional controls and fresh Mac source transfer/qualification/nativebuild/controls ONLY. No paired campaign timing until both setup jobs terminalandchecked plus rootquietGO."
+}

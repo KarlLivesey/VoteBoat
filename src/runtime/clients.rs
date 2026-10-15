@@ -14,10 +14,8 @@
 // rights and limitations under the RPL.
 //! Client proposal ownership, deterministic application admission and outcomes.
 use super::*;
-mod ingress;
 mod ready;
 use crate::{application::*, log::EntryPayload, logical_voter::LogicalActivationControlProfile};
-pub use ingress::ProposalIngress;
 mod control;
 mod observer_clear;
 #[cfg(test)]
@@ -270,17 +268,15 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         self.pending.is_empty()
     }
     fn check_submit<
-        'app,
-        A: ProposalAdmission<Receipt = R> + 'app,
+        A: ProposalAdmission<Receipt = R>,
         Q: ReadyScheduler,
         T: TimerService,
         E: ElectionEntropy,
     >(
         &self,
         owner: &EffectOwner<Q, T, E>,
-        application: &'app A,
+        application: &A,
         request: &ClientRequest,
-        mut validation: Option<&mut ingress::SubmissionValidation<'app, A>>,
     ) -> Result<(usize, usize, u64, u64, bool), ClientError> {
         if self.closed {
             return Err(ClientError::Closed);
@@ -303,11 +299,6 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
             return Err(ClientError::RequestTooLarge);
         }
         let control = self.request_control(request)?;
-        if control {
-            if let Some(validation) = validation.as_deref_mut() {
-                *validation = ingress::SubmissionValidation::default();
-            }
-        }
         self.check_capacity(request.group, 0, control)?;
         let state = core.state();
         if application.applied_index() < state.base_index()
@@ -318,29 +309,22 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         application
             .validate_proposal_context(core, request.operation, &request.bytes)
             .map_err(ClientError::Application)?;
-        let pending = || {
-            let log = state
-                .entries
-                .iter()
-                .skip((application.applied_index() - state.base_index()) as usize)
-                .filter_map(|e| match &e.payload {
-                    EntryPayload::Command { operation, bytes } => {
-                        Some((*operation, bytes.as_slice()))
-                    }
-                    _ => None,
-                });
-            let queued = self
-                .pending
-                .values()
-                .filter(|p| p.ticket.group == request.group)
-                .map(|p| (p.ticket.operation, p.bytes.as_slice()));
-            log.chain(queued)
-        };
-        let receipt_bound = match validation.filter(|_| !control) {
-            Some(validation) => validation.validate(application, request, pending),
-            None => application.validate_proposal(request.operation, &request.bytes, pending()),
-        }
-        .map_err(ClientError::Application)?;
+        let log = state
+            .entries
+            .iter()
+            .skip((application.applied_index() - state.base_index()) as usize)
+            .filter_map(|e| match &e.payload {
+                EntryPayload::Command { operation, bytes } => Some((*operation, bytes.as_slice())),
+                _ => None,
+            });
+        let queued = self
+            .pending
+            .values()
+            .filter(|p| p.ticket.group == request.group)
+            .map(|p| (p.ticket.operation, p.bytes.as_slice()));
+        let receipt_bound = application
+            .validate_proposal(request.operation, &request.bytes, log.chain(queued))
+            .map_err(ClientError::Application)?;
         if receipt_bound < size_of::<R>() || receipt_bound > self.limits.receipt_bytes {
             return Err(ClientError::RequestTooLarge);
         }
@@ -372,22 +356,7 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         application: &A,
         request: ClientRequest,
     ) -> Result<ClientTicket, ClientRejected> {
-        self.submit_validated(owner, application, request, None)
-    }
-    fn submit_validated<
-        'app,
-        A: ProposalAdmission<Receipt = R> + 'app,
-        Q: ReadyScheduler,
-        T: TimerService,
-        E: ElectionEntropy,
-    >(
-        &mut self,
-        owner: &mut EffectOwner<Q, T, E>,
-        application: &'app A,
-        request: ClientRequest,
-        mut validation: Option<&mut ingress::SubmissionValidation<'app, A>>,
-    ) -> Result<ClientTicket, ClientRejected> {
-        let check = self.check_submit(owner, application, &request, validation.as_deref_mut());
+        let check = self.check_submit(owner, application, &request);
         let (receipt_bound, charged, sequence, term, control) = match check {
             Ok(v) => v,
             Err(reason) => return Err(ClientRejected { reason, request }),
@@ -441,13 +410,6 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
             self.bulk.requests += 1;
             self.bulk.bytes += charged;
             *self.bulk_groups.entry(ticket.group).or_default() += 1;
-        }
-        if let Some(validation) = validation {
-            if control {
-                *validation = ingress::SubmissionValidation::default();
-            } else {
-                validation.accepted = true;
-            }
         }
         Ok(ticket)
     }

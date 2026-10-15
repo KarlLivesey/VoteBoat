@@ -1,0 +1,27 @@
+{
+  "time_utc": "2026-10-15T17:02:30.779582+00:00",
+  "linux": {
+    "original_handle": 84364,
+    "actual_terminal_exit": 0,
+    "completed_case_end_records": 48,
+    "terminal_tool_chunk": "52f183",
+    "markers": [
+      "ALL_TIMING_END",
+      "CAMPAIGN_EXIT0"
+    ],
+    "postguards_and_validators_complete": true
+  },
+  "mac": {
+    "original_handle": 2749,
+    "actual_terminal_exit": 0,
+    "completed_case_end_records": 48,
+    "terminal_tool_chunk": "1812fd",
+    "markers": [
+      "ALL_TIMING_END",
+      "CAMPAIGN_EXIT0",
+      "ORIGINAL_MAC484_CAMPAIGN_SSH_EXIT0"
+    ],
+    "postguards_and_validators_complete": true
+  },
+  "authorization": "Both original fixed484 campaign parents actually terminated. Collection, raw readout and archive authorized now; preserve every original case, failure, regression and boundary. No replacement workloads."
+}

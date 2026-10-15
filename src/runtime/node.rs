@@ -581,20 +581,6 @@ where
             .router
             .drain_failed_exports(&mut self.local.owner, &mut snapshots.worker, limit)
     }
-    /// Sequential ordinary proposals with scoped exact admission reuse. Draining
-    /// is checked for every original before application lookup, as in `propose`.
-    /// The callback cannot poll or mutate this node while the scope is live.
-    pub fn with_submission_batch<Output>(
-        &mut self,
-        callback: impl FnOnce(&mut dyn ProposalIngress) -> Output,
-    ) -> Output {
-        self.local.clients.with_submission_policy(
-            &mut self.local.owner,
-            |group| self.local.applications.get(&group),
-            self.drain.is_some(),
-            callback,
-        )
-    }
     pub fn propose(&mut self, request: ClientRequest) -> Result<ClientTicket, ClientRejected> {
         if self.drain.is_some() {
             return Err(ClientRejected {

@@ -1,0 +1,27 @@
+{
+  "time_utc": "2026-10-15T16:35:32.517978+00:00",
+  "authorization": "Start original fixed484 campaigns on each host once. Fresh qualifications, selected controls, exact source/artifact/compiler/profile/fixture/device guards, independent reviews and checked publications complete. No same-host builds/checks/copies/archive/profile while timing. No replacement/restart on observation timeout. Poll original handles to actual terminal; collect/readout/archive only after both END.",
+  "published_evidence_commit": "480d0286b59b9f20cd95b8bad63b52e3994b67b1",
+  "candidate_source_commit": "efd383dc36b4b9edf8f66021b90115824440b468",
+  "baseline_source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "schema_sha256": "81a09d3b2d73f789db7519d0045f45704314e06aa091f580a26a3902cb586a4a",
+  "linux_policy_unchanged": {
+    "perf_event_paranoid": "2",
+    "kptr_restrict": "2",
+    "perf_event_mlock_kb": "516"
+  },
+  "cases_per_host": 48,
+  "offers_per_host": 391680,
+  "scope": "Native Counter diagnostic only; no full P9/default/third-filesystem acceptance.",
+  "mac_actual_power_source": "AC Power; prequiet read actual0/d1c0ce, battery80%, no pending owned jobs.",
+  "linux": {
+    "job": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/linux/revision2/campaign",
+    "config_sha256": "09a6749d635c657d1cdcb9b605be1df67f3c08475c7123cc50e2a38db2fa2c29",
+    "ready_sha256": "1b0771ad29828b2373c474911b5e513c0ce90111ea2b337e16a373ab0563e172"
+  },
+  "mac": {
+    "job": "/private/tmp/voteboat-native484-pair-NB2I6n/campaign",
+    "config_sha256": "da49a6d4c41587326d296f8ed78de54143f7234dbbb75a29f82fa609748025b8",
+    "ready_sha256": "174f29da296e25fbb9fc09ab308618e9ad2f95eb2af8bde79a35db108442b7f4"
+  }
+}

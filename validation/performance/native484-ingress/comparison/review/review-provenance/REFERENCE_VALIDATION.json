@@ -1,0 +1,27 @@
+{
+  "exit": 0,
+  "scope": "Final484 helper parsed all96 actual saved481 cases with matching quietGO/config/bothEND; no new workload, external validator, timing, source build or capture.",
+  "actual_reference_reader_originals": {
+    "linux": {
+      "handle": 99364,
+      "actual_terminal_chunk": "4e6206",
+      "exit": 0
+    },
+    "mac": {
+      "handle": 57723,
+      "actual_terminal_chunk": "326022",
+      "exit": 0
+    }
+  },
+  "earlier_unchanged_ledger_parser_outputs_retained": "reference481-initial-{linux,mac}; later final output additionally records existing device/policy snapshots, physical pair ratios and group trial summaries.",
+  "matching_prior_independent_raw_cases": 96,
+  "crosscheck_scope": "Everycase completed/during rate, applied count, backlog, intended p50/p95/p99/max, all prior root physicalcounter fields, pergroup count/backlog/intended quantiles match saved ROOT_DATA_REVIEW exactly. Final parser independently also checks service/dispatch, inflight/refusals, all original source timer bounds, primitive/storage/maintenance/recovery/base/resource scopes.",
+  "prior_root_readout": {
+    "path": "target/p9/native481-admission/ROOT_DATA_REVIEW.json",
+    "sha256": "c3da408b25cb3a06855177869a47d652d4a765f4caab3c25d2ef4374aa1cc1db"
+  },
+  "reader_sha256": "02209e3306d1fc1c1685dec733f7633b146154834df2a414b768ada03baaa516",
+  "reference_context_sha256": "510f53e2a3213a9f19872ea6033bccf398e15b8bf6dccc811c98374782017e45",
+  "resource_units": "Linux KiB*1024 and Mac bytes both independently validated.",
+  "actual484_campaign_data_read": false
+}

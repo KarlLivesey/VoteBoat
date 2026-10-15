@@ -1,0 +1,98 @@
+START t1-singleton-tcp-baseline
+END t1-singleton-tcp-baseline 0
+START t1-singleton-tcp-candidate
+END t1-singleton-tcp-candidate 0
+START t1-singleton-quic-candidate
+END t1-singleton-quic-candidate 0
+START t1-singleton-quic-baseline
+END t1-singleton-quic-baseline 0
+START t1-moderate-quic-baseline
+END t1-moderate-quic-baseline 0
+START t1-moderate-quic-candidate
+END t1-moderate-quic-candidate 0
+START t1-moderate-tcp-candidate
+END t1-moderate-tcp-candidate 0
+START t1-moderate-tcp-baseline
+END t1-moderate-tcp-baseline 0
+START t1-loaded-tcp-baseline
+END t1-loaded-tcp-baseline 0
+START t1-loaded-tcp-candidate
+END t1-loaded-tcp-candidate 0
+START t1-loaded-quic-candidate
+END t1-loaded-quic-candidate 0
+START t1-loaded-quic-baseline
+END t1-loaded-quic-baseline 0
+START t1-skew-quic-baseline
+END t1-skew-quic-baseline 0
+START t1-skew-quic-candidate
+END t1-skew-quic-candidate 0
+START t1-skew-tcp-candidate
+END t1-skew-tcp-candidate 0
+START t1-skew-tcp-baseline
+END t1-skew-tcp-baseline 0
+START t2-moderate-tcp-baseline
+END t2-moderate-tcp-baseline 0
+START t2-moderate-tcp-candidate
+END t2-moderate-tcp-candidate 0
+START t2-moderate-quic-candidate
+END t2-moderate-quic-candidate 0
+START t2-moderate-quic-baseline
+END t2-moderate-quic-baseline 0
+START t2-loaded-quic-baseline
+END t2-loaded-quic-baseline 0
+START t2-loaded-quic-candidate
+END t2-loaded-quic-candidate 0
+START t2-loaded-tcp-candidate
+END t2-loaded-tcp-candidate 0
+START t2-loaded-tcp-baseline
+END t2-loaded-tcp-baseline 0
+START t2-skew-tcp-baseline
+END t2-skew-tcp-baseline 0
+START t2-skew-tcp-candidate
+END t2-skew-tcp-candidate 0
+START t2-skew-quic-candidate
+END t2-skew-quic-candidate 0
+START t2-skew-quic-baseline
+END t2-skew-quic-baseline 0
+START t2-singleton-quic-baseline
+END t2-singleton-quic-baseline 0
+START t2-singleton-quic-candidate
+END t2-singleton-quic-candidate 0
+START t2-singleton-tcp-candidate
+END t2-singleton-tcp-candidate 0
+START t2-singleton-tcp-baseline
+END t2-singleton-tcp-baseline 0
+START t3-loaded-tcp-baseline
+END t3-loaded-tcp-baseline 0
+START t3-loaded-tcp-candidate
+END t3-loaded-tcp-candidate 0
+START t3-loaded-quic-candidate
+END t3-loaded-quic-candidate 0
+START t3-loaded-quic-baseline
+END t3-loaded-quic-baseline 0
+START t3-skew-quic-baseline
+END t3-skew-quic-baseline 0
+START t3-skew-quic-candidate
+END t3-skew-quic-candidate 0
+START t3-skew-tcp-candidate
+END t3-skew-tcp-candidate 0
+START t3-skew-tcp-baseline
+END t3-skew-tcp-baseline 0
+START t3-singleton-tcp-baseline
+END t3-singleton-tcp-baseline 0
+START t3-singleton-tcp-candidate
+END t3-singleton-tcp-candidate 0
+START t3-singleton-quic-candidate
+END t3-singleton-quic-candidate 0
+START t3-singleton-quic-baseline
+END t3-singleton-quic-baseline 0
+START t3-moderate-quic-baseline
+END t3-moderate-quic-baseline 0
+START t3-moderate-quic-candidate
+END t3-moderate-quic-candidate 0
+START t3-moderate-tcp-candidate
+END t3-moderate-tcp-candidate 0
+START t3-moderate-tcp-baseline
+END t3-moderate-tcp-baseline 0
+ALL_TIMING_END
+CAMPAIGN_EXIT 0

@@ -1,0 +1,8 @@
+{
+  "command": [
+    "/usr/bin/python3.14",
+    "target/p9/native484-ingress/review/archive-central.py",
+    "target/p9/native484-ingress/review/MAC_PAIRED_ROOT_ARCHIVE_VERIFIED.json"
+  ],
+  "script_sha256": "ce3a52ec23fa36ca6177ea868691329119f15306825ccd957ccccf17a350b3c1"
+}

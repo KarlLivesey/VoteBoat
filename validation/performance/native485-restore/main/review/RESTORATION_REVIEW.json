@@ -1,0 +1,70 @@
+{
+  "actual_exit": 0,
+  "baseline": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "rejected": "efd383dc36b4b9edf8f66021b90115824440b468",
+  "selected_files": 2538,
+  "qualified480_inputs": 1495,
+  "all_selected_bytes_modes_exact": true,
+  "failures": [],
+  "removed_only_rejected_modules": [
+    "src/runtime/clients/ingress.rs",
+    "tests/application/prepared_admission.rs",
+    "tests/application/prepared_admission/wrapper.rs",
+    "tests/client_admission/ingress.rs",
+    "tests/startup/multi/ingress.rs",
+    "tests/startup/multi/ingress/application.rs",
+    "tests/startup/multi/ingress/history.rs",
+    "tests/support/node_ingress.rs"
+  ],
+  "changed_experiment_paths": [
+    "docs/component-contracts.json",
+    "docs/provider-conformance.json",
+    "examples/benchmark/offered.rs",
+    "src/application.rs",
+    "src/bin/support/counter_application.rs",
+    "src/runtime/clients.rs",
+    "src/runtime/clients/ingress.rs",
+    "src/runtime/node.rs",
+    "tests/application.rs",
+    "tests/application/prepared_admission.rs",
+    "tests/application/prepared_admission/wrapper.rs",
+    "tests/client_admission/ingress.rs",
+    "tests/effect_owner.rs",
+    "tests/startup/multi.rs",
+    "tests/startup/multi/ingress.rs",
+    "tests/startup/multi/ingress/application.rs",
+    "tests/startup/multi/ingress/history.rs",
+    "tests/support/node.rs",
+    "tests/support/node_ingress.rs",
+    "validation/check-provider-conformance.test.mjs"
+  ],
+  "unrelated_tracked_deletions": [],
+  "current480_ready_oracle_retained": true,
+  "schema_adequate": true,
+  "schema_note": "Retains all6 Mac loaded paired gains and all6 Mac cold skew tail losses. Exact restoration/no migration, affected checks+enabled hooks, both-host raw evidence and fullP9 objective preserved. Validation checker expected-count restoration must be included among experiment inputs.",
+  "mode_scope": "Exact physical480 modes from qualification for1495 inputs including seven0600 keys; remaining1043 baseline source/evidence paths compared against Git regular/executable checkout modes0644/0755. Git archive group-write metadata is not a historical checkout mode.",
+  "scope": "Independent read-only git480 archive bytes+qualified physical modes compared to current full source/tests/examples/benchmarks/root build/license/toolchain/hooks/direct code validators/two contract ledgers. Docs/evidence additions are excluded from rollback; no tests/builds/workloads or source edits by reviewer.",
+  "input_proof_sha256": "d09eb8b8a517e6ec2d1930214aab1fe87039316130560d73e4824cc603d67e97",
+  "actual_terminal_tool_chunk": "e334cd",
+  "review_failures_preserved": [
+    {
+      "actual_exit": 1,
+      "tool_chunk": "e0bcd2",
+      "script": "verify-initial.py",
+      "raw_stdout": "verify.stdout",
+      "raw_stderr": "verify.stderr",
+      "cause": "Reviewer selection assertion omitted qualified documentation inputs; corrected union includes every qualified input."
+    },
+    {
+      "actual_exit": 1,
+      "tool_chunk": "f18ea6",
+      "script": "verify.py.attempt2",
+      "raw_stdout": "verify-attempt2.stdout",
+      "raw_stderr": "verify-attempt2.stderr",
+      "proof": "INPUT_PROOF.json.attempt2",
+      "cause": "Reviewer treated Git archive group-write tar metadata as checkout modes on non-qualified files. Corrected to Git regular/executable checkout0644/0755;1495 exact physical qualification modes unchanged. No source or permissions changed."
+    }
+  ],
+  "root_restoration_receipt_sha256": "08b426b98f9053b1d3fd9238e44844f465c7c6453c7e22c310387932d1723d81",
+  "baseline_expected_count_checker_restored": true
+}

@@ -1,0 +1,18 @@
+{
+  "actual_exit": 0,
+  "host": "mac",
+  "cases": 48,
+  "inputs": 582,
+  "totals": {
+    "applied": 330860,
+    "window_refused": 60820
+  },
+  "losses": {
+    "rate": 11,
+    "during": 10,
+    "p99": 11,
+    "cpu": 15,
+    "rss": 19,
+    "cold_p99": 6
+  }
+}

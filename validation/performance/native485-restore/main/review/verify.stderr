@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native485-restore/review/verify.py", line 10, in <module>
+    assert set(qualified['sha256'])<=set(selected)|{'AGENTS.md'},set(qualified['sha256'])-set(selected)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'docs/COMMAND_BYTES.md', 'AGENTS.md', 'README.md', '.gitignore', 'docs/PERFORMANCE.md', 'validation/performance/native480-admission/SCHEMA.md'}

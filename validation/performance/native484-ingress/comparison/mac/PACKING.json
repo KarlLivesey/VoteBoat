@@ -1,0 +1,416 @@
+[
+  {
+    "original_path": "independent-review/linux.json",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/review/independent-actual/linux.json",
+    "archived_path": "independent-review/linux.json.gz",
+    "original_sha256": "18d8fd9c884d4c6d91bc8eb059ecffcdfa930606d2091dda7b17f32ac42ff5e4",
+    "original_bytes": 242895,
+    "original_mode": "0o644",
+    "archived_sha256": "8056dc7dc0c28a02dafe10060c78e3fcf1c2ea8db8291dbf9027d31603becb56"
+  },
+  {
+    "original_path": "independent-review/mac.json",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/review/independent-actual/mac.json",
+    "archived_path": "independent-review/mac.json.gz",
+    "original_sha256": "a58b68d4a9890c1eb65d00f3a5d6720d3bf1419eb115ac5f7da4a6f26227eb68",
+    "original_bytes": 225171,
+    "original_mode": "0o644",
+    "archived_sha256": "6ddc6d9ad29c6b8b7508a89a2c6d22fe6aaea44461311c00f0122b25ce24cf05"
+  },
+  {
+    "original_path": "raw/CAMPAIGN_CONFIG.json",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/CAMPAIGN_CONFIG.json",
+    "archived_path": "raw/CAMPAIGN_CONFIG.json.gz",
+    "original_sha256": "da49a6d4c41587326d296f8ed78de54143f7234dbbb75a29f82fa609748025b8",
+    "original_bytes": 681967,
+    "original_mode": "0o644",
+    "archived_sha256": "94a0d528bc3e6d4454e64ac22ce9c9a0fbe11cf930d059610208848080e82e9d"
+  },
+  {
+    "original_path": "raw/COLLECTED.json",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/COLLECTED.json",
+    "archived_path": "raw/COLLECTED.json.gz",
+    "original_sha256": "e9d6a6e770d9dfc6021ccfa498d61a136304a89c010270e892102e8c7a5f3a05",
+    "original_bytes": 195736,
+    "original_mode": "0o644",
+    "archived_sha256": "69c775ec6a6d6ab851523d5cc29edde66d6a6a05ac354127a7fc0a97f2eaf130"
+  },
+  {
+    "original_path": "raw/after-host.json",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/after-host.json",
+    "archived_path": "raw/after-host.json.gz",
+    "original_sha256": "36b3fc90e73cfa297b370ea644e636ff0a66f132fa4db0bd18a74059201e4904",
+    "original_bytes": 159208,
+    "original_mode": "0o644",
+    "archived_sha256": "a04ccf594fa9029dd7e561a3423e9e8cbd36fb788ce61b122f1e7937e7ed7bb8"
+  },
+  {
+    "original_path": "raw/before-host.json",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/before-host.json",
+    "archived_path": "raw/before-host.json.gz",
+    "original_sha256": "80077b539bf39537a73cf34bc1047fee7decc45cb864191ffd438e3e94e2b660",
+    "original_bytes": 159260,
+    "original_mode": "0o644",
+    "archived_sha256": "29dcaf175218c1f709e4edbe6c4311bd1c0c797555ad9de59e0893b0e48ca002"
+  },
+  {
+    "original_path": "raw/campaign/CAMPAIGN.json",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/campaign/CAMPAIGN.json",
+    "archived_path": "raw/campaign/CAMPAIGN.json.gz",
+    "original_sha256": "ecf2b256144072bdbd3d8d41d21e61fff69fab43d450dccac3e343c5f5c582e9",
+    "original_bytes": 99008,
+    "original_mode": "0o644",
+    "archived_sha256": "62890bda3908ee28330ba260f7db7f04f718bd22496e6c2069edf2066da8b1a2"
+  },
+  {
+    "original_path": "raw/results/t1-loaded-quic-baseline/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t1-loaded-quic-baseline/offers.csv",
+    "archived_path": "raw/results/t1-loaded-quic-baseline/offers.csv.gz",
+    "original_sha256": "f70b7c207c06c94f7b89887175b821efc5d295d6ae0e6467ee0f3866b7117a72",
+    "original_bytes": 1047294,
+    "original_mode": "0o644",
+    "archived_sha256": "c9ec47085f8c4c11851f25dc701ddf144db6cbed452526a0819cd12c97a58985"
+  },
+  {
+    "original_path": "raw/results/t1-loaded-quic-candidate/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t1-loaded-quic-candidate/offers.csv",
+    "archived_path": "raw/results/t1-loaded-quic-candidate/offers.csv.gz",
+    "original_sha256": "2f9ae562b8f07ac06b1d7134180489d0399d7941738f0197c49e1a723d9565eb",
+    "original_bytes": 1064467,
+    "original_mode": "0o644",
+    "archived_sha256": "4696b1de7703605c8a00f54166407a4b3086f34800d86dc63cd2e8b0c9a1bafa"
+  },
+  {
+    "original_path": "raw/results/t1-loaded-tcp-baseline/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t1-loaded-tcp-baseline/offers.csv",
+    "archived_path": "raw/results/t1-loaded-tcp-baseline/offers.csv.gz",
+    "original_sha256": "d7b16b5e032a35a6ff9d8326bc72df16064dc57b8da31051c3ed6c6cb3595dbe",
+    "original_bytes": 1040173,
+    "original_mode": "0o644",
+    "archived_sha256": "742b59b0f3dbbd1b055e7230dc6a40f575aef1f5fab7e603af8c67f4dfadf5e8"
+  },
+  {
+    "original_path": "raw/results/t1-loaded-tcp-candidate/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t1-loaded-tcp-candidate/offers.csv",
+    "archived_path": "raw/results/t1-loaded-tcp-candidate/offers.csv.gz",
+    "original_sha256": "d6e1a5f250eac7365e9d38e54be65e011c41dace1dfb1e22ccff4bb7731a81b4",
+    "original_bytes": 1062022,
+    "original_mode": "0o644",
+    "archived_sha256": "7fb2134a7ff2b50cd3147b43de204ccb27ff8ec7e72522b2fb06f1ec4e5b988a"
+  },
+  {
+    "original_path": "raw/results/t1-moderate-quic-baseline/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t1-moderate-quic-baseline/offers.csv",
+    "archived_path": "raw/results/t1-moderate-quic-baseline/offers.csv.gz",
+    "original_sha256": "a3f756728185138b4b7798b2065477c7a8ad8274e9575b0d802ce4bb3d41a4be",
+    "original_bytes": 557240,
+    "original_mode": "0o644",
+    "archived_sha256": "e3074ae14b12c87ee54000d52a96aa9622e43ea38d643b4727381633b418057a"
+  },
+  {
+    "original_path": "raw/results/t1-moderate-quic-candidate/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t1-moderate-quic-candidate/offers.csv",
+    "archived_path": "raw/results/t1-moderate-quic-candidate/offers.csv.gz",
+    "original_sha256": "83aff718c445aeed52d6f05e88c29060cc8cb667a52af33ca32a22878ca19511",
+    "original_bytes": 557339,
+    "original_mode": "0o644",
+    "archived_sha256": "d261b99f6251a2c5e872c163e67cfb5c64ca8926248e24982a681789ab90375a"
+  },
+  {
+    "original_path": "raw/results/t1-moderate-tcp-baseline/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t1-moderate-tcp-baseline/offers.csv",
+    "archived_path": "raw/results/t1-moderate-tcp-baseline/offers.csv.gz",
+    "original_sha256": "7de0a92942eff272997f3bd0cbe4db63ab7586aae5609aa5774eb5e0c841124d",
+    "original_bytes": 557241,
+    "original_mode": "0o644",
+    "archived_sha256": "bde80bc6fe974a667405f2c2afbd8289dd82a24b2d5aabb2af5e031178ff695d"
+  },
+  {
+    "original_path": "raw/results/t1-moderate-tcp-candidate/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t1-moderate-tcp-candidate/offers.csv",
+    "archived_path": "raw/results/t1-moderate-tcp-candidate/offers.csv.gz",
+    "original_sha256": "4334f5d8b02b76849a367a735c9681f05a786f4ddb5ed98bf16d817d568a478c",
+    "original_bytes": 557238,
+    "original_mode": "0o644",
+    "archived_sha256": "d8b7560d728c838bf9f721e993e0b4408ae117f7d72a3d9093abd20f6286cfe1"
+  },
+  {
+    "original_path": "raw/results/t1-skew-quic-baseline/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t1-skew-quic-baseline/offers.csv",
+    "archived_path": "raw/results/t1-skew-quic-baseline/offers.csv.gz",
+    "original_sha256": "86542be8dcf3f269597f0e45da753e6ddb9556adbb0e374f1030082ca081457c",
+    "original_bytes": 531271,
+    "original_mode": "0o644",
+    "archived_sha256": "39410a967208fbf5ecf8db739052b533adf9ece5a728aef035f2ffed39201ea2"
+  },
+  {
+    "original_path": "raw/results/t1-skew-quic-candidate/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t1-skew-quic-candidate/offers.csv",
+    "archived_path": "raw/results/t1-skew-quic-candidate/offers.csv.gz",
+    "original_sha256": "0864bed8077f9f15dbe7dca8fb6dc329b033c677e39de6397208307690cf2654",
+    "original_bytes": 530175,
+    "original_mode": "0o644",
+    "archived_sha256": "5c4675be172fd091a60fe35cd7e1cb2b32279a4c4682508e96ad292b25942dfc"
+  },
+  {
+    "original_path": "raw/results/t1-skew-tcp-baseline/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t1-skew-tcp-baseline/offers.csv",
+    "archived_path": "raw/results/t1-skew-tcp-baseline/offers.csv.gz",
+    "original_sha256": "e5563f0c891c7d3e2fa3ef27569ffb68b6b505c4a4fbd56d2c1f9a22303ce22c",
+    "original_bytes": 531215,
+    "original_mode": "0o644",
+    "archived_sha256": "b7062971d2098cce5ab183419552d3bcac0924a2f1469f4750233afc14a1a8c2"
+  },
+  {
+    "original_path": "raw/results/t1-skew-tcp-candidate/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t1-skew-tcp-candidate/offers.csv",
+    "archived_path": "raw/results/t1-skew-tcp-candidate/offers.csv.gz",
+    "original_sha256": "1d74d0284bfa346cc1f244b2af7c579e5f70d6b123d5497ed9d392970cb2a577",
+    "original_bytes": 530196,
+    "original_mode": "0o644",
+    "archived_sha256": "3771f1bc0caaceb8046de593d18f81b15b4cd264583ab6184c8913b777a35657"
+  },
+  {
+    "original_path": "raw/results/t2-loaded-quic-baseline/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t2-loaded-quic-baseline/offers.csv",
+    "archived_path": "raw/results/t2-loaded-quic-baseline/offers.csv.gz",
+    "original_sha256": "0fc440a358ffd3c4bc750b69c85696970f7d372ed0043cd718b388dfe52478f1",
+    "original_bytes": 1044981,
+    "original_mode": "0o644",
+    "archived_sha256": "5841adfa7db84cf3a8427614d9db2d4f53ef83ddedeefc0482e8a9cc5e4267a9"
+  },
+  {
+    "original_path": "raw/results/t2-loaded-quic-candidate/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t2-loaded-quic-candidate/offers.csv",
+    "archived_path": "raw/results/t2-loaded-quic-candidate/offers.csv.gz",
+    "original_sha256": "c20afa1db6e089813986c46bcef50c93f8eb0052c4ada7d7506b4f0da72276ee",
+    "original_bytes": 1060377,
+    "original_mode": "0o644",
+    "archived_sha256": "a611cab8b6aaa9e9ed1a9f8d36303987581967ed00e12cabc3c67d9577e57e88"
+  },
+  {
+    "original_path": "raw/results/t2-loaded-tcp-baseline/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t2-loaded-tcp-baseline/offers.csv",
+    "archived_path": "raw/results/t2-loaded-tcp-baseline/offers.csv.gz",
+    "original_sha256": "c3ec1b83d0a43361e2d5789d1a295bc577d3100b0a1e03885e4bf250d5fb89eb",
+    "original_bytes": 1044280,
+    "original_mode": "0o644",
+    "archived_sha256": "e0e96f1ea3613c8c089897091b2d63c8782204be8766fa8403878f705455655f"
+  },
+  {
+    "original_path": "raw/results/t2-loaded-tcp-candidate/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t2-loaded-tcp-candidate/offers.csv",
+    "archived_path": "raw/results/t2-loaded-tcp-candidate/offers.csv.gz",
+    "original_sha256": "a8d1dc32e419b967e3267c8fc982f976795406c75439d50f823bf7b710de7b4e",
+    "original_bytes": 1060158,
+    "original_mode": "0o644",
+    "archived_sha256": "b31db6f57faf9a1738d71c46c96b52393ea7edad8d865ce04d30ac26107a718c"
+  },
+  {
+    "original_path": "raw/results/t2-moderate-quic-baseline/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t2-moderate-quic-baseline/offers.csv",
+    "archived_path": "raw/results/t2-moderate-quic-baseline/offers.csv.gz",
+    "original_sha256": "c475b76afe14422230c6468dcd87d60faef90c0f8007bed2c9e5d3e5e65fc890",
+    "original_bytes": 557233,
+    "original_mode": "0o644",
+    "archived_sha256": "ebb4018a4d6b5451c065c838ac53a78f8beae0e9f3bdb5e68450532e8cac22f8"
+  },
+  {
+    "original_path": "raw/results/t2-moderate-quic-candidate/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t2-moderate-quic-candidate/offers.csv",
+    "archived_path": "raw/results/t2-moderate-quic-candidate/offers.csv.gz",
+    "original_sha256": "9c58ec8a574972edd0046b85236bcfac6f1a7a5cdc73b1976035da330e676b2f",
+    "original_bytes": 557234,
+    "original_mode": "0o644",
+    "archived_sha256": "006e1f326a8878c5f37c154db9cf7bd275233fb64bfc102a30824bf3ffd889e9"
+  },
+  {
+    "original_path": "raw/results/t2-moderate-tcp-baseline/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t2-moderate-tcp-baseline/offers.csv",
+    "archived_path": "raw/results/t2-moderate-tcp-baseline/offers.csv.gz",
+    "original_sha256": "966fe1a5ca1b7f91b0369a65b6be811a3cd32bc24028aa61d3858f7a32fa3bad",
+    "original_bytes": 557238,
+    "original_mode": "0o644",
+    "archived_sha256": "bb9094d2a0a3425a1b2570f0c76815ff6ecb56664b0f9d82e112ed705e335f06"
+  },
+  {
+    "original_path": "raw/results/t2-moderate-tcp-candidate/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t2-moderate-tcp-candidate/offers.csv",
+    "archived_path": "raw/results/t2-moderate-tcp-candidate/offers.csv.gz",
+    "original_sha256": "801af7b2caede0254ddacad63b0eae790a74794464142d7aadb048157f72aee1",
+    "original_bytes": 557105,
+    "original_mode": "0o644",
+    "archived_sha256": "7ad6f1a6594f39e4be0bea2d290d69c82d2fba139fda11504a3606141d76093d"
+  },
+  {
+    "original_path": "raw/results/t2-skew-quic-baseline/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t2-skew-quic-baseline/offers.csv",
+    "archived_path": "raw/results/t2-skew-quic-baseline/offers.csv.gz",
+    "original_sha256": "e8920e3cba8f1e38c589e0b870e72e27e2e9a16e069b6b8dbd082a13e48428e6",
+    "original_bytes": 531087,
+    "original_mode": "0o644",
+    "archived_sha256": "1b3b2a04738860e5b0a82a463e454356f081ca1f57eae71a7329066a6aa4d11a"
+  },
+  {
+    "original_path": "raw/results/t2-skew-quic-candidate/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t2-skew-quic-candidate/offers.csv",
+    "archived_path": "raw/results/t2-skew-quic-candidate/offers.csv.gz",
+    "original_sha256": "43a71c09bf79dccf38fcb85ba522e4c437c49109ea1b0724b0578d5dc8d6abd1",
+    "original_bytes": 530262,
+    "original_mode": "0o644",
+    "archived_sha256": "cd3b33bd81d1f3418111ae702f00c21f57a0072c1dec6d535391f827218858a0"
+  },
+  {
+    "original_path": "raw/results/t2-skew-tcp-baseline/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t2-skew-tcp-baseline/offers.csv",
+    "archived_path": "raw/results/t2-skew-tcp-baseline/offers.csv.gz",
+    "original_sha256": "3790eea064779f419155e3c1974b5605bff41bf69d27dc363e64df6a1058f9e5",
+    "original_bytes": 531545,
+    "original_mode": "0o644",
+    "archived_sha256": "f4dbc5abf2488661784d4622167ac0e0b1436f2c3e5c3be95e30509dee39ecdb"
+  },
+  {
+    "original_path": "raw/results/t2-skew-tcp-candidate/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t2-skew-tcp-candidate/offers.csv",
+    "archived_path": "raw/results/t2-skew-tcp-candidate/offers.csv.gz",
+    "original_sha256": "8930f93182a413b5165d23839fed6e0289f230ac631a7e902d54844d61c0160a",
+    "original_bytes": 530366,
+    "original_mode": "0o644",
+    "archived_sha256": "3127eb53c91f67846c0306b386b1009cdfd6d7ebe21a4d950906eacfe598cb87"
+  },
+  {
+    "original_path": "raw/results/t3-loaded-quic-baseline/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t3-loaded-quic-baseline/offers.csv",
+    "archived_path": "raw/results/t3-loaded-quic-baseline/offers.csv.gz",
+    "original_sha256": "5f320c2f22c44716a4b7056d3d18038f83c6a0d40fc3cb058fec4c440a2a6233",
+    "original_bytes": 1040909,
+    "original_mode": "0o644",
+    "archived_sha256": "42f84a5eb8a285e5775bae28652eb55cf4700fd4a30598cd6dbafa320f2ac691"
+  },
+  {
+    "original_path": "raw/results/t3-loaded-quic-candidate/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t3-loaded-quic-candidate/offers.csv",
+    "archived_path": "raw/results/t3-loaded-quic-candidate/offers.csv.gz",
+    "original_sha256": "ed30879055e2dc8a7135080e48a9be7f6d27436d87e259372ebab369ed56e817",
+    "original_bytes": 1064577,
+    "original_mode": "0o644",
+    "archived_sha256": "2758b5044bfb60d5a884ee0402d120571f67272dd37a0b41eaec7d580546fe97"
+  },
+  {
+    "original_path": "raw/results/t3-loaded-tcp-baseline/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t3-loaded-tcp-baseline/offers.csv",
+    "archived_path": "raw/results/t3-loaded-tcp-baseline/offers.csv.gz",
+    "original_sha256": "1491d83e33e5c9299a425511baf4dcdb1f01d23d1569b70596cf4856ff920516",
+    "original_bytes": 1047540,
+    "original_mode": "0o644",
+    "archived_sha256": "d41dce553ee0985a19e08dc6285b39ae4c132fcb78018f0e8b1866bd4b5727b4"
+  },
+  {
+    "original_path": "raw/results/t3-loaded-tcp-candidate/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t3-loaded-tcp-candidate/offers.csv",
+    "archived_path": "raw/results/t3-loaded-tcp-candidate/offers.csv.gz",
+    "original_sha256": "72b41f4eb2fb395b809b9a8a8bf97178c50e549f21de98f4623b7984f5b3d900",
+    "original_bytes": 1052180,
+    "original_mode": "0o644",
+    "archived_sha256": "17ebd23d7efc656e1054383ff3b9d11ade5268715b256bd30d1908707be832b4"
+  },
+  {
+    "original_path": "raw/results/t3-moderate-quic-baseline/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t3-moderate-quic-baseline/offers.csv",
+    "archived_path": "raw/results/t3-moderate-quic-baseline/offers.csv.gz",
+    "original_sha256": "a67b05634a9cb8cdc082936a83b8f83d42255431f07a39f43797b475b76d206b",
+    "original_bytes": 557281,
+    "original_mode": "0o644",
+    "archived_sha256": "ff5bfd3278407dab4a02c57505d85ba269ef88cc7c8e64f8883112887ce01635"
+  },
+  {
+    "original_path": "raw/results/t3-moderate-quic-candidate/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t3-moderate-quic-candidate/offers.csv",
+    "archived_path": "raw/results/t3-moderate-quic-candidate/offers.csv.gz",
+    "original_sha256": "b5a78918d6bb4726b06c747f2754f09705ac2b053786985602a85f86717ee5d2",
+    "original_bytes": 557239,
+    "original_mode": "0o644",
+    "archived_sha256": "55e2ca809680356cfb6b505527d5bafbc656f2595f01b617e4246d73db99f72c"
+  },
+  {
+    "original_path": "raw/results/t3-moderate-tcp-baseline/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t3-moderate-tcp-baseline/offers.csv",
+    "archived_path": "raw/results/t3-moderate-tcp-baseline/offers.csv.gz",
+    "original_sha256": "b4a36e78e4a7511bfe2367fc63693b20db5d25be0df22d75791be082aaef781c",
+    "original_bytes": 557225,
+    "original_mode": "0o644",
+    "archived_sha256": "7da5c1a01d9d32f8ecb7a31cc4ab00a5a0b4735b906dbbcca883ac10754a9a5e"
+  },
+  {
+    "original_path": "raw/results/t3-moderate-tcp-candidate/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t3-moderate-tcp-candidate/offers.csv",
+    "archived_path": "raw/results/t3-moderate-tcp-candidate/offers.csv.gz",
+    "original_sha256": "7d6906b85583b40833b4d1c9c7a5a6ac8efaf7f00621e9a8fe704a968d4b82ea",
+    "original_bytes": 557238,
+    "original_mode": "0o644",
+    "archived_sha256": "090878460afb480d5115b82f288907fc2bdbe4649ce1e919a5a72000fc638417"
+  },
+  {
+    "original_path": "raw/results/t3-skew-quic-baseline/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t3-skew-quic-baseline/offers.csv",
+    "archived_path": "raw/results/t3-skew-quic-baseline/offers.csv.gz",
+    "original_sha256": "b0d4b26ca71754402a323013620dbad300db6596d9a954b7385a428aa86d163d",
+    "original_bytes": 531102,
+    "original_mode": "0o644",
+    "archived_sha256": "a34b37bd91cff9785a5beeaf08ab2e89febd157b6b623214143758b0b36aa143"
+  },
+  {
+    "original_path": "raw/results/t3-skew-quic-candidate/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t3-skew-quic-candidate/offers.csv",
+    "archived_path": "raw/results/t3-skew-quic-candidate/offers.csv.gz",
+    "original_sha256": "dbc21f68b3acb084d8e155fcbe922468073fab04c94469c9c6707fdc8b80f5cd",
+    "original_bytes": 531142,
+    "original_mode": "0o644",
+    "archived_sha256": "11652e05e95ab7ba5d80a8810a5cc1dd0304108cb2cc32360fab4f6ca770517e"
+  },
+  {
+    "original_path": "raw/results/t3-skew-tcp-baseline/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t3-skew-tcp-baseline/offers.csv",
+    "archived_path": "raw/results/t3-skew-tcp-baseline/offers.csv.gz",
+    "original_sha256": "19fe526c79d447fc904617796d1b8d9bf52c75e71ee4b8e161121293bffd723a",
+    "original_bytes": 531118,
+    "original_mode": "0o644",
+    "archived_sha256": "ff7b8467ef6c5856777187561b6bd0762e2c7593284cbf9d20ab1cf24184416f"
+  },
+  {
+    "original_path": "raw/results/t3-skew-tcp-candidate/offers.csv",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/results/t3-skew-tcp-candidate/offers.csv",
+    "archived_path": "raw/results/t3-skew-tcp-candidate/offers.csv.gz",
+    "original_sha256": "182e820e8441b52dc094e6f4c4c87d58e146b14fc0c564b8f78604d0047f48af",
+    "original_bytes": 530557,
+    "original_mode": "0o644",
+    "archived_sha256": "fcbb4739f98cbd139f3faf5a883c0434b6ce601a52e4bfe5b01cbb0692a76f61"
+  },
+  {
+    "original_path": "raw/setup-host.json",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/mac/collected/setup-host.json",
+    "archived_path": "raw/setup-host.json.gz",
+    "original_sha256": "d6cded0cd78d8c3106875074d67a80c7102122aca9868fc894b519b0e341373f",
+    "original_bytes": 159641,
+    "original_mode": "0o644",
+    "archived_sha256": "8d8cdb401f830533470b6b9d82b55be2a96a0e5b56f44109f49ed9d553a28792"
+  },
+  {
+    "original_path": "readout/actual484-mac/PROVENANCE.json",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/review/actual484-mac/PROVENANCE.json",
+    "archived_path": "readout/actual484-mac/PROVENANCE.json.gz",
+    "original_sha256": "23b990e6315bc26924b8441bdbaca02f961ab9ac961d35393e0a9267664fae0c",
+    "original_bytes": 208822,
+    "original_mode": "0o644",
+    "archived_sha256": "d2e25279902ea8334599a0f78321e5319fa9ab327a9c069e98f126a4a6a310dd"
+  },
+  {
+    "original_path": "readout/actual484-mac/READOUT.json",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/review/actual484-mac/READOUT.json",
+    "archived_path": "readout/actual484-mac/READOUT.json.gz",
+    "original_sha256": "226993454dac2d1d270557bdba66990b9a96401416c9927585ce29b019e25260",
+    "original_bytes": 2130633,
+    "original_mode": "0o644",
+    "archived_sha256": "572969725bd314532caa916d9cd6ee395843881320187db8a98175f7c6c9793d"
+  }
+]

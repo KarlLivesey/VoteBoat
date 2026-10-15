@@ -14,9 +14,9 @@ const review = (value, name = 'LogStore') => value.reviews.find(row => row.publi
 
 test('review counts only audited operations and retains unreviewed contracts', () => {
     const report = checkObligations(inventory, ledger, read);
-    assert.equal(report.reviewed_contracts, 45);
-    assert.equal(report.reviewed_operations, 420);
-    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 45);
+    assert.equal(report.reviewed_contracts, 44);
+    assert.equal(report.reviewed_operations, 415);
+    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 44);
     for (const name of ['DiagnosticClock / DiagnosticWallTime', 'WireCodec', 'StateMachine', 'ReadableStateMachine', 'CheckpointStateMachine', 'BoundedStateMachine + ApplicationReceipt', 'PeerTransport', 'TimerService', 'ReadyScheduler', 'LogStore', 'SnapshotStore', 'SnapshotRetention', 'SnapshotWorker', 'CredentialJournal / CredentialRecordIo', 'AdmissionPolicy / AdmissionRequest / AdmissionLease', 'BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits']) {
         assert.ok(!report.unreviewed_contracts.includes(name));
     }

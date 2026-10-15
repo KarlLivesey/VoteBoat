@@ -1,0 +1,20 @@
+[
+  "/usr/bin/python3.14",
+  "target/p9/native484-ingress/review/raw_readout.py",
+  "--phase",
+  "campaign484",
+  "--host",
+  "mac",
+  "--job",
+  "target/p9/native484-ingress/comparison/mac/collected",
+  "--quiet-go",
+  "target/p9/native484-ingress/ROOT_QUIET_GO.json",
+  "--both-end",
+  "target/p9/native484-ingress/ROOT_QUIET_END.json",
+  "--case-root",
+  "target/p9/native484-ingress/comparison/mac/collected/results",
+  "--resource-root",
+  "target/p9/native484-ingress/comparison/mac/collected/campaign-metadata",
+  "--output",
+  "target/p9/native484-ingress/review/actual484-mac"
+]

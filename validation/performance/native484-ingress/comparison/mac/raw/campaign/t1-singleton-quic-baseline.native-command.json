@@ -1,0 +1,18 @@
+[
+  "/private/tmp/voteboat-mac480-f7b0ef1-mccmJS/artifacts/native/native_benchmark",
+  "/private/tmp/voteboat-native484-pair-NB2I6n/wal/t1-singleton-quic-baseline",
+  "quic",
+  "256",
+  "1",
+  "1",
+  "--offered",
+  "8",
+  "--maintenance",
+  "2",
+  "--ready-items",
+  "16",
+  "--offered-capacity",
+  "4096",
+  "--publication",
+  "witness"
+]

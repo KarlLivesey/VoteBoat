@@ -1,0 +1,16 @@
+{
+  "exit": 0,
+  "archive": "validation/performance/native484-ingress/comparison/mac",
+  "payloads": 1120,
+  "packed_originals": 46,
+  "selected_originals": 1117,
+  "raw_originals": 1036,
+  "manifest_sha256": "f616a893697dada493c6e257f88d9a0db8a35dbe290277f0cf69d38685931c6d",
+  "archived_bytes": 10701179,
+  "actual_original_handle": 2749,
+  "actual_original_exit": 0,
+  "all48_cases_validators_readbacks_exit": 0,
+  "readout_sha256": "226993454dac2d1d270557bdba66990b9a96401416c9927585ce29b019e25260",
+  "independent_receipt_sha256": "a20e5c20e0c195e097fbdfd71cbc64eee6687fe68d86c553e402b873dfcd77e6",
+  "no_new_workloads": true
+}

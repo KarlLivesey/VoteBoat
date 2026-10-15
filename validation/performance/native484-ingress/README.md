@@ -1,4 +1,8 @@
-# 484: fresh ingress artifacts and paired measurement plan
+# 484: fresh ingress artifacts and completed paired rejection
+
+**Completed:** [all96 paired native results](comparison/README.md) reject483.
+Mac loaded gains are retained alongside Linux and cold-tail regressions;485
+restores checked480. Earlier sections below record premeasurement publications.
 
 483 is published as `efd383dc36b4b9edf8f66021b90115824440b468` through the enabled
 full strict hook; origin/main matched and all1502 selected source hashes/modes

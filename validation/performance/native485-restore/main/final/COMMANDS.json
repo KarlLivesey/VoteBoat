@@ -1,0 +1,23 @@
+[
+  {
+    "name": "metadata-tests",
+    "argv": [
+      "node",
+      "--test",
+      "validation/check-provider-conformance.test.mjs"
+    ],
+    "start_utc": "2026-10-15T17:07:05.445032+00:00",
+    "end_utc": "2026-10-15T17:07:05.672375+00:00",
+    "actual_exit": 0
+  },
+  {
+    "name": "strict",
+    "argv": [
+      "sh",
+      ".githooks/pre-push"
+    ],
+    "start_utc": "2026-10-15T17:07:05.672503+00:00",
+    "end_utc": "2026-10-15T17:07:31.424909+00:00",
+    "actual_exit": 0
+  }
+]

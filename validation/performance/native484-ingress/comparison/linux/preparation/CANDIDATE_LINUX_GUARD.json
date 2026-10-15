@@ -1,0 +1,13 @@
+{
+  "exit": 0,
+  "scope": "Read-only final483 Linux actual fresh source/artifact/qualification/publication guard, not campaign/config/timing or gain claim.",
+  "source_commit": "efd383dc36b4b9edf8f66021b90115824440b468",
+  "source_files": 1503,
+  "artifacts": {
+    "voteboat": "8643d5a310e63ff5a1de9d311054e005d4b5841237e8b647cd66710f2a86366b",
+    "native_benchmark": "0ff042c1ade83771217ed96af4a0f24912d79917eb4f95cb0d8230808780963d"
+  },
+  "proofs": 50,
+  "compiler_tools": 3,
+  "publication_authority": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/publication/RECEIPT.json"
+}

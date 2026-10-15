@@ -1,0 +1,10 @@
+{
+  "exit": 0,
+  "commit": "480d0286b59b9f20cd95b8bad63b52e3994b67b1",
+  "remote_exit": 0,
+  "remote_main": "480d0286b59b9f20cd95b8bad63b52e3994b67b1",
+  "enabled_hook": ".githooks/pre-push",
+  "same_full_selected_source": true,
+  "selected_inputs": 1502,
+  "scope": "Fresh published483 Mac artifact qualification and actual both-host484 paired configurations only. No engine/build input changed; actual enabled strict hook. Candidate source remains efd383dc36b4b9edf8f66021b90115824440b468. No paired timing or performance acceptance claim."
+}

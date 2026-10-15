@@ -1,0 +1,150 @@
+{
+  "time_utc": "2026-10-15T17:05:48.184145+00:00",
+  "baseline": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "rejected": "efd383dc36b4b9edf8f66021b90115824440b468",
+  "restored": [
+    {
+      "path": "docs/component-contracts.json",
+      "status": "M",
+      "before_sha256": "a0ab7805f408ae32b730bbec7962801bd488481412db94e47ad49b263829ffab",
+      "before_mode": "0o644",
+      "after_sha256": "976165b5e6b0dcc247b7fe75fb01c20dc11d6eb9a0d86c26c2a6aff1df12f871"
+    },
+    {
+      "path": "docs/provider-conformance.json",
+      "status": "M",
+      "before_sha256": "a97d39462661547802e448736e8fc5071e306f65a5592099ec696965b1c806ee",
+      "before_mode": "0o644",
+      "after_sha256": "f27a1ecca9e848d233a0da18d223d484237f8d9f2ec2ac5463ee7f3361418c6f"
+    },
+    {
+      "path": "examples/benchmark/offered.rs",
+      "status": "M",
+      "before_sha256": "74f42f873100e51fffdfd956dbc5a0343e82e7978323fa48db7ef09e8c045838",
+      "before_mode": "0o644",
+      "after_sha256": "6fd3edb07a6459b3cba5a501a8d98e8e87a31e9134801096c7b87527ff9430c6"
+    },
+    {
+      "path": "src/application.rs",
+      "status": "M",
+      "before_sha256": "81d97cff05ad80a45cb3ade22f8fafce749294a155f8c24deb41404877966c2e",
+      "before_mode": "0o644",
+      "after_sha256": "d6075051efcc4693a59075b12a20b7e7ed11bd2111e0d1c2adb961213744fa36"
+    },
+    {
+      "path": "src/bin/support/counter_application.rs",
+      "status": "M",
+      "before_sha256": "62291c8d3599a721d1d84491fca14572a34ef97e41915fd6d5b7c3af9e8447b0",
+      "before_mode": "0o644",
+      "after_sha256": "9e9c5d772d87ff46144bd13743eba0fe6ec4999c3a5a5c6a1003230530b8591f"
+    },
+    {
+      "path": "src/runtime/clients.rs",
+      "status": "M",
+      "before_sha256": "e392992cfaee689b31a8d3cc1b92329b584cda355cb1a6c35809f2b49b6d7da9",
+      "before_mode": "0o644",
+      "after_sha256": "37b983a1b67f7f5496b74ee65332c702b7a1e74554077af100e170fdfae07c6c"
+    },
+    {
+      "path": "src/runtime/clients/ingress.rs",
+      "status": "A",
+      "before_sha256": "4685d279bd848ddce185ec269a4ed7165847d5deec99b59971afc713c832d76d",
+      "before_mode": "0o644",
+      "after": "removed rejected483-only module; committed original retained"
+    },
+    {
+      "path": "src/runtime/node.rs",
+      "status": "M",
+      "before_sha256": "b75fe84426c87ffbbffc9749dbcee71857287b1d364463647a4ab76ff1f9491b",
+      "before_mode": "0o644",
+      "after_sha256": "fadfa8a1b1143de6e884f29320baae42dd0a38c3e5d346e1f901a7423eb66116"
+    },
+    {
+      "path": "tests/application.rs",
+      "status": "M",
+      "before_sha256": "d200d8bcb2518d973f7743202e14f3d62631f1c4a8b0cfdd36c358c04b0def37",
+      "before_mode": "0o644",
+      "after_sha256": "88307f9d9bb46beb0cde7ba063e9ab36fbc2ceb05da73ccf57992044ed487535"
+    },
+    {
+      "path": "tests/application/prepared_admission.rs",
+      "status": "A",
+      "before_sha256": "92a25dfcee18cb48bd7b9799fa04369f8bad9d7742f83643574a37bd6ee1a68b",
+      "before_mode": "0o644",
+      "after": "removed rejected483-only module; committed original retained"
+    },
+    {
+      "path": "tests/application/prepared_admission/wrapper.rs",
+      "status": "A",
+      "before_sha256": "a6fde0fc30f05a863b64216e016cad9b1a49502a93b0a40a164277b8f6cd0226",
+      "before_mode": "0o644",
+      "after": "removed rejected483-only module; committed original retained"
+    },
+    {
+      "path": "tests/client_admission/ingress.rs",
+      "status": "A",
+      "before_sha256": "2dc7eef0a5e423cb862bc77c188331999f0ac58909d1eeeea6b303680bc0377c",
+      "before_mode": "0o644",
+      "after": "removed rejected483-only module; committed original retained"
+    },
+    {
+      "path": "tests/effect_owner.rs",
+      "status": "M",
+      "before_sha256": "a953bbed7e4571c60f4499b0fa5accbc8bd1d15009edaef37f3fce6513910600",
+      "before_mode": "0o644",
+      "after_sha256": "79c884a6a373dba5513a7b55501a3dc7d801265e7ecb5c4ac3ad8713767fbf0d"
+    },
+    {
+      "path": "tests/startup/multi.rs",
+      "status": "M",
+      "before_sha256": "efbcc9e95d6f7ba7113a633ab3463fb45e9b3fd5fdb3b22f841bc1b20dc6ba4e",
+      "before_mode": "0o644",
+      "after_sha256": "d2bb1f8dd7d0b4c7bfe6800b71eb936b65eb0e358f946fa4d4c254f99c4069d1"
+    },
+    {
+      "path": "tests/startup/multi/ingress.rs",
+      "status": "A",
+      "before_sha256": "cd3100d2b8e00588bb79779795d6a31ea0b00d63a5ef360f6242e47792bf12fd",
+      "before_mode": "0o644",
+      "after": "removed rejected483-only module; committed original retained"
+    },
+    {
+      "path": "tests/startup/multi/ingress/application.rs",
+      "status": "A",
+      "before_sha256": "f9f449e2149de03172cfe3872f508f756f040c13f5255c83100bc423decdaf86",
+      "before_mode": "0o644",
+      "after": "removed rejected483-only module; committed original retained"
+    },
+    {
+      "path": "tests/startup/multi/ingress/history.rs",
+      "status": "A",
+      "before_sha256": "2dac9ffd1df0b816f71fa9876d807ed6bf6ec6e65f200f73306ba88c5f165066",
+      "before_mode": "0o644",
+      "after": "removed rejected483-only module; committed original retained"
+    },
+    {
+      "path": "tests/support/node.rs",
+      "status": "M",
+      "before_sha256": "33a7fdf60233224db67e066fd5c02b482fffc52592b42c17272b9942cfcc7c5c",
+      "before_mode": "0o644",
+      "after_sha256": "bc49832a244eea51ef9ff075c83e387032f656fc54753bd57a09e246a32c38e1"
+    },
+    {
+      "path": "tests/support/node_ingress.rs",
+      "status": "A",
+      "before_sha256": "1fa51b8fdc47cc67fe3d22dfba035d2492201a3c4d3ee587da204634a022160e",
+      "before_mode": "0o644",
+      "after": "removed rejected483-only module; committed original retained"
+    },
+    {
+      "path": "validation/check-provider-conformance.test.mjs",
+      "status": "M",
+      "before_sha256": "c2890e15701d707b26471530f0d5ce70991b4d0dc79800934379a323825dd7d3",
+      "before_mode": "0o644",
+      "after_sha256": "e483eb3da484190df72b555151f1cde64947940703aa6f155a5285298d445b30",
+      "reason": "Focused fix after metadata negative checker count mismatch45/420\u219244/415; no production edits."
+    }
+  ],
+  "exact_baseline_selected_inputs": 2502,
+  "scope": "All baseline source/tests/examples/root build/matched workspace/two contract ledgers byte-identical; newly introduced rejected modules removed. Docs/evidence not reset. No workload/build/WAL deletion."
+}

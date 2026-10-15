@@ -1,0 +1,9 @@
+[
+  "ssh",
+  "-F",
+  "/dev/null",
+  "-o",
+  "IdentityAgent=/home/karllivesey/.1password/agent.sock",
+  "karllivesey@192.168.192.76",
+  "cd '/private/tmp/voteboat-native484-pair-NB2I6n' && /usr/bin/tar -cf - campaign ACTUAL_MAC_GUARD.json TRANSFER_PROOF.json TRANSFER.json PUBLICATION_AUTHORITY.json prepare.stdout prepare.stderr prepare.exit"
+]

@@ -1,0 +1,22 @@
+[
+  "/usr/bin/python3",
+  "target/p9/native484-ingress/comparison/common/prepare.py",
+  "--baseline",
+  "/nonexistent/immutable480",
+  "--candidate",
+  "/nonexistent/future483",
+  "--host",
+  "linux",
+  "--job",
+  "target/p9/native484-ingress/comparison/must-not-exist",
+  "--wal-parent",
+  "target/p9/native484-ingress/comparison/wal-must-not-exist",
+  "--source-commit",
+  "UNSET",
+  "--baseline-publication-authority",
+  "/nonexistent/baseline.json",
+  "--publication-authority",
+  "/nonexistent/candidate.json",
+  "--schema",
+  "target/p9/native484-ingress/comparison/SCHEMA.md"
+]

@@ -1,0 +1,16 @@
+[
+  "python3",
+  "target/p9/native484-ingress/review/independent-actual/recompute.py",
+  "--host",
+  "mac",
+  "--job",
+  "target/p9/native484-ingress/comparison/mac/collected",
+  "--readout",
+  "target/p9/native484-ingress/review/actual484-mac/READOUT.json",
+  "--case-root",
+  "target/p9/native484-ingress/comparison/mac/collected/results",
+  "--resource-root",
+  "target/p9/native484-ingress/comparison/mac/collected/campaign-metadata",
+  "--output",
+  "target/p9/native484-ingress/review/independent-actual/mac.json"
+]

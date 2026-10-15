@@ -1,0 +1,18 @@
+[
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux/artifacts/native/native_benchmark",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/comparison/linux/revision2/wal/t1-loaded-tcp-candidate",
+  "tcp",
+  "16000",
+  "4096",
+  "1",
+  "--offered",
+  "2000",
+  "--maintenance",
+  "2",
+  "--ready-items",
+  "64",
+  "--offered-capacity",
+  "4096",
+  "--publication",
+  "witness"
+]

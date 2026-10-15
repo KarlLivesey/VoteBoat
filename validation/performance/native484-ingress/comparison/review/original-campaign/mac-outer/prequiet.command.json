@@ -1,0 +1,11 @@
+[
+  "ssh",
+  "-F",
+  "/dev/null",
+  "-o",
+  "IdentityAgent=/home/karllivesey/.1password/agent.sock",
+  "-o",
+  "BatchMode=yes",
+  "karllivesey@192.168.192.76",
+  "/usr/bin/python3 -c 'from pathlib import Path\nimport subprocess,json,time,hashlib\njob=Path('\"'\"'/private/tmp/voteboat-native484-pair-NB2I6n/campaign'\"'\"')\nbatt=subprocess.run([\"/usr/bin/pmset\",\"-g\",\"batt\"],capture_output=True,text=True)\nrows=subprocess.check_output([\"/bin/ps\",\"-ax\",\"-o\",\"pid=,ppid=,state=,etime=,command=\"],text=True).splitlines()\n# Query processes contain the search strings themselves; exclude the current\n# Python query and SSH/bash ancestors rather than calling them setup workers.\nobserved=[r for r in rows if any(s in r for s in [\"cargo +stable\",\"/bin/cargo \",\"/bin/rustc \",\"native_benchmark\",\"campaign.py --authorized-quiet\",\"run.sh\"]) and \"python3 -c\"not in r]\nanswer={\"time_unix\":time.time(),\"power_command\":[\"/usr/bin/pmset\",\"-g\",\"batt\"],\"power_exit\":batt.returncode,\"power_stdout\":batt.stdout,\"power_stderr\":batt.stderr,\"candidate_setup_status\":Path(\"/private/tmp/voteboat-mac484-efd383d-JuSJyd/STATUS\").read_text().strip(),\"candidate_setup_stage\":Path(\"/private/tmp/voteboat-mac484-efd383d-JuSJyd/STAGE\").read_text().strip(),\"campaign_started\":(job/\"STARTED.json\").exists(),\"ready_sha256\":hashlib.sha256((job/\"READY.json\").read_bytes()).hexdigest(),\"config_sha256\":hashlib.sha256((job/\"CAMPAIGN_CONFIG.json\").read_bytes()).hexdigest(),\"possibly_owned_build_benchmark_processes\":observed}\nassert batt.returncode==0\nprint(json.dumps(answer,indent=2))\n'"
+]

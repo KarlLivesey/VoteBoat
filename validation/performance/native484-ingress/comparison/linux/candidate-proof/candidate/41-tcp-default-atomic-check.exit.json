@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/home/karllivesey/.nvm/versions/node/v24.21.0/bin/node",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux/control-tools/check-native-benchmark.mjs",
+    "--storage",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux/controls/wal/tcp-default-atomic"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.03154587998869829,
+  "error": null,
+  "received_signals": []
+}

@@ -1,0 +1,10 @@
+{
+  "python": {
+    "path": "/usr/bin/python3.14",
+    "sha256": "7579d289e4d95778305acd13fc71be2a3800f7f6a202619505875234659c2c60"
+  },
+  "node": {
+    "path": "/home/karllivesey/.nvm/versions/node/v24.21.0/bin/node",
+    "sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c"
+  }
+}

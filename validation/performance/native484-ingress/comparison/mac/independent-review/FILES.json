@@ -1,0 +1,78 @@
+{
+  "recompute.py": {
+    "sha256": "d977ce69d9b2609e336663a2ede91d9afd87a9818d244ddb37bc347da71ce26b",
+    "bytes": 13244
+  },
+  "linux.stdout": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "linux.stderr": {
+    "sha256": "10347baebe823a3b0925adbe6d6f7d1f97c60357a158284826daac285e83deb5",
+    "bytes": 661
+  },
+  "linux.exit": {
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "bytes": 2
+  },
+  "recompute-initial.py": {
+    "sha256": "e733a3e9952d1f2680193b614860ef4128b630061700b6416fc47bb0dfa91ad2",
+    "bytes": 13335
+  },
+  "linux-attempt2.stdout": {
+    "sha256": "43e32eea971ee053a4ad7666dba7e840eee791010e9a5bbe7ecf2b6d341c243a",
+    "bytes": 261
+  },
+  "linux-attempt2.stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "linux.json": {
+    "sha256": "18d8fd9c884d4c6d91bc8eb059ecffcdfa930606d2091dda7b17f32ac42ff5e4",
+    "bytes": 242895
+  },
+  "mac.command.json": {
+    "sha256": "c4546257c978213bde3bee401cc21471c32eda0f9e0d4e95185acff5a9526099",
+    "bytes": 522
+  },
+  "mac.stdout": {
+    "sha256": "f56093524a47914ec381e8a9d94422a6b09fcb1bb5d70b1ebd6222a416023a45",
+    "bytes": 258
+  },
+  "mac.stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "mac.json": {
+    "sha256": "a58b68d4a9890c1eb65d00f3a5d6720d3bf1419eb115ac5f7da4a6f26227eb68",
+    "bytes": 225171
+  },
+  "mac.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2
+  },
+  "seal.py": {
+    "sha256": "e03c396eb35d32f35d0368296c8a81effa303fbd1f15b5b2d8a36502856d4cf9",
+    "bytes": 5507
+  },
+  "linux-attempt2.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2
+  },
+  "seal.stdout": {
+    "sha256": "b032c2ff63f10a51da6f4e60325739370dcefa9a14d8f1e129f0a77d801dd2ed",
+    "bytes": 115
+  },
+  "seal.stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "RECEIPT.json": {
+    "sha256": "a20e5c20e0c195e097fbdfd71cbc64eee6687fe68d86c553e402b873dfcd77e6",
+    "bytes": 58615
+  },
+  "seal.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2
+  }
+}

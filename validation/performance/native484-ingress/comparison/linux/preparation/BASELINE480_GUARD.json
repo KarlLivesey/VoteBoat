@@ -1,0 +1,13 @@
+{
+  "exit": 0,
+  "scope": "Read-only adapted guard against actual immutable480 Linux artifact/qualification receipts, not a benchmark or fresh483 success.",
+  "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "publication_authority": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/publication2/RECEIPT.json",
+  "source_files": 1495,
+  "artifacts": {
+    "voteboat": "f3233aad647806aeab594775cff9f894775099256e564982b84a1a1b08f60435",
+    "native_benchmark": "8d3530a6e801ebb857d8dff3fc1a0fb4ef5af865c3aed89d1450271f2054b84d"
+  },
+  "proofs": 20,
+  "compiler_tools": 3
+}

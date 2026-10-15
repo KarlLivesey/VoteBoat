@@ -1,0 +1,18 @@
+{
+  "actual_exit": 0,
+  "host": "linux",
+  "cases": 48,
+  "inputs": 582,
+  "totals": {
+    "applied": 263904,
+    "window_refused": 127776
+  },
+  "losses": {
+    "rate": 17,
+    "during": 18,
+    "p99": 16,
+    "cpu": 15,
+    "rss": 10,
+    "cold_p99": 3
+  }
+}

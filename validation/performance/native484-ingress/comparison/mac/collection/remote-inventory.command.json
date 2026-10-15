@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "ssh",
+    "-F",
+    "/dev/null",
+    "-o",
+    "IdentityAgent=/home/karllivesey/.1password/agent.sock",
+    "karllivesey@192.168.192.76",
+    "/Applications/Xcode-beta.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9",
+    "-"
+  ],
+  "stdin": "from pathlib import Path\nimport json,hashlib,stat\nb=Path('/private/tmp/voteboat-native484-pair-NB2I6n')\nnames=['ACTUAL_MAC_GUARD.json','TRANSFER_PROOF.json','TRANSFER.json','PUBLICATION_AUTHORITY.json','prepare.stdout','prepare.stderr','prepare.exit']+[str(p.relative_to(b))for p in (b/'campaign').rglob('*')if p.is_file()]\nprint(json.dumps({n:{'sha256':hashlib.sha256((b/n).read_bytes()).hexdigest(),'bytes':(b/n).stat().st_size,'mode':oct(stat.S_IMODE((b/n).stat().st_mode))}for n in sorted(names)},indent=2))\n"
+}

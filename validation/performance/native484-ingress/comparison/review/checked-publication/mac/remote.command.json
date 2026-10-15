@@ -1,0 +1,7 @@
+[
+  "git",
+  "ls-remote",
+  "--heads",
+  "origin",
+  "refs/heads/main"
+]

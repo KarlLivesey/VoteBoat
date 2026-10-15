@@ -1,0 +1,141 @@
+{
+  "actual_exit": 0,
+  "files": {
+    "ACTUAL_MAC_GUARD.json": {
+      "sha256": "7730f62e7149f4eb8ea4db436875babb9dadb1c300c1580298c69a1ccaf4aed1",
+      "bytes": 748,
+      "mode": "0o644"
+    },
+    "TRANSFER_PROOF.json": {
+      "sha256": "7e8c888844ebe263abe22a24b04d748335822bd6b8f6a4281c5bbd8fec21f788",
+      "bytes": 176,
+      "mode": "0o644"
+    },
+    "TRANSFER.json": {
+      "sha256": "e9922d63ebcd4630a406dc69891ae4b9056609f847e16e54ba5d859da112d146",
+      "bytes": 1214,
+      "mode": "0o644"
+    },
+    "PUBLICATION_AUTHORITY.json": {
+      "sha256": "8a57eb2613a182996045a550deebb04109839de5e106b98b9548d7c0013d456c",
+      "bytes": 433,
+      "mode": "0o644"
+    },
+    "prepare.stdout": {
+      "sha256": "4a80a538f97e800412442078def10540ec54e3d3575d80aa6ba6f7d1523e1aae",
+      "bytes": 74,
+      "mode": "0o644"
+    },
+    "prepare.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": "0o644"
+    },
+    "prepare.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2,
+      "mode": "0o644"
+    },
+    "campaign/plan.py": {
+      "sha256": "396e5f8f72e98fa295ae4bdfbef9dc9da17363ce3630724960f7b285b400b332",
+      "bytes": 2439,
+      "mode": "0o644"
+    },
+    "campaign/SCHEMA.md": {
+      "sha256": "81a09d3b2d73f789db7519d0045f45704314e06aa091f580a26a3902cb586a4a",
+      "bytes": 8170,
+      "mode": "0o644"
+    },
+    "campaign/ORDER.txt": {
+      "sha256": "3c8a4ec966ce03acb8c26ec246ce7097c4a9fd1e518f7e54da428b321ccea1e1",
+      "bytes": 1188,
+      "mode": "0o644"
+    },
+    "campaign/campaign.py": {
+      "sha256": "8e36f1865f131d04c80a028a85f737b0b1e84a1bf58dd55a3686617a80804fe8",
+      "bytes": 6406,
+      "mode": "0o644"
+    },
+    "campaign/CAMPAIGN_CONFIG.json": {
+      "sha256": "da49a6d4c41587326d296f8ed78de54143f7234dbbb75a29f82fa609748025b8",
+      "bytes": 681967,
+      "mode": "0o644"
+    },
+    "campaign/REQUIRED_COMMIT": {
+      "sha256": "4bc0eb7091dcea93fddeddd4b2966aedf7ae2fe76f67a7a2baa3dc76016186c5",
+      "bytes": 41,
+      "mode": "0o644"
+    },
+    "campaign/common.py": {
+      "sha256": "9ef38f48fc67d63dd8d2b26b525be3ec20d6d8c1c1a454c9f3963de97d612512",
+      "bytes": 25922,
+      "mode": "0o644"
+    },
+    "campaign/PREPARING.json": {
+      "sha256": "389c527aee62f93468eba269bebec8565be04caa1df4a25dcab8879e3eb64c97",
+      "bytes": 234,
+      "mode": "0o644"
+    },
+    "campaign/resources.py": {
+      "sha256": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+      "bytes": 2177,
+      "mode": "0o644"
+    },
+    "campaign/READY.json": {
+      "sha256": "174f29da296e25fbb9fc09ab308618e9ad2f95eb2af8bde79a35db108442b7f4",
+      "bytes": 541,
+      "mode": "0o644"
+    },
+    "campaign/prepare.py": {
+      "sha256": "9753881ecc2c76b4080bba762396f7d5cc74ef31e7828d5951638b7c1d6fd788",
+      "bytes": 6562,
+      "mode": "0o644"
+    },
+    "campaign/setup-host.json": {
+      "sha256": "d6cded0cd78d8c3106875074d67a80c7102122aca9868fc894b519b0e341373f",
+      "bytes": 159641,
+      "mode": "0o644"
+    },
+    "campaign/control-tools/check-benchmark-storage.mjs": {
+      "sha256": "f46a15656e91d9c6d32f3f268dde74a2a2e7425f9d5027da4c7cc0a8a69d9856",
+      "bytes": 11797,
+      "mode": "0o644"
+    },
+    "campaign/control-tools/check-offered.mjs": {
+      "sha256": "13f0c1f45df5bbc20802e21883bf7157ef0272210df1269f0e8fddb739d90015",
+      "bytes": 9264,
+      "mode": "0o644"
+    },
+    "campaign/control-tools/check-publication-timings.mjs": {
+      "sha256": "9d69d025335612afbef911377d2e15654e2186c1e0cb36884fa5fa8ee6b9d5a1",
+      "bytes": 4526,
+      "mode": "0o644"
+    },
+    "campaign/control-tools/check-maintenance.mjs": {
+      "sha256": "99fd718641c95a0412ef2e98e33b23da717470613bdc496d6313c8b58d0ce658",
+      "bytes": 6918,
+      "mode": "0o644"
+    },
+    "campaign/control-tools/check-rounded-rate.mjs": {
+      "sha256": "262f06cfb0e878bfa7ce02741f51d7cd6e7e8df6b07b8973df4a7d89502c662d",
+      "bytes": 760,
+      "mode": "0o644"
+    },
+    "campaign/control-tools/check-lanes.mjs": {
+      "sha256": "cb49a5d3cee377cf3154d9a9f092ea90e9af64b87ba98272cae50765c51dc920",
+      "bytes": 4733,
+      "mode": "0o644"
+    },
+    "campaign/control-tools/check-native-benchmark.mjs": {
+      "sha256": "8c3f8a31270aa52ff4cdadd75479185dbfe33c0f2adecef0739dc43b008e54d7",
+      "bytes": 6595,
+      "mode": "0o644"
+    },
+    "campaign/control-tools/check-publication-profile.mjs": {
+      "sha256": "425f3f905db3e368260095bc8eb78d92aa9753b9d9cf3995a78040a5b7a72b41",
+      "bytes": 1361,
+      "mode": "0o644"
+    }
+  },
+  "scope": "Prepared metadata/helpers/validators only; no workload or source/binary/build/WAL copy."
+}

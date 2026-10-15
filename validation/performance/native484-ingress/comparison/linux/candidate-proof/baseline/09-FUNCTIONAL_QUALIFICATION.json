@@ -1,0 +1,34 @@
+{
+  "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "scope": "480 exact reusable Counter proposal admission; final functional/strict/metadata qualification",
+  "source_inventory": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/final/INPUTS.json",
+    "sha256": "b370b5bbff85e716b91ed92f97f28e7495b5a733b59dd0b8272d250a69ab8105"
+  },
+  "proofs": {
+    "functional": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/final/functional.json",
+      "sha256": "7d63c73cf0b409ff6eb9869ded9af842c2432fe2e5ce9910c0ce616d223ea72a"
+    },
+    "strict": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/final/strict.json",
+      "sha256": "940e81abb34de8c4669d1a3687acda2ed6e5ba3bca29a4e3e4af2dc589793dc9"
+    },
+    "metadata": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/final/metadata.json",
+      "sha256": "fcd50d1ac09b14c93bd8008fc98f399e9e95bfdd296534942644e641a2d2f4b4"
+    }
+  },
+  "final_source_guards": [
+    {
+      "before": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/checked4/BEFORE.json",
+        "sha256": "32ecf26e2a31e60dda288491fa5efdfd394138f3f5cc7771f5fb4e60ece117e5"
+      },
+      "after": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/checked4/AFTER.json",
+        "sha256": "32ecf26e2a31e60dda288491fa5efdfd394138f3f5cc7771f5fb4e60ece117e5"
+      }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/review/independent-actual/recompute.py", line 84, in <module>
+    a=hist(before[k]);z=hist(after[k]);assert {n:z.get(n,0)-a.get(n,0)for n in set(z)|set(a)if z.get(n,0)-a.get(n,0)}=={n:v0 for n,v0 in v.items()if v0}
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/review/independent-actual/recompute.py", line 22, in hist
+    def hist(s):return {k:int(v)for k,v in (part.split(':')for part in s.split(';')if part)}
+                                    ^^^
+ValueError: too many values to unpack (expected 2, got 3)

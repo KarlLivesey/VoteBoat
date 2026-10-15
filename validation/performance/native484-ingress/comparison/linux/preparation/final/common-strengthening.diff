@@ -1,0 +1,15 @@
+--- validation/performance/native484-ingress/preparation/comparison/common/common.py
++++ target/p9/native484-ingress/comparison/common/common.py
+@@ -172,6 +172,12 @@
+             ready=load(candidate/'READINESS.json');original=load(candidate/'ORIGINAL_TERMINAL.json')
+             assert ready['exit']==0 and ready['source_exact'] is True and ready['source_commit']==commit
+             assert ready['source_inventory_sha256']==sha(candidate/'SOURCE.json')
++            assert ready['inputs']==len(source['files'])
++            qualified=load(candidate/'ROOT_FINAL_INPUTS.json')
++            assert qualified['published_commit']==commit and set(qualified['files'])==set(source['files'])
++            for name,item in qualified['files'].items():
++                assert source['files'][name]==item['sha256']and source['modes'][name]==item['mode'],name
++            proofs += [proof(candidate/'ROOT_FINAL_INPUTS.json')]
+             assert ready['fresh_root_executable_buildscript'] is True and ready['controls']==4
+             assert ready['artifact_sha256']=={a['target']:a['sha256']for a in artifacts}and ready['native_uuid']==symbols['uuid']
+             assert original['actual_exit']==0 and original['original_handle'] and original['terminal_tool_chunk']
