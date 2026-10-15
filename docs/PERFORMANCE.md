@@ -466,6 +466,19 @@ result checker refuses. Per-replica durations overlap, and adding them does not
 reconstruct client latency. Keep `--journal-timings` off for the original fixed
 serial acceptance gate.
 
+Current shared `storage.csv` records exact ticket dependencies and distinguishes
+synchronized1/1 sync/publication pairs,0/0 barriers and ambiguous I/O. Command
+counts include replica/retry observations; they are not completed client originals.
+Histogram bin65 is overflow. The checker also accepts the historical21-column
+format, whose missing dependency fields remain unavailable.
+
+`barrier_pending_tickets` and `barrier_correlation_capacity_bytes` are snapshot
+gauges and may decrease. Capacity belongs to the cloned pending-vector snapshot,
+not retained live-observer allocation or whole-process memory. The checker returns
+these as stage/replica observations separately from cumulative counter deltas;
+counter and histogram monotonicity, exact ticket conservation and physical barrier
+checks remain required. Nested elapsed times overlap and must not be added as CPU.
+
 Slice158 adds one successful60-second QUIC pause run with the original gate:
 group1's forced boundary11 is installed and retained across reopen, two new
 follower installs occur, and the source leader/term/binding is unchanged. All

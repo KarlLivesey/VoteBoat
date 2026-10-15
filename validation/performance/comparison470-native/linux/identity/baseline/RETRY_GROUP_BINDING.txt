@@ -1,0 +1,26 @@
+Frozenpublished3793source 6edb9bcf72d25a4b1a979a86f9142fee241ec6c55148d39a1c81f347d5a17743
+640:     campaign(replicas, clock, groups)?;
+641:     verify_expected(replicas, clock, expected, last)?;
+642:     let first = warmup.samples.iter().find(|s| s.operation == 1).unwrap();
+643:     let last_success = ledger.rows.iter().rev().find(|r| r.status == "applied");
+644:     let (operation, value, retry_group_id) = last_success
+645:         .map(|r| (r.operation, r.value, r.group))
+646:         .unwrap_or_else(|| {
+647:             let s = warmup
+648:                 .samples
+649:                 .iter()
+650:                 .find(|s| s.operation == WARMUP as u128)
+651:                 .unwrap();
+652:             (WARMUP, s.value, s.group)
+653:         });
+654:     let retries = retry(replicas, clock, 1, first.value, groups)?
+655:         + retry_group(replicas, clock, operation, value, groups, retry_group_id)?;
+656:     let retry_index = boundaries(replicas.iter().flat_map(|n| {
+657:         n.local()
+658:             .applications
+659:             .iter()
+660:             .map(|(g, a)| (*g, a.applied_index()))
+661:     }));
+662:     verify_expected(replicas, clock, expected, &retry_index)?;
+663:     Ok::<_, Failure>(retries)
+664: }

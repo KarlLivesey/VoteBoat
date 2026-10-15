@@ -1,0 +1,66 @@
+{
+  "source_commit": null,
+  "source_inventory": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/doc29/BEFORE.json",
+    "sha256": null
+  },
+  "proofs": {
+    "doc29": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/doc29/TERMINAL.json",
+      "sha256": null
+    },
+    "integration23": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration23/TERMINAL.json",
+      "sha256": null
+    },
+    "focused22": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration22/TERMINAL.json",
+      "sha256": null
+    },
+    "controls12": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/controls12/TERMINAL.json",
+      "sha256": null
+    },
+    "baseline24": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline24/TERMINAL.json",
+      "sha256": null
+    },
+    "baseline27": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline27/TERMINAL.json",
+      "sha256": null
+    },
+    "baseline28": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline28/TERMINAL.json",
+      "sha256": null
+    },
+    "doc_only": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/doc29/DOC_ONLY.json",
+      "sha256": null
+    },
+    "integration23_source": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration23/AFTER.json",
+      "sha256": null
+    },
+    "affected_remaining": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration23/affected-remaining.exit.json",
+      "sha256": null
+    },
+    "core_regressions": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration23/core-regressions.exit.json",
+      "sha256": null
+    },
+    "matched": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration23/matched.exit.json",
+      "sha256": null
+    },
+    "native_benchmark": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration23/native-benchmark-tests.exit.json",
+      "sha256": null
+    },
+    "services": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration23/services-three.exit.json",
+      "sha256": null
+    }
+  },
+  "scope": "1454 actual changed-root inputs: integration23 five stages, focused17/strict22, actual four network controls, final doc29strict and exact worker rustdoc-only reuse. Explicit three published-baseline native failures retained; no full all-feature444 or root-unchanged claim. Values remain null until actual publication/receipt assembly."
+}

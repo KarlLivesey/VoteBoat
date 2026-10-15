@@ -1,0 +1,27 @@
+{
+  "time": "2026-10-15T05:41:15.161517+00:00",
+  "original_session_id": 33443,
+  "actual_exit": 1,
+  "stage": "ALL_TIMING_END",
+  "workload_exits": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "scope": "Original handle polled to terminal1; all18workloads0/fouroriginalrawchecks1. No benchmark restart; quietwindow ends only now."
+}

@@ -1,0 +1,41 @@
+{
+  "payloads": 682,
+  "compressed_files": 29,
+  "manifest_sha256": "fc0f7e3c2fe913a93d0f121283e9f13b808c09af8131df272359670d9cfa1115",
+  "exact_outer_set_sha": "PASS",
+  "original_and_container_hashes_lengths": "PASS",
+  "all_selected_original_bytes_current_equal": "PASS",
+  "no_links_or_binary_magic": "PASS",
+  "workloads": 18,
+  "workload_exits": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "original_campaign_exit": 1,
+  "original_four_failed_case_validators": [
+    "g1-tcp-r500-w64-q16-t2-on",
+    "g1-quic-r500-w64-q16-t2-off",
+    "g1-quic-r500-w64-q16-t2-on",
+    "g1-quic-r500-w64-q16-t3-off"
+  ],
+  "revalidation_commands": 31,
+  "revalidation_exits_all_zero": true,
+  "no_workloads_rerun": true,
+  "scope": "Independent reread of sealed archive after collector37146 actualterminal0; review file intentionally outside sealed linux/."
+}

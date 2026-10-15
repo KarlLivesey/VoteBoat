@@ -1,0 +1,152 @@
+{
+  "summary": {
+    "tcp": {
+      "baseline": {
+        "total_rate_median": "139.2528339700298552201457600479046286163",
+        "during_rate_median": "137.8333333333333333333333333333333333333",
+        "p99_intended_ns_median": 1521461182,
+        "applied_counts": [
+          4217,
+          4199,
+          4087
+        ],
+        "window_refusals": [
+          10783,
+          10801,
+          10913
+        ],
+        "leader_barriers_per_applied_median": "0.1420441071852027507706900640265591652834"
+      },
+      "off": {
+        "total_rate_median": "168.3046880923217475039159350815521816768",
+        "during_rate_median": "167.0666666666666666666666666666666666667",
+        "p99_intended_ns_median": 1294045120,
+        "applied_counts": [
+          5076,
+          7615,
+          4391
+        ],
+        "window_refusals": [
+          9924,
+          7385,
+          10609
+        ],
+        "leader_barriers_per_applied_median": "0.1398314734684582099749487588248690503302"
+      },
+      "on": {
+        "total_rate_median": "148.5855521802033370586240137843340090210",
+        "during_rate_median": "147.9666666666666666666666666666666666667",
+        "p99_intended_ns_median": 1389139508,
+        "applied_counts": [
+          4531,
+          4503,
+          4196
+        ],
+        "window_refusals": [
+          10469,
+          10497,
+          10804
+        ],
+        "leader_barriers_per_applied_median": "0.1401288030202087497224072840328669775705"
+      }
+    },
+    "quic": {
+      "baseline": {
+        "total_rate_median": "143.6546207423778542363731680601689594573",
+        "during_rate_median": "142.6333333333333333333333333333333333333",
+        "p99_intended_ns_median": 2088335798,
+        "applied_counts": [
+          4343,
+          4851,
+          3741
+        ],
+        "window_refusals": [
+          10657,
+          10149,
+          11259
+        ],
+        "leader_barriers_per_applied_median": "0.1365415611328574717936909970066774119272"
+      },
+      "off": {
+        "total_rate_median": "140.9015715019331872899035973240383097795",
+        "during_rate_median": "140.1333333333333333333333333333333333333",
+        "p99_intended_ns_median": 2845982801,
+        "applied_counts": [
+          3525,
+          4244,
+          5064
+        ],
+        "window_refusals": [
+          11475,
+          10756,
+          9936
+        ],
+        "leader_barriers_per_applied_median": "0.1384281200631911532385466034755134281201"
+      },
+      "on": {
+        "total_rate_median": "154.6821712252796898511238828515485575039",
+        "during_rate_median": "153.5666666666666666666666666666666666667",
+        "p99_intended_ns_median": 1356184179,
+        "applied_counts": [
+          4425,
+          4796,
+          4671
+        ],
+        "window_refusals": [
+          10575,
+          10204,
+          10329
+        ],
+        "leader_barriers_per_applied_median": "0.1405337781484570475396163469557964970809"
+      }
+    }
+  },
+  "paired": {
+    "tcp": [
+      {
+        "trial": 1,
+        "total_rate_on_over_off": "0.8922556995021408636568938929392919243823",
+        "during_rate_on_over_off": "0.8912609736632083000798084596967278531523",
+        "p99_intended_on_over_off": "1.073486145521726475812528082482935370909",
+        "leader_barriers_per_applied_on_over_off": "1.053499637042516513989897710785872846143"
+      },
+      {
+        "trial": 2,
+        "total_rate_on_over_off": "0.5891406239736266466070715049839209414712",
+        "during_rate_on_over_off": "0.5878691564031254138524698715401933518741",
+        "p99_intended_on_over_off": "1.358455092081664056437380270033401754706",
+        "leader_barriers_per_applied_on_over_off": "0.4005558689935771881141634639302860488736"
+      },
+      {
+        "trial": 3,
+        "total_rate_on_over_off": "0.9339047786030361444152981318267190423929",
+        "during_rate_on_over_off": "0.9549341345042754795470302750173330251907",
+        "p99_intended_on_over_off": "0.6092033095191720547382432489864618638970",
+        "leader_barriers_per_applied_on_over_off": "1.032838006104774828206171225581676981024"
+      }
+    ],
+    "quic": [
+      {
+        "trial": 1,
+        "total_rate_on_over_off": "1.251645570606575765774039532898596611304",
+        "during_rate_on_over_off": "1.260040450736781277087546951748049696619",
+        "p99_intended_on_over_off": "0.3935213421748793108382583847152621828502",
+        "leader_barriers_per_applied_on_over_off": "0.9953554469515788014280267581712938892932"
+      },
+      {
+        "trial": 2,
+        "total_rate_on_over_off": "1.129164993937701872244292356455419383393",
+        "during_rate_on_over_off": "1.125594671741198858230256898192197906756",
+        "p99_intended_on_over_off": "0.4302655938643530825750763207089388169497",
+        "leader_barriers_per_applied_on_over_off": "1.040881944959950627850142716370681210491"
+      },
+      {
+        "trial": 3,
+        "total_rate_on_over_off": "0.9281635317541226031814906444876326339944",
+        "during_rate_on_over_off": "0.9214000000000000000000000000000000000000",
+        "p99_intended_on_over_off": "1.280949866095208196655812578167293716646",
+        "leader_barriers_per_applied_on_over_off": "1.016087669967758693196342137161610581085"
+      }
+    ]
+  }
+}

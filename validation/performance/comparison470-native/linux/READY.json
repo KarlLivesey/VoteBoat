@@ -1,0 +1,11 @@
+{
+  "time": "2026-10-15T05:28:32.165068+00:00",
+  "campaign_config_sha256": "7fe1f2fe5bd7fa2f00400aa791c6582d998d20e26c9a4724b9f454729a9c1cce",
+  "campaign_driver_sha256": "02c09e83ce6301acb9eaabc71515b24a1074d55ac45cc6fc63390c1158a69230",
+  "root_review_sha256": "29b8f3e05e068b4cfb132f726c04cc0cd10a04d5411a9012643f42d0c39119b7",
+  "socket_preflight_sha256": "d6652e55c542c6f108639535a6ea23901b1859739a162ebd9ff731175ca722c2",
+  "timing_authorized": true,
+  "root_quiet_grant": true,
+  "scope": "Authoritative root quiet grant after actual build/control/publication termination and corrected independent setup review. Config timing_authorized=false is frozen preparation state; this READY grants the actual serial measurement window. No same-host build/check/copy/archive/competing benchmark until originalcampaignterminal. Only original-handle progress polling is permitted.",
+  "independent_review": "review426 found no blocking mismatch in exact eighteencommands/collectorargv/artifactprofile/selection/output/activation/serialtiming after focusedpreparationfix."
+}

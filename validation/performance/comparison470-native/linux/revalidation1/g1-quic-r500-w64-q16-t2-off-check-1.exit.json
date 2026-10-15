@@ -1,0 +1,13 @@
+{
+  "name": "g1-quic-r500-w64-q16-t2-off-check-1",
+  "command": [
+    "node",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/check-selection.mjs",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-off",
+    "off"
+  ],
+  "exit": 0,
+  "start": "2026-10-15T05:42:36.245644+00:00",
+  "end": "2026-10-15T05:42:36.261764+00:00",
+  "elapsed_s": 0.01613328797975555
+}

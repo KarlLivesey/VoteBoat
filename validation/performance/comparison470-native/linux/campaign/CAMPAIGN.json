@@ -1,0 +1,1211 @@
+{
+  "scope": "18 serial finite native diagnostics: historical458 production455 versus same470 ELF OFF/ON; primary OFF/ON instrumented end-to-end comparison. TCP/QUIC, ABC/BCA/CAB, 15000 offers at500/s, window64/ready16/warm64, maintenance2s/noPause. Not sustained capacity/fairness/headroom/P9 acceptance.",
+  "cases": [
+    {
+      "name": "g1-tcp-r500-w64-q16-t1-baseline",
+      "variant": "baseline",
+      "protocol": "tcp",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30,
+      "window": 64,
+      "ready_items": 16,
+      "warmup": 64,
+      "trial": 1,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-baseline",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t1-baseline",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native458-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-baseline",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t1-baseline/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native458-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-baseline",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+      "validator_commands": [
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/control-tools/check-native-benchmark.mjs",
+          "--storage",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-baseline"
+        ]
+      ],
+      "start_unix": 1792042114.445077,
+      "end_unix": 1792042146.4829915,
+      "exit": 0,
+      "validator_exits": [
+        0
+      ],
+      "validator_exit": 0
+    },
+    {
+      "name": "g1-tcp-r500-w64-q16-t1-off",
+      "variant": "off",
+      "protocol": "tcp",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30,
+      "window": 64,
+      "ready_items": 16,
+      "warmup": 64,
+      "trial": 1,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-off",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t1-off",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-off",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t1-off/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-off",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+      "validator_commands": [
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/control-tools/check-native-benchmark.mjs",
+          "--storage",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-off"
+        ],
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/check-selection.mjs",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-off",
+          "off"
+        ]
+      ],
+      "start_unix": 1792042146.4831629,
+      "end_unix": 1792042178.581234,
+      "exit": 0,
+      "validator_exits": [
+        0,
+        0
+      ],
+      "validator_exit": 0
+    },
+    {
+      "name": "g1-tcp-r500-w64-q16-t1-on",
+      "variant": "on",
+      "protocol": "tcp",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30,
+      "window": 64,
+      "ready_items": 16,
+      "warmup": 64,
+      "trial": 1,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-on",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t1-on",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-on",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16",
+        "--append-window",
+        "4"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t1-on/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-on",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16",
+        "--append-window",
+        "4"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+      "validator_commands": [
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/control-tools/check-native-benchmark.mjs",
+          "--storage",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-on"
+        ],
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/check-selection.mjs",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-on",
+          "on"
+        ]
+      ],
+      "start_unix": 1792042178.5814896,
+      "end_unix": 1792042210.5891817,
+      "exit": 0,
+      "validator_exits": [
+        0,
+        0
+      ],
+      "validator_exit": 0
+    },
+    {
+      "name": "g1-tcp-r500-w64-q16-t2-off",
+      "variant": "off",
+      "protocol": "tcp",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30,
+      "window": 64,
+      "ready_items": 16,
+      "warmup": 64,
+      "trial": 2,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-off",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t2-off",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-off",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t2-off/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-off",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+      "validator_commands": [
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/control-tools/check-native-benchmark.mjs",
+          "--storage",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-off"
+        ],
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/check-selection.mjs",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-off",
+          "off"
+        ]
+      ],
+      "start_unix": 1792042210.5895514,
+      "end_unix": 1792042242.2745445,
+      "exit": 0,
+      "validator_exits": [
+        0,
+        0
+      ],
+      "validator_exit": 0
+    },
+    {
+      "name": "g1-tcp-r500-w64-q16-t2-on",
+      "variant": "on",
+      "protocol": "tcp",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30,
+      "window": 64,
+      "ready_items": 16,
+      "warmup": 64,
+      "trial": 2,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-on",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t2-on",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-on",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16",
+        "--append-window",
+        "4"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t2-on/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-on",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16",
+        "--append-window",
+        "4"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+      "validator_commands": [
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/control-tools/check-native-benchmark.mjs",
+          "--storage",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-on"
+        ],
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/check-selection.mjs",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-on",
+          "on"
+        ]
+      ],
+      "start_unix": 1792042242.275033,
+      "end_unix": 1792042275.9322977,
+      "exit": 0,
+      "validator_exits": [
+        1,
+        0
+      ],
+      "validator_exit": 1
+    },
+    {
+      "name": "g1-tcp-r500-w64-q16-t2-baseline",
+      "variant": "baseline",
+      "protocol": "tcp",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30,
+      "window": 64,
+      "ready_items": 16,
+      "warmup": 64,
+      "trial": 2,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-baseline",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t2-baseline",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native458-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-baseline",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t2-baseline/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native458-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-baseline",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+      "validator_commands": [
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/control-tools/check-native-benchmark.mjs",
+          "--storage",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-baseline"
+        ]
+      ],
+      "start_unix": 1792042275.9326725,
+      "end_unix": 1792042307.6944935,
+      "exit": 0,
+      "validator_exits": [
+        0
+      ],
+      "validator_exit": 0
+    },
+    {
+      "name": "g1-tcp-r500-w64-q16-t3-on",
+      "variant": "on",
+      "protocol": "tcp",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30,
+      "window": 64,
+      "ready_items": 16,
+      "warmup": 64,
+      "trial": 3,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-on",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t3-on",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-on",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16",
+        "--append-window",
+        "4"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t3-on/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-on",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16",
+        "--append-window",
+        "4"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+      "validator_commands": [
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/control-tools/check-native-benchmark.mjs",
+          "--storage",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-on"
+        ],
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/check-selection.mjs",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-on",
+          "on"
+        ]
+      ],
+      "start_unix": 1792042307.694852,
+      "end_unix": 1792042342.348146,
+      "exit": 0,
+      "validator_exits": [
+        0,
+        0
+      ],
+      "validator_exit": 0
+    },
+    {
+      "name": "g1-tcp-r500-w64-q16-t3-baseline",
+      "variant": "baseline",
+      "protocol": "tcp",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30,
+      "window": 64,
+      "ready_items": 16,
+      "warmup": 64,
+      "trial": 3,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-baseline",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t3-baseline",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native458-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-baseline",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t3-baseline/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native458-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-baseline",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+      "validator_commands": [
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/control-tools/check-native-benchmark.mjs",
+          "--storage",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-baseline"
+        ]
+      ],
+      "start_unix": 1792042342.3484938,
+      "end_unix": 1792042375.2751617,
+      "exit": 0,
+      "validator_exits": [
+        0
+      ],
+      "validator_exit": 0
+    },
+    {
+      "name": "g1-tcp-r500-w64-q16-t3-off",
+      "variant": "off",
+      "protocol": "tcp",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30,
+      "window": 64,
+      "ready_items": 16,
+      "warmup": 64,
+      "trial": 3,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-off",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t3-off",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-off",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t3-off/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-off",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+      "validator_commands": [
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/control-tools/check-native-benchmark.mjs",
+          "--storage",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-off"
+        ],
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/check-selection.mjs",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-off",
+          "off"
+        ]
+      ],
+      "start_unix": 1792042375.2759447,
+      "end_unix": 1792042408.3718033,
+      "exit": 0,
+      "validator_exits": [
+        0,
+        0
+      ],
+      "validator_exit": 0
+    },
+    {
+      "name": "g1-quic-r500-w64-q16-t1-baseline",
+      "variant": "baseline",
+      "protocol": "quic",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30,
+      "window": 64,
+      "ready_items": 16,
+      "warmup": 64,
+      "trial": 1,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-baseline",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t1-baseline",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native458-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-baseline",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t1-baseline/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native458-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-baseline",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+      "validator_commands": [
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/control-tools/check-native-benchmark.mjs",
+          "--storage",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-baseline"
+        ]
+      ],
+      "start_unix": 1792042408.372107,
+      "end_unix": 1792042441.38772,
+      "exit": 0,
+      "validator_exits": [
+        0
+      ],
+      "validator_exit": 0
+    },
+    {
+      "name": "g1-quic-r500-w64-q16-t1-off",
+      "variant": "off",
+      "protocol": "quic",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30,
+      "window": 64,
+      "ready_items": 16,
+      "warmup": 64,
+      "trial": 1,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-off",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t1-off",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-off",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t1-off/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-off",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+      "validator_commands": [
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/control-tools/check-native-benchmark.mjs",
+          "--storage",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-off"
+        ],
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/check-selection.mjs",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-off",
+          "off"
+        ]
+      ],
+      "start_unix": 1792042441.3883119,
+      "end_unix": 1792042474.6325054,
+      "exit": 0,
+      "validator_exits": [
+        0,
+        0
+      ],
+      "validator_exit": 0
+    },
+    {
+      "name": "g1-quic-r500-w64-q16-t1-on",
+      "variant": "on",
+      "protocol": "quic",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30,
+      "window": 64,
+      "ready_items": 16,
+      "warmup": 64,
+      "trial": 1,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-on",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t1-on",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-on",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16",
+        "--append-window",
+        "4"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t1-on/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-on",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16",
+        "--append-window",
+        "4"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+      "validator_commands": [
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/control-tools/check-native-benchmark.mjs",
+          "--storage",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-on"
+        ],
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/check-selection.mjs",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-on",
+          "on"
+        ]
+      ],
+      "start_unix": 1792042474.6328049,
+      "end_unix": 1792042507.208797,
+      "exit": 0,
+      "validator_exits": [
+        0,
+        0
+      ],
+      "validator_exit": 0
+    },
+    {
+      "name": "g1-quic-r500-w64-q16-t2-off",
+      "variant": "off",
+      "protocol": "quic",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30,
+      "window": 64,
+      "ready_items": 16,
+      "warmup": 64,
+      "trial": 2,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-off",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t2-off",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-off",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t2-off/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-off",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+      "validator_commands": [
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/control-tools/check-native-benchmark.mjs",
+          "--storage",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-off"
+        ],
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/check-selection.mjs",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-off",
+          "off"
+        ]
+      ],
+      "start_unix": 1792042507.2092905,
+      "end_unix": 1792042539.7270963,
+      "exit": 0,
+      "validator_exits": [
+        1,
+        0
+      ],
+      "validator_exit": 1
+    },
+    {
+      "name": "g1-quic-r500-w64-q16-t2-on",
+      "variant": "on",
+      "protocol": "quic",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30,
+      "window": 64,
+      "ready_items": 16,
+      "warmup": 64,
+      "trial": 2,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-on",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t2-on",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-on",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16",
+        "--append-window",
+        "4"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t2-on/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-on",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16",
+        "--append-window",
+        "4"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+      "validator_commands": [
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/control-tools/check-native-benchmark.mjs",
+          "--storage",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-on"
+        ],
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/check-selection.mjs",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-on",
+          "on"
+        ]
+      ],
+      "start_unix": 1792042539.7275712,
+      "end_unix": 1792042572.0227711,
+      "exit": 0,
+      "validator_exits": [
+        1,
+        0
+      ],
+      "validator_exit": 1
+    },
+    {
+      "name": "g1-quic-r500-w64-q16-t2-baseline",
+      "variant": "baseline",
+      "protocol": "quic",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30,
+      "window": 64,
+      "ready_items": 16,
+      "warmup": 64,
+      "trial": 2,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-baseline",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t2-baseline",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native458-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-baseline",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t2-baseline/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native458-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-baseline",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+      "validator_commands": [
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/control-tools/check-native-benchmark.mjs",
+          "--storage",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-baseline"
+        ]
+      ],
+      "start_unix": 1792042572.0243127,
+      "end_unix": 1792042605.486687,
+      "exit": 0,
+      "validator_exits": [
+        0
+      ],
+      "validator_exit": 0
+    },
+    {
+      "name": "g1-quic-r500-w64-q16-t3-on",
+      "variant": "on",
+      "protocol": "quic",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30,
+      "window": 64,
+      "ready_items": 16,
+      "warmup": 64,
+      "trial": 3,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-on",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t3-on",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-on",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16",
+        "--append-window",
+        "4"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t3-on/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-on",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16",
+        "--append-window",
+        "4"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+      "validator_commands": [
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/control-tools/check-native-benchmark.mjs",
+          "--storage",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-on"
+        ],
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/check-selection.mjs",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-on",
+          "on"
+        ]
+      ],
+      "start_unix": 1792042605.4870577,
+      "end_unix": 1792042638.139991,
+      "exit": 0,
+      "validator_exits": [
+        0,
+        0
+      ],
+      "validator_exit": 0
+    },
+    {
+      "name": "g1-quic-r500-w64-q16-t3-baseline",
+      "variant": "baseline",
+      "protocol": "quic",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30,
+      "window": 64,
+      "ready_items": 16,
+      "warmup": 64,
+      "trial": 3,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-baseline",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t3-baseline",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native458-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-baseline",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t3-baseline/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native458-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-baseline",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+      "validator_commands": [
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/control-tools/check-native-benchmark.mjs",
+          "--storage",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-baseline"
+        ]
+      ],
+      "start_unix": 1792042638.140329,
+      "end_unix": 1792042671.5590107,
+      "exit": 0,
+      "validator_exits": [
+        0
+      ],
+      "validator_exit": 0
+    },
+    {
+      "name": "g1-quic-r500-w64-q16-t3-off",
+      "variant": "off",
+      "protocol": "quic",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30,
+      "window": 64,
+      "ready_items": 16,
+      "warmup": 64,
+      "trial": 3,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-off",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t3-off",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-off",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t3-off/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-off",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+      "validator_commands": [
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/control-tools/check-native-benchmark.mjs",
+          "--storage",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-off"
+        ],
+        [
+          "node",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/check-selection.mjs",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-off",
+          "off"
+        ]
+      ],
+      "start_unix": 1792042671.559598,
+      "end_unix": 1792042704.336322,
+      "exit": 0,
+      "validator_exits": [
+        1,
+        0
+      ],
+      "validator_exit": 1
+    }
+  ]
+}

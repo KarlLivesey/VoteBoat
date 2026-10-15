@@ -1,0 +1,40 @@
+{
+  "commit": "a37f867a8a10359b35e754242b166c03b13813f3",
+  "files": {
+    "check-benchmark-storage.mjs": {
+      "sha256": "d198a89660a65e8f00e64f06a9d43983124b47a0db5d31a6d95801fbe9603702",
+      "mode": "0o644",
+      "committed_path": "validation/check-benchmark-storage.mjs"
+    },
+    "check-journal-timings.mjs": {
+      "sha256": "8fcfa3865a3662663d76c2f3e89b4d9f12557326306f5a08bed1b5647d7e5292",
+      "mode": "0o644",
+      "committed_path": "validation/check-journal-timings.mjs"
+    },
+    "check-lanes.mjs": {
+      "sha256": "cb49a5d3cee377cf3154d9a9f092ea90e9af64b87ba98272cae50765c51dc920",
+      "mode": "0o644",
+      "committed_path": "validation/check-lanes.mjs"
+    },
+    "check-maintenance.mjs": {
+      "sha256": "99fd718641c95a0412ef2e98e33b23da717470613bdc496d6313c8b58d0ce658",
+      "mode": "0o644",
+      "committed_path": "validation/check-maintenance.mjs"
+    },
+    "check-native-benchmark.mjs": {
+      "sha256": "888fb80a06dd564b4d95908ca959d4ed995bebd3d61f245ee5455a2214eac5be",
+      "mode": "0o644",
+      "committed_path": "validation/check-native-benchmark.mjs"
+    },
+    "check-offered.mjs": {
+      "sha256": "c11ca7957c50f9ad2763e724905af82516bd8b253ae828a4df797ed17bd3129a",
+      "mode": "0o644",
+      "committed_path": "validation/check-offered.mjs"
+    },
+    "check-rounded-rate.mjs": {
+      "sha256": "262f06cfb0e878bfa7ce02741f51d7cd6e7e8df6b07b8973df4a7d89502c662d",
+      "mode": "0o644",
+      "committed_path": "validation/check-rounded-rate.mjs"
+    }
+  }
+}

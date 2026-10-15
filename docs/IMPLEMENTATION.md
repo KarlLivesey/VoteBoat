@@ -20,6 +20,31 @@ has advanced from implementation/publication to actual native off/on measurement
 the [measurement boundaries and observer caveats](P9.md) keep sustained headroom,
 fairness, physical debt and all both-host acceptance separate from this experiment.
 
+[Native470 comparison](../validation/performance/comparison470-native/linux/README.md)
+original33443 is now terminal1/ALL_TIMING_END: all18 workloads exit0, with four
+original raw-check failures because snapshot correlation capacity144→0 was
+incorrectly treated as cumulative. [Before-edit correction schema](../validation/performance/comparison470-native/GAUGE_FIX_SCHEMA.md)
+separates both gauges from cumulative deltas, preserving integer/conservation/
+physical checks and counter/histogram monotonicity. Revalidation73301 ends0:
+nine focused JS controls and all18 existing raw histories/all12 selection checks;
+no workload repeats and no original failure is overwritten. Snapshot capacity is
+cloned diagnostic backing, not retained live-owner memory or RSS.
+
+Primary same470 OFF→ON completed medians: TCP168.304688→148.585552 originals/s,
+p991294.045120→1389.139508ms; all three rate pairs lose. QUIC140.901572→154.682171/s,
+p992845.982801→1356.184179ms, but trial3 loses both rate and tail. Actual physical
+grouping exists in every ON run, yet median leader barriers per applied original
+slightly increase on both protocols. No consistent useful gain or default change
+is justified. Large window refusals and whole-process resources do not establish
+headroom or physical debt. The next bounded investigation is an identified driver
+ordering gate: ready advancement ends before successful submission parks the first
+visit, so this poll cannot create queued successors. Audit residual budgets,
+control/first-Durable priority and fairness before any focused change; do not
+retune quantum, window, checkpoints or storage durability. Full P9 remains active.
+The [472 before-edit schema](../validation/performance/pipeline472/SCHEMA.md)
+records the private residual-budget shape, authority/lease transitions, terminal
+priority, overload cleanup and deterministic acceptance before runtime edits.
+
 The1.5× larger published/matched sustained requirement is a minimum acceptance
 bar, not a target or stopping ceiling. The user wants that capacity and
 substantially more. Keep profiling, removing measured work and comparing both
@@ -761,8 +786,8 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: measure published470 pipeline amortization | Test whether bounded overlap reduces the measured durable barrier cost | [Published470](../validation/performance/pipeline470/publication/README.md), checked Core→owner→worker→native path, fresh asserted artifacts and quiet host | Rotating TCP/QUIC same-ELF470 off/on plus retained458 context; actual create/recover selection, synchronized same-group multi-unit barriers, completed originals/s, p99/refusals/horizon/drain/maintenance/retries/joins and whole-process resources; keep all failures and observer caveats | P9.1/P9.2/P9.3 |
-| Next: resolve measured limits and qualify both-host behavior | Retain or reject470 from useful performance, then reduce the largest remaining demonstrated cost | Terminal native comparison, fresh framework controls and original Mac455 termination before new Mac work | Source-grounded ordering/ownership design before any further edit; Linux20M bulk and singleton regression controls; fresh Mac qualification and matched measurements; sustained physical memory/debt and offered-load expansion remain explicit requirements | P9.0/P9.1/P9.2/P9.3 |
+| Current: publish native470 results and design a bounded driver pump | Resolve the source-identified one-unit-per-poll gate after inconsistent measured benefit | [Original18-case evidence](../validation/performance/comparison470-native/linux/README.md), preserved failures/revalidation, current driver/owner/worker contracts | Verify/archive/push every raw outcome; before-edit shape shares residual step/effect/event/attempt budgets, preserves control/first-Durable/error priority, FIFO cold groups and exact default-one cadence; reject an infeasible design without another tuning campaign | P9.0/P9.1/P9.2/P9.3 |
+| Next: one focused ordering fix and actual comparisons | Test whether already-queued successors can reach a subsequent physical barrier usefully | Feasible bounded pump schema and deterministic queued/held-worker control; original Mac455 termination before new Mac work | Complete selected-path implementation with no renewed per-pass allowances or outcome shortcuts; exact partial/overload/failure/cleanup/FnMut histories and all strict checks; fresh paired native off/on, Linux20M bulk/singleton and Mac qualification/measurements; keep regressions and reject ineffective changes | P9.0/P9.1/P9.2/P9.3 |
 | Following: full curve, sustainable headroom and composition qualification | Satisfy the entire performance objective beyond the current experiment | Retained measured improvements, qualified weighted fixture, source/artifact/host identities and stable maintenance | All seven required framework cells on both hosts with healthy margin; sustained memory/debt, durable applications/headroom/skew/fairness, independent placement/shared barriers and P8 composition; preserve every outcome/fence/retry | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed

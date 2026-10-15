@@ -1,0 +1,102 @@
+{
+  "tcp": {
+    "baseline": {
+      "total_rate_median": "139.2528339700298552201457600479046286163",
+      "during_rate_median": "137.8333333333333333333333333333333333333",
+      "p99_intended_ns_median": 1521461182,
+      "applied_counts": [
+        4217,
+        4199,
+        4087
+      ],
+      "window_refusals": [
+        10783,
+        10801,
+        10913
+      ],
+      "leader_barriers_per_applied_median": "0.1420441071852027507706900640265591652834"
+    },
+    "off": {
+      "total_rate_median": "168.3046880923217475039159350815521816768",
+      "during_rate_median": "167.0666666666666666666666666666666666667",
+      "p99_intended_ns_median": 1294045120,
+      "applied_counts": [
+        5076,
+        7615,
+        4391
+      ],
+      "window_refusals": [
+        9924,
+        7385,
+        10609
+      ],
+      "leader_barriers_per_applied_median": "0.1398314734684582099749487588248690503302"
+    },
+    "on": {
+      "total_rate_median": "148.5855521802033370586240137843340090210",
+      "during_rate_median": "147.9666666666666666666666666666666666667",
+      "p99_intended_ns_median": 1389139508,
+      "applied_counts": [
+        4531,
+        4503,
+        4196
+      ],
+      "window_refusals": [
+        10469,
+        10497,
+        10804
+      ],
+      "leader_barriers_per_applied_median": "0.1401288030202087497224072840328669775705"
+    }
+  },
+  "quic": {
+    "baseline": {
+      "total_rate_median": "143.6546207423778542363731680601689594573",
+      "during_rate_median": "142.6333333333333333333333333333333333333",
+      "p99_intended_ns_median": 2088335798,
+      "applied_counts": [
+        4343,
+        4851,
+        3741
+      ],
+      "window_refusals": [
+        10657,
+        10149,
+        11259
+      ],
+      "leader_barriers_per_applied_median": "0.1365415611328574717936909970066774119272"
+    },
+    "off": {
+      "total_rate_median": "140.9015715019331872899035973240383097795",
+      "during_rate_median": "140.1333333333333333333333333333333333333",
+      "p99_intended_ns_median": 2845982801,
+      "applied_counts": [
+        3525,
+        4244,
+        5064
+      ],
+      "window_refusals": [
+        11475,
+        10756,
+        9936
+      ],
+      "leader_barriers_per_applied_median": "0.1384281200631911532385466034755134281201"
+    },
+    "on": {
+      "total_rate_median": "154.6821712252796898511238828515485575039",
+      "during_rate_median": "153.5666666666666666666666666666666666667",
+      "p99_intended_ns_median": 1356184179,
+      "applied_counts": [
+        4425,
+        4796,
+        4671
+      ],
+      "window_refusals": [
+        10575,
+        10204,
+        10329
+      ],
+      "leader_barriers_per_applied_median": "0.1405337781484570475396163469557964970809"
+    }
+  }
+}

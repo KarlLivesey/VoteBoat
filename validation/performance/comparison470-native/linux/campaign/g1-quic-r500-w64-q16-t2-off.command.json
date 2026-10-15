@@ -1,0 +1,16 @@
+[
+  "python3",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t2-off/resources.py",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/artifacts/native/native_benchmark",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-off",
+  "quic",
+  "15000",
+  "64",
+  "1",
+  "--offered",
+  "500",
+  "--maintenance",
+  "2",
+  "--ready-items",
+  "16"
+]

@@ -1,0 +1,35 @@
+[
+  {
+    "command": [
+      "ast.parse",
+      "target/p9/native470-linux/guard.py"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "bash",
+      "-n",
+      "target/p9/native470-linux/export-source.sh"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "bash",
+      "-n",
+      "target/p9/native470-linux/run.sh"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "python3",
+      "target/p9/native470-linux/guard.py",
+      "target/p9/native470-linux",
+      "qualification"
+    ],
+    "exit": 1,
+    "expected": "sentinel refuses before receipts/source/build"
+  }
+]

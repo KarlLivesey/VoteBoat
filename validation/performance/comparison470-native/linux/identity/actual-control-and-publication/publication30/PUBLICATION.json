@@ -1,0 +1,9 @@
+{
+  "commit": "a37f867a8a10359b35e754242b166c03b13813f3",
+  "exit": 0,
+  "remote_commit": "a37f867a8a10359b35e754242b166c03b13813f3",
+  "hook_enabled": true,
+  "push_receipt_sha256": "d8eb3eda2496e2fbbc40944147e18305b4fbe281878a75aa6c5ac159f9169bcc",
+  "push_stdout_sha256": "282487865beabbd0ea2ef111759ccb2c9a9900dc45af8a1f98f9bf9ff4fdaaf3",
+  "push_stderr_sha256": "d58d4ac30b10ddcdc34287297f3c22792c06b98e9fc17f7100b95eb1f604288d"
+}

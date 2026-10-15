@@ -1,0 +1,10 @@
+{
+  "observed_utc": "2026-10-15T05:45:48.687916+00:00",
+  "exact_manifest_payload_set": 682,
+  "compressed_originals": 29,
+  "all_original_and_container_hashes_lengths": true,
+  "selected_originals_current_exact": 679,
+  "manifest_sha256": "fc0f7e3c2fe913a93d0f121283e9f13b808c09af8131df272359670d9cfa1115",
+  "review_adaptation": "Initial root review used PACKING original_path as key for SELECTION archived_path. Corrected lookup uses archived_path including .gz; unchanged sealed payloads allverify.",
+  "scope": "Root independently reread every sealed archive payload, decompressed original and selected source; originalcampaign1/revalidation0 preserved."
+}

@@ -1,0 +1,32 @@
+{
+  "state": "PREPARED_ONLY_ROOT_REVIEW_AND_SOCKET_PREFLIGHT_PENDING",
+  "command": [
+    "python3",
+    "-u",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign.py",
+    "--authorized-quiet"
+  ],
+  "cases": 18,
+  "campaign_config_sha256": "7fe1f2fe5bd7fa2f00400aa791c6582d998d20e26c9a4724b9f454729a9c1cce",
+  "campaign_driver_sha256": "02c09e83ce6301acb9eaabc71515b24a1074d55ac45cc6fc63390c1158a69230",
+  "selection_checker_sha256": "d3194ad0722357a5ec1b291119f4a139b1359b0274483973a41897ea23c95a84",
+  "collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+  "original_controller": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison461-native/linux/campaign.py",
+  "original_controller_sha256": "ccf030dc00facd2db18e708fd80fc475779fb071966a1f7a8a47e75805b0f9ea",
+  "candidate_commit": "a37f867a8a10359b35e754242b166c03b13813f3",
+  "candidate_elf_sha256": "268ea24412df55c7c8ca61d503b5d2a0614da196a1fcdeb601366d574e56e940",
+  "baseline_commit": "3793b9655511551fd4fec7fe0c0cc3a7276263a1",
+  "baseline_elf_sha256": "bb2dbb6595dfdbf9a6c7d835a14665de5cdced4e7d4eec7f0b31710fa0c0ca61",
+  "actual_release_activation": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native470-linux/controls/ROOT_CONTROL_REVIEW.json",
+    "sha256": "0d91dfab1a57219696e5daabd5d2531ddc4e9017ca8a1bebf0be5a8d24ac819d"
+  },
+  "wal_parent_is_directory": true,
+  "all18_case_roots_absent": true,
+  "READY_issued": false,
+  "socket_preflight_executed": false,
+  "campaign_executed": false,
+  "syntax_checks_executed": false,
+  "scope": "Text/config preparation only; no artifact rebuild/readiness rerun/test/workload/socket preflight. Root reviews guards and writes actual READY after preflight. No publication pending flag fabricated.",
+  "focused_preparation_fix": "Removed unsupported metadata directory argv from18resource commands; collector owns its directory through __file__. Failed original config/receipts retained in preparation-attempt1. No workload started."
+}

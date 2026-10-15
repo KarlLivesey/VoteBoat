@@ -50,6 +50,18 @@ test('current35 distinguishes logical barriers from physical synchronization', (
     assert.equal(value.totals.synchronized_barrier_calls, 6);
     assert.equal(value.totals.no_io_barrier_calls, 6);
 });
+test('snapshot gauges may drain and remain observations rather than cumulative deltas', () => {
+    const value = fixture(true, (r,n) => { r.barrier_correlation_capacity_bytes = n === 1 ? 144 : 0; });
+    assert.equal(value.gauges.length, 12);
+    assert.equal(value.gauges.find(r => r.stage === 'before_measurement').barrier_correlation_capacity_bytes, 144);
+    assert.equal(value.gauges.find(r => r.stage === 'after_create_join').barrier_correlation_capacity_bytes, 0);
+    for (const field of ['barrier_pending_tickets', 'barrier_correlation_capacity_bytes']) assert.equal(value.totals[field], undefined);
+    assert.throws(() => fixture(true, r => { r.barrier_correlation_capacity_bytes = -1; }));
+    assert.throws(() => fixture(true, r => { r.barrier_correlation_capacity_bytes = 1.5; }));
+});
+test('cumulative counters still cannot decline across valid local snapshots', () => {
+    assert.throws(() => fixture(true, (r,n) => { if (n === 2) r.encoded_bytes = 0; }), /encoded_bytes/);
+});
 test('ambiguous I/O remains explicit without inventing exact per-call pairs', () => {
     const value = fixture(true, (r,n) => {
         r.no_io_barrier_calls = n; r.ambiguous_io_barrier_calls = n;

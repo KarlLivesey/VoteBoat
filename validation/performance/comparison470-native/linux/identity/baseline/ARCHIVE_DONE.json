@@ -1,0 +1,13 @@
+{
+  "archive": "/home/karllivesey/Documents/ChatGPT/VoteBoat/validation/performance/native458/linux/setup",
+  "regular_files": 93,
+  "payload_files": 92,
+  "manifest_sha256": "e5b2d0c7df619973d36014a0b3956e341a2c7561796ac3ee70a486e44085c3e2",
+  "all_hashes_reread_verified": true,
+  "lossless_containers": 2,
+  "build_original": 47295,
+  "pilot_original": 53351,
+  "all_actual_exit0": true,
+  "all_operations_END": true,
+  "no_long_campaign_started": true
+}

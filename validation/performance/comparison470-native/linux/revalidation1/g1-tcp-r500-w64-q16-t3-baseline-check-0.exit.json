@@ -1,0 +1,13 @@
+{
+  "name": "g1-tcp-r500-w64-q16-t3-baseline-check-0",
+  "command": [
+    "node",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/revalidation1/control-tools/check-native-benchmark.mjs",
+    "--storage",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison470-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-baseline"
+  ],
+  "exit": 0,
+  "start": "2026-10-15T05:42:35.834876+00:00",
+  "end": "2026-10-15T05:42:35.894536+00:00",
+  "elapsed_s": 0.05967451597098261
+}

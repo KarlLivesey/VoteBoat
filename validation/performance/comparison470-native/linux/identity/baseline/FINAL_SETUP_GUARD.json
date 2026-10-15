@@ -1,0 +1,13 @@
+{
+  "source_commit": "3793b9655511551fd4fec7fe0c0cc3a7276263a1",
+  "source_inputs": 1422,
+  "full_hash_and_physical_modes_after_pilots": true,
+  "artifact_original_copy_after_pilots": true,
+  "private_validator_hash_modes_after_pilots": true,
+  "build_original": 47295,
+  "build_actual_exit": 0,
+  "pilot_original": 53351,
+  "pilot_actual_exit": 0,
+  "no_main459_source_comparison": true,
+  "long_campaign_started": false
+}

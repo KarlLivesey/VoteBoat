@@ -5,6 +5,9 @@ import fs from 'node:fs';
 const legacy = 'stage,replica,append_calls,append_units,append_commands,append_ns,append_max_ns,barrier_calls,barrier_tickets,barrier_ns,barrier_max_ns,errors,encoded_bytes,io_append_calls,io_append_ns,sync_calls,sync_ns,publish_calls,publish_ns,batch_histogram,group_units'.split(',');
 const extra = 'successful_barriers,barrier_known_originals,barrier_missing_tickets,barrier_dropped_tickets,barrier_pending_tickets,barrier_correlation_capacity_bytes,barrier_unit_histogram,barrier_original_histogram,barrier_same_group_unit_histogram,synchronized_barrier_calls,no_io_barrier_calls,ambiguous_io_barrier_calls,synchronized_same_group_multi_unit_calls,synchronized_same_group_multi_unit_known_originals'.split(',');
 const histograms = ['batch_histogram', 'group_units', 'barrier_unit_histogram', 'barrier_original_histogram', 'barrier_same_group_unit_histogram'];
+// These describe each observation, not cumulative work. Capacity belongs to
+// Trace::snapshot's cloned pending Vec, not the live observer's retained backing.
+const gaugeFields = ['barrier_pending_tickets', 'barrier_correlation_capacity_bytes'];
 const sum = map => [...map.values()].reduce((a, b) => a + b, 0);
 const weight = map => [...map].reduce((a, [key, count]) => a + key * count, 0);
 function counts(value) {
@@ -132,9 +135,10 @@ export function checkStorage(storagePath, firstGroup, groups) {
         }
         snapshots.set(key, row);
     }
-    const totals = Object.fromEntries(numericFields.map(key => [key, 0]));
+    const monotonic = numericFields.filter(field => !gaugeFields.includes(field));
+    const totals = Object.fromEntries(monotonic.map(key => [key, 0]));
+    const gauges = [];
     const histogram = new Map();
-    const monotonic = numericFields.filter(field => field !== 'barrier_pending_tickets');
     for (const replica of [1, 2, 3]) {
         const sequence = stages.map(stage => snapshots.get(`${stage}:${replica}`));
         assert.ok(sequence.every(Boolean));
@@ -145,7 +149,9 @@ export function checkStorage(storagePath, firstGroup, groups) {
                 for (const [bin, count] of before) assert.ok((after.get(bin) ?? 0) >= count, field);
             }
         }
-        for (const field of numericFields) totals[field] += sequence[1][field] - sequence[0][field];
+        for (const field of monotonic) totals[field] += sequence[1][field] - sequence[0][field];
+        if (current) for (const row of sequence) gauges.push(Object.fromEntries(
+            ['stage', 'replica', ...gaugeFields].map(field => [field, row[field]])));
         const before = counts(sequence[0].batch_histogram);
         for (const [units, calls] of counts(sequence[1].batch_histogram)) histogram.set(units, (histogram.get(units) ?? 0) + calls - (before.get(units) ?? 0));
     }
@@ -153,5 +159,5 @@ export function checkStorage(storagePath, firstGroup, groups) {
     // count suffix commands, including replicas/retries, not successful clients.
     const correlationComplete = current && [...snapshots.values()].every(row => row.barrier_missing_tickets === 0 && row.barrier_dropped_tickets === 0);
     console.log(`storage measured deltas: append_calls=${totals.append_calls} units=${totals.append_units} commands=${totals.append_commands} mean_units=${(totals.append_units / totals.append_calls).toFixed(3)} append_ms=${(totals.append_ns / 1e6).toFixed(3)} barriers=${totals.barrier_calls} mean_appends_per_barrier=${(totals.append_calls / totals.barrier_calls).toFixed(3)} mean_units_per_barrier=${(totals.barrier_tickets / totals.barrier_calls).toFixed(3)} barrier_ms=${(totals.barrier_ns / 1e6).toFixed(3)} sync_ms=${(totals.sync_ns / 1e6).toFixed(3)} publish_ms=${(totals.publish_ns / 1e6).toFixed(3)} histogram=${[...histogram].sort((a,b)=>a[0]-b[0]).map(([n,c])=>n+':'+c).join('|')}${current ? ` synchronized=${totals.synchronized_barrier_calls} no_io=${totals.no_io_barrier_calls} ambiguous_io=${totals.ambiguous_io_barrier_calls} dependency_correlation_complete=${correlationComplete}` : ''}`);
-    return { schema: current ? 35 : 21, totals, correlationComplete };
+    return { schema: current ? 35 : 21, totals, gauges, correlationComplete };
 }

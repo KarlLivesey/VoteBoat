@@ -1,0 +1,19 @@
+{
+  "time": "2026-10-15T05:27:17.523865+00:00",
+  "actual_controller_guards_exit": 0,
+  "exact18_commands_and_rotations": true,
+  "frozen_committed_validator_closure": true,
+  "baseline_candidate_compiler_files_equal": true,
+  "all18_roots_absent": true,
+  "no_competing_known_build_profile_benchmark_process": true,
+  "syntax_checks": 0,
+  "policies_unchanged": {
+    "perf_event_paranoid": "2",
+    "kptr_restrict": "2",
+    "perf_event_mlock_kb": "516"
+  },
+  "filesystem_free_bytes": 783673339904,
+  "campaign_config_sha256": "7fe1f2fe5bd7fa2f00400aa791c6582d998d20e26c9a4724b9f454729a9c1cce",
+  "driver_sha256": "02c09e83ce6301acb9eaabc71515b24a1074d55ac45cc6fc63390c1158a69230",
+  "scope": "Independent root setup review only; no workload or READY yet. Config timing_authorized=false records preparation state; actual root quiet grant will be explicit in READY."
+}

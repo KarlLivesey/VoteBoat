@@ -1,0 +1,8 @@
+{
+  "time": "2026-10-15T05:25:56.474000+00:00",
+  "exit": 1,
+  "actual_controller_guards_exit": 0,
+  "failure": "AssertionError at independent per-case resource_command[2:] == expected executable argv; config inserts a metadata directory unsupported by the unchanged collector.",
+  "workloads_started": false,
+  "focused_fix": "Preserve original config/preparation receipts; remove only redundant metadata directory from eighteen resource commands. No controller, collector, engine or benchmark change."
+}

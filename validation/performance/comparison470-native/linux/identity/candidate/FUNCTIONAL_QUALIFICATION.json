@@ -1,0 +1,66 @@
+{
+  "source_commit": "a37f867a8a10359b35e754242b166c03b13813f3",
+  "source_inventory": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/doc29/AFTER.json",
+    "sha256": "d6b7349f58c8e849664a8806b23cea264c5cb12cefe4a06fc18f81a2b15f8e64"
+  },
+  "proofs": {
+    "doc29": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/doc29/TERMINAL.json",
+      "sha256": "6c0d6e0e9c1ff91daaa73cef5c77f52eae1acf1f42d6fd8ac5993620072533ea"
+    },
+    "integration23": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration23/TERMINAL.json",
+      "sha256": "998280113e189bee7d37448311e88498e192d44b36f0d08a803ee0c7145271d9"
+    },
+    "focused22": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration22/TERMINAL.json",
+      "sha256": "1a94eb37bc6fd2fed29cbffff2970f14e338b7096148cd1ffa777373af16e345"
+    },
+    "controls12": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/controls12/TERMINAL.json",
+      "sha256": "a1ae3f3a29fe3257eca881cd539a885fd7eb17395b96ac0dd3ed6b885095beef"
+    },
+    "baseline24": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline24/TERMINAL.json",
+      "sha256": "1ed3faec1b2e0d32ee5157a15f4e395d68a9c99f712c6ecb2d88228b02a1971e"
+    },
+    "baseline27": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline27/TERMINAL.json",
+      "sha256": "5adf03abd25a86360155046042e3bb0ef0d3d021871d05bfb8cb693fba61e3bc"
+    },
+    "baseline28": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline28/TERMINAL.json",
+      "sha256": "f5816abc4a2b64fe1d71011698ab2b567fbb90c411e467999f86728b8a66fff1"
+    },
+    "doc_only": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/doc29/DOC_ONLY.json",
+      "sha256": "2212e39c457c8a8b9fab1c30de726026e19f01a77756d329ed912dedeb754be1"
+    },
+    "integration23_source": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration23/AFTER.json",
+      "sha256": "f7c7a903f30895a5acfd33377b6c2563a4f8afb4a65900a81f8b4e6a6439cf5e"
+    },
+    "affected_remaining": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration23/affected-remaining.exit.json",
+      "sha256": "b821755f47f0025c3d02e184e4f264bdd8e3bc7c3301a697d324adcef45bda22"
+    },
+    "core_regressions": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration23/core-regressions.exit.json",
+      "sha256": "d5902544e845d7ab8038e192fab7d8536e2de3bcdafdfa6a75a569e94626a89a"
+    },
+    "matched": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration23/matched.exit.json",
+      "sha256": "cd272e0d75a270615490ed773c959baf169d38edecd03dd63abdca7a5d5e283e"
+    },
+    "native_benchmark": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration23/native-benchmark-tests.exit.json",
+      "sha256": "d5d04a56b289295c7924183f703311982f4fc1ef9e7f35511481c003bf868cdb"
+    },
+    "services": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration23/services-three.exit.json",
+      "sha256": "abbbcb8bf1c45ec7f1a5dd87c05db027f9981702920ddef3ca8fe2cc0280d914"
+    }
+  },
+  "scope": "Actual final1454 source+mode qualification: doc29strict/metadata0, exact worker rustdoc-only reuse of completed23five stages, focused17+hook22, fouractualnetworkcontrols12; three published469 baseline-reproduced native failures24/27/28 remain exit101, not passes. No fullallfeature444/rootunchanged/performance claim."
+}
