@@ -1,0 +1,97 @@
+{
+  "integration1": {
+    "exit": 1,
+    "end": "2026-10-15T03:25:55.212898+00:00",
+    "same_selected_inputs": true
+  },
+  "integration2": {
+    "exit": 101,
+    "end": "2026-10-15T03:27:19.269004+00:00",
+    "same_selected_inputs": true
+  },
+  "integration3": {
+    "exit": 1,
+    "end": "2026-10-15T03:29:48.368223+00:00",
+    "same_selected_inputs": true
+  },
+  "integration4": {
+    "exit": 101,
+    "end": "2026-10-15T03:32:52.212324+00:00",
+    "same_selected_inputs": true
+  },
+  "integration5": {
+    "exit": 101,
+    "end": "2026-10-15T03:38:43.092115+00:00",
+    "same_selected_inputs": true
+  },
+  "integration6": {
+    "exit": 0,
+    "end": "2026-10-15T03:43:23.636869+00:00",
+    "same_selected_inputs": true
+  },
+  "integration7": {
+    "exit": 101,
+    "end": "2026-10-15T03:43:56.664508+00:00",
+    "same_selected_inputs": true
+  },
+  "integration8": {
+    "exit": 101,
+    "end": "2026-10-15T03:45:03.247823+00:00",
+    "same_selected_inputs": true
+  },
+  "integration9": {
+    "exit": 101,
+    "end": "2026-10-15T03:46:20.420788+00:00",
+    "same_selected_inputs": true
+  },
+  "integration10": {
+    "exit": 0,
+    "end": "2026-10-15T03:48:27.863158+00:00",
+    "same_selected_inputs": true
+  },
+  "integration11": {
+    "exit": 101,
+    "end": "2026-10-15T04:00:02.968093+00:00",
+    "same_selected_inputs": true
+  },
+  "diagnostic13": {
+    "exit": 101,
+    "end": "2026-10-15T04:01:48.827064+00:00",
+    "same_selected_inputs": true
+  },
+  "baseline14": {
+    "exit": 0,
+    "source_unchanged": true,
+    "finished": 1792037136.0151255
+  },
+  "diagnostic15": {
+    "exit": 101,
+    "end": "2026-10-15T04:08:20.216664+00:00",
+    "same_selected_inputs": true
+  },
+  "integration17": {
+    "exit": 101,
+    "end": "2026-10-15T04:33:36.227343+00:00",
+    "same_selected_inputs": true
+  },
+  "integration18": {
+    "exit": 0,
+    "end": "2026-10-15T04:33:51.412207+00:00",
+    "same_selected_inputs": true
+  },
+  "diagnostic19": {
+    "exit": 0,
+    "end": "2026-10-15T04:35:05.413076+00:00",
+    "same_selected_inputs": true
+  },
+  "integration20": {
+    "exit": 1,
+    "end": "2026-10-15T04:38:36.480614+00:00",
+    "same_selected_inputs": true
+  },
+  "core": {
+    "original_handle": 51064,
+    "actual_exit": 101,
+    "scope": "First focused Core attempt; preserve raw errors before fixes"
+  }
+}

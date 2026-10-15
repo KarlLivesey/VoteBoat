@@ -1,0 +1,22 @@
+{
+  "original_handle": 90378,
+  "exit": 101,
+  "result": "0passed/1failed/202filtered;41.10s;published baseline reproduces same line2352 drain failure",
+  "source_unchanged": true,
+  "raw_sha256": {
+    "PID.json": "3572364e5cce42fee83929bee8b73a414d9c399e1726d3bf31a0dcba0cfc44c8",
+    "RUN.json": "f590f6755cc19ad9203c281f97fbaf3d91b79d7612fbea4ccda7a0dc3b72152d",
+    "SOURCE_AFTER.json": "2f4a112b6aa3c8ac5cfaa298b88b723aeb36e9a51b25a08849ffab35fe474ada",
+    "SOURCE_BEFORE.json": "abdb688433d8f20359549e4aa32b31973bb47d0629170c4d9674607cbce096fd",
+    "STAGE": "8221ac66be71558c921fb44cfb66f7997699aea754d917763882d6d9eddc836e",
+    "STATUS": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c",
+    "TERMINAL.json": "1ed3faec1b2e0d32ee5157a15f4e395d68a9c99f712c6ecb2d88228b02a1971e",
+    "filesystems.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "filesystems.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "filesystems.stdout": "99266578b6b504a611c31c75a7887b3783ac1ff8e6e75bd41185e1d360a718be",
+    "run.py": "ca60b035ccbc2d91d15b7a00390c915d26a1193082f9de54079bb4bfcb16c011",
+    "test.exit": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c",
+    "test.stderr": "ef3353c6f4dfe5d48d59051441aa44150490a61525c090cbd29a9438a7763f28",
+    "test.stdout": "4bcaaf19037d994a85718d102a27145872f7a5dfeb22ced7c86d745c4a8cb2b7"
+  }
+}

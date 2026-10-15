@@ -1,0 +1,17 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--all-features",
+    "--lib",
+    "--",
+    "--test-threads=1"
+  ],
+  "start": "2026-10-15T03:49:01.721072+00:00",
+  "end": "2026-10-15T03:54:05.035253+00:00",
+  "elapsed_s": 303.3141984269896,
+  "exit": 0
+}

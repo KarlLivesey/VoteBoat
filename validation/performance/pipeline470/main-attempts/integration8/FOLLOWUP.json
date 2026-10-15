@@ -1,0 +1,7 @@
+{
+  "previous": "integration7",
+  "changed_inputs": [
+    "src/runtime/effects.rs"
+  ],
+  "reason": "Extract ordered preflight validation from submit_persists to satisfy unchanged100-line limit; no lint config change."
+}

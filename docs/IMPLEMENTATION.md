@@ -743,8 +743,8 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: publish measured468 rejection and checked469 restoration | Close the heap-buffer experiment without carrying unproven complexity | [All24 paired results](../validation/performance/comparison468/linux/MEASUREMENTS.md), fresh artifact/provenance and [before-edit469 schema](../validation/performance/slice469/SCHEMA.md) | Preserve every mixed trial/setup proof, exact39da source/build/contract equality and no extra modules; original70 matched controls/full enabled hook0, commit/push; no Mac468 or buffer/frame retuning | P9.1/P9.3 |
-| Next: integrated bounded same-group persistence pipeline | Amortize the dominant durable barrier context through actual overlap and queued units | Retained455 source, native elapsed evidence, Core/owner/shard/worker/provider contract audit and original Mac455 qualification | Before-edit accepted/durable/unit/visit/admission/control/credit/restart schema; complete usable opt-in path with unchanged aggregate limits and physical durability protocol, exact failures/recovery/outcomes, actual units/barrier and paired useful rates/tails; no isolated unused API milestone | P9.1/P9.2/P9.3 |
+| Current: integrated470 bounded same-group persistence pipeline | Amortize the dominant durable barrier context through actual overlap and queued units | Published469 restoration, retained455 source, [audit](../validation/performance/pipeline470/AUDIT.md), [unified before-edit schema](../validation/performance/pipeline470/SCHEMA.md) and original Mac455 qualification | Complete usable opt-in Core→runtime/owner→worker→native service path; exact sealed-window completion/order/credits, default-false application and default-one worker capabilities, protected bounds, failures/recovery/outcomes and all strict checks; commit/push through enabled hook, no isolated unused API milestone | P9.1/P9.2/P9.3 |
+| Next: measure actual pipeline amortization and useful performance | Retain this redesign only if it reduces the measured limiting stage without losing outcomes or tails | Complete checked published470, exact source/artifact/compiler guards and quiet within-host configurations | Fresh asserted native artifacts; real same-group successors share a subsequent physical barrier; exact units/originals per barrier, repeated paired off/on completed originals/s, latency/refusals/drain/maintenance/recovery and bounded memory/debt; preserve every failure/regression, reject or retain from actual evidence | P9.1/P9.2/P9.3 |
 | Following: full curve, sustainable headroom and composition qualification | Satisfy the entire performance objective beyond the current experiment | Retained measured improvements, qualified weighted fixture, source/artifact/host identities and stable maintenance | All seven required framework cells on both hosts with healthy margin; sustained memory/debt, durable applications/headroom/skew/fairness, independent placement/shared barriers and P8 composition; preserve every outcome/fence/retry | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
@@ -752,6 +752,157 @@ comparison or short diagnostics. All seven one-group healthy-margin cells on
 both hosts, real durable applications, offered-load/headroom, fairness/skew,
 placement/shared barriers, active maintenance and P8 composition remain required.
 P9 stays active; P10 is excluded.
+
+469 published`2d53b4c4` through original48965/full enabled hook0; its exact
+source/build/contracts restoration closes468 without a new baseline build or
+unchanged broad rerun. [470 unified schema](../validation/performance/pipeline470/SCHEMA.md)
+resolves commit ordering by retaining unchanged canonical state until all sealed
+units have exact Durable, then installing the chain and planning commitment
+once. It specifies scoped per-unit/visit identities, parked credit lifetimes,
+whole-window output escrow inside existing owner bounds, control seal points,
+default-off application admission and default-one provider capability. It also
+fixes the identified refused-prefix retry ordering requirement. Implementation
+is integrated across Core/runtime/root scopes. Linux all431 library tests pass,
+including the10 Core and four runtime controls. Four public contracts, two gated
+native WAL and three startup/restart controls pass. All51 native benchmark tests
+pass before semantic lint extractions. The first library compile, two formatting
+attempts, two invalid test setups, a missed serial benchmark caller and three
+strict failures are retained. Focused validation/assembly/cleanup extractions
+now pass the entire enabled formatting/four-profile/standalone strict hook;
+lint settings are unchanged. Metadata checker and39 controls pass after updating
+stale review counts. Broader affected integrations and actual selected-pipeline
+network histories remain. These are partial checks, not complete pipeline
+qualification, publication or a performance gain. Original Mac45584206 remains
+the only live Mac qualification; do not restart it or run competing timings.
+
+470 integration11 subsequently passes the application suite but stops at four
+native owner progress/drain failures (199 owner controls pass). The remaining
+named suites and network histories did not execute. The first hundred-group
+checkpoint failure reproduces with the original15s deadline and Btrfs temporary
+directory; exact published469 passes the same unprofiled control. Restricting
+repeated data submissions to explicitly multi-unit workers preserves default
+cadence but does not resolve that failure. No deadline or limit is increased.
+[Fresh Linux CPU evidence](../validation/performance/pipeline470/profile-linux/README.md)
+finds repeated owned-connection union reconstruction under71.79%/70.22% of
+selected baseline/candidate samples. These are overlapping inclusive samples
+from whole debug test launches, both failing under recording, not a throughput
+or elapsed-time comparison. Raw profiles, symbolication, failures and exact
+pre-correction source are retained; kernel policies remain2/2/516.
+
+The before-edit schema now covers a pure incoming-event shortcut: exact known
+peer/store and current provisioning, local ownership/group/target and all live
+Core-fence guards must hold; otherwise the original complete union remains the
+reference. The invariant audit also corrects parked public Core callbacks to
+use the same post-callback full validation as ordinary visits. Integration18
+passes formatting, six differential connection controls and six scoped window
+controls with1,453 source hashes/modes unchanged. Integration17's single failed
+route-fixture setup remains; the fixture now uses the existing driver-owned
+route install instead of the capacity setter that preserves prior routes.
+These private controls do not replace native recovery or current strict checks.
+Diagnostic19 then passes the same first failing Btrfs native checkpoint control
+in44.87s with the original15s progress deadline and exact1,453 selected source
+hashes/modes. That is one functional recovery result, not a rate or causal-share
+claim. Review next identifies caught callback unwinding as an additional way to
+skip post-validation; a conservative completion guard must force the original
+full reference after such an unwind. The remaining failed histories and
+unexecuted suites are next; actual selected TCP/QUIC pipeline histories and
+checked publication still precede fresh performance artifacts. Full P9 remains
+active, with no gain or macro milestone claimed.
+
+Integration22 passes all17 focused final-source controls (ten connection and
+seven window controls, including ordinary/parked caught unwinds) and the complete
+enabled formatting/four-profile/standalone strict hook, zero diagnostics and
+1,454 selected source hashes/modes unchanged. Integration20's test-module path
+format failure is retained; the explicit nested path is corrected before22.
+Integration21 then passes the first native history on final source (104.87s),
+but stops at the second compacted-group catch-up drain failure (41.25s); later
+two histories and the build do not run. Exact published469's existing checked
+ELF reproduces that same second failure/assertion/pending third-node shape in
+baseline24 (41.10s), with source1,412/ELF unchanged and Btrfs temporary storage.
+That failure does not establish a new pipeline regression; neither does the
+variable first-case duration establish speed. Current-only profile25 records
+1,169 samples/zero reported loss,1,159 selected and27 unresolved leaves; headless
+JSON symbolication completes and its local server stops0. Kernel2/2/516,
+source1,454 and ELF hashes remain unchanged. Overlapping inclusive peer-poll/
+ingress/admission contexts are33.13%/31.41%/27.61%; persistence-window15.01%
+includes publication9.66%. This debug catch-up fixture has no connection budget,
+so it is a different path from profile16, not paired optimization evidence.
+Integration26 collects both remaining histories' actual exits before building
+the control executable; any failed stage keeps its overall status nonzero.
+No release artifact or performance qualification follows from these checks.
+
+Integration26 terminates101 with the native quota/reconnect and facade recovery
+histories failing at their original progress limits (32.95s/54.83s). The debug
+control build independently completes0; all1,454 compiled inputs/modes remain
+unchanged. The failed stages are not hidden by the successful build. Exact
+published469 controls for those two histories are next, sequentially, before
+actual selected-pipeline controls and the unexecuted integration23 suites.
+No further production change is selected from the inherited catch-up failure
+before the new pipeline has been exercised end to end.
+
+Exact published469 controls27/28 also fail the quota/reconnect and facade
+recovery progress assertions (58.22s/51.32s), source1,412/ELF unchanged, fresh
+Btrfs roots and original deadlines. Along with24, all three outstanding native
+timeouts reproduce in published source; they remain failures, not passes or a
+causal explanation. Controls12 then completes all14 workload/validator/readback
+stages0 on final debug source: TCP/QUIC startup and shared assemblies each finish
+128 originals, recover192 including64 warmups, verify retries and join workers.
+All three actual Core/worker selections read back units4/originals64/1MiB on
+create and recover;1,466 guarded source/controller/validator inputs and the
+actual ELF remain exact. Shared measurement leader deltas prove one physical
+sync/publication covers three same-group units/48 command originals on TCP,
+and two units/32 originals on QUIC. All shared ticket correlations are complete;
+suffix-command counts are not substituted for client outcomes.
+
+These four short debug runs report completed originals/s and p99ms respectively:
+TCP startup359.809/207.148, shared381.839/181.598; QUIC startup152.806/517.437,
+shared265.252/293.611. They are functional histories without a paired baseline,
+not release throughput, sustained barrier amortization, or headroom evidence.
+Integration23 now executes the remaining named suites, actual three-service
+controls, core-only regressions, matched workspace and native benchmark tests
+sequentially on unchanged1,454 compiled inputs. Archive/review and checked
+publication remain current; fresh native/framework artifacts and actual paired
+measurements remain the next deliverable, with every full P9 requirement active.
+
+The [historical attempts](../validation/performance/pipeline470/main-attempts/README.md),
+[final focused controls and baseline failures](../validation/performance/pipeline470/final-controls/README.md)
+and [current catch-up profile](../validation/performance/pipeline470/profile-linux-catchup/README.md)
+are sealed separately. Root independently verifies exact payload sets and hashes
+(336/177/89 payloads respectively); the profile includes an exact1,454-input
+unpublished source reconstruction before any future correction. Integration23's
+first stage now passes all12 previously unexecuted integration suites: log19,
+logical formats9, maintenance5, membership32, native member startup50,
+providers46, Raft79, runtime55, shared barrier8, snapshot27, startup63 and worker11.
+That is404 passing controls, with no ignored/filtered cases in those suites.
+The service/core/matched/benchmark stages remain pending or live; no full-stage
+terminal result is inferred yet, and the three native baseline-reproduced
+failures remain outstanding.
+
+Integration23 subsequently passes both actual three-service TCP/QUIC
+retry/replacement/native-recovery histories, core-only library363/owner195/
+providers31/Raft29/runtime38/snapshot12/worker3, and all70 standalone matched
+controls. Its last native-benchmark test stage is live on original49766;
+collect it only after actual termination. Archive that final result separately
+from the already-sealed partial receipts, then review and publish the complete
+checked slice through the enabled hook. No production input has changed during
+this qualification. The three baseline-reproduced native timeouts stay explicit.
+
+[Remaining qualification](../validation/performance/pipeline470/remaining-checks/README.md)
+original49766 now terminates0/DONE: all five stages pass, including all51 final
+native benchmark controls in278.72s, with1,454 source hashes/modes unchanged.
+All27 archive payloads and their decompressed originals independently verify.
+Final source-only review finds no additional functional blocker; it identifies
+only stale public worker rustdoc claiming unconditional serial operation.
+[Final documentation/checks](../validation/performance/pipeline470/final-documentation/README.md)
+corrects that wording after the original job ends. The sole changed input is
+src/worker.rs rustdoc; exact before/after evidence proves all non-rustdoc bytes
+identical. Functional checks are reused with that explicit exception, and final
+original64519 passes the complete enabled strict hook and metadata checker0 on
+the documented source. All1,454 inputs/modes remain exact during that check;
+all20 archive payloads and original containers independently verify. The three
+baseline-reproduced native failures remain outstanding. Checked publication is
+next; fresh asserted artifacts and paired performance evidence follow, with no
+P9 acceptance or sustained improvement claimed.
 
 429 is checked and exactly promoted: all1,425 selected source hashes match;
 three changed paths include the new independent equality-oracle module. [Scoped

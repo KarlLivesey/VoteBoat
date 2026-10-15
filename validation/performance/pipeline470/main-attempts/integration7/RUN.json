@@ -1,0 +1,24 @@
+{
+  "pid": 2,
+  "start": "2026-10-15T03:43:41.173182+00:00",
+  "commands": [
+    [
+      "strict-hook",
+      [
+        "sh",
+        ".githooks/pre-push"
+      ]
+    ]
+  ],
+  "environment": {
+    "CARGO_TARGET_DIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks",
+    "CARGO_BUILD_JOBS": "2",
+    "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration7/test-tmp",
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null,
+    "RUSTC_WRAPPER": null,
+    "RUSTC_WORKSPACE_WRAPPER": null,
+    "PROTOC": null
+  },
+  "runner_sha256": "58b9ba3fd4c815c58ee9d77ef462f8772327f2571d88deefd6ba9569ccf3f1f5"
+}

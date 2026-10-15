@@ -1,0 +1,32 @@
+{
+  "commit": "2d53b4c43b71a63d63c96b7a3d0062da8d7643ff",
+  "source": "/tmp/voteboat-470-baseline-0q3xoh_j",
+  "argv": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--all-features",
+    "--test",
+    "effect_owner",
+    "native::automatic_hundred_group_checkpoints_reclaim_and_reopen",
+    "--",
+    "--exact",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "environment": {
+    "CARGO_TARGET_DIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target",
+    "CARGO_BUILD_JOBS": "2",
+    "RUSTUP_TOOLCHAIN": "1.98.1",
+    "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/test-tmp",
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null,
+    "RUSTC_WRAPPER": null,
+    "RUSTC_WORKSPACE_WRAPPER": null,
+    "PROTOC": null
+  },
+  "deadline": "Unchanged committed15s fixture; no source edits",
+  "permission": "require_escalated for authorized TCP/QUIC localhost test"
+}

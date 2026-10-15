@@ -1,0 +1,7 @@
+
+running 2 tests
+test append_window::failed_shared_publication_fails_b_c_but_recovers_the_valid_unacknowledged_suffix ... ok
+test append_window::syncing_a_cannot_absorb_later_b_and_c_but_their_next_barrier_is_shared ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+

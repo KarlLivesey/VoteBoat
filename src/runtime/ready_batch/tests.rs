@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 use crate::log::LogLimits;
+mod append_window;
 mod fixture;
 mod routine;
 use fixture::*;

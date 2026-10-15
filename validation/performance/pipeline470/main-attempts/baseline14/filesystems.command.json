@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "df",
+    "-T",
+    "/tmp/voteboat-470-baseline-0q3xoh_j",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/test-tmp",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14"
+  ],
+  "cwd": "/tmp/voteboat-470-baseline-0q3xoh_j"
+}

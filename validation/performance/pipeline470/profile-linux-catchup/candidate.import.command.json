@@ -1,0 +1,18 @@
+{
+  "args": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply",
+    "import",
+    "--save-only",
+    "--no-open",
+    "--symbol-dir",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps",
+    "--output",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/profile25/candidate.json.gz",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/profile25/candidate.data"
+  ],
+  "environment": {
+    "LD_LIBRARY_PATH": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/lib",
+    "XDG_CACHE_HOME": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/profile25/cache",
+    "DEBUGINFOD_URLS": ""
+  }
+}

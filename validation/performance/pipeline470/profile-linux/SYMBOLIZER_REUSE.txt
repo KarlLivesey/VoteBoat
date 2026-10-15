@@ -1,0 +1,1 @@
+Adapted455 JSON query helper sha256=ebb87302b345e1485d0a02c64b5ccd9482eaf1644ead5274dcdb1a748dddd84a; only native-thread selection and scope/embedded-DWARF limitation text changed. Algorithm/assertions unchanged.

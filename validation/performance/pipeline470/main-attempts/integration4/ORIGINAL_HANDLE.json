@@ -1,0 +1,5 @@
+{
+  "session_id": 24220,
+  "command": "python3 target/p9/slice470/integration4/run.py",
+  "do_not_restart_on_observation_timeout": true
+}

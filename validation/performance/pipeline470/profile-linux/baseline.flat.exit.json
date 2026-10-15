@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+    "script",
+    "-i",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/profile16/baseline.data",
+    "-G",
+    "-F",
+    "comm,tid,time,period,event,ip,sym,dso"
+  ],
+  "exit": 0,
+  "elapsed_s": 1.33874969399767
+}

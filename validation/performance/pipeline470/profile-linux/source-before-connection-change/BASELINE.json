@@ -1,0 +1,17 @@
+{
+  "baseline_commit": "2d53b4c43b71a63d63c96b7a3d0062da8d7643ff",
+  "new_inputs": [
+    "examples/benchmark/append_window.rs",
+    "examples/benchmark/observe_barriers.rs",
+    "src/native/startup/append_window.rs",
+    "src/raft/append_window.rs",
+    "src/raft/append_window/tests.rs",
+    "src/runtime/append_window.rs",
+    "src/runtime/effects/append_window.rs",
+    "src/runtime/ready_batch/tests/append_window.rs",
+    "tests/provider_conformance/append_window.rs",
+    "tests/startup/append_window.rs",
+    "tests/worker/append_window.rs"
+  ],
+  "scope": "Exact compiled1452file SHA/physical-mode inventory; apply trackedpatch and new-inputs to published baseline, then restore inventory modes. Compiled debug artifacts remain at hashed original paths; no binary/build/WAL copies."
+}

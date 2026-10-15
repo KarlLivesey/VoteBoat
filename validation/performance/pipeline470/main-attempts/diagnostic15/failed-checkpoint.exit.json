@@ -1,0 +1,21 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--all-features",
+    "--test",
+    "effect_owner",
+    "native::automatic_hundred_group_checkpoints_reclaim_and_reopen",
+    "--",
+    "--exact",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "start": "2026-10-15T04:07:22.852616+00:00",
+  "end": "2026-10-15T04:08:20.191700+00:00",
+  "elapsed_s": 57.33910035400186,
+  "exit": 101
+}

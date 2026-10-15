@@ -14,12 +14,12 @@
 // rights and limitations under the RPL.
 //! Fault injection into completion correlation, not child authority evidence.
 use super::*;
-use crate::runtime::{RuntimeOwner, VisitTicket};
+use crate::runtime::{EffectTicket, RuntimeOwner, VisitTicket};
 
 fn fixture() -> (
     LogicalPersistenceWorker,
     SyncSender<WorkerEvent>,
-    VisitTicket,
+    PersistUnitId,
     LogTicket,
 ) {
     let group = GroupIdentity {
@@ -45,6 +45,10 @@ fn fixture() -> (
         },
         group,
         sequence: 1,
+    };
+    let unit = PersistUnitId {
+        effect: EffectTicket { visit, sequence: 1 },
+        append: None,
     };
     let log = LogTicket {
         binding: store,
@@ -75,7 +79,7 @@ fn fixture() -> (
                 binding,
                 sequence: 1,
             },
-            visits: vec![visit],
+            units: vec![unit],
             usage: WorkerUsage {
                 requests: 1,
                 units: 1,
@@ -87,20 +91,20 @@ fn fixture() -> (
         fenced: false,
         outstanding: Arc::new(AtomicBool::new(true)),
     };
-    (worker, sender, visit, log)
+    (worker, sender, unit, log)
 }
 
 fn written(
     worker: &mut LogicalPersistenceWorker,
     sender: &SyncSender<WorkerEvent>,
-    visit: VisitTicket,
+    unit: PersistUnitId,
     log: LogTicket,
 ) {
     let request = worker.retained.as_ref().unwrap().ticket;
     sender
         .try_send(WorkerEvent::Written {
             request,
-            admissions: vec![(visit, log)],
+            admissions: vec![(unit, log)],
         })
         .unwrap();
     assert!(matches!(
@@ -114,8 +118,8 @@ fn written(
 #[test]
 fn durable_matches_every_original_written_ticket_field() {
     for field in 0..8 {
-        let (mut worker, sender, visit, original) = fixture();
-        written(&mut worker, &sender, visit, original);
+        let (mut worker, sender, unit, original) = fixture();
+        written(&mut worker, &sender, unit, original);
         let request = worker.retained.as_ref().unwrap().ticket;
         let mut altered = original;
         match field {
@@ -132,7 +136,7 @@ fn durable_matches_every_original_written_ticket_field() {
         sender
             .try_send(WorkerEvent::Durable {
                 request,
-                visits: vec![visit],
+                units: vec![unit],
                 completion: DurableLog {
                     tickets: vec![altered],
                 },
@@ -141,14 +145,14 @@ fn durable_matches_every_original_written_ticket_field() {
         let result = worker.poll(1).pop();
         let Some(WorkerEvent::Failed {
             request: failed,
-            visits,
+            units,
             error,
         }) = result
         else {
             panic!("mismatched durable field {field} escaped");
         };
         assert_eq!(failed, request);
-        assert_eq!(visits, vec![visit]);
+        assert_eq!(units, vec![unit]);
         assert!(matches!(error, StorageError::Uncertain(_)));
         assert!(worker.fenced);
         assert_eq!(worker.usage(), WorkerUsage::default());
@@ -158,13 +162,13 @@ fn durable_matches_every_original_written_ticket_field() {
 
 #[test]
 fn original_written_ticket_releases_only_at_consumed_durable() {
-    let (mut worker, sender, visit, log) = fixture();
-    written(&mut worker, &sender, visit, log);
+    let (mut worker, sender, unit, log) = fixture();
+    written(&mut worker, &sender, unit, log);
     let request = worker.retained.as_ref().unwrap().ticket;
     sender
         .try_send(WorkerEvent::Durable {
             request,
-            visits: vec![visit],
+            units: vec![unit],
             completion: DurableLog { tickets: vec![log] },
         })
         .unwrap();
@@ -174,4 +178,39 @@ fn original_written_ticket_releases_only_at_consumed_durable() {
     assert!(!worker.fenced);
     assert_eq!(worker.usage(), WorkerUsage::default());
     assert!(!worker.outstanding.load(Ordering::Acquire));
+}
+
+#[test]
+fn logical_default_one_rejects_sibling_effect_ids_at_both_worker_stages() {
+    for terminal in [false, true] {
+        let (mut worker, sender, original, log) = fixture();
+        assert_eq!(worker.max_outstanding_units_per_group(), 1);
+        if terminal {
+            written(&mut worker, &sender, original, log);
+        }
+        let mut sibling = original;
+        sibling.effect.sequence += 1;
+        let request = worker.retained.as_ref().unwrap().ticket;
+        let event = if terminal {
+            WorkerEvent::Durable {
+                request,
+                units: vec![sibling],
+                completion: DurableLog { tickets: vec![log] },
+            }
+        } else {
+            WorkerEvent::Written {
+                request,
+                admissions: vec![(sibling, log)],
+            }
+        };
+        sender.try_send(event).unwrap();
+        let Some(WorkerEvent::Failed { units, error, .. }) = worker.poll(1).pop() else {
+            panic!("sibling effect escaped exact logical correlation");
+        };
+        assert_eq!(units, vec![original]);
+        assert!(matches!(error, StorageError::Uncertain(_)));
+        assert!(worker.fenced);
+        assert_eq!(worker.usage(), WorkerUsage::default());
+        assert!(!worker.outstanding.load(Ordering::Acquire));
+    }
 }

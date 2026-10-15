@@ -1,0 +1,11 @@
+{
+  "command": [
+    "node",
+    "validation/check-native-benchmark.mjs",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/controls12/tcp-startup"
+  ],
+  "start": "2026-10-15T04:54:05.811132+00:00",
+  "end": "2026-10-15T04:54:05.929423+00:00",
+  "elapsed_s": 0.11830278998240829,
+  "exit": 0
+}

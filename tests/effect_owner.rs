@@ -1234,7 +1234,7 @@ struct HostWorker {
     binding: WorkerBinding,
     sequence: u64,
     accepted: Option<(WorkerTicket, Vec<PersistUnit>)>,
-    written: Option<(WorkerTicket, Vec<VisitTicket>, Vec<LogTicket>)>,
+    written: Option<(WorkerTicket, Vec<PersistUnitId>, Vec<LogTicket>)>,
     reject: bool,
     fail: bool,
     closed: bool,
@@ -1355,23 +1355,23 @@ impl PersistenceWorker for HostWorker {
         if limit == 0 {
             return vec![];
         }
-        if let Some((request, visits, tickets)) = self.written.take() {
+        if let Some((request, units, tickets)) = self.written.take() {
             return vec![if self.fail {
                 WorkerEvent::Failed {
                     request,
-                    visits,
+                    units,
                     error: voteboat::contracts::StorageError::Rejected("injected failure"),
                 }
             } else {
                 WorkerEvent::Durable {
                     request,
-                    visits,
+                    units,
                     completion: self.store.barrier(&tickets).unwrap(),
                 }
             }];
         }
         if let Some((request, units)) = self.accepted.take() {
-            let visits = units.iter().map(|u| u.visit).collect::<Vec<_>>();
+            let unit_ids = units.iter().map(|u| u.id).collect::<Vec<_>>();
             let tickets = self
                 .store
                 .append_batch(
@@ -1381,12 +1381,12 @@ impl PersistenceWorker for HostWorker {
                         .collect(),
                 )
                 .unwrap();
-            let admissions = visits
+            let admissions = unit_ids
                 .iter()
                 .copied()
                 .zip(tickets.iter().copied())
                 .collect();
-            self.written = Some((request, visits, tickets));
+            self.written = Some((request, unit_ids, tickets));
             return vec![WorkerEvent::Written {
                 request,
                 admissions,

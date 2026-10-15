@@ -225,7 +225,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         S: ReadyScheduler,
         T: TimerService,
         E: ElectionEntropy,
-        A: StateMachine<Receipt = R> + ReadableStateMachine,
+        A: ProposalAdmission<Receipt = R> + ReadableStateMachine,
         W: PersistenceWorker,
         O: OutboundQueue,
     >(
@@ -243,7 +243,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         S: ReadyScheduler,
         T: TimerService,
         E: ElectionEntropy,
-        A: StateMachine<Receipt = R> + ReadableStateMachine,
+        A: ProposalAdmission<Receipt = R> + ReadableStateMachine,
         W: PersistenceWorker,
         O: OutboundQueue,
     >(
@@ -260,7 +260,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         S: ReadyScheduler,
         T: TimerService,
         E: ElectionEntropy,
-        A: StateMachine<Receipt = R> + ReadableStateMachine,
+        A: ProposalAdmission<Receipt = R> + ReadableStateMachine,
         W: PersistenceWorker,
         O: OutboundQueue,
     >(
@@ -326,6 +326,15 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
             if app.applied_index() != core.state().commit_index {
                 return Err(ReplicaError::MissingApplication);
             }
+            if let Some(window) = core.append_window_limits() {
+                if !app.supports_append_window()
+                    || window.max_units > limits.leases
+                    || window.max_originals > parts.clients.limits().group_requests
+                    || window.max_originals > parts.clients.limits().requests
+                {
+                    return Err(ReplicaError::InvalidLimits);
+                }
+            }
         }
         if groups != parts.applications.len() {
             return Err(ReplicaError::MissingApplication);
@@ -335,6 +344,10 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
             .limits()
             .validate()
             .map_err(ReplicaError::Worker)?;
+        parts
+            .owner
+            .validate_append_pipeline(&*parts.persistence)
+            .map_err(ReplicaError::Owner)?;
         parts
             .outbound
             .limits()
@@ -529,7 +542,16 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         self.collect_effects(p.owner, b.effects, &mut out)?;
         self.retry_effects(p, now, b.retries, &mut out)?;
         self.submit_batch(p.owner, p.persistence, now, true, &mut out)?;
-        self.submit_batch(p.owner, p.persistence, now, false, &mut out)?;
+        let submissions = if p.persistence.max_outstanding_units_per_group() > 1 {
+            b.effects
+        } else {
+            1
+        };
+        for _ in 0..submissions {
+            if !self.submit_batch(p.owner, p.persistence, now, false, &mut out)? {
+                break;
+            }
+        }
         p.clients
             .reconcile(p.owner, b.reconcile)
             .map_err(ReplicaError::Client)?;
@@ -885,7 +907,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         now: MonoTime,
         control: bool,
         out: &mut ReplicaProgress,
-    ) -> Result<(), ReplicaError> {
+    ) -> Result<bool, ReplicaError> {
         let queue = if control {
             &mut self.control
         } else {
@@ -894,6 +916,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         let limits = worker.limits();
         let mut count = 0;
         let mut bytes = 0usize;
+        let mut groups = std::collections::BTreeSet::new();
         for lease in queue
             .iter()
             .take(self.limits.persistence_batch_units.min(limits.batch_units))
@@ -901,6 +924,9 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
             let Effect::Persist(update) = &lease.effect else {
                 unreachable!()
             };
+            if !groups.insert(update.group) {
+                break;
+            }
             let (payload, _) = persist_payload_cost(update).map_err(ReplicaError::Worker)?;
             let next = bytes
                 .checked_add(PERSIST_UNIT_METADATA)
@@ -913,7 +939,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         }
         if count == 0 {
             return if queue.is_empty() {
-                Ok(())
+                Ok(false)
             } else {
                 Err(ReplicaError::Worker(WorkerError::BatchTooLarge))
             };
@@ -923,12 +949,14 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         match owner.submit_persists(worker, leases, now) {
             Ok(_) => {
                 out.persistence_batches += 1;
-                Ok(())
+                Ok(true)
             }
             Err(rejected) => {
-                queue.extend(rejected.leases);
+                for lease in rejected.leases.into_iter().rev() {
+                    queue.push_front(lease);
+                }
                 if rejected.reason == EffectOwnerError::Worker(WorkerError::Overloaded) {
-                    Ok(())
+                    Ok(false)
                 } else {
                     Err(ReplicaError::Owner(rejected.reason))
                 }
@@ -952,6 +980,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         }
         p.clients.close();
         p.reads.close();
+        p.owner.seal_append_windows();
         Ok(())
     }
     /// Explicit failed-domain cleanup of this driver's and snapshot router's

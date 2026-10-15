@@ -1,0 +1,3 @@
+Filesystem     Type   1K-blocks       Used Available Use% Mounted on
+tmpfs          tmpfs   31716948    1429544  30287404   5% /tmp
+/dev/nvme1n1p2 btrfs 1949318196 1112925572 767484796  60% /home

@@ -1,0 +1,5 @@
+{
+  "session_id": 21412,
+  "command": "python3 target/p9/slice470/diagnostic15/run.py",
+  "scope": "Focused correction, identical BtrfsTMPDIR/original15sdeadline; source held; no competing Linux jobs. controls12 prepared source guard is now stale and must be refreshed only after final checked-source scope."
+}

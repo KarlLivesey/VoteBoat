@@ -1,0 +1,111 @@
+{
+  "pid": 3840969,
+  "start": "2026-10-15T03:29:45.675520+00:00",
+  "commands": [
+    [
+      "format",
+      [
+        "cargo",
+        "+stable",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ]
+    ],
+    [
+      "library-window",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--lib",
+        "opening_fallback_replays_the_full_checked_prefix_and_terminal_error_once",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "public-window",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "provider_conformance",
+        "append_window",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "worker-window",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "worker",
+        "append_window",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "startup-window",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "startup",
+        "append_window",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "native-benchmark",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--example",
+        "native_benchmark",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ]
+    ]
+  ],
+  "environment": {
+    "CARGO_TARGET_DIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks",
+    "CARGO_BUILD_JOBS": "2",
+    "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration3/test-tmp",
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null,
+    "RUSTC_WRAPPER": null,
+    "RUSTC_WORKSPACE_WRAPPER": null,
+    "PROTOC": null
+  },
+  "runner_sha256": "56bd85a84288d87869f0533ca02ab9d8a7d68a983993d03ecbc65e4ff009975e"
+}

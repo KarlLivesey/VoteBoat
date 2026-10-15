@@ -51,7 +51,14 @@ impl Raft {
         if self.batch_limits_locked {
             return Err(RaftError::Busy);
         }
-        self.batch_limits = limits.validate()?;
+        let limits = limits.validate()?;
+        if self
+            .append_window_limits
+            .is_some_and(|window| window.max_originals > limits.max_proposal_entries)
+        {
+            return Err(StorageError::Rejected("append window exceeds proposal envelope").into());
+        }
+        self.batch_limits = limits;
         Ok(())
     }
     pub fn batch_limits(&self) -> BatchLimits {

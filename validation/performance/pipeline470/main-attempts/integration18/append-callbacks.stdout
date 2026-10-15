@@ -1,0 +1,11 @@
+
+running 6 tests
+test runtime::ready_batch::tests::append_window::failed_empty_successor_visit_seals_without_consuming_or_releasing_old_inputs ... ok
+test runtime::ready_batch::tests::append_window::opening_fallback_replays_the_full_checked_prefix_and_terminal_error_once ... ok
+test runtime::ready_batch::tests::append_window::parked_inputs_keep_exact_visits_and_wait_for_every_durable_unit ... ok
+test runtime::ready_batch::tests::append_window::parked_scoped_callback_checks_replaced_core_even_when_callback_returns_error ... ok
+test runtime::ready_batch::tests::append_window::parked_scoped_fence_preserves_callback_result_and_ownership_until_explicit_stop ... ok
+test runtime::ready_batch::tests::append_window::queued_control_seals_and_remains_queued_until_the_window_drains ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 433 filtered out; finished in 0.00s
+

@@ -1,0 +1,39 @@
+{
+  "scope": "Core source-ready only; focusedtests not yet run",
+  "files": {
+    "src/raft.rs": {
+      "sha256": "8363165d6798b9bf4800d020d3dbf5c8827c90c47b63ed4fb633c8cc5aebdbe7",
+      "mode": "0o644"
+    },
+    "src/raft/proposals.rs": {
+      "sha256": "70ddc2a752a260e0a5f46e6d37bcb7e03af6dbf1bd3f0ac25363c63a9d410267",
+      "mode": "0o644"
+    },
+    "src/raft/batch_limits.rs": {
+      "sha256": "a03548979fa82e7c2812d2a7320a8dc1bd7dc110cf6377e2f9506c5652933764",
+      "mode": "0o644"
+    },
+    "src/raft/admitted_replication.rs": {
+      "sha256": "7c30068088788692922222ea03ed4a2d3ababd221a2a0c785b4f52a806bb4a4c",
+      "mode": "0o644"
+    },
+    "src/log/transition/view.rs": {
+      "sha256": "40874f6dc8a8ddd6ed6b539aa59438a7508289c39b5f8d76270e86711df8b8fc",
+      "mode": "0o644"
+    },
+    "src/log/transition/incoming.rs": {
+      "sha256": "62e566db51e06cb6f9c615b5481319b14bb2ef4e766a4c1542387fe482918140",
+      "mode": "0o644"
+    },
+    "src/raft/append_window.rs": {
+      "sha256": "84a367d75fd0722b44c449633c172cb9784c2826b75432fd6ddb2db46562cc12",
+      "mode": "0o644"
+    },
+    "src/raft/append_window/tests.rs": {
+      "sha256": "eecf40c92c267cf0739cb4072a5417b96ebdccd3fcd2e9a9645c10051a20718e",
+      "mode": "0o644"
+    }
+  },
+  "focused_tests": 10,
+  "proposed_command": "CARGO_TARGET_DIR=target/p9/slice470/core-checks cargo +stable test --locked --offline --no-default-features --lib raft::append_window::tests:: -- --nocapture"
+}

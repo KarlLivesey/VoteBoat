@@ -1,0 +1,19 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--all-features",
+    "--test",
+    "counter_service",
+    "three_",
+    "--",
+    "--test-threads=1"
+  ],
+  "start": "2026-10-15T05:00:00.997836+00:00",
+  "end": "2026-10-15T05:00:27.549575+00:00",
+  "elapsed_s": 26.55175798101118,
+  "exit": 0
+}

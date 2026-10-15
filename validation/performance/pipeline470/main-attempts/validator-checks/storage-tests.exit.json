@@ -1,0 +1,12 @@
+{
+  "command": [
+    "node",
+    "validation/check-benchmark-storage.test.mjs"
+  ],
+  "exit": 0,
+  "reason": "Root archival run: agent exact final7 controls passed but filesystem raw logs were not saved; preserve actual output now.",
+  "source": {
+    "validation/check-benchmark-storage.mjs": "d198a89660a65e8f00e64f06a9d43983124b47a0db5d31a6d95801fbe9603702",
+    "validation/check-benchmark-storage.test.mjs": "6b9ef20bee5f5d6327b788cc480a96c553b7fbfb5276cd0df617298654103afc"
+  }
+}

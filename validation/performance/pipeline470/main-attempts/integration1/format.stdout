@@ -1,0 +1,343 @@
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/src/native/worker.rs:20:
+ use std::{
+     collections::BTreeMap,
+     sync::{
+-        Arc,
+         mpsc::{self, Receiver, SyncSender, TryRecvError, TrySendError},
++        Arc,
+     },
+     thread::{self, JoinHandle, Thread},
+ };
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/src/runtime/ready_batch/tests/append_window.rs:127:
+     }
+     let a = stage(&mut shard);
+     let fresh = shard.poll(MonoTime(0)).unwrap().unwrap();
+-    assert!(
+-        shard
+-            .step_append_checked(fresh, MonoTime(0), 2, |_, _, _| Ok(()))
+-            .unwrap()
+-            .is_none()
+-    );
++    assert!(shard
++        .step_append_checked(fresh, MonoTime(0), 2, |_, _, _| Ok(()))
++        .unwrap()
++        .is_none());
+     assert_eq!(shard.finish(fresh), Err(RuntimeError::DependencyPending));
+     shard.cancel_append_candidate(fresh).unwrap();
+     assert!(!shard.core(group()).unwrap().can_stage_append_window());
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/src/runtime.rs:17:
+ //! these ingress credits are not an outbound or application memory budget.
+ use crate::{
+     identity::*,
+-    outbound::{MessageClass, message_cost},
++    outbound::{message_cost, MessageClass},
+     raft::*,
+ };
+ use std::{
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/worker/append_window.rs:31:
+ impl JournalIo for Journal {
+     fn read_manifest(&mut self) -> io::Result<Vec<u8>> {
+         self.0
+-            .0
++             .0
+             .lock()
+             .unwrap()
+             .manifest
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/worker/append_window.rs:39:
+             .ok_or(io::ErrorKind::NotFound.into())
+     }
+     fn read_log(&mut self, _: usize) -> io::Result<Vec<u8>> {
+-        Ok(self.0.0.lock().unwrap().bytes.clone())
++        Ok(self.0 .0.lock().unwrap().bytes.clone())
+     }
+     fn append(&mut self, bytes: &[u8]) -> io::Result<()> {
+-        self.0.0.lock().unwrap().bytes.extend_from_slice(bytes);
++        self.0 .0.lock().unwrap().bytes.extend_from_slice(bytes);
+         Ok(())
+     }
+     fn truncate_log(&mut self, length: u64) -> io::Result<()> {
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/worker/append_window.rs:49:
+-        self.0.0.lock().unwrap().bytes.truncate(length as usize);
++        self.0 .0.lock().unwrap().bytes.truncate(length as usize);
+         Ok(())
+     }
+     fn sync_log(&mut self) -> io::Result<()> {
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/worker/append_window.rs:65:
+         Ok(())
+     }
+     fn publish_manifest(&mut self, bytes: &[u8]) -> io::Result<()> {
+-        let mut device = self.0.0.lock().unwrap();
++        let mut device = self.0 .0.lock().unwrap();
+         if device.armed {
+             device.publications += 1;
+             if device.fail_second && device.publications == 2 {
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/worker/append_window.rs:167:
+     let store = prepared(journal.clone());
+     let binding = store.binding();
+     {
+-        let mut device = journal.0.0.lock().unwrap();
++        let mut device = journal.0 .0.lock().unwrap();
+         device.armed = true;
+         device.fail_second = fail_second;
+     }
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/worker/append_window.rs:189:
+         WorkerError::Overloaded
+     );
+     {
+-        let mut device = journal.0.0.lock().unwrap();
++        let mut device = journal.0 .0.lock().unwrap();
+         assert_eq!(device.syncs, 1);
+         device.released = true;
+     }
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/worker/append_window.rs:196:
+-    journal.0.1.notify_all();
++    journal.0 .1.notify_all();
+     let events = terminals(&mut worker);
+     assert_events(&events, [a, b, c], fail_second);
+     assert_eq!(worker.usage(), WorkerUsage::default());
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/worker/append_window.rs:203:
+         assert!(Instant::now() < deadline);
+         thread::yield_now();
+     }
+-    assert_eq!(journal.0.0.lock().unwrap().syncs, 2);
++    assert_eq!(journal.0 .0.lock().unwrap().syncs, 2);
+     let recovered =
+         NativeLogStore::recover(journal, binding.identity, LogLimits::default()).unwrap();
+     assert_eq!(
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/worker.rs:247:
+     let written = worker.poll(1).pop().unwrap();
+     assert_eq!(written.request(), ticket);
+     assert!(!written.terminal());
+-    assert!(
+-        apply_to_shard(&mut shard, written)[0]
+-            .result
+-            .as_ref()
+-            .unwrap()
+-            .is_empty()
+-    );
++    assert!(apply_to_shard(&mut shard, written)[0]
++        .result
++        .as_ref()
++        .unwrap()
++        .is_empty());
+     assert_eq!(worker.usage().requests, 1);
+     assert_eq!(shard.finish(visit), Err(RuntimeError::DependencyPending));
+     let durable = worker.poll(1).pop().unwrap();
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/worker.rs:394:
+                 Effect::Persist(update) => {
+                     self.effect_sequence = self.effect_sequence.checked_add(1).unwrap();
+                     assert!(self.pending.len() < 100);
+-                    assert!(
+-                        self.pending
+-                            .insert(
+-                                visit.group,
+-                                PersistUnit {
+-                                    id: PersistUnitId {
+-                                        effect: EffectTicket {
+-                                            visit,
+-                                            sequence: self.effect_sequence
+-                                        },
+-                                        append: None
++                    assert!(self
++                        .pending
++                        .insert(
++                            visit.group,
++                            PersistUnit {
++                                id: PersistUnitId {
++                                    effect: EffectTicket {
++                                        visit,
++                                        sequence: self.effect_sequence
+                                     },
+-                                    update
+-                                }
+-                            )
+-                            .is_none()
+-                    );
++                                    append: None
++                                },
++                                update
++                            }
++                        )
++                        .is_none());
+                 }
+                 Effect::Send(message) => {
+                     assert!(self.messages.len() < 8192);
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/worker.rs:605:
+     worker_pump(nodes, None);
+     for node in nodes.iter() {
+         node.values(10);
+-        assert!(
+-            node.results
+-                .iter()
+-                .any(|r| r.duplicate && r.outcome == CounterOutcome::Value(7))
+-        );
++        assert!(node
++            .results
++            .iter()
++            .any(|r| r.duplicate && r.outcome == CounterOutcome::Value(7)));
+     }
+     for g in 1..=100 {
+         nodes[0]
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/worker.rs:675:
+         .unwrap();
+     worker_pump(nodes, Some(node(1)));
+     assert_eq!(nodes[1].reads, [16]);
+-    assert!(
+-        nodes
+-            .iter()
+-            .all(|n| n.worker.is_drained() && n.pending.is_empty() && n.outbound.is_drained())
+-    );
++    assert!(nodes
++        .iter()
++        .all(|n| n.worker.is_drained() && n.pending.is_empty() && n.outbound.is_drained()));
+     assert!(nodes.iter().any(|n| n.rejected_sends > 0));
+ }
+ 
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/worker.rs:738:
+     use super::*;
+     use std::{
+         sync::{
+-            Arc, Condvar, Mutex,
+             atomic::{AtomicUsize, Ordering},
++            Arc, Condvar, Mutex,
+         },
+         time::{Duration, Instant},
+     };
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/worker.rs:931:
+         assert_eq!(nodes[1].reads.iter().filter(|v| **v == 20).count(), 1);
+         assert_eq!(nodes[1].reads.iter().filter(|v| **v == 19).count(), 99);
+         for node in &mut nodes {
+-            assert!(
+-                node.results
+-                    .iter()
+-                    .any(|r| r.duplicate && r.outcome == CounterOutcome::Value(7))
+-            );
+-            assert!(
+-                node.results
+-                    .iter()
+-                    .any(|r| r.duplicate && r.outcome == CounterOutcome::Value(15))
+-            );
++            assert!(node
++                .results
++                .iter()
++                .any(|r| r.duplicate && r.outcome == CounterOutcome::Value(7)));
++            assert!(node
++                .results
++                .iter()
++                .any(|r| r.duplicate && r.outcome == CounterOutcome::Value(15)));
+             for g in 1..=100 {
+                 let app = &node.apps[&group(g)];
+                 assert_eq!(
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/worker.rs:999:
+         assert_eq!(units.len(), 2);
+         submit_for_timed(&mut timed, &mut worker, units, now).unwrap();
+         let written = event(&mut worker);
+-        assert!(
+-            apply_to_timed(&mut timed, written, now).iter().all(|d| d
+-                .result
+-                .as_ref()
+-                .unwrap()
+-                .is_empty())
+-        );
++        assert!(apply_to_timed(&mut timed, written, now).iter().all(|d| d
++            .result
++            .as_ref()
++            .unwrap()
++            .is_empty()));
+         assert!(timed.poll(MonoTime(301)).unwrap().is_none());
+         let durable = event(&mut worker);
+         let deliveries = apply_to_timed(&mut timed, durable, MonoTime(301));
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/worker.rs:1188:
+         assert_eq!(worker.usage().units, 100);
+         let written = apply_to_shard(&mut shard, event(&mut worker));
+         assert_eq!(written.len(), 100);
+-        assert!(
+-            written
+-                .iter()
+-                .all(|d| d.result.as_ref().unwrap().is_empty())
+-        );
++        assert!(written
++            .iter()
++            .all(|d| d.result.as_ref().unwrap().is_empty()));
+         let durable = apply_to_shard(&mut shard, event(&mut worker));
+         assert_eq!(durable.len(), 100);
+-        assert!(
+-            durable
+-                .iter()
+-                .all(|d| d.result.as_ref().unwrap().len() == 2)
+-        );
++        assert!(durable
++            .iter()
++            .all(|d| d.result.as_ref().unwrap().len() == 2));
+         for visit in visits {
+             shard.finish(visit).unwrap();
+         }
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/worker.rs:1246:
+         submit_for_shard(&mut shard, &mut worker, vec![unit]).unwrap();
+         let written = event(&mut worker);
+         assert!(matches!(written, WorkerEvent::Written { .. }));
+-        assert!(
+-            apply_to_shard(&mut shard, written)[0]
+-                .result
+-                .as_ref()
+-                .unwrap()
+-                .is_empty()
+-        );
++        assert!(apply_to_shard(&mut shard, written)[0]
++            .result
++            .as_ref()
++            .unwrap()
++            .is_empty());
+         assert_eq!(worker.usage().requests, 1);
+         assert!(worker.poll(10).is_empty());
+         assert_eq!(shard.finish(visit), Err(RuntimeError::DependencyPending));
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/worker.rs:1259:
+         shard.admit(group(2), Event::Heartbeat).unwrap();
+         let other = shard.poll(MonoTime(1)).unwrap().unwrap();
+         assert_eq!(other.group, group(2));
+-        assert!(
+-            shard
+-                .step_next(other, MonoTime(1))
+-                .unwrap()
+-                .unwrap()
+-                .result
+-                .unwrap()
+-                .is_empty()
+-        );
++        assert!(shard
++            .step_next(other, MonoTime(1))
++            .unwrap()
++            .unwrap()
++            .result
++            .unwrap()
++            .is_empty());
+         shard.finish(other).unwrap();
+         worker.close();
+         release(&gate);
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/worker.rs:1321:
+             while failures.len() < 2 {
+                 let output = event(&mut worker);
+                 match output {
+-                    WorkerEvent::Written { .. } => assert!(
+-                        apply_to_shard(&mut shard, output).iter().all(|d| d
+-                            .result
+-                            .as_ref()
+-                            .unwrap()
+-                            .is_empty())
+-                    ),
++                    WorkerEvent::Written { .. } => assert!(apply_to_shard(&mut shard, output)
++                        .iter()
++                        .all(|d| d.result.as_ref().unwrap().is_empty())),
+                     WorkerEvent::Failed { request, .. } => {
+                         assert!(failures.insert(request.sequence));
+-                        assert!(
+-                            apply_to_shard(&mut shard, output)
+-                                .iter()
+-                                .all(|d| d.result.is_err())
+-                        );
++                        assert!(apply_to_shard(&mut shard, output)
++                            .iter()
++                            .all(|d| d.result.is_err()));
+                     }
+                     WorkerEvent::Durable { .. } => panic!("failed barrier released durability"),
+                 }

@@ -1,0 +1,66 @@
+{
+  "pid": 1034706,
+  "start": "2026-10-15T04:47:44.899063+00:00",
+  "commands": [
+    [
+      "native-failure-3",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "effect_owner",
+        "native::native_shared_peer_quota_pressure_reconnect_restart_and_retry",
+        "--",
+        "--exact",
+        "--nocapture",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "native-failure-4",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "effect_owner",
+        "native::owning_native_facade_checkpoints_restarts_and_retries_hundred_groups",
+        "--",
+        "--exact",
+        "--nocapture",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "native-control-build",
+      [
+        "cargo",
+        "+stable",
+        "build",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--example",
+        "native_benchmark"
+      ]
+    ]
+  ],
+  "environment": {
+    "CARGO_TARGET_DIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks",
+    "CARGO_BUILD_JOBS": "2",
+    "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration26/test-tmp",
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null,
+    "RUSTC_WRAPPER": null,
+    "RUSTC_WORKSPACE_WRAPPER": null,
+    "PROTOC": null
+  },
+  "runner_sha256": "28f836f2e30c86ef6ad94237f777e60b6c6e73c0e9ee2c0311a73d8214cc89eb"
+}

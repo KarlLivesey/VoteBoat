@@ -1,0 +1,19 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--all-features",
+    "--lib",
+    "opening_fallback_replays_the_full_checked_prefix_and_terminal_error_once",
+    "--",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "start": "2026-10-15T03:38:04.413486+00:00",
+  "end": "2026-10-15T03:38:08.121863+00:00",
+  "elapsed_s": 3.7084044289949816,
+  "exit": 0
+}

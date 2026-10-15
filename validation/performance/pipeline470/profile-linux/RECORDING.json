@@ -1,0 +1,48 @@
+{
+  "scope": "CPU sampling diagnostic of one failing hundred-group snapshot control, whole debug test launch; NOT throughput/acceptance or an unperturbed progress test. Profile I/O and sampling may alter elapsed outcomes. Both original15s deadlines remain. No builds/checks/copies during recording.",
+  "event": "cycles:u",
+  "frequency": 199,
+  "call_graph": "dwarf,16384",
+  "mmap_pages": 128,
+  "settings_before": {
+    "perf_event_paranoid": 2,
+    "kptr_restrict": 2,
+    "perf_event_mlock_kb": 516
+  },
+  "perf": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+  "perf_sha256": "f0fe2b92d280391fa7efa55616f098ba683b9682cf145275d5eda136125f2a64",
+  "perf_version": "perf version 7.2.10-1",
+  "cases": [
+    {
+      "name": "baseline",
+      "exit": 101,
+      "elapsed_s": 66.0505106629862,
+      "data_bytes": 53373676
+    },
+    {
+      "name": "candidate",
+      "exit": 101,
+      "elapsed_s": 50.78007127501769,
+      "data_bytes": 54902596
+    }
+  ],
+  "artifacts": {
+    "baseline": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+      "sha256": "a741b314bd87c1dd3b60a27237c4ebb0935f84143ebf9dd52ff5fc20f37cb8ba"
+    },
+    "candidate": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+      "sha256": "2f264f55b051e30f7b21c1096955fae9d53b59cccb69bfeb38c719571ef4eaaa"
+    }
+  },
+  "settings_after": {
+    "perf_event_paranoid": 2,
+    "kptr_restrict": 2,
+    "perf_event_mlock_kb": 516
+  },
+  "recording_complete": true,
+  "all_workloads_passed": false,
+  "artifact_hashes_unchanged": true,
+  "source_hashes_unchanged": true
+}

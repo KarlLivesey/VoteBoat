@@ -1,0 +1,7 @@
+{
+  "previous": "integration9",
+  "changed_inputs": [
+    "examples/benchmark/shared.rs"
+  ],
+  "reason": "Complete semantic extraction of rejected Node assembly; previous join-loop extraction left caller118lines. Same rejection/cleanup paths, no lint configuration changes."
+}

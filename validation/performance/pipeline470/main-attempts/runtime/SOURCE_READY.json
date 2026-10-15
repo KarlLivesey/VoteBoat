@@ -1,0 +1,88 @@
+{
+  "status": "SOURCE_READY_FOR_PARENT_CHECKS",
+  "checks_by_this_agent": "owned rustfmt only; no Cargo",
+  "shared_files": "ReplicaDriver constructors, existing worker fixtures also include other agents\u2019 edits; listed hashes describe current integrated files, not exclusive authorship",
+  "late_callback_fix": "allocation-free accepted-prefix count and terminal-error replay, same unchanged Core/queue/visit",
+  "fixture_correction": "integration2 original38356 failure retained by root. Valid U=2/originals=2; fallback budget is public two-original projection minus one. None/Some1/Some3 assertions retained.",
+  "files": {
+    "src/worker.rs": {
+      "sha256": "f424caac084bed8b80def7399ab3d8d9d395adeb1b3bcffb4d6af0613bfe52a5",
+      "mode": "0o644"
+    },
+    "src/native/worker.rs": {
+      "sha256": "ccfae64ab017f402b712b7f1e09985879bba540353cb74a6d2470e684d80bb2d",
+      "mode": "0o644"
+    },
+    "src/runtime.rs": {
+      "sha256": "1843fc8e192308ffe37d3c76f10294852ecbd6ada68490d785d7c40fcaa1a6a3",
+      "mode": "0o644"
+    },
+    "src/runtime/append_window.rs": {
+      "sha256": "9f2c7f9fbfd2d6b4e6716a9299a9682be363c8f2227cb6df3d2a82878efe03e3",
+      "mode": "0o644"
+    },
+    "src/runtime/timed.rs": {
+      "sha256": "0c4252a4bff8ce2a3b942720f904ec4925698e4a616ddd6e53776954b5ccb959",
+      "mode": "0o644"
+    },
+    "src/runtime/effects.rs": {
+      "sha256": "20062e646c79c26805f036b37237f3a067f9ed84d3f5459ba234bcd085b446ba",
+      "mode": "0o644"
+    },
+    "src/runtime/effects/append_window.rs": {
+      "sha256": "94313b039aad760013c557d6e0320dcf3715ed40b5b9bffc870a0925ced84e04",
+      "mode": "0o644"
+    },
+    "src/runtime/effects/overlap.rs": {
+      "sha256": "51982ac7ec8a1488d61907f311b1a79d9df67b173e8c76cf9a0ee260652fa984",
+      "mode": "0o644"
+    },
+    "src/runtime/effects/ready.rs": {
+      "sha256": "afa2edc4a7b0ba0956e32e7d5d9d0597ad3ba91a218948e66c6e76eeccd2adb1",
+      "mode": "0o644"
+    },
+    "src/runtime/effect_inspection.rs": {
+      "sha256": "0606404bf02a533dd753b60e5aa17478568a18f2040eeffee2e06e521bdac8b9",
+      "mode": "0o644"
+    },
+    "src/runtime/clients.rs": {
+      "sha256": "6c71c862dbbbf4bd5483f413608b8213527155836d16e39645858aef89d2b623",
+      "mode": "0o644"
+    },
+    "src/runtime/replica.rs": {
+      "sha256": "0e56f75ff1a0d5558faa744a16081b406d2227d4427959a9d4f7a644fb07297d",
+      "mode": "0o644"
+    },
+    "src/runtime/ready_batch.rs": {
+      "sha256": "b1605f56e9cfb978e1c68d2ad41052d5bcb4f6be289a223a5f9b3b907a6c4de6",
+      "mode": "0o644"
+    },
+    "src/runtime/ready_batch/tests.rs": {
+      "sha256": "cb45b547e56dd29944c2796374ff4a2a163e8aad6612b2622e1a6b7288af2259",
+      "mode": "0o644"
+    },
+    "src/runtime/ready_batch/tests/fixture.rs": {
+      "sha256": "0e40a150b7141920639705a188cda1bbd46df4828b883733aa72451bd7ca89da",
+      "mode": "0o644"
+    },
+    "src/runtime/ready_batch/tests/append_window.rs": {
+      "sha256": "92d80b1a5f2807df5e699f495394b5c189f913a5782a8dbae0d45c6ff4bee728",
+      "mode": "0o644"
+    },
+    "tests/worker.rs": {
+      "sha256": "e3b6eb976d33c3853b029f095af1a928b5595dd5c5c9d5d60e07573c6c9cd337",
+      "mode": "0o644"
+    },
+    "tests/worker/append_window.rs": {
+      "sha256": "91554d215af10fab793fac5c8c564f6e45f401cfa23b21977f422ab8bb90d7af",
+      "mode": "0o644"
+    }
+  },
+  "focused_followup": {
+    "prior65248": "terminal1 formatting only; no tests",
+    "source_change": "successful staged Data advances cursor to3, matching ordinary ready collection; existing parked-credits control asserts cursor",
+    "native_failure_model": "complete fsynced B/C frames recover under new session but their exact terminal observations remain Failed; only A Durable",
+    "new_test": "failed_shared_publication_fails_b_c_but_recovers_the_valid_unacknowledged_suffix",
+    "formatting": "parent will run canonical cargo fmt; no additional scoped rustfmt by this agent"
+  }
+}

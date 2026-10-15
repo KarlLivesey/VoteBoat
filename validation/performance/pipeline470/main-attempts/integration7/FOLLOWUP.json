@@ -1,0 +1,12 @@
+{
+  "previous": "integration6",
+  "previous_terminal": {
+    "exit": 0,
+    "end": "2026-10-15T03:43:23.636869+00:00",
+    "same_selected_inputs": true
+  },
+  "changed_inputs": [
+    "examples/benchmark/shared.rs"
+  ],
+  "reason": "All51 native benchmark tests pass; remove unused private shared open wrapper after migration, strict hook before broader regressions."
+}

@@ -1,0 +1,210 @@
+{
+  "affected-remaining.stdout": [
+    {
+      "result": "ok",
+      "passed": 19,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "0.40s"
+    },
+    {
+      "result": "ok",
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "0.00s"
+    },
+    {
+      "result": "ok",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "0.02s"
+    },
+    {
+      "result": "ok",
+      "passed": 32,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "0.31s"
+    },
+    {
+      "result": "ok",
+      "passed": 50,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "75.53s"
+    },
+    {
+      "result": "ok",
+      "passed": 46,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "0.33s"
+    },
+    {
+      "result": "ok",
+      "passed": 79,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "2.73s"
+    },
+    {
+      "result": "ok",
+      "passed": 55,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "1.10s"
+    },
+    {
+      "result": "ok",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "0.58s"
+    },
+    {
+      "result": "ok",
+      "passed": 27,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "0.79s"
+    },
+    {
+      "result": "ok",
+      "passed": 63,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "149.87s"
+    },
+    {
+      "result": "ok",
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "6.15s"
+    }
+  ],
+  "core-regressions.stdout": [
+    {
+      "result": "ok",
+      "passed": 363,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "0.31s"
+    },
+    {
+      "result": "ok",
+      "passed": 195,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "0.13s"
+    },
+    {
+      "result": "ok",
+      "passed": 31,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "0.03s"
+    },
+    {
+      "result": "ok",
+      "passed": 29,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "0.02s"
+    },
+    {
+      "result": "ok",
+      "passed": 38,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "0.07s"
+    },
+    {
+      "result": "ok",
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "0.00s"
+    },
+    {
+      "result": "ok",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "0.12s"
+    }
+  ],
+  "matched.stdout": [
+    {
+      "result": "ok",
+      "passed": 70,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "1.73s"
+    }
+  ],
+  "native-benchmark-tests.stdout": [
+    {
+      "result": "ok",
+      "passed": 51,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 0,
+      "elapsed_text": "278.72s"
+    }
+  ],
+  "services-three.stdout": [
+    {
+      "result": "ok",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filtered": 201,
+      "elapsed_text": "23.73s"
+    }
+  ]
+}

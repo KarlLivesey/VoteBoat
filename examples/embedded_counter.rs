@@ -181,6 +181,7 @@ fn startup(root: &str, tls: &Path, mode: NativeOpenMode) -> Result<NativeStartup
         entropy_seed: 17,
         limits: NodeLimits::default(),
         ready_visit_items: 16,
+        append_window: None,
         tls: check(NativeTlsConfig::new(TlsCredentials {
             roots: vec![material(&tls.join("ca.der"))?],
             certificate_chain: vec![material(&tls.join("node1.der"))?],

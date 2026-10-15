@@ -1,0 +1,24 @@
+
+running 14 tests
+test raft::append_window::tests::actual_full_capacities_and_independent_entry_owners_fit_the_peak_charge ... ok
+test raft::append_window::tests::default_remains_serial_and_refusal_returns_original_owned_buffers ... ok
+test raft::append_window::tests::early_first_unit_preserves_original_context_and_never_exposes_descendant ... ok
+test raft::append_window::tests::final_head_has_one_commit_plan_and_no_early_application ... ok
+test raft::append_window::tests::late_callback_error_fences_without_escaped_output ... ok
+test raft::append_window::tests::sealed_or_budget_refusal_preserves_prior_window_and_legacy_valid_input ... ok
+test raft::append_window::tests::stale_window_ids_and_each_ticket_scope_field_are_rejected ... ok
+test raft::append_window::tests::startup_limits_and_aggregate_count_never_raise_the_legacy_envelope ... ok
+test raft::append_window::tests::three_revisions_wait_for_all_exact_tickets_then_match_independent_serial_log ... ok
+test raft::append_window::tests::wrong_full_effect_wrong_ticket_and_wrong_order_cannot_mutate_or_seal ... ok
+test runtime::ready_batch::tests::append_window::failed_empty_successor_visit_seals_without_consuming_or_releasing_old_inputs ... ok
+test runtime::ready_batch::tests::append_window::opening_fallback_replays_the_full_checked_prefix_and_terminal_error_once ... FAILED
+test runtime::ready_batch::tests::append_window::parked_inputs_keep_exact_visits_and_wait_for_every_durable_unit ... ok
+test runtime::ready_batch::tests::append_window::queued_control_seals_and_remains_queued_until_the_window_drains ... ok
+
+failures:
+
+failures:
+    runtime::ready_batch::tests::append_window::opening_fallback_replays_the_full_checked_prefix_and_terminal_error_once
+
+test result: FAILED. 13 passed; 1 failed; 0 ignored; 0 measured; 417 filtered out; finished in 0.00s
+

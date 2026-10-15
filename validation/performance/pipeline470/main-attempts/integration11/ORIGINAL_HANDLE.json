@@ -1,0 +1,5 @@
+{
+  "session_id": 23424,
+  "command": "python3 target/p9/slice470/integration11/run.py",
+  "scope": "Original affected all-feature/core/matched/service regression sequence; Rust source held, socket access authorized. No timing."
+}

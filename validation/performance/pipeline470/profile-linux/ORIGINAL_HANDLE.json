@@ -1,0 +1,5 @@
+{
+  "session_id": 69979,
+  "command": "python3 target/p9/slice470/profile16/record.py",
+  "scope": "Serial baseline/candidate CPU profiles; user-space cycles only; policies2/2/516 unchanged; no competing Linux work; actual test failures remain separate from recorder completion."
+}

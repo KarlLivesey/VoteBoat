@@ -1,0 +1,717 @@
+{
+  "baseline": {
+    "scope": "Whole debug test launch, sample counts not elapsed or CPU duration. Native/inline contexts overlap. Missing callers are never invented; structured frames only.",
+    "samples": 3204,
+    "threads": {
+      "env": 5,
+      "effect_owner-3b": 9,
+      "native::automat": 2861,
+      "voteboat-snapsh": 111,
+      "voteboat-dial": 7,
+      "voteboat-wal": 211
+    },
+    "chain_depth_0_1_2_3plus": {
+      "2": 122,
+      "3": 282,
+      "1": 619,
+      "0": 2181
+    },
+    "self": [
+      {
+        "function": "[unknown]",
+        "dso": "/usr/lib/libc.so.6",
+        "samples": 470,
+        "percent": 14.66916354556804
+      },
+      {
+        "function": "<u128 as core::cmp::PartialEq>::eq",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 233,
+        "percent": 7.272159800249688
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::LeafOrInternal>>::find_key_index::<voteboat::identity::NodeId>",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 118,
+        "percent": 3.682896379525593
+      },
+      {
+        "function": "<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<voteboat::identity::NodeId>> as core::iter::traits::iterator::Iterator>::next",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 111,
+        "percent": 3.4644194756554305
+      },
+      {
+        "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::entry",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 102,
+        "percent": 3.183520599250936
+      },
+      {
+        "function": "alloc::collections::btree::mem::replace::<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>,",
+        "dso": "&voteboat::identity::NodeId, &voteboat::identity::StoreIdentity), <alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::next_unchecked::{closure#0}> (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 98,
+        "percent": 3.058676654182272
+      },
+      {
+        "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Dying, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::deallocating_next::<alloc::alloc::Global>",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 97,
+        "percent": 3.027465667915106
+      },
+      {
+        "function": "<core::slice::iter::Iter<voteboat::identity::NodeId> as core::iter::traits::iterator::Iterator>::next",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 68,
+        "percent": 2.1223470661672907
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::LeafOrInternal>>::find_key_index::<voteboat::identity::NodeId>",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 60,
+        "percent": 1.8726591760299625
+      },
+      {
+        "function": "<core::num::nonzero::NonZero<u64> as core::cmp::Ord>::cmp",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 54,
+        "percent": 1.6853932584269662
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::LeafOrInternal>>::search_tree::<voteboat::identity::NodeId>",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 48,
+        "percent": 1.4981273408239701
+      },
+      {
+        "function": "<core::ops::range::Range<usize> as core::slice::index::SliceIndex<[_]>>::get_unchecked::precondition_check",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 46,
+        "percent": 1.435705368289638
+      },
+      {
+        "function": "core::slice::index::range::<core::ops::range::RangeFull>",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 43,
+        "percent": 1.3420724094881398
+      },
+      {
+        "function": "<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::into_mut",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 41,
+        "percent": 1.2796504369538078
+      },
+      {
+        "function": "alloc::collections::btree::mem::replace::<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, voteboat::identity::GroupIdentity, voteboat::runtime::Group, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>,",
+        "dso": "&voteboat::identity::GroupIdentity, &voteboat::runtime::Group), <alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, voteboat::identity::GroupIdentity, voteboat::runtime::Group, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::next_unchecked::{closure#0}> (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 41,
+        "percent": 1.2796504369538078
+      },
+      {
+        "function": "<voteboat::runtime::Shard<voteboat::native::runtime::FairScheduler>>::reserved_connections::{closure#0}",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 39,
+        "percent": 1.2172284644194757
+      },
+      {
+        "function": "[unknown]",
+        "dso": "[unknown]",
+        "samples": 37,
+        "percent": 1.1548064918851435
+      },
+      {
+        "function": "fsync",
+        "dso": "/usr/lib/libc.so.6",
+        "samples": 36,
+        "percent": 1.1235955056179776
+      },
+      {
+        "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::LeafOrInternal>, alloc::collections::btree::node::marker::KV>>::into_kv",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 35,
+        "percent": 1.0923845193508115
+      },
+      {
+        "function": "alloc::collections::btree::mem::replace::<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Dying, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>, alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Dying, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::LeafOrInternal>, alloc::collections::btree::node::marker::KV>, <alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Dying, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::deallocating_next_unchecked<alloc::alloc::Global>::{closure#0}>",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 35,
+        "percent": 1.0923845193508115
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::LeafOrInternal>>::search_tree::<voteboat::identity::NodeId>",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 33,
+        "percent": 1.0299625468164795
+      },
+      {
+        "function": "<std::fs::File>::sync_all",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 32,
+        "percent": 0.9987515605493134
+      },
+      {
+        "function": "<std::thread::thread::Thread>::park",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 30,
+        "percent": 0.9363295880149812
+      },
+      {
+        "function": "<core::option::Option<voteboat::snapshot::SnapshotRef>>::map_or::<u64, <voteboat::log::GroupLog>::base_index::{closure#0}>",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 29,
+        "percent": 0.9051186017478152
+      },
+      {
+        "function": "<alloc::collections::vec_deque::VecDeque<voteboat::runtime::Queued>>::slice_ranges::<core::ops::range::RangeFull>",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 29,
+        "percent": 0.9051186017478152
+      },
+      {
+        "function": "<core::num::nonzero::NonZero<u128> as core::cmp::PartialEq>::eq",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 27,
+        "percent": 0.8426966292134831
+      },
+      {
+        "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::get::<voteboat::identity::NodeId>",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 26,
+        "percent": 0.8114856429463171
+      },
+      {
+        "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::next_unchecked::{closure#0}",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 26,
+        "percent": 0.8114856429463171
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::Leaf>>::push_with_handle",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 24,
+        "percent": 0.7490636704119851
+      },
+      {
+        "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert_fit",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 22,
+        "percent": 0.686641697877653
+      }
+    ],
+    "inclusive": [
+      {
+        "function": "[unknown]",
+        "samples": 635,
+        "percent": 19.818976279650435
+      },
+      {
+        "function": "<std::fs::File>::sync_all",
+        "samples": 56,
+        "percent": 1.7478152309612984
+      },
+      {
+        "function": "std::sys::pal::unix::cvt_r::<i32, <std::sys::fs::unix::File>::fsync::{closure#0}>",
+        "samples": 55,
+        "percent": 1.7166042446941323
+      },
+      {
+        "function": "<std::sys::fs::unix::File>::fsync",
+        "samples": 55,
+        "percent": 1.7166042446941323
+      },
+      {
+        "function": "fsync",
+        "samples": 37,
+        "percent": 1.1548064918851435
+      },
+      {
+        "function": "std::sys::pal::unix::cvt::<i32>",
+        "samples": 32,
+        "percent": 0.9987515605493134
+      },
+      {
+        "function": "<std::sys::fs::unix::File>::fsync::{closure#0}",
+        "samples": 30,
+        "percent": 0.9363295880149812
+      },
+      {
+        "function": "voteboat::native::log_store::file::sync_directory",
+        "samples": 30,
+        "percent": 0.9363295880149812
+      },
+      {
+        "function": "<std::sys::fs::unix::File>::fsync::os_fsync",
+        "samples": 30,
+        "percent": 0.9363295880149812
+      },
+      {
+        "function": "core::ptr::drop_glue::<alloc::vec::set_len_on_drop::SetLenOnDrop>",
+        "samples": 27,
+        "percent": 0.8426966292134831
+      },
+      {
+        "function": "<voteboat::native::log_store::file::FileLogIo>::publish_with::<<voteboat::native::log_store::file::FileLogIo as voteboat::native::log_store::JournalIo>::publish_manifest::{closure#0}::{closure#0}>::{closure#2}",
+        "samples": 26,
+        "percent": 0.8114856429463171
+      },
+      {
+        "function": "<std::sync::mpmc::context::Context>::wait_until",
+        "samples": 26,
+        "percent": 0.8114856429463171
+      },
+      {
+        "function": "<voteboat::native::log_store::file::FileLogIo as voteboat::native::log_store::JournalIo>::sync_log",
+        "samples": 22,
+        "percent": 0.686641697877653
+      },
+      {
+        "function": "<u128 as core::cmp::PartialEq>::eq",
+        "samples": 21,
+        "percent": 0.6554307116104869
+      },
+      {
+        "function": "<std::sys::sync::thread_parking::futex::Parker>::park",
+        "samples": 19,
+        "percent": 0.5930087390761548
+      },
+      {
+        "function": "<std::thread::thread::Thread>::park",
+        "samples": 19,
+        "percent": 0.5930087390761548
+      },
+      {
+        "function": "<voteboat::native::log_store::file::FileLogIo as voteboat::native::log_store::JournalIo>::sync_log::{closure#0}",
+        "samples": 18,
+        "percent": 0.5617977528089888
+      },
+      {
+        "function": "<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo> as voteboat::log::LogStore>::barrier",
+        "samples": 15,
+        "percent": 0.4681647940074906
+      },
+      {
+        "function": "std::fs::rename::<std::path::PathBuf, std::path::PathBuf>",
+        "samples": 15,
+        "percent": 0.4681647940074906
+      },
+      {
+        "function": "std::sys::pal::unix::futex::futex_wait",
+        "samples": 14,
+        "percent": 0.4369538077403246
+      },
+      {
+        "function": "<voteboat::native::snapshot_store::FileSnapshotIo as voteboat::native::snapshot_store::SnapshotIo>::publish_manifest",
+        "samples": 13,
+        "percent": 0.40574282147315854
+      },
+      {
+        "function": "snprintf",
+        "samples": 12,
+        "percent": 0.37453183520599254
+      },
+      {
+        "function": "core::ptr::drop_glue::<std::fs::File>",
+        "samples": 12,
+        "percent": 0.37453183520599254
+      },
+      {
+        "function": "<alloc::raw_vec::RawVecInner>::finish_grow",
+        "samples": 11,
+        "percent": 0.3433208489388265
+      },
+      {
+        "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::get::<voteboat::identity::NodeId>",
+        "samples": 11,
+        "percent": 0.3433208489388265
+      },
+      {
+        "function": "core::ptr::drop_glue::<std::path::PathBuf>",
+        "samples": 10,
+        "percent": 0.3121098626716604
+      },
+      {
+        "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Dying, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::deallocating_next::<alloc::alloc::Global>",
+        "samples": 10,
+        "percent": 0.3121098626716604
+      },
+      {
+        "function": "<voteboat::native::log_store::file::FileLogIo>::timed::<(), <voteboat::native::log_store::file::FileLogIo as voteboat::native::log_store::JournalIo>::sync_log::{closure#0}>",
+        "samples": 9,
+        "percent": 0.2808988764044944
+      },
+      {
+        "function": "<voteboat::native::snapshot_store::FileSnapshotIo>::create::<std::path::PathBuf>",
+        "samples": 9,
+        "percent": 0.2808988764044944
+      },
+      {
+        "function": "<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<voteboat::identity::GroupIdentity>> as core::iter::traits::iterator::Iterator>::next",
+        "samples": 9,
+        "percent": 0.2808988764044944
+      }
+    ],
+    "observed_context_samples": {
+      "allocator_named": 38,
+      "group_config": 6,
+      "snapshot_worker": 3,
+      "main_drive": 4
+    }
+  },
+  "candidate": {
+    "scope": "Whole debug test launch, sample counts not elapsed or CPU duration. Native/inline contexts overlap. Missing callers are never invented; structured frames only.",
+    "samples": 3296,
+    "threads": {
+      "env": 5,
+      "effect_owner-3b": 4,
+      "native::automat": 2929,
+      "voteboat-snapsh": 97,
+      "voteboat-dial": 15,
+      "voteboat-wal": 246
+    },
+    "chain_depth_0_1_2_3plus": {
+      "2": 51,
+      "1": 562,
+      "3": 77,
+      "0": 2606
+    },
+    "self": [
+      {
+        "function": "[unknown]",
+        "dso": "/usr/lib/libc.so.6",
+        "samples": 488,
+        "percent": 14.805825242718447
+      },
+      {
+        "function": "<u128 as core::cmp::PartialEq>::eq",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 207,
+        "percent": 6.280339805825243
+      },
+      {
+        "function": "<core::iter::adapters::enumerate::Enumerate<core::slice::iter::Iter<voteboat::identity::NodeId>> as core::iter::traits::iterator::Iterator>::next",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 151,
+        "percent": 4.581310679611651
+      },
+      {
+        "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::entry",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 105,
+        "percent": 3.1856796116504853
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::LeafOrInternal>>::find_key_index::<voteboat::identity::NodeId>",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 104,
+        "percent": 3.1553398058252426
+      },
+      {
+        "function": "alloc::collections::btree::mem::replace::<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>,",
+        "dso": "&voteboat::identity::NodeId, &voteboat::identity::StoreIdentity), <alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::next_unchecked::{closure#0}> (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 102,
+        "percent": 3.0946601941747574
+      },
+      {
+        "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Dying, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::deallocating_next::<alloc::alloc::Global>",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 95,
+        "percent": 2.8822815533980584
+      },
+      {
+        "function": "<core::slice::iter::Iter<voteboat::identity::NodeId> as core::iter::traits::iterator::Iterator>::next",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 59,
+        "percent": 1.7900485436893203
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::LeafOrInternal>>::search_tree::<voteboat::identity::NodeId>",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 54,
+        "percent": 1.6383495145631068
+      },
+      {
+        "function": "<voteboat::identity::NodeId as core::borrow::Borrow<voteboat::identity::NodeId>>::borrow",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 52,
+        "percent": 1.5776699029126213
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::LeafOrInternal>>::find_key_index::<voteboat::identity::NodeId>",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 52,
+        "percent": 1.5776699029126213
+      },
+      {
+        "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::LeafOrInternal>, alloc::collections::btree::node::marker::KV>>::into_kv",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 46,
+        "percent": 1.395631067961165
+      },
+      {
+        "function": "<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::into_mut",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 45,
+        "percent": 1.3652912621359223
+      },
+      {
+        "function": "<core::num::nonzero::NonZero<u64> as core::cmp::Ord>::cmp",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 44,
+        "percent": 1.3349514563106797
+      },
+      {
+        "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::insert_fit",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 41,
+        "percent": 1.2439320388349515
+      },
+      {
+        "function": "[unknown]",
+        "dso": "[unknown]",
+        "samples": 39,
+        "percent": 1.183252427184466
+      },
+      {
+        "function": "<std::fs::File>::sync_all",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 39,
+        "percent": 1.183252427184466
+      },
+      {
+        "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::LeafOrInternal>, alloc::collections::btree::node::marker::KV>>::next_leaf_edge",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 34,
+        "percent": 1.0315533980582525
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::LeafOrInternal>>::search_tree::<voteboat::identity::NodeId>",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 32,
+        "percent": 0.970873786407767
+      },
+      {
+        "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::insert",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 31,
+        "percent": 0.9405339805825242
+      },
+      {
+        "function": "<alloc::collections::vec_deque::VecDeque<voteboat::runtime::Queued>>::iter",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 30,
+        "percent": 0.9101941747572816
+      },
+      {
+        "function": "fsync",
+        "dso": "/usr/lib/libc.so.6",
+        "samples": 29,
+        "percent": 0.8798543689320388
+      },
+      {
+        "function": "<alloc::collections::btree::navigate::LazyLeafRange<alloc::collections::btree::node::marker::Dying, voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::deallocating_end::<alloc::alloc::Global>",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 29,
+        "percent": 0.8798543689320388
+      },
+      {
+        "function": "alloc::collections::btree::mem::replace::<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Dying, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>, alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Dying, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::LeafOrInternal>, alloc::collections::btree::node::marker::KV>, <alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Dying, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::deallocating_next_unchecked<alloc::alloc::Global>::{closure#0}>",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 28,
+        "percent": 0.8495145631067961
+      },
+      {
+        "function": "<std::thread::thread::Thread>::park",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 28,
+        "percent": 0.8495145631067961
+      },
+      {
+        "function": "<alloc::collections::vec_deque::VecDeque<voteboat::runtime::Queued>>::slice_ranges::<core::ops::range::RangeFull>",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 28,
+        "percent": 0.8495145631067961
+      },
+      {
+        "function": "alloc::collections::btree::mem::replace::<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, voteboat::identity::GroupIdentity, voteboat::runtime::Group, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>,",
+        "dso": "&voteboat::identity::GroupIdentity, &voteboat::runtime::Group), <alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, voteboat::identity::GroupIdentity, voteboat::runtime::Group, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::next_unchecked::{closure#0}> (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 28,
+        "percent": 0.8495145631067961
+      },
+      {
+        "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::Edge>>::next_kv",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 26,
+        "percent": 0.7888349514563107
+      },
+      {
+        "function": "alloc::collections::btree::node::slice_insert::<voteboat::identity::NodeId>",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 26,
+        "percent": 0.7888349514563107
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::Leaf>>::push_with_handle",
+        "dso": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+        "samples": 24,
+        "percent": 0.7281553398058253
+      }
+    ],
+    "inclusive": [
+      {
+        "function": "[unknown]",
+        "samples": 568,
+        "percent": 17.233009708737864
+      },
+      {
+        "function": "fsync",
+        "samples": 31,
+        "percent": 0.9405339805825242
+      },
+      {
+        "function": "<std::fs::File>::sync_all",
+        "samples": 18,
+        "percent": 0.5461165048543689
+      },
+      {
+        "function": "snprintf",
+        "samples": 16,
+        "percent": 0.4854368932038835
+      },
+      {
+        "function": "std::sys::pal::unix::cvt_r::<i32, <std::sys::fs::unix::File>::fsync::{closure#0}>",
+        "samples": 16,
+        "percent": 0.4854368932038835
+      },
+      {
+        "function": "<std::sys::fs::unix::File>::fsync",
+        "samples": 16,
+        "percent": 0.4854368932038835
+      },
+      {
+        "function": "std::sys::pal::unix::cvt::<i32>",
+        "samples": 10,
+        "percent": 0.30339805825242716
+      },
+      {
+        "function": "<voteboat::native::snapshot_store::FileSnapshotIo as voteboat::native::snapshot_store::SnapshotIo>::publish_manifest",
+        "samples": 10,
+        "percent": 0.30339805825242716
+      },
+      {
+        "function": "__ctype_init",
+        "samples": 9,
+        "percent": 0.27305825242718446
+      },
+      {
+        "function": "<std::sys::fs::unix::File>::fsync::{closure#0}",
+        "samples": 7,
+        "percent": 0.21237864077669902
+      },
+      {
+        "function": "<std::sys::fs::unix::File>::fsync::os_fsync",
+        "samples": 7,
+        "percent": 0.21237864077669902
+      },
+      {
+        "function": "read",
+        "samples": 7,
+        "percent": 0.21237864077669902
+      },
+      {
+        "function": "voteboat::native::log_store::file::sync_directory",
+        "samples": 6,
+        "percent": 0.1820388349514563
+      },
+      {
+        "function": "alloc::alloc::alloc",
+        "samples": 5,
+        "percent": 0.15169902912621358
+      },
+      {
+        "function": "<alloc::alloc::Global>::alloc_impl_runtime",
+        "samples": 5,
+        "percent": 0.15169902912621358
+      },
+      {
+        "function": "cfree",
+        "samples": 5,
+        "percent": 0.15169902912621358
+      },
+      {
+        "function": "<voteboat::native::log_store::file::FileLogIo>::publish_with::<<voteboat::native::log_store::file::FileLogIo as voteboat::native::log_store::JournalIo>::publish_manifest::{closure#0}::{closure#0}>::{closure#2}",
+        "samples": 4,
+        "percent": 0.12135922330097088
+      },
+      {
+        "function": "std::fs::rename::<std::path::PathBuf, std::path::PathBuf>",
+        "samples": 4,
+        "percent": 0.12135922330097088
+      },
+      {
+        "function": "<core::iter::adapters::chain::Chain<alloc::collections::btree::map::Keys<voteboat::identity::GroupIdentity, voteboat::log::GroupLog>, alloc::collections::btree::map::Keys<voteboat::identity::GroupIdentity, voteboat::log::GroupLog>> as core::iter::traits::iterator::Iterator>::try_fold::<(), core::iter::traits::iterator::Iterator::any::check<&voteboat::identity::GroupIdentity, voteboat::log::stage_batch::{closure#0}>::{closure#0}, core::ops::control_flow::ControlFlow<()>>",
+        "samples": 4,
+        "percent": 0.12135922330097088
+      },
+      {
+        "function": "core::ptr::drop_glue::<std::fs::File>",
+        "samples": 3,
+        "percent": 0.09101941747572816
+      },
+      {
+        "function": "<std::fs::File as std::io::Write>::write",
+        "samples": 3,
+        "percent": 0.09101941747572816
+      },
+      {
+        "function": "<voteboat::native::snapshot_store::FileSnapshotIo>::create::<std::path::PathBuf>",
+        "samples": 3,
+        "percent": 0.09101941747572816
+      },
+      {
+        "function": "<alloc::alloc::Global>::grow_impl",
+        "samples": 3,
+        "percent": 0.09101941747572816
+      },
+      {
+        "function": "<alloc::alloc::Global as core::alloc::Allocator>::grow",
+        "samples": 3,
+        "percent": 0.09101941747572816
+      },
+      {
+        "function": "<alloc::raw_vec::RawVecInner>::finish_grow",
+        "samples": 3,
+        "percent": 0.09101941747572816
+      },
+      {
+        "function": "alloc::alloc::realloc_nonnull",
+        "samples": 3,
+        "percent": 0.09101941747572816
+      },
+      {
+        "function": "<alloc::alloc::Global>::grow_impl_runtime",
+        "samples": 3,
+        "percent": 0.09101941747572816
+      },
+      {
+        "function": "<voteboat::native::snapshot_store::FileSnapshotIo as voteboat::native::snapshot_store::SnapshotIo>::sync_slot",
+        "samples": 3,
+        "percent": 0.09101941747572816
+      },
+      {
+        "function": "<voteboat::log_format::Decoder>::tree",
+        "samples": 3,
+        "percent": 0.09101941747572816
+      },
+      {
+        "function": "realloc",
+        "samples": 3,
+        "percent": 0.09101941747572816
+      }
+    ],
+    "observed_context_samples": {
+      "allocator_named": 19,
+      "group_config": 5,
+      "snapshot_worker": 1
+    }
+  }
+}

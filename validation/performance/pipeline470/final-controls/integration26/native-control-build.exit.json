@@ -1,0 +1,16 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "build",
+    "--locked",
+    "--offline",
+    "--all-features",
+    "--example",
+    "native_benchmark"
+  ],
+  "start": "2026-10-15T04:49:12.781639+00:00",
+  "end": "2026-10-15T04:49:18.180131+00:00",
+  "elapsed_s": 5.3985087079927325,
+  "exit": 0
+}

@@ -1,0 +1,12 @@
+{
+  "selected_paths": 1454,
+  "before_after_files_exact": true,
+  "current_modes_hashes_exact": true,
+  "mismatches": [],
+  "recorded_after_sha256": "f7c7a903f30895a5acfd33377b6c2563a4f8afb4a65900a81f8b4e6a6439cf5e",
+  "worker_before_doc_correction": {
+    "sha256": "f424caac084bed8b80def7399ab3d8d9d395adeb1b3bcffb4d6af0613bfe52a5",
+    "mode": "0o644"
+  },
+  "scope": "Verified after actual original49766 terminal0, before root planned doc-only worker.rs correction. No source changes or test reruns during collection."
+}

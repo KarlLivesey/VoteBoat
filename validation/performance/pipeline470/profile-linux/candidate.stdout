@@ -1,0 +1,11 @@
+
+running 1 test
+test native::automatic_hundred_group_checkpoints_reclaim_and_reopen ... FAILED
+
+failures:
+
+failures:
+    native::automatic_hundred_group_checkpoints_reclaim_and_reopen
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 202 filtered out; finished in 46.41s
+

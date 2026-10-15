@@ -1,0 +1,11 @@
+{
+  "command": [
+    "node",
+    "--input-type=module",
+    "-e",
+    "import {checkStorage} from \"./validation/check-benchmark-storage.mjs\"; for (const p of [\"target/p9/native458-linux/controls/tcp-storage/storage.csv\", \"target/p9/native458-linux/controls/quic-storage/storage.csv\"]) { console.log(p); checkStorage(p,1,2); }"
+  ],
+  "exit": 0,
+  "reason": "Actual final-byte historical21 validation after agent NEW35-only assertions; preserve filesystem raw outputs.",
+  "checker_sha256": "d198a89660a65e8f00e64f06a9d43983124b47a0db5d31a6d95801fbe9603702"
+}

@@ -49,11 +49,10 @@ pub(super) fn recover<A: CheckpointStateMachine>(
             prepared.applications.get_mut(&bootstrap.group).unwrap(),
         ))?
         .0;
-        prepared.cores.push(super::super::configured_core(
-            core,
-            config.tls.wire_version(),
-            authorization,
-        ));
+        let mut core =
+            super::super::configured_core(core, config.tls.wire_version(), authorization);
+        checked(core.configure_append_window(config.append_window))?;
+        prepared.cores.push(core);
         prepared.snapshots.insert(bootstrap.group, snapshots);
     }
     prepared.store = Some(store);

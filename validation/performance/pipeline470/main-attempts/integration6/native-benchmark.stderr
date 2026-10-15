@@ -1,0 +1,27 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+warning: function `open` is never used
+  --> examples/benchmark/shared.rs:34:15
+   |
+34 | pub(super) fn open(
+   |               ^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `voteboat` (example "native_benchmark" test) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.39s
+     Running unittests examples/native_benchmark.rs (target/p9/slice470/integration-checks/debug/examples/native_benchmark-38789566316d72a1)
+maintenance recovery files: /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration6/test-tmp/voteboat-shared-repair-4006625-Quic-1792035692694152061
+protocol=Quic phase=initial-write
+protocol=Quic phase=survivor-write
+protocol=Quic phase=automatic-checkpoint
+protocol=Quic phase=reopen
+protocol=Quic phase=arm-recovery
+maintenance recovery files: /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration6/test-tmp/voteboat-shared-repair-4006625-TcpTls-1792035708245215579
+protocol=TcpTls phase=initial-write
+protocol=TcpTls phase=survivor-write
+protocol=TcpTls phase=automatic-checkpoint
+protocol=TcpTls phase=reopen
+protocol=TcpTls phase=arm-recovery
+covered automatic checkpoint: original=ScheduledCheckpoint { admission: AdmissionTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(6), incarnation: GroupIncarnation(1) }, sequence: 5 }, target_index: 2, executed: false } step=OwnerStep { admission: Some(AdmissionTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(6), incarnation: GroupIncarnation(1) }, sequence: 5 }), proposed: None, visit: VisitTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(6), incarnation: GroupIncarnation(1) }, sequence: 33693 }, operation: None, read: None, error: Some(NotApplied) } durable_base=3 commit=3
+receive pressure files: /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration6/test-tmp/voteboat-shared-repair-4006625-Quic-1792035746588891505
+receive pressure files: /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration6/test-tmp/voteboat-shared-repair-4006625-TcpTls-1792035763951844924

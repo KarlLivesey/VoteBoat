@@ -32,6 +32,7 @@ use crate::{
     worker::*,
 };
 use std::{collections::BTreeMap, net::SocketAddr, net::TcpListener, path::PathBuf, sync::Arc};
+mod append_window;
 mod multi;
 mod owner_limits;
 mod peer_rotation;
@@ -72,6 +73,10 @@ pub struct NativeStartup {
     /// background turns. Native defaults select 16; this does not promise a
     /// proposal batch width. Valid startup values are 1..=64.
     pub ready_visit_items: usize,
+    /// Explicit bounded successive Command append units for an ordinary group.
+    /// None preserves serial persistence. The application and selected worker
+    /// must support the full window; no durability or wire format is changed.
+    pub append_window: Option<crate::raft::AppendWindowLimits>,
 }
 /// Explicit trusted deployment input for reopening a durably assigned member.
 /// Bootstrap remains the original group identity/history. Provisioned stores
@@ -601,6 +606,8 @@ impl NativeStartup {
         let mut application = Some(app);
         let result = (|| {
             self.validate()?;
+            validate_storage_selection(&self, LogLimits::default())?;
+            self.validate_append_application(application.as_ref().unwrap())?;
             application
                 .as_ref()
                 .unwrap()
@@ -872,6 +879,7 @@ impl NativeStartup {
                 rotation.validate(&self, authorization.stores(&self))?;
             }
             validate_fresh_application(application.as_ref().unwrap(), self.bootstrap.group)?;
+            self.validate_append_application(application.as_ref().unwrap())?;
             match protocol {
                 NativePeerProtocol::TcpTls => {
                     let listener = TcpListener::bind(self.listen)?;
@@ -979,6 +987,7 @@ fn validate_storage_selection(
     let limits = checked(limits.validate())?;
     let worker = startup_worker_limits(limits)?;
     startup_shard_limits(limits, 1, config.ready_visit_items)?;
+    config.validate_append_limits(limits, worker)?;
     if worker.batch_units > limits.max_batch_units || worker.batch_bytes > limits.max_batch_bytes {
         return Err(error(
             "storage limits",
@@ -1114,7 +1123,8 @@ fn recover_storage<A: CheckpointStateMachine>(
         app,
     ))?
     .0;
-    let core = configured_core(core, config.tls.wire_version(), authorization);
+    let mut core = configured_core(core, config.tls.wire_version(), authorization);
+    checked(core.configure_append_window(config.append_window))?;
     Ok(StartupStorage {
         store,
         snapshots,
@@ -1435,17 +1445,23 @@ where
     } = application_routes(timed.authorization())?;
     let factory = transport_factory(config.tls.wire_version())?;
     let worker_limits = startup_worker_limits(store.limits())?;
-    cleanup.log = Some(checked(NativeLogWorker::spawn(
+    let worker_binding = WorkerBinding {
+        store: store.binding(),
+        generation: StorageWorkerGeneration::new(1).unwrap(),
+    };
+    let owner = checked(EffectOwner::new(timed, worker_binding, owner_limits))?;
+    checked(owner.validate_append_pipeline_limits(
+        worker_binding,
+        worker_limits,
+        config.append_window.map_or(1, |window| window.max_units),
+    ))?;
+    cleanup.log = Some(checked(NativeLogWorker::spawn_with_group_pipeline(
         store,
         StorageWorkerGeneration::new(1).unwrap(),
         worker_limits,
         wake.clone(),
+        config.append_window.map_or(1, |window| window.max_units),
     ))?);
-    let owner = checked(EffectOwner::new(
-        timed,
-        cleanup.log.as_ref().unwrap().binding(),
-        owner_limits,
-    ))?;
     cleanup.snapshots = Some(checked(NativeSnapshotWorker::spawn(
         std::mem::take(&mut prepared.snapshots),
         SnapshotWorkerBinding {

@@ -1,0 +1,27 @@
+{
+  "src/raft.rs": {
+    "sha256": "63f20f9f5ef04e6a29d6aebe27e35c84ad1c3a499a3854d591a5fcee35b3d91f",
+    "mode": "0o644"
+  },
+  "src/raft/batch_limits.rs": {
+    "sha256": "71de8ea344da994118532c3f1b6c228086f0dbb25252e16e0c93ace88796acda",
+    "mode": "0o644"
+  },
+  "src/raft/admitted_replication.rs": {
+    "sha256": "101510a6a36f5227b2e8cbac21efca67efd72f0ef087e2c264b3e01276d82803",
+    "mode": "0o644"
+  },
+  "src/log/transition/view.rs": {
+    "sha256": "ec7fcaef74aa3505bc39076b32cba6e6979699931dcdce76d9ec18748142eb96",
+    "mode": "0o644"
+  },
+  "src/log/transition/incoming.rs": {
+    "sha256": "3ec8cc8e0b2a8acd05f8f915dad3490c6430b80d0ee417e4f5c13381e322a357",
+    "mode": "0o644"
+  },
+  "src/raft/proposals.rs": {
+    "sha256": "799d84215db79ce5f9e264c8631b3863a5e1526a66c1defe2f871aa6c3c7211b",
+    "mode": "0o644",
+    "scope": "committed baseline; only Core author edits this file"
+  }
+}

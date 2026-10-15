@@ -1,0 +1,5 @@
+{
+  "session_id": 75899,
+  "command": "python3 target/p9/slice470/integration6/run.py",
+  "scope": "Linux original integration6 format/native benchmark tests; source held"
+}

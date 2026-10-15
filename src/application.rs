@@ -20,7 +20,7 @@ use crate::{
 };
 use std::collections::{BTreeMap, BTreeSet};
 
-pub const PROPOSAL_ADMISSION_CONTRACT_VERSION: u32 = 1;
+pub const PROPOSAL_ADMISSION_CONTRACT_VERSION: u32 = 2;
 
 /// Deterministic application admission against all unapplied durable commands
 /// and retained queued/in-flight client commands. The caller serializes this
@@ -37,6 +37,22 @@ where
     /// singleton execution for applications with context-dependent guards.
     /// This grants no durability, admission or result authority.
     fn supports_ready_batch(&self) -> bool {
+        false
+    }
+
+    /// Opt into bounded successive ordinary append units while canonical
+    /// durable Core and application state remain unchanged. This is stronger
+    /// than `supports_ready_batch`: earlier units may be staged or Written,
+    /// and the Core reports a pending dependency throughout the window.
+    ///
+    /// The caller retains every predecessor original in the pending iterator
+    /// until its normal log/application takeover, including canceled waits.
+    /// Validation must remain valid under those observations and preserve
+    /// operation conflicts, dedup capacity and per-command receipt bounds.
+    /// Control/context changes seal and drain the window before execution.
+    /// Hosts still perform context and proposal checks in their original order;
+    /// this capability supplies no admission, durability or result authority.
+    fn supports_append_window(&self) -> bool {
         false
     }
 
@@ -188,6 +204,10 @@ impl BoundedStateMachine for Counter {
 
 impl ProposalAdmission for Counter {
     fn supports_ready_batch(&self) -> bool {
+        true
+    }
+
+    fn supports_append_window(&self) -> bool {
         true
     }
 

@@ -25,6 +25,7 @@ use std::{
     mem::size_of,
 };
 mod administration;
+mod append_window;
 mod applications;
 mod checkpoint_schedule;
 mod clients;
@@ -328,12 +329,15 @@ struct Visit {
     ticket: VisitTicket,
     used: [Usage; 3],
     deadline: MonoTime,
+    append: Option<AppendUnitId>,
 }
 struct Group {
     core: Raft,
     queues: [VecDeque<Queued>; 3],
     usage: [Usage; 3],
     visit: Option<Visit>,
+    parked: BTreeMap<u64, Visit>,
+    connection_validation_pending: bool,
     turn: usize,
     fenced: bool,
     timer: Option<TimerToken>,
@@ -469,6 +473,8 @@ impl<Q: ReadyScheduler> Shard<Q> {
                 queues: std::array::from_fn(|_| VecDeque::new()),
                 usage: [Usage::default(); 3],
                 visit: None,
+                parked: BTreeMap::new(),
+                connection_validation_pending: false,
                 turn: 0,
                 fenced: false,
                 timer: None,
@@ -495,10 +501,16 @@ impl<Q: ReadyScheduler> Shard<Q> {
         })
     }
     pub fn active_visits(&self) -> usize {
-        self.groups.values().filter(|g| g.visit.is_some()).count()
+        self.groups
+            .values()
+            .map(|g| usize::from(g.visit.is_some()) + g.parked.len())
+            .sum()
     }
     pub fn close_admission(&mut self) {
         self.closed = true;
+        for group in self.groups.values_mut() {
+            group.core.seal_append_window();
+        }
     }
     pub fn is_drained(&self) -> bool {
         self.usage().items == 0 && self.active_visits() == 0
@@ -648,6 +660,12 @@ impl<Q: ReadyScheduler> Shard<Q> {
                 });
                 g.usage[class as usize].add(cost);
                 self.usage[class as usize].add(cost);
+                if class != Class::Data || timer.is_some() {
+                    g.core.seal_append_window();
+                    if g.visit.is_none() && !g.parked.is_empty() {
+                        self.scheduler.cancel(group);
+                    }
+                }
                 Ok(admission)
             }
             Err(reason) => Err(Rejected {
@@ -684,6 +702,14 @@ impl<Q: ReadyScheduler> Shard<Q> {
             .groups
             .get_mut(&group)
             .ok_or(RuntimeError::SchedulerContract)?;
+        if !g.parked.is_empty()
+            && (!g.core.can_stage_append_window()
+                || !g.queues[0].is_empty()
+                || !g.queues[2].is_empty())
+        {
+            g.core.seal_append_window();
+            return Ok(None);
+        }
         if g.visit.is_some() || !g.ready() || g.fenced {
             return Err(RuntimeError::SchedulerContract);
         }
@@ -697,6 +723,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
             ticket,
             used: [Usage::default(); 3],
             deadline,
+            append: None,
         });
         Ok(Some(ticket))
     }
@@ -844,22 +871,31 @@ impl<Q: ReadyScheduler> Shard<Q> {
         f: impl FnOnce(&mut Raft) -> R,
     ) -> Result<R, RuntimeError> {
         let group = self.live(ticket)?;
+        group.connection_validation_pending = true;
         let result = f(&mut group.core);
-        if group.core.is_fenced() {
+        self.validate_after_core_callback(ticket.group)?;
+        Ok(result)
+    }
+    fn validate_after_core_callback(&mut self, group: GroupIdentity) -> Result<(), RuntimeError> {
+        if self.groups[&group].core.is_fenced() {
             // Preserve the callback's failure (for example, a failed storage
             // barrier). A fenced core cannot expand its peer set. Keep existing
             // reservations until the caller explicitly stops/reclaims it;
             // inspecting its connections here would mask the cause as Fenced.
-            return Ok(result);
+            return Ok(());
         }
         if let Err(error) = self
             .reserved_connection_peers()
-            .and_then(|_| self.retain_connection_history(ticket.group))
+            .and_then(|_| self.retain_connection_history(group))
         {
-            let _ = self.stop_group(ticket.group);
+            let _ = self.stop_group(group);
             return Err(error);
         }
-        Ok(result)
+        self.groups
+            .get_mut(&group)
+            .unwrap()
+            .connection_validation_pending = false;
+        Ok(())
     }
     pub fn finish(&mut self, ticket: VisitTicket) -> Result<(), RuntimeError> {
         let g = self.live(ticket)?;
@@ -886,7 +922,8 @@ impl<Q: ReadyScheduler> Shard<Q> {
             .get_mut(&group)
             .ok_or(RuntimeError::UnknownGroup)?;
         self.scheduler.cancel(group);
-        let had_active_visit = g.visit.take().is_some();
+        let had_active_visit = g.visit.take().is_some() || !g.parked.is_empty();
+        g.parked.clear();
         g.core.storage_failed();
         g.fenced = true;
         g.timer = None;

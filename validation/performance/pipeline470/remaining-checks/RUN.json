@@ -1,0 +1,125 @@
+{
+  "pid": 1179949,
+  "start": "2026-10-15T04:55:50.797867+00:00",
+  "commands": [
+    [
+      "affected-remaining",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "raft",
+        "--test",
+        "runtime",
+        "--test",
+        "worker",
+        "--test",
+        "provider_conformance",
+        "--test",
+        "startup",
+        "--test",
+        "log_store",
+        "--test",
+        "snapshot",
+        "--test",
+        "shared_barrier",
+        "--test",
+        "membership",
+        "--test",
+        "maintenance",
+        "--test",
+        "native_member_startup",
+        "--test",
+        "logical_formats",
+        "--",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "services-three",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "counter_service",
+        "three_",
+        "--",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "core-regressions",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--lib",
+        "--test",
+        "raft",
+        "--test",
+        "runtime",
+        "--test",
+        "effect_owner",
+        "--test",
+        "worker",
+        "--test",
+        "provider_conformance",
+        "--test",
+        "snapshot",
+        "--",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "matched",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--manifest-path",
+        "benchmarks/matched/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "native-benchmark-tests",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--example",
+        "native_benchmark",
+        "--",
+        "--test-threads=1"
+      ]
+    ]
+  ],
+  "environment": {
+    "CARGO_TARGET_DIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks",
+    "CARGO_BUILD_JOBS": "2",
+    "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration23/test-tmp",
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null,
+    "RUSTC_WRAPPER": null,
+    "RUSTC_WORKSPACE_WRAPPER": null,
+    "PROTOC": null
+  },
+  "runner_sha256": "69d5b5b57d34b1c9a0fbce76af2d5ebc8ed0a10efdd0ab3c3f4a50a414af8dd8"
+}

@@ -31,36 +31,13 @@ use voteboat::{
     worker::*,
 };
 
-pub(super) fn open(
-    root: &Path,
-    mode: NativeOpenMode,
-    protocol: NativePeerProtocol,
-    capacity: usize,
-    clock: &Instant,
-    groups: usize,
-    ready_visit_items: usize,
-) -> Result<(Vec<Replica<SharedLog>>, Vec<Trace>), Failure> {
-    open_partition(
-        root,
-        mode,
-        protocol,
-        capacity,
-        clock,
-        Partition {
-            offset: 0,
-            groups,
-            lane: 1,
-            ready_visit_items,
-        },
-    )
-}
-
 #[derive(Clone, Copy)]
 pub(super) struct Partition {
     pub offset: usize,
     pub groups: usize,
     pub lane: u64,
     pub ready_visit_items: usize,
+    pub append_window: Option<voteboat::raft::AppendWindowLimits>,
 }
 
 pub(super) fn open_partition(
@@ -71,6 +48,15 @@ pub(super) fn open_partition(
     clock: &Instant,
     partition: Partition,
 ) -> Result<(Vec<Replica<SharedLog>>, Vec<Trace>), Failure> {
+    if let Some(window) = partition.append_window {
+        checked(window.validate(LogLimits::default(), voteboat::raft::BatchLimits::default()))?;
+        let worker = WorkerLimits::default();
+        if window.max_units > worker.max_requests - worker.control_requests
+            || window.max_units > worker.max_units - worker.control_units
+        {
+            return Err("append window exceeds ordinary worker capacity".into());
+        }
+    }
     if partition.groups == 0
         || !(1..=64).contains(&partition.ready_visit_items)
         || partition.groups > 32
@@ -126,6 +112,7 @@ pub(super) fn open_partition(
             addresses: &addresses,
             lane: partition.lane,
             ready_visit_items: partition.ready_visit_items,
+            append_window: partition.append_window,
         };
         let (replica, trace) = match setup.open_replica(n) {
             Ok(opened) => opened,
@@ -407,6 +394,7 @@ struct ClusterSetup<'a> {
     addresses: &'a BTreeMap<u64, std::net::SocketAddr>,
     lane: u64,
     ready_visit_items: usize,
+    append_window: Option<voteboat::raft::AppendWindowLimits>,
 }
 impl ClusterSetup<'_> {
     fn open_replica(&self, n: u64) -> Result<(Replica<SharedLog>, Trace), Failure> {
@@ -444,6 +432,7 @@ impl ClusterSetup<'_> {
             addresses,
             lane,
             ready_visit_items,
+            append_window,
         } = *self;
         let directory = root.join(format!("replica{n}"));
         let create = mode == NativeOpenMode::Create;
@@ -451,10 +440,13 @@ impl ClusterSetup<'_> {
         let identity = bootstraps.first().ok_or("empty lane")?.voter_stores[&node(n)];
         let log = open_log(&directory, identity, create, bootstraps, &trace)?;
         let RecoveredGroups {
-            cores,
+            mut cores,
             applications,
             snapshots,
         } = recover_groups(&directory, n, create, bootstraps, capacity, &log, member)?;
+        for core in &mut cores {
+            checked(core.configure_append_window(append_window))?;
+        }
         let owner_id = RuntimeOwner {
             store: log.binding(),
             lane: ExecutionLaneId::new(lane).ok_or("invalid lane identity")?,
@@ -497,7 +489,8 @@ impl ClusterSetup<'_> {
         let ingress = checked(IngressRouter::new(ingress.binding(), ingress_limits))?;
         let factory = checked(NativeTransportFactory::new(codec, Default::default()))?;
         let wake: Arc<dyn WorkerWake> = Arc::new(ThreadWake::current());
-        let mut workers = spawn_workers(log, timed, snapshots, owner_id, wake.clone())?;
+        let mut workers =
+            spawn_workers(log, timed, snapshots, owner_id, wake.clone(), append_window)?;
         workers.limit_recovery(recovery)?;
         let Workers {
             owner,
@@ -526,10 +519,86 @@ impl ClusterSetup<'_> {
                 routes: routes(n, &remote, addresses),
             }),
         };
-        // Failed construction retains its directory; successful runs join workers explicitly.
-        let replica = Node::from_parts(parts, NodeLimits::default(), now)
-            .map_err(|e| format!("node assembly failed: {:?}", e.reason))?;
+        let replica = assemble_replica(parts, now)?;
         Ok((replica, trace))
+    }
+}
+
+type SharedParts = NodeParts<
+    FairScheduler,
+    DeadlineQueue,
+    JitterEntropy,
+    Counter,
+    NativeLogWorker<SharedLog>,
+    NativeOutbound,
+    NativeSnapshotWorker<NativeSnapshotStore<FileSnapshotIo>>,
+    NativeServiceConnector,
+    NativeTransportFactory<NativeWireCodec>,
+>;
+fn assemble_replica(parts: SharedParts, now: MonoTime) -> Result<Replica<SharedLog>, Failure> {
+    // Failed construction retains its files and owners until explicit joins.
+    match Node::from_parts(parts, NodeLimits::default(), now) {
+        Ok(replica) => Ok(replica),
+        Err(rejected) => {
+            let original = format!("node assembly failed: {:?}", rejected.reason);
+            let mut parts = *rejected.parts;
+            parts.local.persistence.close();
+            let mut snapshots = parts
+                .local
+                .snapshots
+                .take()
+                .ok_or("missing cleanup snapshots")?;
+            join_rejected_workers(
+                &mut parts.local.persistence,
+                &mut snapshots.worker,
+                parts.peers.take().map(|peers| peers.connector),
+                &original,
+            )?;
+            Err(original.into())
+        }
+    }
+}
+
+fn join_rejected_workers(
+    persistence: &mut NativeLogWorker<SharedLog>,
+    snapshots: &mut NativeSnapshotWorker<NativeSnapshotStore<FileSnapshotIo>>,
+    mut connector: Option<NativeServiceConnector>,
+    original: &str,
+) -> Result<(), Failure> {
+    snapshots.close();
+    if let Some(connector) = &mut connector {
+        connector.close();
+    }
+    let mut dialer = None;
+    let (mut log, mut snap) = (false, false);
+    let deadline = Instant::now() + Duration::from_secs(10);
+    loop {
+        if let Some(pending) = connector.take() {
+            match pending.into_dialer() {
+                Ok(tcp) => dialer = tcp,
+                Err(pending) => connector = Some(*pending),
+            }
+        }
+        let dial = match &mut dialer {
+            Some(tcp) => {
+                tcp.close();
+                checked(tcp.try_finish())?
+            }
+            None => connector.is_none(),
+        };
+        if !log {
+            log = persistence.try_reclaim()?.is_some();
+        }
+        if !snap {
+            snap = snapshots.try_reclaim()?.is_some();
+        }
+        if log && snap && dial {
+            return Ok(());
+        }
+        if Instant::now() >= deadline {
+            return Err(format!("{original}; rejected construction workers did not join").into());
+        }
+        std::thread::park_timeout(Duration::from_micros(100));
     }
 }
 
@@ -587,17 +656,28 @@ fn spawn_workers(
     snapshots: BTreeMap<GroupIdentity, NativeSnapshotStore<FileSnapshotIo>>,
     owner_id: RuntimeOwner,
     wake: Arc<dyn WorkerWake>,
+    append_window: Option<voteboat::raft::AppendWindowLimits>,
 ) -> Result<Workers, Failure> {
-    let persistence = checked(NativeLogWorker::spawn(
+    let binding = WorkerBinding {
+        store: log.binding(),
+        generation: StorageWorkerGeneration::new(1).unwrap(),
+    };
+    let owner = checked(EffectOwner::new(
+        timed,
+        binding,
+        EffectOwnerLimits::default(),
+    ))?;
+    checked(owner.validate_append_pipeline_limits(
+        binding,
+        WorkerLimits::default(),
+        append_window.map_or(1, |window| window.max_units),
+    ))?;
+    let persistence = checked(NativeLogWorker::spawn_with_group_pipeline(
         log,
         StorageWorkerGeneration::new(1).unwrap(),
         WorkerLimits::default(),
         wake.clone(),
-    ))?;
-    let owner = checked(EffectOwner::new(
-        timed,
-        persistence.binding(),
-        EffectOwnerLimits::default(),
+        append_window.map_or(1, |window| window.max_units),
     ))?;
     let worker = checked(NativeSnapshotWorker::spawn(
         snapshots,

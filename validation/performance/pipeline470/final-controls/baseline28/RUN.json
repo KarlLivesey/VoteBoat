@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+    "native::owning_native_facade_checkpoints_restarts_and_retries_hundred_groups",
+    "--exact",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "cwd": "/tmp/voteboat-470-baseline-0q3xoh_j",
+  "environment": {
+    "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline28/test-tmp",
+    "CARGO_TARGET_DIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target",
+    "CARGO_BUILD_JOBS": "2",
+    "RUSTUP_TOOLCHAIN": "1.98.1",
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null,
+    "RUSTC_WRAPPER": null,
+    "RUSTC_WORKSPACE_WRAPPER": null,
+    "PROTOC": null
+  },
+  "build_provenance": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/checkpoint.stderr",
+  "compiler_provenance": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/compiler.stdout",
+  "commit": "2d53b4c43b71a63d63c96b7a3d0062da8d7643ff",
+  "ELF": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+    "sha256": "a741b314bd87c1dd3b60a27237c4ebb0935f84143ebf9dd52ff5fc20f37cb8ba",
+    "mode": "0o755"
+  },
+  "scope": "Only fourth failed history, unchanged deadline; direct existing test executable, no Cargo/recompile/first baseline repeat."
+}

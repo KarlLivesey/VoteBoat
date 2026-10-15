@@ -1,0 +1,8 @@
+{
+  "previous": "diagnostic13",
+  "changed_inputs": [
+    "src/runtime/replica.rs"
+  ],
+  "baseline": "baseline14/RESULT.json",
+  "reason": "Default-capacity-one worker retains one data batch per poll; explicitmultiunit keeps boundedrepeat. No deadline/limit/config change; cause share not established."
+}

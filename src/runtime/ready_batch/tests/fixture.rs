@@ -45,9 +45,17 @@ pub(super) fn shard(limits: ShardLimits, log: LogLimits) -> Shard<Ready> {
     shard_with_batch_limits(limits, log, BatchLimits::default())
 }
 pub(super) fn shard_with_batch_limits(
+    limits: ShardLimits,
+    log: LogLimits,
+    batch: BatchLimits,
+) -> Shard<Ready> {
+    shard_with_append_window(limits, log, batch, None)
+}
+pub(super) fn shard_with_append_window(
     mut limits: ShardLimits,
     log: LogLimits,
     batch: BatchLimits,
+    window: Option<AppendWindowLimits>,
 ) -> Shard<Ready> {
     let identity = StoreIdentity {
         id: StoreId::new(1).unwrap(),
@@ -77,6 +85,7 @@ pub(super) fn shard_with_batch_limits(
     };
     let mut core = Raft::recover(node, binding, state, log).unwrap();
     core.configure_batch_limits(batch).unwrap();
+    core.configure_append_window(window).unwrap();
     let effects = core.step(Event::Campaign).unwrap();
     finish(&mut core, effects);
     assert_eq!(core.role(), Role::Leader);

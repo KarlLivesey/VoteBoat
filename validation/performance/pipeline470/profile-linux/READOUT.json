@@ -1,0 +1,50 @@
+{
+  "scope": "Whole debug native test launch; selected on-CPU sample counts, inclusive scopes overlap; not elapsed/throughput/leader attribution. Original perf reports0lost both; all raw events retained.",
+  "recorded_samples": {
+    "baseline": 3204,
+    "candidate": 3296
+  },
+  "results": {
+    "baseline": {
+      "selected_sample_weight": 3194,
+      "reserved_connections": {
+        "function": "<voteboat::runtime::Shard<voteboat::native::runtime::FairScheduler>>::reserved_connections",
+        "sample_weight": 2293,
+        "percent_of_selected_sample_weight": 71.79085785848466
+      },
+      "check_connection_event": {
+        "function": "<voteboat::runtime::Shard<voteboat::native::runtime::FairScheduler>>::check_connection_event",
+        "sample_weight": 2158,
+        "percent_of_selected_sample_weight": 67.5641828428303
+      },
+      "core_connection_replicas": {
+        "function": "<voteboat::raft::Raft>::connection_replicas",
+        "sample_weight": 1087,
+        "percent_of_selected_sample_weight": 34.03256105197245
+      },
+      "unresolved_leaf_samples": 37,
+      "at_most_two_frames": 24
+    },
+    "candidate": {
+      "selected_sample_weight": 3291,
+      "reserved_connections": {
+        "function": "<voteboat::runtime::Shard<voteboat::native::runtime::FairScheduler>>::reserved_connections",
+        "sample_weight": 2311,
+        "percent_of_selected_sample_weight": 70.22181707687633
+      },
+      "check_connection_event": {
+        "function": "<voteboat::runtime::Shard<voteboat::native::runtime::FairScheduler>>::check_connection_event",
+        "sample_weight": 2134,
+        "percent_of_selected_sample_weight": 64.84351261014889
+      },
+      "core_connection_replicas": {
+        "function": "<voteboat::raft::Raft>::connection_replicas",
+        "sample_weight": 1198,
+        "percent_of_selected_sample_weight": 36.40230932847159
+      },
+      "unresolved_leaf_samples": 40,
+      "at_most_two_frames": 21
+    }
+  },
+  "decision": "One-batch default cadence trial did not resolve actual timeout. Largest measured remaining admission context is repeated full owned-connection union reconstruction; review a pure covered-input shortcut preserving all identity/fence/provisioned checks and full fallback. No performance gain established."
+}

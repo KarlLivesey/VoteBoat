@@ -58,12 +58,16 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         if self.core(group).is_none() {
             return Err(EffectOwnerError::Runtime(RuntimeError::UnknownGroup));
         }
-        Ok(self.active.get(&group).map(|active| EffectVisitInspection {
-            visit: active.visit,
-            leased: active.leased,
-            kind: active.kind.map(EffectLeaseInspectionKind::from),
-            remaining: active.effects.len(),
-            waiting: active.waiting,
-        }))
+        Ok(self
+            .active
+            .values()
+            .find(|a| a.visit.group == group)
+            .map(|active| EffectVisitInspection {
+                visit: active.visit,
+                leased: active.leased,
+                kind: active.kind.map(EffectLeaseInspectionKind::from),
+                remaining: active.effects.len(),
+                waiting: active.waiting,
+            }))
     }
 }

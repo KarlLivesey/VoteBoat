@@ -1,0 +1,5 @@
+{
+  "cause": "Workspace formatter found diffs after scoped formatting; no tests executed",
+  "fix": "cargo +stable fmt --all with unchanged formatter configuration",
+  "next": "integration2 exact refreshed inputs; no old result relabeled"
+}

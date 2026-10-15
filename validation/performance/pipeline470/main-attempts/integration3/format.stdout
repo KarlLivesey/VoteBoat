@@ -1,0 +1,17 @@
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/src/runtime/ready_batch/tests/append_window.rs:130:
+     }
+     let a = stage(&mut shard);
+     let fresh = shard.poll(MonoTime(0)).unwrap().unwrap();
+-    assert!(
+-        shard
+-            .step_append_checked(fresh, MonoTime(0), 2, |_, _, _| Ok(()))
+-            .unwrap()
+-            .is_none()
+-    );
++    assert!(shard
++        .step_append_checked(fresh, MonoTime(0), 2, |_, _, _| Ok(()))
++        .unwrap()
++        .is_none());
+     assert_eq!(shard.finish(fresh), Err(RuntimeError::DependencyPending));
+     shard.cancel_append_candidate(fresh).unwrap();
+     assert!(!shard.core(group()).unwrap().can_stage_append_window());

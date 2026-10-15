@@ -1,0 +1,37 @@
+{
+  "scope": "Current candidate only, whole debug compacted-group catch-up test launch; original deadline fails. Different fixture from profile16 (this owner has no connection budget). Inclusive sample contexts overlap, are not elapsed/throughput/leader attribution, and are not paired before/after improvement evidence.",
+  "recorded_samples": 1169,
+  "selected_sample_denominator": 1159,
+  "excluded_sample_weight": 10,
+  "unresolved_leaf_samples": 27,
+  "depth_at_most_two": 17,
+  "contexts": {
+    "peer_poll": {
+      "function": "<voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativePeerConnector, effect_owner::support::peer_fault::Factory>>::poll::<voteboat::native::outbound::NativeOutbound, voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>",
+      "sample_weight": 384,
+      "percent_of_selected_sample_weight": 33.13201035375324
+    },
+    "ingress_dispatch": {
+      "function": "<voteboat::runtime::ingress::IngressRouter>::dispatch::<alloc::boxed::Box<dyn voteboat::transport::PeerTransport>, voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>",
+      "sample_weight": 364,
+      "percent_of_selected_sample_weight": 31.406384814495254
+    },
+    "owner_admission": {
+      "function": "<voteboat::runtime::effects::EffectOwner<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>>::admit",
+      "sample_weight": 320,
+      "percent_of_selected_sample_weight": 27.610008628127698
+    },
+    "persistence_window": {
+      "function": "voteboat::native::worker::finish_persist_window::<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>",
+      "sample_weight": 174,
+      "percent_of_selected_sample_weight": 15.012942191544434
+    },
+    "manifest_publication": {
+      "function": "<voteboat::native::log_store::file::FileLogIo as voteboat::native::log_store::JournalIo>::publish_manifest",
+      "sample_weight": 112,
+      "percent_of_selected_sample_weight": 9.663503019844693
+    }
+  },
+  "baseline_control": "baseline24 exactpublished469 fails same line2352/state,41.10s; no cause or new-regression conclusion.",
+  "decision": "Retain raw inherited failure; finish unexecuted final-source histories and actual selected pipeline controls before another production optimization. No rate established."
+}

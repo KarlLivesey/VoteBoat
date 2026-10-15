@@ -1,0 +1,7 @@
+{
+  "old": "target/p9/slice470/profile16/symbolize-native-json.py",
+  "old_sha256": "792f2246c4eb247cae12f5420024f7fb126ac6fa88443da6d3d56960f990500e",
+  "current": "target/p9/slice470/profile25/symbolize-native-json.py",
+  "current_sha256": "5cc31af10c3ca88492664d901fc7f6dbd3d2b805c9301228633350059d86dded",
+  "only_change": "Selected test thread native::automat replaced by native::hundred; parser, physical stacks, weights, denominators, native/inline attribution and assertions unchanged. Local JSON endpoint only."
+}

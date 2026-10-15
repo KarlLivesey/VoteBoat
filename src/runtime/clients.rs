@@ -495,6 +495,7 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
                 now,
                 limit,
                 |group| application(group).is_some_and(ProposalAdmission::supports_ready_batch),
+                |group| application(group).is_some_and(ProposalAdmission::supports_append_window),
                 |core, event, prefix| {
                     self.check_ready_execution(
                         core,

@@ -1,0 +1,22 @@
+{
+  "original_handle": 51064,
+  "utc": "2026-10-15T02:58:39.501708+00:00",
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--lib",
+    "raft::append_window::tests::",
+    "--",
+    "--nocapture"
+  ],
+  "environment_overrides": {
+    "CARGO_TARGET_DIR": "target/p9/slice470/core-checks",
+    "CARGO_BUILD_JOBS": "2"
+  },
+  "scope": "10selectedCoretests; librarytestELFcompile only; no services/Mac/performance",
+  "source_before": "SOURCE_READY.json"
+}

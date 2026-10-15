@@ -1,0 +1,111 @@
+{
+  "pid": 3786400,
+  "start": "2026-10-15T03:26:43.796798+00:00",
+  "commands": [
+    [
+      "format",
+      [
+        "cargo",
+        "+stable",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ]
+    ],
+    [
+      "library-window",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--lib",
+        "append_window",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "public-window",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "provider_conformance",
+        "append_window",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "worker-window",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "worker",
+        "append_window",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "startup-window",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "startup",
+        "append_window",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "native-benchmark",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--example",
+        "native_benchmark",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ]
+    ]
+  ],
+  "environment": {
+    "CARGO_TARGET_DIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks",
+    "CARGO_BUILD_JOBS": "2",
+    "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration2/test-tmp",
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null,
+    "RUSTC_WRAPPER": null,
+    "RUSTC_WORKSPACE_WRAPPER": null,
+    "PROTOC": null
+  },
+  "runner_sha256": "3e1f99103f64faa59d12c01d15cebe58a1d0abc2ed0f3f949722e1dc0ea77f3c"
+}

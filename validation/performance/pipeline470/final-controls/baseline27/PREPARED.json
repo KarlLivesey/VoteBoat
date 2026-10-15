@@ -1,0 +1,8 @@
+{
+  "scope": "Only third failed native history; unchanged published469 baseline14 source and existing test executable",
+  "command": "python3 -u target/p9/slice470/baseline27/run.py",
+  "status": "PREPARED_NOT_STARTED; awaiting root host release after integration26 terminal",
+  "test": "native::native_shared_peer_quota_pressure_reconnect_restart_and_retry",
+  "source_and_executable_guards": "Same launch-time full source/modes and ELF guards as baseline24",
+  "storage": "Fresh baseline27/test-tmp on Btrfs; original deadline unchanged; no Cargo/rebuild"
+}

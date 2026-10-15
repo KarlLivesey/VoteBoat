@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/examples/native_benchmark",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/controls12/quic-shared",
+    "quic",
+    "128",
+    "64",
+    "1",
+    "--append-window",
+    "4"
+  ],
+  "start": "2026-10-15T04:54:12.137585+00:00",
+  "end": "2026-10-15T04:54:15.143417+00:00",
+  "elapsed_s": 3.005845526000485,
+  "exit": 0
+}

@@ -1,0 +1,9 @@
+{
+  "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/examples/native_benchmark",
+  "sha256": "75021abd8f150db32b6ef3f486b57403531073cb549fee815cef4c85cefc31bc",
+  "mode": "0o755",
+  "build": "integration26/native-control-build.exit.json",
+  "scope": "Debug all-feature functional executable only; no fresh release/framework artifact assertion",
+  "compiler": "rustc 1.98.1 (48a229cea 2026-09-01)\nbinary: rustc\ncommit-hash: 48a229ceaefd4985c50990b14116b6d856af0985\ncommit-date: 2026-09-01\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1\nLLVM version: 22.1.8\n",
+  "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05)\n"
+}

@@ -1,0 +1,11 @@
+{
+  "command": [
+    "node",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/controls12/check-selection.mjs",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/controls12/tcp-shared"
+  ],
+  "start": "2026-10-15T04:54:08.509823+00:00",
+  "end": "2026-10-15T04:54:08.525069+00:00",
+  "elapsed_s": 0.015258361003361642,
+  "exit": 0
+}

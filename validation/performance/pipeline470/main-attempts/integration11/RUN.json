@@ -1,0 +1,141 @@
+{
+  "pid": 4174155,
+  "start": "2026-10-15T03:49:01.720938+00:00",
+  "commands": [
+    [
+      "library-all",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--lib",
+        "--",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "affected-all",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "raft",
+        "--test",
+        "runtime",
+        "--test",
+        "effect_owner",
+        "--test",
+        "worker",
+        "--test",
+        "provider_conformance",
+        "--test",
+        "startup",
+        "--test",
+        "application",
+        "--test",
+        "log_store",
+        "--test",
+        "snapshot",
+        "--test",
+        "shared_barrier",
+        "--test",
+        "membership",
+        "--test",
+        "maintenance",
+        "--test",
+        "native_member_startup",
+        "--test",
+        "logical_formats",
+        "--",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "services-three",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "counter_service",
+        "three_",
+        "--",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "core-regressions",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--lib",
+        "--test",
+        "raft",
+        "--test",
+        "runtime",
+        "--test",
+        "effect_owner",
+        "--test",
+        "worker",
+        "--test",
+        "provider_conformance",
+        "--test",
+        "snapshot",
+        "--",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "matched",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--manifest-path",
+        "benchmarks/matched/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "native-control-build",
+      [
+        "cargo",
+        "+stable",
+        "build",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--example",
+        "native_benchmark"
+      ]
+    ]
+  ],
+  "environment": {
+    "CARGO_TARGET_DIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks",
+    "CARGO_BUILD_JOBS": "2",
+    "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration11/test-tmp",
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null,
+    "RUSTC_WRAPPER": null,
+    "RUSTC_WORKSPACE_WRAPPER": null,
+    "PROTOC": null
+  },
+  "runner_sha256": "0df098748fb314ae343b0edd284676dac1944604a547d3de0d589e7a7d93d7cb"
+}

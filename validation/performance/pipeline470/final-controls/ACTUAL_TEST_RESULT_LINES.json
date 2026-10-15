@@ -1,0 +1,29 @@
+{
+  "integration21/native-failure-1.stdout": [
+    "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 202 filtered out; finished in 104.87s"
+  ],
+  "integration21/native-failure-2.stdout": [
+    "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 202 filtered out; finished in 41.25s"
+  ],
+  "integration22/append-callbacks.stdout": [
+    "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 437 filtered out; finished in 0.00s"
+  ],
+  "integration22/connections.stdout": [
+    "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 434 filtered out; finished in 0.00s"
+  ],
+  "integration26/native-failure-3.stdout": [
+    "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 202 filtered out; finished in 32.95s"
+  ],
+  "integration26/native-failure-4.stdout": [
+    "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 202 filtered out; finished in 54.83s"
+  ],
+  "baseline24/test.stdout": [
+    "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 202 filtered out; finished in 41.10s"
+  ],
+  "baseline27/test.stdout": [
+    "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 202 filtered out; finished in 58.22s"
+  ],
+  "baseline28/test.stdout": [
+    "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 202 filtered out; finished in 51.32s"
+  ]
+}

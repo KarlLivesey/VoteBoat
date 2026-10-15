@@ -1,0 +1,11 @@
+{
+  "command": [
+    "node",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/controls12/check-selection.mjs",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/controls12/quic-startup"
+  ],
+  "start": "2026-10-15T04:54:12.101088+00:00",
+  "end": "2026-10-15T04:54:12.121200+00:00",
+  "elapsed_s": 0.020123449998209253,
+  "exit": 0
+}

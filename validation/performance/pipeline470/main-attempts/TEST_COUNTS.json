@@ -1,0 +1,313 @@
+{
+  "meaning": "Exact test-result lines parsed from archived outputs; separate invocations/targets/configurations, not a final-source aggregate. Compiler-only attempts have no inferred test result.",
+  "logs": {
+    "integration2/library-window.stdout": {
+      "rust_result_lines": [
+        {
+          "result": "FAILED",
+          "passed": 13,
+          "failed": 1,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 417,
+          "elapsed_text": "0.00s"
+        }
+      ],
+      "node_reported_counts": []
+    },
+    "integration4/library-window.stdout": {
+      "rust_result_lines": [
+        {
+          "result": "FAILED",
+          "passed": 3,
+          "failed": 1,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 427,
+          "elapsed_text": "0.00s"
+        }
+      ],
+      "node_reported_counts": []
+    },
+    "integration5/library-window.stdout": {
+      "rust_result_lines": [
+        {
+          "result": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 430,
+          "elapsed_text": "0.00s"
+        }
+      ],
+      "node_reported_counts": []
+    },
+    "integration5/public-window.stdout": {
+      "rust_result_lines": [
+        {
+          "result": "ok",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 42,
+          "elapsed_text": "0.00s"
+        }
+      ],
+      "node_reported_counts": []
+    },
+    "integration5/startup-window.stdout": {
+      "rust_result_lines": [
+        {
+          "result": "ok",
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 60,
+          "elapsed_text": "0.35s"
+        }
+      ],
+      "node_reported_counts": []
+    },
+    "integration5/worker-window.stdout": {
+      "rust_result_lines": [
+        {
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 9,
+          "elapsed_text": "0.00s"
+        }
+      ],
+      "node_reported_counts": []
+    },
+    "integration6/native-benchmark.stdout": {
+      "rust_result_lines": [
+        {
+          "result": "ok",
+          "passed": 51,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "elapsed_text": "246.87s"
+        }
+      ],
+      "node_reported_counts": []
+    },
+    "integration11/affected-all.stdout": {
+      "rust_result_lines": [
+        {
+          "result": "ok",
+          "passed": 12,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "elapsed_text": "0.00s"
+        },
+        {
+          "result": "FAILED",
+          "passed": 199,
+          "failed": 4,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "elapsed_text": "329.02s"
+        }
+      ],
+      "node_reported_counts": []
+    },
+    "integration11/library-all.stdout": {
+      "rust_result_lines": [
+        {
+          "result": "ok",
+          "passed": 431,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "elapsed_text": "298.76s"
+        }
+      ],
+      "node_reported_counts": []
+    },
+    "diagnostic13/failed-checkpoint.stdout": {
+      "rust_result_lines": [
+        {
+          "result": "FAILED",
+          "passed": 0,
+          "failed": 1,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 202,
+          "elapsed_text": "52.00s"
+        }
+      ],
+      "node_reported_counts": []
+    },
+    "baseline14/checkpoint.stdout": {
+      "rust_result_lines": [
+        {
+          "result": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 202,
+          "elapsed_text": "88.60s"
+        }
+      ],
+      "node_reported_counts": []
+    },
+    "diagnostic15/failed-checkpoint.stdout": {
+      "rust_result_lines": [
+        {
+          "result": "FAILED",
+          "passed": 0,
+          "failed": 1,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 202,
+          "elapsed_text": "51.59s"
+        }
+      ],
+      "node_reported_counts": []
+    },
+    "integration17/connections.stdout": {
+      "rust_result_lines": [
+        {
+          "result": "FAILED",
+          "passed": 5,
+          "failed": 1,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 433,
+          "elapsed_text": "0.00s"
+        }
+      ],
+      "node_reported_counts": []
+    },
+    "integration18/append-callbacks.stdout": {
+      "rust_result_lines": [
+        {
+          "result": "ok",
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 433,
+          "elapsed_text": "0.00s"
+        }
+      ],
+      "node_reported_counts": []
+    },
+    "integration18/connections.stdout": {
+      "rust_result_lines": [
+        {
+          "result": "ok",
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 433,
+          "elapsed_text": "0.00s"
+        }
+      ],
+      "node_reported_counts": []
+    },
+    "diagnostic19/failed-checkpoint.stdout": {
+      "rust_result_lines": [
+        {
+          "result": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 202,
+          "elapsed_text": "44.87s"
+        }
+      ],
+      "node_reported_counts": []
+    },
+    "validator-checks/storage-tests.stdout": {
+      "rust_result_lines": [],
+      "node_reported_counts": [
+        [
+          "tests",
+          "7"
+        ],
+        [
+          "pass",
+          "7"
+        ],
+        [
+          "fail",
+          "0"
+        ],
+        [
+          "cancelled",
+          "0"
+        ],
+        [
+          "skipped",
+          "0"
+        ]
+      ]
+    },
+    "METADATA_TESTS.log": {
+      "rust_result_lines": [],
+      "node_reported_counts": [
+        [
+          "tests",
+          "1"
+        ],
+        [
+          "pass",
+          "0"
+        ],
+        [
+          "fail",
+          "1"
+        ],
+        [
+          "cancelled",
+          "0"
+        ],
+        [
+          "skipped",
+          "0"
+        ]
+      ]
+    },
+    "METADATA_TESTS_FOLLOWUP.log": {
+      "rust_result_lines": [],
+      "node_reported_counts": [
+        [
+          "tests",
+          "39"
+        ],
+        [
+          "pass",
+          "39"
+        ],
+        [
+          "fail",
+          "0"
+        ],
+        [
+          "cancelled",
+          "0"
+        ],
+        [
+          "skipped",
+          "0"
+        ]
+      ]
+    }
+  }
+}

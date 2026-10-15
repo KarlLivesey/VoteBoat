@@ -1,0 +1,53 @@
+{
+  "scope": "Prepared only; source not frozen or executed until agents SOURCE_READY and canonical fmt. Focused changed library controls then complete enabled hook.",
+  "commands": [
+    [
+      "format",
+      [
+        "cargo",
+        "+stable",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ]
+    ],
+    [
+      "connections",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--lib",
+        "connections::tests",
+        "--",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "append-callbacks",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--lib",
+        "runtime::ready_batch::tests::append_window",
+        "--",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "strict-hook",
+      [
+        "sh",
+        ".githooks/pre-push"
+      ]
+    ]
+  ]
+}

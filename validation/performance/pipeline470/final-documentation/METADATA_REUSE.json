@@ -1,0 +1,11 @@
+{
+  "exact_prior_files": {
+    "validation/check-provider-conformance.mjs": "21405943f6350cf60d8f0a3488e6001f5b08fd74fdf798970ebe86faf76a21d6",
+    "validation/check-provider-conformance.test.mjs": "f91c22e01bf36a994529f8499096930c914c545d7d71b0e2d7c4a1673efe0ead",
+    "docs/component-contracts.json": "060c85b24d8fdd1952f43065fdccbf8307de7729a2e8a406428b0e5fce1bb2f0",
+    "docs/provider-conformance.json": "47c0c424d01a91bf39fa4deef03afc1c6b8904f8966b9ab0c9e2d10ecbfb876f"
+  },
+  "prior_metadata_controls_exit": 0,
+  "controls_passed": 39,
+  "reason": "No change in checker/test/contract JSON; actual metadata checker rerun against final documented source, not unchanged39-test self-controls."
+}

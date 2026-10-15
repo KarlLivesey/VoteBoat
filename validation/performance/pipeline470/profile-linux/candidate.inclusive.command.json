@@ -1,0 +1,13 @@
+[
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+  "report",
+  "-i",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/profile16/candidate.data",
+  "--stdio",
+  "--children",
+  "--sort",
+  "comm,symbol",
+  "--percent-limit",
+  "1",
+  "-n"
+]

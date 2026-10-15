@@ -1,0 +1,18 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--all-features",
+    "--lib",
+    "runtime::ready_batch::tests::append_window",
+    "--",
+    "--test-threads=1"
+  ],
+  "start": "2026-10-15T04:39:15.182511+00:00",
+  "end": "2026-10-15T04:39:15.325940+00:00",
+  "elapsed_s": 0.14344628900289536,
+  "exit": 0
+}

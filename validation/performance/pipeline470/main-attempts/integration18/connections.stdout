@@ -1,0 +1,11 @@
+
+running 6 tests
+test runtime::connections::tests::another_live_fenced_core_preserves_global_failure_before_bad_target ... ok
+test runtime::connections::tests::failed_tightening_stop_and_register_keep_exact_owned_union ... ok
+test runtime::connections::tests::historical_but_unprovisioned_peer_uses_reference_refusal ... ok
+test runtime::connections::tests::local_identity_group_and_target_mismatches_never_skip_reference ... ok
+test runtime::connections::tests::queued_unknown_peers_keep_union_capacity_and_exact_store_conflicts ... ok
+test runtime::connections::tests::repeated_known_snapshots_and_configurations_match_full_union_at_capacity ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 433 filtered out; finished in 0.00s
+

@@ -1,0 +1,6 @@
+{
+  "session_id": 77916,
+  "command": "python3 target/p9/slice470/integration1/run.py",
+  "socket_access": "authorized escalated local test run",
+  "do_not_restart_on_observation_timeout": true
+}

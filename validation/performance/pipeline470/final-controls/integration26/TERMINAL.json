@@ -1,0 +1,15 @@
+{
+  "exit": 101,
+  "failed_stages": [
+    {
+      "stage": "native-failure-3",
+      "exit": 101
+    },
+    {
+      "stage": "native-failure-4",
+      "exit": 101
+    }
+  ],
+  "end": "2026-10-15T04:49:18.207522+00:00",
+  "same_selected_inputs": true
+}

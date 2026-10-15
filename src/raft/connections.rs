@@ -111,74 +111,89 @@ impl Raft {
             peers.insert(node, store);
             Ok(())
         };
-        if let Event::Configure(proposal) = event {
-            use crate::membership::ConfigurationChange;
-            if let ConfigurationChange::Learners(next) | ConfigurationChange::Joint { next, .. } =
-                &proposal.record.change
-            {
-                for (&node, &store) in next.voter_stores().iter().chain(next.learners()) {
-                    add(node, store)?;
-                }
-            }
-        }
         if let Event::Receive(message) = event {
             if message.group != self.durable.bootstrap.group || message.to != self.node {
                 return Err(RaftError::WrongIdentity);
             }
-            match &message.rpc {
-                Rpc::LearnerRepair { joint, .. } => {
-                    if let EntryPayload::Configuration(record) = &joint.payload {
-                        if let crate::membership::ConfigurationChange::Joint { next, .. } =
-                            &record.change
-                        {
-                            for (&node, &store) in next.voter_stores().iter().chain(next.learners())
-                            {
-                                add(node, store)?;
-                            }
-                        }
-                    }
-                }
-                Rpc::Append { entries, .. } => {
-                    for entry in entries {
-                        if let EntryPayload::Configuration(record) = &entry.payload {
-                            use crate::membership::ConfigurationChange;
-                            match &record.change {
-                                ConfigurationChange::Learners(next)
-                                | ConfigurationChange::Joint { next, .. } => {
-                                    for (&node, &store) in
-                                        next.voter_stores().iter().chain(next.learners())
-                                    {
-                                        add(node, store)?;
-                                    }
-                                }
-                                ConfigurationChange::Final { .. } => (),
-                            }
-                        }
-                    }
-                }
-                Rpc::Snapshot { snapshot }
-                | Rpc::LearnerRepairSnapshot { snapshot }
-                | Rpc::CommittedLearnerRepairSnapshot { snapshot } => {
-                    if let Some(membership) = &snapshot.metadata.membership {
-                        for (node, store) in membership.replicas() {
-                            add(node, store)?;
-                        }
-                    } else {
-                        for (&node, &store) in &snapshot.metadata.bootstrap.voter_stores {
-                            add(node, store)?;
-                        }
-                    }
-                }
-                Rpc::AuthorityReply {
-                    candidate,
-                    granted: true,
-                    ..
-                } => {
-                    add(candidate.node, candidate.store)?;
-                }
-                _ => (),
-            }
         }
+        visit_event_connection_stores(event, &mut add)?;
         Ok(peers)
     }
 }
+
+/// Visit only stores advertised in an event payload, in the public inspection
+/// order. This does not validate its envelope, current Core, or peer authority.
+pub(crate) fn visit_event_connection_stores<E>(
+    event: &Event,
+    mut add: impl FnMut(NodeId, StoreIdentity) -> Result<(), E>,
+) -> Result<(), E> {
+    if let Event::Configure(proposal) = event {
+        use crate::membership::ConfigurationChange;
+        if let ConfigurationChange::Learners(next) | ConfigurationChange::Joint { next, .. } =
+            &proposal.record.change
+        {
+            for (&node, &store) in next.voter_stores().iter().chain(next.learners()) {
+                add(node, store)?;
+            }
+        }
+    }
+    if let Event::Receive(message) = event {
+        match &message.rpc {
+            Rpc::LearnerRepair { joint, .. } => {
+                if let EntryPayload::Configuration(record) = &joint.payload {
+                    if let crate::membership::ConfigurationChange::Joint { next, .. } =
+                        &record.change
+                    {
+                        for (&node, &store) in next.voter_stores().iter().chain(next.learners()) {
+                            add(node, store)?;
+                        }
+                    }
+                }
+            }
+            Rpc::Append { entries, .. } => {
+                for entry in entries {
+                    if let EntryPayload::Configuration(record) = &entry.payload {
+                        use crate::membership::ConfigurationChange;
+                        match &record.change {
+                            ConfigurationChange::Learners(next)
+                            | ConfigurationChange::Joint { next, .. } => {
+                                for (&node, &store) in
+                                    next.voter_stores().iter().chain(next.learners())
+                                {
+                                    add(node, store)?;
+                                }
+                            }
+                            ConfigurationChange::Final { .. } => (),
+                        }
+                    }
+                }
+            }
+            Rpc::Snapshot { snapshot }
+            | Rpc::LearnerRepairSnapshot { snapshot }
+            | Rpc::CommittedLearnerRepairSnapshot { snapshot } => {
+                if let Some(membership) = &snapshot.metadata.membership {
+                    for (node, store) in membership.replicas() {
+                        add(node, store)?;
+                    }
+                } else {
+                    for (&node, &store) in &snapshot.metadata.bootstrap.voter_stores {
+                        add(node, store)?;
+                    }
+                }
+            }
+            Rpc::AuthorityReply {
+                candidate,
+                granted: true,
+                ..
+            } => {
+                add(candidate.node, candidate.store)?;
+            }
+            _ => (),
+        }
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+#[path = "connections/tests.rs"]
+mod tests;

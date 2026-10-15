@@ -1,0 +1,7 @@
+{
+  "previous": "integration5",
+  "changed_inputs": [
+    "examples/benchmark/batching.rs"
+  ],
+  "reason": "Migrate previously missed serial benchmark test call to explicit (ready, None); prior fallback/public/worker/startup tests passed, no broad rerun."
+}

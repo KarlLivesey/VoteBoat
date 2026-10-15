@@ -1,0 +1,10 @@
+{
+  "command": [
+    "node",
+    "validation/check-provider-conformance.mjs"
+  ],
+  "start": "2026-10-15T05:09:03.939059+00:00",
+  "end": "2026-10-15T05:09:04.135618+00:00",
+  "elapsed_s": 0.19657275298959576,
+  "exit": 0
+}

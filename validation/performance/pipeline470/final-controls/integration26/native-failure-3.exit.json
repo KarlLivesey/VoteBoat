@@ -1,0 +1,21 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--all-features",
+    "--test",
+    "effect_owner",
+    "native::native_shared_peer_quota_pressure_reconnect_restart_and_retry",
+    "--",
+    "--exact",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "start": "2026-10-15T04:47:44.899169+00:00",
+  "end": "2026-10-15T04:48:17.912263+00:00",
+  "elapsed_s": 33.01310905799619,
+  "exit": 101
+}

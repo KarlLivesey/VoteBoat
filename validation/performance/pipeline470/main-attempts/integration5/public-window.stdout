@@ -1,0 +1,9 @@
+
+running 4 tests
+test append_window_cases::public_window_app_optin_preserves_context_and_all_pending_original_capacity ... ok
+test append_window_cases::public_window_defaults_finite_limits_and_first_attempt_lock_keep_serial_admission ... ok
+test append_window_cases::public_window_full_effect_and_all_ticket_fields_reject_without_sealing ... ok
+test append_window_cases::public_window_host_barrier_and_serial_oracle_preserve_one_commit_and_every_original ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 42 filtered out; finished in 0.00s
+

@@ -16,9 +16,9 @@
 //! execution owners. It owns the selected LogStore, never another WAL/runtime.
 //! Already queued independent requests can share one bounded durability barrier;
 //! original appends, completion scopes, admission credits and FIFO are retained.
-use crate::{contracts::StorageError, identity::*, log::*, runtime::VisitTicket, worker::*};
+use crate::{contracts::StorageError, identity::*, log::*, worker::*};
 use std::{
-    collections::{BTreeMap, BTreeSet},
+    collections::BTreeMap,
     sync::{
         mpsc::{self, Receiver, SyncSender, TryRecvError, TrySendError},
         Arc,
@@ -55,12 +55,13 @@ enum Work {
 struct Retained {
     usage: WorkerUsage,
     control: bool,
-    visits: Vec<VisitTicket>,
+    unit_ids: Vec<PersistUnitId>,
     reclaim: bool,
 }
 pub struct NativeLogWorker<L: LogStore + Send + 'static> {
     binding: WorkerBinding,
     limits: WorkerLimits,
+    max_units_per_group: usize,
     sequence: u64,
     sender: Option<SyncSender<Work>>,
     events: Receiver<WorkerEvent>,
@@ -70,7 +71,7 @@ pub struct NativeLogWorker<L: LogStore + Send + 'static> {
     reclaim_pending: bool,
     thread: Option<JoinHandle<L>>,
     retained: BTreeMap<u64, Retained>,
-    groups: BTreeSet<GroupIdentity>,
+    groups: BTreeMap<GroupIdentity, usize>,
     usage: WorkerUsage,
     data: WorkerUsage,
     fenced: bool,
@@ -82,12 +83,30 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
     /// abandons observation, not accepted writes; use close/poll/try_reclaim for
     /// deterministic shutdown and store return. No host executor is shut down.
     pub fn spawn(
-        mut store: L,
+        store: L,
         generation: StorageWorkerGeneration,
         limits: WorkerLimits,
         wake: Arc<dyn WorkerWake>,
     ) -> Result<Self, WorkerError> {
+        Self::spawn_with_group_pipeline(store, generation, limits, wake, 1)
+    }
+    /// Explicit bounded same-group request selection; the default spawn is serial.
+    pub fn spawn_with_group_pipeline(
+        mut store: L,
+        generation: StorageWorkerGeneration,
+        limits: WorkerLimits,
+        wake: Arc<dyn WorkerWake>,
+        max_units_per_group: usize,
+    ) -> Result<Self, WorkerError> {
         let limits = limits.validate()?;
+        if max_units_per_group == 0
+            || max_units_per_group > 64
+            || max_units_per_group > limits.max_units - limits.control_units
+            || max_units_per_group > limits.max_requests - limits.control_requests
+            || max_units_per_group > store.limits().max_pending_units
+        {
+            return Err(WorkerError::InvalidLimits);
+        }
         if limits.batch_units > store.limits().max_batch_units
             || limits.batch_bytes > store.limits().max_batch_bytes
         {
@@ -153,6 +172,7 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
         Ok(Self {
             binding,
             limits,
+            max_units_per_group,
             sequence: 0,
             sender: Some(sender),
             events,
@@ -162,7 +182,7 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
             reclaim_pending: false,
             thread: Some(thread),
             retained: BTreeMap::new(),
-            groups: BTreeSet::new(),
+            groups: BTreeMap::new(),
             usage: WorkerUsage::default(),
             data: WorkerUsage::default(),
             fenced: false,
@@ -182,12 +202,19 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
         let (bytes, control) = batch_cost(units, capacity, self.limits)?;
         if units
             .iter()
-            .any(|u| u.visit.owner.store != self.binding.store)
+            .any(|u| u.id.visit().owner.store != self.binding.store)
         {
             return Err(WorkerError::WrongBinding);
         }
-        if units.iter().any(|u| self.groups.contains(&u.visit.group)) {
+        if units.iter().any(|u| {
+            self.groups.get(&u.id.visit().group).copied().unwrap_or(0) >= self.max_units_per_group
+        }) {
             return Err(WorkerError::Overloaded);
+        }
+        if units.iter().any(|u| {
+            u.id.effect.sequence == 0 || self.retained.values().any(|r| r.unit_ids.contains(&u.id))
+        }) {
+            return Err(WorkerError::WrongBinding);
         }
         let fits = |u: WorkerUsage, r: usize, n: usize, b: usize| {
             u.requests < r
@@ -239,8 +266,15 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
             if r.reclaim {
                 self.reclaim_pending = false;
             }
-            for v in r.visits {
-                self.groups.remove(&v.group);
+            for v in r.unit_ids {
+                let count = self
+                    .groups
+                    .get_mut(&v.visit().group)
+                    .expect("retained group unit");
+                *count -= 1;
+                if *count == 0 {
+                    self.groups.remove(&v.visit().group);
+                }
             }
             self.usage.requests -= r.usage.requests;
             self.usage.units -= r.usage.units;
@@ -291,7 +325,7 @@ fn ready_window(
 }
 struct PendingBarrier {
     request: WorkerTicket,
-    visits: Vec<VisitTicket>,
+    unit_ids: Vec<PersistUnitId>,
 }
 fn persist_window<L: LogStore>(
     store: &mut L,
@@ -306,7 +340,7 @@ fn persist_window<L: LogStore>(
     let mut pending = Vec::with_capacity(batches.len());
     let mut window_failure = None;
     for batch in batches {
-        let visits = batch.units.iter().map(|u| u.visit).collect::<Vec<_>>();
+        let unit_ids = batch.units.iter().map(|u| u.id).collect::<Vec<_>>();
         let result = if *fenced {
             Err(StorageError::Fenced)
         } else {
@@ -319,11 +353,11 @@ fn persist_window<L: LogStore>(
             )
         };
         let result = result.and_then(|admitted| {
-            if admitted.len() != visits.len()
-                || visits.iter().any(|v| {
+            if admitted.len() != unit_ids.len()
+                || unit_ids.iter().any(|v| {
                     admitted
                         .iter()
-                        .filter(|t| t.binding == binding.store && t.group == v.group)
+                        .filter(|t| t.binding == binding.store && t.group == v.visit().group)
                         .count()
                         != 1
                 })
@@ -335,9 +369,17 @@ fn persist_window<L: LogStore>(
         });
         match result {
             Ok(admitted) => {
-                let admissions = visits
+                let admissions = unit_ids
                     .iter()
-                    .map(|v| (*v, *admitted.iter().find(|t| t.group == v.group).unwrap()))
+                    .map(|v| {
+                        (
+                            *v,
+                            *admitted
+                                .iter()
+                                .find(|t| t.group == v.visit().group)
+                                .unwrap(),
+                        )
+                    })
                     .collect();
                 let _ = out.send(WorkerEvent::Written {
                     request: batch.ticket,
@@ -347,7 +389,7 @@ fn persist_window<L: LogStore>(
                 tickets.extend(admitted);
                 pending.push(PendingBarrier {
                     request: batch.ticket,
-                    visits,
+                    unit_ids,
                 });
             }
             Err(error) => {
@@ -357,7 +399,7 @@ fn persist_window<L: LogStore>(
                 *fenced |= fatal(&error);
                 let _ = out.send(WorkerEvent::Failed {
                     request: batch.ticket,
-                    visits,
+                    units: unit_ids,
                     error,
                 });
                 wake.wake();
@@ -402,17 +444,17 @@ fn finish_persist_window<L: LogStore>(
         let terminal = match &result {
             Ok(()) => {
                 let completion = DurableLog {
-                    tickets: tickets.by_ref().take(p.visits.len()).collect(),
+                    tickets: tickets.by_ref().take(p.unit_ids.len()).collect(),
                 };
                 WorkerEvent::Durable {
                     request: p.request,
-                    visits: p.visits,
+                    units: p.unit_ids,
                     completion,
                 }
             }
             Err(error) => WorkerEvent::Failed {
                 request: p.request,
-                visits: p.visits,
+                units: p.unit_ids,
                 error: error.clone(),
             },
         };
@@ -436,6 +478,9 @@ impl<L: LogStore + Send + 'static> PersistenceWorker for NativeLogWorker<L> {
     }
     fn usage(&self) -> WorkerUsage {
         self.usage
+    }
+    fn max_outstanding_units_per_group(&self) -> usize {
+        self.max_units_per_group
     }
     fn reclaim_limit(&self) -> Option<usize> {
         self.reclaim_supported.then_some(self.max_reclaim_bytes)
@@ -500,7 +545,7 @@ impl<L: LogStore + Send + 'static> PersistenceWorker for NativeLogWorker<L> {
                     bytes,
                 },
                 control: false,
-                visits: Vec::new(),
+                unit_ids: Vec::new(),
                 reclaim: true,
             },
         );
@@ -555,7 +600,7 @@ impl<L: LogStore + Send + 'static> PersistenceWorker for NativeLogWorker<L> {
             binding: self.binding,
             sequence,
         };
-        let visits = units.iter().map(|u| u.visit).collect::<Vec<_>>();
+        let unit_ids = units.iter().map(|u| u.id).collect::<Vec<_>>();
         let count = units.len();
         match self
             .sender
@@ -565,8 +610,8 @@ impl<L: LogStore + Send + 'static> PersistenceWorker for NativeLogWorker<L> {
         {
             Ok(()) => {
                 self.sequence = sequence;
-                for v in &visits {
-                    self.groups.insert(v.group);
+                for v in &unit_ids {
+                    *self.groups.entry(v.visit().group).or_default() += 1;
                 }
                 let usage = WorkerUsage {
                     requests: 1,
@@ -586,7 +631,7 @@ impl<L: LogStore + Send + 'static> PersistenceWorker for NativeLogWorker<L> {
                     Retained {
                         usage,
                         control,
-                        visits,
+                        unit_ids,
                         reclaim: false,
                     },
                 );
@@ -628,7 +673,7 @@ impl<L: LogStore + Send + 'static> PersistenceWorker for NativeLogWorker<L> {
                             binding: self.binding,
                             sequence,
                         },
-                        visits: r.visits.clone(),
+                        units: r.unit_ids.clone(),
                         error: StorageError::Uncertain(
                             "worker disconnected; recover accepted work".into(),
                         ),

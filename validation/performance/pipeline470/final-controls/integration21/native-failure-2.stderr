@@ -1,0 +1,7 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/effect_owner.rs (target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b)
+
+thread 'native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport' (939356) panicked at tests/effect_owner.rs:2352:9:
+effect-owner cluster did not drain: [(EffectOwnerUsage { active_visits: 0, reserved_bytes: 0, leased: 0, persistence_requests: 0 }, WorkerUsage { requests: 0, units: 0, bytes: 0 }, OutboundUsage { batches: 0, messages: 0, bytes: 0 }, Some(SnapshotRouterUsage { requests: 0, image_bytes: 0 }), Some(SnapshotWorkUsage { requests: 0, bytes: 0 }), 698, 565), (EffectOwnerUsage { active_visits: 0, reserved_bytes: 0, leased: 0, persistence_requests: 0 }, WorkerUsage { requests: 0, units: 0, bytes: 0 }, OutboundUsage { batches: 0, messages: 0, bytes: 0 }, Some(SnapshotRouterUsage { requests: 0, image_bytes: 0 }), Some(SnapshotWorkUsage { requests: 0, bytes: 0 }), 300, 300), (EffectOwnerUsage { active_visits: 16, reserved_bytes: 74011968, leased: 15, persistence_requests: 1 }, WorkerUsage { requests: 1, units: 1, bytes: 1392 }, OutboundUsage { batches: 0, messages: 0, bytes: 0 }, Some(SnapshotRouterUsage { requests: 4, image_bytes: 409600 }), Some(SnapshotWorkUsage { requests: 4, bytes: 428226 }), 265, 289)]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `--test effect_owner`

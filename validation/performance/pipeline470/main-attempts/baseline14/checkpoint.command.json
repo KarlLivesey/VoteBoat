@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--all-features",
+    "--test",
+    "effect_owner",
+    "native::automatic_hundred_group_checkpoints_reclaim_and_reopen",
+    "--",
+    "--exact",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "cwd": "/tmp/voteboat-470-baseline-0q3xoh_j"
+}

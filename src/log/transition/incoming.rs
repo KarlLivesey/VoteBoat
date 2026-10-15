@@ -78,6 +78,12 @@ impl OwnedNextLog {
             Ok(Self(OwnedChange::Other { next, update }))
         }
     }
+    pub(crate) fn summary(&self) -> Option<LogSummary> {
+        match &self.0 {
+            OwnedChange::Append(append) => Some(append.summary),
+            _ => None,
+        }
+    }
     pub(crate) fn update(&self) -> &LogUpdate {
         match &self.0 {
             OwnedChange::Append(append) => &append.update,

@@ -1,0 +1,6 @@
+{
+  "scope": "default sandbox only, before workload",
+  "exit": 1,
+  "error": "PermissionError: [Errno 1] Operation not permitted creating local TCP socket",
+  "action": "Use authorized local test execution with socket access; no test or limit changed"
+}

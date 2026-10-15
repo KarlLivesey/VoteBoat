@@ -1,0 +1,337 @@
+   Compiling protobuf v2.28.0
+   Compiling memchr v2.8.3
+   Compiling proc-macro2 v1.0.107
+   Compiling libc v0.2.190
+   Compiling bytes v1.12.1
+   Compiling aho-corasick v1.1.5
+   Compiling regex-syntax v0.8.11
+   Compiling unicode-ident v1.0.26
+   Compiling quote v1.0.47
+   Compiling regex-automata v0.4.18
+   Compiling zerocopy v0.8.62
+   Compiling cfg-if v1.0.5
+   Compiling getrandom v0.2.17
+   Compiling regex v1.13.1
+   Compiling protobuf-codegen v2.28.0
+   Compiling shlex v2.0.1
+   Compiling bitflags v1.3.2
+   Compiling find-msvc-tools v0.1.14
+   Compiling protobuf-build v0.14.1
+   Compiling cc v1.6.0
+   Compiling syn v2.0.119
+   Compiling ring v0.17.14
+   Compiling raft-proto v0.7.0
+   Compiling rand_core v0.6.4
+   Compiling thiserror v1.0.69
+   Compiling slog v2.7.0
+   Compiling ppv-lite86 v0.2.21
+   Compiling rand_chacha v0.3.1
+   Compiling thiserror-impl v1.0.69
+   Compiling byteorder v1.5.0
+   Compiling fxhash v0.2.1
+   Compiling rand v0.8.8
+   Compiling getset v0.1.7
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+   Compiling untrusted v0.9.0
+   Compiling raft v0.7.0
+error[E0425]: cannot find type `LogTicket` in this scope
+  --> src/runtime/effects/append_window.rs:21:53
+   |
+21 |             + size_of::<WorkerTicket>() + size_of::<LogTicket>() + size_of::<VisitTicket>()))?;
+   |                                                     ^^^^^^^^^ not found in this scope
+   |
+help: consider importing this struct
+   |
+ 4 + use crate::log::LogTicket;
+   |
+
+error[E0609]: no field `visit` on type `&worker::PersistUnit`
+  --> src/logical_voter/persistence/admission.rs:30:26
+   |
+30 |                     || u.visit.group != self.mapping.parent
+   |                          ^^^^^ unknown field
+   |
+help: one of the expressions' fields has a field of the same name
+   |
+30 |                     || u.id.effect.visit.group != self.mapping.parent
+   |                          ++++++++++
+
+error[E0609]: no field `visit` on type `&worker::PersistUnit`
+  --> src/logical_voter/persistence/admission.rs:31:26
+   |
+31 |                     || u.visit.owner.store != self.binding.store
+   |                          ^^^^^ unknown field
+   |
+help: one of the expressions' fields has a field of the same name
+   |
+31 |                     || u.id.effect.visit.owner.store != self.binding.store
+   |                          ++++++++++
+
+error[E0609]: no field `visit` on type `&worker::PersistUnit`
+  --> src/logical_voter/persistence/admission.rs:32:26
+   |
+32 |                     || u.visit.sequence == 0
+   |                          ^^^^^ unknown field
+   |
+help: one of the expressions' fields has a field of the same name
+   |
+32 |                     || u.id.effect.visit.sequence == 0
+   |                          ++++++++++
+
+error[E0026]: variant `worker::WorkerEvent::Durable` does not have a field named `visits`
+  --> src/logical_voter/persistence/admission.rs:73:21
+   |
+73 |                     visits, completion, ..
+   |                     ^^^^^^ variant `worker::WorkerEvent::Durable` does not have this field
+
+error[E0026]: variant `worker::WorkerEvent::Failed` does not have a field named `visits`
+  --> src/logical_voter/persistence/admission.rs:80:39
+   |
+80 |                 WorkerEvent::Failed { visits, .. } => visits == &retained.visits,
+   |                                       ^^^^^^ variant `worker::WorkerEvent::Failed` does not have this field
+
+error[E0277]: can't compare `worker::PersistUnitId` with `runtime::VisitTicket`
+  --> src/logical_voter/persistence/admission.rs:67:35
+   |
+67 | ...                   v == original
+   |                         ^^ no implementation for `worker::PersistUnitId == runtime::VisitTicket`
+   |
+help: the trait `PartialEq<runtime::VisitTicket>` is not implemented for `worker::PersistUnitId`
+      but trait `PartialEq<worker::PersistUnitId>` is implemented for it
+  --> src/worker.rs:48:34
+   |
+48 | #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+   |                                  ^^^^^^^^^
+   = help: for that trait implementation, expected `worker::PersistUnitId`, found `runtime::VisitTicket`
+   = note: required for `&worker::PersistUnitId` to implement `PartialEq<&runtime::VisitTicket>`
+
+error[E0609]: no field `group` on type `&worker::PersistUnitId`
+  --> src/logical_voter/persistence/admission.rs:69:53
+   |
+69 | ...                   && t.group == v.group
+   |                                       ^^^^^ unknown field
+   |
+help: one of the expressions' fields has a field of the same name
+   |
+69 |                                     && t.group == v.effect.visit.group
+   |                                                     +++++++++++++
+
+error[E0559]: variant `worker::WorkerEvent::Failed` has no field named `visits`
+   --> src/logical_voter/persistence/admission.rs:104:13
+    |
+104 |             visits: retained.visits,
+    |             ^^^^^^ `worker::WorkerEvent::Failed` does not have this field
+    |
+    = note: available fields are: `units`
+
+error[E0609]: no field `visit` on type `&worker::PersistUnit`
+   --> src/logical_voter/persistence/admission.rs:136:45
+    |
+136 |         let visits = units.iter().map(|u| u.visit).collect();
+    |                                             ^^^^^ unknown field
+    |
+help: one of the expressions' fields has a field of the same name
+    |
+136 |         let visits = units.iter().map(|u| u.id.effect.visit).collect();
+    |                                             ++++++++++
+
+error[E0559]: variant `worker::WorkerEvent::Failed` has no field named `visits`
+  --> src/logical_voter/persistence/progress.rs:61:21
+   |
+61 |                     visits: batch.units.iter().map(|u| u.visit).collect(),
+   |                     ^^^^^^ `worker::WorkerEvent::Failed` does not have this field
+   |
+   = note: available fields are: `units`
+
+error[E0609]: no field `visit` on type `&worker::PersistUnit`
+  --> src/logical_voter/persistence/progress.rs:61:58
+   |
+61 |                     visits: batch.units.iter().map(|u| u.visit).collect(),
+   |                                                          ^^^^^ unknown field
+   |
+help: one of the expressions' fields has a field of the same name
+   |
+61 |                     visits: batch.units.iter().map(|u| u.id.effect.visit).collect(),
+   |                                                          ++++++++++
+
+error[E0609]: no field `visit` on type `&worker::PersistUnit`
+  --> src/logical_voter/persistence/progress.rs:79:37
+   |
+79 |             || origin.visit != unit.visit
+   |                                     ^^^^^ unknown field
+   |
+help: one of the expressions' fields has a field of the same name
+   |
+79 |             || origin.visit != unit.id.effect.visit
+   |                                     ++++++++++
+
+error[E0559]: variant `worker::WorkerEvent::Failed` has no field named `visits`
+  --> src/logical_voter/persistence/progress.rs:93:17
+   |
+93 |                 visits: pending.batch.units.iter().map(|u| u.visit).collect(),
+   |                 ^^^^^^ `worker::WorkerEvent::Failed` does not have this field
+   |
+   = note: available fields are: `units`
+
+error[E0609]: no field `visit` on type `&worker::PersistUnit`
+  --> src/logical_voter/persistence/progress.rs:93:62
+   |
+93 |                 visits: pending.batch.units.iter().map(|u| u.visit).collect(),
+   |                                                              ^^^^^ unknown field
+   |
+help: one of the expressions' fields has a field of the same name
+   |
+93 |                 visits: pending.batch.units.iter().map(|u| u.id.effect.visit).collect(),
+   |                                                              ++++++++++
+
+error[E0609]: no field `visit` on type `&worker::PersistUnit`
+   --> src/logical_voter/persistence/progress.rs:117:36
+    |
+117 |             admissions: vec![(unit.visit, ticket)],
+    |                                    ^^^^^ unknown field
+    |
+help: one of the expressions' fields has a field of the same name
+    |
+117 |             admissions: vec![(unit.id.effect.visit, ticket)],
+    |                                    ++++++++++
+
+error[E0559]: variant `worker::WorkerEvent::Durable` has no field named `visits`
+   --> src/logical_voter/persistence/progress.rs:121:13
+    |
+121 |             visits: vec![unit.visit],
+    |             ^^^^^^ `worker::WorkerEvent::Durable` does not have this field
+    |
+    = note: available fields are: `units`
+
+error[E0609]: no field `visit` on type `&worker::PersistUnit`
+   --> src/logical_voter/persistence/progress.rs:121:31
+    |
+121 |             visits: vec![unit.visit],
+    |                               ^^^^^ unknown field
+    |
+help: one of the expressions' fields has a field of the same name
+    |
+121 |             visits: vec![unit.id.effect.visit],
+    |                               ++++++++++
+
+error[E0308]: mismatched types
+   --> src/logical_voter/persistence/tests.rs:103:31
+    |
+103 |             admissions: vec![(visit, log)],
+    |                               ^^^^^ expected `PersistUnitId`, found `VisitTicket`
+
+error[E0559]: variant `worker::WorkerEvent::Durable` has no field named `visits`
+   --> src/logical_voter/persistence/tests.rs:135:17
+    |
+135 |                 visits: vec![visit],
+    |                 ^^^^^^ `worker::WorkerEvent::Durable` does not have this field
+    |
+    = note: available fields are: `units`
+
+error[E0026]: variant `worker::WorkerEvent::Failed` does not have a field named `visits`
+   --> src/logical_voter/persistence/tests.rs:144:13
+    |
+144 |             visits,
+    |             ^^^^^^
+    |             |
+    |             variant `worker::WorkerEvent::Failed` does not have this field
+    |             help: `worker::WorkerEvent::Failed` has a field named `units`
+
+error[E0027]: pattern does not mention field `units`
+   --> src/logical_voter/persistence/tests.rs:142:18
+    |
+142 |           let Some(WorkerEvent::Failed {
+    |  __________________^
+143 | |             request: failed,
+144 | |             visits,
+145 | |             error,
+146 | |         }) = result
+    | |_________^ missing field `units`
+    |
+help: include the missing field in the pattern
+    |
+145 -             error,
+146 -         }) = result
+145 +             error, units }) = result
+    |
+help: if you don't care about this missing field, you can explicitly ignore it
+    |
+145 -             error,
+146 -         }) = result
+145 +             error, units: _ }) = result
+    |
+help: or always ignore missing fields here
+    |
+145 -             error,
+146 -         }) = result
+145 +             error, .. }) = result
+    |
+
+error[E0559]: variant `worker::WorkerEvent::Durable` has no field named `visits`
+   --> src/logical_voter/persistence/tests.rs:167:13
+    |
+167 |             visits: vec![visit],
+    |             ^^^^^^ `worker::WorkerEvent::Durable` does not have this field
+    |
+    = note: available fields are: `units`
+
+error[E0609]: no field `visit` on type `&worker::PersistUnit`
+   --> src/logical_voter/persistence.rs:136:29
+    |
+136 |                 visit: unit.visit,
+    |                             ^^^^^ unknown field
+    |
+help: one of the expressions' fields has a field of the same name
+    |
+136 |                 visit: unit.id.effect.visit,
+    |                             ++++++++++
+
+error[E0277]: the trait bound `A: application::ProposalAdmission` is not satisfied
+   --> src/logical_voter/runtime.rs:116:49
+    |
+116 |         let driver = ReplicaDriver::new_logical(parts, limits, now)?;
+    |                      -------------------------- ^^^^^ the trait `application::ProposalAdmission` is not implemented for `A`
+    |                      |
+    |                      required by a bound introduced by this call
+    |
+note: required by a bound in `replica::ReplicaDriver::<R>::new_logical`
+   --> src/runtime/replica.rs:246:12
+    |
+242 |     pub(crate) fn new_logical<
+    |                   ----------- required by a bound in this associated function
+...
+246 |         A: ProposalAdmission<Receipt = R> + ReadableStateMachine,
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `ReplicaDriver::<R>::new_logical`
+help: consider further restricting type parameter `A` with trait `ProposalAdmission`
+    |
+101 |         A: StateMachine<Receipt = R> + ReadableStateMachine<ReadResult = V> + application::ProposalAdmission,
+    |                                                                             ++++++++++++++++++++++++++++++++
+
+error[E0499]: cannot borrow `self.usage[_]` as mutable more than once at a time
+  --> src/runtime/append_window.rs:65:17
+   |
+58 |         let group = self.live(anchor)?;
+   |                     ---- first mutable borrow occurs here
+...
+64 |                 group.usage[i].sub(used);
+   |                 -------------- first borrow later used here
+65 |                 self.usage[i].sub(used);
+   |                 ^^^^^^^^^^^^^ second mutable borrow occurs here
+
+error[E0499]: cannot borrow `results` as mutable more than once at a time
+   --> src/worker.rs:392:21
+    |
+377 |     let mut apply = |id: PersistUnitId, task: Task<'_>| {
+    |                     ----------------------------------- first mutable borrow occurs here
+...
+386 |         results.push(WorkerDelivery { id, result, retired_units });
+    |         ------- first borrow occurs due to use of `results` in closure
+...
+392 |                     results.push(WorkerDelivery { id, result: Err(WorkerError::WrongBinding), retired_units: None });
+    |                     ^^^^^^^ second mutable borrow occurs here
+393 |                 } else { apply(id, Task::Written(ticket)); }
+    |                          ----- first borrow later used here
+
+Some errors have detailed explanations: E0026, E0027, E0277, E0308, E0425, E0499, E0559, E0609.
+For more information about an error, try `rustc --explain E0026`.
+error: could not compile `voteboat` (lib test) due to 27 previous errors

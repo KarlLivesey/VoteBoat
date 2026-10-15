@@ -156,14 +156,20 @@ fn wait_entered(g: &Shared) {
 fn unit(w: &impl PersistenceWorker, g: u128, data: bool) -> Vec<PersistUnit> {
     let group = group(g);
     vec![PersistUnit {
-        visit: VisitTicket {
-            owner: RuntimeOwner {
-                store: w.binding().store,
-                lane: ExecutionLaneId::new(1).unwrap(),
-                generation: RuntimeGeneration::new(1).unwrap(),
+        id: PersistUnitId {
+            effect: EffectTicket {
+                visit: VisitTicket {
+                    owner: RuntimeOwner {
+                        store: w.binding().store,
+                        lane: ExecutionLaneId::new(1).unwrap(),
+                        generation: RuntimeGeneration::new(1).unwrap(),
+                    },
+                    group,
+                    sequence: 1,
+                },
+                sequence: 1,
             },
-            group,
-            sequence: 1,
+            append: None,
         },
         update: LogUpdate {
             snapshot_membership: None,

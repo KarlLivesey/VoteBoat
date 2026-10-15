@@ -1,0 +1,9 @@
+{
+  "previous": "integration10",
+  "strict_hook": {
+    "exit": 0,
+    "end": "2026-10-15T03:48:27.863158+00:00",
+    "same_selected_inputs": true
+  },
+  "scope": "All affected Rust functional scopes and build of debug-only actual CLI control;1452compiled inputs exact. No performance artifact or measurement claim. JS validator work independent and excluded from this Rust scope."
+}

@@ -321,7 +321,7 @@ mod tests {
             16,
             &clock,
             false,
-            16,
+            (16, None),
         )?;
         let result = (|| {
             campaign(&mut replicas, &clock, 1)?;

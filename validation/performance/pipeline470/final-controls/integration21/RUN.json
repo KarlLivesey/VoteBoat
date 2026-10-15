@@ -1,0 +1,102 @@
+{
+  "pid": 899556,
+  "start": "2026-10-15T04:40:04.202330+00:00",
+  "commands": [
+    [
+      "native-failure-1",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "effect_owner",
+        "native::automatic_hundred_group_checkpoints_reclaim_and_reopen",
+        "--",
+        "--exact",
+        "--nocapture",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "native-failure-2",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "effect_owner",
+        "native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport",
+        "--",
+        "--exact",
+        "--nocapture",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "native-failure-3",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "effect_owner",
+        "native::native_shared_peer_quota_pressure_reconnect_restart_and_retry",
+        "--",
+        "--exact",
+        "--nocapture",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "native-failure-4",
+      [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "effect_owner",
+        "native::owning_native_facade_checkpoints_restarts_and_retries_hundred_groups",
+        "--",
+        "--exact",
+        "--nocapture",
+        "--test-threads=1"
+      ]
+    ],
+    [
+      "native-control-build",
+      [
+        "cargo",
+        "+stable",
+        "build",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--example",
+        "native_benchmark"
+      ]
+    ]
+  ],
+  "environment": {
+    "CARGO_TARGET_DIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks",
+    "CARGO_BUILD_JOBS": "2",
+    "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration21/test-tmp",
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null,
+    "RUSTC_WRAPPER": null,
+    "RUSTC_WORKSPACE_WRAPPER": null,
+    "PROTOC": null
+  },
+  "runner_sha256": "dd6362faae84da8821ccd9b7f306a0d0aee3a653f6333018342e0f8ab1e62cc8"
+}

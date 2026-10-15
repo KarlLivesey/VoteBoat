@@ -17,10 +17,12 @@
 use super::*;
 use crate::{log::LogEntry, worker::*};
 use std::collections::BTreeSet;
+mod append_window;
 #[path = "effect_inspection.rs"]
 mod inspection;
 mod overlap;
 mod ready;
+pub use append_window::append_window_effect_reservation;
 pub use inspection::{EffectLeaseInspectionKind, EffectVisitInspection};
 #[cfg(all(test, feature = "native"))]
 #[path = "effects/peer_ingress_tests.rs"]
@@ -109,6 +111,7 @@ struct Active {
     ready: bool,
     control: bool,
     read_captured: bool,
+    append: Option<AppendUnitId>,
 }
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum LeaseKind {
@@ -128,7 +131,7 @@ fn kind(effect: &Effect) -> LeaseKind {
     }
 }
 struct Request {
-    visits: Vec<VisitTicket>,
+    units: Vec<PersistUnitId>,
     written: bool,
 }
 
@@ -151,9 +154,11 @@ pub struct EffectOwner<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> {
     runtime: TimedShard<Q, T, E>,
     worker: WorkerBinding,
     limits: EffectOwnerLimits,
-    active: BTreeMap<GroupIdentity, Active>,
-    ready: VecDeque<GroupIdentity>,
+    active: BTreeMap<u64, Active>,
+    ready: VecDeque<VisitTicket>,
     requests: BTreeMap<u64, Request>,
+    windows: BTreeMap<GroupIdentity, append_window::Window>,
+    append_closed: bool,
     reserved: usize,
     sequence: u64,
     failed: Option<EffectOwnerError>,
@@ -192,6 +197,8 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             active: BTreeMap::new(),
             ready: VecDeque::new(),
             requests: BTreeMap::new(),
+            windows: BTreeMap::new(),
+            append_closed: false,
             reserved: 0,
             sequence: 0,
             failed: None,
@@ -239,6 +246,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         for group in groups {
             let _ = self.runtime.stop_group(group);
         }
+        self.abandon_append_windows();
         self.active.retain(|_, a| {
             a.effects.clear();
             a.ready = false;
@@ -297,7 +305,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         extra: usize,
     ) -> Result<(), EffectOwnerError> {
         self.validate_lease(lease)?;
-        let a = self.active.get_mut(&lease.ticket.visit.group).unwrap();
+        let a = self.active.get_mut(&lease.ticket.visit.sequence).unwrap();
         let capacity = a.effects.capacity();
         let needed = effect_bytes(a.effects.make_contiguous(), capacity)
             .and_then(|n| n.checked_add(effect_bytes(std::slice::from_ref(&lease.effect), 1)?))
@@ -320,7 +328,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     /// continuation budget plus image allowance before any later preparation.
     pub(super) fn defer_snapshot(&mut self, lease: &EffectLease) -> Result<(), EffectOwnerError> {
         self.validate_lease(lease)?;
-        let a = self.active.get_mut(&lease.ticket.visit.group).unwrap();
+        let a = self.active.get_mut(&lease.ticket.visit.sequence).unwrap();
         let capacity = a.effects.capacity();
         let retained = effect_bytes(a.effects.make_contiguous(), capacity)
             .and_then(|n| n.checked_add(effect_bytes(std::slice::from_ref(&lease.effect), 1)?))
@@ -349,8 +357,8 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         self.runtime.has_pending_peer_ingress(group, peer)
             || self
                 .active
-                .get(&group)
-                .is_some_and(|a| a.received_from == Some(peer))
+                .values()
+                .any(|a| a.visit.group == group && a.received_from == Some(peer))
     }
     pub fn deadline(&self, group: GroupIdentity) -> Option<TimerToken> {
         self.runtime.deadline(group)
@@ -471,21 +479,29 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             .map(|_| ())
             .ok_or(RuntimeError::EventTooLarge)
     }
-    fn refresh(&mut self, group: GroupIdentity) -> Result<(), EffectOwnerError> {
+    fn refresh(&mut self, visit: VisitTicket) -> Result<(), EffectOwnerError> {
         let a = self
             .active
-            .get_mut(&group)
+            .get_mut(&visit.sequence)
             .ok_or(EffectOwnerError::StaleEffect)?;
         if a.leased.is_none() && !a.effects.is_empty() && !a.ready {
             a.ready = true;
-            self.ready.push_back(group);
+            self.ready.push_back(visit);
         }
+        if self.windows.contains_key(&visit.group) {
+            return self.refresh_append_window(visit.group).map(|_| ());
+        }
+        let a = self.active.get(&visit.sequence).unwrap();
         if a.leased.is_none()
             && a.effects.is_empty()
             && !a.waiting
-            && !self.runtime.core(group).unwrap().has_pending_dependency()
+            && !self
+                .runtime
+                .core(visit.group)
+                .unwrap()
+                .has_pending_dependency()
         {
-            let a = self.active.remove(&group).unwrap();
+            let a = self.active.remove(&visit.sequence).unwrap();
             self.runtime
                 .finish(a.visit)
                 .map_err(EffectOwnerError::Runtime)?;
@@ -500,7 +516,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     ) -> Result<(), EffectOwnerError> {
         let a = self
             .active
-            .get_mut(&visit.group)
+            .get_mut(&visit.sequence)
             .ok_or(EffectOwnerError::StaleEffect)?;
         if a.visit != visit || !a.effects.is_empty() || a.leased.is_some() {
             return self.fail(EffectOwnerError::ProviderContract);
@@ -509,7 +525,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             return self.fail(EffectOwnerError::ReservationTooLarge);
         }
         a.effects = effects.into();
-        self.refresh(visit.group)
+        self.refresh(visit)
     }
     /// Bounded ready visits. Returned invocation errors are not client success;
     /// the host separately budgets result retention and routes original IDs.
@@ -558,7 +574,13 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         limit: usize,
         mut check: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
-        let result = self.advance_inner(now, limit, |_| false, |core, event, _| check(core, event));
+        let result = self.advance_inner(
+            now,
+            limit,
+            |_| false,
+            |_| false,
+            |core, event, _| check(core, event),
+        );
         match result {
             Err(error @ (EffectOwnerError::Runtime(_) | EffectOwnerError::ReservationTooLarge)) => {
                 self.fail(error)
@@ -571,9 +593,10 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         now: MonoTime,
         limit: usize,
         eligible: impl FnMut(GroupIdentity) -> bool,
+        append_eligible: impl FnMut(GroupIdentity) -> bool,
         check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
-        let result = self.advance_inner(now, limit, eligible, check);
+        let result = self.advance_inner(now, limit, eligible, append_eligible, check);
         match result {
             Err(error @ (EffectOwnerError::Runtime(_) | EffectOwnerError::ReservationTooLarge)) => {
                 self.fail(error)
@@ -586,6 +609,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         now: MonoTime,
         limit: usize,
         mut eligible: impl FnMut(GroupIdentity) -> bool,
+        mut append_eligible: impl FnMut(GroupIdentity) -> bool,
         mut check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
         self.check()?;
@@ -597,17 +621,45 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             .poll_timers(now)
             .map_err(EffectOwnerError::Runtime)?;
         for _ in 0..limit {
-            if self.active.len() >= self.limits.active_visits || steps.len() >= limit {
+            if steps.len() >= limit {
                 break;
             }
             let Some(visit) = self.runtime.poll(now).map_err(EffectOwnerError::Runtime)? else {
                 break;
             };
+            if !self.windows.contains_key(&visit.group)
+                && self.visit_slots() >= self.limits.active_visits
+            {
+                self.runtime
+                    .finish(visit)
+                    .map_err(EffectOwnerError::Runtime)?;
+                continue;
+            }
             let max_items = if eligible(visit.group) {
                 limit - steps.len()
             } else {
                 1
             };
+            let mut checked = append_window::CheckReplay::default();
+            if !self.append_closed
+                && append_eligible(visit.group)
+                && self
+                    .core(visit.group)
+                    .is_some_and(|core| core.can_stage_append_window())
+                && self.try_append_step(
+                    visit,
+                    now,
+                    max_items,
+                    &mut |core, event, prefix| {
+                        let result = check(core, event, prefix);
+                        checked.record(&result);
+                        result
+                    },
+                    &mut steps,
+                )?
+            {
+                continue;
+            }
             let control = self
                 .runtime
                 .next_class(visit, now)
@@ -626,12 +678,14 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             }
             let stepped = self
                 .runtime
-                .step_ready_checked(visit, now, max_items, &mut check)
+                .step_ready_checked(visit, now, max_items, |core, event, prefix| {
+                    checked.next().unwrap_or_else(|| check(core, event, prefix))
+                })
                 .map_err(EffectOwnerError::Runtime)?;
             if let Some(step) = stepped {
                 self.install_ready_steps(visit, step, &mut steps)?;
             } else {
-                self.refresh(visit.group)?;
+                self.refresh(visit)?;
             }
         }
         Ok(steps)
@@ -641,7 +695,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         visit: VisitTicket,
         step: Stepped,
     ) -> Result<OwnerStep, EffectOwnerError> {
-        self.active.get_mut(&visit.group).unwrap().received_from = step.received_from;
+        self.active.get_mut(&visit.sequence).unwrap().received_from = step.received_from;
         let (effects, error) = match step.result {
             Ok(e) => (e, None),
             Err(e) => (Vec::new(), Some(e)),
@@ -662,8 +716,8 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     }
     pub(crate) fn take_owned_effect(&mut self) -> Result<Option<EffectLease>, EffectOwnerError> {
         self.check()?;
-        while let Some(group) = self.ready.pop_front() {
-            let Some(a) = self.active.get_mut(&group) else {
+        while let Some(visit) = self.ready.pop_front() {
+            let Some(a) = self.active.get_mut(&visit.sequence) else {
                 continue;
             };
             a.ready = false;
@@ -694,7 +748,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         self.check()?;
         if self
             .active
-            .get(&ticket.visit.group)
+            .get(&ticket.visit.sequence)
             .is_none_or(|a| a.visit != ticket.visit || a.leased != Some(ticket))
         {
             return Err(EffectOwnerError::StaleEffect);
@@ -703,7 +757,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     }
     pub(super) fn validate_lease(&self, lease: &EffectLease) -> Result<(), EffectOwnerError> {
         self.live(lease.ticket)?;
-        if self.active[&lease.ticket.visit.group].kind != Some(kind(&lease.effect)) {
+        if self.active[&lease.ticket.visit.sequence].kind != Some(kind(&lease.effect)) {
             return Err(EffectOwnerError::StaleEffect);
         }
         Ok(())
@@ -714,7 +768,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         let valid = self.failed.is_some()
             && self
                 .active
-                .get(&lease.ticket.visit.group)
+                .get(&lease.ticket.visit.sequence)
                 .is_some_and(|a| a.visit == lease.ticket.visit && a.leased == Some(lease.ticket));
         if !valid {
             return Err(EffectRejected {
@@ -722,7 +776,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                 lease: Box::new(lease),
             });
         }
-        let a = self.active.remove(&lease.ticket.visit.group).unwrap();
+        let a = self.active.remove(&lease.ticket.visit.sequence).unwrap();
         self.reserved -= a.reserved;
         Ok(())
     }
@@ -733,7 +787,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         if self.failed.is_none()
             || self
                 .active
-                .get(&ticket.visit.group)
+                .get(&ticket.visit.sequence)
                 .is_none_or(|a| a.visit != ticket.visit || a.leased != Some(ticket))
         {
             return Err(EffectOwnerError::StaleEffect);
@@ -745,7 +799,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         ticket: EffectTicket,
     ) -> Result<(), EffectOwnerError> {
         self.validate_failed_transfer(ticket)?;
-        let a = self.active.remove(&ticket.visit.group).unwrap();
+        let a = self.active.remove(&ticket.visit.sequence).unwrap();
         self.reserved -= a.reserved;
         Ok(())
     }
@@ -758,20 +812,18 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         if bytes > self.limits.reserved_bytes - self.reserved {
             return Err(EffectOwnerError::Overloaded);
         }
-        if !self.active[&ticket.visit.group].control {
-            let bulk = self
-                .active
-                .values()
-                .filter(|a| !a.control)
-                .map(|a| a.reserved)
-                .sum::<usize>();
+        if !self.active[&ticket.visit.sequence].control {
+            let bulk = self.bulk_reserved();
             if bytes > (self.limits.reserved_bytes - self.limits.control_bytes).saturating_sub(bulk)
             {
                 return Err(EffectOwnerError::Overloaded);
             }
         }
         self.reserved += bytes;
-        self.active.get_mut(&ticket.visit.group).unwrap().reserved += bytes;
+        self.active
+            .get_mut(&ticket.visit.sequence)
+            .unwrap()
+            .reserved += bytes;
         Ok(())
     }
     pub fn complete_effect<R>(
@@ -823,7 +875,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         let Effect::ReadReady(barrier) = &lease.effect else {
             return Err(EffectOwnerError::StaleEffect);
         };
-        if self.active[&lease.ticket.visit.group].read_captured {
+        if self.active[&lease.ticket.visit.sequence].read_captured {
             return Err(EffectOwnerError::StaleEffect);
         }
         self.runtime
@@ -833,7 +885,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             .map_err(EffectOwnerError::Runtime)?
             .map_err(EffectOwnerError::Consensus)?;
         self.active
-            .get_mut(&lease.ticket.visit.group)
+            .get_mut(&lease.ticket.visit.sequence)
             .unwrap()
             .read_captured = true;
         Ok(callback())
@@ -844,7 +896,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     ) -> Result<(), EffectRejected> {
         let result = (|| {
             self.validate_lease(&lease)?;
-            let a = self.active.get_mut(&lease.ticket.visit.group).unwrap();
+            let a = self.active.get_mut(&lease.ticket.visit.sequence).unwrap();
             if !matches!(a.kind, Some(LeaseKind::Read(_))) || !a.read_captured {
                 return Err(EffectOwnerError::StaleEffect);
             }
@@ -852,7 +904,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             a.leased_bytes = 0;
             a.kind = None;
             a.read_captured = false;
-            self.refresh(lease.ticket.visit.group)
+            self.refresh(lease.ticket.visit)
         })();
         result.map_err(|reason| EffectRejected {
             reason,
@@ -907,17 +959,19 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                     .map_err(EffectOwnerError::Runtime)?
                     .map_err(EffectOwnerError::Consensus)?;
             }
+            let id = PersistUnitId {
+                effect: lease.ticket,
+                append: self.active[&lease.ticket.visit.sequence].append,
+            };
             let result = self
                 .runtime
-                .with_core(lease.ticket.visit, now, |core| {
-                    callback(core, &lease.effect)
-                })
+                .with_persist_unit(id, now, |core| callback(core, &lease.effect))
                 .map_err(EffectOwnerError::Runtime)?;
             let (effects, result) = match result {
                 Ok(result) => result,
                 Err(error) => return self.fail(EffectOwnerError::Consensus(error)),
             };
-            let a = self.active.get_mut(&lease.ticket.visit.group).unwrap();
+            let a = self.active.get_mut(&lease.ticket.visit.sequence).unwrap();
             let capacity = a.effects.capacity();
             let retained = effect_bytes(a.effects.make_contiguous(), capacity)
                 .and_then(|n| n.checked_add(effect_bytes(&effects, effects.capacity())?))
@@ -930,7 +984,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             a.leased_bytes = 0;
             a.kind = None;
             a.read_captured = false;
-            self.refresh(lease.ticket.visit.group)?;
+            self.refresh(lease.ticket.visit)?;
             Ok(result)
         })();
         if let Err(error @ EffectOwnerError::Runtime(_)) = &result {
@@ -977,14 +1031,14 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         ticket: EffectTicket,
     ) -> Result<(), EffectOwnerError> {
         self.live(ticket)?;
-        let a = self.active.get_mut(&ticket.visit.group).unwrap();
+        let a = self.active.get_mut(&ticket.visit.sequence).unwrap();
         if !matches!(a.kind, Some(LeaseKind::Send(_))) {
             return Err(EffectOwnerError::StaleEffect);
         }
         a.leased = None;
         a.leased_bytes = 0;
         a.kind = None;
-        self.refresh(ticket.visit.group)
+        self.refresh(ticket.visit)
     }
     /// Complete only the original logical send already accepted by its selected
     /// proof-bearing queue. Generic physical transfers never reset this window.
@@ -998,7 +1052,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         if !self.authorization().is_logical() {
             return Err(EffectOwnerError::ProviderContract);
         }
-        let Some(LeaseKind::Send(peer)) = self.active[&ticket.visit.group].kind else {
+        let Some(LeaseKind::Send(peer)) = self.active[&ticket.visit.sequence].kind else {
             return Err(EffectOwnerError::StaleEffect);
         };
         if let Some(message) = vote {
@@ -1014,35 +1068,40 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         }
         self.release_owned_send(ticket)
     }
+    fn validate_persist_batch(
+        &self,
+        worker: &impl PersistenceWorker,
+        leases: &[EffectLease],
+        capacity: usize,
+    ) -> Result<(), EffectOwnerError> {
+        self.check()?;
+        if worker.binding() != self.worker {
+            return Err(EffectOwnerError::WrongWorker);
+        }
+        if leases.is_empty() || capacity > worker.limits().batch_units {
+            return Err(EffectOwnerError::Worker(WorkerError::BatchTooLarge));
+        }
+        let mut groups = BTreeSet::new();
+        for lease in leases {
+            self.validate_lease(lease)?;
+            if !self.active[&lease.ticket.visit.sequence].effects.is_empty() {
+                return Err(EffectOwnerError::ProviderContract);
+            }
+            if !groups.insert(lease.ticket.visit.group)
+                || !matches!(lease.effect, Effect::Persist(_))
+            {
+                return Err(EffectOwnerError::PersistenceEffect);
+            }
+        }
+        Ok(())
+    }
     pub fn submit_persists<W: PersistenceWorker>(
         &mut self,
         worker: &mut W,
         leases: Vec<EffectLease>,
         now: MonoTime,
     ) -> Result<WorkerTicket, EffectBatchRejected> {
-        let checked = (|| {
-            self.check()?;
-            if worker.binding() != self.worker {
-                return Err(EffectOwnerError::WrongWorker);
-            }
-            if leases.is_empty() || leases.capacity() > worker.limits().batch_units {
-                return Err(EffectOwnerError::Worker(WorkerError::BatchTooLarge));
-            }
-            let mut groups = BTreeSet::new();
-            for lease in &leases {
-                self.validate_lease(lease)?;
-                if !self.active[&lease.ticket.visit.group].effects.is_empty() {
-                    return Err(EffectOwnerError::ProviderContract);
-                }
-                if !groups.insert(lease.ticket.visit.group)
-                    || !matches!(lease.effect, Effect::Persist(_))
-                {
-                    return Err(EffectOwnerError::PersistenceEffect);
-                }
-            }
-            Ok(())
-        })();
-        if let Err(reason) = checked {
+        if let Err(reason) = self.validate_persist_batch(worker, &leases, leases.capacity()) {
             return Err(EffectBatchRejected { reason, leases });
         }
         let tickets = leases.iter().map(|l| l.ticket).collect::<Vec<_>>();
@@ -1053,7 +1112,10 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                     unreachable!()
                 };
                 PersistUnit {
-                    visit: lease.ticket.visit,
+                    id: PersistUnitId {
+                        effect: lease.ticket,
+                        append: self.active[&lease.ticket.visit.sequence].append,
+                    },
                     update,
                 }
             })
@@ -1080,7 +1142,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                     || self.requests.contains_key(&request.sequence)
                 {
                     for ticket in &tickets {
-                        let a = self.active.get_mut(&ticket.visit.group).unwrap();
+                        let a = self.active.get_mut(&ticket.visit.sequence).unwrap();
                         a.leased = None;
                         a.leased_bytes = 0;
                         a.kind = None;
@@ -1091,20 +1153,35 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                         leases: vec![],
                     });
                 }
-                let visits = tickets.iter().map(|t| t.visit).collect();
+                let units = tickets
+                    .iter()
+                    .map(|t| PersistUnitId {
+                        effect: *t,
+                        append: self.active[&t.visit.sequence].append,
+                    })
+                    .collect();
                 self.requests.insert(
                     request.sequence,
                     Request {
-                        visits,
+                        units,
                         written: false,
                     },
                 );
                 for ticket in tickets {
-                    let a = self.active.get_mut(&ticket.visit.group).unwrap();
+                    let a = self.active.get_mut(&ticket.visit.sequence).unwrap();
                     a.leased = None;
                     a.leased_bytes = 0;
                     a.kind = None;
                     a.waiting = true;
+                    if a.append.is_some() {
+                        if let Err(error) = self.runtime.park_append_visit(ticket.visit) {
+                            let _ = self.fail::<()>(EffectOwnerError::Runtime(error.clone()));
+                            return Err(EffectBatchRejected {
+                                reason: EffectOwnerError::Runtime(error),
+                                leases: vec![],
+                            });
+                        }
+                    }
                 }
                 Ok(request)
             }
@@ -1123,21 +1200,23 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         let Some(pending) = self.requests.get(&request.sequence) else {
             return Err(EffectOwnerError::StaleCompletion);
         };
-        let visits: Vec<_> = match &event {
-            WorkerEvent::Written { admissions, .. } => admissions.iter().map(|(v, _)| *v).collect(),
-            WorkerEvent::Durable { visits, .. } | WorkerEvent::Failed { visits, .. } => {
-                visits.clone()
+        let units: Vec<_> = match &event {
+            WorkerEvent::Written { admissions, .. } => {
+                admissions.iter().map(|(id, _)| *id).collect()
             }
+            WorkerEvent::Durable { units, .. } | WorkerEvent::Failed { units, .. } => units.clone(),
         };
-        let actual: BTreeSet<_> = visits.iter().map(|v| (v.group, v.sequence)).collect();
-        let expected: BTreeSet<_> = pending
-            .visits
-            .iter()
-            .map(|v| (v.group, v.sequence))
-            .collect();
-        if visits.len() != pending.visits.len()
-            || actual != expected
-            || visits.iter().any(|v| v.owner != self.runtime.owner())
+        if units.len() != pending.units.len()
+            || units.iter().any(|id| {
+                id.visit().owner != self.runtime.owner()
+                    || pending
+                        .units
+                        .iter()
+                        .filter(|expected| *expected == id)
+                        .count()
+                        != 1
+                    || units.iter().filter(|actual| *actual == id).count() != 1
+            })
         {
             return self.fail(EffectOwnerError::ProviderContract);
         }
@@ -1155,13 +1234,13 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         }
         let early = self.reserve_replication(&event)?;
         for delivery in
-            crate::worker::apply_to_timed_with_replication(&mut self.runtime, event, now, |visit| {
-                early.contains(&visit.group)
+            crate::worker::apply_to_timed_with_replication(&mut self.runtime, event, now, |id| {
+                early.contains(&id)
             })
         {
             if terminal {
                 self.active
-                    .get_mut(&delivery.visit.group)
+                    .get_mut(&delivery.id.visit().sequence)
                     .ok_or(EffectOwnerError::StaleCompletion)?
                     .waiting = false;
             }
@@ -1169,11 +1248,16 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                 Ok(e) => e,
                 Err(e) => return self.fail(EffectOwnerError::Worker(e)),
             };
-            self.install_continuation(delivery.visit, effects)?;
+            if let Some(units) = delivery.retired_units {
+                self.retire_append_window(delivery.id.visit().group, units, effects)?;
+            } else {
+                self.install_continuation(delivery.id.visit(), effects)?;
+            }
         }
         Ok(())
     }
     pub fn close_admission(&mut self) -> Result<(), EffectOwnerError> {
+        self.seal_append_windows();
         match self.runtime.close_admission() {
             Ok(()) => Ok(()),
             Err(e) => self.fail(EffectOwnerError::Runtime(e)),
@@ -1182,6 +1266,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     pub fn is_drained(&self) -> bool {
         self.failed.is_none()
             && self.active.is_empty()
+            && self.windows.is_empty()
             && self.requests.is_empty()
             && self.runtime.is_drained()
     }

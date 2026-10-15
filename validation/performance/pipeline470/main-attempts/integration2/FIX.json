@@ -1,0 +1,8 @@
+{
+  "cause": "New fallback control selected max_originals1 with max_units2; invalid fixture rejected before exercising fallback",
+  "fix": "Valid U2/originals2 with exact two-original public reservation minus1; callback expectations and production validation unchanged",
+  "changed_inputs": [
+    "src/runtime/ready_batch/tests/append_window.rs"
+  ],
+  "next": "Rerun only failed control then previously unexecuted focused stages;13 passed controls retained for their unchanged source scope"
+}

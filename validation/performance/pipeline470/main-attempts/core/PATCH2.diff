@@ -1,0 +1,541 @@
+diff --git a/src/log/transition/incoming.rs b/src/log/transition/incoming.rs
+index 09703c5e..55f15687 100644
+--- a/src/log/transition/incoming.rs
++++ b/src/log/transition/incoming.rs
+@@ -78,6 +78,12 @@ impl OwnedNextLog {
+             Ok(Self(OwnedChange::Other { next, update }))
+         }
+     }
++    pub(crate) fn summary(&self) -> Option<LogSummary> {
++        match &self.0 {
++            OwnedChange::Append(append) => Some(append.summary),
++            _ => None,
++        }
++    }
+     pub(crate) fn update(&self) -> &LogUpdate {
+         match &self.0 {
+             OwnedChange::Append(append) => &append.update,
+diff --git a/src/log/transition/view.rs b/src/log/transition/view.rs
+index 18b87613..b1923b4a 100644
+--- a/src/log/transition/view.rs
++++ b/src/log/transition/view.rs
+@@ -77,11 +77,9 @@ impl<'a> LogView<'a> {
+     }
+     /// Prefix/tail were admitted by this owner; metadata describes their exact
+     /// accepted version. This is not an unchecked public storage admission API.
+-    #[cfg(test)]
+     pub(crate) fn overlay(base: &'a GroupLog, tail: &'a [LogEntry], metadata: LogMetadata) -> Self {
+         Self::trimmed_overlay(base, tail, metadata, 0)
+     }
+-    #[cfg(any(feature = "native", test))]
+     pub(crate) fn trimmed_overlay(
+         base: &'a GroupLog,
+         tail: &'a [LogEntry],
+diff --git a/src/logical_voter/persistence.rs b/src/logical_voter/persistence.rs
+index 6979f4ed..63d4ba28 100644
+--- a/src/logical_voter/persistence.rs
++++ b/src/logical_voter/persistence.rs
+@@ -57,7 +57,7 @@ struct PersistBatch {
+ }
+ struct RetainedPersist {
+     ticket: WorkerTicket,
+-    visits: Vec<crate::runtime::VisitTicket>,
++    units: Vec<PersistUnitId>,
+     usage: WorkerUsage,
+     written: Option<LogTicket>,
+ }
+@@ -133,7 +133,7 @@ impl LogicalPersistencePort {
+             update: unit.update.clone(),
+             origin: PersistOrigin {
+                 request: pending.batch.ticket,
+-                visit: unit.visit,
++                visit: unit.id.visit(),
+             },
+         })
+     }
+diff --git a/src/logical_voter/persistence/admission.rs b/src/logical_voter/persistence/admission.rs
+index 83121375..9e060f8a 100644
+--- a/src/logical_voter/persistence/admission.rs
++++ b/src/logical_voter/persistence/admission.rs
+@@ -27,17 +27,21 @@ impl LogicalPersistenceWorker {
+         if units.len() != 1
+             || units.iter().any(|u| {
+                 u.update.group != self.mapping.parent
+-                    || u.visit.group != self.mapping.parent
+-                    || u.visit.owner.store != self.binding.store
+-                    || u.visit.sequence == 0
++                    || u.id.visit().group != self.mapping.parent
++                    || u.id.visit().owner.store != self.binding.store
++                    || u.id.visit().sequence == 0
++                    || u.id.effect.sequence == 0
+             })
+         {
+             return Err(WorkerError::WrongBinding);
+         }
++        if units.iter().any(|unit| unit.id.append.is_some()) {
++            return Err(WorkerError::Unsupported);
++        }
+         let (bytes, control) = batch_cost(units, capacity, self.limits)?;
+         let reserved = bytes
+             .checked_add(std::mem::size_of::<RetainedPersist>())
+-            .and_then(|n| n.checked_add(std::mem::size_of::<crate::runtime::VisitTicket>()))
++            .and_then(|n| n.checked_add(std::mem::size_of::<PersistUnitId>()))
+             .ok_or(WorkerError::BatchTooLarge)?;
+         let ceiling = if control {
+             self.limits.max_bytes
+@@ -59,25 +63,25 @@ impl LogicalPersistenceWorker {
+             && match &event {
+                 WorkerEvent::Written { admissions, .. } => {
+                     retained.written.is_none()
+-                        && admissions.len() == retained.visits.len()
++                        && admissions.len() == retained.units.len()
+                         && admissions
+                             .iter()
+-                            .zip(&retained.visits)
++                            .zip(&retained.units)
+                             .all(|((v, t), original)| {
+                                 v == original
+                                     && t.binding == self.binding.store
+-                                    && t.group == v.group
++                                    && t.group == v.visit().group
+                             })
+                 }
+                 WorkerEvent::Durable {
+-                    visits, completion, ..
++                    units, completion, ..
+                 } => {
+-                    visits == &retained.visits
++                    units == &retained.units
+                         && retained.written.as_ref().is_some_and(|ticket| {
+                             completion.tickets.as_slice() == std::slice::from_ref(ticket)
+                         })
+                 }
+-                WorkerEvent::Failed { visits, .. } => visits == &retained.visits,
++                WorkerEvent::Failed { units, .. } => units == &retained.units,
+             };
+         if !valid {
+             self.fenced = true;
+@@ -101,7 +105,7 @@ impl LogicalPersistenceWorker {
+         self.fenced = true;
+         WorkerEvent::Failed {
+             request: retained.ticket,
+-            visits: retained.visits,
++            units: retained.units,
+             error: StorageError::Uncertain(message.to_owned()),
+         }
+     }
+@@ -133,7 +137,7 @@ impl PersistenceWorker for LogicalPersistenceWorker {
+             binding: self.binding,
+             sequence,
+         };
+-        let visits = units.iter().map(|u| u.visit).collect();
++        let ids = units.iter().map(|u| u.id).collect();
+         self.outstanding.store(true, Ordering::Release);
+         match self
+             .sender
+@@ -145,7 +149,7 @@ impl PersistenceWorker for LogicalPersistenceWorker {
+                 self.sequence = sequence;
+                 self.retained = Some(RetainedPersist {
+                     ticket,
+-                    visits,
++                    units: ids,
+                     usage,
+                     written: None,
+                 });
+diff --git a/src/logical_voter/persistence/progress.rs b/src/logical_voter/persistence/progress.rs
+index 85376d31..ad01eee3 100644
+--- a/src/logical_voter/persistence/progress.rs
++++ b/src/logical_voter/persistence/progress.rs
+@@ -58,7 +58,7 @@ impl LogicalPersistencePort {
+                 self.fenced = true;
+                 self.held.push_back(WorkerEvent::Failed {
+                     request: batch.ticket,
+-                    visits: batch.units.iter().map(|u| u.visit).collect(),
++                    units: batch.units.iter().map(|u| u.id).collect(),
+                     error: error.clone(),
+                 });
+                 return Err(error);
+@@ -76,7 +76,7 @@ impl LogicalPersistencePort {
+             return Err(StorageError::StaleTicket);
+         };
+         if origin.request != pending.batch.ticket
+-            || origin.visit != unit.visit
++            || origin.visit != unit.id.visit()
+             || update != &unit.update
+             || generation != self.parent.generation
+             || Some(observation.receipt().operation) != pending.operation
+@@ -90,7 +90,7 @@ impl LogicalPersistencePort {
+             self.fenced = true;
+             self.held.push_back(WorkerEvent::Failed {
+                 request: pending.batch.ticket,
+-                visits: pending.batch.units.iter().map(|u| u.visit).collect(),
++                units: pending.batch.units.iter().map(|u| u.id).collect(),
+                 error: StorageError::Rejected("committed logical mutation refusal"),
+             });
+             self.pending = None;
+@@ -114,11 +114,11 @@ impl LogicalPersistencePort {
+         };
+         self.held.push_back(WorkerEvent::Written {
+             request: pending.batch.ticket,
+-            admissions: vec![(unit.visit, ticket)],
++            admissions: vec![(unit.id, ticket)],
+         });
+         self.held.push_back(WorkerEvent::Durable {
+             request: pending.batch.ticket,
+-            visits: vec![unit.visit],
++            units: vec![unit.id],
+             completion: DurableLog {
+                 tickets: vec![ticket],
+             },
+diff --git a/src/logical_voter/persistence/tests.rs b/src/logical_voter/persistence/tests.rs
+index 13a2129f..d6ba2295 100644
+--- a/src/logical_voter/persistence/tests.rs
++++ b/src/logical_voter/persistence/tests.rs
+@@ -14,12 +14,12 @@
+ // rights and limitations under the RPL.
+ //! Fault injection into completion correlation, not child authority evidence.
+ use super::*;
+-use crate::runtime::{RuntimeOwner, VisitTicket};
++use crate::runtime::{EffectTicket, RuntimeOwner, VisitTicket};
+ 
+ fn fixture() -> (
+     LogicalPersistenceWorker,
+     SyncSender<WorkerEvent>,
+-    VisitTicket,
++    PersistUnitId,
+     LogTicket,
+ ) {
+     let group = GroupIdentity {
+@@ -46,6 +46,10 @@ fn fixture() -> (
+         group,
+         sequence: 1,
+     };
++    let unit = PersistUnitId {
++        effect: EffectTicket { visit, sequence: 1 },
++        append: None,
++    };
+     let log = LogTicket {
+         binding: store,
+         batch: 1,
+@@ -75,7 +79,7 @@ fn fixture() -> (
+                 binding,
+                 sequence: 1,
+             },
+-            visits: vec![visit],
++            units: vec![unit],
+             usage: WorkerUsage {
+                 requests: 1,
+                 units: 1,
+@@ -87,20 +91,20 @@ fn fixture() -> (
+         fenced: false,
+         outstanding: Arc::new(AtomicBool::new(true)),
+     };
+-    (worker, sender, visit, log)
++    (worker, sender, unit, log)
+ }
+ 
+ fn written(
+     worker: &mut LogicalPersistenceWorker,
+     sender: &SyncSender<WorkerEvent>,
+-    visit: VisitTicket,
++    unit: PersistUnitId,
+     log: LogTicket,
+ ) {
+     let request = worker.retained.as_ref().unwrap().ticket;
+     sender
+         .try_send(WorkerEvent::Written {
+             request,
+-            admissions: vec![(visit, log)],
++            admissions: vec![(unit, log)],
+         })
+         .unwrap();
+     assert!(matches!(
+@@ -114,8 +118,8 @@ fn written(
+ #[test]
+ fn durable_matches_every_original_written_ticket_field() {
+     for field in 0..8 {
+-        let (mut worker, sender, visit, original) = fixture();
+-        written(&mut worker, &sender, visit, original);
++        let (mut worker, sender, unit, original) = fixture();
++        written(&mut worker, &sender, unit, original);
+         let request = worker.retained.as_ref().unwrap().ticket;
+         let mut altered = original;
+         match field {
+@@ -132,7 +136,7 @@ fn durable_matches_every_original_written_ticket_field() {
+         sender
+             .try_send(WorkerEvent::Durable {
+                 request,
+-                visits: vec![visit],
++                units: vec![unit],
+                 completion: DurableLog {
+                     tickets: vec![altered],
+                 },
+@@ -141,14 +145,14 @@ fn durable_matches_every_original_written_ticket_field() {
+         let result = worker.poll(1).pop();
+         let Some(WorkerEvent::Failed {
+             request: failed,
+-            visits,
++            units,
+             error,
+         }) = result
+         else {
+             panic!("mismatched durable field {field} escaped");
+         };
+         assert_eq!(failed, request);
+-        assert_eq!(visits, vec![visit]);
++        assert_eq!(units, vec![unit]);
+         assert!(matches!(error, StorageError::Uncertain(_)));
+         assert!(worker.fenced);
+         assert_eq!(worker.usage(), WorkerUsage::default());
+@@ -158,13 +162,13 @@ fn durable_matches_every_original_written_ticket_field() {
+ 
+ #[test]
+ fn original_written_ticket_releases_only_at_consumed_durable() {
+-    let (mut worker, sender, visit, log) = fixture();
+-    written(&mut worker, &sender, visit, log);
++    let (mut worker, sender, unit, log) = fixture();
++    written(&mut worker, &sender, unit, log);
+     let request = worker.retained.as_ref().unwrap().ticket;
+     sender
+         .try_send(WorkerEvent::Durable {
+             request,
+-            visits: vec![visit],
++            units: vec![unit],
+             completion: DurableLog { tickets: vec![log] },
+         })
+         .unwrap();
+@@ -175,3 +179,38 @@ fn original_written_ticket_releases_only_at_consumed_durable() {
+     assert_eq!(worker.usage(), WorkerUsage::default());
+     assert!(!worker.outstanding.load(Ordering::Acquire));
+ }
++
++#[test]
++fn logical_default_one_rejects_sibling_effect_ids_at_both_worker_stages() {
++    for terminal in [false, true] {
++        let (mut worker, sender, original, log) = fixture();
++        assert_eq!(worker.max_outstanding_units_per_group(), 1);
++        if terminal {
++            written(&mut worker, &sender, original, log);
++        }
++        let mut sibling = original;
++        sibling.effect.sequence += 1;
++        let request = worker.retained.as_ref().unwrap().ticket;
++        let event = if terminal {
++            WorkerEvent::Durable {
++                request,
++                units: vec![sibling],
++                completion: DurableLog { tickets: vec![log] },
++            }
++        } else {
++            WorkerEvent::Written {
++                request,
++                admissions: vec![(sibling, log)],
++            }
++        };
++        sender.try_send(event).unwrap();
++        let Some(WorkerEvent::Failed { units, error, .. }) = worker.poll(1).pop() else {
++            panic!("sibling effect escaped exact logical correlation");
++        };
++        assert_eq!(units, vec![original]);
++        assert!(matches!(error, StorageError::Uncertain(_)));
++        assert!(worker.fenced);
++        assert_eq!(worker.usage(), WorkerUsage::default());
++        assert!(!worker.outstanding.load(Ordering::Acquire));
++    }
++}
+diff --git a/src/raft.rs b/src/raft.rs
+index 27213c95..3bdee158 100644
+--- a/src/raft.rs
++++ b/src/raft.rs
+@@ -27,6 +27,10 @@ use crate::{
+ use std::collections::{BTreeMap, BTreeSet};
+ 
+ mod admitted_replication;
++mod append_window;
++pub use append_window::{
++    AppendCompletion, AppendRejected, AppendUnitId, AppendWindowLimits, StagedAppend,
++};
+ mod batch_limits;
+ pub use batch_limits::BatchLimits;
+ mod completion;
+@@ -347,6 +351,9 @@ pub struct Raft {
+     request_sequence: u64,
+     last_batch: u64,
+     pending: Option<Pending>,
++    append_window_limits: Option<AppendWindowLimits>,
++    append_window: Option<append_window::Window>,
++    append_window_sequence: u64,
+     read: Option<PendingRead>,
+     ready_read: Option<ReadBarrier>,
+     last_read_request: u64,
+@@ -471,6 +478,9 @@ impl Raft {
+             request_sequence: 0,
+             last_batch: 0,
+             pending: None,
++            append_window_limits: None,
++            append_window: None,
++            append_window_sequence: 0,
+             read: None,
+             ready_read: None,
+             last_read_request: 0,
+@@ -792,6 +802,7 @@ impl Raft {
+     }
+     fn has_persistence_dependency(&self) -> bool {
+         self.pending.is_some()
++            || self.append_window.is_some()
+             || self.staged_snapshot.is_some()
+             || self.application_install.is_some()
+             || self.checkpoint_requested.is_some()
+@@ -811,6 +822,7 @@ impl Raft {
+         self.clear_replication_authority();
+         self.fenced = true;
+         self.pending = None;
++        self.append_window = None;
+         self.staged_snapshot = None;
+         self.staged_snapshot_repair = false;
+         self.application_install = None;
+@@ -1081,6 +1093,9 @@ impl Raft {
+         self.admitted(ticket)
+     }
+     pub fn admitted(&mut self, ticket: LogTicket) -> Result<(), RaftError> {
++        if self.append_window.is_some() {
++            return Err(RaftError::Busy);
++        }
+         if self.fenced {
+             return Err(RaftError::Fenced);
+         }
+@@ -1109,6 +1124,9 @@ impl Raft {
+         &mut self,
+         completion: &DurableLog,
+     ) -> Result<PreparedCompletion, RaftError> {
++        if self.append_window.is_some() {
++            return Err(RaftError::Busy);
++        }
+         if self.fenced {
+             return Err(RaftError::Fenced);
+         }
+diff --git a/src/raft/admitted_replication.rs b/src/raft/admitted_replication.rs
+index f864e9d7..aa61bba8 100644
+--- a/src/raft/admitted_replication.rs
++++ b/src/raft/admitted_replication.rs
+@@ -6,13 +6,13 @@ use std::mem::size_of;
+ 
+ #[derive(Clone, Copy)]
+ pub(super) struct AdmittedRange {
+-    ticket: LogTicket,
+-    context: RequestContext,
++    pub(super) ticket: LogTicket,
++    pub(super) context: RequestContext,
+ }
+ #[derive(Clone, Copy)]
+ pub(super) struct EmptyAppendAlias {
+-    original: Replication,
+-    successor: RequestContext,
++    pub(super) original: Replication,
++    pub(super) successor: RequestContext,
+ }
+ impl Raft {
+     /// Additional bounded early-output reservation before exact append admission.
+@@ -138,7 +138,7 @@ impl Raft {
+         })?;
+         (bytes <= self.limits.max_batch_bytes).then_some(suffix)
+     }
+-    fn early_peer(&self, peer: NodeId) -> bool {
++    pub(super) fn early_peer(&self, peer: NodeId) -> bool {
+         let tip = self.durable.last_index();
+         if peer == self.node
+             || self.progress.get(&peer).is_none_or(|index| *index < tip)
+@@ -183,6 +183,16 @@ impl Raft {
+         index: u64,
+     ) -> Option<&LogEntry> {
+         let range = self.admitted_ranges.get(&peer)?;
++        if let Some(window) = &self.append_window {
++            let unit = window
++                .units
++                .iter()
++                .find(|unit| unit.ticket == Some(range.ticket))?;
++            if range.context != sent.context {
++                return None;
++            }
++            return unit.next.entry_at(index);
++        }
+         let pending = self.pending.as_ref()?;
+         let metadata = pending.next.metadata();
+         if range.context != sent.context
+diff --git a/src/raft/batch_limits.rs b/src/raft/batch_limits.rs
+index 8e7c1eb0..c088aaa2 100644
+--- a/src/raft/batch_limits.rs
++++ b/src/raft/batch_limits.rs
+@@ -51,7 +51,14 @@ impl Raft {
+         if self.batch_limits_locked {
+             return Err(RaftError::Busy);
+         }
+-        self.batch_limits = limits.validate()?;
++        let limits = limits.validate()?;
++        if self
++            .append_window_limits
++            .is_some_and(|window| window.max_originals > limits.max_proposal_entries)
++        {
++            return Err(StorageError::Rejected("append window exceeds proposal envelope").into());
++        }
++        self.batch_limits = limits;
+         Ok(())
+     }
+     pub fn batch_limits(&self) -> BatchLimits {
+diff --git a/src/raft/proposals.rs b/src/raft/proposals.rs
+index e638e697..75ca2482 100644
+--- a/src/raft/proposals.rs
++++ b/src/raft/proposals.rs
+@@ -107,6 +107,20 @@ impl Raft {
+         &self,
+         proposals: &[Proposal],
+         capacity: usize,
++    ) -> Result<u64, RaftError> {
++        self.validate_proposal_batch_at(
++            proposals,
++            capacity,
++            self.durable.entries.len(),
++            self.durable.last_index(),
++        )
++    }
++    pub(super) fn validate_proposal_batch_at(
++        &self,
++        proposals: &[Proposal],
++        capacity: usize,
++        entries_len: usize,
++        last_index: u64,
+     ) -> Result<u64, RaftError> {
+         let count = proposals.len();
+         if count == 0 || count > self.batch_limits.max_proposal_entries {
+@@ -115,20 +129,13 @@ impl Raft {
+         if capacity > self.batch_limits.max_proposal_entries {
+             return Err(StorageError::Rejected("proposal allocation count budget").into());
+         }
+-        if self
+-            .durable
+-            .entries
+-            .len()
++        if entries_len
+             .checked_add(count)
+             .is_none_or(|n| n > self.limits.max_entries_per_group)
+         {
+             return Err(StorageError::Rejected("proposal retained entry budget").into());
+         }
+-        let first = self
+-            .durable
+-            .last_index()
+-            .checked_add(1)
+-            .ok_or(RaftError::Exhausted)?;
++        let first = last_index.checked_add(1).ok_or(RaftError::Exhausted)?;
+         first
+             .checked_add(count as u64 - 1)
+             .ok_or(RaftError::Exhausted)?;
+@@ -154,7 +161,7 @@ impl Raft {
+         }
+         Ok(first)
+     }
+-    fn validate_conversion_peak(
++    pub(super) fn validate_conversion_peak(
+         &self,
+         proposals: &[Proposal],
+         capacity: usize,

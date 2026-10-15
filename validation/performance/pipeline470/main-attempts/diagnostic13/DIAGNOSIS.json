@@ -1,0 +1,10 @@
+{
+  "previous": "integration11",
+  "previous_terminal": {
+    "exit": 101,
+    "end": "2026-10-15T04:00:02.968093+00:00",
+    "same_selected_inputs": true
+  },
+  "actual": "Application suite passes; effect_owner199pass4fail. Four native snapshot/catch-up progress limits exceeded, thirdreplica retains4snapshotworker jobs. No provider error/invariant panic reported. First fails before automatic checkpoint waves. Cause unestablished.",
+  "reason": "Focused unchanged-source reproduction of first actual progress failure, original15s deadline unchanged, nocapture for immediate diagnostic; no broad retry and no other Linux check/benchmark."
+}

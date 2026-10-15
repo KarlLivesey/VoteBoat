@@ -12,6 +12,9 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
+#[cfg(feature = "native")]
+#[path = "worker/append_window.rs"]
+mod append_window;
 mod support;
 use std::collections::{BTreeMap, VecDeque};
 use support::outbound::HostOutbound;
@@ -97,7 +100,10 @@ fn campaign<Q: ReadyScheduler>(shard: &mut Shard<Q>, g: u128) -> PersistUnit {
         panic!()
     };
     PersistUnit {
-        visit,
+        id: PersistUnitId {
+            effect: EffectTicket { visit, sequence: 1 },
+            append: None,
+        },
         update: update.clone(),
     }
 }
@@ -108,7 +114,7 @@ struct HostWorker {
     binding: WorkerBinding,
     sequence: u64,
     accepted: Option<(WorkerTicket, Vec<PersistUnit>)>,
-    written: Option<(WorkerTicket, Vec<VisitTicket>, Vec<LogTicket>)>,
+    written: Option<(WorkerTicket, Vec<PersistUnitId>, Vec<LogTicket>)>,
     usage: WorkerUsage,
     closed: bool,
 }
@@ -156,7 +162,7 @@ impl PersistenceWorker for HostWorker {
         };
         if units
             .iter()
-            .any(|u| u.visit.owner.store != self.binding.store)
+            .any(|u| u.id.visit().owner.store != self.binding.store)
         {
             return Err(WorkerRejected {
                 reason: WorkerError::WrongBinding,
@@ -181,7 +187,7 @@ impl PersistenceWorker for HostWorker {
             return vec![];
         }
         if let Some((request, units)) = self.accepted.take() {
-            let visits = units.iter().map(|u| u.visit).collect::<Vec<_>>();
+            let visits = units.iter().map(|u| u.id).collect::<Vec<_>>();
             let tickets = self
                 .store
                 .append_batch(
@@ -206,7 +212,7 @@ impl PersistenceWorker for HostWorker {
             self.usage = WorkerUsage::default();
             vec![WorkerEvent::Durable {
                 request,
-                visits,
+                units: visits,
                 completion,
             }]
         } else {
@@ -222,7 +228,7 @@ fn host_worker_stages_exact_effects_and_durable_owner_delivery_without_native_fe
     let mut store = HostLogStore::new(1);
     let mut shard = shard(&mut store, 2);
     let mut unit = campaign(&mut shard, 1);
-    let visit = unit.visit;
+    let visit = unit.id.visit();
     let original = unit.update.clone();
     let mut worker = HostWorker::new(store);
     unit.update.hard_state.term += 1;
@@ -272,7 +278,7 @@ fn stopped_visit_does_not_discard_other_groups_in_a_shared_completion() {
     let mut shard = shard(&mut store, 2);
     let first = campaign(&mut shard, 1);
     let second = campaign(&mut shard, 2);
-    let surviving = second.visit;
+    let surviving = second.id.visit();
     let mut worker = HostWorker::new(store);
     submit_for_shard(&mut shard, &mut worker, vec![first, second]).unwrap();
     let event = worker.poll(1).pop().unwrap();
@@ -310,6 +316,7 @@ struct WorkerNode<W: PersistenceWorker> {
     results: Vec<CounterReceipt>,
     reads: Vec<i64>,
     largest_batch: usize,
+    effect_sequence: u64,
 }
 impl<W: PersistenceWorker> WorkerNode<W> {
     fn new<L: LogStore>(
@@ -376,16 +383,30 @@ impl<W: PersistenceWorker> WorkerNode<W> {
             results: vec![],
             reads: vec![],
             largest_batch: 0,
+            effect_sequence: 0,
         }
     }
     fn effects(&mut self, visit: VisitTicket, effects: Vec<Effect>) {
         for effect in effects {
             match effect {
                 Effect::Persist(update) => {
+                    self.effect_sequence = self.effect_sequence.checked_add(1).unwrap();
                     assert!(self.pending.len() < 100);
                     assert!(self
                         .pending
-                        .insert(visit.group, PersistUnit { visit, update })
+                        .insert(
+                            visit.group,
+                            PersistUnit {
+                                id: PersistUnitId {
+                                    effect: EffectTicket {
+                                        visit,
+                                        sequence: self.effect_sequence
+                                    },
+                                    append: None
+                                },
+                                update
+                            }
+                        )
                         .is_none());
                 }
                 Effect::Send(message) => {
@@ -433,22 +454,22 @@ impl<W: PersistenceWorker> WorkerNode<W> {
         if self.hold {
             if let WorkerEvent::Durable {
                 request,
-                visits,
+                units: visits,
                 completion,
             } = &mut event
             {
-                if let Some(index) = visits.iter().position(|v| v.group == group(1)) {
+                if let Some(index) = visits.iter().position(|v| v.visit().group == group(1)) {
                     assert!(self.held.is_none());
                     self.held = Some(WorkerEvent::Durable {
                         request: *request,
-                        visits: vec![visits.remove(index)],
+                        units: vec![visits.remove(index)],
                         completion: completion.clone(),
                     });
                 }
             }
         }
         for delivery in apply_to_shard(&mut self.shard, event) {
-            self.effects(delivery.visit, delivery.result.unwrap());
+            self.effects(delivery.id.visit(), delivery.result.unwrap());
         }
     }
     fn progress(&mut self) -> bool {
@@ -486,7 +507,7 @@ impl<W: PersistenceWorker> WorkerNode<W> {
                     units,
                 }) => {
                     for unit in units {
-                        self.pending.insert(unit.visit.group, unit);
+                        self.pending.insert(unit.id.visit().group, unit);
                     }
                 }
                 Err(e) => panic!("worker rejected valid persistence: {e:?}"),
@@ -960,7 +981,10 @@ mod native {
                 panic!()
             };
             units.push(PersistUnit {
-                visit,
+                id: PersistUnitId {
+                    effect: EffectTicket { visit, sequence: 1 },
+                    append: None,
+                },
                 update: update.clone(),
             });
         }
@@ -978,7 +1002,7 @@ mod native {
         assert_eq!(deliveries.len(), 2);
         for delivery in deliveries {
             assert_eq!(delivery.result.unwrap().len(), 2);
-            timed.finish(delivery.visit).unwrap();
+            timed.finish(delivery.id.visit()).unwrap();
         }
         assert!(timed.is_drained());
         assert!(timed.poll(MonoTime(302)).unwrap().is_none());
@@ -1058,7 +1082,7 @@ mod native {
             });
         }
         let duplicate = PersistUnit {
-            visit: first.visit,
+            id: first.id,
             update: first.update.clone(),
         };
         let gate = Arc::new((Mutex::new(Gate::default()), Condvar::new()));
@@ -1142,7 +1166,7 @@ mod native {
         let units = (1..=100)
             .map(|g| campaign(&mut shard, g))
             .collect::<Vec<_>>();
-        let visits = units.iter().map(|u| u.visit).collect::<Vec<_>>();
+        let visits = units.iter().map(|u| u.id.visit()).collect::<Vec<_>>();
         let mut worker = NativeLogWorker::spawn(
             store,
             StorageWorkerGeneration::new(1).unwrap(),
@@ -1192,7 +1216,7 @@ mod native {
         let mut store = HostLogStore::new(1);
         let mut shard = shard(&mut store, 2);
         let unit = campaign(&mut shard, 1);
-        let visit = unit.visit;
+        let visit = unit.id.visit();
         let gate = Arc::new((Mutex::new(Gate::default()), Condvar::new()));
         let wake = Arc::new(Wake::default());
         let mut worker = NativeLogWorker::spawn(

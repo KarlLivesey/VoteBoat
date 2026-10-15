@@ -1,0 +1,19 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error: this function has too many lines (118/100)
+   --> examples/benchmark/shared.rs:418:5
+    |
+418 | /     fn open_profile_with_ingress(
+419 | |         &self,
+420 | |         n: u64,
+421 | |         recovery: Option<SnapshotRecoveryLimits>,
+422 | |         member: bool,
+423 | |         ingress_limits: IngressLimits,
+424 | |     ) -> Result<(Replica<SharedLog>, Trace), Failure> {
+    | |_____________________________________________________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#too_many_lines
+    = note: requested on the command line with `-D clippy::too-many-lines`
+
+error: could not compile `voteboat` (example "native_benchmark" test) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `voteboat` (example "native_benchmark") due to 1 previous error

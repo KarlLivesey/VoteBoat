@@ -1,0 +1,27 @@
+{
+  "args": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+    "record",
+    "-e",
+    "cycles:u",
+    "-F",
+    "199",
+    "--call-graph",
+    "dwarf,16384",
+    "-m",
+    "128",
+    "-o",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/profile16/baseline.data",
+    "--",
+    "/usr/bin/env",
+    "-u",
+    "LD_LIBRARY_PATH",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps/effect_owner-3b9732cae5c45d5b",
+    "native::automatic_hundred_group_checkpoints_reclaim_and_reopen",
+    "--exact",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/profile16/baseline-tmp",
+  "LD_LIBRARY_PATH": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/lib"
+}

@@ -1,0 +1,24 @@
+--- checked/src/worker.rs
++++ documented/src/worker.rs
+@@ -163,7 +163,9 @@
+     fn wake(&self);
+ }
+ /// Submit transfers an owned batch only on success. Rejection returns it whole.
+-/// At most one accepted unit per group remains outstanding. Poll delivers
++/// The default permits one outstanding accepted unit per group. An explicit
++/// immutable capability permits bounded successive requests; each atomic submit
++/// still contains at most one unit per group. Poll delivers
+ /// Written before Durable/Failed, with exact visit and store scopes. A terminal
+ /// poll releases input/output credits; polling Written alone does not. Worker
+ /// tickets are admissions, never durable prefixes. Closing drains accepted work;
+@@ -174,7 +176,9 @@
+     fn binding(&self) -> WorkerBinding;
+     fn limits(&self) -> WorkerLimits;
+     fn usage(&self) -> WorkerUsage;
+-    /// Finite same-group request capacity. The default preserves serial workers.
++    /// Immutable same-group outstanding-unit bound in 1..=64, defaulting to one.
++    /// Successive requests remain subject to ordinary resource/admission limits;
++    /// this capability reserves no capacity and grants no durability evidence.
+     fn max_outstanding_units_per_group(&self) -> usize {
+         1
+     }

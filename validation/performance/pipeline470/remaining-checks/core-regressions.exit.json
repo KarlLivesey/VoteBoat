@@ -1,0 +1,29 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--no-default-features",
+    "--lib",
+    "--test",
+    "raft",
+    "--test",
+    "runtime",
+    "--test",
+    "effect_owner",
+    "--test",
+    "worker",
+    "--test",
+    "provider_conformance",
+    "--test",
+    "snapshot",
+    "--",
+    "--test-threads=1"
+  ],
+  "start": "2026-10-15T05:00:27.549841+00:00",
+  "end": "2026-10-15T05:00:52.279644+00:00",
+  "elapsed_s": 24.730203223996796,
+  "exit": 0
+}

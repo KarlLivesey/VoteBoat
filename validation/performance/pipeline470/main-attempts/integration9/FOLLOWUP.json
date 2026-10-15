@@ -1,0 +1,9 @@
+{
+  "previous": "integration8",
+  "changed_inputs": [
+    "examples/benchmark/shared.rs",
+    "examples/native_benchmark.rs",
+    "tests/membership.rs"
+  ],
+  "reason": "Extract existing rejected-worker join loop, lanes option dispatch and membership ticket fixture to satisfy unchanged100-line limit; behavior/assertions and config unchanged."
+}

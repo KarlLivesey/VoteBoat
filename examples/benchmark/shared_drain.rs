@@ -209,6 +209,7 @@ impl Harness {
                     addresses: &self.addresses,
                     lane: 1,
                     ready_visit_items: 16,
+                    append_window: None,
                 }
                 .open_profile(n, None, true)
                 .unwrap()

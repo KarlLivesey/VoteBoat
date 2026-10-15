@@ -1,0 +1,8 @@
+{
+  "before_sha256": "f424caac084bed8b80def7399ab3d8d9d395adeb1b3bcffb4d6af0613bfe52a5",
+  "after_sha256": "d1efe909651d9a0cb7e3a08e299360a58e2f0ff4eceb19e32e590a947bcfe93a",
+  "doc_stripped_sha256": "adc9166afd157e95baef87ac8b79f5864dd244e3d28776f5da189bbd4b8441cd",
+  "doc_stripped_bytes_equal": true,
+  "only_changed_lines_are_trait_method_rustdoc": true,
+  "functional_reuse": "Exact integration23/22 code except these public rustdoc lines; no algorithm/API shape/behavior/constant/feature/test change. Final strict checks still required."
+}

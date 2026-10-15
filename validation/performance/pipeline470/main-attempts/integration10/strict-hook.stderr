@@ -1,0 +1,128 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.72s
+    Checking rand_core v0.10.1
+    Checking once_cell v1.21.4
+    Checking cpufeatures v0.3.1
+    Checking tracing-core v0.1.36
+    Checking chacha20 v0.10.2
+    Checking getrandom v0.4.3
+    Checking pin-project-lite v0.2.17
+    Checking rustls v0.23.45
+    Checking tracing v0.1.44
+    Checking rand v0.10.3
+    Checking thiserror v2.0.21
+    Checking rand_pcg v0.10.2
+    Checking slab v0.4.12
+    Checking lru-slab v0.1.3
+    Checking tinyvec v1.13.3
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Checking rustc-hash v2.1.3
+    Checking quinn-proto v0.11.19
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 24.54s
+   Compiling ring v0.17.14
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 13.87s
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 14.94s
+   Compiling unicode-ident v1.0.27
+   Compiling autocfg v1.5.1
+   Compiling proc-macro2 v1.0.107
+   Compiling num-traits v0.2.19
+   Compiling serde_core v1.0.229
+   Compiling quote v1.0.47
+   Compiling syn v3.0.9
+   Compiling siphasher v1.0.4
+   Compiling phf_shared v0.11.3
+   Compiling rand_core v0.6.4
+   Compiling serde v1.0.229
+   Compiling version_check v0.9.5
+   Compiling regex-syntax v0.8.11
+   Compiling regex-automata v0.4.18
+   Compiling serde_derive v1.0.229
+   Compiling generic-array v0.14.7
+   Compiling rand v0.8.8
+   Compiling phf_generator v0.11.3
+   Compiling regex v1.13.1
+    Checking futures-sink v0.3.34
+    Checking futures-core v0.3.34
+    Checking typenum v1.20.1
+    Checking memchr v2.8.3
+   Compiling parse-zoneinfo v0.3.1
+    Checking futures-channel v0.3.34
+   Compiling phf_codegen v0.11.3
+   Compiling futures-macro v0.3.34
+   Compiling phf v0.11.3
+    Checking futures-task v0.3.34
+    Checking slab v0.4.12
+    Checking futures-io v0.3.34
+   Compiling chrono-tz-build v0.2.1
+    Checking futures-util v0.3.34
+   Compiling syn v2.0.119
+    Checking utf8parse v0.2.2
+   Compiling iana-time-zone v0.1.65
+   Compiling chrono v0.4.45
+    Checking anstyle-parse v1.0.0
+   Compiling chrono-tz v0.8.6
+    Checking crypto-common v0.1.7
+    Checking block-buffer v0.10.4
+    Checking is_terminal_polyfill v1.70.2
+    Checking anstyle v1.0.14
+   Compiling unicode-segmentation v1.13.3
+   Compiling semver v1.0.28
+    Checking colorchoice v1.0.5
+    Checking anstyle-query v1.1.5
+   Compiling convert_case v0.10.0
+    Checking anstream v1.0.0
+   Compiling openraft-macros v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling cc v1.8.0
+    Checking digest v0.10.7
+    Checking anyerror v0.1.13
+   Compiling tokio-macros v2.7.2
+    Checking clap_lex v1.1.1
+   Compiling unicode-xid v0.2.6
+    Checking cpufeatures v0.2.17
+   Compiling heck v0.5.0
+    Checking unicode-width v0.2.2
+    Checking fnv v1.0.7
+    Checking bytecount v0.6.9
+    Checking strsim v0.11.1
+    Checking papergrid v0.17.0
+    Checking clap_builder v4.6.7
+   Compiling clap_derive v4.6.7
+    Checking sha2 v0.10.9
+    Checking tokio v1.53.2
+   Compiling derive_more-impl v2.1.1
+    Checking validit v0.2.6
+   Compiling ring v0.17.14
+    Checking openraft-rt v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling tracing-attributes v0.1.31
+   Compiling thiserror-impl v2.0.21
+   Compiling zmij v1.0.23
+    Checking either v1.19.0
+    Checking itertools v0.15.0
+    Checking thiserror v2.0.21
+    Checking tracing v0.1.44
+    Checking openraft-rt-tokio v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+    Checking derive_more v2.1.1
+    Checking quorum-set v0.2.2
+    Checking display-more v0.2.6
+    Checking clap v4.6.7
+    Checking tabled v0.20.0
+    Checking futures-executor v0.3.34
+   Compiling serde_json v1.0.154
+    Checking base2histogram v0.2.3
+    Checking maplit v1.0.2
+    Checking parse-size v1.1.0
+    Checking peel-off v0.1.1
+   Compiling anyhow v1.0.104
+    Checking smallvec v1.16.3
+    Checking backoff-series v0.1.1
+    Checking openraft v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+    Checking futures v0.3.34
+    Checking getrandom v0.2.17
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Checking itoa v1.0.18
+    Checking openraft-legacy v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+    Checking bench-minimal v0.1.0 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+    Checking voteboat-matched-framework v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/benchmarks/matched)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 18.74s

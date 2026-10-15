@@ -1,0 +1,229 @@
+diff --git a/src/log/transition/incoming.rs b/src/log/transition/incoming.rs
+index 09703c5e..55f15687 100644
+--- a/src/log/transition/incoming.rs
++++ b/src/log/transition/incoming.rs
+@@ -78,6 +78,12 @@ impl OwnedNextLog {
+             Ok(Self(OwnedChange::Other { next, update }))
+         }
+     }
++    pub(crate) fn summary(&self) -> Option<LogSummary> {
++        match &self.0 {
++            OwnedChange::Append(append) => Some(append.summary),
++            _ => None,
++        }
++    }
+     pub(crate) fn update(&self) -> &LogUpdate {
+         match &self.0 {
+             OwnedChange::Append(append) => &append.update,
+diff --git a/src/log/transition/view.rs b/src/log/transition/view.rs
+index 18b87613..b1923b4a 100644
+--- a/src/log/transition/view.rs
++++ b/src/log/transition/view.rs
+@@ -77,11 +77,9 @@ impl<'a> LogView<'a> {
+     }
+     /// Prefix/tail were admitted by this owner; metadata describes their exact
+     /// accepted version. This is not an unchecked public storage admission API.
+-    #[cfg(test)]
+     pub(crate) fn overlay(base: &'a GroupLog, tail: &'a [LogEntry], metadata: LogMetadata) -> Self {
+         Self::trimmed_overlay(base, tail, metadata, 0)
+     }
+-    #[cfg(any(feature = "native", test))]
+     pub(crate) fn trimmed_overlay(
+         base: &'a GroupLog,
+         tail: &'a [LogEntry],
+diff --git a/src/raft.rs b/src/raft.rs
+index 27213c95..3bdee158 100644
+--- a/src/raft.rs
++++ b/src/raft.rs
+@@ -27,6 +27,10 @@ use crate::{
+ use std::collections::{BTreeMap, BTreeSet};
+ 
+ mod admitted_replication;
++mod append_window;
++pub use append_window::{
++    AppendCompletion, AppendRejected, AppendUnitId, AppendWindowLimits, StagedAppend,
++};
+ mod batch_limits;
+ pub use batch_limits::BatchLimits;
+ mod completion;
+@@ -347,6 +351,9 @@ pub struct Raft {
+     request_sequence: u64,
+     last_batch: u64,
+     pending: Option<Pending>,
++    append_window_limits: Option<AppendWindowLimits>,
++    append_window: Option<append_window::Window>,
++    append_window_sequence: u64,
+     read: Option<PendingRead>,
+     ready_read: Option<ReadBarrier>,
+     last_read_request: u64,
+@@ -471,6 +478,9 @@ impl Raft {
+             request_sequence: 0,
+             last_batch: 0,
+             pending: None,
++            append_window_limits: None,
++            append_window: None,
++            append_window_sequence: 0,
+             read: None,
+             ready_read: None,
+             last_read_request: 0,
+@@ -792,6 +802,7 @@ impl Raft {
+     }
+     fn has_persistence_dependency(&self) -> bool {
+         self.pending.is_some()
++            || self.append_window.is_some()
+             || self.staged_snapshot.is_some()
+             || self.application_install.is_some()
+             || self.checkpoint_requested.is_some()
+@@ -811,6 +822,7 @@ impl Raft {
+         self.clear_replication_authority();
+         self.fenced = true;
+         self.pending = None;
++        self.append_window = None;
+         self.staged_snapshot = None;
+         self.staged_snapshot_repair = false;
+         self.application_install = None;
+@@ -1081,6 +1093,9 @@ impl Raft {
+         self.admitted(ticket)
+     }
+     pub fn admitted(&mut self, ticket: LogTicket) -> Result<(), RaftError> {
++        if self.append_window.is_some() {
++            return Err(RaftError::Busy);
++        }
+         if self.fenced {
+             return Err(RaftError::Fenced);
+         }
+@@ -1109,6 +1124,9 @@ impl Raft {
+         &mut self,
+         completion: &DurableLog,
+     ) -> Result<PreparedCompletion, RaftError> {
++        if self.append_window.is_some() {
++            return Err(RaftError::Busy);
++        }
+         if self.fenced {
+             return Err(RaftError::Fenced);
+         }
+diff --git a/src/raft/admitted_replication.rs b/src/raft/admitted_replication.rs
+index f864e9d7..aa61bba8 100644
+--- a/src/raft/admitted_replication.rs
++++ b/src/raft/admitted_replication.rs
+@@ -6,13 +6,13 @@ use std::mem::size_of;
+ 
+ #[derive(Clone, Copy)]
+ pub(super) struct AdmittedRange {
+-    ticket: LogTicket,
+-    context: RequestContext,
++    pub(super) ticket: LogTicket,
++    pub(super) context: RequestContext,
+ }
+ #[derive(Clone, Copy)]
+ pub(super) struct EmptyAppendAlias {
+-    original: Replication,
+-    successor: RequestContext,
++    pub(super) original: Replication,
++    pub(super) successor: RequestContext,
+ }
+ impl Raft {
+     /// Additional bounded early-output reservation before exact append admission.
+@@ -138,7 +138,7 @@ impl Raft {
+         })?;
+         (bytes <= self.limits.max_batch_bytes).then_some(suffix)
+     }
+-    fn early_peer(&self, peer: NodeId) -> bool {
++    pub(super) fn early_peer(&self, peer: NodeId) -> bool {
+         let tip = self.durable.last_index();
+         if peer == self.node
+             || self.progress.get(&peer).is_none_or(|index| *index < tip)
+@@ -183,6 +183,16 @@ impl Raft {
+         index: u64,
+     ) -> Option<&LogEntry> {
+         let range = self.admitted_ranges.get(&peer)?;
++        if let Some(window) = &self.append_window {
++            let unit = window
++                .units
++                .iter()
++                .find(|unit| unit.ticket == Some(range.ticket))?;
++            if range.context != sent.context {
++                return None;
++            }
++            return unit.next.entry_at(index);
++        }
+         let pending = self.pending.as_ref()?;
+         let metadata = pending.next.metadata();
+         if range.context != sent.context
+diff --git a/src/raft/batch_limits.rs b/src/raft/batch_limits.rs
+index 8e7c1eb0..c088aaa2 100644
+--- a/src/raft/batch_limits.rs
++++ b/src/raft/batch_limits.rs
+@@ -51,7 +51,14 @@ impl Raft {
+         if self.batch_limits_locked {
+             return Err(RaftError::Busy);
+         }
+-        self.batch_limits = limits.validate()?;
++        let limits = limits.validate()?;
++        if self
++            .append_window_limits
++            .is_some_and(|window| window.max_originals > limits.max_proposal_entries)
++        {
++            return Err(StorageError::Rejected("append window exceeds proposal envelope").into());
++        }
++        self.batch_limits = limits;
+         Ok(())
+     }
+     pub fn batch_limits(&self) -> BatchLimits {
+diff --git a/src/raft/proposals.rs b/src/raft/proposals.rs
+index e638e697..75ca2482 100644
+--- a/src/raft/proposals.rs
++++ b/src/raft/proposals.rs
+@@ -107,6 +107,20 @@ impl Raft {
+         &self,
+         proposals: &[Proposal],
+         capacity: usize,
++    ) -> Result<u64, RaftError> {
++        self.validate_proposal_batch_at(
++            proposals,
++            capacity,
++            self.durable.entries.len(),
++            self.durable.last_index(),
++        )
++    }
++    pub(super) fn validate_proposal_batch_at(
++        &self,
++        proposals: &[Proposal],
++        capacity: usize,
++        entries_len: usize,
++        last_index: u64,
+     ) -> Result<u64, RaftError> {
+         let count = proposals.len();
+         if count == 0 || count > self.batch_limits.max_proposal_entries {
+@@ -115,20 +129,13 @@ impl Raft {
+         if capacity > self.batch_limits.max_proposal_entries {
+             return Err(StorageError::Rejected("proposal allocation count budget").into());
+         }
+-        if self
+-            .durable
+-            .entries
+-            .len()
++        if entries_len
+             .checked_add(count)
+             .is_none_or(|n| n > self.limits.max_entries_per_group)
+         {
+             return Err(StorageError::Rejected("proposal retained entry budget").into());
+         }
+-        let first = self
+-            .durable
+-            .last_index()
+-            .checked_add(1)
+-            .ok_or(RaftError::Exhausted)?;
++        let first = last_index.checked_add(1).ok_or(RaftError::Exhausted)?;
+         first
+             .checked_add(count as u64 - 1)
+             .ok_or(RaftError::Exhausted)?;
+@@ -154,7 +161,7 @@ impl Raft {
+         }
+         Ok(first)
+     }
+-    fn validate_conversion_peak(
++    pub(super) fn validate_conversion_peak(
+         &self,
+         proposals: &[Proposal],
+         capacity: usize,

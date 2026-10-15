@@ -16,6 +16,8 @@
 use super::*;
 use std::{io, sync::Mutex};
 use voteboat::{contracts::StorageError, native::log_store::JournalIo};
+#[path = "observe_barriers.rs"]
+mod barriers;
 
 #[derive(Clone, Default)]
 pub(super) struct Totals {
@@ -39,6 +41,7 @@ pub(super) struct Totals {
     histogram: BTreeMap<usize, u64>,
     groups: BTreeMap<u128, u64>,
     publication: Option<voteboat::native::log_store::JournalTimingSnapshot>,
+    barriers: barriers::Barriers,
 }
 #[derive(Clone, Default)]
 pub(super) struct Trace(
@@ -51,6 +54,10 @@ impl Trace {
     }
     fn update(&self, f: impl FnOnce(&mut Totals)) {
         f(&mut self.0.lock().expect("benchmark trace poisoned"));
+    }
+    fn io_counts(&self) -> (u64, u64) {
+        let totals = self.0.lock().expect("benchmark trace poisoned");
+        (totals.sync_calls, totals.publish_calls)
     }
     pub(super) fn snapshot(&self) -> Totals {
         let mut totals = self.0.lock().expect("benchmark trace poisoned").clone();
@@ -160,21 +167,23 @@ impl<L: LogStore> LogStore for ObservedLog<L> {
         let mut groups = Vec::with_capacity(units);
         for mutation in &mutations {
             groups.push(match mutation {
-                LogMutation::Create(b) => b.group.id.get(),
+                LogMutation::Create(b) => (b.group, 0),
                 LogMutation::Update(u) => {
-                    commands += u.suffix.as_ref().map_or(0, |s| {
+                    let originals = u.suffix.as_ref().map_or(0, |s| {
                         s.entries
                             .iter()
                             .filter(|e| matches!(e.payload, EntryPayload::Command { .. }))
                             .count()
                     });
-                    u.group.id.get()
+                    commands += originals;
+                    (u.group, originals)
                 }
             });
         }
         let start = Instant::now();
         let result = self.inner.append_batch(mutations);
         let ns = start.elapsed().as_nanos();
+        let pending_limit = self.inner.limits().max_pending_units;
         self.trace.update(|t| {
             t.append_calls += 1;
             t.append_units += units as u64;
@@ -183,13 +192,17 @@ impl<L: LogStore> LogStore for ObservedLog<L> {
             t.append_max_ns = t.append_max_ns.max(ns);
             t.errors += u64::from(result.is_err());
             *t.histogram.entry(units).or_default() += 1;
-            for g in groups {
-                *t.groups.entry(g).or_default() += 1;
+            if let Ok(tickets) = &result {
+                t.barriers.accepted(tickets, &groups, pending_limit);
+            }
+            for (group, _) in groups {
+                *t.groups.entry(group.id.get()).or_default() += 1;
             }
         });
         result
     }
     fn barrier(&mut self, tickets: &[LogTicket]) -> Result<DurableLog, StorageError> {
+        let before = self.trace.io_counts();
         let start = Instant::now();
         let result = self.inner.barrier(tickets);
         let ns = start.elapsed().as_nanos();
@@ -199,6 +212,13 @@ impl<L: LogStore> LogStore for ObservedLog<L> {
             t.barrier_ns += ns;
             t.barrier_max_ns = t.barrier_max_ns.max(ns);
             t.errors += u64::from(result.is_err());
+            if result.is_ok() {
+                t.barriers.completed(
+                    tickets,
+                    t.sync_calls.saturating_sub(before.0),
+                    t.publish_calls.saturating_sub(before.1),
+                );
+            }
         });
         result
     }
@@ -224,7 +244,7 @@ pub(super) fn write_csv(
     file: &mut File,
     snapshots: &[(String, usize, Totals)],
 ) -> Result<(), Failure> {
-    writeln!(file, "stage,replica,append_calls,append_units,append_commands,append_ns,append_max_ns,barrier_calls,barrier_tickets,barrier_ns,barrier_max_ns,errors,encoded_bytes,io_append_calls,io_append_ns,sync_calls,sync_ns,publish_calls,publish_ns,batch_histogram,group_units")?;
+    writeln!(file, "stage,replica,append_calls,append_units,append_commands,append_ns,append_max_ns,barrier_calls,barrier_tickets,barrier_ns,barrier_max_ns,errors,encoded_bytes,io_append_calls,io_append_ns,sync_calls,sync_ns,publish_calls,publish_ns,batch_histogram,group_units,successful_barriers,barrier_known_originals,barrier_missing_tickets,barrier_dropped_tickets,barrier_pending_tickets,barrier_correlation_capacity_bytes,barrier_unit_histogram,barrier_original_histogram,barrier_same_group_unit_histogram,synchronized_barrier_calls,no_io_barrier_calls,ambiguous_io_barrier_calls,synchronized_same_group_multi_unit_calls,synchronized_same_group_multi_unit_known_originals")?;
     for (stage, replica, t) in snapshots {
         let histogram = t
             .histogram
@@ -238,8 +258,8 @@ pub(super) fn write_csv(
             .map(|(g, c)| format!("{g}:{c}"))
             .collect::<Vec<_>>()
             .join("|");
-        writeln!(file, "{stage},{replica},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{histogram},{groups}",
-            t.append_calls,t.append_units,t.append_commands,t.append_ns,t.append_max_ns,t.barrier_calls,t.barrier_tickets,t.barrier_ns,t.barrier_max_ns,t.errors,t.encoded_bytes,t.io_append_calls,t.io_append_ns,t.sync_calls,t.sync_ns,t.publish_calls,t.publish_ns)?;
+        writeln!(file, "{stage},{replica},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{histogram},{groups},{}",
+            t.append_calls,t.append_units,t.append_commands,t.append_ns,t.append_max_ns,t.barrier_calls,t.barrier_tickets,t.barrier_ns,t.barrier_max_ns,t.errors,t.encoded_bytes,t.io_append_calls,t.io_append_ns,t.sync_calls,t.sync_ns,t.publish_calls,t.publish_ns,t.barriers.fields())?;
     }
     file.sync_all()?;
     Ok(())
@@ -360,6 +380,8 @@ mod tests {
             "create plus one real barrier; rejected barriers must not synchronize"
         );
         assert_eq!(totals.publish_calls, 2);
+        assert_eq!(totals.barriers.successes, 1);
+        assert_eq!((totals.barriers.missing, totals.barriers.dropped), (0, 0));
         drop(observed);
         let recovered = NativeLogStore::recover(
             FileLogIo::open(&root).unwrap(),

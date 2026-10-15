@@ -7,35 +7,40 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     pub(super) fn reserve_replication(
         &mut self,
         event: &WorkerEvent,
-    ) -> Result<BTreeSet<GroupIdentity>, EffectOwnerError> {
-        let mut selected = BTreeSet::new();
+    ) -> Result<Vec<PersistUnitId>, EffectOwnerError> {
+        let mut selected = Vec::new();
         let WorkerEvent::Written { admissions, .. } = event else {
             return Ok(selected);
         };
         if self.authorization().is_logical() {
             return Ok(selected);
         }
-        for (visit, _) in admissions {
+        for (id, _) in admissions {
+            let visit = id.visit();
             let Some(extra) = self
                 .runtime
                 .core(visit.group)
-                .and_then(Raft::admitted_replication_reservation)
+                .and_then(|core| match id.append {
+                    Some(append) => core.append_replication_reservation(append),
+                    None => core.admitted_replication_reservation(),
+                })
             else {
                 continue;
             };
             let active = self
                 .active
-                .get(&visit.group)
+                .get(&visit.sequence)
                 .ok_or(EffectOwnerError::StaleCompletion)?;
-            if active.visit != *visit || active.leased.is_some() || !active.effects.is_empty() {
+            if active.visit != visit || active.leased.is_some() || !active.effects.is_empty() {
                 return self.fail(EffectOwnerError::ProviderContract);
             }
-            let bulk = self
-                .active
-                .values()
-                .filter(|a| !a.control)
-                .map(|a| a.reserved)
-                .sum::<usize>();
+            if id.append.is_some() {
+                if extra <= active.reserved {
+                    selected.push(*id);
+                }
+                continue;
+            }
+            let bulk = self.bulk_reserved();
             let available = (self.limits.reserved_bytes - self.reserved).min(if active.control {
                 usize::MAX
             } else {
@@ -44,9 +49,9 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             if extra > available {
                 continue;
             }
-            self.active.get_mut(&visit.group).unwrap().reserved += extra;
+            self.active.get_mut(&visit.sequence).unwrap().reserved += extra;
             self.reserved += extra;
-            selected.insert(visit.group);
+            selected.push(*id);
         }
         Ok(selected)
     }
@@ -58,13 +63,13 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     ) -> Result<(), EffectOwnerError> {
         let active = self
             .active
-            .get_mut(&visit.group)
+            .get_mut(&visit.sequence)
             .ok_or(EffectOwnerError::StaleCompletion)?;
         if active.visit != visit {
             return self.fail(EffectOwnerError::ProviderContract);
         }
         if effects.is_empty() {
-            return self.refresh(visit.group);
+            return self.refresh(visit);
         }
         if active.effects.is_empty() && active.leased.is_none() {
             return self.install(visit, effects);
@@ -91,6 +96,6 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             return self.fail(EffectOwnerError::ReservationTooLarge);
         }
         active.effects.extend(effects);
-        self.refresh(visit.group)
+        self.refresh(visit)
     }
 }

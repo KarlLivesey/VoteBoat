@@ -1,0 +1,4 @@
+target/p9/native458-linux/controls/tcp-storage/storage.csv
+storage measured deltas: append_calls=18 units=18 commands=9 mean_units=1.000 append_ms=0.222 barriers=18 mean_appends_per_barrier=1.000 mean_units_per_barrier=1.000 barrier_ms=57.521 sync_ms=18.847 publish_ms=38.594 histogram=1:18|2:0
+target/p9/native458-linux/controls/quic-storage/storage.csv
+storage measured deltas: append_calls=18 units=18 commands=9 mean_units=1.000 append_ms=0.255 barriers=18 mean_appends_per_barrier=1.000 mean_units_per_barrier=1.000 barrier_ms=336.625 sync_ms=152.751 publish_ms=183.746 histogram=1:18|2:0

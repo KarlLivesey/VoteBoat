@@ -1,0 +1,50 @@
+{
+  "integration21": {
+    "exit": 101,
+    "end": "2026-10-15T04:42:49.167612+00:00",
+    "same_selected_inputs": true
+  },
+  "integration22": {
+    "exit": 0,
+    "end": "2026-10-15T04:39:56.641761+00:00",
+    "same_selected_inputs": true
+  },
+  "integration26": {
+    "exit": 101,
+    "failed_stages": [
+      {
+        "stage": "native-failure-3",
+        "exit": 101
+      },
+      {
+        "stage": "native-failure-4",
+        "exit": 101
+      }
+    ],
+    "end": "2026-10-15T04:49:18.207522+00:00",
+    "same_selected_inputs": true
+  },
+  "baseline24": {
+    "exit": 101,
+    "source_unchanged": true,
+    "ELF_unchanged": true,
+    "finished": 1792039472.2531931
+  },
+  "baseline27": {
+    "exit": 101,
+    "source_unchanged": true,
+    "ELF_unchanged": true,
+    "finished": 1792039892.8428373
+  },
+  "baseline28": {
+    "exit": 101,
+    "source_unchanged": true,
+    "ELF_unchanged": true,
+    "finished": 1792039969.5176163
+  },
+  "controls12": {
+    "exit": 0,
+    "end": "2026-10-15T04:54:15.200930+00:00",
+    "same_selected_inputs": true
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "src/logical_voter/persistence.rs": {
+    "sha256": "426ed9eb7b9c77138a5884e5fe5a7e0742439b6de6fbf093443bd4b27e504fae",
+    "mode": "0o644"
+  },
+  "src/logical_voter/persistence/admission.rs": {
+    "sha256": "e12381ff5030290aeff917889518b5255e674070bfdecbf84cd78afdc3f3a755",
+    "mode": "0o644"
+  },
+  "src/logical_voter/persistence/progress.rs": {
+    "sha256": "234e8eeac81c121e9bdac479ffafca40634e1586ce6fe9b6b7d0083ee5609616",
+    "mode": "0o644"
+  },
+  "src/logical_voter/persistence/tests.rs": {
+    "sha256": "02abe6b5b85326b9526e20ae729e6b1bb508dd29c996028071c6e7fde1187133",
+    "mode": "0o644"
+  }
+}

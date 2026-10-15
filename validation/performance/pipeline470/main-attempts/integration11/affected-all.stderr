@@ -1,0 +1,5 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 28.85s
+     Running tests/application.rs (target/p9/slice470/integration-checks/debug/deps/application-7c068b5008356b3b)
+     Running tests/effect_owner.rs (target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b)
+error: test failed, to rerun pass `--test effect_owner`

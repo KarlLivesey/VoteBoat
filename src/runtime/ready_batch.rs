@@ -213,7 +213,7 @@ fn collect(
     };
     stepped(originals, result)
 }
-fn stepped(
+pub(super) fn stepped(
     originals: Vec<(Option<AdmissionTicket>, OperationId)>,
     result: Result<Vec<Effect>, RaftError>,
 ) -> Stepped {

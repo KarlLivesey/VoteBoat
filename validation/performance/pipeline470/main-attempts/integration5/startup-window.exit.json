@@ -1,0 +1,20 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--all-features",
+    "--test",
+    "startup",
+    "append_window",
+    "--",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "start": "2026-10-15T03:38:36.246089+00:00",
+  "end": "2026-10-15T03:38:42.433351+00:00",
+  "elapsed_s": 6.187291639012983,
+  "exit": 0
+}

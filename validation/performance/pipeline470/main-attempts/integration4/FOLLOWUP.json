@@ -1,0 +1,11 @@
+{
+  "source_changes": [
+    "docs/provider-conformance.json",
+    "src/runtime/append_window.rs",
+    "src/runtime/ready_batch/tests/append_window.rs",
+    "tests/worker/append_window.rs"
+  ],
+  "scope": "Four runtime window controls repeated after successful-data scheduling cursor fix;10 Core controls retained from integration2 unchanged Core/transition source scope. Public/worker/startup/example stages previously not run.",
+  "earlier_source_only_correction": "Publication-failure fixture now checks valid unacknowledged WAL suffix under new session, with A-only Durable and B/C Failed; wrong old expectation never executed.",
+  "format": "cargo +stable fmt --all, unchanged configuration"
+}

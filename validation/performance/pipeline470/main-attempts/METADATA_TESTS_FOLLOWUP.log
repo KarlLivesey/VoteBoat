@@ -1,0 +1,47 @@
+✔ review counts only audited operations and retains unreviewed contracts (13.808235ms)
+✔ rejects unknown contract (4.581665ms)
+✔ rejects unknown operation (3.324925ms)
+✔ rejects missing operation (4.361973ms)
+✔ rejects duplicate operation (3.431416ms)
+✔ rejects missing assertion (4.9356ms)
+✔ rejects missing function (2.958157ms)
+✔ rejects missing test (3.304676ms)
+✔ rejects escaping path (2.895298ms)
+✔ rejects false completion claim (3.008441ms)
+✔ rejects missing limitation (4.114208ms)
+✔ rejects missing snapshot operation (3.811769ms)
+✔ rejects missing logical tracked cancellation (1.257272ms)
+✔ rejects missing logical session retirement assertion (1.391704ms)
+✔ rejects missing logical attachment limitation (1.525385ms)
+✔ rejects missing original channel retirement (4.447604ms)
+✔ rejects missing delegated receiving access assertion (5.431813ms)
+✔ rejects missing delegated path limitation (5.260321ms)
+✔ rejects missing retention assertion (3.427618ms)
+✔ rejects missing admission operation (3.584864ms)
+✔ rejects missing admission assertion (4.345512ms)
+✔ rejects missing timer operation (2.648304ms)
+✔ rejects missing timer assertion (2.738162ms)
+✔ rejects missing timer limitation (2.492682ms)
+✔ rejects missing exact owner isolation assertion (2.335096ms)
+✔ rejects missing poll preservation assertion (3.253571ms)
+✔ rejects missing timer defective-provider runner (2.187529ms)
+✔ rejects missing transport operation (2.03361ms)
+✔ rejects missing transport assertion (2.128788ms)
+✔ rejects missing transport limitation (2.333934ms)
+✔ rejects missing transport inspection (2.318004ms)
+✔ rejects missing inspection assertion (1.918353ms)
+✔ rejects missing inspection limitation (2.972804ms)
+✔ rejects missing wire operation (2.463878ms)
+✔ rejects missing wire assertion (1.587702ms)
+✔ rejects missing wire limitation (1.456195ms)
+✔ rejects missing buffer operation (4.449427ms)
+✔ rejects missing buffer assertion (3.662739ms)
+✔ rejects missing buffer limitation (4.062972ms)
+ℹ tests 39
+ℹ suites 0
+ℹ pass 39
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 140.103869

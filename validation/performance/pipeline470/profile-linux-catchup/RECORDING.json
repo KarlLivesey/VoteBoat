@@ -1,0 +1,46 @@
+{
+  "scope": "CPU sampling diagnostic of remaining compacted-group catch-up drain failure after covered-admission correction, current candidate only, whole debug test launch; NOT throughput/acceptance or an unperturbed progress test. Profile I/O and sampling may alter elapsed outcomes. Original drain progress deadline remains unchanged. No builds/checks/copies during recording.",
+  "event": "cycles:u",
+  "frequency": 199,
+  "call_graph": "dwarf,16384",
+  "mmap_pages": 128,
+  "settings_before": {
+    "perf_event_paranoid": 2,
+    "kptr_restrict": 2,
+    "perf_event_mlock_kb": 516
+  },
+  "perf": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+  "perf_sha256": "f0fe2b92d280391fa7efa55616f098ba683b9682cf145275d5eda136125f2a64",
+  "perf_version": "perf version 7.2.10-1",
+  "cases": [
+    {
+      "name": "candidate",
+      "start_utc": "2026-10-15T04:45:07.469653+00:00",
+      "end_utc": "2026-10-15T04:45:59.440283+00:00",
+      "exit": 101,
+      "elapsed_s": 51.970652040006826,
+      "data_bytes": 19564028
+    }
+  ],
+  "artifacts": {
+    "candidate": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/integration-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+      "sha256": "9bc0b474be0bebf358b32a55b805f064941cb7167f171e2ae0f125f710815a5a"
+    }
+  },
+  "selected_source_inventory": {
+    "path": "target/p9/slice470/integration22/BEFORE.json",
+    "sha256": "6c6271c479b8e85f8afff878cf9612a8a4bbca2e8a3e63f76d7604646cf8686c",
+    "files": 1454
+  },
+  "prepared_recording_start_utc": "2026-10-15T04:45:07.450394+00:00",
+  "settings_after": {
+    "perf_event_paranoid": 2,
+    "kptr_restrict": 2,
+    "perf_event_mlock_kb": 516
+  },
+  "recording_complete": true,
+  "all_workloads_passed": false,
+  "artifact_hashes_unchanged": true,
+  "source_hashes_unchanged": true
+}

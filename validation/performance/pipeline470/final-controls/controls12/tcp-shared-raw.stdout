@@ -1,0 +1,2 @@
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/controls12/tcp-shared: 128 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=25 units=25 commands=384 mean_units=1.000 append_ms=1.058 barriers=23 mean_appends_per_barrier=1.087 mean_units_per_barrier=1.087 barrier_ms=641.832 sync_ms=221.049 publish_ms=420.156 histogram=1:25 synchronized=23 no_io=0 ambiguous_io=0 dependency_correlation_complete=true

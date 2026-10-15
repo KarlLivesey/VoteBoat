@@ -1,0 +1,8 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.17s
+     Running unittests src/lib.rs (target/p9/slice470/integration-checks/debug/deps/voteboat-ebeb84c4129d638f)
+
+thread 'runtime::ready_batch::tests::append_window::opening_fallback_replays_the_full_checked_prefix_and_terminal_error_once' (3890899) panicked at src/runtime/ready_batch/tests/append_window.rs:210:10:
+called `Result::unwrap()` on an `Err` value: DependencyPending
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `--lib`

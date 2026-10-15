@@ -58,6 +58,8 @@ type Replica<
     NativeServiceConnector,
     voteboat::native::transport::NativeTransportFactory<voteboat::native::wire::NativeWireCodec>,
 >;
+#[path = "benchmark/append_window.rs"]
+mod append_window;
 #[path = "benchmark/batching.rs"]
 mod batching;
 #[path = "benchmark/failure.rs"]
@@ -122,7 +124,7 @@ fn open(
     capacity: usize,
     clock: &Instant,
 ) -> Result<Vec<Replica>, Failure> {
-    open_recorded(root, mode, protocol, capacity, clock, false, 16).map(|(nodes, _)| nodes)
+    open_recorded(root, mode, protocol, capacity, clock, false, (16, None)).map(|(nodes, _)| nodes)
 }
 fn open_recorded(
     root: &Path,
@@ -131,8 +133,9 @@ fn open_recorded(
     capacity: usize,
     clock: &Instant,
     record: bool,
-    ready_visit_items: usize,
+    ready: (usize, Option<voteboat::raft::AppendWindowLimits>),
 ) -> Result<(Vec<Replica>, Vec<observe::Trace>), Failure> {
+    let (ready_visit_items, append_window) = ready;
     let reservations = (0..3)
         .map(|_| {
             (0..32)
@@ -188,6 +191,7 @@ fn open_recorded(
             entropy_seed: n + 17,
             limits: NodeLimits::default(),
             ready_visit_items,
+            append_window,
         };
         let timers = TimerConfig {
             heartbeat_ms: 50,
@@ -702,18 +706,35 @@ fn close<L: LogStore + Send + 'static>(
 fn exclusive(path: &Path) -> Result<File, Failure> {
     Ok(OpenOptions::new().create_new(true).write(true).open(path)?)
 }
+fn run_selected_lanes(
+    args: &[String],
+    append_window: bool,
+    ready_items: bool,
+    group_weights: bool,
+) -> Result<(), Failure> {
+    if append_window {
+        return Err("--append-window is unsupported with --lanes".into());
+    }
+    if ready_items {
+        return Err("--ready-items is unsupported with --lanes".into());
+    }
+    if group_weights {
+        return Err("--group-weights requires --offered".into());
+    }
+    lanes::run(args)
+}
 fn main() -> Result<(), Failure> {
     let mut args = std::env::args().skip(1).collect::<Vec<_>>();
     let selected_ready_items = ready_items::extract(&mut args)?;
+    let selected_append_window = append_window::extract(&mut args)?;
     let raw_group_weights = offered_groups::extract(&mut args)?;
     if args.first().is_some_and(|arg| arg == "--lanes") {
-        if selected_ready_items.is_some() {
-            return Err("--ready-items is unsupported with --lanes".into());
-        }
-        if raw_group_weights.is_some() {
-            return Err("--group-weights requires --offered".into());
-        }
-        return lanes::run(&args[1..]);
+        return run_selected_lanes(
+            &args[1..],
+            selected_append_window.is_some(),
+            selected_ready_items.is_some(),
+            raw_group_weights.is_some(),
+        );
     }
     let ready_visit_items = selected_ready_items.unwrap_or(16);
     let journal_timings = args.last().is_some_and(|arg| arg == "--journal-timings");
@@ -725,7 +746,7 @@ fn main() -> Result<(), Failure> {
     }
     if !matches!(args.len(), 4 | 5 | 7 | 9 | 11) {
         return Err(
-            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64) [--ready-items 1|16|32|64] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
+            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64) [--ready-items 1|16|32|64] [--append-window UNITS(2..64)] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
                 .into(),
         );
     }
@@ -799,6 +820,7 @@ fn main() -> Result<(), Failure> {
         group_schedule,
         maintenance,
         ready_visit_items,
+        append_window: selected_append_window,
     };
     run_selected(config, &clock, capacity, journal_timings)
 }
@@ -812,29 +834,43 @@ fn run_selected(
     let protocol = config.protocol;
     let groups = config.groups;
     let ready_visit_items = config.ready_visit_items;
+    let append_selection = config.append_window;
     if config.shared {
         run(config, clock, |mode| {
-            shared::open(
+            let opened = shared::open_partition(
                 root,
                 mode,
                 protocol,
                 capacity,
                 clock,
-                groups,
-                ready_visit_items,
-            )
+                shared::Partition {
+                    offset: 0,
+                    groups,
+                    lane: 1,
+                    ready_visit_items,
+                    append_window: append_selection,
+                },
+            )?;
+            if let Err(error) = append_window::verify(root, mode, &opened.0, append_selection) {
+                return failure::cleanup(opened.0, clock, root, error);
+            }
+            Ok(opened)
         })
     } else {
         run(config, clock, |mode| {
-            open_recorded(
+            let opened = open_recorded(
                 root,
                 mode,
                 protocol,
                 capacity,
                 clock,
                 journal_timings,
-                ready_visit_items,
-            )
+                (ready_visit_items, append_selection),
+            )?;
+            if let Err(error) = append_window::verify(root, mode, &opened.0, append_selection) {
+                return failure::cleanup(opened.0, clock, root, error);
+            }
+            Ok(opened)
         })
     }
 }
@@ -849,6 +885,7 @@ struct RunConfig<'a> {
     group_schedule: Option<offered_groups::GroupSchedule>,
     maintenance: Option<offered::MaintenanceConfig>,
     ready_visit_items: usize,
+    append_window: Option<voteboat::raft::AppendWindowLimits>,
 }
 fn run<L: LogStore + Send + 'static>(
     config: RunConfig<'_>,
@@ -1089,12 +1126,15 @@ fn report_run(
     let percentile = |p: usize| latency[(count * p).div_ceil(100) - 1] as f64 / 1000.;
     let election_ms = if shared { 10000 } else { 1000 };
     let diagnostic = if !shared && journal {
-        " journal_timings=true proposal_batch_diagnostics=true queue_selection_reason_observed=false"
+        " journal_timings=true proposal_batch_diagnostics=false barrier_dependency_diagnostics=false queue_selection_reason_observed=false"
+    } else if shared {
+        " proposal_batch_diagnostics=true barrier_dependency_diagnostics=true physical_barrier_correlation=true queue_selection_reason_observed=false"
     } else {
         ""
     };
     let ready_settings = ready_items::settings(config.ready_visit_items);
-    let summary = format!("protocol={protocol:?} replicas=3 groups={groups} assembly={} leader_placement={} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms={election_ms} election_spread_ms={election_ms} payload_bytes=8 warmup={WARMUP} operations={count} window={window} max_inflight={} elapsed_s={:.6} applied_ops_s={:.3} p50_us={:.3} p95_us={:.3} p99_us={:.3} max_us={:.3} recovered_value={capacity} recovery_retries={recovery_retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3} persistence_batches={} worker_events={} application_deliveries={}{diagnostic} {ready_settings}\n",
+    let pipeline_settings = append_window::settings(config.append_window);
+    let summary = format!("protocol={protocol:?} replicas=3 groups={groups} assembly={} leader_placement={} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms={election_ms} election_spread_ms={election_ms} payload_bytes=8 warmup={WARMUP} operations={count} window={window} max_inflight={} elapsed_s={:.6} applied_ops_s={:.3} p50_us={:.3} p95_us={:.3} p99_us={:.3} max_us={:.3} recovered_value={capacity} recovery_retries={recovery_retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3} persistence_batches={} worker_events={} application_deliveries={}{diagnostic} {ready_settings} {pipeline_settings}\n",
         if shared { "shared" } else { "startup" }, placement, measured.max_inflight, measured.elapsed.as_secs_f64(), count as f64 / measured.elapsed.as_secs_f64(), percentile(50), percentile(95), percentile(99), *latency.last().unwrap() as f64 / 1000., measured.polls.rounds, measured.polls.host_ns as f64 / 1e6, measured.polls.max_host_ns as f64 / 1e6, measured.polls.persistence_batches, measured.polls.worker_events, measured.polls.application_deliveries);
     let mut output = exclusive(&root.join("summary.txt"))?;
     output.write_all(summary.as_bytes())?;

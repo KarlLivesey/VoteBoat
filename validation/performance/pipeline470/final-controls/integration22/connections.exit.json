@@ -1,0 +1,18 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--all-features",
+    "--lib",
+    "connections::tests",
+    "--",
+    "--test-threads=1"
+  ],
+  "start": "2026-10-15T04:39:01.145530+00:00",
+  "end": "2026-10-15T04:39:15.182268+00:00",
+  "elapsed_s": 14.036746212019352,
+  "exit": 0
+}

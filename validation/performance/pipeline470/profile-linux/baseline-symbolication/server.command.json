@@ -1,0 +1,18 @@
+{
+  "args": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply",
+    "load",
+    "--no-open",
+    "--address",
+    "127.0.0.1",
+    "--port",
+    "38491",
+    "--symbol-dir",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/baseline14/target/debug/deps",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/profile16/baseline.json.gz"
+  ],
+  "environment": {
+    "XDG_CACHE_HOME": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice470/profile16/cache",
+    "DEBUGINFOD_URLS": ""
+  }
+}

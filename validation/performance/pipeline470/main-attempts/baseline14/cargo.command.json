@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "cargo",
+    "+stable",
+    "-V"
+  ],
+  "cwd": "/tmp/voteboat-470-baseline-0q3xoh_j"
+}
