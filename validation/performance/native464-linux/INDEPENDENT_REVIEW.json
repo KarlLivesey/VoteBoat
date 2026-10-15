@@ -1,0 +1,29 @@
+{
+  "reviewer": "/root/linux426",
+  "source_commit": "6fce8989e2c57afa033b5ee982aaa201eae04ac6",
+  "original_build_handle": 94642,
+  "actual_build_exit": 0,
+  "stage": "DONE",
+  "selected_committed_inputs": 1438,
+  "direct_git_object_and_sha256_equality": true,
+  "exact_full_physical_modes": true,
+  "private_0600_fixtures": 7,
+  "committed_toolchain_in_export": true,
+  "root_example_and_buildscript_fresh_false": true,
+  "root_example_profile": {
+    "opt_level": "3",
+    "debuginfo": 0,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": false
+  },
+  "native_default_lto_and_codegen_verified_actual_vv": true,
+  "withinhost_tools_exact_native458": true,
+  "release_oracle_cfg_absent": true,
+  "original_copy_artifact_hashes_exact": true,
+  "ELF_sha256": "7bcb14f58b4e3b9a2e65765e4d058e6e86c2ff397909547074cbb9af42a23f4d",
+  "symbol_records_all_exit0_and_hashes_exact": true,
+  "review_scope": "Read-only source/artifact/compiler/provenance inspection only; no workload/build/test/CLI or source change. This ignored receipt is the only write.",
+  "material_findings": [],
+  "performance_or_activation_claim": false
+}

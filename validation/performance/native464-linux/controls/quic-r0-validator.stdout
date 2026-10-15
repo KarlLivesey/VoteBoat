@@ -1,0 +1,3 @@
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/quic-r0-storage: 128 scheduled offers, 95 admissions, 95 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=500.000 admitted_during=371.094 applied_during=242.188 applied_drain=334.223 applied_total=267.804 ops/s; window_refused=33 backlog_at_horizon=33
+storage measured deltas: append_calls=25 units=25 commands=285 mean_units=1.000 append_ms=0.568 barriers=25 mean_appends_per_barrier=1.000 mean_units_per_barrier=1.000 barrier_ms=637.982 sync_ms=221.389 publish_ms=416.332 histogram=1:25

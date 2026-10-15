@@ -743,7 +743,7 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: separate acknowledged commit and append frontiers, then measure actual joined work | Remove the concrete full-tip refusal found in463 diagnostics while retaining ordered commit batches | Published checked463, exact-primary traces, [464 schema](../validation/performance/slice464/SCHEMA.md), fresh asserted artifacts, original Mac455 qualification | Differential prefix/catch-up/durability/recovery controls, strict checks and publication; real activation before repeated disabled/enabled completed originals/s, p99/refusals/barriers on both hosts; retain losses | P9.1/P9.2/P9.3 |
+| Current: measure active joined work and durable/fairness effects | Determine whether the now-active ordering removes enough barrier work to improve useful completion | Published checked464, fresh asserted native artifact, actual activation, [paired plan](../validation/performance/comparison464-native/SCHEMA.md), original Mac455 qualification | Repeated disabled/enabled completed originals/s, p99/refusals/barriers/join counts on both hosts; retain losses and unchanged outcomes, no parameter tuning; weighted headroom/fairness follows useful improvement | P9.1/P9.2/P9.3 |
 | Next: remove the next measured limiting stage | Increase useful work after the candidate is retained or rejected | Actual disabled/enabled join counts, completed rates/tails/refusals/physical barriers and current profile; schema before editing | Choose from measured ordering, batching, ownership or waiting costs; preserve every original result and partial-progress/restart contract; checked published slice and repeated paired evidence without retuning rejected experiments | P9.1/P9.2/P9.3 |
 | Following: full curve, sustainable headroom and composition qualification | Satisfy the entire performance objective beyond the current experiment | Retained measured improvements, qualified weighted fixture, source/artifact/host identities and stable maintenance | All seven required framework cells on both hosts with healthy margin; sustained memory/debt, durable applications/headroom/skew/fairness, independent placement/shared barriers and P8 composition; preserve every outcome/fence/retry | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
@@ -34410,3 +34410,15 @@ address calculation. This measured ordering refusal motivates464, not a claimed
 speedup. The current mini plan advances to publication, fresh asserted artifacts
 and real activation before paired durable measurements. Original Mac45584206
 continues; no464 Mac result, default change or completed macro milestone.
+
+Fresh464 native build94642 and actual activation controls4913 are terminal0;
+[all135 evidence payloads](../validation/performance/native464-linux/README.md)
+independently verify. Root/library/build-script are compiled fresh:false with
+1438 exact committed inputs, same compiler/tools/native profile, included
+toolchain and seven0600 fixtures. Four native/validator exits0 preserve recovery,
+retry and worker closure. Enabled TCP/QUIC measurement joins2/3 versus disabled0
+establish activation, while lower short completed rates and worse tails remain.
+No benefit is inferred. [Before-launch paired schema](../validation/performance/comparison464-native/SCHEMA.md)
+fixes twelve same-source0/2 cases with active maintenance, no quantum/window or
+checkpoint tuning. This advances the current mini item's evidence, not the
+unmet sustained both-host/full-composition macro scope.

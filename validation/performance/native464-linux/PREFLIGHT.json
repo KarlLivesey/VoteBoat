@@ -1,0 +1,40 @@
+{
+  "sockets": [
+    {
+      "family": "AF_INET",
+      "kind": "SOCK_STREAM",
+      "bind_listen_exit": 0
+    },
+    {
+      "family": "AF_INET",
+      "kind": "SOCK_DGRAM",
+      "bind_listen_exit": 0
+    },
+    {
+      "family": "AF_INET6",
+      "kind": "SOCK_STREAM",
+      "bind_listen_exit": 0
+    },
+    {
+      "family": "AF_INET6",
+      "kind": "SOCK_DGRAM",
+      "bind_listen_exit": 0
+    }
+  ],
+  "quiet_hold_mac_acknowledged": true,
+  "build_original": 94642,
+  "build_terminal": 0,
+  "timestamp": 1792023376.1822555,
+  "scope": "shortfunctionalcontrols only; no capacity inference",
+  "no_competing_named_jobs": true,
+  "process_names_checked": [
+    "cargo",
+    "native_benchmark",
+    "perf",
+    "rustc",
+    "samply",
+    "voteboat-matched"
+  ],
+  "agents_quiet": true,
+  "quiet_granted_at": 1792023409.5730898
+}

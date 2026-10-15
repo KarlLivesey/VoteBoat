@@ -1,0 +1,12 @@
+{
+  "commit": "6fce8989e2c57afa033b5ee982aaa201eae04ac6",
+  "script_sha256": "9d298c5c5bcd2bc949c83e867fbdae74bdb8d3be8e7c45e64138bc72900bfccb",
+  "profile_proof_sha256": "5af776eb7b89009a26c916f70b40abe3e06e90bcb4101c259e437ba729fde589",
+  "pilot_config_sha256": "d901fb7c3fb63924f51df6d4f99e663ccdaa2bb3114ffd3e034ff88f0472e15f",
+  "controller_sha256": "04d7c75386dcabdec44214d5ebf3b85d5de6058e61c97a9a5ecc7a7897ddce5c",
+  "resources_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+  "actual_build_terminal_exit": 0,
+  "pilot_started": false,
+  "socket_preflight_performed": false,
+  "quiet_granted": false
+}

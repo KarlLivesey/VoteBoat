@@ -1,0 +1,248 @@
+{
+  "original_handle": 4913,
+  "terminal_exit": 0,
+  "all_four_processes_and_validators_exit0": true,
+  "scope": "128offer functionalcontrols; not sustained or capacity acceptance",
+  "rows": [
+    {
+      "case": "tcp-r0",
+      "applied": "121",
+      "window_refused": "7",
+      "unknown": "0",
+      "pending": "0",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "ready_reply_inputs_effective": "0",
+      "joined_transitions": "0",
+      "joined_reply_inputs": "0",
+      "joined_originals": "0",
+      "applied_total_ops_s": "293.904",
+      "p99_us": "173432.500",
+      "recovered_value": "185",
+      "joined_rows": [
+        {
+          "phase": "warmup",
+          "replica": "1",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        },
+        {
+          "phase": "warmup",
+          "replica": "2",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        },
+        {
+          "phase": "warmup",
+          "replica": "3",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        },
+        {
+          "phase": "measurement",
+          "replica": "1",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        },
+        {
+          "phase": "measurement",
+          "replica": "2",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        },
+        {
+          "phase": "measurement",
+          "replica": "3",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        }
+      ]
+    },
+    {
+      "case": "tcp-r2",
+      "applied": "80",
+      "window_refused": "48",
+      "unknown": "0",
+      "pending": "0",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "ready_reply_inputs_effective": "2",
+      "joined_transitions": "2",
+      "joined_reply_inputs": "4",
+      "joined_originals": "2",
+      "applied_total_ops_s": "232.769",
+      "p99_us": "245674.199",
+      "recovered_value": "144",
+      "joined_rows": [
+        {
+          "phase": "warmup",
+          "replica": "1",
+          "joined_transitions": "1",
+          "joined_reply_inputs": "2",
+          "joined_originals": "1"
+        },
+        {
+          "phase": "warmup",
+          "replica": "2",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        },
+        {
+          "phase": "warmup",
+          "replica": "3",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        },
+        {
+          "phase": "measurement",
+          "replica": "1",
+          "joined_transitions": "2",
+          "joined_reply_inputs": "4",
+          "joined_originals": "2"
+        },
+        {
+          "phase": "measurement",
+          "replica": "2",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        },
+        {
+          "phase": "measurement",
+          "replica": "3",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        }
+      ]
+    },
+    {
+      "case": "quic-r0",
+      "applied": "95",
+      "window_refused": "33",
+      "unknown": "0",
+      "pending": "0",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "ready_reply_inputs_effective": "0",
+      "joined_transitions": "0",
+      "joined_reply_inputs": "0",
+      "joined_originals": "0",
+      "applied_total_ops_s": "267.804",
+      "p99_us": "193685.830",
+      "recovered_value": "159",
+      "joined_rows": [
+        {
+          "phase": "warmup",
+          "replica": "1",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        },
+        {
+          "phase": "warmup",
+          "replica": "2",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        },
+        {
+          "phase": "warmup",
+          "replica": "3",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        },
+        {
+          "phase": "measurement",
+          "replica": "1",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        },
+        {
+          "phase": "measurement",
+          "replica": "2",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        },
+        {
+          "phase": "measurement",
+          "replica": "3",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        }
+      ]
+    },
+    {
+      "case": "quic-r2",
+      "applied": "82",
+      "window_refused": "46",
+      "unknown": "0",
+      "pending": "0",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "ready_reply_inputs_effective": "2",
+      "joined_transitions": "3",
+      "joined_reply_inputs": "6",
+      "joined_originals": "3",
+      "applied_total_ops_s": "219.761",
+      "p99_us": "277121.814",
+      "recovered_value": "146",
+      "joined_rows": [
+        {
+          "phase": "warmup",
+          "replica": "1",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        },
+        {
+          "phase": "warmup",
+          "replica": "2",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        },
+        {
+          "phase": "warmup",
+          "replica": "3",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        },
+        {
+          "phase": "measurement",
+          "replica": "1",
+          "joined_transitions": "3",
+          "joined_reply_inputs": "6",
+          "joined_originals": "3"
+        },
+        {
+          "phase": "measurement",
+          "replica": "2",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        },
+        {
+          "phase": "measurement",
+          "replica": "3",
+          "joined_transitions": "0",
+          "joined_reply_inputs": "0",
+          "joined_originals": "0"
+        }
+      ]
+    }
+  ]
+}

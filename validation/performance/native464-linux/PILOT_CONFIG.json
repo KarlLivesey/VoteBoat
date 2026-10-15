@@ -1,0 +1,271 @@
+{
+  "candidate_source_commit": "6fce8989e2c57afa033b5ee982aaa201eae04ac6",
+  "artifact": {
+    "kind": "native",
+    "target": "native_benchmark",
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/target-native-release/release/examples/native_benchmark",
+    "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/artifacts/native/native_benchmark",
+    "sha256": "7bcb14f58b4e3b9a2e65765e4d058e6e86c2ff397909547074cbb9af42a23f4d",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/source#voteboat@0.1.0",
+      "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/source/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "native_benchmark",
+        "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/source/examples/native_benchmark.rs",
+        "edition": "2021",
+        "required-features": [
+          "tls"
+        ],
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/target-native-release/release/examples/native_benchmark"
+      ],
+      "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/target-native-release/release/examples/native_benchmark",
+      "fresh": false
+    },
+    "compiled_source_sha256": "c8e4b600edabd8fa3370d71b31612a0a7d411eb74d32a3e667402a69ca17113c",
+    "manifest_sha256": "5cbd2a32a3ebb52769c1f3c2de02c4b3ff3d09e2f84947c6cd53aad6beef9c9f"
+  },
+  "profile_proof_sha256": "5af776eb7b89009a26c916f70b40abe3e06e90bcb4101c259e437ba729fde589",
+  "control_tools": {
+    "directory": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/control-tools",
+    "inventory_sha256": "586a3d790703c7e3d507f05130dcdc59264a3673208b2b6fec77e83ddad61dbf",
+    "files": {
+      "check-benchmark-storage.mjs": {
+        "sha256": "d03de4b3027f8468d6e7bcc2b22f1a8051aba5a5f469fedbeb8e8ce9f3409aaf",
+        "mode": "0o644",
+        "committed_path": "validation/check-benchmark-storage.mjs"
+      },
+      "check-lanes.mjs": {
+        "sha256": "cb49a5d3cee377cf3154d9a9f092ea90e9af64b87ba98272cae50765c51dc920",
+        "mode": "0o644",
+        "committed_path": "validation/check-lanes.mjs"
+      },
+      "check-maintenance.mjs": {
+        "sha256": "99fd718641c95a0412ef2e98e33b23da717470613bdc496d6313c8b58d0ce658",
+        "mode": "0o644",
+        "committed_path": "validation/check-maintenance.mjs"
+      },
+      "check-native-benchmark.mjs": {
+        "sha256": "7c4e97bce50a85f64e87e5e7f223d2d7c10fc433d867e24deacdf0ce6b1d8538",
+        "mode": "0o644",
+        "committed_path": "validation/check-native-benchmark.mjs"
+      },
+      "check-offered.mjs": {
+        "sha256": "c11ca7957c50f9ad2763e724905af82516bd8b253ae828a4df797ed17bd3129a",
+        "mode": "0o644",
+        "committed_path": "validation/check-offered.mjs"
+      },
+      "check-publication-timings.mjs": {
+        "sha256": "4a4ba88136cbae48b3d822ed6b06274008f66955a15b6bba0e062e3c8715d331",
+        "mode": "0o644",
+        "committed_path": "validation/check-publication-timings.mjs"
+      },
+      "check-rounded-rate.mjs": {
+        "sha256": "262f06cfb0e878bfa7ce02741f51d7cd6e7e8df6b07b8973df4a7d89502c662d",
+        "mode": "0o644",
+        "committed_path": "validation/check-rounded-rate.mjs"
+      },
+      "check-joined.mjs": {
+        "sha256": "ddc8cbee429ca57ccdfd68ef665ddeb285f5fa958eae386e17b2b68cc4d8cf32",
+        "mode": "0o644",
+        "committed_path": "validation/check-joined.mjs"
+      }
+    }
+  },
+  "cases": [
+    {
+      "name": "tcp-r0",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/tcp-r0-metadata",
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/tcp-r0-storage",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/tcp-r0-storage",
+        "tcp",
+        "128",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--ready-items",
+        "16",
+        "--ready-replies",
+        "0"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/tcp-r0-metadata/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/tcp-r0-storage",
+        "tcp",
+        "128",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--ready-items",
+        "16",
+        "--ready-replies",
+        "0"
+      ],
+      "check_command": [
+        "node",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/control-tools/check-native-benchmark.mjs",
+        "--storage",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/tcp-r0-storage"
+      ],
+      "scope": "Functional CLI controls only;128offers/rate500/window64/onegroup/warm64/noMaintenance/pause; exactoriginals/recovery/newcounterchecker. No rate/capacity claim."
+    },
+    {
+      "name": "tcp-r2",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/tcp-r2-metadata",
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/tcp-r2-storage",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/tcp-r2-storage",
+        "tcp",
+        "128",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--ready-items",
+        "16",
+        "--ready-replies",
+        "2"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/tcp-r2-metadata/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/tcp-r2-storage",
+        "tcp",
+        "128",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--ready-items",
+        "16",
+        "--ready-replies",
+        "2"
+      ],
+      "check_command": [
+        "node",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/control-tools/check-native-benchmark.mjs",
+        "--storage",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/tcp-r2-storage"
+      ],
+      "scope": "Functional CLI controls only;128offers/rate500/window64/onegroup/warm64/noMaintenance/pause; exactoriginals/recovery/newcounterchecker. No rate/capacity claim."
+    },
+    {
+      "name": "quic-r0",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/quic-r0-metadata",
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/quic-r0-storage",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/quic-r0-storage",
+        "quic",
+        "128",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--ready-items",
+        "16",
+        "--ready-replies",
+        "0"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/quic-r0-metadata/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/quic-r0-storage",
+        "quic",
+        "128",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--ready-items",
+        "16",
+        "--ready-replies",
+        "0"
+      ],
+      "check_command": [
+        "node",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/control-tools/check-native-benchmark.mjs",
+        "--storage",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/quic-r0-storage"
+      ],
+      "scope": "Functional CLI controls only;128offers/rate500/window64/onegroup/warm64/noMaintenance/pause; exactoriginals/recovery/newcounterchecker. No rate/capacity claim."
+    },
+    {
+      "name": "quic-r2",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/quic-r2-metadata",
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/quic-r2-storage",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/quic-r2-storage",
+        "quic",
+        "128",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--ready-items",
+        "16",
+        "--ready-replies",
+        "2"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/quic-r2-metadata/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/quic-r2-storage",
+        "quic",
+        "128",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--ready-items",
+        "16",
+        "--ready-replies",
+        "2"
+      ],
+      "check_command": [
+        "node",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/control-tools/check-native-benchmark.mjs",
+        "--storage",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/quic-r2-storage"
+      ],
+      "scope": "Functional CLI controls only;128offers/rate500/window64/onegroup/warm64/noMaintenance/pause; exactoriginals/recovery/newcounterchecker. No rate/capacity claim."
+    }
+  ],
+  "no_long_campaign": true,
+  "quiet_coordination": "HELD: root must separately perform actual socket/process preflight and grant quiet. This setup does not authorize launch."
+}

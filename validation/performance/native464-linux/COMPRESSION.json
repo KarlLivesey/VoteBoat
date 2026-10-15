@@ -1,0 +1,18 @@
+[
+  {
+    "original_relative_path": "logs/native-release.jsonl",
+    "archive_relative_path": "logs/native-release.jsonl.gz",
+    "original_bytes": 3232074,
+    "original_sha256": "4c94ff1576b18c3b47fcd39e40ddca5a9de0f3ef64ba95e5a8f4665f2b23fe62",
+    "gzip_bytes": 107195,
+    "gzip_sha256": "fbf14d58f0d1e9d9a850deaf12f711b06d43c15edcdaa977f46b2b142989bbf9"
+  },
+  {
+    "original_relative_path": "logs/symbol-table.log",
+    "archive_relative_path": "logs/symbol-table.log.gz",
+    "original_bytes": 2176973,
+    "original_sha256": "daeda78462e0007fc3bb43f0acb8d809a81248dcaa9bf34174259acd8fe94111",
+    "gzip_bytes": 207303,
+    "gzip_sha256": "817427f6e640df954b131cf6b21e7f430d1d957bb903d11807e95d3a9516776a"
+  }
+]

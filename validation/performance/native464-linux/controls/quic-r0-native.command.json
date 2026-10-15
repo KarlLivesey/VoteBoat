@@ -1,0 +1,16 @@
+[
+  "python3",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/quic-r0-metadata/resources.py",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/artifacts/native/native_benchmark",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/controls/quic-r0-storage",
+  "quic",
+  "128",
+  "64",
+  "1",
+  "--offered",
+  "500",
+  "--ready-items",
+  "16",
+  "--ready-replies",
+  "0"
+]
