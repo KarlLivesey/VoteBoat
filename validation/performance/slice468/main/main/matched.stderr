@@ -1,0 +1,8 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+   Compiling voteboat-matched-framework v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/benchmarks/matched)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.36s
+     Running unittests src/main.rs (target/p9/slice455/padded-target-checks/debug/deps/voteboat_matched_framework-8c2bbd72218e067a)
+
+thread 'voteboat_engine::wait_cache::tests::unwind_closes_every_endpoint_and_discards_oversized_backing' (676) panicked at src/voteboat_engine/wait_cache/tests.rs:197:9:
+test-only interruption with an active lease
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

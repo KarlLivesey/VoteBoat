@@ -1,0 +1,17 @@
+{
+  "commit": "39da70a749788e193f49f95955b69024a9da0b51",
+  "files": {
+    "benchmarks/matched/src/voteboat_engine.rs": {
+      "sha256": "2f87dc9d2da035ac9ed23afc03b757a59c694b3d56c5e8c43d194a2e442cb269",
+      "mode": "0o644"
+    },
+    "benchmarks/matched/src/voteboat_engine/client_requests.rs": {
+      "sha256": "fd7af81d4ebf9def440117186dc1ea4607eb2e73d9306c04fae55b21b72ffaa5",
+      "mode": "0o644"
+    },
+    "benchmarks/matched/src/voteboat_engine/client_outcomes.rs": {
+      "sha256": "c4eaf5ebf2c9102aa0d7a9f5aeec55d460fa6e7d720386679c4cdcea3d86248f",
+      "mode": "0o644"
+    }
+  }
+}

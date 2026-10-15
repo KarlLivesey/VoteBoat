@@ -1,0 +1,34 @@
+{
+  "original_handle": 72709,
+  "actual_terminal_exit": 0,
+  "stage": "DONE",
+  "matched_tests": 77,
+  "matched_failures": 0,
+  "full_enabled_format_four_profiles_standalone_hook_exit": 0,
+  "compiled_input_count": 1443,
+  "before_after_bytes_modes_exact": true,
+  "reviewed_final_hashes_exact": {
+    "benchmarks/matched/src/voteboat_engine.rs": "7939ec8ba9e5e2096432e64586017cfa70de2fd63281a16825949e37001879ea",
+    "benchmarks/matched/src/voteboat_engine/wait_cache.rs": "74d496ce4f3b7c42b1f1dbf8aeb2d841a12d2db9348df1251b19c20427a3abf3",
+    "benchmarks/matched/src/voteboat_engine/wait_cache/tests.rs": "dc6a447cfabab4ce3eae9c92dae287bd52198b11a1cf95054f3ca5b0766eeb31",
+    "benchmarks/matched/src/workload.rs": "4138f4bff2131c126fc74f1a852199f9234d3d816f4b5f53bf6b675acc3a9469"
+  },
+  "root_production_scope_exact_parent": [
+    "Cargo.toml",
+    "Cargo.lock",
+    "clippy.toml",
+    "build.rs",
+    "rust-toolchain.toml",
+    ".cargo",
+    ".githooks",
+    "src",
+    "tests",
+    "examples",
+    "benches",
+    "docs/component-contracts.json",
+    "docs/provider-conformance.json"
+  ],
+  "prior_qualification_reuse": "Exact467/465/455 production/provider/native/network/recovery, no root implementation or public API changed. New private matched Client and shared driver covered by77 tests and full hook.",
+  "expected_unwind_stderr": "catch_unwind control emits a test-only panic to stderr under --nocapture; overall test passes, not a test failure.",
+  "performance": "Unmeasured; current test-executable layouts only, no release/floor/native gain."
+}

@@ -18,7 +18,7 @@ fn ids(width: usize) -> Vec<u128> {
 async fn every_request_receipt_is_checked_in_original_order() {
     for width in [0, 1, 4, 5, 17] {
         let (sender, mut receiver) = mpsc::channel(1);
-        let client = Client(sender);
+        let mut client = Client::new(sender, 4);
         let originals = ids(width);
         let mut write = Box::pin(client.write(&originals));
         if width == 0 {
@@ -62,7 +62,7 @@ async fn invalid_ids_never_send_and_precede_closed_channel_error() {
                 if closed {
                     receiver.close();
                 }
-                let client = Client(sender);
+                let mut client = Client::new(sender, 4);
                 let mut originals = ids(width);
                 originals[index] = 0;
                 assert_eq!(
@@ -80,7 +80,7 @@ async fn empty_and_all_request_widths_preserve_closed_send_error() {
     for width in [0, 1, 4, 5, 17] {
         let (sender, receiver) = mpsc::channel(1);
         drop(receiver);
-        let client = Client(sender);
+        let mut client = Client::new(sender, 4);
         assert_eq!(
             client.write(&ids(width)).await.unwrap_err().to_string(),
             "channel closed"
@@ -97,7 +97,7 @@ async fn canceling_full_queue_send_never_publishes_a_partial_request() {
                 originals: Vec::new()
             })
             .is_ok());
-        let client = Client(sender);
+        let mut client = Client::new(sender, 4);
         let originals = ids(width);
         let mut write = Box::pin(client.write(&originals));
         assert!(futures::poll!(&mut write).is_pending());
@@ -127,7 +127,7 @@ async fn zero_identity_precedes_a_full_send_queue_for_every_request_width() {
                     originals: Vec::new()
                 })
                 .is_ok());
-            let client = Client(sender);
+            let mut client = Client::new(sender, 4);
             let mut originals = ids(width);
             originals[index] = 0;
             let mut write = Box::pin(client.write(&originals));
@@ -148,7 +148,7 @@ async fn zero_identity_precedes_a_full_send_queue_for_every_request_width() {
 async fn accepted_request_cancellation_closes_every_receiver_without_losing_request() {
     for width in [1, 4, 5, 17] {
         let (sender, mut receiver) = mpsc::channel(1);
-        let client = Client(sender);
+        let mut client = Client::new(sender, 4);
         let originals = ids(width);
         let mut write = Box::pin(client.write(&originals));
         assert!(futures::poll!(&mut write).is_pending());
@@ -172,7 +172,7 @@ async fn wrong_or_closed_first_and_middle_receipts_cancel_all_unvisited_receiver
         for failed in [0, width / 2] {
             for wrong in [false, true] {
                 let (sender, mut receiver) = mpsc::channel(1);
-                let client = Client(sender);
+                let mut client = Client::new(sender, 4);
                 let originals = ids(width);
                 let mut write = Box::pin(client.write(&originals));
                 assert!(futures::poll!(&mut write).is_pending());
@@ -216,7 +216,7 @@ async fn wrong_or_closed_first_and_middle_receipts_cancel_all_unvisited_receiver
 async fn queued_wrong_tail_cannot_bypass_the_original_first_wait() {
     for width in [4, 5, 17] {
         let (sender, mut receiver) = mpsc::channel(1);
-        let client = Client(sender);
+        let mut client = Client::new(sender, 4);
         let originals = ids(width);
         let mut write = Box::pin(client.write(&originals));
         assert!(futures::poll!(&mut write).is_pending());
@@ -261,7 +261,7 @@ fn receiver_only_wait_layout_diagnostic_against_literal450_write() {
             });
             waits.push((operation, wait));
         }
-        client.0.send(Request { originals: entries }).await?;
+        client.sender.send(Request { originals: entries }).await?;
         for (operation, wait) in waits {
             if wait.await? != operation {
                 return Err("VoteBoat original applied result differs".into());
@@ -271,12 +271,13 @@ fn receiver_only_wait_layout_diagnostic_against_literal450_write() {
     }
 
     let (sender, _receiver) = mpsc::channel(1);
-    let client = Client(sender);
+    let mut client = Client::new(sender, 4);
     let originals = ids(4);
+    let literal_client = client.clone();
     let current = client.write(&originals);
-    let literal450 = literal450_write(&client, &originals);
+    let literal450 = literal450_write(&literal_client, &originals);
     println!(
-        "scope=actual_current_dev_future_vs_literal450_source_replica unpolled_current_future_bytes={} unpolled_literal450_future_bytes={} receiver_bytes={} old_wait_tuple_bytes={} receiver_vec_header_bytes={} old_wait_vec_header_bytes={}",
+        "scope=actual_current_test_executable_see_recorded_profile_vs_literal450_source_replica unpolled_current_future_bytes={} unpolled_literal450_future_bytes={} receiver_bytes={} old_wait_tuple_bytes={} receiver_vec_header_bytes={} old_wait_vec_header_bytes={}",
         std::mem::size_of_val(&current),
         std::mem::size_of_val(&literal450),
         std::mem::size_of::<oneshot::Receiver<OperationId>>(),
@@ -288,7 +289,7 @@ fn receiver_only_wait_layout_diagnostic_against_literal450_write() {
         let receivers = Vec::<oneshot::Receiver<OperationId>>::with_capacity(width);
         let tuples = Vec::<(OperationId, oneshot::Receiver<OperationId>)>::with_capacity(width);
         println!(
-            "scope=dev_requested_wait_reserve_not_allocator_or_RSS width={width} receiver_capacity={} tuple_capacity={} receiver_element_capacity_bytes={} tuple_element_capacity_bytes={}",
+            "scope=actual_current_test_executable_see_recorded_profile_requested_wait_reserve_not_allocator_or_RSS width={width} receiver_capacity={} tuple_capacity={} receiver_element_capacity_bytes={} tuple_element_capacity_bytes={}",
             receivers.capacity(),
             tuples.capacity(),
             receivers.capacity() * std::mem::size_of::<oneshot::Receiver<OperationId>>(),

@@ -743,8 +743,8 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: publish measured466 rejection and467 restoration | Remove the representation that regresses all six selected Linux pairs | Published466, fresh asserted source/artifact identities, actual1720 pairs and31284 CPU data; [467 schema](../validation/performance/slice467/SCHEMA.md) | Preserve every raw regression/setup failure, prove full465 source/build/contract equality, focused conformance and full enabled strict hook, commit/push; original Mac455 continues | P9.1/P9.2/P9.3 |
-| Next: optimize the largest remaining measured stage | Improve sustained useful throughput through less work or better ordering | Restored455 baseline and both-host CPU/waiting/materialization evidence, original comparison contract; close466 cost movement before selection | Before-edit ownership/transition schema, focused correctness/recovery checks, checked publication and repeated paired rates/tails/debt; no chunk-size retuning or resurrection of rejected paths | P9.1/P9.2/P9.3 |
+| Current: checked exclusive-client heap wait-buffer reuse | Remove one repeated receiver-Vec allocation/free per request after first use, preserving every original channel | Published467 restoration/466 forensic closure, saved455 client profile and [before-edit468 schema](../validation/performance/slice468/SCHEMA.md); original Mac455 qualification | Cold-clone/bounded-cache/cancellation/oversized controls, all matched outcomes, exact source/modes, full enabled strict hook and publication; fresh asserted artifacts, actual layouts and repeated paired rate/p99/memory disposition | P9.1/P9.3 |
+| Next: optimize the largest remaining measured stage | Improve sustained useful throughput through less work or better ordering | Current468 disposition, both-host CPU/waiting/materialization evidence and original comparison contract | Before-edit ownership/transition/restart schema; profile-backed structural reduction or bounded-persistence design, correctness/recovery checks, checked publication and repeated paired results; no hint/parameter retuning or rejected-path repetition | P9.1/P9.2/P9.3 |
 | Following: full curve, sustainable headroom and composition qualification | Satisfy the entire performance objective beyond the current experiment | Retained measured improvements, qualified weighted fixture, source/artifact/host identities and stable maintenance | All seven required framework cells on both hosts with healthy margin; sustained memory/debt, durable applications/headroom/skew/fairness, independent placement/shared barriers and P8 composition; preserve every outcome/fence/retry | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
@@ -34528,3 +34528,31 @@ No Mac466 performance campaign is needed after these Linux losses.
 The full both-host sustained, durable/headroom/fairness/placement/P8 acceptance
 remains unchanged and open; no macro milestone closes.467 is published asff8f9031
 through original96685/enabled hook0, all1441 qualified source hashes unchanged.
+
+468 implements [exclusive-client heap wait-buffer reuse](../validation/performance/slice468/SCHEMA.md)
+in the private matched host. The request buffer and every Tokio oneshot remain;
+manual clones start empty, first allocation stays timed, and an exclusive RAII
+lease/drain clears all receivers before retaining bounded empty storage. Cache
+capacity is limited by arbitrary configured request width; oversized requests
+retain their behavior and discard backing. No root API/provider/WAL/wire change.
+
+[Original72709](../validation/performance/slice468/main/README.md) ends0/DONE:
+all77 matched tests and the complete enabled
+format/default/all/core/native/standalone strict hook0,1443 exact SHA/mode inputs
+before/after. All39 archived payloads independently verify; source review's
+final hashes match. Root production/
+build/contracts equal467/465, so exact prior native/protocol/network/recovery
+checks are reused. Six new ownership controls and a common layout diagnostic
+cover repeated reuse, cold/concurrent independent clones, validation/receipt/send
+errors, blocked-send/accepted-wait cancellation, oversize discard and unwind.
+The expected catch_unwind panic remains in raw stderr; it is not a failed test.
+
+Actual current test-executable Client/cache/lease/receiver sizes40/32/8/8 bytes,
+VoteBoat write280, shared enum/write/client-loop40/1696/2024; upstream client/
+write24/1664. Historical literal450 source-replica diagnostics remain explicitly
+separate from compiled baselines. These are not release layouts or RSS. New
+client state can alter shared enum/future codegen, so candidate upstream controls
+and actual rate/tail/memory evidence decide. Checked publication and fresh
+asserted artifacts precede repeated20M bulk/1M singleton comparisons; no useful
+gain, native speed or P9 milestone is established yet. Original Mac455's broad
+P8 history matrix continues with actual per-case progress and no restart.

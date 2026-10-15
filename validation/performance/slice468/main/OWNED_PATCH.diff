@@ -1,0 +1,254 @@
+diff --git a/benchmarks/matched/src/voteboat_engine.rs b/benchmarks/matched/src/voteboat_engine.rs
+index 2da93246..40f49f14 100644
+--- a/benchmarks/matched/src/voteboat_engine.rs
++++ b/benchmarks/matched/src/voteboat_engine.rs
+@@ -2,6 +2,7 @@
+ // Copyright (c) 2026 Karl Livesey
+ mod actor;
+ mod stats;
++mod wait_cache;
+ use super::{application::Noop, snapshots::MemorySnapshots, store::MemoryStore, Failure, Settings};
+ use crate::{attribution::Attribution, CHANNEL_CAPACITY};
+ pub(crate) use stats::Diagnostics;
+@@ -28,8 +29,15 @@ struct Original {
+ struct Request {
+     originals: Vec<Original>,
+ }
+-#[derive(Clone)]
+-pub(super) struct Client(mpsc::Sender<Request>);
++pub(super) struct Client {
++    sender: mpsc::Sender<Request>,
++    waits: wait_cache::WaitCache,
++}
++impl Clone for Client {
++    fn clone(&self) -> Self {
++        Self::new(self.sender.clone(), self.waits.retain_limit())
++    }
++}
+ pub(super) struct Cluster {
+     senders: Vec<mpsc::Sender<Request>>,
+     actors: Vec<JoinHandle<Result<Option<Attribution>, Failure>>>,
+@@ -39,6 +47,7 @@ pub(super) struct Cluster {
+     stop: watch::Sender<bool>,
+     stats: Arc<[stats::Stats; 3]>,
+     batch_limits: BatchLimits,
++    client_batch: usize,
+     #[cfg(test)]
+     paused: Arc<[AtomicBool; 3]>,
+     #[cfg(test)]
+@@ -134,6 +143,7 @@ impl Cluster {
+             stop,
+             stats,
+             batch_limits,
++            client_batch: settings.batch,
+             #[cfg(test)]
+             paused,
+             #[cfg(test)]
+@@ -159,7 +169,7 @@ impl Cluster {
+         self.batch_limits
+     }
+     pub fn client(&self) -> Client {
+-        Client(self.senders[0].clone())
++        Client::new(self.senders[0].clone(), self.client_batch)
+     }
+     async fn wait_frontier(&self, expected: u64) -> Result<(), Failure> {
+         tokio::time::timeout(Duration::from_secs(10), async {
+@@ -210,9 +220,15 @@ impl Cluster {
+     }
+ }
+ impl Client {
+-    pub async fn write(&self, originals: &[u128]) -> Result<usize, Failure> {
++    fn new(sender: mpsc::Sender<Request>, retain_limit: usize) -> Self {
++        Self {
++            sender,
++            waits: wait_cache::WaitCache::new(retain_limit),
++        }
++    }
++    pub async fn write(&mut self, originals: &[u128]) -> Result<usize, Failure> {
+         let mut entries = Vec::with_capacity(originals.len());
+-        let mut waits = Vec::with_capacity(originals.len());
++        let mut waits = self.waits.lease(originals.len());
+         for &original in originals {
+             let operation = OperationId::new(original).ok_or("zero original identity")?;
+             let (reply, wait) = oneshot::channel();
+@@ -223,9 +239,9 @@ impl Client {
+             });
+             waits.push(wait);
+         }
+-        self.0.send(Request { originals: entries }).await?;
++        self.sender.send(Request { originals: entries }).await?;
+         let mut expected = originals.iter();
+-        for wait in waits {
++        for wait in waits.drain() {
+             let applied = wait.await?;
+             if expected.next().copied() != Some(applied.get()) {
+                 return Err("VoteBoat original applied result differs".into());
+@@ -369,7 +385,7 @@ mod tests {
+             .unwrap();
+             let mut cluster = Cluster::new(settings).await.unwrap();
+             cluster.pause_follower(2, true);
+-            let client = cluster.client();
++            let mut client = cluster.client();
+             for start in (1..=12_000).step_by(4) {
+                 let originals: Vec<_> = (start..start + 4).map(|n| n as u128).collect();
+                 let completed = match tokio::time::timeout(
+diff --git a/benchmarks/matched/src/voteboat_engine/client_outcomes.rs b/benchmarks/matched/src/voteboat_engine/client_outcomes.rs
+index 6127c714..1c049d5b 100644
+--- a/benchmarks/matched/src/voteboat_engine/client_outcomes.rs
++++ b/benchmarks/matched/src/voteboat_engine/client_outcomes.rs
+@@ -18,7 +18,7 @@ fn ids(width: usize) -> Vec<u128> {
+ async fn every_request_receipt_is_checked_in_original_order() {
+     for width in [0, 1, 4, 5, 17] {
+         let (sender, mut receiver) = mpsc::channel(1);
+-        let client = Client(sender);
++        let mut client = Client::new(sender, 4);
+         let originals = ids(width);
+         let mut write = Box::pin(client.write(&originals));
+         if width == 0 {
+@@ -62,7 +62,7 @@ async fn invalid_ids_never_send_and_precede_closed_channel_error() {
+                 if closed {
+                     receiver.close();
+                 }
+-                let client = Client(sender);
++                let mut client = Client::new(sender, 4);
+                 let mut originals = ids(width);
+                 originals[index] = 0;
+                 assert_eq!(
+@@ -80,7 +80,7 @@ async fn empty_and_all_request_widths_preserve_closed_send_error() {
+     for width in [0, 1, 4, 5, 17] {
+         let (sender, receiver) = mpsc::channel(1);
+         drop(receiver);
+-        let client = Client(sender);
++        let mut client = Client::new(sender, 4);
+         assert_eq!(
+             client.write(&ids(width)).await.unwrap_err().to_string(),
+             "channel closed"
+@@ -97,7 +97,7 @@ async fn canceling_full_queue_send_never_publishes_a_partial_request() {
+                 originals: Vec::new()
+             })
+             .is_ok());
+-        let client = Client(sender);
++        let mut client = Client::new(sender, 4);
+         let originals = ids(width);
+         let mut write = Box::pin(client.write(&originals));
+         assert!(futures::poll!(&mut write).is_pending());
+@@ -127,7 +127,7 @@ async fn zero_identity_precedes_a_full_send_queue_for_every_request_width() {
+                     originals: Vec::new()
+                 })
+                 .is_ok());
+-            let client = Client(sender);
++            let mut client = Client::new(sender, 4);
+             let mut originals = ids(width);
+             originals[index] = 0;
+             let mut write = Box::pin(client.write(&originals));
+@@ -148,7 +148,7 @@ async fn zero_identity_precedes_a_full_send_queue_for_every_request_width() {
+ async fn accepted_request_cancellation_closes_every_receiver_without_losing_request() {
+     for width in [1, 4, 5, 17] {
+         let (sender, mut receiver) = mpsc::channel(1);
+-        let client = Client(sender);
++        let mut client = Client::new(sender, 4);
+         let originals = ids(width);
+         let mut write = Box::pin(client.write(&originals));
+         assert!(futures::poll!(&mut write).is_pending());
+@@ -172,7 +172,7 @@ async fn wrong_or_closed_first_and_middle_receipts_cancel_all_unvisited_receiver
+         for failed in [0, width / 2] {
+             for wrong in [false, true] {
+                 let (sender, mut receiver) = mpsc::channel(1);
+-                let client = Client(sender);
++                let mut client = Client::new(sender, 4);
+                 let originals = ids(width);
+                 let mut write = Box::pin(client.write(&originals));
+                 assert!(futures::poll!(&mut write).is_pending());
+@@ -216,7 +216,7 @@ async fn wrong_or_closed_first_and_middle_receipts_cancel_all_unvisited_receiver
+ async fn queued_wrong_tail_cannot_bypass_the_original_first_wait() {
+     for width in [4, 5, 17] {
+         let (sender, mut receiver) = mpsc::channel(1);
+-        let client = Client(sender);
++        let mut client = Client::new(sender, 4);
+         let originals = ids(width);
+         let mut write = Box::pin(client.write(&originals));
+         assert!(futures::poll!(&mut write).is_pending());
+@@ -261,7 +261,7 @@ fn receiver_only_wait_layout_diagnostic_against_literal450_write() {
+             });
+             waits.push((operation, wait));
+         }
+-        client.0.send(Request { originals: entries }).await?;
++        client.sender.send(Request { originals: entries }).await?;
+         for (operation, wait) in waits {
+             if wait.await? != operation {
+                 return Err("VoteBoat original applied result differs".into());
+@@ -271,12 +271,13 @@ fn receiver_only_wait_layout_diagnostic_against_literal450_write() {
+     }
+ 
+     let (sender, _receiver) = mpsc::channel(1);
+-    let client = Client(sender);
++    let mut client = Client::new(sender, 4);
+     let originals = ids(4);
++    let literal_client = client.clone();
+     let current = client.write(&originals);
+-    let literal450 = literal450_write(&client, &originals);
++    let literal450 = literal450_write(&literal_client, &originals);
+     println!(
+-        "scope=actual_current_dev_future_vs_literal450_source_replica unpolled_current_future_bytes={} unpolled_literal450_future_bytes={} receiver_bytes={} old_wait_tuple_bytes={} receiver_vec_header_bytes={} old_wait_vec_header_bytes={}",
++        "scope=actual_current_test_executable_see_recorded_profile_vs_literal450_source_replica unpolled_current_future_bytes={} unpolled_literal450_future_bytes={} receiver_bytes={} old_wait_tuple_bytes={} receiver_vec_header_bytes={} old_wait_vec_header_bytes={}",
+         std::mem::size_of_val(&current),
+         std::mem::size_of_val(&literal450),
+         std::mem::size_of::<oneshot::Receiver<OperationId>>(),
+@@ -288,7 +289,7 @@ fn receiver_only_wait_layout_diagnostic_against_literal450_write() {
+         let receivers = Vec::<oneshot::Receiver<OperationId>>::with_capacity(width);
+         let tuples = Vec::<(OperationId, oneshot::Receiver<OperationId>)>::with_capacity(width);
+         println!(
+-            "scope=dev_requested_wait_reserve_not_allocator_or_RSS width={width} receiver_capacity={} tuple_capacity={} receiver_element_capacity_bytes={} tuple_element_capacity_bytes={}",
++            "scope=actual_current_test_executable_see_recorded_profile_requested_wait_reserve_not_allocator_or_RSS width={width} receiver_capacity={} tuple_capacity={} receiver_element_capacity_bytes={} tuple_element_capacity_bytes={}",
+             receivers.capacity(),
+             tuples.capacity(),
+             receivers.capacity() * std::mem::size_of::<oneshot::Receiver<OperationId>>(),
+diff --git a/benchmarks/matched/src/voteboat_engine/client_requests.rs b/benchmarks/matched/src/voteboat_engine/client_requests.rs
+index 274719e1..e709ef45 100644
+--- a/benchmarks/matched/src/voteboat_engine/client_requests.rs
++++ b/benchmarks/matched/src/voteboat_engine/client_requests.rs
+@@ -6,7 +6,7 @@ use std::mem::size_of;
+ #[tokio::test]
+ async fn zero_identity_never_publishes_a_partial_request_and_precedes_send_error() {
+     let (sender, mut receiver) = mpsc::channel(1);
+-    let client = Client(sender);
++    let mut client = Client::new(sender, 4);
+     assert_eq!(
+         client
+             .write(&[u128::MAX, 0, 17])
+@@ -34,7 +34,7 @@ async fn zero_identity_never_publishes_a_partial_request_and_precedes_send_error
+ #[tokio::test]
+ async fn queued_client_cancellation_drops_every_original_wait_without_losing_request() {
+     let (sender, mut receiver) = mpsc::channel(1);
+-    let client = Client(sender);
++    let mut client = Client::new(sender, 4);
+     let ids = [u128::MAX, 1 << 127, (1 << 64) | 1, 19];
+     let mut write = Box::pin(client.write(&ids));
+     assert!(futures::poll!(&mut write).is_pending());
+@@ -55,7 +55,7 @@ async fn queued_client_cancellation_drops_every_original_wait_without_losing_req
+ #[tokio::test]
+ async fn first_wrong_receipt_returns_while_later_sender_remains_owned() {
+     let (sender, mut receiver) = mpsc::channel(1);
+-    let client = Client(sender);
++    let mut client = Client::new(sender, 4);
+     let writer = tokio::spawn(async move { client.write(&[u128::MAX, 17]).await });
+     let mut request = receiver.recv().await.unwrap();
+     let tail = request.originals.pop().unwrap();
+@@ -76,7 +76,7 @@ async fn first_wrong_receipt_returns_while_later_sender_remains_owned() {
+ #[tokio::test]
+ async fn first_closed_receipt_returns_without_waiting_for_the_tail() {
+     let (sender, mut receiver) = mpsc::channel(1);
+-    let client = Client(sender);
++    let mut client = Client::new(sender, 4);
+     let writer = tokio::spawn(async move { client.write(&[1 << 127, 7]).await });
+     let mut request = receiver.recv().await.unwrap();
+     let tail = request.originals.pop().unwrap();
+@@ -92,7 +92,7 @@ async fn first_closed_receipt_returns_without_waiting_for_the_tail() {
+ #[tokio::test]
+ async fn flat_request_layout_and_every_channel_capacity_are_reported_at_queue_boundary() {
+     let (sender, mut receiver) = mpsc::channel(1);
+-    let client = Client(sender);
++    let mut client = Client::new(sender, 4);
+     let ids = [u128::MAX, 1 << 127, (1 << 64) | 1, 19];
+     let writer = tokio::spawn(async move { client.write(&ids).await });
+     let request = receiver.recv().await.unwrap();

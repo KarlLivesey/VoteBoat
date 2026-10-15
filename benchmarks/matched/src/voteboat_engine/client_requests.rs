@@ -6,7 +6,7 @@ use std::mem::size_of;
 #[tokio::test]
 async fn zero_identity_never_publishes_a_partial_request_and_precedes_send_error() {
     let (sender, mut receiver) = mpsc::channel(1);
-    let client = Client(sender);
+    let mut client = Client::new(sender, 4);
     assert_eq!(
         client
             .write(&[u128::MAX, 0, 17])
@@ -34,7 +34,7 @@ async fn zero_identity_never_publishes_a_partial_request_and_precedes_send_error
 #[tokio::test]
 async fn queued_client_cancellation_drops_every_original_wait_without_losing_request() {
     let (sender, mut receiver) = mpsc::channel(1);
-    let client = Client(sender);
+    let mut client = Client::new(sender, 4);
     let ids = [u128::MAX, 1 << 127, (1 << 64) | 1, 19];
     let mut write = Box::pin(client.write(&ids));
     assert!(futures::poll!(&mut write).is_pending());
@@ -55,7 +55,7 @@ async fn queued_client_cancellation_drops_every_original_wait_without_losing_req
 #[tokio::test]
 async fn first_wrong_receipt_returns_while_later_sender_remains_owned() {
     let (sender, mut receiver) = mpsc::channel(1);
-    let client = Client(sender);
+    let mut client = Client::new(sender, 4);
     let writer = tokio::spawn(async move { client.write(&[u128::MAX, 17]).await });
     let mut request = receiver.recv().await.unwrap();
     let tail = request.originals.pop().unwrap();
@@ -76,7 +76,7 @@ async fn first_wrong_receipt_returns_while_later_sender_remains_owned() {
 #[tokio::test]
 async fn first_closed_receipt_returns_without_waiting_for_the_tail() {
     let (sender, mut receiver) = mpsc::channel(1);
-    let client = Client(sender);
+    let mut client = Client::new(sender, 4);
     let writer = tokio::spawn(async move { client.write(&[1 << 127, 7]).await });
     let mut request = receiver.recv().await.unwrap();
     let tail = request.originals.pop().unwrap();
@@ -92,7 +92,7 @@ async fn first_closed_receipt_returns_without_waiting_for_the_tail() {
 #[tokio::test]
 async fn flat_request_layout_and_every_channel_capacity_are_reported_at_queue_boundary() {
     let (sender, mut receiver) = mpsc::channel(1);
-    let client = Client(sender);
+    let mut client = Client::new(sender, 4);
     let ids = [u128::MAX, 1 << 127, (1 << 64) | 1, 19];
     let writer = tokio::spawn(async move { client.write(&ids).await });
     let request = receiver.recv().await.unwrap();
