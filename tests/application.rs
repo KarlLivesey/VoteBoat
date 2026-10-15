@@ -14,6 +14,9 @@
 // rights and limitations under the RPL.
 use voteboat::{application::*, identity::OperationId, log::*};
 
+#[path = "application/capacity_bound.rs"]
+mod capacity_bound;
+
 #[path = "application/ready_admission.rs"]
 mod ready_admission;
 

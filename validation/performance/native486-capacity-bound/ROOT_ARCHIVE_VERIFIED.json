@@ -1,0 +1,8 @@
+{
+  "exit": 0,
+  "payloads": 65,
+  "originals": 63,
+  "lossless_gzip": 33,
+  "manifest_sha256": "a24cb5852817236851be846f823c408ad34c426dc36c6aa88ef3a936a677972c",
+  "scope": "Independent root recursive exact path-set/seal/gzip/original byte/hash/length/mode comparison; actual artifact review is separately sealed in archive. No workload, check suite or build repeated."
+}

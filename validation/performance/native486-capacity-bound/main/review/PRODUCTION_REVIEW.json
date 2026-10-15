@@ -1,0 +1,25 @@
+{
+  "review_status": "PASS",
+  "kind": "independent read-only semantic/source review, not test execution or measured performance",
+  "source_sha256": "00e59954dbd634a0bd35e50782604bc696e1b6e7b077c278f6a8a7802651b6b7",
+  "schema_sha256": "3027b186d45b71933083579cf6d88999649562e1616da90d0e9defdbc9f82303",
+  "production_diff_sha256": "4fd124107ef5f6e680439db7ff1241436b1568f000c81e30fef4fefe079f882d",
+  "method_sha256": "ed6325a769ccbd0a718ab17e906203bd91fe2ef6cc7b6f3856e56a642cd5a210",
+  "findings": {
+    "correct_cardinality_bound": "FirstNone after n<R raw IDs proves at most n+1<=R novel distinct reservations including candidate, so exact same receipt bound follows without membership/tree work.",
+    "fallback_exact": "AtR buffered items, replay buffered.into_iter followed by pending.map ID preserves ID order. Original pending can exceedR only atR+1th item or later, so buffering cannot consume past original first capacity failure. Candidate final membership/capacity follows full pending as before.",
+    "syntax_and_zero": "Candidate bytes.len()!=8 returns before remaining/next/allocation. R0 constructs only an empty unallocated Vec then exact old fallback.",
+    "iterator_observability": "Only explicit next and Vec.push used; no size_hint/collect/count/nth. Short branch stops at firstNone, including non-fused sources. Fallback wrappers use next through the original for loop; no borrowed payload survives buffering.",
+    "ownership_and_panic": "Vec owns only builtin Copy OperationIds. Immutable Counter state and receipt type unchanged; iterator panic unwinds local buffer, no persistent context or application mutation. Changed allocator/OOM behavior is not claimed equivalent.",
+    "allocation_limits": "Vec::new avoids R-sized empty-case allocation. Logical len<=R<=1M; actual Vec capacity may exceedlen and fallback can retain bothVec andBTreeSet. Schema discloses this; no universal memory/performance claim.",
+    "contract_surface": "No public method, callback, batch/cache/state/generation, persistence format, admission authority, ticket/outcome, or provider default changes."
+  },
+  "schema_precision_note": "Sentence saying duplicate/applied/conflicting IDs take fallback applies when raw pending reachesR; shorter sequences also use the exact fastpath. Explicit preceding n<R rule is correct; parent notified.",
+  "acceptance_still_required": [
+    "Independent old validator oracle with exact error/receipt/next-count/checkpoint comparison, not merely mirrored fastpath.",
+    "Small exhaustive and larger R0/R-1/R/R+1 boundaries; committed/duplicate/overflow candidates, hostile hints/overrides/non-fused/panic/earlystop controls.",
+    "Affected all/core application/client/provider and native recovery controls plus enabled full strict hook; separate fresh artifacts/Macqualification and unchanged both-host finite pairs including cold tails."
+  ],
+  "no_build_test_workload_or_source_edits_by_reviewer": true,
+  "performance_claim": "None; current480482 profile motivates algorithm choice but measured486 rates/CPU/tails are not yet available."
+}

@@ -1,0 +1,67 @@
+{
+  "review_status": "PASS",
+  "review_kind": "Independent final source/test read-only validity and coverage review; no reviewer test/build execution or production edits.",
+  "files": {
+    "src/application.rs": {
+      "sha256": "00e59954dbd634a0bd35e50782604bc696e1b6e7b077c278f6a8a7802651b6b7",
+      "bytes": 22362,
+      "mode": "0o644"
+    },
+    "tests/application.rs": {
+      "sha256": "ed4fdb0fb0e7abdb76089ad77dc5eb0139e0236e8aa0986cb6c951ec8b4d1fbd",
+      "bytes": 17785,
+      "mode": "0o644"
+    },
+    "tests/application/capacity_bound.rs": {
+      "sha256": "e381c84b9a5daa32f70f9186fc01d82e8d3c7edf33dc65f44cc91badabbdaf89",
+      "bytes": 10854,
+      "mode": "0o644"
+    },
+    "tests/application/ready_admission.rs": {
+      "sha256": "e5a393a531a04069e5f2eec953a8c6930a1930bbdc2b7a5b0d09b307b34bc053",
+      "bytes": 6721,
+      "mode": "0o644"
+    },
+    "validation/performance/native486-capacity-bound/SCHEMA.md": {
+      "sha256": "3027b186d45b71933083579cf6d88999649562e1616da90d0e9defdbc9f82303",
+      "bytes": 3831,
+      "mode": "0o644"
+    }
+  },
+  "previous_production_review_sha256": "30301da2dfcb21aeafe32dc21b0f18c94b61813dd1c3665621ae5c4a059640f6",
+  "production_unchanged_since_previous_review": true,
+  "schema_precision_corrected": true,
+  "test_count": 6,
+  "exhaustive_oracle": {
+    "reference": "Copied original480 BTreeSet/dedup algorithm; committed ID membership supplied by public apply_batch, not optimized validator or prepared context.",
+    "valid_capacity_committed_states": 47,
+    "pending_sequences_per_state": 781,
+    "candidates": 6,
+    "candidate_byte_lengths": [
+      0,
+      7,
+      8,
+      9
+    ],
+    "total_comparisons": 880968,
+    "checked_outputs": [
+      "Exact Result<receipt_size,ApplicationError> across all cases.",
+      "Exact serialized Counter checkpoint before/after each immutable state traversal; applied_index and remaining_operations match population."
+    ],
+    "state_validity": "Every applied subset contains unique IDs within capacity. Public command construction yields normal valid entries and correct dedup membership. Candidate VALID bytes may conflict with earlier payload; old admission intentionally validates capacity/syntax only, preserving later original operation semantics."
+  },
+  "additional_coverage": {
+    "larger_boundaries": "Capacity17/64/65/1024, committed0/capacity-2/capacity, pendingR-1/R/R+1, novel and duplicated prefixes, committed/pending/new candidate IDs; exact oracle result and checkpoint equality.",
+    "hostile": "Six explicit expected next-count cases cover firstNone<R, exactR thenNone, duplicate-prefix overflow and R0 empty/committed/novel. Overridden size_hint/count/nth/last/collect/fold panic, confirming only next is used; iterator Drop observed.",
+    "syntax_priority": "Malformed candidate on spare and exhausted capacity uses zero next calls despite immediate next panic and panicking size_hint; iterator Drop and checkpoint equality checked.",
+    "nonfused": "Capacity1 tests exactR fallback, capacity2/3 test fastpath; each stops on firstNone with exactly2 polls, subsequentSome remains observable by original iterator owner.",
+    "panic": "Caught next panic before buffer completes, during fallback and atR0; exact calls, iterator drop, unchanged fullcheckpoint and still-valid committed retry checked."
+  },
+  "ownership_and_contract_assessment": "Source preserves existing error/receipt semantics and polling order, owns copied IDs only, no persistent cache/API/ready preparation/provider/default/durability effects. Allocation strategy changes (including slack and near-capacity dual allocations) remain disclosed and are not asserted equal or universally improved.",
+  "limitations": [
+    "Finite exhaustive small-state oracle and boundary tests support this bounded algorithm; not a full consensus/recovery proof. Existing retained480 ready-context differential and service/recovery controls remain separate.",
+    "These tests do not measure allocator residency, one-million-slot allocation peak, sustained useful throughput, CPU/RSS or tail causation. Paired both-host measurements and fullP9 acceptance remain future work.",
+    "Reviewer did not execute tests. Parent reported original75531 successful affected all/core/application/client/provider/service scopes; final strict and archive receipts remain parent-owned."
+  ],
+  "no_blocking_findings": true
+}

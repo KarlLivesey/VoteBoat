@@ -1,0 +1,31 @@
+{
+  "files": {
+    "src/application.rs": {
+      "sha256": "00e59954dbd634a0bd35e50782604bc696e1b6e7b077c278f6a8a7802651b6b7",
+      "bytes": 22362,
+      "mode": "0o644"
+    },
+    "tests/application.rs": {
+      "sha256": "ed4fdb0fb0e7abdb76089ad77dc5eb0139e0236e8aa0986cb6c951ec8b4d1fbd",
+      "bytes": 17785,
+      "mode": "0o644"
+    },
+    "tests/application/capacity_bound.rs": {
+      "sha256": "e381c84b9a5daa32f70f9186fc01d82e8d3c7edf33dc65f44cc91badabbdaf89",
+      "bytes": 10854,
+      "mode": "0o644"
+    },
+    "tests/application/ready_admission.rs": {
+      "sha256": "e5a393a531a04069e5f2eec953a8c6930a1930bbdc2b7a5b0d09b307b34bc053",
+      "bytes": 6721,
+      "mode": "0o644"
+    },
+    "validation/performance/native486-capacity-bound/SCHEMA.md": {
+      "sha256": "3027b186d45b71933083579cf6d88999649562e1616da90d0e9defdbc9f82303",
+      "bytes": 3831,
+      "mode": "0o644"
+    }
+  },
+  "source_review_sha256": "b828817da2a063601c5d98cf589363e6729f35f0544b084dba08de7879161221",
+  "baseline": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e"
+}

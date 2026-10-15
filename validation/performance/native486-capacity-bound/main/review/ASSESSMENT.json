@@ -1,0 +1,7 @@
+{
+  "assessment": "sound with the documented polling/allocation conditions",
+  "kind": "read-only mathematical/source review; no code, tests or benchmark executed",
+  "sha256": "135907580d2acc822403004df8834bd7217b11fc47095db91b5faa4fa3fd7887",
+  "bytes": 4944,
+  "baseline": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e"
+}
