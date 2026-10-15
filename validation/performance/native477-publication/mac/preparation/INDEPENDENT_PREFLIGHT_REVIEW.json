@@ -1,0 +1,53 @@
+{
+  "time_utc": "2026-10-15T11:53:55.309815+00:00",
+  "review_scope": "Read-only independent common477controller/prepare/resource/sourceguard inspection; actualLinux476candidate_record read-only PASS. Not actualMacpreparedconfig/quiet-window permission.",
+  "source_sha256": {
+    "campaign.py": "5f613579c8a4e697b161b9c28a21b8833c5f49173b8887b8b3760fb1cba7d5b6",
+    "common.py": "fb3acabc2adfb0ae7a6babcf0f280002aa73f0f12db2524752d6d2590f0bc58a",
+    "plan.py": "72bcde2b9ec477bbc5425d739b15b08915120c53c7ab79f77be7db01bdee1d8a",
+    "prepare.py": "571fa93997ab48262b8ccafdce8fab57c563a38a80c39ebaa6171a3de7bfa067",
+    "resources.py": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+    "test_plan.py": "704a36c4ad41d9971d5af37b5048a5c1d1d69a8becf3433a9b01350e9e57af83",
+    "test_resources.py": "e873bd7128079994689e8753212895658e31d646513690bfbaa469c3aeb062b5"
+  },
+  "schema_sha256": "89f1dac109d98ec22e628145d221aad1f19ea34ea1f616d3b2fc7f9a52ca8edc",
+  "linux_actual_candidate_guard": "PASS:1492sourcefiles,2artifacts,20proofrefs,3compilertools",
+  "pure_plan": {
+    "cases": 48,
+    "unique_names": 48,
+    "adjacent_pairs": 24,
+    "arm_first": {
+      "atomic": 12,
+      "witness": 12
+    },
+    "offered_total": 297984,
+    "horizon_total_seconds": 1440,
+    "trials": 3,
+    "matrix_matches_schema": true
+  },
+  "corrected_findings": [
+    "Linuxreadinessreceipt actual_exit/source_exact/cases4 fields now used.",
+    "Controller exceptions signal/wait the original owned child before terminal and preserve actualexit/partialcase; ProcessLookup races tolerated.",
+    "Resource helper metadata-write errors afterPopen now terminate/wait originalnative before helperexit; signals forward to ownednative with race handling."
+  ],
+  "reviewed_invariants": [
+    "Oneidenticalfresh476nativebinary/diagnostics/profile/source perhost for both explicitatomic/witness arms; no475binarypairedarm.",
+    "Sourcefile+directory modes, original/copylibrary/exe hashes, Cargo fresh:false root/example/buildscript and nativeopt3debug0assertoverflow/defaultLTOCGU/toolidentities guard.",
+    "Recursive imported JSvalidatorclosure includespublicationprofile/timings/storage/offered; frozen checksums verified before/after timing.",
+    "Sixcapacity readbacks cover allCreate/Recover replicas and all eleven bounds; sixpublication readbacks cover actualprovider plusdiagnostic scope.",
+    "Nooverwrite/restart: freshjob/wal, STARTED/campaign markers and freshcase roots; allfixedchildfailures retained withoutreplacement.",
+    "All48 native workloads terminate before independentreadback/JSvalidation; actualchildcommands/start/end/exits/raw errors preserved.",
+    "LinuxRSS KiB*1024 versusDarwinRSS bytes; wholechildresourcesinclude warmup/drain/recovery, notmeasurement-only/debtproof.",
+    "Nativeofferedtimer remains startbeforemeasure/endaftermeasure, beforepersist/history/followerverify/join/recovery. This is originalnative boundary, distinctfrom frameworkallclientjoin boundary.",
+    "Existing64warmups/120sdrain/2smaintenance/ready16/capacity4096/onegroup/threevoters unchanged; no filesystem/policy changes."
+  ],
+  "blockers_at_review": [],
+  "limitations": [
+    "ActualLinux/MacfrozenCAMPAIGN_CONFIG files notyet created/inspected at this review; verifytheir exact48commands/order/guardrefs beforelaunch.",
+    "ActualMac476qualification/nativeartifact preparation remains separate required evidence; no remotecopy/preflight run bythisreviewer.",
+    "Ownedchild failurecleanup reviewed bysource inspection here; no syntheticcleanup subprocess tests run bythisreviewer.",
+    "Runtime read-onlyhost snapshots/sourceguards and rootexplicitquiet grant stillrequired; no timingpermission granted bythisreceipt.",
+    "Cross-filesystem gains and fullP9 acceptance remain open."
+  ],
+  "linux476_candidate_guard_method": "Directread-only call candidate_record(Path(target/p9/native476-linux).resolve(),linux,7e9068296ce00dde5bf3e03bf4d852ed2833d185,Path(target/p9/native476-publication/publication/RECEIPT.json).resolve()); tooloutput actual_linux476_candidate_guard_PASS1492/2/20/3."
+}

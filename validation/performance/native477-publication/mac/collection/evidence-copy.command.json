@@ -1,0 +1,10 @@
+{
+  "command": [
+    "scp",
+    "-p",
+    "karllivesey@192.168.192.76:/private/tmp/voteboat-native477-kBXQpc/revision2/campaign/COLLECTED.tar.gz",
+    "target/p9/native477-publication/mac-collection/COLLECTED.tar.gz"
+  ],
+  "exit": 0,
+  "elapsed_s": 1.5163163130055182
+}

@@ -1,0 +1,36 @@
+{
+  "actual_raw_recomputation_exit": 0,
+  "all96_cases_and_original_boundaries_checked": true,
+  "totals": {
+    "linux": {
+      "cases": 48,
+      "applied": 249383,
+      "refused": 48601,
+      "late_decisions": 4,
+      "checkpoints": 668,
+      "reclaims": 2004
+    },
+    "mac": {
+      "cases": 48,
+      "applied": 285221,
+      "refused": 12763,
+      "late_decisions": 15,
+      "checkpoints": 672,
+      "reclaims": 2016
+    }
+  },
+  "files": {
+    "independent-review.py": "464ffce3427269267b96d428973abb1f0815c1445f8e052e38f77bb09a973697",
+    "INDEPENDENT_READOUT.json": "8f93b1bea218edca51256db98f20a48e69aa98dc011e7e0bef6800ae4bebb95d",
+    "independent-review.stdout": "e0526f38559df46fc726d413e7d7a35029880f2d2069456a694429d0210759e3",
+    "independent-review.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "independent-cold-review.py": "9c06c4afa1b0947ac5e71504b503bb5f0280bf8998c50ed38f68e04ffe67c095",
+    "INDEPENDENT_COLD_WORK.json": "8a8d6f33eb8dcee5e9f5d55ba246ab73d2ded719f1f0d4ea8f4bcdb8495059d4",
+    "independent-cold-review.stdout": "d9bc510898b9073f0b7639ad6e176185605680fcbb31f488e6d8c378df5392a2",
+    "independent-cold-review.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "NEXT_STAGE_REVIEW.md": "14c576d128f8d4d552f112e4949f0b7854e82d730658793ba168fc6bb4fef6b0"
+  },
+  "no_production_docs_edits_or_workloads": true,
+  "recommendation": "Existing ready16 versus64 witness comparison in materially new4096 backlog/two-sync context; no new provider/algorithm or default claim.",
+  "accepted_next_matrix": "478 ready16/64 witness only; singleton256@8/window1, moderate8192@128/window256, one-groupbulk8192@1024/window4096, groups2weights31,1skew8192@1024/window4096;48cases/host. Disclose hot2048 per-group pending and cold256-offer finite fairness sample."
+}

@@ -1,0 +1,9 @@
+{
+  "time_utc": "2026-10-15T11:59:35.458670+00:00",
+  "candidate_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "proof_commit": "c3aeed5c800fcb47e70a8b0df1cbd5f655d9dfe2",
+  "linux_config_sha256": "e3f634ba07997adb64f32be10dfe5f9ea3ccfa58cafcb00024d5106467705313",
+  "mac_config_sha256": "0aac877ab0ed116da83e9dca522d1f8daeca05bd2cfdb3d3f30b3d752046daef",
+  "authorization": "Launch each original48-case serial campaign once. Both-host setup/copies/checks/archive/publication are terminal; author and independent reviewer STOPPED READY. No same-host builds/checks/copies/archive/profiling/competing benchmarks during timing. Preserve original handles, failures and durable markers; no timeout restart. No bulk transfer or collection until both campaigns actually terminate.",
+  "scope": "Finite native paired diagnostics only; fullP9 and third-filesystem acceptance remain open."
+}

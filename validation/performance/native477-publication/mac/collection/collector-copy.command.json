@@ -1,0 +1,10 @@
+{
+  "command": [
+    "scp",
+    "-p",
+    "target/p9/native477-publication/mac-collection/collect.py",
+    "karllivesey@192.168.192.76:/private/tmp/voteboat-native477-kBXQpc/revision2/campaign/collect477.py"
+  ],
+  "exit": 0,
+  "elapsed_s": 1.6598094450018834
+}

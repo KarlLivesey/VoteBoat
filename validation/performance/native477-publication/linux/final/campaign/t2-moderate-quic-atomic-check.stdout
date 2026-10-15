@@ -1,0 +1,5 @@
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t2-moderate-quic-atomic: 8192 scheduled offers, 7606 admissions, 7606 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=128.000 admitted_during=118.844 applied_during=116.391 applied_drain=292.872 applied_total=117.857 ops/s; window_refused=586 backlog_at_horizon=157
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t2-moderate-quic-atomic: 30 durable checkpoint boundaries, 90 exact-scope reclamation rows, 1 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=8168.648 reclaim_ms=15088.524 reclaimed_bytes=1074016 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=1892 units=1892 commands=22818 mean_units=1.000 append_ms=33.013 barriers=1891 mean_appends_per_barrier=1.001 mean_units_per_barrier=1.000 barrier_ms=93011.206 sync_ms=32313.705 publish_ms=60692.739 histogram=1:1892

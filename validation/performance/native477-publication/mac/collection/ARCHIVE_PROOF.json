@@ -1,0 +1,31 @@
+{
+  "scope": "48 original Mac477 paired case processes, frozen validators and readback checks all actually ended0. Original94749; no retries/replacements. Not fullP9, sustained20M, default promotion or three-filesystem acceptance.",
+  "source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "proof_document_commit": "c3aeed5c800fcb47e70a8b0df1cbd5f655d9dfe2",
+  "native_executable_sha256": "2fd48262a655debafaf7f04496bf34c867dc17b92f1e5890969819333cbcae84",
+  "native_profile": "Same fresh476 native opt3/debug0/assertions+overflow/defaultLTO+codegen executable for both arms.",
+  "common_source_files": 1491,
+  "source_device_cpu_guards_before_after_exact": true,
+  "raw_transfer_members": 1035,
+  "totals": {
+    "offers": 297984,
+    "applied": 285221,
+    "window_refused": 12763,
+    "no_leader": 0,
+    "admission_refused": 0,
+    "not_proposed": 0,
+    "unknown": 0,
+    "pending": 0
+  },
+  "maintenance_status_counts": {
+    "('checkpoint', 'completed')": 672,
+    "('reclaim', 'completed')": 2016
+  },
+  "timer_metric_limit": "No explicit missed-timer count is exposed. All raw logs, dispatch distributions and late decisions are retained; late offer decisions are not timer misses.",
+  "latency_convention": "Nearest rank ceil(n*p/100)-1; intended/service successful originals, dispatch all offered rows.",
+  "counter_scope": "Ordinary provider primitives exclude cold repair, initial selectors and reclamation. Metadata-inclusive command/unit mean is not a proposal-width maximum; codec bytes are not drive I/O; nested wall durations are not additive CPU.",
+  "resource_scope": "Whole child process including warmup/recovery/cleanup; Mac RSS raw bytes. No continuous memory/debt plateau claim.",
+  "host": "M2 Max; macOS/APFS Data volume/container/internal SSD shared by all three voters; stable1.98.0/LLVM22.1.8/protoc3.21.12. Linux1.98.1 is a separate within-host comparison.",
+  "transfer_scope": "Post-terminal text/CSV/JSON only; no binaries, source/buildtrees or generated WAL transferred. Original stores remain on Mac.",
+  "preparation_scope": "Superseded successful configurations and deliberate negative helper/guard probes retained. Initial Linux sandbox discovery failure is included as shared setup context, not a Mac benchmark failure."
+}

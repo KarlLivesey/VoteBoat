@@ -1,0 +1,31 @@
+{
+  "source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "linux_job": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3",
+  "linux_config_sha256": "e3f634ba07997adb64f32be10dfe5f9ea3ccfa58cafcb00024d5106467705313",
+  "linux_READY_sha256": "b702b78f30ee81e4e1e467aaa7a184b2efa6c11f30c5077321b1644d62052a3f",
+  "mac_job": "/private/tmp/voteboat-native477-kBXQpc/revision2/campaign",
+  "mac_config_sha256": "0aac877ab0ed116da83e9dca522d1f8daeca05bd2cfdb3d3f30b3d752046daef",
+  "mac_READY_sha256": "46cafc7917caaf795d1bb99dd6c6ba9e62da01a6b68178410c9f817f9f6ee7fa",
+  "same48_case_order": true,
+  "same5_runner_scripts_sha256": {
+    "common.py": "de44c9a3af76b4d04d69193ec0e60d3a93c54c06f81932f9dfe23f34cf35e3a8",
+    "plan.py": "72bcde2b9ec477bbc5425d739b15b08915120c53c7ab79f77be7db01bdee1d8a",
+    "prepare.py": "5b340c3274e6f674123e596f0ec56887df8da72b4010dbb9901a3034e4a3b556",
+    "campaign.py": "5f613579c8a4e697b161b9c28a21b8833c5f49173b8887b8b3760fb1cba7d5b6",
+    "resources.py": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0"
+  },
+  "same_validator_closure_sha256": {
+    "check-benchmark-storage.mjs": "f46a15656e91d9c6d32f3f268dde74a2a2e7425f9d5027da4c7cc0a8a69d9856",
+    "check-offered.mjs": "13f0c1f45df5bbc20802e21883bf7157ef0272210df1269f0e8fddb739d90015",
+    "check-publication-timings.mjs": "9d69d025335612afbef911377d2e15654e2186c1e0cb36884fa5fa8ee6b9d5a1",
+    "check-maintenance.mjs": "99fd718641c95a0412ef2e98e33b23da717470613bdc496d6313c8b58d0ce658",
+    "check-rounded-rate.mjs": "262f06cfb0e878bfa7ce02741f51d7cd6e7e8df6b07b8973df4a7d89502c662d",
+    "check-lanes.mjs": "cb49a5d3cee377cf3154d9a9f092ea90e9af64b87ba98272cae50765c51dc920",
+    "check-native-benchmark.mjs": "8c3f8a31270aa52ff4cdadd75479185dbfe33c0f2adecef0739dc43b008e54d7",
+    "check-publication-profile.mjs": "425f3f905db3e368260095bc8eb78d92aa9753b9d9cf3995a78040a5b7a72b41"
+  },
+  "mac_candidate_sha256": "2fd48262a655debafaf7f04496bf34c867dc17b92f1e5890969819333cbcae84",
+  "linux_candidate_sha256": "0bf40f6b4547c446f9db2a86a4bffe6d9ab223640d470154ec266a0d7cc2d064",
+  "source_and_profile_same_within_host": true,
+  "scope": "Setup-only frozen config/transfer review. No timing was launched; source candidate commit remains476 despite later proof/docs commit."
+}

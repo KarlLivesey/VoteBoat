@@ -1,0 +1,38 @@
+{
+  "source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "proof_docs_commit": "c3aeed5c800fcb47e70a8b0df1cbd5f655d9dfe2",
+  "files": {
+    "PUBLICATION_AUTHORITY.json": {
+      "sha256": "40d2b93945e1d3cb15bf1c8a0c282aad490dc8a344af1900f3bb3fd6cd9ee31d",
+      "mode": "0o644"
+    },
+    "SCHEMA.md": {
+      "sha256": "89f1dac109d98ec22e628145d221aad1f19ea34ea1f616d3b2fc7f9a52ca8edc",
+      "mode": "0o644"
+    },
+    "common/campaign.py": {
+      "sha256": "5f613579c8a4e697b161b9c28a21b8833c5f49173b8887b8b3760fb1cba7d5b6",
+      "mode": "0o644"
+    },
+    "common/common.py": {
+      "sha256": "fb3acabc2adfb0ae7a6babcf0f280002aa73f0f12db2524752d6d2590f0bc58a",
+      "mode": "0o644"
+    },
+    "common/plan.py": {
+      "sha256": "72bcde2b9ec477bbc5425d739b15b08915120c53c7ab79f77be7db01bdee1d8a",
+      "mode": "0o644"
+    },
+    "common/prepare.py": {
+      "sha256": "571fa93997ab48262b8ccafdce8fab57c563a38a80c39ebaa6171a3de7bfa067",
+      "mode": "0o644"
+    },
+    "common/resources.py": {
+      "sha256": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+      "mode": "0o644"
+    }
+  },
+  "directories": {
+    "common": "0o755"
+  },
+  "scope": "Seven small runner/schema/authority text files only; no source/build/binary/generated WAL transfer."
+}

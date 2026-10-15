@@ -1,0 +1,8 @@
+{'host': 'mac', 'case': 't1-moderate-quic-atomic', 'union_ms': 5820.109959, 'checkpoint_max_ms': 136.118917, 'reclaim_max_ms': 682.498959, 'completed': 124}
+{'host': 'mac', 'case': 't1-moderate-quic-witness', 'union_ms': 5892.862666, 'checkpoint_max_ms': 350.201375, 'reclaim_max_ms': 281.36125, 'completed': 124}
+{'host': 'mac', 'case': 't3-moderate-quic-atomic', 'union_ms': 5223.334459, 'checkpoint_max_ms': 134.4265, 'reclaim_max_ms': 85.455667, 'completed': 124}
+{'host': 'mac', 'case': 't3-moderate-quic-witness', 'union_ms': 6330.580001, 'checkpoint_max_ms': 602.558875, 'reclaim_max_ms': 281.592375, 'completed': 124}
+linux tcp {'union_ms': 3229.847268, 'checkpoint_max_ms': 428.574286, 'reclaim_max_ms': 352.143198}
+linux quic {'union_ms': 1894.881965, 'checkpoint_max_ms': 222.150453, 'reclaim_max_ms': 238.011148}
+mac tcp {'union_ms': 1331.558042, 'checkpoint_max_ms': 333.05175, 'reclaim_max_ms': 88.902166}
+mac quic {'union_ms': 1075.058834, 'checkpoint_max_ms': 86.690833, 'reclaim_max_ms': 84.255}

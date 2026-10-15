@@ -1,0 +1,16 @@
+{
+  "time_utc": "2026-10-15T12:34:08.834091+00:00",
+  "linux": {
+    "original_handle": 58029,
+    "actual_terminal_exit": 0,
+    "cases": 48,
+    "frozen_validators_passed": true
+  },
+  "mac": {
+    "original_handle": 94749,
+    "actual_terminal_exit": 0,
+    "cases": 48,
+    "frozen_validators_passed": true
+  },
+  "authorization": "Both original campaigns actually terminated. Collection, independent raw recomputation and lossless archiving may begin. No native gain, full P9 or three-filesystem acceptance follows from process success alone."
+}

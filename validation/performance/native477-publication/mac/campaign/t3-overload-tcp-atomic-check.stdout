@@ -1,0 +1,5 @@
+/private/tmp/voteboat-native477-kBXQpc/revision2/wal/t3-overload-tcp-atomic: 8192 scheduled offers, 6801 admissions, 6801 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=1024.000 admitted_during=850.125 applied_during=338.125 applied_drain=299.439 applied_total=313.715 ops/s; window_refused=1391 backlog_at_horizon=4096
+/private/tmp/voteboat-native477-kBXQpc/revision2/wal/t3-overload-tcp-atomic: 3 durable checkpoint boundaries, 9 exact-scope reclamation rows, 0 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=268.221 reclaim_ms=649.858 reclaimed_bytes=209202 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=1206 units=1206 commands=20403 mean_units=1.000 append_ms=1180.154 barriers=1205 mean_appends_per_barrier=1.001 mean_units_per_barrier=1.000 barrier_ms=34399.414 sync_ms=9609.648 publish_ms=24794.051 histogram=1:1206

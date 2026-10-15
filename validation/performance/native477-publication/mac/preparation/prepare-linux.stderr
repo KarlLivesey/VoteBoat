@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/common/prepare.py", line 60, in <module>
+    snapshot = host_snapshot(args.host,wal); save(job/'setup-host.json',snapshot)
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/common/common.py", line 144, in host_snapshot
+    physical = command(['lsblk','--json','--bytes','--inverse','--paths','-o','NAME,TYPE,FSTYPE,UUID,MODEL,SERIAL,TRAN',device]); commands.append(physical)
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/common/common.py", line 134, in command
+    assert run.returncode == 0, result
+           ^^^^^^^^^^^^^^^^^^^
+AssertionError: {'command': ['lsblk', '--json', '--bytes', '--inverse', '--paths', '-o', 'NAME,TYPE,FSTYPE,UUID,MODEL,SERIAL,TRAN', '/dev/nvme1n1p2'], 'exit': 32, 'stdout': '{\n   "blockdevices": [\n\n   ]\n}\n', 'stderr': 'lsblk: /dev/nvme1n1p2: No such file or directory\n'}

@@ -1,0 +1,44 @@
+{
+  "time_utc": "2026-10-15T11:59:25.935594+00:00",
+  "status": "PASS finalLinux3/Mac2 actualconfigbindingreview",
+  "linux_config_sha256": "e3f634ba07997adb64f32be10dfe5f9ea3ccfa58cafcb00024d5106467705313",
+  "mac_config_sha256": "0aac877ab0ed116da83e9dca522d1f8daeca05bd2cfdb3d3f30b3d752046daef",
+  "mac_ready_sha256": "46cafc7917caaf795d1bb99dd6c6ba9e62da01a6b68178410c9f817f9f6ee7fa",
+  "candidate_source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "published_evidence_schema_commit": "c3aeed5c800fcb47e70a8b0df1cbd5f655d9dfe2",
+  "identical48case_order_semantics": true,
+  "same5frozen_scripts_and8validator_closure_hashes": true,
+  "shared1491sourcefiles_identical": true,
+  "linux_only_supplemental_source": "validation/performance/native476-publication/SCHEMA.md",
+  "explicit_atomic_witness_same_host_binary": true,
+  "mac_binary_sha256": "2fd48262a655debafaf7f04496bf34c867dc17b92f1e5890969819333cbcae84",
+  "mac_remote_job": "/private/tmp/voteboat-native477-kBXQpc/revision2/campaign",
+  "mac_device_identity": {
+    "st_dev": 16777231,
+    "device": "/dev/disk3s1",
+    "volume": {
+      "DeviceIdentifier": "disk3s1",
+      "VolumeUUID": "9E7B008F-06D2-4473-A147-7FE27468C88A",
+      "DiskUUID": "9E7B008F-06D2-4473-A147-7FE27468C88A",
+      "MountPoint": "/System/Volumes/Data",
+      "FilesystemType": "apfs",
+      "APFSContainerReference": "disk3"
+    },
+    "physical_stores": [
+      {
+        "DeviceIdentifier": "disk0s2",
+        "DiskUUID": "2EECCAB9-EF76-4A6A-BE9F-1A7603B8F536",
+        "ParentWholeDisk": "disk0",
+        "MediaName": "",
+        "Internal": true,
+        "SolidState": true,
+        "DeviceTreePath": "IODeviceTree:/arm-io/ans@47400000/iop-ans-nub/AppleANS3CGv2Controller",
+        "Protocol": null,
+        "TotalSize": 1995218165760
+      }
+    ]
+  },
+  "runtime_argv_canonical_native_bindings": true,
+  "review_assertion_corrections": "Initial literalcrosshost inventoryequality assertcorrectedforoneLinux-only supplemental476schema; all1491common bytesidentical. No actualconfig/source change or workload.",
+  "scope": "Finalread-onlyactualcollectedconfigreview. No workloads/builds/remotecopies/newguard layers. RootseparatequietGO remainsrequired."
+}

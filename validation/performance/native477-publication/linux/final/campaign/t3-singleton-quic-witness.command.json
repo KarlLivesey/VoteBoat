@@ -1,0 +1,21 @@
+[
+  "/usr/bin/python3.14",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3/resources.py",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3/campaign-metadata/t3-singleton-quic-witness",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t3-singleton-quic-witness",
+  "quic",
+  "256",
+  "1",
+  "1",
+  "--offered",
+  "8",
+  "--maintenance",
+  "2",
+  "--ready-items",
+  "16",
+  "--offered-capacity",
+  "4096",
+  "--publication",
+  "witness"
+]

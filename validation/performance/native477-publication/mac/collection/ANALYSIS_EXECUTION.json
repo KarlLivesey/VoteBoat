@@ -1,0 +1,28 @@
+{
+  "command": [
+    "python3",
+    "target/p9/native477-publication/mac-collection/analyse.py"
+  ],
+  "actual_exit": 0,
+  "original_tool_result_chunk": "aab2ef",
+  "source_sha256": "00d6bc3416aaa1d6e90018377a08ac97b711891881acac2af5b5f5c6cb142da1",
+  "stdout_summary": {
+    "totals": {
+      "offers": 297984,
+      "applied": 285221,
+      "window_refused": 12763,
+      "no_leader": 0,
+      "admission_refused": 0,
+      "not_proposed": 0,
+      "unknown": 0,
+      "pending": 0
+    },
+    "cells": 8,
+    "maintenance": {
+      "('checkpoint', 'completed')": 672,
+      "('reclaim', 'completed')": 2016
+    },
+    "all48_raw_recomputations": "PASS"
+  },
+  "scope": "Actual original analysis invocation, no benchmark rerun; derived analysis only."
+}

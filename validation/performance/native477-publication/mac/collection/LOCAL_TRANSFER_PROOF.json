@@ -1,0 +1,46 @@
+{
+  "steps": [
+    {
+      "command": [
+        "scp",
+        "-p",
+        "target/p9/native477-publication/mac-collection/collect.py",
+        "karllivesey@192.168.192.76:/private/tmp/voteboat-native477-kBXQpc/revision2/campaign/collect477.py"
+      ],
+      "exit": 0,
+      "elapsed_s": 1.6598094450018834
+    },
+    {
+      "command": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "karllivesey@192.168.192.76",
+        "/Applications/Xcode-beta.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9",
+        "/private/tmp/voteboat-native477-kBXQpc/revision2/campaign/collect477.py",
+        "/private/tmp/voteboat-native477-kBXQpc/revision2/campaign"
+      ],
+      "exit": 0,
+      "elapsed_s": 3.3530095199821517
+    },
+    {
+      "command": [
+        "scp",
+        "-p",
+        "karllivesey@192.168.192.76:/private/tmp/voteboat-native477-kBXQpc/revision2/campaign/COLLECTED.tar.gz",
+        "target/p9/native477-publication/mac-collection/COLLECTED.tar.gz"
+      ],
+      "exit": 0,
+      "elapsed_s": 1.5163163130055182
+    }
+  ],
+  "remote_export": {
+    "files": 1035,
+    "original_bytes": 22101745,
+    "archive_sha256": "9cf2f0d7d883061ea9009f03c2f87f0e2cddd45f66d957fed8f5741a42610aeb",
+    "archive_bytes": 6818234,
+    "manifest_sha256": "a731f38f7c78878337adb4f7f52af1635dff12035be8dfe3c0ac8a74426fe142"
+  },
+  "exact_member_set_sha256_lengths_modes": true,
+  "scope": "Post-terminal source-free/binary-free/buildtree-free/WAL-free plain evidence collection. No workload rerun."
+}

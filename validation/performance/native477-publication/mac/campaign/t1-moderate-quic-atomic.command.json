@@ -1,0 +1,21 @@
+[
+  "/Applications/Xcode-beta.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9",
+  "/private/tmp/voteboat-native477-kBXQpc/revision2/campaign/resources.py",
+  "/private/tmp/voteboat-native477-kBXQpc/revision2/campaign/campaign-metadata/t1-moderate-quic-atomic",
+  "/private/tmp/voteboat-mac476-7e90682-kN01PT/artifacts/native/native_benchmark",
+  "/private/tmp/voteboat-native477-kBXQpc/revision2/wal/t1-moderate-quic-atomic",
+  "quic",
+  "8192",
+  "256",
+  "1",
+  "--offered",
+  "128",
+  "--maintenance",
+  "2",
+  "--ready-items",
+  "16",
+  "--offered-capacity",
+  "4096",
+  "--publication",
+  "atomic"
+]

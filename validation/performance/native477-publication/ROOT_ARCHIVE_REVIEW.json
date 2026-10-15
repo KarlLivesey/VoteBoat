@@ -1,0 +1,20 @@
+{
+  "archives": [
+    {
+      "host": "linux",
+      "payloads": 1144,
+      "gzip": 46,
+      "manifest_sha256": "e7d8f14260e74013db3fde2662ed3e27be4a5e5c2306a621c9a9138cc8480443",
+      "exact_set_hashes_lossless_originals": true
+    },
+    {
+      "host": "mac",
+      "payloads": 1163,
+      "gzip": 48,
+      "manifest_sha256": "6ad94b1400d7002cf78b6e79869a73bdc983428e905987b8a06b801fba924727",
+      "exact_set_hashes_lossless_originals": true
+    }
+  ],
+  "all96_root_raw_rate_and_quantile_recomputation": "ROOT_DATA_REVIEW.json",
+  "performance_scope": "Finite native offered diagnostics; default unchanged, real ext4/XFS and full P9 remain open."
+}

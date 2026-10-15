@@ -1,0 +1,281 @@
+{
+  "root_raw_recomputation_cases": 96,
+  "all_unique_offer_conservation_recovery_and_rate_quantiles_match_independent_review": true,
+  "independent_input_hashes_bytes_verified": 388,
+  "independent_readout_sha256": "8f93b1bea218edca51256db98f20a48e69aa98dc011e7e0bef6800ae4bebb95d",
+  "cells": [
+    {
+      "host": "linux",
+      "cell": "singleton",
+      "protocol": "tcp",
+      "arms": {
+        "atomic": {
+          "completed_originals_s": 5.093748393240741,
+          "p99_ms": 692.155618,
+          "refused": 93
+        },
+        "witness": {
+          "completed_originals_s": 5.968742964157708,
+          "p99_ms": 586.735114,
+          "refused": 65
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "cell": "singleton",
+      "protocol": "quic",
+      "arms": {
+        "atomic": {
+          "completed_originals_s": 4.817618302884964,
+          "p99_ms": 803.990331,
+          "refused": 100
+        },
+        "witness": {
+          "completed_originals_s": 6.062490003522343,
+          "p99_ms": 535.24585,
+          "refused": 62
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "cell": "moderate",
+      "protocol": "tcp",
+      "arms": {
+        "atomic": {
+          "completed_originals_s": 114.24295935813267,
+          "p99_ms": 5323.051569,
+          "refused": 746
+        },
+        "witness": {
+          "completed_originals_s": 121.54566604535763,
+          "p99_ms": 4647.846172,
+          "refused": 399
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "cell": "moderate",
+      "protocol": "quic",
+      "arms": {
+        "atomic": {
+          "completed_originals_s": 120.45176498187134,
+          "p99_ms": 5329.52154,
+          "refused": 468
+        },
+        "witness": {
+          "completed_originals_s": 123.07542064127881,
+          "p99_ms": 4181.977499,
+          "refused": 308
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "cell": "bulk",
+      "protocol": "tcp",
+      "arms": {
+        "atomic": {
+          "completed_originals_s": 198.0324658627493,
+          "p99_ms": 19704.452767,
+          "refused": 1260
+        },
+        "witness": {
+          "completed_originals_s": 266.4367801366119,
+          "p99_ms": 12856.660844,
+          "refused": 688
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "cell": "bulk",
+      "protocol": "quic",
+      "arms": {
+        "atomic": {
+          "completed_originals_s": 163.5383840974834,
+          "p99_ms": 23693.972746,
+          "refused": 2170
+        },
+        "witness": {
+          "completed_originals_s": 303.16099275174184,
+          "p99_ms": 10756.220849,
+          "refused": 0
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "cell": "overload",
+      "protocol": "tcp",
+      "arms": {
+        "atomic": {
+          "completed_originals_s": 221.16657792079133,
+          "p99_ms": 18947.477894,
+          "refused": 2582
+        },
+        "witness": {
+          "completed_originals_s": 242.4244212059124,
+          "p99_ms": 16276.292884,
+          "refused": 2037
+        }
+      }
+    },
+    {
+      "host": "linux",
+      "cell": "overload",
+      "protocol": "quic",
+      "arms": {
+        "atomic": {
+          "completed_originals_s": 191.98488581417902,
+          "p99_ms": 22172.507083,
+          "refused": 2668
+        },
+        "witness": {
+          "completed_originals_s": 279.2254804062562,
+          "p99_ms": 14347.258298,
+          "refused": 2125
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "cell": "singleton",
+      "protocol": "tcp",
+      "arms": {
+        "atomic": {
+          "completed_originals_s": 7.249986878429999,
+          "p99_ms": 217.859666,
+          "refused": 24
+        },
+        "witness": {
+          "completed_originals_s": 7.406216353790549,
+          "p99_ms": 159.951959,
+          "refused": 19
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "cell": "singleton",
+      "protocol": "quic",
+      "arms": {
+        "atomic": {
+          "completed_originals_s": 7.406233885655179,
+          "p99_ms": 188.003833,
+          "refused": 19
+        },
+        "witness": {
+          "completed_originals_s": 7.406245756915517,
+          "p99_ms": 162.844583,
+          "refused": 19
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "cell": "moderate",
+      "protocol": "tcp",
+      "arms": {
+        "atomic": {
+          "completed_originals_s": 124.96845949057325,
+          "p99_ms": 3153.84375,
+          "refused": 178
+        },
+        "witness": {
+          "completed_originals_s": 127.85601356987289,
+          "p99_ms": 766.031917,
+          "refused": 0
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "cell": "moderate",
+      "protocol": "quic",
+      "arms": {
+        "atomic": {
+          "completed_originals_s": 127.70954799594865,
+          "p99_ms": 897.704708,
+          "refused": 0
+        },
+        "witness": {
+          "completed_originals_s": 127.78458478576623,
+          "p99_ms": 1891.830542,
+          "refused": 3
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "cell": "bulk",
+      "protocol": "tcp",
+      "arms": {
+        "atomic": {
+          "completed_originals_s": 357.26300212239386,
+          "p99_ms": 6927.864917,
+          "refused": 0
+        },
+        "witness": {
+          "completed_originals_s": 481.31731356700783,
+          "p99_ms": 1275.512292,
+          "refused": 0
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "cell": "bulk",
+      "protocol": "quic",
+      "arms": {
+        "atomic": {
+          "completed_originals_s": 353.5207570535674,
+          "p99_ms": 7178.674041,
+          "refused": 0
+        },
+        "witness": {
+          "completed_originals_s": 470.4026681430438,
+          "p99_ms": 1472.977208,
+          "refused": 0
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "cell": "overload",
+      "protocol": "tcp",
+      "arms": {
+        "atomic": {
+          "completed_originals_s": 313.7151195828724,
+          "p99_ms": 12582.852416,
+          "refused": 1629
+        },
+        "witness": {
+          "completed_originals_s": 488.097336752868,
+          "p99_ms": 7914.134271,
+          "refused": 479
+        }
+      }
+    },
+    {
+      "host": "mac",
+      "cell": "overload",
+      "protocol": "quic",
+      "arms": {
+        "atomic": {
+          "completed_originals_s": 375.7342922674332,
+          "p99_ms": 10682.126521,
+          "refused": 1238
+        },
+        "witness": {
+          "completed_originals_s": 490.95707340458443,
+          "p99_ms": 7952.974792,
+          "refused": 347
+        }
+      }
+    }
+  ],
+  "scope": "Post-terminal root raw recomputation plus independent provenance audit. No benchmark rerun or source change; no fullP9 or three-filesystem acceptance."
+}

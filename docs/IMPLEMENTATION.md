@@ -3,21 +3,17 @@
 ## Active P9 plan — 15 October 2026
 
 The default remains the retained469/455 implementation restored in473;
-475 adds the capacity fixture.470/472 are rejected experiments.
-Both475 offered-load sweeps are complete:54 workloads and54 validators pass on
-Btrfs and APFS. Larger queues improve batching but expose severe overload tails;
-manifest publication remains the largest measured elapsed stage. The current476
-candidate introduces a separate opt-in two-sync WitnessLogIo behind JournalIo,
-with independent fixed acknowledged-boundary witnesses.476 is published as
-`7e906829` through the full enabled hook. Linux's fresh published-source native
-artifact and four selected release/recovery controls pass; published-source Mac
-qualification and fresh artifact/recovery controls also pass.
-[477's before-measurement schema](../validation/performance/native477-publication/SCHEMA.md)
-uses the same476 binary for both explicit provider arms, with matched diagnostics
-and rotated offered-load pairs. FileLogIo remains the default; no gain is claimed.
-The user's real ext4/XFS scratch volume remains pending. The linked current-plus-
-next-two plan below governs work. Historical entries retain their original state
-and are superseded by later rejection/restoration/results. Full P9 is incomplete.
+470/472 are rejected experiments.476's opt-in two-sync WitnessLogIo is published
+and qualified on both hosts.477's paired Btrfs/APFS measurements are complete:
+all96 original cases and validators pass, with useful bulk gains and explicit
+singleton/moderate regressions. Native barriers remain the largest elapsed stage.
+[478's before-measurement schema](../validation/performance/native478-ready/SCHEMA.md)
+compares existing ready16/64 using the same476 binaries, with singleton/moderate
+and hot/cold guards. FileLogIo and ready16 stay defaults. The user's real ext4/XFS
+scratch and all-three-filesystem native acceptance remain pending; available-host
+results do not close that acceptance. Full P9 remains incomplete. The linked
+current-plus-next-two plan below governs work; historical entries retain their
+original scope and are superseded by later rejection/restoration/results.
 
 ### Earlier experiment and qualification record
 
@@ -877,9 +873,9 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current477: measure paired native publication and headroom | Establish useful completed-rate/tail/barrier improvements rather than fewer source calls | Published checked476; completed fresh Linux/Mac native artifacts and release controls; [before-measurement schema](../validation/performance/native477-publication/SCHEMA.md), common explicit diagnostics/admission | Rotated same-volume/device baseline/candidate measurements on Btrfs/APFS plus user's ext4/XFS when supplied; exact outcomes/recovery/refusals, latency/drain, physical work and cold maintenance; no universal acceptance before all three pass | P9.0/P9.1/P9.2/P9.3 |
-| Next478: reduce the remaining measured limiting stage | Continue the profile/measure/design/change/compare loop using actual retained costs | Complete477 raw readout including regressions; existing rejected-experiment ledger; source-grounded ownership/order/restart schema before a new change | A bounded usable algorithm, batching or ordering change only when the data supports it; relevant correctness/crash/fairness controls and zero-diagnostic enabled hook, then fresh paired artifacts and actual completed-rate/tail comparison; no repeated rejected family without new evidence | P9.0/P9.1/P9.2/P9.3 |
-| Next479: sustained curve and composed service qualification | Complete remaining full P9 acceptance without narrowing the objective | Retained measured improvements, both-host qualified artifacts/workloads and supplied third filesystem for native acceptance | All seven one-group cells with healthy sustained margin, bounded memory/debt, durable headroom/fairness/skew, placement/shared physical barriers and P8 relays/striped/recursive/logical voters; preserve every original outcome/failure and do not start P10 | P9.0/P9.1/P9.2/P9.3/P9.4 |
+| Current478: amortize remaining native barriers | Reduce measured barrier frequency using existing bounded ready batches | Complete477 raw readout/regressions; fresh476 artifacts and unchanged source controls; [before-measurement schema](../validation/performance/native478-ready/SCHEMA.md) | Rotated Witness ready16/64 pairs on singleton/moderate/one-group load/two-group skew; actual outcomes/recovery/refusals, cold latency and shared physical work; retain all regressions and default16 | P9.0/P9.1/P9.2/P9.3 |
+| Next479: reduce the remaining measured limiting stage | Continue the profile/measure/design/change/compare loop after actual batching results | Complete478 raw readout, rejected-experiment ledger and source-grounded ownership/order/restart schema | A bounded usable algorithm/batching/ordering change only when supported by data; relevant correctness/crash/fairness controls, zero-diagnostic enabled hook and fresh paired evidence; no rejected-family replay without new context | P9.0/P9.1/P9.2/P9.3 |
+| Next480: sustained curve and composed service qualification | Complete full P9 acceptance without narrowing the objective | Retained measured improvements, both-host qualified artifacts/workloads and supplied third filesystem for native acceptance | All seven one-group cells with healthy sustained margin, bounded memory/debt, durable headroom/fairness/skew, placement/shared physical barriers and P8 relays/striped/recursive/logical voters; preserve all outcomes/failures and exclude P10 | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
 comparison or short diagnostics. All seven one-group healthy-margin cells on
@@ -35188,3 +35184,53 @@ The mini plan advances to477's same-binary explicit atomic/witness comparison,
 then the remaining measured limiting stage and full sustained/composed scope.
 The macro plan is reviewed and unchanged: these checks qualify portable opt-in
 functionality, not a throughput gain, three-filesystem acceptance or a P9 milestone.
+
+
+[477 Linux](../validation/performance/native477-publication/linux/README.md)
+original58029 and [Mac](../validation/performance/native477-publication/mac/README.md)
+original94749 actually terminate0. All96 processes,96 validators and96 actual
+six-capacity/six-provider readback checks pass, with no case replacement. Root
+quiet windows exclude builds/checks/copies/archive/profiling; collection starts
+only after both terminal results. Source476/compiled artifacts remain unchanged.
+Linux297984offers=249383applied+48601windowrefused; Mac297984=285221+12763;
+other refusals/unknown/pending0. Every case recovers64+applied and verifies retries
+and worker joins. Maintenance remains active: Linux668checkpoints/2004reclaims/
+4skips; Mac672/2016. No storage/primitive error observations.
+
+Bulk512offered/s/window4096 completed medians atomic→witness: LinuxTCP
+198.032→266.437/s, p9919704.453→12856.661ms; LinuxQUIC163.538→303.161/s,
+p9923693.973→10756.221ms. MacTCP357.263→481.317/s, p996927.865→1275.512ms;
+MacQUIC353.521→470.403/s, p997178.674→1472.977ms. All12 paired bulk rates and
+p99 improve. Leader mean barrier/publication TCP andQUIC: Linux41.605/27.395→
+28.152/14.026ms and48.612/32.496→24.963/12.286; Mac22.174/16.310→14.007/7.243
+and22.379/16.543→14.292/7.470. Nested elapsed is not CPU or additive across
+replicas; encoded codec bytes are not drive I/O. Command/unit means fall, so this
+is reduced publication work, not a demonstrated increase in proposal width.
+
+Regressions remain decisive limits: Mac moderateQUIC p99 median897.705→1891.831ms,
+paired2.197/.790/2.151, witness window refusals43/0/3 versus atomic0/0/0.
+Linux singletonTCPt2 andQUICt1 p99 worsen2.8%/8.7%, moderateTCPt3 worsens2.8%.
+Linux overloadTCPt2 during-rate falls207.375→104.000/s and refusals rise2437→3267,
+while drain-inclusive total rises222.808→231.908/s. A better total rate does not
+establish headroom. Bulk witness queues remain: LinuxTCP hits4096; LinuxQUIC
+3813–3892 at horizon; Mac roughly539–745 despite zero bulk refusals. Full trial,
+service/dispatch/maxima/refusal/cold-work/resource regressions stay in the archive.
+No internal missed-timer counter exists; recorded late offer decisions/dispatch
+lateness are not relabeled as timer misses.
+
+Root recomputes all96 raw rates/nearest-rank quantiles and verifies independent
+input hashes. Exact archives verify1144payloads/46lossless originals Linux and
+1163/48 Mac. Histograms count append units per call, not proposal command widths;
+all one-group leader bins are1. Barrier elapsed still occupies roughly83–91% of
+witness bulk/overload time; whole-process CPU is about0.2–0.35 core over a different
+boundary. The next small test changes existing ready16→64 in the new4096-backlog/
+two-sync context, preserving singleton/moderate guards and adding finite two-group
+31:1 hot/cold diagnostics. Earlier small-window quantum results cannot answer this
+load. No new gathering timer, fusion/pipeline revival, observer or rebuild.
+
+The macro plan is reviewed and unchanged.477 completes available-host diagnostics,
+not native all-three-filesystem acceptance. FileLogIo and ready16 stay defaults;
+real ext4/XFS remains pending the user. Full healthy-margin framework curve,
+sustained memory/debt, fairness/skew, independent placement/shared barriers and P8
+composition remain open.8,422,500 originals/s is a framework minimum, not a ceiling
+or a score for these disk-backed Counter histories.

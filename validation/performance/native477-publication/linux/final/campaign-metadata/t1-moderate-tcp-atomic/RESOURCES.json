@@ -1,0 +1,18 @@
+{
+  "pid": 3871012,
+  "exit": 0,
+  "helper_exit": 0,
+  "helper_error": null,
+  "elapsed_seconds": 67.92506561000482,
+  "user_seconds": 5.770214,
+  "system_seconds": 2.507548,
+  "max_rss_raw": 17916,
+  "max_rss_unit": "KiB",
+  "max_rss_bytes": 18345984,
+  "voluntary_context_switches": 451887,
+  "involuntary_context_switches": 16693,
+  "block_inputs": 0,
+  "block_outputs": 744368,
+  "received_signals": [],
+  "scope": "Whole child process including warmup, horizon, drain, maintenance, recovery and cleanup; not measurement-only or continuous RSS/debt. Block I/O counts are not bytes."
+}

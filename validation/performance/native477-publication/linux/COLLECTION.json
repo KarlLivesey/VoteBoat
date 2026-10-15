@@ -1,0 +1,57 @@
+{
+  "collection_utc": "2026-10-15T12:38:02.654588+00:00",
+  "original_handle": 58029,
+  "actual_terminal_exit": 0,
+  "processes": 48,
+  "validators": 48,
+  "readback_checks": 48,
+  "source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "config_sha256": "e3f634ba07997adb64f32be10dfe5f9ea3ccfa58cafcb00024d5106467705313",
+  "actual_offers": 297984,
+  "actual_applied": 249383,
+  "actual_window_refused": 48601,
+  "all_other_outcomes_zero": true,
+  "independent_raw_sha_modes_exact": true,
+  "all_actual_exit_ledger": "0",
+  "no_workload_repeated": true,
+  "earlier_preparation_versions": [
+    "linux(sandboxdeviceinvisible exit32)",
+    "linux2(pre-aliasfreeze, no timing)",
+    "linux3(final original58029)"
+  ],
+  "physical_device": {
+    "st_dev": 55,
+    "mount": {
+      "target": "/home",
+      "source": "/dev/nvme1n1p2[/@home]",
+      "fstype": "btrfs",
+      "options": "rw,noatime,compress=zstd:1,ssd,discard=async,space_cache=v2,subvolid=257,subvol=/@home",
+      "uuid": "5fd67d14-d948-4cdc-93a9-30d6b676d3dd"
+    },
+    "physical_chain": {
+      "blockdevices": [
+        {
+          "name": "/dev/nvme1n1p2",
+          "type": "part",
+          "fstype": "btrfs",
+          "uuid": "5fd67d14-d948-4cdc-93a9-30d6b676d3dd",
+          "model": null,
+          "serial": null,
+          "tran": "nvme",
+          "children": [
+            {
+              "name": "/dev/nvme1n1",
+              "type": "disk",
+              "fstype": null,
+              "uuid": null,
+              "model": "Sabrent SB-ROCKET-NVMe4-2TB",
+              "serial": "48790459603318",
+              "tran": "nvme"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "scope": "Raw-only collection after both original host campaigns terminated and root authorized collection. No source/build tree, binaries, generated WAL or repeated test/workload. Native476 artifact proofs retained by SHA; cross-filesystem/fullP9 acceptance open."
+}

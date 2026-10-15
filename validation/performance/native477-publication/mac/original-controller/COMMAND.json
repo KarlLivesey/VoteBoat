@@ -1,0 +1,13 @@
+{
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "karllivesey@192.168.192.76",
+    "/Applications/Xcode-beta.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9",
+    "/private/tmp/voteboat-native477-kBXQpc/revision2/campaign/campaign.py",
+    "--authorized-quiet"
+  ],
+  "start_utc": "2026-10-15T12:00:03.744277+00:00",
+  "scope": "Original single Mac477 quiet-window launch authorized by root; no retries or replacement."
+}

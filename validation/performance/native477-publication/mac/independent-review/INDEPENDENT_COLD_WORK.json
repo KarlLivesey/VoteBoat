@@ -1,0 +1,871 @@
+{
+  "scope": "Union of submitted-to-completed maintenance intervals across all three replicas; overlapping waits, never additive CPU or isolated disk time.",
+  "inputs": {
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t1-singleton-tcp-atomic/maintenance.csv": "965bf4dcd19b1bee958e64b1a7ae9a60657c1c60f21bb94127252c2280c774eb",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t1-singleton-tcp-witness/maintenance.csv": "0d1879fa8238f844145e11f1a5eb20d06458f6e9d218810a77e3bd4d32f25230",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t1-singleton-quic-witness/maintenance.csv": "f53f5870ca956455115c67a2781e81662004f8fec2d8ba9b739843cb60c04f9b",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t1-singleton-quic-atomic/maintenance.csv": "fc9708f9d5b52ed0591e1ee781f663cf5db42b780cc246a37c3323735ab67f14",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t1-moderate-quic-atomic/maintenance.csv": "92366138234620c6632a9d9f7e3f3939bac5bfd494a556b9fdf4ce390acd7b11",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t1-moderate-quic-witness/maintenance.csv": "34d86edc0490cb0ec768f1e43f6ade166e39ccf813fafb2848cd7d2f3ec94075",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t1-moderate-tcp-witness/maintenance.csv": "00c04be029a3e88658a6816f4c1f605f9ac399f67feec866a4b905578a3657a3",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t1-moderate-tcp-atomic/maintenance.csv": "e142840e8a8cebde040957fdd84acd55dcc46ec45d41adbebb0d0eff38c532db",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t1-bulk-tcp-atomic/maintenance.csv": "8dc037f1e21e08f1d2be636716895c3be46cf180be5de4d39c98abf7be4328f0",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t1-bulk-tcp-witness/maintenance.csv": "bbe9d7839bc79a139a9d0448375d8a01d73319eb36d90bcba4ebad44589f7f0f",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t1-bulk-quic-witness/maintenance.csv": "ac0f6a087f337c9c704a7fbdab498c7c1942a4bcbb82f89f26e2b4377c47285b",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t1-bulk-quic-atomic/maintenance.csv": "0816f7148a332bd26c9c3b7214719e29a9ebcd94d47e404bf0e8765ea660ba83",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t1-overload-quic-atomic/maintenance.csv": "c430d6bcc9107f6469081d8fff7300e792bab2c6f8bd7f563aafae83b8e9e87e",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t1-overload-quic-witness/maintenance.csv": "1a30855faa06abd4ccb5c5bec99e69ca3e9b03b05e978658709bd2b0d9094539",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t1-overload-tcp-witness/maintenance.csv": "2feb2f124a2c2413208bda2589177a5f9b93a0215b6d6b57d931d1e2829b319c",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t1-overload-tcp-atomic/maintenance.csv": "d2b0f16c88aed3d15184dc6317691da12b80e8dede8e30a15b5c7e24f78637d9",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t2-moderate-tcp-atomic/maintenance.csv": "88c5a596836d5c61b9e3f0dec2aafb7ce4cb99336b5b3fd3fe3409160bdf3e68",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t2-moderate-tcp-witness/maintenance.csv": "05ff7e435f9b08dafb2f8c1943bf721b45914423b36db59a9308a3c55917fbcc",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t2-moderate-quic-witness/maintenance.csv": "53c952b82b30e232329f329cc94c2f8f9d7ef502965bba16d30fa0dfeab9410b",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t2-moderate-quic-atomic/maintenance.csv": "8d3cf41df9c0320cddb01df5262ea1afbb03c3f73e6111175ee072ce3507307f",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t2-bulk-quic-atomic/maintenance.csv": "0b27a512e1f63abf1d9a6239f56630a56278c7338ab8e2e14aaaa19e1b36c9d3",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t2-bulk-quic-witness/maintenance.csv": "9e95cfb79a9789ca9806f504dd9c57b587d2131a6bf027a3f80ee731667c1719",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t2-bulk-tcp-witness/maintenance.csv": "3cc9d7092fb271811ec82ede292b1bd4b1c6c1ecb7d307c4810bba78b0f15b18",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t2-bulk-tcp-atomic/maintenance.csv": "d109d24203a825aae921dca3ed3e4d860c4a5cae7f34a97dcb32e4f859cded66",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t2-overload-tcp-atomic/maintenance.csv": "6f138e3e1f3a3625edcbf3b9853dc11ea787790fd465fde9a163539ed454ee40",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t2-overload-tcp-witness/maintenance.csv": "a351f4c39b646ef0c1ac30b5c121033b2902cf857de633bedc27449ae61c9a44",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t2-overload-quic-witness/maintenance.csv": "9a3d51de8e72c23a4064ddcabce737fce0a01807b26d20095ab370e5aaac3416",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t2-overload-quic-atomic/maintenance.csv": "d3517035b547cf226eb96aaf22a5bc59301d16ee727e6112d2c0586c3b5e0bd5",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t2-singleton-quic-atomic/maintenance.csv": "891a43a90fce957d1a1f74beba485267a143e50a589054ee47a7db0ca58c5193",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t2-singleton-quic-witness/maintenance.csv": "7012df26f26dbef22126732c838ceb4be3e74f38600adceb8f1f249f9e436c80",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t2-singleton-tcp-witness/maintenance.csv": "82e094d9999ce0694006412287436e1178c283b99b8d543ea8fdabce1f72aa7c",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t2-singleton-tcp-atomic/maintenance.csv": "96fdfbfe442faea86529dc80e0472be18b6a03df38980ac6238d828e81c83c8f",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t3-bulk-tcp-atomic/maintenance.csv": "041f0964ee176edda1fbf100de412720e80d6825301de5d55679eaf9d27223a5",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t3-bulk-tcp-witness/maintenance.csv": "69c43d4d4a5cdf1d27e08d499e615f170dbc665f22908d691c1e9187ac78e994",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t3-bulk-quic-witness/maintenance.csv": "71be89986426665e616460d0331e03679bc1b8f7ab408b2e794a315bb1501f5f",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t3-bulk-quic-atomic/maintenance.csv": "3798c0e0429ebdae621ae21808465af9b6943478b9d6a2fba24939ee82ea5216",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t3-overload-quic-atomic/maintenance.csv": "894307a6065cd02d996b57f9141d3b0bf39e82ad5dc0af7fea1e1f959fe148a4",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t3-overload-quic-witness/maintenance.csv": "4b403bd3bdd8638de0735f5b67f67e6612e1aca554b05e911cc1dc4f9325a50c",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t3-overload-tcp-witness/maintenance.csv": "70b491a4792eed7170696f97fe6c486e76ded9e39b0ca40fe815b63cf5cee2fb",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t3-overload-tcp-atomic/maintenance.csv": "8221247717e174a439f21d36921f7e8e62215935b3cce0f129620fcdd171b36f",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t3-singleton-tcp-atomic/maintenance.csv": "39bd3e8492b4800bc3c5ce1e07209d9cf331af909b30a7d1c3fdcf74bb4463b9",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t3-singleton-tcp-witness/maintenance.csv": "85bfb90935d552d16a197d15f1fdc6724d04719d8aaf0f7036de577606e9591f",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t3-singleton-quic-witness/maintenance.csv": "550e7e1287ce173f33b48957f026d1aab1ea0ab2cfdc13570eca4305a2ed2209",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t3-singleton-quic-atomic/maintenance.csv": "89e5818417819f3eb0afd3b40ef6dc3c61c3dd9df5c9dbd3eafbc13c43f5ab7c",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t3-moderate-quic-atomic/maintenance.csv": "41721dea2c61caa73d2092b2055428b55dbb35fc2f0b5160951da82f5a1f6f0f",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t3-moderate-quic-witness/maintenance.csv": "a5c937a405732559edbc499faadc697caf04ad18805c79d22a9722e97b676e9a",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t3-moderate-tcp-witness/maintenance.csv": "48c67f1b28d3f4dc70cc8e59ee6ebd4f59f8b3f6754a3d7399e01d0503b4d24a",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t3-moderate-tcp-atomic/maintenance.csv": "f4c43d25cbe447a803b79be12d4a1ec52ece7e4689559074f050757cc87493a8",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t1-singleton-tcp-atomic/maintenance.csv": "2bdb6bfaf252ce5207b4df5c90a066c32f6e90edd6fd4a3b1275c01bcf408f4a",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t1-singleton-tcp-witness/maintenance.csv": "359eed564c87cc39b6d6e978c62e1ef01d5ee430dafe3e7e3a91370caa9ffecb",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t1-singleton-quic-witness/maintenance.csv": "442a7b5e8a0505cbf9f5316d16599fb4fc6034024eb8a18c72260063e1daeef8",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t1-singleton-quic-atomic/maintenance.csv": "d015af106ad33c2b1f498f1bd28349ce59c7f125da0a6ce0ffe27644af011d6a",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t1-moderate-quic-atomic/maintenance.csv": "7fb7e6645231252d12c4d8176352d30558220a260b8ca1fc9c9e66b8a28e6005",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t1-moderate-quic-witness/maintenance.csv": "37ab1295a32b5394ac48c684bbd8bdb9120df656868b9ac820a2cc3b94818c98",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t1-moderate-tcp-witness/maintenance.csv": "4527123b5263fca1b764a3ffdc3ad36bdabacf48e587b694afd086fe9ab27faa",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t1-moderate-tcp-atomic/maintenance.csv": "bf6099facbaf5b799aa6a6ca210624e76bf23dd67937d00782f563c1afe1f0e6",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t1-bulk-tcp-atomic/maintenance.csv": "dd1e4aa013bd95d0975b26d622125c25ea790730e8d25ae4b204661baf5459c6",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t1-bulk-tcp-witness/maintenance.csv": "8a21f51c109b08eb251b2cbf86b104a5bc586b6d8366bcd570f5a3541f49e6e0",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t1-bulk-quic-witness/maintenance.csv": "7296a78a4fd2aee13e427d9121e06da2b763858e7839e2f7231093e6d6ca6240",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t1-bulk-quic-atomic/maintenance.csv": "c70461d2528e4198e237587ef048bbc37f4e02840677d21f724f394a7321be11",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t1-overload-quic-atomic/maintenance.csv": "6d77042874ba51ed1643561e934a533929bf7b70041054507210f0cc2e32abc6",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t1-overload-quic-witness/maintenance.csv": "25b093b763adca3d2cb1917a2a9b688a668f516edfbece15ee98b52190ae7836",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t1-overload-tcp-witness/maintenance.csv": "511ac067408b2dc22e71eb7c92f39648e0e3bf7d9eb2c25a897780e17d64c838",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t1-overload-tcp-atomic/maintenance.csv": "03551ca77b2b60a081c0e16389591cddd7e5063a6f126852a2e98ff88278ca19",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t2-moderate-tcp-atomic/maintenance.csv": "7a7228745bd753e7fa01d0e61450d42ab0895dcaced23659913486f1bfd1afcd",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t2-moderate-tcp-witness/maintenance.csv": "f5c045e85cd3c8f55e39349d9b63fbebca159da098e4e5427cb68bf315c07677",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t2-moderate-quic-witness/maintenance.csv": "3d3d39e00e0da7786c4c76436555e08457df36158ca53cc9665cfe45d801f753",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t2-moderate-quic-atomic/maintenance.csv": "69851f56f473966aab012cd52eccff330d92ea99cffc17ec0ac9d6f1cd7f608a",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t2-bulk-quic-atomic/maintenance.csv": "d14999da525f90319335a0609daf804f209764ea9643810c9e45f059013be2c4",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t2-bulk-quic-witness/maintenance.csv": "7f3925004276675b60a9156a1323fd04e249e5900e8b1c459344858d6763add6",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t2-bulk-tcp-witness/maintenance.csv": "286adce1d0cdde0970508724587d487b16267ff952b95b48d5f76a555236c3ed",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t2-bulk-tcp-atomic/maintenance.csv": "5d15aa470ac4ef8d752bfa269eb906dc90dce56e7ceb32e777e77815c2c0c144",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t2-overload-tcp-atomic/maintenance.csv": "8b9a360703f8a8046aef4e8139608545ab8ad16cca351bb82b7f144d729cf224",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t2-overload-tcp-witness/maintenance.csv": "93f12f5aaa310adff165c64253f532ea118fb20a8f876b6683bcec09db63d05d",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t2-overload-quic-witness/maintenance.csv": "5e9802834172cc15df649151178e85b107cfad5b4be02927e23ad27fe9023c3e",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t2-overload-quic-atomic/maintenance.csv": "17b53497bdeb7ecdb7034497f9cd9722714a53d43f9938c0692ad3acdbb54f1e",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t2-singleton-quic-atomic/maintenance.csv": "0953987eab42ff507211e5861c5ede5f0cd1f6483fe8c02d76caccb9d1ce98ae",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t2-singleton-quic-witness/maintenance.csv": "6edb88a3eb4b5d6a95721c0822a39c64f2e55dc688d271dbe61839edb0c0a9aa",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t2-singleton-tcp-witness/maintenance.csv": "ee9d552461cca15a6190e2f144cc28557e94b5bf15907906caac94b3f97d4891",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t2-singleton-tcp-atomic/maintenance.csv": "36e9f2db4ae2dc2595269d4725ca8f15c01d2d755031eabe0cf9df64aed41b7a",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t3-bulk-tcp-atomic/maintenance.csv": "bf6d1fdd6bad219fbb460390a27f63c3817baf8a1be2580e7911c8566f1b3c74",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t3-bulk-tcp-witness/maintenance.csv": "a345be5d03e73733eabcf4c621a706a68447fbdb0a2c02a5f174bd79ac7c993d",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t3-bulk-quic-witness/maintenance.csv": "3504a735ece5d82ec42dc686665c6d5f8956c0f6d9a343b5f1e127e3f2ca485f",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t3-bulk-quic-atomic/maintenance.csv": "b630ee453295709f037702cc9ae938a6cbc5b88620722feb0629e58e88c7bd20",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t3-overload-quic-atomic/maintenance.csv": "7907bfc65626b9614afa5c72c12f9a607b4d136e43e2505372f75e26f853bd14",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t3-overload-quic-witness/maintenance.csv": "f5b766cf1655138aaba1bf3dd0ad4524059dce0f4ed54753a19cf71ba6a9c4a9",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t3-overload-tcp-witness/maintenance.csv": "391bf5f4316ecb056e2b23ec79d5ef5c698a566602dc19149ce26983d5bc1ca9",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t3-overload-tcp-atomic/maintenance.csv": "bfee766a6ad816e737b2478f045cd7f9149e8214b7d9ebeb122782bbe71dd167",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t3-singleton-tcp-atomic/maintenance.csv": "77ff07d8a684a527c7bc9ec2a00c35cf367f18a31322f078f9a71896ca599512",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t3-singleton-tcp-witness/maintenance.csv": "d6a2ec147097189fb946f3e1c09186940e2091065112163541f061585abbd5b0",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t3-singleton-quic-witness/maintenance.csv": "58800bbc7a58eb4903be7ab60d7e0aa9a6528d914a93d49e9480f62e5d21da86",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t3-singleton-quic-atomic/maintenance.csv": "a63d0785e3beb25f6a50e4743d4f3e34f6d8b002586f432ace9df27d60fb995f",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t3-moderate-quic-atomic/maintenance.csv": "6765fd2289b75afd01fc38106fa2adbbbdbb7ec66e129e80bf40338a09ac7b22",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t3-moderate-quic-witness/maintenance.csv": "840cbe003e84bda0c920851372e4a58dc9f3fd59b8eeeaedb47701eb20d0e3b0",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t3-moderate-tcp-witness/maintenance.csv": "0dfc3e17aba3d0039faf6cb988508fea38bc38053f264c60d0ba95209bafd07b",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/mac-collection/raw/results/t3-moderate-tcp-atomic/maintenance.csv": "77ecca896f863cff4f236c3d83c9845c0fdc40a9e25fa0951d6e39222669e7d9"
+  },
+  "records": [
+    {
+      "host": "linux",
+      "case": "t1-singleton-tcp-atomic",
+      "union_ms": 4495.013517,
+      "checkpoint_max_ms": 431.178102,
+      "reclaim_max_ms": 167.713073,
+      "completed": 60
+    },
+    {
+      "host": "linux",
+      "case": "t1-singleton-tcp-witness",
+      "union_ms": 3521.644743,
+      "checkpoint_max_ms": 256.517105,
+      "reclaim_max_ms": 377.591602,
+      "completed": 60
+    },
+    {
+      "host": "linux",
+      "case": "t1-singleton-quic-witness",
+      "union_ms": 5135.193436,
+      "checkpoint_max_ms": 438.162356,
+      "reclaim_max_ms": 435.592699,
+      "completed": 60
+    },
+    {
+      "host": "linux",
+      "case": "t1-singleton-quic-atomic",
+      "union_ms": 4889.699946,
+      "checkpoint_max_ms": 404.064909,
+      "reclaim_max_ms": 362.240992,
+      "completed": 60
+    },
+    {
+      "host": "linux",
+      "case": "t1-moderate-quic-atomic",
+      "union_ms": 11579.536658,
+      "checkpoint_max_ms": 515.527977,
+      "reclaim_max_ms": 599.737837,
+      "completed": 124
+    },
+    {
+      "host": "linux",
+      "case": "t1-moderate-quic-witness",
+      "union_ms": 12389.668577,
+      "checkpoint_max_ms": 595.203335,
+      "reclaim_max_ms": 476.782525,
+      "completed": 124
+    },
+    {
+      "host": "linux",
+      "case": "t1-moderate-tcp-witness",
+      "union_ms": 11977.999366,
+      "checkpoint_max_ms": 824.688398,
+      "reclaim_max_ms": 478.879452,
+      "completed": 124
+    },
+    {
+      "host": "linux",
+      "case": "t1-moderate-tcp-atomic",
+      "union_ms": 14142.838138,
+      "checkpoint_max_ms": 1331.166261,
+      "reclaim_max_ms": 384.819774,
+      "completed": 120
+    },
+    {
+      "host": "linux",
+      "case": "t1-bulk-tcp-atomic",
+      "union_ms": 2891.031296,
+      "checkpoint_max_ms": 539.195993,
+      "reclaim_max_ms": 216.575372,
+      "completed": 28
+    },
+    {
+      "host": "linux",
+      "case": "t1-bulk-tcp-witness",
+      "union_ms": 3229.847268,
+      "checkpoint_max_ms": 428.574286,
+      "reclaim_max_ms": 352.143198,
+      "completed": 28
+    },
+    {
+      "host": "linux",
+      "case": "t1-bulk-quic-witness",
+      "union_ms": 1894.881965,
+      "checkpoint_max_ms": 211.973307,
+      "reclaim_max_ms": 261.347471,
+      "completed": 28
+    },
+    {
+      "host": "linux",
+      "case": "t1-bulk-quic-atomic",
+      "union_ms": 2902.778246,
+      "checkpoint_max_ms": 394.610076,
+      "reclaim_max_ms": 405.724924,
+      "completed": 28
+    },
+    {
+      "host": "linux",
+      "case": "t1-overload-quic-atomic",
+      "union_ms": 1824.802823,
+      "checkpoint_max_ms": 590.408375,
+      "reclaim_max_ms": 181.014342,
+      "completed": 12
+    },
+    {
+      "host": "linux",
+      "case": "t1-overload-quic-witness",
+      "union_ms": 1283.408281,
+      "checkpoint_max_ms": 327.047266,
+      "reclaim_max_ms": 197.27829,
+      "completed": 12
+    },
+    {
+      "host": "linux",
+      "case": "t1-overload-tcp-witness",
+      "union_ms": 1184.050972,
+      "checkpoint_max_ms": 435.717985,
+      "reclaim_max_ms": 210.837557,
+      "completed": 12
+    },
+    {
+      "host": "linux",
+      "case": "t1-overload-tcp-atomic",
+      "union_ms": 883.897002,
+      "checkpoint_max_ms": 244.162333,
+      "reclaim_max_ms": 188.547033,
+      "completed": 12
+    },
+    {
+      "host": "linux",
+      "case": "t2-moderate-tcp-atomic",
+      "union_ms": 12567.706298,
+      "checkpoint_max_ms": 1070.068332,
+      "reclaim_max_ms": 500.102596,
+      "completed": 120
+    },
+    {
+      "host": "linux",
+      "case": "t2-moderate-tcp-witness",
+      "union_ms": 10014.386141,
+      "checkpoint_max_ms": 571.652795,
+      "reclaim_max_ms": 249.221387,
+      "completed": 124
+    },
+    {
+      "host": "linux",
+      "case": "t2-moderate-quic-witness",
+      "union_ms": 10910.609681,
+      "checkpoint_max_ms": 530.077998,
+      "reclaim_max_ms": 383.931294,
+      "completed": 124
+    },
+    {
+      "host": "linux",
+      "case": "t2-moderate-quic-atomic",
+      "union_ms": 13360.443184,
+      "checkpoint_max_ms": 816.615402,
+      "reclaim_max_ms": 865.278666,
+      "completed": 120
+    },
+    {
+      "host": "linux",
+      "case": "t2-bulk-quic-atomic",
+      "union_ms": 3856.923996,
+      "checkpoint_max_ms": 611.325924,
+      "reclaim_max_ms": 559.685538,
+      "completed": 24
+    },
+    {
+      "host": "linux",
+      "case": "t2-bulk-quic-witness",
+      "union_ms": 2409.048449,
+      "checkpoint_max_ms": 361.923644,
+      "reclaim_max_ms": 238.011148,
+      "completed": 28
+    },
+    {
+      "host": "linux",
+      "case": "t2-bulk-tcp-witness",
+      "union_ms": 2255.34704,
+      "checkpoint_max_ms": 344.670473,
+      "reclaim_max_ms": 181.85937,
+      "completed": 28
+    },
+    {
+      "host": "linux",
+      "case": "t2-bulk-tcp-atomic",
+      "union_ms": 2432.590097,
+      "checkpoint_max_ms": 421.051637,
+      "reclaim_max_ms": 415.734651,
+      "completed": 28
+    },
+    {
+      "host": "linux",
+      "case": "t2-overload-tcp-atomic",
+      "union_ms": 1271.292431,
+      "checkpoint_max_ms": 545.343094,
+      "reclaim_max_ms": 391.735261,
+      "completed": 12
+    },
+    {
+      "host": "linux",
+      "case": "t2-overload-tcp-witness",
+      "union_ms": 3423.132051,
+      "checkpoint_max_ms": 768.617894,
+      "reclaim_max_ms": 543.623452,
+      "completed": 12
+    },
+    {
+      "host": "linux",
+      "case": "t2-overload-quic-witness",
+      "union_ms": 1327.249527,
+      "checkpoint_max_ms": 461.45673,
+      "reclaim_max_ms": 177.437945,
+      "completed": 12
+    },
+    {
+      "host": "linux",
+      "case": "t2-overload-quic-atomic",
+      "union_ms": 882.789106,
+      "checkpoint_max_ms": 304.233705,
+      "reclaim_max_ms": 162.045677,
+      "completed": 12
+    },
+    {
+      "host": "linux",
+      "case": "t2-singleton-quic-atomic",
+      "union_ms": 4584.255807,
+      "checkpoint_max_ms": 419.838835,
+      "reclaim_max_ms": 307.57708,
+      "completed": 60
+    },
+    {
+      "host": "linux",
+      "case": "t2-singleton-quic-witness",
+      "union_ms": 4590.756044,
+      "checkpoint_max_ms": 359.214692,
+      "reclaim_max_ms": 250.567356,
+      "completed": 60
+    },
+    {
+      "host": "linux",
+      "case": "t2-singleton-tcp-witness",
+      "union_ms": 5428.487016,
+      "checkpoint_max_ms": 594.610959,
+      "reclaim_max_ms": 472.737681,
+      "completed": 60
+    },
+    {
+      "host": "linux",
+      "case": "t2-singleton-tcp-atomic",
+      "union_ms": 5500.191987,
+      "checkpoint_max_ms": 600.79837,
+      "reclaim_max_ms": 429.67232,
+      "completed": 60
+    },
+    {
+      "host": "linux",
+      "case": "t3-bulk-tcp-atomic",
+      "union_ms": 2549.224155,
+      "checkpoint_max_ms": 497.438825,
+      "reclaim_max_ms": 185.220455,
+      "completed": 28
+    },
+    {
+      "host": "linux",
+      "case": "t3-bulk-tcp-witness",
+      "union_ms": 3668.167987,
+      "checkpoint_max_ms": 514.394688,
+      "reclaim_max_ms": 791.317837,
+      "completed": 28
+    },
+    {
+      "host": "linux",
+      "case": "t3-bulk-quic-witness",
+      "union_ms": 1883.623877,
+      "checkpoint_max_ms": 222.150453,
+      "reclaim_max_ms": 200.468177,
+      "completed": 28
+    },
+    {
+      "host": "linux",
+      "case": "t3-bulk-quic-atomic",
+      "union_ms": 3953.827959,
+      "checkpoint_max_ms": 538.215285,
+      "reclaim_max_ms": 445.38799,
+      "completed": 28
+    },
+    {
+      "host": "linux",
+      "case": "t3-overload-quic-atomic",
+      "union_ms": 847.187713,
+      "checkpoint_max_ms": 208.958937,
+      "reclaim_max_ms": 124.291808,
+      "completed": 12
+    },
+    {
+      "host": "linux",
+      "case": "t3-overload-quic-witness",
+      "union_ms": 1101.752918,
+      "checkpoint_max_ms": 438.703159,
+      "reclaim_max_ms": 154.772099,
+      "completed": 12
+    },
+    {
+      "host": "linux",
+      "case": "t3-overload-tcp-witness",
+      "union_ms": 1192.429723,
+      "checkpoint_max_ms": 275.31656,
+      "reclaim_max_ms": 351.108291,
+      "completed": 12
+    },
+    {
+      "host": "linux",
+      "case": "t3-overload-tcp-atomic",
+      "union_ms": 1906.067021,
+      "checkpoint_max_ms": 678.751468,
+      "reclaim_max_ms": 273.431641,
+      "completed": 12
+    },
+    {
+      "host": "linux",
+      "case": "t3-singleton-tcp-atomic",
+      "union_ms": 5636.982237,
+      "checkpoint_max_ms": 588.611431,
+      "reclaim_max_ms": 278.912998,
+      "completed": 60
+    },
+    {
+      "host": "linux",
+      "case": "t3-singleton-tcp-witness",
+      "union_ms": 5012.610525,
+      "checkpoint_max_ms": 476.081636,
+      "reclaim_max_ms": 250.807139,
+      "completed": 60
+    },
+    {
+      "host": "linux",
+      "case": "t3-singleton-quic-witness",
+      "union_ms": 4669.521765,
+      "checkpoint_max_ms": 281.373923,
+      "reclaim_max_ms": 327.166288,
+      "completed": 60
+    },
+    {
+      "host": "linux",
+      "case": "t3-singleton-quic-atomic",
+      "union_ms": 6207.998155,
+      "checkpoint_max_ms": 666.485905,
+      "reclaim_max_ms": 222.53764,
+      "completed": 60
+    },
+    {
+      "host": "linux",
+      "case": "t3-moderate-quic-atomic",
+      "union_ms": 11203.322295,
+      "checkpoint_max_ms": 556.707917,
+      "reclaim_max_ms": 381.174467,
+      "completed": 124
+    },
+    {
+      "host": "linux",
+      "case": "t3-moderate-quic-witness",
+      "union_ms": 12338.465999,
+      "checkpoint_max_ms": 1017.382568,
+      "reclaim_max_ms": 355.005975,
+      "completed": 124
+    },
+    {
+      "host": "linux",
+      "case": "t3-moderate-tcp-witness",
+      "union_ms": 12482.3296,
+      "checkpoint_max_ms": 627.807945,
+      "reclaim_max_ms": 551.932014,
+      "completed": 124
+    },
+    {
+      "host": "linux",
+      "case": "t3-moderate-tcp-atomic",
+      "union_ms": 11810.234648,
+      "checkpoint_max_ms": 762.535518,
+      "reclaim_max_ms": 448.988624,
+      "completed": 124
+    },
+    {
+      "host": "mac",
+      "case": "t1-singleton-tcp-atomic",
+      "union_ms": 2396.022749,
+      "checkpoint_max_ms": 108.820792,
+      "reclaim_max_ms": 72.764666,
+      "completed": 60
+    },
+    {
+      "host": "mac",
+      "case": "t1-singleton-tcp-witness",
+      "union_ms": 2639.920542,
+      "checkpoint_max_ms": 541.584167,
+      "reclaim_max_ms": 81.095666,
+      "completed": 60
+    },
+    {
+      "host": "mac",
+      "case": "t1-singleton-quic-witness",
+      "union_ms": 2209.196875,
+      "checkpoint_max_ms": 87.186292,
+      "reclaim_max_ms": 80.033,
+      "completed": 60
+    },
+    {
+      "host": "mac",
+      "case": "t1-singleton-quic-atomic",
+      "union_ms": 2473.891708,
+      "checkpoint_max_ms": 111.611167,
+      "reclaim_max_ms": 70.630375,
+      "completed": 60
+    },
+    {
+      "host": "mac",
+      "case": "t1-moderate-quic-atomic",
+      "union_ms": 5820.109959,
+      "checkpoint_max_ms": 136.118917,
+      "reclaim_max_ms": 682.498959,
+      "completed": 124
+    },
+    {
+      "host": "mac",
+      "case": "t1-moderate-quic-witness",
+      "union_ms": 5892.862666,
+      "checkpoint_max_ms": 350.201375,
+      "reclaim_max_ms": 281.36125,
+      "completed": 124
+    },
+    {
+      "host": "mac",
+      "case": "t1-moderate-tcp-witness",
+      "union_ms": 5155.953581,
+      "checkpoint_max_ms": 408.515,
+      "reclaim_max_ms": 90.319708,
+      "completed": 124
+    },
+    {
+      "host": "mac",
+      "case": "t1-moderate-tcp-atomic",
+      "union_ms": 5241.855709,
+      "checkpoint_max_ms": 124.797667,
+      "reclaim_max_ms": 94.92925,
+      "completed": 124
+    },
+    {
+      "host": "mac",
+      "case": "t1-bulk-tcp-atomic",
+      "union_ms": 2710.433041,
+      "checkpoint_max_ms": 891.6175,
+      "reclaim_max_ms": 283.332125,
+      "completed": 28
+    },
+    {
+      "host": "mac",
+      "case": "t1-bulk-tcp-witness",
+      "union_ms": 1052.997208,
+      "checkpoint_max_ms": 85.044,
+      "reclaim_max_ms": 88.902166,
+      "completed": 28
+    },
+    {
+      "host": "mac",
+      "case": "t1-bulk-quic-witness",
+      "union_ms": 1075.058834,
+      "checkpoint_max_ms": 86.690833,
+      "reclaim_max_ms": 85.427208,
+      "completed": 28
+    },
+    {
+      "host": "mac",
+      "case": "t1-bulk-quic-atomic",
+      "union_ms": 1201.469333,
+      "checkpoint_max_ms": 128.420709,
+      "reclaim_max_ms": 81.687833,
+      "completed": 28
+    },
+    {
+      "host": "mac",
+      "case": "t1-overload-quic-atomic",
+      "union_ms": 509.982459,
+      "checkpoint_max_ms": 104.753792,
+      "reclaim_max_ms": 79.873042,
+      "completed": 12
+    },
+    {
+      "host": "mac",
+      "case": "t1-overload-quic-witness",
+      "union_ms": 447.707208,
+      "checkpoint_max_ms": 87.341875,
+      "reclaim_max_ms": 80.254792,
+      "completed": 12
+    },
+    {
+      "host": "mac",
+      "case": "t1-overload-tcp-witness",
+      "union_ms": 1188.044751,
+      "checkpoint_max_ms": 785.803416,
+      "reclaim_max_ms": 92.028417,
+      "completed": 12
+    },
+    {
+      "host": "mac",
+      "case": "t1-overload-tcp-atomic",
+      "union_ms": 488.060041,
+      "checkpoint_max_ms": 96.86775,
+      "reclaim_max_ms": 81.412791,
+      "completed": 12
+    },
+    {
+      "host": "mac",
+      "case": "t2-moderate-tcp-atomic",
+      "union_ms": 6820.218333,
+      "checkpoint_max_ms": 707.945333,
+      "reclaim_max_ms": 272.9115,
+      "completed": 124
+    },
+    {
+      "host": "mac",
+      "case": "t2-moderate-tcp-witness",
+      "union_ms": 5494.697748,
+      "checkpoint_max_ms": 654.317042,
+      "reclaim_max_ms": 88.982458,
+      "completed": 124
+    },
+    {
+      "host": "mac",
+      "case": "t2-moderate-quic-witness",
+      "union_ms": 5734.617709,
+      "checkpoint_max_ms": 756.951041,
+      "reclaim_max_ms": 88.282709,
+      "completed": 124
+    },
+    {
+      "host": "mac",
+      "case": "t2-moderate-quic-atomic",
+      "union_ms": 5745.253206,
+      "checkpoint_max_ms": 333.068625,
+      "reclaim_max_ms": 342.824625,
+      "completed": 124
+    },
+    {
+      "host": "mac",
+      "case": "t2-bulk-quic-atomic",
+      "union_ms": 1530.616332,
+      "checkpoint_max_ms": 475.399,
+      "reclaim_max_ms": 83.293958,
+      "completed": 28
+    },
+    {
+      "host": "mac",
+      "case": "t2-bulk-quic-witness",
+      "union_ms": 1029.292958,
+      "checkpoint_max_ms": 83.4115,
+      "reclaim_max_ms": 84.255,
+      "completed": 28
+    },
+    {
+      "host": "mac",
+      "case": "t2-bulk-tcp-witness",
+      "union_ms": 1648.472917,
+      "checkpoint_max_ms": 651.109292,
+      "reclaim_max_ms": 88.766,
+      "completed": 28
+    },
+    {
+      "host": "mac",
+      "case": "t2-bulk-tcp-atomic",
+      "union_ms": 1132.030917,
+      "checkpoint_max_ms": 97.654584,
+      "reclaim_max_ms": 86.882542,
+      "completed": 28
+    },
+    {
+      "host": "mac",
+      "case": "t2-overload-tcp-atomic",
+      "union_ms": 1317.601542,
+      "checkpoint_max_ms": 332.08,
+      "reclaim_max_ms": 269.215333,
+      "completed": 12
+    },
+    {
+      "host": "mac",
+      "case": "t2-overload-tcp-witness",
+      "union_ms": 781.881875,
+      "checkpoint_max_ms": 407.6665,
+      "reclaim_max_ms": 87.025084,
+      "completed": 12
+    },
+    {
+      "host": "mac",
+      "case": "t2-overload-quic-witness",
+      "union_ms": 452.252,
+      "checkpoint_max_ms": 84.307458,
+      "reclaim_max_ms": 73.910917,
+      "completed": 12
+    },
+    {
+      "host": "mac",
+      "case": "t2-overload-quic-atomic",
+      "union_ms": 510.290833,
+      "checkpoint_max_ms": 88.133625,
+      "reclaim_max_ms": 91.074083,
+      "completed": 12
+    },
+    {
+      "host": "mac",
+      "case": "t2-singleton-quic-atomic",
+      "union_ms": 3135.299415,
+      "checkpoint_max_ms": 708.08325,
+      "reclaim_max_ms": 74.507667,
+      "completed": 60
+    },
+    {
+      "host": "mac",
+      "case": "t2-singleton-quic-witness",
+      "union_ms": 2597.953831,
+      "checkpoint_max_ms": 505.692667,
+      "reclaim_max_ms": 75.730958,
+      "completed": 60
+    },
+    {
+      "host": "mac",
+      "case": "t2-singleton-tcp-witness",
+      "union_ms": 2490.09025,
+      "checkpoint_max_ms": 400.568542,
+      "reclaim_max_ms": 79.182083,
+      "completed": 60
+    },
+    {
+      "host": "mac",
+      "case": "t2-singleton-tcp-atomic",
+      "union_ms": 3109.901334,
+      "checkpoint_max_ms": 444.538291,
+      "reclaim_max_ms": 209.625459,
+      "completed": 60
+    },
+    {
+      "host": "mac",
+      "case": "t3-bulk-tcp-atomic",
+      "union_ms": 1699.511667,
+      "checkpoint_max_ms": 623.433167,
+      "reclaim_max_ms": 83.626875,
+      "completed": 28
+    },
+    {
+      "host": "mac",
+      "case": "t3-bulk-tcp-witness",
+      "union_ms": 1331.558042,
+      "checkpoint_max_ms": 333.05175,
+      "reclaim_max_ms": 90.98325,
+      "completed": 28
+    },
+    {
+      "host": "mac",
+      "case": "t3-bulk-quic-witness",
+      "union_ms": 1084.131125,
+      "checkpoint_max_ms": 91.01725,
+      "reclaim_max_ms": 80.71475,
+      "completed": 28
+    },
+    {
+      "host": "mac",
+      "case": "t3-bulk-quic-atomic",
+      "union_ms": 1138.104249,
+      "checkpoint_max_ms": 103.149416,
+      "reclaim_max_ms": 83.911833,
+      "completed": 28
+    },
+    {
+      "host": "mac",
+      "case": "t3-overload-quic-atomic",
+      "union_ms": 431.700583,
+      "checkpoint_max_ms": 85.117625,
+      "reclaim_max_ms": 72.585625,
+      "completed": 12
+    },
+    {
+      "host": "mac",
+      "case": "t3-overload-quic-witness",
+      "union_ms": 423.884125,
+      "checkpoint_max_ms": 74.794958,
+      "reclaim_max_ms": 74.783667,
+      "completed": 12
+    },
+    {
+      "host": "mac",
+      "case": "t3-overload-tcp-witness",
+      "union_ms": 598.105125,
+      "checkpoint_max_ms": 135.330208,
+      "reclaim_max_ms": 156.828292,
+      "completed": 12
+    },
+    {
+      "host": "mac",
+      "case": "t3-overload-tcp-atomic",
+      "union_ms": 516.2235,
+      "checkpoint_max_ms": 102.621209,
+      "reclaim_max_ms": 88.8,
+      "completed": 12
+    },
+    {
+      "host": "mac",
+      "case": "t3-singleton-tcp-atomic",
+      "union_ms": 2994.14096,
+      "checkpoint_max_ms": 650.509834,
+      "reclaim_max_ms": 69.35325,
+      "completed": 60
+    },
+    {
+      "host": "mac",
+      "case": "t3-singleton-tcp-witness",
+      "union_ms": 2205.565707,
+      "checkpoint_max_ms": 79.7755,
+      "reclaim_max_ms": 86.030792,
+      "completed": 60
+    },
+    {
+      "host": "mac",
+      "case": "t3-singleton-quic-witness",
+      "union_ms": 2191.266706,
+      "checkpoint_max_ms": 82.7045,
+      "reclaim_max_ms": 80.86975,
+      "completed": 60
+    },
+    {
+      "host": "mac",
+      "case": "t3-singleton-quic-atomic",
+      "union_ms": 2484.852001,
+      "checkpoint_max_ms": 109.896292,
+      "reclaim_max_ms": 73.180458,
+      "completed": 60
+    },
+    {
+      "host": "mac",
+      "case": "t3-moderate-quic-atomic",
+      "union_ms": 5223.334459,
+      "checkpoint_max_ms": 134.4265,
+      "reclaim_max_ms": 85.455667,
+      "completed": 124
+    },
+    {
+      "host": "mac",
+      "case": "t3-moderate-quic-witness",
+      "union_ms": 6330.580001,
+      "checkpoint_max_ms": 602.558875,
+      "reclaim_max_ms": 281.592375,
+      "completed": 124
+    },
+    {
+      "host": "mac",
+      "case": "t3-moderate-tcp-witness",
+      "union_ms": 5777.214457,
+      "checkpoint_max_ms": 725.645583,
+      "reclaim_max_ms": 89.471875,
+      "completed": 124
+    },
+    {
+      "host": "mac",
+      "case": "t3-moderate-tcp-atomic",
+      "union_ms": 6948.510621,
+      "checkpoint_max_ms": 888.095417,
+      "reclaim_max_ms": 319.999458,
+      "completed": 124
+    }
+  ]
+}

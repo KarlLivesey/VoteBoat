@@ -1,0 +1,98 @@
+START t1-singleton-tcp-atomic
+END t1-singleton-tcp-atomic 0
+START t1-singleton-tcp-witness
+END t1-singleton-tcp-witness 0
+START t1-singleton-quic-witness
+END t1-singleton-quic-witness 0
+START t1-singleton-quic-atomic
+END t1-singleton-quic-atomic 0
+START t1-moderate-quic-atomic
+END t1-moderate-quic-atomic 0
+START t1-moderate-quic-witness
+END t1-moderate-quic-witness 0
+START t1-moderate-tcp-witness
+END t1-moderate-tcp-witness 0
+START t1-moderate-tcp-atomic
+END t1-moderate-tcp-atomic 0
+START t1-bulk-tcp-atomic
+END t1-bulk-tcp-atomic 0
+START t1-bulk-tcp-witness
+END t1-bulk-tcp-witness 0
+START t1-bulk-quic-witness
+END t1-bulk-quic-witness 0
+START t1-bulk-quic-atomic
+END t1-bulk-quic-atomic 0
+START t1-overload-quic-atomic
+END t1-overload-quic-atomic 0
+START t1-overload-quic-witness
+END t1-overload-quic-witness 0
+START t1-overload-tcp-witness
+END t1-overload-tcp-witness 0
+START t1-overload-tcp-atomic
+END t1-overload-tcp-atomic 0
+START t2-moderate-tcp-atomic
+END t2-moderate-tcp-atomic 0
+START t2-moderate-tcp-witness
+END t2-moderate-tcp-witness 0
+START t2-moderate-quic-witness
+END t2-moderate-quic-witness 0
+START t2-moderate-quic-atomic
+END t2-moderate-quic-atomic 0
+START t2-bulk-quic-atomic
+END t2-bulk-quic-atomic 0
+START t2-bulk-quic-witness
+END t2-bulk-quic-witness 0
+START t2-bulk-tcp-witness
+END t2-bulk-tcp-witness 0
+START t2-bulk-tcp-atomic
+END t2-bulk-tcp-atomic 0
+START t2-overload-tcp-atomic
+END t2-overload-tcp-atomic 0
+START t2-overload-tcp-witness
+END t2-overload-tcp-witness 0
+START t2-overload-quic-witness
+END t2-overload-quic-witness 0
+START t2-overload-quic-atomic
+END t2-overload-quic-atomic 0
+START t2-singleton-quic-atomic
+END t2-singleton-quic-atomic 0
+START t2-singleton-quic-witness
+END t2-singleton-quic-witness 0
+START t2-singleton-tcp-witness
+END t2-singleton-tcp-witness 0
+START t2-singleton-tcp-atomic
+END t2-singleton-tcp-atomic 0
+START t3-bulk-tcp-atomic
+END t3-bulk-tcp-atomic 0
+START t3-bulk-tcp-witness
+END t3-bulk-tcp-witness 0
+START t3-bulk-quic-witness
+END t3-bulk-quic-witness 0
+START t3-bulk-quic-atomic
+END t3-bulk-quic-atomic 0
+START t3-overload-quic-atomic
+END t3-overload-quic-atomic 0
+START t3-overload-quic-witness
+END t3-overload-quic-witness 0
+START t3-overload-tcp-witness
+END t3-overload-tcp-witness 0
+START t3-overload-tcp-atomic
+END t3-overload-tcp-atomic 0
+START t3-singleton-tcp-atomic
+END t3-singleton-tcp-atomic 0
+START t3-singleton-tcp-witness
+END t3-singleton-tcp-witness 0
+START t3-singleton-quic-witness
+END t3-singleton-quic-witness 0
+START t3-singleton-quic-atomic
+END t3-singleton-quic-atomic 0
+START t3-moderate-quic-atomic
+END t3-moderate-quic-atomic 0
+START t3-moderate-quic-witness
+END t3-moderate-quic-witness 0
+START t3-moderate-tcp-witness
+END t3-moderate-tcp-witness 0
+START t3-moderate-tcp-atomic
+END t3-moderate-tcp-atomic 0
+ALL_TIMING_END
+CAMPAIGN_EXIT 0

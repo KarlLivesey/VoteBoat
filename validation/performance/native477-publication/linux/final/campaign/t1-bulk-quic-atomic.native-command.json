@@ -1,0 +1,18 @@
+[
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t1-bulk-quic-atomic",
+  "quic",
+  "8192",
+  "4096",
+  "1",
+  "--offered",
+  "512",
+  "--maintenance",
+  "2",
+  "--ready-items",
+  "16",
+  "--offered-capacity",
+  "4096",
+  "--publication",
+  "atomic"
+]

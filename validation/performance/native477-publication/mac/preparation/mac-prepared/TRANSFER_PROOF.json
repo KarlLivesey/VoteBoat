@@ -1,0 +1,8 @@
+{
+  "source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "files": 7,
+  "exact_sha256_and_modes": true,
+  "exact_directory_modes": true,
+  "python_version": "3.9.6 (default, May 25 2026, 19:03:31) \n[Clang 21.0.0 (clang-2100.3.20.101)]",
+  "scope": "Small runner/schema/authority text transfer only; no production source, binaries, builds or WAL copied."
+}

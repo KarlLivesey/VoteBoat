@@ -1,0 +1,21 @@
+[
+  "/usr/bin/python3.14",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3/resources.py",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3/campaign-metadata/t2-overload-tcp-atomic",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3-wal/t2-overload-tcp-atomic",
+  "tcp",
+  "8192",
+  "4096",
+  "1",
+  "--offered",
+  "1024",
+  "--maintenance",
+  "2",
+  "--ready-items",
+  "16",
+  "--offered-capacity",
+  "4096",
+  "--publication",
+  "atomic"
+]

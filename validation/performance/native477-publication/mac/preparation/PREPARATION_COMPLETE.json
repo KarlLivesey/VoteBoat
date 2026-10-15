@@ -1,0 +1,52 @@
+{
+  "scope": "Preparation only. Stop all setup/copies/checks after this receipt; root quiet-window GO is separate. No VoteBoat workload or build was run.",
+  "candidate_source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "proof_docs_commit": "c3aeed5c800fcb47e70a8b0df1cbd5f655d9dfe2",
+  "attempts": [
+    {
+      "name": "Linux initial sandbox setup",
+      "exit": 1,
+      "detail": "Source/artifact/readiness guards passed; lsblk could not see sandbox-hidden /dev/nvme1n1p2, exit32. Partial setup preserved, no READY/timing."
+    },
+    {
+      "name": "Linux2 host setup",
+      "exit": 0
+    },
+    {
+      "name": "Mac first text copy/prepare",
+      "exit": 0,
+      "original_prepare_handle": 78603
+    },
+    {
+      "name": "Linux3 final host setup",
+      "exit": 0
+    },
+    {
+      "name": "Mac final text copy/prepare",
+      "exit": 0,
+      "original_prepare_handle": 38065
+    },
+    {
+      "name": "Mac preparation evidence collection",
+      "exit": 0,
+      "original_handle": 79857
+    }
+  ],
+  "focused_runner_revision": "Root-approved interpreter-alias/native-command binding; previous configs preserved. No candidate/artifact/workload/schema change.",
+  "linux_job": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3",
+  "mac_job": "/private/tmp/voteboat-native477-kBXQpc/revision2/campaign",
+  "linux_launch": [
+    "/usr/bin/python3.14",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native477-publication/linux3/campaign.py",
+    "--authorized-quiet"
+  ],
+  "mac_launch": [
+    "/Applications/Xcode-beta.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9",
+    "/private/tmp/voteboat-native477-kBXQpc/revision2/campaign/campaign.py",
+    "--authorized-quiet"
+  ],
+  "all_case_roots_fresh_at_prepare": true,
+  "no_timing_started": true,
+  "review": "FINAL_PREPARATION_REVIEW.json",
+  "static_and_owned_child_probes": "4 plan/readback/static tests and3 harmless Python-child ownership/resource tests reportOK; raw stdout/stderr and deliberate negative helper error receipts retained. No VoteBoat benchmarks used as tests."
+}
