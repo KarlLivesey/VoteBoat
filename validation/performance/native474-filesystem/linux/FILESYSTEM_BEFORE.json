@@ -1,0 +1,12 @@
+[
+  {
+    "variant": "default",
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default",
+    "attributes": "----------------------"
+  },
+  {
+    "variant": "nocow",
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow",
+    "attributes": "---------------C------"
+  }
+]

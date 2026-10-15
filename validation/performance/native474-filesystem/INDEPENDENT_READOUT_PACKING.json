@@ -1,0 +1,8 @@
+{
+  "original_path": "target/p9/native474-filesystem/linux/INDEPENDENT_READOUT.json",
+  "original_bytes": 101630,
+  "original_sha256": "8faaf90ddfaf81a4656ff9314e04237932a3e5f813f21316d1a05b783f5abbed",
+  "container_bytes": 14541,
+  "container_sha256": "6fe808f0505fd1bb3be508b98cadd07e4856615bcfdae891387c178a8cc262bd",
+  "scope": "Independent raw ledger/counter/readback analysis after actual terminal0; no workload repeats."
+}

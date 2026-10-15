@@ -1,0 +1,10 @@
+{
+  "pid": 3863241,
+  "start": "2026-10-15T07:34:55.018287+00:00",
+  "command": [
+    "python3",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign.py",
+    "--authorized-quiet"
+  ],
+  "quiet_grant_sha256": "49ce2f2a937fc1fd9c8a80d985cbfde676ce9c54d076d5caf7b949efcdf7b7af"
+}

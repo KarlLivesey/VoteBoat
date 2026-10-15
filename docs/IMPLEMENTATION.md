@@ -858,9 +858,10 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current474: isolate filesystem policy in the real durable service | Determine whether the current deployment amplifies sync/publication latency before changing formats | Checked473 restoration; [filesystem schema](../validation/performance/native474-filesystem/SCHEMA.md), immutable native455 artifact/proofs and fresh same-device default/NoCoW parents | Publish restoration, finish setup/independent review and quiet window; twelve actual TCP/QUIC paired cases with exact outcomes/recovery/maintenance, completed rates, latency/refusals and physical barrier data; archive every result | P9.0/P9.2/P9.3 |
-| Next475: bounded larger-window offered-load capacity sweep | Distinguish admission/backlog limits from actual durable capacity and batching | Filesystem results, explicit common client/shard budgets, current fixture window64 cap and independent validator | Before-edit schema; checked offered-only windows32/256/4096 with common budgets/readbacks and ready16; actual recovery/budget controls, fresh native artifacts; rotated low/mid/overload measurements including latency/refusals/drain and real observed widths | P9.0/P9.2/P9.3 |
-| Following476: select and qualify durable publication improvement | Remove measured sync/publication work while preserving acknowledged-prefix damage detection and recovery | Current filesystem/load/counter evidence; precise journal authority, corruption/crash model and public JournalIo contract | Explicit format/API/ownership/migration/old-new cleanup plan before edits; no silent latest-authority fallback; modeled write/sync/reclaim/restart/corruption cuts, native recovery and actual paired durable gain; keep full framework curve and all P8 performance obligations linked in the macro plan | P9.0/P9.1/P9.2/P9.3/P9.4 |
+| Completed474: isolate filesystem policy in the real durable service | Determine whether the current deployment amplifies sync/publication latency before changing formats | Checked473 restoration; [filesystem schema](../validation/performance/native474-filesystem/SCHEMA.md), immutable native455 artifact/proofs and fresh same-device default/NoCoW parents | Publish restoration, finish setup/independent review and quiet window; twelve actual TCP/QUIC paired cases with exact outcomes/recovery/maintenance, completed rates, latency/refusals and physical barrier data; archive every result | P9.0/P9.2/P9.3 |
+| Current475: bounded larger-window offered-load capacity sweep | Distinguish admission/backlog limits from actual durable capacity and batching | Filesystem results, explicit common client/shard budgets, current fixture window64 cap and independent validator | Before-edit schema; checked offered-only windows32/256/4096 with common budgets/readbacks and ready16; actual recovery/budget controls, fresh native artifacts; rotated low/mid/overload measurements including latency/refusals/drain and real observed widths | P9.0/P9.2/P9.3 |
+| Next476: select and qualify durable publication improvement | Remove measured sync/publication work while preserving acknowledged-prefix damage detection and recovery | Current filesystem/load/counter evidence; precise journal authority, corruption/crash model and public JournalIo contract | Explicit format/API/ownership/migration/old-new cleanup plan before edits; no silent latest-authority fallback; modeled write/sync/reclaim/restart/corruption cuts, native recovery and actual paired durable gain; keep full framework curve and all P8 performance obligations linked in the macro plan | P9.0/P9.1/P9.2/P9.3/P9.4 |
+| Following: full sustained curve and composed service qualification | Complete remaining full P9 acceptance beyond this native sequence | Retained measured improvements and both-host qualified artifacts/workloads | All seven one-group floors with healthy margin, sustained bounded memory/debt, durable headroom/fairness/skew, placement/shared barriers and P8 relays/striped/recursive/logical voters; preserve outcomes and every failure | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
 comparison or short diagnostics. All seven one-group healthy-margin cells on
@@ -34965,3 +34966,34 @@ unacknowledged suffix behavior, fencing, old/new cleanup and migration. Choose
 implementation only from the actual filesystem/load evidence. Framework
 throughput ratios are not CPU attribution or comparable durable capacity; full
 seven-cell/both-host sustained healthy margin and all P9 macro scope stay open.
+
+
+473 restoration and474 setup publish9559f37e through original45092/full enabled
+hook0, exact remote main and clean worktree. [474 actual results](../validation/performance/native474-filesystem/linux/README.md)
+original27143 end0/ALL_TIMING_END after391.355s; all12 workloads/validators0.
+Same immutable455 release, fresh same-NVMe default Btrfs versus NoCoW, onegroup/
+3voters/15000offers500/s/window64/ready16/active2smaintenance/noPause. TCP median
+completed151.528→174.645 originals/s,p991572.132→996.206ms; paired rates
+1.208805/.972365/1.351998 and tails.629608/1.998262/.480549 preserve trial2
+regression. QUIC157.988→150.844/s,p991327.084→2094.808ms; rates
+1.105744/.810443/.899618 and tails.707026/1.898602/1.745374 lose twice.
+No universal NoCoW recommendation/default change follows; it also changes
+compression/filesystem-data-checksum policy. No ext4/XFS comparison is claimed.
+
+Replica1 configured-leader mean barrier/WALsync/publication medians TCP
+43.916/15.035/28.869→37.735/12.677/25.048ms; QUIC40.876/14.085/26.778→
+41.520/13.903/27.601ms. Nested elapsed scopes remain dominant but not additiveCPU.
+Allcase offers=applied+windowrefused, unknown/pending/other refusals0, recovery
+64+applied/retries/joins pass; all hit64inflight and substantial refusals remain.
+Attributes independently certify370files including18WAL+36MANIFEST files/arm,
+zero policy mismatches. All16 CPU policy records unchanged. Root archive250
+payloads/15 lossless originals verifies exact hashes/lengths; independent readout
+agrees on every raw ledger/pair/counter/recovery result. No workload was repeated.
+
+Next [475 schema](../validation/performance/native475-capacity/SCHEMA.md) adds
+an explicit common offered-capacity4096 fixture profile across windows32/256/4096,
+with per-group/client/shard caps and actual readbacks, while retaining ready16,
+control reserves, production/defaults and all original outcomes. It is a necessary
+measurement capability, not a gain. Checked small wide TCP/QUIC recovery controls
+and fresh published native artifacts precede the54-case/host offered-rate sweep.
+The default Btrfs path remains the reference. Full P9 macro scope is unchanged.

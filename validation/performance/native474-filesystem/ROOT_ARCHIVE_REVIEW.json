@@ -1,0 +1,12 @@
+{
+  "payloads": 250,
+  "gzip": 15,
+  "manifest_sha256": "2c1d2a64bac06f98b899b2b6e5e47c30e8cce794a86aa683aa4e794fb424a07c",
+  "exactrecursive_allSHA_allcontainer_originalSHA_lengths": "PASS",
+  "case_count": 12,
+  "all12workload_validator_exit0": "PASS",
+  "source_artifact_unchanged_455": "PASS",
+  "post_run_file_policy": "PASS",
+  "scope": "Independent archival reread; original actual data unchanged and no workload repeated.",
+  "native_format": "No format changed; current manifest retained."
+}

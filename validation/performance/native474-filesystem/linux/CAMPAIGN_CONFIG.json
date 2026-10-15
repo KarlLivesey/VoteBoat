@@ -1,0 +1,833 @@
+{
+  "baseline": {
+    "source_commit": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+    "source_inventory": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/SOURCE.json",
+    "source_inventory_sha256": "e9c3fa0df75905f1b8ce1e37bff78f059649a6bc58aae6551c194a3237fdb054",
+    "artifact": {
+      "kind": "native",
+      "target": "native_benchmark",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/target-native-release/release/examples/native_benchmark",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+      "sha256": "13c6f44666ca7bc60442d8e87e8591ff1a7ae59ce3b83a7510b455560a4cd6a8",
+      "compiler_record": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/source#voteboat@0.1.0",
+        "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/source/Cargo.toml",
+        "target": {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "native_benchmark",
+          "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/source/examples/native_benchmark.rs",
+          "edition": "2021",
+          "required-features": [
+            "tls"
+          ],
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": false
+        },
+        "features": [
+          "default",
+          "native",
+          "quic",
+          "tls"
+        ],
+        "filenames": [
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/target-native-release/release/examples/native_benchmark"
+        ],
+        "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/target-native-release/release/examples/native_benchmark",
+        "fresh": false
+      },
+      "compiled_source_sha256": "8df5fe9d97e933f186a66f42b54544c90438b0628541571899c4496f2a564820",
+      "manifest_sha256": "5cbd2a32a3ebb52769c1f3c2de02c4b3ff3d09e2f84947c6cd53aad6beef9c9f"
+    },
+    "root_artifact": {
+      "kind": "native",
+      "target": "voteboat",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/target-native-release/release/deps/libvoteboat-dcdd2fc8943f326a.rlib",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/libvoteboat-dcdd2fc8943f326a.rlib",
+      "sha256": "5d733a2d8da2255d76aa399954bd61901ee8bf3dff5b7035a58d6b2315d1225c",
+      "compiler_record": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/source#voteboat@0.1.0",
+        "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/source/Cargo.toml",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "voteboat",
+          "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/source/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": false
+        },
+        "features": [
+          "default",
+          "native",
+          "quic",
+          "tls"
+        ],
+        "filenames": [
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/target-native-release/release/deps/libvoteboat-dcdd2fc8943f326a.rlib",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/target-native-release/release/deps/libvoteboat-dcdd2fc8943f326a.rmeta"
+        ],
+        "executable": null,
+        "fresh": false
+      },
+      "compiled_source_sha256": "b15e256c65fb95f0e83e052b0ee76bc5a03f2d4b20706ff7529959ae685d4e6a",
+      "manifest_sha256": "5cbd2a32a3ebb52769c1f3c2de02c4b3ff3d09e2f84947c6cd53aad6beef9c9f"
+    },
+    "profile_proof": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/PROFILE_PROOF.json",
+      "sha256": "0c7878394ecc2455da9aa6d43a214b13b93b7a6b90aa840bf52e30f91edc075b"
+    },
+    "compiler": {
+      "rustc.txt": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/logs/rustc.txt",
+        "sha256": "778fbc643a806f0dd123c056e66201d7e8a56a61928ec0a33171be8d6c2d5a37"
+      },
+      "cargo.txt": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/logs/cargo.txt",
+        "sha256": "9950bbb2d5c3417b1a068f0e81f6d3cac991a363193bdf2a22d447f5acf8b503"
+      },
+      "tool-binaries.sha256": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/logs/tool-binaries.sha256",
+        "sha256": "5493d578c4e3f6d67d018dc2c885ba87b7a61674969299ed7975c7ea58aefa86"
+      }
+    }
+  },
+  "candidate": {
+    "source_commit": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+    "source_inventory": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/SOURCE.json",
+    "source_inventory_sha256": "e9c3fa0df75905f1b8ce1e37bff78f059649a6bc58aae6551c194a3237fdb054",
+    "artifact": {
+      "kind": "native",
+      "target": "native_benchmark",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/target-native-release/release/examples/native_benchmark",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+      "sha256": "13c6f44666ca7bc60442d8e87e8591ff1a7ae59ce3b83a7510b455560a4cd6a8",
+      "compiler_record": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/source#voteboat@0.1.0",
+        "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/source/Cargo.toml",
+        "target": {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "native_benchmark",
+          "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/source/examples/native_benchmark.rs",
+          "edition": "2021",
+          "required-features": [
+            "tls"
+          ],
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": false
+        },
+        "features": [
+          "default",
+          "native",
+          "quic",
+          "tls"
+        ],
+        "filenames": [
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/target-native-release/release/examples/native_benchmark"
+        ],
+        "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/target-native-release/release/examples/native_benchmark",
+        "fresh": false
+      },
+      "compiled_source_sha256": "8df5fe9d97e933f186a66f42b54544c90438b0628541571899c4496f2a564820",
+      "manifest_sha256": "5cbd2a32a3ebb52769c1f3c2de02c4b3ff3d09e2f84947c6cd53aad6beef9c9f"
+    },
+    "root_artifact": {
+      "kind": "native",
+      "target": "voteboat",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/target-native-release/release/deps/libvoteboat-dcdd2fc8943f326a.rlib",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/libvoteboat-dcdd2fc8943f326a.rlib",
+      "sha256": "5d733a2d8da2255d76aa399954bd61901ee8bf3dff5b7035a58d6b2315d1225c",
+      "compiler_record": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/source#voteboat@0.1.0",
+        "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/source/Cargo.toml",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "voteboat",
+          "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/source/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": false
+        },
+        "features": [
+          "default",
+          "native",
+          "quic",
+          "tls"
+        ],
+        "filenames": [
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/target-native-release/release/deps/libvoteboat-dcdd2fc8943f326a.rlib",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/target-native-release/release/deps/libvoteboat-dcdd2fc8943f326a.rmeta"
+        ],
+        "executable": null,
+        "fresh": false
+      },
+      "compiled_source_sha256": "b15e256c65fb95f0e83e052b0ee76bc5a03f2d4b20706ff7529959ae685d4e6a",
+      "manifest_sha256": "5cbd2a32a3ebb52769c1f3c2de02c4b3ff3d09e2f84947c6cd53aad6beef9c9f"
+    },
+    "profile_proof": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/PROFILE_PROOF.json",
+      "sha256": "0c7878394ecc2455da9aa6d43a214b13b93b7a6b90aa840bf52e30f91edc075b"
+    },
+    "compiler": {
+      "rustc.txt": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/logs/rustc.txt",
+        "sha256": "778fbc643a806f0dd123c056e66201d7e8a56a61928ec0a33171be8d6c2d5a37"
+      },
+      "cargo.txt": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/logs/cargo.txt",
+        "sha256": "9950bbb2d5c3417b1a068f0e81f6d3cac991a363193bdf2a22d447f5acf8b503"
+      },
+      "tool-binaries.sha256": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/logs/tool-binaries.sha256",
+        "sha256": "5493d578c4e3f6d67d018dc2c885ba87b7a61674969299ed7975c7ea58aefa86"
+      }
+    }
+  },
+  "control_tools": {
+    "directory": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/control-tools",
+    "inventory_sha256": "cb87f5c74b007798e004047f064158814c2f937e500698396e1d7ce37c23fe60",
+    "files": {
+      "check-benchmark-storage.mjs": {
+        "sha256": "d03de4b3027f8468d6e7bcc2b22f1a8051aba5a5f469fedbeb8e8ce9f3409aaf",
+        "mode": "0o644",
+        "committed_path": "validation/check-benchmark-storage.mjs"
+      },
+      "check-lanes.mjs": {
+        "sha256": "cb49a5d3cee377cf3154d9a9f092ea90e9af64b87ba98272cae50765c51dc920",
+        "mode": "0o644",
+        "committed_path": "validation/check-lanes.mjs"
+      },
+      "check-maintenance.mjs": {
+        "sha256": "99fd718641c95a0412ef2e98e33b23da717470613bdc496d6313c8b58d0ce658",
+        "mode": "0o644",
+        "committed_path": "validation/check-maintenance.mjs"
+      },
+      "check-native-benchmark.mjs": {
+        "sha256": "888fb80a06dd564b4d95908ca959d4ed995bebd3d61f245ee5455a2214eac5be",
+        "mode": "0o644",
+        "committed_path": "validation/check-native-benchmark.mjs"
+      },
+      "check-offered.mjs": {
+        "sha256": "bd96046dc52ab2800b235c92fe69745c2f191b89251a7f7658012e241790f805",
+        "mode": "0o644",
+        "committed_path": "validation/check-offered.mjs"
+      },
+      "check-publication-timings.mjs": {
+        "sha256": "4a4ba88136cbae48b3d822ed6b06274008f66955a15b6bba0e062e3c8715d331",
+        "mode": "0o644",
+        "committed_path": "validation/check-publication-timings.mjs"
+      },
+      "check-rounded-rate.mjs": {
+        "sha256": "262f06cfb0e878bfa7ce02741f51d7cd6e7e8df6b07b8973df4a7d89502c662d",
+        "mode": "0o644",
+        "committed_path": "validation/check-rounded-rate.mjs"
+      }
+    }
+  },
+  "profile": "nativeopt3/debug0/assert+overflow/defaultLTO/defaultcodegen; notframeworkthin/cgu1",
+  "scope": "Same immutable published455 native release, defaultBtrfs CoW/compressioneligible versus freshNoCoW/noCompression parents on SAME physical NVMe;onegroup3replicas/TCPQUIC/3pairedrotatingtrials/15000offers500persec/window64/ready16/active2smaintenance/noPause. Combinedfilesystempolicy diagnostic,notisolatedCoW/ext4/enginegain/fullcapacity/headroom.",
+  "resources": "Existingpercasecollector wholeprocess peakRSSLinuxKiB/raw+normalizedbytes, includeswarmup/recovery/cleanup; notmeasurementonly/time-series; blockcountsnotbytes",
+  "cases": [
+    {
+      "name": "tcp-t1-default",
+      "variant": "default",
+      "protocol": "tcp",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30.0,
+      "window": 64,
+      "ready_items": 16,
+      "trial": 1,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default/tcp-t1-default",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/tcp-t1-default",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default/tcp-t1-default",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/tcp-t1-default/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default/tcp-t1-default",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "name": "tcp-t1-nocow",
+      "variant": "nocow",
+      "protocol": "tcp",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30.0,
+      "window": 64,
+      "ready_items": 16,
+      "trial": 1,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/tcp-t1-nocow",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/tcp-t1-nocow",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/tcp-t1-nocow",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/tcp-t1-nocow/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/tcp-t1-nocow",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "name": "tcp-t2-nocow",
+      "variant": "nocow",
+      "protocol": "tcp",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30.0,
+      "window": 64,
+      "ready_items": 16,
+      "trial": 2,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/tcp-t2-nocow",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/tcp-t2-nocow",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/tcp-t2-nocow",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/tcp-t2-nocow/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/tcp-t2-nocow",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "name": "tcp-t2-default",
+      "variant": "default",
+      "protocol": "tcp",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30.0,
+      "window": 64,
+      "ready_items": 16,
+      "trial": 2,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default/tcp-t2-default",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/tcp-t2-default",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default/tcp-t2-default",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/tcp-t2-default/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default/tcp-t2-default",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "name": "tcp-t3-default",
+      "variant": "default",
+      "protocol": "tcp",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30.0,
+      "window": 64,
+      "ready_items": 16,
+      "trial": 3,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default/tcp-t3-default",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/tcp-t3-default",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default/tcp-t3-default",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/tcp-t3-default/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default/tcp-t3-default",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "name": "tcp-t3-nocow",
+      "variant": "nocow",
+      "protocol": "tcp",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30.0,
+      "window": 64,
+      "ready_items": 16,
+      "trial": 3,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/tcp-t3-nocow",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/tcp-t3-nocow",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/tcp-t3-nocow",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/tcp-t3-nocow/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/tcp-t3-nocow",
+        "tcp",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "name": "quic-t1-nocow",
+      "variant": "nocow",
+      "protocol": "quic",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30.0,
+      "window": 64,
+      "ready_items": 16,
+      "trial": 1,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/quic-t1-nocow",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/quic-t1-nocow",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/quic-t1-nocow",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/quic-t1-nocow/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/quic-t1-nocow",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "name": "quic-t1-default",
+      "variant": "default",
+      "protocol": "quic",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30.0,
+      "window": 64,
+      "ready_items": 16,
+      "trial": 1,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default/quic-t1-default",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/quic-t1-default",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default/quic-t1-default",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/quic-t1-default/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default/quic-t1-default",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "name": "quic-t2-default",
+      "variant": "default",
+      "protocol": "quic",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30.0,
+      "window": 64,
+      "ready_items": 16,
+      "trial": 2,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default/quic-t2-default",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/quic-t2-default",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default/quic-t2-default",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/quic-t2-default/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default/quic-t2-default",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "name": "quic-t2-nocow",
+      "variant": "nocow",
+      "protocol": "quic",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30.0,
+      "window": 64,
+      "ready_items": 16,
+      "trial": 2,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/quic-t2-nocow",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/quic-t2-nocow",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/quic-t2-nocow",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/quic-t2-nocow/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/quic-t2-nocow",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "name": "quic-t3-nocow",
+      "variant": "nocow",
+      "protocol": "quic",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30.0,
+      "window": 64,
+      "ready_items": 16,
+      "trial": 3,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/quic-t3-nocow",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/quic-t3-nocow",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/quic-t3-nocow",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/quic-t3-nocow/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/quic-t3-nocow",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "name": "quic-t3-default",
+      "variant": "default",
+      "protocol": "quic",
+      "groups": 1,
+      "offered_rate": 500,
+      "requested_offers": 15000,
+      "horizon_seconds": 30.0,
+      "window": 64,
+      "ready_items": 16,
+      "trial": 3,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default/quic-t3-default",
+      "metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/quic-t3-default",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default/quic-t3-default",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_command": [
+        "python3",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/campaign-metadata/quic-t3-default/resources.py",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-default/quic-t3-default",
+        "quic",
+        "15000",
+        "64",
+        "1",
+        "--offered",
+        "500",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16"
+      ],
+      "resource_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    }
+  ],
+  "timing_authorized": false,
+  "root_quiet_grant_required": true,
+  "filesystem_setup": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/FILESYSTEM_SETUP.json",
+    "sha256": "dca946b957b1db414e7ef881cd2a4d4d9dcd35fd9f6cd62be41bbebb41b2f752"
+  },
+  "reused_fixture_and_artifact_proof": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-quantum64/linux/READY.json"
+}

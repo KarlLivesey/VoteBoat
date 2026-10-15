@@ -1,0 +1,13 @@
+{
+  "state": "PREPARED_NOT_TIMED_AWAITING_FINISHED_CHECKS_PUBLICATION_REVIEW_QUIET",
+  "campaign_config_sha256": "3d7ac8dd59ed5cdfcd1b44285a8c68ba0b546690e490fd6765b33ce221ee7f6a",
+  "campaign_driver_sha256": "b014068f7cda99d9b7d835c400c401c73d0afd49f4ab26119213265fbc818144",
+  "case_count": 12,
+  "same_native_artifact_sha256": "13c6f44666ca7bc60442d8e87e8591ff1a7ae59ce3b83a7510b455560a4cd6a8",
+  "source_commit": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "filesystem_setup_sha256": "dca946b957b1db414e7ef881cd2a4d4d9dcd35fd9f6cd62be41bbebb41b2f752",
+  "host_setup_sha256": "0e0786d997a1fc4db327fef2de13fcdc06a45bdee0062ecd801128e3f2577dd6",
+  "no_build_or_source_copy": true,
+  "case_roots_all_absent": true,
+  "post_review_correction": "Require actual descendant file C policy perarm and >=3replicaWALfiles each after timing, preserve raw attrs and failed certification without workload replacement."
+}

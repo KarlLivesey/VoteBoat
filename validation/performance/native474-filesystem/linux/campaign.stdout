@@ -1,0 +1,24 @@
+START tcp-t1-default
+END tcp-t1-default 0
+START tcp-t1-nocow
+END tcp-t1-nocow 0
+START tcp-t2-nocow
+END tcp-t2-nocow 0
+START tcp-t2-default
+END tcp-t2-default 0
+START tcp-t3-default
+END tcp-t3-default 0
+START tcp-t3-nocow
+END tcp-t3-nocow 0
+START quic-t1-nocow
+END quic-t1-nocow 0
+START quic-t1-default
+END quic-t1-default 0
+START quic-t2-default
+END quic-t2-default 0
+START quic-t2-nocow
+END quic-t2-nocow 0
+START quic-t3-nocow
+END quic-t3-nocow 0
+START quic-t3-default
+END quic-t3-default 0

@@ -1,0 +1,5 @@
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/tcp-t1-nocow: 15000 scheduled offers, 5722 admissions, 5722 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=500.000 admitted_during=190.733 applied_during=188.600 applied_drain=334.651 applied_total=189.525 ops/s; window_refused=9278 backlog_at_horizon=64
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native474-filesystem/linux/storage-nocow/tcp-t1-nocow: 14 durable checkpoint boundaries, 42 exact-scope reclamation rows, 0 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=2454.762 reclaim_ms=5405.706 reclaimed_bytes=767254 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=1283 units=1283 commands=17166 mean_units=1.000 append_ms=27.674 barriers=1283 mean_appends_per_barrier=1.000 mean_units_per_barrier=1.000 barrier_ms=46873.415 sync_ms=16430.006 publish_ms=30426.714 histogram=1:1283

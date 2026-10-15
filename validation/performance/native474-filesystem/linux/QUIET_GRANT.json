@@ -1,0 +1,11 @@
+{
+  "time": "2026-10-15T07:34:55.018058+00:00",
+  "published_restoration": "9559f37e502a3ab671d1e4145ae1fbaf8fc31b2e",
+  "enabled_hook_actual_exit": 0,
+  "no_competing_build_check_profile_benchmark_processes": true,
+  "governor_changes": false,
+  "other_work_on_linux_during_timing": "No builds/checks/copies/archive/competingbenchmarks; only small original-handle statuspolls.",
+  "frozen_ready_sha256": "05cf526f7df60ca62c1078179a792fa1e0a3c1dea8df59aafbec357795889035",
+  "config_sha256": "3d7ac8dd59ed5cdfcd1b44285a8c68ba0b546690e490fd6765b33ce221ee7f6a",
+  "controller_sha256": "b014068f7cda99d9b7d835c400c401c73d0afd49f4ab26119213265fbc818144"
+}

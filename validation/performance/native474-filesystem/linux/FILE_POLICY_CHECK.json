@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "checked_regular_files": 370,
+  "critical_wal_files": {
+    "default": 18,
+    "nocow": 18
+  },
+  "mismatches": [],
+  "scope": "NoCoW also disables filesystem data checksumming/compression; engine WAL CRC and native durability protocol unchanged."
+}
