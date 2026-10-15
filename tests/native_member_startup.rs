@@ -241,7 +241,7 @@ fn seed(path: &Path, local: u64, phase: u64, commit: u64, compact: bool) {
             commit_index: if compact { 4 } else { commit },
             suffix: Some(Suffix {
                 from: 1,
-                entries: history.into(),
+                entries: history,
             }),
             snapshot: None,
             snapshot_membership: None,
@@ -2069,7 +2069,7 @@ fn seed_repair_nodes(
                 },
                 suffix: Some(Suffix {
                     from: 1,
-                    entries: retained.into(),
+                    entries: retained,
                 }),
                 snapshot: None,
                 snapshot_membership: None,
@@ -2315,7 +2315,7 @@ fn seed_witness_files(
                 commit_index: count as u64,
                 suffix: Some(Suffix {
                     from: 1,
-                    entries: history[..count].to_vec().into(),
+                    entries: history[..count].to_vec(),
                 }),
                 snapshot: None,
                 snapshot_membership: None,

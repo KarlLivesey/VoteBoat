@@ -1,0 +1,8 @@
+{
+  "actual_setup_tool_exit": 1,
+  "missing_optional_tool": "/usr/bin/time absent; exact shell output: zsh:1: no such file or directory: /usr/bin/time",
+  "guard_refusal": "Changed driver input after optional wrapper edit, correctly refused before any timing. Raw guard.log retained.",
+  "action": "Restored frozen phase-diagnostic.sh and COMMANDS.json byte-for-byte; optional RSS wrapper not used. Existing ON retained-owner charges and shell elapsed/user/system remain, full RSS/plateau acceptance is not claimed. No installation or additional helper.",
+  "restored_guard_actual_exit": 0,
+  "timing_started_before_correction": false
+}

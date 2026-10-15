@@ -102,8 +102,7 @@ pub(super) fn command(state: &GroupLog, value: u8) -> LogMutation {
                     operation: OperationId::new(index.into()).unwrap(),
                     bytes: vec![value; 1300].into(),
                 },
-            }]
-            .into(),
+            }],
         }),
         snapshot: None,
         snapshot_membership: None,
@@ -150,7 +149,7 @@ pub(super) fn exact(store: &impl LogStore, state: &GroupLog) {
         store
             .fetch_range(group(), state.generation, 1, 16, 32768)
             .unwrap(),
-        state.entries.to_vec()
+        state.entries
     );
 }
 pub(super) fn fenced(store: &mut impl LogStore, layout: &Layout, mutation: LogMutation) {

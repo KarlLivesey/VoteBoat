@@ -56,10 +56,7 @@ fn core(a: &LogicalApplication, entries: Vec<LogEntry>, commit: u64) -> crate::r
                 voted_for: None,
             },
             commit_index: commit,
-            suffix: Some(Suffix {
-                from: 1,
-                entries: entries.into(),
-            }),
+            suffix: Some(Suffix { from: 1, entries }),
             snapshot: None,
             snapshot_membership: None,
         })],
@@ -198,7 +195,7 @@ fn child_journal_does_not_inherit_parent_batch_limit() {
         commit_index: 1,
         suffix: Some(Suffix {
             from: 1,
-            entries: vec![e.clone()].into(),
+            entries: vec![e.clone()],
         }),
         snapshot: None,
         snapshot_membership: None,

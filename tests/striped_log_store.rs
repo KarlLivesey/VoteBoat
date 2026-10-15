@@ -58,7 +58,7 @@ fn add(store: &mut impl LogStore, value: u8, commit: bool) -> Vec<LogTicket> {
             if commit { index } else { s.commit_index },
             Some(Suffix {
                 from: index,
-                entries: vec![e].into(),
+                entries: vec![e],
             }),
         )])
         .unwrap()

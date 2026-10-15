@@ -635,7 +635,7 @@ fn native_decision_publication_completion_and_release_cuts_keep_exact_phase_stat
                 boundary,
                 Some(Suffix {
                     from: boundary,
-                    entries: vec![entries[boundary as usize - 1].clone()].into(),
+                    entries: vec![entries[boundary as usize - 1].clone()],
                 }),
             );
             let frame = NativeLogCodec

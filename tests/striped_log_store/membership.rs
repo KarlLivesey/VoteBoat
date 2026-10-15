@@ -60,8 +60,7 @@ fn configure(store: &mut impl LogStore, expected: u64, change: ConfigurationChan
                     index,
                     term: 1,
                     payload: EntryPayload::Configuration(Box::new(record)),
-                }]
-                .into(),
+                }],
             }),
         )],
     );

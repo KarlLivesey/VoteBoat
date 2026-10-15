@@ -29,7 +29,7 @@ fn one_group_stripes_original_bytes_and_reopens_exact_suffix_snapshot_and_sessio
         store
             .fetch_range(group(1), s.generation, 1, 1, 4096)
             .unwrap(),
-        s.entries.to_vec()
+        s.entries
     );
     let old = add(&mut store, 8, false);
     let accepted_revision = LogRevision::new(s.revision.get() + 1).unwrap();
@@ -44,7 +44,7 @@ fn one_group_stripes_original_bytes_and_reopens_exact_suffix_snapshot_and_sessio
             commit_index: 1,
             suffix: Some(Suffix {
                 from: 2,
-                entries: vec![entry(2, 2, 9)].into(),
+                entries: vec![entry(2, 2, 9)],
             }),
             snapshot: None,
             snapshot_membership: None,

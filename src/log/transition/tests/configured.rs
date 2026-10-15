@@ -51,7 +51,7 @@ fn accept(state: &GroupLog, operation: u128, change: ConfigurationChange) -> Gro
             state.commit_index,
             Some(Suffix {
                 from: index,
-                entries: vec![record].into(),
+                entries: vec![record],
             }),
         ),
         LogLimits::default(),
@@ -136,7 +136,7 @@ fn append(state: &GroupLog) -> LogUpdate {
         state.commit_index,
         Some(Suffix {
             from: index,
-            entries: vec![entry(index, state.hard_state.term)].into(),
+            entries: vec![entry(index, state.hard_state.term)],
         }),
     )
 }
@@ -154,7 +154,7 @@ fn stable_joint_final_and_compacted_histories_match_original_validator() {
                 None,
                 Some(Suffix {
                     from: state.last_index() + 1,
-                    entries: vec![entry(state.last_index() + 1, 1)].into(),
+                    entries: vec![entry(state.last_index() + 1, 1)],
                 }),
                 Some(Suffix {
                     from: state.last_index() + 1,
@@ -162,8 +162,7 @@ fn stable_joint_final_and_compacted_histories_match_original_validator() {
                         index: state.last_index() + 1,
                         term: 1,
                         payload: EntryPayload::Noop,
-                    }]
-                    .into(),
+                    }],
                 }),
             ] {
                 compare(
@@ -215,19 +214,12 @@ fn configured_delta_preserves_old_payload_and_checkpoint_allocations() {
     );
     assert!(!summary.is_plain());
     assert_eq!(summary, LogSummary::from_validated(&state));
-    let pointers: Vec<_> = state.entries.iter().map(std::ptr::from_ref).collect();
+    let pointer = state.entries.as_ptr();
     let incoming = proposal(&state, state.last_index(), None);
     planned(&state, &incoming)
         .install(&mut state, incoming)
         .unwrap();
-    assert_eq!(
-        state
-            .entries
-            .iter()
-            .map(std::ptr::from_ref)
-            .collect::<Vec<_>>(),
-        pointers
-    );
+    assert_eq!(state.entries.as_ptr(), pointer);
 }
 
 #[test]
@@ -269,7 +261,7 @@ fn configured_replacement_configuration_and_snapshot_keep_full_fallback() {
         state.commit_index,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 1)].into(),
+            entries: vec![entry(3, 1)],
         }),
     );
     assert!(planned(&state, &replacement).full().is_some());
@@ -288,7 +280,7 @@ fn configured_replacement_configuration_and_snapshot_keep_full_fallback() {
         3,
         Some(Suffix {
             from: 4,
-            entries: vec![next.entries.last().unwrap().clone()].into(),
+            entries: vec![next.entries.last().unwrap().clone()],
         }),
     );
     assert!(planned(&stable, &incoming).full().is_some());
@@ -337,7 +329,7 @@ fn configured_overlay_tail_supports_unpublished_deltas_and_full_ballot_fallback(
         panic!("configured delta required")
     };
     let metadata = delta.metadata();
-    let tail = EntryHistory::from(delta.append.unwrap().entries);
+    let tail = delta.append.unwrap().entries;
     let accepted = stage_update(&base, &first, LogLimits::default()).unwrap();
     let mut second = append(&accepted);
     second.commit_index = second.suffix.as_ref().unwrap().from;

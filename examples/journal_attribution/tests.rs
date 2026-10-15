@@ -110,7 +110,7 @@ fn combined_batch_commits_the_old_command_not_its_new_append() {
         1,
         Some(Suffix {
             from: 1,
-            entries: vec![command(1, 10, 1)].into(),
+            entries: vec![command(1, 10, 1)],
         }),
     );
     f.submit(
@@ -118,7 +118,7 @@ fn combined_batch_commits_the_old_command_not_its_new_append() {
         1,
         Some(Suffix {
             from: 2,
-            entries: vec![command(2, 20, 1)].into(),
+            entries: vec![command(2, 20, 1)],
         }),
     );
     f.submit(2, 1, None);
@@ -168,7 +168,7 @@ fn replacement_keeps_the_discarded_append_distinct_from_the_committed_entry() {
         1,
         Some(Suffix {
             from: 1,
-            entries: vec![command(1, 10, 1)].into(),
+            entries: vec![command(1, 10, 1)],
         }),
     );
     f.submit(
@@ -176,7 +176,7 @@ fn replacement_keeps_the_discarded_append_distinct_from_the_committed_entry() {
         2,
         Some(Suffix {
             from: 1,
-            entries: vec![command(1, 20, 2)].into(),
+            entries: vec![command(1, 20, 2)],
         }),
     );
     f.submit(1, 2, None);
@@ -207,7 +207,7 @@ fn complete_written_and_torn_tails_are_not_credited_as_original_durability() {
         1,
         Some(Suffix {
             from: 1,
-            entries: vec![command(1, 10, 1)].into(),
+            entries: vec![command(1, 10, 1)],
         }),
     );
     f.close();
@@ -234,7 +234,7 @@ fn native_identity_and_durable_corruption_refuse_without_modifying_source() {
         1,
         Some(Suffix {
             from: 1,
-            entries: vec![command(1, 10, 1)].into(),
+            entries: vec![command(1, 10, 1)],
         }),
     );
     f.close();
@@ -262,7 +262,7 @@ fn current_selection_and_missing_lock_are_refused_without_creating_files() {
         1,
         Some(Suffix {
             from: 1,
-            entries: vec![command(1, 10, 1)].into(),
+            entries: vec![command(1, 10, 1)],
         }),
     );
     for term in 2..=8 {

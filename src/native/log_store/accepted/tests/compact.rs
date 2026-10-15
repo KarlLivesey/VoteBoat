@@ -66,7 +66,7 @@ fn deferred_trim_composes_with_accepted_tail_and_subset_publication() {
         5,
         Some(Suffix {
             from: 4,
-            entries: vec![entry(4, 1), entry(5, 1)].into(),
+            entries: vec![entry(4, 1), entry(5, 1)],
         }),
     );
     let old = accept(&mut store, &mut oracle, update);
@@ -84,7 +84,7 @@ fn deferred_trim_composes_with_accepted_tail_and_subset_publication() {
         5,
         Some(Suffix {
             from: 6,
-            entries: vec![entry(6, 1)].into(),
+            entries: vec![entry(6, 1)],
         }),
     );
     let appended = accept(&mut store, &mut oracle, update);
@@ -97,7 +97,7 @@ fn deferred_trim_composes_with_accepted_tail_and_subset_publication() {
         5,
         Some(Suffix {
             from: 7,
-            entries: vec![entry(7, 1)].into(),
+            entries: vec![entry(7, 1)],
         }),
     );
     let later = accept(&mut store, &mut oracle, update);
@@ -126,7 +126,7 @@ fn invalid_later_unit_does_not_trim_or_write_the_earlier_compaction() {
         2,
         Some(Suffix {
             from: 1,
-            entries: vec![entry(1, 1), entry(2, 1)].into(),
+            entries: vec![entry(1, 1), entry(2, 1)],
         }),
     );
     commit(&mut store, vec![initial]);
@@ -191,7 +191,7 @@ fn trimmed_accepted_view_materializes_exact_configuration_and_replacement_fallba
             2,
             Some(Suffix {
                 from,
-                entries: vec![payload].into(),
+                entries: vec![payload],
             }),
         );
         let ticket = accept(&mut store, &mut oracle, update);
@@ -203,98 +203,4 @@ fn trimmed_accepted_view_materializes_exact_configuration_and_replacement_fallba
         store.barrier(&ticket).unwrap();
         assert_eq!(store.durable, oracle);
     }
-}
-
-#[test]
-fn repeated_accepted_batches_and_partial_compaction_keep_full_boundary_backing_charged() {
-    let mut store = open(2);
-    let original: EntryBatch = (1..=8).map(|index| entry(index, 1)).collect();
-    let update = mutation(
-        &store,
-        1,
-        8,
-        Some(Suffix {
-            from: 1,
-            entries: original.clone(),
-        }),
-    );
-    commit(&mut store, vec![update]);
-    let full_charge = store.durable[&group(1)].entries.allocation_bytes().unwrap();
-    let update = compact(&store, 3);
-    commit(&mut store, vec![update]);
-    assert_eq!(
-        store.durable[&group(1)].entries.allocation_bytes(),
-        Some(full_charge)
-    );
-    assert_eq!(
-        store.durable[&group(1)].entries.capacity(),
-        original.capacity()
-    );
-    assert_eq!(
-        store.durable[&group(1)].entries.get(0).unwrap() as *const LogEntry,
-        &original[3] as *const LogEntry
-    );
-    let mut batches = Vec::new();
-    for start in [9, 13, 17] {
-        let batch: EntryBatch = (start..start + 4).map(|index| entry(index, 1)).collect();
-        let update = mutation(
-            &store,
-            1,
-            start + 3,
-            Some(Suffix {
-                from: start,
-                entries: batch.clone(),
-            }),
-        );
-        store.append_batch(vec![update]).unwrap();
-        batches.push(batch);
-    }
-    assert_eq!(store.durable[&group(1)].last_index(), 8);
-    let accepted_charge = tail(&store).allocation_bytes().unwrap();
-    let update = compact(&store, 10);
-    let compacted = store.append_batch(vec![update]).unwrap();
-    assert_eq!(tail(&store).allocation_bytes(), Some(accepted_charge));
-    assert_eq!(tail(&store).len(), 10);
-    assert_eq!(
-        tail(&store).get(0).unwrap() as *const LogEntry,
-        &batches[0][2] as *const LogEntry
-    );
-    let update = compact(&store, 15);
-    let later = store.append_batch(vec![update]).unwrap();
-    assert_eq!(
-        tail(&store).allocation_bytes(),
-        Some(accepted_charge - batches[0].allocation_bytes().unwrap())
-    );
-    assert_eq!(tail(&store).len(), 5);
-    assert_eq!(
-        tail(&store).get(0).unwrap() as *const LogEntry,
-        &batches[1][3] as *const LogEntry
-    );
-    assert_eq!(store.barrier(&compacted), Err(StorageError::StaleTicket));
-    let update = mutation(&store, 2, 0, None);
-    let other = store.append_batch(vec![update]).unwrap();
-    store.barrier(&other).unwrap();
-    let state = &store.durable[&group(1)];
-    assert_eq!(state.base_index(), 15);
-    assert_eq!(
-        state.entries,
-        (16..=20).map(|index| entry(index, 1)).collect::<Vec<_>>()
-    );
-    assert_eq!(
-        state.entries.get(0).unwrap() as *const LogEntry,
-        &batches[1][3] as *const LogEntry
-    );
-    assert_eq!(
-        state.entries.get(1).unwrap() as *const LogEntry,
-        batches[2].as_ptr()
-    );
-    assert!(
-        state.entries.allocation_bytes().unwrap()
-            >= batches[1].allocation_bytes().unwrap() + batches[2].allocation_bytes().unwrap()
-    );
-    assert_eq!(
-        store.accepted.summaries[&group(1)].retained_bytes(),
-        state.entries.allocation_bytes()
-    );
-    assert_eq!(store.barrier(&later).unwrap().tickets, later);
 }

@@ -62,8 +62,7 @@ fn committed_core() -> Raft {
                 command(2, 2, 3),
                 command(3, 1, 7),
                 command(4, 3, -2),
-            ]
-            .into(),
+            ],
         }),
     );
     if let LogMutation::Update(u) = &mut mutation {
@@ -213,12 +212,10 @@ fn invalid_snapshot_binding_boundary_schema_or_tail_never_partly_restores() {
     assert!(restore_application(&core, &mut capacity, &mut snapshots).is_err());
     assert_eq!(capacity.applied_index(), 0);
     let mut invalid_state = core.state().clone();
-    let mut invalid_entry = invalid_state.entries[3].clone();
-    invalid_entry.payload = EntryPayload::Command {
+    invalid_state.entries[3].payload = EntryPayload::Command {
         operation: OperationId::new(3).unwrap(),
         bytes: vec![0].into(),
     };
-    invalid_state.entries.replace(3, invalid_entry).unwrap();
     let bad_tail = Raft::recover(
         node(1),
         core.storage_binding(),
@@ -729,7 +726,7 @@ mod native {
                 2,
                 Some(Suffix {
                     from: 1,
-                    entries: vec![command(1, 1, 7), command(2, 2, 3)].into(),
+                    entries: vec![command(1, 1, 7), command(2, 2, 3)],
                 }),
             )],
         );
@@ -744,7 +741,7 @@ mod native {
                 5,
                 Some(Suffix {
                     from: 5,
-                    entries: vec![command(5, 1, 7)].into(),
+                    entries: vec![command(5, 1, 7)],
                 }),
             )],
         );
@@ -783,7 +780,7 @@ mod native {
             )
             .unwrap();
             let mut app = Counter::new(20).unwrap();
-            app.apply_batch(&core.replay_committed()).unwrap();
+            app.apply_batch(core.replay_committed()).unwrap();
             let io = MemoryIo::default();
             let mut snapshots = create(io.clone());
             checkpoint_application(&core, &app, &mut snapshots).unwrap();
@@ -796,7 +793,7 @@ mod native {
                     4,
                     Some(Suffix {
                         from: 3,
-                        entries: vec![command(3, 1, 7), command(4, 3, -2)].into(),
+                        entries: vec![command(3, 1, 7), command(4, 3, -2)],
                     }),
                 )],
             );
@@ -1673,7 +1670,7 @@ fn restore_refuses_altered_membership_even_with_same_reference_configuration_id(
     use voteboat::membership::Membership;
     let core = committed_core();
     let mut app = Counter::new(10).unwrap();
-    app.apply_batch(&core.replay_committed()).unwrap();
+    app.apply_batch(core.replay_committed()).unwrap();
     let mut snapshots = HostSnapshots::new();
     let receipt = checkpoint_application(&core, &app, &mut snapshots).unwrap();
     let snapshot = snapshots.current.as_mut().unwrap();

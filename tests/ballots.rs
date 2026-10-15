@@ -85,8 +85,7 @@ fn staged<S: LogStore>(store: &mut S) {
                     100,
                     1,
                     ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[4, 5])),
-                )]
-                .into(),
+                )],
             }),
         )],
     );
@@ -112,8 +111,7 @@ fn joint<S: LogStore>(store: &mut S) {
                         id: cid(3),
                         next: configuration(4, &[3, 4, 5], &[1, 2]),
                     },
-                )]
-                .into(),
+                )],
             }),
         )],
     );
@@ -167,8 +165,7 @@ fn rollback_conformance<S: LogStore>(store: &mut S) {
                         id: cid(3),
                         next: configuration(4, &[3, 4, 5], &[1, 2]),
                     },
-                )]
-                .into(),
+                )],
             }),
         ),
     );
@@ -190,8 +187,7 @@ fn rollback_conformance<S: LogStore>(store: &mut S) {
                         id: cid(3),
                         next: configuration(4, &[3, 4, 5], &[1, 2]),
                     },
-                )]
-                .into(),
+                )],
             }),
         )],
     );
@@ -211,8 +207,7 @@ fn rollback_conformance<S: LogStore>(store: &mut S) {
                     index: 2,
                     term: 2,
                     payload: EntryPayload::Noop,
-                }]
-                .into(),
+                }],
             }),
         )],
     );
@@ -253,8 +248,7 @@ fn removal<S: LogStore>(store: &mut S) {
                     101,
                     3,
                     ConfigurationChange::Final { id: cid(4) },
-                )]
-                .into(),
+                )],
             }),
         )],
     );
@@ -277,8 +271,7 @@ fn removal<S: LogStore>(store: &mut S) {
                         id: cid(5),
                         next: configuration(6, &[1, 2, 3], &[]),
                     },
-                )]
-                .into(),
+                )],
             }),
         )],
     );
@@ -298,8 +291,7 @@ fn removal<S: LogStore>(store: &mut S) {
                     102,
                     5,
                     ConfigurationChange::Final { id: cid(6) },
-                )]
-                .into(),
+                )],
             }),
         )],
     );
@@ -381,8 +373,7 @@ fn ballot_origin_is_checked_on_recovery_without_granting_current_authority() {
                     index: 1,
                     term: 2,
                     payload: EntryPayload::Noop,
-                }]
-                .into(),
+                }],
             }),
         )],
     );

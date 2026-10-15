@@ -73,7 +73,7 @@ fn populated() -> (ModelIo, GroupLog) {
             2,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 7), entry(2, 1, 3)].into(),
+                entries: vec![entry(1, 1, 7), entry(2, 1, 3)],
             }),
         )],
     );
@@ -111,7 +111,7 @@ fn generated_native_batch_mutations_reach_bounded_inner_decoders() {
             3,
             Some(Suffix {
                 from: 3,
-                entries: vec![command].into(),
+                entries: vec![command],
             }),
         )],
         "wal-update-batch",

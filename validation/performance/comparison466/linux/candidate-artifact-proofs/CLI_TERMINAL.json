@@ -1,0 +1,9 @@
+{
+  "execution_kind": "synchronous_exec",
+  "tool_chunk_id": "062ffe",
+  "session_handle": null,
+  "actual_exit": 0,
+  "command": "bash target/p9/matched466-linux/cli-run.sh",
+  "CLI_STATUS": 0,
+  "scope": "Chunk identifier is not a live session handle. All three controls and post-sourceguard completed in this original invocation."
+}

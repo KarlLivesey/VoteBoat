@@ -1,0 +1,77 @@
+{
+  "commit": "92454c26cfe35aa65034eb3c306e990d42d88a80",
+  "source_inputs": 1459,
+  "source_sha256_and_physical_modes": true,
+  "counts": {
+    "root_lib_all": [
+      437
+    ],
+    "root_protocol_all": [
+      203,
+      24,
+      5,
+      11,
+      2,
+      19,
+      9,
+      44,
+      32,
+      46,
+      79,
+      55,
+      27,
+      14,
+      9,
+      9
+    ],
+    "root_lib_core": [
+      355
+    ],
+    "root_protocol_core": [
+      195,
+      14,
+      5,
+      2,
+      18,
+      31,
+      29,
+      38,
+      12,
+      5,
+      3
+    ],
+    "root_three_services": [
+      2
+    ],
+    "root_member_services": [
+      2
+    ],
+    "matched_tests": [
+      71
+    ]
+  },
+  "commands": [
+    "root_lib_all",
+    "root_protocol_all",
+    "root_lib_core",
+    "root_protocol_core",
+    "root_three_services",
+    "root_member_services",
+    "matched_tests",
+    "root_fmt",
+    "root_default_strict",
+    "root_all_strict",
+    "root_core_strict",
+    "root_native_strict",
+    "matched_fmt",
+    "matched_strict",
+    "provider_metadata",
+    "source_preflight"
+  ],
+  "all_command_exits": 0,
+  "compiler": "rustc 1.98.0 (88d9e12ae 2026-08-18)\nbinary: rustc\ncommit-hash: 88d9e12ae178fab0fb5cc050a94da85685d449ea\ncommit-date: 2026-08-18\nhost: aarch64-apple-darwin\nrelease: 1.98.0\nLLVM version: 22.1.8\n",
+  "qualification_only": true,
+  "fresh_performance_build": false,
+  "performance_claim": false,
+  "original455_job_preserved": "/tmp/voteboat-mac455-7a99ae5-fENMzQ; original handle84206"
+}

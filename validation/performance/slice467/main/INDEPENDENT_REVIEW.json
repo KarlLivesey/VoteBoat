@@ -1,0 +1,34 @@
+{
+  "review": "Independent readonly slice467 restoration proof; no tests/builds/workloads run",
+  "base": "9798ed44091d932faebb51e62c69afed513a87a9",
+  "prior_exact_base": "84fc509fecbcdefd872bf23f8618e092b5a79802",
+  "full_baseline_blob_bytes_modes_exact": 2485,
+  "baseline_tree_identical_to_prior462_scope": true,
+  "all_compiled_before_current_physical_files_exact": 1441,
+  "no_extra_tracked_untracked_nonignored_scope_files": true,
+  "no_extra_ignored_compiled_source_files": true,
+  "selected_restore_paths": 171,
+  "removed_experiment_paths": [
+    "docs/ENTRY_BATCHES.md",
+    "src/log/entry_batch.rs",
+    "src/log/entry_batch/tests.rs",
+    "src/log/entry_history.rs",
+    "src/log/entry_history/tests.rs",
+    "tests/provider_conformance/log_store/entry_batches.rs"
+  ],
+  "schema_beforeedit_hash_exact": true,
+  "reuse_scope": "Complete source/build/contracts/comparison scope exact465/462. Prior455 production/network/recovery scopes remain reusable only as previously established, with retained cfgtest459 controls distinguished. No466 performance acceptance transferred.",
+  "qualification_status_files_observed": {
+    "provider-all.status": "0",
+    "provider-core.status": "0",
+    "metadata.status": "0"
+  },
+  "qualification_limit": "Root owns original91332 and final terminal/frozenAFTER proof; this source review does not imply finalhook completed.",
+  "review_script_focused_correction": "Initial readonly script completed blob+compiled comparisons then hit KeyError after_sha256 by assuming removal action was remove; actual schema uses remove_experiment_added. Corrected metadata interpretation and reran same proof successfully. No source/qualification failure.",
+  "blockers": [],
+  "proof_sha256": {
+    "RESTORE.json": "9107caeafdc70d50cf0332884b0fc74763d89c154ffdb02407a705758641786e",
+    "BASELINE_EQUIVALENCE.json": "2361d988d1d09763da2f144624499def429c878d6b53cfb86b2ace6ea978b302",
+    "BEFORE.json": "c81e0d85d8a4f020da25a6021db7925390af27c0c0787ff94b170c56563b3192"
+  }
+}

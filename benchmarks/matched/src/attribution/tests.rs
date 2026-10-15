@@ -8,11 +8,6 @@ fn disabled_recorder_reads_no_clock_cells_or_snapshots() {
     recorder.invalid.set(true); // Poisoned cells cannot affect the disabled path.
     assert!(Recorder::<false>::start().is_none());
     recorder.finish(Phase::Core, None, true, usize::MAX);
-    recorder.observe_entry_allocations(|| panic!("disabled observation inspected history"));
-    assert_eq!(
-        recorder.entry_allocations.get(),
-        EntryAllocations::default()
-    );
     assert!(Recorder::<false>::provider_snapshot(&recorder, &recorder).is_none());
     recorder.finish_scope(Phase::CheckpointCompact, None, &recorder, &recorder);
     assert!(recorder.report(0, &recorder, &recorder).unwrap().is_none());
@@ -20,46 +15,6 @@ fn disabled_recorder_reads_no_clock_cells_or_snapshots() {
         .intervals
         .iter()
         .all(|cell| cell.get() == Interval::default()));
-}
-
-#[test]
-fn retained_entry_observations_are_per_owner_checked_and_do_not_invent_rss() {
-    let actor = Recorder::<true>::default();
-    let store = Recorder::<true>::default();
-    let snapshots = Recorder::<true>::default();
-    for bytes in [256, 700, 128] {
-        actor.observe_entry_allocations(|| Some(bytes));
-    }
-    store.observe_entry_allocations(|| Some(900));
-    store.observe_entry_allocations(|| Some(128));
-    let report =
-        serde_json::to_value(actor.report(0, &store, &snapshots).unwrap().unwrap()).unwrap();
-    assert_eq!(report["core_entry_allocations"]["observations"], 3);
-    assert_eq!(report["core_entry_allocations"]["last_bytes"], 128);
-    assert_eq!(
-        report["core_entry_allocations"]["maximum_observed_bytes"],
-        700
-    );
-    assert_eq!(report["store_entry_allocations"]["observations"], 2);
-    assert_eq!(
-        report["store_entry_allocations"]["maximum_observed_bytes"],
-        900
-    );
-    assert!(report["entry_allocation_observation_scope"]
-        .as_str()
-        .unwrap()
-        .contains("not_continuous_peak_not_RSS"));
-    actor.entry_allocations.set(EntryAllocations {
-        observations: u64::MAX,
-        ..actor.entry_allocations.get()
-    });
-    let before = actor.entry_allocations.get();
-    actor.observe_entry_allocations(|| Some(usize::MAX));
-    assert_eq!(actor.entry_allocations.get(), before);
-    assert!(actor.report(0, &store, &snapshots).is_err());
-    store.observe_entry_allocations(|| None);
-    assert_eq!(store.entry_allocations.get().last_bytes, 128);
-    assert!(store.invalid.get());
 }
 #[test]
 fn interval_accounting_is_checked_and_overflow_is_atomic() {

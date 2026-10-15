@@ -205,13 +205,17 @@ pub(crate) fn persist_payload_cost(update: &LogUpdate) -> Result<(usize, bool), 
             .checked_add(
                 suffix
                     .entries
-                    .allocation_bytes()
+                    .capacity()
+                    .checked_mul(size_of::<LogEntry>())
                     .ok_or(WorkerError::BatchTooLarge)?,
             )
             .ok_or(WorkerError::BatchTooLarge)?;
         for entry in &suffix.entries {
             if !matches!(entry.payload, EntryPayload::Noop) {
                 control = false;
+                bytes = bytes
+                    .checked_add(entry.retained_payload_bytes())
+                    .ok_or(WorkerError::BatchTooLarge)?;
             }
         }
     }

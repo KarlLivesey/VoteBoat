@@ -58,7 +58,7 @@ fn cross_group_failed_later_unit_and_reused_identity_keep_every_original_state()
         0,
         Some(Suffix {
             from: 1,
-            entries: vec![entry(1, 1, 1)].into(),
+            entries: vec![entry(1, 1, 1)],
         }),
     );
     let invalid = update(&oracle[&group(2)], 1, 1, None);
@@ -91,7 +91,7 @@ fn finite_ballot_commit_suffix_rows_match_materialized_map_validator() {
                         commit,
                         Some(Suffix {
                             from,
-                            entries: vec![entry(from, term, 7)].into(),
+                            entries: vec![entry(from, term, 7)],
                         }),
                     );
                     let LogMutation::Update(proposal) = &mut mutation else {
@@ -116,7 +116,7 @@ fn plain_append_and_metadata_keep_prior_payload_allocations_and_cold_groups() {
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, id as u8), entry(2, 1, 1)].into(),
+                entries: vec![entry(1, 1, id as u8), entry(2, 1, 1)],
             }),
         );
         compare(&mut owned, &mut oracle, vec![mutation]);
@@ -135,7 +135,7 @@ fn plain_append_and_metadata_keep_prior_payload_allocations_and_cold_groups() {
         1,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 1, 3)].into(),
+            entries: vec![entry(3, 1, 3)],
         }),
     );
     compare(&mut owned, &mut oracle, vec![append]);
@@ -160,7 +160,7 @@ fn configuration_snapshot_and_generation_replacement_keep_the_exact_fallback() {
         1,
         Some(Suffix {
             from: 1,
-            entries: vec![entry(1, 1, 1), entry(2, 1, 2)].into(),
+            entries: vec![entry(1, 1, 1), entry(2, 1, 2)],
         }),
     );
     compare(&mut owned, &mut oracle, vec![seed]);
@@ -170,7 +170,7 @@ fn configuration_snapshot_and_generation_replacement_keep_the_exact_fallback() {
         1,
         Some(Suffix {
             from: 2,
-            entries: vec![entry(2, 2, 8)].into(),
+            entries: vec![entry(2, 2, 8)],
         }),
     );
     let generation = oracle[&group(1)].generation;
@@ -199,7 +199,7 @@ fn configuration_snapshot_and_generation_replacement_keep_the_exact_fallback() {
         3,
         Some(Suffix {
             from: 3,
-            entries: vec![configuration].into(),
+            entries: vec![configuration],
         }),
     );
     compare(&mut owned, &mut oracle, vec![accept]);
@@ -230,7 +230,7 @@ fn configuration_snapshot_and_generation_replacement_keep_the_exact_fallback() {
         4,
         Some(Suffix {
             from: 4,
-            entries: vec![entry(4, 2, 4)].into(),
+            entries: vec![entry(4, 2, 4)],
         }),
     );
     compare(&mut owned, &mut oracle, vec![append]);
@@ -268,7 +268,7 @@ fn immutable_limits_bound_new_groups_and_missing_lookup_has_no_side_effect() {
         0,
         Some(Suffix {
             from: 1,
-            entries: vec![entry(1, 1, 1), entry(2, 1, 2)].into(),
+            entries: vec![entry(1, 1, 1), entry(2, 1, 2)],
         }),
     );
     compare(&mut owned, &mut oracle, vec![overflow]);

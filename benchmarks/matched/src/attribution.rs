@@ -144,12 +144,6 @@ impl ScopedInterval {
     }
 }
 pub(super) struct ProviderSnapshot([Interval; PHASES]);
-#[derive(Clone, Copy, Default, Debug, Eq, PartialEq, Serialize)]
-struct EntryAllocations {
-    observations: u64,
-    last_bytes: usize,
-    maximum_observed_bytes: usize,
-}
 #[derive(Clone)]
 pub(super) struct Recorder<const ENABLED: bool> {
     intervals: [Cell<Interval>; PHASES],
@@ -157,7 +151,6 @@ pub(super) struct Recorder<const ENABLED: bool> {
     invalid: Cell<bool>,
     boundaries: Boundaries,
     compact_gaps: Gaps,
-    entry_allocations: Cell<EntryAllocations>,
 }
 impl<const ENABLED: bool> Default for Recorder<ENABLED> {
     fn default() -> Self {
@@ -167,27 +160,10 @@ impl<const ENABLED: bool> Default for Recorder<ENABLED> {
             invalid: Cell::new(false),
             boundaries: Boundaries::default(),
             compact_gaps: Gaps::default(),
-            entry_allocations: Cell::new(EntryAllocations::default()),
         }
     }
 }
 impl<const ENABLED: bool> Recorder<ENABLED> {
-    /// Lazy diagnostic observation: disabled recording never inspects history.
-    /// Failure poisons only the final report, preserving provider outcomes.
-    pub fn observe_entry_allocations(&self, charge: impl FnOnce() -> Option<usize>) {
-        if ENABLED {
-            let before = self.entry_allocations.get();
-            if let Some((bytes, observations)) = charge().zip(before.observations.checked_add(1)) {
-                self.entry_allocations.set(EntryAllocations {
-                    observations,
-                    last_bytes: bytes,
-                    maximum_observed_bytes: before.maximum_observed_bytes.max(bytes),
-                });
-            } else {
-                self.invalid.set(true);
-            }
-        }
-    }
     pub fn start() -> Option<Instant> {
         if ENABLED {
             Some(Instant::now())
@@ -308,9 +284,6 @@ impl<const ENABLED: bool> Recorder<ENABLED> {
             }).collect(),
             checkpoint_compact_gap_scope: "whole_successful_checkpoint_compact_observations_including_warmup_and_drain;state_to_pin_starts_after_protected_checkpoint_verification_including_any_full_fallback_and_includes_guards_excludes_prior_verification;pin_to_append_includes_nested_pinned_load_verification_restore_and_planning;barrier_to_reconcile_includes_Core_completion_install_broadcast_and_return_cleanup;elapsed_not_CPU_or_pure_Core;do_not_add_nested_provider_intervals",
             checkpoint_compact_gaps: self.compact_gaps.report(),
-            entry_allocation_observation_scope: "TRACE_only_whole_lifetime_per_owner_EntryHistory_backing_payloads_hidden_entries_and_descriptor_capacity;Core_after_successful_persistence_and_maintenance;store_after_successful_volatile_apply_including_pending;not_continuous_peak_not_RSS_excludes_other_Core_pending_effects_application_snapshot_queue_and_transient_coalescing_memory;shared_owners_charged_in_full_do_not_sum_as_physical_RSS",
-            core_entry_allocations: self.entry_allocations.get(),
-            store_entry_allocations: store.entry_allocations.get(),
             checkpoint_provider_scopes: SCOPES.iter().enumerate().map(|(slot, &phase)| {
                 let values = self.scopes[slot].get();
                 ScopeReport { scope: NAMES[phase as usize], methods: NAMES.iter().enumerate()
@@ -348,9 +321,6 @@ pub(super) struct Attribution {
     checkpoint_provider_scopes: Vec<ScopeReport>,
     checkpoint_compact_gap_scope: &'static str,
     checkpoint_compact_gaps: [GapReport; 3],
-    entry_allocation_observation_scope: &'static str,
-    core_entry_allocations: EntryAllocations,
-    store_entry_allocations: EntryAllocations,
 }
 #[cfg(test)]
 mod tests;

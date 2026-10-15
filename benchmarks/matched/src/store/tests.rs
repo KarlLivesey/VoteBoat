@@ -47,8 +47,7 @@ fn completed_predicate_keeps_pending_before_missing_errors_and_exact_outcomes() 
                         operation: OperationId::new(1).unwrap(),
                         bytes: vec![7].into(),
                     },
-                }]
-                .into(),
+                }],
             }),
             snapshot: None,
             snapshot_membership: None,
@@ -66,14 +65,12 @@ fn completed_predicate_keeps_pending_before_missing_errors_and_exact_outcomes() 
     assert_eq!(store.matches_state(group, &actual), Ok(true));
     assert_eq!(store.matches_state(group, &before), Ok(false));
     let mut bytes = actual.clone();
-    let mut entry = bytes.entries[0].clone();
-    let EntryPayload::Command { bytes: payload, .. } = &mut entry.payload else {
+    let EntryPayload::Command { bytes: payload, .. } = &mut bytes.entries[0].payload else {
         unreachable!()
     };
     let mut replacement = payload.to_vec();
     replacement[0] ^= 1;
     *payload = replacement.into();
-    bytes.entries.replace(0, entry).unwrap();
     assert_eq!(store.matches_state(group, &bytes), Ok(false));
     assert_eq!(
         store.matches_state(missing, &actual),

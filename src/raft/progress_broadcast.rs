@@ -25,7 +25,7 @@ impl Raft {
             let end = (sent.end - self.durable.base_index()) as usize;
             self.durable
                 .entries
-                .range(start..end)
+                .get(start..end)
                 .ok_or(RaftError::WrongCompletion)?
                 .to_vec()
         };

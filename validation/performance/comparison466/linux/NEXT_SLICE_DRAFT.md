@@ -1,0 +1,7 @@
+# Draft467 disposition (no implementation)
+
+Reject466: all three bulk and all three singleton OFF rate and p99 pairs regress on the required Linux host. A Mac performance campaign is unnecessary for this retention decision; finish its original functional qualification and preserve its failures separately. Fresh CPU data may explain the costs but does not justify retaining the regression or retuning variants.
+
+The root-owned next checked slice should restore exact465 production9798ed44091d932faebb51e62c69afed513a87a9 (retained455 production): canonical/history/Suffix ownership, provider/native/full/configured paths, completion/replay/application contracts and harness projections. Compare the complete source/build/contracts/benchmark scope against the actual base. Preserve466 source, artifacts and all qualification, paired and CPU evidence independently. Explicitly decide which independent value/error controls remain meaningful after rollback; retain no dead production container path and weaken no assertion.
+
+No durable format migration should be necessary after exact465 restoration is established:466 preserved semantic WAL/wire encoding. Ticket, fencing, publication and restart contracts remain unchanged. Root writes the final schema before edits and publishes through the enabled formatting/four strict profiles/standalone hook. This draft is not an implemented rollback or qualification claim. Full P9 scope and linked macro/current-plus-next-two plans remain active.

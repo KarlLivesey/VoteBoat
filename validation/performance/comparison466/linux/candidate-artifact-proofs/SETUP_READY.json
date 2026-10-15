@@ -1,0 +1,71 @@
+{
+  "state": "FRESH_ARTIFACT_AND_CLI_SETUP_END",
+  "candidate_commit": "92454c26cfe35aa65034eb3c306e990d42d88a80",
+  "source_inputs": 1448,
+  "qualified_inputs": 1446,
+  "added_configuration": [
+    ".gitignore",
+    "README.md"
+  ],
+  "build_original_handle": 99290,
+  "build_actual_exit": 0,
+  "CLI_actual_exit": 0,
+  "four_fresh_false": true,
+  "root_build_script_fresh_false_releasecfg": true,
+  "phase_scope_method_counts": [
+    29,
+    4,
+    15
+  ],
+  "current_cli": [
+    {
+      "case": "off",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "output_sha256": "a98bde222064fe7f7a7a536a95c953d61e962092c4e1d567d0b658a6e7ab5f68"
+    },
+    {
+      "case": "on",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "output_sha256": "fb1c768ce44da7856ea3204ea699b13168f9f848850dc12ef30927a94e463922"
+    },
+    {
+      "case": "openraft",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "output_sha256": "ab11aa58197b59b2120df659c3622c32be0524554ad1c02f41d6545b938c35d8"
+    }
+  ],
+  "protoc": "bundled protobuf-build0.14.1 libprotoc3.9.0, baseline SHA verified",
+  "artifacts_and_packed_DWP_original_copy_hashes": true,
+  "proof_sha256": {
+    "SOURCE.json": "7d939d015f9703ff88ac56993cfa460b8d9c8b10e7c65e3da1628b77aa62f623",
+    "FUNCTIONAL_REUSE.json": "70cecc08fc44ab2e8f45650d859f30518446fcd498d2ec17005d6156c2108106",
+    "PUBLICATION.json": "99fd14c26ec6714f5a0bb6e2393debfc93e823d4b11f9832ad05dc5964a4ee82",
+    "ARTIFACTS.json": "534c3b7adff0b224c0b3578fff46f0b30bf8c660bc9ad37015c061a0f65ff58f",
+    "SYMBOLS.json": "bdd6ed051bd35b7041d98e792a3c2042898c6489a694db5aa15b4be7b8e0b791",
+    "RELEASE_ORACLE.json": "5120a1f1baf06f57cc21d389d421c8b44d25dd50b93586bc7cf0d53218d9269b",
+    "BUILD_TERMINAL.json": "2d73d8565ef901954cef88d00e982bad8a74535685828ef00af8162bcba4453d",
+    "CLI.json": "5c992d84c54d1511f3e24023080ecdfe6b4b7b37a840a4510eaa35563aa53110",
+    "CLI_TERMINAL.json": "5db9e3fe41943ae717f01778f9d06016c72c985ec6317a707f7ae74af3d1cba5",
+    "logs/cli-source-after.log": "5764c3a5b89bd9bd80f4ea7d8a08b6d2c10da73981ce92b504506af6f8ae32e8"
+  },
+  "timing_started": false,
+  "pair_setup_owner": "review426; no pair guards claimed here"
+}

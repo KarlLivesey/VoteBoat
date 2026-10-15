@@ -33,7 +33,7 @@ fn configured() -> Store {
         1,
         Some(Suffix {
             from: 1,
-            entries: vec![record].into(),
+            entries: vec![record],
         }),
     );
     commit(&mut store, vec![update]);
@@ -50,7 +50,7 @@ fn configured_multiple_accepted_deltas_subset_publication_and_full_fallback_reco
         1,
         Some(Suffix {
             from: 2,
-            entries: vec![entry(2, 1)].into(),
+            entries: vec![entry(2, 1)],
         }),
     );
     let first = store.append_batch(vec![update]).unwrap();
@@ -62,7 +62,7 @@ fn configured_multiple_accepted_deltas_subset_publication_and_full_fallback_reco
         2,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 1)].into(),
+            entries: vec![entry(3, 1)],
         }),
     );
     let second = store.append_batch(vec![update]).unwrap();
@@ -82,7 +82,7 @@ fn configured_multiple_accepted_deltas_subset_publication_and_full_fallback_reco
         2,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 2)].into(),
+            entries: vec![entry(3, 2)],
         }),
     );
     let replaced = store.append_batch(vec![update]).unwrap();
@@ -117,7 +117,7 @@ fn configured_multiple_accepted_deltas_subset_publication_and_full_fallback_reco
         3,
         Some(Suffix {
             from: 4,
-            entries: vec![entry(4, 2)].into(),
+            entries: vec![entry(4, 2)],
         }),
     );
     let tickets = store.append_batch(vec![update]).unwrap();
@@ -148,7 +148,7 @@ fn configured_delta_uncertainty_fences_and_recovers_complete_transition() {
             1,
             Some(Suffix {
                 from: 2,
-                entries: vec![entry(2, 1)].into(),
+                entries: vec![entry(2, 1)],
             }),
         );
         let mut expected = BTreeMap::from([(group(1), before.clone())]);

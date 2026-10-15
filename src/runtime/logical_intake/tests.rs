@@ -117,7 +117,7 @@ fn shard(limits: ShardLimits) -> Shard<Ready> {
         commit_index: 0,
         snapshot: None,
         snapshot_membership: None,
-        entries: vec![].into(),
+        entries: vec![],
     };
     let core = Raft::recover(id, owner().store, state, LogLimits::default()).unwrap();
     let mut shard = Shard::new(owner(), limits, Ready(VecDeque::new())).unwrap();

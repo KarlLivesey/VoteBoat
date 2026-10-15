@@ -53,8 +53,7 @@ fn command(log: &mut impl LogStore, operation: u128, delta: i64) {
                         operation: OperationId::new(operation).unwrap(),
                         bytes: delta.to_le_bytes().to_vec().into(),
                     },
-                }]
-                .into(),
+                }],
             }),
         )],
     );
@@ -72,7 +71,7 @@ fn old_checkpoint(log: &mut impl LogStore, snapshots: &mut impl SnapshotRetentio
     let mut core = recover(log);
     assert!(!core.local_voter());
     let mut app = Counter::new(16).unwrap();
-    app.apply_batch(&core.replay_committed()).unwrap();
+    app.apply_batch(core.replay_committed()).unwrap();
     let receipt = checkpoint_application(&core, &app, snapshots).unwrap();
     compact_replica(&mut core, log, snapshots, &app, receipt.reference()).unwrap();
     command(log, 901, 3);
@@ -89,7 +88,7 @@ fn rollback(log: &mut impl LogStore, from: u64) {
             state.commit_index,
             Some(Suffix {
                 from,
-                entries: vec![].into(),
+                entries: vec![],
             }),
         )],
     );
@@ -166,13 +165,8 @@ fn publish_uninstalled(log: &impl LogStore, snapshots: &mut impl SnapshotRetenti
     let old = snapshots.load_pinned(state.snapshot.unwrap()).unwrap();
     app.restore_checkpoint(1, old.metadata.index, &old.application)
         .unwrap();
-    app.apply_batch(
-        &state
-            .entries
-            .view(..(state.commit_index - state.base_index()) as usize)
-            .to_cow(),
-    )
-    .unwrap();
+    app.apply_batch(&state.entries[..(state.commit_index - state.base_index()) as usize])
+        .unwrap();
     let bytes = app.checkpoint(16384).unwrap();
     let ticket = snapshots
         .begin(

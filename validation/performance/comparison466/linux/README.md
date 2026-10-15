@@ -1,0 +1,13 @@
+# Slice466 Linux paired diagnostics: rejected
+
+All 24 original workloads and their validators terminated successfully under controller1720; ALL_STATUS=0 and ALL_STAGE=ALL_TIMING_END are preserved. [MEASUREMENTS.md](MEASUREMENTS.md) and [READOUT.json](READOUT.json) retain all rates, p99 ratios and losses against the455 baseline from this same campaign. No reruns or replacement cases were used. Required-host regressions reject466 independently of Mac performance.
+
+The two raw directories preserve all case JSON, stderr, shell elapsed/user/system time, command and exit files, exact config, before/after guards and original RESULTS. Both cells complete1,048,576 originals with1,024 warmups. Original matched profile, pinned upstream, maintenance, outcomes and timer boundaries are in SCHEMA.md. This is a short volatile/in-process one-group diagnostic, not full P9 or durable acceptance.
+
+Setup provenance includes exact source SHA/mode inventories, Cargo JSON and verbose compiler invocations, four fresh:false artifact records, release buildscript/oracle proof, original/copy ELF/DWP hashes, compiler/protoc identities, actual three CLI controls, guard/checker scripts and negative controls. Actual binaries, debug sidecars, build trees, source tar/export trees, WAL state and CPU recordings are excluded. The candidate and baseline artifact proofs are copied as regular metadata files; their absolute original paths identify evidence locations and are not rewritten as archive-local build paths. Source scope differs despite equal1448 counts and is disclosed in SOURCE_SCOPE.json.
+
+Control documents are separately committed92454 proofs, not silently added compiled inputs. Preserve the initial absent-document guard refusal, exact old guard/diff, and negative metadata controls. The optional GNU time/RSS preparation failure and changed-driver refusal occurred before any workload; resource-extension records original/restored drivers and guard. No optional wrapper or RSS measurement was used. ON entry charges are per-owner named lifetime observations, not RSS, continuous peaks or transient/pending debt; baseline metrics are N/A. Every failure and slow tail remains.
+
+Fresh466 CPU capture and analysis are owned and archived separately. No causal or allocator conclusion is drawn here. NEXT_SLICE_DRAFT.md is a proposed root-owned checked rollback, not an implemented change. All production files remain untouched by this archival task. Full P9 remains active.
+
+SHA256SUMS covers every regular payload file except files named SHA256SUMS themselves. No symlinks or binary/build outputs are included.

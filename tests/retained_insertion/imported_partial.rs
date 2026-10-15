@@ -665,7 +665,7 @@ fn partial_freeze_and_grant_frames_recover_exact_images_and_retained_service() {
                     boundary - 1,
                     Some(Suffix {
                         from: 1,
-                        entries: entries[..boundary as usize - 1].to_vec().into(),
+                        entries: entries[..boundary as usize - 1].to_vec(),
                     }),
                 )],
             );
@@ -678,7 +678,7 @@ fn partial_freeze_and_grant_frames_recover_exact_images_and_retained_service() {
             boundary,
             Some(Suffix {
                 from: boundary,
-                entries: vec![entries[boundary as usize - 1].clone()].into(),
+                entries: vec![entries[boundary as usize - 1].clone()],
             }),
         );
         let frame = NativeLogCodec

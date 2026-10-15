@@ -1,0 +1,35 @@
+{
+  "scope": "Preparation only; no source export/build/CLI/timing/profile/host actions",
+  "required_published_commit": "92454c26cfe35aa65034eb3c306e990d42d88a80",
+  "candidate_config_present": false,
+  "actual_fresh_cli_proof_present": false,
+  "fresh_guard_refuses_until_proof": true,
+  "syntax": "PythonAST and bash-n all0",
+  "checker_extension": "Pending actualfreshCLI files; unchanged29/4/15 rules prepared with1Mcounts; newONchargeproof mustvalidate actualoutput thenfreeze",
+  "inputs_needed": [
+    "Fresh466 source/artifact/profile/release-oracle/DWP proof and build terminal0",
+    "Actual466 off/on/OpenRaft16KCLI outputs/exits with29/4/15+newownerobservations",
+    "Publicationreceipt/freshCLI checker positive and negativecontrol proof",
+    "ActualMac455 qualifiedbaseline and candidate466 artifacts later; no454 substitution",
+    "Parent separate host quiet grants beforecapacity andbeforeprofile"
+  ],
+  "files_sha256": {
+    "artifact-guard.py": "088ef172190222bed09b99b74d1c5c7e041ce98627deb8a65da6ebe36b0e3ef4",
+    "prepare-pair.py": "261d50e83b1c635f38c85a196dc72a6c4e5ee6670b2a58d3097c1e8a604c6ae4",
+    "phase-diagnostic.sh": "cdae471faccff546b5a2c1c60778c965c44242cd9482becd02dba6e6aa5fbdee",
+    "phase-diagnostic-check.py": "7a7bb0fa957f24e87db1c37ed82ceb1038196fcae07b4ae94c64c806e8dbece0",
+    "summarize.py": "8b6d590905f7b1b531d2ad2d90280eb4cfb3514c94ce09ce140906f855fa918e",
+    "linux-run.sh": "3adcf4171e3569c868d87d0acc2437ef37d8535aecdf3ea8ff2c6bffa331ea02",
+    "REQUIRED_COMMIT.txt": "36a209b03a1597bd250fc8e851745dbe23d0c949fc6751ef7a6b0dc6b9bf65ee",
+    "BASELINE_CONFIG.linux.json": "29f795229f57170052916d4c77a1b599b00ef15ee5d01af6a8cb7094b8f40d75",
+    "SCHEMA.md": "7bc22b246f001671d405a8a1209cd5c34f397460c326fb524ff1f5cc2906202e",
+    "PROFILE_SCHEMA.md": "b8cc8e90ae406c8ad94ea254d3a035f28c96f9035dfbf9a11f794569a98049e6",
+    "perf-run-quiet.py": "41b12839132f3002177ae0860a737fdfe092beb71e381643d159d9b580b06adf",
+    "READINESS_REFUSAL.json": "4ba2f2876695cdca653daed66681a5bd0c9b56c0d90e3a97b870ee5c287b9b6c"
+  },
+  "readiness_refusal": {
+    "actual_exit_of_guard_call": "ValueError refusal as expected; no artifact/source/compiler guard run",
+    "message": "fresh candidate CLI/observer validation is not yet supplied",
+    "no_usable_candidate_config": true
+  }
+}

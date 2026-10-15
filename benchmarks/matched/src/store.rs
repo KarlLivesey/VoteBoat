@@ -74,10 +74,6 @@ impl<const TRACE: bool> MemoryStore<TRACE> {
             })
             .collect();
         self.pending.clone_from(&tickets);
-        for group in groups {
-            self.attribution
-                .observe_entry_allocations(|| self.state.get(group)?.entries.allocation_bytes());
-        }
         Ok(tickets)
     }
     fn complete(&mut self, dependencies: &[LogTicket]) -> Result<DurableLog, StorageError> {

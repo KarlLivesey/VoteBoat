@@ -295,7 +295,7 @@ fn creation_native_wal_every_torn_frame_and_barrier_failure_recovers_old_or_comp
                 2,
                 Some(Suffix {
                     from: 1,
-                    entries: prefix.clone().into(),
+                    entries: prefix.clone(),
                 }),
             )],
         );
@@ -314,8 +314,7 @@ fn creation_native_wal_every_torn_frame_and_barrier_failure_recovers_old_or_comp
                 2,
                 10,
                 value.encode(MAX_GROUP_CREATION_BYTES).unwrap(),
-            )]
-            .into(),
+            )],
         }),
     );
     let frame = NativeLogCodec

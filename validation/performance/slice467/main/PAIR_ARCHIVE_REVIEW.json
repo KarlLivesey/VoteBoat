@@ -1,0 +1,7 @@
+{
+  "payloads": 292,
+  "sha256sums_sha256": "9925c06a926eb98c5770b023f029cd5c48db2f29d4f15fee65d2b2815ac685d9",
+  "all_payloads_verify": true,
+  "decision": "reject466",
+  "reason": "Every selected required-host OFF pair loses useful throughput and p99; shortdiagnostics, no macroacceptance."
+}

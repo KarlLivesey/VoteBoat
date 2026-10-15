@@ -1,0 +1,4 @@
+COMMAND_END=provider-all exit=0
+COMMAND_END=provider-core exit=0
+COMMAND_END=metadata exit=0
+COMMAND_END=enabled-hook exit=0

@@ -73,7 +73,7 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
                     commit_index: 0,
                     suffix: Some(Suffix {
                         from: entry.index,
-                        entries: vec![entry.clone()].into(),
+                        entries: vec![entry.clone()],
                     }),
                     snapshot: None,
                     snapshot_membership: None,
@@ -93,13 +93,13 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
         let LogMutation::Update(update) = batch.remove(0) else {
             return Err(ApplicationError::InvalidCommand);
         };
-        let Some(suffix) = update.suffix else {
+        let Some(mut suffix) = update.suffix else {
             return Err(ApplicationError::InvalidCommand);
         };
         if update.group != self.mapping.parent || suffix.entries.len() != 1 {
             return Err(ApplicationError::InvalidCommand);
         }
-        let entry = suffix.entries.into_vec().remove(0);
+        let entry = suffix.entries.remove(0);
         if self.enrollment_entry_bytes(&entry)? != bytes {
             return Err(ApplicationError::InvalidCommand);
         }

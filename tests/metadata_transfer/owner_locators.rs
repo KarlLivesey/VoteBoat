@@ -761,7 +761,7 @@ pub(super) fn journal_cuts<A: CheckpointStateMachine>(
                 n - 1,
                 Some(Suffix {
                     from: 1,
-                    entries: old_entries.to_vec().into(),
+                    entries: old_entries.to_vec(),
                 }),
             )],
         );
@@ -774,7 +774,7 @@ pub(super) fn journal_cuts<A: CheckpointStateMachine>(
         n,
         Some(Suffix {
             from: n,
-            entries: vec![entries.last().unwrap().clone()].into(),
+            entries: vec![entries.last().unwrap().clone()],
         }),
     );
     let frame = NativeLogCodec

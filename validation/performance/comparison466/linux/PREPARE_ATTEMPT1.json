@@ -1,0 +1,20 @@
+{
+  "stage": "guard.verify(candidate) before CONFIG_PAIR output",
+  "command": [
+    "python3",
+    "target/p9/comparison466/prepare-pair.py",
+    "--baseline-config",
+    "target/p9/comparison466/BASELINE_CONFIG.linux.json",
+    "--baseline-job",
+    "target/p9/matched455-linux",
+    "--candidate-job",
+    "target/p9/matched466-linux",
+    "--output",
+    "target/p9/comparison466/CONFIG_PAIR.linux.json"
+  ],
+  "failure": "ValueError: essential455 command-byte/configuration inputs absent",
+  "missing_frozen_source_key": "docs/COMMAND_BYTES.md",
+  "raw_provenance": "Original traceback is preserved in tool transcript; this is a factual metadata receipt, not a fabricated raw stdout/stderr file.",
+  "candidate_frozen_source_unchanged": true,
+  "config_not_created": true
+}

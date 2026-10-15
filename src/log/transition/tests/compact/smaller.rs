@@ -49,7 +49,7 @@ fn every_trim_boundary_preserves_exact_charge_with_known_or_overflowed_total() {
             let mut installed = state.clone();
             let actual = plan.install(&mut installed, change.clone()).unwrap();
             assert_eq!(installed, expected);
-            assert_eq!(actual, LogSummary::from_validated(&installed));
+            assert_eq!(actual, LogSummary::from_validated(&expected));
         }
     }
 }
@@ -67,13 +67,12 @@ fn repeated_trim_of_base_and_unpublished_tail_matches_materialized_oracle() {
             8,
             Some(Suffix {
                 from: 3,
-                entries: tail.clone().into(),
+                entries: tail.clone(),
             }),
         ),
         LogLimits::default(),
     )
     .unwrap();
-    let tail = EntryHistory::from(tail);
     let view = LogView::trimmed_overlay(&base, &tail, LogMetadata::from_log(&accepted), 1);
     assert_eq!(view.materialize(), accepted);
     for index in 2..=8 {
@@ -88,7 +87,7 @@ fn repeated_trim_of_base_and_unpublished_tail_matches_materialized_oracle() {
             let mut installed = accepted.clone();
             let actual = plan.install(&mut installed, change.clone()).unwrap();
             assert_eq!(installed, expected);
-            assert_eq!(actual, LogSummary::from_validated(&installed));
+            assert_eq!(actual, LogSummary::from_validated(&expected));
         }
     }
 }

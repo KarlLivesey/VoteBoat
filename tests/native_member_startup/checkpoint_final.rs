@@ -86,7 +86,7 @@ fn seed_checkpoint(path: &Path, local: u64, joint_checkpoint: bool) {
             commit_index: committed,
             suffix: Some(Suffix {
                 from: 1,
-                entries: history[..count].to_vec().into(),
+                entries: history[..count].to_vec(),
             }),
             snapshot: None,
             snapshot_membership: None,

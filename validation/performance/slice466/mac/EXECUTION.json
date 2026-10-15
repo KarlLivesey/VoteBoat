@@ -1,0 +1,33 @@
+{
+  "candidate": "92454c26cfe35aa65034eb3c306e990d42d88a80",
+  "remote_job": "/tmp/voteboat-mac466-92454c2-LvYfi1",
+  "allocation_tool": "577485 exit0",
+  "source_scp_original_handle": 89223,
+  "source_scp_exit": 0,
+  "first_qualification_original_handle": 7779,
+  "first_qualification_ssh_exit": 255,
+  "first_raw_remote_STATUS": "0 (not qualification: controlled stop, STAGE root_lib_all, no library exit receipt)",
+  "controlled_stop_tool": "16a065 exit0",
+  "mode_correction_tool": "1fa818 exit0",
+  "resumed_qualification_original_handle": 96710,
+  "resumed_qualification_exit": 0,
+  "resumed_remote_PID": 3198,
+  "resumed_remote_STAGE": "DONE",
+  "resumed_remote_STATUS": 0,
+  "collection_original_handle": 98916,
+  "collection_exit": 0,
+  "collected_tar_sha256": "32474c015aa6d508790366f8f9744762491d67a705c9d0c4778415830edafd5f",
+  "collected_files": 99,
+  "source_bytes_changed_for_mode_correction": 0,
+  "original455_handle_untouched": 84206,
+  "no_performance_build_or_campaign": true,
+  "totals": {
+    "root_lib_all": 437,
+    "root_protocol_all": 588,
+    "root_lib_core": 355,
+    "root_protocol_core": 352,
+    "root_three_services": 2,
+    "root_member_services": 2,
+    "matched_tests": 71
+  }
+}

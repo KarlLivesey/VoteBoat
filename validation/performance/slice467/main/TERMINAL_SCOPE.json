@@ -1,0 +1,17 @@
+{
+  "all_recorded_jobs_terminal": true,
+  "original_runs": [
+    {
+      "handle": 91332,
+      "actual_exit": 0,
+      "status_path": "main/STATUS",
+      "stage": "DONE"
+    }
+  ],
+  "source_before": "BEFORE.json",
+  "source_after": "AFTER.json",
+  "scope_notes": [
+    "BEFORE is restored465 source before467 checks; experiment pre-edit hashes/physical modes and removals are in RESTORE.json, full466source retained in published92454c26.",
+    "No changed source between provider checks and enabledhook; no broad unchanged suites or baselinebuild rerun."
+  ]
+}

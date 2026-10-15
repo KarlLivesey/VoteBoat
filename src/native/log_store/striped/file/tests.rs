@@ -37,13 +37,8 @@ fn actual_file_catalog_every_publication_primitive_cut_keeps_exact_acknowledged_
         let selected = if selects_new(cut) { &next } else { &old };
         exact(&recovered, selected);
         assert_eq!(
-            recovered
-                .state(group())
-                .unwrap()
-                .entries
-                .view(..old.entries.len())
-                .to_vec(),
-            old.entries.to_vec()
+            &recovered.state(group()).unwrap().entries[..old.entries.len()],
+            old.entries
         );
         let follow = command(selected, 0x93);
         let followed = expected(selected, &follow);
@@ -103,10 +98,7 @@ fn actual_file_catalog_reclaim_cuts_preserve_original_frames_through_next_parity
         commit(&mut recovered, vec![mutation]);
         fill(&mut recovered);
         let expected = recovered.state(group()).unwrap();
-        assert_eq!(
-            expected.entries.view(..next.entries.len()).to_vec(),
-            next.entries.to_vec()
-        );
+        assert_eq!(&expected.entries[..next.entries.len()], next.entries);
         let reclaimed = recovered.reclaim(recovered.limits().max_wal_bytes).unwrap();
         assert!(reclaimed.after_bytes < reclaimed.before_bytes);
         drop(recovered);

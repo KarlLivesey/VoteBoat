@@ -1,0 +1,20 @@
+{
+  "reason": "Root explicitly requires exact Linux physical source modes; original exported664/775 drift is a transfer contract failure. Controlled stop only new466 runner/descendants, not a timeout restart.",
+  "runner": 95954,
+  "stage": "root_lib_all",
+  "owned_processes": {
+    "95954": {
+      "parent": 95953,
+      "command": "bash ./run.sh"
+    },
+    "97010": {
+      "parent": 95954,
+      "command": "/Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo test --locked --offline --all-features --lib -- --test-threads=1 --nocapture"
+    },
+    "98337": {
+      "parent": 97010,
+      "command": "/tmp/voteboat-mac466-92454c2-LvYfi1/target-root-all/debug/deps/voteboat-5698d7e8eff70be4 --test-threads=1 --nocapture"
+    }
+  },
+  "signals": "SIGTERM descendant processes then verified runner; original45584206 is outside tree and untouched."
+}

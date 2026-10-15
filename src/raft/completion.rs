@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Karl Livesey
 //! Synchronous completion can borrow its canonical committed interval.
 use super::*;
-use std::borrow::Cow;
 use std::ops::Range;
 
 pub(super) struct PreparedCompletion {
@@ -21,15 +20,14 @@ pub(super) struct PreparedCompletion {
 /// [`Self::into_owned`] without changing effect order.
 #[derive(Debug)]
 pub struct CompletionEffects<'a> {
-    committed: Option<Cow<'a, [LogEntry]>>,
+    committed: Option<&'a [LogEntry]>,
     following: Vec<Effect>,
 }
 
 impl<'a> CompletionEffects<'a> {
-    /// Newly committed contiguous entries, borrowed or coalesced, before every
-    /// following effect. A multi-chunk interval remains one application batch.
+    /// Newly committed contiguous entries, before all following effects.
     pub fn committed(&self) -> Option<&[LogEntry]> {
-        self.committed.as_deref()
+        self.committed
     }
 
     /// Owned effects that follow application of the committed interval.
@@ -38,9 +36,8 @@ impl<'a> CompletionEffects<'a> {
     }
 
     /// Consume the result for immediate application and later effect handling.
-    /// A single chunk remains borrowed; a multi-chunk interval owns one
-    /// coalesced vector. The output retains its core borrow until its last use.
-    pub fn into_parts(self) -> (Option<Cow<'a, [LogEntry]>>, Vec<Effect>) {
+    /// The interval continues to borrow the core until its last use.
+    pub fn into_parts(self) -> (Option<&'a [LogEntry]>, Vec<Effect>) {
         (self.committed, self.following)
     }
 
@@ -48,17 +45,16 @@ impl<'a> CompletionEffects<'a> {
     pub fn into_owned(self) -> Vec<Effect> {
         let mut effects = self.following;
         if let Some(entries) = self.committed {
-            effects.insert(0, Effect::Committed(entries.into_owned()));
+            effects.insert(0, Effect::Committed(entries.to_vec()));
         }
         effects
     }
 }
 
 impl Raft {
-    /// Complete exact admitted durability dependencies. A contiguous canonical
-    /// interval is borrowed; an interval spanning chunks is coalesced once. All
-    /// fallible transitions finish before that output is built. Snapshot
-    /// installation exposes its installation effect
+    /// Complete exact admitted durability dependencies without copying committed
+    /// entries. All fallible transitions finish before the result borrows the
+    /// canonical log. Snapshot installation exposes its installation effect
     /// instead of a committed interval, as in [`Self::complete`].
     pub fn complete_borrowed(
         &mut self,
@@ -70,9 +66,7 @@ impl Raft {
 
     fn borrow_completion(&self, prepared: PreparedCompletion) -> CompletionEffects<'_> {
         CompletionEffects {
-            committed: prepared
-                .committed
-                .map(|range| self.durable.entries.view(range).to_cow()),
+            committed: prepared.committed.map(|range| &self.durable.entries[range]),
             following: prepared.following,
         }
     }

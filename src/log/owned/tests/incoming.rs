@@ -19,8 +19,7 @@ fn owned_input_moves_new_payload_after_whole_batch_admission() {
                 operation: OperationId::new(1).unwrap(),
                 bytes,
             },
-        }]
-        .into(),
+        }],
     });
     let raw = vec![LogMutation::Update(change)];
     let mut oracle = states(&owned);
@@ -50,8 +49,7 @@ fn invalid_later_owned_unit_never_installs_an_earlier_moved_append() {
                 operation: OperationId::new(1).unwrap(),
                 bytes: vec![7; 8].into(),
             },
-        }]
-        .into(),
+        }],
     });
     let LogMutation::Update(second) = &mut batch[1] else {
         unreachable!()

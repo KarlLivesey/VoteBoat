@@ -15,34 +15,15 @@ fn fixture(groups: u128) -> Fixture {
     let mut store = HostLogStore::new(1);
     let runtime = timed_with_visit_items(1, &mut store, groups, 1, 64);
     let event_bytes = runtime.limits().max_event_bytes;
-    // Independent physical owner: campaign captures one Noop batch. Four
-    // serialized writes then retain four more singleton batch backings, shared
-    // command headers and the actual descriptor capacity growth.
-    let mut history = voteboat::log::EntryHistory::from(vec![LogEntry {
-        index: 1,
-        term: 1,
-        payload: EntryPayload::Noop,
-    }]);
-    let leader_charge = history.allocation_bytes().unwrap();
     let single = runtime
         .core(group(1))
         .unwrap()
         .effect_reservation(event_bytes)
         .unwrap()
-        + leader_charge;
+        + std::mem::size_of::<LogEntry>();
     // Leave enough room for all four original writes' retained history. Only
     // batching's extra transient observation metadata must exceed this slack.
-    for index in 2..=5 {
-        history.push(LogEntry {
-            index,
-            term: 1,
-            payload: EntryPayload::Command {
-                operation: OperationId::new(u128::from(index)).unwrap(),
-                bytes: 1i64.to_le_bytes().to_vec().into(),
-            },
-        });
-    }
-    let growth = history.allocation_bytes().unwrap() - leader_charge;
+    let growth = 4 * (std::mem::size_of::<LogEntry>() + 8);
     assert!(4 * std::mem::size_of::<OwnerStep>() > growth);
     let mut worker = HostWorker::new(store);
     let mut owner = EffectOwner::new(

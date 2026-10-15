@@ -65,9 +65,7 @@ pub(super) fn control_frame(bytes: &[u8], limits: LogLimits) -> io::Result<Vec<u
             return Err(invalid("striped checkpoint trailing bytes"));
         }
         for group in groups.values_mut() {
-            let mut entries = std::mem::take(&mut group.entries).into_vec();
-            strip(&mut entries);
-            group.entries = entries.into();
+            strip(&mut group.entries);
         }
         NativeLogCodec
             .encode_checkpoint(sequence, &groups, limits, limits.max_wal_bytes)
@@ -79,9 +77,7 @@ pub(super) fn control_frame(bytes: &[u8], limits: LogLimits) -> io::Result<Vec<u
         for mutation in &mut mutations {
             if let LogMutation::Update(update) = mutation {
                 if let Some(suffix) = &mut update.suffix {
-                    let mut entries = std::mem::take(&mut suffix.entries).into_vec();
-                    strip(&mut entries);
-                    suffix.entries = entries.into();
+                    strip(&mut suffix.entries);
                 }
             }
         }

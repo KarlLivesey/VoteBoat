@@ -24,7 +24,7 @@ fn virtual_accepted_prefix_and_tail_preserve_multiple_unpublished_updates() {
         1,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 1)].into(),
+            entries: vec![entry(3, 1)],
         }),
     );
     let plan = NextLog::plan(
@@ -38,7 +38,7 @@ fn virtual_accepted_prefix_and_tail_preserve_multiple_unpublished_updates() {
         panic!("plain append delta required")
     };
     let metadata = delta.metadata();
-    let tail = EntryHistory::from(delta.append.unwrap().entries);
+    let tail = delta.append.unwrap().entries;
     let view = LogView::overlay(&base, &tail, metadata);
     assert_eq!(view.term_at(1), Some(1));
     assert_eq!(view.term_at(3), Some(1));
@@ -51,7 +51,7 @@ fn virtual_accepted_prefix_and_tail_preserve_multiple_unpublished_updates() {
         2,
         Some(Suffix {
             from: 4,
-            entries: vec![entry(4, 2)].into(),
+            entries: vec![entry(4, 2)],
         }),
     );
     let plan = NextLog::plan(&view, &delta.summary, &second, LogLimits::default()).unwrap();
@@ -61,7 +61,7 @@ fn virtual_accepted_prefix_and_tail_preserve_multiple_unpublished_updates() {
         panic!("second plain delta required")
     };
     let mut published = base;
-    published.entries.append_history(tail);
+    published.entries.extend(tail);
     metadata.install_header(&mut published);
     let summary = NextLog::Delta(next)
         .install(&mut published, second)

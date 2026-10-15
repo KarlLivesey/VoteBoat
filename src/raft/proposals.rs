@@ -159,40 +159,28 @@ impl Raft {
         proposals: &[Proposal],
         capacity: usize,
     ) -> Result<(), RaftError> {
-        let (raw, shared) = proposals
-            .iter()
-            .try_fold((0usize, 0usize), |(raw, shared), proposal| {
-                Some((
-                    raw.checked_add(proposal.bytes.capacity())?,
-                    shared
-                        .checked_add(CommandBytes::retained_bytes_for_len(proposal.bytes.len())?)?,
-                ))
+        let staged = capacity
+            .checked_mul(size_of::<Proposal>())
+            .and_then(|n| n.checked_add(size_of::<Vec<Proposal>>()))
+            .and_then(|n| {
+                proposals
+                    .len()
+                    .checked_mul(size_of::<LogEntry>())
+                    .and_then(|entries| n.checked_add(entries))
             })
             .ok_or(RaftError::Exhausted)?;
-        let peak = Self::proposal_batch_staging_bytes(proposals.len(), capacity, raw, shared)
-            .ok_or(RaftError::Exhausted)?;
+        let peak = proposals.iter().try_fold(staged, |sum, proposal| {
+            sum.checked_add(proposal.bytes.capacity())
+                .and_then(|n| {
+                    CommandBytes::retained_bytes_for_len(proposal.bytes.len())
+                        .and_then(|shared| n.checked_add(shared))
+                })
+                .ok_or(RaftError::Exhausted)
+        })?;
         if peak > self.limits.max_batch_bytes {
             return Err(StorageError::Rejected("proposal shared conversion peak budget").into());
         }
         Ok(())
-    }
-    /// Two sequential allocation stages: converting while original proposals
-    /// live, then capturing entries after that proposal allocation is released.
-    /// Canonical history descriptors belong to the later install, not this gate.
-    pub(crate) fn proposal_batch_staging_bytes(
-        count: usize,
-        capacity: usize,
-        raw_payload: usize,
-        shared_payload: usize,
-    ) -> Option<usize> {
-        let conversion = capacity
-            .checked_mul(size_of::<Proposal>())?
-            .checked_add(size_of::<Vec<Proposal>>())?
-            .checked_add(count.checked_mul(size_of::<LogEntry>())?)?
-            .checked_add(raw_payload)?
-            .checked_add(shared_payload)?;
-        let captured = EntryBatch::allocation_bytes_for_shape(count, shared_payload)?;
-        Some(conversion.max(captured))
     }
     fn persist_proposal_entries(
         &mut self,
@@ -204,7 +192,7 @@ impl Raft {
             self.durable.commit_index,
             Some(Suffix {
                 from: first,
-                entries: entries.into(),
+                entries,
             }),
             After::LeaderAppend,
             None,

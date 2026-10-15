@@ -138,8 +138,7 @@ fn complete_image_membership_parent_and_pin_fields_are_retained() {
                         operation: OperationId::new(99).unwrap(),
                         bytes: vec![9, 8, 7].into(),
                     },
-                }]
-                .into(),
+                }],
             }),
             snapshot: None,
             snapshot_membership: None,

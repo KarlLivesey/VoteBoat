@@ -47,8 +47,7 @@ fn source_preflight_allows_actual_not_caught_up_readiness_reply() {
                     index: 3,
                     term: 1,
                     payload: EntryPayload::Noop,
-                }]
-                .into(),
+                }],
             }),
             After::LeaderAppend,
             None,

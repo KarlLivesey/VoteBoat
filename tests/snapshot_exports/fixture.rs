@@ -39,7 +39,7 @@ pub(super) fn committed(id: u128) -> (HostLogStore, Raft, Counter) {
         1,
         Some(Suffix {
             from: 1,
-            entries: vec![entry.clone()].into(),
+            entries: vec![entry.clone()],
         }),
     );
     append(&mut log, vec![mutation]);
@@ -85,7 +85,7 @@ impl Fixture {
                 1,
                 Some(Suffix {
                     from: 1,
-                    entries: vec![e].into(),
+                    entries: vec![e],
                 }),
             );
             append(&mut log, vec![mutation]);
@@ -182,7 +182,7 @@ fn append_suffix(
         2,
         Some(Suffix {
             from: 2,
-            entries: vec![entry.clone()].into(),
+            entries: vec![entry.clone()],
         }),
     );
     append(log, vec![mutation]);

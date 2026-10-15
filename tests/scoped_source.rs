@@ -268,8 +268,7 @@ fn native_frame_cuts_keep_fence_and_original_image_together_with_retained_servic
                         entry(1, 100, app.bootstrap_command(100000).unwrap()),
                         entry(2, 1, data(1, 7)),
                         entry(3, 2, data(200, 11)),
-                    ]
-                    .into(),
+                    ],
                 }),
             )],
         );
@@ -283,7 +282,7 @@ fn native_frame_cuts_keep_fence_and_original_image_together_with_retained_servic
         4,
         Some(Suffix {
             from: 4,
-            entries: vec![entry(4, 200, fence(0, 128))].into(),
+            entries: vec![entry(4, 200, fence(0, 128))],
         }),
     );
     let frame = NativeLogCodec

@@ -264,7 +264,7 @@ fn verify_recovery(root: &Path, expected: GroupLog, count: usize) -> Result<(), 
         return Err("recovered WAL differs from acknowledged state".into());
     }
     let mut app = checked(Counter::new(count))?;
-    let receipts = checked(app.apply_batch(&actual.entries.view(..).to_cow()))?;
+    let receipts = checked(app.apply_batch(&actual.entries))?;
     if checked(app.read_applied(actual.commit_index))? != count as i64 || receipts.len() != count {
         return Err("replay mismatch".into());
     }

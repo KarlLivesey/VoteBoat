@@ -35,7 +35,7 @@ fn populated() -> BTreeMap<voteboat::identity::GroupIdentity, GroupLog> {
             0,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, g as u8)].into(),
+                entries: vec![entry(1, 1, g as u8)],
             }),
         );
         apply_batch(&mut state, &[mutation], LogLimits::default()).unwrap();
@@ -53,26 +53,15 @@ fn later_invalid_transition_leaves_the_whole_batch_uninstalled() {
         0,
         Some(Suffix {
             from: 1,
-            entries: vec![entry(1, 2, 7)].into(),
+            entries: vec![entry(1, 2, 7)],
         }),
     );
     let invalid = update(&state[&group(2)], 1, 2, None);
     assert!(apply_batch(&mut state, &[valid.clone(), invalid], LogLimits::default()).is_err());
     assert_eq!(state, before);
-    let cold_allocations: Vec<_> = state[&group(3)]
-        .entries
-        .iter()
-        .map(std::ptr::from_ref)
-        .collect();
+    let cold_allocation = state[&group(3)].entries.as_ptr();
     apply_batch(&mut state, &[valid], LogLimits::default()).unwrap();
-    assert_eq!(
-        state[&group(3)]
-            .entries
-            .iter()
-            .map(std::ptr::from_ref)
-            .collect::<Vec<_>>(),
-        cold_allocations
-    );
+    assert_eq!(state[&group(3)].entries.as_ptr(), cold_allocation);
     assert_eq!(state[&group(2)], before[&group(2)]);
     assert!(state[&group(1)].generation > before[&group(1)].generation);
 }

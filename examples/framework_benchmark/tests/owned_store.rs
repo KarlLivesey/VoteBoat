@@ -102,7 +102,7 @@ fn modeled_suffix_generation_and_range_still_require_completed_exact_batch() {
             commit_index: 0,
             suffix: Some(Suffix {
                 from: 1,
-                entries: vec![command(term)].into(),
+                entries: vec![command(term)],
             }),
             snapshot: None,
             snapshot_membership: None,

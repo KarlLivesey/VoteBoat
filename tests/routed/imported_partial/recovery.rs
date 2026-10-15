@@ -95,7 +95,7 @@ impl RunCore {
         )
         .unwrap();
         let mut app = Counter::new(8).unwrap();
-        app.apply_batch(&core.replay_committed()).unwrap();
+        app.apply_batch(core.replay_committed()).unwrap();
         Self {
             core,
             store,

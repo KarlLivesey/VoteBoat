@@ -590,7 +590,7 @@ fn imported_metadata_adoption_and_retirement_journal_cuts_resume_exact_history()
                 last,
                 Some(Suffix {
                     from: last,
-                    entries: vec![entry.clone()].into(),
+                    entries: vec![entry.clone()],
                 }),
             );
             let frame = NativeLogCodec
@@ -791,7 +791,7 @@ fn seed_imported_metadata(
             last - 1,
             Some(Suffix {
                 from: 1,
-                entries: base.to_vec().into(),
+                entries: base.to_vec(),
             }),
         )],
     );

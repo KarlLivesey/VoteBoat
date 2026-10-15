@@ -285,7 +285,7 @@ fn every_torn_native_record_recovers_old_or_complete_administrative_state() {
             index,
             Some(Suffix {
                 from: 1,
-                entries: seed.into(),
+                entries: seed,
             }),
         );
         append(&mut log, vec![change]);
@@ -310,7 +310,7 @@ fn every_torn_native_record_recovers_old_or_complete_administrative_state() {
             entry.index,
             Some(Suffix {
                 from: entry.index,
-                entries: vec![entry].into(),
+                entries: vec![entry],
             }),
         );
         append(&mut log, vec![change]);
@@ -337,7 +337,7 @@ fn every_torn_native_record_recovers_old_or_complete_administrative_state() {
                 NativeLogStore::recover(torn, identity(1), LogLimits::default()).unwrap();
             let state = recovered.state(group(1)).unwrap();
             let mut a = app(2);
-            a.apply_batch(&state.entries.view(..state.commit_index as usize).to_cow())
+            a.apply_batch(&state.entries[..state.commit_index as usize])
                 .unwrap();
             assert_eq!(a.inner().read_applied(a.applied_index()), Ok(7));
             let record = a.record(OperationId::new(10).unwrap());

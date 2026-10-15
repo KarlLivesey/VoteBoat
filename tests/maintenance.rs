@@ -177,7 +177,7 @@ fn unit(w: &impl PersistenceWorker, g: u128, data: bool) -> Vec<PersistUnit> {
             snapshot: None,
             suffix: data.then(|| Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 7)].into(),
+                entries: vec![entry(1, 1, 7)],
             }),
         },
     }]

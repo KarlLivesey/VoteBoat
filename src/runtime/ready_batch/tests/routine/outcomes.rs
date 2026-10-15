@@ -35,7 +35,7 @@ fn deferred_heartbeat_batch_preserves_duplicate_conflict_and_original_applicatio
     }
     let mut counter = Counter::new(4).unwrap();
     counter
-        .apply_batch(&shard.core(group()).unwrap().replay_committed())
+        .apply_batch(shard.core(group()).unwrap().replay_committed())
         .unwrap();
     assert_eq!(counter.read_applied(1), Ok(0));
     assert_eq!(shard.core(group()).unwrap().state().commit_index, 1);

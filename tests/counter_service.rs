@@ -513,22 +513,6 @@ fn three_quic_service_processes_retry_replace_leader_and_recover_native_files() 
     replicated_history(true);
 }
 /// Prepared durable assignment tests service recovery, not online proposal delivery.
-fn seeded_member_entries(
-    records: &[voteboat::membership::ConfigurationRecord],
-    final_view: bool,
-) -> voteboat::log::EntryBatch {
-    use voteboat::log::{EntryPayload, LogEntry};
-    records
-        .iter()
-        .take(if final_view { 2 } else { 1 })
-        .enumerate()
-        .map(|(i, r)| LogEntry {
-            index: i as u64 + 1,
-            term: 1,
-            payload: EntryPayload::Configuration(Box::new(r.clone())),
-        })
-        .collect()
-}
 fn seed_member_service(root: &std::path::Path, final_view: bool, include_learner: bool) {
     let _gate = fixture_gate();
     use voteboat::{
@@ -595,7 +579,16 @@ fn seed_member_service(root: &std::path::Path, final_view: bool, include_learner
             .unwrap();
         log.barrier(&tickets).unwrap();
         let state = log.state(group).unwrap();
-        let entries = seeded_member_entries(&records, final_view);
+        let entries = records
+            .iter()
+            .take(if final_view { 2 } else { 1 })
+            .enumerate()
+            .map(|(i, r)| LogEntry {
+                index: i as u64 + 1,
+                term: 1,
+                payload: EntryPayload::Configuration(Box::new(r.clone())),
+            })
+            .collect::<Vec<_>>();
         let tickets = log
             .append_batch(vec![LogMutation::Update(LogUpdate {
                 group,
@@ -921,8 +914,7 @@ fn checkpoint_source(root: &std::path::Path, id: u64, operation: u128, delta: i6
                         operation: OperationId::new(operation).unwrap(),
                         bytes: delta.to_le_bytes().to_vec().into(),
                     },
-                }]
-                .into(),
+                }],
             }),
             snapshot: None,
             snapshot_membership: None,
@@ -1179,8 +1171,7 @@ fn enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_cre
                                 expected: ConfigurationId::new(3).unwrap(),
                                 change: ConfigurationChange::Learners(next),
                             })),
-                        }]
-                        .into(),
+                        }],
                     }),
                     snapshot: None,
                     snapshot_membership: None,
@@ -2815,8 +2806,7 @@ fn seed_fourth_learner(cluster: &Cluster, fourth: voteboat::identity::StoreIdent
                                 expected: ConfigurationId::new(3).unwrap(),
                                 change: ConfigurationChange::Learners(next),
                             })),
-                        }]
-                        .into(),
+                        }],
                     }),
                     snapshot: None,
                     snapshot_membership: None,

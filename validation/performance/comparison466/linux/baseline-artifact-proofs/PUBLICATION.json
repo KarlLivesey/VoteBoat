@@ -1,0 +1,18 @@
+{
+  "commit": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "original_handle": 2691,
+  "exit": 0,
+  "parent_confirmation": "Root authorized after actualpush2691terminal0/fullhook0; HEAD=origin/main checked locally",
+  "proof": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice455/publication/push.log",
+    "sha256": "282487865beabbd0ea2ef111759ccb2c9a9900dc45af8a1f98f9bf9ff4fdaaf3"
+  },
+  "status_proof": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice455/publication/STATUS",
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  "stderr_proof": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice455/publication/push.stderr",
+    "sha256": "7df0d3f50d68084b859d410258b56c527614759e984194468e7f2398f8f644e2"
+  }
+}

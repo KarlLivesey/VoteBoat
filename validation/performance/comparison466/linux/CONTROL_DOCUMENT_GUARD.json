@@ -1,0 +1,29 @@
+{
+  "controls": [
+    {
+      "mutation": "missing_document",
+      "rejected": true,
+      "message": "'docs/ENTRY_BATCHES.md'"
+    },
+    {
+      "mutation": "wrong_document_commit",
+      "rejected": true,
+      "message": "wrong committed API document: docs/COMMAND_BYTES.md"
+    },
+    {
+      "mutation": "wrong_document_hash",
+      "rejected": true,
+      "message": "changed committed API document: docs/COMMAND_BYTES.md"
+    }
+  ],
+  "scope": "Only temporary in-memory config metadata changed; actual compiled source/artifacts/control-documents untouched.",
+  "original_guard_reconstructed_from_exact_inverse_and_hash_proved": "088ef172190222bed09b99b74d1c5c7e041ce98627deb8a65da6ebe36b0e3ef4",
+  "compiled_inventory_unchanged": 1448,
+  "separate_committed_control_documents": [
+    "docs/COMMAND_BYTES.md",
+    "docs/ENTRY_BATCHES.md",
+    "benchmarks/matched/COMPARISON.md",
+    "validation/performance/slice466/SCHEMA.md",
+    "validation/performance/slice466/OBSERVATION_SCHEMA.md"
+  ]
+}

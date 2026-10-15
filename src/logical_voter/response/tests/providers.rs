@@ -59,9 +59,7 @@ impl LogCodec for LogProvider {
         if self.0.get() == Fault::BatchPayload {
             if let Some(LogMutation::Update(update)) = mutations.first_mut() {
                 if let Some(suffix) = &mut update.suffix {
-                    let mut entries = suffix.entries.to_vec();
-                    entries[0].term += 1;
-                    suffix.entries = entries.into();
+                    suffix.entries[0].term += 1;
                 }
             }
         }

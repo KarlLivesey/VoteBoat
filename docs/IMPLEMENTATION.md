@@ -1,6 +1,6 @@
 # Implementation record
 
-## Active P9 plan — 14 October 2026
+## Active P9 plan — 15 October 2026
 
 The1.5× larger published/matched sustained requirement is a minimum acceptance
 bar, not a target or stopping ceiling. The user wants that capacity and
@@ -743,8 +743,8 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: publish and qualify immutable canonical entry ownership | Establish net useful gain from the checked integrated466 path | [Linux466 qualification](../validation/performance/slice466/main/README.md), published source, fresh asserted artifacts, original Mac455 qualification | Enabled-hook publication, Mac qualification, actual clone/coalescing profiles, repeated same-host paired completed rates/tails/refusals and retained backing debt; reject unearned complexity | P9.1/P9.2/P9.3 |
-| Next: optimize the largest remaining measured stage | Improve sustained useful throughput through less work or better ordering | Current466 disposition and both-host CPU/waiting/materialization evidence, original comparison contract | Before-edit ownership/transition schema, focused correctness/recovery checks, checked publication and repeated paired rates/tails/debt; preserve all rejected paths and raw regressions | P9.1/P9.2/P9.3 |
+| Current: publish measured466 rejection and467 restoration | Remove the representation that regresses all six selected Linux pairs | Published466, fresh asserted source/artifact identities, actual1720 pairs and31284 CPU data; [467 schema](../validation/performance/slice467/SCHEMA.md) | Preserve every raw regression/setup failure, prove full465 source/build/contract equality, focused conformance and full enabled strict hook, commit/push; original Mac455 continues | P9.1/P9.2/P9.3 |
+| Next: optimize the largest remaining measured stage | Improve sustained useful throughput through less work or better ordering | Restored455 baseline and both-host CPU/waiting/materialization evidence, original comparison contract; close466 cost movement before selection | Before-edit ownership/transition schema, focused correctness/recovery checks, checked publication and repeated paired rates/tails/debt; no chunk-size retuning or resurrection of rejected paths | P9.1/P9.2/P9.3 |
 | Following: full curve, sustainable headroom and composition qualification | Satisfy the entire performance objective beyond the current experiment | Retained measured improvements, qualified weighted fixture, source/artifact/host identities and stable maintenance | All seven required framework cells on both hosts with healthy margin; sustained memory/debt, durable applications/headroom/skew/fairness, independent placement/shared barriers and P8 composition; preserve every outcome/fence/retry | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
@@ -34477,9 +34477,47 @@ TRACE-only observations report full per-owner entry allocation at named success
 points without changing the existing phase/counter semantics or OFF inspection.
 These counters are not whole-process RSS, a continuous peak or transient debt.
 
-Publication and fresh performance qualification follow. No466 speedup, sustained
-memory plateau, Mac qualification or macro completion is claimed. The macro plan
-is reviewed for the new physical bound: interior partial backings are bounded
-by retained chunks and admitted batches, not merely two boundary spans, and must
-be measured under conflict/maintenance pressure. The full both-host sustained,
-durable/headroom/fairness/placement/P8 acceptance remains unchanged and open.
+466 publishes as92454c26 with the full enabled hook0. Fresh Linux build99290
+ends0:1448 committed inputs, root library/executable/pinned upstream fresh:false,
+asserted profile and exact within-host compiler/tools, original/copied ELF+DWP
+hashes. Actual OFF/ON/OpenRaft CLI controls finish16,384 originals/frontiers17,409
+on all three replicas; ON retains29 phases/four scopes/15 provider methods and
+explicit per-owner allocation observations. This establishes build/control
+provenance rather than performance.
+
+[Paired original1720](../validation/performance/comparison466/linux/MEASUREMENTS.md)
+ends0/ALL_TIMING_END with all24 cases and validators0.
+Every bulk and singleton OFF pair regresses rate and p99. Bulk medians455→466
+7,444,889→6,055,125 completed originals/s, p993.668682→3.807844ms;
+singleton108,097→77,659/s and.018955→.024576ms. Rotating three trials, maintenance,
+outcomes and timer scopes match. ON bulk5,868,409 and singleton63,826/s retain
+observer overhead/tails without a cause claim. Upstream medians3,327,889 and
+20,105/s remain separate. These selected1M cells are not sustained acceptance.
+
+Fresh headless CPU31284 also ends0, with20M requested/19,988,480 bulk originals
+and1,048,576 singleton. Policies remain2/2/516, no browser/tool install/recapture;
+bulk lost1chunk remains. Initial physical-self analysis identifies singleton
+EntryHistory::get19.634%; bulk append_for8.067%, EntryIter::next3.320% and
+iterator-to-Vec2.422%. This is whole-launch CPU sampling, not the throughput
+clock or causal allocator attribution. Removing an old slice-copy symbol moved
+work into other paths; a representation win is not established.
+
+[467's before-edit restoration schema](../validation/performance/slice467/SCHEMA.md)
+rejects466 without retuning.171 changed source/test/example/contract/schema paths
+return to4659798ed44; all2485 baseline source/build/contract/validator bytes and
+physical modes match, plus1441 exact compiled inputs with no ignored/untracked
+extras. Prior exact-baseline production/protocol/network/recovery scopes remain
+eligible. Original91332 ends0/DONE: providers42/27, metadata0 and the complete
+enabled formatting/four-profile/standalone strict hook0; all1441 source/mode
+inputs remain exact before/after. [All34 restoration payloads](../validation/performance/slice467/main/README.md)
+independently verify; source review confirms baseline equality and no extra
+compiled inputs. All466 source, failed preparation and raw
+measurements stay. Original Mac455 qualification continues; corrected466
+functional96710 also ends0/DONE: [103 verified archive payloads](../validation/performance/slice466/mac/README.md)
+retain437/core355 library,588 all-feature/352 core integration, actual service
+selectors2 each, matched71 and all strict/metadata/source/mode controls0.
+The first mode-drift attempt's controlled stop/SSH255/raw STATUS0 is explicitly
+unqualified; no performance artifact or claim follows.
+No Mac466 performance campaign is needed after these Linux losses.
+The full both-host sustained, durable/headroom/fairness/placement/P8 acceptance
+remains unchanged and open; no macro milestone closes.

@@ -370,7 +370,7 @@ fn cross_authority_native_intent_torn_frames_recover_local_creations_and_lock() 
         5,
         Some(Suffix {
             from: 5,
-            entries: vec![entry(5, 300, intent.encode(100000).unwrap())].into(),
+            entries: vec![entry(5, 300, intent.encode(100000).unwrap())],
         }),
     );
     let frame = NativeLogCodec
@@ -601,7 +601,7 @@ fn seed_cross_authority_intent(
             4,
             Some(Suffix {
                 from: 1,
-                entries: prefix.to_vec().into(),
+                entries: prefix.to_vec(),
             }),
         )],
     );

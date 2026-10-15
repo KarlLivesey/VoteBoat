@@ -1,0 +1,37 @@
+{
+  "state": "PUBLISHED_BUILD_PREP_READY",
+  "required_commit": "92454c26cfe35aa65034eb3c306e990d42d88a80",
+  "functional_inputs": 1446,
+  "actual_publication_proof": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice466/PUBLICATION.json",
+  "baseline_tools_sha256": "5493d578c4e3f6d67d018dc2c885ba87b7a61674969299ed7975c7ea58aefa86",
+  "protoc": "Exactbaseline protobuf-build0.14.1 bundledprotoc-linux-x86_64 libprotoc3.9.0; no system36.1",
+  "syntax_checks": [
+    {
+      "script": "run.sh",
+      "syntax_exit": 0
+    },
+    {
+      "script": "export-source.sh",
+      "syntax_exit": 0
+    },
+    {
+      "script": "cli-run.sh",
+      "syntax_exit": 0
+    },
+    {
+      "script": "guard.py",
+      "syntax_exit": 0
+    },
+    {
+      "script": "phase-diagnostic-check.py",
+      "syntax_exit": 0
+    },
+    {
+      "script": "artifact-guard.py",
+      "syntax_exit": 0
+    }
+  ],
+  "source_export_started": false,
+  "build_started": false,
+  "timing_authorized": false
+}

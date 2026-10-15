@@ -64,7 +64,7 @@ fn pending_entries(core: &mut Raft, entries: Vec<LogEntry>, after: After) -> Log
             commit,
             Some(Suffix {
                 from: entries[0].index,
-                entries: entries.into(),
+                entries,
             }),
             after,
             Some(response),
@@ -138,22 +138,13 @@ fn borrowed_commit_only_interval_is_canonical_and_owned_materialization_is_indep
         .persist(
             core.state().hard_state,
             1,
-            Some(Suffix {
-                from: 2,
-                entries: entries.into(),
-            }),
+            Some(Suffix { from: 2, entries }),
             After::Reply,
             None,
         )
         .unwrap();
     assert!(durable(&mut core, effects).is_empty());
-    let canonical = core
-        .state()
-        .entries
-        .view(1..)
-        .as_contiguous()
-        .unwrap()
-        .as_ptr();
+    let canonical = core.state().entries[1..].as_ptr();
     let EntryPayload::Command { bytes, .. } = &core.state().entries[1].payload else {
         unreachable!()
     };
@@ -180,7 +171,7 @@ fn borrowed_commit_only_interval_is_canonical_and_owned_materialization_is_indep
     let mut replacement = bytes.to_vec();
     replacement[0] = 255;
     *bytes = replacement.into();
-    assert_ne!(materialized, core.state().entries.view(1..).to_vec());
+    assert_ne!(materialized, core.state().entries[1..]);
     core.persist(core.state().hard_state, 3, None, After::Reply, None)
         .unwrap();
     let exact = admit(&mut core);
@@ -389,7 +380,7 @@ fn retiring() -> Raft {
                 2.min(index),
                 Some(Suffix {
                     from: index,
-                    entries: entries.into(),
+                    entries,
                 }),
                 After::Reply,
                 None,
@@ -516,15 +507,14 @@ fn borrowed_persistence_helper_keeps_preflight_exactness_barrier_and_late_error_
         match failure {
             0 => store.binding.session = StoreSession::new(2).unwrap(),
             1 => {
-                let suffix = update.suffix.as_mut().unwrap();
-                let mut entries = suffix.entries.to_vec();
-                let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
+                let EntryPayload::Command { bytes, .. } =
+                    &mut update.suffix.as_mut().unwrap().entries[0].payload
+                else {
                     unreachable!()
                 };
                 let mut replacement = bytes.to_vec();
                 replacement[0] = 8;
                 *bytes = replacement.into();
-                suffix.entries = entries.into();
             }
             2 => store.fail_barrier = true,
             3 => core.request_sequence = u64::MAX,
@@ -571,10 +561,7 @@ fn borrowed_persistence_helper_keeps_preflight_exactness_barrier_and_late_error_
         persist_effect_borrowed(&mut borrowed, &mut borrowed_store, update)
             .unwrap()
             .into_parts();
-    assert_eq!(
-        committed.as_ref().unwrap()[0],
-        command(2, u128::MAX, vec![7])
-    );
+    assert_eq!(committed.unwrap()[0], command(2, u128::MAX, vec![7]));
     let mut materialized = vec![Effect::Committed(committed.unwrap().to_vec())];
     materialized.extend(following);
     assert_eq!(materialized, expected);
@@ -585,173 +572,4 @@ fn borrowed_persistence_helper_keeps_preflight_exactness_barrier_and_late_error_
             .unwrap(),
         *borrowed.state()
     );
-}
-
-#[test]
-fn exact_entry_backing_survives_pending_admission_delayed_durable_and_canonical_install() {
-    use crate::application::{Counter, CounterOutcome, StateMachine};
-    let mut core = core();
-    core.role = Role::Follower;
-    let before = core.state().clone();
-    let mut app = Counter::new(8).unwrap();
-    assert!(app
-        .apply_batch(&core.replay_committed())
-        .unwrap()
-        .is_empty());
-    let expected = vec![
-        command(2, u128::MAX, 2i64.to_le_bytes().to_vec()),
-        command(3, (1 << 127) | 7, 5i64.to_le_bytes().to_vec()),
-    ];
-    let update = pending_entries(&mut core, expected.clone(), After::Reply);
-    let batch = update.suffix.as_ref().unwrap().entries.clone();
-    let pointer = batch.as_ptr();
-    assert_eq!(
-        core.pending
-            .as_ref()
-            .unwrap()
-            .next
-            .update()
-            .suffix
-            .as_ref()
-            .unwrap()
-            .entries
-            .as_ptr(),
-        pointer
-    );
-    let exact = ticket(&core);
-    assert!(matches!(
-        core.complete_borrowed(&DurableLog {
-            tickets: vec![exact]
-        }),
-        Err(RaftError::WrongCompletion)
-    ));
-    assert_eq!(core.state(), &before);
-    let mut store = ModeledStore::new(&core);
-    let tickets = store
-        .append_batch(vec![LogMutation::Update(update)])
-        .unwrap();
-    assert_eq!(tickets, vec![exact]);
-    assert_eq!(
-        store.states[&exact.group].entries.get(1).unwrap() as *const LogEntry,
-        pointer
-    );
-    core.admitted(exact).unwrap();
-    assert_eq!(core.state(), &before);
-    assert_eq!(app.applied_index(), 1);
-    assert_eq!(
-        core.pending
-            .as_ref()
-            .unwrap()
-            .next
-            .update()
-            .suffix
-            .as_ref()
-            .unwrap()
-            .entries
-            .as_ptr(),
-        pointer
-    );
-    let mut wrong = exact;
-    wrong.batch += 1;
-    assert!(matches!(
-        core.complete_borrowed(&DurableLog {
-            tickets: vec![wrong]
-        }),
-        Err(RaftError::WrongCompletion)
-    ));
-    assert_eq!(core.state(), &before);
-    let completion = store.barrier(&tickets).unwrap();
-    let result = core.complete_borrowed(&completion).unwrap();
-    assert_eq!(result.committed().unwrap(), expected);
-    assert_eq!(result.committed().unwrap().as_ptr(), pointer);
-    assert!(matches!(result.following(), [Effect::Send(_)]));
-    // One application invocation receives the entire two-original commit batch.
-    let receipts = app.apply_batch(result.committed().unwrap()).unwrap();
-    assert_eq!(
-        receipts
-            .iter()
-            .map(|r| (r.index, r.operation.get(), r.outcome))
-            .collect::<Vec<_>>(),
-        vec![
-            (2, u128::MAX, CounterOutcome::Value(2)),
-            (3, (1 << 127) | 7, CounterOutcome::Value(7))
-        ]
-    );
-    drop(result);
-    assert_eq!(
-        core.state().entries.get(1).unwrap() as *const LogEntry,
-        pointer
-    );
-    assert_eq!(core.state(), &store.states[&exact.group]);
-    assert!(!core.has_pending_dependency());
-    assert_eq!(batch, expected);
-}
-
-#[test]
-fn fragmented_canonical_commit_coalesces_once_without_splitting_application_batch() {
-    use crate::application::{ApplicationError, Counter, StateMachine};
-    for invalid_later in [false, true] {
-        let mut core = core();
-        core.role = Role::Follower;
-        let mut app = Counter::new(8).unwrap();
-        app.apply_batch(&core.replay_committed()).unwrap();
-        let mut reference = app.clone();
-        let first = command(2, u128::MAX, 2i64.to_le_bytes().to_vec());
-        let effects = core
-            .persist(
-                core.state().hard_state,
-                1,
-                Some(Suffix {
-                    from: 2,
-                    entries: vec![first.clone()].into(),
-                }),
-                After::Reply,
-                None,
-            )
-            .unwrap();
-        assert!(durable(&mut core, effects).is_empty());
-        let first_pointer = core.state().entries.get(1).unwrap() as *const LogEntry;
-        let second = command(
-            3,
-            (1 << 127) | 7,
-            if invalid_later {
-                vec![5]
-            } else {
-                5i64.to_le_bytes().to_vec()
-            },
-        );
-        let reference_entries = vec![first.clone(), second.clone()];
-        let update = pending_entries(&mut core, vec![second.clone()], After::Reply);
-        let second_batch = update.suffix.as_ref().unwrap().entries.clone();
-        let exact = admit(&mut core);
-        let (committed, following) = core.complete_borrowed(&exact).unwrap().into_parts();
-        let committed = committed.unwrap();
-        assert!(matches!(&committed, std::borrow::Cow::Owned(_)));
-        assert_eq!(committed.as_ref(), &[first, second]);
-        assert_ne!(committed.as_ptr(), first_pointer);
-        assert_ne!(committed.as_ptr(), second_batch.as_ptr());
-        assert!(matches!(following.as_slice(), [Effect::Send(_)]));
-        let outcome = app.apply_batch(&committed);
-        assert_eq!(outcome, reference.apply_batch(&reference_entries));
-        if invalid_later {
-            assert_eq!(outcome, Err(ApplicationError::InvalidCommand));
-            assert_eq!(app.applied_index(), 1);
-            assert_eq!(app.read_applied(1), Ok(0));
-            assert_eq!(app.remaining_operations(), 8);
-        } else {
-            assert_eq!(outcome.unwrap().len(), 2);
-            assert_eq!(app.read_applied(3), Ok(7));
-        }
-        assert_eq!(app.applied_index(), reference.applied_index());
-        assert_eq!(app.remaining_operations(), reference.remaining_operations());
-        drop(committed);
-        assert_eq!(
-            core.state().entries.get(1).unwrap() as *const LogEntry,
-            first_pointer
-        );
-        assert_eq!(
-            core.state().entries.get(2).unwrap() as *const LogEntry,
-            second_batch.as_ptr()
-        );
-    }
 }

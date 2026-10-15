@@ -101,8 +101,7 @@ fn mutation(state: &GroupLog, stage: Stage) -> (LogMutation, Stage) {
                         expected: state.membership().unwrap().id(),
                         change,
                     })),
-                }]
-                .into(),
+                }],
             }),
         ),
         next,

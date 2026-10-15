@@ -7,8 +7,6 @@ use voteboat::{identity::*, log::*};
 mod command_bytes;
 #[path = "log_store/default_errors.rs"]
 mod default_errors;
-#[path = "log_store/entry_batches.rs"]
-mod entry_batches;
 #[path = "log_store/entry_clone.rs"]
 mod entry_clone;
 #[path = "log_store/entry_equality.rs"]
@@ -92,7 +90,7 @@ fn suffix_and_ranges(store: &mut impl LogStore, one_entry_bytes: usize) {
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 7), entry(2, 1, 8)].into(),
+                entries: vec![entry(1, 1, 7), entry(2, 1, 8)],
             }),
         )],
     );
@@ -105,7 +103,7 @@ fn suffix_and_ranges(store: &mut impl LogStore, one_entry_bytes: usize) {
             1,
             Some(Suffix {
                 from: 3,
-                entries: vec![entry(3, 1, 9)].into(),
+                entries: vec![entry(3, 1, 9)],
             }),
         )])
         .unwrap();
@@ -117,7 +115,7 @@ fn suffix_and_ranges(store: &mut impl LogStore, one_entry_bytes: usize) {
         1,
         Some(Suffix {
             from: 2,
-            entries: vec![entry(2, 2, 10), entry(3, 2, 11)].into(),
+            entries: vec![entry(2, 2, 10), entry(3, 2, 11)],
         }),
     );
     let LogMutation::Update(change) = &mut replacement else {
@@ -182,7 +180,7 @@ fn refusal_and_reclamation(store: &mut impl LogStore) {
             1,
             Some(Suffix {
                 from: 4,
-                entries: vec![oversized].into(),
+                entries: vec![oversized],
             })
         )])
         .is_err());
@@ -222,7 +220,7 @@ pub fn reopened(store: &mut impl LogStore, old: StoreBinding, states: &[GroupLog
             1,
             Some(Suffix {
                 from: 4,
-                entries: vec![entry(4, 2, 12)].into(),
+                entries: vec![entry(4, 2, 12)],
             }),
         )])
         .unwrap();

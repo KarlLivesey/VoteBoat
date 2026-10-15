@@ -113,7 +113,7 @@ pub(super) fn encode(
                     .base_index()
                     .checked_add(1)
                     .ok_or(StorageError::Rejected("checkpoint index exhausted"))?,
-                entries: s.entries.to_vec().into(),
+                entries: s.entries.clone(),
             }),
             snapshot: None,
         }))?;

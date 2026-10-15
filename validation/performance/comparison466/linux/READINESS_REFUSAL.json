@@ -1,0 +1,5 @@
+{
+  "actual_exit_of_guard_call": "ValueError refusal as expected; no artifact/source/compiler guard run",
+  "message": "fresh candidate CLI/observer validation is not yet supplied",
+  "no_usable_candidate_config": true
+}

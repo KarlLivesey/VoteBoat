@@ -1,0 +1,32 @@
+{
+  "docs/COMMAND_BYTES.md": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison466/control-documents/docs/COMMAND_BYTES.md",
+    "sha256": "5f50be51db841f4e781f6e187b47880a25705a884aead2f9016a8b27b6154a30",
+    "source_commit": "92454c26cfe35aa65034eb3c306e990d42d88a80",
+    "scope": "Committed API documentation kept separately from immutable1448 actual compiled-source inventory; no rebuilt or added compiled input."
+  },
+  "docs/ENTRY_BATCHES.md": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison466/control-documents/docs/ENTRY_BATCHES.md",
+    "sha256": "f72a2ccc697b7c25daf15a57f857829d7ca71b1f996cbfe3bbad3125269bc5c6",
+    "source_commit": "92454c26cfe35aa65034eb3c306e990d42d88a80",
+    "scope": "Committed API documentation kept separately from immutable1448 actual compiled-source inventory; no rebuilt or added compiled input."
+  },
+  "benchmarks/matched/COMPARISON.md": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison466/control-documents/benchmarks/matched/COMPARISON.md",
+    "sha256": "33ba7e5e2eafb694c034663e88c6476c7d8ee746dd52c3676da999c4b565b507",
+    "source_commit": "92454c26cfe35aa65034eb3c306e990d42d88a80",
+    "scope": "Separately committed control-document proof; immutable compiled source1448 map unchanged."
+  },
+  "validation/performance/slice466/SCHEMA.md": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison466/control-documents/validation/performance/slice466/SCHEMA.md",
+    "sha256": "c9407f909c440871699673728c83b071ab87baedef61d256508f1a7b3aafdb17",
+    "source_commit": "92454c26cfe35aa65034eb3c306e990d42d88a80",
+    "scope": "Separately committed control-document proof; immutable compiled source1448 map unchanged."
+  },
+  "validation/performance/slice466/OBSERVATION_SCHEMA.md": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison466/control-documents/validation/performance/slice466/OBSERVATION_SCHEMA.md",
+    "sha256": "8f0ebc0d6ea35178593aadab268d620fc192239fa34a78592544d763d510e6e7",
+    "source_commit": "92454c26cfe35aa65034eb3c306e990d42d88a80",
+    "scope": "Separately committed control-document proof; immutable compiled source1448 map unchanged."
+  }
+}

@@ -158,7 +158,7 @@ fn combined_pending_append_trim_and_subset_barrier_only_preserve_verified_overla
         5,
         Some(Suffix {
             from: 4,
-            entries: vec![entry(4, 1), entry(5, 1)].into(),
+            entries: vec![entry(4, 1), entry(5, 1)],
         }),
     );
     let old = store.append_batch(vec![update]).unwrap();
@@ -191,7 +191,7 @@ fn combined_pending_append_trim_and_subset_barrier_only_preserve_verified_overla
         5,
         Some(Suffix {
             from: 6,
-            entries: vec![entry(6, 1)].into(),
+            entries: vec![entry(6, 1)],
         }),
     );
     let later = store.append_batch(vec![update]).unwrap();
@@ -251,7 +251,7 @@ fn rewrites_fresh_owners_and_reopen_cannot_reuse_old_prefix_proof() {
         2,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 2)].into(),
+            entries: vec![entry(3, 2)],
         }),
     );
     let tickets = store.append_batch(vec![replacement]).unwrap();
@@ -262,7 +262,7 @@ fn rewrites_fresh_owners_and_reopen_cannot_reuse_old_prefix_proof() {
         2,
         Some(Suffix {
             from: 4,
-            entries: vec![entry(4, 2)].into(),
+            entries: vec![entry(4, 2)],
         }),
     );
     let appended = store.append_batch(vec![append]).unwrap();
@@ -319,7 +319,7 @@ fn failed_publication_fences_before_missing_and_never_advances_verified_prefix()
             0,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1)].into(),
+                entries: vec![entry(1, 1)],
             }),
         );
         match store.append_batch(vec![update]) {

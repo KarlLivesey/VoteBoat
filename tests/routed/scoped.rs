@@ -237,7 +237,7 @@ fn native_scoped_fence_frame_cuts_recover_old_or_exact_fence_with_retained_servi
                 3,
                 Some(Suffix {
                     from: 1,
-                    entries: prefix.into(),
+                    entries: prefix,
                 }),
             )],
         );
@@ -251,7 +251,7 @@ fn native_scoped_fence_frame_cuts_recover_old_or_exact_fence_with_retained_servi
         4,
         Some(Suffix {
             from: 4,
-            entries: vec![entry(4, 200, freeze(0, 128))].into(),
+            entries: vec![entry(4, 200, freeze(0, 128))],
         }),
     );
     let frame = NativeLogCodec

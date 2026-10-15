@@ -90,8 +90,7 @@ fn two_publications_pin_original_anchor_until_exact_reconcile() {
                         term: 1,
                         payload: EntryPayload::Noop,
                     },
-                ]
-                .into(),
+                ],
             }),
         ),
     );

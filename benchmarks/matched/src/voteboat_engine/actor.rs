@@ -115,8 +115,6 @@ impl<const TRACE: bool> Actor<TRACE> {
                 .peak_peer_queue
                 .fetch_max(self.parts.peer_receiver.len(), Ordering::Relaxed);
             self.maintain()?;
-            self.attribution
-                .observe_entry_allocations(|| self.parts.core.state().entries.allocation_bytes());
             self.parts.stats[self.parts.slot]
                 .retained
                 .store(self.parts.core.state().entries.len(), Ordering::Relaxed);
@@ -317,7 +315,7 @@ impl<const TRACE: bool> Actor<TRACE> {
                     &mut self.pending,
                     &self.attribution,
                     self.parts.slot,
-                    &entries,
+                    entries,
                 )?;
             }
             effects.extend(following);
@@ -328,8 +326,6 @@ impl<const TRACE: bool> Actor<TRACE> {
                 .finish(Phase::PersistHelper, started, result.is_err(), 0);
             effects.extend(result.map_err(debug_error)?);
         }
-        self.attribution
-            .observe_entry_allocations(|| self.parts.core.state().entries.allocation_bytes());
         Ok(())
     }
     fn send(&mut self, message: Message) -> Result<(), Failure> {

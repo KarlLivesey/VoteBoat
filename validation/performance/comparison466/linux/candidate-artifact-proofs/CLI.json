@@ -1,0 +1,97 @@
+[
+  {
+    "case": "off",
+    "actual_exit": 0,
+    "completed_originals": 16384,
+    "completed_requests": 4096,
+    "applied_frontiers": [
+      17409,
+      17409,
+      17409
+    ],
+    "phase_scope_method_counts": null,
+    "entry_allocation_observations": [],
+    "guarded_output_sha256": "a98bde222064fe7f7a7a536a95c953d61e962092c4e1d567d0b658a6e7ab5f68",
+    "checker_sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "scope": "Functional control only; whole-lifetime observed per-owner allocations are not RSS/continuous peak; rates are not paired capacity evidence."
+  },
+  {
+    "case": "on",
+    "actual_exit": 0,
+    "completed_originals": 16384,
+    "completed_requests": 4096,
+    "applied_frontiers": [
+      17409,
+      17409,
+      17409
+    ],
+    "phase_scope_method_counts": [
+      29,
+      4,
+      15
+    ],
+    "entry_allocation_observations": [
+      {
+        "replica_slot": 0,
+        "core_entry_allocations": {
+          "observations": 7364,
+          "last_bytes": 280512,
+          "maximum_observed_bytes": 480064
+        },
+        "store_entry_allocations": {
+          "observations": 2266,
+          "last_bytes": 280512,
+          "maximum_observed_bytes": 480064
+        },
+        "entry_allocation_observation_scope": "TRACE_only_whole_lifetime_per_owner_EntryHistory_backing_payloads_hidden_entries_and_descriptor_capacity;Core_after_successful_persistence_and_maintenance;store_after_successful_volatile_apply_including_pending;not_continuous_peak_not_RSS_excludes_other_Core_pending_effects_application_snapshot_queue_and_transient_coalescing_memory;shared_owners_charged_in_full_do_not_sum_as_physical_RSS"
+      },
+      {
+        "replica_slot": 1,
+        "core_entry_allocations": {
+          "observations": 3973,
+          "last_bytes": 280000,
+          "maximum_observed_bytes": 482560
+        },
+        "store_entry_allocations": {
+          "observations": 1988,
+          "last_bytes": 280000,
+          "maximum_observed_bytes": 482560
+        },
+        "entry_allocation_observation_scope": "TRACE_only_whole_lifetime_per_owner_EntryHistory_backing_payloads_hidden_entries_and_descriptor_capacity;Core_after_successful_persistence_and_maintenance;store_after_successful_volatile_apply_including_pending;not_continuous_peak_not_RSS_excludes_other_Core_pending_effects_application_snapshot_queue_and_transient_coalescing_memory;shared_owners_charged_in_full_do_not_sum_as_physical_RSS"
+      },
+      {
+        "replica_slot": 2,
+        "core_entry_allocations": {
+          "observations": 3954,
+          "last_bytes": 286528,
+          "maximum_observed_bytes": 531264
+        },
+        "store_entry_allocations": {
+          "observations": 1978,
+          "last_bytes": 286528,
+          "maximum_observed_bytes": 531264
+        },
+        "entry_allocation_observation_scope": "TRACE_only_whole_lifetime_per_owner_EntryHistory_backing_payloads_hidden_entries_and_descriptor_capacity;Core_after_successful_persistence_and_maintenance;store_after_successful_volatile_apply_including_pending;not_continuous_peak_not_RSS_excludes_other_Core_pending_effects_application_snapshot_queue_and_transient_coalescing_memory;shared_owners_charged_in_full_do_not_sum_as_physical_RSS"
+      }
+    ],
+    "guarded_output_sha256": "fb1c768ce44da7856ea3204ea699b13168f9f848850dc12ef30927a94e463922",
+    "checker_sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "scope": "Functional control only; whole-lifetime observed per-owner allocations are not RSS/continuous peak; rates are not paired capacity evidence."
+  },
+  {
+    "case": "openraft",
+    "actual_exit": 0,
+    "completed_originals": 16384,
+    "completed_requests": 4096,
+    "applied_frontiers": [
+      17409,
+      17409,
+      17409
+    ],
+    "phase_scope_method_counts": null,
+    "entry_allocation_observations": [],
+    "guarded_output_sha256": "ab11aa58197b59b2120df659c3622c32be0524554ad1c02f41d6545b938c35d8",
+    "checker_sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "scope": "Functional control only; whole-lifetime observed per-owner allocations are not RSS/continuous peak; rates are not paired capacity evidence."
+  }
+]

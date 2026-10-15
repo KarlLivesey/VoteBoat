@@ -539,7 +539,7 @@ fn retained_intent_native_frame_cuts_recover_original_creation_and_exact_lock() 
         4,
         Some(Suffix {
             from: 4,
-            entries: vec![entry(4, 200, intent.encode(100000).unwrap())].into(),
+            entries: vec![entry(4, 200, intent.encode(100000).unwrap())],
         }),
     );
     let frame = NativeLogCodec
@@ -778,7 +778,7 @@ fn bound_source_frame_cuts_recover_intent_fence_and_image_together() {
         4,
         Some(Suffix {
             from: 4,
-            entries: vec![entry(4, 200, intent.encode(100000).unwrap())].into(),
+            entries: vec![entry(4, 200, intent.encode(100000).unwrap())],
         }),
     );
     let frame = NativeLogCodec
@@ -953,7 +953,7 @@ fn adoption_frame_cuts_recover_original_grant_or_exact_new_epoch_with_exports() 
         6,
         Some(Suffix {
             from: 6,
-            entries: vec![entry(6, 300, command.clone())].into(),
+            entries: vec![entry(6, 300, command.clone())],
         }),
     );
     let frame = NativeLogCodec
@@ -1612,7 +1612,7 @@ fn seed_retained_intent(
             3,
             Some(Suffix {
                 from: 1,
-                entries: prefix.to_vec().into(),
+                entries: prefix.to_vec(),
             }),
         )],
     );
@@ -1649,8 +1649,7 @@ fn seed_bound_source(
                     entry(1, 100, app.bootstrap_command(100000).unwrap()),
                     entry(2, 1, data_at(intent, 1, 7)),
                     entry(3, 2, data_at(intent, 200, 11)),
-                ]
-                .into(),
+                ],
             }),
         )],
     );
@@ -1689,8 +1688,7 @@ fn seed_retained_adoption(
                     entry(3, 2, data_at(intent, 200, 11)),
                     entry(4, 200, intent.encode(100000).unwrap()),
                     entry(5, 3, data_at(intent, 200, 2)),
-                ]
-                .into(),
+                ],
             }),
         )],
     );

@@ -1,0 +1,1 @@
+/Users/karllivesey/.cargo/bin/cargo +stable test --locked --offline --no-default-features --test log_owned --test log_staging --test provider_conformance --test snapshot --test snapshot_worker --test raft --test runtime --test worker --test effect_owner --test membership --test learners -- --test-threads=1 

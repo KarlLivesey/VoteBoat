@@ -1,0 +1,13 @@
+{
+  "original_handle": 91332,
+  "actual_terminal_exit": 0,
+  "stage": "DONE",
+  "source_inputs": 1441,
+  "before_after_sha_and_modes_exact": true,
+  "provider_all": 42,
+  "provider_core": 27,
+  "metadata_exit": 0,
+  "full_enabled_format_four_profiles_and_standalone_hook_exit": 0,
+  "source_reuse": "Exact465 production/build/contracts; checked465/462/455 production/protocol/network/recovery scope reused, not466 experimental qualification.",
+  "scope": "Restoration qualification only, not new throughput or P9acceptance."
+}

@@ -35,7 +35,7 @@ fn selected_complete_upper_canonical_history_fits_lower_snapshot_and_import() {
                         commit_index: 0,
                         suffix: Some(Suffix {
                             from: entry.index,
-                            entries: vec![entry.clone()].into(),
+                            entries: vec![entry.clone()],
                         }),
                         snapshot: None,
                         snapshot_membership: None,

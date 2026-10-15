@@ -91,7 +91,7 @@ fn compacted_log_conformance<S: LogStore>(mut store: S) {
             3,
             Some(Suffix {
                 from: 3,
-                entries: vec![].into()
+                entries: vec![]
             })
         )])
         .is_err());
@@ -103,7 +103,7 @@ fn compacted_log_conformance<S: LogStore>(mut store: S) {
             3,
             Some(Suffix {
                 from: 4,
-                entries: vec![entry(4, 2, 9)].into(),
+                entries: vec![entry(4, 2, 9)],
             }),
         )],
     );
@@ -174,7 +174,7 @@ fn conformance<S: LogStore>(mut store: S) {
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 10), entry(2, 1, 20)].into(),
+                entries: vec![entry(1, 1, 10), entry(2, 1, 20)],
             }),
         )],
     );
@@ -198,7 +198,7 @@ fn conformance<S: LogStore>(mut store: S) {
             1,
             Some(Suffix {
                 from: 2,
-                entries: vec![entry(2, 2, 30), entry(3, 2, 40)].into(),
+                entries: vec![entry(2, 2, 30), entry(3, 2, 40)],
             }),
         )],
     );
@@ -220,7 +220,7 @@ fn conformance<S: LogStore>(mut store: S) {
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![].into(),
+                entries: vec![],
             }),
         ),
         update(&new, 2, 0, None),
@@ -232,7 +232,7 @@ fn conformance<S: LogStore>(mut store: S) {
             1,
             Some(Suffix {
                 from: 5,
-                entries: vec![].into(),
+                entries: vec![],
             }),
         ),
         update(&old, 2, 1, None),
@@ -271,7 +271,7 @@ fn restart_recovers_policy_identity_hard_state_suffix_and_commit() {
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 1), entry(2, 2, 2)].into(),
+                entries: vec![entry(1, 1, 1), entry(2, 2, 2)],
             }),
         )],
     );
@@ -284,7 +284,7 @@ fn restart_recovers_policy_identity_hard_state_suffix_and_commit() {
             1,
             Some(Suffix {
                 from: 2,
-                entries: vec![entry(2, 3, 3)].into(),
+                entries: vec![entry(2, 3, 3)],
             }),
         )],
     );
@@ -309,7 +309,7 @@ fn suffix_fence_invalidates_uncompleted_old_generation() {
             0,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 1)].into(),
+                entries: vec![entry(1, 1, 1)],
             }),
         )])
         .unwrap();
@@ -327,7 +327,7 @@ fn suffix_fence_invalidates_uncompleted_old_generation() {
         commit_index: 0,
         suffix: Some(Suffix {
             from: 1,
-            entries: vec![entry(1, 2, 2)].into(),
+            entries: vec![entry(1, 2, 2)],
         }),
     });
     let new = store.append_batch(vec![replacement]).unwrap();
@@ -349,7 +349,7 @@ fn every_interrupted_replacement_is_atomic_and_never_loses_committed_prefix() {
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 1), entry(2, 1, 2)].into(),
+                entries: vec![entry(1, 1, 1), entry(2, 1, 2)],
             }),
         )],
     );
@@ -363,7 +363,7 @@ fn every_interrupted_replacement_is_atomic_and_never_loses_committed_prefix() {
             1,
             Some(Suffix {
                 from: 2,
-                entries: vec![entry(2, 2, 3), entry(3, 2, 4)].into(),
+                entries: vec![entry(2, 2, 3), entry(3, 2, 4)],
             }),
         )])
         .unwrap();
@@ -412,7 +412,7 @@ fn failed_sync_or_publication_fences_without_acknowledging_the_transition() {
             0,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 1)].into(),
+                entries: vec![entry(1, 1, 1)],
             }),
         )]) {
             Err(StorageError::Uncertain(_)) => (),
@@ -496,7 +496,7 @@ fn valid_checksums_cannot_hide_unbounded_policy_or_command_lengths() {
         commit_index: 0,
         suffix: Some(Suffix {
             from: 1,
-            entries: vec![entry(1, 1, 1)].into(),
+            entries: vec![entry(1, 1, 1)],
         }),
     });
     let mut bytes = NativeLogCodec.encode_batch(2, &[mutation], limits).unwrap();
@@ -530,7 +530,7 @@ fn user_commands_leave_control_reserve_and_admission_is_bounded() {
             0,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 1)].into(),
+                entries: vec![entry(1, 1, 1)],
             }),
         )],
     );
@@ -544,7 +544,7 @@ fn user_commands_leave_control_reserve_and_admission_is_bounded() {
             0,
             Some(Suffix {
                 from,
-                entries: vec![entry(from, 1, 2)].into(),
+                entries: vec![entry(from, 1, 2)],
             }),
         )]) {
             Ok(tickets) => {

@@ -54,7 +54,7 @@ fn seed(p: &NamespacePlan) -> (ModelIo, NativeLogStore<ModelIo>) {
             3,
             Some(Suffix {
                 from: 1,
-                entries: prefix(p).into(),
+                entries: prefix(p),
             }),
         )],
     );
@@ -69,7 +69,7 @@ fn recovered(log: &NativeLogStore<ModelIo>) -> (Raft, Directory) {
     )
     .unwrap();
     let mut app = fresh(16);
-    app.apply_batch(&core.replay_committed()).unwrap();
+    app.apply_batch(core.replay_committed()).unwrap();
     (core, app)
 }
 #[test]
@@ -83,7 +83,7 @@ fn every_cancel_frame_cut_and_barrier_fault_preserves_old_or_cancelled_then_exac
         4,
         Some(Suffix {
             from: 4,
-            entries: vec![entry(4, 4, bytes.clone())].into(),
+            entries: vec![entry(4, 4, bytes.clone())],
         }),
     );
     let frame = NativeLogCodec
@@ -130,7 +130,7 @@ fn every_cancel_frame_cut_and_barrier_fault_preserves_old_or_cancelled_then_exac
                 at,
                 Some(Suffix {
                     from: at,
-                    entries: vec![entry(at, 4, bytes.clone())].into(),
+                    entries: vec![entry(at, 4, bytes.clone())],
                 }),
             )],
         );

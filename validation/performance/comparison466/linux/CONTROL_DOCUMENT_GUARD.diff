@@ -1,0 +1,20 @@
+--- original-refused-guard.py
++++ focused-control-doc-guard.py
+@@ -137,11 +137,16 @@
+     if config['source_commit'] == REQUIRED_CANDIDATE_COMMIT:
+         need({'src/log/command_bytes.rs', 'src/log/command_bytes/tests.rs',
+               'tests/provider_conformance/log_store/command_bytes.rs',
+-              'docs/COMMAND_BYTES.md', 'rust-toolchain.toml',
++              'rust-toolchain.toml',
+               'src/format_crc.rs', 'src/format_crc/tests.rs'} <= set(config['source_sha256']),
+              'essential455 command-byte/configuration inputs absent')
+     if config['source_commit'] == REQUIRED_CANDIDATE_COMMIT:
+         need({'src/log/entry_batch.rs', 'src/log/entry_batch/tests.rs', 'src/log/entry_history.rs', 'src/log/entry_history/tests.rs', 'tests/provider_conformance/log_store/entry_batches.rs'} <= set(config['source_sha256']), 'essential466 immutable ownership inputs absent')
++    if config['source_commit'] == REQUIRED_CANDIDATE_COMMIT:
++        for name in ['docs/COMMAND_BYTES.md', 'docs/ENTRY_BATCHES.md', 'benchmarks/matched/COMPARISON.md', 'validation/performance/slice466/SCHEMA.md', 'validation/performance/slice466/OBSERVATION_SCHEMA.md']:
++            doc = config['api_documentation'][name]
++            need(doc['source_commit'] == config['source_commit'], 'wrong committed API document: ' + name)
++            need(digest(doc['path']) == doc['sha256'], 'changed committed API document: ' + name)
+     need(set(inventory['git_modes']) == set(config['source_sha256']), 'source mode inventory differs')
+     for relative, git_mode in inventory['git_modes'].items():
+         need(git_mode in ('100644', '100755'), 'unsupported source mode')

@@ -174,43 +174,29 @@ fn full_store_equality_keeps_empty_nonempty_configuration_and_ordered_entries() 
             term: 1,
             payload: configurations().pop().unwrap(),
         },
-    ]
-    .into();
+    ];
     store.durable.insert(group(1), state.clone());
     let object: &dyn LogStore = &store;
     assert_eq!(object.matches_state(group(1), &state), Ok(true));
     let changes: &[fn(&mut GroupLog)] = &[
         |s| s.revision = LogRevision::new(99).unwrap(),
-        |s| change_entry(s, 0, |entry| entry.index += 1),
-        |s| change_entry(s, 0, |entry| entry.term += 1),
-        |s| change_entry(s, 0, |entry| entry.payload = EntryPayload::Noop),
+        |s| s.entries[0].index += 1,
+        |s| s.entries[0].term += 1,
+        |s| s.entries[0].payload = EntryPayload::Noop,
         |s| {
-            change_entry(s, 0, |entry| {
-                let EntryPayload::Command { bytes, .. } = &mut entry.payload else {
-                    unreachable!()
-                };
-                let mut replacement = bytes.to_vec();
-                replacement.push(7);
-                *bytes = replacement.into();
-            })
+            let EntryPayload::Command { bytes, .. } = &mut s.entries[0].payload else {
+                unreachable!()
+            };
+            let mut replacement = bytes.to_vec();
+            replacement.push(7);
+            *bytes = replacement.into();
         },
-        |s| {
-            let first = s.entries[0].clone();
-            let second = s.entries[1].clone();
-            s.entries.replace(0, second).unwrap();
-            s.entries.replace(1, first).unwrap();
-        },
-        |s| change_entry(s, 2, |entry| entry.payload = EntryPayload::Noop),
+        |s| s.entries.swap(0, 1),
+        |s| s.entries[2].payload = EntryPayload::Noop,
     ];
     for change in changes {
         let mut different = state.clone();
         change(&mut different);
         assert_eq!(object.matches_state(group(1), &different), Ok(false));
     }
-}
-
-fn change_entry(state: &mut GroupLog, index: usize, change: impl FnOnce(&mut LogEntry)) {
-    let mut entry = state.entries[index].clone();
-    change(&mut entry);
-    state.entries.replace(index, entry).unwrap();
 }

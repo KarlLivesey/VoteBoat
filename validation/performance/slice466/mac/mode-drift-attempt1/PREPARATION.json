@@ -1,0 +1,18 @@
+{
+  "status": "PREPARED_ONLY_UNPUBLISHED_REFUSAL",
+  "required_commit": "UNSET",
+  "expected_matched_tests": 71,
+  "base_runner": "target/p9/mac455/run.sh",
+  "scope": "Fresh committed source qualification only; Linux final16 all-feature and11 core integration selectors, full all/core libraries; three_2 plus member_service_recovers2; root fmt/four strict and matched71/fmt/strict/provider metadata. No performance artifact/CLI/benchmark/profile in this runner.",
+  "new_required_inputs": [
+    "src/log/entry_batch.rs",
+    "src/log/entry_batch/tests.rs",
+    "src/log/entry_history.rs",
+    "src/log/entry_history/tests.rs",
+    "tests/provider_conformance/log_store/entry_batches.rs",
+    "docs/ENTRY_BATCHES.md"
+  ],
+  "original455": "84206 preserved; never restarted",
+  "counts": "derived from committed export after publication, no guessed count",
+  "keys": "seven fixture keys0600 inventoried separately from committed modes"
+}

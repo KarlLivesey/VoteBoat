@@ -664,7 +664,7 @@ fn metadata_journal_cuts<A: StateMachine + Clone>(
                 entries[count - 2].index,
                 Some(Suffix {
                     from: 1,
-                    entries: entries[..count - 1].to_vec().into(),
+                    entries: entries[..count - 1].to_vec(),
                 }),
             )],
         );
@@ -677,7 +677,7 @@ fn metadata_journal_cuts<A: StateMachine + Clone>(
         entries[count - 1].index,
         Some(Suffix {
             from: entries[count - 1].index,
-            entries: entries[count - 1..].to_vec().into(),
+            entries: entries[count - 1..].to_vec(),
         }),
     );
     let frame = NativeLogCodec

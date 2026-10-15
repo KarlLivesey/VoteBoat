@@ -412,7 +412,7 @@ mod client_admission {
         pump(&mut owner, &mut worker, &mut apps, MonoTime(400));
         for g in 1..=count {
             let mut app = Counter::new(capacity).unwrap();
-            app.apply_batch(&owner.core(group(g)).unwrap().replay_committed())
+            app.apply_batch(owner.core(group(g)).unwrap().replay_committed())
                 .unwrap();
             apps.insert(group(g), app);
         }
@@ -2704,8 +2704,7 @@ mod native {
                                     operation: OperationId::new(1).unwrap(),
                                     bytes: 7i64.to_le_bytes().to_vec().into(),
                                 },
-                            }]
-                            .into(),
+                            }],
                         }),
                     )
                 })
@@ -2769,7 +2768,7 @@ mod native {
                     store.limits(),
                 )
                 .unwrap();
-                app.apply_batch(&core.replay_committed()).unwrap();
+                app.apply_batch(core.replay_committed()).unwrap();
                 core
             };
             if with_snapshots && !recover && id <= 2 {
@@ -4306,7 +4305,7 @@ mod read_results {
         let mut caught_up = lagging;
         caught_up
             .counter
-            .apply_batch(&owner.core(group(1)).unwrap().replay_committed())
+            .apply_batch(owner.core(group(1)).unwrap().replay_committed())
             .unwrap();
         r.submit(&mut owner, lease, &caught_up, query, MonoTime(400))
             .unwrap();
@@ -4645,7 +4644,7 @@ mod read_invocations {
         assert!(reads.is_drained());
         assert!(owner.is_drained());
         app.counter
-            .apply_batch(&owner.core(group(1)).unwrap().replay_committed())
+            .apply_batch(owner.core(group(1)).unwrap().replay_committed())
             .unwrap();
         let next = reads.submit(&mut owner, &app, group(1), vec![3]).unwrap();
         assert!(next.request > ticket.request);

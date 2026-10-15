@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison466/artifact-guard.py", line 188, in <module>
+    print(json.dumps(verify_pair(sys.argv[1]), sort_keys=True))
+                     ~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison466/artifact-guard.py", line 184, in verify_pair
+    return {'baseline': verify(baseline), 'candidate': verify(candidate)}
+                        ~~~~~~^^^^^^^^^^
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison466/artifact-guard.py", line 50, in verify
+    need(digest(path) == expected, 'changed driver input: ' + path)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison466/artifact-guard.py", line 15, in need
+    raise ValueError(label)
+ValueError: changed driver input: /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison466/phase-diagnostic.sh

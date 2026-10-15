@@ -384,7 +384,7 @@ fn retained_metadata_adoption_native_cuts_keep_original_exports_and_resume() {
                 5,
                 Some(Suffix {
                     from: 1,
-                    entries: owner_log.clone().into(),
+                    entries: owner_log.clone(),
                 }),
             )],
         );
@@ -397,7 +397,7 @@ fn retained_metadata_adoption_native_cuts_keep_original_exports_and_resume() {
         6,
         Some(Suffix {
             from: 6,
-            entries: vec![entry(6, 701, bytes.clone())].into(),
+            entries: vec![entry(6, 701, bytes.clone())],
         }),
     );
     let frame = NativeLogCodec

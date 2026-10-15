@@ -31,7 +31,7 @@ type WrappedSetup = (
 fn wrapped(capacity: usize, maintenance: bool) -> WrappedSetup {
     let (owner, worker, _, _, _) = setup_with_visit_items(1, capacity, 64);
     let mut app = Application::new(Counter::new(capacity).unwrap(), maintenance).unwrap();
-    app.apply_batch(&owner.core(group(1)).unwrap().replay_committed())
+    app.apply_batch(owner.core(group(1)).unwrap().replay_committed())
         .unwrap();
     let clients = ClientRouter::new(
         ClientRouterBinding::new(

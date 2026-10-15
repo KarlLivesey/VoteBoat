@@ -1,0 +1,1625 @@
+{
+  "decision": "REJECT466 on requiredLinuxhost; no Macperformancecampaign required to establish ineligibility",
+  "scope": "Short one-group3voter volatile/inprocess frameworkdiagnostics only; eachcase1048576completedoriginals+1024warmup; not20Msustained/fullcurve/durable acceptance",
+  "original_controller": 1720,
+  "actual_terminal_exit": 0,
+  "actual_terminal_stage": "ALL_TIMING_END",
+  "all24cases_exact_counts_frontiers_exit0": true,
+  "cells": [
+    {
+      "cell": "bulk",
+      "clients": 4096,
+      "batch": 4,
+      "variants": {
+        "baseline": {
+          "completed_originals_per_second": [
+            7444889.3580410965,
+            7483106.977487572,
+            7278233.93491426
+          ],
+          "request_p99_ms": [
+            3.668682,
+            3.081249,
+            3.738944
+          ],
+          "median_completed_originals_per_second": 7444889.3580410965,
+          "median_request_p50_ms": 2.111026,
+          "median_request_p99_ms": 3.668682
+        },
+        "candidate": {
+          "completed_originals_per_second": [
+            5972516.374943157,
+            6392258.165405154,
+            6055125.458505362
+          ],
+          "request_p99_ms": [
+            3.807844,
+            3.677649,
+            4.439731
+          ],
+          "median_completed_originals_per_second": 6055125.458505362,
+          "median_request_p50_ms": 2.642806,
+          "median_request_p99_ms": 3.807844
+        },
+        "on": {
+          "completed_originals_per_second": [
+            6457636.256056644,
+            5690125.577423131,
+            5868408.937129864
+          ],
+          "request_p99_ms": [
+            4.263009,
+            4.036694,
+            4.039379
+          ],
+          "median_completed_originals_per_second": 5868408.937129864,
+          "median_request_p50_ms": 2.731832,
+          "median_request_p99_ms": 4.039379
+        },
+        "openraft": {
+          "completed_originals_per_second": [
+            3327889.372865015,
+            3337376.4806259065,
+            3223937.370948277
+          ],
+          "request_p99_ms": [
+            6.195219,
+            7.103646,
+            7.00955
+          ],
+          "median_completed_originals_per_second": 3327889.372865015,
+          "median_request_p50_ms": 4.856935,
+          "median_request_p99_ms": 7.00955
+        }
+      },
+      "paired_vs_baseline": {
+        "candidate": {
+          "rate": [
+            0.8022303741146058,
+            0.8542251480081517,
+            0.8319498263800577
+          ],
+          "p99": [
+            1.0379324236878529,
+            1.1935578721485995,
+            1.187429124373085
+          ]
+        },
+        "on": {
+          "rate": [
+            0.8673918369360134,
+            0.7603961288461457,
+            0.8062957291024467
+          ],
+          "p99": [
+            1.1620001406499665,
+            1.31008367061539,
+            1.0803529017818936
+          ]
+        }
+      },
+      "cases": [
+        {
+          "label": "baseline-c4096-b4-t1",
+          "variant": "baseline",
+          "trial": 1,
+          "clients": 4096,
+          "batch": 4,
+          "completed_originals": 1048576,
+          "completed_requests": 262144,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 0.140845075,
+          "completed_originals_per_second": 7444889.3580410965,
+          "request_p50_ms": 2.079246,
+          "request_p99_ms": 3.668682,
+          "exit": 0,
+          "diagnostics": [
+            {
+              "retained_entries": 3856,
+              "peak_retained_entries": 21896,
+              "peak_peer_queue": 18,
+              "peak_client_queue": 4091,
+              "persistence_units": 5640,
+              "checkpoint_count": 204,
+              "snapshot_installs": 0,
+              "proposal_batches": 3157,
+              "proposed_originals": 1049600,
+              "maximum_proposal_width": 8196
+            },
+            {
+              "retained_entries": 1808,
+              "peak_retained_entries": 7472,
+              "peak_peer_queue": 5,
+              "peak_client_queue": 0,
+              "persistence_units": 3021,
+              "checkpoint_count": 204,
+              "snapshot_installs": 32,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            },
+            {
+              "retained_entries": 2808,
+              "peak_retained_entries": 7648,
+              "peak_peer_queue": 17,
+              "peak_client_queue": 0,
+              "persistence_units": 3032,
+              "checkpoint_count": 203,
+              "snapshot_installs": 119,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            }
+          ],
+          "entry_allocation_observations": "N/A; no per-owner charge observation for OFF/upstream or baselineON"
+        },
+        {
+          "label": "candidate-c4096-b4-t1",
+          "variant": "candidate",
+          "trial": 1,
+          "clients": 4096,
+          "batch": 4,
+          "completed_originals": 1048576,
+          "completed_requests": 262144,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 0.175566869,
+          "completed_originals_per_second": 5972516.374943157,
+          "request_p50_ms": 2.664266,
+          "request_p99_ms": 3.807844,
+          "exit": 0,
+          "diagnostics": [
+            {
+              "retained_entries": 3136,
+              "peak_retained_entries": 10964,
+              "peak_peer_queue": 4,
+              "peak_client_queue": 4088,
+              "persistence_units": 11928,
+              "checkpoint_count": 202,
+              "snapshot_installs": 0,
+              "proposal_batches": 6340,
+              "proposed_originals": 1049600,
+              "maximum_proposal_width": 4948
+            },
+            {
+              "retained_entries": 1576,
+              "peak_retained_entries": 7932,
+              "peak_peer_queue": 3,
+              "peak_client_queue": 0,
+              "persistence_units": 4544,
+              "checkpoint_count": 201,
+              "snapshot_installs": 13,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            },
+            {
+              "retained_entries": 4476,
+              "peak_retained_entries": 7964,
+              "peak_peer_queue": 3,
+              "peak_client_queue": 0,
+              "persistence_units": 4527,
+              "checkpoint_count": 200,
+              "snapshot_installs": 5,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            }
+          ],
+          "entry_allocation_observations": "N/A; no per-owner charge observation for OFF/upstream or baselineON"
+        },
+        {
+          "label": "on-c4096-b4-t1",
+          "variant": "on",
+          "trial": 1,
+          "clients": 4096,
+          "batch": 4,
+          "completed_originals": 1048576,
+          "completed_requests": 262144,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 0.162377681,
+          "completed_originals_per_second": 6457636.256056644,
+          "request_p50_ms": 2.421459,
+          "request_p99_ms": 4.263009,
+          "exit": 0,
+          "diagnostics": [
+            {
+              "retained_entries": 4360,
+              "peak_retained_entries": 22348,
+              "peak_peer_queue": 4,
+              "peak_client_queue": 4083,
+              "persistence_units": 8100,
+              "checkpoint_count": 200,
+              "snapshot_installs": 0,
+              "proposal_batches": 4499,
+              "proposed_originals": 1049600,
+              "maximum_proposal_width": 16328
+            },
+            {
+              "retained_entries": 3312,
+              "peak_retained_entries": 7828,
+              "peak_peer_queue": 3,
+              "peak_client_queue": 0,
+              "persistence_units": 3701,
+              "checkpoint_count": 199,
+              "snapshot_installs": 42,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            },
+            {
+              "retained_entries": 2312,
+              "peak_retained_entries": 8012,
+              "peak_peer_queue": 3,
+              "peak_client_queue": 0,
+              "persistence_units": 3687,
+              "checkpoint_count": 198,
+              "snapshot_installs": 42,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            }
+          ],
+          "entry_allocation_observations": [
+            {
+              "replica_slot": 0,
+              "core_entry_allocations": {
+                "observations": 20607,
+                "last_bytes": 361920,
+                "maximum_observed_bytes": 2133312
+              },
+              "store_entry_allocations": {
+                "observations": 8300,
+                "last_bytes": 361920,
+                "maximum_observed_bytes": 2133312
+              }
+            },
+            {
+              "replica_slot": 1,
+              "core_entry_allocations": {
+                "observations": 7711,
+                "last_bytes": 279296,
+                "maximum_observed_bytes": 602560
+              },
+              "store_entry_allocations": {
+                "observations": 3942,
+                "last_bytes": 279296,
+                "maximum_observed_bytes": 602560
+              }
+            },
+            {
+              "replica_slot": 2,
+              "core_entry_allocations": {
+                "observations": 7690,
+                "last_bytes": 215232,
+                "maximum_observed_bytes": 601280
+              },
+              "store_entry_allocations": {
+                "observations": 3927,
+                "last_bytes": 215232,
+                "maximum_observed_bytes": 601280
+              }
+            }
+          ]
+        },
+        {
+          "label": "openraft-c4096-b4-t1",
+          "variant": "openraft",
+          "trial": 1,
+          "clients": 4096,
+          "batch": 4,
+          "completed_originals": 1048576,
+          "completed_requests": 262144,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 0.315087397,
+          "completed_originals_per_second": 3327889.372865015,
+          "request_p50_ms": 4.856935,
+          "request_p99_ms": 6.195219,
+          "exit": 0,
+          "diagnostics": null,
+          "entry_allocation_observations": "N/A; no per-owner charge observation for OFF/upstream or baselineON"
+        },
+        {
+          "label": "baseline-c4096-b4-t2",
+          "variant": "baseline",
+          "trial": 2,
+          "clients": 4096,
+          "batch": 4,
+          "completed_originals": 1048576,
+          "completed_requests": 262144,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 0.140125753,
+          "completed_originals_per_second": 7483106.977487572,
+          "request_p50_ms": 2.111026,
+          "request_p99_ms": 3.081249,
+          "exit": 0,
+          "diagnostics": [
+            {
+              "retained_entries": 4020,
+              "peak_retained_entries": 21608,
+              "peak_peer_queue": 7,
+              "peak_client_queue": 4084,
+              "persistence_units": 5224,
+              "checkpoint_count": 204,
+              "snapshot_installs": 0,
+              "proposal_batches": 2981,
+              "proposed_originals": 1049600,
+              "maximum_proposal_width": 11060
+            },
+            {
+              "retained_entries": 2996,
+              "peak_retained_entries": 7604,
+              "peak_peer_queue": 4,
+              "peak_client_queue": 0,
+              "persistence_units": 2982,
+              "checkpoint_count": 204,
+              "snapshot_installs": 56,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            },
+            {
+              "retained_entries": 1948,
+              "peak_retained_entries": 8040,
+              "peak_peer_queue": 6,
+              "peak_client_queue": 0,
+              "persistence_units": 2949,
+              "checkpoint_count": 203,
+              "snapshot_installs": 116,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            }
+          ],
+          "entry_allocation_observations": "N/A; no per-owner charge observation for OFF/upstream or baselineON"
+        },
+        {
+          "label": "candidate-c4096-b4-t2",
+          "variant": "candidate",
+          "trial": 2,
+          "clients": 4096,
+          "batch": 4,
+          "completed_originals": 1048576,
+          "completed_requests": 262144,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 0.164038431,
+          "completed_originals_per_second": 6392258.165405154,
+          "request_p50_ms": 2.483065,
+          "request_p99_ms": 3.677649,
+          "exit": 0,
+          "diagnostics": [
+            {
+              "retained_entries": 1000,
+              "peak_retained_entries": 21480,
+              "peak_peer_queue": 4,
+              "peak_client_queue": 4090,
+              "persistence_units": 10562,
+              "checkpoint_count": 202,
+              "snapshot_installs": 0,
+              "proposal_batches": 5712,
+              "proposed_originals": 1049600,
+              "maximum_proposal_width": 11220
+            },
+            {
+              "retained_entries": 1932,
+              "peak_retained_entries": 8008,
+              "peak_peer_queue": 3,
+              "peak_client_queue": 0,
+              "persistence_units": 4095,
+              "checkpoint_count": 200,
+              "snapshot_installs": 15,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            },
+            {
+              "retained_entries": 5204,
+              "peak_retained_entries": 8012,
+              "peak_peer_queue": 3,
+              "peak_client_queue": 0,
+              "persistence_units": 4312,
+              "checkpoint_count": 199,
+              "snapshot_installs": 32,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            }
+          ],
+          "entry_allocation_observations": "N/A; no per-owner charge observation for OFF/upstream or baselineON"
+        },
+        {
+          "label": "on-c4096-b4-t2",
+          "variant": "on",
+          "trial": 2,
+          "clients": 4096,
+          "batch": 4,
+          "completed_originals": 1048576,
+          "completed_requests": 262144,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 0.18427994,
+          "completed_originals_per_second": 5690125.577423131,
+          "request_p50_ms": 2.791144,
+          "request_p99_ms": 4.036694,
+          "exit": 0,
+          "diagnostics": [
+            {
+              "retained_entries": 5076,
+              "peak_retained_entries": 16696,
+              "peak_peer_queue": 4,
+              "peak_client_queue": 4085,
+              "persistence_units": 11449,
+              "checkpoint_count": 202,
+              "snapshot_installs": 0,
+              "proposal_batches": 6088,
+              "proposed_originals": 1049600,
+              "maximum_proposal_width": 8196
+            },
+            {
+              "retained_entries": 2004,
+              "peak_retained_entries": 8020,
+              "peak_peer_queue": 3,
+              "peak_client_queue": 0,
+              "persistence_units": 4465,
+              "checkpoint_count": 199,
+              "snapshot_installs": 12,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            },
+            {
+              "retained_entries": 4028,
+              "peak_retained_entries": 8012,
+              "peak_peer_queue": 3,
+              "peak_client_queue": 0,
+              "persistence_units": 4458,
+              "checkpoint_count": 200,
+              "snapshot_installs": 14,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            }
+          ],
+          "entry_allocation_observations": [
+            {
+              "replica_slot": 0,
+              "core_entry_allocations": {
+                "observations": 26833,
+                "last_bytes": 588608,
+                "maximum_observed_bytes": 1191360
+              },
+              "store_entry_allocations": {
+                "observations": 11651,
+                "last_bytes": 588608,
+                "maximum_observed_bytes": 1191360
+              }
+            },
+            {
+              "replica_slot": 1,
+              "core_entry_allocations": {
+                "observations": 9116,
+                "last_bytes": 195456,
+                "maximum_observed_bytes": 592896
+              },
+              "store_entry_allocations": {
+                "observations": 4676,
+                "last_bytes": 195456,
+                "maximum_observed_bytes": 592896
+              }
+            },
+            {
+              "replica_slot": 2,
+              "core_entry_allocations": {
+                "observations": 9111,
+                "last_bytes": 325120,
+                "maximum_observed_bytes": 610432
+              },
+              "store_entry_allocations": {
+                "observations": 4672,
+                "last_bytes": 325120,
+                "maximum_observed_bytes": 610432
+              }
+            }
+          ]
+        },
+        {
+          "label": "openraft-c4096-b4-t2",
+          "variant": "openraft",
+          "trial": 2,
+          "clients": 4096,
+          "batch": 4,
+          "completed_originals": 1048576,
+          "completed_requests": 262144,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 0.314191703,
+          "completed_originals_per_second": 3337376.4806259065,
+          "request_p50_ms": 4.833761,
+          "request_p99_ms": 7.103646,
+          "exit": 0,
+          "diagnostics": null,
+          "entry_allocation_observations": "N/A; no per-owner charge observation for OFF/upstream or baselineON"
+        },
+        {
+          "label": "baseline-c4096-b4-t3",
+          "variant": "baseline",
+          "trial": 3,
+          "clients": 4096,
+          "batch": 4,
+          "completed_originals": 1048576,
+          "completed_requests": 262144,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 0.144070115,
+          "completed_originals_per_second": 7278233.93491426,
+          "request_p50_ms": 2.161481,
+          "request_p99_ms": 3.738944,
+          "exit": 0,
+          "diagnostics": [
+            {
+              "retained_entries": 2656,
+              "peak_retained_entries": 21928,
+              "peak_peer_queue": 7,
+              "peak_client_queue": 4089,
+              "persistence_units": 5486,
+              "checkpoint_count": 204,
+              "snapshot_installs": 0,
+              "proposal_batches": 3054,
+              "proposed_originals": 1049600,
+              "maximum_proposal_width": 12892
+            },
+            {
+              "retained_entries": 3656,
+              "peak_retained_entries": 7956,
+              "peak_peer_queue": 6,
+              "peak_client_queue": 0,
+              "persistence_units": 2862,
+              "checkpoint_count": 203,
+              "snapshot_installs": 62,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            },
+            {
+              "retained_entries": 5728,
+              "peak_retained_entries": 7840,
+              "peak_peer_queue": 6,
+              "peak_client_queue": 0,
+              "persistence_units": 3024,
+              "checkpoint_count": 203,
+              "snapshot_installs": 68,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            }
+          ],
+          "entry_allocation_observations": "N/A; no per-owner charge observation for OFF/upstream or baselineON"
+        },
+        {
+          "label": "candidate-c4096-b4-t3",
+          "variant": "candidate",
+          "trial": 3,
+          "clients": 4096,
+          "batch": 4,
+          "completed_originals": 1048576,
+          "completed_requests": 262144,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 0.173171639,
+          "completed_originals_per_second": 6055125.458505362,
+          "request_p50_ms": 2.642806,
+          "request_p99_ms": 4.439731,
+          "exit": 0,
+          "diagnostics": [
+            {
+              "retained_entries": 5660,
+              "peak_retained_entries": 22144,
+              "peak_peer_queue": 10,
+              "peak_client_queue": 4088,
+              "persistence_units": 8737,
+              "checkpoint_count": 202,
+              "snapshot_installs": 0,
+              "proposal_batches": 4798,
+              "proposed_originals": 1049600,
+              "maximum_proposal_width": 16204
+            },
+            {
+              "retained_entries": 1000,
+              "peak_retained_entries": 7988,
+              "peak_peer_queue": 9,
+              "peak_client_queue": 0,
+              "persistence_units": 3740,
+              "checkpoint_count": 200,
+              "snapshot_installs": 58,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            },
+            {
+              "retained_entries": 3096,
+              "peak_retained_entries": 7992,
+              "peak_peer_queue": 3,
+              "peak_client_queue": 0,
+              "persistence_units": 3847,
+              "checkpoint_count": 201,
+              "snapshot_installs": 28,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            }
+          ],
+          "entry_allocation_observations": "N/A; no per-owner charge observation for OFF/upstream or baselineON"
+        },
+        {
+          "label": "on-c4096-b4-t3",
+          "variant": "on",
+          "trial": 3,
+          "clients": 4096,
+          "batch": 4,
+          "completed_originals": 1048576,
+          "completed_requests": 262144,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 0.178681481,
+          "completed_originals_per_second": 5868408.937129864,
+          "request_p50_ms": 2.731832,
+          "request_p99_ms": 4.039379,
+          "exit": 0,
+          "diagnostics": [
+            {
+              "retained_entries": 5812,
+              "peak_retained_entries": 21804,
+              "peak_peer_queue": 5,
+              "peak_client_queue": 4088,
+              "persistence_units": 8761,
+              "checkpoint_count": 201,
+              "snapshot_installs": 0,
+              "proposal_batches": 4791,
+              "proposed_originals": 1049600,
+              "maximum_proposal_width": 14820
+            },
+            {
+              "retained_entries": 1372,
+              "peak_retained_entries": 8044,
+              "peak_peer_queue": 3,
+              "peak_client_queue": 0,
+              "persistence_units": 3833,
+              "checkpoint_count": 200,
+              "snapshot_installs": 21,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            },
+            {
+              "retained_entries": 3284,
+              "peak_retained_entries": 8036,
+              "peak_peer_queue": 4,
+              "peak_client_queue": 0,
+              "persistence_units": 3845,
+              "checkpoint_count": 199,
+              "snapshot_installs": 44,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            }
+          ],
+          "entry_allocation_observations": [
+            {
+              "replica_slot": 0,
+              "core_entry_allocations": {
+                "observations": 21751,
+                "last_bytes": 480384,
+                "maximum_observed_bytes": 2256000
+              },
+              "store_entry_allocations": {
+                "observations": 8962,
+                "last_bytes": 480384,
+                "maximum_observed_bytes": 2256000
+              }
+            },
+            {
+              "replica_slot": 1,
+              "core_entry_allocations": {
+                "observations": 7865,
+                "last_bytes": 175488,
+                "maximum_observed_bytes": 621376
+              },
+              "store_entry_allocations": {
+                "observations": 4054,
+                "last_bytes": 175488,
+                "maximum_observed_bytes": 621376
+              }
+            },
+            {
+              "replica_slot": 2,
+              "core_entry_allocations": {
+                "observations": 8018,
+                "last_bytes": 331072,
+                "maximum_observed_bytes": 607808
+              },
+              "store_entry_allocations": {
+                "observations": 4088,
+                "last_bytes": 331072,
+                "maximum_observed_bytes": 607808
+              }
+            }
+          ]
+        },
+        {
+          "label": "openraft-c4096-b4-t3",
+          "variant": "openraft",
+          "trial": 3,
+          "clients": 4096,
+          "batch": 4,
+          "completed_originals": 1048576,
+          "completed_requests": 262144,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 0.325247013,
+          "completed_originals_per_second": 3223937.370948277,
+          "request_p50_ms": 4.989594,
+          "request_p99_ms": 7.00955,
+          "exit": 0,
+          "diagnostics": null,
+          "entry_allocation_observations": "N/A; no per-owner charge observation for OFF/upstream or baselineON"
+        }
+      ],
+      "largest_named_point_owner_charges_across_ON_trials_bytes": {
+        "core_entry_allocations": 2256000,
+        "store_entry_allocations": 2256000
+      }
+    },
+    {
+      "cell": "singleton",
+      "clients": 1,
+      "batch": 1,
+      "variants": {
+        "baseline": {
+          "completed_originals_per_second": [
+            109087.55968778017,
+            105732.9656012041,
+            108096.94853157019
+          ],
+          "request_p99_ms": [
+            0.018705,
+            0.019276,
+            0.018955
+          ],
+          "median_completed_originals_per_second": 108096.94853157019,
+          "median_request_p50_ms": 0.007784,
+          "median_request_p99_ms": 0.018955
+        },
+        "candidate": {
+          "completed_originals_per_second": [
+            77658.96444380985,
+            75192.25411232546,
+            79334.4050360477
+          ],
+          "request_p99_ms": [
+            0.024576,
+            0.025558,
+            0.024055
+          ],
+          "median_completed_originals_per_second": 77658.96444380985,
+          "median_request_p50_ms": 0.011241,
+          "median_request_p99_ms": 0.024576
+        },
+        "on": {
+          "completed_originals_per_second": [
+            68345.32584948339,
+            63825.581137887195,
+            63641.420480243825
+          ],
+          "request_p99_ms": [
+            0.026189,
+            0.030036,
+            0.030317
+          ],
+          "median_completed_originals_per_second": 63825.581137887195,
+          "median_request_p50_ms": 0.013224,
+          "median_request_p99_ms": 0.030036
+        },
+        "openraft": {
+          "completed_originals_per_second": [
+            19454.7368787896,
+            20851.628043884644,
+            20105.010623917708
+          ],
+          "request_p99_ms": [
+            0.132609,
+            0.126538,
+            0.127469
+          ],
+          "median_completed_originals_per_second": 20105.010623917708,
+          "median_request_p50_ms": 0.042791,
+          "median_request_p99_ms": 0.127469
+        }
+      },
+      "paired_vs_baseline": {
+        "candidate": {
+          "rate": [
+            0.7118956979703075,
+            0.711152417647398,
+            0.7339190061676694
+          ],
+          "p99": [
+            1.3138732959101844,
+            1.3258974891056234,
+            1.2690582959641257
+          ]
+        },
+        "on": {
+          "rate": [
+            0.6265180561843601,
+            0.6036488315159898,
+            0.5887439131702877
+          ],
+          "p99": [
+            1.400106923282545,
+            1.5582070969080721,
+            1.5994196781851755
+          ]
+        }
+      },
+      "cases": [
+        {
+          "label": "baseline-c1-b1-t1",
+          "variant": "baseline",
+          "trial": 1,
+          "clients": 1,
+          "batch": 1,
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 9.61224179,
+          "completed_originals_per_second": 109087.55968778017,
+          "request_p50_ms": 0.007795,
+          "request_p99_ms": 0.018705,
+          "exit": 0,
+          "diagnostics": [
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 4,
+              "peak_client_queue": 1,
+              "persistence_units": 2099203,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 1049600,
+              "proposed_originals": 1049600,
+              "maximum_proposal_width": 1
+            },
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 1,
+              "peak_client_queue": 0,
+              "persistence_units": 1903638,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            },
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 1,
+              "peak_client_queue": 0,
+              "persistence_units": 2007721,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            }
+          ],
+          "entry_allocation_observations": "N/A; no per-owner charge observation for OFF/upstream or baselineON"
+        },
+        {
+          "label": "candidate-c1-b1-t1",
+          "variant": "candidate",
+          "trial": 1,
+          "clients": 1,
+          "batch": 1,
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 13.502317569,
+          "completed_originals_per_second": 77658.96444380985,
+          "request_p50_ms": 0.011241,
+          "request_p99_ms": 0.024576,
+          "exit": 0,
+          "diagnostics": [
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 4,
+              "peak_client_queue": 1,
+              "persistence_units": 2099203,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 1049600,
+              "proposed_originals": 1049600,
+              "maximum_proposal_width": 1
+            },
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 2,
+              "peak_client_queue": 0,
+              "persistence_units": 1915802,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            },
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 1,
+              "peak_client_queue": 0,
+              "persistence_units": 1986570,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            }
+          ],
+          "entry_allocation_observations": "N/A; no per-owner charge observation for OFF/upstream or baselineON"
+        },
+        {
+          "label": "on-c1-b1-t1",
+          "variant": "on",
+          "trial": 1,
+          "clients": 1,
+          "batch": 1,
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 15.342322053,
+          "completed_originals_per_second": 68345.32584948339,
+          "request_p50_ms": 0.013125,
+          "request_p99_ms": 0.026189,
+          "exit": 0,
+          "diagnostics": [
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 3,
+              "peak_client_queue": 1,
+              "persistence_units": 2099203,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 1049600,
+              "proposed_originals": 1049600,
+              "maximum_proposal_width": 1
+            },
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 2,
+              "peak_client_queue": 0,
+              "persistence_units": 1945303,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            },
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 2,
+              "peak_client_queue": 0,
+              "persistence_units": 1984589,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            }
+          ],
+          "entry_allocation_observations": [
+            {
+              "replica_slot": 0,
+              "core_entry_allocations": {
+                "observations": 7079806,
+                "last_bytes": 979072,
+                "maximum_observed_bytes": 1030144
+              },
+              "store_entry_allocations": {
+                "observations": 2099412,
+                "last_bytes": 979072,
+                "maximum_observed_bytes": 1030144
+              }
+            },
+            {
+              "replica_slot": 1,
+              "core_entry_allocations": {
+                "observations": 3891321,
+                "last_bytes": 977856,
+                "maximum_observed_bytes": 1029632
+              },
+              "store_entry_allocations": {
+                "observations": 1945512,
+                "last_bytes": 977856,
+                "maximum_observed_bytes": 1029632
+              }
+            },
+            {
+              "replica_slot": 2,
+              "core_entry_allocations": {
+                "observations": 3969882,
+                "last_bytes": 978560,
+                "maximum_observed_bytes": 1030528
+              },
+              "store_entry_allocations": {
+                "observations": 1984798,
+                "last_bytes": 978560,
+                "maximum_observed_bytes": 1030528
+              }
+            }
+          ]
+        },
+        {
+          "label": "openraft-c1-b1-t1",
+          "variant": "openraft",
+          "trial": 1,
+          "clients": 1,
+          "batch": 1,
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 53.89823602,
+          "completed_originals_per_second": 19454.7368787896,
+          "request_p50_ms": 0.043121,
+          "request_p99_ms": 0.132609,
+          "exit": 0,
+          "diagnostics": null,
+          "entry_allocation_observations": "N/A; no per-owner charge observation for OFF/upstream or baselineON"
+        },
+        {
+          "label": "baseline-c1-b1-t2",
+          "variant": "baseline",
+          "trial": 2,
+          "clients": 1,
+          "batch": 1,
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 9.917209775,
+          "completed_originals_per_second": 105732.9656012041,
+          "request_p50_ms": 0.007784,
+          "request_p99_ms": 0.019276,
+          "exit": 0,
+          "diagnostics": [
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 3,
+              "peak_client_queue": 1,
+              "persistence_units": 2099203,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 1049600,
+              "proposed_originals": 1049600,
+              "maximum_proposal_width": 1
+            },
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 2,
+              "peak_client_queue": 0,
+              "persistence_units": 1884656,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            },
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 2,
+              "peak_client_queue": 0,
+              "persistence_units": 2003902,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            }
+          ],
+          "entry_allocation_observations": "N/A; no per-owner charge observation for OFF/upstream or baselineON"
+        },
+        {
+          "label": "candidate-c1-b1-t2",
+          "variant": "candidate",
+          "trial": 2,
+          "clients": 1,
+          "batch": 1,
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 13.945266203,
+          "completed_originals_per_second": 75192.25411232546,
+          "request_p50_ms": 0.011321,
+          "request_p99_ms": 0.025558,
+          "exit": 0,
+          "diagnostics": [
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 4,
+              "peak_client_queue": 1,
+              "persistence_units": 2099203,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 1049600,
+              "proposed_originals": 1049600,
+              "maximum_proposal_width": 1
+            },
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 1,
+              "peak_client_queue": 0,
+              "persistence_units": 1894601,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            },
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 1,
+              "peak_client_queue": 0,
+              "persistence_units": 1982723,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            }
+          ],
+          "entry_allocation_observations": "N/A; no per-owner charge observation for OFF/upstream or baselineON"
+        },
+        {
+          "label": "on-c1-b1-t2",
+          "variant": "on",
+          "trial": 2,
+          "clients": 1,
+          "batch": 1,
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 16.428773249,
+          "completed_originals_per_second": 63825.581137887195,
+          "request_p50_ms": 0.013224,
+          "request_p99_ms": 0.030036,
+          "exit": 0,
+          "diagnostics": [
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 4,
+              "peak_client_queue": 1,
+              "persistence_units": 2099203,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 1049600,
+              "proposed_originals": 1049600,
+              "maximum_proposal_width": 1
+            },
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 2,
+              "peak_client_queue": 0,
+              "persistence_units": 1905256,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            },
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 2,
+              "peak_client_queue": 0,
+              "persistence_units": 1974279,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            }
+          ],
+          "entry_allocation_observations": [
+            {
+              "replica_slot": 0,
+              "core_entry_allocations": {
+                "observations": 7029525,
+                "last_bytes": 979072,
+                "maximum_observed_bytes": 1030144
+              },
+              "store_entry_allocations": {
+                "observations": 2099412,
+                "last_bytes": 979072,
+                "maximum_observed_bytes": 1030144
+              }
+            },
+            {
+              "replica_slot": 1,
+              "core_entry_allocations": {
+                "observations": 3811255,
+                "last_bytes": 962624,
+                "maximum_observed_bytes": 1029824
+              },
+              "store_entry_allocations": {
+                "observations": 1905465,
+                "last_bytes": 962624,
+                "maximum_observed_bytes": 1029824
+              }
+            },
+            {
+              "replica_slot": 2,
+              "core_entry_allocations": {
+                "observations": 3949332,
+                "last_bytes": 971840,
+                "maximum_observed_bytes": 1029760
+              },
+              "store_entry_allocations": {
+                "observations": 1974488,
+                "last_bytes": 971840,
+                "maximum_observed_bytes": 1029760
+              }
+            }
+          ]
+        },
+        {
+          "label": "openraft-c1-b1-t2",
+          "variant": "openraft",
+          "trial": 2,
+          "clients": 1,
+          "batch": 1,
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 50.287488238,
+          "completed_originals_per_second": 20851.628043884644,
+          "request_p50_ms": 0.040897,
+          "request_p99_ms": 0.126538,
+          "exit": 0,
+          "diagnostics": null,
+          "entry_allocation_observations": "N/A; no per-owner charge observation for OFF/upstream or baselineON"
+        },
+        {
+          "label": "baseline-c1-b1-t3",
+          "variant": "baseline",
+          "trial": 3,
+          "clients": 1,
+          "batch": 1,
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 9.700329327,
+          "completed_originals_per_second": 108096.94853157019,
+          "request_p50_ms": 0.007784,
+          "request_p99_ms": 0.018955,
+          "exit": 0,
+          "diagnostics": [
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 3,
+              "peak_client_queue": 1,
+              "persistence_units": 2099203,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 1049600,
+              "proposed_originals": 1049600,
+              "maximum_proposal_width": 1
+            },
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 1,
+              "peak_client_queue": 0,
+              "persistence_units": 1902748,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            },
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 1,
+              "peak_client_queue": 0,
+              "persistence_units": 2007954,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            }
+          ],
+          "entry_allocation_observations": "N/A; no per-owner charge observation for OFF/upstream or baselineON"
+        },
+        {
+          "label": "candidate-c1-b1-t3",
+          "variant": "candidate",
+          "trial": 3,
+          "clients": 1,
+          "batch": 1,
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 13.217165989,
+          "completed_originals_per_second": 79334.4050360477,
+          "request_p50_ms": 0.011051,
+          "request_p99_ms": 0.024055,
+          "exit": 0,
+          "diagnostics": [
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 4,
+              "peak_client_queue": 1,
+              "persistence_units": 2099203,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 1049600,
+              "proposed_originals": 1049600,
+              "maximum_proposal_width": 1
+            },
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 2,
+              "peak_client_queue": 0,
+              "persistence_units": 1928249,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            },
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 2,
+              "peak_client_queue": 0,
+              "persistence_units": 1986157,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            }
+          ],
+          "entry_allocation_observations": "N/A; no per-owner charge observation for OFF/upstream or baselineON"
+        },
+        {
+          "label": "on-c1-b1-t3",
+          "variant": "on",
+          "trial": 3,
+          "clients": 1,
+          "batch": 1,
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 16.476313572,
+          "completed_originals_per_second": 63641.420480243825,
+          "request_p50_ms": 0.013294,
+          "request_p99_ms": 0.030317,
+          "exit": 0,
+          "diagnostics": [
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 3,
+              "peak_client_queue": 1,
+              "persistence_units": 2099203,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 1049600,
+              "proposed_originals": 1049600,
+              "maximum_proposal_width": 1
+            },
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 2,
+              "peak_client_queue": 0,
+              "persistence_units": 1897251,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            },
+            {
+              "retained_entries": 5601,
+              "peak_retained_entries": 6000,
+              "peak_peer_queue": 2,
+              "peak_client_queue": 0,
+              "persistence_units": 1968295,
+              "checkpoint_count": 209,
+              "snapshot_installs": 0,
+              "proposal_batches": 0,
+              "proposed_originals": 0,
+              "maximum_proposal_width": 0
+            }
+          ],
+          "entry_allocation_observations": [
+            {
+              "replica_slot": 0,
+              "core_entry_allocations": {
+                "observations": 7015532,
+                "last_bytes": 979072,
+                "maximum_observed_bytes": 1030144
+              },
+              "store_entry_allocations": {
+                "observations": 2099412,
+                "last_bytes": 979072,
+                "maximum_observed_bytes": 1030144
+              }
+            },
+            {
+              "replica_slot": 1,
+              "core_entry_allocations": {
+                "observations": 3795251,
+                "last_bytes": 977472,
+                "maximum_observed_bytes": 1029696
+              },
+              "store_entry_allocations": {
+                "observations": 1897460,
+                "last_bytes": 977472,
+                "maximum_observed_bytes": 1029696
+              }
+            },
+            {
+              "replica_slot": 2,
+              "core_entry_allocations": {
+                "observations": 3937355,
+                "last_bytes": 978112,
+                "maximum_observed_bytes": 1029760
+              },
+              "store_entry_allocations": {
+                "observations": 1968504,
+                "last_bytes": 978112,
+                "maximum_observed_bytes": 1029760
+              }
+            }
+          ]
+        },
+        {
+          "label": "openraft-c1-b1-t3",
+          "variant": "openraft",
+          "trial": 3,
+          "clients": 1,
+          "batch": 1,
+          "completed_originals": 1048576,
+          "completed_requests": 1048576,
+          "applied_frontiers": [
+            1049601,
+            1049601,
+            1049601
+          ],
+          "seconds": 52.154958762,
+          "completed_originals_per_second": 20105.010623917708,
+          "request_p50_ms": 0.042791,
+          "request_p99_ms": 0.127469,
+          "exit": 0,
+          "diagnostics": null,
+          "entry_allocation_observations": "N/A; no per-owner charge observation for OFF/upstream or baselineON"
+        }
+      ],
+      "largest_named_point_owner_charges_across_ON_trials_bytes": {
+        "core_entry_allocations": 1030528,
+        "store_entry_allocations": 1030528
+      }
+    }
+  ],
+  "limits": [
+    "All six candidateOFF rate ratios below1 and p99 ratios above1; every slowtail/loss retained. No causal conclusion from this campaign.",
+    "Per-owner charge observations exist onlycandidateON; full backing/payload/hiddenentries/descriptorcapacity at named lifetimepoints, not continuouspeak/RSS or pending/coalescing/wholeprocess memory. Baseline unavailable isN/A, notzero; never sum sharing owners as physical RSS.",
+    "Refusal counters are not separately reported in this fixedcompletionframework; do not infer offered-load headroom.",
+    "GNUtime optionalRSSwrapper prep failed beforetiming; original frozenrunner restored. NoRSS/plateau evidence and no toolinstallation.",
+    "Inclusive elapsed observerphases overlap; notCPU or additivecriticalpath. FreshCPUdiagnostics ownedseparately; no allocatorcause guess or retune."
+  ]
+}

@@ -66,7 +66,7 @@ fn scope_bytes(slot: usize) -> usize {
                 commit_index: 0,
                 suffix: Some(Suffix {
                     from: entry.index,
-                    entries: vec![entry.clone()].into(),
+                    entries: vec![entry.clone()],
                 }),
                 snapshot: None,
                 snapshot_membership: None,

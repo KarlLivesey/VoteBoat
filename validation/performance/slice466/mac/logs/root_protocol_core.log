@@ -1,0 +1,420 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-mac466-92454c2-LvYfi1/source)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 22.24s
+     Running tests/effect_owner.rs (/tmp/voteboat-mac466-92454c2-LvYfi1/target-root-core/debug/deps/effect_owner-afc7d1c4ba5370ec)
+
+running 195 tests
+test application_boundary_and_one_use_read_are_checked_before_release ... ok
+test application_results::byte_ceiling_prevents_application_and_close_drains_without_closing_shared_app ... ok
+test application_results::held_results_backpressure_before_apply_control_reserve_and_retry_after_release ... ok
+test application_results::host_receipts_nested_capacity_wrong_identity_and_partial_application_fail_closed ... ok
+test application_results::retries_and_conflicting_content_emit_original_application_outcomes ... ok
+test application_results::written_and_wrong_effect_never_apply_or_publish_and_durable_application_is_ordered ... ok
+test application_results::wrong_runtime_and_modified_committed_content_reject_before_application ... ok
+test automatic_election_rejection_written_and_exact_durable_ownership ... ok
+test bulk_leases_leave_a_reserved_visit_for_control ... ok
+test callback_capacity_and_reservation_extension_are_bounded ... ok
+test client_admission::cancelled_queued_wait_retains_capacity_until_execution_then_retry_returns_original ... ok
+test client_admission::delayed_applied_reply_retains_verified_position_through_actual_log_compaction ... ok
+test client_admission::execution_revalidates_current_application_before_creating_persist ... ok
+test client_admission::host_admission_policy_and_wrong_runtime_reject_without_touching_shared_application ... ok
+test client_admission::per_group_budget_close_and_foreign_completion_preserve_shared_owner ... ok
+test client_admission::proposal_context_is_checked_before_admission_and_again_before_persistence ... ok
+test client_admission::queued_retries_conflicts_and_capacity_use_exact_invocation_positions ... ok
+test client_admission::ready_batch::budget::held_visit_reduces_current_global_or_bulk_room_without_blocking_a_fitting_singleton ... ok
+test client_admission::ready_batch::budget::tight_bulk_output_budget_shrinks_ready_prefix_instead_of_fencing_or_starving ... ok
+test client_admission::ready_batch::canceling_one_batched_observation_does_not_cancel_other_commands ... ok
+test client_admission::ready_batch::context::default_host_context_is_rechecked_after_original_singleton_durability ... ok
+test client_admission::ready_batch::every_native_quantum_preserves_unknown_after_written_for_all_selected_originals ... ok
+test client_admission::ready_batch::failure_after_written_leaves_all_batched_results_unknown_and_releases_on_observation ... ok
+test client_admission::ready_batch::per_poll_original_step_budget_does_not_expand_with_batch_size ... ok
+test client_admission::ready_batch::ready_native_admissions_share_persist_but_keep_every_original_result ... ok
+test client_admission::ready_batch::wrapper::checks::maintenance_wrapper_keeps_actual_capability_and_singleton_data_order ... ok
+test client_admission::ready_batch::wrapper::checks::retained_capacity_refuses_novel_id_but_original_retry_keeps_exact_outcome ... ok
+test client_admission::ready_batch::wrapper::checks::written_failure_keeps_every_wrapped_original_unknown ... ok
+test client_admission::ready_batch::wrapper::plain_service_wrapper_batches_originals_with_full_wrapper_receipt_bounds ... ok
+test client_admission::recovered_unapplied_log_reserves_capacity_without_old_router_memory ... ok
+test client_admission::runtime_rejection_preserves_original_request_without_spending_client_ticket ... ok
+test client_admission::stopping_runtime_returns_exact_unprocessed_tracked_inputs ... ok
+test client_admission::tracked_step_and_written_do_not_publish_applied_before_commit_and_application ... ok
+test closing_drains_accepted_work_and_disarms_automatic_timers ... ok
+test connection_budget::budget_replacement_preserves_history_and_rejects_tightening_below_owned_union ... ok
+test connection_budget::competing_queued_changes_reserve_union_and_protocol_rejection_releases_only_queue_credits ... ok
+test connection_budget::failed_storage_keeps_its_cause_and_connection_history_until_recovery ... ok
+test connection_budget::granted_authority_reply_reserves_candidate_until_protocol_rejection ... ok
+test connection_budget::local_configuration_events_reserve_peer_union_before_ownership_and_release_on_rejection ... ok
+test connection_budget::shared_future_peer_is_charged_once_but_conflicting_store_cannot_share_a_slot ... ok
+test connection_budget::stopping_a_group_returns_queued_reservation_and_registration_cannot_overbook_it ... ok
+test durable_before_written_fences_without_releasing_a_vote ... ok
+test failure_keeps_external_lease_charged_until_explicit_discard ... ok
+test held_effect_stops_its_group_while_other_group_commits ... ok
+test ingress::blocked_group_retains_full_frame_charge_while_other_group_progresses_and_retry_completes ... ok
+test ingress::bulk_saturation_leaves_transport_ownership_and_control_reserve_for_another_peer ... ok
+test ingress::capacity_bytes_are_inspected_before_take_and_wrong_owner_cannot_dispatch ... ok
+test ingress::false_receive_metadata_returns_original_batch_and_fences_without_credit_release ... ok
+test ingress::retired_connection_discards_only_still_held_input_and_new_generation_can_progress ... ok
+test ingress::snapshots_have_separate_ceiling_and_cannot_consume_all_data_or_control_slots ... ok
+test ingress::unknown_group_reports_terminal_rejection_and_closing_one_router_preserves_shared_owner ... ok
+test invalid_reservation_is_rejected_before_core_progress ... ok
+test node_facade::abort_after_written_returns_unknown_and_durable_worker_work_without_rollback_or_false_applied ... ok
+test node_facade::abort_preserves_earlier_success_and_network_remains_explicitly_drainable_without_core_access ... ok
+test node_facade::all_poll_budgets_and_time_validate_before_either_driver_performs_work ... ok
+test node_facade::automatic_checkpoints::abort_and_snapshot_failure_preserve_checkpoint_identity ... ok
+test node_facade::automatic_checkpoints::concurrency_bound_and_shutdown_keep_exact_requests_until_durable ... ok
+test node_facade::automatic_checkpoints::held_group_does_not_duplicate_or_block_another_group ... ok
+test node_facade::automatic_checkpoints::manual_checkpoint_and_late_scans_do_not_invent_a_new_boundary ... ok
+test node_facade::automatic_checkpoints::policy_is_opt_in_and_validated_without_work ... ok
+test node_facade::automatic_checkpoints::threshold_is_applied_distance_and_admission_is_not_completion ... ok
+test node_facade::automatic_maintenance::deadlines_coalesce_and_manual_results_remain_owned ... ok
+test node_facade::automatic_maintenance::fatal_completion_preserves_diagnostics_and_wrong_receipt_preserves_ownership ... ok
+test node_facade::automatic_maintenance::held_job_drains_on_shutdown_and_abort_retains_recovery_ticket ... ok
+test node_facade::automatic_maintenance::overload_and_storage_refusal_back_off_without_a_poll_loop ... ok
+test node_facade::automatic_maintenance::permanent_admission_refusal_stops_schedule_but_service_stays_running ... ok
+test node_facade::automatic_maintenance::policy_is_optional_validated_before_work_and_clock_does_not_wrap ... ok
+test node_facade::configuration_cancellation_is_unknown_and_does_not_undo_queued_work ... ok
+test node_facade::configuration_cannot_expand_a_local_only_node_without_peer_providers ... ok
+test node_facade::configuration_checks_enforced_application_envelope_before_authorization_or_persistence ... ok
+test node_facade::configuration_committed_output_survives_shutdown_and_request_count_stays_bounded ... ok
+test node_facade::configuration_limits_reject_with_original_request_and_no_core_mutation ... ok
+test node_facade::configuration_queued_behind_campaign_uses_its_actual_proposal_term ... ok
+test node_facade::configuration_receipts_wait_for_durability_and_joint_then_final_commit ... ok
+test node_facade::configuration_rejects_static_wire_before_persistence_even_with_host_authorization ... ok
+test node_facade::configuration_shutdown_and_abort_preserve_unknown_outputs_and_ownership ... ok
+test node_facade::configuration_status_resumes_a_lost_joint_reply_through_fresh_authorization ... ok
+test node_facade::configuration_written_storage_failure_retains_unknown_receipt_for_recovery ... ok
+test node_facade::constructor_requires_connections_for_rollback_reachable_recovered_learners ... ok
+test node_facade::constructor_requires_voter_store_authorization_and_returns_original_parts_before_poll ... ok
+test node_facade::delayed_readiness_and_restarted_peer_session_cannot_promote_through_owned_node ... ok
+test node_facade::drain_recovery::cancellation_before_disable_executes_waits_for_exact_enable_admissions ... ok
+test node_facade::drain_recovery::cancellation_waits_behind_an_accepted_persistence_dependency ... ok
+test node_facade::drain_recovery::journal_failure_preserves_active_gate_and_old_cancel_cannot_release_new_local_intent ... ok
+test node_facade::drain_recovery::old_owner_and_superseded_journal_views_do_not_reopen_or_replace_a_gate ... ok
+test node_facade::drain_recovery::planned_membership_drain_requires_restored_complete_assignments_and_final_commits ... ok
+test node_facade::drain_recovery::recovered_stale_manifest_still_gates_every_actual_assignment ... ok
+test node_facade::event_reporting::failed_event_sink_cannot_change_original_write_read_or_shutdown ... ok
+test node_facade::facade_exact_client_and_read_outputs_hold_shutdown_until_consumer_completion ... ok
+test node_facade::local_drain::accepted_read_is_retained_until_its_completion_is_consumed ... ok
+test node_facade::local_drain::accepted_work_is_not_lost_when_admission_closes ... ok
+test node_facade::local_drain::exact_manifest_validation_has_no_partial_side_effects ... ok
+test node_facade::local_drain::gate_is_idempotent_and_disables_every_assigned_follower ... ok
+test node_facade::local_drain::membership_change_never_reuses_old_drain_configuration ... ok
+test node_facade::local_drain::ordinary_requests_keep_their_ownership_and_maintenance_stays_available ... ok
+test node_facade::local_drain::queue_pressure_retries_suppression_without_failing_the_node ... ok
+test node_facade::maintenance_result_is_scoped_retained_and_part_of_shutdown ... ok
+test node_facade::member_receive_modes_require_selected_wire_before_node_service_or_persistence ... ok
+test node_facade::membership_routes_are_preflighted_and_rejections_return_owned_routes ... ok
+test node_facade::node_drain_inspection_keeps_owner_and_peer_progress_under_the_original_driver ... ok
+test node_facade::node_retains_pin_checked_routes_across_live_poll_and_drain_and_rejects_withdrawal ... ok
+test node_facade::peer_credentials::node_forwards_prepared_peer_credentials_without_changing_consensus_and_refuses_after_shutdown ... ok
+test node_facade::provider_failure_fences_node_and_returns_unknown_with_original_selected_resources ... ok
+test node_facade::queued_configuration_rechecks_authorization_and_default_poll_denies_it ... ok
+test node_facade::refusing_diagnostics_cannot_change_original_node_write_read_or_shutdown ... ok
+test node_facade::route_plan_constructor_failure_returns_hints_and_leaves_owner_policy_uninstalled ... ok
+test node_facade::selected_host_placement_is_rechecked_at_execution_and_preserves_core_gates ... ok
+test node_facade::selected_network::supplied_network_build_refusal_returns_original_provider_and_local_parts ... ok
+test node_facade::selected_network::supplied_network_owns_poll_close_and_reclaim_without_catalog_authority ... ok
+test node_facade::selected_transport_capacity_rechecks_version_and_roster_budgets_before_persistence ... ok
+test node_facade::stalled_accepted_write_keeps_quiescing_until_abort_and_returns_retained_original_lease ... ok
+test node_facade::uncertain_maintenance_preserves_earlier_reply_and_failed_result ... ok
+test node_facade::unknown_and_closed_admission_return_original_command_allocation_and_instances_shutdown_independently ... ok
+test node_facade::unsupported_and_rejected_maintenance_preserve_running_service ... ok
+test node_facade::unsupported_snapshot_and_invalid_driver_limits_reject_before_any_service_or_io ... ok
+test node_facade::witness_controls_require_authority_wire_before_admission_and_close_with_node ... ok
+test node_facade::wrong_maintenance_receipt_fences_without_losing_original_ticket ... ok
+test peer_driver::binding_time_and_budget_errors_do_not_poll_provider_or_fence_owner ... ok
+test peer_driver::bounded_staging_covers_whole_outbound_queue_so_one_stalled_peer_cannot_pin_other_peer_admission ... ok
+test peer_driver::close_resolves_staged_work_but_waits_for_accepted_send_and_preserves_other_instance ... ok
+test peer_driver::closed::close_between_poll_and_submit_retains_ticket_and_reconnects_only_that_peer ... ok
+test peer_driver::closed::driver_drain_inspection_preserves_accepted_original_ticket_until_actual_completion ... ok
+test peer_driver::closed::invalid_binding_at_submit_still_fences_the_driver ... ok
+test peer_driver::closing_connecting_driver_waits_for_actual_provider_receipts_before_reclaim ... ok
+test peer_driver::closing_network_resolves_queued_outbound_on_poll_without_closing_host_queue ... ok
+test peer_driver::construction_returns_selected_parts_on_route_or_budget_failure_without_closing_host_resources ... ok
+test peer_driver::disconnected::authenticated_reconnect_starts_a_fresh_disconnected_output_interval ... ok
+test peer_driver::disconnected::failed_peer_releases_saturated_output_without_waiting_for_reconnect ... ok
+test peer_driver::discovery_misses_back_off_without_fencing_but_invalid_scope_is_terminal ... ok
+test peer_driver::expired_attempt_retains_provider_slot_and_late_session_cannot_attach_or_spend_replacement_generation ... ok
+test peer_driver::explicit_disconnect_cancels_exact_attempt_and_other_peer_can_attach ... ok
+test peer_driver::failed_local_owner_can_drain_network_and_cancel_held_ingress_without_core_access ... ok
+test peer_driver::invalid_factory_transport_is_aborted_and_fences_before_any_raft_or_send_progress ... ok
+test peer_driver::local_configuration_admission_uses_retained_pins_and_prevents_queued_route_withdrawal ... ok
+test peer_driver::membership_removal_cancels_attempts_but_waits_for_obsolete_provider_receipts ... ok
+test peer_driver::membership_removal_discards_held_input_and_completes_accepted_and_staged_output ... ok
+test peer_driver::mis_scoped_connector_receipt_fences_and_closes_returned_session_for_recovery ... ok
+test peer_driver::mis_scoped_transport_completion_keeps_exact_queue_payload_until_explicit_recovery ... ok
+test peer_driver::oversized_outbound_poll_is_quarantined_whole_with_credits_until_explicit_recovery ... ok
+test peer_driver::owned_route_plan_checks_pins_retains_queued_dependencies_and_rejects_stale_budget_restore ... ok
+test peer_driver::planned_retirement_waits_for_only_that_peers_original_outbound_credits ... ok
+test peer_driver::prospective_routes_check_credentials_and_capacity_without_changing_roster_or_clock ... ok
+test peer_driver::public_host_reactor_attaches_and_keeps_blocked_peer_credits_while_other_peer_and_ingress_progress ... ok
+test peer_driver::receive_fairness::held_recovery_receive_preserves_control_reserve_and_outbound_completion ... ok
+test peer_driver::receive_fairness::saturated_background_receive_credit_rotates_between_ready_peers ... ok
+test peer_driver::receive_fairness::saturated_data_message_credit_rotates_between_ready_peers ... ok
+test peer_driver::rejected_queue_completion_returns_original_payload_and_holds_credit_for_recovery ... ok
+test peer_driver::retained_plan_connects_only_after_valid_witness_reply_and_preserves_live_bindings ... ok
+test peer_driver::wrong_outbound_terminal_ticket_fences_instead_of_publishing_unscoped_local_completion ... ok
+test persistence_overlap::follower_can_persist_before_local_barrier_and_held_send_survives_durable ... ok
+test persistence_overlap::insufficient_extra_space_keeps_original_serialized_progress ... ok
+test persistence_overlap::local_failure_after_early_send_fences_and_retains_external_charge ... ok
+test persistence_overlap::written_and_durable_in_one_poll_preserve_queued_sends_and_original_commit ... ok
+test prospective_fanout_rejection_returns_input_without_ticket_or_fencing ... ok
+test read_invocations::admission_correlates_original_queries_and_retains_credits_through_consumer ... ok
+test read_invocations::cancellation_before_read_step_keeps_capacity_and_cancels_ready_without_catchup ... ok
+test read_invocations::current_output_bound_is_revalidated_before_executing_an_admitted_query ... ok
+test read_invocations::failed_construction_returns_selected_execution_owner_and_held_result ... ok
+test read_invocations::fresh_owner_uses_live_core_read_floor_and_abort_preserves_completed_success ... ok
+test read_invocations::lagging_ready_read_retries_and_cancelled_wait_does_not_execute_query ... ok
+test read_invocations::per_group_retention_budget_leaves_other_groups_and_close_drains_accepted_work ... ok
+test read_invocations::queued_cancel_is_exact_and_cannot_cancel_a_subsequent_read ... ok
+test read_invocations::runtime_rejection_preserves_original_query_without_spending_ticket ... ok
+test read_invocations::stale_queued_read_step_returns_exact_not_read_and_id_exhaustion_never_wraps ... ok
+test read_results::application_catchup_retries_without_consuming_query_or_barrier ... ok
+test read_results::global_byte_backpressure_and_wrong_effect_do_not_run_application ... ok
+test read_results::nested_capacity_and_result_bound_reject_before_callback_and_wrong_runtime_is_intact ... ok
+test read_results::original_read_is_one_use_and_poll_keeps_allocation_credits ... ok
+test read_results::per_group_overload_retains_original_query_and_other_group_progresses ... ok
+test read_results::query_failure_consumes_authority_but_invalid_provider_fences_without_success ... ok
+test replica_driver::assembly_rejects_missing_or_lagging_application_and_held_work ... ok
+test replica_driver::failed_worker_fences_without_applied_and_explicit_cleanup_releases_rejected_work ... ok
+test replica_driver::invalid_accepted_send_ticket_fences_and_external_payload_stays_provider_owned ... ok
+test replica_driver::overloaded_wal_retains_exact_leases_and_written_cannot_publish_applied ... ok
+test replica_driver::public_host_components_drive_exact_applied_and_original_read_with_consumer_credits ... ok
+test replica_driver::snapshot_retry_policy_is_bounded_and_rejects_without_mutation ... ok
+test replica_driver::wrong_binding_clock_and_budget_reject_before_provider_poll_and_can_resume ... ok
+test snapshot_routes::accepted_snapshot_failure_keeps_other_leases_until_explicit_failed_discard ... ok
+test snapshot_routes::bounded_routing_and_wrong_binding_reject_before_transfer ... ok
+test snapshot_routes::closing_owner_drains_snapshot_wal_and_application_dependencies ... ok
+test snapshot_routes::envelopes::every_altered_snapshot_envelope_retains_the_original_live_lease ... ok
+test snapshot_routes::invalid_accepted_ticket_fences_but_returns_original_lease_for_discard ... ok
+test snapshot_routes::oversized_provider_result_fences_and_releases_only_router_owned_payload ... ok
+test snapshot_routes::recovery_budget::byte_quota_retains_credit_until_router_delivery_and_retries_exact_lease ... ok
+test snapshot_routes::recovery_budget::checkpoint_publication_and_reconciliation_bypass_full_recovery_quota ... ok
+test snapshot_routes::recovery_budget::count_quota_retains_credit_until_router_delivery_and_retries_exact_lease ... ok
+test snapshot_routes::recovery_budget::oversized_recovery_and_invalid_limits_are_rejected_before_preparation ... ok
+test snapshot_routes::recovery_budget::provider_refusal_and_failed_owner_discard_release_only_their_credits ... ok
+test snapshot_routes::rejection_retries_keep_exact_lease_and_stale_completions_do_not_release_it ... ok
+test snapshot_routes::reservation::competing_snapshot_leases_release_speculation_and_all_finish ... ok
+test snapshot_routes::reservation::rejected_worker_releases_only_speculation_and_retry_restores_budget ... ok
+test transaction_driver_conformance::host_components_commit_reverse_and_retry_without_native_providers ... ok
+test transaction_driver_conformance::host_durable_refusal_aborts_absent_peer_and_leaves_balances_unchanged ... ok
+test transaction_driver_conformance::lost_actual_start_output_cancels_observation_then_resumes_from_quorum_status ... ok
+test transaction_driver_conformance::original_driver_output_cannot_release_a_new_drivers_credits ... ok
+
+test result: ok. 195 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+     Running tests/learners.rs (/tmp/voteboat-mac466-92454c2-LvYfi1/target-root-core/debug/deps/learners-f2f6f0b902238a81)
+
+running 14 tests
+test enrollment_requires_committed_and_accepted_exact_store_assignment ... ok
+test host_configuration_proposal_requires_joint_commit_before_final_and_recovery_replays_it ... ok
+test host_learner_enrollment_replication_and_checkpoint_recovery ... ok
+test joint_or_policy_transition_cannot_use_learner_recovery_to_open_dynamic_voting ... ok
+test local_configuration_promotion_checks_all_proofs_before_mutating_journal ... ok
+test local_policy_change_commits_only_with_old_and_new_recursive_predicates ... ok
+test missing_pinned_learner_data_prevents_recovery_and_application_exposure ... ok
+test readiness_exchange_suspends_verification_rejects_stale_completion_and_denies_capability ... ok
+test readiness_expires_when_commit_advances_or_leader_changes_term ... ok
+test readiness_refuses_a_current_checkpoint_that_understates_configured_lifetime_capacity ... ok
+test readiness_rejects_changed_capabilities_provider_bindings_and_pending_writes ... ok
+test readiness_requires_pinned_compacted_data_and_rechecks_configuration_and_commit ... ok
+test readiness_storage_failure_fences_without_reply_and_recovery_discards_pending_exchange ... ok
+test readiness_uses_fresh_context_exact_sessions_and_applied_durable_prefix ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/log_owned.rs (/tmp/voteboat-mac466-92454c2-LvYfi1/target-root-core/debug/deps/log_owned-5bc6633ad6e4121a)
+
+running 5 tests
+test configuration_snapshot_and_generation_replacement_keep_the_exact_fallback ... ok
+test cross_group_failed_later_unit_and_reused_identity_keep_every_original_state ... ok
+test finite_ballot_commit_suffix_rows_match_materialized_map_validator ... ok
+test immutable_limits_bound_new_groups_and_missing_lookup_has_no_side_effect ... ok
+test plain_append_and_metadata_keep_prior_payload_allocations_and_cold_groups ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/log_staging.rs (/tmp/voteboat-mac466-92454c2-LvYfi1/target-root-core/debug/deps/log_staging-2692249b4c35b3bf)
+
+running 2 tests
+test creates_count_new_groups_and_reject_reused_ids_and_duplicate_units_atomically ... ok
+test later_invalid_transition_leaves_the_whole_batch_uninstalled ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/membership.rs (/tmp/voteboat-mac466-92454c2-LvYfi1/target-root-core/debug/deps/membership-044c638aa41f4ebc)
+
+running 18 tests
+test accepted_log_activation_uses_both_policies_before_joint_commit ... ok
+test arbitrary_weighted_policy_changes_require_joint_rules_even_with_same_voters ... ok
+test configuration_ingress_charges_owned_metadata_to_data_budget ... ok
+test configuration_snapshots::checkpoint_validation_rejects_bad_boundaries_operations_and_joint_identity ... ok
+test configuration_snapshots::compacted_joint_status_does_not_invent_the_discarded_entry_term ... ok
+test configuration_snapshots::host_snapshot_base_preserves_joint_rollback_final_and_application_dedup ... ok
+test configuration_snapshots::matching_snapshot_cannot_forge_configuration_or_drop_operation_history ... ok
+test configuration_snapshots::snapshot_membership_cost_is_retained_by_worker_and_ingress_reservations ... ok
+test host_configuration_status_distinguishes_durable_and_committed_phases ... ok
+test host_store_configuration_journal_conformance ... ok
+test joint_frontier_matches_exhaustive_prefix_evaluation ... ok
+test promotion_requires_committed_matching_learner_identity_and_no_hot_voter_edit ... ok
+test replacement_removes_uncommitted_joint_and_reconstructs_previous_learners ... ok
+test replay_rejects_index_overflow_without_panicking ... ok
+test replica_and_voter_identity_views_follow_activation_rollback_and_compaction ... ok
+test snapshots_cannot_erase_the_only_recoverable_configuration ... ok
+test static_core_refuses_journal_recovery_and_host_injected_configuration_rpc ... ok
+test transition_grammar_rejects_overlap_early_final_and_operation_reuse ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/provider_conformance.rs (/tmp/voteboat-mac466-92454c2-LvYfi1/target-root-core/debug/deps/provider_conformance-8cdb8cd4249006d9)
+
+running 31 tests
+test admission_cases::host_admission_final_credit_release_crosses_threads_and_view_close ... ok
+test admission_cases::host_admission_generated_ownership_and_refusal_history ... ok
+test admission_cases::opaque_lease_destroys_its_provider_token_once_after_all_thread_owners ... ok
+test admission_cases::shared_history_detects_a_provider_releasing_accepted_credits_early - should panic ... ok
+test application_cases::commit_batch::counter_admission_is_invariant_under_moving_pending_prefix_to_applied ... ok
+test application_cases::counter_satisfies_shared_application_read_and_checkpoint_obligations ... ok
+test application_cases::independent_host_set_application_satisfies_same_public_obligations ... ok
+test application_cases::shared_application_checker_rejects_bad_receipts_partial_failure_and_future_reads ... ok
+test buffer_cases::host_buffer_generated_owner_class_and_byte_lifetimes ... ok
+test buffer_cases::mutants::shared_buffer_checker_detects_early_credit_release ... ok
+test buffer_cases::mutants::shared_buffer_checker_detects_nonzero_growth ... ok
+test cases::command_bytes::construction_reads_and_default_expose_exact_content ... ok
+test cases::command_bytes::every_retained_clone_is_charged_without_source_spare_capacity ... ok
+test cases::command_bytes::independent_content_and_complete_entry_fields_determine_equality ... ok
+test cases::command_bytes::shared_clone_survives_source_drop_and_replacement_is_independent ... ok
+test cases::default_errors::checkpoint_default_is_object_safe_and_preserves_raw_provider_error_outcomes ... ok
+test cases::default_errors::default_comparison_never_turns_provider_errors_into_a_mismatch ... ok
+test cases::entry_batches::batch_capture_clone_export_and_consumption_preserve_independent_values ... ok
+test cases::entry_batches::cross_chunk_coalescing_preserves_one_ordered_complete_interval ... ok
+test cases::entry_batches::every_owner_charges_full_backing_including_hidden_entries_and_spare_capacity ... ok
+test cases::entry_batches::history_ranges_and_edits_match_vec_without_mutating_shared_owners ... ok
+test cases::entry_clone::clone_from_matches_derived_replacement_and_independent_ownership ... ok
+test cases::entry_clone::fieldwise_clone_matches_independent_derived_top_level_for_every_payload ... ok
+test cases::entry_equality::converted_spare_capacity_and_every_command_field_follow_content_equality ... ok
+test cases::entry_equality::full_store_equality_keeps_empty_nonempty_configuration_and_ordered_entries ... ok
+test cases::entry_equality::generated_entries_match_independent_tuple_equality_in_both_directions ... ok
+test cases::matches::default_is_object_safe_and_preserves_complete_snapshot_and_configuration_equality ... ok
+test credential_cases::host_credential_journal_satisfies_shared_publication_contract_without_native ... ok
+test host_log_store_satisfies_scoped_ticket_and_range_obligations_without_native ... ok
+test host_snapshot_bindings_cannot_publish_or_pin_each_others_images ... ok
+test host_snapshots_preserve_stages_exact_references_and_two_log_anchors ... ok
+
+test result: ok. 31 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/raft.rs (/tmp/voteboat-mac466-92454c2-LvYfi1/target-root-core/debug/deps/raft-8ddfaee29f2440f9)
+
+running 29 tests
+test campaigning::pause_also_blocks_a_valid_timeout_now_invitation ... ok
+test campaigning::pause_blocks_explicit_campaign_without_changing_durable_vote ... ok
+test campaigning::paused_candidate_ignores_its_late_ballots_and_still_votes_and_replicates ... ok
+test campaigning::paused_leader_can_handoff_and_cannot_campaign_again ... ok
+test campaigning::pending_self_vote_finishes_before_pause_discards_candidacy ... ok
+test campaigning::recovery_requires_the_host_to_reapply_volatile_pause ... ok
+test counter_read_waits_for_application_and_cannot_reuse_or_move_barrier ... ok
+test delayed_read_acknowledgements_cannot_authorize_a_later_read_after_leader_change ... ok
+test drain_coordinator::bounded_fair_dispatch_rejects_stale_completion_and_rechecks_original_intent ... ok
+test drain_coordinator::missing_and_wrong_group_views_do_not_discard_independent_dispatches ... ok
+test leadership::an_uncommitted_source_tail_cannot_emit_a_handoff_signal ... ok
+test leadership::lagging_target_waits_for_durable_prefix_and_exact_cancel_releases_quiescence ... ok
+test leadership::recursive_quorum_policy_still_decides_the_target_election ... ok
+test leadership::signal_without_election_quorum_is_not_transfer_success ... ok
+test leadership::source_restart_discards_volatile_attempt_and_does_not_infer_completion ... ok
+test leadership::target_catch_up_must_complete_persistence_before_it_can_trigger_handoff ... ok
+test leadership::target_restart_before_ballot_persistence_requires_fresh_leader_contact ... ok
+test leadership::timeout_signal_cannot_send_votes_until_target_term_and_ballot_are_durable ... ok
+test leadership::transfer_rejects_self_unknown_and_stale_target_identity_without_mutation ... ok
+test leadership::transfer_uses_ordinary_quorum_election_and_preserves_committed_commands ... ok
+test leadership::wrong_signal_origin_config_tail_and_unobserved_leader_are_rejected ... ok
+test read_ack_rejects_foreign_scope_old_term_and_previous_store_session ... ok
+test read_authority_and_applied_prefix_history_with_host_storage ... ok
+test read_probe_higher_term_waits_for_its_exact_durability_ticket ... ok
+test read_requires_current_term_commit_and_ready_tokens_are_bounded_and_cancelable ... ok
+test recursive_policy_is_used_for_both_election_and_commit ... ok
+test recursive_reads_require_fresh_distinct_voters_for_the_exact_context ... ok
+test single_voter_read_and_restart_reject_prior_session_authority ... ok
+test three_node_history_with_only_host_components ... ok
+
+test result: ok. 29 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running tests/runtime.rs (/tmp/voteboat-mac466-92454c2-LvYfi1/target-root-core/debug/deps/runtime-f2935d9274691d9c)
+
+running 38 tests
+test campaign_delay::durable_self_vote_fences_expired_campaign_and_preserves_matching_ballot ... ok
+test campaign_delay::missing_ballots_still_retry_after_the_fresh_durable_self_vote_window ... ok
+test campaigning::pause_invalidates_queued_election_and_resume_arms_a_fresh_timer ... ok
+test campaigning::paused_follower_keeps_replication_contact_without_rearming_an_election ... ok
+test campaigning::paused_leader_retains_automatic_heartbeat_deadlines ... ok
+test deadlines_visit_tokens_and_shutdown_do_not_alias_or_roll_back_work ... ok
+test delayed_durable_vote_completion_resets_and_fences_a_queued_expiration ... ok
+test diagnostic_wall_clock_jumps_never_enter_monotonic_election_timing ... ok
+test dropping_one_shard_leaves_the_host_store_and_other_owner_live ... ok
+test enrolled_learner_has_no_election_timer_and_still_processes_durable_replication ... ok
+test expiration_backpressure_retains_one_token_and_close_cancels_queued_campaigns ... ok
+test host_ready_deadline_clock_and_entropy_contracts ... ok
+test host_shard_reserves_control_bounds_retention_and_fairly_drains ... ok
+test hundred_groups_share_host_log_and_scheduler_with_delayed_completion_isolation ... ok
+test leader_contact_invalidates_an_election_already_queued_for_dispatch ... ok
+test network_round_trip_longer_than_heartbeat_interval_still_commits_and_reads ... ok
+test node_item_and_group_byte_limits_each_preserve_control_reserves ... ok
+test prospective_reservation_peeks_the_exact_queue_choice_without_consumption ... ok
+test ready_quantum::every_native_quantum_keeps_control_data_background_and_group_fairness ... ok
+test retained_capacity_group_identity_and_background_are_charged_before_admission ... ok
+test retained_voter_replication_contact_bridges_scope_without_activating_it ... ok
+test scheduler_contract::host_scheduler_obligations ... ok
+test scheduler_contract::shared_assertions_detect_destructive_refusal ... ok
+test scheduler_contract::shared_assertions_detect_incarnation_blind_cancel ... ok
+test scheduler_contract::shared_assertions_detect_unfair_front_insertion ... ok
+test stale_malformed_denied_and_unrelated_messages_do_not_extend_election_deadlines ... ok
+test suspended_dependency_scopes_completion_and_allows_another_group_to_run ... ok
+test timer_contract::host_timer_exact_tokens_and_bounded_histories ... ok
+test timer_contract::isolation::host_timer_distinct_store_session_lane_and_generation_isolation ... ok
+test timer_contract::mutants::shared_owner_assertions_detect_store_blind_cancellation ... ok
+test timer_contract::mutants::shared_poll_assertions_detect_budget_bypass ... ok
+test timer_contract::mutants::shared_poll_assertions_detect_destructive_regression_refusal ... ok
+test timer_contract::mutants::shared_poll_assertions_detect_false_lateness ... ok
+test timer_contract::mutants::shared_poll_assertions_detect_reversed_deadline_order ... ok
+test timer_contract::polling::host_timer_poll_retains_refused_work_and_transfers_exact_bounded_expirations ... ok
+test timer_contract::shared_timer_assertions_detect_cancellation_ignoring_owner ... ok
+test timer_provider_failure_latches_and_still_allows_explicit_stop ... ok
+test virtual_time_elects_replaces_and_recovers_leaders_with_host_providers ... ok
+
+test result: ok. 38 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running tests/snapshot.rs (/tmp/voteboat-mac466-92454c2-LvYfi1/target-root-core/debug/deps/snapshot-041fc8b5245c12c2)
+
+running 12 tests
+test buffered_append_can_catch_up_across_compaction_without_snapshot_install ... ok
+test checkpoint_plus_tail_preserves_dedup_and_host_application_schema ... ok
+test compacted_three_node_snapshot_catchup_and_election_with_host_providers ... ok
+test durable_pin_switch_conformance_with_host_provider ... ok
+test invalid_snapshot_binding_boundary_schema_or_tail_never_partly_restores ... ok
+test log_match::binding_precedes_comparison_and_comparison_errors_precede_snapshot_work ... ok
+test log_match::snapshot_install_verification_keeps_the_full_arbitrary_state_method ... ok
+test missing_anchor_refuses_recovery_and_swapped_stage_cannot_install ... ok
+test public_snapshot_conformance_with_host_provider ... ok
+test recursive_snapshot_catchup_keeps_the_persisted_policy ... ok
+test restore_refuses_altered_membership_even_with_same_reference_configuration_id ... ok
+test snapshot_refusal::delayed_snapshot_refusal_persists_higher_term_without_replication_credit ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/snapshot_worker.rs (/tmp/voteboat-mac466-92454c2-LvYfi1/target-root-core/debug/deps/snapshot_worker-280b52b0dbbe835a)
+
+running 5 tests
+test downstream_worker_selection_rejection_stale_envelope_and_failure ... ok
+test install_requires_reconciled_image_and_valid_application_before_acknowledgement ... ok
+test invalid_application_and_store_scope_never_submit_work ... ok
+test local_checkpoint_checks_context_boundary_and_exact_retention_completion ... ok
+test local_checkpoint_rejects_foreign_published_boundary_before_wal ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/worker.rs (/tmp/voteboat-mac466-92454c2-LvYfi1/target-root-core/debug/deps/worker-642719579b6e6323)
+
+running 3 tests
+test host_worker_stages_exact_effects_and_durable_owner_delivery_without_native_features ... ok
+test public_host_workers_replicate_read_retry_replace_leader_and_close_independently ... ok
+test stopped_visit_does_not_discard_other_groups_in_a_shared_completion ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+

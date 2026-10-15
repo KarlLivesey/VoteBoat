@@ -1,0 +1,9 @@
+{
+  "event": "QUIET_START",
+  "utc": "2026-10-15T01:39:46.685119+00:00",
+  "scope": "Linux only: no concurrent builds/checks/copies/archive work/other benchmarks; serial run-internal identity/checker steps occur outside measured child workload windows. Remote Mac455/466 qualification and status polling remain on Mac, no Linux export/copy.",
+  "prepared": "RUN_READY.json plus restored guard resource-extension/guard-restored.log; optional wrapper not used.",
+  "same_host_process_names": "    PID COMMAND\n      1 codex\n      2 zsh\n      3 python3\n      4 ps\n",
+  "loadavg": "7.74 7.48 7.70 8/3643 4",
+  "not_acceptance": "Short paired1,048,576 originals percell, not20M sustained or fullcell/bothhost qualification."
+}
