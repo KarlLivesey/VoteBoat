@@ -1,0 +1,1 @@
+test log::command_bytes::tests::current_and_legacy_representation_layouts_are_diagnostic_only ... scope=dev_current_vs_literal_legacy_representation_not_published_ELF CommandBytes=16 OptionArcSlice=16 EntryPayload=48 LogEntry=64 legacyVec=24 legacyPayload=48 legacyEntry=64 sharedHeaderCharge=16 legacyFixtureFieldRead=12

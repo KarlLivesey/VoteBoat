@@ -1,0 +1,9 @@
+# Mac455 qualification
+
+Original SSH84206 finished normally with exit0/DONE on frozen `7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8`. All-feature library414, core334, CRC3, all27 selected integration targets (789 tests), core27 targets (391 tests), real TCP/QUIC three-service2, matched70, formatting/four strict root profiles and standalone strict checks passed. Routed192 passed in33,371.18s; all raw slow histories remain.
+
+All1445 Linux frozen input bytes match, with three explicit export additions. **Transfer did not preserve requested Linux physical modes:**1437 ordinary files were0664 instead of0644 and hook0775 instead of0755. Seven keys remained0600. The original inventoried mode guard passed; `PHYSICAL_MODE_SCOPE.json` supersedes the generated `source_permissions_preserved=true`. No retroactive chmod/retest or fully mode-qualified transfer claim.
+
+Fresh asserted framework build proves all four artifacts `fresh:false`, current root build script/oracle scope, opt3/debug2/packed/assertions/overflow/thinLTO/CGU1, compiler/locks and original/copy hashes. Executable SHA `15a329c75d941abdd72185071dd54654ee73d55b39d3b22adcad0385f68dd0e9`; UUID `A9FF22D4-2B60-38A7-83F2-7BB90A2E9EA1`, complete current dSYM recorded. Three original OFF/ON/OpenRaft controls completed16,384 originals/4,096 requests, frontiers[17,409;3]; ON29 phases/four scopes/15 methods. These are qualification controls, no capacity or acceptance claim.
+
+One authorized3s/5ms textual sample of the long TCP cold case is disclosed in the retained commands/readout. Its thread wall-stack observations are not CPU-time accounting; no recapture or deadline/source change. A post-terminal read-only summary attempt found remote `rg` unavailable(exit127); existing `grep` fallback passed. No workload was repeated. Lossless compression mappings include original and compressed hashes, with independent decompression verification.

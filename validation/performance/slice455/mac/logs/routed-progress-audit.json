@@ -1,0 +1,103 @@
+{
+  "utc": "2026-10-15T01:55:38.011514+00:00",
+  "log_path": "/tmp/voteboat-mac455-7a99ae5-fENMzQ/logs/root_protocol_all.log",
+  "log_bytes": 66529,
+  "log_mtime_utc": "2026-10-15T01:46:45.476494+00:00",
+  "stage": "root_protocol_all",
+  "declared_current_target_tests": 192,
+  "current_target_expected": 192,
+  "current_target_completed": 110,
+  "results": {
+    "ok": 110,
+    "FAILED": 0,
+    "ignored": 0
+  },
+  "current_unreported": [
+    "native::insertion::nested::moves::quic_nested_later_moves_recover_unread_phases_from_checkpoint"
+  ],
+  "not_yet_started": 81,
+  "next10_unstarted": [
+    "native::insertion::nested::moves::quic_nested_later_moves_recover_unread_phases_from_wal",
+    "native::insertion::nested::moves::retirement::merge::quic_nested_merge_retirement_recovers_partial_cleanup_from_wal",
+    "native::insertion::nested::moves::retirement::merge::quic_nested_merge_retirement_recovers_partial_cleanup_then_reclaims",
+    "native::insertion::nested::moves::retirement::merge::tcp_nested_merge_retirement_recovers_partial_cleanup_from_wal",
+    "native::insertion::nested::moves::retirement::merge::tcp_nested_merge_retirement_recovers_partial_cleanup_then_reclaims",
+    "native::insertion::nested::moves::retirement::quic_assigned_nested_retirement_recovers_then_reclaims_checkpoint",
+    "native::insertion::nested::moves::retirement::quic_assigned_nested_retirement_recovers_unread_result_from_wal",
+    "native::insertion::nested::moves::retirement::tcp_assigned_nested_retirement_recovers_then_reclaims_checkpoint",
+    "native::insertion::nested::moves::retirement::tcp_assigned_nested_retirement_recovers_unread_result_from_wal",
+    "native::insertion::nested::moves::tcp_nested_later_moves_recover_unread_phases_from_checkpoint"
+  ],
+  "last_completed": [
+    [
+      "native::delegation::tcp_delegated_split_recovers_every_phase_from_wal",
+      "ok"
+    ],
+    [
+      "native::delegation::unread_phase::accepted_unknown_must_not_be_an_applied_unread_cut",
+      "ok"
+    ],
+    [
+      "native::delegation::unread_phase::unknown_completion_waits_for_actual_native_reservation_release",
+      "ok"
+    ]
+  ],
+  "completed_target_summaries": [
+    "test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+    "test result: ok. 203 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 332.22s",
+    "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s",
+    "test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.58s",
+    "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+    "test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.67s",
+    "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s",
+    "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+    "test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1971.46s",
+    "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.53s",
+    "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+    "test result: ok. 42 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 67.13s",
+    "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 69.33s",
+    "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 69.74s",
+    "test result: ok. 42 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.68s",
+    "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+    "test result: ok. 41 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.99s",
+    "test result: ok. 79 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.76s",
+    "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.24s"
+  ],
+  "last30lines": [
+    "test native::delegation::reparenting::quic_cross_authority_reparent_resumes_checkpoints_and_original_observations ... ok",
+    "test native::delegation::reparenting::quic_cross_authority_reparent_resumes_wal_and_serves_without_metadata ... ok",
+    "test native::delegation::reparenting::tcp_cross_authority_reparent_resumes_checkpoints_and_original_observations ... ok",
+    "test native::delegation::reparenting::tcp_cross_authority_reparent_resumes_wal_and_serves_without_metadata ... ok",
+    "test native::delegation::repeat::quic_delegated_repeated_moves_recover_from_checkpoints ... ok",
+    "test native::delegation::repeat::quic_delegated_repeated_moves_recover_from_wal ... ok",
+    "test native::delegation::repeat::tcp_delegated_repeated_moves_recover_from_checkpoints ... ok",
+    "test native::delegation::repeat::tcp_delegated_repeated_moves_recover_from_wal ... ok",
+    "test native::delegation::retained::parent_moves::quic_imported_parent_move_checkpoint ... ok",
+    "test native::delegation::retained::parent_moves::quic_imported_parent_move_wal ... ok",
+    "test native::delegation::retained::parent_moves::quic_retained_parent_move_checkpoint ... ok",
+    "test native::delegation::retained::parent_moves::quic_retained_parent_move_wal ... ok",
+    "test native::delegation::retained::parent_moves::tcp_imported_parent_move_checkpoint ... ok",
+    "test native::delegation::retained::parent_moves::tcp_imported_parent_move_wal ... ok",
+    "test native::delegation::retained::parent_moves::tcp_retained_parent_move_checkpoint ... ok",
+    "test native::delegation::retained::parent_moves::tcp_retained_parent_move_wal ... ok",
+    "test native::delegation::retained::quic_foreign_retained_scopes_recover_unread_phases_from_checkpoint ... ok",
+    "test native::delegation::retained::quic_foreign_retained_scopes_recover_unread_phases_from_wal ... ok",
+    "test native::delegation::retained::quic_root_retained_scopes_recover_unread_phases_from_checkpoint ... ok",
+    "test native::delegation::retained::quic_root_retained_scopes_recover_unread_phases_from_wal ... ok",
+    "test native::delegation::retained::tcp_foreign_retained_scopes_recover_unread_phases_from_checkpoint ... ok",
+    "test native::delegation::retained::tcp_foreign_retained_scopes_recover_unread_phases_from_wal ... ok",
+    "test native::delegation::retained::tcp_root_retained_scopes_recover_unread_phases_from_checkpoint ... ok",
+    "test native::delegation::retained::tcp_root_retained_scopes_recover_unread_phases_from_wal ... ok",
+    "test native::delegation::retained_failed_store_does_not_poison_the_next_history ... ok",
+    "test native::delegation::tcp_delegated_split_recovers_every_phase_from_checkpoints ... ok",
+    "test native::delegation::tcp_delegated_split_recovers_every_phase_from_wal ... ok",
+    "test native::delegation::unread_phase::accepted_unknown_must_not_be_an_applied_unread_cut ... ok",
+    "test native::delegation::unread_phase::unknown_completion_waits_for_actual_native_reservation_release ... ok",
+    "test native::insertion::nested::moves::quic_nested_later_moves_recover_unread_phases_from_checkpoint ... "
+  ],
+  "inventory_command": [
+    "/tmp/voteboat-mac455-7a99ae5-fENMzQ/target-root-all/debug/deps/routed-36fdca8d939daf9e",
+    "--list"
+  ],
+  "inventory_scope": "Existing immutable test binary libtest listing only; zero tests executed, no process attach or restart."
+}

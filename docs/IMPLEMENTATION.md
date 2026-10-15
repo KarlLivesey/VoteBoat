@@ -2,9 +2,11 @@
 
 ## Active P9 plan — 15 October 2026
 
-Latest production publication is470 `a37f867a8a10359b35e754242b166c03b13813f3`;
-native measurement/gauge evidence is published in `a01d9d51`.
-472's bounded driver pump is implemented and locally checked, awaiting publication.
+Latest production publication is472 `de5a7221e49c89771dd3cd22a0b904966b1f4789`;
+native470 measurement/gauge evidence is published in `a01d9d51`.
+The [472 publication receipt](../validation/performance/pipeline472/publication/README.md)
+records original48079/full enabled hook0 and exact remote main.472's bounded
+driver pump is implemented and locally checked; fresh Linux builds are in progress.
 Its [qualification archive](../validation/performance/pipeline472/main/README.md)
 preserves the two compile failures, focused corrections, final source inventories,
 actual selected-driver/network controls and complete enabled strict hook0.
@@ -58,6 +60,24 @@ retune quantum, window, checkpoints or storage durability. Full P9 remains activ
 The [472 before-edit schema](../validation/performance/pipeline472/SCHEMA.md)
 records the private residual-budget shape, authority/lease transitions, terminal
 priority, overload cleanup and deterministic acceptance before runtime edits.
+
+Original Mac45584206 has now actually terminated0/DONE. Its
+[113-payload archive](../validation/performance/slice455/mac/README.md) retains
+all414/core334 library checks, all27/core27 integration targets (789/391 tests),
+actual TCP/QUIC three-service2, matched70, formatting/four strict profiles,
+fresh asserted framework artifacts and three original16K CLI controls. Routed192
+takes33,371.18s and is not relabeled a timing improvement. All1445 frozen source
+bytes match;1438 ordinary file writable-mode differences mean the original
+transfer did not preserve requested Linux permissions. The explicit correction
+supersedes generated preservation=true; private keys remain0600. Fresh472 Mac
+qualification uses corrected exact file/directory-mode guards and tool identities,
+without rewriting or repeating the original455 job. No P9 milestone closes.
+
+The [next native comparison schema](../validation/performance/comparison472-native/SCHEMA.md)
+uses24 cases:470/472 at both default1 and selected4, TCP/QUIC and three paired
+trials. This isolates selected-path usefulness while checking default-path cost
+in the same campaign. Exact original outcomes, refusals, latency and physical
+barriers remain required; four queued units alone do not establish amortization.
 
 The1.5× larger published/matched sustained requirement is a minimum acceptance
 bar, not a target or stopping ceiling. The user wants that capacity and

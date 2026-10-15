@@ -1,0 +1,6 @@
+{
+  "manifest_sha256": "faf0c275f7271cc3dfea56a9dc54a8d403f5e51f3cdc7e5a01a23e62499c9f3a",
+  "exact_payload_set": 113,
+  "all_payload_and_compressed_original_hashes": "PASS",
+  "mode_scope": "1438 ordinary writable-bit differences explicitly retained; requested Linux physical-mode preservation was not achieved. Seven private fixture modes0600 preserved. No retroactive qualification claim."
+}

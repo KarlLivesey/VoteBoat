@@ -1,0 +1,13 @@
+{
+  "original_session": 84206,
+  "actual_exit": 0,
+  "remote_status": "0",
+  "remote_stage": "DONE",
+  "selected_inputs": 1448,
+  "hashes_and_inventoried_modes_unchanged": true,
+  "linux_physical_mode_preservation": false,
+  "supersedes": "QUALIFICATION.json source_permissions_preserved=true only describes original664/775 SOURCE inventory, not Linux644/755 preservation",
+  "fixture_keys_0600_preserved": true,
+  "uuid": "UUID: A9FF22D4-2B60-38A7-83F2-7BB90A2E9EA1 (arm64) /tmp/voteboat-mac455-7a99ae5-fENMzQ/target-matched-release/release/voteboat-matched-framework",
+  "performance_claim": false
+}

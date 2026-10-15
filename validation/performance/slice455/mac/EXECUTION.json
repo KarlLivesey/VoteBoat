@@ -1,0 +1,20 @@
+{
+  "original_session": 84206,
+  "actual_terminal_exit": 0,
+  "remote_job": "/tmp/voteboat-mac455-7a99ae5-fENMzQ",
+  "source_commit": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "terminal_archive": {
+    "sha256": "20fa433f25bbc1d0cc2c59de6418914e92cfcbc007228c0a615498e189342e36",
+    "bytes": 489835,
+    "selected_raw_files": 109
+  },
+  "post_terminal_audit_commands": [
+    "Read STAGE/STATUS and completed receipts",
+    "Read-only rg summary attempt returned127: remote rg unavailable; grep fallback returned0",
+    "xcrun dwarfdump --uuid current original executable returned0",
+    "Source SHA and inventoried mode audit returned0",
+    "SCP completed compact evidence archive returned0"
+  ],
+  "changes_to_running_job": false,
+  "sample_diagnostic": "One root-authorized bounded textual sample of actual TCP cold test child; exact commands/raw retained; wall-stack observations, not capacity CPU accounting."
+}

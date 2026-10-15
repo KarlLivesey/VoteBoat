@@ -1,0 +1,11 @@
+[
+  {
+    "original_path": "logs/cold-sample.txt",
+    "original_bytes": 1629993,
+    "original_sha256": "55359c97c21342fb51b9a9d77848396ec406163a0f7ef045c9d2db58e1a44146",
+    "compressed_path": "logs/cold-sample.txt.gz",
+    "compressed_bytes": 121604,
+    "compressed_sha256": "2d5bb0211e2d43859ecdb092046e65d52864f8c4ea8cc9d2cc7b3708070557c7",
+    "independent_decompression_verified": true
+  }
+]

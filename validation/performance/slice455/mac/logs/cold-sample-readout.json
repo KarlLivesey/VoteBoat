@@ -1,0 +1,480 @@
+{
+  "scope": "Single existing three-second wall stack sample, node observations not CPU-us; nested/shared nodes overlap and are not summed. Main harness idle thread separated. No allocator or throughput causality.",
+  "threads": [
+    {
+      "thread": "Thread_27369461   DispatchQueue_1: com.apple.main-thread  (serial)",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394897: cold_recovery::tcp_two_levels_recover_actual_checkpoint_suffix_",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394898: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394899: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394900: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394901: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394902: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394903: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394904: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394905: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394906: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394907: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394908: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394909: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394910: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394911: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394912: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394913: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394914: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394915: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394918: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394919: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394920: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394921: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394922: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394923: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394924: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394925: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394926: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394927: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394928: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394929: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394930: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394931: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394932: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394933: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394934: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394935: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394937: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394938: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394939: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394940: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394941: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394942: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394945: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394946: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394947: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394952: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394953: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394954: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394955: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394956: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394957: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394958: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394959: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394960: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394961: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394962: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394963: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394964: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394965: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394966: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394967: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394968: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394969: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394971: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394972: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394973: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394976: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394977: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394978: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394979: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394980: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394981: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394984: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394985: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394986: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394987: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394988: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394989: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394990: voteboat-wal",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394991: voteboat-snapshot",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27394992: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27395024: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27395025: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27395026: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27395027: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27395028: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27395029: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27395030: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27395031: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27395032: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27395184: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27395185: voteboat-dial",
+      "observations": 234
+    },
+    {
+      "thread": "Thread_27395186: voteboat-dial",
+      "observations": 234
+    }
+  ],
+  "top_source_nodes": [
+    {
+      "thread": "Thread_27369461   DispatchQueue_1: com.apple.main-thread  (serial)",
+      "source": "tests/logical_nested_native.rs:1",
+      "maximum_node_observations": 234
+    },
+    {
+      "thread": "Thread_27394897: cold_recovery::tcp_two_levels_recover_actual_checkpoint_suffix_",
+      "source": "tests/logical_nested_native/cold_recovery.rs:26",
+      "maximum_node_observations": 234
+    },
+    {
+      "thread": "Thread_27394897: cold_recovery::tcp_two_levels_recover_actual_checkpoint_suffix_",
+      "source": "tests/logical_nested_native/cold_recovery.rs:27",
+      "maximum_node_observations": 234
+    },
+    {
+      "thread": "Thread_27394897: cold_recovery::tcp_two_levels_recover_actual_checkpoint_suffix_",
+      "source": "tests/logical_nested_native/cold_recovery.rs:48",
+      "maximum_node_observations": 234
+    },
+    {
+      "thread": "Thread_27394899: voteboat-snapshot",
+      "source": "src/native/snapshot_worker.rs:94",
+      "maximum_node_observations": 234
+    },
+    {
+      "thread": "Thread_27394902: voteboat-snapshot",
+      "source": "src/native/snapshot_worker.rs:94",
+      "maximum_node_observations": 234
+    },
+    {
+      "thread": "Thread_27394905: voteboat-snapshot",
+      "source": "src/native/snapshot_worker.rs:94",
+      "maximum_node_observations": 234
+    },
+    {
+      "thread": "Thread_27394908: voteboat-snapshot",
+      "source": "src/native/snapshot_worker.rs:94",
+      "maximum_node_observations": 234
+    },
+    {
+      "thread": "Thread_27394911: voteboat-snapshot",
+      "source": "src/native/snapshot_worker.rs:94",
+      "maximum_node_observations": 234
+    },
+    {
+      "thread": "Thread_27394914: voteboat-snapshot",
+      "source": "src/native/snapshot_worker.rs:94",
+      "maximum_node_observations": 234
+    },
+    {
+      "thread": "Thread_27394919: voteboat-snapshot",
+      "source": "src/native/snapshot_worker.rs:94",
+      "maximum_node_observations": 234
+    },
+    {
+      "thread": "Thread_27394922: voteboat-snapshot",
+      "source": "src/native/snapshot_worker.rs:94",
+      "maximum_node_observations": 234
+    },
+    {
+      "thread": "Thread_27394925: voteboat-snapshot",
+      "source": "src/native/snapshot_worker.rs:94",
+      "maximum_node_observations": 234
+    },
+    {
+      "thread": "Thread_27394928: voteboat-snapshot",
+      "source": "src/native/snapshot_worker.rs:94",
+      "maximum_node_observations": 234
+    },
+    {
+      "thread": "Thread_27394931: voteboat-snapshot",
+      "source": "src/native/snapshot_worker.rs:94",
+      "maximum_node_observations": 234
+    },
+    {
+      "thread": "Thread_27394934: voteboat-snapshot",
+      "source": "src/native/snapshot_worker.rs:94",
+      "maximum_node_observations": 234
+    },
+    {
+      "thread": "Thread_27394938: voteboat-snapshot",
+      "source": "src/native/snapshot_worker.rs:94",
+      "maximum_node_observations": 234
+    },
+    {
+      "thread": "Thread_27394941: voteboat-snapshot",
+      "source": "src/native/snapshot_worker.rs:94",
+      "maximum_node_observations": 234
+    }
+  ],
+  "crc_nodes": [],
+  "sampling_exit": 0,
+  "raw": "cold-sample.txt"
+}

@@ -1,0 +1,25 @@
+{
+  "utc": "2026-10-15T02:36:39.411622+00:00",
+  "stage": "root_protocol_all",
+  "status": "running",
+  "target": "routed",
+  "expected": 192,
+  "completed": 113,
+  "failed": 0,
+  "current_unreported": [
+    "native::insertion::nested::moves::retirement::merge::quic_nested_merge_retirement_recovers_partial_cleanup_then_reclaims"
+  ],
+  "unstarted": 78,
+  "last_completed": [
+    [
+      "native::insertion::nested::moves::quic_nested_later_moves_recover_unread_phases_from_wal",
+      "ok"
+    ],
+    [
+      "native::insertion::nested::moves::retirement::merge::quic_nested_merge_retirement_recovers_partial_cleanup_from_wal",
+      "ok"
+    ]
+  ],
+  "log_bytes": 66891,
+  "log_mtime_utc": "2026-10-15T02:30:31.284441+00:00"
+}
