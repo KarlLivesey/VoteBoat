@@ -92,13 +92,13 @@ impl ProposalAdmission for Application {
         delegate!(self, app => app.supports_ready_batch())
     }
 
-    fn prepare_ready_admission<'pending>(
+    fn prepare_proposal_admission<'pending>(
         &self,
         pending: impl Iterator<Item = (OperationId, &'pending [u8])>,
-    ) -> Option<ReadyAdmission<'_>> {
+    ) -> Option<PreparedAdmission<'_>> {
         match self {
             Self::Counter(app) => {
-                let mut admission = app.prepare_ready_admission(pending)?;
+                let mut admission = app.prepare_proposal_admission(pending)?;
                 Some(Box::new(move |operation, bytes| {
                     admission(operation, bytes)?;
                     Ok(std::mem::size_of::<Receipt>())

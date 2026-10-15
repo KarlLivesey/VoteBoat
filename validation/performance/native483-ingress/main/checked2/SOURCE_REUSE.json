@@ -1,0 +1,37 @@
+{
+  "prior_original": 88435,
+  "prior_actual_exit": 101,
+  "unchanged_files": 1469,
+  "retained_successful_scopes": [
+    "application-all23",
+    "client-all37",
+    "node-all67",
+    "provider-all42"
+  ],
+  "retained_library_passes": 405,
+  "library_socket_permission_failures": 21,
+  "exact_failed_tests_retried": [
+    "logical_voter::bridge::enrollment::tests::native_quic_candidate_original_unknown_and_owned_recovery_fresh_reads",
+    "logical_voter::bridge::enrollment::tests::native_tcp_candidate_original_applied_and_fresh_enrollment_image_snapshot",
+    "native::quic_socket::tests::routed_datagrams_are_charged_bounded_and_discarded_with_the_retired_lease",
+    "program_transaction::driver::tests::history::actual_commit_then_version_refusal_preserves_original_first_positions",
+    "program_transaction::driver::tests::history::actual_lifetime_quota_refuses_new_start_but_original_controls_still_finish",
+    "program_transaction::driver::tests::history::real_exported_completion_is_rejected_intact_by_fresh_driver",
+    "program_transaction::driver::tests::history::unconsumed_actual_start_cannot_supply_prepare_then_fresh_resume_finishes",
+    "program_transaction::driver::tests::native::real_applied_output_rejects_wrong_original_command",
+    "program_transaction::driver::tests::native::real_applied_output_rejects_wrong_retained_node",
+    "program_transaction::driver::tests::native::real_applied_output_rejects_wrong_retained_operation",
+    "program_transaction::driver::tests::native::real_applied_output_rejects_wrong_retained_ticket",
+    "program_transaction::driver::tests::native::real_quorum_output_rejects_wrong_original_query",
+    "program_transaction::driver::tests::native::real_quorum_output_rejects_wrong_retained_node",
+    "program_transaction::driver::tests::native::real_quorum_output_rejects_wrong_retained_ticket",
+    "transaction::driver::tests::native::real_applied_output_rejects_wrong_original_command",
+    "transaction::driver::tests::native::real_applied_output_rejects_wrong_retained_node",
+    "transaction::driver::tests::native::real_applied_output_rejects_wrong_retained_operation",
+    "transaction::driver::tests::native::real_applied_output_rejects_wrong_retained_ticket",
+    "transaction::driver::tests::native::real_quorum_output_rejects_wrong_original_query",
+    "transaction::driver::tests::native::real_quorum_output_rejects_wrong_retained_node",
+    "transaction::driver::tests::native::real_quorum_output_rejects_wrong_retained_ticket"
+  ],
+  "cause": "Sandbox forbids local TCP/UDP socket bind (EPERM); retry only the21 actual failing library controls with authorized local-network access. Native/service remaining scopes were never started. No source change or check weakening."
+}

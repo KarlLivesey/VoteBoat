@@ -23,8 +23,18 @@ completed comparison](../validation/performance/native481-admission/README.md)
 retains480 as a qualified algorithm improvement: all six Mac loaded pairs improve,
 TCP794.133→1065.505 and QUIC809.012→1177.929 completed/s, with sharp polling-cost
 reductions. Linux throughput is mixed and repeated default/cold-tail losses
-remain. This is not universal native acceptance. [482's preprofile schema](../validation/performance/native482-current-profile/SCHEMA.md)
-uses existing timelines and current headless profiles before another edit.
+remain. This is not universal native acceptance. [482's completed headless profiles](../validation/performance/native482-current-profile/README.md)
+use unchanged480 artifacts and exact current symbols. Loaded Linux Counter
+validation covers57.003% of native perf-period weight, submission55.257%; Mac's
+different moderateQUIC case has reconciliation19.846% and admission0.040% of
+observed thread CPU delta. Overlapping sampled contexts are not elapsed CPU or
+individual-tail causes. [483's pre-edit schema](../validation/performance/native483-ingress/SCHEMA.md)
+now has [checked implementation](../validation/performance/native483-ingress/README.md):
+exact temporary admission reuse inside an explicit synchronous public ingress
+scope; fallback, original guards/outcomes and failure cleanup remain. Final local
+checks pass, including caught-provider-panic continuation and real scoped TCP/QUIC
+recovery.484 qualifies fresh published artifacts and paired retention; no gain is
+established yet.
 FileLogIo and
 ready16 stay defaults. The user's real ext4/XFS
 scratch and all-three-filesystem native acceptance remain pending; available-host
@@ -890,9 +900,9 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current482: locate remaining work and repeated service-tail losses | Select the next real limiting stage after481's qualified tradeoff | Complete96-case raw/independent review; [existing-timeline/current-profile schema](../validation/performance/native482-current-profile/SCHEMA.md); unchanged qualified480 artifacts | Quantify service versus dispatch and maintenance counterexamples; one guarded headless current profile/host with explicit unknown/CPU/wall limits; source ownership/ordering audit; no allocator/network cause inferred from absent counters | P9.0/P9.1/P9.2/P9.3 |
-| Next483: bounded measured ordering/algorithm improvement | Reduce supported remaining work without changing original outcomes | Current482 numerical profiles and source/contract audit; chosen before-edit data/API, transitions, ownership, restart/cleanup and acceptance schema | Focused differential/lifecycle/public composition controls; actual network/recovery, zero-diagnostic enabled hook, checked publication/fresh artifacts and paired retention decision; no naive cleanup cap or rejected-family replay without new evidence | P9.0/P9.1/P9.2/P9.3 |
-| Next484: sustained curve and composed service qualification | Complete full P9 acceptance without narrowing the objective | Retained measured improvements, both-host qualified artifacts/workloads and supplied third filesystem for native acceptance | All seven one-group cells with healthy sustained margin, bounded memory/debt, durable headroom/fairness/skew, placement/shared physical barriers and P8 relays/striped/recursive/logical voters; preserve all outcomes/failures and exclude P10 | P9.0/P9.1/P9.2/P9.3/P9.4 |
+| Current484: fresh both-host ingress qualification and paired retention | Establish whether checked483 removes useful cost without hiding481's losses | [Checked483](../validation/performance/native483-ingress/README.md), published source, fresh asserted native artifacts, exact compiler/profile/source identities and scoped Mac qualification | Paired480/483 singleton/moderate/loaded/skew on both hosts with active maintenance, completed PUTS/s and latency/refusals, original recovery/retry/join, physical work and bounded queues; preserve every regression, no default promotion or causal tail claim from profiles | P9.0/P9.1/P9.2/P9.3 |
+| Next485: remaining measured ordering/algorithm improvement | Remove the next measured drain after the paired ingress result |484 retained/rejected decision, numerical profiles/raw ownership/tail evidence and a bounded schema before edits | Exact contracts/partial progress/restart/cleanup, focused differential/native checks, zero-diagnostic publication, fresh both-host measurements; preserve losses and explain each attempted/rejected change | P9.0/P9.1/P9.2/P9.3 |
+| Next486: full sustained/composed acceptance | Continue beyond individual gains toward the complete P9 objective | Retained measured improvements and supplied third filesystem for native acceptance; independent placement/composed fixtures | All seven one-group cells with healthy sustained margin on both hosts, bounded memory/debt, durable headroom/fairness/skew, placement/shared physical barriers and P8 relays/striped/recursive/logical voters; actual completed rates/latency/refusals and every failure retained; P10 excluded | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
 comparison or short diagnostics. All seven one-group healthy-margin cells on
@@ -35369,4 +35379,84 @@ selects headless current profiles and source ownership/order audits; it does not
 change checkpoint cadence or add another observer prerequisite. Reconciliation
 audit rejects a naive len cap because fresh Unknown outcomes need a later
 terminal transition; returned logical visits, cursor and cleanup must be exact.
-Current482/next483/next484 plans above supersede the historical480 next steps.
+That482/483/484 plan is now superseded by current483/next484/next485 above;
+the historical480 next steps retain their original scope.
+
+### 482: completed headless current profiles and selected ingress scope
+
+[482 evidence](../validation/performance/native482-current-profile/README.md)
+retains original Linux11490 and Mac18694, both actual terminal0 before conversion.
+Frozen validation/recovery/retry/join and current symbol identities pass; owned
+headless symbol servers join0. No recapture, source build, observer, policy/default
+change or browser. Linux current480 loaded TCP completes715.425 originals/s,
+p996522.608ms (8219 apply/7781 window refuse); Mac's different default moderateQUIC
+case completes127.821/s,p99793.179ms (8192 apply/refuse0). Active maintenance and
+original offers/queues remain visible; profiled rates are not paired acceptance.
+
+Independent raw review matches3683 Linux native samples/17,333,009,497 period
+and139360 Mac rows/12,103,830µs threadCPUDelta counted once. Loaded Linux Counter
+validation57.003%, submission instantiation55.257%, ready execution5.083% and
+reconciliation19.528% overlap. Mac reconciliation19.846% and admission0.03963%
+apply only to its moderate regime. Assigned wait-frame42.252%, unknown ancestry
+45.075%, first intervals and debug0 limits prevent instruction/individual-tail
+causality. Mac's capture does not reproduce481's extreme default tails. Linux
+initial leaf-only conversion remains alongside same-recording recovered callers;
+no second capture or zero-truncation claim. All prior481 regressions remain open.
+
+Independent archive verification491011 ends0:168 Linux/174 Mac recursive payload
+seals,65/19 gzip original hash/length checks,165 Linux original files/recorded
+modes and172 Mac originals including43 transfer modes match. Ignored61,970,732-
+byte Linux perf.data and archived original1,104,449-byte Mac JSON.gz identities
+match. Original errors, approval timeout before process creation and focused
+ready_pending parser correction retain their honest scopes. Full raw numerical
+review agrees; no failed recording or successful workload was replaced.
+
+[483's pre-edit schema](../validation/performance/native483-ingress/SCHEMA.md)
+selects the largest loaded Linux work: optional exact proposal-admission reuse
+inside a public synchronous ingress capability. Immutable application/exclusive
+owner lifetime, all per-original checks/results/credits, reset/error/control
+boundaries, legacy fallback and partial-success cleanup precede implementation.
+Ready-only host opt-in cannot silently enable ingress. Actual offered decisions,
+leader selection and timer boundaries remain unchanged. Qualification and fresh
+both-host paired480/483 measurements are current/next work, not established gain.
+
+The linked mini plan advances to current483, next484 and next485; the full macro
+scope is reviewed and unchanged. Seven both-host sustained framework cells with
+healthy margin, useful durable headroom/fairness/skew, bounded memory/debt,
+placement/shared physical barriers and P8 composition stay required. Pending real
+ext4/XFS is not replaced by Btrfs/APFS evidence.8,422,500/s remains a minimum, not
+a stopping target. FileLogIo/ready16 remain defaults; P10/Windows/Pi are excluded.
+
+
+### 483: checked scoped exact ingress admission
+
+[483 evidence](../validation/performance/native483-ingress/README.md) implements
+optional general PreparedAdmission and synchronous ClientRouter/Node submission
+scopes against482's largest loaded Linux CPU context. First acceptance remains
+full/reference validation; the second may prepare exact retained reservations
+once. DefaultNone and ready-only host compatibility remain; the original Counter
+validator is byte-identical. Every original retains guards, tickets, charges and
+outcomes. Control/error/group/app/applied boundaries reset. The whole context is
+moved out before lookup and restored only on complete success, including safe
+continuation after a caught provider panic. No cache survives restart or poll.
+The offered loop keeps its64 decisions, clock/ledger order, exact current-term
+leader predicate and maintenance/timer boundaries. No batching/storage defaults,
+wire format, durability or authentication semantics change.
+
+Actual selected qualification: application23/23, client37/37, Node67/67 and
+provider42/27 all/core; library405 initial passes plus exact21 socket-denied
+controls retried0; new actual scoped three-voter/three-group TCP/QUIC2, original
+native quantum/recovery1, actual three-service retry/replacement/recovery2 and
+standalone70.45partial/420operation metadata and42 explicit negative controls pass.
+Original88435's sandbox EPERM and26633's test-only strict large enum failure are
+retained. Only the test decision boxing changes afterward; original32113 actually
+ends0/DONE after affected all/core client tests, metadata and the complete enabled
+formatter/four-profile/standalone hook. Independent production review finds no
+remaining blocker after the caught-panic cleanup fix. All failures and scope
+reuse are explicit; no weakened check or performance gain claim.
+
+The archive seals219 payloads/217 originals/107 gzip representations,961351bytes;
+all recursive/original hashes/lengths/modes match. Final selected source projection
+is1502 files including eight new Rust modules. Fresh published483 native artifacts,
+Mac qualification and paired480/483 singleton/moderate/loaded/skew are the next
+step.481's losses remain open. Full macro scope and defaults remain unchanged.

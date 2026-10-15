@@ -258,6 +258,57 @@ fn outputs<L: LogStore + Send + 'static>(
     }
     Ok(())
 }
+fn submit_offers(
+    scopes: &mut [&mut dyn ProposalIngress; 3],
+    start: &Instant,
+    ledger: &mut Ledger<'_>,
+) -> Result<(), Failure> {
+    for _ in 0..64 {
+        let now = start.elapsed().as_nanos();
+        if !ledger.due(now) {
+            break;
+        }
+        let row = ledger.begin(now);
+        let group = ledger.rows[row].group;
+        if ledger.full(group) {
+            ledger.rows[row].status = "window_refused";
+            continue;
+        }
+        let Some(replica) = scopes.iter().position(|scope| scope.ready_leader(group)) else {
+            ledger.rows[row].status = "no_leader";
+            continue;
+        };
+        let request = ClientRequest {
+            group,
+            operation: OperationId::new(ledger.rows[row].operation as u128).unwrap(),
+            bytes: 1i64.to_le_bytes().to_vec(),
+        };
+        match scopes[replica].submit(request) {
+            Ok(ticket) => ledger.admit(row, replica, ticket)?,
+            Err(error) => {
+                ledger.rows[row].status = "admission_refused";
+                ledger.rows[row].reason = format!("{:?}", error.reason);
+            }
+        }
+    }
+    Ok(())
+}
+fn offers<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
+    start: &Instant,
+    ledger: &mut Ledger<'_>,
+) -> Result<(), Failure> {
+    let [first, second, third] = replicas else {
+        return Err("offered benchmark requires exactly three replicas".into());
+    };
+    first.with_submission_batch(|first| {
+        second.with_submission_batch(|second| {
+            third.with_submission_batch(|third| {
+                submit_offers(&mut [first, second, third], start, ledger)
+            })
+        })
+    })
+}
 fn measure<L: LogStore + Send + 'static>(
     replicas: &mut [Replica<L>],
     clock: &Instant,
@@ -270,34 +321,7 @@ fn measure<L: LogStore + Send + 'static>(
         let paused = maintenance.paused(start.elapsed().as_nanos(), replicas, totals)?;
         poll_selected(replicas, clock, totals, paused)?;
         outputs(replicas, start, ledger)?;
-        for _ in 0..64 {
-            let now = start.elapsed().as_nanos();
-            if !ledger.due(now) {
-                break;
-            }
-            let row = ledger.begin(now);
-            let group = ledger.rows[row].group;
-            if ledger.full(group) {
-                ledger.rows[row].status = "window_refused";
-                continue;
-            }
-            let Ok(replica) = leader(replicas, group) else {
-                ledger.rows[row].status = "no_leader";
-                continue;
-            };
-            let request = ClientRequest {
-                group,
-                operation: OperationId::new(ledger.rows[row].operation as u128).unwrap(),
-                bytes: 1i64.to_le_bytes().to_vec(),
-            };
-            match replicas[replica].propose(request) {
-                Ok(ticket) => ledger.admit(row, replica, ticket)?,
-                Err(error) => {
-                    ledger.rows[row].status = "admission_refused";
-                    ledger.rows[row].reason = format!("{:?}", error.reason);
-                }
-            }
-        }
+        offers(replicas, start, ledger)?;
         let now = start.elapsed().as_nanos();
         maintenance.step(replicas, now)?;
         if maintenance.finished()

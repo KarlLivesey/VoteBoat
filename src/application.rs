@@ -24,15 +24,18 @@ mod ready_admission;
 
 pub const PROPOSAL_ADMISSION_CONTRACT_VERSION: u32 = 1;
 
-/// Optional validation state for one synchronous already-ready prefix. The
+/// Exact temporary validation state for one synchronous admission scope. The
 /// capability borrows immutable application state and owns retained pending
 /// data; it must not borrow temporary iterator items. Successful checks reserve
 /// their original operations for following checks. It performs no I/O or state
 /// application and grants no admission, authentication or durability authority.
 /// Drop it before application mutation and never reuse it across a Core/group
 /// transition or after a rejected candidate.
-pub type ReadyAdmission<'app> =
+pub type PreparedAdmission<'app> =
     Box<dyn FnMut(OperationId, &[u8]) -> Result<usize, ApplicationError> + 'app>;
+
+/// Compatible name for validation state used by an already-ready prefix.
+pub type ReadyAdmission<'app> = PreparedAdmission<'app>;
 
 /// Deterministic application admission against all unapplied durable commands
 /// and retained queued/in-flight client commands. The caller serializes this
@@ -53,15 +56,26 @@ where
     }
 
     /// Optionally prepare exact reservations against the same pending commands
-    /// as `validate_proposal`. The result must preserve that method's per-command
-    /// receipt bound and error ordering, incorporating successful predecessors.
-    /// The constructor may consume pending items but cannot retain their borrowed
-    /// bytes. None preserves the original validator for this entire prefix.
-    fn prepare_ready_admission<'pending>(
+    /// as `validate_proposal` while the application and Core context stay
+    /// unchanged. Preserve its per-command receipt bound and error ordering,
+    /// incorporating successful predecessors. The constructor may consume pending
+    /// items but cannot retain their borrowed bytes. None preserves the original
+    /// validator for the scope. This grants no ready-batching or admission authority.
+    fn prepare_proposal_admission<'pending>(
         &self,
         _pending: impl Iterator<Item = (OperationId, &'pending [u8])>,
-    ) -> Option<ReadyAdmission<'_>> {
+    ) -> Option<PreparedAdmission<'_>> {
         None
+    }
+
+    /// Optionally prepare an already-ready prefix. By default, use the general
+    /// proposal capability. An implementation overriding only this method opts
+    /// into ready execution without opting into scoped ingress preparation.
+    fn prepare_ready_admission<'pending>(
+        &self,
+        pending: impl Iterator<Item = (OperationId, &'pending [u8])>,
+    ) -> Option<ReadyAdmission<'_>> {
+        self.prepare_proposal_admission(pending)
     }
 
     /// Optional deterministic check against the current consensus context.
@@ -215,10 +229,10 @@ impl ProposalAdmission for Counter {
         true
     }
 
-    fn prepare_ready_admission<'pending>(
+    fn prepare_proposal_admission<'pending>(
         &self,
         pending: impl Iterator<Item = (OperationId, &'pending [u8])>,
-    ) -> Option<ReadyAdmission<'_>> {
+    ) -> Option<PreparedAdmission<'_>> {
         Some(ready_admission::prepare(self, pending))
     }
 

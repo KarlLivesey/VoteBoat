@@ -1,0 +1,14 @@
+{
+  "exit": 0,
+  "received_signals": [],
+  "failure": null,
+  "cleanup": [],
+  "profiler_exit": 0,
+  "elapsed_s": 68.18556008399999,
+  "end_utc": "2026-10-15T15:27:03.042758+00:00",
+  "profile": {
+    "sha256": "f3914123b2f8c180f907af6b6f3002fc328d46e0ee7778ac43b3e22dbe88e197",
+    "bytes": 1104449
+  },
+  "scope": "Recording only; any profiler JSON finalization is inherent to samply record. No post-record conversion, validation, symbol server, browser or SVG. Wait for both-host terminal/root GO before analysis."
+}

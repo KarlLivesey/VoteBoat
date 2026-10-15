@@ -1,0 +1,37 @@
+{
+  "scope": "Independent read-only483 implementation review against HEAD; no source/test edits or Rust checks by this reviewer. Includes root focused working-context move after caught-provider-panic finding. Test execution and broad qualification remain root-owned.",
+  "time_utc": "2026-10-15T15:53:25.149284+00:00",
+  "findings": [
+    {
+      "severity": "correctness",
+      "status": "fixed_in_observed_source",
+      "issue": "A prepared host callback could reserve then panic; catching it inside the outer ingress scope left rejected reservations live.",
+      "resolution": "submit_validated mem::take leaves the lent slot default while working state validates/admits; restore only after successful noncontrol ownership. Any error/unwind drops working context. Source-linked ninth host regression catches the panic inside the scope and continues; its executed result remains separate."
+    }
+  ],
+  "review_result": "No remaining production blocker found in observed source after focused panic fix.",
+  "checked_invariants": {
+    "guard_order": "closed, binding, failed owner, group/leader, command shape/control, request count preflight, applied boundary, Core-context, exact validation, receipt bound, charged bytes, final capacity/sequence, tracked admission, original router indexes/credits. Legacy submit passes None to the same path. Node preserves draining before application lookup.",
+    "cache_lifetime": "One contiguous group/application/applied-index run. First accepted original uses full validator, second may prepare once; None retained only for run. Error/control/group/app/applied changes reset; successful tracked predecessors remain original queue inputs. No worker delivery/Core advancement/application mutation through capability. Callback return/unwind drops state; caught provider unwind empties working slot.",
+    "pending_and_fallback": "Factory sees the unchanged ordered unapplied durable commands followed by all retained same-group client commands. Prepared capability cannot retain temporary pending-item references through independent iterator/application lifetimes. Ready-only providers do not opt into ingress; general opt-in does not grant supports_ready_batch.",
+    "counter": "Exact480 helper and legacy full Counter validator semantics retained. Owned operation-ID reservations, immutable dedup/applied state, syntax-before-deferred pending capacity, full receipt bound and plain wrapper enlargement unchanged; Maintenance None fallback.",
+    "routing_and_timer": "Offered loop still decides at most64 originals, reads now per original before due/begin/window check, tests replica readiness in original index order with exact Leader+current-term-commit predicate, submits/records one result immediately and drops all scopes before maintenance/next poll. Existing maintenance/output/start/drain/latency boundaries unchanged; no request precollection or gathering delay.",
+    "authority": "ready_leader diagnostic only; owner fencing may leave predicate true but submit rechecks failure. No maintenance privilege, quorum/durability/read authority or new persistent cache."
+  },
+  "limits": [
+    "Coherent immutable application/provider contract remains required; arbitrary interior mutation or panicking Drop/allocator behavior is not certified.",
+    "New API removes repeated exact submission setup when several originals are already due in one scope; no end-to-end gain or cure for481 Mac tail regressions is established before fresh paired measurements.",
+    "Original metadata checker TAP reports one file-level pass in this environment; do not infer42 inner tests.",
+    "Read-only source observations initially used nonexistent examples/benchmark.rs; actual leader helper examples/native_benchmark.rs subsequently checked. No workload or source change from that observation."
+  ],
+  "source_sha256": {
+    "src/application.rs": "81d97cff05ad80a45cb3ade22f8fafce749294a155f8c24deb41404877966c2e",
+    "src/application/ready_admission.rs": "cd10eaa9a55cf97055287d2882b0b2930ce3fa2d6172698dac5cd374f95d15fd",
+    "src/bin/support/counter_application.rs": "62291c8d3599a721d1d84491fca14572a34ef97e41915fd6d5b7c3af9e8447b0",
+    "src/runtime/clients.rs": "e392992cfaee689b31a8d3cc1b92329b584cda355cb1a6c35809f2b49b6d7da9",
+    "src/runtime/clients/ingress.rs": "4685d279bd848ddce185ec269a4ed7165847d5deec99b59971afc713c832d76d",
+    "src/runtime/node.rs": "b75fe84426c87ffbbffc9749dbcee71857287b1d364463647a4ab76ff1f9491b",
+    "examples/benchmark/offered.rs": "74f42f873100e51fffdfd956dbc5a0343e82e7978323fa48db7ef09e8c045838",
+    "examples/native_benchmark.rs": "f0c559a293fb721b1e657df1fbc89cd64723c8a6411de106dea690b07952d6d2"
+  }
+}

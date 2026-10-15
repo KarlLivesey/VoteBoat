@@ -1,0 +1,685 @@
+{
+  "cpu_unit": "threadCPUDelta microseconds attributed to sampled stack",
+  "cpu_us": 12103830,
+  "totals": {
+    "samples": 139360,
+    "cpu_us": 12103830,
+    "wall_sample_weight": 458696,
+    "positive_cpu_samples": 110284,
+    "null_stack_cpu_us": 0,
+    "unresolved_leaf_cpu_us": 154401,
+    "any_unresolved_stack_cpu_us": 5455817,
+    "malformed_stack_cpu_us": 0,
+    "zero_cpu_delta_samples": 29076
+  },
+  "contexts_nonadditive": {
+    "client_reconcile": {
+      "cpu_us": 2402134,
+      "percent": 19.846065253725474,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 0,
+        "reserved_set_insert": 0,
+        "pending_receipt_get": 826774
+      }
+    },
+    "client_cleanup": {
+      "cpu_us": 443132,
+      "percent": 3.661089093287001,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 0,
+        "reserved_set_insert": 0,
+        "pending_receipt_get": 380780
+      }
+    },
+    "client_submission": {
+      "cpu_us": 2230,
+      "percent": 0.018423920362397688,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 847,
+        "reserved_set_insert": 122,
+        "pending_receipt_get": 0
+      }
+    },
+    "ready_execution": {
+      "cpu_us": 4210,
+      "percent": 0.03478237880075976,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 1293,
+        "reserved_set_insert": 1397,
+        "pending_receipt_get": 0
+      }
+    },
+    "ready_validation": {
+      "cpu_us": 3763,
+      "percent": 0.03108933288058408,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 1293,
+        "reserved_set_insert": 1397,
+        "pending_receipt_get": 0
+      }
+    },
+    "prepared_ready_admission": {
+      "cpu_us": 593,
+      "percent": 0.0048992756838124795,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 133,
+        "reserved_set_insert": 334,
+        "pending_receipt_get": 0
+      }
+    },
+    "legacy_and_prepared_counter_admission": {
+      "cpu_us": 4797,
+      "percent": 0.039632083398395385,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 2140,
+        "reserved_set_insert": 1519,
+        "pending_receipt_get": 0
+      }
+    },
+    "ready_admission": {
+      "cpu_us": 0,
+      "percent": 0.0,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 0,
+        "reserved_set_insert": 0,
+        "pending_receipt_get": 0
+      }
+    },
+    "submission_admission": {
+      "cpu_us": 4204,
+      "percent": 0.034732807714582904,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 2007,
+        "reserved_set_insert": 1185,
+        "pending_receipt_get": 0
+      }
+    },
+    "all_counter_admission": {
+      "cpu_us": 4204,
+      "percent": 0.034732807714582904,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 2007,
+        "reserved_set_insert": 1185,
+        "pending_receipt_get": 0
+      }
+    },
+    "ready_batch_collect": {
+      "cpu_us": 853,
+      "percent": 0.007047356084809519,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 133,
+        "reserved_set_insert": 334,
+        "pending_receipt_get": 0
+      }
+    },
+    "pending_receipt_get": {
+      "cpu_us": 827069,
+      "percent": 6.833118112200848,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 0,
+        "reserved_set_insert": 0,
+        "pending_receipt_get": 827069
+      }
+    },
+    "outcome_lookup": {
+      "cpu_us": 17720,
+      "percent": 0.1463999411756444,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 17720,
+        "reserved_set_insert": 0,
+        "pending_receipt_get": 0
+      }
+    },
+    "reserved_set_insert": {
+      "cpu_us": 1519,
+      "percent": 0.012549746650440398,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 0,
+        "reserved_set_insert": 1519,
+        "pending_receipt_get": 0
+      }
+    }
+  },
+  "top_self": [
+    {
+      "function": "semaphore_timedwait_trap",
+      "cpu_us": 5114093,
+      "percent": 42.25185746990829
+    },
+    {
+      "function": "__fcntl",
+      "cpu_us": 1106084,
+      "percent": 9.138297547140038
+    },
+    {
+      "function": "__recvfrom",
+      "cpu_us": 1069417,
+      "percent": 8.835360377665582
+    },
+    {
+      "function": "ClientRouter.pending BTreeMap::get",
+      "cpu_us": 827069,
+      "percent": 6.833118112200848
+    },
+    {
+      "function": "::find_lower_bound_index::",
+      "cpu_us": 463899,
+      "percent": 3.8326628843927915
+    },
+    {
+      "function": "write",
+      "cpu_us": 418655,
+      "percent": 3.458863847228522
+    },
+    {
+      "function": "__sendto",
+      "cpu_us": 395890,
+      "percent": 3.270782884425839
+    },
+    {
+      "function": "::get::",
+      "cpu_us": 287003,
+      "percent": 2.3711750743359747
+    },
+    {
+      "function": "::find_leaf_edges_spanning_range::",
+      "cpu_us": 262081,
+      "percent": 2.165273306052712
+    },
+    {
+      "function": "::reconcile::",
+      "cpu_us": 207721,
+      "percent": 1.716159265290408
+    },
+    {
+      "function": "semaphore_wait_trap",
+      "cpu_us": 169504,
+      "percent": 1.4004162318869318
+    },
+    {
+      "function": "::find_upper_bound_index::",
+      "cpu_us": 162369,
+      "percent": 1.3414679485749552
+    },
+    {
+      "function": "::perform_next_checked::",
+      "cpu_us": 134497,
+      "percent": 1.1111937295880725
+    },
+    {
+      "function": "::encode_into",
+      "cpu_us": 73724,
+      "percent": 0.6090964595504068
+    },
+    {
+      "function": "::cleanup",
+      "cpu_us": 61724,
+      "percent": 0.5099542871966972
+    },
+    {
+      "function": "::decode",
+      "cpu_us": 48052,
+      "percent": 0.3969983054950375
+    },
+    {
+      "function": "::decode_batch",
+      "cpu_us": 44873,
+      "percent": 0.3707338916690006
+    },
+    {
+      "function": "__open",
+      "cpu_us": 42284,
+      "percent": 0.34934396798368783
+    },
+    {
+      "function": "::poll_transmit",
+      "cpu_us": 41465,
+      "percent": 0.34257751472054715
+    },
+    {
+      "function": "_platform_memmove",
+      "cpu_us": 32072,
+      "percent": 0.264973979310681
+    },
+    {
+      "function": "::connection_replicas",
+      "cpu_us": 25681,
+      "percent": 0.21217251068463452
+    },
+    {
+      "function": "::dying_next",
+      "cpu_us": 23270,
+      "percent": 0.19225319588923506
+    },
+    {
+      "function": "::next",
+      "cpu_us": 20673,
+      "percent": 0.1707971774223531
+    },
+    {
+      "function": "::poll_with_configuration_authorization::",
+      "cpu_us": 19832,
+      "percent": 0.16384896350989728
+    },
+    {
+      "function": "::next",
+      "cpu_us": 19221,
+      "percent": 0.15880097456755424
+    },
+    {
+      "function": "__rename",
+      "cpu_us": 18216,
+      "percent": 0.15049781763293107
+    },
+    {
+      "function": "voteboat::format_crc::crc32c",
+      "cpu_us": 16410,
+      "percent": 0.13557692069369778
+    },
+    {
+      "function": "::predict_1rtt_overhead",
+      "cpu_us": 15901,
+      "percent": 0.13137164021636127
+    },
+    {
+      "function": "mach_absolute_time",
+      "cpu_us": 14621,
+      "percent": 0.12079647516529891
+    },
+    {
+      "function": "::space_can_send",
+      "cpu_us": 14590,
+      "percent": 0.1205403578867185
+    }
+  ],
+  "top_inclusive": [
+    {
+      "function": "native_benchmark::offered::run::",
+      "cpu_us": 10619182,
+      "percent": 87.73406434161748
+    },
+    {
+      "function": "std::rt::lang_start::::{closure#0}",
+      "cpu_us": 10619182,
+      "percent": 87.73406434161748
+    },
+    {
+      "function": "std::rt::lang_start_internal",
+      "cpu_us": 10619182,
+      "percent": 87.73406434161748
+    },
+    {
+      "function": "start",
+      "cpu_us": 10619182,
+      "percent": 87.73406434161748
+    },
+    {
+      "function": "main",
+      "cpu_us": 10619182,
+      "percent": 87.73406434161748
+    },
+    {
+      "function": "std::sys::backtrace::__rust_begin_short_backtrace:: core::result::Result, core::result::Result>",
+      "cpu_us": 10619182,
+      "percent": 87.73406434161748
+    },
+    {
+      "function": "native_benchmark::main",
+      "cpu_us": 10619182,
+      "percent": 87.73406434161748
+    },
+    {
+      "function": "native_benchmark::run_selected",
+      "cpu_us": 10619182,
+      "percent": 87.73406434161748
+    },
+    {
+      "function": "native_benchmark::offered::measure::",
+      "cpu_us": 10090608,
+      "percent": 83.36706645747668
+    },
+    {
+      "function": "std::thread::functions::park_timeout",
+      "cpu_us": 5119314,
+      "percent": 42.29499257672985
+    },
+    {
+      "function": "[unresolved] libdispatch.dylib!0x3aef",
+      "cpu_us": 5115356,
+      "percent": 42.26229218354851
+    },
+    {
+      "function": "semaphore_timedwait_trap",
+      "cpu_us": 5114093,
+      "percent": 42.25185746990829
+    },
+    {
+      "function": "[unresolved] libdispatch.dylib!0x37327",
+      "cpu_us": 5114093,
+      "percent": 42.25185746990829
+    },
+    {
+      "function": "native_benchmark::poll_selected::",
+      "cpu_us": 5086199,
+      "percent": 42.02140149027209
+    },
+    {
+      "function": "::poll_with_configuration_authorization::",
+      "cpu_us": 5057706,
+      "percent": 41.7859966638659
+    },
+    {
+      "function": "::poll_authorized::",
+      "cpu_us": 2583145,
+      "percent": 21.341550567051918
+    },
+    {
+      "function": "::poll_inner::",
+      "cpu_us": 2548903,
+      "percent": 21.058648378240605
+    },
+    {
+      "function": "::reconcile::",
+      "cpu_us": 2402134,
+      "percent": 19.846065253725474
+    },
+    {
+      "function": "::poll::",
+      "cpu_us": 2101323,
+      "percent": 17.360810586401165
+    },
+    {
+      "function": "::poll",
+      "cpu_us": 1892863,
+      "percent": 15.638545815663306
+    },
+    {
+      "function": "::poll",
+      "cpu_us": 1789039,
+      "percent": 14.780767740459012
+    },
+    {
+      "function": "::poll_session",
+      "cpu_us": 1783760,
+      "percent": 14.737153446471076
+    },
+    {
+      "function": "::new::thread_start",
+      "cpu_us": 1484648,
+      "percent": 12.265935658382512
+    },
+    {
+      "function": "_pthread_start",
+      "cpu_us": 1484648,
+      "percent": 12.265935658382512
+    },
+    {
+      "function": "::poll_datagram_read",
+      "cpu_us": 1219929,
+      "percent": 10.078867598107376
+    },
+    {
+      "function": "::recv",
+      "cpu_us": 1119366,
+      "percent": 9.248031408240202
+    },
+    {
+      "function": "fcntl",
+      "cpu_us": 1106087,
+      "percent": 9.138322332683126
+    },
+    {
+      "function": "__fcntl",
+      "cpu_us": 1106084,
+      "percent": 9.138297547140038
+    },
+    {
+      "function": "::sync_all",
+      "cpu_us": 1105415,
+      "percent": 9.132770371031318
+    },
+    {
+      "function": "::recv_from_with_flags",
+      "cpu_us": 1084595,
+      "percent": 8.960758701997632
+    },
+    {
+      "function": "__recvfrom",
+      "cpu_us": 1077947,
+      "percent": 8.905833938513677
+    },
+    {
+      "function": "std::sys::backtrace::__rust_begin_short_backtrace::",
+      "cpu_us": 1034413,
+      "percent": 8.546162660909811
+    },
+    {
+      "function": "::call_once::{shim:vtable#0}",
+      "cpu_us": 1034413,
+      "percent": 8.546162660909811
+    },
+    {
+      "function": "::find_leaf_edges_spanning_range::",
+      "cpu_us": 888349,
+      "percent": 7.339404139020459
+    },
+    {
+      "function": "::publish_barrier",
+      "cpu_us": 862293,
+      "percent": 7.124133435449771
+    }
+  ],
+  "top_callers": [
+    {
+      "caller": "std::rt::lang_start_internal",
+      "callee": "std::rt::lang_start::::{closure#0}",
+      "cpu_us": 10619182,
+      "percent": 87.73406434161748
+    },
+    {
+      "caller": "std::rt::lang_start::::{closure#0}",
+      "callee": "std::sys::backtrace::__rust_begin_short_backtrace:: core::result::Result, core::result::Result>",
+      "cpu_us": 10619182,
+      "percent": 87.73406434161748
+    },
+    {
+      "caller": "main",
+      "callee": "std::rt::lang_start_internal",
+      "cpu_us": 10619182,
+      "percent": 87.73406434161748
+    },
+    {
+      "caller": "native_benchmark::run_selected",
+      "callee": "native_benchmark::offered::run::",
+      "cpu_us": 10619182,
+      "percent": 87.73406434161748
+    },
+    {
+      "caller": "start",
+      "callee": "main",
+      "cpu_us": 10619182,
+      "percent": 87.73406434161748
+    },
+    {
+      "caller": "native_benchmark::main",
+      "callee": "native_benchmark::run_selected",
+      "cpu_us": 10619182,
+      "percent": 87.73406434161748
+    },
+    {
+      "caller": "std::sys::backtrace::__rust_begin_short_backtrace:: core::result::Result, core::result::Result>",
+      "callee": "native_benchmark::main",
+      "cpu_us": 10619182,
+      "percent": 87.73406434161748
+    },
+    {
+      "caller": "native_benchmark::offered::run::",
+      "callee": "native_benchmark::offered::measure::",
+      "cpu_us": 10090608,
+      "percent": 83.36706645747668
+    },
+    {
+      "caller": "std::thread::functions::park_timeout",
+      "callee": "[unresolved] libdispatch.dylib!0x3aef",
+      "cpu_us": 5115356,
+      "percent": 42.26229218354851
+    },
+    {
+      "caller": "[unresolved] libdispatch.dylib!0x37327",
+      "callee": "semaphore_timedwait_trap",
+      "cpu_us": 5114093,
+      "percent": 42.25185746990829
+    },
+    {
+      "caller": "[unresolved] libdispatch.dylib!0x3aef",
+      "callee": "[unresolved] libdispatch.dylib!0x37327",
+      "cpu_us": 5114093,
+      "percent": 42.25185746990829
+    },
+    {
+      "caller": "native_benchmark::poll_selected::",
+      "callee": "::poll_with_configuration_authorization::",
+      "cpu_us": 5057706,
+      "percent": 41.7859966638659
+    },
+    {
+      "caller": "native_benchmark::offered::measure::",
+      "callee": "std::thread::functions::park_timeout",
+      "cpu_us": 5039350,
+      "percent": 41.63434218755551
+    },
+    {
+      "caller": "native_benchmark::offered::measure::",
+      "callee": "native_benchmark::poll_selected::",
+      "cpu_us": 5037998,
+      "percent": 41.62317216947032
+    },
+    {
+      "caller": "::poll_with_configuration_authorization::",
+      "callee": "::poll_authorized::",
+      "cpu_us": 2583145,
+      "percent": 21.341550567051918
+    },
+    {
+      "caller": "::poll_authorized::",
+      "callee": "::poll_inner::",
+      "cpu_us": 2548903,
+      "percent": 21.058648378240605
+    },
+    {
+      "caller": "::poll_inner::",
+      "callee": "::reconcile::",
+      "cpu_us": 2402134,
+      "percent": 19.846065253725474
+    },
+    {
+      "caller": "::poll_with_configuration_authorization::",
+      "callee": "::poll::",
+      "cpu_us": 2101323,
+      "percent": 17.360810586401165
+    },
+    {
+      "caller": "::poll::",
+      "callee": "::poll",
+      "cpu_us": 1892863,
+      "percent": 15.638545815663306
+    },
+    {
+      "caller": "::poll_session",
+      "callee": "::poll",
+      "cpu_us": 1779710,
+      "percent": 14.703692963301698
+    },
+    {
+      "caller": "::poll",
+      "callee": "::poll_session",
+      "cpu_us": 1651387,
+      "percent": 13.64350788138961
+    },
+    {
+      "caller": "_pthread_start",
+      "callee": "::new::thread_start",
+      "cpu_us": 1484648,
+      "percent": 12.265935658382512
+    },
+    {
+      "caller": "::poll",
+      "callee": "::poll_datagram_read",
+      "cpu_us": 1219929,
+      "percent": 10.078867598107376
+    },
+    {
+      "caller": "::poll_datagram_read",
+      "callee": "::recv",
+      "cpu_us": 1119366,
+      "percent": 9.248031408240202
+    },
+    {
+      "caller": "fcntl",
+      "callee": "__fcntl",
+      "cpu_us": 1106084,
+      "percent": 9.138297547140038
+    },
+    {
+      "caller": "::sync_all",
+      "callee": "fcntl",
+      "cpu_us": 1105415,
+      "percent": 9.132770371031318
+    },
+    {
+      "caller": "::recv",
+      "callee": "::recv_from_with_flags",
+      "cpu_us": 1084595,
+      "percent": 8.960758701997632
+    },
+    {
+      "caller": "::recv_from_with_flags",
+      "callee": "__recvfrom",
+      "cpu_us": 1077947,
+      "percent": 8.905833938513677
+    },
+    {
+      "caller": "::new::thread_start",
+      "callee": "::call_once::{shim:vtable#0}",
+      "cpu_us": 1034413,
+      "percent": 8.546162660909811
+    },
+    {
+      "caller": "::call_once::{shim:vtable#0}",
+      "callee": "std::sys::backtrace::__rust_begin_short_backtrace::",
+      "cpu_us": 1034413,
+      "percent": 8.546162660909811
+    },
+    {
+      "caller": "::reconcile::",
+      "callee": "::find_leaf_edges_spanning_range::",
+      "cpu_us": 888349,
+      "percent": 7.339404139020459
+    },
+    {
+      "caller": "::barrier",
+      "callee": "::barrier",
+      "cpu_us": 855125,
+      "percent": 7.064912511163822
+    },
+    {
+      "caller": "::barrier",
+      "callee": "::publish_barrier",
+      "cpu_us": 854903,
+      "percent": 7.063078380975278
+    },
+    {
+      "caller": "std::sys::backtrace::__rust_begin_short_backtrace::",
+      "callee": "::barrier",
+      "cpu_us": 853735,
+      "percent": 7.053428542866183
+    },
+    {
+      "caller": "::poll",
+      "callee": "::poll_datagram_write",
+      "cpu_us": 540674,
+      "percent": 4.466966241264129
+    }
+  ],
+  "scope": "Each threadCPUDelta counted once, never multiplied by sample weight. Interval observations assigned to sampled stacks include startup/warmup/recovery/cleanup; wait-stack attribution is not an instruction cost. Inclusive contexts overlap. Wall coalesced sample weights are separate from CPU. Native debug0 limits source/inline; full exact labels and addresses remain in SUMMARY and original query responses."
+}

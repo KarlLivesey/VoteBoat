@@ -1,0 +1,9 @@
+{
+  "exit": 0,
+  "actual_profiler_exit": 0,
+  "actual_native_exit": 0,
+  "all_owned_processes_terminated": true,
+  "recording_ended": true,
+  "no_restart_or_replacement": true,
+  "conversion_started": false
+}

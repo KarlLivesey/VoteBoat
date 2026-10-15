@@ -1,0 +1,254 @@
+{
+  "exit": 0,
+  "scope": "Independent same-data raw frame/context/weight reconstruction and ledger arithmetic after both actual original terminals. No captures/browser/tests/source edits. Physical sampled-stack unions overlap.",
+  "linux": {
+    "native_pid": 2669021,
+    "samples": 3683,
+    "period": 17333009497,
+    "maximum_join_delta_ms": "0.000655",
+    "contexts_nonadditive": {
+      "client_reconcile": {
+        "samples": 672,
+        "count_percent": 18.245995112679882,
+        "period": 3384838590,
+        "period_percent": 19.52827978653014
+      },
+      "pending_btree": {
+        "samples": 661,
+        "count_percent": 17.947325549823514,
+        "period": 3443577944,
+        "period_percent": 19.867167006375986
+      },
+      "client_cleanup": {
+        "samples": 177,
+        "count_percent": 4.8058647841433615,
+        "period": 885722763,
+        "period_percent": 5.110034487394131
+      },
+      "counter_validate": {
+        "samples": 1648,
+        "count_percent": 44.746130871572085,
+        "period": 9880352160,
+        "period_percent": 57.00309667348935
+      },
+      "counter_submit_monomorph": {
+        "samples": 1587,
+        "count_percent": 43.089872386641325,
+        "period": 9577779139,
+        "period_percent": 55.257450477124145
+      },
+      "client_submit_physical": {
+        "samples": 1596,
+        "count_percent": 43.334238392614715,
+        "period": 9644529754,
+        "period_percent": 55.64255737394753
+      },
+      "ready_execution": {
+        "samples": 166,
+        "count_percent": 4.507195221286994,
+        "period": 881082840,
+        "period_percent": 5.0832652007286905
+      },
+      "counter_ready_monomorph": {
+        "samples": 61,
+        "count_percent": 1.6562584849307629,
+        "period": 302573021,
+        "period_percent": 1.7456461963652035
+      },
+      "counter_prepared": {
+        "samples": 33,
+        "count_percent": 0.8960086885691013,
+        "period": 196877635,
+        "period_percent": 1.1358537306177303
+      }
+    },
+    "quality": {
+      "unresolved_leaf_count": 131,
+      "unresolved_leaf_period": 126179903,
+      "any_unresolved_count": 131,
+      "any_unresolved_period": 126179903,
+      "synthetic_leaf_count": 266,
+      "synthetic_leaf_period": 1296896043,
+      "single_frame_count": 6,
+      "single_frame_period": 5733067
+    },
+    "workload": {
+      "completed_originals_s": 715.4246094442153,
+      "during_originals_s": 515.375,
+      "p99_ms": 6522.607712,
+      "status_counts": {
+        "applied": 8219,
+        "window_refused": 7781
+      },
+      "max_inflight": 4096,
+      "recovered_value": 8283
+    }
+  },
+  "mac": {
+    "native_pid": "23437",
+    "rows": 139360,
+    "cpu_delta_us_once": 12103830,
+    "wall_sample_weight_separate": 458696,
+    "thread_cpu_us": {
+      "29466783": 10619182,
+      "29466796": 292558,
+      "29466795": 548531,
+      "29466800": 31781,
+      "29466799": 249693,
+      "29466812": 125863,
+      "29466811": 233221,
+      "29467657": 11,
+      "29467656": 969,
+      "29467659": 8,
+      "29467658": 969,
+      "29467661": 14,
+      "29467660": 1030
+    },
+    "contexts_nonadditive": {
+      "client_reconcile": {
+        "cpu_us": 2402134,
+        "percent": 19.846065253725474
+      },
+      "pending_btree": {
+        "cpu_us": 1850914,
+        "percent": 15.291969566657826
+      },
+      "client_cleanup": {
+        "cpu_us": 443132,
+        "percent": 3.661089093287001
+      },
+      "counter_validate": {
+        "cpu_us": 4204,
+        "percent": 0.034732807714582904
+      },
+      "counter_ready_monomorph": {
+        "cpu_us": 3142,
+        "percent": 0.02595872546127961
+      },
+      "ready_execution": {
+        "cpu_us": 4210,
+        "percent": 0.03478237880075976
+      },
+      "client_submit_physical": {
+        "cpu_us": 2230,
+        "percent": 0.018423920362397688
+      },
+      "counter_submit_monomorph": {
+        "cpu_us": 1062,
+        "percent": 0.008774082253303294
+      },
+      "counter_prepared": {
+        "cpu_us": 593,
+        "percent": 0.0048992756838124795
+      }
+    },
+    "quality": {
+      "unresolved_leaf_cpu_us": 154401,
+      "any_unresolved_cpu_us": 5455817
+    },
+    "workload": {
+      "completed_originals_s": 127.82105850690648,
+      "during_originals_s": 127.765625,
+      "p99_ms": 793.17925,
+      "status_counts": {
+        "applied": 8192
+      },
+      "max_inflight": 125,
+      "recovered_value": 8256
+    }
+  },
+  "inputs": {
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/ROOT_QUIET_END.json": "7fe911ed6683ef7a69358a1b99a68adcef09540b08026fddaef1605840458ff1",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/samply-symbolication/data/CONTEXTS.json": "fa271d11deaeade0507674800ea6c076e805ae7e4b8fd7c1f992c9c5433d53bf",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/readouts/native.json.gz": "ca32a14362ffdf34b4abed45529692c45e499fb5495ab704f524fa50c3524e18",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/samply-symbolication/data/ADDRESS_SYMBOLS.json": "bac26205336026932121af7a9119150024b049cf6581d8358a92cd1030f99f63",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/capture/metadata/RESOURCES.json": "a3add998b7bcf5624a18fdc5fd8dc37359456bb5c874b4b1006fa4338d07e104",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/readouts/leaves.stdout": "8824fee36411de9f1b5a04c02367aafc429b0dc8207fb05071e75f110d186e6a",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/mac/raw/profile.json.gz": "f3914123b2f8c180f907af6b6f3002fc328d46e0ee7778ac43b3e22dbe88e197",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/mac/analysis/SUMMARY.json": "65052ff3178a1b1d99dccf1f2f0b8d72aebc20227d2408a4454b35c80e5a48e3",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/mac/COMPACT_CPU.json": "7e0b47581cd0b9d2fdffebfb69e75753fcad2a284ba4e34eec53f0607e183abb",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/mac/symbolication/ADDRESS_SYMBOLS.json": "4974a728ea6e1fcb8715d010ce01a305dc10f857210e2312959f6b7a17910f18",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/VALIDATION.json": "2843d39fbdda7a7853ebd15cd296e6f8de60f3173981df1b709abcdc5470335c",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/capture/wal/offers.csv": "30ba921ae53c26abf1f81beb1c13ccbbebe692dd77a7122f32f3697aefab36b4",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/mac/raw/VALIDATION.json": "d36d285d092195ed9af4ecb0c335d3f71284aee4d18978e95d808f1394895adc",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/mac/raw/results/offers.csv": "b2bf400acb5a7d4926a6f1cd1e29b70a59e57f14daf0873abd08e0879fcefec2",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/CONFIG.json": "f897ff86b3b8b4c8a53b30e3cc84f878744071d5307ffa96382c0fa1df3a0c53",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/TERMINAL.json": "c9b6a35cfe19784b1465ba0ae183e62e51080f1d7d3ac809f4b7a6fc7f30002e",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/samply-contexts.py": "3cfd5da49bd7c7fefdd75d77fe7fcf1626e35c2afc7e813ba5bbfd6cbd808faf",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/DIAGNOSTIC.json": "9b48b7cfddf6e8d72a50422021acc6e8e6d086aabbe833cb76f460fb05201e3d",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/mac/raw/CONFIG.json": "160969ecbb8db926ee9a2b671d6cccbcdcaffca0fa46a250be33e4330627259d",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/mac/raw/TERMINAL.json": "4363a38d4158fcd26d2113ce19ee9e58f638a4fd2e98fdab0fe14ef769a6be30",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/mac/collapse.py": "5c6d3c3383c87211c679fae8627f7671b283d5c20dd71fb6226cf35d6794b44b",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/mac/readout.py": "474f1d1b915cf91134dde554a75bf9c218a03396d2acab7a053982a2e5a3e92b",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/mac/QUALITY.json": "0515d0a647754fb8fc055cd6fa7320652a096f5f80bfb4de8e5363fece0f9bbf",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/INDEPENDENT_PREPARATION_REVIEW.json": "0b5d7a3292391ed74c38edb34506e1e38d57ef6ba4294af903732d78cb43c248",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/src/runtime/clients.rs": "37b983a1b67f7f5496b74ee65332c702b7a1e74554077af100e170fdfae07c6c",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/src/runtime/clients/ready.rs": "430eabeda3d3042b5d5253660b1785256ed346bc5b6ce47a5ba71b2bcaf7b6e9",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/src/application.rs": "d6075051efcc4693a59075b12a20b7e7ed11bd2111e0d1c2adb961213744fa36",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/src/native/worker.rs": "16e180d86f2940099a3f0b67e0b8c8af3ff1aab1546fb5801fa31d003a30bfa7",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/independent-profile-review.py": "95f249c37e0805d9b322cc91fbee9e202e83d4b646e9ad887cc0c30ccddeca83",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/readouts/PROVENANCE.json": "ffde3898682f61b4112d29230bf2a39f5bdf0e524d60a92d7001487afcc219b1",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/mac/LOCAL_TRANSFER_PROOF.json": "01b8f0f06bae5d28ed7f4c7aa728a57d6112a7ab839c10d3d1871de576bef9c9"
+  },
+  "current_identities": {
+    "linux": {
+      "native_library_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/artifacts/native/native_benchmark",
+      "raw_breakpad_id": "0C6B4CAD4DE97F239AA7F3CA04FD28DE0",
+      "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+      "artifact_sha256": "8d3530a6e801ebb857d8dff3fc1a0fb4ef5af865c3aed89d1450271f2054b84d"
+    },
+    "mac": {
+      "native_library_path": "/private/tmp/voteboat-mac480-f7b0ef1-mccmJS/artifacts/native/native_benchmark",
+      "raw_breakpad_id": "EDE59E8D89283C4E9F043AADBBEF57720",
+      "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+      "artifact_sha256": "fef05adc73179359ea2acc0d9b92978c57c4795410a727aefc30f1aac422fa52"
+    }
+  },
+  "actual_execution": {
+    "independent_raw_numeric_script_exit": 0,
+    "tool_chunk": "32a347",
+    "root_end_originals": {
+      "linux": {
+        "handle": 11490,
+        "tool_chunk": "d4fe2c",
+        "exit": 0
+      },
+      "mac": {
+        "handle": 18694,
+        "tool_chunk": "f4df06",
+        "exit": 0
+      }
+    },
+    "script": "independent-profile-review.py",
+    "stdout": "independent-profile-review.stdout",
+    "stderr": "independent-profile-review.stderr"
+  },
+  "interpretation": {
+    "largest_supported_loaded_linux_cost": "Counter legacy validate_proposal exact physical union57.003% cycle-period;55.257% is its submit iterator monomorph and physical ClientRouter::submit union55.643%. These overlap and must not be summed. Source check_submit reconstructs pending log+all group router pending and Counter rebuilds its reserved BTreeSet per submitted original.480 cached ready-prefix validation, which is now smaller, not this submit path.",
+    "mac_remaining_named_application_cost": "Client reconcile2,402,134us/12,103,830us=19.846%; Counter legacy+prepared4,797us=.03963%. This moderate offered-load sample does not support Counter admission as its limiting stage.",
+    "reconcile_priority": "Concrete shared second-stage work: Linux19.528% period and Mac19.846% CPU-delta. Same-call fixed-owner loop repeatedly wraps bounded128 visits through stable pending using several BTree searches; source supports reducing repeated observation/search work. It is not Linux largest cost.",
+    "tail_boundary": "Mac capture p99793.179ms,max125pending,zero refusals did not reproduce481 candidate moderateQUIC1.2\u20132.0s p99. No CPU sample establishes cause of those repeated tails, and no frame establishes per-original barrier/network causality.",
+    "wait_frame_bias": "Mac42.252% of observed CPU deltas is assigned to semaphore_timedwait_trap; this is interval-to-current-stack attribution, not evidence the wait instruction consumes42% CPU.45.075% any unresolved ancestry includes this path. Do not subtract waits and renormalize without a new valid estimator.",
+    "quality": "Linux same16KiB saved stacks imported headlessly recover ancestry; six single-frame samples,unresolved leaf.728%period,synthetic fun leaf7.482%period retained separately. Perf-text98.30%leaf-only is superseded for caller review, not silently discarded. Debug0/source-inline and unmarked truncation uncertainty remains."
+  },
+  "smallest_next_source_choices": [
+    {
+      "priority": "Largest loaded-throughput opportunity",
+      "audit": "Submission batching or scoped admission context: reduce repeated exact reservation reconstruction across already available bounded commands without introducing a global cache.",
+      "schema_constraints": "Separate explicit public composition contract; immutable application/Core view plus owned temporary reservations; per-original context, capacity,receipt guards and original outcomes; discard/rebuild on any later refusal and before Core/application/group/binding transition. Preserve singleton/default-provider legacy fallback and oracle. No unsafe digest/revision shortcut.",
+      "risk": "Existing public calls submit one original at a time; a cross-call cache needs precise invalidation and is larger than the ready-prefix480 change. A new batch API must preserve each original offer decision/timer and completion, not change the benchmark batching contract."
+    },
+    {
+      "priority": "Smaller portable measured slice",
+      "audit": "Optimize same-call ClientRouter::reconcile stable observations and repeated BTree lookups while preserving exactly the legacy logical visit/cursor and reservation cleanup result.",
+      "schema_constraints": "Borrowed immutable owner; same bounded visits and fair cyclic sequence; no cache survives call. Unknown publication may set has_output and require a later visit to mark terminal, so initial pending-count cap alone is invalid. Cancellation/released/terminal states, cleanup/accounting, group fairness, cursor when items removed, failed-owner and leadership-change precedence need differential traces and unchanged oracle.",
+      "risk": "Does not remove the larger Linux submission stage or prove a Mac tail cure. Retention requires the loaded and default moderate/skew regressions remain visible."
+    }
+  ],
+  "limits": [
+    "Different workload/event types across hosts; no direct CPU-share/rate comparison. All rates here are profiled diagnostic results, not sustained or unprofiled acceptance.",
+    "Whole-native-launch sampling includes startup/warmup/drain/recovery/cleanup, not exact native throughput-timer scope. Each native delta/period is used once; no sum of overlapping phases or inclusive unions.",
+    "Current stack-symbol identity resolution verified against current480 IDs and frozen proofs; no new remote binary copy or capture.",
+    "Source observations identify redundant work, not an end-to-end performance gain before a checked candidate and matched measurement."
+  ]
+}

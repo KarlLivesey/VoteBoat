@@ -1,0 +1,66 @@
+{
+  "files": {
+    "tests/startup/multi.rs": {
+      "sha256": "efbcc9e95d6f7ba7113a633ab3463fb45e9b3fd5fdb3b22f841bc1b20dc6ba4e",
+      "bytes": 12335,
+      "mode": "0o644"
+    },
+    "tests/startup/multi/ingress/application.rs": {
+      "sha256": "f9f449e2149de03172cfe3872f508f756f040c13f5255c83100bc423decdaf86",
+      "bytes": 4403,
+      "mode": "0o644"
+    },
+    "tests/startup/multi/ingress/history.rs": {
+      "sha256": "2dac9ffd1df0b816f71fa9876d807ed6bf6ec6e65f200f73306ba88c5f165066",
+      "bytes": 6916,
+      "mode": "0o644"
+    },
+    "tests/startup/multi/ingress.rs": {
+      "sha256": "cd3100d2b8e00588bb79779795d6a31ea0b00d63a5ef360f6242e47792bf12fd",
+      "bytes": 5050,
+      "mode": "0o644"
+    }
+  },
+  "source_scope": "Only a two-line module loader modifies legacy fixture. New isolated PreparedHost retains unchanged HostApplication reference/serialized checkpoint schema; default ready opt-in staysfalse. No production/legacy fixture behavior changes in this native control task.",
+  "commands": [
+    {
+      "command": "CARGO_BUILD_JOBS=2 cargo +stable test --locked --offline --all-features --test startup multi::ingress:: -- --test-threads=1",
+      "original_handle": 70886,
+      "actual_terminal_chunk": "8792bb",
+      "exit": 101,
+      "reason": "Test-only nonexistent ProposalPosition.group; no workload ran; all raw native-ingress-compile-position.* retained."
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 cargo +stable test --locked --offline --all-features --test startup multi::ingress:: -- --test-threads=1",
+      "original_handle": 39828,
+      "actual_terminal_chunk": "05f1e6",
+      "exit": 0,
+      "tests": 2,
+      "filtered": 60
+    },
+    {
+      "command": "CARGO_BUILD_JOBS=2 cargo +stable clippy --locked --offline --all-features --test startup -- -D warnings",
+      "original_handle": 18834,
+      "actual_terminal_chunk": "97efd3",
+      "exit": 0,
+      "diagnostics": 0
+    }
+  ],
+  "no_benchmark_or_speedup_claim": true,
+  "exit": 0,
+  "source_exact": true,
+  "logs_sha256": {
+    "native-format.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "native-format.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "native-format.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "native-ingress-compile-position.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "native-ingress-compile-position.stderr": "2c9e39f71098aaf11c979230b1327a9f118848358dd351f2b646daa77b7be367",
+    "native-ingress-compile-position.exit": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c",
+    "native-ingress.stdout": "5ee799f1fd4c12f6f090cc76d1468ff74fc34d188102bd648a2c354a526dc770",
+    "native-ingress.stderr": "3366732a692e7ab9aef3c61555071fde998e92bf62e4ddd62acce499a644d440",
+    "native-ingress.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "native-clippy.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "native-clippy.stderr": "4d75435fc3c93e1bc4dfb22ff17924f3bf0aee293d230d9bbaeb67cd34209247",
+    "native-clippy.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  }
+}

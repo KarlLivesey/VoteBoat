@@ -1,0 +1,519 @@
+{
+  "exit": 0,
+  "decision": "PASS; no concrete blocker in reviewed frozen preparations",
+  "time_utc": "2026-10-15T15:24:43.083146+00:00",
+  "scope": "Independent local read-only provenance, argv and original-process lifecycle review. No remote operation, capture, build, test, install or production edit. Separate parent quiet GO still required.",
+  "config_sha256": {
+    "linux": "f897ff86b3b8b4c8a53b30e3cc84f878744071d5307ffa96382c0fa1df3a0c53",
+    "mac": "160969ecbb8db926ee9a2b671d6cccbcdcaffca0fa46a250be33e4330627259d"
+  },
+  "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "checks": {
+    "linux_source_files_exact_hash_mode": 1495,
+    "linux_source_directories_exact_mode": 328,
+    "linux_source_scope": "Exact files/directories/hash/modes independently checked by first read-only probe before its later argv-index assertion failed. No source/proof changes between probes.",
+    "linux_artifact_original_copy_tool_and_proof_hashes": true,
+    "mac_collected_qualification_proofs_rehashed": 51,
+    "mac_transferred_inputs_exact_hash_length_mode": 11,
+    "eight_frozen_validator_modules_each_host": true,
+    "native_root_and_executable_profile": "Both candidate records opt3/debug0/assertions/overflow, fresh:false; existing native default LTO/codegen proof retained.",
+    "symbols": "Linux480 selected artifact ELF proof; Mac480 UUID EDE59E8D-8928-3C4E-9F04-3AADBBEF5772. No476 symbol maps.",
+    "linux_policy": "2/2/516 unchanged; no policy mutation in controllers.",
+    "retained_bounds": {
+      "linux": 16128,
+      "mac": 8320
+    }
+  },
+  "workloads": {
+    "linux": "TCP/Witness/q64/16000@2000/window4096/one group",
+    "mac": "QUIC/Witness/q16/8192@128/window256/one group",
+    "both": "8B Counter;64warm;active2smaintenance;120sdrain;same physical mapping as481"
+  },
+  "lifecycle_review": [
+    "Exclusive new outputs and frozen source/artifact/tools/device/CPU guards before/after; no recording overwrite or timeout restart.",
+    "Linux owns original perf group, forwards signals, waits original perf and inherited native resource owner; cleans surviving original group on abnormal profiler exit. TERM/KILL timeouts are cleanup only.",
+    "Mac owns new samply session/group; successful samply has joined native; abnormal/interrupted groups receive bounded TERM then KILL/wait, with ProcessLookupError races handled.",
+    "Neither record path converts, validates, resolves symbols or opens a browser. Both actual terminals plus parent GO precede post-record work.",
+    "Linux cycles:u1000Hz,DWARF16384,mmap128. Mac samply1000Hz,save-only,no-open; exact native suffix uses current480 artifact."
+  ],
+  "preserved_review_helper_error": {
+    "first_probe_exit": 1,
+    "error": "AssertionError comparing perf_command[15:] to resource_command; index15 is LD_LIBRARY_PATH. Inspection confirmed exact env wrapper and corrected resource start16. Preparation and recording scripts were unchanged; no workload ran.",
+    "focused_correction": "Exact perf_command[12:16] env wrapper plus [16:] resource suffix now passes."
+  },
+  "limitations": [
+    "Mac remote source/binary/compiler bytes were not recopied or newly rehashed; current actual preparation guards and locally verified collected qualification closure supply that evidence.",
+    "Debug0 limits inline/source visibility; whole-launch samples include warmup/drain/recovery. Mac threadCPUDelta is counted once, not multiplied by wall sample weight. Different workload/event types forbid cross-host CPU-share/rate comparison.",
+    "Read-only lifecycle review is not a formal cleanup proof or a causal explanation of tails."
+  ],
+  "inputs": {
+    "target/p9/native482-current-profile/linux/CONFIG.json": {
+      "sha256": "f897ff86b3b8b4c8a53b30e3cc84f878744071d5307ffa96382c0fa1df3a0c53",
+      "bytes": 298164
+    },
+    "target/p9/native482-current-profile/linux/READY.json": {
+      "sha256": "62ce226484493a222205d01747057a48e49b70a3625d379cd37263572da5410b",
+      "bytes": 1753
+    },
+    "target/p9/native482-current-profile/linux/PREPARATION.json": {
+      "sha256": "0f108ae9175e9e37fe842b7b5976b800cf7c3ba57ed539c9982953dcdb2e6061",
+      "bytes": 1135
+    },
+    "target/p9/native482-current-profile/mac/prepared/CONFIG.json": {
+      "sha256": "160969ecbb8db926ee9a2b671d6cccbcdcaffca0fa46a250be33e4330627259d",
+      "bytes": 5692
+    },
+    "target/p9/native482-current-profile/mac/prepared/READY.json": {
+      "sha256": "9ab3c779befef663bff07a691258e21ed16db1f6b624ca40acf3c40ae8e5daf7",
+      "bytes": 2022
+    },
+    "target/p9/native482-current-profile/mac/PREPARATION_REVIEW.json": {
+      "sha256": "7960fab73f4053434a1f4987dfa2a7fdc8c0bb19bcd3c5fb58fb7fa68f9d3606",
+      "bytes": 1125
+    },
+    "target/p9/native481-admission/mac/prepared/campaign/CAMPAIGN_CONFIG.json": {
+      "sha256": "5c5e38304de6ea8587c6eff0c45e07c9a32d55e328db6581734862181045412d",
+      "bytes": 676675
+    },
+    "validation/performance/native482-current-profile/SCHEMA.md": {
+      "sha256": "b2935c70ef4bff13275c7a442b25e25aa174d3352c7db3c7569d306c5e0ab6d3",
+      "bytes": 5517
+    },
+    "target/p9/native482-current-profile/linux/prepare.py": {
+      "sha256": "ac606549ced12a4ecb9a4d4a3c179d4b4a41d4b59deb70466cc460d04c966a8a",
+      "bytes": 6758
+    },
+    "target/p9/native482-current-profile/linux/record.py": {
+      "sha256": "9d7cb57885f01089d817c884d1e49c24884e639433d3c6fe70d95b08da36846c",
+      "bytes": 5585
+    },
+    "target/p9/native482-current-profile/linux/validate.py": {
+      "sha256": "1dbc0fef82ab18421f9b464a4a78a2a2e9d4948290373aecd7c0036df280e3b4",
+      "bytes": 1857
+    },
+    "target/p9/native482-current-profile/linux/common.py": {
+      "sha256": "7344bb43528779527b774236792f57dcc648d3c8c8e559126a120afc89caba27",
+      "bytes": 18230
+    },
+    "target/p9/native482-current-profile/linux/resources.py": {
+      "sha256": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+      "bytes": 2177
+    },
+    "target/p9/native482-current-profile/mac/prepared/record.py": {
+      "sha256": "092e44c5466dc7f4d527739edd14d6c2c3ae4044fdeda1b12076dea81db072aa",
+      "bytes": 7224
+    },
+    "target/p9/native482-current-profile/linux/control-tools/check-benchmark-storage.mjs": {
+      "sha256": "f46a15656e91d9c6d32f3f268dde74a2a2e7425f9d5027da4c7cc0a8a69d9856",
+      "bytes": 11797
+    },
+    "target/p9/native482-current-profile/linux/control-tools/check-lanes.mjs": {
+      "sha256": "cb49a5d3cee377cf3154d9a9f092ea90e9af64b87ba98272cae50765c51dc920",
+      "bytes": 4733
+    },
+    "target/p9/native482-current-profile/linux/control-tools/check-maintenance.mjs": {
+      "sha256": "99fd718641c95a0412ef2e98e33b23da717470613bdc496d6313c8b58d0ce658",
+      "bytes": 6918
+    },
+    "target/p9/native482-current-profile/linux/control-tools/check-native-benchmark.mjs": {
+      "sha256": "8c3f8a31270aa52ff4cdadd75479185dbfe33c0f2adecef0739dc43b008e54d7",
+      "bytes": 6595
+    },
+    "target/p9/native482-current-profile/linux/control-tools/check-offered.mjs": {
+      "sha256": "13f0c1f45df5bbc20802e21883bf7157ef0272210df1269f0e8fddb739d90015",
+      "bytes": 9264
+    },
+    "target/p9/native482-current-profile/linux/control-tools/check-publication-profile.mjs": {
+      "sha256": "425f3f905db3e368260095bc8eb78d92aa9753b9d9cf3995a78040a5b7a72b41",
+      "bytes": 1361
+    },
+    "target/p9/native482-current-profile/linux/control-tools/check-publication-timings.mjs": {
+      "sha256": "9d69d025335612afbef911377d2e15654e2186c1e0cb36884fa5fa8ee6b9d5a1",
+      "bytes": 4526
+    },
+    "target/p9/native482-current-profile/linux/control-tools/check-rounded-rate.mjs": {
+      "sha256": "262f06cfb0e878bfa7ce02741f51d7cd6e7e8df6b07b8973df4a7d89502c662d",
+      "bytes": 760
+    },
+    "target/p9/native482-current-profile/linux/SCHEMA.md": {
+      "sha256": "b2935c70ef4bff13275c7a442b25e25aa174d3352c7db3c7569d306c5e0ab6d3",
+      "bytes": 5517
+    },
+    "target/p9/native482-current-profile/mac/prepared/control-tools/check-benchmark-storage.mjs": {
+      "sha256": "f46a15656e91d9c6d32f3f268dde74a2a2e7425f9d5027da4c7cc0a8a69d9856",
+      "bytes": 11797
+    },
+    "target/p9/native482-current-profile/mac/prepared/control-tools/check-lanes.mjs": {
+      "sha256": "cb49a5d3cee377cf3154d9a9f092ea90e9af64b87ba98272cae50765c51dc920",
+      "bytes": 4733
+    },
+    "target/p9/native482-current-profile/mac/prepared/control-tools/check-maintenance.mjs": {
+      "sha256": "99fd718641c95a0412ef2e98e33b23da717470613bdc496d6313c8b58d0ce658",
+      "bytes": 6918
+    },
+    "target/p9/native482-current-profile/mac/prepared/control-tools/check-native-benchmark.mjs": {
+      "sha256": "8c3f8a31270aa52ff4cdadd75479185dbfe33c0f2adecef0739dc43b008e54d7",
+      "bytes": 6595
+    },
+    "target/p9/native482-current-profile/mac/prepared/control-tools/check-offered.mjs": {
+      "sha256": "13f0c1f45df5bbc20802e21883bf7157ef0272210df1269f0e8fddb739d90015",
+      "bytes": 9264
+    },
+    "target/p9/native482-current-profile/mac/prepared/control-tools/check-publication-profile.mjs": {
+      "sha256": "425f3f905db3e368260095bc8eb78d92aa9753b9d9cf3995a78040a5b7a72b41",
+      "bytes": 1361
+    },
+    "target/p9/native482-current-profile/mac/prepared/control-tools/check-publication-timings.mjs": {
+      "sha256": "9d69d025335612afbef911377d2e15654e2186c1e0cb36884fa5fa8ee6b9d5a1",
+      "bytes": 4526
+    },
+    "target/p9/native482-current-profile/mac/prepared/control-tools/check-rounded-rate.mjs": {
+      "sha256": "262f06cfb0e878bfa7ce02741f51d7cd6e7e8df6b07b8973df4a7d89502c662d",
+      "bytes": 760
+    },
+    "target/p9/native482-current-profile/mac/prepared/SCHEMA.md": {
+      "sha256": "b2935c70ef4bff13275c7a442b25e25aa174d3352c7db3c7569d306c5e0ab6d3",
+      "bytes": 5517
+    },
+    "target/p9/native482-current-profile/mac/prepared/TRANSFER.json": {
+      "sha256": "f26e87ab627778a504ca9046035a6a691969895c9996b37399ba9a8eb0f1f0d1",
+      "bytes": 1804
+    },
+    "target/p9/native482-current-profile/mac/prepared/TRANSFER_PROOF.json": {
+      "sha256": "9fdb4551732da63763bc30905874f76ca3652be53fe5519e0c774e3536fa4f5b",
+      "bytes": 169
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/publication2/RECEIPT.json": {
+      "sha256": "de881eea62a689e4c5789d407dc9805213cfb8e5155458bfa0bf1133621a7ae8",
+      "bytes": 448
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/SOURCE.json": {
+      "sha256": "1bc4a744c96513e5c316571de8c018595e74bceeb1915c29651c28e10c7353e4",
+      "bytes": 468657
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/ARTIFACTS.json": {
+      "sha256": "bedad4528d55ced36560d2ddd066fe4401f944314d197715e0c91b0c9c5eb36b",
+      "bytes": 3662
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/SYMBOLS.json": {
+      "sha256": "a7ee57183299504df11d7bd7650106d0f6fa32b156ba171a5a8c0f692b07060c",
+      "bytes": 2178
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/READY.json": {
+      "sha256": "f73d0773b06cb86093124da8f48d180b28d45d2e1ca3c3031a091cfd3f52aa79",
+      "bytes": 2368
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/controls/COMPLETION.json": {
+      "sha256": "0e049f996096591051ccdb6191701a66d354ff0270fab30c223a59a56c2a18de",
+      "bytes": 849
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/controls/COMPLETED_RESULTS.json": {
+      "sha256": "345adc4b53360fcbee9b26e1a5f1d2de2022f0f0b5bd9115bd55d6fae053cafc",
+      "bytes": 25381
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/controls/TERMINAL.json": {
+      "sha256": "3904f91845940a7a4786a828eadcc870516bb1b0013cb9333920ddb8692d19b7",
+      "bytes": 4217
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/PUBLICATION.json": {
+      "sha256": "e0434b86e355480bc4f60ff9abedd04521d9218d076063668081a9837380ae2d",
+      "bytes": 464
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/FUNCTIONAL_QUALIFICATION.json": {
+      "sha256": "5d76623744370eb562e94e401aaae389b0d8ccd22c674b2177afefabb9ba919a",
+      "bytes": 1565
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/PROFILE_PROOF.json": {
+      "sha256": "4b6fe8cd07862c638202e0e6b28ee02c50ecaea41de3955b9c9f480f37e3e96c",
+      "bytes": 11052
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/BUILD_TERMINAL.json": {
+      "sha256": "73f947d785b631a5ca73669dba7efed8516bdbaaa7150630d192de3e438bd7a0",
+      "bytes": 87
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/controls/BEFORE.json": {
+      "sha256": "23e9f7c83c1f6bcabe170f9bcd7e5105713084cd0ffe81b66762371d6fad4152",
+      "bytes": 358009
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/controls/AFTER.json": {
+      "sha256": "23e9f7c83c1f6bcabe170f9bcd7e5105713084cd0ffe81b66762371d6fad4152",
+      "bytes": 358009
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/logs/rustc.txt": {
+      "sha256": "778fbc643a806f0dd123c056e66201d7e8a56a61928ec0a33171be8d6c2d5a37",
+      "bytes": 196
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/logs/cargo.txt": {
+      "sha256": "9950bbb2d5c3417b1a068f0e81f6d3cac991a363193bdf2a22d447f5acf8b503",
+      "bytes": 36
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/logs/protoc.txt": {
+      "sha256": "41654adf2af1c3734c95808b5d5333d2fe1381fca76b4799f5c30198e38fc1fe",
+      "bytes": 16
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/logs/native-release-profile.txt": {
+      "sha256": "0f29218a13d1cd47d385bc1a24cbae3436dde3cce8942338d33ba2b8529d4d73",
+      "bytes": 188
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/logs/native-root-rustc-lines.txt": {
+      "sha256": "611637e1507b3078476c27f1e94f4c1ebd31d53c2b02764467591f701f81fbab",
+      "bytes": 6489
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/logs/tool-binaries.sha256": {
+      "sha256": "5493d578c4e3f6d67d018dc2c885ba87b7a61674969299ed7975c7ea58aefa86",
+      "bytes": 473
+    },
+    "/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo": {
+      "sha256": "da77c8b33849312255ccde3179198ada4c8deb370488d050286146b1d1b27e14",
+      "bytes": 40680304
+    },
+    "/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc": {
+      "sha256": "859254978c0a0402c32f949f6de0d99aee73be8d15f45aac00ae1448aac51e74",
+      "bytes": 645952
+    },
+    "/home/karllivesey/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/protobuf-build-0.14.1/bin/protoc-linux-x86_64": {
+      "sha256": "30c6f9b5c03fb4ad7c2f0ad2efa0297c1f4e349726b6c968a029a277e864d48e",
+      "bytes": 4969752
+    },
+    "/usr/bin/python3.14": {
+      "sha256": "7579d289e4d95778305acd13fc71be2a3800f7f6a202619505875234659c2c60",
+      "bytes": 14424
+    },
+    "/home/karllivesey/.nvm/versions/node/v24.21.0/bin/node": {
+      "sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
+      "bytes": 126595440
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf": {
+      "sha256": "f0fe2b92d280391fa7efa55616f098ba683b9682cf145275d5eda136125f2a64",
+      "bytes": 12819952
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/lib/libpfm.so.4.14.1": {
+      "sha256": "807641ee5d1dc4a2e5617686783313caaaca15f989f142e06c0508b9733d207e",
+      "bytes": 2471320
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply": {
+      "sha256": "0ca59d520059aa2ee4db1860c732089829e75740ee75314e84d2b0ab8c90873e",
+      "bytes": 17231224
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/artifacts/native/libvoteboat-dcdd2fc8943f326a.rlib": {
+      "sha256": "f3233aad647806aeab594775cff9f894775099256e564982b84a1a1b08f60435",
+      "bytes": 37470830
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/target-native-release/release/deps/libvoteboat-dcdd2fc8943f326a.rlib": {
+      "sha256": "f3233aad647806aeab594775cff9f894775099256e564982b84a1a1b08f60435",
+      "bytes": 37470830
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/artifacts/native/native_benchmark": {
+      "sha256": "8d3530a6e801ebb857d8dff3fc1a0fb4ef5af865c3aed89d1450271f2054b84d",
+      "bytes": 9708872
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/target-native-release/release/examples/native_benchmark": {
+      "sha256": "8d3530a6e801ebb857d8dff3fc1a0fb4ef5af865c3aed89d1450271f2054b84d",
+      "bytes": 9708872
+    },
+    "target/p9/native480-admission/mac/collection/raw/SOURCE.json": {
+      "sha256": "2f8b7b395ca1ff2dcfe40bf447a7f917024f4b260167cab9120780e5f6b06f95",
+      "bytes": 351750
+    },
+    "target/p9/native480-admission/mac/collection/raw/ARTIFACTS.json": {
+      "sha256": "1e38f4afa7198acb3de39cfd4cf492fdc2fcbb21edfc578f0a7034017011d89a",
+      "bytes": 3144
+    },
+    "target/p9/native480-admission/mac/collection/raw/SYMBOLS.json": {
+      "sha256": "72022c6c2dce81b519442fa2f2a7c65541a4f3441a3a88b8f5d0cd218f485f54",
+      "bytes": 2001
+    },
+    "target/p9/native480-admission/mac/collection/raw/APPEND_ONLY_RUNTIME_QUALIFICATION.json": {
+      "sha256": "cd3e1f43c66cbd821100d44c21d34afd4b429023d4b35dff17cbb382b52a5816",
+      "bytes": 3016
+    },
+    "target/p9/native480-admission/mac/collection/raw/APPEND_ONLY_RUNTIME_TESTS.json": {
+      "sha256": "2f8ddc009fc7e41757f6c0fc6c5ab6e3d6274feaea65bc8f7d62128b262ea8fe",
+      "bytes": 1472
+    },
+    "target/p9/native480-admission/mac/collection/raw/client_runtime_before.json": {
+      "sha256": "e6976334a9a40cf989f67d059625f243ea8516fcb76b0845e6b1640621f3ebd7",
+      "bytes": 444
+    },
+    "target/p9/native480-admission/mac/collection/raw/client_runtime_after.json": {
+      "sha256": "e6976334a9a40cf989f67d059625f243ea8516fcb76b0845e6b1640621f3ebd7",
+      "bytes": 444
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/client_runtime_all.stdout": {
+      "sha256": "99f8cff765d37d1a0911f61b33bca1e2c52493a1f26f9110915e40581540a838",
+      "bytes": 3341
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/client_runtime_all.stderr": {
+      "sha256": "71adead9aedd30878cb3a5e1882e1168998631caefa7d305da42d9f96618bd41",
+      "bytes": 292
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/client_runtime_all.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/client_runtime_all.command.json": {
+      "sha256": "0a712940b154437488b52713c63ed8a11e498984da387d0f3b7de5041b4d38e0",
+      "bytes": 198
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/client_runtime_core.stdout": {
+      "sha256": "319dd7197fb262d4bbebfdd266a693cc98b2e3a612aa913f06cfaff265e06909",
+      "bytes": 3341
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/client_runtime_core.stderr": {
+      "sha256": "ca4972cbfb8f154784873f0cbebba78e68fbf52d929d2632b608302254112fff",
+      "bytes": 291
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/client_runtime_core.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/client_runtime_core.command.json": {
+      "sha256": "edf896bf1c311deca8084c930cfad801399b8295dda5666babdb7c9b4923e5dc",
+      "bytes": 205
+    },
+    "target/p9/native480-admission/mac/collection/raw/STATUS": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/STAGE": {
+      "sha256": "8221ac66be71558c921fb44cfb66f7997699aea754d917763882d6d9eddc836e",
+      "bytes": 5
+    },
+    "target/p9/native480-admission/mac/collection/raw/CONTROLS.json": {
+      "sha256": "0a89894859581d5aed7642b4e206199106d3a93a3e8336bd7a2ddc8a84e2fba7",
+      "bytes": 33401
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/native-buildscript-invocation.txt": {
+      "sha256": "a9855271c7390dfa052466d8e8a2c6e22c95213cc8986978ff1ab75f70450e46",
+      "bytes": 2348
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/all_library.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/artifact_guard.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/counter_service.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/macho-sections.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/macho-uuid.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/matched_fmt.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/matched_strict.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/matched_tests.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/native-release.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/provider_metadata.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/provider_metadata_controls.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/resume_source_before.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/root_fmt.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/selected_core.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/selected_tests.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/source_after.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/source_before.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/strict_all.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/strict_core.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/strict_default.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/strict_native.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/symbol-table.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/tool_cargo_identity.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/tool_hash_identity.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/tool_rustc_identity.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/wide_controls.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/rustc.txt": {
+      "sha256": "bd38eb565e393486255b35ff1f74e9dc7ca87425f1febb798b9dd042159a833a",
+      "bytes": 192
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/cargo.txt": {
+      "sha256": "fb3f25aefd6d5441842d285f5a9b125b3f0f0b0bf2013d9a32677f9e99c6c854",
+      "bytes": 36
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/protoc.txt": {
+      "sha256": "5d8e8ea015f9d39d174f30332765f0edeb50e00689dc792907c56d56ea637d22",
+      "bytes": 18
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/native-release-profile.txt": {
+      "sha256": "7ada6866a709ff66c4452b3c3a340e37084cd1a2c6e21184e7cc42c7bb6c18b8",
+      "bytes": 121
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/native-root-rustc-lines.txt": {
+      "sha256": "60be8d4ab9f7321c018cec70962a32e214ee4487f69fac9136a3f67e6c815cd0",
+      "bytes": 5760
+    },
+    "target/p9/native480-admission/mac/collection/raw/logs/tool-sha256.txt": {
+      "sha256": "bcf574c83cb1c7201195b261b6619dcfe0bf11839385bd38758b210bfa901187",
+      "bytes": 407
+    }
+  }
+}

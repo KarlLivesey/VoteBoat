@@ -1,0 +1,40 @@
+{
+  "originals": [
+    {
+      "handle": 88435,
+      "actual_exit": 101,
+      "terminal_chunk": "bd1782",
+      "cause": "21 local socket EPERM;405 library successes and earlier scopes retained"
+    },
+    {
+      "handle": 26633,
+      "actual_exit": 101,
+      "terminal_chunk": "20dc4a",
+      "cause": "all pending functionalchecks0, strict test-only large_enum_variant"
+    },
+    {
+      "handle": 32113,
+      "actual_exit": 0,
+      "terminal_chunk": "388cf2",
+      "cause": "focusedboxedtest reruns and enabledallstrict complete0"
+    }
+  ],
+  "source_inventory": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/final/INPUTS.json",
+    "sha256": "560e9b4ed1c752aff56c549d350926e6861ab94115a733fb11040f8e5f8db3fd"
+  },
+  "functional": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/final/functional.json",
+    "sha256": "3d2639b04a475c01e910b5b44c9d86d912d9476b03828aef6acbc91bd7b67dfa"
+  },
+  "strict": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/final/strict.json",
+    "sha256": "1b8c8d337dc11c4da74a682adca719e82cb1e9f16fae25f235d5baba9750e54b"
+  },
+  "metadata": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/final/metadata.json",
+    "sha256": "95d3410f986db2388f22043466765de6d070b6bea3d52e91a886039d3dd1e066"
+  },
+  "full_P9_incomplete": true,
+  "native_performance_claim": false
+}

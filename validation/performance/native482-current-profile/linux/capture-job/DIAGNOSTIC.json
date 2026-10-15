@@ -1,0 +1,219 @@
+{
+  "original_handle": 11490,
+  "actual_terminal_tool_chunk": "d4fe2c",
+  "actual_exit": 0,
+  "validator_exit": 0,
+  "completed_originals_per_second": 715.4246094442153,
+  "during_originals_per_second": 515.375,
+  "offers": 16000,
+  "completed": 8219,
+  "window_refused": 7781,
+  "status_counts": {
+    "applied": 8219,
+    "window_refused": 7781
+  },
+  "latencies_nearest_rank": {
+    "intended": {
+      "p50_ms": 4399.116449,
+      "p95_ms": 6448.259843,
+      "p99_ms": 6522.607712,
+      "max_ms": 6556.992327
+    },
+    "service": {
+      "p50_ms": 4394.51102,
+      "p95_ms": 6448.222104,
+      "p99_ms": 6522.457512,
+      "max_ms": 6556.968435
+    },
+    "dispatch": {
+      "p50_ms": 0.095301,
+      "p95_ms": 0.879437,
+      "p99_ms": 2.11522,
+      "max_ms": 6.182158
+    }
+  },
+  "backlog_at_horizon": 4096,
+  "max_inflight": 4096,
+  "measurement_seconds": 11.488282471,
+  "offer_horizon_seconds": 8.0,
+  "drain_seconds": 3.488282471,
+  "recovered_value": "8283",
+  "checkpoints": "3",
+  "reclaims": "9",
+  "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "native_build_id": "ad4c6b0ce94d237f9aa7f3ca04fd28de1747eb7b",
+  "native_breakpad_id": "0C6B4CAD4DE97F239AA7F3CA04FD28DE0",
+  "native_exec_branch": "2669021.1",
+  "native_samples": 3683,
+  "native_period": 17333009497,
+  "samply_depth_histogram": {
+    "1": 6,
+    "2": 13,
+    "3": 16,
+    "4": 25,
+    "5": 43,
+    "6": 44,
+    "7": 57,
+    "8": 104,
+    "9": 88,
+    "10": 75,
+    "11": 192,
+    "12": 105,
+    "13": 105,
+    "14": 283,
+    "15": 1352,
+    "16": 322,
+    "17": 617,
+    "18": 125,
+    "19": 29,
+    "20": 13,
+    "21": 10,
+    "22": 26,
+    "23": 18,
+    "24": 3,
+    "25": 5,
+    "26": 1,
+    "27": 4,
+    "29": 2
+  },
+  "symbolic_contexts": {
+    "pending_client_btree": {
+      "count": 661,
+      "sample_count_percent": 17.947325549823514,
+      "period_weight": 3443577944,
+      "period_percent": 19.867167006375986,
+      "self_count": 657,
+      "self_period_weight": 3424327311
+    },
+    "client_reconcile": {
+      "count": 672,
+      "sample_count_percent": 18.245995112679882,
+      "period_weight": 3384838590,
+      "period_percent": 19.52827978653014,
+      "self_count": 81,
+      "self_period_weight": 413920112
+    },
+    "pending_intersection_pending_client_btree": {
+      "count": 661,
+      "sample_count_percent": 17.947325549823514,
+      "period_weight": 3443577944,
+      "period_percent": 19.867167006375986,
+      "self_count": 0,
+      "self_period_weight": 0
+    },
+    "pending_intersection_client_reconcile": {
+      "count": 549,
+      "sample_count_percent": 14.906326364376866,
+      "period_weight": 2751093779,
+      "period_percent": 15.87199141312511,
+      "self_count": 0,
+      "self_period_weight": 0
+    },
+    "OperationId_set_insert": {
+      "count": 1032,
+      "sample_count_percent": 28.02063535161553,
+      "period_weight": 6239668757,
+      "period_percent": 35.99876154270822,
+      "self_count": 839,
+      "self_period_weight": 5142726883
+    },
+    "Counter_validate_proposal": {
+      "count": 1648,
+      "sample_count_percent": 44.746130871572085,
+      "period_weight": 9880352160,
+      "period_percent": 57.00309667348935,
+      "self_count": 111,
+      "self_period_weight": 625933016
+    },
+    "core_raft": {
+      "count": 59,
+      "sample_count_percent": 1.6019549280477872,
+      "period_weight": 269315020,
+      "period_percent": 1.5537695288669466,
+      "self_count": 16,
+      "self_period_weight": 72622376
+    },
+    "Counter_applied_map_get": {
+      "count": 416,
+      "sample_count_percent": 11.295139831658974,
+      "period_weight": 2405508669,
+      "period_percent": 13.878193913274817,
+      "self_count": 413,
+      "self_period_weight": 2405506381
+    },
+    "check_ready_execution": {
+      "count": 166,
+      "sample_count_percent": 4.507195221286994,
+      "period_weight": 881082840,
+      "period_percent": 5.0832652007286905,
+      "self_count": 0,
+      "self_period_weight": 0
+    },
+    "ready_collect": {
+      "count": 103,
+      "sample_count_percent": 2.7966331794732553,
+      "period_weight": 570095672,
+      "period_percent": 3.2890749416520673,
+      "self_count": 0,
+      "self_period_weight": 0
+    },
+    "pending_intersection_Counter_validate_proposal": {
+      "count": 72,
+      "sample_count_percent": 1.95492804778713,
+      "period_weight": 474949397,
+      "period_percent": 2.7401438687390343,
+      "self_count": 0,
+      "self_period_weight": 0
+    },
+    "pending_intersection_check_ready_execution": {
+      "count": 39,
+      "sample_count_percent": 1.0589193592180288,
+      "period_weight": 213644378,
+      "period_percent": 1.2325867474830474,
+      "self_count": 0,
+      "self_period_weight": 0
+    },
+    "pending_intersection_ready_collect": {
+      "count": 35,
+      "sample_count_percent": 0.9503122454520772,
+      "period_weight": 194951306,
+      "period_percent": 1.1247400864445507,
+      "self_count": 0,
+      "self_period_weight": 0
+    }
+  },
+  "Counter_submission_validate_monomorph": [
+    {
+      "function": "<voteboat::application::Counter as voteboat::application::ProposalAdmission>::validate_proposal::<core::iter::adapters::chain::Chain<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::skip::Skip<core::slice::iter::Iter<voteboat::log::LogEntry>>, <voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::check_submit<voteboat::application::Counter, voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>::{closure#0}>, core::iter::adapters::map::Map<core::iter::adapters::filter::Filter<alloc::collections::btree::map::Values<u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>>, <voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::check_submit<voteboat::application::Counter, voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>::{closure#1}>, <voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::check_submit<voteboat::application::Counter, voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>::{closure#2}>>>",
+      "sample_count": 1587,
+      "sample_count_percent": 43.089872386641325,
+      "period_weight": 9577779139,
+      "period_percent": 55.257450477124145
+    }
+  ],
+  "source_inputs": {
+    "src/application.rs": {
+      "sha256": "d6075051efcc4693a59075b12a20b7e7ed11bd2111e0d1c2adb961213744fa36",
+      "bytes": 21880,
+      "mode": "0o644"
+    },
+    "src/runtime/clients.rs": {
+      "sha256": "37b983a1b67f7f5496b74ee65332c702b7a1e74554077af100e170fdfae07c6c",
+      "bytes": 29910,
+      "mode": "0o644"
+    },
+    "src/application/ready_admission.rs": {
+      "sha256": "cd10eaa9a55cf97055287d2882b0b2930ce3fa2d6172698dac5cd374f95d15fd",
+      "bytes": 1637,
+      "mode": "0o644"
+    }
+  },
+  "observed_source_explanation": "Counter::validate_proposal builds a new reserved BTreeSet over pending log+queued operations, checking self.dedup on each. check_submit calls it separately for each submitted request. This source structure fits the measured exact submit/counter/set-insert/get ancestry; samples do not measure call counts, allocation totals or prove a future optimization gain. Ready-admission batching is a separate current480 path.",
+  "limits": [
+    "Profiled diagnostic only; not unprofiled capacity acceptance.",
+    "Native process selected across all TIDs; whole launch includes warmup, maintenance, drain, recovery and cleanup. No exact measurement-only CPU sample boundary.",
+    "Native ELF debug0; unresolved/synthetic frames retained separately. Full-depth and zero-truncation claims not made.",
+    "CPU sample counts and event-period weighting are distinct, inclusive contexts overlap and cannot be summed. No off-CPU/blocked-time or per-original causal trace.",
+    "Linux loaded TCP and Mac moderate QUIC intentionally differ; no cross-host CPU percentage comparison."
+  ]
+}

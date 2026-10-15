@@ -1,0 +1,5 @@
+{
+  "actual_exit": 1,
+  "terminal_tool_chunk": "bbf08d",
+  "cause": "Generated remaining-command assignment lacked newline before env assignment; Python rejected before checks/workloads started. Only this syntax was corrected; original script/stdout/stderr retained."
+}

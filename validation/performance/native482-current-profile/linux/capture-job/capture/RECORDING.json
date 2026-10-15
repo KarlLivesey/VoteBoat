@@ -1,0 +1,23 @@
+{
+  "scope": "482 Linux cycles:u CPU sampling diagnostic, whole perf launch including Python resource owner, startup/warmup/native measurement/drain/maintenance/verification/recovery/cleanup. Native480 debug0 limits inline/source resolution; raw addresses/unresolved/truncated samples retained. Not unprofiled throughput or an acceptance result. No browser/SVG/sudo/sysctl/install/rebuild.",
+  "start_unix": 1792077939.199741,
+  "kernel_policy_before": {
+    "perf_event_paranoid": 2,
+    "kptr_restrict": 2,
+    "perf_event_mlock_kb": 516
+  },
+  "perf_exit": 0,
+  "native_exit": 0,
+  "received_signals": [],
+  "errors": [],
+  "conversion_started": false,
+  "resource_helper_exit": 0,
+  "post_guard_exit": 0,
+  "end_unix": 1792077952.2631054,
+  "kernel_policy_after": {
+    "perf_event_paranoid": 2,
+    "kptr_restrict": 2,
+    "perf_event_mlock_kb": 516
+  },
+  "data_bytes": 61970732
+}

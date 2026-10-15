@@ -1,0 +1,65 @@
+{
+  "exit": 0,
+  "scope": "Application capability and compatibility tests only, not whole repository qualification. Full Counter original validate_proposal byte-identical.",
+  "commands": [
+    {
+      "command": "CARGO_TARGET_DIR=target/p9/native483-ingress/app/target-all CARGO_BUILD_JOBS=2 cargo +stable test --locked --offline --all-features --test application -- --test-threads=1",
+      "original_handle": 5130,
+      "actual_terminal_chunk": "3c872e",
+      "exit": 0,
+      "tests": 23
+    },
+    {
+      "command": "CARGO_TARGET_DIR=target/p9/native483-ingress/app/target-all CARGO_BUILD_JOBS=2 cargo +stable test --locked --offline --no-default-features --test application -- --test-threads=1",
+      "original_handle": 60258,
+      "actual_terminal_chunk": "8f2722",
+      "exit": 0,
+      "tests": 23
+    },
+    {
+      "command": "CARGO_TARGET_DIR=target/p9/native483-ingress/app/target-all CARGO_BUILD_JOBS=2 cargo +stable clippy --locked --offline --all-features --test application -- -D warnings",
+      "original_handle": 31024,
+      "actual_terminal_chunk": "a1aea7",
+      "exit": 0,
+      "diagnostics": 0
+    },
+    {
+      "command": "rustfmt +stable --edition 2021 src/application.rs src/bin/support/counter_application.rs tests/application.rs",
+      "actual_terminal_chunk": "b65a0c",
+      "exit": 0
+    }
+  ],
+  "scope_source_sha256": "3ce70373bcd529235afaf17bd678dfee798b1e396b43034d444ac50da4645f01",
+  "initial_failures_preserved": [
+    {
+      "command": "/home/karllivesey/.cargo/bin/rustfmt +stable --edition2021 ...",
+      "tool_chunk": "51caf0",
+      "exit": 127,
+      "reason": "Wrong Linux rustfmt path. Used installed /usr/bin rustfmt viaPATH instead; no source rollback."
+    },
+    {
+      "command": "cargo +stable fmt --all -- --check",
+      "tool_chunk": "dcbb5c",
+      "exit": 1,
+      "raw": "format-initial.stdout/stderr",
+      "reason": "New explicit module-path resolution fixed; other reported ingress formatting belonged to concurrently edited parent files. This is not claimed full formatter success."
+    }
+  ],
+  "logs_sha256": {
+    "format-initial.stdout": "3ca89edeb04c339e5cd17f3bad8eb17924c9da89127de1b44b173cb1ff654f83",
+    "format-initial.stderr": "53303eef90c6a4216fc9dc8382bf907fabcc43f74eb9bdf24250725160aec28a",
+    "format-initial.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "format.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "format.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "format.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "application-all.stdout": "4fdcf4ab2c60932e34406e584c2204cad6e838a8ddf047fabd7121c082fbf38f",
+    "application-all.stderr": "6f38a4bf639f50b438d956c85b693cfaf0bcd69e301b9e695c4fd99ee87d9df8",
+    "application-all.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "application-core.stdout": "4fdcf4ab2c60932e34406e584c2204cad6e838a8ddf047fabd7121c082fbf38f",
+    "application-core.stderr": "9a3c0f869decb5d1a6108a235fdb7fe9f7533cc687bf7bacd38a1e331120be72",
+    "application-core.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "application-clippy.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "application-clippy.stderr": "464f40f6e9f63a11ae4739a8972880a43468c3f500e6a239fe4a1a1fb322b16f",
+    "application-clippy.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  }
+}

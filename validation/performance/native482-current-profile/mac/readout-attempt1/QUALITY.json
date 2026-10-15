@@ -1,0 +1,125 @@
+{
+  "raw_profile_sha256": "f3914123b2f8c180f907af6b6f3002fc328d46e0ee7778ac43b3e22dbe88e197",
+  "sample_units": {
+    "eventDelay": "ms",
+    "threadCPUDelta": "\u00b5s",
+    "time": "ms"
+  },
+  "profile_interval_ms": 1.0,
+  "threads": [
+    {
+      "name": "native_benchmark",
+      "tid": "29466783",
+      "rows": 65934,
+      "first_sample_time_ms": 376.501833,
+      "first_cpu_delta_us": 11408
+    },
+    {
+      "name": "voteboat-snapshot",
+      "tid": "29466796",
+      "rows": 1808,
+      "first_sample_time_ms": 442.899042,
+      "first_cpu_delta_us": 39
+    },
+    {
+      "name": "voteboat-wal",
+      "tid": "29466795",
+      "rows": 35269,
+      "first_sample_time_ms": 442.899042,
+      "first_cpu_delta_us": 64
+    },
+    {
+      "name": "voteboat-snapshot",
+      "tid": "29466800",
+      "rows": 549,
+      "first_sample_time_ms": 507.834792,
+      "first_cpu_delta_us": 48
+    },
+    {
+      "name": "voteboat-wal",
+      "tid": "29466799",
+      "rows": 16916,
+      "first_sample_time_ms": 507.834792,
+      "first_cpu_delta_us": 65
+    },
+    {
+      "name": "voteboat-snapshot",
+      "tid": "29466812",
+      "rows": 2248,
+      "first_sample_time_ms": 571.1505,
+      "first_cpu_delta_us": 75
+    },
+    {
+      "name": "voteboat-wal",
+      "tid": "29466811",
+      "rows": 16403,
+      "first_sample_time_ms": 571.1505,
+      "first_cpu_delta_us": 131
+    },
+    {
+      "name": "voteboat-snapshot",
+      "tid": "29467657",
+      "rows": 2,
+      "first_sample_time_ms": 65992.3585,
+      "first_cpu_delta_us": 11
+    },
+    {
+      "name": "voteboat-wal",
+      "tid": "29467656",
+      "rows": 62,
+      "first_sample_time_ms": 65992.3585,
+      "first_cpu_delta_us": 21
+    },
+    {
+      "name": "voteboat-snapshot",
+      "tid": "29467659",
+      "rows": 2,
+      "first_sample_time_ms": 66026.328333,
+      "first_cpu_delta_us": 8
+    },
+    {
+      "name": "voteboat-wal",
+      "tid": "29467658",
+      "rows": 75,
+      "first_sample_time_ms": 66026.328333,
+      "first_cpu_delta_us": 16
+    },
+    {
+      "name": "voteboat-snapshot",
+      "tid": "29467661",
+      "rows": 2,
+      "first_sample_time_ms": 66058.240375,
+      "first_cpu_delta_us": 14
+    },
+    {
+      "name": "voteboat-wal",
+      "tid": "29467660",
+      "rows": 90,
+      "first_sample_time_ms": 66058.240375,
+      "first_cpu_delta_us": 10
+    }
+  ],
+  "cpu_delta_us": 12103830,
+  "cpu_delta_once": true,
+  "wall_sample_weight": 458696,
+  "totals": {
+    "samples": 139360,
+    "cpu_us": 12103830,
+    "wall_sample_weight": 458696,
+    "positive_cpu_samples": 110284,
+    "null_stack_cpu_us": 0,
+    "unresolved_leaf_cpu_us": 154401,
+    "any_unresolved_stack_cpu_us": 5455817,
+    "malformed_stack_cpu_us": 0,
+    "zero_cpu_delta_samples": 29076
+  },
+  "unresolved_leaf_percent": 1.2756375461320921,
+  "any_unresolved_stack_percent": 45.07512911202487,
+  "limits": [
+    "Whole-launch sample scope cannot be cropped precisely to native throughput timer with these raw files.",
+    "CPU deltas are interval observations assigned to sampled stacks; first intervals/startup, coalesced waits and unknown frames limit attribution.",
+    "No explicit lost/truncated warning appears in captured stderr; unmarked stack truncation/capture loss cannot be quantified from this profile.",
+    "Mac threadCPUDelta is not Linux cycles:u; host workloads also differ.",
+    "Native debug0 limits source/inline attribution. All raw addresses/query responses and unknowns retained."
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "exit": 0,
+  "source_exact": true,
+  "proofs": {
+    "metadata": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/checked3/metadata.exit.json",
+      "sha256": "572c55faead8e1a0508f04c521b51f593fc7e283f21d82ae5452c2064db8aaae"
+    },
+    "metadata-negative": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/checked3/metadata-negative.exit.json",
+      "sha256": "71316c77bb9a597aae176888b26c7e9d62f9eb8db82947d05e7a46f96f71c080"
+    }
+  },
+  "scope": "45partial420operations metadata and42 explicit no-isolation negative controls pass."
+}

@@ -1,0 +1,32 @@
+{
+  "time_utc": "2026-10-15T15:27:32.347745+00:00",
+  "linux": {
+    "original_handle": 11490,
+    "actual_terminal_exit": 0,
+    "terminal_tool_chunk": "d4fe2c",
+    "profiler_exit": 0,
+    "native_exit": 0,
+    "resource_helper_exit": 0,
+    "post_guard_exit": 0,
+    "all_owned_processes_terminated": true,
+    "raw_perf_bytes": 61970732,
+    "kernel_policy_unchanged": [
+      2,
+      2,
+      516
+    ]
+  },
+  "mac": {
+    "original_handle": 18694,
+    "actual_terminal_exit": 0,
+    "terminal_tool_chunk": "f4df06",
+    "markers": [
+      "MAC482_RECORD_EXIT0",
+      "ORIGINAL_MAC482_SSH_EXIT0"
+    ],
+    "profiler_exit": 0,
+    "post_guard_exit": 0,
+    "individual_native_and_profile_file_metadata": "Collect and validate after this END; not inferred from controller success alone."
+  },
+  "authorization": "Both original482recordings actually terminated0. Collection, validation, same-data conversion/symbolication, numerical analysis and lossless archive may begin. No replacement recording or policy/binary/source change. Diagnostic cells differ; do not compare CPU shares cross-host or call profiled rates acceptance."
+}

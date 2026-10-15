@@ -1,0 +1,13 @@
+[
+  "cargo",
+  "+stable",
+  "test",
+  "--locked",
+  "--offline",
+  "--no-default-features",
+  "--test",
+  "effect_owner",
+  "node_facade::",
+  "--",
+  "--test-threads=1"
+]

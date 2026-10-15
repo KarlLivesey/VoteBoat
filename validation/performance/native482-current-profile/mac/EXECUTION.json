@@ -1,0 +1,70 @@
+{
+  "scope": "One original Mac482 current480 profile and post-both-END frozen validation, owned localhost symbol resolution and saved-JSON numerical conversion. No workload rerun, browser, SVG, sudo/settings change or binary/source/buildtree/WAL transfer.",
+  "capture": {
+    "original_handle": 18694,
+    "actual_exit": 0,
+    "terminal_tool_chunk": "f4df06",
+    "command_receipt": "live/COMMAND.json",
+    "profiler_exit": 0,
+    "cleanup": [],
+    "profile_bytes": 1104449
+  },
+  "validation_collection": {
+    "original_handle": 67771,
+    "actual_exit": 0,
+    "terminal_tool_chunk": "16f966",
+    "command": [
+      "ssh",
+      "karllivesey@192.168.192.76",
+      "/Applications/Xcode-beta.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9 /private/tmp/voteboat-native482-sxtrtW/collect.py"
+    ],
+    "source_sha256": "e57be4b19e69e15befedca2abddf3d8e57b4d228a98cb53ab9bc933c07172352"
+  },
+  "symbolication": {
+    "original_handle": 69533,
+    "actual_exit": 0,
+    "terminal_tool_chunk": "a0eb58",
+    "command": [
+      "ssh",
+      "karllivesey@192.168.192.76",
+      "/Applications/Xcode-beta.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9 /private/tmp/voteboat-native482-sxtrtW/symbolicate.py"
+    ],
+    "source_sha256": "16fc834575573380c09526b914b3b8ae402bab340062e820128bc56fcb176b76",
+    "server_exit": 0,
+    "server_joined": true,
+    "queried_addresses": 4055,
+    "known_functions": 3836,
+    "unknown": 219
+  },
+  "collapse": {
+    "command": [
+      "python3",
+      "target/p9/native482-current-profile/mac/collapse.py",
+      "target/p9/native482-current-profile/mac/raw/profile.json.gz",
+      "target/p9/native482-current-profile/mac/symbolication/ADDRESS_SYMBOLS.json",
+      "target/p9/native482-current-profile/mac/analysis"
+    ],
+    "actual_exit": 0,
+    "tool_chunk": "fceb6d",
+    "source_sha256": "5c6d3c3383c87211c679fae8627f7671b283d5c20dd71fb6226cf35d6794b44b"
+  },
+  "formal_readout": {
+    "command": [
+      "python3",
+      "target/p9/native482-current-profile/mac/readout.py"
+    ],
+    "actual_exit": 0,
+    "tool_chunk": "86e97b",
+    "source_sha256": "474f1d1b915cf91134dde554a75bf9c218a03396d2acab7a053982a2e5a3e92b",
+    "prior_numerical_classifier_fix_tool_chunk": "9d052f",
+    "initial_success_tool_chunk": "162b6d",
+    "focused_fix": "Recognize actual480 ready_pending legacy-validation instantiation instead of old479 check_ready_execution name; preserve initial misclassified labels/source/outputs in readout-attempt1. Final compact label-only readability pass leaves raw/profile/sample/context weights unchanged."
+  },
+  "outputs_sha256": {
+    "analysis/SUMMARY.json": "65052ff3178a1b1d99dccf1f2f0b8d72aebc20227d2408a4454b35c80e5a48e3",
+    "COMPACT_CPU.json": "7e0b47581cd0b9d2fdffebfb69e75753fcad2a284ba4e34eec53f0607e183abb",
+    "QUALITY.json": "0515d0a647754fb8fc055cd6fa7320652a096f5f80bfb4de8e5363fece0f9bbf",
+    "WORKLOAD_READOUT.json": "a3c3308bc9c20481acf4360e605bc7a5db645cff4b54950eead57e8a9ba8d354"
+  },
+  "preparation_observation": "Automatic permission approval timed out before CreateProcess for first preparation invocation; no remote process started; one explicitly permitted same-scope retry52663 ended0. Raw available tool message/provenance preserved PREPARE_APPROVAL_TIMEOUT.json."
+}

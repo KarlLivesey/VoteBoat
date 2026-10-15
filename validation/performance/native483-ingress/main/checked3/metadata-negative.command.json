@@ -1,0 +1,7 @@
+[
+  "/home/karllivesey/.nvm/versions/node/v24.21.0/bin/node",
+  "--test",
+  "--test-reporter=tap",
+  "--test-isolation=none",
+  "validation/check-provider-conformance.test.mjs"
+]

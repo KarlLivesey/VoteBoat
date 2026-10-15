@@ -1,0 +1,27 @@
+{
+  "ROOT_ARCHIVE_VERIFIED.json": {
+    "sha256": "b8be53c9fe9ca389047cb9359023ad729f09fd8818a8daf90693b1bba3d5f76e",
+    "bytes": 3161,
+    "mode": "0o644"
+  },
+  "ROOT_ARCHIVE_VERIFY.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2,
+    "mode": "0o644"
+  },
+  "ROOT_ARCHIVE_VERIFY.py": {
+    "sha256": "4e2d7b7f18e67640356e3bcfbcabde3d46fa05d29b3a6aaa4c98b7ef993e41af",
+    "bytes": 4016,
+    "mode": "0o644"
+  },
+  "ROOT_ARCHIVE_VERIFY.stderr": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "mode": "0o644"
+  },
+  "ROOT_ARCHIVE_VERIFY.stdout": {
+    "sha256": "b8be53c9fe9ca389047cb9359023ad729f09fd8818a8daf90693b1bba3d5f76e",
+    "bytes": 3161,
+    "mode": "0o644"
+  }
+}

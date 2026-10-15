@@ -1,0 +1,47 @@
+{
+  "exit": 0,
+  "scope": "Source-linked partial metadata integrity only; no assertion of executed Rust tests, arbitrary-provider conformance, native/platform qualification or measured gain. Existing unrelated inventory/reviews byte-equivalent as parsed data; only three authorized checker expected counts changed.",
+  "inventory_contracts": 150,
+  "reviewed_contracts": 45,
+  "reviewed_operations": 420,
+  "old_reviews_other_than_proposal_exact": true,
+  "old_operation_rows_exact": true,
+  "new_capability_contract": "ProposalIngress / scoped submission composition",
+  "commands": [
+    {
+      "command": [
+        "node",
+        "validation/check-provider-conformance.mjs"
+      ],
+      "actual_exit": 0,
+      "tool_chunk": "0de389",
+      "stdout": "check-final.stdout",
+      "stderr": "check-final.stderr"
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "validation/check-provider-conformance.test.mjs"
+      ],
+      "actual_exit": 0,
+      "tool_chunk": "71d7d3",
+      "stdout": "negative.stdout",
+      "stderr": "negative.stderr",
+      "actual_reported_scope": "one file-level pass; no inferred inner test count"
+    }
+  ],
+  "input_sha256": {
+    "docs/component-contracts.json": "2e546f7ca9f1131eafa4de30e9137df7e5f811ec70a54cbfda6f45d2afba87e8",
+    "docs/provider-conformance.json": "1e9a0c818f74ea5f7ff5caa1ce3c41d63be3be844b8fbc263863c7452d86d8ab",
+    "validation/check-provider-conformance.mjs": "21405943f6350cf60d8f0a3488e6001f5b08fd74fdf798970ebe86faf76a21d6",
+    "validation/check-provider-conformance.test.mjs": "c2890e15701d707b26471530f0d5ce70991b4d0dc79800934379a323825dd7d3",
+    "src/application.rs": "81d97cff05ad80a45cb3ade22f8fafce749294a155f8c24deb41404877966c2e",
+    "src/runtime/clients/ingress.rs": "b207266072eb5ed12adafbc5c5d340981991caf47153469c701b906412365a92",
+    "src/runtime/node.rs": "b75fe84426c87ffbbffc9749dbcee71857287b1d364463647a4ab76ff1f9491b",
+    "tests/client_admission/ingress.rs": "19c6da3472161c9459f0b3c9f33eedd2a7ae5d9714a37c4baf7c756de2beafba",
+    "tests/support/node_ingress.rs": "1fa51b8fdc47cc67fe3d22dfba035d2492201a3c4d3ee587da204634a022160e",
+    "tests/application/prepared_admission.rs": "92a25dfcee18cb48bd7b9799fa04369f8bad9d7742f83643574a37bd6ee1a68b",
+    "tests/application/prepared_admission/wrapper.rs": "a6fde0fc30f05a863b64216e016cad9b1a49502a93b0a40a164277b8f6cd0226"
+  }
+}

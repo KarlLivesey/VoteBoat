@@ -1,0 +1,52 @@
+{
+  "time_utc": "2026-10-15T15:25:55.674952+00:00",
+  "command": [
+    "/private/tmp/voteboat-samply0131-IDCfdm/extracted/samply-aarch64-apple-darwin/samply",
+    "record",
+    "--save-only",
+    "--no-open",
+    "--rate",
+    "1000",
+    "--symbol-dir",
+    "/private/tmp/voteboat-mac480-f7b0ef1-mccmJS/artifacts/native",
+    "--symbol-dir",
+    "/private/tmp/voteboat-mac480-f7b0ef1-mccmJS/target-native-release/release/examples",
+    "--output",
+    "/private/tmp/voteboat-native482-sxtrtW/profile.json.gz",
+    "--",
+    "/private/tmp/voteboat-mac480-f7b0ef1-mccmJS/artifacts/native/native_benchmark",
+    "/private/tmp/voteboat-native482-sxtrtW/workload",
+    "quic",
+    "8192",
+    "256",
+    "1",
+    "--offered",
+    "128",
+    "--maintenance",
+    "2",
+    "--ready-items",
+    "16",
+    "--offered-capacity",
+    "4096",
+    "--publication",
+    "witness"
+  ],
+  "cwd": "/private/tmp/voteboat-native482-sxtrtW",
+  "environment": {
+    "PATH": "/Users/karllivesey/.cargo/bin:/opt/homebrew/bin:/tmp/voteboat-macos-CzK1if/reference-tools296/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    "TMPDIR": "/private/tmp/voteboat-native482-sxtrtW/record-tmp",
+    "RUSTFLAGS": null,
+    "CARGO_ENCODED_RUSTFLAGS": null,
+    "RUSTC_WRAPPER": null,
+    "RUSTC_WORKSPACE_WRAPPER": null,
+    "DYLD_INSERT_LIBRARIES": null,
+    "DYLD_LIBRARY_PATH": null,
+    "MallocStackLogging": null,
+    "MallocScribble": null
+  },
+  "nofile": [
+    4096,
+    9223372036854775807
+  ],
+  "ownership": "Profiler starts in a new session/process group owned by this controller; interrupt sends TERM to that group, waits10s, then KILL+wait if needed. No shared-process kill or browser/server."
+}

@@ -1,0 +1,64 @@
+{
+  "checks": [
+    {
+      "command": [
+        "cargo",
+        "+stable",
+        "check",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--lib"
+      ],
+      "actual_exit": 101,
+      "original_handle": 16624,
+      "terminal_chunk": "23294b",
+      "cause": "New Node Output parameter initially reused parent O, and private SubmissionBatch declaration initially omitted required EffectOwner scheduler/timer/entropy bounds. Focused signature fixes only."
+    },
+    {
+      "command": [
+        "cargo",
+        "+stable",
+        "check",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--lib"
+      ],
+      "actual_exit": 0,
+      "original_handle": 95963,
+      "terminal_chunk": "2ebdba"
+    },
+    {
+      "command": [
+        "cargo",
+        "+stable",
+        "check",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--example",
+        "native_benchmark"
+      ],
+      "actual_exit": 101,
+      "original_handle": 87442,
+      "terminal_chunk": "981d8c",
+      "cause": "Mechanical offered-loop extraction selected the first clock declaration inside the loop. Restored the exact original HEAD loop and extracted using its maintenance boundary; no workload was launched."
+    },
+    {
+      "command": [
+        "cargo",
+        "+stable",
+        "check",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--example",
+        "native_benchmark"
+      ],
+      "actual_exit": 0,
+      "terminal_chunk": "4fbcba"
+    }
+  ],
+  "scope": "Early compile-only probes, tool output IDs preserve original terminal records. These are not workload failures or final qualification."
+}

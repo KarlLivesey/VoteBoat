@@ -2,6 +2,8 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 use voteboat::{native::connect::*, raft::Role};
+#[path = "multi/ingress.rs"]
+mod ingress;
 #[path = "multi/peer_rotation.rs"]
 mod peer_rotation;
 type MultiNode = NativeNode<HostApplication, NativeServiceConnector>;

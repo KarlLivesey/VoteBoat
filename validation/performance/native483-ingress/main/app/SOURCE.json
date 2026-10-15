@@ -1,0 +1,31 @@
+{
+  "counter_validate_byte_identical": true,
+  "counter_validate_sha256": "53fb3758512873a303a12f56f64314871d7558a989fc16db1893583500158806",
+  "files": {
+    "src/application.rs": {
+      "sha256": "81d97cff05ad80a45cb3ade22f8fafce749294a155f8c24deb41404877966c2e",
+      "bytes": 22568,
+      "mode": "0o644"
+    },
+    "src/bin/support/counter_application.rs": {
+      "sha256": "62291c8d3599a721d1d84491fca14572a34ef97e41915fd6d5b7c3af9e8447b0",
+      "bytes": 6874,
+      "mode": "0o644"
+    },
+    "tests/application.rs": {
+      "sha256": "d200d8bcb2518d973f7743202e14f3d62631f1c4a8b0cfdd36c358c04b0def37",
+      "bytes": 17793,
+      "mode": "0o644"
+    },
+    "tests/application/prepared_admission.rs": {
+      "sha256": "92a25dfcee18cb48bd7b9799fa04369f8bad9d7742f83643574a37bd6ee1a68b",
+      "bytes": 6760,
+      "mode": "0o644"
+    },
+    "tests/application/prepared_admission/wrapper.rs": {
+      "sha256": "a6fde0fc30f05a863b64216e016cad9b1a49502a93b0a40a164277b8f6cd0226",
+      "bytes": 2208,
+      "mode": "0o644"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "scope": "Final independent read-only483 production review against HEAD after root moved the single whole-working-context guard into SubmissionBatch::submit before application lookup/drain. No production/test edits or Rust checks by reviewer. Earlier intermediate source review retained.",
+  "time_utc": "2026-10-15T15:54:55.619341+00:00",
+  "findings": [
+    {
+      "severity": "correctness",
+      "status": "fixed_in_observed_source",
+      "issue": "A prepared host callback could reserve then panic; catching it inside the outer ingress scope left rejected reservations live.",
+      "resolution": "SubmissionBatch::submit mem::take leaves self.validation default before drain/application lookup; local validation passes into submit_validated and restores only onOk. Any failed result or provider/lookup unwind drops local state; inner protected-control success restores the already-reset default. Earlier admitted originals remain owned. Ninth public regression is source-linked; actual execution receipt belongs to router-test owner."
+    }
+  ],
+  "review_result": "No remaining production blocker found in observed source after focused panic fix.",
+  "checked_invariants": {
+    "guard_order": "closed, binding, failed owner, group/leader, command shape/control, request count preflight, applied boundary, Core-context, exact validation, receipt bound, charged bytes, final capacity/sequence, tracked admission, original router indexes/credits. Legacy submit passes None to the same path. Node preserves draining before application lookup.",
+    "cache_lifetime": "One contiguous group/application/applied-index run. First accepted original full validator, second may prepare once; None retained only for run. Error/control/group/app/applied changes reset. Entire local context moves out before application lookup and restores only on successful admission; result errors or any caught lookup/provider unwind leave member default. No worker/Core/application transitions through capability; callback completion drops state, accepted originals remain owned.",
+    "pending_and_fallback": "Factory sees the unchanged ordered unapplied durable commands followed by all retained same-group client commands. Prepared capability cannot retain temporary pending-item references through independent iterator/application lifetimes. Ready-only providers do not opt into ingress; general opt-in does not grant supports_ready_batch.",
+    "counter": "Exact480 helper and legacy full Counter validator semantics retained. Owned operation-ID reservations, immutable dedup/applied state, syntax-before-deferred pending capacity, full receipt bound and plain wrapper enlargement unchanged; Maintenance None fallback.",
+    "routing_and_timer": "Offered loop still decides at most64 originals, reads now per original before due/begin/window check, tests replica readiness in original index order with exact Leader+current-term-commit predicate, submits/records one result immediately and drops all scopes before maintenance/next poll. Existing maintenance/output/start/drain/latency boundaries unchanged; no request precollection or gathering delay.",
+    "authority": "ready_leader diagnostic only; owner fencing may leave predicate true but submit rechecks failure. No maintenance privilege, quorum/durability/read authority or new persistent cache."
+  },
+  "limits": [
+    "Coherent immutable application/provider contract remains required; arbitrary interior mutation or panicking Drop/allocator behavior is not certified.",
+    "New API removes repeated exact submission setup when several originals are already due in one scope; no end-to-end gain or cure for481 Mac tail regressions is established before fresh paired measurements.",
+    "Read-only source observations initially used nonexistent examples/benchmark.rs; actual leader helper examples/native_benchmark.rs subsequently checked. No workload or source change from that observation.",
+    "Initial default-isolation Node TAP reports one file-level pass; exact absolute Node --test-isolation=none exposes all42 registered controls, all pass0 with existing thresholds unchanged. Both scopes retained."
+  ],
+  "source_sha256": {
+    "src/application.rs": "81d97cff05ad80a45cb3ade22f8fafce749294a155f8c24deb41404877966c2e",
+    "src/application/ready_admission.rs": "cd10eaa9a55cf97055287d2882b0b2930ce3fa2d6172698dac5cd374f95d15fd",
+    "src/bin/support/counter_application.rs": "62291c8d3599a721d1d84491fca14572a34ef97e41915fd6d5b7c3af9e8447b0",
+    "src/runtime/clients.rs": "e392992cfaee689b31a8d3cc1b92329b584cda355cb1a6c35809f2b49b6d7da9",
+    "src/runtime/clients/ingress.rs": "4685d279bd848ddce185ec269a4ed7165847d5deec99b59971afc713c832d76d",
+    "src/runtime/node.rs": "b75fe84426c87ffbbffc9749dbcee71857287b1d364463647a4ab76ff1f9491b",
+    "examples/benchmark/offered.rs": "74f42f873100e51fffdfd956dbc5a0343e82e7978323fa48db7ef09e8c045838",
+    "examples/native_benchmark.rs": "f0c559a293fb721b1e657df1fbc89cd64723c8a6411de106dea690b07952d6d2"
+  },
+  "native_conformance_sources": {
+    "tests/startup/multi/ingress.rs": "cd3100d2b8e00588bb79779795d6a31ea0b00d63a5ef360f6242e47792bf12fd",
+    "tests/startup/multi/ingress/application.rs": "f9f449e2149de03172cfe3872f508f756f040c13f5255c83100bc423decdaf86",
+    "tests/startup/multi/ingress/history.rs": "2dac9ffd1df0b816f71fa9876d807ed6bf6ec6e65f200f73306ba88c5f165066"
+  }
+}

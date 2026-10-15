@@ -1,0 +1,19 @@
+{
+  "exit": 0,
+  "actual_prepare_handle": 52663,
+  "actual_prepare_exit": 0,
+  "prepare_terminal_tool_chunk": "b32763",
+  "job": "/private/tmp/voteboat-native482-sxtrtW",
+  "files": 11,
+  "config_sha256": "160969ecbb8db926ee9a2b671d6cccbcdcaffca0fa46a250be33e4330627259d",
+  "record_sha256": "092e44c5466dc7f4d527739edd14d6c2c3ae4044fdeda1b12076dea81db072aa",
+  "schema_sha256": "b2935c70ef4bff13275c7a442b25e25aa174d3352c7db3c7569d306c5e0ab6d3",
+  "ready_sha256": "9ab3c779befef663bff07a691258e21ed16db1f6b624ca40acf3c40ae8e5daf7",
+  "prepared_tar_sha256": "ec6a41ca476e83718e3225cdeede87bda9df63ef2021cdfa86eaf9c9e36562a2",
+  "exact_transfer_hashes_lengths_modes": true,
+  "record_not_started": true,
+  "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "macho_uuid": "EDE59E8D-8928-3C4E-9F04-3AADBBEF5772",
+  "original_copy_sha256": "fef05adc73179359ea2acc0d9b92978c57c4795410a727aefc30f1aac422fa52",
+  "scope": "Actual Mac482 preparation only; one reviewer approval-timeout before process creation preserved separately. No pilot/recording/build/tool install/policy change. Separate root quiet GO required."
+}

@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply",
+    "import",
+    "--save-only",
+    "--no-open",
+    "--unstable-presymbolicate",
+    "--symbol-dir",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/artifacts/native",
+    "--output",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/readouts/native.json.gz",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/capture/perf.data"
+  ],
+  "XDG_CACHE_HOME": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/symbol-cache",
+  "DEBUGINFOD_URLS": ""
+}

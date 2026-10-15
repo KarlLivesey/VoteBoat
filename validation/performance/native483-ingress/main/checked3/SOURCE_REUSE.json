@@ -1,0 +1,8 @@
+{
+  "prior_original": 26633,
+  "prior_actual_exit": 101,
+  "only_changed_input": [
+    "tests/client_admission/ingress.rs"
+  ],
+  "focused_fix": "Box the test-only Decision::Accepted payload to satisfy existing strict large_enum_variant. No production/API/validation semantics changed. Rerun affected clientall/core, metadata and all strict profiles; reuse every other exact successful scoped result and retain all failures."
+}

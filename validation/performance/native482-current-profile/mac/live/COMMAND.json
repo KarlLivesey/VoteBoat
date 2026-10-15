@@ -1,0 +1,9 @@
+{
+  "command": [
+    "ssh",
+    "karllivesey@192.168.192.76",
+    "/Applications/Xcode-beta.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9 /private/tmp/voteboat-native482-sxtrtW/record.py --authorized-quiet"
+  ],
+  "time_utc": "2026-10-15T15:25:52.945513+00:00",
+  "scope": "One original authorized Mac482 capture; no restart/replacement, conversion or collection before both-host actual END and root GO."
+}

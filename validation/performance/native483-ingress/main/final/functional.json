@@ -1,0 +1,59 @@
+{
+  "exit": 0,
+  "source_exact": true,
+  "proofs": {
+    "application-all": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/checked/application-all.exit.json",
+      "sha256": "80618f81ef517dc2c1b506e0bdf5d9d0192d8288a714609d846e61432a8b861f"
+    },
+    "node-all": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/checked/node-all.exit.json",
+      "sha256": "2dc2e6d141288c3cf5a289b696e8a79ad0a12572290530029d1859aafd96558b"
+    },
+    "provider-all": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/checked/provider-all.exit.json",
+      "sha256": "99e50601e785946b8ca5bc107d1c316c4b8e988e62eab9fa60783a463fe24bf0"
+    },
+    "library-native-retry": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/checked2/library-native-retry.exit.json",
+      "sha256": "8f340032cce37533534a860465c41e1cfd521bb3e726b05e59f42b421a6af0ed"
+    },
+    "native-scoped": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/checked2/native-scoped.exit.json",
+      "sha256": "53ca4280c7c31b60cc07fea9d3a3dc80a2ae34ee8bf9c3151be2ade5f6b3c8cc"
+    },
+    "native-ready": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/checked2/native-ready.exit.json",
+      "sha256": "d42e5ff99fc6a128cd763d2c2a84c65bc73c3e2ffb7cb502829d7a6a241ffae1"
+    },
+    "service": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/checked2/service.exit.json",
+      "sha256": "c88fbd6dc84547bb4879030e6c7443872c41d87024c41b9e65ecf63cee193595"
+    },
+    "application-core": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/checked2/application-core.exit.json",
+      "sha256": "4833192db9eea84bd46ea51544d649a9776918e2280719eabb39ac61052ff44e"
+    },
+    "node-core": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/checked2/node-core.exit.json",
+      "sha256": "3901490beaeac8e4380797ec897fefb68a902128488a4c81cf42ba3ead8d80de"
+    },
+    "provider-core": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/checked2/provider-core.exit.json",
+      "sha256": "4fdd56c4cdefed9fab5e223549c3910a9f32dd8b388825f24fbefb251abf8cd6"
+    },
+    "matched": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/checked2/matched.exit.json",
+      "sha256": "5617f5cb0c6cc32b2c9048a05080403b005eba18782f4f7e2879ee80f298470c"
+    },
+    "client-all": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/checked3/client-all.exit.json",
+      "sha256": "0f5c2c7ed0a57fae3f82066979632d5d0339656f8b3798db98022b4e6624b28e"
+    },
+    "client-core": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native483-ingress/checked3/client-core.exit.json",
+      "sha256": "797b988fbf3c6c8e6ae9f3e1564e40d6286f9d551473eb61c6193395e6902146"
+    }
+  },
+  "scope": "application23 all/core; clients37 all/core; Node67 all/core; providers42all/27core; library405 original successes+exact21 socket-denied controls retried0=426 selected passes; actualnative scopedTCP/QUIC2, nativequantums1, three-serviceTCP/QUIC2; standalone70. Onlychangedinput after checked2 was test-only Decision box, focused clientall/core rerun. Original sandbox/script/test/strict failures retained; no source semantics changed after functionalqualification."
+}

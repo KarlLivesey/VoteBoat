@@ -1,0 +1,9 @@
+{
+  "command": [
+    "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+    "/private/tmp/voteboat-native482-sxtrtW/control-tools/check-native-benchmark.mjs",
+    "--storage",
+    "/private/tmp/voteboat-native482-sxtrtW/workload"
+  ],
+  "exit": 0
+}

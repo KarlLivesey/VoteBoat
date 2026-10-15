@@ -1,0 +1,36 @@
+{
+  "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "source_files": 1495,
+  "qualified_projection_files": 1494,
+  "actual_export_exit": 0,
+  "actual_build_exit": 0,
+  "original_controls_exit": 1,
+  "actual_postterminal_completion_exit": 0,
+  "actual_native_processes_pass": 3,
+  "actual_native_storage_validators_pass": 3,
+  "actual_instrumented_witness_publication_validators_pass": 2,
+  "default_legacy_filelogio_physical_verified": true,
+  "cases": 3,
+  "artifact_sha256": "8d3530a6e801ebb857d8dff3fc1a0fb4ef5af865c3aed89d1450271f2054b84d",
+  "root_artifact_sha256": "f3233aad647806aeab594775cff9f894775099256e564982b84a1a1b08f60435",
+  "original_handles": {
+    "export": 28822,
+    "build": 90090,
+    "controls": 36585
+  },
+  "proof_sha256": {
+    "PUBLICATION.json": "e0434b86e355480bc4f60ff9abedd04521d9218d076063668081a9837380ae2d",
+    "FUNCTIONAL_QUALIFICATION.json": "5d76623744370eb562e94e401aaae389b0d8ccd22c674b2177afefabb9ba919a",
+    "SOURCE.json": "1bc4a744c96513e5c316571de8c018595e74bceeb1915c29651c28e10c7353e4",
+    "ARTIFACTS.json": "bedad4528d55ced36560d2ddd066fe4401f944314d197715e0c91b0c9c5eb36b",
+    "SYMBOLS.json": "a7ee57183299504df11d7bd7650106d0f6fa32b156ba171a5a8c0f692b07060c",
+    "PROFILE_PROOF.json": "4b6fe8cd07862c638202e0e6b28ee02c50ecaea41de3955b9c9f480f37e3e96c",
+    "BUILD_TERMINAL.json": "73f947d785b631a5ca73669dba7efed8516bdbaaa7150630d192de3e438bd7a0",
+    "controls/TERMINAL.json": "3904f91845940a7a4786a828eadcc870516bb1b0013cb9333920ddb8692d19b7",
+    "controls/COMPLETION.json": "0e049f996096591051ccdb6191701a66d354ff0270fab30c223a59a56c2a18de",
+    "controls/COMPLETED_RESULTS.json": "345adc4b53360fcbee9b26e1a5f1d2de2022f0f0b5bd9115bd55d6fae053cafc",
+    "controls/BEFORE.json": "23e9f7c83c1f6bcabe170f9bcd7e5105713084cd0ffe81b66762371d6fad4152",
+    "controls/AFTER.json": "23e9f7c83c1f6bcabe170f9bcd7e5105713084cd0ffe81b66762371d6fad4152"
+  },
+  "limits": "READY for later root-reviewed diagnostic campaign only. Original controller exit1 is preserved: extra default publication checker expected opt-in publication.csv. All three original native cases and full native validators exited0. Same-raw postterminal correction verifies default FileLogIo selectors/manifests/source binding; no workload/validator rerun. Default no publication diagnostics; no capacity/throughput gain acceptance yet."
+}

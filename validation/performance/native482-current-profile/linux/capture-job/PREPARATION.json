@@ -1,0 +1,24 @@
+{
+  "exit": 0,
+  "static_checks": "Five Python ASTs, exact frozen eight-module validator and existing resource-owner hashes; native matrix/perf argv and source/artifact/compiler/runtime SHA/modes guards pass. No capture or benchmark pilot.",
+  "kernel_policy": {
+    "perf_event_paranoid": 2,
+    "kptr_restrict": 2,
+    "perf_event_mlock_kb": 516
+  },
+  "source_files": 1495,
+  "source_directories": 328,
+  "perf_version": "perf version 7.2.10-1",
+  "perf_tools": [
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+      "sha256": "f0fe2b92d280391fa7efa55616f098ba683b9682cf145275d5eda136125f2a64"
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/lib/libpfm.so.4.14.1",
+      "sha256": "807641ee5d1dc4a2e5617686783313caaaca15f989f142e06c0508b9733d207e"
+    }
+  ],
+  "symbols": "Existing480 native artifact debug0 only; no mismatched framework debug2 symbols or rebuilt artifact used. Native ELF/root freshness/buildID recorded in candidate480 proofs.",
+  "recording_started": false
+}

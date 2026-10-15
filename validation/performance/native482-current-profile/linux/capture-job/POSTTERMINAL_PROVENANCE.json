@@ -1,0 +1,76 @@
+{
+  "inputs": {
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/CONFIG.json": {
+      "sha256": "f897ff86b3b8b4c8a53b30e3cc84f878744071d5307ffa96382c0fa1df3a0c53",
+      "bytes": 298164,
+      "mode": "0o644"
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/READY.json": {
+      "sha256": "62ce226484493a222205d01747057a48e49b70a3625d379cd37263572da5410b",
+      "bytes": 1753,
+      "mode": "0o644"
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/TERMINAL.json": {
+      "sha256": "c9b6a35cfe19784b1465ba0ae183e62e51080f1d7d3ac809f4b7a6fc7f30002e",
+      "bytes": 209,
+      "mode": "0o644"
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/VALIDATION.json": {
+      "sha256": "2843d39fbdda7a7853ebd15cd296e6f8de60f3173981df1b709abcdc5470335c",
+      "bytes": 6621,
+      "mode": "0o644"
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/capture/wal/offers.csv": {
+      "sha256": "30ba921ae53c26abf1f81beb1c13ccbbebe692dd77a7122f32f3697aefab36b4",
+      "bytes": 1038931,
+      "mode": "0o644"
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/capture/metadata/RESOURCES.json": {
+      "sha256": "a3add998b7bcf5624a18fdc5fd8dc37359456bb5c874b4b1006fa4338d07e104",
+      "bytes": 597,
+      "mode": "0o644"
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/readouts/ANALYSIS.json": {
+      "sha256": "d5f77ce2150a0dea4531161c1f0f7201fb11de5e5d9166006ea298d4c08cfd80",
+      "bytes": 326494,
+      "mode": "0o644"
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/readouts/native.json.gz": {
+      "sha256": "ca32a14362ffdf34b4abed45529692c45e499fb5495ab704f524fa50c3524e18",
+      "bytes": 85775,
+      "mode": "0o644"
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/samply-symbolication/data/ADDRESS_SYMBOLS.json": {
+      "sha256": "bac26205336026932121af7a9119150024b049cf6581d8358a92cd1030f99f63",
+      "bytes": 1114717,
+      "mode": "0o644"
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/samply-symbolication/data/CONTEXTS.json": {
+      "sha256": "fa271d11deaeade0507674800ea6c076e805ae7e4b8fd7c1f992c9c5433d53bf",
+      "bytes": 421626,
+      "mode": "0o644"
+    }
+  },
+  "analysis_scripts": {
+    "record.py": "9d7cb57885f01089d817c884d1e49c24884e639433d3c6fe70d95b08da36846c",
+    "validate.py": "1dbc0fef82ab18421f9b464a4a78a2a2e9d4948290373aecd7c0036df280e3b4",
+    "resources.py": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+    "common.py": "7344bb43528779527b774236792f57dcc648d3c8c8e559126a120afc89caba27",
+    "prepare.py": "ac606549ced12a4ecb9a4d4a3c179d4b4a41d4b59deb70466cc460d04c966a8a",
+    "convert.py": "3206522da9f33540b567d794d10b8f0e587e3b4aa2361af26ca47158dde7c1fc",
+    "analyse.py": "2c5622e43e669cdddc15d42f1b8c91513b3f2cb0f0b817e53d09df2cc1b4f6d2",
+    "symbolicate.py": "267b75b738880c84bc2e571ca1b4d8bb12c109a2147bfcf8d8240cd18ca1f46d",
+    "symbolize-native-json.py": "2f7a3c24160c9755a8a669bba36fec16b801bcae3c78757037ceeff45c1dd34c",
+    "samply-contexts.py": "3cfd5da49bd7c7fefdd75d77fe7fcf1626e35c2afc7e813ba5bbfd6cbd808faf"
+  },
+  "nearest_rank": "Sort actual applied intended/service ns and all offers dispatch ns; index ceil(n*p/100)-1, divide ns by1e6. DIAGNOSTIC readout checked against actual summary p99.",
+  "source_explanation": "Observed exactCounter.validate_proposal/check_submit generic instantiation distinguished from physical ClientRouter::submit caller; no physicalcheck_submit frame claimed.",
+  "observation_errors": [
+    {
+      "tool_chunk": "979395",
+      "command": "rg -n 'fn validate_proposal|fn check_submit|fn submit|ready_admission' src/application/counter.rs src/application.rs src/runtime/clients.rs",
+      "stderr": "rg: src/application/counter.rs: No such file or directory (os error 2)",
+      "scope": "Read-only source path observation, compound command continued; no data/profile changes. Correct existing source src/application.rs read subsequently."
+    }
+  ]
+}

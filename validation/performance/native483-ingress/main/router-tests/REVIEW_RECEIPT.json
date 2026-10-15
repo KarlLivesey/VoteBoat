@@ -1,0 +1,202 @@
+{
+  "exit": 0,
+  "scope": "Independent public downstream router tests and source read-only review; finite regression/conformance evidence, not complete safety proof or native performance qualification. No benchmark/browser/source-provider edits.",
+  "actual_scopes": {
+    "attempt1": {
+      "actual_exit": 101,
+      "passed": 35,
+      "failed": 1,
+      "command": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "effect_owner",
+        "client_admission",
+        "--",
+        "--test-threads=1"
+      ]
+    },
+    "attempt2": {
+      "actual_exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "command": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "effect_owner",
+        "client_admission::ingress::ingress_counter_",
+        "--",
+        "--test-threads=1"
+      ]
+    },
+    "attempt3": {
+      "actual_exit": 0,
+      "passed": 1,
+      "failed": 0,
+      "command": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "effect_owner",
+        "client_admission::ingress::ingress_caught_provider_panic_",
+        "--",
+        "--test-threads=1"
+      ]
+    },
+    "attempt4": {
+      "actual_exit": 0,
+      "passed": 37,
+      "failed": 0,
+      "command": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "effect_owner",
+        "client_admission",
+        "--",
+        "--test-threads=1"
+      ]
+    }
+  },
+  "original_handles": {
+    "attempt1": 40089,
+    "attempt2": 15367,
+    "attempt3_and_attempt4": 6133
+  },
+  "terminal_tool_chunks": {
+    "attempt1": "075c8e",
+    "attempt2": "df44b9",
+    "attempt3_and_attempt4": "8e8091"
+  },
+  "final_source_exact_after": {
+    "tests/client_admission/ingress.rs": "54b81c8339d14086311d8a479fc3e41f423fadd5324f6cb15975e29efc87bd52",
+    "tests/effect_owner.rs": "a953bbed7e4571c60f4499b0fa5accbc8bd1d15009edaef37f3fce6513910600",
+    "src/runtime/clients/ingress.rs": "4685d279bd848ddce185ec269a4ed7165847d5deec99b59971afc713c832d76d",
+    "src/runtime/clients.rs": "e392992cfaee689b31a8d3cc1b92329b584cda355cb1a6c35809f2b49b6d7da9",
+    "src/runtime/node.rs": "b75fe84426c87ffbbffc9749dbcee71857287b1d364463647a4ab76ff1f9491b",
+    "src/application.rs": "81d97cff05ad80a45cb3ade22f8fafce749294a155f8c24deb41404877966c2e"
+  },
+  "implemented_tests": 9,
+  "failed_check_focused_fix": "Attempt1 failed only Counter differential pumping: existing single-capacity HostWorker refused a concurrently collected second-group persist lease. New test-local pump retains/retries returned exact leases; the original raw failure and failed test source remain. Attempt2 corrected differential passed. No production fallback weakened.",
+  "review_found_and_fixed_by_parent": "Prepared-validator panic caught inside outer ingress callback could retain mutated cached reservations. Parent moved whole validation to a local at start of scoped submit and restores only after full successful tracked ownership. Ninth downstream test reserves then panics, catches inside the same callback, requires immediate drop/full next validation/fresh pending reprepare and every accepted original outcome. Focused1 and consolidated37 passed on final source.",
+  "checked_behaviors": [
+    "Mixed-group Counter scoped vs repeated legacy: exact individual tickets, refusal request content/capacity, final and per-completion credits, operation positions, duplicate/conflict receipts and application totals.",
+    "Empty/singleton constructor0; lazy second factory1; defaultNone cached; ready-only host override never used by ingress.",
+    "Exact borrowed pending content copied into owned temporary reservations, reset by group and borrowed application identity.",
+    "Per-original Core context guard, receipt upper bound, final byte charge and actual runtime admission refusal drop context; rejected IDs never consume later successful capacity/sequence.",
+    "Unwinding outer callback preserves accepted ownership; cancel stops observation, retained capacity survives until durable application, retry returns original outcome.",
+    "Caught downstream provider panic inside live callback discards context and allows exact original processing to continue."
+  ],
+  "limits": [
+    "Selected router scope ran all-features; parent coordinates core/full strict/native/metadata/matched qualification.",
+    "Application-pointer scope control tests do not claim arbitrary interior-mutable provider behavior is safe; providers retain immutable coherent-state contract.",
+    "Untracked runtime filler is admission-only capacity evidence, not a durable application history; durable outcomes are established separately by Counter differential/unwind controls and parent native controls."
+  ],
+  "inputs": {
+    "target/p9/native483-ingress/router-tests/attempt1/COMMAND.json": {
+      "sha256": "d3f209c38c2f02342f36f6e7617008ea441d788ef121fb2c397b592db958fb29",
+      "bytes": 168
+    },
+    "target/p9/native483-ingress/router-tests/attempt1/EXIT.json": {
+      "sha256": "55b92d4da6b854bf4b123bebbe2dadd86fb015f634dfe76defb95be396a769e0",
+      "bytes": 21
+    },
+    "target/p9/native483-ingress/router-tests/attempt1/SOURCE.json": {
+      "sha256": "d3f6aa4328a7894f8a36ea0cc2b3a1816cb07448e0dd182c27925f025a91986e",
+      "bytes": 590
+    },
+    "target/p9/native483-ingress/router-tests/attempt1/ingress.rs": {
+      "sha256": "19c6da3472161c9459f0b3c9f33eedd2a7ae5d9714a37c4baf7c756de2beafba",
+      "bytes": 19794
+    },
+    "target/p9/native483-ingress/router-tests/attempt1/stderr": {
+      "sha256": "5603a7672555ef8b261c57bbfbf3b43154bb8a396c78a14d64f63066992a6d15",
+      "bytes": 290
+    },
+    "target/p9/native483-ingress/router-tests/attempt1/stdout": {
+      "sha256": "96160f480cbc25c5f272ad6e398efa2a9584c2f78eadd6051e9bf645aaa35e68",
+      "bytes": 5735
+    },
+    "target/p9/native483-ingress/router-tests/attempt2/COMMAND.json": {
+      "sha256": "c5b205b7c847af0f458349570fafd4932d35dde554a0fa1f46e3edd6b71c04e4",
+      "bytes": 195
+    },
+    "target/p9/native483-ingress/router-tests/attempt2/EXIT.json": {
+      "sha256": "ac402e57cc9c2e0ca0a3fe16d4959090bfaa023c6fa1b4dd328b65bad8ee9cf5",
+      "bytes": 19
+    },
+    "target/p9/native483-ingress/router-tests/attempt2/SOURCE.json": {
+      "sha256": "f65d6b4db5a31aa8c6ee0301e2ebed3aba08ea6da30c886f789e990cb744c77c",
+      "bytes": 590
+    },
+    "target/p9/native483-ingress/router-tests/attempt2/ingress.rs": {
+      "sha256": "ff58ba28543eb85e9c7622fc3982e9f533d5f6fe79f2f492acdaee51fb19d524",
+      "bytes": 21708
+    },
+    "target/p9/native483-ingress/router-tests/attempt2/stderr": {
+      "sha256": "3643ccc1b763c0f71c5e60927752760d442c67d698504fdf80d71ffad5145832",
+      "bytes": 234
+    },
+    "target/p9/native483-ingress/router-tests/attempt2/stdout": {
+      "sha256": "29a4d64507e3b84b7b0bf6e39867734c5450aa2ff858a92bd81e9a953e52f056",
+      "bytes": 239
+    },
+    "target/p9/native483-ingress/router-tests/attempt3/COMMAND.json": {
+      "sha256": "93fa5375a0a461b88e6f68ed31c2e7db49210de23a07a1e13561f8a88c6223c8",
+      "bytes": 209
+    },
+    "target/p9/native483-ingress/router-tests/attempt3/EXIT.json": {
+      "sha256": "ac402e57cc9c2e0ca0a3fe16d4959090bfaa023c6fa1b4dd328b65bad8ee9cf5",
+      "bytes": 19
+    },
+    "target/p9/native483-ingress/router-tests/attempt3/SOURCE.json": {
+      "sha256": "f1fe50edee4fc62df05a886335a50056409570a3f0eebdfa5d16f10814f00008",
+      "bytes": 590
+    },
+    "target/p9/native483-ingress/router-tests/attempt3/stderr": {
+      "sha256": "fa645531ad667a255314b11ca3bc5cf0dd062c559c013f668b28e90b905e69a5",
+      "bytes": 235
+    },
+    "target/p9/native483-ingress/router-tests/attempt3/stdout": {
+      "sha256": "35e784b1eeafe009509d6c018168cb164e511839fdb4264ca5f9e5ebcc91050c",
+      "bytes": 233
+    },
+    "target/p9/native483-ingress/router-tests/attempt4/COMMAND.json": {
+      "sha256": "d3f209c38c2f02342f36f6e7617008ea441d788ef121fb2c397b592db958fb29",
+      "bytes": 168
+    },
+    "target/p9/native483-ingress/router-tests/attempt4/EXIT.json": {
+      "sha256": "ac402e57cc9c2e0ca0a3fe16d4959090bfaa023c6fa1b4dd328b65bad8ee9cf5",
+      "bytes": 19
+    },
+    "target/p9/native483-ingress/router-tests/attempt4/SOURCE.json": {
+      "sha256": "f1fe50edee4fc62df05a886335a50056409570a3f0eebdfa5d16f10814f00008",
+      "bytes": 590
+    },
+    "target/p9/native483-ingress/router-tests/attempt4/stderr": {
+      "sha256": "c06cefabd1eb4c1e1b1f52559e4aad340dd7823fdfcb39b218b4c6ec6c75fbc7",
+      "bytes": 158
+    },
+    "target/p9/native483-ingress/router-tests/attempt4/stdout": {
+      "sha256": "210104c25e74271c24daab246221eb9639d409d6dabf1304d7358667ec570e85",
+      "bytes": 4385
+    }
+  }
+}

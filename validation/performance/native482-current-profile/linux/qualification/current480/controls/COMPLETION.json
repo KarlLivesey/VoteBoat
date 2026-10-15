@@ -1,0 +1,16 @@
+{
+  "exit": 0,
+  "source_exact": true,
+  "cases": 3,
+  "actual_native_processes_pass": 3,
+  "actual_native_storage_validators_pass": 3,
+  "witness_publication_validators_pass": 2,
+  "original_controller_exit": 1,
+  "original_extra_default_publication_checker_exit": 1,
+  "postterminal_completion_only": true,
+  "no_workload_or_validator_rerun": true,
+  "default_publication_trace_expected": false,
+  "preserved_original_terminal_sha256": "3904f91845940a7a4786a828eadcc870516bb1b0013cb9333920ddb8692d19b7",
+  "completed_results_sha256": "345adc4b53360fcbee9b26e1a5f1d2de2022f0f0b5bd9115bd55d6fae053cafc",
+  "scope": "Focused harness-reference correction from the same original raw default case. Original extra checker failure and original controller exit1 remain unchanged; it required an opt-in diagnostics file absent from the default contract."
+}

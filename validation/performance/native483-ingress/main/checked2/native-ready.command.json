@@ -1,0 +1,13 @@
+[
+  "cargo",
+  "+stable",
+  "test",
+  "--locked",
+  "--offline",
+  "--all-features",
+  "--test",
+  "startup",
+  "native_selected_quantums_bound_original_visits_and_recover_exact_individual_retries",
+  "--",
+  "--test-threads=1"
+]

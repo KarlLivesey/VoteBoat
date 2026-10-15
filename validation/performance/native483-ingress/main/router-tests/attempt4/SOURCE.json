@@ -1,0 +1,8 @@
+{
+  "tests/client_admission/ingress.rs": "54b81c8339d14086311d8a479fc3e41f423fadd5324f6cb15975e29efc87bd52",
+  "tests/effect_owner.rs": "a953bbed7e4571c60f4499b0fa5accbc8bd1d15009edaef37f3fce6513910600",
+  "src/runtime/clients/ingress.rs": "4685d279bd848ddce185ec269a4ed7165847d5deec99b59971afc713c832d76d",
+  "src/runtime/clients.rs": "e392992cfaee689b31a8d3cc1b92329b584cda355cb1a6c35809f2b49b6d7da9",
+  "src/runtime/node.rs": "b75fe84426c87ffbbffc9749dbcee71857287b1d364463647a4ab76ff1f9491b",
+  "src/application.rs": "81d97cff05ad80a45cb3ade22f8fafce749294a155f8c24deb41404877966c2e"
+}

@@ -34,6 +34,8 @@ mod local_drain;
 mod peer_credentials;
 #[path = "node_network.rs"]
 mod selected_network;
+#[path = "node_ingress.rs"]
+mod submission_batches;
 type Parts = NodeParts<
     Ready,
     Timers,

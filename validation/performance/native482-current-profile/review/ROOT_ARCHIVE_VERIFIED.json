@@ -1,0 +1,69 @@
+{
+  "exit": 0,
+  "scope": "Independent read-only comparison of sealed482 archives against original ignored files/mode inventories; no capture, rebuild, workload or source change. Generated README/PACKING/SELECTION metadata is sealed; original modes for packed payloads remain in transfer/selection inventories rather than encoded in gzip.",
+  "hosts": {
+    "linux": {
+      "payloads": 168,
+      "packed_originals": 65,
+      "manifest_sha256": "29e981dde1a258bc860a75b4d09bd6132995685388ff3907c0e817cce0530f29",
+      "all_recursive_payload_hashes_exact": true,
+      "all_packed_lengths_hashes_exact": true,
+      "archived_originals_compared_to_ignored_files": 165,
+      "recorded_source_or_transfer_modes_verified": 165,
+      "raw_profile": {
+        "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/capture/perf.data",
+        "sha256": "26de351dbcc4adbbf1e1627af2d5c02a84cc5d49d421a4b8fbd7d406ad3c6675",
+        "bytes": 61970732,
+        "retention": "Ignored raw perf.data preserved; archive binds identity and converted data, not raw binary perf.data."
+      }
+    },
+    "mac": {
+      "payloads": 174,
+      "packed_originals": 19,
+      "manifest_sha256": "b1208921d4221ecb5555f26028ee69461e34c7a0be821c79f23438eceb9772b0",
+      "all_recursive_payload_hashes_exact": true,
+      "all_packed_lengths_hashes_exact": true,
+      "archived_originals_compared_to_ignored_files": 172,
+      "recorded_source_or_transfer_modes_verified": 43,
+      "raw_profile": {
+        "path": "target/p9/native482-current-profile/mac/raw/profile.json.gz",
+        "sha256": "f3914123b2f8c180f907af6b6f3002fc328d46e0ee7778ac43b3e22dbe88e197",
+        "bytes": 1104449,
+        "retention": "Original saved JSON.gz preserved byte-for-byte in archive and ignored collection."
+      }
+    }
+  },
+  "originals": {
+    "time_utc": "2026-10-15T15:27:32.347745+00:00",
+    "linux": {
+      "original_handle": 11490,
+      "actual_terminal_exit": 0,
+      "terminal_tool_chunk": "d4fe2c",
+      "profiler_exit": 0,
+      "native_exit": 0,
+      "resource_helper_exit": 0,
+      "post_guard_exit": 0,
+      "all_owned_processes_terminated": true,
+      "raw_perf_bytes": 61970732,
+      "kernel_policy_unchanged": [
+        2,
+        2,
+        516
+      ]
+    },
+    "mac": {
+      "original_handle": 18694,
+      "actual_terminal_exit": 0,
+      "terminal_tool_chunk": "f4df06",
+      "markers": [
+        "MAC482_RECORD_EXIT0",
+        "ORIGINAL_MAC482_SSH_EXIT0"
+      ],
+      "profiler_exit": 0,
+      "post_guard_exit": 0,
+      "individual_native_and_profile_file_metadata": "Collect and validate after this END; not inferred from controller success alone."
+    },
+    "authorization": "Both original482recordings actually terminated0. Collection, validation, same-data conversion/symbolication, numerical analysis and lossless archive may begin. No replacement recording or policy/binary/source change. Diagnostic cells differ; do not compare CPU shares cross-host or call profiled rates acceptance."
+  },
+  "independent_numerical_review_sha256": "01c07d87a4d62730e662226767cc8c28a47243504af624c0bd004ee323c370be"
+}

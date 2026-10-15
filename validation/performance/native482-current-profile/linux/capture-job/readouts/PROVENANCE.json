@@ -1,0 +1,30 @@
+{
+  "analyse_sha256": "2c5622e43e669cdddc15d42f1b8c91513b3f2cb0f0b817e53d09df2cc1b4f6d2",
+  "inputs": {
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/readouts/stacks.stdout": {
+      "sha256": "28ac49e458eb7a06db198a748d185e712f1d853eeba72cdc15e0659c9310916c",
+      "bytes": 478357
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/readouts/leaves.stdout": {
+      "sha256": "8824fee36411de9f1b5a04c02367aafc429b0dc8207fb05071e75f110d186e6a",
+      "bytes": 1713871
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/readouts/self.stdout": {
+      "sha256": "329322cb79cc096214c47d53f5e134c8bf21ef16628779daacc283890108eb5a",
+      "bytes": 3788614
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/VALIDATION.json": {
+      "sha256": "2843d39fbdda7a7853ebd15cd296e6f8de60f3173981df1b709abcdc5470335c",
+      "bytes": 6621
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/capture/metadata/RESOURCES.json": {
+      "sha256": "a3add998b7bcf5624a18fdc5fd8dc37359456bb5c874b4b1006fa4338d07e104",
+      "bytes": 597
+    },
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/capture/perf.data": {
+      "sha256": "26de351dbcc4adbbf1e1627af2d5c02a84cc5d49d421a4b8fbd7d406ad3c6675",
+      "bytes": 61970732
+    }
+  },
+  "folded_format": "Root-to-leaf frame IDs (full exact symbol+DSO in SYMBOLS.json); native.folded uses raw period weights and native.samples.folded sample counts. No SVG/browser required."
+}

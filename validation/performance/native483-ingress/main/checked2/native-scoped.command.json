@@ -1,0 +1,13 @@
+[
+  "cargo",
+  "+stable",
+  "test",
+  "--locked",
+  "--offline",
+  "--all-features",
+  "--test",
+  "startup",
+  "multi::ingress::",
+  "--",
+  "--test-threads=1"
+]

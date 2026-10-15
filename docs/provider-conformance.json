@@ -4487,6 +4487,38 @@
         {
           "file": "tests/client_admission/ready_batch/temporary_context.rs",
           "symbol": "per_original_context_guard_precedes_prepared_validation"
+        },
+        {
+          "file": "tests/application/prepared_admission.rs",
+          "symbol": "ready_only_provider_does_not_opt_into_general_preparation_or_consume_pending"
+        },
+        {
+          "file": "tests/application/prepared_admission.rs",
+          "symbol": "general_provider_forwards_ready_preparation_without_granting_ready_batching"
+        },
+        {
+          "file": "tests/application/prepared_admission.rs",
+          "symbol": "general_none_reaches_ready_fallback_without_consuming_pending"
+        },
+        {
+          "file": "tests/application/prepared_admission.rs",
+          "symbol": "counter_general_context_owns_pending_ids_and_keeps_syntax_before_capacity"
+        },
+        {
+          "file": "tests/application/prepared_admission/wrapper.rs",
+          "symbol": "executable_plain_counter_forwards_general_and_ready_with_full_receipt_bound"
+        },
+        {
+          "file": "tests/application/prepared_admission/wrapper.rs",
+          "symbol": "executable_maintenance_profile_retains_both_fallbacks"
+        },
+        {
+          "file": "tests/startup/multi/ingress.rs",
+          "symbol": "tcp_scoped_ingress_keeps_individual_host_outcomes_and_recovers_all_groups"
+        },
+        {
+          "file": "tests/startup/multi/ingress.rs",
+          "symbol": "quic_scoped_ingress_keeps_individual_host_outcomes_and_recovers_all_groups"
         }
       ],
       "operations": [
@@ -4550,6 +4582,282 @@
           ],
           "remaining": [
             "Selected finite independent-host histories do not certify arbitrary application providers, allocation failures or concurrent external mutation. Existing protected-control, cancellation, retry and native recovery histories remain separate checks."
+          ]
+        },
+        {
+          "names": [
+            "prepare_proposal_admission"
+          ],
+          "obligation": "Optional general exact reservations borrow immutable application state and own retained pending data independently of iterator-item lifetimes. Preserve full validator receipt bound, successful predecessor reservations, syntax-before-capacity order and application state. Default None and ready-only providers retain legacy ingress; default ready delegation can use a general capability without granting ready batching. Plain executable forwarding preserves its larger wrapped receipt bound; Maintenance keeps both fallbacks.",
+          "assertions": [
+            {
+              "file": "tests/application/prepared_admission.rs",
+              "symbol": "ready_only_provider_does_not_opt_into_general_preparation_or_consume_pending"
+            },
+            {
+              "file": "tests/application/prepared_admission.rs",
+              "symbol": "general_provider_forwards_ready_preparation_without_granting_ready_batching"
+            },
+            {
+              "file": "tests/application/prepared_admission.rs",
+              "symbol": "general_none_reaches_ready_fallback_without_consuming_pending"
+            },
+            {
+              "file": "tests/application/prepared_admission.rs",
+              "symbol": "counter_general_context_owns_pending_ids_and_keeps_syntax_before_capacity"
+            },
+            {
+              "file": "tests/application/prepared_admission/wrapper.rs",
+              "symbol": "executable_plain_counter_forwards_general_and_ready_with_full_receipt_bound"
+            },
+            {
+              "file": "tests/application/prepared_admission/wrapper.rs",
+              "symbol": "executable_maintenance_profile_retains_both_fallbacks"
+            },
+            {
+              "file": "tests/startup/multi/ingress.rs",
+              "symbol": "tcp_scoped_ingress_keeps_individual_host_outcomes_and_recovers_all_groups"
+            },
+            {
+              "file": "tests/startup/multi/ingress.rs",
+              "symbol": "quic_scoped_ingress_keeps_individual_host_outcomes_and_recovers_all_groups"
+            }
+          ],
+          "remaining": [
+            "Source-linked finite provider controls are not arbitrary-provider certification, allocation-failure coverage, concurrent external-mutation safety or a performance result. Their actual test exits and same-cut macOS/native qualification must be read separately; no pass is inferred from metadata presence."
+          ]
+        }
+      ]
+    },
+    {
+      "public_contract": "ProposalIngress / scoped submission composition",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/client_admission/ingress.rs",
+          "symbol": "ingress_counter_matches_legacy_tickets_credits_retries_conflicts_and_original_results"
+        },
+        {
+          "file": "tests/client_admission/ingress.rs",
+          "symbol": "ingress_empty_singleton_lazy_second_and_cached_none_keep_reference_fallback"
+        },
+        {
+          "file": "tests/client_admission/ingress.rs",
+          "symbol": "ingress_does_not_opt_a_ready_only_downstream_provider_in"
+        },
+        {
+          "file": "tests/client_admission/ingress.rs",
+          "symbol": "ingress_receipt_and_context_guard_errors_discard_candidate_reservations"
+        },
+        {
+          "file": "tests/client_admission/ingress.rs",
+          "symbol": "ingress_final_byte_charge_refusal_resets_prepared_state_and_preserves_successful_credits"
+        },
+        {
+          "file": "tests/client_admission/ingress.rs",
+          "symbol": "ingress_resets_on_group_and_borrowed_application_identity_changes"
+        },
+        {
+          "file": "tests/client_admission/ingress.rs",
+          "symbol": "ingress_runtime_refusal_after_preparation_preserves_accepted_prefix_and_resets"
+        },
+        {
+          "file": "tests/client_admission/ingress.rs",
+          "symbol": "ingress_callback_unwind_retains_admitted_outcomes_cancel_reservations_and_retry_history"
+        },
+        {
+          "file": "tests/support/node_ingress.rs",
+          "symbol": "scoped_node_submissions_retain_individual_results_after_partial_refusal"
+        },
+        {
+          "file": "tests/support/node_ingress.rs",
+          "symbol": "scoped_node_drain_precedes_missing_application_and_preserves_request"
+        },
+        {
+          "file": "tests/client_admission/ingress.rs",
+          "symbol": "ingress_caught_provider_panic_discards_context_before_continuing_the_same_scope"
+        },
+        {
+          "file": "tests/startup/multi/ingress.rs",
+          "symbol": "tcp_scoped_ingress_keeps_individual_host_outcomes_and_recovers_all_groups"
+        },
+        {
+          "file": "tests/startup/multi/ingress.rs",
+          "symbol": "quic_scoped_ingress_keeps_individual_host_outcomes_and_recovers_all_groups"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "ClientRouter::with_submission_batch"
+          ],
+          "obligation": "Exclusive owner/router and immutable application synchronous scope preserves every per-original decision, ticket, pending iterator, order and credit. Prepare only after successful first ordinary admission, once on the second; None fallback and ready-only separation remain. Drop/reset on receipt/context/byte/capacity refusal or group/application change; successful predecessors survive scope return/unwind with original cancellation and retry ownership. The lent slot stays empty while validation/admission owns a working context and is restored only after successful ordinary ownership, so a prepared-provider panic caught inside the same outer callback cannot retain rejected reservations.",
+          "assertions": [
+            {
+              "file": "tests/client_admission/ingress.rs",
+              "symbol": "ingress_counter_matches_legacy_tickets_credits_retries_conflicts_and_original_results"
+            },
+            {
+              "file": "tests/client_admission/ingress.rs",
+              "symbol": "ingress_empty_singleton_lazy_second_and_cached_none_keep_reference_fallback"
+            },
+            {
+              "file": "tests/client_admission/ingress.rs",
+              "symbol": "ingress_does_not_opt_a_ready_only_downstream_provider_in"
+            },
+            {
+              "file": "tests/client_admission/ingress.rs",
+              "symbol": "ingress_receipt_and_context_guard_errors_discard_candidate_reservations"
+            },
+            {
+              "file": "tests/client_admission/ingress.rs",
+              "symbol": "ingress_final_byte_charge_refusal_resets_prepared_state_and_preserves_successful_credits"
+            },
+            {
+              "file": "tests/client_admission/ingress.rs",
+              "symbol": "ingress_resets_on_group_and_borrowed_application_identity_changes"
+            },
+            {
+              "file": "tests/client_admission/ingress.rs",
+              "symbol": "ingress_runtime_refusal_after_preparation_preserves_accepted_prefix_and_resets"
+            },
+            {
+              "file": "tests/client_admission/ingress.rs",
+              "symbol": "ingress_callback_unwind_retains_admitted_outcomes_cancel_reservations_and_retry_history"
+            },
+            {
+              "file": "tests/client_admission/ingress.rs",
+              "symbol": "ingress_caught_provider_panic_discards_context_before_continuing_the_same_scope"
+            },
+            {
+              "file": "tests/startup/multi/ingress.rs",
+              "symbol": "tcp_scoped_ingress_keeps_individual_host_outcomes_and_recovers_all_groups"
+            },
+            {
+              "file": "tests/startup/multi/ingress.rs",
+              "symbol": "quic_scoped_ingress_keeps_individual_host_outcomes_and_recovers_all_groups"
+            }
+          ],
+          "remaining": [
+            "Selected source-linked finite host/Node histories only; metadata integrity does not establish executed tests, arbitrary-provider certification, every fault/interleaving, same-cut native TCP/QUIC/macOS qualification or a measured speedup. Existing authentication, quorum durability, restart, cancellation and service histories remain separate obligations."
+          ]
+        },
+        {
+          "names": [
+            "Node::with_submission_batch"
+          ],
+          "obligation": "Forward only the same ordinary scoped capability; every original checks Node draining before application lookup. Later malformed/missing-group refusal returns the original request allocation while previous individual results and duplicate outcomes remain owned; normal poll/application/cleanup resumes after the scope drops.",
+          "assertions": [
+            {
+              "file": "tests/support/node_ingress.rs",
+              "symbol": "scoped_node_submissions_retain_individual_results_after_partial_refusal"
+            },
+            {
+              "file": "tests/support/node_ingress.rs",
+              "symbol": "scoped_node_drain_precedes_missing_application_and_preserves_request"
+            },
+            {
+              "file": "tests/startup/multi/ingress.rs",
+              "symbol": "tcp_scoped_ingress_keeps_individual_host_outcomes_and_recovers_all_groups"
+            },
+            {
+              "file": "tests/startup/multi/ingress.rs",
+              "symbol": "quic_scoped_ingress_keeps_individual_host_outcomes_and_recovers_all_groups"
+            }
+          ],
+          "remaining": [
+            "Selected source-linked finite host/Node histories only; metadata integrity does not establish executed tests, arbitrary-provider certification, every fault/interleaving, same-cut native TCP/QUIC/macOS qualification or a measured speedup. Existing authentication, quorum durability, restart, cancellation and service histories remain separate obligations."
+          ]
+        },
+        {
+          "names": [
+            "ready_leader"
+          ],
+          "obligation": "Inspect live Core leader role and committed-current-term predicate per query, with false for missing Core; diagnostic only. No cached leader, lease, linearizable-read, fencing bypass, admission or durability authority follows. submit independently rechecks failure even if fencing leaves leader readiness true.",
+          "assertions": [
+            {
+              "file": "tests/support/node_ingress.rs",
+              "symbol": "scoped_node_submissions_retain_individual_results_after_partial_refusal"
+            },
+            {
+              "file": "tests/client_admission/ingress.rs",
+              "symbol": "ingress_empty_singleton_lazy_second_and_cached_none_keep_reference_fallback"
+            },
+            {
+              "file": "tests/startup/multi/ingress.rs",
+              "symbol": "tcp_scoped_ingress_keeps_individual_host_outcomes_and_recovers_all_groups"
+            },
+            {
+              "file": "tests/startup/multi/ingress.rs",
+              "symbol": "quic_scoped_ingress_keeps_individual_host_outcomes_and_recovers_all_groups"
+            }
+          ],
+          "remaining": [
+            "Selected source-linked finite host/Node histories only; metadata integrity does not establish executed tests, arbitrary-provider certification, every fault/interleaving, same-cut native TCP/QUIC/macOS qualification or a measured speedup. Existing authentication, quorum durability, restart, cancellation and service histories remain separate obligations.",
+            "Selected elected/other/missing-group readiness observations are not exhaustive term/fencing transition coverage; the exact source predicate remains part of review."
+          ]
+        },
+        {
+          "names": [
+            "submit"
+          ],
+          "obligation": "Return each original ticket or rejected request immediately under unchanged guard/error/receipt/credit order. Rejecting a candidate discards prepared reservations; earlier successful tracked admissions are not rolled back. Missing application and ordinary drain preserve original ownership and no maintenance authority escapes. The lent slot stays empty while validation/admission owns a working context and is restored only after successful ordinary ownership, so a prepared-provider panic caught inside the same outer callback cannot retain rejected reservations.",
+          "assertions": [
+            {
+              "file": "tests/client_admission/ingress.rs",
+              "symbol": "ingress_counter_matches_legacy_tickets_credits_retries_conflicts_and_original_results"
+            },
+            {
+              "file": "tests/client_admission/ingress.rs",
+              "symbol": "ingress_empty_singleton_lazy_second_and_cached_none_keep_reference_fallback"
+            },
+            {
+              "file": "tests/client_admission/ingress.rs",
+              "symbol": "ingress_does_not_opt_a_ready_only_downstream_provider_in"
+            },
+            {
+              "file": "tests/client_admission/ingress.rs",
+              "symbol": "ingress_receipt_and_context_guard_errors_discard_candidate_reservations"
+            },
+            {
+              "file": "tests/client_admission/ingress.rs",
+              "symbol": "ingress_final_byte_charge_refusal_resets_prepared_state_and_preserves_successful_credits"
+            },
+            {
+              "file": "tests/client_admission/ingress.rs",
+              "symbol": "ingress_resets_on_group_and_borrowed_application_identity_changes"
+            },
+            {
+              "file": "tests/client_admission/ingress.rs",
+              "symbol": "ingress_runtime_refusal_after_preparation_preserves_accepted_prefix_and_resets"
+            },
+            {
+              "file": "tests/client_admission/ingress.rs",
+              "symbol": "ingress_callback_unwind_retains_admitted_outcomes_cancel_reservations_and_retry_history"
+            },
+            {
+              "file": "tests/support/node_ingress.rs",
+              "symbol": "scoped_node_submissions_retain_individual_results_after_partial_refusal"
+            },
+            {
+              "file": "tests/support/node_ingress.rs",
+              "symbol": "scoped_node_drain_precedes_missing_application_and_preserves_request"
+            },
+            {
+              "file": "tests/client_admission/ingress.rs",
+              "symbol": "ingress_caught_provider_panic_discards_context_before_continuing_the_same_scope"
+            },
+            {
+              "file": "tests/startup/multi/ingress.rs",
+              "symbol": "tcp_scoped_ingress_keeps_individual_host_outcomes_and_recovers_all_groups"
+            },
+            {
+              "file": "tests/startup/multi/ingress.rs",
+              "symbol": "quic_scoped_ingress_keeps_individual_host_outcomes_and_recovers_all_groups"
+            }
+          ],
+          "remaining": [
+            "Selected source-linked finite host/Node histories only; metadata integrity does not establish executed tests, arbitrary-provider certification, every fault/interleaving, same-cut native TCP/QUIC/macOS qualification or a measured speedup. Existing authentication, quorum durability, restart, cancellation and service histories remain separate obligations."
           ]
         }
       ]

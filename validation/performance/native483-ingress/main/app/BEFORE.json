@@ -1,0 +1,6 @@
+{
+  "src/application.rs": "d6075051efcc4693a59075b12a20b7e7ed11bd2111e0d1c2adb961213744fa36",
+  "src/bin/support/counter_application.rs": "9e9c5d772d87ff46144bd13743eba0fe6ec4999c3a5a5c6a1003230530b8591f",
+  "tests/application.rs": "88307f9d9bb46beb0cde7ba063e9ab36fbc2ceb05da73ccf57992044ed487535",
+  "tests/application/ready_admission.rs": "e5a393a531a04069e5f2eec953a8c6930a1930bbdc2b7a5b0d09b307b34bc053"
+}

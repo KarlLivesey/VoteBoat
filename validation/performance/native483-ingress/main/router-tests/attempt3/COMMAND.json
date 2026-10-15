@@ -1,0 +1,13 @@
+[
+  "cargo",
+  "+stable",
+  "test",
+  "--locked",
+  "--offline",
+  "--all-features",
+  "--test",
+  "effect_owner",
+  "client_admission::ingress::ingress_caught_provider_panic_",
+  "--",
+  "--test-threads=1"
+]

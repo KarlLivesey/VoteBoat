@@ -1,0 +1,16 @@
+{
+  "exit": 0,
+  "files": 43,
+  "original_handle": 18694,
+  "actual_terminal_exit": 0,
+  "terminal_tool_chunk": "f4df06",
+  "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "profile_sha256": "f3914123b2f8c180f907af6b6f3002fc328d46e0ee7778ac43b3e22dbe88e197",
+  "all_hashes_lengths_modes_exact": true,
+  "symbol_server_joined_exit": 0,
+  "collection_handle": 67771,
+  "collection_terminal_chunk": "16f966",
+  "symbol_handle": 69533,
+  "symbol_terminal_chunk": "a0eb58",
+  "scope": "Post-both-END exact text/profile transfer; no source/binary/buildtrees/WAL."
+}

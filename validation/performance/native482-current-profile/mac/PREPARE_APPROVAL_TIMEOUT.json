@@ -1,0 +1,6 @@
+{
+  "tool_cell": "365",
+  "process_started": false,
+  "raw_tool_message": "exec_command failed: CreateProcess { message: \"Rejected(\\\"The automatic permission approval review did not finish before its deadline. Do not assume the action is unsafe based on the timeout alone. You may retry once, or ask the user for guidance or explicit approval.\\\")\" }",
+  "scope": "Approval reviewer timeout before execution. No SSH guard or recording process was created. One identical-scope preparation-only retry follows; no timed recording authorized."
+}

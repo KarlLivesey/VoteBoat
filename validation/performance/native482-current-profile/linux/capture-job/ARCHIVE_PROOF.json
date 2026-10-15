@@ -1,0 +1,28 @@
+{
+  "scope": "One original current480 loaded native CPU diagnostic; not unprofiled acceptance. No recapture/browser/SVG/sysctl/sudo/install/rebuild. Same saved data converted after both original captures ended.",
+  "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "schema_publication_commit": "33de924687b4240083f9e31f80fa7ac886fb905c",
+  "original_handle": 11490,
+  "actual_terminal_tool_chunk": "d4fe2c",
+  "actual_terminal_exit": 0,
+  "frozen_validation_exit": 0,
+  "same_native480_artifact": "8d3530a6e801ebb857d8dff3fc1a0fb4ef5af865c3aed89d1450271f2054b84d",
+  "source_inputs": 1495,
+  "source_directories": 328,
+  "recording_post_source_artifact_compiler_runtime_tool_policy_guard_exit": 0,
+  "raw_perf_ignored_location": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native482-current-profile/linux/capture/perf.data",
+    "sha256": "26de351dbcc4adbbf1e1627af2d5c02a84cc5d49d421a4b8fbd7d406ad3c6675",
+    "bytes": 61970732
+  },
+  "native_exec_samples": 3683,
+  "native_exec_period_weight": 17333009497,
+  "whole_launch_samples": 3730,
+  "whole_launch_period_weight": 17421684805,
+  "reported_lost_samples": 0,
+  "profiler_resource_owner_native_all_terminated": true,
+  "symbol_server_exit": 0,
+  "native_build_id": "ad4c6b0ce94d237f9aa7f3ca04fd28de1747eb7b",
+  "raw_source_native_WAL_binary_buildtrees_excluded": true,
+  "independent_review": "Parent independent raw reviewer has paths; archive publication remains parent-owned."
+}

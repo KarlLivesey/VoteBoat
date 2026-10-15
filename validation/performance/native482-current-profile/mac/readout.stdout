@@ -1,0 +1,169 @@
+{
+  "exit": 0,
+  "contexts": {
+    "client_reconcile": {
+      "cpu_us": 2402134,
+      "percent": 19.846065253725474,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 0,
+        "reserved_set_insert": 0,
+        "pending_receipt_get": 826774
+      }
+    },
+    "client_cleanup": {
+      "cpu_us": 443132,
+      "percent": 3.661089093287001,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 0,
+        "reserved_set_insert": 0,
+        "pending_receipt_get": 380780
+      }
+    },
+    "client_submission": {
+      "cpu_us": 2230,
+      "percent": 0.018423920362397688,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 847,
+        "reserved_set_insert": 122,
+        "pending_receipt_get": 0
+      }
+    },
+    "ready_execution": {
+      "cpu_us": 4210,
+      "percent": 0.03478237880075976,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 1293,
+        "reserved_set_insert": 1397,
+        "pending_receipt_get": 0
+      }
+    },
+    "ready_validation": {
+      "cpu_us": 3763,
+      "percent": 0.03108933288058408,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 1293,
+        "reserved_set_insert": 1397,
+        "pending_receipt_get": 0
+      }
+    },
+    "prepared_ready_admission": {
+      "cpu_us": 593,
+      "percent": 0.0048992756838124795,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 133,
+        "reserved_set_insert": 334,
+        "pending_receipt_get": 0
+      }
+    },
+    "legacy_and_prepared_counter_admission": {
+      "cpu_us": 4797,
+      "percent": 0.039632083398395385,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 2140,
+        "reserved_set_insert": 1519,
+        "pending_receipt_get": 0
+      }
+    },
+    "ready_admission": {
+      "cpu_us": 3142,
+      "percent": 0.02595872546127961,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 1160,
+        "reserved_set_insert": 1063,
+        "pending_receipt_get": 0
+      }
+    },
+    "submission_admission": {
+      "cpu_us": 1062,
+      "percent": 0.008774082253303294,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 847,
+        "reserved_set_insert": 122,
+        "pending_receipt_get": 0
+      }
+    },
+    "all_counter_admission": {
+      "cpu_us": 4204,
+      "percent": 0.034732807714582904,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 2007,
+        "reserved_set_insert": 1185,
+        "pending_receipt_get": 0
+      }
+    },
+    "ready_batch_collect": {
+      "cpu_us": 853,
+      "percent": 0.007047356084809519,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 133,
+        "reserved_set_insert": 334,
+        "pending_receipt_get": 0
+      }
+    },
+    "pending_receipt_get": {
+      "cpu_us": 827069,
+      "percent": 6.833118112200848,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 0,
+        "reserved_set_insert": 0,
+        "pending_receipt_get": 827069
+      }
+    },
+    "outcome_lookup": {
+      "cpu_us": 17720,
+      "percent": 0.1463999411756444,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 17720,
+        "reserved_set_insert": 0,
+        "pending_receipt_get": 0
+      }
+    },
+    "reserved_set_insert": {
+      "cpu_us": 1519,
+      "percent": 0.012549746650440398,
+      "child_context_us_nonadditive": {
+        "outcome_lookup": 0,
+        "reserved_set_insert": 1519,
+        "pending_receipt_get": 0
+      }
+    }
+  },
+  "groups": {
+    "1": {
+      "offers": 8192,
+      "applied": 8192,
+      "refusals": {
+        "window_refused": 0,
+        "no_leader": 0,
+        "admission_refused": 0,
+        "not_proposed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "completed_originals_s": 127.82105850690648,
+      "during_originals_s": 127.765625,
+      "backlog_at_horizon": 15,
+      "intended_latency": {
+        "p50_ms": 106.643292,
+        "p95_ms": 346.09525,
+        "p99_ms": 793.17925,
+        "max_ms": 976.217458
+      },
+      "service_latency": {
+        "p50_ms": 106.55525,
+        "p95_ms": 346.092875,
+        "p99_ms": 793.029708,
+        "max_ms": 976.17975
+      },
+      "dispatch_latency": {
+        "p50_ms": 0.088292,
+        "p95_ms": 0.168958,
+        "p99_ms": 0.214458,
+        "max_ms": 1.410542
+      }
+    }
+  },
+  "sample_rows": 139360,
+  "cpu_us": 12103830,
+  "wall_sample_weight": 458696
+}

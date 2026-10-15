@@ -364,6 +364,7 @@ mod application_results {
 }
 mod client_admission {
     use super::*;
+    mod ingress;
     mod ready_batch;
     #[test]
     fn stopping_runtime_returns_exact_unprocessed_tracked_inputs() {

@@ -1,0 +1,6 @@
+{
+  "exit": 0,
+  "files": 11,
+  "exact_hashes_lengths_modes": true,
+  "scope": "Only11 recipe/config/validator text files, no capture/source/binaries/buildtrees/WAL."
+}
