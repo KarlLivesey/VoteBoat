@@ -1,0 +1,5 @@
+{
+  "actual_exit": 1,
+  "terminal_tool_chunk": "c3ed33",
+  "reason": "Reviewer wrongly demanded explicit rustc overflow-checks=on; CargoJSON proves overflow_checks true and rustc debug-assertions=on supplies the default. No engine/build correction or rerun."
+}

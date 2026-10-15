@@ -1,0 +1,5 @@
+{
+  "actual_exit": 1,
+  "terminal_tool_chunk": "6bb3dc",
+  "reason": "Root reader assumed ORIGINALS keys were uncompressed names; this manifest keys them by archived path. Focused parser correction only; archive/original bytes unchanged."
+}

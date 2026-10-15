@@ -1,0 +1,10 @@
+from pathlib import Path
+import json,gzip,hashlib
+root=Path.cwd();r=root/'validation/performance/native487-capacity-bound/preparation';h=lambda b:hashlib.sha256(b).hexdigest();files=json.loads((r/'FILES.json').read_text());originals=json.loads((r/'ORIGINALS.json').read_text());packing=json.loads((r/'PACKING.json').read_text());assert len(files)==169 and len(originals)==167 and len(packing)==51
+assert {p.relative_to(r).as_posix()for p in r.rglob('*')if p.is_file()and p.name!='FILES.json'}==set(files)
+for name,v in files.items():data=(r/name).read_bytes();assert h(data)==v['sha256']and len(data)==v['bytes'],name
+packed={v['original']:name for name,v in packing.items()}
+for name,v in originals.items():
+ p=r/name;blob=p.read_bytes();data=gzip.decompress(blob)if name in packing else blob;source=root/v['path'];assert data==source.read_bytes()and h(data)==v['sha256']and len(data)==v['bytes']and oct(source.stat().st_mode&0o7777)==v['mode'],name
+ if name in packing:assert h(data)==packing[name]['sha256']and len(data)==packing[name]['bytes']
+report={'actual_exit':0,'payloads':len(files),'originals':len(originals),'lossless_gzip':len(packing),'manifest_sha256':h((r/'FILES.json').read_bytes()),'scope':'Root independent recursive exact path-set/hash/length and all original byte/hash/length/mode/gzip comparison. No workload or suite repeated.'};(root/'target/p9/native487-capacity-bound/root/PREPARATION_ARCHIVE_VERIFIED.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))

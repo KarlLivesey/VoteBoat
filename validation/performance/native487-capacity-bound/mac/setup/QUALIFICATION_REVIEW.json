@@ -1,0 +1,44 @@
+{
+  "exit": 0,
+  "scope": "Source-linked selected Counter-method Mac qualification, fresh native artifact and four functional histories only; no broad unchanged library/Node execution claim or throughput claim. Root independent review is separate.",
+  "readiness_sha256": "7396407e48946c7959a454a3187a6dbd14148a5432b4356698372072ad6cfffd",
+  "local_transfer_proof_sha256": "5aa712b7a0e5665d38ba4ec5dbbcd8524939b38f8a08ba8b6cd4b58d9eaef8b6",
+  "actual_original_terminal_sha256": "e653a005f23574feb260758031eb24f882576d184bc85d298811d82d6a73b9c4",
+  "all_checks_zero": true,
+  "actual_expected_counts": {
+    "application_all": [
+      23
+    ],
+    "application_core": [
+      23
+    ],
+    "client_all": [
+      28
+    ],
+    "client_core": [
+      28
+    ],
+    "unit_application_all": [
+      39
+    ],
+    "unit_application_core": [
+      39
+    ],
+    "provider_all": [
+      42
+    ],
+    "provider_core": [
+      27
+    ],
+    "counter_service": [
+      2
+    ],
+    "matched_tests": [
+      70
+    ]
+  },
+  "actual_node_tests": 42,
+  "controls": 4,
+  "source_files": 1496,
+  "source_directories": 327
+}

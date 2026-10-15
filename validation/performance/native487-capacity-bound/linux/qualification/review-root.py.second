@@ -1,0 +1,28 @@
+from pathlib import Path
+import hashlib,json,subprocess
+root=Path.cwd();j=root/'target/p9/native486-capacity-bound/linux';load=lambda p:json.loads(p.read_text());sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();ready=load(j/'READY.json');source=load(j/'SOURCE.json');final=load(root/'target/p9/native486-capacity-bound/ROOT_FINAL_INPUTS.json');commit=final['published_commit']
+assert ready['source_commit']==source['commit']==commit and ready['source_files']==1497 and ready['qualified_projection_files']==1496
+for name,digest in ready['proof_sha256'].items():assert sha(j/name)==digest,name
+for name,digest in source['sha256'].items():
+ p=Path(source['source_root'])/name;assert sha(p)==digest and oct(p.stat().st_mode&0o7777)==source['physical_modes'][name],name
+ assert hashlib.sha256(subprocess.check_output(['git','show',commit+':'+name])).hexdigest()==digest,name
+for name,row in final['files'].items():assert source['sha256'][name]==row['sha256']and source['physical_modes'][name]==row['mode'],name
+assert set(source['sha256'])-set(final['files'])=={'validation/performance/native486-capacity-bound/SCHEMA.md'}
+records=[json.loads(l)for l in(j/'logs/native-release.jsonl').read_text().splitlines()if l.startswith('{')];artifacts=load(j/'ARTIFACTS.json')
+for artifact in artifacts:
+ record=artifact['compiler_record'];assert record in records and record['fresh']is False
+ profile=record['profile'];assert profile['opt_level']=='3'and profile['debuginfo']==0 and profile['debug_assertions']and profile['overflow_checks']and not profile['test']
+ assert sha(Path(artifact['original']))==sha(Path(artifact['copy']))==artifact['sha256']
+profile=load(j/'PROFILE_PROOF.json');assert profile['root_buildscript_compilation']in records and profile['root_buildscript_compilation']['fresh']is False;assert profile['root_buildscript_record']in records and profile['root_buildscript_record']['cfgs']==[]
+for line in profile['actual_rustc_lines']:
+ assert '-C opt-level=3'in line and '-C debug-assertions=on'in line and '-C overflow-checks=off'not in line
+ assert '-C debuginfo=2'not in line and '-C codegen-units=1'not in line and '-C lto=thin'not in line
+symbols=load(j/'SYMBOLS.json');assert symbols['reference_oracle_cfg_absent_PROFILErelease']is True and symbols['executable_sha256']==ready['artifact_sha256']
+terminal=load(j/'controls/TERMINAL.json');assert terminal['actual_exit']==0 and terminal['source_exact']is True and all(c['exit']==0 for c in terminal['commands']);assert load(j/'controls/BEFORE.json')==load(j/'controls/AFTER.json')
+results=load(j/'controls/RESULTS.json');assert len(results)==3
+for row in results:
+ label='tcp-default-atomic'if row['selection']!='witness'else row['protocol']+'-witness';raw=dict(part.split('=',1)for part in(j/'controls'/f'{label}.stdout').read_text().split()if'='in part);summary=row['summary'];assert all(raw[k]==str(v)for k,v in summary.items())
+ assert all(summary[k]=='0'for k in['window_refused','no_leader','admission_refused','not_proposed','unknown','pending']);assert summary['applied']=='512'and summary['recovered_value']=='576'and summary['warmup']=='64'and summary['retry_verified']=='true'and summary['workers_joined']=='true'and summary['checkpoints']=='1'and summary['reclaims']=='3'
+ if row['selection']=='witness':assert summary['publication_provider']=='WitnessLogIo'and summary['ready_visit_items_effective']=='64'
+ else:assert summary['publication_provider']=='FileLogIo'and summary['ready_visit_items_effective']=='16'and '--ready-items'not in row['native_command']and '--publication'not in row['native_command']
+report={'actual_exit':0,'published_commit':commit,'exported_files':len(source['sha256']),'qualified_projection':len(final['files']),'ready_proofs':len(ready['proof_sha256']),'fresh_root_executable_buildscript_raw_cargo_json':True,'native_profile_raw_verbose_lines':True,'selected_control_count':len(results),'each_applied':512,'each_recovered':576,'executable_sha256':ready['artifact_sha256'],'root_rlib_sha256':ready['root_artifact_sha256'],'scope':'Independent root actual raw source/artifact/profile/controls review; no workload, build or check suite repeated. No measured gain/P9 acceptance.'};(j/'INDEPENDENT_ROOT_REVIEW.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))

@@ -1,0 +1,8 @@
+{
+  "actual_exit": 0,
+  "payloads": 169,
+  "originals": 167,
+  "lossless_gzip": 51,
+  "manifest_sha256": "608fee38711f410cc20426da3c61c6dab4cb1f0d5344404362bc74b9d5bd4852",
+  "scope": "Root independent recursive exact path-set/hash/length and all original byte/hash/length/mode/gzip comparison. No workload or suite repeated."
+}

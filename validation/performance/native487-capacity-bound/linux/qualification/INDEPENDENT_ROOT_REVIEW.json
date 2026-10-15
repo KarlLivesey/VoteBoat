@@ -1,0 +1,15 @@
+{
+  "actual_exit": 0,
+  "published_commit": "dcdcafe3f0c0a56d01e3c3095d3c276113cd7d69",
+  "exported_files": 1497,
+  "qualified_projection": 1496,
+  "ready_proofs": 22,
+  "fresh_root_executable_buildscript_raw_cargo_json": true,
+  "native_profile_raw_verbose_lines": true,
+  "selected_control_count": 3,
+  "each_applied": 512,
+  "each_recovered": 576,
+  "executable_sha256": "f3c6e797c3ea1e4af255210b8cbb63fa23505f0d0af22735dba286a50bffd8e7",
+  "root_rlib_sha256": "ea3678c2cbdf0d5f715bb60b2817b9edbba0c0aa66f397f1ae022878fb286cd2",
+  "scope": "Independent root actual raw source/artifact/profile/controls review; no workload, build or check suite repeated. No measured gain/P9 acceptance."
+}

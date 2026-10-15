@@ -1,5 +1,10 @@
 # 486: exact Counter capacity proof with less work
 
+Published as `dcdcafe3f0c0a56d01e3c3095d3c276113cd7d69` through original97050,
+actual terminal0/e3e963 and the full enabled hook. All1496 inputs/modes stay exact.
+[Fresh qualification and paired retention](../native487-capacity-bound/SCHEMA.md)
+are in progress; the publication itself is not a speed claim.
+
 The [before-edit schema](SCHEMA.md) targets the measured480 Counter validator,
 without the rejected483 ingress API. Candidate syntax remains first. With R free
 slots, fewer than R raw pending IDs plus one candidate always fit; membership

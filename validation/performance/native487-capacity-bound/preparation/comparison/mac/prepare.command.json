@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "ssh",
+    "-F",
+    "/dev/null",
+    "-o",
+    "IdentityAgent=/home/karllivesey/.1password/agent.sock",
+    "karllivesey@192.168.192.76",
+    "bash",
+    "-s"
+  ],
+  "stdin_file": "target/p9/native487-capacity-bound/comparison/mac/prepare.sh"
+}

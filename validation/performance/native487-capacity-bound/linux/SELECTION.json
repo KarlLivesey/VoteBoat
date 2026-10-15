@@ -1,0 +1,1982 @@
+[
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/ACTIVATION.json",
+    "original_path": "qualification/ACTIVATION.json",
+    "archived_path": "qualification/ACTIVATION.json",
+    "original_sha256": "91e1155b8e7a3b0d01de9cf203bfae2e59d491afa94bfdc9d49be55dbb801d51",
+    "original_bytes": 1204,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/ARTIFACTS.json",
+    "original_path": "qualification/ARTIFACTS.json",
+    "archived_path": "qualification/ARTIFACTS.json",
+    "original_sha256": "33406e619eb3759406470e5ac6324747476896f5d9963fc63fadf6bfd34ddf9e",
+    "original_bytes": 3732,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/BUILD_TERMINAL.json",
+    "original_path": "qualification/BUILD_TERMINAL.json",
+    "archived_path": "qualification/BUILD_TERMINAL.json",
+    "original_sha256": "da3a19de1664d02c5e0b4d899928f1db2e8cafda1c133aa855000fa32aada733",
+    "original_bytes": 87,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/EXPORT_TERMINAL.json",
+    "original_path": "qualification/EXPORT_TERMINAL.json",
+    "archived_path": "qualification/EXPORT_TERMINAL.json",
+    "original_sha256": "e1b5232cbf660b49098ab75eb48c90391751334ad422e90b523f4682cc4a384f",
+    "original_bytes": 68,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/FUNCTIONAL_QUALIFICATION.json",
+    "original_path": "qualification/FUNCTIONAL_QUALIFICATION.json",
+    "archived_path": "qualification/FUNCTIONAL_QUALIFICATION.json",
+    "original_sha256": "9ccb865c8a4c36dec88fa736af3f7e4d6f94cc665384f7dde6fe2baed328d6a0",
+    "original_bytes": 5244,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/INDEPENDENT_ROOT_REVIEW.json",
+    "original_path": "qualification/INDEPENDENT_ROOT_REVIEW.json",
+    "archived_path": "qualification/INDEPENDENT_ROOT_REVIEW.json",
+    "original_sha256": "4ae8138f6aa6d093dad5470bf24990ccffbb5b22be4c26f57dc09b7bc30297a0",
+    "original_bytes": 692,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/ORIGINALS.json",
+    "original_path": "qualification/ORIGINALS.json",
+    "archived_path": "qualification/ORIGINALS.json",
+    "original_sha256": "610484c4d6b8bc485899fd28e6f10a2afe14a1777992dd1c321b64151c9030a7",
+    "original_bytes": 1147,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/PID",
+    "original_path": "qualification/PID",
+    "archived_path": "qualification/PID",
+    "original_sha256": "1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/PREPARATION.json",
+    "original_path": "qualification/PREPARATION.json",
+    "archived_path": "qualification/PREPARATION.json",
+    "original_sha256": "b832f38001ef4793dc80848bbc67dcd741ad89368845a854e80a501f9498dd27",
+    "original_bytes": 4807,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/PROFILE_PROOF.json",
+    "original_path": "qualification/PROFILE_PROOF.json",
+    "archived_path": "qualification/PROFILE_PROOF.json",
+    "original_sha256": "b8aeeba8d6281ac379822f541ccad057d2f6fc1d4e2de24c8f822048e236b0ed",
+    "original_bytes": 11237,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/PUBLICATION.json",
+    "original_path": "qualification/PUBLICATION.json",
+    "archived_path": "qualification/PUBLICATION.json",
+    "original_sha256": "4e0ec306f4d1d9791c5f6ec44641c5d647c7956f45bb035ab6131d846f924a60",
+    "original_bytes": 1883,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/READY.json",
+    "original_path": "qualification/READY.json",
+    "archived_path": "qualification/READY.json",
+    "original_sha256": "00437ea19b6b336e0afee8b5ecb937fec6dc9779964629f855855fa791292659",
+    "original_bytes": 3443,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/REQUIRED_COMMIT.txt",
+    "original_path": "qualification/REQUIRED_COMMIT.txt",
+    "archived_path": "qualification/REQUIRED_COMMIT.txt.gz",
+    "original_sha256": "1cae45f474891ce78a7aed80d28d9eb80efaa47919e27d0ae74541b9acb5ff53",
+    "original_bytes": 41,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/REVIEW_INITIAL_FAILURE.json",
+    "original_path": "qualification/REVIEW_INITIAL_FAILURE.json",
+    "archived_path": "qualification/REVIEW_INITIAL_FAILURE.json",
+    "original_sha256": "e901963b09af8ae0dcb8053dabdd1ff08f5120b6eb26e60d233565b5d89d5adf",
+    "original_bytes": 261,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/REVIEW_SECOND_FAILURE.json",
+    "original_path": "qualification/REVIEW_SECOND_FAILURE.json",
+    "archived_path": "qualification/REVIEW_SECOND_FAILURE.json",
+    "original_sha256": "4567930cac1edf14698d32c00e54d87ad62bdc176301124f7246529a52a726b0",
+    "original_bytes": 309,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/SCHEMA.md",
+    "original_path": "qualification/SCHEMA.md",
+    "archived_path": "qualification/SCHEMA.md",
+    "original_sha256": "3027b186d45b71933083579cf6d88999649562e1616da90d0e9defdbc9f82303",
+    "original_bytes": 3831,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/SOURCE.json",
+    "original_path": "qualification/SOURCE.json",
+    "archived_path": "qualification/SOURCE.json.gz",
+    "original_sha256": "dd2645aa1f42000ac6e5ce9c1d5b4af6ed5dda1da44e30ae3da2baaa48b080ff",
+    "original_bytes": 469103,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/STAGE",
+    "original_path": "qualification/STAGE",
+    "archived_path": "qualification/STAGE",
+    "original_sha256": "8221ac66be71558c921fb44cfb66f7997699aea754d917763882d6d9eddc836e",
+    "original_bytes": 5,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/STATUS",
+    "original_path": "qualification/STATUS",
+    "archived_path": "qualification/STATUS",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/SYMBOLS.json",
+    "original_path": "qualification/SYMBOLS.json",
+    "archived_path": "qualification/SYMBOLS.json",
+    "original_sha256": "bf962c4725efcf56447f88e55bd6eb7d7d00fc194935385c993edc84242952b6",
+    "original_bytes": 2208,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/archive.py",
+    "original_path": "qualification/archive.py",
+    "archived_path": "qualification/archive.py",
+    "original_sha256": "5360e175e4bccdad9395c2bd5de27e37521cc0e9de0b5d508c2885a484da7461",
+    "original_bytes": 11256,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/build.exit",
+    "original_path": "qualification/build.exit",
+    "archived_path": "qualification/build.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/build.stderr",
+    "original_path": "qualification/build.stderr",
+    "archived_path": "qualification/build.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/build.stdout",
+    "original_path": "qualification/build.stdout",
+    "archived_path": "qualification/build.stdout.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/control-tools/SOURCE.json",
+    "original_path": "qualification/control-tools/SOURCE.json",
+    "archived_path": "qualification/control-tools/SOURCE.json",
+    "original_sha256": "840d5f75810340e871d544a78e3ff2362321789d6fe2e0bfeedcc48fd218f915",
+    "original_bytes": 959,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/control-tools/check-benchmark-storage.mjs",
+    "original_path": "qualification/control-tools/check-benchmark-storage.mjs",
+    "archived_path": "qualification/control-tools/check-benchmark-storage.mjs",
+    "original_sha256": "f46a15656e91d9c6d32f3f268dde74a2a2e7425f9d5027da4c7cc0a8a69d9856",
+    "original_bytes": 11797,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/control-tools/check-lanes.mjs",
+    "original_path": "qualification/control-tools/check-lanes.mjs",
+    "archived_path": "qualification/control-tools/check-lanes.mjs",
+    "original_sha256": "cb49a5d3cee377cf3154d9a9f092ea90e9af64b87ba98272cae50765c51dc920",
+    "original_bytes": 4733,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/control-tools/check-maintenance.mjs",
+    "original_path": "qualification/control-tools/check-maintenance.mjs",
+    "archived_path": "qualification/control-tools/check-maintenance.mjs",
+    "original_sha256": "99fd718641c95a0412ef2e98e33b23da717470613bdc496d6313c8b58d0ce658",
+    "original_bytes": 6918,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/control-tools/check-native-benchmark.mjs",
+    "original_path": "qualification/control-tools/check-native-benchmark.mjs",
+    "archived_path": "qualification/control-tools/check-native-benchmark.mjs",
+    "original_sha256": "8c3f8a31270aa52ff4cdadd75479185dbfe33c0f2adecef0739dc43b008e54d7",
+    "original_bytes": 6595,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/control-tools/check-offered.mjs",
+    "original_path": "qualification/control-tools/check-offered.mjs",
+    "archived_path": "qualification/control-tools/check-offered.mjs",
+    "original_sha256": "13f0c1f45df5bbc20802e21883bf7157ef0272210df1269f0e8fddb739d90015",
+    "original_bytes": 9264,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/control-tools/check-publication-profile.mjs",
+    "original_path": "qualification/control-tools/check-publication-profile.mjs",
+    "archived_path": "qualification/control-tools/check-publication-profile.mjs",
+    "original_sha256": "425f3f905db3e368260095bc8eb78d92aa9753b9d9cf3995a78040a5b7a72b41",
+    "original_bytes": 1361,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/control-tools/check-publication-timings.mjs",
+    "original_path": "qualification/control-tools/check-publication-timings.mjs",
+    "archived_path": "qualification/control-tools/check-publication-timings.mjs",
+    "original_sha256": "9d69d025335612afbef911377d2e15654e2186c1e0cb36884fa5fa8ee6b9d5a1",
+    "original_bytes": 4526,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/control-tools/check-rounded-rate.mjs",
+    "original_path": "qualification/control-tools/check-rounded-rate.mjs",
+    "archived_path": "qualification/control-tools/check-rounded-rate.mjs",
+    "original_sha256": "262f06cfb0e878bfa7ce02741f51d7cd6e7e8df6b07b8973df4a7d89502c662d",
+    "original_bytes": 760,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls.exit",
+    "original_path": "qualification/controls.exit",
+    "archived_path": "qualification/controls.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls.stderr",
+    "original_path": "qualification/controls.stderr",
+    "archived_path": "qualification/controls.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls.stdout",
+    "original_path": "qualification/controls.stdout",
+    "archived_path": "qualification/controls.stdout.gz",
+    "original_sha256": "0f8ae9dcbd2c857f15a8aba938b9e123832a87607deeeafa70159158ffded0bc",
+    "original_bytes": 4356,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/AFTER.json",
+    "original_path": "qualification/controls/AFTER.json",
+    "archived_path": "qualification/controls/AFTER.json.gz",
+    "original_sha256": "dac09dda6031c11f4887c6e32916640d0083748dd09d1a1a1950fbe4cbe7f9a7",
+    "original_bytes": 366042,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/ARTIFACT.json",
+    "original_path": "qualification/controls/ARTIFACT.json",
+    "archived_path": "qualification/controls/ARTIFACT.json",
+    "original_sha256": "9cc16ef523b224e7cbe0b7276d022bc690cd95a2d08c3f4c5d58d815c5f9189b",
+    "original_bytes": 1783,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/BEFORE.json",
+    "original_path": "qualification/controls/BEFORE.json",
+    "archived_path": "qualification/controls/BEFORE.json.gz",
+    "original_sha256": "dac09dda6031c11f4887c6e32916640d0083748dd09d1a1a1950fbe4cbe7f9a7",
+    "original_bytes": 366042,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/RESULTS.json",
+    "original_path": "qualification/controls/RESULTS.json",
+    "archived_path": "qualification/controls/RESULTS.json",
+    "original_sha256": "a7a0551a877f0b1cfe5d94e9d82d882a6d16fe94705fb397c6c18add4e050285",
+    "original_bytes": 25416,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/RUN.json",
+    "original_path": "qualification/controls/RUN.json",
+    "archived_path": "qualification/controls/RUN.json",
+    "original_sha256": "a16c07ef6f07a17e5644b80250409cb12288befe7c232fac4362b9127a5c2f84",
+    "original_bytes": 567,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/RUNTIME_TOOLS.json",
+    "original_path": "qualification/controls/RUNTIME_TOOLS.json",
+    "archived_path": "qualification/controls/RUNTIME_TOOLS.json",
+    "original_sha256": "810ef452553700f96b3243e2938a73f2cc08d1cd9f1683df3d517c44e0130bd0",
+    "original_bytes": 306,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/TERMINAL.json",
+    "original_path": "qualification/controls/TERMINAL.json",
+    "archived_path": "qualification/controls/TERMINAL.json",
+    "original_sha256": "5304f552d84ab9aab8a5703cdb9b655383f0ed9b379ffcfc508bdb4d505acef9",
+    "original_bytes": 4698,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/quic-witness-PHYSICAL.json",
+    "original_path": "qualification/controls/quic-witness-PHYSICAL.json",
+    "archived_path": "qualification/controls/quic-witness-PHYSICAL.json",
+    "original_sha256": "9c5dbb61a7b120eca2817338aa5d298313418af6a3bdda20e235527b13cbf06f",
+    "original_bytes": 1569,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/quic-witness-check.OWNED.json",
+    "original_path": "qualification/controls/quic-witness-check.OWNED.json",
+    "archived_path": "qualification/controls/quic-witness-check.OWNED.json",
+    "original_sha256": "4fabc8eb29e4c1bd55c9b11d419a88e3e048a250909a2f52a88eb81c75c9de25",
+    "original_bytes": 398,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/quic-witness-check.exit.json",
+    "original_path": "qualification/controls/quic-witness-check.exit.json",
+    "archived_path": "qualification/controls/quic-witness-check.exit.json",
+    "original_sha256": "ab220b910612bc1cd3e713c420f60f7f832e2f3af5297111ebb5ffd0b58f37d8",
+    "original_bytes": 447,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/quic-witness-check.stderr",
+    "original_path": "qualification/controls/quic-witness-check.stderr",
+    "archived_path": "qualification/controls/quic-witness-check.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/quic-witness-check.stdout",
+    "original_path": "qualification/controls/quic-witness-check.stdout",
+    "archived_path": "qualification/controls/quic-witness-check.stdout.gz",
+    "original_sha256": "48f14faa2756ace172dabb10343d07892e532621e29b4e1c178b70f37b7ecb87",
+    "original_bytes": 1091,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/quic-witness-publication-check.OWNED.json",
+    "original_path": "qualification/controls/quic-witness-publication-check.OWNED.json",
+    "archived_path": "qualification/controls/quic-witness-publication-check.OWNED.json",
+    "original_sha256": "ed62cb60b65945b839dad327d53d4c38dd64d54bed280f5e179ed385babb227f",
+    "original_bytes": 415,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/quic-witness-publication-check.exit.json",
+    "original_path": "qualification/controls/quic-witness-publication-check.exit.json",
+    "archived_path": "qualification/controls/quic-witness-publication-check.exit.json",
+    "original_sha256": "b2468ccd42f02227e341addb3683611cab584c18f17fe64f1f2673d71b24c2ae",
+    "original_bytes": 464,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/quic-witness-publication-check.stderr",
+    "original_path": "qualification/controls/quic-witness-publication-check.stderr",
+    "archived_path": "qualification/controls/quic-witness-publication-check.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/quic-witness-publication-check.stdout",
+    "original_path": "qualification/controls/quic-witness-publication-check.stdout",
+    "archived_path": "qualification/controls/quic-witness-publication-check.stdout.gz",
+    "original_sha256": "d98289174dd42aebbec7b6676155614348df19634d97022ebf86d49461b200dd",
+    "original_bytes": 1905,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/quic-witness.OWNED.json",
+    "original_path": "qualification/controls/quic-witness.OWNED.json",
+    "archived_path": "qualification/controls/quic-witness.OWNED.json",
+    "original_sha256": "dc8a6a21e0102adb0c69f4c435a1a72072f9ef8b8ae1bee3101d7ea843c20691",
+    "original_bytes": 554,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/quic-witness.exit.json",
+    "original_path": "qualification/controls/quic-witness.exit.json",
+    "archived_path": "qualification/controls/quic-witness.exit.json",
+    "original_sha256": "03e1b0c715404fd9455c2adae1715fe6c5897d733e36a195aaf5999ccee907c8",
+    "original_bytes": 600,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/quic-witness.stderr",
+    "original_path": "qualification/controls/quic-witness.stderr",
+    "archived_path": "qualification/controls/quic-witness.stderr.gz",
+    "original_sha256": "b7289cad9caa0e0b3f0a4189646cde1e694423a0c39cbb36c87605f52c1ca896",
+    "original_bytes": 3577,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/quic-witness.stdout",
+    "original_path": "qualification/controls/quic-witness.stdout",
+    "archived_path": "qualification/controls/quic-witness.stdout.gz",
+    "original_sha256": "7bff6a88b09c5322bba5b9410b00d1e0cb29c2fff410a475950c1ef6ff33c074",
+    "original_bytes": 1956,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/run.py",
+    "original_path": "qualification/controls/run.py",
+    "archived_path": "qualification/controls/run.py",
+    "original_sha256": "3bcf5951402c32ec94b7632c713de0cf42816fedd3c6b9fc1864f92c5be4468f",
+    "original_bytes": 10352,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-default-atomic-PHYSICAL.json",
+    "original_path": "qualification/controls/tcp-default-atomic-PHYSICAL.json",
+    "archived_path": "qualification/controls/tcp-default-atomic-PHYSICAL.json",
+    "original_sha256": "1786964a434d19204bcc71e2167d9b102b4275458469fcfe258376a84a58fa41",
+    "original_bytes": 1560,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-default-atomic-check.OWNED.json",
+    "original_path": "qualification/controls/tcp-default-atomic-check.OWNED.json",
+    "archived_path": "qualification/controls/tcp-default-atomic-check.OWNED.json",
+    "original_sha256": "23bd471eba6ff3dcdb10639c83f07f86bb1f7af201b1c3f5224b34fa3aa941e6",
+    "original_bytes": 404,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-default-atomic-check.exit.json",
+    "original_path": "qualification/controls/tcp-default-atomic-check.exit.json",
+    "archived_path": "qualification/controls/tcp-default-atomic-check.exit.json",
+    "original_sha256": "007ffb6d3b97a7bd47a7ac812a8048dc71b066d8bda2e742d6e65781006356cc",
+    "original_bytes": 453,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-default-atomic-check.stderr",
+    "original_path": "qualification/controls/tcp-default-atomic-check.stderr",
+    "archived_path": "qualification/controls/tcp-default-atomic-check.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-default-atomic-check.stdout",
+    "original_path": "qualification/controls/tcp-default-atomic-check.stdout",
+    "archived_path": "qualification/controls/tcp-default-atomic-check.stdout.gz",
+    "original_sha256": "948410bc8ef49b793e67f3f7fae99078646e2ed0fbe00e0fecfb7ba4fbbdce73",
+    "original_bytes": 1099,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-default-atomic.OWNED.json",
+    "original_path": "qualification/controls/tcp-default-atomic.OWNED.json",
+    "archived_path": "qualification/controls/tcp-default-atomic.OWNED.json",
+    "original_sha256": "0af5a7342d00e21c253bffaaa9df2a664d2bef1a86a79b1a94fb8d967a718118",
+    "original_bytes": 457,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-default-atomic.exit.json",
+    "original_path": "qualification/controls/tcp-default-atomic.exit.json",
+    "archived_path": "qualification/controls/tcp-default-atomic.exit.json",
+    "original_sha256": "cc15ab9b052e8d53823cc7e84a9ebbd12dfce698a10586e89be97b96fc347be6",
+    "original_bytes": 502,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-default-atomic.stderr",
+    "original_path": "qualification/controls/tcp-default-atomic.stderr",
+    "archived_path": "qualification/controls/tcp-default-atomic.stderr.gz",
+    "original_sha256": "95a0764da4a79eb3a5bf50a20df6d338ac4f4ee21bad8e78ed172d9d3fbf689a",
+    "original_bytes": 2108,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-default-atomic.stdout",
+    "original_path": "qualification/controls/tcp-default-atomic.stdout",
+    "archived_path": "qualification/controls/tcp-default-atomic.stdout.gz",
+    "original_sha256": "dea85909a61e80a999c4a426104cf432d3f958b4afd8c5bfd41f7bb46c8474b1",
+    "original_bytes": 1675,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-witness-PHYSICAL.json",
+    "original_path": "qualification/controls/tcp-witness-PHYSICAL.json",
+    "archived_path": "qualification/controls/tcp-witness-PHYSICAL.json",
+    "original_sha256": "0cd8a6174df957bc086e206e4b20fbb20febdd29a0519781050db8a1596eb30b",
+    "original_bytes": 1566,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-witness-check.OWNED.json",
+    "original_path": "qualification/controls/tcp-witness-check.OWNED.json",
+    "archived_path": "qualification/controls/tcp-witness-check.OWNED.json",
+    "original_sha256": "e8e20d203ed9368514303c1dabb8aae0184eb743b979039e498eb6e0aedaa642",
+    "original_bytes": 397,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-witness-check.exit.json",
+    "original_path": "qualification/controls/tcp-witness-check.exit.json",
+    "archived_path": "qualification/controls/tcp-witness-check.exit.json",
+    "original_sha256": "122acd3c46ec89a930a7dab847829397f43aeceb918f15a1453adcee1cc774cd",
+    "original_bytes": 446,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-witness-check.stderr",
+    "original_path": "qualification/controls/tcp-witness-check.stderr",
+    "archived_path": "qualification/controls/tcp-witness-check.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-witness-check.stdout",
+    "original_path": "qualification/controls/tcp-witness-check.stdout",
+    "archived_path": "qualification/controls/tcp-witness-check.stdout.gz",
+    "original_sha256": "57004f04730687e58ce8457645d44e1132cd45f3db71747120e7ba7c3754834f",
+    "original_bytes": 1090,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-witness-publication-check.OWNED.json",
+    "original_path": "qualification/controls/tcp-witness-publication-check.OWNED.json",
+    "archived_path": "qualification/controls/tcp-witness-publication-check.OWNED.json",
+    "original_sha256": "9c6f5a3243a4a4ddac6c581d29d504c62635525c1bc1722c875f5af8b34dc670",
+    "original_bytes": 414,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-witness-publication-check.exit.json",
+    "original_path": "qualification/controls/tcp-witness-publication-check.exit.json",
+    "archived_path": "qualification/controls/tcp-witness-publication-check.exit.json",
+    "original_sha256": "6e8379f4ed53a8cd2967671cf78c77ab43794994040253ad353f9331d8f5ebfe",
+    "original_bytes": 463,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-witness-publication-check.stderr",
+    "original_path": "qualification/controls/tcp-witness-publication-check.stderr",
+    "archived_path": "qualification/controls/tcp-witness-publication-check.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-witness-publication-check.stdout",
+    "original_path": "qualification/controls/tcp-witness-publication-check.stdout",
+    "archived_path": "qualification/controls/tcp-witness-publication-check.stdout.gz",
+    "original_sha256": "f9c04dae3b7eb9814a690caf5cccb43ae75ea97e64be539282700cea588f2cfb",
+    "original_bytes": 1908,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-witness.OWNED.json",
+    "original_path": "qualification/controls/tcp-witness.OWNED.json",
+    "archived_path": "qualification/controls/tcp-witness.OWNED.json",
+    "original_sha256": "e0895d5c50111c2552e1179be6fe159e4faaeee6256a46cf50701c2818b5e201",
+    "original_bytes": 552,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-witness.exit.json",
+    "original_path": "qualification/controls/tcp-witness.exit.json",
+    "archived_path": "qualification/controls/tcp-witness.exit.json",
+    "original_sha256": "6b348a1714baea43204dbdaafe191fa743a4b1eda7c5d94c765b169630ed3c85",
+    "original_bytes": 598,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-witness.stderr",
+    "original_path": "qualification/controls/tcp-witness.stderr",
+    "archived_path": "qualification/controls/tcp-witness.stderr.gz",
+    "original_sha256": "a67b533046b52e768355f88d8e4b89a14e0901f774559b22d72e52dff6dfa585",
+    "original_bytes": 3579,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/tcp-witness.stdout",
+    "original_path": "qualification/controls/tcp-witness.stdout",
+    "archived_path": "qualification/controls/tcp-witness.stdout.gz",
+    "original_sha256": "222fe3199661a9641915c768c3b38e448170d732b6fbfa5c1f5cba550526e3ac",
+    "original_bytes": 1953,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/quic-witness/bases.csv",
+    "original_path": "qualification/controls/wal/quic-witness/bases.csv",
+    "archived_path": "qualification/controls/wal/quic-witness/bases.csv",
+    "original_sha256": "d57853114c3b00c7d45d7c18a5a9f5aced300d01a97652a96ab5c94dd0c74eba",
+    "original_bytes": 273,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/quic-witness/maintenance-config.txt",
+    "original_path": "qualification/controls/wal/quic-witness/maintenance-config.txt",
+    "archived_path": "qualification/controls/wal/quic-witness/maintenance-config.txt.gz",
+    "original_sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+    "original_bytes": 333,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/quic-witness/maintenance.csv",
+    "original_path": "qualification/controls/wal/quic-witness/maintenance.csv",
+    "archived_path": "qualification/controls/wal/quic-witness/maintenance.csv",
+    "original_sha256": "e4d965cb9ef8962bf4f0ba53863c17f8372298c2157e03de085a530aa4842d64",
+    "original_bytes": 505,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/quic-witness/offers.csv",
+    "original_path": "qualification/controls/wal/quic-witness/offers.csv",
+    "archived_path": "qualification/controls/wal/quic-witness/offers.csv",
+    "original_sha256": "4b59feb2f72651d0e8da4d78621026f63008a8c8d730d680e6789a80efd5a7ab",
+    "original_bytes": 31186,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/quic-witness/publication.csv",
+    "original_path": "qualification/controls/wal/quic-witness/publication.csv",
+    "archived_path": "qualification/controls/wal/quic-witness/publication.csv",
+    "original_sha256": "e9553c0651f7b082a7329fcb97885720aa70323602ad650dba4cdfb339df222d",
+    "original_bytes": 3574,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/quic-witness/run.txt",
+    "original_path": "qualification/controls/wal/quic-witness/run.txt",
+    "archived_path": "qualification/controls/wal/quic-witness/run.txt.gz",
+    "original_sha256": "82318b4021f5ff854688221e46729703d0e355b821dd0d6047eef5f793e0b4bc",
+    "original_bytes": 652,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/quic-witness/storage.csv",
+    "original_path": "qualification/controls/wal/quic-witness/storage.csv",
+    "archived_path": "qualification/controls/wal/quic-witness/storage.csv",
+    "original_sha256": "ff4d70f0af9cfef024f6602bb02cb8818db61ca7eda2e600043b22a9c893738d",
+    "original_bytes": 1849,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/quic-witness/summary.txt",
+    "original_path": "qualification/controls/wal/quic-witness/summary.txt",
+    "archived_path": "qualification/controls/wal/quic-witness/summary.txt.gz",
+    "original_sha256": "7bff6a88b09c5322bba5b9410b00d1e0cb29c2fff410a475950c1ef6ff33c074",
+    "original_bytes": 1956,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/tcp-default-atomic/bases.csv",
+    "original_path": "qualification/controls/wal/tcp-default-atomic/bases.csv",
+    "archived_path": "qualification/controls/wal/tcp-default-atomic/bases.csv",
+    "original_sha256": "4ad102bb7f1029ee514fddd66bf3097b759d92d1ddac4c8a0a195e9e19a6a15d",
+    "original_bytes": 152,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/tcp-default-atomic/maintenance-config.txt",
+    "original_path": "qualification/controls/wal/tcp-default-atomic/maintenance-config.txt",
+    "archived_path": "qualification/controls/wal/tcp-default-atomic/maintenance-config.txt.gz",
+    "original_sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+    "original_bytes": 333,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/tcp-default-atomic/maintenance.csv",
+    "original_path": "qualification/controls/wal/tcp-default-atomic/maintenance.csv",
+    "archived_path": "qualification/controls/wal/tcp-default-atomic/maintenance.csv",
+    "original_sha256": "3c6d72ada4f1fc79e3b16d87b8f555bfb88cca0587c4e706ff71a5d103a2b0af",
+    "original_bytes": 503,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/tcp-default-atomic/offers.csv",
+    "original_path": "qualification/controls/wal/tcp-default-atomic/offers.csv",
+    "archived_path": "qualification/controls/wal/tcp-default-atomic/offers.csv",
+    "original_sha256": "f18ba12458085d02f440394f70906cb32e8ccff597bc746b4fd943009e679443",
+    "original_bytes": 31294,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/tcp-default-atomic/run.txt",
+    "original_path": "qualification/controls/wal/tcp-default-atomic/run.txt",
+    "archived_path": "qualification/controls/wal/tcp-default-atomic/run.txt.gz",
+    "original_sha256": "9b6705cb7854c7adaa578a2e040772caa23f234aa3bc7978d0ec22aaf7d00304",
+    "original_bytes": 375,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/tcp-default-atomic/storage.csv",
+    "original_path": "qualification/controls/wal/tcp-default-atomic/storage.csv",
+    "archived_path": "qualification/controls/wal/tcp-default-atomic/storage.csv",
+    "original_sha256": "8ea5c8a4fcb559444ac0b9274324663156c36b4e29810777ffd492620111c144",
+    "original_bytes": 1674,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/tcp-default-atomic/summary.txt",
+    "original_path": "qualification/controls/wal/tcp-default-atomic/summary.txt",
+    "archived_path": "qualification/controls/wal/tcp-default-atomic/summary.txt.gz",
+    "original_sha256": "dea85909a61e80a999c4a426104cf432d3f958b4afd8c5bfd41f7bb46c8474b1",
+    "original_bytes": 1675,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/tcp-witness/bases.csv",
+    "original_path": "qualification/controls/wal/tcp-witness/bases.csv",
+    "archived_path": "qualification/controls/wal/tcp-witness/bases.csv",
+    "original_sha256": "fd7bfc5c8bebc19845144c0c3ea450e9736275a4a8f200ba870b09db41c778cf",
+    "original_bytes": 273,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/tcp-witness/maintenance-config.txt",
+    "original_path": "qualification/controls/wal/tcp-witness/maintenance-config.txt",
+    "archived_path": "qualification/controls/wal/tcp-witness/maintenance-config.txt.gz",
+    "original_sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+    "original_bytes": 333,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/tcp-witness/maintenance.csv",
+    "original_path": "qualification/controls/wal/tcp-witness/maintenance.csv",
+    "archived_path": "qualification/controls/wal/tcp-witness/maintenance.csv",
+    "original_sha256": "741609e4d0cc4ed6ebfa29be14b559a4edb32c26859b26049556f0b66056d9af",
+    "original_bytes": 505,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/tcp-witness/offers.csv",
+    "original_path": "qualification/controls/wal/tcp-witness/offers.csv",
+    "archived_path": "qualification/controls/wal/tcp-witness/offers.csv",
+    "original_sha256": "268b730e897aecfbac79194079047f0e0ede4f502dd56446245d8ccf9ca86071",
+    "original_bytes": 31182,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/tcp-witness/publication.csv",
+    "original_path": "qualification/controls/wal/tcp-witness/publication.csv",
+    "archived_path": "qualification/controls/wal/tcp-witness/publication.csv",
+    "original_sha256": "54889a249d1dc16288b33579790657098500178136e3b1830453f74c21d988ca",
+    "original_bytes": 3556,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/tcp-witness/run.txt",
+    "original_path": "qualification/controls/wal/tcp-witness/run.txt",
+    "archived_path": "qualification/controls/wal/tcp-witness/run.txt.gz",
+    "original_sha256": "066bbb70af824097335fc9cba2a4e97238adb5e0c3cc1f6684ba7ebe0e232f7f",
+    "original_bytes": 654,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/tcp-witness/storage.csv",
+    "original_path": "qualification/controls/wal/tcp-witness/storage.csv",
+    "archived_path": "qualification/controls/wal/tcp-witness/storage.csv",
+    "original_sha256": "c4486e21cf67d6ee5926856b830c71a2d85f64742e486615db29c8cdf86b71e3",
+    "original_bytes": 1847,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/tcp-witness/summary.txt",
+    "original_path": "qualification/controls/wal/tcp-witness/summary.txt",
+    "archived_path": "qualification/controls/wal/tcp-witness/summary.txt.gz",
+    "original_sha256": "222fe3199661a9641915c768c3b38e448170d732b6fbfa5c1f5cba550526e3ac",
+    "original_bytes": 1953,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/export-source.sh",
+    "original_path": "qualification/export-source.sh",
+    "archived_path": "qualification/export-source.sh",
+    "original_sha256": "0a527a5f076c6017c8aacbd72591212e198ccb30008998c9014be977932b5cee",
+    "original_bytes": 5418,
+    "source_mode": "0o755",
+    "archived_mode": "0o755"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/export.exit",
+    "original_path": "qualification/export.exit",
+    "archived_path": "qualification/export.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/export.stderr",
+    "original_path": "qualification/export.stderr",
+    "archived_path": "qualification/export.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/export.stdout",
+    "original_path": "qualification/export.stdout",
+    "archived_path": "qualification/export.stdout.gz",
+    "original_sha256": "9e1c134fa297beac80bcdd3a909763d1ec274214459f81d5a0012ac500d1b4a2",
+    "original_bytes": 421,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/guard.py",
+    "original_path": "qualification/guard.py",
+    "archived_path": "qualification/guard.py",
+    "original_sha256": "8f919d5911378b86c4a809bfef5ba6b0ffd1a1d7309b4a918050cb7e3cf6d4f5",
+    "original_bytes": 10715,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/artifact-guards.log",
+    "original_path": "qualification/logs/artifact-guards.log",
+    "archived_path": "qualification/logs/artifact-guards.log.gz",
+    "original_sha256": "ed2e3bb723591a5c1b34df3db936b126151528cb97943106321e2a16664d1aef",
+    "original_bytes": 161,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/baseline-tool-preflight.log",
+    "original_path": "qualification/logs/baseline-tool-preflight.log",
+    "archived_path": "qualification/logs/baseline-tool-preflight.log.gz",
+    "original_sha256": "aa7088137297187bb225bcf279fcdcb16838529c13ba38e746b17d291654e92a",
+    "original_bytes": 287,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/cargo-path.txt",
+    "original_path": "qualification/logs/cargo-path.txt",
+    "archived_path": "qualification/logs/cargo-path.txt.gz",
+    "original_sha256": "3699f44c65537473d9eb97fd89825d8d23635d5ac35e6521135066f964b3ae4c",
+    "original_bytes": 79,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/cargo.txt",
+    "original_path": "qualification/logs/cargo.txt",
+    "archived_path": "qualification/logs/cargo.txt.gz",
+    "original_sha256": "9950bbb2d5c3417b1a068f0e81f6d3cac991a363193bdf2a22d447f5acf8b503",
+    "original_bytes": 36,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/cpu.txt",
+    "original_path": "qualification/logs/cpu.txt",
+    "archived_path": "qualification/logs/cpu.txt.gz",
+    "original_sha256": "da6de5a8777a73ab6de78d5c68a2212d570e23132f285f89e20a2d0cdf32bdad",
+    "original_bytes": 3978,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/elf-notes.exit",
+    "original_path": "qualification/logs/elf-notes.exit",
+    "archived_path": "qualification/logs/elf-notes.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/elf-notes.log",
+    "original_path": "qualification/logs/elf-notes.log",
+    "archived_path": "qualification/logs/elf-notes.log.gz",
+    "original_sha256": "dde2d62594d9655598b86721c74b9b3e0aa4e61a003cdcfab8d99131be9ce645",
+    "original_bytes": 407,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/elf-notes.stderr",
+    "original_path": "qualification/logs/elf-notes.stderr",
+    "archived_path": "qualification/logs/elf-notes.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/elf-sections.exit",
+    "original_path": "qualification/logs/elf-sections.exit",
+    "archived_path": "qualification/logs/elf-sections.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/elf-sections.log",
+    "original_path": "qualification/logs/elf-sections.log",
+    "archived_path": "qualification/logs/elf-sections.log.gz",
+    "original_sha256": "a3fa9bfabb4f650200ef0ee671ab3b5e2b195571e93d2107ea6fca87b4435bee",
+    "original_bytes": 5208,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/elf-sections.stderr",
+    "original_path": "qualification/logs/elf-sections.stderr",
+    "archived_path": "qualification/logs/elf-sections.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/host.txt",
+    "original_path": "qualification/logs/host.txt",
+    "archived_path": "qualification/logs/host.txt.gz",
+    "original_sha256": "86f7d7cc7a21648bd29006d15ae3fa43359047671da685108387bbfb00040fa5",
+    "original_bytes": 104,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/native-release-profile.txt",
+    "original_path": "qualification/logs/native-release-profile.txt",
+    "archived_path": "qualification/logs/native-release-profile.txt.gz",
+    "original_sha256": "0f29218a13d1cd47d385bc1a24cbae3436dde3cce8942338d33ba2b8529d4d73",
+    "original_bytes": 188,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/native-release.command",
+    "original_path": "qualification/logs/native-release.command",
+    "archived_path": "qualification/logs/native-release.command.gz",
+    "original_sha256": "992bc2abafb3e95621b32e05b5fce22eb91a137432cfa2603a111ed5e50f7183",
+    "original_bytes": 303,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/native-release.jsonl",
+    "original_path": "qualification/logs/native-release.jsonl",
+    "archived_path": "qualification/logs/native-release.jsonl.gz",
+    "original_sha256": "85050b1692857334d80be816d78c838982b852379dc12a0f37883e20771809b5",
+    "original_bytes": 3238659,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/native-release.stderr",
+    "original_path": "qualification/logs/native-release.stderr",
+    "archived_path": "qualification/logs/native-release.stderr.gz",
+    "original_sha256": "8351741e3e40deff1043ec45d2b2cf0da06c44230ab61b7587b2eb3780af4753",
+    "original_bytes": 222073,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/native-root-rustc-lines.txt",
+    "original_path": "qualification/logs/native-root-rustc-lines.txt",
+    "archived_path": "qualification/logs/native-root-rustc-lines.txt.gz",
+    "original_sha256": "fa0672806c5a1147ccb18091d76875bcb534b72c797d8e252111ee1ad334f5b5",
+    "original_bytes": 6614,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/protoc-path.txt",
+    "original_path": "qualification/logs/protoc-path.txt",
+    "archived_path": "qualification/logs/protoc-path.txt.gz",
+    "original_sha256": "1e3b657c7d86200075b9bb6ea94a6bab08314d62fc2a2b39ea116fa35428b753",
+    "original_bytes": 117,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/protoc.txt",
+    "original_path": "qualification/logs/protoc.txt",
+    "archived_path": "qualification/logs/protoc.txt.gz",
+    "original_sha256": "41654adf2af1c3734c95808b5d5333d2fe1381fca76b4799f5c30198e38fc1fe",
+    "original_bytes": 16,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/qualification-preflight.log",
+    "original_path": "qualification/logs/qualification-preflight.log",
+    "archived_path": "qualification/logs/qualification-preflight.log.gz",
+    "original_sha256": "be54bb52392d29ea9773e93e79eed79ab9c8f47edf8c7e2670f09bc8c47e8f81",
+    "original_bytes": 200,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/rustc-path.txt",
+    "original_path": "qualification/logs/rustc-path.txt",
+    "archived_path": "qualification/logs/rustc-path.txt.gz",
+    "original_sha256": "ef9c6f628fd2cbada68bb8b26a0f7c5c7f780a1850d76d754a1fd836fbf7dc25",
+    "original_bytes": 79,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/rustc.txt",
+    "original_path": "qualification/logs/rustc.txt",
+    "archived_path": "qualification/logs/rustc.txt.gz",
+    "original_sha256": "778fbc643a806f0dd123c056e66201d7e8a56a61928ec0a33171be8d6c2d5a37",
+    "original_bytes": 196,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/source-after-full.log",
+    "original_path": "qualification/logs/source-after-full.log",
+    "archived_path": "qualification/logs/source-after-full.log.gz",
+    "original_sha256": "437d956b3c957d237a618fc90f11ff71d8bfa8f39153028550c1825664d20834",
+    "original_bytes": 59800,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/source-after.log",
+    "original_path": "qualification/logs/source-after.log",
+    "archived_path": "qualification/logs/source-after.log.gz",
+    "original_sha256": "2535b8203e999d7b258873ca23334e7d871c103dabcbd552546ed724acd552b1",
+    "original_bytes": 89,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/source-before-full.log",
+    "original_path": "qualification/logs/source-before-full.log",
+    "archived_path": "qualification/logs/source-before-full.log.gz",
+    "original_sha256": "437d956b3c957d237a618fc90f11ff71d8bfa8f39153028550c1825664d20834",
+    "original_bytes": 59800,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/source-before.log",
+    "original_path": "qualification/logs/source-before.log",
+    "archived_path": "qualification/logs/source-before.log.gz",
+    "original_sha256": "2535b8203e999d7b258873ca23334e7d871c103dabcbd552546ed724acd552b1",
+    "original_bytes": 89,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/symbol-table.exit",
+    "original_path": "qualification/logs/symbol-table.exit",
+    "archived_path": "qualification/logs/symbol-table.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/symbol-table.log",
+    "original_path": "qualification/logs/symbol-table.log",
+    "archived_path": "qualification/logs/symbol-table.log.gz",
+    "original_sha256": "d26fbfc5c39f647d379741d3c06801e306b55a7a9de863a307da214ec8d9f6d5",
+    "original_bytes": 2134845,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/symbol-table.stderr",
+    "original_path": "qualification/logs/symbol-table.stderr",
+    "archived_path": "qualification/logs/symbol-table.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/logs/tool-binaries.sha256",
+    "original_path": "qualification/logs/tool-binaries.sha256",
+    "archived_path": "qualification/logs/tool-binaries.sha256",
+    "original_sha256": "5493d578c4e3f6d67d018dc2c885ba87b7a61674969299ed7975c7ea58aefa86",
+    "original_bytes": 473,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/prepared-unpublished/FUNCTIONAL_QUALIFICATION.json",
+    "original_path": "qualification/prepared-unpublished/FUNCTIONAL_QUALIFICATION.json",
+    "archived_path": "qualification/prepared-unpublished/FUNCTIONAL_QUALIFICATION.json",
+    "original_sha256": "1f73bf218044f4ea16d4c2de868de6597fb4b545c9815b77702b326b79a8c6cb",
+    "original_bytes": 207,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/prepared-unpublished/PREPARATION.json",
+    "original_path": "qualification/prepared-unpublished/PREPARATION.json",
+    "archived_path": "qualification/prepared-unpublished/PREPARATION.json",
+    "original_sha256": "b832f38001ef4793dc80848bbc67dcd741ad89368845a854e80a501f9498dd27",
+    "original_bytes": 4807,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/prepared-unpublished/PUBLICATION.json",
+    "original_path": "qualification/prepared-unpublished/PUBLICATION.json",
+    "archived_path": "qualification/prepared-unpublished/PUBLICATION.json",
+    "original_sha256": "31160bf6a8cfc284f01569ec31d09690ff11b6daf763344a9960fbee57f3dc00",
+    "original_bytes": 73,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/prepared-unpublished/REQUIRED_COMMIT.txt",
+    "original_path": "qualification/prepared-unpublished/REQUIRED_COMMIT.txt",
+    "archived_path": "qualification/prepared-unpublished/REQUIRED_COMMIT.txt.gz",
+    "original_sha256": "032c782c1cb5bad40ce45531ab8150371aa30d9b8ff91df907702a1138575854",
+    "original_bytes": 6,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/prepared-unpublished/SCHEMA.md",
+    "original_path": "qualification/prepared-unpublished/SCHEMA.md",
+    "archived_path": "qualification/prepared-unpublished/SCHEMA.md",
+    "original_sha256": "3027b186d45b71933083579cf6d88999649562e1616da90d0e9defdbc9f82303",
+    "original_bytes": 3831,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/prepared-unpublished/controls/run.py",
+    "original_path": "qualification/prepared-unpublished/controls/run.py",
+    "archived_path": "qualification/prepared-unpublished/controls/run.py",
+    "original_sha256": "3bcf5951402c32ec94b7632c713de0cf42816fedd3c6b9fc1864f92c5be4468f",
+    "original_bytes": 10352,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/prepared-unpublished/export-source.sh",
+    "original_path": "qualification/prepared-unpublished/export-source.sh",
+    "archived_path": "qualification/prepared-unpublished/export-source.sh",
+    "original_sha256": "a3d90694ddeace0e7ba54b61ea736c5024c4610ad2ba3570fbb965ca66d21473",
+    "original_bytes": 5427,
+    "source_mode": "0o755",
+    "archived_mode": "0o755"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/prepared-unpublished/guard.py",
+    "original_path": "qualification/prepared-unpublished/guard.py",
+    "archived_path": "qualification/prepared-unpublished/guard.py",
+    "original_sha256": "855338f1ba5fa305a07bd10a1117ec73992fb0fc04ecfa86b940f5351b131f66",
+    "original_bytes": 9724,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/prepared-unpublished/ready.py",
+    "original_path": "qualification/prepared-unpublished/ready.py",
+    "archived_path": "qualification/prepared-unpublished/ready.py",
+    "original_sha256": "f53304c528c7995abecf8c8d9ac16e44839c08f3880a1d4074861b1cabb5b2b8",
+    "original_bytes": 4057,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/prepared-unpublished/run.sh",
+    "original_path": "qualification/prepared-unpublished/run.sh",
+    "archived_path": "qualification/prepared-unpublished/run.sh",
+    "original_sha256": "ca6b516fe252d8e33d16d51df62e97f6b3969cfe14a9575d032d401b800fa147",
+    "original_bytes": 4011,
+    "source_mode": "0o755",
+    "archived_mode": "0o755"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/prepared-unpublished/setup-after-build.sh",
+    "original_path": "qualification/prepared-unpublished/setup-after-build.sh",
+    "archived_path": "qualification/prepared-unpublished/setup-after-build.sh",
+    "original_sha256": "df48d7fd41f1d5439226cc96f89b7d2d9270dd926c832d7f851c8a149a7c30cf",
+    "original_bytes": 420,
+    "source_mode": "0o755",
+    "archived_mode": "0o755"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/qualification-activation.exit",
+    "original_path": "qualification/qualification-activation.exit",
+    "archived_path": "qualification/qualification-activation.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/qualification-activation.stderr",
+    "original_path": "qualification/qualification-activation.stderr",
+    "archived_path": "qualification/qualification-activation.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/qualification-activation.stdout",
+    "original_path": "qualification/qualification-activation.stdout",
+    "archived_path": "qualification/qualification-activation.stdout.gz",
+    "original_sha256": "be54bb52392d29ea9773e93e79eed79ab9c8f47edf8c7e2670f09bc8c47e8f81",
+    "original_bytes": 200,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/ready.py",
+    "original_path": "qualification/ready.py",
+    "archived_path": "qualification/ready.py",
+    "original_sha256": "f53304c528c7995abecf8c8d9ac16e44839c08f3880a1d4074861b1cabb5b2b8",
+    "original_bytes": 4057,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/review-root.py",
+    "original_path": "qualification/review-root.py",
+    "archived_path": "qualification/review-root.py",
+    "original_sha256": "59b5af7290e3adb175bedb7e257a2c2c8f45fcfe2b6572f1f8ee25be111cc623",
+    "original_bytes": 4374,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/review-root.py.initial",
+    "original_path": "qualification/review-root.py.initial",
+    "archived_path": "qualification/review-root.py.initial",
+    "original_sha256": "404fb574879b3d0bc5f1c11b22f3d5c621d9111a5cdcef44dad419fbe93623dd",
+    "original_bytes": 4283,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/review-root.py.second",
+    "original_path": "qualification/review-root.py.second",
+    "archived_path": "qualification/review-root.py.second",
+    "original_sha256": "cc426675c72ab507d1fb3865e4f240e1189b66661819f6dd2ddbe28ae8d60204",
+    "original_bytes": 4288,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/run.sh",
+    "original_path": "qualification/run.sh",
+    "archived_path": "qualification/run.sh",
+    "original_sha256": "ca6b516fe252d8e33d16d51df62e97f6b3969cfe14a9575d032d401b800fa147",
+    "original_bytes": 4011,
+    "source_mode": "0o755",
+    "archived_mode": "0o755"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/setup-after-build.sh",
+    "original_path": "qualification/setup-after-build.sh",
+    "archived_path": "qualification/setup-after-build.sh",
+    "original_sha256": "df48d7fd41f1d5439226cc96f89b7d2d9270dd926c832d7f851c8a149a7c30cf",
+    "original_bytes": 420,
+    "source_mode": "0o755",
+    "archived_mode": "0o755"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/slice486-source.sha256",
+    "original_path": "qualification/slice486-source.sha256",
+    "archived_path": "qualification/slice486-source.sha256",
+    "original_sha256": "5f81e43dc9bcd723f98da8f6ecae2bf41f024f9e3f0e781363626e71668a70c9",
+    "original_bytes": 398,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/source-export.command.json",
+    "original_path": "qualification/source-export.command.json",
+    "archived_path": "qualification/source-export.command.json",
+    "original_sha256": "0e510b519dafae145a500e7438fb0ccabee1765a41a2473b64a8a6c8562f54ba",
+    "original_bytes": 61497,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/source.sha256",
+    "original_path": "qualification/source.sha256",
+    "archived_path": "qualification/source.sha256.gz",
+    "original_sha256": "ace589a772df457a53fa9de89b2477ef4161ab8f0b581026084926475fd44da4",
+    "original_bytes": 152614,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/unpublished-guard.command.json",
+    "original_path": "qualification/unpublished-guard.command.json",
+    "archived_path": "qualification/unpublished-guard.command.json",
+    "original_sha256": "4b29327d6d08fc746b7786f0f4f6d218b80e922124351ef15dbaa9b67e2dc863",
+    "original_bytes": 238,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/unpublished-guard.exit",
+    "original_path": "qualification/unpublished-guard.exit",
+    "archived_path": "qualification/unpublished-guard.exit",
+    "original_sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/unpublished-guard.stderr",
+    "original_path": "qualification/unpublished-guard.stderr",
+    "archived_path": "qualification/unpublished-guard.stderr.gz",
+    "original_sha256": "552545e4ee6dc81d562433ee8e5798f0241871c39e9714c6ba6894a0704935f7",
+    "original_bytes": 668,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/unpublished-guard.stdout",
+    "original_path": "qualification/unpublished-guard.stdout",
+    "archived_path": "qualification/unpublished-guard.stdout.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/AFTER.json",
+    "original_path": "root-publication/AFTER.json",
+    "archived_path": "root-publication/AFTER.json",
+    "original_sha256": "6e1dda98aa5b539c3cf66a3ac186b386a778b8968323efacda83b4182037d837",
+    "original_bytes": 130,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/BEFORE.json",
+    "original_path": "root-publication/BEFORE.json",
+    "archived_path": "root-publication/BEFORE.json",
+    "original_sha256": "6e1dda98aa5b539c3cf66a3ac186b386a778b8968323efacda83b4182037d837",
+    "original_bytes": 130,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/ORIGINAL_JOB.json",
+    "original_path": "root-publication/ORIGINAL_JOB.json",
+    "archived_path": "root-publication/ORIGINAL_JOB.json",
+    "original_sha256": "863b2ec983d86faf23e51f52b6fb0dab0f98ce3124a66de490bc1676e5750b5d",
+    "original_bytes": 274,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/RECEIPT.json",
+    "original_path": "root-publication/RECEIPT.json",
+    "archived_path": "root-publication/RECEIPT.json",
+    "original_sha256": "44ac62f8b44978dd9b6c89d61b17024aef4082c796450d69eeddda3925f1a044",
+    "original_bytes": 337,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/commit.exit",
+    "original_path": "root-publication/commit.exit",
+    "archived_path": "root-publication/commit.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/commit.stderr",
+    "original_path": "root-publication/commit.stderr",
+    "archived_path": "root-publication/commit.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/commit.stdout",
+    "original_path": "root-publication/commit.stdout",
+    "archived_path": "root-publication/commit.stdout.gz",
+    "original_sha256": "3718684d4a7d4d2107a47f3d233a455e1fd1ef94e02a7cc2bd9eb705a91aabe6",
+    "original_bytes": 7292,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/push.exit",
+    "original_path": "root-publication/push.exit",
+    "archived_path": "root-publication/push.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/push.stderr",
+    "original_path": "root-publication/push.stderr",
+    "archived_path": "root-publication/push.stderr.gz",
+    "original_sha256": "c9dd87b844ef1232c9158a1083926fb1b65e1c36cbd8104ca1a2eb2581a0e484",
+    "original_bytes": 435,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/push.stdout",
+    "original_path": "root-publication/push.stdout",
+    "archived_path": "root-publication/push.stdout.gz",
+    "original_sha256": "282487865beabbd0ea2ef111759ccb2c9a9900dc45af8a1f98f9bf9ff4fdaaf3",
+    "original_bytes": 53,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/remote.exit",
+    "original_path": "root-publication/remote.exit",
+    "archived_path": "root-publication/remote.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/remote.stderr",
+    "original_path": "root-publication/remote.stderr",
+    "archived_path": "root-publication/remote.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/remote.stdout",
+    "original_path": "root-publication/remote.stdout",
+    "archived_path": "root-publication/remote.stdout.gz",
+    "original_sha256": "bc4748e0ff98aeb85e289100ce9bf1c9e3ea37dc9427ae6edcb030eaf166166b",
+    "original_bytes": 57,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/stage.exit",
+    "original_path": "root-publication/stage.exit",
+    "archived_path": "root-publication/stage.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/stage.stderr",
+    "original_path": "root-publication/stage.stderr",
+    "archived_path": "root-publication/stage.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/stage.stdout",
+    "original_path": "root-publication/stage.stdout",
+    "archived_path": "root-publication/stage.stdout.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/staged-whitespace.exit",
+    "original_path": "root-publication/staged-whitespace.exit",
+    "archived_path": "root-publication/staged-whitespace.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/staged-whitespace.stderr",
+    "original_path": "root-publication/staged-whitespace.stderr",
+    "archived_path": "root-publication/staged-whitespace.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/staged-whitespace.stdout",
+    "original_path": "root-publication/staged-whitespace.stdout",
+    "archived_path": "root-publication/staged-whitespace.stdout.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/whitespace.exit",
+    "original_path": "root-publication/whitespace.exit",
+    "archived_path": "root-publication/whitespace.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/whitespace.stderr",
+    "original_path": "root-publication/whitespace.stderr",
+    "archived_path": "root-publication/whitespace.stderr.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/whitespace.stdout",
+    "original_path": "root-publication/whitespace.stdout",
+    "archived_path": "root-publication/whitespace.stdout.gz",
+    "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "original_bytes": 0,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/.githooks/pre-push",
+    "original_path": "root-qualification/.githooks/pre-push",
+    "archived_path": "root-qualification/.githooks/pre-push",
+    "original_sha256": "e3e9d01c12837936819f7c6f5b4b8840af19e9cded729381599df0f0fc17ee92",
+    "original_bytes": 1701,
+    "source_mode": "0o755",
+    "archived_mode": "0o755"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/CHECKED.json",
+    "original_path": "root-qualification/CHECKED.json",
+    "archived_path": "root-qualification/CHECKED.json",
+    "original_sha256": "fa9709555b19df24cae02d95ada06109ad8e58ccc21d618ebe3b029829f5eecc",
+    "original_bytes": 867,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/ORIGINALS.json",
+    "original_path": "root-qualification/ORIGINALS.json",
+    "archived_path": "root-qualification/ORIGINALS.json",
+    "original_sha256": "73bd478e917261287a8edb185e7d6ed3ad72d3270f84c5fb0e408ee0dd2930d4",
+    "original_bytes": 283,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/ROOT_ARCHIVE_VERIFIED.json",
+    "original_path": "root-qualification/ROOT_ARCHIVE_VERIFIED.json",
+    "archived_path": "root-qualification/ROOT_ARCHIVE_VERIFIED.json",
+    "original_sha256": "7b05a24be26bdc5da44109f3e8db965e45671879d063cc5c9817fffd5df2b000",
+    "original_bytes": 374,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/ROOT_FINAL_INPUTS.json",
+    "original_path": "root-qualification/ROOT_FINAL_INPUTS.json",
+    "archived_path": "root-qualification/ROOT_FINAL_INPUTS.json.gz",
+    "original_sha256": "5265ba08c8605671324753d206c11f76b2cc78eaca583d6473fc9c9babfd24e6",
+    "original_bytes": 237527,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publish.py",
+    "original_path": "root-qualification/publish.py",
+    "archived_path": "root-qualification/publish.py",
+    "original_sha256": "603d60ca815a5c1ad27b8e0b226456f6b586e1722e95327b9ebbf10bf79a0f47",
+    "original_bytes": 2149,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/run.py",
+    "original_path": "root-qualification/run.py",
+    "archived_path": "root-qualification/run.py",
+    "original_sha256": "5ab1e0f4f9ff749020ceaba03e96d7d49b74086aed36623c304b6ebbaad0f40c",
+    "original_bytes": 3305,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/CHECKED.json",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/CHECKED.json",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/CHECKED.json",
+    "original_sha256": "fa9709555b19df24cae02d95ada06109ad8e58ccc21d618ebe3b029829f5eecc",
+    "original_bytes": 867,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/checked/COMMANDS.json",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/checked/COMMANDS.json",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/checked/COMMANDS.json",
+    "original_sha256": "169b03d7b144ae717b721e3763723899a91667fbed2faa0c565d9b0ba2bc855a",
+    "original_bytes": 4738,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/checked/INPUTS_AFTER.json",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/checked/INPUTS_AFTER.json",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/checked/INPUTS_AFTER.json.gz",
+    "original_sha256": "6c1773f55496262d3d3d3018bda75d3119ad5e1a1fcb6f8e3c914847d3760982",
+    "original_bytes": 224301,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/checked/INPUTS_BEFORE.json",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/checked/INPUTS_BEFORE.json",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/checked/INPUTS_BEFORE.json.gz",
+    "original_sha256": "6c1773f55496262d3d3d3018bda75d3119ad5e1a1fcb6f8e3c914847d3760982",
+    "original_bytes": 224301,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/checked/logs/application-all.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/application-all.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/application-all.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/checked/logs/application-core.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/application-core.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/application-core.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/checked/logs/application-unit-all.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/application-unit-all.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/application-unit-all.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/checked/logs/application-unit-core.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/application-unit-core.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/application-unit-core.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/checked/logs/clients-all.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/clients-all.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/clients-all.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/checked/logs/clients-core.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/clients-core.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/clients-core.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/checked/logs/fmt.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/fmt.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/fmt.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/checked/logs/matched.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/matched.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/matched.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/checked/logs/metadata-negative.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/metadata-negative.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/metadata-negative.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/checked/logs/metadata.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/metadata.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/metadata.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/checked/logs/providers-all.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/providers-all.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/providers-all.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/checked/logs/providers-core.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/providers-core.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/providers-core.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/checked/logs/services.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/services.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/services.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/checked/logs/strict.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/strict.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/checked/logs/strict.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/AFTER.json",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/publication/AFTER.json",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/publication/AFTER.json",
+    "original_sha256": "6e1dda98aa5b539c3cf66a3ac186b386a778b8968323efacda83b4182037d837",
+    "original_bytes": 130,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/BEFORE.json",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/publication/BEFORE.json",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/publication/BEFORE.json",
+    "original_sha256": "6e1dda98aa5b539c3cf66a3ac186b386a778b8968323efacda83b4182037d837",
+    "original_bytes": 130,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/RECEIPT.json",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/publication/RECEIPT.json",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/publication/RECEIPT.json",
+    "original_sha256": "44ac62f8b44978dd9b6c89d61b17024aef4082c796450d69eeddda3925f1a044",
+    "original_bytes": 337,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/commit.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/publication/commit.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/publication/commit.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/push.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/publication/push.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/publication/push.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/remote.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/publication/remote.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/publication/remote.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/stage.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/publication/stage.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/publication/stage.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/staged-whitespace.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/publication/staged-whitespace.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/publication/staged-whitespace.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  },
+  {
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/publication/whitespace.exit",
+    "original_path": "root-qualification/target/p9/native486-capacity-bound/publication/whitespace.exit",
+    "archived_path": "root-qualification/target/p9/native486-capacity-bound/publication/whitespace.exit",
+    "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "original_bytes": 2,
+    "source_mode": "0o644",
+    "archived_mode": "0o644"
+  }
+]

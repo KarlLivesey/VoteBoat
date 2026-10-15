@@ -1,0 +1,32 @@
+[
+  {
+    "replica": 1,
+    "generation": 1,
+    "selector": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/tcp-default-atomic/replica1/CURRENT",
+    "wal_bytes": 20164,
+    "metadata_bytes": 52,
+    "selector_sha256": "9bb7c6942f50caad722236b8dbff4a0d4fee89550995bb6d5081d3953a64f8df",
+    "wal_sha256": "0a446e2de9ac774cfc41dcee6b1a133600bd642bce9234b11733df3c63f91f7e",
+    "metadata_sha256": "f5446432478a3c36af953c2df64ecf58e1e97614a4287517c6a6c5ca28293f93"
+  },
+  {
+    "replica": 2,
+    "generation": 1,
+    "selector": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/tcp-default-atomic/replica2/CURRENT",
+    "wal_bytes": 28974,
+    "metadata_bytes": 52,
+    "selector_sha256": "9bb7c6942f50caad722236b8dbff4a0d4fee89550995bb6d5081d3953a64f8df",
+    "wal_sha256": "3d0093615a2bff1037b21ffaba62ae8843dba09538dc07685c208f18bef89abb",
+    "metadata_sha256": "ab441b39d59f03f6e9c2bd3f56ab01dbffca6298e3f8f4a338a3071adea785d9"
+  },
+  {
+    "replica": 3,
+    "generation": 1,
+    "selector": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/tcp-default-atomic/replica3/CURRENT",
+    "wal_bytes": 29174,
+    "metadata_bytes": 52,
+    "selector_sha256": "9bb7c6942f50caad722236b8dbff4a0d4fee89550995bb6d5081d3953a64f8df",
+    "wal_sha256": "e6fbfeb48708f85b72bd5a5d5597289a622ed0b4dcf11f1d9478d185acb8a79e",
+    "metadata_sha256": "aff7aace6c2b49be9dde54303bfbd7d5b38465bc5fd865478326e7c57cbdca44"
+  }
+]

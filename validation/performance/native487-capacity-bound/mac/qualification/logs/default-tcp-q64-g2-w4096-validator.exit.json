@@ -1,0 +1,10 @@
+{
+  "command": [
+    "node",
+    "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/source/validation/check-native-benchmark.mjs",
+    "--storage",
+    "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/control-wal/default-tcp-q64-g2-w4096"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.12077591700000045
+}

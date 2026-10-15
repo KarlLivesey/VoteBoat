@@ -1,0 +1,7 @@
+{
+  "actual_exit": 0,
+  "tool_chunk": "afe59f",
+  "source": "Root reports actual independent raw review execution in task message; source and saved review are included. No fabricated stdout/stderr or child-side execution.",
+  "review_path": "target/p9/native486-capacity-bound/mac/INDEPENDENT_ROOT_REVIEW.json",
+  "script_path": "target/p9/native486-capacity-bound/mac/root-review.py"
+}

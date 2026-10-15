@@ -1,0 +1,5 @@
+{
+  "actual_exit": 1,
+  "terminal_tool_chunk": "61515e",
+  "reason": "Reviewer expected diagnostic publication_provider in default control; omitted default intentionally has no publication readback/summary fields. Correct guard checks exact omission, q16 and52-byte metadata; no workload or engine change."
+}

@@ -1,0 +1,22 @@
+{
+  "source_commit": "dcdcafe3f0c0a56d01e3c3095d3c276113cd7d69",
+  "actual_qualification_guard_exit": 0,
+  "command": [
+    "/usr/bin/python3.14",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/guard.py",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux",
+    "qualification"
+  ],
+  "publication": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/PUBLICATION.json",
+    "sha256": "4e0ec306f4d1d9791c5f6ec44641c5d647c7956f45bb035ab6131d846f924a60"
+  },
+  "qualification": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/FUNCTIONAL_QUALIFICATION.json",
+    "sha256": "9ccb865c8a4c36dec88fa736af3f7e4d6f94cc665384f7dde6fe2baed328d6a0"
+  },
+  "guard_sha256": "8f919d5911378b86c4a809bfef5ba6b0ffd1a1d7309b4a918050cb7e3cf6d4f5",
+  "export_sha256": "0a527a5f076c6017c8aacbd72591212e198ccb30008998c9014be977932b5cee",
+  "prior_unpublished_preparation_preserved": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/prepared-unpublished",
+  "no_source_export_build_controls_yet": true
+}

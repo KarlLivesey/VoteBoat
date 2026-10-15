@@ -1,0 +1,24 @@
+{
+  "exit": 0,
+  "source_commit": "dcdcafe3f0c0a56d01e3c3095d3c276113cd7d69",
+  "source_files": 1496,
+  "source_directories": 327,
+  "protected_private_fixture_keys_0600": 7,
+  "native_artifact_sha256": {
+    "voteboat": "c59f42db67306856518582d37c26a40f988e66b32631ff2b9423cc520de2f561",
+    "native_benchmark": "c7d84b4414d578ac67dfbc5dc6bfb45625bb8e5cb06519d5ce745333d23b3567"
+  },
+  "native_uuid": "703C547E-623F-3987-B4A8-B677C8AA008C",
+  "actual_original_handle": 60577,
+  "actual_original_exit": 0,
+  "terminal_tool_chunk": "ee680f",
+  "readiness_sha256": "7396407e48946c7959a454a3187a6dbd14148a5432b4356698372072ad6cfffd",
+  "original_terminal_sha256": "e653a005f23574feb260758031eb24f882576d184bc85d298811d82d6a73b9c4",
+  "original_remote_payloads": 212,
+  "selected_remote_original_payloads": 211,
+  "selected_remote_files_including_collection_manifest": 212,
+  "redundant_remote_file_omitted": "source.sha256; exact hashes/modes already inSOURCE.json",
+  "qualification_review_sha256": "9fa310c10de341f2f247b074c8bfaf0c4085a24736225dda164f5939d4670f30",
+  "independent_root_review_sha256": "87071fe4a1cea35e6608dd1b72fab84a3d31fdea5764d62ff6af1e1ee9be2eb5",
+  "scope": "Fresh published486 native artifact/functionality qualification only. All four controls explicitly ready64; default names mean default FileLogIo provider, not omitted defaultready16. No throughput/sustained/fullP9/default-promotion claim."
+}

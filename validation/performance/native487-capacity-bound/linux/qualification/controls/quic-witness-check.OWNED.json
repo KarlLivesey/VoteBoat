@@ -1,0 +1,10 @@
+{
+  "pid": 346146,
+  "process_group": 346146,
+  "command": [
+    "/home/karllivesey/.nvm/versions/node/v24.21.0/bin/node",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/control-tools/check-native-benchmark.mjs",
+    "--storage",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native486-capacity-bound/linux/controls/wal/quic-witness"
+  ]
+}

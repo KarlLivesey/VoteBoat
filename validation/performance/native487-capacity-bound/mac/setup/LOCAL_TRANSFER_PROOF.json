@@ -1,0 +1,13 @@
+{
+  "exit": 0,
+  "original_handle": 60577,
+  "actual_original_exit": 0,
+  "terminal_tool_chunk": "ee680f",
+  "raw_originals": 212,
+  "members_including_manifest": 213,
+  "all_sha256_lengths_modes_exact": true,
+  "archive_sha256": "9af781be37bb4e7aa9b0f6d73635e1c4b2d1f81ec2c1f878f0ed279c8a06ebe5",
+  "manifest_sha256": "5c49622071f26320f140a6dcfd8f3cd17d2538b9d37920b94a7b7fea546ae738",
+  "readiness_sha256": "7396407e48946c7959a454a3187a6dbd14148a5432b4356698372072ad6cfffd",
+  "no_source_build_binary_WAL_transfer": true
+}

@@ -1,0 +1,6 @@
+{
+  "exit": 0,
+  "files": 8,
+  "exact_hashes_lengths_modes": true,
+  "scope": "Small comparison helper/schema/authority text only; no source/binary/buildtrees/WAL/workload."
+}

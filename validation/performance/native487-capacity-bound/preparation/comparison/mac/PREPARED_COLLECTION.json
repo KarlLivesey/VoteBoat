@@ -1,0 +1,7 @@
+{
+  "actual_exit": 0,
+  "files": 28,
+  "exact_remote_local_hashes_bytes_modes": true,
+  "remote_inventory_sha256": "5e390507edabbbfa1b99e81b09873c368e401d8f13c71525aa8d5752f071d59c",
+  "scope": "Prepared helpers/configs/validator closure/guards/power source only; no source/buildtrees/binaries/WAL transfer, no workload."
+}

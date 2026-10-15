@@ -1,0 +1,6 @@
+[
+  "node",
+  "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/source/validation/check-native-benchmark.mjs",
+  "--storage",
+  "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/control-wal/witness-quic-q64-g2-w4096"
+]

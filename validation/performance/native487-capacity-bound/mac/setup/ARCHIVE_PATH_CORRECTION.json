@@ -1,0 +1,7 @@
+{
+  "scope": "Initial archive used inherited ingress namespace by mechanical rename; no production or evidence bytes changed. Original seal and receipts retained at initial-archive-path. Corrected output only before publication.",
+  "initial_archive": "validation/performance/native486-ingress/mac",
+  "final_archive": "validation/performance/native487-capacity-bound/mac",
+  "initial_tool_chunk": "658d28",
+  "initial_exit": 0
+}

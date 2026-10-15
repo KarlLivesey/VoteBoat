@@ -1,0 +1,9 @@
+[
+  "ssh",
+  "-F",
+  "/dev/null",
+  "-o",
+  "IdentityAgent=/home/karllivesey/.1password/agent.sock",
+  "karllivesey@192.168.192.76",
+  "/usr/bin/tar -xf - -C '/private/tmp/voteboat-native487-pair-aoKAm5'"
+]

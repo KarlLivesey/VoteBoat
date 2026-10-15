@@ -1,0 +1,6 @@
+{
+  "candidate": "/private/tmp/voteboat-mac486-dcdcafe-XAunHE",
+  "source_commit": "dcdcafe3f0c0a56d01e3c3095d3c276113cd7d69",
+  "host": "mac",
+  "scope": "Setup only; no timing authorization, workload, build or dependency update."
+}

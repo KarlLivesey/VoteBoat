@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/artifacts/native/native_benchmark",
+    "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/control-wal/default-tcp-q64-g2-w4096",
+    "tcp",
+    "512",
+    "4096",
+    "2",
+    "--offered",
+    "128",
+    "--maintenance",
+    "2",
+    "--ready-items",
+    "64",
+    "--offered-capacity",
+    "4096",
+    "--group-weights",
+    "31,1"
+  ],
+  "exit": 0,
+  "elapsed_s": 5.829492084
+}

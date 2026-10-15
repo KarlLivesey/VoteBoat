@@ -1,0 +1,53 @@
+{
+  "exit": 0,
+  "scope": "Independent root read of all post-terminal original payload hashes/bytes/modes, actual check outputs/counts/exits,1496 qualifiedsource records, freshCargoJSON/vv root/exe/buildscript, symbol/tool identities and fourraw control records. No build, workload or suite was rerun; binaries remain onMac with actual guard hash proof. No performance claim.",
+  "commit": "dcdcafe3f0c0a56d01e3c3095d3c276113cd7d69",
+  "actual_original": {
+    "actual_exit": 0,
+    "original_handle": 60577,
+    "terminal_tool_chunk": "ee680f",
+    "time_utc": "2026-10-15T17:27:59.856381+00:00",
+    "markers": [
+      "DONE",
+      "MAC486_SETUP_READY",
+      "MAC486_EXIT=0"
+    ],
+    "no_restarts_or_replacements": true
+  },
+  "collection_originals": 212,
+  "source_files": 1496,
+  "source_directories": 327,
+  "private_keys_0600": 7,
+  "actual_rust_test_counts": {
+    "application_all": 23,
+    "application_core": 23,
+    "client_all": 28,
+    "client_core": 28,
+    "unit_application_all": 39,
+    "unit_application_core": 39,
+    "provider_all": 42,
+    "provider_core": 27,
+    "counter_service": 2,
+    "matched_tests": 70
+  },
+  "tap_tests": 42,
+  "all_checks_exit0": true,
+  "fresh_native_root_executable_buildscript": true,
+  "native_profile": "opt3/debug0/assertions+overflow/nativeDEFAULTLTO+codegen",
+  "native_uuid": "703C547E-623F-3987-B4A8-B677C8AA008C",
+  "artifact_sha256": {
+    "voteboat": "c59f42db67306856518582d37c26a40f988e66b32631ff2b9423cc520de2f561",
+    "native_benchmark": "c7d84b4414d578ac67dfbc5dc6bfb45625bb8e5cb06519d5ce745333d23b3567"
+  },
+  "within_host480_tool_bytes_exact": true,
+  "controls": {
+    "count": 4,
+    "applied_each": 512,
+    "recovered_each": 576,
+    "all_refusals_unknown_pending": 0,
+    "quantum": 64,
+    "groups": 2,
+    "default_scope": "ProviderFileLogIo omittedpublication selection, explicitready64; no claimdefaultquantum16 was omitted onMac."
+  },
+  "readiness_sha256": "7396407e48946c7959a454a3187a6dbd14148a5432b4356698372072ad6cfffd"
+}

@@ -1,0 +1,31 @@
+{
+  "actual_exit": 0,
+  "argv_normalized_records_exact484": true,
+  "all48_order_fields_exact484": true,
+  "controller_plan_prepare_only_identity_text_changes": true,
+  "resources_byte_exact484": true,
+  "readout_only_change_add487_source_commit_binding": true,
+  "reader_reference_phases_retained": [
+    "reference481",
+    "campaign484"
+  ],
+  "cases": 48,
+  "pairs": 24,
+  "offers": 391680,
+  "scheduled_horizon_s": 1344,
+  "candidate": "dcdcafe3f0c0a56d01e3c3095d3c276113cd7d69",
+  "baseline": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "scripts": {
+    "common.py": "22255b08f6010a0b5bd1a91d9080a81724f476b0b2f426d7d3d668b560a40c8a",
+    "prepare.py": "64d529b70c4786bd639ab6e157145efcc58c3c63ce7ee4d2cb3206cc5cd234bb",
+    "campaign.py": "ad894c6543ec8055bc1a37fbc03531f979d74079d10327fc95bced2722b3eac0",
+    "plan.py": "8a0e6bdddd3871298ec2746d08cc276112f7a309ac745c1fb010026715e1fc66",
+    "resources.py": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+    "test_plan.py": "5d6bb3fa5aab9e9de364c6c06609aa23d830fe00cd180c8a4758677495ff4cad",
+    "REQUIRED_COMMIT": "1cae45f474891ce78a7aed80d28d9eb80efaa47919e27d0ae74541b9acb5ff53"
+  },
+  "schema_sha256": "606906af33ef76f6fa54d641fad901d7161ceeeb04a35e9875f9368e81536662",
+  "readout_sha256": "31fcaed6b5fe68df4bd450bbf337ea1e6338af91804522857e86101bb62701c6",
+  "actual_config_assembled": false,
+  "timing_started": false
+}

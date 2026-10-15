@@ -1,0 +1,9 @@
+[
+  "ssh",
+  "-F",
+  "/dev/null",
+  "-o",
+  "IdentityAgent=/home/karllivesey/.1password/agent.sock",
+  "karllivesey@192.168.192.76",
+  "base=$(mktemp -d /tmp/voteboat-native487-pair-XXXXXX) && cd \"$base\" && pwd -P"
+]

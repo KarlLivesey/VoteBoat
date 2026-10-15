@@ -1,0 +1,257 @@
+{
+  "comparison/actual-linux-guard.stderr.gz": {
+    "original": "comparison/actual-linux-guard.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "comparison/actual-linux-guard.stdout.gz": {
+    "original": "comparison/actual-linux-guard.stdout",
+    "sha256": "f2de459fe2bfb6001394aef976f470fc43c9ce99d76cd4cbc23e0d45efdf9f48",
+    "bytes": 409
+  },
+  "comparison/guard-adaptation.diff.gz": {
+    "original": "comparison/guard-adaptation.diff",
+    "sha256": "81e37d91b3a55add6b9ae38201df1438b43968e568b58e6bdf2094e2b4088dbe",
+    "bytes": 12009
+  },
+  "comparison/linux/campaign/CAMPAIGN_CONFIG.json.gz": {
+    "original": "comparison/linux/campaign/CAMPAIGN_CONFIG.json",
+    "sha256": "e93c56179fdaad3ad55217cee19ee10c964411efbe76d6be311da98e9228038f",
+    "bytes": 693760
+  },
+  "comparison/linux/campaign/setup-host.json.gz": {
+    "original": "comparison/linux/campaign/setup-host.json",
+    "sha256": "6fe1db2477c6a4494f8fbcdc55de76b7c27cdf2a5b94d5aeb83997cff17ec9f6",
+    "bytes": 39761
+  },
+  "comparison/linux/prepare.stderr.gz": {
+    "original": "comparison/linux/prepare.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "comparison/linux/prepare.stdout.gz": {
+    "original": "comparison/linux/prepare.stdout",
+    "sha256": "55a3f45b288fb9b6cdd66ebe14f6364ac64cdd19a7796d8596af0f488ebfd262",
+    "bytes": 127
+  },
+  "comparison/mac/collect-prepared.stderr.gz": {
+    "original": "comparison/mac/collect-prepared.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "comparison/mac/job.stderr.gz": {
+    "original": "comparison/mac/job.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "comparison/mac/job.stdout.gz": {
+    "original": "comparison/mac/job.stdout",
+    "sha256": "582117ae121a5a07de02527b38c2779449922115122af128b2165273adac297b",
+    "bytes": 44
+  },
+  "comparison/mac/prepare.stderr.gz": {
+    "original": "comparison/mac/prepare.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "comparison/mac/prepare.stdout.gz": {
+    "original": "comparison/mac/prepare.stdout",
+    "sha256": "348ecf7d51947060963d2acb9508c3dc046adbc959734b73adcbffbcc27d1b55",
+    "bytes": 928
+  },
+  "comparison/mac/prepared/campaign/CAMPAIGN_CONFIG.json.gz": {
+    "original": "comparison/mac/prepared/campaign/CAMPAIGN_CONFIG.json",
+    "sha256": "d62834423aad8430f997f1566b315b9c10a6d62420e7b2122c1d3723260a5a61",
+    "bytes": 680568
+  },
+  "comparison/mac/prepared/campaign/setup-host.json.gz": {
+    "original": "comparison/mac/prepared/campaign/setup-host.json",
+    "sha256": "ee4afd3fe4c7f42b4c333335a4d96a87ebe158e29918cac63ce1fbc76e6b7455",
+    "bytes": 159166
+  },
+  "comparison/mac/prepared/prepare.stderr.gz": {
+    "original": "comparison/mac/prepared/prepare.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "comparison/mac/prepared/prepare.stdout.gz": {
+    "original": "comparison/mac/prepared/prepare.stdout",
+    "sha256": "0bab57ca15fbdba692ef3e89a02e5886c26551fd4030f7493c8ff01194d55971",
+    "bytes": 74
+  },
+  "comparison/mac/transfer.stderr.gz": {
+    "original": "comparison/mac/transfer.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "comparison/mac/transfer.stdout.gz": {
+    "original": "comparison/mac/transfer.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "comparison/missing-candidate.stderr.gz": {
+    "original": "comparison/missing-candidate.stderr",
+    "sha256": "96600ff0814b8fc2ddd855de76a48d56678c4fa15908a58f2ca89ee77aff0303",
+    "bytes": 1668
+  },
+  "comparison/missing-candidate.stdout.gz": {
+    "original": "comparison/missing-candidate.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "comparison/plan.stderr.gz": {
+    "original": "comparison/plan.stderr",
+    "sha256": "9d5822f16af9b5fe0e4ad15771f3fd6c5f0262b26a6ebc83b6ec6bd52bf2d655",
+    "bytes": 102
+  },
+  "comparison/plan.stdout.gz": {
+    "original": "comparison/plan.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "comparison/reference484-linux.stderr.gz": {
+    "original": "comparison/reference484-linux.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "comparison/reference484-linux.stdout.gz": {
+    "original": "comparison/reference484-linux.stdout",
+    "sha256": "0b13df0d97980e83aa5700e3687a3850ac6269ae4abeed066b4fca223e5ab8da",
+    "bytes": 300
+  },
+  "comparison/reference484-linux/PROVENANCE.json.gz": {
+    "original": "comparison/reference484-linux/PROVENANCE.json",
+    "sha256": "45bd92a71a2b1cf02cb5cfac31df1b8d3db056d541360231cee2059ac2414151",
+    "bytes": 212299
+  },
+  "comparison/reference484-linux/READOUT.json.gz": {
+    "original": "comparison/reference484-linux/READOUT.json",
+    "sha256": "80239fd7c77865836f52c1fa7d715b0dee8005bbb34c3abab10e531c1d1acaea",
+    "bytes": 2191893
+  },
+  "comparison/reference484-mac.stderr.gz": {
+    "original": "comparison/reference484-mac.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "comparison/reference484-mac.stdout.gz": {
+    "original": "comparison/reference484-mac.stdout",
+    "sha256": "13409963ab0e417f69dc6a3eca8b025fd79d062d396bebffe42ea37e30ff6464",
+    "bytes": 297
+  },
+  "comparison/reference484-mac/PROVENANCE.json.gz": {
+    "original": "comparison/reference484-mac/PROVENANCE.json",
+    "sha256": "d14e9e993e0e4d5a69435365ec748391e90d3efaa51a18a1ba83db6212be2d86",
+    "bytes": 208855
+  },
+  "comparison/reference484-mac/READOUT.json.gz": {
+    "original": "comparison/reference484-mac/READOUT.json",
+    "sha256": "226993454dac2d1d270557bdba66990b9a96401416c9927585ce29b019e25260",
+    "bytes": 2130633
+  },
+  "comparison/static.stderr.gz": {
+    "original": "comparison/static.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "comparison/static.stdout.gz": {
+    "original": "comparison/static.stdout",
+    "sha256": "90f42ef685191b0a9d7364d23a594d07afd90f09b986290d0e68ee30a861d898",
+    "bytes": 1409
+  },
+  "fresh486-references/ROOT_FINAL_INPUTS.json.gz": {
+    "original": "fresh486-references/ROOT_FINAL_INPUTS.json",
+    "sha256": "5265ba08c8605671324753d206c11f76b2cc78eaca583d6473fc9c9babfd24e6",
+    "bytes": 237527
+  },
+  "independent-review/linux-config-attempt2.stderr.gz": {
+    "original": "independent-review/linux-config-attempt2.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "independent-review/linux-config-attempt2.stdout.gz": {
+    "original": "independent-review/linux-config-attempt2.stdout",
+    "sha256": "2c25f1ce2af8e5103322cf8452e9a4cf7cf7d422ea95527333999b6cbfa8aeb9",
+    "bytes": 156
+  },
+  "independent-review/linux-config.stderr.gz": {
+    "original": "independent-review/linux-config.stderr",
+    "sha256": "f665ec3ed6e24bb570d1e4baa9fa33526956b110d7a5b2c49b5ae9859a75f4dc",
+    "bytes": 369
+  },
+  "independent-review/linux-config.stdout.gz": {
+    "original": "independent-review/linux-config.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "independent-review/mac-config.stderr.gz": {
+    "original": "independent-review/mac-config.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "independent-review/mac-config.stdout.gz": {
+    "original": "independent-review/mac-config.stdout",
+    "sha256": "edf05e629ddc42254b73f60bf320236f04c2bda6949ebeb5bdce92d446100ea9",
+    "bytes": 292
+  },
+  "published486/commit.stderr.gz": {
+    "original": "published486/commit.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "published486/commit.stdout.gz": {
+    "original": "published486/commit.stdout",
+    "sha256": "3718684d4a7d4d2107a47f3d233a455e1fd1ef94e02a7cc2bd9eb705a91aabe6",
+    "bytes": 7292
+  },
+  "published486/push.stderr.gz": {
+    "original": "published486/push.stderr",
+    "sha256": "c9dd87b844ef1232c9158a1083926fb1b65e1c36cbd8104ca1a2eb2581a0e484",
+    "bytes": 435
+  },
+  "published486/push.stdout.gz": {
+    "original": "published486/push.stdout",
+    "sha256": "282487865beabbd0ea2ef111759ccb2c9a9900dc45af8a1f98f9bf9ff4fdaaf3",
+    "bytes": 53
+  },
+  "published486/remote.stderr.gz": {
+    "original": "published486/remote.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "published486/remote.stdout.gz": {
+    "original": "published486/remote.stdout",
+    "sha256": "bc4748e0ff98aeb85e289100ce9bf1c9e3ea37dc9427ae6edcb030eaf166166b",
+    "bytes": 57
+  },
+  "published486/stage.stderr.gz": {
+    "original": "published486/stage.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "published486/stage.stdout.gz": {
+    "original": "published486/stage.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "published486/staged-whitespace.stderr.gz": {
+    "original": "published486/staged-whitespace.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "published486/staged-whitespace.stdout.gz": {
+    "original": "published486/staged-whitespace.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "published486/whitespace.stderr.gz": {
+    "original": "published486/whitespace.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "published486/whitespace.stdout.gz": {
+    "original": "published486/whitespace.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  }
+}

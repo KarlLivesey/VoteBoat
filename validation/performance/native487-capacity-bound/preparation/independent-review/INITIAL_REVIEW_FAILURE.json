@@ -1,0 +1,6 @@
+{
+  "actual_exit": 1,
+  "tool_chunk": "7971ce",
+  "cause": "Review helper assumed prepare.py only changed its leading docstring. Actual reviewed delta also changes candidate identity in an assertion message and the diagnostic scope string. Focused normalization of only slice identity strings; no actual config/source/helper mutation or workload.",
+  "initial_script": "review-linux-config.py.initial"
+}

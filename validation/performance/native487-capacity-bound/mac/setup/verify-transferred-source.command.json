@@ -1,0 +1,1 @@
+["ssh", "-F", "/dev/null", "-o", "IdentityAgent=/home/karllivesey/.1password/agent.sock", "-o", "BatchMode=yes", "karllivesey@192.168.192.76", "/usr/bin/python3", "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/verify-source.py"]

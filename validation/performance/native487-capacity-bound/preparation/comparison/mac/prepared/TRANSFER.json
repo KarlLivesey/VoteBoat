@@ -1,0 +1,42 @@
+{
+  "SCHEMA.md": {
+    "sha256": "606906af33ef76f6fa54d641fad901d7161ceeeb04a35e9875f9368e81536662",
+    "bytes": 6758,
+    "mode": "0o644"
+  },
+  "PUBLICATION_AUTHORITY.json": {
+    "sha256": "44ac62f8b44978dd9b6c89d61b17024aef4082c796450d69eeddda3925f1a044",
+    "bytes": 337,
+    "mode": "0o644"
+  },
+  "common/common.py": {
+    "sha256": "22255b08f6010a0b5bd1a91d9080a81724f476b0b2f426d7d3d668b560a40c8a",
+    "bytes": 27105,
+    "mode": "0o644"
+  },
+  "common/prepare.py": {
+    "sha256": "64d529b70c4786bd639ab6e157145efcc58c3c63ce7ee4d2cb3206cc5cd234bb",
+    "bytes": 6562,
+    "mode": "0o644"
+  },
+  "common/plan.py": {
+    "sha256": "8a0e6bdddd3871298ec2746d08cc276112f7a309ac745c1fb010026715e1fc66",
+    "bytes": 2439,
+    "mode": "0o644"
+  },
+  "common/campaign.py": {
+    "sha256": "ad894c6543ec8055bc1a37fbc03531f979d74079d10327fc95bced2722b3eac0",
+    "bytes": 6406,
+    "mode": "0o644"
+  },
+  "common/resources.py": {
+    "sha256": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+    "bytes": 2177,
+    "mode": "0o644"
+  },
+  "common/REQUIRED_COMMIT": {
+    "sha256": "1cae45f474891ce78a7aed80d28d9eb80efaa47919e27d0ae74541b9acb5ff53",
+    "bytes": 41,
+    "mode": "0o644"
+  }
+}

@@ -1,0 +1,262 @@
+TAP version 13
+# Subtest: review counts only audited operations and retains unreviewed contracts
+ok 1 - review counts only audited operations and retains unreviewed contracts
+  ---
+  duration_ms: 35.194167
+  type: 'test'
+  ...
+# Subtest: rejects unknown contract
+ok 2 - rejects unknown contract
+  ---
+  duration_ms: 8.294459
+  type: 'test'
+  ...
+# Subtest: rejects unknown operation
+ok 3 - rejects unknown operation
+  ---
+  duration_ms: 7.740834
+  type: 'test'
+  ...
+# Subtest: rejects missing operation
+ok 4 - rejects missing operation
+  ---
+  duration_ms: 8.420041
+  type: 'test'
+  ...
+# Subtest: rejects duplicate operation
+ok 5 - rejects duplicate operation
+  ---
+  duration_ms: 7.254542
+  type: 'test'
+  ...
+# Subtest: rejects missing assertion
+ok 6 - rejects missing assertion
+  ---
+  duration_ms: 7.1895
+  type: 'test'
+  ...
+# Subtest: rejects missing function
+ok 7 - rejects missing function
+  ---
+  duration_ms: 7.257375
+  type: 'test'
+  ...
+# Subtest: rejects missing test
+ok 8 - rejects missing test
+  ---
+  duration_ms: 7.109083
+  type: 'test'
+  ...
+# Subtest: rejects escaping path
+ok 9 - rejects escaping path
+  ---
+  duration_ms: 7.097917
+  type: 'test'
+  ...
+# Subtest: rejects false completion claim
+ok 10 - rejects false completion claim
+  ---
+  duration_ms: 7.127834
+  type: 'test'
+  ...
+# Subtest: rejects missing limitation
+ok 11 - rejects missing limitation
+  ---
+  duration_ms: 7.387625
+  type: 'test'
+  ...
+# Subtest: rejects missing snapshot operation
+ok 12 - rejects missing snapshot operation
+  ---
+  duration_ms: 8.144625
+  type: 'test'
+  ...
+# Subtest: rejects missing logical tracked cancellation
+ok 13 - rejects missing logical tracked cancellation
+  ---
+  duration_ms: 2.479125
+  type: 'test'
+  ...
+# Subtest: rejects missing logical session retirement assertion
+ok 14 - rejects missing logical session retirement assertion
+  ---
+  duration_ms: 2.428667
+  type: 'test'
+  ...
+# Subtest: rejects missing logical attachment limitation
+ok 15 - rejects missing logical attachment limitation
+  ---
+  duration_ms: 2.449667
+  type: 'test'
+  ...
+# Subtest: rejects missing original channel retirement
+ok 16 - rejects missing original channel retirement
+  ---
+  duration_ms: 12.740292
+  type: 'test'
+  ...
+# Subtest: rejects missing delegated receiving access assertion
+ok 17 - rejects missing delegated receiving access assertion
+  ---
+  duration_ms: 12.137416
+  type: 'test'
+  ...
+# Subtest: rejects missing delegated path limitation
+ok 18 - rejects missing delegated path limitation
+  ---
+  duration_ms: 12.208875
+  type: 'test'
+  ...
+# Subtest: rejects missing retention assertion
+ok 19 - rejects missing retention assertion
+  ---
+  duration_ms: 8.352584
+  type: 'test'
+  ...
+# Subtest: rejects missing admission operation
+ok 20 - rejects missing admission operation
+  ---
+  duration_ms: 10.345167
+  type: 'test'
+  ...
+# Subtest: rejects missing admission assertion
+ok 21 - rejects missing admission assertion
+  ---
+  duration_ms: 9.831834
+  type: 'test'
+  ...
+# Subtest: rejects missing timer operation
+ok 22 - rejects missing timer operation
+  ---
+  duration_ms: 6.705167
+  type: 'test'
+  ...
+# Subtest: rejects missing timer assertion
+ok 23 - rejects missing timer assertion
+  ---
+  duration_ms: 6.244208
+  type: 'test'
+  ...
+# Subtest: rejects missing timer limitation
+ok 24 - rejects missing timer limitation
+  ---
+  duration_ms: 6.521583
+  type: 'test'
+  ...
+# Subtest: rejects missing exact owner isolation assertion
+ok 25 - rejects missing exact owner isolation assertion
+  ---
+  duration_ms: 6.338167
+  type: 'test'
+  ...
+# Subtest: rejects missing poll preservation assertion
+ok 26 - rejects missing poll preservation assertion
+  ---
+  duration_ms: 6.654042
+  type: 'test'
+  ...
+# Subtest: rejects missing timer defective-provider runner
+ok 27 - rejects missing timer defective-provider runner
+  ---
+  duration_ms: 6.114625
+  type: 'test'
+  ...
+# Subtest: rejects missing transport operation
+ok 28 - rejects missing transport operation
+  ---
+  duration_ms: 5.961292
+  type: 'test'
+  ...
+# Subtest: rejects missing transport assertion
+ok 29 - rejects missing transport assertion
+  ---
+  duration_ms: 5.349625
+  type: 'test'
+  ...
+# Subtest: rejects missing transport limitation
+ok 30 - rejects missing transport limitation
+  ---
+  duration_ms: 5.506667
+  type: 'test'
+  ...
+# Subtest: rejects missing transport inspection
+ok 31 - rejects missing transport inspection
+  ---
+  duration_ms: 5.961583
+  type: 'test'
+  ...
+# Subtest: rejects missing inspection assertion
+ok 32 - rejects missing inspection assertion
+  ---
+  duration_ms: 5.325833
+  type: 'test'
+  ...
+# Subtest: rejects missing inspection limitation
+ok 33 - rejects missing inspection limitation
+  ---
+  duration_ms: 5.630416
+  type: 'test'
+  ...
+# Subtest: rejects missing wire operation
+ok 34 - rejects missing wire operation
+  ---
+  duration_ms: 4.257875
+  type: 'test'
+  ...
+# Subtest: rejects missing wire assertion
+ok 35 - rejects missing wire assertion
+  ---
+  duration_ms: 4.076208
+  type: 'test'
+  ...
+# Subtest: rejects missing wire limitation
+ok 36 - rejects missing wire limitation
+  ---
+  duration_ms: 4.284
+  type: 'test'
+  ...
+# Subtest: rejects missing buffer operation
+ok 37 - rejects missing buffer operation
+  ---
+  duration_ms: 10.015166
+  type: 'test'
+  ...
+# Subtest: rejects missing buffer assertion
+ok 38 - rejects missing buffer assertion
+  ---
+  duration_ms: 9.694833
+  type: 'test'
+  ...
+# Subtest: rejects missing buffer limitation
+ok 39 - rejects missing buffer limitation
+  ---
+  duration_ms: 9.958958
+  type: 'test'
+  ...
+# Subtest: rejects missing ready context operation
+ok 40 - rejects missing ready context operation
+  ---
+  duration_ms: 13.271667
+  type: 'test'
+  ...
+# Subtest: rejects missing ready context assertion
+ok 41 - rejects missing ready context assertion
+  ---
+  duration_ms: 13.108541
+  type: 'test'
+  ...
+# Subtest: rejects missing ready context limitation
+ok 42 - rejects missing ready context limitation
+  ---
+  duration_ms: 12.924875
+  type: 'test'
+  ...
+1..42
+# tests 42
+# suites 0
+# pass 42
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 360.81375

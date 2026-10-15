@@ -1,0 +1,42 @@
+{
+  "source_commit": "dcdcafe3f0c0a56d01e3c3095d3c276113cd7d69",
+  "scope": "Exactly one original export/build/three-control chain; no restart, no candidate performance campaign.",
+  "originals": [
+    {
+      "phase": "export",
+      "original_handle": 12673,
+      "launch_chunk": "be18e0",
+      "terminal_chunk": "09ff25",
+      "actual_exit": 0,
+      "script": "export-source.sh",
+      "command": [
+        "bash",
+        "target/p9/native486-capacity-bound/linux/export-source.sh"
+      ]
+    },
+    {
+      "phase": "fresh_native_build",
+      "original_handle": 87183,
+      "launch_chunk": "07f906",
+      "terminal_chunk": "6428b0",
+      "actual_exit": 0,
+      "script": "run.sh",
+      "command": [
+        "bash",
+        "target/p9/native486-capacity-bound/linux/run.sh"
+      ]
+    },
+    {
+      "phase": "functional_controls_and_READY",
+      "original_handle": 83300,
+      "launch_chunk": "7a1800",
+      "terminal_chunk": "24bc6c",
+      "actual_exit": 0,
+      "script": "setup-after-build.sh",
+      "command": [
+        "bash",
+        "target/p9/native486-capacity-bound/linux/setup-after-build.sh"
+      ]
+    }
+  ]
+}

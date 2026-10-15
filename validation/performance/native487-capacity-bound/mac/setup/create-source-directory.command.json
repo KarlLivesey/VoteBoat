@@ -1,0 +1,1 @@
+["ssh", "-F", "/dev/null", "-o", "IdentityAgent=/home/karllivesey/.1password/agent.sock", "-o", "BatchMode=yes", "karllivesey@192.168.192.76", "mkdir", "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/source"]

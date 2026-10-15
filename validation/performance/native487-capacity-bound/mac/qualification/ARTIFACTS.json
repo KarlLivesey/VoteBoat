@@ -1,0 +1,94 @@
+[
+  {
+    "kind": "native",
+    "target": "voteboat",
+    "original": "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/target-native-release/release/deps/libvoteboat-31702aea823d5b18.rlib",
+    "copy": "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/artifacts/native/libvoteboat-31702aea823d5b18.rlib",
+    "sha256": "c59f42db67306856518582d37c26a40f988e66b32631ff2b9423cc520de2f561",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///private/tmp/voteboat-mac486-dcdcafe-XAunHE/source#voteboat@0.1.0",
+      "manifest_path": "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/source/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "voteboat",
+        "src_path": "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/source/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/target-native-release/release/deps/libvoteboat-31702aea823d5b18.rlib",
+        "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/target-native-release/release/deps/libvoteboat-31702aea823d5b18.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    }
+  },
+  {
+    "kind": "native",
+    "target": "native_benchmark",
+    "original": "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/target-native-release/release/examples/native_benchmark",
+    "copy": "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/artifacts/native/native_benchmark",
+    "sha256": "c7d84b4414d578ac67dfbc5dc6bfb45625bb8e5cb06519d5ce745333d23b3567",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///private/tmp/voteboat-mac486-dcdcafe-XAunHE/source#voteboat@0.1.0",
+      "manifest_path": "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/source/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "native_benchmark",
+        "src_path": "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/source/examples/native_benchmark.rs",
+        "edition": "2021",
+        "required-features": [
+          "tls"
+        ],
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/target-native-release/release/examples/native_benchmark"
+      ],
+      "executable": "/private/tmp/voteboat-mac486-dcdcafe-XAunHE/target-native-release/release/examples/native_benchmark",
+      "fresh": false
+    }
+  }
+]
