@@ -1,0 +1,9 @@
+{
+  "remote_base": "/private/tmp/voteboat-native481-9VAgbU",
+  "files": 7,
+  "archive_sha256": "823518eef7fbd174ef21f6fde3627ee1c6746402a29da5d94849bc5ac72ebefa",
+  "manifest_sha256": "2b21939cad998711548363c9981f4b144dd0da5dfa838854c3c47bb8f44de318",
+  "common_sha256": "7344bb43528779527b774236792f57dcc648d3c8c8e559126a120afc89caba27",
+  "schema_sha256": "3635702aca4e4ccf858dc6c3287a93d646c31ad52b7d797c652fcd7915080751",
+  "scope": "Preparation transfer only; no source/binary/build/WAL or performance launch."
+}

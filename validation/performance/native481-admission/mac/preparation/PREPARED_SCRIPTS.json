@@ -1,0 +1,21 @@
+{
+  "scope": "Prepared only; no workload launched. Five runtime helper files adapted from478;4static plan/syntax tests passed, preserving existing CLI bound (initial16384 refuses, selected16000 fits16128/16384).",
+  "scripts": {
+    "common.py": "34d46300e9d1e8a23978fb996ea64ad25f2df43f238ff5f99ac17101e03a83dc",
+    "campaign.py": "1f57a603b66fd81ebffc4bb50631de95eefcf9a4e298c46638c2e8df6f04ae88",
+    "resources.py": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+    "prepare.py": "a41366c1130ead1f0e12160cc3e53a73f82c7e289006ca82b8474529782d017b",
+    "test_plan.py": "a37388e3e795c9c3fd30c58d1759dcc00c2c381e8599bb9716d3591f73a8afaa",
+    "plan.py": "b32722c16b93b23b740f494c8d9ae9a8d4f6fc744cc74467cb41f8e713d484a6"
+  },
+  "schema_sha256": "3635702aca4e4ccf858dc6c3287a93d646c31ad52b7d797c652fcd7915080751",
+  "linux_config_sha256": "67e6fedc1c16c0369f13ce381b1360431841c38b078730f83fc85be64f0e1fb2",
+  "linux_ready_sha256": "b12f24866451357c55cee0f78a5e1fafdea8ae3d07243483f77c2d23b11018ef",
+  "actual_linux_setup_handle": 89489,
+  "actual_linux_setup_exit": 0,
+  "cases": 48,
+  "scheduled_horizon_seconds": 1344,
+  "offers_per_host": 391680,
+  "no_timing_started": true,
+  "mac_handoff": "Use the same five runtime scripts and schema in a fresh Mac job; pass existing476 baseline, freshly qualified480 candidate, each actual publication authority, existing478 baseline-combination controls. No source/binary/build/WAL transfer or new pilot. Mac480 required qualification scope names reflect owner run; final actual receipt review pending."
+}

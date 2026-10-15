@@ -1,0 +1,176 @@
+{
+  "actual_exit": 0,
+  "source_exact": true,
+  "commands": [
+    {
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/controls/wal/tcp-atomic",
+        "tcp",
+        "512",
+        "4096",
+        "1",
+        "--offered",
+        "128",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16",
+        "--offered-capacity",
+        "4096",
+        "--publication",
+        "atomic"
+      ],
+      "exit": 0,
+      "elapsed_s": 6.300233394984389
+    },
+    {
+      "command": [
+        "node",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/control-tools/check-native-benchmark.mjs",
+        "--storage",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/controls/wal/tcp-atomic"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.03272336200461723
+    },
+    {
+      "command": [
+        "node",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/control-tools/check-publication-timings.mjs",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/controls/wal/tcp-atomic/publication.csv",
+        "atomic"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.020625208009732887
+    },
+    {
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/controls/wal/tcp-witness",
+        "tcp",
+        "512",
+        "4096",
+        "1",
+        "--offered",
+        "128",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16",
+        "--offered-capacity",
+        "4096",
+        "--publication",
+        "witness"
+      ],
+      "exit": 0,
+      "elapsed_s": 5.556013571011135
+    },
+    {
+      "command": [
+        "node",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/control-tools/check-native-benchmark.mjs",
+        "--storage",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/controls/wal/tcp-witness"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.02389612401020713
+    },
+    {
+      "command": [
+        "node",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/control-tools/check-publication-timings.mjs",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/controls/wal/tcp-witness/publication.csv",
+        "witness"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.016546662984183058
+    },
+    {
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/controls/wal/quic-atomic",
+        "quic",
+        "512",
+        "4096",
+        "1",
+        "--offered",
+        "128",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16",
+        "--offered-capacity",
+        "4096",
+        "--publication",
+        "atomic"
+      ],
+      "exit": 0,
+      "elapsed_s": 6.631890593998833
+    },
+    {
+      "command": [
+        "node",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/control-tools/check-native-benchmark.mjs",
+        "--storage",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/controls/wal/quic-atomic"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.02380479298881255
+    },
+    {
+      "command": [
+        "node",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/control-tools/check-publication-timings.mjs",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/controls/wal/quic-atomic/publication.csv",
+        "atomic"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.015969389001838863
+    },
+    {
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/controls/wal/quic-witness",
+        "quic",
+        "512",
+        "4096",
+        "1",
+        "--offered",
+        "128",
+        "--maintenance",
+        "2",
+        "--ready-items",
+        "16",
+        "--offered-capacity",
+        "4096",
+        "--publication",
+        "witness"
+      ],
+      "exit": 0,
+      "elapsed_s": 5.585216850013239
+    },
+    {
+      "command": [
+        "node",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/control-tools/check-native-benchmark.mjs",
+        "--storage",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/controls/wal/quic-witness"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.024826872017001733
+    },
+    {
+      "command": [
+        "node",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/control-tools/check-publication-timings.mjs",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/controls/wal/quic-witness/publication.csv",
+        "witness"
+      ],
+      "exit": 0,
+      "elapsed_s": 0.016888936021132395
+    }
+  ],
+  "cases": 4,
+  "end": "2026-10-15T11:44:20.193626+00:00"
+}

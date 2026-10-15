@@ -1,0 +1,22 @@
+{
+  "time_utc": "2026-10-15T15:02:07.793093+00:00",
+  "linux": {
+    "original_handle": 1858,
+    "actual_terminal_exit": 0,
+    "completed_case_end_records": 48,
+    "terminal_tool_chunk": "9dcfed",
+    "durable_stage": "ALL_TIMING_END"
+  },
+  "mac": {
+    "original_handle": 81015,
+    "actual_terminal_exit": 0,
+    "completed_case_end_records": 48,
+    "terminal_tool_chunk": "0274b1",
+    "markers": [
+      "ALL_TIMING_END",
+      "CAMPAIGN_EXIT0",
+      "ORIGINAL_MAC481_SSH_EXIT0"
+    ]
+  },
+  "authorization": "Both original campaigns actually terminated0; all48processes/validators/readbacks perhost passed0. Collection, raw independent recomputation and lossless archival may begin. No workload repeats/replacements, default promotion, fullP9 or third-filesystem acceptance follows from process success."
+}

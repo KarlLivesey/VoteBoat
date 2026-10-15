@@ -1,0 +1,26 @@
+{
+  "time_utc": "2026-10-15T14:34:26.583270+00:00",
+  "authorization": "Start original fixed481 campaigns on each host once. Both fresh qualifications/selected controls, exact source/artifact/compiler/profile/fixture/device guards, independent reviews and checked publications are complete. No same-host builds/checks/copies/archive/profile while timing. No replacement/restart on observation timeout. Poll original handles to actual terminal; collect/readout/archive only afterbothEND.",
+  "published_evidence_commit": "875666103aa26e72bd923fc366cb123b497faa85",
+  "candidate_source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "baseline_source_commit": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+  "schema_sha256": "3635702aca4e4ccf858dc6c3287a93d646c31ad52b7d797c652fcd7915080751",
+  "linux": {
+    "job": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native481-admission/linux",
+    "config_sha256": "dec17984b4967585f93173a6470fc6e78e05963c83134bf34a9221761c57bf1f",
+    "ready_sha256": "d9a0b2a5647bfc792cd942ef8efb707a2865f323cccd834adb80d8ac4015e777"
+  },
+  "mac": {
+    "job": "/private/tmp/voteboat-native481-9VAgbU/campaign",
+    "config_sha256": "5c5e38304de6ea8587c6eff0c45e07c9a32d55e328db6581734862181045412d",
+    "ready_sha256": "28b0a49a60939d81127ee46b19c6a8ca66898141859045e47a4100276e389990"
+  },
+  "linux_policy_unchanged": {
+    "perf_event_paranoid": "2",
+    "kptr_restrict": "2",
+    "perf_event_mlock_kb": "516"
+  },
+  "cases_per_host": 48,
+  "offers_per_host": 391680,
+  "scope": "Native Counter diagnostic only; no completed P9 milestone/default promotion/third-filesystem acceptance."
+}

@@ -1,0 +1,18 @@
+{
+  "totals": {
+    "offers": 391680,
+    "applied": 296506,
+    "window_refused": 95174,
+    "no_leader": 0,
+    "admission_refused": 0,
+    "not_proposed": 0,
+    "unknown": 0,
+    "pending": 0
+  },
+  "cells": 8,
+  "maintenance": {
+    "('checkpoint', 'completed')": 624,
+    "('reclaim', 'completed')": 1872
+  },
+  "all48_raw_recomputations": "PASS"
+}

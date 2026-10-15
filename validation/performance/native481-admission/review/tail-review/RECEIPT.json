@@ -1,0 +1,47 @@
+{
+  "exit": 0,
+  "actual_analysis_tool_chunk": "049f5c",
+  "actual_analysis_exit": 0,
+  "cases": 18,
+  "raw_and_source_inputs": 77,
+  "initial_analysis_tool_chunk": "778ba4",
+  "initial_analysis_exit": 1,
+  "initial_error": "Parser else2 typo; original source/stdout/stderr retained. Focused whitespace correction passed; no workload or validator repeated.",
+  "scope_correction": "Report aggregate snapshot scope clarified from source without rerunning arithmetic; existing numerical results unchanged.",
+  "files": {
+    "analyze.py": {
+      "sha256": "1de772a09471b019fc1910dec877bf836fc336ff67c315b87f30069076a5027f",
+      "bytes": 9107
+    },
+    "REPORT.json": {
+      "sha256": "6aa392919cb50dabc58ffce17336f027fd4f479a095d11309ab39da3024fe979",
+      "bytes": 452986
+    },
+    "CONCLUSION.json": {
+      "sha256": "5ce482bb3ee2481b07486676730d61c317c8179f8a07112cec38974079a1c49a",
+      "bytes": 4644
+    },
+    "attempt1-analyze.py": {
+      "sha256": "85a9d47949526bf01ffffdc2930d2bf7d18a510bb3363f4d7f63adfd8d0203aa",
+      "bytes": 9002
+    },
+    "stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "stderr": {
+      "sha256": "8c7c2d07c621e3219af9a9c94d411c22fec6696e388713933a811f00006f26bb",
+      "bytes": 1305
+    },
+    "attempt2.stdout": {
+      "sha256": "11facc6bad19de1725b98201e35f7ee7906bf2b0437d7afabca62a5ecc6e48e0",
+      "bytes": 2075
+    },
+    "attempt2.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  },
+  "no_production_source_or_tests_changed": true,
+  "no_workload_or_profile_launched": true
+}

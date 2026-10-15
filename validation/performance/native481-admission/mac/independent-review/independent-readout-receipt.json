@@ -1,0 +1,40 @@
+{
+  "exit": 0,
+  "original_analysis_tool_chunk": "405901",
+  "actual_analysis_exit": 0,
+  "cases": 96,
+  "failures": 0,
+  "input_files": 900,
+  "root_quiet_end_sha256": "4938ac02337c39b78a0533e28f6090b315da44d4379c093ec544ee665a70c7f0",
+  "original_handles": {
+    "linux": 1858,
+    "mac": 81015
+  },
+  "actual_terminal_exits": {
+    "linux": 0,
+    "mac": 0
+  },
+  "files": {
+    "independent-readout.py": {
+      "sha256": "1c072444cd5685a9dc85999f477f5c089734750e6e70ca3a4de982ac2125ae6e",
+      "bytes": 15531
+    },
+    "independent-readout.json": {
+      "sha256": "569cb228bc010993078a02ad14add6a031535061d1f51f92afa17cae21bf5fac",
+      "bytes": 1259571
+    },
+    "independent-readout.stdout": {
+      "sha256": "9873b0683fa05ca55865b96e8aeef1fd4327a96019ca7fdefe32ba20ebf36b0c",
+      "bytes": 5712
+    },
+    "independent-readout.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "independent-decision.json": {
+      "sha256": "4eadffcfe75f41d0b4e1e4e7b18cdb5c4589170622f97ed44634ad1f0bd6061a",
+      "bytes": 31700
+    }
+  },
+  "scope": "Frozen independent reader executed only after root bothEND and Mac complete collection notice. No workload, copy, profile, source edit or broad checks. Allcase outcomes/latency/physical/resource arithmetic preserved. Setup AST typo was previously retained in tool6c7e0b; corrected before timing and reader source stayed frozen."
+}

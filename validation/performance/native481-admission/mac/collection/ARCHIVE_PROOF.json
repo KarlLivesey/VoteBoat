@@ -1,0 +1,46 @@
+{
+  "scope": "48 original Mac481 published 476/480 Witness paired processes; original 81015 actually0, every process/validator/readback 0, no retry/replacement. Both hosts actually ended before collection. No full P9, sustained 20M, default promotion or three-filesystem acceptance.",
+  "source_commits": {
+    "baseline": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+    "candidate": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e"
+  },
+  "native_executable_sha256": {
+    "baseline": "2fd48262a655debafaf7f04496bf34c867dc17b92f1e5890969819333cbcae84",
+    "candidate": "fef05adc73179359ea2acc0d9b92978c57c4795410a727aefc30f1aac422fa52"
+  },
+  "native_profile": "Separate genuinely fresh 476/480 opt3/debug0/assertions+overflow/default LTO+codegen artifacts, same within-host compiler/tool bytes. Compiled candidate remains f7b0ef1 despite later evidence commits.",
+  "qualified_source_files": {
+    "baseline": 1491,
+    "candidate": 1494
+  },
+  "source_device_cpu_guards_before_after_exact": true,
+  "raw_transfer_members": 1035,
+  "raw_transfer_manifest_sha256": "5053d042c74691f70d60ec80857759f2ab9ae1299fc0334de9b8ca1d018a0009",
+  "totals": {
+    "offers": 391680,
+    "applied": 296506,
+    "window_refused": 95174,
+    "no_leader": 0,
+    "admission_refused": 0,
+    "not_proposed": 0,
+    "unknown": 0,
+    "pending": 0
+  },
+  "maintenance_status_counts": {
+    "('checkpoint', 'completed')": 624,
+    "('reclaim', 'completed')": 1872
+  },
+  "latency_convention": "Nearest rank ceil(n*p/100)-1. Intended/service successful originals; dispatch all offers. Per-group completed rates share whole-case elapsed boundary; during rates use offered horizon.",
+  "timer_limit": "185 late offer decisions retained; no explicit missed-timer counter. Late decisions are not timer misses.",
+  "counter_scope": "Ordinary provider primitives exclude cold repair, selectors and reclamation. Metadata-inclusive command/unit means are not proposal widths; codec bytes are not drive I/O. Nested elapsed scopes are not additive CPU.",
+  "resource_scope": "Whole child including warmup/recovery/cleanup; Mac RSS raw bytes, not continuous memory/debt plateau.",
+  "host": "M2 Max, APFS Data volume/container/internal SSD shared by all voters and skew groups. stable1.98.0/LLVM22.1.8/protoc3.21.12. Linux1.98.1 is a separate within-host comparison.",
+  "transfer_scope": "Only post-terminal text/CSV/JSON; no binaries, source/build trees or generated WAL transferred. Original stores remain on Mac.",
+  "failure_scope": "All48 workload/validator/readback exits0; no timing observation errors. Shared initial preparation authority-path failure and prestart guard-revision records retained. Mac480 qualification initial 101, resume 0 and separate runtime-scope append 0 are preserved in the separately sealed native480-admission/mac archive; they are not relabeled as one successful scope.",
+  "independent_review": {
+    "cases": 96,
+    "exit": 0,
+    "input_files": 900,
+    "receipt_sha256": "9bde18c178806a522b008043da1f705eb63e7eb0d7268340cf967c84dc9f4f75"
+  }
+}

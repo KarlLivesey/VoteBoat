@@ -1,0 +1,12 @@
+{
+  "exit": 0,
+  "previous_config_sha256": "67e6fedc1c16c0369f13ce381b1360431841c38b078730f83fc85be64f0e1fb2",
+  "config_sha256": "dec17984b4967585f93173a6470fc6e78e05963c83134bf34a9221761c57bf1f",
+  "ready_sha256": "d9a0b2a5647bfc792cd942ef8efb707a2865f323cccd834adb80d8ac4015e777",
+  "common_sha256": "7344bb43528779527b774236792f57dcc648d3c8c8e559126a120afc89caba27",
+  "original_setup_handle": 89489,
+  "actual_original_setup_exit": 0,
+  "focused_guard_after_update_exit": 0,
+  "no_timing_started": true,
+  "scope": "Prestart helper-only Mac qualification guard addition; original setup proofs retained. Linux source/artifacts/matrix/commands unchanged; exact guards rerun once, no workloads/checks/builds."
+}

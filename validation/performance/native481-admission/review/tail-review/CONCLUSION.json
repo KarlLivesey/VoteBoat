@@ -1,0 +1,129 @@
+{
+  "exit": 0,
+  "cases": 18,
+  "findings": [
+    {
+      "topic": "Mac moderate QUIC",
+      "baseline_service_p99_ms": [
+        788.866,
+        700.641,
+        779.128
+      ],
+      "candidate_service_p99_ms": [
+        2004.942,
+        1228.159,
+        1664.06
+      ],
+      "candidate_dispatch_p99_ms": [
+        0.214,
+        0.225,
+        0.212
+      ],
+      "applied_over1000ms_baseline": [
+        0,
+        0,
+        0
+      ],
+      "applied_over1000ms_candidate": [
+        365,
+        302,
+        423
+      ],
+      "own_p99_maintenance_overlap_baseline": [
+        "49/82",
+        "33/82",
+        "57/82"
+      ],
+      "own_p99_maintenance_overlap_candidate": [
+        "82/82",
+        "82/82",
+        "82/82"
+      ],
+      "candidate_p99_dispatched_during_maintenance": [
+        "46/82",
+        "7/82",
+        "4/82"
+      ],
+      "interpretation": "Service/backlog stall, not offer-dispatch delay. Maintenance overlaps all candidate tail cohorts, but most trial2/3 slow requests start outside recorded maintenance windows. Long requests naturally span more periodic waves, so overlap is not exclusive causal attribution."
+    },
+    {
+      "topic": "Mac TCP cold skew",
+      "baseline_service_p99_ms": [
+        453.149,
+        454.123,
+        923.03
+      ],
+      "candidate_service_p99_ms": [
+        760.767,
+        835.303,
+        997.588
+      ],
+      "baseline_dispatch_p99_ms": [
+        15.318,
+        12.143,
+        12.945
+      ],
+      "candidate_dispatch_p99_ms": [
+        0.79,
+        0.768,
+        0.413
+      ],
+      "candidate_own_p99_maintenance_overlap": [
+        "3/3",
+        "0/3",
+        "3/3"
+      ],
+      "counterexamples": [
+        {
+          "trial": 2,
+          "receipt_gap_ms": 692.4,
+          "from_ms": 4704.6,
+          "to_ms": 5397.0,
+          "recorded_checkpoint_reclaim_overlap": false
+        },
+        {
+          "trial": 3,
+          "receipt_gap_ms": 575.2,
+          "from_ms": 2629.6,
+          "to_ms": 3204.8,
+          "recorded_checkpoint_reclaim_overlap": false
+        }
+      ],
+      "interpretation": "Dispatch improves while service tails worsen. Scheduled checkpoint/reclaim intervals cannot be the sole explanation; background follower catchup may continue after those intervals and is not timestamped."
+    },
+    {
+      "topic": "Install counters",
+      "moderate_replica3_installs_baseline": [
+        18,
+        12,
+        14
+      ],
+      "moderate_replica3_installs_candidate": [
+        15,
+        18,
+        14
+      ],
+      "cold_TCP_replica3_installs_baseline": [
+        2,
+        1,
+        2
+      ],
+      "cold_TCP_replica3_installs_candidate": [
+        2,
+        1,
+        2
+      ],
+      "interpretation": "Counts do not increase consistently with regressions; only replica3 aggregate, no per-install timing or bytes. Neither rule out nor establish snapshot/catchup cause."
+    },
+    {
+      "topic": "Concrete ordering/source facts",
+      "facts": [
+        "Fixture observes checkpoint completion then enqueues reclamation for all3replicas in the same reactor turn; later waves require that active reclamation set complete.",
+        "NativeLogWorker processes Work::Reclaim synchronously on its single store-owning worker before receiving another queued work item. This is a possible durable-service delay path, not proof it caused a particular recorded gap.",
+        "NativeLogStore::reclaim encodes/decodes/verifies full checkpoint state and only replaces the log when shorter; no comparison/durability shortcut or speculative publication is warranted."
+      ]
+    }
+  ],
+  "recommendation": "Smallest next step is a source ordering audit of existing foreground persistence, queued reclamation and snapshot send/install completion paths: establish what can keep an original waiting after scheduled maintenance rows end, and how a cold group shares those owners/budgets. Use existing deterministic held-completion fixtures to reason about exact ordering if needed. Do not change checkpoint frequency or fixture scheduling to hide cost, revive rejected fusion/pipeline, or add a new measurement/observer prerequisite. Existing data identifies service-side stalls but lacks per-original commit/physical-barrier/install timestamps, so it does not justify a specific allocator/network-loss/filesystem fix. Keep480 a measured tradeoff with guard regressions open; fullP9 remains active.",
+  "limits": "No new benchmark, profile, observer, remote operation or production edit. Correlation is separated from unidentifiable causes; cumulative/nested wall counters are not additive CPU time."
+}

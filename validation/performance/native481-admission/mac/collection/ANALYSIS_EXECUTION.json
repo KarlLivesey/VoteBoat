@@ -1,0 +1,13 @@
+{
+  "command": [
+    "python3",
+    "target/p9/native481-admission/mac-collection/analyse.py"
+  ],
+  "exit": 0,
+  "tool_chunk": "3d3c54",
+  "source_sha256": "4de89c369efb312fd4a4ca1ce16939ff1674178059ae5f798d684b2422b3d29f",
+  "analysis_sha256": "24fed3a6fd2c5bc9b20ad75880a2f5b3ad782df6f22f1e2b3b6ee634b0c38964",
+  "stdout_sha256": "39a86eda484ce20020c7d5a80a6c9e7f778f144c02e49f8e00e61b3a882216b8",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "scope": "Actual successful48 raw-ledger recomputation after both-host terminal. No workload/source change or rerun."
+}

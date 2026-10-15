@@ -1,0 +1,32 @@
+{
+  "scope": "One original48-case Linux481 paired476/480 Witness finite offered campaign; no workload/validator/checksuite rerun, no source/default/filesystem/policy change. Not fullP9/sustained20M/three-filesystem acceptance.",
+  "original_handle": 1858,
+  "actual_terminal_exit": 0,
+  "terminal_tool_chunk": "9dcfed",
+  "source_commits": {
+    "baseline": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+    "candidate": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e"
+  },
+  "source_inputs": {
+    "baseline": 1492,
+    "candidate": 1495
+  },
+  "source_file_directory_modes_and_original_copy_artifacts_exact": true,
+  "withinhost_compiler_profile_runtime_validator_guards_exact": true,
+  "config_sha256": "dec17984b4967585f93173a6470fc6e78e05963c83134bf34a9221761c57bf1f",
+  "all_processes_validators_readbacks_pass": 48,
+  "totals": {
+    "applied": 248327,
+    "window_refused": 143353
+  },
+  "maintenance": {
+    "('checkpoint', 'completed')": 623,
+    "('reclaim', 'completed')": 1869,
+    "('skip', 'skipped')": 1
+  },
+  "time_utc": "2026-10-15T15:06:52.643706+00:00",
+  "counter_scope": "Nested elapsed wall scopes overlap, not additiveCPU. Append units include metadata and are not literal command-bearing proposal width. Encoded bytes are codec bytes, not deviceI/O.",
+  "resource_scope": "Whole child user/system/RSS includes startup/warmup/recovery/cleanup. CPU per completed original uses that broader CPU boundary; host poll covers fixture rounds, not individual visits. LinuxRSS rawKiB converted to bytes; blockcounts are not bytes.",
+  "qualification_scope": "480 original controls-controller exit1 and focused same-raw default-provider completion0 remain explicitly bound; no defaultpublication.csv is expected from uninstrumented Legacy FileLogIo. Fresh qualification archives published separately.",
+  "raw_exclusions": "No binaries, full production source, buildtrees, generated WAL states or Python bytecode/caches."
+}

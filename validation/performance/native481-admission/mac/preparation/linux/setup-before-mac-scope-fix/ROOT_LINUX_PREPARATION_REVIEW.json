@@ -1,0 +1,10 @@
+{
+  "exit": 0,
+  "campaign_config_sha256": "67e6fedc1c16c0369f13ce381b1360431841c38b078730f83fc85be64f0e1fb2",
+  "schema_sha256": "3635702aca4e4ccf858dc6c3287a93d646c31ad52b7d797c652fcd7915080751",
+  "cases": 48,
+  "pairs": 24,
+  "offers": 391680,
+  "horizon_seconds": 1344,
+  "review": "Root independent actual config/matrix/adjacency/source-arm executable binding, frozen scripts/artifacts/proofs/tools. Read lifecycle ownership, no retry/overwrite, fixed command order, process-group cleanup, all timing before validators. Setup only; no timing grant."
+}

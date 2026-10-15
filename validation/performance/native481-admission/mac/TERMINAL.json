@@ -1,0 +1,9 @@
+{
+  "exit": 0,
+  "pid": 11606,
+  "end_unix": 1792076388.624557,
+  "all_timing_ended": true,
+  "cases_terminated": 48,
+  "received_signal": null,
+  "no_retries_or_replacements": true
+}

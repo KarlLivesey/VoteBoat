@@ -1,0 +1,855 @@
+{
+  "exit": 0,
+  "classification": "Intended ready-stage work reduction established; mixed overall retention result, no universal speedup/default promotion.",
+  "loaded": [
+    {
+      "host": "linux",
+      "protocol": "tcp",
+      "medians": {
+        "baseline": {
+          "completed_ops_s": 614.9091440380026,
+          "during_ops_s": 475.625,
+          "p99_ms": 7464.13949,
+          "refused": 8099,
+          "host_poll_ms": 3180.971,
+          "max_host_poll_ms": 33.092,
+          "leader_barriers_per_original": 0.03568726355611602,
+          "leader_mean_barrier_ms": 27.0535485229682,
+          "leader_barrier_wall_fraction": 0.5879035530507113,
+          "wholeprocess_cpu_core_equivalent": 0.37985023647010313
+        },
+        "candidate": {
+          "completed_ops_s": 532.7397135653174,
+          "during_ops_s": 496.125,
+          "p99_ms": 7317.487549,
+          "refused": 7935,
+          "host_poll_ms": 2017.569,
+          "max_host_poll_ms": 2.83,
+          "leader_barriers_per_original": 0.037037037037037035,
+          "leader_mean_barrier_ms": 34.552046970198674,
+          "leader_barrier_wall_fraction": 0.6892732519543345,
+          "wholeprocess_cpu_core_equivalent": 0.2546641525707949
+        }
+      },
+      "pairs": [
+        {
+          "trial": 1,
+          "baseline": "t1-loaded-tcp-baseline",
+          "candidate": "t1-loaded-tcp-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 0.8663714285770858,
+          "during_ops_s_ratio": 1.0689469431726366,
+          "p99_ms_ratio": 0.9803524651171813,
+          "max_ms_ratio": 0.9791676999341947,
+          "leader_barriers_per_original_ratio": 1.0750510557601838,
+          "max_host_poll_ms_ratio": 0.08551915870905355,
+          "refusal_delta": -256,
+          "cold": null
+        },
+        {
+          "trial": 2,
+          "baseline": "t2-loaded-tcp-baseline",
+          "candidate": "t2-loaded-tcp-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.7354459060676806,
+          "during_ops_s_ratio": 1.3865965834428384,
+          "p99_ms_ratio": 0.5037359172109613,
+          "max_ms_ratio": 0.5038609044732199,
+          "leader_barriers_per_original_ratio": 1.037693722090885,
+          "max_host_poll_ms_ratio": 0.08392072021774023,
+          "refusal_delta": -1441,
+          "cold": null
+        },
+        {
+          "trial": 3,
+          "baseline": "t3-loaded-tcp-baseline",
+          "candidate": "t3-loaded-tcp-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 0.672345431469881,
+          "during_ops_s_ratio": 0.7209723299715541,
+          "p99_ms_ratio": 1.3704386939485311,
+          "max_ms_ratio": 1.3750851028641684,
+          "leader_barriers_per_original_ratio": 0.9728453134528161,
+          "max_host_poll_ms_ratio": 0.07949857610518192,
+          "refusal_delta": 1046,
+          "cold": null
+        }
+      ]
+    },
+    {
+      "host": "linux",
+      "protocol": "quic",
+      "medians": {
+        "baseline": {
+          "completed_ops_s": 623.3442209879466,
+          "during_ops_s": 413.625,
+          "p99_ms": 7404.385514,
+          "refused": 8595,
+          "host_poll_ms": 3139.673,
+          "max_host_poll_ms": 32.822,
+          "leader_barriers_per_original": 0.03554748313440581,
+          "leader_mean_barrier_ms": 26.422006452554744,
+          "leader_barrier_wall_fraction": 0.5869321878627531,
+          "wholeprocess_cpu_core_equivalent": 0.3746969443447757
+        },
+        "candidate": {
+          "completed_ops_s": 687.1920558543358,
+          "during_ops_s": 600.125,
+          "p99_ms": 6218.805903,
+          "refused": 7137,
+          "host_poll_ms": 1630.196,
+          "max_host_poll_ms": 2.566,
+          "leader_barriers_per_original": 0.0375815402589816,
+          "leader_mean_barrier_ms": 27.07039014868805,
+          "leader_barrier_wall_fraction": 0.7226996547200577,
+          "wholeprocess_cpu_core_equivalent": 0.2923757229199813
+        }
+      },
+      "pairs": [
+        {
+          "trial": 1,
+          "baseline": "t1-loaded-quic-baseline",
+          "candidate": "t1-loaded-quic-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.5470996766366751,
+          "during_ops_s_ratio": 1.949179292929293,
+          "p99_ms_ratio": 0.6894942586858938,
+          "max_ms_ratio": 0.6928799472108078,
+          "leader_barriers_per_original_ratio": 1.0840253046813817,
+          "max_host_poll_ms_ratio": 0.07673765703428523,
+          "refusal_delta": -3031,
+          "cold": null
+        },
+        {
+          "trial": 2,
+          "baseline": "t2-loaded-quic-baseline",
+          "candidate": "t2-loaded-quic-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 0.9773764468243171,
+          "during_ops_s_ratio": 0.9748062015503876,
+          "p99_ms_ratio": 1.128583012961747,
+          "max_ms_ratio": 1.1304241456908284,
+          "leader_barriers_per_original_ratio": 0.9528551674174844,
+          "max_host_poll_ms_ratio": 0.0811973925700905,
+          "refusal_delta": 91,
+          "cold": null
+        },
+        {
+          "trial": 3,
+          "baseline": "t3-loaded-quic-baseline",
+          "candidate": "t3-loaded-quic-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.0689562974172213,
+          "during_ops_s_ratio": 1.4508915080084617,
+          "p99_ms_ratio": 0.8020699165116766,
+          "max_ms_ratio": 0.8030295394262928,
+          "leader_barriers_per_original_ratio": 1.085511694856725,
+          "max_host_poll_ms_ratio": 0.06096520626409115,
+          "refusal_delta": -1458,
+          "cold": null
+        }
+      ]
+    },
+    {
+      "host": "mac",
+      "protocol": "tcp",
+      "medians": {
+        "baseline": {
+          "completed_ops_s": 794.1332562502829,
+          "during_ops_s": 459.25,
+          "p99_ms": 6162.868125,
+          "refused": 8230,
+          "host_poll_ms": 3628.979,
+          "max_host_poll_ms": 45.912,
+          "leader_barriers_per_original": 0.0368911645004595,
+          "leader_mean_barrier_ms": 11.731855558718863,
+          "leader_barrier_wall_fraction": 0.3474525667949302,
+          "wholeprocess_cpu_core_equivalent": 0.6096605431558698
+        },
+        "candidate": {
+          "completed_ops_s": 1065.5052373362396,
+          "during_ops_s": 784.125,
+          "p99_ms": 4870.049666,
+          "refused": 5631,
+          "host_poll_ms": 1065.541,
+          "max_host_poll_ms": 3.082,
+          "leader_barriers_per_original": 0.0364963503649635,
+          "leader_mean_barrier_ms": 12.87274857742782,
+          "leader_barrier_wall_fraction": 0.5021324813895272,
+          "wholeprocess_cpu_core_equivalent": 0.5339829622282366
+        }
+      },
+      "pairs": [
+        {
+          "trial": 1,
+          "baseline": "t1-loaded-tcp-baseline",
+          "candidate": "t1-loaded-tcp-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.1754919642034436,
+          "during_ops_s_ratio": 1.3845944474686989,
+          "p99_ms_ratio": 0.8907029724897773,
+          "max_ms_ratio": 0.8914557942858405,
+          "leader_barriers_per_original_ratio": 0.9744901798479945,
+          "max_host_poll_ms_ratio": 0.0678809770279497,
+          "refusal_delta": -1409,
+          "cold": null
+        },
+        {
+          "trial": 2,
+          "baseline": "t2-loaded-tcp-baseline",
+          "candidate": "t2-loaded-tcp-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.3672333736332762,
+          "during_ops_s_ratio": 1.5349860982391104,
+          "p99_ms_ratio": 0.7997986884444541,
+          "max_ms_ratio": 0.8006125469184684,
+          "leader_barriers_per_original_ratio": 0.9855562461385583,
+          "max_host_poll_ms_ratio": 0.06963470319634703,
+          "refusal_delta": -2318,
+          "cold": null
+        },
+        {
+          "trial": 3,
+          "baseline": "t3-loaded-tcp-baseline",
+          "candidate": "t3-loaded-tcp-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.3676037043533469,
+          "during_ops_s_ratio": 1.7815961374609486,
+          "p99_ms_ratio": 0.7799074090779279,
+          "max_ms_ratio": 0.7813271541540879,
+          "leader_barriers_per_original_ratio": 1.0273852151001703,
+          "max_host_poll_ms_ratio": 0.06536417494336992,
+          "refusal_delta": -2752,
+          "cold": null
+        }
+      ]
+    },
+    {
+      "host": "mac",
+      "protocol": "quic",
+      "medians": {
+        "baseline": {
+          "completed_ops_s": 809.0116072089688,
+          "during_ops_s": 483.625,
+          "p99_ms": 6139.026375,
+          "refused": 8035,
+          "host_poll_ms": 3841.633,
+          "max_host_poll_ms": 46.335,
+          "leader_barriers_per_original": 0.03527934714375392,
+          "leader_mean_barrier_ms": 12.083231288256227,
+          "leader_barrier_wall_fraction": 0.3515576886693713,
+          "wholeprocess_cpu_core_equivalent": 0.5900314557519244
+        },
+        "candidate": {
+          "completed_ops_s": 1177.9287109838092,
+          "during_ops_s": 995.625,
+          "p99_ms": 4375.999666,
+          "refused": 3989,
+          "host_poll_ms": 1502.906,
+          "max_host_poll_ms": 3.28,
+          "leader_barriers_per_original": 0.037886829427614926,
+          "leader_mean_barrier_ms": 11.744852437362637,
+          "leader_barrier_wall_fraction": 0.5462174031810659,
+          "wholeprocess_cpu_core_equivalent": 0.534180329459106
+        }
+      },
+      "pairs": [
+        {
+          "trial": 1,
+          "baseline": "t1-loaded-quic-baseline",
+          "candidate": "t1-loaded-quic-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.6576716512801073,
+          "during_ops_s_ratio": 2.5189753320683113,
+          "p99_ms_ratio": 0.6277611888268335,
+          "max_ms_ratio": 0.629493054929099,
+          "leader_barriers_per_original_ratio": 1.1268325073600567,
+          "max_host_poll_ms_ratio": 0.07168772129212746,
+          "refusal_delta": -4753,
+          "cold": null
+        },
+        {
+          "trial": 2,
+          "baseline": "t2-loaded-quic-baseline",
+          "candidate": "t2-loaded-quic-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.3731366788603039,
+          "during_ops_s_ratio": 1.9188426252646436,
+          "p99_ms_ratio": 0.769012468591961,
+          "max_ms_ratio": 0.7699692107976186,
+          "leader_barriers_per_original_ratio": 1.0576634288705744,
+          "max_host_poll_ms_ratio": 0.23681997541884986,
+          "refusal_delta": -3900,
+          "cold": null
+        },
+        {
+          "trial": 3,
+          "baseline": "t3-loaded-quic-baseline",
+          "candidate": "t3-loaded-quic-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.4114566839014544,
+          "during_ops_s_ratio": 1.893254070819333,
+          "p99_ms_ratio": 0.7128165605901962,
+          "max_ms_ratio": 0.7144226640049969,
+          "leader_barriers_per_original_ratio": 1.0771224014201224,
+          "max_host_poll_ms_ratio": 0.0674220351785907,
+          "refusal_delta": -3456,
+          "cold": null
+        }
+      ]
+    }
+  ],
+  "cold": [
+    {
+      "host": "linux",
+      "protocol": "tcp",
+      "medians": {
+        "baseline": {
+          "applied": 256,
+          "refused": 0,
+          "completed_ops_s": 23.882836148891787,
+          "during_ops_s": 30.125,
+          "p99_ms": 1115.560397,
+          "max_ms": 1178.055247,
+          "backlog": 15
+        },
+        "candidate": {
+          "applied": 256,
+          "refused": 0,
+          "completed_ops_s": 25.867901966606823,
+          "during_ops_s": 30.25,
+          "p99_ms": 1267.639462,
+          "max_ms": 1329.733223,
+          "backlog": 14
+        }
+      },
+      "paired_p99_ratios": [
+        1.3656440270709969,
+        0.9595034283438323,
+        1.196651298436169
+      ]
+    },
+    {
+      "host": "linux",
+      "protocol": "quic",
+      "medians": {
+        "baseline": {
+          "applied": 256,
+          "refused": 0,
+          "completed_ops_s": 24.77084884933908,
+          "during_ops_s": 30.5,
+          "p99_ms": 940.797901,
+          "max_ms": 972.045196,
+          "backlog": 12
+        },
+        "candidate": {
+          "applied": 256,
+          "refused": 0,
+          "completed_ops_s": 21.71495294789999,
+          "during_ops_s": 29.375,
+          "p99_ms": 2103.979782,
+          "max_ms": 2166.474512,
+          "backlog": 21
+        }
+      },
+      "paired_p99_ratios": [
+        2.3482379624002325,
+        0.8820337420254084,
+        2.747502458554061
+      ]
+    },
+    {
+      "host": "mac",
+      "protocol": "tcp",
+      "medians": {
+        "baseline": {
+          "applied": 256,
+          "refused": 0,
+          "completed_ops_s": 28.459231649346275,
+          "during_ops_s": 31.25,
+          "p99_ms": 454.873813,
+          "max_ms": 486.122063,
+          "backlog": 5
+        },
+        "candidate": {
+          "applied": 256,
+          "refused": 0,
+          "completed_ops_s": 28.266016265750167,
+          "during_ops_s": 31.25,
+          "p99_ms": 835.434063,
+          "max_ms": 881.415521,
+          "backlog": 6
+        }
+      },
+      "paired_p99_ratios": [
+        1.6736167619304128,
+        1.8389502454106053,
+        1.0803146328425135
+      ]
+    },
+    {
+      "host": "mac",
+      "protocol": "quic",
+      "medians": {
+        "baseline": {
+          "applied": 256,
+          "refused": 0,
+          "completed_ops_s": 28.654647375951367,
+          "during_ops_s": 31.125,
+          "p99_ms": 786.089896,
+          "max_ms": 848.586646,
+          "backlog": 6
+        },
+        "candidate": {
+          "applied": 256,
+          "refused": 0,
+          "completed_ops_s": 28.66116972629572,
+          "during_ops_s": 31.25,
+          "p99_ms": 434.036729,
+          "max_ms": 467.454396,
+          "backlog": 6
+        }
+      },
+      "paired_p99_ratios": [
+        0.9256373390278272,
+        0.6229237463700971,
+        0.47158487186446835
+      ]
+    }
+  ],
+  "guard_losses": [
+    {
+      "host": "linux",
+      "protocol": "tcp",
+      "cell": "singleton",
+      "baseline_completed_ops_s": 6.156220343755167,
+      "candidate_completed_ops_s": 5.781237166737472,
+      "baseline_p99_ms": 613.949089,
+      "candidate_p99_ms": 721.865927,
+      "pairs": [
+        {
+          "trial": 1,
+          "baseline": "t1-singleton-tcp-baseline",
+          "candidate": "t1-singleton-tcp-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 0.9296497707935582,
+          "during_ops_s_ratio": 0.9296482412060302,
+          "p99_ms_ratio": 1.175774897191842,
+          "max_ms_ratio": 1.1859111004489844,
+          "leader_barriers_per_original_ratio": 1.0027485112230876,
+          "max_host_poll_ms_ratio": 2.4877250409165304,
+          "refusal_delta": 14,
+          "cold": null
+        },
+        {
+          "trial": 2,
+          "baseline": "t2-singleton-tcp-baseline",
+          "candidate": "t2-singleton-tcp-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 0.9289354695899642,
+          "during_ops_s_ratio": 0.9289340101522843,
+          "p99_ms_ratio": 1.7857916242473855,
+          "max_ms_ratio": 1.0960498853683238,
+          "leader_barriers_per_original_ratio": 1.0028057236762995,
+          "max_host_poll_ms_ratio": 1.4383708467309753,
+          "refusal_delta": 14,
+          "cold": null
+        },
+        {
+          "trial": 3,
+          "baseline": "t3-singleton-tcp-baseline",
+          "candidate": "t3-singleton-tcp-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.1279460180499141,
+          "during_ops_s_ratio": 1.125,
+          "p99_ms_ratio": 0.369828885621989,
+          "max_ms_ratio": 0.4099898706985849,
+          "leader_barriers_per_original_ratio": 0.9954810202851979,
+          "max_host_poll_ms_ratio": 0.9882583170254403,
+          "refusal_delta": -24,
+          "cold": null
+        }
+      ]
+    },
+    {
+      "host": "linux",
+      "protocol": "tcp",
+      "cell": "moderate",
+      "baseline_completed_ops_s": 125.6530450208383,
+      "candidate_completed_ops_s": 126.03847338234438,
+      "baseline_p99_ms": 2768.992699,
+      "candidate_p99_ms": 2384.357799,
+      "pairs": [
+        {
+          "trial": 1,
+          "baseline": "t1-moderate-tcp-baseline",
+          "candidate": "t1-moderate-tcp-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 0.9847743419445394,
+          "during_ops_s_ratio": 0.983267339379231,
+          "p99_ms_ratio": 1.2437244705576551,
+          "max_ms_ratio": 1.2392711901059226,
+          "leader_barriers_per_original_ratio": 1.042850417562403,
+          "max_host_poll_ms_ratio": 0.8712933753943218,
+          "refusal_delta": 140,
+          "cold": null
+        },
+        {
+          "trial": 2,
+          "baseline": "t2-moderate-tcp-baseline",
+          "candidate": "t2-moderate-tcp-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.0071070931619541,
+          "during_ops_s_ratio": 1.0070710829921845,
+          "p99_ms_ratio": 0.777830964586493,
+          "max_ms_ratio": 0.8259067687216368,
+          "leader_barriers_per_original_ratio": 0.8651521949103473,
+          "max_host_poll_ms_ratio": 0.859704641350211,
+          "refusal_delta": -56,
+          "cold": null
+        },
+        {
+          "trial": 3,
+          "baseline": "t3-moderate-tcp-baseline",
+          "candidate": "t3-moderate-tcp-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.0030674016808916,
+          "during_ops_s_ratio": 1.0042383445524807,
+          "p99_ms_ratio": 0.8610921220056276,
+          "max_ms_ratio": 0.9309691357767531,
+          "leader_barriers_per_original_ratio": 0.9777072475172303,
+          "max_host_poll_ms_ratio": 1.0107849011384062,
+          "refusal_delta": -27,
+          "cold": null
+        }
+      ]
+    },
+    {
+      "host": "linux",
+      "protocol": "quic",
+      "cell": "singleton",
+      "baseline_completed_ops_s": 5.90622252388368,
+      "candidate_completed_ops_s": 5.718748842310781,
+      "baseline_p99_ms": 552.572975,
+      "candidate_p99_ms": 570.136229,
+      "pairs": [
+        {
+          "trial": 1,
+          "baseline": "t1-singleton-quic-baseline",
+          "candidate": "t1-singleton-quic-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.0476211923188181,
+          "during_ops_s_ratio": 1.0476190476190477,
+          "p99_ms_ratio": 0.9092736502359711,
+          "max_ms_ratio": 1.1786165187468687,
+          "leader_barriers_per_original_ratio": 0.9982650936849409,
+          "max_host_poll_ms_ratio": 0.7798165137614678,
+          "refusal_delta": -9,
+          "cold": null
+        },
+        {
+          "trial": 2,
+          "baseline": "t2-singleton-quic-baseline",
+          "candidate": "t2-singleton-quic-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 0.7766998474250274,
+          "during_ops_s_ratio": 0.7766990291262136,
+          "p99_ms_ratio": 2.6803337507284546,
+          "max_ms_ratio": 2.4559347140160357,
+          "leader_barriers_per_original_ratio": 1.010099531615925,
+          "max_host_poll_ms_ratio": 0.5964450296247532,
+          "refusal_delta": 46,
+          "cold": null
+        },
+        {
+          "trial": 3,
+          "baseline": "t3-singleton-quic-baseline",
+          "candidate": "t3-singleton-quic-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.005499383367316,
+          "during_ops_s_ratio": 1.0054945054945055,
+          "p99_ms_ratio": 0.6350673997499368,
+          "max_ms_ratio": 0.6729595479997118,
+          "leader_barriers_per_original_ratio": 0.9997837276698818,
+          "max_host_poll_ms_ratio": 0.7214339058999253,
+          "refusal_delta": -1,
+          "cold": null
+        }
+      ]
+    },
+    {
+      "host": "linux",
+      "protocol": "quic",
+      "cell": "moderate",
+      "baseline_completed_ops_s": 125.48317147015233,
+      "candidate_completed_ops_s": 124.56106383545495,
+      "baseline_p99_ms": 2747.705304,
+      "candidate_p99_ms": 3243.367895,
+      "pairs": [
+        {
+          "trial": 1,
+          "baseline": "t1-moderate-quic-baseline",
+          "candidate": "t1-moderate-quic-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 0.9683269677527572,
+          "during_ops_s_ratio": 0.9683212771264654,
+          "p99_ms_ratio": 1.7810702437580166,
+          "max_ms_ratio": 1.7022670372965125,
+          "leader_barriers_per_original_ratio": 0.9543139747047897,
+          "max_host_poll_ms_ratio": 0.7811923786109404,
+          "refusal_delta": 254,
+          "cold": null
+        },
+        {
+          "trial": 2,
+          "baseline": "t2-moderate-quic-baseline",
+          "candidate": "t2-moderate-quic-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.003012743061465,
+          "during_ops_s_ratio": 1.0019942664838588,
+          "p99_ms_ratio": 1.0102776676810608,
+          "max_ms_ratio": 0.9570715689140338,
+          "leader_barriers_per_original_ratio": 1.0618061484815344,
+          "max_host_poll_ms_ratio": 0.9229916897506925,
+          "refusal_delta": -17,
+          "cold": null
+        },
+        {
+          "trial": 3,
+          "baseline": "t3-moderate-quic-baseline",
+          "candidate": "t3-moderate-quic-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.0000696827009334,
+          "during_ops_s_ratio": 1.0008785140562249,
+          "p99_ms_ratio": 1.0664702227309397,
+          "max_ms_ratio": 1.0097882539163376,
+          "leader_barriers_per_original_ratio": 1.0750882780920024,
+          "max_host_poll_ms_ratio": 0.9676850763807285,
+          "refusal_delta": 4,
+          "cold": null
+        }
+      ]
+    },
+    {
+      "host": "mac",
+      "protocol": "tcp",
+      "cell": "singleton",
+      "baseline_completed_ops_s": 7.406249508178743,
+      "candidate_completed_ops_s": 7.4062422947306725,
+      "baseline_p99_ms": 158.366458,
+      "candidate_p99_ms": 160.099959,
+      "pairs": [
+        {
+          "trial": 1,
+          "baseline": "t1-singleton-tcp-baseline",
+          "candidate": "t1-singleton-tcp-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 0.9874980571288366,
+          "during_ops_s_ratio": 0.9875,
+          "p99_ms_ratio": 1.0155608961710003,
+          "max_ms_ratio": 2.5306678263333624,
+          "leader_barriers_per_original_ratio": 1.0003835826620637,
+          "max_host_poll_ms_ratio": 0.14076710162119416,
+          "refusal_delta": 3,
+          "cold": null
+        },
+        {
+          "trial": 2,
+          "baseline": "t2-singleton-tcp-baseline",
+          "candidate": "t2-singleton-tcp-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 0.99999992837501,
+          "during_ops_s_ratio": 1.0,
+          "p99_ms_ratio": 1.0208189667194953,
+          "max_ms_ratio": 0.9947647881954089,
+          "leader_barriers_per_original_ratio": 1.0,
+          "max_host_poll_ms_ratio": 1.1832460732984293,
+          "refusal_delta": 0,
+          "cold": null
+        },
+        {
+          "trial": 3,
+          "baseline": "t3-singleton-tcp-baseline",
+          "candidate": "t3-singleton-tcp-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.000001979154191,
+          "during_ops_s_ratio": 1.0,
+          "p99_ms_ratio": 0.996623603212746,
+          "max_ms_ratio": 1.1963297728694282,
+          "leader_barriers_per_original_ratio": 1.0,
+          "max_host_poll_ms_ratio": 0.9528301886792454,
+          "refusal_delta": 0,
+          "cold": null
+        }
+      ]
+    },
+    {
+      "host": "mac",
+      "protocol": "tcp",
+      "cell": "moderate",
+      "baseline_completed_ops_s": 127.83899070228459,
+      "candidate_completed_ops_s": 127.83081383664177,
+      "baseline_p99_ms": 744.062,
+      "candidate_p99_ms": 754.158416,
+      "pairs": [
+        {
+          "trial": 1,
+          "baseline": "t1-moderate-tcp-baseline",
+          "candidate": "t1-moderate-tcp-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 0.9999360377800395,
+          "during_ops_s_ratio": 0.9995110024449878,
+          "p99_ms_ratio": 0.8869383399187443,
+          "max_ms_ratio": 0.9039605930032264,
+          "leader_barriers_per_original_ratio": 1.000253936008126,
+          "max_host_poll_ms_ratio": 0.5917711346833815,
+          "refusal_delta": 0,
+          "cold": null
+        },
+        {
+          "trial": 2,
+          "baseline": "t2-moderate-tcp-baseline",
+          "candidate": "t2-moderate-tcp-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 0.9943608162472475,
+          "during_ops_s_ratio": 0.9944987775061125,
+          "p99_ms_ratio": 1.050213781916023,
+          "max_ms_ratio": 0.9594726484556363,
+          "leader_barriers_per_original_ratio": 0.9865379730759462,
+          "max_host_poll_ms_ratio": 0.7153246753246754,
+          "refusal_delta": 0,
+          "cold": null
+        },
+        {
+          "trial": 3,
+          "baseline": "t3-moderate-tcp-baseline",
+          "candidate": "t3-moderate-tcp-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.0001471286962653,
+          "during_ops_s_ratio": 1.0,
+          "p99_ms_ratio": 1.0454624608944358,
+          "max_ms_ratio": 1.0663354884934735,
+          "leader_barriers_per_original_ratio": 0.9906542056074766,
+          "max_host_poll_ms_ratio": 0.83690587138863,
+          "refusal_delta": 0,
+          "cold": null
+        }
+      ]
+    },
+    {
+      "host": "mac",
+      "protocol": "quic",
+      "cell": "singleton",
+      "baseline_completed_ops_s": 7.406210663995055,
+      "candidate_completed_ops_s": 7.406214810758992,
+      "baseline_p99_ms": 164.041834,
+      "candidate_p99_ms": 164.020333,
+      "pairs": [
+        {
+          "trial": 1,
+          "baseline": "t1-singleton-quic-baseline",
+          "candidate": "t1-singleton-quic-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 0.9999991679727032,
+          "during_ops_s_ratio": 1.0,
+          "p99_ms_ratio": 0.9937489757190473,
+          "max_ms_ratio": 1.02280443525937,
+          "leader_barriers_per_original_ratio": 1.0,
+          "max_host_poll_ms_ratio": 0.09688995215311005,
+          "refusal_delta": 0,
+          "cold": null
+        },
+        {
+          "trial": 2,
+          "baseline": "t2-singleton-quic-baseline",
+          "candidate": "t2-singleton-quic-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.0042370436050212,
+          "during_ops_s_ratio": 1.0042372881355932,
+          "p99_ms_ratio": 1.0200465858478918,
+          "max_ms_ratio": 1.3313683893694412,
+          "leader_barriers_per_original_ratio": 0.9998700387284588,
+          "max_host_poll_ms_ratio": 0.5579078455790785,
+          "refusal_delta": -1,
+          "cold": null
+        },
+        {
+          "trial": 3,
+          "baseline": "t3-singleton-quic-baseline",
+          "candidate": "t3-singleton-quic-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.0000046484656693,
+          "during_ops_s_ratio": 1.0,
+          "p99_ms_ratio": 0.9998689297755595,
+          "max_ms_ratio": 0.959309325307572,
+          "leader_barriers_per_original_ratio": 1.0,
+          "max_host_poll_ms_ratio": 2.989090909090909,
+          "refusal_delta": 0,
+          "cold": null
+        }
+      ]
+    },
+    {
+      "host": "mac",
+      "protocol": "quic",
+      "cell": "moderate",
+      "baseline_completed_ops_s": 127.82870396016617,
+      "candidate_completed_ops_s": 127.85164098776072,
+      "baseline_p99_ms": 779.149125,
+      "candidate_p99_ms": 1664.171,
+      "pairs": [
+        {
+          "trial": 1,
+          "baseline": "t1-moderate-quic-baseline",
+          "candidate": "t1-moderate-quic-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 0.9954462091073102,
+          "during_ops_s_ratio": 0.9998771649674487,
+          "p99_ms_ratio": 2.541336660990837,
+          "max_ms_ratio": 2.3954709276615964,
+          "leader_barriers_per_original_ratio": 0.9593525793909353,
+          "max_host_poll_ms_ratio": 0.9112854556427278,
+          "refusal_delta": 38,
+          "cold": null
+        },
+        {
+          "trial": 2,
+          "baseline": "t2-moderate-quic-baseline",
+          "candidate": "t2-moderate-quic-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.00031287079064,
+          "during_ops_s_ratio": 1.000366837857667,
+          "p99_ms_ratio": 1.752838090508518,
+          "max_ms_ratio": 1.7975868472593004,
+          "leader_barriers_per_original_ratio": 0.9289147482924361,
+          "max_host_poll_ms_ratio": 0.6703539823008849,
+          "refusal_delta": 0,
+          "cold": null
+        },
+        {
+          "trial": 3,
+          "baseline": "t3-moderate-quic-baseline",
+          "candidate": "t3-moderate-quic-candidate",
+          "both_valid": true,
+          "completed_ops_s_ratio": 1.000158357897785,
+          "during_ops_s_ratio": 1.0,
+          "p99_ms_ratio": 2.1358825244140522,
+          "max_ms_ratio": 1.9750777860938404,
+          "leader_barriers_per_original_ratio": 0.9475277497477296,
+          "max_host_poll_ms_ratio": 0.8352601156069365,
+          "refusal_delta": 0,
+          "cold": null
+        }
+      ]
+    }
+  ],
+  "interpretation": [
+    "All6 Mac loaded rate and p99 pairs improve, with headroom-seeking offered load2000/s. Linux loaded rates win3/6 pairs and lose3/6 despite a substantial repeatable maximum host-poll reduction. No many-group aggregate replaces the onegroup result.",
+    "Linux loaded maxpoll medians~33ms fall to2.6-2.8ms; Mac loaded~46ms falls to3.1-3.3ms and skew~20-21ms falls to~1.6-1.7ms. This matches removal of per-candidate ready reservation rebuilding; it is not a sampled before/after CPU proof or one-Shard-visit timing.",
+    "Mac moderateQUIC p99 worsens in every pair and firstcandidate refuses38 originals; all3 Mac TCPskew coldp99 worsen despite256/256cold applied and0refused. Linux QUICskew also loses2/3 rate/cold-tail pairs. These guard losses remain material, not explained away by improved aggregate rates.",
+    "Remaining candidate loaded leader-barrier elapsed fractions are~.69/.72 Linux and~.50/.55 Mac, with skew~.82-.90. Mean barrier latency varies materially between pairs/arms. These inclusive scopes overlap with host progress and cannot be summed as CPU or establish a filesystem/allocator cause.",
+    "The source change does not eliminate submission validation or pending receipt scans/reconciliation. Existing479 Mac showed a separate15.397% sampled submission context; source and later performance context motivate investigation but481 does not measure its new share.",
+    "Next decision should retain the measured ready-stage algorithm benefit as a qualified tradeoff, keepdefaults16/FileLogIo, and focus on the repeated moderate/cold-tail losses and actual remaining durable/admission ordering. Existing maintenance/offer timelines and per-replica barriers can test correlation before another source change; correlation is not causation. Do not call full retention accepted on all cells or begin uncontrolled quantum/pipeline/fusion tuning."
+  ],
+  "scope": "Finite8s loaded histories with scheduled horizons/drain/refusals, not sustained capacity, physical-debt plateau, threefilesystem acceptance or fullP9. Source/artifact guards and all original outcomes passed; performance regressions are separate."
+}

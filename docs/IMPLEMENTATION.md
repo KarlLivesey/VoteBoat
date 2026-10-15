@@ -15,13 +15,17 @@ identify repeated exact Counter reservation work in the Mac backlog regime;
 Linux's low-backlog capture separately identifies reconciliation. [480's pre-edit
 schema](../validation/performance/native480-admission/SCHEMA.md) scopes one optional
 temporary ready-admission context. Its local functional checks and full enabled
-strict hook pass, with no performance gain claimed.480 is published as
+strict hook pass.480 is published as
 `f7b0ef12709bb7e7aad4f0279851aa035b508e9e`; fresh Linux/Mac native artifacts and
 functional controls pass. Mac's separate missing client-runtime28/28 check closes
-the runner's scope gap without changing source or repeating workloads. [481's premeasurement
-schema](../validation/performance/native481-admission/SCHEMA.md) compares the
-immutable476 baseline with480, using2000/s loaded demand to avoid the earlier
-Mac offer ceiling. FileLogIo and
+the runner's scope gap without changing source or repeating workloads. [481's
+completed comparison](../validation/performance/native481-admission/README.md)
+retains480 as a qualified algorithm improvement: all six Mac loaded pairs improve,
+TCP794.133→1065.505 and QUIC809.012→1177.929 completed/s, with sharp polling-cost
+reductions. Linux throughput is mixed and repeated default/cold-tail losses
+remain. This is not universal native acceptance. [482's preprofile schema](../validation/performance/native482-current-profile/SCHEMA.md)
+uses existing timelines and current headless profiles before another edit.
+FileLogIo and
 ready16 stay defaults. The user's real ext4/XFS
 scratch and all-three-filesystem native acceptance remain pending; available-host
 results do not close that acceptance. Full P9 remains incomplete. The linked
@@ -886,9 +890,9 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current481: fresh artifacts and paired retention decision | Retain useful measured improvement rather than checked code or a CPU-only claim | Published480 source and checked qualification; scoped Mac qualification, genuinely fresh native root/executable proofs and [fixed paired schema](../validation/performance/native481-admission/SCHEMA.md) | Both-host rotating476/480 pairs; default16 singleton/moderate guards, selected64 loaded/skew checks; completed/during rates, latency/refusals, cold fairness and physical barrier work; all regressions retained; no default promotion; third-filesystem acceptance stays open | P9.0/P9.1/P9.2/P9.3 |
-| Next482: act on the measured limiting stage | Convert481 evidence into a useful retained improvement or focused rejection | Complete paired raw histories and independent numerical review; distinguish CPU, physical barriers and harness offer limits | Record retention decision and all attempts; before any new edit, specify exact data/API, ordering, ownership, partial progress/restart and checks; checked publication through enabled hook; no repeated rejected family without new evidence | P9.0/P9.1/P9.2/P9.3 |
-| Next483: sustained curve and composed service qualification | Complete full P9 acceptance without narrowing the objective | Retained measured improvements, both-host qualified artifacts/workloads and supplied third filesystem for native acceptance | All seven one-group cells with healthy sustained margin, bounded memory/debt, durable headroom/fairness/skew, placement/shared physical barriers and P8 relays/striped/recursive/logical voters; preserve all outcomes/failures and exclude P10 | P9.0/P9.1/P9.2/P9.3/P9.4 |
+| Current482: locate remaining work and repeated service-tail losses | Select the next real limiting stage after481's qualified tradeoff | Complete96-case raw/independent review; [existing-timeline/current-profile schema](../validation/performance/native482-current-profile/SCHEMA.md); unchanged qualified480 artifacts | Quantify service versus dispatch and maintenance counterexamples; one guarded headless current profile/host with explicit unknown/CPU/wall limits; source ownership/ordering audit; no allocator/network cause inferred from absent counters | P9.0/P9.1/P9.2/P9.3 |
+| Next483: bounded measured ordering/algorithm improvement | Reduce supported remaining work without changing original outcomes | Current482 numerical profiles and source/contract audit; chosen before-edit data/API, transitions, ownership, restart/cleanup and acceptance schema | Focused differential/lifecycle/public composition controls; actual network/recovery, zero-diagnostic enabled hook, checked publication/fresh artifacts and paired retention decision; no naive cleanup cap or rejected-family replay without new evidence | P9.0/P9.1/P9.2/P9.3 |
+| Next484: sustained curve and composed service qualification | Complete full P9 acceptance without narrowing the objective | Retained measured improvements, both-host qualified artifacts/workloads and supplied third filesystem for native acceptance | All seven one-group cells with healthy sustained margin, bounded memory/debt, durable headroom/fairness/skew, placement/shared physical barriers and P8 relays/striped/recursive/logical voters; preserve all outcomes/failures and exclude P10 | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
 comparison or short diagnostics. All seven one-group healthy-margin cells on
@@ -35333,3 +35337,36 @@ relabeled successful. Publish this complete checked source/evidence, then activa
 the prepared unpublished-sentinel fresh runners using the actual commit. Next481
 qualifies Mac and measures both-host matched retention;482 preserves full sustained
 curve/composed scope. Macro requirements, defaults and pending ext4/XFS stay open.
+
+
+### 481: completed admission comparison and remaining measured work
+
+Both original481 campaigns finish0, Linux1858 and Mac81015, all96 native
+processes/validators/readbacks. [Evidence](../validation/performance/native481-admission/README.md)
+retains every raw case, slower tail, failure and source/artifact/compiler/profile
+guard. Root's full raw recomputation matches the independent900-input review.
+Mac loaded TCP794.133→1065.505 and QUIC809.012→1177.929 completed originals/s,
+p996162.868→4870.050 and6139.026→4376.000ms; all six pairs improve. Linux
+TCP614.909→532.740 and QUIC623.344→687.192/s remain mixed despite lower loaded
+CPU/poll work. Mac default16 moderateQUIC p99779.149→1664.171ms and all three
+TCP cold-tail pairs regress; Linux QUIC skew also regresses. No universal gain
+or default promotion follows.480 is retained as a qualified algorithm benefit,
+with performance acceptance and observed losses open.
+
+Linux391680=248327applied+143353window refusals; Mac391680=296506+95174. All
+other classes/unknown/pending0; recovery64+applied/retries/joins pass, maintenance
+623/624checkpoints and1869/1872reclaims active. All cold256 apply/refuse0.
+Physical barriers still dominate overlapping wall contexts; finite8s loaded
+histories and broad RSS/CPU do not establish sustained headroom/debt. Realext4/XFS,
+all fullP9 framework/native/composed requirements and the unchanged defaults stay
+open. Macro plan reviewed: no milestone closes; repeated default/cold-tail
+losses add a focused ordering/profile question before another performance edit.
+
+Existing-timeline review separates service from dispatch and finds major cold
+gaps outside recorded maintenance. Correlation cannot identify a precise wait
+source. [482 schema](../validation/performance/native482-current-profile/SCHEMA.md)
+selects headless current profiles and source ownership/order audits; it does not
+change checkpoint cadence or add another observer prerequisite. Reconciliation
+audit rejects a naive len cap because fresh Unknown outcomes need a later
+terminal transition; returned logical visits, cursor and cleanup must be exact.
+Current482/next483/next484 plans above supersede the historical480 next steps.

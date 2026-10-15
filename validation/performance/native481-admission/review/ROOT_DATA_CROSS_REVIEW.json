@@ -1,0 +1,14 @@
+{
+  "exit": 0,
+  "records": 96,
+  "independent_input_count": 900,
+  "root_raw_recomputation_original_handle": 82162,
+  "root_raw_recomputation_actual_exit": 0,
+  "terminal_tool_chunk": "2e7470",
+  "source_exact": true,
+  "qualified_projection_files": 1494,
+  "root_reader_sha256": "8ce7ceb25a352b67b3349a09147dec673d3cc3810f1afc4722994b78bc7c90b0",
+  "root_data_sha256": "c3da408b25cb3a06855177869a47d652d4a765f4caab3c25d2ef4374aa1cc1db",
+  "independent_data_sha256": "569cb228bc010993078a02ad14add6a031535061d1f51f92afa17cae21bf5fac",
+  "scope": "All96 root raw ledgers match independent readout for exact conservation, completed/during rates, p50/p95/p99/max, per-group outcomes/backlog/latency, all checked per-replica physical deltas, maintenance and recovery. Unchanged qualified source scope reused; no test suites or workloads rerun."
+}

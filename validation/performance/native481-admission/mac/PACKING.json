@@ -1,0 +1,290 @@
+[
+  {
+    "original_path": "CAMPAIGN_CONFIG.json",
+    "archived_path": "CAMPAIGN_CONFIG.json.gz",
+    "original_bytes": 676675,
+    "original_sha256": "5c5e38304de6ea8587c6eff0c45e07c9a32d55e328db6581734862181045412d"
+  },
+  {
+    "original_path": "COLLECTED.json",
+    "archived_path": "COLLECTED.json.gz",
+    "original_bytes": 195581,
+    "original_sha256": "5053d042c74691f70d60ec80857759f2ab9ae1299fc0334de9b8ca1d018a0009"
+  },
+  {
+    "original_path": "after-host.json",
+    "archived_path": "after-host.json.gz",
+    "original_bytes": 159488,
+    "original_sha256": "7c18989928459f68ae8a261071fe2fb6fd2584a9269ad3802985df081634bffa"
+  },
+  {
+    "original_path": "before-host.json",
+    "archived_path": "before-host.json.gz",
+    "original_bytes": 159255,
+    "original_sha256": "b0f7807b8bf67dbef1c5c6d56fb631ca5f6048cbff575049ff9e2472ec823e35"
+  },
+  {
+    "original_path": "campaign/CAMPAIGN.json",
+    "archived_path": "campaign/CAMPAIGN.json.gz",
+    "original_bytes": 97582,
+    "original_sha256": "8ddd7df4cb6f5a471d58585085e4386c9cf49e43030b931f5518b42f1f64ed7d"
+  },
+  {
+    "original_path": "collection/ANALYSIS.json",
+    "archived_path": "collection/ANALYSIS.json.gz",
+    "original_bytes": 998646,
+    "original_sha256": "24fed3a6fd2c5bc9b20ad75880a2f5b3ad782df6f22f1e2b3b6ee634b0c38964"
+  },
+  {
+    "original_path": "independent-review/independent-readout.json",
+    "archived_path": "independent-review/independent-readout.json.gz",
+    "original_bytes": 1259571,
+    "original_sha256": "569cb228bc010993078a02ad14add6a031535061d1f51f92afa17cae21bf5fac"
+  },
+  {
+    "original_path": "preparation/ROOT_DATA_REVIEW.json",
+    "archived_path": "preparation/ROOT_DATA_REVIEW.json.gz",
+    "original_bytes": 277777,
+    "original_sha256": "c3da408b25cb3a06855177869a47d652d4a765f4caab3c25d2ef4374aa1cc1db"
+  },
+  {
+    "original_path": "preparation/linux/setup-before-mac-scope-fix/CAMPAIGN_CONFIG.json",
+    "archived_path": "preparation/linux/setup-before-mac-scope-fix/CAMPAIGN_CONFIG.json.gz",
+    "original_bytes": 679018,
+    "original_sha256": "67e6fedc1c16c0369f13ce381b1360431841c38b078730f83fc85be64f0e1fb2"
+  },
+  {
+    "original_path": "preparation/mac/prepared/campaign/CAMPAIGN_CONFIG.json",
+    "archived_path": "preparation/mac/prepared/campaign/CAMPAIGN_CONFIG.json.gz",
+    "original_bytes": 676675,
+    "original_sha256": "5c5e38304de6ea8587c6eff0c45e07c9a32d55e328db6581734862181045412d"
+  },
+  {
+    "original_path": "preparation/mac/prepared/campaign/setup-host.json",
+    "archived_path": "preparation/mac/prepared/campaign/setup-host.json.gz",
+    "original_bytes": 159468,
+    "original_sha256": "dc25ef5229939c8ca07240d504f77b3103002d32ad13bd02d737a5cae34aefac"
+  },
+  {
+    "original_path": "results/t1-loaded-quic-baseline/offers.csv",
+    "archived_path": "results/t1-loaded-quic-baseline/offers.csv.gz",
+    "original_bytes": 1035859,
+    "original_sha256": "f25748855eb6079751ea3664470b27d4d056d3095a352b4edc3cd62684707fdd"
+  },
+  {
+    "original_path": "results/t1-loaded-quic-candidate/offers.csv",
+    "archived_path": "results/t1-loaded-quic-candidate/offers.csv.gz",
+    "original_bytes": 1050820,
+    "original_sha256": "5ed08dc33818811ab1a68440841978f0abe67521344b54fce93e99f383e9cc97"
+  },
+  {
+    "original_path": "results/t1-loaded-tcp-baseline/offers.csv",
+    "archived_path": "results/t1-loaded-tcp-baseline/offers.csv.gz",
+    "original_bytes": 1036466,
+    "original_sha256": "8c60f70b5b64a26859fb58b1f2b9a291e4d79636b439ecc75742fc12656a32cf"
+  },
+  {
+    "original_path": "results/t1-loaded-tcp-candidate/offers.csv",
+    "archived_path": "results/t1-loaded-tcp-candidate/offers.csv.gz",
+    "original_bytes": 1039179,
+    "original_sha256": "c72a527553ce58993000c10ea4f82af3667adeaa3cb183bdabd77b5d5dd64f76"
+  },
+  {
+    "original_path": "results/t1-moderate-quic-baseline/offers.csv",
+    "archived_path": "results/t1-moderate-quic-baseline/offers.csv.gz",
+    "original_bytes": 557234,
+    "original_sha256": "1cd4212fdfa68930c76e1e0d0d4fd8cbe9a9be821851d595e898f138dc203051"
+  },
+  {
+    "original_path": "results/t1-moderate-quic-candidate/offers.csv",
+    "archived_path": "results/t1-moderate-quic-candidate/offers.csv.gz",
+    "original_bytes": 557165,
+    "original_sha256": "91b607dd017199ad1f1bdaa188142590ef9586bf4f2acd10c733c99ee745442a"
+  },
+  {
+    "original_path": "results/t1-moderate-tcp-baseline/offers.csv",
+    "archived_path": "results/t1-moderate-tcp-baseline/offers.csv.gz",
+    "original_bytes": 557238,
+    "original_sha256": "02d673356c833fff8408dd6c8c0cc142ae08b14e1ee7cfcc393fda0d61be157e"
+  },
+  {
+    "original_path": "results/t1-moderate-tcp-candidate/offers.csv",
+    "archived_path": "results/t1-moderate-tcp-candidate/offers.csv.gz",
+    "original_bytes": 557240,
+    "original_sha256": "60cd98c9092732890588acda4fbe47950aeae095628626b9866318463390be4b"
+  },
+  {
+    "original_path": "results/t1-skew-quic-baseline/offers.csv",
+    "archived_path": "results/t1-skew-quic-baseline/offers.csv.gz",
+    "original_bytes": 530903,
+    "original_sha256": "dece611bcfd68a5d0917654a51ec5db157546d7ca49f7ba77ab6f41f65c3e253"
+  },
+  {
+    "original_path": "results/t1-skew-quic-candidate/offers.csv",
+    "archived_path": "results/t1-skew-quic-candidate/offers.csv.gz",
+    "original_bytes": 530950,
+    "original_sha256": "2f38e8f1c444e7ed5993fcfcfd968f625a5af6cd3251520c9f6e0f600bb85b16"
+  },
+  {
+    "original_path": "results/t1-skew-tcp-baseline/offers.csv",
+    "archived_path": "results/t1-skew-tcp-baseline/offers.csv.gz",
+    "original_bytes": 530555,
+    "original_sha256": "16ac430e44bcff9015db58e805cedbeeee359f1e6747c58cf20d170489504b29"
+  },
+  {
+    "original_path": "results/t1-skew-tcp-candidate/offers.csv",
+    "archived_path": "results/t1-skew-tcp-candidate/offers.csv.gz",
+    "original_bytes": 530620,
+    "original_sha256": "3e7aa18808995b02d714033ecc5ea61c3b0947cfc8947353e4c55fb5b8db0830"
+  },
+  {
+    "original_path": "results/t2-loaded-quic-baseline/offers.csv",
+    "archived_path": "results/t2-loaded-quic-baseline/offers.csv.gz",
+    "original_bytes": 1037331,
+    "original_sha256": "fd7fb917591bdf2cd30c5c41275c138ae04a286b9d4a17bffc7f12365caf584c"
+  },
+  {
+    "original_path": "results/t2-loaded-quic-candidate/offers.csv",
+    "archived_path": "results/t2-loaded-quic-candidate/offers.csv.gz",
+    "original_bytes": 1052826,
+    "original_sha256": "8040922fe21dfab01a260bd84f85cafa7c4c90f58c5f306461471fd896021b25"
+  },
+  {
+    "original_path": "results/t2-loaded-tcp-baseline/offers.csv",
+    "archived_path": "results/t2-loaded-tcp-baseline/offers.csv.gz",
+    "original_bytes": 1038265,
+    "original_sha256": "1a82994228f44f3bc2f4671b49fecd6b2abea32cda9cb1f5761f090ffd4fa782"
+  },
+  {
+    "original_path": "results/t2-loaded-tcp-candidate/offers.csv",
+    "archived_path": "results/t2-loaded-tcp-candidate/offers.csv.gz",
+    "original_bytes": 1044490,
+    "original_sha256": "1536171976c39f1658ef6c43792eb6601f1c5b80376b369a7709fd83b1c0a775"
+  },
+  {
+    "original_path": "results/t2-moderate-quic-baseline/offers.csv",
+    "archived_path": "results/t2-moderate-quic-baseline/offers.csv.gz",
+    "original_bytes": 557235,
+    "original_sha256": "196829db2559b8fc6dd09a4182b09caeba171fad5b489a6995921724829fc274"
+  },
+  {
+    "original_path": "results/t2-moderate-quic-candidate/offers.csv",
+    "archived_path": "results/t2-moderate-quic-candidate/offers.csv.gz",
+    "original_bytes": 557242,
+    "original_sha256": "7d0effb9cee1c75e34122068eadcd46e7bbccf9e49f8cf92dba0d1b892594687"
+  },
+  {
+    "original_path": "results/t2-moderate-tcp-baseline/offers.csv",
+    "archived_path": "results/t2-moderate-tcp-baseline/offers.csv.gz",
+    "original_bytes": 557237,
+    "original_sha256": "883d58a7ec61ce6843bdf7ea436db00e7b8bf70ff92d97ea7cc763bbef8d4c06"
+  },
+  {
+    "original_path": "results/t2-moderate-tcp-candidate/offers.csv",
+    "archived_path": "results/t2-moderate-tcp-candidate/offers.csv.gz",
+    "original_bytes": 557308,
+    "original_sha256": "0dcf567af9c1e58e2752e43a15324dd05edf8cd9d44489e7a00ebfa61d424e29"
+  },
+  {
+    "original_path": "results/t2-skew-quic-baseline/offers.csv",
+    "archived_path": "results/t2-skew-quic-baseline/offers.csv.gz",
+    "original_bytes": 530226,
+    "original_sha256": "6613a482a1ef5466e9aa6fe592aa3c41a64c8036ecacb4fccad4cfff0b834991"
+  },
+  {
+    "original_path": "results/t2-skew-quic-candidate/offers.csv",
+    "archived_path": "results/t2-skew-quic-candidate/offers.csv.gz",
+    "original_bytes": 531691,
+    "original_sha256": "270f068d5de7a3b6ff38b01e87c8720faac85f853eb24d11241adebe3bcd03ec"
+  },
+  {
+    "original_path": "results/t2-skew-tcp-baseline/offers.csv",
+    "archived_path": "results/t2-skew-tcp-baseline/offers.csv.gz",
+    "original_bytes": 530785,
+    "original_sha256": "cfea1913e4aea8aa97a3d7f8b062724749d6b17c23b509d5a3d1fd7ff5a60d9f"
+  },
+  {
+    "original_path": "results/t2-skew-tcp-candidate/offers.csv",
+    "archived_path": "results/t2-skew-tcp-candidate/offers.csv.gz",
+    "original_bytes": 530416,
+    "original_sha256": "98e7acf5156a128a0ac4bf56d7eebde89ad7634f046678241de59cc75d0c629c"
+  },
+  {
+    "original_path": "results/t3-loaded-quic-baseline/offers.csv",
+    "archived_path": "results/t3-loaded-quic-baseline/offers.csv.gz",
+    "original_bytes": 1036627,
+    "original_sha256": "f71efcad4682024977d25b4d1c9e8b34b61f5cc6094d0e4206a55ad31dc4f92a"
+  },
+  {
+    "original_path": "results/t3-loaded-quic-candidate/offers.csv",
+    "archived_path": "results/t3-loaded-quic-candidate/offers.csv.gz",
+    "original_bytes": 1047934,
+    "original_sha256": "9388d7c6fdcbf8c90e9cccbe6d56159be465637f980f18514adcee24c8efbe82"
+  },
+  {
+    "original_path": "results/t3-loaded-tcp-baseline/offers.csv",
+    "archived_path": "results/t3-loaded-tcp-baseline/offers.csv.gz",
+    "original_bytes": 1036089,
+    "original_sha256": "ec80b2efe3ba26e77ba591db2bd30a2d213b3618471e1d017f112a1c6e88026d"
+  },
+  {
+    "original_path": "results/t3-loaded-tcp-candidate/offers.csv",
+    "archived_path": "results/t3-loaded-tcp-candidate/offers.csv.gz",
+    "original_bytes": 1042870,
+    "original_sha256": "9dc8dfa9956b5895ebba742e86f0e7b9382b0dc0be558837764844a7b92c32c1"
+  },
+  {
+    "original_path": "results/t3-moderate-quic-baseline/offers.csv",
+    "archived_path": "results/t3-moderate-quic-baseline/offers.csv.gz",
+    "original_bytes": 557237,
+    "original_sha256": "3a20c40aa3aa910697b1fa0ac2f7e1e5ff7dae10ced9124aa19ea6ac9b5c096f"
+  },
+  {
+    "original_path": "results/t3-moderate-quic-candidate/offers.csv",
+    "archived_path": "results/t3-moderate-quic-candidate/offers.csv.gz",
+    "original_bytes": 557237,
+    "original_sha256": "584ebe0b873c64fa913b2d2df726b4bce12c22017eb9b1fe296b9ba0a2400e72"
+  },
+  {
+    "original_path": "results/t3-moderate-tcp-baseline/offers.csv",
+    "archived_path": "results/t3-moderate-tcp-baseline/offers.csv.gz",
+    "original_bytes": 557238,
+    "original_sha256": "5608146e18d96d228749eec60807a9b21e7dbcf849ac3b5b3756d353c5759e4f"
+  },
+  {
+    "original_path": "results/t3-moderate-tcp-candidate/offers.csv",
+    "archived_path": "results/t3-moderate-tcp-candidate/offers.csv.gz",
+    "original_bytes": 557235,
+    "original_sha256": "eaf1f449aed9559bafaf9ea7ddb28e9a4822a8f6468ca7aa937eb6d938f7100f"
+  },
+  {
+    "original_path": "results/t3-skew-quic-baseline/offers.csv",
+    "archived_path": "results/t3-skew-quic-baseline/offers.csv.gz",
+    "original_bytes": 530203,
+    "original_sha256": "89c67c9dd1a739f096627a312e37ab43421c73eb0fcdcca82f48d57c66db0519"
+  },
+  {
+    "original_path": "results/t3-skew-quic-candidate/offers.csv",
+    "archived_path": "results/t3-skew-quic-candidate/offers.csv.gz",
+    "original_bytes": 531399,
+    "original_sha256": "b033b7e38330b0bb522c79578969fd3b9b38ca169f8d2cb30cf16508e2f2e558"
+  },
+  {
+    "original_path": "results/t3-skew-tcp-baseline/offers.csv",
+    "archived_path": "results/t3-skew-tcp-baseline/offers.csv.gz",
+    "original_bytes": 530590,
+    "original_sha256": "61c973504ceb217e43a4e7b51fc2ddf3eba81994ef07981b6dcb15568ee5592e"
+  },
+  {
+    "original_path": "results/t3-skew-tcp-candidate/offers.csv",
+    "archived_path": "results/t3-skew-tcp-candidate/offers.csv.gz",
+    "original_bytes": 529573,
+    "original_sha256": "7e600c5438c4d63cbf67b84cde1fbe0cd520b92a20fe2a30b7742ea5542a86ba"
+  },
+  {
+    "original_path": "setup-host.json",
+    "archived_path": "setup-host.json.gz",
+    "original_bytes": 159468,
+    "original_sha256": "dc25ef5229939c8ca07240d504f77b3103002d32ad13bd02d737a5cae34aefac"
+  }
+]

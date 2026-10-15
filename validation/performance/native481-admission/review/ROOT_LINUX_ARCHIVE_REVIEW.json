@@ -1,0 +1,7 @@
+{
+  "exit": 0,
+  "payloads": 1119,
+  "selected_originals": 1116,
+  "manifest_sha256": "d15af40d5a393c46c2eca4655c8beb34b066641f032509e3804914238a582c66",
+  "scope": "Root exact recursive seal and original current source bytes/hash/length/mode/gzip verification afterbothEND. All paired gains/regressions/raw errors retained; no workloads rerun."
+}

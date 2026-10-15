@@ -1,0 +1,8 @@
+{
+  "exit": 0,
+  "files": 7,
+  "exact_sha256_lengths_modes": true,
+  "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "schema_evidence_commit": "f7e2b3f2658fae30c1517e856864d8eda503e69f",
+  "scope": "Seven small runtime/schema/authority text files only; reuses existing qualified476/480 source/artifacts. No binaries,buildtrees,production source or generated WAL copy; no pilot or timed workload."
+}

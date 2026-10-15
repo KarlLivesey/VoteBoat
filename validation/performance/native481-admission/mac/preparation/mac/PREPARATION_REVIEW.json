@@ -1,0 +1,23 @@
+{
+  "exit": 0,
+  "original_setup_handle": 59622,
+  "actual_setup_exit": 0,
+  "terminal_tool_chunk": "425c89",
+  "remote_job": "/private/tmp/voteboat-native481-9VAgbU/campaign",
+  "config_sha256": "5c5e38304de6ea8587c6eff0c45e07c9a32d55e328db6581734862181045412d",
+  "ready_sha256": "28b0a49a60939d81127ee46b19c6a8ca66898141859045e47a4100276e389990",
+  "schema_sha256": "3635702aca4e4ccf858dc6c3287a93d646c31ad52b7d797c652fcd7915080751",
+  "common_sha256": "7344bb43528779527b774236792f57dcc648d3c8c8e559126a120afc89caba27",
+  "cases": 48,
+  "offers": 391680,
+  "horizon_seconds": 1344,
+  "source_commits": {
+    "baseline": "7e9068296ce00dde5bf3e03bf4d852ed2833d185",
+    "candidate": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e"
+  },
+  "artifacts_sha256": {
+    "baseline": "2fd48262a655debafaf7f04496bf34c867dc17b92f1e5890969819333cbcae84",
+    "candidate": "fef05adc73179359ea2acc0d9b92978c57c4795410a727aefc30f1aac422fa52"
+  },
+  "scope": "Mac481 prepared only, no native process,profile,pilot,build/check or timed campaign. Reuses exact476 and480 qualified source/artifacts, append-only client-runtime qualification bound."
+}

@@ -1,0 +1,8 @@
+{
+  "exit": 0,
+  "payloads": 1137,
+  "collected_originals": 1035,
+  "gzip": 48,
+  "manifest_sha256": "f09f76281a5875a1d672e13e33811a9d5a604a0c7e0d9f8e1732b996f8931d56",
+  "scope": "Root independent exact recursive seal, all collected originals and gzip hash/length/mode checks, six independent files. Both actual terminal0 precede collection. No workloads rerun."
+}

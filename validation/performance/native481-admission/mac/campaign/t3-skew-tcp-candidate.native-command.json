@@ -1,0 +1,20 @@
+[
+  "/private/tmp/voteboat-mac480-f7b0ef1-mccmJS/artifacts/native/native_benchmark",
+  "/private/tmp/voteboat-native481-9VAgbU/wal/t3-skew-tcp-candidate",
+  "tcp",
+  "8192",
+  "4096",
+  "2",
+  "--offered",
+  "1024",
+  "--maintenance",
+  "2",
+  "--ready-items",
+  "64",
+  "--offered-capacity",
+  "4096",
+  "--publication",
+  "witness",
+  "--group-weights",
+  "31,1"
+]

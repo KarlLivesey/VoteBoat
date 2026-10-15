@@ -1,0 +1,6 @@
+[
+  "/opt/homebrew/Cellar/node/26.11.1/bin/node",
+  "/private/tmp/voteboat-native481-9VAgbU/campaign/control-tools/check-native-benchmark.mjs",
+  "--storage",
+  "/private/tmp/voteboat-native481-9VAgbU/wal/t3-loaded-tcp-candidate"
+]

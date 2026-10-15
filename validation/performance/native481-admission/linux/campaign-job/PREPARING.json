@@ -1,0 +1,6 @@
+{
+  "candidate": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux",
+  "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "host": "linux",
+  "scope": "Setup only; no timing authorization, workload, build or dependency update."
+}

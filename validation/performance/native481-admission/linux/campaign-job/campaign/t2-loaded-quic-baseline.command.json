@@ -1,0 +1,21 @@
+[
+  "/usr/bin/python3.14",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native481-admission/linux/resources.py",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native481-admission/linux/campaign-metadata/t2-loaded-quic-baseline",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native476-linux/artifacts/native/native_benchmark",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native481-admission/linux-wal/t2-loaded-quic-baseline",
+  "quic",
+  "16000",
+  "4096",
+  "1",
+  "--offered",
+  "2000",
+  "--maintenance",
+  "2",
+  "--ready-items",
+  "64",
+  "--offered-capacity",
+  "4096",
+  "--publication",
+  "witness"
+]

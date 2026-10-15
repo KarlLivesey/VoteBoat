@@ -1,0 +1,12 @@
+{
+  "start_utc": "2026-10-15T14:34:51.665359+00:00",
+  "command": [
+    "ssh",
+    "karllivesey@192.168.192.76",
+    "/Applications/Xcode-beta.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/bin/python3.9 /private/tmp/voteboat-native481-9VAgbU/campaign/campaign.py --authorized-quiet"
+  ],
+  "config_sha256": "5c5e38304de6ea8587c6eff0c45e07c9a32d55e328db6581734862181045412d",
+  "ready_sha256": "28b0a49a60939d81127ee46b19c6a8ca66898141859045e47a4100276e389990",
+  "root_quiet_go_sha256": "70312998c31d568d0bb5843c204a33e3cf4ddb09b0e5e006742087fde562a2dc",
+  "scope": "One original authorized48-case Mac481 campaign, no restart. No competing work or collection/analysis until root both-END."
+}

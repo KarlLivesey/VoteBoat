@@ -1,0 +1,162 @@
+[
+  {
+    "source": "target/p9/native481-admission/ROOT_QUIET_GO.json",
+    "archive": "ROOT_QUIET_GO.json",
+    "sha256": "70312998c31d568d0bb5843c204a33e3cf4ddb09b0e5e006742087fde562a2dc",
+    "bytes": 1638,
+    "mode": "0o644",
+    "lossless_gzip": false
+  },
+  {
+    "source": "target/p9/native481-admission/ROOT_QUIET_END.json",
+    "archive": "ROOT_QUIET_END.json",
+    "sha256": "4938ac02337c39b78a0533e28f6090b315da44d4379c093ec544ee665a70c7f0",
+    "bytes": 818,
+    "mode": "0o644",
+    "lossless_gzip": false
+  },
+  {
+    "source": "target/p9/native481-admission/ROOT_LINUX_PREPARATION_REVIEW.json",
+    "archive": "ROOT_LINUX_PREPARATION_REVIEW.json",
+    "sha256": "9ed46264e696cdad6ceb6a6758f4c66cc8c51f3358beac0d3dcd887d53b6ca12",
+    "bytes": 558,
+    "mode": "0o644",
+    "lossless_gzip": false
+  },
+  {
+    "source": "target/p9/native481-admission/ROOT_LINUX_SCOPE_GUARD_REVISION.json",
+    "archive": "ROOT_LINUX_SCOPE_GUARD_REVISION.json",
+    "sha256": "407f74413327fb48990cba0fed12a8b9b67ba5c55ff4d63bc910149ddb661c60",
+    "bytes": 714,
+    "mode": "0o644",
+    "lossless_gzip": false
+  },
+  {
+    "source": "target/p9/native481-admission/ROOT_MAC_PREPARATION_REVIEW.json",
+    "archive": "ROOT_MAC_PREPARATION_REVIEW.json",
+    "sha256": "afc1f23621902b61880a3ff34aca3e188971431c970fa538d252df1071b0d49b",
+    "bytes": 529,
+    "mode": "0o644",
+    "lossless_gzip": false
+  },
+  {
+    "source": "target/p9/native481-admission/ROOT_LINUX_ARCHIVE_REVIEW.json",
+    "archive": "ROOT_LINUX_ARCHIVE_REVIEW.json",
+    "sha256": "3ad0b872defac76241afa374ef707e08ca37124f819a61bb405eed3c1b666e3c",
+    "bytes": 348,
+    "mode": "0o644",
+    "lossless_gzip": false
+  },
+  {
+    "source": "target/p9/native481-admission/ROOT_MAC_ARCHIVE_REVIEW.json",
+    "archive": "ROOT_MAC_ARCHIVE_REVIEW.json",
+    "sha256": "9b96cac1b8216c21a08a00d8e8bb2593da1a235f700a3d55a769c970f6581585",
+    "bytes": 366,
+    "mode": "0o644",
+    "lossless_gzip": false
+  },
+  {
+    "source": "target/p9/native481-admission/ROOT_DATA_CROSS_REVIEW.json",
+    "archive": "ROOT_DATA_CROSS_REVIEW.json",
+    "sha256": "8d19e3c38690eced1a0dbe2d42bb57d78e15179cc0dd4a129d53f6459e0c216f",
+    "bytes": 844,
+    "mode": "0o644",
+    "lossless_gzip": false
+  },
+  {
+    "source": "target/p9/native481-admission/INDEPENDENT_SCHEMA_REVIEW.json",
+    "archive": "INDEPENDENT_SCHEMA_REVIEW.json",
+    "sha256": "7ede81092c4cf9e3c7e10e16820d14731a29b6e505f54b94f96bdfcd71380785",
+    "bytes": 6627,
+    "mode": "0o644",
+    "lossless_gzip": false
+  },
+  {
+    "source": "target/p9/native481-admission/root-data-review.py",
+    "archive": "root-data-review.py",
+    "sha256": "8ce7ceb25a352b67b3349a09147dec673d3cc3810f1afc4722994b78bc7c90b0",
+    "bytes": 5317,
+    "mode": "0o644",
+    "lossless_gzip": false
+  },
+  {
+    "source": "target/p9/native481-admission/tail-review/CONCLUSION.json",
+    "archive": "tail-review/CONCLUSION.json",
+    "sha256": "5ce482bb3ee2481b07486676730d61c317c8179f8a07112cec38974079a1c49a",
+    "bytes": 4644,
+    "mode": "0o644",
+    "lossless_gzip": false
+  },
+  {
+    "source": "target/p9/native481-admission/tail-review/RECEIPT.json",
+    "archive": "tail-review/RECEIPT.json",
+    "sha256": "8d8f2f53af67d2f477c102391e750e4753ae26caa424e24d9d079e0912fbaabc",
+    "bytes": 1677,
+    "mode": "0o644",
+    "lossless_gzip": false
+  },
+  {
+    "source": "target/p9/native481-admission/tail-review/REPORT.json",
+    "archive": "tail-review/REPORT.json.gz",
+    "sha256": "6aa392919cb50dabc58ffce17336f027fd4f479a095d11309ab39da3024fe979",
+    "bytes": 452986,
+    "mode": "0o644",
+    "lossless_gzip": true
+  },
+  {
+    "source": "target/p9/native481-admission/tail-review/analyze.py",
+    "archive": "tail-review/analyze.py",
+    "sha256": "1de772a09471b019fc1910dec877bf836fc336ff67c315b87f30069076a5027f",
+    "bytes": 9107,
+    "mode": "0o644",
+    "lossless_gzip": false
+  },
+  {
+    "source": "target/p9/native481-admission/tail-review/attempt1-analyze.py",
+    "archive": "tail-review/attempt1-analyze.py",
+    "sha256": "85a9d47949526bf01ffffdc2930d2bf7d18a510bb3363f4d7f63adfd8d0203aa",
+    "bytes": 9002,
+    "mode": "0o644",
+    "lossless_gzip": false
+  },
+  {
+    "source": "target/p9/native481-admission/tail-review/attempt2.stderr",
+    "archive": "tail-review/attempt2.stderr.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "mode": "0o644",
+    "lossless_gzip": true
+  },
+  {
+    "source": "target/p9/native481-admission/tail-review/attempt2.stdout",
+    "archive": "tail-review/attempt2.stdout.gz",
+    "sha256": "11facc6bad19de1725b98201e35f7ee7906bf2b0437d7afabca62a5ecc6e48e0",
+    "bytes": 2075,
+    "mode": "0o644",
+    "lossless_gzip": true
+  },
+  {
+    "source": "target/p9/native481-admission/tail-review/stderr",
+    "archive": "tail-review/stderr.gz",
+    "sha256": "8c7c2d07c621e3219af9a9c94d411c22fec6696e388713933a811f00006f26bb",
+    "bytes": 1305,
+    "mode": "0o644",
+    "lossless_gzip": true
+  },
+  {
+    "source": "target/p9/native481-admission/tail-review/stdout",
+    "archive": "tail-review/stdout.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "mode": "0o644",
+    "lossless_gzip": true
+  },
+  {
+    "source": "target/p9/native482-next/RECONCILE_AUDIT.md",
+    "archive": "RECONCILE_AUDIT.md",
+    "sha256": "62d77c727e209e0ec2a34a136dfc6fcd919e9a16d58f5172b3e732521a435804",
+    "bytes": 17529,
+    "mode": "0o644",
+    "lossless_gzip": false
+  }
+]

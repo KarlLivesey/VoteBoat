@@ -1,0 +1,10 @@
+{
+  "time_utc": "2026-10-15T11:43:48.755154+00:00",
+  "actual_first_setup_exit": 1,
+  "actual_first_case_exit": 1,
+  "stderr": "Error: \"no local TCP/UDP endpoint\"",
+  "completed_cases": 0,
+  "source_exact": true,
+  "action": "Preserve original failed controls/tool closure/setup stdout+stderr+status, then rerun functional control phase only with authorized local networking escalation. No artifact build or source export repeats, no timing campaign.",
+  "failed_controls": "target/p9/native476-linux/controls-sandbox-denied"
+}
