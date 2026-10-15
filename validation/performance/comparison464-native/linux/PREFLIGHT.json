@@ -1,0 +1,27 @@
+{
+  "sockets": [
+    {
+      "family": "AF_INET",
+      "kind": "SOCK_STREAM",
+      "bind_listen_exit": 0
+    },
+    {
+      "family": "AF_INET",
+      "kind": "SOCK_DGRAM",
+      "bind_listen_exit": 0
+    },
+    {
+      "family": "AF_INET6",
+      "kind": "SOCK_STREAM",
+      "bind_listen_exit": 0
+    },
+    {
+      "family": "AF_INET6",
+      "kind": "SOCK_DGRAM",
+      "bind_listen_exit": 0
+    }
+  ],
+  "timestamp": 1792023620.0330248,
+  "setup_complete": true,
+  "no_timing_started": true
+}

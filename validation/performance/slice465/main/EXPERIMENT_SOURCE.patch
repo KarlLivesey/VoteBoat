@@ -1,0 +1,4077 @@
+diff --git a/docs/component-contracts.json b/docs/component-contracts.json
+index 39d16f09..01deaaa8 100644
+--- a/docs/component-contracts.json
++++ b/docs/component-contracts.json
+@@ -76,7 +76,7 @@
+         "tests/log_store/batch_limits.rs",
+         "benchmarks/matched/src/voteboat_engine.rs"
+       ],
+-      "scope": "Startup-only per-Core proposal/outbound ceilings, defaults64/64, hard maxima16384/1024. Count is independent of allocated staging and retained-history byte/entry limits; native defaults remain unchanged. First event locks settings; verified recovery starts at defaults and host reapplies its configuration. Fixed ordinary receive cap1024 permits asymmetric outbound batching; existing byte, identity, term, configuration and exact ticket checks remain. Repair RPCs retain64 independently. Every original retains its ordered position/result; larger-than-outbound proposal batches use durable chunked replication rather than early Written sends. Runtime visit/control/byte/output limits remain authoritative. Linux exact-original, short-tail, bounded-input, stale-completion, low-limit repair and actual modeled WAL publication cuts pass; paired capacity and Mac qualification remain separate. Slice455 retains raw Proposal Vec role/count/capacity/index/length/staging checks, then bounds source-plus-shared conversion peak before capture. The additional peak refusal is pre-admission; legacy singleton has no new batch ceiling. Original count envelopes, ordered outcomes and existing defaults remain."
++      "scope": "Startup-only per-Core proposal/outbound ceilings, defaults64/64, hard maxima16384/1024. Count is independent of allocated staging and retained-history byte/entry limits; native defaults remain unchanged. First event locks settings; verified recovery starts at defaults and host reapplies its configuration. Fixed ordinary receive cap1024 permits asymmetric outbound batching; existing byte, identity, term, configuration and exact ticket checks remain. Repair RPCs retain64 independently. Every original retains its ordered position/result; larger-than-outbound proposal batches use durable chunked replication rather than early Written sends. Runtime visit/control/byte/output limits remain authoritative. Linux exact-original, short-tail, bounded-input, stale-completion, low-limit repair and actual modeled WAL publication cuts pass; paired capacity and Mac qualification remain separate. Slice455 retains raw Proposal Vec role/count/capacity/index/length/staging checks, then bounds source-plus-shared conversion peak before capture. The additional peak refusal is pre-admission; legacy singleton has no new batch ceiling. Original count envelopes, ordered outcomes and existing defaults remain. Slice463 adds startup max_ready_reply_inputs (0 disables, default2, bounded64) for an internal whole-ordered-intake producer; public singleton/batch entry points and replication/repair count envelopes remain unchanged. New setting is reapplied after recovery, not persisted or quorum authority."
+     },
+     {
+       "design_id": "C10/C15",
+@@ -485,16 +485,18 @@
+       "operations": [
+         "validate_proposal",
+         "validate_proposal_context",
+-        "supports_ready_batch"
++        "supports_ready_batch",
++        "supports_ready_commit_batch"
+       ],
+       "native": "Counter",
+       "conformance": [
+         "tests/effect_owner.rs",
+         "tests/directory.rs",
+         "tests/routed.rs",
+-        "tests/leadership_maintenance.rs"
++        "tests/leadership_maintenance.rs",
++        "tests/provider_conformance/application/commit_batch.rs"
+       ],
+-      "scope": "Optional contract 1, deterministic syntax and dedup capacity validation over applied state, unapplied durable log and retained client commands, with per-command receipt bound. Repeated immediately before service proposal. No mutation or I/O; native and independent host applications use the same public contract. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Slice196b1 adds an optional deterministic current-core context check, repeated at admission and immediately before execution by ClientRouter. It restricts proposals without granting quorum or authentication authority. Composite applications must forward it for translated inner commands; low-level hosts retain the same obligation. A host test changes the accepted context after queuing and verifies rejection before persistence. Slice410 adds optional default-false supports_ready_batch for already-ready original commands sharing unchanged Core context and an exact admission-indexed pending prefix. Counter opts in; context-dependent host applications retain singleton validation. Per-original positions/outcomes and shared-visit credits remain distinct from commitment/application. Preview charges whole input and expanded observation metadata before dequeue; original poll/visit budgets and protected traffic boundaries remain. Admission scans skip the validated applied prefix by index rather than visiting retained history."
++      "scope": "Optional contract 1, deterministic syntax and dedup capacity validation over applied state, unapplied durable log and retained client commands, with per-command receipt bound. Repeated immediately before service proposal. No mutation or I/O; native and independent host applications use the same public contract. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Slice196b1 adds an optional deterministic current-core context check, repeated at admission and immediately before execution by ClientRouter. It restricts proposals without granting quorum or authentication authority. Composite applications must forward it for translated inner commands; low-level hosts retain the same obligation. A host test changes the accepted context after queuing and verifies rejection before persistence. Slice410 adds optional default-false supports_ready_batch for already-ready original commands sharing unchanged Core context and an exact admission-indexed pending prefix. Counter opts in; context-dependent host applications retain singleton validation. Per-original positions/outcomes and shared-visit credits remain distinct from commitment/application. Preview charges whole input and expanded observation metadata before dequeue; original poll/visit budgets and protected traffic boundaries remain. Admission scans skip the validated applied prefix by index rather than visiting retained history. Slice463 adds separate default-false supports_ready_commit_batch: context checks, validation errors and receipt bounds must be identical across durable application of the preceding ordinary committed prefix and removal of its pending reservations. Counter opts in; composite/context-sensitive applications remain serialized unless independently established. This grants no quorum, authentication or result authority. Selected finite downstream Counter histories and default-only wrapper controls are not universal host certification."
+     },
+     {
+       "design_id": "C05/C10/C15",
+diff --git a/docs/provider-conformance.json b/docs/provider-conformance.json
+index 5ad4df5e..c68449a9 100644
+--- a/docs/provider-conformance.json
++++ b/docs/provider-conformance.json
+@@ -4332,6 +4332,68 @@
+           ]
+         }
+       ]
++    },
++    {
++      "public_contract": "ProposalAdmission",
++      "status": "partial",
++      "runners": [
++        {
++          "file": "tests/provider_conformance/application/commit_batch.rs",
++          "symbol": "counter_admission_is_invariant_under_moving_pending_prefix_to_applied"
++        },
++        {
++          "file": "tests/provider_conformance/application/commit_batch.rs",
++          "symbol": "commit_batch_capability_is_separate_and_wrappers_default_to_serialized"
++        }
++      ],
++      "operations": [
++        {
++          "names": [
++            "supports_ready_batch",
++            "supports_ready_commit_batch"
++          ],
++          "obligation": "Separate default-false capability from ordinary ready batching. Native Counter opts in; a host wrapper accepting ordinary ready batching keeps serialization unless it separately asserts whole-context invariance. Capability grants no durability, quorum, authentication or outcome authority.",
++          "assertions": [
++            {
++              "file": "tests/provider_conformance/application/commit_batch.rs",
++              "symbol": "commit_batch_capability_is_separate_and_wrappers_default_to_serialized"
++            }
++          ],
++          "remaining": [
++            "Arbitrary downstream context/error/receipt invariance is a trusted provider obligation, not certified by this selected wrapper."
++          ]
++        },
++        {
++          "names": [
++            "validate_proposal"
++          ],
++          "obligation": "Selected Counter pending-to-applied prefix transformations preserve command admission results and per-command receipt bound, including duplicate/conflicting operations, overflow and bounded dedup capacity.",
++          "assertions": [
++            {
++              "file": "tests/provider_conformance/application/commit_batch.rs",
++              "symbol": "counter_admission_is_invariant_under_moving_pending_prefix_to_applied"
++            }
++          ],
++          "remaining": [
++            "Finite Counter cases do not certify every host application or full runtime lifecycle."
++          ]
++        },
++        {
++          "names": [
++            "validate_proposal_context"
++          ],
++          "obligation": "Repeat current-core context validation before admission and immediately before persistence; a changed context can refuse an already queued command without proposing it. This check grants no quorum or authentication authority.",
++          "assertions": [
++            {
++              "file": "tests/effect_owner.rs",
++              "symbol": "proposal_context_is_checked_before_admission_and_again_before_persistence"
++            }
++          ],
++          "remaining": [
++            "Selected application context refusal does not certify all composite translations or arbitrary host guards."
++          ]
++        }
++      ]
+     }
+   ]
+ }
+diff --git a/examples/benchmark/failure.rs b/examples/benchmark/failure.rs
+index 35a9f1cf..e6955718 100644
+--- a/examples/benchmark/failure.rs
++++ b/examples/benchmark/failure.rs
+@@ -50,6 +50,7 @@ pub(super) fn write_partial(
+     writeln!(output, "valid_measurement=false phase={phase} completed={} unresolved={} poll_rounds={} host_poll_ns={} max_host_poll_ns={} persistence_batches={} worker_events={} application_deliveries={}\noriginal_error={error}",
+         samples.len(), unresolved.len(), polls.rounds, polls.host_ns, polls.max_host_ns,
+         polls.persistence_batches, polls.worker_events, polls.application_deliveries)?;
++    writeln!(output, "{}", polls.joined.summary()?)?;
+     output.sync_all()?;
+     Ok(())
+ }
+diff --git a/examples/benchmark/joined.rs b/examples/benchmark/joined.rs
+new file mode 100644
+index 00000000..eaeb6ef3
+--- /dev/null
++++ b/examples/benchmark/joined.rs
+@@ -0,0 +1,117 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Joined intake observations from returned original steps, without pre-poll work.
++//! Originals here have proposed positions; they are not completed writes. The
++//! outcome ledger remains the source of completed throughput and latency.
++use super::*;
++
++#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
++struct Counts {
++    transitions: u64,
++    replies: u64,
++    originals: u64,
++}
++#[derive(Default)]
++pub(super) struct Totals {
++    replicas: [Counts; 3],
++}
++impl Counts {
++    fn add(&mut self, other: Self) -> Result<(), Failure> {
++        self.transitions = self
++            .transitions
++            .checked_add(other.transitions)
++            .ok_or("joined transition overflow")?;
++        self.replies = self
++            .replies
++            .checked_add(other.replies)
++            .ok_or("joined reply overflow")?;
++        self.originals = self
++            .originals
++            .checked_add(other.originals)
++            .ok_or("joined original overflow")?;
++        Ok(())
++    }
++}
++fn count(steps: &[OwnerStep]) -> Counts {
++    let replies = steps
++        .iter()
++        .take_while(|step| {
++            step.operation.is_none()
++                && step.proposed.is_none()
++                && step.read.is_none()
++                && step.error.is_none()
++        })
++        .count();
++    let originals = steps.len() - replies;
++    if replies == 0
++        || originals == 0
++        || steps[replies..].iter().any(|step| {
++            step.operation.is_none()
++                || step.proposed.is_none()
++                || step.read.is_some()
++                || step.error.is_some()
++        })
++    {
++        return Counts::default();
++    }
++    Counts {
++        transitions: 1,
++        replies: replies as u64,
++        originals: originals as u64,
++    }
++}
++impl Totals {
++    pub(super) fn observe(
++        &mut self,
++        replica: usize,
++        mut steps: &[OwnerStep],
++    ) -> Result<(), Failure> {
++        let total = self
++            .replicas
++            .get_mut(replica)
++            .ok_or("invalid joined replica")?;
++        while let Some(first) = steps.first() {
++            let width = steps
++                .iter()
++                .take_while(|step| step.visit == first.visit)
++                .count();
++            total.add(count(&steps[..width]))?;
++            steps = &steps[width..];
++        }
++        Ok(())
++    }
++    pub(super) fn summary(&self) -> Result<String, Failure> {
++        let mut total = Counts::default();
++        for counts in self.replicas {
++            total.add(counts)?;
++        }
++        Ok(format!(
++            "joined_transitions={} joined_reply_inputs={} joined_originals={}",
++            total.transitions, total.replies, total.originals
++        ))
++    }
++}
++pub(super) fn write(root: &Path, phases: &[(&str, &PollTotals)]) -> Result<(), Failure> {
++    let mut file = exclusive(&root.join("joined.csv"))?;
++    writeln!(
++        file,
++        "phase,replica,joined_transitions,joined_reply_inputs,joined_originals"
++    )?;
++    for (phase, polls) in phases {
++        for (replica, counts) in polls.joined.replicas.iter().enumerate() {
++            writeln!(
++                file,
++                "{phase},{},{},{},{}",
++                replica + 1,
++                counts.transitions,
++                counts.replies,
++                counts.originals
++            )?;
++        }
++    }
++    file.sync_all()?;
++    Ok(())
++}
++#[cfg(test)]
++#[path = "joined_tests.rs"]
++mod tests;
+diff --git a/examples/benchmark/joined_tests.rs b/examples/benchmark/joined_tests.rs
+new file mode 100644
+index 00000000..a61d82cb
+--- /dev/null
++++ b/examples/benchmark/joined_tests.rs
+@@ -0,0 +1,81 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++fn step(visit: u64, original: Option<u64>) -> OwnerStep {
++    let owner = RuntimeOwner {
++        store: StoreBinding {
++            identity: store(1),
++            session: StoreSession::new(1).unwrap(),
++        },
++        lane: ExecutionLaneId::new(1).unwrap(),
++        generation: RuntimeGeneration::new(1).unwrap(),
++    };
++    OwnerStep {
++        visit: VisitTicket {
++            owner,
++            group: group(),
++            sequence: visit,
++        },
++        admission: Some(AdmissionTicket {
++            owner,
++            group: group(),
++            sequence: original.unwrap_or(99),
++        }),
++        operation: original.map(|_| OperationId::new(u128::MAX).unwrap()),
++        proposed: original.map(|index| ProposalPosition { index, term: 1 }),
++        read: None,
++        error: None,
++    }
++}
++#[test]
++fn counts_actual_joined_visits_and_each_repeated_operation_original() {
++    let mut totals = Totals::default();
++    totals
++        .observe(
++            0,
++            &[
++                step(1, None),
++                step(1, None),
++                step(1, Some(7)),
++                step(1, Some(8)),
++                step(2, None),
++                step(3, Some(9)),
++                step(3, Some(10)),
++                step(4, None),
++                step(4, Some(11)),
++            ],
++        )
++        .unwrap();
++    assert_eq!(
++        totals.replicas[0],
++        Counts {
++            transitions: 2,
++            replies: 3,
++            originals: 3
++        }
++    );
++    assert_eq!(
++        totals.summary().unwrap(),
++        "joined_transitions=2 joined_reply_inputs=3 joined_originals=3"
++    );
++    assert_eq!(totals.replicas[1], Counts::default());
++}
++#[test]
++fn ordinary_failed_and_reversed_steps_never_count_as_joined() {
++    let mut failed = step(1, Some(1));
++    failed.error = Some(voteboat::raft::RaftError::Busy);
++    let mut unproposed = step(2, Some(2));
++    unproposed.proposed = None;
++    for steps in [
++        vec![step(1, None), failed],
++        vec![step(2, None), unproposed],
++        vec![step(3, Some(3)), step(3, None)],
++        vec![step(4, None)],
++        vec![step(5, Some(5)), step(5, Some(6))],
++        vec![step(6, None), step(7, Some(7))],
++    ] {
++        let mut totals = Totals::default();
++        totals.observe(2, &steps).unwrap();
++        assert_eq!(totals.replicas, [Counts::default(); 3]);
++    }
++}
+diff --git a/examples/benchmark/lanes.rs b/examples/benchmark/lanes.rs
+index 1ddbd703..b30da3ca 100644
+--- a/examples/benchmark/lanes.rs
++++ b/examples/benchmark/lanes.rs
+@@ -46,7 +46,7 @@ impl Config {
+                 offset,
+                 groups,
+                 lane: lane as u64 + 1,
+-                ready_visit_items: 16,
++                ready: ready_items::Settings::default(),
+             },
+             count: share(self.count, self.lanes, lane),
+             warmup: share(WARMUP, self.lanes, lane),
+diff --git a/examples/benchmark/lanes/tests.rs b/examples/benchmark/lanes/tests.rs
+index cff6069d..6825b4f5 100644
+--- a/examples/benchmark/lanes/tests.rs
++++ b/examples/benchmark/lanes/tests.rs
+@@ -193,7 +193,7 @@ fn partial_replica_startup_joins_previously_opened_nodes() {
+             offset: 0,
+             groups: 2,
+             lane: 1,
+-            ready_visit_items: 16,
++            ready: ready_items::Settings::default(),
+         }
+     )
+     .is_err());
+diff --git a/examples/benchmark/offered.rs b/examples/benchmark/offered.rs
+index 5bc84df5..c90b021b 100644
+--- a/examples/benchmark/offered.rs
++++ b/examples/benchmark/offered.rs
+@@ -340,23 +340,11 @@ pub(super) fn run<L: LogStore + Send + 'static>(
+         ..
+     } = config;
+     std::fs::create_dir(root)?;
+-    std::fs::write(root.join("run.txt"), format!("mode=offered protocol={protocol:?} offers={count} offered_rate={rate} window={window} groups={groups} warmup={WARMUP}{}\n", config.group_schedule.as_ref().map_or_else(String::new, offered_groups::GroupSchedule::metadata)))?;
++    std::fs::write(root.join("run.txt"), format!("mode=offered protocol={protocol:?} offers={count} offered_rate={rate} window={window} groups={groups} warmup={WARMUP} ready_visit_items={} ready_reply_inputs={}{}\n", config.ready_visit_items, config.ready_reply_inputs, config.group_schedule.as_ref().map_or_else(String::new, offered_groups::GroupSchedule::metadata)))?;
+     let mut raw = exclusive(&root.join("offers.csv"))?;
+     let mut storage = Vec::new();
+-    let (mut replicas, traces) = open_cluster(NativeOpenMode::Create)?;
+-    // Any error after construction still attempts explicit worker shutdown/join.
+-    let preparation = prepare_offered(&mut replicas, clock, &config);
+-    let (warmup, placement) = match preparation {
+-        Ok(w) => w,
+-        Err(error) => {
+-            let cleanup = close(replicas, clock);
+-            std::fs::write(
+-                root.join("failure.txt"),
+-                format!("preparation={error}; cleanup={cleanup:?}\n"),
+-            )?;
+-            return Err(error);
+-        }
+-    };
++    let (replicas, traces) = open_cluster(NativeOpenMode::Create)?;
++    let (mut replicas, warmup, placement) = prepare_or_close(replicas, clock, &config)?;
+     let mut ledger = Ledger::new(count, rate, window, groups, config.group_schedule.as_ref());
+     let mut maintenance = prepare_maintenance(&config, ledger.horizon())?;
+     let mut totals = PollTotals::default();
+@@ -375,6 +363,7 @@ pub(super) fn run<L: LogStore + Send + 'static>(
+     observe::capture(&mut storage, "after_measurement", &traces);
+     // Preserve all observed rows before validation or cleanup can fail.
+     let persisted = ledger.write(&mut raw);
++    let joined_raw = joined::write(root, &[("warmup", &warmup.polls), ("measurement", &totals)]);
+     let maintenance_raw = if maintenance_config.is_some() {
+         maintenance.write(&mut exclusive(&root.join("maintenance.csv"))?)
+     } else {
+@@ -383,6 +372,7 @@ pub(super) fn run<L: LogStore + Send + 'static>(
+     let history = result
+         .and(persisted)
+         .and(maintenance_raw)
++        .and(joined_raw)
+         .and_then(|()| maintenance.validate(&replicas, &totals))
+         .and_then(|()| ledger.history(&warmup));
+     let (expected, last) = match history {
+@@ -434,6 +424,26 @@ pub(super) fn run<L: LogStore + Send + 'static>(
+     )
+ }
+ 
++// Preparation retains ownership so every failure attempts the original worker
++// shutdown/join and preserves its original preparation/cleanup diagnostic.
++fn prepare_or_close<L: LogStore + Send + 'static>(
++    mut replicas: Vec<Replica<L>>,
++    clock: &Instant,
++    config: &RunConfig<'_>,
++) -> Result<(Vec<Replica<L>>, Measurement, String), Failure> {
++    match prepare_offered(&mut replicas, clock, config) {
++        Ok((warmup, placement)) => Ok((replicas, warmup, placement)),
++        Err(error) => {
++            let cleanup = close(replicas, clock);
++            std::fs::write(
++                config.root.join("failure.txt"),
++                format!("preparation={error}; cleanup={cleanup:?}\n"),
++            )?;
++            Err(error)
++        }
++    }
++}
++
+ fn checked_stage<T>(
+     root: &Path,
+     stage: &str,
+@@ -568,12 +578,13 @@ fn report_offered(
+         .collect::<Vec<_>>();
+     let dispatch_p99 = percentile(&mut dispatch_lag, 99);
+     let maintenance_summary = maintenance.summary(totals);
+-    let ready_settings = ready_items::settings(config.ready_visit_items);
++    let ready_settings = ready_items::report(config.ready_visit_items, config.ready_reply_inputs);
++    let joined_settings = totals.joined.summary()?;
+     let group_settings = config
+         .group_schedule
+         .as_ref()
+         .map_or_else(String::new, offered_groups::GroupSchedule::metadata);
+-    let summary = format!("mode=offered protocol={protocol:?} replicas=3 groups={groups} assembly=shared leader_placement={placement} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000 payload_bytes=8 warmup={WARMUP} offers={count} offered_rate={rate} window={window} max_inflight={} admitted={admitted} admitted_during={admitted_during} late_decisions={late_decisions} dispatch_p99_us={dispatch_p99} applied={applied} applied_during={during} applied_drain={} window_refused={} no_leader={} admission_refused={} not_proposed={} unknown=0 pending=0 horizon_ns={horizon} elapsed_ns={} drain_ns={} backlog_at_horizon={backlog} offered_ops_s={:.3} admitted_ops_s={:.3} applied_during_ops_s={:.3} applied_total_ops_s={:.3} p99_us={p99} service_p99_us={service_p99} recovered_value={recovered_value} recovery_retries={retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3}{maintenance_summary} {ready_settings}{group_settings}\n", ledger.max_pending, applied-during, ledger.count_status("window_refused"), ledger.count_status("no_leader"), ledger.count_status("admission_refused"), ledger.count_status("not_proposed"), elapsed.as_nanos(), elapsed.as_nanos().saturating_sub(horizon), count as f64 * 1e9 / horizon as f64, admitted as f64 / elapsed.as_secs_f64(), during as f64 * 1e9 / horizon as f64, applied as f64 / elapsed.as_secs_f64(), totals.rounds, totals.host_ns as f64/1e6, totals.max_host_ns as f64/1e6);
++    let summary = format!("mode=offered protocol={protocol:?} replicas=3 groups={groups} assembly=shared leader_placement={placement} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000 payload_bytes=8 warmup={WARMUP} offers={count} offered_rate={rate} window={window} max_inflight={} admitted={admitted} admitted_during={admitted_during} late_decisions={late_decisions} dispatch_p99_us={dispatch_p99} applied={applied} applied_during={during} applied_drain={} window_refused={} no_leader={} admission_refused={} not_proposed={} unknown=0 pending=0 horizon_ns={horizon} elapsed_ns={} drain_ns={} backlog_at_horizon={backlog} offered_ops_s={:.3} admitted_ops_s={:.3} applied_during_ops_s={:.3} applied_total_ops_s={:.3} p99_us={p99} service_p99_us={service_p99} recovered_value={recovered_value} recovery_retries={retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3}{maintenance_summary} {ready_settings} {joined_settings}{group_settings}\n", ledger.max_pending, applied-during, ledger.count_status("window_refused"), ledger.count_status("no_leader"), ledger.count_status("admission_refused"), ledger.count_status("not_proposed"), elapsed.as_nanos(), elapsed.as_nanos().saturating_sub(horizon), count as f64 * 1e9 / horizon as f64, admitted as f64 / elapsed.as_secs_f64(), during as f64 * 1e9 / horizon as f64, applied as f64 / elapsed.as_secs_f64(), totals.rounds, totals.host_ns as f64/1e6, totals.max_host_ns as f64/1e6);
+     let mut file = exclusive(&root.join("summary.txt"))?;
+     file.write_all(summary.as_bytes())?;
+     file.sync_all()?;
+diff --git a/examples/benchmark/ready_items.rs b/examples/benchmark/ready_items.rs
+index 4656b5fe..a5573693 100644
+--- a/examples/benchmark/ready_items.rs
++++ b/examples/benchmark/ready_items.rs
+@@ -2,6 +2,40 @@
+ // Copyright (c) 2026 Karl Livesey
+ //! Explicit visit quantum selection; parse before opening benchmark resources.
+ use super::*;
++#[derive(Clone, Copy)]
++pub(super) struct Settings {
++    pub items: usize,
++    pub replies: usize,
++}
++impl Default for Settings {
++    fn default() -> Self {
++        Self {
++            items: 16,
++            replies: 2,
++        }
++    }
++}
++pub(super) fn extract_replies(args: &mut Vec<String>) -> Result<Option<usize>, Failure> {
++    let Some(position) = args.iter().position(|arg| arg == "--ready-replies") else {
++        return Ok(None);
++    };
++    if args
++        .iter()
++        .skip(position + 1)
++        .any(|arg| arg == "--ready-replies")
++    {
++        return Err("duplicate --ready-replies".into());
++    }
++    let selected = args
++        .get(position + 1)
++        .ok_or("missing --ready-replies value")?
++        .parse::<usize>()?;
++    if !matches!(selected, 0 | 2) {
++        return Err("--ready-replies must be 0 or 2".into());
++    }
++    args.drain(position..position + 2);
++    Ok(Some(selected))
++}
+ pub(super) fn extract(args: &mut Vec<String>) -> Result<Option<usize>, Failure> {
+     let Some(position) = args.iter().position(|arg| arg == "--ready-items") else {
+         return Ok(None);
+@@ -23,7 +57,10 @@ pub(super) fn extract(args: &mut Vec<String>) -> Result<Option<usize>, Failure>
+     args.drain(position..position + 2);
+     Ok(Some(selected))
+ }
+-pub(super) fn settings(items: usize) -> String {
++pub(super) fn report(items: usize, replies: usize) -> String {
++    format!("{} ready_reply_inputs_requested={replies} ready_reply_inputs_effective={replies} ready_commit_batch_capable=true", settings(items))
++}
++fn settings(items: usize) -> String {
+     let limits = ShardLimits::default();
+     format!("ready_visit_items_requested={items} ready_visit_items_effective={items} core_proposal_entries={} ready_visit_bytes={} ready_visit_ms={} ready_batch_capable=true",
+         voteboat::raft::BatchLimits::default().max_proposal_entries, limits.visit_bytes, limits.visit_ms)
+@@ -68,8 +105,18 @@ mod tests {
+             generation: RuntimeGeneration::new(1).unwrap(),
+         };
+         for selected in [1, 16, 32, 64] {
+-            let (_, timed) =
+-                shared::timed_shard(Vec::new(), owner, 1, 1, &clock, selected).unwrap();
++            let (_, timed) = shared::timed_shard(
++                Vec::new(),
++                owner,
++                1,
++                1,
++                &clock,
++                Settings {
++                    items: selected,
++                    ..Settings::default()
++                },
++            )
++            .unwrap();
+             let limits = timed.limits();
+             assert_eq!(limits.visit_items, selected);
+             assert_eq!(limits.visit_bytes, ShardLimits::default().visit_bytes);
+@@ -77,6 +124,58 @@ mod tests {
+         }
+     }
+     #[test]
++    fn shared_assembly_installs_reply_switch_in_recovered_core() {
++        let owner = RuntimeOwner {
++            store: StoreBinding {
++                identity: store(1),
++                session: StoreSession::new(1).unwrap(),
++            },
++            lane: ExecutionLaneId::new(1).unwrap(),
++            generation: RuntimeGeneration::new(1).unwrap(),
++        };
++        for replies in [0, 2] {
++            let bootstrap = Bootstrap {
++                group: group(),
++                configuration: ConfigurationId::new(1).unwrap(),
++                policy: Policy::new(
++                    Tree::Majority((1..=3).map(|n| Tree::Voter(node(n))).collect()),
++                    Limits::default(),
++                )
++                .unwrap(),
++                voter_stores: (1..=3).map(|n| (node(n), store(n))).collect(),
++            };
++            let mut states = BTreeMap::new();
++            apply_batch(
++                &mut states,
++                &[LogMutation::Create(bootstrap)],
++                LogLimits::default(),
++            )
++            .unwrap();
++            let core = voteboat::raft::Raft::recover(
++                node(1),
++                owner.store,
++                states.remove(&group()).unwrap(),
++                LogLimits::default(),
++            )
++            .unwrap();
++            let clock = Instant::now();
++            let (_, timed) = shared::timed_shard(
++                vec![core],
++                owner,
++                1,
++                1,
++                &clock,
++                Settings { items: 16, replies },
++            )
++            .unwrap();
++            let limits = timed.core(group()).unwrap().batch_limits();
++            assert_eq!(limits.max_ready_reply_inputs, replies);
++            assert_eq!(limits.max_proposal_entries, 64);
++            assert_eq!(limits.max_replication_entries, 64);
++            assert_eq!(timed.limits().visit_items, 16);
++        }
++    }
++    #[test]
+     fn invalid_duplicate_and_missing_choices_fail_without_mutating_arguments() {
+         for values in [
+             vec!["--ready-items"],
+@@ -92,3 +191,36 @@ mod tests {
+         }
+     }
+ }
++
++#[cfg(test)]
++mod reply_tests {
++    use super::*;
++    #[test]
++    fn reply_switch_is_explicit_bounded_and_preserves_other_arguments() {
++        for replies in [0, 2] {
++            let mut input = vec![
++                "root".to_owned(),
++                "--ready-replies".to_owned(),
++                replies.to_string(),
++                "--ready-items".to_owned(),
++                "16".to_owned(),
++            ];
++            assert_eq!(extract_replies(&mut input).unwrap(), Some(replies));
++            assert_eq!(input, ["root", "--ready-items", "16"]);
++            assert!(
++                report(16, replies).contains(&format!("ready_reply_inputs_effective={replies}"))
++            );
++        }
++        for values in [
++            vec!["--ready-replies"],
++            vec!["--ready-replies", "1"],
++            vec!["--ready-replies", "65"],
++            vec!["--ready-replies", "2", "--ready-replies", "0"],
++        ] {
++            let mut input: Vec<_> = values.iter().map(|v| (*v).to_owned()).collect();
++            let before = input.clone();
++            assert!(extract_replies(&mut input).is_err());
++            assert_eq!(input, before);
++        }
++    }
++}
+diff --git a/examples/benchmark/shared.rs b/examples/benchmark/shared.rs
+index 91048e11..002dedae 100644
+--- a/examples/benchmark/shared.rs
++++ b/examples/benchmark/shared.rs
+@@ -38,7 +38,7 @@ pub(super) fn open(
+     capacity: usize,
+     clock: &Instant,
+     groups: usize,
+-    ready_visit_items: usize,
++    ready: ready_items::Settings,
+ ) -> Result<(Vec<Replica<SharedLog>>, Vec<Trace>), Failure> {
+     open_partition(
+         root,
+@@ -50,7 +50,7 @@ pub(super) fn open(
+             offset: 0,
+             groups,
+             lane: 1,
+-            ready_visit_items,
++            ready,
+         },
+     )
+ }
+@@ -60,7 +60,7 @@ pub(super) struct Partition {
+     pub offset: usize,
+     pub groups: usize,
+     pub lane: u64,
+-    pub ready_visit_items: usize,
++    pub ready: ready_items::Settings,
+ }
+ 
+ pub(super) fn open_partition(
+@@ -72,7 +72,8 @@ pub(super) fn open_partition(
+     partition: Partition,
+ ) -> Result<(Vec<Replica<SharedLog>>, Vec<Trace>), Failure> {
+     if partition.groups == 0
+-        || !(1..=64).contains(&partition.ready_visit_items)
++        || !(1..=64).contains(&partition.ready.items)
++        || !matches!(partition.ready.replies, 0 | 2)
+         || partition.groups > 32
+         || partition.lane == 0
+         || partition.lane > 4
+@@ -125,7 +126,7 @@ pub(super) fn open_partition(
+             bootstraps: &bootstraps,
+             addresses: &addresses,
+             lane: partition.lane,
+-            ready_visit_items: partition.ready_visit_items,
++            ready: partition.ready,
+         };
+         let (replica, trace) = match setup.open_replica(n) {
+             Ok(opened) => opened,
+@@ -249,7 +250,7 @@ pub(super) fn timed_shard(
+     n: u64,
+     groups: usize,
+     clock: &Instant,
+-    ready_visit_items: usize,
++    ready: ready_items::Settings,
+ ) -> Result<
+     (
+         MonoTime,
+@@ -261,12 +262,16 @@ pub(super) fn timed_shard(
+         owner_id,
+         ShardLimits {
+             max_groups: groups,
+-            visit_items: ready_visit_items,
++            visit_items: ready.items,
+             ..ShardLimits::default()
+         },
+         checked(FairScheduler::new(groups))?,
+     ))?;
+-    for core in cores {
++    for mut core in cores {
++        checked(core.configure_batch_limits(voteboat::raft::BatchLimits {
++            max_ready_reply_inputs: ready.replies,
++            ..voteboat::raft::BatchLimits::default()
++        }))?;
+         checked(shard.register(core))?;
+     }
+     let now = MonoTime(clock.elapsed().as_millis() as u64);
+@@ -406,7 +411,7 @@ struct ClusterSetup<'a> {
+     bootstraps: &'a [Bootstrap],
+     addresses: &'a BTreeMap<u64, std::net::SocketAddr>,
+     lane: u64,
+-    ready_visit_items: usize,
++    ready: ready_items::Settings,
+ }
+ impl ClusterSetup<'_> {
+     fn open_replica(&self, n: u64) -> Result<(Replica<SharedLog>, Trace), Failure> {
+@@ -443,7 +448,7 @@ impl ClusterSetup<'_> {
+             bootstraps,
+             addresses,
+             lane,
+-            ready_visit_items,
++            ready,
+         } = *self;
+         let directory = root.join(format!("replica{n}"));
+         let create = mode == NativeOpenMode::Create;
+@@ -478,14 +483,7 @@ impl ClusterSetup<'_> {
+         ))?
+         .peers()
+         .collect::<BTreeMap<_, _>>();
+-        let (now, timed) = timed_shard(
+-            cores,
+-            owner_id,
+-            n,
+-            bootstraps.len(),
+-            clock,
+-            ready_visit_items,
+-        )?;
++        let (now, timed) = timed_shard(cores, owner_id, n, bootstraps.len(), clock, ready)?;
+         let (version, codec) = wire_profile(member)?;
+         let (outbound, roster) = peer_io(local, first, last, &remote, now, version)?;
+         let Routers {
+diff --git a/examples/benchmark/shared_drain.rs b/examples/benchmark/shared_drain.rs
+index 05bb8f06..a375509d 100644
+--- a/examples/benchmark/shared_drain.rs
++++ b/examples/benchmark/shared_drain.rs
+@@ -208,7 +208,7 @@ impl Harness {
+                     bootstraps: &self.bootstraps,
+                     addresses: &self.addresses,
+                     lane: 1,
+-                    ready_visit_items: 16,
++                    ready: ready_items::Settings::default(),
+                 }
+                 .open_profile(n, None, true)
+                 .unwrap()
+diff --git a/examples/benchmark/shared_recovery.rs b/examples/benchmark/shared_recovery.rs
+index c212a2cf..f686fe01 100644
+--- a/examples/benchmark/shared_recovery.rs
++++ b/examples/benchmark/shared_recovery.rs
+@@ -82,7 +82,7 @@ impl Harness {
+             bootstraps: &self.bootstraps,
+             addresses: &self.addresses,
+             lane: 1,
+-            ready_visit_items: 16,
++            ready: ready_items::Settings::default(),
+         }
+         .open_profile_with_ingress(n, self.recovery, false, self.ingress)
+         .unwrap()
+diff --git a/examples/native_benchmark.rs b/examples/native_benchmark.rs
+index 976890d5..60b79ed2 100644
+--- a/examples/native_benchmark.rs
++++ b/examples/native_benchmark.rs
+@@ -62,6 +62,8 @@ type Replica<
+ mod batching;
+ #[path = "benchmark/failure.rs"]
+ mod failure;
++#[path = "benchmark/joined.rs"]
++mod joined;
+ #[path = "benchmark/observe.rs"]
+ mod observe;
+ #[path = "benchmark/offered.rs"]
+@@ -232,6 +234,7 @@ fn open_recorded(
+ }
+ #[derive(Default)]
+ struct PollTotals {
++    joined: joined::Totals,
+     batching: Option<batching::Totals>,
+     rounds: usize,
+     host_ns: u128,
+@@ -272,6 +275,7 @@ fn poll_selected<L: LogStore + Send + 'static>(
+             .map(|_| batching::before(replica, now));
+         let progress = checked(replica.poll(now, NodePollBudget::default()))?;
+         if let Some(p) = progress.replica {
++            totals.joined.observe(i, &p.steps)?;
+             if let (Some(batches), Some(before)) = (&mut totals.batching, &batch_before) {
+                 batches.observe(i + 1, before, &p.steps)?;
+             }
+@@ -702,13 +706,22 @@ fn close<L: LogStore + Send + 'static>(
+ fn exclusive(path: &Path) -> Result<File, Failure> {
+     Ok(OpenOptions::new().create_new(true).write(true).open(path)?)
+ }
++fn selected_protocol(value: &str) -> Result<NativePeerProtocol, Failure> {
++    match value {
++        "tcp" => Ok(NativePeerProtocol::TcpTls),
++        #[cfg(feature = "quic")]
++        "quic" => Ok(NativePeerProtocol::Quic),
++        _ => Err("unsupported protocol".into()),
++    }
++}
+ fn main() -> Result<(), Failure> {
+     let mut args = std::env::args().skip(1).collect::<Vec<_>>();
+     let selected_ready_items = ready_items::extract(&mut args)?;
++    let selected_ready_replies = ready_items::extract_replies(&mut args)?;
+     let raw_group_weights = offered_groups::extract(&mut args)?;
+     if args.first().is_some_and(|arg| arg == "--lanes") {
+-        if selected_ready_items.is_some() {
+-            return Err("--ready-items is unsupported with --lanes".into());
++        if selected_ready_items.is_some() || selected_ready_replies.is_some() {
++            return Err("ready settings are unsupported with --lanes".into());
+         }
+         if raw_group_weights.is_some() {
+             return Err("--group-weights requires --offered".into());
+@@ -725,7 +738,7 @@ fn main() -> Result<(), Failure> {
+     }
+     if !matches!(args.len(), 4 | 5 | 7 | 9 | 11) {
+         return Err(
+-            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64) [--ready-items 1|16|32|64] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
++            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64) [--ready-items 1|16|32|64] [--ready-replies 0|2 (shared assembly)] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
+                 .into(),
+         );
+     }
+@@ -733,16 +746,15 @@ fn main() -> Result<(), Failure> {
+         unreachable!()
+     };
+     let shared = args.len() >= 5;
++    if selected_ready_replies.is_some() && !shared {
++        return Err("--ready-replies requires shared assembly (GROUPS)".into());
++    }
++    let ready_reply_inputs = selected_ready_replies.unwrap_or(2);
+     let groups = if shared { args[4].parse::<usize>()? } else { 1 };
+     if !(1..=32).contains(&groups) {
+         return Err("group count out of bounds".into());
+     }
+-    let protocol = match protocol.as_str() {
+-        "tcp" => NativePeerProtocol::TcpTls,
+-        #[cfg(feature = "quic")]
+-        "quic" => NativePeerProtocol::Quic,
+-        _ => return Err("unsupported protocol".into()),
+-    };
++    let protocol = selected_protocol(protocol)?;
+     let count = operations.parse::<usize>()?;
+     let window = window.parse::<usize>()?;
+     if !(1..=50000).contains(&count) || !(1..=64).contains(&window) {
+@@ -799,6 +811,7 @@ fn main() -> Result<(), Failure> {
+         group_schedule,
+         maintenance,
+         ready_visit_items,
++        ready_reply_inputs,
+     };
+     run_selected(config, &clock, capacity, journal_timings)
+ }
+@@ -812,17 +825,13 @@ fn run_selected(
+     let protocol = config.protocol;
+     let groups = config.groups;
+     let ready_visit_items = config.ready_visit_items;
++    let ready = ready_items::Settings {
++        items: ready_visit_items,
++        replies: config.ready_reply_inputs,
++    };
+     if config.shared {
+         run(config, clock, |mode| {
+-            shared::open(
+-                root,
+-                mode,
+-                protocol,
+-                capacity,
+-                clock,
+-                groups,
+-                ready_visit_items,
+-            )
++            shared::open(root, mode, protocol, capacity, clock, groups, ready)
+         })
+     } else {
+         run(config, clock, |mode| {
+@@ -849,6 +858,7 @@ struct RunConfig<'a> {
+     group_schedule: Option<offered_groups::GroupSchedule>,
+     maintenance: Option<offered::MaintenanceConfig>,
+     ready_visit_items: usize,
++    ready_reply_inputs: usize,
+ }
+ fn run<L: LogStore + Send + 'static>(
+     config: RunConfig<'_>,
+@@ -963,6 +973,10 @@ fn write_run_reports(
+     storage: &[(String, usize, observe::Totals)],
+     journal: bool,
+ ) -> Result<(), Failure> {
++    joined::write(
++        config.root,
++        &[("warmup", &warmup.polls), ("measurement", &measured.polls)],
++    )?;
+     batching::write(
+         config.root,
+         &[("warmup", &warmup.polls), ("measurement", &measured.polls)],
+@@ -1093,8 +1107,9 @@ fn report_run(
+     } else {
+         ""
+     };
+-    let ready_settings = ready_items::settings(config.ready_visit_items);
+-    let summary = format!("protocol={protocol:?} replicas=3 groups={groups} assembly={} leader_placement={} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms={election_ms} election_spread_ms={election_ms} payload_bytes=8 warmup={WARMUP} operations={count} window={window} max_inflight={} elapsed_s={:.6} applied_ops_s={:.3} p50_us={:.3} p95_us={:.3} p99_us={:.3} max_us={:.3} recovered_value={capacity} recovery_retries={recovery_retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3} persistence_batches={} worker_events={} application_deliveries={}{diagnostic} {ready_settings}\n",
++    let ready_settings = ready_items::report(config.ready_visit_items, config.ready_reply_inputs);
++    let joined_settings = measured.polls.joined.summary()?;
++    let summary = format!("protocol={protocol:?} replicas=3 groups={groups} assembly={} leader_placement={} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms={election_ms} election_spread_ms={election_ms} payload_bytes=8 warmup={WARMUP} operations={count} window={window} max_inflight={} elapsed_s={:.6} applied_ops_s={:.3} p50_us={:.3} p95_us={:.3} p99_us={:.3} max_us={:.3} recovered_value={capacity} recovery_retries={recovery_retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3} persistence_batches={} worker_events={} application_deliveries={}{diagnostic} {ready_settings} {joined_settings}\n",
+         if shared { "shared" } else { "startup" }, placement, measured.max_inflight, measured.elapsed.as_secs_f64(), count as f64 / measured.elapsed.as_secs_f64(), percentile(50), percentile(95), percentile(99), *latency.last().unwrap() as f64 / 1000., measured.polls.rounds, measured.polls.host_ns as f64 / 1e6, measured.polls.max_host_ns as f64 / 1e6, measured.polls.persistence_batches, measured.polls.worker_events, measured.polls.application_deliveries);
+     let mut output = exclusive(&root.join("summary.txt"))?;
+     output.write_all(summary.as_bytes())?;
+diff --git a/src/application.rs b/src/application.rs
+index 5119c6aa..e6b0ab41 100644
+--- a/src/application.rs
++++ b/src/application.rs
+@@ -40,6 +40,17 @@ where
+         false
+     }
+ 
++    /// Opt into joining ready proposal validation with an older ordinary
++    /// prefix's quorum commit. Context validation, command validation and
++    /// receipt bounds must be identical before and after that prefix is
++    /// durably applied and removed from the retained pending commands.
++    /// This also requires `supports_ready_batch`; neither capability grants
++    /// durability, quorum, authentication or result authority. Composite
++    /// applications must establish this property for their complete guards.
++    fn supports_ready_commit_batch(&self) -> bool {
++        false
++    }
++
+     /// Optional deterministic check against the current consensus context.
+     /// The owning client router calls this at admission and again immediately
+     /// before execution. It may restrict proposals; it grants no consensus or
+@@ -191,6 +202,10 @@ impl ProposalAdmission for Counter {
+         true
+     }
+ 
++    fn supports_ready_commit_batch(&self) -> bool {
++        true
++    }
++
+     fn validate_proposal<'a>(
+         &self,
+         operation: OperationId,
+diff --git a/src/raft.rs b/src/raft.rs
+index 27213c95..d095e507 100644
+--- a/src/raft.rs
++++ b/src/raft.rs
+@@ -37,6 +37,7 @@ use admitted_replication::{AdmittedRange, EmptyAppendAlias};
+ mod log_staging;
+ mod progress_broadcast;
+ mod proposals;
++mod ready_replies;
+ pub use proposals::{Proposal, MAX_PROPOSAL_BATCH_ENTRIES};
+ mod readiness;
+ mod receive;
+@@ -648,7 +649,9 @@ impl Raft {
+     /// Conservative output reservation for one event and its dependent durable
+     /// completions. The owner must bound input retention by `input_bytes`, drain
+     /// each output batch before another completion, and run only one event in
+-    /// the visit. Core/log memory and host snapshot-worker buffers are separate.
++    /// the visit. The private ready-reply producer instead reserves all of its
++    /// ordered controls, proposals, temporary quorum plan and observations for
++    /// one atomic transition. Core/log memory and host snapshot buffers are separate.
+     /// Covers the accepted head and every configuration reachable by truncating
+     /// its uncommitted suffix. Use `event_effect_reservation` for incoming growth.
+     pub fn effect_reservation(&self, input_bytes: usize) -> Option<usize> {
+@@ -1176,7 +1179,7 @@ impl Raft {
+         };
+         let mut effects = Vec::new();
+         effects.extend(retirement);
+-        self.after_durable(p.after, p.reply, &mut effects)?;
++        self.after_durable(p.after, p.reply, previous_commit, &mut effects)?;
+         if self.remember_granted_vote(&effects) {
+             self.reset_election()?;
+         }
+@@ -1189,6 +1192,7 @@ impl Raft {
+         &mut self,
+         after: After,
+         reply: Option<Message>,
++        previous_commit: u64,
+         effects: &mut Vec<Effect>,
+     ) -> Result<(), RaftError> {
+         match after {
+@@ -1228,7 +1232,11 @@ impl Raft {
+             }
+             After::LeaderAppend => {
+                 self.progress.insert(self.node, self.durable.last_index());
+-                effects.extend(self.broadcast_append_progress()?);
++                effects.extend(if previous_commit < self.durable.commit_index {
++                    self.broadcast_committed_append_progress()?
++                } else {
++                    self.broadcast_append_progress()?
++                });
+                 effects.extend(self.maybe_commit()?);
+             }
+             After::Commit if self.role == Role::Leader => {
+diff --git a/src/raft/admitted_replication.rs b/src/raft/admitted_replication.rs
+index f864e9d7..e40b0a69 100644
+--- a/src/raft/admitted_replication.rs
++++ b/src/raft/admitted_replication.rs
+@@ -111,12 +111,10 @@ impl Raft {
+             || !pending.next.is_append()
+             || pending.membership.is_some()
+             || !matches!(pending.after, After::LeaderAppend)
+-            || self.durable.last_index() != self.durable.commit_index
+-            || self.durable.term_at(self.durable.commit_index) != Some(self.durable.hard_state.term)
++            || !self.early_committed_tip(pending)
+             || pending.next.update().hard_state != self.durable.hard_state
+             || next.ballot_origin != self.durable.ballot_origin
+             || next.generation != self.durable.generation
+-            || pending.next.update().commit_index != self.durable.commit_index
+         {
+             return None;
+         }
+@@ -138,6 +136,19 @@ impl Raft {
+         })?;
+         (bytes <= self.limits.max_batch_bytes).then_some(suffix)
+     }
++    fn early_committed_tip(&self, pending: &Pending) -> bool {
++        let tip = self.durable.last_index();
++        if self.durable.term_at(tip) != Some(self.durable.hard_state.term) {
++            return false;
++        }
++        let commit = pending.next.update().commit_index;
++        (tip == self.durable.commit_index && commit == self.durable.commit_index)
++            || (tip > self.durable.commit_index
++                && commit == tip
++                && self.membership().joint().is_none()
++                && self.membership().last_configuration_index() <= self.durable.commit_index
++                && self.membership().frontier(&self.progress) >= tip)
++    }
+     fn early_peer(&self, peer: NodeId) -> bool {
+         let tip = self.durable.last_index();
+         if peer == self.node
+diff --git a/src/raft/batch_limits.rs b/src/raft/batch_limits.rs
+index 8e7c1eb0..a66bc59c 100644
+--- a/src/raft/batch_limits.rs
++++ b/src/raft/batch_limits.rs
+@@ -10,6 +10,9 @@ use super::*;
+ pub struct BatchLimits {
+     pub max_proposal_entries: usize,
+     pub max_replication_entries: usize,
++    /// Already-ready successful replies considered before ordinary proposals.
++    /// Zero keeps the serialized input path.
++    pub max_ready_reply_inputs: usize,
+ }
+ impl BatchLimits {
+     /// Opt-in original-entry ceiling; owned-byte and retained-history limits
+@@ -18,12 +21,14 @@ impl BatchLimits {
+     /// Fixed bounded ordinary receive ceiling, independent of outbound batching.
+     /// A default64-entry sender can therefore receive a larger peer's chunks.
+     pub const MAX_REPLICATION_ENTRIES: usize = 1024;
++    pub const MAX_READY_REPLY_INPUTS: usize = 64;
+ 
+     pub fn validate(self) -> Result<Self, RaftError> {
+         if self.max_proposal_entries == 0
+             || self.max_proposal_entries > Self::MAX_PROPOSAL_ENTRIES
+             || self.max_replication_entries == 0
+             || self.max_replication_entries > Self::MAX_REPLICATION_ENTRIES
++            || self.max_ready_reply_inputs > Self::MAX_READY_REPLY_INPUTS
+         {
+             return Err(StorageError::Rejected("invalid core batch limits").into());
+         }
+@@ -35,6 +40,7 @@ impl Default for BatchLimits {
+         Self {
+             max_proposal_entries: MAX_PROPOSAL_BATCH_ENTRIES,
+             max_replication_entries: 64,
++            max_ready_reply_inputs: 2,
+         }
+     }
+ }
+diff --git a/src/raft/progress_broadcast.rs b/src/raft/progress_broadcast.rs
+index 59ea4e57..0d9f4218 100644
+--- a/src/raft/progress_broadcast.rs
++++ b/src/raft/progress_broadcast.rs
+@@ -67,6 +67,28 @@ impl Raft {
+         self.broadcast_ready_peers()
+     }
+ 
++    /// A joined append also owes the newly durable old-prefix notification.
++    /// Early Written replication retains its original range/context and alias;
++    /// retrying it here changes only the now-durable advertised commit frontier.
++    pub(super) fn broadcast_committed_append_progress(&mut self) -> Result<Vec<Effect>, RaftError> {
++        let mut effects = Vec::new();
++        for peer in self.peers() {
++            if let Some(sent) = self
++                .requests
++                .get(&peer)
++                .copied()
++                .filter(|s| s.snapshot.is_none())
++            {
++                if sent.commit_at_start < self.durable.commit_index {
++                    effects.push(self.retry_replication(peer, sent)?);
++                }
++            } else {
++                effects.push(self.append_for(peer)?);
++            }
++        }
++        Ok(effects)
++    }
++
+     fn broadcast_ready_peers(&mut self) -> Result<Vec<Effect>, RaftError> {
+         let mut effects = Vec::new();
+         for peer in self.peers() {
+diff --git a/src/raft/progress_broadcast/tests.rs b/src/raft/progress_broadcast/tests.rs
+index f1897231..4a914a5c 100644
+--- a/src/raft/progress_broadcast/tests.rs
++++ b/src/raft/progress_broadcast/tests.rs
+@@ -158,6 +158,7 @@ fn partial_prefixes_commit_all_originals_without_replaying_other_peer() {
+         .configure_batch_limits(BatchLimits {
+             max_proposal_entries: 64,
+             max_replication_entries: 2,
++            ..BatchLimits::default()
+         })
+         .unwrap();
+     let mut counter = Counter::new(6).unwrap();
+diff --git a/src/raft/proposals.rs b/src/raft/proposals.rs
+index e638e697..96006acd 100644
+--- a/src/raft/proposals.rs
++++ b/src/raft/proposals.rs
+@@ -103,7 +103,7 @@ impl Raft {
+         self.persist_proposal_entries(index, vec![entry])
+     }
+ 
+-    fn validate_proposal_batch(
++    pub(super) fn validate_proposal_batch(
+         &self,
+         proposals: &[Proposal],
+         capacity: usize,
+@@ -154,7 +154,7 @@ impl Raft {
+         }
+         Ok(first)
+     }
+-    fn validate_conversion_peak(
++    pub(super) fn validate_conversion_peak(
+         &self,
+         proposals: &[Proposal],
+         capacity: usize,
+diff --git a/src/raft/proposals/tests/batch_limits.rs b/src/raft/proposals/tests/batch_limits.rs
+index 7b9561df..98b32feb 100644
+--- a/src/raft/proposals/tests/batch_limits.rs
++++ b/src/raft/proposals/tests/batch_limits.rs
+@@ -10,6 +10,7 @@ fn wide() -> BatchLimits {
+     BatchLimits {
+         max_proposal_entries: 4096,
+         max_replication_entries: 1024,
++        max_ready_reply_inputs: 2,
+     }
+ }
+ 
+@@ -34,6 +35,10 @@ fn startup_limits_reject_invalid_settings_and_lock_on_the_first_refused_event()
+             max_replication_entries: 1025,
+             ..wide()
+         },
++        BatchLimits {
++            max_ready_reply_inputs: 65,
++            ..wide()
++        },
+     ] {
+         assert!(core.configure_batch_limits(limits).is_err());
+         assert_eq!(core.batch_limits(), BatchLimits::default());
+diff --git a/src/raft/ready_replies.rs b/src/raft/ready_replies.rs
+new file mode 100644
+index 00000000..ea7c8ef5
+--- /dev/null
++++ b/src/raft/ready_replies.rs
+@@ -0,0 +1,179 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Read-only planning of ordered ready replies and an ordinary command prefix.
++use super::*;
++
++struct ReadyReplyPlan {
++    progress: BTreeMap<NodeId, u64>,
++    commit_index: u64,
++}
++
++impl Raft {
++    /// No queued input or Core field is changed on Err. The runtime retains its
++    /// original inputs and executes the ordinary first event on any refusal.
++    pub(crate) fn propose_after_ready_replies(
++        &mut self,
++        replies: &[Message],
++        proposals: Vec<Proposal>,
++    ) -> Result<Vec<Effect>, RaftError> {
++        self.ready_reply_state(replies.len())?;
++        let plan = self.ready_reply_progress(replies)?;
++        let first = self.validate_proposal_batch(&proposals, proposals.capacity())?;
++        self.validate_conversion_peak(&proposals, proposals.capacity())?;
++        let entries = proposals
++            .into_iter()
++            .enumerate()
++            .map(|(offset, proposal)| LogEntry {
++                index: first + offset as u64,
++                term: self.durable.hard_state.term,
++                payload: EntryPayload::Command {
++                    operation: proposal.operation,
++                    bytes: proposal.bytes.into(),
++                },
++            })
++            .collect();
++        let update = LogUpdate {
++            group: self.durable.bootstrap.group,
++            expected_revision: self.durable.revision,
++            hard_state: self.durable.hard_state,
++            commit_index: plan.commit_index,
++            suffix: Some(Suffix {
++                from: first,
++                entries,
++            }),
++            snapshot: None,
++            snapshot_membership: None,
++        };
++        let next = OwnedNextLog::plan_copy(
++            &LogView::new(&self.durable),
++            &self.log_summary,
++            &update,
++            self.limits,
++        )?;
++        if !next.is_append() {
++            return Err(RaftError::Busy);
++        }
++        // Allocate the outward container before the sole infallible promotion.
++        let effects = vec![Effect::Persist(update)];
++        self.batch_limits_locked = true;
++        self.progress = plan.progress;
++        for reply in replies {
++            self.retire_replication(reply.from);
++            self.next_index
++                .insert(reply.from, self.progress[&reply.from] + 1);
++        }
++        self.pending = Some(Pending {
++            next,
++            membership: None,
++            ticket: None,
++            after: After::LeaderAppend,
++            reply: None,
++        });
++        Ok(effects)
++    }
++
++    fn ready_reply_state(&self, count: usize) -> Result<(), RaftError> {
++        if self.fenced {
++            return Err(RaftError::Fenced);
++        }
++        if self.role != Role::Leader || !self.local_voter() {
++            return Err(RaftError::NotLeader);
++        }
++        if count == 0
++            || count > self.batch_limits.max_ready_reply_inputs
++            || self.has_pending_dependency()
++            || !self.log_summary.is_plain()
++            || self.membership.joint().is_some()
++            || self.membership.last_configuration_index() > self.durable.commit_index
++            || self.transfer.is_some()
++            || self.read.is_some()
++            || self.ready_read.is_some()
++            || self.authority_request.is_some()
++            || self.replication_permit.is_some()
++            || self.learner_readiness.is_some()
++            || self.ready_learner.is_some()
++            || self.durable.last_index() <= self.durable.commit_index
++            || self.durable.term_at(self.durable.last_index()) != Some(self.durable.hard_state.term)
++        {
++            return Err(RaftError::Busy);
++        }
++        // The serialized history first commits, then appends. Do not rescue a
++        // proposal that would fail its second revision or later request budget.
++        self.durable
++            .revision
++            .get()
++            .checked_add(2)
++            .ok_or(RaftError::Exhausted)?;
++        let contexts = self
++            .membership
++            .replicas()
++            .count()
++            .checked_mul(4)
++            .and_then(|n| n.checked_add(count))
++            .ok_or(RaftError::Exhausted)?;
++        self.request_sequence
++            .checked_add(contexts as u64)
++            .ok_or(RaftError::Exhausted)?;
++        Ok(())
++    }
++
++    fn ready_reply_progress(&self, replies: &[Message]) -> Result<ReadyReplyPlan, RaftError> {
++        let tip = self.durable.last_index();
++        let next = tip.checked_add(1).ok_or(RaftError::Exhausted)?;
++        let mut progress = self.progress.clone();
++        let mut peers = BTreeSet::new();
++        let mut commit_index = self.durable.commit_index;
++        for (index, reply) in replies.iter().enumerate() {
++            self.authenticated_message_source(reply)?;
++            let sent = self
++                .requests
++                .get(&reply.from)
++                .ok_or(RaftError::InvalidMessage)?;
++            if reply.term != self.durable.hard_state.term
++                || reply.rpc
++                    != (Rpc::Appended {
++                        success: true,
++                        matching_index: sent.end,
++                    })
++                || sent.context != reply.context
++                || sent.configuration != reply.configuration
++                || sent.snapshot.is_some()
++                || sent.end > tip
++                || sent.start == 0
++                || sent.start > sent.end.saturating_add(1)
++                || self.empty_append_aliases.contains_key(&reply.from)
++                || !peers.insert(reply.from)
++            {
++                return Err(RaftError::InvalidMessage);
++            }
++            let prefix = progress[&reply.from].max(sent.end);
++            progress.insert(reply.from, prefix);
++            let frontier = self.membership.frontier(&progress).min(tip);
++            if index == 0 {
++                if frontier <= commit_index
++                    || self.durable.term_at(frontier) != Some(self.durable.hard_state.term)
++                {
++                    return Err(RaftError::Busy);
++                }
++                commit_index = frontier;
++            } else if frontier != commit_index {
++                // Preserve the serialized application's commit-batch boundary.
++                return Err(RaftError::Busy);
++            }
++        }
++        // Also prove every installed catch-up cursor remains representable.
++        for reply in replies {
++            progress[&reply.from]
++                .checked_add(1)
++                .filter(|cursor| *cursor <= next)
++                .ok_or(RaftError::Exhausted)?;
++        }
++        Ok(ReadyReplyPlan {
++            progress,
++            commit_index,
++        })
++    }
++}
++
++#[cfg(test)]
++mod tests;
+diff --git a/src/raft/ready_replies/gates.rs b/src/raft/ready_replies/gates.rs
+new file mode 100644
+index 00000000..e2f83998
+--- /dev/null
++++ b/src/raft/ready_replies/gates.rs
+@@ -0,0 +1,310 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Boundary refusals retain exact original receive scopes and canonical state.
++use super::*;
++
++pub(super) fn rejected(core: &mut Raft, replies: &[Message], proposals: Vec<Proposal>) {
++    let before = core.state().clone();
++    let progress = core.progress.clone();
++    let next = core.next_index.clone();
++    let requests: Vec<_> = core
++        .requests
++        .iter()
++        .map(|(peer, sent)| {
++            (
++                *peer,
++                sent.context,
++                sent.configuration,
++                sent.start,
++                sent.end,
++                sent.commit_at_start,
++            )
++        })
++        .collect();
++    let cursors = (
++        core.request_sequence,
++        core.last_batch,
++        core.batch_limits_locked,
++        core.role,
++    );
++    assert!(core
++        .propose_after_ready_replies(replies, proposals)
++        .is_err());
++    assert_eq!(core.state(), &before);
++    assert_eq!(core.progress, progress);
++    assert_eq!(core.next_index, next);
++    assert_eq!(
++        core.requests
++            .iter()
++            .map(|(peer, sent)| {
++                (
++                    *peer,
++                    sent.context,
++                    sent.configuration,
++                    sent.start,
++                    sent.end,
++                    sent.commit_at_start,
++                )
++            })
++            .collect::<Vec<_>>(),
++        requests
++    );
++    assert_eq!(
++        (
++            core.request_sequence,
++            core.last_batch,
++            core.batch_limits_locked,
++            core.role
++        ),
++        cursors
++    );
++    assert!(core.pending.is_none());
++}
++
++#[test]
++fn complete_reply_scope_and_success_are_required_before_any_mutation() {
++    for variant in 0..12 {
++        let (mut core, mut replies) = ready(0);
++        core.batch_limits_locked = false;
++        let message = &mut replies[1];
++        match variant {
++            0 => message.to = node(2),
++            1 => message.sender.identity.id = StoreId::new(99).unwrap(),
++            2 => message.group.incarnation = GroupIncarnation::new(2).unwrap(),
++            3 => message.configuration = ConfigurationId::new(2).unwrap(),
++            4 => message.context.origin.session = StoreSession::new(2).unwrap(),
++            5 => message.context.sequence += 1,
++            6 => message.term += 1,
++            7 => message.term = 0,
++            8 => {
++                message.rpc = Rpc::Appended {
++                    success: false,
++                    matching_index: 3,
++                }
++            }
++            9 => {
++                message.rpc = Rpc::Appended {
++                    success: true,
++                    matching_index: 2,
++                }
++            }
++            10 => replies[1] = replies[0].clone(),
++            _ => message.rpc = Rpc::ReadAck,
++        }
++        rejected(&mut core, &replies, vec![proposal(12)]);
++        assert!(!core.batch_limits_locked);
++    }
++}
++
++#[test]
++fn count_quorum_legacy_counters_and_proposal_budgets_refuse_without_pending() {
++    for variant in 0..10 {
++        let (mut core, mut replies) = ready(if variant == 3 { 1 } else { 0 });
++        let mut proposals = vec![proposal(12)];
++        match variant {
++            0 => core.batch_limits.max_ready_reply_inputs = 0,
++            1 => replies.clear(),
++            2 => core.batch_limits.max_ready_reply_inputs = 1,
++            3 => {
++                // Five voters: peer5 alone plus self is not enough. Removing
++                // peer2's known match makes first selected reply insufficient.
++                core.progress.insert(node(2), 0);
++            }
++            4 => {
++                core.durable.revision = LogRevision::new(u64::MAX - 1).unwrap();
++                core.log_summary = LogSummary::from_validated(core.state());
++            }
++            5 => core.request_sequence = u64::MAX - 1,
++            6 => proposals.clear(),
++            7 => proposals[0]
++                .bytes
++                .resize(core.limits.max_command_bytes + 1, 0),
++            8 => core.limits.max_entries_per_group = core.state().entries.len(),
++            _ => core.limits.max_batch_bytes = 1,
++        }
++        rejected(&mut core, &replies, proposals);
++    }
++    let (mut core, replies) = ready(0);
++    core.batch_limits.max_ready_reply_inputs = 1;
++    assert!(core
++        .propose_after_ready_replies(&replies[..1], vec![proposal(12)])
++        .is_ok());
++}
++
++#[test]
++fn ready_bound_is_startup_only_zero_disables_and_sixty_four_is_valid() {
++    for max_ready_reply_inputs in [0, 2, 64] {
++        let mut core = core();
++        let limits = BatchLimits {
++            max_ready_reply_inputs,
++            ..BatchLimits::default()
++        };
++        core.configure_batch_limits(limits).unwrap();
++        assert_eq!(core.batch_limits(), limits);
++        core.step(Event::Heartbeat).unwrap();
++        assert_eq!(
++            core.configure_batch_limits(BatchLimits::default()),
++            Err(RaftError::Busy)
++        );
++    }
++    let mut core = core();
++    assert!(core
++        .configure_batch_limits(BatchLimits {
++            max_ready_reply_inputs: 65,
++            ..BatchLimits::default()
++        })
++        .is_err());
++    assert_eq!(core.batch_limits().max_ready_reply_inputs, 2);
++}
++
++#[test]
++fn altered_persistence_and_wrong_ticket_cannot_gain_joined_authority() {
++    let (mut core, replies) = ready(0);
++    let effects = core
++        .propose_after_ready_replies(&replies, vec![proposal(12)])
++        .unwrap();
++    let exact = update(effects);
++    for variant in 0..4 {
++        let mut altered = exact.clone();
++        match variant {
++            0 => altered.commit_index -= 1,
++            1 => altered.hard_state.term += 1,
++            2 => altered.suffix.as_mut().unwrap().entries[0].term += 1,
++            _ => {
++                let EntryPayload::Command { bytes, .. } =
++                    &mut altered.suffix.as_mut().unwrap().entries[0].payload
++                else {
++                    panic!()
++                };
++                *bytes = vec![7; 8].into();
++            }
++        }
++        assert_eq!(
++            core.validate_persist_effect(&altered),
++            Err(RaftError::WrongCompletion)
++        );
++        core.validate_persist_effect(&exact).unwrap();
++    }
++    let mut wrong = ticket(&core);
++    wrong.last_index -= 1;
++    assert_eq!(
++        core.replicate_admitted(wrong),
++        Err(RaftError::WrongCompletion)
++    );
++    assert!(core.pending.as_ref().unwrap().ticket.is_none());
++    core.storage_failed();
++    assert_eq!(
++        core.propose_after_ready_replies(&replies, vec![proposal(13)]),
++        Err(RaftError::Fenced)
++    );
++}
++
++#[test]
++fn actual_empty_collector_aliases_remain_distinct_from_primary_tip_replies() {
++    let mut core = core();
++    for peer in [node(2), node(3)] {
++        core.progress.insert(peer, 1);
++    }
++    let collectors = sends(core.step(Event::Heartbeat).unwrap());
++    let append = update(
++        core.propose_batch(vec![proposal(10), proposal(11)])
++            .unwrap(),
++    );
++    let exact = ticket(&core);
++    let early = sends(core.replicate_admitted(exact).unwrap());
++    let primaries: Vec<_> = early.iter().map(|m| ack(&core, m)).collect();
++    let before = core.state().clone();
++    assert_eq!(
++        core.propose_after_ready_replies(&primaries, vec![proposal(12)]),
++        Err(RaftError::Busy)
++    );
++    assert_eq!(core.state(), &before);
++    let pending = core.pending.as_ref().unwrap();
++    assert_eq!(pending.ticket, Some(exact));
++    assert!(pending.next.matches_update(&append));
++    assert_eq!(core.admitted_ranges.len(), 2);
++    core.complete(&DurableLog {
++        tickets: vec![exact],
++    })
++    .unwrap();
++    let alias = ack(&core, &collectors[0]);
++    assert!(core.is_empty_alias(&alias));
++    rejected(
++        &mut core,
++        &[alias.clone(), primaries[1].clone()],
++        vec![proposal(12)],
++    );
++    assert!(core.is_empty_alias(&alias));
++    assert_eq!(
++        core.requests[&primaries[0].from].context,
++        primaries[0].context
++    );
++    for collector in &collectors {
++        let response = ack(&core, collector);
++        assert!(core.step(Event::Receive(response)).unwrap().is_empty());
++    }
++    // Early range records outlive Durable until the exact primary reply. They
++    // grant no new authority: its full tip is already canonical and each older
++    // alias was independently consumed above without acknowledging that tip.
++    assert_eq!(core.admitted_ranges.len(), 2);
++    assert!(core.pending.is_none());
++    assert_eq!(core.state().last_index(), 3);
++    assert!(core
++        .propose_after_ready_replies(&primaries, vec![proposal(12)])
++        .is_ok());
++    assert!(core.admitted_ranges.is_empty());
++}
++
++#[test]
++fn read_transfer_checkpoint_and_existing_pending_dependencies_are_not_crossed() {
++    for variant in 0..5 {
++        let (mut core, replies) = ready(0);
++        match variant {
++            0 | 1 => {
++                core.step(Event::Read {
++                    request: ReadRequestId::new(1).unwrap(),
++                })
++                .unwrap();
++                if variant == 1 {
++                    core.ready_read = Some(core.read.take().unwrap().barrier);
++                }
++            }
++            2 => {
++                core.step(Event::TransferLeadership(LeadershipTransferRequest {
++                    operation: OperationId::new(99).unwrap(),
++                    target: PeerIdentity {
++                        node: node(2),
++                        store: core.membership().voter_store(node(2)).unwrap(),
++                    },
++                    configuration: core.membership().id(),
++                }))
++                .unwrap();
++            }
++            3 => {
++                core.step(Event::Checkpoint).unwrap();
++            }
++            _ => core.role = Role::Follower,
++        }
++        let reset = core.election_reset;
++        let requested = core.checkpoint_requested;
++        let transfer = core.transfer;
++        let barrier = core.read.as_ref().map(|r| r.barrier);
++        let ready = core.ready_read;
++        rejected(&mut core, &replies, vec![proposal(12)]);
++        assert_eq!(core.election_reset, reset);
++        assert_eq!(core.checkpoint_requested, requested);
++        assert_eq!(core.transfer, transfer);
++        assert_eq!(core.read.as_ref().map(|r| r.barrier), barrier);
++        assert_eq!(core.ready_read, ready);
++    }
++    let (mut core, replies) = ready(0);
++    let existing = update(core.propose_batch(vec![proposal(12)]).unwrap());
++    let before = core.state().clone();
++    assert_eq!(
++        core.propose_after_ready_replies(&replies, vec![proposal(13)]),
++        Err(RaftError::Busy)
++    );
++    assert_eq!(core.state(), &before);
++    core.validate_persist_effect(&existing).unwrap();
++    assert!(core.pending.as_ref().unwrap().ticket.is_none());
++}
+diff --git a/src/raft/ready_replies/native.rs b/src/raft/ready_replies/native.rs
+new file mode 100644
+index 00000000..f88e1812
+--- /dev/null
++++ b/src/raft/ready_replies/native.rs
+@@ -0,0 +1,191 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Native framing/recovery with the synced-image model from tests/support.
++use super::*;
++use crate::native::log_store::{JournalIo, NativeLogStore};
++use std::{cell::RefCell, io, rc::Rc};
++
++#[derive(Default)]
++struct Device {
++    log: Vec<u8>,
++    synced: Vec<u8>,
++    manifest: Option<Vec<u8>>,
++    publication_fault: u8,
++}
++#[derive(Clone, Default)]
++struct ModelIo(Rc<RefCell<Device>>);
++impl ModelIo {
++    fn power_loss(&self) {
++        let mut device = self.0.borrow_mut();
++        device.log = device.synced.clone();
++        device.publication_fault = 0;
++    }
++}
++impl JournalIo for ModelIo {
++    fn read_manifest(&mut self) -> io::Result<Vec<u8>> {
++        self.0
++            .borrow()
++            .manifest
++            .clone()
++            .ok_or(io::ErrorKind::NotFound.into())
++    }
++    fn read_log(&mut self, limit: usize) -> io::Result<Vec<u8>> {
++        let device = self.0.borrow();
++        if device.log.len() > limit {
++            return Err(io::Error::other("oversized WAL"));
++        }
++        Ok(device.log.clone())
++    }
++    fn append(&mut self, bytes: &[u8]) -> io::Result<()> {
++        self.0.borrow_mut().log.extend(bytes);
++        Ok(())
++    }
++    fn sync_log(&mut self) -> io::Result<()> {
++        let mut device = self.0.borrow_mut();
++        device.synced = device.log.clone();
++        Ok(())
++    }
++    fn truncate_log(&mut self, len: u64) -> io::Result<()> {
++        self.0.borrow_mut().log.truncate(len as usize);
++        Ok(())
++    }
++    fn publish_manifest(&mut self, bytes: &[u8]) -> io::Result<()> {
++        let mut device = self.0.borrow_mut();
++        if device.publication_fault == 1 {
++            return Err(io::Error::other("before publication"));
++        }
++        device.manifest = Some(bytes.to_vec());
++        if device.publication_fault == 2 {
++            return Err(io::Error::other("after publication"));
++        }
++        Ok(())
++    }
++}
++fn seed(core: &Raft, partial_prefix: bool) -> (ModelIo, NativeLogStore<ModelIo>) {
++    let io = ModelIo::default();
++    let mut store = NativeLogStore::create(io.clone(), core.binding.identity, core.limits).unwrap();
++    let group = core.state().bootstrap.group;
++    let tickets = store
++        .append_batch(vec![LogMutation::Create(core.state().bootstrap.clone())])
++        .unwrap();
++    store.barrier(&tickets).unwrap();
++    let ends: &[usize] = if partial_prefix { &[1, 3, 5] } else { &[1, 3] };
++    let mut first = 0;
++    for &end in ends {
++        let from = first as u64 + 1;
++        let entries = core.state().entries[first..end].to_vec();
++        first = end;
++        let current = store.state(group).unwrap();
++        let update = LogUpdate {
++            group,
++            expected_revision: current.revision,
++            hard_state: core.state().hard_state,
++            commit_index: 1,
++            suffix: Some(Suffix { from, entries }),
++            snapshot: None,
++            snapshot_membership: None,
++        };
++        let tickets = store
++            .append_batch(vec![LogMutation::Update(update)])
++            .unwrap();
++        store.barrier(&tickets).unwrap();
++    }
++    assert_eq!(store.state(group).unwrap(), *core.state());
++    (io, store)
++}
++
++#[test]
++fn native_power_loss_recovers_combined_transition_atomically_and_failed_publication_fences() {
++    check_power_loss(false);
++}
++
++pub(super) fn check_power_loss(partial_prefix: bool) {
++    for phase in 0..4 {
++        check_phase(partial_prefix, phase);
++    }
++}
++
++fn check_phase(partial_prefix: bool, phase: u8) {
++    let (mut core, replies) = if partial_prefix { partial(0) } else { ready(0) };
++    let (io, mut store) = seed(&core, partial_prefix);
++    let before = core.state().clone();
++    let first_new = if partial_prefix { 14 } else { 12 };
++    let combined = update(
++        core.propose_after_ready_replies(
++            &replies,
++            vec![proposal(first_new), proposal(first_new + 1)],
++        )
++        .unwrap(),
++    );
++    assert_eq!(combined.commit_index, 3);
++    assert_eq!(
++        combined.suffix.as_ref().unwrap().from,
++        before.last_index() + 1
++    );
++    let tickets = store
++        .append_batch(vec![LogMutation::Update(combined)])
++        .unwrap();
++    let early = core.replicate_admitted(tickets[0]).unwrap();
++    if partial_prefix {
++        assert!(early.is_empty());
++    }
++    assert_eq!(core.state(), &before);
++    assert_eq!(core.progress[&core.node], before.last_index());
++    if phase == 1 {
++        let effects = core.complete(&store.barrier(&tickets).unwrap()).unwrap();
++        assert!(matches!(effects.first(), Some(Effect::Committed(entries)) if entries.len() == 2));
++    } else if phase >= 2 {
++        io.0.borrow_mut().publication_fault = phase - 1;
++        assert!(store.barrier(&tickets).is_err());
++        assert_eq!(
++            store.state(before.bootstrap.group),
++            Err(StorageError::Fenced)
++        );
++        core.storage_failed();
++        assert_eq!(core.state(), &before);
++        assert_eq!(
++            core.complete(&DurableLog {
++                tickets: tickets.clone()
++            }),
++            Err(RaftError::Fenced)
++        );
++    } else {
++        assert_eq!(core.state(), &before);
++    }
++    drop(store);
++    io.power_loss();
++    check_recovered(io, &core, &before, tickets, phase);
++}
++
++fn check_recovered(
++    io: ModelIo,
++    core: &Raft,
++    before: &GroupLog,
++    tickets: Vec<LogTicket>,
++    phase: u8,
++) {
++    let recovered = NativeLogStore::recover(io, core.binding.identity, core.limits).unwrap();
++    let state = recovered.state(before.bootstrap.group).unwrap();
++    assert_eq!(state.commit_index, if phase == 0 { 1 } else { 3 });
++    assert_eq!(
++        state.last_index(),
++        before.last_index() + if phase == 0 { 0 } else { 2 }
++    );
++    assert_eq!(state.entries[..before.entries.len()], before.entries);
++    let mut restarted = Raft::recover(core.node, recovered.binding(), state, core.limits).unwrap();
++    assert_eq!(
++        restarted.complete(&DurableLog { tickets }),
++        Err(RaftError::WrongCompletion)
++    );
++    let mut app = Counter::new(16).unwrap();
++    let receipts = app.apply_batch(restarted.replay_committed()).unwrap();
++    assert_eq!(receipts.len(), if phase == 0 { 0 } else { 2 });
++    assert_eq!(app.applied_index(), if phase == 0 { 1 } else { 3 });
++    assert_eq!(
++        receipts
++            .iter()
++            .map(|receipt| receipt.operation.get())
++            .collect::<Vec<_>>(),
++        if phase == 0 { vec![] } else { vec![10, 11] }
++    );
++}
+diff --git a/src/raft/ready_replies/partial.rs b/src/raft/ready_replies/partial.rs
+new file mode 100644
+index 00000000..15e364a3
+--- /dev/null
++++ b/src/raft/ready_replies/partial.rs
+@@ -0,0 +1,122 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Commit-prefix, append-base and remote catch-up cursors are distinct.
++use super::*;
++
++#[test]
++fn partial_three_five_weighted_histories_retain_middle_and_match_serialized_receipts() {
++    for kind in 0..3 {
++        let (mut serial, replies) = partial(kind);
++        let (mut joined, joined_replies) = partial(kind);
++        let mut app = Counter::new(32).unwrap();
++        app.apply_batch(serial.replay_committed()).unwrap();
++        let mut joined_app = app.clone();
++        let commit = serial.step(Event::Receive(replies[0].clone())).unwrap();
++        let receipts = apply(&mut app, &durable(&mut serial, commit));
++        serial.step(Event::Receive(replies[1].clone())).unwrap();
++        let append = serial
++            .propose_batch(vec![proposal(14), proposal(15)])
++            .unwrap();
++        assert!(apply(&mut app, &durable(&mut serial, append)).is_empty());
++        let before = joined.state().clone();
++        let combined = update(
++            joined
++                .propose_after_ready_replies(&joined_replies, vec![proposal(14), proposal(15)])
++                .unwrap(),
++        );
++        assert_eq!(combined.commit_index, 3);
++        assert_eq!(combined.suffix.as_ref().unwrap().from, 6);
++        assert_eq!(joined.state(), &before);
++        for reply in &joined_replies {
++            assert_eq!(joined.progress[&reply.from], 3);
++            assert_eq!(joined.next_index[&reply.from], 4);
++        }
++        assert!(joined.admitted_replication_reservation().is_none());
++        let exact = ticket(&joined);
++        assert!(joined.replicate_admitted(exact).unwrap().is_empty());
++        assert_eq!(joined.state(), &before);
++        let effects = joined
++            .complete(&DurableLog {
++                tickets: vec![exact],
++            })
++            .unwrap();
++        assert_eq!(apply(&mut joined_app, &effects), receipts);
++        assert_eq!(joined_app.applied_index(), 3);
++        assert_eq!(joined.state().entries, serial.state().entries);
++        assert_eq!(joined.state().commit_index, 3);
++        assert_eq!(joined.state().last_index(), 7);
++        let requests = sends(effects);
++        assert_missing_middle(&joined_replies, &requests);
++        // Only an ACK for the new catch-up range may commit the middle and tail.
++        assert!(joined
++            .step(Event::Receive(joined_replies[0].clone()))
++            .unwrap()
++            .is_empty());
++        assert_eq!(joined.state().commit_index, 3);
++        let mut new_receipts = Vec::new();
++        for request in &requests {
++            let response = ack(&joined, request);
++            let commit = joined.step(Event::Receive(response)).unwrap();
++            if joined.pending.is_some() {
++                new_receipts.extend(apply(&mut joined_app, &durable(&mut joined, commit)));
++            }
++            if joined.state().commit_index == 7 {
++                break;
++            }
++        }
++        assert_eq!(new_receipts.len(), 4);
++        assert_eq!(joined.state().commit_index, 7);
++    }
++}
++
++fn assert_missing_middle(replies: &[Message], requests: &[Message]) {
++    for reply in replies {
++        let request = requests.iter().find(|m| m.to == reply.from).unwrap();
++        assert!(matches!(&request.rpc,
++            Rpc::Append { previous_index: 3, entries, leader_commit: 3, .. }
++            if entries.iter().map(|e| e.index).eq(4..=7)));
++    }
++}
++
++#[test]
++fn later_reply_cannot_merge_another_commit_batch_and_already_committed_reply_cannot_join() {
++    let (mut core, mut replies) = partial(0);
++    // Exact peer3 request for the newer range would advance a second commit.
++    core.retire_replication(replies[1].from);
++    let request = sends(vec![core.append_for(replies[1].from).unwrap()]).remove(0);
++    replies[1] = ack(&core, &request);
++    gates::rejected(&mut core, &replies, vec![proposal(14)]);
++
++    let (mut core, replies) = partial(0);
++    let commit = core.step(Event::Receive(replies[0].clone())).unwrap();
++    durable(&mut core, commit);
++    assert_eq!(core.state().commit_index, 3);
++    gates::rejected(&mut core, &replies[1..], vec![proposal(14)]);
++}
++
++#[test]
++fn older_term_commit_frontier_refuses_even_with_current_term_tip() {
++    let (mut core, mut replies) = partial(0);
++    core.durable.hard_state.term += 1;
++    for entry in &mut core.durable.entries[3..] {
++        entry.term = core.durable.hard_state.term;
++    }
++    for reply in &mut replies {
++        reply.term = core.durable.hard_state.term;
++    }
++    core.log_summary = LogSummary::from_validated(core.state());
++    gates::rejected(&mut core, &replies, vec![proposal(14)]);
++}
++
++#[test]
++fn successful_older_range_does_not_reduce_known_peer_progress() {
++    let (mut core, replies) = partial(0);
++    core.progress.insert(replies[0].from, 4);
++    let planned = update(
++        core.propose_after_ready_replies(&replies[..1], vec![proposal(14)])
++            .unwrap(),
++    );
++    assert_eq!(planned.commit_index, 4);
++    assert_eq!(core.progress[&replies[0].from], 4);
++    assert_eq!(core.next_index[&replies[0].from], 5);
++}
+diff --git a/src/raft/ready_replies/partial_native.rs b/src/raft/ready_replies/partial_native.rs
+new file mode 100644
+index 00000000..e17da5e7
+--- /dev/null
++++ b/src/raft/ready_replies/partial_native.rs
+@@ -0,0 +1,9 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! The same physical publication faults with a committed prefix below the tip.
++use super::*;
++
++#[test]
++fn partial_commit_and_new_suffix_recover_atomically_without_applying_retained_old_tail() {
++    native::check_power_loss(true);
++}
+diff --git a/src/raft/ready_replies/tests.rs b/src/raft/ready_replies/tests.rs
+new file mode 100644
+index 00000000..c0a6cc6f
+--- /dev/null
++++ b/src/raft/ready_replies/tests.rs
+@@ -0,0 +1,335 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Actual ordered Core histories; fixture tickets assert host durability only.
++use super::*;
++use crate::application::{Counter, StateMachine};
++use crate::quorum::{Limits, Policy, Tree, WeightedChild};
++use crate::raft::membership_tests::{core, durable};
++#[path = "gates.rs"]
++mod gates;
++#[cfg(feature = "native")]
++#[path = "native.rs"]
++mod native;
++#[path = "partial.rs"]
++mod partial;
++#[cfg(feature = "native")]
++#[path = "partial_native.rs"]
++mod partial_native;
++
++fn node(id: u64) -> NodeId {
++    NodeId::new(id).unwrap()
++}
++fn proposal(id: u128) -> Proposal {
++    Proposal {
++        operation: OperationId::new(id).unwrap(),
++        bytes: 1i64.to_le_bytes().to_vec(),
++    }
++}
++fn update(effects: Vec<Effect>) -> LogUpdate {
++    let [Effect::Persist(update)] = effects.as_slice() else {
++        panic!("expected sole persistence effect")
++    };
++    update.clone()
++}
++fn sends(effects: Vec<Effect>) -> Vec<Message> {
++    effects
++        .into_iter()
++        .filter_map(|effect| match effect {
++            Effect::Send(message) => Some(message),
++            _ => None,
++        })
++        .collect()
++}
++fn ack(core: &Raft, request: &Message) -> Message {
++    let Rpc::Append {
++        previous_index,
++        entries,
++        ..
++    } = &request.rpc
++    else {
++        panic!("expected ordinary append")
++    };
++    Message {
++        group: request.group,
++        configuration: request.configuration,
++        from: request.to,
++        to: request.from,
++        sender: StoreBinding {
++            identity: core.membership().replica_store(request.to).unwrap(),
++            session: StoreSession::new(1).unwrap(),
++        },
++        term: request.term,
++        context: request.context,
++        rpc: Rpc::Appended {
++            success: true,
++            matching_index: entries.last().map_or(*previous_index, |entry| entry.index),
++        },
++    }
++}
++fn ticket(core: &Raft) -> LogTicket {
++    let metadata = core.pending.as_ref().unwrap().next.metadata();
++    LogTicket {
++        binding: core.binding,
++        batch: core.last_batch + 1,
++        group: metadata.group,
++        revision: metadata.revision,
++        generation: metadata.generation,
++        last_index: metadata.last_index,
++        term: metadata.hard_state.term,
++    }
++}
++fn policy_core(kind: usize) -> Raft {
++    let mut state = core().state().clone();
++    let count = if kind == 1 { 5 } else { 3 };
++    let stores = (1..=count)
++        .map(|n| {
++            (
++                node(n),
++                StoreIdentity {
++                    id: StoreId::new(n as u128).unwrap(),
++                    incarnation: StoreIncarnation::new(1).unwrap(),
++                },
++            )
++        })
++        .collect();
++    let tree = if kind == 2 {
++        Tree::Weighted(
++            [2, 3, 1]
++                .into_iter()
++                .enumerate()
++                .map(|(offset, weight)| WeightedChild {
++                    weight,
++                    node: Tree::Voter(node(offset as u64 + 1)),
++                })
++                .collect(),
++        )
++    } else {
++        Tree::Majority((1..=count).map(|n| Tree::Voter(node(n))).collect())
++    };
++    state.bootstrap.policy = Policy::new(tree, Limits::default()).unwrap();
++    state.bootstrap.voter_stores = stores;
++    let binding = core().binding;
++    let mut core = Raft::recover(node(1), binding, state, LogLimits::default()).unwrap();
++    core.role = Role::Leader;
++    core.initialize_replication().unwrap();
++    core
++}
++fn ready(kind: usize) -> (Raft, Vec<Message>) {
++    let mut core = policy_core(kind);
++    let append = core
++        .propose_batch(vec![proposal(10), proposal(11)])
++        .unwrap();
++    let requests = sends(durable(&mut core, append));
++    if kind == 1 {
++        let response = ack(&core, requests.iter().find(|m| m.to == node(2)).unwrap());
++        assert!(core.step(Event::Receive(response)).unwrap().is_empty());
++    }
++    let peers = if kind == 1 { [3, 4] } else { [2, 3] };
++    let replies = peers
++        .into_iter()
++        .map(|peer| ack(&core, requests.iter().find(|m| m.to == node(peer)).unwrap()))
++        .collect();
++    (core, replies)
++}
++fn partial(kind: usize) -> (Raft, Vec<Message>) {
++    let (mut core, replies) = ready(kind);
++    let append = core
++        .propose_batch(vec![proposal(12), proposal(13)])
++        .unwrap();
++    durable(&mut core, append);
++    assert_eq!(core.state().commit_index, 1);
++    assert_eq!(core.state().last_index(), 5);
++    assert!(replies.iter().all(|reply| matches!(
++        reply.rpc,
++        Rpc::Appended {
++            matching_index: 3,
++            ..
++        }
++    )));
++    (core, replies)
++}
++fn apply(counter: &mut Counter, effects: &[Effect]) -> Vec<crate::application::CounterReceipt> {
++    let mut receipts = Vec::new();
++    for effect in effects {
++        if let Effect::Committed(entries) = effect {
++            receipts.extend(counter.apply_batch(entries).unwrap());
++        }
++    }
++    receipts
++}
++
++#[test]
++fn three_five_and_weighted_histories_match_serialized_receipts_and_uncommitted_tail() {
++    for kind in 0..3 {
++        let (mut serial, replies) = ready(kind);
++        let (mut joined, joined_replies) = ready(kind);
++        let mut serial_app = Counter::new(16).unwrap();
++        let mut joined_app = serial_app.clone();
++        serial_app.apply_batch(serial.replay_committed()).unwrap();
++        joined_app.apply_batch(joined.replay_committed()).unwrap();
++        let commit = serial.step(Event::Receive(replies[0].clone())).unwrap();
++        let old_receipts = apply(&mut serial_app, &durable(&mut serial, commit));
++        assert!(
++            sends(serial.step(Event::Receive(replies[1].clone())).unwrap())
++                .iter()
++                .all(|m| matches!(
++                    &m.rpc,
++                    Rpc::Append {
++                        leader_commit: 3,
++                        ..
++                    }
++                ))
++        );
++        let append = serial
++            .propose_batch(vec![proposal(12), proposal(13)])
++            .unwrap();
++        assert!(apply(&mut serial_app, &durable(&mut serial, append)).is_empty());
++        let before = joined.state().clone();
++        let planned = joined
++            .propose_after_ready_replies(&joined_replies, vec![proposal(12), proposal(13)])
++            .unwrap();
++        assert_eq!(joined.state(), &before);
++        let combined = update(planned);
++        assert_eq!(combined.commit_index, 3);
++        assert_eq!(combined.suffix.as_ref().unwrap().from, 4);
++        let effects = durable(&mut joined, vec![Effect::Persist(combined)]);
++        assert!(matches!(effects.first(), Some(Effect::Committed(entries)) if entries.len() == 2));
++        assert_eq!(apply(&mut joined_app, &effects), old_receipts);
++        assert_eq!(joined_app.applied_index(), 3);
++        assert_eq!(joined.state().entries, serial.state().entries);
++        assert_eq!(joined.state().hard_state, serial.state().hard_state);
++        assert_eq!(joined.state().commit_index, 3);
++        assert_eq!(joined.state().last_index(), 5);
++        assert_eq!(
++            joined.state().revision.get() + 1,
++            serial.state().revision.get()
++        );
++        assert!(sends(effects).iter().all(|m| {
++            matches!(
++                m.rpc,
++                Rpc::Append {
++                    leader_commit: 3,
++                    ..
++                }
++            )
++        }));
++    }
++}
++
++fn assert_durable_notifications(core: &Raft, early: &[Message], notifications: &[Message]) {
++    assert_eq!(notifications.len(), early.len());
++    for notification in notifications {
++        let original = early.iter().find(|m| m.to == notification.to).unwrap();
++        assert_eq!(notification.context, original.context);
++        assert!(
++            matches!(&notification.rpc, Rpc::Append { leader_commit: 3, entries, .. }
++            if entries.len() == 2)
++        );
++        assert_eq!(core.requests[&notification.to].commit_at_start, 1);
++    }
++}
++
++#[test]
++fn written_sends_old_commit_exact_durable_notifies_same_context_and_new_tail_needs_quorum() {
++    let (mut core, replies) = ready(0);
++    let planned = core
++        .propose_after_ready_replies(&replies, vec![proposal(12), proposal(13)])
++        .unwrap();
++    assert_eq!(update(planned).commit_index, 3);
++    let exact = ticket(&core);
++    let before = core.state().clone();
++    let early = sends(core.replicate_admitted(exact).unwrap());
++    assert_eq!(early.len(), 2);
++    for message in &early {
++        assert!(
++            matches!(&message.rpc, Rpc::Append { previous_index: 3, entries,
++            leader_commit: 1, .. } if entries.len() == 2)
++        );
++        assert_eq!(core.progress[&message.to], 3);
++        let response = ack(&core, message);
++        assert_eq!(core.step(Event::Receive(response)), Err(RaftError::Busy));
++    }
++    let mut stale = exact;
++    stale.batch += 1;
++    assert_eq!(
++        core.complete(&DurableLog {
++            tickets: vec![stale]
++        }),
++        Err(RaftError::WrongCompletion)
++    );
++    assert_eq!(core.state(), &before);
++    let durable_effects = core
++        .complete(&DurableLog {
++            tickets: vec![exact],
++        })
++        .unwrap();
++    assert!(
++        matches!(durable_effects.first(), Some(Effect::Committed(entries)) if entries.len() == 2)
++    );
++    let notifications = sends(durable_effects);
++    assert_durable_notifications(&core, &early, &notifications);
++    assert_eq!(core.state().commit_index, 3);
++    let commit = core.step(Event::Receive(ack(&core, &early[0]))).unwrap();
++    assert_eq!(core.state().commit_index, 3);
++    let final_effects = durable(&mut core, commit);
++    assert!(
++        matches!(final_effects.first(), Some(Effect::Committed(entries)) if entries.len() == 2)
++    );
++    assert_eq!(core.state().commit_index, 5);
++    assert_eq!(
++        core.complete(&DurableLog {
++            tickets: vec![exact]
++        }),
++        Err(RaftError::WrongCompletion)
++    );
++}
++
++#[test]
++fn an_unconsumed_old_primary_reply_remains_scoped_until_its_later_notification() {
++    let (mut core, replies) = ready(0);
++    let delayed = replies[1].clone();
++    let planned = update(
++        core.propose_after_ready_replies(&replies[..1], vec![proposal(12)])
++            .unwrap(),
++    );
++    core.validate_persist_effect(&planned).unwrap();
++    let exact = ticket(&core);
++    let early = sends(core.replicate_admitted(exact).unwrap());
++    assert_eq!(early.len(), 1);
++    assert_eq!(early[0].to, replies[0].from);
++    assert_eq!(
++        core.step(Event::Receive(delayed.clone())),
++        Err(RaftError::Busy)
++    );
++    assert_eq!(
++        core.validate_persist_effect(&planned),
++        Err(RaftError::WrongCompletion)
++    );
++    let pending = core.pending.as_ref().unwrap();
++    assert!(pending.next.matches_update(&planned));
++    assert_eq!(pending.ticket, Some(exact));
++    let completed = core
++        .complete(&DurableLog {
++            tickets: vec![exact],
++        })
++        .unwrap();
++    let notification = sends(completed)
++        .into_iter()
++        .find(|m| m.to == delayed.from)
++        .unwrap();
++    assert_eq!(notification.context, delayed.context);
++    assert!(matches!(
++        notification.rpc,
++        Rpc::Append {
++            leader_commit: 3,
++            ..
++        }
++    ));
++    let next = sends(core.step(Event::Receive(delayed)).unwrap());
++    assert_eq!(next.len(), 1);
++    assert!(
++        matches!(&next[0].rpc, Rpc::Append { previous_index: 3, entries, leader_commit: 3, .. }
++        if entries.len() == 1)
++    );
++    assert_eq!(core.state().commit_index, 3);
++}
+diff --git a/src/runtime/clients.rs b/src/runtime/clients.rs
+index bde0c07b..9d80e2de 100644
+--- a/src/runtime/clients.rs
++++ b/src/runtime/clients.rs
+@@ -494,7 +494,12 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
+             .advance_batch_authorized(
+                 now,
+                 limit,
+-                |group| application(group).is_some_and(ProposalAdmission::supports_ready_batch),
++                |group| {
++                    application(group).map_or((false, false), |app| {
++                        let batch = app.supports_ready_batch();
++                        (batch, batch && app.supports_ready_commit_batch())
++                    })
++                },
+                 |core, event, prefix| {
+                     self.check_ready_execution(
+                         core,
+diff --git a/src/runtime/effects.rs b/src/runtime/effects.rs
+index 3adc5b5f..17ef3b69 100644
+--- a/src/runtime/effects.rs
++++ b/src/runtime/effects.rs
+@@ -21,6 +21,7 @@ use std::collections::BTreeSet;
+ mod inspection;
+ mod overlap;
+ mod ready;
++mod ready_joined;
+ pub use inspection::{EffectLeaseInspectionKind, EffectVisitInspection};
+ #[cfg(all(test, feature = "native"))]
+ #[path = "effects/peer_ingress_tests.rs"]
+@@ -99,6 +100,7 @@ pub struct OwnerStep {
+ struct Active {
+     visit: VisitTicket,
+     received_from: Option<NodeId>,
++    other_received_from: Vec<NodeId>,
+     reserved: usize,
+     continuation_bytes: usize,
+     effects: VecDeque<Effect>,
+@@ -318,12 +320,20 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+     /// A rejected snapshot attempt owns no prepared image or worker request.
+     /// Keep its actual queued/leased payload charged, and reacquire the original
+     /// continuation budget plus image allowance before any later preparation.
++    /// Joined receive-source capacity remains owned until this visit retires.
+     pub(super) fn defer_snapshot(&mut self, lease: &EffectLease) -> Result<(), EffectOwnerError> {
+         self.validate_lease(lease)?;
+         let a = self.active.get_mut(&lease.ticket.visit.group).unwrap();
+         let capacity = a.effects.capacity();
+         let retained = effect_bytes(a.effects.make_contiguous(), capacity)
+             .and_then(|n| n.checked_add(effect_bytes(std::slice::from_ref(&lease.effect), 1)?))
++            .and_then(|n| {
++                n.checked_add(
++                    a.other_received_from
++                        .capacity()
++                        .checked_mul(size_of::<NodeId>())?,
++                )
++            })
+             .ok_or(EffectOwnerError::ReservationTooLarge)?;
+         if retained > a.reserved {
+             return self.fail(EffectOwnerError::ProviderContract);
+@@ -347,10 +357,9 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+     /// Original queued inputs and dependent visits; no source authority.
+     pub(crate) fn has_pending_peer_ingress(&self, group: GroupIdentity, peer: NodeId) -> bool {
+         self.runtime.has_pending_peer_ingress(group, peer)
+-            || self
+-                .active
+-                .get(&group)
+-                .is_some_and(|a| a.received_from == Some(peer))
++            || self.active.get(&group).is_some_and(|a| {
++                a.received_from == Some(peer) || a.other_received_from.contains(&peer)
++            })
+     }
+     pub fn deadline(&self, group: GroupIdentity) -> Option<TimerToken> {
+         self.runtime.deadline(group)
+@@ -558,7 +567,12 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+         limit: usize,
+         mut check: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
+     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
+-        let result = self.advance_inner(now, limit, |_| false, |core, event, _| check(core, event));
++        let result = self.advance_inner(
++            now,
++            limit,
++            |_| (false, false),
++            |core, event, _| check(core, event),
++        );
+         match result {
+             Err(error @ (EffectOwnerError::Runtime(_) | EffectOwnerError::ReservationTooLarge)) => {
+                 self.fail(error)
+@@ -570,7 +584,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+         &mut self,
+         now: MonoTime,
+         limit: usize,
+-        eligible: impl FnMut(GroupIdentity) -> bool,
++        eligible: impl FnMut(GroupIdentity) -> (bool, bool),
+         check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
+     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
+         let result = self.advance_inner(now, limit, eligible, check);
+@@ -585,7 +599,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+         &mut self,
+         now: MonoTime,
+         limit: usize,
+-        mut eligible: impl FnMut(GroupIdentity) -> bool,
++        mut eligible: impl FnMut(GroupIdentity) -> (bool, bool),
+         mut check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
+     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
+         self.check()?;
+@@ -603,11 +617,8 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+             let Some(visit) = self.runtime.poll(now).map_err(EffectOwnerError::Runtime)? else {
+                 break;
+             };
+-            let max_items = if eligible(visit.group) {
+-                limit - steps.len()
+-            } else {
+-                1
+-            };
++            let (batch, joined) = eligible(visit.group);
++            let max_items = if batch { limit - steps.len() } else { 1 };
+             let control = self
+                 .runtime
+                 .next_class(visit, now)
+@@ -624,6 +635,12 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+             if !self.reserve_ready_visit(visit, reserved, control)? {
+                 continue;
+             }
++            if control
++                && joined
++                && self.try_joined_ready(visit, now, max_items, &mut check, &mut steps)?
++            {
++                continue;
++            }
+             let stepped = self
+                 .runtime
+                 .step_ready_checked(visit, now, max_items, &mut check)
+diff --git a/src/runtime/effects/peer_ingress_tests.rs b/src/runtime/effects/peer_ingress_tests.rs
+index 83ecabff..badf1663 100644
+--- a/src/runtime/effects/peer_ingress_tests.rs
++++ b/src/runtime/effects/peer_ingress_tests.rs
+@@ -155,3 +155,38 @@ fn original_receive_source_survives_queued_input_consumption_and_persistence_lea
+         Some(lease.ticket)
+     );
+ }
++
++#[test]
++fn deferred_payload_reservation_keeps_source_capacity_until_visit_retirement() {
++    let mut owner = owner();
++    owner.admit(group(1), vote(2, 1)).unwrap();
++    let steps = owner.advance(MonoTime(0), 1).unwrap();
++    let visit = steps[0].visit;
++    let lease = owner.take_effect().unwrap().unwrap();
++    assert!(matches!(lease.effect, Effect::Send(_)));
++    // Isolate deferred-payload accounting with a real live visit/lease. The
++    // joined transition/worker test separately proves actual source collection.
++    let active = owner.active.get_mut(&group(1)).unwrap();
++    active.other_received_from = Vec::with_capacity(7);
++    active.other_received_from.push(node(3));
++    let source_bytes = active.other_received_from.capacity() * size_of::<NodeId>();
++    let capacity = active.effects.capacity();
++    let payload = effect_bytes(active.effects.make_contiguous(), capacity).unwrap()
++        + effect_bytes(std::slice::from_ref(&lease.effect), 1).unwrap();
++    let original = owner.usage().reserved_bytes;
++    owner.defer_snapshot(&lease).unwrap();
++    assert_eq!(owner.usage().reserved_bytes, payload + source_bytes);
++    assert!(owner.usage().reserved_bytes < original);
++    assert!(owner.has_pending_peer_ingress(group(1), node(2)));
++    assert!(owner.has_pending_peer_ingress(group(1), node(3)));
++    assert_eq!(
++        owner.inspect_visit(group(1)).unwrap().unwrap().visit(),
++        visit
++    );
++    owner.defer_snapshot(&lease).unwrap();
++    assert_eq!(owner.usage().reserved_bytes, payload + source_bytes);
++    owner.release_transferred_send(lease.ticket).unwrap();
++    assert_eq!(owner.usage().reserved_bytes, 0);
++    assert!(!owner.has_pending_peer_ingress(group(1), node(2)));
++    assert!(!owner.has_pending_peer_ingress(group(1), node(3)));
++}
+diff --git a/src/runtime/effects/ready.rs b/src/runtime/effects/ready.rs
+index 479a43c3..0257be3d 100644
+--- a/src/runtime/effects/ready.rs
++++ b/src/runtime/effects/ready.rs
+@@ -11,13 +11,17 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+         max_items: usize,
+         control: bool,
+     ) -> Result<Option<(usize, usize)>, EffectOwnerError> {
+-        let max_items = max_items.min(
+-            self.runtime
+-                .core(visit.group)
+-                .ok_or(EffectOwnerError::Runtime(RuntimeError::UnknownGroup))?
+-                .batch_limits()
+-                .max_proposal_entries,
+-        );
++        let max_items = if control {
++            max_items
++        } else {
++            max_items.min(
++                self.runtime
++                    .core(visit.group)
++                    .ok_or(EffectOwnerError::Runtime(RuntimeError::UnknownGroup))?
++                    .batch_limits()
++                    .max_proposal_entries,
++            )
++        };
+         let Some(full) = self
+             .runtime
+             .next_ready_effect_reservation(visit, now, max_items)
+@@ -106,6 +110,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+             Active {
+                 visit,
+                 received_from: None,
++                other_received_from: Vec::new(),
+                 reserved,
+                 continuation_bytes: reserved,
+                 effects: VecDeque::new(),
+diff --git a/src/runtime/effects/ready_joined.rs b/src/runtime/effects/ready_joined.rs
+new file mode 100644
+index 00000000..6a2851d7
+--- /dev/null
++++ b/src/runtime/effects/ready_joined.rs
+@@ -0,0 +1,105 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Bulk-only optional planning layered over an independently reserved control.
++use super::*;
++impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E> {
++    pub(super) fn try_joined_ready(
++        &mut self,
++        visit: VisitTicket,
++        now: MonoTime,
++        max: usize,
++        check: &mut impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
++        output: &mut Vec<OwnerStep>,
++    ) -> Result<bool, EffectOwnerError> {
++        let Some((reserved, observations)) = self
++            .runtime
++            .joined_reservation(visit, now, max)
++            .map_err(EffectOwnerError::Runtime)?
++        else {
++            return Ok(false);
++        };
++        let original = self.active[&visit.group].reserved;
++        let Some(reserved) = output
++            .len()
++            .checked_mul(size_of::<OwnerStep>())
++            .and_then(|bytes| reserved.checked_add(bytes))
++        else {
++            return Ok(false);
++        };
++        let reserved = reserved.max(original);
++        if !self.joined_bulk_fits(reserved, original) {
++            return Ok(false);
++        }
++        let additional = reserved - original;
++        self.reserved += additional;
++        {
++            let active = self.active.get_mut(&visit.group).unwrap();
++            active.reserved = reserved;
++            active.continuation_bytes = reserved;
++            active.control = false;
++        }
++        let mut sources = Vec::new();
++        let mut expanded = Vec::new();
++        let allocated = expanded
++            .try_reserve_exact(output.len() + observations)
++            .is_ok()
++            && sources.try_reserve_exact(observations).is_ok();
++        let joined = if allocated {
++            self.runtime
++                .step_joined_checked(visit, now, max, check)
++                .map_err(EffectOwnerError::Runtime)
++        } else {
++            Ok(None)
++        };
++        let joined = match joined {
++            Ok(Some(joined)) => joined,
++            other => {
++                self.reserved -= additional;
++                let active = self.active.get_mut(&visit.group).unwrap();
++                active.reserved = original;
++                active.continuation_bytes = original;
++                active.control = true;
++                return other.map(|_| false);
++            }
++        };
++        expanded.append(output);
++        for control in &joined.controls {
++            sources.push(control.received_from);
++        }
++        let first = sources.remove(0);
++        let members = joined.controls.len();
++        // All owner output and source capacity is already allocated. The joined
++        // Core mutation cannot be followed by an allocation-dependent refusal.
++        let proposal_offset = expanded.len() + members;
++        for control in joined.controls {
++            expanded.push(OwnerStep {
++                admission: control.admission,
++                proposed: None,
++                visit,
++                operation: None,
++                read: None,
++                error: None,
++            });
++        }
++        self.install_ready_steps(visit, joined.proposals, &mut expanded)?;
++        debug_assert_eq!(expanded[proposal_offset].visit, visit);
++        *output = expanded;
++        let active = self.active.get_mut(&visit.group).unwrap();
++        active.received_from = Some(first);
++        active.other_received_from = sources;
++        Ok(true)
++    }
++    fn joined_bulk_fits(&self, reserved: usize, original: usize) -> bool {
++        let bulk_ceiling = self.limits.reserved_bytes - self.limits.control_bytes;
++        let bulk_count = self.active.values().filter(|a| !a.control).count();
++        let bulk = self
++            .active
++            .values()
++            .filter(|a| !a.control)
++            .map(|a| a.reserved)
++            .sum::<usize>();
++        reserved <= bulk_ceiling.saturating_sub(bulk)
++            && reserved.saturating_sub(original) <= self.limits.reserved_bytes - self.reserved
++            && bulk_count < self.limits.active_visits - self.limits.control_visits
++    }
++}
+diff --git a/src/runtime/ready_batch.rs b/src/runtime/ready_batch.rs
+index 9d938b60..0fa172a4 100644
+--- a/src/runtime/ready_batch.rs
++++ b/src/runtime/ready_batch.rs
+@@ -2,6 +2,8 @@
+ // Copyright (c) 2026 Karl Livesey
+ //! Opt-in collection of bounded already-ready ordinary original proposals.
+ use super::*;
++mod joined;
++pub(crate) use joined::JoinedReady;
+ pub(crate) struct ReadyProposal {
+     pub(crate) admission: AdmissionTicket,
+     pub(crate) command: Proposal,
+diff --git a/src/runtime/ready_batch/joined.rs b/src/runtime/ready_batch/joined.rs
+new file mode 100644
+index 00000000..cb2762f4
+--- /dev/null
++++ b/src/runtime/ready_batch/joined.rs
+@@ -0,0 +1,328 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! A non-consuming, ordered intake; failure leaves the ordinary head intact.
++use super::*;
++
++pub(crate) struct JoinedControl {
++    pub(crate) admission: Option<AdmissionTicket>,
++    pub(crate) received_from: NodeId,
++}
++pub(crate) struct JoinedReady {
++    pub(crate) controls: Vec<JoinedControl>,
++    pub(crate) proposals: Stepped,
++}
++struct Selection {
++    replies: usize,
++    proposals: usize,
++    input_bytes: usize,
++}
++struct Cursor {
++    turn: usize,
++    offsets: [usize; 3],
++    used: Usage,
++}
++impl Cursor {
++    fn next(&self, group: &Group, limits: ShardLimits) -> Option<(usize, usize)> {
++        if self.used.items >= limits.visit_items {
++            return None;
++        }
++        const ORDER: [usize; 4] = [0, 0, 1, 2];
++        (0..4)
++            .map(|offset| (self.turn + offset, ORDER[(self.turn + offset) % 4]))
++            .find(|(_, class)| {
++                group.queues[*class]
++                    .get(self.offsets[*class])
++                    .is_some_and(|q| q.cost <= limits.visit_bytes.saturating_sub(self.used.bytes))
++            })
++    }
++    fn consume(&mut self, group: &Group, turn: usize, class: usize) {
++        self.used.add(group.queues[class][self.offsets[class]].cost);
++        self.offsets[class] += 1;
++        self.turn = (turn + 1) % 4;
++    }
++}
++fn selection(group: &Group, limits: ShardLimits, now: MonoTime, max: usize) -> Option<Selection> {
++    let visit = group.visit.as_ref()?;
++    if now >= visit.deadline
++        || group.core.has_pending_dependency()
++        || group.core.role() != Role::Leader
++        || !group.core.local_voter()
++        || group.core.leadership_transfer().is_some()
++        || !group.queues[2].is_empty()
++        || !group.queues[0]
++            .iter()
++            .all(|q| routine_control(q, group.core.state().hard_state.term))
++    {
++        return None;
++    }
++    let mut cursor = Cursor {
++        turn: group.turn,
++        offsets: [0; 3],
++        used: sum(&visit.used),
++    };
++    let replies = reply_prefix(group, limits, &mut cursor, max)?;
++    let log = group.core.proposal_limits();
++    let count_limit = max
++        .saturating_sub(replies)
++        .min(group.core.batch_limits().max_proposal_entries)
++        .min(
++            log.max_entries_per_group
++                .saturating_sub(group.core.state().entries.len()),
++        );
++    let mut payload = 0usize;
++    let mut proposals = 0;
++    while proposals < count_limit {
++        let Some((turn, class)) = cursor.next(group, limits) else {
++            break;
++        };
++        if class != 1 {
++            break;
++        }
++        let queued = &group.queues[1][proposals];
++        let Event::Propose { bytes, .. } = &queued.event else {
++            break;
++        };
++        if queued.timer.is_some()
++            || queued.admission.is_none()
++            || bytes.len() > log.max_command_bytes
++        {
++            break;
++        }
++        let next_payload = payload.checked_add(bytes.capacity())?;
++        let next_count = proposals + 1;
++        let staged = proposal_input(next_count, next_payload)?
++            .checked_add(next_count.checked_mul(size_of::<crate::log::LogEntry>())?)?;
++        if staged > log.max_batch_bytes
++            || group
++                .core
++                .state()
++                .last_index()
++                .checked_add(next_count as u64)
++                .is_none()
++        {
++            break;
++        }
++        payload = next_payload;
++        proposals = next_count;
++        cursor.consume(group, turn, class);
++    }
++    if proposals == 0 {
++        return None;
++    }
++    Some(Selection {
++        replies,
++        proposals,
++        input_bytes: proposal_input(proposals, payload).unwrap().checked_mul(2)?,
++    })
++}
++fn reply_prefix(
++    group: &Group,
++    limits: ShardLimits,
++    cursor: &mut Cursor,
++    max: usize,
++) -> Option<usize> {
++    let reply_limit = group.core.batch_limits().max_ready_reply_inputs;
++    let mut replies = 0;
++    while replies < max {
++        let (turn, class) = cursor.next(group, limits)?;
++        if class != 0 {
++            break;
++        }
++        let queued = &group.queues[0][replies];
++        if replies >= reply_limit
++            || queued.timer.is_some()
++            || !matches!(
++                &queued.event,
++                Event::Receive(Message {
++                    rpc: Rpc::Appended { success: true, .. },
++                    ..
++                })
++            )
++        {
++            return None;
++        }
++        cursor.consume(group, turn, class);
++        replies += 1;
++    }
++    (replies > 0).then_some(replies)
++}
++fn reservation(group: &Group, selected: &Selection, limits: ShardLimits) -> Option<usize> {
++    let controls = selected.replies.checked_mul(size_of::<Message>())?;
++    // A cloned quorum frontier BTreeMap plus its validated policy walk. Charge
++    // one conservative node allocation per replica (including node overhead).
++    let planning = group
++        .core
++        .membership()
++        .replicas()
++        .count()
++        .checked_mul(32 * (size_of::<NodeId>() + size_of::<u64>() + size_of::<usize>()))?;
++    let metadata = selected_metadata(selected.proposals)?
++        .checked_add(
++            selected
++                .replies
++                .checked_mul(size_of::<JoinedControl>() + 2 * size_of::<OwnerStep>())?,
++        )?
++        .checked_add((selected.replies + selected.proposals).checked_mul(size_of::<NodeId>())?)?
++        .checked_add(size_of::<JoinedReady>() + 3 * size_of::<Vec<Message>>())?;
++    group
++        .core
++        .effect_reservation(
++            selected
++                .input_bytes
++                .checked_add(controls)?
++                .max(limits.max_event_bytes),
++        )?
++        .checked_add(metadata)?
++        .checked_add(planning)
++}
++impl<Q: ReadyScheduler> Shard<Q> {
++    pub(in crate::runtime) fn joined_reservation(
++        &mut self,
++        ticket: VisitTicket,
++        now: MonoTime,
++        max: usize,
++    ) -> Result<Option<(usize, usize)>, RuntimeError> {
++        self.observe(now)?;
++        let limits = self.limits;
++        if self.control_profile.is_some() {
++            return Ok(None);
++        }
++        let group = self.live(ticket)?;
++        Ok(selection(group, limits, now, max).and_then(|s| {
++            reservation(group, &s, limits).map(|bytes| (bytes, s.replies + s.proposals))
++        }))
++    }
++    pub(in crate::runtime) fn step_joined_checked(
++        &mut self,
++        ticket: VisitTicket,
++        now: MonoTime,
++        max: usize,
++        mut check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
++    ) -> Result<Option<JoinedReady>, RuntimeError> {
++        self.observe(now)?;
++        self.reserved_connection_peers()?;
++        let limits = self.limits;
++        if self.control_profile.is_some() {
++            return Ok(None);
++        }
++        let group = self.live(ticket)?;
++        let Some(selected) = selection(group, limits, now, max) else {
++            return Ok(None);
++        };
++        // This producer accepts only an existing plain stable roster and ordinary
++        // commands: its connection union cannot grow. Registration/ordinary
++        // transitions already retained that roster; no fallible post-plan walk.
++        Ok(prepare(group, &selected, limits, now, &mut check))
++    }
++}
++fn prepare(
++    group: &mut Group,
++    selected: &Selection,
++    limits: ShardLimits,
++    now: MonoTime,
++    check: &mut impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
++) -> Option<JoinedReady> {
++    let mut messages = Vec::new();
++    let mut controls = Vec::new();
++    let mut members = Vec::new();
++    messages.try_reserve_exact(selected.replies).ok()?;
++    controls.try_reserve_exact(selected.replies).ok()?;
++    members
++        .try_reserve_exact(selected.proposals.saturating_sub(1))
++        .ok()?;
++    for queued in group.queues[0].iter().take(selected.replies) {
++        let Event::Receive(message) = &queued.event else {
++            unreachable!()
++        };
++        messages.push(message.clone());
++        controls.push(JoinedControl {
++            admission: queued.admission,
++            received_from: message.from,
++        });
++    }
++    let prefix = copy_prefix(group, selected.proposals, check)?;
++    let proposals = copy_proposals(&prefix)?;
++    let count = proposals.len();
++    let result = Ok(group
++        .core
++        .propose_after_ready_replies(&messages, proposals)
++        .ok()?);
++    // Core succeeded. No fallible allocation/check follows before all originals
++    // and controls move from their queues to this one owned visit.
++    for class in std::iter::repeat_n(0, selected.replies).chain(std::iter::repeat_n(1, count)) {
++        let (turn, actual_class) = group.next_queued(limits, now).unwrap();
++        debug_assert_eq!(class, actual_class);
++        let queued = group.queues[class].pop_front().unwrap();
++        group.visit.as_mut().unwrap().used[class].add(queued.cost);
++        group.turn = (turn + 1) % 4;
++    }
++    for (offset, original) in prefix.iter().enumerate().skip(1) {
++        members.push(SteppedProposal {
++            admission: Some(original.admission),
++            operation: original.command.operation,
++            proposed: position(&result, offset, original.command.operation),
++            error: None,
++        });
++    }
++    let first = &prefix[0];
++    Some(JoinedReady {
++        controls,
++        proposals: Stepped {
++            admission: Some(first.admission),
++            operation: Some(first.command.operation),
++            proposed: position(&result, 0, first.command.operation),
++            read: None,
++            received_from: None,
++            timer: None,
++            batch_members: members,
++            result,
++        },
++    })
++}
++fn copy_prefix(
++    group: &Group,
++    count: usize,
++    check: &mut impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
++) -> Option<Vec<ReadyProposal>> {
++    let mut prefix = Vec::new();
++    prefix.try_reserve_exact(count).ok()?;
++    for queued in group.queues[1].iter().take(count) {
++        if check(&group.core, &queued.event, &prefix).is_err() {
++            break;
++        }
++        let Event::Propose { operation, bytes } = &queued.event else {
++            unreachable!()
++        };
++        let mut copied = Vec::new();
++        copied.try_reserve_exact(bytes.len()).ok()?;
++        copied.extend_from_slice(bytes);
++        prefix.push(ReadyProposal {
++            admission: queued.admission.unwrap(),
++            command: Proposal {
++                operation: *operation,
++                bytes: copied,
++            },
++        });
++    }
++    if prefix.is_empty() {
++        return None;
++    }
++    Some(prefix)
++}
++fn copy_proposals(prefix: &[ReadyProposal]) -> Option<Vec<Proposal>> {
++    let mut proposals = Vec::new();
++    proposals.try_reserve_exact(prefix.len()).ok()?;
++    for entry in prefix {
++        let mut copied = Vec::new();
++        copied.try_reserve_exact(entry.command.bytes.len()).ok()?;
++        copied.extend_from_slice(&entry.command.bytes);
++        proposals.push(Proposal {
++            operation: entry.command.operation,
++            bytes: copied,
++        });
++    }
++    Some(proposals)
++}
++
++#[cfg(test)]
++mod tests;
+diff --git a/src/runtime/ready_batch/joined/fixture.rs b/src/runtime/ready_batch/joined/fixture.rs
+new file mode 100644
+index 00000000..b22002e9
+--- /dev/null
++++ b/src/runtime/ready_batch/joined/fixture.rs
+@@ -0,0 +1,177 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Real election/durable Noop and outstanding primary replies, no synthetic role.
++use super::*;
++pub(super) struct Ready(VecDeque<GroupIdentity>);
++impl ReadyScheduler for Ready {
++    fn capacity(&self) -> usize {
++        1
++    }
++    fn enqueue(&mut self, group: GroupIdentity) -> Result<(), RuntimeError> {
++        if !self.0.contains(&group) {
++            self.0.push_back(group);
++        }
++        Ok(())
++    }
++    fn pop(&mut self) -> Option<GroupIdentity> {
++        self.0.pop_front()
++    }
++    fn cancel(&mut self, group: GroupIdentity) {
++        self.0.retain(|g| *g != group);
++    }
++    fn len(&self) -> usize {
++        self.0.len()
++    }
++}
++pub(super) fn node(n: u64) -> NodeId {
++    NodeId::new(n).unwrap()
++}
++pub(super) fn group() -> GroupIdentity {
++    GroupIdentity {
++        id: GroupId::new(1).unwrap(),
++        incarnation: GroupIncarnation::new(1).unwrap(),
++    }
++}
++fn binding(n: u128) -> StoreBinding {
++    StoreBinding {
++        identity: StoreIdentity {
++            id: StoreId::new(n).unwrap(),
++            incarnation: StoreIncarnation::new(1).unwrap(),
++        },
++        session: StoreSession::new(1).unwrap(),
++    }
++}
++pub(super) fn command(id: u128) -> Event {
++    Event::Propose {
++        operation: OperationId::new(id).unwrap(),
++        bytes: 1i64.to_le_bytes().to_vec(),
++    }
++}
++fn durable(core: &mut Raft, mut effects: Vec<Effect>) -> Vec<Effect> {
++    let mut output = Vec::new();
++    while let Some(effect) = effects.pop() {
++        if let Effect::Persist(update) = effect {
++            let mut states = BTreeMap::from([(group(), core.state().clone())]);
++            apply_batch(
++                &mut states,
++                &[LogMutation::Update(update)],
++                core.proposal_limits(),
++            )
++            .unwrap();
++            let state = &states[&group()];
++            let ticket = LogTicket {
++                binding: core.storage_binding(),
++                batch: state.revision.get(),
++                group: group(),
++                revision: state.revision,
++                generation: state.generation,
++                last_index: state.last_index(),
++                term: state.hard_state.term,
++            };
++            core.admitted(ticket).unwrap();
++            effects.extend(
++                core.complete(&DurableLog {
++                    tickets: vec![ticket],
++                })
++                .unwrap(),
++            );
++        } else {
++            output.push(effect);
++        }
++    }
++    output
++}
++pub(super) fn leader(batch: BatchLimits) -> (Raft, Vec<Message>) {
++    let bootstrap = Bootstrap {
++        group: group(),
++        configuration: ConfigurationId::new(1).unwrap(),
++        policy: Policy::new(
++            Tree::Majority((1..=3).map(|n| Tree::Voter(node(n))).collect()),
++            Limits::default(),
++        )
++        .unwrap(),
++        voter_stores: (1..=3)
++            .map(|n| (node(n), binding(u128::from(n)).identity))
++            .collect(),
++    };
++    let state = GroupLog {
++        bootstrap,
++        revision: LogRevision::new(1).unwrap(),
++        generation: LogGeneration::new(1).unwrap(),
++        hard_state: HardState::default(),
++        ballot_origin: None,
++        commit_index: 0,
++        snapshot: None,
++        snapshot_membership: None,
++        entries: Vec::new(),
++    };
++    let mut core = Raft::recover(node(1), binding(1), state, LogLimits::default()).unwrap();
++    core.configure_batch_limits(batch).unwrap();
++    let election = core.step(Event::Campaign).unwrap();
++    let votes = durable(&mut core, election);
++    let vote = votes
++        .into_iter()
++        .find_map(|e| match e {
++            Effect::Send(m) if m.to == node(2) => Some(m),
++            _ => None,
++        })
++        .unwrap();
++    let voted = response(&vote, Rpc::Voted { granted: true });
++    let election = core.step(Event::Receive(voted)).unwrap();
++    let append = durable(&mut core, election);
++    assert_eq!(core.role(), Role::Leader);
++    assert_eq!(core.state().last_index(), 1);
++    assert_eq!(core.state().commit_index, 0);
++    let mut replies: Vec<_> = append
++        .into_iter()
++        .filter_map(|e| match e {
++            Effect::Send(m) if matches!(m.rpc, Rpc::Append { .. }) => Some(response(
++                &m,
++                Rpc::Appended {
++                    success: true,
++                    matching_index: 1,
++                },
++            )),
++            _ => None,
++        })
++        .collect();
++    replies.sort_by_key(|m| m.from);
++    assert_eq!(replies.len(), 2);
++    (core, replies)
++}
++fn response(sent: &Message, rpc: Rpc) -> Message {
++    Message {
++        group: sent.group,
++        configuration: sent.configuration,
++        from: sent.to,
++        sender: binding(u128::from(sent.to.get())),
++        to: sent.from,
++        term: sent.term,
++        context: sent.context,
++        rpc,
++    }
++}
++pub(super) fn prepared(
++    mut limits: ShardLimits,
++    batch: BatchLimits,
++) -> (Shard<Ready>, Vec<Message>) {
++    let (core, replies) = leader(batch);
++    limits.max_groups = 1;
++    let owner = RuntimeOwner {
++        store: core.storage_binding(),
++        lane: ExecutionLaneId::new(1).unwrap(),
++        generation: RuntimeGeneration::new(1).unwrap(),
++    };
++    let mut shard = Shard::new(owner, limits, Ready(VecDeque::new())).unwrap();
++    shard.register(core).unwrap();
++    (shard, replies)
++}
++pub(super) fn token(shard: &Shard<Ready>) -> TimerToken {
++    TimerToken {
++        owner: shard.owner,
++        group: group(),
++        kind: TimerKind::Heartbeat,
++        sequence: 1,
++        deadline: MonoTime(50),
++    }
++}
+diff --git a/src/runtime/ready_batch/joined/owner.rs b/src/runtime/ready_batch/joined/owner.rs
+new file mode 100644
+index 00000000..8cee7018
+--- /dev/null
++++ b/src/runtime/ready_batch/joined/owner.rs
+@@ -0,0 +1,435 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Owner/worker ownership controls; this deterministic worker makes no disk claim.
++use super::*;
++use crate::{
++    native::runtime::{DeadlineQueue, JitterEntropy},
++    worker::*,
++};
++type Owner = EffectOwner<Ready, DeadlineQueue, JitterEntropy>;
++struct Worker {
++    binding: WorkerBinding,
++    state: GroupLog,
++    events: VecDeque<WorkerEvent>,
++}
++impl PersistenceWorker for Worker {
++    fn binding(&self) -> WorkerBinding {
++        self.binding
++    }
++    fn limits(&self) -> WorkerLimits {
++        WorkerLimits::default()
++    }
++    fn usage(&self) -> WorkerUsage {
++        WorkerUsage::default()
++    }
++    fn submit(&mut self, units: Vec<PersistUnit>) -> Result<WorkerTicket, WorkerRejected> {
++        assert!(self.events.is_empty());
++        assert_eq!(units.len(), 1);
++        let unit = &units[0];
++        let mut states = BTreeMap::from([(group(), self.state.clone())]);
++        apply_batch(
++            &mut states,
++            &[LogMutation::Update(unit.update.clone())],
++            LogLimits::default(),
++        )
++        .unwrap();
++        self.state = states.remove(&group()).unwrap();
++        let request = WorkerTicket {
++            binding: self.binding,
++            sequence: self.state.revision.get(),
++        };
++        let ticket = LogTicket {
++            binding: self.binding.store,
++            batch: self.state.revision.get(),
++            group: group(),
++            revision: self.state.revision,
++            generation: self.state.generation,
++            last_index: self.state.last_index(),
++            term: self.state.hard_state.term,
++        };
++        self.events.push_back(WorkerEvent::Written {
++            request,
++            admissions: vec![(unit.visit, ticket)],
++        });
++        self.events.push_back(WorkerEvent::Durable {
++            request,
++            visits: vec![unit.visit],
++            completion: DurableLog {
++                tickets: vec![ticket],
++            },
++        });
++        Ok(request)
++    }
++    fn poll(&mut self, limit: usize) -> Vec<WorkerEvent> {
++        (0..limit).filter_map(|_| self.events.pop_front()).collect()
++    }
++    fn close(&mut self) {}
++}
++fn setup(limits: EffectOwnerLimits, batch: BatchLimits) -> (Owner, Worker, Vec<Message>) {
++    let (shard, replies) = prepared(ShardLimits::default(), batch);
++    let binding = WorkerBinding {
++        store: shard.owner.store,
++        generation: StorageWorkerGeneration::new(1).unwrap(),
++    };
++    let worker = Worker {
++        binding,
++        state: shard.core(group()).unwrap().state().clone(),
++        events: VecDeque::new(),
++    };
++    let timers = DeadlineQueue::new(shard.owner, 1).unwrap();
++    let timed = TimedShard::new(
++        shard,
++        timers,
++        JitterEntropy::new(1),
++        TimerConfig::default(),
++        MonoTime(0),
++    )
++    .unwrap();
++    (
++        EffectOwner::new(timed, binding, limits).unwrap(),
++        worker,
++        replies,
++    )
++}
++fn queue(owner: &mut Owner, replies: Vec<Message>) {
++    for reply in replies {
++        owner.admit(group(), Event::Receive(reply)).unwrap();
++    }
++    owner.admit_tracked(group(), command(u128::MAX)).unwrap();
++    owner
++        .admit_tracked(group(), command((1u128 << 96) + 3))
++        .unwrap();
++}
++fn retained(owner: &Owner, expected: bool) {
++    assert_eq!(owner.has_pending_peer_ingress(group(), node(2)), expected);
++    assert_eq!(owner.has_pending_peer_ingress(group(), node(3)), expected);
++}
++#[test]
++fn both_receive_sources_live_through_lease_written_durable_and_final_retirement() {
++    let (mut owner, mut worker, replies) =
++        setup(EffectOwnerLimits::default(), BatchLimits::default());
++    queue(&mut owner, replies);
++    let token = owner.deadline(group()).unwrap();
++    let steps = owner
++        .advance_batch_authorized(MonoTime(0), 4, |_| (true, true), |_, _, _| Ok(()))
++        .unwrap();
++    assert_eq!(steps.len(), 4);
++    assert!(steps
++        .iter()
++        .all(|step| step.visit == steps[0].visit && step.error.is_none()));
++    assert!(steps[..2].iter().all(|step| step.operation.is_none()));
++    assert_eq!(steps[2].operation.unwrap().get(), u128::MAX);
++    assert_eq!(steps[3].operation.unwrap().get(), (1u128 << 96) + 3);
++    assert_eq!(steps[2].proposed.unwrap().index, 2);
++    assert_eq!(steps[3].proposed.unwrap().index, 3);
++    assert_eq!(owner.deadline(group()), Some(token));
++    retained(&owner, true);
++    let persist = owner.take_effect().unwrap().unwrap();
++    retained(&owner, true);
++    owner
++        .submit_persists(&mut worker, vec![persist], MonoTime(0))
++        .unwrap();
++    retained(&owner, true);
++    let written = worker.poll(1).pop().unwrap();
++    assert!(matches!(written, WorkerEvent::Written { .. }));
++    owner.deliver_worker(written, MonoTime(0)).unwrap();
++    retained(&owner, true);
++    // Early ordinary suffix sends may precede Durable, but cannot retire the
++    // receive-source union while this same visit still waits on its barrier.
++    while let Some(lease) = owner.take_effect().unwrap() {
++        assert!(matches!(lease.effect, Effect::Send(_)));
++        owner.release_transferred_send(lease.ticket).unwrap();
++        retained(&owner, true);
++    }
++    owner
++        .deliver_worker(worker.poll(1).pop().unwrap(), MonoTime(0))
++        .unwrap();
++    retained(&owner, true);
++    let mut committed = 0;
++    while let Some(lease) = owner.take_effect().unwrap() {
++        match &lease.effect {
++            Effect::Send(_) => owner.release_transferred_send(lease.ticket).unwrap(),
++            Effect::Committed(entries) => {
++                committed += entries.len();
++                let applied = entries.last().unwrap().index;
++                retained(&owner, true);
++                owner.release(lease, applied, MonoTime(0)).unwrap();
++            }
++            other => panic!("unexpected joined output {other:?}"),
++        }
++    }
++    assert_eq!(committed, 1);
++    retained(&owner, false);
++    assert_eq!(owner.usage().active_visits, 0);
++}
++
++#[test]
++fn unavailable_bulk_or_capability_keeps_original_protected_control_and_queued_data() {
++    for enabled in [false, true] {
++        // Admit each ordinary proposal, but leave no bulk room for the
++        // joined producer's additional staging/output/source reservation.
++        let (core, _) = leader(BatchLimits::default());
++        let ordinary = core
++            .effect_reservation(ShardLimits::default().max_event_bytes)
++            .unwrap();
++        let limits = EffectOwnerLimits {
++            reserved_bytes: 256 * 1024 * 1024,
++            control_bytes: 256 * 1024 * 1024 - ordinary,
++            ..EffectOwnerLimits::default()
++        };
++        let (mut owner, _, replies) = setup(limits, BatchLimits::default());
++        queue(&mut owner, replies);
++        let steps = owner
++            .advance_batch_authorized(
++                MonoTime(0),
++                4,
++                |_| (true, enabled),
++                |_, _, _| panic!("bulk refusal precedes app checks"),
++            )
++            .unwrap();
++        assert_eq!(steps.len(), 1);
++        assert!(steps[0].operation.is_none());
++        let persist = owner.take_effect().unwrap().unwrap();
++        let Effect::Persist(update) = persist.effect else {
++            panic!()
++        };
++        assert!(update.suffix.is_none());
++        assert_eq!(update.commit_index, 1);
++        assert_eq!(owner.core(group()).unwrap().state().last_index(), 1);
++        assert_eq!(owner.usage().active_visits, 1);
++        retained(&owner, true);
++    }
++}
++
++#[test]
++fn one_original_core_limit_does_not_hide_control_plus_original_output_room() {
++    let (mut owner, _, mut replies) = setup(
++        EffectOwnerLimits::default(),
++        BatchLimits {
++            max_proposal_entries: 1,
++            ..BatchLimits::default()
++        },
++    );
++    owner
++        .admit(group(), Event::Receive(replies.remove(0)))
++        .unwrap();
++    owner.admit_tracked(group(), command(5)).unwrap();
++    let steps = owner
++        .advance_batch_authorized(MonoTime(0), 2, |_| (true, true), |_, _, _| Ok(()))
++        .unwrap();
++    assert_eq!(steps.len(), 2);
++    assert!(steps[0].operation.is_none());
++    assert_eq!(steps[1].operation.unwrap().get(), 5);
++    let lease = owner.take_effect().unwrap().unwrap();
++    let Effect::Persist(update) = lease.effect else {
++        panic!()
++    };
++    assert_eq!(update.commit_index, 1);
++    assert_eq!(update.suffix.unwrap().entries.len(), 1);
++}
++
++#[test]
++fn closed_timer_owner_serializes_existing_controls_without_a_joined_refresh() {
++    let (mut owner, _, replies) = setup(EffectOwnerLimits::default(), BatchLimits::default());
++    queue(&mut owner, replies);
++    owner.close_admission().unwrap();
++    let steps = owner
++        .advance_batch_authorized(
++            MonoTime(0),
++            4,
++            |_| (true, true),
++            |_, _, _| panic!("closed timer owner must serialize controls"),
++        )
++        .unwrap();
++    assert_eq!(steps.len(), 1);
++    assert!(steps[0].operation.is_none());
++    assert!(owner.deadline(group()).is_none());
++    let lease = owner.take_effect().unwrap().unwrap();
++    let Effect::Persist(update) = lease.effect else {
++        panic!()
++    };
++    assert!(update.suffix.is_none());
++}
++
++struct CommitContext(crate::application::Counter);
++impl crate::application::StateMachine for CommitContext {
++    type Receipt = crate::application::CounterReceipt;
++    fn applied_index(&self) -> u64 {
++        self.0.applied_index()
++    }
++    fn apply_batch(
++        &mut self,
++        entries: &[LogEntry],
++    ) -> Result<Vec<Self::Receipt>, crate::application::ApplicationError> {
++        self.0.apply_batch(entries)
++    }
++}
++impl crate::application::BoundedStateMachine for CommitContext {
++    fn receipt_bytes_bound(
++        &self,
++        entries: &[LogEntry],
++    ) -> Result<usize, crate::application::ApplicationError> {
++        self.0.receipt_bytes_bound(entries)
++    }
++}
++impl crate::application::ProposalAdmission for CommitContext {
++    fn supports_ready_batch(&self) -> bool {
++        true
++    }
++    fn validate_proposal_context(
++        &self,
++        core: &Raft,
++        _: OperationId,
++        _: &[u8],
++    ) -> Result<(), crate::application::ApplicationError> {
++        if core.state().commit_index == 0 {
++            Ok(())
++        } else {
++            Err(crate::application::ApplicationError::InvalidCommand)
++        }
++    }
++    fn validate_proposal<'a>(
++        &self,
++        operation: OperationId,
++        bytes: &[u8],
++        pending: impl Iterator<Item = (OperationId, &'a [u8])>,
++    ) -> Result<usize, crate::application::ApplicationError> {
++        self.0.validate_proposal(operation, bytes, pending)
++    }
++}
++fn apply_serialized_noop(owner: &mut Owner, app: &mut CommitContext) {
++    while let Some(lease) = owner.take_effect().unwrap() {
++        match &lease.effect {
++            Effect::Send(_) => owner.release_transferred_send(lease.ticket).unwrap(),
++            Effect::Committed(entries) => {
++                let receipts = crate::application::StateMachine::apply_batch(app, entries).unwrap();
++                assert!(
++                    receipts.is_empty(),
++                    "the committed prefix is the ordinary Noop"
++                );
++                let applied = crate::application::StateMachine::applied_index(app);
++                assert_eq!(applied, entries.last().unwrap().index);
++                owner.release(lease, applied, MonoTime(0)).unwrap();
++            }
++            other => panic!("unexpected serialized output {other:?}"),
++        }
++    }
++}
++#[test]
++fn context_sensitive_batch_host_default_false_waits_for_original_commit() {
++    use crate::application::{Counter, ProposalAdmission};
++    let (mut owner, mut worker, replies) =
++        setup(EffectOwnerLimits::default(), BatchLimits::default());
++    let mut app = CommitContext(Counter::new(8).unwrap());
++    assert!(app.supports_ready_batch());
++    assert!(!app.supports_ready_commit_batch());
++    let mut clients = ClientRouter::new(
++        ClientRouterBinding::new(
++            owner.authorization(),
++            ClientRouterGeneration::new(1).unwrap(),
++        ),
++        ClientRouterLimits::default(),
++    )
++    .unwrap();
++    let operation = OperationId::new(u128::MAX).unwrap();
++    clients
++        .submit(
++            &mut owner,
++            &app,
++            ClientRequest {
++                group: group(),
++                operation,
++                bytes: 1i64.to_le_bytes().to_vec(),
++            },
++        )
++        .unwrap();
++    for reply in replies {
++        owner.admit(group(), Event::Receive(reply)).unwrap();
++    }
++    // The real Router must thread BOTH capabilities. A batch-only wrapper
++    // observes the original durable commit before proposal execution.
++    let steps = clients
++        .advance(&mut owner, MonoTime(0), 4, |_| Some(&app))
++        .unwrap();
++    assert_eq!(steps.len(), 1);
++    assert!(steps[0].operation.is_none());
++    let persist = owner.take_effect().unwrap().unwrap();
++    assert!(matches!(&persist.effect, Effect::Persist(update) if update.suffix.is_none()));
++    owner
++        .submit_persists(&mut worker, vec![persist], MonoTime(0))
++        .unwrap();
++    for event in worker.poll(2) {
++        owner.deliver_worker(event, MonoTime(0)).unwrap();
++    }
++    apply_serialized_noop(&mut owner, &mut app);
++    assert_eq!(crate::application::StateMachine::applied_index(&app), 1);
++    let mut steps = Vec::new();
++    let mut notifications = 0;
++    // The still-queued second ACK owes its old commit notification. Its Send
++    // owns that visit until handback; do not skip it to find the later Data.
++    for _ in 0..4 {
++        steps.extend(
++            clients
++                .advance(&mut owner, MonoTime(0), 4, |_| Some(&app))
++                .unwrap(),
++        );
++        while let Some(lease) = owner.take_effect().unwrap() {
++            assert!(
++                matches!(&lease.effect, Effect::Send(message) if message.to == node(3)
++                && matches!(&message.rpc, Rpc::Append { leader_commit: 1, .. }))
++            );
++            notifications += 1;
++            owner.release_transferred_send(lease.ticket).unwrap();
++        }
++        if steps.iter().any(|step| step.operation == Some(operation)) {
++            break;
++        }
++    }
++    assert_eq!(notifications, 1);
++    assert!(steps
++        .iter()
++        .filter(|step| step.operation.is_none())
++        .all(|step| step.error.is_none()));
++    let step = steps
++        .iter()
++        .find(|s| s.operation == Some(operation))
++        .unwrap();
++    assert_eq!(
++        step.error,
++        Some(RaftError::Admission(
++            crate::application::ApplicationError::InvalidCommand
++        ))
++    );
++    assert!(step.proposed.is_none());
++    assert_eq!(owner.core(group()).unwrap().state().last_index(), 1);
++}
++
++#[test]
++fn failed_join_checks_refund_to_identical_control_reservation_without_dequeue() {
++    let mut charges = Vec::new();
++    for enabled in [false, true] {
++        let (mut owner, _, replies) = setup(EffectOwnerLimits::default(), BatchLimits::default());
++        queue(&mut owner, replies);
++        let mut checks = 0;
++        let steps = owner
++            .advance_batch_authorized(
++                MonoTime(0),
++                4,
++                |_| (true, enabled),
++                |_, _, _| {
++                    checks += 1;
++                    Err(RaftError::Busy)
++                },
++            )
++            .unwrap();
++        assert_eq!(checks, usize::from(enabled));
++        assert_eq!(steps.len(), 1);
++        assert!(steps[0].error.is_none());
++        assert!(steps[0].operation.is_none());
++        charges.push(owner.usage().reserved_bytes);
++        let lease = owner.take_effect().unwrap().unwrap();
++        assert!(matches!(lease.effect, Effect::Persist(update) if update.suffix.is_none()));
++        assert_eq!(owner.core(group()).unwrap().state().last_index(), 1);
++    }
++    assert_eq!(charges[0], charges[1]);
++}
+diff --git a/src/runtime/ready_batch/joined/tests.rs b/src/runtime/ready_batch/joined/tests.rs
+new file mode 100644
+index 00000000..5ae1e938
+--- /dev/null
++++ b/src/runtime/ready_batch/joined/tests.rs
+@@ -0,0 +1,208 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use crate::{
++    contracts::HardState,
++    log::*,
++    quorum::{Limits, Policy, Tree},
++};
++#[path = "fixture.rs"]
++mod fixture;
++use fixture::*;
++#[cfg(feature = "native")]
++#[path = "owner.rs"]
++mod owner;
++
++#[test]
++fn two_replies_and_original_prefix_follow_real_cursor_and_keep_full_ids() {
++    let (mut shard, replies) = prepared(ShardLimits::default(), BatchLimits::default());
++    for reply in replies {
++        shard.admit(group(), Event::Receive(reply)).unwrap();
++    }
++    let ids = [u128::MAX, (1u128 << 96) + 7, 7];
++    let tickets: Vec<_> = ids
++        .into_iter()
++        .map(|id| shard.admit_tracked(group(), command(id)).unwrap())
++        .collect();
++    let visit = shard.poll(MonoTime(0)).unwrap().unwrap();
++    let before = shard.core(group()).unwrap().state().clone();
++    let mut seen = Vec::new();
++    let joined = shard
++        .step_joined_checked(visit, MonoTime(0), 4, |_, event, prefix| {
++            let Event::Propose { operation, .. } = event else {
++                panic!()
++            };
++            seen.push((operation.get(), prefix.len()));
++            Ok(())
++        })
++        .unwrap()
++        .unwrap();
++    assert_eq!(seen, vec![(ids[0], 0), (ids[1], 1)]);
++    assert_eq!(
++        joined
++            .controls
++            .iter()
++            .map(|c| c.received_from)
++            .collect::<Vec<_>>(),
++        vec![node(2), node(3)]
++    );
++    assert_eq!(joined.proposals.admission, Some(tickets[0]));
++    assert_eq!(joined.proposals.operation.unwrap().get(), ids[0]);
++    assert_eq!(joined.proposals.proposed.unwrap().index, 2);
++    assert_eq!(
++        joined.proposals.batch_members[0].admission,
++        Some(tickets[1])
++    );
++    assert_eq!(joined.proposals.batch_members[0].operation.get(), ids[1]);
++    assert_eq!(joined.proposals.batch_members[0].proposed.unwrap().index, 3);
++    let g = &shard.groups[&group()];
++    assert_eq!(g.turn, 3);
++    assert_eq!(g.visit.as_ref().unwrap().used[0].items, 2);
++    assert_eq!(g.visit.as_ref().unwrap().used[1].items, 2);
++    assert_eq!(g.queues[1].len(), 1);
++    assert_eq!(g.core.state(), &before);
++    let Effect::Persist(update) = &joined.proposals.result.as_ref().unwrap()[0] else {
++        panic!()
++    };
++    assert_eq!(update.commit_index, before.last_index());
++    assert_eq!(update.suffix.as_ref().unwrap().entries.len(), 2);
++}
++
++#[test]
++fn rejected_second_original_remains_queued_and_first_failure_preserves_all_inputs() {
++    for rejected in [1, 2] {
++        let (mut shard, replies) = prepared(ShardLimits::default(), BatchLimits::default());
++        for reply in replies {
++            shard.admit(group(), Event::Receive(reply)).unwrap();
++        }
++        for id in 1..=3 {
++            shard.admit_tracked(group(), command(id)).unwrap();
++        }
++        let visit = shard.poll(MonoTime(0)).unwrap().unwrap();
++        let before = shard.core(group()).unwrap().state().clone();
++        let result = shard
++            .step_joined_checked(visit, MonoTime(0), 5, |_, event, _| {
++                if matches!(event, Event::Propose { operation, .. } if operation.get() == rejected)
++                {
++                    Err(RaftError::Busy)
++                } else {
++                    Ok(())
++                }
++            })
++            .unwrap();
++        let g = &shard.groups[&group()];
++        if rejected == 1 {
++            assert!(result.is_none());
++            assert_eq!(g.queues[0].len(), 2);
++            assert_eq!(g.queues[1].len(), 3);
++            assert_eq!(g.turn, 0);
++            assert_eq!(sum(&g.visit.as_ref().unwrap().used).items, 0);
++            assert!(!g.core.has_pending_dependency());
++        } else {
++            let joined = result.unwrap();
++            assert_eq!(joined.proposals.operation.unwrap().get(), 1);
++            assert!(joined.proposals.batch_members.is_empty());
++            assert_eq!(g.queues[1].len(), 2);
++            assert!(
++                matches!(&g.queues[1][0].event, Event::Propose { operation, .. } if operation.get() == 2)
++            );
++        }
++        assert_eq!(g.core.state(), &before);
++    }
++}
++
++#[test]
++fn selector_respects_reply_cap_protected_tail_background_timers_and_output_limit() {
++    for boundary in 0..7 {
++        let batch = BatchLimits {
++            max_ready_reply_inputs: if boundary == 0 { 1 } else { 2 },
++            ..BatchLimits::default()
++        };
++        let (mut shard, replies) = prepared(ShardLimits::default(), batch);
++        for reply in replies {
++            shard.admit(group(), Event::Receive(reply)).unwrap();
++        }
++        shard.admit_tracked(group(), command(1)).unwrap();
++        match boundary {
++            1 => {
++                shard.admit(group(), Event::Campaign).unwrap();
++            }
++            2 => {
++                shard.admit(group(), Event::Checkpoint).unwrap();
++            }
++            3 => {
++                let timer = token(&shard);
++                shard.groups.get_mut(&group()).unwrap().queues[0][0].timer = Some(timer);
++            }
++            4 => {
++                shard.groups.get_mut(&group()).unwrap().turn = 2;
++            }
++            _ => (),
++        }
++        let visit = shard.poll(MonoTime(0)).unwrap().unwrap();
++        let now = if boundary == 5 {
++            shard.groups[&group()].visit.as_ref().unwrap().deadline
++        } else {
++            MonoTime(0)
++        };
++        let limit = if boundary == 6 { 2 } else { 4 };
++        assert!(shard
++            .joined_reservation(visit, now, limit)
++            .unwrap()
++            .is_none());
++        assert!(shard
++            .step_joined_checked(visit, now, limit, |_, _, _| panic!(
++                "boundary must precede application checks"
++            ))
++            .unwrap()
++            .is_none());
++        assert_eq!(
++            shard.groups[&group()].queues[0].len(),
++            if boundary == 1 { 3 } else { 2 }
++        );
++        assert_eq!(shard.groups[&group()].queues[1].len(), 1);
++    }
++}
++
++#[test]
++fn cursor_skips_only_nonfitting_controls_and_does_not_fish_past_fitting_reply() {
++    let (mut shard, replies) = prepared(ShardLimits::default(), BatchLimits::default());
++    for reply in replies {
++        shard.admit(group(), Event::Receive(reply)).unwrap();
++    }
++    for id in 1..=4 {
++        shard.admit_tracked(group(), command(id)).unwrap();
++    }
++    // A third routine reply is still a control boundary after the first Data
++    // turn; it cannot be pulled before Data or skipped to enlarge its batch.
++    let extra = shard.groups[&group()].queues[0][0].event.clone();
++    shard.admit(group(), extra).unwrap();
++    let visit = shard.poll(MonoTime(0)).unwrap().unwrap();
++    let g = shard.groups.get_mut(&group()).unwrap();
++    let selected = selection(g, ShardLimits::default(), MonoTime(0), 8).unwrap();
++    assert_eq!((selected.replies, selected.proposals), (2, 1));
++    let mut cursor = Cursor {
++        turn: 0,
++        offsets: [0; 3],
++        used: Usage::default(),
++    };
++    let mut order = Vec::new();
++    for _ in 0..4 {
++        let (turn, class) = cursor.next(g, ShardLimits::default()).unwrap();
++        order.push(class);
++        cursor.consume(g, turn, class);
++    }
++    assert_eq!(order, [0, 0, 1, 0]);
++    let original_cost = g.queues[0][0].cost;
++    let bytes = original_cost - 1;
++    let small = ShardLimits {
++        visit_bytes: bytes,
++        ..ShardLimits::default()
++    };
++    // The real scheduler and scalar selector agree that an ineligible control
++    // does not consume its turn; Data may be the ordinary head instead.
++    g.queues[1][0].cost = 1;
++    assert_eq!(g.next_queued(small, MonoTime(0)), Some((2, 1)));
++    assert!(selection(g, small, MonoTime(0), 8).is_none());
++    assert_eq!(g.visit.as_ref().unwrap().ticket, visit);
++}
+diff --git a/src/runtime/timed.rs b/src/runtime/timed.rs
+index 9d74fe1d..cea0ecd6 100644
+--- a/src/runtime/timed.rs
++++ b/src/runtime/timed.rs
+@@ -473,6 +473,47 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
+         self.check()?;
+         self.shard.next_class(visit, now)
+     }
++    // The joined producer cannot repair/re-register a timer after committing.
++    // Only the exact ordinary leader refresh no-op is eligible.
++    fn joined_timer_unchanged(&self, group: GroupIdentity) -> bool {
++        !self.closed
++            && !self.authorization.is_logical()
++            && self.failed.is_none()
++            && self.shard.core(group).is_some_and(|core| {
++                !core.is_fenced()
++                    && core.role() == Role::Leader
++                    && self.managed.get(&group).is_some_and(|managed| {
++                        managed.token.kind == TimerKind::Heartbeat
++                            && managed.reset == core.election_reset_sequence()
++                    })
++            })
++    }
++    pub(super) fn joined_reservation(
++        &mut self,
++        visit: VisitTicket,
++        now: MonoTime,
++        max: usize,
++    ) -> Result<Option<(usize, usize)>, RuntimeError> {
++        self.check()?;
++        if !self.joined_timer_unchanged(visit.group) {
++            return Ok(None);
++        }
++        self.shard.joined_reservation(visit, now, max)
++    }
++    pub(super) fn step_joined_checked(
++        &mut self,
++        visit: VisitTicket,
++        now: MonoTime,
++        max: usize,
++        check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
++    ) -> Result<Option<ready_batch::JoinedReady>, RuntimeError> {
++        self.check()?;
++        if !self.joined_timer_unchanged(visit.group) {
++            return Ok(None);
++        }
++        // The producer preserves leadership/reset and consumes no timer token.
++        self.shard.step_joined_checked(visit, now, max, check)
++    }
+     pub(super) fn next_ready_effect_reservation(
+         &mut self,
+         visit: VisitTicket,
+diff --git a/tests/log_store/batch_limits.rs b/tests/log_store/batch_limits.rs
+index c6b6241a..ac24a6d1 100644
+--- a/tests/log_store/batch_limits.rs
++++ b/tests/log_store/batch_limits.rs
+@@ -15,6 +15,7 @@ fn setup(io: ModelIo) -> (NativeLogStore<ModelIo>, Raft) {
+         BatchLimits {
+             max_proposal_entries: 4096,
+             max_replication_entries: 1024,
++            max_ready_reply_inputs: 2,
+         },
+     )
+ }
+@@ -94,6 +95,7 @@ fn check_recovery(
+         .configure_batch_limits(BatchLimits {
+             max_proposal_entries: 4096,
+             max_replication_entries: 1024,
++            max_ready_reply_inputs: 2,
+         })
+         .unwrap();
+     let originals: Vec<_> = restarted
+diff --git a/tests/log_store/batch_limits/aggregate.rs b/tests/log_store/batch_limits/aggregate.rs
+index 2a851be8..24d44215 100644
+--- a/tests/log_store/batch_limits/aggregate.rs
++++ b/tests/log_store/batch_limits/aggregate.rs
+@@ -14,6 +14,7 @@ fn batch_limits() -> BatchLimits {
+     BatchLimits {
+         max_proposal_entries: ORIGINALS as usize,
+         max_replication_entries: 1024,
++        max_ready_reply_inputs: 2,
+     }
+ }
+ fn setup_aggregate(io: ModelIo) -> (NativeLogStore<ModelIo>, Raft) {
+diff --git a/tests/provider_conformance/application/commit_batch.rs b/tests/provider_conformance/application/commit_batch.rs
+index c93b7c4d..cc488895 100644
+--- a/tests/provider_conformance/application/commit_batch.rs
++++ b/tests/provider_conformance/application/commit_batch.rs
+@@ -58,3 +58,44 @@ fn counter_admission_is_invariant_under_moving_pending_prefix_to_applied() {
+         }
+     }
+ }
++
++struct BatchOnly(Counter);
++impl StateMachine for BatchOnly {
++    type Receipt = CounterReceipt;
++    fn applied_index(&self) -> u64 {
++        self.0.applied_index()
++    }
++    fn apply_batch(
++        &mut self,
++        entries: &[LogEntry],
++    ) -> Result<Vec<Self::Receipt>, ApplicationError> {
++        self.0.apply_batch(entries)
++    }
++}
++impl BoundedStateMachine for BatchOnly {
++    fn receipt_bytes_bound(&self, entries: &[LogEntry]) -> Result<usize, ApplicationError> {
++        self.0.receipt_bytes_bound(entries)
++    }
++}
++impl ProposalAdmission for BatchOnly {
++    fn supports_ready_batch(&self) -> bool {
++        true
++    }
++    fn validate_proposal<'a>(
++        &self,
++        operation: OperationId,
++        bytes: &[u8],
++        pending: impl Iterator<Item = (OperationId, &'a [u8])>,
++    ) -> Result<usize, ApplicationError> {
++        self.0.validate_proposal(operation, bytes, pending)
++    }
++}
++#[test]
++fn commit_batch_capability_is_separate_and_wrappers_default_to_serialized() {
++    let counter = Counter::new(8).unwrap();
++    assert!(counter.supports_ready_batch());
++    assert!(counter.supports_ready_commit_batch());
++    let wrapper = BatchOnly(counter);
++    assert!(wrapper.supports_ready_batch());
++    assert!(!wrapper.supports_ready_commit_batch());
++}
+diff --git a/validation/check-joined.mjs b/validation/check-joined.mjs
+new file mode 100644
+index 00000000..a41dcc61
+--- /dev/null
++++ b/validation/check-joined.mjs
+@@ -0,0 +1,43 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++// Original-step counter arithmetic, not eligibility/hit-rate or quorum evidence.
++import assert from 'node:assert/strict';
++export function validateJoined(summary, csv) {
++    const integer = value => {
++        assert.match(String(value), /^(0|[1-9]\d*)$/);
++        const result = Number(value);
++        assert.ok(Number.isSafeInteger(result));
++        return result;
++    };
++    const bound = integer(summary.ready_reply_inputs_effective);
++    assert.ok([0, 2].includes(bound));
++    assert.equal(integer(summary.ready_reply_inputs_requested), bound);
++    assert.equal(summary.ready_commit_batch_capable, 'true');
++    const lines = csv.trim().split('\n');
++    assert.equal(lines.shift(), 'phase,replica,joined_transitions,joined_reply_inputs,joined_originals');
++    assert.equal(lines.length, 6);
++    const seen = new Set();
++    const totals = {warmup: [0, 0, 0], measurement: [0, 0, 0]};
++    for (const line of lines) {
++        const fields = line.split(',');
++        assert.equal(fields.length, 5);
++        const [phase, ...values] = fields;
++        assert.ok(Object.hasOwn(totals, phase));
++        const [replica, transitions, replies, originals] = values.map(integer);
++        assert.ok([1, 2, 3].includes(replica));
++        const key = `${phase}:${replica}`;
++        assert.ok(!seen.has(key));
++        seen.add(key);
++        assert.ok(transitions <= replies && replies <= transitions * bound);
++        assert.ok(transitions <= originals && originals <= transitions * 64);
++        if (!transitions) assert.equal(originals, 0);
++        for (const [index, value] of [transitions, replies, originals].entries()) {
++            totals[phase][index] += value;
++            assert.ok(Number.isSafeInteger(totals[phase][index]));
++        }
++    }
++    assert.ok(totals.warmup[2] <= integer(summary.warmup));
++    assert.ok(totals.measurement[2] <= integer(summary.offers ?? summary.operations));
++    assert.deepEqual(totals.measurement, ['joined_transitions', 'joined_reply_inputs', 'joined_originals'].map(key => integer(summary[key])));
++    return totals;
++}
+diff --git a/validation/check-joined.test.mjs b/validation/check-joined.test.mjs
+new file mode 100644
+index 00000000..93563a40
+--- /dev/null
++++ b/validation/check-joined.test.mjs
+@@ -0,0 +1,20 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++import assert from 'node:assert/strict';
++import { validateJoined } from './check-joined.mjs';
++const summary = {ready_reply_inputs_effective: '2', ready_reply_inputs_requested: '2', ready_commit_batch_capable: 'true', warmup: '64', offers: '100', joined_transitions: '3', joined_reply_inputs: '5', joined_originals: '10'};
++const header = 'phase,replica,joined_transitions,joined_reply_inputs,joined_originals\n';
++const rows = ['warmup,1,0,0,0', 'warmup,2,0,0,0', 'warmup,3,1,2,4', 'measurement,1,2,3,6', 'measurement,2,1,2,4', 'measurement,3,0,0,0'];
++const csv = header + rows.join('\n');
++assert.deepEqual(validateJoined(summary, csv).measurement, [3, 5, 10]);
++for (const [edited, data] of [
++    [{...summary, ready_reply_inputs_effective: '0'}, csv],
++    [{...summary, joined_originals: '9'}, csv],
++    [summary, csv.replace('measurement,2,1,2,4', 'measurement,1,1,2,4')],
++    [summary, csv.replace('measurement,2,1,2,4', 'measurement,2,1,3,4')],
++    [summary, csv.replace('measurement,3,0,0,0', 'measurement,3,0,0,1')],
++    [summary, header + rows.slice(1).join('\n')],
++]) assert.throws(() => validateJoined(edited, data));
++const zeros = header + rows.map(line => line.split(',').slice(0, 2).concat(['0', '0', '0']).join(',')).join('\n');
++validateJoined({...summary, ready_reply_inputs_effective: '0', ready_reply_inputs_requested: '0', joined_transitions: '0', joined_reply_inputs: '0', joined_originals: '0'}, zeros);
++console.log('joined counter positive/disabled and six rejection controls pass');
+diff --git a/validation/check-native-benchmark.mjs b/validation/check-native-benchmark.mjs
+index abcb1077..17aae720 100644
+--- a/validation/check-native-benchmark.mjs
++++ b/validation/check-native-benchmark.mjs
+@@ -9,6 +9,7 @@ import { validateLanes } from './check-lanes.mjs';
+ import { validateOffered } from './check-offered.mjs';
+ import { validateMaintenance } from './check-maintenance.mjs';
+ import { validateRoundedRate } from './check-rounded-rate.mjs';
++import { validateJoined } from './check-joined.mjs';
+ 
+ const requireStorage = process.argv.includes('--storage');
+ const directories = process.argv.slice(2).filter(arg => arg !== '--storage');
+@@ -28,6 +29,10 @@ for (const directory of directories) {
+         console.log(JSON.stringify({directory, ...result}));
+         continue;
+     }
++    if (summary.ready_reply_inputs_effective !== undefined) {
++        const joinedPath = runDirectory ? path.join(directory, 'joined.csv') : `${directory}.joined.csv`;
++        validateJoined(summary, fs.readFileSync(joinedPath, 'utf8'));
++    }
+     const groups = Number(summary.groups);
+     if (summary.mode === 'offered') {
+         const offers = runDirectory ? path.join(directory, 'offers.csv') : `${directory}.offers.csv`;

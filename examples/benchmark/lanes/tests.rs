@@ -193,7 +193,7 @@ fn partial_replica_startup_joins_previously_opened_nodes() {
             offset: 0,
             groups: 2,
             lane: 1,
-            ready: ready_items::Settings::default(),
+            ready_visit_items: 16,
         }
     )
     .is_err());

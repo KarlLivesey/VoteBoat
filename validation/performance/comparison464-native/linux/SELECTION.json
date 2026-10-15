@@ -1,0 +1,1368 @@
+{
+  "copied_evidence_files": 271,
+  "files": [
+    {
+      "original_path": "target/p9/comparison464-native/linux/CAMPAIGN_CONFIG.json",
+      "archived_path": "CAMPAIGN_CONFIG.json",
+      "original_sha256": "3198045f581f84c58a66dea2f40af02ae460187e2ecfc5a21eefdc4b53957ab4"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/CAMPAIGN_STAGE",
+      "archived_path": "CAMPAIGN_STAGE",
+      "original_sha256": "0c1fdee0b8301ec702b059d0fc124736909d7878ba512f9171ecc9e6aa180d84"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/CAMPAIGN_STATUS",
+      "archived_path": "CAMPAIGN_STATUS",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/COMMANDS.json",
+      "archived_path": "COMMANDS.json",
+      "original_sha256": "76ecfd8aa1ad4fe57a663b265604a2c2a69545d76cebbced5af094aafe4b2080"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/ORIGINAL_EXIT",
+      "archived_path": "ORIGINAL_EXIT",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/PREFLIGHT.json",
+      "archived_path": "PREFLIGHT.json",
+      "original_sha256": "b3aa4c3753789b67699eedbab6edc9f697baaf7884e2d05705a2eda15750a3ef"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/READY.json",
+      "archived_path": "READY.json",
+      "original_sha256": "35053207bf5acfa6fbf300f6fa090eb30bb624027f1784e022b99fe971b37415"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/SETUP_GUARD.json",
+      "archived_path": "SETUP_GUARD.json",
+      "original_sha256": "f5a32857e44a8de490931d09f7c562383ad9d234ccf9ceaa4f2e643129153e29"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t1-off/NATIVE_PID",
+      "archived_path": "campaign-metadata/g1-quic-r500-w64-q16-t1-off/NATIVE_PID",
+      "original_sha256": "28a899b4777532b605078fe6256907cdf8a5efacedd906497867f464bfd634a5"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t1-off/RESOURCES.json",
+      "archived_path": "campaign-metadata/g1-quic-r500-w64-q16-t1-off/RESOURCES.json",
+      "original_sha256": "9bd56c3cc2b800aa7b64cb8cf047e49940db92d5758fc8f9c69b774d631d8407"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t1-off/resources.py",
+      "archived_path": "campaign-metadata/g1-quic-r500-w64-q16-t1-off/resources.py",
+      "original_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t1-on/NATIVE_PID",
+      "archived_path": "campaign-metadata/g1-quic-r500-w64-q16-t1-on/NATIVE_PID",
+      "original_sha256": "5b0e694919974f29b50fb46bdddad1a8b4b1e5bc2815917997691c80b81ac5fd"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t1-on/RESOURCES.json",
+      "archived_path": "campaign-metadata/g1-quic-r500-w64-q16-t1-on/RESOURCES.json",
+      "original_sha256": "7d71b0d6696649be9310713292202ac6b6ec2c3f94b2029a2392912750224b94"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t1-on/resources.py",
+      "archived_path": "campaign-metadata/g1-quic-r500-w64-q16-t1-on/resources.py",
+      "original_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t2-off/NATIVE_PID",
+      "archived_path": "campaign-metadata/g1-quic-r500-w64-q16-t2-off/NATIVE_PID",
+      "original_sha256": "7aaa57c316af33b06596ac115be1c1d5db4163106301dac4e4bdc972e277fb01"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t2-off/RESOURCES.json",
+      "archived_path": "campaign-metadata/g1-quic-r500-w64-q16-t2-off/RESOURCES.json",
+      "original_sha256": "28ba1c9b5181126176c354a02fae150007d19125e0d5b2de96ed6870069f2eca"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t2-off/resources.py",
+      "archived_path": "campaign-metadata/g1-quic-r500-w64-q16-t2-off/resources.py",
+      "original_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t2-on/NATIVE_PID",
+      "archived_path": "campaign-metadata/g1-quic-r500-w64-q16-t2-on/NATIVE_PID",
+      "original_sha256": "17aa6c9ba71d0ac4aecd01f502702165052b437bcc602fb9856a972f0272cc9c"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t2-on/RESOURCES.json",
+      "archived_path": "campaign-metadata/g1-quic-r500-w64-q16-t2-on/RESOURCES.json",
+      "original_sha256": "57d73abca456a22c10fdcadc03652e144326971af4201f079ab6de6c694f46c8"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t2-on/resources.py",
+      "archived_path": "campaign-metadata/g1-quic-r500-w64-q16-t2-on/resources.py",
+      "original_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t3-off/NATIVE_PID",
+      "archived_path": "campaign-metadata/g1-quic-r500-w64-q16-t3-off/NATIVE_PID",
+      "original_sha256": "17e58d13acb6596aaf332304a60e11febafda4be470c79d61024ff841747ce41"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t3-off/RESOURCES.json",
+      "archived_path": "campaign-metadata/g1-quic-r500-w64-q16-t3-off/RESOURCES.json",
+      "original_sha256": "a42321129495cbab6e734b44c95831d261f68f968c16381d763cd0f0072f0014"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t3-off/resources.py",
+      "archived_path": "campaign-metadata/g1-quic-r500-w64-q16-t3-off/resources.py",
+      "original_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t3-on/NATIVE_PID",
+      "archived_path": "campaign-metadata/g1-quic-r500-w64-q16-t3-on/NATIVE_PID",
+      "original_sha256": "d154f1291e591cf0b04b00f9d6ddd50b4af1c14b9d87e375dc90c35e7acf2391"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t3-on/RESOURCES.json",
+      "archived_path": "campaign-metadata/g1-quic-r500-w64-q16-t3-on/RESOURCES.json",
+      "original_sha256": "ea4efb2f2107b0869223192b509723f4ff851e33b39228d1d3ef00bec8626ec5"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-quic-r500-w64-q16-t3-on/resources.py",
+      "archived_path": "campaign-metadata/g1-quic-r500-w64-q16-t3-on/resources.py",
+      "original_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t1-off/NATIVE_PID",
+      "archived_path": "campaign-metadata/g1-tcp-r500-w64-q16-t1-off/NATIVE_PID",
+      "original_sha256": "2fabdaa945f3f3378f0d2ccac87fb878fabf0620bed54aa2be8519199f7a32f1"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t1-off/RESOURCES.json",
+      "archived_path": "campaign-metadata/g1-tcp-r500-w64-q16-t1-off/RESOURCES.json",
+      "original_sha256": "5656e8af450be94ac66ce90fd9562c2ef827ebf8218653e075563c9ba9be4838"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t1-off/resources.py",
+      "archived_path": "campaign-metadata/g1-tcp-r500-w64-q16-t1-off/resources.py",
+      "original_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t1-on/NATIVE_PID",
+      "archived_path": "campaign-metadata/g1-tcp-r500-w64-q16-t1-on/NATIVE_PID",
+      "original_sha256": "a6dc4d208bb4845244ef0dcf40b1d5799262182e7cf2aa3cf25e5619fb285cf1"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t1-on/RESOURCES.json",
+      "archived_path": "campaign-metadata/g1-tcp-r500-w64-q16-t1-on/RESOURCES.json",
+      "original_sha256": "76ae15bb602adc016b15815a3b8fa4a5b8303b0b97d107e254d50003ec57dc7d"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t1-on/resources.py",
+      "archived_path": "campaign-metadata/g1-tcp-r500-w64-q16-t1-on/resources.py",
+      "original_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t2-off/NATIVE_PID",
+      "archived_path": "campaign-metadata/g1-tcp-r500-w64-q16-t2-off/NATIVE_PID",
+      "original_sha256": "cc6d71f14d9075324f34d3192c3979b5da433881c18e221a12f04d24fe59054f"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t2-off/RESOURCES.json",
+      "archived_path": "campaign-metadata/g1-tcp-r500-w64-q16-t2-off/RESOURCES.json",
+      "original_sha256": "a9666f5fd945c439ea583ee1bb24a6daa92419da8efde1030ea5ad1462b29792"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t2-off/resources.py",
+      "archived_path": "campaign-metadata/g1-tcp-r500-w64-q16-t2-off/resources.py",
+      "original_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t2-on/NATIVE_PID",
+      "archived_path": "campaign-metadata/g1-tcp-r500-w64-q16-t2-on/NATIVE_PID",
+      "original_sha256": "806798fbc61ed1c4b824a899b76dbc71b6c5a41c89a9e8cb9122141844a57f58"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t2-on/RESOURCES.json",
+      "archived_path": "campaign-metadata/g1-tcp-r500-w64-q16-t2-on/RESOURCES.json",
+      "original_sha256": "9e8be2102ec96b3b0f2d63b085f43e7561c447f0c073a049bf796f735338fd6f"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t2-on/resources.py",
+      "archived_path": "campaign-metadata/g1-tcp-r500-w64-q16-t2-on/resources.py",
+      "original_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t3-off/NATIVE_PID",
+      "archived_path": "campaign-metadata/g1-tcp-r500-w64-q16-t3-off/NATIVE_PID",
+      "original_sha256": "f2bd9aeab60d3020649bbdf5b90bb548343497d8b242144e009d61a6bf8c46dc"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t3-off/RESOURCES.json",
+      "archived_path": "campaign-metadata/g1-tcp-r500-w64-q16-t3-off/RESOURCES.json",
+      "original_sha256": "dc8e422db6ce52f96ca61fa3bde506962496520988840faa5b6ade5276d18f7f"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t3-off/resources.py",
+      "archived_path": "campaign-metadata/g1-tcp-r500-w64-q16-t3-off/resources.py",
+      "original_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t3-on/NATIVE_PID",
+      "archived_path": "campaign-metadata/g1-tcp-r500-w64-q16-t3-on/NATIVE_PID",
+      "original_sha256": "0a97fa0ad480f86a6b8cf25179d165536c3c09f24967793021cba3484778ddd9"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t3-on/RESOURCES.json",
+      "archived_path": "campaign-metadata/g1-tcp-r500-w64-q16-t3-on/RESOURCES.json",
+      "original_sha256": "275a554d5af253fc6897a2f20214017e2441001010068f6ecbaaebbf0477e218"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign-metadata/g1-tcp-r500-w64-q16-t3-on/resources.py",
+      "archived_path": "campaign-metadata/g1-tcp-r500-w64-q16-t3-on/resources.py",
+      "original_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign.py",
+      "archived_path": "campaign.py",
+      "original_sha256": "ccf030dc00facd2db18e708fd80fc475779fb071966a1f7a8a47e75805b0f9ea"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/CAMPAIGN.json",
+      "archived_path": "campaign/CAMPAIGN.json",
+      "original_sha256": "e7332ae2a696b1f29f51af893f85bba9c4b932f39fdfeb4dda45590da39b9a9b"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t1-off-check.command.json",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t1-off-check.command.json",
+      "original_sha256": "9c295efebbc38b55e9d0516dbf5eab1566cef911fbd91ac21457ebaee92afe1b"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t1-off-check.exit",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t1-off-check.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t1-off-check.stderr",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t1-off-check.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t1-off-check.stdout",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t1-off-check.stdout",
+      "original_sha256": "575fd0af9da4df8d6b64c0d6cb2c7ccbb40caffcdfcfc63ce0c2b4efca64a81e"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t1-off.command.json",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t1-off.command.json",
+      "original_sha256": "6f80d2c8dad49cb3855bb2b64e3747c180869821c9b231cfe61d69e26c4e9638"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t1-off.exit",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t1-off.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t1-off.stderr",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t1-off.stderr",
+      "original_sha256": "57ba9d16ba6d5023aa9dd3c283cae97bfd41e331428452aeb0689b507d1bf4dc"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t1-off.stdout",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t1-off.stdout",
+      "original_sha256": "4ba79363247e492d4234362c71d1ec7baa6224306192d55bc311dba5658be3c3"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t1-on-check.command.json",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t1-on-check.command.json",
+      "original_sha256": "cfa8b506e8d3df1be8205605551b951e51acb07d50e8f6b1e06f90debdd19147"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t1-on-check.exit",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t1-on-check.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t1-on-check.stderr",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t1-on-check.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t1-on-check.stdout",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t1-on-check.stdout",
+      "original_sha256": "962bc508b42383b20baa2ccf9895d0c4aadcb1a21e7f03a97332871c3b0a977c"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t1-on.command.json",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t1-on.command.json",
+      "original_sha256": "7738826aee91f40f81a9aadef36e766569f6c2c2185dc0800be5f841f9ddbba5"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t1-on.exit",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t1-on.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t1-on.stderr",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t1-on.stderr",
+      "original_sha256": "57ba9d16ba6d5023aa9dd3c283cae97bfd41e331428452aeb0689b507d1bf4dc"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t1-on.stdout",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t1-on.stdout",
+      "original_sha256": "81398e97b5f74df598da7a6608ea4c9c61a804a87f85fe67cb803f338f5178a5"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t2-off-check.command.json",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t2-off-check.command.json",
+      "original_sha256": "33cbd944c0770171a854e58b1d323db2608c9d873fbcd890d75648703b143646"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t2-off-check.exit",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t2-off-check.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t2-off-check.stderr",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t2-off-check.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t2-off-check.stdout",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t2-off-check.stdout",
+      "original_sha256": "053252cfc9a182ca5a925d2ff8b8174730de2310d4b62ed8bc0e221528c461ca"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t2-off.command.json",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t2-off.command.json",
+      "original_sha256": "72b4897c08d367d3ee3f01869263cc3f22dfff19eb93a53bd3e8e5a4c168705f"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t2-off.exit",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t2-off.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t2-off.stderr",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t2-off.stderr",
+      "original_sha256": "57ba9d16ba6d5023aa9dd3c283cae97bfd41e331428452aeb0689b507d1bf4dc"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t2-off.stdout",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t2-off.stdout",
+      "original_sha256": "58dfef915fadf7b927adc9d5924fdcfbb6d80c3f1b569db4504e5e342284159c"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t2-on-check.command.json",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t2-on-check.command.json",
+      "original_sha256": "1cbe2db3ecba70ccd6b0aeffa3c0a4944f3cf691c1647d5f4f9a77e3c504b3fa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t2-on-check.exit",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t2-on-check.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t2-on-check.stderr",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t2-on-check.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t2-on-check.stdout",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t2-on-check.stdout",
+      "original_sha256": "dc2263bc7f55191ac4facca801d497bb6914a16274e4269507fe331227c3a5b7"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t2-on.command.json",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t2-on.command.json",
+      "original_sha256": "889f2bd8ebd6efca19f478b5090c23247214bf3f1e62b957af63d575159e94df"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t2-on.exit",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t2-on.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t2-on.stderr",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t2-on.stderr",
+      "original_sha256": "57ba9d16ba6d5023aa9dd3c283cae97bfd41e331428452aeb0689b507d1bf4dc"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t2-on.stdout",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t2-on.stdout",
+      "original_sha256": "bc2d0dec250a9e44c61b2807e650555e700d47cfd679993cdc9aa1e4611fd573"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t3-off-check.command.json",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t3-off-check.command.json",
+      "original_sha256": "2be5a27520632eed96d65cd8f8f359c82cca87f769b227a0fda4d37823e27ea0"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t3-off-check.exit",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t3-off-check.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t3-off-check.stderr",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t3-off-check.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t3-off-check.stdout",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t3-off-check.stdout",
+      "original_sha256": "8f9b0db8badfea472f2a19b6eb084e7efafa04f45a8629e7c694dd7e064de118"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t3-off.command.json",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t3-off.command.json",
+      "original_sha256": "b490d2bf13384057a6fb53e2856c847ca8f80a1e38edc6f1ad580164bfe7b228"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t3-off.exit",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t3-off.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t3-off.stderr",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t3-off.stderr",
+      "original_sha256": "57ba9d16ba6d5023aa9dd3c283cae97bfd41e331428452aeb0689b507d1bf4dc"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t3-off.stdout",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t3-off.stdout",
+      "original_sha256": "37e3136c69e1a519e7c2f16c8b4c2db42cef01453448e9ac49ab5d7689bdcff7"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t3-on-check.command.json",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t3-on-check.command.json",
+      "original_sha256": "32bbd75cc175fa205849176a05e78bd367387d9ca2f1611918570f4ad461b561"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t3-on-check.exit",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t3-on-check.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t3-on-check.stderr",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t3-on-check.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t3-on-check.stdout",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t3-on-check.stdout",
+      "original_sha256": "beb5ef14ab949bf700f3c771d75fe1fc47794dd2e116235ed7bb8e5461719239"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t3-on.command.json",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t3-on.command.json",
+      "original_sha256": "e9b8fa304db5bcac61ae57238ae652021226f7fa6d92e9f61565058e5c58faef"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t3-on.exit",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t3-on.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t3-on.stderr",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t3-on.stderr",
+      "original_sha256": "57ba9d16ba6d5023aa9dd3c283cae97bfd41e331428452aeb0689b507d1bf4dc"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-quic-r500-w64-q16-t3-on.stdout",
+      "archived_path": "campaign/g1-quic-r500-w64-q16-t3-on.stdout",
+      "original_sha256": "60c81ba0bae7e272f0175b6c4286f5e74422486ed52eafe886a2268c4c3e65b8"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t1-off-check.command.json",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t1-off-check.command.json",
+      "original_sha256": "2f0dbfad8314fdbca336636c09dd9b4a678059052e6396f1ebbd478d360f59e0"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t1-off-check.exit",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t1-off-check.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t1-off-check.stderr",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t1-off-check.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t1-off-check.stdout",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t1-off-check.stdout",
+      "original_sha256": "8ce3727456c732c47391541c6ec910101114b1a12fdac633284454779a9dba26"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t1-off.command.json",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t1-off.command.json",
+      "original_sha256": "2e6c09edbbb314d667b211be7f2883333d830e93413ebb3c9725c11c42c97176"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t1-off.exit",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t1-off.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t1-off.stderr",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t1-off.stderr",
+      "original_sha256": "2e50e43e9bb77b7c6418a6693a1849275a4578c6508603750d5de1485bfece5c"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t1-off.stdout",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t1-off.stdout",
+      "original_sha256": "a99cf6d34df261df6dc91536c10615128f5c0c4368b469fb66c881c2b82fd6d2"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t1-on-check.command.json",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t1-on-check.command.json",
+      "original_sha256": "1a50a2bc2a1d31bec9e362fdb1a09e0d197e5ca4a3c1beba68aefa332765e5b5"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t1-on-check.exit",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t1-on-check.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t1-on-check.stderr",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t1-on-check.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t1-on-check.stdout",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t1-on-check.stdout",
+      "original_sha256": "4142186e2dc4ead0a31e1477bbdc9af0e60ba79b4a81c17184d9a25257e3bae5"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t1-on.command.json",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t1-on.command.json",
+      "original_sha256": "4574dc42ab060daafd0b44a92078dbdd555705313408ad4b81c37729835fc82a"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t1-on.exit",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t1-on.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t1-on.stderr",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t1-on.stderr",
+      "original_sha256": "2e50e43e9bb77b7c6418a6693a1849275a4578c6508603750d5de1485bfece5c"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t1-on.stdout",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t1-on.stdout",
+      "original_sha256": "e98a82890e2635874e47fa193026cc0e6f8c5fe27f7bfb81909f2c47625e465a"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t2-off-check.command.json",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t2-off-check.command.json",
+      "original_sha256": "afa38bc0a13067f295c33568e8988e038a824d9423cfc296a18927b2fe6f1af9"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t2-off-check.exit",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t2-off-check.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t2-off-check.stderr",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t2-off-check.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t2-off-check.stdout",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t2-off-check.stdout",
+      "original_sha256": "95218704b1a2224b301fa49808d48e964ff98522a9a104051619aacc027cb16a"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t2-off.command.json",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t2-off.command.json",
+      "original_sha256": "cbaa86e18f450a6b1a7fa511708274150acfb0c40c5c486cd17523408eeb3a23"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t2-off.exit",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t2-off.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t2-off.stderr",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t2-off.stderr",
+      "original_sha256": "2e50e43e9bb77b7c6418a6693a1849275a4578c6508603750d5de1485bfece5c"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t2-off.stdout",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t2-off.stdout",
+      "original_sha256": "83f2d21b72f4280ae57accd1fc00466aa3a1324ff365b725cd054285a1b2c24f"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t2-on-check.command.json",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t2-on-check.command.json",
+      "original_sha256": "307ff002b88595e5d3c2bcf2c24f804d28bc05c5165b74173e42e779f2586597"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t2-on-check.exit",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t2-on-check.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t2-on-check.stderr",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t2-on-check.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t2-on-check.stdout",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t2-on-check.stdout",
+      "original_sha256": "c41a07c96458237959c5b0d09c3eb2f0eafa186dd7456aa3e8d0eb8bcb61e1db"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t2-on.command.json",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t2-on.command.json",
+      "original_sha256": "1718fe1a06e0beaf58de0441bb242c12fea2e6c9fa06beec5fe803a5a51ecc5a"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t2-on.exit",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t2-on.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t2-on.stderr",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t2-on.stderr",
+      "original_sha256": "2e50e43e9bb77b7c6418a6693a1849275a4578c6508603750d5de1485bfece5c"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t2-on.stdout",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t2-on.stdout",
+      "original_sha256": "565295593a1c9b6ea1841ef99c639aae55418241ea1d93f21bc02ea476c2eb90"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t3-off-check.command.json",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t3-off-check.command.json",
+      "original_sha256": "02ea4a3d7214376b4083e7a8baf75ee6692c388ec498a8e2521ee792b4b5eca6"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t3-off-check.exit",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t3-off-check.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t3-off-check.stderr",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t3-off-check.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t3-off-check.stdout",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t3-off-check.stdout",
+      "original_sha256": "3bbb5b028701dddc45c930f73ced19baa2d6a2d17a67bf89ad2cb7a7ea2fec2d"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t3-off.command.json",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t3-off.command.json",
+      "original_sha256": "a7b3c18f6a5304e36748007e67007a921a9d6ef0fcfbd7ff19ac5f01f83a1127"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t3-off.exit",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t3-off.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t3-off.stderr",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t3-off.stderr",
+      "original_sha256": "2e50e43e9bb77b7c6418a6693a1849275a4578c6508603750d5de1485bfece5c"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t3-off.stdout",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t3-off.stdout",
+      "original_sha256": "a7667e230803f842e957e53c8b5112247d896adb8365a1e811c06f0bd6cde59a"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t3-on-check.command.json",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t3-on-check.command.json",
+      "original_sha256": "6d2af93d0a27dbc1b2acc93fe951356deaad1ea416b5ac19e00e74f7b4ab45a2"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t3-on-check.exit",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t3-on-check.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t3-on-check.stderr",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t3-on-check.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t3-on-check.stdout",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t3-on-check.stdout",
+      "original_sha256": "8c64ad92114e594800935b436f6fbe60efaeb6fd92aeb7b4c75e3e0c678ecbaa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t3-on.command.json",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t3-on.command.json",
+      "original_sha256": "df1756962cd3cb63c75b885c26b86eb071e3a898dc0dcfd739af5cb7a8b1728c"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t3-on.exit",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t3-on.exit",
+      "original_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t3-on.stderr",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t3-on.stderr",
+      "original_sha256": "2e50e43e9bb77b7c6418a6693a1849275a4578c6508603750d5de1485bfece5c"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/campaign/g1-tcp-r500-w64-q16-t3-on.stdout",
+      "archived_path": "campaign/g1-tcp-r500-w64-q16-t3-on.stdout",
+      "original_sha256": "b123f78340c752667a6dc7c51ee3ff82319d20c178aa17f897f7fc31da5a605f"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-off/bases.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t1-off/bases.csv",
+      "original_sha256": "51d37b88ed8cf8d92b5470d482566865001121587762387455f4a881887d817c"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-off/joined.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t1-off/joined.csv",
+      "original_sha256": "a416ff708d55997bd8e28dc4baf469d81fd23bb450770e60a542a4894cf373b1"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-off/maintenance-config.txt",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t1-off/maintenance-config.txt",
+      "original_sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-off/maintenance.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t1-off/maintenance.csv",
+      "original_sha256": "3e4dd11e8aab8c3eeb3dca32f357abd4ebf8f697f0413c09c754dca60aabd885"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-off/offers.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t1-off/offers.csv.gz",
+      "original_sha256": "283347109f7a27cd69dba41f5fe347233e6ef351fbcef7427c0e6fa801ec6643"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-off/run.txt",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t1-off/run.txt",
+      "original_sha256": "75cc5611c0331479af49ac43e71bddf893f506d5928b0c9b44a87201abf77f26"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-off/storage.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t1-off/storage.csv",
+      "original_sha256": "9e18e34e314f81effce52a51c1315ddb083760326adc7797b1b264e22992ab4d"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-off/summary.txt",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t1-off/summary.txt",
+      "original_sha256": "4ba79363247e492d4234362c71d1ec7baa6224306192d55bc311dba5658be3c3"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-on/bases.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t1-on/bases.csv",
+      "original_sha256": "bafde9d0074b6173f34f8c6be37f79b4bdf16ffc948f64ae900b8b27370fc91b"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-on/joined.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t1-on/joined.csv",
+      "original_sha256": "f64463f324e1620a65327a7848c57bb2aefc45f49ad6300f3b99cd1cd3a97f84"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-on/maintenance-config.txt",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t1-on/maintenance-config.txt",
+      "original_sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-on/maintenance.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t1-on/maintenance.csv",
+      "original_sha256": "21e2f42205f54ec180b22b0abca5713864a3d40302fbd2c476378e1b0900c568"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-on/offers.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t1-on/offers.csv.gz",
+      "original_sha256": "04c93e28b929475487959a2642a567e39214be7f9ecc0fd1f70e3f92e1b9c551"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-on/run.txt",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t1-on/run.txt",
+      "original_sha256": "ef82ece6a16708155612f0ef34ee95f327e4d4994561766b444c132bc8d4cef0"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-on/storage.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t1-on/storage.csv",
+      "original_sha256": "b7250745a3bc6e09667f691ad4fa415bd2f8ebe5b5a898283e92a3135f219864"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t1-on/summary.txt",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t1-on/summary.txt",
+      "original_sha256": "81398e97b5f74df598da7a6608ea4c9c61a804a87f85fe67cb803f338f5178a5"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-off/bases.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t2-off/bases.csv",
+      "original_sha256": "cd3951533e1b3b34e88ac3873b6c19a5a52e0de5e00e6b10595f464f37d80de9"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-off/joined.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t2-off/joined.csv",
+      "original_sha256": "a416ff708d55997bd8e28dc4baf469d81fd23bb450770e60a542a4894cf373b1"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-off/maintenance-config.txt",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t2-off/maintenance-config.txt",
+      "original_sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-off/maintenance.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t2-off/maintenance.csv",
+      "original_sha256": "d7fad42aba8a299198484e1cb85bd24cf50bd2b94491c2501931a5ea1a82cde4"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-off/offers.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t2-off/offers.csv.gz",
+      "original_sha256": "c6f994423e9903442686a5d8b73a8977e0081eb10efa34e866cc47002c889ccd"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-off/run.txt",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t2-off/run.txt",
+      "original_sha256": "75cc5611c0331479af49ac43e71bddf893f506d5928b0c9b44a87201abf77f26"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-off/storage.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t2-off/storage.csv",
+      "original_sha256": "d99ea32b0e012c1ef8b272b96163b6aca183ff756df03344abc9c370551421d9"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-off/summary.txt",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t2-off/summary.txt",
+      "original_sha256": "58dfef915fadf7b927adc9d5924fdcfbb6d80c3f1b569db4504e5e342284159c"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-on/bases.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t2-on/bases.csv",
+      "original_sha256": "ad1d7254c1c7142d43d3c7e452dc299edaf13fac590a2a83f9bcb2be1629f61f"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-on/joined.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t2-on/joined.csv",
+      "original_sha256": "9def3b2557f6b903151c2d7178cf14e0db36300be03bbe2cff5487c756fceca6"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-on/maintenance-config.txt",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t2-on/maintenance-config.txt",
+      "original_sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-on/maintenance.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t2-on/maintenance.csv",
+      "original_sha256": "51e305280baaee805e83083ee8e2e715b19f451ac5e1de579e1b964b0bdf1fc0"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-on/offers.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t2-on/offers.csv.gz",
+      "original_sha256": "bba2e7cee6e8e44e8e47f19d0116d34cfeeaa2cc2a306a3048e39fe03bed1ac7"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-on/run.txt",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t2-on/run.txt",
+      "original_sha256": "ef82ece6a16708155612f0ef34ee95f327e4d4994561766b444c132bc8d4cef0"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-on/storage.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t2-on/storage.csv",
+      "original_sha256": "c62fc47a7e809123bf09fba232c1c224d182f42e7defaadfaeaad833a65d4b21"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t2-on/summary.txt",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t2-on/summary.txt",
+      "original_sha256": "bc2d0dec250a9e44c61b2807e650555e700d47cfd679993cdc9aa1e4611fd573"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-off/bases.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t3-off/bases.csv",
+      "original_sha256": "60e173362da563f55bcb3747b200108b6752f8ff3c293795227e61c57a1b3f3f"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-off/joined.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t3-off/joined.csv",
+      "original_sha256": "a416ff708d55997bd8e28dc4baf469d81fd23bb450770e60a542a4894cf373b1"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-off/maintenance-config.txt",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t3-off/maintenance-config.txt",
+      "original_sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-off/maintenance.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t3-off/maintenance.csv",
+      "original_sha256": "58c56758559c35f7948fbb7bceb8ccd56527873251a1bdf92d20f6f644c0be7d"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-off/offers.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t3-off/offers.csv.gz",
+      "original_sha256": "201393afa9812589b10098132362b1575f8f4fa2287d6b31e47319391fe999cc"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-off/run.txt",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t3-off/run.txt",
+      "original_sha256": "75cc5611c0331479af49ac43e71bddf893f506d5928b0c9b44a87201abf77f26"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-off/storage.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t3-off/storage.csv",
+      "original_sha256": "5488d99c875467e88665fca1c82947101b8a124e096b2de7b222e7700a628c70"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-off/summary.txt",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t3-off/summary.txt",
+      "original_sha256": "37e3136c69e1a519e7c2f16c8b4c2db42cef01453448e9ac49ab5d7689bdcff7"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-on/bases.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t3-on/bases.csv",
+      "original_sha256": "7eede3d604359175fe6778c0239d2328516ca21bb707389756211046dde662b4"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-on/joined.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t3-on/joined.csv",
+      "original_sha256": "39e3cc06796fadb973929826cf4761b291050a663fe4f7dc160cdbf459b6c28d"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-on/maintenance-config.txt",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t3-on/maintenance-config.txt",
+      "original_sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-on/maintenance.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t3-on/maintenance.csv",
+      "original_sha256": "1a74441a42833a785229b0c0132bb0c6188b73ef1cf6682f1dd48c7ba9454c2b"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-on/offers.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t3-on/offers.csv.gz",
+      "original_sha256": "6f5ee7350e9f7b5288b08de28edb52ea7c5d9e0c5e30a823c5c956568a64fd98"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-on/run.txt",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t3-on/run.txt",
+      "original_sha256": "ef82ece6a16708155612f0ef34ee95f327e4d4994561766b444c132bc8d4cef0"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-on/storage.csv",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t3-on/storage.csv",
+      "original_sha256": "1a667d2b1e9c9d54a759f7cd867fbca3516c4e99232e2f34c4000d22a2542a31"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-quic-r500-w64-q16-t3-on/summary.txt",
+      "archived_path": "case-data/g1-quic-r500-w64-q16-t3-on/summary.txt",
+      "original_sha256": "60c81ba0bae7e272f0175b6c4286f5e74422486ed52eafe886a2268c4c3e65b8"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-off/bases.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t1-off/bases.csv",
+      "original_sha256": "ecb9ba8155464b1d4509a55d4c5619b5200ae30ea05c089979bcae0d350c7dd9"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-off/joined.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t1-off/joined.csv",
+      "original_sha256": "a416ff708d55997bd8e28dc4baf469d81fd23bb450770e60a542a4894cf373b1"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-off/maintenance-config.txt",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t1-off/maintenance-config.txt",
+      "original_sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-off/maintenance.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t1-off/maintenance.csv",
+      "original_sha256": "0d06a9c4e3050c43f9bf378c53ae95539369d7aa7cefe23efc77e0599ee8a2b8"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-off/offers.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t1-off/offers.csv.gz",
+      "original_sha256": "0f6e5fe930355edb18aa37caa4bb87c4dfc62c77fb33e9c8298a44db56860da4"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-off/run.txt",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t1-off/run.txt",
+      "original_sha256": "b0486258292e15da687c5da11178273b76811fe19747cd7280cb7a3dbbbb073e"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-off/storage.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t1-off/storage.csv",
+      "original_sha256": "8f742faece1b2c5c08dbe430fafa632d88d3f594c8fa47901e432acbee0f9d54"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-off/summary.txt",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t1-off/summary.txt",
+      "original_sha256": "a99cf6d34df261df6dc91536c10615128f5c0c4368b469fb66c881c2b82fd6d2"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-on/bases.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t1-on/bases.csv",
+      "original_sha256": "447874fa2c8b01a1c98e17c1a802bf056c60d2251940131c0adf951b8f0ddf54"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-on/joined.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t1-on/joined.csv",
+      "original_sha256": "987f89810b398f32f62713300342a2819e0c07657d7f27f3ed96599218df8b79"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-on/maintenance-config.txt",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t1-on/maintenance-config.txt",
+      "original_sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-on/maintenance.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t1-on/maintenance.csv",
+      "original_sha256": "533c5dd999e634a7504e7b056b2382d556c9e59358dc035ebb9abe6238b7b612"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-on/offers.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t1-on/offers.csv.gz",
+      "original_sha256": "c3390c33bb21a54be48c93c10f97de2bed779ee370d2bdd7b0c5ea6bf1b8962f"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-on/run.txt",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t1-on/run.txt",
+      "original_sha256": "eaddb04390e9c853452a9acc6fce16a620d5fb103e471221663d3ee0761214b9"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-on/storage.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t1-on/storage.csv",
+      "original_sha256": "0cbc87ef590011d275c69844e9c06ba3b149dd641d0311b4a388a894f3cf43c6"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t1-on/summary.txt",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t1-on/summary.txt",
+      "original_sha256": "e98a82890e2635874e47fa193026cc0e6f8c5fe27f7bfb81909f2c47625e465a"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-off/bases.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t2-off/bases.csv",
+      "original_sha256": "33715636d44e3e71b53d50d40fc3b9a3d9a0bd1cdc6d20d2143eb19ffd680f5a"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-off/joined.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t2-off/joined.csv",
+      "original_sha256": "a416ff708d55997bd8e28dc4baf469d81fd23bb450770e60a542a4894cf373b1"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-off/maintenance-config.txt",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t2-off/maintenance-config.txt",
+      "original_sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-off/maintenance.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t2-off/maintenance.csv",
+      "original_sha256": "a98fde0a4e2e25bff391b2a4ee2ae9c98764f29bf8b4d7a3109a948a174d47a4"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-off/offers.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t2-off/offers.csv.gz",
+      "original_sha256": "d8bdb61a7f5ef28a7613bf16268c5f99ca9a1c86bfeb52453726ae5d52ef0b96"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-off/run.txt",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t2-off/run.txt",
+      "original_sha256": "b0486258292e15da687c5da11178273b76811fe19747cd7280cb7a3dbbbb073e"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-off/storage.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t2-off/storage.csv",
+      "original_sha256": "cf019879b0d3c8930ad08bbda8bad6c516ceb144e8c157b01daaff47696ed2a8"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-off/summary.txt",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t2-off/summary.txt",
+      "original_sha256": "83f2d21b72f4280ae57accd1fc00466aa3a1324ff365b725cd054285a1b2c24f"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-on/bases.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t2-on/bases.csv",
+      "original_sha256": "655af375c3edae45311088569daf81e5e729fcedd328d644bb6fdb061da49b11"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-on/joined.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t2-on/joined.csv",
+      "original_sha256": "3aff8cdbb1a9aaaec469f541af487f9375c70cba5e1ea53d17456ed037c0a563"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-on/maintenance-config.txt",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t2-on/maintenance-config.txt",
+      "original_sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-on/maintenance.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t2-on/maintenance.csv",
+      "original_sha256": "2e793ab70340e9ef4af3c053e520df1c20d73f653bb1cdde7d796da05ab35f36"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-on/offers.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t2-on/offers.csv.gz",
+      "original_sha256": "c422dc9b719c1edd582a838dee38e4860f4e38d3e162dc18797c0a0e8d98583f"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-on/run.txt",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t2-on/run.txt",
+      "original_sha256": "eaddb04390e9c853452a9acc6fce16a620d5fb103e471221663d3ee0761214b9"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-on/storage.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t2-on/storage.csv",
+      "original_sha256": "c53bb9b349a9ec68477251173a8b035191c5840e67bf4c53395af7c5f9cba5f7"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t2-on/summary.txt",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t2-on/summary.txt",
+      "original_sha256": "565295593a1c9b6ea1841ef99c639aae55418241ea1d93f21bc02ea476c2eb90"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-off/bases.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t3-off/bases.csv",
+      "original_sha256": "0d2858653ba54f81526a36d647418078ba11d305eebb58686a6f99d38dd32f76"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-off/joined.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t3-off/joined.csv",
+      "original_sha256": "a416ff708d55997bd8e28dc4baf469d81fd23bb450770e60a542a4894cf373b1"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-off/maintenance-config.txt",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t3-off/maintenance-config.txt",
+      "original_sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-off/maintenance.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t3-off/maintenance.csv",
+      "original_sha256": "87064a3efa2171a3e3de53e12da10418e7b407511d0c2711a3aae00d5e4da7d7"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-off/offers.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t3-off/offers.csv.gz",
+      "original_sha256": "6b98b84060b0c84d527b096050ebc0fff1a95188f250b86895b0d11fa6040db2"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-off/run.txt",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t3-off/run.txt",
+      "original_sha256": "b0486258292e15da687c5da11178273b76811fe19747cd7280cb7a3dbbbb073e"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-off/storage.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t3-off/storage.csv",
+      "original_sha256": "a07f9783519df8cdcceab8290cc69336de31e01d5a0dc61d566153d0e9567dcb"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-off/summary.txt",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t3-off/summary.txt",
+      "original_sha256": "a7667e230803f842e957e53c8b5112247d896adb8365a1e811c06f0bd6cde59a"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-on/bases.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t3-on/bases.csv",
+      "original_sha256": "96ac7b90557126a49d9375026a5ee90b04b2cde51613ccac51de3dc9d8d0f156"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-on/joined.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t3-on/joined.csv",
+      "original_sha256": "83e80b5600b27c25f2ecc98e7a77eed0403b2f089e19d7b6b2e73b1c6fad0845"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-on/maintenance-config.txt",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t3-on/maintenance-config.txt",
+      "original_sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-on/maintenance.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t3-on/maintenance.csv",
+      "original_sha256": "9b63626cfaf4b7e809c217a79ae95be3c798eeccf4e1ef6388bab9ffb4d9ef93"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-on/offers.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t3-on/offers.csv.gz",
+      "original_sha256": "7918a9d793ed944793937bd8d74677af79195458a1f6b7e5c7f15e9b2d0a0220"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-on/run.txt",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t3-on/run.txt",
+      "original_sha256": "eaddb04390e9c853452a9acc6fce16a620d5fb103e471221663d3ee0761214b9"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-on/storage.csv",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t3-on/storage.csv",
+      "original_sha256": "540ff50d30da58d772cbdaac0af206780854637ec6a28618dbf701ca0ef97121"
+    },
+    {
+      "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison464-native/linux/campaign-wal/g1-tcp-r500-w64-q16-t3-on/summary.txt",
+      "archived_path": "case-data/g1-tcp-r500-w64-q16-t3-on/summary.txt",
+      "original_sha256": "b123f78340c752667a6dc7c51ee3ff82319d20c178aa17f897f7fc31da5a605f"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/control-tools/SOURCE.json",
+      "archived_path": "control-tools/SOURCE.json",
+      "original_sha256": "586a3d790703c7e3d507f05130dcdc59264a3673208b2b6fec77e83ddad61dbf"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/control-tools/check-benchmark-storage.mjs",
+      "archived_path": "control-tools/check-benchmark-storage.mjs",
+      "original_sha256": "d03de4b3027f8468d6e7bcc2b22f1a8051aba5a5f469fedbeb8e8ce9f3409aaf"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/control-tools/check-joined.mjs",
+      "archived_path": "control-tools/check-joined.mjs",
+      "original_sha256": "ddc8cbee429ca57ccdfd68ef665ddeb285f5fa958eae386e17b2b68cc4d8cf32"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/control-tools/check-lanes.mjs",
+      "archived_path": "control-tools/check-lanes.mjs",
+      "original_sha256": "cb49a5d3cee377cf3154d9a9f092ea90e9af64b87ba98272cae50765c51dc920"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/control-tools/check-maintenance.mjs",
+      "archived_path": "control-tools/check-maintenance.mjs",
+      "original_sha256": "99fd718641c95a0412ef2e98e33b23da717470613bdc496d6313c8b58d0ce658"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/control-tools/check-native-benchmark.mjs",
+      "archived_path": "control-tools/check-native-benchmark.mjs",
+      "original_sha256": "7c4e97bce50a85f64e87e5e7f223d2d7c10fc433d867e24deacdf0ce6b1d8538"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/control-tools/check-offered.mjs",
+      "archived_path": "control-tools/check-offered.mjs",
+      "original_sha256": "c11ca7957c50f9ad2763e724905af82516bd8b253ae828a4df797ed17bd3129a"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/control-tools/check-publication-timings.mjs",
+      "archived_path": "control-tools/check-publication-timings.mjs",
+      "original_sha256": "4a4ba88136cbae48b3d822ed6b06274008f66955a15b6bba0e062e3c8715d331"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/control-tools/check-rounded-rate.mjs",
+      "archived_path": "control-tools/check-rounded-rate.mjs",
+      "original_sha256": "262f06cfb0e878bfa7ce02741f51d7cd6e7e8df6b07b8973df4a7d89502c662d"
+    },
+    {
+      "original_path": "target/p9/native464-linux/ARTIFACTS.json",
+      "archived_path": "identity/ARTIFACTS.json",
+      "original_sha256": "e5997204cf37dfc74c79d6aca78b15c09e62f5dc69095fbaa73adecaf60cb16e"
+    },
+    {
+      "original_path": "target/p9/native464-linux/INDEPENDENT_REVIEW.json",
+      "archived_path": "identity/INDEPENDENT_REVIEW.json",
+      "original_sha256": "ee083756a156c761e20b8b8a3c3c8bb87289af9409b54f99e04921941f194031"
+    },
+    {
+      "original_path": "target/p9/native464-linux/PREPARATION.json",
+      "archived_path": "identity/PREPARATION.json",
+      "original_sha256": "5e1054f51cb127f723be7aadbb19af318886174a723d7b689d30a614b5048a19"
+    },
+    {
+      "original_path": "target/p9/native464-linux/PROFILE_PROOF.json",
+      "archived_path": "identity/PROFILE_PROOF.json",
+      "original_sha256": "5af776eb7b89009a26c916f70b40abe3e06e90bcb4101c259e437ba729fde589"
+    },
+    {
+      "original_path": "target/p9/native464-linux/PUBLICATION.json",
+      "archived_path": "identity/PUBLICATION.json",
+      "original_sha256": "a17fe2cd4b6f64641c8d4bc087dbf828bab11642fff32306f2c30aeb1ce98740"
+    },
+    {
+      "original_path": "target/p9/native464-linux/SOURCE.json",
+      "archived_path": "identity/SOURCE.json.gz",
+      "original_sha256": "5b4d995b0106f325c3106d1fabaab1f20c1fc59a8d287a72dd77e6efabfc9ba5"
+    },
+    {
+      "original_path": "target/p9/native464-linux/SYMBOLS.json",
+      "archived_path": "identity/SYMBOLS.json",
+      "original_sha256": "27bbacbf968d109ca520f05ec3c77eb646c8226fa678b6cabd878cccb793ef18"
+    },
+    {
+      "original_path": "target/p9/native464-linux/logs/artifact-guards.log",
+      "archived_path": "identity/logs/artifact-guards.log",
+      "original_sha256": "ed2e3bb723591a5c1b34df3db936b126151528cb97943106321e2a16664d1aef"
+    },
+    {
+      "original_path": "target/p9/native464-linux/logs/cargo.txt",
+      "archived_path": "identity/logs/cargo.txt",
+      "original_sha256": "9950bbb2d5c3417b1a068f0e81f6d3cac991a363193bdf2a22d447f5acf8b503"
+    },
+    {
+      "original_path": "target/p9/native464-linux/logs/native-release-profile.txt",
+      "archived_path": "identity/logs/native-release-profile.txt",
+      "original_sha256": "0f29218a13d1cd47d385bc1a24cbae3436dde3cce8942338d33ba2b8529d4d73"
+    },
+    {
+      "original_path": "target/p9/native464-linux/logs/native-root-rustc-lines.txt",
+      "archived_path": "identity/logs/native-root-rustc-lines.txt",
+      "original_sha256": "5e61af908d329afdf01f0d643de6f5c01594fb00f046a8a0dd8623f3b59a8353"
+    },
+    {
+      "original_path": "target/p9/native464-linux/logs/protoc.txt",
+      "archived_path": "identity/logs/protoc.txt",
+      "original_sha256": "41654adf2af1c3734c95808b5d5333d2fe1381fca76b4799f5c30198e38fc1fe"
+    },
+    {
+      "original_path": "target/p9/native464-linux/logs/rustc.txt",
+      "archived_path": "identity/logs/rustc.txt",
+      "original_sha256": "778fbc643a806f0dd123c056e66201d7e8a56a61928ec0a33171be8d6c2d5a37"
+    },
+    {
+      "original_path": "target/p9/native464-linux/logs/source-after-full.log",
+      "archived_path": "identity/logs/source-after-full.log",
+      "original_sha256": "cf9e2bfe00ef182706999e976a6b7be402b1ef0e6c11e46953a76acbb0215c4c"
+    },
+    {
+      "original_path": "target/p9/native464-linux/logs/source-after.log",
+      "archived_path": "identity/logs/source-after.log",
+      "original_sha256": "b9cb0592c99cf6f2013df0350ef6c99e70b4704d5f8c79c6053e02998ba36058"
+    },
+    {
+      "original_path": "target/p9/native464-linux/logs/source-before-full.log",
+      "archived_path": "identity/logs/source-before-full.log",
+      "original_sha256": "cf9e2bfe00ef182706999e976a6b7be402b1ef0e6c11e46953a76acbb0215c4c"
+    },
+    {
+      "original_path": "target/p9/native464-linux/logs/source-before.log",
+      "archived_path": "identity/logs/source-before.log",
+      "original_sha256": "b9cb0592c99cf6f2013df0350ef6c99e70b4704d5f8c79c6053e02998ba36058"
+    },
+    {
+      "original_path": "target/p9/native464-linux/logs/tool-binaries.sha256",
+      "archived_path": "identity/logs/tool-binaries.sha256",
+      "original_sha256": "5493d578c4e3f6d67d018dc2c885ba87b7a61674969299ed7975c7ea58aefa86"
+    },
+    {
+      "original_path": "target/p9/native464-linux/source-export.command.json",
+      "archived_path": "identity/source-export.command.json",
+      "original_sha256": "11dc78dfa6fb4d52278db4c9e761e00946cae7ee7b7f70de90f8f326476df642"
+    },
+    {
+      "original_path": "target/p9/native464-linux/source.sha256",
+      "archived_path": "identity/source.sha256",
+      "original_sha256": "b63541c2debd2a51f53a5dabf28742a54911f6e7ab1ac28abcbbea9033ffd3f3"
+    },
+    {
+      "original_path": "validation/performance/slice464/SCHEMA.md",
+      "archived_path": "preparation/SOURCE_SCHEMA.md",
+      "original_sha256": "d9914c5c4818f2f5d4f9110796e6c8013e4f7aaea6fefc87cbe4e73d679fcbd2"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/prepare.py",
+      "archived_path": "preparation/prepare.py",
+      "original_sha256": "ac0d64e8ccc3d451ddf1124fcf41924dec8cc8baa72b4ecb843a9efee753d577"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/runner.stderr",
+      "archived_path": "runner.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original_path": "target/p9/comparison464-native/linux/runner.stdout",
+      "archived_path": "runner.stdout",
+      "original_sha256": "10a18d3e7d578c98015b56b80e3877addfe68660b7fa8a9d1205e3a0015278b9"
+    }
+  ],
+  "excluded": [
+    "full source/source.tar",
+    "binaries/library artifacts",
+    "build trees",
+    "generated replica WAL/manifests/locks/storage",
+    "post-analysis aggregate files not yet sealed by root"
+  ],
+  "nested_manifest_policy": "Outer SHA256SUMS covers every regular payload except itself; copied nested inventories remain ordinary immutable payloads."
+}

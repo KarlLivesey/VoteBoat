@@ -158,7 +158,6 @@ fn partial_prefixes_commit_all_originals_without_replaying_other_peer() {
         .configure_batch_limits(BatchLimits {
             max_proposal_entries: 64,
             max_replication_entries: 2,
-            ..BatchLimits::default()
         })
         .unwrap();
     let mut counter = Counter::new(6).unwrap();

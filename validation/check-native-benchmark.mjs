@@ -9,7 +9,6 @@ import { validateLanes } from './check-lanes.mjs';
 import { validateOffered } from './check-offered.mjs';
 import { validateMaintenance } from './check-maintenance.mjs';
 import { validateRoundedRate } from './check-rounded-rate.mjs';
-import { validateJoined } from './check-joined.mjs';
 
 const requireStorage = process.argv.includes('--storage');
 const directories = process.argv.slice(2).filter(arg => arg !== '--storage');
@@ -28,10 +27,6 @@ for (const directory of directories) {
         }
         console.log(JSON.stringify({directory, ...result}));
         continue;
-    }
-    if (summary.ready_reply_inputs_effective !== undefined) {
-        const joinedPath = runDirectory ? path.join(directory, 'joined.csv') : `${directory}.joined.csv`;
-        validateJoined(summary, fs.readFileSync(joinedPath, 'utf8'));
     }
     const groups = Number(summary.groups);
     if (summary.mode === 'offered') {

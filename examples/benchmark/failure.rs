@@ -50,7 +50,6 @@ pub(super) fn write_partial(
     writeln!(output, "valid_measurement=false phase={phase} completed={} unresolved={} poll_rounds={} host_poll_ns={} max_host_poll_ns={} persistence_batches={} worker_events={} application_deliveries={}\noriginal_error={error}",
         samples.len(), unresolved.len(), polls.rounds, polls.host_ns, polls.max_host_ns,
         polls.persistence_batches, polls.worker_events, polls.application_deliveries)?;
-    writeln!(output, "{}", polls.joined.summary()?)?;
     output.sync_all()?;
     Ok(())
 }

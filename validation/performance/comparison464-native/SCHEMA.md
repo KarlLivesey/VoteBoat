@@ -21,7 +21,8 @@ copies or other benchmarks on Linux while timing; agents acknowledge quiet.
 Poll original handle; no automatic retries/reruns on slow observations or losses.
 Only collect after actual terminal. Preserve every process/validator exit and raw
 error; a failed case remains a failed case. No default/quantum/window/maintenance
-retuning. The script must stop on failed validation and retain partial progress.
+retuning. The reused controller validates after all timed processes terminate,
+retains partial progress and exits nonzero if any process or validator fails.
 
 Report individual paired completed originals/s and p99 plus medians, horizon and
 drain completions, refusals/unknown/pending, actual joined transitions/replies/

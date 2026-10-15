@@ -1,0 +1,10 @@
+{
+  "exact_base": "84fc509fecbcdefd872bf23f8618e092b5a79802",
+  "baseline_proof": "BASELINE_EQUIVALENCE.json",
+  "baseline_inputs": 2485,
+  "no_extra_untracked_build_source": true,
+  "reuse": "Prior462/455 exact production/native protocol/network/recovery qualification remains eligible. No experimental performance result reused as a baseline rate. Existing455 artifact stays immutable.",
+  "new_checks": "providersall/core, metadata, full enabled formatting/default/all/core/native/standalone strict hook0 original68198",
+  "original_failure": "53761 all/core provider+metadata0 but hook101 due omitted matched initializer; corrected envelopecopy in FINAL and fullhook rerun.",
+  "native_comparison_rejection": "1214all12outcomevalidators0 but mixedrate/fourp99losses; no guardretune/Mac463464campaign"
+}

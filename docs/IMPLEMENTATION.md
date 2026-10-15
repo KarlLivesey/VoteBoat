@@ -743,7 +743,7 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: measure active joined work and durable/fairness effects | Determine whether the now-active ordering removes enough barrier work to improve useful completion | Published checked464, fresh asserted native artifact, actual activation, [paired plan](../validation/performance/comparison464-native/SCHEMA.md), original Mac455 qualification | Repeated disabled/enabled completed originals/s, p99/refusals/barriers/join counts on both hosts; retain losses and unchanged outcomes, no parameter tuning; weighted headroom/fairness follows useful improvement | P9.1/P9.2/P9.3 |
+| Current: reject measured ready-reply joining and select a distinct measured limiter | Remove unearned complexity after active same-source comparison worsens tails | Complete twelve-case464 evidence, [465 rollback schema](../validation/performance/slice465/SCHEMA.md), exact462 baseline, current profiles and original Mac455 qualification | Preserve all raw losses; exact baseline source/contracts restored, retained oracle and strict hook clean, checked publication; choose next structural ownership/order/waiting change from measured cost without retuning fusion | P9.1/P9.2/P9.3 |
 | Next: remove the next measured limiting stage | Increase useful work after the candidate is retained or rejected | Actual disabled/enabled join counts, completed rates/tails/refusals/physical barriers and current profile; schema before editing | Choose from measured ordering, batching, ownership or waiting costs; preserve every original result and partial-progress/restart contract; checked published slice and repeated paired evidence without retuning rejected experiments | P9.1/P9.2/P9.3 |
 | Following: full curve, sustainable headroom and composition qualification | Satisfy the entire performance objective beyond the current experiment | Retained measured improvements, qualified weighted fixture, source/artifact/host identities and stable maintenance | All seven required framework cells on both hosts with healthy margin; sustained memory/debt, durable applications/headroom/skew/fairness, independent placement/shared barriers and P8 composition; preserve every outcome/fence/retry | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
@@ -34422,3 +34422,32 @@ No benefit is inferred. [Before-launch paired schema](../validation/performance/
 fixes twelve same-source0/2 cases with active maintenance, no quantum/window or
 checkpoint tuning. This advances the current mini item's evidence, not the
 unmet sustained both-host/full-composition macro scope.
+
+Native464's [twelve completed same-source runs](../validation/performance/comparison464-native/MEASUREMENTS.md)
+reject463/464: all workloads/validators0 and actual enabled joins, but TCP median
+160.582→164.261 originals/s has p991122.767→1589.014ms; QUIC
+152.979→152.658/s has p991145.813→2462.987ms. Four of six paired tails regress,
+with mixed rates despite modest API barrier amortization. All276 raw payloads
+independently verify, with every refusal, maintenance event and resource record.
+Counters count proposed joined positions and store API calls, not completed
+joined outcomes or a complete physical fsync profile. No causal gain, headroom,
+sustained plateau, Mac result or framework floor is inferred.
+
+[465 schema](../validation/performance/slice465/SCHEMA.md) and
+[qualification](../validation/performance/slice465/main/README.md)
+restores the exact checked462/production455 path and contracts, retaining the
+independent Counter oracle and all source/history/evidence. Full2485-file
+baseline equality catches an initially missed comparison initializer; the
+failed53761 hook remains. Focused restoration gives final68198 terminal0/DONE,
+providers42/27, metadata0, full enabled strict hook0 and1441 unchanged scoped
+hashes/modes. Prior exact baseline production/protocol/network/recovery evidence
+is reused; no unchanged broad suites or new baseline build are needed. The
+current mini plan closes this experiment through publication, then uses the
+existing CPU profile to select a distinct structural limiter. No parameter
+retuning or Mac463/464 campaign; original455 qualification continues. Full P9
+macro acceptance remains unchanged and open.
+
+Independent review confirms exact2485 baseline blobs and physical1441 compiled
+inputs with no ignored/untracked extras; all190 rollback payloads verify. The
+current deliverable is publication of this measured rejection, then distinct
+profile-led work; neither the one-group floors nor wider P9 qualification close.

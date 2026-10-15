@@ -1,0 +1,6 @@
+{
+  "native_artifact_and_pilot_archive": "validation/performance/native464-linux",
+  "manifest_sha256": "5db43d8cfed1b2f453912a4512d5acf6b0a18659429c2c2f180b5e5c0e969c25",
+  "source_qualification": "validation/performance/slice464/main",
+  "note": "No binaries/fullsource copied. Original/copy identities, source inventory and compiler records remain in the referenced sealed artifact archive and selected identity payloads here."
+}

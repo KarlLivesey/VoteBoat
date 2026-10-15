@@ -1,0 +1,12 @@
+{
+  "original_restore_script": "restore.py",
+  "failure_stage": "full baseline projection after selected44paths restored",
+  "actual_exception": "AssertionError: benchmarks/matched/src/envelopes.rs",
+  "cause": "initial selection omitted matched BatchLimits initializer introduced463; complete baseline equality caught it before any passing baseline claim",
+  "focused_fix": "benchmarks/matched/src/envelopes.rs",
+  "before_sha256": "22ca74f5413210688807969408aab61f80c3953e189eea55df0bf64b180408a3",
+  "after_sha256": "320bc7eabe45dfe463cd88e3f107e6ffb1da8828a15298e9935d47b8e3497970",
+  "original_qualification_handle": 53761,
+  "actual_exit": 101,
+  "passed_commands_retained": "providerall/core+metadata; failedhooknotreused"
+}

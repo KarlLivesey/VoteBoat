@@ -1,0 +1,16 @@
+{
+  "source_commit": "6fce8989e2c57afa033b5ee982aaa201eae04ac6",
+  "source_inputs": 1438,
+  "source_artifact_compiler_validator_guards": 0,
+  "same_artifact_both_arms": true,
+  "same_source_profile_payload_settings": true,
+  "exact_runner_sha256": "ccf030dc00facd2db18e708fd80fc475779fb071966a1f7a8a47e75805b0f9ea",
+  "exact_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+  "campaign_config_sha256": "3198045f581f84c58a66dea2f40af02ae460187e2ecfc5a21eefdc4b53957ab4",
+  "all_12_absent_roots_have_existing_parent": true,
+  "socket_preflight_performed": false,
+  "quiet_grant": false,
+  "source_build_script": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native464-linux/run.sh",
+  "preparation_script_sha256": "ac0d64e8ccc3d451ddf1124fcf41924dec8cc8baa72b4ecb843a9efee753d577",
+  "scope": "Preparation only. Root must perform actual socket/process preflight and create READY.json before explicit --authorized-quiet launch."
+}

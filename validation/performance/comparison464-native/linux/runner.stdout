@@ -1,0 +1,24 @@
+START g1-tcp-r500-w64-q16-t1-off
+END g1-tcp-r500-w64-q16-t1-off 0
+START g1-tcp-r500-w64-q16-t1-on
+END g1-tcp-r500-w64-q16-t1-on 0
+START g1-tcp-r500-w64-q16-t2-on
+END g1-tcp-r500-w64-q16-t2-on 0
+START g1-tcp-r500-w64-q16-t2-off
+END g1-tcp-r500-w64-q16-t2-off 0
+START g1-tcp-r500-w64-q16-t3-off
+END g1-tcp-r500-w64-q16-t3-off 0
+START g1-tcp-r500-w64-q16-t3-on
+END g1-tcp-r500-w64-q16-t3-on 0
+START g1-quic-r500-w64-q16-t1-off
+END g1-quic-r500-w64-q16-t1-off 0
+START g1-quic-r500-w64-q16-t1-on
+END g1-quic-r500-w64-q16-t1-on 0
+START g1-quic-r500-w64-q16-t2-on
+END g1-quic-r500-w64-q16-t2-on 0
+START g1-quic-r500-w64-q16-t2-off
+END g1-quic-r500-w64-q16-t2-off 0
+START g1-quic-r500-w64-q16-t3-off
+END g1-quic-r500-w64-q16-t3-off 0
+START g1-quic-r500-w64-q16-t3-on
+END g1-quic-r500-w64-q16-t3-on 0

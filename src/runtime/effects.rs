@@ -21,7 +21,6 @@ use std::collections::BTreeSet;
 mod inspection;
 mod overlap;
 mod ready;
-mod ready_joined;
 pub use inspection::{EffectLeaseInspectionKind, EffectVisitInspection};
 #[cfg(all(test, feature = "native"))]
 #[path = "effects/peer_ingress_tests.rs"]
@@ -100,7 +99,6 @@ pub struct OwnerStep {
 struct Active {
     visit: VisitTicket,
     received_from: Option<NodeId>,
-    other_received_from: Vec<NodeId>,
     reserved: usize,
     continuation_bytes: usize,
     effects: VecDeque<Effect>,
@@ -320,20 +318,12 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     /// A rejected snapshot attempt owns no prepared image or worker request.
     /// Keep its actual queued/leased payload charged, and reacquire the original
     /// continuation budget plus image allowance before any later preparation.
-    /// Joined receive-source capacity remains owned until this visit retires.
     pub(super) fn defer_snapshot(&mut self, lease: &EffectLease) -> Result<(), EffectOwnerError> {
         self.validate_lease(lease)?;
         let a = self.active.get_mut(&lease.ticket.visit.group).unwrap();
         let capacity = a.effects.capacity();
         let retained = effect_bytes(a.effects.make_contiguous(), capacity)
             .and_then(|n| n.checked_add(effect_bytes(std::slice::from_ref(&lease.effect), 1)?))
-            .and_then(|n| {
-                n.checked_add(
-                    a.other_received_from
-                        .capacity()
-                        .checked_mul(size_of::<NodeId>())?,
-                )
-            })
             .ok_or(EffectOwnerError::ReservationTooLarge)?;
         if retained > a.reserved {
             return self.fail(EffectOwnerError::ProviderContract);
@@ -357,9 +347,10 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     /// Original queued inputs and dependent visits; no source authority.
     pub(crate) fn has_pending_peer_ingress(&self, group: GroupIdentity, peer: NodeId) -> bool {
         self.runtime.has_pending_peer_ingress(group, peer)
-            || self.active.get(&group).is_some_and(|a| {
-                a.received_from == Some(peer) || a.other_received_from.contains(&peer)
-            })
+            || self
+                .active
+                .get(&group)
+                .is_some_and(|a| a.received_from == Some(peer))
     }
     pub fn deadline(&self, group: GroupIdentity) -> Option<TimerToken> {
         self.runtime.deadline(group)
@@ -567,12 +558,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         limit: usize,
         mut check: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
-        let result = self.advance_inner(
-            now,
-            limit,
-            |_| (false, false),
-            |core, event, _| check(core, event),
-        );
+        let result = self.advance_inner(now, limit, |_| false, |core, event, _| check(core, event));
         match result {
             Err(error @ (EffectOwnerError::Runtime(_) | EffectOwnerError::ReservationTooLarge)) => {
                 self.fail(error)
@@ -584,7 +570,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         &mut self,
         now: MonoTime,
         limit: usize,
-        eligible: impl FnMut(GroupIdentity) -> (bool, bool),
+        eligible: impl FnMut(GroupIdentity) -> bool,
         check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
         let result = self.advance_inner(now, limit, eligible, check);
@@ -599,7 +585,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         &mut self,
         now: MonoTime,
         limit: usize,
-        mut eligible: impl FnMut(GroupIdentity) -> (bool, bool),
+        mut eligible: impl FnMut(GroupIdentity) -> bool,
         mut check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
         self.check()?;
@@ -617,8 +603,11 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             let Some(visit) = self.runtime.poll(now).map_err(EffectOwnerError::Runtime)? else {
                 break;
             };
-            let (batch, joined) = eligible(visit.group);
-            let max_items = if batch { limit - steps.len() } else { 1 };
+            let max_items = if eligible(visit.group) {
+                limit - steps.len()
+            } else {
+                1
+            };
             let control = self
                 .runtime
                 .next_class(visit, now)
@@ -633,12 +622,6 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                 continue;
             };
             if !self.reserve_ready_visit(visit, reserved, control)? {
-                continue;
-            }
-            if control
-                && joined
-                && self.try_joined_ready(visit, now, max_items, &mut check, &mut steps)?
-            {
                 continue;
             }
             let stepped = self

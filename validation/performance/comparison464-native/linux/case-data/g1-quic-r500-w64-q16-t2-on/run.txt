@@ -1,0 +1,1 @@
+mode=offered protocol=Quic offers=15000 offered_rate=500 window=64 groups=1 warmup=64 ready_visit_items=16 ready_reply_inputs=2

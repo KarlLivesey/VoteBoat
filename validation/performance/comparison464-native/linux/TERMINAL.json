@@ -1,0 +1,13 @@
+{
+  "original_campaign_handle": 1214,
+  "actual_original_exit": 0,
+  "campaign_status": 0,
+  "stage": "ALL_TIMING_END",
+  "native_processes": 12,
+  "native_exits0": 12,
+  "validators": 12,
+  "validator_exits0": 12,
+  "all_original_cases_retained": true,
+  "no_repeat_or_replacement": true,
+  "root_analysis_disposition": "Not assigned by collector; raw measurement evidence only."
+}

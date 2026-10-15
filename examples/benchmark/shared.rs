@@ -38,7 +38,7 @@ pub(super) fn open(
     capacity: usize,
     clock: &Instant,
     groups: usize,
-    ready: ready_items::Settings,
+    ready_visit_items: usize,
 ) -> Result<(Vec<Replica<SharedLog>>, Vec<Trace>), Failure> {
     open_partition(
         root,
@@ -50,7 +50,7 @@ pub(super) fn open(
             offset: 0,
             groups,
             lane: 1,
-            ready,
+            ready_visit_items,
         },
     )
 }
@@ -60,7 +60,7 @@ pub(super) struct Partition {
     pub offset: usize,
     pub groups: usize,
     pub lane: u64,
-    pub ready: ready_items::Settings,
+    pub ready_visit_items: usize,
 }
 
 pub(super) fn open_partition(
@@ -72,8 +72,7 @@ pub(super) fn open_partition(
     partition: Partition,
 ) -> Result<(Vec<Replica<SharedLog>>, Vec<Trace>), Failure> {
     if partition.groups == 0
-        || !(1..=64).contains(&partition.ready.items)
-        || !matches!(partition.ready.replies, 0 | 2)
+        || !(1..=64).contains(&partition.ready_visit_items)
         || partition.groups > 32
         || partition.lane == 0
         || partition.lane > 4
@@ -126,7 +125,7 @@ pub(super) fn open_partition(
             bootstraps: &bootstraps,
             addresses: &addresses,
             lane: partition.lane,
-            ready: partition.ready,
+            ready_visit_items: partition.ready_visit_items,
         };
         let (replica, trace) = match setup.open_replica(n) {
             Ok(opened) => opened,
@@ -250,7 +249,7 @@ pub(super) fn timed_shard(
     n: u64,
     groups: usize,
     clock: &Instant,
-    ready: ready_items::Settings,
+    ready_visit_items: usize,
 ) -> Result<
     (
         MonoTime,
@@ -262,16 +261,12 @@ pub(super) fn timed_shard(
         owner_id,
         ShardLimits {
             max_groups: groups,
-            visit_items: ready.items,
+            visit_items: ready_visit_items,
             ..ShardLimits::default()
         },
         checked(FairScheduler::new(groups))?,
     ))?;
-    for mut core in cores {
-        checked(core.configure_batch_limits(voteboat::raft::BatchLimits {
-            max_ready_reply_inputs: ready.replies,
-            ..voteboat::raft::BatchLimits::default()
-        }))?;
+    for core in cores {
         checked(shard.register(core))?;
     }
     let now = MonoTime(clock.elapsed().as_millis() as u64);
@@ -411,7 +406,7 @@ struct ClusterSetup<'a> {
     bootstraps: &'a [Bootstrap],
     addresses: &'a BTreeMap<u64, std::net::SocketAddr>,
     lane: u64,
-    ready: ready_items::Settings,
+    ready_visit_items: usize,
 }
 impl ClusterSetup<'_> {
     fn open_replica(&self, n: u64) -> Result<(Replica<SharedLog>, Trace), Failure> {
@@ -448,7 +443,7 @@ impl ClusterSetup<'_> {
             bootstraps,
             addresses,
             lane,
-            ready,
+            ready_visit_items,
         } = *self;
         let directory = root.join(format!("replica{n}"));
         let create = mode == NativeOpenMode::Create;
@@ -483,7 +478,14 @@ impl ClusterSetup<'_> {
         ))?
         .peers()
         .collect::<BTreeMap<_, _>>();
-        let (now, timed) = timed_shard(cores, owner_id, n, bootstraps.len(), clock, ready)?;
+        let (now, timed) = timed_shard(
+            cores,
+            owner_id,
+            n,
+            bootstraps.len(),
+            clock,
+            ready_visit_items,
+        )?;
         let (version, codec) = wire_profile(member)?;
         let (outbound, roster) = peer_io(local, first, last, &remote, now, version)?;
         let Routers {

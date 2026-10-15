@@ -14,7 +14,6 @@ fn batch_limits() -> BatchLimits {
     BatchLimits {
         max_proposal_entries: ORIGINALS as usize,
         max_replication_entries: 1024,
-        max_ready_reply_inputs: 2,
     }
 }
 fn setup_aggregate(io: ModelIo) -> (NativeLogStore<ModelIo>, Raft) {

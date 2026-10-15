@@ -1,0 +1,12 @@
+{
+  "commit": "6fce8989e2c57afa033b5ee982aaa201eae04ac6",
+  "origin_main": "6fce8989e2c57afa033b5ee982aaa201eae04ac6",
+  "actual_push_exit": 0,
+  "push_original_handle": 32951,
+  "qualified_main_exit": 0,
+  "qualification_original_handle": 36468,
+  "qualified_inputs": 1454,
+  "all_source_committed": true,
+  "enabled_hook": ".githooks/pre-push",
+  "performance_qualification": false
+}

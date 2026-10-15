@@ -1,0 +1,24 @@
+{
+  "all_recorded_jobs_terminal": true,
+  "source_before": "BEFORE.json",
+  "source_after": "FINAL_AFTER.json",
+  "original_runs": [
+    {
+      "handle": 53761,
+      "actual_exit": 101,
+      "status_path": "main/STATUS"
+    },
+    {
+      "handle": 68198,
+      "actual_exit": 0,
+      "status_path": "final/STATUS"
+    }
+  ],
+  "scope_notes": [
+    "Reject463/464 after original1214all12workloads+validators0: actualjoins/modestamortization but mixedrates/fourp99pairlosses; no retune or Mac463/464campaign.",
+    "Restore44initialscopedpaths, fullbaselineprojection catches omitted matched/envelopes initializer. Original53761 providers42/27+metadata0 but enabledhook101 retained. Focusedonefieldrestore follows, no weakened checks.",
+    "Final original68198exit0/DONE providers42/27, metadata0 and full enabled formatting/default/all/core/native/standalone stricthook0.",
+    "FullBASELINE_EQUIVALENCE2485 committed source/build/contracts/comparison files match exact84fc509baseline; noextrauntrackedbuildinputs; final1441scopedsourcehashes/modesunchanged.",
+    "Prior exact462/455 production/native protocol/network/recovery scope reused with complete baselineequality. No new performance acceptance or fullP9 completion; originalMac45584206continues."
+  ]
+}

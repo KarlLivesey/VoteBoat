@@ -1,0 +1,42 @@
+{
+  "main/provider-all.log": [
+    {
+      "result": "ok",
+      "passed": "42",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "main/provider-core.log": [
+    {
+      "result": "ok",
+      "passed": "27",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "final/provider-all.log": [
+    {
+      "result": "ok",
+      "passed": "42",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ],
+  "final/provider-core.log": [
+    {
+      "result": "ok",
+      "passed": "27",
+      "failed": "0",
+      "ignored": "0",
+      "measured": "0",
+      "filtered": "0"
+    }
+  ]
+}

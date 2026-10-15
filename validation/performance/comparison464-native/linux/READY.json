@@ -1,0 +1,11 @@
+{
+  "campaign_config_sha256": "3198045f581f84c58a66dea2f40af02ae460187e2ecfc5a21eefdc4b53957ab4",
+  "campaign_driver_sha256": "ccf030dc00facd2db18e708fd80fc475779fb071966a1f7a8a47e75805b0f9ea",
+  "measurement_schema_sha256": "afb907d9211e380d3ef6c657aeffd9608db1ba3fe521b661e83d73570c9dd4f6",
+  "quiet_grant": true,
+  "agents_quiet_acknowledged": true,
+  "socket_preflight_exit": 0,
+  "all_builds_checks_copies_archives_terminal": true,
+  "approved_fixed_scope": "12samebinary0/2 TCPQUIC pairs; no replacements/retuning",
+  "timestamp": 1792023634.6259625
+}

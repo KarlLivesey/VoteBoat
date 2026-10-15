@@ -1,0 +1,1872 @@
+{
+  "original_handle": 1214,
+  "actual_terminal_exit": 0,
+  "all_12_workloads_and_validators_exit0": true,
+  "source_commit": "6fce8989e2c57afa033b5ee982aaa201eae04ac6",
+  "binary_sha256": "7bcb14f58b4e3b9a2e65765e4d058e6e86c2ff397909547074cbb9af42a23f4d",
+  "config_sha256": "3198045f581f84c58a66dea2f40af02ae460187e2ecfc5a21eefdc4b53957ab4",
+  "scope": "SAME published464 source/binary producerOFF0 versus ON2;12 serial paired trials (3 per TCP/TLS+QUIC),15000offers/rate500/window64/ready16/g1/3voters/Counter8bytes/warm64/active2smaintenance/noPause. Finite durable application diagnostic; joins are actual returned-step observations, not a hit-rate or causal proof. No framework floor or full sustained/headroom/fairness acceptance claim.",
+  "method": "Rates independently recomputed from exact completed counts and elapsed_ns; p99/order-statistics recomputed from applied offers. Storage deltas after_measurement minus before_measurement; leader1 and all3 physical replicas separated. Per-cell medians and per-trial ON/OFF ratios are distinct.",
+  "limits": [
+    "Instrumented joins are actual returned-step counts, not opportunity or eligibility hit rate.",
+    "All refusals remain in the15000-original offered denominator; completed rates count only applied originals.",
+    "Barrier/sync/publication counts include active maintenance in the measurement-plus-drain interval; inclusive elapsed attribution may overlap and is not CPU time.",
+    "Whole-process peak RSS includes warmup/recovery/cleanup; no continuous plateau/debt proof.",
+    "Finite onegroup disk-backed diagnostic; no framework/sustained/full-P9 acceptance.",
+    "Joined originals are proposed joined originals from OwnerSteps, not separately attributed completed receipts. Successful runs separately prove all admitted originals eventually applied.",
+    "sync_calls counts JournalIo::sync_log; publish_calls counts JournalIo::publish_manifest. Publication contains nested filesystem operations, so neither is a complete physical fsync syscall count."
+  ],
+  "cases": [
+    {
+      "name": "g1-tcp-r500-w64-q16-t1-off",
+      "protocol": "tcp",
+      "trial": 1,
+      "producer": "off",
+      "completed_originals": 4954,
+      "total_completed_originals_s": 163.96793824647108,
+      "horizon_completed_originals_s": 163.66666666666666,
+      "p99_ms": 1122.766987,
+      "service_p99_ms": 1122.649211,
+      "max_latency_ms": 1287.598259,
+      "dispatch_p99_ms": 0.224625,
+      "elapsed_ns": 30213223713,
+      "horizon_ns": 30000000000,
+      "drain_ns": 213223713,
+      "applied_during": 4910,
+      "backlog_at_horizon": 44,
+      "outcomes": {
+        "applied": 4954,
+        "window_refused": 10046,
+        "no_leader": 0,
+        "admission_refused": 0,
+        "not_proposed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "joined": {
+        "warmup": {
+          "joined_transitions": 0,
+          "joined_reply_inputs": 0,
+          "joined_originals": 0
+        },
+        "measurement": {
+          "joined_transitions": 0,
+          "joined_reply_inputs": 0,
+          "joined_originals": 0
+        }
+      },
+      "storage_per_replica": [
+        {
+          "replica": 1,
+          "append_calls": 687,
+          "append_units": 687,
+          "append_commands": 4954,
+          "barrier_calls": 687,
+          "barrier_tickets": 687,
+          "barrier_ns": 27081132913,
+          "sync_calls": 687,
+          "sync_ns": 9149976282,
+          "publish_calls": 687,
+          "publish_ns": 17924158157,
+          "errors": 0
+        },
+        {
+          "replica": 2,
+          "append_calls": 211,
+          "append_units": 211,
+          "append_commands": 4954,
+          "barrier_calls": 211,
+          "barrier_tickets": 211,
+          "barrier_ns": 9600530994,
+          "sync_calls": 211,
+          "sync_ns": 3358519651,
+          "publish_calls": 211,
+          "publish_ns": 6239869208,
+          "errors": 0
+        },
+        {
+          "replica": 3,
+          "append_calls": 221,
+          "append_units": 221,
+          "append_commands": 4954,
+          "barrier_calls": 221,
+          "barrier_tickets": 221,
+          "barrier_ns": 10467087702,
+          "sync_calls": 221,
+          "sync_ns": 3741797173,
+          "publish_calls": 221,
+          "publish_ns": 6723027799,
+          "errors": 0
+        }
+      ],
+      "storage_all_replicas": {
+        "append_calls": 1119,
+        "append_units": 1119,
+        "append_commands": 14862,
+        "barrier_calls": 1119,
+        "barrier_tickets": 1119,
+        "barrier_ns": 47148751609,
+        "sync_calls": 1119,
+        "sync_ns": 16250293106,
+        "publish_calls": 1119,
+        "publish_ns": 30887055164,
+        "errors": 0
+      },
+      "leader_logical_barriers_per_completed_original": 0.13867581752119498,
+      "leader_syncs_per_completed_original": 0.13867581752119498,
+      "leader_publications_per_completed_original": 0.13867581752119498,
+      "all_replica_syncs_per_completed_original": 0.22587807832054904,
+      "all_replica_publications_per_completed_original": 0.22587807832054904,
+      "commands_per_leader_publication": 7.211062590975255,
+      "commands_per_all_replica_publication": 13.281501340482574,
+      "leader_barrier_elapsed_fraction": 0.8963337765690875,
+      "leader_publish_elapsed_fraction": 0.5932554012529183,
+      "maintenance": {
+        "checkpoints": 14,
+        "reclaims": 42,
+        "maintenance_skips": 0,
+        "reclaimed_bytes": 702064,
+        "snapshot_events": 153,
+        "snapshot_supplies": 97,
+        "follower_snapshot_installs": 9
+      },
+      "maintenance_rows": {
+        "checkpoint:completed": 14,
+        "reclaim:completed": 42
+      },
+      "recovery_retries": 0,
+      "recovered_value": 5018,
+      "retry_verified": true,
+      "workers_joined": true,
+      "whole_process_peak_rss_bytes": 16723968
+    },
+    {
+      "name": "g1-tcp-r500-w64-q16-t1-on",
+      "protocol": "tcp",
+      "trial": 1,
+      "producer": "on",
+      "completed_originals": 4943,
+      "total_completed_originals_s": 164.26082951038265,
+      "horizon_completed_originals_s": 163.5,
+      "p99_ms": 1589.013643,
+      "service_p99_ms": 1588.914149,
+      "max_latency_ms": 1988.977836,
+      "dispatch_p99_ms": 0.34934899999999997,
+      "elapsed_ns": 30092384257,
+      "horizon_ns": 30000000000,
+      "drain_ns": 92384257,
+      "applied_during": 4905,
+      "backlog_at_horizon": 38,
+      "outcomes": {
+        "applied": 4943,
+        "window_refused": 10057,
+        "no_leader": 0,
+        "admission_refused": 0,
+        "not_proposed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "joined": {
+        "warmup": {
+          "joined_transitions": 1,
+          "joined_reply_inputs": 2,
+          "joined_originals": 1
+        },
+        "measurement": {
+          "joined_transitions": 98,
+          "joined_reply_inputs": 116,
+          "joined_originals": 361
+        }
+      },
+      "storage_per_replica": [
+        {
+          "replica": 1,
+          "append_calls": 628,
+          "append_units": 628,
+          "append_commands": 4943,
+          "barrier_calls": 628,
+          "barrier_tickets": 628,
+          "barrier_ns": 26524527030,
+          "sync_calls": 628,
+          "sync_ns": 9301342325,
+          "publish_calls": 628,
+          "publish_ns": 17216207493,
+          "errors": 0
+        },
+        {
+          "replica": 2,
+          "append_calls": 248,
+          "append_units": 248,
+          "append_commands": 4943,
+          "barrier_calls": 248,
+          "barrier_tickets": 248,
+          "barrier_ns": 12908680485,
+          "sync_calls": 248,
+          "sync_ns": 4531571208,
+          "publish_calls": 248,
+          "publish_ns": 8374486100,
+          "errors": 0
+        },
+        {
+          "replica": 3,
+          "append_calls": 262,
+          "append_units": 262,
+          "append_commands": 4943,
+          "barrier_calls": 262,
+          "barrier_tickets": 262,
+          "barrier_ns": 13021552467,
+          "sync_calls": 262,
+          "sync_ns": 4530028431,
+          "publish_calls": 262,
+          "publish_ns": 8488703636,
+          "errors": 0
+        }
+      ],
+      "storage_all_replicas": {
+        "append_calls": 1138,
+        "append_units": 1138,
+        "append_commands": 14829,
+        "barrier_calls": 1138,
+        "barrier_tickets": 1138,
+        "barrier_ns": 52454759982,
+        "sync_calls": 1138,
+        "sync_ns": 18362941964,
+        "publish_calls": 1138,
+        "publish_ns": 34079397229,
+        "errors": 0
+      },
+      "leader_logical_barriers_per_completed_original": 0.12704835120372243,
+      "leader_syncs_per_completed_original": 0.12704835120372243,
+      "leader_publications_per_completed_original": 0.12704835120372243,
+      "all_replica_syncs_per_completed_original": 0.2302245599838155,
+      "all_replica_publications_per_completed_original": 0.2302245599838155,
+      "commands_per_leader_publication": 7.8710191082802545,
+      "commands_per_all_replica_publication": 13.030755711775043,
+      "leader_barrier_elapsed_fraction": 0.8814365390083687,
+      "leader_publish_elapsed_fraction": 0.5721117790457304,
+      "maintenance": {
+        "checkpoints": 14,
+        "reclaims": 42,
+        "maintenance_skips": 0,
+        "reclaimed_bytes": 624797,
+        "snapshot_events": 83,
+        "snapshot_supplies": 45,
+        "follower_snapshot_installs": 3
+      },
+      "maintenance_rows": {
+        "checkpoint:completed": 14,
+        "reclaim:completed": 42
+      },
+      "recovery_retries": 0,
+      "recovered_value": 5007,
+      "retry_verified": true,
+      "workers_joined": true,
+      "whole_process_peak_rss_bytes": 17903616
+    },
+    {
+      "name": "g1-tcp-r500-w64-q16-t2-on",
+      "protocol": "tcp",
+      "trial": 2,
+      "producer": "on",
+      "completed_originals": 5239,
+      "total_completed_originals_s": 173.0058932786597,
+      "horizon_completed_originals_s": 172.5,
+      "p99_ms": 1080.213216,
+      "service_p99_ms": 1080.145348,
+      "max_latency_ms": 1492.713331,
+      "dispatch_p99_ms": 0.25021,
+      "elapsed_ns": 30282205425,
+      "horizon_ns": 30000000000,
+      "drain_ns": 282205425,
+      "applied_during": 5175,
+      "backlog_at_horizon": 64,
+      "outcomes": {
+        "applied": 5239,
+        "window_refused": 9761,
+        "no_leader": 0,
+        "admission_refused": 0,
+        "not_proposed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "joined": {
+        "warmup": {
+          "joined_transitions": 1,
+          "joined_reply_inputs": 2,
+          "joined_originals": 1
+        },
+        "measurement": {
+          "joined_transitions": 106,
+          "joined_reply_inputs": 112,
+          "joined_originals": 385
+        }
+      },
+      "storage_per_replica": [
+        {
+          "replica": 1,
+          "append_calls": 682,
+          "append_units": 682,
+          "append_commands": 5239,
+          "barrier_calls": 682,
+          "barrier_tickets": 682,
+          "barrier_ns": 26467837062,
+          "sync_calls": 682,
+          "sync_ns": 9166285777,
+          "publish_calls": 682,
+          "publish_ns": 17294549660,
+          "errors": 0
+        },
+        {
+          "replica": 2,
+          "append_calls": 284,
+          "append_units": 284,
+          "append_commands": 5239,
+          "barrier_calls": 284,
+          "barrier_tickets": 284,
+          "barrier_ns": 12492776578,
+          "sync_calls": 284,
+          "sync_ns": 4226597977,
+          "publish_calls": 284,
+          "publish_ns": 8263361293,
+          "errors": 0
+        },
+        {
+          "replica": 3,
+          "append_calls": 261,
+          "append_units": 261,
+          "append_commands": 5239,
+          "barrier_calls": 261,
+          "barrier_tickets": 261,
+          "barrier_ns": 11866622799,
+          "sync_calls": 261,
+          "sync_ns": 4233081145,
+          "publish_calls": 261,
+          "publish_ns": 7630872287,
+          "errors": 0
+        }
+      ],
+      "storage_all_replicas": {
+        "append_calls": 1227,
+        "append_units": 1227,
+        "append_commands": 15717,
+        "barrier_calls": 1227,
+        "barrier_tickets": 1227,
+        "barrier_ns": 50827236439,
+        "sync_calls": 1227,
+        "sync_ns": 17625964899,
+        "publish_calls": 1227,
+        "publish_ns": 33188783240,
+        "errors": 0
+      },
+      "leader_logical_barriers_per_completed_original": 0.1301775147928994,
+      "leader_syncs_per_completed_original": 0.1301775147928994,
+      "leader_publications_per_completed_original": 0.1301775147928994,
+      "all_replica_syncs_per_completed_original": 0.2342050009543806,
+      "all_replica_publications_per_completed_original": 0.2342050009543806,
+      "commands_per_leader_publication": 7.681818181818182,
+      "commands_per_all_replica_publication": 12.809290953545233,
+      "leader_barrier_elapsed_fraction": 0.874039281172996,
+      "leader_publish_elapsed_fraction": 0.5711126193511052,
+      "maintenance": {
+        "checkpoints": 14,
+        "reclaims": 42,
+        "maintenance_skips": 0,
+        "reclaimed_bytes": 691028,
+        "snapshot_events": 101,
+        "snapshot_supplies": 63,
+        "follower_snapshot_installs": 2
+      },
+      "maintenance_rows": {
+        "checkpoint:completed": 14,
+        "reclaim:completed": 42
+      },
+      "recovery_retries": 0,
+      "recovered_value": 5303,
+      "retry_verified": true,
+      "workers_joined": true,
+      "whole_process_peak_rss_bytes": 18440192
+    },
+    {
+      "name": "g1-tcp-r500-w64-q16-t2-off",
+      "protocol": "tcp",
+      "trial": 2,
+      "producer": "off",
+      "completed_originals": 4121,
+      "total_completed_originals_s": 136.49006318045303,
+      "horizon_completed_originals_s": 135.23333333333332,
+      "p99_ms": 2670.103503,
+      "service_p99_ms": 2669.9791099999998,
+      "max_latency_ms": 3032.094367,
+      "dispatch_p99_ms": 0.25793,
+      "elapsed_ns": 30192674133,
+      "horizon_ns": 30000000000,
+      "drain_ns": 192674133,
+      "applied_during": 4057,
+      "backlog_at_horizon": 64,
+      "outcomes": {
+        "applied": 4121,
+        "window_refused": 10879,
+        "no_leader": 0,
+        "admission_refused": 0,
+        "not_proposed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "joined": {
+        "warmup": {
+          "joined_transitions": 0,
+          "joined_reply_inputs": 0,
+          "joined_originals": 0
+        },
+        "measurement": {
+          "joined_transitions": 0,
+          "joined_reply_inputs": 0,
+          "joined_originals": 0
+        }
+      },
+      "storage_per_replica": [
+        {
+          "replica": 1,
+          "append_calls": 576,
+          "append_units": 576,
+          "append_commands": 4121,
+          "barrier_calls": 576,
+          "barrier_tickets": 576,
+          "barrier_ns": 25475642430,
+          "sync_calls": 576,
+          "sync_ns": 8413433366,
+          "publish_calls": 576,
+          "publish_ns": 17055771664,
+          "errors": 0
+        },
+        {
+          "replica": 2,
+          "append_calls": 183,
+          "append_units": 183,
+          "append_commands": 4121,
+          "barrier_calls": 183,
+          "barrier_tickets": 183,
+          "barrier_ns": 10016402638,
+          "sync_calls": 183,
+          "sync_ns": 3362713027,
+          "publish_calls": 183,
+          "publish_ns": 6651653271,
+          "errors": 0
+        },
+        {
+          "replica": 3,
+          "append_calls": 186,
+          "append_units": 186,
+          "append_commands": 4105,
+          "barrier_calls": 186,
+          "barrier_tickets": 186,
+          "barrier_ns": 9910359830,
+          "sync_calls": 186,
+          "sync_ns": 3404889766,
+          "publish_calls": 186,
+          "publish_ns": 6503579113,
+          "errors": 0
+        }
+      ],
+      "storage_all_replicas": {
+        "append_calls": 945,
+        "append_units": 945,
+        "append_commands": 12347,
+        "barrier_calls": 945,
+        "barrier_tickets": 945,
+        "barrier_ns": 45402404898,
+        "sync_calls": 945,
+        "sync_ns": 15181036159,
+        "publish_calls": 945,
+        "publish_ns": 30211004048,
+        "errors": 0
+      },
+      "leader_logical_barriers_per_completed_original": 0.13977190002426595,
+      "leader_syncs_per_completed_original": 0.13977190002426595,
+      "leader_publications_per_completed_original": 0.13977190002426595,
+      "all_replica_syncs_per_completed_original": 0.22931327347731134,
+      "all_replica_publications_per_completed_original": 0.22931327347731134,
+      "commands_per_leader_publication": 7.154513888888889,
+      "commands_per_all_replica_publication": 13.065608465608465,
+      "leader_barrier_elapsed_fraction": 0.8437689989889178,
+      "leader_publish_elapsed_fraction": 0.5648976830892357,
+      "maintenance": {
+        "checkpoints": 14,
+        "reclaims": 42,
+        "maintenance_skips": 0,
+        "reclaimed_bytes": 581330,
+        "snapshot_events": 126,
+        "snapshot_supplies": 78,
+        "follower_snapshot_installs": 7
+      },
+      "maintenance_rows": {
+        "checkpoint:completed": 14,
+        "reclaim:completed": 42
+      },
+      "recovery_retries": 0,
+      "recovered_value": 4185,
+      "retry_verified": true,
+      "workers_joined": true,
+      "whole_process_peak_rss_bytes": 16617472
+    },
+    {
+      "name": "g1-tcp-r500-w64-q16-t3-off",
+      "protocol": "tcp",
+      "trial": 3,
+      "producer": "off",
+      "completed_originals": 4849,
+      "total_completed_originals_s": 160.58210974379946,
+      "horizon_completed_originals_s": 159.5,
+      "p99_ms": 1058.381321,
+      "service_p99_ms": 1058.241397,
+      "max_latency_ms": 1222.889878,
+      "dispatch_p99_ms": 0.256034,
+      "elapsed_ns": 30196389920,
+      "horizon_ns": 30000000000,
+      "drain_ns": 196389920,
+      "applied_during": 4785,
+      "backlog_at_horizon": 64,
+      "outcomes": {
+        "applied": 4849,
+        "window_refused": 10151,
+        "no_leader": 0,
+        "admission_refused": 0,
+        "not_proposed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "joined": {
+        "warmup": {
+          "joined_transitions": 0,
+          "joined_reply_inputs": 0,
+          "joined_originals": 0
+        },
+        "measurement": {
+          "joined_transitions": 0,
+          "joined_reply_inputs": 0,
+          "joined_originals": 0
+        }
+      },
+      "storage_per_replica": [
+        {
+          "replica": 1,
+          "append_calls": 669,
+          "append_units": 669,
+          "append_commands": 4849,
+          "barrier_calls": 669,
+          "barrier_tickets": 669,
+          "barrier_ns": 26460105192,
+          "sync_calls": 669,
+          "sync_ns": 9240224401,
+          "publish_calls": 669,
+          "publish_ns": 17213452327,
+          "errors": 0
+        },
+        {
+          "replica": 2,
+          "append_calls": 211,
+          "append_units": 211,
+          "append_commands": 4849,
+          "barrier_calls": 210,
+          "barrier_tickets": 210,
+          "barrier_ns": 9570287275,
+          "sync_calls": 211,
+          "sync_ns": 3698511391,
+          "publish_calls": 210,
+          "publish_ns": 5881307717,
+          "errors": 0
+        },
+        {
+          "replica": 3,
+          "append_calls": 214,
+          "append_units": 214,
+          "append_commands": 4849,
+          "barrier_calls": 214,
+          "barrier_tickets": 214,
+          "barrier_ns": 9760583312,
+          "sync_calls": 214,
+          "sync_ns": 3425813556,
+          "publish_calls": 214,
+          "publish_ns": 6332821266,
+          "errors": 0
+        }
+      ],
+      "storage_all_replicas": {
+        "append_calls": 1094,
+        "append_units": 1094,
+        "append_commands": 14547,
+        "barrier_calls": 1093,
+        "barrier_tickets": 1093,
+        "barrier_ns": 45790975779,
+        "sync_calls": 1094,
+        "sync_ns": 16364549348,
+        "publish_calls": 1093,
+        "publish_ns": 29427581310,
+        "errors": 0
+      },
+      "leader_logical_barriers_per_completed_original": 0.13796659104970097,
+      "leader_syncs_per_completed_original": 0.13796659104970097,
+      "leader_publications_per_completed_original": 0.13796659104970097,
+      "all_replica_syncs_per_completed_original": 0.22561352856259023,
+      "all_replica_publications_per_completed_original": 0.2254073004743246,
+      "commands_per_leader_publication": 7.24813153961136,
+      "commands_per_all_replica_publication": 13.309240622140896,
+      "leader_barrier_elapsed_fraction": 0.8762671717414358,
+      "leader_publish_elapsed_fraction": 0.5700500083819291,
+      "maintenance": {
+        "checkpoints": 14,
+        "reclaims": 42,
+        "maintenance_skips": 0,
+        "reclaimed_bytes": 660701,
+        "snapshot_events": 127,
+        "snapshot_supplies": 77,
+        "follower_snapshot_installs": 5
+      },
+      "maintenance_rows": {
+        "checkpoint:completed": 14,
+        "reclaim:completed": 42
+      },
+      "recovery_retries": 0,
+      "recovered_value": 4913,
+      "retry_verified": true,
+      "workers_joined": true,
+      "whole_process_peak_rss_bytes": 16842752
+    },
+    {
+      "name": "g1-tcp-r500-w64-q16-t3-on",
+      "protocol": "tcp",
+      "trial": 3,
+      "producer": "on",
+      "completed_originals": 4147,
+      "total_completed_originals_s": 137.06247241579115,
+      "horizon_completed_originals_s": 136.1,
+      "p99_ms": 1974.6365779999999,
+      "service_p99_ms": 1974.485828,
+      "max_latency_ms": 2046.582622,
+      "dispatch_p99_ms": 0.517505,
+      "elapsed_ns": 30256276039,
+      "horizon_ns": 30000000000,
+      "drain_ns": 256276039,
+      "applied_during": 4083,
+      "backlog_at_horizon": 64,
+      "outcomes": {
+        "applied": 4147,
+        "window_refused": 10853,
+        "no_leader": 0,
+        "admission_refused": 0,
+        "not_proposed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "joined": {
+        "warmup": {
+          "joined_transitions": 1,
+          "joined_reply_inputs": 2,
+          "joined_originals": 1
+        },
+        "measurement": {
+          "joined_transitions": 88,
+          "joined_reply_inputs": 96,
+          "joined_originals": 337
+        }
+      },
+      "storage_per_replica": [
+        {
+          "replica": 1,
+          "append_calls": 536,
+          "append_units": 536,
+          "append_commands": 4147,
+          "barrier_calls": 536,
+          "barrier_tickets": 536,
+          "barrier_ns": 24371537887,
+          "sync_calls": 536,
+          "sync_ns": 8280696211,
+          "publish_calls": 536,
+          "publish_ns": 16085156271,
+          "errors": 0
+        },
+        {
+          "replica": 2,
+          "append_calls": 219,
+          "append_units": 219,
+          "append_commands": 4147,
+          "barrier_calls": 219,
+          "barrier_tickets": 219,
+          "barrier_ns": 11912047060,
+          "sync_calls": 219,
+          "sync_ns": 3741645515,
+          "publish_calls": 219,
+          "publish_ns": 8167996021,
+          "errors": 0
+        },
+        {
+          "replica": 3,
+          "append_calls": 218,
+          "append_units": 218,
+          "append_commands": 4147,
+          "barrier_calls": 218,
+          "barrier_tickets": 218,
+          "barrier_ns": 11886180277,
+          "sync_calls": 218,
+          "sync_ns": 3944462825,
+          "publish_calls": 218,
+          "publish_ns": 7939493494,
+          "errors": 0
+        }
+      ],
+      "storage_all_replicas": {
+        "append_calls": 973,
+        "append_units": 973,
+        "append_commands": 12441,
+        "barrier_calls": 973,
+        "barrier_tickets": 973,
+        "barrier_ns": 48169765224,
+        "sync_calls": 973,
+        "sync_ns": 15966804551,
+        "publish_calls": 973,
+        "publish_ns": 32192645786,
+        "errors": 0
+      },
+      "leader_logical_barriers_per_completed_original": 0.12925006028454306,
+      "leader_syncs_per_completed_original": 0.12925006028454306,
+      "leader_publications_per_completed_original": 0.12925006028454306,
+      "all_replica_syncs_per_completed_original": 0.23462744152399326,
+      "all_replica_publications_per_completed_original": 0.23462744152399326,
+      "commands_per_leader_publication": 7.736940298507463,
+      "commands_per_all_replica_publication": 12.78622816032888,
+      "leader_barrier_elapsed_fraction": 0.8055035542241008,
+      "leader_publish_elapsed_fraction": 0.5316304045569393,
+      "maintenance": {
+        "checkpoints": 14,
+        "reclaims": 42,
+        "maintenance_skips": 0,
+        "reclaimed_bytes": 381226,
+        "snapshot_events": 72,
+        "snapshot_supplies": 38,
+        "follower_snapshot_installs": 2
+      },
+      "maintenance_rows": {
+        "checkpoint:completed": 14,
+        "reclaim:completed": 42
+      },
+      "recovery_retries": 0,
+      "recovered_value": 4211,
+      "retry_verified": true,
+      "workers_joined": true,
+      "whole_process_peak_rss_bytes": 17293312
+    },
+    {
+      "name": "g1-quic-r500-w64-q16-t1-off",
+      "protocol": "quic",
+      "trial": 1,
+      "producer": "off",
+      "completed_originals": 4625,
+      "total_completed_originals_s": 152.97933493700555,
+      "horizon_completed_originals_s": 152.03333333333333,
+      "p99_ms": 1145.812999,
+      "service_p99_ms": 1145.800794,
+      "max_latency_ms": 1215.409821,
+      "dispatch_p99_ms": 0.188237,
+      "elapsed_ns": 30232841592,
+      "horizon_ns": 30000000000,
+      "drain_ns": 232841592,
+      "applied_during": 4561,
+      "backlog_at_horizon": 64,
+      "outcomes": {
+        "applied": 4625,
+        "window_refused": 10375,
+        "no_leader": 0,
+        "admission_refused": 0,
+        "not_proposed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "joined": {
+        "warmup": {
+          "joined_transitions": 0,
+          "joined_reply_inputs": 0,
+          "joined_originals": 0
+        },
+        "measurement": {
+          "joined_transitions": 0,
+          "joined_reply_inputs": 0,
+          "joined_originals": 0
+        }
+      },
+      "storage_per_replica": [
+        {
+          "replica": 1,
+          "append_calls": 621,
+          "append_units": 621,
+          "append_commands": 4625,
+          "barrier_calls": 621,
+          "barrier_tickets": 621,
+          "barrier_ns": 26708867667,
+          "sync_calls": 621,
+          "sync_ns": 9050007864,
+          "publish_calls": 621,
+          "publish_ns": 17652347880,
+          "errors": 0
+        },
+        {
+          "replica": 2,
+          "append_calls": 200,
+          "append_units": 200,
+          "append_commands": 4625,
+          "barrier_calls": 200,
+          "barrier_tickets": 200,
+          "barrier_ns": 10792017724,
+          "sync_calls": 200,
+          "sync_ns": 3479091151,
+          "publish_calls": 200,
+          "publish_ns": 7310841731,
+          "errors": 0
+        },
+        {
+          "replica": 3,
+          "append_calls": 203,
+          "append_units": 203,
+          "append_commands": 4625,
+          "barrier_calls": 203,
+          "barrier_tickets": 203,
+          "barrier_ns": 11146665730,
+          "sync_calls": 203,
+          "sync_ns": 3719354365,
+          "publish_calls": 203,
+          "publish_ns": 7425225510,
+          "errors": 0
+        }
+      ],
+      "storage_all_replicas": {
+        "append_calls": 1024,
+        "append_units": 1024,
+        "append_commands": 13875,
+        "barrier_calls": 1024,
+        "barrier_tickets": 1024,
+        "barrier_ns": 48647551121,
+        "sync_calls": 1024,
+        "sync_ns": 16248453380,
+        "publish_calls": 1024,
+        "publish_ns": 32388415121,
+        "errors": 0
+      },
+      "leader_logical_barriers_per_completed_original": 0.13427027027027028,
+      "leader_syncs_per_completed_original": 0.13427027027027028,
+      "leader_publications_per_completed_original": 0.13427027027027028,
+      "all_replica_syncs_per_completed_original": 0.2214054054054054,
+      "all_replica_publications_per_completed_original": 0.2214054054054054,
+      "commands_per_leader_publication": 7.447665056360709,
+      "commands_per_all_replica_publication": 13.5498046875,
+      "leader_barrier_elapsed_fraction": 0.8834388784039245,
+      "leader_publish_elapsed_fraction": 0.5838798786506075,
+      "maintenance": {
+        "checkpoints": 14,
+        "reclaims": 42,
+        "maintenance_skips": 0,
+        "reclaimed_bytes": 584338,
+        "snapshot_events": 94,
+        "snapshot_supplies": 50,
+        "follower_snapshot_installs": 4
+      },
+      "maintenance_rows": {
+        "checkpoint:completed": 14,
+        "reclaim:completed": 42
+      },
+      "recovery_retries": 0,
+      "recovered_value": 4689,
+      "retry_verified": true,
+      "workers_joined": true,
+      "whole_process_peak_rss_bytes": 17911808
+    },
+    {
+      "name": "g1-quic-r500-w64-q16-t1-on",
+      "protocol": "quic",
+      "trial": 1,
+      "producer": "on",
+      "completed_originals": 3853,
+      "total_completed_originals_s": 126.83182604790362,
+      "horizon_completed_originals_s": 126.3,
+      "p99_ms": 3580.457696,
+      "service_p99_ms": 3580.357443,
+      "max_latency_ms": 4793.08249,
+      "dispatch_p99_ms": 0.33100599999999997,
+      "elapsed_ns": 30378810430,
+      "horizon_ns": 30000000000,
+      "drain_ns": 378810430,
+      "applied_during": 3789,
+      "backlog_at_horizon": 64,
+      "outcomes": {
+        "applied": 3853,
+        "window_refused": 11147,
+        "no_leader": 0,
+        "admission_refused": 0,
+        "not_proposed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "joined": {
+        "warmup": {
+          "joined_transitions": 1,
+          "joined_reply_inputs": 2,
+          "joined_originals": 1
+        },
+        "measurement": {
+          "joined_transitions": 80,
+          "joined_reply_inputs": 97,
+          "joined_originals": 283
+        }
+      },
+      "storage_per_replica": [
+        {
+          "replica": 1,
+          "append_calls": 518,
+          "append_units": 518,
+          "append_commands": 3853,
+          "barrier_calls": 518,
+          "barrier_tickets": 518,
+          "barrier_ns": 25043016684,
+          "sync_calls": 518,
+          "sync_ns": 8602329910,
+          "publish_calls": 518,
+          "publish_ns": 16435170046,
+          "errors": 0
+        },
+        {
+          "replica": 2,
+          "append_calls": 203,
+          "append_units": 203,
+          "append_commands": 3853,
+          "barrier_calls": 203,
+          "barrier_tickets": 203,
+          "barrier_ns": 10708199008,
+          "sync_calls": 203,
+          "sync_ns": 3458479684,
+          "publish_calls": 203,
+          "publish_ns": 7247426833,
+          "errors": 0
+        },
+        {
+          "replica": 3,
+          "append_calls": 194,
+          "append_units": 194,
+          "append_commands": 3853,
+          "barrier_calls": 194,
+          "barrier_tickets": 194,
+          "barrier_ns": 11189679795,
+          "sync_calls": 194,
+          "sync_ns": 3765499067,
+          "publish_calls": 194,
+          "publish_ns": 7422151464,
+          "errors": 0
+        }
+      ],
+      "storage_all_replicas": {
+        "append_calls": 915,
+        "append_units": 915,
+        "append_commands": 11559,
+        "barrier_calls": 915,
+        "barrier_tickets": 915,
+        "barrier_ns": 46940895487,
+        "sync_calls": 915,
+        "sync_ns": 15826308661,
+        "publish_calls": 915,
+        "publish_ns": 31104748343,
+        "errors": 0
+      },
+      "leader_logical_barriers_per_completed_original": 0.13444069556189983,
+      "leader_syncs_per_completed_original": 0.13444069556189983,
+      "leader_publications_per_completed_original": 0.13444069556189983,
+      "all_replica_syncs_per_completed_original": 0.23747729042304697,
+      "all_replica_publications_per_completed_original": 0.23747729042304697,
+      "commands_per_leader_publication": 7.438223938223938,
+      "commands_per_all_replica_publication": 12.6327868852459,
+      "leader_barrier_elapsed_fraction": 0.8243580419880187,
+      "leader_publish_elapsed_fraction": 0.5410076896812842,
+      "maintenance": {
+        "checkpoints": 14,
+        "reclaims": 42,
+        "maintenance_skips": 0,
+        "reclaimed_bytes": 532461,
+        "snapshot_events": 118,
+        "snapshot_supplies": 76,
+        "follower_snapshot_installs": 3
+      },
+      "maintenance_rows": {
+        "checkpoint:completed": 14,
+        "reclaim:completed": 42
+      },
+      "recovery_retries": 0,
+      "recovered_value": 3917,
+      "retry_verified": true,
+      "workers_joined": true,
+      "whole_process_peak_rss_bytes": 17027072
+    },
+    {
+      "name": "g1-quic-r500-w64-q16-t2-on",
+      "protocol": "quic",
+      "trial": 2,
+      "producer": "on",
+      "completed_originals": 4727,
+      "total_completed_originals_s": 156.69858719088242,
+      "horizon_completed_originals_s": 156.23333333333332,
+      "p99_ms": 1510.747202,
+      "service_p99_ms": 1510.641062,
+      "max_latency_ms": 2011.049808,
+      "dispatch_p99_ms": 0.224342,
+      "elapsed_ns": 30166194123,
+      "horizon_ns": 30000000000,
+      "drain_ns": 166194123,
+      "applied_during": 4687,
+      "backlog_at_horizon": 40,
+      "outcomes": {
+        "applied": 4727,
+        "window_refused": 10273,
+        "no_leader": 0,
+        "admission_refused": 0,
+        "not_proposed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "joined": {
+        "warmup": {
+          "joined_transitions": 2,
+          "joined_reply_inputs": 2,
+          "joined_originals": 16
+        },
+        "measurement": {
+          "joined_transitions": 95,
+          "joined_reply_inputs": 109,
+          "joined_originals": 396
+        }
+      },
+      "storage_per_replica": [
+        {
+          "replica": 1,
+          "append_calls": 620,
+          "append_units": 620,
+          "append_commands": 4727,
+          "barrier_calls": 620,
+          "barrier_tickets": 620,
+          "barrier_ns": 25849455811,
+          "sync_calls": 620,
+          "sync_ns": 8861139067,
+          "publish_calls": 620,
+          "publish_ns": 16982125670,
+          "errors": 0
+        },
+        {
+          "replica": 2,
+          "append_calls": 243,
+          "append_units": 243,
+          "append_commands": 4727,
+          "barrier_calls": 243,
+          "barrier_tickets": 243,
+          "barrier_ns": 11373485504,
+          "sync_calls": 243,
+          "sync_ns": 3698011582,
+          "publish_calls": 243,
+          "publish_ns": 7673053584,
+          "errors": 0
+        },
+        {
+          "replica": 3,
+          "append_calls": 239,
+          "append_units": 239,
+          "append_commands": 4727,
+          "barrier_calls": 239,
+          "barrier_tickets": 239,
+          "barrier_ns": 11873959779,
+          "sync_calls": 239,
+          "sync_ns": 3925713408,
+          "publish_calls": 239,
+          "publish_ns": 7945987240,
+          "errors": 0
+        }
+      ],
+      "storage_all_replicas": {
+        "append_calls": 1102,
+        "append_units": 1102,
+        "append_commands": 14181,
+        "barrier_calls": 1102,
+        "barrier_tickets": 1102,
+        "barrier_ns": 49096901094,
+        "sync_calls": 1102,
+        "sync_ns": 16484864057,
+        "publish_calls": 1102,
+        "publish_ns": 32601166494,
+        "errors": 0
+      },
+      "leader_logical_barriers_per_completed_original": 0.13116141315845145,
+      "leader_syncs_per_completed_original": 0.13116141315845145,
+      "leader_publications_per_completed_original": 0.13116141315845145,
+      "all_replica_syncs_per_completed_original": 0.2331288343558282,
+      "all_replica_publications_per_completed_original": 0.2331288343558282,
+      "commands_per_leader_publication": 7.624193548387097,
+      "commands_per_all_replica_publication": 12.868421052631579,
+      "leader_barrier_elapsed_fraction": 0.8569014608074562,
+      "leader_publish_elapsed_fraction": 0.5629522107017172,
+      "maintenance": {
+        "checkpoints": 14,
+        "reclaims": 42,
+        "maintenance_skips": 0,
+        "reclaimed_bytes": 611107,
+        "snapshot_events": 101,
+        "snapshot_supplies": 63,
+        "follower_snapshot_installs": 3
+      },
+      "maintenance_rows": {
+        "checkpoint:completed": 14,
+        "reclaim:completed": 42
+      },
+      "recovery_retries": 0,
+      "recovered_value": 4791,
+      "retry_verified": true,
+      "workers_joined": true,
+      "whole_process_peak_rss_bytes": 17772544
+    },
+    {
+      "name": "g1-quic-r500-w64-q16-t2-off",
+      "protocol": "quic",
+      "trial": 2,
+      "producer": "off",
+      "completed_originals": 4159,
+      "total_completed_originals_s": 138.10399122626293,
+      "horizon_completed_originals_s": 137.16666666666666,
+      "p99_ms": 1876.928177,
+      "service_p99_ms": 1876.924226,
+      "max_latency_ms": 2702.514031,
+      "dispatch_p99_ms": 0.246174,
+      "elapsed_ns": 30114987721,
+      "horizon_ns": 30000000000,
+      "drain_ns": 114987721,
+      "applied_during": 4115,
+      "backlog_at_horizon": 44,
+      "outcomes": {
+        "applied": 4159,
+        "window_refused": 10841,
+        "no_leader": 0,
+        "admission_refused": 0,
+        "not_proposed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "joined": {
+        "warmup": {
+          "joined_transitions": 0,
+          "joined_reply_inputs": 0,
+          "joined_originals": 0
+        },
+        "measurement": {
+          "joined_transitions": 0,
+          "joined_reply_inputs": 0,
+          "joined_originals": 0
+        }
+      },
+      "storage_per_replica": [
+        {
+          "replica": 1,
+          "append_calls": 594,
+          "append_units": 594,
+          "append_commands": 4159,
+          "barrier_calls": 594,
+          "barrier_tickets": 594,
+          "barrier_ns": 25757844667,
+          "sync_calls": 594,
+          "sync_ns": 8683487403,
+          "publish_calls": 594,
+          "publish_ns": 17068444787,
+          "errors": 0
+        },
+        {
+          "replica": 2,
+          "append_calls": 189,
+          "append_units": 189,
+          "append_commands": 4159,
+          "barrier_calls": 189,
+          "barrier_tickets": 189,
+          "barrier_ns": 9482672751,
+          "sync_calls": 189,
+          "sync_ns": 3312770196,
+          "publish_calls": 189,
+          "publish_ns": 6168086147,
+          "errors": 0
+        },
+        {
+          "replica": 3,
+          "append_calls": 183,
+          "append_units": 183,
+          "append_commands": 4159,
+          "barrier_calls": 183,
+          "barrier_tickets": 183,
+          "barrier_ns": 9590140011,
+          "sync_calls": 183,
+          "sync_ns": 3465009731,
+          "publish_calls": 183,
+          "publish_ns": 6123014524,
+          "errors": 0
+        }
+      ],
+      "storage_all_replicas": {
+        "append_calls": 966,
+        "append_units": 966,
+        "append_commands": 12477,
+        "barrier_calls": 966,
+        "barrier_tickets": 966,
+        "barrier_ns": 44830657429,
+        "sync_calls": 966,
+        "sync_ns": 15461267330,
+        "publish_calls": 966,
+        "publish_ns": 29359545458,
+        "errors": 0
+      },
+      "leader_logical_barriers_per_completed_original": 0.14282279394085118,
+      "leader_syncs_per_completed_original": 0.14282279394085118,
+      "leader_publications_per_completed_original": 0.14282279394085118,
+      "all_replica_syncs_per_completed_original": 0.23226737196441452,
+      "all_replica_publications_per_completed_original": 0.23226737196441452,
+      "commands_per_leader_publication": 7.001683501683502,
+      "commands_per_all_replica_publication": 12.916149068322982,
+      "leader_barrier_elapsed_fraction": 0.8553164592206808,
+      "leader_publish_elapsed_fraction": 0.5667757511685023,
+      "maintenance": {
+        "checkpoints": 14,
+        "reclaims": 42,
+        "maintenance_skips": 0,
+        "reclaimed_bytes": 582940,
+        "snapshot_events": 140,
+        "snapshot_supplies": 90,
+        "follower_snapshot_installs": 4
+      },
+      "maintenance_rows": {
+        "checkpoint:completed": 14,
+        "reclaim:completed": 42
+      },
+      "recovery_retries": 0,
+      "recovered_value": 4223,
+      "retry_verified": true,
+      "workers_joined": true,
+      "whole_process_peak_rss_bytes": 17190912
+    },
+    {
+      "name": "g1-quic-r500-w64-q16-t3-off",
+      "protocol": "quic",
+      "trial": 3,
+      "producer": "off",
+      "completed_originals": 5216,
+      "total_completed_originals_s": 173.0052684697048,
+      "horizon_completed_originals_s": 172.23333333333332,
+      "p99_ms": 980.021678,
+      "service_p99_ms": 979.929856,
+      "max_latency_ms": 1184.781706,
+      "dispatch_p99_ms": 0.216075,
+      "elapsed_ns": 30149370861,
+      "horizon_ns": 30000000000,
+      "drain_ns": 149370861,
+      "applied_during": 5167,
+      "backlog_at_horizon": 49,
+      "outcomes": {
+        "applied": 5216,
+        "window_refused": 9784,
+        "no_leader": 0,
+        "admission_refused": 0,
+        "not_proposed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "joined": {
+        "warmup": {
+          "joined_transitions": 0,
+          "joined_reply_inputs": 0,
+          "joined_originals": 0
+        },
+        "measurement": {
+          "joined_transitions": 0,
+          "joined_reply_inputs": 0,
+          "joined_originals": 0
+        }
+      },
+      "storage_per_replica": [
+        {
+          "replica": 1,
+          "append_calls": 704,
+          "append_units": 704,
+          "append_commands": 5216,
+          "barrier_calls": 704,
+          "barrier_tickets": 704,
+          "barrier_ns": 26197818922,
+          "sync_calls": 704,
+          "sync_ns": 8723325740,
+          "publish_calls": 704,
+          "publish_ns": 17467743020,
+          "errors": 0
+        },
+        {
+          "replica": 2,
+          "append_calls": 235,
+          "append_units": 235,
+          "append_commands": 5216,
+          "barrier_calls": 235,
+          "barrier_tickets": 235,
+          "barrier_ns": 10077229366,
+          "sync_calls": 235,
+          "sync_ns": 3635977344,
+          "publish_calls": 235,
+          "publish_ns": 6439101951,
+          "errors": 0
+        },
+        {
+          "replica": 3,
+          "append_calls": 216,
+          "append_units": 216,
+          "append_commands": 5216,
+          "barrier_calls": 216,
+          "barrier_tickets": 216,
+          "barrier_ns": 9787427754,
+          "sync_calls": 216,
+          "sync_ns": 3506547780,
+          "publish_calls": 216,
+          "publish_ns": 6278820015,
+          "errors": 0
+        }
+      ],
+      "storage_all_replicas": {
+        "append_calls": 1155,
+        "append_units": 1155,
+        "append_commands": 15648,
+        "barrier_calls": 1155,
+        "barrier_tickets": 1155,
+        "barrier_ns": 46062476042,
+        "sync_calls": 1155,
+        "sync_ns": 15865850864,
+        "publish_calls": 1155,
+        "publish_ns": 30185664986,
+        "errors": 0
+      },
+      "leader_logical_barriers_per_completed_original": 0.13496932515337423,
+      "leader_syncs_per_completed_original": 0.13496932515337423,
+      "leader_publications_per_completed_original": 0.13496932515337423,
+      "all_replica_syncs_per_completed_original": 0.2214340490797546,
+      "all_replica_publications_per_completed_original": 0.2214340490797546,
+      "commands_per_leader_publication": 7.409090909090909,
+      "commands_per_all_replica_publication": 13.548051948051947,
+      "leader_barrier_elapsed_fraction": 0.8689341825002536,
+      "leader_publish_elapsed_fraction": 0.5793733839599141,
+      "maintenance": {
+        "checkpoints": 14,
+        "reclaims": 42,
+        "maintenance_skips": 0,
+        "reclaimed_bytes": 709473,
+        "snapshot_events": 123,
+        "snapshot_supplies": 73,
+        "follower_snapshot_installs": 5
+      },
+      "maintenance_rows": {
+        "checkpoint:completed": 14,
+        "reclaim:completed": 42
+      },
+      "recovery_retries": 0,
+      "recovered_value": 5280,
+      "retry_verified": true,
+      "workers_joined": true,
+      "whole_process_peak_rss_bytes": 17911808
+    },
+    {
+      "name": "g1-quic-r500-w64-q16-t3-on",
+      "protocol": "quic",
+      "trial": 3,
+      "producer": "on",
+      "completed_originals": 4597,
+      "total_completed_originals_s": 152.65768894657225,
+      "horizon_completed_originals_s": 151.1,
+      "p99_ms": 2462.987064,
+      "service_p99_ms": 2462.8844670000003,
+      "max_latency_ms": 3173.767554,
+      "dispatch_p99_ms": 0.211533,
+      "elapsed_ns": 30113124545,
+      "horizon_ns": 30000000000,
+      "drain_ns": 113124545,
+      "applied_during": 4533,
+      "backlog_at_horizon": 64,
+      "outcomes": {
+        "applied": 4597,
+        "window_refused": 10403,
+        "no_leader": 0,
+        "admission_refused": 0,
+        "not_proposed": 0,
+        "unknown": 0,
+        "pending": 0
+      },
+      "joined": {
+        "warmup": {
+          "joined_transitions": 1,
+          "joined_reply_inputs": 2,
+          "joined_originals": 1
+        },
+        "measurement": {
+          "joined_transitions": 93,
+          "joined_reply_inputs": 108,
+          "joined_originals": 470
+        }
+      },
+      "storage_per_replica": [
+        {
+          "replica": 1,
+          "append_calls": 586,
+          "append_units": 586,
+          "append_commands": 4597,
+          "barrier_calls": 586,
+          "barrier_tickets": 586,
+          "barrier_ns": 25757343073,
+          "sync_calls": 586,
+          "sync_ns": 8530266056,
+          "publish_calls": 586,
+          "publish_ns": 17221314572,
+          "errors": 0
+        },
+        {
+          "replica": 2,
+          "append_calls": 237,
+          "append_units": 237,
+          "append_commands": 4597,
+          "barrier_calls": 237,
+          "barrier_tickets": 237,
+          "barrier_ns": 12586403977,
+          "sync_calls": 237,
+          "sync_ns": 4162263001,
+          "publish_calls": 237,
+          "publish_ns": 8421925750,
+          "errors": 0
+        },
+        {
+          "replica": 3,
+          "append_calls": 226,
+          "append_units": 226,
+          "append_commands": 4597,
+          "barrier_calls": 226,
+          "barrier_tickets": 226,
+          "barrier_ns": 11566371852,
+          "sync_calls": 226,
+          "sync_ns": 3969986366,
+          "publish_calls": 226,
+          "publish_ns": 7594148036,
+          "errors": 0
+        }
+      ],
+      "storage_all_replicas": {
+        "append_calls": 1049,
+        "append_units": 1049,
+        "append_commands": 13791,
+        "barrier_calls": 1049,
+        "barrier_tickets": 1049,
+        "barrier_ns": 49910118902,
+        "sync_calls": 1049,
+        "sync_ns": 16662515423,
+        "publish_calls": 1049,
+        "publish_ns": 33237388358,
+        "errors": 0
+      },
+      "leader_logical_barriers_per_completed_original": 0.12747443985207743,
+      "leader_syncs_per_completed_original": 0.12747443985207743,
+      "leader_publications_per_completed_original": 0.12747443985207743,
+      "all_replica_syncs_per_completed_original": 0.22819229932564716,
+      "all_replica_publications_per_completed_original": 0.22819229932564716,
+      "commands_per_leader_publication": 7.8447098976109215,
+      "commands_per_all_replica_publication": 13.146806482364155,
+      "leader_barrier_elapsed_fraction": 0.8553527228471136,
+      "leader_publish_elapsed_fraction": 0.5718873359111264,
+      "maintenance": {
+        "checkpoints": 13,
+        "reclaims": 39,
+        "maintenance_skips": 1,
+        "reclaimed_bytes": 545611,
+        "snapshot_events": 66,
+        "snapshot_supplies": 36,
+        "follower_snapshot_installs": 1
+      },
+      "maintenance_rows": {
+        "checkpoint:completed": 13,
+        "reclaim:completed": 39,
+        "skip:skipped": 1
+      },
+      "recovery_retries": 0,
+      "recovered_value": 4661,
+      "retry_verified": true,
+      "workers_joined": true,
+      "whole_process_peak_rss_bytes": 17879040
+    }
+  ],
+  "pairs": [
+    {
+      "protocol": "tcp",
+      "trial": 1,
+      "off": "g1-tcp-r500-w64-q16-t1-off",
+      "on": "g1-tcp-r500-w64-q16-t1-on",
+      "on_over_off": {
+        "total_completed_originals_s": 1.0017862715543286,
+        "horizon_completed_originals_s": 0.9989816700610998,
+        "p99_ms": 1.4152657331382688,
+        "service_p99_ms": 1.415325582943825,
+        "leader_logical_barriers_per_completed_original": 0.9161536126102489,
+        "leader_syncs_per_completed_original": 0.9161536126102489,
+        "leader_publications_per_completed_original": 0.9161536126102489,
+        "commands_per_leader_publication": 1.0915200095657116,
+        "leader_barrier_elapsed_fraction": 0.9833798101219154,
+        "leader_publish_elapsed_fraction": 0.9643600004946707
+      },
+      "completed_difference": -11,
+      "window_refused_difference": 11,
+      "on_measurement_joins": {
+        "joined_transitions": 98,
+        "joined_reply_inputs": 116,
+        "joined_originals": 361
+      }
+    },
+    {
+      "protocol": "tcp",
+      "trial": 2,
+      "off": "g1-tcp-r500-w64-q16-t2-off",
+      "on": "g1-tcp-r500-w64-q16-t2-on",
+      "on_over_off": {
+        "total_completed_originals_s": 1.2675347145962501,
+        "horizon_completed_originals_s": 1.2755730835592805,
+        "p99_ms": 0.4045585554216623,
+        "service_p99_ms": 0.4045519846782622,
+        "leader_logical_barriers_per_completed_original": 0.9313568376068376,
+        "leader_syncs_per_completed_original": 0.9313568376068376,
+        "leader_publications_per_completed_original": 0.9313568376068376,
+        "commands_per_leader_publication": 1.0737023229136793,
+        "leader_barrier_elapsed_fraction": 1.0358750821852318,
+        "leader_publish_elapsed_fraction": 1.0110018795401712
+      },
+      "completed_difference": 1118,
+      "window_refused_difference": -1118,
+      "on_measurement_joins": {
+        "joined_transitions": 106,
+        "joined_reply_inputs": 112,
+        "joined_originals": 385
+      }
+    },
+    {
+      "protocol": "tcp",
+      "trial": 3,
+      "off": "g1-tcp-r500-w64-q16-t3-off",
+      "on": "g1-tcp-r500-w64-q16-t3-on",
+      "on_over_off": {
+        "total_completed_originals_s": 0.853535133113317,
+        "horizon_completed_originals_s": 0.8532915360501567,
+        "p99_ms": 1.865713744961302,
+        "service_p99_ms": 1.8658179821706598,
+        "leader_logical_barriers_per_completed_original": 0.9368214384450663,
+        "leader_syncs_per_completed_original": 0.9368214384450663,
+        "leader_publications_per_completed_original": 0.9368214384450663,
+        "commands_per_leader_publication": 1.0674392781401305,
+        "leader_barrier_elapsed_fraction": 0.9192442444503496,
+        "leader_publish_elapsed_fraction": 0.9326030992718644
+      },
+      "completed_difference": -702,
+      "window_refused_difference": 702,
+      "on_measurement_joins": {
+        "joined_transitions": 88,
+        "joined_reply_inputs": 96,
+        "joined_originals": 337
+      }
+    },
+    {
+      "protocol": "quic",
+      "trial": 1,
+      "off": "g1-quic-r500-w64-q16-t1-off",
+      "on": "g1-quic-r500-w64-q16-t1-on",
+      "on_over_off": {
+        "total_completed_originals_s": 0.829078163401161,
+        "horizon_completed_originals_s": 0.8307388730541548,
+        "p99_ms": 3.1248185341978303,
+        "service_p99_ms": 3.1247643235618145,
+        "leader_logical_barriers_per_completed_original": 1.0012692704891895,
+        "leader_syncs_per_completed_original": 1.0012692704891895,
+        "leader_publications_per_completed_original": 1.0012692704891895,
+        "commands_per_leader_publication": 0.9987323385161223,
+        "leader_barrier_elapsed_fraction": 0.933124024921062,
+        "leader_publish_elapsed_fraction": 0.9265736146475807
+      },
+      "completed_difference": -772,
+      "window_refused_difference": 772,
+      "on_measurement_joins": {
+        "joined_transitions": 80,
+        "joined_reply_inputs": 97,
+        "joined_originals": 283
+      }
+    },
+    {
+      "protocol": "quic",
+      "trial": 2,
+      "off": "g1-quic-r500-w64-q16-t2-off",
+      "on": "g1-quic-r500-w64-q16-t2-on",
+      "on_over_off": {
+        "total_completed_originals_s": 1.134641988254742,
+        "horizon_completed_originals_s": 1.139003645200486,
+        "p99_ms": 0.8049041090185519,
+        "service_p99_ms": 0.8048492534082725,
+        "leader_logical_barriers_per_completed_original": 0.9183507025690227,
+        "leader_syncs_per_completed_original": 0.9183507025690227,
+        "leader_publications_per_completed_original": 0.9183507025690227,
+        "commands_per_leader_publication": 1.0889086241264572,
+        "leader_barrier_elapsed_fraction": 1.0018531171354046,
+        "leader_publish_elapsed_fraction": 0.9932538742899599
+      },
+      "completed_difference": 568,
+      "window_refused_difference": -568,
+      "on_measurement_joins": {
+        "joined_transitions": 95,
+        "joined_reply_inputs": 109,
+        "joined_originals": 396
+      }
+    },
+    {
+      "protocol": "quic",
+      "trial": 3,
+      "off": "g1-quic-r500-w64-q16-t3-off",
+      "on": "g1-quic-r500-w64-q16-t3-on",
+      "on_over_off": {
+        "total_completed_originals_s": 0.8823875151137629,
+        "horizon_completed_originals_s": 0.8772982388233017,
+        "p99_ms": 2.513196513189783,
+        "service_p99_ms": 2.5133273079905023,
+        "leader_logical_barriers_per_completed_original": 0.9444697134494828,
+        "leader_syncs_per_completed_original": 0.9444697134494828,
+        "leader_publications_per_completed_original": 0.9444697134494828,
+        "commands_per_leader_publication": 1.0587952009045416,
+        "leader_barrier_elapsed_fraction": 0.9843699788468893,
+        "leader_publish_elapsed_fraction": 0.9870790611787826
+      },
+      "completed_difference": -619,
+      "window_refused_difference": 619,
+      "on_measurement_joins": {
+        "joined_transitions": 93,
+        "joined_reply_inputs": 108,
+        "joined_originals": 470
+      }
+    }
+  ],
+  "cells": [
+    {
+      "protocol": "tcp",
+      "producer": "off",
+      "medians": {
+        "total_completed_originals_s": 160.58210974379946,
+        "horizon_completed_originals_s": 159.5,
+        "p99_ms": 1122.766987,
+        "service_p99_ms": 1122.649211,
+        "leader_logical_barriers_per_completed_original": 0.13867581752119498,
+        "leader_syncs_per_completed_original": 0.13867581752119498,
+        "leader_publications_per_completed_original": 0.13867581752119498,
+        "commands_per_leader_publication": 7.211062590975255,
+        "leader_barrier_elapsed_fraction": 0.8762671717414358,
+        "leader_publish_elapsed_fraction": 0.5700500083819291
+      },
+      "completed_range": [
+        4121,
+        4954
+      ],
+      "refusal_range": [
+        10046,
+        10879
+      ],
+      "maintenance_ranges": {
+        "checkpoints": [
+          14,
+          14
+        ],
+        "reclaims": [
+          42,
+          42
+        ],
+        "follower_snapshot_installs": [
+          5,
+          9
+        ]
+      },
+      "measurement_join_counts": [
+        {
+          "joined_transitions": 0,
+          "joined_reply_inputs": 0,
+          "joined_originals": 0
+        },
+        {
+          "joined_transitions": 0,
+          "joined_reply_inputs": 0,
+          "joined_originals": 0
+        },
+        {
+          "joined_transitions": 0,
+          "joined_reply_inputs": 0,
+          "joined_originals": 0
+        }
+      ]
+    },
+    {
+      "protocol": "tcp",
+      "producer": "on",
+      "medians": {
+        "total_completed_originals_s": 164.26082951038265,
+        "horizon_completed_originals_s": 163.5,
+        "p99_ms": 1589.013643,
+        "service_p99_ms": 1588.914149,
+        "leader_logical_barriers_per_completed_original": 0.12925006028454306,
+        "leader_syncs_per_completed_original": 0.12925006028454306,
+        "leader_publications_per_completed_original": 0.12925006028454306,
+        "commands_per_leader_publication": 7.736940298507463,
+        "leader_barrier_elapsed_fraction": 0.874039281172996,
+        "leader_publish_elapsed_fraction": 0.5711126193511052
+      },
+      "completed_range": [
+        4147,
+        5239
+      ],
+      "refusal_range": [
+        9761,
+        10853
+      ],
+      "maintenance_ranges": {
+        "checkpoints": [
+          14,
+          14
+        ],
+        "reclaims": [
+          42,
+          42
+        ],
+        "follower_snapshot_installs": [
+          2,
+          3
+        ]
+      },
+      "measurement_join_counts": [
+        {
+          "joined_transitions": 98,
+          "joined_reply_inputs": 116,
+          "joined_originals": 361
+        },
+        {
+          "joined_transitions": 106,
+          "joined_reply_inputs": 112,
+          "joined_originals": 385
+        },
+        {
+          "joined_transitions": 88,
+          "joined_reply_inputs": 96,
+          "joined_originals": 337
+        }
+      ]
+    },
+    {
+      "protocol": "quic",
+      "producer": "off",
+      "medians": {
+        "total_completed_originals_s": 152.97933493700555,
+        "horizon_completed_originals_s": 152.03333333333333,
+        "p99_ms": 1145.812999,
+        "service_p99_ms": 1145.800794,
+        "leader_logical_barriers_per_completed_original": 0.13496932515337423,
+        "leader_syncs_per_completed_original": 0.13496932515337423,
+        "leader_publications_per_completed_original": 0.13496932515337423,
+        "commands_per_leader_publication": 7.409090909090909,
+        "leader_barrier_elapsed_fraction": 0.8689341825002536,
+        "leader_publish_elapsed_fraction": 0.5793733839599141
+      },
+      "completed_range": [
+        4159,
+        5216
+      ],
+      "refusal_range": [
+        9784,
+        10841
+      ],
+      "maintenance_ranges": {
+        "checkpoints": [
+          14,
+          14
+        ],
+        "reclaims": [
+          42,
+          42
+        ],
+        "follower_snapshot_installs": [
+          4,
+          5
+        ]
+      },
+      "measurement_join_counts": [
+        {
+          "joined_transitions": 0,
+          "joined_reply_inputs": 0,
+          "joined_originals": 0
+        },
+        {
+          "joined_transitions": 0,
+          "joined_reply_inputs": 0,
+          "joined_originals": 0
+        },
+        {
+          "joined_transitions": 0,
+          "joined_reply_inputs": 0,
+          "joined_originals": 0
+        }
+      ]
+    },
+    {
+      "protocol": "quic",
+      "producer": "on",
+      "medians": {
+        "total_completed_originals_s": 152.65768894657225,
+        "horizon_completed_originals_s": 151.1,
+        "p99_ms": 2462.987064,
+        "service_p99_ms": 2462.8844670000003,
+        "leader_logical_barriers_per_completed_original": 0.13116141315845145,
+        "leader_syncs_per_completed_original": 0.13116141315845145,
+        "leader_publications_per_completed_original": 0.13116141315845145,
+        "commands_per_leader_publication": 7.624193548387097,
+        "leader_barrier_elapsed_fraction": 0.8553527228471136,
+        "leader_publish_elapsed_fraction": 0.5629522107017172
+      },
+      "completed_range": [
+        3853,
+        4727
+      ],
+      "refusal_range": [
+        10273,
+        11147
+      ],
+      "maintenance_ranges": {
+        "checkpoints": [
+          13,
+          14
+        ],
+        "reclaims": [
+          39,
+          42
+        ],
+        "follower_snapshot_installs": [
+          1,
+          3
+        ]
+      },
+      "measurement_join_counts": [
+        {
+          "joined_transitions": 80,
+          "joined_reply_inputs": 97,
+          "joined_originals": 283
+        },
+        {
+          "joined_transitions": 95,
+          "joined_reply_inputs": 109,
+          "joined_originals": 396
+        },
+        {
+          "joined_transitions": 93,
+          "joined_reply_inputs": 108,
+          "joined_originals": 470
+        }
+      ]
+    }
+  ]
+}

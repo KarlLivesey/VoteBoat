@@ -1,0 +1,42 @@
+{
+  "review": "Independent slice465 rollback verification; no builds/tests/workloads executed",
+  "base": "84fc509fecbcdefd872bf23f8618e092b5a79802",
+  "baseline_blob_bytes_sha_modes_verified": 2485,
+  "nonignored_physical_scoped_files_exact": 2485,
+  "all_physical_compiled_scope_file_set_bytes_modes_before_after_current_exact": 1441,
+  "selected_restore_paths": 45,
+  "missed_initial_path": {
+    "original_restore_script": "restore.py",
+    "failure_stage": "full baseline projection after selected44paths restored",
+    "actual_exception": "AssertionError: benchmarks/matched/src/envelopes.rs",
+    "cause": "initial selection omitted matched BatchLimits initializer introduced463; complete baseline equality caught it before any passing baseline claim",
+    "focused_fix": "benchmarks/matched/src/envelopes.rs",
+    "before_sha256": "22ca74f5413210688807969408aab61f80c3953e189eea55df0bf64b180408a3",
+    "after_sha256": "320bc7eabe45dfe463cd88e3f107e6ffb1da8828a15298e9935d47b8e3497970",
+    "original_qualification_handle": 53761,
+    "actual_exit": 101,
+    "passed_commands_retained": "providerall/core+metadata; failedhooknotreused"
+  },
+  "production_reference": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "src455_changed_paths": [
+    "src/log/transition/tests/compact.rs"
+  ],
+  "src455_added_paths": [
+    "src/log/transition/tests/compact/smaller.rs"
+  ],
+  "build_config455_changed_paths": [],
+  "reuse_scope": "All production src byte-identical to455; only retained cfg(test)459 compact accounting controls differ. Full source/build/contracts/comparison scope exact462. Existing production/network/recovery qualification reusable by exact source scope; no new performance qualification claimed. Final provider42/27, metadata and full enabled hook actual0 reused as recorded.",
+  "limits": "2485 baseline includes full tracked comparison tree; physical compiled directories separately enumerated including ignored files. Whole historical evidence/docs and ignored build outputs outside compiled source directories are outside equivalence. No earlier failures or rejected experiments erased.",
+  "original_failed_handle": 53761,
+  "final_handle": 68198,
+  "final_exit": 0,
+  "final_stage": "DONE",
+  "manifest_sha256": {
+    "BASELINE_EQUIVALENCE.json": "3ad106dfcfa26d66c99dcb1ae842e483596b95fc9542ca968cc4c9a34dcc5314",
+    "FINAL_BEFORE.json": "587d621fd0298284a9341ef61faa97deba4ada9fa6a16d02a382b187473b1dfb",
+    "FINAL_AFTER.json": "587d621fd0298284a9341ef61faa97deba4ada9fa6a16d02a382b187473b1dfb",
+    "RESTORE.json": "c68c7676ecdfe3cb1c74747d3753f50bf723985238f62c1c8ea3f5e2f7084b29",
+    "RESTORE_FAILURE.json": "eed6cb43e2630cb89cace5d5594d5f097891232bc0b55111a6788619a9304340"
+  },
+  "blocking_findings": []
+}

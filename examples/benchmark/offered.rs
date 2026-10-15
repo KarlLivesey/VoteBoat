@@ -340,11 +340,23 @@ pub(super) fn run<L: LogStore + Send + 'static>(
         ..
     } = config;
     std::fs::create_dir(root)?;
-    std::fs::write(root.join("run.txt"), format!("mode=offered protocol={protocol:?} offers={count} offered_rate={rate} window={window} groups={groups} warmup={WARMUP} ready_visit_items={} ready_reply_inputs={}{}\n", config.ready_visit_items, config.ready_reply_inputs, config.group_schedule.as_ref().map_or_else(String::new, offered_groups::GroupSchedule::metadata)))?;
+    std::fs::write(root.join("run.txt"), format!("mode=offered protocol={protocol:?} offers={count} offered_rate={rate} window={window} groups={groups} warmup={WARMUP}{}\n", config.group_schedule.as_ref().map_or_else(String::new, offered_groups::GroupSchedule::metadata)))?;
     let mut raw = exclusive(&root.join("offers.csv"))?;
     let mut storage = Vec::new();
-    let (replicas, traces) = open_cluster(NativeOpenMode::Create)?;
-    let (mut replicas, warmup, placement) = prepare_or_close(replicas, clock, &config)?;
+    let (mut replicas, traces) = open_cluster(NativeOpenMode::Create)?;
+    // Any error after construction still attempts explicit worker shutdown/join.
+    let preparation = prepare_offered(&mut replicas, clock, &config);
+    let (warmup, placement) = match preparation {
+        Ok(w) => w,
+        Err(error) => {
+            let cleanup = close(replicas, clock);
+            std::fs::write(
+                root.join("failure.txt"),
+                format!("preparation={error}; cleanup={cleanup:?}\n"),
+            )?;
+            return Err(error);
+        }
+    };
     let mut ledger = Ledger::new(count, rate, window, groups, config.group_schedule.as_ref());
     let mut maintenance = prepare_maintenance(&config, ledger.horizon())?;
     let mut totals = PollTotals::default();
@@ -363,7 +375,6 @@ pub(super) fn run<L: LogStore + Send + 'static>(
     observe::capture(&mut storage, "after_measurement", &traces);
     // Preserve all observed rows before validation or cleanup can fail.
     let persisted = ledger.write(&mut raw);
-    let joined_raw = joined::write(root, &[("warmup", &warmup.polls), ("measurement", &totals)]);
     let maintenance_raw = if maintenance_config.is_some() {
         maintenance.write(&mut exclusive(&root.join("maintenance.csv"))?)
     } else {
@@ -372,7 +383,6 @@ pub(super) fn run<L: LogStore + Send + 'static>(
     let history = result
         .and(persisted)
         .and(maintenance_raw)
-        .and(joined_raw)
         .and_then(|()| maintenance.validate(&replicas, &totals))
         .and_then(|()| ledger.history(&warmup));
     let (expected, last) = match history {
@@ -422,26 +432,6 @@ pub(super) fn run<L: LogStore + Send + 'static>(
             retries,
         },
     )
-}
-
-// Preparation retains ownership so every failure attempts the original worker
-// shutdown/join and preserves its original preparation/cleanup diagnostic.
-fn prepare_or_close<L: LogStore + Send + 'static>(
-    mut replicas: Vec<Replica<L>>,
-    clock: &Instant,
-    config: &RunConfig<'_>,
-) -> Result<(Vec<Replica<L>>, Measurement, String), Failure> {
-    match prepare_offered(&mut replicas, clock, config) {
-        Ok((warmup, placement)) => Ok((replicas, warmup, placement)),
-        Err(error) => {
-            let cleanup = close(replicas, clock);
-            std::fs::write(
-                config.root.join("failure.txt"),
-                format!("preparation={error}; cleanup={cleanup:?}\n"),
-            )?;
-            Err(error)
-        }
-    }
 }
 
 fn checked_stage<T>(
@@ -578,13 +568,12 @@ fn report_offered(
         .collect::<Vec<_>>();
     let dispatch_p99 = percentile(&mut dispatch_lag, 99);
     let maintenance_summary = maintenance.summary(totals);
-    let ready_settings = ready_items::report(config.ready_visit_items, config.ready_reply_inputs);
-    let joined_settings = totals.joined.summary()?;
+    let ready_settings = ready_items::settings(config.ready_visit_items);
     let group_settings = config
         .group_schedule
         .as_ref()
         .map_or_else(String::new, offered_groups::GroupSchedule::metadata);
-    let summary = format!("mode=offered protocol={protocol:?} replicas=3 groups={groups} assembly=shared leader_placement={placement} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000 payload_bytes=8 warmup={WARMUP} offers={count} offered_rate={rate} window={window} max_inflight={} admitted={admitted} admitted_during={admitted_during} late_decisions={late_decisions} dispatch_p99_us={dispatch_p99} applied={applied} applied_during={during} applied_drain={} window_refused={} no_leader={} admission_refused={} not_proposed={} unknown=0 pending=0 horizon_ns={horizon} elapsed_ns={} drain_ns={} backlog_at_horizon={backlog} offered_ops_s={:.3} admitted_ops_s={:.3} applied_during_ops_s={:.3} applied_total_ops_s={:.3} p99_us={p99} service_p99_us={service_p99} recovered_value={recovered_value} recovery_retries={retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3}{maintenance_summary} {ready_settings} {joined_settings}{group_settings}\n", ledger.max_pending, applied-during, ledger.count_status("window_refused"), ledger.count_status("no_leader"), ledger.count_status("admission_refused"), ledger.count_status("not_proposed"), elapsed.as_nanos(), elapsed.as_nanos().saturating_sub(horizon), count as f64 * 1e9 / horizon as f64, admitted as f64 / elapsed.as_secs_f64(), during as f64 * 1e9 / horizon as f64, applied as f64 / elapsed.as_secs_f64(), totals.rounds, totals.host_ns as f64/1e6, totals.max_host_ns as f64/1e6);
+    let summary = format!("mode=offered protocol={protocol:?} replicas=3 groups={groups} assembly=shared leader_placement={placement} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000 payload_bytes=8 warmup={WARMUP} offers={count} offered_rate={rate} window={window} max_inflight={} admitted={admitted} admitted_during={admitted_during} late_decisions={late_decisions} dispatch_p99_us={dispatch_p99} applied={applied} applied_during={during} applied_drain={} window_refused={} no_leader={} admission_refused={} not_proposed={} unknown=0 pending=0 horizon_ns={horizon} elapsed_ns={} drain_ns={} backlog_at_horizon={backlog} offered_ops_s={:.3} admitted_ops_s={:.3} applied_during_ops_s={:.3} applied_total_ops_s={:.3} p99_us={p99} service_p99_us={service_p99} recovered_value={recovered_value} recovery_retries={retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3}{maintenance_summary} {ready_settings}{group_settings}\n", ledger.max_pending, applied-during, ledger.count_status("window_refused"), ledger.count_status("no_leader"), ledger.count_status("admission_refused"), ledger.count_status("not_proposed"), elapsed.as_nanos(), elapsed.as_nanos().saturating_sub(horizon), count as f64 * 1e9 / horizon as f64, admitted as f64 / elapsed.as_secs_f64(), during as f64 * 1e9 / horizon as f64, applied as f64 / elapsed.as_secs_f64(), totals.rounds, totals.host_ns as f64/1e6, totals.max_host_ns as f64/1e6);
     let mut file = exclusive(&root.join("summary.txt"))?;
     file.write_all(summary.as_bytes())?;
     file.sync_all()?;

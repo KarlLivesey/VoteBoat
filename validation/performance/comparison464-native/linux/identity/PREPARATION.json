@@ -1,0 +1,14 @@
+{
+  "commit": "6fce8989e2c57afa033b5ee982aaa201eae04ac6",
+  "source_inputs": 1438,
+  "publication_receipt": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice464/PUBLICATION.json",
+  "publication_sha256": "a17fe2cd4b6f64641c8d4bc087dbf828bab11642fff32306f2c30aeb1ce98740",
+  "template_runner_sha256": "224b5e711dfdeb17dd26c98c5a1d9095517a90db5de4ef5f26674a846d414c15",
+  "template_guard_sha256": "2fc6a38e0b1754adb334bfa0bd18c04e871f80ddeda92372968f52af8e986c5c",
+  "adapted_runner_sha256": "73f5347b3595525982e78dbf5890b458c10cf9f9cdae55413863fbc519d2327c",
+  "adapted_guard_sha256": "471917bab6f64c8ed80c6fd0c9af50eb9d115803cc69817b3db436986b6deff3",
+  "script_sha256": "804aa44e87adf18e13f3c4105589e3911bb64f2cdb0da7ce5b5895a3db991b63",
+  "source_only_setup": true,
+  "build_run_checks_or_timing_started": false,
+  "next_step": "Root coordinates the original fresh native DEBUG0 build runner; assemble private control-tools/resources/pilot config only after actual artifacts exist."
+}

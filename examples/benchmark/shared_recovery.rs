@@ -82,7 +82,7 @@ impl Harness {
             bootstraps: &self.bootstraps,
             addresses: &self.addresses,
             lane: 1,
-            ready: ready_items::Settings::default(),
+            ready_visit_items: 16,
         }
         .open_profile_with_ingress(n, self.recovery, false, self.ingress)
         .unwrap()
