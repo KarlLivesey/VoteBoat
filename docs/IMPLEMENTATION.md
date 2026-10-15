@@ -35460,3 +35460,29 @@ all recursive/original hashes/lengths/modes match. Final selected source project
 is1502 files including eight new Rust modules. Fresh published483 native artifacts,
 Mac qualification and paired480/483 singleton/moderate/loaded/skew are the next
 step.481's losses remain open. Full macro scope and defaults remain unchanged.
+
+### 484: published483 and fresh Linux artifact qualification
+
+483 publishes as `efd383dc36b4b9edf8f66021b90115824440b468`: original60703
+actually ends0/a017de after enabled full strict push and exact origin/main;
+all1502 selected source files/modes remain exact. [484 evidence](../validation/performance/native484-ingress/README.md)
+records fresh Linux export76794/build85533/controls41354, all terminal0. Root,
+executable and buildscript are genuinely fresh:false with actual native opt3/
+debug0/assertions/overflow/defaultLTO+codegen; root/executable hashes are
+8643d5a3…/0ff042c1…, buildIDee9d5a03…. Compiler/protoc bytes match immutable480.
+1503 exported committed files are1502 qualified inputs plus483schema; seven
+private fixture keys stay0600. All three controls apply512/recover576 with zero
+refusals, original retries/joins and active maintenance. Witness TCP/QUIC ready64/
+groups2/31:1 each6capacity+6publication readbacks; genuinely omitted default flags
+select FileLogIo/ready16 with6capacity/0publication, manifest CRC/WAL length checked.
+Root independently verifies every record and182 archive payloads/178originals/
+75gzip representations, exact path sets/hashes/lengths/modes and22READY proofs.
+
+The premeasurement48-case paired schema/scripts retain481's exact offers/order,
+windows/quantums, active maintenance and original outcome/timer boundaries. Actual
+Linux baseline/candidate provenance and four static plan controls pass; original
+UNSET refusal and focused authority-shape read errors remain. Mac's single
+original41196 qualification/build is still live; no campaign/config/timing has
+started. Both-host actual readiness plus separate quietGO remain required.
+Current484/next485/next486 and the complete macro scope stay active and unchanged;
+no native speedup, default promotion or full P9 acceptance is claimed.

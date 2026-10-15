@@ -1,0 +1,149 @@
+{
+  "scope": "PREPARED ONLY. No source export, build, benchmark/control process or library compilation occurred. Required commit deliberately UNSET. Root actual483 publication+final qualification and explicit GO required.",
+  "source_schema": "validation/performance/native483-ingress/SCHEMA.md",
+  "static_checks": [
+    {
+      "command": [
+        "bash",
+        "-n",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux/run.sh"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux/export-source.sh"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux/setup-after-build.sh"
+      ],
+      "exit": 0
+    }
+  ],
+  "python_ast_checks": [
+    "guard.py",
+    "controls/run.py",
+    "ready.py",
+    "export-source.sh embedded export Python"
+  ],
+  "expected_unpublished_guard": {
+    "command": [
+      "/usr/bin/python3.14",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux/guard.py",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux",
+      "qualification"
+    ],
+    "exit": 1,
+    "expected": true,
+    "no_export_build_controls": true
+  },
+  "files": {
+    "run.sh": {
+      "sha256": "839b256bc49755ff6e4e648248c833d53349e32b8e143443a647cdf49f8601ff",
+      "mode": "0o755"
+    },
+    "guard.py": {
+      "sha256": "c8eed8247afb7e97a86f43d62af239ef3b83249f2589147f2039c3e5754d1aaf",
+      "mode": "0o644"
+    },
+    "export-source.sh": {
+      "sha256": "14abddbcf318747938747a4005b44fd36935252a5236cfb0d20728c9996ca8aa",
+      "mode": "0o755"
+    },
+    "setup-after-build.sh": {
+      "sha256": "9373e11b74ab95f3c93ec4b8d582ecf800a1d814b6f210859a4dd1ad7d1b68f1",
+      "mode": "0o755"
+    },
+    "controls/run.py": {
+      "sha256": "c95276e435d399774dc3ff5fd8584f5b8edcd91c3e0d9d2788a2cfb03d388707",
+      "mode": "0o644"
+    },
+    "ready.py": {
+      "sha256": "46884590daf66681af25bf8890e2c8b65f3726b5271da28904361ea84af6f815",
+      "mode": "0o644"
+    },
+    "SCHEMA.md": {
+      "sha256": "69b52211ac8f8d0aabe0988db339e01901b92411726b12eb4c9d1992620a0845",
+      "mode": "0o644"
+    },
+    "REQUIRED_COMMIT.txt": {
+      "sha256": "032c782c1cb5bad40ce45531ab8150371aa30d9b8ff91df907702a1138575854",
+      "mode": "0o644"
+    },
+    "PUBLICATION.json": {
+      "sha256": "ee6cbef28021accdabd0d5391a207e5794c90d90f00753a9c21dfd3c48b06fbb",
+      "mode": "0o644"
+    },
+    "FUNCTIONAL_QUALIFICATION.json": {
+      "sha256": "fc8e2d1c460ef766cf7f871411316c6cd32aedaf2be1e8f47b08579d57859eac",
+      "mode": "0o644"
+    }
+  },
+  "candidate_commit": "UNSET",
+  "immutable_baseline480_sha256": "8d3530a6e801ebb857d8dff3fc1a0fb4ef5af865c3aed89d1450271f2054b84d",
+  "qualification_scope_required": "483 exact temporary synchronous ingress admission; final functional/strict/metadata qualification",
+  "future_commands": {
+    "qualification": [
+      "/usr/bin/python3.14",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux/guard.py",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux",
+      "qualification"
+    ],
+    "export": [
+      "bash",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux/export-source.sh"
+    ],
+    "build": [
+      "bash",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux/run.sh"
+    ],
+    "controls_and_ready": [
+      "bash",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux/setup-after-build.sh"
+    ]
+  },
+  "future_control_shape": {
+    "cases": 3,
+    "Witness": {
+      "protocols": [
+        "tcp",
+        "quic"
+      ],
+      "ready_items": 64,
+      "groups": 2,
+      "weights": "31,1",
+      "offers": 512,
+      "rate": 128,
+      "window": 4096,
+      "warmup": 64,
+      "maintenance_seconds": 2,
+      "capacity_readbacks": 6,
+      "publication_readbacks": 6,
+      "publication_csv": true
+    },
+    "default": {
+      "protocol": "tcp",
+      "publication_flag_omitted": true,
+      "ready_flag_omitted": true,
+      "provider": "LegacyFileLogIo",
+      "ready_items": 16,
+      "groups": 1,
+      "offers": 512,
+      "rate": 128,
+      "window": 4096,
+      "warmup": 64,
+      "maintenance_seconds": 2,
+      "capacity_readbacks": 6,
+      "publication_readbacks": 0,
+      "publication_csv": false,
+      "physical": "CURRENT20B/MANIFEST52B CRC/acknowledged selectedWALlength"
+    }
+  }
+}

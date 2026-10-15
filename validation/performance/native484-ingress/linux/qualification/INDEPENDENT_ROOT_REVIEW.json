@@ -1,0 +1,96 @@
+{
+  "exit": 0,
+  "scope": "Independent root read of actual CargoJSON/vv/source/byte/mode/compiler/baseline/control/original records. No build/workload/validator was repeated; no speed/capacity claim.",
+  "commit": "efd383dc36b4b9edf8f66021b90115824440b468",
+  "export_files": 1503,
+  "qualified_files": 1502,
+  "extra_committed_source": "validation/performance/native483-ingress/SCHEMA.md",
+  "all_ready_bound_proofs_exact": 22,
+  "fresh_library_executable_buildscript": true,
+  "native_profile": "opt3/debug0/assertions+overflow/native-defaultLTO+codegen; actual JSON plusvv checked",
+  "baseline480_tool_bytes_exact": true,
+  "originals": {
+    "export": {
+      "handle": 76794,
+      "launch_chunk": "0b03c7",
+      "actual_terminal_chunk": "ab6464",
+      "actual_exit": 0,
+      "command": [
+        "bash",
+        "target/p9/native484-ingress/linux/export-source.sh"
+      ]
+    },
+    "build": {
+      "handle": 85533,
+      "launch_chunk": "477d1d",
+      "actual_terminal_chunk": "85e21e",
+      "actual_exit": 0,
+      "command": [
+        "bash",
+        "target/p9/native484-ingress/linux/run.sh"
+      ]
+    },
+    "controls_and_ready": {
+      "handle": 41354,
+      "launch_chunk": "422114",
+      "actual_terminal_chunk": "4776bb",
+      "actual_exit": 0,
+      "command": [
+        "bash",
+        "target/p9/native484-ingress/linux/setup-after-build.sh"
+      ]
+    }
+  },
+  "controls": [
+    {
+      "protocol": "tcp",
+      "selection": "witness",
+      "groups": 2,
+      "weights": "31,1",
+      "ready_quantum": 64,
+      "applied": "512",
+      "recovered_value": "576",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "checkpoints": "1",
+      "reclaims": "3",
+      "capacity_readbacks": 6,
+      "publication_readbacks": 6
+    },
+    {
+      "protocol": "quic",
+      "selection": "witness",
+      "groups": 2,
+      "weights": "31,1",
+      "ready_quantum": 64,
+      "applied": "512",
+      "recovered_value": "576",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "checkpoints": "1",
+      "reclaims": "3",
+      "capacity_readbacks": 6,
+      "publication_readbacks": 6
+    },
+    {
+      "protocol": "tcp",
+      "selection": "default-atomic",
+      "groups": 1,
+      "weights": null,
+      "ready_quantum": 16,
+      "applied": "512",
+      "recovered_value": "576",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "checkpoints": "1",
+      "reclaims": "3",
+      "capacity_readbacks": 6,
+      "publication_readbacks": 0
+    }
+  ],
+  "ready_sha256": "758366ffbff2fd8cdc45353488a19189f57df9fbdef4d50a4bc5ec6d63f51180",
+  "artifact_hashes": {
+    "voteboat": "8643d5a310e63ff5a1de9d311054e005d4b5841237e8b647cd66710f2a86366b",
+    "native_benchmark": "0ff042c1ade83771217ed96af4a0f24912d79917eb4f95cb0d8230808780963d"
+  }
+}

@@ -1,0 +1,5 @@
+wave,kind,group,replica,intended_ns,submitted_ns,completed_ns,status,previous_base,requested_index,observed_base,snapshot_generation,ticket_sequence,before_bytes,after_bytes,reason
+1,checkpoint,1,1,2000000000,2000100690,2149948875,completed,0,251,264,1,0,0,0,
+1,reclaim,1,1,2000000000,2149948875,2208545501,completed,0,0,0,0,81,23879,3111,
+1,reclaim,1,2,2000000000,2149948875,2215462315,completed,0,0,0,0,45,19575,14761,
+1,reclaim,1,3,2000000000,2149948875,2215462315,completed,0,0,0,0,45,19563,14761,

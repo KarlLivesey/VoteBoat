@@ -1,0 +1,26 @@
+{
+  "scope": "Preparation-only observation failures and intended refusal; no benchmark/native process was launched by this comparison preparation.",
+  "baseline_initial": {
+    "actual_exit": 1,
+    "tool_chunk": "f471bb",
+    "available_error_text": "KeyError: 'remote_main'",
+    "provenance": "Original available tool output only, not a separately captured original stderr file. Caller selected export PUBLICATION wrapper instead of canonical publication authority. Actual canonical authority path was then read from frozen481 config; corrected read-only guard fc38f1 exit0. No checker condition weakened."
+  },
+  "candidate_initial": {
+    "actual_exit": 1,
+    "tool_chunk": "82ebbe",
+    "stdout": "candidate-linux-guard.stdout",
+    "stderr": "candidate-linux-guard.stderr",
+    "exit_file": "candidate-linux-guard.exit",
+    "cause": "Actual483 publication receipt names its full-source fact same_full_selected_source/selected_inputs, whereas copied480 branch expected source_exact. Adapted candidate branch to bind the actual source fact and exact1502 qualified projection; baseline480 branch unchanged.",
+    "corrected_tool_chunk": "1f1738",
+    "corrected_exit": 0
+  },
+  "unpublished_negative_control": {
+    "actual_exit": 1,
+    "tool_chunk": "37484f",
+    "files": "unpublished-guard.*",
+    "expected_refusal": true,
+    "no_job_or_wal_created": true
+  }
+}

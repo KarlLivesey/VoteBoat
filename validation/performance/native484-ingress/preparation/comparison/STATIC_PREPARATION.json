@@ -1,0 +1,15 @@
+{
+  "exit": 0,
+  "static_plan_tests": 4,
+  "static_plan_actual_exit": 0,
+  "all48_plan_records_exact_to481": true,
+  "resources_script_byte_identical_to481": true,
+  "unpublished_refusal_actual_exit": 1,
+  "unpublished_no_campaign_or_wal_created": true,
+  "cases": 48,
+  "pairs": 24,
+  "offers_per_host": 391680,
+  "scheduled_horizon_seconds": 1344,
+  "source_commit_sentinel": "UNSET",
+  "scope": "Local static plan/syntax/unpublished-refusal only. No source/binary/WAL copy, compilation, artifact qualification, native control, timing or rate claim."
+}

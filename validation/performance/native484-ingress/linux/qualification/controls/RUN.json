@@ -1,0 +1,27 @@
+{
+  "scope": "Three native483 fresh release functional controls: explicit q64 Witness TCP/QUIC two-group31:1 plus omitted publication/ready flags default FileLogIo TCP one-group; no capacity/gain timing claim. Selectedwindow4096 is not achieved capacity/batchwidth.",
+  "start": "2026-10-15T16:04:24.432033+00:00",
+  "selected": [
+    [
+      "tcp",
+      "witness",
+      64,
+      2,
+      "31,1"
+    ],
+    [
+      "quic",
+      "witness",
+      64,
+      2,
+      "31,1"
+    ],
+    [
+      "tcp",
+      "default-atomic",
+      16,
+      1,
+      null
+    ]
+  ]
+}

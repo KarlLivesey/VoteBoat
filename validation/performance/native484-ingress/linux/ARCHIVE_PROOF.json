@@ -1,0 +1,28 @@
+{
+  "exit": 0,
+  "source_commit": "efd383dc36b4b9edf8f66021b90115824440b468",
+  "source_files": 1503,
+  "qualified_projection_files": 1502,
+  "extra_committed_source": [
+    "validation/performance/native483-ingress/SCHEMA.md"
+  ],
+  "ready_sha256": "758366ffbff2fd8cdc45353488a19189f57df9fbdef4d50a4bc5ec6d63f51180",
+  "native_artifact_sha256": "0ff042c1ade83771217ed96af4a0f24912d79917eb4f95cb0d8230808780963d",
+  "root_artifact_sha256": "8643d5a310e63ff5a1de9d311054e005d4b5841237e8b647cd66710f2a86366b",
+  "native_build_id": "ee9d5a035f2a39596b453aca1993d1f2223abdcf",
+  "original_handles": {
+    "export": 76794,
+    "build": 85533,
+    "controls_and_ready": 41354
+  },
+  "actual_export_exit": 0,
+  "actual_build_exit": 0,
+  "actual_controls_exit": 0,
+  "native_processes_and_storage_validators": 3,
+  "witness_publication_validators": 2,
+  "default_legacy_filelogio_verified": true,
+  "independent_root_review_exit": 0,
+  "independent_root_review_sha256": "9a01d0e24bb2948272ed45e09e15372be6bb5c511f8e296491eb4444cb508c12",
+  "scope": "Fresh native483 Linux artifact/control qualification only; no speedup, capacity or fullP9 acceptance claim. All original processes actually terminate0; expected unpublished guard refusal1 is preserved, not a workload failure.",
+  "excluded": "Binaries/root rlib, target-native-release buildtree, full source directory/source.tar, generated WAL/snapshot trees and caches. Source inventories retain exact hashes/gitblob IDs/physical modes/archive SHA. Copied main 483 publication/sourceguards/normalized proofs and referenced actual exit receipts make authority inspectable without duplicating full main source or suite logs."
+}

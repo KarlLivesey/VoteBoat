@@ -1,0 +1,82 @@
+{
+  "baseline-guard.stderr.gz": {
+    "original": "baseline-guard.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "baseline-guard.stdout.gz": {
+    "original": "baseline-guard.stdout",
+    "sha256": "cc426b71ce30e0d99030b35da157fff3e442d82aa786f002d5abbee56398b080",
+    "bytes": 612
+  },
+  "candidate-linux-guard-attempt2.stderr.gz": {
+    "original": "candidate-linux-guard-attempt2.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "candidate-linux-guard-attempt2.stdout.gz": {
+    "original": "candidate-linux-guard-attempt2.stdout",
+    "sha256": "5267a80d7db1bffc4672a8b5f9fa567bc3a9d8b3060fb7fd440f8a863824fbbb",
+    "bytes": 610
+  },
+  "candidate-linux-guard.stderr.gz": {
+    "original": "candidate-linux-guard.stderr",
+    "sha256": "7fd2ca656d8136e61773a10e7bb8eef2d5e87d3dc4859cc2c7f531b93a020e96",
+    "bytes": 430
+  },
+  "candidate-linux-guard.stdout.gz": {
+    "original": "candidate-linux-guard.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "final-static-guards.stderr.gz": {
+    "original": "final-static-guards.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "final-static-guards.stdout.gz": {
+    "original": "final-static-guards.stdout",
+    "sha256": "b12e805a053e3668b8f7eae5848700580fca34f41031d88951df393b3698f52e",
+    "bytes": 1030
+  },
+  "plan-check.stderr.gz": {
+    "original": "plan-check.stderr",
+    "sha256": "967c92d36cebcf36f2f214cac7698609db89c071c595426864067899c8d2dcc7",
+    "bytes": 102
+  },
+  "plan-check.stdout.gz": {
+    "original": "plan-check.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "plan-final.stderr.gz": {
+    "original": "plan-final.stderr",
+    "sha256": "44825f24cdbd1bcc73113cc0e880161c602c66296af8171cc29ead1360391377",
+    "bytes": 102
+  },
+  "plan-final.stdout.gz": {
+    "original": "plan-final.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "plan-frozen.stderr.gz": {
+    "original": "plan-frozen.stderr",
+    "sha256": "44825f24cdbd1bcc73113cc0e880161c602c66296af8171cc29ead1360391377",
+    "bytes": 102
+  },
+  "plan-frozen.stdout.gz": {
+    "original": "plan-frozen.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "unpublished-guard.stderr.gz": {
+    "original": "unpublished-guard.stderr",
+    "sha256": "cb8cd266e2e673e73edb7f89837401cdfb6d7e04713cde9382bd3779e19ed3ee",
+    "bytes": 787
+  },
+  "unpublished-guard.stdout.gz": {
+    "original": "unpublished-guard.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  }
+}

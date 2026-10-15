@@ -1,0 +1,26 @@
+{
+  "command": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux/artifacts/native/native_benchmark",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux/controls/wal/quic-witness",
+    "quic",
+    "512",
+    "4096",
+    "2",
+    "--offered",
+    "128",
+    "--maintenance",
+    "2",
+    "--offered-capacity",
+    "4096",
+    "--ready-items",
+    "64",
+    "--publication",
+    "witness",
+    "--group-weights",
+    "31,1"
+  ],
+  "exit": 0,
+  "elapsed_s": 5.8639541050069965,
+  "error": null,
+  "received_signals": []
+}

@@ -1,0 +1,25 @@
+{
+  "exit": 0,
+  "scope": "Read-only actualLinux immutable480/fresh483 provenance and cross-arm compiler/profile/build/fixture/validator input comparison only. No campaign/config/WAL setup, source copy, build, workload or timing. Mac actual receipts remain pending.",
+  "source_commits": {
+    "baseline": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+    "candidate": "efd383dc36b4b9edf8f66021b90115824440b468"
+  },
+  "artifacts_sha256": {
+    "baseline": {
+      "voteboat": "f3233aad647806aeab594775cff9f894775099256e564982b84a1a1b08f60435",
+      "native_benchmark": "8d3530a6e801ebb857d8dff3fc1a0fb4ef5af865c3aed89d1450271f2054b84d"
+    },
+    "candidate": {
+      "voteboat": "8643d5a310e63ff5a1de9d311054e005d4b5841237e8b647cd66710f2a86366b",
+      "native_benchmark": "0ff042c1ade83771217ed96af4a0f24912d79917eb4f95cb0d8230808780963d"
+    }
+  },
+  "proof_counts": {
+    "baseline": 20,
+    "candidate": 52
+  },
+  "matching_fixture_files": 19,
+  "matching_validator_modules": 8,
+  "compiler_and_native_profile_match": true
+}

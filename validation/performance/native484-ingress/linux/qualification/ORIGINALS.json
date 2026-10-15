@@ -1,0 +1,87 @@
+{
+  "source_commit": "efd383dc36b4b9edf8f66021b90115824440b468",
+  "originals": {
+    "export": {
+      "handle": 76794,
+      "launch_chunk": "0b03c7",
+      "actual_terminal_chunk": "ab6464",
+      "actual_exit": 0,
+      "command": [
+        "bash",
+        "target/p9/native484-ingress/linux/export-source.sh"
+      ]
+    },
+    "build": {
+      "handle": 85533,
+      "launch_chunk": "477d1d",
+      "actual_terminal_chunk": "85e21e",
+      "actual_exit": 0,
+      "command": [
+        "bash",
+        "target/p9/native484-ingress/linux/run.sh"
+      ]
+    },
+    "controls_and_ready": {
+      "handle": 41354,
+      "launch_chunk": "422114",
+      "actual_terminal_chunk": "4776bb",
+      "actual_exit": 0,
+      "command": [
+        "bash",
+        "target/p9/native484-ingress/linux/setup-after-build.sh"
+      ]
+    }
+  },
+  "ready_sha256": "758366ffbff2fd8cdc45353488a19189f57df9fbdef4d50a4bc5ec6d63f51180",
+  "build_id": "ee9d5a035f2a39596b453aca1993d1f2223abdcf",
+  "no_timeout_restart": true,
+  "no_paired_timing": true,
+  "fresh_artifact_claim": "Actual root/executable/buildscript compiler-artifact fresh:false; fresh native target, opt3/debug0/assertions/overflow with defaultLTO+codegen, actual CargoJSON/vv flags and original/copy hashes retained. No reused root library.",
+  "controls": [
+    {
+      "protocol": "tcp",
+      "selection": "witness",
+      "groups": 2,
+      "weights": "31,1",
+      "ready_quantum": 64,
+      "applied": "512",
+      "recovered_value": "576",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "checkpoints": "1",
+      "reclaims": "3",
+      "capacity_readbacks": 6,
+      "publication_readbacks": 6
+    },
+    {
+      "protocol": "quic",
+      "selection": "witness",
+      "groups": 2,
+      "weights": "31,1",
+      "ready_quantum": 64,
+      "applied": "512",
+      "recovered_value": "576",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "checkpoints": "1",
+      "reclaims": "3",
+      "capacity_readbacks": 6,
+      "publication_readbacks": 6
+    },
+    {
+      "protocol": "tcp",
+      "selection": "default-atomic",
+      "groups": 1,
+      "weights": null,
+      "ready_quantum": 16,
+      "applied": "512",
+      "recovered_value": "576",
+      "retry_verified": "true",
+      "workers_joined": "true",
+      "checkpoints": "1",
+      "reclaims": "3",
+      "capacity_readbacks": 6,
+      "publication_readbacks": 0
+    }
+  ]
+}

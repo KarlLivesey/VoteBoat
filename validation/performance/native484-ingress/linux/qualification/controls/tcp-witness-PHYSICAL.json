@@ -1,0 +1,32 @@
+[
+  {
+    "replica": 1,
+    "generation": 1,
+    "selector": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux/controls/wal/tcp-witness/replica1/WITNESS-CURRENT",
+    "wal_bytes": 22173,
+    "metadata_bytes": 128,
+    "selector_sha256": "ac20b13eadd44e066dd3d565bb111205d508eb00c48e9bdeb449b8b69058ac39",
+    "wal_sha256": "454170b902798cfc8815aa5d6e6409938bf7bb4f57b8056b971853336710ff0d",
+    "metadata_sha256": "524f77ba5a4c079f1121e4f36e3e0cc436abea50ff882b1570b7b3f040d223e0"
+  },
+  {
+    "replica": 2,
+    "generation": 1,
+    "selector": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux/controls/wal/tcp-witness/replica2/WITNESS-CURRENT",
+    "wal_bytes": 31031,
+    "metadata_bytes": 128,
+    "selector_sha256": "ac20b13eadd44e066dd3d565bb111205d508eb00c48e9bdeb449b8b69058ac39",
+    "wal_sha256": "eaa57775de81075f95e1ab344188c3d5ae142f4d80122eb2ff6a2614f2b07f69",
+    "metadata_sha256": "caf6c5a2ab92d35bb3f9be6ea7e2acf2b63d19c95f7eb1b254a9f6f8dd3c1153"
+  },
+  {
+    "replica": 3,
+    "generation": 1,
+    "selector": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native484-ingress/linux/controls/wal/tcp-witness/replica3/WITNESS-CURRENT",
+    "wal_bytes": 31262,
+    "metadata_bytes": 128,
+    "selector_sha256": "ac20b13eadd44e066dd3d565bb111205d508eb00c48e9bdeb449b8b69058ac39",
+    "wal_sha256": "e35b5f3e7a0a91667d516d5a37b048aae7a8b480d88dd693fb4e11f96c9a6ea3",
+    "metadata_sha256": "cecd73266d1f6c183ae4a5cb21cdfa77d1b2b4a4fc2207d21b9d57e26f77cca7"
+  }
+]

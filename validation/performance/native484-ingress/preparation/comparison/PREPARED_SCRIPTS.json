@@ -1,0 +1,37 @@
+{
+  "scope": "484 comparison scripts/schema prepared locally; no campaign/config, build, native control, timing, remote/source/binary/WAL copy. Linux actual fresh provenance guard passes, Mac actual readiness pending. Separate independent/root review and both-host quietGO required.",
+  "source_commits": {
+    "baseline": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+    "candidate": "efd383dc36b4b9edf8f66021b90115824440b468"
+  },
+  "candidate_publication_authority": "target/p9/native483-ingress/publication/RECEIPT.json",
+  "scripts": {
+    "REQUIRED_COMMIT": "4bc0eb7091dcea93fddeddd4b2966aedf7ae2fe76f67a7a2baa3dc76016186c5",
+    "campaign.py": "8e36f1865f131d04c80a028a85f737b0b1e84a1bf58dd55a3686617a80804fe8",
+    "common.py": "54e0e59b7268a17bc16e3879ec56cf986441ef1961ed0e27fd294434ee34eb41",
+    "plan.py": "396e5f8f72e98fa295ae4bdfbef9dc9da17363ce3630724960f7b285b400b332",
+    "prepare.py": "9753881ecc2c76b4080bba762396f7d5cc74ef31e7828d5951638b7c1d6fd788",
+    "resources.py": "4c0c5d9ee522493b25bf1a206a74753c9c8eddb862937edf3ae22bc324b2c3e0",
+    "test_plan.py": "5d6bb3fa5aab9e9de364c6c06609aa23d830fe00cd180c8a4758677495ff4cad"
+  },
+  "schema_sha256": "81a09d3b2d73f789db7519d0045f45704314e06aa091f580a26a3902cb586a4a",
+  "static_checks": {
+    "plan_tests": 4,
+    "plan_exit": 0,
+    "final_static_tool_chunk": "2cb1fa",
+    "all48_records_equal481": true,
+    "resources_byte_identical481": true,
+    "unpublished_refusal_expected_exit": 1,
+    "baseline480_actual_guard_exit": 0,
+    "candidate483_linux_actual_guard_exit": 0,
+    "source_artifact_compiler_profile_fixture_validator_comparison_exit": 0
+  },
+  "cases": 48,
+  "pairs": 24,
+  "offers_per_host": 391680,
+  "scheduled_horizon_seconds": 1344,
+  "timed_campaign_started": false,
+  "actual_campaign_config": null,
+  "mac_actual_guard": null,
+  "handoff": "Use same5 runtimePython scripts +REQUIRED_COMMIT/schema in fresh comparisonjob after actualqualifiedcandidate receipts. prepare.py requires explicit baseline/candidate/sourcecommit/publication authorities; no476 combination-control argument. Freeze actual configs/readiness afterguards, publishschema/proofs thenrootquietGO; no competing samehostwork whiletiming."
+}
