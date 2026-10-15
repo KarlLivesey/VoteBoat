@@ -1,0 +1,2 @@
+{"commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e", "qualified_inputs": 1494, "scope": "480 actual normalized final functional/strict/metadata receipts; no native or framework performance claim."}
+{"source_inputs": 1495, "functional_projection": 1494, "added_build_configuration": ["validation/performance/native480-admission/SCHEMA.md"], "changed_inputs": 13, "fresh_target_absent": true, "build_started": false}

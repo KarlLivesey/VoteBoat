@@ -2,7 +2,7 @@
 
 ## Active P9 plan — 15 October 2026
 
-The default remains the retained469/455 implementation restored in473;
+Persistence/driver defaults retain the469/455 behavior restored in473;
 470/472 are rejected experiments.476's opt-in two-sync WitnessLogIo is published
 and qualified on both hosts.477's paired Btrfs/APFS measurements are complete:
 all96 original cases and validators pass, with useful bulk gains and explicit
@@ -15,8 +15,12 @@ identify repeated exact Counter reservation work in the Mac backlog regime;
 Linux's low-backlog capture separately identifies reconciliation. [480's pre-edit
 schema](../validation/performance/native480-admission/SCHEMA.md) scopes one optional
 temporary ready-admission context. Its local functional checks and full enabled
-strict hook pass, with no performance gain claimed. Checked publication, fresh
-Linux/Mac artifacts and paired measurements follow. FileLogIo and
+strict hook pass, with no performance gain claimed.480 is published as
+`f7b0ef12709bb7e7aad4f0279851aa035b508e9e`; fresh Linux artifacts and functional
+controls pass, while scoped Mac qualification continues. [481's premeasurement
+schema](../validation/performance/native481-admission/SCHEMA.md) compares the
+immutable476 baseline with480, using2000/s loaded demand to avoid the earlier
+Mac offer ceiling. FileLogIo and
 ready16 stay defaults. The user's real ext4/XFS
 scratch and all-three-filesystem native acceptance remain pending; available-host
 results do not close that acceptance. Full P9 remains incomplete. The linked
@@ -881,9 +885,9 @@ Median leader barriers/applied TCP.137945→.137095, QUIC.136723→.141282; comm
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current480: qualify exact temporary admission reuse | Remove measured repeated ready-stage set construction without changing outcomes | Complete479 raw profiles/quality; [accepted API/ownership/error-prefix/restart schema](../validation/performance/native480-admission/SCHEMA.md); unchanged per-command Counter oracle | Differential Counter and independent downstream context controls; singleton/fallback/receipt/error-prefix/cancellation/service recovery; exact source scope; zero-diagnostic enabled hook and checked publication including every new module | P9.0/P9.1/P9.2/P9.3 |
-| Next481: fresh artifacts and paired retention decision | Retain useful measured improvement rather than checked code or a CPU-only claim | Published480 source, scoped Mac qualification, genuinely fresh native root/executable proofs and preserved476/478 references | Both-host rotating pairs at the same selected settings; completed/during rates, latency/refusals, cold fairness and physical barrier work; all regressions retained; no rejected-family replay or default promotion; third-filesystem acceptance remains open until supplied | P9.0/P9.1/P9.2/P9.3 |
-| Next482: sustained curve and composed service qualification | Complete full P9 acceptance without narrowing the objective | Retained measured improvements, both-host qualified artifacts/workloads and supplied third filesystem for native acceptance | All seven one-group cells with healthy sustained margin, bounded memory/debt, durable headroom/fairness/skew, placement/shared physical barriers and P8 relays/striped/recursive/logical voters; preserve all outcomes/failures and exclude P10 | P9.0/P9.1/P9.2/P9.3/P9.4 |
+| Current481: fresh artifacts and paired retention decision | Retain useful measured improvement rather than checked code or a CPU-only claim | Published480 source and checked qualification; scoped Mac qualification, genuinely fresh native root/executable proofs and [fixed paired schema](../validation/performance/native481-admission/SCHEMA.md) | Both-host rotating476/480 pairs; default16 singleton/moderate guards, selected64 loaded/skew checks; completed/during rates, latency/refusals, cold fairness and physical barrier work; all regressions retained; no default promotion; third-filesystem acceptance stays open | P9.0/P9.1/P9.2/P9.3 |
+| Next482: act on the measured limiting stage | Convert481 evidence into a useful retained improvement or focused rejection | Complete paired raw histories and independent numerical review; distinguish CPU, physical barriers and harness offer limits | Record retention decision and all attempts; before any new edit, specify exact data/API, ordering, ownership, partial progress/restart and checks; checked publication through enabled hook; no repeated rejected family without new evidence | P9.0/P9.1/P9.2/P9.3 |
+| Next483: sustained curve and composed service qualification | Complete full P9 acceptance without narrowing the objective | Retained measured improvements, both-host qualified artifacts/workloads and supplied third filesystem for native acceptance | All seven one-group cells with healthy sustained margin, bounded memory/debt, durable headroom/fairness/skew, placement/shared physical barriers and P8 relays/striped/recursive/logical voters; preserve all outcomes/failures and exclude P10 | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
 comparison or short diagnostics. All seven one-group healthy-margin cells on

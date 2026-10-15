@@ -1,0 +1,96 @@
+{
+  "scope": "finite ordinary-barrier diagnostic; cold repair, initialization selector and reclamation namespace work excluded; live snapshots may cut calls; joined totals stable; parallel times are not client critical path",
+  "provider": "witness",
+  "measurement_deltas": [
+    {
+      "replica": "1",
+      "step": "open",
+      "calls": "0",
+      "elapsed_ns": "0"
+    },
+    {
+      "replica": "1",
+      "step": "write",
+      "calls": "167",
+      "elapsed_ns": "1019982"
+    },
+    {
+      "replica": "1",
+      "step": "file_sync",
+      "calls": "167",
+      "elapsed_ns": "1770369328"
+    },
+    {
+      "replica": "1",
+      "step": "rename",
+      "calls": "0",
+      "elapsed_ns": "0"
+    },
+    {
+      "replica": "1",
+      "step": "directory_sync",
+      "calls": "0",
+      "elapsed_ns": "0"
+    },
+    {
+      "replica": "2",
+      "step": "open",
+      "calls": "0",
+      "elapsed_ns": "0"
+    },
+    {
+      "replica": "2",
+      "step": "write",
+      "calls": "55",
+      "elapsed_ns": "343813"
+    },
+    {
+      "replica": "2",
+      "step": "file_sync",
+      "calls": "55",
+      "elapsed_ns": "751923259"
+    },
+    {
+      "replica": "2",
+      "step": "rename",
+      "calls": "0",
+      "elapsed_ns": "0"
+    },
+    {
+      "replica": "2",
+      "step": "directory_sync",
+      "calls": "0",
+      "elapsed_ns": "0"
+    },
+    {
+      "replica": "3",
+      "step": "open",
+      "calls": "0",
+      "elapsed_ns": "0"
+    },
+    {
+      "replica": "3",
+      "step": "write",
+      "calls": "56",
+      "elapsed_ns": "369238"
+    },
+    {
+      "replica": "3",
+      "step": "file_sync",
+      "calls": "56",
+      "elapsed_ns": "636891914"
+    },
+    {
+      "replica": "3",
+      "step": "rename",
+      "calls": "0",
+      "elapsed_ns": "0"
+    },
+    {
+      "replica": "3",
+      "step": "directory_sync",
+      "calls": "0",
+      "elapsed_ns": "0"
+    }
+  ]
+}

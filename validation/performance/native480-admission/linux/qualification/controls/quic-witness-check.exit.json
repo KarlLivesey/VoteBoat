@@ -1,0 +1,10 @@
+{
+  "command": [
+    "node",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/control-tools/check-native-benchmark.mjs",
+    "--storage",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/controls/wal/quic-witness"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.023799702001269907
+}

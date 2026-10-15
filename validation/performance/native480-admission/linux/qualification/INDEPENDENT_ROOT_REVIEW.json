@@ -1,0 +1,39 @@
+{
+  "exit": 0,
+  "reviewer": "mac475_collect",
+  "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "ready_sha256": "f73d0773b06cb86093124da8f48d180b28d45d2e1ca3c3031a091cfd3f52aa79",
+  "source_files_verified": 1495,
+  "qualified_projection_files_verified": 1494,
+  "artifact_sha256": {
+    "native_benchmark": "8d3530a6e801ebb857d8dff3fc1a0fb4ef5af865c3aed89d1450271f2054b84d",
+    "voteboat": "f3233aad647806aeab594775cff9f894775099256e564982b84a1a1b08f60435"
+  },
+  "proofs_verified": {
+    "PUBLICATION.json": "e0434b86e355480bc4f60ff9abedd04521d9218d076063668081a9837380ae2d",
+    "FUNCTIONAL_QUALIFICATION.json": "5d76623744370eb562e94e401aaae389b0d8ccd22c674b2177afefabb9ba919a",
+    "SOURCE.json": "1bc4a744c96513e5c316571de8c018595e74bceeb1915c29651c28e10c7353e4",
+    "ARTIFACTS.json": "bedad4528d55ced36560d2ddd066fe4401f944314d197715e0c91b0c9c5eb36b",
+    "SYMBOLS.json": "a7ee57183299504df11d7bd7650106d0f6fa32b156ba171a5a8c0f692b07060c",
+    "PROFILE_PROOF.json": "4b6fe8cd07862c638202e0e6b28ee02c50ecaea41de3955b9c9f480f37e3e96c",
+    "BUILD_TERMINAL.json": "73f947d785b631a5ca73669dba7efed8516bdbaaa7150630d192de3e438bd7a0",
+    "controls/TERMINAL.json": "3904f91845940a7a4786a828eadcc870516bb1b0013cb9333920ddb8692d19b7",
+    "controls/COMPLETION.json": "0e049f996096591051ccdb6191701a66d354ff0270fab30c223a59a56c2a18de",
+    "controls/COMPLETED_RESULTS.json": "345adc4b53360fcbee9b26e1a5f1d2de2022f0f0b5bd9115bd55d6fae053cafc",
+    "controls/BEFORE.json": "23e9f7c83c1f6bcabe170f9bcd7e5105713084cd0ffe81b66762371d6fad4152",
+    "controls/AFTER.json": "23e9f7c83c1f6bcabe170f9bcd7e5105713084cd0ffe81b66762371d6fad4152"
+  },
+  "checks": [
+    "Full source file set/SHA/modes and1494qualified projection match",
+    "Fresh root/executable/buildscript CargoJSON and actual native opt3debug0/assert+overflow/defaultLTO+codegen rustc flags",
+    "Original/copy artifact hashes and actual compiler/tool hashes; baseline Cargo.lock identity",
+    "Three original native processes/storage validators0; two explicitWitness publication validators0 and6capacity+6publication readbacks",
+    "Defaultlegacy capacity6/publication0; original extra publication checker1/controller1 preserved, same-raw physical completion0 exact refs, no rerun"
+  ],
+  "initial_review_probe": {
+    "tool_chunk": "5c46e0",
+    "actual_exit": 1,
+    "error": "AssertionError from reviewer expecting6publication readbacks in defaultlegacy control; actual contract has0. Earlier source/artifact/profile/tool checks passed. Focused expectation corrected, no workload/validator repeated."
+  },
+  "scope": "Read-only independent source/artifact/control review, not fresh performance measurements, a gain or fullP9/native threefilesystem acceptance."
+}

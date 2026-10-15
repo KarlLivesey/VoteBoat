@@ -1,0 +1,23 @@
+{
+  "exit": 0,
+  "source_commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e",
+  "source_files": 1495,
+  "qualified_projection_files": 1494,
+  "ready_sha256": "f73d0773b06cb86093124da8f48d180b28d45d2e1ca3c3031a091cfd3f52aa79",
+  "native_artifact_sha256": "8d3530a6e801ebb857d8dff3fc1a0fb4ef5af865c3aed89d1450271f2054b84d",
+  "root_artifact_sha256": "f3233aad647806aeab594775cff9f894775099256e564982b84a1a1b08f60435",
+  "original_handles": {
+    "export": 28822,
+    "build": 90090,
+    "controls": 36585
+  },
+  "actual_export_exit": 0,
+  "actual_build_exit": 0,
+  "original_controls_exit": 1,
+  "separate_postterminal_completion_exit": 0,
+  "original_native_processes_and_storage_validators": 3,
+  "witness_publication_validators": 2,
+  "same_raw_default_filelogio_completion": true,
+  "scope": "Fresh native480 Linux functional qualification only. No speedup, capacity or fullP9 acceptance claim. Original failed extra default checker/controller exit1 retained; no workload or validator rerun.",
+  "excluded": "Binaries/root rlib, target-native-release buildtree, full source directory/source.tar, redundant source.sha256 inventory, generated WAL/snapshot trees and caches. SOURCE.json retains full source/archive identities; published main qualification referenced, not recopied."
+}

@@ -1,0 +1,65 @@
+[
+  {
+    "original_path": "qualification/SOURCE.json",
+    "archived_path": "qualification/SOURCE.json.gz",
+    "original_sha256": "1bc4a744c96513e5c316571de8c018595e74bceeb1915c29651c28e10c7353e4",
+    "original_bytes": 468657,
+    "container_sha256": "febbc05b5b8f2f958f4f7cd0969997ff4249f870068e9f0a44a0fb43a37839e0",
+    "container_bytes": 138690,
+    "reason": "large or Git-whitespace-sensitive original text"
+  },
+  {
+    "original_path": "qualification/controls/AFTER.json",
+    "archived_path": "qualification/controls/AFTER.json.gz",
+    "original_sha256": "23e9f7c83c1f6bcabe170f9bcd7e5105713084cd0ffe81b66762371d6fad4152",
+    "original_bytes": 358009,
+    "container_sha256": "bb3398a1197b62f8b5dc4b2673c481fd732ed9b53cdf6465c752580c6dcd1465",
+    "container_bytes": 74899,
+    "reason": "large or Git-whitespace-sensitive original text"
+  },
+  {
+    "original_path": "qualification/controls/BEFORE.json",
+    "archived_path": "qualification/controls/BEFORE.json.gz",
+    "original_sha256": "23e9f7c83c1f6bcabe170f9bcd7e5105713084cd0ffe81b66762371d6fad4152",
+    "original_bytes": 358009,
+    "container_sha256": "bb3398a1197b62f8b5dc4b2673c481fd732ed9b53cdf6465c752580c6dcd1465",
+    "container_bytes": 74899,
+    "reason": "large or Git-whitespace-sensitive original text"
+  },
+  {
+    "original_path": "qualification/logs/native-release.command",
+    "archived_path": "qualification/logs/native-release.command.gz",
+    "original_sha256": "410718aa367aa75a02e90384c63b4a91d05a8f0105bb507a4830b3377f6026f7",
+    "original_bytes": 298,
+    "container_sha256": "d59759014bc6448923344ad875ee9e0aa49e4bee7cc66d82177796d3842b0ebd",
+    "container_bytes": 230,
+    "reason": "large or Git-whitespace-sensitive original text"
+  },
+  {
+    "original_path": "qualification/logs/native-release.jsonl",
+    "archived_path": "qualification/logs/native-release.jsonl.gz",
+    "original_sha256": "94a924e74637ac89cecbd37eb7cbd7710651e12d4075f9a18f1bd6a451fc970e",
+    "original_bytes": 3236464,
+    "container_sha256": "dcedb6de1c6b8ae8e58f88061e7369e0154d916d075db79010b7ca6cbc92c49d",
+    "container_bytes": 107132,
+    "reason": "large or Git-whitespace-sensitive original text"
+  },
+  {
+    "original_path": "qualification/logs/native-release.stderr",
+    "archived_path": "qualification/logs/native-release.stderr.gz",
+    "original_sha256": "253be469e4a647e2fb48c561a97f5fef725c6acd9ffdeec219be780dddf57fa4",
+    "original_bytes": 219973,
+    "container_sha256": "25fa0ac34b8cc128b2cd33033d3b8ce196f6ec12e3ac316f8f78498fa0e826e5",
+    "container_bytes": 21100,
+    "reason": "large or Git-whitespace-sensitive original text"
+  },
+  {
+    "original_path": "qualification/logs/symbol-table.log",
+    "archived_path": "qualification/logs/symbol-table.log.gz",
+    "original_sha256": "631fd7536ac050a99b1cbadc00831598c96038b8d15b9e5c1bddbb8043f3ca50",
+    "original_bytes": 2129638,
+    "container_sha256": "98de80cc889d0525264865a9294df8292a385f880253ac76ff443aef630d0c20",
+    "container_bytes": 207336,
+    "reason": "large or Git-whitespace-sensitive original text"
+  }
+]

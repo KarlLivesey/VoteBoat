@@ -1,0 +1,21 @@
+{"commit": "f7b0ef12709bb7e7aad4f0279851aa035b508e9e", "qualified_inputs": 1494, "scope": "480 actual normalized final functional/strict/metadata receipts; no native or framework performance claim."}
+exact1495 committed inputs +1494 qualified input projection hashes/physical modes passed
+START tcp-witness
+END tcp-witness 0
+START tcp-witness-check
+END tcp-witness-check 0
+START tcp-witness-publication-check
+END tcp-witness-publication-check 0
+START quic-witness
+END quic-witness 0
+START quic-witness-check
+END quic-witness-check 0
+START quic-witness-publication-check
+END quic-witness-publication-check 0
+START tcp-default-atomic
+END tcp-default-atomic 0
+START tcp-default-atomic-check
+END tcp-default-atomic-check 0
+START tcp-default-atomic-publication-check
+END tcp-default-atomic-publication-check 1
+CONTROLS_EXIT=1

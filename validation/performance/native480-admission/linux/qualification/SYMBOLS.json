@@ -1,0 +1,54 @@
+{
+  "executable_sha256": "8d3530a6e801ebb857d8dff3fc1a0fb4ef5af865c3aed89d1450271f2054b84d",
+  "symbol_form": "NativeLinuxELF debug0 acceptance/symboltable; no DWARF/DWP requirement, native defaultLTO/codegen preserved.",
+  "elf_notes_sha256": "ea7ae241acc82f0b51ccd962d19184521732e730435a857df9bd7ab775ab414f",
+  "elf_sections_sha256": "731e41ab8598bc79159fe37f598e33d61435c09a69bff31047a0c3c9f6b8b442",
+  "symbol_table_sha256": "631fd7536ac050a99b1cbadc00831598c96038b8d15b9e5c1bddbb8043f3ca50",
+  "reference_oracle_cfg_absent_PROFILErelease": true,
+  "root_buildscript_record": {
+    "reason": "build-script-executed",
+    "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/source#voteboat@0.1.0",
+    "linked_libs": [],
+    "linked_paths": [],
+    "cfgs": [],
+    "env": [],
+    "out_dir": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/target-native-release/release/build/voteboat-15a02fc41a295d95/out"
+  },
+  "root_buildscript_fresh_record": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/source#voteboat@0.1.0",
+    "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/source/Cargo.toml",
+    "target": {
+      "kind": [
+        "custom-build"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "build-script-build",
+      "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/source/build.rs",
+      "edition": "2021",
+      "doc": false,
+      "doctest": false,
+      "test": false
+    },
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/target-native-release/release/build/voteboat-d2572b14cedfc02c/build-script-build"
+    ],
+    "executable": null,
+    "fresh": false
+  }
+}

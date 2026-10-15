@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/controls/run.py", line 41, in <module>
+    run(name+'-publication-check',['node',str(tools/'check-publication-timings.mjs'),str(root/'publication.csv'),publication])
+    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/controls/run.py", line 31, in run
+    receipt={'command':cmd,'exit':r.returncode,'elapsed_s':time.monotonic()-clock};write(controls/(name+'.exit.json'),receipt);commands.append(receipt);print('END '+name+' '+str(r.returncode),flush=True);assert r.returncode==0
+                                                                                                                                                                                                                   ^^^^^^^^^^^^^^^
+AssertionError

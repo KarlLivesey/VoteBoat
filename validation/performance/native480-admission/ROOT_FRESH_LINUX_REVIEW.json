@@ -1,0 +1,7 @@
+{
+  "scope": "Root independent exact-recursive seal plus all selected original source/length/hash/mode and gzip verification; no workloads rerun. Original controller1 and separate completion0 retained.",
+  "payloads": 148,
+  "selected": 144,
+  "manifest_sha256": "dde740182ab8382223aa543e2be90c03768866cdb85ca98563290bf22da6b1fa",
+  "exit": 0
+}

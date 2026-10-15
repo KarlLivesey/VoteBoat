@@ -1,0 +1,21 @@
+{
+  "scope": "Three native480 release functional controls: explicitq64 Witness TCP/QUIC plus omittedpublication/ready flags defaultatomicTCP; no capacity/gain timing claim. Selectedwindow4096 is not achieved capacity/batchwidth.",
+  "start": "2026-10-15T14:13:17.166487+00:00",
+  "selected": [
+    [
+      "tcp",
+      "witness",
+      64
+    ],
+    [
+      "quic",
+      "witness",
+      64
+    ],
+    [
+      "tcp",
+      "default-atomic",
+      16
+    ]
+  ]
+}

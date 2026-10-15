@@ -1,0 +1,83 @@
+{
+  "scope": "Prepared native480 Linux source-export/fresh-native-build/three functional release-control runner only. No source export/build/workload/newcargo tests launched. Root must bind exact final checked source and successful published480 before GO.",
+  "source_commit": "UNPUBLISHED",
+  "final_manifest": "UNBOUND_PENDING_ROOT_FINAL_FIXES_AND_GO",
+  "suggested_source_projection": "target/p9/native480-admission/checked3/BEFORE.json (1494 at preparation; deliberately not bound or accepted)",
+  "syntax_checks": [
+    {
+      "path": "guard.py",
+      "check": "Python AST",
+      "exit": 0
+    },
+    {
+      "path": "controls/run.py",
+      "check": "Python AST",
+      "exit": 0
+    },
+    {
+      "path": "export-source.sh",
+      "check": "Embedded Python AST",
+      "exit": 0
+    },
+    {
+      "path": "run.sh",
+      "check": "bash -n",
+      "exit": 0
+    },
+    {
+      "path": "export-source.sh",
+      "check": "bash -n",
+      "exit": 0
+    },
+    {
+      "path": "setup-after-build.sh",
+      "check": "bash -n",
+      "exit": 0
+    }
+  ],
+  "unpublished_guard_command": [
+    "/usr/bin/python3.14",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux/guard.py",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native480-admission/linux",
+    "qualification"
+  ],
+  "unpublished_guard_actual_exit": 1,
+  "unpublished_guard_expected_refusal": true,
+  "fresh_source_target_artifacts_absent": true,
+  "source_contract": "git archive exact publishedcommit selected projection plus all tracked src/tests/examples/configs/locks/fixtures/validator closure. SHA/modes/private0600 and observed directory modes preserved dynamically; no source hash count constant.",
+  "native_profile": "opt3/debug0/assertions+overflow/nativeDEFAULT LTO+codegen; inherited flags/wrappers/profile overrides unset. Fresh Cargo JSON+vv root/executable/buildscript false, full source/lock/compiler identity and original/copy/root SHA required.",
+  "qualification_bindings_required": [
+    "REQUIRED_COMMIT.txt exact actual480 published40hex",
+    "PUBLICATION.json actual successful enabled-hook/push/remote proof+hook SHA",
+    "FUNCTIONAL_QUALIFICATION.json final projection SHA, actual normalized functional/strict/metadata exit0/source_exact receipts, covering final before/after source guards"
+  ],
+  "release_controls": [
+    {
+      "protocol": "tcp",
+      "publication": "witness",
+      "ready_items": 64
+    },
+    {
+      "protocol": "quic",
+      "publication": "witness",
+      "ready_items": 64
+    },
+    {
+      "protocol": "tcp",
+      "publication": "actual default atomic; omit --publication",
+      "ready_items": "actual default16; omit --ready-items"
+    }
+  ],
+  "control_outcome": "Each512 offers@128/s/window4096/groups1/64warmup/active2s; exact recovery/retry/join, all statuses, six capacity+six Create/Recover provider readbacks, full native physical validator plus publicationtimings and actual persisted selectors/ACK/manifest CRC/length checks. No timing or gain claim.",
+  "known_observation": "Exploratory rg on absent examples/benchmark/config.rs returned2 (toolchunk6fc01d); no source/build/control affected, actual ready_items.rs found with rg --files.",
+  "files_sha256": {
+    "guard.py": "e22cb36607cd7ca61529b8a8ae14b9fbace4e5fbfbc192d65c29322bd97f5fa5",
+    "run.sh": "3d42271a806b925d9ed2ec004210eab40c6ba18b9ee66c37c1b0eeb192be1512",
+    "export-source.sh": "ab7f42a79106ce7fd4d55bfebc9f7e544dbb6295c3b5f576882ad34e7f1e6877",
+    "setup-after-build.sh": "467f75b68e26ac63c7db864a098077a45c1ccb9406efcc4b054bc9e15e091c39",
+    "controls/run.py": "103ef006f15a572e68f7856bf17b06ccc8ddba4bf4f182ad1829e0c6d6a3bbcf",
+    "REQUIRED_COMMIT.txt": "33dffc7290850bd179b2bc7fdb0c835967de6273bd8edcb6b7224fa1a8959af1",
+    "PUBLICATION.json": "42403ca236c54899ce8faeed38f495e7ed3b8d4bdd8f31652c64ef4c978fb50a",
+    "FUNCTIONAL_QUALIFICATION.json": "3bbfbcb3d6e42c8c5783657e449ee18ad95fbc56a149e8d61bd882136eaf711a"
+  }
+}
