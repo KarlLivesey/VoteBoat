@@ -715,7 +715,7 @@ fn main() -> Result<(), Failure> {
     let publication = Publication::extract(&mut args)?;
     let raw_group_weights = offered_groups::extract(&mut args)?;
     if args.first().is_some_and(|arg| arg == "--lanes") {
-        capacity_profile.validate(false, 1)?;
+        capacity_profile.validate(false, 1, 16)?;
         publication.validate(false)?;
         if selected_ready_items.is_some() {
             return Err("--ready-items is unsupported with --lanes".into());
@@ -725,7 +725,7 @@ fn main() -> Result<(), Failure> {
         }
         return lanes::run(&args[1..]);
     }
-    let ready_visit_items = selected_ready_items.unwrap_or(16);
+    let ready_visit_items = selected_ready_items.unwrap_or(256);
     let journal_timings = args.last().is_some_and(|arg| arg == "--journal-timings");
     if journal_timings {
         args.pop();
@@ -735,7 +735,7 @@ fn main() -> Result<(), Failure> {
     }
     if !matches!(args.len(), 4 | 5 | 7 | 9 | 11) {
         return Err(
-            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64; offered-capacity 4096 enables 1..4096) [--offered-capacity 4096 (offered only)] [--publication atomic|witness (offered only)] [--ready-items 1|16|32|64|128|256|512|1024] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
+            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..4*READY clamped to 64..4096; offered-capacity 4096 enables 1..4096) [--offered-capacity 4096 (offered only)] [--publication atomic|witness (offered only)] [--ready-items 1|16|32|64|128|256|512|1024 (default 256)] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
                 .into(),
         );
     }
@@ -761,7 +761,7 @@ fn main() -> Result<(), Failure> {
     } else {
         None
     };
-    capacity_profile.validate_workload(count, offered_rate.is_some(), window)?;
+    capacity_profile.validate_workload(count, offered_rate.is_some(), window, ready_visit_items)?;
     publication.validate(offered_rate.is_some())?;
     let maintenance = if args.len() >= 9 {
         if args[7] != "--maintenance" {

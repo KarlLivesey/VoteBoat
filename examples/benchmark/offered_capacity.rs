@@ -26,9 +26,14 @@ impl CapacityProfile {
         args.drain(position..position + 2);
         Ok(Self::Offered4096)
     }
-    pub(super) fn validate(self, offered: bool, window: usize) -> Result<(), Failure> {
+    pub(super) fn validate(
+        self,
+        offered: bool,
+        window: usize,
+        ready: usize,
+    ) -> Result<(), Failure> {
         let max = match self {
-            Self::Legacy => 64,
+            Self::Legacy => self.clients(ready).group_requests,
             Self::Offered4096 if offered => 4096,
             Self::Offered4096 => return Err("--offered-capacity requires offered mode".into()),
         };
@@ -42,11 +47,12 @@ impl CapacityProfile {
         count: usize,
         offered: bool,
         window: usize,
+        ready: usize,
     ) -> Result<(), Failure> {
         if !(1..=50000).contains(&count) {
             return Err("count/window out of bounds".into());
         }
-        self.validate(offered, window)
+        self.validate(offered, window, ready)
     }
     pub(super) fn shard(self, ready: usize, groups: usize) -> ShardLimits {
         let mut limits = ShardLimits {
@@ -57,15 +63,24 @@ impl CapacityProfile {
         if self == Self::Offered4096 {
             limits.group_items = 4112;
         }
-        // Same rule as native startup: a group's queue holds one full visit.
-        limits.group_items = limits.group_items.max(ready + limits.group_control_items);
+        // Same rule as native startup: a group's queue holds every admitted
+        // client original beside its control reserve.
+        limits.group_items = limits
+            .group_items
+            .max(self.clients(ready).group_requests + limits.group_control_items);
         limits
     }
-    pub(super) fn clients(self) -> ClientRouterLimits {
+    /// Legacy mirrors native service startup: four visits per group, never
+    /// below the router default, within the router-wide request ceiling.
+    pub(super) fn clients(self, ready: usize) -> ClientRouterLimits {
         let mut limits = ClientRouterLimits::default();
-        if self == Self::Offered4096 {
-            limits.group_requests = 4096;
-        }
+        limits.group_requests = if self == Self::Offered4096 {
+            4096
+        } else {
+            ready
+                .saturating_mul(4)
+                .clamp(limits.group_requests, limits.requests)
+        };
         limits
     }
     pub(super) fn readback(
@@ -76,7 +91,7 @@ impl CapacityProfile {
         groups: usize,
     ) -> Result<(), Failure> {
         let expected_shard = self.shard(ready, groups);
-        let expected_clients = self.clients();
+        let expected_clients = self.clients(ready);
         // Compare every selected/independent admission bound before workers exist.
         if format!("{shard:?}") != format!("{expected_shard:?}")
             || format!("{clients:?}") != format!("{expected_clients:?}")
@@ -90,7 +105,7 @@ impl CapacityProfile {
             return String::new();
         }
         let s = self.shard(16, 1);
-        let c = self.clients();
+        let c = self.clients(16);
         format!(" offered_capacity_requested=4096 offered_capacity_effective=4096 client_requests={} client_group_requests={} client_bytes={} client_receipt_bytes={} shard_max_items={} shard_control_items={} shard_group_items={} shard_group_control_items={} shard_group_bytes={}", c.requests, c.group_requests, c.bytes, c.receipt_bytes, s.max_items, s.control_items, s.group_items, s.group_control_items, s.group_bytes)
     }
 }

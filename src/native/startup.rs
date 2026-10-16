@@ -69,9 +69,11 @@ pub struct NativeStartup {
     pub entropy_seed: u64,
     pub limits: NodeLimits,
     /// Maximum original items in one runtime visit, including control and
-    /// background turns. Native defaults select 16. Startup also sizes each
-    /// core's proposal and replication width to carry one full visit (never
-    /// below the 64-entry defaults). Valid startup values are 1..=1024.
+    /// background turns. The native services select 256. Startup also sizes
+    /// each core's proposal and replication width to carry one full visit
+    /// (never below the 64-entry defaults) and admits up to four visits of
+    /// client originals per group (never below 64, within the router-wide
+    /// 4,096). Valid startup values are 1..=1024.
     pub ready_visit_items: usize,
 }
 /// Explicit trusted deployment input for reopening a durably assigned member.
@@ -1018,10 +1020,11 @@ fn startup_shard_limits(
         visit_items: ready_visit_items,
         ..ShardLimits::default()
     };
-    // A group's queue must hold one full visit beside its control reserve.
+    // A group's queue must hold every original its client router can admit
+    // (at least one full visit) beside its control reserve.
     limits.group_items = limits
         .group_items
-        .max(ready_visit_items + limits.group_control_items);
+        .max(startup_client_limits(ready_visit_items).group_requests + limits.group_control_items);
     if log.max_batch_bytes > limits.max_event_bytes {
         limits.max_event_bytes = log
             .max_batch_bytes
@@ -1276,8 +1279,19 @@ struct ApplicationRoutes<R, Q, V> {
     clients: ClientRouter<R>,
     reads: ReadRequests<Q, V>,
 }
+/// Per-group client capacity for a visit quantum: enough admitted originals to
+/// fill several visits while earlier batches are in flight, within the shared
+/// router-wide request ceiling. The default 16-item visit keeps the default 64.
+fn startup_client_limits(ready_visit_items: usize) -> ClientRouterLimits {
+    let mut limits = ClientRouterLimits::default();
+    limits.group_requests = ready_visit_items
+        .saturating_mul(4)
+        .clamp(limits.group_requests, limits.requests);
+    limits
+}
 fn application_routes<R: ApplicationReceipt, Q, V>(
     authorization: RuntimeAuthorization,
+    ready_visit_items: usize,
 ) -> Result<ApplicationRoutes<R, Q, V>, NativeStartupError> {
     let results = checked(ApplicationRouter::new(
         ApplicationRouterBinding::new(authorization, ApplicationRouterGeneration::new(1).unwrap()),
@@ -1285,7 +1299,7 @@ fn application_routes<R: ApplicationReceipt, Q, V>(
     ))?;
     let clients = checked(ClientRouter::new(
         ClientRouterBinding::new(authorization, ClientRouterGeneration::new(1).unwrap()),
-        ClientRouterLimits::default(),
+        startup_client_limits(ready_visit_items),
     ))?;
     let reads = checked(ReadRequests::new(
         ReadInvocationBinding::new(authorization, ReadInvocationGeneration::new(1).unwrap()),
@@ -1446,7 +1460,7 @@ where
         results,
         clients,
         reads,
-    } = application_routes(timed.authorization())?;
+    } = application_routes(timed.authorization(), config.ready_visit_items)?;
     let factory = transport_factory(config.tls.wire_version())?;
     let worker_limits = startup_worker_limits(store.limits())?;
     cleanup.log = Some(checked(NativeLogWorker::spawn(

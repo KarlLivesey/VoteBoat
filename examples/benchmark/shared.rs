@@ -292,6 +292,7 @@ fn application_routers(
     owner_id: RuntimeOwner,
     local: LocalIdentity,
     profile: CapacityProfile,
+    ready_visit_items: usize,
 ) -> Result<Routers, Failure> {
     let ingress = checked(IngressRouter::new(
         IngressBinding {
@@ -313,7 +314,7 @@ fn application_routers(
             RuntimeAuthorization::physical(owner_id),
             ClientRouterGeneration::new(1).unwrap(),
         ),
-        profile.clients(),
+        profile.clients(ready_visit_items),
     ))?;
     let reads = checked(ReadRequests::new(
         ReadInvocationBinding::new(
@@ -521,7 +522,7 @@ impl ClusterSetup<'_> {
             results,
             clients,
             reads,
-        } = application_routers(owner_id, local, capacity_profile)?;
+        } = application_routers(owner_id, local, capacity_profile, ready_visit_items)?;
         self.check_capacity(n, timed.limits(), clients.limits())?;
         let ingress = checked(IngressRouter::new(ingress.binding(), ingress_limits))?;
         let factory = checked(NativeTransportFactory::new(codec, Default::default()))?;

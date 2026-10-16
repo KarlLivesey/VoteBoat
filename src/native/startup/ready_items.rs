@@ -18,7 +18,14 @@ fn ready_visit_selection_changes_only_quantum_and_keeps_derived_resource_floors(
                 assert_eq!(limits.max_groups, baseline.max_groups);
                 assert_eq!(limits.max_items, baseline.max_items);
                 assert_eq!(limits.max_bytes, baseline.max_bytes);
-                assert_eq!(limits.group_items, baseline.group_items);
+                // The queue grows only to hold the client router's admissions.
+                assert_eq!(
+                    limits.group_items,
+                    baseline.group_items.max(
+                        startup_client_limits(selected).group_requests
+                            + baseline.group_control_items
+                    )
+                );
                 assert_eq!(limits.group_bytes, baseline.group_bytes);
                 assert_eq!(limits.control_items, baseline.control_items);
                 assert_eq!(limits.control_bytes, baseline.control_bytes);
@@ -48,18 +55,27 @@ fn wide_ready_visits_size_the_group_queue_and_core_batches() {
         for selected in [256, 1024] {
             let limits = startup_shard_limits(LogLimits::default(), groups, selected).unwrap();
             assert_eq!(limits.visit_items, selected);
+            let clients = startup_client_limits(selected);
+            assert_eq!(clients.group_requests, (4 * selected).min(clients.requests));
             assert_eq!(
                 limits.group_items,
                 baseline
                     .group_items
-                    .max(selected + baseline.group_control_items)
+                    .max(clients.group_requests + baseline.group_control_items)
             );
+            assert!(limits.group_items >= selected + baseline.group_control_items);
             assert_eq!(limits.max_items, baseline.max_items);
             assert_eq!(limits.visit_bytes, baseline.visit_bytes);
             let batch = crate::raft::BatchLimits::for_ready_visit(selected).unwrap();
             assert_eq!(batch.max_proposal_entries, selected);
             assert_eq!(batch.max_replication_entries, selected);
         }
+    }
+    for selected in [1, 16] {
+        assert_eq!(
+            startup_client_limits(selected).group_requests,
+            ClientRouterLimits::default().group_requests
+        );
     }
     for selected in [1, 16, 64] {
         assert_eq!(

@@ -36,15 +36,19 @@ fn parser_refuses_invalid_modes_and_keeps_legacy_windows() {
         input,
         args(&["root", "tcp", "8192", "4096", "1", "--offered", "512"])
     );
-    assert!(selected.validate(false, 1).is_err());
-    assert!(selected.validate(true, 4096).is_ok());
-    assert!(selected.validate(true, 4097).is_err());
-    assert!(selected.validate_workload(0, true, 4096).is_err());
-    assert!(selected.validate_workload(50001, true, 4096).is_err());
-    assert!(selected.validate_workload(8192, true, 4096).is_ok());
-    assert!(selected.validate(true, 0).is_err());
-    assert!(CapacityProfile::Legacy.validate(true, 65).is_err());
-    assert!(CapacityProfile::Legacy.validate(false, 64).is_ok());
+    assert!(selected.validate(false, 1, 16).is_err());
+    assert!(selected.validate(true, 4096, 16).is_ok());
+    assert!(selected.validate(true, 4097, 16).is_err());
+    assert!(selected.validate_workload(0, true, 4096, 16).is_err());
+    assert!(selected.validate_workload(50001, true, 4096, 16).is_err());
+    assert!(selected.validate_workload(8192, true, 4096, 16).is_ok());
+    assert!(selected.validate(true, 0, 16).is_err());
+    assert!(CapacityProfile::Legacy.validate(true, 65, 16).is_err());
+    assert!(CapacityProfile::Legacy.validate(false, 64, 16).is_ok());
+    // Legacy mirrors the service: four visits per group within 64..=4096.
+    assert!(CapacityProfile::Legacy.validate(true, 1024, 256).is_ok());
+    assert!(CapacityProfile::Legacy.validate(true, 1025, 256).is_err());
+    assert_eq!(CapacityProfile::Legacy.clients(1024).group_requests, 4096);
     assert_eq!(
         CapacityProfile::extract(&mut input).unwrap(),
         CapacityProfile::Legacy
@@ -128,7 +132,7 @@ fn actual_readback_rejects_changed_independent_bounds_and_profile_drift() {
             RuntimeAuthorization::physical(shard.owner()),
             ClientRouterGeneration::new(1).unwrap(),
         );
-        let clients = ClientRouter::<CounterReceipt>::new(binding, profile.clients()).unwrap();
+        let clients = ClientRouter::<CounterReceipt>::new(binding, profile.clients(16)).unwrap();
         profile
             .readback(shard.limits(), clients.limits(), 16, 1)
             .unwrap();
@@ -141,7 +145,7 @@ fn actual_readback_rejects_changed_independent_bounds_and_profile_drift() {
         assert!(profile
             .readback(
                 CapacityProfile::Offered4096.shard(16, 1),
-                CapacityProfile::Legacy.clients(),
+                CapacityProfile::Legacy.clients(16),
                 16,
                 1
             )
