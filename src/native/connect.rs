@@ -102,7 +102,12 @@ pub struct NativePeerConnector<
     io_phase: IoPhase,
     now: MonoTime,
     closed: bool,
+    /// Accept phases to skip after the listener reported no pending
+    /// connection; bounds idle `accept` syscalls without delaying a ready one
+    /// by more than `ACCEPT_IDLE_PHASES` accept phases.
+    accept_idle: u8,
 }
+const ACCEPT_IDLE_PHASES: u8 = 7;
 fn next_key<V>(map: &BTreeMap<NodeId, V>, cursor: Option<NodeId>) -> Option<NodeId> {
     cursor
         .and_then(|c| {
@@ -183,6 +188,7 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> NativePeerConnec
             terminal_cursor: None,
             anonymous_cursor: 0,
             io_phase: IoPhase::Prefaces,
+            accept_idle: 0,
             now,
             closed: false,
         })
@@ -311,6 +317,10 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> NativePeerConnec
         let Some(listener) = &self.listener else {
             return Ok(());
         };
+        if self.accept_idle != 0 {
+            self.accept_idle -= 1;
+            return Ok(());
+        }
         while *calls != 0 {
             let Some(slot) = self.anonymous.iter_mut().find(|a| a.is_none()) else {
                 break;
@@ -340,7 +350,10 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> NativePeerConnec
                         deadline,
                     });
                 }
-                Err(e) if e.kind() == io::ErrorKind::WouldBlock => break,
+                Err(e) if e.kind() == io::ErrorKind::WouldBlock => {
+                    self.accept_idle = ACCEPT_IDLE_PHASES;
+                    break;
+                }
                 Err(e) if e.kind() == io::ErrorKind::Interrupted => continue,
                 Err(e) => return Err(ConnectError::Io(e.kind())),
             }

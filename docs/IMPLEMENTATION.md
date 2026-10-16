@@ -96,6 +96,18 @@ follower — every commit advance is its own two-sync persistence round — whic
 selected re-measuring the qualified slice 461 commit/append fusion under load
 (below: no gain).
 
+#### S1 implemented: idle listener accepts no longer run every poll
+
+Non-storage loop: the native benchmark on Linux tmpfs (`/tmp`), where syncs are
+negligible, isolates service CPU. A samply profile there showed ~21% of service
+CPU in libc socket syscalls; `accept4` returning WouldBlock on every poll round
+was 4.3%, and the benchmark's own unbuffered offers ledger 5.2% (post-run).
+After an empty `accept`, `NativePeerConnector` now skips its next seven accept
+phases (a ready connection waits at most that many polls; successful accepts
+continue immediately; skipped phases consume no socket-call budget). The ledger
+uses one buffered stream. Four interleaved tmpfs pairs at 15,000/s offered:
+25–26 → 22 µs whole-process CPU/original at the same completed rate.
+
 #### C5 implemented: new native stores use the two-sync witness publication
 
 `FileLogIo` now covers both physical formats without converting either:

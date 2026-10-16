@@ -175,7 +175,9 @@ impl<'a> Ledger<'a> {
     fn count_status(&self, status: &str) -> usize {
         self.rows.iter().filter(|r| r.status == status).count()
     }
-    fn write(&self, file: &mut File) -> Result<(), Failure> {
+    fn write(&self, raw: &mut File) -> Result<(), Failure> {
+        // One buffered write stream, not a syscall per formatted field.
+        let mut file = std::io::BufWriter::new(&mut *raw);
         writeln!(file, "operation,group,intended_ns,dispatched_ns,completed_ns,replica,sequence,status,reason,applied_index,value")?;
         for r in &self.rows {
             let reason = r.reason.replace([',', '\n', '\r'], "|");
@@ -195,7 +197,7 @@ impl<'a> Ledger<'a> {
                 r.value
             )?;
         }
-        file.sync_all()?;
+        file.into_inner().map_err(|e| e.into_error())?.sync_all()?;
         Ok(())
     }
     fn history(&self, warmup: &Measurement) -> Result<History, Failure> {
