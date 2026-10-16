@@ -725,7 +725,7 @@ fn main() -> Result<(), Failure> {
         }
         return lanes::run(&args[1..]);
     }
-    let ready_visit_items = selected_ready_items.unwrap_or(256);
+    let ready_visit_items = selected_ready_items.unwrap_or(1024);
     let journal_timings = args.last().is_some_and(|arg| arg == "--journal-timings");
     if journal_timings {
         args.pop();

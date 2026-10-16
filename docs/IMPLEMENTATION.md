@@ -40,7 +40,10 @@ implemented or benchmarked; unsafe variants are not offered as options.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current C5: witness publication for new native stores | Two syncs per barrier without per-barrier file creation, rename or directory sync | Witness provider (slice 476) | Format selection/never-convert tests; three-configuration suite; fmt + strict Clippy; Mac legacy/witness pairs | T2 |
+| Done C6: a poll never truncates a ready visit | The default replica step budget (128) silently cut every 256-original visit in half, capping each leader barrier at 128 originals; defaults now let one barrier carry a whole 1,024-original visit | C3a/C3b | Mac APFS loaded pairs, 31:1 skew, window 1, RAM-disk CPU/original; three-configuration suite; fmt + strict Clippy | T3 |
+| Next C4': re-measure commit/append fusion without the cap | The 461 re-measurement saw ~65 originals per barrier — the 128-step cap — not arrival limits; with C6 the leader's alternating commit-only barrier is the next serial wait | C6; slice 461 (b4875d9b) | Leader barriers per original and loaded writes/s on APFS; strict acknowledgement contract unchanged | T3 |
+| Following C7: shared barriers across groups | With two groups the leader's WAL worker starts each barrier for whichever group arrived first, so groups take turns; waiting (bounded) for the host's next turn lets queued groups share it | C6 | Multi-group writes/s and per-group latency on APFS; single-group unchanged | T3 |
+| Done C5: witness publication for new native stores | Two syncs per barrier without per-barrier file creation, rename or directory sync | Witness provider (slice 476) | Format selection/never-convert tests; three-configuration suite; fmt + strict Clippy; Mac legacy/witness pairs | T2 |
 | Done C3b: wide native batches by default | Service default visit 256; client admission and shard queue derived from the visit so a hot group can fill whole barriers and admitted work cannot overload the owner | C3a | Native default old/new loaded pairs, 31:1 skew per-group latency, window-1; three-configuration suite; fmt + strict Clippy | T3 |
 | Next C4: overlap the commit round with the next append | The leader's single persistence slot alternates append and commit-only barriers (~45 ms cycle); persisting the commit with already-ready data must trigger under real input ordering, not only when data is the very next input | Slice 461 design and its tests; C3b counters | Leader barriers per original fall under load; strict acknowledgement contract unchanged; full suite | T3 |
 | Following P2: framework per-original copies | Profiled bulk cell: entry-slice copies 13% (follower `plan_copy` 5.7%, leader `append_for` per peer ~5%), compaction 6.7% | Profiles in `target/claude/prof` method | Framework rate, CPU/original and busy cores on both cells | T4 |
@@ -48,6 +51,33 @@ implemented or benchmarked; unsafe variants are not offered as options.
 Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider than
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
+
+#### C6 implemented: a poll never truncates a ready visit
+
+A per-original event trace of the native benchmark (scratch instrumentation of
+append, barrier and completion times; Mac APFS, one group, 16,000 offers at
+8,000/s, window 1,024) showed originals waiting a median 107 ms between
+`propose` and the leader's first append, and every leader append carrying at
+most 128 entries although ~800 were queued. Each group has one active ready
+visit, held until its persistence completes, so each leader barrier admits only
+what one visit steps in — and `ReplicaPollBudget::steps` (128) truncated the
+256-original visit. The default step budget is now 1,024
+(`BatchLimits::MAX_READY_VISIT_ITEMS`), and the counter service and native
+benchmark default to 1,024-original visits. No protocol, durability or
+acknowledgement change: the budget only bounds work per poll.
+
+Mac APFS, Witness publication, three interleaved pairs, main 39ea3eae vs C6:
+4,208 → 7,520 completed/s (the offered 8,000/s now bounds it), p99 251 → 136 ms.
+Saturation sweep at 20,000/s offered (16,000 offers): ready 256 ~5,900/s;
+ready 1,024 with window 1,024 8,431/s and with window 4,096 12,569/s, versus
+~4,300/s on main at any window. RAM-disk CPU/original 26.4 → 24.9 µs (neutral).
+31:1 two-group skew at 1,024/s: cold group median 191–197 ms in both, p99 and
+refusals within run-to-run variance. Window 1: 20/s offered-bound in both.
+
+The trace also corrects the Slice 461 re-measurement below: its ~65 originals
+per barrier was this cap, not arrival-limited batches, so fusion is re-opened.
+A test assumed one `settle` covered a refused drain gate's retry; one poll now
+drains the whole 4,096-heartbeat queue first, so it settles until the retry lands.
 
 #### C1 measured and rejected: piggyback-only commit propagation
 
@@ -122,7 +152,11 @@ nearly spins under load); a 50 µs park after progress gave p99 11.0 → 12.7 ms
 and CPU 30.9 → 34.5 µs (mixed). Park tuning only trades latency for CPU. The
 selected direction is readiness-based waiting (block until a socket is
 readable or a worker wakes), which removes both costs; it is a transport-level
-design change. Experiment reverted.
+design change. Experiment reverted. Re-measured on main 39ea3eae (five pairs):
+skipping the park after progress was +3–14% writes/s on saturated Mac APFS
+(three pairs, within that host's fsync variance) but again 22.7 → 63.6
+µs/original on the RAM disk; capping it at one unparked round after progress
+gave p99 13.5 → 12.3 ms for 24.5 → 27.3 µs/original. Rejected again.
 
 #### S2 implemented: WAL recovery replays in place
 

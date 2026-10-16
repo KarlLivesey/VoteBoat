@@ -147,7 +147,7 @@ pub fn configuration(
         tls: credentials,
         entropy_seed: id * 17,
         limits: NodeLimits::default(),
-        ready_visit_items: 256,
+        ready_visit_items: 1024,
     };
     let mut config = NativeMemberStartup {
         startup: config,

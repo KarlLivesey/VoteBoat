@@ -77,7 +77,9 @@ impl Default for ReplicaPollBudget {
         Self {
             worker_events: 32,
             snapshot_events: 16,
-            steps: 128,
+            // Never below the widest ready visit, so one poll steps a whole
+            // visit and its originals share one persistence round.
+            steps: crate::raft::BatchLimits::MAX_READY_VISIT_ITEMS,
             effects: 256,
             retries: 256,
             reconcile: 128,

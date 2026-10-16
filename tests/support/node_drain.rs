@@ -181,7 +181,14 @@ fn queue_pressure_retries_suppression_without_failing_the_node() {
     }
     assert!(full);
     n.begin_local_drain(manifest(&n)).unwrap();
-    settle(&mut n);
+    // The refused gate is retried on a later poll; one poll may drain the
+    // whole queue before that retry, so settle until the retry has landed.
+    for _ in 0..4 {
+        settle(&mut n);
+        if n.local_drain_status().unwrap().locally_quiescent {
+            break;
+        }
+    }
     assert!(n.local_drain_status().unwrap().locally_quiescent);
     assert_eq!(n.state(), NodeState::Running);
     shutdown(&mut n);
