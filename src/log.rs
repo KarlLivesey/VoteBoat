@@ -398,6 +398,57 @@ pub fn apply_batch(
     Ok(())
 }
 
+/// Recovery replay of one already decoded batch, applied in place.
+///
+/// Performs every validation of [`apply_batch`], but without copying the
+/// touched groups first, so replaying a WAL is linear rather than quadratic in
+/// its length. On error `state` may be partially updated: callers must discard
+/// it, as recovery does by failing the whole open.
+#[cfg(feature = "native")]
+pub(crate) fn replay_batch(
+    state: &mut BTreeMap<GroupIdentity, GroupLog>,
+    mutations: &[LogMutation],
+    limits: LogLimits,
+) -> Result<(), StorageError> {
+    let limits = limits.validate()?;
+    if mutations.is_empty() || mutations.len() > limits.max_batch_units {
+        return Err(StorageError::Rejected("batch unit limit"));
+    }
+    let mut touched = Vec::with_capacity(mutations.len());
+    for mutation in mutations {
+        let group = match mutation {
+            LogMutation::Create(b) => b.group,
+            LogMutation::Update(u) => u.group,
+        };
+        if touched.contains(&group) {
+            return Err(StorageError::Rejected(
+                "one atomic unit per group per batch",
+            ));
+        }
+        touched.push(group);
+        match mutation {
+            LogMutation::Create(b) => {
+                if state.len() >= limits.max_groups || state.keys().any(|g| g.id == b.group.id) {
+                    return Err(StorageError::Rejected(
+                        "existing group identity or group limit",
+                    ));
+                }
+                state.insert(group, stage_create(b)?);
+            }
+            LogMutation::Update(update) => {
+                let current = state
+                    .get_mut(&group)
+                    .ok_or(StorageError::Rejected("group not bootstrapped"))?;
+                if current.bootstrap.group != update.group {
+                    return Err(StorageError::Rejected("group not bootstrapped"));
+                }
+                apply_update(current, update, limits)?;
+            }
+        }
+    }
+    Ok(())
+}
+
 /// Validate a whole batch without copying groups unrelated to its transitions.
 /// The caller installs these owned replacements only after admission succeeds.
 pub(crate) fn stage_batch(

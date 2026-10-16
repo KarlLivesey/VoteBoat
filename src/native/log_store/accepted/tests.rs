@@ -7,6 +7,7 @@ mod configured;
 mod fixture;
 mod incoming;
 mod incoming_codec;
+mod replay;
 mod torn_tail;
 use fixture::*;
 

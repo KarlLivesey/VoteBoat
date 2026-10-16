@@ -96,6 +96,22 @@ follower — every commit advance is its own two-sync persistence round — whic
 selected re-measuring the qualified slice 461 commit/append fusion under load
 (below: no gain).
 
+#### S2 implemented: WAL recovery replays in place
+
+Native and striped recovery replayed each WAL frame through the atomic
+`apply_batch`, which clones every touched group's whole log to stage one frame,
+making restart quadratic in WAL length. Recovery now uses an internal
+`replay_batch` with identical validation that applies frames in place; any
+error still fails the whole open, so partial state is discarded. The public
+atomic `apply_batch` is unchanged. A differential test replays real batches
+both ways (states and invalid-batch errors identical). Mac service loop (RAM
+disk, marginal CPU between 2,000 and 16,000 originals, five pairs): 33.0 →
+30.5 µs/original, every pair lower.
+
+Mac evidence for S1 (same loop, whole-process CPU): 73 → 36 µs/original,
+pairs 0.45–0.54; idle `accept` and unbuffered ledger syscalls cost more on
+Darwin.
+
 #### S1 implemented: idle listener accepts no longer run every poll
 
 Non-storage loop: the native benchmark on Linux tmpfs (`/tmp`), where syncs are

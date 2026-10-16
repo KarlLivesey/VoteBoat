@@ -127,7 +127,7 @@ pub(super) fn controls(
             if sequence.checked_add(1) != Some(seq) {
                 return Err(invalid("control sequence discontinuity"));
             }
-            apply_batch(&mut groups, &mutations, limits).map_err(encode_error)?;
+            crate::log::replay_batch(&mut groups, &mutations, limits).map_err(encode_error)?;
             sequence = seq;
         }
     }

@@ -232,7 +232,7 @@ impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
             if sequence.checked_add(1) != Some(seq) {
                 return Err(StorageError::Corrupt("batch sequence discontinuity"));
             }
-            apply_batch(&mut state, &mutations, limits)
+            crate::log::replay_batch(&mut state, &mutations, limits)
                 .map_err(|_| StorageError::Corrupt("invalid log transition"))?;
             if (offset as u64) < boundary && (offset + size) as u64 > boundary {
                 return Err(StorageError::Corrupt("durable marker inside frame"));
