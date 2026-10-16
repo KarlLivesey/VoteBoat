@@ -96,6 +96,18 @@ follower — every commit advance is its own two-sync persistence round — whic
 selected re-measuring the qualified slice 461 commit/append fusion under load
 (below: no gain).
 
+#### Host-loop parking measured and rejected; readiness waiting selected
+
+The counter service parks 1 ms after every loop iteration and the native
+benchmark 100 µs; sockets are polled, so the park sets a per-hop latency floor.
+Mac RAM-disk loop, five pairs each: never parking after a progressing poll cut
+p99 14.3 → 3.4 ms but raised marginal CPU 22.6 → 64.2 µs/original (the loop
+nearly spins under load); a 50 µs park after progress gave p99 11.0 → 12.7 ms
+and CPU 30.9 → 34.5 µs (mixed). Park tuning only trades latency for CPU. The
+selected direction is readiness-based waiting (block until a socket is
+readable or a worker wakes), which removes both costs; it is a transport-level
+design change. Experiment reverted.
+
 #### S2 implemented: WAL recovery replays in place
 
 Native and striped recovery replayed each WAL frame through the atomic
