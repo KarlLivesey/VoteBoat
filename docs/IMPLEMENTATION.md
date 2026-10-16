@@ -96,6 +96,22 @@ follower — every commit advance is its own two-sync persistence round — whic
 selected re-measuring the qualified slice 461 commit/append fusion under load
 (below: no gain).
 
+#### Readiness waiting prototyped; needs a socket-driven service benchmark
+
+A prototype (scratch worktree, not merged) added advisory `readiness_fds`
+reporting through session/transport/connector/peer-network layers, one audited
+`poll(2)` module (the only `unsafe`, documented, `libc` already in the lock) and a
+loopback `SocketWake`; correctness never depends on the wait (1 ms bound,
+polling remains the only progress). Mac RAM-disk loop, five pairs each, versus
+the 100 µs park: plain wait −23% marginal CPU but p99 13.0 → 26.4 ms; hybrid
+(park after progress) no gain; with write interest −16% CPU, p99 12.0 → 29.0
+ms; capped at the next scheduled offer, p99 10.6 → 37.0 ms because `poll(2)`
+has millisecond resolution. The native benchmark generates its offered load
+inside the host loop, so it cannot represent a service whose requests arrive by
+socket. Prerequisite before any readiness change: a service-level load test
+(real `voteboat-counter` processes, external client over the real protocol).
+The `unsafe_code` lint on main is unchanged.
+
 #### Host-loop parking measured and rejected; readiness waiting selected
 
 The counter service parks 1 ms after every loop iteration and the native
