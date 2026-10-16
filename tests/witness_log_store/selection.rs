@@ -12,13 +12,13 @@ fn exclusive_lifetime_and_explicit_legacy_provider_incompatibility() {
     assert!(FileLogIo::open(&root.0).is_err());
     drop(store);
     assert!(FileLogIo::create(&root.0).is_err());
-    let legacy_open = FileLogIo::open(&root.0);
-    assert!(
-        legacy_open.is_err()
-            || NativeLogStore::recover(legacy_open.unwrap(), identity(1), LogLimits::default())
-                .is_err()
-    );
-    let store = recover(&root).unwrap();
+    // The format-aware FileLogIo selects the witness reader; it never reads
+    // witness files as the legacy layout.
+    let expected = recover(&root).unwrap().state(group(1)).unwrap();
+    let selected = FileLogIo::open(&root.0).unwrap();
+    assert!(selected.is_witness());
+    let store = NativeLogStore::recover(selected, identity(1), LogLimits::default()).unwrap();
+    assert_eq!(store.state(group(1)).unwrap().entries, expected.entries);
     drop(store);
     let legacy = Directory::new("legacy");
     let store = NativeLogStore::create(

@@ -11,7 +11,7 @@ pub(super) fn recover<A: CheckpointStateMachine>(
     let create = config.mode == NativeOpenMode::Create;
     let store = if create {
         let mut store = NativeLogStore::create(
-            FileLogIo::create(&config.directory)?,
+            FileLogIo::create_witness(&config.directory)?,
             config.store,
             LogLimits::default(),
         )?;

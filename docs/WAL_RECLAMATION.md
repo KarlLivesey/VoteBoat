@@ -36,6 +36,16 @@ complete new pair. A provider must synchronize new data and metadata and their
 selection before deleting old data. Unsupported providers decline before work;
 no weaker in-place rewrite is substituted.
 
+`FileLogIo` covers two physical formats for one directory, never converting
+between them. `FileLogIo::create` makes the single-WAL layout with an atomic
+MANIFEST publication described here; `FileLogIo::create_witness` makes the
+two-sync fixed-witness layout (`WitnessLogIo`). `FileLogIo::open` selects the
+witness reader exactly when `WITNESS-CURRENT` exists and the legacy reader
+otherwise; each reader still refuses the other's files. Native startup creates
+new stores in the witness format, so each durable barrier synchronizes the WAL
+and one fixed witness without creating, renaming or directory-syncing a file;
+stores created earlier reopen in their original format.
+
 FileLogIo opens existing legacy log.wal/MANIFEST stores unchanged. Its first
 cleanup writes log.1.wal and MANIFEST.1; subsequent cleanups alternate slots 0 and
 1. CURRENT contains a positive checked selection generation with a version and

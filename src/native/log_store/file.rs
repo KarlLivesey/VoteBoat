@@ -23,14 +23,14 @@ use std::{
     path::{Path, PathBuf},
 };
 
-pub struct FileLogIo {
+pub(super) struct LegacyFileIo {
     directory: PathBuf,
     log: File,
     _lock: File,
     generation: u64,
     timings: Option<JournalTimings>,
 }
-impl FileLogIo {
+impl LegacyFileIo {
     /// Attach native diagnostics before handing this file to a store/worker.
     /// This changes no durability, format, lifetime or JournalIo result.
     pub fn with_timings(mut self, timings: JournalTimings) -> Self {
@@ -267,7 +267,7 @@ fn lock(directory: &Path) -> io::Result<File> {
     file.try_lock().map_err(io::Error::other)?;
     Ok(file)
 }
-impl JournalIo for FileLogIo {
+impl JournalIo for LegacyFileIo {
     fn read_manifest(&mut self) -> io::Result<Vec<u8>> {
         let mut b = Vec::new();
         File::open(self.directory.join(manifest_name(self.generation)))?
@@ -314,6 +314,90 @@ impl JournalIo for FileLogIo {
     }
 }
 
+/// Native file journal for one store directory.
+///
+/// `create` makes the original single-WAL-plus-atomic-MANIFEST layout and
+/// `create_witness` makes the two-sync fixed-witness layout. `open` reopens
+/// either, selected by the witness format's `WITNESS-CURRENT` marker, and never
+/// converts between them. Both formats certify identical durability.
+pub struct FileLogIo(Format);
+enum Format {
+    Legacy(LegacyFileIo),
+    Witness(super::WitnessLogIo),
+}
+impl FileLogIo {
+    pub fn create(directory: impl AsRef<Path>) -> io::Result<Self> {
+        Ok(Self(Format::Legacy(LegacyFileIo::create(directory)?)))
+    }
+    /// A fresh store whose barriers synchronize the WAL and one fixed witness,
+    /// without per-barrier file creation, rename or directory synchronization.
+    pub fn create_witness(directory: impl AsRef<Path>) -> io::Result<Self> {
+        Ok(Self(Format::Witness(super::WitnessLogIo::create(
+            directory,
+        )?)))
+    }
+    pub fn open(directory: impl AsRef<Path>) -> io::Result<Self> {
+        let directory = directory.as_ref();
+        if directory.join("WITNESS-CURRENT").exists() {
+            Ok(Self(Format::Witness(super::WitnessLogIo::open(directory)?)))
+        } else {
+            Ok(Self(Format::Legacy(LegacyFileIo::open(directory)?)))
+        }
+    }
+    /// Whether this store uses the two-sync witness publication.
+    pub fn is_witness(&self) -> bool {
+        matches!(self.0, Format::Witness(_))
+    }
+    /// Attach native diagnostics before handing this file to a store/worker.
+    /// This changes no durability, format, lifetime or JournalIo result.
+    pub fn with_timings(self, timings: JournalTimings) -> Self {
+        Self(match self.0 {
+            Format::Legacy(io) => Format::Legacy(io.with_timings(timings)),
+            Format::Witness(io) => Format::Witness(io.with_timings(timings)),
+        })
+    }
+}
+macro_rules! each {
+    ($self:expr, $io:ident => $call:expr) => {
+        match &mut $self.0 {
+            Format::Legacy($io) => $call,
+            Format::Witness($io) => $call,
+        }
+    };
+}
+impl JournalIo for FileLogIo {
+    fn read_manifest(&mut self) -> io::Result<Vec<u8>> {
+        each!(self, io => io.read_manifest())
+    }
+    fn read_log(&mut self, limit: usize) -> io::Result<Vec<u8>> {
+        each!(self, io => io.read_log(limit))
+    }
+    fn append(&mut self, bytes: &[u8]) -> io::Result<()> {
+        each!(self, io => io.append(bytes))
+    }
+    fn sync_log(&mut self) -> io::Result<()> {
+        each!(self, io => io.sync_log())
+    }
+    fn truncate_log(&mut self, length: u64) -> io::Result<()> {
+        each!(self, io => io.truncate_log(length))
+    }
+    fn publish_manifest(&mut self, bytes: &[u8]) -> io::Result<()> {
+        each!(self, io => io.publish_manifest(bytes))
+    }
+    fn publish_barrier(&mut self, manifest: &[u8]) -> io::Result<()> {
+        each!(self, io => io.publish_barrier(manifest))
+    }
+    fn supports_replacement(&self) -> bool {
+        match &self.0 {
+            Format::Legacy(io) => io.supports_replacement(),
+            Format::Witness(io) => io.supports_replacement(),
+        }
+    }
+    fn replace_log(&mut self, bytes: &[u8], manifest: &[u8]) -> io::Result<()> {
+        each!(self, io => io.replace_log(bytes, manifest))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -331,7 +415,7 @@ mod tests {
             incarnation: GroupIncarnation::new(1).unwrap(),
         }
     }
-    fn fill(store: &mut NativeLogStore<FileLogIo>) {
+    fn fill(store: &mut NativeLogStore<LegacyFileIo>) {
         for _ in 0..30 {
             let s = store.state(group()).unwrap();
             let tickets = store
@@ -360,7 +444,7 @@ mod tests {
                     std::process::id()
                 ));
                 let mut store = NativeLogStore::create(
-                    FileLogIo::create(&path).unwrap(),
+                    LegacyFileIo::create(&path).unwrap(),
                     identity(),
                     LogLimits::default(),
                 )
@@ -402,11 +486,11 @@ mod tests {
                     .is_err());
                 assert_publication_prefix(timing.snapshot().publication, cut);
                 assert!(
-                    FileLogIo::open(&path).is_err(),
+                    LegacyFileIo::open(&path).is_err(),
                     "failed publication retains exclusive ownership"
                 );
                 drop(store);
-                let mut io = FileLogIo::open(&path).unwrap();
+                let mut io = LegacyFileIo::open(&path).unwrap();
                 let selected = io.read_manifest().unwrap();
                 assert_eq!(
                     selected,
@@ -448,7 +532,7 @@ mod tests {
                 "voteboat-first-publication-cut-{}-{cut}",
                 std::process::id()
             ));
-            let mut io = FileLogIo::create(&path).unwrap();
+            let mut io = LegacyFileIo::create(&path).unwrap();
             io.sync_log().unwrap();
             let bytes = super::super::manifest(
                 StoreBinding {
@@ -471,12 +555,12 @@ mod tests {
             drop(io);
             if cut < 4 {
                 assert!(
-                    FileLogIo::open(&path).is_err(),
+                    LegacyFileIo::open(&path).is_err(),
                     "missing initial selection fails closed"
                 );
             } else {
                 let recovered = NativeLogStore::recover(
-                    FileLogIo::open(&path).unwrap(),
+                    LegacyFileIo::open(&path).unwrap(),
                     identity(),
                     LogLimits::default(),
                 )
@@ -496,7 +580,7 @@ mod tests {
                     std::process::id()
                 ));
                 let mut store = NativeLogStore::create(
-                    FileLogIo::create(&path).unwrap(),
+                    LegacyFileIo::create(&path).unwrap(),
                     identity(),
                     LogLimits::default(),
                 )
@@ -540,12 +624,12 @@ mod tests {
                     })
                     .is_err());
                 assert!(
-                    FileLogIo::open(&path).is_err(),
+                    LegacyFileIo::open(&path).is_err(),
                     "exclusive lock must survive every error"
                 );
                 drop(store);
                 let mut recovered = NativeLogStore::recover(
-                    FileLogIo::open(&path).unwrap(),
+                    LegacyFileIo::open(&path).unwrap(),
                     identity(),
                     LogLimits::default(),
                 )
@@ -560,6 +644,71 @@ mod tests {
                 assert!(!path.join("log.wal").exists());
                 drop(recovered);
                 std::fs::remove_dir_all(path).unwrap();
+            }
+        }
+    }
+    #[test]
+    fn open_selects_each_store_format_and_never_converts_it() {
+        for witness in [false, true] {
+            for reclaimed in [false, true] {
+                let path = std::env::temp_dir().join(format!(
+                    "voteboat-file-format-{}-{witness}-{reclaimed}",
+                    std::process::id()
+                ));
+                let _ = fs::remove_dir_all(&path);
+                let io = if witness {
+                    FileLogIo::create_witness(&path).unwrap()
+                } else {
+                    FileLogIo::create(&path).unwrap()
+                };
+                assert_eq!(io.is_witness(), witness);
+                let mut store =
+                    NativeLogStore::create(io, identity(), LogLimits::default()).unwrap();
+                let voter = NodeId::new(1).unwrap();
+                let tickets = store
+                    .append_batch(vec![LogMutation::Create(Bootstrap {
+                        group: group(),
+                        configuration: ConfigurationId::new(1).unwrap(),
+                        policy: Policy::new(Tree::Voter(voter), Limits::default()).unwrap(),
+                        voter_stores: [(voter, identity())].into(),
+                    })])
+                    .unwrap();
+                store.barrier(&tickets).unwrap();
+                for _ in 0..30 {
+                    let s = store.state(group()).unwrap();
+                    let tickets = store
+                        .append_batch(vec![LogMutation::Update(LogUpdate {
+                            snapshot_membership: None,
+                            group: group(),
+                            expected_revision: s.revision,
+                            hard_state: HardState {
+                                term: s.hard_state.term + 1,
+                                voted_for: None,
+                            },
+                            commit_index: 0,
+                            suffix: None,
+                            snapshot: None,
+                        })])
+                        .unwrap();
+                    store.barrier(&tickets).unwrap();
+                }
+                if reclaimed {
+                    store.reclaim(store.limits().max_wal_bytes).unwrap();
+                }
+                let expected = store.state(group()).unwrap();
+                drop(store);
+                assert_eq!(path.join("WITNESS-CURRENT").exists(), witness);
+                for _ in 0..2 {
+                    let io = FileLogIo::open(&path).unwrap();
+                    assert_eq!(io.is_witness(), witness);
+                    let recovered =
+                        NativeLogStore::recover(io, identity(), LogLimits::default()).unwrap();
+                    let state = recovered.state(group()).unwrap();
+                    assert_eq!(state.hard_state, expected.hard_state);
+                    assert_eq!(state.entries, expected.entries);
+                    assert_eq!(state.commit_index, expected.commit_index);
+                }
+                fs::remove_dir_all(&path).unwrap();
             }
         }
     }

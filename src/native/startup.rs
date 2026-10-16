@@ -191,7 +191,7 @@ impl NativeMemberStartup {
         let create = self.startup.mode == NativeOpenMode::Create;
         let mut log = if create {
             let mut log = NativeLogStore::create(
-                FileLogIo::create(&self.startup.directory)?,
+                FileLogIo::create_witness(&self.startup.directory)?,
                 self.startup.store,
                 log_limits,
             )?;
@@ -1063,7 +1063,7 @@ fn recover_storage<A: CheckpointStateMachine>(
     } = storage;
     let create = config.mode == NativeOpenMode::Create;
     let io = if create {
-        FileLogIo::create(&config.directory)?
+        FileLogIo::create_witness(&config.directory)?
     } else {
         FileLogIo::open(&config.directory)?
     };

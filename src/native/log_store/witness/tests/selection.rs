@@ -50,12 +50,15 @@ fn selected_missing_corrupt_or_legacy_files_never_fall_back() {
     let path = Directory::new();
     drop(populated(&path.0));
     assert!(FileLogIo::create(&path.0).is_err());
+    // The legacy reader never misreads a witness store; the format-aware
+    // FileLogIo selects the witness reader instead of falling back.
     assert!(NativeLogStore::recover(
-        FileLogIo::open(&path.0).unwrap(),
+        crate::native::log_store::file::LegacyFileIo::open(&path.0).unwrap(),
         identity(),
         LogLimits::default(),
     )
     .is_err());
+    assert!(FileLogIo::open(&path.0).unwrap().is_witness());
     assert!(WitnessLogIo::create(&path.0).is_err());
     let selector = fs::read(path.0.join("WITNESS-CURRENT")).unwrap();
     for cut in 0..selector.len() {
