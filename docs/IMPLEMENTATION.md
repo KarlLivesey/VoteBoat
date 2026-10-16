@@ -1,6 +1,101 @@
 # Implementation record
 
-## Active P9 plan — 15 October 2026
+## Active P9 plan — resumed 15 October 2026 (protocol-work track)
+
+Resumed at the user's request. Goal: make VoteBoat as fast as possible on minimal
+hardware, for both real durable writes and the in-memory framework floor. Primary
+metric is less CPU and fewer serial waits per completed original; multi-core
+scaling is a welcome addition, never a substitute. Durable changes must help on
+copy-on-write (Btrfs, APFS) and non-CoW (ext4/XFS) volumes alike.
+
+Measured starting point on this Linux host (9800X3D, release+debuginfo, 1024
+warmups, default retention, attribution off; whole-process CPU over wall):
+
+| Cell | Completed originals/s | CPU ns/original | Busy cores |
+| --- | ---: | ---: | ---: |
+| Framework clients1/batch1 | 138,857 | 14,616 | 2.02 |
+| Framework clients4096/batch4 | 8,004,116 | 248 | 1.94 |
+
+Attribution of the singleton leader shows ~3.8 sent messages per original (two
+appends plus commit-only notifications) and two persistence rounds per original:
+one for the entries and one solely to make the advanced commit index durable.
+Native 487 loaded TCP spends 10.1 of 13.7 s in leader barriers (~29 ms, two
+~14 ms syncs on Btrfs) carrying ~27 originals each; results additionally wait
+for the commit index to ride a later barrier.
+
+### Macro plan (this track)
+
+Absolute requirement (user, 16 October 2026): anything confirmed as committed
+is committed, and every existing guarantee keeps working. Only safe behaviour is
+implemented or benchmarked; unsafe variants are not offered as options.
+
+| Milestone | User-visible outcome | Acceptance |
+| --- | --- | --- |
+| T0 Recovery always works | A crash at any point never prevents restart and never loses acknowledged state | Exhaustive damaged-tail recovery for native log and vote stores; acknowledged-prefix damage still detected |
+| T2 Cheaper durable barrier | Fewer physical syncs per group commit on CoW and non-CoW volumes | Only with a complete recovery/damage proof and no relaxation of acknowledged state; Btrfs, ext4/XFS, APFS |
+| T3 Wider group commit | Barrier cost amortized over everything queued | Native loaded writes/s and p99 improve with lower CPU/original; unchanged durability contract |
+| T4 Per-original CPU | Framework CPU/original materially below 248 ns bulk / 14.6 µs singleton | Profile-selected removals of per-original allocation/handoff with no semantic change |
+
+### Mini plan
+
+| Deliverable | Purpose | Dependencies | Completion checks | Advances |
+| --- | --- | --- | --- | --- |
+| Current R1: damaged unacknowledged tail ends recovery | A crash during an unsynchronized append can leave a complete-length frame whose header or checksum fails past the recovery boundary; recovery returned `Corrupt` and the replica could never restart. Such bytes were never acknowledged, so recover the verified prefix and truncate | None | Every single-bit flip of an unacknowledged frame recovers the acknowledged prefix (log and vote stores); acknowledged-prefix damage still `Corrupt`; full three-configuration suite; fmt + strict Clippy | T0 |
+| Next P1: framework profile | Find per-original CPU in singleton (14.6 µs) and bulk (248 ns) without semantic change | Sampling profiler (`perf_event_paranoid` ≤1) or an in-process sampler | Ranked numeric hotspots on both cells | T4 |
+| Following C3: native group-commit width | Let one barrier carry more queued ready originals within byte bounds | Native storage counters per barrier | Native loaded/window1 rates, p99, CPU/original, syncs/original | T3 |
+
+#### C1 measured and rejected: piggyback-only commit propagation
+
+Removing commit-only Append notifications in stable configurations cut framework
+singleton CPU/original 16.8→12.9 µs (three pairs, rate +3–14%). It is rejected:
+followers then learn an ordinary commit only from the next append or heartbeat,
+and existing contracts depend on prompt convergence. The full suite showed it —
+directory and five effect-owner native histories pump to quiescence and expect
+every follower applied, and the executable membership history checks follower
+durable commit right after a reply. Baseline HEAD passes all of those in an
+isolated worktree. etcd also broadcasts an append after each commit advance.
+
+#### C2 measured and rejected: commit-only advances without a physical sync
+
+A native barrier covering only ordinary commit-index advances skipped WAL sync
+and publication. Linux Btrfs TCP pairs: window1 9.7–10.1→17.4–26.1 completed/s;
+loaded 587–655→977–1,221/s, p99 ~7→4–5 s, CPU/original ~310→~190 µs. By Raft's
+rules no confirmed commit is lost (entries are quorum-durable; reads wait for a
+current-term commit, `src/raft.rs:874`), but recovery could restart below what
+was acknowledged. It is rejected under the absolute requirement: about 26 fault/
+power-loss model tests assert acknowledged results are committed immediately on
+recovery, and the full suite exposed a real loss — `StripedJournal` only makes
+appends recoverable at publication, so a skipped sync lost frames even on a
+clean restart. Proving it safe would need an audit of every recovered-commit
+consumer; an opt-in mode was declined as an unsafe option to maintain.
+
+#### R1 implemented: damaged unacknowledged tails no longer block recovery
+
+`NativeLogStore` and `NativeVoteStore` recovery now treat a frame that starts at
+or after the published recovery boundary and fails its length, header or
+checksum check as the end of an interrupted append: the verified prefix is
+recovered and the WAL truncated there, as a short tail already was. Damage that
+starts inside the boundary remains `Corrupt`. Before, a power cut during an
+unsynchronized append (torn sector, zero-filled extent) left a replica that could
+never restart, although nothing in that frame had been acknowledged. Valid
+unacknowledged frames before the damage still replay. No format, durability
+barrier or acknowledgement changes.
+
+Evidence on this Linux host: new tests flip every bit of an unacknowledged log
+frame and vote frame (each recovers exactly the acknowledged prefix), plus header,
+body, earlier-valid-frame and acknowledged-damage cases. The generated
+`wal-interrupted-suffix` campaign now requires every damaged suffix to recover
+the original prefix instead of accepting refusals. Full suites: all-features 120
+binaries pass except `native_relay` QUIC relay startup and the benchmark example's
+uneven three-lane run, which both failed at an `unwrap` under full-suite load
+and pass on immediate isolated reruns; no-default and native-only 236 binaries
+pass. Formatting and all four strict Clippy profiles report zero diagnostics.
+Mac has not been run from this session.
+
+Mac measurements are not reachable from this session; they are recorded as
+pending rather than inferred.
+
+### Earlier pause record
 
 **Paused at the user's request after487 wrap-up.** [All96 current native cases](../validation/performance/native487-capacity-bound/comparison/README.md) and final validators pass.486 remains a checked loaded-CPU reduction: Linux TCP629.570→753.827/QUIC702.331→810.306 completed originals/s; Mac TCP1070.849→1297.300/QUIC1021.043→1332.900. Loaded CPU/original falls in all12 pairs and matching-wall average busy cores also fall. Singleton/moderate/skew/cold-tail losses remain explicit; this is not universal native/default or full P9 acceptance. All current work is committed/pushed during wrap-up; singleton framework CPU profiling waits for explicit resume. Full objective and remaining macro milestones are unchanged.
 

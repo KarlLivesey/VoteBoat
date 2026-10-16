@@ -168,7 +168,9 @@ fn generated_interrupted_unacknowledged_suffixes_recover_only_the_original_prefi
     let next = NativeLogCodec
         .encode_batch(3, &[update(&expected, 2, 2, None)], limits())
         .unwrap();
-    campaign(
+    // Nothing past the recovery boundary was acknowledged: every interrupted
+    // or damaged suffix must recover exactly the acknowledged prefix.
+    campaign_all_accepted(
         "wal-interrupted-suffix",
         &next,
         &[(16, 4), (20, 4)],

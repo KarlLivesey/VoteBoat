@@ -349,10 +349,20 @@ impl<I: VoteIo, C: VoteLogCodec> NativeVoteStore<I, C> {
                 }
                 break;
             }
-            let frame_len = codec.frame_length(remaining, limits)?;
+            // Bytes from the acknowledged boundary onward were never
+            // acknowledged; a damaged frame there is an interrupted append.
+            let tail = offset >= durable_bytes as usize;
+            let frame_len = match codec.frame_length(remaining, limits) {
+                Ok(length) => length,
+                Err(_) if tail => break,
+                Err(error) => return Err(error),
+            };
             if frame_len < HEADER + TRAILER
                 || frame_len > HEADER + RECORD * limits.max_batch_records + TRAILER
             {
+                if tail {
+                    break;
+                }
                 return Err(StorageError::Corrupt("codec frame length outside budget"));
             }
             if remaining.len() < frame_len {
@@ -361,7 +371,11 @@ impl<I: VoteIo, C: VoteLogCodec> NativeVoteStore<I, C> {
                 }
                 break;
             }
-            let (seq, records) = codec.decode(&remaining[..frame_len], limits)?;
+            let (seq, records) = match codec.decode(&remaining[..frame_len], limits) {
+                Ok(decoded) => decoded,
+                Err(_) if tail => break,
+                Err(error) => return Err(error),
+            };
             if records.is_empty() || records.len() > limits.max_batch_records {
                 return Err(StorageError::Corrupt("codec record count outside budget"));
             }

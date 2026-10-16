@@ -200,8 +200,19 @@ impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
                 }
                 break;
             }
-            let size = codec.frame_length(remaining, limits)?;
+            // Bytes from the recovery boundary onward were never acknowledged.
+            // A damaged frame there is an interrupted append: recover the
+            // complete verified prefix and discard that batch and the rest.
+            let tail = offset >= boundary as usize;
+            let size = match codec.frame_length(remaining, limits) {
+                Ok(size) => size,
+                Err(_) if tail => break,
+                Err(error) => return Err(error),
+            };
             if size < HEADER + TRAILER || size > limits.max_batch_bytes {
+                if tail {
+                    break;
+                }
                 return Err(StorageError::Corrupt("frame length outside budget"));
             }
             if remaining.len() < size {
@@ -210,7 +221,11 @@ impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
                 }
                 break;
             }
-            let (seq, mutations) = codec.decode_batch(&remaining[..size], limits)?;
+            let (seq, mutations) = match codec.decode_batch(&remaining[..size], limits) {
+                Ok(decoded) => decoded,
+                Err(_) if tail => break,
+                Err(error) => return Err(error),
+            };
             if mutations.iter().any(|m| matches!(m, LogMutation::Update(u) if u.snapshot.is_some_and(|r| r.store != identity))) {
                 return Err(StorageError::Corrupt("foreign snapshot store identity"));
             }

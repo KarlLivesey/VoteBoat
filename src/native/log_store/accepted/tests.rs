@@ -7,6 +7,7 @@ mod configured;
 mod fixture;
 mod incoming;
 mod incoming_codec;
+mod torn_tail;
 use fixture::*;
 
 fn payload_pointer(entry: &LogEntry) -> *const u8 {

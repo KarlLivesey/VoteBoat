@@ -248,6 +248,33 @@ fn interrupted_tail_is_discarded_but_acknowledged_prefix_cannot_be_truncated() {
     }
 }
 #[test]
+fn every_bit_of_an_unacknowledged_frame_recovers_the_acknowledged_prefix() {
+    let io = ModelIo::default();
+    let mut store =
+        NativeVoteStore::create(io.clone(), identity(), VoteStoreLimits::default()).unwrap();
+    let first = store.append_votes(vec![record(1, 1, 2)]).unwrap();
+    store.barrier(&[first]).unwrap();
+    let prefix = io.0.borrow().log.clone();
+    store.append_votes(vec![record(1, 2, 3)]).unwrap();
+    let full = io.0.borrow().log.clone();
+    drop(store);
+    for bit in prefix.len() * 8..full.len() * 8 {
+        let image = ModelIo::default();
+        let mut log = full.clone();
+        log[bit / 8] ^= 1 << (bit % 8);
+        image.0.borrow_mut().manifest = io.0.borrow().manifest.clone();
+        image.0.borrow_mut().log = log;
+        let store = NativeVoteStore::recover(image.clone(), identity(), VoteStoreLimits::default())
+            .unwrap_or_else(|e| panic!("bit={bit}: {e:?}"));
+        assert_eq!(
+            store.recovered()[&group(1)].hard_state,
+            record(1, 1, 2).hard_state,
+            "bit={bit}"
+        );
+        assert_eq!(image.0.borrow().log, prefix, "bit={bit}");
+    }
+}
+#[test]
 fn every_bit_of_a_complete_frame_and_manifest_is_checked() {
     let io = ModelIo::default();
     let mut store =

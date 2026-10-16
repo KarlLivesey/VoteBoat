@@ -84,6 +84,25 @@ pub(super) fn campaign(
     name: &str,
     original: &[u8],
     fields: &[(usize, usize)],
+    check: impl FnMut(&Case) -> bool,
+) {
+    campaign_with(name, original, fields, false, check);
+}
+/// Every generated case must be accepted, rather than a mix of outcomes.
+#[cfg(feature = "native")]
+pub(super) fn campaign_all_accepted(
+    name: &str,
+    original: &[u8],
+    fields: &[(usize, usize)],
+    check: impl FnMut(&Case) -> bool,
+) {
+    campaign_with(name, original, fields, true, check);
+}
+fn campaign_with(
+    name: &str,
+    original: &[u8],
+    fields: &[(usize, usize)],
+    all_accepted: bool,
     mut check: impl FnMut(&Case) -> bool,
 ) {
     assert!(!original.is_empty());
@@ -109,7 +128,11 @@ pub(super) fn campaign(
             counts.structured_overwrites += usize::from(case.repair());
         }
     }
-    assert!(counts.accepted > 0 && counts.refused > 0);
+    if all_accepted {
+        assert_eq!(counts.refused, 0);
+    } else {
+        assert!(counts.accepted > 0 && counts.refused > 0);
+    }
     assert_eq!(counts.accepted + counts.refused, SEEDS.len() * CASES);
     println!(
         "{name}: seeds={SEEDS:?} cases={} {counts:?}",
