@@ -40,9 +40,13 @@ implemented or benchmarked; unsafe variants are not offered as options.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current R1: damaged unacknowledged tail ends recovery | A crash during an unsynchronized append can leave a complete-length frame whose header or checksum fails past the recovery boundary; recovery returned `Corrupt` and the replica could never restart. Such bytes were never acknowledged, so recover the verified prefix and truncate | None | Every single-bit flip of an unacknowledged frame recovers the acknowledged prefix (log and vote stores); acknowledged-prefix damage still `Corrupt`; full three-configuration suite; fmt + strict Clippy | T0 |
-| Next P1: framework profile | Find per-original CPU in singleton (14.6 µs) and bulk (248 ns) without semantic change | Sampling profiler (`perf_event_paranoid` ≤1) or an in-process sampler | Ranked numeric hotspots on both cells | T4 |
-| Following C3: native group-commit width | Let one barrier carry more queued ready originals within byte bounds | Native storage counters per barrier | Native loaded/window1 rates, p99, CPU/original, syncs/original | T3 |
+| Current C3b: wide native batches by default | Service default visit 256; client admission and shard queue derived from the visit so a hot group can fill whole barriers and admitted work cannot overload the owner | C3a | Native default old/new loaded pairs, 31:1 skew per-group latency, window-1; three-configuration suite; fmt + strict Clippy | T3 |
+| Next C4: overlap the commit round with the next append | The leader's single persistence slot alternates append and commit-only barriers (~45 ms cycle); persisting the commit with already-ready data must trigger under real input ordering, not only when data is the very next input | Slice 461 design and its tests; C3b counters | Leader barriers per original fall under load; strict acknowledgement contract unchanged; full suite | T3 |
+| Following P2: framework per-original copies | Profiled bulk cell: entry-slice copies 13% (follower `plan_copy` 5.7%, leader `append_for` per peer ~5%), compaction 6.7% | Profiles in `target/claude/prof` method | Framework rate, CPU/original and busy cores on both cells | T4 |
+
+Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider than
+64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
+untracked scratch copies (no kernel policy change), folded stacks read as text.
 
 #### C1 measured and rejected: piggyback-only commit propagation
 
@@ -90,6 +94,55 @@ Storage counters show the leader performs about twice as many barriers as each
 follower — every commit advance is its own two-sync persistence round — which
 selected re-measuring the qualified slice 461 commit/append fusion under load
 (below: no gain).
+
+#### C3b implemented: wide native batches are the service default
+
+The counter service selects a 256-original visit. Native startup derives each
+group's client admission (four visits, at least the 64 default, within the 4,096
+router ceiling) and grows the group's shard queue to everything the router can
+admit plus the control reserve. An earlier draft sized the queue to one visit
+only; the benchmark then failed with `Owner(Runtime(Overloaded))` when admitted
+originals exceeded the queue, so both limits now come from one rule. The native
+benchmark's default profile mirrors the service and defaults to 256.
+
+Linux Btrfs TCP, service defaults, 16,000 offers at 6,000/s, three interleaved
+pairs: old 241–447 completed/s (p99 335–725 ms, 405–747 µs CPU/original), new
+2,535–3,407/s (p99 547–569 ms, 72–101 µs). 31:1 two-group skew at 1,024/s:
+hot group 905–921 → 7,190–7,216 applied, cold group median 288–309 → 318–326 ms
+and p99 502–842 → 626–685 ms, all cold originals applied in both. Window-1
+11–16/s for both (few samples). Mac not run from this session.
+
+Checks: library, startup, example and affected suites; fmt and four strict
+Clippy profiles plus the matched workspace report zero diagnostics. The
+all-features suite passed 121 binaries; two failed once under full-suite load
+and pass on repeated isolated reruns — `startup` maintenance binding (UDP bind
+on a just-released port) and the benchmark's QUIC mixed voter/learner drain
+history (16 reruns pass). That harness selects `ready_visit_items: 16`, so its
+derived client/shard limits are byte-identical to before C3b and it does not use
+native startup; the failure is pre-existing timing sensitivity, not a C3b
+outcome change. No-default-features compiles none of the changed native-gated
+code (C3a's 117/117 applies); native-only passes 119/119.
+
+#### Slices 463/464 commit-prefix joining re-measured on C3b: not adopted
+
+464's partial-prefix joining (reverse of the 465 restoration, 9798ed44) was
+re-applied on C3b in a scratch worktree; its default `max_ready_reply_inputs` 2
+enables it. Four interleaved Linux Btrfs pairs, service defaults, 6,000/s:
+C3b 2,490/2,532/3,013/2,653 completed/s, joined 3,513/3,008/2,536/2,828 (median
++12%), p99 two better/two worse, leader originals per barrier ~60→~70. Too small
+and mixed to justify re-adding ~1,500 lines of Core/runtime joining. Not adopted.
+
+#### Native run-to-run collapse is this host's fsync latency
+
+Per-run storage counters separate the regimes. Healthy runs (all 16,000 offers
+at ~6,000/s, dispatch-to-completion median 13–23 ms) show leader syncs of
+1.2–5 ms; collapsed runs (2,200–2,800/s, commits arriving as 256-original visit
+chunks every ~100 ms) show 11–15 ms syncs at the same 1.5–7.6 KiB per barrier.
+Batch bytes are not the cause; the shared Btrfs volume's flush latency varies
+between minutes (other users' workloads, load ≈8). Default `FileLogIo`
+publication costs about twice the Witness publication when flushes are slow
+(24–26 ms vs ~11 ms). Paired comparisons on this host therefore need many
+interleaved trials or a quiet/dedicated volume (the pending ext4/XFS scratch).
 
 #### Slice 461 fusion re-measured under load: still rejected
 
