@@ -40,7 +40,8 @@ implemented or benchmarked; unsafe variants are not offered as options.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current C3b: wide native batches by default | Service default visit 256; client admission and shard queue derived from the visit so a hot group can fill whole barriers and admitted work cannot overload the owner | C3a | Native default old/new loaded pairs, 31:1 skew per-group latency, window-1; three-configuration suite; fmt + strict Clippy | T3 |
+| Current C5: witness publication for new native stores | Two syncs per barrier without per-barrier file creation, rename or directory sync | Witness provider (slice 476) | Format selection/never-convert tests; three-configuration suite; fmt + strict Clippy; Mac legacy/witness pairs | T2 |
+| Done C3b: wide native batches by default | Service default visit 256; client admission and shard queue derived from the visit so a hot group can fill whole barriers and admitted work cannot overload the owner | C3a | Native default old/new loaded pairs, 31:1 skew per-group latency, window-1; three-configuration suite; fmt + strict Clippy | T3 |
 | Next C4: overlap the commit round with the next append | The leader's single persistence slot alternates append and commit-only barriers (~45 ms cycle); persisting the commit with already-ready data must trigger under real input ordering, not only when data is the very next input | Slice 461 design and its tests; C3b counters | Leader barriers per original fall under load; strict acknowledgement contract unchanged; full suite | T3 |
 | Following P2: framework per-original copies | Profiled bulk cell: entry-slice copies 13% (follower `plan_copy` 5.7%, leader `append_for` per peer ~5%), compaction 6.7% | Profiles in `target/claude/prof` method | Framework rate, CPU/original and busy cores on both cells | T4 |
 
@@ -95,6 +96,32 @@ follower — every commit advance is its own two-sync persistence round — whic
 selected re-measuring the qualified slice 461 commit/append fusion under load
 (below: no gain).
 
+#### C5 implemented: new native stores use the two-sync witness publication
+
+`FileLogIo` now covers both physical formats without converting either:
+`create` keeps the legacy single-WAL/atomic-MANIFEST layout, `create_witness`
+makes the fixed-witness layout and `open` selects the witness reader exactly when
+`WITNESS-CURRENT` exists. Native startup (single-group, multi-group and learner
+enrollment) creates witness stores, so each barrier synchronizes the WAL and one
+fixed witness instead of also creating, syncing and renaming a manifest and
+syncing the directory. Existing stores reopen in their original format; public
+types are unchanged. The legacy reader still refuses witness files.
+
+Apple M2 Max, C3b service defaults, interleaved pairs, legacy → witness:
+loaded 1,995–2,298 → 3,891–4,182 completed/s (p99 565–793 → 405–426 ms);
+window-1 9.4–10.1 → 15.6–18.7/s. Linux Btrfs pairs are dominated by flush
+variance on the shared volume (above) and were not used for this decision.
+
+Mac full-suite note: both logical activation suites fail on macOS identically
+at the pre-change baseline 5c9dd7fe and at cc90b578. `logical_activation_driver`
+(26/29 of 31) first fails with `Lower(Client { .. reason:
+Application(DedupCapacity) })` in the QUIC byte-pressure history;
+`logical_activation_nested` (10/12 of 14) first fails the bounded native peer
+terminal-observation assertion in the QUIC uncommitted-import history. Remaining
+failures follow a poisoned fixture mutex, so counts vary with ordering. Both pass
+on Linux. They are pre-existing macOS issues, recorded for a separate fix. On the
+same Mac the four strict Clippy profiles and formatting report zero diagnostics.
+
 #### C3b implemented: wide native batches are the service default
 
 The counter service selects a 256-original visit. Native startup derives each
@@ -110,7 +137,15 @@ pairs: old 241–447 completed/s (p99 335–725 ms, 405–747 µs CPU/original),
 2,535–3,407/s (p99 547–569 ms, 72–101 µs). 31:1 two-group skew at 1,024/s:
 hot group 905–921 → 7,190–7,216 applied, cold group median 288–309 → 318–326 ms
 and p99 502–842 → 626–685 ms, all cold originals applied in both. Window-1
-11–16/s for both (few samples). Mac not run from this session.
+11–16/s for both (few samples).
+
+Apple M2 Max (macOS 27.0, APFS, load ≈1.7), same commits built on the host with
+the same native profile and `--publication witness` (the service still used the
+legacy publication until C5), three interleaved loaded pairs: old 428–519 completed/s
+(p99 273–470 ms, 769–903 µs CPU/original), new 4,049–4,235/s (p99 406–431 ms,
+114–119 µs). 31:1 skew, two pairs: hot group 884–1,166 → 7,842–7,890 applied;
+cold group median 210–274 → 200–201 ms, p99 924–1,156 → 490–540 ms, and its 1–7
+refusals fall to zero. Window-1 18.7–19.8 vs 19.1–19.4/s.
 
 Checks: library, startup, example and affected suites; fmt and four strict
 Clippy profiles plus the matched workspace report zero diagnostics. The
@@ -177,8 +212,8 @@ and pass on immediate isolated reruns; no-default and native-only 236 binaries
 pass. Formatting and all four strict Clippy profiles report zero diagnostics.
 Mac has not been run from this session.
 
-Mac measurements are not reachable from this session; they are recorded as
-pending rather than inferred.
+Mac (192.168.192.76) is reachable over non-interactive SSH; measurements there use
+fresh temporary source exports and the existing toolchain/protoc.
 
 ### Earlier pause record
 
