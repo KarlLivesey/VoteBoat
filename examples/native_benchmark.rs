@@ -735,7 +735,7 @@ fn main() -> Result<(), Failure> {
     }
     if !matches!(args.len(), 4 | 5 | 7 | 9 | 11) {
         return Err(
-            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64; offered-capacity 4096 enables 1..4096) [--offered-capacity 4096 (offered only)] [--publication atomic|witness (offered only)] [--ready-items 1|16|32|64] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
+            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64; offered-capacity 4096 enables 1..4096) [--offered-capacity 4096 (offered only)] [--publication atomic|witness (offered only)] [--ready-items 1|16|32|64|128|256|512|1024] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
                 .into(),
         );
     }

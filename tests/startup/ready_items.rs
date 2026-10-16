@@ -33,7 +33,7 @@ fn rotation() -> NativePeerRotationStartup {
 fn invalid_quantum_refuses_every_startup_branch_before_files_listeners_or_workers() {
     let occupied = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
     let listen = occupied.local_addr().unwrap();
-    for items in [0, 65, usize::MAX] {
+    for items in [0, 1025, usize::MAX] {
         let directory = root();
         let wake = || Arc::new(ThreadWake::current());
         let startup = || invalid(&directory, listen, items, NativeOpenMode::Create);
@@ -113,7 +113,7 @@ fn invalid_quantum_refuses_every_startup_branch_before_files_listeners_or_worker
 }
 #[test]
 fn enrollment_rejects_invalid_quantum_before_importing_or_altering_application() {
-    for items in [0, 65, usize::MAX] {
+    for items in [0, 1025, usize::MAX] {
         let directory = root();
         let mut startup = config(directory.clone(), NativeOpenMode::Create);
         startup.ready_visit_items = items;

@@ -17,16 +17,17 @@ pub(super) fn extract(args: &mut Vec<String>) -> Result<Option<usize>, Failure> 
         .get(position + 1)
         .ok_or("missing --ready-items value")?
         .parse::<usize>()?;
-    if !matches!(selected, 1 | 16 | 32 | 64) {
-        return Err("--ready-items must be 1, 16, 32 or 64".into());
+    if !matches!(selected, 1 | 16 | 32 | 64 | 128 | 256 | 512 | 1024) {
+        return Err("--ready-items must be 1, 16, 32, 64, 128, 256, 512 or 1024".into());
     }
     args.drain(position..position + 2);
     Ok(Some(selected))
 }
 pub(super) fn settings(items: usize) -> String {
     let limits = ShardLimits::default();
-    format!("ready_visit_items_requested={items} ready_visit_items_effective={items} core_proposal_entries={} ready_visit_bytes={} ready_visit_ms={} ready_batch_capable=true",
-        voteboat::raft::BatchLimits::default().max_proposal_entries, limits.visit_bytes, limits.visit_ms)
+    let core = voteboat::raft::BatchLimits::for_ready_visit(items).unwrap_or_default();
+    format!("ready_visit_items_requested={items} ready_visit_items_effective={items} core_proposal_entries={} core_replication_entries={} ready_visit_bytes={} ready_visit_ms={} ready_batch_capable=true",
+        core.max_proposal_entries, core.max_replication_entries, limits.visit_bytes, limits.visit_ms)
 }
 #[cfg(test)]
 mod tests {
@@ -36,7 +37,7 @@ mod tests {
     }
     #[test]
     fn explicit_quantums_preserve_other_arguments_and_report_the_selected_settings() {
-        for selected in [1, 16, 32, 64] {
+        for selected in [1, 16, 32, 64, 128, 256, 512, 1024] {
             let mut input = args(&[
                 "root",
                 "tcp",
@@ -82,6 +83,7 @@ mod tests {
             vec!["--ready-items"],
             vec!["--ready-items", "0"],
             vec!["--ready-items", "65"],
+            vec!["--ready-items", "2048"],
             vec!["--ready-items", "2"],
             vec!["--ready-items", "32", "--ready-items", "64"],
         ] {

@@ -69,6 +69,38 @@ appends recoverable at publication, so a skipped sync lost frames even on a
 clean restart. Proving it safe would need an audit of every recovered-commit
 consumer; an opt-in mode was declined as an unsafe option to maintain.
 
+#### C3a implemented: native visits wider than 64 carry whole batches
+
+Native startup previously left every core at the default 64-entry proposal and
+64-entry replication width, and refused `ready_visit_items` above 64. Startup
+now applies `BatchLimits::for_ready_visit(items)` (proposal and replication width
+at least the visit, replication within the fixed 1,024 receive ceiling, defaults
+unchanged up to 64), sizes each group's queue to hold one full visit beside its
+control reserve, and accepts 1..=1024. The service default stays 16, so default
+behaviour is unchanged; changing defaults (C3b) needs fairness measurements.
+
+Linux Btrfs TCP, one group, three voters, Witness publication, offered-capacity
+profile, 16,000 offers at 6,000/s, interleaved pairs: ready 64 completed
+603–1,984/s (median 914), ready 256 2,303–5,972/s (median 2,815), CPU/original
+53–318 µs vs 74–744 µs with 256 lower in four of five pairs; p99 also lower in
+four of five. Runs are bimodal on this busy host (other users' load ≈8): healthy
+runs absorb the full 6,000/s at either setting. Window-1 rates are unchanged
+(~8/s), as expected because a visit never holds more than one original there.
+Storage counters show the leader performs about twice as many barriers as each
+follower — every commit advance is its own two-sync persistence round — which
+selected re-measuring the qualified slice 461 commit/append fusion under load
+(below: no gain).
+
+#### Slice 461 fusion re-measured under load: still rejected
+
+The qualified commit/append fusion (b4875d9b) was re-applied on C3a and measured
+where it should matter most: ready 256, 16,000 offers at 6,000/s. Four interleaved
+Linux Btrfs pairs: C3a 2,412–2,804 completed/s, fusion 1,588–3,094/s (lower in
+three pairs); leader barriers and originals per barrier unchanged (~65). Leader
+batches are arrival-limited — about one barrier's worth of arrivals (~6,000/s ×
+~11 ms sync) is ready at each visit — so fusing the commit round did not raise
+throughput. The experiment was reverted without publication.
+
 #### R1 implemented: damaged unacknowledged tails no longer block recovery
 
 `NativeLogStore` and `NativeVoteStore` recovery now treat a frame that starts at

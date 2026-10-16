@@ -51,7 +51,7 @@ pub(super) fn open_partition(
     partition: Partition,
 ) -> Result<(Vec<Replica<SharedLog>>, Vec<Trace>), Failure> {
     if partition.groups == 0
-        || !(1..=64).contains(&partition.ready_visit_items)
+        || !(1..=1024).contains(&partition.ready_visit_items)
         || partition.groups > 32
         || partition.lane == 0
         || partition.lane > 4
@@ -259,7 +259,12 @@ pub(super) fn timed_shard_profile(
         profile.shard(ready_visit_items, groups),
         checked(FairScheduler::new(groups))?,
     ))?;
-    for core in cores {
+    // Same core sizing as native startup: one proposal/request carries a visit.
+    let batch_limits = checked(voteboat::raft::BatchLimits::for_ready_visit(
+        ready_visit_items,
+    ))?;
+    for mut core in cores {
+        checked(core.configure_batch_limits(batch_limits))?;
         checked(shard.register(core))?;
     }
     let now = MonoTime(clock.elapsed().as_millis() as u64);

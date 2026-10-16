@@ -19,6 +19,25 @@ impl BatchLimits {
     /// A default64-entry sender can therefore receive a larger peer's chunks.
     pub const MAX_REPLICATION_ENTRIES: usize = 1024;
 
+    /// Largest runtime visit quantum a host may pair with these limits.
+    pub const MAX_READY_VISIT_ITEMS: usize = Self::MAX_REPLICATION_ENTRIES;
+
+    /// Limits for a host visiting at most `items` ready originals per group.
+    /// Proposals can carry the whole visit and ordinary replication sends it in
+    /// as few chunks as the fixed receive ceiling allows. Values up to the
+    /// default proposal width return the defaults unchanged.
+    pub fn for_ready_visit(items: usize) -> Result<Self, RaftError> {
+        if items == 0 || items > Self::MAX_READY_VISIT_ITEMS {
+            return Err(StorageError::Rejected("invalid ready visit quantum").into());
+        }
+        let default = Self::default();
+        Self {
+            max_proposal_entries: items.max(default.max_proposal_entries),
+            max_replication_entries: items.max(default.max_replication_entries),
+        }
+        .validate()
+    }
+
     pub fn validate(self) -> Result<Self, RaftError> {
         if self.max_proposal_entries == 0
             || self.max_proposal_entries > Self::MAX_PROPOSAL_ENTRIES

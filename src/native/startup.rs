@@ -69,8 +69,9 @@ pub struct NativeStartup {
     pub entropy_seed: u64,
     pub limits: NodeLimits,
     /// Maximum original items in one runtime visit, including control and
-    /// background turns. Native defaults select 16; this does not promise a
-    /// proposal batch width. Valid startup values are 1..=64.
+    /// background turns. Native defaults select 16. Startup also sizes each
+    /// core's proposal and replication width to carry one full visit (never
+    /// below the 64-entry defaults). Valid startup values are 1..=1024.
     pub ready_visit_items: usize,
 }
 /// Explicit trusted deployment input for reopening a durably assigned member.
@@ -998,8 +999,11 @@ fn startup_worker_limits(limits: LogLimits) -> Result<WorkerLimits, NativeStartu
     checked(worker.validate())
 }
 fn validate_ready_items(items: usize) -> Result<(), NativeStartupError> {
-    if !(1..=crate::raft::BatchLimits::default().max_proposal_entries).contains(&items) {
-        return Err(error("runtime limits", "ready visit items outside 1..=64"));
+    if crate::raft::BatchLimits::for_ready_visit(items).is_err() {
+        return Err(error(
+            "runtime limits",
+            "ready visit items outside 1..=1024",
+        ));
     }
     Ok(())
 }
@@ -1014,6 +1018,10 @@ fn startup_shard_limits(
         visit_items: ready_visit_items,
         ..ShardLimits::default()
     };
+    // A group's queue must hold one full visit beside its control reserve.
+    limits.group_items = limits
+        .group_items
+        .max(ready_visit_items + limits.group_control_items);
     if log.max_batch_bytes > limits.max_event_bytes {
         limits.max_event_bytes = log
             .max_batch_bytes
@@ -1205,7 +1213,13 @@ fn prepare_runtime<S: SecureSession>(
         shard_limits,
         checked(FairScheduler::new(group_count))?,
     ))?;
-    for core in cores {
+    // A wider visit quantum is only useful if one proposal and one replication
+    // request can carry it; up to 64 this keeps the default core limits.
+    let batch_limits = checked(crate::raft::BatchLimits::for_ready_visit(
+        config.ready_visit_items,
+    ))?;
+    for mut core in cores {
+        checked(core.configure_batch_limits(batch_limits))?;
         checked(shard.register(core))?;
     }
     let timed = checked(TimedShard::new(

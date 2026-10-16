@@ -32,12 +32,39 @@ fn ready_visit_selection_changes_only_quantum_and_keeps_derived_resource_floors(
             }
         }
     }
-    for invalid in [0, 65, usize::MAX] {
+    for invalid in [0, 1025, usize::MAX] {
         assert_eq!(
             startup_shard_limits(LogLimits::default(), 1, invalid)
                 .unwrap_err()
                 .stage,
             "runtime limits"
+        );
+    }
+}
+#[test]
+fn wide_ready_visits_size_the_group_queue_and_core_batches() {
+    for groups in [1, 256] {
+        let baseline = startup_shard_limits(LogLimits::default(), groups, 16).unwrap();
+        for selected in [256, 1024] {
+            let limits = startup_shard_limits(LogLimits::default(), groups, selected).unwrap();
+            assert_eq!(limits.visit_items, selected);
+            assert_eq!(
+                limits.group_items,
+                baseline
+                    .group_items
+                    .max(selected + baseline.group_control_items)
+            );
+            assert_eq!(limits.max_items, baseline.max_items);
+            assert_eq!(limits.visit_bytes, baseline.visit_bytes);
+            let batch = crate::raft::BatchLimits::for_ready_visit(selected).unwrap();
+            assert_eq!(batch.max_proposal_entries, selected);
+            assert_eq!(batch.max_replication_entries, selected);
+        }
+    }
+    for selected in [1, 16, 64] {
+        assert_eq!(
+            crate::raft::BatchLimits::for_ready_visit(selected).unwrap(),
+            crate::raft::BatchLimits::default()
         );
     }
 }

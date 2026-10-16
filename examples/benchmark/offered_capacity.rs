@@ -57,6 +57,8 @@ impl CapacityProfile {
         if self == Self::Offered4096 {
             limits.group_items = 4112;
         }
+        // Same rule as native startup: a group's queue holds one full visit.
+        limits.group_items = limits.group_items.max(ready + limits.group_control_items);
         limits
     }
     pub(super) fn clients(self) -> ClientRouterLimits {
