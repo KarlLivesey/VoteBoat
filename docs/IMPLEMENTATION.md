@@ -50,7 +50,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done C9: steady polls stop rebuilding peer assignments | Idle and moderate-load CPU is dominated by fixed per-poll work; skip provably unchanged peer reconciliation | C6 | Idle CPU/round and loaded CPU/original pairs; affected suites; fmt + strict Clippy | T4 |
 | Done C17: gather window and wait cap as service options | Operators choose the CPU/latency point (200 µs default; 400 µs −20% CPU for disk-bound deployments) | C13 | counter/directory/transfer suites | T4 |
 | Done C18: per-round host costs re-profiled | Fresh profile and syscall counts at head; dedup hash map and quiet-socket read skipping measured and rejected; staged-batch deadline scan bounded | E1 | Five tmpfs pairs each; syscall shim counts; library, peers, runtime, owner, transport suites; fmt + strict Clippy | T4 |
-| In progress D1a: a leader append overlaps a commit-only persistence (branch `d1a-overlap`) | The leader's slot stops alternating append/commit barriers; +12–30% at window 1,024 and +18% at 2,048 on APFS, CPU neutral; one stall in nine runs still open | C6, E1 | Stall reproduced and fixed with a test; three-configuration suites; APFS pairs | T3 |
+| Parked D1a: a leader append overlaps a commit-only persistence | Measured +12–30% at window 1,024 and +18% at 2,048 on APFS, CPU neutral, but one run in nine stalled; branch removed, patch and local tag kept outside the tree | C6, E1 | Stall reproduced and fixed with a test before any re-apply; three-configuration suites; APFS pairs | T3 |
 | Later P3: shared Append entries | `Rpc::Append` copies entries per peer (~5%); 81 construction sites | — | Framework and native pairs | T4 |
 | Later M1: macOS kqueue readiness | `poll(2)` is ~19% of Mac host CPU under load | E1 | Mac pairs | T4 |
 | Later C10: remaining per-poll fixed costs | Idle profile after C9: connector poll/accept, TLS reads of idle sockets, scheduler map scans, connection-union recheck per step | C9 | Same idle/loaded CPU pairs | T4 |
@@ -118,7 +118,7 @@ extra work; a shorter wait cap makes it worse). Adopted for the Linux gains and
 the Mac gains under load; the Mac idle cost is recorded for a later
 platform-specific keep-warm policy.
 
-#### D1a in progress (branch `d1a-overlap`): measured, not merged
+#### D1a parked: measured, not merged, branch removed
 
 The durable chain at a fixed client window is bound by the leader's single
 persistence slot alternating append and commit-only barriers (Mac APFS
@@ -144,10 +144,15 @@ each. Linux tmpfs 15,000/s: marginal CPU and p99 unchanged.
 
 Open: one run in nine at window 2,048 stalled (26 leader barriers, most
 offers refused, only five host wait timeouts), not reproduced on Linux.
-The branch stays off `main` until the cause is found and tested; next is
-instrumenting worker refusals, continuation outcomes and a no-progress
-watchdog in the benchmark and reproducing at window 2,048 on the Mac.
-Details and the schema plan are in the branch's copy of this document.
+Under the requirement that confirmed work must always work, an unexplained
+stall disqualifies the branch. On 17 October 2026 the branch was removed from
+the repository and the remote so that nothing unconfirmed stays in flight; the
+full diff against 1170fb63 is kept outside the tree as
+`target/claude/d1a-overlap.patch` and the commits as the local tag
+`parked/d1a-overlap` (bd2e80d2). Re-applying it requires first reproducing
+the stall at window 2,048 on the Mac with worker refusals, continuation
+outcomes and a no-progress watchdog instrumented, fixing it with a test, and
+then the three-configuration suites and APFS pairs.
 
 #### D1 schema plan: ordered pipelined persistence per group (superseded by D1a)
 
