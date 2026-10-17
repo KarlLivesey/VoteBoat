@@ -90,10 +90,19 @@ impl<const ENABLED: bool> Recorder<ENABLED> {
         };
         // A volatile log has no store provider: none of its boundaries ran, so
         // there is no complete observation to record and none is fabricated.
+        // The snapshot side must still have run exactly once each, unfailed.
         if STORE_METHODS
             .iter()
             .all(|phase| before.0[*phase as usize] == after.0[*phase as usize])
         {
+            let once = |phase: Phase| {
+                let (before, after) = (before.0[phase as usize], after.0[phase as usize]);
+                before.calls.checked_add(1) == Some(after.calls)
+                    && before.failures == after.failures
+            };
+            if !once(Phase::SnapshotPin) || !once(Phase::SnapshotReconcile) {
+                self.invalid.set(true);
+            }
             return;
         }
         let mut stamps = [None; BOUNDARIES];

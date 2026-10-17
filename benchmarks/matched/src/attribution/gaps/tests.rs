@@ -196,6 +196,37 @@ fn helper_without_store_calls_records_no_gap_and_stays_valid() {
         .observe(Phase::StoreAppend, at(9), at(10), false, 0);
     fixture.finish(before.as_ref(), false);
     assert!(fixture.actor.invalid.get());
+    // Without store calls, a missing, repeated or failed snapshot-side call
+    // still invalidates the report.
+    let missing_pin = Fixture::new();
+    let before = missing_pin.before();
+    missing_pin
+        .snapshots
+        .observe(Phase::SnapshotReconcile, at(5), at(8), false, 0);
+    missing_pin.finish(before.as_ref(), false);
+    assert!(missing_pin.actor.invalid.get());
+    let repeated = Fixture::new();
+    let before = repeated.before();
+    for n in [1, 3] {
+        repeated
+            .snapshots
+            .observe(Phase::SnapshotPin, at(n), at(n + 1), false, 0);
+    }
+    repeated
+        .snapshots
+        .observe(Phase::SnapshotReconcile, at(5), at(8), false, 0);
+    repeated.finish(before.as_ref(), false);
+    assert!(repeated.actor.invalid.get());
+    let failed = Fixture::new();
+    let before = failed.before();
+    failed
+        .snapshots
+        .observe(Phase::SnapshotPin, at(1), at(3), true, 0);
+    failed
+        .snapshots
+        .observe(Phase::SnapshotReconcile, at(5), at(8), false, 0);
+    failed.finish(before.as_ref(), false);
+    assert!(failed.actor.invalid.get());
 }
 #[test]
 fn partial_helper_error_does_not_read_or_fabricate_a_completed_gap() {

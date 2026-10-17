@@ -25,6 +25,7 @@ use crate::{
     snapshot::{Snapshot, SnapshotRef},
 };
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::atomic::{AtomicU64, Ordering};
 
 mod admitted_replication;
 mod batch_limits;
@@ -262,13 +263,22 @@ pub enum Effect {
     CheckpointCompacted(SnapshotRef),
 }
 /// Correlates one pending transition of a volatile core with its completion.
-/// Only the core constructs it; it names the exact revision and generation the
-/// pending transition installs and owns no log data. Not a durability receipt.
+/// Only the core constructs it; it names the exact core incarnation and the
+/// revision and generation the pending transition installs, and owns no log
+/// data. Revision and generation are local to one log history, so the
+/// incarnation keeps a token from another core, or from an earlier recovery of
+/// the same history, from completing this one. Not a durability receipt.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct VolatilePersist {
+    incarnation: u64,
     revision: LogRevision,
     generation: LogGeneration,
 }
+/// Process-unique volatile core incarnations, one per `recover_volatile` call.
+/// Only equality is used, never ordering or a protocol decision, and no value
+/// outlives the process: a volatile core has no cross-process restart. Zero is
+/// never issued, so a durable core's zero matches no token.
+static VOLATILE_INCARNATIONS: AtomicU64 = AtomicU64::new(1);
 impl VolatilePersist {
     pub fn revision(&self) -> LogRevision {
         self.revision
@@ -386,6 +396,8 @@ pub struct Raft {
     leader_contact: Option<(StoreBinding, NodeId, u64)>,
     // The core's log is the only copy: completions use `PersistVolatile` tokens.
     volatile: bool,
+    // Nonzero only for a volatile core: the `recover_volatile` call that made it.
+    incarnation: u64,
 }
 
 impl Raft {
@@ -511,6 +523,7 @@ impl Raft {
             transfer: None,
             leader_contact: None,
             volatile: false,
+            incarnation: 0,
         })
     }
     /// Static voter over a [`VolatileLog`]: the core's log becomes the only
@@ -521,6 +534,11 @@ impl Raft {
     /// [`Self::state`], which can be recovered here in the same process. If that
     /// state is compacted, the host's application must already be at or past the
     /// snapshot anchor, or be restored with `snapshot::restore_application`.
+    ///
+    /// Membership is static: the core refuses every configuration transition
+    /// (see [`Event::Configure`] and replicated configuration entries), so any
+    /// state it completes is recoverable here. Each call is a new incarnation;
+    /// tokens emitted by any earlier core never complete the returned one.
     pub fn recover_volatile(
         node: NodeId,
         log: &VolatileLog,
@@ -533,8 +551,15 @@ impl Raft {
             log.limits(),
             RecoveryMode::StaticVoter,
         )?;
+        core.incarnation = Self::next_volatile_incarnation()?;
         core.volatile = true;
         Ok(core)
+    }
+    fn next_volatile_incarnation() -> Result<u64, RaftError> {
+        // Uniqueness needs only the atomic increment, not ordering with other memory.
+        VOLATILE_INCARNATIONS
+            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
+            .map_err(|_| RaftError::Exhausted)
     }
     /// True for a core whose log is the only copy (see [`Self::recover_volatile`]).
     pub fn is_volatile(&self) -> bool {
@@ -1177,8 +1202,9 @@ impl Raft {
         }
         self.install_pending()
     }
-    /// The exact single pending transition of a volatile core. Its revision and
-    /// generation advance on every transition and at most one is in flight.
+    /// The exact single pending transition of this volatile core incarnation.
+    /// Its revision advances on every transition and at most one is in
+    /// flight; the incarnation is unique to this `recover_volatile` call.
     fn finish_volatile(
         &mut self,
         persist: VolatilePersist,
@@ -1192,6 +1218,7 @@ impl Raft {
         if self.pending.as_ref().is_none_or(|p| {
             let next = p.next.metadata();
             p.ticket.is_some()
+                || persist.incarnation != self.incarnation
                 || next.revision != persist.revision
                 || next.generation != persist.generation
         }) {
@@ -1377,6 +1404,7 @@ impl Raft {
             )?;
             let metadata = next.metadata();
             let token = VolatilePersist {
+                incarnation: self.incarnation,
                 revision: metadata.revision,
                 generation: metadata.generation,
             };
@@ -1735,6 +1763,18 @@ impl Raft {
             && self.membership().voter_store(m.from) == Some(m.sender.identity)
     }
     fn receive(&mut self, mut m: Message) -> Result<Vec<Effect>, RaftError> {
+        // A volatile log has static membership. Learner repair always carries
+        // configuration state; ordinary replication is refused below.
+        if self.volatile
+            && matches!(
+                m.rpc,
+                Rpc::LearnerRepair { .. }
+                    | Rpc::LearnerRepairSnapshot { .. }
+                    | Rpc::CommittedLearnerRepairSnapshot { .. }
+            )
+        {
+            return Err(RaftError::InvalidMessage);
+        }
         // Repair can remain queued while its learner completes promotion.
         // Authenticate before discarding obsolete terms or refusing a repair
         // whose historical view no longer owns this replica's voting state.
@@ -1761,11 +1801,13 @@ impl Raft {
         // Static/default assemblies retain the strict learner-repair exception.
         // Explicit member assemblies use ordinary authorized replication and
         // the same validated journal, log matching and durability dependencies.
-        if !self.configuration_replication
+        // A volatile core refuses all configuration ingress, before any state
+        // change: static voter recovery could not accept the result.
+        if (self.volatile || !self.configuration_replication)
             && (matches!(&m.rpc, Rpc::Append { entries, .. } if entries.iter().any(|e| matches!(e.payload, EntryPayload::Configuration(_))))
                 || matches!(&m.rpc, Rpc::Snapshot { snapshot } if snapshot.metadata.membership.is_some()))
         {
-            if !self.permits_joint_repair(&m) {
+            if self.volatile || !self.permits_joint_repair(&m) {
                 return Err(RaftError::InvalidMessage);
             }
             self.trim_joint_repair(&mut m);

@@ -7,6 +7,7 @@ use membership_tests::{core, durable};
 fn volatile() -> (Raft, VolatileLog) {
     let mut core = core();
     core.volatile = true;
+    core.incarnation = Raft::next_volatile_incarnation().unwrap();
     let log = VolatileLog::new(core.binding, core.limits).unwrap();
     (core, log)
 }
@@ -62,6 +63,12 @@ fn volatile_persist_carries_no_entries_and_installs_the_exact_proposal() {
     let expected = durable(&mut twin, effects);
     assert_eq!(core.state(), twin.state());
     assert_eq!(following, expected);
+}
+
+#[test]
+fn volatile_token_is_three_words_and_never_sizes_effect() {
+    assert_eq!(std::mem::size_of::<VolatilePersist>(), 24);
+    assert!(std::mem::size_of::<LogUpdate>() > std::mem::size_of::<VolatilePersist>());
 }
 
 #[test]
@@ -224,7 +231,9 @@ fn proposal_batches_collect_a_tight_suffix_before_owned_planning() {
                 bytes: vec![i as u8; i],
             })
             .collect::<Vec<_>>();
-        // The core's debug assertion checks the collected suffix itself.
+        // An exact-length source collects tight today, so owned planning does
+        // not reallocate to normalize capacity. std does not promise this, so
+        // it is checked here rather than asserted in `propose_batch`.
         let persist = token(&core.propose_batch(proposals).unwrap());
         let suffix = &core.pending.as_ref().unwrap().next.update().suffix;
         let entries = &suffix.as_ref().unwrap().entries;
@@ -233,4 +242,48 @@ fn proposal_batches_collect_a_tight_suffix_before_owned_planning() {
         persist_volatile(&mut core, &log, persist).unwrap();
         assert_eq!(core.state().last_index(), 1 + width as u64);
     }
+}
+
+#[test]
+fn volatile_plan_moves_the_input_suffix_allocation() {
+    // `CommandBytes` is shared, so payload pointers survive an entry clone;
+    // the suffix buffer itself does not. A copying plan fails this check.
+    fn plan(core: &mut Raft) -> (Vec<Effect>, *const LogEntry, *const LogEntry) {
+        let entries = (2..=3)
+            .map(|index| LogEntry {
+                index,
+                term: 1,
+                payload: EntryPayload::Command {
+                    operation: OperationId::new(u128::from(index)).unwrap(),
+                    bytes: vec![index as u8].into(),
+                },
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(entries.capacity(), entries.len());
+        let input = entries.as_ptr();
+        core.role = Role::Follower;
+        let effects = core
+            .persist(
+                core.state().hard_state,
+                1,
+                Some(Suffix { from: 2, entries }),
+                After::Reply,
+                None,
+            )
+            .unwrap();
+        let pending = core.pending.as_ref().unwrap();
+        let planned = &pending.next.update().suffix.as_ref().unwrap().entries;
+        assert_eq!(planned.len(), 2);
+        (effects, input, planned.as_ptr())
+    }
+    let (mut core, log) = volatile();
+    let (effects, input, planned) = plan(&mut core);
+    assert_eq!(planned, input);
+    persist_volatile(&mut core, &log, token(&effects)).unwrap();
+    assert_eq!(core.state().last_index(), 3);
+    // Control: the durable seam keeps a copy for its store in another buffer.
+    let mut durable_core = membership_tests::core();
+    let (effects, input, planned) = plan(&mut durable_core);
+    assert!(matches!(&effects[..], [Effect::Persist(_)]));
+    assert_ne!(planned, input);
 }

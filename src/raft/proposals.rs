@@ -42,7 +42,7 @@ impl Raft {
         self.check_proposal_role()?;
         let first = self.validate_proposal_batch(&proposals, proposals.capacity())?;
         self.validate_conversion_peak(&proposals, proposals.capacity())?;
-        let entries: Vec<LogEntry> = proposals
+        let entries = proposals
             .into_iter()
             .enumerate()
             .map(|(offset, proposal)| LogEntry {
@@ -54,9 +54,6 @@ impl Raft {
                 },
             })
             .collect();
-        // An exact-length source collects tight, so owned planning never has
-        // to reallocate the suffix to normalize its retained capacity.
-        debug_assert_eq!(entries.capacity(), entries.len());
         let effects = self.persist_proposal_entries(first, entries)?;
         self.finish_step(effects)
     }

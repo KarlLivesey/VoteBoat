@@ -81,8 +81,8 @@ validated initial state a store would create. `Raft::recover_volatile(node,
 &log, state)` runs the full static-voter recovery validation and marks the core
 volatile (`is_volatile`). A volatile core plans each transition with
 `OwnedNextLog::plan_owned` (the update moves into `Pending`; no clone) and emits
-`Effect::PersistVolatile(VolatilePersist)`, a `Copy` token with private
-revision/generation fields that only the core constructs. The host completes it
+`Effect::PersistVolatile(VolatilePersist)`, a 24-byte `Copy` token with private
+incarnation/revision/generation fields that only the core constructs. The host completes it
 with `raft::persist_volatile(raft, &log, token)`, which returns the same
 borrowed `CompletionEffects` as `persist_effect_borrowed`. Snapshot work uses
 `compact_volatile_replica`, `stage_volatile_snapshot_effect` and
@@ -90,13 +90,16 @@ borrowed `CompletionEffects` as `persist_effect_borrowed`. Snapshot work uses
 helpers through a private `LogSeam`/`LogCheck` trait over `Durable`/`Volatile`
 wrappers. The `benchmarks/matched` harness now uses `VolatileStore` (the
 `VolatileLog` plus the unchanged attribution recorder) and `recover_volatile`.
-Whether the OpenRaft side also keeps a single entry copy is not verified in
-this tree (`bench_minimal` is external); reviewers should confirm parity.
+Both round-1 reviewers read the pinned OpenRaft `bench_minimal` store
+(e88bb40): append moves entries into one `BTreeMap` and the OpenRaft core keeps
+log ids, not entries, so each side now keeps one canonical entry copy.
 
 Invariants: no result before install (`finish_completion` and
-`finish_volatile` share one `install_pending`); exact correlation by revision
-plus generation, which advance on every transition, with at most one pending
-transition (`begin_step` returns `Busy` while pending); any `persist_volatile`
+`finish_volatile` share one `install_pending`); exact correlation by core
+incarnation, revision and generation (revision advances on every transition),
+with at most one pending transition (`begin_step` returns `Busy` while pending);
+static membership (a volatile core refuses every configuration transition, so
+everything it can complete is recoverable by `recover_volatile`); any `persist_volatile`
 error (wrong binding, stale or mismatched token, failed install) fences the core
 and drops the pending plan, leaving `state()` at the last completed transition,
 which `recover_volatile` accepts in the same process; the same validators run
@@ -130,8 +133,7 @@ with `Persist` ≡ `PersistVolatile`),
 `src/raft/volatile_tests.rs`: token carries no entries and installs the exact
 moved proposal (payload pointer preserved), `Busy` until completion, durable
 seam refusals, borrowed commit-only interval, fencing on wrong binding and stale
-token, and a tight `propose_batch` suffix (also a `debug_assert` in
-`propose_batch`). `tests/runtime.rs`: `register_refuses_volatile_core`. Harness:
+token, and a tight `propose_batch` suffix. `tests/runtime.rs`: `register_refuses_volatile_core`. Harness:
 `volatile_store_round_trip_keeps_fifo_and_attribution` replaces the three
 mirror-predicate tests; a gap test covers helpers without store calls; actor and
 workload tests now expect zero store-side calls.
@@ -143,6 +145,64 @@ workspace's all-target Clippy, all zero diagnostics. Suites: library unit tests
 (443), `volatile`, `snapshot`, `runtime`, `effect_owner`, `raft`, `worker`,
 `log_store`, `log_owned`, and the matched workspace (69), all passing; full
 default and other-configuration results are listed in the PR.
+
+Review round 1 (GPT-6.1-Sol requested changes; Claude Opus approved with
+non-blocking notes) found two defects, both reproduced through the public API:
+
+- Tokens carried only revision and generation, which are local to one log
+  history. A token from core A completed core B at equal counters, even with a
+  different group and store binding, and after fence → `recover_volatile` of
+  saved state → new campaign the old incarnation's token equalled the new one.
+  Fix: `VolatilePersist` also carries the core's incarnation, a process-unique
+  nonzero `u64` taken from a static `AtomicU64` (checked increment, `Exhausted`
+  on overflow) on every `recover_volatile` call. `finish_volatile` compares it
+  with the revision and generation (three integer compares, no allocation), so
+  a mismatch returns `WrongCompletion` and fences. The value is only compared
+  for equality, never ordered or replicated, and never outlives the process;
+  a volatile core has no cross-process restart, so nothing reconstructs it.
+  The token grew from 16 to 24 bytes; `Effect`'s size is set by larger
+  variants. Durable cores keep incarnation zero, which no token carries.
+- `recover_volatile` is static-voter recovery and rejects configuration state,
+  but a volatile leader accepted `Event::Configure` (a `Learners` change needs
+  no promotion proofs) and committed it, stranding that state after a fence.
+  Fix: static membership is enforced before any state change. `configure`
+  returns `Storage(Rejected("volatile log has static membership"))`. In
+  `receive`, a volatile core refuses an `Append` carrying a configuration entry
+  or a `Snapshot` carrying membership with `InvalidMessage`, the error a
+  default static assembly already returns for unpermitted configuration
+  ingress; it applies even after `with_configuration_replication` and never
+  takes the joint-repair exception. Learner repair RPCs are refused the same
+  way. A refused append installs nothing, creates no pending plan and does not
+  fence; the follower just stays behind until a leader without configuration
+  replaces it. The joint-repair and learner-repair guards are defence in depth:
+  those paths already require the local node to be a committed learner, which
+  a static voter never is, so no test can tell them apart.
+
+Tests added: `volatile_tokens_complete_only_their_own_core_incarnation` (two
+groups sharing one binding, different bindings, an old-incarnation token after
+recovery has created a new pending transition with identical counters, and
+same-core duplicates after completion and while a later transition is pending;
+each refusal returns `WrongCompletion`, fences, drops the pending plan and
+leaves `state()` unchanged), `volatile_leader_refuses_configuration_that_a_durable_leader_accepts`
+(then fences all three replicas, recovers their completed state and commits
+again), and `volatile_follower_refuses_replicated_configuration_and_recovers`
+(a durable leader and a durable configuration-replicating follower commit a
+`Learners` entry; the volatile follower refuses every configuration append and,
+after compaction, the membership snapshot, then recovers after a fence).
+Non-blocking test fixes: the wrong-mode compaction test now gives the durable
+store exactly the core's state and counts every `LogStore` call, asserting
+zero before the three refusals; `volatile_plan_moves_the_input_suffix_allocation`
+checks that the suffix buffer itself (not the shared command bytes) reaches the
+pending plan, with a durable control that must hold another buffer;
+`volatile_token_is_three_words_and_never_sizes_effect` pins the token size. The
+harness's no-store compaction branch now still requires exactly one unfailed
+`SnapshotPin` and one `SnapshotReconcile` (Opus N3). The `debug_assert` in
+`propose_batch` was removed because std does not promise a tight collect (Opus
+N5); the unit test still checks the capacity. Mutation checks, each reverted:
+removing the incarnation compare, the receive gate, the `configure` guard,
+`compact_with`'s mode check, or moving to a cloned plan each fails its test.
+Not taken: an `into_owned` frequency counter in the harness (Opus N4); the
+runner should report it as unmeasured.
 
 #### E1 implemented: event-driven host waiting
 
