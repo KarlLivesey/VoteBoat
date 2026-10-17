@@ -100,7 +100,7 @@ service's clients arrive by socket; dispatch lag is reported separately.
 Measured (interleaved pairs against fcffde20): Linux tmpfs loaded 15,000/s
 marginal CPU/original 28.6 → 20.8 µs (−27%), rate unchanged, p99 4.0 → 7.3 ms;
 idle (20 writes/s) CPU 0.375 → 0.139 s (−63%), rounds 30,735 → 2,823. Mac RAM
-disk: loaded 23.6 → 21.2 µs (−10%), p99 14 → 17 ms; 1,000/s 255 → 206 µs/write
+disk (final tree, five pairs): loaded 23.5 → 20.5 µs (−13%), p99 14.1 → 17.4 ms; 1,000/s 255 → 206 µs/write
 (−19%); 4,000/s 72 → 59 (−18%); idle CPU 0.51 → 0.79 s (+55%, identical on
 APFS and identical barrier counts: the same binary with the old park instead of
 the wait costs 0.54–0.60 s, so this is the platform's wake-from-idle cost, not
