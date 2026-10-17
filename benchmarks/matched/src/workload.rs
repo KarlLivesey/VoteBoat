@@ -111,17 +111,12 @@ async fn client_loop(
     let requests = settings.operations / settings.clients / settings.batch;
     let mut latencies = Vec::with_capacity(requests);
     let mut completed = 0;
-    // Validation permits only one or four originals per request. Each client
-    // owns this buffer across the write await; neither engine retains the slice.
-    let mut originals = [0_u128; 4];
     start.wait().await;
     for request in 0..requests {
         let first = settings.warmup + (request * settings.clients + id) * settings.batch + 1;
-        for (offset, original) in originals[..settings.batch].iter_mut().enumerate() {
-            *original = (first + offset) as u128;
-        }
+        let originals: Vec<_> = (first..first + settings.batch).map(|n| n as u128).collect();
         let now = Instant::now();
-        completed += client.write(&originals[..settings.batch]).await?;
+        completed += client.write(&originals).await?;
         latencies.push(u64::try_from(now.elapsed().as_nanos())?);
     }
     if completed != settings.operations / settings.clients {

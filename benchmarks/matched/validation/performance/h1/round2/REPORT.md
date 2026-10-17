@@ -1,5 +1,12 @@
 # H1 builder round 2 — 17 October 2026
 
+Historical round 2 record. The buffer candidate retained here was subsequently
+**rejected and reverted in round 3**: the quiet-Mac 30-pair check found mean
+proposal width +5.858% (wider in 30/30, p=1.8626451e-9) and persists/original
+−1.624% (p=8.6799264e-7). See [round 3](../round3/REPORT.md) and the
+[runner report](https://github.com/KarlLivesey/VoteBoat/pull/2#issuecomment-6240057138).
+All raw JSON, hashes, measurements and logs below remain unchanged.
+
 Reverted `80cab34e` with `git revert --no-commit`, then retained and relabeled
 the rejected experiment's raw evidence. `benchmarks/matched/src/main.rs` matches
 `297aec15` exactly; all matched source matches `b58f57bf`. The one-worker

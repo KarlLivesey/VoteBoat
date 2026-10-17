@@ -40,7 +40,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| In progress H1: review round 2, preserve the benchmark instrument | Keep the worker flag and fixed ID buffer; restore the original client scheduler after workload-shape review | V1 / PR 1 (`622bc411`); pinned matched workspace; review of `80cab34e` | Exact runtime revert; bulk attribution comparison against flag-only `297aec15`; matched tests; both fmt checks and five strict Clippy configurations; independent review and quiet-Mac qualification remain pending | T4 |
+| In progress H1: review round 3, preserve the benchmark instrument | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`); pinned matched workspace; quiet-Mac 30-pair buffer attribution result | All matched source byte-identical to flag-only `297aec15`; raw evidence preserved; matched tests; both fmt checks and five strict Clippy configurations; independent review of the reduced scope | T4 |
 | In progress V1: core-canonical volatile log | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
 | Next V2: scalar commit-advance plan and smaller `Pending` | Commit-only rounds (~2.3 per singleton original) still build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices | V1 measured | Same twin tests; singleton framework pairs | T4 |
 | Following V3: chunked canonical log with shared immutable batches | The batch V1 moves into pending becomes a shared chunk, removing the remaining two in-process per-peer clones | V1, V2 measured | Framework pairs on both cells; compaction/snapshot suites | T4 |
@@ -85,7 +85,8 @@ CLI/default/rejection boundaries and a real small workload for both engines with
 one and two server workers, checking runtime worker count and both JSON fields.
 There is no durable binary sharing this comparison workspace's `main.rs`.
 
-For overhead experiments, change shared workload/client-runtime code only;
+The original overhead experiment plan (both candidates now rejected) was to
+change shared workload/client-runtime code only;
 preserve per-original completion, identities, per-request latency observations,
 barrier/elapsed boundaries, attribution and protocol counts. First candidate:
 use a fixed four-element original-ID buffer instead of allocating a Vec every
@@ -114,14 +115,16 @@ with the matched lock offline. Builds use this worktree's `target/h1-build` and
 `target/h1-release`, separate from the main checkout. The flag makes no performance
 claim; overhead experiment evidence and review decisions follow separately.
 
-#### H1 implemented: reuse each client's original-ID buffer
+#### H1 rejected candidate: reuse each client's original-ID buffer
 
-The shared workload owns one `[u128; 4]` per client task and passes its validated
-one-/four-element slice to either adapter. This removes the per-request ID Vec
-allocation. Original numbering/order, one reply per original, latency clocks,
-completion checks and all attribution paths are unchanged. No engine-only path
-was added. All 71 matched tests and strict matched Clippy pass; formatting is
-clean. This is a separate change from the worker flag.
+The rejected `b58f57bf` shared workload owned one `[u128; 4]` per client task
+and passed its validated one-/four-element slice to either adapter. This removed
+the per-request ID Vec allocation. Original numbering/order, one reply per
+original, latency clock boundaries, completion checks and attribution code were
+preserved; realized request arrivals and batching were subsequently found to
+change. No engine-only path was added. The original 71 matched tests, strict
+matched Clippy and formatting passed. Those checks did not establish workload
+shape equivalence. This was a separate change from the worker flag.
 
 Three interleaved pairs for each engine/cell, AB/BA/AB, on the loaded Linux
 9800X3D host, release+debuginfo, default 16 server / 1 client workers, 1024 warmups,
@@ -136,9 +139,12 @@ default retention, upstream envelopes and attribution off. Bulk requests
 | VoteBoat | Singleton | 12,454 | 11,713 |
 | OpenRaft | Singleton | 39,242 | 38,931 |
 
-Kept on code reasoning. The allocation saving is unmeasurable at this noise
-level; these sample medians are not measured wins or attributed savings.
-Quiet-Mac confirmation remains recommended (GPT P3 and Claude Opus N2).
+Rejected and reverted in round 3 after the quiet-Mac runner found changed
+workload shape. The prior keep-on-code-reasoning decision is withdrawn.
+[Claude Opus round 1 N2](https://github.com/KarlLivesey/VoteBoat/pull/2#issuecomment-6239604979)
+found that the apparent CPU gain was noise: these sample medians are not measured
+wins or attributed allocation savings. The later Mac CPU observations cannot
+qualify a candidate that changes the scoring instrument.
 These are loaded-host diagnostics, not a quiet capacity qualification or a library
 speed claim. Uptime before every pair,
 individual rates/CPU/cores and binary hashes are in
@@ -149,6 +155,21 @@ it searches a nested latency object while this harness emits top-level
 `request_p99_ns`. No p99 comparison is claimed. No processes were stopped and
 our own builds/checks finished before measurement. The fixed-buffer release
 binary was the baseline for the subsequently rejected runtime experiment.
+
+The [initial quiet-Mac report](https://github.com/KarlLivesey/VoteBoat/pull/2#issuecomment-6239967157)
+was inconclusive: eight bulk pairs showed +5.779% mean width (wider in 7/8,
+exact sign p=0.070312). The independent
+[30-pair quiet-Mac report](https://github.com/KarlLivesey/VoteBoat/pull/2#issuecomment-6240057138)
+classified **WORKLOAD CHANGED**: median paired head/flag mean-width ratio
+1.058583 (+5.858%), wider in 30/30 (p=1.8626451e-9); persists/original ratio
+0.983757 (−1.624%, lower in 28/30, p=8.6799264e-7); sends/original ratio
+0.998246 (−0.175%). All 60 runs completed 3,997,696 originals; pre-run load
+was 1.31–2.54 on 12 CPUs. These fresh AB/BA pairs were not pooled with the
+initial Mac or loaded-Linux series. Significant widening beyond the symmetric
+±3% band changes the benchmark workload even when completion counts agree.
+The reports and raw artifacts remain in the main checkout under
+`target/claude/research-r1/runner-pr2-mac-attribution{,-30}.md` and
+`runner-pr2-artifacts/`; the linked PR comments preserve their published results.
 
 #### H1 round 2 schema plan: restore the original client runtime
 
@@ -188,7 +209,8 @@ because the pinned OpenRaft provider owns its corresponding paths.
 
 #### H1 round 2 implemented and validated (17 October 2026)
 
-The client runtime is restored exactly: `main.rs` matches flag-only `297aec15`,
+Historical round 2 state (the buffer is subsequently rejected in round 3):
+the client runtime was restored exactly: `main.rs` matches flag-only `297aec15`,
 and all matched source matches pre-experiment `b58f57bf`. Worker selection and
 fixed-buffer reuse remain. The original `current-pairs.txt` is byte-for-byte
 preserved and labeled rejected in its evidence README. The PR description and
@@ -223,8 +245,10 @@ passed. The source restoration is exact; no measurements were discarded or
 rerun to seek agreement. Other processes were left running. Full outputs,
 hashes, methodology and check logs are in `h1/round2/REPORT.md` and its siblings.
 
-The macro plan remains T4; no library milestone is complete. Quiet-Mac
-qualification and independent review remain pending, with V2/V3 unchanged.
+At round 2 the macro plan remained T4; no library milestone was complete.
+Quiet-Mac qualification and independent review were pending. The subsequent Mac
+result and round 3 decision above supersede the buffer keep decision; V2/V3 are
+unchanged.
 
 Claude Opus round 1 arrived during publication. Its B1 is addressed by the same
 exact revert; N1's changed first-poll/timing behavior is removed with it, and
@@ -239,6 +263,41 @@ build provenance and a self-contained invocation reading top-level
 changes only evidence/docs, with no API/state/ownership or cleanup changes;
 acceptance is the recipe smoke, clean diff and enabled pre-push checks. A final
 diff check also caught and removed a trailing blank line in the saved test log.
+
+#### H1 round 3 schema plan: restore the flag-only workload
+
+Revert `b58f57bf` without deleting its historical raw evidence. Restore the
+per-request original-ID Vec, passed to either adapter and dropped after the
+latency sample, exactly as at `297aec15`. No new data/API shape, state transition,
+persistence/restart behavior or dependency is introduced. Client tasks own their
+Vec across each write await; cancellation drops it normally. Runtime ownership,
+campaign expiry and server cleanup remain unchanged. Acceptance: byte-for-byte
+comparison of the entire matched source tree with `297aec15`, unchanged raw
+records, matched tests, both fmt checks and all five strict Clippy configurations
+with the enabled pre-push hook. The flag remains default 16 with its effective
+value in JSON. Macro review: H1 still advances T4 without a speed claim; no new
+helper or prerequisite is needed, and V2/V3 retain their dependencies and checks.
+
+#### H1 round 3 implemented and validated (17 October 2026)
+
+Reverted `b58f57bf` with `git revert --no-commit`, resolving its documentation
+conflict while preserving raw evidence. The entire matched source tree now equals
+flag-only `297aec15`: empty `git diff 297aec15 --exit-code --
+benchmarks/matched/src`, plus a 26/26 file byte audit with no added/missing files.
+All 12 existing raw `.txt`/`.json`/`.log` files are byte-identical to `2fe7fe16`.
+Only the worker flag remains; both overhead candidates are rejected. No alternate
+runtime/buffer mode, new crate, unsafe code or library change was introduced.
+
+Actual checks: root and matched fmt pass; all four root strict Clippy
+configurations and matched all-target strict Clippy pass with zero diagnostics
+through the enabled `.githooks/pre-push`; matched tests pass 71/71 offline with
+the comparison lock. The actual push reruns the hook. The matched README, H1
+notes and round-2 report identify the rejected buffer; raw data remain unchanged.
+`h1/round3/REPORT.md` records source verification, the Mac results and both runner
+links, Opus's noise finding, exact check commands and limits. This builder did
+not rerun Mac benchmarks, release/executable controls, root test suites or remote
+CI. Independent round-3 review remains outstanding; no merge was performed.
+The T4 macro milestone and V2/V3 dependencies are unchanged.
 
 #### V1 implemented: core-canonical volatile log (measurement pending (runner))
 
