@@ -25,10 +25,12 @@ mod command_bytes;
 mod comparison;
 mod owned;
 pub(crate) mod transition;
+mod volatile;
 pub use command_bytes::CommandBytes;
 pub(crate) use comparison::CheckpointComparison;
 pub use comparison::{CheckpointLineage, CheckpointLog};
 pub use owned::OwnedLogState;
+pub use volatile::VolatileLog;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum EntryPayload {

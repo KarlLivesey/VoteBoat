@@ -18,8 +18,11 @@ use crate::{
     application::{ApplicationError, CheckpointStateMachine},
     contracts::StorageError,
     identity::*,
-    log::{Bootstrap, LogStore},
-    raft::{persist_effect, Effect, Message, Raft, RaftError, RecoveryMode, RequestContext, Rpc},
+    log::{Bootstrap, LogStore, VolatileLog},
+    raft::{
+        persist_effect, persist_volatile, CompletionEffects, Effect, Message, Raft, RaftError,
+        RecoveryMode, RequestContext, Rpc,
+    },
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -401,13 +404,110 @@ fn restore_application_from<A: CheckpointStateMachine>(
     })
 }
 
-fn verify_log<L: LogStore>(raft: &Raft, log: &L) -> Result<(), CheckpointError> {
-    if log.binding() != raft.storage_binding()
-        || !log.matches_state(raft.state().bootstrap.group, raft.state())?
-    {
-        return Err(CheckpointError::InvalidBinding);
+/// The log side of the snapshot helpers. Durable stores hold a second copy
+/// that must match the core exactly; a volatile log has none, because the
+/// core's log is the log. Wrappers keep the two seams apart without coherence
+/// questions, and neither is public.
+trait LogCheck {
+    fn volatile(&self) -> bool;
+    fn binding(&self) -> StoreBinding;
+    fn matches_state(&self, raft: &Raft) -> Result<bool, StorageError>;
+    /// A durable helper never touches a volatile core, nor the reverse; the
+    /// refusal precedes every mutation, including fencing.
+    fn check_mode(&self, raft: &Raft) -> Result<(), CheckpointError> {
+        if self.volatile() != raft.is_volatile() {
+            return Err(CheckpointError::InvalidBinding);
+        }
+        Ok(())
     }
-    Ok(())
+    fn verify(&self, raft: &Raft) -> Result<(), CheckpointError> {
+        if self.binding() != raft.storage_binding() || !self.matches_state(raft)? {
+            return Err(CheckpointError::InvalidBinding);
+        }
+        Ok(())
+    }
+}
+trait LogSeam: LogCheck {
+    fn matches_checkpoint(&mut self, raft: &Raft) -> Result<bool, StorageError>;
+    /// Complete the single persistence dependency of a snapshot transition.
+    fn persist(
+        &mut self,
+        raft: &mut Raft,
+        effects: Vec<Effect>,
+    ) -> Result<Vec<Effect>, CheckpointError>;
+}
+struct Durable<L>(L);
+struct Volatile<'a>(&'a VolatileLog);
+fn single(effects: Vec<Effect>) -> Result<Effect, CheckpointError> {
+    let [effect]: [Effect; 1] = effects
+        .try_into()
+        .map_err(|_| CheckpointError::InvalidBoundary)?;
+    Ok(effect)
+}
+impl<L: LogStore> LogCheck for Durable<&L> {
+    fn volatile(&self) -> bool {
+        false
+    }
+    fn binding(&self) -> StoreBinding {
+        self.0.binding()
+    }
+    fn matches_state(&self, raft: &Raft) -> Result<bool, StorageError> {
+        self.0
+            .matches_state(raft.state().bootstrap.group, raft.state())
+    }
+}
+impl<L: LogStore> LogCheck for Durable<&mut L> {
+    fn volatile(&self) -> bool {
+        false
+    }
+    fn binding(&self) -> StoreBinding {
+        self.0.binding()
+    }
+    fn matches_state(&self, raft: &Raft) -> Result<bool, StorageError> {
+        self.0
+            .matches_state(raft.state().bootstrap.group, raft.state())
+    }
+}
+impl<L: LogStore> LogSeam for Durable<&mut L> {
+    fn matches_checkpoint(&mut self, raft: &Raft) -> Result<bool, StorageError> {
+        self.0.matches_checkpoint_state(raft.checkpoint_log())
+    }
+    fn persist(
+        &mut self,
+        raft: &mut Raft,
+        effects: Vec<Effect>,
+    ) -> Result<Vec<Effect>, CheckpointError> {
+        let Effect::Persist(update) = single(effects)? else {
+            return Err(CheckpointError::InvalidBoundary);
+        };
+        Ok(persist_effect(raft, self.0, update)?)
+    }
+}
+impl LogCheck for Volatile<'_> {
+    fn volatile(&self) -> bool {
+        true
+    }
+    fn binding(&self) -> StoreBinding {
+        self.0.binding()
+    }
+    fn matches_state(&self, _: &Raft) -> Result<bool, StorageError> {
+        Ok(true)
+    }
+}
+impl LogSeam for Volatile<'_> {
+    fn matches_checkpoint(&mut self, _: &Raft) -> Result<bool, StorageError> {
+        Ok(true)
+    }
+    fn persist(
+        &mut self,
+        raft: &mut Raft,
+        effects: Vec<Effect>,
+    ) -> Result<Vec<Effect>, CheckpointError> {
+        let Effect::PersistVolatile(persist) = single(effects)? else {
+            return Err(CheckpointError::InvalidBoundary);
+        };
+        Ok(persist_volatile(raft, self.0, persist).map(CompletionEffects::into_owned)?)
+    }
 }
 /// Recovery of a compacted voter verifies retained data and restores application
 /// before returning a core that can participate in elections or acknowledge data.
@@ -651,10 +751,30 @@ pub fn compact_replica<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetent
     application: &A,
     reference: SnapshotRef,
 ) -> Result<Vec<Effect>, CheckpointError> {
+    compact_with(raft, Durable(log), store, application, reference)
+}
+/// [`compact_replica`] for a volatile core: the same order of binding, pin,
+/// pinned load and restore checks before compaction; the core's log is the
+/// only copy, so there is no provider copy to compare.
+pub fn compact_volatile_replica<A: CheckpointStateMachine, S: SnapshotRetention>(
+    raft: &mut Raft,
+    log: &VolatileLog,
+    store: &mut S,
+    application: &A,
+    reference: SnapshotRef,
+) -> Result<Vec<Effect>, CheckpointError> {
+    compact_with(raft, Volatile(log), store, application, reference)
+}
+fn compact_with<A: CheckpointStateMachine, L: LogSeam, S: SnapshotRetention>(
+    raft: &mut Raft,
+    mut log: L,
+    store: &mut S,
+    application: &A,
+    reference: SnapshotRef,
+) -> Result<Vec<Effect>, CheckpointError> {
     // Binding remains first; only compaction uses the protected core view.
-    if log.binding() != raft.storage_binding()
-        || !log.matches_checkpoint_state(raft.checkpoint_log())?
-    {
+    log.check_mode(raft)?;
+    if log.binding() != raft.storage_binding() || !log.matches_checkpoint(raft)? {
         return Err(CheckpointError::InvalidBinding);
     }
     check_binding(raft, store)?;
@@ -680,10 +800,7 @@ pub fn compact_replica<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetent
         &snapshot.application,
     )?;
     let effects = raft.begin_compact(reference)?;
-    let [Effect::Persist(update)] = effects.as_slice() else {
-        return Err(CheckpointError::InvalidBoundary);
-    };
-    let effects = persist_effect(raft, log, update.clone())?;
+    let effects = log.persist(raft, effects)?;
     if let Err(e) = store.reconcile_log(Some(reference)) {
         raft.storage_failed();
         return Err(e.into());
@@ -712,8 +829,29 @@ pub fn stage_snapshot_effect<A: CheckpointStateMachine, L: LogStore, S: Snapshot
     application: &A,
     message: Message,
 ) -> Result<Vec<Effect>, CheckpointError> {
+    stage_with(raft, Durable(log), store, application, message)
+}
+/// [`stage_snapshot_effect`] for a volatile core. A wrong-mode call returns
+/// `InvalidBinding` before any mutation; later errors fence as for durable cores.
+pub fn stage_volatile_snapshot_effect<A: CheckpointStateMachine, S: SnapshotRetention>(
+    raft: &mut Raft,
+    log: &VolatileLog,
+    store: &mut S,
+    application: &A,
+    message: Message,
+) -> Result<Vec<Effect>, CheckpointError> {
+    stage_with(raft, Volatile(log), store, application, message)
+}
+fn stage_with<A: CheckpointStateMachine, L: LogSeam, S: SnapshotRetention>(
+    raft: &mut Raft,
+    mut log: L,
+    store: &mut S,
+    application: &A,
+    message: Message,
+) -> Result<Vec<Effect>, CheckpointError> {
+    log.check_mode(raft)?;
     let result = (|| {
-        verify_log(raft, log)?;
+        log.verify(raft)?;
         check_binding(raft, store)?;
         application.validate_group(raft.state().bootstrap.group)?;
         if !raft.staged_matches(&message) {
@@ -751,10 +889,7 @@ pub fn stage_snapshot_effect<A: CheckpointStateMachine, L: LogStore, S: Snapshot
             return Err(CheckpointError::InvalidBoundary);
         }
         let effects = raft.snapshot_stored(reference)?;
-        let [Effect::Persist(update)] = effects.as_slice() else {
-            return Err(CheckpointError::InvalidBoundary);
-        };
-        Ok(persist_effect(raft, log, update.clone())?)
+        log.persist(raft, effects)
     })();
     if result.is_err() {
         raft.storage_failed();
@@ -768,8 +903,29 @@ pub fn finish_snapshot_install<A: CheckpointStateMachine, L: LogStore, S: Snapsh
     application: &mut A,
     reference: SnapshotRef,
 ) -> Result<Vec<Effect>, CheckpointError> {
+    finish_install_with(raft, &Durable(log), store, application, reference)
+}
+/// [`finish_snapshot_install`] for a volatile core. A wrong-mode call returns
+/// `InvalidBinding` before any mutation; later errors fence as for durable cores.
+pub fn finish_volatile_snapshot_install<A: CheckpointStateMachine, S: SnapshotRetention>(
+    raft: &mut Raft,
+    log: &VolatileLog,
+    store: &mut S,
+    application: &mut A,
+    reference: SnapshotRef,
+) -> Result<Vec<Effect>, CheckpointError> {
+    finish_install_with(raft, &Volatile(log), store, application, reference)
+}
+fn finish_install_with<A: CheckpointStateMachine, L: LogCheck, S: SnapshotRetention>(
+    raft: &mut Raft,
+    log: &L,
+    store: &mut S,
+    application: &mut A,
+    reference: SnapshotRef,
+) -> Result<Vec<Effect>, CheckpointError> {
+    log.check_mode(raft)?;
     let result = (|| {
-        verify_log(raft, log)?;
+        log.verify(raft)?;
         check_binding(raft, store)?;
         application.validate_group(raft.state().bootstrap.group)?;
         if raft.state().snapshot != Some(reference) || application.applied_index() > reference.index

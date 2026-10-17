@@ -38,8 +38,9 @@ fn ready_actor_clients<const TRACE: bool>(
     }
     .log_limits()
     .unwrap();
-    let store = MemoryStore::<TRACE>::new(binding, limits, bootstrap).unwrap();
-    let mut core = Raft::recover(node, binding, store.state(group).unwrap(), limits).unwrap();
+    let store = VolatileStore::<TRACE>::new(binding, limits).unwrap();
+    let state = store.log.bootstrap(&bootstrap).unwrap();
+    let mut core = Raft::recover_volatile(node, &store.log, state).unwrap();
     core.configure_batch_limits(envelopes.voteboat_limits(4).unwrap())
         .unwrap();
     let settings = Settings {
@@ -83,14 +84,12 @@ fn ready_actor_clients<const TRACE: bool>(
 #[test]
 fn overdue_paused_follower_keeps_state_and_unpaused_tick_resumes_campaign() {
     let (mut actor, _sender) = ready_actor_clients::<false>(crate::Envelopes::Common64, 1);
-    let group = actor.parts.application.group;
-    let limits = actor.parts.store.limits();
     let batch_limits = actor.parts.core.batch_limits();
-    actor.parts.core = Raft::recover(
+    // In-process restart from the completed state the core exports.
+    actor.parts.core = Raft::recover_volatile(
         NodeId::new(1).unwrap(),
-        actor.parts.store.binding(),
-        actor.parts.store.state(group).unwrap(),
-        limits,
+        &actor.parts.store.log,
+        actor.parts.core.state().clone(),
     )
     .unwrap();
     actor
@@ -111,7 +110,6 @@ fn overdue_paused_follower_keeps_state_and_unpaused_tick_resumes_campaign() {
     actor.tick().unwrap();
     assert_eq!(actor.parts.core.role(), Role::Follower);
     assert_eq!(actor.parts.core.state(), &before);
-    assert_eq!(actor.parts.store.state(group).unwrap(), before);
     assert_eq!(actor.parts.application.applied, applied);
     assert_eq!(actor.last_contact, overdue);
     assert_eq!(
@@ -126,7 +124,6 @@ fn overdue_paused_follower_keeps_state_and_unpaused_tick_resumes_campaign() {
     actor.tick().unwrap();
     assert_eq!(actor.parts.core.role(), Role::Follower);
     assert_eq!(actor.parts.core.state(), &before);
-    assert_eq!(actor.parts.store.state(group).unwrap(), before);
     assert_eq!(actor.parts.application.applied, applied);
     assert!(actor.last_contact > overdue);
     assert!(!actor.tick_paused);
@@ -254,15 +251,12 @@ fn checked_checkpoint_scopes<const TRACE: bool>() {
     assert_checkpoint_report(&value);
 }
 fn assert_checkpoint_report(value: &serde_json::Value) {
+    // Gaps between store-side boundaries have no observation without a store.
     let gaps = value["checkpoint_compact_gaps"].as_array().unwrap();
     assert_eq!(gaps.len(), 3);
     for gap in gaps {
-        assert_eq!(gap["calls"], 2);
+        assert_eq!(gap["calls"], 0);
         assert_eq!(gap["failures"], 0);
-        assert!(
-            gap["total_elapsed_ns"].as_u64().unwrap()
-                >= gap["maximum_elapsed_ns"].as_u64().unwrap()
-        );
     }
     let phases = value["phases"].as_array().unwrap();
     for name in [
@@ -285,12 +279,13 @@ fn assert_checkpoint_report(value: &serde_json::Value) {
     };
     assert_eq!(count("store_state_clone_nested"), 0);
     assert_eq!(count("store_matches_state_exact_nested"), 0);
+    // The volatile log has no provider copy to compare, append or barrier.
     assert_eq!(
         count("store_checkpoint_state_protected_inclusive_nested"),
-        2
+        0
     );
-    assert_eq!(count("store_append_nested"), 2);
-    assert_eq!(count("store_barrier_nested"), 2);
+    assert_eq!(count("store_append_nested"), 0);
+    assert_eq!(count("store_barrier_nested"), 0);
     assert_eq!(count("snapshot_pin_for_log_nested"), 2);
     assert_eq!(count("snapshot_reconcile_log_inclusive_nested"), 2);
     assert_eq!(count("snapshot_load_pinned_nested"), 4);
@@ -379,9 +374,9 @@ fn partial_compact_helper_error_keeps_original_failure_without_gap_success() {
     let revision = actor.parts.core.state().revision;
     let before = actor.provider_snapshot();
     let started = Recorder::<true>::start();
-    let result = compact_replica(
+    let result = compact_volatile_replica(
         &mut actor.parts.core,
-        &mut actor.parts.store,
+        &actor.parts.store.log,
         &mut actor.parts.snapshots,
         &actor.parts.application,
         reference,

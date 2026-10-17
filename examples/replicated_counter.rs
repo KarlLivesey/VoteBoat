@@ -52,6 +52,9 @@ impl Demo {
                 | Effect::CheckpointCompacted(_) => {
                     return Err("synchronous demo does not request asynchronous checkpoints".into())
                 }
+                Effect::PersistVolatile(_) => {
+                    return Err("durable demo replicas never emit volatile persistence".into())
+                }
                 Effect::SnapshotRequired {
                     to,
                     context,

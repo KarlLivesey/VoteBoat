@@ -25,13 +25,14 @@ use crate::{
     snapshot::{Snapshot, SnapshotRef},
 };
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::atomic::{AtomicU64, Ordering};
 
 mod admitted_replication;
 mod batch_limits;
 pub use batch_limits::BatchLimits;
 mod completion;
 use completion::PreparedCompletion;
-pub use completion::{persist_effect_borrowed, CompletionEffects};
+pub use completion::{persist_effect_borrowed, persist_volatile, CompletionEffects};
 mod leadership;
 use admitted_replication::{AdmittedRange, EmptyAppendAlias};
 mod log_staging;
@@ -238,6 +239,10 @@ pub enum Effect {
     /// Read-only maintenance, suspended under the original owner visit.
     VerifyLearnerReadiness(Message),
     Persist(LogUpdate),
+    /// Emitted only by a core recovered with [`Raft::recover_volatile`]: the
+    /// core already owns the planned transition, so the token carries no data.
+    /// Complete it with [`persist_volatile`]; it is never durability evidence.
+    PersistVolatile(VolatilePersist),
     Send(Message),
     /// Ordered committed entries. Not a client success: application must apply
     /// and return a result before a caller can acknowledge its operation.
@@ -256,6 +261,31 @@ pub enum Effect {
     },
     /// The exact WAL anchor is durable; reconcile snapshot retention next.
     CheckpointCompacted(SnapshotRef),
+}
+/// Correlates one pending transition of a volatile core with its completion.
+/// Only the core constructs it; it names the exact core incarnation and the
+/// revision and generation the pending transition installs, and owns no log
+/// data. Revision and generation are local to one log history, so the
+/// incarnation keeps a token from another core, or from an earlier recovery of
+/// the same history, from completing this one. Not a durability receipt.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct VolatilePersist {
+    incarnation: u64,
+    revision: LogRevision,
+    generation: LogGeneration,
+}
+/// Process-unique volatile core incarnations, one per `recover_volatile` call.
+/// Only equality is used, never ordering or a protocol decision, and no value
+/// outlives the process: a volatile core has no cross-process restart. Zero is
+/// never issued, so a durable core's zero matches no token.
+static VOLATILE_INCARNATIONS: AtomicU64 = AtomicU64::new(1);
+impl VolatilePersist {
+    pub fn revision(&self) -> LogRevision {
+        self.revision
+    }
+    pub fn generation(&self) -> LogGeneration {
+        self.generation
+    }
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum RaftError {
@@ -364,6 +394,10 @@ pub struct Raft {
     readiness_check: Option<Message>,
     transfer: Option<LeadershipTransfer>,
     leader_contact: Option<(StoreBinding, NodeId, u64)>,
+    // The core's log is the only copy: completions use `PersistVolatile` tokens.
+    volatile: bool,
+    // Nonzero only for a volatile core: the `recover_volatile` call that made it.
+    incarnation: u64,
 }
 
 impl Raft {
@@ -488,7 +522,48 @@ impl Raft {
             readiness_check: None,
             transfer: None,
             leader_contact: None,
+            volatile: false,
+            incarnation: 0,
         })
+    }
+    /// Static voter over a [`VolatileLog`]: the core's log becomes the only
+    /// canonical copy, kept in process memory. Nothing is durable; every
+    /// persistence dependency is a payload-free [`Effect::PersistVolatile`].
+    /// Recovery validation is the same as for a durable static voter. A fenced
+    /// volatile core still exports its last completed state through
+    /// [`Self::state`], which can be recovered here in the same process. If that
+    /// state is compacted, the host's application must already be at or past the
+    /// snapshot anchor, or be restored with `snapshot::restore_application`.
+    ///
+    /// Membership is static: the core refuses every configuration transition
+    /// (see [`Event::Configure`] and replicated configuration entries), so any
+    /// state it completes is recoverable here. Each call is a new incarnation;
+    /// tokens emitted by any earlier core never complete the returned one.
+    pub fn recover_volatile(
+        node: NodeId,
+        log: &VolatileLog,
+        state: GroupLog,
+    ) -> Result<Self, RaftError> {
+        let mut core = Self::recover_checked(
+            node,
+            log.binding(),
+            state,
+            log.limits(),
+            RecoveryMode::StaticVoter,
+        )?;
+        core.incarnation = Self::next_volatile_incarnation()?;
+        core.volatile = true;
+        Ok(core)
+    }
+    fn next_volatile_incarnation() -> Result<u64, RaftError> {
+        // Uniqueness needs only the atomic increment, not ordering with other memory.
+        VOLATILE_INCARNATIONS
+            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
+            .map_err(|_| RaftError::Exhausted)
+    }
+    /// True for a core whose log is the only copy (see [`Self::recover_volatile`]).
+    pub fn is_volatile(&self) -> bool {
+        self.volatile
     }
     fn validate_recovery(
         node: NodeId,
@@ -1061,20 +1136,22 @@ impl Raft {
         if self.fenced {
             return Err(RaftError::Fenced);
         }
-        if self
-            .pending
-            .as_ref()
-            .is_none_or(|p| !p.next.matches_update(update) || p.ticket.is_some())
+        if self.volatile
+            || self
+                .pending
+                .as_ref()
+                .is_none_or(|p| !p.next.matches_update(update) || p.ticket.is_some())
         {
             return Err(RaftError::WrongCompletion);
         }
         Ok(())
     }
     pub fn admit_effect(&mut self, update: &LogUpdate, ticket: LogTicket) -> Result<(), RaftError> {
-        if self
-            .pending
-            .as_ref()
-            .is_none_or(|p| !p.next.matches_update(update))
+        if self.volatile
+            || self
+                .pending
+                .as_ref()
+                .is_none_or(|p| !p.next.matches_update(update))
         {
             return Err(RaftError::WrongCompletion);
         }
@@ -1083,6 +1160,9 @@ impl Raft {
     pub fn admitted(&mut self, ticket: LogTicket) -> Result<(), RaftError> {
         if self.fenced {
             return Err(RaftError::Fenced);
+        }
+        if self.volatile {
+            return Err(RaftError::WrongCompletion);
         }
         let p = self.pending.as_mut().ok_or(RaftError::WrongCompletion)?;
         let next = p.next.metadata();
@@ -1112,12 +1192,43 @@ impl Raft {
         if self.fenced {
             return Err(RaftError::Fenced);
         }
+        if self.volatile {
+            return Err(RaftError::WrongCompletion);
+        }
         let p = self.pending.as_ref().ok_or(RaftError::WrongCompletion)?;
         let ticket = p.ticket.ok_or(RaftError::WrongCompletion)?;
         if !completion.tickets.contains(&ticket) {
             return Err(RaftError::WrongCompletion);
         }
-        let p = self.pending.take().unwrap();
+        self.install_pending()
+    }
+    /// The exact single pending transition of this volatile core incarnation.
+    /// Its revision advances on every transition and at most one is in
+    /// flight; the incarnation is unique to this `recover_volatile` call.
+    fn finish_volatile(
+        &mut self,
+        persist: VolatilePersist,
+    ) -> Result<PreparedCompletion, RaftError> {
+        if self.fenced {
+            return Err(RaftError::Fenced);
+        }
+        if !self.volatile {
+            return Err(RaftError::WrongCompletion);
+        }
+        if self.pending.as_ref().is_none_or(|p| {
+            let next = p.next.metadata();
+            p.ticket.is_some()
+                || persist.incarnation != self.incarnation
+                || next.revision != persist.revision
+                || next.generation != persist.generation
+        }) {
+            return Err(RaftError::WrongCompletion);
+        }
+        self.install_pending()
+    }
+    /// Install the correlated pending transition; callers check correlation.
+    fn install_pending(&mut self) -> Result<PreparedCompletion, RaftError> {
+        let p = self.pending.take().ok_or(RaftError::WrongCompletion)?;
         let previous_commit = self.durable.commit_index;
         let configuration_changed = p
             .membership
@@ -1282,12 +1393,31 @@ impl Raft {
         after: After,
         reply: Option<Message>,
     ) -> Result<Vec<Effect>, RaftError> {
-        let next = OwnedNextLog::plan_copy(
-            &LogView::new(&self.durable),
-            &self.log_summary,
-            &update,
-            self.limits,
-        )?;
+        // A volatile core is the only owner of its log: move the update into
+        // the plan instead of keeping a copy for a store to validate again.
+        let (next, effect) = if self.volatile {
+            let next = OwnedNextLog::plan_owned(
+                &LogView::new(&self.durable),
+                &self.log_summary,
+                update,
+                self.limits,
+            )?;
+            let metadata = next.metadata();
+            let token = VolatilePersist {
+                incarnation: self.incarnation,
+                revision: metadata.revision,
+                generation: metadata.generation,
+            };
+            (next, Effect::PersistVolatile(token))
+        } else {
+            let next = OwnedNextLog::plan_copy(
+                &LogView::new(&self.durable),
+                &self.log_summary,
+                &update,
+                self.limits,
+            )?;
+            (next, Effect::Persist(update))
+        };
         let membership = next
             .full()
             .map(GroupLog::membership)
@@ -1320,7 +1450,7 @@ impl Raft {
             after,
             reply,
         });
-        Ok(vec![Effect::Persist(update)])
+        Ok(vec![effect])
     }
     /// Exact accepted node/store voting assignment, never durability evidence.
     /// Learners and replaced/removed physical replicas return false.
@@ -1633,6 +1763,18 @@ impl Raft {
             && self.membership().voter_store(m.from) == Some(m.sender.identity)
     }
     fn receive(&mut self, mut m: Message) -> Result<Vec<Effect>, RaftError> {
+        // A volatile log has static membership. Learner repair always carries
+        // configuration state; ordinary replication is refused below.
+        if self.volatile
+            && matches!(
+                m.rpc,
+                Rpc::LearnerRepair { .. }
+                    | Rpc::LearnerRepairSnapshot { .. }
+                    | Rpc::CommittedLearnerRepairSnapshot { .. }
+            )
+        {
+            return Err(RaftError::InvalidMessage);
+        }
         // Repair can remain queued while its learner completes promotion.
         // Authenticate before discarding obsolete terms or refusing a repair
         // whose historical view no longer owns this replica's voting state.
@@ -1659,11 +1801,13 @@ impl Raft {
         // Static/default assemblies retain the strict learner-repair exception.
         // Explicit member assemblies use ordinary authorized replication and
         // the same validated journal, log matching and durability dependencies.
-        if !self.configuration_replication
+        // A volatile core refuses all configuration ingress, before any state
+        // change: static voter recovery could not accept the result.
+        if (self.volatile || !self.configuration_replication)
             && (matches!(&m.rpc, Rpc::Append { entries, .. } if entries.iter().any(|e| matches!(e.payload, EntryPayload::Configuration(_))))
                 || matches!(&m.rpc, Rpc::Snapshot { snapshot } if snapshot.metadata.membership.is_some()))
         {
-            if !self.permits_joint_repair(&m) {
+            if self.volatile || !self.permits_joint_repair(&m) {
                 return Err(RaftError::InvalidMessage);
             }
             self.trim_joint_repair(&mut m);
@@ -1900,6 +2044,8 @@ mod completion_tests;
 #[cfg(test)]
 #[path = "raft/membership_tests.rs"]
 mod membership_tests;
+#[cfg(test)]
+mod volatile_tests;
 
 #[path = "raft/authority.rs"]
 mod authority;

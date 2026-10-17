@@ -455,7 +455,9 @@ impl<Q: ReadyScheduler> Shard<Q> {
             return Err(RuntimeError::Closed);
         }
         let group = core.state().bootstrap.group;
-        if core.storage_binding() != self.owner.store {
+        // The owner submits persistence to a durable log provider; a volatile
+        // core's log has no provider and its tokens are not storage work.
+        if core.storage_binding() != self.owner.store || core.is_volatile() {
             return Err(RuntimeError::WrongOwner);
         }
         if self.groups.contains_key(&group) || self.groups.keys().any(|g| g.id == group.id) {
