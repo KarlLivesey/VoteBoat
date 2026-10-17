@@ -54,6 +54,22 @@ Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider th
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
 
+#### Pipelined replication prototyped and rejected
+
+Each follower has one tracked replication request, and early replication
+(`replicate_admitted`) fires only when everything durable is committed and the
+follower has acknowledged the tip, so under load batch k+1 waits for the
+leader to process batch k's acknowledgement. A measurement-only prototype sent
+each new leader batch at its `Written` event behind one outstanding range ending
+at the leader's tip, kept the predecessor in a one-slot `superseded` record whose
+successful acknowledgement still advanced progress and commit, and dropped the
+"everything durable is committed" precondition. Mac APFS, Witness, 16,000 offers
+at 20,000/s, three pairs against 222c30b1: 8,490 → 7,462 completed/s (all pairs
+0.85–0.89), p99 134 → 161 ms. Followers persist one received append per step, so
+early sends split their work into more, smaller barriers instead of one large
+batch per acknowledgement round trip. Pipelining would first need followers to
+merge consecutive queued appends into one persistence round. Not adopted.
+
 #### C9 implemented: steady polls stop rebuilding peer assignments
 
 Priority order from the user (17 October 2026): general CPU speed, then
