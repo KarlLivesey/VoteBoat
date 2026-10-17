@@ -114,6 +114,40 @@ with the matched lock offline. Builds use this worktree's `target/h1-build` and
 `target/h1-release`, separate from the main checkout. Overhead measurements and
 keep/drop decisions are not yet implemented evidence.
 
+#### H1 implemented: reuse each client's original-ID buffer
+
+The shared workload owns one `[u128; 4]` per client task and passes its validated
+one-/four-element slice to either adapter. This removes the per-request ID Vec
+allocation. Original numbering/order, one reply per original, latency clocks,
+completion checks and all attribution paths are unchanged. No engine-only path
+was added. All 71 matched tests and strict matched Clippy pass; formatting is
+clean. This is a separate change from the worker flag.
+
+Three interleaved pairs for each engine/cell, AB/BA/AB, on the loaded Linux
+9800X3D host, release+debuginfo, default 16 server / 1 client workers, 1024 warmups,
+default retention, upstream envelopes and attribution off. Bulk requests
+4,000,000 originals (rounded to 3,997,696), 4096 clients / batch4; singleton
+131,072 originals, 1 client / batch1. Medians of whole-process CPU ns/original:
+
+| Engine | Cell | Flag-only baseline | Fixed buffer | Change |
+| --- | --- | ---: | ---: | ---: |
+| VoteBoat | Bulk | 281 | 283 | +0.7% (neutral; overlapping 274–283 / 272–287 ranges) |
+| OpenRaft | Bulk | 799 | 778 | −2.6% |
+| VoteBoat | Singleton | 12,454 | 11,713 | −5.9% |
+| OpenRaft | Singleton | 39,242 | 38,931 | −0.8% |
+
+Kept: both singleton engines use less CPU in every pair; bulk is neutral for
+VoteBoat and lower for OpenRaft. These are loaded-host diagnostics, not a quiet
+capacity qualification or a library speed claim. Uptime before every pair,
+individual rates/CPU/cores and binary hashes are in
+`benchmarks/matched/validation/performance/h1/buffer-pairs.txt`; environment in
+`environment.txt`. One-minute load was 66.8–69.4. All runs use the supplied
+`target/claude/tools/run.py` from the main checkout; it reports `p99=None` because
+it searches a nested latency object while this harness emits top-level
+`request_p99_ns`. No p99 comparison is claimed. No processes were stopped and
+our own builds/checks finished before measurement. The fixed-buffer release
+binary is the baseline for the next independent experiment.
+
 #### V1 implemented: core-canonical volatile log (measurement pending (runner))
 
 Design: `target/claude/research-r1/architect-plan.md` (PR 1). Implemented
