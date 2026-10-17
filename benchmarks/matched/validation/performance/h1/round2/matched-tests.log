@@ -190,4 +190,3 @@ test workload::tests::actual_maintenance_keeps_original_results_and_all_follower
 test voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install ... ok
 
 test result: ok. 71 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.01s
-

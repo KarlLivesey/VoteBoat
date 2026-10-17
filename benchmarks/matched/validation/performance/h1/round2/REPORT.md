@@ -92,3 +92,19 @@ alone does not certify that topology or scheduler equivalence (review P3).
 
 Not run/verified here: macOS, quiet scaling/capacity campaigns, root test suites,
 remote CI outcomes. No merge performed. Independent review remains pending.
+
+## Late Claude Opus review follow-up
+
+The review posted during publication: B1 is addressed by the exact runtime
+revert; N1's changed first-poll timing is removed with it. N4's topology test
+request was conditional on retaining that runtime, which is removed; the manual
+controls above cover the restored executable. N2 is addressed by removing
+percentage-win presentations and describing buffer savings as unmeasurable at
+this noise level, keeping raw samples as diagnostics. For N3, `../README.md`
+now gives exact child-rusage arithmetic and a self-contained invocation using
+top-level `request_p99_ns`, independent of old absolute paths or an untracked
+tool. Its smoke completed 128 originals with numeric p99 (1438011 ns); that is
+recipe validation, not a latency result. N5's additive settings key is documented.
+A final diff check also removed a trailing blank line from the saved test log.
+This follow-up changes no Rust source; prior test results remain applicable,
+with the full enabled hook run again for its push.
