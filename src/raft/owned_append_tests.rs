@@ -119,10 +119,11 @@ fn delayed_completion(receiver: &mut Raft, effects: &[Effect]) -> Vec<Effect> {
 
 fn check_independent_pending(receiver: &Raft, effects: &[Effect]) {
     let original = update(effects);
-    let pending = receiver.pending.as_ref().unwrap().next.update();
-    assert_eq!(original, pending);
+    let pending = &receiver.pending.as_ref().unwrap().next;
+    assert_eq!(*original, pending.update());
+    assert!(pending.matches_update(original));
     let raw = original.suffix.as_ref().unwrap();
-    let owned = pending.suffix.as_ref().unwrap();
+    let owned = pending.suffix().unwrap();
     assert_ne!(raw.entries.as_ptr(), owned.entries.as_ptr());
     assert_eq!(
         bytes(&raw.entries[1]).as_ptr(),

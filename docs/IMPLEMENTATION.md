@@ -41,7 +41,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | In progress V1: core-canonical volatile log | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
-| Next V2: scalar commit-advance plan and smaller `Pending` | Commit-only rounds (~2.3 per singleton original) still build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices | V1 measured | Same twin tests; singleton framework pairs | T4 |
+| In progress V2: scalar commit-advance plan | Commit-only rounds (~2.3 of 5.3 persistence rounds per singleton original) only advance the commit index, yet each builds, validates, stores and compares a full `LogUpdate`/`OwnedAppend` plan inside a 1,728-byte `Pending`. A scalar `CommitAdvance` plan keeps only the predecessor summary, the next revision and the commit index; the durable effect is unchanged and moved instead of cloned; cold `Pending` parts are boxed | V1 (stacked on PR 1, whose measurement is still pending) | Scalar-vs-`plan_owned` equivalence over valid and invalid commits; volatile scalar install, durable identical `LogUpdate`, failed-completion fencing, stale-token refusal and not-scalar cases; size-of tests; the V1 twin tests; three suites and the matched suite; fmt + five strict Clippy runs; runner singleton pairs (pending) | T4 |
 | Following V3: chunked canonical log with shared immutable batches | The batch V1 moves into pending becomes a shared chunk, removing the remaining two in-process per-peer clones | V1, V2 measured | Framework pairs on both cells; compaction/snapshot suites | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
 | Done C15: batched admission uses the pending bound | Same fast path for ready batches | C14 | Linux/Mac pairs; suites | T4 |
@@ -68,6 +68,117 @@ implemented or benchmarked; unsafe variants are not offered as options.
 Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider than
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
+
+#### V2 implemented: scalar commit-advance plan (measurement pending (runner))
+
+Design: `target/claude/research-r1/architect-plan.md` section 5 item 1, with
+the section 6 decision: durable stores keep the `LogUpdate` shape (no new
+`LogMutation`, no codec change) and only the core's plan becomes scalar.
+
+Schema plan (written before editing; the plan's last revision is marked):
+
+- Data/API. A private `CommitAdvance { predecessor: LogMetadata, summary:
+  LogSummary }` becomes `OwnedChange::Commit`, built by a new core-only
+  `OwnedNextLog::plan_commit(view, summary, commit_index, limits)`.
+  `plan_owned` and `plan_copy` never build it, so native stores never see the
+  variant; the native install match refuses it (fail closed). The cold
+  `OwnedChange::Other` keeps its `NextLog` behind a `Box`, and so do
+  `Pending.membership` (configuration changes only) and the `SnapshotRef` of
+  the two snapshot `After` variants. No public API change.
+- Revised during implementation: the first shape (`predecessor: LogSummary,
+  revision, commit_index`, 352 B) made `OwnedChange` trip Clippy's
+  `large_enum_variant` (`Append` was 880 B). The cause was fixed rather than
+  allowed. `OwnedAppend` no longer keeps a copy of the whole admitted
+  `LogUpdate`: it keeps `{ predecessor, summary, suffix }` (672 B), because the
+  update's other fields are the predecessor's group and revision, the next
+  ballot and commit index, and no snapshot. `matches_update` compares those
+  fields (`matches_plain`); admission rejects any other update before planning,
+  so the answers are the same. The commit advance is then an empty append
+  without a suffix (640 B).
+- Selection. `Raft::persist` takes the scalar path exactly when `suffix` is
+  `None` and the hard state equals the durable one; snapshots and compaction go
+  through `persist_update` with `snapshot: Some(..)`, so they never qualify.
+  Today such an update always takes the `OwnedChange::Append` path
+  (`append_eligible` holds), so the scalar plan replaces exactly that plan.
+- Validation. `plan_commit` runs the checks `validate_base` and
+  `validate_append_metadata` make for that update, in the same order with the
+  same errors: limits, stale summary, ballot follows, ballot fields, commit
+  regression or gap or hard term behind the log, revision exhaustion. The group
+  and expected revision come from the core's own log, so they match by
+  construction. The ballot origin is retained (unchanged hard state), and the
+  next summary is `append_summary(summary, next, None)`, as before.
+- Effects. A volatile core emits the same `PersistVolatile` token. A durable
+  core emits the same `Effect::Persist(LogUpdate { group, expected_revision,
+  hard_state, commit_index, suffix: None, snapshot: None, snapshot_membership:
+  None })` as before; the plan no longer holds a clone of it.
+- State transitions and ownership. Unchanged: step → `Pending { next:
+  Commit }` → completion (`finish_completion` or `finish_volatile`) →
+  `install_pending`, which checks the predecessor metadata, installs the header
+  (revision and commit index; every other field stays the same) and returns the
+  next summary. `metadata`, `term_at`, `entry_at`, `full`,
+  `preserves_checkpoint_prefix` and `early_suffix` answer as they did for the
+  empty append (`early_suffix` already returned `None` for it).
+- Failure and cleanup. A wrong binding, stale token, failed barrier or failed
+  install still fences and drops the pending plan; `state()` stays at the last
+  completed transition. No partial progress exists because install is one
+  synchronous call and the predecessor check runs before any mutation. Restart
+  behaviour is unchanged: durable stores receive the same mutation bytes; a
+  volatile core has no cross-process restart.
+- Acceptance. Scalar-vs-`plan_owned` equivalence of metadata, summary, install
+  result and errors; the volatile scalar round has no update or suffix and
+  installs only the commit index; the durable round emits the identical
+  `LogUpdate` and completes through a store's full validation; an incomplete
+  scalar round fences and keeps `state()`; a stale scalar token is refused;
+  hard-state changes, new entries and snapshots do not take the scalar path;
+  size-of tests for `Pending` and `OwnedNextLog`; existing suites in all
+  configurations.
+
+Implemented evidence (measurement pending (runner)). Shape as planned, after
+the revision above. `Raft::persist` routes commit-only rounds to
+`persist_commit`, which calls `plan_commit`. A volatile core emits the token
+(with PR 1's incarnation); a durable core emits the identical `LogUpdate`. Both
+go through `stage_pending`, the tail `persist_update` already used.
+`PreparedOwnedLog::Append` now carries the checked `OwnedAppend`, so it stays
+within the lint's variant bound; a prepared commit advance is an `OwnedAppend`
+with no suffix. `NextLog::prepare_install` is unchanged. Test-only
+`OwnedNextLog::update()` rebuilds the admitted update; `suffix()` borrows the
+planned suffix.
+
+Sizes on x86_64 (`size_of` in a debug test build; "before" is PR 1's tip):
+`Pending` 1,728 → 1,088 B and `OwnedNextLog` 912 → 672 B, both measured.
+`After` 144 → at most 16 B and `Pending.membership` 288 → at most 8 B, both
+asserted. Computed from field sizes (`LogMetadata` 304 B, `LogSummary` 336 B,
+`Option<Suffix>` 32 B): `OwnedAppend` 880 → 672 B and the new `CommitAdvance`
+640 B. `pending_and_plan_sizes` keeps the measured values as upper bounds.
+
+Tests: `log::transition::tests::incoming::scalar_commit_plan_matches_the_owned_empty_append`
+(valid, voted, unvalidated-vote, term-behind, revision-exhausted and
+regressed-commit states over every commit index, a stale summary and invalid
+limits: equal errors, metadata, term lookups, `matches_update` truth tables
+against seven mutated updates, predecessor refusal, installed state and
+summary). `src/raft/commit_advance_tests.rs`: volatile scalar round (no suffix
+or update, the entries buffer is not moved, only revision and commit change,
+the committed interval is borrowed), durable round (identical `LogUpdate`,
+mutated updates refused, completion through a modelled store's full
+`apply_batch` gives the store's state), incomplete rounds fence (wrong binding,
+failed barrier, failed predecessor check; then `recover_volatile` completes a
+new round), stale and forged-generation tokens refused, new-term, new-vote,
+new-entry and compaction rounds not scalar, and the size test.
+
+Checks run on the builder's loaded machine (17 October 2026, load average
+40 to 150) on the tree rebased onto `cpu/volatile-log` b40d22b7:
+`cargo +stable fmt --all -- --check`, and strict Clippy with default, all
+features, no default features and native only, all zero diagnostics. Default
+suite: 85 test binaries done with 1,804 passed and 0 failed, including the 452
+library unit tests and `raft` (79). `representative_relay_model` was still
+running at publication, after 51 minutes single-threaded. `volatile` (7),
+`snapshot` (27), `runtime` (57), `effect_owner` (210) and `worker` (9) also
+pass. The `--all-features` and `--no-default-features` suites and the matched
+workspace's fmt, Clippy and tests were queued behind it; the PR lists their
+results when they finish. Before the rebase, the same change on 622bc411 passed
+85 default binaries (1,802 tests, 0 failures) before that run was stopped for
+the rebase.
+
 
 #### V1 implemented: core-canonical volatile log (measurement pending (runner))
 
