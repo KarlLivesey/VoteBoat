@@ -52,6 +52,28 @@ Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider th
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
 
+#### Apple barrier publication measured; parked on device detection
+
+Witness publication needs only ordering between its phases: WAL bytes and the
+primary record, then the acknowledgement record whose full sync makes both
+durable. On APFS, `F_BARRIERFSYNC` for phase one (Apple documents exactly this
+two-phase pattern, with hardware support guaranteed on Apple SSDs) measured,
+against C6 on the Mac's internal SSD, three pairs at 20,000/s offered: barrier
+13.3 → 7.8 ms, 8,129 → 13,440 completed/s, p99 140 → 80 ms, whole-run
+CPU/original 40 → 27 µs. A probe gave 8.6–9.2 ms for two full flushes and 5.0 ms
+for barrier + full flush.
+
+The user approved it for internal Apple SSDs only (one audited `fcntl`). Device
+identification through `df`/`diskutil` subprocesses was implemented and then
+rejected: on macOS the witness crash test
+`every_cold_repair_byte_cut_keeps_the_other_witness_and_restarts_again` failed
+1 in 3 (main 0 in 3) with `lock acquisition failed because the operation would
+block` — a spawned child briefly holds another store's `flock` descriptor, so a
+concurrent close-and-reopen fails. Identification without subprocesses needs
+IOKit FFI (more `unsafe`); enabling it on every macOS volume was declined.
+Parked; the user has since ordered priorities as general CPU speed, platform
+CPU speed, general durable-save speed, then platform durable-save speed.
+
 #### C6 implemented: a poll never truncates a ready visit
 
 A per-original event trace of the native benchmark (scratch instrumentation of
