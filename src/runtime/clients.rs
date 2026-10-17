@@ -187,6 +187,14 @@ pub struct ClientRouter<R> {
     sequence: u64,
     cursor: u64,
     closed: bool,
+    /// Delivered requests awaiting finalization, per group; a group whose
+    /// core has a pending dependency is skipped whole.
+    finalize: BTreeMap<GroupIdentity, VecDeque<u64>>,
+    finalize_groups: Vec<GroupIdentity>,
+    /// Each group's leadership view at the last reconciliation; a change
+    /// triggers one full round-robin pass over every pending request.
+    observed: BTreeMap<GroupIdentity, (Role, u64)>,
+    scan_remaining: usize,
 }
 impl<R: ApplicationReceipt> ClientRouter<R> {
     pub fn new(
@@ -251,6 +259,10 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
             sequence: 0,
             cursor: 0,
             closed: false,
+            finalize: BTreeMap::new(),
+            finalize_groups: Vec::new(),
+            observed: BTreeMap::new(),
+            scan_remaining: 0,
         })
     }
     pub fn binding(&self) -> ClientRouterBinding {
@@ -419,7 +431,9 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         if !p.has_output {
             p.has_output = true;
             p.outcome = Some(outcome);
+            let group = p.ticket.group;
             self.ready.push_back(sequence);
+            self.finalize.entry(group).or_default().push_back(sequence);
         }
     }
     fn cleanup(&mut self, sequence: u64) {
@@ -705,6 +719,12 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
     }
     /// Bounded fair observation. Durable log takeover or a newer term with no
     /// pending dependency permits release of abandoned command reservations.
+    /// Observe leadership and delivery for pending requests. Only two things
+    /// change a pending request here: a group's leadership view (role or
+    /// term) moving, which triggers one bounded round-robin pass over every
+    /// request, and a delivered output becoming final once its group has no
+    /// persistence dependency, handled from a per-group queue. Steady polls
+    /// therefore touch only requests that can change.
     pub fn reconcile<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
         &mut self,
         owner: &EffectOwner<Q, T, E>,
@@ -718,8 +738,20 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         if visits > 65536 {
             return Err(ClientError::InvalidLimits);
         }
+        let mut changed = owner.is_failed();
+        for group in owner.groups() {
+            let core = owner.core(group).unwrap();
+            let view = (core.role(), core.state().hard_state.term);
+            if self.observed.get(&group) != Some(&view) {
+                self.observed.insert(group, view);
+                changed = true;
+            }
+        }
+        if changed && self.scan_remaining == 0 {
+            self.scan_remaining = self.pending.len();
+        }
         let mut visited = 0;
-        for _ in 0..visits {
+        while self.scan_remaining > 0 && visited < visits {
             let sequence = self
                 .pending
                 .range((Excluded(self.cursor), Unbounded))
@@ -727,37 +759,72 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
                 .map(|(s, _)| *s)
                 .or_else(|| self.pending.first_key_value().map(|(s, _)| *s));
             let Some(sequence) = sequence else {
+                self.scan_remaining = 0;
                 break;
             };
             self.cursor = sequence;
+            self.scan_remaining -= 1;
             visited += 1;
-            let p = &self.pending[&sequence];
-            let core = owner.core(p.ticket.group).unwrap();
-            let unknown = if owner.is_failed() {
-                Some(ClientUnknown::OwnerFailed)
-            } else if core.role() != Role::Leader || core.state().hard_state.term != p.term {
-                Some(ClientUnknown::LeadershipChanged)
-            } else {
-                None
+            self.reconcile_one(owner, sequence);
+        }
+        self.finalize_groups.clear();
+        self.finalize_groups.extend(self.finalize.keys().copied());
+        for index in 0..self.finalize_groups.len() {
+            if visited >= visits {
+                break;
+            }
+            let group = self.finalize_groups[index];
+            let Some(core) = owner.core(group) else {
+                self.finalize.remove(&group);
+                continue;
             };
-            let takeover = p.stepped
-                && p.position.is_some_and(|pos| {
-                    !core.has_pending_dependency()
-                        && (core
-                            .state()
-                            .entry_at(pos.index)
-                            .is_some_and(|e| e.term == pos.term)
-                            || core.state().hard_state.term > pos.term)
-                });
-            if owner.is_failed() || (p.has_output && takeover) {
-                self.pending.get_mut(&sequence).unwrap().terminal = true;
+            if core.has_pending_dependency() {
+                continue;
             }
-            if let Some(reason) = unknown {
-                self.publish(sequence, ClientOutcome::Unknown(reason));
+            while visited < visits {
+                let Some(sequence) = self.finalize.get_mut(&group).and_then(VecDeque::pop_front)
+                else {
+                    self.finalize.remove(&group);
+                    break;
+                };
+                visited += 1;
+                self.reconcile_one(owner, sequence);
             }
-            self.cleanup(sequence);
         }
         Ok(visited)
+    }
+    fn reconcile_one<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
+        &mut self,
+        owner: &EffectOwner<Q, T, E>,
+        sequence: u64,
+    ) {
+        let Some(p) = self.pending.get(&sequence) else {
+            return;
+        };
+        let core = owner.core(p.ticket.group).unwrap();
+        let unknown = if owner.is_failed() {
+            Some(ClientUnknown::OwnerFailed)
+        } else if core.role() != Role::Leader || core.state().hard_state.term != p.term {
+            Some(ClientUnknown::LeadershipChanged)
+        } else {
+            None
+        };
+        let takeover = p.stepped
+            && p.position.is_some_and(|pos| {
+                !core.has_pending_dependency()
+                    && (core
+                        .state()
+                        .entry_at(pos.index)
+                        .is_some_and(|e| e.term == pos.term)
+                        || core.state().hard_state.term > pos.term)
+            });
+        if owner.is_failed() || (p.has_output && takeover) {
+            self.pending.get_mut(&sequence).unwrap().terminal = true;
+        }
+        if let Some(reason) = unknown {
+            self.publish(sequence, ClientOutcome::Unknown(reason));
+        }
+        self.cleanup(sequence);
     }
     pub fn poll(&mut self) -> Option<ClientCompletion<R>> {
         let sequence = self.ready.pop_front()?;

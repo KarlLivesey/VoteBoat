@@ -41,6 +41,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
+| Done C11: client reconciliation touches only what can change | Largest per-write host item after E1 | E1 | Linux/Mac loaded pairs; library, effect-owner, admission, service suites | T4 |
 | Done E2: directory and transfer services wait on readiness | Same host-loop change for the other two binaries, through one shared `HostWait` | E1 | counter 203, directory 22, transfer 9/12/33; fmt + strict Clippy | T4 |
 | Done C9: steady polls stop rebuilding peer assignments | Idle and moderate-load CPU is dominated by fixed per-poll work; skip provably unchanged peer reconciliation | C6 | Idle CPU/round and loaded CPU/original pairs; affected suites; fmt + strict Clippy | T4 |
 | Later C10: remaining per-poll fixed costs | Idle profile after C9: connector poll/accept, TLS reads of idle sockets, scheduler map scans, connection-union recheck per step | C9 | Same idle/loaded CPU pairs | T4 |
@@ -107,6 +108,21 @@ the wait costs 0.54–0.60 s, so this is the platform's wake-from-idle cost, not
 extra work; a shorter wait cap makes it worse). Adopted for the Linux gains and
 the Mac gains under load; the Mac idle cost is recorded for a later
 platform-specific keep-warm policy.
+
+#### C11 implemented: client reconciliation touches only what can change
+
+With fixed per-round costs gone, the loaded host profile's largest single item
+was `ClientRouter::reconcile` (6.1% self plus ~4% of B-tree traversal): every
+poll revisited up to 128 pending requests round-robin, each with two ordered-map
+lookups, to notice the few whose output had been delivered and whose group had
+no persistence dependency, or a leadership change. Only two things change a
+pending request there: a group's leadership view (role, term) moving, or a
+delivered output becoming final. The router now records each group's view and
+runs the full bounded pass only when it moves or the owner failed, and keeps a
+per-group queue of delivered requests that it drains once the group has no
+pending dependency (a group with one is skipped whole). The per-request logic is
+unchanged. Linux tmpfs 15,000/s: 20.9 → 18.4 µs/original (−12%); Mac RAM disk
+20.9 → 19.5 µs (−7%); rate and p99 unchanged.
 
 #### E2 implemented: every service binary waits on readiness
 
