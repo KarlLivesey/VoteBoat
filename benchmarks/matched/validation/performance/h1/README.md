@@ -4,8 +4,8 @@ Stacks on PR 1 (`622bc411`); harness-only changes. These are three interleaved
 pairs per engine and cell on a shared, loaded Linux 9800X3D host, not a sustained
 capacity qualification. Every run and uptime observation is retained.
 
-- `buffer-pairs.txt`: `297aec15` flag-only versus fixed original-ID buffer
-  (source subsequently committed in `b58f57bf`).
+- `buffer-pairs.txt`: `297aec15` flag-only versus **rejected** fixed original-ID
+  buffer (`b58f57bf`), preserved unchanged as historical raw data.
 - `current-pairs.txt`: fixed-buffer baseline versus **rejected** current-thread
   client candidate (`80cab34e`), preserved unchanged as historical raw data.
 - `environment.txt`: compiler, OS, CPU, flags and common settings.
@@ -13,11 +13,24 @@ capacity qualification. Every run and uptime observation is retained.
   controls, not controls for the restored runtime.
 - `round2/REPORT.md`: restored-runtime validation, full attribution outputs and
   the explicitly unverified numeric match on the heavily loaded host.
+- `round3/REPORT.md`: buffer rejection, quiet-Mac results and exact flag-only
+  source restoration; round 3 checks are recorded separately from earlier runs.
 
-The fixed buffer is kept on code reasoning; its allocation saving is unmeasurable
-at this noise level. All sample medians, including singleton deltas, are
-historical diagnostics rather than measured wins or attributed savings.
-Quiet-Mac confirmation remains recommended. The current-thread client was rejected
+The fixed buffer is rejected and reverted in round 3. The
+[initial Mac report](https://github.com/KarlLivesey/VoteBoat/pull/2#issuecomment-6239967157)
+was inconclusive (mean width +5.779%, wider in 7/8 pairs, p=0.070312).
+The independent [30-pair Mac report](https://github.com/KarlLivesey/VoteBoat/pull/2#issuecomment-6240057138)
+found **WORKLOAD CHANGED**: mean width +5.858%, wider in 30/30 pairs,
+p=1.8626451e-9; persists/original −1.624%, lower in 28/30,
+p=8.6799264e-7; sends/original −0.175%. These are medians of within-pair
+head/flag ratios. The initial and fresh 30-pair series are separate, not pooled.
+[Claude Opus round 1 N2](https://github.com/KarlLivesey/VoteBoat/pull/2#issuecomment-6239604979)
+already found the apparent buffer CPU gain was noise. All original sample medians,
+including singleton deltas, remain historical diagnostics rather than measured
+wins or attributed savings. The later Mac workload result supersedes the prior
+keep-on-code-reasoning decision and the loaded-Linux null result.
+
+The current-thread client was rejected
 and reverted in round 2. GPT-6.1-Sol review found smaller merge widths and higher
 persists per original in all three bulk pairs, including with attribution off:
 attribution-on median mean width 687.36→512.33 and persists/original
@@ -38,8 +51,9 @@ code, observer-count change or per-original responder removal is part of H1.
 ## Method
 
 Check out the exact source in a clean detached worktree: `297aec15` for flag-only,
-`b58f57bf` for the retained buffer, or `80cab34e` only to reproduce the rejected
-candidate. Build from that worktree with its matched comparison lock:
+`b58f57bf` only to reproduce the rejected buffer, or `80cab34e` only to
+reproduce the rejected current-thread candidate. Build from that worktree with
+its matched comparison lock:
 
 ```sh
 CARGO_TARGET_DIR="$PWD/target/h1-release" CARGO_BUILD_JOBS=4 cargo +stable build --release --manifest-path benchmarks/matched/Cargo.toml --locked --offline
@@ -113,4 +127,5 @@ tool searches a nested latency object, whereas this harness emits
 `request_p99_ns` at top level, so it prints `p99=None`. No p99 result or quiet
 capacity claim is made. No outlier was removed. Different experiment windows
 have different background load; compare each candidate only to its own paired
-baseline, not across windows. No worker scaling curve or macOS run was taken.
+baseline, not across windows. No worker scaling curve or macOS run was taken by
+the original builder; the subsequent runner Mac reports are linked above.
