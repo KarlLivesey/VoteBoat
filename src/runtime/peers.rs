@@ -175,6 +175,71 @@ pub struct PeerDriver<C: PeerConnector, F: PeerTransportFactory<C::Session>> {
     now: MonoTime,
     closed: bool,
     failed: Option<PeerDriverError>,
+    /// Bumped whenever the retained admission route plan is replaced.
+    routes_generation: u64,
+    /// Inputs of the last reconciliation that found the authorized roster
+    /// already equal to the desired assignments.
+    steady: Option<SteadyAssignments>,
+}
+/// While these inputs are unchanged and every core's connection set is its
+/// fixed bootstrap voter set, reconciliation would again find the roster
+/// unchanged and adopt identical routes, so it can be skipped.
+struct SteadyAssignments {
+    routes_generation: u64,
+    groups: Vec<(GroupIdentity, ConfigurationId)>,
+    roster: Vec<(NodeId, StoreIdentity)>,
+}
+impl SteadyAssignments {
+    fn capture<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy, Tr: PeerTransport>(
+        routes_generation: u64,
+        owner: &EffectOwner<Q, T, E>,
+        roster: &PeerRoster<Tr>,
+    ) -> Option<Self> {
+        let mut groups = Vec::new();
+        for group in owner.groups() {
+            let core = owner.core(group)?;
+            if !core.connections_are_bootstrap() {
+                return None;
+            }
+            groups.push((group, core.state().bootstrap.configuration));
+        }
+        Some(Self {
+            routes_generation,
+            groups,
+            roster: Self::roster(roster).collect(),
+        })
+    }
+    fn roster<Tr: PeerTransport>(
+        roster: &PeerRoster<Tr>,
+    ) -> impl Iterator<Item = (NodeId, StoreIdentity)> + '_ {
+        roster
+            .authorized_peers()
+            .filter_map(|peer| Some((peer, roster.peer_identity(peer)?.store)))
+    }
+    fn holds<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy, Tr: PeerTransport>(
+        &self,
+        routes_generation: u64,
+        owner: &EffectOwner<Q, T, E>,
+        roster: &PeerRoster<Tr>,
+    ) -> bool {
+        if self.routes_generation != routes_generation {
+            return false;
+        }
+        let mut groups = owner.groups();
+        for &(expected, configuration) in &self.groups {
+            let unchanged = groups.next().is_some_and(|group| {
+                group == expected
+                    && owner.core(group).is_some_and(|core| {
+                        core.connections_are_bootstrap()
+                            && core.state().bootstrap.configuration == configuration
+                    })
+            });
+            if !unchanged {
+                return false;
+            }
+        }
+        groups.next().is_none() && Self::roster(roster).eq(self.roster.iter().copied())
+    }
 }
 impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
     pub fn new<O: OutboundQueue>(
@@ -275,6 +340,8 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
             now,
             closed: false,
             failed: None,
+            routes_generation: 0,
+            steady: None,
         })
     }
     pub fn usage(&self) -> PeerDriverUsage {
@@ -392,6 +459,7 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         routes: BTreeMap<NodeId, PeerRoute<C::Endpoint>>,
     ) {
         self.parts.admission_routes = Some(routes);
+        self.routes_generation += 1;
     }
     pub(super) fn route_budget(
         parts: &PeerParts<C, F>,
@@ -474,6 +542,7 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         };
         owner.install_connection_budget(budget);
         self.parts.admission_routes = Some(routes);
+        self.routes_generation += 1;
         self.now = now;
         Ok(())
     }
@@ -500,6 +569,14 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         let Some(plan) = &self.parts.admission_routes else {
             return Ok(());
         };
+        if self
+            .steady
+            .as_ref()
+            .is_some_and(|s| s.holds(self.routes_generation, owner, &self.parts.roster))
+        {
+            return Ok(());
+        }
+        self.steady = None;
         let mut assignments = PeerAssignments::from_cores(
             self.parts.roster.local(),
             owner.groups().map(|g| owner.core(g).unwrap()),
@@ -538,6 +615,8 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         {
             // Adopt changed hints without canceling accepted work or resetting fairness.
             self.parts.routes = routes;
+            self.steady =
+                SteadyAssignments::capture(self.routes_generation, owner, &self.parts.roster);
             return Ok(());
         }
         let peers = self.check_assignment_routes(&assignments, &routes, now)?;

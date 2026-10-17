@@ -17,6 +17,20 @@ use super::*;
 impl Raft {
     /// Exact stores needed by committed, accepted and pending rollback views.
     /// Connection permission is not voting, membership activation or durability.
+    /// Whether `connection_replicas` is exactly the bootstrap voter set, which
+    /// is fixed for this core's lifetime: a plain log with no pending full
+    /// plan, staged snapshot or connection permit.
+    pub(crate) fn connections_are_bootstrap(&self) -> bool {
+        !self.fenced
+            && self.log_summary.matches(&self.durable)
+            && self.log_summary.is_plain()
+            && self
+                .pending
+                .as_ref()
+                .is_none_or(|p| p.next.full().is_none())
+            && self.staged_snapshot.is_none()
+            && self.connection_permit().is_none()
+    }
     pub fn connection_replicas(
         &self,
         limit: usize,

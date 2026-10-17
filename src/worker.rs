@@ -234,9 +234,15 @@ pub fn batch_cost(
         .checked_mul(PERSIST_UNIT_METADATA)
         .ok_or(WorkerError::BatchTooLarge)?;
     let mut control = true;
-    let mut groups = BTreeSet::new();
-    for unit in units {
-        if unit.visit.group != unit.update.group || !groups.insert(unit.update.group) {
+    // Small batches (the usual case) check duplicates without allocating.
+    let mut groups = (units.len() > 16).then(BTreeSet::new);
+    for (i, unit) in units.iter().enumerate() {
+        let group = unit.update.group;
+        let duplicate = match &mut groups {
+            Some(groups) => !groups.insert(group),
+            None => units[..i].iter().any(|u| u.update.group == group),
+        };
+        if unit.visit.group != group || duplicate {
             return Err(WorkerError::WrongBinding);
         }
         let (payload, is_control) = persist_payload_cost(&unit.update)?;

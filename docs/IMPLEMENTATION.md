@@ -40,6 +40,8 @@ implemented or benchmarked; unsafe variants are not offered as options.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
+| Done C9: steady polls stop rebuilding peer assignments | Idle and moderate-load CPU is dominated by fixed per-poll work; skip provably unchanged peer reconciliation | C6 | Idle CPU/round and loaded CPU/original pairs; affected suites; fmt + strict Clippy | T4 |
+| Next C10: remaining per-poll fixed costs | Idle profile after C9: connector poll/accept, TLS reads of idle sockets, scheduler map scans, connection-union recheck per step | C9 | Same idle/loaded CPU pairs | T4 |
 | Done C6: a poll never truncates a ready visit | The default replica step budget (128) silently cut every 256-original visit in half, capping each leader barrier at 128 originals; defaults now let one barrier carry a whole 1,024-original visit | C3a/C3b | Mac APFS loaded pairs, 31:1 skew, window 1, RAM-disk CPU/original; three-configuration suite; fmt + strict Clippy | T3 |
 | Next C4': re-measure commit/append fusion without the cap | The 461 re-measurement saw ~65 originals per barrier — the 128-step cap — not arrival limits; with C6 the leader's alternating commit-only barrier is the next serial wait | C6; slice 461 (b4875d9b) | Leader barriers per original and loaded writes/s on APFS; strict acknowledgement contract unchanged | T3 |
 | Following C7: shared barriers across groups | With two groups the leader's WAL worker starts each barrier for whichever group arrived first, so groups take turns; waiting (bounded) for the host's next turn lets queued groups share it | C6 | Multi-group writes/s and per-group latency on APFS; single-group unchanged | T3 |
@@ -51,6 +53,43 @@ implemented or benchmarked; unsafe variants are not offered as options.
 Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider than
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
+
+#### C9 implemented: steady polls stop rebuilding peer assignments
+
+Priority order from the user (17 October 2026): general CPU speed, then
+platform CPU speed, then general durable-save speed, then platform durable-save
+speed. An idle native host (window 1, 20/s) still spends ~18 µs of CPU per poll
+round across three replicas, and at moderate load (~2 originals per round) that
+fixed per-round cost dominates CPU/original. The idle profile showed every node
+poll calling `reconcile_planned_membership` twice, each time rebuilding
+`PeerAssignments` from every core's `connection_replicas`, building a desired
+map and cloning every route into a new map — only to find the roster unchanged
+and swap in identical routes (~13% of idle CPU).
+
+`PeerDriver` now records the inputs of a reconciliation that found the roster
+already equal to the desired assignments: the admission-route plan generation,
+each group with its bootstrap configuration, and the authorized peers with their
+stores. It skips the rebuild only while all of those are unchanged and every
+core's connection set is still its fixed bootstrap voter set
+(`Raft::connections_are_bootstrap`: plain log, no pending full plan, staged
+snapshot or connection permit). Any configuration entry, snapshot, permit,
+route-plan replacement, group change or roster change recomputes exactly as
+before. Two smaller changes ride along: the WAL thread reuses the cost validated
+at admission instead of recomputing `batch_cost` per request (and small batches
+check duplicate groups without allocating), and the client router boxes its
+~650-byte pending records so ordered-map removals shift pointers.
+
+Mac M2 Max, RAM-disk WAL, interleaved pairs against dd4c6bc9: idle CPU per poll
+round 17.9–18.3 → 15.0–15.1 µs (three pairs); loaded 15,000/s marginal
+CPU/original 25.0 → 23.5 µs (five pairs, rate and p99 unchanged). Measured and
+dropped: skipping the connection-union recheck in `Shard::with_core` and a
+time-bounded idle `accept` (no measurable change on the Mac; Linux timing was
+too noisy under other users' load ≈32). Affected suites pass: library 433,
+effect_owner 208, peers 50, native_member_startup 19, startup 60.
+
+The C6 all-feature run had 12 `logical_activation_nested` failures from one
+15-second wall-clock timeout (`native logical child timeout`) while this host
+was also profiling; the binary passes alone on the same commit (14/14, 206 s).
 
 #### Apple barrier publication measured; parked on device detection
 

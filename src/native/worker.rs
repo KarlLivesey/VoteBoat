@@ -44,6 +44,8 @@ impl WorkerWake for ThreadWake {
 struct Batch {
     ticket: WorkerTicket,
     units: Vec<PersistUnit>,
+    /// Cost validated at admission; the units are not changed afterwards.
+    bytes: usize,
 }
 enum Work {
     Persist(Batch),
@@ -263,9 +265,7 @@ fn ready_window(
 ) -> Vec<Batch> {
     let ceiling = limits.batch_units.min(max_pending_units);
     let mut units = first.units.len();
-    let mut bytes = batch_cost(&first.units, first.units.capacity(), limits)
-        .expect("admitted request retains its validated cost")
-        .0;
+    let mut bytes = first.bytes;
     let mut batches = vec![first];
     while batches.len() < limits.max_requests && units < ceiling {
         let Ok(work) = requests.try_recv() else {
@@ -275,9 +275,7 @@ fn ready_window(
             *deferred = Some(work);
             break;
         };
-        let cost = batch_cost(&next.units, next.units.capacity(), limits)
-            .expect("admitted request retains its validated cost")
-            .0;
+        let cost = next.bytes;
         if next.units.len() > ceiling - units || cost > limits.batch_bytes.saturating_sub(bytes) {
             *deferred = Some(Work::Persist(next));
             break;
@@ -557,12 +555,11 @@ impl<L: LogStore + Send + 'static> PersistenceWorker for NativeLogWorker<L> {
         };
         let visits = units.iter().map(|u| u.visit).collect::<Vec<_>>();
         let count = units.len();
-        match self
-            .sender
-            .as_ref()
-            .unwrap()
-            .try_send(Work::Persist(Batch { ticket, units }))
-        {
+        match self.sender.as_ref().unwrap().try_send(Work::Persist(Batch {
+            ticket,
+            units,
+            bytes,
+        })) {
             Ok(()) => {
                 self.sequence = sequence;
                 for v in &visits {

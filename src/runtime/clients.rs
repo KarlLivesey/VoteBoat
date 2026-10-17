@@ -174,7 +174,8 @@ struct Pending<R> {
 pub struct ClientRouter<R> {
     binding: ClientRouterBinding,
     limits: ClientRouterLimits,
-    pending: BTreeMap<u64, Pending<R>>,
+    // Boxed: removals shift node slots, and a pending request is ~650 bytes.
+    pending: BTreeMap<u64, Box<Pending<R>>>,
     admissions: BTreeMap<u64, u64>,
     positions: BTreeMap<(GroupIdentity, u64, u64), u64>,
     groups: BTreeMap<GroupIdentity, usize>,
@@ -385,7 +386,7 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         };
         self.pending.insert(
             sequence,
-            Pending {
+            Box::new(Pending {
                 ticket,
                 admission,
                 bytes: request.bytes,
@@ -400,7 +401,7 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
                 exported: false,
                 released: false,
                 outcome: None,
-            },
+            }),
         );
         self.admissions.insert(admission.sequence, sequence);
         *self.groups.entry(ticket.group).or_default() += 1;

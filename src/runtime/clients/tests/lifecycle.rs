@@ -51,7 +51,7 @@ fn canceled_observation_and_foreign_completion_keep_class_until_terminal_cleanup
             requests: 1,
             bytes: p.charged,
         };
-        r.pending.insert(1, p);
+        r.pending.insert(1, Box::new(p));
         r.groups.insert(group(1), 1);
         r.usage = charge;
         if !control {
