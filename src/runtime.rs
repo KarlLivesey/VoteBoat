@@ -343,6 +343,8 @@ struct Group {
     turn: usize,
     fenced: bool,
     timer: Option<TimerToken>,
+    /// Queued events that can change the group's connection set.
+    queued_connection_changes: usize,
 }
 impl Group {
     fn ready(&self) -> bool {
@@ -478,10 +480,20 @@ impl<Q: ReadyScheduler> Shard<Q> {
                 turn: 0,
                 fenced: false,
                 timer: None,
+                queued_connection_changes: 0,
             },
         );
         self.retain_connection_history(group)?;
         Ok(())
+    }
+    /// Every group's connection set is its fixed bootstrap voter set and no
+    /// queued event can change it, so the reserved union and retained history
+    /// are already exactly what `register` established: stepping needs no
+    /// recheck. Any configuration, snapshot or permit path recomputes as before.
+    fn connections_steady(&self) -> bool {
+        self.groups.values().all(|g| {
+            g.fenced || (g.queued_connection_changes == 0 && g.core.connections_are_bootstrap())
+        })
     }
     /// Whether the scheduler holds a ready group, so a poll would open a visit
     /// and step queued input without any new input. Groups whose input waits
@@ -652,6 +664,9 @@ impl<Q: ReadyScheduler> Shard<Q> {
                 if tracked {
                     self.admission_sequence = sequence.unwrap();
                 }
+                if connections::changes_connections(&event) {
+                    g.queued_connection_changes += 1;
+                }
                 g.queues[class as usize].push_back(Queued {
                     event,
                     cost,
@@ -785,7 +800,9 @@ impl<Q: ReadyScheduler> Shard<Q> {
         mut check: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
     ) -> Result<Option<Stepped>, RuntimeError> {
         self.observe(now)?;
-        self.reserved_connection_peers()?;
+        if !self.connections_steady() {
+            self.reserved_connection_peers()?;
+        }
         let limits = self.limits;
         let g = self.live(ticket)?;
         if g.core.has_pending_dependency() {
@@ -796,6 +813,9 @@ impl<Q: ReadyScheduler> Shard<Q> {
         };
         g.turn = (turn + 1) % 4;
         let q = g.queues[class].pop_front().unwrap();
+        if connections::changes_connections(&q.event) {
+            g.queued_connection_changes -= 1;
+        }
         g.visit.as_mut().unwrap().used[class].add(q.cost);
         let operation = match &q.event {
             Event::Propose { operation, .. } => Some(*operation),
@@ -842,7 +862,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
             result,
             batch_members: Vec::new(),
         };
-        if stepped.result.is_ok() {
+        if stepped.result.is_ok() && !self.connections_steady() {
             self.retain_connection_history(ticket.group)?;
         }
         Ok(Some(stepped))
@@ -855,8 +875,15 @@ impl<Q: ReadyScheduler> Shard<Q> {
         ticket: VisitTicket,
         f: impl FnOnce(&mut Raft) -> R,
     ) -> Result<R, RuntimeError> {
+        self.live(ticket)?;
+        let steady = self.connections_steady();
         let group = self.live(ticket)?;
         let result = f(&mut group.core);
+        if steady && group.core.connections_are_bootstrap() {
+            // The connection set was the fixed bootstrap set before and still
+            // is: the reserved union and retained history cannot have changed.
+            return Ok(result);
+        }
         if group.core.is_fenced() {
             // Preserve the callback's failure (for example, a failed storage
             // barrier). A fenced core cannot expand its peer set. Keep existing

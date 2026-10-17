@@ -41,6 +41,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
+| Done C12: connection rechecks skipped while at bootstrap | Per-step/per-completion union rebuild removed in steady state | C9 | Profile removal; suites | T4 |
 | Done C11: client reconciliation touches only what can change | Largest per-write host item after E1 | E1 | Linux/Mac loaded pairs; library, effect-owner, admission, service suites | T4 |
 | Done E2: directory and transfer services wait on readiness | Same host-loop change for the other two binaries, through one shared `HostWait` | E1 | counter 203, directory 22, transfer 9/12/33; fmt + strict Clippy | T4 |
 | Done C9: steady polls stop rebuilding peer assignments | Idle and moderate-load CPU is dominated by fixed per-poll work; skip provably unchanged peer reconciliation | C6 | Idle CPU/round and loaded CPU/original pairs; affected suites; fmt + strict Clippy | T4 |
@@ -108,6 +109,22 @@ the wait costs 0.54–0.60 s, so this is the platform's wake-from-idle cost, not
 extra work; a shorter wait cap makes it worse). Adopted for the Linux gains and
 the Mac gains under load; the Mac idle cost is recorded for a later
 platform-specific keep-warm policy.
+
+#### C12 implemented: connection rechecks skipped while every group is at bootstrap
+
+Each step and each `with_core` call recomputed the reserved connection union
+(cloning the budget history and inspecting every core and queued event) and
+re-retained the group's connection replicas, although in steady operation every
+group's connection set is its fixed bootstrap voter set. The shard now counts
+queued connection-changing events per group and skips both rechecks while every
+live group has none and `connections_are_bootstrap()`; any configuration,
+snapshot, permit or queued change recomputes exactly as before. Under load the
+skip applied to every call (8,824 of 8,824 in one run). Loaded profile: the
+union rebuild fell from 4.8% to 0.2% of samples and its map clone from 2.1% to
+none, but interleaved Linux pairs moved only −1…−2%, within run-to-run noise;
+kept for the removed work and its low risk (library, effect-owner, runtime,
+membership, startup, learners, configuration-capacity, native-member-startup
+and counter suites pass).
 
 #### C11 implemented: client reconciliation touches only what can change
 
