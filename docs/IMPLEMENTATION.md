@@ -50,7 +50,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done C9: steady polls stop rebuilding peer assignments | Idle and moderate-load CPU is dominated by fixed per-poll work; skip provably unchanged peer reconciliation | C6 | Idle CPU/round and loaded CPU/original pairs; affected suites; fmt + strict Clippy | T4 |
 | Done C17: gather window and wait cap as service options | Operators choose the CPU/latency point (200 µs default; 400 µs −20% CPU for disk-bound deployments) | C13 | counter/directory/transfer suites | T4 |
 | Done C18: per-round host costs re-profiled | Fresh profile and syscall counts at head; dedup hash map and quiet-socket read skipping measured and rejected; staged-batch deadline scan bounded | E1 | Five tmpfs pairs each; syscall shim counts; library, peers, runtime, owner, transport suites; fmt + strict Clippy | T4 |
-| Next D1: ordered pipelined persistence per group | Several persists in flight per group, completed in order; schema plan below | C6, E1 | APFS window-1,024 pairs; fault model tests; three-configuration suites | T3 |
+| In progress D1a: a leader append overlaps a commit-only persistence (branch `d1a-overlap`) | The leader's slot stops alternating append/commit barriers; +12–30% at window 1,024 and +18% at 2,048 on APFS, CPU neutral; one stall in nine runs still open | C6, E1 | Stall reproduced and fixed with a test; three-configuration suites; APFS pairs | T3 |
 | Later P3: shared Append entries | `Rpc::Append` copies entries per peer (~5%); 81 construction sites | — | Framework and native pairs | T4 |
 | Later M1: macOS kqueue readiness | `poll(2)` is ~19% of Mac host CPU under load | E1 | Mac pairs | T4 |
 | Later C10: remaining per-poll fixed costs | Idle profile after C9: connector poll/accept, TLS reads of idle sockets, scheduler map scans, connection-union recheck per step | C9 | Same idle/loaded CPU pairs | T4 |
@@ -118,7 +118,38 @@ extra work; a shorter wait cap makes it worse). Adopted for the Linux gains and
 the Mac gains under load; the Mac idle cost is recorded for a later
 platform-specific keep-warm policy.
 
-#### D1 schema plan: ordered pipelined persistence per group (not started)
+#### D1a in progress (branch `d1a-overlap`): measured, not merged
+
+The durable chain at a fixed client window is bound by the leader's single
+persistence slot alternating append and commit-only barriers (Mac APFS
+trace at 99db105f: 61 barriers of ~12 ms, two ~6 ms device flushes each).
+Branch `d1a-overlap` (c8271c88) lets an ordinary leader append be planned
+behind a queued commit-only persistence so both ride one worker barrier:
+`Raft::pending_commit` and `step_permitted`, in-order completion, early
+replication for the chained append, a permission-aware shard queue, owner
+visits that continue behind their leased persistence, a replica driver
+that steps the continuation before submitting, and a native worker that
+takes two units per group with a 100 µs straggler wait after a commit-only
+unit. Tests cover the core contract (chained planning, in-order and
+combined completion, out-of-order and unadmitted rejection, fencing, early
+replication), the owner continuation and the worker rule; the library,
+owner, core, runtime, worker, startup and service suites pass with strict
+Clippy and formatting clean.
+
+Measured on the Mac APFS volume (16,000 offers at 20,000/s, interleaved
+pairs against 5ff6db7a, rate during the offering horizon): window 1,024
++12–30% with p99 153→121 ms, window 2,048 +18% with p99 179→141 ms,
+window 4,096 inconclusive; leader barriers carry one commit and one append
+each. Linux tmpfs 15,000/s: marginal CPU and p99 unchanged.
+
+Open: one run in nine at window 2,048 stalled (26 leader barriers, most
+offers refused, only five host wait timeouts), not reproduced on Linux.
+The branch stays off `main` until the cause is found and tested; next is
+instrumenting worker refusals, continuation outcomes and a no-progress
+watchdog in the benchmark and reproducing at window 2,048 on the Mac.
+Details and the schema plan are in the branch's copy of this document.
+
+#### D1 schema plan: ordered pipelined persistence per group (superseded by D1a)
 
 Purpose: at a fixed client window the durable rate is bound by the chain
 leader append barrier → follower barrier → leader commit barrier, because a
