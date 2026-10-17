@@ -23,7 +23,8 @@ These controls establish no sustained capacity or minimum-floor win.
 engine (default 16; positive integer up to the harness budget of 32768). For
 example, pass `--server-workers 1` for a one-worker scaling cell. The effective
 value appears in both `settings.server_workers` and the existing top-level
-`server_workers` JSON field; client workers remain 1. Keep worker counts equal
+`server_workers` JSON field; one client executor runs on the calling thread
+with a current-thread runtime. Keep worker counts equal
 when comparing engines. This flag belongs to the volatile framework binary;
 there is no durable binary sharing this workspace's entry point.
 
