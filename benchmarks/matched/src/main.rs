@@ -146,8 +146,9 @@ fn server_runtime(settings: Settings) -> Result<Runtime, Failure> {
 fn main() -> Result<(), Failure> {
     let (engine, settings) = Settings::parse()?;
     let server = server_runtime(settings)?;
-    let clients = Builder::new_multi_thread()
-        .worker_threads(1)
+    // One client executor in either topology; drive it on the caller to avoid
+    // the extra worker handoff while keeping the server runtime independent.
+    let clients = Builder::new_current_thread()
         .thread_name("matched-client")
         .thread_stack_size(3 * 1024 * 1024)
         .enable_all()

@@ -148,6 +148,54 @@ it searches a nested latency object while this harness emits top-level
 our own builds/checks finished before measurement. The fixed-buffer release
 binary is the baseline for the next independent experiment.
 
+#### H1 implemented: drive the shared client executor on the caller
+
+The one-worker multithread client runtime is replaced with a current-thread
+runtime driven by the caller. It still executes one client task at a time;
+the separate server runtime and its selected worker count serve both engines
+identically. This removes the additional client worker/scheduler handoff. Client
+IDs, replies, bounded admission, barrier/timing scope, all attribution counting
+and JSON keys stay unchanged. Timeout still drops the owned JoinSet, then runs
+owned server cleanup before runtime destruction. No library source changed.
+
+Against the retained fixed-buffer binary, three new AB/BA/AB pairs per engine
+and cell with the same settings as above (one-minute load 52.6–59.1):
+
+| Engine | Cell | Fixed-buffer baseline | Current-thread client | Change |
+| --- | --- | ---: | ---: | ---: |
+| VoteBoat | Bulk | 268 | 261 | −2.6% |
+| OpenRaft | Bulk | 703 | 703 | neutral |
+| VoteBoat | Singleton | 12,243 | 11,732 | −4.2% |
+| OpenRaft | Singleton | 38,523 | 37,670 | −2.2% |
+
+Kept: both singleton medians are lower; bulk is lower for VoteBoat and neutral
+for OpenRaft. All runs are retained in `h1/current-pairs.txt` beside the prior
+experiment, including the last VoteBoat singleton pair that regressed
+11,406→12,969 ns. Three loaded-host pairs do not establish a quiet-machine win;
+do not combine the two experiments' medians into an overall speedup because
+host load changed between windows. No measured candidate was dropped. Actor
+proposal/reply-map/watch optimizations and fewer per-original responders were
+not attempted: the pinned OpenRaft provider owns its corresponding paths, so an
+actor-only edit would violate this task's engine-neutral comparison constraint.
+
+Final builder validation: all 71 matched tests pass, including attribution-on
+and -off original-result/maintenance coverage; matched fmt and strict Clippy
+are clean. The enabled pre-push hook runs root fmt, root strict Clippy in all
+four configurations, matched fmt and strict all-target Clippy; both preceding
+slice pushes passed it with zero diagnostics. The release binary also completed
+real CLI campaigns for both engines at 1, 2 and 16 server workers with matching
+JSON settings/report fields, 128 originals, 32 requests and all three frontiers
+133. One-second campaign guard runs returned the original campaign expiry with
+successful cleanup for both engines. The smoke assertion initially expected
+Display text but Rust main prints the error's Debug form; it was corrected
+against the observed `Expired { phase: "campaign", ... }`, with no product fix.
+These CLI results are preserved in `h1/final-cli.log`.
+
+Builder scope is complete; independent measurement/review and macOS execution
+remain outstanding. The macro plan remains T4: no library milestone is claimed
+complete, and V2/V3 remain the next library deliverables after their recorded
+dependencies. Server-worker scaling campaigns are enabled, not qualified here.
+
 #### V1 implemented: core-canonical volatile log (measurement pending (runner))
 
 Design: `target/claude/research-r1/architect-plan.md` (PR 1). Implemented
