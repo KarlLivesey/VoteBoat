@@ -41,7 +41,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
-| Next E2: directory and transfer services wait on readiness | Same host-loop change for the other two binaries | E1 | Their suites; idle CPU | T4 |
+| Done E2: directory and transfer services wait on readiness | Same host-loop change for the other two binaries, through one shared `HostWait` | E1 | counter 203, directory 22, transfer 9/12/33; fmt + strict Clippy | T4 |
 | Done C9: steady polls stop rebuilding peer assignments | Idle and moderate-load CPU is dominated by fixed per-poll work; skip provably unchanged peer reconciliation | C6 | Idle CPU/round and loaded CPU/original pairs; affected suites; fmt + strict Clippy | T4 |
 | Later C10: remaining per-poll fixed costs | Idle profile after C9: connector poll/accept, TLS reads of idle sockets, scheduler map scans, connection-union recheck per step | C9 | Same idle/loaded CPU pairs | T4 |
 | Done C6: a poll never truncates a ready visit | The default replica step budget (128) silently cut every 256-original visit in half, capping each leader barrier at 128 originals; defaults now let one barrier carry a whole 1,024-original visit | C3a/C3b | Mac APFS loaded pairs, 31:1 skew, window 1, RAM-disk CPU/original; three-configuration suite; fmt + strict Clippy | T3 |
@@ -107,6 +107,21 @@ the wait costs 0.54–0.60 s, so this is the platform's wake-from-idle cost, not
 extra work; a shorter wait cap makes it worse). Adopted for the Linux gains and
 the Mac gains under load; the Mac idle cost is recorded for a later
 platform-specific keep-warm policy.
+
+#### E2 implemented: every service binary waits on readiness
+
+`service_setup::HostWait` holds the process-wide `HostWake`, the reusable
+descriptor buffer and the wait (10 ms cap, 100 µs gather on queued work). The
+counter, directory and transfer services call it with their node's descriptors
+and deadline, their command listener and the open administrative connection's
+channel; the old unconditional 1 ms parks are gone. No behaviour change beyond
+when a round starts: counter 203, directory 22, transfer 9/12/33 pass.
+
+The E1 three-configuration run on this host: native-only and no-default suites
+clean; the all-features run again failed only `logical_activation_driver`
+(first `cohort/progress.rs:29` wait timeout under load, then the serial
+`HISTORY` mutex cascade) and `logical_activation_nested` (the 15 s wall-clock
+timeout); both pass alone on the same tree (31/31 twice, 14/14).
 
 #### Inline small command bytes measured and rejected
 

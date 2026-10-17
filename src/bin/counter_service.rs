@@ -89,7 +89,6 @@ use std::{
     net::{SocketAddr, TcpListener},
     os::fd::AsRawFd,
     path::Path,
-    sync::Arc,
     time::{Duration, Instant},
 };
 use voteboat::observability::*;
@@ -532,16 +531,12 @@ fn run_service(
     let command_local = service_access::server_local(id, owner.store.session);
     let discovery = prepared.discovery;
     let command_scopes = service.local().owner.groups().collect::<Vec<_>>();
-    let mut command_generation = 0u64;
-    let start = Instant::now();
-    println!(
-        "ready node={id} peer={peer_address} transport={protocol:?} command={}",
-        listener.local_addr()?
-    );
+    let (mut command_generation, start) = (0u64, Instant::now());
+    announce_ready(id, &peer_address, protocol, &listener)?;
     let mut connection: Option<Connection> = None;
     let (mut quit, mut shutdown) = (false, shutdown::Shutdown::default());
     let mut leadership = leadership_set::Leaders::new(&service);
-    let mut host = HostWait::new();
+    let mut host = service_setup::HostWait::new();
     loop {
         let time = now(start);
         poll_credential_updates(&mut service, &mut credentials, &mut peers, &mut quit);
@@ -617,7 +612,12 @@ fn run_service(
         if service.is_drained() {
             break;
         }
-        host.wait(&service, &listener, connection.as_ref(), time)?;
+        let deadline = service.next_deadline();
+        host.wait(
+            |out| host_fds(&service, &listener, connection.as_ref(), out),
+            deadline,
+            time,
+        )?;
     }
     finish_service(service, drain, credentials, peers, observer, id)
 }
@@ -1314,54 +1314,29 @@ fn poll_service(
     checked(result)?;
     Ok(())
 }
-/// Longest the host loop waits with nothing announced; bounds host-side
-/// timers such as credential reloads and administrative deadlines.
-const HOST_MAX_WAIT: Duration = Duration::from_millis(10);
-/// Gather window before a round that already has queued work.
-const HOST_GATHER: Duration = Duration::from_micros(100);
-/// Host-loop readiness state: the wake every worker signals, the reusable
-/// descriptor buffer and the wait itself.
-struct HostWait {
-    wake: Arc<voteboat::native::readiness::HostWake>,
-    readiness: voteboat::native::readiness::Readiness,
-    fds: Vec<voteboat::worker::ReadinessFd>,
+fn announce_ready(
+    id: u64,
+    peer_address: &impl std::fmt::Display,
+    protocol: NativePeerProtocol,
+    listener: &TcpListener,
+) -> Result<(), Failure> {
+    println!(
+        "ready node={id} peer={peer_address} transport={protocol:?} command={}",
+        listener.local_addr()?
+    );
+    Ok(())
 }
-impl HostWait {
-    fn new() -> Self {
-        Self {
-            wake: service_setup::host_wake(),
-            readiness: voteboat::native::readiness::Readiness::default(),
-            fds: Vec::new(),
-        }
-    }
-    /// Wait for a socket, a worker wake or the earliest deadline instead of
-    /// polling at a fixed cadence; polling remains the only source of progress.
-    fn wait(
-        &mut self,
-        service: &Service,
-        listener: &TcpListener,
-        connection: Option<&Connection>,
-        time: MonoTime,
-    ) -> Result<(), Failure> {
-        self.fds.clear();
-        service.readiness_fds(&mut self.fds);
-        self.fds.push(self.wake.fd());
-        self.fds
-            .push(voteboat::worker::ReadinessFd::read(listener.as_raw_fd()));
-        if let Some(c) = connection {
-            c.stream.readiness_fds(&mut self.fds);
-        }
-        let limit = service
-            .next_deadline()
-            .map(|d| Duration::from_millis(d.0.saturating_sub(time.0)))
-            .map_or(HOST_MAX_WAIT, |d| d.min(HOST_MAX_WAIT));
-        if self.fds.iter().any(|f| f.immediate) {
-            std::thread::park_timeout(HOST_GATHER);
-        } else {
-            self.readiness.wait(&self.fds, limit)?;
-        }
-        self.wake.drain();
-        Ok(())
+/// Descriptors the counter host waits on besides its worker wake.
+fn host_fds(
+    service: &Service,
+    listener: &TcpListener,
+    connection: Option<&Connection>,
+    out: &mut Vec<voteboat::worker::ReadinessFd>,
+) {
+    service.readiness_fds(out);
+    out.push(voteboat::worker::ReadinessFd::read(listener.as_raw_fd()));
+    if let Some(c) = connection {
+        c.stream.readiness_fds(out);
     }
 }
 fn accept_connection(

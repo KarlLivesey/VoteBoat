@@ -187,6 +187,50 @@ pub fn host_wake() -> Arc<voteboat::native::readiness::HostWake> {
     })
     .clone()
 }
+/// Longest a host loop waits with nothing announced; bounds host-side timers
+/// such as credential reloads and administrative deadlines.
+const HOST_MAX_WAIT: std::time::Duration = std::time::Duration::from_millis(10);
+/// Gather window before a round that already has queued work.
+const HOST_GATHER: std::time::Duration = std::time::Duration::from_micros(100);
+/// Host-loop readiness state: the wake every worker signals, the reusable
+/// descriptor buffer and the wait itself.
+pub struct HostWait {
+    wake: Arc<voteboat::native::readiness::HostWake>,
+    readiness: voteboat::native::readiness::Readiness,
+    fds: Vec<voteboat::worker::ReadinessFd>,
+}
+impl HostWait {
+    pub fn new() -> Self {
+        Self {
+            wake: host_wake(),
+            readiness: voteboat::native::readiness::Readiness::default(),
+            fds: Vec::new(),
+        }
+    }
+    /// Wait for a socket named by `collect`, a worker wake or `deadline`
+    /// instead of polling at a fixed cadence; polling remains the only source
+    /// of progress, so a missed or spurious report costs latency only.
+    pub fn wait(
+        &mut self,
+        collect: impl FnOnce(&mut Vec<voteboat::worker::ReadinessFd>),
+        deadline: Option<MonoTime>,
+        time: MonoTime,
+    ) -> std::io::Result<()> {
+        self.fds.clear();
+        collect(&mut self.fds);
+        self.fds.push(self.wake.fd());
+        let limit = deadline
+            .map(|d| std::time::Duration::from_millis(d.0.saturating_sub(time.0)))
+            .map_or(HOST_MAX_WAIT, |d| d.min(HOST_MAX_WAIT));
+        if self.fds.iter().any(|f| f.immediate) {
+            std::thread::park_timeout(HOST_GATHER);
+        } else {
+            self.readiness.wait(&self.fds, limit)?;
+        }
+        self.wake.drain();
+        Ok(())
+    }
+}
 pub fn open_application_with_rotation<A>(
     mut config: NativeMemberStartup,
     protocol: NativePeerProtocol,

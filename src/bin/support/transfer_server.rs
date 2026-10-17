@@ -281,6 +281,7 @@ struct Host<'a, A: App> {
 }
 impl<A: App> Host<'_, A> {
     fn drive(&mut self) -> Result<(), Failure> {
+        let mut host = super::service_setup::HostWait::new();
         loop {
             let now = MonoTime(self.start.elapsed().as_millis().min(u64::MAX as u128) as u64);
             let peer_failure = !self.quit && self.peers.as_mut().is_some_and(|p| p.poll(self.node));
@@ -341,7 +342,20 @@ impl<A: App> Host<'_, A> {
             {
                 return Err("shutdown timeout; recovery required".into());
             }
-            std::thread::park_timeout(Duration::from_millis(1));
+            let deadline = self.node.next_deadline();
+            host.wait(
+                |out| {
+                    self.node.readiness_fds(out);
+                    out.push(voteboat::worker::ReadinessFd::read(
+                        std::os::fd::AsRawFd::as_raw_fd(self.listener),
+                    ));
+                    if let Some(c) = &self.connection {
+                        c.readiness_fds(out);
+                    }
+                },
+                deadline,
+                now,
+            )?;
         }
     }
 }

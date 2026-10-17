@@ -223,6 +223,7 @@ fn run(
     let mut sequence = 0u64;
     let mut quit = false;
     let mut shutdown = None;
+    let mut host = service_setup::HostWait::new();
     println!(
         "ready directory node={id} authority={:?} command={}",
         plan.authority,
@@ -283,7 +284,20 @@ fn run(
         if shutdown.is_some_and(|t| t.elapsed() > Duration::from_secs(10)) {
             return Err("metadata shutdown timed out; recover before reuse".into());
         }
-        std::thread::park_timeout(Duration::from_millis(1));
+        let deadline = owner.node().next_deadline();
+        host.wait(
+            |out| {
+                owner.node().readiness_fds(out);
+                out.push(voteboat::worker::ReadinessFd::read(
+                    std::os::fd::AsRawFd::as_raw_fd(&listener),
+                ));
+                if let Some(c) = &connection {
+                    c.readiness_fds(out);
+                }
+            },
+            deadline,
+            now,
+        )?;
     }
     credentials.finish()?;
     if let Some(peers) = &mut peers {

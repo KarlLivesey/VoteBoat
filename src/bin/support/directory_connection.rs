@@ -48,6 +48,11 @@ pub struct Commands<'a> {
     pub peers: &'a mut Option<super::peer_credentials::Peers>,
 }
 impl Connection {
+    /// Descriptors of this connection's channel, for the host's readiness wait.
+    #[cfg(unix)]
+    pub fn readiness_fds(&self, out: &mut Vec<voteboat::worker::ReadinessFd>) {
+        self.channel.readiness_fds(out);
+    }
     pub fn new(stream: TcpStream, generation: SecureSessionGeneration) -> Result<Self, Failure> {
         stream.set_nonblocking(true)?;
         Ok(Self {

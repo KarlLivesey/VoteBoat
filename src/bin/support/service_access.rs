@@ -472,10 +472,8 @@ impl Channel {
         }
     }
     /// Descriptors whose readiness means this channel may have input or can
-    /// take pending output; advisory for the host loop's wait. Only the
-    /// counter service waits on readiness so far.
+    /// take pending output; advisory for the host loop's wait.
     #[cfg(unix)]
-    #[allow(dead_code)]
     pub fn readiness_fds(&self, out: &mut Vec<voteboat::worker::ReadinessFd>) {
         use std::os::fd::AsRawFd;
         match self {
