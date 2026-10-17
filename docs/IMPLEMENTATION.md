@@ -41,6 +41,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
+| Done C13: 200 µs gather window | Fewer, fuller rounds; CPU/latency knob measured at 0/100/200/400 µs | E1 | Linux and Mac pairs | T4 |
 | Done C12: connection rechecks skipped while at bootstrap | Per-step/per-completion union rebuild removed in steady state | C9 | Profile removal; suites | T4 |
 | Done C11: client reconciliation touches only what can change | Largest per-write host item after E1 | E1 | Linux/Mac loaded pairs; library, effect-owner, admission, service suites | T4 |
 | Done E2: directory and transfer services wait on readiness | Same host-loop change for the other two binaries, through one shared `HostWait` | E1 | counter 203, directory 22, transfer 9/12/33; fmt + strict Clippy | T4 |
@@ -109,6 +110,18 @@ the wait costs 0.54–0.60 s, so this is the platform's wake-from-idle cost, not
 extra work; a shorter wait cap makes it worse). Adopted for the Linux gains and
 the Mac gains under load; the Mac idle cost is recorded for a later
 platform-specific keep-warm policy.
+
+#### C13 implemented: 200 µs gather window
+
+The gather window before a round with queued work is the host's CPU/latency
+knob: each round costs ~15 µs plus ~12 µs for the timed sleep, so a longer
+window means fewer, fuller rounds. Linux tmpfs 15,000/s against the 100 µs
+window: 200 µs −10% CPU/original (p99 8.2 → 10.1 ms); 400 µs −20% (p99 8 →
+16 ms); no window at all +66% CPU with p99 2.4 ms. Mac RAM disk 200 µs: −11%
+(p99 16 → 20 ms). The benchmark and the services now use 200 µs. On a real
+disk, where p99 is dominated by the fsync (100 ms+), 400 µs is nearly free in
+latency and is the natural choice for a disk-bound deployment; making it a
+service option is a later item.
 
 #### C12 implemented: connection rechecks skipped while every group is at bootstrap
 

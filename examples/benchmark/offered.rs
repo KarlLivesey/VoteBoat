@@ -383,7 +383,7 @@ fn measure<L: LogStore + Send + 'static>(
     }
 }
 /// Gather window before a round with pending work; the former fixed park.
-const GATHER: Duration = Duration::from_micros(100);
+const GATHER: Duration = Duration::from_micros(200);
 /// A wait that returns within this is a busy host, not one waking from idle.
 const BUSY: Duration = Duration::from_millis(1);
 /// Longest a host waits with nothing announced; bounds drain-timeout checks.

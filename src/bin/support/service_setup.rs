@@ -191,7 +191,7 @@ pub fn host_wake() -> Arc<voteboat::native::readiness::HostWake> {
 /// such as credential reloads and administrative deadlines.
 const HOST_MAX_WAIT: std::time::Duration = std::time::Duration::from_millis(10);
 /// Gather window before a round that already has queued work.
-const HOST_GATHER: std::time::Duration = std::time::Duration::from_micros(100);
+const HOST_GATHER: std::time::Duration = std::time::Duration::from_micros(200);
 /// Host-loop readiness state: the wake every worker signals, the reusable
 /// descriptor buffer and the wait itself.
 pub struct HostWait {
