@@ -54,6 +54,17 @@ Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider th
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
 
+#### Inline small command bytes measured and rejected
+
+`CommandBytes` stored values up to 22 bytes inline (no `Arc` allocation per
+small command; same 24-byte size). Mac framework bulk cell, five pairs against
+d4eda985: CPU/write 315 → 376 ns (+19%), 7.04M → 5.90M writes/s; singleton
+unchanged. The engine shares one payload allocation between pending, durable
+and outbound copies and short-circuits its hot comparisons on pointer identity
+(`matches_update`, `matches_checkpoint_state`, `LogEntry::eq`); inline values
+have no identity, so every comparison became a content compare and the payload
+accessors stopped inlining. Fixture adjustments only; not adopted.
+
 #### Pipelined replication prototyped and rejected
 
 Each follower has one tracked replication request, and early replication
