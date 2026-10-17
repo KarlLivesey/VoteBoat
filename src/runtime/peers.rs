@@ -435,14 +435,13 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
             self.parts
                 .roster
                 .next_deadline_filtered(|peer| !self.attempts.iter().any(|t| t.peer.node == peer)),
-            self.staged
-                .iter()
-                .filter_map(|batch| {
-                    self.parts.roster.disconnected_send_deadline(
-                        batch.ticket.peer,
-                        self.limits.disconnected_send_retry_ms,
-                    )
-                })
+            // Only a disconnected peer's staged sends have a deadline; scan
+            // the staged queue for a peer only once the roster names one.
+            self.parts
+                .roster
+                .disconnected_send_deadlines(self.limits.disconnected_send_retry_ms)
+                .filter(|(peer, _)| self.staged.iter().any(|batch| batch.ticket.peer == *peer))
+                .map(|(_, deadline)| deadline)
                 .min()
                 .map(|deadline| deadline.max(self.now)),
         ]

@@ -49,6 +49,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done E2: directory and transfer services wait on readiness | Same host-loop change for the other two binaries, through one shared `HostWait` | E1 | counter 203, directory 22, transfer 9/12/33; fmt + strict Clippy | T4 |
 | Done C9: steady polls stop rebuilding peer assignments | Idle and moderate-load CPU is dominated by fixed per-poll work; skip provably unchanged peer reconciliation | C6 | Idle CPU/round and loaded CPU/original pairs; affected suites; fmt + strict Clippy | T4 |
 | Done C17: gather window and wait cap as service options | Operators choose the CPU/latency point (200 µs default; 400 µs −20% CPU for disk-bound deployments) | C13 | counter/directory/transfer suites | T4 |
+| Done C18: per-round host costs re-profiled | Fresh profile and syscall counts at head; dedup hash map and quiet-socket read skipping measured and rejected; staged-batch deadline scan bounded | E1 | Five tmpfs pairs each; syscall shim counts; library, peers, runtime, owner, transport suites; fmt + strict Clippy | T4 |
 | Next D1: ordered pipelined persistence per group | Several persists in flight per group, completed in order; schema plan below | C6, E1 | APFS window-1,024 pairs; fault model tests; three-configuration suites | T3 |
 | Later P3: shared Append entries | `Rpc::Append` copies entries per peer (~5%); 81 construction sites | — | Framework and native pairs | T4 |
 | Later M1: macOS kqueue readiness | `poll(2)` is ~19% of Mac host CPU under load | E1 | Mac pairs | T4 |
@@ -148,6 +149,44 @@ are ordered; nothing is acknowledged before its durable completion).
 Acceptance: the strict acknowledgement contract and every fault/power-loss
 model test unchanged; Mac APFS window 1,024 pairs (target +30–50% toward the
 ~13k/s window-4,096 ceiling); btrfs pairs; the three-configuration suites.
+
+#### C18: per-round host costs re-profiled; two items rejected, one kept
+
+A fresh Linux tmpfs profile at 99db105f (15,000/s, 256 ms of CPU for
+16,000 writes) has no single scalable item above 5%: syscalls 24% self
+(kernel work of the host and WAL threads), memcpy ~7%, the Counter's outcome
+B-tree insert 3.8%, a `min` fold in the node's deadline 2.8%, scheduler set
+insert 2.1%, TLS encrypt 2.0%, wire encode 2.3%, log encode 1.7%. A preload
+shim counting syscalls (no tracer is installed here) for one loaded run:
+27,566 `recv` of which 24,036 returned EAGAIN (every session read every
+round), 3,553 `send`, 7,539 `write`, 3,813 `fsync`, 1,224 `accept4`, 497
+`poll` (immediate rounds skip the wait).
+
+Measured with five interleaved tmpfs pairs each (marginal CPU/original):
+
+- Counter dedup map as a `HashMap` (std random-seeded hasher; checkpoint
+  sorts explicitly) plus the staged-scan change below: 14.34 → 14.25 µs
+  (−0.6%, pairs 0.87–1.04). Noise; the hash map is not adopted (it would add
+  a sort per checkpoint for no measured gain).
+- Quiet-socket read skipping: the readiness wait reported per descriptor
+  whether the kernel found no input (`ReadinessFd::quiet`), hosts polled on
+  every round (timeout 0 when immediate) and passed the report back
+  (`NetworkNode::observe_readiness`), and a peer transport whose socket was
+  quiet spent no read call that round. Empty reads fell 24,036 → 5,414 but
+  `poll` rose 497 → 3,267, and CPU went 14.91 → 15.23 µs (+2%, pairs
+  1.00–1.05) with p99 +9% (a quiet report is stale by the gather window).
+  One `poll(2)` over ~10 descriptors costs about what the ~7 empty `recv`
+  calls it replaced cost. Rejected; patch kept outside the tree.
+- Kept: `PeerDriver::next_deadline` no longer scans every staged batch per
+  round. It asks the roster for peers with a disconnected-send deadline (at
+  most the peer count) and scans the staged queue only for those. Same
+  result, and a bounded cost under backpressure, where the staged queue can
+  hold up to `staged_batches` (4,096) entries per round.
+
+Per-item shaving at ≤4% of a profile has now failed to move interleaved
+pairs five times in this track; only whole-class removals have. The
+remaining general CPU is spread across kernel work, copies, encoding and
+TLS. The durable tier (D1) is next.
 
 #### F1 deferred commit folding measured and rejected
 

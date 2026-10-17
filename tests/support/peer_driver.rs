@@ -510,6 +510,22 @@ impl Fixture {
         Self::with_ingress_limits(peer_capacity, IngressLimits::default())
     }
     fn with_ingress_limits(peer_capacity: usize, ingress_limits: IngressLimits) -> Self {
+        Self::with_limits(
+            peer_capacity,
+            ingress_limits,
+            PeerDriverLimits {
+                staged_batches: 8,
+                ..Default::default()
+            },
+            |_| {},
+        )
+    }
+    fn with_limits(
+        peer_capacity: usize,
+        ingress_limits: IngressLimits,
+        driver_limits: PeerDriverLimits,
+        roster: impl FnOnce(&mut PeerRosterLimits),
+    ) -> Self {
         let (owner, _) = single(1);
         let mut limits = OutboundLimits::default();
         limits.node.max.batches = 8;
@@ -538,6 +554,7 @@ impl Fixture {
         parts.ingress = IngressRouter::new(parts.ingress.binding(), ingress_limits).unwrap();
         let mut roster_limits = parts.roster.limits();
         roster_limits.peers = peer_capacity;
+        roster(&mut roster_limits);
         parts.roster = PeerRoster::new(
             PeerRosterConfig {
                 local: local(1),
@@ -557,10 +574,7 @@ impl Fixture {
                 parts,
                 f.owner.identity(),
                 &f.outbound,
-                PeerDriverLimits {
-                    staged_batches: 8,
-                    ..Default::default()
-                },
+                driver_limits,
                 MonoTime(0),
             )
             .unwrap_or_else(|r| panic!("{:?}", r.reason)),
@@ -1719,6 +1733,51 @@ fn local_configuration_admission_uses_retained_pins_and_prevents_queued_route_wi
         .unwrap_or_else(|r| panic!("{:?}", r.reason));
     assert!(f.connect.borrow().submitted.is_empty());
     f.close(0);
+}
+
+#[test]
+fn next_deadline_reports_disconnected_send_retries_only_for_peers_with_staged_sends() {
+    use voteboat::discovery::DiscoveryError;
+    let mut f = Fixture::with_limits(
+        2,
+        IngressLimits::default(),
+        PeerDriverLimits {
+            staged_batches: 8,
+            disconnected_send_retry_ms: 5,
+            ..Default::default()
+        },
+        |limits| {
+            limits.retry_min_ms = 100;
+            limits.retry_max_ms = 400;
+        },
+    );
+    f.connect.borrow_mut().rejection = Some(ConnectError::Discovery(DiscoveryError::Missing));
+    assert_eq!(f.poll(0).unwrap().connection_failures, 2);
+    // Both peers are disconnected since 0, but nothing is staged for them:
+    // only the reconnect backoff (100 ms) is due.
+    let driver = f.driver.as_ref().unwrap();
+    assert_eq!(driver.next_deadline(), Some(MonoTime(100)));
+    let ticket = f.enqueue(2);
+    assert_eq!(f.poll(1).unwrap().connection_failures, 0);
+    // The staged send for the disconnected peer carries its retry deadline.
+    assert_eq!(
+        f.driver.as_ref().unwrap().next_deadline(),
+        Some(MonoTime(5))
+    );
+    let expired = f.poll(5).unwrap();
+    assert!(expired
+        .completions
+        .iter()
+        .any(|c| c.ticket == ticket && c.result == LocalSendResult::Failed));
+    assert_eq!(
+        f.driver.as_ref().unwrap().next_deadline(),
+        Some(MonoTime(100))
+    );
+    f.connect.borrow_mut().rejection = None;
+    f.connect.borrow_mut().ready = true;
+    assert_eq!(f.poll(100).unwrap().connection_submissions, 2);
+    assert_eq!(f.poll(100).unwrap().connections, 2);
+    f.close(100);
 }
 
 #[test]

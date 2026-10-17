@@ -293,6 +293,21 @@ impl<P: PeerTransport> PeerRoster<P> {
             None
         }
     }
+    /// Every peer whose staged sends currently carry a disconnected-send
+    /// deadline (see `disconnected_send_deadline`), with that deadline.
+    pub(crate) fn disconnected_send_deadlines(
+        &self,
+        retry_ms: u64,
+    ) -> impl Iterator<Item = (NodeId, MonoTime)> + '_ {
+        self.peers.iter().filter_map(move |(&node, p)| {
+            if p.authorized && (p.transport.is_none() || p.retiring) {
+                p.failure_since
+                    .map(|since| (node, MonoTime(since.0.saturating_add(retry_ms))))
+            } else {
+                None
+            }
+        })
+    }
     pub fn is_fenced(&self) -> bool {
         self.fenced
     }
