@@ -303,6 +303,7 @@ mod tests {
         {
             let settings = Settings {
                 clients: 4096,
+                server_workers: crate::DEFAULT_SERVER_WORKERS,
                 batch: 4,
                 requested_operations: 16384,
                 operations: 16384,
@@ -358,6 +359,7 @@ mod tests {
         for attribution in [false, true] {
             let settings = Settings {
                 clients: 1,
+                server_workers: crate::DEFAULT_SERVER_WORKERS,
                 batch: 4,
                 requested_operations: 12_000,
                 operations: 12_000,

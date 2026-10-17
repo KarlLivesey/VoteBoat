@@ -1,0 +1,9 @@
+voteboat workers= 1 completed=128 requests=32 frontiers=[133,133,133] JSON workers match
+voteboat workers= 2 completed=128 requests=32 frontiers=[133,133,133] JSON workers match
+voteboat workers= 16 completed=128 requests=32 frontiers=[133,133,133] JSON workers match
+voteboat timeout returncode= 1 stderr= Error: Expired { phase: "campaign", budget: 1s, source: Elapsed(()) }
+VoteBoat timeout: corrected smoke assertion accepts Rust main Result debug output (Expired/campaign), no cleanup failure
+openraft workers= 1 completed=128 requests=32 frontiers=[133,133,133] JSON workers match
+openraft workers= 2 completed=128 requests=32 frontiers=[133,133,133] JSON workers match
+openraft workers= 16 completed=128 requests=32 frontiers=[133,133,133] JSON workers match
+openraft timeout returncode= 1 stderr= Error: Expired { phase: "campaign", budget: 1s, source: Elapsed(()) }
