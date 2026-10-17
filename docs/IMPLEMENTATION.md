@@ -149,6 +149,26 @@ Acceptance: the strict acknowledgement contract and every fault/power-loss
 model test unchanged; Mac APFS window 1,024 pairs (target +30–50% toward the
 ~13k/s window-4,096 ceiling); btrfs pairs; the three-configuration suites.
 
+#### F1 deferred commit folding measured and rejected
+
+The leader's single persistence slot alternates append barriers and
+commit-only barriers. F1 made the leader defer a commit advance
+(`deferred_commit`, enabled by `Shard::register`) and fold it into the next
+append persist, flushing it through a synthetic control step only when nothing
+else was queued or a read/configure had to see it. Core-only, no API change.
+Measured: Linux tmpfs 15,000/s leader barriers 1,094 → 957 (−13%) but marginal
+CPU/original 14.8 → 15.7 µs (+6%); Mac APFS, Witness, 16,000 offers at
+20,000/s, six interleaved pairs against aa4c7d17: window 4,096 median 11,323 →
+8,882 completed/s, p99 538 → 1,030 ms (barriers 60 → 52); window 1,024 7,794 →
+8,452/s, p99 unchanged (barriers 58 → 48) at +10% CPU. Fewer barriers do not
+buy throughput here: a deferred commit delays every acknowledgement in the
+batch by the next append's barrier, and at a fixed window throughput is
+window / acknowledgement latency, so the wider window loses outright and the
+narrow one gains less than the CPU it costs. Eight owner-admission tests also
+needed the synthetic flush to be driven by the owner. Not adopted; the patch is
+kept outside the tree. D1 (followers accepting the next append while the
+previous one persists) remains the durable-tier item.
+
 #### C17 implemented: gather window and wait cap are counter-service options
 
 `voteboat-counter serve … --gather-us US --host-wait-ms MS` set the host loop's
