@@ -90,6 +90,11 @@ effect_owner 208, peers 50, native_member_startup 19, startup 60.
 The C6 all-feature run had 12 `logical_activation_nested` failures from one
 15-second wall-clock timeout (`native logical child timeout`) while this host
 was also profiling; the binary passes alone on the same commit (14/14, 206 s).
+`logical_activation_driver` is intermittent on Linux independent of C9:
+`learners::real_parent_intent_replicates_learners_but_cannot_promote_absent_native_*`
+sometimes leaves the original bridge undrained (`learners.rs:95`) and the
+poisoned `HISTORY` mutex fails seven more tests. Isolated runs: dd4c6bc9 one of
+two failed, bfaf02c2 one of two failed. Recorded for a separate fix.
 
 #### Apple barrier publication measured; parked on device detection
 
