@@ -316,19 +316,21 @@ impl From<StorageError> for RaftError {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 enum After {
     Campaign,
     Reply,
     LeaderAppend,
     Commit,
     Compact,
-    CheckpointCompact(SnapshotRef),
-    SnapshotInstall(SnapshotRef),
+    // Snapshot references are boxed: every round moves `Pending`.
+    CheckpointCompact(Box<SnapshotRef>),
+    SnapshotInstall(Box<SnapshotRef>),
 }
 struct Pending {
     next: OwnedNextLog,
-    membership: Option<Membership>,
+    // Only a configuration change carries one.
+    membership: Option<Box<Membership>>,
     ticket: Option<LogTicket>,
     after: After,
     reply: Option<Message>,
@@ -714,7 +716,7 @@ impl Raft {
     pub fn membership(&self) -> &Membership {
         self.pending
             .as_ref()
-            .and_then(|p| p.membership.as_ref())
+            .and_then(|p| p.membership.as_deref())
             .unwrap_or(&self.membership)
     }
     pub fn storage_binding(&self) -> StoreBinding {
@@ -1246,7 +1248,7 @@ impl Raft {
             self.checkpoint_lineage = CheckpointLineage::new();
         }
         if let Some(membership) = p.membership {
-            self.membership = membership;
+            self.membership = *membership;
         }
         if configuration_changed {
             self.configuration_changed()?;
@@ -1354,11 +1356,13 @@ impl Raft {
                 }
             }
             After::SnapshotInstall(reference) => {
+                let reference = *reference;
                 self.application_install =
                     Some((reference, reply.ok_or(RaftError::WrongCompletion)?));
                 effects.push(Effect::SnapshotInstalled(reference));
             }
             After::CheckpointCompact(reference) => {
+                let reference = *reference;
                 self.clear_replication_requests();
                 self.repair_requests.clear();
                 self.checkpoint_reconcile = Some(reference);
@@ -1376,6 +1380,9 @@ impl Raft {
         after: After,
         reply: Option<Message>,
     ) -> Result<Vec<Effect>, RaftError> {
+        if suffix.is_none() && hard_state == self.durable.hard_state {
+            return self.persist_commit(commit_index, after, reply);
+        }
         let update = LogUpdate {
             snapshot_membership: None,
             group: self.durable.bootstrap.group,
@@ -1387,6 +1394,35 @@ impl Raft {
         };
         self.persist_update(update, after, reply)
     }
+    /// A round that only advances the commit index (or only the revision) plans
+    /// a scalar advance. A durable store still receives the same update.
+    fn persist_commit(
+        &mut self,
+        commit_index: u64,
+        after: After,
+        reply: Option<Message>,
+    ) -> Result<Vec<Effect>, RaftError> {
+        let next = OwnedNextLog::plan_commit(
+            &LogView::new(&self.durable),
+            &self.log_summary,
+            commit_index,
+            self.limits,
+        )?;
+        let update = if self.volatile {
+            None
+        } else {
+            Some(LogUpdate {
+                snapshot_membership: None,
+                group: self.durable.bootstrap.group,
+                expected_revision: self.durable.revision,
+                hard_state: self.durable.hard_state,
+                commit_index,
+                suffix: None,
+                snapshot: None,
+            })
+        };
+        self.stage_pending(next, update, after, reply)
+    }
     fn persist_update(
         &mut self,
         update: LogUpdate,
@@ -1395,20 +1431,14 @@ impl Raft {
     ) -> Result<Vec<Effect>, RaftError> {
         // A volatile core is the only owner of its log: move the update into
         // the plan instead of keeping a copy for a store to validate again.
-        let (next, effect) = if self.volatile {
+        if self.volatile {
             let next = OwnedNextLog::plan_owned(
                 &LogView::new(&self.durable),
                 &self.log_summary,
                 update,
                 self.limits,
             )?;
-            let metadata = next.metadata();
-            let token = VolatilePersist {
-                incarnation: self.incarnation,
-                revision: metadata.revision,
-                generation: metadata.generation,
-            };
-            (next, Effect::PersistVolatile(token))
+            self.stage_pending(next, None, after, reply)
         } else {
             let next = OwnedNextLog::plan_copy(
                 &LogView::new(&self.durable),
@@ -1416,15 +1446,33 @@ impl Raft {
                 &update,
                 self.limits,
             )?;
-            (next, Effect::Persist(update))
-        };
+            self.stage_pending(next, Some(update), after, reply)
+        }
+    }
+    /// Make `next` the single pending transition. `update` is the durable
+    /// store's exact input; without one the core is volatile and emits a token.
+    fn stage_pending(
+        &mut self,
+        next: OwnedNextLog,
+        update: Option<LogUpdate>,
+        after: After,
+        reply: Option<Message>,
+    ) -> Result<Vec<Effect>, RaftError> {
         let membership = next
             .full()
-            .map(GroupLog::membership)
+            .map(|full| full.membership().map(Box::new))
             .transpose()
             .map_err(|_| RaftError::InvalidRecovery)?;
         let metadata = next.metadata();
-        let accepted_membership = membership.as_ref().unwrap_or(&self.membership);
+        let effect = match update {
+            Some(update) => Effect::Persist(update),
+            None => Effect::PersistVolatile(VolatilePersist {
+                incarnation: self.incarnation,
+                revision: metadata.revision,
+                generation: metadata.generation,
+            }),
+        };
+        let accepted_membership = membership.as_deref().unwrap_or(&self.membership);
         if self
             .learner_readiness
             .as_ref()
@@ -1892,7 +1940,7 @@ impl Raft {
         self.pending
             .as_mut()
             .ok_or(RaftError::WrongCompletion)?
-            .after = After::CheckpointCompact(reference);
+            .after = After::CheckpointCompact(Box::new(reference));
         Ok(effects)
     }
     pub(crate) fn checkpoint_reconciled(
@@ -1999,7 +2047,7 @@ impl Raft {
                 suffix: None,
                 snapshot: Some(reference),
             },
-            After::SnapshotInstall(reference),
+            After::SnapshotInstall(Box::new(reference)),
             Some(reply),
         )
     }
@@ -2039,6 +2087,8 @@ pub fn persist_effect<S: LogStore>(
 mod append_prefix_tests;
 #[cfg(test)]
 mod checkpoint_tests;
+#[cfg(test)]
+mod commit_advance_tests;
 #[cfg(test)]
 mod completion_tests;
 #[cfg(test)]
