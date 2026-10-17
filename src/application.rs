@@ -83,6 +83,18 @@ where
         bytes: &[u8],
         pending: impl Iterator<Item = (OperationId, &'a [u8])>,
     ) -> Result<usize, ApplicationError>;
+    /// Decide without seeing the pending commands when `pending_bound` (an
+    /// upper bound on how many there are) already settles the question; the
+    /// result must equal what `validate_proposal` would return for any such
+    /// pending set. `None` asks the router for the full check.
+    fn validate_proposal_bounded(
+        &self,
+        _operation: OperationId,
+        _bytes: &[u8],
+        _pending_bound: usize,
+    ) -> Option<Result<usize, ApplicationError>> {
+        None
+    }
 }
 
 /// Optional bounded receipt capability; wire and checkpoint schemas are separate.
@@ -222,6 +234,19 @@ impl ProposalAdmission for Counter {
         Some(ready_admission::prepare(self, pending))
     }
 
+    fn validate_proposal_bounded(
+        &self,
+        _operation: OperationId,
+        bytes: &[u8],
+        pending_bound: usize,
+    ) -> Option<Result<usize, ApplicationError>> {
+        if bytes.len() != 8 {
+            return Some(Err(ApplicationError::InvalidCommand));
+        }
+        // Even if every pending command and this one are novel, they fit.
+        (pending_bound < self.remaining_operations())
+            .then_some(Ok(std::mem::size_of::<CounterReceipt>()))
+    }
     fn validate_proposal<'a>(
         &self,
         operation: OperationId,
@@ -562,5 +587,54 @@ impl CheckpointStateMachine for Counter {
         self.applied = index;
         self.dedup = dedup;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod bounded_validation {
+    use super::*;
+    #[test]
+    fn bounded_answer_matches_the_full_scan_or_defers() {
+        let mut counter = Counter::new(4).unwrap();
+        let op = |n: u128| OperationId::new(n).unwrap();
+        let bytes = 1i64.to_le_bytes();
+        // Malformed commands are refused without any pending scan.
+        assert_eq!(
+            counter.validate_proposal_bounded(op(1), &bytes[..7], 0),
+            Some(Err(ApplicationError::InvalidCommand))
+        );
+        // Three pending plus this one fit in four: decided from the bound.
+        assert_eq!(
+            counter.validate_proposal_bounded(op(1), &bytes, 3),
+            Some(Ok(std::mem::size_of::<CounterReceipt>()))
+        );
+        assert_eq!(
+            counter.validate_proposal(op(1), &bytes, (2..5).map(|n| (op(n), &bytes[..]))),
+            Ok(std::mem::size_of::<CounterReceipt>())
+        );
+        // Four pending might not fit: deferred to the full scan, which refuses
+        // four novel ones but accepts duplicates of one id.
+        assert_eq!(counter.validate_proposal_bounded(op(1), &bytes, 4), None);
+        assert_eq!(
+            counter.validate_proposal(op(1), &bytes, (2..6).map(|n| (op(n), &bytes[..]))),
+            Err(ApplicationError::DedupCapacity)
+        );
+        assert_eq!(
+            counter.validate_proposal(op(1), &bytes, (0..4).map(|_| (op(2), &bytes[..]))),
+            Ok(std::mem::size_of::<CounterReceipt>())
+        );
+        // Applied operations shrink the remaining capacity the bound compares to.
+        counter
+            .apply_batch(&[LogEntry {
+                index: 1,
+                term: 1,
+                payload: EntryPayload::Command {
+                    operation: op(9),
+                    bytes: bytes.to_vec().into(),
+                },
+            }])
+            .unwrap();
+        assert_eq!(counter.validate_proposal_bounded(op(1), &bytes, 3), None);
+        assert!(counter.validate_proposal_bounded(op(1), &bytes, 2).is_some());
     }
 }

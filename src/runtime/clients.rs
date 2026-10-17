@@ -322,21 +322,32 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         application
             .validate_proposal_context(core, request.operation, &request.bytes)
             .map_err(ClientError::Application)?;
-        let log = state
-            .entries
-            .iter()
-            .skip((application.applied_index() - state.base_index()) as usize)
-            .filter_map(|e| match &e.payload {
-                EntryPayload::Command { operation, bytes } => Some((*operation, bytes.as_slice())),
-                _ => None,
-            });
-        let queued = self
-            .pending
-            .values()
-            .filter(|p| p.ticket.group == request.group)
-            .map(|p| (p.ticket.operation, p.bytes.as_slice()));
+        let unapplied = (application.applied_index() - state.base_index()) as usize;
+        // Unapplied log commands plus this group's queued requests bound the
+        // pending set; an application that can decide from the bound alone
+        // skips the scan.
+        let pending_bound = state.entries.len().saturating_sub(unapplied)
+            + self.groups.get(&request.group).copied().unwrap_or(0);
         let receipt_bound = application
-            .validate_proposal(request.operation, &request.bytes, log.chain(queued))
+            .validate_proposal_bounded(request.operation, &request.bytes, pending_bound)
+            .unwrap_or_else(|| {
+                let log = state
+                    .entries
+                    .iter()
+                    .skip(unapplied)
+                    .filter_map(|e| match &e.payload {
+                        EntryPayload::Command { operation, bytes } => {
+                            Some((*operation, bytes.as_slice()))
+                        }
+                        _ => None,
+                    });
+                let queued = self
+                    .pending
+                    .values()
+                    .filter(|p| p.ticket.group == request.group)
+                    .map(|p| (p.ticket.operation, p.bytes.as_slice()));
+                application.validate_proposal(request.operation, &request.bytes, log.chain(queued))
+            })
             .map_err(ClientError::Application)?;
         if receipt_bound < size_of::<R>() || receipt_bound > self.limits.receipt_bytes {
             return Err(ClientError::RequestTooLarge);

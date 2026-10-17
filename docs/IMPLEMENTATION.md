@@ -41,6 +41,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
+| Done C14: proposal validation from a pending bound | Admission no longer scans every pending command when the count already settles it | — | Linux/Mac pairs; unit test; suites | T4 |
 | Done C13: 200 µs gather window | Fewer, fuller rounds; CPU/latency knob measured at 0/100/200/400 µs | E1 | Linux and Mac pairs | T4 |
 | Done C12: connection rechecks skipped while at bootstrap | Per-step/per-completion union rebuild removed in steady state | C9 | Profile removal; suites | T4 |
 | Done C11: client reconciliation touches only what can change | Largest per-write host item after E1 | E1 | Linux/Mac loaded pairs; library, effect-owner, admission, service suites | T4 |
@@ -111,6 +112,22 @@ extra work; a shorter wait cap makes it worse). Adopted for the Linux gains and
 the Mac gains under load; the Mac idle cost is recorded for a later
 platform-specific keep-warm policy.
 
+#### C14 implemented: proposal validation decided from a pending bound
+
+Admitting a client request validated it against every pending command: the
+unapplied log commands plus the group's queued requests, about 2,000 under a
+1,024-deep window, and the reference counter buffered every pending id into a
+fresh `Vec` before checking dedup capacity (4.6% of host samples plus 3.7% in
+`realloc`). The router already knows an upper bound on that count from the log
+length and its per-group queue count. `ProposalAdmission::validate_proposal_bounded`
+(default `None`, so the other thirty-five applications are unchanged) lets an
+application decide from the bound alone when the answer cannot depend on which
+commands are pending; the counter keeps its command-shape check and answers
+when even all-novel pending commands plus this one fit, deferring to the full
+scan otherwise (`bounded_answer_matches_the_full_scan_or_defers`). Measured
+with the C12 completion, interleaved pairs: Linux tmpfs 15,000/s 16.65 → 15.44
+µs/original (−7%), Mac RAM disk 17.2 → 16.0 (−7%); rate and p99 unchanged.
+
 #### C13 implemented: 200 µs gather window
 
 The gather window before a round with queued work is the host's CPU/latency
@@ -132,10 +149,11 @@ group's connection set is its fixed bootstrap voter set. The shard now counts
 queued connection-changing events per group and skips both rechecks while every
 live group has none and `connections_are_bootstrap()`; any configuration,
 snapshot, permit or queued change recomputes exactly as before. Under load the
-skip applied to every call (8,824 of 8,824 in one run). Loaded profile: the
-union rebuild fell from 4.8% to 0.2% of samples and its map clone from 2.1% to
-none, but interleaved Linux pairs moved only −1…−2%, within run-to-run noise;
-kept for the removed work and its low risk (library, effect-owner, runtime,
+skip applied to every call (8,824 of 8,824 in one run). The first cut guarded
+only the single-event step and `with_core`; the loaded path is the batched step
+(`step_ready_checked`), which the profile still showed rebuilding the union
+(4.8% plus a 3.1% map clone). With that site guarded too, measured together
+with C14 below: Linux −7%, Mac −7%. Kept for the removed work and its low risk (library, effect-owner, runtime,
 membership, startup, learners, configuration-capacity, native-member-startup
 and counter suites pass).
 

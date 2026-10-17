@@ -150,7 +150,9 @@ impl<Q: ReadyScheduler> Shard<Q> {
             return Ok(None);
         }
         self.observe(now)?;
-        self.reserved_connection_peers()?;
+        if !self.connections_steady() {
+            self.reserved_connection_peers()?;
+        }
         let limits = self.limits;
         let ordinary = self.control_profile.is_none();
         let group = self.live(ticket)?;
@@ -167,7 +169,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
             return self.step_next_checked(ticket, now, |_, _| Err(error.clone()));
         }
         let stepped = collect(group, window, &mut check);
-        if stepped.result.is_ok() {
+        if stepped.result.is_ok() && !self.connections_steady() {
             self.retain_connection_history(ticket.group)?;
         }
         Ok(Some(stepped))

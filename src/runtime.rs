@@ -490,7 +490,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
     /// queued event can change it, so the reserved union and retained history
     /// are already exactly what `register` established: stepping needs no
     /// recheck. Any configuration, snapshot or permit path recomputes as before.
-    fn connections_steady(&self) -> bool {
+    pub(super) fn connections_steady(&self) -> bool {
         self.groups.values().all(|g| {
             g.fenced || (g.queued_connection_changes == 0 && g.core.connections_are_bootstrap())
         })
