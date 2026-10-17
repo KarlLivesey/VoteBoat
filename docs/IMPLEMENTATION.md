@@ -49,7 +49,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done E2: directory and transfer services wait on readiness | Same host-loop change for the other two binaries, through one shared `HostWait` | E1 | counter 203, directory 22, transfer 9/12/33; fmt + strict Clippy | T4 |
 | Done C9: steady polls stop rebuilding peer assignments | Idle and moderate-load CPU is dominated by fixed per-poll work; skip provably unchanged peer reconciliation | C6 | Idle CPU/round and loaded CPU/original pairs; affected suites; fmt + strict Clippy | T4 |
 | Done C17: gather window and wait cap as service options | Operators choose the CPU/latency point (200 µs default; 400 µs −20% CPU for disk-bound deployments) | C13 | counter/directory/transfer suites | T4 |
-| Later D1: follower append pipelining | Accept append k+1 while append k persists so the leader can pipeline; fixed-window durable rate is chain-bound | T2/T3 design | APFS/btrfs pairs; full suite | T3 |
+| Next D1: ordered pipelined persistence per group | Several persists in flight per group, completed in order; schema plan below | C6, E1 | APFS window-1,024 pairs; fault model tests; three-configuration suites | T3 |
 | Later P3: shared Append entries | `Rpc::Append` copies entries per peer (~5%); 81 construction sites | — | Framework and native pairs | T4 |
 | Later M1: macOS kqueue readiness | `poll(2)` is ~19% of Mac host CPU under load | E1 | Mac pairs | T4 |
 | Later C10: remaining per-poll fixed costs | Idle profile after C9: connector poll/accept, TLS reads of idle sockets, scheduler map scans, connection-union recheck per step | C9 | Same idle/loaded CPU pairs | T4 |
@@ -116,6 +116,38 @@ the wait costs 0.54–0.60 s, so this is the platform's wake-from-idle cost, not
 extra work; a shorter wait cap makes it worse). Adopted for the Linux gains and
 the Mac gains under load; the Mac idle cost is recorded for a later
 platform-specific keep-warm policy.
+
+#### D1 schema plan: ordered pipelined persistence per group (not started)
+
+Purpose: at a fixed client window the durable rate is bound by the chain
+leader append barrier → follower barrier → leader commit barrier, because a
+group has exactly one persist in flight (`Raft::pending: Option<Pending>`, 80
+references; the worker refuses a second unit per group; the ready step blocks
+on `has_pending_dependency`). Leader-only pipelining (prototype, rejected)
+made followers persist one small append per step. The fix is letting a group
+hold several persists in flight, completed strictly in order, so followers
+coalesce back-to-back appends and the leader can send the next batch at
+`Written` of the previous one.
+
+Shape: `pending` becomes a bounded FIFO (`VecDeque<Pending>`, limit from
+`BatchLimits`, default 4). `persist_update` plans the next update against the
+durable log plus every queued pending tail (the native store's `Accepted`
+overlays already plan against such a tail; the core needs the same `LogView`
+overlay). `validate_persist_effect`/`admitted` address the oldest unadmitted
+pending; `complete` must match the oldest admitted one, else
+`WrongCompletion`. Only appends that extend the chain tip (same term, next
+index, no membership/snapshot change in flight) may enqueue behind a pending
+persist; every other input keeps waiting on `has_pending_dependency`. The
+worker admits up to the limit of units per group and persists them in
+submission order within one barrier when queued together. `early_suffix`
+replication keys on the chain tip. Failure: a failed or fenced persist fails
+every later pending one and fences the core; an out-of-order or unknown
+completion is a provider contract violation. Recovery is unchanged (WAL frames
+are ordered; nothing is acknowledged before its durable completion).
+
+Acceptance: the strict acknowledgement contract and every fault/power-loss
+model test unchanged; Mac APFS window 1,024 pairs (target +30–50% toward the
+~13k/s window-4,096 ceiling); btrfs pairs; the three-configuration suites.
 
 #### C17 implemented: gather window and wait cap are counter-service options
 
