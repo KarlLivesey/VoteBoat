@@ -48,7 +48,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done C11: client reconciliation touches only what can change | Largest per-write host item after E1 | E1 | Linux/Mac loaded pairs; library, effect-owner, admission, service suites | T4 |
 | Done E2: directory and transfer services wait on readiness | Same host-loop change for the other two binaries, through one shared `HostWait` | E1 | counter 203, directory 22, transfer 9/12/33; fmt + strict Clippy | T4 |
 | Done C9: steady polls stop rebuilding peer assignments | Idle and moderate-load CPU is dominated by fixed per-poll work; skip provably unchanged peer reconciliation | C6 | Idle CPU/round and loaded CPU/original pairs; affected suites; fmt + strict Clippy | T4 |
-| Next C17: gather window and wait cap as service options | Operators choose the CPU/latency point (200 µs default; 400 µs −20% CPU for disk-bound deployments) | C13 | counter/directory/transfer suites | T4 |
+| Done C17: gather window and wait cap as service options | Operators choose the CPU/latency point (200 µs default; 400 µs −20% CPU for disk-bound deployments) | C13 | counter/directory/transfer suites | T4 |
 | Later D1: follower append pipelining | Accept append k+1 while append k persists so the leader can pipeline; fixed-window durable rate is chain-bound | T2/T3 design | APFS/btrfs pairs; full suite | T3 |
 | Later P3: shared Append entries | `Rpc::Append` copies entries per peer (~5%); 81 construction sites | — | Framework and native pairs | T4 |
 | Later M1: macOS kqueue readiness | `poll(2)` is ~19% of Mac host CPU under load | E1 | Mac pairs | T4 |
@@ -116,6 +116,15 @@ the wait costs 0.54–0.60 s, so this is the platform's wake-from-idle cost, not
 extra work; a shorter wait cap makes it worse). Adopted for the Linux gains and
 the Mac gains under load; the Mac idle cost is recorded for a later
 platform-specific keep-warm policy.
+
+#### C17 implemented: gather window and wait cap are counter-service options
+
+`voteboat-counter serve … --gather-us US --host-wait-ms MS` set the host loop's
+gather window (default 200 µs, at most 10 ms; longer means fewer, fuller rounds:
+−10% CPU/original at 200 µs and −20% at 400 µs against 100 µs, for more
+latency) and the cap on waiting with nothing announced (default 10 ms, at most
+1 s; bounds host-side timers). `service_setup::HostWait::with` carries them;
+the directory and transfer services keep the defaults.
 
 #### Durable throughput re-measured after E1
 

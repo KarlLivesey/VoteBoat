@@ -96,7 +96,7 @@ use voteboat::worker::PersistenceWorker;
 use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError, runtime::*};
 
 const HELP: &str =
-    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--timing-profile throughput|edge|legacy] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--command-listen ADDRESS] [--discovery-peers FILE] [--wal-reclaim-ms MS] [--checkpoint-entries N]\n\
+    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--timing-profile throughput|edge|legacy] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--command-listen ADDRESS] [--discovery-peers FILE] [--wal-reclaim-ms MS] [--checkpoint-entries N] [--gather-us US] [--host-wait-ms MS]\n\
 voteboat-counter placement-plan INPUT learner OPERATION | replace RETIRING LEARNER_OPERATION VOTER_OPERATION retire|retain | voters OPERATION retire|retain POLICY\n\
 voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE] [--leadership-maintenance enabled]\n\
 voteboat-counter client BASE_PORT NODE status|metrics|timings|maintenance|configuration-status OPERATION_ID|configure OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
@@ -117,6 +117,7 @@ Endpoint discovery: client ... --discover-via NODE --command-peers FILE --servic
 Versioned discovery source: discovery-status; discovery-update EXPECTED NEXT NODE SOCKET_ADDRESS. Updates are local volatile hints; persist the v2 startup file separately.\n\
 Remote command routing: client ... --command-peers FILE --service-tls TLS_DIRECTORY --principal ID.\n\
 --wal-reclaim-ms enables physical reclamation; --checkpoint-entries enables automatic checkpoints.\n\
+--gather-us (default 200, at most 10000) is the host loop's gather window before a round with queued work: longer windows mean fewer, fuller rounds (less CPU per write, more latency); --host-wait-ms (default 10) caps how long the host waits with nothing announced.\n\
 Use the same operation ID and delta when retrying an unknown write.\n\
 Maintenance profile: serve ... --service-access FILE --leadership-maintenance enabled; all peers use schema2/wire8.\n\
 Commands: move-leader OP CONFIG SOURCE SOURCE_STORE SOURCE_INC TARGET TARGET_STORE TARGET_INC; leadership-status OP; resume-leadership OP; cancel-leadership OP.\n\
@@ -384,6 +385,18 @@ struct PreparedService {
     peer_address: std::net::SocketAddr,
     discovery: Option<command_discovery::Source>,
     drain: Option<drain_service::Driver>,
+    host: service_setup::HostWait,
+}
+/// The host loop's readiness wait, with any operator-chosen gather window
+/// and wait cap.
+fn host_wait(options: &StartupOptions) -> service_setup::HostWait {
+    match (options.gather_us, options.host_wait_ms) {
+        (None, None) => service_setup::HostWait::new(),
+        (gather, cap) => service_setup::HostWait::with(
+            gather.map_or(service_setup::HOST_GATHER, Duration::from_micros),
+            cap.map_or(service_setup::HOST_MAX_WAIT, Duration::from_millis),
+        ),
+    }
 }
 fn prepare_service(
     mode: &str,
@@ -487,6 +500,7 @@ fn prepare_service(
         peer_address,
         discovery,
         drain,
+        host: host_wait(options),
     })
 }
 fn serve(
@@ -536,7 +550,7 @@ fn run_service(
     let mut connection: Option<Connection> = None;
     let (mut quit, mut shutdown) = (false, shutdown::Shutdown::default());
     let mut leadership = leadership_set::Leaders::new(&service);
-    let mut host = service_setup::HostWait::new();
+    let mut host = prepared.host;
     loop {
         let time = now(start);
         poll_credential_updates(&mut service, &mut credentials, &mut peers, &mut quit);
@@ -955,6 +969,9 @@ struct StartupOptions {
     remote_admin: administration::Mode,
     wal_reclaim_ms: Option<u64>,
     checkpoint_entries: Option<u64>,
+    /// Host-loop gather window and wait cap; see `service_setup::HostWait`.
+    gather_us: Option<u64>,
+    host_wait_ms: Option<u64>,
     leadership_maintenance: bool,
     node_drain: bool,
     membership_drain: Option<std::path::PathBuf>,
@@ -976,6 +993,8 @@ impl StartupOptions {
             remote_admin: administration::Mode::Automatic,
             wal_reclaim_ms: None,
             checkpoint_entries: None,
+            gather_us: None,
+            host_wait_ms: None,
             membership_drain: None,
             groups: None,
             group_admin_plans: None,
@@ -1159,6 +1178,8 @@ fn is_startup_option(flag: &str) -> bool {
             | "--discovery-peers"
             | "--peer-discovery"
             | "--wal-reclaim-ms"
+            | "--gather-us"
+            | "--host-wait-ms"
             | "--checkpoint-entries"
             | "--leadership-maintenance"
             | "--node-drain"
@@ -1235,6 +1256,20 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
             }
             "--wal-reclaim-ms" if options.wal_reclaim_ms.is_none() && args[0] == "serve" => {
                 options.wal_reclaim_ms = Some(positive_option(&value, "WAL reclaim interval")?);
+            }
+            "--gather-us" if options.gather_us.is_none() && args[0] == "serve" => {
+                let gather = value.parse::<u64>()?;
+                if gather > 10_000 {
+                    return Err("--gather-us must be at most 10000".into());
+                }
+                options.gather_us = Some(gather);
+            }
+            "--host-wait-ms" if options.host_wait_ms.is_none() && args[0] == "serve" => {
+                let cap = positive_option(&value, "host wait cap")?;
+                if cap > 1_000 {
+                    return Err("--host-wait-ms must be at most 1000".into());
+                }
+                options.host_wait_ms = Some(cap);
             }
             "--leadership-maintenance" if leadership_maintenance.is_none() => {
                 leadership_maintenance = Some(enabled_option(&value, "--leadership-maintenance")?);

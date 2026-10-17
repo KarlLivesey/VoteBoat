@@ -189,22 +189,32 @@ pub fn host_wake() -> Arc<voteboat::native::readiness::HostWake> {
 }
 /// Longest a host loop waits with nothing announced; bounds host-side timers
 /// such as credential reloads and administrative deadlines.
-const HOST_MAX_WAIT: std::time::Duration = std::time::Duration::from_millis(10);
+pub const HOST_MAX_WAIT: std::time::Duration = std::time::Duration::from_millis(10);
 /// Gather window before a round that already has queued work.
-const HOST_GATHER: std::time::Duration = std::time::Duration::from_micros(200);
+pub const HOST_GATHER: std::time::Duration = std::time::Duration::from_micros(200);
 /// Host-loop readiness state: the wake every worker signals, the reusable
 /// descriptor buffer and the wait itself.
 pub struct HostWait {
     wake: Arc<voteboat::native::readiness::HostWake>,
     readiness: voteboat::native::readiness::Readiness,
     fds: Vec<voteboat::worker::ReadinessFd>,
+    gather: std::time::Duration,
+    max_wait: std::time::Duration,
 }
 impl HostWait {
     pub fn new() -> Self {
+        Self::with(HOST_GATHER, HOST_MAX_WAIT)
+    }
+    /// A host loop with its own gather window (the CPU/latency knob: longer
+    /// gathers mean fewer, fuller rounds) and wait cap (the bound on
+    /// host-side timers such as credential reloads).
+    pub fn with(gather: std::time::Duration, max_wait: std::time::Duration) -> Self {
         Self {
             wake: host_wake(),
             readiness: voteboat::native::readiness::Readiness::default(),
             fds: Vec::new(),
+            gather,
+            max_wait,
         }
     }
     /// Wait for a socket named by `collect`, a worker wake or `deadline`
@@ -221,9 +231,9 @@ impl HostWait {
         self.fds.push(self.wake.fd());
         let limit = deadline
             .map(|d| std::time::Duration::from_millis(d.0.saturating_sub(time.0)))
-            .map_or(HOST_MAX_WAIT, |d| d.min(HOST_MAX_WAIT));
+            .map_or(self.max_wait, |d| d.min(self.max_wait));
         if self.fds.iter().any(|f| f.immediate) {
-            std::thread::park_timeout(HOST_GATHER);
+            std::thread::park_timeout(self.gather);
         } else {
             self.readiness.wait(&self.fds, limit)?;
         }
