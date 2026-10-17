@@ -230,6 +230,38 @@ fn scheduler_conformance<Q: ReadyScheduler>(mut q: Q) {
     assert_eq!(q.pop(), Some(group(1)));
     assert!(q.is_empty());
 }
+#[cfg(feature = "native")]
+mod deadline_queue_readiness {
+    use super::*;
+    use voteboat::native::runtime::DeadlineQueue;
+    #[test]
+    fn deadline_queue_reports_its_earliest_deadline() {
+        let mut timers = DeadlineQueue::new(owner(HostLogStore::new(1).binding()), 4).unwrap();
+        assert_eq!(timers.next_deadline(), None);
+        let late = timers
+            .register(group(1), TimerKind::Election, MonoTime(30))
+            .unwrap();
+        timers
+            .register(group(2), TimerKind::Heartbeat, MonoTime(20))
+            .unwrap();
+        assert_eq!(timers.next_deadline(), Some(MonoTime(20)));
+        // Replacing a group's timer moves the earliest deadline with it.
+        timers
+            .register(group(2), TimerKind::Heartbeat, MonoTime(40))
+            .unwrap();
+        assert_eq!(timers.next_deadline(), Some(MonoTime(30)));
+        assert_eq!(timers.poll(MonoTime(30), 10).unwrap().len(), 1);
+        assert_eq!(timers.next_deadline(), Some(MonoTime(40)));
+        assert_eq!(timers.cancel(late), Err(RuntimeError::StaleTicket));
+        let last = timers
+            .register(group(1), TimerKind::Election, MonoTime(35))
+            .unwrap();
+        assert_eq!(timers.next_deadline(), Some(MonoTime(35)));
+        timers.cancel(last).unwrap();
+        assert_eq!(timers.next_deadline(), Some(MonoTime(40)));
+    }
+}
+
 fn timer_conformance<T: TimerService>(mut timers: T) {
     let old = timers
         .register(group(1), TimerKind::Election, MonoTime(10))

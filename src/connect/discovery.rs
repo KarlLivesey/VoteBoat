@@ -301,6 +301,10 @@ impl<C: PeerConnector<Endpoint = SocketAddr>, R: PeerDiscovery> DiscoveryConnect
 impl<C: PeerConnector<Endpoint = SocketAddr>, R: PeerDiscovery> PeerConnector
     for DiscoveryConnector<C, R>
 {
+    #[cfg(unix)]
+    fn readiness_fds(&self, out: &mut Vec<crate::worker::ReadinessFd>) {
+        self.connector.readiness_fds(out)
+    }
     type Endpoint = SocketAddr;
     type Session = C::Session;
     fn local(&self) -> LocalIdentity {

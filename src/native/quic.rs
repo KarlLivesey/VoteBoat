@@ -654,6 +654,14 @@ impl NativeQuicSession {
     }
 }
 impl SecureSession for NativeQuicSession {
+    #[cfg(unix)]
+    fn readiness_fds(&self, out: &mut Vec<crate::worker::ReadinessFd>) {
+        out.extend(
+            self.socket
+                .readiness_fd()
+                .map(crate::worker::ReadinessFd::read),
+        );
+    }
     fn security(&self) -> SessionSecurity {
         SessionSecurity::Authenticated
     }

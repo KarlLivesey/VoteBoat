@@ -179,6 +179,7 @@ mod tls {
         chunk: usize,
         interrupt: bool,
     }
+    impl voteboat::secure::HostDescriptor for Memory {}
     impl Drop for Memory {
         fn drop(&mut self) {
             self.outgoing.lock().unwrap().closed = true;
@@ -853,4 +854,16 @@ mod tls {
             std::thread::park_timeout(Duration::from_millis(1));
         }
     }
+}
+
+#[cfg(unix)]
+#[test]
+fn host_descriptors_come_only_from_socket_backed_sessions() {
+    use std::os::fd::AsRawFd;
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let stream = std::net::TcpStream::connect(listener.local_addr().unwrap()).unwrap();
+    assert_eq!(stream.host_fd(), Some(stream.as_raw_fd()));
+    struct Pipe;
+    impl HostDescriptor for Pipe {}
+    assert_eq!(Pipe.host_fd(), None);
 }

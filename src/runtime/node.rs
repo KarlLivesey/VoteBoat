@@ -159,6 +159,39 @@ pub struct NodeProgress {
     pub replica: Option<ReplicaProgress>,
     pub peers: Option<PeerDriverProgress>,
 }
+impl NodeProgress {
+    /// Whether this poll did replica, persistence, application or network work.
+    /// Refusals, blocked ingress and peer status rows alone are not progress.
+    pub fn made_progress(&self) -> bool {
+        self.replica.as_ref().is_some_and(|r| {
+            !r.steps.is_empty()
+                || r.worker_events
+                    + r.snapshot_events
+                    + r.snapshot_installs
+                    + r.snapshot_supplies
+                    + r.effects
+                    + r.retries
+                    + r.persistence_batches
+                    + r.sends
+                    + r.applications
+                    + r.reads
+                    > 0
+        }) || self.peers.as_ref().is_some_and(|p| {
+            p.connection_submissions
+                + p.connections
+                + p.connection_failures
+                + p.obsolete_connections
+                + p.sends
+                + p.received
+                + p.ingress.admitted
+                + p.ingress.discarded
+                > 0
+                || !p.completions.is_empty()
+                || !p.ingress.completed.is_empty()
+                || !p.ingress.rejected.is_empty()
+        })
+    }
+}
 pub struct NetworkNodeRecovery<L, R, N: PeerNetwork> {
     pub local: L,
     pub replica: ReplicaDriver<R>,
@@ -957,6 +990,38 @@ where
             .set_admission_routes(&mut self.local.owner, routes, now)?;
         self.now = now;
         Ok(())
+    }
+    /// Earliest deadline at which a poll has timer, retry or connection work
+    /// even without input: a host that waits on `readiness_fds` must wake by
+    /// then. Advisory: polling remains the only way any of it executes.
+    pub fn next_deadline(&self) -> Option<MonoTime> {
+        [
+            self.local.owner.next_deadline(),
+            self.replica.next_deadline(),
+            self.peers.as_ref().and_then(PeerNetwork::next_deadline),
+        ]
+        .into_iter()
+        .flatten()
+        .min()
+    }
+    /// Descriptors whose readability means the next poll may have network work.
+    /// Advisory: a host may wait on them (and its worker wake) instead of a
+    /// fixed park; polling remains the only source of progress.
+    #[cfg(unix)]
+    pub fn readiness_fds(&self, out: &mut Vec<crate::worker::ReadinessFd>) {
+        let first = out.len();
+        if let Some(peers) = &self.peers {
+            peers.readiness_fds(out);
+        }
+        if !self.local.outbound.is_drained() {
+            // Queued output is flushed by the next poll once a socket can take it.
+            for fd in &mut out[first..] {
+                fd.write = true;
+            }
+        }
+        if self.local.owner.has_ready_input() || self.replica.has_queued_persists() {
+            out.push(crate::worker::ReadinessFd::immediate());
+        }
     }
     pub fn poll(
         &mut self,

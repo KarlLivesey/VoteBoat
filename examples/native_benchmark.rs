@@ -249,6 +249,11 @@ struct PollTotals {
     snapshot_installs: [usize; 3],
     snapshot_send_refusals: [usize; 3],
     snapshot_supplies: usize,
+    /// Rounds that ended in a readiness wait, by how the wait ended.
+    waits: usize,
+    waits_immediate: usize,
+    waits_ready: usize,
+    waits_timeout: usize,
 }
 #[path = "benchmark/checkpoint_steps.rs"]
 mod checkpoint_steps;

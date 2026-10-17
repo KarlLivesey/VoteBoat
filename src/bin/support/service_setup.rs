@@ -18,7 +18,7 @@ use voteboat::{
     application::*,
     identity::*,
     log::*,
-    native::{connect::*, node::*, startup::*, tls::*, worker::*},
+    native::{connect::*, node::*, startup::*, tls::*},
     quorum::*,
     runtime::*,
 };
@@ -176,6 +176,17 @@ where
 {
     open_application_with_rotation(config, protocol, timers, member, app, None)
 }
+/// The one readiness-observable wake for this process's single host thread.
+/// Workers wake it with a byte on a local socket pair, which the host loop's
+/// readiness wait observes alongside its sockets and timers.
+pub fn host_wake() -> Arc<voteboat::native::readiness::HostWake> {
+    static WAKE: std::sync::OnceLock<Arc<voteboat::native::readiness::HostWake>> =
+        std::sync::OnceLock::new();
+    WAKE.get_or_init(|| {
+        Arc::new(voteboat::native::readiness::HostWake::new().expect("host wake socket pair"))
+    })
+    .clone()
+}
 pub fn open_application_with_rotation<A>(
     mut config: NativeMemberStartup,
     protocol: NativePeerProtocol,
@@ -188,7 +199,7 @@ where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
     A::Receipt: ApplicationReceipt,
 {
-    let wake = Arc::new(ThreadWake::current());
+    let wake: Arc<dyn voteboat::worker::WorkerWake> = host_wake();
     let opened = if member {
         // Explicit recovery only: provisioned routes do not establish assignment.
         // The native member constructor verifies the authoritative WAL/checkpoint.

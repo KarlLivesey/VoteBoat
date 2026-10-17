@@ -244,6 +244,11 @@ impl ReceivedBatch {
 /// the channel immediately and fails accepted sends. Dropping a handle abandons
 /// observation, not external progress or the queue's retained credits.
 pub trait PeerTransport {
+    /// Raw descriptors whose readability means there may be input to poll.
+    /// Advisory, for host readiness waits; implementations without sockets
+    /// report nothing.
+    #[cfg(unix)]
+    fn readiness_fds(&self, _out: &mut Vec<crate::worker::ReadinessFd>) {}
     /// Production providers attest an authenticated identity-bound channel.
     fn security(&self) -> SessionSecurity;
     fn binding(&self) -> SessionBinding;
@@ -279,6 +284,10 @@ pub trait PeerTransport {
 }
 
 impl<P: PeerTransport + ?Sized> PeerTransport for Box<P> {
+    #[cfg(unix)]
+    fn readiness_fds(&self, out: &mut Vec<crate::worker::ReadinessFd>) {
+        (**self).readiness_fds(out)
+    }
     fn security(&self) -> SessionSecurity {
         (**self).security()
     }

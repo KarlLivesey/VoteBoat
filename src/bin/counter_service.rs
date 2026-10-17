@@ -87,7 +87,9 @@ use setup::{checked, group, Failure, Service};
 use std::{
     io::{Read, Write},
     net::{SocketAddr, TcpListener},
+    os::fd::AsRawFd,
     path::Path,
+    sync::Arc,
     time::{Duration, Instant},
 };
 use voteboat::observability::*;
@@ -539,6 +541,7 @@ fn run_service(
     let mut connection: Option<Connection> = None;
     let (mut quit, mut shutdown) = (false, shutdown::Shutdown::default());
     let mut leadership = leadership_set::Leaders::new(&service);
+    let mut host = HostWait::new();
     loop {
         let time = now(start);
         poll_credential_updates(&mut service, &mut credentials, &mut peers, &mut quit);
@@ -614,7 +617,7 @@ fn run_service(
         if service.is_drained() {
             break;
         }
-        std::thread::park_timeout(Duration::from_millis(1));
+        host.wait(&service, &listener, connection.as_ref(), time)?;
     }
     finish_service(service, drain, credentials, peers, observer, id)
 }
@@ -1310,6 +1313,56 @@ fn poll_service(
     ));
     checked(result)?;
     Ok(())
+}
+/// Longest the host loop waits with nothing announced; bounds host-side
+/// timers such as credential reloads and administrative deadlines.
+const HOST_MAX_WAIT: Duration = Duration::from_millis(10);
+/// Gather window before a round that already has queued work.
+const HOST_GATHER: Duration = Duration::from_micros(100);
+/// Host-loop readiness state: the wake every worker signals, the reusable
+/// descriptor buffer and the wait itself.
+struct HostWait {
+    wake: Arc<voteboat::native::readiness::HostWake>,
+    readiness: voteboat::native::readiness::Readiness,
+    fds: Vec<voteboat::worker::ReadinessFd>,
+}
+impl HostWait {
+    fn new() -> Self {
+        Self {
+            wake: service_setup::host_wake(),
+            readiness: voteboat::native::readiness::Readiness::default(),
+            fds: Vec::new(),
+        }
+    }
+    /// Wait for a socket, a worker wake or the earliest deadline instead of
+    /// polling at a fixed cadence; polling remains the only source of progress.
+    fn wait(
+        &mut self,
+        service: &Service,
+        listener: &TcpListener,
+        connection: Option<&Connection>,
+        time: MonoTime,
+    ) -> Result<(), Failure> {
+        self.fds.clear();
+        service.readiness_fds(&mut self.fds);
+        self.fds.push(self.wake.fd());
+        self.fds
+            .push(voteboat::worker::ReadinessFd::read(listener.as_raw_fd()));
+        if let Some(c) = connection {
+            c.stream.readiness_fds(&mut self.fds);
+        }
+        let limit = service
+            .next_deadline()
+            .map(|d| Duration::from_millis(d.0.saturating_sub(time.0)))
+            .map_or(HOST_MAX_WAIT, |d| d.min(HOST_MAX_WAIT));
+        if self.fds.iter().any(|f| f.immediate) {
+            std::thread::park_timeout(HOST_GATHER);
+        } else {
+            self.readiness.wait(&self.fds, limit)?;
+        }
+        self.wake.drain();
+        Ok(())
+    }
 }
 fn accept_connection(
     listener: &TcpListener,

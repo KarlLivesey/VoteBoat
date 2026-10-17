@@ -445,6 +445,12 @@ impl<S: SecureSession, C: WireCodec, P: BufferPool> NativePeerTransport<S, C, P>
     }
 }
 impl<S: SecureSession, C: WireCodec, P: BufferPool> PeerTransport for NativePeerTransport<S, C, P> {
+    #[cfg(unix)]
+    fn readiness_fds(&self, out: &mut Vec<crate::worker::ReadinessFd>) {
+        if let Some(session) = &self.session {
+            session.readiness_fds(out);
+        }
+    }
     fn drain_status(&mut self) -> TransportDrainStatus {
         TransportDrainStatus {
             binding: self.binding,

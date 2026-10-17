@@ -524,6 +524,31 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> NativePeerConnec
 impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> PeerConnector
     for NativePeerConnector<D>
 {
+    #[cfg(unix)]
+    fn readiness_fds(&self, out: &mut Vec<crate::worker::ReadinessFd>) {
+        use crate::worker::ReadinessFd;
+        use std::os::fd::AsRawFd;
+        if let Some(listener) = &self.listener {
+            out.push(ReadinessFd::read(listener.as_raw_fd()));
+        }
+        out.extend(
+            self.anonymous
+                .iter()
+                .flatten()
+                .map(|a| ReadinessFd::read(a.stream.as_raw_fd())),
+        );
+        for attempt in self.attempts.values() {
+            match &attempt.stage {
+                Stage::Preface { stream, .. } => out.push(ReadinessFd {
+                    fd: stream.as_raw_fd(),
+                    write: true,
+                    immediate: false,
+                }),
+                Stage::Handshake(session) => session.readiness_fds(out),
+                _ => {}
+            }
+        }
+    }
     type Endpoint = SocketAddr;
     type Session = Session;
     fn local(&self) -> LocalIdentity {
@@ -847,6 +872,18 @@ impl PeerConnector for NativeServiceConnector {
         match self {
             Self::Discovered(c) => c.is_drained(),
             _ => self.usage().requests == 0 && self.usage().anonymous == 0,
+        }
+    }
+    #[cfg(unix)]
+    fn readiness_fds(&self, out: &mut Vec<crate::worker::ReadinessFd>) {
+        match self {
+            Self::Discovered(c) => c.readiness_fds(out),
+            Self::Tcp(c) => c.readiness_fds(out),
+            Self::RotatingTcp(c) => c.readiness_fds(out),
+            #[cfg(feature = "quic")]
+            Self::Quic(c) => c.readiness_fds(out),
+            #[cfg(feature = "quic")]
+            Self::RotatingQuic(c) => c.readiness_fds(out),
         }
     }
     type Endpoint = SocketAddr;

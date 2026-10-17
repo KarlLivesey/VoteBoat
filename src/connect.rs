@@ -152,6 +152,13 @@ pub trait PeerConnector {
     fn local(&self) -> LocalIdentity;
     fn limits(&self) -> ConnectLimits;
     fn usage(&self) -> ConnectUsage;
+    /// Raw descriptors (listeners and in-progress handshakes) whose readability
+    /// means there may be connection work to poll.
+    /// Advisory, for host readiness waits; implementations without sockets
+    /// report nothing.
+    #[cfg(unix)]
+    fn readiness_fds(&self, _out: &mut Vec<crate::worker::ReadinessFd>) {}
+
     fn next_deadline(&self) -> Option<MonoTime>;
     /// Exact construction-provisioned credential identity, for membership-driven
     /// connection admission. False by default; hints never provision trust.

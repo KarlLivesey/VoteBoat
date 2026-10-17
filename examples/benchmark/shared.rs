@@ -14,6 +14,13 @@
 // rights and limitations under the RPL.
 //! Benchmark assembly: one WAL, snapshot worker and peer endpoint per replica.
 use super::observe::{ObservedLog, Trace};
+use voteboat::native::readiness::HostWake;
+/// One readiness-observable wake for the single benchmark host thread.
+pub(super) fn host_wake() -> Arc<HostWake> {
+    static WAKE: std::sync::OnceLock<Arc<HostWake>> = std::sync::OnceLock::new();
+    WAKE.get_or_init(|| Arc::new(HostWake::new().expect("host wake socket")))
+        .clone()
+}
 use super::publication::BenchJournal;
 use super::*;
 pub(super) type SharedLog = ObservedLog<NativeLogStore<BenchJournal>>;
@@ -526,7 +533,7 @@ impl ClusterSetup<'_> {
         self.check_capacity(n, timed.limits(), clients.limits())?;
         let ingress = checked(IngressRouter::new(ingress.binding(), ingress_limits))?;
         let factory = checked(NativeTransportFactory::new(codec, Default::default()))?;
-        let wake: Arc<dyn WorkerWake> = Arc::new(ThreadWake::current());
+        let wake: Arc<dyn WorkerWake> = host_wake();
         let mut workers = spawn_workers(log, timed, snapshots, owner_id, wake.clone())?;
         workers.limit_recovery(recovery)?;
         let Workers {

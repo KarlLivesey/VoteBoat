@@ -14,6 +14,7 @@
 // rights and limitations under the RPL.
 //! TLS 1.3 mutual authentication using pinned Rustls/ring. No global crypto
 //! provider, executor, listener or connection pool is constructed.
+use crate::secure::HostDescriptor;
 use crate::{identity::*, runtime::MonoTime, secure::*};
 use rustls::{
     pki_types::{CertificateDer, PrivateKeyDer, ServerName},
@@ -175,7 +176,7 @@ pub struct TlsPeer {
     pub server_name: String,
 }
 
-pub struct NativeTlsSession<I: Read + Write> {
+pub struct NativeTlsSession<I: Read + Write + HostDescriptor> {
     io: Option<I>,
     connection: Connection,
     local: LocalIdentity,
@@ -196,8 +197,11 @@ pub struct NativeTlsSession<I: Read + Write> {
     handshake_read: usize,
     handshake_written: usize,
     peer_closed: bool,
+    /// Decrypted input is buffered in the connection; the socket itself may
+    /// not be readable, so a readiness wait must not block.
+    plaintext_pending: bool,
 }
-impl<I: Read + Write> NativeTlsSession<I> {
+impl<I: Read + Write + HostDescriptor> NativeTlsSession<I> {
     /// Generic I/O must be nonblocking and honor Read/Write byte counts. Writes
     /// must advance the stream without an additional host flush. Any host-side
     /// buffers need separate accounting. It may share its host reactor; this
@@ -276,6 +280,7 @@ impl<I: Read + Write> NativeTlsSession<I> {
         let hello = encode_hello(local, wire_version);
         Ok(Self {
             io: Some(io),
+            plaintext_pending: false,
             connection,
             local,
             peer,
@@ -374,36 +379,6 @@ impl<I: Read + Write> NativeTlsSession<I> {
         self.io.take().ok_or(SessionError::Closed)
     }
 }
-impl NativeTlsSession<TcpStream> {
-    pub fn client_tcp(
-        stream: TcpStream,
-        config: &NativeTlsConfig,
-        local: LocalIdentity,
-        peer: TlsPeer,
-        generation: SecureSessionGeneration,
-        limits: SessionLimits,
-        now: MonoTime,
-    ) -> Result<Self, SessionError> {
-        stream
-            .set_nonblocking(true)
-            .map_err(|e| SessionError::Io(e.kind()))?;
-        Self::client(stream, config, local, peer, generation, limits, now)
-    }
-    pub fn server_tcp(
-        stream: TcpStream,
-        config: &NativeTlsConfig,
-        local: LocalIdentity,
-        peer: TlsPeer,
-        generation: SecureSessionGeneration,
-        limits: SessionLimits,
-        now: MonoTime,
-    ) -> Result<Self, SessionError> {
-        stream
-            .set_nonblocking(true)
-            .map_err(|e| SessionError::Io(e.kind()))?;
-        Self::server(stream, config, local, peer, generation, limits, now)
-    }
-}
 struct LimitedIo<'a, I> {
     io: &'a mut I,
     budget: SessionPollBudget,
@@ -466,7 +441,50 @@ impl<I: Write> Write for LimitedIo<'_, I> {
         Ok(())
     }
 }
-impl<I: Read + Write> SecureSession for NativeTlsSession<I> {
+impl NativeTlsSession<TcpStream> {
+    /// Client session over a TCP stream, switched to non-blocking first.
+    pub fn client_tcp(
+        stream: TcpStream,
+        config: &NativeTlsConfig,
+        local: LocalIdentity,
+        peer: TlsPeer,
+        generation: SecureSessionGeneration,
+        limits: SessionLimits,
+        now: MonoTime,
+    ) -> Result<Self, SessionError> {
+        stream
+            .set_nonblocking(true)
+            .map_err(|e| SessionError::Io(e.kind()))?;
+        Self::client(stream, config, local, peer, generation, limits, now)
+    }
+    /// Server session over a TCP stream, switched to non-blocking first.
+    pub fn server_tcp(
+        stream: TcpStream,
+        config: &NativeTlsConfig,
+        local: LocalIdentity,
+        peer: TlsPeer,
+        generation: SecureSessionGeneration,
+        limits: SessionLimits,
+        now: MonoTime,
+    ) -> Result<Self, SessionError> {
+        stream
+            .set_nonblocking(true)
+            .map_err(|e| SessionError::Io(e.kind()))?;
+        Self::server(stream, config, local, peer, generation, limits, now)
+    }
+}
+impl<I: Read + Write + HostDescriptor> SecureSession for NativeTlsSession<I> {
+    #[cfg(unix)]
+    fn readiness_fds(&self, out: &mut Vec<crate::worker::ReadinessFd>) {
+        // Only while this session still owns its stream.
+        if let Some(fd) = self.io.as_ref().and_then(HostDescriptor::host_fd) {
+            out.push(crate::worker::ReadinessFd {
+                fd,
+                write: !self.is_flushed(),
+                immediate: self.plaintext_pending,
+            });
+        }
+    }
     fn security(&self) -> SessionSecurity {
         SessionSecurity::Authenticated
     }
@@ -542,6 +560,7 @@ impl<I: Read + Write> SecureSession for NativeTlsSession<I> {
                                 .process_new_packets()
                                 .map_err(|_| SessionError::Authentication)?;
                             self.peer_closed |= state.peer_has_closed();
+                            self.plaintext_pending |= state.plaintext_bytes_to_read() > 0;
                         }
                         Err(e)
                             if matches!(
@@ -592,7 +611,10 @@ impl<I: Read + Write> SecureSession for NativeTlsSession<I> {
         }
         match self.connection.reader().read(bytes) {
             Ok(n) => Ok(n),
-            Err(e) if e.kind() == io::ErrorKind::WouldBlock => Err(SessionError::WouldBlock),
+            Err(e) if e.kind() == io::ErrorKind::WouldBlock => {
+                self.plaintext_pending = false;
+                Err(SessionError::WouldBlock)
+            }
             Err(e) if e.kind() == io::ErrorKind::UnexpectedEof => {
                 self.fail(SessionError::Truncated)
             }

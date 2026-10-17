@@ -195,6 +195,12 @@ pub struct Expiration {
 pub trait TimerService {
     fn owner(&self) -> RuntimeOwner;
     fn capacity(&self) -> usize;
+    /// Earliest registered deadline, so a host may wait until it instead of
+    /// polling at a fixed cadence. Advisory: `poll` remains the only way a
+    /// deadline fires, and `None` only means the host must use its own bound.
+    fn next_deadline(&self) -> Option<MonoTime> {
+        None
+    }
     /// Replace only this exact group incarnation/kind, issuing a fresh token.
     /// Replacement remains possible at capacity; rejected registration leaves
     /// existing deadlines intact. A past deadline is eligible at the next poll.
@@ -476,6 +482,12 @@ impl<Q: ReadyScheduler> Shard<Q> {
         );
         self.retain_connection_history(group)?;
         Ok(())
+    }
+    /// Whether the scheduler holds a ready group, so a poll would open a visit
+    /// and step queued input without any new input. Groups whose input waits
+    /// on a persistence dependency are not scheduled and do not count.
+    pub fn has_queued_input(&self) -> bool {
+        !self.closed && !self.scheduler.is_empty()
     }
     pub fn core(&self, group: GroupIdentity) -> Option<&Raft> {
         self.groups.get(&group).map(|g| &g.core)

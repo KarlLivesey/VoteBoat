@@ -278,6 +278,15 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     pub fn worker_binding(&self) -> WorkerBinding {
         self.worker
     }
+    /// Whether a poll has owner work without new input: deliverable effects or
+    /// queued group input. Advisory for host waiting.
+    pub fn has_ready_input(&self) -> bool {
+        !self.ready.is_empty() || self.runtime.has_queued_input()
+    }
+    /// Earliest timer deadline; advisory for host waiting (see `TimerService`).
+    pub fn next_deadline(&self) -> Option<MonoTime> {
+        self.runtime.next_deadline()
+    }
     pub fn groups(&self) -> impl Iterator<Item = GroupIdentity> + '_ {
         self.runtime.groups()
     }

@@ -164,6 +164,9 @@ impl TimerService for DeadlineQueue {
     fn len(&self) -> usize {
         self.by_group.len()
     }
+    fn next_deadline(&self) -> Option<MonoTime> {
+        self.by_deadline.first_key_value().map(|(key, _)| key.0)
+    }
 }
 
 #[derive(Clone)]

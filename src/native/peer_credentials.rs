@@ -149,6 +149,10 @@ impl<C: NativePeerMaterialProvider> PeerCredentialControl for RotatingPeerConnec
     }
 }
 impl<C: NativePeerMaterialProvider> PeerConnector for RotatingPeerConnector<C> {
+    #[cfg(unix)]
+    fn readiness_fds(&self, out: &mut Vec<crate::worker::ReadinessFd>) {
+        self.inner.readiness_fds(out)
+    }
     type Endpoint = C::Endpoint;
     type Session = GuardedSession<C::Session, CredentialLease>;
     fn local(&self) -> LocalIdentity {

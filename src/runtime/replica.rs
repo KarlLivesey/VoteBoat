@@ -171,6 +171,9 @@ pub struct ReplicaDriver<R> {
     data: VecDeque<EffectLease>,
     retries: VecDeque<EffectLease>,
     snapshot_sends: SnapshotSendRetries,
+    /// The worker refused the last submission as overloaded; queued leases
+    /// cannot be submitted until it delivers an event.
+    persist_refused: bool,
     failed_result: Option<ApplicationResults<R>>,
     now: MonoTime,
     failed: Option<ReplicaError>,
@@ -349,6 +352,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
             data: VecDeque::with_capacity(limits.leases),
             retries: VecDeque::with_capacity(limits.leases),
             snapshot_sends: SnapshotSendRetries::new(limits.leases, limits.snapshot_send_retry_ms),
+            persist_refused: false,
             failed_result: None,
             now,
             failed: None,
@@ -376,6 +380,15 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         }
     }
     /// Only local retained effects, not quorum/client/network quiescence.
+    /// Whether persistence leases await submission; advisory for host waiting.
+    pub fn has_queued_persists(&self) -> bool {
+        !self.persist_refused && (!self.data.is_empty() || !self.control.is_empty())
+    }
+    /// Earliest host-clock deadline of retained retry work; advisory for a host
+    /// that waits on readiness instead of polling at a fixed cadence.
+    pub fn next_deadline(&self) -> Option<MonoTime> {
+        self.snapshot_sends.next_deadline()
+    }
     pub fn is_drained(&self) -> bool {
         self.usage().leases() == 0 && self.failed_result.is_none() && self.usage().reclaims == 0
     }
@@ -511,6 +524,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         }
         for event in events {
             out.worker_events += 1;
+            self.persist_refused = false;
             p.owner
                 .deliver_worker(event, now)
                 .map_err(ReplicaError::Owner)?;
@@ -925,11 +939,13 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         match owner.submit_persists(worker, leases, now) {
             Ok(_) => {
                 out.persistence_batches += 1;
+                self.persist_refused = false;
                 Ok(())
             }
             Err(rejected) => {
                 queue.extend(rejected.leases);
                 if rejected.reason == EffectOwnerError::Worker(WorkerError::Overloaded) {
+                    self.persist_refused = true;
                     Ok(())
                 } else {
                     Err(ReplicaError::Owner(rejected.reason))

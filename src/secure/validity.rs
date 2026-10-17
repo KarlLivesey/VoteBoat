@@ -85,6 +85,10 @@ impl<S: SecureSession, V: SessionValidity> GuardedSession<S, V> {
     }
 }
 impl<S: SecureSession, V: SessionValidity> SecureSession for GuardedSession<S, V> {
+    #[cfg(unix)]
+    fn readiness_fds(&self, out: &mut Vec<crate::worker::ReadinessFd>) {
+        self.session.readiness_fds(out)
+    }
     fn security(&self) -> SessionSecurity {
         self.session.security()
     }

@@ -20,6 +20,10 @@ rustls = { version = "=0.23.45", optional = true, default-features = false, feat
 quinn-proto = { version = "=0.11.19", optional = true, default-features = false, features = ["rustls-ring"] }
 bytes = { version = "=1.12.1", optional = true }
 
+[target.'cfg(unix)'.dependencies]
+# poll(2) for host readiness waiting.
+libc = "=0.2.190"
+
 [dev-dependencies]
 raft_reference = { package = "raft", version = "=0.7.0", default-features = false, features = ["protobuf-codec"] }
 slog = { version = "=2.7.0", default-features = false }
@@ -36,7 +40,8 @@ required-features = ["native"]
 exclude = ["VoteBoat-Design-Pack/reference-rust"]
 
 [lints.rust]
-unsafe_code = "forbid"
+# One audited poll(2) in native/readiness.rs; everything else stays forbidden.
+unsafe_code = "deny"
 
 [lints.clippy]
 all = { level = "warn", priority = -1 }

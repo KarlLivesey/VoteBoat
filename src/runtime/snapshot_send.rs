@@ -51,6 +51,13 @@ impl SnapshotSendRetries {
     pub(super) fn clear(&mut self) {
         self.pending.clear();
     }
+    /// When the earliest pending send becomes eligible for retry.
+    pub(super) fn next_deadline(&self) -> Option<MonoTime> {
+        self.pending
+            .iter()
+            .map(|(_, since)| MonoTime(since.0.saturating_add(self.delay_ms)))
+            .min()
+    }
 }
 
 #[cfg(test)]
@@ -108,5 +115,19 @@ mod tests {
         assert!(!retries.expired(ticket(1), MonoTime(u64::MAX - 50)).unwrap());
         assert!(!retries.expired(ticket(1), MonoTime(u64::MAX - 1)).unwrap());
         assert!(retries.expired(ticket(1), MonoTime(u64::MAX)).unwrap());
+    }
+
+    #[test]
+    fn next_deadline_is_the_earliest_pending_retry() {
+        let mut retries = SnapshotSendRetries::new(4, 50);
+        assert_eq!(retries.next_deadline(), None);
+        assert!(!retries.expired(ticket(1), MonoTime(100)).unwrap());
+        assert!(!retries.expired(ticket(2), MonoTime(120)).unwrap());
+        assert_eq!(retries.next_deadline(), Some(MonoTime(150)));
+        retries.complete(ticket(1));
+        assert_eq!(retries.next_deadline(), Some(MonoTime(170)));
+        assert!(retries.expired(ticket(2), MonoTime(170)).unwrap());
+        retries.clear();
+        assert_eq!(retries.next_deadline(), None);
     }
 }

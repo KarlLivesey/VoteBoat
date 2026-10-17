@@ -33,6 +33,10 @@ pub(super) struct QuicSocketHub {
     leases: BTreeMap<SocketAddr, Mailbox>,
 }
 impl QuicSocketHub {
+    #[cfg(unix)]
+    pub(super) fn socket_fd(&self) -> std::os::fd::RawFd {
+        std::os::fd::AsRawFd::as_raw_fd(&self.socket)
+    }
     pub(super) fn new(socket: UdpSocket, address: SocketAddr) -> Arc<Mutex<Self>> {
         Arc::new(Mutex::new(Self {
             socket,
@@ -91,6 +95,15 @@ pub(super) enum SessionSocket {
     Shared(SharedSocket),
 }
 impl SessionSocket {
+    /// The UDP socket this session receives through (advisory readiness).
+    #[cfg(unix)]
+    pub(super) fn readiness_fd(&self) -> Option<std::os::fd::RawFd> {
+        use std::os::fd::AsRawFd;
+        match self {
+            Self::Dedicated(s) => Some(s.as_raw_fd()),
+            Self::Shared(s) => lock(&s.hub).ok().map(|hub| hub.socket.as_raw_fd()),
+        }
+    }
     pub(super) fn local_addr(&self) -> io::Result<SocketAddr> {
         match self {
             Self::Dedicated(s) => s.local_addr(),

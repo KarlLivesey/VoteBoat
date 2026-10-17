@@ -271,6 +271,16 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
     pub fn limits(&self) -> ShardLimits {
         self.shard.limits
     }
+    pub fn has_queued_input(&self) -> bool {
+        !self.closed && self.failed.is_none() && self.shard.has_queued_input()
+    }
+    /// Earliest timer deadline of a live shard; see `TimerService::next_deadline`.
+    pub fn next_deadline(&self) -> Option<MonoTime> {
+        if self.closed || self.failed.is_some() {
+            return None;
+        }
+        self.timers.next_deadline()
+    }
     pub fn groups(&self) -> impl Iterator<Item = GroupIdentity> + '_ {
         self.shard.groups.keys().copied()
     }

@@ -471,6 +471,29 @@ impl Channel {
             _ => None,
         }
     }
+    /// Descriptors whose readiness means this channel may have input or can
+    /// take pending output; advisory for the host loop's wait. Only the
+    /// counter service waits on readiness so far.
+    #[cfg(unix)]
+    #[allow(dead_code)]
+    pub fn readiness_fds(&self, out: &mut Vec<voteboat::worker::ReadinessFd>) {
+        use std::os::fd::AsRawFd;
+        match self {
+            Self::Plain(stream) => {
+                out.push(voteboat::worker::ReadinessFd::read(stream.as_raw_fd()))
+            }
+            Self::Selecting { stream, .. } => out.extend(
+                stream
+                    .as_ref()
+                    .map(|s| voteboat::worker::ReadinessFd::read(s.as_raw_fd())),
+            ),
+            Self::Tls { session, .. } => {
+                if let Some(session) = session {
+                    session.readiness_fds(out);
+                }
+            }
+        }
+    }
     pub fn is_flushed(&self) -> bool {
         match self {
             Self::Plain(_) => true,

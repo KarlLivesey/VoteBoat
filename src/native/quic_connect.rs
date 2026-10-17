@@ -216,6 +216,19 @@ impl NativeQuicConnector {
     }
 }
 impl PeerConnector for NativeQuicConnector {
+    #[cfg(unix)]
+    fn readiness_fds(&self, out: &mut Vec<crate::worker::ReadinessFd>) {
+        if let Some(hub) = &self.hub {
+            if let Ok(hub) = hub.lock() {
+                out.push(crate::worker::ReadinessFd::read(hub.socket_fd()));
+            }
+        }
+        for attempt in self.attempts.values() {
+            if let Stage::Handshake(session) = &attempt.stage {
+                session.readiness_fds(out);
+            }
+        }
+    }
     type Endpoint = SocketAddr;
     type Session = NativeQuicSession;
     fn local(&self) -> LocalIdentity {

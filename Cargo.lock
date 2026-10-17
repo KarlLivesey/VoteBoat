@@ -575,6 +575,7 @@ name = "voteboat"
 version = "0.1.0"
 dependencies = [
  "bytes",
+ "libc",
  "quinn-proto",
  "raft",
  "ring",

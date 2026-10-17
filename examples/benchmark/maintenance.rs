@@ -275,6 +275,16 @@ impl Maintenance {
     pub(super) fn idle(&self) -> bool {
         self.active.is_none()
     }
+    /// Next time `step` has scheduled work: the next wave, or now while a wave
+    /// is active and must be polled to completion.
+    pub(super) fn next_due(&self, now: u128) -> Option<u128> {
+        let config = self.config?;
+        if !self.idle() {
+            return Some(now);
+        }
+        let intended = self.next as u128 * config.period;
+        (intended < self.horizon).then_some(intended)
+    }
     pub(super) fn finished(&self) -> bool {
         self.idle()
             && self

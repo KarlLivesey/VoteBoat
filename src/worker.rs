@@ -150,6 +150,36 @@ impl WorkerLimits {
 pub trait WorkerWake: Send + Sync {
     fn wake(&self);
 }
+/// One descriptor a host readiness wait observes: readable input, and also
+/// writability while the owner has output it could not yet flush.
+#[cfg(unix)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ReadinessFd {
+    pub fd: std::os::fd::RawFd,
+    pub write: bool,
+    /// The owner already holds input no descriptor announces (for example
+    /// decrypted bytes buffered in a session): the host must not wait at all.
+    pub immediate: bool,
+}
+#[cfg(unix)]
+impl ReadinessFd {
+    pub fn read(fd: std::os::fd::RawFd) -> Self {
+        Self {
+            fd,
+            write: false,
+            immediate: false,
+        }
+    }
+    /// Work is already queued inside the owner: wait for nothing. The
+    /// descriptor is negative, which `poll(2)` ignores.
+    pub fn immediate() -> Self {
+        Self {
+            fd: -1,
+            write: false,
+            immediate: true,
+        }
+    }
+}
 /// Submit transfers an owned batch only on success. Rejection returns it whole.
 /// At most one accepted unit per group remains outstanding. Poll delivers
 /// Written before Durable/Failed, with exact visit and store scopes. A terminal

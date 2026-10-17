@@ -180,6 +180,20 @@ pub struct SessionDrainStatus {
 /// cannot undo external progress. Revocation latches
 /// failure and prevents further plaintext I/O. Key/certificate rotation creates
 /// a new authenticated connection. No method shuts down shared host resources.
+/// Host descriptor of a session's I/O handle, for advisory readiness waits.
+/// In-memory and test handles have none.
+pub trait HostDescriptor {
+    #[cfg(unix)]
+    fn host_fd(&self) -> Option<std::os::fd::RawFd> {
+        None
+    }
+}
+impl HostDescriptor for std::net::TcpStream {
+    #[cfg(unix)]
+    fn host_fd(&self) -> Option<std::os::fd::RawFd> {
+        Some(std::os::fd::AsRawFd::as_raw_fd(self))
+    }
+}
 pub trait SecureSession {
     fn security(&self) -> SessionSecurity;
     fn state(&self) -> SessionState;
@@ -207,6 +221,11 @@ pub trait SecureSession {
     }
     fn close(&mut self);
     fn revoke(&mut self);
+    /// Raw descriptors whose readability means there may be input to poll.
+    /// Advisory, for host readiness waits; implementations without sockets
+    /// report nothing.
+    #[cfg(unix)]
+    fn readiness_fds(&self, _out: &mut Vec<crate::worker::ReadinessFd>) {}
 }
 /// Production composition must call this before accepting a channel for Raft
 /// traffic; a security capability alone is insufficient until it is ready.
@@ -223,6 +242,10 @@ pub fn require_authenticated(
 }
 
 impl<S: SecureSession + ?Sized> SecureSession for Box<S> {
+    #[cfg(unix)]
+    fn readiness_fds(&self, out: &mut Vec<crate::worker::ReadinessFd>) {
+        (**self).readiness_fds(out)
+    }
     fn security(&self) -> SessionSecurity {
         (**self).security()
     }

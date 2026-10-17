@@ -48,6 +48,11 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerNetworkParts for
 }
 
 impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerNetwork for PeerDriver<C, F> {
+    #[cfg(unix)]
+    fn readiness_fds(&self, out: &mut Vec<crate::worker::ReadinessFd>) {
+        self.parts.connector.readiness_fds(out);
+        self.parts.roster.readiness_fds(out);
+    }
     type Endpoint = C::Endpoint;
     type Parts = PeerParts<C, F>;
     type Recovery = PeerDriverRecovery<C, F>;

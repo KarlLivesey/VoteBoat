@@ -161,6 +161,15 @@ pub struct PeerRoster<P: PeerTransport> {
     fenced: bool,
 }
 impl<P: PeerTransport> PeerRoster<P> {
+    /// Readiness descriptors of every established peer transport (advisory).
+    #[cfg(unix)]
+    pub fn readiness_fds(&self, out: &mut Vec<crate::worker::ReadinessFd>) {
+        for peer in self.peers.values() {
+            if let Some(transport) = &peer.transport {
+                transport.readiness_fds(out);
+            }
+        }
+    }
     pub fn new(
         config: PeerRosterConfig,
         authorized: BTreeMap<NodeId, StoreIdentity>,

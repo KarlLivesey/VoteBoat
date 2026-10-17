@@ -40,8 +40,10 @@ implemented or benchmarked; unsafe variants are not offered as options.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
+| Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
+| Next E2: directory and transfer services wait on readiness | Same host-loop change for the other two binaries | E1 | Their suites; idle CPU | T4 |
 | Done C9: steady polls stop rebuilding peer assignments | Idle and moderate-load CPU is dominated by fixed per-poll work; skip provably unchanged peer reconciliation | C6 | Idle CPU/round and loaded CPU/original pairs; affected suites; fmt + strict Clippy | T4 |
-| Next C10: remaining per-poll fixed costs | Idle profile after C9: connector poll/accept, TLS reads of idle sockets, scheduler map scans, connection-union recheck per step | C9 | Same idle/loaded CPU pairs | T4 |
+| Later C10: remaining per-poll fixed costs | Idle profile after C9: connector poll/accept, TLS reads of idle sockets, scheduler map scans, connection-union recheck per step | C9 | Same idle/loaded CPU pairs | T4 |
 | Done C6: a poll never truncates a ready visit | The default replica step budget (128) silently cut every 256-original visit in half, capping each leader barrier at 128 originals; defaults now let one barrier carry a whole 1,024-original visit | C3a/C3b | Mac APFS loaded pairs, 31:1 skew, window 1, RAM-disk CPU/original; three-configuration suite; fmt + strict Clippy | T3 |
 | Next C4': re-measure commit/append fusion without the cap | The 461 re-measurement saw ~65 originals per barrier — the 128-step cap — not arrival limits; with C6 the leader's alternating commit-only barrier is the next serial wait | C6; slice 461 (b4875d9b) | Leader barriers per original and loaded writes/s on APFS; strict acknowledgement contract unchanged | T3 |
 | Following C7: shared barriers across groups | With two groups the leader's WAL worker starts each barrier for whichever group arrived first, so groups take turns; waiting (bounded) for the host's next turn lets queued groups share it | C6 | Multi-group writes/s and per-group latency on APFS; single-group unchanged | T3 |
@@ -53,6 +55,58 @@ implemented or benchmarked; unsafe variants are not offered as options.
 Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider than
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
+
+#### E1 implemented: event-driven host waiting
+
+The user's priority order (17 October 2026): general CPU speed, platform CPU
+speed, general durable-save speed, platform durable-save speed. Native hosts
+polled every socket and worker channel on a fixed cadence (benchmark 100 µs,
+service 1 ms): about 15 µs of CPU per round across three replicas even with
+nothing to do, so CPU per write was 250 µs at 1,000 writes/s and 70 µs at
+4,000/s on the Mac RAM disk. The host loop now waits on readiness instead.
+
+Shape: `native::readiness::Readiness::wait(&[ReadinessFd], timeout)` is one
+audited `poll(2)` over a buffer the module owns (the crate's only `unsafe`;
+`unsafe_code` is `deny`, `libc` is a direct unix dependency already in the
+lock). `HostWake` replaces `ThreadWake` for hosts that wait: one byte on a
+`UnixStream` pair per burst of wakes, no unpark. `NetworkNode::readiness_fds`
+reports every session socket (`secure::HostDescriptor` gives a session's
+descriptor; in-memory test handles have none), the listener, connecting
+sockets with write interest, and marks sockets write-interested while outbound
+batches are queued; it appends an `immediate` entry when work is already queued
+inside the node (a scheduled group, deliverable effects, or persistence leases
+not refused by the worker) and when a session holds decrypted input no socket
+announces. `NetworkNode::next_deadline` is the earliest timer, retry or
+connection deadline (`TimerService::next_deadline`, default `None`). Waiting is
+advisory: the host polls exactly as before afterwards, so a missed, stale or
+spurious report costs latency only; correctness and durability never depend on
+it. The host loop (benchmark and counter service): if any entry is immediate,
+gather 100 µs then poll; otherwise wait until readiness or the earliest
+deadline (cap 50 ms benchmark, 10 ms service), gather 100 µs only if the wait
+returned within 1 ms (a busy host), and poll at once after a long block.
+
+Found on the way, each with a test: `HostWake::drain` must empty the socket
+before clearing its pending flag or a wake landing during the drain is lost and
+every later wake stays silent until a timeout (visible on the Mac as 50 ms
+stalls; `concurrent_wakes_during_drains_are_never_lost`); the first prototype
+reported only the listener because the connector builds sessions through the
+generic constructors; queued-but-unscheduled group input must not count as
+immediate (groups waiting on a persist are not scheduled); a timed sleep after
+a long block is stretched by power management on macOS, so the gather applies
+only to a hot host. The benchmark's offered load moved to its own thread that
+hands over due offers in 1 ms ticks and wakes the host once per burst, as a
+service's clients arrive by socket; dispatch lag is reported separately.
+
+Measured (interleaved pairs against fcffde20): Linux tmpfs loaded 15,000/s
+marginal CPU/original 28.6 → 20.8 µs (−27%), rate unchanged, p99 4.0 → 7.3 ms;
+idle (20 writes/s) CPU 0.375 → 0.139 s (−63%), rounds 30,735 → 2,823. Mac RAM
+disk: loaded 23.6 → 21.2 µs (−10%), p99 14 → 17 ms; 1,000/s 255 → 206 µs/write
+(−19%); 4,000/s 72 → 59 (−18%); idle CPU 0.51 → 0.79 s (+55%, identical on
+APFS and identical barrier counts: the same binary with the old park instead of
+the wait costs 0.54–0.60 s, so this is the platform's wake-from-idle cost, not
+extra work; a shorter wait cap makes it worse). Adopted for the Linux gains and
+the Mac gains under load; the Mac idle cost is recorded for a later
+platform-specific keep-warm policy.
 
 #### Inline small command bytes measured and rejected
 

@@ -69,6 +69,12 @@ pub trait PeerNetwork: Sized {
     fn close(&mut self);
     fn is_drained(&self) -> bool;
     fn next_deadline(&self) -> Option<MonoTime>;
+    /// Raw descriptors whose readability means there may be input to poll.
+    /// Advisory, for host readiness waits; implementations without sockets
+    /// report nothing.
+    #[cfg(unix)]
+    fn readiness_fds(&self, _out: &mut Vec<crate::worker::ReadinessFd>) {}
+
     fn into_parts(self) -> Result<Self::Parts, Box<Self>>;
     fn into_recovery(self) -> Result<Self::Recovery, Box<Self>>;
 }

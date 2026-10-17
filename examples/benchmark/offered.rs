@@ -79,6 +79,8 @@ impl<'a> Ledger<'a> {
     fn horizon(&self) -> u128 {
         self.intended(self.count)
     }
+    /// Whether the next scheduled offer is due (the offerer thread's rule).
+    #[cfg(test)]
     fn due(&self, now: u128) -> bool {
         self.rows.len() < self.count && self.intended(self.rows.len()) <= now
     }
@@ -268,14 +270,24 @@ fn measure<L: LogStore + Send + 'static>(
     start: &Instant,
     maintenance: &mut Maintenance,
 ) -> Result<(), Failure> {
+    let wake = shared::host_wake();
+    let mut readiness = voteboat::native::readiness::Readiness::default();
+    let mut fds = Vec::new();
+    // Offers arrive from another thread, as a service's clients would by
+    // socket: the generator sleeps until each scheduled instant, hands over
+    // every offer that is due and wakes the host once per burst.
+    let offers = Offerer::spawn(ledger.count, ledger.rate, *start, wake.clone());
     loop {
         let paused = maintenance.paused(start.elapsed().as_nanos(), replicas, totals)?;
         poll_selected(replicas, clock, totals, paused)?;
         outputs(replicas, start, ledger)?;
         for _ in 0..64 {
-            let now = start.elapsed().as_nanos();
-            if !ledger.due(now) {
+            let Ok(offset) = offers.due.try_recv() else {
                 break;
+            };
+            let now = start.elapsed().as_nanos();
+            if offset != ledger.rows.len() {
+                return Err("offer schedule out of order".into());
             }
             let row = ledger.begin(now);
             let group = ledger.rows[row].group;
@@ -312,7 +324,110 @@ fn measure<L: LogStore + Send + 'static>(
         if now > ledger.horizon() + 120_000_000_000 {
             return Err("offered drain timed out; pending outcomes remain uncertain".into());
         }
-        std::thread::park_timeout(Duration::from_micros(100));
+        // Block until a socket is readable (or writable while output is
+        // pending), a session holds buffered input, a worker or the offerer
+        // wakes the host, or the earliest deadline. Polling remains the only
+        // source of progress.
+        fds.clear();
+        for replica in replicas.iter() {
+            replica.readiness_fds(&mut fds);
+        }
+        fds.push(wake.fd());
+        let now_ns = start.elapsed().as_nanos();
+        let node = replicas
+            .iter()
+            .filter_map(|replica| replica.next_deadline())
+            .min()
+            .map(|deadline| {
+                Duration::from_millis(
+                    deadline
+                        .0
+                        .saturating_sub(clock.elapsed().as_millis() as u64),
+                )
+            });
+        let host = maintenance
+            .next_due(now_ns)
+            .map(|due| Duration::from_nanos(due.saturating_sub(now_ns) as u64));
+        let limit = [node, host, Some(MAX_WAIT)]
+            .into_iter()
+            .flatten()
+            .min()
+            .unwrap();
+        totals.waits += 1;
+        // Queued work needs no kernel wait: gather briefly so one round
+        // carries what arrives together, as the previous fixed inter-round
+        // park did. Otherwise block until something is announced or the
+        // earliest deadline, then poll at once; a timed sleep after a long
+        // block is stretched by power management on some platforms.
+        if fds.iter().any(|f| f.immediate) {
+            totals.waits_immediate += 1;
+            std::thread::park_timeout(GATHER);
+        } else {
+            let waited_from = Instant::now();
+            let ready = readiness.wait(&fds, limit)?;
+            let waited = waited_from.elapsed();
+            if ready {
+                totals.waits_ready += 1;
+                if waited < BUSY {
+                    // Work arrived almost at once: the host is busy, so gather
+                    // briefly and let one round carry what arrives together.
+                    // After a long block the host polls at once instead; a
+                    // timed sleep after idling is stretched on some platforms.
+                    std::thread::park_timeout(GATHER);
+                }
+            } else {
+                totals.waits_timeout += 1;
+            }
+        }
+        wake.drain();
+    }
+}
+/// Gather window before a round with pending work; the former fixed park.
+const GATHER: Duration = Duration::from_micros(100);
+/// A wait that returns within this is a busy host, not one waking from idle.
+const BUSY: Duration = Duration::from_millis(1);
+/// Longest a host waits with nothing announced; bounds drain-timeout checks.
+const MAX_WAIT: Duration = Duration::from_millis(50);
+/// Offered-load generator on its own thread.
+struct Offerer {
+    due: std::sync::mpsc::Receiver<usize>,
+}
+impl Offerer {
+    fn spawn(
+        count: usize,
+        rate: usize,
+        start: Instant,
+        wake: Arc<voteboat::native::readiness::HostWake>,
+    ) -> Self {
+        let (sender, due) = std::sync::mpsc::channel();
+        std::thread::Builder::new()
+            .name("offerer".into())
+            .spawn(move || {
+                use voteboat::worker::WorkerWake;
+                let mut next = 0usize;
+                // Offers are handed over in 1 ms ticks: a client pipelining
+                // requests, and sub-millisecond sleeps are coarse on some hosts.
+                while next < count {
+                    let intended =
+                        Duration::from_nanos((next as u128 * 1_000_000_000 / rate as u128) as u64);
+                    let elapsed = start.elapsed();
+                    if elapsed < intended {
+                        std::thread::sleep((intended - elapsed).max(Duration::from_millis(1)));
+                        continue;
+                    }
+                    // Hand over every offer that is due, then wake once.
+                    let now = start.elapsed().as_nanos();
+                    while next < count && next as u128 * 1_000_000_000 / rate as u128 <= now {
+                        if sender.send(next).is_err() {
+                            return;
+                        }
+                        next += 1;
+                    }
+                    wake.wake();
+                }
+            })
+            .expect("offerer thread");
+        Self { due }
     }
 }
 fn percentile(values: &mut [u128], p: usize) -> String {
@@ -577,7 +692,7 @@ fn report_offered(
         .map_or_else(String::new, offered_groups::GroupSchedule::metadata);
     let capacity_settings = config.capacity_profile.settings();
     let publication_settings = config.publication.settings();
-    let summary = format!("mode=offered protocol={protocol:?} replicas=3 groups={groups} assembly=shared leader_placement={placement} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000 payload_bytes=8 warmup={WARMUP} offers={count} offered_rate={rate} window={window} max_inflight={} admitted={admitted} admitted_during={admitted_during} late_decisions={late_decisions} dispatch_p99_us={dispatch_p99} applied={applied} applied_during={during} applied_drain={} window_refused={} no_leader={} admission_refused={} not_proposed={} unknown=0 pending=0 horizon_ns={horizon} elapsed_ns={} drain_ns={} backlog_at_horizon={backlog} offered_ops_s={:.3} admitted_ops_s={:.3} applied_during_ops_s={:.3} applied_total_ops_s={:.3} p99_us={p99} service_p99_us={service_p99} recovered_value={recovered_value} recovery_retries={retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3}{maintenance_summary} {ready_settings}{group_settings}{capacity_settings}{publication_settings}\n", ledger.max_pending, applied-during, ledger.count_status("window_refused"), ledger.count_status("no_leader"), ledger.count_status("admission_refused"), ledger.count_status("not_proposed"), elapsed.as_nanos(), elapsed.as_nanos().saturating_sub(horizon), count as f64 * 1e9 / horizon as f64, admitted as f64 / elapsed.as_secs_f64(), during as f64 * 1e9 / horizon as f64, applied as f64 / elapsed.as_secs_f64(), totals.rounds, totals.host_ns as f64/1e6, totals.max_host_ns as f64/1e6);
+    let summary = format!("mode=offered protocol={protocol:?} replicas=3 groups={groups} assembly=shared leader_placement={placement} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000 payload_bytes=8 warmup={WARMUP} offers={count} offered_rate={rate} window={window} max_inflight={} admitted={admitted} admitted_during={admitted_during} late_decisions={late_decisions} dispatch_p99_us={dispatch_p99} applied={applied} applied_during={during} applied_drain={} window_refused={} no_leader={} admission_refused={} not_proposed={} unknown=0 pending=0 horizon_ns={horizon} elapsed_ns={} drain_ns={} backlog_at_horizon={backlog} offered_ops_s={:.3} admitted_ops_s={:.3} applied_during_ops_s={:.3} applied_total_ops_s={:.3} p99_us={p99} service_p99_us={service_p99} recovered_value={recovered_value} recovery_retries={retries} retry_verified=true workers_joined=true poll_rounds={} host_waits={} host_waits_immediate={} host_waits_ready={} host_waits_timeout={} host_poll_ms={:.3} max_host_poll_ms={:.3}{maintenance_summary} {ready_settings}{group_settings}{capacity_settings}{publication_settings}\n", ledger.max_pending, applied-during, ledger.count_status("window_refused"), ledger.count_status("no_leader"), ledger.count_status("admission_refused"), ledger.count_status("not_proposed"), elapsed.as_nanos(), elapsed.as_nanos().saturating_sub(horizon), count as f64 * 1e9 / horizon as f64, admitted as f64 / elapsed.as_secs_f64(), during as f64 * 1e9 / horizon as f64, applied as f64 / elapsed.as_secs_f64(), totals.rounds, totals.waits, totals.waits_immediate, totals.waits_ready, totals.waits_timeout, totals.host_ns as f64/1e6, totals.max_host_ns as f64/1e6);
     let mut file = exclusive(&root.join("summary.txt"))?;
     file.write_all(summary.as_bytes())?;
     file.sync_all()?;
