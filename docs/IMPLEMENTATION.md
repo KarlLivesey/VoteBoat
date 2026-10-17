@@ -48,6 +48,10 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done C11: client reconciliation touches only what can change | Largest per-write host item after E1 | E1 | Linux/Mac loaded pairs; library, effect-owner, admission, service suites | T4 |
 | Done E2: directory and transfer services wait on readiness | Same host-loop change for the other two binaries, through one shared `HostWait` | E1 | counter 203, directory 22, transfer 9/12/33; fmt + strict Clippy | T4 |
 | Done C9: steady polls stop rebuilding peer assignments | Idle and moderate-load CPU is dominated by fixed per-poll work; skip provably unchanged peer reconciliation | C6 | Idle CPU/round and loaded CPU/original pairs; affected suites; fmt + strict Clippy | T4 |
+| Next C16: client router slabs | Four ordered maps per request (pending, admissions, positions, groups) cost ~6–8% of host CPU in B-tree operations; sequences are monotonic, so sequence-indexed slabs give O(1) | C11 | Linux/Mac pairs; library and client suites | T4 |
+| Later D1: follower append pipelining | Accept append k+1 while append k persists so the leader can pipeline; fixed-window durable rate is chain-bound | T2/T3 design | APFS/btrfs pairs; full suite | T3 |
+| Later P3: shared Append entries | `Rpc::Append` copies entries per peer (~5%); 81 construction sites | — | Framework and native pairs | T4 |
+| Later M1: macOS kqueue readiness | `poll(2)` is ~19% of Mac host CPU under load | E1 | Mac pairs | T4 |
 | Later C10: remaining per-poll fixed costs | Idle profile after C9: connector poll/accept, TLS reads of idle sockets, scheduler map scans, connection-union recheck per step | C9 | Same idle/loaded CPU pairs | T4 |
 | Done C6: a poll never truncates a ready visit | The default replica step budget (128) silently cut every 256-original visit in half, capping each leader barrier at 128 originals; defaults now let one barrier carry a whole 1,024-original visit | C3a/C3b | Mac APFS loaded pairs, 31:1 skew, window 1, RAM-disk CPU/original; three-configuration suite; fmt + strict Clippy | T3 |
 | Next C4': re-measure commit/append fusion without the cap | The 461 re-measurement saw ~65 originals per barrier — the 128-step cap — not arrival limits; with C6 the leader's alternating commit-only barrier is the next serial wait | C6; slice 461 (b4875d9b) | Leader barriers per original and loaded writes/s on APFS; strict acknowledgement contract unchanged | T3 |
@@ -112,6 +116,21 @@ the wait costs 0.54–0.60 s, so this is the platform's wake-from-idle cost, not
 extra work; a shorter wait cap makes it worse). Adopted for the Linux gains and
 the Mac gains under load; the Mac idle cost is recorded for a later
 platform-specific keep-warm policy.
+
+#### Durable throughput re-measured after E1
+
+Mac APFS, Witness, 16,000 offers at 20,000/s, two runs each, fcffde20 (before
+E1) versus f84a02ff: window 1,024 8,308/8,333 → 8,232/7,708 completed/s (the
+leader append → follower barrier → commit barrier chain bounds a fixed window
+either way); window 4,096 7,405/7,471 → 12,685/10,682, p99 1.28/1.23 s → 0.41/
+0.53 s. Linux btrfs on this shared host stays too variable to read (3.9–9.5k/s
+across runs of the same tree). Raising the fixed-window rate needs the follower
+to accept the next append while its previous one persists (a Raft-core pending
+chain) before leader pipelining can help; recorded as the durable-tier item.
+
+Measured and dropped on the way: pre-sizing completion effect vectors and the
+benchmark's own bookkeeping (no change), and a bounded spare list for frame
+buffers (Linux +2%, Mac −2%, both noise).
 
 #### C15 implemented: the batched admission path uses the same bound
 
