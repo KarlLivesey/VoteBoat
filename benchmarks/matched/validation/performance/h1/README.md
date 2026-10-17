@@ -6,12 +6,26 @@ capacity qualification. Every run and uptime observation is retained.
 
 - `buffer-pairs.txt`: `297aec15` flag-only versus fixed original-ID buffer
   (source subsequently committed in `b58f57bf`).
-- `current-pairs.txt`: fixed-buffer baseline versus current-thread client.
+- `current-pairs.txt`: fixed-buffer baseline versus **rejected** current-thread
+  client candidate (`80cab34e`), preserved unchanged as historical raw data.
 - `environment.txt`: compiler, OS, CPU, flags and common settings.
-- `final-cli.log`: final binary worker-count and campaign guard controls.
+- `final-cli.log`: historical `80cab34e` binary worker-count and campaign guard
+  controls, not controls for the restored runtime.
+- `round2/REPORT.md`: restored-runtime validation, full attribution outputs and
+  the explicitly unverified numeric match on the heavily loaded host.
 
-Both measured candidates were kept; no measured candidate was discarded. The
-implementation record contains median CPU ns/original, decisions and limits.
+The fixed buffer is kept on code inspection and provisional diagnostic evidence;
+VoteBoat bulk 281→283 ns/original is within observed noise, not a measured win.
+Quiet-Mac confirmation remains recommended. The current-thread client was rejected
+and reverted in round 2. GPT-6.1-Sol review found smaller merge widths and higher
+persists per original in all three bulk pairs, including with attribution off:
+attribution-on median mean width 687.36→512.33 and persists/original
+0.005866→0.006617; attribution-off 715.28→554.08 and 0.005997→0.006287.
+The candidate changes the benchmark instrument despite favorable CPU medians.
+The original one-worker multithread client runtime is restored without an
+alternative flag. Any future runtime experiment needs separate quiet-Mac runner
+qualification of widths, persists/sends per original, latency and CPU for both
+engines. The implementation record contains decisions and limits.
 Actor-only changes were excluded before implementation because the pinned
 OpenRaft provider owns its matching path. No library change, dependency, unsafe
 code, observer-count change or per-original responder removal is part of H1.
