@@ -40,6 +40,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
+| In progress H1: harness worker flag and engine-neutral overhead | Make server scaling explicit and reduce shared harness CPU without changing either engine's protocol path | V1 / PR 1 (`622bc411`); pinned matched workspace | CLI → runtime → workload/JSON tests for both engines; three interleaved pairs per engine/cell/candidate; matched tests; both fmt checks and five strict Clippy configurations | T4 |
 | In progress V1: core-canonical volatile log | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
 | Next V2: scalar commit-advance plan and smaller `Pending` | Commit-only rounds (~2.3 per singleton original) still build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices | V1 measured | Same twin tests; singleton framework pairs | T4 |
 | Following V3: chunked canonical log with shared immutable batches | The batch V1 moves into pending becomes a shared chunk, removing the remaining two in-process per-peer clones | V1, V2 measured | Framework pairs on both cells; compaction/snapshot suites | T4 |
@@ -68,6 +69,50 @@ implemented or benchmarked; unsafe variants are not offered as options.
 Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider than
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
+
+#### H1 schema plan: worker setting and shared harness costs
+
+This deliverable stacks on V1 / PR 1. The existing T4 milestone still applies;
+no new library prerequisite or production API is needed. The current deliverable
+is H1; the next two library deliverables remain V2 and V3 in the mini plan.
+
+Shape: add a validated positive `Settings.server_workers` (default 16, harness
+worker budget 32768), pass it to the sole server runtime builder used by both engines,
+and serialize it in settings and the existing top-level `server_workers` key.
+CLI validation precedes all runtime/cluster creation. Runtime ownership, campaign
+bounds, actor stop/drain and failed-campaign cleanup remain as before. Test the
+CLI/default/rejection boundaries and a real small workload for both engines with
+one and two server workers, checking runtime worker count and both JSON fields.
+There is no durable binary sharing this comparison workspace's `main.rs`.
+
+For overhead experiments, change shared workload/client-runtime code only;
+preserve per-original completion, identities, per-request latency observations,
+barrier/elapsed boundaries, attribution and protocol counts. First candidate:
+use a fixed four-element original-ID buffer instead of allocating a Vec every
+request (validated batch is 1 or 4). Second candidate: run the one-worker client
+executor on the calling thread to remove its extra worker handoff. Keep separate
+binaries and interleave baseline/candidate three times on each cell and engine,
+recording uptime before each pair. Keep only a candidate that lowers CPU/original
+for both engines or is neutral for one and lower for the other. Buffer ownership
+stays in each client task across awaits; cancellation drops it normally. No
+engine adapter, responder count, queue bound or attribution code changes.
+
+#### H1 implemented: server worker flag (overhead experiments pending)
+
+`--server-workers N` now sets the shared server runtime builder (default 16,
+validated harness budget 1..32768). Both engines receive the same runtime
+configuration. JSON reports retain the top-level `server_workers` key and add
+`settings.server_workers`; both report the selected value. The README documents
+usage. No library or durable-service source changed.
+
+Validation on 17 October 2026: all 71 matched tests pass, including CLI default,
+bounds/missing-value rejection, and actual one-/two-worker runs of both engines
+that check runtime metrics, completed originals and both JSON worker fields.
+Root and matched fmt checks and all five strict Clippy configurations pass with
+zero diagnostics through the enabled `.githooks/pre-push`. Release build passes
+with the matched lock offline. Builds use this worktree's `target/h1-build` and
+`target/h1-release`, separate from the main checkout. Overhead measurements and
+keep/drop decisions are not yet implemented evidence.
 
 #### V1 implemented: core-canonical volatile log (measurement pending (runner))
 

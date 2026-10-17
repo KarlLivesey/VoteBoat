@@ -4,6 +4,7 @@ use super::*;
 fn settings(envelopes: Envelopes, batch: usize) -> Settings {
     Settings {
         clients: 4096,
+        server_workers: crate::DEFAULT_SERVER_WORKERS,
         batch,
         requested_operations: 16384,
         operations: 16384,
