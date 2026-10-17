@@ -40,6 +40,9 @@ implemented or benchmarked; unsafe variants are not offered as options.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
+| In progress V1: core-canonical volatile log | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
+| Next V2: scalar commit-advance plan and smaller `Pending` | Commit-only rounds (~2.3 per singleton original) still build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices | V1 measured | Same twin tests; singleton framework pairs | T4 |
+| Following V3: chunked canonical log with shared immutable batches | The batch V1 moves into pending becomes a shared chunk, removing the remaining two in-process per-peer clones | V1, V2 measured | Framework pairs on both cells; compaction/snapshot suites | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
 | Done C15: batched admission uses the pending bound | Same fast path for ready batches | C14 | Linux/Mac pairs; suites | T4 |
 | Done C14: proposal validation from a pending bound | Admission no longer scans every pending command when the count already settles it | — | Linux/Mac pairs; unit test; suites | T4 |
@@ -65,6 +68,81 @@ implemented or benchmarked; unsafe variants are not offered as options.
 Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider than
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
+
+#### V1 implemented: core-canonical volatile log (measurement pending (runner))
+
+Design: `target/claude/research-r1/architect-plan.md` (PR 1). Implemented
+evidence only; the runner's interleaved pairs on a quiet machine have not been
+taken yet.
+
+Shape: `log::VolatileLog { binding, limits }` is documented as not durable and
+is not a `LogStore`; it holds no log copy and `bootstrap` returns the same
+validated initial state a store would create. `Raft::recover_volatile(node,
+&log, state)` runs the full static-voter recovery validation and marks the core
+volatile (`is_volatile`). A volatile core plans each transition with
+`OwnedNextLog::plan_owned` (the update moves into `Pending`; no clone) and emits
+`Effect::PersistVolatile(VolatilePersist)`, a `Copy` token with private
+revision/generation fields that only the core constructs. The host completes it
+with `raft::persist_volatile(raft, &log, token)`, which returns the same
+borrowed `CompletionEffects` as `persist_effect_borrowed`. Snapshot work uses
+`compact_volatile_replica`, `stage_volatile_snapshot_effect` and
+`finish_volatile_snapshot_install`; their bodies are shared with the durable
+helpers through a private `LogSeam`/`LogCheck` trait over `Durable`/`Volatile`
+wrappers. The `benchmarks/matched` harness now uses `VolatileStore` (the
+`VolatileLog` plus the unchanged attribution recorder) and `recover_volatile`.
+Whether the OpenRaft side also keeps a single entry copy is not verified in
+this tree (`bench_minimal` is external); reviewers should confirm parity.
+
+Invariants: no result before install (`finish_completion` and
+`finish_volatile` share one `install_pending`); exact correlation by revision
+plus generation, which advance on every transition, with at most one pending
+transition (`begin_step` returns `Busy` while pending); any `persist_volatile`
+error (wrong binding, stale or mismatched token, failed install) fences the core
+and drops the pending plan, leaving `state()` at the last completed transition,
+which `recover_volatile` accepts in the same process; the same validators run
+(`plan_owned` and `plan_copy` share `validate_base`, `append_eligible`,
+`validate_append_metadata` and `NextLog::plan`); the compaction and snapshot
+order is unchanged, only the provider-copy comparison is gone. The durable seam
+(`validate_persist_effect`, `admit_effect`, `admitted`, `complete`,
+`persist_effect`) returns `WrongCompletion` for a volatile core before any store
+submission; durable snapshot helpers return `InvalidBinding` for a volatile
+core before any mutation (no pin, no pending, no fence) and the volatile helpers
+do the same for a durable core; `runtime::Shard::register` refuses volatile
+cores with `WrongOwner`. Durable and native paths are byte-for-byte the same
+plan and effect as before.
+
+Breaking change: `Effect` has a new `PersistVolatile` variant, so exhaustive
+`Effect` matches need an arm. Three needed one in-tree:
+`examples/replicated_counter.rs`, `tests/snapshot.rs` and `tests/raft.rs` (the
+plan's scan listed two). Harness attribution keeps its JSON keys; the store-side
+phases and the three checkpoint-compact gaps now report zero calls, because a
+helper with no store-side call records no gap rather than invalidating the
+report.
+
+Tests: `tests/volatile.rs` (public API, three in-process replicas):
+`volatile_and_durable_clusters_reach_identical_logs_and_effects` (single and
+batch proposals, heartbeats, re-election, a replaced uncommitted suffix for the
+non-append path, a read; equal states, roles, applications and effect sequences
+with `Persist` ≡ `PersistVolatile`),
+`volatile_compaction_and_snapshot_install_match_durable_helpers`,
+`volatile_wrong_binding_or_stale_token_fences_and_recovers_completed_state`,
+`durable_helpers_refuse_volatile_cores_without_mutation_and_vice_versa`.
+`src/raft/volatile_tests.rs`: token carries no entries and installs the exact
+moved proposal (payload pointer preserved), `Busy` until completion, durable
+seam refusals, borrowed commit-only interval, fencing on wrong binding and stale
+token, and a tight `propose_batch` suffix (also a `debug_assert` in
+`propose_batch`). `tests/runtime.rs`: `register_refuses_volatile_core`. Harness:
+`volatile_store_round_trip_keeps_fifo_and_attribution` replaces the three
+mirror-predicate tests; a gap test covers helpers without store calls; actor and
+workload tests now expect zero store-side calls.
+
+Checks run on the builder's loaded machine (17 October 2026): `cargo +stable
+fmt --all -- --check` and the matched workspace's fmt check; strict Clippy with
+all features, default, no default features and native only, and the matched
+workspace's all-target Clippy, all zero diagnostics. Suites: library unit tests
+(443), `volatile`, `snapshot`, `runtime`, `effect_owner`, `raft`, `worker`,
+`log_store`, `log_owned`, and the matched workspace (69), all passing; full
+default and other-configuration results are listed in the PR.
 
 #### E1 implemented: event-driven host waiting
 

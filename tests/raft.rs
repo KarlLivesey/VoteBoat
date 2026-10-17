@@ -89,6 +89,9 @@ impl<S: LogStore> Cluster<S> {
                 | Effect::SnapshotInstalled(_) => {
                     panic!("baseline history has no compacted groups")
                 }
+                Effect::PersistVolatile(_) => {
+                    panic!("durable baseline history never emits volatile persistence")
+                }
                 Effect::ReadReady(barrier) => self.reads.entry(id).or_default().push(barrier),
                 Effect::Send(message) => {
                     assert!(self.messages.len() < 10000);

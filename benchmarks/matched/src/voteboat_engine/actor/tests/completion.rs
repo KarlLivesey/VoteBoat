@@ -6,7 +6,7 @@ fn commit_update<const TRACE: bool>(
     actor: &mut Actor<TRACE>,
     ids: &[OperationId],
     bytes: &[u8],
-) -> (LogUpdate, Vec<oneshot::Receiver<OperationId>>) {
+) -> (VolatilePersist, Vec<oneshot::Receiver<OperationId>>) {
     let mut originals = Vec::new();
     let mut waits = Vec::new();
     for &operation in ids {
@@ -24,13 +24,14 @@ fn commit_update<const TRACE: bool>(
         .unwrap();
     let mut initial = actor.parts.core.propose_batch(proposals).unwrap();
     assert_eq!(initial.len(), 1);
-    let Effect::Persist(append) = initial.remove(0) else {
+    let Effect::PersistVolatile(append) = initial.remove(0) else {
         panic!("proposal must first persist its entries");
     };
-    let mut following =
-        persist_effect(&mut actor.parts.core, &mut actor.parts.store, append).unwrap();
+    let mut following = persist_volatile(&mut actor.parts.core, &actor.parts.store.log, append)
+        .unwrap()
+        .into_owned();
     assert_eq!(following.len(), 1);
-    let Effect::Persist(commit) = following.remove(0) else {
+    let Effect::PersistVolatile(commit) = following.remove(0) else {
         panic!("single voter must persist commitment before application");
     };
     assert_eq!(actor.parts.application.applied, 1);
@@ -53,7 +54,9 @@ fn check_immediate<const TRACE: bool>() {
     for wait in &mut waits {
         assert_eq!(wait.try_recv(), Err(oneshot::error::TryRecvError::Empty));
     }
-    actor.effects(vec![Effect::Persist(update)]).unwrap();
+    actor
+        .effects(vec![Effect::PersistVolatile(update)])
+        .unwrap();
     assert_eq!(actor.parts.application.applied, 3);
     assert_eq!(actor.parts.core.state().commit_index, 3);
     assert!(actor.pending.is_empty());
@@ -74,7 +77,7 @@ fn existing_fifo_application_error_precedes_new_commit_application() {
     };
     let error = actor
         .effects(vec![
-            Effect::Persist(update),
+            Effect::PersistVolatile(update),
             Effect::Committed(vec![invalid]),
         ])
         .unwrap_err();
@@ -102,18 +105,18 @@ fn existing_fifo_send_error_precedes_new_commit_receipt() {
         group: actor.parts.application.group,
         configuration: ConfigurationId::new(1).unwrap(),
         from: NodeId::new(1).unwrap(),
-        sender: actor.parts.store.binding(),
+        sender: actor.parts.store.log.binding(),
         to: NodeId::new(2).unwrap(),
         term: 1,
         context: RequestContext {
-            origin: actor.parts.store.binding(),
+            origin: actor.parts.store.log.binding(),
             sequence: 1,
         },
         rpc: Rpc::ReadProbe,
     };
     assert_eq!(
         actor
-            .effects(vec![Effect::Persist(update), Effect::Send(message)])
+            .effects(vec![Effect::PersistVolatile(update), Effect::Send(message)])
             .unwrap_err()
             .to_string(),
         "unknown recipient"
@@ -132,7 +135,7 @@ fn borrowed_application_failure_preserves_frontier_and_all_original_waits() {
     let id = OperationId::new(u128::MAX).unwrap();
     let (update, mut waits) = commit_update(&mut actor, &[id], &[7, 255]);
     assert!(actor
-        .effects(vec![Effect::Persist(update)])
+        .effects(vec![Effect::PersistVolatile(update)])
         .unwrap_err()
         .to_string()
         .contains("InvalidCommand"));
@@ -156,7 +159,7 @@ fn borrowed_and_fifo_owned_delivery_stop_after_same_dropped_wait() {
         ];
         let (update, mut waits) = commit_update(&mut actor, &ids, &[]);
         drop(waits.remove(1));
-        let mut effects = vec![Effect::Persist(update)];
+        let mut effects = vec![Effect::PersistVolatile(update)];
         if queued {
             effects.push(Effect::Committed(Vec::new()));
         }

@@ -176,6 +176,28 @@ fn overflow_is_checked_before_any_gap_counter_advances() {
         .is_err());
 }
 #[test]
+fn helper_without_store_calls_records_no_gap_and_stays_valid() {
+    let fixture = Fixture::new();
+    let before = fixture.before();
+    let at = |n| fixture.base + Duration::from_nanos(n);
+    fixture
+        .snapshots
+        .observe(Phase::SnapshotPin, at(1), at(3), false, 0);
+    fixture
+        .snapshots
+        .observe(Phase::SnapshotReconcile, at(5), at(8), false, 0);
+    fixture.finish(before.as_ref(), false);
+    assert_eq!(fixture.counts(), [Interval::default(); 3]);
+    assert!(!fixture.actor.invalid.get());
+    // One store-side call without the others still cannot certify a gap.
+    let before = fixture.before();
+    fixture
+        .store
+        .observe(Phase::StoreAppend, at(9), at(10), false, 0);
+    fixture.finish(before.as_ref(), false);
+    assert!(fixture.actor.invalid.get());
+}
+#[test]
 fn partial_helper_error_does_not_read_or_fabricate_a_completed_gap() {
     let fixture = Fixture::new();
     fixture.finish(None, true);

@@ -1155,6 +1155,9 @@ impl<L: LogStore, S: SnapshotRetention> SnapshotCluster<L, S> {
                 Effect::VerifyLearnerReadiness(_) => {
                     panic!("static snapshot fixture has no learner")
                 }
+                Effect::PersistVolatile(_) => {
+                    panic!("durable snapshot fixture never emits volatile persistence")
+                }
                 Effect::SnapshotInstalled(reference) => {
                     self.installs += 1;
                     queue.extend(

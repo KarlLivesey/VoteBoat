@@ -378,6 +378,17 @@ fn host_shard<Q: ReadyScheduler>(scheduler: Q) -> (Shard<Q>, HostLogStore) {
     }
     (shard, log)
 }
+#[test]
+fn register_refuses_volatile_core() {
+    let log = VolatileLog::new(HostLogStore::new(1).binding(), LogLimits::default()).unwrap();
+    let mut shard = Shard::new(owner(log.binding()), small_limits(), HostReady::new(3)).unwrap();
+    let state = log.bootstrap(&bootstrap(1, 3)).unwrap();
+    let core = Raft::recover_volatile(node(1), &log, state.clone()).unwrap();
+    // The owner's persistence leases need a durable provider.
+    assert_eq!(shard.register(core), Err(RuntimeError::WrongOwner));
+    let core = Raft::recover(node(1), log.binding(), state, log.limits()).unwrap();
+    shard.register(core).unwrap();
+}
 fn proposal(operation: u128) -> Event {
     Event::Propose {
         operation: OperationId::new(operation).unwrap(),
