@@ -115,9 +115,10 @@ pub fn persist_effect_borrowed<'a, S: LogStore>(
 /// Complete one [`Effect::PersistVolatile`] token of a volatile core, returning
 /// a committed interval borrowed only after every completion check succeeds.
 /// No storage work happens: the core already owns the planned transition and
-/// installs it into its own log, the only copy. The binding and the exact
-/// pending revision and generation are checked first; any error fences the
-/// core, whose last completed state stays exportable through `Raft::state`.
+/// installs it into its own log, the only copy. The binding, the core's
+/// incarnation and the exact pending revision and generation are checked
+/// first; any error fences the core, whose last completed state stays
+/// exportable through `Raft::state`.
 pub fn persist_volatile<'a>(
     raft: &'a mut Raft,
     log: &VolatileLog,

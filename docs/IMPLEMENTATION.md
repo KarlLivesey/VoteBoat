@@ -162,6 +162,16 @@ non-blocking notes) found two defects, both reproduced through the public API:
   a volatile core has no cross-process restart, so nothing reconstructs it.
   The token grew from 16 to 24 bytes; `Effect`'s size is set by larger
   variants. Durable cores keep incarnation zero, which no token carries.
+  Recorded deviation: the counter is a process-wide static, which the design
+  pack's "no hidden runtimes or process-wide singletons" rule discourages. It
+  is kept because the alternatives are weaker: an embedder-supplied incarnation
+  reintroduces the reuse defect above the moment a value repeats, and a
+  per-log counter collides when two logs with the same binding and group exist
+  in one process (two identical simulated clusters). The static needs no setup
+  or teardown, is lock-free, cannot issue zero and cannot wrap. One visible
+  consequence: a volatile core's `PersistVolatile` tokens differ from run to
+  run within a process, so tests compare token fields through accessors, not
+  recorded token values.
 - `recover_volatile` is static-voter recovery and rejects configuration state,
   but a volatile leader accepted `Event::Configure` (a `Learners` change needs
   no promotion proofs) and committed it, stranding that state after a fence.
@@ -173,8 +183,13 @@ non-blocking notes) found two defects, both reproduced through the public API:
   ingress; it applies even after `with_configuration_replication` and never
   takes the joint-repair exception. Learner repair RPCs are refused the same
   way. A refused append installs nothing, creates no pending plan and does not
-  fence; the follower just stays behind until a leader without configuration
-  replaces it. The joint-repair and learner-repair guards are defence in depth:
+  fence. It also does not reset the follower's election timer, so once the
+  group commits a configuration entry the volatile follower falls behind,
+  eventually campaigns, can depose the leader, and can never win because every
+  later leader holds the entry it refuses. A volatile replica in a group that
+  commits a configuration change is therefore unsupported, not merely slow;
+  default static durable followers behave the same way today, so this is not a
+  regression. The joint-repair and learner-repair guards are defence in depth:
   those paths already require the local node to be a committed learner, which
   a static voter never is, so no test can tell them apart.
 
