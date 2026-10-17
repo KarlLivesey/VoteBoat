@@ -48,7 +48,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done C11: client reconciliation touches only what can change | Largest per-write host item after E1 | E1 | Linux/Mac loaded pairs; library, effect-owner, admission, service suites | T4 |
 | Done E2: directory and transfer services wait on readiness | Same host-loop change for the other two binaries, through one shared `HostWait` | E1 | counter 203, directory 22, transfer 9/12/33; fmt + strict Clippy | T4 |
 | Done C9: steady polls stop rebuilding peer assignments | Idle and moderate-load CPU is dominated by fixed per-poll work; skip provably unchanged peer reconciliation | C6 | Idle CPU/round and loaded CPU/original pairs; affected suites; fmt + strict Clippy | T4 |
-| Next C16: client router slabs | Four ordered maps per request (pending, admissions, positions, groups) cost ~6–8% of host CPU in B-tree operations; sequences are monotonic, so sequence-indexed slabs give O(1) | C11 | Linux/Mac pairs; library and client suites | T4 |
+| Next C17: gather window and wait cap as service options | Operators choose the CPU/latency point (200 µs default; 400 µs −20% CPU for disk-bound deployments) | C13 | counter/directory/transfer suites | T4 |
 | Later D1: follower append pipelining | Accept append k+1 while append k persists so the leader can pipeline; fixed-window durable rate is chain-bound | T2/T3 design | APFS/btrfs pairs; full suite | T3 |
 | Later P3: shared Append entries | `Rpc::Append` copies entries per peer (~5%); 81 construction sites | — | Framework and native pairs | T4 |
 | Later M1: macOS kqueue readiness | `poll(2)` is ~19% of Mac host CPU under load | E1 | Mac pairs | T4 |
@@ -129,8 +129,13 @@ to accept the next append while its previous one persists (a Raft-core pending
 chain) before leader pipelining can help; recorded as the durable-tier item.
 
 Measured and dropped on the way: pre-sizing completion effect vectors and the
-benchmark's own bookkeeping (no change), and a bounded spare list for frame
-buffers (Linux +2%, Mac −2%, both noise).
+benchmark's own bookkeeping (no change), a bounded spare list for frame buffers
+(Linux +2%, Mac −2%, both noise), and sequence-indexed slabs replacing the
+client router's ordered maps (Linux +1%, Mac 0%, suites green). Each of these
+was a 2–6% item in the loaded profile; at this level profile attribution on
+this shared host no longer predicts interleaved pairs, and the measurable wins
+have all come from removing whole classes of work rather than shaving
+per-operation costs.
 
 #### C15 implemented: the batched admission path uses the same bound
 
