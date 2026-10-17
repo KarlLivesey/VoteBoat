@@ -19,6 +19,14 @@ These controls establish no sustained capacity or minimum-floor win.
 [Mac pilot](validation/pilot-mac131072/REPORT.md),
 [Startup limits checks](validation/performance/slice414-harness/REPORT.md).
 
+`--server-workers N` selects the server runtime's worker thread count for either
+engine (default 16; positive integer up to the harness budget of 32768). For
+example, pass `--server-workers 1` for a one-worker scaling cell. The effective
+value appears in both `settings.server_workers` and the existing top-level
+`server_workers` JSON field; client workers remain 1. Keep worker counts equal
+when comparing engines. This flag belongs to the volatile framework binary;
+there is no durable binary sharing this workspace's entry point.
+
 One three-voter group, empty business payloads, 1024 singleton warmups and equal
 closed-loop per-client requests. Every request awaits all its original applied
 results. Requested totals round down like pinned OpenRaft. Primary defaults retain
