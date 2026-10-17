@@ -70,6 +70,21 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         prefix: &[ReadyProposal],
         validation: &mut ReadyValidation<'a>,
     ) -> Result<usize, ApplicationError> {
+        // Unapplied log commands, this group's queued requests and the batch
+        // prefix bound the pending set; an application that can decide from
+        // the bound alone skips both the scan and the batch preparation.
+        let state = core.state();
+        let unapplied = (app.applied_index() - state.base_index()) as usize;
+        let bound = state.entries.len().saturating_sub(unapplied)
+            + self
+                .groups
+                .get(&state.bootstrap.group)
+                .copied()
+                .unwrap_or(0)
+            + prefix.len();
+        if let Some(decided) = app.validate_proposal_bounded(operation, bytes, bound) {
+            return decided;
+        }
         if !prefix.is_empty() && !validation.prepared {
             validation.context =
                 app.prepare_ready_admission(self.ready_pending(core, app.applied_index(), prefix));

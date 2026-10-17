@@ -41,6 +41,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
+| Done C15: batched admission uses the pending bound | Same fast path for ready batches | C14 | Linux/Mac pairs; suites | T4 |
 | Done C14: proposal validation from a pending bound | Admission no longer scans every pending command when the count already settles it | — | Linux/Mac pairs; unit test; suites | T4 |
 | Done C13: 200 µs gather window | Fewer, fuller rounds; CPU/latency knob measured at 0/100/200/400 µs | E1 | Linux and Mac pairs | T4 |
 | Done C12: connection rechecks skipped while at bootstrap | Per-step/per-completion union rebuild removed in steady state | C9 | Profile removal; suites | T4 |
@@ -111,6 +112,18 @@ the wait costs 0.54–0.60 s, so this is the platform's wake-from-idle cost, not
 extra work; a shorter wait cap makes it worse). Adopted for the Linux gains and
 the Mac gains under load; the Mac idle cost is recorded for a later
 platform-specific keep-warm policy.
+
+#### C15 implemented: the batched admission path uses the same bound
+
+The batched (ready) proposal path still prepared a full admission context per
+batch (`ready_admission::prepare`: a scan of every pending command into an
+ordered set, 3.7% of host samples plus ~6% of set building and merging). It now
+tries `validate_proposal_bounded` first with the same bound plus the batch
+prefix, and prepares the context only when an application defers. Interleaved
+pairs: Linux tmpfs 15,000/s 16.07 → 15.39 µs/original (−4%), Mac RAM disk
+15.7 → 15.1 (−4%); rate and p99 unchanged; library, effect-owner, admission,
+application, counter, directory, membership, startup, learner and logical
+application suites pass.
 
 #### C14 implemented: proposal validation decided from a pending bound
 
