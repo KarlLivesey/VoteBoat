@@ -635,6 +635,8 @@ mod bounded_validation {
             }])
             .unwrap();
         assert_eq!(counter.validate_proposal_bounded(op(1), &bytes, 3), None);
-        assert!(counter.validate_proposal_bounded(op(1), &bytes, 2).is_some());
+        assert!(counter
+            .validate_proposal_bounded(op(1), &bytes, 2)
+            .is_some());
     }
 }
