@@ -40,7 +40,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| In progress H1: harness worker flag and engine-neutral overhead | Make server scaling explicit and reduce shared harness CPU without changing either engine's protocol path | V1 / PR 1 (`622bc411`); pinned matched workspace | CLI → runtime → workload/JSON tests for both engines; three interleaved pairs per engine/cell/candidate; matched tests; both fmt checks and five strict Clippy configurations | T4 |
+| In progress H1: review round 2, preserve the benchmark instrument | Keep the worker flag and fixed ID buffer; restore the original client scheduler after workload-shape review | V1 / PR 1 (`622bc411`); pinned matched workspace; review of `80cab34e` | Exact runtime revert; bulk attribution comparison against flag-only `297aec15`; matched tests; both fmt checks and five strict Clippy configurations; independent review and quiet-Mac qualification remain pending | T4 |
 | In progress V1: core-canonical volatile log | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
 | Next V2: scalar commit-advance plan and smaller `Pending` | Commit-only rounds (~2.3 per singleton original) still build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices | V1 measured | Same twin tests; singleton framework pairs | T4 |
 | Following V3: chunked canonical log with shared immutable batches | The batch V1 moves into pending becomes a shared chunk, removing the remaining two in-process per-peer clones | V1, V2 measured | Framework pairs on both cells; compaction/snapshot suites | T4 |
@@ -89,15 +89,15 @@ For overhead experiments, change shared workload/client-runtime code only;
 preserve per-original completion, identities, per-request latency observations,
 barrier/elapsed boundaries, attribution and protocol counts. First candidate:
 use a fixed four-element original-ID buffer instead of allocating a Vec every
-request (validated batch is 1 or 4). Second candidate: run the one-worker client
-executor on the calling thread to remove its extra worker handoff. Keep separate
+request (validated batch is 1 or 4). The second candidate, running the client
+executor on the calling thread, was rejected in review (see below). Keep separate
 binaries and interleave baseline/candidate three times on each cell and engine,
-recording uptime before each pair. Keep only a candidate that lowers CPU/original
-for both engines or is neutral for one and lower for the other. Buffer ownership
+recording uptime before each pair. CPU medians alone cannot qualify a candidate:
+also preserve realized merge widths and protocol work per original. Buffer ownership
 stays in each client task across awaits; cancellation drops it normally. No
 engine adapter, responder count, queue bound or attribution code changes.
 
-#### H1 implemented: server worker flag (overhead experiments pending)
+#### H1 implemented: server worker flag
 
 `--server-workers N` now sets the shared server runtime builder (default 16,
 validated harness budget 1..32768). Both engines receive the same runtime
@@ -111,8 +111,8 @@ that check runtime metrics, completed originals and both JSON worker fields.
 Root and matched fmt checks and all five strict Clippy configurations pass with
 zero diagnostics through the enabled `.githooks/pre-push`. Release build passes
 with the matched lock offline. Builds use this worktree's `target/h1-build` and
-`target/h1-release`, separate from the main checkout. Overhead measurements and
-keep/drop decisions are not yet implemented evidence.
+`target/h1-release`, separate from the main checkout. The flag makes no performance
+claim; overhead experiment evidence and review decisions follow separately.
 
 #### H1 implemented: reuse each client's original-ID buffer
 
@@ -136,9 +136,11 @@ default retention, upstream envelopes and attribution off. Bulk requests
 | VoteBoat | Singleton | 12,454 | 11,713 | −5.9% |
 | OpenRaft | Singleton | 39,242 | 38,931 | −0.8% |
 
-Kept: both singleton engines use less CPU in every pair; bulk is neutral for
-VoteBoat and lower for OpenRaft. These are loaded-host diagnostics, not a quiet
-capacity qualification or a library speed claim. Uptime before every pair,
+Kept on code inspection and provisional diagnostic evidence. Both singleton
+engines used less CPU in these pairs; VoteBoat bulk 281→283 ns is within the
+observed noise, not a measured win. Quiet-Mac confirmation remains recommended.
+These are loaded-host diagnostics, not a quiet capacity qualification or a library
+speed claim. Uptime before every pair,
 individual rates/CPU/cores and binary hashes are in
 `benchmarks/matched/validation/performance/h1/buffer-pairs.txt`; environment in
 `environment.txt`. One-minute load was 66.8–69.4. All runs use the supplied
@@ -146,55 +148,83 @@ individual rates/CPU/cores and binary hashes are in
 it searches a nested latency object while this harness emits top-level
 `request_p99_ns`. No p99 comparison is claimed. No processes were stopped and
 our own builds/checks finished before measurement. The fixed-buffer release
-binary is the baseline for the next independent experiment.
+binary was the baseline for the subsequently rejected runtime experiment.
 
-#### H1 implemented: drive the shared client executor on the caller
+#### H1 round 2 schema plan: restore the original client runtime
 
-The one-worker multithread client runtime is replaced with a current-thread
-runtime driven by the caller. It still executes one client task at a time;
-the separate server runtime and its selected worker count serve both engines
-identically. This removes the additional client worker/scheduler handoff. Client
-IDs, replies, bounded admission, barrier/timing scope, all attribution counting
-and JSON keys stay unchanged. Timeout still drops the owned JoinSet, then runs
-owned server cleanup before runtime destruction. No library source changed.
+Use `git revert --no-commit 80cab34e` and retain the raw experiment records as
+rejected evidence. Restore exactly `Builder::new_multi_thread().worker_threads(1)`
+and the existing thread name, stack, drivers and ownership. No new API/flag,
+dependency, state, persistence format or restart path is introduced. The server
+runtime owns cluster setup/shutdown; the client runtime owns the guarded campaign;
+timeout drops client tasks before separately guarded server cleanup, as before.
+Acceptance: unchanged worker flag and fixed buffer, source comparison with the
+pre-experiment tree, required fmt/Clippy/tests, executable smoke/expiry controls,
+and one bulk attribution run compared with flag-only `297aec15`. H1 advances T4;
+V2/V3 remain the next library deliverables, with their existing dependencies.
 
-Against the retained fixed-buffer binary, three new AB/BA/AB pairs per engine
-and cell with the same settings as above (one-minute load 52.6–59.1):
+#### H1 rejected candidate: current-thread client runtime
 
-| Engine | Cell | Fixed-buffer baseline | Current-thread client | Change |
-| --- | --- | ---: | ---: | ---: |
-| VoteBoat | Bulk | 268 | 261 | −2.6% |
-| OpenRaft | Bulk | 703 | 703 | neutral |
-| VoteBoat | Singleton | 12,243 | 11,732 | −4.2% |
-| OpenRaft | Singleton | 38,523 | 37,670 | −2.2% |
+`80cab34e` replaced the one-worker multithread client runtime with a current-thread
+runtime. Round 2 reverts it; no alternative runtime flag is retained. Raw
+`h1/current-pairs.txt` remains historical evidence, including the VoteBoat
+singleton regression 11,406→12,969 ns/original. Its favorable median CPU values
+do not establish an equivalent benchmark instrument.
 
-Kept: both singleton medians are lower; bulk is lower for VoteBoat and neutral
-for OpenRaft. All runs are retained in `h1/current-pairs.txt` beside the prior
-experiment, including the last VoteBoat singleton pair that regressed
-11,406→12,969 ns. Three loaded-host pairs do not establish a quiet-machine win;
-do not combine the two experiments' medians into an overall speedup because
-host load changed between windows. No measured candidate was dropped. Actor
-proposal/reply-map/watch optimizations and fewer per-original responders were
-not attempted: the pinned OpenRaft provider owns its corresponding paths, so an
-actor-only edit would violate this task's engine-neutral comparison constraint.
+GPT-6.1-Sol round 1 found smaller measured merge widths and more persists per
+original in all three bulk pairs, including with attribution disabled. Its
+attribution-on medians were mean proposal width 687.36→512.33 originals and
+whole-run persists/original 0.005866→0.006617; attribution-off medians were
+715.28→554.08 and 0.005997→0.006287. Scheduler-dependent arrival and barrier
+startup behavior changes server work per original even with the same hard bounds,
+completions and observer code. Any future experiment requires separate quiet-Mac
+qualification of widths, persists/sends, latency and CPU for both engines by the
+runner. No lower-or-neutral portable CPU or p99 claim is made here.
 
-Final builder validation: all 71 matched tests pass, including attribution-on
-and -off original-result/maintenance coverage; matched fmt and strict Clippy
-are clean. The enabled pre-push hook runs root fmt, root strict Clippy in all
-four configurations, matched fmt and strict all-target Clippy; both preceding
-slice pushes passed it with zero diagnostics. The release binary also completed
-real CLI campaigns for both engines at 1, 2 and 16 server workers with matching
-JSON settings/report fields, 128 originals, 32 requests and all three frontiers
-133. One-second campaign guard runs returned the original campaign expiry with
-successful cleanup for both engines. The smoke assertion initially expected
-Display text but Rust main prints the error's Debug form; it was corrected
-against the observed `Expired { phase: "campaign", ... }`, with no product fix.
-These CLI results are preserved in `h1/final-cli.log`.
+The existing workload worker/JSON unit test exercises one runtime, not `main`'s
+two-runtime topology, and does not certify scheduler equivalence (review P3).
+Executable controls provide manual coverage. Actor-only changes remain excluded
+because the pinned OpenRaft provider owns its corresponding paths.
 
-Builder scope is complete; independent measurement/review and macOS execution
-remain outstanding. The macro plan remains T4: no library milestone is claimed
-complete, and V2/V3 remain the next library deliverables after their recorded
-dependencies. Server-worker scaling campaigns are enabled, not qualified here.
+#### H1 round 2 implemented and validated (17 October 2026)
+
+The client runtime is restored exactly: `main.rs` matches flag-only `297aec15`,
+and all matched source matches pre-experiment `b58f57bf`. Worker selection and
+fixed-buffer reuse remain. The original `current-pairs.txt` is byte-for-byte
+preserved and labeled rejected in its evidence README. The PR description and
+H1 documentation withdraw the current-thread keep decision and qualify the
+buffer measurements as provisional. No new runtime mode is offered.
+
+Actual checks: root and matched formatting pass; all four root strict Clippy
+configurations and matched all-target strict Clippy pass with zero diagnostics
+through `.githooks/pre-push`; matched tests pass 71/71; offline release build
+passes. Fresh executable controls for both engines at 1/2/16 server workers
+pass with matching worker fields, 128 originals / 32 requests and frontiers
+`[133,133,133]`. Both one-second campaign expiry controls return exit 1 with
+the original expiry and no cleanup error. Root test suites, macOS and remote CI
+were not run/verified by this builder. The hook remains enabled for the push.
+
+One fresh attribution-on bulk run per saved flag-only, restored and rejected
+binary, sequentially after this builder's builds/checks completed, yielded:
+
+| Binary | Mean measured proposal width | Whole-run persists/original | Sends/original |
+| --- | ---: | ---: | ---: |
+| Flag-only `297aec15` | 553.01 | 0.006252 | 0.007339 |
+| Restored runtime + fixed buffer | 492.87 | 0.006841 | 0.007540 |
+| Rejected `80cab34e` | 500.53 | 0.006712 | 0.007461 |
+
+All completed 3,997,696 measured originals / 999,424 requests, with frontiers
+`[3998721,3998721,3998721]` and maximum proposal width 16384. At observed load
+95.15–95.30, the restored sample is 10.87% narrower and uses 9.42% more persists
+per original than flag-only. **Numeric matching with flag-only is not verified**;
+this single sample cannot establish workload-shape equivalence or distinguish
+the runtime variants on this host. Do not claim that measurement acceptance
+passed. The source restoration is exact; no measurements were discarded or
+rerun to seek agreement. Other processes were left running. Full outputs,
+hashes, methodology and check logs are in `h1/round2/REPORT.md` and its siblings.
+
+The macro plan remains T4; no library milestone is complete. Quiet-Mac
+qualification and independent review remain pending, with V2/V3 unchanged.
 
 #### V1 implemented: core-canonical volatile log (measurement pending (runner))
 
