@@ -129,16 +129,16 @@ default retention, upstream envelopes and attribution off. Bulk requests
 4,000,000 originals (rounded to 3,997,696), 4096 clients / batch4; singleton
 131,072 originals, 1 client / batch1. Medians of whole-process CPU ns/original:
 
-| Engine | Cell | Flag-only baseline | Fixed buffer | Change |
-| --- | --- | ---: | ---: | ---: |
-| VoteBoat | Bulk | 281 | 283 | +0.7% (neutral; overlapping 274–283 / 272–287 ranges) |
-| OpenRaft | Bulk | 799 | 778 | −2.6% |
-| VoteBoat | Singleton | 12,454 | 11,713 | −5.9% |
-| OpenRaft | Singleton | 39,242 | 38,931 | −0.8% |
+| Engine | Cell | Flag-only sample median | Fixed-buffer sample median |
+| --- | --- | ---: | ---: |
+| VoteBoat | Bulk | 281 | 283 |
+| OpenRaft | Bulk | 799 | 778 |
+| VoteBoat | Singleton | 12,454 | 11,713 |
+| OpenRaft | Singleton | 39,242 | 38,931 |
 
-Kept on code inspection and provisional diagnostic evidence. Both singleton
-engines used less CPU in these pairs; VoteBoat bulk 281→283 ns is within the
-observed noise, not a measured win. Quiet-Mac confirmation remains recommended.
+Kept on code reasoning. The allocation saving is unmeasurable at this noise
+level; these sample medians are not measured wins or attributed savings.
+Quiet-Mac confirmation remains recommended (GPT P3 and Claude Opus N2).
 These are loaded-host diagnostics, not a quiet capacity qualification or a library
 speed claim. Uptime before every pair,
 individual rates/CPU/cores and binary hashes are in
@@ -225,6 +225,20 @@ hashes, methodology and check logs are in `h1/round2/REPORT.md` and its siblings
 
 The macro plan remains T4; no library milestone is complete. Quiet-Mac
 qualification and independent review remain pending, with V2/V3 unchanged.
+
+Claude Opus round 1 arrived during publication. Its B1 is addressed by the same
+exact revert; N1's changed first-poll/timing behavior is removed with it, and
+N4's conditional request for a retained runtime mode does not apply. Existing
+manual executable controls cover the restored two-runtime path, without claiming
+unit-test topology coverage. N2 is addressed by describing the buffer saving as
+unmeasurable at this noise level and removing percentage-win presentations.
+For N3, the H1 evidence README now defines exact child-rusage CPU arithmetic,
+build provenance and a self-contained invocation reading top-level
+`request_p99_ns`; historical `p99=None` logs remain untouched. N5's additive
+`settings.server_workers` key is already explicitly documented. This follow-up
+changes only evidence/docs, with no API/state/ownership or cleanup changes;
+acceptance is the recipe smoke, clean diff and enabled pre-push checks. A final
+diff check also caught and removed a trailing blank line in the saved test log.
 
 #### V1 implemented: core-canonical volatile log (measurement pending (runner))
 
