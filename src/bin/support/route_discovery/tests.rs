@@ -48,6 +48,7 @@ pub(super) fn stalled_authority() -> (Discovery, Endpoint, TcpListener, Manifest
 }
 
 fn assert_attempt_closed(listener: &TcpListener) {
+    listener.set_nonblocking(false).unwrap();
     let (stream, _) = listener.accept().unwrap();
     let stream = blocking_fixture_stream(stream);
     stream
@@ -114,7 +115,6 @@ fn blocking_fixture_stream(stream: TcpStream) -> TcpStream {
 fn accepted_fixture_stream_explicitly_clears_nonblocking_mode() {
     use std::os::fd::AsRawFd;
     let listener = TcpListener::bind(("127.0.0.1", 0)).unwrap();
-    listener.set_nonblocking(true).unwrap();
     let _client = TcpStream::connect(listener.local_addr().unwrap()).unwrap();
     let (stream, _) = listener.accept().unwrap();
     // Simulate macOS inheritance on Linux, so removing the explicit mode reset

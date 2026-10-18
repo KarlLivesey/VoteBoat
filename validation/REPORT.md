@@ -7749,3 +7749,19 @@ and all three extracted scripts with each injected exit101 pass, for Linux and
 macOS RUNNER_OS branches executed on Linux (`ci-budget-check.json`). Hosted
 execution remains separate. Final default has14pass/5fail in unchanged R1
 driver (learners root plus4poison), continues into exhaustive relay model.
+
+TR1b round2: shared fixed Unix lease namespace now repairs01777/0666 modes,
+opens existing files without O_CREAT, and diagnoses per-uid fallback when shared
+ownership/permissions are unusable. Different-TMPDIR handoff, unwritable /sys,
+mode repair/fresh creation, restrictive umask077, unwind and exhaustive legacy/
+ephemeral exclusion controls pass. Service allocators remain TR12/TR15, with
+all their candidate residues/bands excluded. All-ephemeral1024–65535 has no safe
+unprivileged handoff pool; customized macOS ephemeral ranges and noncooperating
+explicit binders remain documented limitations. PR-only stale-run cancellation
+and blocking fixture accept are implemented. Root fmt/four strict Clippy plus
+matched fmt/strict Clippy pass. Isolation7/7; route discovery8/8; umask control1/1.
+One simultaneous four-core all-feature voter pair passes42/42 each in13.22/13.10s,
+no AddrInUse or poison. Full all-feature suite counts follow on completion;
+other feature suites and parent comparison belong to the independent runner.
+The orchestrator explicitly approves class-specific TR1b acceptance, departing
+from architect §4's every-counted-run-passes rule; full qualification stays open.

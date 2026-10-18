@@ -36676,10 +36676,64 @@ Final487 wrap-up archive verification passes: Linux1208payload/1205original/278g
 
 ## Active reliability track — started 18 October 2026
 
+### TR1b round 2 schema amendment (before editing)
+
+M3 needs a single accessible coordination namespace, independent of `TMPDIR`.
+Use `/tmp/voteboat-test-ports` on Unix, optionally overridden by
+`VOTEBOAT_TEST_PORT_LEASE_DIR` for CI sandboxes sharing the same socket namespace.
+Create/repair sticky 01777 directories and 0666 persistent lock files independent
+of umask. Open existing files without O_CREAT (Linux protected_regular applies
+to other users' files in sticky directories); std File advisory locks remain
+the cross-process ownership mechanism. If a legacy directory/file cannot be
+repaired or used, drop partial reservations and use a per-user fallback with an
+explicit diagnostic that cross-user handoff/reopen coordination is lost.
+
+Keep acquire -> bound probes -> handoff -> owner/reopen/release -> drop.
+Cleanup closes probes, removes the local registry entry, then drops the file
+lock. Replace private socket-allocating cleanup controls with shared namespace
+leases, retaining the fork gate and lock-release assertion. Namespace controls
+exercise permissions without binding private-namespace sockets.
+
+For the smallest bounded compatibility path, exclude the counter-service range
+1024–32767 and all directory/transfer ladder residues from the candidate pool;
+their block allocator conversion remains TR12/TR15. Search the remaining
+unprivileged space outside the actual Linux ephemeral range, including above
+its maximum. macOS/unreadable-proc fallback assumes 49152–65535; customized
+macOS ranges remain a documented limitation. An ephemeral range covering every
+unprivileged port leaves no safe handoff pool: diagnose exhaustion rather than
+silently reintroduce outgoing-dial collisions. A bound-listener production seam
+would be needed to remove that host limitation and is outside this slice.
+
+M1 needs current PR feedback: cancel older runs only for pull_request, retaining
+the per-ref group and uncancelled push runs. The route-discovery fixture selects
+blocking mode before accept as well as before read. Checks: permission/fallback,
+different-TMPDIR subprocess ownership, pool selection, unwind, accept tests;
+two concurrent four-core voter copies; full all-feature suite; all lint gates.
+
 The binding target is reliable suites from Raspberry Pis to large hosts,
 including GitHub's 3–4 core runners, without weakened assertions, ignored tests,
 retries or changed library guarantees. The architect's TR track remains active;
 TR1b is a bounded isolation/CI slice, not full hardware-independence qualification.
+
+### TR1b acceptance decision (orchestrator-approved, round 2)
+
+The orchestrator explicitly approves this slice's acceptance as **no AddrInUse
+or poison cascade in any proof environment, no new failures versus the parent
+on the same matrix, remaining failures pre-existing and assigned to TR3/TR4/TR6**.
+This is a documented departure from architect plan §4's **every counted run
+passes** rule, not a declaration that red executions pass. It applies to bounded
+TR1b acceptance; M1/M3/M5 and the full hardware-independent suite goal remain
+open. The independent parent-versus-PR matrix runner's report will be attached
+when it lands; unchanged deadline source alone is not evidence of equivalence.
+The builder runs the full all-features suite to completion here; the other
+feature configurations and matched-parent matrix are the suite runner's job.
+
+The 360-minute workflow guard is also supported by hosted run
+[39124019601](https://github.com/KarlLivesey/VoteBoat/actions/runs/39124019601):
+both OS all-feature jobs exceeded the previous 90-minute guard and the chained
+no-default jobs nevertheless started. That hosted observation is distinct from
+the earlier local injected-exit controls. Round 2 keeps per-ref concurrency but
+cancels stale pull-request runs; push-to-main runs remain uncancelled.
 
 ### Reliability macro plan (planned)
 
@@ -37019,3 +37073,63 @@ not a macOS run or GitHub timeout-engine simulation. Current corrected-source
 default suite has passed beyond activation-driver's root learners failure and
 four poison cascades (14pass/5fail), reaching exhaustive relay enumeration.
 These files remain owned by the independent R1 builder and untouched here.
+
+### TR1b round 2 implemented and focused validation (18 October 2026)
+
+Opus P2-1 / Sol P2-2: one Unix namespace `/tmp/voteboat-test-ports`, with sticky
+01777 directory and 0666 files explicitly repaired after creation, regardless
+of umask. Existing files open without O_CREAT, avoiding Linux protected_regular;
+exclusive std File locks use the Unix flock protocol across accounts. Unusable
+legacy ownership/modes or read-only mounts trigger a per-effective-uid namespace
+only after the shared attempt fails; partial leases unwind before fallback.
+The diagnostic explicitly says CROSS-USER COORDINATION IS LOST. No privileged
+execution was needed: a child points the override at pre-existing read-only
+`/sys`, acquires via fallback, and its diagnostic is asserted. Owned 0500/0600
+legacy modes are repaired and fresh directory/file modes are checked too.
+
+Sol P2-1 / Opus P3-2: TMPDIR no longer selects lock inodes. The deterministic
+child control uses a different TMPDIR after the parent's TCP/UDP probes close,
+asserts the parent's file is locked, and cannot lease its port. CI sandboxes may
+set VOTEBOAT_TEST_PORT_LEASE_DIR; **all processes sharing loopback must use the
+same override**. Different overrides or the diagnosed per-user fallback lose
+cross-namespace handoff/reopen coordination. The fixed `/tmp` path trades normal
+per-user temporary-directory isolation for required cross-user socket exclusion.
+
+Opus P3-1: pool excludes counter's entire 1024–32767 band, directory's residues
+5–7 and 33–35 modulo128 (20000+128k, offsets1–3/101–103), and transfer's four
+128-wide slots at 14000+1024k with those offsets. A source-derived exhaustive
+candidate control checks every reachable base, including u16 wrap. Conversion
+of those service allocators remains TR12/TR15; their own cross-copy races are
+not solved here. Private cleanup no longer allocates real ports: a lock-only
+Reservation exercises the exact lease Drop path and unchanged lock-release
+assertion, while the live handoff/rebind check uses the shared pool. Reservation
+fields are visible only within the test crate to construct that ownership control.
+
+Opus P3-2: candidates scan32768–65535 outside the detected Linux ephemeral
+range, so ranges starting below20000 can use the high band (tested15000–65000
+and1024–20000). macOS and missing/unparseable Linux proc data assume49152–65535,
+with a diagnostic. Customized macOS ephemeral ranges remain a host limitation.
+A range1024–65535 has mathematically no unprivileged non-ephemeral port; the
+control proves the candidate set empty and allocation diagnoses exhaustion.
+It cannot honestly be called supported without a bound-listener production seam
+or host port-range adjustment. Noncooperating programs explicitly binding a
+leased port during handoff/reopen remain outside advisory-lock protection.
+
+Opus P2-2: per-ref concurrency cancels only pull_request events; main push runs
+remain uncancelled. Opus P3-3: blocking mode is selected before fixture accept,
+as well as before read; the Linux inheritance regression uses a blocking accept
+then simulates inherited nonblocking mode on the stream. Opus P3-4: the comment
+now gives the actual probes -> registry -> file-lock release order.
+
+Actual focused checks on the round-2 Rust inputs (hashes and raw logs in
+`validation/reliability/tr1b/round2/`): root fmt and all four strict Clippy
+commands plus matched fmt/all-target strict Clippy pass, zero diagnostics.
+Fixture isolation7/7; additional umask077 control1/1; directory route-discovery
+8/8. Exactly one simultaneous pair of all-feature logical_voter_native binaries
+under taskset -c0-3: **42/42 each**, exits0,13.22s/13.10s, no AddrInUse or poison.
+No process was detached; the foreground controller waited for both owned PIDs.
+No activation-driver, production library, Cargo dependency, assertion threshold,
+lint level, ignored-test or unsafe-code change. The full all-feature run follows
+this checked publication; counts will be recorded after completion, rather than
+inferred from these focused checks. Other full configurations and the matched
+parent comparison remain assigned to the suite runner.
