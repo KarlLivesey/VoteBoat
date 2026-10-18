@@ -30,7 +30,7 @@ pass granularity: peer messages queued before a collection pass are handled firs
 a pass takes only requests already queued when it starts, and peer progress that
 arrives during it is handled before the next pass (bounded by max_proposal_entries).
 Exception: a request deferred at the proposal ceiling runs as the next pass ahead
-of queued peers, so peer progress can wait two passes. Valid scoring
+of queued peers, so peer progress can wait two or more passes. Valid scoring
 configurations cannot reach it: each ceiling is request capacity × request width.
 
 Failure/cleanup: overflow, unexpected effect, missing/duplicate/wrong result,

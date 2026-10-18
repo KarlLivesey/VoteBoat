@@ -179,7 +179,7 @@ old-rule and not comparable.
 
 Deferral exception, now stated in SCHEMA.md, COMPARISON.md and README.md: a
 request deferred at the proposal ceiling runs as the next pass before the biased
-select, so peer progress can wait two passes. No valid scoring configuration
+select, so peer progress can wait two or more passes. No valid scoring configuration
 reaches it (each ceiling is request capacity × request width 1 or 4; singleton
 warmup ends before measurement). Scheduling is unchanged. COMPARISON.md now says
 H2 trades two SCHEMA.md clauses: "already-ready" read literally, and "peer
