@@ -36979,3 +36979,17 @@ Focused-phase input controls execute with empty/whitespace, duplicate and unknow
 selections: each exits2 before a build/run, preventing an empty matrix from
 returning a misleading success. Bash syntax check passes. Default selection
 remains all five environments.
+
+#### Current allocator focused acceptance (Rust inputs 717a3261)
+
+Ownership/compatibility control: all-feature/native each38/38 passing executions
+(core feature-off target has0 tests and is not substantive proof). Striped-node:
+38/38 all-feature executions pass. Fresh voter extra acceptance: **E4 five pairs,
+all ten copies42/42**, plus **E5 three defaults42/42** pass. The manifest selects
+E4/E5 explicitly; no already-failed E3 clock row was retried or erased. This
+satisfies the concurrent port-race acceptance on the final allocator, not the
+complete hardware-independence matrix. Raw outputs, build records, priority/
+affinity observations and exact per-run times are in
+`final-policy-focused-proof.tar.gz`, with machine-readable counts in
+`final-policy-focused-summary.json`. Failed earlier clock environments remain
+blockers for TR3/TR4/TR6. Final full suites are still running on corrected inputs.

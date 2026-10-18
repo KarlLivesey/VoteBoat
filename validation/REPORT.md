@@ -7735,3 +7735,9 @@ input changes. Old all-feature successor/deep nested repetition are explicitly
 interrupted/superseded for consistent-source validation, not successes. Verified
 owned families only were stopped; original baseline/partial outputs and exact
 interruption record are retained. Final suites restart on corrected inputs.
+
+Final allocator focused acceptance (Rust717a3261): ownership/compatibility
+all/native38/38 each, striped38/38. Fresh voter E4 five concurrent pairs all
+copies42/42 and E5 three defaults42/42 pass. The E4/E5 selection is explicit,
+not a full matrix or a retry of failed E3. Current-policy raw evidence/counts
+are archived. Earlier clock failures remain blockers; final full suites pending.

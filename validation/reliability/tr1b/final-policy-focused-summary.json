@@ -1,0 +1,101 @@
+[
+  {
+    "directory": "fixture-all-features",
+    "executions": 38,
+    "environments": {
+      "E1": 10,
+      "E2": 5,
+      "E3": 10,
+      "E4": 10,
+      "E5": 3
+    },
+    "commits": [
+      "4ea002e463abc8871d70d5980c1ca51b3fc1c02c"
+    ],
+    "selected": [
+      "E1",
+      "E2",
+      "E3",
+      "E4",
+      "E5"
+    ]
+  },
+  {
+    "directory": "fixture-native",
+    "executions": 38,
+    "environments": {
+      "E1": 10,
+      "E2": 5,
+      "E3": 10,
+      "E4": 10,
+      "E5": 3
+    },
+    "commits": [
+      "4ea002e463abc8871d70d5980c1ca51b3fc1c02c"
+    ],
+    "selected": [
+      "E1",
+      "E2",
+      "E3",
+      "E4",
+      "E5"
+    ]
+  },
+  {
+    "directory": "fixture-no-default-features",
+    "executions": 38,
+    "environments": {
+      "E1": 10,
+      "E2": 5,
+      "E3": 10,
+      "E4": 10,
+      "E5": 3
+    },
+    "commits": [
+      "4ea002e463abc8871d70d5980c1ca51b3fc1c02c"
+    ],
+    "selected": [
+      "E1",
+      "E2",
+      "E3",
+      "E4",
+      "E5"
+    ]
+  },
+  {
+    "directory": "striped-all",
+    "executions": 38,
+    "environments": {
+      "E1": 10,
+      "E2": 5,
+      "E3": 10,
+      "E4": 10,
+      "E5": 3
+    },
+    "commits": [
+      "4ea002e463abc8871d70d5980c1ca51b3fc1c02c"
+    ],
+    "selected": [
+      "E1",
+      "E2",
+      "E3",
+      "E4",
+      "E5"
+    ]
+  },
+  {
+    "directory": "voter-focused",
+    "executions": 13,
+    "environments": {
+      "E4": 10,
+      "E5": 3
+    },
+    "commits": [
+      "4ea002e463abc8871d70d5980c1ca51b3fc1c02c"
+    ],
+    "selected": [
+      "E4",
+      "E5"
+    ]
+  }
+]
