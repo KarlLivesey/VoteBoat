@@ -57,3 +57,11 @@ or count a clean production workspace as a clean comparison harness.
 Run feature configurations that spawn `target/debug` executables sequentially,
 or give each configuration a distinct `CARGO_TARGET_DIR`. Cargo's build lock
 can be released while integration tests are still using those executables.
+
+Disk budget for agent work. Build only inside your own checkout's `target/`;
+do not create additional `CARGO_TARGET_DIR`s, copies of the source tree, or
+per-revision build trees unless the task brief names them. Before you report a
+task complete, delete your checkout's `target/` and any scratch directories you
+created, and leave no detached processes running. Anyone who creates a worktree
+removes it (`git worktree remove --force`, then `git worktree prune`) as soon as
+its result is recorded; save a patch rather than keeping a worktree for later.
