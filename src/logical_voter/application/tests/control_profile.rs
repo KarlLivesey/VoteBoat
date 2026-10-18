@@ -23,7 +23,6 @@ fn wrapper(command_bytes: usize) -> LogicalActivationApplication<Counter> {
         LogicalActivationLimits {
             command_bytes,
             intents: 2,
-            business_operations: 8,
             ..LogicalActivationLimits::default()
         },
         Counter::new(8).unwrap(),
@@ -58,13 +57,7 @@ fn configuration(nodes: [u64; 3], id: u64) -> Configuration {
 fn begin() -> Vec<u8> {
     let intent = ChildActivationIntent::new(
         app().mapping(),
-        ChildActivationOperations {
-            begin: OperationId::new(100).unwrap(),
-            learners: OperationId::new(101).unwrap(),
-            membership: OperationId::new(102).unwrap(),
-            outcome: OperationId::new(103).unwrap(),
-            release: OperationId::new(104).unwrap(),
-        },
+        ChildActivationOperations::reserved(1).unwrap(),
         &configuration([2, 3, 4], 1),
         ConfigurationId::new(2).unwrap(),
         ConfigurationId::new(3).unwrap(),
@@ -72,6 +65,10 @@ fn begin() -> Vec<u8> {
     )
     .unwrap();
     wrapper(4096).begin(&intent).unwrap()
+}
+/// The parent operation of the selected-profile `Begin`.
+fn begin_operation() -> u128 {
+    ChildActivationOperations::reserved(1).unwrap().begin.get()
 }
 fn parent_entry(index: u64, operation: u128, bytes: Vec<u8>) -> LogEntry {
     LogEntry {
@@ -115,6 +112,10 @@ fn selected_profile_is_immutable_and_checkpoint_binding_is_exact() {
         .with_activation_control_profile(wrapper(4096).control_profile())
         .unwrap();
     assert!(selected.configuration.starts_with(&original));
+    // The child binds the v2 profile: its embedding tag and the profile's magic.
+    let tail = &selected.configuration[original.len()..];
+    assert_eq!(&tail[..8], b"VBACTP02");
+    assert_eq!(&tail[16..24], b"VBACTP02");
     assert!(!selected.same_configuration(&ordinary));
     assert!(!selected.same_configuration(
         &ordinary
@@ -170,7 +171,7 @@ fn original_mixed_action_uses_reserved_capacity_and_replays_without_splitting() 
         4,
         vec![
             parent_entry(2, 201, business),
-            parent_entry(3, 100, begin()),
+            parent_entry(3, begin_operation(), begin()),
         ],
     );
     let bytes = a.encode_command(&mixed, usize::MAX).unwrap();
@@ -219,7 +220,7 @@ fn malformed_and_business_wrapped_controls_do_not_use_reserved_capacity() {
     let mut trailing = begin();
     trailing.push(0);
     for bytes in [trailing, wrapper(4096).business(&begin()).unwrap()] {
-        let c = append(&a, 3, vec![parent_entry(2, 100, bytes)]);
+        let c = append(&a, 3, vec![parent_entry(2, begin_operation(), bytes)]);
         assert!(!c.control(a.activation_control_profile()));
         assert_eq!(admitted(&a, &c), Err(ApplicationError::DedupCapacity));
     }
@@ -243,7 +244,7 @@ fn control_capsule(a: &LogicalApplication) -> Command {
                     generation: ClientRouterGeneration::new(1).unwrap(),
                     sequence: 1,
                     group: group(1),
-                    operation: OperationId::new(100).unwrap(),
+                    operation: OperationId::new(begin_operation()).unwrap(),
                 },
                 position: ProposalPosition { index: 1, term: 1 },
             },

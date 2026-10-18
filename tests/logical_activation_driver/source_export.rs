@@ -197,7 +197,7 @@ fn candidate() -> LogicalApplication {
         LogicalEnrollmentPlan {
             parent: setup::mapping().child,
             target,
-            operation: OperationId::new(351201).unwrap(),
+            operation: history::intent(351200).operations().learners,
             expected: ConfigurationId::new(1).unwrap(),
             configuration: ConfigurationId::new(2).unwrap(),
             source_application_schema: fixture::app().schema_version(),

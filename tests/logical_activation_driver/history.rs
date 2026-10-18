@@ -29,7 +29,7 @@ fn original_parent_begin_fresh_status_retry_busy_and_cancel_tcp() {
 fn original_parent_begin_fresh_status_retry_busy_and_cancel_quic() {
     history(NativePeerProtocol::Quic);
 }
-pub(super) fn intent(base: u128) -> ChildActivationIntent {
+pub(super) fn intent(number: u64) -> ChildActivationIntent {
     let c = |nodes: [u64; 3], id| {
         Configuration::new(
             ConfigurationId::new(id).unwrap(),
@@ -46,16 +46,10 @@ pub(super) fn intent(base: u128) -> ChildActivationIntent {
         )
         .unwrap()
     };
-    let op = |offset| OperationId::new(base + offset).unwrap();
     ChildActivationIntent::new(
         setup::mapping(),
-        ChildActivationOperations {
-            begin: op(0),
-            learners: op(1),
-            membership: op(2),
-            outcome: op(3),
-            release: op(4),
-        },
+        // Each distinct `number` is a distinct activation with its reserved IDs.
+        ChildActivationOperations::reserved(number).unwrap(),
         &c([1, 2, 3], 1),
         ConfigurationId::new(2).unwrap(),
         ConfigurationId::new(3).unwrap(),

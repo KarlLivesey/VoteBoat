@@ -62,11 +62,11 @@ impl LogicalActivationControlProfile {
         LOGICAL_ACTIVATION_RESPONSE_SCHEMA
     }
     pub fn format_version(&self) -> u32 {
-        1
+        2
     }
     pub(crate) fn configuration_bytes(&self, max: usize) -> Result<Vec<u8>, ApplicationError> {
         let mut e = Encoder::new(max);
-        e.put(b"VBACTP01")?;
+        e.put(b"VBACTP02")?;
         e.u64(u64::from(self.format_version()))?;
         e.group(self.parent)?;
         e.u64(self.mappings.len() as u64)?;
@@ -75,7 +75,6 @@ impl LogicalActivationControlProfile {
         }
         for n in [
             self.limits.intents,
-            self.limits.business_operations,
             self.limits.command_bytes,
             self.limits.checkpoint_bytes,
         ] {

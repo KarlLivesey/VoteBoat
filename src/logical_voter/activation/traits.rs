@@ -88,7 +88,7 @@ where
                 EntryPayload::Command { operation, bytes } => {
                     match codec::decode(bytes, next.limits.command_bytes)? {
                         Envelope::Business(raw) => {
-                            next.check_business(*operation)?;
+                            Self::check_business(*operation)?;
                             let inner = LogEntry {
                                 index: entry.index,
                                 term: entry.term,
@@ -105,7 +105,6 @@ where
                                 return Err(ApplicationError::InvalidCommand);
                             }
                             out.push(ActivationReceipt::Business(receipts.remove(0)));
-                            next.business_operations.insert(*operation);
                         }
                         Envelope::Control(c) => {
                             let receipt =

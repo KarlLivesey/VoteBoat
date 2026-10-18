@@ -16,9 +16,9 @@ use super::*;
 use control_profile::LogicalActivationCommandClass;
 #[test]
 fn actual_profile_classifies_complete_control_envelopes_without_promoting_business() {
-    let a = app(2, 4);
+    let a = app(2);
     let profile = a.control_profile();
-    let i = intent(10);
+    let i = intent(1);
     let begin = a.begin(&i).unwrap();
     assert_eq!(
         profile
@@ -75,7 +75,7 @@ fn actual_profile_classifies_complete_control_envelopes_without_promoting_busine
 }
 #[test]
 fn profile_encoding_is_bounded_and_pins_all_selected_limits_and_inner_schema() {
-    let a = app(2, 4);
+    let a = app(2);
     let profile = a.control_profile();
     let original = profile.configuration_bytes(4096).unwrap();
     assert_eq!(
@@ -83,7 +83,7 @@ fn profile_encoding_is_bounded_and_pins_all_selected_limits_and_inner_schema() {
         original
     );
     assert!(profile.configuration_bytes(original.len() - 1).is_err());
-    let changed = app(3, 4).control_profile();
+    let changed = app(3).control_profile();
     assert_ne!(profile, changed);
     assert_ne!(original, changed.configuration_bytes(4096).unwrap());
     assert_eq!(profile.parent(), a.parent());

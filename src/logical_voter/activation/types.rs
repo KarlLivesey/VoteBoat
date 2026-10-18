@@ -17,7 +17,6 @@ use crate::{membership::Configuration, quorum::Tree};
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct LogicalActivationLimits {
     pub intents: usize,
-    pub business_operations: usize,
     pub command_bytes: usize,
     pub checkpoint_bytes: usize,
 }
@@ -25,7 +24,6 @@ impl Default for LogicalActivationLimits {
     fn default() -> Self {
         Self {
             intents: 64,
-            business_operations: 16384,
             command_bytes: 64 * 1024,
             checkpoint_bytes: 16 * 1024 * 1024,
         }
@@ -33,9 +31,7 @@ impl Default for LogicalActivationLimits {
 }
 impl LogicalActivationLimits {
     pub fn validate(self) -> Result<Self, ApplicationError> {
-        if self.business_operations == 0
-            || self.business_operations > 65536
-            || self.intents == 0
+        if self.intents == 0
             || self.intents > 16384
             || self.command_bytes < CONTROL_BYTES
             || self.command_bytes > 16 * 1024 * 1024
@@ -50,11 +46,18 @@ impl LogicalActivationLimits {
     pub(super) fn control_checkpoint_bound(self) -> Result<usize, ApplicationError> {
         self.intents
             .checked_mul(3 * (CONTROL_BYTES + 16) + 128)
-            .and_then(|v| v.checked_add(self.business_operations * 16))
             .and_then(|v| v.checked_add(2048))
             .ok_or(ApplicationError::ReceiptBudget)
     }
 }
+/// High 64 bits of every activation phase `OperationId` ("VBACTPH1").
+///
+/// The parent's operation-ID space is split: every phase ID of every activation
+/// intent carries this tag, and no business operation may. The two kinds can
+/// therefore never collide, and the wrapper keeps no business-ID history.
+pub const ACTIVATION_OPERATION_TAG: u64 = 0x5642_4143_5450_4831;
+/// Activation numbers `n` are below this bound, so `8n + 7` fits in 64 bits.
+const ACTIVATION_NUMBERS: u64 = 1 << 61;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ChildActivationOperations {
     pub begin: OperationId,
@@ -65,6 +68,38 @@ pub struct ChildActivationOperations {
     pub release: OperationId,
 }
 impl ChildActivationOperations {
+    /// Phase IDs of activation number `n` (`n < 2^61`): `(TAG << 64) | (8n + k)`
+    /// with `k` = 0 begin, 1 learners, 2 membership, 3 outcome, 4 release.
+    /// Every intent must use exactly this layout.
+    pub fn reserved(n: u64) -> Result<Self, ApplicationError> {
+        if n >= ACTIVATION_NUMBERS {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let phase = |k: u64| {
+            OperationId::new((u128::from(ACTIVATION_OPERATION_TAG) << 64) | u128::from(8 * n + k))
+                .ok_or(ApplicationError::InvalidCommand)
+        };
+        Ok(Self {
+            begin: phase(0)?,
+            learners: phase(1)?,
+            membership: phase(2)?,
+            outcome: phase(3)?,
+            release: phase(4)?,
+        })
+    }
+    /// True iff `id` lies in the reserved activation space. Such an ID is never
+    /// a valid business operation, whether or not any intent uses it.
+    pub fn is_reserved(id: OperationId) -> bool {
+        id.get() >> 64 == u128::from(ACTIVATION_OPERATION_TAG)
+    }
+    /// The complete reserved layout whose begin phase is `begin`, if any.
+    pub(super) fn of_begin(begin: OperationId) -> Option<Self> {
+        let low = begin.get() as u64;
+        if !Self::is_reserved(begin) || !low.is_multiple_of(8) {
+            return None;
+        }
+        Self::reserved(low / 8).ok()
+    }
     pub(super) fn ids(self) -> [OperationId; 5] {
         [
             self.begin,
@@ -136,8 +171,8 @@ impl ChildActivationIntent {
             self.mapping.store,
             self.mapping.child,
         )?;
-        let ids = self.operations.ids();
-        if ids.iter().enumerate().any(|(i, id)| ids[..i].contains(id))
+        // The exact reserved layout implies five distinct tagged phase IDs.
+        if ChildActivationOperations::of_begin(self.operations.begin) != Some(self.operations)
             || !(self.old_configuration < self.learners_configuration
                 && self.learners_configuration < self.joint_configuration
                 && self.joint_configuration < self.target_configuration)

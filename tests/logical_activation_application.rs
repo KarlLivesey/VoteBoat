@@ -75,19 +75,17 @@ fn app() -> LogicalActivationApplication<App> {
 fn intent() -> ChildActivationIntent {
     ChildActivationIntent::new(
         mapping(),
-        ChildActivationOperations {
-            begin: op(10),
-            learners: op(11),
-            membership: op(12),
-            outcome: op(13),
-            release: op(14),
-        },
+        ChildActivationOperations::reserved(1).unwrap(),
         &config([1, 2, 3], 1),
         ConfigurationId::new(2).unwrap(),
         ConfigurationId::new(3).unwrap(),
         &config([1, 2, 4], 4),
     )
     .unwrap()
+}
+/// The reserved begin phase of `intent()`.
+fn begin_op() -> OperationId {
+    ChildActivationOperations::reserved(1).unwrap().begin
 }
 fn entry(index: u64, operation: OperationId, bytes: Vec<u8>) -> LogEntry {
     LogEntry {
