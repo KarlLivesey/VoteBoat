@@ -36850,3 +36850,13 @@ binaries: observing the first process must not postpone launching the second.
 The isolation control is requalified under this corrected launch ordering;
 long-running binaries already overlap but retain their original runner/source
 provenance in the evidence. This changes no Rust inputs or assertions.
+
+Additional direct evidence (Rust inputs unchanged from `1ec4a1dc`):
+`logical_network` first E1 fails 1/4 pass, with three independent 15 s native-
+child timeouts (64.19 s total, sampled nice15/CPUs0–3). `transaction_driver`
+passes E1×10 and E2×5, then its first E3 run fails 13/14 pass at the unchanged
+phase boundary (`drive.rs:135`, Decide outstanding; 85.23 s total, nice15/0–3).
+The architect assigns these to TR3 and TR6 respectively. Neither failed binary
+is retried unchanged. Complete successful prefixes and failing outputs are
+retained under `failed-proof-1ec4a1dc/`. No `AddrInUse` or poison cascade occurs
+in these failures. Program/striped/nested/voter/directory qualification continues.

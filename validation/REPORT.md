@@ -7686,3 +7686,10 @@ blocks complete reliability qualification; TR3's planned clock/quiescent pacing
 remains necessary. No unchanged retry or increased bound is used. Actual host
 load exceeded the stated 30–80 range. Remaining binaries are being checked
 independently; complete-track success is not claimed.
+
+Direct follow-up failures: logical-network E1 run 1 has three child progress
+timeouts (1 pass/3 fail, 64.19s); transaction driver passes 10 constrained and
+5 serial runs, then E3 run 1 has one phase-boundary timeout (13 pass/1 fail,
+85.23s). Both sample nice15/CPUs0–3; no port error or poison cascade. These
+remain TR3/TR6 work, without unchanged retries or altered assertions. Evidence
+is archived under `validation/reliability/tr1b/failed-proof-1ec4a1dc/`.
