@@ -61,7 +61,7 @@ pub fn cancellation(
         ReadOutcome::Unavailable(ReadUnavailable::Cancelled)
     ));
     refused(parent);
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     loop {
         peers.initial(parent, target);
         let inspection = parent.inspect_read(ticket).unwrap();

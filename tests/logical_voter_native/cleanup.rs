@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
-use super::cluster::ChildNode;
+use super::{cluster::ChildNode, harness};
 use std::time::{Duration, Instant};
 pub fn join(node: ChildNode) {
     let mut parts = node
@@ -14,7 +14,7 @@ pub fn join(node: ChildNode) {
         .into_dialer()
         .unwrap_or_else(|_| panic!("actual child connector must drain"));
     let mut snapshots = parts.local.snapshots.take().unwrap();
-    let end = Instant::now() + Duration::from_secs(10);
+    let end = harness::hang_guard();
     let (mut wal, mut snapshot) = (false, false);
     loop {
         let dial = dialer.as_mut().is_none_or(|d| d.try_finish().unwrap());

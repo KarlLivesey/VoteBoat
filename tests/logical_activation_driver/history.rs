@@ -80,9 +80,9 @@ fn driver(
     )
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = cluster::HISTORY.lock().unwrap();
-    let mut cohort = cluster::Cluster::new_with_application(protocol, fixture::child_application());
-    let clock = cohort.clock;
+    let _serial = crate::history_guard();
+    let mut cohort = cluster::Cluster::simulated(protocol, fixture::child_application());
+    let clock = &cohort.clock.clone();
     let mut bridge =
         LogicalChildBridge::new(&mut cohort.nodes, setup::mapping(), support::node(1)).unwrap();
     let image = drive::claim_in(&mut bridge, clock, 8000, false);
@@ -164,7 +164,7 @@ fn history(protocol: NativePeerProtocol) {
         Some(original.operations().begin)
     );
     node.close_intake().unwrap();
-    progress::until(&mut bridge, node, clock, fixture::FacadeNode::is_drained);
+    progress::drain(&mut bridge, node, clock);
     bridge.close();
     assert!(bridge.is_drained());
     drop(bridge);

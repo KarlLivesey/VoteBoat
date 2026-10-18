@@ -1,16 +1,20 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
-use super::{cluster::Cluster, setup, support};
+use super::{
+    cluster::Cluster,
+    harness::{self, FixtureClock},
+    setup, support,
+};
 use std::time::{Duration, Instant};
 use voteboat::{identity::OperationId, logical_voter::*, runtime::*};
-impl Cluster {
+impl<C: FixtureClock> Cluster<C> {
     pub fn claim(
         &mut self,
         representative: u64,
         operation: u128,
         withhold: bool,
     ) -> VerifiedLogicalImage {
-        let clock = self.clock;
+        let clock = &self.clock;
         let mut bridge = LogicalChildBridge::new(
             &mut self.nodes,
             setup::mapping(),
@@ -23,7 +27,7 @@ impl Cluster {
         image
     }
     pub fn read(&mut self, query: LogicalQuery) -> LogicalRead {
-        let end = Instant::now() + Duration::from_secs(15);
+        let end = harness::hang_guard();
         loop {
             self.wait(|host| host.leader().is_some());
             let slot = self.leader().unwrap();
@@ -57,7 +61,7 @@ impl Cluster {
 
 pub fn claim_in(
     bridge: &mut super::aliases::Bridge<'_>,
-    clock: Instant,
+    clock: impl FixtureClock,
     operation: u128,
     withhold: bool,
 ) -> VerifiedLogicalImage {
@@ -65,10 +69,10 @@ pub fn claim_in(
     bridge.begin_claim(operation).unwrap();
     assert_eq!(bridge.begin_claim(operation), Err(LogicalBridgeError::Busy));
     assert!(bridge.take_image().is_none());
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     let mut held = false;
     loop {
-        let now = MonoTime(clock.elapsed().as_millis() as u64);
+        let now = clock.round(harness::bridge_settled(bridge));
         let usage = bridge
             .advance(
                 now,
@@ -84,7 +88,7 @@ pub fn claim_in(
             for _ in 0..32 {
                 let usage = bridge
                     .advance(
-                        MonoTime(clock.elapsed().as_millis() as u64),
+                        clock.round(harness::bridge_settled(bridge)),
                         LogicalBridgeBudget {
                             node_polls: 3,
                             completions: 0,

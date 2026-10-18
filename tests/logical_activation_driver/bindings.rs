@@ -40,12 +40,10 @@ fn descriptors(image: &VerifiedLogicalImage) {
 }
 #[test]
 fn original_verified_profile_rejects_changed_or_missing_parent_before_transfer() {
-    let _serial = cluster::HISTORY.lock().unwrap();
-    let mut cohort = cluster::Cluster::new_with_application(
-        NativePeerProtocol::TcpTls,
-        fixture::child_application(),
-    );
-    let clock = cohort.clock;
+    let _serial = crate::history_guard();
+    let mut cohort =
+        cluster::Cluster::simulated(NativePeerProtocol::TcpTls, fixture::child_application());
+    let clock = &cohort.clock.clone();
     let mut bridge =
         LogicalChildBridge::new(&mut cohort.nodes, setup::mapping(), support::node(1)).unwrap();
     let image = drive::claim_in(&mut bridge, clock, 8000, false);
@@ -125,12 +123,7 @@ fn original_verified_profile_rejects_changed_or_missing_parent_before_transfer()
     let mut node = fixture::FacadeNode::from_parts(&image, parts, fixture::limits(), MonoTime(0))
         .unwrap_or_else(|e| panic!("exact original profile {:?}", e.reason));
     node.close_intake().unwrap();
-    progress::until(
-        &mut bridge,
-        &mut node,
-        clock,
-        fixture::FacadeNode::is_drained,
-    );
+    progress::drain(&mut bridge, &mut node, clock);
     bridge.close();
     assert!(bridge.is_drained());
     drop(bridge);

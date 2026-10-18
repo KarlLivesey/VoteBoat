@@ -26,9 +26,9 @@ fn real_parent_intent_replicates_learners_but_cannot_promote_absent_native_quic(
     history(NativePeerProtocol::Quic);
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = cluster::HISTORY.lock().unwrap();
+    let _serial = crate::history_guard();
     let mut cohort = super::member::Member::new(protocol);
-    let clock = cohort.clock;
+    let clock = &cohort.clock.clone();
     let mut bridge =
         LogicalChildBridge::new(&mut cohort.nodes, setup::mapping(), support::node(1)).unwrap();
     let image = drive::claim_in(&mut bridge, clock, 5001, false);
@@ -47,7 +47,7 @@ fn history(protocol: NativePeerProtocol) {
         ChildActivationDriverLimits::default(),
     )
     .unwrap_or_else(|e| panic!("real driver {:?}", e.reason));
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     loop {
         step(&mut driver, &mut bridge, clock);
         if driver.phase() == ChildActivationDriverPhase::Enrolling {
@@ -90,7 +90,7 @@ fn history(protocol: NativePeerProtocol) {
         .outcome
         .is_none());
     node.close_intake().unwrap();
-    progress::until(&mut bridge, node, clock, fixture::FacadeNode::is_drained);
+    progress::drain(&mut bridge, node, clock);
     bridge.close();
     assert!(
         bridge.is_drained(),
@@ -109,11 +109,12 @@ fn history(protocol: NativePeerProtocol) {
 fn step(
     driver: &mut ChildActivationDriver<'_, fixture::FacadeNode>,
     bridge: &mut Bridge<'_>,
-    clock: Instant,
+    clock: &harness::SimClock,
 ) {
+    let now = progress::round(bridge, clock);
     driver
         .advance_with_child(
-            MonoTime(clock.elapsed().as_millis() as u64),
+            now,
             ChildActivationDriverBudget::default(),
             fixture::budget(4),
             bridge,

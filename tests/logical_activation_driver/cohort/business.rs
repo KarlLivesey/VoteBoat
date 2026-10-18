@@ -40,7 +40,7 @@ fn read(
     value: i64,
 ) {
     let mut ticket = None;
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     loop {
         peers.initial(parent, target);
         if ticket.is_none() {
@@ -88,7 +88,7 @@ fn write(
 ) -> ProposalPosition {
     let mut ticket = None;
     let mut unknown = false;
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     loop {
         peers.initial(parent, target);
         if ticket.is_none() {

@@ -35,11 +35,15 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | T2 Cheaper durable barrier | Fewer physical syncs per group commit on CoW and non-CoW volumes | Only with a complete recovery/damage proof and no relaxation of acknowledged state; Btrfs, ext4/XFS, APFS |
 | T3 Wider group commit | Barrier cost amortized over everything queued | Native loaded writes/s and p99 improve with lower CPU/original; unchanged durability contract |
 | T4 Per-original CPU | Framework CPU/original materially below 248 ns bulk / 14.6 µs singleton | Profile-selected removals of per-original allocation/handoff with no semantic change |
+| Q1 Reliable suites on any host (user, 18 October 2026) | Every suite passes on any hardware, from a Raspberry Pi to large servers and GitHub's 3–4 core runners | No outcome depends on wall-clock speed, core count, disk latency or scheduling; no assertion weakened, no test ignored or retried, no library capacity changed; Platform feedback green |
 
 ### Mini plan
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
+| In progress R1: deterministic simulated time in the activation driver fixtures | Platform feedback has failed on every main run since 17 October: the activation driver fixtures turned elapsed wall time into protocol time, so a slow host produced more heartbeats and exhausted child group 802's 128 retained actions; the first panic then poisoned the shared serialization lock for 25 more tests | Research report `target/claude/research-ci/dedup-capacity-root-cause.md` and its patch | `logical_activation_driver` 32/32 in 5 constrained (3 CPUs, nice 19, two owned burners) default-thread runs, 5 constrained serial runs and 3 unconstrained runs; unpatched failure reproduced once; fmt, four strict Clippy configurations, matched workspace fmt + Clippy; default, all-feature and no-default full suites; GitHub Actions green | Q1 |
+| Next R2: same simulated clock for `logical_voter_native` and `logical_activation_nested` | Both binaries still feed elapsed wall time to protocol time through the shared `Cluster`/`claim_in` path (left on `Instant` here) or their own clocks; the nested binary has the same 128-action upper budget | R1 harness | Same constrained/serial/unconstrained proof for each binary | Q1 |
+| Following R3: macOS `route_discovery` socket `WouldBlock` | Run 39052489549 failed in `authority_authentication_cannot_extend_the_lookup_deadline` (`src/bin/support/route_discovery/tests.rs:52`) with an unrelated non-blocking socket read | — | Root cause reproduced; event-driven wait with a generous ceiling; macOS run | Q1 |
 | In progress H1: review round 3, preserve the benchmark instrument | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`); pinned matched workspace; quiet-Mac 30-pair buffer attribution result | All matched source byte-identical to flag-only `297aec15`; raw evidence preserved; matched tests; both fmt checks and five strict Clippy configurations; independent review of the reduced scope | T4 |
 | Done V1: core-canonical volatile log (merged 041fc3fb; Mac −18.8% bulk, −16.3% singleton CPU/write) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
 | Next V2: scalar commit-advance plan and smaller `Pending` | Commit-only rounds (~2.3 per singleton original) still build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices | V1 measured | Same twin tests; singleton framework pairs | T4 |
@@ -69,6 +73,104 @@ implemented or benchmarked; unsafe variants are not offered as options.
 Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider than
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
+
+#### R1 schema plan: deterministic simulated time in the activation driver fixtures
+
+(Unrelated to the earlier R1 storage-recovery slice below; R labels here are the
+test-reliability track.)
+
+- Data/API: one test-local `SimClock` (shared `Rc<Cell<u64>>`) per test supplies
+  every `MonoTime` the fixture hands to native children, logical parents, the
+  activation driver and the outer parent sessions. Shared fixture helpers take
+  `impl FixtureClock`; `Instant` keeps its wall-clock behaviour for
+  `logical_voter_native`, which is not converted in this slice.
+- State transitions: each complete fixture poll round calls
+  `round(settled)`. Time advances one millisecond only when no native node polled
+  in that round has durable log or snapshot worker requests in flight
+  (`persistence.usage().requests` and `snapshots.worker.usage().requests`,
+  owner-side counters that change only when the node polls). Reads never advance
+  time. Bootstrap, claims, outer handshakes, the workflow, enrollment, cleanup and
+  shutdown all use the same clock, so no handoff can jump time backwards.
+- Ownership: the clock belongs to the test; members, the cohort `Peers`, the
+  outer `Channels` and single-cohort fixtures hold clones of one handle.
+- Failure/cleanup: worker I/O always completes without protocol time, so a held
+  clock cannot stall progress. Real `Instant` deadlines remain only as one
+  documented hang guard, `harness::HANG` (300 s per wait). Each node's address is
+  reserved on an OS-assigned TCP+UDP pair and held until that node binds it.
+  `HISTORY` waits recover a poisoned guard because the mutex only serializes.
+- Acceptance: the unpatched constrained failure reproduced; group 802's retained
+  high-water mark independent of CPU constraint and disk latency; the proof runs
+  and full suites in the mini plan.
+
+#### R1 implemented: deterministic simulated time in the activation driver fixtures
+
+Root cause (research report `target/claude/research-ci/dedup-capacity-root-cause.md`):
+the cohort fixtures converted `Instant::elapsed()` into protocol time. On a slow
+runner more parent heartbeat and election deadlines expired between the same
+workflow milestones, and every parent protocol send consumes a child-committed
+Authorize action. Child group 802's contracted 128-action history (the preflight
+budgets 64 protocol actions and proves the 516,640-byte checkpoint bound) filled
+with 111 Authorize records and admission returned `DedupCapacity`. The first
+panic poisoned `cluster::HISTORY`, failing 25 later tests with `PoisonError`.
+
+The research patch stepped a `Peers` clock one millisecond per round. Measured
+with temporary admission instrumentation (not committed), that removed the CPU
+dependence but not the disk dependence: rounds park for 1 ms while waiting for a
+sync, so a slow disk still turns into protocol time. With every
+`fsync`/`fdatasync` delayed 20 ms (an `LD_PRELOAD` shim; a Raspberry Pi SD-card
+class disk), the research patch failed 10 of 32 tests with group 802 at 128/128.
+R1 therefore holds protocol time still while durable worker I/O is in flight.
+
+Peak retained actions per child group (serial runs, `--nocapture`):
+
+| Condition | Research patch 801/802/803 | R1 801/802/803 | R1 result |
+| --- | --- | --- | --- |
+| Unconstrained | 54/103/52 | 47/93/49 | 32/32 |
+| 3 CPUs, nice 19, two owned burners (host load 49 → 150) | 52/104/55 | 48/92/48 | 32/32 |
+| Every sync delayed 20 ms | 66/**128**/65 (10 failed) | 47/90/47 | 32/32 |
+
+Worst test shown; byte-pressure, ordinary-pressure and replacement histories
+all stay at 87–93 for group 802 under R1 in every condition.
+
+What changed (tests only; no `src/` change, no capacity, timer, lint or
+assertion change):
+
+- `tests/logical_voter_native/harness.rs` (shared by both binaries):
+  `FixtureClock`, `SimClock`, `bridge_settled`/`nodes_settled`, `hang_guard`,
+  and `Reservation` (OS-assigned TCP+UDP pair, retried if the UDP half is taken;
+  `reclaim` rebinds a released address to prove release).
+- `Cluster<C: FixtureClock = Instant>`: `Cluster::simulated` for this binary;
+  wall-clock `new`/`new_with_application` unchanged for `logical_voter_native`.
+  Fixed probing from port 20000 replaced by held ephemeral reservations, which are
+  re-taken at `close` so a reopen cannot lose its address. `drive::claim_in` is
+  generic over the clock.
+- Activation-driver `Member`, cohort `Members`, cohort `Peers`, outer `Channels`,
+  single-cohort `progress` helpers and close-family helpers use the shared clock;
+  the research patch's timestamp hand-offs (`enroll(now)`, `finish_at`,
+  cleanup returning a time) are unnecessary with one clock and were dropped.
+- Port race: CI run 39065324507 failed with `AddrInUse` at the
+  `original_enrollment` stage, i.e. learner 4 binding its address. That address
+  was reserved and released when the first cohort started and bound only at
+  enrollment, while other ephemeral binds ran. It is now held until the node binds.
+- Drain race: single-cohort tests and `close_peer` waited only for the parent
+  facade to drain, then sampled `bridge.is_drained()` once. That predicate also
+  covers child follower persistence, which the bridge documentation says the
+  host must keep pumping. `progress::drain` and `close_peer` now pump until
+  both have settled; the assertion is unchanged. The research patch failed
+  `learners` TCP on this race once, unconstrained.
+- All 15 s and 10 s real watchdogs in the binary and shared helpers became
+  `harness::hang_guard()` (300 s). A 20 ms-sync run takes 270 s for the binary,
+  so second-scale guards would themselves depend on hardware.
+- Poison: all 16 `HISTORY` waits use `history_guard()`, plus the research
+  regression test that recovers and clears a deliberately poisoned guard.
+
+What did not change: production code, admission limits (128 actions, 4 control,
+206,944 bytes), checkpoint capacity and the 516,640-byte preflight proof,
+timer profiles, assertion predicates, native I/O. Rounds and I/O completion order
+remain asynchronous: this is deterministic protocol time, not a deterministic
+network simulator. The CI cleanup timeout at `cohort/members.rs:224` was a 15 s
+real wait in native member shutdown; it was not reproduced locally, and is
+covered by the same clock (shutdown in protocol time) and the 300 s guard.
 
 #### H1 schema plan: worker setting and shared harness costs
 

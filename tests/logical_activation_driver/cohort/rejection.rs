@@ -27,7 +27,7 @@ type NativeParts = voteboat::native::node::NativeNodeParts<
 pub fn prepared(
     mut error: Box<voteboat::native::startup::NativeStartupRejected<LogicalApplication>>,
 ) -> ! {
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     while !error.try_cleanup().unwrap() {
         assert!(Instant::now() < end, "original prepared rejection cleanup");
         std::thread::park_timeout(Duration::from_millis(1));
@@ -49,7 +49,7 @@ pub fn parts(mut parts: NativeParts, reason: impl std::fmt::Debug, now: MonoTime
     let mut peers = parts.peers.take().unwrap();
     assert!(peers.roster.is_drained());
     peers.connector.close();
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     while !peers.connector.is_drained() {
         assert!(peers
             .connector

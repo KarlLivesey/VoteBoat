@@ -39,6 +39,8 @@ pub mod drive;
 mod enrollment;
 #[path = "logical_activation_driver/fixture.rs"]
 mod fixture;
+#[path = "logical_voter_native/harness.rs"]
+pub mod harness;
 #[path = "logical_activation_driver/history.rs"]
 mod history;
 #[path = "logical_activation_driver/intake.rs"]
@@ -58,3 +60,23 @@ pub mod setup;
 #[path = "logical_activation_driver/source_export.rs"]
 mod source_export;
 pub mod support;
+
+// HISTORY serializes independent test-owned hosts; it contains no shared state
+// that another test must discard after a panic.
+fn history_guard() -> std::sync::MutexGuard<'static, ()> {
+    cluster::HISTORY
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+}
+
+#[test]
+fn serial_history_recovers_after_a_test_panic() {
+    let failed = std::panic::catch_unwind(|| {
+        let _serial = history_guard();
+        panic!("intentional test-local serialization poison");
+    });
+    assert!(failed.is_err());
+    let _serial = history_guard();
+    assert!(cluster::HISTORY.is_poisoned());
+    cluster::HISTORY.clear_poison();
+}

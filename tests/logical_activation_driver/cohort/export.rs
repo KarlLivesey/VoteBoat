@@ -21,7 +21,7 @@ pub fn snapshot(
     target: &mut aliases::Bridge<'_>,
 ) -> Snapshot {
     target.checkpoint_backing(0).unwrap();
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     loop {
         peers.step(driver, target);
         if target

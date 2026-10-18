@@ -14,9 +14,10 @@
 // rights and limitations under the RPL.
 //! Genuine bootstrap files and member Nodes; no configuration or proof seeding.
 use super::*;
+use harness::{FixtureClock, Reservation, SimClock};
 use std::{
     collections::BTreeMap,
-    net::{SocketAddr, TcpListener, UdpSocket},
+    net::SocketAddr,
     path::PathBuf,
     sync::{
         atomic::{AtomicU64, Ordering},
@@ -36,10 +37,12 @@ use voteboat::{
 };
 pub struct Member {
     pub nodes: Vec<cluster::ChildNode>,
-    pub clock: Instant,
+    pub clock: SimClock,
     pub root: PathBuf,
     pub protocol: NativePeerProtocol,
     addresses: [SocketAddr; 4],
+    // Each address stays bound here until its own node binds it.
+    reserved: [Option<Reservation>; 4],
 }
 impl Member {
     pub fn new(protocol: NativePeerProtocol) -> Self {
@@ -50,31 +53,24 @@ impl Member {
             NEXT.fetch_add(1, Ordering::Relaxed)
         ));
         std::fs::create_dir(&root).unwrap();
-        let sockets: Vec<_> = (0..4)
-            .map(|_| {
-                let tcp = TcpListener::bind("127.0.0.1:0").unwrap();
-                let udp = UdpSocket::bind(tcp.local_addr().unwrap()).unwrap();
-                (tcp, udp)
-            })
-            .collect();
-        let addresses = sockets
-            .iter()
-            .map(|(t, _)| t.local_addr().unwrap())
-            .collect::<Vec<_>>()
-            .try_into()
-            .unwrap();
-        drop(sockets);
+        let reserved: [Option<Reservation>; 4] =
+            std::array::from_fn(|_| Some(Reservation::ephemeral()));
+        let addresses = reserved.each_ref().map(|r| r.as_ref().unwrap().address());
         let mut host = Self {
             root,
             protocol,
             addresses,
-            clock: Instant::now(),
+            reserved,
+            clock: SimClock::default(),
             nodes: Vec::new(),
         };
         for id in 1..=3 {
             host.create_bootstrap(id);
         }
-        host.nodes = (1..=3).map(|id| host.open(id)).collect();
+        for id in 1..=3 {
+            let node = host.open(id);
+            host.nodes.push(node);
+        }
         host.nodes[0]
             .control(setup::mapping().child, NodeControl::Campaign)
             .unwrap();
@@ -138,7 +134,8 @@ impl Member {
                 .collect::<BTreeMap<_, _>>(),
         }
     }
-    pub fn open(&self, id: u64) -> cluster::ChildNode {
+    pub fn open(&mut self, id: u64) -> cluster::ChildNode {
+        drop(self.reserved[id as usize - 1].take());
         self.config(id)
             .open_with_protocol_and_timers(
                 self.protocol,
@@ -155,10 +152,11 @@ impl Member {
         selected
             .enroll_snapshot(image, &mut fixture::child_application())
             .unwrap();
-        self.nodes.push(self.open(4));
+        let node = self.open(4);
+        self.nodes.push(node);
     }
     pub fn now(&self) -> MonoTime {
-        MonoTime(self.clock.elapsed().as_millis() as u64)
+        self.clock.now()
     }
     pub fn leader(&self) -> Option<usize> {
         self.nodes.iter().position(|n| {
@@ -171,14 +169,14 @@ impl Member {
         })
     }
     pub fn poll(&mut self) {
-        let now = self.now();
+        let now = self.clock.round(harness::nodes_settled(&self.nodes));
         for n in &mut self.nodes {
             n.poll(now, NodePollBudget::default()).unwrap();
         }
         std::thread::park_timeout(Duration::from_millis(1));
     }
     pub fn wait(&mut self, done: impl Fn(&Self) -> bool) {
-        let end = Instant::now() + Duration::from_secs(15);
+        let end = harness::hang_guard();
         while !done(self) {
             self.poll();
             assert!(
@@ -196,11 +194,9 @@ impl Member {
         for n in self.nodes.drain(..) {
             cleanup::join(n);
         }
+        self.reserved = Default::default();
         for address in self.addresses {
-            drop((
-                TcpListener::bind(address).unwrap(),
-                UdpSocket::bind(address).unwrap(),
-            ));
+            drop(Reservation::reclaim(address));
         }
         std::fs::remove_dir_all(self.root).unwrap();
     }

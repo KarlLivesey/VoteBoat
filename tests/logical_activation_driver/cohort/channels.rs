@@ -14,6 +14,7 @@
 // rights and limitations under the RPL.
 //! Actual authenticated parent sessions retaining original envelope ownership.
 use super::{groups as setup, support};
+use crate::harness::{self, FixtureClock, Reservation, SimClock};
 use std::{
     collections::BTreeMap,
     net::{SocketAddr, TcpListener, UdpSocket},
@@ -36,15 +37,17 @@ pub struct Channels {
     connectors: Vec<NativeServiceConnector>,
     sessions: BTreeMap<(usize, usize), Session>,
     addresses: Vec<SocketAddr>,
+    // Sessions carry no durable worker, so every round is settled.
+    clock: SimClock,
 }
 impl Channels {
     pub fn new(
         descriptors: &[LogicalPeerDescriptor],
         bindings: &[(RuntimeAuthorization, OutboundBinding)],
         protocol: NativePeerProtocol,
-        now: MonoTime,
+        clock: &SimClock,
     ) -> Self {
-        Self::new_wrapped(descriptors, bindings, protocol, now, |_, _, session| {
+        Self::new_wrapped(descriptors, bindings, protocol, clock, |_, _, session| {
             session
         })
     }
@@ -52,15 +55,12 @@ impl Channels {
         descriptors: &[LogicalPeerDescriptor],
         bindings: &[(RuntimeAuthorization, OutboundBinding)],
         protocol: NativePeerProtocol,
-        now: MonoTime,
+        clock: &SimClock,
         mut wrap: impl FnMut(usize, usize, Box<dyn SecureSession>) -> Box<dyn SecureSession>,
     ) -> Self {
+        let now = clock.now();
         let held = (0..3)
-            .map(|_| {
-                let tcp = TcpListener::bind("127.0.0.1:0").unwrap();
-                let udp = UdpSocket::bind(tcp.local_addr().unwrap()).unwrap();
-                (tcp, udp)
-            })
+            .map(|_| Reservation::ephemeral().into_sockets())
             .collect::<Vec<_>>();
         let addresses = held
             .iter()
@@ -75,6 +75,7 @@ impl Channels {
             connectors,
             sessions: BTreeMap::new(),
             addresses,
+            clock: clock.clone(),
         };
         result.establish(descriptors, bindings, now, &mut wrap);
         result
@@ -111,9 +112,9 @@ impl Channels {
                     .unwrap();
             }
         }
-        let clock = Instant::now();
+        let end = harness::hang_guard();
         while self.sessions.len() < 6 {
-            let now = MonoTime(start.0 + clock.elapsed().as_millis() as u64);
+            let now = self.clock.round(true);
             for (from, connector) in self.connectors.iter_mut().enumerate() {
                 for output in connector.poll(now, ConnectPollBudget::default()).unwrap() {
                     let to = descriptors
@@ -144,10 +145,7 @@ impl Channels {
                     assert!(self.sessions.insert((from, to), session).is_none());
                 }
             }
-            assert!(
-                clock.elapsed() < Duration::from_secs(10),
-                "actual outer handshake timeout"
-            );
+            assert!(Instant::now() < end, "actual outer handshake timeout");
             std::thread::park_timeout(Duration::from_millis(1));
         }
     }
@@ -171,7 +169,7 @@ impl Channels {
             })
             .collect()
     }
-    pub fn close(mut self, sessions: impl IntoIterator<Item = Session>, start: MonoTime) {
+    pub fn close(mut self, sessions: impl IntoIterator<Item = Session>) {
         assert!(self.sessions.is_empty());
         self.sessions = sessions
             .into_iter()
@@ -184,11 +182,11 @@ impl Channels {
         for connector in &mut self.connectors {
             connector.close();
         }
-        let clock = Instant::now();
+        let end = harness::hang_guard();
         while !self.sessions.values().all(Session::is_drained)
             || !self.connectors.iter().all(PeerConnector::is_drained)
         {
-            let now = MonoTime(start.0 + clock.elapsed().as_millis() as u64);
+            let now = self.clock.round(true);
             for session in self.sessions.values_mut() {
                 if !session.is_drained() {
                     session.poll(now, TransportPollBudget::default()).unwrap();
@@ -200,10 +198,7 @@ impl Channels {
                     .unwrap()
                     .is_empty());
             }
-            assert!(
-                clock.elapsed() < Duration::from_secs(15),
-                "actual outer close timeout"
-            );
+            assert!(Instant::now() < end, "actual outer close timeout");
             std::thread::park_timeout(Duration::from_millis(1));
         }
         self.sessions.clear();
@@ -213,16 +208,13 @@ impl Channels {
                 .unwrap_or_else(|_| panic!("outer connector drain"))
             {
                 while !dialer.try_finish().unwrap() {
-                    assert!(clock.elapsed() < Duration::from_secs(15));
+                    assert!(Instant::now() < end, "actual outer dialer join");
                     std::thread::park_timeout(Duration::from_millis(1));
                 }
             }
         }
         for address in self.addresses {
-            drop((
-                TcpListener::bind(address).unwrap(),
-                UdpSocket::bind(address).unwrap(),
-            ));
+            drop(Reservation::reclaim(address));
         }
     }
 }

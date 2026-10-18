@@ -64,7 +64,7 @@ pub fn phase(
     target: &mut aliases::Bridge<'_>,
     phase: ChildActivationDriverPhase,
 ) {
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     loop {
         peers.step(driver, target);
         if driver.phase() == phase && target.is_drained() {

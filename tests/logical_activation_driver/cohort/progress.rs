@@ -14,18 +14,28 @@
 // rights and limitations under the RPL.
 //! Independent parent backing and target administrative ownership.
 use super::*;
+use harness::{FixtureClock, SimClock};
 use voteboat::application::StateMachine;
 pub struct Peers<'a> {
     pub parents: [fixture::FacadeNode; 2],
     pub bridges: [aliases::Bridge<'a>; 2],
-    pub clock: Instant,
+    // Shared with the members and channels; one round per complete poll of
+    // every parent and bridge, never derived from wall-clock time.
+    pub clock: SimClock,
 }
 impl Peers<'_> {
     pub fn now(&self) -> MonoTime {
-        MonoTime(self.clock.elapsed().as_millis() as u64)
+        self.clock.now()
+    }
+    /// Every round polls all three bridges, so all ten native nodes decide
+    /// whether durable I/O holds protocol time still.
+    fn tick(&self, target: &aliases::Bridge<'_>) -> MonoTime {
+        let settled =
+            harness::bridge_settled(target) && self.bridges.iter().all(harness::bridge_settled);
+        self.clock.round(settled)
     }
     pub fn initial(&mut self, leader: &mut fixture::FacadeNode, target: &mut aliases::Bridge<'_>) {
-        let now = self.now();
+        let now = self.tick(target);
         self.bridges[0].advance(now, fixture::budget(4)).unwrap();
         pump(&mut self.bridges[0], leader);
         leader.poll(now, LogicalNodePollBudget::default()).unwrap();
@@ -37,7 +47,7 @@ impl Peers<'_> {
         leader: &mut fixture::FacadeNode,
         target: &mut aliases::Bridge<'_>,
     ) -> [LogicalNodeShutdownProgress; 3] {
-        let now = self.now();
+        let now = self.tick(target);
         self.bridges[0].advance(now, fixture::budget(4)).unwrap();
         pump(&mut self.bridges[0], leader);
         let leader_done = shutdown(leader, now);
@@ -55,7 +65,7 @@ impl Peers<'_> {
         driver: &mut ChildActivationDriver<'_, fixture::FacadeNode>,
         target: &mut aliases::Bridge<'_>,
     ) {
-        let now = self.now();
+        let now = self.tick(target);
         driver
             .advance(now, ChildActivationDriverBudget::default(), |p| {
                 let bridge = &mut self.bridges[0];
@@ -88,7 +98,7 @@ impl Peers<'_> {
     }
     pub fn elect(&mut self, leader: &mut fixture::FacadeNode, target: &mut aliases::Bridge<'_>) {
         leader.campaign().unwrap();
-        let end = Instant::now() + Duration::from_secs(15);
+        let end = harness::hang_guard();
         loop {
             self.initial(leader, target);
             let core = leader.local().owner.core(setup::mapping().parent).unwrap();

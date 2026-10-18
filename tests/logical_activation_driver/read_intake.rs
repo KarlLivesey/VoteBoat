@@ -26,9 +26,9 @@ fn held_ordinary_read_quota_preserves_active_status_and_exact_cleanup_quic() {
     history(NativePeerProtocol::Quic);
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = cluster::HISTORY.lock().unwrap();
-    let mut cohort = cluster::Cluster::new_with_application(protocol, fixture::child_application());
-    let clock = cohort.clock;
+    let _serial = crate::history_guard();
+    let mut cohort = cluster::Cluster::simulated(protocol, fixture::child_application());
+    let clock = &cohort.clock.clone();
     let mut bridge =
         LogicalChildBridge::new(&mut cohort.nodes, setup::mapping(), support::node(1)).unwrap();
     let image = drive::claim_in(&mut bridge, clock, 330_201, false);
@@ -84,12 +84,7 @@ fn history(protocol: NativePeerProtocol) {
     }
     assert!(node.local().reads.is_drained());
     node.close_intake().unwrap();
-    progress::until(
-        &mut bridge,
-        &mut node,
-        clock,
-        fixture::FacadeNode::is_drained,
-    );
+    progress::drain(&mut bridge, &mut node, clock);
     bridge.close();
     assert!(bridge.is_drained());
     drop(bridge);
@@ -127,12 +122,12 @@ fn limits() -> LogicalRouterLimits {
 fn read(
     bridge: &mut aliases::Bridge<'_>,
     node: &mut fixture::FacadeNode,
-    clock: Instant,
+    clock: &harness::SimClock,
     query: ActivationQuery<()>,
     expected: ActivationRead<i64>,
 ) -> Output {
     let ticket = node.read(setup::mapping().parent, query).unwrap();
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     loop {
         progress::step(bridge, node, clock, 4);
         if let Some(output) = node.poll_read() {

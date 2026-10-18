@@ -14,8 +14,9 @@
 // rights and limitations under the RPL.
 //! Genuine bootstrap files and member Nodes; no configuration or proof seeding.
 use super::*;
+use harness::{FixtureClock, Reservation, SimClock};
 use std::{
-    net::{SocketAddr, TcpListener, UdpSocket},
+    net::SocketAddr,
     path::PathBuf,
     sync::{
         atomic::{AtomicU64, Ordering},
@@ -36,13 +37,16 @@ use voteboat::{
 pub struct Members {
     pub slot: usize,
     pub nodes: Vec<cluster::ChildNode>,
-    pub clock: Instant,
+    pub clock: SimClock,
     pub root: PathBuf,
     pub protocol: NativePeerProtocol,
     addresses: Vec<SocketAddr>,
+    // Each address stays bound here until its own node binds it; the
+    // enrolled learner's address is otherwise exposed for the whole workflow.
+    reserved: Vec<Option<Reservation>>,
 }
 impl Members {
-    pub fn new(protocol: NativePeerProtocol, slot: usize, clock: Instant) -> Self {
+    pub fn new(protocol: NativePeerProtocol, slot: usize, clock: &SimClock) -> Self {
         static NEXT: AtomicU64 = AtomicU64::new(1);
         let root = std::env::temp_dir().join(format!(
             "voteboat-activation-member-{}-{}",
@@ -50,34 +54,29 @@ impl Members {
             NEXT.fetch_add(1, Ordering::Relaxed)
         ));
         std::fs::create_dir(&root).unwrap();
-        let sockets: Vec<_> = (0..groups::ids(slot).len())
-            .map(|_| {
-                let tcp = TcpListener::bind("127.0.0.1:0").unwrap();
-                let udp = UdpSocket::bind(tcp.local_addr().unwrap()).unwrap();
-                (tcp, udp)
-            })
-            .collect();
-        let addresses = sockets
-            .iter()
-            .map(|(t, _)| t.local_addr().unwrap())
+        let reserved = (0..groups::ids(slot).len())
+            .map(|_| Some(Reservation::ephemeral()))
             .collect::<Vec<_>>();
-        drop(sockets);
+        let addresses = reserved
+            .iter()
+            .map(|r| r.as_ref().unwrap().address())
+            .collect();
         let mut host = Self {
             root,
             slot,
             protocol,
             addresses,
-            clock,
+            reserved,
+            clock: clock.clone(),
             nodes: Vec::new(),
         };
         for id in groups::ids(slot).into_iter().take(3) {
             host.create_bootstrap(id);
         }
-        host.nodes = groups::ids(slot)
-            .into_iter()
-            .take(3)
-            .map(|id| host.open(id))
-            .collect();
+        for id in groups::ids(slot).into_iter().take(3) {
+            let node = host.open(id);
+            host.nodes.push(node);
+        }
         host.nodes[0]
             .control(groups::mapping(slot).child, NodeControl::Campaign)
             .unwrap();
@@ -149,7 +148,15 @@ impl Members {
             provisioned_stores: groups::stores(self.slot),
         }
     }
-    pub fn open(&self, id: u64) -> cluster::ChildNode {
+    fn position(&self, id: u64) -> usize {
+        groups::ids(self.slot)
+            .iter()
+            .position(|n| *n == id)
+            .unwrap()
+    }
+    pub fn open(&mut self, id: u64) -> cluster::ChildNode {
+        let slot = self.position(id);
+        drop(self.reserved[slot].take());
         let selected = self.config(id);
         let limits = selected.startup.limits;
         let now = self.now();
@@ -191,10 +198,11 @@ impl Members {
                 groups::physical_log_limits(),
             )
             .unwrap();
-        self.nodes.push(self.open(4));
+        let node = self.open(4);
+        self.nodes.push(node);
     }
     pub fn now(&self) -> MonoTime {
-        MonoTime(self.clock.elapsed().as_millis() as u64)
+        self.clock.now()
     }
     pub fn leader(&self) -> Option<usize> {
         self.nodes.iter().position(|n| {
@@ -211,14 +219,14 @@ impl Members {
         })
     }
     pub fn poll(&mut self) {
-        let now = self.now();
+        let now = self.clock.round(harness::nodes_settled(&self.nodes));
         for n in &mut self.nodes {
             n.poll(now, NodePollBudget::default()).unwrap();
         }
         std::thread::park_timeout(Duration::from_millis(1));
     }
     pub fn wait(&mut self, done: impl Fn(&Self) -> bool) {
-        let end = Instant::now() + Duration::from_secs(15);
+        let end = harness::hang_guard();
         while !done(self) {
             self.poll();
             assert!(
@@ -236,11 +244,9 @@ impl Members {
         for n in self.nodes.drain(..) {
             super::super::cleanup::join(n);
         }
+        self.reserved.clear();
         for address in self.addresses {
-            drop((
-                TcpListener::bind(address).unwrap(),
-                UdpSocket::bind(address).unwrap(),
-            ));
+            drop(Reservation::reclaim(address));
         }
         std::fs::remove_dir_all(self.root).unwrap();
     }

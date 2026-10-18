@@ -35,9 +35,9 @@ fn original_readiness_admission_stop_retains_authorization_until_dispatch_quic()
     history(NativePeerProtocol::Quic, true);
 }
 fn history(protocol: NativePeerProtocol, stop: bool) {
-    let _serial = cluster::HISTORY.lock().unwrap();
+    let _serial = crate::history_guard();
     let mut cohort = member::Member::new(protocol);
-    let clock = cohort.clock;
+    let clock = &cohort.clock.clone();
     let mut bridge =
         LogicalChildBridge::new(&mut cohort.nodes, setup::mapping(), support::node(1)).unwrap();
     let image = drive::claim_in(&mut bridge, clock, 5201, false);
@@ -112,7 +112,7 @@ fn history(protocol: NativePeerProtocol, stop: bool) {
         node
     };
     node.close_intake().unwrap();
-    progress::until(&mut bridge, node, clock, fixture::FacadeNode::is_drained);
+    progress::drain(&mut bridge, node, clock);
     bridge.close();
     assert!(bridge.is_drained());
     drop(bridge);
@@ -126,10 +126,10 @@ fn history(protocol: NativePeerProtocol, stop: bool) {
 fn phase(
     driver: &mut ChildActivationDriver<'_, fixture::FacadeNode>,
     bridge: &mut aliases::Bridge<'_>,
-    clock: Instant,
+    clock: &harness::SimClock,
     wanted: ChildActivationDriverPhase,
 ) {
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     loop {
         progress::child_step(driver, bridge, clock, 4);
         if driver.phase() == wanted && bridge.is_drained() {
@@ -146,10 +146,10 @@ fn phase(
 fn export(
     driver: &mut ChildActivationDriver<'_, fixture::FacadeNode>,
     bridge: &mut aliases::Bridge<'_>,
-    clock: Instant,
+    clock: &harness::SimClock,
 ) -> Snapshot {
     bridge.checkpoint_backing(0).unwrap();
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     loop {
         progress::child_step(driver, bridge, clock, 3);
         if bridge
@@ -254,9 +254,9 @@ fn assert_terminal(
 fn stop_original_readiness<'p>(
     mut driver: ChildActivationDriver<'p, fixture::FacadeNode>,
     bridge: &mut aliases::Bridge<'_>,
-    clock: Instant,
+    clock: &harness::SimClock,
 ) -> &'p mut fixture::FacadeNode {
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     loop {
         progress::child_step(&mut driver, bridge, clock, 4);
         let usage = bridge.usage();

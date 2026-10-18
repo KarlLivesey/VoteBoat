@@ -134,7 +134,7 @@ fn wait(
     target: &mut aliases::Bridge<'_>,
     ticket: ClientTicket,
 ) -> Client {
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     loop {
         peers.initial(parent, target);
         if let Some(output) = parent.poll_client() {

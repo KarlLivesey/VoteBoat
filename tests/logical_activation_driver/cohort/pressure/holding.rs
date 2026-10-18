@@ -135,7 +135,7 @@ fn client(
         })
         .unwrap();
     ownership::refused(parent); // accepted but not stepped: no observation authority.
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     loop {
         peers.initial(parent, target);
         ownership::refused(parent); // also true just before a real ready output is exported.
@@ -166,7 +166,7 @@ pub fn read(
 ) -> Read {
     let ticket = parent.read(groups::mapping(1).parent, query).unwrap();
     ownership::refused(parent);
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     loop {
         peers.initial(parent, target);
         ownership::refused(parent);

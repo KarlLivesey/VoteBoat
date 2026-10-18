@@ -52,7 +52,7 @@ pub fn close(
         peers.parents[1].local().outbound.binding(),
     ];
     let mut observed: [Observed; 3] = std::array::from_fn(|_| Observed::default());
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     loop {
         for (i, done) in peers.shutdown_step(leader, target).into_iter().enumerate() {
             observed[i].retain(done, bindings[i]);

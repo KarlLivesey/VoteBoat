@@ -16,21 +16,19 @@
 use super::*;
 use aliases::Bridge;
 use fixture::{budget, FacadeNode};
-pub fn step(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: Instant, completions: usize) {
-    pump(bridge, node, clock, completions);
-    node.poll(
-        MonoTime(clock.elapsed().as_millis() as u64),
-        LogicalNodePollBudget::default(),
-    )
-    .unwrap();
+use harness::{FixtureClock, SimClock};
+/// Protocol time for one round over the native nodes this bridge polls.
+pub fn round(bridge: &Bridge<'_>, clock: &SimClock) -> MonoTime {
+    clock.round(harness::bridge_settled(bridge))
 }
-pub fn pump(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: Instant, completions: usize) {
-    bridge
-        .advance(
-            MonoTime(clock.elapsed().as_millis() as u64),
-            budget(completions),
-        )
+pub fn step(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: &SimClock, completions: usize) {
+    pump(bridge, node, clock, completions);
+    node.poll(clock.now(), LogicalNodePollBudget::default())
         .unwrap();
+}
+pub fn pump(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: &SimClock, completions: usize) {
+    let now = round(bridge, clock);
+    bridge.advance(now, budget(completions)).unwrap();
     node.pump_backing(|p| {
         bridge.pump_persistence(p.persistence).unwrap();
         bridge.pump_release(p.releases).unwrap();
@@ -39,10 +37,10 @@ pub fn pump(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: Instant, comp
 pub fn until(
     bridge: &mut Bridge<'_>,
     node: &mut FacadeNode,
-    clock: Instant,
+    clock: &SimClock,
     mut done: impl FnMut(&FacadeNode) -> bool,
 ) {
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     while !done(node) {
         step(bridge, node, clock, 4);
         assert!(Instant::now() < end, "original parent progress");
@@ -52,31 +50,25 @@ pub fn until(
 pub fn advance(
     driver: &mut ChildActivationDriver<'_, FacadeNode>,
     bridge: &mut Bridge<'_>,
-    clock: Instant,
+    clock: &SimClock,
     completions: usize,
 ) {
+    let now = round(bridge, clock);
     driver
-        .advance(
-            MonoTime(clock.elapsed().as_millis() as u64),
-            ChildActivationDriverBudget::default(),
-            |p| {
-                bridge.advance(
-                    MonoTime(clock.elapsed().as_millis() as u64),
-                    budget(completions),
-                )?;
-                bridge.pump_persistence(p.persistence)?;
-                bridge.pump_release(p.releases).map(|_| ())
-            },
-        )
+        .advance(now, ChildActivationDriverBudget::default(), |p| {
+            bridge.advance(now, budget(completions))?;
+            bridge.pump_persistence(p.persistence)?;
+            bridge.pump_release(p.releases).map(|_| ())
+        })
         .unwrap();
 }
 pub fn phase(
     driver: &mut ChildActivationDriver<'_, FacadeNode>,
     bridge: &mut Bridge<'_>,
-    clock: Instant,
+    clock: &SimClock,
     wanted: ChildActivationDriverPhase,
 ) {
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     while driver.phase() != wanted {
         advance(driver, bridge, clock, 4);
         assert!(
@@ -90,10 +82,10 @@ pub fn phase(
 pub fn stop<'a>(
     mut driver: ChildActivationDriver<'a, FacadeNode>,
     bridge: &mut Bridge<'_>,
-    clock: Instant,
+    clock: &SimClock,
 ) -> &'a mut FacadeNode {
     driver.stop_waiting().unwrap();
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     while !driver.is_drained() {
         advance(&mut driver, bridge, clock, 4);
         assert!(Instant::now() < end, "original observer cleanup");
@@ -103,7 +95,7 @@ pub fn stop<'a>(
         .unwrap_or_else(|_| panic!("original borrower drain"))
 }
 
-pub fn elect(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: Instant) {
+pub fn elect(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: &SimClock) {
     use voteboat::application::StateMachine;
     node.campaign().unwrap();
     until(bridge, node, clock, |n| {
@@ -120,18 +112,30 @@ pub fn elect(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: Instant) {
 pub fn child_step(
     driver: &mut ChildActivationDriver<'_, FacadeNode>,
     bridge: &mut Bridge<'_>,
-    clock: Instant,
+    clock: &SimClock,
     polls: usize,
 ) {
     let mut budget = fixture::budget(4);
     budget.node_polls = polls;
+    let now = round(bridge, clock);
     driver
-        .advance_with_child(
-            MonoTime(clock.elapsed().as_millis() as u64),
-            ChildActivationDriverBudget::default(),
-            budget,
-            bridge,
-        )
+        .advance_with_child(now, ChildActivationDriverBudget::default(), budget, bridge)
         .unwrap();
     std::thread::park_timeout(Duration::from_millis(1));
+}
+/// Pump until the parent has drained and the bridge reports every child's
+/// accepted lower work settled. A drained parent can leave follower
+/// persistence in flight; the host must keep pumping until it completes.
+pub fn drain(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: &SimClock) {
+    let end = harness::hang_guard();
+    while !(node.is_drained() && bridge.is_drained()) {
+        if node.is_drained() {
+            let now = round(bridge, clock);
+            bridge.advance(now, budget(4)).unwrap();
+        } else {
+            step(bridge, node, clock, 4);
+        }
+        assert!(Instant::now() < end, "original parent and bridge drain");
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
 }

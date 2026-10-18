@@ -92,7 +92,7 @@ fn read(
     let ticket = parent
         .read(groups::mapping(1).parent, ActivationQuery::Business(()))
         .unwrap();
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::hang_guard();
     loop {
         peers.initial(parent, target);
         if let Some(output) = parent.poll_read() {
