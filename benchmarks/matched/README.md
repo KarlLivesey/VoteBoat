@@ -19,6 +19,21 @@ These controls establish no sustained capacity or minimum-floor win.
 [Mac pilot](validation/pilot-mac131072/REPORT.md),
 [Startup limits checks](validation/performance/slice414-harness/REPORT.md).
 
+`--server-workers N` selects the server runtime's worker thread count for either
+engine (default 16; positive integer up to the harness budget of 32768). For
+example, pass `--server-workers 1` for a one-worker scaling cell. The effective
+value appears in both `settings.server_workers` and the existing top-level
+`server_workers` JSON field; clients retain the original one-worker multithread
+runtime. Keep worker counts equal when comparing engines. This flag belongs to
+the volatile framework binary;
+there is no durable binary sharing this workspace's entry point.
+
+H1 retains only this flag. Both the fixed original-ID buffer and current-thread
+client runtime were rejected and reverted because they changed realized merge
+widths and persistence work per original. The quiet-Mac 30-pair buffer check
+found mean width +5.858% (wider in 30/30 pairs); the workload source now equals
+flag-only `297aec15` byte for byte. See [H1 evidence](validation/performance/h1/README.md).
+
 One three-voter group, empty business payloads, 1024 singleton warmups and equal
 closed-loop per-client requests. Every request awaits all its original applied
 results. Requested totals round down like pinned OpenRaft. Primary defaults retain

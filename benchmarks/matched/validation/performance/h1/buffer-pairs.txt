@@ -1,0 +1,51 @@
+runner=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/claude/tools/run.py
+3e2126a44af11d2b7798bd8afef7fa417cd0140228dfb9815305c453929ea646  /home/karllivesey/.t3/worktrees/VoteBoat/t3-28491f51/target/h1-evidence/flag-baseline
+a49495a3bb3b368d32c8eb98fbdf94167598e7a06fa959e00c23c7b9c2c09769  /home/karllivesey/.t3/worktrees/VoteBoat/t3-28491f51/target/h1-evidence/original-buffer
+PAIR 1 engine=voteboat clients=4096 batch=4
+20:16:01 up 23:14,  1 user,  load average: 69.39, 78.65, 73.16
+baseline c4096/b4 rate=5,306,228/s wall=0.79s cpu=1.10s cpu_ns/write=274 cores=1.39 p99=None
+candidate c4096/b4 rate=4,824,153/s wall=0.88s cpu=1.15s cpu_ns/write=287 cores=1.31 p99=None
+PAIR 1 engine=openraft clients=4096 batch=4
+20:16:03 up 23:14,  1 user,  load average: 67.04, 78.00, 72.98
+baseline c4096/b4 rate=2,412,870/s wall=1.74s cpu=3.24s cpu_ns/write=810 cores=1.87 p99=None
+candidate c4096/b4 rate=2,610,093/s wall=1.62s cpu=3.11s cpu_ns/write=778 cores=1.92 p99=None
+PAIR 2 engine=voteboat clients=4096 batch=4
+20:16:06 up 23:14,  1 user,  load average: 67.04, 78.00, 72.98
+candidate c4096/b4 rate=4,820,426/s wall=0.86s cpu=1.13s cpu_ns/write=283 cores=1.31 p99=None
+baseline c4096/b4 rate=4,865,579/s wall=0.88s cpu=1.13s cpu_ns/write=283 cores=1.29 p99=None
+PAIR 2 engine=openraft clients=4096 batch=4
+20:16:08 up 23:14,  1 user,  load average: 66.80, 77.77, 72.93
+candidate c4096/b4 rate=2,578,040/s wall=1.63s cpu=3.08s cpu_ns/write=769 cores=1.89 p99=None
+baseline c4096/b4 rate=2,627,303/s wall=1.61s cpu=3.19s cpu_ns/write=799 cores=1.98 p99=None
+PAIR 3 engine=voteboat clients=4096 batch=4
+20:16:11 up 23:14,  1 user,  load average: 66.80, 77.77, 72.93
+baseline c4096/b4 rate=4,877,036/s wall=0.86s cpu=1.12s cpu_ns/write=281 cores=1.31 p99=None
+candidate c4096/b4 rate=4,833,409/s wall=0.87s cpu=1.09s cpu_ns/write=272 cores=1.26 p99=None
+PAIR 3 engine=openraft clients=4096 batch=4
+20:16:13 up 23:14,  1 user,  load average: 68.65, 77.97, 73.02
+baseline c4096/b4 rate=2,628,483/s wall=1.60s cpu=3.13s cpu_ns/write=783 cores=1.96 p99=None
+candidate c4096/b4 rate=2,554,026/s wall=1.65s cpu=3.19s cpu_ns/write=798 cores=1.94 p99=None
+PAIR 1 engine=voteboat clients=1 batch=1
+20:16:16 up 23:14,  1 user,  load average: 68.65, 77.97, 73.02
+baseline c1/b1 rate=61,165/s wall=2.17s cpu=1.62s cpu_ns/write=12,360 cores=0.75 p99=None
+candidate c1/b1 rate=65,136/s wall=2.05s cpu=1.55s cpu_ns/write=11,832 cores=0.76 p99=None
+PAIR 1 engine=openraft clients=1 batch=1
+20:16:21 up 23:14,  1 user,  load average: 67.80, 77.64, 72.94
+baseline c1/b1 rate=23,162/s wall=5.71s cpu=5.13s cpu_ns/write=39,173 cores=0.90 p99=None
+candidate c1/b1 rate=23,950/s wall=5.52s cpu=5.04s cpu_ns/write=38,475 cores=0.91 p99=None
+PAIR 2 engine=voteboat clients=1 batch=1
+20:16:32 up 23:14,  1 user,  load average: 67.68, 77.29, 72.88
+candidate c1/b1 rate=67,751/s wall=1.95s cpu=1.52s cpu_ns/write=11,600 cores=0.78 p99=None
+baseline c1/b1 rate=64,168/s wall=2.07s cpu=1.63s cpu_ns/write=12,458 cores=0.79 p99=None
+PAIR 2 engine=openraft clients=1 batch=1
+20:16:36 up 23:14,  1 user,  load average: 68.11, 77.22, 72.88
+candidate c1/b1 rate=23,723/s wall=5.58s cpu=5.23s cpu_ns/write=39,890 cores=0.94 p99=None
+baseline c1/b1 rate=23,485/s wall=5.63s cpu=5.28s cpu_ns/write=40,273 cores=0.94 p99=None
+PAIR 3 engine=voteboat clients=1 batch=1
+20:16:47 up 23:15,  1 user,  load average: 68.04, 76.93, 72.83
+baseline c1/b1 rate=66,334/s wall=2.01s cpu=1.63s cpu_ns/write=12,454 cores=0.81 p99=None
+candidate c1/b1 rate=84,359/s wall=1.57s cpu=1.54s cpu_ns/write=11,713 cores=0.98 p99=None
+PAIR 3 engine=openraft clients=1 batch=1
+20:16:51 up 23:15,  1 user,  load average: 68.44, 76.86, 72.83
+baseline c1/b1 rate=25,472/s wall=5.19s cpu=5.14s cpu_ns/write=39,242 cores=0.99 p99=None
+candidate c1/b1 rate=25,729/s wall=5.15s cpu=5.10s cpu_ns/write=38,931 cores=0.99 p99=None
