@@ -129,15 +129,13 @@ impl<'a> LogView<'a> {
     /// materialized log will hold them. An owner-held tail or earlier trim is
     /// joined by descriptors only.
     pub(crate) fn trimmed_charge(&self, count: usize) -> Option<usize> {
-        if self.tail.is_none() && self.removed == 0 {
-            return self.base.entries.trimmed_charge(count);
+        match self.tail {
+            None => self.base.entries.trimmed_charge(self.removed + count),
+            Some(tail) => self
+                .base
+                .entries
+                .joined_trimmed_charge(self.removed, tail, count),
         }
-        let mut entries = self.base.entries.clone();
-        entries.trim_prefix(self.removed);
-        if let Some(tail) = self.tail {
-            entries.append(tail.to_batch());
-        }
-        entries.trimmed_charge(count)
     }
     /// Retained charge after appending `batch` to this view's entries. A view
     /// with an owner-held tail charges every piece of `batch` in full.

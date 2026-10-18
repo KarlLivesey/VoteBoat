@@ -72,6 +72,85 @@ Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider th
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
 
+#### V3b implemented: shared frozen batches with validation reuse (measurement pending (runner))
+
+Design: `target/claude/research-r1/architect-plan-pr3x.md` §2.3 (3x-B) with
+the parts of §§2.4–2.8, 3 and 4 that apply. Base: PR 6 (`cpu/entry-staging`)
+at 1403cfd2 (V3a round 2) on main 30a1f6c5; V2 is not composed. Implemented
+evidence only; the runner's paired measurements have not been taken.
+
+Shape, as planned below, with these differences:
+
+- `src/log/entries.rs` (+ `facts`, `canonical`, `range`, `iter`): pieces are
+  either a shared range of an `Arc` backing or, for batches narrower than
+  `SHARE_MIN` = 16 entries, an owned vector. Below that width a shared
+  backing's fixed cost (allocation, reference counts, descriptors, freeing at
+  compaction) was measured above its per-entry saving: in a single-thread
+  three-core driver the library cost per write was +24% at width 1 with every
+  batch shared, about parity with the threshold, and −43% at width 390.
+  Owned pieces are copied when sent and scanned by the original loops, as
+  before V3b; adjacent owned pieces in a canonical log gather into one
+  vector, like the flat log.
+- Facts are a uniform metrics value, or a prefix-sum index for mixed
+  backings (O(1) exact subrange totals); maxima are backing-wide and only
+  accept a range, otherwise the visible entries are checked. No segment tree.
+- `EntryRange` (borrowed canonical interval) and `StateMachine::apply_entries`
+  (provided; default one `apply_batch` call on `contiguous()`); `as_slice`,
+  `slices`, `EntryIter`, `EntrySlices`; `edit` on both containers (explicit
+  copy, edit, refreeze); `EntryLog::{push, pop, append, append_log,
+  truncate, trim_prefix, clear, extend, extend_from_slice}`. Mutations of a
+  log change descriptors or owned vectors only; no shared backing is ever
+  mutated.
+- Retained charges: a shared piece charges its whole backing (allocated
+  capacity, every payload, the metrics index); an owned piece in a canonical
+  log charges logically (length and payloads, as the flat log did), and in a
+  message or update its allocated capacity (as `message_cost` and the worker
+  did). `LogSummary` uses the same rules incrementally (append coalescing,
+  whole-piece release on trim) and equals a fresh recount.
+- Wire decode does not reject intrinsically malformed batches earlier than
+  before (plan §2.5's `from_decoded`): error timing is unchanged, and the
+  core's validators run the original loops on unsealed content.
+- `GroupLog::term_at`/`last_index`/`last_term` read a cached tail; lookups
+  probe the last pieces before a binary search.
+- V3a round 2's `plan_owned_leader` folds into `plan_owned`: no plan
+  reallocates frozen entries.
+- Code generation: `install_pending` takes the pending plan with `let … else`
+  and the owned install wrappers are `#[inline]` with the whole-log
+  replacement out of line, which removed the extra by-value copies of
+  `Pending` (1.7 KiB) and `OwnedNextLog` (~0.9 KiB) that the larger install
+  path had introduced.
+
+Public breakage: `GroupLog.entries: EntryLog`, `Suffix.entries` and
+`Rpc::Append.entries: EntryBatch`; `CompletionEffects::committed` /
+`into_parts` and `Raft::replay_committed` return `EntryRange`;
+`Membership::replay`/`replay_from` take any `IntoIterator<Item = &LogEntry>`
+(slices still work). `Vec` literals migrate with `.into()`; indexing by
+range and in-place mutation of these fields end.
+
+Harness: VoteBoat's `Noop` overrides `apply_entries` (same per-entry checks
+and results, one call per interval) and the actor applies a borrowed
+committed interval through it; the FIFO `Effect::Committed` path is
+unchanged. The collection loop, width ceiling, deferral rule and reply order
+are untouched; OpenRaft is untouched. The empty-envelope `LogUpdate` size
+grows by 32 bytes, which the computed `selected_log_batch_bytes` follows.
+
+Tests added: `src/log/entries/tests.rs` (+ `oracle.rs`, the original loops
+kept verbatim): facts against a full scan for every subrange; joined pieces
+and broken joins; malformed content validated entry by entry; fan-out
+selection against the original loop over mixed pieces, every offset, four
+count ceilings and seven byte budgets; log operations against a `Vec` model
+(400 random steps); appended/trimmed charges against fresh recounts;
+overlay join charges against the materialized log; holders keeping their
+contents across truncate/trim/edit; logical equality across partitions;
+borrowed intervals. `tests/wire/entry_goldens.rs`: wire (commands,
+configurations), WAL and checkpoint bytes equal hex captured at 2b1bf078
+before encoder edits, for owned, shared-subrange and two-backing partitions.
+`src/raft/volatile_tests.rs`: `wide_batches_share_one_backing_from_proposal_to_every_follower`
+(widths 15/16/64 across a three-core volatile cluster). Existing pointer
+tests now assert sharing for wide batches and copies for narrow ones.
+
+Checks: pending (recorded below when the sequential suites finish).
+
 #### V3b schema plan: shared frozen batches with validation reuse (planned)
 
 Design: `target/claude/research-r1/architect-plan-pr3x.md` §2.3 (3x-B) and the

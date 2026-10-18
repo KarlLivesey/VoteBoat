@@ -8,17 +8,11 @@ impl Raft {
         if self.log_summary.matches(&self.durable) {
             return self.log_summary.retained_bytes();
         }
-        // A stale summary is never an admission authority. Preserve the old
-        // conservative inspection for diagnostics; transition planning rejects
-        // mismatched summary versions independently.
-        let mut bytes = self
-            .durable
-            .entries
-            .len()
-            .checked_mul(std::mem::size_of::<LogEntry>())?;
-        for entry in &self.durable.entries {
-            bytes = bytes.checked_add(entry.retained_payload_bytes())?;
-        }
+        // A stale summary is never an admission authority. Preserve the
+        // conservative inspection for diagnostics, charged as a fresh summary
+        // would be; transition planning rejects mismatched summary versions
+        // independently.
+        let mut bytes = self.durable.entries.retained_bytes()?;
         if let Some(base) = &self.durable.snapshot_membership {
             bytes = bytes.checked_add(base.retained_bytes())?;
         }

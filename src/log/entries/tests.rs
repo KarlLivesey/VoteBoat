@@ -333,3 +333,42 @@ fn borrowed_intervals_iterate_and_borrow_exactly() {
     assert!(log.borrowed(0..71).is_none());
     assert!(log.shared_range(69..71).is_none());
 }
+
+#[test]
+fn joined_overlay_charges_equal_the_materialized_log() {
+    let mut rng = Rng(88);
+    for case in 0..40 {
+        let mut base = EntryLog::default();
+        let mut next = 1;
+        for _ in 0..1 + rng.below(4) {
+            let width = 1 + rng.below(30) as usize;
+            base.append(history(&mut rng, next, width, case % 2 == 0).into());
+            next += width as u64;
+        }
+        // The tail may continue the base's last shared backing.
+        let mut tail = EntryLog::default();
+        let wide: Vec<LogEntry> = history(&mut rng, next, 40, true);
+        base.append(wide[..20].to_vec().into());
+        if case % 3 == 0 {
+            let whole = EntryLog::from(wide.clone());
+            base.truncate(base.len() - 20);
+            base.append(whole.shared_range(0..20).unwrap());
+            tail.append(whole.shared_range(20..40).unwrap());
+        } else {
+            tail.append(wide[20..].to_vec().into());
+        }
+        let skip = rng.below(base.len() as u64) as usize;
+        let visible = base.len() - skip + tail.len();
+        for count in [0, 1, visible / 2, base.len() - skip, visible] {
+            let mut materialized = base.clone();
+            materialized.trim_prefix(skip);
+            materialized.append_log(tail.clone());
+            materialized.trim_prefix(count);
+            assert_eq!(
+                base.joined_trimmed_charge(skip, &tail, count),
+                materialized.retained_bytes(),
+                "{case} {skip} {count}"
+            );
+        }
+    }
+}

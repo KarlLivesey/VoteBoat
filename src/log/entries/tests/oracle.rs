@@ -83,7 +83,22 @@ pub(super) fn old_selection(
 
 /// Facts of a valid visible range against a direct scan.
 pub(super) fn check_facts(batch: &EntryBatch, expected: &[LogEntry]) {
-    let summary = batch.summary().expect("valid range has facts");
+    check_validators(batch, expected);
+    let payload: usize = expected.iter().map(LogEntry::payload_bytes).sum();
+    assert_eq!(batch.payload_bytes(), payload);
+    let configured = expected
+        .iter()
+        .any(|e| matches!(e.payload, EntryPayload::Configuration(_)));
+    assert_eq!(batch.has_configuration(), configured);
+    let data = expected
+        .iter()
+        .any(|e| !matches!(e.payload, EntryPayload::Noop));
+    assert_eq!(batch.has_data(), data);
+    let Some(summary) = batch.summary() else {
+        // Only a single small owned piece goes straight to the original loops.
+        assert!(!batch.is_shared() && batch.slices().count() == 1);
+        return;
+    };
     assert_eq!(summary.count, expected.len());
     assert_eq!(
         summary.bounds,
@@ -92,19 +107,12 @@ pub(super) fn check_facts(batch: &EntryBatch, expected: &[LogEntry]) {
             .zip(expected.last())
             .map(|(a, b)| ((a.index, a.term), (b.index, b.term)))
     );
-    let payload: usize = expected.iter().map(LogEntry::payload_bytes).sum();
     assert_eq!(summary.payload, payload);
-    assert_eq!(batch.payload_bytes(), payload);
     let configurations = expected
         .iter()
         .filter(|e| matches!(e.payload, EntryPayload::Configuration(_)))
         .count();
     assert_eq!(summary.configurations, configurations);
-    assert_eq!(batch.has_configuration(), configurations != 0);
-    let data = expected
-        .iter()
-        .any(|e| !matches!(e.payload, EntryPayload::Noop));
-    assert_eq!(batch.has_data(), data);
     // Maxima are upper bounds, never below the visible maximum.
     let max_payload = expected
         .iter()
@@ -114,7 +122,6 @@ pub(super) fn check_facts(batch: &EntryBatch, expected: &[LogEntry]) {
     assert!(summary.max_payload >= max_payload);
     let max_configuration = expected.iter().filter_map(activated_configuration).max();
     assert!(summary.max_configuration >= max_configuration);
-    check_validators(batch, expected);
 }
 
 /// Validators against the original loops, across receiver contexts.

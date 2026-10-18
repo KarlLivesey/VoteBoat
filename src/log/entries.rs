@@ -373,6 +373,9 @@ impl EntryBatch {
     pub(crate) fn summary(&self) -> Option<Summary> {
         match &self.spans {
             Spans::Empty => Some(Summary::EMPTY),
+            // A small owned batch is validated by the original loops, which
+            // do less than measuring its facts first.
+            Spans::One(Span::Owned(_)) => None,
             Spans::One(span) => span.summary(),
             Spans::Many(spans) => spans
                 .iter()

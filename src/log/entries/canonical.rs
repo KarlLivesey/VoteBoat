@@ -223,6 +223,34 @@ impl EntryLog {
             }
         }
     }
+    /// Move another log's pieces after this log's last entry.
+    pub fn append_log(&mut self, other: EntryLog) {
+        for span in other.spans {
+            self.append_span(span);
+        }
+    }
+    /// Exact charge of `self[skip..]` followed by `tail`, after trimming
+    /// `count` entries from that sequence, without building it: pieces are
+    /// charged as `append_log` would hold them.
+    pub(crate) fn joined_trimmed_charge(
+        &self,
+        skip: usize,
+        tail: &EntryLog,
+        count: usize,
+    ) -> Option<usize> {
+        let visible = self.len.saturating_sub(skip);
+        if count >= visible {
+            return tail.trimmed_charge(count - visible);
+        }
+        let head = self.trimmed_charge(skip + count)?;
+        let joined = match (self.spans.last(), tail.spans.first()) {
+            (Some(last), Some(first)) if last.adjoins(first) => {
+                tail.retained_bytes()?.checked_sub(first.log_charge()?)?
+            }
+            _ => tail.retained_bytes()?,
+        };
+        head.checked_add(joined)
+    }
     fn append_span(&mut self, span: Span) {
         let ordinal = self.len() + span.len();
         match (self.spans.last_mut(), span) {

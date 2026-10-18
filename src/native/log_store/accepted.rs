@@ -378,7 +378,7 @@ impl Accepted {
                 Overlay::Plain(plain) => {
                     let state = durable.get_mut(&group).unwrap();
                     state.entries.trim_prefix(plain.removed);
-                    state.entries.append(plain.tail.to_batch());
+                    state.entries.append_log(plain.tail);
                     plain.metadata.install_header(state);
                     if LogMetadata::from_log(state) != plain.metadata {
                         return Err(StorageError::Rejected("promoted log metadata mismatch"));
