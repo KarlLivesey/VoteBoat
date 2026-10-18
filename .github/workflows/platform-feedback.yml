@@ -51,8 +51,12 @@ jobs:
           if [[ "$RUNNER_OS" == macOS ]]; then ulimit -n 4096; fi
           # Each configuration must finish before the next can replace binaries
           # in target/debug. Preserve every failure while exposing later suites.
-          status=0
-          cargo test --locked --offline --no-fail-fast --all-features || status=1
-          cargo test --locked --offline --no-fail-fast --no-default-features || status=1
-          cargo test --locked --offline --no-fail-fast --no-default-features --features native || status=1
-          exit "$status"
+          all_features=0
+          no_default_features=0
+          native=0
+          cargo test --locked --offline --no-fail-fast --all-features || all_features=$?
+          cargo test --locked --offline --no-fail-fast --no-default-features || no_default_features=$?
+          cargo test --locked --offline --no-fail-fast --no-default-features --features native || native=$?
+          printf 'Configuration exits: all-features=%s no-default-features=%s native=%s\n' \
+            "$all_features" "$no_default_features" "$native"
+          if (( all_features || no_default_features || native )); then exit 1; fi

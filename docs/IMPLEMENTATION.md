@@ -36765,3 +36765,10 @@ last-descriptor-close assertion cannot overlap that fork window. The same lock
 release assertion remains. Focused corrected isolation is 3/3; the full matrix
 restarts only after this source change. The initial matrix and failure remain
 in the evidence; they are not counted as a passing proof.
+
+Workflow review also tightened the status record: each feature configuration's
+actual exit code is now printed before computing the overall job result.
+Stubbed exit-101 failures at each of the three positions prove all later
+configurations still run, their exact statuses are printed, and the step exits
+1; the all-pass control exits 0. This workflow-only refinement does not change
+the test artifacts qualified at `5651d512`.
