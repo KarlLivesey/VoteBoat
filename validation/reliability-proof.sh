@@ -16,6 +16,10 @@ esac
 # race) without rerunning a different, already-failed clock environment. They
 # are never a substitute for the default complete matrix; record the selection.
 read -r -a environments <<< "${RELIABILITY_ENVIRONMENTS:-E1 E2 E3 E4 E5}"
+if (( ${#environments[@]} == 0 )); then
+  echo 'at least one environment is required' >&2
+  exit 2
+fi
 seen_environments=" "
 for selected in "${environments[@]}"; do
   case "$selected" in E1|E2|E3|E4|E5) ;; *) echo "unknown environment: $selected" >&2; exit 2 ;; esac

@@ -36974,3 +36974,8 @@ current-allocator concurrency evidence without repeating an already-failed,
 unchanged clock row. It filters environments only: every libtest case still
 runs, with no ignore/retry/test-name filter. A focused pass cannot qualify the
 full matrix; the preserved clock failures remain blockers.
+
+Focused-phase input controls execute with empty/whitespace, duplicate and unknown
+selections: each exits2 before a build/run, preventing an empty matrix from
+returning a misleading success. Bash syntax check passes. Default selection
+remains all five environments.
