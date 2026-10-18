@@ -7693,3 +7693,11 @@ timeouts (1 pass/3 fail, 64.19s); transaction driver passes 10 constrained and
 85.23s). Both sample nice15/CPUs0–3; no port error or poison cascade. These
 remain TR3/TR6 work, without unchanged retries or altered assertions. Evidence
 is archived under `validation/reliability/tr1b/failed-proof-1ec4a1dc/`.
+
+Corrected direct checkpoint: isolation (all/native), striped-node and directory
+all pass 38 executions each, including five genuinely concurrent launch pairs.
+The 12-test directory matrix includes the accepted-socket-mode regression.
+Program transaction passes 10 constrained and 5 serial executions, then E3 run 1
+fails four original fixture/phase deadlines (10/14 pass, 96.71s, nice15/CPUs0–3).
+It is stopped without unchanged retry; remaining TR6 clock work is explicit.
+Complete positive and negative raw evidence is archived under reliability/tr1b.

@@ -36860,3 +36860,18 @@ The architect assigns these to TR3 and TR6 respectively. Neither failed binary
 is retried unchanged. Complete successful prefixes and failing outputs are
 retained under `failed-proof-1ec4a1dc/`. No `AddrInUse` or poison cascade occurs
 in these failures. Program/striped/nested/voter/directory qualification continues.
+
+Corrected passing checkpoint: isolation passes all 38 runs in all-feature and
+native-only configurations (no-native is compiled out). Striped-node and the
+12-test directory binary each pass all 38 all-feature executions under the direct
+launcher with both E4 copies started before observation. Raw logs, per-run
+priority/affinity metadata, command build records and wall seconds are in
+`passing-direct-checkpoint.tar.gz`; these supersede the wrapper-based checkpoint
+for qualification. Production changes remain none.
+
+Program transaction passes E1×10/E2×5, then stops at its first E3 run: 10/14
+pass, four independent existing fixture/phase deadline failures, 96.71 s,
+sampled nice15/CPUs0–3. No port error or poison cascade occurs. This is remaining
+TR6 work; the complete successful prefix and failure are archived in
+`failed-proof-1ec4a1dc/program_transaction_driver.tar.gz`. Voter and nested proof
+and sequential full suites remain in progress.
