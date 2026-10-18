@@ -161,20 +161,26 @@ fn checkpoints_require_original_configuration_and_restore_atomically() {
     assert_eq!(restored.checkpoint(usize::MAX).unwrap(), bytes);
     let old = restored.checkpoint(usize::MAX).unwrap();
     for cut in 0..bytes.len() {
-        assert!(restored.restore_checkpoint(1, 1, &bytes[..cut]).is_err());
+        assert!(restored
+            .restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, 1, &bytes[..cut])
+            .is_err());
         assert_eq!(restored.checkpoint(usize::MAX).unwrap(), old);
     }
     assert_eq!(
         restored.restore_checkpoint(2, 1, &bytes),
         Err(ApplicationError::UnsupportedSchema)
     );
-    assert!(restored.restore_checkpoint(1, 2, &bytes).is_err());
+    assert!(restored
+        .restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, 2, &bytes)
+        .is_err());
     let mut changed = app(LogicalLimits {
         max_actions: limits.max_actions + 1,
         ..limits
     });
     assert!(!changed.same_configuration(&a));
-    assert!(changed.restore_checkpoint(1, 1, &bytes).is_err());
+    assert!(changed
+        .restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, 1, &bytes)
+        .is_err());
     assert_eq!(changed.applied_index(), 0);
 }
 #[test]

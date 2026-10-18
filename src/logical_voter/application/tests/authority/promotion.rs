@@ -84,7 +84,7 @@ fn actual_grant_uses_retained_base_and_exact_committed_promotion_boundary() {
     let checkpoint = a.checkpoint(usize::MAX).unwrap();
     let mut restored = fixture();
     restored
-        .restore_checkpoint(1, a.applied_index(), &checkpoint)
+        .restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, a.applied_index(), &checkpoint)
         .unwrap();
     assert_eq!(restored.state, a.state);
     let duplicate = apply(&mut restored, &c);

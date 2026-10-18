@@ -143,7 +143,11 @@ fn selected_profile_is_immutable_and_checkpoint_binding_is_exact() {
     let mut restored = app();
     let before = restored.checkpoint(usize::MAX).unwrap();
     assert_eq!(
-        restored.restore_checkpoint(1, 0, &selected.checkpoint(usize::MAX).unwrap()),
+        restored.restore_checkpoint(
+            LOGICAL_APPLICATION_SCHEMA,
+            0,
+            &selected.checkpoint(usize::MAX).unwrap()
+        ),
         Err(ApplicationError::InvalidCheckpoint)
     );
     assert_eq!(restored.checkpoint(usize::MAX).unwrap(), before);
@@ -187,7 +191,7 @@ fn original_mixed_action_uses_reserved_capacity_and_replays_without_splitting() 
     let checkpoint = a.checkpoint(usize::MAX).unwrap();
     let mut restored = selected();
     restored
-        .restore_checkpoint(1, a.applied_index(), &checkpoint)
+        .restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, a.applied_index(), &checkpoint)
         .unwrap();
     assert_eq!(restored.state, a.state);
     let suffix = mutate(&restored, 5, update_without_suffix(&restored));
@@ -201,7 +205,7 @@ fn original_mixed_action_uses_reserved_capacity_and_replays_without_splitting() 
         .unwrap();
     let before = different.checkpoint(usize::MAX).unwrap();
     assert_eq!(
-        different.restore_checkpoint(1, a.applied_index(), &checkpoint),
+        different.restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, a.applied_index(), &checkpoint),
         Err(ApplicationError::InvalidCheckpoint)
     );
     assert_eq!(different.checkpoint(usize::MAX).unwrap(), before);

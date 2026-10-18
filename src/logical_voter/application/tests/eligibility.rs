@@ -103,7 +103,9 @@ fn original_admission_configuration_is_not_current_eligibility() {
         .is_ok());
     let checkpoint = a.checkpoint(usize::MAX).unwrap();
     let mut restored = app();
-    restored.restore_checkpoint(1, 2, &checkpoint).unwrap();
+    restored
+        .restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, 2, &checkpoint)
+        .unwrap();
     assert_eq!(restored.state, a.state);
 }
 #[test]
@@ -160,7 +162,9 @@ fn removed_representative_cannot_new_work_but_original_retry_survives() {
     assert_eq!(r.outcome, LogicalOutcome::Claimed);
     let checkpoint = a.checkpoint(usize::MAX).unwrap();
     let mut restored = app();
-    restored.restore_checkpoint(1, 6, &checkpoint).unwrap();
+    restored
+        .restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, 6, &checkpoint)
+        .unwrap();
     assert_eq!(restored.state, a.state);
 }
 
@@ -221,6 +225,8 @@ fn child_journal_does_not_inherit_parent_batch_limit() {
     claim(&mut a);
     let bytes = a.checkpoint(usize::MAX).unwrap();
     let mut restored = app_with_limits(a.limits);
-    restored.restore_checkpoint(1, 2, &bytes).unwrap();
+    restored
+        .restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, 2, &bytes)
+        .unwrap();
     assert_eq!(restored.state, a.state);
 }

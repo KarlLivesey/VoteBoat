@@ -67,7 +67,10 @@ pub fn export_for(
             let SnapshotExportOutcome::Loaded(snapshot) = output.outcome() else {
                 panic!("original loaded image");
             };
-            assert_eq!(snapshot.metadata.application_schema, 1);
+            assert_eq!(
+                snapshot.metadata.application_schema,
+                LOGICAL_APPLICATION_SCHEMA
+            );
             assert_eq!(
                 snapshot.metadata.membership.as_ref().unwrap().id(),
                 configuration
@@ -129,8 +132,14 @@ pub fn target(
                 setup::lower_app(3).initialization(),
                 LogicalInitialization::EnrollmentCandidate(_)
             ));
-            assert_eq!(setup::lower_app(3).schema_version(), 2);
-            assert_eq!(setup::upper_app().schema_version(), 1);
+            assert_eq!(
+                setup::lower_app(3).schema_version(),
+                LOGICAL_ENROLLMENT_APPLICATION_SCHEMA
+            );
+            assert_eq!(
+                setup::upper_app().schema_version(),
+                LOGICAL_APPLICATION_SCHEMA
+            );
             assert_eq!(image.mapping(), setup::lower_mapping(3));
             for ((node, usage), original) in nodes.iter().zip(&before).zip(&original) {
                 assert!(

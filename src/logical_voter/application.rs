@@ -30,6 +30,12 @@ pub(super) struct State {
     pub published: Option<SnapshotRef>,
     pub bytes: usize,
     pub enrollment: Option<Box<LogicalEnrollmentRecord>>,
+    /// Session-space retirement watermark (a contiguous prefix). Always 0
+    /// until retirement is implemented; carried by checkpoint v3.
+    pub retired_below: u128,
+    /// High-water mark (a maximum) of allocated parent snapshot generations,
+    /// so numbering never depends on retained records.
+    pub snapshot_generation: u64,
 }
 impl State {
     pub fn new(bootstrap: &Bootstrap) -> Result<Self, ApplicationError> {
@@ -46,6 +52,8 @@ impl State {
             published: None,
             bytes: 0,
             enrollment: None,
+            retired_below: 0,
+            snapshot_generation: 0,
         })
     }
 }
@@ -56,6 +64,8 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
         &mut self,
         entries: &[LogEntry],
     ) -> Result<Vec<LogicalReceipt>, ApplicationError> {
+        #[cfg(test)]
+        WORK.with(|w| w.set((w.get().0 + 1, w.get().1)));
         let mut receipts = Vec::with_capacity(
             entries
                 .iter()
@@ -161,5 +171,19 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
     }
 }
 
+// Per-thread counts of `apply_entries` and `encode_state` calls, so tests can
+// show that restore does no replay and encodes once.
+#[cfg(test)]
+std::thread_local! {
+    static WORK: std::cell::Cell<(u64, u64)> = const { std::cell::Cell::new((0, 0)) };
+}
+#[cfg(test)]
+pub(super) fn count_encode() {
+    WORK.with(|w| w.set((w.get().0, w.get().1 + 1)));
+}
+#[cfg(test)]
+pub(super) fn work() -> (u64, u64) {
+    WORK.with(std::cell::Cell::get)
+}
 #[cfg(test)]
 mod tests;

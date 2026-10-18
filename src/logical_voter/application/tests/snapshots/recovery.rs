@@ -76,7 +76,7 @@ fn restored_claim(a: &LogicalApplication, id: u128) -> LogicalApplication {
     let checkpoint = a.checkpoint(usize::MAX).unwrap();
     let mut recovered = app();
     recovered
-        .restore_checkpoint(1, a.applied_index(), &checkpoint)
+        .restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, a.applied_index(), &checkpoint)
         .unwrap();
     assert_eq!(recovered.state, a.state);
     let c = command(
@@ -139,7 +139,11 @@ fn anchored_orphan_recovery_reuses_bytes_then_keeps_generations_after_reconcile(
     let checkpoint = recovered.checkpoint(usize::MAX).unwrap();
     let mut second = app();
     second
-        .restore_checkpoint(1, recovered.applied_index(), &checkpoint)
+        .restore_checkpoint(
+            LOGICAL_APPLICATION_SCHEMA,
+            recovered.applied_index(),
+            &checkpoint,
+        )
         .unwrap();
     assert_eq!(second.state, recovered.state);
 }

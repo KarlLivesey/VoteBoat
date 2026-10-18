@@ -14,15 +14,17 @@ mod refusals;
 use fixture::{candidate, enrollment, import};
 
 #[test]
-fn original_v1_empty_checkpoint_bytes_schema_and_query_shapes_are_preserved() {
+fn v3_empty_checkpoint_schema_and_unchanged_query_and_command_shapes() {
     let a = app();
+    let bytes = a.checkpoint(usize::MAX).unwrap();
+    assert_eq!(bytes, include_bytes!("formats/v3-empty.bin"));
     assert_eq!(
-        a.checkpoint(usize::MAX).unwrap(),
-        include_bytes!("enrollment/v1-empty.bin")
+        app().restore_checkpoint(1, 0, include_bytes!("enrollment/v1-empty.bin")),
+        Err(ApplicationError::UnsupportedSchema)
     );
-    assert_eq!(a.schema_version(), 1);
+    assert_eq!(a.schema_version(), 3);
+    assert_eq!(a.deployment_requirements().unwrap().application_schema, 3);
     assert_eq!(a.initialization(), LogicalInitialization::BootstrapVoter);
-    assert_eq!(a.deployment_requirements().unwrap().application_schema, 1);
     assert_eq!(a.logical_response_schema(), LOGICAL_RESPONSE_SCHEMA);
     assert_eq!(
         a.read_at(0, LogicalQuery::Enrollment),
@@ -43,7 +45,7 @@ fn original_v1_empty_checkpoint_bytes_schema_and_query_shapes_are_preserved() {
 #[test]
 fn candidate_import_materializes_exact_learner_pin_lineage_and_no_source_ballot() {
     let mut a = candidate();
-    assert_eq!(a.schema_version(), 2);
+    assert_eq!(a.schema_version(), 4);
     assert_eq!(
         a.read_at(0, LogicalQuery::Image).unwrap(),
         LogicalRead::Uninitialized

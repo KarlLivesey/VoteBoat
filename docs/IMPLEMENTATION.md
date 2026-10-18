@@ -1,5 +1,168 @@
 # Implementation record
 
+## Reliability track — logical backing bounded by in-flight work (LV)
+
+Design: architect plan `target/claude/research-lv/architect-plan-retained-retirement.md`
+(main checkout, not tracked) on the researcher report
+`target/claude/research-ci/retained-action-growth.md`. The design pack is unchanged.
+
+### Known defect (open; LV2 closes it)
+
+Measured on `origin/main` 30a1f6c5, simulated parent time: in an idle, healthy
+three-voter logical parent at `TimerConfig::default()` (50 ms heartbeat), the
+leader's backing child group retains one new original action per authorised
+heartbeat send, +2,400 actions per minute (followers' children +1,200), and
+nothing removes them. The leader's child reaches the default `max_actions` of
+4,096 after 102 s. Its bridge then fails with a sticky
+`Client { Application(DedupCapacity) }`; the parent leader stays Leader and
+never steps down, client writes are accepted and never answered, and neither a
+restart nor a new representative claim recovers, because the records are in the
+child checkpoint and the full table refuses control actions too. Only embeddings
+that use `voteboat::logical_voter` (logical backing bridges, `LogicalReplicaDriver`,
+`LogicalReleaseCoordinator`) are affected; the shipped service binaries and
+ordinary physical groups are not.
+
+### Macro plan (this track)
+
+| Milestone | User-visible outcome | Acceptance |
+| --- | --- | --- |
+| LVM Logical backing bounded by in-flight work, not uptime | A logical parent runs indefinitely; each backing child retains O(1) original actions, constant checkpoint size and per-apply CPU; a retired operation ID is answered `Expired` and never re-executed; at a limit reached through a bug the voter fails closed and recovers on restart | 30-simulated-minute idle and writes soaks with retention ≤ 2 per child; exactly-once, restart, replacement and checkpoint tests; model checks of retirement; fail-closed test at the limit |
+
+### Mini plan
+
+| Deliverable | Purpose | Dependencies | Completion checks | Advances |
+| --- | --- | --- | --- | --- |
+| In progress LV1: child checkpoint v3 with direct-decode restore and a snapshot-generation high-water mark | Pruning (LV2) needs restore that does not replay retained records, and generation numbering that does not derive from them (`execute.rs` derived the next generation from `SnapshotPublished` records). Also removes the O(n²) replay restore. Behaviour-neutral: nothing is pruned | — | v3 golden round trips (empty, populated, candidate); old v1/v2 checkpoints refused with `UnsupportedSchema`; restore equals the old replay path on representative histories (state, outcomes, next snapshot generation); restore performs no apply; linear restore-cost note; generation monotonic across checkpoint/restore; fmt, four strict Clippy configurations, matched fmt/Clippy; default, all-features and no-default-features suites | LVM |
+| Next LV2: retirement core | Closes the known defect: `consumed_through` in child commands, operation-ID partition, replicated `retired_below` watermark, pruning, `LogicalRefusal::Expired` and tri-state outcome lookup, bridge acknowledgement | LV1 | App-level 72,000-action soak with retention ≤ 1, exactly-once across retirement boundaries, restart/checkpoint at any point, replacement retires older sessions; fails on 30a1f6c5 | LVM |
+| Following LV3: end-to-end soak evidence | Prove the bound on the real bridge/driver/coordinator path | LV2 | Deterministic simulated-clock 30-minute idle and writes soaks, native restart/replacement/checkpoint tests, existing-test intent updates | LVM |
+
+Later in this track: LV4 (retirement in the `logical_voter_promises` model),
+LV5 (fail closed at the limit; claim budget), optional LV6 (protocol
+authorisation by child read).
+
+### LV1 schema plan
+
+- **Data shape.** `application::State` gains `retired_below: u128` (always 0 in
+  LV1; LV2 advances it) and `snapshot_generation: u64`, the high-water mark of
+  allocated parent snapshot generations (a maximum). Checkpoint magic
+  `VBLOGC03` (ordinary) / `VBLOGC04` (enrollment candidate); application
+  schemas `LOGICAL_APPLICATION_SCHEMA` 1 → 3 and
+  `LOGICAL_ENROLLMENT_APPLICATION_SCHEMA` 2 → 4. Layout, canonical order:
+  magic; configuration blob; `applied`, `applied_term`; `retired_below`;
+  `snapshot_generation`; record count and records in ascending operation ID
+  (op, first index, first term, preceding configuration, command blob, outcome,
+  parent revision, parent generation, epoch); configuration entries; then the
+  materialised state as before (enrollment record for candidates,
+  representative, parent checkpoint blob, membership blob, published reference,
+  snapshots, retained bytes). Command and response formats are unchanged in LV1.
+- **Transitions.** `publish` allocates `snapshot_generation + 1` and stores it;
+  `enroll` sets `max(snapshot_generation, 1)` (its target is generation 1).
+  Reusing an existing identical snapshot reference does not allocate. No other
+  transition touches either field. On every LV1 history the field equals the
+  old derivation (maximum generation over `SnapshotPublished` records and the
+  enrollment target).
+- **Restore.** Decode every field directly into a fresh `State` (no
+  `apply_entries`). Validate: magic, configuration, index and terms; record
+  count ≤ `max_actions`, strictly ascending IDs, each command decodes with a
+  matching ID, `1 ≤ first_index ≤ applied`, `1 ≤ first_term ≤ applied_term`;
+  record and configuration indexes unique with terms non-decreasing in index
+  order; membership rebuilt by folding the configuration entries from the child
+  bootstrap (as apply does) and each record's preceding configuration equal to
+  the membership in force before its index; parent image decodes through the
+  log codec; snapshots decode and verify against their references; enrollment
+  only for candidates; `bytes` equals the sum of command lengths;
+  representative present exactly when the parent image is; LV1 reachable-state
+  rules `retired_below == 0` and `snapshot_generation ==` the old derivation;
+  read envelopes; and finally the exact canonical re-encode equals the input.
+  The candidate state is built in a copy and swapped in only on success.
+- **Ownership.** Both fields are replicated child application state, persisted
+  only in the child checkpoint and reconstructed by log-suffix replay.
+- **Failure paths.** Truncated, trailing, reordered or altered bytes →
+  `InvalidCheckpoint` with state unchanged. A v1/v2 checkpoint presented with
+  its old schema number → `UnsupportedSchema` (no migration; the crate is
+  unpublished, architect Q1). Old bytes under the new schema → `InvalidCheckpoint`
+  (wrong magic). Never a panic or a silent misread.
+- **Restart/partial-progress cases.** Restore into a copy then swap (unchanged);
+  checkpoints are taken between applies, so no partially applied command can be
+  captured; a restored replica replays its log suffix through the ordinary
+  apply path, so the high-water mark advances identically on every replica.
+- **Semantic change for reviewers.** The old restore cross-checked that the
+  materialised image equals the replay of the retained command history. Once
+  LV2 prunes commands that history no longer exists; LV1 replaces it with
+  structural validation plus the exact canonical re-encode (architect §2.8).
+
+#### LV1 implemented
+
+Evidence only (planned work is in the rows and schema plan above).
+
+- **Code.** `application::State` gained `retired_below` (always 0) and
+  `snapshot_generation`; `publish` allocates `snapshot_generation + 1` and
+  `enroll` raises the mark to at least 1 (`application/execute.rs`,
+  `application/enrollment.rs`). Checkpoint v3 encoder in `checkpoint.rs`; the
+  direct-decode restore is `checkpoint/restore.rs` (one decode pass, one
+  `encode_state` for the exact comparison, no `apply_entries`). New
+  `decode_enrollment` in `codec/enrollment.rs`. Schemas 3/4; command and
+  response formats unchanged.
+- **Goldens** (`src/logical_voter/application/tests/formats/`): `v3-empty`,
+  `v3-populated` (10 applied entries, 8 records, child configuration change,
+  two publications, refusals, retry, term change), `v4-candidate-empty`,
+  `v4-candidate-enrolled`; each round-trips encode → restore → re-encode
+  byte-identically. Legacy fixtures `v1-populated`, `v2-candidate-empty` and
+  `v2-candidate-enrolled` were generated on `origin/main` 30a1f6c5 by the same
+  history code (plus the existing `v1-empty`); each is refused with
+  `UnsupportedSchema` under its old schema and `InvalidCheckpoint` under the new
+  one, with state unchanged. `v3-populated` is exactly 24 bytes longer than
+  `v1-populated` (the two new fields).
+- **Equivalence with the replay restore.** A test-only oracle reimplements the
+  former restore (replay every retained record and configuration entry through
+  `apply_entries`). The shared application-test `apply` helper now asserts after
+  every apply that the high-water mark equals the former derivation, and that
+  both the direct restore and the replay oracle rebuild the exact state
+  (records, receipts, membership, parent, snapshots, generation). In the
+  default-feature lib run this checked 285 states across 40 tests (96 with
+  child configuration entries); 450 larger states (> 64 records) were checked
+  only for the generation rule. The populated history then publishes on the
+  original, the directly restored and the replayed copies: identical receipts,
+  generation 3.
+- **No replay, linear cost.** Test-only per-thread counters show restore makes
+  0 `apply_entries` calls and 1 `encode_state` call at 1, 2, 65 and 513
+  records. Ignored timing report (`cargo test --release --lib
+  restore_cost_report -- --ignored --nocapture`, Linux 9800X3D, host load ~115,
+  printed only):
+
+  | Records | Checkpoint bytes | Replay restore ms | Direct restore ms |
+  | ---: | ---: | ---: | ---: |
+  | 256 | 65,306 | 6.57 | 0.10 |
+  | 512 | 129,562 | 16.6 | 0.22 |
+  | 1,024 | 258,074 | 57.3 | 0.44 |
+  | 2,048 | 515,098 | 208 | 0.96 |
+  | 3,968 | 997,018 | 776 | 1.92 |
+
+- **Corruption classes** refused with `InvalidCheckpoint` and no partial
+  restore: non-zero watermark, generation mark ±1, retained-byte total,
+  preceding configuration, record index past `applied`, record term past
+  `applied_term`, trailing byte, six truncation points, wrong applied index.
+- **Generation decoupling.** Removing both publication records from a state
+  (simulating LV2 retirement) lowers the former derivation below the mark; the
+  next publication still gets mark + 1, and re-publishing an identical snapshot
+  allocates nothing.
+- **Deviations from the architect plan.** (1) LV1 restore enforces the
+  reachable-state rules `retired_below == 0` and `snapshot_generation ==` the
+  retained floor; the plan's `>=` and the watermark/claim-retention/session
+  rules need the LV2 ID partition and move there. (2) Membership is rebuilt by
+  the same per-entry fold apply uses rather than `Membership::replay`, and its
+  blob is checked by the exact re-encode. (3) Added checks beyond the plan:
+  exact preceding configuration per record, unique indexes with non-decreasing
+  terms, representative present exactly when the parent image is, receipt epoch
+  ≤ current, at most two retained snapshots. (4) For LV2: checkpoints written by
+  LV1 embed `VBLOGA01/02` commands; if LV2 changes the command format it should
+  bump the schemas again so LV1 stores fail with `UnsupportedSchema` rather
+  than `InvalidCheckpoint`.
+- **Stage-1 score.** Changed paths are inside `src/logical_voter/**`,
+  `tests/logical_*` and `docs/`; no shared `src/` file changed, so the matched
+  CPU-per-write score is unaffected by construction.
+- **Validation.** In progress; recorded below when the three full configurations finish.
+
 ## Active P9 plan — resumed 15 October 2026 (protocol-work track)
 
 Resumed at the user's request. Goal: make VoteBoat as fast as possible on minimal
