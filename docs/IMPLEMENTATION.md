@@ -149,7 +149,40 @@ before encoder edits, for owned, shared-subrange and two-backing partitions.
 (widths 15/16/64 across a three-core volatile cluster). Existing pointer
 tests now assert sharing for wide batches and copies for narrow ones.
 
-Checks: pending (recorded below when the sequential suites finish).
+Indicative measurement (builder, this loaded Linux host, 18 October 2026;
+not the runner's gate). Release binaries built from `git archive` copies of
+main 30a1f6c5 and da68b760; `run.py BIN …`, three interleaved AB/BA pairs per
+cell, whole-process CPU per completed write, load average 25–36 throughout
+(per-run uptime in `target/v3b/indicative-da68b760.txt`):
+
+| Cell | main ns/write (median) | V3b ns/write (median) | Change | Pairs better |
+| --- | ---: | ---: | ---: | ---: |
+| bulk 4096/4, 16 workers | 279 | 238 | −14.7% | 3/3 |
+| bulk 4096/4, 1 worker | 272 | 227 | −16.5% | 3/3 |
+| singleton 1/1, 16 workers | 11,477 | 11,711 | +2.0% | 0/3 |
+| singleton 1/1, 1 worker | 9,368 | 9,999 | +6.7% | 0/3 |
+
+Against V3a (1403cfd2, six pairs, load 30–34): bulk −9.5% (16 workers) and
+−14.8% (1 worker), 6/6 each; singleton +3.2% and +3.7%, 1/6 and 0/6.
+Attribution controls: the leader persists exactly 264,195 times with
+proposal width 1 on main, V3a and V3b at 1 and 16 workers (two or three runs
+each); follower persists and leader sends vary by about ±1% in both
+directions between runs, as in PR 6.
+
+Library-only driver (`target/v3b/driver`: three volatile cores stepped in
+one thread, thread CPU time, minimum of five repetitions, interleaved
+rounds). Ratio V3b/main of the per-write library cost: width 1 ≈ 1.00 with
+the default release profile and ≈ 1.05 with the harness profile (thin LTO,
+one codegen unit); width 4 ≈ 1.05; width 16 ≈ 0.97; width 32 ≈ 0.83; width
+64 ≈ 0.80; width 390 ≈ 0.57. The singleton remainder is spread over the
+completion path (a 1.7 KiB `Pending` and a 0.9 KiB `OwnedNextLog` are still
+moved by value per persistence round, as on main, and their copies shift
+with code generation), piece dispatch, and frees; sampled profiles (an
+in-process SIGPROF sampler in the scratch driver, because perf events are
+not available to this user) show no single site above ~1% of samples. V2's
+smaller `Pending` targets the same copies.
+
+Checks: recorded below when the sequential suites finish.
 
 #### V3b schema plan: shared frozen batches with validation reuse (planned)
 
