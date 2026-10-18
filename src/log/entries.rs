@@ -184,17 +184,18 @@ fn totals(spans: &[Span]) -> Option<Totals> {
             .try_fold(Totals::default(), |sum, span| sum.join(span.totals()?)),
     }
 }
-/// Exact, from each piece's index, or a scan of that piece's visible entries.
+/// Exact, from a shared piece's index, or a scan of the visible entries.
 fn has_configuration(spans: &[Span]) -> bool {
-    spans.iter().any(|span| {
-        span.totals().map_or_else(
-            || {
-                span.entries()
-                    .iter()
-                    .any(|entry| matches!(entry.payload, EntryPayload::Configuration(_)))
-            },
-            |totals| totals.configurations != 0,
-        )
+    let scan = |span: &Span| {
+        span.entries()
+            .iter()
+            .any(|entry| matches!(entry.payload, EntryPayload::Configuration(_)))
+    };
+    spans.iter().any(|span| match span {
+        Span::Owned(_) => scan(span),
+        Span::Shared { .. } => span
+            .totals()
+            .map_or_else(|| scan(span), |totals| totals.configurations != 0),
     })
 }
 
@@ -296,12 +297,21 @@ impl EntryBatch {
         self.len == 0
     }
     pub fn first(&self) -> Option<&LogEntry> {
-        self.spans.as_slice().first()?.entries().first()
+        match &self.spans {
+            Spans::One(span) => span.entries().first(),
+            spans => spans.as_slice().first()?.entries().first(),
+        }
     }
     pub fn last(&self) -> Option<&LogEntry> {
-        self.spans.as_slice().last()?.entries().last()
+        match &self.spans {
+            Spans::One(span) => span.entries().last(),
+            spans => spans.as_slice().last()?.entries().last(),
+        }
     }
     pub fn get(&self, offset: usize) -> Option<&LogEntry> {
+        if let Spans::One(span) = &self.spans {
+            return span.entries().get(offset);
+        }
         let mut offset = offset;
         for span in self.spans.as_slice() {
             if offset < span.len() {
@@ -312,7 +322,10 @@ impl EntryBatch {
         None
     }
     pub fn iter(&self) -> Iter<'_> {
-        Iter::new(self.spans.as_slice(), 0, 0, self.len)
+        match &self.spans {
+            Spans::One(span) => Iter::from_parts(span.entries(), &[], &[], self.len),
+            spans => Iter::new(spans.as_slice(), 0, 0, self.len),
+        }
     }
     /// Contiguous pieces in order; their concatenation is this batch.
     pub fn slices(&self) -> impl DoubleEndedIterator<Item = &[LogEntry]> + ExactSizeIterator {
@@ -391,6 +404,11 @@ impl EntryBatch {
     }
     /// Any visible command or configuration.
     pub(crate) fn has_data(&self) -> bool {
+        if let Spans::One(Span::Owned(entries)) = &self.spans {
+            return entries
+                .iter()
+                .any(|entry| !matches!(entry.payload, EntryPayload::Noop));
+        }
         self.totals().map_or_else(
             || {
                 self.iter()
@@ -402,6 +420,9 @@ impl EntryBatch {
     /// Visible payload total, summed as the old unchecked loop did when the
     /// index is unavailable.
     pub(crate) fn payload_bytes(&self) -> usize {
+        if let Spans::One(Span::Owned(entries)) = &self.spans {
+            return entries.iter().map(LogEntry::payload_bytes).sum();
+        }
         self.totals().map_or_else(
             || self.iter().map(LogEntry::payload_bytes).sum(),
             |totals| totals.payload,
@@ -444,12 +465,13 @@ impl EntryBatch {
                 .all(|entry| activated_configuration(entry).is_none_or(|id| id <= configuration))
         };
         let Some(summary) = self.summary() else {
-            return configurations_within()
-                && previous_index
-                    .checked_add(1)
-                    .map_or(self.is_empty(), |from| {
-                        self.valid_sequence(from, previous_term, message_term, max_command_bytes)
-                    });
+            return self.valid_append_sequence(
+                previous_index,
+                previous_term,
+                message_term,
+                configuration,
+                max_command_bytes,
+            );
         };
         let Some((first, last)) = summary.bounds else {
             return true;
@@ -466,6 +488,29 @@ impl EntryBatch {
                 .iter()
                 .all(|entry| entry.payload_bytes() <= max_command_bytes)
     }
+    /// The original follower loop, for content without facts.
+    fn valid_append_sequence(
+        &self,
+        previous_index: u64,
+        mut previous_term: u64,
+        message_term: u64,
+        configuration: ConfigurationId,
+        max_command_bytes: usize,
+    ) -> bool {
+        for (offset, entry) in self.slices().flatten().enumerate() {
+            if activated_configuration(entry).is_some_and(|id| id > configuration)
+                || previous_index.checked_add(offset as u64 + 1) != Some(entry.index)
+                || entry.term == 0
+                || entry.term < previous_term
+                || entry.term > message_term
+                || entry.payload_bytes() > max_command_bytes
+            {
+                return false;
+            }
+            previous_term = entry.term;
+        }
+        true
+    }
     /// The original per-entry loop, for content without facts.
     fn valid_sequence(
         &self,
@@ -474,7 +519,7 @@ impl EntryBatch {
         hard_term: u64,
         max_command_bytes: usize,
     ) -> bool {
-        for (offset, entry) in self.iter().enumerate() {
+        for (offset, entry) in self.slices().flatten().enumerate() {
             if from.checked_add(offset as u64) != Some(entry.index)
                 || entry.term == 0
                 || entry.term < previous_term
