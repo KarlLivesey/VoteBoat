@@ -7657,3 +7657,13 @@ out allocator reuse; a sibling fork can transiently inherit even CLOEXEC fds.
 A shared spawn guard makes the unchanged last-close assertion valid. The
 failed matrix is retained separately and is not a successful proof. The
 corrected focused control passes 3/3; qualification continues on the fix.
+
+TR1b checkpoint at source `5651d512`: fixture isolation (3 tests/run), directory
+unit binary (12) and logical voter native (42) each pass all 38 executions:
+10 constrained, 5 serial, 10 CPU-contended, 5 concurrent pairs and 3 defaults.
+The five corrected voter pairs all pass both copies, versus the parent port
+collision. Root fmt/four strict Clippy profiles and matched fmt/Clippy pass with
+zero diagnostics through enabled pushes. Remaining proof and final full-suite
+counts are pending. The default full suite has continued beyond an activation-
+driver failure (root learners bridge-usage assertion + two poison cascades);
+those files belong to R1 and are unchanged here.

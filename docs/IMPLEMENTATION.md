@@ -36772,3 +36772,26 @@ Stubbed exit-101 failures at each of the three positions prove all later
 configurations still run, their exact statuses are printed, and the step exits
 1; the all-pass control exits 0. This workflow-only refinement does not change
 the test artifacts qualified at `5651d512`.
+
+TR1b qualification checkpoint (18 October 2026):
+
+| All-feature binary | Tests/run | E1 | E2 | E3 | E4 | E5 | Pass/fail executions |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `fixture_isolation` | 3 | 10 | 5 | 10 | 5 pairs / 10 copies | 3 | 38/0 |
+| `bin:voteboat-directory` | 12 | 10 | 5 | 10 | 5 pairs / 10 copies | 3 | 38/0 |
+| `logical_voter_native` | 42 | 10 | 5 | 10 | 5 pairs / 10 copies | 3 | 38/0 |
+
+E1: CPUs 0–3, relative nice +19; E2: E1 + `--test-threads=1`; E3:
+E1 plus three owned CPU burners; E4: two E1 copies together; E5: direct binary
+with default affinity/priority. Absolute constrained nice was 15 (inherited −4).
+The parent port-race reproducer failed 42/42; all five corrected voter pairs
+pass 42/42 per copy. Source commit: `5651d512`; later commits change only CI/
+documentation/evidence. Every corrected execution is counted, including the
+extra CPU-contended runs. Full raw outputs and per-execution wall seconds are
+in `validation/reliability/tr1b/checkpoint-5651d512.tar.gz`.
+
+Both enabled push hooks passed root fmt, all four strict Clippy profiles and
+matched fmt/strict Clippy (zero diagnostics). No hang-guard warnings observed
+in these completed executions. TR2 ratchet: not introduced in this slice.
+The remaining all-feature binaries and full-suite final counts are pending;
+this checkpoint does not qualify the complete reliability track.
