@@ -69,7 +69,7 @@ fn duplicate_existing_replaces_old_wait_and_keeps_only_admitted_prefix() {
     let (mut actor, _sender) = ready_actor_clients::<false>(crate::Envelopes::UpstreamDefault, 1);
     let old_id = operation(u128::MAX);
     let (old, mut old_waits) = request(&[old_id]);
-    let mut proposals = Vec::new();
+    let mut proposals = staging(&actor);
     actor.include(old, &mut proposals).unwrap();
     let prefix = operation(1 << 100);
     let tail = operation(17);
@@ -84,7 +84,7 @@ fn duplicate_existing_replaces_old_wait_and_keeps_only_admitted_prefix() {
     canceled(&mut old_waits[0]);
     canceled(&mut waits[2]);
     assert_eq!(
-        proposals.iter().map(|p| p.operation).collect::<Vec<_>>(),
+        proposals.iter().map(|(id, _)| id).collect::<Vec<_>>(),
         [old_id, prefix]
     );
     assert_eq!(actor.pending.len(), 2);
@@ -99,7 +99,7 @@ fn duplicate_within_batch_replaces_first_wait_and_cancels_unvisited_tail() {
     let (mut actor, _sender) = ready_actor_clients::<false>(crate::Envelopes::UpstreamDefault, 1);
     let id = operation(1 << 127);
     let (duplicate, mut waits) = request(&[id, id, operation(9)]);
-    let mut proposals = Vec::new();
+    let mut proposals = staging(&actor);
     assert_eq!(
         actor
             .include(duplicate, &mut proposals)
@@ -109,8 +109,7 @@ fn duplicate_within_batch_replaces_first_wait_and_cancels_unvisited_tail() {
     );
     canceled(&mut waits[0]);
     canceled(&mut waits[2]);
-    assert_eq!(proposals.len(), 1);
-    assert_eq!(proposals[0].operation, id);
+    assert_eq!(proposals.iter().map(|(id, _)| id).collect::<Vec<_>>(), [id]);
     assert_eq!(actor.pending.len(), 1);
     actor.deliver(vec![id]).unwrap();
     assert_eq!(waits[1].try_recv().unwrap(), id);
@@ -127,14 +126,18 @@ fn checked_budget(clients: usize) {
         ready_actor_clients::<false>(crate::Envelopes::UpstreamDefault, clients);
     let bound = clients * 4 + 1;
     let ids: Vec<_> = (1..=bound).map(|n| operation((n as u128) << 64)).collect();
-    let mut proposals = Vec::new();
+    // One staged batch per proposal-sized chunk, as the actor submits them.
+    let mut staged = Vec::new();
     let mut admitted_waits = Vec::new();
     for chunk in ids.chunks(actor.parts.core.batch_limits().max_proposal_entries) {
         let (next, waits) = request(chunk);
-        actor.include(next, &mut proposals).unwrap();
+        let mut batch = staging(&actor);
+        actor.include(next, &mut batch).unwrap();
+        staged.push(batch);
         admitted_waits.extend(waits);
     }
     assert_eq!(actor.pending.len(), bound);
+    let mut proposals = staging(&actor);
     let (over, mut over_waits) = request(&[ids[0]]);
     assert_eq!(
         actor.include(over, &mut proposals).unwrap_err().to_string(),
@@ -152,8 +155,12 @@ fn checked_budget(clients: usize) {
     );
     canceled(&mut malformed_waits[0]);
     assert_eq!(actor.pending.len(), bound);
+    assert!(proposals.is_empty());
     assert_eq!(
-        proposals.iter().map(|p| p.operation).collect::<Vec<_>>(),
+        staged
+            .iter()
+            .flat_map(|batch| batch.iter().map(|(id, _)| id))
+            .collect::<Vec<_>>(),
         ids
     );
     actor.deliver(ids.iter().rev().copied().collect()).unwrap();
@@ -173,7 +180,7 @@ fn dropped_client_and_missing_result_stop_delivery_in_input_order() {
     let (mut actor, _sender) = ready_actor_clients::<false>(crate::Envelopes::UpstreamDefault, 1);
     let ids = [operation(1 << 110), operation(3), operation(u128::MAX)];
     let (next, mut waits) = request(&ids);
-    actor.include(next, &mut Vec::new()).unwrap();
+    actor.include(next, &mut staging(&actor)).unwrap();
     drop(waits.remove(1));
     assert_eq!(
         actor.deliver(ids.to_vec()).unwrap_err().to_string(),
@@ -201,7 +208,7 @@ fn dropped_client_and_missing_result_stop_delivery_in_input_order() {
 fn actor_drop_cancels_all_admitted_and_deferred_original_waits() {
     let (mut actor, _sender) = ready_actor_clients::<false>(crate::Envelopes::UpstreamDefault, 1);
     let (next, mut waits) = request(&[operation(1 << 127), operation(17)]);
-    actor.include(next, &mut Vec::new()).unwrap();
+    actor.include(next, &mut staging(&actor)).unwrap();
     let (deferred, deferred_waits) = request(&[operation(1 << 65)]);
     actor.deferred = Some(deferred);
     waits.extend(deferred_waits);
@@ -223,7 +230,7 @@ fn bounded_churn_preserves_receipts_and_reuses_retained_capacity() {
             .map(|n| operation((round << 96) | (n << 64) | 1))
             .collect();
         let (next, waits) = request(&ids);
-        actor.include(next, &mut Vec::new()).unwrap();
+        actor.include(next, &mut staging(&actor)).unwrap();
         assert_eq!(actor.pending.len(), 5);
         high_water = high_water.max(actor.pending.capacity());
         actor.deliver(ids.iter().rev().copied().collect()).unwrap();
@@ -251,7 +258,7 @@ fn checked_partial_rotation(clients: usize) {
     let mut waits = Vec::new();
     for chunk in initial_ids.chunks(actor.parts.core.batch_limits().max_proposal_entries) {
         let (first, next_waits) = request(chunk);
-        actor.include(first, &mut Vec::new()).unwrap();
+        actor.include(first, &mut staging(&actor)).unwrap();
         waits.extend(next_waits);
     }
     let mut active: VecDeque<_> = initial_ids.into_iter().zip(waits).collect();
@@ -265,7 +272,7 @@ fn checked_partial_rotation(clients: usize) {
         minimum_capacity = minimum_capacity.min(actor.pending.capacity());
         let next_id = operation(((round as u128) << 64) | (1 << 127) | 1);
         let (next, mut waits) = request(&[next_id]);
-        actor.include(next, &mut Vec::new()).unwrap();
+        actor.include(next, &mut staging(&actor)).unwrap();
         active.push_back((next_id, waits.pop().unwrap()));
         assert_eq!(actor.pending.len(), bound);
         high_water = high_water.max(actor.pending.capacity());

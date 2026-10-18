@@ -7,6 +7,7 @@ use crate::quorum::{Limits, Policy, Tree};
 #[path = "tests/batch_limits.rs"]
 mod batch_limit_tests;
 mod compact;
+mod entries;
 mod incoming;
 
 fn node(value: u64) -> NodeId {
@@ -19,6 +20,9 @@ fn proposal(value: u128) -> Proposal {
     }
 }
 fn leader() -> Raft {
+    leader_at(1)
+}
+fn leader_at(term: u64) -> Raft {
     let stores: BTreeMap<_, _> = (1..=3)
         .map(|n| {
             (
@@ -58,7 +62,7 @@ fn leader() -> Raft {
         group: bootstrap.group,
         expected_revision: states[&bootstrap.group].revision,
         hard_state: HardState {
-            term: 1,
+            term,
             voted_for: None,
         },
         commit_index: 1,

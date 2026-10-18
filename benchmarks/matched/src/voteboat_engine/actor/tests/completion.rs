@@ -18,11 +18,9 @@ fn commit_update<const TRACE: bool>(
         });
         waits.push(wait);
     }
-    let mut proposals = Vec::new();
-    actor
-        .include(Request { originals }, &mut proposals)
-        .unwrap();
-    let mut initial = actor.parts.core.propose_batch(proposals).unwrap();
+    let mut batch = staging(actor);
+    actor.include(Request { originals }, &mut batch).unwrap();
+    let mut initial = actor.parts.core.propose_entries(batch).unwrap();
     assert_eq!(initial.len(), 1);
     let Effect::PersistVolatile(append) = initial.remove(0) else {
         panic!("proposal must first persist its entries");

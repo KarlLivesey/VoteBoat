@@ -199,39 +199,36 @@ impl<const TRACE: bool> Actor<TRACE> {
     }
     fn requests(&mut self, first: Request) -> Result<(), Failure> {
         let started = Recorder::<TRACE>::start();
-        let proposals = self.collect(first);
+        let batch = self.collect(first);
         self.attribution.finish(
             Phase::HostAdmission,
             started,
-            proposals.is_err(),
-            proposals.as_ref().map_or(0, Vec::len),
+            batch.is_err(),
+            batch.as_ref().map_or(0, ProposalBatch::len),
         );
-        let mut proposals = proposals?;
-        let width = proposals.len();
+        let batch = batch?;
+        let width = batch.len();
         let started = Recorder::<TRACE>::start();
-        let result = if width == 1 {
-            let proposal = proposals.pop().unwrap();
-            self.parts.core.step(Event::Propose {
-                operation: proposal.operation,
-                bytes: proposal.bytes,
-            })
-        } else {
-            self.parts.core.propose_batch(proposals)
-        };
+        let result = self.parts.core.propose_entries(batch);
         self.attribution
             .finish(Phase::Core, started, result.is_err(), width);
         let effects = result.map_err(debug_error)?;
         self.parts.stats[self.parts.slot].record_proposals(width)?;
         self.effects(effects)
     }
-    fn collect(&mut self, first: Request) -> Result<Vec<Proposal>, Failure> {
+    fn collect(&mut self, first: Request) -> Result<ProposalBatch, Failure> {
         let capacity = self.parts.core.batch_limits().max_proposal_entries;
-        let mut proposals = Vec::with_capacity(first.originals.len());
-        self.include(first, &mut proposals)?;
-        while proposals.len() < capacity && self.parts.peer_receiver.is_empty() {
+        // An oversized request still reaches the shape check in `include`.
+        let mut batch = self
+            .parts
+            .core
+            .proposal_batch(first.originals.len().min(capacity))
+            .map_err(debug_error)?;
+        self.include(first, &mut batch)?;
+        while batch.len() < capacity && self.parts.peer_receiver.is_empty() {
             match self.parts.receiver.try_recv() {
-                Ok(request) if proposals.len() + request.originals.len() <= capacity => {
-                    self.include(request, &mut proposals)?;
+                Ok(request) if batch.len() + request.originals.len() <= capacity => {
+                    self.include(request, &mut batch)?;
                 }
                 Ok(request) => {
                     self.deferred = Some(request);
@@ -243,10 +240,10 @@ impl<const TRACE: bool> Actor<TRACE> {
                 }
             }
         }
-        self.reserve(size_of::<Vec<Proposal>>() + proposals.capacity() * size_of::<Proposal>())?;
-        Ok(proposals)
+        self.reserve(batch.retained_bytes())?;
+        Ok(batch)
     }
-    fn include(&mut self, request: Request, proposals: &mut Vec<Proposal>) -> Result<(), Failure> {
+    fn include(&mut self, request: Request, batch: &mut ProposalBatch) -> Result<(), Failure> {
         if request.originals.is_empty()
             || request.originals.len() > self.parts.core.batch_limits().max_proposal_entries
         {
@@ -264,7 +261,7 @@ impl<const TRACE: bool> Actor<TRACE> {
             if self.pending.insert(operation, reply).is_some() {
                 return Err("duplicate original admission".into());
             }
-            proposals.push(Proposal { operation, bytes });
+            batch.push(operation, bytes).map_err(debug_error)?;
         }
         Ok(())
     }

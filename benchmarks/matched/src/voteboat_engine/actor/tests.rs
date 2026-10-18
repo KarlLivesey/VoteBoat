@@ -6,6 +6,10 @@ mod completion;
 mod originals;
 mod replies;
 
+fn staging<const TRACE: bool>(actor: &Actor<TRACE>) -> ProposalBatch {
+    actor.parts.core.proposal_batch(0).unwrap()
+}
+
 fn ready_actor<const TRACE: bool>(
     envelopes: crate::Envelopes,
 ) -> (Actor<TRACE>, mpsc::Sender<Request>) {

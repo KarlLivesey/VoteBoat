@@ -59,24 +59,28 @@
     },
     {
       "design_id": "C03/C04/C10",
-      "public_contract": "raft::BatchLimits / Raft::configure_batch_limits / Raft::batch_limits / Raft::propose_batch",
+      "public_contract": "raft::BatchLimits / Raft::configure_batch_limits / Raft::batch_limits / Raft::propose_batch / raft::ProposalBatch / Raft::proposal_batch / Raft::propose_entries",
       "operations": [
         "validate",
         "configure_batch_limits",
         "batch_limits",
-        "propose_batch"
+        "propose_batch",
+        "proposal_batch",
+        "push",
+        "propose_entries"
       ],
       "native": "Deterministic Core count envelopes, with original LogStore/worker/transport/application ownership and provider byte budgets.",
       "conformance": [
         "src/raft/proposals/tests/batch_limits.rs",
         "src/raft/proposals/tests/batch_limits/aggregate.rs",
+        "src/raft/proposals/tests/entries.rs",
         "tests/log_store/batch_limits/aggregate.rs",
         "src/raft/request_window_tests.rs",
         "src/runtime/ready_batch/tests/routine.rs",
         "tests/log_store/batch_limits.rs",
         "benchmarks/matched/src/voteboat_engine.rs"
       ],
-      "scope": "Startup-only per-Core proposal/outbound ceilings, defaults64/64, hard maxima16384/1024. Count is independent of allocated staging and retained-history byte/entry limits; native defaults remain unchanged. First event locks settings; verified recovery starts at defaults and host reapplies its configuration. Fixed ordinary receive cap1024 permits asymmetric outbound batching; existing byte, identity, term, configuration and exact ticket checks remain. Repair RPCs retain64 independently. Every original retains its ordered position/result; larger-than-outbound proposal batches use durable chunked replication rather than early Written sends. Runtime visit/control/byte/output limits remain authoritative. Linux exact-original, short-tail, bounded-input, stale-completion, low-limit repair and actual modeled WAL publication cuts pass; paired capacity and Mac qualification remain separate. Slice455 retains raw Proposal Vec role/count/capacity/index/length/staging checks, then bounds source-plus-shared conversion peak before capture. The additional peak refusal is pre-admission; legacy singleton has no new batch ceiling. Original count envelopes, ordered outcomes and existing defaults remain."
+      "scope": "Startup-only per-Core proposal/outbound ceilings, defaults64/64, hard maxima16384/1024. Count is independent of allocated staging and retained-history byte/entry limits; native defaults remain unchanged. First event locks settings; verified recovery starts at defaults and host reapplies its configuration. Fixed ordinary receive cap1024 permits asymmetric outbound batching; existing byte, identity, term, configuration and exact ticket checks remain. Repair RPCs retain64 independently. Every original retains its ordered position/result; larger-than-outbound proposal batches use durable chunked replication rather than early Written sends. Runtime visit/control/byte/output limits remain authoritative. Linux exact-original, short-tail, bounded-input, stale-completion, low-limit repair and actual modeled WAL publication cuts pass; paired capacity and Mac qualification remain separate. Slice455 retains raw Proposal Vec role/count/capacity/index/length/staging checks, then bounds source-plus-shared conversion peak before capture. The additional peak refusal is pre-admission; legacy singleton has no new batch ceiling. Original count envelopes, ordered outcomes and existing defaults remain. V3a adds ProposalBatch, built as final command entries by push under the creating Core's count, command-length and simultaneous staging-peak bounds (a single entry keeps the singleton ceiling); propose_entries rechecks count, allocated capacity, retained entries, largest command and recorded peak against the receiving Core's own limits and stamps that Core's next index and current term in place. The builder's limits are an allocation guard, never admission authority; propose_batch and Event::Propose are unchanged."
     },
     {
       "design_id": "C10/C15",

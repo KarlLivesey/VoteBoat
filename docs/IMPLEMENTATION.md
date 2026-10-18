@@ -40,9 +40,10 @@ implemented or benchmarked; unsafe variants are not offered as options.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| In progress V1: core-canonical volatile log | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
-| Next V2: scalar commit-advance plan and smaller `Pending` | Commit-only rounds (~2.3 per singleton original) still build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices | V1 measured | Same twin tests; singleton framework pairs | T4 |
-| Following V3: chunked canonical log with shared immutable batches | The batch V1 moves into pending becomes a shared chunk, removing the remaining two in-process per-peer clones | V1, V2 measured | Framework pairs on both cells; compaction/snapshot suites | T4 |
+| Merged V1: core-canonical volatile log (PR 1, main 041fc3fb) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
+| In review V2: scalar commit-advance plan and smaller `Pending` (PR 3) | Commit-only rounds (~2.3 per singleton original) still build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices | V1 measured | Same twin tests; singleton framework pairs | T4 |
+| In progress V3a: direct entry staging | Proposals are built twice: the host stages a `Vec<Proposal>` and `propose_batch` scans it twice and collects a second `Vec<LogEntry>` (3.3% of bulk process CPU, plus the host's staging Vec). A bounded `ProposalBatch` builder creates final-shaped entries once and does its budget accounting while inserting; `Raft::propose_entries` stamps index/term in place and hands the same Vec to the existing planner | V1 (design: `target/claude/research-r1/architect-plan-pr3x.md` §§1, 2.2, 3.1, 3.12) | Builder/legacy equivalence at widths 1/2/max, cross-core and old-term builders, failed-push and drop cleanup, allocation-survival and legacy-boundary tests; harness collection on the builder with unchanged receipt/attribution counts; fmt + strict Clippy (four configurations and the matched workspace); runner pairs on both framework cells (pending) | T4 |
+| Following V3b: shared frozen batches with validation reuse | The batch V3a stages becomes a shared immutable batch carried by Append, pending and a chunked canonical log, with sealed intrinsic facts reused by planning, fanout, ingress costing and install, removing the per-peer clones and repeated entry walks | V3a measured, V2 | Framework pairs on both cells; byte goldens; compaction/snapshot and native suites | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
 | Done C15: batched admission uses the pending bound | Same fast path for ready batches | C14 | Linux/Mac pairs; suites | T4 |
 | Done C14: proposal validation from a pending bound | Admission no longer scans every pending command when the count already settles it | — | Linux/Mac pairs; unit test; suites | T4 |
@@ -68,6 +69,134 @@ implemented or benchmarked; unsafe variants are not offered as options.
 Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider than
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
+
+#### V3a implemented: direct entry staging (measurement pending (runner))
+
+Design: `target/claude/research-r1/architect-plan-pr3x.md` §§1, 2.2 (3x-A).
+Base: main 041fc3fb (PR 1 merged); PR base main. Written against PR 1 head
+84bd1804 and reapplied unchanged on main. V2 (PR 3, `cpu/scalar-commit`) is
+separate and not composed here; this slice touches only the re-export line of
+`src/raft.rs`. Implemented evidence only; the runner's paired measurements
+have not been taken.
+
+Shape: `raft::ProposalBatch` (`src/raft/proposals/batch.rs`) with
+`Raft::proposal_batch(capacity)`, `push(operation, bytes)`, `len`,
+`is_empty`, `iter` (read-only `(OperationId, &[u8])`, in order) and
+`retained_bytes`, plus `Raft::propose_entries(batch)`, as planned below. The
+push computes everything alive at once before the payload copy: the entry
+allocation (old and new buffers while growing), staged shared bytes, the
+incoming Vec capacity and its shared copy. Growth doubles from the current
+capacity, capped at the count limit and, for a multi-entry batch, clamped so
+that peak fits `max_batch_bytes`; a push that cannot fit even one more slot is
+refused. `propose_entries` checks, in order: `begin_step` (fence, pending
+dependency), role/transfer, count and allocated capacity, retained entries
+(two or more), checked index range, largest command, recorded peak (two or
+more); then it stamps index/term in place and calls the unchanged
+`persist_proposal_entries`. A width-1 batch differs from `Event::Propose` only
+when the index range and the command length both fail (index first here), or
+when another core's builder allocated more than this core's proposal count
+ceiling (refused here; `Event::Propose` has no count check).
+`propose_batch`, `Event::Propose`, their checks and tests are unchanged.
+
+Deviations from the design's §2.2 sketch: `retained_bytes` returns `usize`,
+not `Option<usize>`, because every term is already bounded by checked
+arithmetic in `push` (capacity ≤ the count ceiling, shared bytes ≤ a checked
+peak), so it cannot overflow; `iter` is an addition, read-only, so the harness
+tests can inspect staged originals without mutable or entry access.
+
+Harness: `Actor::collect` creates `proposal_batch(min(first width, original
+ceiling))` (an oversized request still reaches the old shape error), keeps the
+merge loop, peer-queue condition, deferral and reply insert order, pushes each
+original after its reply insert, reserves `retained_bytes()` and submits every
+width through `propose_entries`; the width-1 `Event::Propose` branch is gone.
+Payload conversion moves from `Phase::Core` into `Phase::HostAdmission`
+(empty in the scored workload). Persist and send counts per original are
+unchanged: one persistence request per collected batch, as before. OpenRaft is
+untouched; at the equivalent point its client builds a `Vec<ClientRequest>`
+for `client_write_many` and its core builds each `Entry` once. `EmptyEnvelope`
+and the selected `LogLimits` are unchanged; the builder's peak for a full
+envelope is smaller than the legacy Proposal-plus-entry charge it sizes.
+
+Tests: `src/raft/proposals/tests/entries.rs` — legacy equivalence at widths
+1 (`Event::Propose`), 2 and 64 (effects, entries, completion effects, state,
+summary, retained bytes); the same fence/dependency/role/transfer guards and
+empty refusal; cross-core rechecks of command length (single and multi),
+count, allocated capacity, retained entries and exact peak boundary; an
+older-term/index builder stamped with the current term and next index; a
+refused push keeps earlier entries and accounting, a dropped batch leaves no
+pending state; the single-entry ceiling versus the multi-entry peak and its
+exact boundary; clamped growth (4 → 7, then refusal) and doubling to 64; the
+builder allocation is the persisted suffix; the legacy peak boundary
+unchanged. `src/raft/volatile_tests.rs`:
+`entry_batches_reach_the_volatile_plan_in_their_own_allocation` (tight buffer
+reaches `Pending` by pointer; spare capacity normalized as before). Harness:
+`width_one_staged_submission_matches_the_old_propose_event`; collection,
+reply and completion tests now stage a `ProposalBatch` (staged contents read
+through `iter`). `docs/component-contracts.json` lists the new operations.
+
+Checks run on the builder's loaded machine (18 October 2026, load 37–114),
+on main 041fc3fb plus this slice: `cargo +stable fmt --all -- --check`, the
+matched workspace's fmt check, strict Clippy with default features, all
+features, no default features and native only, and the matched workspace's
+all-target Clippy (the tracked pre-push hook), all zero diagnostics. Suites,
+run sequentially: default features `cargo +stable test --locked --offline`
+passed (126 test targets including doc-tests, 2,454 tests, 0 failed, 0
+ignored; `representative_relay_model` alone took 4,914 s). The all-feature,
+no-default-feature and matched-workspace suites were still running when this
+slice was first published; their results follow in a later commit.
+
+#### V3a schema plan: direct entry staging (planned)
+
+Design: `target/claude/research-r1/architect-plan-pr3x.md` §1 "Finite split"
+and §2.2 (3x-A only). Planned work, not evidence.
+
+Data/API shape. `raft::ProposalBatch` (re-exported beside `Proposal`) owns a
+private `Vec<LogEntry>` whose entries already hold their final
+`EntryPayload::Command { operation, bytes: CommandBytes }` with placeholder
+index and term zero, a copy of the creating core's `max_proposal_entries`,
+`max_command_bytes` and `max_batch_bytes`, the shared payload charge, the
+largest command length and the recorded staging peak. No `Clone`, no mutable
+or caller-indexed entry access, no public constructor besides
+`Raft::proposal_batch(&self, capacity)`. `push(operation, bytes)` inserts one
+original; `len`, `is_empty` and `retained_bytes` (Vec header + allocated entry
+capacity + shared payload charge) are read-only. `Raft::propose_entries(batch)`
+admits it; `propose_batch` and `Event::Propose` are unchanged.
+
+State transitions. Builder: empty → n entries by `push`; a refused push
+leaves the earlier entries and accounting unchanged and drops its argument.
+Before converting a payload it checks count, command length, growth and the
+simultaneous peak (entry allocation(s), existing shared payloads, the incoming
+raw Vec capacity and the prospective shared allocation), with checked
+arithmetic. Growth is capped doubling through `reserve_exact`, clamped to the
+proposal count and, once the batch is multi-entry, to the byte budget. The
+first entry follows the legacy single-proposal ceiling (command length only);
+the second and later pushes require every recorded peak ≤ `max_batch_bytes`.
+Core: `propose_entries` runs `begin_step`, the proposal role/transfer checks,
+then against the receiving core's own limits: nonempty count and capacity ≤
+`max_proposal_entries`; for two or more entries the retained-entry budget, the
+recorded peak ≤ `max_batch_bytes`; largest command ≤ `max_command_bytes`;
+checked first/last index. It then writes `index = first + offset` and the
+current hard term into each entry in place and passes the same Vec to
+`persist_proposal_entries` (owned planning in volatile mode, the existing copy
+in durable mode). The builder's snapshot is an allocation guard, never
+admission authority: a builder from another or older core is rechecked and
+stamped with this core's term and next index.
+
+Ownership and cleanup. The host owns the builder until `propose_entries`; the
+core then owns the Vec through the existing `Pending`. A dropped builder,
+partial collection or refused admission leaves no pending plan and releases
+its allocations by ordinary drop.
+
+Harness. `Actor::collect` builds a `ProposalBatch` with the same merge loop,
+peer-queue condition, original ceiling, deferral rule and pending reply insert
+order, reserves `retained_bytes()` (the actual owned input) and submits every
+width through `propose_entries`. The OpenRaft adapter is untouched; at the
+equivalent point its client hands `ClientRequest`s to `client_write_many` and
+its core builds each `Entry` once.
+
+Acceptance: §3.1 and §3.12 tests; legacy proposal tests unchanged; four strict
+Clippy configurations, fmt, and the matched workspace fmt/Clippy at zero
+diagnostics; default, all-feature, no-default-feature and matched suites.
 
 #### V1 implemented: core-canonical volatile log (measurement pending (runner))
 

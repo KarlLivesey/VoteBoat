@@ -38,7 +38,7 @@ use admitted_replication::{AdmittedRange, EmptyAppendAlias};
 mod log_staging;
 mod progress_broadcast;
 mod proposals;
-pub use proposals::{Proposal, MAX_PROPOSAL_BATCH_ENTRIES};
+pub use proposals::{Proposal, ProposalBatch, MAX_PROPOSAL_BATCH_ENTRIES};
 mod readiness;
 mod receive;
 mod send_window;

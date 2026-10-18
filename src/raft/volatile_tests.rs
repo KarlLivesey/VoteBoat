@@ -287,3 +287,30 @@ fn volatile_plan_moves_the_input_suffix_allocation() {
     assert!(matches!(&effects[..], [Effect::Persist(_)]));
     assert_ne!(planned, input);
 }
+
+#[test]
+fn entry_batches_reach_the_volatile_plan_in_their_own_allocation() {
+    // A tight builder's buffer is the planned suffix: no proposal-to-entry
+    // collect and no copy. A spare-capacity buffer is normalized as before.
+    for (capacity, width) in [(4, 4), (8, 3)] {
+        let (mut core, log) = volatile();
+        let mut batch = core.proposal_batch(capacity).unwrap();
+        for n in 0..width {
+            batch
+                .push(OperationId::new(200 + n as u128).unwrap(), vec![n as u8; n])
+                .unwrap();
+        }
+        let (input, allocated) = batch.allocation();
+        assert_eq!(allocated, capacity);
+        let persist = token(&core.propose_entries(batch).unwrap());
+        let suffix = &core.pending.as_ref().unwrap().next.update().suffix;
+        let entries = &suffix.as_ref().unwrap().entries;
+        assert_eq!(entries.len(), width);
+        assert_eq!(entries.capacity(), width);
+        if capacity == width {
+            assert_eq!(entries.as_ptr(), input);
+        }
+        persist_volatile(&mut core, &log, persist).unwrap();
+        assert_eq!(core.state().last_index(), 1 + width as u64);
+    }
+}
