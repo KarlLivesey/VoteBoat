@@ -36993,3 +36993,29 @@ affinity observations and exact per-run times are in
 `final-policy-focused-proof.tar.gz`, with machine-readable counts in
 `final-policy-focused-summary.json`. Failed earlier clock environments remain
 blockers for TR3/TR4/TR6. Final full suites are still running on corrected inputs.
+
+### TR1b CI budget correction (schema before editing)
+
+The completed baseline takes6,716s (112minutes), already beyond each
+new90-minute configuration budget. Chaining makes later configurations run,
+but does not itself prevent a known premature cut-off within one configuration.
+For M1 visibility, allow360minutes per test job, the GitHub default, retaining
+the sequential chain and failure status. This adjusts the workflow guard only;
+no test deadline, assertion, feature selection or library guarantee changes.
+Runner ownership/cleanup and cancellation stay with GitHub. Acceptance: assert
+all three budgets in parsed YAML, keep all three exact no-fail-fast commands,
+and execute the three scripts with an injected failure at every position.
+The actual hosted six-hour limit still bounds execution, so this is evidence-
+based headroom, not a claim that arbitrary hardware completes within a bound.
+See [GitHub workflow timeout semantics](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idtimeout-minutes).
+
+CI budget correction implemented: all three test jobs now allow360minutes.
+Parsed YAML verifies budgets, exact no-fail-fast commands, matrix isolation,
+sequential needs and failure-tolerant conditions. All three extracted scripts
+execute for each injected exit101 position and the all-success case, exercising
+both RUNNER_OS shell branches on Linux. Every injected status stays101; no
+continue-on-error is used. Raw outcomes are in `ci-budget-check.json`. This is
+not a macOS run or GitHub timeout-engine simulation. Current corrected-source
+default suite has passed beyond activation-driver's root learners failure and
+four poison cascades (14pass/5fail), reaching exhaustive relay enumeration.
+These files remain owned by the independent R1 builder and untouched here.

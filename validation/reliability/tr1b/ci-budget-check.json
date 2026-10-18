@@ -1,0 +1,162 @@
+[
+  {
+    "runner_environment": "Linux",
+    "injected_failure": "test",
+    "executed": [
+      "test",
+      "test_no_default",
+      "test_native"
+    ],
+    "exits": [
+      101,
+      0,
+      0
+    ],
+    "workflow_red": true,
+    "budgets_minutes": [
+      360,
+      360,
+      360
+    ]
+  },
+  {
+    "runner_environment": "Linux",
+    "injected_failure": "test_no_default",
+    "executed": [
+      "test",
+      "test_no_default",
+      "test_native"
+    ],
+    "exits": [
+      0,
+      101,
+      0
+    ],
+    "workflow_red": true,
+    "budgets_minutes": [
+      360,
+      360,
+      360
+    ]
+  },
+  {
+    "runner_environment": "Linux",
+    "injected_failure": "test_native",
+    "executed": [
+      "test",
+      "test_no_default",
+      "test_native"
+    ],
+    "exits": [
+      0,
+      0,
+      101
+    ],
+    "workflow_red": true,
+    "budgets_minutes": [
+      360,
+      360,
+      360
+    ]
+  },
+  {
+    "runner_environment": "Linux",
+    "injected_failure": "none",
+    "executed": [
+      "test",
+      "test_no_default",
+      "test_native"
+    ],
+    "exits": [
+      0,
+      0,
+      0
+    ],
+    "workflow_red": false,
+    "budgets_minutes": [
+      360,
+      360,
+      360
+    ]
+  },
+  {
+    "runner_environment": "macOS",
+    "injected_failure": "test",
+    "executed": [
+      "test",
+      "test_no_default",
+      "test_native"
+    ],
+    "exits": [
+      101,
+      0,
+      0
+    ],
+    "workflow_red": true,
+    "budgets_minutes": [
+      360,
+      360,
+      360
+    ]
+  },
+  {
+    "runner_environment": "macOS",
+    "injected_failure": "test_no_default",
+    "executed": [
+      "test",
+      "test_no_default",
+      "test_native"
+    ],
+    "exits": [
+      0,
+      101,
+      0
+    ],
+    "workflow_red": true,
+    "budgets_minutes": [
+      360,
+      360,
+      360
+    ]
+  },
+  {
+    "runner_environment": "macOS",
+    "injected_failure": "test_native",
+    "executed": [
+      "test",
+      "test_no_default",
+      "test_native"
+    ],
+    "exits": [
+      0,
+      0,
+      101
+    ],
+    "workflow_red": true,
+    "budgets_minutes": [
+      360,
+      360,
+      360
+    ]
+  },
+  {
+    "runner_environment": "macOS",
+    "injected_failure": "none",
+    "executed": [
+      "test",
+      "test_no_default",
+      "test_native"
+    ],
+    "exits": [
+      0,
+      0,
+      0
+    ],
+    "workflow_red": false,
+    "budgets_minutes": [
+      360,
+      360,
+      360
+    ]
+  }
+]

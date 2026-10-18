@@ -7741,3 +7741,11 @@ all/native38/38 each, striped38/38. Fresh voter E4 five concurrent pairs all
 copies42/42 and E5 three defaults42/42 pass. The E4/E5 selection is explicit,
 not a full matrix or a retry of failed E3. Current-policy raw evidence/counts
 are archived. Earlier clock failures remain blockers; final full suites pending.
+
+CI budget correction: a112-minute measured default baseline exceeds the
+intermediate90-minute per-configuration budget. All three sequential test jobs
+now allow360minutes; test deadlines/assertions stay unchanged. Parsed budgets
+and all three extracted scripts with each injected exit101 pass, for Linux and
+macOS RUNNER_OS branches executed on Linux (`ci-budget-check.json`). Hosted
+execution remains separate. Final default has14pass/5fail in unchanged R1
+driver (learners root plus4poison), continues into exhaustive relay model.
