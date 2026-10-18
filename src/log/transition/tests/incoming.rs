@@ -217,13 +217,14 @@ fn owned_preparation_rejects_stale_predecessor_without_installation() {
     assert_eq!(wrong, before);
 }
 /// Every answer of the scalar plan equals the empty append `plan_owned` builds
-/// for the same commit-only update, including its errors.
+/// for the same commit-only update, including its errors. Returns whether both
+/// plans were valid.
 fn assert_commit_equivalent(
     state: &GroupLog,
     summary: &LogSummary,
     commit: u64,
     limits: LogLimits,
-) {
+) -> bool {
     let view = LogView::new(state);
     let change = LogUpdate {
         hard_state: state.hard_state,
@@ -237,7 +238,7 @@ fn assert_commit_equivalent(
         "commit {commit}"
     );
     let (Ok(owned), Ok(scalar)) = (owned, scalar) else {
-        return;
+        return false;
     };
     assert!(owned.is_append() && !scalar.is_append());
     assert!(scalar.is_commit() && scalar.suffix().is_none());
@@ -299,6 +300,7 @@ fn assert_commit_equivalent(
     expected.revision = LogRevision::new(state.revision.get() + 1).unwrap();
     expected.commit_index = commit;
     assert_eq!(left, expected);
+    true
 }
 #[test]
 fn scalar_commit_plan_matches_the_owned_empty_append() {
@@ -338,4 +340,37 @@ fn scalar_commit_plan_matches_the_owned_empty_append() {
         ..limits
     };
     assert_commit_equivalent(&plain, &LogSummary::from_validated(&plain), 2, invalid);
+}
+/// Configured (learner, joint, final) and checkpointed histories take the same
+/// scalar route; so do a term-zero vote, which fails `follows`, and an exhausted
+/// revision.
+#[test]
+fn scalar_commit_plan_matches_on_configured_and_compacted_logs() {
+    let limits = LogLimits::default();
+    let histories = super::configured::histories();
+    let mut bases = histories.clone();
+    bases.push(super::configured::checkpoint(&histories[1], 3));
+    bases.push(super::configured::checkpoint(&histories[3], 4));
+    bases.push(super::configured::checkpoint(&histories[5], 5));
+    let (mut valid, mut refused) = (0, 0);
+    for base in &bases {
+        let mut zero_vote = base.clone();
+        zero_vote.hard_state.term = 0;
+        zero_vote.hard_state.voted_for = Some(node(1));
+        let mut exhausted = base.clone();
+        exhausted.revision = LogRevision::new(u64::MAX).unwrap();
+        for state in [base, &zero_vote, &exhausted] {
+            let summary = LogSummary::from_validated(state);
+            for commit in 0..=state.last_index() + 1 {
+                if assert_commit_equivalent(state, &summary, commit, limits) {
+                    valid += 1;
+                } else {
+                    refused += 1;
+                }
+            }
+        }
+    }
+    // Each base admits commits from its commit index to its last index; every
+    // term-zero vote and exhausted revision is refused, as `plan_owned` is.
+    assert_eq!((valid, refused), (12, 150));
 }

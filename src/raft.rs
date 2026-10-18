@@ -329,7 +329,10 @@ enum After {
 }
 struct Pending {
     next: OwnedNextLog,
-    // Only a configuration change carries one.
+    // Filled for every full-replacement plan (`next.full()`): configuration
+    // entries, a new ballot over a configured history, truncating suffixes and
+    // snapshot installs. Ordinary appends and scalar commit rounds leave it
+    // `None` and allocate nothing.
     membership: Option<Box<Membership>>,
     ticket: Option<LogTicket>,
     after: After,

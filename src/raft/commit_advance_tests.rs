@@ -302,8 +302,10 @@ fn ballot_entries_or_snapshot_rounds_do_not_take_the_scalar_path() {
 fn pending_and_plan_sizes() {
     // Measured on x86_64 before V2: Pending 1,728 B, OwnedNextLog 912 B,
     // After 144 B. The bounds are the sizes after V2 on the same target.
-    assert_eq!(size_of::<Option<Pending>>(), size_of::<Pending>());
     let pending = size_of::<Pending>();
+    // The core holds `Option<Pending>`. Rust does not guarantee a niche, so
+    // bound it by at most one aligned tag word rather than equality.
+    assert!(size_of::<Option<Pending>>() <= PENDING_BYTES + align_of::<Pending>());
     let plan = size_of::<OwnedNextLog>();
     assert!(
         pending <= PENDING_BYTES && plan <= PLAN_BYTES,
