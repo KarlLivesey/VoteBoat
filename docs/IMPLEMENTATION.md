@@ -36831,3 +36831,15 @@ retained in `failed-proof-5651d512/raw-matrices.tar.gz`. It had 131 passing and
 1 failing all-feature executions (network voter E3 run 3, UDP `AddrInUse`);
 priority resets invalidate the claimed environment, not the observed outcomes.
 Corrected proof starts on the new source; no host service was changed.
+
+Corrected direct matrix at `1ec4a1dc`: isolation passes all 38 executions. The
+first all-feature network-voter E1 run samples nice **15**, affinity **0–3**,
+and fails **1 passed / 3 failed** in 132.92 s, with independent wall-clock
+progress/client/child timeouts (`host.rs:116`, `history.rs:67`, `cluster.rs:177`).
+No port collision or poison cascade occurs. These fixtures still derive
+`MonoTime` from `Instant::elapsed()` and assert real 15 s deadlines; the architect
+assigns that conversion/quiescent pacing to TR3. This is an unresolved hardware-
+dependence defect, not a passing proof. The failed binary is not retried
+unchanged; remaining binary proofs continue independently. Actual host load
+rises above the brief's 30–80 range (roughly 64 at launch, above 140 later);
+no foreign process, host daemon or priority is changed to make tests pass.

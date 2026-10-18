@@ -7678,3 +7678,11 @@ network-voter outer-channel fixture (TCP `:0` had not reserved UDP). The paired
 lease now transfers prebound sockets into the three identical channel fixtures;
 its ownership control passes 3/3. Both stopped matrices remain retained; no host
 daemon or foreign process was changed. Final proof is pending on corrected source.
+
+Corrected TR1b direct launcher at `1ec4a1dc`: isolation passes all 38 executions.
+Network voter first E1 samples nice15/CPUs0–3 and fails 3/4 on independent real-
+time deadlines in host/history/cluster, with no port or poison failure. This
+blocks complete reliability qualification; TR3's planned clock/quiescent pacing
+remains necessary. No unchanged retry or increased bound is used. Actual host
+load exceeded the stated 30–80 range. Remaining binaries are being checked
+independently; complete-track success is not claimed.
