@@ -47,14 +47,14 @@ fn history(protocol: NativePeerProtocol) {
         ChildActivationDriverLimits::default(),
     )
     .unwrap_or_else(|e| panic!("real driver {:?}", e.reason));
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     loop {
         step(&mut driver, &mut bridge, clock);
         if driver.phase() == ChildActivationDriverPhase::Enrolling {
             break;
         }
         assert!(
-            Instant::now() < end,
+            end.within(clock),
             "original child Learners progress: {:?}",
             driver.phase()
         );
@@ -79,7 +79,7 @@ fn history(protocol: NativePeerProtocol) {
     driver.stop_waiting_with_child(&mut bridge).unwrap();
     while !driver.is_drained() {
         step(&mut driver, &mut bridge, clock);
-        assert!(Instant::now() < end, "original administrative cleanup");
+        assert!(end.within(clock), "original administrative cleanup");
     }
     let node = driver
         .try_reclaim()

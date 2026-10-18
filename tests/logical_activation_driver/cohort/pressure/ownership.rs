@@ -61,7 +61,7 @@ pub fn cancellation(
         ReadOutcome::Unavailable(ReadUnavailable::Cancelled)
     ));
     refused(parent);
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(&peers.clock, harness::LIVENESS_MS);
     loop {
         peers.initial(parent, target);
         let inspection = parent.inspect_read(ticket).unwrap();
@@ -76,7 +76,7 @@ pub fn cancellation(
             break;
         }
         assert!(!inspection.terminal(), "actual cancellation never retained");
-        assert!(Instant::now() < end, "original cancellation admission");
+        assert!(end.within(&peers.clock), "original cancellation admission");
     }
     loop {
         peers.initial(parent, target);
@@ -84,7 +84,7 @@ pub fn cancellation(
         if inspection.terminal() && inspection.cancellation().is_none() {
             break;
         }
-        assert!(Instant::now() < end, "original cancellation step");
+        assert!(end.within(&peers.clock), "original cancellation step");
     }
     clear(parent);
     assert!(matches!(

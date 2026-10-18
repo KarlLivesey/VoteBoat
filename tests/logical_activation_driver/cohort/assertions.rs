@@ -64,14 +64,14 @@ pub fn phase(
     target: &mut aliases::Bridge<'_>,
     phase: ChildActivationDriverPhase,
 ) {
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(&peers.clock, harness::LIVENESS_MS);
     loop {
         peers.step(driver, target);
         if driver.phase() == phase && target.is_drained() {
             return;
         }
         assert!(
-            Instant::now() < end,
+            end.within(&peers.clock),
             "original target phase {:?} expected {phase:?}",
             driver.phase()
         );

@@ -150,7 +150,7 @@ fn settle(
     intent: &ChildActivationIntent,
 ) {
     use voteboat::application::StateMachine;
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(&peers.clock, harness::LIVENESS_MS);
     loop {
         peers.initial(parent, target);
         let status = parent.local().applications[&intent.mapping().parent]
@@ -177,6 +177,9 @@ fn settle(
         if parents && child {
             return;
         }
-        assert!(Instant::now() < end, "actual full pressured convergence");
+        assert!(
+            end.within(&peers.clock),
+            "actual full pressured convergence"
+        );
     }
 }

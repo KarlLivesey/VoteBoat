@@ -177,7 +177,7 @@ fn drain(
     clock: &harness::SimClock,
     observed: &mut Observed,
 ) {
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     while !sender.is_drained() {
         let now = progress::round(bridge, clock);
         bridge.advance(now, fixture::budget(4)).unwrap();
@@ -192,7 +192,7 @@ fn drain(
             });
         observed.retain(output);
         assert_ne!(sender.state(), NodeState::RecoveryRequired);
-        assert!(Instant::now() < end, "original requested sender close");
+        assert!(end.within(clock), "original requested sender close");
         std::thread::park_timeout(Duration::from_millis(1));
     }
     assert!(sender.local().persistence.is_drained());

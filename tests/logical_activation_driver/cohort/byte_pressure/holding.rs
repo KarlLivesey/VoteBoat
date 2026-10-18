@@ -92,7 +92,7 @@ fn read(
     let ticket = parent
         .read(groups::mapping(1).parent, ActivationQuery::Business(()))
         .unwrap();
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(&peers.clock, harness::LIVENESS_MS);
     loop {
         peers.initial(parent, target);
         if let Some(output) = parent.poll_read() {
@@ -110,7 +110,7 @@ fn read(
             return output;
         }
         assert!(
-            Instant::now() < end,
+            end.within(&peers.clock),
             "actual original byte-pressure quorum read"
         );
     }

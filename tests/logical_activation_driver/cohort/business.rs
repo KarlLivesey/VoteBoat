@@ -40,7 +40,7 @@ fn read(
     value: i64,
 ) {
     let mut ticket = None;
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(&peers.clock, harness::LIVENESS_MS);
     loop {
         peers.initial(parent, target);
         if ticket.is_none() {
@@ -74,7 +74,7 @@ fn read(
                 other => panic!("actual parent quorum read {other:?}"),
             }
         }
-        assert!(Instant::now() < end, "original parent fresh read");
+        assert!(end.within(&peers.clock), "original parent fresh read");
     }
 }
 fn write(
@@ -88,7 +88,7 @@ fn write(
 ) -> ProposalPosition {
     let mut ticket = None;
     let mut unknown = false;
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(&peers.clock, harness::LIVENESS_MS);
     loop {
         peers.initial(parent, target);
         if ticket.is_none() {
@@ -134,6 +134,6 @@ fn write(
                 other => panic!("actual original parent client {other:?}"),
             }
         }
-        assert!(Instant::now() < end, "original parent business receipt");
+        assert!(end.within(&peers.clock), "original parent business receipt");
     }
 }

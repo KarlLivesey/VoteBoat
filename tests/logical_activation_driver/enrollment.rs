@@ -129,14 +129,14 @@ fn phase(
     clock: &harness::SimClock,
     wanted: ChildActivationDriverPhase,
 ) {
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     loop {
         progress::child_step(driver, bridge, clock, 4);
         if driver.phase() == wanted && bridge.is_drained() {
             return;
         }
         assert!(
-            Instant::now() < end,
+            end.within(clock),
             "actual child phase {:?} expected {:?}",
             driver.phase(),
             wanted
@@ -149,7 +149,7 @@ fn export(
     clock: &harness::SimClock,
 ) -> Snapshot {
     bridge.checkpoint_backing(0).unwrap();
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     loop {
         progress::child_step(driver, bridge, clock, 3);
         if bridge
@@ -166,7 +166,7 @@ fn export(
         {
             break;
         }
-        assert!(Instant::now() < end, "original durable checkpoint anchor");
+        assert!(end.within(clock), "original durable checkpoint anchor");
     }
     let ticket = loop {
         match bridge.export_checkpoint_backing(0) {
@@ -175,7 +175,7 @@ fn export(
             Err(reason) => panic!("original export admission {reason:?}"),
         }
         assert!(
-            Instant::now() < end,
+            end.within(clock),
             "original maintenance before export admission"
         );
     };
@@ -184,7 +184,7 @@ fn export(
         if let Some(output) = bridge.poll_checkpoint_export_backing(0) {
             break output;
         }
-        assert!(Instant::now() < end, "original Node export result");
+        assert!(end.within(clock), "original Node export result");
     };
     assert_eq!(output.ticket(), ticket);
     assert_eq!(
@@ -256,7 +256,7 @@ fn stop_original_readiness<'p>(
     bridge: &mut aliases::Bridge<'_>,
     clock: &harness::SimClock,
 ) -> &'p mut fixture::FacadeNode {
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     loop {
         progress::child_step(&mut driver, bridge, clock, 4);
         let usage = bridge.usage();
@@ -266,7 +266,7 @@ fn stop_original_readiness<'p>(
         {
             break;
         }
-        assert!(Instant::now() < end, "original readiness admission");
+        assert!(end.within(clock), "original readiness admission");
     }
     driver.stop_waiting_with_child(bridge).unwrap();
     progress::child_step(&mut driver, bridge, clock, 0);
@@ -276,7 +276,7 @@ fn stop_original_readiness<'p>(
     while !driver.is_drained() {
         progress::child_step(&mut driver, bridge, clock, 4);
         assert!(
-            Instant::now() < end,
+            end.within(clock),
             "original readiness/cancel dispatch cleanup"
         );
     }

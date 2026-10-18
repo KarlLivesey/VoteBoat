@@ -45,7 +45,7 @@ fn history(protocol: NativePeerProtocol) {
         ChildActivationDriverLimits::default(),
     )
     .unwrap_or_else(|e| panic!("actual driver {:?}", e.reason));
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     loop {
         progress::child_step(&mut driver, &mut bridge, clock, 3);
         // No child work/read is held; the sole attempt is the exact original
@@ -54,7 +54,7 @@ fn history(protocol: NativePeerProtocol) {
         if usage.actions == 0 && usage.child_attempts == 1 {
             break;
         }
-        assert!(Instant::now() < end, "original configuration admission");
+        assert!(end.within(clock), "original configuration admission");
     }
     assert_old(&bridge);
     driver.stop_waiting_with_child(&mut bridge).unwrap();
@@ -66,7 +66,7 @@ fn history(protocol: NativePeerProtocol) {
     assert!(!bridge.is_drained());
     while !driver.is_drained() {
         progress::child_step(&mut driver, &mut bridge, clock, 3);
-        assert!(Instant::now() < end, "actual original dispatch settles");
+        assert!(end.within(clock), "actual original dispatch settles");
     }
     assert_eq!(bridge.usage().child_attempts, 0);
     let node = driver

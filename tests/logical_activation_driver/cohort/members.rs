@@ -14,7 +14,7 @@
 // rights and limitations under the RPL.
 //! Genuine bootstrap files and member Nodes; no configuration or proof seeding.
 use super::*;
-use harness::{FixtureClock, Reservation, SimClock};
+use harness::{FixtureClock, Observed, PortLease, SimClock};
 use std::{
     net::SocketAddr,
     path::PathBuf,
@@ -41,9 +41,9 @@ pub struct Members {
     pub root: PathBuf,
     pub protocol: NativePeerProtocol,
     addresses: Vec<SocketAddr>,
-    // Each address stays bound here until its own node binds it; the
-    // enrolled learner's address is otherwise exposed for the whole workflow.
-    reserved: Vec<Option<Reservation>>,
+    // Owned for the whole test, including the enrolled learner's address
+    // before enrollment.
+    leases: Vec<PortLease>,
 }
 impl Members {
     pub fn new(protocol: NativePeerProtocol, slot: usize, clock: &SimClock) -> Self {
@@ -54,19 +54,16 @@ impl Members {
             NEXT.fetch_add(1, Ordering::Relaxed)
         ));
         std::fs::create_dir(&root).unwrap();
-        let reserved = (0..groups::ids(slot).len())
-            .map(|_| Some(Reservation::ephemeral()))
+        let leases = (0..groups::ids(slot).len())
+            .map(|_| PortLease::acquire(protocol))
             .collect::<Vec<_>>();
-        let addresses = reserved
-            .iter()
-            .map(|r| r.as_ref().unwrap().address())
-            .collect();
+        let addresses = leases.iter().map(PortLease::address).collect();
         let mut host = Self {
             root,
             slot,
             protocol,
             addresses,
-            reserved,
+            leases,
             clock: clock.clone(),
             nodes: Vec::new(),
         };
@@ -156,7 +153,7 @@ impl Members {
     }
     pub fn open(&mut self, id: u64) -> cluster::ChildNode {
         let slot = self.position(id);
-        drop(self.reserved[slot].take());
+        self.leases[slot].handoff();
         let selected = self.config(id);
         let limits = selected.startup.limits;
         let now = self.now();
@@ -219,34 +216,48 @@ impl Members {
         })
     }
     pub fn poll(&mut self) {
-        let now = self.clock.round(harness::nodes_settled(&self.nodes));
+        let now = self.clock.round(Observed::nodes(&self.nodes));
         for n in &mut self.nodes {
             n.poll(now, NodePollBudget::default()).unwrap();
         }
         std::thread::park_timeout(Duration::from_millis(1));
     }
     pub fn wait(&mut self, done: impl Fn(&Self) -> bool) {
-        let end = harness::hang_guard();
+        let end = harness::Wait::new(&self.clock, harness::LIVENESS_MS);
         while !done(self) {
             self.poll();
             assert!(
-                Instant::now() < end,
+                end.within(&self.clock),
                 "actual member progress: {}",
                 self.root.display()
             );
         }
     }
     pub fn finish(mut self) {
+        // Retained records are never removed, so this is the workflow's peak.
+        let retained = retained::group(&self.nodes, self.slot);
+        eprintln!(
+            "336 retained group={} protocol_time={:?} {retained:?}",
+            groups::mapping(self.slot).child.id.get(),
+            self.clock.now(),
+        );
+        assert!(
+            retained.protocol <= retained::PROTOCOL_ACTIONS,
+            "group {} retained {} protocol actions; the lifetime preflight budgets {}",
+            groups::mapping(self.slot).child.id.get(),
+            retained.protocol,
+            retained::PROTOCOL_ACTIONS
+        );
         for n in &mut self.nodes {
             n.begin_shutdown();
         }
         self.wait(|h| h.nodes.iter().all(|n| n.is_drained()));
-        for n in self.nodes.drain(..) {
+        // Rebind each address as soon as its own node has joined: this proves
+        // the node released it, while the lease still owns the port.
+        // Nodes are opened in `groups::ids` order, the same order as leases.
+        for (n, lease) in self.nodes.drain(..).zip(&mut self.leases) {
             super::super::cleanup::join(n);
-        }
-        self.reserved.clear();
-        for address in self.addresses {
-            drop(Reservation::reclaim(address));
+            lease.reclaim();
         }
         std::fs::remove_dir_all(self.root).unwrap();
     }

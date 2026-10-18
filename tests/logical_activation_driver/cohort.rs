@@ -40,6 +40,8 @@ mod preflight;
 mod progress;
 #[path = "cohort/rejection.rs"]
 mod rejection;
+#[path = "cohort/retained.rs"]
+mod retained;
 #[path = "cohort/snapshots.rs"]
 mod snapshots;
 

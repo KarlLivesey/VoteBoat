@@ -127,7 +127,7 @@ fn read(
     expected: ActivationRead<i64>,
 ) -> Output {
     let ticket = node.read(setup::mapping().parent, query).unwrap();
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     loop {
         progress::step(bridge, node, clock, 4);
         if let Some(output) = node.poll_read() {
@@ -143,7 +143,7 @@ fn read(
             }
             return output;
         }
-        assert!(Instant::now() < end, "original selected read progress");
+        assert!(end.within(clock), "original selected read progress");
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }

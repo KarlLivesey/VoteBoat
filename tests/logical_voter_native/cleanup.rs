@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::{cluster::ChildNode, harness};
-use std::time::{Duration, Instant};
+use std::time::Duration;
 pub fn join(node: ChildNode) {
     let mut parts = node
         .into_parts()
@@ -14,7 +14,9 @@ pub fn join(node: ChildNode) {
         .into_dialer()
         .unwrap_or_else(|_| panic!("actual child connector must drain"));
     let mut snapshots = parts.local.snapshots.take().unwrap();
-    let end = harness::hang_guard();
+    // Joining worker threads takes no protocol time, so this wait has only
+    // the real-time hang guard.
+    let end = harness::HangGuard::new();
     let (mut wal, mut snapshot) = (false, false);
     loop {
         let dial = dialer.as_mut().is_none_or(|d| d.try_finish().unwrap());
@@ -27,7 +29,7 @@ pub fn join(node: ChildNode) {
         if dial && wal && snapshot {
             return;
         }
-        assert!(Instant::now() < end, "actual child workers must join");
+        end.check("actual child workers must join");
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }

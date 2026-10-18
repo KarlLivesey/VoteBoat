@@ -16,10 +16,10 @@
 use super::*;
 use aliases::Bridge;
 use fixture::{budget, FacadeNode};
-use harness::{FixtureClock, SimClock};
+use harness::{FixtureClock, Observed, SimClock};
 /// Protocol time for one round over the native nodes this bridge polls.
 pub fn round(bridge: &Bridge<'_>, clock: &SimClock) -> MonoTime {
-    clock.round(harness::bridge_settled(bridge))
+    clock.round(Observed::default().bridge(bridge))
 }
 pub fn step(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: &SimClock, completions: usize) {
     pump(bridge, node, clock, completions);
@@ -40,10 +40,10 @@ pub fn until(
     clock: &SimClock,
     mut done: impl FnMut(&FacadeNode) -> bool,
 ) {
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     while !done(node) {
         step(bridge, node, clock, 4);
-        assert!(Instant::now() < end, "original parent progress");
+        assert!(end.within(clock), "original parent progress");
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }
@@ -68,11 +68,11 @@ pub fn phase(
     clock: &SimClock,
     wanted: ChildActivationDriverPhase,
 ) {
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     while driver.phase() != wanted {
         advance(driver, bridge, clock, 4);
         assert!(
-            Instant::now() < end,
+            end.within(clock),
             "original driver progress {:?}",
             driver.phase()
         );
@@ -85,10 +85,10 @@ pub fn stop<'a>(
     clock: &SimClock,
 ) -> &'a mut FacadeNode {
     driver.stop_waiting().unwrap();
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     while !driver.is_drained() {
         advance(&mut driver, bridge, clock, 4);
-        assert!(Instant::now() < end, "original observer cleanup");
+        assert!(end.within(clock), "original observer cleanup");
     }
     driver
         .try_reclaim()
@@ -124,10 +124,13 @@ pub fn child_step(
     std::thread::park_timeout(Duration::from_millis(1));
 }
 /// Pump until the parent has drained and the bridge reports every child's
-/// accepted lower work settled. A drained parent can leave follower
-/// persistence in flight; the host must keep pumping until it completes.
+/// accepted lower work settled, within the original 15 s bound in protocol
+/// time. A drained parent can leave follower persistence in flight, and the
+/// bridge contract makes the host keep pumping until it completes, so this
+/// checks that both drain within the bound, not that the bridge has already
+/// drained at the instant the parent does.
 pub fn drain(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: &SimClock) {
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     while !(node.is_drained() && bridge.is_drained()) {
         if node.is_drained() {
             let now = round(bridge, clock);
@@ -135,7 +138,7 @@ pub fn drain(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: &SimClock) {
         } else {
             step(bridge, node, clock, 4);
         }
-        assert!(Instant::now() < end, "original parent and bridge drain");
+        assert!(end.within(clock), "original parent and bridge drain");
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }

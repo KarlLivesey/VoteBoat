@@ -15,7 +15,7 @@
 #![cfg(feature = "tls")]
 //! Actual three physical child voters and one logical parent voter. This target
 //! qualifies original parent observation ownership, not membership activation.
-use std::time::{Duration, Instant};
+use std::time::Duration;
 use voteboat::{
     identity::*, logical_voter::*, native::connect::NativePeerProtocol, raft::Role, runtime::*,
 };
@@ -79,4 +79,47 @@ fn serial_history_recovers_after_a_test_panic() {
     let _serial = history_guard();
     assert!(cluster::HISTORY.is_poisoned());
     cluster::HISTORY.clear_poison();
+}
+
+#[test]
+fn port_lease_owns_both_halves_and_refuses_while_the_node_is_absent() {
+    use std::{
+        io::{ErrorKind, Read},
+        net::{TcpListener, TcpStream, UdpSocket},
+    };
+    let mut lease = harness::PortLease::acquire(NativePeerProtocol::TcpTls);
+    let address = lease.address();
+    // An absent node's held listener closes each connection at once.
+    let mut stream = TcpStream::connect(address).unwrap();
+    stream.set_read_timeout(Some(harness::HANG)).unwrap();
+    match stream.read(&mut [0]) {
+        Ok(n) => assert_eq!(n, 0),
+        Err(e) => assert_eq!(e.kind(), ErrorKind::ConnectionReset),
+    }
+    // No other socket or lease can take either half.
+    assert_eq!(
+        TcpListener::bind(address).unwrap_err().kind(),
+        ErrorKind::AddrInUse
+    );
+    assert_eq!(
+        UdpSocket::bind(address).unwrap_err().kind(),
+        ErrorKind::AddrInUse
+    );
+    assert_ne!(
+        harness::PortLease::acquire(NativePeerProtocol::TcpTls).address(),
+        address
+    );
+    // The node binds its own half; the unused half stays with the lease.
+    lease.handoff();
+    let node = TcpListener::bind(address).unwrap();
+    assert_eq!(
+        UdpSocket::bind(address).unwrap_err().kind(),
+        ErrorKind::AddrInUse
+    );
+    drop(node);
+    lease.reclaim();
+    assert_eq!(
+        TcpListener::bind(address).unwrap_err().kind(),
+        ErrorKind::AddrInUse
+    );
 }

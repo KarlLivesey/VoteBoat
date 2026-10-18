@@ -89,14 +89,14 @@ fn wait(
     clock: &harness::SimClock,
     ticket: ClientTicket,
 ) -> Output {
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     loop {
         progress::step(bridge, node, clock, 4);
         if let Some(output) = node.poll_client() {
             assert_eq!(output.ticket(), ticket);
             return output;
         }
-        assert!(Instant::now() < end, "original client outcome");
+        assert!(end.within(clock), "original client outcome");
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }
@@ -203,7 +203,7 @@ fn fresh_status(
             ActivationQuery::Status(intent.operations().begin),
         )
         .unwrap();
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     loop {
         progress::step(bridge, node, clock, 4);
         if let Some(output) = node.poll_read() {
@@ -225,7 +225,7 @@ fn fresh_status(
                 other => panic!("original fresh Status {other:?}"),
             }
         }
-        assert!(Instant::now() < end, "original fresh Status progress");
+        assert!(end.within(clock), "original fresh Status progress");
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }

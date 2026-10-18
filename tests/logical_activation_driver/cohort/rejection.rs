@@ -27,9 +27,10 @@ type NativeParts = voteboat::native::node::NativeNodeParts<
 pub fn prepared(
     mut error: Box<voteboat::native::startup::NativeStartupRejected<LogicalApplication>>,
 ) -> ! {
-    let end = harness::hang_guard();
+    // Rejected-startup cleanup takes no protocol time; real time only guards it.
+    let end = harness::HangGuard::new();
     while !error.try_cleanup().unwrap() {
-        assert!(Instant::now() < end, "original prepared rejection cleanup");
+        end.check("original prepared rejection cleanup");
         std::thread::park_timeout(Duration::from_millis(1));
     }
     panic!("actual original native preparation {:?}", error.reason)
@@ -49,14 +50,14 @@ pub fn parts(mut parts: NativeParts, reason: impl std::fmt::Debug, now: MonoTime
     let mut peers = parts.peers.take().unwrap();
     assert!(peers.roster.is_drained());
     peers.connector.close();
-    let end = harness::hang_guard();
+    let end = harness::HangGuard::new();
     while !peers.connector.is_drained() {
         assert!(peers
             .connector
             .poll(now, ConnectPollBudget::default())
             .unwrap()
             .is_empty());
-        assert!(Instant::now() < end, "original rejected connector drain");
+        end.check("original rejected connector drain");
         std::thread::park_timeout(Duration::from_millis(1));
     }
     let mut dialer = peers
@@ -74,7 +75,7 @@ pub fn parts(mut parts: NativeParts, reason: impl std::fmt::Debug, now: MonoTime
         if wal && image && dialer.as_mut().is_none_or(|d| d.try_finish().unwrap()) {
             break;
         }
-        assert!(Instant::now() < end, "original rejected workers join");
+        end.check("original rejected workers join");
         std::thread::park_timeout(Duration::from_millis(1));
     }
     panic!("actual original native assembly {reason:?}")

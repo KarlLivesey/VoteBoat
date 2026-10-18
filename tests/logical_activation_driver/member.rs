@@ -14,7 +14,7 @@
 // rights and limitations under the RPL.
 //! Genuine bootstrap files and member Nodes; no configuration or proof seeding.
 use super::*;
-use harness::{FixtureClock, Reservation, SimClock};
+use harness::{FixtureClock, Observed, PortLease, SimClock};
 use std::{
     collections::BTreeMap,
     net::SocketAddr,
@@ -41,8 +41,9 @@ pub struct Member {
     pub root: PathBuf,
     pub protocol: NativePeerProtocol,
     addresses: [SocketAddr; 4],
-    // Each address stays bound here until its own node binds it.
-    reserved: [Option<Reservation>; 4],
+    // Owned for the whole test, including the learner's address before it
+    // is enrolled.
+    leases: [PortLease; 4],
 }
 impl Member {
     pub fn new(protocol: NativePeerProtocol) -> Self {
@@ -53,14 +54,13 @@ impl Member {
             NEXT.fetch_add(1, Ordering::Relaxed)
         ));
         std::fs::create_dir(&root).unwrap();
-        let reserved: [Option<Reservation>; 4] =
-            std::array::from_fn(|_| Some(Reservation::ephemeral()));
-        let addresses = reserved.each_ref().map(|r| r.as_ref().unwrap().address());
+        let leases: [PortLease; 4] = std::array::from_fn(|_| PortLease::acquire(protocol));
+        let addresses = leases.each_ref().map(PortLease::address);
         let mut host = Self {
             root,
             protocol,
             addresses,
-            reserved,
+            leases,
             clock: SimClock::default(),
             nodes: Vec::new(),
         };
@@ -135,7 +135,7 @@ impl Member {
         }
     }
     pub fn open(&mut self, id: u64) -> cluster::ChildNode {
-        drop(self.reserved[id as usize - 1].take());
+        self.leases[id as usize - 1].handoff();
         self.config(id)
             .open_with_protocol_and_timers(
                 self.protocol,
@@ -169,18 +169,18 @@ impl Member {
         })
     }
     pub fn poll(&mut self) {
-        let now = self.clock.round(harness::nodes_settled(&self.nodes));
+        let now = self.clock.round(Observed::nodes(&self.nodes));
         for n in &mut self.nodes {
             n.poll(now, NodePollBudget::default()).unwrap();
         }
         std::thread::park_timeout(Duration::from_millis(1));
     }
     pub fn wait(&mut self, done: impl Fn(&Self) -> bool) {
-        let end = harness::hang_guard();
+        let end = harness::Wait::new(&self.clock, harness::LIVENESS_MS);
         while !done(self) {
             self.poll();
             assert!(
-                Instant::now() < end,
+                end.within(&self.clock),
                 "actual member progress: {}",
                 self.root.display()
             );
@@ -191,12 +191,12 @@ impl Member {
             n.begin_shutdown();
         }
         self.wait(|h| h.nodes.iter().all(|n| n.is_drained()));
-        for n in self.nodes.drain(..) {
+        // Rebind each address as soon as its own node has joined: this proves
+        // the node released it, while the lease still owns the port. Nodes
+        // are opened in id order, the same order as leases.
+        for (n, lease) in self.nodes.drain(..).zip(&mut self.leases) {
             cleanup::join(n);
-        }
-        self.reserved = Default::default();
-        for address in self.addresses {
-            drop(Reservation::reclaim(address));
+            lease.reclaim();
         }
         std::fs::remove_dir_all(self.root).unwrap();
     }

@@ -134,14 +134,17 @@ fn wait(
     target: &mut aliases::Bridge<'_>,
     ticket: ClientTicket,
 ) -> Client {
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(&peers.clock, harness::LIVENESS_MS);
     loop {
         peers.initial(parent, target);
         if let Some(output) = parent.poll_client() {
             assert_eq!(output.ticket(), ticket);
             return output;
         }
-        assert!(Instant::now() < end, "actual original byte-pressure client");
+        assert!(
+            end.within(&peers.clock),
+            "actual original byte-pressure client"
+        );
     }
 }
 pub fn applied(output: &Client, operation: OperationId, duplicate: bool) {

@@ -122,7 +122,7 @@ fn settle(
     intent: &ChildActivationIntent,
 ) {
     use voteboat::application::StateMachine;
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(&peers.clock, harness::LIVENESS_MS);
     loop {
         peers.initial(parent, target);
         let status = parent.local().applications[&intent.mapping().parent]
@@ -150,7 +150,7 @@ fn settle(
             return;
         }
         assert!(
-            Instant::now() < end,
+            end.within(&peers.clock),
             "actual terminal parent/child convergence"
         );
     }

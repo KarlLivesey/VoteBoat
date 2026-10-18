@@ -124,7 +124,7 @@ fn export(
     clock: &harness::SimClock,
 ) -> SnapshotExportCompletion {
     bridge.checkpoint_backing(0).unwrap();
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     while !bridge
         .inspect_backing(0, |p| {
             p.owner
@@ -137,14 +137,14 @@ fn export(
         .unwrap()
     {
         progress::step(bridge, node, clock, 4);
-        assert!(Instant::now() < end, "original backing checkpoint");
+        assert!(end.within(clock), "original backing checkpoint");
     }
     let ticket = loop {
         match bridge.export_checkpoint_backing(0) {
             Ok(ticket) => break ticket,
             Err(SnapshotRouteError::Overloaded) => {
                 progress::step(bridge, node, clock, 4);
-                assert!(Instant::now() < end, "original checkpoint ownership drain");
+                assert!(end.within(clock), "original checkpoint ownership drain");
             }
             error => panic!("original export admission {error:?}"),
         }
@@ -155,7 +155,7 @@ fn export(
             assert_eq!(output.ticket(), ticket);
             return output;
         }
-        assert!(Instant::now() < end, "original backing load");
+        assert!(end.within(clock), "original backing load");
     }
 }
 fn candidate() -> LogicalApplication {

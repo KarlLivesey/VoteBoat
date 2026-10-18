@@ -2,10 +2,10 @@
 // Copyright (c) 2026 Karl Livesey
 use super::{
     cluster::Cluster,
-    harness::{self, FixtureClock},
+    harness::{self, FixtureClock, Observed},
     setup, support,
 };
-use std::time::{Duration, Instant};
+use std::time::Duration;
 use voteboat::{identity::OperationId, logical_voter::*, runtime::*};
 impl<C: FixtureClock> Cluster<C> {
     pub fn claim(
@@ -27,7 +27,7 @@ impl<C: FixtureClock> Cluster<C> {
         image
     }
     pub fn read(&mut self, query: LogicalQuery) -> LogicalRead {
-        let end = harness::hang_guard();
+        let end = harness::Wait::new(&self.clock, harness::LIVENESS_MS);
         loop {
             self.wait(|host| host.leader().is_some());
             let slot = self.leader().unwrap();
@@ -53,7 +53,10 @@ impl<C: FixtureClock> Cluster<C> {
                         ReadOutcome::NotRead(_) | ReadOutcome::Unavailable(_) => break,
                     }
                 }
-                assert!(Instant::now() < end, "actual logical quorum read timeout");
+                assert!(
+                    end.within(&self.clock),
+                    "actual logical quorum read timeout"
+                );
             }
         }
     }
@@ -69,10 +72,10 @@ pub fn claim_in(
     bridge.begin_claim(operation).unwrap();
     assert_eq!(bridge.begin_claim(operation), Err(LogicalBridgeError::Busy));
     assert!(bridge.take_image().is_none());
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(&clock, harness::LIVENESS_MS);
     let mut held = false;
     loop {
-        let now = clock.round(harness::bridge_settled(bridge));
+        let now = clock.round(Observed::default().bridge(bridge));
         let usage = bridge
             .advance(
                 now,
@@ -88,7 +91,7 @@ pub fn claim_in(
             for _ in 0..32 {
                 let usage = bridge
                     .advance(
-                        clock.round(harness::bridge_settled(bridge)),
+                        clock.round(Observed::default().bridge(bridge)),
                         LogicalBridgeBudget {
                             node_polls: 3,
                             completions: 0,
@@ -111,7 +114,7 @@ pub fn claim_in(
             assert!(!withhold || held);
             return image;
         }
-        assert!(Instant::now() < end, "actual child claim timeout");
+        assert!(end.within(&clock), "actual child claim timeout");
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }

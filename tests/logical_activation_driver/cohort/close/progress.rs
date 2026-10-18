@@ -24,7 +24,7 @@ pub fn now(clock: &SimClock) -> MonoTime {
 }
 /// Protocol time for one round over the native nodes this bridge polls.
 pub fn round(bridge: &aliases::Bridge<'_>, clock: &SimClock) -> MonoTime {
-    clock.round(harness::bridge_settled(bridge))
+    clock.round(harness::Observed::default().bridge(bridge))
 }
 pub fn quiet_budget() -> LogicalNodePollBudget {
     LogicalNodePollBudget {
@@ -53,7 +53,7 @@ pub fn hold(
     observed: &gate::Observed,
 ) {
     sender.campaign().unwrap();
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     while observed.borrow().accepted != 7 {
         step(
             bridge,
@@ -66,7 +66,7 @@ pub fn hold(
             },
         )
         .unwrap();
-        assert!(Instant::now() < end, "actual authorized seven-byte send");
+        assert!(end.within(clock), "actual authorized seven-byte send");
         std::thread::park_timeout(Duration::from_millis(1));
     }
     assert!(observed.borrow().offered > 7);
@@ -83,7 +83,7 @@ pub fn hold(
         )
         .unwrap();
         assert!(
-            Instant::now() < end,
+            end.within(clock),
             "original lower work must settle before failure"
         );
         std::thread::park_timeout(Duration::from_millis(1));
@@ -127,7 +127,7 @@ pub fn close_peer(
     assert!(peer.local().results.is_drained());
     peer.close_intake().unwrap();
     assert_eq!(peer.state(), NodeState::Quiescing);
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     // A drained parent can leave its bridge's follower persistence in
     // flight; keep pumping until that accepted lower work settles too.
     while !(peer.is_drained() && bridge.is_drained()) {
@@ -137,7 +137,7 @@ pub fn close_peer(
         } else {
             step(bridge, peer, clock, quiet_budget()).unwrap();
         }
-        assert!(Instant::now() < end, "original opposite endpoint close");
+        assert!(end.within(clock), "original opposite endpoint close");
         std::thread::park_timeout(Duration::from_millis(1));
     }
     assert_eq!(peer.state(), NodeState::Drained);
@@ -147,7 +147,7 @@ pub fn fail_running(
     sender: &mut fixture::FacadeNode,
     clock: &SimClock,
 ) {
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     loop {
         assert_eq!(sender.state(), NodeState::Running);
         match step(
@@ -183,7 +183,7 @@ pub fn fail_running(
             }
         }
         assert!(
-            Instant::now() < end,
+            end.within(clock),
             "real opposite close must terminate original send"
         );
         std::thread::park_timeout(Duration::from_millis(1));

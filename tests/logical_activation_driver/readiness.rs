@@ -84,9 +84,9 @@ fn original_step(
     selected: usize,
     ticket: AdmissionTicket,
 ) -> OwnerStep {
-    let end = harness::hang_guard();
+    let end = harness::Wait::new(&host.clock, harness::LIVENESS_MS);
     loop {
-        let now = harness::FixtureClock::round(&host.clock, harness::nodes_settled(&host.nodes));
+        let now = harness::FixtureClock::round(&host.clock, harness::Observed::nodes(&host.nodes));
         let mut observed = None;
         for (i, n) in host.nodes.iter_mut().enumerate() {
             let p = n.poll(now, NodePollBudget::default()).unwrap();
@@ -100,7 +100,7 @@ fn original_step(
             return s;
         }
         assert!(
-            Instant::now() < end,
+            end.within(&host.clock),
             "exact original admission must execute"
         );
         std::thread::park_timeout(Duration::from_millis(1));

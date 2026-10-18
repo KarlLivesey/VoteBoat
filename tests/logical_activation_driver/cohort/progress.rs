@@ -14,7 +14,7 @@
 // rights and limitations under the RPL.
 //! Independent parent backing and target administrative ownership.
 use super::*;
-use harness::{FixtureClock, SimClock};
+use harness::{FixtureClock, Observed, SimClock};
 use voteboat::application::StateMachine;
 pub struct Peers<'a> {
     pub parents: [fixture::FacadeNode; 2],
@@ -27,12 +27,18 @@ impl Peers<'_> {
     pub fn now(&self) -> MonoTime {
         self.clock.now()
     }
-    /// Every round polls all three bridges, so all ten native nodes decide
-    /// whether durable I/O holds protocol time still.
+    /// Every round polls all three bridges and both other parents, so all
+    /// ten native nodes and the parents decide whether time stands still.
     fn tick(&self, target: &aliases::Bridge<'_>) -> MonoTime {
-        let settled =
-            harness::bridge_settled(target) && self.bridges.iter().all(harness::bridge_settled);
-        self.clock.round(settled)
+        let observed = self
+            .bridges
+            .iter()
+            .fold(Observed::default().bridge(target), Observed::bridge);
+        let observed = self
+            .parents
+            .iter()
+            .fold(observed, |o, p| o.local(p.local()));
+        self.clock.round(observed)
     }
     pub fn initial(&mut self, leader: &mut fixture::FacadeNode, target: &mut aliases::Bridge<'_>) {
         let now = self.tick(target);
@@ -98,7 +104,7 @@ impl Peers<'_> {
     }
     pub fn elect(&mut self, leader: &mut fixture::FacadeNode, target: &mut aliases::Bridge<'_>) {
         leader.campaign().unwrap();
-        let end = harness::hang_guard();
+        let end = harness::Wait::new(&self.clock, harness::LIVENESS_MS);
         loop {
             self.initial(leader, target);
             let core = leader.local().owner.core(setup::mapping().parent).unwrap();
@@ -117,7 +123,7 @@ impl Peers<'_> {
                 return;
             }
             assert!(
-                Instant::now() < end,
+                end.within(&self.clock),
                 "actual three-parent current-term election"
             );
         }
