@@ -101,6 +101,15 @@ impl PortLease {
             reservation.sockets.take();
         }
     }
+
+    /// Move probes directly into a connector that accepts already-bound sockets.
+    /// The caller retains this lease through connector shutdown/release checks.
+    pub fn take_sockets(&mut self) -> Vec<(TcpListener, UdpSocket)> {
+        self.held
+            .iter_mut()
+            .map(|r| r.sockets.take().expect("bound socket ownership"))
+            .collect()
+    }
 }
 
 fn bind_pair(port: u16) -> io::Result<(TcpListener, UdpSocket)> {

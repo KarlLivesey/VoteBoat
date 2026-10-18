@@ -44,9 +44,10 @@ fn lease_holds_across_handoff_and_processes() {
     let [address] = lease.addresses();
     assert!(TcpListener::bind(address).is_err());
     assert!(UdpSocket::bind(address).is_err());
-    lease.handoff();
-    let tcp = TcpListener::bind(address).unwrap();
-    let udp = UdpSocket::bind(address).unwrap();
+    let mut sockets = lease.take_sockets();
+    let (tcp, udp) = sockets.pop().unwrap();
+    assert_eq!(tcp.local_addr().unwrap(), address);
+    assert_eq!(udp.local_addr().unwrap(), address);
     let output = Command::new(std::env::current_exe().unwrap())
         .args(["--exact", "lease_child"])
         .env("VOTEBOAT_TEST_LEASE_PARENT", address.port().to_string())

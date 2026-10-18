@@ -34,17 +34,37 @@ cleanup() {
   done
 }
 trap cleanup EXIT
-# The shell only records the inherited absolute nice value, then execs libtest.
+# Exec the test directly: a named shell between nice and exec can be reprioritized
+# by a host policy daemon. Observe only our child, without changing host policy.
 launch() {
   local log=$1 constrained=$2
   shift 2
   if [[ "$constrained" == yes ]]; then
-    taskset -c 0-3 nice -n 19 bash -c 'ps -o ni= -p $$; cat /proc/loadavg; exec "$@"' bash "$@" > "$log" 2>&1 &
+    taskset -c 0-3 nice -n 19 "$@" > "$log" 2>&1 &
   else
     "$@" > "$log" 2>&1 &
   fi
   launched=$!
   children+=("$launched")
+  observe "$launched" "$1" "$log.meta"
+}
+observe() {
+  local pid=$1 expected=$2 metadata=$3 observed= start=$SECONDS actual state
+  expected=$(realpath "$expected")
+  printf 'pid=%s constrained=%s executable=%s\n' "$pid" "$constrained" "$expected" > "$metadata"
+  cat /proc/loadavg >> "$metadata"
+  while [[ -r /proc/$pid/stat ]] && (( SECONDS - start < 5 )); do
+    read -r _ _ state _ < "/proc/$pid/stat" || break
+    if [[ "$state" == Z ]]; then break; fi
+    actual=$(readlink "/proc/$pid/exe" 2>/dev/null || true)
+    if [[ "$actual" == "$expected" ]]; then
+      ps -o pid=,ni=,comm= -p "$pid" >> "$metadata" || true
+      taskset -pc "$pid" >> "$metadata" 2>&1 || true
+      observed=yes
+      break
+    fi
+  done
+  if [[ "$observed" != yes ]]; then echo 'completed before sample, or startup not yet observed' >> "$metadata"; fi
 }
 record() {
   local pid=$1 env=$2 rep=$3 copy=$4 start=$5 status=0

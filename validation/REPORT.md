@@ -7667,3 +7667,14 @@ zero diagnostics through enabled pushes. Remaining proof and final full-suite
 counts are pending. The default full suite has continued beyond an activation-
 driver failure (root learners bridge-usage assertion + two poison cascades);
 those files belong to R1 and are unchanged here.
+
+TR1b environment correction supersedes the previous checkpoint's nice claim:
+`ananicy-cpp` applies Bash's Doc-View nice −4 policy to the intermediary wrapper.
+Recorded values were 11, 15 and −4. The passing outcomes remain evidence, but
+that matrix does not qualify the requested priority environment. The direct
+launcher now has no intermediary Bash and samples its owned executable from the
+parent. The old matrix independently stopped at a new UDP `AddrInUse` in the
+network-voter outer-channel fixture (TCP `:0` had not reserved UDP). The paired
+lease now transfers prebound sockets into the three identical channel fixtures;
+its ownership control passes 3/3. Both stopped matrices remain retained; no host
+daemon or foreign process was changed. Final proof is pending on corrected source.

@@ -28,6 +28,7 @@ pub struct Channels {
     sessions: BTreeMap<(usize, usize), Session>,
     addresses: Vec<SocketAddr>,
     observations: Vec<Observation>,
+    _ports: support::ports::PortLease,
 }
 impl Channels {
     pub fn new(
@@ -36,13 +37,8 @@ impl Channels {
         protocol: NativePeerProtocol,
         now: MonoTime,
     ) -> Self {
-        let held = (0..3)
-            .map(|_| {
-                let tcp = TcpListener::bind("127.0.0.1:0").unwrap();
-                let udp = UdpSocket::bind(tcp.local_addr().unwrap()).unwrap();
-                (tcp, udp)
-            })
-            .collect::<Vec<_>>();
+        let mut ports = support::ports::PortLease::acquire(3);
+        let held = ports.take_sockets();
         let addresses = held
             .iter()
             .map(|(tcp, _)| tcp.local_addr().unwrap())
@@ -57,6 +53,7 @@ impl Channels {
             sessions: BTreeMap::new(),
             addresses,
             observations: Vec::new(),
+            _ports: ports,
         };
         result.establish(descriptors, bindings, now);
         result

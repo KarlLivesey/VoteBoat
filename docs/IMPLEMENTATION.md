@@ -36773,7 +36773,7 @@ configurations still run, their exact statuses are printed, and the step exits
 1; the all-pass control exits 0. This workflow-only refinement does not change
 the test artifacts qualified at `5651d512`.
 
-TR1b qualification checkpoint (18 October 2026):
+TR1b observational checkpoint (18 October 2026; environment qualification superseded below):
 
 | All-feature binary | Tests/run | E1 | E2 | E3 | E4 | E5 | Pass/fail executions |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -36783,7 +36783,8 @@ TR1b qualification checkpoint (18 October 2026):
 
 E1: CPUs 0–3, relative nice +19; E2: E1 + `--test-threads=1`; E3:
 E1 plus three owned CPU burners; E4: two E1 copies together; E5: direct binary
-with default affinity/priority. Absolute constrained nice was 15 (inherited −4).
+with default affinity/priority. Constrained nice samples include 11, 15 and −4;
+the wrapper-based matrix is not an accepted priority-environment proof.
 The parent port-race reproducer failed 42/42; all five corrected voter pairs
 pass 42/42 per copy. Source commit: `5651d512`; later commits change only CI/
 documentation/evidence. Every corrected execution is counted, including the
@@ -36795,3 +36796,38 @@ matched fmt/strict Clippy (zero diagnostics). No hang-guard warnings observed
 in these completed executions. TR2 ratchet: not introduced in this slice.
 The remaining all-feature binaries and full-suite final counts are pending;
 this checkpoint does not qualify the complete reliability track.
+
+### TR1b focused schema amendment (before editing)
+
+The first matrix is **not an accepted environment proof**. `ananicy-cpp`
+actively assigns Bash the `Doc-View` nice −4 policy. The Bash prologue between
+`nice` and `exec` therefore races that policy: constrained logs contain nice
+11, 15 and −4. Keep every execution, supersede the earlier uniform-nice claim,
+launch the test executable directly after `taskset`/`nice`, and observe its
+`/proc/<owned pid>/exe`, priority and affinity from the parent. Never alter the
+host daemon or other processes. Short tests may finish before observation;
+record that explicitly rather than claiming a sampled priority.
+
+The matrix also independently stopped on network-voter E3 run 3: UDP binding
+failed after TCP had successfully bound `:0` (`channels.rs:39`). TCP port
+allocation says nothing about the UDP namespace. The three identical outer
+channel fixtures in the touched voter/nested binaries need the existing paired
+lease too. Add `PortLease::take_sockets()` to move still-bound sockets straight
+to the existing connector constructor; the Channels owner retains the file
+lease through drain and its unchanged TCP/UDP release assertions. This is
+smaller than a new production binding API. Acceptance: bound-socket transfer
+control, corrected direct-binary proof, all lint gates and final full suites.
+No activation-driver file or production code changes.
+
+
+TR1b amendment implemented: the three outer-channel fixtures now transfer
+leased, already-bound TCP/UDP sockets to their existing connectors and keep
+leases through their unchanged close-release checks. The failure was specifically
+UDP allocation after a TCP `:0` bind, not TCP probe/drop at this site. The transfer
+control passes 3/3. The runner now launches `taskset -c 0-3 nice -n 19 "$BIN"`
+directly, recording metadata from its parent; it contains no Bash intermediary
+that can receive the host's Bash priority rule. The stopped earlier matrix is
+retained in `failed-proof-5651d512/raw-matrices.tar.gz`. It had 131 passing and
+1 failing all-feature executions (network voter E3 run 3, UDP `AddrInUse`);
+priority resets invalidate the claimed environment, not the observed outcomes.
+Corrected proof starts on the new source; no host service was changed.
