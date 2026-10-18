@@ -7650,3 +7650,10 @@ all three configurations execute and the overall step remains red on any
 failure. Full repeated proof and suites are pending, not implied by these
 focused results. See the reliability section in `docs/IMPLEMENTATION.md` and
 `validation/reliability/tr1b/` for source-bound outcomes.
+
+TR1b first proof at `146524a2`: 36 passing fixture-isolation executions then
+one E5 failure in the new cleanup control. The isolated lock namespace rules
+out allocator reuse; a sibling fork can transiently inherit even CLOEXEC fds.
+A shared spawn guard makes the unchanged last-close assertion valid. The
+failed matrix is retained separately and is not a successful proof. The
+corrected focused control passes 3/3; qualification continues on the fix.

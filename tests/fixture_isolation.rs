@@ -13,6 +13,10 @@ use std::{
     sync::Mutex,
 };
 
+// Even CLOEXEC descriptors are present between another thread's fork and exec.
+// Do not fork while asserting that this process's unwind closed the last copy.
+static SPAWN: Mutex<()> = Mutex::new(());
+
 #[test]
 fn lease_child() {
     let Ok(port) = std::env::var("VOTEBOAT_TEST_LEASE_PARENT") else {
@@ -35,6 +39,7 @@ fn lease_child() {
 
 #[test]
 fn lease_holds_across_handoff_and_processes() {
+    let _spawn = serial::serial(&SPAWN);
     let mut lease = ports::PortLease::acquire(1);
     let [address] = lease.addresses();
     assert!(TcpListener::bind(address).is_err());
@@ -58,6 +63,7 @@ fn lease_holds_across_handoff_and_processes() {
 
 #[test]
 fn panic_releases_port_lease_and_serial_guard_without_cascades() {
+    let _spawn = serial::serial(&SPAWN);
     static LOCK: Mutex<()> = Mutex::new(());
     // Socket probes remain bound; only lock release, not a free port, is
     // asserted after unwinding. No other allocator uses this private namespace.

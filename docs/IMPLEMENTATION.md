@@ -36755,3 +36755,13 @@ private namespace (probes never handed off), while shared-namespace socket
 release is asserted only under an owned lease. The failed check is retained;
 no production assertion, timeout or guarantee was weakened. The private helper
 is needed solely to prove cleanup without assuming a freed port stays free.
+
+The first repeated proof at `146524a2` stopped at fixture-isolation E5 run 2:
+36 executions passed, then its private lock-release assertion saw `WouldBlock`.
+Private namespaces exclude another allocator, exposing transient descriptor
+inheritance during the sibling test's fork/exec (CLOEXEC closes only at exec).
+The cleanup test now shares a spawn guard with the subprocess test, so its
+last-descriptor-close assertion cannot overlap that fork window. The same lock
+release assertion remains. Focused corrected isolation is 3/3; the full matrix
+restarts only after this source change. The initial matrix and failure remain
+in the evidence; they are not counted as a passing proof.
