@@ -27,6 +27,7 @@ fn ready_actor_clients<const TRACE: bool>(
     };
     let limits = Settings {
         clients,
+        server_workers: crate::DEFAULT_SERVER_WORKERS,
         batch: 4,
         requested_operations: 16384,
         operations: 16384,
@@ -45,6 +46,7 @@ fn ready_actor_clients<const TRACE: bool>(
         .unwrap();
     let settings = Settings {
         clients,
+        server_workers: crate::DEFAULT_SERVER_WORKERS,
         batch: 4,
         requested_operations: 16384,
         operations: 16384,

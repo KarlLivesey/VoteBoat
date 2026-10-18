@@ -40,9 +40,11 @@ implemented or benchmarked; unsafe variants are not offered as options.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| In progress V1: core-canonical volatile log | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
-| In progress V2: scalar commit-advance plan | Commit-only rounds (~2.3 of 5.3 persistence rounds per singleton original) only advance the commit index, yet each builds, validates, stores and compares a full `LogUpdate`/`OwnedAppend` plan inside a 1,728-byte `Pending`. A scalar `CommitAdvance` plan keeps only the predecessor summary, the next revision and the commit index; the durable effect is unchanged and moved instead of cloned; cold `Pending` parts are boxed | V1 (stacked on PR 1, whose measurement is still pending) | Scalar-vs-`plan_owned` equivalence over valid and invalid commits; volatile scalar install, durable identical `LogUpdate`, failed-completion fencing, stale-token refusal and not-scalar cases; size-of tests; the V1 twin tests; three suites and the matched suite; fmt + five strict Clippy runs; runner singleton pairs (pending) | T4 |
-| Following V3: chunked canonical log with shared immutable batches | The batch V1 moves into pending becomes a shared chunk, removing the remaining two in-process per-peer clones | V1, V2 measured | Framework pairs on both cells; compaction/snapshot suites | T4 |
+| Done H1: matched harness `--server-workers` flag (merged 30a1f6c5; flag only) | Expose the server runtime worker count so scaling runs are possible; both shared-client overhead candidates (reused original-ID buffer, current-thread client runtime) were measured and rejected because they changed server work | V1 / PR 1 (`622bc411`); pinned matched workspace; quiet-Mac 30-pair buffer attribution result | Matched source byte-identical to flag-only `297aec15`; raw evidence preserved; matched tests 71/71; both fmt checks and five strict Clippy configurations; independent review of the reduced scope | T4 |
+| Done V1: core-canonical volatile log (merged 041fc3fb; Mac −18.8% bulk, −16.3% singleton CPU/write) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
+| In review (PR 3) V2: scalar commit-advance plan, slimmer `OwnedAppend`, boxed cold `Pending` parts | Commit-only rounds (~2.3 of 5.3 persistence rounds per singleton original) only advance the commit index, yet each built, validated, stored and compared a full `LogUpdate`/`OwnedAppend` plan inside a 1,728-byte `Pending`. Built: core-only `OwnedNextLog::plan_commit` producing `CommitAdvance { predecessor: LogMetadata, summary: LogSummary }` (same checks and errors as the empty append; durable `LogUpdate` unchanged and moved, not cloned); `OwnedAppend` keeps `{ predecessor, summary, suffix }` instead of a copy of the admitted update; `OwnedChange::Other`'s `NextLog`, `Pending.membership` (full-replacement plans) and the snapshot `After` variants' `SnapshotRef` are boxed. `Pending` 1,728 → 1,088 B | V1 (merged 041fc3fb) | Scalar-vs-`plan_owned` oracle over plain, configured and compacted histories; volatile scalar install, durable identical `LogUpdate`, failed-completion fencing, stale-token refusal and not-scalar cases; size-of upper bounds; three suites and the matched suite (suite runner); fmt + five strict Clippy runs; runner pairs (round 1 ACCEPT: Mac singleton −4.13%, bulk +0.36%) | T4 |
+| In progress V3a: direct entry staging (cpu/entry-staging) | Proposals are copied from `Vec<Proposal>` into a new `Vec<LogEntry>` at admission; a `ProposalBatch` builder constructs the final entries once, checked against the receiving core's limits, then stamps index and term in place (design `target/claude/research-r1/architect-plan-pr3x.md` §2.2) | V2 merged; legacy `propose_batch`/`Event::Propose` budgets unchanged | Builder limit, partial-failure and stale-core refusal tests; legacy-API error precedence; suites in three configurations; fmt + five strict Clippy runs; runner pairs on both framework cells counting host-admission and core CPU together | T4 |
+| Following V3b: shared frozen batches with validation reuse | Leader append and per-peer `Rpc::Append` still clone entries; an immutable `EntryBatch` of shared sealed spans lets peers and the log share one allocation and reuse its content checks (design §2.3) | V3a | Seal/range/evidence tests, compaction and snapshot suites, durable/native compatibility; runner pairs on both framework cells | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
 | Done C15: batched admission uses the pending bound | Same fast path for ready batches | C14 | Linux/Mac pairs; suites | T4 |
 | Done C14: proposal validation from a pending bound | Admission no longer scans every pending command when the count already settles it | — | Linux/Mac pairs; unit test; suites | T4 |
@@ -69,7 +71,7 @@ Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider th
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
 
-#### V2 implemented: scalar commit-advance plan (measurement pending (runner))
+#### V2 implemented: scalar commit-advance plan (in review, PR 3)
 
 Design: `target/claude/research-r1/architect-plan.md` section 5 item 1, with
 the section 6 decision: durable stores keep the `LogUpdate` shape (no new
@@ -83,8 +85,11 @@ Schema plan (written before editing; the plan's last revision is marked):
   `plan_owned` and `plan_copy` never build it, so native stores never see the
   variant; the native install match refuses it (fail closed). The cold
   `OwnedChange::Other` keeps its `NextLog` behind a `Box`, and so do
-  `Pending.membership` (configuration changes only) and the `SnapshotRef` of
-  the two snapshot `After` variants. No public API change.
+  `Pending.membership` (every full-replacement plan: configuration entries,
+  a new ballot over a configured history, truncating suffixes and snapshot
+  installs; never an ordinary append or a scalar commit round) and the
+  `SnapshotRef` of the two snapshot `After` variants. (Corrected in review
+  round 2; the first wording said configuration changes only.) No public API change.
 - Revised during implementation: the first shape (`predecessor: LogSummary,
   revision, commit_index`, 352 B) made `OwnedChange` trip Clippy's
   `large_enum_variant` (`Append` was 880 B). The cause was fixed rather than
@@ -179,12 +184,286 @@ results when they finish. Before the rebase, the same change on 622bc411 passed
 85 default binaries (1,802 tests, 0 failures) before that run was stopped for
 the rebase.
 
+Review round 1 (both reviewers APPROVE, P3 findings only) and the round 1
+runner report are PR 3 comments on `8093c722`. The runner reported Mac
+singleton CPU/write 26,490 → 25,397 ns (−4.13%, 7/7 pairs) and Mac bulk
+281 → 282 ns (+0.36%, within the 1% guard), verdict ACCEPT; full suites are
+the suite runner's. Round 2 (this merge of `main` plus review follow-ups)
+changes no production code path: one comment in `src/raft.rs`, this
+documentation, a wider scalar-vs-`plan_owned` oracle
+(`scalar_commit_plan_matches_on_configured_and_compacted_logs`: learner,
+joint and final histories, checkpointed bases, a term-zero vote and revision
+exhaustion) and the `Option<Pending>` niche assertion relaxed to an upper
+bound.
 
-#### V1 implemented: core-canonical volatile log (measurement pending (runner))
+#### H1 schema plan: worker setting and shared harness costs
 
-Design: `target/claude/research-r1/architect-plan.md` (PR 1). Implemented
-evidence only; the runner's interleaved pairs on a quiet machine have not been
-taken yet.
+This deliverable stacks on V1 / PR 1. The existing T4 milestone still applies;
+no new library prerequisite or production API is needed. The current deliverable
+is H1; the next two library deliverables remain V2 and V3 in the mini plan.
+
+Shape: add a validated positive `Settings.server_workers` (default 16, harness
+worker budget 32768), pass it to the sole server runtime builder used by both engines,
+and serialize it in settings and the existing top-level `server_workers` key.
+CLI validation precedes all runtime/cluster creation. Runtime ownership, campaign
+bounds, actor stop/drain and failed-campaign cleanup remain as before. Test the
+CLI/default/rejection boundaries and a real small workload for both engines with
+one and two server workers, checking runtime worker count and both JSON fields.
+There is no durable binary sharing this comparison workspace's `main.rs`.
+
+The original overhead experiment plan (both candidates now rejected) was to
+change shared workload/client-runtime code only;
+preserve per-original completion, identities, per-request latency observations,
+barrier/elapsed boundaries, attribution and protocol counts. First candidate:
+use a fixed four-element original-ID buffer instead of allocating a Vec every
+request (validated batch is 1 or 4). The second candidate, running the client
+executor on the calling thread, was rejected in review (see below). Keep separate
+binaries and interleave baseline/candidate three times on each cell and engine,
+recording uptime before each pair. CPU medians alone cannot qualify a candidate:
+also preserve realized merge widths and protocol work per original. Buffer ownership
+stays in each client task across awaits; cancellation drops it normally. No
+engine adapter, responder count, queue bound or attribution code changes.
+
+#### H1 implemented: server worker flag
+
+`--server-workers N` now sets the shared server runtime builder (default 16,
+validated harness budget 1..32768). Both engines receive the same runtime
+configuration. JSON reports retain the top-level `server_workers` key and add
+`settings.server_workers`; both report the selected value. The README documents
+usage. No library or durable-service source changed.
+
+Validation on 17 October 2026: all 71 matched tests pass, including CLI default,
+bounds/missing-value rejection, and actual one-/two-worker runs of both engines
+that check runtime metrics, completed originals and both JSON worker fields.
+Root and matched fmt checks and all five strict Clippy configurations pass with
+zero diagnostics through the enabled `.githooks/pre-push`. Release build passes
+with the matched lock offline. Builds use this worktree's `target/h1-build` and
+`target/h1-release`, separate from the main checkout. The flag makes no performance
+claim; overhead experiment evidence and review decisions follow separately.
+
+#### H1 rejected candidate: reuse each client's original-ID buffer
+
+The rejected `b58f57bf` shared workload owned one `[u128; 4]` per client task
+and passed its validated one-/four-element slice to either adapter. This removed
+the per-request ID Vec allocation. Original numbering/order, one reply per
+original, latency clock boundaries, completion checks and attribution code were
+preserved; realized request arrivals and batching were subsequently found to
+change. No engine-only path was added. The original 71 matched tests, strict
+matched Clippy and formatting passed. Those checks did not establish workload
+shape equivalence. This was a separate change from the worker flag.
+
+Three interleaved pairs for each engine/cell, AB/BA/AB, on the loaded Linux
+9800X3D host, release+debuginfo, default 16 server / 1 client workers, 1024 warmups,
+default retention, upstream envelopes and attribution off. Bulk requests
+4,000,000 originals (rounded to 3,997,696), 4096 clients / batch4; singleton
+131,072 originals, 1 client / batch1. Medians of whole-process CPU ns/original:
+
+| Engine | Cell | Flag-only sample median | Fixed-buffer sample median |
+| --- | --- | ---: | ---: |
+| VoteBoat | Bulk | 281 | 283 |
+| OpenRaft | Bulk | 799 | 778 |
+| VoteBoat | Singleton | 12,454 | 11,713 |
+| OpenRaft | Singleton | 39,242 | 38,931 |
+
+Rejected and reverted in round 3 after the quiet-Mac runner found changed
+workload shape. The prior keep-on-code-reasoning decision is withdrawn.
+[Claude Opus round 1 N2](https://github.com/KarlLivesey/VoteBoat/pull/2#issuecomment-6239604979)
+found that the apparent CPU gain was noise: these sample medians are not measured
+wins or attributed allocation savings. The later Mac CPU observations cannot
+qualify a candidate that changes the scoring instrument.
+These are loaded-host diagnostics, not a quiet capacity qualification or a library
+speed claim. Uptime before every pair,
+individual rates/CPU/cores and binary hashes are in
+`benchmarks/matched/validation/performance/h1/buffer-pairs.txt`; environment in
+`environment.txt`. One-minute load was 66.8–69.4. All runs use the supplied
+`target/claude/tools/run.py` from the main checkout; it reports `p99=None` because
+it searches a nested latency object while this harness emits top-level
+`request_p99_ns`. No p99 comparison is claimed. No processes were stopped and
+our own builds/checks finished before measurement. The fixed-buffer release
+binary was the baseline for the subsequently rejected runtime experiment.
+
+The [initial quiet-Mac report](https://github.com/KarlLivesey/VoteBoat/pull/2#issuecomment-6239967157)
+was inconclusive: eight bulk pairs showed +5.779% mean width (wider in 7/8,
+exact sign p=0.070312). The independent
+[30-pair quiet-Mac report](https://github.com/KarlLivesey/VoteBoat/pull/2#issuecomment-6240057138)
+classified **WORKLOAD CHANGED**: median paired head/flag mean-width ratio
+1.058583 (+5.858%), wider in 30/30 (p=1.8626451e-9); persists/original ratio
+0.983757 (−1.624%, lower in 28/30, p=8.6799264e-7); sends/original ratio
+0.998246 (−0.175%). All 60 runs completed 3,997,696 originals; pre-run load
+was 1.31–2.54 on 12 CPUs. These fresh AB/BA pairs were not pooled with the
+initial Mac or loaded-Linux series. Significant widening beyond the symmetric
+±3% band changes the benchmark workload even when completion counts agree.
+The reports and raw artifacts remain in the main checkout under
+`target/claude/research-r1/runner-pr2-mac-attribution{,-30}.md` and
+`runner-pr2-artifacts/`; the linked PR comments preserve their published results.
+
+#### H1 round 2 schema plan: restore the original client runtime
+
+Use `git revert --no-commit 80cab34e` and retain the raw experiment records as
+rejected evidence. Restore exactly `Builder::new_multi_thread().worker_threads(1)`
+and the existing thread name, stack, drivers and ownership. No new API/flag,
+dependency, state, persistence format or restart path is introduced. The server
+runtime owns cluster setup/shutdown; the client runtime owns the guarded campaign;
+timeout drops client tasks before separately guarded server cleanup, as before.
+Acceptance: unchanged worker flag and fixed buffer, source comparison with the
+pre-experiment tree, required fmt/Clippy/tests, executable smoke/expiry controls,
+and one bulk attribution run compared with flag-only `297aec15`. H1 advances T4;
+V2/V3 remain the next library deliverables, with their existing dependencies.
+
+#### H1 rejected candidate: current-thread client runtime
+
+`80cab34e` replaced the one-worker multithread client runtime with a current-thread
+runtime. Round 2 reverts it; no alternative runtime flag is retained. Raw
+`h1/current-pairs.txt` remains historical evidence, including the VoteBoat
+singleton regression 11,406→12,969 ns/original. Its favorable median CPU values
+do not establish an equivalent benchmark instrument.
+
+GPT-6.1-Sol round 1 found smaller measured merge widths and more persists per
+original in all three bulk pairs, including with attribution disabled. Its
+attribution-on medians were mean proposal width 687.36→512.33 originals and
+whole-run persists/original 0.005866→0.006617; attribution-off medians were
+715.28→554.08 and 0.005997→0.006287. Scheduler-dependent arrival and barrier
+startup behavior changes server work per original even with the same hard bounds,
+completions and observer code. Any future experiment requires separate quiet-Mac
+qualification of widths, persists/sends, latency and CPU for both engines by the
+runner. No lower-or-neutral portable CPU or p99 claim is made here.
+
+The existing workload worker/JSON unit test exercises one runtime, not `main`'s
+two-runtime topology, and does not certify scheduler equivalence (review P3).
+Executable controls provide manual coverage. Actor-only changes remain excluded
+because the pinned OpenRaft provider owns its corresponding paths.
+
+#### H1 round 2 implemented and validated (17 October 2026)
+
+Historical round 2 state (the buffer is subsequently rejected in round 3):
+the client runtime was restored exactly: `main.rs` matches flag-only `297aec15`,
+and all matched source matches pre-experiment `b58f57bf`. Worker selection and
+fixed-buffer reuse remain. The original `current-pairs.txt` is byte-for-byte
+preserved and labeled rejected in its evidence README. The PR description and
+H1 documentation withdraw the current-thread keep decision and qualify the
+buffer measurements as provisional. No new runtime mode is offered.
+
+Actual checks: root and matched formatting pass; all four root strict Clippy
+configurations and matched all-target strict Clippy pass with zero diagnostics
+through `.githooks/pre-push`; matched tests pass 71/71; offline release build
+passes. Fresh executable controls for both engines at 1/2/16 server workers
+pass with matching worker fields, 128 originals / 32 requests and frontiers
+`[133,133,133]`. Both one-second campaign expiry controls return exit 1 with
+the original expiry and no cleanup error. Root test suites, macOS and remote CI
+were not run/verified by this builder. The hook remains enabled for the push.
+
+One fresh attribution-on bulk run per saved flag-only, restored and rejected
+binary, sequentially after this builder's builds/checks completed, yielded:
+
+| Binary | Mean measured proposal width | Whole-run persists/original | Sends/original |
+| --- | ---: | ---: | ---: |
+| Flag-only `297aec15` | 553.01 | 0.006252 | 0.007339 |
+| Restored runtime + fixed buffer | 492.87 | 0.006841 | 0.007540 |
+| Rejected `80cab34e` | 500.53 | 0.006712 | 0.007461 |
+
+All completed 3,997,696 measured originals / 999,424 requests, with frontiers
+`[3998721,3998721,3998721]` and maximum proposal width 16384. At observed load
+95.15–95.30, the restored sample is 10.87% narrower and uses 9.42% more persists
+per original than flag-only. **Numeric matching with flag-only is not verified**;
+this single sample cannot establish workload-shape equivalence or distinguish
+the runtime variants on this host. Do not claim that measurement acceptance
+passed. The source restoration is exact; no measurements were discarded or
+rerun to seek agreement. Other processes were left running. Full outputs,
+hashes, methodology and check logs are in `h1/round2/REPORT.md` and its siblings.
+
+At round 2 the macro plan remained T4; no library milestone was complete.
+Quiet-Mac qualification and independent review were pending. The subsequent Mac
+result and round 3 decision above supersede the buffer keep decision; V2/V3 are
+unchanged.
+
+Claude Opus round 1 arrived during publication. Its B1 is addressed by the same
+exact revert; N1's changed first-poll/timing behavior is removed with it, and
+N4's conditional request for a retained runtime mode does not apply. Existing
+manual executable controls cover the restored two-runtime path, without claiming
+unit-test topology coverage. N2 is addressed by describing the buffer saving as
+unmeasurable at this noise level and removing percentage-win presentations.
+For N3, the H1 evidence README now defines exact child-rusage CPU arithmetic,
+build provenance and a self-contained invocation reading top-level
+`request_p99_ns`; historical `p99=None` logs remain untouched. N5's additive
+`settings.server_workers` key is already explicitly documented. This follow-up
+changes only evidence/docs, with no API/state/ownership or cleanup changes;
+acceptance is the recipe smoke, clean diff and enabled pre-push checks. A final
+diff check also caught and removed a trailing blank line in the saved test log.
+
+#### H1 round 3 schema plan: restore the flag-only workload
+
+Revert `b58f57bf` without deleting its historical raw evidence. Restore the
+per-request original-ID Vec, passed to either adapter and dropped after the
+latency sample, exactly as at `297aec15`. No new data/API shape, state transition,
+persistence/restart behavior or dependency is introduced. Client tasks own their
+Vec across each write await; cancellation drops it normally. Runtime ownership,
+campaign expiry and server cleanup remain unchanged. Acceptance: byte-for-byte
+comparison of the entire matched source tree with `297aec15`, unchanged raw
+records, matched tests, both fmt checks and all five strict Clippy configurations
+with the enabled pre-push hook. The flag remains default 16 with its effective
+value in JSON. Macro review: H1 still advances T4 without a speed claim; no new
+helper or prerequisite is needed, and V2/V3 retain their dependencies and checks.
+
+#### H1 round 3 implemented and validated (17 October 2026)
+
+Reverted `b58f57bf` with `git revert --no-commit`, resolving its documentation
+conflict while preserving raw evidence. The entire matched source tree now equals
+flag-only `297aec15`: empty `git diff 297aec15 --exit-code --
+benchmarks/matched/src`, plus a 26/26 file byte audit with no added/missing files.
+All 12 existing raw `.txt`/`.json`/`.log` files are byte-identical to `2fe7fe16`.
+Only the worker flag remains; both overhead candidates are rejected. No alternate
+runtime/buffer mode, new crate, unsafe code or library change was introduced.
+
+Actual checks: root and matched fmt pass; all four root strict Clippy
+configurations and matched all-target strict Clippy pass with zero diagnostics
+through the enabled `.githooks/pre-push`; matched tests pass 71/71 offline with
+the comparison lock. The actual push reruns the hook. The matched README, H1
+notes and round-2 report identify the rejected buffer; raw data remain unchanged.
+`h1/round3/REPORT.md` records source verification, the Mac results and both runner
+links, Opus's noise finding, exact check commands and limits. This builder did
+not rerun Mac benchmarks, release/executable controls, root test suites or remote
+CI. Independent round-3 review remains outstanding; no merge was performed.
+The T4 macro milestone and V2/V3 dependencies are unchanged.
+
+#### V1 implemented: core-canonical volatile log (merged 18 October 2026, 041fc3fb)
+
+Design: `target/claude/research-r1/architect-plan.md` (PR 1,
+https://github.com/KarlLivesey/VoteBoat/pull/1, head b40d22b7). Both reviewers
+approved round 2 (84bd1804); b40d22b7 is documentation only.
+
+Measured (runner report `target/claude/research-r1/runner-pr1.md`, candidate
+622bc411 against f9de5056; the round-2 delta changes the completion token and
+the configuration refusal, not the per-write path). Score is whole-process CPU
+per completed write at equal cores, medians of 7 interleaved pairs per cell:
+
+| Host | Cell | CPU ns/write base → candidate | Pairs improving | Rate /s | Effective cores |
+| --- | --- | --- | --- | --- | --- |
+| Mac (quiet, primary) | bulk 4096×4 | 341 → 277 (−18.8%) | 7/7 | 6.41 M → 7.75 M (+21.0%) | 2.01 → 1.99 |
+| Mac (quiet, primary) | singleton 1×1 | 30,282 → 25,359 (−16.3%) | 7/7 | 63.3 k → 73.0 k (+15.3%) | 1.89 → 1.83 |
+| Linux (loaded, secondary) | bulk | 320 → 263 (−17.8%) | 7/7 | 4.55 M → 5.46 M | 1.44 → 1.39 |
+| Linux (loaded, secondary) | singleton | 14,336 → 11,474 (−20.0%) | 7/7 | — | — |
+
+Sampled `matched-server` thread CPU per write on Linux: bulk −18.5%,
+singleton −14.7%. Mac bulk p99 2.78 → 2.17 ms. The candidate used no extra
+cores; the gain is CPU removed, not CPU moved.
+
+Attribution: with identical completed writes (131,072) and zero phase
+failures, persists per original fell 5.160 → 5.077 and sends per original
+6.322 → 6.156. The runner applied the brief's parity floor and reported
+REJECT on that ground alone (every CPU threshold passed). The orchestrator
+overruled it: the brief's parity floor exists to catch an instrument change
+in the harness, and these counts are library behaviour (synchronous volatile
+completion lets some commit-only rounds coalesce) with the client workload
+unchanged. Parity stays binding for harness PRs; for library PRs a count
+change is a finding to explain.
+
+Suites (runner report `target/claude/research-r1/runner-pr1-suites-84bd1804.md`,
+all eleven commands sequential on 84bd1804): fmt and the five strict Clippy
+configurations clean; default 2,444 tests, all-features 2,758, no-default
+1,237, matched 69, zero failures. An earlier all-features run at load ≈160
+had eight failures in `tests/logical_activation_driver` (learners,
+read_intake, readiness, source_export; QUIC and TCP variants), the known
+load-sensitive set; they passed in the clean run and are untouched by V1.
 
 Shape: `log::VolatileLog { binding, limits }` is documented as not durable and
 is not a `LogStore`; it holds no log copy and `bootstrap` returns the same

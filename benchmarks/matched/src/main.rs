@@ -13,7 +13,7 @@ mod workload;
 
 use serde::Serialize;
 use std::{env, error::Error, time::Duration};
-use tokio::runtime::Builder;
+use tokio::runtime::{Builder, Runtime};
 
 type Failure = Box<dyn Error + Send + Sync>;
 const UPSTREAM: &str = "e88bb40707f2e511d8ecc44d31edcb1d814a11a8";
@@ -21,6 +21,7 @@ const CHANNEL_CAPACITY: usize = 65_536;
 const COMMON_ENTRY_BATCH_CAPACITY: usize = 64;
 const API_REQUEST_BATCH_CAPACITY: usize = 4096;
 const MAX_PROPOSAL_ENTRIES: usize = 16384;
+const DEFAULT_SERVER_WORKERS: usize = 16;
 const DEFAULT_CAMPAIGN_TIMEOUT_SECS: u64 = 3600;
 
 #[derive(Clone, Copy, Debug, Serialize, PartialEq, Eq)]
@@ -38,6 +39,7 @@ enum Envelopes {
 #[derive(Clone, Copy, Debug, Serialize)]
 struct Settings {
     clients: usize,
+    server_workers: usize,
     batch: usize,
     requested_operations: usize,
     operations: usize,
@@ -55,6 +57,7 @@ impl Settings {
         let mut engine = String::from("voteboat");
         let mut settings = Self {
             clients: 4096,
+            server_workers: DEFAULT_SERVER_WORKERS,
             batch: 1,
             requested_operations: 20_000_000,
             operations: 0,
@@ -70,6 +73,7 @@ impl Settings {
                 "--engine" => engine = value,
                 "--campaign-timeout-secs" => settings.campaign_timeout_secs = value.parse()?,
                 "--attribution" => settings.attribution = value.parse()?,
+                "--server-workers" => settings.server_workers = value.parse()?,
                 "--clients" => settings.clients = value.parse()?,
                 "--batch" => settings.batch = value.parse()?,
                 "--operations" => settings.requested_operations = value.parse()?,
@@ -103,6 +107,9 @@ impl Settings {
         if !(1..=4096).contains(&self.clients) || !matches!(self.batch, 1 | 4) {
             return Err("clients must be1..4096 and batch1 or4".into());
         }
+        if !(1..=32_768).contains(&self.server_workers) {
+            return Err("server workers must be1..32768".into());
+        }
         if self.requested_operations > 20_000_000 || self.warmup > 65_536 {
             return Err("run exceeds declared operation/warmup budget".into());
         }
@@ -127,14 +134,18 @@ impl Settings {
     }
 }
 
-fn main() -> Result<(), Failure> {
-    let (engine, settings) = Settings::parse()?;
-    let server = Builder::new_multi_thread()
-        .worker_threads(16)
+fn server_runtime(settings: Settings) -> Result<Runtime, Failure> {
+    Ok(Builder::new_multi_thread()
+        .worker_threads(settings.server_workers)
         .thread_name("matched-server")
         .thread_stack_size(3 * 1024 * 1024)
         .enable_all()
-        .build()?;
+        .build()?)
+}
+
+fn main() -> Result<(), Failure> {
+    let (engine, settings) = Settings::parse()?;
+    let server = server_runtime(settings)?;
     let clients = Builder::new_multi_thread()
         .worker_threads(1)
         .thread_name("matched-client")
@@ -169,6 +180,7 @@ mod tests {
     fn rounding_matches_equal_upstream_client_batches() {
         let settings = Settings {
             clients: 4096,
+            server_workers: DEFAULT_SERVER_WORKERS,
             batch: 4,
             requested_operations: 20_000_000,
             operations: 0,
@@ -205,6 +217,23 @@ mod budget_tests {
     use super::*;
     fn parse(arguments: &[&str]) -> Result<(String, Settings), Failure> {
         Settings::parse_from(arguments.iter().map(|s| String::from(*s)))
+    }
+    #[test]
+    fn server_workers_cli_defaults_and_invalid_values() {
+        assert_eq!(parse(&[]).unwrap().1.server_workers, 16);
+        for value in ["1", "2", "16", "32768"] {
+            assert_eq!(
+                parse(&["--server-workers", value])
+                    .unwrap()
+                    .1
+                    .server_workers,
+                value.parse::<usize>().unwrap()
+            );
+        }
+        for value in ["0", "32769", "-1", "invalid", "18446744073709551616"] {
+            assert!(parse(&["--server-workers", value]).is_err());
+        }
+        assert!(parse(&["--server-workers"]).is_err());
     }
     #[test]
     fn campaign_cli_default_and_finite_bounds_are_validated() {
