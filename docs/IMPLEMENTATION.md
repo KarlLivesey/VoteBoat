@@ -40,10 +40,10 @@ implemented or benchmarked; unsafe variants are not offered as options.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| In progress H2: ready-snapshot collection in the matched harness | The VoteBoat actor cut each proposal pass as soon as a peer message was queued, so batch width tracked follower reply latency and any faster replication path paid extra wake/park rounds at 16 workers (V3b: rounds 7.7k → 17.3k, sys 30 → 50 ns/write). A pass now takes only the requests queued when it starts; peer progress arriving during it is handled before the next pass. This changes the instrument for VoteBoat's actor only | H1 merged (`30a1f6c5`); researcher note `target/claude/research-r3/v3b-regression.md`. Next steps in order: merge V2 (PR 3); merge H2 and re-baseline main under it; V3b-s (width-1 per-round overhead); then re-measure V3a/V3b rebased on V2 | Actor tests that a mid-pass peer message neither truncates the pass nor waits past the next pass, and that a request queued after the pass reads its ready count waits for the next pass; existing deferral/capacity tests; 73 matched tests; root and matched fmt; matched and four root strict Clippy builds; quiet-Mac 5 interleaved pairs × 4 cells against `30a1f6c5`; attribution parity controls side by side; main re-baselined before any later gate | T4 |
+| Done H2: ready-snapshot collection in the matched harness (merged 8b3c1e6c; main re-baselined) | The VoteBoat actor cut each proposal pass as soon as a peer message was queued, so batch width tracked follower reply latency and any faster replication path paid extra wake/park rounds at 16 workers (V3b: rounds 7.7k → 17.3k, sys 30 → 50 ns/write). A pass now takes only the requests queued when it starts; peer progress arriving during it is handled before the next pass. This changes the instrument for VoteBoat's actor only | H1 merged (`30a1f6c5`); researcher note `target/claude/research-r3/v3b-regression.md`. Next steps in order: merge V2 (PR 3); merge H2 and re-baseline main under it; V3b-s (width-1 per-round overhead); then re-measure V3a/V3b rebased on V2 | Actor tests that a mid-pass peer message neither truncates the pass nor waits past the next pass, and that a request queued after the pass reads its ready count waits for the next pass; existing deferral/capacity tests; 73 matched tests; root and matched fmt; matched and four root strict Clippy builds; quiet-Mac 5 interleaved pairs × 4 cells against `30a1f6c5`; attribution parity controls side by side; main re-baselined before any later gate | T4 |
 | Done H1: server worker flag (merged `30a1f6c5`) | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`) | Matched source byte-identical to flag-only `297aec15`; matched tests; both fmt checks and five strict Clippy configurations; independent review | T4 |
 | Done V1: core-canonical volatile log (merged 041fc3fb; Mac −18.8% bulk, −16.3% singleton CPU/write) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
-| Next V2 merge (PR 3), then H2 merge and main re-baseline | V2: commit-only rounds (~2.3 per singleton original) still build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices. Both reviews approved and its benchmark accepted (Mac singleton −4.1%, old rule). Once V2 and H2 are on main, main is re-baselined under H2 so later gates compare like with like | V1 measured; H2 reviews | V2 full suites on its head, then merge; H2 merge; quiet-Mac main baseline, 4 cells, under H2 | T4 |
+| Next V2 merge (PR 3) (H2 merged and main re-baselined 19 Oct) | V2: commit-only rounds (~2.3 per singleton original) still build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices. Both reviews approved and its benchmark accepted (Mac singleton −4.1%, old rule). Once V2 and H2 are on main, main is re-baselined under H2 so later gates compare like with like | V1 measured; H2 reviews | V2 full suites on its head, then merge; H2 merge; quiet-Mac main baseline, 4 cells, under H2 | T4 |
 | Following V3b-s, then V3a/V3b re-measured on V2 | V3b-s removes width-1 per-round overhead, which H2's narrower one-worker passes weight about 20% more. V3a (PR 6, entry staging) and V3b (`cpu/shared-batches`, shared immutable batches removing the remaining in-process per-peer clones) are rebased on V2 and re-measured against the H2 main baseline | H2 merged and main re-baselined; V2 merged | Framework pairs on all four cells against the H2 baseline; compaction/snapshot suites | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
 | Done C15: batched admission uses the pending bound | Same fast path for ready batches | C14 | Linux/Mac pairs; suites | T4 |
@@ -140,6 +140,26 @@ checks: main's rule fails the new test at pass width (4 instead of 12), and
 swapping peer/proposal priority fails it at the catch-up append (entries to 21
 instead of 17). Not run: root test suites (no root source changed), Linux
 measurements (host occupied), remote CI.
+
+#### H2 merged and main re-baselined (19 October 2026, `8b3c1e6c`)
+
+PR 9 merged with both reviewers' round-2 approval (`e20f6afa`, plus the
+"two or more passes" wording fix). Quiet-Mac baseline of main `8b3c1e6c` under
+the H2 rule, both engines, five runs per cell, whole-process CPU per completed
+write (`target/claude/tools/baseline-mac.sh`, raw lines in
+`target/claude/research-r3/baseline-h2-8b3c1e6c.txt`; Mac load < 1 at start):
+
+| Cell | VoteBoat ns/write (median, min–max) | OpenRaft ns/write (median, min–max) | VB/OR |
+| --- | ---: | ---: | ---: |
+| bulk 4096/4, 16 workers | 249 (248–255) | 913 (889–975) | 0.273 |
+| singleton 1/1, 16 workers | 23,390 (23,172–23,816) | 83,210 (82,270–84,040) | 0.281 |
+| bulk 4096/4, 1 worker | 219 (216–221) | 669 (666–674) | 0.327 |
+| singleton 1/1, 1 worker | 13,511 (13,342–13,635) | 30,408 (30,270–30,593) | 0.444 |
+
+These are the T4 reference values from here on; every later framework gate
+compares base and candidate under this rule in the same session. Earlier
+absolute 1-worker bulk numbers and earlier VoteBoat-versus-OpenRaft ratios are
+old-rule and not comparable.
 
 #### H2 round 2: review fixes (19 October 2026)
 
