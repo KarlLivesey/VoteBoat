@@ -12,6 +12,19 @@ case "$config" in
   native) features=(--no-default-features --features native) ;;
   *) echo "unknown configuration: $config" >&2; exit 2 ;;
 esac
+# Focused phase runs support a slice's extra acceptance (for example the port
+# race) without rerunning a different, already-failed clock environment. They
+# are never a substitute for the default complete matrix; record the selection.
+read -r -a environments <<< "${RELIABILITY_ENVIRONMENTS:-E1 E2 E3 E4 E5}"
+seen_environments=" "
+for selected in "${environments[@]}"; do
+  case "$selected" in E1|E2|E3|E4|E5) ;; *) echo "unknown environment: $selected" >&2; exit 2 ;; esac
+  if [[ "$seen_environments" == *" $selected "* ]]; then
+    echo "duplicate environment: $selected" >&2
+    exit 2
+  fi
+  seen_environments+="$selected "
+done
 export CARGO_TARGET_DIR=${CARGO_TARGET_DIR:-target/reliability-$config}
 export CARGO_BUILD_JOBS=${CARGO_BUILD_JOBS:-2}
 output=${RELIABILITY_OUTPUT:-target/tr1b/proof/$config}
@@ -23,6 +36,8 @@ if [[ -e "$summary" ]]; then
   exit 2
 fi
 printf 'suite\tenvironment\trepetition\tcopy\texit\tseconds\tcommit\n' > "$summary"
+printf '%s\n' "${environments[@]}" > "$output/environment-selection.txt"
+echo "Selected environments: ${environments[*]} (full qualification requires all five)"
 commit=$(git rev-parse HEAD)
 burners=()
 children=()
@@ -84,7 +99,7 @@ for suite in "$@"; do
   exe=$(jq -r --arg name "$name" 'select(.reason == "compiler-artifact" and .target.name == $name and .profile.test == true) | .executable // empty' "$output/$name-build.jsonl")
   [[ -x "$exe" ]]
   failed=0
-  for env in E1 E2 E3 E4 E5; do
+  for env in "${environments[@]}"; do
     reps=10
     args=()
     constrained=yes

@@ -36965,3 +36965,12 @@ nested execution are explicitly **interrupted/superseded**, never passes or
 ignored tests. All original files are preserved. Restart final full suites on a
 consistent corrected source tree after focused controls/gates. No foreign model,
 worker, daemon or priority was touched.
+
+Focused proof support: the runner's default still executes E1–E5 unchanged.
+An explicit `RELIABILITY_ENVIRONMENTS` selection records its phases in the output
+manifest and is labeled partial, for a slice's separately required extra check
+(such as the port-race E4). Unknown/duplicate phases are rejected. This permits
+current-allocator concurrency evidence without repeating an already-failed,
+unchanged clock row. It filters environments only: every libtest case still
+runs, with no ignore/retry/test-name filter. A focused pass cannot qualify the
+full matrix; the preserved clock failures remain blockers.
