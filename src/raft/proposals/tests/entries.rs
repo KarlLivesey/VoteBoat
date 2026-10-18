@@ -346,8 +346,12 @@ fn the_builder_allocation_becomes_the_persisted_suffix() {
     let (pointer, capacity) = batch.allocation();
     assert_eq!(capacity, 5);
     let effects = core.propose_entries(batch).unwrap();
-    // No second proposal-to-entry collect: the request holds the same buffer.
-    assert_eq!(persisted(&effects).entries.as_ptr(), pointer);
+    // No second proposal-to-entry collect: the request holds the same buffer,
+    // frozen in place as the shared backing.
+    assert_eq!(
+        persisted(&effects).entries.first_backing_ptr(),
+        Some(pointer)
+    );
 }
 
 #[test]

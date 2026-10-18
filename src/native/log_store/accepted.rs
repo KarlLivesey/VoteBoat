@@ -20,7 +20,7 @@ struct Plain {
     base: LogMetadata,
     metadata: LogMetadata,
     summary: LogSummary,
-    tail: Vec<LogEntry>,
+    tail: EntryLog,
     removed: usize,
 }
 struct Full {
@@ -209,7 +209,7 @@ impl Accepted {
             }
             Some(Overlay::Plain(plain)) => {
                 if let Some(suffix) = append.into_suffix() {
-                    plain.tail.extend(suffix.entries);
+                    plain.tail.append(suffix.entries);
                 }
                 plain.metadata = metadata;
                 plain.summary = summary;
@@ -223,7 +223,7 @@ impl Accepted {
                         summary,
                         tail: append
                             .into_suffix()
-                            .map_or_else(Vec::new, |suffix| suffix.entries),
+                            .map_or_else(EntryLog::default, |suffix| suffix.entries.into()),
                         removed: 0,
                     })),
                 );
@@ -279,7 +279,7 @@ impl Accepted {
             }
             Some(Overlay::Plain(plain)) => {
                 if let Some(suffix) = delta.append {
-                    plain.tail.extend(suffix.entries);
+                    plain.tail.append(suffix.entries);
                 }
                 plain.metadata = metadata;
                 plain.summary = delta.summary;
@@ -291,7 +291,9 @@ impl Accepted {
                         base: delta.predecessor,
                         metadata,
                         summary: delta.summary,
-                        tail: delta.append.map_or_else(Vec::new, |suffix| suffix.entries),
+                        tail: delta
+                            .append
+                            .map_or_else(EntryLog::default, |suffix| suffix.entries.into()),
                         removed: 0,
                     })),
                 );
@@ -316,7 +318,7 @@ impl Accepted {
                     .removed
                     .min(durable[&group].entries.len() - plain.removed);
                 plain.removed += durable_removed;
-                plain.tail.drain(..delta.removed - durable_removed);
+                plain.tail.trim_prefix(delta.removed - durable_removed);
                 plain.metadata = metadata;
                 plain.summary = delta.summary;
             }
@@ -327,7 +329,7 @@ impl Accepted {
                         base: LogMetadata::from_log(&durable[&group]),
                         metadata,
                         summary: delta.summary,
-                        tail: Vec::new(),
+                        tail: EntryLog::default(),
                         removed: delta.removed,
                     })),
                 );
@@ -375,8 +377,8 @@ impl Accepted {
                 }
                 Overlay::Plain(plain) => {
                     let state = durable.get_mut(&group).unwrap();
-                    state.entries.drain(..plain.removed);
-                    state.entries.extend(plain.tail);
+                    state.entries.trim_prefix(plain.removed);
+                    state.entries.append(plain.tail.to_batch());
                     plain.metadata.install_header(state);
                     if LogMetadata::from_log(state) != plain.metadata {
                         return Err(StorageError::Rejected("promoted log metadata mismatch"));

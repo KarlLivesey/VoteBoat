@@ -52,7 +52,8 @@ fn configured_pending_append_and_compacted_joint_commit_keep_connections_and_mem
                             operation: operation(555),
                             bytes: vec![7].into(),
                         },
-                    }],
+                    }]
+                    .into(),
                 }),
                 After::LeaderAppend,
                 None,

@@ -14,7 +14,7 @@
 // rights and limitations under the RPL.
 //! Bounded outbound ownership before a transport. Local completion cannot
 //! establish a durable follower acknowledgement or read authority.
-use crate::{identity::*, log::EntryPayload, quorum::Tree, raft::*};
+use crate::{identity::*, quorum::Tree, raft::*};
 use std::mem::size_of;
 
 pub const OUTBOUND_CONTRACT_VERSION: u32 = 2;
@@ -307,27 +307,29 @@ pub fn message_cost(
             add(size_of::<crate::raft::LearnerReadinessRequest>())?;
             MessageClass::Control
         }
-        Rpc::Append { entries, .. } | Rpc::LearnerRepair { entries, .. } => {
-            if let Rpc::LearnerRepair { joint, .. } = &message.rpc {
-                add(size_of::<crate::log::LogEntry>())?;
-                add(joint.retained_payload_bytes())?;
+        Rpc::Append { entries, .. } => {
+            // Every shared backing the message keeps alive, in full, from its
+            // cached charge; the class depends only on the visible entries.
+            add(entries
+                .retained_bytes()
+                .ok_or(OutboundError::BatchTooLarge)?)?;
+            if entries.has_data() {
+                MessageClass::Data
+            } else {
+                MessageClass::Control
             }
+        }
+        Rpc::LearnerRepair { joint, entries, .. } => {
+            add(size_of::<crate::log::LogEntry>())?;
+            add(joint.retained_payload_bytes())?;
             add(entries
                 .capacity()
                 .checked_mul(size_of::<crate::log::LogEntry>())
                 .ok_or(OutboundError::BatchTooLarge)?)?;
-            let mut class = if matches!(message.rpc, Rpc::LearnerRepair { .. }) {
-                MessageClass::Data
-            } else {
-                MessageClass::Control
-            };
             for entry in entries {
                 add(entry.retained_payload_bytes())?;
-                if !matches!(entry.payload, EntryPayload::Noop) {
-                    class = MessageClass::Data;
-                }
             }
-            class
+            MessageClass::Data
         }
         Rpc::Snapshot { snapshot }
         | Rpc::LearnerRepairSnapshot { snapshot }

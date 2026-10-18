@@ -411,7 +411,7 @@ fn interrupted_remaining_freeze_preserves_only_a_complete_owner_boundary() {
                 boundary - 1,
                 Some(Suffix {
                     from: 1,
-                    entries: entries[..entries.len() - 1].to_vec(),
+                    entries: entries[..entries.len() - 1].to_vec().into(),
                 }),
             )],
         );
@@ -424,7 +424,7 @@ fn interrupted_remaining_freeze_preserves_only_a_complete_owner_boundary() {
         boundary,
         Some(Suffix {
             from: boundary,
-            entries: vec![entries.last().unwrap().clone()],
+            entries: vec![entries.last().unwrap().clone()].into(),
         }),
     );
     let frame = NativeLogCodec

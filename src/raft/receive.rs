@@ -240,8 +240,7 @@ impl Raft {
         if previous_term > m.term
             || ((previous_index == 0) != (previous_term == 0))
             || entries.len() > BatchLimits::MAX_REPLICATION_ENTRIES
-            || entries.iter().map(LogEntry::payload_bytes).sum::<usize>()
-                > self.limits.max_batch_bytes
+            || entries.payload_bytes() > self.limits.max_batch_bytes
         {
             return Err(RaftError::InvalidMessage);
         }
@@ -259,8 +258,15 @@ impl Raft {
         self.vote_context = None;
         self.clear_replication_requests();
         self.repair_requests.clear();
-        let tight_payloads =
-            self.validate_append_entries(&m, previous_index, previous_term, entries)?;
+        if !entries.valid_append(
+            previous_index,
+            previous_term,
+            m.term,
+            m.configuration,
+            self.limits.max_command_bytes,
+        ) {
+            return Err(RaftError::InvalidMessage);
+        }
         if self.durable.term_at(previous_index) != Some(previous_term) {
             let mut reply = self.reply(
                 &m,
@@ -289,20 +295,7 @@ impl Raft {
                 Ok(vec![Effect::Send(reply)])
             };
         }
-        let mut suffix_offset = None;
-        for (offset, entry) in entries.iter().enumerate() {
-            match self.durable.entry_at(entry.index) {
-                Some(old_entry) if old_entry.term == entry.term => {
-                    if old_entry != entry {
-                        return Err(RaftError::InvalidMessage);
-                    }
-                }
-                _ => {
-                    suffix_offset = Some(offset);
-                    break;
-                }
-            }
-        }
+        let suffix_offset = self.first_new_entry(entries)?;
         let matching = entries.last().map_or(previous_index, |e| e.index);
         let commit = self.durable.commit_index.max(leader_commit.min(matching));
         let mut reply = self.reply(
@@ -318,7 +311,7 @@ impl Raft {
             let Rpc::Append { entries, .. } = &mut m.rpc else {
                 unreachable!()
             };
-            Self::take_append_suffix(entries, offset, tight_payloads)
+            Self::take_append_suffix(entries, offset)
         });
         if hard != old || suffix.is_some() || commit != self.durable.commit_index {
             self.persist(hard, commit, suffix, After::Reply, Some(reply))
@@ -326,56 +319,31 @@ impl Raft {
             Ok(vec![Effect::Send(reply)])
         }
     }
-    fn take_append_suffix(
-        entries: &mut Vec<LogEntry>,
-        offset: usize,
-        tight_payloads: bool,
-    ) -> Suffix {
-        let from = entries[offset].index;
-        // Transfer only the allocation shape produced by the previous clone.
-        // Other shapes retain that clone's raw admission/accounting behavior.
-        let entries = if offset == 0 && entries.capacity() == entries.len() && tight_payloads {
-            std::mem::take(entries)
-        } else {
-            entries[offset..].to_vec()
-        };
-        Suffix { from, entries }
-    }
-    fn validate_append_entries(
-        &self,
-        m: &Message,
-        previous_index: u64,
-        previous_term: u64,
-        entries: &[LogEntry],
-    ) -> Result<bool, RaftError> {
-        let mut previous = previous_term;
-        let mut tight_payloads = true;
-        for (i, e) in entries.iter().enumerate() {
-            match &e.payload {
-                EntryPayload::Configuration(record) => {
-                    let activated = match &record.change {
-                        crate::membership::ConfigurationChange::Learners(next) => next.id(),
-                        crate::membership::ConfigurationChange::Joint { id, .. }
-                        | crate::membership::ConfigurationChange::Final { id } => *id,
-                    };
-                    if activated > m.configuration {
+    /// Offset of the first entry not already held. Same-term overlap is
+    /// compared by content: a separately allocated batch with the same index
+    /// and term must still be identical.
+    fn first_new_entry(&self, entries: &EntryBatch) -> Result<Option<usize>, RaftError> {
+        for (offset, entry) in entries.iter().enumerate() {
+            match self.durable.entry_at(entry.index) {
+                Some(old_entry) if old_entry.term == entry.term => {
+                    if old_entry != entry {
                         return Err(RaftError::InvalidMessage);
                     }
-                    tight_payloads = false;
                 }
-                EntryPayload::Command { .. } | EntryPayload::Noop => {}
+                _ => return Ok(Some(offset)),
             }
-            if previous_index.checked_add(i as u64 + 1) != Some(e.index)
-                || e.term == 0
-                || e.term < previous
-                || e.term > m.term
-                || e.payload_bytes() > self.limits.max_command_bytes
-            {
-                return Err(RaftError::InvalidMessage);
-            }
-            previous = e.term;
         }
-        Ok(tight_payloads)
+        Ok(None)
+    }
+    /// The new suffix shares the received backings; nothing is copied.
+    fn take_append_suffix(entries: &mut EntryBatch, offset: usize) -> Suffix {
+        let from = entries[offset].index;
+        let entries = if offset == 0 {
+            std::mem::take(entries)
+        } else {
+            entries.slice(offset..entries.len()).unwrap_or_default()
+        };
+        Suffix { from, entries }
     }
 
     fn receive_appended(

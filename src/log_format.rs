@@ -451,7 +451,10 @@ impl<'a> Decoder<'a> {
                 for _ in 0..count {
                     entries.push(self.mutation_entry(limits)?);
                 }
-                Some(Suffix { from, entries })
+                Some(Suffix {
+                    from,
+                    entries: entries.into(),
+                })
             }
             _ => return Err(StorageError::Corrupt("suffix flag")),
         };

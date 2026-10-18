@@ -70,7 +70,7 @@ fn replacement_invalidates_only_its_own_generation_and_keeps_other_group_tickets
             0,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 1)],
+                entries: vec![entry(1, 1, 1)].into(),
             }),
         )])
         .unwrap();
@@ -86,7 +86,7 @@ fn replacement_invalidates_only_its_own_generation_and_keeps_other_group_tickets
             0,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 2, 2)],
+                entries: vec![entry(1, 2, 2)].into(),
             }),
         )])
         .unwrap();

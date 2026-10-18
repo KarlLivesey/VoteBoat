@@ -538,7 +538,7 @@ fn seeded_fault_schedules_preserve_committed_prefixes_and_acknowledged_recovery(
                     )
                     .unwrap();
                     assert!(
-                        core.replay_committed().starts_with(&acknowledged),
+                        core.replay_committed().to_vec().starts_with(&acknowledged),
                         "seed={seed} step={step}"
                     );
                     cluster.applied.insert(id, core.replay_committed().to_vec());
@@ -644,12 +644,12 @@ fn persistence_driver_rejects_a_different_body_with_identical_ticket_metadata() 
     let [Effect::Persist(mut update)] = effects else {
         panic!("expected persistence")
     };
-    let EntryPayload::Command { bytes, .. } =
-        &mut update.suffix.as_mut().unwrap().entries[0].payload
-    else {
-        unreachable!()
-    };
-    *bytes = vec![2].into();
+    update.suffix.as_mut().unwrap().entries.edit(|entries| {
+        let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
+            unreachable!()
+        };
+        *bytes = vec![2].into();
+    });
     let before = io.0.borrow().log.clone();
     assert_eq!(
         persist_effect(&mut replica.core, &mut replica.store, update),

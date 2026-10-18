@@ -17,7 +17,7 @@ fn owned_append_moves_new_input_and_retains_canonical_prefix_and_exact_charge() 
         2,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 1)],
+            entries: vec![entry(3, 1)].into(),
         }),
     );
     let incoming = pointer(&change.suffix.as_ref().unwrap().entries[0]);
@@ -46,19 +46,18 @@ fn owned_append_moves_new_input_and_retains_canonical_prefix_and_exact_charge() 
 #[test]
 fn copy_keeps_raw_external_capacity_and_seals_one_normalized_allocation() {
     let state = current();
-    let mut change = update(
+    let change = update(
         &state,
         1,
         1,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 1)],
+            entries: vec![entry(3, 1)].into(),
         }),
     );
-    let suffix = change.suffix.as_mut().unwrap();
-    suffix.entries.reserve(100);
-    let raw_capacity = suffix.entries.capacity();
-    let EntryPayload::Command { bytes, .. } = &mut suffix.entries[0].payload else {
+    let suffix = change.suffix.as_ref().unwrap();
+    let raw_backing = suffix.entries.first_backing_ptr();
+    let EntryPayload::Command { bytes, .. } = &suffix.entries[0].payload else {
         unreachable!()
     };
     let raw_charge = bytes.retained_bytes();
@@ -75,7 +74,10 @@ fn copy_keeps_raw_external_capacity_and_seals_one_normalized_allocation() {
         unreachable!()
     };
     assert_eq!(bytes.retained_bytes(), raw_charge);
-    assert_eq!(owned.entries.capacity(), owned.entries.len());
+    // A small batch is an owned value: the core keeps its own normalized
+    // copy, sharing only the immutable payload bytes.
+    assert!(!owned.entries.is_shared());
+    assert_ne!(owned.entries.first_backing_ptr(), raw_backing);
     assert_eq!(bytes.as_ptr(), raw_pointer);
     assert_eq!(pointer(plan.entry_at(3).unwrap()), bytes.as_ptr());
     let EntryPayload::Command { bytes, .. } = &change.suffix.as_ref().unwrap().entries[0].payload
@@ -83,8 +85,8 @@ fn copy_keeps_raw_external_capacity_and_seals_one_normalized_allocation() {
         unreachable!()
     };
     assert_eq!(
-        change.suffix.as_ref().unwrap().entries.capacity(),
-        raw_capacity
+        change.suffix.as_ref().unwrap().entries.first_backing_ptr(),
+        raw_backing
     );
     assert_eq!(bytes.as_ptr(), raw_pointer);
     assert!(plan.matches_update(&change));
@@ -103,17 +105,17 @@ fn owned_normalization_matches_old_clone_and_identical_headers_do_not_hide_paylo
         1,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 1)],
+            entries: vec![entry(3, 1)].into(),
         }),
     );
-    let EntryPayload::Command { bytes, .. } =
-        &mut change.suffix.as_mut().unwrap().entries[0].payload
-    else {
-        unreachable!()
-    };
-    let mut raw = bytes.to_vec();
-    raw.reserve(10000);
-    *bytes = raw.into();
+    change.suffix.as_mut().unwrap().entries.edit(|entries| {
+        let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
+            unreachable!()
+        };
+        let mut raw = bytes.to_vec();
+        raw.reserve(10000);
+        *bytes = raw.into();
+    });
     let original = change.clone();
     let expected = stage_update(&state, &change, LogLimits::default()).unwrap();
     let plan = OwnedNextLog::plan_owned(
@@ -125,20 +127,22 @@ fn owned_normalization_matches_old_clone_and_identical_headers_do_not_hide_paylo
     .unwrap();
     for operation in [false, true] {
         let mut wrong = original.clone();
-        let EntryPayload::Command {
-            operation: id,
-            bytes,
-        } = &mut wrong.suffix.as_mut().unwrap().entries[0].payload
-        else {
-            unreachable!()
-        };
-        if operation {
-            *id = OperationId::new(99).unwrap();
-        } else {
-            let mut raw = bytes.to_vec();
-            raw[0] ^= 1;
-            *bytes = raw.into();
-        }
+        wrong.suffix.as_mut().unwrap().entries.edit(|entries| {
+            let EntryPayload::Command {
+                operation: id,
+                bytes,
+            } = &mut entries[0].payload
+            else {
+                unreachable!()
+            };
+            if operation {
+                *id = OperationId::new(99).unwrap();
+            } else {
+                let mut raw = bytes.to_vec();
+                raw[0] ^= 1;
+                *bytes = raw.into();
+            }
+        });
         assert!(!plan.matches_update(&wrong));
     }
     let mut canonical = state;
@@ -161,7 +165,7 @@ fn owned_validation_and_terms_match_borrowed_oracle_for_valid_invalid_and_compac
                         commit,
                         Some(Suffix {
                             from,
-                            entries: vec![entry(from, term)],
+                            entries: vec![entry(from, term)].into(),
                         }),
                     );
                     compare_owned(&state, change);
@@ -203,7 +207,7 @@ fn owned_preparation_rejects_stale_predecessor_without_installation() {
         1,
         Some(Suffix {
             from: 3,
-            entries: vec![entry(3, 1)],
+            entries: vec![entry(3, 1)].into(),
         }),
     );
     let plan = OwnedNextLog::plan_owned(

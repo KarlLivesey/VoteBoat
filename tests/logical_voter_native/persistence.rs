@@ -143,7 +143,7 @@ pub(super) fn append(parent: &mut Parent, index: u64, delta: i64) {
         Rpc::Append {
             previous_index: index - 1,
             previous_term: if index == 1 { 0 } else { 7 },
-            entries: vec![command(index, delta)],
+            entries: vec![command(index, delta)].into(),
             leader_commit: index,
         },
         index + 1,

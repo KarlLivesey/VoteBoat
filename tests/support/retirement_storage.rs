@@ -131,7 +131,7 @@ where
             freeze_index,
             Some(Suffix {
                 from: 1,
-                entries: prefix.to_vec(),
+                entries: prefix.to_vec().into(),
             }),
         )],
     );
@@ -158,7 +158,7 @@ where
             retire_index,
             Some(Suffix {
                 from: retire_index,
-                entries: vec![retirement.clone()],
+                entries: vec![retirement.clone()].into(),
             }),
         )],
     );
@@ -345,7 +345,7 @@ pub fn history<S: RetirableOwner>(
                 index,
                 Some(Suffix {
                     from: index,
-                    entries: vec![noop(index)],
+                    entries: vec![noop(index)].into(),
                 }),
             )],
         );

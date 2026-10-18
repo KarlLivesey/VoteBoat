@@ -27,7 +27,8 @@ fn rollback_request() -> Message {
                 index: 5,
                 term: 2,
                 payload: EntryPayload::Noop,
-            }],
+            }]
+            .into(),
             leader_commit: 4,
         },
     }

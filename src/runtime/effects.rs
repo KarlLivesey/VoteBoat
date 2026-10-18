@@ -1216,11 +1216,7 @@ fn effect_bytes(effects: &[Effect], capacity: usize) -> Option<usize> {
                 .checked_mul(size_of::<LogEntry>())?
                 .checked_add(entries_bytes(entries)?)?,
             Effect::Persist(update) => (match &update.suffix {
-                Some(suffix) => suffix
-                    .entries
-                    .capacity()
-                    .checked_mul(size_of::<LogEntry>())?
-                    .checked_add(entries_bytes(&suffix.entries)?)?,
+                Some(suffix) => suffix.entries.retained_bytes()?,
                 None => 0,
             })
             .checked_add(

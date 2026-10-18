@@ -50,7 +50,7 @@ pub(super) fn populated(root: &Directory) -> Store {
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 17), entry(2, 1, 29)],
+                entries: vec![entry(1, 1, 17), entry(2, 1, 29)].into(),
             }),
         )],
     );

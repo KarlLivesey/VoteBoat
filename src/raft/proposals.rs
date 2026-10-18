@@ -193,9 +193,11 @@ impl Raft {
         self.persist(
             self.durable.hard_state,
             self.durable.commit_index,
+            // Freezing measures the batch's intrinsic facts once; planning,
+            // fan-out and every follower reuse them.
             Some(Suffix {
                 from: first,
-                entries,
+                entries: entries.into(),
             }),
             After::LeaderAppend,
             None,

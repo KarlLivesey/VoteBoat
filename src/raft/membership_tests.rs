@@ -92,7 +92,8 @@ pub(super) fn core() -> Raft {
                 index: 1,
                 term: 1,
                 payload: EntryPayload::Noop,
-            }],
+            }]
+            .into(),
         }),
         snapshot: None,
         snapshot_membership: None,
@@ -157,7 +158,7 @@ fn accept(core: &mut Raft, op: u128, change: ConfigurationChange) -> Vec<Effect>
         core.durable.commit_index,
         Some(Suffix {
             from: entry.index,
-            entries: vec![entry],
+            entries: vec![entry].into(),
         }),
         After::LeaderAppend,
         None,
@@ -512,7 +513,8 @@ fn recursive_joint_recovery_catches_up_old_voter_and_commits_after_election() {
     for peer in peers.values() {
         let mut app = crate::application::Counter::new(100).unwrap();
         use crate::application::StateMachine;
-        app.apply_batch(peer.replay_committed()).unwrap();
+        app.apply_batch(&peer.replay_committed().contiguous())
+            .unwrap();
         assert_eq!(app.read_applied(5), Ok(7));
     }
 }
@@ -558,15 +560,13 @@ fn joint_repair_rejects_overwrite_commit_claims_and_foreign_authority_before_mut
                     *previous_term = 99;
                 }
             }
-            8 => {
-                if let Rpc::Append { entries, .. } = &mut message.rpc {
-                    entries.push(LogEntry {
-                        index: 4,
-                        term: 1,
-                        payload: EntryPayload::Noop,
-                    });
-                }
-            }
+            8 => edit_append(&mut message, |entries| {
+                entries.push(LogEntry {
+                    index: 4,
+                    term: 1,
+                    payload: EntryPayload::Noop,
+                })
+            }),
             9 => {
                 receiver = follower(staged(), 3);
                 message.to = node(3);
@@ -576,14 +576,12 @@ fn joint_repair_rejects_overwrite_commit_claims_and_foreign_authority_before_mut
                 receiver.durable.commit_index = 1;
             }
             12 => receiver.limits.max_command_bytes = 1,
-            13 => {
-                if let Rpc::Append { entries, .. } = &mut message.rpc {
-                    let EntryPayload::Configuration(record) = &mut entries[0].payload else {
-                        unreachable!()
-                    };
-                    record.expected = cid(1);
-                }
-            }
+            13 => edit_append(&mut message, |entries| {
+                let EntryPayload::Configuration(record) = &mut entries[0].payload else {
+                    unreachable!()
+                };
+                record.expected = cid(1);
+            }),
             _ => unreachable!(),
         }
         let state = receiver.state().clone();
@@ -623,6 +621,12 @@ fn joint_repair_rejects_overwrite_commit_claims_and_foreign_authority_before_mut
     assert!(restarted.local_voter());
 }
 
+/// Replace an append's entries with an edited copy.
+fn edit_append(message: &mut Message, edit: impl FnOnce(&mut Vec<LogEntry>)) {
+    if let Rpc::Append { entries, .. } = &mut message.rpc {
+        entries.edit(edit);
+    }
+}
 fn retained_repair_pair(gap: u64, overlap: usize) -> (Raft, Raft) {
     let mut state = joint(false).state().clone();
     let mut joint = state.entries.pop().unwrap();
@@ -706,26 +710,29 @@ fn joint_repair_refuses_forked_overlap_bad_ranges_and_out_of_window_learners() {
         let (mut source, mut receiver) =
             retained_repair_pair(if variant == 6 { 100 } else { 3 }, 1);
         let mut repair = emitted_repair(&mut source);
+        let term = repair.term;
         let Rpc::Append { entries, .. } = &mut repair.rpc else {
             unreachable!()
         };
+        let mut edited = entries.to_vec();
         match variant {
             0 => {
-                let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
+                let EntryPayload::Command { bytes, .. } = &mut edited[0].payload else {
                     unreachable!()
                 };
                 let mut replacement = bytes.to_vec();
                 replacement[0] ^= 1;
                 *bytes = replacement.into();
             }
-            1 => entries[1].term = repair.term + 1,
-            2 => entries[1].index += 1,
-            3 => entries[1].term = 0,
-            4 => entries[1].payload = source.state().entries[1].payload.clone(),
+            1 => edited[1].term = term + 1,
+            2 => edited[1].index += 1,
+            3 => edited[1].term = 0,
+            4 => edited[1].payload = source.state().entries[1].payload.clone(),
             5 => receiver.limits.max_batch_bytes = 256,
             6 => (),
             _ => unreachable!(),
         }
+        *entries = edited.into();
         let before = (
             receiver.state().clone(),
             receiver.role(),
@@ -812,10 +819,12 @@ fn joint_repair_trims_only_a_verified_compacted_overlap() {
             let Rpc::Append { entries, .. } = &mut message.rpc else {
                 unreachable!()
             };
-            entries
-                .iter_mut()
-                .filter(|e| e.index >= 4)
-                .for_each(|e| e.term = 2);
+            entries.edit(|entries| {
+                entries
+                    .iter_mut()
+                    .filter(|e| e.index >= 4)
+                    .for_each(|e| e.term = 2)
+            });
         }
         let before = receiver.state().clone();
         let effects = receiver.step(Event::Receive(message));
@@ -826,7 +835,10 @@ fn joint_repair_trims_only_a_verified_compacted_overlap() {
             assert!(receiver.local_voter());
             assert_eq!(receiver.state().commit_index, 4);
             assert_eq!(receiver.state().base_index(), 4);
-            assert_eq!(receiver.state().entries, source.state().entries[4..]);
+            assert_eq!(
+                receiver.state().entries,
+                source.state().entries.to_vec()[4..]
+            );
         } else {
             assert_eq!(effects, Err(RaftError::InvalidMessage));
             assert_eq!(receiver.state(), &before);
@@ -1373,7 +1385,8 @@ fn accepted_final_clears_prior_authority_and_rollback_restores_joint_base() {
                     index: 4,
                     term: 2,
                     payload: EntryPayload::Noop,
-                }],
+                }]
+                .into(),
             }),
             After::Reply,
             None,
@@ -1621,7 +1634,8 @@ fn older_request_scope_can_roll_back_uncommitted_final_without_early_reply() {
                     index: 4,
                     term: 2,
                     payload: EntryPayload::Noop,
-                }],
+                }]
+                .into(),
             }),
             After::LeaderAppend,
             None,
@@ -1670,7 +1684,7 @@ fn partial_catch_up_scopes_matching_prefix_without_claiming_follower_activation(
         Rpc::Append {
             previous_index: 1,
             previous_term: 1,
-            entries: vec![leader.state().entries[1].clone()],
+            entries: vec![leader.state().entries[1].clone()].into(),
             leader_commit: 3,
         },
     );
@@ -1832,7 +1846,7 @@ fn request_scope_bridge_does_not_authorize_learners_or_reads() {
         Rpc::Append {
             previous_index: 2,
             previous_term: 1,
-            entries: vec![],
+            entries: vec![].into(),
             leader_commit: 2,
         },
     );
@@ -1866,7 +1880,7 @@ fn request_scope_bridge_does_not_authorize_learners_or_reads() {
     message.rpc = Rpc::Append {
         previous_index: 2,
         previous_term: 1,
-        entries: vec![leader.state().entries[2].clone()],
+        entries: vec![leader.state().entries[2].clone()].into(),
         leader_commit: 2,
     };
     assert_eq!(
@@ -2009,7 +2023,8 @@ fn prospective_reservation_is_pure_and_does_not_authorize_configuration_ingress(
                     expected: cid(1),
                     change: ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[4, 5, 6])),
                 })),
-            }],
+            }]
+            .into(),
         },
     );
     let event = Event::Receive(message);
@@ -2179,7 +2194,8 @@ fn prospective_connection_inspection_rejects_store_conflicts_and_wrong_scope_wit
                     expected: cid(1),
                     change: ConfigurationChange::Learners(next),
                 })),
-            }],
+            }]
+            .into(),
         },
     );
     assert_eq!(
@@ -2278,7 +2294,7 @@ fn retired_commit_exception_cannot_append_raise_terms_or_authorize_learners() {
         rpc: Rpc::Append {
             previous_index: 4,
             previous_term: 1,
-            entries: vec![],
+            entries: vec![].into(),
             leader_commit: 4,
         },
     };
@@ -2314,7 +2330,8 @@ fn retired_commit_exception_cannot_append_raise_terms_or_authorize_learners() {
                         index: 5,
                         term: 1,
                         payload: EntryPayload::Noop,
-                    }],
+                    }]
+                    .into(),
                     leader_commit: 4,
                 }
             }
@@ -2322,7 +2339,7 @@ fn retired_commit_exception_cannot_append_raise_terms_or_authorize_learners() {
                 invalid.rpc = Rpc::Append {
                     previous_index: 4,
                     previous_term: 2,
-                    entries: vec![],
+                    entries: vec![].into(),
                     leader_commit: 4,
                 }
             }
@@ -2330,7 +2347,7 @@ fn retired_commit_exception_cannot_append_raise_terms_or_authorize_learners() {
                 invalid.rpc = Rpc::Append {
                     previous_index: 4,
                     previous_term: 1,
-                    entries: vec![],
+                    entries: vec![].into(),
                     leader_commit: 5,
                 }
             }
@@ -2456,7 +2473,7 @@ fn witnessed_promoted_leader_catches_up_only_after_exact_durability() {
         Rpc::Append {
             previous_index: 2,
             previous_term: 1,
-            entries: vec![witness.durable.entries[2].clone()],
+            entries: vec![witness.durable.entries[2].clone()].into(),
             leader_commit: 3,
         },
     );
@@ -2655,7 +2672,7 @@ fn permit_survives_partial_progress_but_cannot_authorize_vote_read_or_other_head
         Rpc::Append {
             previous_index: 3,
             previous_term: 1,
-            entries: vec![],
+            entries: vec![].into(),
             leader_commit: 3,
         },
     );
@@ -2774,7 +2791,7 @@ fn promoted_term_observation_waits_for_storage_and_retains_same_base_permit() {
         Rpc::Append {
             previous_index: 2,
             previous_term: 1,
-            entries: vec![],
+            entries: vec![].into(),
             leader_commit: 2,
         },
     );
@@ -2852,7 +2869,7 @@ fn connection_retention_includes_pending_and_rollback_views_until_exact_commit()
             2,
             Some(Suffix {
                 from: 3,
-                entries: vec![],
+                entries: vec![].into(),
             }),
             After::Reply,
             None,
@@ -2964,7 +2981,7 @@ fn owner_connection_budget_retains_pending_and_rollback_history_and_fences_unres
                 2,
                 Some(Suffix {
                     from: 3,
-                    entries: vec![],
+                    entries: vec![].into(),
                 }),
                 After::Reply,
                 None,
@@ -3076,7 +3093,7 @@ fn finalized_repair_pair() -> (Raft, Raft) {
             joint_index + 1,
             Some(Suffix {
                 from: entry.index,
-                entries: vec![entry],
+                entries: vec![entry].into(),
             }),
             After::Commit,
             None,

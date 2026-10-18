@@ -56,7 +56,7 @@ fn enroll<S: LogStore>(store: &mut S) {
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry],
+                entries: vec![entry].into(),
             }),
         )],
     );
@@ -89,7 +89,8 @@ fn command_message() -> Message {
                     operation: OperationId::new(7).unwrap(),
                     bytes: 7i64.to_le_bytes().to_vec().into(),
                 },
-            }],
+            }]
+            .into(),
             leader_commit: 2,
         },
         2,
@@ -187,7 +188,8 @@ fn conformance<S: LogStore>(store: &mut S) -> Raft {
         })]
     ));
     let mut app = Counter::new(16).unwrap();
-    app.apply_batch(core.replay_committed()).unwrap();
+    app.apply_batch(&core.replay_committed().contiguous())
+        .unwrap();
     assert_eq!(app.read_applied(2).unwrap(), 7);
     core
 }
@@ -200,7 +202,8 @@ fn snapshots() -> support::snapshot::HostSnapshots {
 fn checkpoint_conformance<L: LogStore, S: SnapshotRetention>(log: &mut L, snapshots: &mut S) {
     let mut core = conformance(log);
     let mut app = Counter::new(16).unwrap();
-    app.apply_batch(core.replay_committed()).unwrap();
+    app.apply_batch(&core.replay_committed().contiguous())
+        .unwrap();
     let receipt = checkpoint_application(&core, &app, snapshots).unwrap();
     assert_eq!(receipt.metadata.configuration(), cid(2));
     compact_replica(&mut core, log, snapshots, &app, receipt.reference()).unwrap();
@@ -272,7 +275,7 @@ fn enrollment_requires_committed_and_accepted_exact_store_assignment() {
                 1,
                 Some(Suffix {
                     from: 2,
-                    entries: vec![entry],
+                    entries: vec![entry].into(),
                 }),
             )],
             store.limits(),
@@ -379,7 +382,7 @@ mod native {
                 1,
                 Some(Suffix {
                     from: 1,
-                    entries: vec![record],
+                    entries: vec![record].into(),
                 }),
             )])
             .unwrap();
@@ -434,7 +437,7 @@ mod native {
                     1,
                     Some(Suffix {
                         from: 1,
-                        entries: vec![record],
+                        entries: vec![record].into(),
                     }),
                 )])
                 .unwrap();
@@ -511,7 +514,7 @@ fn joint_or_policy_transition_cannot_use_learner_recovery_to_open_dynamic_voting
                 1,
                 Some(Suffix {
                     from: 2,
-                    entries: vec![entry],
+                    entries: vec![entry].into(),
                 }),
             )],
             log.limits(),
@@ -606,7 +609,9 @@ fn readiness_cluster_with_stores<L: LogStore, M: LogStore>(
     assert_eq!(leader.state().commit_index, 2);
     assert_eq!(learner.state().commit_index, 2);
     let mut application = Counter::new(16).unwrap();
-    application.apply_batch(learner.replay_committed()).unwrap();
+    application
+        .apply_batch(&learner.replay_committed().contiguous())
+        .unwrap();
     (leader, learner, application)
 }
 fn learner_peer() -> voteboat::secure::PeerIdentity {
@@ -1447,11 +1452,11 @@ fn readiness_rejects_changed_capabilities_provider_bindings_and_pending_writes()
         Rpc::Append {
             previous_index: 2,
             previous_term: 2,
-            entries: vec![LogEntry {
+            entries: EntryBatch::from(vec![LogEntry {
                 index: 3,
                 term: 2,
                 payload: EntryPayload::Noop,
-            }],
+            }]),
             leader_commit: 2,
         },
         2,
@@ -1559,7 +1564,7 @@ fn readiness_requires_pinned_compacted_data_and_rechecks_configuration_and_commi
         2,
         Some(Suffix {
             from: 3,
-            entries: vec![changed],
+            entries: vec![changed].into(),
         }),
     );
     if let LogMutation::Update(update) = &mut mutation {
@@ -1988,7 +1993,9 @@ fn configuration_conformance<L: LogStore>(leader_log: &mut L) -> (Raft, u64) {
     assert!(leader.membership().is_voter(node(4)));
     assert!(!leader.membership().is_voter(node(3)));
     let mut application = Counter::new(16).unwrap();
-    let receipts = application.apply_batch(leader.replay_committed()).unwrap();
+    let receipts = application
+        .apply_batch(&leader.replay_committed().contiguous())
+        .unwrap();
     assert!(receipts.is_empty());
     assert_eq!(application.applied_index(), 4);
     assert_eq!(

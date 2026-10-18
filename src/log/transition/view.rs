@@ -62,7 +62,7 @@ impl LogMetadata {
 #[derive(Clone, Copy)]
 pub(crate) struct LogView<'a> {
     base: &'a GroupLog,
-    tail: &'a [LogEntry],
+    tail: Option<&'a EntryLog>,
     metadata: LogMetadata,
     removed: usize,
 }
@@ -70,7 +70,7 @@ impl<'a> LogView<'a> {
     pub(crate) fn new(base: &'a GroupLog) -> Self {
         Self {
             base,
-            tail: &[],
+            tail: None,
             metadata: LogMetadata::from_log(base),
             removed: 0,
         }
@@ -78,19 +78,19 @@ impl<'a> LogView<'a> {
     /// Prefix/tail were admitted by this owner; metadata describes their exact
     /// accepted version. This is not an unchecked public storage admission API.
     #[cfg(test)]
-    pub(crate) fn overlay(base: &'a GroupLog, tail: &'a [LogEntry], metadata: LogMetadata) -> Self {
+    pub(crate) fn overlay(base: &'a GroupLog, tail: &'a EntryLog, metadata: LogMetadata) -> Self {
         Self::trimmed_overlay(base, tail, metadata, 0)
     }
     #[cfg(any(feature = "native", test))]
     pub(crate) fn trimmed_overlay(
         base: &'a GroupLog,
-        tail: &'a [LogEntry],
+        tail: &'a EntryLog,
         metadata: LogMetadata,
         removed: usize,
     ) -> Self {
         Self {
             base,
-            tail,
+            tail: Some(tail).filter(|tail| !tail.is_empty()),
             metadata,
             removed,
         }
@@ -109,21 +109,45 @@ impl<'a> LogView<'a> {
             return None;
         }
         if index > self.base.last_index() {
-            return self
-                .tail
-                .get(usize::try_from(index.checked_sub(self.tail.first()?.index)?).ok()?)
+            let tail = self.tail?;
+            return tail
+                .get(usize::try_from(index.checked_sub(tail.first()?.index)?).ok()?)
                 .map(|entry| entry.term);
         }
         self.base.term_at(index)
     }
     pub(crate) fn materialize(&self) -> GroupLog {
         let mut current = self.base.clone();
-        current.entries.drain(..self.removed);
-        current.entries.extend(self.tail.iter().cloned());
+        current.entries.trim_prefix(self.removed);
+        if let Some(tail) = self.tail {
+            current.entries.append(tail.to_batch());
+        }
         self.metadata.install_header(&mut current);
         current
     }
-    pub(crate) fn entries(&self) -> impl Iterator<Item = &'a LogEntry> + use<'a> {
-        self.base.entries[self.removed..].iter().chain(self.tail)
+    /// Exact charge of this view's entries after trimming `count`, as the
+    /// materialized log will hold them. An owner-held tail or earlier trim is
+    /// joined by descriptors only.
+    pub(crate) fn trimmed_charge(&self, count: usize) -> Option<usize> {
+        if self.tail.is_none() && self.removed == 0 {
+            return self.base.entries.trimmed_charge(count);
+        }
+        let mut entries = self.base.entries.clone();
+        entries.trim_prefix(self.removed);
+        if let Some(tail) = self.tail {
+            entries.append(tail.to_batch());
+        }
+        entries.trimmed_charge(count)
+    }
+    /// Retained charge after appending `batch` to this view's entries. A view
+    /// with an owner-held tail charges every piece of `batch` in full.
+    pub(crate) fn appended_charge(&self, retained: usize, batch: &EntryBatch) -> Option<usize> {
+        match self.tail {
+            Some(tail) => tail.appended_charge(retained, batch),
+            None if self.removed < self.base.entries.len() => {
+                self.base.entries.appended_charge(retained, batch)
+            }
+            None => retained.checked_add(batch.retained_bytes()?),
+        }
     }
 }

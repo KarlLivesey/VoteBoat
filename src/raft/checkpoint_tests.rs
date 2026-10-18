@@ -61,7 +61,8 @@ fn same_core_suffix_replacement_and_replayed_higher_term_replace_lineage() {
                     term: 2,
                     payload: EntryPayload::Noop,
                 },
-            ],
+            ]
+            .into(),
             leader_commit: 1,
         },
     };

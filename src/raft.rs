@@ -98,7 +98,8 @@ pub enum Rpc {
     Append {
         previous_index: u64,
         previous_term: u64,
-        entries: Vec<LogEntry>,
+        /// Shared immutable entries; the wire encoding is the visible sequence.
+        entries: EntryBatch,
         leader_commit: u64,
     },
     Appended {
@@ -873,8 +874,11 @@ impl Raft {
             || self.checkpoint_reconcile.is_some()
     }
     /// Host replays these through its application checkpoint/dedup contract.
-    pub fn replay_committed(&self) -> &[LogEntry] {
-        &self.durable.entries[..(self.durable.commit_index - self.durable.base_index()) as usize]
+    pub fn replay_committed(&self) -> EntryRange<'_> {
+        self.durable
+            .entries
+            .borrowed(0..(self.durable.commit_index - self.durable.base_index()) as usize)
+            .expect("committed prefix is retained")
     }
     pub fn storage_failed(&mut self) {
         self.checkpoint_lineage = CheckpointLineage::new();
@@ -1228,7 +1232,9 @@ impl Raft {
     }
     /// Install the correlated pending transition; callers check correlation.
     fn install_pending(&mut self) -> Result<PreparedCompletion, RaftError> {
-        let p = self.pending.take().ok_or(RaftError::WrongCompletion)?;
+        let Some(p) = self.pending.take() else {
+            return Err(RaftError::WrongCompletion);
+        };
         let previous_commit = self.durable.commit_index;
         let configuration_changed = p
             .membership
@@ -1396,13 +1402,9 @@ impl Raft {
         // A volatile core is the only owner of its log: move the update into
         // the plan instead of keeping a copy for a store to validate again.
         let (next, effect) = if self.volatile {
-            // The leader's own entries keep their allocation; see `plan_owned_leader`.
-            let plan = if matches!(after, After::LeaderAppend) {
-                OwnedNextLog::plan_owned_leader
-            } else {
-                OwnedNextLog::plan_owned
-            };
-            let next = plan(
+            // Frozen entries keep their allocation (spare capacity included,
+            // and charged); no plan reallocates them.
+            let next = OwnedNextLog::plan_owned(
                 &LogView::new(&self.durable),
                 &self.log_summary,
                 update,
@@ -1566,7 +1568,7 @@ impl Raft {
             self.durable.commit_index,
             Some(Suffix {
                 from: next,
-                entries: vec![entry],
+                entries: vec![entry].into(),
             }),
             After::LeaderAppend,
             None,
@@ -1610,31 +1612,19 @@ impl Raft {
                 reference,
             });
         }
-        let remaining = self
-            .durable
-            .entries
-            .get((next - self.durable.base_index() - 1) as usize..)
-            .unwrap_or(&[]);
-        let mut count = 0usize;
-        let mut bytes = 0usize;
+        let offset = (next - self.durable.base_index() - 1) as usize;
         // One bounded RPC can carry several entries; outer wire limits are
-        // negotiated by the later codec/transport assembly. Select before
-        // copying so the owned range needs only one exact allocation.
-        for entry in remaining
-            .iter()
-            .take(self.batch_limits.max_replication_entries)
-        {
-            let size = 37 + entry.payload_bytes();
-            if size > self.limits.max_batch_bytes.saturating_sub(bytes + 256) {
-                break;
-            }
-            count += 1;
-            bytes += size;
-        }
-        if count == 0 && next <= self.durable.last_index() {
+        // negotiated by the later codec/transport assembly. The selection is
+        // the original per-entry rule, evaluated from cached facts, and the
+        // selected range shares the canonical backings.
+        let entries = self.durable.entries.replication_range(
+            offset,
+            self.batch_limits.max_replication_entries,
+            self.limits.max_batch_bytes,
+        );
+        if entries.is_empty() && next <= self.durable.last_index() {
             return Err(StorageError::Rejected("entry exceeds replication batch budget").into());
         }
-        let entries = remaining[..count].to_vec();
         let end = entries.last().map_or(next - 1, |e| e.index);
         let context = self.context()?;
         self.requests.insert(
@@ -1713,7 +1703,7 @@ impl Raft {
                     Rpc::Append {
                         previous_index: index,
                         previous_term: term,
-                        entries: Vec::new(),
+                        entries: EntryBatch::default(),
                         leader_commit: index,
                     },
                 ))
@@ -1810,7 +1800,7 @@ impl Raft {
         // A volatile core refuses all configuration ingress, before any state
         // change: static voter recovery could not accept the result.
         if (self.volatile || !self.configuration_replication)
-            && (matches!(&m.rpc, Rpc::Append { entries, .. } if entries.iter().any(|e| matches!(e.payload, EntryPayload::Configuration(_))))
+            && (matches!(&m.rpc, Rpc::Append { entries, .. } if entries.has_configuration())
                 || matches!(&m.rpc, Rpc::Snapshot { snapshot } if snapshot.metadata.membership.is_some()))
         {
             if self.volatile || !self.permits_joint_repair(&m) {

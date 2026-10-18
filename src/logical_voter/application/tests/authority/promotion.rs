@@ -42,7 +42,18 @@ fn promote(a: &mut LogicalApplication) {
         ),
         transition(3, 3, ConfigurationChange::Final { id: cid(4) }),
     ];
-    let c = mutate(a, 2, update(a, 3, Some(Suffix { from: 1, entries })));
+    let c = mutate(
+        a,
+        2,
+        update(
+            a,
+            3,
+            Some(Suffix {
+                from: 1,
+                entries: entries.into(),
+            }),
+        ),
+    );
     assert_eq!(apply(a, &c).outcome, LogicalOutcome::Mutated);
 }
 #[test]

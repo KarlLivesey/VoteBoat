@@ -6,7 +6,10 @@ use crate::{
     Maintenance,
 };
 use std::{collections::VecDeque, mem::size_of, time::Instant};
-use voteboat::{application::StateMachine, snapshot::*};
+use voteboat::{
+    application::{ApplicationError, StateMachine},
+    snapshot::*,
+};
 
 #[cfg(test)]
 mod tests;
@@ -314,7 +317,7 @@ impl<const TRACE: bool> Actor<TRACE> {
                     &mut self.pending,
                     &self.attribution,
                     self.parts.slot,
-                    entries,
+                    |application| application.apply_entries(entries),
                 )?;
             }
             effects.extend(following);
@@ -353,7 +356,7 @@ impl<const TRACE: bool> Actor<TRACE> {
             &mut self.pending,
             &self.attribution,
             self.parts.slot,
-            &entries,
+            |application| application.apply_batch(&entries),
         )
     }
     fn apply_entries(
@@ -361,10 +364,10 @@ impl<const TRACE: bool> Actor<TRACE> {
         pending: &mut PendingReplies<Reply>,
         attribution: &Recorder<TRACE>,
         slot: usize,
-        entries: &[LogEntry],
+        apply: impl FnOnce(&mut Noop) -> Result<Vec<OperationId>, ApplicationError>,
     ) -> Result<(), Failure> {
         let started = Recorder::<TRACE>::start();
-        let results = application.apply_batch(entries);
+        let results = apply(application);
         attribution.finish(
             Phase::Application,
             started,

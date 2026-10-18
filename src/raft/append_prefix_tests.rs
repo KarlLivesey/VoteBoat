@@ -68,7 +68,7 @@ fn old_prefix(core: &Raft, next: u64) -> Result<Vec<LogEntry>, RaftError> {
     Ok(entries)
 }
 
-fn differential(core: &mut Raft) -> Vec<LogEntry> {
+fn differential(core: &mut Raft) -> EntryBatch {
     let next = core.next_index[&peer()]
         .min(core.state().last_index() + 1)
         .max(1);
@@ -81,7 +81,7 @@ fn differential(core: &mut Raft) -> Vec<LogEntry> {
         assert_eq!(core.request_sequence, sequence);
         assert!(!core.requests.contains_key(&peer()));
         assert_eq!(core.state(), &state);
-        return Vec::new();
+        return EntryBatch::default();
     }
     let old = old.unwrap();
     let Effect::Send(message) = result.unwrap() else {
@@ -97,8 +97,12 @@ fn differential(core: &mut Raft) -> Vec<LogEntry> {
         panic!("ordinary append required")
     };
     assert_eq!(entries, old);
-    assert!(entries.capacity() <= old.capacity());
-    assert_eq!(entries.capacity(), entries.len());
+    // A wide selection shares the canonical entries; a small one is copied.
+    if let Some(first) = entries.first() {
+        let ordinal = (next - state.base_index() - 1) as usize;
+        let canonical = &core.state().entries[ordinal];
+        assert_eq!(std::ptr::eq(first, canonical), entries.is_shared());
+    }
     assert_eq!(previous_index, next - 1);
     assert_eq!(previous_term, state.term_at(next - 1).unwrap());
     assert_eq!(leader_commit, state.commit_index);
@@ -206,14 +210,22 @@ fn full_configuration_and_nonempty_payload_copy_owns_independent_storage() {
         64,
         LogLimits::default().max_batch_bytes,
     );
-    if let EntryPayload::Command { bytes, .. } = &mut core.durable.entries[2].payload {
-        let mut raw = bytes.to_vec();
-        raw.reserve(257);
-        *bytes = raw.into();
-    }
+    core.durable.entries.edit(|entries| {
+        if let EntryPayload::Command { bytes, .. } = &mut entries[2].payload {
+            let mut raw = bytes.to_vec();
+            raw.reserve(257);
+            *bytes = raw.into();
+        }
+    });
     let state = core.state().clone();
-    let mut entries = differential(&mut core);
-    assert_ne!(entries.as_ptr(), core.state().entries[1..].as_ptr());
+    let shared = differential(&mut core);
+    // Four entries are below the sharing width: the message owns a copy.
+    assert!(!shared.is_shared());
+    assert!(!std::ptr::eq(&shared[0], &core.state().entries[1]));
+    // An edit is an explicit copy; the message and the canonical log keep
+    // their contents.
+    let sent = shared.clone();
+    let mut entries = shared.to_vec();
     let EntryPayload::Command { bytes, .. } = &mut entries[1].payload else {
         unreachable!()
     };
@@ -237,4 +249,6 @@ fn full_configuration_and_nonempty_payload_copy_owns_independent_storage() {
     assert_ne!(&**copy as *const _, &**original as *const _);
     copy.expected = ConfigurationId::new(99).unwrap();
     assert_eq!(core.state(), &state);
+    assert_eq!(shared, sent);
+    assert_ne!(shared, entries);
 }

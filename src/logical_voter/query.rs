@@ -101,13 +101,7 @@ pub(super) fn snapshot_charge(s: &Snapshot) -> usize {
 }
 fn parent_charge(p: &GroupLog) -> usize {
     bootstrap_bytes(&p.bootstrap)
-        .saturating_add(p.entries.capacity().saturating_mul(size_of::<LogEntry>()))
-        .saturating_add(
-            p.entries
-                .iter()
-                .map(LogEntry::retained_payload_bytes)
-                .fold(0usize, usize::saturating_add),
-        )
+        .saturating_add(p.entries.retained_bytes().unwrap_or(usize::MAX))
         .saturating_add(
             p.snapshot_membership
                 .as_ref()

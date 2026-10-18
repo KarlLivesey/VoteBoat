@@ -137,6 +137,8 @@ fn host_fixture_uses_only_public_wire_contract_without_native_features() {
 mod native {
     use super::*;
     use voteboat::{log::*, native::wire::NativeWireCodec, quorum::*, snapshot::*};
+    #[path = "../wire/entry_goldens.rs"]
+    mod entry_goldens;
     fn codec() -> NativeWireCodec {
         NativeWireCodec::new(WireLimits::default()).unwrap()
     }
@@ -158,7 +160,7 @@ mod native {
         message(Rpc::Append {
             previous_index: 0,
             previous_term: 0,
-            entries: vec![entry(1, 1, 7)],
+            entries: vec![entry(1, 1, 7)].into(),
             leader_commit: 0,
         })
     }
@@ -236,7 +238,8 @@ mod native {
                         payload: EntryPayload::Noop,
                     },
                     entry(2, 3, 9),
-                ],
+                ]
+                .into(),
                 leader_commit: 2,
             }),
             message(Rpc::Appended {
@@ -485,12 +488,14 @@ mod native {
         let Rpc::Append { entries, .. } = &mut larger.rpc else {
             panic!()
         };
-        let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
-            panic!()
-        };
-        let mut replacement = bytes.to_vec();
-        replacement.extend([1, 2, 3]);
-        *bytes = replacement.into();
+        entries.edit(|entries| {
+            let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
+                panic!()
+            };
+            let mut replacement = bytes.to_vec();
+            replacement.extend([1, 2, 3]);
+            *bytes = replacement.into();
+        });
         assert_eq!(
             short_command.encode_batch(scope(), &[larger.clone()]),
             Err(WireError::TooLarge)
@@ -554,7 +559,7 @@ mod native {
         let entries = message(Rpc::Append {
             previous_index: 0,
             previous_term: 0,
-            entries: vec![entry(1, 1, 1), entry(2, 2, 2)],
+            entries: vec![entry(1, 1, 1), entry(2, 2, 2)].into(),
             leader_commit: 0,
         });
         let one_entry = NativeWireCodec::new(WireLimits {
@@ -652,7 +657,7 @@ mod native {
         message(Rpc::Append {
             previous_index: 0,
             previous_term: 0,
-            entries: configuration_entries(),
+            entries: configuration_entries().into(),
             leader_commit: 2,
         })
     }

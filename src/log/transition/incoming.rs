@@ -43,7 +43,7 @@ impl OwnedNextLog {
         if append_eligible(view, summary, update) {
             let metadata = validate_append_metadata(view, update, limits)?;
             Ok(Self(OwnedChange::Append(OwnedAppend::new(
-                *view.metadata(),
+                view,
                 summary,
                 metadata,
                 update.clone(),
@@ -55,46 +55,19 @@ impl OwnedNextLog {
             }))
         }
     }
-    /// A provider already owns this exact input. Only admitted new append
-    /// allocations are normalized; no retained canonical history is copied.
+    /// A provider already owns this exact input. Its shared entries move into
+    /// the plan; no retained canonical history is copied.
     pub(crate) fn plan_owned(
         view: &LogView<'_>,
         summary: &LogSummary,
         update: LogUpdate,
         limits: LogLimits,
     ) -> Result<Self, StorageError> {
-        Self::plan_owned_with(view, summary, update, limits, true)
-    }
-    /// A core's own leader append, as `plan_owned` but keeping the suffix
-    /// allocation as given. The host reserved its full capacity before the
-    /// proposal, and install moves the entries out, so a shrink here would
-    /// only add a reallocation outside that reservation.
-    pub(crate) fn plan_owned_leader(
-        view: &LogView<'_>,
-        summary: &LogSummary,
-        update: LogUpdate,
-        limits: LogLimits,
-    ) -> Result<Self, StorageError> {
-        Self::plan_owned_with(view, summary, update, limits, false)
-    }
-    fn plan_owned_with(
-        view: &LogView<'_>,
-        summary: &LogSummary,
-        mut update: LogUpdate,
-        limits: LogLimits,
-        normalize: bool,
-    ) -> Result<Self, StorageError> {
         let limits = validate_base(view, summary, &update, limits)?;
         if append_eligible(view, summary, &update) {
             let metadata = validate_append_metadata(view, &update, limits)?;
-            if normalize {
-                normalize_append(&mut update);
-            }
             Ok(Self(OwnedChange::Append(OwnedAppend::new(
-                *view.metadata(),
-                summary,
-                metadata,
-                update,
+                view, summary, metadata, update,
             ))))
         } else {
             let next = NextLog::plan(view, summary, &update, limits)?;
@@ -159,6 +132,9 @@ impl OwnedNextLog {
             .entries
             .get(usize::try_from(index.checked_sub(suffix.from)?).ok()?)
     }
+    // Inlined so a caller's owned plan installs in place rather than being
+    // copied into an argument slot (the plan is close to 1 KiB).
+    #[inline]
     pub(crate) fn prepare_install(
         self,
         current: &GroupLog,
@@ -176,6 +152,7 @@ impl OwnedNextLog {
                 .map(PreparedOwnedLog::Other),
         }
     }
+    #[inline]
     pub(crate) fn install(self, current: &mut GroupLog) -> Result<LogSummary, StorageError> {
         Ok(self.prepare_install(current)?.install(current))
     }
@@ -203,14 +180,14 @@ impl OwnedNextLog {
 }
 impl OwnedAppend {
     fn new(
-        predecessor: LogMetadata,
+        view: &LogView<'_>,
         summary: &LogSummary,
         metadata: LogMetadata,
         update: LogUpdate,
     ) -> Self {
         Self {
-            predecessor,
-            summary: append_summary(summary, metadata, update.suffix.as_ref()),
+            predecessor: *view.metadata(),
+            summary: append_summary(view, summary, metadata, update.suffix.as_ref()),
             update,
         }
     }
@@ -250,6 +227,7 @@ impl PreparedOwnedLog {
             Self::Other(prepared) => prepared.preserves_checkpoint_prefix(),
         }
     }
+    #[inline]
     pub(crate) fn install(self, current: &mut GroupLog) -> LogSummary {
         match self {
             Self::Append { update, summary } => install_append(current, update, summary),
@@ -257,9 +235,10 @@ impl PreparedOwnedLog {
         }
     }
 }
+#[inline]
 fn install_append(current: &mut GroupLog, update: LogUpdate, summary: LogSummary) -> LogSummary {
     if let Some(suffix) = update.suffix {
-        current.entries.extend(suffix.entries);
+        current.entries.append(suffix.entries);
     }
     summary.metadata.install_header(current);
     summary
@@ -278,13 +257,4 @@ fn validate_base(
         return Err(StorageError::Rejected("stale log summary"));
     }
     Ok(limits)
-}
-fn normalize_append(update: &mut LogUpdate) {
-    if let Some(suffix) = &mut update.suffix {
-        if suffix.entries.capacity() != suffix.entries.len() {
-            suffix.entries = std::mem::take(&mut suffix.entries)
-                .into_boxed_slice()
-                .into_vec();
-        }
-    }
 }

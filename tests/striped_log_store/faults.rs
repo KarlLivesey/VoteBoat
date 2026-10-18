@@ -25,7 +25,7 @@ fn mutation(store: &impl LogStore) -> Vec<LogMutation> {
         1,
         Some(Suffix {
             from: 1,
-            entries: vec![e],
+            entries: vec![e].into(),
         }),
     )]
 }

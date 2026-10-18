@@ -430,7 +430,7 @@ fn native_adoption_and_subsequent_freeze_cuts_replay_only_complete_owner_states(
             boundary,
             Some(Suffix {
                 from: boundary,
-                entries: vec![entries[boundary as usize - 1].clone()],
+                entries: (vec![entries[boundary as usize - 1].clone()]).into(),
             }),
         );
         let frame = NativeLogCodec
@@ -576,7 +576,7 @@ fn seed_adoption_log(
             boundary - 1,
             Some(Suffix {
                 from: 1,
-                entries: entries[..boundary as usize - 1].to_vec(),
+                entries: (entries[..boundary as usize - 1].to_vec()).into(),
             }),
         )],
     );

@@ -72,7 +72,8 @@ fn leader_at(term: u64) -> Raft {
                 index: 1,
                 term: 1,
                 payload: EntryPayload::Noop,
-            }],
+            }]
+            .into(),
         }),
         snapshot: None,
         snapshot_membership: None,
@@ -434,7 +435,9 @@ fn direct_batch_uses_the_same_fence_dependency_and_transfer_guards() {
 #[test]
 fn index_exhaustion_is_rejected_before_pending_state() {
     let mut core = leader();
-    core.durable.entries.last_mut().unwrap().index = u64::MAX - 1;
+    core.durable
+        .entries
+        .edit(|entries| entries.last_mut().unwrap().index = u64::MAX - 1);
     assert_eq!(
         core.propose_batch(vec![proposal(1), proposal(2)]),
         Err(RaftError::Exhausted)

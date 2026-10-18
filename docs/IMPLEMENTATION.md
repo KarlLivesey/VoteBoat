@@ -44,7 +44,8 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done V1: core-canonical volatile log (merged 041fc3fb; Mac −18.8% bulk, −16.3% singleton CPU/write) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
 | In review V2: scalar commit-advance plan and smaller `Pending` (PR 3) | Commit-only rounds (~2.3 per singleton original) still build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices | V1 measured | Same twin tests; singleton framework pairs | T4 |
 | In review V3a: direct entry staging (PR 6, round 2) | Proposals are built twice: the host stages a `Vec<Proposal>` and `propose_batch` scans it twice and collects a second `Vec<LogEntry>` (3.3% of bulk process CPU, plus the host's staging Vec). A bounded `ProposalBatch` builder creates final-shaped entries once and does its budget accounting while inserting; `Raft::propose_entries` stamps index/term in place and hands the same Vec to the existing planner | V1 (design: `target/claude/research-r1/architect-plan-pr3x.md` §§1, 2.2, 3.1, 3.12) | Builder/legacy equivalence at widths 1/2/max, cross-core and old-term builders, failed-push and drop cleanup, allocation-survival, last-index boundary and legacy-boundary tests; harness collection on the builder with unchanged receipt/attribution counts; fmt + strict Clippy (four configurations and the matched workspace); runner pairs on both framework cells (pending) | T4 |
-| Following V3b: shared frozen batches with validation reuse | The batch V3a stages becomes a shared immutable batch carried by Append, pending and a chunked canonical log, with sealed intrinsic facts reused by planning, fanout, ingress costing and install, removing the per-peer clones and repeated entry walks | V3a measured, V2 | Framework pairs on both cells; byte goldens; compaction/snapshot and native suites | T4 |
+| In progress V3b: shared frozen batches with validation reuse | The batch V3a stages becomes one immutable shared batch (`Arc` backing plus facts computed once) carried by `Suffix`, `Rpc::Append`, the pending plan and a chunked canonical `EntryLog`; planning, follower validation, fan-out selection, ingress costing and install use the cached facts, removing the per-peer `to_vec`, the install/compaction record moves and the repeated per-entry validation/accounting walks (profile-r2-pr1 §§3, 5: ~19% of bulk process CPU, overlapping classes) | V3a (PR 6 branch `cpu/entry-staging`; design `architect-plan-pr3x.md` §§2.3–2.8, 3, 4) | Facts-versus-scan oracle over subranges and multi-span joins; fast/slow validator equivalence and the old rejection conditions; prefix selection oracle against the old loop; overlap content checks across distinct allocations; old RPCs keep their contents after truncate/compaction; retained charge equals a fresh oracle; wire/WAL byte goldens captured before encoder edits; durable, native, compaction and snapshot suites unchanged in meaning; harness width/persist/send parity; fmt + four strict Clippy + matched; indicative composed pairs (≥4% bulk gate is the runner's) | T4 |
+| Following V3c: profile the composed V2+V3 tree | Choose the next whole cost class (remaining materialization, rounds, refcounts) from a fresh profile instead of adding helpers | V3b measured, V2 merged or rejected | Bounded schema with application/FIFO/durability semantics preserved; independent CPU pairs | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
 | Done C15: batched admission uses the pending bound | Same fast path for ready batches | C14 | Linux/Mac pairs; suites | T4 |
 | Done C14: proposal validation from a pending bound | Admission no longer scans every pending command when the count already settles it | — | Linux/Mac pairs; unit test; suites | T4 |
@@ -70,6 +71,96 @@ implemented or benchmarked; unsafe variants are not offered as options.
 Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider than
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
+
+#### V3b schema plan: shared frozen batches with validation reuse (planned)
+
+Design: `target/claude/research-r1/architect-plan-pr3x.md` §2.3 (3x-B) and the
+parts of §§2.4–2.8, 3 and 4 that apply. Base: PR 6 (`cpu/entry-staging`,
+V3a) on main 30a1f6c5; V2 is not composed. Planned work, not evidence.
+
+Data/API shape (new `src/log/entries.rs`, re-exported from `voteboat::log`):
+
+- Private `BatchData { entries: Box<[LogEntry]>, facts }` behind an `Arc`,
+  immutable after construction. Facts are computed by one inspecting pass at
+  freeze: whether the backing is *sealed* (indices consecutive from the first,
+  every term positive and nondecreasing), the full backing charge
+  (`len × size_of::<LogEntry>()` plus every retained payload), and the
+  per-entry metrics needed by receivers: payload bytes, non-noop and
+  configuration presence, maximum payload and maximum activated
+  configuration. A backing whose entries all have the same metrics stores
+  them once (*uniform*: every singleton and the empty-command bulk workload);
+  a mixed backing stores prefix sums so any subrange's payload total and
+  presence counts are exact in O(1); its maxima are backing-wide and are used
+  only to *accept* a subrange quickly; otherwise the exact visible-range scan
+  runs. Arithmetic overflow leaves the facts absent and the old loops run.
+- `pub struct EntryBatch` — an ordered list of exact ranges of backings
+  (`Empty`, one span, or many), its visible length and the combined range
+  facts (absent unless every span is sealed and each join is index+1 with a
+  nondecreasing term). Read-only: `len`, `is_empty`, `first`, `last`, `get`,
+  `iter`, `slices`, `slice(range)`, `contiguous() -> Cow<[LogEntry]>`,
+  `to_vec`, `retained_bytes`; `Index<usize>`, logical `Eq`/`Debug`,
+  `Clone` (refcounts only), `Default`, `From<Vec<LogEntry>>`,
+  `FromIterator<LogEntry>`, `PartialEq<Vec<LogEntry>>`. No mutable access, no
+  Arc accessor, no caller-supplied facts; an edit is `to_vec` → edit →
+  `into()`, which re-inspects.
+- `pub struct EntryLog` — the canonical log as cumulative-indexed chunks of
+  spans, same read-only queries plus `range(range)` (iterator),
+  `shared_range(range) -> EntryBatch`, and crate-private `append`,
+  `truncate`, `trim_prefix`, `clear`, which change descriptors only. Adjacent
+  views of the same backing coalesce. `retained_bytes` is the cached sum of
+  each chunk's full backing charge.
+- `EntryRange<'a>` — a borrowed canonical interval (`iter`, `slices`,
+  `contiguous`, `to_vec`, `len`) returned by `CompletionEffects::committed`
+  / `into_parts` and `Raft::replay_committed`.
+- `StateMachine::apply_entries(&mut self, EntryRange<'_>)` — new provided
+  method with the default `apply_batch(&entries.contiguous())`: one
+  application call per completion, as before; an implementation may iterate
+  the segments without materializing them.
+
+Public breakage: `GroupLog.entries: EntryLog`, `Suffix.entries: EntryBatch`,
+`Rpc::Append.entries: EntryBatch`; Vec literals migrate with `.into()`, slice
+indexing by range and in-place mutation of these fields end. The
+`CompletionEffects` and `replay_committed` return types change to
+`EntryRange`. `LearnerRepair.entries`, `Effect::Committed`, `Proposal`,
+`propose_batch`, `Event::Propose`, `ProposalBatch` and `propose_entries` keep
+their shapes.
+
+State transitions and ownership: `propose_entries` stamps index/term (V3a)
+and freezes the Vec into one backing; the pending plan owns that batch; the
+volatile install appends its descriptor to the canonical log; `append_for`
+and retries select the identical maximal prefix (the old `37 + payload` and
+256-byte allowance, same equality boundary) from facts and send
+`shared_range` clones; a follower slices the received batch at its first new
+entry, plans it against its own log and installs descriptors. Durable cores
+still emit `Effect::Persist(update)`; the core's own copy is a refcount clone.
+Compaction removes whole chunks and rebases a partial first chunk. Facts are
+intrinsic only: every receiver still checks its own predecessor, terms
+against its hard/message term, limits, commit, revision, ballot, membership,
+configuration scope and overlap contents; equality of separately allocated
+entries is a content comparison (same backing and position is a shortcut,
+never consensus evidence).
+
+Failure/cleanup: freezing never fails (unsealed content takes the old
+validators and is rejected or accepted on its merits); refused plans drop
+their clones; canonical logs change only at install, after every fallible
+check; fencing drops the pending batch; the last owner's drop frees a backing.
+An old RPC or pending plan keeps its immutable contents after a local
+truncate or compaction. A partial chunk pins its whole backing, and is
+charged for it.
+
+Wire and WAL: encoders iterate visible entries; tags, counts, order, fields,
+checksums and versions are unchanged. Decoders build a Vec and freeze it;
+malformed content is still rejected where it was before.
+
+Harness: only VoteBoat's adapter changes: `Noop` iterates
+`apply_entries` segments with the same per-entry checks, `apply_entries` is
+called where the borrowed interval was applied, and `message_cost` keeps its
+call site. The collection loop, width ceiling, deferral rule and reply order
+are untouched, so persists and sends per original are unchanged; OpenRaft is
+untouched.
+
+Acceptance checks: listed in the mini-plan row; plus no `unsafe`, no new
+crate, no lint change, and new tests independent of time, cores and ports.
 
 #### V3a implemented: direct entry staging (measurement pending (runner))
 
