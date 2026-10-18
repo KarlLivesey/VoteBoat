@@ -36892,9 +36892,15 @@ nice sample is seen in the corrected direct test executable metadata.
 
 Activation-nested E1 run 2 fails 13/14 pass in 417.30 s, following its first
 14/14 pass in 393.07 s. Root: the original 15 s CloseDrained deadline at
-`cluster.rs:216`; its diagnostic already shows all three original nodes Drained
-with no provider failure. This is a fixture deadline/order-of-observation issue
-for TR4 investigation, not a port failure. The assertion is unchanged, the
+`cluster.rs:216`; its complete diagnostic shows two nodes Drained and one still Draining, all
+without provider failure. This remains a close/deadline investigation for TR4;
+the underlying cause is not yet established. It is not a port failure. The assertion is unchanged, the
 failing row is not retried, and later repetitions stop. Both runs and complete
 diagnostics are archived in `failed-proof-1ec4a1dc/logical_activation_nested.tar.gz`.
 The final touched nested-native binary and full suites remain active.
+
+Diagnostic correction: the prior short summary incorrectly described all three
+nodes as Drained. A parse of the complete preserved diagnostic returns
+`[(Drained,None,true), (Draining,None,false), (Drained,None,true)]`. The summary
+and PR are corrected; no raw evidence changes. No claim that the done predicate
+was already true, or that a library close defect is ruled out, is justified.

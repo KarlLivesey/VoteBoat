@@ -7711,7 +7711,7 @@ requested repetitions continue. Corrected direct metadata has positive nice11/
 short tests, and no observed negative-priority reset.
 
 Activation-nested's second constrained execution fails 13/14 in417.30s after
-first14/14 in393.07s. The original CloseDrained real deadline fails while all
-three diagnostic nodes are already Drained/no provider failure. No assertion
+first14/14 in393.07s. The original CloseDrained real deadline fails with two diagnostic nodes
+Drained and one still Draining, all without provider failure. No assertion
 or bound is changed; further repetitions stop and both outcomes are archived.
 Remaining TR4 clock/observation work blocks its complete reliability proof.
