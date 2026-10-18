@@ -26,7 +26,7 @@ fn logical_facade_close_drives_original_held_checkpoint_quic() {
 }
 
 fn history(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut cohort = Cluster::new_with_application(protocol, fixture::child_application());
     let clock = cohort.clock;
     let mut bridge =

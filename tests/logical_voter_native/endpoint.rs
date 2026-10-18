@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::{
-    cluster::{Cluster, HISTORY},
+    cluster::{serial, Cluster},
     setup, support,
 };
 use voteboat::{
@@ -101,7 +101,7 @@ fn refused_alias(protocol: NativePeerProtocol, voter_alias: bool) {
     host.finish();
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut host = Cluster::new(protocol);
     let leader = host.leader().unwrap();
     assert_eq!(

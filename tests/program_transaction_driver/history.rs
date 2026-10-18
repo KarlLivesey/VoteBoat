@@ -25,7 +25,7 @@ pub fn assert_values(host: &mut Cluster, value: i64, version: u64) {
     }
 }
 fn commit_refusal(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut host = Cluster::new(protocol, 4, [100, 100]);
     let original = program(1, 0, 90);
     let clock = host.clock;
@@ -74,7 +74,7 @@ fn quic_commit_original_retry_other_coordinator_and_version_refusal() {
     commit_refusal(NativePeerProtocol::Quic)
 }
 fn capacity(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut host = Cluster::new(protocol, 1, [100, 100]);
     let original = program(10, 0, 90);
     let clock = host.clock;

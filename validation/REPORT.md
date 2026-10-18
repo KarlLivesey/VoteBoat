@@ -7632,3 +7632,21 @@ review qualifies runtime behavior; changed Linux/Mac histories remain required.
 Final384 runs frozen383 source with unchanged production379, and has seven later
 fixture deltas versus current388. CURRENT_COMPARISON388.json records the exact
 scope; no final whole-current matrix claim is made while it runs.
+
+## TR1b reliability track — 18 October 2026 (qualification in progress)
+
+The parent `30a1f6c5` port race is reproduced: simultaneous all-feature
+`logical_voter_native` copies pinned to CPUs 0–3 at relative nice +19 produced
+0/42 (`AddrInUse` + 41 poison cascades) and 42/42. CI now exposes all binaries
+and configurations; seven fixture ladders use held cross-process port leases,
+and their serial helpers recover poison. The route-discovery accepted socket
+now explicitly selects blocking mode; production listeners already set their
+required mode, so this slice changes no production behavior.
+
+Focused tests: fixture isolation 3/3 and route-discovery 8/8. A subsequent new
+cleanup check's own free-port race failed; it is fixed by an isolated lock-test
+namespace and then passes 3/3. Raw failure is retained. CI stub controls verify
+all three configurations execute and the overall step remains red on any
+failure. Full repeated proof and suites are pending, not implied by these
+focused results. See the reliability section in `docs/IMPLEMENTATION.md` and
+`validation/reliability/tr1b/` for source-bound outcomes.

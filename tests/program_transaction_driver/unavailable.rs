@@ -3,7 +3,7 @@ use super::{cluster::*, drive::*, history::assert_values};
 use std::time::{Duration, Instant};
 use voteboat::{native::connect::NativePeerProtocol, program_transaction::*};
 fn unavailable(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut host = Cluster::new(protocol, 8, [100, 100]);
     let original = program(60, 0, 96);
     let clock = host.clock;

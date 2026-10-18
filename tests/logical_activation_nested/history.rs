@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Karl Livesey
 use super::{
     business,
-    cluster::{Cluster, HISTORY},
+    cluster::{serial, Cluster},
     enrollment,
     lower::Lower,
     parts, progress, setup, Top,
@@ -61,7 +61,7 @@ fn history(
     unknown: bool,
     uncommitted: bool,
 ) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let clock = Instant::now();
     eprintln!("356 original_nine_bootstraps");
     let mut clusters = (0..3)

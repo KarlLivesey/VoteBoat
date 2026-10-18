@@ -15,7 +15,7 @@
 use super::{
     aliases::Bridge,
     claim,
-    cluster::{Cluster, HISTORY},
+    cluster::{serial, Cluster},
     parent::Parent,
     setup, support,
 };
@@ -27,7 +27,7 @@ use voteboat::{
 pub fn history(
     control: impl FnOnce(&mut [Bridge<'_>], &mut [Parent], &[LogicalPeerDescriptor], &[Instant]),
 ) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut clusters = (0..3)
         .map(|slot| Cluster::new(NativePeerProtocol::TcpTls, slot))
         .collect::<Vec<_>>();

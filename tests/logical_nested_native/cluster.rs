@@ -5,7 +5,7 @@ use std::{
     net::{SocketAddr, TcpListener, UdpSocket},
     path::PathBuf,
     sync::{
-        atomic::{AtomicU64, AtomicUsize, Ordering},
+        atomic::{AtomicU64, Ordering},
         Arc, Mutex,
     },
     time::{Duration, Instant},
@@ -32,8 +32,10 @@ enum NativeWaitStage {
     CloseCatchUp,
 }
 pub static HISTORY: Mutex<()> = Mutex::new(());
+pub fn serial() -> std::sync::MutexGuard<'static, ()> {
+    support::serial::serial(&HISTORY)
+}
 static NEXT: AtomicU64 = AtomicU64::new(1);
-static LISTENER: AtomicUsize = AtomicUsize::new(0);
 pub struct Cluster {
     pub nodes: Vec<ChildNode>,
     pub slot: usize,
@@ -41,6 +43,7 @@ pub struct Cluster {
     pub clock: Instant,
     root: PathBuf,
     addresses: [SocketAddr; 3],
+    ports: support::ports::PortLease,
     protocol: NativePeerProtocol,
 }
 impl Cluster {
@@ -51,15 +54,18 @@ impl Cluster {
             NEXT.fetch_add(1, Ordering::Relaxed)
         ));
         std::fs::create_dir(&root).unwrap();
+        let ports = support::ports::PortLease::acquire(3);
         let mut host = Self {
             nodes: Vec::new(),
             slot,
             representative: support::node(slot as u64 * 3 + 1),
             clock,
             root,
-            addresses: addresses(),
+            addresses: ports.addresses(),
+            ports,
             protocol,
         };
+        host.ports.handoff();
         host.open(NativeOpenMode::Create);
         host
     }
@@ -355,24 +361,4 @@ impl Cluster {
         self.close();
         std::fs::remove_dir_all(self.root).unwrap();
     }
-}
-fn addresses() -> [SocketAddr; 3] {
-    let held = (0..3)
-        .map(|_| {
-            (0..32)
-                .find_map(|_| {
-                    let port = 20000 + LISTENER.fetch_add(1, Ordering::Relaxed) % 10000;
-                    let tcp =
-                        TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, port as u16)).ok()?;
-                    let udp = UdpSocket::bind(tcp.local_addr().ok()?).ok()?;
-                    Some((tcp, udp))
-                })
-                .expect("owned TCP and UDP listeners")
-        })
-        .collect::<Vec<_>>();
-    held.iter()
-        .map(|(tcp, _)| tcp.local_addr().unwrap())
-        .collect::<Vec<_>>()
-        .try_into()
-        .unwrap()
 }

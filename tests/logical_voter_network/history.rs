@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::{
-    cluster::{Cluster, HISTORY},
+    cluster::{serial, Cluster},
     host::Host,
     setup,
 };
@@ -187,7 +187,7 @@ fn assembly_refusals(child: &mut Cluster) {
     assert_eq!(before, after);
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut children = std::array::from_fn(|slot| Cluster::new(protocol, slot));
     assembly_refusals(&mut children[0]);
     let mut host = Host::new(&mut children, protocol, 9201);

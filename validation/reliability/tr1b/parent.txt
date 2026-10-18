@@ -1,0 +1,4 @@
+Parent 30a1f6c59a9cc760562ca55736c517d4d3fb0d24, all features:
+taskset -c 0-3 nice -n 19 <logical_voter_native executable>, two simultaneous copies.
+A: exit 101, 0 passed / 42 failed, 0.02 s; one AddrInUse, 41 PoisonError cascades.
+B: exit 0, 42 passed / 0 failed, 17.58 s.

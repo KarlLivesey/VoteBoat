@@ -104,7 +104,7 @@ fn read_cancel(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: Instant) {
     assert_eq!(node.local().applications[&group].read_calls(), before + 2);
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut cohort = Cluster::new_with_application(protocol, fixture::child_application());
     let clock = cohort.clock;
     let mut bridge =

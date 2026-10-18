@@ -12,7 +12,7 @@ use voteboat::{
 };
 #[test]
 fn original_backing_checkpoint_admission_preserves_scope_and_waits_for_durability() {
-    let _guard = HISTORY.lock().unwrap();
+    let _guard = serial();
     let clock = Instant::now();
     let mut cluster = Cluster::new(NativePeerProtocol::TcpTls, 0, clock);
     {
@@ -89,7 +89,7 @@ fn original_backing_checkpoint_admission_preserves_scope_and_waits_for_durabilit
 
 #[test]
 fn recovered_backing_checkpoint_covers_new_original_claim_before_join() {
-    let _guard = HISTORY.lock().unwrap();
+    let _guard = serial();
     let clock = Instant::now();
     let mut cluster = Cluster::new(NativePeerProtocol::TcpTls, 0, clock);
     let original = claim(&mut cluster, 400001);

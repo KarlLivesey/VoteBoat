@@ -36673,3 +36673,85 @@ User requests current-chain wrap-up, everything committed/pushed, then stop. All
 
 
 Final487 wrap-up archive verification passes: Linux1208payload/1205original/278gzip, Mac1097/1094/44, independent central119/115/50. All recursive seals, original hashes/lengths/modes and lossless containers match. Root's final central reader initially expected a redundant older container_bytes manifest field; the focused parser correction retains exact container SHA/recursive seal/original length checks, with the initial script/error preserved and no data/workload rerun. All owned benchmark, collection, analysis and archive jobs are terminal; final enabled-hook commit/push and clean-tree verification precede pause. No next profiling or optimization is started.
+
+## Active reliability track — started 18 October 2026
+
+The binding target is reliable suites from Raspberry Pis to large hosts,
+including GitHub's 3–4 core runners, without weakened assertions, ignored tests,
+retries or changed library guarantees. The architect's TR track remains active;
+TR1b is a bounded isolation/CI slice, not full hardware-independence qualification.
+
+### Reliability macro plan (planned)
+
+| Milestone | User-visible result | Status |
+| --- | --- | --- |
+| M1 | CI feedback is truthful and green | In progress: TR1 (R1 + TR1b), then TR2 inventory |
+| M2 | Simulated time wherever protocol time is simulated | Planned across TR1–TR11 |
+| M3 | Isolation: no cascades or collisions | In progress in TR1; remaining fixtures through TR12 |
+| M4 | Real-time tests bounded by events and ratios | Planned TR12–TR16 |
+| M5 | Full-suite proof | Planned TR17; every earlier slice records bounded evidence |
+
+### Reliability mini plan (planned)
+
+| Deliverable | Purpose | Dependencies | Completion checks | Milestone |
+| --- | --- | --- | --- | --- |
+| TR1 (R1 + TR1b) | R1 replaces activation-driver fixture time and poison cascades; TR1b exposes all CI failures, isolates seven port ladders and makes accept mode explicit | Architect classification; independent builder branches; existing injected clock/native startup contracts | Parent failure evidence; per-binary reliability matrix; fmt/four strict Clippy profiles/matched checks; sequential full suites; runner and two reviews | M1, M2, M3 |
+| TR2 | Inventory all newly visible failures, ratchet hardware dependencies, probe retained-action exhaustion | TR1 CI visibility and deterministic fixture clocks | All configurations/binaries inventoried; std-only ratchet; idle-leader probe result and ranked follow-ups recorded | M1, M2, M5 |
+| TR3 | Quiescent pacing and logical-voter family isolation | TR2 inventory; read-only backing usage seam L1; existing readiness contracts | Logical voter/network suites and activation driver re-proved, including disk contention; TestDir adopted locally | M2, M3 |
+
+### TR1b schema plan (18 October 2026, before editing)
+
+Data/API: a test-only `PortLease` owns TCP/UDP reservations and exclusive
+cross-process file locks, with addresses read from bound sockets. Seven cluster
+fixtures own the lease after their node fields, so nodes drop before locks.
+Startup releases reservation sockets immediately before binding, while file
+locks survive close/reopen and listener-release assertions. Linux ephemeral
+ranges are excluded so outgoing dials cannot claim a fixture port. Persistent
+lock files are never unlinked (unlinking permits two lock inodes); kernel locks
+release on exit and unwind. An in-process registry prevents local reuse.
+
+State transitions: acquire lock + both sockets -> handoff sockets -> native
+startup -> optional shutdown/reopen -> release checks -> drop lease. Failed
+allocation drops partial reservations; startup failure drops nodes then leases.
+Each owning binary gets one poison-recovering `serial()` helper for its `()`
+mutex; the independent R1 builder owns activation-driver call sites.
+
+The lease helper is needed for M3 because peers require addresses before
+startup; probe/drop alone leaves the confirmed cross-process race. No production
+startup API or dependency is added. The native listener already explicitly sets
+accepted streams nonblocking (`src/native/connect.rs`); service listeners do too.
+The route-discovery fixture instead needs explicit blocking mode. A Linux test
+will simulate inherited nonblocking mode and inspect the resulting socket flag.
+
+CI keeps configurations sequential, adds `--no-fail-fast` within each, records
+all three statuses, and exits nonzero if any failed. Operator recovery also
+continues through its selected binaries. Acceptance: parent two-copy failure,
+required direct-binary proof matrix, unchanged release assertions, mode/lease/
+poison tests, all lint gates, and sequential full-suite counts. Failures remain
+evidence and are classified, never retried unchanged into a passing claim.
+
+#### TR1b implemented
+
+Implementation and qualification in progress. Evidence is added here only after
+commands finish; planned checks above are not claimed as passes.
+
+TR1b implementation: both workflows now request `--no-fail-fast`; platform
+configuration exits are aggregated without overlapping executable builds. All
+seven port ladders use the shared lease helper; owning serial call sites recover
+poison on `()` only (including the shared logical-network fixture). The native
+listener and the other two cited bin-fixture accept helpers already explicitly
+select nonblocking mode. Only route-discovery's blocking-read fixture needed a
+mode reset; **there are no production changes**.
+
+Parent evidence at `30a1f6c5`: simultaneous all-feature logical-voter-native
+copies yielded A **0/42** (one `AddrInUse`, then 41 poison cascades) and B **42/42**
+in 17.58 s. Raw logs are in `validation/reliability/tr1b/`. The CI shell was
+executed with a stub cargo failing each configuration in turn: all three always
+ran, and every injected failure left exit 1; the all-pass control exited 0.
+Initial focused isolation 3/3 and route-discovery 8/8 passed. A stronger cleanup
+check then failed because a released shared port was legitimately reacquired by
+another test before the check. The focused fix gives that lock-release check a
+private namespace (probes never handed off), while shared-namespace socket
+release is asserted only under an owned lease. The failed check is retained;
+no production assertion, timeout or guarantee was weakened. The private helper
+is needed solely to prove cleanup without assuming a freed port stays free.

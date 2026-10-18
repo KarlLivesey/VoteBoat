@@ -18,6 +18,9 @@ pub mod buffer;
 pub mod outbound;
 #[cfg(feature = "tls")]
 pub mod peer_fault;
+#[cfg(feature = "native")]
+pub mod ports;
+pub mod serial;
 pub mod snapshot;
 #[cfg(feature = "tls")]
 pub mod tls;

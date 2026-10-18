@@ -16,7 +16,7 @@
 //! are fabricated. Full recursive multi-voter qualification is a separate target.
 use super::{
     aliases::Bridge,
-    cluster::{Cluster, HISTORY},
+    cluster::{serial, Cluster},
     drive::claim_in,
     setup, support,
 };
@@ -56,7 +56,7 @@ fn logical_facade_original_provider_ownership_and_result_gates_quic() {
     history(NativePeerProtocol::Quic);
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut cohort = Cluster::new_with_application(protocol, fixture::child_application());
     let clock = cohort.clock;
     let image = cohort.claim(1, 8000, false);

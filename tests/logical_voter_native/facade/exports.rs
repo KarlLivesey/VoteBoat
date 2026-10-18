@@ -57,7 +57,7 @@ fn logical_facade_export_survives_abort_and_original_recovery_transfer_quic() {
 }
 
 fn history(protocol: NativePeerProtocol, abort: bool) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut cohort = Cluster::new_with_application(protocol, fixture::child_application());
     let clock = cohort.clock;
     let mut bridge =
