@@ -41,9 +41,9 @@ implemented or benchmarked; unsafe variants are not offered as options.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| In progress R1: deterministic simulated time in the activation driver fixtures | Platform feedback has failed on every main run since 17 October: the activation driver fixtures turned elapsed wall time into protocol time, so a slow host produced more heartbeats and exhausted child group 802's 128 retained actions; the first panic then poisoned the shared serialization lock for 25 more tests | Research report `target/claude/research-ci/dedup-capacity-root-cause.md` and its patch | `logical_activation_driver` 32/32 in 5 constrained (3 CPUs, nice 19, two owned burners) default-thread runs, 5 constrained serial runs and 3 unconstrained runs; unpatched failure reproduced once; fmt, four strict Clippy configurations, matched workspace fmt + Clippy; default, all-feature and no-default full suites; GitHub Actions green | Q1 |
-| Next R2: same simulated clock for `logical_voter_native` and `logical_activation_nested` | Both binaries still feed elapsed wall time to protocol time through the shared `Cluster`/`claim_in` path (left on `Instant` here) or their own clocks; the nested binary has the same 128-action upper budget | R1 harness | Same constrained/serial/unconstrained proof for each binary | Q1 |
-| Following R3: macOS `route_discovery` socket `WouldBlock` | Run 39052489549 failed in `authority_authentication_cannot_extend_the_lookup_deadline` (`src/bin/support/route_discovery/tests.rs:52`) with an unrelated non-blocking socket read | — | Root cause reproduced; event-driven wait with a generous ceiling; macOS run | Q1 |
+| In progress TR1a (PR 5, formerly R1), review round 2: deterministic simulated time in the activation driver fixtures | Platform feedback has failed on every main run since 17 October: the activation driver fixtures turned elapsed wall time into protocol time, so a slow host produced more heartbeats and exhausted child group 802's 128 retained actions; the first panic then poisoned the shared serialization lock for 25 more tests. Round 2 restores every liveness bound in protocol time, holds time while dial work or replicated progress is in flight, asserts the 64-action protocol budget and owns each port for the whole test | Research report `target/claude/research-ci/dedup-capacity-root-cause.md`; architect plan TR1 (b), (c), (f) | Parent `30a1f6c5` under E3; `logical_activation_driver` (`--all-features`) E1 ×10, E2 ×5, E3 ×10, E4 ×5 pairs, E5 ×3 with every run passing; retained protocol actions ≤ 64 in every cohort run; fmt, four strict Clippy configurations, matched workspace fmt + Clippy; all-feature full suite (other configurations: suite runner); two reviews | Q1 (M1, M2, M3) |
+| Next TR1b (PR 4, parallel): CI runs every binary, shared port leases, explicit accept mode | Covers the architect TR1 items this slice does not: (d) `set_nonblocking` in the bin tests (`route_discovery`, the macOS `WouldBlock`), (e) CI `--no-fail-fast` for all three configurations, (g) `validation/reliability-proof.sh`, and leases for the seven other port ladders. TR1a's in-binary `PortLease` uses the same namespace and pool and is swapped for the shared helper once both land | Architect plan; PR 4 review rounds | PR 4's own proof and reviews | Q1 (M1, M3) |
+| Following TR2/TR3: inventory, then the logical-voter family on the same clock | `logical_voter_native` still keeps wall-clock protocol time (its waits keep exactly their old 15 s wall bounds through the shared `Wait`), and `logical_activation_nested` has its own clocks and the same 128-action budget. A read-only bridge seam (L1) would let borrowed children's dial work and readiness hold time too | TR1a harness; TR1b CI visibility | Same matrix per binary; inventory of newly visible CI failures | Q1 (M2, M5) |
 | In progress H1: review round 3, preserve the benchmark instrument | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`); pinned matched workspace; quiet-Mac 30-pair buffer attribution result | All matched source byte-identical to flag-only `297aec15`; raw evidence preserved; matched tests; both fmt checks and five strict Clippy configurations; independent review of the reduced scope | T4 |
 | Done V1: core-canonical volatile log (merged 041fc3fb; Mac −18.8% bulk, −16.3% singleton CPU/write) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
 | Next V2: scalar commit-advance plan and smaller `Pending` | Commit-only rounds (~2.3 per singleton original) still build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices | V1 measured | Same twin tests; singleton framework pairs | T4 |
@@ -74,12 +74,14 @@ Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider th
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
 
-#### R1 schema plan: deterministic simulated time in the activation driver fixtures
+#### TR1a schema plan (formerly R1): deterministic simulated time in the activation driver fixtures
 
-(Unrelated to the earlier R1 storage-recovery slice below; R labels here are the
-test-reliability track.)
+(Named R1 in round 1; renamed TR1a to match the architect plan's TR track and to
+avoid the earlier R1 storage-recovery slice below. Round-1 text follows; the
+round-2 amendment after it supersedes the hold rule, hang guard and ports.)
 
-- Data/API: one test-local `SimClock` (shared `Rc<Cell<u64>>`) per test supplies
+- Data/API: one test-local `SimClock` (shared `Rc`) per independent node domain (one per
+  test, except `source_export`, whose two member domains each have their own) supplies
   every `MonoTime` the fixture hands to native children, logical parents, the
   activation driver and the outer parent sessions. Shared fixture helpers take
   `impl FixtureClock`; `Instant` keeps its wall-clock behaviour for
@@ -102,7 +104,7 @@ test-reliability track.)
   high-water mark independent of CPU constraint and disk latency; the proof runs
   and full suites in the mini plan.
 
-#### R1 implemented: deterministic simulated time in the activation driver fixtures
+#### TR1a round 1 implemented (formerly R1): deterministic simulated time in the activation driver fixtures
 
 Root cause (research report `target/claude/research-ci/dedup-capacity-root-cause.md`):
 the cohort fixtures converted `Instant::elapsed()` into protocol time. On a slow
@@ -171,6 +173,140 @@ remain asynchronous: this is deterministic protocol time, not a deterministic
 network simulator. The CI cleanup timeout at `cohort/members.rs:224` was a 15 s
 real wait in native member shutdown; it was not reproduced locally, and is
 covered by the same clock (shutdown in protocol time) and the 300 s guard.
+
+#### TR1a round 2 schema amendment (before editing, 18 October 2026)
+
+Round-1 reviews: Opus P1 (42 liveness waits widened to a 300 s real guard), Opus
+P2 (the TR1 (f) budget check missing), Sol P2 ×2 (clock advances during dial
+work; ports not continuously owned), seven Opus P3s.
+
+- Waits: `harness::Wait { start: MonoTime, limit_ms, guard }`. Each wait that was
+  15 s or 10 s of wall time asserts `now - start < 15_000` (or `10_000`) ms of the
+  fixture clock with its original message: exactly the old wall bound for the
+  `Instant` clock (`logical_voter_native`), the same number in protocol time for
+  `SimClock`. A separate `HangGuard` (600 s real, the plan's value) panics with
+  "hang guard …, not a timing assertion" and the clock's hold state, and warns once
+  past 150 s. Thread joins after close contain no protocol time and keep only the
+  guard.
+- Clock: `FixtureClock::round(Observed)`. `Observed` sums durable worker requests,
+  connector attempts in `Stage::Dialing` (owned nodes through
+  `peers().connector_usage()`, outer connectors through `usage()`), and hashes the
+  replica state (term, ballot, commit, last index, applied index per group) of
+  every polled node plus connector and session progress. `SimClock` advances 1 ms
+  only when durable = 0, dialing = 0 and the hash equals the previous round's.
+  Each hold ends without protocol time: worker and dial threads finish on their
+  own (dial `connect_timeout` is real time), and a hash change is finite committed
+  or applied progress. Raw descriptor readiness is deliberately not a hold signal:
+  write readiness of queued output waiting on a reconnect backoff would freeze
+  the very timer that clears it. Bridges expose no connector, so borrowed nodes'
+  dial work is not visible (seam L1 in TR3).
+- Budget: `cohort/retained.rs` classifies every retained record by its encoded
+  body and capsule-origin tag, cross-checked against the public receipt outcome
+  and operation id, at the end of each cohort workflow (records are insert-only,
+  so that is the peak), and asserts protocol actions ≤ 64 per child group. If the
+  count exceeded 64, stop and report; the budget is not raised.
+- Ports: `harness::PortLease` (same namespace `/tmp/voteboat-test-ports` with
+  `VOTEBOAT_TEST_PORT_LEASE_DIR` override, shared 0666 lock files and pool as PR
+  4's round-2 amendment): ports outside 1024–32767 and the kernel ephemeral range;
+  file lock for the lease lifetime; the unused protocol half bound for the whole
+  test including reopen; the node's half held until `handoff` immediately before
+  its bind and from `reclaim` (the release check) onward, per node as soon as that
+  node joins. A held TCP half closes each accepted connection on a small thread, so
+  an absent TCP node refuses promptly. Outer channels adopt both bound halves and
+  prove both released at close.
+- Acceptance: a delayed-dial regression test (with the round-1 policy as a
+  negative control), a lease test, and the proof matrix in the mini plan.
+
+#### TR1a round 2 implemented and validated (18 October 2026)
+
+Implemented at `8be8f84c` (tests only; `git diff origin/main...HEAD -- src` is
+empty). Round-1 review findings and their resolution are in PR 5's "Builder
+response (round 2)" comment.
+
+- `harness::Wait` restores every 15 s / 10 s liveness wait in protocol time:
+  42 sites in the activation-driver files and the shared `Cluster::wait`,
+  `Cluster::read` and `claim_in`, plus `progress::drain` and `close_peer`.
+  `HangGuard` is 600 s per wait, warns past 150 s and prints the clock's hold
+  state (protocol time, consecutive held rounds, last hold reason).
+- `SimClock` quiescence: durable worker requests, dial attempts and a hash of
+  observed replica, connector and session progress. Outer channel establishment
+  and close no longer advance time while dialing.
+  `delayed_dial_completion_holds_protocol_time_until_ingested` delays a completion
+  by 20,000 host rounds; its negative control (the round-1 policy) gets
+  `ConnectError::Timeout` for an existing connection.
+- `cohort/retained.rs` and the per-group assertion in `Members::finish`
+  (`336 retained …` trace).
+- `harness::PortLease` replaces `Reservation` in `Cluster`, cohort `Members`,
+  single-cohort `Member` and outer `Channels`, with per-node reclaim.
+  `port_lease_owns_both_halves_and_refuses_while_the_node_is_absent` covers it.
+
+Group 802 protocol actions with `--nocapture` (own measurement runs, not part of
+the proof matrix):
+
+| Clock policy | Condition | QUIC | TCP | Max total of 128 |
+| --- | --- | --- | --- | --- |
+| Round 1 (durable hold only) | 4 runs, 3 owned burners | 56–62 | 48–53 | 94 |
+| Round 2 (quiescent) | 5 runs, 3 owned burners, absolute nice 19 | 52–59 | 48–52 | 91 |
+| Round 2 | unconstrained serial | 54–58 | 48–50 | 90 |
+
+Simulated workflow time fell from ~750 to ~390 ms (TCP) and from ~1,880 to
+~1,560 ms (QUIC). QUIC's extra ~1.1 s is spent in the fourth-member enrollment
+stage, waiting on QUIC handshake retransmission to a member that was not yet
+listening; that is protocol time, not a fixture artifact. The count still varies
+with the real completion order of worker I/O, so 64 holds with a margin of at
+least 5 in every measured run but is not proven.
+
+Proof matrix (`logical_activation_driver`, `--all-features`):
+
+Own processes only: each test binary was built once with `cargo +stable test --locked --offline --all-features --test logical_activation_driver --no-run` and run directly. The CPU burners were the runner's own `taskset -c N sh -c 'while :; do :; done'` processes on CPUs 1–3, killed by PID after each run. Every sample of the test process (114 of 114) showed affinity 0–3 at absolute nice 19 (`nice -n 39` clamps to 19, so `ananicy-cpp` or an inherited niceness cannot lower it). Other sessions kept the host load average at 13–21 throughout. Every execution is counted; there were no reruns.
+
+| Env | Command | Commit | Reps | Result | Wall time (s) |
+| --- | --- | --- | --- | --- | --- |
+| E0 parent | E3 below on the unpatched binary | `30a1f6c5` | 1 | **5 passed / 26 failed** (`DedupCapacity` at `cohort/progress.rs:41`, then `PoisonError` cascade; the original CI pattern) | 10.1 |
+| E1 | `taskset -c 0-3 nice -n 39 $BIN` | `8be8f84c` | 10 | 10/10 runs 34/34 | 26.5–32.6 |
+| E2 | E1 + `--test-threads=1` | `8be8f84c` | 5 | 5/5 runs 34/34 | 27.5–33.9 |
+| E3 | E1 + 3 owned burners on CPUs 1, 2, 3 | `8be8f84c` | 10 | 10/10 runs 34/34 | 53.8–145.8 |
+| E4 | two E1 copies started together | `8be8f84c` | 5 pairs (10 executions) | 10/10 executions 34/34 | 27.7–30.9 |
+| E5 | `cargo +stable test --locked --offline --all-features --test logical_activation_driver` (default threads, no pinning) | `8be8f84c` | 3 | 3/3 runs 34/34 | 25.3–27.8 |
+
+Notes on the matrix:
+- Hang-guard warnings across all executions: **0**.
+- The test count is 34: the original 31, round 1's poison-recovery test, and round 2's delayed-dial and port-lease tests.
+- An earlier attempt of the same E0 run passed 13 and failed 18 (32 s by its own summary). That attempt is excluded only because my runner script had a sampler bug that stalled the matrix; I fixed the script and restarted the whole matrix from E0.
+- Retained-action budget: the ≤ 64 protocol-action assertion ran at the end of every cohort workflow in all of these executions and never failed. Logs and `results.tsv` are in `target/claude/r2/proof/` in the builder worktree.
+
+Other validation at `8be8f84c`:
+- `cargo +stable fmt --all -- --check`: clean.
+- The four strict Clippy configurations: zero diagnostics.
+- Matched workspace fmt and strict Clippy: clean.
+- The enabled pre-push hook passed on push.
+- `cargo +stable test --locked --offline --all-features --no-fail-fast`
+  (7,143 s, loaded host): 2,760 passed, 1 failed. `logical_activation_driver`
+  passed 34/34 and `logical_voter_native` 42/42. The failure is
+  `native_relay::provider_refusal::actual_tcp_decoder_violation_returns_original_authenticated_frame_and_messages`
+  (`helper failure Session(Io(BrokenPipe))` at `tests/native_relay/cluster.rs:130`).
+  That binary shares no file with this change; it is relay fixture timing (TR5)
+  and was not rerun.
+- Slow disk (not in the matrix): with every `fsync`/`fdatasync` delayed 20 ms by
+  an `LD_PRELOAD` shim, the binary passed 34/34 under E1 in 403 s. Group 802 held
+  QUIC 53–56 and TCP 47–52 protocol actions, as on a fast disk, and there were no
+  hang-guard warnings. The research patch failed 10 of 32 tests under the same
+  delay.
+- The default-feature, no-default-feature and native-only full suites are the
+  suite runner's job and were not run here.
+
+Remote CI on the round-1 head (run 39119775187): `logical_activation_driver`
+passed 32/32 on both ubuntu and macOS. The run then failed in
+`logical_activation_nested`, which is unchanged here (TR4).
+
+Residuals:
+- Dial work and readiness of nodes borrowed by a bridge are invisible without
+  seam L1.
+- The startup bind window needs a pre-bound `listen` seam
+  (`src/native/startup.rs:878–909`). Only a process binding that exact port and
+  protocol outside the lease protocol could use it.
+- `logical_voter_native` keeps wall-clock protocol time with its exact old bounds
+  (TR3).
 
 #### H1 schema plan: worker setting and shared harness costs
 
