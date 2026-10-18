@@ -46,10 +46,9 @@ launch() {
   fi
   launched=$!
   children+=("$launched")
-  observe "$launched" "$1" "$log.meta"
 }
 observe() {
-  local pid=$1 expected=$2 metadata=$3 observed= start=$SECONDS actual state
+  local pid=$1 expected=$2 metadata=$3 constrained=$4 observed= start=$SECONDS actual state
   expected=$(realpath "$expected")
   printf 'pid=%s constrained=%s executable=%s\n' "$pid" "$constrained" "$expected" > "$metadata"
   cat /proc/loadavg >> "$metadata"
@@ -107,9 +106,12 @@ for suite in "$@"; do
       if [[ "$env" == E4 ]]; then
         launch "$output/$name-$env-$rep-b.log" yes "$exe"
         second=$launched
+        observe "$first" "$exe" "$output/$name-$env-$rep-a.log.meta" yes
+        observe "$second" "$exe" "$output/$name-$env-$rep-b.log.meta" yes
         record "$first" "$env" "$rep" a "$start"
         record "$second" "$env" "$rep" b "$start"
       else
+        observe "$first" "$exe" "$output/$name-$env-$rep-a.log.meta" "$constrained"
         record "$first" "$env" "$rep" a "$start"
       fi
       children=()

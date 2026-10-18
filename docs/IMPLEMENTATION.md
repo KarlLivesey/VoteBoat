@@ -36843,3 +36843,10 @@ dependence defect, not a passing proof. The failed binary is not retried
 unchanged; remaining binary proofs continue independently. Actual host load
 rises above the brief's 30–80 range (roughly 64 at launch, above 140 later);
 no foreign process, host daemon or priority is changed to make tests pass.
+
+Runner concurrency refinement: both E4 processes are now launched before any
+metadata collection. This matters for sub-millisecond isolation/feature-gated
+binaries: observing the first process must not postpone launching the second.
+The isolation control is requalified under this corrected launch ordering;
+long-running binaries already overlap but retain their original runner/source
+provenance in the evidence. This changes no Rust inputs or assertions.
