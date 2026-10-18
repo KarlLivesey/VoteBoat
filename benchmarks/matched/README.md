@@ -34,6 +34,11 @@ widths and persistence work per original. The quiet-Mac 30-pair buffer check
 found mean width +5.858% (wider in 30/30 pairs); the workload source now equals
 flag-only `297aec15` byte for byte. See [H1 evidence](validation/performance/h1/README.md).
 
+H2 changes VoteBoat's collection pass: it takes only the client requests queued
+when the pass starts, and peer progress arriving during a pass is handled before
+the next one. Results from before H2 are not comparable with later ones. See
+[COMPARISON.md](COMPARISON.md) and [H2 evidence](validation/performance/h2/README.md).
+
 One three-voter group, empty business payloads, 1024 singleton warmups and equal
 closed-loop per-client requests. Every request awaits all its original applied
 results. Requested totals round down like pinned OpenRaft. Primary defaults retain

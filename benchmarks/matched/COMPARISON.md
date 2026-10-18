@@ -96,5 +96,10 @@ proposals" wording more literally. Raft safety, persistence, per-original reply
 order and admission bounds are unchanged.
 
 Researcher measurement of H2 alone on main (quiet Mac): bulk-16 +0.4%, bulk-1
-+0.9%, singletons within ±1% CPU per write, p99 unchanged. Builder measurement:
-see `docs/IMPLEMENTATION.md`, "H2 implemented".
++0.9%, singletons within ±1% CPU per write, p99 unchanged. Builder measurement
+(five pairs, `validation/performance/h2/`): CPU per write ×1.008 bulk-16, ×0.991
+bulk-1, ×0.993 single-16, ×1.009 single-1. Bulk-16 rounds and width are
+unchanged. At one worker passes are about 18% narrower (rounds +22%), because
+main's one-worker passes, never cut by a peer message, also took requests that
+arrived during the pass. Singleton attribution parity is exact (leader persists
+264,195, width 1).

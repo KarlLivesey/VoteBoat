@@ -101,7 +101,45 @@ before any later gate.** New test
 fails on main's rule (pass width 4 instead of 12) and with peer/proposal
 priority swapped (catch-up append carries the next pass's entries).
 
-Measurement: pending (quiet Mac, `fwmac.sh 30a1f6c5 <head> 5`).
+Measured on the quiet Mac (M2 Max), main `30a1f6c5` against `65007ae2`, five
+interleaved pairs per cell (`fwmac.sh`), plus three counter runs per cell and one
+attribution run per cell; raw files in
+`benchmarks/matched/validation/performance/h2/`.
+
+| Cell | CPU ns/write main → H2 | Ratio | Rounds main → H2 | Mean width | p99 µs |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| bulk 4096×4, 16 workers | 248 → 250 | 1.008 | 7,791 → 7,760 | 513 → 515 | 2,370 → 2,312 |
+| bulk 4096×4, 1 worker | 219 → 217 | 0.991 | 13,040 → 15,865 | 307 → 252 | 2,574 → 2,687 |
+| single 1×1, 16 workers | 23,281 → 23,120 | 0.993 | — | 1 | 27.5 → 28.8 |
+| single 1×1, 1 worker | 13,300 → 13,419 | 1.009 | — | 1 | 24.5 → 22.8 |
+
+CPU is neutral in all four cells (within ±1%, inside each cell's pair spread).
+At 16 workers rounds and width are unchanged on main. At one worker H2 narrows
+passes by about 18%: main's one-worker passes were never cut by a peer message
+and ended on an empty queue, so they also took requests enqueued during the
+pass; H2 leaves those for the next pass. CPU stays neutral there too.
+
+Attribution parity (one `--attribution true` run per cell and revision):
+
+| Cell | Leader proposals | Leader persists | Max / mean width | Persists/original | Sends/original | Failures |
+| --- | ---: | ---: | --- | ---: | ---: | ---: |
+| single, main / H2 | 132,096 / 132,096 | 264,195 / 264,195 | 1 / 1 | 5.715086 / 5.718387 | 7.431580 / 7.438196 | 0 / 0 |
+| single1, main / H2 | 132,096 / 132,096 | 264,195 / 264,195 | 1 / 1 | 5.839155 / 5.833235 | 7.679688 / 7.667848 | 0 / 0 |
+| bulk, main / H2 | 7,717 / 8,133 | 12,789 / 13,228 | 3,424 / 597.3 → 2,544 / 562.3 | 0.005979 / 0.006068 | 0.007439 / 0.007631 | 0 / 0 |
+| bulk1, main / H2 | 12,650 / 15,717 | 17,637 / 20,663 | 2,384 / 343.9 → 1,908 / 272.1 | 0.007240 / 0.007988 | 0.007019 / 0.007047 | 0 / 0 |
+
+The singleton floor holds exactly (leader persists 264,195, width 1); follower
+persists and sends move by under 0.2%. All runs completed every original with
+equal final frontiers. Bulk-1 attribution shows the narrower passes (leader
+persists +17%).
+
+Checks run: matched tests 72/72 offline with the comparison lock; root and
+matched fmt; matched all-target strict Clippy; the enabled pre-push hook
+(four root strict Clippy builds plus matched fmt/Clippy) on push. Mutation
+checks: main's rule fails the new test at pass width (4 instead of 12), and
+swapping peer/proposal priority fails it at the catch-up append (entries to 21
+instead of 17). Not run: root test suites (no root source changed), Linux
+measurements (host occupied), remote CI.
 
 #### H1 schema plan: worker setting and shared harness costs
 
