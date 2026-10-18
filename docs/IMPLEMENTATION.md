@@ -34,17 +34,17 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | T0 Recovery always works | A crash at any point never prevents restart and never loses acknowledged state | Exhaustive damaged-tail recovery for native log and vote stores; acknowledged-prefix damage still detected |
 | T2 Cheaper durable barrier | Fewer physical syncs per group commit on CoW and non-CoW volumes | Only with a complete recovery/damage proof and no relaxation of acknowledged state; Btrfs, ext4/XFS, APFS |
 | T3 Wider group commit | Barrier cost amortized over everything queued | Native loaded writes/s and p99 improve with lower CPU/original; unchanged durability contract |
-| T4 Per-original CPU | Framework CPU/original materially below 248 ns bulk / 14.6 µs singleton | Profile-selected removals of per-original allocation/handoff with no semantic change |
+| T4 Per-original CPU | Framework CPU/original materially below the main baseline (old-rule, pre-H2 targets: 248 ns bulk / 14.6 µs singleton; to be re-measured under H2 when main is re-baselined) | Profile-selected removals of per-original allocation/handoff with no semantic change |
 
 ### Mini plan
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| In progress H2: ready-snapshot collection in the matched harness | The VoteBoat actor cut each proposal pass as soon as a peer message was queued, so batch width tracked follower reply latency and any faster replication path paid extra wake/park rounds at 16 workers (V3b: rounds 7.7k → 17.3k, sys 30 → 50 ns/write). A pass now takes only the requests queued when it starts; peer progress arriving during it is handled before the next pass. This changes the instrument for VoteBoat's actor only | H1 merged (`30a1f6c5`); researcher note `target/claude/research-r3/v3b-regression.md`. Next: re-baseline V3b on H2, then V3b-s (width-1 per-round overhead) | Actor test that a mid-pass peer message neither truncates the pass nor waits past the next pass; existing deferral/capacity tests; 72 matched tests; root and matched fmt; matched and four root strict Clippy builds; quiet-Mac 5 interleaved pairs × 4 cells against `30a1f6c5`; attribution parity controls side by side; main re-baselined before any later gate | T4 |
+| In progress H2: ready-snapshot collection in the matched harness | The VoteBoat actor cut each proposal pass as soon as a peer message was queued, so batch width tracked follower reply latency and any faster replication path paid extra wake/park rounds at 16 workers (V3b: rounds 7.7k → 17.3k, sys 30 → 50 ns/write). A pass now takes only the requests queued when it starts; peer progress arriving during it is handled before the next pass. This changes the instrument for VoteBoat's actor only | H1 merged (`30a1f6c5`); researcher note `target/claude/research-r3/v3b-regression.md`. Next steps in order: merge V2 (PR 3); merge H2 and re-baseline main under it; V3b-s (width-1 per-round overhead); then re-measure V3a/V3b rebased on V2 | Actor tests that a mid-pass peer message neither truncates the pass nor waits past the next pass, and that a request queued after the pass reads its ready count waits for the next pass; existing deferral/capacity tests; 73 matched tests; root and matched fmt; matched and four root strict Clippy builds; quiet-Mac 5 interleaved pairs × 4 cells against `30a1f6c5`; attribution parity controls side by side; main re-baselined before any later gate | T4 |
 | Done H1: server worker flag (merged `30a1f6c5`) | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`) | Matched source byte-identical to flag-only `297aec15`; matched tests; both fmt checks and five strict Clippy configurations; independent review | T4 |
 | Done V1: core-canonical volatile log (merged 041fc3fb; Mac −18.8% bulk, −16.3% singleton CPU/write) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
-| Next V2: scalar commit-advance plan and smaller `Pending` | Commit-only rounds (~2.3 per singleton original) still build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices | V1 measured | Same twin tests; singleton framework pairs | T4 |
-| Following V3: chunked canonical log with shared immutable batches | The batch V1 moves into pending becomes a shared chunk, removing the remaining two in-process per-peer clones | V1, V2 measured | Framework pairs on both cells; compaction/snapshot suites | T4 |
+| Next V2 merge (PR 3), then H2 merge and main re-baseline | V2: commit-only rounds (~2.3 per singleton original) still build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices. Both reviews approved and its benchmark accepted (Mac singleton −4.1%, old rule). Once V2 and H2 are on main, main is re-baselined under H2 so later gates compare like with like | V1 measured; H2 reviews | V2 full suites on its head, then merge; H2 merge; quiet-Mac main baseline, 4 cells, under H2 | T4 |
+| Following V3b-s, then V3a/V3b re-measured on V2 | V3b-s removes width-1 per-round overhead, which H2's narrower one-worker passes weight about 20% more. V3a (PR 6, entry staging) and V3b (`cpu/shared-batches`, shared immutable batches removing the remaining in-process per-peer clones) are rebased on V2 and re-measured against the H2 main baseline | H2 merged and main re-baselined; V2 merged | Framework pairs on all four cells against the H2 baseline; compaction/snapshot suites | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
 | Done C15: batched admission uses the pending bound | Same fast path for ready batches | C14 | Linux/Mac pairs; suites | T4 |
 | Done C14: proposal validation from a pending bound | Admission no longer scans every pending command when the count already settles it | — | Linux/Mac pairs; unit test; suites | T4 |
@@ -140,6 +140,69 @@ checks: main's rule fails the new test at pass width (4 instead of 12), and
 swapping peer/proposal priority fails it at the catch-up append (entries to 21
 instead of 17). Not run: root test suites (no root source changed), Linux
 measurements (host occupied), remote CI.
+
+#### H2 round 2: review fixes (19 October 2026)
+
+Schema plan. No data/API shape or scheduling change. One test-only seam:
+`Actor.after_ready: Option<Box<dyn FnOnce() + Send>>`, compiled only under
+`cfg(test)`, taken and run once inside `collect` right after `ready` is read, so
+a test can enqueue a request after the snapshot. Release builds contain no field
+and no call. Acceptance: the new test fails on a drain-until-empty `collect`;
+the round-1 test fails, not hangs, if the actor loop exits early; docs record
+OpenRaft's rule, the measured alternative and the rationale. Decision (taken by
+the orchestrator): keep the ready snapshot.
+
+OpenRaft's rule, read in the pinned source (rev `e88bb407`):
+`merge_client_writes` (`openraft/src/core/merged_raft_msg_receiver.rs:188-232`)
+takes up to `api_batch_capacity` messages (default 4,096) with linger 0, and
+`mpsc_recv_deadline` (`rt/src/async_runtime.rs:282-298`) tries the receiver
+before the deadline, so a merge drains everything available, including arrivals
+during it. Notifications never cut a merge: the `rx_notification.peek()` in
+`process_raft_msg` (`raft_core.rs:1427`) is between API messages and needs
+`broadcast_submitted_on_append`, off by default (`config.rs:736-737`) and unset
+by the harness.
+
+The alternative, "no mid-pass peer check, take requests until the queue is
+empty", was measured in the V3b research: main bulk-16 +1.6%, bulk-1 −0.9%; V3b
+−12.0% / −14.6%. It leaves one-worker batching unchanged and is closer to
+OpenRaft. The snapshot was kept because a pass whose width is fixed at its start
+is independent of both follower reply timing and client arrival timing during the
+pass, so width tracks offered load only (SCHEMA.md's "already-ready original
+proposals"); drain-until-empty makes width depend on client wakeups during the
+pass, a scheduler effect both engines share but still not library work. H2's
++17% bulk 1-worker leader persists is accepted although H1's buffer candidate was
+rejected for +5.9% width: H1's change was an unintended side effect of a runtime
+change under the same rule, while H2's is the stated rule itself, applied to base
+and candidate alike, with main re-baselined before any gate. Every absolute bulk
+1-worker number and every VoteBoat-versus-OpenRaft comparison from before H2 is
+old-rule and not comparable.
+
+Deferral exception, now stated in SCHEMA.md, COMPARISON.md and README.md: a
+request deferred at the proposal ceiling runs as the next pass before the biased
+select, so peer progress can wait two passes. No valid scoring configuration
+reaches it (each ceiling is request capacity × request width 1 or 4; singleton
+warmup ends before measurement). Scheduling is unchanged. COMPARISON.md now says
+H2 trades two SCHEMA.md clauses: "already-ready" read literally, and "peer
+progress precedes more data" relaxed from per request to per pass.
+
+Tests. New `collection::a_request_queued_after_the_pass_starts_waits_for_the_next_pass`
+enqueues through the seam after the snapshot, with zero and with two ready
+requests: the passes are 4 and 12 wide, the late request stays queued, and the
+next pass takes it alone (its operation IDs checked). The round-1 test now drives
+the loop through `select!` with a poll-count bound, panicking with the loop's
+result if it ends early. A first version polled the loop again after a timer
+driver turn, so a heartbeat tick sometimes duplicated the catch-up append (10 of
+100 runs); the watcher now sees the pass in the same poll and stop precedes any
+later tick (0 of 200 runs; the round-1 version was 0 of 100).
+
+Checks run: matched tests 73/73 offline with the comparison lock; root and
+matched fmt; matched all-target strict Clippy; the enabled pre-push hook on
+push. Mutation checks: a drain-until-empty `collect` fails the new test at the
+zero-ready pass (width 8 instead of 4); an actor loop that returns an error at
+start fails the round-1 test at once ("actor loop ended before the next pass")
+instead of hanging. No non-test code path changed, so the round-1 measurements
+stand and were not repeated. Not run: root test suites (no root source changed),
+remote CI.
 
 #### H1 schema plan: worker setting and shared harness costs
 

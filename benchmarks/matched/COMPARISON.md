@@ -91,9 +91,57 @@ From H2, a pass takes only the requests already queued when it starts, within
 the same `max_proposal_entries` ceiling and the same deferral rule. Peer messages
 queued before a pass are still handled first by the biased loop; peer progress
 that arrives during a pass is handled before the next pass, so it waits at most
-one bounded pass. This also matches SCHEMA.md's "already-ready original
-proposals" wording more literally. Raft safety, persistence, per-original reply
-order and admission bounds are unchanged.
+one bounded pass. One path is excepted: a request deferred because it would
+cross the ceiling runs as the next pass before the biased select, so peer
+progress can then wait two passes (more under repeated deferrals). That path
+cannot occur in any valid scoring configuration: each proposal ceiling is the
+request capacity times the request width (1 or 4, `envelopes.rs:18-27`), and
+singleton warmup ends before measurement starts. H2 trades two SCHEMA.md clauses: it reads "already-ready
+original proposals" more literally, and it relaxes "peer progress precedes more
+data" from per request (the old mid-pass check) to per pass. Raft safety,
+persistence, per-original reply order and admission bounds are unchanged.
+
+What the pinned OpenRaft core does (rev `e88bb407`). Its API receiver merges
+consecutive client writes in `BatchRaftMsgReceiver::merge_client_writes`
+(`openraft/src/core/merged_raft_msg_receiver.rs:188-232`, loop at 201-229): it
+takes up to `api_batch_capacity` messages (default 4,096, `config/config.rs:76`;
+64 under Common64) with `api_batch_linger_ms` 0 (`config.rs:77`). Each step calls
+`mpsc_recv_deadline` (`rt/src/async_runtime.rs:282-298`), which tries the
+receiver before checking the deadline, so with zero linger it takes every
+message already available, including ones that arrive while it is merging, and
+stops on an empty queue or a non-mergeable API message. Follower and log
+notifications never cut a merge: the only notification check,
+`rx_notification.peek()` in `process_raft_msg` (`core/raft_core.rs:1427`), sits
+between API messages and applies only when `broadcast_submitted_on_append` is
+on, which defaults to off (`config.rs:736-737`); the harness sets neither option.
+So OpenRaft was never subject to the old VoteBoat cut, and it is not a ready
+snapshot either: it drains until empty.
+
+The alternative was measured. The researcher's V3b study tried "drop the
+mid-pass peer check and keep taking requests until the queue is empty" (quiet
+Mac, three pairs, CPU per write against main in the same session): main bulk-16
++1.6%, bulk-1 −0.9%; V3b bulk-16 −12.0%, bulk-1 −14.6%. It removes the same
+feedback loop, leaves one-worker batching unchanged (the peer cut never fired at
+one worker) and is closer to OpenRaft's merge.
+
+This PR keeps the ready snapshot instead. A pass whose width is fixed when it
+starts is independent of both follower reply timing and client arrival timing
+during the pass, so batch width tracks offered load only; that is the
+"already-ready original proposals" reading of SCHEMA.md. Drain-until-empty would
+make width depend on how many clients the scheduler wakes while the pass runs.
+Both engines share that scheduler effect, but it is still not library work. At
+one worker this makes VoteBoat's passes about 18% narrower than main's and than
+an OpenRaft-like drain.
+
+That +17% in bulk 1-worker leader persists is accepted even though H1's buffer
+candidate was rejected for widening merges by 5.9%. H1's width change was an
+unintended side effect of a runtime change that altered server work under the
+same rule. H2's is the stated rule itself, applied to base and candidate alike,
+and main is re-baselined under it before any gate.
+
+**Old rule.** Every absolute bulk 1-worker number from before H2, and every
+VoteBoat-versus-OpenRaft comparison from before H2, was measured under the old
+rule and is not comparable with H2 results.
 
 Researcher measurement of H2 alone on main (quiet Mac): bulk-16 +0.4%, bulk-1
 +0.9%, singletons within ±1% CPU per write, p99 unchanged. Builder measurement

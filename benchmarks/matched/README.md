@@ -36,7 +36,9 @@ flag-only `297aec15` byte for byte. See [H1 evidence](validation/performance/h1/
 
 H2 changes VoteBoat's collection pass: it takes only the client requests queued
 when the pass starts, and peer progress arriving during a pass is handled before
-the next one. Results from before H2 are not comparable with later ones. See
+the next one (except after a ceiling deferral, which scoring cells cannot reach).
+Results from before H2, including bulk 1-worker numbers and VoteBoat-versus-OpenRaft
+comparisons, are not comparable with later ones. See
 [COMPARISON.md](COMPARISON.md) and [H2 evidence](validation/performance/h2/README.md).
 
 One three-voter group, empty business payloads, 1024 singleton warmups and equal

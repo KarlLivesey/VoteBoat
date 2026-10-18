@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 //! Collection passes take the client requests already queued when they start.
-//! Peer progress that arrives during a pass waits for that pass, and the biased
-//! loop handles it before the next pass.
+//! Requests and peer progress that arrive during a pass wait for that pass, and
+//! the biased loop handles the peer progress before the next pass.
 use super::*;
 
 // A non-zero slot leads so the actor loop does not start with a campaign.
@@ -170,14 +170,32 @@ async fn peer_progress_during_a_pass_waits_for_it_and_precedes_the_next_pass() {
     // The loop handles the queued replies before the next pass proposes.
     assert!(clients[LEADER].try_send(request(17..=20)).is_ok());
     let stats = actors[LEADER].parts.stats.clone();
-    let leader = &mut actors[LEADER];
-    let (result, ()) = tokio::join!(leader.run_inner(), async {
-        while serde_json::to_value(stats[LEADER].read()).unwrap()["proposed_originals"] != 20 {
-            tokio::task::yield_now().await;
+    let proposed =
+        || serde_json::to_value(stats[LEADER].read()).unwrap()["proposed_originals"] == 20;
+    {
+        let run = actors[LEADER].run_inner();
+        tokio::pin!(run);
+        // Every input is already queued, so the first poll of the loop runs
+        // the next pass and the watcher sees it in that same poll; stop is
+        // then sent before any timer tick can be serviced. Bounding polls (not
+        // time) makes an early exit or a stall fail rather than hang.
+        let watcher = async {
+            for _ in 0..10_000 {
+                if proposed() {
+                    return;
+                }
+                tokio::task::yield_now().await;
+            }
+            panic!("actor loop did not run the next pass");
+        };
+        tokio::select! {
+            biased;
+            result = &mut run => panic!("actor loop ended before the next pass: {result:?}"),
+            () = watcher => {}
         }
         stop.send(true).unwrap();
-    });
-    result.unwrap();
+        run.await.unwrap();
+    }
     assert_eq!(
         leader_widths(&actors),
         widths(&[(4, 2), (12, 1)]),
@@ -207,4 +225,51 @@ async fn peer_progress_during_a_pass_waits_for_it_and_precedes_the_next_pass() {
         vec![(acknowledged, Some(acknowledged + 12), acknowledged)]
     );
     assert_eq!(actors[LEADER].parts.application.applied, acknowledged);
+}
+
+#[test]
+fn a_request_queued_after_the_pass_starts_waits_for_the_next_pass() {
+    let Replicas {
+        mut actors,
+        clients,
+        ..
+    } = replicas();
+    actors[LEADER].step(Event::Campaign).unwrap();
+    settle(&mut actors);
+    assert_eq!(actors[LEADER].parts.core.role(), Role::Leader);
+    let started = actors[LEADER].parts.core.state().last_index();
+    let arrive = |actor: &mut Actor, ids: std::ops::RangeInclusive<u128>| {
+        let client = clients[LEADER].clone();
+        actor.after_ready = Some(Box::new(move || {
+            assert!(client.try_send(request(ids)).is_ok());
+        }));
+    };
+
+    // Nothing is ready, so the pass is its first request only.
+    arrive(&mut actors[LEADER], 5..=8);
+    actors[LEADER].requests(request(1..=4)).unwrap();
+    assert!(actors[LEADER].after_ready.is_none(), "hook ran");
+    assert_eq!(leader_widths(&actors), widths(&[(4, 1)]));
+    assert_eq!(actors[LEADER].parts.receiver.len(), 1);
+
+    // Two requests are ready behind the first; one more arrives mid-pass.
+    for ids in [9..=12, 13..=16] {
+        assert!(clients[LEADER].try_send(request(ids)).is_ok());
+    }
+    arrive(&mut actors[LEADER], 17..=20);
+    let first = actors[LEADER].parts.receiver.try_recv().unwrap();
+    actors[LEADER].requests(first).unwrap();
+    assert!(actors[LEADER].after_ready.is_none(), "hook ran");
+    assert_eq!(leader_widths(&actors), widths(&[(4, 1), (12, 1)]));
+    assert_eq!(actors[LEADER].parts.receiver.len(), 1);
+    assert_eq!(actors[LEADER].parts.core.state().last_index(), started + 16);
+
+    // The next pass takes the late request alone.
+    let late = actors[LEADER].parts.receiver.try_recv().unwrap();
+    let late_ids: Vec<_> = late.originals.iter().map(|o| o.operation).collect();
+    let expected: Vec<_> = (17..=20).map(|id| OperationId::new(id).unwrap()).collect();
+    assert_eq!(late_ids, expected);
+    actors[LEADER].requests(late).unwrap();
+    assert_eq!(leader_widths(&actors), widths(&[(4, 2), (12, 1)]));
+    assert_eq!(actors[LEADER].parts.core.state().last_index(), started + 20);
 }
