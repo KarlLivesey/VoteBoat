@@ -36904,3 +36904,36 @@ nodes as Drained. A parse of the complete preserved diagnostic returns
 `[(Drained,None,true), (Draining,None,false), (Drained,None,true)]`. The summary
 and PR are corrected; no raw evidence changes. No claim that the done predicate
 was already true, or that a library close defect is ruled out, is justified.
+
+### TR1b CI schema amendment and macro review (before editing)
+
+The owned default full-suite cargo process has run 5,780 s (96 minutes) and is
+still inside representative-relay enumeration. A single 90-minute job containing
+all configurations can therefore lose every later configuration on a job timeout,
+even with correct exit aggregation. This new measured dependency advances M1's
+scope: separate the three configurations into three chained OS-matrix jobs,
+each retaining the 90-minute limit. Explicit failure-tolerant `needs` conditions
+start the next configuration after the prior matrix completes unsuccessfully;
+manual workflow cancellation remains respected. Each job records/returns cargo's
+actual exit and keeps `--no-fail-fast`. No configuration overlaps its predecessor.
+
+Ownership/cleanup: each job gets its own runner checkout and target directory;
+GitHub owns job cleanup/timeouts. A failed/timed-out configuration stays red while
+later jobs proceed. Keep the pinned toolchain, fetch, macOS fd limit, both OSes
+and per-matrix fail-fast=false. Duplicate the small setup rather than introducing
+a new reusable action prerequisite. Acceptance: parse the workflow, verify the
+chain/conditions and three exact cargo invocations, execute every job script with
+controlled failures, and retain nonzero workflow/job results. Full-suite runtime
+and any remaining per-configuration timeout still belong in TR2's inventory;
+this change does not claim every configuration fits its 90-minute budget.
+
+CI amendment implemented: all-feature → no-default → native-only OS-matrix
+jobs are chained with `needs` and `always() && !cancelled()`. Each keeps its
+90-minute budget, both OSes and macOS fd limit. Each runs/returns its exact cargo
+status with `--no-fail-fast`; there is no continue-on-error. This is the
+[documented GitHub dependency/conditional pattern](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-jobs).
+Static YAML/chain checks and executed exit101 controls pass at all three failure
+positions, with all three scripts executed and the failed status preserved.
+Timeout/cancellation entries in the JSON are explicit expected policy, not an
+executed GitHub engine simulation; actual hosted validation remains outstanding.
+No Rust input changes or additional test retries are involved.

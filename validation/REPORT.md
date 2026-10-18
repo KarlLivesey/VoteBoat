@@ -7715,3 +7715,11 @@ first14/14 in393.07s. The original CloseDrained real deadline fails with two dia
 Drained and one still Draining, all without provider failure. No assertion
 or bound is changed; further repetitions stop and both outcomes are archived.
 Remaining TR4 clock/observation work blocks its complete reliability proof.
+
+CI runtime amendment: the first default full command exceeds96 minutes before
+completion, so the earlier one-job sequence could still lose later configurations
+on its 90-minute timeout. Platform feedback now uses three globally sequential
+OS-matrix jobs with failure-tolerant dependencies, 90 minutes each, exact cargo
+exit propagation and `--no-fail-fast`. YAML/chain checks and executed exit101
+controls pass; actual GitHub timeout execution remains unvalidated. The M1/M5
+macro goals stay incomplete; per-configuration duration/sharding is TR2 inventory.

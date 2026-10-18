@@ -28,7 +28,7 @@ jobs:
       - run: cargo clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
       - run: cargo clippy --locked --offline --keep-going --all-targets --no-default-features --features native -- -D warnings
   test:
-    name: Rust on ${{ matrix.os }}
+    name: Rust all-features on ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -40,23 +40,73 @@ jobs:
       - name: Install pinned Rust toolchain
         run: rustup toolchain install 1.98.1 --profile minimal --component rustfmt --component clippy
       - run: cargo fetch --locked
-      - name: Test feature configurations sequentially
+      - name: Test all-features
         shell: bash
         run: |
           set -e
           compiler="$(bash validation/reference-tools.sh)"
           if [[ -n "$compiler" ]]; then export PROTOC="$compiler"; fi
-          # Native three-node/100-group fixtures retain 300 snapshot-store locks.
-          # macOS shells can inherit a 256-file limit; adjust this step only.
+          # Native fixtures can retain more than the inherited macOS fd limit.
           if [[ "$RUNNER_OS" == macOS ]]; then ulimit -n 4096; fi
-          # Each configuration must finish before the next can replace binaries
-          # in target/debug. Preserve every failure while exposing later suites.
-          all_features=0
-          no_default_features=0
-          native=0
-          cargo test --locked --offline --no-fail-fast --all-features || all_features=$?
-          cargo test --locked --offline --no-fail-fast --no-default-features || no_default_features=$?
-          cargo test --locked --offline --no-fail-fast --no-default-features --features native || native=$?
-          printf 'Configuration exits: all-features=%s no-default-features=%s native=%s\n' \
-            "$all_features" "$no_default_features" "$native"
-          if (( all_features || no_default_features || native )); then exit 1; fi
+          status=0
+          cargo test --locked --offline --no-fail-fast --all-features || status=$?
+          printf 'all-features exit: %s\n' "$status"
+          exit "$status"
+
+  test_no_default:
+    name: Rust no-default-features on ${{ matrix.os }}
+    needs: test
+    # Continue after a failed/timed-out dependency; honor manual cancellation.
+    if: ${{ always() && !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Rust toolchain
+        run: rustup toolchain install 1.98.1 --profile minimal --component rustfmt --component clippy
+      - run: cargo fetch --locked
+      - name: Test no-default-features
+        shell: bash
+        run: |
+          set -e
+          compiler="$(bash validation/reference-tools.sh)"
+          if [[ -n "$compiler" ]]; then export PROTOC="$compiler"; fi
+          # Native fixtures can retain more than the inherited macOS fd limit.
+          if [[ "$RUNNER_OS" == macOS ]]; then ulimit -n 4096; fi
+          status=0
+          cargo test --locked --offline --no-fail-fast --no-default-features || status=$?
+          printf 'no-default-features exit: %s\n' "$status"
+          exit "$status"
+
+  test_native:
+    name: Rust native-only on ${{ matrix.os }}
+    needs: test_no_default
+    # Continue after a failed/timed-out dependency; honor manual cancellation.
+    if: ${{ always() && !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Rust toolchain
+        run: rustup toolchain install 1.98.1 --profile minimal --component rustfmt --component clippy
+      - run: cargo fetch --locked
+      - name: Test native-only
+        shell: bash
+        run: |
+          set -e
+          compiler="$(bash validation/reference-tools.sh)"
+          if [[ -n "$compiler" ]]; then export PROTOC="$compiler"; fi
+          # Native fixtures can retain more than the inherited macOS fd limit.
+          if [[ "$RUNNER_OS" == macOS ]]; then ulimit -n 4096; fi
+          status=0
+          cargo test --locked --offline --no-fail-fast --no-default-features --features native || status=$?
+          printf 'native-only exit: %s\n' "$status"
+          exit "$status"
