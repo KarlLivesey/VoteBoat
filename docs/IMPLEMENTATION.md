@@ -36741,7 +36741,7 @@ cancels stale pull-request runs; push-to-main runs remain uncancelled.
 | --- | --- | --- |
 | M1 | CI feedback is truthful and green | In progress: TR1 (R1 + TR1b), then TR2 inventory |
 | M2 | Simulated time wherever protocol time is simulated | Planned across TR1–TR11 |
-| M3 | Isolation: no cascades or collisions | In progress in TR1; remaining fixtures through TR12 |
+| M3 | Isolation: no cascades or collisions | In progress in TR1; remaining fixtures through TR15; binding-seam/host-policy limit remains |
 | M4 | Real-time tests bounded by events and ratios | Planned TR12–TR16 |
 | M5 | Full-suite proof | Planned TR17; every earlier slice records bounded evidence |
 
@@ -37133,3 +37133,260 @@ lint level, ignored-test or unsafe-code change. The full all-feature run follows
 this checked publication; counts will be recorded after completion, rather than
 inferred from these focused checks. Other full configurations and the matched
 parent comparison remain assigned to the suite runner.
+
+### TR1b round 2 pool follow-up schema (before editing; planned)
+
+The full all-feature command is running against published44a64ea1; keep its
+compiled inputs unchanged through completion. A final source audit finds that
+excluding counter-service's entire1024–32767 band is unnecessarily restrictive
+when the ephemeral maximum is65535 (for example15000–65535 or32768–65535), even
+though usable unprivileged gaps exist. M3 needs those hosts supported without
+converting the service harness prematurely. After recording the completed run,
+retain the existing high-band preference and add a low-band fallback excluding
+routed10000–19999 plus counter's actual endpoint bands within each128-wide
+block. Conservatively reserve residues0–16 and96–127 for counter blocks; all
+actual bound offsets1–4/11–14/101–104/111–114 lie inside them. The directory and
+transfer residue exclusions remain global. Exhaustively check every counter
+base and both wide ephemeral configurations. The all-unprivileged ephemeral
+case1024–65535 still has no possible safe pool.
+
+Also handle stale effective-uid probe names after PID reuse by advancing the
+create_new name on AlreadyExists. A stale-name control belongs in the existing
+unwritable-namespace child. No lease state/API/ownership/handoff transition or
+production code changes. Focused lease/property controls, fmt/four Clippy/
+matched gates and the final-head concurrent voter pair qualify these changes;
+full-suite results must name their exact source head, never be silently
+relabelled after this follow-up. The runner still owns the matched-parent
+matrix and other feature suites.
+
+Additional focused negative control (same44a64ea1 inputs, separate from the
+full-suite execution): `VOTEBOAT_TEST_PORT_LEASE_DIR=/sys fixture_isolation
+--exact lease_holds_across_handoff_and_processes --nocapture` exits101. Parent
+allocation correctly falls back, but lease_child opens `/sys/<port>.lock`
+instead of the parent's actual per-uid namespace and fails NotFound. Keep this
+failed control; it is a fixture-path defect, not evidence that fallback failed.
+Before editing: retain the actual namespace path in PortLease and pass it only
+to the child's direct lock assertion. Child acquire must still independently
+select its namespace, preserving the different-TMPDIR regression's ability to
+detect a split. UID probes themselves use fixed `/tmp`, so a different or absent
+TMPDIR cannot defeat fallback. The unwritable-namespace child will exercise the
+whole handoff/subprocess ownership control too. These changes are needed to
+make the specified fallback genuinely usable by the lease regression suite.
+
+Staging follow-up evidence (root Rust sources still unchanged): std-only copied
+fixture compiles with warnings/unsafe forbidden and strict Clippy including the
+repository complexity/length thresholds,7/7 pass. The original failing direct
+/sys handoff control passes1/1 after the fix. The child now additionally asserts
+its selected namespace equals the parent's, independent of which free port it
+finds. An intentionally TMPDIR-based staged mutant exits101 at that exact
+namespace assertion, proving the regression control detects namespace splits
+without relying on candidate selection or scheduling. All negative-control
+outputs remain separately labeled; none are full-suite rows.
+
+Before editing, correct the unavailable-proc assumption too: the intermediate
+helper used the macOS49152–65535 fallback on Linux, potentially leaving the
+common Linux32768–49151 outgoing band exposed. Linux's missing/unparseable-proc
+fallback conservatively excludes32768–65535 and uses the newly available low
+safe gaps; macOS retains its documented49152–65535 assumption. Unknown tuned
+ranges cannot be inferred when the host hides configuration, so that limitation
+remains explicit. The candidate control already checks32768–65535. This changes
+no behavior on this proof host, whose proc range is readable32768–60999.
+
+### Permission-control concurrency correction (before editing staged follow-up)
+
+A permission simulation must not introduce another private socket namespace
+while healthy concurrent suites use the shared one. Keep the TCP/UDP exclusivity
+assertions under a normal shared lease in the parent; make the /sys child
+exercise directory selection, UID-probe restart handling, 01777/0666 modes and
+exclusive advisory locks only. It binds no ports. The separately recorded
+one-off real fallback handoff control already validates the actual namespace
+field fix; regular proof matrices must not acquire uncoordinated private ports.
+The failed original control stays archived. This directly completes Opus P3-1's
+private-control finding rather than transferring its race into the new test.
+
+A small test-only fresh control-directory allocator is needed for M3 filesystem
+controls: create_dir atomically advances on AlreadyExists, so stale PID names or
+shared PID namespaces do not fail mode/unwind controls. It reserves paths, not
+ports, and successful controls remove only their own newly created directories.
+No lease API/state transition or production change accompanies this test fix.
+
+Final allocation failure-path audit (before editing staged follow-up): one
+inaccessible legacy lock file does not make the entire shared namespace
+unusable. Skip such candidates while retaining the first namespace error; only
+fall back after the shared scan cannot satisfy the request. This preserves
+cross-user coordination whenever other shared candidates are usable, including
+partially migrated root-owned file tables. Partial successful reservations still
+drop before fallback. Treat an OS-denied socket port as unavailable just like
+AddrInUse, so a customized unprivileged-port threshold does not abort a safe
+low-band search. No binding assertion is relaxed: only candidates successfully
+bound for both transports enter a lease. Path nonces use AtomicUsize rather than
+adding a needless64-bit atomic requirement.
+
+Use `/proc/sys` for the final Linux unwritable-directory control, rather than
+`/sys`: sysctl directory inode operations reject mode/owner changes even under
+sudo, so the control cannot repair or alter a live system directory. Verified
+against Linux's [proc_sys_setattr and proc_sys_dir_operations](https://github.com/torvalds/linux/blob/master/fs/proc/proc_sysctl.c), including the proc_sys_init assignment for `/proc/sys`.
+Earlier `/sys` negative/staged controls ran unprivileged and remain labeled with
+their actual paths. The final simulation remains filesystem-only and retains
+the parent's shared-lease TCP/UDP exclusivity assertions.
+
+Refine the final failure-path rule before editing: an accessible but busy shared
+pool must never cause fallback merely because another candidate had a legacy
+permission error. Record whether any candidate lock file was accessible; after
+an unsuccessful scan, return the stored namespace error only if none were.
+Otherwise report pool exhaustion without changing namespace. A read-only
+filesystem error proves the namespace unusable immediately and may fall back
+without scanning every filename. This keeps cooperating owners protected when
+the pool is busy and avoids a slow readonly-directory scan.
+
+Shared-file validation amendment (before editing staged follow-up): because the
+namespace is writable by all users, mode repair must apply only to actual lock
+entries. Open with O_NOFOLLOW/O_NONBLOCK from the existing Unix libc dependency
+(no crate/lock changes or unsafe code), and require a regular, single-linked
+file before chmod. Never follow a per-port symlink or repair an aliased inode.
+Directory aliases remain permitted; the contract is about the final lock entry.
+Private filesystem controls verify symlink/hardlink rejection and preservation
+of the target's0600 mode. This is M3 ownership hygiene for the required shared
+writable namespace, with no additional real-port binding or library change.
+
+Filesystem-control setup uses create_new and descriptor-based permission
+changes too: the owned fresh control directory does not justify overwriting
+an unexpected path. Alias checks retain the target's0600 assertion unchanged.
+
+### TR1b round 2 full-suite result and focused example amendment (schema before editing)
+
+The requested foreground command `cargo +stable test --locked --offline
+--all-features --no-fail-fast` completed on published44a64ea1:
+**2765 passed / 1 failed / 0 ignored**,125 target summaries, exit101,
+6761s (14:39:12–16:31:54UTC). Relay-model9/9 completed in3768.80s;
+routed192/192 passed. No process was detached or interrupted. This is a failed
+full-suite result, not a green qualification, and will not be relabelled as a
+run on the subsequent source changes. Other feature suites remain the runner's
+job. The initial /usr/bin/time launch error happened before cargo started and
+is retained separately as zero test executions.
+
+The sole failure is example native_benchmark's
+`shared::recovery::tcp_each_stale_group_requires_snapshot_after_transport_restart`:
+UDP bind at examples/benchmark/shared_recovery.rs:45 returns AddrInUse after
+TCP `:0` succeeds. TCP port availability does not imply UDP availability. The
+example files are identical to parent30a1f6c5, and their chosen ephemeral ports
+are disjoint from this host's61000+ leased band. This establishes an unchanged
+allocator defect and excludes direct lease-band overlap; it does not establish
+matched-parent runtime equivalence. The runner's comparison is still required.
+Do not classify this as a TR3/TR4/TR6 deadline or erase the failed execution.
+
+M3's smallest complete fix reuses PortLease in the two test-only benchmark
+harnesses with the same unchecked TCP0/UDP-same-port allocator: shared recovery
+and shared drain. Their inclusion is already cfg(test). Add one cfg(test) module
+reference to the existing helper in the example; no production benchmark or
+library behavior changes. Recovery keeps the same bound TCP/UDP reservation
+vector through constructor completion and owns its lease for every later
+open/reopen. Drain owns the lease after its nodes field and hands off immediately
+before initial open. Recovery callers declare nodes after Harness, so normal and
+unwind drops release nodes before its lease (no explicit early Harness drops).
+Failed construction drops probes and file locks; no new retry/ignore/deadline
+policy is added. A namespace diagnostic identifies the actual selected lease
+path in recovery fixtures. Check all56 native-benchmark example tests after
+this source fix, with all original history/recovery assertions intact, plus the
+final lease/mode/voter checks and every strict lint gate. Passing focused checks
+will resolve this allocator defect, not retroactively qualify the archived
+whole-suite run or the remaining parent matrix.
+
+### Final permitted-port refinement (before editing)
+
+Do not overstate the1024–65535 limitation: Linux may lower its privileged-port
+threshold, and a caller may have binding capability. Append1–1023 only as a
+last resort after high ports and conventional low gaps. The existing bind step
+skips PermissionDenied and AddrInUse, so the kernel decides which extra ports
+are permitted; never try port0. Counter's block exclusions apply only to its
+actual1024–32767 range. No new query, crate, API, permission or library seam is
+needed. Keep the directory/transfer exclusions global, including wrapped low
+ports. The pure candidate control must find low candidates outside1024–65535
+and none outside1–65535. Ordinary callers denied all low ports still cannot
+obtain a safe pool when every permitted port is ephemeral; that conditional
+case needs a host adjustment or production bound-listener seam. This supersedes
+historical wording treating1024–65535 as universally all unprivileged ports.
+Repeat the focused affected checks and strict gates on these final Rust inputs;
+retain earlier positive/negative outputs under their own names.
+
+### TR1b round 2 final implemented evidence (18 October 2026)
+
+All Opus P2-1/P2-2/P3-1–P3-4 and Sol P2-1/P2-2 responses are implemented.
+The final test-only helper records its actual namespace; child ownership checks
+assert the exact independently selected namespace after probe closure, even
+with a different nonexistent TMPDIR. Sticky01777/0666 permission repair is
+umask-independent; existing opens omit O_CREAT and reject final symlinks,
+nonregular/multilink entries before chmod using existing libc flags and std
+metadata. Inaccessible candidates are skipped; a working but busy namespace
+never triggers fallback. Unusable namespaces diagnose per-effective-uid fallback
+and explicitly warn CROSS-USER COORDINATION IS LOST. UID probes use fixed/tmp,
+advance on stale names and use machine-sized atomics. No privileged execution
+or second real UID was used for the permission simulation.
+
+The final permission simulation is filesystem-only at Linux/proc/sys, with
+shared-lease socket-exclusivity assertions retained in its parent. Unwind uses
+an actual lock-only Reservation and preserves its lock-release assertion. Fresh
+control directories skip existing names; none of these private controls binds
+uncoordinated real ports. Staged negative controls are separately archived:
+nominal-versus-actual fallback namespace failure, deliberately TMPDIR-based
+mutant, and pre-guard alias acceptance. Each was followed by a source fix or an
+expected negative assertion, never a retry of unchanged failing production code.
+
+Pool policy: prefer32768–65535, then1024–32767 gaps, then1–1023 only as a last
+resort when the kernel permits binding. Never allocate port0. Exclude the actual
+Linux ephemeral range, routed10000–19999, counter residues0–16/96–127 modulo128
+inside1024–32767, directory residues5–7/33–35 modulo128, and transfer's four slots
+at14000+1024k with offsets1–3/101–103. Exhaustive controls check every legacy
+base and low/wide ranges, including15000–65535/32768–65535 and low candidates
+outside1024–65535. The all-positive-port range1–65535 has no outside candidate.
+Denied ports are skipped without claiming them. Missing Linux proc conservatively
+excludes32768–65535; macOS assumes49152–65535. Hidden customized ranges remain
+an assumption, and if no permitted port remains outside the detected range,
+this strategy needs a host adjustment or a production bound-listener seam.
+
+All processes sharing loopback must use the same underlying filesystem/inodes
+for the lease directory. CI containers with private/tmp and shared networking
+need a common mounted directory plus VOTEBOAT_TEST_PORT_LEASE_DIR. Different
+overrides, the diagnosed per-user fallback, or noncooperating explicit binders
+can still lose handoff/reopen coordination. These are disclosed limits, not
+full hardware-independent qualification. Counter conversion remains TR12,
+directory/transfer TR15; their own cross-copy races are not solved by exclusion.
+
+The full-suite-discovered benchmark allocator defect is fixed in both test-only
+recovery/drain harnesses with the existing lease helper. Recovery retains file
+leases through every caller-owned replica lifetime; drain drops nodes before
+its lease and preserves reopen ownership. Production benchmark/library logic
+and all original recovery/history assertions are unchanged. The actual source
+is cfg(test), including the one new module reference in the example root.
+
+Final-source completed checks (raw outputs and exact input hashes under
+validation/reliability/tr1b/round2):
+
+| Check | Actual result |
+| --- | --- |
+| Root cargo +stable fmt --all -- --check | pass |
+| Default/all-features/no-default/native-only strict all-target Clippy | all pass, zero diagnostics |
+| Matched workspace fmt and locked/offline strict all-target Clippy | pass, zero diagnostics |
+| All-feature fixture_isolation | 7 pass / 0 fail / 0 ignored |
+| Additional umask077 mode/alias control | 1 pass / 0 fail |
+| All-feature native_benchmark example after allocator change | 56 pass / 0 fail / 0 ignored,18.35s |
+| All-feature directory route_discovery | 8 pass / 0 fail / 0 ignored,1.60s |
+| One simultaneous final-source voter pair, each taskset -c0-3 | both42/42, exits0,14.17s/14.18s; zero AddrInUse/PoisonError |
+
+Earlier checked variants and their successful pairs are retained separately,
+including44a64ea1's13.22s/13.10s pair and the pre-permitted-port variant's
+14.36s/13.84s pair. They are not substituted for the final-source pair. All
+controllers waited for their own children; no detach/nohup, foreign process
+stop/renice, unsafe addition, dependency change, lint weakening, ignored test,
+assertion-threshold change or activation-driver file change occurred.
+
+The full command's **2765/1/0, exit101,6761s at44a64ea1** remains a failed
+archived whole-suite execution. Its sole allocator failure has a focused56/56
+passing correction; the whole suite was not rerun or relabelled after that fix.
+The orchestrator-approved acceptance criterion remains conditional on the
+independent final-source parent-versus-PR matrix. The earlier clock failures
+remain recorded for TR3/TR4/TR6; the benchmark failure is not misclassified as
+one of them. The matrix report will be attached when it lands. Other full
+feature configurations belong to the suite runner. M1/M3/M5 remain open; the
+macro review keeps M3 through TR15 and records the binding-seam/host-policy
+limit without making online membership or split/merge release prerequisites.

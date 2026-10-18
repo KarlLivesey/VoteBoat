@@ -1,0 +1,5 @@
+    PID    PPID PSR  NI COMMAND
+1109093 1108735   0   1 /home/karllivesey/.t3/worktrees/VoteBoat/t3-cfe5dcf7/target/debug/deps/logical_voter_native-209ab1b75c49e9e4
+1109094 1108735   0   1 /home/karllivesey/.t3/worktrees/VoteBoat/t3-cfe5dcf7/target/debug/deps/logical_voter_native-209ab1b75c49e9e4
+pid 1109093's current affinity list: 0-3
+pid 1109094's current affinity list: 0-3

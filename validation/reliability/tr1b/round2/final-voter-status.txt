@@ -1,0 +1,1 @@
+copy A exit 0; copy B exit 0

@@ -1,0 +1,5 @@
+    PID    PPID PSR  NI COMMAND
+1161789 1161354   0   1 /home/karllivesey/.t3/worktrees/VoteBoat/t3-cfe5dcf7/target/debug/deps/logical_voter_native-209ab1b75c49e9e4
+1161790 1161354   0   1 /home/karllivesey/.t3/worktrees/VoteBoat/t3-cfe5dcf7/target/debug/deps/logical_voter_native-209ab1b75c49e9e4
+pid 1161789's current affinity list: 0-3
+pid 1161790's current affinity list: 0-3

@@ -1,0 +1,8 @@
+{
+  "pass": true,
+  "kind": "source assertions, not a YAML parser or workflow-engine simulation",
+  "concurrency": "per ref, cancel only pull_request",
+  "budgets": 3,
+  "needs": "all-features -> no-default -> native",
+  "cargoNoFailFast": 3
+}

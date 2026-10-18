@@ -22,6 +22,8 @@ struct Harness {
     journal: NativeDrainJournal,
     authorization: BTreeMap<GroupIdentity, NativeAdministrationPlan>,
     nodes: Vec<Replica<SharedLog>>,
+    // Nodes close before the lease releases their addresses, including reopen.
+    _ports: crate::test_ports::PortLease,
 }
 fn plan(bootstraps: &[Bootstrap]) -> MembershipDrainPlan {
     let entries = bootstraps
@@ -96,17 +98,8 @@ impl Harness {
                 .as_nanos()
         ));
         std::fs::create_dir(&root).unwrap();
-        let sockets = (1..=3)
-            .map(|n| {
-                let socket = TcpListener::bind("127.0.0.1:0").unwrap();
-                let udp = UdpSocket::bind(socket.local_addr().unwrap()).unwrap();
-                (n, socket, udp)
-            })
-            .collect::<Vec<_>>();
-        let addresses = sockets
-            .iter()
-            .map(|(n, s, _)| (*n, s.local_addr().unwrap()))
-            .collect();
+        let ports = crate::test_ports::PortLease::acquire(3);
+        let addresses = (1..=3).zip(ports.addresses::<3>()).collect();
         let policy = Policy::new(
             Tree::Majority((1..=3).map(|n| Tree::Voter(node(n))).collect()),
             Limits::default(),
@@ -137,8 +130,9 @@ impl Harness {
             journal,
             authorization: BTreeMap::new(),
             nodes: vec![],
+            _ports: ports,
         };
-        drop(sockets);
+        h._ports.handoff();
         h.nodes = h.open(NativeOpenMode::Create);
         h.configure_authorization();
         for g in 1..=h.bootstraps.len() {

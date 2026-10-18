@@ -7765,3 +7765,30 @@ no AddrInUse or poison. Full all-feature suite counts follow on completion;
 other feature suites and parent comparison belong to the independent runner.
 The orchestrator explicitly approves class-specific TR1b acceptance, departing
 from architect §4's every-counted-run-passes rule; full qualification stays open.
+
+TR1b round2 completion: full foreground all-feature/no-fail-fast run on44a64ea1
+finishes2765pass/1fail/0ignored,125summaries,exit101,6761s. Sole failure is
+native_benchmark shared_recovery UDP bind after TCP0, an unchanged-parent
+allocator outside the leased band; this source fact is not matched-parent
+runtime proof. Raw failure stays archived. Both test-only benchmark recovery/
+drain harnesses now retain shared leases through nodes/reopen; final affected
+example56/56 passes after the actual allocator fix, with unchanged assertions.
+The full command is not relabelled as a final-source green run.
+
+Final-source fixture7/7, restrictive-umask mode/alias1/1, route8/8, and exactly
+one final simultaneous taskset0-3 voter pair42/42 each,14.17s/14.18s, exits0,
+zero port/poison diagnostics. Earlier passing source-variant pairs are retained
+separately. Root fmt/four strict Clippy profiles and matched fmt/strict Clippy
+pass zero diagnostics. Fixed TMPDIR-independent shared namespace, explicit
+01777/0666 repair, actual-path child assertion, filesystem-only unwritable
+/proc/sys control, stale-name handling, lock-alias rejection using existing
+libc flags, and safe namespace exhaustion policy are checked. Pools exclude
+legacy service/routed endpoints and actual ephemeral range, use permitted low
+ports only last, and never choose0. Missing-proc Linux/macOS assumptions and
+no-permitted-outside-range limitation are documented. Diagnostic fallback loses
+cross-user coordination; common loopback needs common filesystem/inodes.
+
+No new crate/unsafe/lint weakening/test ignore/threshold or activation-driver
+change, production benchmark or library change, detached job, or foreign process
+manipulation. Final-source whole-suite/matched-parent qualification, other
+configs and both reviews follow with the runner; macro goals stay open.

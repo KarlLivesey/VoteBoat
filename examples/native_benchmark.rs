@@ -40,6 +40,9 @@ use voteboat::{
 mod lanes;
 #[path = "benchmark/shared.rs"]
 mod shared;
+#[cfg(test)]
+#[path = "../tests/support/ports.rs"]
+mod test_ports;
 type Failure = Box<dyn std::error::Error>;
 type Replica<
     L = voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::FileLogIo>,
