@@ -216,8 +216,9 @@ at 1403cfd2, load average 16–18): 124 result lines, 2,458 tests, 2,457 passed,
 `--example native_benchmark`, with "Address already in use (os error 98)"
 while other worktrees ran network tests on the same host. That example uses
 neither `propose_entries` nor the volatile planner, and rerun alone it passed
-48 of 48. The fixed-port collision is an existing test-reliability issue, not
-fixed here. All-feature and no-default-feature suites are left to the suite
+48 of 48. The cause is an existing race, not fixed here:
+`examples/benchmark/shared.rs` probes a free port with `bind("127.0.0.1:0")`,
+drops it, and rebinds that address later, so another process can take it. All-feature and no-default-feature suites are left to the suite
 runner.
 
 #### V3a schema plan: direct entry staging (planned)
