@@ -57,7 +57,8 @@ impl Raft {
     /// and host admission for exact stores, fanout and application capacity.
     /// This enables the ordinary validated journal/snapshot receive path; it
     /// grants no sender identity, promotion readiness or administrative authority.
-    /// Restart must explicitly repeat the selection.
+    /// Restart must explicitly repeat the selection. A volatile core has static
+    /// membership and still refuses configuration ingress.
     pub fn with_configuration_replication(mut self) -> Self {
         self.configuration_replication = true;
         self
@@ -83,6 +84,11 @@ impl Raft {
         &mut self,
         proposal: ConfigurationProposal,
     ) -> Result<Vec<Effect>, RaftError> {
+        // A volatile log has static membership: `recover_volatile` accepts no
+        // configuration state, so the core never commits any.
+        if self.volatile {
+            return Err(StorageError::Rejected("volatile log has static membership").into());
+        }
         if self.role != Role::Leader || !self.local_voter() {
             return Err(RaftError::NotLeader);
         }

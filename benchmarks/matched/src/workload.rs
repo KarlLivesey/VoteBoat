@@ -281,12 +281,11 @@ mod tests {
             let get = |name| phases.iter().find(|p| p["phase"] == name).unwrap();
             assert_eq!(get("actor_lifetime_inclusive")["calls"], 1);
             assert!(get("core_direct")["calls"].as_u64().unwrap() > 0);
-            let append = get("store_append_nested")["calls"].as_u64().unwrap();
-            assert!(append > 0);
-            assert_eq!(
-                append,
-                get("store_barrier_nested")["calls"].as_u64().unwrap()
-            );
+            // Every persistence token completes through the helper; the volatile
+            // log has no store-side append or barrier to observe.
+            assert!(get("persist_helper_inclusive")["calls"].as_u64().unwrap() > 0);
+            assert_eq!(get("store_append_nested")["calls"], 0);
+            assert_eq!(get("store_barrier_nested")["calls"], 0);
             for phase in phases {
                 assert_eq!(phase["failures"], 0);
                 assert!(

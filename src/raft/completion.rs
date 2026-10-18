@@ -85,10 +85,12 @@ pub fn persist_effect_borrowed<'a, S: LogStore>(
         if store.binding() != raft.binding {
             return Err(RaftError::WrongIdentity);
         }
-        if raft
-            .pending
-            .as_ref()
-            .is_none_or(|p| !p.next.matches_update(&update))
+        // A volatile core's log is not a store's to submit.
+        if raft.volatile
+            || raft
+                .pending
+                .as_ref()
+                .is_none_or(|p| !p.next.matches_update(&update))
         {
             return Err(RaftError::WrongCompletion);
         }
@@ -101,6 +103,32 @@ pub fn persist_effect_borrowed<'a, S: LogStore>(
         let completion = store.barrier(&tickets)?;
         raft.finish_completion(&completion)
     })();
+    match result {
+        Ok(prepared) => Ok(raft.borrow_completion(prepared)),
+        Err(error) => {
+            raft.storage_failed();
+            Err(error)
+        }
+    }
+}
+
+/// Complete one [`Effect::PersistVolatile`] token of a volatile core, returning
+/// a committed interval borrowed only after every completion check succeeds.
+/// No storage work happens: the core already owns the planned transition and
+/// installs it into its own log, the only copy. The binding, the core's
+/// incarnation and the exact pending revision and generation are checked
+/// first; any error fences the core, whose last completed state stays
+/// exportable through `Raft::state`.
+pub fn persist_volatile<'a>(
+    raft: &'a mut Raft,
+    log: &VolatileLog,
+    persist: VolatilePersist,
+) -> Result<CompletionEffects<'a>, RaftError> {
+    let result = if log.binding() != raft.binding {
+        Err(RaftError::WrongIdentity)
+    } else {
+        raft.finish_volatile(persist)
+    };
     match result {
         Ok(prepared) => Ok(raft.borrow_completion(prepared)),
         Err(error) => {

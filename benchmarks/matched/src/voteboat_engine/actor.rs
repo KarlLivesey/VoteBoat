@@ -17,7 +17,7 @@ use pending_replies::PendingReplies;
 pub(super) struct Parts<const TRACE: bool = false> {
     pub slot: usize,
     pub core: Raft,
-    pub store: MemoryStore<TRACE>,
+    pub store: VolatileStore<TRACE>,
     pub snapshots: MemorySnapshots<TRACE>,
     pub application: Noop,
     pub receiver: mpsc::Receiver<Request>,
@@ -272,7 +272,10 @@ impl<const TRACE: bool> Actor<TRACE> {
         let mut effects = VecDeque::from(initial);
         while let Some(effect) = effects.pop_front() {
             match effect {
-                Effect::Persist(update) => self.persist(update, &mut effects)?,
+                Effect::PersistVolatile(persist) => self.persist(persist, &mut effects)?,
+                Effect::Persist(_) => {
+                    return Err("volatile replica emitted durable persistence".into())
+                }
                 Effect::Send(message) => self.send(message)?,
                 Effect::Committed(entries) => self.apply(entries)?,
                 snapshot @ (Effect::SnapshotRequired { .. }
@@ -296,16 +299,15 @@ impl<const TRACE: bool> Actor<TRACE> {
     }
     fn persist(
         &mut self,
-        update: LogUpdate,
+        persist: VolatilePersist,
         effects: &mut VecDeque<Effect>,
     ) -> Result<(), Failure> {
         self.parts.stats[self.parts.slot]
             .persistence_units
             .fetch_add(1, Ordering::Relaxed);
         let started = Recorder::<TRACE>::start();
+        let result = persist_volatile(&mut self.parts.core, &self.parts.store.log, persist);
         if effects.is_empty() {
-            let result =
-                persist_effect_borrowed(&mut self.parts.core, &mut self.parts.store, update);
             self.attribution
                 .finish(Phase::PersistHelper, started, result.is_err(), 0);
             let (committed, following) = result.map_err(debug_error)?.into_parts();
@@ -321,7 +323,7 @@ impl<const TRACE: bool> Actor<TRACE> {
             effects.extend(following);
         } else {
             // Existing FIFO work precedes every newly completed effect.
-            let result = persist_effect(&mut self.parts.core, &mut self.parts.store, update);
+            let result = result.map(CompletionEffects::into_owned);
             self.attribution
                 .finish(Phase::PersistHelper, started, result.is_err(), 0);
             effects.extend(result.map_err(debug_error)?);
@@ -414,9 +416,9 @@ impl<const TRACE: bool> Actor<TRACE> {
                 reference,
             )
             .map_err(debug_error),
-            Effect::StageSnapshot(message) => stage_snapshot_effect(
+            Effect::StageSnapshot(message) => stage_volatile_snapshot_effect(
                 &mut self.parts.core,
-                &mut self.parts.store,
+                &self.parts.store.log,
                 &mut self.parts.snapshots,
                 &self.parts.application,
                 message,
@@ -426,9 +428,9 @@ impl<const TRACE: bool> Actor<TRACE> {
                 self.parts.stats[self.parts.slot]
                     .snapshot_installs
                     .fetch_add(1, Ordering::Relaxed);
-                finish_snapshot_install(
+                finish_volatile_snapshot_install(
                     &mut self.parts.core,
-                    &self.parts.store,
+                    &self.parts.store.log,
                     &mut self.parts.snapshots,
                     &mut self.parts.application,
                     reference,
@@ -509,9 +511,9 @@ impl<const TRACE: bool> Actor<TRACE> {
         let receipt = receipt.map_err(debug_error)?;
         let started = Recorder::<TRACE>::start();
         let before = self.provider_snapshot();
-        let effects = compact_replica(
+        let effects = compact_volatile_replica(
             &mut self.parts.core,
-            &mut self.parts.store,
+            &self.parts.store.log,
             &mut self.parts.snapshots,
             &self.parts.application,
             receipt.reference(),

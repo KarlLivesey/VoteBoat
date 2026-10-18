@@ -2,7 +2,9 @@
 // Copyright (c) 2026 Karl Livesey
 mod actor;
 mod stats;
-use super::{application::Noop, snapshots::MemorySnapshots, store::MemoryStore, Failure, Settings};
+use super::{
+    application::Noop, snapshots::MemorySnapshots, store::VolatileStore, Failure, Settings,
+};
 use crate::{attribution::Attribution, CHANNEL_CAPACITY};
 pub(crate) use stats::Diagnostics;
 use std::{
@@ -90,9 +92,9 @@ impl Cluster {
                 identity: bootstrap.voter_stores[&node],
                 session: StoreSession::new(1).unwrap(),
             };
-            let store = MemoryStore::<TRACE>::new(binding, limits, bootstrap.clone())?;
-            let mut core =
-                Raft::recover(node, binding, store.state(group)?, limits).map_err(debug_error)?;
+            let store = VolatileStore::<TRACE>::new(binding, limits)?;
+            let state = store.log.bootstrap(&bootstrap)?;
+            let mut core = Raft::recover_volatile(node, &store.log, state).map_err(debug_error)?;
             core.configure_batch_limits(batch_limits)
                 .map_err(debug_error)?;
             if core.batch_limits() != batch_limits {

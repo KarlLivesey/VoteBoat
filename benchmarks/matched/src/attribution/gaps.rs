@@ -12,6 +12,11 @@ const METHODS: [Phase; BOUNDARIES] = [
     Phase::StoreBarrier,
     Phase::SnapshotReconcile,
 ];
+const STORE_METHODS: [Phase; 3] = [
+    Phase::StoreCheckpointState,
+    Phase::StoreAppend,
+    Phase::StoreBarrier,
+];
 const GAP_NAMES: [&str; 3] = ["state_to_pin", "pin_to_append", "barrier_to_reconcile"];
 #[derive(Clone, Copy)]
 struct Stamp {
@@ -83,6 +88,23 @@ impl<const ENABLED: bool> Recorder<ENABLED> {
             self.invalid.set(true);
             return;
         };
+        // A volatile log has no store provider: none of its boundaries ran, so
+        // there is no complete observation to record and none is fabricated.
+        // The snapshot side must still have run exactly once each, unfailed.
+        if STORE_METHODS
+            .iter()
+            .all(|phase| before.0[*phase as usize] == after.0[*phase as usize])
+        {
+            let once = |phase: Phase| {
+                let (before, after) = (before.0[phase as usize], after.0[phase as usize]);
+                before.calls.checked_add(1) == Some(after.calls)
+                    && before.failures == after.failures
+            };
+            if !once(Phase::SnapshotPin) || !once(Phase::SnapshotReconcile) {
+                self.invalid.set(true);
+            }
+            return;
+        }
         let mut stamps = [None; BOUNDARIES];
         for (i, phase) in METHODS.iter().enumerate() {
             let index = *phase as usize;
@@ -93,10 +115,7 @@ impl<const ENABLED: bool> Recorder<ENABLED> {
                 self.invalid.set(true);
                 return;
             }
-            let provider = if matches!(
-                phase,
-                Phase::StoreCheckpointState | Phase::StoreAppend | Phase::StoreBarrier
-            ) {
+            let provider = if STORE_METHODS.iter().any(|m| *m as usize == *phase as usize) {
                 store
             } else {
                 snapshots
