@@ -169,7 +169,7 @@ pub(super) async fn run(cluster: &mut Cluster, settings: Settings) -> Result<Rep
         capacity_contract: crate::envelopes::CapacityContract::new(engine, settings, capacities)?,
         engine,
         comparison_gate: "pending_independent_validation_and_policy_review",
-        upstream_commit: UPSTREAM, settings, client_workers: 1, server_workers: 16,
+        upstream_commit: UPSTREAM, settings, client_workers: 1, server_workers: settings.server_workers,
         members: 3, payload_bytes: 0, completion: "every_original_locally_applied_after_quorum_commit",
         durability: "volatile_no_disk", transport: "in_process_actor_messages",
         api_entry_batch_capacity: capacities.0,
@@ -223,6 +223,7 @@ mod tests {
     fn settings(batch: usize, operations: usize) -> Settings {
         Settings {
             clients: 8,
+            server_workers: crate::DEFAULT_SERVER_WORKERS,
             batch,
             requested_operations: operations,
             operations: 0,
@@ -246,6 +247,37 @@ mod tests {
         let mut report = result.unwrap().unwrap();
         report.attach_attribution(&cluster);
         report
+    }
+    #[test]
+    fn server_workers_cli_reaches_runtime_workload_and_json_for_both_engines() {
+        for engine in ["voteboat", "openraft"] {
+            for workers in ["1", "2"] {
+                let (_, settings) = Settings::parse_from(
+                    [
+                        "--engine",
+                        engine,
+                        "--server-workers",
+                        workers,
+                        "--clients",
+                        "2",
+                        "--operations",
+                        "16",
+                        "--warmup",
+                        "0",
+                    ]
+                    .into_iter()
+                    .map(String::from),
+                )
+                .unwrap();
+                let runtime = crate::server_runtime(settings).unwrap();
+                assert_eq!(runtime.metrics().num_workers(), settings.server_workers);
+                let report = runtime.block_on(checked_run(engine, settings));
+                assert_eq!(report.completed_originals, 16);
+                let json = serde_json::to_value(report).unwrap();
+                assert_eq!(json["server_workers"], settings.server_workers);
+                assert_eq!(json["settings"]["server_workers"], settings.server_workers);
+            }
+        }
     }
     fn check_attribution(report: &Report) {
         let Some(records) = &report.attribution else {
