@@ -36937,3 +36937,31 @@ positions, with all three scripts executed and the failed status preserved.
 Timeout/cancellation entries in the JSON are explicit expected policy, not an
 executed GitHub engine simulation; actual hosted validation remains outstanding.
 No Rust input changes or additional test retries are involved.
+
+### TR1b allocator compatibility amendment (before editing)
+
+The completed default baseline is 2,444 pass / 4 fail / 0 ignored across 125
+summaries, exit101, 6,716 s. Driver contributes three failures; routed contributes
+one at `native.rs:73` (`available TCP/UDP endpoint`, underlying errors discarded).
+Routed has an additional legacy ladder, **10000 + counter % 10000**, with only32
+probes. Our lowest-first lease pool occupied that same band, and a deep fixture
+can hold39 endpoints. Thus the new pool can exhaust routed's entire probe window
+under cross-binary concurrency. The exact OS error was not preserved by routed,
+but this avoidable overlap is established and must not be left as a regression.
+
+Keep the lease API, ownership, handoff and cleanup unchanged. Exclude legacy
+10000–19999, prefer30000–32767 (also away from the seven original20k ladders),
+then use20000–29999 as overflow. Continue excluding the actual Linux ephemeral
+range; both bands are below the default Linux/macOS ephemeral pools. Add an
+actual leased-address invariant for the legacy exclusion, without assuming a
+particular free port. No routed fixture rewrite or lifetime-leaking registry is
+needed. This is M3 compatibility for the phased allocator adoption; routed's
+own ladder still belongs to TR9.
+
+Both owned validation families were identified by exact cwd/command and stopped
+with their owned descendants before changing common Rust inputs. The completed
+default baseline remains intact; its all-feature successor and the second deep
+nested execution are explicitly **interrupted/superseded**, never passes or
+ignored tests. All original files are preserved. Restart final full suites on a
+consistent corrected source tree after focused controls/gates. No foreign model,
+worker, daemon or priority was touched.

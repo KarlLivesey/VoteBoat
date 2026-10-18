@@ -42,6 +42,10 @@ fn lease_holds_across_handoff_and_processes() {
     let _spawn = serial::serial(&SPAWN);
     let mut lease = ports::PortLease::acquire(1);
     let [address] = lease.addresses();
+    assert!(
+        !(10000..20000).contains(&address.port()),
+        "leased owners must not occupy the legacy routed candidate band"
+    );
     assert!(TcpListener::bind(address).is_err());
     assert!(UdpSocket::bind(address).is_err());
     let mut sockets = lease.take_sockets();

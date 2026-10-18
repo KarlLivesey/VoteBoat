@@ -7723,3 +7723,15 @@ OS-matrix jobs with failure-tolerant dependencies, 90 minutes each, exact cargo
 exit propagation and `--no-fail-fast`. YAML/chain checks and executed exit101
 controls pass; actual GitHub timeout execution remains unvalidated. The M1/M5
 macro goals stay incomplete; per-configuration duration/sharding is TR2 inventory.
+
+Pre-compatibility default baseline completes:2444 pass/4 fail/0 ignored,
+125target summaries, exit101,6716s. Driver16/19 and routed109/110 fail. Routed
+silently discards bind errors after32 probes in10000–19999; the old lowest-first
+lease policy could occupy39 endpoints in that same band. The precise OS error
+was lost, but this avoidable overlap is corrected by excluding that band,
+preferring30000–32767 then20000–29999, with actual leased-address invariant.
+The focused ownership/compatibility control passes3/3. No deadline or production
+input changes. Old all-feature successor/deep nested repetition are explicitly
+interrupted/superseded for consistent-source validation, not successes. Verified
+owned families only were stopped; original baseline/partial outputs and exact
+interruption record are retained. Final suites restart on corrected inputs.

@@ -46,7 +46,10 @@ impl PortLease {
         std::fs::create_dir_all(directory).unwrap();
         let ephemeral = ephemeral_range();
         let mut held = Vec::new();
-        for port in 10000..32768 {
+        // The unconverted routed fixture probes 10000..20000 with a bounded
+        // window. Do not occupy that band during phased lease adoption. Prefer
+        // the band above the seven original 20000..30000 ladders as well.
+        for port in (30000..32768).chain(20000..30000) {
             if ephemeral.contains(&port) {
                 continue;
             }
