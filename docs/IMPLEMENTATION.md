@@ -40,10 +40,10 @@ implemented or benchmarked; unsafe variants are not offered as options.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| In progress H1: review round 3, preserve the benchmark instrument | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`); pinned matched workspace; quiet-Mac 30-pair buffer attribution result | All matched source byte-identical to flag-only `297aec15`; raw evidence preserved; matched tests; both fmt checks and five strict Clippy configurations; independent review of the reduced scope | T4 |
-| Merged V1: core-canonical volatile log (PR 1, main 041fc3fb) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
+| Done H1: preserve the benchmark instrument (merged 30a1f6c5) | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`); pinned matched workspace; quiet-Mac 30-pair buffer attribution result | All matched source byte-identical to flag-only `297aec15`; raw evidence preserved; matched tests; both fmt checks and five strict Clippy configurations; independent review of the reduced scope | T4 |
+| Done V1: core-canonical volatile log (merged 041fc3fb; Mac −18.8% bulk, −16.3% singleton CPU/write) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
 | In review V2: scalar commit-advance plan and smaller `Pending` (PR 3) | Commit-only rounds (~2.3 per singleton original) still build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices | V1 measured | Same twin tests; singleton framework pairs | T4 |
-| In progress V3a: direct entry staging | Proposals are built twice: the host stages a `Vec<Proposal>` and `propose_batch` scans it twice and collects a second `Vec<LogEntry>` (3.3% of bulk process CPU, plus the host's staging Vec). A bounded `ProposalBatch` builder creates final-shaped entries once and does its budget accounting while inserting; `Raft::propose_entries` stamps index/term in place and hands the same Vec to the existing planner | V1 (design: `target/claude/research-r1/architect-plan-pr3x.md` §§1, 2.2, 3.1, 3.12) | Builder/legacy equivalence at widths 1/2/max, cross-core and old-term builders, failed-push and drop cleanup, allocation-survival and legacy-boundary tests; harness collection on the builder with unchanged receipt/attribution counts; fmt + strict Clippy (four configurations and the matched workspace); runner pairs on both framework cells (pending) | T4 |
+| In review V3a: direct entry staging (PR 6, round 2) | Proposals are built twice: the host stages a `Vec<Proposal>` and `propose_batch` scans it twice and collects a second `Vec<LogEntry>` (3.3% of bulk process CPU, plus the host's staging Vec). A bounded `ProposalBatch` builder creates final-shaped entries once and does its budget accounting while inserting; `Raft::propose_entries` stamps index/term in place and hands the same Vec to the existing planner | V1 (design: `target/claude/research-r1/architect-plan-pr3x.md` §§1, 2.2, 3.1, 3.12) | Builder/legacy equivalence at widths 1/2/max, cross-core and old-term builders, failed-push and drop cleanup, allocation-survival, last-index boundary and legacy-boundary tests; harness collection on the builder with unchanged receipt/attribution counts; fmt + strict Clippy (four configurations and the matched workspace); runner pairs on both framework cells (pending) | T4 |
 | Following V3b: shared frozen batches with validation reuse | The batch V3a stages becomes a shared immutable batch carried by Append, pending and a chunked canonical log, with sealed intrinsic facts reused by planning, fanout, ingress costing and install, removing the per-peer clones and repeated entry walks | V3a measured, V2 | Framework pairs on both cells; byte goldens; compaction/snapshot and native suites | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
 | Done C15: batched admission uses the pending bound | Same fast path for ready batches | C14 | Linux/Mac pairs; suites | T4 |
@@ -76,9 +76,10 @@ untracked scratch copies (no kernel policy change), folded stacks read as text.
 Design: `target/claude/research-r1/architect-plan-pr3x.md` §§1, 2.2 (3x-A).
 Base: main 041fc3fb (PR 1 merged); PR base main. Written against PR 1 head
 84bd1804 and reapplied unchanged on main. V2 (PR 3, `cpu/scalar-commit`) is
-separate and not composed here; this slice touches only the re-export line of
-`src/raft.rs`. Implemented evidence only; the runner's paired measurements
-have not been taken.
+separate and not composed here. Round 1 touched only the re-export line of
+`src/raft.rs`; review round 2 (below) also changes the volatile branch of
+`persist_update`, which PR 3 rewrites. Implemented evidence only; the runner's
+paired measurements have not been taken.
 
 Shape: `raft::ProposalBatch` (`src/raft/proposals/batch.rs`) with
 `Raft::proposal_batch(capacity)`, `push(operation, bytes)`, `len`,
@@ -129,8 +130,8 @@ pending state; the single-entry ceiling versus the multi-entry peak and its
 exact boundary; clamped growth (4 → 7, then refusal) and doubling to 64; the
 builder allocation is the persisted suffix; the legacy peak boundary
 unchanged. `src/raft/volatile_tests.rs`:
-`entry_batches_reach_the_volatile_plan_in_their_own_allocation` (tight buffer
-reaches `Pending` by pointer; spare capacity normalized as before). Harness:
+`entry_batches_reach_the_volatile_plan_in_their_own_allocation` (the builder
+buffer reaches `Pending` by pointer; round 2 keeps spare capacity too). Harness:
 `width_one_staged_submission_matches_the_old_propose_event`; collection,
 reply and completion tests now stage a `ProposalBatch` (staged contents read
 through `iter`). `docs/component-contracts.json` lists the new operations.
@@ -145,6 +146,71 @@ passed (126 test targets including doc-tests, 2,454 tests, 0 failed, 0
 ignored; `representative_relay_model` alone took 4,914 s). The all-feature,
 no-default-feature and matched-workspace suites were still running when this
 slice was first published; their results follow in a later commit.
+
+#### V3a review round 2 (18 October 2026)
+
+Schema plan: no API change. (1) Stamping: `validate_entry_batch` already
+checks `first + (len - 1)`; the loop now assigns `first + offset` for each
+entry, so it never computes an index past the last entry. Before, the
+unbounded `(first..)` iterator advanced past the last entry and overflowed
+(a panic in checked builds) when the batch ended at `u64::MAX`. (2) Volatile
+leader appends: `persist_update` plans `After::LeaderAppend` updates with
+`OwnedNextLog::plan_owned_leader`, which is `plan_owned` without the
+spare-capacity shrink. The builder's capacity is already in its recorded peak
+and in the host's `effect_reservation(retained_bytes())`, and install moves
+the entries out of that buffer, so the shrink only added a reallocation (and
+a short old-plus-new overlap) outside both. Other owned inputs (follower
+appends, native and owned providers) are still normalized; the durable path
+(`plan_copy`) is unchanged. Plans, tokens and installed state equal the legacy
+collected batch. (3) A `reserve_exact` that returns more than the checked
+`next` capacity now restores the old capacity and refuses, so the batch stays
+usable (std does not over-allocate today). Failure and cleanup paths are
+unchanged otherwise: a refused batch leaves no pending state.
+
+Evidence for (2) from the recorded H1 Mac report
+(`benchmarks/matched/validation/performance/h1/round2/flag-only.json`, 4,096
+clients × batch 4, main before this PR): under this PR's growth rule (start at
+the first request's width, then double), 7,060 of 8,253 collected batches
+(85.5%; 93.5% of originals) have a width outside 4 × 2^k, so the shrink ran in
+most scored bulk batches. Common widths were 16, 12, 20, 8, 24, 28. The
+singleton cell (1 client × batch 1) is always width 1 (132,096 of 132,096
+batches in the slice 414 Mac and Linux reports), so the singleton is tight and
+unaffected. Changing the harness to size batches exactly was rejected: it
+would change the merge loop's per-request work and so its realized widths
+(the H1 lesson).
+
+Found and not fixed here: once an entry at index `u64::MAX` is durable,
+`append_for` computes `last_index() + 1` and overflows (`src/raft.rs`), on the
+legacy and new paths alike. The boundary test therefore compares admission
+only at that index.
+
+Tests: `entry_batches_match_legacy_proposals_at_the_last_representable_indexes`
+(widths 1, 2, 64; first index `u64::MAX - width + 1` succeeds and ends at
+`u64::MAX`, `u64::MAX - width + 2` refuses with `Exhausted` and no pending
+state, both equal to `Event::Propose`/`propose_batch`; width 1's second case
+cannot be recovered and is asserted as `InvalidRecovery`), and GPT-6.1-Sol's
+two probes as `a_singleton_entry_batch_stages_at_the_last_representable_index`
+and `…_just_before_the_last_representable_index`. All three fail on the old
+loop. The volatile allocation test adds the bulk shape (4 → 8 → 16 for 12
+originals): pointer and capacity survive, and token, state and retained bytes
+equal the legacy batch's. `only_leader_appends_keep_spare_capacity_in_the_volatile_plan`
+pins the scope. Reverting only the planner selection fails the allocation
+test.
+
+Production lines changed in round 2: `src/raft/proposals/batch.rs` stamping
+loop and the growth branch of `push` (hot path: every proposal, and each
+growth step); `src/raft.rs` volatile `persist_update` planner selection and
+`src/log/transition/incoming.rs` `plan_owned_leader`/`plan_owned_with` (hot
+path: every volatile persistence). The 2b1bf078 measurement needs a rerun.
+
+Checks (this Linux machine, loaded): `cargo +stable fmt --all -- --check`
+and the matched fmt check pass; strict Clippy with default features, all
+features, no default features and native only, and the matched all-target
+Clippy, all zero diagnostics; `cargo +stable test --locked --offline --lib --
+proposals` 33 passed (35 with the two volatile allocation tests);
+`--test volatile` 7 passed; the matched workspace suite 72 passed. The full
+default-feature suite was running when this was committed; its result is in
+the PR's Checks section.
 
 #### V3a schema plan: direct entry staging (planned)
 

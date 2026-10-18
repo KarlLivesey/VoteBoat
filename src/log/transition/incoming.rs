@@ -60,13 +60,36 @@ impl OwnedNextLog {
     pub(crate) fn plan_owned(
         view: &LogView<'_>,
         summary: &LogSummary,
+        update: LogUpdate,
+        limits: LogLimits,
+    ) -> Result<Self, StorageError> {
+        Self::plan_owned_with(view, summary, update, limits, true)
+    }
+    /// A core's own leader append, as `plan_owned` but keeping the suffix
+    /// allocation as given. The host reserved its full capacity before the
+    /// proposal, and install moves the entries out, so a shrink here would
+    /// only add a reallocation outside that reservation.
+    pub(crate) fn plan_owned_leader(
+        view: &LogView<'_>,
+        summary: &LogSummary,
+        update: LogUpdate,
+        limits: LogLimits,
+    ) -> Result<Self, StorageError> {
+        Self::plan_owned_with(view, summary, update, limits, false)
+    }
+    fn plan_owned_with(
+        view: &LogView<'_>,
+        summary: &LogSummary,
         mut update: LogUpdate,
         limits: LogLimits,
+        normalize: bool,
     ) -> Result<Self, StorageError> {
         let limits = validate_base(view, summary, &update, limits)?;
         if append_eligible(view, summary, &update) {
             let metadata = validate_append_metadata(view, &update, limits)?;
-            normalize_append(&mut update);
+            if normalize {
+                normalize_append(&mut update);
+            }
             Ok(Self(OwnedChange::Append(OwnedAppend::new(
                 *view.metadata(),
                 summary,

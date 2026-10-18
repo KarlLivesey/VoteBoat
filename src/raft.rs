@@ -1396,7 +1396,13 @@ impl Raft {
         // A volatile core is the only owner of its log: move the update into
         // the plan instead of keeping a copy for a store to validate again.
         let (next, effect) = if self.volatile {
-            let next = OwnedNextLog::plan_owned(
+            // The leader's own entries keep their allocation; see `plan_owned_leader`.
+            let plan = if matches!(after, After::LeaderAppend) {
+                OwnedNextLog::plan_owned_leader
+            } else {
+                OwnedNextLog::plan_owned
+            };
+            let next = plan(
                 &LogView::new(&self.durable),
                 &self.log_summary,
                 update,

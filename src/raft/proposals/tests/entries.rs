@@ -383,3 +383,112 @@ fn leader_with(limits: &Raft) -> Raft {
     core.limits = limits.limits;
     core
 }
+
+/// A recovered leader whose log ends at `last_index`, behind a checkpoint.
+fn near_exhaustion(last_index: u64) -> Raft {
+    let mut core = recovered_at(last_index).unwrap();
+    core.role = Role::Leader;
+    core.initialize_replication().unwrap();
+    core
+}
+fn recovered_at(last_index: u64) -> Result<Raft, RaftError> {
+    let seed = leader();
+    let mut state = seed.state().clone();
+    state.entries.clear();
+    state.commit_index = last_index;
+    state.snapshot = Some(SnapshotRef {
+        store: seed.binding.identity,
+        group: state.bootstrap.group,
+        configuration: state.bootstrap.configuration,
+        generation: SnapshotGeneration::new(1).unwrap(),
+        index: last_index,
+        term: 1,
+        application_schema: 1,
+        file_bytes: 100,
+        checksum: 7,
+    });
+    Raft::recover_verified(node(1), seed.binding, state, seed.limits)
+}
+fn legacy(core: &mut Raft, proposals: &[Proposal]) -> Result<Vec<Effect>, RaftError> {
+    if let [one] = proposals {
+        core.step(Event::Propose {
+            operation: one.operation,
+            bytes: one.bytes.clone(),
+        })
+    } else {
+        core.propose_batch(proposals.to_vec())
+    }
+}
+
+#[test]
+fn entry_batches_match_legacy_proposals_at_the_last_representable_indexes() {
+    for width in [1, 2, MAX_PROPOSAL_BATCH_ENTRIES] {
+        let proposals = mixed(width);
+        // First index `u64::MAX - width + 1` ends exactly at `u64::MAX`;
+        // `u64::MAX - width + 2` would need index `u64::MAX + 1`.
+        for (last_index, fits) in [
+            (u64::MAX - width as u64, true),
+            (u64::MAX - width as u64 + 1, false),
+        ] {
+            if last_index == u64::MAX {
+                // Width 1 would start past `u64::MAX`; no recovered log ends there.
+                assert_eq!(
+                    recovered_at(last_index).err(),
+                    Some(RaftError::InvalidRecovery)
+                );
+                continue;
+            }
+            let mut old = near_exhaustion(last_index);
+            let mut new = near_exhaustion(last_index);
+            let before = new.state().clone();
+            let expected = legacy(&mut old, &proposals);
+            let actual = new.propose_entries(staged(&new, &proposals));
+            assert_eq!(actual, expected, "width {width}, last index {last_index}");
+            if fits {
+                let last = persisted(&actual.unwrap()).entries.last().unwrap().index;
+                assert_eq!(last, u64::MAX);
+                // Admission only: completing an entry at `u64::MAX` overflows
+                // `append_for`'s `last_index() + 1` on both paths (existing).
+                assert!(new.pending.is_some() && old.pending.is_some());
+                assert_eq!(new.state(), old.state());
+            } else {
+                assert_eq!(actual, Err(RaftError::Exhausted));
+                assert_eq!(new.state(), &before);
+                assert!(new.pending.is_none());
+            }
+        }
+    }
+}
+
+// Review probes (GPT-6.1-Sol, round 1): both panicked in the stamping loop.
+#[test]
+fn a_singleton_entry_batch_stages_at_the_last_representable_index() {
+    let mut old = near_exhaustion(u64::MAX - 1);
+    let mut new = near_exhaustion(u64::MAX - 1);
+    let operation = operation(91);
+    let expected = old
+        .step(Event::Propose {
+            operation,
+            bytes: Vec::new(),
+        })
+        .unwrap();
+    let mut batch = new.proposal_batch(1).unwrap();
+    batch.push(operation, Vec::new()).unwrap();
+    assert_eq!(new.propose_entries(batch).unwrap(), expected);
+}
+
+#[test]
+fn a_singleton_entry_batch_stages_just_before_the_last_representable_index() {
+    let mut old = near_exhaustion(u64::MAX - 2);
+    let mut new = near_exhaustion(u64::MAX - 2);
+    let operation = operation(92);
+    let expected = old
+        .step(Event::Propose {
+            operation,
+            bytes: Vec::new(),
+        })
+        .unwrap();
+    let mut batch = new.proposal_batch(1).unwrap();
+    batch.push(operation, Vec::new()).unwrap();
+    assert_eq!(new.propose_entries(batch).unwrap(), expected);
+}

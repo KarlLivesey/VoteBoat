@@ -80,7 +80,10 @@ impl ProposalBatch {
         }
         if let Some(next) = grown {
             self.entries.reserve_exact(next - len);
-            if self.entries.capacity() > self.max_entries {
+            if self.entries.capacity() != next {
+                // The peak was checked for exactly `next`. `reserve_exact` may
+                // allocate more; restore the old size so the batch stays usable.
+                self.entries.shrink_to(capacity);
                 return Err(StorageError::Rejected("proposal allocation count budget").into());
             }
         }
@@ -200,8 +203,10 @@ impl Raft {
         let first = self.validate_entry_batch(&batch)?;
         let term = self.durable.hard_state.term;
         let mut entries = batch.entries;
-        for (index, entry) in (first..).zip(entries.iter_mut()) {
-            entry.index = index;
+        // `validate_entry_batch` checked `first + (len - 1)`, so no offset
+        // here overflows, and no index past the last entry is computed.
+        for (offset, entry) in entries.iter_mut().enumerate() {
+            entry.index = first + offset as u64;
             entry.term = term;
         }
         let effects = self.persist_proposal_entries(first, entries)?;

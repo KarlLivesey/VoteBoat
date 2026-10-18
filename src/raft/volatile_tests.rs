@@ -290,27 +290,70 @@ fn volatile_plan_moves_the_input_suffix_allocation() {
 
 #[test]
 fn entry_batches_reach_the_volatile_plan_in_their_own_allocation() {
-    // A tight builder's buffer is the planned suffix: no proposal-to-entry
-    // collect and no copy. A spare-capacity buffer is normalized as before.
-    for (capacity, width) in [(4, 4), (8, 3)] {
+    // The builder's buffer is the planned suffix, with its spare capacity:
+    // the host reserved that capacity, so the plan neither copies nor shrinks
+    // it. (4, 12) is the bulk shape: four-original requests merged three at a
+    // time grow 4 -> 8 -> 16. The result matches the legacy collected batch.
+    for (capacity, width) in [(4, 4), (8, 3), (4, 12)] {
         let (mut core, log) = volatile();
+        let (mut legacy, legacy_log) = volatile();
         let mut batch = core.proposal_batch(capacity).unwrap();
+        let mut proposals = Vec::new();
         for n in 0..width {
-            batch
-                .push(OperationId::new(200 + n as u128).unwrap(), vec![n as u8; n])
-                .unwrap();
+            let operation = OperationId::new(200 + n as u128).unwrap();
+            batch.push(operation, vec![n as u8; n]).unwrap();
+            proposals.push(Proposal {
+                operation,
+                bytes: vec![n as u8; n],
+            });
         }
         let (input, allocated) = batch.allocation();
-        assert_eq!(allocated, capacity);
+        assert_eq!(allocated, width.next_power_of_two().max(capacity));
         let persist = token(&core.propose_entries(batch).unwrap());
         let suffix = &core.pending.as_ref().unwrap().next.update().suffix;
         let entries = &suffix.as_ref().unwrap().entries;
         assert_eq!(entries.len(), width);
-        assert_eq!(entries.capacity(), width);
-        if capacity == width {
-            assert_eq!(entries.as_ptr(), input);
-        }
+        assert_eq!(entries.capacity(), allocated);
+        assert_eq!(entries.as_ptr(), input);
+        let expected = token(&legacy.propose_batch(proposals).unwrap());
+        assert_eq!(
+            (persist.revision(), persist.generation()),
+            (expected.revision(), expected.generation())
+        );
         persist_volatile(&mut core, &log, persist).unwrap();
+        persist_volatile(&mut legacy, &legacy_log, expected).unwrap();
+        assert_eq!(core.state(), legacy.state());
+        assert_eq!(core.retained_log_bytes(), legacy.retained_log_bytes());
         assert_eq!(core.state().last_index(), 1 + width as u64);
     }
+}
+
+#[test]
+fn only_leader_appends_keep_spare_capacity_in_the_volatile_plan() {
+    // Any other owned volatile append is still normalized to its length.
+    let (mut core, log) = volatile();
+    let mut entries = Vec::with_capacity(4);
+    entries.extend((2..=3).map(|index| LogEntry {
+        index,
+        term: 1,
+        payload: EntryPayload::Command {
+            operation: OperationId::new(u128::from(index)).unwrap(),
+            bytes: vec![index as u8].into(),
+        },
+    }));
+    core.role = Role::Follower;
+    let effects = core
+        .persist(
+            core.state().hard_state,
+            1,
+            Some(Suffix { from: 2, entries }),
+            After::Reply,
+            None,
+        )
+        .unwrap();
+    let pending = core.pending.as_ref().unwrap();
+    let planned = &pending.next.update().suffix.as_ref().unwrap().entries;
+    assert_eq!((planned.len(), planned.capacity()), (2, 2));
+    persist_volatile(&mut core, &log, token(&effects)).unwrap();
+    assert_eq!(core.state().last_index(), 3);
 }
