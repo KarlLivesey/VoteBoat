@@ -41,7 +41,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | In progress H1: review round 3, preserve the benchmark instrument | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`); pinned matched workspace; quiet-Mac 30-pair buffer attribution result | All matched source byte-identical to flag-only `297aec15`; raw evidence preserved; matched tests; both fmt checks and five strict Clippy configurations; independent review of the reduced scope | T4 |
-| In progress V1: core-canonical volatile log | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
+| Done V1: core-canonical volatile log (merged 041fc3fb; Mac −18.8% bulk, −16.3% singleton CPU/write) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
 | Next V2: scalar commit-advance plan and smaller `Pending` | Commit-only rounds (~2.3 per singleton original) still build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices | V1 measured | Same twin tests; singleton framework pairs | T4 |
 | Following V3: chunked canonical log with shared immutable batches | The batch V1 moves into pending becomes a shared chunk, removing the remaining two in-process per-peer clones | V1, V2 measured | Framework pairs on both cells; compaction/snapshot suites | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
@@ -299,11 +299,45 @@ not rerun Mac benchmarks, release/executable controls, root test suites or remot
 CI. Independent round-3 review remains outstanding; no merge was performed.
 The T4 macro milestone and V2/V3 dependencies are unchanged.
 
-#### V1 implemented: core-canonical volatile log (measurement pending (runner))
+#### V1 implemented: core-canonical volatile log (merged 18 October 2026, 041fc3fb)
 
-Design: `target/claude/research-r1/architect-plan.md` (PR 1). Implemented
-evidence only; the runner's interleaved pairs on a quiet machine have not been
-taken yet.
+Design: `target/claude/research-r1/architect-plan.md` (PR 1,
+https://github.com/KarlLivesey/VoteBoat/pull/1, head b40d22b7). Both reviewers
+approved round 2 (84bd1804); b40d22b7 is documentation only.
+
+Measured (runner report `target/claude/research-r1/runner-pr1.md`, candidate
+622bc411 against f9de5056; the round-2 delta changes the completion token and
+the configuration refusal, not the per-write path). Score is whole-process CPU
+per completed write at equal cores, medians of 7 interleaved pairs per cell:
+
+| Host | Cell | CPU ns/write base → candidate | Pairs improving | Rate /s | Effective cores |
+| --- | --- | --- | --- | --- | --- |
+| Mac (quiet, primary) | bulk 4096×4 | 341 → 277 (−18.8%) | 7/7 | 6.41 M → 7.75 M (+21.0%) | 2.01 → 1.99 |
+| Mac (quiet, primary) | singleton 1×1 | 30,282 → 25,359 (−16.3%) | 7/7 | 63.3 k → 73.0 k (+15.3%) | 1.89 → 1.83 |
+| Linux (loaded, secondary) | bulk | 320 → 263 (−17.8%) | 7/7 | 4.55 M → 5.46 M | 1.44 → 1.39 |
+| Linux (loaded, secondary) | singleton | 14,336 → 11,474 (−20.0%) | 7/7 | — | — |
+
+Sampled `matched-server` thread CPU per write on Linux: bulk −18.5%,
+singleton −14.7%. Mac bulk p99 2.78 → 2.17 ms. The candidate used no extra
+cores; the gain is CPU removed, not CPU moved.
+
+Attribution: with identical completed writes (131,072) and zero phase
+failures, persists per original fell 5.160 → 5.077 and sends per original
+6.322 → 6.156. The runner applied the brief's parity floor and reported
+REJECT on that ground alone (every CPU threshold passed). The orchestrator
+overruled it: the brief's parity floor exists to catch an instrument change
+in the harness, and these counts are library behaviour (synchronous volatile
+completion lets some commit-only rounds coalesce) with the client workload
+unchanged. Parity stays binding for harness PRs; for library PRs a count
+change is a finding to explain.
+
+Suites (runner report `target/claude/research-r1/runner-pr1-suites-84bd1804.md`,
+all eleven commands sequential on 84bd1804): fmt and the five strict Clippy
+configurations clean; default 2,444 tests, all-features 2,758, no-default
+1,237, matched 69, zero failures. An earlier all-features run at load ≈160
+had eight failures in `tests/logical_activation_driver` (learners,
+read_intake, readiness, source_export; QUIC and TCP variants), the known
+load-sensitive set; they passed in the clean run and are untouched by V1.
 
 Shape: `log::VolatileLog { binding, limits }` is documented as not durable and
 is not a `LogStore`; it holds no log copy and `bootstrap` returns the same
