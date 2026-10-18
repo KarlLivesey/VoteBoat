@@ -208,9 +208,17 @@ and the matched fmt check pass; strict Clippy with default features, all
 features, no default features and native only, and the matched all-target
 Clippy, all zero diagnostics; `cargo +stable test --locked --offline --lib --
 proposals` 33 passed (35 with the two volatile allocation tests);
-`--test volatile` 7 passed; the matched workspace suite 72 passed. The full
-default-feature suite was running when this was committed; its result is in
-the PR's Checks section.
+`--test volatile` 7 passed; the matched workspace suite 72 passed. Full
+default-feature suite (`cargo +stable test --locked --offline --no-fail-fast`
+at 1403cfd2, load average 16–18): 124 result lines, 2,458 tests, 2,457 passed,
+1 failed, 0 ignored. The failure was
+`lanes::tests::uneven_three_lane_workload_keeps_exact_global_counts` in
+`--example native_benchmark`, with "Address already in use (os error 98)"
+while other worktrees ran network tests on the same host. That example uses
+neither `propose_entries` nor the volatile planner, and rerun alone it passed
+48 of 48. The fixed-port collision is an existing test-reliability issue, not
+fixed here. All-feature and no-default-feature suites are left to the suite
+runner.
 
 #### V3a schema plan: direct entry staging (planned)
 
