@@ -69,3 +69,32 @@ and its separate artifact/representation disclosure when examining that experime
 
 Election/scheduling, operation identity and engine-owned application-worker choices
 are recorded engine differences; existing features are preserved.
+
+## Collection-pass rule (H2, 18 October 2026)
+
+This changes the measuring instrument for VoteBoat's actor only; the OpenRaft
+engine and the shared driver are unchanged. Results from before H2 are not
+comparable with results after it: re-baseline main with H2 before gating any
+VoteBoat change on it.
+
+Before H2, a VoteBoat collection pass stopped taking ready client requests as
+soon as any peer message was queued. Batch width therefore tracked follower reply
+latency. A library change that made replication faster was charged extra
+proposal rounds, and so extra Tokio and kernel wake/park work, at 16 server
+workers. Researcher measurement on the quiet Mac (bulk 4096×4, 16 workers): the
+V3b candidate cut library CPU per write by 22%, but proposal rounds rose from
+about 7.7k to 17.3k (mean width 516 → 229), 94% of passes were cut by a queued
+peer message (57% on main), system CPU rose from 30 to 50 ns/write and
+whole-process CPU per write rose 14%. At one worker no pass was cut.
+
+From H2, a pass takes only the requests already queued when it starts, within
+the same `max_proposal_entries` ceiling and the same deferral rule. Peer messages
+queued before a pass are still handled first by the biased loop; peer progress
+that arrives during a pass is handled before the next pass, so it waits at most
+one bounded pass. This also matches SCHEMA.md's "already-ready original
+proposals" wording more literally. Raft safety, persistence, per-original reply
+order and admission bounds are unchanged.
+
+Researcher measurement of H2 alone on main (quiet Mac): bulk-16 +0.4%, bulk-1
++0.9%, singletons within ±1% CPU per write, p99 unchanged. Builder measurement:
+see `docs/IMPLEMENTATION.md`, "H2 implemented".

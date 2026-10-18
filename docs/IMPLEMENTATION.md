@@ -40,7 +40,8 @@ implemented or benchmarked; unsafe variants are not offered as options.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| In progress H1: review round 3, preserve the benchmark instrument | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`); pinned matched workspace; quiet-Mac 30-pair buffer attribution result | All matched source byte-identical to flag-only `297aec15`; raw evidence preserved; matched tests; both fmt checks and five strict Clippy configurations; independent review of the reduced scope | T4 |
+| In progress H2: ready-snapshot collection in the matched harness | The VoteBoat actor cut each proposal pass as soon as a peer message was queued, so batch width tracked follower reply latency and any faster replication path paid extra wake/park rounds at 16 workers (V3b: rounds 7.7k → 17.3k, sys 30 → 50 ns/write). A pass now takes only the requests queued when it starts; peer progress arriving during it is handled before the next pass. This changes the instrument for VoteBoat's actor only | H1 merged (`30a1f6c5`); researcher note `target/claude/research-r3/v3b-regression.md`. Next: re-baseline V3b on H2, then V3b-s (width-1 per-round overhead) | Actor test that a mid-pass peer message neither truncates the pass nor waits past the next pass; existing deferral/capacity tests; 72 matched tests; root and matched fmt; matched and four root strict Clippy builds; quiet-Mac 5 interleaved pairs × 4 cells against `30a1f6c5`; attribution parity controls side by side; main re-baselined before any later gate | T4 |
+| Done H1: server worker flag (merged `30a1f6c5`) | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`) | Matched source byte-identical to flag-only `297aec15`; matched tests; both fmt checks and five strict Clippy configurations; independent review | T4 |
 | Done V1: core-canonical volatile log (merged 041fc3fb; Mac −18.8% bulk, −16.3% singleton CPU/write) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
 | Next V2: scalar commit-advance plan and smaller `Pending` | Commit-only rounds (~2.3 per singleton original) still build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices | V1 measured | Same twin tests; singleton framework pairs | T4 |
 | Following V3: chunked canonical log with shared immutable batches | The batch V1 moves into pending becomes a shared chunk, removing the remaining two in-process per-peer clones | V1, V2 measured | Framework pairs on both cells; compaction/snapshot suites | T4 |
@@ -69,6 +70,38 @@ implemented or benchmarked; unsafe variants are not offered as options.
 Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider than
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
+
+#### H2 schema plan: ready-snapshot collection (18 October 2026)
+
+Shape: `Actor::collect` in `benchmarks/matched/src/voteboat_engine/actor.rs`
+reads `receiver.len()` once when a pass starts and takes at most that many
+further requests, still stopping at `max_proposal_entries` and still deferring a
+request that would cross it. The mid-pass `peer_receiver.is_empty()` check is
+removed. No data/API shape, library call, persistence, reply order or admission
+bound changes; the OpenRaft engine is untouched. State transitions: the biased
+loop is unchanged: a deferred request first, then stop, then every peer message
+queued before a pass, then the next pass. Requests arriving during a pass wait for
+the next one, as they already did when a pass ended on an empty queue. Failure
+and cleanup paths are the existing `include`/deferral/disconnect arms. Acceptance:
+an actor test with three hand-stepped replicas showing a pass with queued peer
+replies takes every ready request, and the loop handles those replies before
+the next pass; existing deferral and capacity tests; all matched tests; fmt and
+strict Clippy; quiet-Mac pairs and attribution parity controls against main.
+Macro review: H2 advances T4 by making the instrument stable before V3b is
+gated; no new helper or prerequisite beyond the test's replica builder.
+
+#### H2 implemented: ready-snapshot collection
+
+`collect` now bounds a pass by the requests queued when it starts; peer progress
+arriving during a pass is handled before the next pass. SCHEMA.md states the rule
+at pass granularity and COMPARISON.md records the instrument change. **The
+instrument changed for VoteBoat's actor; main must be re-baselined with it
+before any later gate.** New test
+`collection::peer_progress_during_a_pass_waits_for_it_and_precedes_the_next_pass`
+fails on main's rule (pass width 4 instead of 12) and with peer/proposal
+priority swapped (catch-up append carries the next pass's entries).
+
+Measurement: pending (quiet Mac, `fwmac.sh 30a1f6c5 <head> 5`).
 
 #### H1 schema plan: worker setting and shared harness costs
 
