@@ -7709,3 +7709,9 @@ raw prefix/failure is retained. Activation-nested first E1 passes14 in393.07s;
 requested repetitions continue. Corrected direct metadata has positive nice11/
 15 (relative +19 from inherited −8/−4), with explicit missing samples for very
 short tests, and no observed negative-priority reset.
+
+Activation-nested's second constrained execution fails 13/14 in417.30s after
+first14/14 in393.07s. The original CloseDrained real deadline fails while all
+three diagnostic nodes are already Drained/no provider failure. No assertion
+or bound is changed; further repetitions stop and both outcomes are archived.
+Remaining TR4 clock/observation work blocks its complete reliability proof.

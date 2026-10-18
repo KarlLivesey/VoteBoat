@@ -36889,3 +36889,12 @@ very short isolation control also samples nice11 before the parent is assigned
 its Bash policy, and often finishes before sampling; all use the literal relative
 `nice -n 19` command. Missing samples are reported, never invented. No negative
 nice sample is seen in the corrected direct test executable metadata.
+
+Activation-nested E1 run 2 fails 13/14 pass in 417.30 s, following its first
+14/14 pass in 393.07 s. Root: the original 15 s CloseDrained deadline at
+`cluster.rs:216`; its diagnostic already shows all three original nodes Drained
+with no provider failure. This is a fixture deadline/order-of-observation issue
+for TR4 investigation, not a port failure. The assertion is unchanged, the
+failing row is not retried, and later repetitions stop. Both runs and complete
+diagnostics are archived in `failed-proof-1ec4a1dc/logical_activation_nested.tar.gz`.
+The final touched nested-native binary and full suites remain active.
