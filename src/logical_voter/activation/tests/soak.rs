@@ -336,6 +336,22 @@ fn two_hundred_thousand_distinct_business_writes_keep_bounded_wrapper_state() {
             s.shadow = Some((restored, 1_000));
         }
     }
+    // The last checkpoint is taken at the final write; keep writing until its
+    // restored copy has also applied and matched 1,000 more entries.
+    assert!(s.shadow.is_some());
+    while s.shadow.is_some() {
+        let writes: Vec<_> = (seq + 1..=seq + BATCH)
+            .map(|q| (session_op(q), s.a.business(&delta(q)).unwrap()))
+            .collect();
+        s.admit(&writes, "follow-up write");
+        s.apply(writes);
+        seq += BATCH;
+        expected += (seq - BATCH + 1..=seq)
+            .map(|q| i64::from_le_bytes(delta(q)))
+            .sum::<i64>();
+        s.check_wrapper_bytes();
+    }
+    assert_eq!(s.a.inner().value, expected);
     assert_eq!(s.a.control.records.len(), 8);
     assert_eq!(s.wrapper_bytes.len(), 5);
 }

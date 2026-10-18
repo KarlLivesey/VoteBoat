@@ -301,3 +301,42 @@ fn control_result_reservation_requires_exact_schema_group_and_operation() {
         a.encode_command(&original, usize::MAX).unwrap()
     );
 }
+/// Written by the code at 30a1f6c5: `selected().checkpoint(usize::MAX)`, an
+/// unclaimed child whose configuration embeds the v1 activation profile.
+const V1_SELECTED_CHECKPOINT: &[u8] = include_bytes!("control_profile/v1-selected-checkpoint.bin");
+#[test]
+fn child_checkpoint_with_v1_profile_embedding_is_refused_typed() {
+    let find = |bytes: &[u8], tag: &[u8; 8]| {
+        bytes
+            .windows(8)
+            .enumerate()
+            .filter(|(_, w)| w == tag)
+            .map(|(at, _)| at)
+            .collect::<Vec<_>>()
+    };
+    let v2 = selected().checkpoint(usize::MAX).unwrap();
+    // The embedding tag and the profile's magic, at the same offsets as in v2.
+    let at = find(V1_SELECTED_CHECKPOINT, b"VBACTP01");
+    assert_eq!(at.len(), 2);
+    assert_eq!(at, find(&v2, b"VBACTP02"));
+    assert!(find(V1_SELECTED_CHECKPOINT, b"VBACTP02").is_empty());
+    // Before the embedded profile only the configuration length differs: the
+    // v1 profile carries one more u64, the removed business limit. So the
+    // refusal comes from the profile binding alone.
+    let length = |bytes: &[u8]| u64::from_le_bytes(bytes[8..16].try_into().unwrap());
+    assert_eq!(length(V1_SELECTED_CHECKPOINT), length(&v2) + 8);
+    assert_eq!(V1_SELECTED_CHECKPOINT.len(), v2.len() + 8);
+    assert_eq!(V1_SELECTED_CHECKPOINT[..8], v2[..8]);
+    assert_eq!(V1_SELECTED_CHECKPOINT[16..at[0]], v2[16..at[0]]);
+    for mut child in [selected(), app()] {
+        let before = child.checkpoint(usize::MAX).unwrap();
+        assert_eq!(
+            child.restore_checkpoint(1, 0, V1_SELECTED_CHECKPOINT),
+            Err(ApplicationError::InvalidCheckpoint)
+        );
+        assert_eq!(child.checkpoint(usize::MAX).unwrap(), before);
+    }
+    let mut child = selected();
+    child.restore_checkpoint(1, 0, &v2).unwrap();
+    assert_eq!(child.checkpoint(usize::MAX).unwrap(), v2);
+}
