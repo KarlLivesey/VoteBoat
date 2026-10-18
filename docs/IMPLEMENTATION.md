@@ -36875,3 +36875,17 @@ sampled nice15/CPUs0–3. No port error or poison cascade occurs. This is remain
 TR6 work; the complete successful prefix and failure are archived in
 `failed-proof-1ec4a1dc/program_transaction_driver.tar.gz`. Voter and nested proof
 and sequential full suites remain in progress.
+
+Fresh voter proof: E1×10/E2×5 pass, then E3 run 1 stops with **41/42 pass**,
+296.48 s, at the unchanged child-claim deadline (`drive.rs:110`), sampled nice15/
+CPUs0–3. There is no port failure or poison cascade. Final-runner E4/E5 remain
+unqualified; five older observed passing pairs are retained but not substituted
+for the requested complete proof. The full successful prefix/failure is archived
+in `failed-proof-1ec4a1dc/logical_voter_native.tar.gz`. First activation-nested E1
+passes all 14 tests in 393.07 s; its remaining repetitions continue as requested.
+
+Priority provenance: corrected long binaries consistently sample nice15. The
+very short isolation control also samples nice11 before the parent is assigned
+its Bash policy, and often finishes before sampling; all use the literal relative
+`nice -n 19` command. Missing samples are reported, never invented. No negative
+nice sample is seen in the corrected direct test executable metadata.

@@ -7701,3 +7701,11 @@ Program transaction passes 10 constrained and 5 serial executions, then E3 run 1
 fails four original fixture/phase deadlines (10/14 pass, 96.71s, nice15/CPUs0–3).
 It is stopped without unchanged retry; remaining TR6 clock work is explicit.
 Complete positive and negative raw evidence is archived under reliability/tr1b.
+
+Fresh voter proof passes 10 constrained and 5 serial executions, then E3 run 1
+fails the existing child-claim deadline (41/42 pass, 296.48s, nice15/CPUs0–3).
+E4/E5 are unqualified; old observed passing pairs are not substituted. Complete
+raw prefix/failure is retained. Activation-nested first E1 passes14 in393.07s;
+requested repetitions continue. Corrected direct metadata has positive nice11/
+15 (relative +19 from inherited −8/−4), with explicit missing samples for very
+short tests, and no observed negative-priority reset.
