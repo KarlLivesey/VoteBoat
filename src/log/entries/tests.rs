@@ -541,6 +541,52 @@ fn recovered_backings_never_push_an_append_over_the_outbound_budget() {
 }
 
 #[test]
+fn hidden_bytes_are_kept_exactly_up_to_the_outbound_envelope() {
+    // One uniform backing of 40 × 1,000 B commands; the message shows 20.
+    // A plain copy retains 20 × (64 + 1,016) = 21,600 B and the backing
+    // hides as much again.
+    let entries: Vec<_> = (1..=40).map(|index| command(index, 1, 1_000)).collect();
+    let log = EntryLog::from(entries.clone());
+    assert_eq!(log.to_batch().backing_count(), 1);
+    let (start, end) = (10, 30);
+    let visible = &entries[start..end];
+    let plain = plain_charge(visible);
+    let hidden = log.to_batch().retained_bytes().unwrap() - plain;
+    assert_eq!((plain, hidden), (21_600, 21_600));
+    // The selector's upper bound of a plain copy: a record per entry, and
+    // each payload with at most 23 B beyond its length. Written out here, so
+    // that dropping either envelope term or the 23 B moves the edge below.
+    let copy_max = visible.len() * (std::mem::size_of::<LogEntry>() + 23) + 20_000;
+    let edge = ENVELOPE + copy_max + hidden;
+    let message = |budget| log.shared_range(start..end).unwrap().for_message(budget);
+    // At the edge the backing is kept, and the Append sent alone still fits.
+    let kept = message(edge);
+    assert_eq!(kept, visible);
+    assert!(kept.is_shared());
+    let charge = kept.retained_bytes().unwrap();
+    assert_eq!(charge, plain + hidden);
+    assert!(ENVELOPE + charge <= edge);
+    // Across the 512 B below the edge, no kept hidden byte pushes the
+    // Append over the budget.
+    for budget in edge - 512..=edge {
+        let message = message(budget);
+        assert_eq!(message, visible);
+        let charge = message.retained_bytes().unwrap();
+        assert!(
+            charge == plain || ENVELOPE + charge <= budget,
+            "{budget}: {charge} (plain {plain})"
+        );
+        // The replication path selects and holds the same message.
+        let selected = log.replication_range(start, end - start, budget);
+        assert_eq!(selected.retained_bytes(), Some(charge), "{budget}");
+    }
+    // One byte below the edge, the visible entries are copied.
+    let copied = message(edge - 1);
+    assert_eq!(copied, visible);
+    assert_eq!(copied.retained_bytes(), Some(plain));
+}
+
+#[test]
 fn messages_keep_at_most_the_bounded_hidden_charge() {
     let mut rng = Rng(55);
     for case in 0..8 {

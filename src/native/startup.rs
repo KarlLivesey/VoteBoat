@@ -138,7 +138,8 @@ impl NativeMemberStartup {
     }
     /// Import through one explicitly selected WAL capability. The same limits
     /// must be selected when reopening the member; import grants no readiness.
-    /// Invalid limits are refused before opening files, including on retry.
+    /// Invalid limits, and a batch no outbound budget can hold, are refused
+    /// before opening files, including on retry.
     pub fn enroll_snapshot_with_log_limits<A: CheckpointStateMachine>(
         &self,
         incoming: &Snapshot,
@@ -146,6 +147,8 @@ impl NativeMemberStartup {
         log_limits: LogLimits,
     ) -> Result<(), NativeStartupError> {
         let log_limits = checked(log_limits.validate())?;
+        // A member that every later start would refuse is not enrolled.
+        startup_outbound_limits(log_limits)?;
         validate_bootstrap_selection(&self.startup, log_limits)?;
         self.startup.validate_stores(&self.provisioned_stores)?;
         if self.startup.tls.wire_version() < 2
@@ -1003,11 +1006,14 @@ fn startup_worker_limits(limits: LogLimits) -> Result<WorkerLimits, NativeStartu
     worker.max_bytes = worker.max_bytes.max(ordinary_and_control);
     checked(worker.validate())
 }
-/// Outbound limits that carry every Append the core selects under `limits`:
-/// the batch budget is at least `max_batch_bytes` (an Append keeps hidden
-/// backing bytes only while its charge stays within that), and the peer and
-/// node byte budgets each hold one such data batch beside their control
-/// reserve. Defaults are kept up to 1 MiB.
+/// Outbound limits that carry every Append the core selects under `limits`
+/// that keeps hidden backing bytes: the batch budget is at least
+/// `max_batch_bytes` (an Append keeps them only while its charge stays within
+/// that), and the peer and node byte budgets each hold one such data batch
+/// beside their control reserve. An Append that keeps none is a plain copy,
+/// charged as on main; main's selector can pick a plain copy at the byte limit
+/// whose charge exceeds `max_batch_bytes` (a pre-existing edge, not closed
+/// here). Defaults are kept up to 1 MiB.
 fn startup_outbound_limits(limits: LogLimits) -> Result<OutboundLimits, NativeStartupError> {
     let mut outbound = OutboundLimits::default();
     let batch = limits.max_batch_bytes;

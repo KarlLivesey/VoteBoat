@@ -1398,7 +1398,8 @@ fn recovered_checkpoint_entries_replicate_and_commit_under_default_outbound_budg
 /// Uncommitted term-1 commands written from index 1, so the recovered log is
 /// one uniform backing whose hidden tail (four commands) once fitted the
 /// selector's unused wire allowance (61,728 of 63,552 B) while the Append's
-/// batch charge rose from 987,904 to 1,049,632 B: both followers refused it on
+/// message charge rose from 987,904 to 1,049,632 B (its batch charge, with the
+/// 256 B header, from 988,160 to 1,049,888 B): both followers refused it on
 /// every heartbeat. Every Append must stay within the default budget.
 #[test]
 #[cfg(feature = "native")]
