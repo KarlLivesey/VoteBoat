@@ -199,10 +199,17 @@ live data or begin a transfer; operator lifecycle execution remains separate.
 `voteboat-directory` uses the same storage maintenance as the counter service
 (see [Store maintenance](COUNTER_SERVICE.md#store-maintenance-on-by-default)):
 checkpoints and WAL reclaim are on by default, `--checkpoint-entries`,
-`--wal-reclaim-ms` and `--no-maintenance I-accept-a-bounded-log` are accepted
+`--wal-reclaim-ms`, `--wal-reclaim-min-bytes` and
+`--no-maintenance I-accept-a-bounded-log` are accepted
 by `serve`, and `client ... maintenance` reports the same fields. When the WAL
 passes its high-water mark (75% of usable capacity, or a write is held until a
 rewrite) a new proposal is answered `ERR StoragePressure`: nothing was
 admitted, and the operation can be retried unchanged after a backoff. The
 `maintenance` fields `high_water`, `high_water_entries`, `refused_proposals`
-and `wal_parked` show the state. A full WAL does not fail the node.
+and `wal_parked` show the state. A full WAL does not fail the node. The
+same retryable `ERR StoragePressure` answers a new proposal while the group's
+retained log is at 75% of its 16,384-entry budget, until a checkpoint brings
+it below 50% (`entry_high_water`, `refused_entry_proposals`), and a leader
+elected over a full log always has room for its first entry; the other
+round-3 fields (`retained_entries`, `checkpoint_failures`, `replica_stall`,
+`step_downs` and the rest) are described with the counter service.
