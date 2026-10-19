@@ -68,25 +68,28 @@ pub fn recover<'a>(
                 let app = &p.applications[&setup::bottom(3).group];
                 assert_eq!(record(app), facts.record);
                 // The enrollment record above is the durable import result.
-                // Its claim record is retained until the fresh session's
-                // first command retires it (then the lookup is Unknown, and
-                // a re-applied copy can only refuse).
-                match app
+                // Its claim record is retired only by a command of the fresh
+                // session, and none exists yet: the bridge refuses new work
+                // while it holds the image, and nothing is submitted between
+                // `take_image` and this inspection. So the record is still
+                // retained, and the watermark has not passed the fresh
+                // session's first operation (on every node, whatever it has
+                // applied).
+                let LogicalRead::Outcome(LogicalOutcomeLookup::Retained(status)) = app
                     .read_at(
                         app.applied_index(),
                         LogicalQuery::Outcome(facts.record.operation),
                     )
                     .unwrap()
-                {
-                    LogicalRead::Outcome(LogicalOutcomeLookup::Retained(status)) => {
-                        assert_eq!(status.command, facts.bytes);
-                        assert_eq!(status.first_index, facts.record.first_index);
-                    }
-                    LogicalRead::Outcome(LogicalOutcomeLookup::Unknown) => {
-                        assert!(app.metadata().retired_below >> 64 > 1);
-                    }
-                    other => panic!("original durable import result: {other:?}"),
-                }
+                else {
+                    panic!("original durable import result is not retained")
+                };
+                assert_eq!(status.command, facts.bytes);
+                assert_eq!(status.first_index, facts.record.first_index);
+                assert!(
+                    app.metadata().retired_below
+                        <= (u128::from(fresh.binding().session.get()) << 64) | 1
+                );
                 assert!(
                     p.owner
                         .core(setup::bottom(3).group)

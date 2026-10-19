@@ -92,21 +92,25 @@ pub fn recover<'a>(
                 let record = view.record.unwrap();
                 assert_eq!(record.operation.get(), 356200);
                 assert_eq!(record.first_index, entry.index);
-                // The enrollment record above carries the import; its claim
-                // record is retained until the fresh session's first command
-                // retires it (then the lookup is Unknown).
-                match app
+                // The enrollment record above carries the import. Its claim
+                // record is retired only by a command of the fresh session,
+                // and none exists yet: the bridge refuses new work while it
+                // holds the image, and nothing is submitted between
+                // `take_image` and this inspection. So the record is still
+                // retained, and the watermark has not passed the fresh
+                // session's first operation (on every node, whatever it has
+                // applied).
+                let LogicalRead::Outcome(LogicalOutcomeLookup::Retained(status)) = app
                     .read_at(app.applied_index(), LogicalQuery::Outcome(record.operation))
                     .unwrap()
-                {
-                    LogicalRead::Outcome(LogicalOutcomeLookup::Retained(status)) => {
-                        assert_eq!(status.command, bytes);
-                    }
-                    LogicalRead::Outcome(LogicalOutcomeLookup::Unknown) => {
-                        assert!(app.metadata().retired_below >> 64 > 1);
-                    }
-                    other => panic!("original imported command truth: {other:?}"),
-                }
+                else {
+                    panic!("original imported command truth is not retained")
+                };
+                assert_eq!(status.command, bytes);
+                assert!(
+                    app.metadata().retired_below
+                        <= (u128::from(fresh.binding().session.get()) << 64) | 1
+                );
                 assert!(
                     p.owner
                         .core(setup::bottom(3).group)
