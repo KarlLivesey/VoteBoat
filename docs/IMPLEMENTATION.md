@@ -20,7 +20,7 @@ design pack is unchanged; its amendments are recorded below.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current DR1: `SessionLedger`, Counter and the steady-state application contract (`lb/dr1-session-ledger`) | Audit S1 and RT2, and the U2 probe: the shipped counter service stops refusing every write after 10,000 lifetime operations; one shared session mechanism lands in the core; `deployment_requirements` means a steady-state bound under a declared retention rule, readiness refuses an application that declares none, and the Counter's apply never returns `Err` for a capacity reason | — (ST2 and NT1 run in parallel; only this document conflicts textually) | 1,000,000-write soak from 1,000 rotating clients fails on the base at write 10,001 with `DedupCapacity` and passes with retention ≤ S·K at every checkpoint; exactly-once across eviction, restart and a checkpoint between every apply; consumed retry → `Expired`; evicted-session retry → `Expired` (never a second execution); boundary at exactly S·K; U2 probe (1,000 seeded three-node schedules) shows apply never errors; readiness refuses an undeclared application; native durable CPU per write before/after; fmt, four strict Clippy configurations and matched fmt/Clippy; application, counter_service, runtime, snapshot, checkpoint, log_store and native startup suites in default and all-features | LB |
+| Current DR1: `SessionLedger`, Counter and the steady-state application contract (`lb/dr1-session-ledger`, in review; see DR1 implemented) | Audit S1 and RT2, and the U2 probe: the shipped counter service stops refusing every write after 10,000 lifetime operations; one shared session mechanism lands in the core; `deployment_requirements` means a steady-state bound under a declared retention rule, readiness refuses an application that declares none, and the Counter's apply never returns `Err` for a capacity reason | — (ST2 and NT1 run in parallel; only this document conflicts textually) | 1,000,000-write soak from 1,000 rotating clients fails on the base at write 10,001 with `DedupCapacity` and passes with retention ≤ S·K at every checkpoint; exactly-once across eviction, restart and a checkpoint between every apply; consumed retry → `Expired`; evicted-session retry → `Expired` (never a second execution); boundary at exactly S·K; U2 probe (1,000 seeded three-node schedules) shows apply never errors; readiness refuses an undeclared application; native durable CPU per write before/after; fmt, four strict Clippy configurations and matched fmt/Clippy; application, counter_service, runtime, snapshot, checkpoint, log_store and native startup suites in default and all-features | LB |
 | Next DR2: Maintenance, BucketCounter/Routed and outbox acknowledgement | Audit S2, S3: transfer_service stops refusing after 32 writes; leadership maintenance survives more than 64 transfers. Reuses `SessionLedger` and the U2 probe | DR1 (ledger, `Retention`, probe harness) | Fail@main tests (65 `Begin`/`Complete` pairs; 33 transfer writes); soaks with splits/merges and leader changes; U2 probe run for Maintenance; transfer suites | LB |
 | Then TX1: transaction participants and coordinators | Audit S5, S6: transaction services run indefinitely; a coordinator incarnation is a session at each participant | DR1 (ledger, `Expired` vocabulary) | Fail@main at 4,097 transactions (program: 257); 200,000-transaction soak with coordinator restarts and lost decision receipts | LB |
 
@@ -178,6 +178,180 @@ after acknowledgement or eviction → `Expired`. Old formats →
 with `nat.sh`/`svc.sh` (native durable path changes: +8 bytes per command,
 ledger lookups, no pending scan); matched benchmark unaffected by construction
 (`grep 'Counter' benchmarks/matched/src` is empty).
+
+#### DR1 implemented (19 October 2026, `lb/dr1-session-ledger`)
+
+Evidence first; differences from the schema plan follow.
+
+**Fail@base (main 4920534e).** A temporary test on the base (not committed)
+drove the same rotating-client stream of distinct writes into the service's
+application, `Counter::new(10000)`: write 10,001 is refused at admission with
+`DedupCapacity`, and if committed anyway `apply_batch` returns
+`Err(DedupCapacity)`. That is audit S1: the shipped service refuses every new
+write for life after 10,000 operations (100 s at 100 writes/s).
+
+**Soak (branch, `tests/application/soak.rs`).** Service limits (256 sessions ×
+32 outcomes, 64 nonces), 1,000 clients rotating through a working set of 300,
+10% lost replies, 30% retries, acknowledgement lag, eviction, re-registration.
+An oracle records every executed `(session, sequence)` and asserts none executes
+twice, every duplicate returns the original outcome, and the counter value
+equals the sum of executed deltas after every batch. A checkpoint every 10,000
+writes asserts the bounds, restores into a fresh counter and continues with the
+restored one. Debug runtime 4.4 s.
+
+| Measure | Value |
+| --- | --- |
+| Writes executed / log entries | 1,000,027 / 1,357,248 |
+| Registrations / sessions evicted | 106,173 / 105,918 |
+| Duplicate replies / `Expired` refusals / window refusals / lost replies | 101,856 / 126,979 / 4 / 135,649 |
+| Checkpoints (each restored and continued) | 100 |
+| Peak retained receipts (bound S·K) | 697 (8,192) |
+| Peak checkpoint bytes (bound `snapshot_bytes`) | 23,770 (213,556) |
+
+Two 20,000-write runs with one seed give identical statistics.
+
+**Other new tests.** `tests/application.rs` (26 tests, the Counter-subject suite
+rewritten for sessions, including 13 checkpoint mutations each refused without
+partial install and the readiness refusal of an undeclared application);
+`tests/application/sessions.rs` (registration, LRU eviction with expiry of the
+evicted IDs, consumed retry → `Expired`, nonce bound, session exhaustion,
+checkpoint between every apply of a 21-entry history that exercises every
+outcome, and 300 seeded 200-entry histories against an independently written
+model, admission decisions included, with restores at random points);
+`tests/application/window_bound.rs` (exactly S·K retained, the S·K+1th refused
+at admission and typed at apply, eviction releases a window, limits);
+`tests/application/ready_admission.rs` (ready-batch admission equals the
+validator over 1,692 small cases and never reads pending commands);
+`src/retention/tests.rs` (17 restore refusals, one per invariant, plus every
+truncation); `tests/counter_service/sessions.rs` (the service protocol end to
+end).
+
+**U2 probe (`tests/support/apply_probe.rs`, `tests/lifetime_apply_never_errs.rs`).**
+Fixed history: fill to capacity − 1; the leader proposes two novel commands and
+replicates the first to one follower whose acknowledgement is lost; the leader
+is cut off; the follower is elected and, before applying the inherited entry,
+admits its own novel command; heal and commit. Then 1,000 seeded 200-step
+schedules (proposals, retries, partitions, campaigns, duplicates, reordering,
+checkpoints, restarts from checkpoint with replay compared against a replay
+from the start).
+
+| Application | Apply errors on committed entries | Proposals / admitted / refused | Applied entries | Restarts / checkpoints / leader terms |
+| --- | --- | --- | --- | --- |
+| Counter, branch (2 sessions × window 4) | 0 | 26,371 / 17,742 / 1,834 | 98,305 | 8,333 / 8,391 / 7,252 |
+| Counter, base (`Counter::new(4)`, temporary run) | 0 | — / 11,050 / 9,014 | — | — |
+| Mutant: lifetime table with pending-blind admission | `DedupCapacity` in the fixed history | — | — | — |
+
+So U2 is not reachable for the base Counter: its admission counts every
+unapplied entry in the leader's log, and the fixed history refuses the new
+leader's command. The mutant shows the probe detects the defect class when
+admission does not account for pending entries. On the branch the Counter's apply
+cannot return `Err` for a capacity reason at all (I-LB by construction).
+Maintenance, Directory, transactions and logical applications keep apply-time
+`Err` at their lifetime caps until DR2/DH1/TX1/AI3 run this probe against them.
+
+**CPU per write (quiet Mac, `svc.sh`, native durable, TCP, WAL on the RAM
+disk, 15,000 writes/s offered, marginal CPU per original = (cpu at 16,000 −
+cpu at 2,000) / 14,000).** Base 4920534e against candidate bde63647, two sets
+of 5 interleaved pairs; Mac load average 5–6 while running (three replicas
+plus Spotlight indexing).
+
+| Set | Rate/s | p99 ms | Marginal µs/original | Pairs (cand/base) |
+| --- | --- | --- | --- | --- |
+| 1 | 14,861 → 14,827 | 21.1 → 20.1 | 15.3 → 14.6 (×0.954) | 0.94 0.97 0.93 0.95 0.94 |
+| 2 | 14,859 → 14,840 | 20.3 → 19.9 | 15.7 → 15.1 (×0.959) | 0.97 1.02 0.92 1.02 0.97 |
+
+No regression; about 4% less CPU per write. The benchmark keeps every outcome
+(window = capacity, no acknowledgement), the same retention as the base, so the
+gain is the cheaper per-write path: sequence-ordered `VecDeque` receipts instead
+of a growing `BTreeMap<u128, _>`, no per-batch staging map, and admission with no
+pending scan, despite 8 more bytes per command. The matched framework harness
+links no Counter (`grep Counter benchmarks/matched/src` is empty), so the
+framework cells are unaffected by construction.
+
+**Checks run.** `cargo +stable fmt --all -- --check`; strict Clippy default,
+all-features, no-default-features and native-only: zero diagnostics; matched
+fmt and strict Clippy: zero. All-features: lib (495), bins, examples (native
+benchmark 56) and 114 integration targets in one sequential pass, then `routed`
+in eight filtered chunks covering all 192 of its tests and `counter_service`
+(204). The two counter examples also ran end to end (a retried write returns the
+original value).
+Default features: lib, application, lifetime probe, configuration_capacity,
+runtime, snapshot, snapshot_worker, log_store, native_member_startup, startup,
+effect_owner, raft, provider_conformance, leadership_maintenance and
+counter_service (145). No default features: every target. Not completed:
+`representative_relay_model` (an exhaustive relay model, over 15 minutes in a
+debug build; it uses no Counter and is unchanged).
+
+**Format and API changes (no migration: unpublished crate, user accepted format
+breaks).**
+- New `voteboat::retention` (`SessionLedger`, `SessionLimits`,
+  `SessionOperation`, `SessionCommand`, `SessionRequest`, `SessionRefusal`,
+  `SessionApply`, `Lookup`, `SessionRecord`, `envelope`).
+- `StateMachine::retention()` and `Retention`; `ApplicationError::SessionWindow`
+  and `ApplicationError::RetentionUndeclared` (logical release capture codes 8
+  and 9). The default `validate_deployment_requirements` refuses `Undeclared`.
+- Counter: application schema 1 → 2 (`COUNTER_SCHEMA`), checkpoint `VBCTR001` →
+  `VBCTR002`, commands 8 → 16 bytes (`COUNTER_COMMAND_BYTES`, `Counter::command`),
+  operation IDs `(session << 64) | sequence` (`Counter::operation`), registration
+  `(0 << 64) | nonce` with empty bytes. `CounterOutcome::{Registered, Refused}`,
+  `CounterLookup`, `Counter::{with_limits, limits, lookup_operation,
+  retained_receipts, live_sessions, retained_registrations}`;
+  `remaining_operations` removed. `VBCTR001` with schema 1 → `UnsupportedSchema`.
+- counter_service: `register NONCE`; `add SESSION SEQUENCE ACK DELTA` (was
+  `add OPERATION_ID DELTA`), also under `group ID INC` and `auto`; envelope
+  213,556 bytes (was 330,032); the leadership-maintenance profile is schema 3
+  (was 2, which now equals the inner Counter's). Old stores are refused.
+- Logical-voter goldens regenerated where they embed a Counter checkpoint or the
+  Counter's schema: activation `v2-empty.bin`, `v2-populated.bin`,
+  `v2-profile.bin` and enrollment `v6-candidate-empty.bin`,
+  `v6-candidate-enrolled.bin`. Only the inner Counter blobs and schema field
+  differ (checked by length arithmetic and an identical sequence of non-Counter
+  section tags).
+
+**Differences from the schema plan.**
+- The ledger header is 28 bytes (limits are encoded), so the service bound is
+  213,556 bytes, not 213,552.
+- LRU eviction and oldest-nonce eviction scan at registration instead of keeping
+  `lru` and nonce-order indexes updated on every write: registration is rare, and
+  the per-write path stays two small lookups. `last_index` values are distinct,
+  so the minimum is unique and deterministic.
+- `SessionRefusal::Exhausted` for the 2^64th registration (W: 584,000 years at
+  10^6 registrations/s); a session's sequence space is also u64 (584,000 years
+  at 10^6 writes/s per session). Inside a logical activation wrapper a business
+  session equal to the activation tag (0x5642_4143_5450_4831 ≈ 6.2 × 10^18) would
+  be refused as reserved: 197,000 years of registrations at 10^6/s.
+- Window check uses the command's own acknowledgement (`max(floor,
+  consumed_through)`), as the plan's transition 7 implies; without it a full
+  window could never be acknowledged.
+- Test migration: the test suites used the Counter as a generic application with
+  arbitrary operation numbers. They now use sequences of the built-in session;
+  numbers that exceeded a test's window were renumbered into it (per test family
+  for the counter_service CLI tests), capacity assertions that expected
+  `DedupCapacity` now expect `SessionWindow` (the same refusal, by window), a
+  provider-conformance check that required an apply error at capacity now
+  requires the typed refusal (I-LB), a raft fault-schedule test's chunk size grew
+  from 96 to 128 bytes to keep its one-chunk/two-chunk structure, and the
+  benchmark example's foreground and drain writes moved inside its window.
+
+**Pack amendments realised for the Counter (pack preserved).** ch08
+"Idempotency": `SessionLedger`, explicit `consumed_through`, window K, LRU at
+registration, `Expired` for retired IDs, registration at-least-once with no
+business effect. ch13 "Deduplication lifetime?": closed for the Counter by
+durable session acknowledgement bounded by S·K. ch14 "deduplication state" and
+AGENTS "preserve dedup state across snapshots": retained receipts plus
+watermarks, so every ID is answered by its receipt or `Expired`, never
+re-executed. Application contract chapter: `deployment_requirements` is a
+steady-state bound under a declared `Retention`; readiness refuses `Undeclared`.
+
+**Inventory rows.** S1: closed (R, `SessionLedger`, condition = the session's
+acknowledged prefix and LRU at registration). RT2: closed (contract text,
+`Retention`, readiness refusal). U2: probed; not reachable for the base Counter;
+excluded for the branch Counter by construction; harness ready for DR2, TX1,
+DH1 and AI3. Still open and declared `LifetimeBounded`: Maintenance (S2, so the
+service's maintenance profile keeps 64 lifetime leadership records), BucketCounter
+and Routed (S3), transactions (S5, S6), Directory and metadata (S4, S8),
+adoption and partials (S7, T4), logical configuration history and activation
+intents (F5, L2).
 
 ## Logical-voter reliability track (opened 18 October 2026)
 
