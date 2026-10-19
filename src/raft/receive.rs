@@ -323,14 +323,18 @@ impl Raft {
     /// compared by content: a separately allocated batch with the same index
     /// and term must still be identical.
     fn first_new_entry(&self, entries: &EntryBatch) -> Result<Option<usize>, RaftError> {
-        for (offset, entry) in entries.iter().enumerate() {
-            match self.durable.entry_at(entry.index) {
-                Some(old_entry) if old_entry.term == entry.term => {
-                    if old_entry != entry {
-                        return Err(RaftError::InvalidMessage);
+        let mut offset = 0;
+        for slice in entries.slices() {
+            for entry in slice {
+                match self.durable.entry_at(entry.index) {
+                    Some(old_entry) if old_entry.term == entry.term => {
+                        if old_entry != entry {
+                            return Err(RaftError::InvalidMessage);
+                        }
                     }
+                    _ => return Ok(Some(offset)),
                 }
-                _ => return Ok(Some(offset)),
+                offset += 1;
             }
         }
         Ok(None)

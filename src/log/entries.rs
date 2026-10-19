@@ -400,6 +400,11 @@ impl EntryBatch {
         totals(self.spans.as_slice())
     }
     pub(crate) fn has_configuration(&self) -> bool {
+        if let Spans::One(Span::Owned(entries)) = &self.spans {
+            return entries
+                .iter()
+                .any(|entry| matches!(entry.payload, EntryPayload::Configuration(_)));
+        }
         has_configuration(self.spans.as_slice())
     }
     /// Any visible command or configuration.
@@ -438,7 +443,12 @@ impl EntryBatch {
         hard_term: u64,
         max_command_bytes: usize,
     ) -> bool {
-        let Some(summary) = self.summary() else {
+        // A small owned batch is validated by the original loop.
+        let summary = match &self.spans {
+            Spans::One(Span::Owned(_)) => None,
+            _ => self.summary(),
+        };
+        let Some(summary) = summary else {
             return self.valid_sequence(from, predecessor_term, hard_term, max_command_bytes);
         };
         let Some((first, last)) = summary.bounds else {
@@ -464,7 +474,11 @@ impl EntryBatch {
             self.iter()
                 .all(|entry| activated_configuration(entry).is_none_or(|id| id <= configuration))
         };
-        let Some(summary) = self.summary() else {
+        let summary = match &self.spans {
+            Spans::One(Span::Owned(_)) => None,
+            _ => self.summary(),
+        };
+        let Some(summary) = summary else {
             return self.valid_append_sequence(
                 previous_index,
                 previous_term,
@@ -497,17 +511,21 @@ impl EntryBatch {
         configuration: ConfigurationId,
         max_command_bytes: usize,
     ) -> bool {
-        for (offset, entry) in self.slices().flatten().enumerate() {
-            if activated_configuration(entry).is_some_and(|id| id > configuration)
-                || previous_index.checked_add(offset as u64 + 1) != Some(entry.index)
-                || entry.term == 0
-                || entry.term < previous_term
-                || entry.term > message_term
-                || entry.payload_bytes() > max_command_bytes
-            {
-                return false;
+        let mut expected = previous_index.checked_add(1);
+        for slice in self.slices() {
+            for entry in slice {
+                if activated_configuration(entry).is_some_and(|id| id > configuration)
+                    || expected != Some(entry.index)
+                    || entry.term == 0
+                    || entry.term < previous_term
+                    || entry.term > message_term
+                    || entry.payload_bytes() > max_command_bytes
+                {
+                    return false;
+                }
+                previous_term = entry.term;
+                expected = entry.index.checked_add(1);
             }
-            previous_term = entry.term;
         }
         true
     }
@@ -519,16 +537,20 @@ impl EntryBatch {
         hard_term: u64,
         max_command_bytes: usize,
     ) -> bool {
-        for (offset, entry) in self.slices().flatten().enumerate() {
-            if from.checked_add(offset as u64) != Some(entry.index)
-                || entry.term == 0
-                || entry.term < previous_term
-                || entry.term > hard_term
-                || entry.payload_bytes() > max_command_bytes
-            {
-                return false;
+        let mut expected = Some(from);
+        for slice in self.slices() {
+            for entry in slice {
+                if expected != Some(entry.index)
+                    || entry.term == 0
+                    || entry.term < previous_term
+                    || entry.term > hard_term
+                    || entry.payload_bytes() > max_command_bytes
+                {
+                    return false;
+                }
+                previous_term = entry.term;
+                expected = entry.index.checked_add(1);
             }
-            previous_term = entry.term;
         }
         true
     }

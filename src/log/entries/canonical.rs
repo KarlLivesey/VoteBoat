@@ -85,6 +85,11 @@ impl EntryLog {
             .map_or(0, |previous| self.ends[previous])
     }
     pub fn get(&self, ordinal: usize) -> Option<&LogEntry> {
+        // Most lookups fall in the last piece; past the end its `get` is `None`.
+        let last = self.spans.last()?;
+        if let Some(offset) = ordinal.checked_sub(self.len - last.len()) {
+            return last.entries().get(offset);
+        }
         let (position, start) = self.locate(ordinal)?;
         self.spans[position].entries().get(ordinal - start)
     }
@@ -102,6 +107,13 @@ impl EntryLog {
         }
         if range.is_empty() {
             return Some(EntryRange::EMPTY);
+        }
+        // Newly committed intervals usually lie in the last piece.
+        if let Some(last) = self.spans.last() {
+            if let Some(head) = range.start.checked_sub(self.len - last.len()) {
+                let len = range.end - range.start;
+                return Some(EntryRange::single(&last.entries()[head..head + len]));
+            }
         }
         let (first, first_start) = self.locate(range.start)?;
         // The interval usually ends in the same or a following nearby piece.
@@ -253,6 +265,8 @@ impl EntryLog {
     }
     fn append_span(&mut self, span: Span) {
         let ordinal = self.len() + span.len();
+        // The appended entries end the log; an empty piece leaves the tail.
+        let tail = span.entries().last().map(|last| (last.index, last.term));
         match (self.spans.last_mut(), span) {
             (Some(last), span) if last.adjoins(&span) => {
                 last.extend_to(&span);
@@ -272,7 +286,10 @@ impl EntryLog {
                 self.ends.push(ordinal);
             }
         }
-        self.refresh_tail();
+        self.len = ordinal;
+        if let Some(tail) = tail {
+            self.tail = tail;
+        }
     }
     /// Append one entry as its own backing.
     pub fn push(&mut self, entry: LogEntry) {
@@ -358,27 +375,41 @@ impl EntryLog {
         max_entries: usize,
         max_batch_bytes: usize,
     ) -> EntryBatch {
-        let Some((mut position, start)) = self.locate(offset) else {
+        let Some((position, start)) = self.locate(offset) else {
             return EntryBatch::default();
         };
-        let mut skip = offset - start;
-        let mut count = 0usize;
-        let mut bytes = 0usize;
+        // The first piece decides alone when the selection stops inside it,
+        // reaches `max_entries` or there is no next piece: one descriptor, no
+        // builder.
+        let first = &self.spans[position];
+        let skip = offset - start;
+        let limit = (first.len() - skip).min(max_entries);
+        let (taken, bytes) = select(first, skip, limit, 0, max_batch_bytes);
+        if taken < limit || taken == max_entries || position + 1 == self.spans.len() {
+            if taken == 0 {
+                return EntryBatch::default();
+            }
+            return EntryBatch::single(first.part(skip..skip + taken));
+        }
+        let mut count = taken;
+        let mut bytes = bytes;
         let mut spans = SpanBuilder::default();
-        while position < self.spans.len() && count < max_entries {
-            let span = &self.spans[position];
-            let limit = (span.len() - skip).min(max_entries - count);
-            let (taken, used) = select(span, skip, limit, bytes, max_batch_bytes);
+        spans.push(first.part(skip..skip + taken));
+        // Later pieces are selected from their first entry.
+        for span in &self.spans[position + 1..] {
+            if count == max_entries {
+                break;
+            }
+            let limit = span.len().min(max_entries - count);
+            let (taken, used) = select(span, 0, limit, bytes, max_batch_bytes);
             if taken != 0 {
-                spans.push(span.part(skip..skip + taken));
+                spans.push(span.part(0..taken));
             }
             count += taken;
             bytes = used;
             if taken < limit {
                 break;
             }
-            position += 1;
-            skip = 0;
         }
         spans.finish()
     }
@@ -387,6 +418,10 @@ impl EntryLog {
 /// Entries of the piece from `from` (at most `limit`) admitted after
 /// `bytes`, and the running total after them.
 fn select(span: &Span, from: usize, limit: usize, bytes: usize, max: usize) -> (usize, usize) {
+    if let Span::Owned(entries) = span {
+        // No index for a small owned piece: the original loop.
+        return select_scan(&entries[from..from + limit], bytes, max);
+    }
     // Every admitted entry adds `37 + payload`; it is admitted exactly when
     // the new running total plus the 256-byte allowance is within `max`.
     let total = |taken: usize| -> Option<usize> {
@@ -425,15 +460,19 @@ fn select(span: &Span, from: usize, limit: usize, bytes: usize, max: usize) -> (
         }
         return (low, total(low).unwrap_or(bytes));
     }
+    select_scan(&span.entries()[from..from + limit], bytes, max)
+}
+/// The original per-entry selection loop over `entries`.
+fn select_scan(entries: &[LogEntry], bytes: usize, max: usize) -> (usize, usize) {
     let mut used = bytes;
-    for (taken, entry) in span.entries()[from..from + limit].iter().enumerate() {
+    for (taken, entry) in entries.iter().enumerate() {
         let size = 37 + entry.payload_bytes();
         if size > max.saturating_sub(used + 256) {
             return (taken, used);
         }
         used += size;
     }
-    (limit, used)
+    (entries.len(), used)
 }
 impl From<Vec<LogEntry>> for EntryLog {
     /// One raw piece; recovery validates the history independently.

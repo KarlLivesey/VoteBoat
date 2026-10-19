@@ -35,6 +35,15 @@ impl<'a> EntryRange<'a> {
         back: &[],
         len: 0,
     };
+    /// One contiguous slice.
+    pub(super) fn single(entries: &'a [LogEntry]) -> Self {
+        Self {
+            front: entries,
+            middle: &[],
+            back: &[],
+            len: entries.len(),
+        }
+    }
     /// Visible `len` entries of `spans` after skipping `head` and cutting
     /// `tail`; the caller checked the bounds.
     pub(super) fn new(spans: &'a [Span], head: usize, tail: usize, len: usize) -> Self {
