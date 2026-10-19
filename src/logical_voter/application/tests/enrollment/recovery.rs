@@ -81,7 +81,7 @@ fn original_joint_then_final_parent_updates_promote_without_changing_candidate_s
             .voter_store(NodeId::new(3).unwrap()),
         Some(store(3))
     );
-    assert_eq!(a.schema_version(), 2);
+    assert_eq!(a.schema_version(), 4);
     assert_eq!(
         a.initialization(),
         LogicalInitialization::EnrollmentCandidate(fixture::plan())
@@ -89,7 +89,11 @@ fn original_joint_then_final_parent_updates_promote_without_changing_candidate_s
     let bytes = a.checkpoint(usize::MAX).unwrap();
     let mut restored = candidate();
     restored
-        .restore_checkpoint(2, a.applied_index(), &bytes)
+        .restore_checkpoint(
+            LOGICAL_ENROLLMENT_APPLICATION_SCHEMA,
+            a.applied_index(),
+            &bytes,
+        )
         .unwrap();
     assert_eq!(restored.state, a.state);
 }
@@ -187,7 +191,11 @@ fn retire_import_pin(a: &mut LogicalApplication, reference: SnapshotRef) {
     let checkpoint = a.checkpoint(usize::MAX).unwrap();
     let mut restored = candidate();
     restored
-        .restore_checkpoint(2, a.applied_index(), &checkpoint)
+        .restore_checkpoint(
+            LOGICAL_ENROLLMENT_APPLICATION_SCHEMA,
+            a.applied_index(),
+            &checkpoint,
+        )
         .unwrap();
     assert_eq!(restored.state, a.state);
     assert_eq!(
@@ -223,11 +231,13 @@ fn candidate_checkpoint_suffix_reclaim_and_original_retry_preserve_import() {
         LogicalOutcome::Claimed
     );
     let mut restored = candidate();
-    restored.restore_checkpoint(2, 1, &checkpoint).unwrap();
+    restored
+        .restore_checkpoint(LOGICAL_ENROLLMENT_APPLICATION_SCHEMA, 1, &checkpoint)
+        .unwrap();
     restored.apply_batch(&[suffix]).unwrap();
     assert_eq!(restored.state, a.state);
     assert_eq!(restored.state.enrollment, first);
-    assert_eq!(restored.schema_version(), 2);
+    assert_eq!(restored.schema_version(), 4);
     assert_eq!(
         restored.state.representative.unwrap().logical_session.get(),
         2
@@ -242,7 +252,7 @@ fn candidate_checkpoint_suffix_reclaim_and_original_retry_preserve_import() {
     for cut in [0, 7, 8, checkpoint.len() - 1] {
         let before = restored.checkpoint(usize::MAX).unwrap();
         assert!(restored
-            .restore_checkpoint(2, 1, &checkpoint[..cut])
+            .restore_checkpoint(LOGICAL_ENROLLMENT_APPLICATION_SCHEMA, 1, &checkpoint[..cut])
             .is_err());
         assert_eq!(restored.checkpoint(usize::MAX).unwrap(), before);
     }
@@ -254,7 +264,8 @@ fn permanent_import_generation_floor_survives_checkpoint_and_new_publication() {
     apply(&mut a, &c);
     let checkpoint = a.checkpoint(usize::MAX).unwrap();
     let mut a = candidate();
-    a.restore_checkpoint(2, 1, &checkpoint).unwrap();
+    a.restore_checkpoint(LOGICAL_ENROLLMENT_APPLICATION_SCHEMA, 1, &checkpoint)
+        .unwrap();
     let mut snapshot = a.state.snapshots[0].1.clone();
     snapshot.application.push(7);
     // A later snapshot's data is opaque here; source runtime validity belongs

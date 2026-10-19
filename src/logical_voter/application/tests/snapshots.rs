@@ -117,7 +117,7 @@ fn two_publications_pin_original_anchor_until_exact_reconcile() {
     let before = a.checkpoint(usize::MAX).unwrap();
     let mut recovered = app();
     recovered
-        .restore_checkpoint(1, a.applied_index(), &before)
+        .restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, a.applied_index(), &before)
         .unwrap();
     assert_eq!(recovered.state, a.state);
     anchor(&mut recovered, 7, second);
@@ -167,7 +167,7 @@ fn incoming_ahead_snapshot_must_be_pinned_before_install() {
     let bytes = a.checkpoint(usize::MAX).unwrap();
     let mut restored = app();
     restored
-        .restore_checkpoint(1, a.applied_index(), &bytes)
+        .restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, a.applied_index(), &bytes)
         .unwrap();
     assert_eq!(restored.state, a.state);
 }

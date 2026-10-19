@@ -163,23 +163,9 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
         let reference = if let Some((reference, _)) = existing {
             *reference
         } else {
-            let maximum = self
+            let generation = self
                 .state
-                .records
-                .values()
-                .filter_map(|s| match s.receipt.outcome {
-                    LogicalOutcome::SnapshotPublished(r) => Some(r.generation.get()),
-                    _ => None,
-                })
-                .chain(
-                    self.state
-                        .enrollment
-                        .iter()
-                        .map(|r| r.target_reference.generation.get()),
-                )
-                .max()
-                .unwrap_or(0);
-            let generation = maximum
+                .snapshot_generation
                 .checked_add(1)
                 .and_then(SnapshotGeneration::new)
                 .ok_or(ApplicationError::DedupCapacity)?;
@@ -192,6 +178,10 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
         if !self.state.snapshots.iter().any(|(r, _)| *r == reference) {
             self.state.snapshots.push((reference, snapshot.clone()));
         }
+        self.state.snapshot_generation = self
+            .state
+            .snapshot_generation
+            .max(reference.generation.get());
         self.state.published = Some(reference);
         Ok(LogicalOutcome::SnapshotPublished(reference))
     }

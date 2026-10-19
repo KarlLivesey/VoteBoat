@@ -41,7 +41,10 @@ fn candidate_public_configuration_is_nonserving_and_bound_to_explicit_schema() {
         LogicalInitialization::EnrollmentCandidate(plan())
     );
     assert_eq!(a.schema_version(), LOGICAL_ENROLLMENT_APPLICATION_SCHEMA);
-    assert_eq!(a.deployment_requirements().unwrap().application_schema, 2);
+    assert_eq!(
+        a.deployment_requirements().unwrap().application_schema,
+        LOGICAL_ENROLLMENT_APPLICATION_SCHEMA
+    );
     assert_eq!(
         a.logical_response_schema(),
         LOGICAL_ENROLLMENT_RESPONSE_SCHEMA
@@ -100,17 +103,22 @@ fn candidate_checkpoint_plan_and_legacy_schema_mismatch_refuse_atomically() {
     let mut other = construct(p, LogicalLimits::default()).unwrap();
     assert!(!a.same_configuration(&other));
     let before = other.checkpoint(usize::MAX).unwrap();
-    assert!(other.restore_checkpoint(2, 0, &bytes).is_err());
+    assert_eq!(
+        other.restore_checkpoint(LOGICAL_ENROLLMENT_APPLICATION_SCHEMA, 0, &bytes),
+        Err(ApplicationError::InvalidCheckpoint)
+    );
     assert_eq!(other.checkpoint(usize::MAX).unwrap(), before);
     let legacy = app(LogicalLimits::default())
         .checkpoint(usize::MAX)
         .unwrap();
     assert_eq!(
-        other.restore_checkpoint(1, 0, &legacy),
+        other.restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, 0, &legacy),
         Err(ApplicationError::UnsupportedSchema)
     );
     assert_eq!(other.checkpoint(usize::MAX).unwrap(), before);
     let mut restored = construct(plan(), LogicalLimits::default()).unwrap();
-    restored.restore_checkpoint(2, 0, &bytes).unwrap();
+    restored
+        .restore_checkpoint(LOGICAL_ENROLLMENT_APPLICATION_SCHEMA, 0, &bytes)
+        .unwrap();
     assert_eq!(restored.checkpoint(usize::MAX).unwrap(), bytes);
 }

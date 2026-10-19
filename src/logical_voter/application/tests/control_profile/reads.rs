@@ -90,7 +90,7 @@ fn status_and_active_results_use_selected_reserve_without_creating_authority() {
         let checkpoint = a.checkpoint(usize::MAX).unwrap();
         let mut restored = selected();
         restored
-            .restore_checkpoint(1, a.applied_index(), &checkpoint)
+            .restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, a.applied_index(), &checkpoint)
             .unwrap();
         assert_eq!(restored.state, a.state);
         assert!(admitted(&restored, &c).is_ok());

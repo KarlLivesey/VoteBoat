@@ -3,30 +3,137 @@
 use super::*;
 use crate::logical_voter::codec::Decoder;
 
+const V4_EMPTY: &[u8] = include_bytes!("../formats/v4-candidate-empty.bin");
+const V4_ENROLLED: &[u8] = include_bytes!("../formats/v4-candidate-enrolled.bin");
+/// Generated on `origin/main` 30a1f6c5 by the same fixture (applied 0 and 1).
+const V2_EMPTY: &[u8] = include_bytes!("../formats/v2-candidate-empty.bin");
+const V2_ENROLLED: &[u8] = include_bytes!("../formats/v2-candidate-enrolled.bin");
+fn enrolled() -> LogicalApplication {
+    let mut a = candidate();
+    let c = enrollment(import(&a), 11);
+    assert_eq!(apply(&mut a, &c).outcome, LogicalOutcome::Claimed);
+    a
+}
 #[test]
-fn candidate_v2_configuration_checkpoint_and_schema_are_explicit() {
+fn candidate_v4_configuration_checkpoint_and_schema_are_explicit() {
     let a = candidate();
     let bytes = a.checkpoint(usize::MAX).unwrap();
-    assert_eq!(&bytes[..8], b"VBLOGC02");
+    assert_eq!(&bytes[..8], b"VBLOGC04");
     assert_eq!(&a.configuration[..8], b"VBENRL02");
-    assert_eq!(a.deployment_requirements().unwrap().application_schema, 2);
+    assert_eq!(LOGICAL_ENROLLMENT_APPLICATION_SCHEMA, 4);
+    assert_eq!(a.deployment_requirements().unwrap().application_schema, 4);
     assert_eq!(
         a.logical_response_schema(),
         LOGICAL_ENROLLMENT_RESPONSE_SCHEMA
     );
     let mut restored = candidate();
-    restored.restore_checkpoint(2, 0, &bytes).unwrap();
+    restored
+        .restore_checkpoint(LOGICAL_ENROLLMENT_APPLICATION_SCHEMA, 0, &bytes)
+        .unwrap();
     assert_eq!(restored.state, a.state);
     let before = restored.checkpoint(usize::MAX).unwrap();
-    assert_eq!(
-        restored.restore_checkpoint(1, 0, include_bytes!("v1-empty.bin")),
-        Err(ApplicationError::UnsupportedSchema)
-    );
+    for (schema, applied, old) in [
+        (1, 0, &include_bytes!("v1-empty.bin")[..]),
+        (2, 0, V2_EMPTY),
+        (2, 1, V2_ENROLLED),
+    ] {
+        assert_eq!(
+            restored.restore_checkpoint(schema, applied, old),
+            Err(ApplicationError::UnsupportedSchema)
+        );
+        assert_eq!(
+            restored.restore_checkpoint(LOGICAL_ENROLLMENT_APPLICATION_SCHEMA, applied, old),
+            Err(ApplicationError::InvalidCheckpoint)
+        );
+    }
     assert_eq!(restored.checkpoint(usize::MAX).unwrap(), before);
     let mut wrong = bytes.clone();
     wrong[8 + 8 + 8] ^= 1;
-    assert!(restored.restore_checkpoint(2, 0, &wrong).is_err());
+    assert!(restored
+        .restore_checkpoint(LOGICAL_ENROLLMENT_APPLICATION_SCHEMA, 0, &wrong)
+        .is_err());
     assert_eq!(restored.checkpoint(usize::MAX).unwrap(), before);
+}
+#[test]
+fn candidate_v4_goldens_round_trip_exactly() {
+    for (a, golden) in [(candidate(), V4_EMPTY), (enrolled(), V4_ENROLLED)] {
+        let bytes = a.checkpoint(usize::MAX).unwrap();
+        assert_eq!(bytes, golden);
+        let mut b = candidate();
+        b.restore_checkpoint(
+            LOGICAL_ENROLLMENT_APPLICATION_SCHEMA,
+            a.applied_index(),
+            golden,
+        )
+        .unwrap();
+        assert_eq!(b.state, a.state);
+        assert_eq!(b.checkpoint(usize::MAX).unwrap(), golden);
+    }
+    let a = enrolled();
+    assert_eq!(a.state.snapshot_generation, 1);
+    assert!(a.state.enrollment.is_some());
+    // An ordinary application refuses candidate bytes and vice versa.
+    assert_eq!(
+        app().restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, 1, V4_ENROLLED),
+        Err(ApplicationError::InvalidCheckpoint)
+    );
+}
+/// A candidate's representative exists exactly when its enrollment does, and
+/// the enrollment record is the result of its retained `EnrollmentClaim`.
+#[test]
+fn candidate_restore_checks_enrollment_against_its_claim() {
+    let a = enrolled();
+    let applied = a.applied_index();
+    let edit = |f: fn(&mut LogicalEnrollmentRecord)| {
+        let mut b = a.clone();
+        f(b.state.enrollment.as_mut().unwrap());
+        b
+    };
+    let mut cases = vec![
+        (
+            "enrollment operation",
+            edit(|e| e.operation = OperationId::new(999).unwrap()),
+        ),
+        ("enrollment first index", edit(|e| e.first_index += 1)),
+        ("enrollment first term", edit(|e| e.first_term += 1)),
+        (
+            "enrollment target",
+            edit(|e| e.target_reference.checksum ^= 1),
+        ),
+        ("enrollment learners", edit(|e| e.learners.term += 1)),
+    ];
+    let mut b = a.clone();
+    b.state.enrollment = None;
+    cases.push(("representative without enrollment", b));
+    // With the image and receipt epochs gone too, so only the pairing with
+    // the enrollment is wrong.
+    let mut b = a.clone();
+    b.state.representative = None;
+    b.state.parent = None;
+    for r in b.state.records.values_mut() {
+        r.receipt.epoch = None;
+    }
+    cases.push(("enrollment without representative", b));
+    for (name, broken) in cases {
+        let bytes = broken.checkpoint(usize::MAX).unwrap();
+        let mut target = candidate();
+        let before = target.checkpoint(usize::MAX).unwrap();
+        assert_eq!(
+            target.restore_checkpoint(LOGICAL_ENROLLMENT_APPLICATION_SCHEMA, applied, &bytes),
+            Err(ApplicationError::InvalidCheckpoint),
+            "{name}"
+        );
+        assert_eq!(target.checkpoint(usize::MAX).unwrap(), before, "{name}");
+    }
+    let mut target = candidate();
+    target
+        .restore_checkpoint(
+            LOGICAL_ENROLLMENT_APPLICATION_SCHEMA,
+            applied,
+            &a.checkpoint(usize::MAX).unwrap(),
+        )
+        .unwrap();
+    assert_eq!(target.state, a.state);
 }
 #[test]
 fn exact_candidate_command_reserve_boundary_and_measured_envelope() {

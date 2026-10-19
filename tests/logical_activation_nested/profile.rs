@@ -82,8 +82,14 @@ fn selected_complete_upper_canonical_history_fits_lower_snapshot_and_import() {
     assert!(lower.parent_snapshots.max_application_bytes >= limits.max_child_checkpoint_bytes);
     assert!(lower.max_command_bytes > lower.parent_snapshots.max_file_bytes() + history + 1024);
     assert!(lower.control_action_bytes >= lower.max_command_bytes * 2);
-    assert_eq!(setup::lower_app(3).schema_version(), 2);
-    assert_eq!(setup::upper_app().schema_version(), 1);
+    assert_eq!(
+        setup::lower_app(3).schema_version(),
+        voteboat::logical_voter::LOGICAL_ENROLLMENT_APPLICATION_SCHEMA
+    );
+    assert_eq!(
+        setup::upper_app().schema_version(),
+        voteboat::logical_voter::LOGICAL_APPLICATION_SCHEMA
+    );
     assert!(
         setup::lower_app(3)
             .checkpoint(lower.max_child_checkpoint_bytes)

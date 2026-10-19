@@ -19,7 +19,7 @@ mod commands;
 mod enrollment;
 mod origins;
 pub(super) use atoms::{Decoder, Encoder};
-pub const LOGICAL_APPLICATION_SCHEMA: u64 = 1;
+pub const LOGICAL_APPLICATION_SCHEMA: u64 = 3;
 const MAGIC: &[u8; 8] = b"VBLOGA01";
 impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
     LogicalApplication<C, S, W>

@@ -91,7 +91,9 @@ fn entry(app: &LogicalApplication, c: &Command, index: u64) -> LogEntry {
 }
 fn apply(app: &mut LogicalApplication, c: &Command) -> LogicalReceipt {
     let e = entry(app, c, app.applied_index() + 1);
-    app.apply_batch(&[e]).unwrap().remove(0)
+    let receipt = app.apply_batch(&[e]).unwrap().remove(0);
+    formats::assert_restore_equivalent(app);
+    receipt
 }
 fn claim(app: &mut LogicalApplication) {
     assert_eq!(
@@ -263,7 +265,9 @@ fn durable_term_vote_and_prefix_survive_checkpoint() {
     assert_eq!(apply(&mut a, &c).outcome, LogicalOutcome::Mutated);
     let bytes = a.checkpoint(usize::MAX).unwrap();
     let mut restored = app();
-    restored.restore_checkpoint(1, 2, &bytes).unwrap();
+    restored
+        .restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, 2, &bytes)
+        .unwrap();
     assert_eq!(restored.state, a.state);
     assert!(apply(&mut restored, &c).duplicate);
     assert_eq!(
@@ -272,7 +276,9 @@ fn durable_term_vote_and_prefix_survive_checkpoint() {
     );
     for cut in 0..bytes.len() {
         let before = restored.state.clone();
-        assert!(restored.restore_checkpoint(1, 2, &bytes[..cut]).is_err());
+        assert!(restored
+            .restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, 2, &bytes[..cut])
+            .is_err());
         assert_eq!(restored.state, before);
     }
 }
@@ -439,6 +445,7 @@ mod authority;
 mod control_profile;
 mod eligibility;
 mod enrollment;
+mod formats;
 mod reads;
 mod snapshots;
 
@@ -453,7 +460,9 @@ fn applied_boundary_terms_are_monotonic_and_restored_exactly() {
     .unwrap();
     let bytes = a.checkpoint(usize::MAX).unwrap();
     let mut restored = app();
-    restored.restore_checkpoint(1, 1, &bytes).unwrap();
+    restored
+        .restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, 1, &bytes)
+        .unwrap();
     assert_eq!(restored.state.applied_term, 3);
     let c = command(
         1,
@@ -479,7 +488,7 @@ fn applied_boundary_terms_are_monotonic_and_restored_exactly() {
     let offset = 8 + 8 + restored.configuration.len() + 8;
     bad[offset..offset + 8].copy_from_slice(&2u64.to_le_bytes());
     assert_eq!(
-        restored.restore_checkpoint(1, 2, &bad),
+        restored.restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, 2, &bad),
         Err(ApplicationError::InvalidCheckpoint)
     );
     assert_eq!(restored.checkpoint(usize::MAX).unwrap(), good);

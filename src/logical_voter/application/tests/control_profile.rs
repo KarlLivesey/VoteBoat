@@ -144,7 +144,11 @@ fn selected_profile_is_immutable_and_checkpoint_binding_is_exact() {
     let mut restored = app();
     let before = restored.checkpoint(usize::MAX).unwrap();
     assert_eq!(
-        restored.restore_checkpoint(1, 0, &selected.checkpoint(usize::MAX).unwrap()),
+        restored.restore_checkpoint(
+            LOGICAL_APPLICATION_SCHEMA,
+            0,
+            &selected.checkpoint(usize::MAX).unwrap()
+        ),
         Err(ApplicationError::InvalidCheckpoint)
     );
     assert_eq!(restored.checkpoint(usize::MAX).unwrap(), before);
@@ -188,7 +192,7 @@ fn original_mixed_action_uses_reserved_capacity_and_replays_without_splitting() 
     let checkpoint = a.checkpoint(usize::MAX).unwrap();
     let mut restored = selected();
     restored
-        .restore_checkpoint(1, a.applied_index(), &checkpoint)
+        .restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, a.applied_index(), &checkpoint)
         .unwrap();
     assert_eq!(restored.state, a.state);
     let suffix = mutate(&restored, 5, update_without_suffix(&restored));
@@ -202,7 +206,7 @@ fn original_mixed_action_uses_reserved_capacity_and_replays_without_splitting() 
         .unwrap();
     let before = different.checkpoint(usize::MAX).unwrap();
     assert_eq!(
-        different.restore_checkpoint(1, a.applied_index(), &checkpoint),
+        different.restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, a.applied_index(), &checkpoint),
         Err(ApplicationError::InvalidCheckpoint)
     );
     assert_eq!(different.checkpoint(usize::MAX).unwrap(), before);
@@ -314,29 +318,57 @@ fn child_checkpoint_with_v1_profile_embedding_is_refused_typed() {
             .map(|(at, _)| at)
             .collect::<Vec<_>>()
     };
-    let v2 = selected().checkpoint(usize::MAX).unwrap();
-    // The embedding tag and the profile's magic, at the same offsets as in v2.
-    let at = find(V1_SELECTED_CHECKPOINT, b"VBACTP01");
+    // Frame: magic (8), configuration length (8), configuration, then state.
+    let configuration = |bytes: &[u8]| {
+        let length = u64::from_le_bytes(bytes[8..16].try_into().unwrap()) as usize;
+        bytes[16..16 + length].to_vec()
+    };
+    let v3 = selected().checkpoint(usize::MAX).unwrap();
+    assert_eq!(&V1_SELECTED_CHECKPOINT[..8], b"VBLOGC01");
+    assert_eq!(&v3[..8], b"VBLOGC03");
+    let (old, new) = (configuration(V1_SELECTED_CHECKPOINT), configuration(&v3));
+    // The embedding tag and the profile's magic, at the same offsets. Before
+    // them the configurations are identical; the v1 profile carries one more
+    // u64, the removed business limit.
+    let at = find(&old, b"VBACTP01");
     assert_eq!(at.len(), 2);
-    assert_eq!(at, find(&v2, b"VBACTP02"));
-    assert!(find(V1_SELECTED_CHECKPOINT, b"VBACTP02").is_empty());
-    // Before the embedded profile only the configuration length differs: the
-    // v1 profile carries one more u64, the removed business limit. So the
-    // refusal comes from the profile binding alone.
-    let length = |bytes: &[u8]| u64::from_le_bytes(bytes[8..16].try_into().unwrap());
-    assert_eq!(length(V1_SELECTED_CHECKPOINT), length(&v2) + 8);
-    assert_eq!(V1_SELECTED_CHECKPOINT.len(), v2.len() + 8);
-    assert_eq!(V1_SELECTED_CHECKPOINT[..8], v2[..8]);
-    assert_eq!(V1_SELECTED_CHECKPOINT[16..at[0]], v2[16..at[0]]);
+    assert_eq!(at, find(&new, b"VBACTP02"));
+    assert!(find(&old, b"VBACTP02").is_empty());
+    assert_eq!(old.len(), new.len() + 8);
+    assert_eq!(old[..at[0]], new[..at[0]]);
+    // Same-schema profile binding: the v1 configuration blob in an otherwise
+    // current v3 frame. Only the profile embedding differs, so the refusal
+    // comes from the profile binding alone.
+    let splice = |blob: &[u8]| {
+        let mut bytes = v3[..8].to_vec();
+        bytes.extend_from_slice(&(blob.len() as u64).to_le_bytes());
+        bytes.extend_from_slice(blob);
+        bytes.extend_from_slice(&v3[16 + new.len()..]);
+        bytes
+    };
+    assert_eq!(splice(&new), v3);
+    let spliced = splice(&old);
     for mut child in [selected(), app()] {
         let before = child.checkpoint(usize::MAX).unwrap();
         assert_eq!(
+            child.restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, 0, &spliced),
+            Err(ApplicationError::InvalidCheckpoint)
+        );
+        // Old schema: the legacy file is refused by schema number, and under
+        // the current schema by its v1 frame.
+        assert_eq!(
             child.restore_checkpoint(1, 0, V1_SELECTED_CHECKPOINT),
+            Err(ApplicationError::UnsupportedSchema)
+        );
+        assert_eq!(
+            child.restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, 0, V1_SELECTED_CHECKPOINT),
             Err(ApplicationError::InvalidCheckpoint)
         );
         assert_eq!(child.checkpoint(usize::MAX).unwrap(), before);
     }
     let mut child = selected();
-    child.restore_checkpoint(1, 0, &v2).unwrap();
-    assert_eq!(child.checkpoint(usize::MAX).unwrap(), v2);
+    child
+        .restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, 0, &v3)
+        .unwrap();
+    assert_eq!(child.checkpoint(usize::MAX).unwrap(), v3);
 }

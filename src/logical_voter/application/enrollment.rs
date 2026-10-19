@@ -64,6 +64,10 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
             .snapshots
             .push((reference, import.snapshot.clone()));
         self.state.published = Some(reference);
+        self.state.snapshot_generation = self
+            .state
+            .snapshot_generation
+            .max(reference.generation.get());
         self.state.representative = Some(c.representative);
         self.state.enrollment = Some(Box::new(LogicalEnrollmentRecord {
             plan: import.plan,

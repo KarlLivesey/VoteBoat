@@ -124,7 +124,13 @@ fn coherent_checkpoint_restores_the_original_command_and_duplicate_receipt() {
     assert!(!first.duplicate);
     let checkpoint = app.checkpoint(limits.max_child_checkpoint_bytes).unwrap();
     let mut restored = construct(limits).unwrap();
-    restored.restore_checkpoint(1, 1, &checkpoint).unwrap();
+    restored
+        .restore_checkpoint(
+            crate::logical_voter::LOGICAL_APPLICATION_SCHEMA,
+            1,
+            &checkpoint,
+        )
+        .unwrap();
     assert_eq!(restored.checkpoint(usize::MAX).unwrap(), checkpoint);
     assert!(restored
         .validate_proposal(command.operation, &bytes, std::iter::empty())

@@ -58,7 +58,7 @@ pub(super) fn source_and_original_controls(c: &mut cluster::Cluster) {
             setup::child().group,
             support::node(1),
             ReadinessRequirements {
-                application_schema: 1,
+                application_schema: voteboat::logical_voter::LOGICAL_APPLICATION_SCHEMA,
                 command_bytes: 1,
                 snapshot_bytes: 1,
             },
@@ -156,7 +156,7 @@ fn configure(c: &mut cluster::Cluster) {
                 },
                 readiness: Vec::new(),
                 requirements: ReadinessRequirements {
-                    application_schema: 1,
+                    application_schema: voteboat::logical_voter::LOGICAL_APPLICATION_SCHEMA,
                     command_bytes: setup::limits().max_command_bytes,
                     snapshot_bytes: setup::limits().max_child_checkpoint_bytes,
                 },

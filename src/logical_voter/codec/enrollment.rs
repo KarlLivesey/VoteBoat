@@ -145,4 +145,18 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
         e.u64(r.first_index)?;
         e.u64(r.first_term)
     }
+    pub(in crate::logical_voter) fn decode_enrollment(
+        &self,
+        d: &mut Decoder<'_>,
+    ) -> Result<LogicalEnrollmentRecord, ApplicationError> {
+        Ok(LogicalEnrollmentRecord {
+            plan: d.enrollment_plan()?,
+            origin: d.enrollment_origin()?,
+            learners: self.enrollment_entry(d.blob(self.journal_limits().max_batch_bytes)?)?,
+            target_reference: d.reference()?,
+            operation: d.id128(OperationId::new)?,
+            first_index: d.u64()?,
+            first_term: d.u64()?,
+        })
+    }
 }

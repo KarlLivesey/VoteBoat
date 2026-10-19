@@ -196,7 +196,7 @@ pub fn lower_app(slot: usize) -> LogicalApplication {
                 },
                 expected: ConfigurationId::new(if slot == 3 { 1 } else { 4 }).unwrap(),
                 configuration: ConfigurationId::new(if slot == 3 { 2 } else { 5 }).unwrap(),
-                source_application_schema: 1,
+                source_application_schema: LOGICAL_APPLICATION_SCHEMA,
             },
         )
         .unwrap();
