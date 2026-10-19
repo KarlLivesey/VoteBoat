@@ -475,6 +475,117 @@ map lookup at admission; DR1's Mac A/B stands until the next measurement).
 tables listed above. `Refused(UnknownSession)` is not final, by design: it only
 answers a session ID the service never handed out.
 
+#### DR1 round 3 schema plan (19 October 2026, before editing; PR 15)
+
+GPT-6.1-Sol's round-2 review (5578413371) requested changes: P1 allocation-mark
+rollback after closure, P2 wrapped Counters diverge silently, P3 the checkpoint
+trust boundary, plus two impossible restore states and two documentation
+judgements. Why these pieces and no others: each closes one reviewed defect in
+the DR1 mechanism; nothing here is a new feature. Failure/cleanup for every new
+restore check: `InvalidCheckpoint` before anything is installed (decode builds a
+new ledger; the target is untouched on refusal).
+
+1. **Allocation fence across closure (P1).**
+   - *Invariant.* No restored state can allocate a session ID that was already
+     allocated (plan §1.4 watermark rule, checklist §5.4). Without closure, the
+     newest allocated session (`next_session − 1`) is always live: eviction
+     happens only inside a registration, which then allocates a newer session.
+     Closure on a committed `Refused(Window)` is the one transition that
+     removes the newest session, and with it the evidence for `next_session`.
+   - *Mechanism.* The ledger keeps one **closure record** `(session, index)`:
+     set when apply closes the newest allocated session, cleared when the next
+     registration allocates a newer one. It is a single fixed-size field (16
+     bytes in the ledger header), replaced rather than accumulated, so it is not
+     a collection and its size is the same after any number of closures and any
+     uptime. Restore requires, by equality, that the newest allocated session is
+     exactly one of: live, or the closure record (and the record names no other
+     session). A rewrite of `next_session` alone, or of the record alone, is then
+     inconsistent and refused. History bounds checked at the same time: a live
+     session with ID `n` (not the built-in one) has last-use index ≥ `n − first
+     + 1`, where `first` is the first allocatable ID, because each allocation is
+     its own applied entry; the closure index is ≤ applied, above that session's
+     earliest registration index, distinct from every live last-use index, and
+     above every unused registration's index.
+   - *Format.* Ledger header 28 → 44 bytes; Counter checkpoint `VBCTR002` →
+     `VBCTR003` and `COUNTER_FORMAT` 4 → 5, so a round-2 image is refused by
+     schema, not misread. Service envelope 279,092 → 279,108 bytes.
+   - *Test.* Sol's reproduction exactly (`SessionLimits::new(2, 4, 2)`; register
+     77 at 1; `(2,1,0,+7)` at 2; `(2,5,0,+9)` at 3 → `Refused(Window)`; lower
+     `next_session` 3 → 2) must give `InvalidCheckpoint` with the target
+     unchanged, and the intact image must refuse the retry `Expired` with the
+     next registration getting session 3. Ledger mutations: record removed,
+     record moved, record index 0, above applied, equal to a live index.
+2. **Wrapped identity (P2).**
+   - *Invariant.* Replicas that would decide a committed entry differently
+     refuse each other before the first entry is applied. For a wrapper, that
+     means the compared identity (application schema, compared at readiness,
+     snapshot install and restore) must change whenever the inner identity
+     changes.
+   - *Mechanism.* `Maintenance::new(group, format, capacity, inner)`: `format`
+     is now the maintenance profile number in `1..=15`, and the schema is
+     `format << 60 | inner.schema_version()`, refused (`UnsupportedSchema`) if
+     the inner schema uses the top four bits. The map is injective, so two
+     Maintenance replicas share a schema only if both formats and both inner
+     identities are equal. The logical activation wrapper's schema becomes
+     `LOGICAL_ACTIVATION_SCHEMA ^ inner.schema_version()`, a bijection of the
+     inner identity for the one activation format. The service's maintenance
+     profile (format 3) inherits the Counter's limits through this. Audit of the
+     other six `Retention::wrapping` sites: Routed, the scoped and transfer
+     sources, transfer target, namespace creation and the retirement guard each
+     commit a bootstrap binding that already contains the inner schema (and
+     their own limits and initial checkpoint); no entry is applied until that
+     binding is applied, and a replica whose binding differs fails that entry
+     with `Err(InvalidCommand)` (a loud stop, never a different outcome). Their
+     only in-tree inner application, `BucketCounter`, has one fixed schema.
+     `RoutedControlReads` forwards the inner schema unchanged. So those six are
+     recorded, not changed. Maintenance's own `capacity` is not in its schema:
+     a mismatch fails a committed `Begin` with `Err(DedupCapacity)` on the
+     smaller replica (loud), and DR2 replaces that table.
+   - *Test.* Two `Maintenance<Counter>` with format 3 and inner limits
+     `(2,4,4)` and `(3,4,4)`: each refuses the other's declaration
+     (`UnsupportedSchema`), and a native learner readiness check refuses before
+     any entry is applied. Same for two activation wrappers. Sol's history then
+     cannot be reached.
+3. **Trust boundary (P3).** Documentation only, no authentication. The restore
+   checks detect a single-field inconsistency between a watermark and its
+   evidence (floor vs retained acknowledgements; allocation mark vs live newest
+   session or closure record). They do not detect a consistent rewrite of a
+   watermark and all of its evidence (Sol's coordinated floor + ACK rewrite
+   still restores and re-executes). Checkpoint bytes are trusted input under the
+   pack's non-Byzantine model, protected against accidental corruption by the
+   snapshot/WAL integrity checks; the plan specifies corrupted-watermark checks,
+   not an authenticated checkpoint protocol. The round-2 claim "a lowered floor
+   is always refused" is narrowed to "a lowered floor is refused unless its
+   acknowledgements are rewritten with it".
+4. **Remaining impossible restore states.**
+   - `next_session = 100` at applied 0: refused by item 1's equality (session
+     99 must be live or the closure record) and the history bounds; plus the
+     direct check `next_session − first ≤ applied`.
+   - Unused allocated session without a nonce while `Rg ≥ S`: no history
+     produces it (nonces are only dropped when `Rg` of them are held, and at most
+     `S − 1` sessions hold one at that point). Post-decode check: if `Rg ≥ S`,
+     every unused registered session holds its nonce; for any `Rg`, nonce-less
+     unused sessions are older (lower ID) than every unused session with one
+     (nonces are dropped oldest-first and every registration takes the newest).
+   - *Test.* Failing-input ledger tests for both.
+5. **Refusal storage and closure as an amendment.** Rewrite the round-2
+   rationale: one refused outcome inside the floor's window with a free slot
+   could be charged to a slot; what cannot be kept under S·K is a refusal for an
+   arbitrary far-future sequence, or one when K receipts are already held.
+   Closure is recorded as an amendment to plan §1.4 step 2 ("refusal does not
+   mutate retained state"): a committed window refusal removes its session. The
+   client-visible semantics (Sol confirmed): an executed in-flight original of
+   that session keeps its effect once; a pending one may never execute; both
+   then answer `Expired`; neither may be moved to a new session. Trade-off:
+   registration churn can evict live sessions once no empty session exists.
+6. **Regression.** Keep every round-2 fix and test. Re-run the four finality
+   tests and Sol's seven probes against 120e9cab's `src/` in this worktree
+   (fail), then this branch (pass).
+7. **CPU.** Measure native durable CPU per write against the merge base
+   (4920534e) with `svc.sh` on the quiet Mac, ≥ 5 interleaved pairs. The write
+   path changes only by one comparison on closure (`session == next_session −
+   1`), which is off the hot path.
+
 ## Logical-voter reliability track (opened 18 October 2026)
 
 Goal: logical parents and their backing children run indefinitely with bounded
