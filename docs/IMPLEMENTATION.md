@@ -117,10 +117,30 @@ untracked scratch copies (no kernel policy change), folded stacks read as text.
 | P1, budget boundaries | Native startup derives the outbound limits (above) | Every admitted non-empty Append in both restart tests is admitted with `batch_bytes` equal to its charge and refused one byte under; `outbound_batches_carry_every_selected_append` (defaults unchanged up to 1 MiB; 1 MiB + 1, 8 MiB, 33,587,200 B and 256 MiB derive a budget that admits exactly one such data batch; 1 GiB refuses startup); `retained_charges_exceed_lengths_by_at_most_the_stated_bound` | Pass (new) |
 | P3 (both): sharing claims | `MESSAGE_HIDDEN_MAX` and `SPARE_MAX` comments, the `for_message` comment, the superseded-P3 row, the round-2 plan and the "Message budgets" paragraph qualified by the headroom condition; the round-2 P1 row says narrowed, not fixed; the runner's result recorded; the singleton targets marked unmet with the decision with the user | — | — |
 
+Quiet Mac, whole process, 5 interleaved pairs (`fwmac.sh b72d1ee3 2b6221e2
+5`, CPU ns/write medians, Mac load 0.38 at start; 2b6221e2 is this round's
+code, later commits are records only):
+
+| Cell | main b72d1ee3 | 2b6221e2 | change | pairs | round 2 builder / runner |
+| --- | ---: | ---: | ---: | --- | ---: |
+| bulk-16 | 248 | 217 | −12.5% | 0.88 0.88 0.88 0.88 0.87 | −12.9% / −12.4% |
+| single-16 | 22,228 | 22,622 | +1.8% | 1.01 1.02 1.00 1.03 1.04 | +0.7% / +1.5% |
+| bulk-1 | 215 | 191 | −11.2% | 0.89 0.86 0.88 0.88 0.89 | −12.0% / −12.0% |
+| single-1 | 12,795 | 12,812 | +0.1% | 0.98 1.00 1.01 1.02 1.05 | +2.3% / +2.2% |
+
+Both bulk cells stay within 1 point of round 2 (bulk-1 moves 0.8 points, inside
+the −12.0% to −13.3% range of round 2's four sessions). Bulk Appends are
+count-limited: with small commands the outbound term of the allowance is
+about 0.9 MiB, far above the `MESSAGE_HIDDEN_MAX + 2 × plain` term that
+decides them, so the fix changes which pieces they keep only near the byte
+limit. The singleton code is unchanged since round 2, so the singleton cells
+(+1.8% / +0.1% here) are session spread around the recorded +1% to +2%; the
+singleton targets stay unmet with the decision with the user.
+
 Checks on this tree (Linux, cores 14–15, `-j 2`): `cargo +stable fmt --all --
 --check`; strict Clippy default, all features, no default features and native
-only, zero diagnostics; matched fmt and strict all-target Clippy, zero
-diagnostics. Default: `--lib` 489, `raft` 81, `wire` 20, `volatile` 7,
+only, zero diagnostics (also via the pre-push hook); matched fmt and strict
+all-target Clippy, zero diagnostics. Default: `--lib` 489, `raft` 81, `wire` 20, `volatile` 7,
 `log_owned` 5, `log_store` 19, `native_relay` 13, `startup` 45. All features:
 `--lib` 491, `raft` 81, `wire` 20, `volatile` 7, `log_owned` 5, `log_store`
 19, `native_relay` 22, `startup` 60. Matched tests 75/75. Not run: the other
