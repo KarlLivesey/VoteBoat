@@ -111,6 +111,7 @@ fn claim(a: &mut LogicalApplication) -> LogicalReceipt {
         operation: OperationId::new(1).unwrap(),
         origin_configuration: ConfigurationId::new(1).unwrap(),
         representative: representative(),
+        consumed_through: 0,
         body: CommandBody::Claim {
             expected_epoch: None,
         },

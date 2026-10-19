@@ -255,12 +255,28 @@ fn history(protocol: NativePeerProtocol) {
         assert_eq!(state.base_index(), *base);
         assert!(state.last_index() > *base);
     }
+    // The real bridge acknowledged each consumed outcome: the second
+    // session's claim retired session 1, and its own actions retired all but
+    // the last one, so one original is retained.
+    let LogicalRead::Metadata(m) = cluster.read(LogicalQuery::Metadata) else {
+        panic!("child metadata")
+    };
+    assert_eq!(m.retired_below >> 64, 2);
+    assert!(m.retired_below as u64 > 1);
+    assert_eq!(m.retained_actions, 1);
     cluster.close();
     cluster.open(NativeOpenMode::Recover);
     let recovered = cluster.claim(3, 8103, false);
     assert_eq!(recovered.representative().epoch.get(), 3);
     assert_state(&recovered.image().parent, 2);
     assert_eq!(recovered.image().parent, second);
+    // The recovery claim closed session 2: only the claim itself is retained
+    // until the new session's first command.
+    let LogicalRead::Metadata(m) = cluster.read(LogicalQuery::Metadata) else {
+        panic!("child metadata")
+    };
+    assert_eq!(m.retired_below, (3 << 64) | 1);
+    assert_eq!(m.retained_actions, 1);
     cluster.finish();
 }
 #[test]

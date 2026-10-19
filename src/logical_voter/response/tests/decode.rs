@@ -52,6 +52,7 @@ fn outcome(d: &mut Decoder<'_>) -> LogicalOutcome {
             4 => LogicalRefusal::SnapshotConflict,
             5 => LogicalRefusal::InvalidResponse,
             6 => LogicalRefusal::OperationConflict,
+            7 => LogicalRefusal::Expired,
             _ => panic!("refusal tag"),
         }),
         _ => panic!("outcome tag"),
@@ -81,10 +82,11 @@ pub(super) fn read(a: &LogicalApplication, bytes: &[u8]) -> LogicalRead {
     header(&mut d, 2);
     let r = match d.u8().unwrap() {
         0 => LogicalRead::Image(Box::new(image(a, &mut d))),
-        1 => LogicalRead::Outcome(if d.flag().unwrap() {
-            Some(Box::new(status(&mut d)))
-        } else {
-            None
+        1 => LogicalRead::Outcome(match d.u8().unwrap() {
+            0 => LogicalOutcomeLookup::Unknown,
+            1 => LogicalOutcomeLookup::Retained(Box::new(status(&mut d))),
+            2 => LogicalOutcomeLookup::Expired,
+            tag => panic!("outcome lookup tag {tag}"),
         }),
         2 => {
             assert_eq!(
@@ -161,5 +163,6 @@ fn metadata(d: &mut Decoder<'_>) -> LogicalMetadata {
         retained_action_bytes: usize::try_from(d.u64().unwrap()).unwrap(),
         parent_revision: LogRevision::new(d.u64().unwrap()),
         parent_generation: LogGeneration::new(d.u64().unwrap()),
+        retired_below: d.u128().unwrap(),
     }
 }

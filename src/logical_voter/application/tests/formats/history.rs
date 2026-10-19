@@ -3,7 +3,9 @@
 //! A representative ordinary child history: a child configuration change,
 //! claim, parent mutations, two snapshot publications with an anchor, a stale
 //! representative refusal, a reconcile refusal, an exact retry and a term
-//! change. The same code generated the v1 legacy fixture on `origin/main`.
+//! change. The same code generated the v1 legacy fixture on `origin/main`
+//! and LV1's v3 fixture; since LV2 the final mutation acknowledges sequences
+//! 1–5, so the checkpoint shows retirement.
 use super::*;
 use crate::membership::{Configuration, ConfigurationChange, ConfigurationRecord};
 use crate::snapshot_worker::{SnapshotWorkTicket, SnapshotWorkerBinding};
@@ -40,17 +42,6 @@ pub(super) fn later_snapshot(a: &LogicalApplication) -> Snapshot {
     }
 }
 pub(super) fn publish(a: &mut LogicalApplication, id: u128, s: Snapshot) -> LogicalReceipt {
-    let receipt = publish_unchecked(a, id, s);
-    super::assert_restore_equivalent(a);
-    receipt
-}
-/// Publication without the per-apply LV1 equivalence check, for states that
-/// simulate future retirement.
-pub(super) fn publish_unchecked(
-    a: &mut LogicalApplication,
-    id: u128,
-    s: Snapshot,
-) -> LogicalReceipt {
     let p = a.state.parent.as_ref().unwrap();
     let c = command(
         id,
@@ -65,7 +56,11 @@ pub(super) fn publish_unchecked(
     // Append at the current child term, which the history raises to 2.
     let mut e = entry(a, &c, a.applied_index() + 1);
     e.term = a.state.applied_term.max(1);
-    a.apply_batch(&[e]).unwrap().remove(0)
+    let before = a.checkpoint(usize::MAX).unwrap();
+    let receipts = a.apply_batch(std::slice::from_ref(&e)).unwrap();
+    super::assert_restore_equivalent(a);
+    super::assert_step_replays(&before, &e, &receipts, a);
+    receipts[0]
 }
 fn anchor(a: &mut LogicalApplication, id: u128, r: SnapshotRef) {
     let u = LogUpdate {
@@ -113,7 +108,7 @@ fn noops(from: u64, to: u64) -> Suffix {
             .collect(),
     }
 }
-/// Ten applied child entries, eight retained records.
+/// Ten applied child entries; retirement leaves two retained records.
 pub(super) fn populated() -> LogicalApplication {
     let mut a = app();
     a.apply_batch(&[learners()]).unwrap();
@@ -154,7 +149,17 @@ pub(super) fn populated() -> LogicalApplication {
         LogicalOutcome::Refused(LogicalRefusal::SnapshotConflict)
     );
     assert!(apply(&mut a, &c).duplicate);
-    let c = mutate(&a, 8, update(&a, 3, Some(noops(3, 3))));
+    // The final mutation acknowledges sequences 1–5, retiring them.
+    let c = acknowledging(
+        8,
+        1,
+        5,
+        CommandBody::Mutate {
+            expected_generation: a.state.parent.as_ref().unwrap().generation,
+            update: update(&a, 3, Some(noops(3, 3))),
+            origin: origin(),
+        },
+    );
     let mut e = entry(&a, &c, a.applied_index() + 1);
     e.term = 2;
     assert_eq!(

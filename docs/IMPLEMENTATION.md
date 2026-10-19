@@ -44,7 +44,7 @@ ordinary physical groups are not.
 | --- | --- | --- | --- | --- |
 | Done AI1: activation operation-ID space (merged 19 October 2026, PR 7 head e557bb75) | The wrapper kept every business ID forever only to keep business IDs apart from activation phase IDs, so write 16,385 was refused for life. Make the split structural: phase IDs carry a fixed 64-bit tag, business IDs must not; delete the set, its limit, its checkpoint section and its per-admission clone | Architect plan AI1 (§2, §4.1, §6.2: strict `reserved(n)` layout, named tag, command format bump, intent retirement deferred). Not a logical dependency on LV2. Shares five files with LV1 (`lv/checkpoint-v3`); only this document conflicts textually (see AI1 implemented) | 200,000-write deterministic soak fails on the base at write 16,385 and passes; tag refusal at admission and apply; partition, alias, order-independence, restart and old-format tests; existing activation suites green with reserved IDs; fmt, four strict Clippy configurations and matched workspace at zero diagnostics; default, all-features and no-default suites | LR2 |
 | In review round 2 LV1: child checkpoint v3 with direct-decode restore and a snapshot-generation high-water mark (PR 8; main eab59343 merged in, with AI1's v1-embedding test reworked for the v3 frame) | Pruning (LV2) needs restore that does not replay retained records, and generation numbering that does not derive from them (`execute.rs` derived the next generation from `SnapshotPublished` records). Also removes the O(n²) replay restore. Behaviour-neutral: nothing is pruned | — | v3 golden round trips (empty, populated, candidate); old v1/v2 checkpoints refused with `UnsupportedSchema`; restore equals the old replay path on representative histories (state, outcomes, next snapshot generation); restore performs no apply; restore enforces the admission budgets and reachable-state invariants, each with a failing input; linear restore-cost note; generation monotonic across checkpoint/restore; fmt, four strict Clippy configurations, matched fmt/Clippy; default, all-features and no-default-features suites | LVM |
-| Next LV2: retirement core | Closes the known defect: `consumed_through` in child commands (a command-format change, so LV2 bumps both application schemas and LV1 stores fail `UnsupportedSchema`), operation-ID partition, replicated `retired_below` watermark, pruning, `LogicalRefusal::Expired` and tri-state outcome lookup, bridge acknowledgement | LV1 | App-level 72,000-action soak with retention ≤ 1, exactly-once across retirement boundaries, restart/checkpoint at any point, replacement retires older sessions; fails on 30a1f6c5 | LVM |
+| In progress LV2: retirement core (branch `lv/retire-watermark`, PR stacked on LV1) | Closes the known defect at the application layer: `consumed_through` in child commands (a command-format change, so LV2 bumps both application schemas and LV1 stores fail `UnsupportedSchema`), operation-ID partition, replicated `retired_below` watermark, pruning, `LogicalRefusal::Expired` and tri-state outcome lookup, bridge acknowledgement and `Expired` handling | LV1 (restore without replay, generation high-water mark) | App-level 72,000-action soak with retention ≤ 1 live original (fails with `DedupCapacity` at 4,096 when pruning is removed); exactly-once across retirement boundaries (retired retry → `Expired`, never re-executed; retained retry → original receipt); checkpoint between every apply equals replay; replacement retires older sessions; restore validates the new fields; fmt, four strict Clippy configurations, matched fmt/Clippy; `--lib logical_voter` in three feature sets; four logical integration binaries once | LVM |
 | Following LV3: end-to-end soak evidence | Prove the bound on the real bridge/driver/coordinator path | LV2 | Deterministic simulated-clock 30-minute idle and writes soaks, native restart/replacement/checkpoint tests, existing-test intent updates | LVM |
 | Later AI2: router-level activation soak | Prove LR2 through the real client router with restart, on the LV3 simulated-clock harness | LV3, AI1 | 20,000 router writes, restart from checkpoint, competing `Begin`, identical traces on two runs | LR2 |
 | Later LV5: fail closed at the retained-action limit | Fence the owner with typed results instead of a permanent refusal | LV2 | Fence and claim-recovery tests | LR3 |
@@ -241,6 +241,113 @@ Evidence only (planned work is in the rows and schema plan above).
   No failures, so no port-collision or close-drain timeout occurred in these
   runs. Round 1 (16b07757, reviewers): default lib 83 passed, all-features 84,
   `logical_voter_native` 25 (before the merge of main).
+
+### LV2 schema plan
+
+Written before editing, from architect plan §2.2–§2.10 and the LV1 state.
+
+- **Data/API shape.**
+  - `Command` gains `consumed_through: u64` (encoded after the representative).
+    Command magic `VBLOGA01`/`02` → `VBLOGA03`/`04`.
+  - Operation-ID partition, enforced in `decode_command` (so at admission,
+    apply, restore and in the bridge): `Claim`/`EnrollmentClaim` use claim
+    space `op < 2^64` with `consumed_through == 0`; every other body uses
+    session space `op = (s << 64) | q` with `s ==
+    representative.logical_session`, `q ≥ 1` and `consumed_through < q`.
+    Violations are `InvalidCommand`. `begin_claim`/`begin_enrollment` with
+    `op ≥ 2^64` fail early (`InvalidAssembly`).
+  - `State.retired_below` (reserved at 0 by LV1) becomes live.
+  - Public: `LogicalRefusal::Expired` (checkpoint outcome `5,7`, response atom
+    `7`); `LogicalRead::Outcome(LogicalOutcomeLookup)` with
+    `LogicalOutcomeLookup::{Retained(Box<LogicalActionStatus>), Expired,
+    Unknown}`; `LogicalMetadata.retired_below: u128`. Response magic
+    `VBLOGR01`/`02` → `VBLOGR03`/`04`; response schema IDs `…0001`/`…0002` →
+    `…0003`/`…0004`; metadata read bound 187 → 203 bytes.
+  - Schemas: `LOGICAL_APPLICATION_SCHEMA` 3 → 5 and
+    `LOGICAL_ENROLLMENT_APPLICATION_SCHEMA` 4 → 6, continuing LV1's
+    odd/even pairing (1/2 → 3/4 → 5/6). The literal 3 → 4 would make the new
+    ordinary schema equal LV1's candidate schema, so an LV1 candidate
+    checkpoint would no longer be a typed `UnsupportedSchema` for an ordinary
+    application. Checkpoint magic `VBLOGC03`/`04` → `VBLOGC05`/`06` (layout
+    unchanged; the embedded commands changed).
+- **State transitions** (`apply_command`; every check before any mutation).
+  1. Decode with the partition rules; `command.operation == op`.
+  2. Retained `op`: same bytes → original receipt (`duplicate: true`);
+     different bytes → `OperationConflict`.
+  3. Retired (session space, `op < retired_below`): receipt
+     `Refused(Expired)`, `duplicate: true`, `first_index = index`, current
+     parent revision/generation/epoch. No execution, no record, no byte change.
+  4. Plan: `Some(max(retired_below, (s << 64) | (consumed_through + 1)))` iff
+     session space, `state.representative == Some(command.representative)` and
+     the representative's store is a current child voter; otherwise `None`.
+     `consumed_through < q` keeps the plan ≤ `op`, so the command never prunes
+     its own record.
+  5. `reserve` counts live records after the planned prune (session keys
+     below the plan; claim records with `expected_epoch <` current epoch,
+     enrollment claims counting as `expected_epoch = None`) plus this command.
+  6. Execute (Ineligible check, then `execute`) as before.
+  7. Insert the record.
+  8. With a plan: `retired_below = plan`; remove session keys below it (a
+     `BTreeMap` range: session keys sort above all claim keys); remove dead
+     claim records; subtract their command lengths from `bytes`.
+  9. A `Claimed` outcome (claim or enrollment claim for session `s'`):
+     `retired_below = max(retired_below, (s' << 64) | 1)` and remove session
+     keys below it. Claim records are kept, so the new claim stays resolvable
+     until its first session command (step 8) proves it was consumed.
+  - Lookup `Outcome(op)`: retained → `Retained`; session space and below the
+    watermark → `Expired`; otherwise `Unknown` (including pruned claims, whose
+    later copies re-execute and refuse: `claim` needs `expected == current`
+    and the epoch never decreases; `enroll` needs no representative).
+  - Admission mirrors apply conservatively. A retired session ID is admitted
+    like a duplicate (no reservation), so a stranded bridge can get committed
+    `Expired`. Pending entries are counted without retirement credit; credit is
+    given only for the proposed command's own plan, computed on the applied
+    state. Apply-time occupancy cannot exceed that estimate: entries before
+    this one in its committed log are exactly the leader's prefix at append
+    time; a successful claim among them retires this command (no record); with
+    none, the representative and epoch are unchanged, the watermark only
+    rises, and `validate_proposal_context` (run at submit and at append) has
+    already required the representative to be a voter under the log-tip
+    membership, which is the membership in force when the entry applies.
+- **Restore** (LV1 direct decode, extended; exact re-encode kept). Every
+  record's command decodes under the partition and matches its ID; session
+  keys `≥ retired_below`; no representative ⇒ `retired_below == 0`; a
+  representative of session `s` ⇒ `retired_below >> 64 == s` and its low half
+  `≥ 1`; `snapshot_generation ≥` the retained floor (was `==`); the
+  enrollment record matches its `EnrollmentClaim` record while that record is
+  retained, and once pruned (legitimate after the first session command) only
+  the record's own fields are checked, with its ID in claim space. Claim
+  retention after the epoch moves depends on history (a later prune or a
+  re-executed pruned copy), so restore checks claim records structurally;
+  the exact re-encode and the checksummed container cover the rest (as for
+  every other history-dependent field since LV1). LV1's redundant checks
+  (ascending IDs, configuration order, two-snapshot limit) stay.
+- **Ownership.** `consumed_through` belongs to the bridge that owns the
+  session (one action in flight; `submit_body` sets it to the previous
+  sequence, whose outcome `intake` proves was consumed; the drained activation
+  continuation carries the sequence verbatim). `retired_below`, records and
+  `bytes` are replicated child state in the child log and checkpoint.
+- **Bridge.** Committed `Refused(Expired)` for the in-flight action: set the
+  sticky failure `Refused(Expired)` first, then hand the committed action to
+  its consumer as for any committed refusal (the release coordinator settles it
+  in a failed domain and never mints a permit from it). Lookup `Expired` or
+  `Unknown` while resolving: re-propose the same bytes; admission lets a
+  retired ID through and apply commits `Refused(Expired)`, which takes the
+  path above. `Expired` is never treated as "not committed".
+- **Failure/cleanup.** Late or lower acknowledgements cannot lower the
+  watermark (maximum). A corrupted lower watermark below a live key, a key
+  below it, or a session mismatch is `InvalidCheckpoint`; anything else is
+  caught by the exact re-encode. LV1 checkpoints → `UnsupportedSchema` under
+  their old schema numbers and `InvalidCheckpoint` (magic) under the new ones.
+  Checkpoints are taken between applies, so no partial retirement is captured.
+- **Acceptance checks.** Architect §5.1 (72,000-action leader stream with a
+  `Mutate` every 1,000, 36,000-action follower stream, batches of 64,
+  checkpoint/restore every 5,000, retention ≤ 1 after the first session
+  command), §5.2 E1–E7, §5.3 R1–R4, §5.4 P1–P4; the soak fails with
+  `DedupCapacity` at 4,096 when pruning is removed (old behaviour); LV1's
+  shared per-apply oracle becomes "restore of the checkpoint taken before each
+  apply, then replay of that entry, equals the state". LV3 (end-to-end soak)
+  and LV4 (model) are later slices.
 
 #### AI1 schema plan
 

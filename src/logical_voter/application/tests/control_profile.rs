@@ -323,9 +323,10 @@ fn child_checkpoint_with_v1_profile_embedding_is_refused_typed() {
         let length = u64::from_le_bytes(bytes[8..16].try_into().unwrap()) as usize;
         bytes[16..16 + length].to_vec()
     };
+    // The current frame (checkpoint v4, schema 5); named `v3` since LV1.
     let v3 = selected().checkpoint(usize::MAX).unwrap();
     assert_eq!(&V1_SELECTED_CHECKPOINT[..8], b"VBLOGC01");
-    assert_eq!(&v3[..8], b"VBLOGC03");
+    assert_eq!(&v3[..8], b"VBLOGC05");
     let (old, new) = (configuration(V1_SELECTED_CHECKPOINT), configuration(&v3));
     // The embedding tag and the profile's magic, at the same offsets. Before
     // them the configurations are identical; the v1 profile carries one more

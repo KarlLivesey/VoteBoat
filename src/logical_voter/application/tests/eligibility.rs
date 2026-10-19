@@ -74,6 +74,44 @@ fn core(a: &LogicalApplication, entries: Vec<LogEntry>, commit: u64) -> crate::r
     )
     .unwrap()
 }
+/// Replace the child's only voter (node 2, the test representative's store)
+/// by node 3 through learners, joint and final configuration entries, so the
+/// claimed representative becomes ineligible.
+pub(super) fn remove_representative(a: &mut LogicalApplication) {
+    let at = a.applied_index();
+    let next = Configuration::new(
+        ConfigurationId::new(4).unwrap(),
+        Policy::new(
+            Tree::Voter(NodeId::new(3).unwrap()),
+            PolicyLimits::default(),
+        )
+        .unwrap(),
+        BTreeMap::from([(NodeId::new(3).unwrap(), store(3))]),
+        BTreeMap::new(),
+    )
+    .unwrap();
+    a.apply_batch(&[
+        config(at + 1, 100, 1, ConfigurationChange::Learners(learner())),
+        config(
+            at + 2,
+            101,
+            2,
+            ConfigurationChange::Joint {
+                id: ConfigurationId::new(3).unwrap(),
+                next,
+            },
+        ),
+        config(
+            at + 3,
+            101,
+            3,
+            ConfigurationChange::Final {
+                id: ConfigurationId::new(4).unwrap(),
+            },
+        ),
+    ])
+    .unwrap();
+}
 #[test]
 fn original_admission_configuration_is_not_current_eligibility() {
     let mut a = app();
@@ -112,37 +150,7 @@ fn original_admission_configuration_is_not_current_eligibility() {
 fn removed_representative_cannot_new_work_but_original_retry_survives() {
     let mut a = app();
     claim(&mut a);
-    let change = config(2, 100, 1, ConfigurationChange::Learners(learner()));
-    a.apply_batch(&[change]).unwrap();
-    let next = Configuration::new(
-        ConfigurationId::new(4).unwrap(),
-        Policy::new(
-            Tree::Voter(NodeId::new(3).unwrap()),
-            PolicyLimits::default(),
-        )
-        .unwrap(),
-        BTreeMap::from([(NodeId::new(3).unwrap(), store(3))]),
-        BTreeMap::new(),
-    )
-    .unwrap();
-    let joint = config(
-        3,
-        101,
-        2,
-        ConfigurationChange::Joint {
-            id: ConfigurationId::new(3).unwrap(),
-            next,
-        },
-    );
-    let final_entry = config(
-        4,
-        101,
-        3,
-        ConfigurationChange::Final {
-            id: ConfigurationId::new(4).unwrap(),
-        },
-    );
-    a.apply_batch(&[joint, final_entry]).unwrap();
+    remove_representative(&mut a);
     let c = mutate(&a, 2, update(&a, 0, None));
     assert_eq!(
         apply(&mut a, &c).outcome,

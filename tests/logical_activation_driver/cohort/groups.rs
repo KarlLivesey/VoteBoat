@@ -98,8 +98,9 @@ pub fn physical_log_limits() -> voteboat::log::LogLimits {
 
 pub fn storage_limits() -> LogicalLimits {
     let mut limits = fixture::storage_limits();
-    // Retained action history spans the complete finite replacement workflow;
-    // checkpointing and bridge drain do not retire these original records.
+    // The budget was sized for the whole finite replacement workflow while
+    // records were never removed; since LV2 consumed records are retired, so
+    // it is now headroom. Kept unchanged so the workflow's limits are too.
     limits.max_actions = 128;
     limits.max_command_bytes = limits
         .parent_snapshots

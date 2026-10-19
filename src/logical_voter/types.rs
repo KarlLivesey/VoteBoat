@@ -158,6 +158,10 @@ pub enum LogicalRefusal {
     SnapshotConflict,
     InvalidResponse,
     OperationConflict,
+    /// The operation ID is below the child's retirement watermark: its
+    /// session is closed or its outcome was acknowledged as consumed. It is
+    /// never executed again; a committed copy carries `duplicate: true`.
+    Expired,
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LogicalOutcome {
@@ -207,6 +211,21 @@ pub struct LogicalMetadata {
     pub retained_action_bytes: usize,
     pub parent_revision: Option<LogRevision>,
     pub parent_generation: Option<LogGeneration>,
+    /// Session-space retirement watermark: every session-space operation ID
+    /// below it is `Expired`.
+    pub retired_below: u128,
+}
+/// Outcome lookup of one operation ID. `Unknown` is never proof that the
+/// operation did not commit; `Expired` is never proof that it did.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum LogicalOutcomeLookup {
+    /// The original record with its first receipt.
+    Retained(Box<LogicalActionStatus>),
+    /// A session-space ID below the watermark: never executed again.
+    Expired,
+    /// Not retained and not retired: pending, never proposed, or a pruned
+    /// claim whose later copies can only refuse.
+    Unknown,
 }
 /// Original applied configuration entries; inspection data grants no authority.
 /// Empty entries mean unknown at `child_applied`, not a terminal refusal.
@@ -229,7 +248,7 @@ pub enum LogicalQuery {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LogicalRead {
     Image(Box<LogicalImage>),
-    Outcome(Option<Box<LogicalActionStatus>>),
+    Outcome(LogicalOutcomeLookup),
     Snapshot(Box<Snapshot>),
     Metadata(Box<LogicalMetadata>),
     Uninitialized,

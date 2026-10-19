@@ -75,9 +75,9 @@ impl<N: LogicalBackingChild> LogicalBackingBridge<'_, N> {
             (
                 BridgeStage::Resolving { command, bytes },
                 LogicalQuery::Outcome(operation),
-                LogicalRead::Outcome(status),
+                LogicalRead::Outcome(lookup),
             ) if operation == command.operation => {
-                if let Some(status) = status {
+                if let LogicalOutcomeLookup::Retained(status) = lookup {
                     if status.operation != operation
                         || status.command != *bytes
                         || status.first_index != status.receipt.first_index
@@ -96,8 +96,11 @@ impl<N: LogicalBackingChild> LogicalBackingBridge<'_, N> {
                         self.nodes[node].local().owner.identity(),
                     )
                 } else {
-                    // Absence is unknown. Repropose the SAME immutable bytes,
-                    // relying on application deduplication, never an Abort fact.
+                    // Unknown is not "not committed" and Expired is not
+                    // "committed": repropose the SAME immutable bytes. The
+                    // child deduplicates a retained copy and commits a
+                    // terminal `Refused(Expired)` for a retired one, which
+                    // `finish_action` turns into a sticky failure.
                     work.stage = BridgeStage::Applying {
                         command: command.clone(),
                         bytes: bytes.clone(),
@@ -281,6 +284,7 @@ impl<N: LogicalBackingChild> LogicalBackingBridge<'_, N> {
             operation,
             origin_configuration: core.membership().id(),
             representative,
+            consumed_through: 0,
             body: CommandBody::Claim {
                 expected_epoch: previous.map(|r| r.epoch),
             },

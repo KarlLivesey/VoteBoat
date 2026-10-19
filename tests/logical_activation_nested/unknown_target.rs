@@ -67,17 +67,26 @@ pub fn recover<'a>(
             .inspect_backing(node, |p| {
                 let app = &p.applications[&setup::bottom(3).group];
                 assert_eq!(record(app), facts.record);
-                let LogicalRead::Outcome(Some(status)) = app
+                // The enrollment record above is the durable import result.
+                // Its claim record is retained until the fresh session's
+                // first command retires it (then the lookup is Unknown, and
+                // a re-applied copy can only refuse).
+                match app
                     .read_at(
                         app.applied_index(),
                         LogicalQuery::Outcome(facts.record.operation),
                     )
                     .unwrap()
-                else {
-                    panic!("original durable import result")
-                };
-                assert_eq!(status.command, facts.bytes);
-                assert_eq!(status.first_index, facts.record.first_index);
+                {
+                    LogicalRead::Outcome(LogicalOutcomeLookup::Retained(status)) => {
+                        assert_eq!(status.command, facts.bytes);
+                        assert_eq!(status.first_index, facts.record.first_index);
+                    }
+                    LogicalRead::Outcome(LogicalOutcomeLookup::Unknown) => {
+                        assert!(app.metadata().retired_below >> 64 > 1);
+                    }
+                    other => panic!("original durable import result: {other:?}"),
+                }
                 assert!(
                     p.owner
                         .core(setup::bottom(3).group)

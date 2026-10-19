@@ -43,7 +43,7 @@ fn short_read_destinations_and_overbound_values_are_atomic() {
     let state = a.state.clone();
     assert!(a
         .encode_read(
-            &LogicalRead::Outcome(Some(Box::new(status.clone()))),
+            &LogicalRead::Outcome(LogicalOutcomeLookup::Retained(Box::new(status.clone()))),
             &mut out
         )
         .is_err());
@@ -108,6 +108,7 @@ fn accepted_state_growth_cannot_exceed_the_checked_response_envelope() {
         operation: OperationId::new(1).unwrap(),
         origin_configuration: ConfigurationId::new(1).unwrap(),
         representative: representative(),
+        consumed_through: 0,
         body: CommandBody::Claim {
             expected_epoch: None,
         },
@@ -141,6 +142,7 @@ fn full_image_framing_refuses_growth_even_when_parent_codec_fits() {
         operation: OperationId::new(1).unwrap(),
         origin_configuration: ConfigurationId::new(1).unwrap(),
         representative: representative(),
+        consumed_through: 0,
         body: CommandBody::Claim {
             expected_epoch: None,
         },
@@ -199,9 +201,10 @@ fn full_image_framing_refuses_growth_even_when_parent_codec_fits() {
         (revision, groups, checkpoint.len())
     );
     let command = Command {
-        operation: OperationId::new(2).unwrap(),
+        operation: OperationId::new(command::session_operation(1, 2)).unwrap(),
         origin_configuration: ConfigurationId::new(1).unwrap(),
         representative: representative(),
+        consumed_through: 0,
         body: CommandBody::Mutate {
             expected_generation: parent.generation,
             update,

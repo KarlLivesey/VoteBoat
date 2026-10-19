@@ -12,12 +12,14 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-//! Retained child action history by kind, checked against the preflight budget.
+//! Retained child action records by kind, checked against the preflight budget.
 //!
-//! Records are never removed, so the count at the end of a workflow is its
-//! peak. The kind comes from the encoded command; each decoded kind is
-//! cross-checked against the record's public receipt outcome and operation,
-//! so a format change fails here instead of miscounting.
+//! Since LV2 the child retires consumed records (a session watermark), so
+//! the count is the live set at the time of the scan, bounded by in-flight
+//! work rather than by the workflow's history. The kind comes from the
+//! encoded command; each decoded kind is cross-checked against the record's
+//! public receipt outcome and operation, so a format change fails here
+//! instead of miscounting.
 use super::*;
 use voteboat::{application::ReadableStateMachine, identity::OperationId};
 
@@ -42,10 +44,11 @@ pub struct Retained {
     pub total: usize,
 }
 
-// Fixed command header: magic, mapping (parent group, voter, store, child
-// group), operation, origin configuration, representative binding.
+// Fixed command header (format v3): magic, mapping (parent group, voter,
+// store, child group), operation, origin configuration, representative
+// binding, consumed-through sequence.
 const OPERATION: usize = 8 + 24 + 8 + 24 + 24;
-const BODY: usize = OPERATION + 16 + 8 + 8 + 8 + 24 + 8 + 8;
+const BODY: usize = OPERATION + 16 + 8 + 8 + 8 + 24 + 8 + 8 + 8;
 // Authorize: expected revision, expected generation, local configuration.
 const CAPSULE_ORIGIN: usize = BODY + 1 + 24;
 
@@ -63,7 +66,7 @@ pub fn count(app: &LogicalApplication) -> Retained {
                 break 'sessions;
             }
             let id = OperationId::new(session << 64 | sequence).unwrap();
-            let Ok(LogicalRead::Outcome(Some(status))) =
+            let Ok(LogicalRead::Outcome(LogicalOutcomeLookup::Retained(status))) =
                 app.read_at(metadata.child_applied, LogicalQuery::Outcome(id))
             else {
                 continue;
@@ -78,7 +81,7 @@ pub fn count(app: &LogicalApplication) -> Retained {
 
 fn classify(status: &LogicalActionStatus, retained: &mut Retained) {
     let bytes = &status.command;
-    assert!(matches!(&bytes[..8], b"VBLOGA01" | b"VBLOGA02"));
+    assert!(matches!(&bytes[..8], b"VBLOGA03" | b"VBLOGA04"));
     assert_eq!(
         u128::from_le_bytes(bytes[OPERATION..OPERATION + 16].try_into().unwrap()),
         status.operation.get(),

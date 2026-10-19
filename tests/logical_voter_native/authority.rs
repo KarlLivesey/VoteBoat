@@ -262,7 +262,11 @@ fn authorized_terminal(cluster: &mut Cluster, image: &VerifiedLogicalImage) {
     let operation =
         OperationId::new((u128::from(image.representative().logical_session.get()) << 64) | 1)
             .unwrap();
-    let LogicalRead::Outcome(Some(status)) = cluster.read(LogicalQuery::Outcome(operation)) else {
+    // Sequence 1 is the session's only action, so no later command has
+    // acknowledged (and retired) it.
+    let LogicalRead::Outcome(LogicalOutcomeLookup::Retained(status)) =
+        cluster.read(LogicalQuery::Outcome(operation))
+    else {
         panic!("original accepted capsule lacks fresh child quorum outcome");
     };
     assert_eq!(status.operation, operation);

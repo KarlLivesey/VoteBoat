@@ -68,11 +68,28 @@ fn representative(epoch: u64) -> RepresentativeBinding {
         logical_session: StoreSession::new(epoch).unwrap(),
     }
 }
+/// A command at `id` within its partition: claim bodies use claim space
+/// (`id` itself); every other body is sequence `id` of session `epoch` (the
+/// test representative's logical session), acknowledging nothing.
 fn command(id: u128, epoch: u64, body: CommandBody) -> Command {
+    acknowledging(id, epoch, 0, body)
+}
+/// As `command`, acknowledging `consumed_through` earlier session outcomes.
+fn acknowledging(id: u128, epoch: u64, consumed_through: u64, body: CommandBody) -> Command {
+    let claim = matches!(
+        body,
+        CommandBody::Claim { .. } | CommandBody::EnrollmentClaim(_)
+    );
+    let operation = if claim {
+        id
+    } else {
+        command::session_operation(epoch, u64::try_from(id).unwrap())
+    };
     Command {
-        operation: OperationId::new(id).unwrap(),
+        operation: OperationId::new(operation).unwrap(),
         origin_configuration: ConfigurationId::new(1).unwrap(),
         representative: representative(epoch),
+        consumed_through,
         body,
     }
 }
@@ -91,9 +108,11 @@ fn entry(app: &LogicalApplication, c: &Command, index: u64) -> LogEntry {
 }
 fn apply(app: &mut LogicalApplication, c: &Command) -> LogicalReceipt {
     let e = entry(app, c, app.applied_index() + 1);
-    let receipt = app.apply_batch(&[e]).unwrap().remove(0);
+    let before = app.checkpoint(usize::MAX).unwrap();
+    let receipts = app.apply_batch(std::slice::from_ref(&e)).unwrap();
     formats::assert_restore_equivalent(app);
-    receipt
+    formats::assert_step_replays(&before, &e, &receipts, app);
+    receipts[0]
 }
 fn claim(app: &mut LogicalApplication) {
     assert_eq!(
@@ -197,11 +216,37 @@ fn exact_retry_keeps_original_outcome_after_replacement() {
     assert_eq!(r.index, 3);
     assert_eq!(r.epoch, Some(representative(1).epoch));
     assert_eq!(a.state.representative, Some(representative(2)));
+    // The claim closed session 1: an old-session command is `Expired`
+    // (never executed, never recorded) instead of a recorded refusal.
     let old_mutation = mutate(&a, 3, update(&a, 0, None));
+    let before = a.state.clone();
+    let r = apply(&mut a, &old_mutation);
+    assert_eq!(r.outcome, LogicalOutcome::Refused(LogicalRefusal::Expired));
+    assert!(r.duplicate);
     assert_eq!(
-        apply(&mut a, &old_mutation).outcome,
+        a.state,
+        State {
+            applied: before.applied + 1,
+            ..before
+        }
+    );
+    // A different binding inside the current session is still refused, and
+    // recorded, as stale.
+    let mut forged = command(
+        3,
+        2,
+        CommandBody::Mutate {
+            expected_generation: a.state.parent.as_ref().unwrap().generation,
+            update: update(&a, 0, None),
+            origin: origin(),
+        },
+    );
+    forged.representative.physical_session = StoreSession::new(9).unwrap();
+    assert_eq!(
+        apply(&mut a, &forged).outcome,
         LogicalOutcome::Refused(LogicalRefusal::StaleRepresentative)
     );
+    assert!(a.state.records.contains_key(&forged.operation));
 }
 #[test]
 fn batch_conflict_and_malformed_suffix_are_atomic() {
@@ -372,8 +417,16 @@ fn control_reserve_and_pending_content_are_enforced() {
         .outcome,
         LogicalOutcome::Claimed
     );
-    assert_eq!(a.state.records.len(), 4);
-    assert!(apply(&mut a, &control).duplicate);
+    // The new claim closed session 1: its records are retired, and a retry
+    // of the old control action is answered `Expired`, never re-executed.
+    assert_eq!(a.state.records.len(), 1);
+    let retry = apply(&mut a, &control);
+    assert!(retry.duplicate);
+    assert_eq!(
+        retry.outcome,
+        LogicalOutcome::Refused(LogicalRefusal::Expired)
+    );
+    // Retired IDs reserve nothing, however many copies are pending.
     assert!(a
         .validate_proposal(
             control.operation,
@@ -381,6 +434,22 @@ fn control_reserve_and_pending_content_are_enforced() {
             std::iter::repeat_n((control.operation, b.as_slice()), 8)
         )
         .is_ok());
+    // The total count still bounds control actions: claims refused at the
+    // current epoch stay retained (their copies could not differ yet).
+    for id in 7..10 {
+        let refused = command(
+            id,
+            4,
+            CommandBody::Claim {
+                expected_epoch: Some(representative(2).epoch),
+            },
+        );
+        assert_eq!(
+            apply(&mut a, &refused).outcome,
+            LogicalOutcome::Refused(LogicalRefusal::StaleRepresentative)
+        );
+    }
+    assert_eq!(a.state.records.len(), 4);
     let full = command(
         6,
         3,
@@ -447,6 +516,7 @@ mod eligibility;
 mod enrollment;
 mod formats;
 mod reads;
+mod retirement;
 mod snapshots;
 
 #[test]

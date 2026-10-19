@@ -19,8 +19,11 @@ mod commands;
 mod enrollment;
 mod origins;
 pub(super) use atoms::{Decoder, Encoder};
-pub const LOGICAL_APPLICATION_SCHEMA: u64 = 3;
-const MAGIC: &[u8; 8] = b"VBLOGA01";
+pub const LOGICAL_APPLICATION_SCHEMA: u64 = 5;
+/// Command format v3 (ordinary): carries `consumed_through`.
+const MAGIC: &[u8; 8] = b"VBLOGA03";
+/// Command format v3 (enrollment candidate).
+const CANDIDATE_MAGIC: &[u8; 8] = b"VBLOGA04";
 impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
     LogicalApplication<C, S, W>
 {
@@ -29,16 +32,31 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
         c: &Command,
         max_bytes: usize,
     ) -> Result<Vec<u8>, ApplicationError> {
+        let bytes = self.command_bytes(c, max_bytes)?;
+        if self.decode_command(&bytes)? != *c {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        Ok(bytes)
+    }
+    /// Encoding without the decode check, so tests can build commands that
+    /// violate the partition rules.
+    pub(super) fn command_bytes(
+        &self,
+        c: &Command,
+        max_bytes: usize,
+    ) -> Result<Vec<u8>, ApplicationError> {
         let mut e = Encoder::new(max_bytes.min(self.limits.max_command_bytes));
-        e.put(if self.candidate() { b"VBLOGA02" } else { MAGIC })?;
+        e.put(if self.candidate() {
+            CANDIDATE_MAGIC
+        } else {
+            MAGIC
+        })?;
         e.mapping(self.mapping)?;
         e.u128(c.operation.get())?;
         e.u64(c.origin_configuration.get())?;
         e.representative(c.representative)?;
+        e.u64(c.consumed_through)?;
         self.encode_body(&mut e, &c.body)?;
-        if self.decode_command(&e.bytes)? != *c {
-            return Err(ApplicationError::InvalidCommand);
-        }
         Ok(e.bytes)
     }
     pub(crate) fn decode_command(&self, bytes: &[u8]) -> Result<Command, ApplicationError> {
@@ -46,7 +64,12 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
             return Err(ApplicationError::InvalidCommand);
         }
         let mut d = Decoder::new(bytes);
-        if d.take(8)? != if self.candidate() { b"VBLOGA02" } else { MAGIC }
+        if d.take(8)?
+            != if self.candidate() {
+                CANDIDATE_MAGIC
+            } else {
+                MAGIC
+            }
             || d.mapping()? != self.mapping
         {
             return Err(ApplicationError::InvalidCommand);
@@ -54,14 +77,22 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
         let operation = d.id128(OperationId::new)?;
         let origin_configuration = d.id(ConfigurationId::new)?;
         let representative = d.representative()?;
+        let consumed_through = d.u64()?;
         let body = self.decode_body(&mut d, representative)?;
         d.finish()?;
-        Ok(Command {
+        let command = Command {
             operation,
             origin_configuration,
             representative,
+            consumed_through,
             body,
-        })
+        };
+        // Every holder of command bytes (admission, apply, restore, bridge)
+        // sees only partitioned commands.
+        if !command.partitioned() {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        Ok(command)
     }
     pub(crate) fn snapshot_bytes(&self, snapshot: &Snapshot) -> Result<Vec<u8>, ApplicationError> {
         let mut bytes = self

@@ -92,13 +92,21 @@ pub fn recover<'a>(
                 let record = view.record.unwrap();
                 assert_eq!(record.operation.get(), 356200);
                 assert_eq!(record.first_index, entry.index);
-                let LogicalRead::Outcome(Some(status)) = app
+                // The enrollment record above carries the import; its claim
+                // record is retained until the fresh session's first command
+                // retires it (then the lookup is Unknown).
+                match app
                     .read_at(app.applied_index(), LogicalQuery::Outcome(record.operation))
                     .unwrap()
-                else {
-                    panic!("original imported command truth")
-                };
-                assert_eq!(status.command, bytes);
+                {
+                    LogicalRead::Outcome(LogicalOutcomeLookup::Retained(status)) => {
+                        assert_eq!(status.command, bytes);
+                    }
+                    LogicalRead::Outcome(LogicalOutcomeLookup::Unknown) => {
+                        assert!(app.metadata().retired_below >> 64 > 1);
+                    }
+                    other => panic!("original imported command truth: {other:?}"),
+                }
                 assert!(
                     p.owner
                         .core(setup::bottom(3).group)
