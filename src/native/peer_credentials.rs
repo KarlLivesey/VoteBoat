@@ -167,6 +167,9 @@ impl<C: NativePeerMaterialProvider> PeerConnector for RotatingPeerConnector<C> {
     fn next_deadline(&self) -> Option<MonoTime> {
         self.inner.next_deadline()
     }
+    fn accept_status(&self) -> Option<crate::connect::AcceptStatus> {
+        self.inner.accept_status()
+    }
     fn supports_peer(&self, peer: PeerIdentity) -> bool {
         self.inner.supports_peer(peer)
     }

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 //! Authenticated explicit split/merge administration over the native guarded apps.
+#[path = "support/accept_health.rs"]
+mod accept_health;
 #[path = "support/transfer_app.rs"]
 mod app;
 #[path = "support/transfer_binding.rs"]

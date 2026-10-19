@@ -43,13 +43,12 @@ pub fn make(
         })
         .collect::<BTreeMap<_, _>>();
     let connector = connector(host, local, remote.clone(), pins);
-    let first = owner.store.session.get() * 10000;
     let roster = PeerRoster::new(
         PeerRosterConfig {
             local,
             outbound,
-            first_generation: SecureSessionGeneration::new(first).unwrap(),
-            last_generation: SecureSessionGeneration::new(first + 9999).unwrap(),
+            // The store session scopes generations (startup does the same).
+            first_generation: SecureSessionGeneration::new(1).unwrap(),
             wire_version: 1,
             limits: PeerRosterLimits::default(),
             transport_limits: TransportLimits::default(),

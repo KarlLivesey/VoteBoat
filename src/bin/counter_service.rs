@@ -81,6 +81,8 @@ mod setup;
 #[path = "support/shutdown.rs"]
 mod shutdown;
 use diagnostics::Diagnostics;
+#[path = "support/accept_health.rs"]
+mod accept_health;
 #[path = "support/peer_metrics.rs"]
 mod peer_metrics;
 use setup::{checked, group, Failure, Service};

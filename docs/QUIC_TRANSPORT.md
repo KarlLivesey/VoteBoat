@@ -47,8 +47,8 @@ streams and unreliable application datagrams are disabled.
 Once Ready, pass the session to `NativePeerTransport` or
 `NativeTransportFactory` with the same codec, outbound queue and limits used for
 TCP/TLS. Authentication does not grant voting, membership or durability evidence.
-Restart still needs a fresh persisted store session and a host-reserved fresh
-connection generation; QUIC connection IDs do not replace those identities.
+Restart still needs a fresh persisted store session, which scopes the
+connection generations; QUIC connection IDs do not replace those identities.
 
 ## Reliable channel and bounds
 

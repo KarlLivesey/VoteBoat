@@ -52,8 +52,6 @@ pub(super) fn exercise<C: PeerConnector<Endpoint = SocketAddr>>(
         connector,
         SourceReconnectConfig {
             endpoint,
-            first_generation: generation,
-            last_generation: generation,
             retry_ms: 10,
         },
         now,

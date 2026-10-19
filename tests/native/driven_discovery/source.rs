@@ -72,8 +72,6 @@ impl SourceServer {
             client_connector,
             SourceReconnectConfig {
                 endpoint,
-                first_generation: SecureSessionGeneration::new(2).unwrap(),
-                last_generation: SecureSessionGeneration::new(1000).unwrap(),
                 retry_ms: 10,
             },
             MonoTime(0),

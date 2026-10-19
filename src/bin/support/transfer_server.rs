@@ -25,22 +25,27 @@ use voteboat::{
     secure::LocalIdentity,
 };
 pub type Node<A> = NativeNode<A, NativeServiceConnector>;
+fn protocol(transport: &str) -> Result<NativePeerProtocol, Failure> {
+    match transport {
+        "tcp" => Ok(NativePeerProtocol::TcpTls),
+        #[cfg(feature = "quic")]
+        "quic" => Ok(NativePeerProtocol::Quic),
+        #[cfg(not(feature = "quic"))]
+        "quic" => Err("QUIC support requires building with --features quic".into()),
+        _ => Err("unsupported transport".into()),
+    }
+}
 pub fn serve(args: &[String]) -> Result<(), Failure> {
     let [mode, root, id, base, tls, profile, group, access, transport, rest @ ..] = args else {
         return Err(super::HELP.into());
     };
+    let protocol = protocol(transport)?;
     let (peers, peer_path, timing_profile) = options(rest)?;
     let timers = timing_profile.timers();
     let profile = Profile::load(Path::new(profile))?;
     let binding = profile.binding(group)?;
     let id = id.parse::<u64>()?;
     let base = base.parse::<u16>()?;
-    let protocol = match transport.as_str() {
-        "tcp" => NativePeerProtocol::TcpTls,
-        #[cfg(feature = "quic")]
-        "quic" => NativePeerProtocol::Quic,
-        _ => return Err("unsupported transport".into()),
-    };
     let create = match mode.as_str() {
         "create" => true,
         "recover" => false,

@@ -39,8 +39,8 @@ remote delivery did not occur.
 
 Inactive peer records remain within the configured peer ceiling to preserve
 remote session floors on same-store re-enrollment. Capacity rejection can thus
-require a full drain and replacement roster with the next reserved connection
-generation range. Reusing a node ID with a different store also requires that
+require a full drain and replacement roster starting at the drained roster's
+`reclaim_generation()`. Reusing a node ID with a different store also requires that
 handoff; rejecting it prevents an identity switch from erasing a prior session
 floor. Restart still requires the existing fresh persisted local StoreSession.
 There is no unbounded identity history or live credential rotation.

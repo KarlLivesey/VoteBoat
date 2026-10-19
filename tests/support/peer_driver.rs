@@ -462,7 +462,6 @@ fn parts_with(
                 local: local(1),
                 outbound,
                 first_generation: SecureSessionGeneration::new(1).unwrap(),
-                last_generation: SecureSessionGeneration::new(100).unwrap(),
                 wire_version,
                 limits: PeerRosterLimits {
                     peers: 2,
@@ -560,7 +559,6 @@ impl Fixture {
                 local: local(1),
                 outbound: f.outbound.binding(),
                 first_generation: SecureSessionGeneration::new(1).unwrap(),
-                last_generation: SecureSessionGeneration::new(100).unwrap(),
                 wire_version: 1,
                 limits: roster_limits,
                 transport_limits: TransportLimits::default(),

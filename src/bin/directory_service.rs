@@ -13,6 +13,8 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Native replicated metadata authority with explicit trusted initial grants.
+#[path = "support/accept_health.rs"]
+mod accept_health;
 #[path = "support/authority_endpoints.rs"]
 mod authority_endpoints;
 #[path = "support/command_client.rs"]
@@ -120,6 +122,10 @@ fn options(args: &[String]) -> Result<Options, Failure> {
                     "tcp" => NativePeerProtocol::TcpTls,
                     #[cfg(feature = "quic")]
                     "quic" => NativePeerProtocol::Quic,
+                    #[cfg(not(feature = "quic"))]
+                    "quic" => {
+                        return Err("QUIC support requires building with --features quic".into())
+                    }
                     _ => return Err("unsupported transport".into()),
                 };
             }
