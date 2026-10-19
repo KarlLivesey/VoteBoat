@@ -319,6 +319,140 @@ skipped deadlines, and the native hundred-group checkpoint tests' hand-made
 - The striped store reports no `physical_usage` and keeps its own limits
   (ST3's row).
 
+#### ST2 round 2: ST2b schema plan (written before editing, 19 October 2026)
+
+Review of round 1 blocked the merge on two points: a WAL that fills at append
+time is still node-fatal, and the checkpoint cost (+5.4% marginal native
+durable CPU/write). This plan covers ST2b; the checkpoint-cost plan follows.
+
+**Where the failure comes from.** `NativeLogStore::append_batch` refuses a
+batch whose encoding does not fit (`Rejected("WAL capacity/control reserve")`).
+On the WAL thread that refusal becomes `WorkerEvent::Failed`, and
+`worker::Task::Failed` calls `Raft::storage_failed`, which fences the core: the
+owner fails and the node enters `RecoveryRequired`. The entry is already in the
+core's pending transition (the core has one pending persistence dependency per
+group, `Raft::has_pending_dependency`), so the core cannot simply forget it.
+
+**Seam: the persistence worker for safety, proposal admission for the client.**
+- *Safety, at the WAL thread.* Only the WAL thread knows the exact encoded size
+  and the exact WAL length, and every byte any group writes (leader proposals,
+  follower replication, noops, compactions, hard state) passes through it.
+  A capacity refusal there is side-effect free: the check runs before the
+  store's sequence, accepted state or file change. So the WAL thread *parks*
+  the batch instead of failing it, and retries parked batches after each
+  successful rewrite (the only operation that shrinks the WAL). A parked batch
+  has no `Written` event, so a leader has not replicated it and a follower has
+  not acknowledged it; it is delayed, never refused. The owner side keeps the
+  batch's admission credits, so the existing one-outstanding-unit-per-group
+  rule keeps the group's later work behind it.
+- *Client, at proposal admission.* Parking alone would turn a burst into
+  unbounded latency. `NetworkNode::propose` (and `propose_maintenance`) refuse
+  a new client request with the typed, retryable
+  `ClientError::StoragePressure` while the node is in the high-water state.
+  This is the only capacity refusal a client sees, and it happens before the
+  request reaches any core or log, so it can never refer to an entry that is
+  in a log, let alone a committed one. Requests already admitted are not
+  refused later: they reach the core and the WAL (parking if they must).
+- Why not refuse at worker `submit` (owner side) instead of parking: the owner
+  does not know the encoded size (the codec is inside the store), and a
+  conservative bound per batch (`max_batch_bytes`, 1 MiB) times 64 outstanding
+  requests would refuse data at an empty WAL. Why not only at admission:
+  followers write data they never admitted, and the published occupancy lags
+  the WAL thread by a window.
+
+**U2-style invariant (no committed entry is refused by storage capacity).**
+Capacity refusals exist in exactly two places after this change: proposal
+admission (before any log) and the store's `append_batch_within_capacity`,
+whose refusal type (`AppendRefused::Full`) is not a `StorageError` and is
+consumed on the WAL thread, so it cannot reach `WorkerEvent::Failed`,
+`Raft::storage_failed` or any client. Checks: a worker test that a batch that
+does not fit produces no `Failed` event, is written after a rewrite, and is
+reported `Durable`; the node test asserts every admitted write is applied.
+
+**Data/API shape.**
+- `log::AppendRefused { Full(Vec<LogMutation>), Failed(StorageError) }` and
+  `LogStore::append_batch_within_capacity(mutations)`. The default delegates to
+  `append_batch` (never `Full`); `NativeLogStore` checks capacity before
+  planning and returns the unchanged mutations with `Full`.
+- `WalUsage` gains `parked: usize`: bytes (owner-side cost) of batches the WAL
+  thread holds for space. The native worker publishes it next to the length.
+- `WalMaintenancePolicy` gains `high_water_percent` (default 75) and
+  `low_water_percent` (default 50) of the usable capacity; `configure` refuses
+  `0 < low < high <= 100` violations with `InvalidLimits`. With no policy
+  (explicit opt-out) the same defaults apply to the gate.
+- `WalMaintenanceStatus` gains `high_water: bool`, `high_water_entries: u64`
+  (times the state was entered) and `refused_proposals: u64` (saturating).
+- `ClientError::StoragePressure`. Binaries report it as `ERR StoragePressure`.
+
+**State transitions.** `Normal → HighWater` when published `bytes ≥ high` or
+`parked > 0`; `HighWater → Normal` when `bytes < low` and `parked == 0`.
+Evaluated on every poll and at every proposal (one relaxed load). While in
+`HighWater`: proposals refuse typed; the checkpoint scan runs with pressure
+(every applied group, as at 50%); a rewrite is due once `min_reclaim_bytes`
+is reclaimable (instead of capacity / 8), spaced by `retry_ms`; with a parked
+batch it is due once any byte is reclaimable. Heartbeats, votes, terms, commit
+records and compactions are control batches, which use the control reserve
+and are never gated. The leader keeps its role; followers keep replicating
+(their data may park, which only delays their acknowledgement).
+
+**Ownership.** The WAL thread owns parked batches and retries them; the node
+owns the high-water state and the gate; the store owns the exact check.
+
+**Failure and cleanup.** A parked batch is retried after every successful
+rewrite, in arrival order, before new work. A fatal store error fails parked
+batches with the fatal error like any queued work. If the owner closes the
+worker with batches still parked, the WAL thread rewrites once and retries; a
+batch that still does not fit is reported `Failed(Rejected("WAL capacity at
+close"))` (nothing was written; the host is shutting down). Maintenance keeps
+running in `Quiescing`/`Draining` while a batch is parked, so a drain cannot
+wait for ever on a batch only a rewrite can unpark. No format change.
+
+**Acceptance checks.**
+1. Native node, the binaries' open path, a slow rewrite injected (the
+   persistence worker refuses reclaim submissions for a simulated interval),
+   4 KiB writes offered faster than the rewrite drains: no node leaves
+   `Running`; proposals get `StoragePressure` during the window; every admitted
+   write is applied; WAL bytes never exceed the usable capacity; proposals
+   resume after the rewrite. The same test on 47646b4c (with the typed match
+   replaced by `is_err()`) fails with the node-fatal error (recorded).
+2. Worker test: a batch that does not fit parks (no `Failed`), and is written
+   and reported `Durable` after a rewrite; parked bytes are published.
+3. Store test: `Full` returns the mutations unchanged and leaves state,
+   sequence and length unchanged.
+4. Gate unit tests: hysteresis, parked forces high water, policy validation.
+5. Operator docs and the `maintenance` status: `high_water`, `wal_parked`,
+   `refused_proposals`.
+
+#### ST2 round 2: checkpoint publication cost plan (before editing)
+
+A checkpoint publication does four full device flushes in
+`FileSnapshotIo` (`F_FULLFSYNC` on macOS through `File::sync_all`):
+(1) the slot file, (2) the directory after the slot, (3) `MANIFEST.next`,
+(4) the directory after the rename. The crash-model orderings are:
+O1 slot bytes durable before a durable root references them; O2 manifest bytes
+durable before (or with) the rename that installs them; O3 the new root durable
+before the log compaction that supersedes the WAL prefix is persisted
+(`publish` returns only after (4)); O4 the slot's directory entry durable
+before a durable root references it.
+
+- **Barrier fsync (brief item 2a): not applicable as briefed.** The WAL does not
+  use `F_BARRIERFSYNC`: the approved change was measured and then parked
+  (section "Apple barrier publication measured; parked on device detection"),
+  because identifying an internal Apple SSD needed subprocesses (which broke a
+  crash test through a shared `flock`) or IOKit FFI (declined), and enabling it
+  on every macOS volume was declined. There is no existing gating to reuse, so
+  adding it to the snapshot store would be a new durability decision. Not
+  done; recorded for the user.
+- **Flush (2) is redundant after the first publication of each slot in a store
+  session.** `begin_slot` truncates and rewrites the same inode, so the
+  directory entry does not change; (1) covers the inode's size and data. The
+  first `sync_slot` of each slot in each session still syncs the directory, so
+  O4 holds for a slot file created by a crashed earlier session. Steady state:
+  three flushes instead of four.
+- (1), (3) and (4) each carry a distinct ordering (O1, O2, O3) and stay.
+- Threshold unchanged. Re-measure with the round-1 protocol (8 pairs, base =
+  the branch's merge base with current main after merging main).
+
 #### Design-pack amendment realised by ST2 (pack preserved)
 
 | Pack text | Amendment |
