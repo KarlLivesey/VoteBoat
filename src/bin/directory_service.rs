@@ -122,6 +122,10 @@ fn options(args: &[String]) -> Result<Options, Failure> {
                     "tcp" => NativePeerProtocol::TcpTls,
                     #[cfg(feature = "quic")]
                     "quic" => NativePeerProtocol::Quic,
+                    #[cfg(not(feature = "quic"))]
+                    "quic" => {
+                        return Err("QUIC support requires building with --features quic".into())
+                    }
                     _ => return Err("unsupported transport".into()),
                 };
             }

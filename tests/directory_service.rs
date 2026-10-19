@@ -432,6 +432,19 @@ fn invalid_metadata_plan_is_rejected_before_storage_or_tls() {
         assert!(!c.root.join("1").exists());
     }
 }
+#[cfg(not(feature = "quic"))]
+#[test]
+fn unavailable_quic_selection_rejects_before_creating_a_store() {
+    let c = Cluster::new(false);
+    let out = c
+        .server(1, "create")
+        .args(["--transport", "quic"])
+        .fixture_output()
+        .unwrap();
+    assert!(!out.status.success());
+    assert!(String::from_utf8_lossy(&out.stderr).contains("--features quic"));
+    assert!(!c.root.join("1").exists());
+}
 
 #[path = "directory_service/initialization.rs"]
 mod initialization;

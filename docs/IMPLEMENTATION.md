@@ -19,7 +19,7 @@ maximum sustainable rate. Design: `target/claude/research-lv/architect-plan-life
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current NT1: connection generations and listener (`lb/nt1-connection-generations`; round 3 in review) | Audit N1, N3, N6, P3-6 and the P3-16 discovery form: survivors no longer enter recovery after ~27.8 h with one peer down, and a port scan or fd spike cannot kill a node | — (ST2 runs in parallel and also edits `native/startup.rs`, in a different function; a rebase reconciles) | Q2 probe written up; native soak of more than 10,000 connect attempts fails on the base and passes; restart uniqueness; injected accept errors; two-node native reconnect past the old boundary; listener health and exhaustion reach `NodeObservation`, Pressure events and `metrics`; no counter class node-fatal; fmt, four strict Clippy configurations and matched fmt/Clippy; transport, peers, connect, startup, runtime-peer, logical_voter_native and counter_service suites in default and all-features | LB |
+| Current NT1: connection generations and listener (`lb/nt1-connection-generations`; round 4 in review) | Audit N1, N3, N6, P3-6 and the P3-16 discovery form: survivors no longer enter recovery after ~27.8 h with one peer down, and a port scan or fd spike cannot kill a node | — (ST2 runs in parallel and also edits `native/startup.rs`, in a different function; a rebase reconciles) | Q2 probe written up; native soak of more than 10,000 connect attempts fails on the base and passes; restart uniqueness; injected accept errors; two-node native reconnect past the old boundary; listener health and exhaustion reach `NodeObservation`, Pressure events and `metrics`; no counter class node-fatal; fmt, four strict Clippy configurations and matched fmt/Clippy; transport, peers, connect, startup, runtime-peer, logical_voter_native and counter_service suites in default and all-features | LB |
 | Next NT2: roster, budget and cache reclaim | Audit N2, RT3, N4, N5: re-provisioning a node or churning members never kills survivors | NT1 (same files) | U6 probe as fail@main; churn soak | LB |
 | Then DR1: Counter session ledger | Audit S1, RT2 for Counter through the generic `SessionLedger` | ST2 merged | 200,000-write soak fails on the base; restart and exactly-once tests | LB |
 
@@ -444,6 +444,42 @@ transfer_service 33. Default features: lib 487 (1 ignored), `voteboat-counter`
 210, logical_voter_native 25, observability 11, peers 22, remote_discovery 29,
 startup 48, counter_service 144, directory_service 17, transfer_service 24.
 All pass. Not run: macOS, and native durable A/B (no write-path change).
+
+### NT1 round 4 (evidence, 19 October 2026)
+
+**Reported regression.** The default-feature `counter_service` test
+`unavailable_quic_selection_rejects_before_creating_a_store` failed at line
+1692: `voteboat-counter serve … --transport quic` started a QUIC node and
+created its store.
+
+**Root cause: a shared build artifact, not branch code.** NT1 does not touch
+transport selection. `parse_protocol` in `src/bin/counter_service.rs` is
+unchanged from main, and so are its `cfg(feature = "quic")` arms and the
+`Cargo.toml` features. A clean default-feature build of b4f6a7fc refuses with
+`QUIC support requires building with --features quic`, exits 1 and creates
+nothing. In that build `counter_service` passes 144/144, including this test.
+The failure reproduces exactly at line 1692 when the default-feature test
+executable (`target/debug/deps/counter_service-*`) runs after an
+`--all-features` build has rewritten `target/debug/voteboat-counter`. Test
+binaries call `CARGO_BIN_EXE_voteboat-counter`, a fixed path that each feature
+configuration overwrites. This is the AGENTS.md hazard: run feature
+configurations sequentially or give each its own target directory.
+
+**Hardening (same contract in all three binaries).** `voteboat-directory` and
+`voteboat-transfer` already refused `quic` without the feature, before any
+store exists, but only said `unsupported transport`. Both now give the counter
+binary's `--features quic` hint. The transfer binary checks the transport before
+it loads the profile, through a `protocol` helper. New default-feature tests:
+`directory_service::unavailable_quic_selection_rejects_before_creating_a_store`
+and
+`transfer_service::profiles::unavailable_quic_selection_rejects_before_opening_replica_files`.
+
+**Validation (Linux, cores 0-3, nice 19, `-j 2`, one configuration at a
+time).** Default features: counter_service 144, directory_service 18,
+transfer_service 25. All-features: counter_service 203, directory_service 22,
+transfer_service 33. All pass. fmt, plus strict Clippy in the default,
+all-features, no-default-features and native-only configurations: zero
+diagnostics. The pre-push hook adds matched fmt and Clippy.
 
 ## Logical-voter reliability track (opened 18 October 2026)
 
