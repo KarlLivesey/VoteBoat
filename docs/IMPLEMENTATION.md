@@ -43,8 +43,8 @@ ordinary physical groups are not.
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Done AI1: activation operation-ID space (merged 19 October 2026, PR 7 head e557bb75) | The wrapper kept every business ID forever only to keep business IDs apart from activation phase IDs, so write 16,385 was refused for life. Make the split structural: phase IDs carry a fixed 64-bit tag, business IDs must not; delete the set, its limit, its checkpoint section and its per-admission clone | Architect plan AI1 (§2, §4.1, §6.2: strict `reserved(n)` layout, named tag, command format bump, intent retirement deferred). Not a logical dependency on LV2. Shares five files with LV1 (`lv/checkpoint-v3`); only this document conflicts textually (see AI1 implemented) | 200,000-write deterministic soak fails on the base at write 16,385 and passes; tag refusal at admission and apply; partition, alias, order-independence, restart and old-format tests; existing activation suites green with reserved IDs; fmt, four strict Clippy configurations and matched workspace at zero diagnostics; default, all-features and no-default suites | LR2 |
-| In progress LV1: child checkpoint v3 with direct-decode restore and a snapshot-generation high-water mark | Pruning (LV2) needs restore that does not replay retained records, and generation numbering that does not derive from them (`execute.rs` derived the next generation from `SnapshotPublished` records). Also removes the O(n²) replay restore. Behaviour-neutral: nothing is pruned | — | v3 golden round trips (empty, populated, candidate); old v1/v2 checkpoints refused with `UnsupportedSchema`; restore equals the old replay path on representative histories (state, outcomes, next snapshot generation); restore performs no apply; linear restore-cost note; generation monotonic across checkpoint/restore; fmt, four strict Clippy configurations, matched fmt/Clippy; default, all-features and no-default-features suites | LVM |
-| Next LV2: retirement core | Closes the known defect: `consumed_through` in child commands, operation-ID partition, replicated `retired_below` watermark, pruning, `LogicalRefusal::Expired` and tri-state outcome lookup, bridge acknowledgement | LV1 | App-level 72,000-action soak with retention ≤ 1, exactly-once across retirement boundaries, restart/checkpoint at any point, replacement retires older sessions; fails on 30a1f6c5 | LVM |
+| In review round 2 LV1: child checkpoint v3 with direct-decode restore and a snapshot-generation high-water mark (PR 8; main eab59343 merged in, with AI1's v1-embedding test reworked for the v3 frame) | Pruning (LV2) needs restore that does not replay retained records, and generation numbering that does not derive from them (`execute.rs` derived the next generation from `SnapshotPublished` records). Also removes the O(n²) replay restore. Behaviour-neutral: nothing is pruned | — | v3 golden round trips (empty, populated, candidate); old v1/v2 checkpoints refused with `UnsupportedSchema`; restore equals the old replay path on representative histories (state, outcomes, next snapshot generation); restore performs no apply; restore enforces the admission budgets and reachable-state invariants, each with a failing input; linear restore-cost note; generation monotonic across checkpoint/restore; fmt, four strict Clippy configurations, matched fmt/Clippy; default, all-features and no-default-features suites | LVM |
+| Next LV2: retirement core | Closes the known defect: `consumed_through` in child commands (a command-format change, so LV2 bumps both application schemas and LV1 stores fail `UnsupportedSchema`), operation-ID partition, replicated `retired_below` watermark, pruning, `LogicalRefusal::Expired` and tri-state outcome lookup, bridge acknowledgement | LV1 | App-level 72,000-action soak with retention ≤ 1, exactly-once across retirement boundaries, restart/checkpoint at any point, replacement retires older sessions; fails on 30a1f6c5 | LVM |
 | Following LV3: end-to-end soak evidence | Prove the bound on the real bridge/driver/coordinator path | LV2 | Deterministic simulated-clock 30-minute idle and writes soaks, native restart/replacement/checkpoint tests, existing-test intent updates | LVM |
 | Later AI2: router-level activation soak | Prove LR2 through the real client router with restart, on the LV3 simulated-clock harness | LV3, AI1 | 20,000 router writes, restart from checkpoint, competing `Begin`, identical traces on two runs | LR2 |
 | Later LV5: fail closed at the retained-action limit | Fence the owner with typed results instead of a permanent refusal | LV2 | Fence and claim-recovery tests | LR3 |
@@ -84,9 +84,14 @@ authorisation by child read), AI3 (retiring old activation intents).
   the membership in force before its index; parent image decodes through the
   log codec; snapshots decode and verify against their references; enrollment
   only for candidates; `bytes` equals the sum of command lengths;
-  representative present exactly when the parent image is; LV1 reachable-state
-  rules `retired_below == 0` and `snapshot_generation ==` the old derivation;
-  read envelopes; and finally the exact canonical re-encode equals the input.
+  representative present exactly when the parent image is; the published
+  reference and the parent's durable snapshot are retained snapshots; for
+  candidates, representative present exactly when the enrollment is, and the
+  enrollment matches its retained `EnrollmentClaim` record; the retained set
+  passes the admission budgets (`reserve` on the rebuilt state); LV1
+  reachable-state rules `retired_below == 0` and `snapshot_generation ==` the
+  old derivation; read envelopes; and finally the exact canonical re-encode
+  equals the input.
   The candidate state is built in a copy and swapped in only on success.
 - **Ownership.** Both fields are replicated child application state, persisted
   only in the child checkpoint and reconstructed by log-suffix replay.
@@ -126,13 +131,21 @@ Evidence only (planned work is in the rows and schema plan above).
   `UnsupportedSchema` under its old schema and `InvalidCheckpoint` under the new
   one, with state unchanged. `v3-populated` is exactly 24 bytes longer than
   `v1-populated` (the two new fields).
+- **Merge with main (round 2).** Main eab59343 (AI1, V2, H2, TR1a, TR1b) is
+  merged in; only this file conflicted. AI1's
+  `child_checkpoint_with_v1_profile_embedding_is_refused_typed` assumed the v1
+  frame and schema 1, so it failed after the bump. It now splices the v1
+  configuration blob (`VBACTP01`) into a current v3 frame and expects
+  `InvalidCheckpoint` under schema 3 (the profile binding alone refuses it),
+  and keeps the legacy file as `UnsupportedSchema` under schema 1 and
+  `InvalidCheckpoint` under schema 3; the real v3 bytes still restore.
 - **Equivalence with the replay restore.** A test-only oracle reimplements the
   former restore (replay every retained record and configuration entry through
   `apply_entries`). The shared application-test `apply` helper now asserts after
   every apply that the high-water mark equals the former derivation, and that
   both the direct restore and the replay oracle rebuild the exact state
   (records, receipts, membership, parent, snapshots, generation). In the
-  default-feature lib run this checked 285 states across 40 tests (96 with
+  round-1 default-feature lib run this checked 285 states across 40 tests (96 with
   child configuration entries); 450 larger states (> 64 records) were checked
   only for the generation rule. The populated history then publishes on the
   original, the directly restored and the replayed copies: identical receipts,
@@ -140,21 +153,51 @@ Evidence only (planned work is in the rows and schema plan above).
 - **No replay, linear cost.** Test-only per-thread counters show restore makes
   0 `apply_entries` calls and 1 `encode_state` call at 1, 2, 65 and 513
   records. Ignored timing report (`cargo test --release --lib
-  restore_cost_report -- --ignored --nocapture`, Linux 9800X3D, host load ~115,
-  printed only):
+  restore_cost_report -- --ignored --nocapture`, Linux 9800X3D, printed only).
+  Round 1 ran at host load ~115. Round 2 ran at load ~6 on cores 4–9, after
+  restore gained the admission-budget pass (a second decode of each retained
+  command); it is still linear:
 
-  | Records | Checkpoint bytes | Replay restore ms | Direct restore ms |
-  | ---: | ---: | ---: | ---: |
-  | 256 | 65,306 | 6.57 | 0.10 |
-  | 512 | 129,562 | 16.6 | 0.22 |
-  | 1,024 | 258,074 | 57.3 | 0.44 |
-  | 2,048 | 515,098 | 208 | 0.96 |
-  | 3,968 | 997,018 | 776 | 1.92 |
+  | Records | Checkpoint bytes | Replay ms (r1) | Direct ms (r1) | Replay ms (r2) | Direct ms (r2) |
+  | ---: | ---: | ---: | ---: | ---: | ---: |
+  | 256 | 65,306 | 6.57 | 0.10 | 3.89 | 0.089 |
+  | 512 | 129,562 | 16.6 | 0.22 | 12.2 | 0.172 |
+  | 1,024 | 258,074 | 57.3 | 0.44 | 43.1 | 0.340 |
+  | 2,048 | 515,098 | 208 | 0.96 | 154 | 0.739 |
+  | 3,968 | 997,018 | 776 | 1.92 | 573 | 1.59 |
 
 - **Corruption classes** refused with `InvalidCheckpoint` and no partial
   restore: non-zero watermark, generation mark ±1, retained-byte total,
   preceding configuration, record index past `applied`, record term past
   `applied_term`, trailing byte, six truncation points, wrong applied index.
+  Round 2 (`application/tests/formats/refusals.rs`, byte edits on the
+  populated golden): swapped records, a record at the configuration entry's
+  index, duplicate record indexes, a duplicated configuration entry,
+  decreasing terms, a representative without a parent image and the reverse,
+  a receipt epoch above the representative's, three snapshots, invalid
+  outcome and refusal tags; swapped configuration entries on a two-entry
+  history; unretained published or durable snapshot. Candidates
+  (`enrollment/formats.rs`): enrollment operation, first index, first term,
+  target reference and learners each mismatching the claim record; a
+  representative without an enrollment and the reverse.
+- **Admission budgets on restore (G6).** Restore calls `reserve(&[])` on the
+  rebuilt state, the same function admission and apply use, so a retained set
+  that apply could not reach is `InvalidCheckpoint`. Each budget has a test
+  that fills the retained set to the limit (restores exactly; admission then
+  refuses one more original with `DedupCapacity`) and one past it (refused):
+  retained bytes (262,144-byte budget, Sol's reproduction), ordinary count
+  (32 of 64 actions), ordinary bytes (room for three ordinary originals), and
+  the action count at exactly the default `max_actions` of 4,096 records,
+  with `max_actions + 1` refused.
+- **Mutation check of the restore checks (run once, not committed).**
+  Removing each check made its test fail: `reserve` (all three budget
+  tests), published retained, durable retained, candidate pairing, enrollment
+  match, record position collision, configuration position collision, term
+  order, representative iff parent, receipt epoch. Three checks are layered:
+  removing the ascending-ID check, the configuration-order check or the
+  two-snapshot limit leaves their inputs refused by the exact re-encode
+  (records are a sorted map), the membership fold, and the metadata
+  read-envelope bound (sized for two snapshots) respectively.
 - **Generation decoupling.** Removing both publication records from a state
   (simulating LV2 retirement) lowers the former derivation below the mark; the
   next publication still gets mark + 1, and re-publishing an identical snapshot
@@ -167,14 +210,37 @@ Evidence only (planned work is in the rows and schema plan above).
   blob is checked by the exact re-encode. (3) Added checks beyond the plan:
   exact preceding configuration per record, unique indexes with non-decreasing
   terms, representative present exactly when the parent image is, receipt epoch
-  ≤ current, at most two retained snapshots. (4) For LV2: checkpoints written by
-  LV1 embed `VBLOGA01/02` commands; if LV2 changes the command format it should
-  bump the schemas again so LV1 stores fail with `UnsupportedSchema` rather
-  than `InvalidCheckpoint`.
+  ≤ current, at most two retained snapshots; in round 2 the admission budgets,
+  published and durable snapshots retained, candidate representative iff
+  enrollment, and the enrollment record against its claim record (LV1 retains
+  that record; once LV2 can retire it, LV2 checks it only while retained).
+  (4) LV2 adds `consumed_through` to child commands, so the command format
+  changes and LV2 bumps both application schemas; checkpoints written by LV1
+  (embedding `VBLOGA01/02` commands) then fail with `UnsupportedSchema`, not
+  `InvalidCheckpoint`.
 - **Stage-1 score.** Changed paths are inside `src/logical_voter/**`,
   `tests/logical_*` and `docs/`; no shared `src/` file changed, so the matched
   CPU-per-write score is unaffected by construction.
-- **Validation.** In progress; recorded below when the three full configurations finish.
+- **Validation (round 2, head after the merge of main eab59343).** Builder
+  runs on Linux cores 4–9, `nice -n 19`, `-j 4`; each integration binary run
+  once, directly. Full suites are left to the orchestrator.
+
+  | Check | Result |
+  | --- | --- |
+  | `cargo +stable fmt --all -- --check` | clean |
+  | Strict Clippy: default, all-features, no-default, native-only (pre-push hook) | 0 diagnostics each |
+  | Matched workspace fmt and strict all-target Clippy (pre-push hook) | clean |
+  | `--lib logical_voter`, default features | 101 passed, 1 ignored (timing report) |
+  | `--lib logical_voter`, all features | 102 passed, 1 ignored |
+  | `--lib logical_voter`, no default features | 100 passed, 1 ignored |
+  | `--test logical_voter_native`, all features | 42 passed |
+  | `--test logical_activation_driver`, all features | 35 passed |
+  | `--test logical_activation_nested`, all features | 14 passed |
+  | `--test logical_nested_native`, all features | 15 passed |
+
+  No failures, so no port-collision or close-drain timeout occurred in these
+  runs. Round 1 (16b07757, reviewers): default lib 83 passed, all-features 84,
+  `logical_voter_native` 25 (before the merge of main).
 
 #### AI1 schema plan
 
