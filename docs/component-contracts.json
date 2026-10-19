@@ -1204,7 +1204,7 @@
         "tests/peers.rs",
         "tests/effect_owner.rs"
       ],
-      "scope": "Construction-authorized identities, bounded connection/handshake reservations, host-reserved checked generation ranges, fair polling, monotonic reconnect deadlines/backoff, stale attempt/input rejection and exact accepted-send lifetime through retirement. Provider violations fence coordination without releasing separate outbound credits. Native 100-group TCP/TLS histories and quiescent connection replacement before further replication/checkpoint/recovery. Construction-selected PeerConnector now owns native socket/TLS establishment; PeerDriver now owns exact attempt deadlines and separate bounded ingress/staging resources. No membership or quorum authority."
+      "scope": "Construction-authorized identities, bounded connection/handshake reservations, store-session-scoped checked generations through u64::MAX, fair polling, monotonic reconnect deadlines/backoff, stale attempt/input rejection and exact accepted-send lifetime through retirement. Provider violations fence coordination without releasing separate outbound credits. Native 100-group TCP/TLS histories and quiescent connection replacement before further replication/checkpoint/recovery. Construction-selected PeerConnector now owns native socket/TLS establishment; PeerDriver now owns exact attempt deadlines and separate bounded ingress/staging resources. No membership or quorum authority."
     },
     {
       "design_id": "C06/C15",

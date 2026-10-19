@@ -23,8 +23,8 @@ addresses, excessive timeouts, reused generations, concurrent requests for the
 same peer and aggregate capacity overflow. Rejection returns the original
 request and consumes no generation or slot. Accepted generations increase per
 peer, so independent peers may be submitted in a different generation order.
-Host-reserved generation ranges must not overlap within a recovered store
-session, including across replacement dialers/rosters. Restart obtains a fresh
+Generations are scoped by the recovered store session and must not be reused
+within it, including across replacement dialers/rosters. Restart obtains a fresh
 persisted store session. Dialing persists no state and reconstructs no authority.
 
 The request ceiling includes queued work, the active connect call and completed

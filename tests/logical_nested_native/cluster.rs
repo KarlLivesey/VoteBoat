@@ -185,7 +185,6 @@ impl Cluster {
         };
         let transport = setup::physical_transport_limits();
         let owner = parts.local.owner.identity();
-        let first = owner.store.session.get().checked_mul(10000).unwrap();
         assert!(parts.local.outbound.is_drained());
         let mut outbound = parts.local.outbound.binding();
         outbound.generation = voteboat::identity::OutboundGeneration::new(2).unwrap();
@@ -220,11 +219,8 @@ impl Cluster {
                     store: owner.store,
                 },
                 outbound: parts.local.outbound.binding(),
-                first_generation: voteboat::identity::SecureSessionGeneration::new(first).unwrap(),
-                last_generation: voteboat::identity::SecureSessionGeneration::new(
-                    first.checked_add(9999).unwrap(),
-                )
-                .unwrap(),
+                // The store session scopes generations (startup does the same).
+                first_generation: voteboat::identity::SecureSessionGeneration::new(1).unwrap(),
                 wire_version: 8,
                 limits: PeerRosterLimits::default(),
                 transport_limits: transport,

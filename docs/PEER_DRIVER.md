@@ -43,8 +43,9 @@ Accepted connector attempts retain driver slots until their actual terminal
 receipt, including canceled/expired sockets or dials. A replacement for that peer
 cannot spend a generation or start while its old provider work remains retained.
 Late returned sessions close without attaching. Existing roster backoff and
-host-reserved generation ranges remain authoritative; restart persists a fresh
-store session. These IDs are allocation/lifetime scopes, not durability tokens
+store-session-scoped generations remain authoritative; restart persists a fresh
+store session. A spent generation space (unreachable: see PEER_ROSTER.md) issues
+no ticket and is never a driver error. These IDs are allocation/lifetime scopes, not durability tokens
 or contiguous log prefixes. `next_deadline` combines connector/eligible roster
 hints and omits retries blocked by retained canceled work; separately schedule
 the core's timer deadlines and provider readiness.

@@ -111,8 +111,8 @@ Heartbeat or Checkpoint events; it exposes no raw Propose bypass.
 This facade adds no durability token, log watermark, protocol generation or
 consensus effect. Written remains distinct from Durable. Snapshot publication,
 WAL durability, application installation and cleanup preserve their existing
-ordered dependencies. Fresh store sessions on restart and host-reserved secure
-generation ranges remain authoritative for stale-completion rejection.
+ordered dependencies. Fresh store sessions on restart, which scope every secure
+session generation, remain authoritative for stale-completion rejection.
 
 `reclaim(max_bytes)` now submits explicit physical cleanup to the selected
 PersistenceWorker while Running. The existing WAL thread serializes it between
@@ -184,10 +184,11 @@ For opt-in remote endpoint discovery, supply a `DiscoveryConnector::new_driven`
 with `ReconnectingPeerDiscovery` as its resolver. Construct that resolver from
 an authenticated `NativeRemotePeerDiscovery`, a dedicated public
 `PeerConnector<Endpoint = SocketAddr>`, and `SourceReconnectConfig`. The
-connector must already trust the same source identity. Supply its numeric address
-and a reserved, nonoverlapping connection-generation range strictly later than
-the initial source session; the host remains responsible for fresh store sessions
-on restart. The source connector cannot discover its own source address.
+connector must already trust the same source identity. Supply its numeric address.
+Reconnect generations continue after the initial source session's generation
+through `u64::MAX` within the local store session; the host remains responsible
+for fresh store sessions on restart. The source connector cannot discover its
+own source address.
 
 Ordinary Node polling drives lookups and source reconnection. A failed source
 retains valid cached hints and generation floors, releases its failed session,

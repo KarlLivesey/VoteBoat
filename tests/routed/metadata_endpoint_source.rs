@@ -7,10 +7,7 @@ use std::{
     collections::BTreeSet,
     rc::Rc,
 };
-use voteboat::{
-    connect::*, discovery::*, identity::SecureSessionGeneration, native::remote_discovery::*,
-    secure::*,
-};
+use voteboat::{connect::*, discovery::*, native::remote_discovery::*, secure::*};
 #[path = "metadata_source_connector.rs"]
 mod connector;
 type Server = NativeDiscoveryResponder<Box<dyn SecureSession>, View>;
@@ -124,8 +121,6 @@ impl View {
             connector,
             SourceReconnectConfig {
                 endpoint: "127.0.0.1:4567".parse().unwrap(),
-                first_generation: SecureSessionGeneration::new(2).unwrap(),
-                last_generation: SecureSessionGeneration::new(8).unwrap(),
                 retry_ms: 10,
             },
             now(clock),

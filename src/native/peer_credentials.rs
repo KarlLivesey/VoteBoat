@@ -108,6 +108,10 @@ impl<C: NativePeerMaterialProvider> RotatingPeerConnector<C> {
             closed: false,
         })
     }
+    /// Read-only view of the wrapped provider (status only; grants nothing).
+    pub fn inner(&self) -> &C {
+        &self.inner
+    }
     /// Reclaim the provider after close and all accepted receipts have drained.
     pub fn into_inner(self) -> Result<C, Self> {
         if self.closed && self.pending.is_empty() && self.inner.is_drained() {

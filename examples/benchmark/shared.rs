@@ -495,13 +495,6 @@ impl ClusterSetup<'_> {
             lane: ExecutionLaneId::new(lane).ok_or("invalid lane identity")?,
             generation: RuntimeGeneration::new(1).unwrap(),
         };
-        let first = owner_id
-            .store
-            .session
-            .get()
-            .checked_mul(10000)
-            .ok_or("session exhausted")?;
-        let last = first.checked_add(9999).ok_or("session exhausted")?;
         let local = LocalIdentity {
             node: node(n),
             store: owner_id.store,
@@ -523,7 +516,7 @@ impl ClusterSetup<'_> {
             capacity_profile,
         )?;
         let (version, codec) = wire_profile(member)?;
-        let (outbound, roster) = peer_io(local, first, last, &remote, now, version)?;
+        let (outbound, roster) = peer_io(local, &remote, now, version)?;
         let Routers {
             ingress,
             results,
@@ -659,8 +652,6 @@ fn spawn_workers(
 
 fn peer_io(
     local: LocalIdentity,
-    first: u64,
-    last: u64,
     remote: &BTreeMap<NodeId, StoreIdentity>,
     now: MonoTime,
     version: u16,
@@ -677,8 +668,8 @@ fn peer_io(
         PeerRosterConfig {
             local,
             outbound: outbound.binding(),
-            first_generation: SecureSessionGeneration::new(first).ok_or("session exhausted")?,
-            last_generation: SecureSessionGeneration::new(last).ok_or("session exhausted")?,
+            // The store session scopes generations, as in native startup.
+            first_generation: SecureSessionGeneration::new(1).unwrap(),
             wire_version: version,
             limits: PeerRosterLimits::default(),
             transport_limits: TransportLimits::default(),

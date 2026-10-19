@@ -144,10 +144,12 @@ type Driver = ReconnectingPeerDiscovery<Connector>;
 fn config() -> SourceReconnectConfig {
     SourceReconnectConfig {
         endpoint: "127.0.0.1:4567".parse().unwrap(),
-        first_generation: SecureSessionGeneration::new(2).unwrap(),
-        last_generation: SecureSessionGeneration::new(3).unwrap(),
         retry_ms: 10,
     }
+}
+/// Reconnects continue after the initial source session's generation (1).
+fn first() -> SecureSessionGeneration {
+    SecureSessionGeneration::new(2).unwrap()
 }
 fn failed() -> (NativeRemotePeerDiscovery<HostSession>, MonoTime) {
     let (mut client, _) = client_server();
@@ -171,8 +173,11 @@ fn poll(d: &mut Driver, now: MonoTime) {
     d.poll_discovery(now, SessionPollBudget::default()).unwrap();
 }
 
+/// On the base, reconnects stopped at the end of the host range
+/// (about 2.8 h of a 10,000 range at a 1 s retry). Now they continue through
+/// the store session's full u64 space.
 #[test]
-fn retry_consumes_only_reserved_generations_and_stops_at_exhaustion() {
+fn retry_continues_past_the_old_reserved_range() {
     let (mut d, c, now) = fixture();
     c.borrow_mut().reject = true;
     poll(&mut d, now);
@@ -184,20 +189,51 @@ fn retry_consumes_only_reserved_generations_and_stops_at_exhaustion() {
     );
     poll(&mut d, MonoTime(now.0 + 9));
     assert_eq!(c.borrow().tickets.len(), 1);
-    poll(&mut d, MonoTime(now.0 + 10));
-    assert_eq!(
-        c.borrow()
-            .tickets
-            .iter()
-            .map(|t| t.generation.get())
-            .collect::<Vec<_>>(),
-        [2, 3]
-    );
+    for attempt in 1..=10_001 {
+        poll(&mut d, MonoTime(now.0 + 10 * attempt));
+    }
+    let tickets = c
+        .borrow()
+        .tickets
+        .iter()
+        .map(|t| t.generation.get())
+        .collect::<Vec<_>>();
+    assert_eq!(tickets, (2..=10_003).collect::<Vec<_>>());
+    assert!(matches!(d.status(), SourceReconnectStatus::Backoff { .. }));
+    assert!(d.discovery_pending());
+}
+/// After 2^64 attempts (584 million years at the 1 ms minimum retry) the
+/// status is the typed `Exhausted`, with no busy deadline.
+#[test]
+fn spent_generation_space_reports_exhausted_without_a_deadline() {
+    let (mut a, _) = pair();
+    a.binding.generation = SecureSessionGeneration::new(u64::MAX - 1).unwrap();
+    let mut client = NativeRemotePeerDiscovery::new(
+        a,
+        peer(2),
+        RemoteDiscoveryConfig {
+            retry_ms: 10,
+            ..RemoteDiscoveryConfig::default()
+        },
+        MonoTime(0),
+    )
+    .ok()
+    .unwrap();
+    client.resolve(peer(3), MonoTime(0)).unwrap_err();
+    let now = client.next_deadline().unwrap();
+    client.poll(now, SessionPollBudget::default()).unwrap();
+    assert!(client.source_failed());
+    let connector = Connector::new();
+    let c = connector.control.clone();
+    let mut d = Driver::new(client, connector, config(), now).ok().unwrap();
+    c.borrow_mut().reject = true;
+    poll(&mut d, now);
+    assert_eq!(c.borrow().tickets[0].generation.get(), u64::MAX);
     assert_eq!(d.status(), SourceReconnectStatus::Exhausted);
     assert!(!d.discovery_pending());
     assert_eq!(d.discovery_deadline(), None);
     poll(&mut d, MonoTime(now.0 + 100));
-    assert_eq!(c.borrow().tickets.len(), 2);
+    assert_eq!(c.borrow().tickets.len(), 1);
 }
 #[test]
 fn deadline_and_poll_error_retain_original_ticket_until_actual_receipt() {
@@ -226,7 +262,7 @@ fn deadline_and_poll_error_retain_original_ticket_until_actual_receipt() {
 fn close_drains_accepted_ticket_without_publishing_late_success() {
     let (mut d, c, now) = fixture();
     let (mut a, _) = pair();
-    a.binding.generation = config().first_generation;
+    a.binding.generation = first();
     c.borrow_mut().success = Some(a);
     poll(&mut d, now);
     c.borrow_mut().hold = true;
@@ -248,7 +284,7 @@ fn wrong_completion_ticket_or_session_binding_fences_the_source() {
     for mismatch in 0..6 {
         let (mut d, c, now) = fixture();
         let (mut a, _) = pair();
-        a.binding.generation = config().first_generation;
+        a.binding.generation = first();
         c.borrow_mut().success = Some(a);
         c.borrow_mut().wrong_ticket = mismatch == 0;
         c.borrow_mut().wrong_binding = mismatch;
@@ -313,19 +349,17 @@ fn invalid_time_and_zero_budget_do_not_submit_or_change_pending_work() {
 }
 #[test]
 fn constructor_returns_original_owners_for_invalid_configuration_and_binding() {
-    for case in 0..8 {
+    for case in 0..6 {
         let (mut client, now) = failed();
         let mut c = Connector::new();
         let original = c.control.clone();
         let mut cfg = config();
         match case {
-            0 => cfg.first_generation = SecureSessionGeneration::new(1).unwrap(),
-            1 => cfg.last_generation = SecureSessionGeneration::new(1).unwrap(),
-            2 => cfg.retry_ms = 0,
-            3 => cfg.endpoint = "0.0.0.0:4567".parse().unwrap(),
-            4 => c.owner = local(9),
-            5 => c.limits.requests = 0,
-            6 => client.close(),
+            0 => cfg.retry_ms = 0,
+            1 => cfg.endpoint = "0.0.0.0:4567".parse().unwrap(),
+            2 => c.owner = local(9),
+            3 => c.limits.requests = 0,
+            4 => client.close(),
             _ => cfg.endpoint.set_port(0),
         }
         let rejected = Driver::new(client, c, cfg, now).err().unwrap();
@@ -353,7 +387,7 @@ fn constructor_rejection_preserves_pending_owners_and_monotonic_time() {
         ticket: ConnectTicket {
             local: local(1),
             peer: peer(2),
-            generation: config().first_generation,
+            generation: first(),
         },
         direction: ConnectDirection::Dial(config().endpoint),
         deadline: MonoTime(now.0 + 50),
@@ -392,8 +426,8 @@ fn owning_discovery_connector_reconnects_source_without_manual_resolver_polling(
     let source_connector = Connector::new();
     let source_control = source_connector.control.clone();
     let (mut source_client, mut source_server) = pair();
-    source_client.binding.generation = config().first_generation;
-    source_server.binding.generation = config().first_generation;
+    source_client.binding.generation = first();
+    source_server.binding.generation = first();
     source_control.borrow_mut().success = Some(source_client);
     let resolver = Driver::new(remote, source_connector, config(), MonoTime(0))
         .ok()

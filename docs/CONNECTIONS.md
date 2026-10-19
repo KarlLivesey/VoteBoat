@@ -77,6 +77,19 @@ host's responsibility; dial completions use the supplied dialer's wake handle.
 `next_deadline` includes anonymous/attempt expiry and immediately pollable
 terminal results. A canceled dial awaiting its actual receipt has no busy deadline.
 
+Listener `accept()` errors are classified by `classify_accept`, and only a
+listener that is gone or misused (`EBADF`, `EINVAL`, `ENOTSOCK`, `EFAULT`) returns
+`ConnectError::Io`. A connection that failed before acceptance (`ECONNABORTED`,
+`ECONNRESET`, `EINTR`, `EPERM`, `ETIMEDOUT` and the pending network errors that
+Linux `accept(2)` says to treat like `EAGAIN`) is skipped and accepting continues
+within the socket-call budget. Descriptor, buffer or memory exhaustion (`EMFILE`,
+`ENFILE`, `ENOBUFS`, `ENOMEM`) and unrecognised errors stop accepting for a
+delay that doubles from 10 ms to 1 s and resets after the next successful or
+empty accept. While backing off, the listener is left out of `readiness_fds` and
+`next_deadline` reports the retry time. `accept_status()` counts survived errors
+and reports the last one and any retry time. A port scan, a client reset before
+acceptance or a descriptor spike is therefore never fatal to the node.
+
 The accepted deadline must be later than submission time and no farther than the
 configured timeout (default 10000 ms, hard ceiling 60000 ms). Pass the exact live
 `PeerRoster::attempt_deadline(ticket)`, rejecting a missing/stale ticket. The

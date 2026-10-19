@@ -1,5 +1,232 @@
 # Implementation record
 
+## Lifetime bounds track (opened 19 October 2026)
+
+User rule (19 October 2026): this is infrastructure, so failing after X time,
+connections or messages is a defect; "fixed by restart" does not count; a bound
+is acceptable only with recorded arithmetic that it survives 100 years at the
+maximum sustainable rate. Design: `target/claude/research-lv/architect-plan-lifetime-bounds.md`
+(contract §1, slices §3) and the audit `target/claude/research-lv/lifetime-audit.md`
+(main checkout, untracked). The design pack is unchanged.
+
+### Macro plan (this track)
+
+| Milestone | User-visible outcome | Acceptance |
+| --- | --- | --- |
+| LB Infrastructure runs indefinitely | The three service binaries and every library embedding run for unbounded uptime at any sustained rate. Every retained structure has a replicated reclaim rule, a recorded widening proof, or a typed fail-closed refusal with a non-lossy, non-hanging recovery path. No transport or listener event is node-fatal | Every P1/P2 audit row closed by a slice with a fail@main exhaustion test and a simulated-time soak; an inventory table maps each audit row to its slice and test; LBZ cross-binary soak |
+
+### Mini plan
+
+| Deliverable | Purpose | Dependencies | Completion checks | Advances |
+| --- | --- | --- | --- | --- |
+| Current NT1: connection generations and listener (`lb/nt1-connection-generations`) | Audit N1, N3, N6, P3-6 and the P3-16 discovery form: survivors no longer enter recovery after ~27.8 h with one peer down, and a port scan or fd spike cannot kill a node | — (ST2 runs in parallel and also edits `native/startup.rs`, in a different function; a rebase reconciles) | Q2 probe written up; native soak of more than 10,000 connect attempts fails on the base and passes; restart uniqueness; injected accept errors; two-node native reconnect past the old boundary; fmt, four strict Clippy configurations and matched fmt/Clippy; transport, peers, connect, startup, runtime-peer, logical_voter_native and counter_service suites in default and all-features | LB |
+| Next NT2: roster, budget and cache reclaim | Audit N2, RT3, N4, N5: re-provisioning a node or churning members never kills survivors | NT1 (same files) | U6 probe as fail@main; churn soak | LB |
+| Then DR1: Counter session ledger | Audit S1, RT2 for Counter through the generic `SessionLedger` | ST2 merged | 200,000-write soak fails on the base; restart and exactly-once tests | LB |
+
+### NT1 schema plan (before editing, 19 October 2026)
+
+**Q2 probe (option A or B).** Every `SecureSessionGeneration` consumer was read:
+- Wire: the TLS hello (`native/tls.rs` `encode_hello`) carries node, store and
+  store session but **no generation**, so a peer never learns our generation.
+  The relay frame codec (`relay/network/frame/codec/fields.rs` `session()`)
+  carries the u64 generation **together with both full `StoreBinding`s**
+  (identity, incarnation, store session), so its key is already
+  `(session, generation)`.
+- Ordered comparisons: `native/connect.rs:260`, `native/dial.rs:158`,
+  `native/quic_connect.rs:191` require a strictly increasing generation per
+  peer inside one connector object, which lives for one process (one store
+  session) and starts at 0. `remote_discovery/client.rs:113` and
+  `remote_manifest/client.rs:131` compare `binding.local` (which includes the
+  store session) before the generation. `transport/peers.rs` `attach` requires
+  `b.local == self.local` and an exact ticket.
+- Persistence: none. The `logical_voter` origin codec persists storage-worker
+  and client-router generations, not `SecureSessionGeneration`.
+
+Nothing compares generations across store sessions, and nothing stores one in a
+field narrower than u64. **Option A**: no wire or format change.
+
+**N1 data/API shape.**
+- `PeerRosterConfig` drops `last_generation`. `first_generation` stays as the
+  start of the roster's sequence (1 for a fresh session; a replacement roster in
+  the same session starts at `reclaim_generation()`). The roster issues
+  `first ..= u64::MAX`.
+- `native/startup.rs` stops deriving `session * 10000 .. +9999`; it passes
+  `first_generation = 1`. The domain is the store session.
+- At `u64::MAX` the roster issues no ticket: `due_connections` returns an empty
+  list (not `Err(Exhausted)`), `next_deadline` stays silent for due peers, and
+  `generations_exhausted()` reports it. The driver therefore never maps it to
+  `NodeError::Peer`. Other peers' existing transports keep working.
+- **Uniqueness across restart.** `StoreSession` is persisted in the WAL manifest
+  and incremented by one at every recovery before service starts
+  (`native/log_store.rs:243-250`). Every ticket and binding embeds
+  `local.store.session`, so `(session, generation)` never repeats even though
+  each session restarts at generation 1. Test: two opens of the same store show
+  a strictly larger session and that no `ConnectTicket` or `SessionBinding`
+  of the first session equals one of the second; a stale first-session ticket
+  is refused by the second roster.
+- **Arithmetic.** Roster limits allow at most 65,536 peers and
+  `retry_min_ms >= 1`. Take one attempt per peer per 10 ms across 65,536 peers:
+  6.55 × 10^6 attempts/s; 2^64 / 6.55 × 10^6 = 2.8 × 10^12 s ≈ 89,000 years.
+  Even at the configuration floor (one attempt per peer per 1 ms) it is
+  ≈ 8,900 years, and at 10^7 attempts/s (beyond any host's TLS rate) ≈ 58,000
+  years. The default configuration (1,024 peers, 100 ms minimum retry) gives
+  2^64 / 10,240 ≈ 5.7 × 10^7 years.
+
+**N6.** `SourceReconnectConfig` drops `first_generation` and `last_generation`.
+The reconnecting discovery issues `binding.generation + 1 ..= u64::MAX` from the
+current source session (the same domain rule: generations are scoped by
+`binding.local.store.session`). Exhaustion after 2^64 attempts (`retry_ms >= 1`:
+≥ 584 million years) keeps the existing typed `SourceReconnectStatus::Exhausted`.
+
+**N3 listener.** A pure `classify_accept(&io::Error) -> AcceptAction`:
+- `Idle`: `WouldBlock` (unchanged idle-phase skip).
+- `Retry` (skip this connection, keep accepting within the call budget):
+  `EINTR`, `ECONNABORTED`, `ECONNRESET`, `EPERM`, `ETIMEDOUT`, and the Linux
+  pending-network errors `accept(2)` says to treat like `EAGAIN` (`EPROTO`,
+  `ENETDOWN`, `ENOPROTOOPT`, `EHOSTDOWN`, `ENONET`, `EHOSTUNREACH`,
+  `EOPNOTSUPP`, `ENETUNREACH`).
+- `Backoff`: `EMFILE`, `ENFILE`, `ENOBUFS`, `ENOMEM` and any unrecognised error.
+  The connector stops accepting until `now + delay`, delay doubling from 10 ms
+  to 1,000 ms, reset by the next successful accept or `WouldBlock`. While
+  backing off, the listener fd is left out of `readiness_fds` (so a readable
+  backlog cannot spin the host) and `next_deadline` includes the retry time.
+- `Fatal` (listener gone or misused; a bug, not an environmental event):
+  `EBADF`, `EINVAL`, `ENOTSOCK`, `EFAULT`. Unchanged `ConnectError::Io`.
+- Observability: `NativePeerConnector::accept_status()` returns
+  `AcceptStatus { transient_errors, last_error, retry_at }`
+  (`transient_errors` saturates: diagnostic only, 58,000 years at 10^7/s).
+- Test seam: a `#[cfg(test)]` queue of injected `io::Error`s consulted before
+  `listener.accept()`; release builds are unchanged.
+
+**Silent-stuck P3 forms.**
+- P3-6 (`runtime/peers.rs:461,544` `routes_generation += 1`): the counter only
+  invalidates the cached "steady" reconciliation. Replace it with clearing that
+  cache (`steady = None`) wherever `admission_routes` changes; no counter
+  remains, so nothing can overflow.
+- P3-16 (`bin/support/peer_discovery.rs:113-117` `unwrap_or(0)`): the next
+  generation becomes `Option<SecureSessionGeneration>`; when it is spent,
+  `poll_discovery` returns a typed `DiscoveryError::Exhausted` (new,
+  non-retryable) instead of silently stopping (arithmetic: 100 ms minimum retry,
+  ≥ 5.8 × 10^10 years).
+
+**Ownership, failure and cleanup.** No new owner or thread. Accept backoff is
+volatile connector state; close/drain semantics are unchanged (the backoff
+deadline is not reported once closed). No durable state changes.
+
+**Acceptance checks.**
+1. Native soak (`tests/startup/connection_generations.rs`): one store opened
+   through `NativeStartup`, its only peer down, simulated time stepping past
+   the 10 s connect timeout and 10 s retry cap; 12,000 attempts with the node
+   `Running` after every poll. Recorded as failing on the base.
+2. Restart uniqueness (same file).
+3. Two-node native reconnect over the TR1b port pool after 10,001 attempts.
+4. Roster unit soak (`tests/peers.rs`): 1,000,000 failed attempts across three
+   peers plus a fourth peer flapping every simulated minute for 30 simulated
+   days; generations strictly increasing; exhaustion at `u64::MAX` issues no
+   ticket and no error.
+5. Injected accept errors of every class (`native/connect.rs` unit tests);
+   classifier table test.
+6. Discovery source exhaustion is typed; routes-generation counter removed.
+
+### NT1 implemented (evidence, 19 October 2026)
+
+Base: `origin/main` 345054e5 (3d552e2e plus TR4). Audit rows closed: N1, N3,
+N6, P3-6, and the P3-16 discovery-source form. Option A (Q2): no wire or
+storage format change.
+
+**Fail@main, recorded on the base** (new tests compiled against unmodified
+`src/`; log `target/nt1-logs/base-startup-cg.log`, deleted with `target/`):
+- `native_node_survives_more_connect_attempts_than_the_old_per_process_range`
+  and `native_pair_reconnects_with_a_generation_past_the_old_range` both panic
+  with `node left service after 10000 attempts (last generation Some(19999)):
+  Peer(Roster(Exhausted))`: store session 1 owned `10000 ..= 19999`, attempt
+  10,001 failed the roster, the driver failed and the node entered recovery.
+- `connect_generations_are_unique_across_store_session_restarts` fails on its
+  new-design assertion only (`left: 10000, right: 20000`): on the base,
+  restarts used disjoint ranges; its uniqueness checks passed there too.
+
+**After** (same tests, this branch; simulated time, no wall-clock in the soaks):
+- The native soak opens one store through `NativeStartup`, its only peer down,
+  and steps simulated time in 10 s increments (connect timeout and retry cap):
+  12,000 attempts, about 2.8 simulated days, the node `Running` after every poll,
+  generations 1 ..= 12,000 strictly increasing.
+- Restart uniqueness: three opens of one store give sessions 1 < 2 < 3; each
+  restarts at generation 1; all 150 `(session, generation)` pairs and tickets
+  are distinct; no first-session ticket equals a later one.
+- Two native nodes over the TR1b port pool: 10,002 accept attempts on the
+  accepting node, then the stopped peer starts and a real TCP/TLS session is
+  attached with a generation above 10,000; the accepting node is elected and
+  both apply the committed entry.
+- Roster soak (`tests/peers.rs`): 1,000,000 failed attempts across three peers
+  plus a fourth peer connected for a simulated minute and dropped, repeatedly,
+  for 30 simulated days (about 38,200 flaps at the 7.8 s backoff cap): every
+  ticket's generation is the previous plus one, nothing grows, no error. 0.75 s.
+- `spent_generation_space_issues_no_ticket_and_no_error`: from `u64::MAX`, one
+  ticket is issued, then `due_connections` returns `Ok([])`, the transport still
+  attaches and `generations_exhausted()` is set.
+- Listener (`native/connect.rs` unit tests, injected `io::Error`s): the
+  classifier table; `ECONNABORTED`, `EINTR`, `EPROTO`, `ECONNRESET` in one poll
+  leave the listener accepting a real connection afterwards (on the base the
+  first `ECONNABORTED` returned `ConnectError::Io`, which `runtime/peers.rs`
+  turned into node recovery); `EMFILE`/`ENFILE`/`ENOBUFS` back off 10, 20, 40 ms
+  and so on to 1 s, keep the listener out of the wait set, report the retry
+  time in `next_deadline`, then accept a real connection and reset the delay;
+  `EBADF` is still reported as `ConnectError::Io`.
+- N6: `retry_continues_past_the_old_reserved_range` (10,002 reconnect attempts,
+  generations 2 ..= 10,003, still backing off) and
+  `spent_generation_space_reports_exhausted_without_a_deadline`.
+- P3-16: `source_generations_end_in_a_typed_refusal_not_a_silent_stop`
+  (`voteboat-counter` unit test).
+
+**Design differences from the architect plan.**
+- `PeerRosterConfig` keeps `first_generation` (drops only `last_generation`):
+  the drained-roster handoff (`reclaim_generation`) needs a start point, and the
+  exhaustion test needs to start near `u64::MAX`.
+- A spent generation space is reported by `generations_exhausted()` instead of
+  a new `PeerState::Exhausted`: the roster's sequence is shared by all peers, and
+  the observable effect (no further attempt, no error) is the same.
+- P3-6: instead of `checked_add`, the `routes_generation` counter is removed;
+  replacing the route plan clears the cached steady reconciliation directly, so
+  nothing remains that can overflow.
+- `SourceReconnectConfig` drops both generation fields and derives its start
+  from the current source binding.
+- New read-only accessors for status: `NativePeerConnector::accept_status`,
+  `NativeServiceConnector::accept_status`, `RotatingPeerConnector::inner` and
+  `PeerDriver::connector`.
+
+**Public API changes.** `PeerRosterConfig::last_generation` removed;
+`PeerRoster::generations_exhausted` added; `due_connections` no longer returns
+`Exhausted` for a spent space; `SourceReconnectConfig::{first,last}_generation`
+removed; `DiscoveryError::Exhausted` added; `AcceptAction`, `classify_accept`
+and `AcceptStatus` added. No format change; no migration.
+
+**Pack amendment (§1.7, ch05 "Peer transport").** The pack does not specify a
+generation range (only this repository's PEER_ROSTER, NODE, DISCOVERY, DIALING,
+PEER_DRIVER, PEER_MEMBERSHIP and QUIC_TRANSPORT notes did; all updated).
+Realised here: connect generations are full-width per store session; listener
+errors are per-connection; a transport event is never node-fatal except a
+listener that is gone. The pack is unchanged.
+
+**CPU per write.** Static changed-file list on the poll path:
+`transport/peers.rs` (`next_deadline_filtered` compares `sequence` with
+`u64::MAX` instead of a stored bound), `runtime/peers.rs` (one integer compare
+removed from the steady check), `native/connect.rs` (one `Option` test before
+each accept phase; one filter in `readiness_fds`). Nothing runs per write. The
+matched framework links none of these (no roster, driver, connector or node in
+`benchmarks/matched/src`), so framework cells are unaffected by construction.
+Native durable A/B pairs (`svc.sh`/`nat.sh`) run on the remote Mac and were not
+run under this task's host rules (Linux cores 0-3 only).
+
+**Q8 record (certificate validity).** The three service binaries generate no
+certificates: they load operator-supplied DER material, so `notAfter` is the
+operator's choice, and the existing credential reload (`credential_worker`,
+peer rotation) replaces it without data loss. The test fixtures
+(`tests/fixtures/tls`, `tests/fixtures/four-node-tls`) are valid from
+2020-01-01 to 2050-01-01 (checked with `openssl x509 -enddate`). A handshake
+failure after expiry stays a per-peer connect failure, which after this slice no
+longer exhausts anything. Still open (not in NT1): a warning at a quarter of the
+remaining validity, and the TCP half-open measurement after a remote `kill -9`.
+
 ## Logical-voter reliability track (opened 18 October 2026)
 
 Goal: logical parents and their backing children run indefinitely with bounded

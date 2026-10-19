@@ -17,18 +17,28 @@ histories use the same public roster methods as independent host providers.
 queue binding, negotiated wire version, transport ceilings and roster limits.
 The authorization map binds each allowed remote node to a store identity and
 incarnation. Discovery hints cannot add or change these identities. Local peers,
-incompatible limits and empty generation ranges are rejected before progress.
+and incompatible limits are rejected before progress.
 An empty authorized map is valid for an instance with no current remote peers.
 
-The host reserves a **disjoint inclusive range** of SecureSessionGeneration
-values within this local store session. The roster issues checked increasing
-generations only inside that range. Recreating a roster in the same session must
+SecureSessionGeneration values are scoped by the local store session, which is
+part of every ticket and binding. The roster issues checked, strictly increasing
+generations from `first_generation` (1 for a fresh session) through `u64::MAX`.
+There is no host-reserved range. Recreating a roster in the same session must
 use unused generations: after complete shutdown, `reclaim_generation` returns
-the next unused value within its range. Concurrent rosters require separate
-host-reserved ranges. Merely constructing another roster with the original range
-is not permitted. Restart persists a fresh WAL session before service starts,
-which invalidates the previous local connection domain. No new durable generation
-or remote progress watermark is introduced.
+the next unused value for the replacement's `first_generation`. Restart persists
+a fresh WAL session before service starts (the session strictly increases), which
+invalidates the previous local connection domain, so a restarted process starts
+again at 1 without reusing any `(session, generation)` pair. Nothing persists or
+transmits a generation outside its binding: the TLS hello carries none, and the
+relay frame carries it only next to both full store bindings. No new durable
+generation or remote progress watermark is introduced.
+
+Arithmetic: at most 65,536 peers with a retry floor of 1 ms, one attempt per
+peer per 10 ms is 6.55 × 10^6 attempts/s; 2^64 attempts then last about 89,000
+years (8,900 years at the 1 ms floor). Defaults (1,024 peers, 100 ms minimum
+retry) give about 5.7 × 10^7 years. If the space is ever spent,
+`generations_exhausted()` is set and peers simply get no further attempt;
+`due_connections` returns no ticket and no error, so it can never fail a node.
 
 `due_connections(now, limit)` examines at most `limit` peers with a rotating
 cursor. It reserves connection capacity before returning a ConnectTicket. The
@@ -66,8 +76,8 @@ Connect timeout defaults to 10 seconds. Failed/expired connections retry after
 100 milliseconds, doubling up to 10 seconds. A valid local Sent completion
 resets the failure count; it supplies no remote acknowledgement. Deadlines use
 caller-supplied local monotonic milliseconds. Time reversal rejects progress.
-Arithmetic cannot wrap a deadline or generation; sequence exhaustion returns
-every already-issued ticket and rejects subsequent issuance.
+Arithmetic cannot wrap a deadline or generation; a spent generation space
+returns every already-issued ticket and issues no further one.
 
 `poll(now, visits, budget)` fairly visits at most the requested number of peers.
 Each actual connection receives the existing independent session/plaintext

@@ -205,7 +205,6 @@ fn config(limits: PeerRosterLimits) -> PeerRosterConfig {
         local: local(),
         outbound: outbound(),
         first_generation: SecureSessionGeneration::new(1).unwrap(),
-        last_generation: SecureSessionGeneration::new(u64::MAX).unwrap(),
         wire_version: 1,
         limits,
         transport_limits: TransportLimits::default(),
@@ -675,13 +674,15 @@ fn drained_roster_hands_off_fresh_generations_and_rejects_old_ready_work() {
         .unwrap();
 }
 
+/// The generation space of a store session is spent only after 2^64
+/// attempts. Even then it is a per-peer condition: the peer gets no further
+/// attempt, nothing returns an error, and no busy deadline is reported.
 #[test]
-fn generation_range_exhaustion_never_hides_partially_issued_tickets() {
+fn spent_generation_space_issues_no_ticket_and_no_error() {
     let last = SecureSessionGeneration::new(u64::MAX).unwrap();
     let mut r = PeerRoster::<Host>::new(
         PeerRosterConfig {
             first_generation: last,
-            last_generation: last,
             ..config(limits())
         },
         [(node(2), identity(2)), (node(3), identity(3))].into(),
@@ -693,8 +694,92 @@ fn generation_range_exhaustion_never_hides_partially_issued_tickets() {
     assert_eq!(r.usage().connecting, 1);
     let ticket = issued[0];
     assert_eq!(ticket.generation, last);
+    assert!(r.generations_exhausted());
+    // The other peer stays due but gets nothing; the roster stays usable.
+    assert_eq!(r.due_connections(MonoTime(1), 2), Ok(Vec::new()));
+    assert_eq!(
+        r.next_deadline(),
+        Some(MonoTime(limits().connect_timeout_ms))
+    );
+    r.attach(ticket, Host::new(ticket, 1), MonoTime(1)).unwrap();
+    assert_eq!(r.next_deadline(), None);
+    assert_eq!(r.due_connections(MonoTime(2), 2), Ok(Vec::new()));
     r.abort();
     assert_eq!(r.reclaim_generation(), Err(PeerRosterError::Exhausted));
+}
+
+/// Simulated-time soak: 1,000,000 failed attempts across three stopped peers
+/// plus a fourth peer that connects and drops every simulated minute, over
+/// 30 simulated days. Generations stay strictly increasing within the store
+/// session and the roster never refuses.
+#[test]
+fn roster_soak_of_a_million_attempts_and_thirty_days_of_flapping() {
+    const DAY_MS: u64 = 24 * 60 * 60 * 1000;
+    const ATTEMPTS: u64 = 1_000_000;
+    let flapping = node(5);
+    let limits = PeerRosterLimits {
+        peers: 4,
+        connecting: 4,
+        connect_timeout_ms: 1000,
+        retry_min_ms: 100,
+        // Three peers at this cap make one million attempts in 30 days.
+        retry_max_ms: 7_776,
+        ..PeerRosterLimits::default()
+    };
+    let mut r = PeerRoster::<Host>::new(
+        config(limits),
+        [2, 3, 4, 5].map(|n| (node(n), identity(n as u128))).into(),
+        MonoTime(0),
+    )
+    .unwrap();
+    let mut now = MonoTime(0);
+    let mut last = 0;
+    let (mut failed, mut flaps) = (0u64, 0u64);
+    let mut drop_at = None;
+    let mut checkpoint = ATTEMPTS / 10;
+    while failed < ATTEMPTS || now.0 < 30 * DAY_MS {
+        for ticket in r.due_connections(now, 4).unwrap() {
+            assert_eq!(ticket.local, local());
+            assert_eq!(
+                ticket.generation.get(),
+                last + 1,
+                "strictly increasing, no gaps"
+            );
+            last = ticket.generation.get();
+            if ticket.peer.node == flapping {
+                r.attach(ticket, Host::new(ticket, 1), now).unwrap();
+                drop_at = Some(MonoTime(now.0 + 60_000));
+            } else {
+                r.connect_failed(ticket, now).unwrap();
+                failed += 1;
+            }
+        }
+        if drop_at == Some(now) {
+            r.disconnect(flapping, now).unwrap();
+            drop_at = None;
+            flaps += 1;
+        }
+        if failed >= checkpoint {
+            // Every 10%: nothing retained grows with the attempt count.
+            assert!(!r.generations_exhausted());
+            assert!(r.usage().connections <= 1);
+            assert_eq!(r.usage().connecting, 0);
+            checkpoint += ATTEMPTS / 10;
+        }
+        now = [r.next_deadline(), drop_at]
+            .into_iter()
+            .flatten()
+            .min()
+            .unwrap();
+    }
+    assert!(failed >= ATTEMPTS, "{failed}");
+    // Each flap is a minute connected plus the capped reconnect backoff.
+    assert!(
+        flaps >= 30 * DAY_MS / (60_000 + limits.retry_max_ms) - 1,
+        "{flaps}"
+    );
+    assert_eq!(last, failed + flaps + u64::from(drop_at.is_some()));
+    assert!(!r.generations_exhausted());
 }
 
 fn assignment_core(voters: &[u64], replacement: Option<(u64, u128)>) -> Raft {

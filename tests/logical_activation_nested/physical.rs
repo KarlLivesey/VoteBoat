@@ -49,14 +49,13 @@ pub fn select(
         },
     )
     .unwrap();
-    let first = owner.store.session.get().checked_mul(10000).unwrap();
     peers.factory = NativeTransportFactory::new(codec(), transport()).unwrap();
     peers.roster = PeerRoster::new(
         PeerRosterConfig {
             local,
             outbound,
-            first_generation: SecureSessionGeneration::new(first).unwrap(),
-            last_generation: SecureSessionGeneration::new(first + 9999).unwrap(),
+            // The store session scopes generations (startup does the same).
+            first_generation: SecureSessionGeneration::new(1).unwrap(),
             wire_version: 8,
             limits: PeerRosterLimits {
                 peers: 2,

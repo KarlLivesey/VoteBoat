@@ -72,7 +72,7 @@ impl Prepared {
             dialer,
             remote: None,
             attempt: None,
-            next: 1,
+            next: SecureSessionGeneration::new(1),
             retry_at: MonoTime(0),
             now: MonoTime(0),
             wanted: false,
@@ -80,6 +80,18 @@ impl Prepared {
             joined: false,
         })
     }
+}
+/// Take the next source connection generation. A spent space is a typed
+/// refusal, never a silent stop of discovery.
+fn take_generation(
+    next: &mut Option<SecureSessionGeneration>,
+) -> Result<SecureSessionGeneration, DiscoveryError> {
+    let generation = next.ok_or(DiscoveryError::Exhausted)?;
+    *next = generation
+        .get()
+        .checked_add(1)
+        .and_then(SecureSessionGeneration::new);
+    Ok(generation)
 }
 struct Attempt {
     ticket: ConnectTicket,
@@ -91,7 +103,9 @@ pub struct Source {
     dialer: NativeTcpDialer,
     remote: Option<NativeRemotePeerDiscovery<Box<dyn SecureSession>>>,
     attempt: Option<Attempt>,
-    next: u64,
+    /// Next source connection generation; `None` once `u64::MAX` was used
+    /// (at the 100 ms retry floor that takes 5.8e10 years).
+    next: Option<SecureSessionGeneration>,
     retry_at: MonoTime,
     now: MonoTime,
     wanted: bool,
@@ -109,16 +123,14 @@ impl Source {
         self.now = now;
         Ok(())
     }
-    fn begin(&mut self) {
-        let Some(generation) = SecureSessionGeneration::new(self.next) else {
-            self.wanted = false;
-            return;
-        };
-        self.next = self.next.checked_add(1).unwrap_or(0);
-        let Some(deadline) = self.now.0.checked_add(5000).map(MonoTime) else {
-            self.wanted = false;
-            return;
-        };
+    fn begin(&mut self) -> Result<(), DiscoveryError> {
+        let generation = take_generation(&mut self.next)?;
+        let deadline = self
+            .now
+            .0
+            .checked_add(5000)
+            .map(MonoTime)
+            .ok_or(DiscoveryError::Exhausted)?;
         let ticket = ConnectTicket {
             local: self.prepared.access.local,
             peer: service_access::transport_identity(self.prepared.endpoint.node, false),
@@ -138,6 +150,7 @@ impl Source {
             }
             Err(_) => self.retry_at = MonoTime(self.now.0.saturating_add(100)),
         }
+        Ok(())
     }
     fn progress(&mut self, budget: SessionPollBudget) -> Result<(), DiscoveryError> {
         let mut attempt = self.attempt.take().expect("active source attempt");
@@ -205,7 +218,9 @@ impl PeerDiscovery for Source {
             .as_mut()
             .map_or(Err(DiscoveryError::Unavailable), |r| r.resolve(peer, now));
         if result.is_err() {
-            self.wanted = self.next != 0;
+            // A spent generation space surfaces as `Exhausted` from the next
+            // discovery poll rather than silently stopping lookups.
+            self.wanted = true;
         }
         result
     }
@@ -251,7 +266,7 @@ impl DiscoveryDriver for Source {
                 .map_err(|_| DiscoveryError::Unavailable)?;
         } else if self.source_failed() {
             if self.wanted && now >= self.retry_at {
-                self.begin();
+                self.begin()?;
             }
         } else if let Some(r) = &mut self.remote {
             let pending = r.pending().is_some();
@@ -282,5 +297,24 @@ impl DiscoveryDriver for Source {
                 self.remote.as_ref().and_then(|r| r.discovery_deadline())
             }
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn source_generations_end_in_a_typed_refusal_not_a_silent_stop() {
+        let mut next = SecureSessionGeneration::new(u64::MAX - 1);
+        assert_eq!(take_generation(&mut next).unwrap().get(), u64::MAX - 1);
+        assert_eq!(take_generation(&mut next).unwrap().get(), u64::MAX);
+        for _ in 0..2 {
+            assert_eq!(take_generation(&mut next), Err(DiscoveryError::Exhausted));
+        }
+        assert!(!DiscoveryError::Exhausted.retryable());
+        let mut fresh = SecureSessionGeneration::new(1);
+        assert_eq!(take_generation(&mut fresh).unwrap().get(), 1);
+        assert_eq!(fresh.unwrap().get(), 2);
     }
 }

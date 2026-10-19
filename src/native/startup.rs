@@ -1176,16 +1176,6 @@ fn prepare_runtime<S: SecureSession>(
         lane: ExecutionLaneId::new(1).unwrap(),
         generation: RuntimeGeneration::new(1).unwrap(),
     };
-    // Store session makes each startup's transport generations disjoint.
-    let first = owner_id
-        .store
-        .session
-        .get()
-        .checked_mul(10000)
-        .ok_or_else(|| error("generation", "session exhausted"))?;
-    let last = first
-        .checked_add(9999)
-        .ok_or_else(|| error("generation", "session exhausted"))?;
     let local = LocalIdentity {
         node: config.node,
         store: owner_id.store,
@@ -1244,10 +1234,10 @@ fn prepare_runtime<S: SecureSession>(
         PeerRosterConfig {
             local,
             outbound: outbound.binding(),
-            first_generation: SecureSessionGeneration::new(first)
-                .ok_or_else(|| error("generation", "session exhausted"))?,
-            last_generation: SecureSessionGeneration::new(last)
-                .ok_or_else(|| error("generation", "session exhausted"))?,
+            // The store session is the generation domain: it is persisted
+            // and strictly increases on every recovery, so each process can
+            // use the full u64 space from 1 without reusing a pair.
+            first_generation: SecureSessionGeneration::new(1).unwrap(),
             wire_version: config.tls.wire_version(),
             limits: PeerRosterLimits::default(),
             transport_limits: TransportLimits::default(),

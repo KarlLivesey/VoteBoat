@@ -106,8 +106,78 @@ pub struct NativePeerConnector<
     /// connection; bounds idle `accept` syscalls without delaying a ready one
     /// by more than `ACCEPT_IDLE_PHASES` accept phases.
     accept_idle: u8,
+    /// Consecutive resource-class accept failures; sets the backoff delay.
+    accept_failures: u32,
+    accept_status: AcceptStatus,
+    #[cfg(test)]
+    injected_accept_errors: std::collections::VecDeque<io::Error>,
 }
 const ACCEPT_IDLE_PHASES: u8 = 7;
+const ACCEPT_BACKOFF_MIN_MS: u64 = 10;
+const ACCEPT_BACKOFF_MAX_MS: u64 = 1000;
+
+/// What the listener does after an `accept()` error. Environmental errors are
+/// never node-fatal; only a listener that is gone or misused is.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum AcceptAction {
+    /// No pending connection: skip a few accept phases.
+    Idle,
+    /// This connection failed before it was accepted (aborted, reset, a
+    /// pending network error): keep accepting within the call budget.
+    Retry,
+    /// Out of descriptors, buffers or memory, or an unrecognised error: stop
+    /// accepting for a bounded, doubling delay, then try again.
+    Backoff,
+    /// The listener is gone or misused (`EBADF`, `EINVAL`, `ENOTSOCK`,
+    /// `EFAULT`): a bug, reported as `ConnectError::Io`.
+    Fatal,
+}
+
+/// Classify an `accept()` error. Linux `accept(2)` asks callers to treat the
+/// pending network errors (`EPROTO`, `ENETDOWN`, ...) like `EAGAIN`.
+pub fn classify_accept(error: &io::Error) -> AcceptAction {
+    #[cfg(unix)]
+    if let Some(code) = error.raw_os_error() {
+        return match code {
+            libc::EBADF | libc::EINVAL | libc::ENOTSOCK | libc::EFAULT => AcceptAction::Fatal,
+            libc::EMFILE | libc::ENFILE | libc::ENOBUFS | libc::ENOMEM => AcceptAction::Backoff,
+            libc::EINTR
+            | libc::ECONNABORTED
+            | libc::ECONNRESET
+            | libc::EPERM
+            | libc::ETIMEDOUT
+            | libc::EPROTO
+            | libc::ENETDOWN
+            | libc::ENOPROTOOPT
+            | libc::EHOSTDOWN
+            | libc::EHOSTUNREACH
+            | libc::EOPNOTSUPP
+            | libc::ENETUNREACH => AcceptAction::Retry,
+            #[cfg(target_os = "linux")]
+            libc::ENONET => AcceptAction::Retry,
+            _ if code == libc::EAGAIN || code == libc::EWOULDBLOCK => AcceptAction::Idle,
+            _ => AcceptAction::Backoff,
+        };
+    }
+    match error.kind() {
+        io::ErrorKind::WouldBlock => AcceptAction::Idle,
+        io::ErrorKind::Interrupted
+        | io::ErrorKind::ConnectionAborted
+        | io::ErrorKind::ConnectionReset => AcceptAction::Retry,
+        _ => AcceptAction::Backoff,
+    }
+}
+
+/// Listener health, for observability only. Grants no authority.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct AcceptStatus {
+    /// Accept errors that did not stop the listener (saturating; diagnostic).
+    pub transient_errors: u64,
+    pub last_error: Option<io::ErrorKind>,
+    pub last_os_error: Option<i32>,
+    /// While set, the listener is not polled before this time.
+    pub retry_at: Option<MonoTime>,
+}
 fn next_key<V>(map: &BTreeMap<NodeId, V>, cursor: Option<NodeId>) -> Option<NodeId> {
     cursor
         .and_then(|c| {
@@ -189,9 +259,17 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> NativePeerConnec
             anonymous_cursor: 0,
             io_phase: IoPhase::Prefaces,
             accept_idle: 0,
+            accept_failures: 0,
+            accept_status: AcceptStatus::default(),
+            #[cfg(test)]
+            injected_accept_errors: std::collections::VecDeque::new(),
             now,
             closed: false,
         })
+    }
+    /// Transient accept errors survived and any current accept backoff.
+    pub fn accept_status(&self) -> AcceptStatus {
+        self.accept_status
     }
     pub fn listener_addr(&self) -> io::Result<Option<SocketAddr>> {
         self.listener
@@ -313,16 +391,49 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> NativePeerConnec
         }
         Ok(())
     }
+    /// Whether an accept backoff (if any) has elapsed; clears it once due.
+    fn accept_ready(&mut self) -> bool {
+        match self.accept_status.retry_at {
+            Some(at) if self.now < at => false,
+            Some(_) => {
+                self.accept_status.retry_at = None;
+                true
+            }
+            None => true,
+        }
+    }
+    fn accept_one(&mut self) -> io::Result<TcpStream> {
+        #[cfg(test)]
+        if let Some(error) = self.injected_accept_errors.pop_front() {
+            return Err(error);
+        }
+        match &self.listener {
+            Some(listener) => listener.accept().map(|(stream, _)| stream),
+            None => Err(io::ErrorKind::NotConnected.into()),
+        }
+    }
+    fn accept_failed(&mut self, error: &io::Error) {
+        let status = &mut self.accept_status;
+        status.transient_errors = status.transient_errors.saturating_add(1);
+        status.last_error = Some(error.kind());
+        status.last_os_error = error.raw_os_error();
+    }
+    fn back_off_accept(&mut self) {
+        let delay =
+            (ACCEPT_BACKOFF_MIN_MS << self.accept_failures.min(7)).min(ACCEPT_BACKOFF_MAX_MS);
+        self.accept_failures = self.accept_failures.saturating_add(1);
+        self.accept_status.retry_at = Some(MonoTime(self.now.0.saturating_add(delay)));
+    }
     fn accept(&mut self, calls: &mut usize) -> Result<(), ConnectError> {
-        let Some(listener) = &self.listener else {
+        if self.listener.is_none() || !self.accept_ready() {
             return Ok(());
-        };
+        }
         if self.accept_idle != 0 {
             self.accept_idle -= 1;
             return Ok(());
         }
         while *calls != 0 {
-            let Some(slot) = self.anonymous.iter_mut().find(|a| a.is_none()) else {
+            let Some(index) = self.anonymous.iter().position(Option::is_none) else {
                 break;
             };
             let Some(deadline) = self
@@ -334,8 +445,9 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> NativePeerConnec
                 break;
             };
             *calls -= 1;
-            match listener.accept() {
-                Ok((stream, _)) => {
+            match self.accept_one() {
+                Ok(stream) => {
+                    self.accept_failures = 0;
                     if stream
                         .set_nonblocking(true)
                         .and_then(|_| stream.set_nodelay(true))
@@ -343,19 +455,27 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> NativePeerConnec
                     {
                         continue;
                     }
-                    *slot = Some(Anonymous {
+                    self.anonymous[index] = Some(Anonymous {
                         stream,
                         bytes: [0; PREFACE],
                         read: 0,
                         deadline,
                     });
                 }
-                Err(e) if e.kind() == io::ErrorKind::WouldBlock => {
-                    self.accept_idle = ACCEPT_IDLE_PHASES;
-                    break;
-                }
-                Err(e) if e.kind() == io::ErrorKind::Interrupted => continue,
-                Err(e) => return Err(ConnectError::Io(e.kind())),
+                Err(e) => match classify_accept(&e) {
+                    AcceptAction::Idle => {
+                        self.accept_failures = 0;
+                        self.accept_idle = ACCEPT_IDLE_PHASES;
+                        break;
+                    }
+                    AcceptAction::Retry => self.accept_failed(&e),
+                    AcceptAction::Backoff => {
+                        self.accept_failed(&e);
+                        self.back_off_accept();
+                        break;
+                    }
+                    AcceptAction::Fatal => return Err(ConnectError::Io(e.kind())),
+                },
             }
         }
         Ok(())
@@ -528,7 +648,13 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> PeerConnector
     fn readiness_fds(&self, out: &mut Vec<crate::worker::ReadinessFd>) {
         use crate::worker::ReadinessFd;
         use std::os::fd::AsRawFd;
-        if let Some(listener) = &self.listener {
+        // A backing-off listener stays out of the wait set, so a readable
+        // backlog cannot spin the host; `next_deadline` wakes it instead.
+        if let Some(listener) = self
+            .listener
+            .as_ref()
+            .filter(|_| self.accept_status.retry_at.is_none())
+        {
             out.push(ReadinessFd::read(listener.as_raw_fd()));
         }
         out.extend(
@@ -587,6 +713,11 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> PeerConnector
                 _ => Some(a.deadline),
             })
             .chain(self.anonymous.iter().flatten().map(|a| a.deadline))
+            .chain(
+                self.accept_status
+                    .retry_at
+                    .filter(|_| self.listener.is_some()),
+            )
             .min()
     }
     fn submit(
@@ -793,6 +924,14 @@ impl super::peer_credentials::NativePeerMaterialProvider for NativeServiceConnec
     }
 }
 impl NativeServiceConnector {
+    /// Listener status of a TCP connector; `None` for the other variants.
+    pub fn accept_status(&self) -> Option<AcceptStatus> {
+        match self {
+            Self::Tcp(c) => Some(c.accept_status()),
+            Self::RotatingTcp(c) => Some(c.inner().accept_status()),
+            _ => None,
+        }
+    }
     /// Attach an explicitly owned source before any data requests are accepted.
     /// Rejection returns both owners; closed sources must drain their own work.
     pub fn with_discovery(
@@ -1032,5 +1171,239 @@ impl PeerCredentialControl for NativeServiceConnector {
             Self::RotatingQuic(c) => c.replace_peer_credentials(expected, replacement, material),
             _ => Err((ConnectError::InvalidRequest, material)),
         }
+    }
+}
+
+#[cfg(test)]
+mod accept_tests {
+    use super::*;
+    use crate::native::{tls::TlsCredentials, worker::ThreadWake};
+    use std::{sync::Arc, time::Duration};
+
+    fn local() -> LocalIdentity {
+        LocalIdentity {
+            node: NodeId::new(1).unwrap(),
+            store: StoreBinding {
+                identity: StoreIdentity {
+                    id: StoreId::new(1).unwrap(),
+                    incarnation: StoreIncarnation::new(1).unwrap(),
+                },
+                session: StoreSession::new(1).unwrap(),
+            },
+        }
+    }
+    fn connector() -> NativePeerConnector {
+        let tls = NativeTlsConfig::new(TlsCredentials {
+            roots: vec![include_bytes!("../../tests/fixtures/tls/ca.der").to_vec()],
+            certificate_chain: vec![include_bytes!("../../tests/fixtures/tls/node1.der").to_vec()],
+            private_key: include_bytes!("../../tests/fixtures/tls/node1-key.der").to_vec(),
+        })
+        .unwrap();
+        let dialer = NativeTcpDialer::spawn(
+            local(),
+            BTreeMap::new(),
+            DialLimits::default(),
+            Arc::new(ThreadWake::current()),
+        )
+        .unwrap();
+        NativePeerConnector::new(
+            NativeConnectConfig {
+                local: local(),
+                limits: ConnectLimits {
+                    requests: 4,
+                    anonymous: 4,
+                    timeout_ms: 60_000,
+                },
+                session: SessionLimits::default(),
+            },
+            tls,
+            BTreeMap::new(),
+            dialer,
+            Some(TcpListener::bind("127.0.0.1:0").unwrap()),
+            MonoTime(0),
+        )
+        .unwrap_or_else(|r| panic!("construct: {:?}", r.reason))
+    }
+    fn os(code: i32) -> io::Error {
+        io::Error::from_raw_os_error(code)
+    }
+    fn listener_polled(c: &NativePeerConnector) -> bool {
+        let mut fds = Vec::new();
+        c.readiness_fds(&mut fds);
+        fds.len() == 1
+    }
+    /// Poll at `now` until a real connection occupies an anonymous slot.
+    fn accept_real_connection(c: &mut NativePeerConnector, now: u64) -> TcpStream {
+        let address = c.listener_addr().unwrap().unwrap();
+        let client = TcpStream::connect(address).unwrap();
+        for _ in 0..10_000 {
+            c.poll(MonoTime(now), ConnectPollBudget::default()).unwrap();
+            if c.usage().anonymous == 1 {
+                return client;
+            }
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
+        panic!("listener stopped accepting: {:?}", c.accept_status());
+    }
+    fn finish(mut c: NativePeerConnector) {
+        c.close();
+        let mut dialer = c.into_dialer().unwrap_or_else(|_| panic!("drained"));
+        for _ in 0..10_000 {
+            if dialer.try_finish().unwrap() {
+                return;
+            }
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
+        panic!("dialer did not finish");
+    }
+
+    #[test]
+    fn accept_errors_are_classified_by_what_they_mean_for_the_listener() {
+        use AcceptAction::*;
+        for (code, action) in [
+            (libc::EAGAIN, Idle),
+            (libc::EWOULDBLOCK, Idle),
+            (libc::EINTR, Retry),
+            (libc::ECONNABORTED, Retry),
+            (libc::ECONNRESET, Retry),
+            (libc::EPERM, Retry),
+            (libc::ETIMEDOUT, Retry),
+            (libc::EPROTO, Retry),
+            (libc::ENETDOWN, Retry),
+            (libc::ENOPROTOOPT, Retry),
+            (libc::EHOSTDOWN, Retry),
+            (libc::EHOSTUNREACH, Retry),
+            (libc::EOPNOTSUPP, Retry),
+            (libc::ENETUNREACH, Retry),
+            (libc::EMFILE, Backoff),
+            (libc::ENFILE, Backoff),
+            (libc::ENOBUFS, Backoff),
+            (libc::ENOMEM, Backoff),
+            (libc::EIO, Backoff),
+            (libc::EBADF, Fatal),
+            (libc::EINVAL, Fatal),
+            (libc::ENOTSOCK, Fatal),
+            (libc::EFAULT, Fatal),
+        ] {
+            assert_eq!(classify_accept(&os(code)), action, "errno {code}");
+        }
+        #[cfg(target_os = "linux")]
+        assert_eq!(classify_accept(&os(libc::ENONET)), Retry);
+        for (kind, action) in [
+            (io::ErrorKind::WouldBlock, Idle),
+            (io::ErrorKind::Interrupted, Retry),
+            (io::ErrorKind::ConnectionAborted, Retry),
+            (io::ErrorKind::ConnectionReset, Retry),
+            (io::ErrorKind::Other, Backoff),
+        ] {
+            assert_eq!(classify_accept(&io::Error::from(kind)), action, "{kind:?}");
+        }
+    }
+
+    /// Fails on the base: the first ECONNABORTED returned `ConnectError::Io`,
+    /// which the peer driver turned into node recovery.
+    #[test]
+    fn injected_aborted_and_network_accept_errors_keep_the_listener_accepting() {
+        let mut c = connector();
+        c.injected_accept_errors.extend(
+            [
+                libc::ECONNABORTED,
+                libc::EINTR,
+                libc::EPROTO,
+                libc::ECONNRESET,
+            ]
+            .map(os),
+        );
+        c.poll(MonoTime(1), ConnectPollBudget::default()).unwrap();
+        assert!(c.injected_accept_errors.is_empty());
+        let status = c.accept_status();
+        assert_eq!(status.transient_errors, 4);
+        assert_eq!(status.last_os_error, Some(libc::ECONNRESET));
+        assert_eq!(status.retry_at, None);
+        assert!(listener_polled(&c));
+        let _client = accept_real_connection(&mut c, 1);
+        finish(c);
+    }
+
+    #[test]
+    fn injected_resource_accept_errors_back_off_then_accept_again() {
+        let mut c = connector();
+        c.injected_accept_errors
+            .extend([libc::EMFILE, libc::ENFILE, libc::ENOBUFS].map(os));
+        c.poll(MonoTime(100), ConnectPollBudget::default()).unwrap();
+        // One resource error stops this accept phase for 10 ms.
+        assert_eq!(c.injected_accept_errors.len(), 2);
+        assert_eq!(c.accept_status().retry_at, Some(MonoTime(110)));
+        assert_eq!(c.next_deadline(), Some(MonoTime(110)));
+        assert!(
+            !listener_polled(&c),
+            "a backing-off listener must not spin the host"
+        );
+        c.poll(MonoTime(109), ConnectPollBudget::default()).unwrap();
+        assert_eq!(
+            c.injected_accept_errors.len(),
+            2,
+            "no accept before the deadline"
+        );
+        // Consecutive failures double the delay, capped at one second.
+        c.poll(MonoTime(110), ConnectPollBudget::default()).unwrap();
+        assert_eq!(c.accept_status().retry_at, Some(MonoTime(130)));
+        c.poll(MonoTime(130), ConnectPollBudget::default()).unwrap();
+        assert_eq!(c.accept_status().retry_at, Some(MonoTime(170)));
+        for _ in 0..10 {
+            c.injected_accept_errors.push_back(os(libc::EMFILE));
+            let at = c.accept_status().retry_at.unwrap();
+            c.poll(at, ConnectPollBudget::default()).unwrap();
+        }
+        let at = c.accept_status().retry_at.unwrap();
+        assert_eq!(c.accept_status().transient_errors, 13);
+        assert_eq!(c.accept_status().last_os_error, Some(libc::EMFILE));
+        // After the delay the listener is polled again and accepts for real.
+        c.poll(at, ConnectPollBudget::default()).unwrap();
+        assert_eq!(c.accept_status().retry_at, None);
+        assert!(listener_polled(&c));
+        let _client = accept_real_connection(&mut c, at.0);
+        // A success resets the delay to its minimum. Idle accept phases may
+        // be skipped first, so poll until the injected error is consumed.
+        c.injected_accept_errors.push_back(os(libc::EMFILE));
+        for _ in 0..=ACCEPT_IDLE_PHASES {
+            if c.injected_accept_errors.is_empty() {
+                break;
+            }
+            c.poll(at, ConnectPollBudget::default()).unwrap();
+        }
+        assert_eq!(c.accept_status().retry_at, Some(MonoTime(at.0 + 10)));
+        finish(c);
+    }
+
+    #[test]
+    fn delay_doubling_is_capped_at_one_second() {
+        let mut c = connector();
+        let mut now = 0;
+        let mut delays = Vec::new();
+        for _ in 0..12 {
+            c.injected_accept_errors.push_back(os(libc::ENOMEM));
+            c.poll(MonoTime(now), ConnectPollBudget::default()).unwrap();
+            let at = c.accept_status().retry_at.unwrap().0;
+            delays.push(at - now);
+            now = at;
+        }
+        assert_eq!(
+            delays,
+            [10, 20, 40, 80, 160, 320, 640, 1000, 1000, 1000, 1000, 1000]
+        );
+        finish(c);
+    }
+
+    #[test]
+    fn a_listener_that_is_gone_is_still_reported() {
+        let mut c = connector();
+        c.injected_accept_errors.push_back(os(libc::EBADF));
+        assert!(matches!(
+            c.poll(MonoTime(1), ConnectPollBudget::default()),
+            Err(ConnectError::Io(_))
+        ));
+        assert_eq!(c.accept_status().transient_errors, 0);
+        finish(c);
     }
 }
