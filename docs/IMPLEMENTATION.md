@@ -343,6 +343,49 @@ uniqueness per owner lineage with full-binding equality; PEER_ROSTER leads with
 the worst case (≈ 8,900 years at the 1 ms floor); the `AcceptStatus` field list
 is complete; the Q8 leftovers get an owning slice (NT4) in an inventory table.
 
+### NT1 round 2 implemented (evidence, 19 October 2026)
+
+| Finding | Change | Test |
+| --- | --- | --- |
+| Opus P2 listener health never surfaced | `PeerConnector::accept_status` (delegated by every wrapper, including `Discovered`); driver progress `accept_errors`, `accept_backoffs`, `accept_paused`, `generations_exhausted`; `NodeCounters`, `NetworkHealth`, `EventKind::Pressure`; `metrics` prints them and the live `peer_accept_*` fields | `native::connect::health_tests::injected_emfile_reaches_counters_events_and_connector_status` (real native node, `Discovered` connector, simulated time); `reporter_emits_listener_pressure_and_reports_exhaustion_once`; `listener_pressure_reaches_metrics_and_events`; `peer_metrics` maximum-reply test |
+| Opus 2 discovery source `Exhausted` node-fatal | `begin` takes no generation and returns nothing; `resolve` returns `Exhausted` per lookup once the source cannot reconnect; not pending, no deadline | `a_spent_source_refuses_lookups_without_failing_the_node` (spent space and clock limit, plus a fresh-source control); `source_attempts_end_at_the_generation_space_and_the_clock` |
+| Opus 9 roster deadline overflow node-fatal | `due_connections` returns `Ok([])`; `generations_exhausted()` covers it | `an_attempt_deadline_past_the_clock_issues_no_ticket_and_no_error`; the existing `construction_exhaustion_and_rejection_preserve_resources` asserted the old `Err(Exhausted)` at `MonoTime(u64::MAX)` and now asserts `Ok([])` plus the flag |
+| Opus 8 three more errnos | `ENOSR`, `ESOCKTNOSUPPORT`, `EPROTONOSUPPORT` → Retry | classifier table |
+| Opus 4 soak could hang | `run_until` fails after `3 × count` polls without a new expiry | the three connection-generation tests |
+| Opus 5 wall-clock limits | Pair test steps 1 ms of protocol time per round (60 s protocol liveness bound); worker joins use a 600 s hang guard only | same |
+| Opus 6 replacement rosters at 1 | `close()` then `reclaim_generation()` in `logical_nested_native` and `logical_activation_nested` | both binaries, both feature sets |
+| Sol 2 replay and interrupted recovery | Live recovered roster refuses old tickets with equal (1) and higher (50,000) generations; crash after the session write skips that session; crash before it (`JournalIo` whose publication fails) exposes nothing and the next open reuses the unexposed number | `connect_generations_are_unique_across_store_session_restarts`; `a_recovered_roster_refuses_tickets_and_completions_of_the_previous_session`; `a_recovered_connector_refuses_tickets_of_the_previous_session`; `a_recovered_helper_refuses_captures_of_its_previous_session` |
+| Docs (Opus 3, 7, 10; Sol 1) | CONNECTIONS, PEER_DRIVER, DIALING, PEER_ROSTER, the `AcceptStatus` list and the source floor corrected; inventory table with NT4 | `node validation/check-inventory.mjs` |
+
+Mutation check: making `NativeServiceConnector::accept_status` return `None`
+for `Discovered` again fails the end-to-end test (`accept_errors` and
+`accept_backoffs` stay `(0, 0)`); restored before commit.
+
+**Public API changes (round 2).** `AcceptStatus` moves to `crate::connect`
+(still re-exported from `native::connect`) and gains `backoffs`;
+`PeerConnector::accept_status` added with a `None` default; the inherent
+`NativePeerConnector::accept_status`, `NativeServiceConnector::accept_status`
+and `RotatingPeerConnector::inner` are replaced by the trait method;
+`PeerDriverProgress`, `NodeCounters`, `NodeObservation`, `CounterSnapshot`
+and `EventKind::Pressure` gain fields; `NetworkHealth` added;
+`generations_exhausted()` also covers the deadline overflow. No format change;
+no migration. CPU: per poll, one `accept_status` copy and two subtractions in
+the driver; nothing per write.
+
+**Validation (Linux, cores 0-3, nice 19, `-j 2`, each binary run directly and
+sequentially).** fmt; strict Clippy default, all-features, no-default-features
+and native-only; matched fmt and Clippy: zero diagnostics.
+`validation/check-inventory.mjs` passes. All-features: lib 488 (1 ignored),
+`voteboat-counter` 55, transport 37, peers 22, connect 21, dial 6, discovery 9,
+observability 11, remote_discovery 29, startup 63, effect_owner 210,
+logical_voter_native 42, logical_nested_native 15, logical_activation_nested 17,
+counter_service 203. Default features: lib 486 (1 ignored), `voteboat-counter`
+52, transport 37, peers 22, connect 21, dial 6, discovery 9, observability 11,
+remote_discovery 29, startup 48, effect_owner 210, logical_voter_native 25,
+logical_nested_native 13, logical_activation_nested 11, counter_service 144.
+All pass. Not run: macOS (the classifier's errno constants come from `libc`
+for both targets), native durable A/B (no write-path change).
+
 ## Logical-voter reliability track (opened 18 October 2026)
 
 Goal: logical parents and their backing children run indefinitely with bounded
