@@ -186,9 +186,6 @@ pub struct WalMaintenanceStatus {
     /// a group without a leader.
     pub noop_starved: bool,
     noop_refusals: u64,
-    /// The control reserve: room above the high-water mark that only noop
-    /// transitions may use (R4-1). Set at construction from the store limits.
-    pub(super) noop_reserve: usize,
 }
 /// WAL occupancy at or above half the usable capacity: checkpoints stop
 /// waiting for their entry threshold and reclaim may run early.

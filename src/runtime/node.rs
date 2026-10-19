@@ -233,6 +233,9 @@ pub struct NetworkNode<
     // The data budget (`max_entries_per_group`) of the node's groups. They
     // share one store, so one set of log limits.
     entry_budget: usize,
+    // The store's control reserve: WAL room above the high-water mark only
+    // noop transitions may use (R4-1).
+    wal_noop_reserve: usize,
     checkpoints: CheckpointStatus,
     retention: RetentionMode,
     drain: Option<drain::LocalDrain>,
@@ -333,6 +336,7 @@ where
             parts.local.owner.install_connection_budget(budget);
             peers.as_mut().unwrap().install_admission_routes(routes);
         }
+        let wal_noop_reserve = Self::smallest_log_limits(&parts.local).control_reserve_bytes;
         let mut node = Self {
             local: parts.local,
             replica,
@@ -344,6 +348,7 @@ where
             maintenance,
             core_pressure: false,
             entry_budget,
+            wal_noop_reserve,
             checkpoints,
             retention: limits.retention,
             drain: None,
@@ -360,7 +365,7 @@ where
         let budget = usage.filter(|u| u.capacity > 0).map(|u| super::WalBudget {
             limit: self.maintenance.high_water_bytes(u.capacity),
             published: u.bytes,
-            reserve: self.maintenance.noop_reserve,
+            reserve: self.wal_noop_reserve,
         });
         self.local.owner.set_wal_budget(budget);
     }
@@ -374,7 +379,6 @@ where
         let mut checkpoints = CheckpointStatus::default();
         let mut maintenance = WalMaintenanceStatus::default();
         let limits = Self::smallest_log_limits(local);
-        maintenance.noop_reserve = limits.control_reserve_bytes;
         // I5 / U5: whatever the retention mode, the WAL above the high-water
         // mark must hold the largest batch, or a batch could wait for ever.
         super::maintenance::check_wal_headroom(
