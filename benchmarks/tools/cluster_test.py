@@ -24,6 +24,7 @@ import tempfile
 import unittest
 from types import SimpleNamespace
 
+sys.dont_write_bytecode = True  # leave no __pycache__ in the source tree
 HERE = os.path.dirname(os.path.abspath(__file__))
 SCRIPT = os.environ.get("CLUSTER_PY", os.path.join(HERE, "cluster.py"))
 spec = importlib.util.spec_from_file_location("cluster", SCRIPT)
