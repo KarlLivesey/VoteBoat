@@ -228,11 +228,12 @@ impl CheckpointStatus {
             let retained = core.state().entries.len() as u64;
             let urgent = pressure || core.leader_noop_pending() || retained >= entry_high;
             let min_entries = if urgent { 1 } else { policy.min_entries };
-            if core.has_pending_dependency()
-                || applied > core.state().commit_index
-                || beyond < min_entries
-            {
+            if applied > core.state().commit_index || beyond < min_entries {
                 self.deferred.remove(&group);
+                continue;
+            }
+            // A transient persistence dependency keeps a deferral's start.
+            if core.has_pending_dependency() {
                 continue;
             }
             if !urgent && retained < defer_cap && !core.replicas_acknowledged(applied) {

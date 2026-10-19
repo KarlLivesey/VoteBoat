@@ -43,6 +43,9 @@ fn history(quic: bool) {
     let mut c = Cluster::new();
     c.quic = quic;
     c.wal_reclaim_ms = Some(20);
+    // Rewrite at every deadline (the default needs 4 MiB reclaimable), so
+    // each new worker sequence is a physical rewrite.
+    c.wal_reclaim_min_bytes = Some(0);
     for id in 1..=3 {
         c.start(id, "create");
     }
@@ -53,8 +56,8 @@ fn history(quic: bool) {
         c.ok(id, &["checkpoint"]);
     }
     let first = wait_maintenance(&c, 1, 0);
-    // Further progress proves the scheduler, rather than a one-off
-    // startup/manual request, continues to drive physical maintenance.
+    // A second matched worker sequence proves the scheduler, rather than a
+    // one-off startup/manual request, continues to drive physical maintenance.
     wait_maintenance(&c, 1, first);
     c.stop();
     for id in 1..=3 {
@@ -82,19 +85,10 @@ fn wait_maintenance(c: &Cluster, id: usize, after: u64) -> u64 {
                 text.contains("enabled=true") && text.contains("completion_error=None"),
                 "{text}"
             );
-            let field = |name: &str| {
-                text.split_whitespace()
-                    .find_map(|s| s.strip_prefix(name))
-                    .unwrap()
-                    .parse::<u64>()
-                    .unwrap()
-            };
-            // Each interval either rewrites (a new worker sequence) or, with
-            // too little to reclaim, moves on (`skipped`): both show the
-            // schedule is still running.
-            let progress = field("last_sequence=") + field("skipped=");
-            if progress > after {
-                return progress;
+            assert!(text.contains("skipped=0 "), "{text}");
+            let sequence = field(&text, "last_sequence=");
+            if sequence > after {
+                return sequence;
             }
         }
         assert!(Instant::now() < deadline, "maintenance did not complete");
@@ -209,13 +203,28 @@ fn maintenance_defaults_and_opt_out_are_operator_visible() {
         "high_water=false",
         "refused_proposals=0",
         "wal_parked=0",
+        "retained_budget=16384",
+        "retained_capacity=16640",
+        "entry_high_water=false",
+        "checkpoint_failures=0",
+        "wal_refused_proposals=0",
+        "wal_held_ms=0",
+        "step_downs=0",
+        "last_step_down=none",
     ] {
         assert!(text.contains(field), "{field}: {text}");
+    }
+    // The default schedule runs: with too little to reclaim each 1 s deadline
+    // moves on (`skipped`) instead of rewriting.
+    let deadline = Instant::now() + Duration::from_secs(10);
+    while field(&wait_status(&c, 1), "skipped=") == 0 {
+        assert!(Instant::now() < deadline, "default schedule never ran");
+        std::thread::sleep(Duration::from_millis(50));
     }
     c.stop();
     let log = c.service_log(1);
     assert!(
-        log.contains("maintenance retention=maintained checkpoint_entries=8192 checkpoint_scan_ms=10 wal_reclaim_ms=1000 wal_retry_ms=100"),
+        log.contains("maintenance retention=maintained checkpoint_entries=8192 checkpoint_scan_ms=10 wal_reclaim_ms=1000 wal_retry_ms=100 wal_reclaim_min_bytes=4194304"),
         "{log}"
     );
     c.no_maintenance = true;
@@ -231,7 +240,7 @@ fn maintenance_defaults_and_opt_out_are_operator_visible() {
     c.stop();
     let log = c.service_log(1);
     assert!(
-        log.contains("maintenance retention=lifetime-bounded checkpoint_entries=off checkpoint_scan_ms=off wal_reclaim_ms=off wal_retry_ms=off"),
+        log.contains("maintenance retention=lifetime-bounded checkpoint_entries=off checkpoint_scan_ms=off wal_reclaim_ms=off wal_retry_ms=off wal_reclaim_min_bytes=off"),
         "{log}"
     );
     fs::remove_dir_all(&c.root).unwrap();
@@ -280,6 +289,13 @@ fn maintenance_selection_is_validated_before_files_or_listeners() {
             "duplicate",
         ),
         (vec!["--checkpoint-entries", "8193"], "at most 8192"),
+        // ST2 round 3 (I6): an interval that could overflow the deadline.
+        (vec!["--wal-reclaim-ms", "86400001"], "at most 86400000"),
+        (
+            vec!["--no-maintenance", ack, "--wal-reclaim-min-bytes", "0"],
+            "cannot be combined",
+        ),
+        (vec!["--wal-reclaim-min-bytes", "-1"], "InvalidDigit"),
     ] {
         let out = run(Command::new(BIN)
             .args(["serve", "create"])
@@ -294,4 +310,11 @@ fn maintenance_selection_is_validated_before_files_or_listeners() {
         assert!(!target.exists(), "{args:?}");
     }
     fs::remove_dir_all(&c.root).unwrap();
+}
+fn field(text: &str, name: &str) -> u64 {
+    text.split_whitespace()
+        .find_map(|s| s.strip_prefix(name))
+        .unwrap_or_else(|| panic!("{name} missing: {text}"))
+        .parse()
+        .unwrap()
 }

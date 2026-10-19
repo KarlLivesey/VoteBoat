@@ -172,6 +172,7 @@ struct Cluster {
     udp_sockets: Vec<UdpSocket>,
     quic: bool,
     wal_reclaim_ms: Option<u64>,
+    wal_reclaim_min_bytes: Option<u64>,
     checkpoint_entries: Option<u64>,
     no_maintenance: bool,
     leadership_maintenance: bool,
@@ -221,6 +222,7 @@ impl Cluster {
             udp_sockets,
             quic: false,
             wal_reclaim_ms: None,
+            wal_reclaim_min_bytes: None,
             checkpoint_entries: None,
             no_maintenance: false,
             leadership_maintenance: false,
@@ -278,6 +280,11 @@ impl Cluster {
         }
         if let Some(interval) = self.wal_reclaim_ms {
             command.arg("--wal-reclaim-ms").arg(interval.to_string());
+        }
+        if let Some(bytes) = self.wal_reclaim_min_bytes {
+            command
+                .arg("--wal-reclaim-min-bytes")
+                .arg(bytes.to_string());
         }
         if self.leadership_maintenance {
             command.args(["--leadership-maintenance", "enabled"]);

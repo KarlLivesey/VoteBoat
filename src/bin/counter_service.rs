@@ -95,7 +95,7 @@ use voteboat::observability::*;
 use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError, runtime::*};
 
 const HELP: &str =
-    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--timing-profile throughput|edge|legacy] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--command-listen ADDRESS] [--discovery-peers FILE] [--wal-reclaim-ms MS] [--checkpoint-entries N] [--no-maintenance I-accept-a-bounded-log] [--gather-us US] [--host-wait-ms MS]\n\
+    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--timing-profile throughput|edge|legacy] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--command-listen ADDRESS] [--discovery-peers FILE] [--wal-reclaim-ms MS] [--wal-reclaim-min-bytes N] [--checkpoint-entries N] [--no-maintenance I-accept-a-bounded-log] [--gather-us US] [--host-wait-ms MS]\n\
 voteboat-counter placement-plan INPUT learner OPERATION | replace RETIRING LEARNER_OPERATION VOTER_OPERATION retire|retain | voters OPERATION retire|retain POLICY\n\
 voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE] [--leadership-maintenance enabled]\n\
 voteboat-counter client BASE_PORT NODE status|metrics|timings|maintenance|configuration-status OPERATION_ID|configure OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
@@ -115,7 +115,7 @@ Optional authenticated commands: serve --service-access FILE; client ... --servi
 Endpoint discovery: client ... --discover-via NODE --command-peers FILE --service-tls TLS_DIRECTORY --principal ID. Raft peer discovery: serve ... --peer-discovery FILE; see docs/COUNTER_SERVICE.md.\n\
 Versioned discovery source: discovery-status; discovery-update EXPECTED NEXT NODE SOCKET_ADDRESS. Updates are local volatile hints; persist the v2 startup file separately.\n\
 Remote command routing: client ... --command-peers FILE --service-tls TLS_DIRECTORY --principal ID.\n\
-Checkpoints (every 8192 applied entries) and WAL reclaim (every 1000 ms and at half WAL occupancy) are on by default; --checkpoint-entries and --wal-reclaim-ms change them; --no-maintenance I-accept-a-bounded-log disables both and every group then stops accepting writes at its store limits. Startup prints the selection; the maintenance command reports it.\n\
+Checkpoints (every 8192 applied entries) and WAL reclaim (every 1000 ms and at half WAL occupancy) are on by default; --checkpoint-entries, --wal-reclaim-ms and --wal-reclaim-min-bytes (bytes that must be reclaimable for a scheduled rewrite; 0 rewrites at every interval) change them; --no-maintenance I-accept-a-bounded-log disables both and every group then stops accepting writes at its store limits. Startup prints the selection; the maintenance command reports it.\n\
 --gather-us (default 200, at most 10000) is the host loop's gather window before a round with queued work: longer windows mean fewer, fuller rounds (less CPU per write, more latency); --host-wait-ms (default 10) caps how long the host waits with nothing announced.\n\
 Use the same operation ID and delta when retrying an unknown write.\n\
 Maintenance profile: serve ... --service-access FILE --leadership-maintenance enabled; all peers use schema2/wire8.\n\
@@ -1146,6 +1146,7 @@ fn is_startup_option(flag: &str) -> bool {
             | "--discovery-peers"
             | "--peer-discovery"
             | "--wal-reclaim-ms"
+            | "--wal-reclaim-min-bytes"
             | "--no-maintenance"
             | "--gather-us"
             | "--host-wait-ms"

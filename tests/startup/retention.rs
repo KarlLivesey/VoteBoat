@@ -24,7 +24,12 @@ const ENTRY_LIMIT: u64 = 16_384;
 const WINDOW: u64 = 64;
 #[derive(Clone)]
 pub(super) struct Padded(pub(super) HostApplication);
+/// Unpadded 8-byte deltas are accepted too (the absent-follower soak uses
+/// them so the retained-entry budget, not the WAL, is what fills).
 fn canonical(bytes: &[u8]) -> Result<&[u8], ApplicationError> {
+    if bytes.len() == 8 {
+        return Ok(bytes);
+    }
     if bytes.len() != PADDED || bytes[8..].iter().any(|b| *b != 0) {
         return Err(ApplicationError::InvalidCommand);
     }
@@ -263,9 +268,14 @@ fn release(
 /// clock advances one millisecond per 100 polls, so writes arrive far faster
 /// than the 1 s reclaim interval and the 100 ms checkpoint scan: the 50%
 /// occupancy path must keep the WAL bounded.
+///
+/// `VOTEBOAT_ST2_NATIVE_SOAK_WRITES` runs longer (release builds; ST2 round 3
+/// recorded 163,840 writes, 640 MiB, ten times both old bounds).
 #[test]
 fn default_native_node_keeps_accepting_past_the_wal_and_entry_limits() {
-    const TOTAL: u64 = 32_768;
+    let total: u64 = std::env::var("VOTEBOAT_ST2_NATIVE_SOAK_WRITES")
+        .map_or(32_768u64, |v| v.parse().unwrap())
+        .next_multiple_of(4);
     let directory = root();
     let mut n = open(&directory, NativeOpenMode::Create);
     let mut clock = Clock::with_rate(100);
@@ -275,10 +285,10 @@ fn default_native_node_keeps_accepting_past_the_wal_and_entry_limits() {
     let (mut rewrites, mut last_rewrite) = (0u64, None);
     let mut bases = vec![core(&n).state().base_index()];
     let mut written = 0;
-    while written < TOTAL {
+    while written < total {
         // Quarters of 8,192 writes (32 MiB): each passes the 50% occupancy
         // point, so each must include a checkpoint.
-        drive(&mut n, &mut clock, written, TOTAL / 4, |n| {
+        drive(&mut n, &mut clock, written, total / 4, |n| {
             max_wal = max_wal.max(n.wal_usage().unwrap().bytes);
             max_retained = max_retained.max(retained(n));
             let at = n.wal_maintenance().last_reclaimed.map(|(t, _)| t);
@@ -287,7 +297,7 @@ fn default_native_node_keeps_accepting_past_the_wal_and_entry_limits() {
                 last_rewrite = at;
             }
         });
-        written += TOTAL / 4;
+        written += total / 4;
         let base = core(&n).state().base_index();
         assert!(
             base > *bases.last().unwrap(),
@@ -302,8 +312,8 @@ fn default_native_node_keeps_accepting_past_the_wal_and_entry_limits() {
     assert!(max_wal <= capacity * 3 / 4, "{max_wal} of {capacity}");
     assert!(max_retained < ENTRY_LIMIT, "{max_retained}");
     eprintln!(
-        "ST2 native soak: writes={TOTAL} appended_bytes={} last_index={} max_wal={max_wal} capacity={capacity} max_retained={max_retained} bases={bases:?} rewrites={rewrites} last_reclaim={reclaimed:?} simulated_ms={}",
-        TOTAL * PADDED as u64,
+        "ST2 native soak: writes={total} appended_bytes={} last_index={} max_wal={max_wal} capacity={capacity} max_retained={max_retained} bases={bases:?} rewrites={rewrites} last_reclaim={reclaimed:?} simulated_ms={}",
+        total * PADDED as u64,
         core(&n).state().last_index(),
         clock.now
     );

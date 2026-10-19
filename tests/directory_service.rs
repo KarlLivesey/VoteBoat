@@ -355,6 +355,15 @@ fn maintenance_defaults_are_visible_and_selection_is_validated_before_storage() 
         "checkpoint_entries=8192",
         "high_water=false",
         "wal_parked=0",
+        // ST2 round 3 (I7).
+        "retained_budget=16384",
+        "retained_capacity=16640",
+        "entry_high_water=false",
+        "checkpoint_failures=0",
+        "wal_refused_proposals=0",
+        "wal_held_ms=0",
+        "step_downs=0",
+        "last_step_down=none",
     ] {
         assert!(text.contains(field), "{field}: {text}");
     }
@@ -372,6 +381,12 @@ fn maintenance_defaults_are_visible_and_selection_is_validated_before_storage() 
             "cannot be combined",
         ),
         (vec!["--checkpoint-entries", "8193"], "at most 8192"),
+        // ST2 round 3 (I6).
+        (vec!["--wal-reclaim-ms", "86400001"], "at most 86400000"),
+        (
+            vec!["--no-maintenance", ack, "--wal-reclaim-min-bytes", "0"],
+            "cannot be combined",
+        ),
     ] {
         let out = c.server(9, "create").args(&args).fixture_output().unwrap();
         assert!(!out.status.success(), "{args:?}");

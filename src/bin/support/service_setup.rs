@@ -419,13 +419,19 @@ pub const NO_MAINTENANCE_ACK: &str = "I-accept-a-bounded-log";
 pub struct MaintenanceOptions {
     pub checkpoint_entries: Option<u64>,
     pub wal_reclaim_ms: Option<u64>,
+    /// Bytes that must be reclaimable for an interval deadline to rewrite
+    /// the WAL (default the ceiling / 16, 4 MiB); zero rewrites at every one.
+    pub wal_reclaim_min_bytes: Option<usize>,
     pub lifetime_bounded: bool,
 }
 impl MaintenanceOptions {
     pub fn is_flag(flag: &str) -> bool {
         matches!(
             flag,
-            "--checkpoint-entries" | "--wal-reclaim-ms" | "--no-maintenance"
+            "--checkpoint-entries"
+                | "--wal-reclaim-ms"
+                | "--wal-reclaim-min-bytes"
+                | "--no-maintenance"
         )
     }
     /// Record one flag pair. Each flag may appear once.
@@ -442,6 +448,9 @@ impl MaintenanceOptions {
             }
             "--wal-reclaim-ms" if self.wal_reclaim_ms.is_none() => {
                 self.wal_reclaim_ms = Some(positive("WAL reclaim interval")?);
+            }
+            "--wal-reclaim-min-bytes" if self.wal_reclaim_min_bytes.is_none() => {
+                self.wal_reclaim_min_bytes = Some(value.parse::<usize>()?);
             }
             "--no-maintenance" if !self.lifetime_bounded => {
                 if value != NO_MAINTENANCE_ACK {
@@ -460,10 +469,12 @@ impl MaintenanceOptions {
     /// ignored once serving.
     pub fn validate(&self) -> Result<(), Failure> {
         if self.lifetime_bounded
-            && (self.checkpoint_entries.is_some() || self.wal_reclaim_ms.is_some())
+            && (self.checkpoint_entries.is_some()
+                || self.wal_reclaim_ms.is_some()
+                || self.wal_reclaim_min_bytes.is_some())
         {
             return Err(
-                "--no-maintenance cannot be combined with --checkpoint-entries or --wal-reclaim-ms"
+                "--no-maintenance cannot be combined with --checkpoint-entries, --wal-reclaim-ms or --wal-reclaim-min-bytes"
                     .into(),
             );
         }
@@ -510,16 +521,22 @@ impl MaintenanceOptions {
                 ..policy
             })))?;
         }
-        if let Some(interval_ms) = self.wal_reclaim_ms {
+        if self.wal_reclaim_ms.is_some() || self.wal_reclaim_min_bytes.is_some() {
             let policy = node
                 .wal_maintenance()
                 .policy
                 .ok_or("WAL reclaim unavailable")?;
-            checked(node.configure_wal_maintenance(Some(WalMaintenancePolicy {
-                interval_ms,
-                retry_ms: interval_ms.min(policy.retry_ms),
-                ..policy
-            })))?;
+            let interval_ms = self.wal_reclaim_ms.unwrap_or(policy.interval_ms);
+            checked(
+                node.configure_wal_maintenance(Some(WalMaintenancePolicy {
+                    interval_ms,
+                    retry_ms: interval_ms.min(policy.retry_ms),
+                    min_reclaim_bytes: self
+                        .wal_reclaim_min_bytes
+                        .unwrap_or(policy.min_reclaim_bytes),
+                    ..policy
+                })),
+            )?;
         }
         Ok(())
     }
@@ -533,12 +550,13 @@ where
     let checkpoint = node.checkpoints().policy;
     let wal = node.wal_maintenance().policy;
     format!(
-        "maintenance retention={} checkpoint_entries={} checkpoint_scan_ms={} wal_reclaim_ms={} wal_retry_ms={}",
+        "maintenance retention={} checkpoint_entries={} checkpoint_scan_ms={} wal_reclaim_ms={} wal_retry_ms={} wal_reclaim_min_bytes={}",
         retention_name(node.retention()),
         checkpoint.map_or("off".into(), |p| p.min_entries.to_string()),
         checkpoint.map_or("off".into(), |p| p.interval_ms.to_string()),
         wal.map_or("off".into(), |p| p.interval_ms.to_string()),
         wal.map_or("off".into(), |p| p.retry_ms.to_string()),
+        wal.map_or("off".into(), |p| p.min_reclaim_bytes.to_string()),
     )
 }
 fn retention_name(mode: RetentionMode) -> &'static str {

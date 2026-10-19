@@ -527,3 +527,112 @@ fn follower_with_a_slow_rewrite_declines_new_data_instead_of_failing() {
     stop(nodes, &mut clock);
     std::fs::remove_dir_all(directory).unwrap();
 }
+
+/// ST2 round 3 (I2, Opus P2-2): one follower is permanently absent, the
+/// normal state while a three-node group's member is under maintenance. The
+/// leader's checkpoint must not wait for that replica beyond its bounds
+/// (entries and 250 ms of protocol time), so small writes three times past
+/// the retained-entry budget all apply (a typed `StoragePressure` refusal is
+/// retried), the retained log stays below the data budget, the leader keeps
+/// its term and no write is refused at the budget itself.
+#[test]
+fn absent_follower_does_not_stop_the_leader_checkpointing() {
+    const TOTAL: u64 = 3 * 16_384;
+    let directory = root();
+    std::fs::create_dir(&directory).unwrap();
+    let sockets = (0..3)
+        .map(|_| std::net::TcpListener::bind("127.0.0.1:0").unwrap())
+        .collect::<Vec<_>>();
+    let addresses = sockets
+        .iter()
+        .map(|s| s.local_addr().unwrap())
+        .collect::<Vec<_>>();
+    drop(sockets);
+    let bootstrap = cluster_bootstrap();
+    // Node 3 is never started.
+    let mut nodes = (1..=2)
+        .map(|n| {
+            let c = selected_wire_config(
+                &directory,
+                &addresses,
+                &bootstrap,
+                n,
+                NativeOpenMode::Create,
+                8,
+            );
+            open(c, Arc::new(AtomicBool::new(false)))
+        })
+        .collect::<Vec<_>>();
+    let mut clock = Clock::new();
+    nodes[0].control(group(), NodeControl::Campaign).unwrap();
+    while !(core(&nodes[0]).role() == Role::Leader
+        && core(&nodes[1]).state().commit_index == core(&nodes[0]).state().last_index())
+    {
+        clock.poll(&mut nodes);
+    }
+    let term = core(&nodes[0]).state().hard_state.term;
+    let budget = core(&nodes[0]).log_limits().max_entries_per_group;
+    let small = |k: u64| ClientRequest {
+        group: group(),
+        operation: OperationId::new(u128::from(k % 100 + 1)).unwrap(),
+        bytes: 1i64.to_le_bytes().to_vec(),
+    };
+    let (mut issued, mut applied, mut refused, mut max_retained) = (0u64, 0u64, 0u64, 0usize);
+    let mut bases = vec![core(&nodes[0]).state().base_index()];
+    let mut progress_ms = 0;
+    while applied < TOTAL {
+        while issued < TOTAL && issued - applied < WINDOW {
+            match nodes[0].propose(small(issued)) {
+                Ok(_) => issued += 1,
+                Err(rejected) => {
+                    assert!(
+                        matches!(rejected.reason, ClientError::StoragePressure),
+                        "{:?}",
+                        rejected.reason
+                    );
+                    refused += 1;
+                    break;
+                }
+            }
+        }
+        clock.poll(&mut nodes);
+        while let Some(output) = nodes[0].poll_client() {
+            match nodes[0].complete_client(output).unwrap() {
+                ClientOutcome::Applied { .. } => {
+                    applied += 1;
+                    progress_ms = clock.now;
+                }
+                ClientOutcome::NotProposed(RaftError::StoragePressure) => {
+                    issued -= 1;
+                    refused += 1;
+                }
+                other => panic!("write {applied} not applied: {other:?}{}", dump(&nodes)),
+            }
+        }
+        let leader = core(&nodes[0]);
+        max_retained = max_retained.max(leader.state().entries.len());
+        if leader.state().base_index() > *bases.last().unwrap() {
+            bases.push(leader.state().base_index());
+        }
+        assert_eq!(leader.role(), Role::Leader);
+        assert_eq!(leader.state().hard_state.term, term);
+        assert!(
+            clock.now < progress_ms + 5_000,
+            "stalled at {} ms with {applied} applied:{}",
+            clock.now,
+            dump(&nodes)
+        );
+    }
+    let leader = core(&nodes[0]);
+    assert!(max_retained < budget, "{max_retained} of {budget}");
+    assert_eq!(leader.entry_budget_refusals(), 0);
+    assert!(bases.len() >= 5, "{bases:?}");
+    eprintln!(
+        "ST2 absent follower: writes={TOTAL} refused={refused} max_retained={max_retained} budget={budget} checkpoints={} bases={bases:?} stall={:?} simulated_ms={}",
+        bases.len() - 1,
+        leader.replica_stall(),
+        clock.now
+    );
+    stop(nodes, &mut clock);
+    std::fs::remove_dir_all(directory).unwrap();
+}
