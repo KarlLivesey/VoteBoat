@@ -42,8 +42,8 @@ pub use range::{EntryRange, Slices as EntrySlices};
 /// what sharing and cached facts save per entry.
 pub(crate) const SHARE_MIN: usize = 16;
 
-/// Most a leader's Append may keep alive beyond plain copies of its visible
-/// entries (see [`EntryBatch::for_message`]). It covers a whole backing's
+/// Fixed part of what a leader's Append may keep alive beyond plain copies of
+/// its visible entries (see [`EntryBatch::for_message`]). It covers a whole backing's
 /// kept spare capacity (at most 4 KiB) and the index of a mixed backing at
 /// the receive ceiling (1,025 × 24 bytes), so whole frozen proposals are
 /// shared whatever their content.
@@ -448,12 +448,14 @@ impl EntryBatch {
     /// A shared piece pins its whole backing, which can be far wider than the
     /// message (a recovered log is one backing). Shared pieces are kept while
     /// what they keep alive beyond plain copies of their visible entries
-    /// totals at most [`MESSAGE_HIDDEN_MAX`] and at most the selection budget
-    /// the visible entries leave unused (`max_batch_bytes - 256 - (37 +
-    /// payload)` per entry); any other piece is copied, as a plain vector
-    /// would hold it. So a message's retained charge exceeds that of a plain
-    /// vector of its visible entries by at most `MESSAGE_HIDDEN_MAX`, and it
-    /// stays within the per-message bound the core reserves for its effects
+    /// totals at most [`MESSAGE_HIDDEN_MAX`] plus twice the plain copy of the
+    /// visible entries, and at most the selection budget the visible entries
+    /// leave unused (`max_batch_bytes - 256 - (37 + payload)` per entry); any
+    /// other piece is copied, as a plain vector would hold it. So a message's
+    /// retained charge is at most three times that of a plain vector of its
+    /// visible entries plus `MESSAGE_HIDDEN_MAX` (a narrow slice of a wide
+    /// backing is copied), and it stays within the per-message bound the
+    /// core reserves for its effects
     /// (`max_batch_bytes` plus one record per entry: a retained payload
     /// exceeds its length by at most 23 bytes, so records, payloads and the
     /// hidden bytes together stay within `max_batch_bytes - 256` plus `size_of
@@ -467,14 +469,21 @@ impl EntryBatch {
                 return self;
             }
         }
-        let visible = self
-            .len()
+        let (len, payload) = (self.len(), self.payload_bytes());
+        let selected = len
             .checked_mul(37)
-            .and_then(|bytes| bytes.checked_add(self.payload_bytes()));
-        let allowance = visible
-            .and_then(|visible| max_batch_bytes.checked_sub(256)?.checked_sub(visible))
-            .unwrap_or(0)
-            .min(MESSAGE_HIDDEN_MAX);
+            .and_then(|bytes| bytes.checked_add(payload));
+        let room = selected
+            .and_then(|selected| max_batch_bytes.checked_sub(256)?.checked_sub(selected))
+            .unwrap_or(0);
+        // A plain copy of the visible entries holds at least this much.
+        let plain = len
+            .checked_mul(std::mem::size_of::<LogEntry>())
+            .and_then(|records| records.checked_add(payload))
+            .and_then(|plain| plain.checked_mul(2))
+            .and_then(|twice| twice.checked_add(MESSAGE_HIDDEN_MAX))
+            .unwrap_or(usize::MAX);
+        let allowance = room.min(plain);
         // Pieces are kept in order while the running total stays within the
         // allowance; a piece that would exceed it is copied instead.
         let keeps = |span: &Span, hidden: &mut usize| match span

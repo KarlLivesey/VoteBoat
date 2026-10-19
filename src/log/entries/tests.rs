@@ -530,8 +530,10 @@ fn messages_keep_at_most_the_bounded_hidden_charge() {
                     assert_eq!(message, visible);
                     let used = message.len() * 37 + message.payload_bytes();
                     let room = (budget - 256).saturating_sub(used);
-                    let hidden = message.retained_bytes().unwrap() - plain_charge(visible);
-                    assert!(hidden <= room.min(MESSAGE_HIDDEN_MAX), "{case} {offset}");
+                    let plain = plain_charge(visible);
+                    let hidden = message.retained_bytes().unwrap() - plain;
+                    let allowance = room.min(MESSAGE_HIDDEN_MAX + 2 * plain);
+                    assert!(hidden <= allowance, "{case} {offset}");
                     let end = offset + message.len();
                     let retry = log.shared_range(offset..end).unwrap().for_message(budget);
                     assert_eq!(retry.retained_bytes(), message.retained_bytes());
