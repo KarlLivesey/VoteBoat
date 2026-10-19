@@ -164,7 +164,7 @@ fn session_exhaustion_is_a_typed_refusal_and_commands_keep_working() {
     image[36..44].copy_from_slice(&u64::MAX.to_le_bytes());
     let mut exhausted = Counter::new(2).unwrap();
     exhausted
-        .restore_checkpoint(COUNTER_SCHEMA, 0, &image)
+        .restore_checkpoint(exhausted.schema_version(), 0, &image)
         .unwrap();
     let r = exhausted
         .apply_batch(&[register(1, 5), command(2, 1, 4)])
@@ -237,7 +237,7 @@ fn checkpoint_between_every_apply_restores_to_the_replayed_state() {
         let image = prefix.checkpoint(bound).unwrap();
         let mut restored = Counter::with_limits(limits).unwrap();
         restored
-            .restore_checkpoint(COUNTER_SCHEMA, split as u64, &image)
+            .restore_checkpoint(restored.schema_version(), split as u64, &image)
             .unwrap();
         assert_eq!(restored.checkpoint(bound).unwrap(), image);
         let tail = restored.apply_batch(&entries[split..]).unwrap();
@@ -284,9 +284,15 @@ impl Model {
             return (CounterOutcome::Registered(*session), true);
         }
         if self.live.len() == self.sessions {
-            let mut by_age: Vec<_> = self.live.iter().map(|(s, v)| (v.1, *s)).collect();
+            // Sessions holding nothing (no outcome, no nonce) first, then
+            // least recently used.
+            let mut by_age: Vec<_> = self
+                .live
+                .iter()
+                .map(|(s, v)| (!v.3.is_empty() || v.2.is_some(), v.1, *s))
+                .collect();
             by_age.sort();
-            let victim = by_age[0].1;
+            let victim = by_age[0].2;
             if let Some(nonce) = self.live.remove(&victim).unwrap().2 {
                 self.nonces.remove(&nonce);
             }
@@ -331,10 +337,15 @@ impl Model {
                 (CounterOutcome::OperationConflict, true)
             };
         }
-        let new_floor = (*floor).max(ack);
-        if sequence > new_floor + self.window {
+        if sequence > ack + self.window {
+            // A committed command outside its own window closes the session.
+            if let Some(n) = *nonce {
+                self.nonces.remove(&n);
+            }
+            self.live.remove(&session);
             return refused(SessionRefusal::Window);
         }
+        let new_floor = (*floor).max(ack);
         let outcome = match self.value.checked_add(delta) {
             Some(v) => {
                 self.value = v;
@@ -351,12 +362,11 @@ impl Model {
         }
         (outcome, false)
     }
-    fn admit(&self, session: u64, sequence: u64, ack: u64) -> Result<usize, ApplicationError> {
-        match self.live.get(&session) {
-            Some((floor, ..)) if sequence > (*floor).max(ack) + self.window => {
-                Err(ApplicationError::SessionWindow)
-            }
-            _ => Ok(std::mem::size_of::<CounterReceipt>()),
+    fn admit(&self, sequence: u64, ack: u64) -> Result<usize, ApplicationError> {
+        if sequence > ack + self.window {
+            Err(ApplicationError::SessionWindow)
+        } else {
+            Ok(std::mem::size_of::<CounterReceipt>())
         }
     }
     fn retained(&self) -> usize {
@@ -408,7 +418,7 @@ fn seeded_histories_match_an_independent_model_through_checkpoints() {
                         &Counter::command(ack, delta),
                         std::iter::empty()
                     ),
-                    model.admit(session, sequence, ack),
+                    model.admit(sequence, ack),
                     "seed {seed} index {index}"
                 );
                 (
@@ -430,7 +440,7 @@ fn seeded_histories_match_an_independent_model_through_checkpoints() {
                 let image = counter.checkpoint(bound).unwrap();
                 let mut restored = Counter::with_limits(limits).unwrap();
                 restored
-                    .restore_checkpoint(COUNTER_SCHEMA, index, &image)
+                    .restore_checkpoint(restored.schema_version(), index, &image)
                     .unwrap();
                 counter = restored;
             }

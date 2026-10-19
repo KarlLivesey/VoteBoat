@@ -22,7 +22,7 @@ use crate::{
 
 mod counter;
 pub use counter::{
-    Counter, CounterLookup, CounterOutcome, CounterReceipt, COUNTER_COMMAND_BYTES, COUNTER_SCHEMA,
+    Counter, CounterLookup, CounterOutcome, CounterReceipt, COUNTER_COMMAND_BYTES, COUNTER_FORMAT,
 };
 
 pub const PROPOSAL_ADMISSION_CONTRACT_VERSION: u32 = 1;
@@ -142,6 +142,22 @@ pub enum Retention {
     LifetimeBounded,
 }
 
+impl Retention {
+    /// The rule a wrapper reports when it keeps a table of its own under rule
+    /// `own` around an inner application with rule `inner`. The weaker rule
+    /// wins: an undeclared inner application stays undeclared through any
+    /// wrapper (so readiness and membership still refuse it), and a lifetime
+    /// table on either side makes the whole lifetime-bounded. Otherwise the
+    /// wrapper's table is bounded and the inner declaration is reported.
+    pub fn wrapping(own: Self, inner: Self) -> Self {
+        match (own, inner) {
+            (Self::Undeclared, _) | (_, Self::Undeclared) => Self::Undeclared,
+            (Self::LifetimeBounded, _) | (_, Self::LifetimeBounded) => Self::LifetimeBounded,
+            (_, inner) => inner,
+        }
+    }
+}
+
 /// A host applies only committed, contiguous entries and emits client success
 /// after application. Local reads do not create a linearizability proof; the
 /// core's read-barrier protocol must authorize distributed linearizable reads.
@@ -168,8 +184,9 @@ pub trait StateMachine {
         None
     }
     /// The declared retention rule. The default, `Undeclared`, is refused by
-    /// readiness and membership checks; wrappers forward their inner rule
-    /// unless they keep a lifetime table of their own.
+    /// readiness and membership checks. A wrapper reports
+    /// [`Retention::wrapping`] of its own rule and its inner application's, so
+    /// an undeclared inner application is refused through any wrapper.
     fn retention(&self) -> Retention {
         Retention::Undeclared
     }

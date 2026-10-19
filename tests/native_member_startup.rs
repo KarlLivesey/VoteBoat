@@ -504,7 +504,7 @@ fn member_histories(protocol: NativePeerProtocol) {
                     group(),
                     OperationId::new(101).unwrap(),
                     ReadinessRequirements {
-                        application_schema: voteboat::application::COUNTER_SCHEMA,
+                        application_schema: Counter::new(100).unwrap().schema_version(),
                         command_bytes: voteboat::application::COUNTER_COMMAND_BYTES,
                         snapshot_bytes: 4096,
                     }
@@ -585,12 +585,12 @@ fn enrollment_history(protocol: NativePeerProtocol) {
             )),
             index: 2,
             term: 1,
-            application_schema: COUNTER_SCHEMA,
+            application_schema: Counter::new(100).unwrap().schema_version(),
         },
         application: source.checkpoint(4096).unwrap(),
     };
     let mut bad = image.clone();
-    bad.metadata.application_schema = COUNTER_SCHEMA + 1;
+    bad.metadata.application_schema = Counter::new(100).unwrap().schema_version() + 1;
     assert!(selected
         .enroll_snapshot(&bad, &mut Counter::new(100).unwrap())
         .is_err());

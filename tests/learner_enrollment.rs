@@ -120,7 +120,7 @@ fn incoming() -> Snapshot {
             bootstrap,
             index: 2,
             term: 2,
-            application_schema: COUNTER_SCHEMA,
+            application_schema: Counter::new(100).unwrap().schema_version(),
         },
         application: app.checkpoint(4096).unwrap(),
     }
@@ -238,7 +238,9 @@ fn invalid_identity_schema_data_and_budget_do_not_mutate_storage() {
         match variant {
             0 => local = node(1),
             1 => snapshots.identity.store = identity(5),
-            2 => image.metadata.application_schema = COUNTER_SCHEMA + 1,
+            2 => {
+                image.metadata.application_schema = Counter::new(100).unwrap().schema_version() + 1
+            }
             3 => image.application.clear(),
             4 => snapshots.limits.max_application_bytes = 32,
             _ => unreachable!(),

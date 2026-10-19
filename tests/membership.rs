@@ -1187,7 +1187,7 @@ mod configuration_snapshots {
             membership: s.checkpoint_membership(index).unwrap(),
             index,
             term: s.term_at(index).unwrap(),
-            application_schema: COUNTER_SCHEMA,
+            application_schema: Counter::new(10).unwrap().schema_version(),
         }
     }
     fn publish<S: SnapshotStore>(
@@ -1300,7 +1300,7 @@ mod configuration_snapshots {
         let saved = snapshots.load_pinned(receipt.reference()).unwrap();
         let mut restored = Counter::new(10).unwrap();
         restored
-            .restore_checkpoint(COUNTER_SCHEMA, 3, &saved.application)
+            .restore_checkpoint(restored.schema_version(), 3, &saved.application)
             .unwrap();
         let receipts = restored.apply_batch(&finished.entries).unwrap();
         assert_eq!(receipts.len(), 1);
@@ -1963,7 +1963,7 @@ mod configuration_snapshots {
             assert!(reference.matches(&snapshot));
             assert_eq!(snapshot.metadata.membership, expected.snapshot_membership);
             let mut app = Counter::new(10).unwrap();
-            app.restore_checkpoint(COUNTER_SCHEMA, reference.index, &snapshot.application)
+            app.restore_checkpoint(app.schema_version(), reference.index, &snapshot.application)
                 .unwrap();
             app.apply_batch(
                 &expected.entries[..(expected.commit_index - reference.index) as usize],

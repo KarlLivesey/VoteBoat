@@ -531,7 +531,7 @@ fn joint_or_policy_transition_cannot_use_learner_recovery_to_open_dynamic_voting
 
 fn readiness_requirements() -> ReadinessRequirements {
     ReadinessRequirements {
-        application_schema: voteboat::application::COUNTER_SCHEMA,
+        application_schema: Counter::new(16).unwrap().schema_version(),
         command_bytes: voteboat::application::COUNTER_COMMAND_BYTES,
         snapshot_bytes: 4096,
     }
@@ -1490,6 +1490,46 @@ fn readiness_rejects_changed_capabilities_provider_bindings_and_pending_writes()
     );
     let durable = log.barrier(&tickets).unwrap();
     learner.complete(&durable).unwrap();
+    verify_learner_readiness(
+        &learner,
+        &app,
+        &log,
+        &mut snapshots,
+        request,
+        leader.storage_binding(),
+    )
+    .unwrap();
+}
+
+#[test]
+fn readiness_refuses_a_learner_whose_session_limits_differ() {
+    // The leader declares the envelope of a window-16 Counter. A learner built
+    // with window 32 fits that byte envelope, but it would decide the same
+    // committed entry differently, so its schema differs and readiness fails.
+    let mut log = HostLogStore::new(4);
+    let (mut leader, learner, app, _leader_log) = readiness_cluster(&mut log);
+    let mut snapshots = snapshots();
+    let request = leader
+        .begin_learner_readiness(
+            learner_peer(),
+            log.binding().session,
+            readiness_requirements(),
+        )
+        .unwrap();
+    let mut other = Counter::new(32).unwrap();
+    other.apply_batch(learner.replay_committed()).unwrap();
+    assert!(other.readiness_requirements().snapshot_bytes <= request.requirements.snapshot_bytes);
+    assert_eq!(
+        verify_learner_readiness(
+            &learner,
+            &other,
+            &log,
+            &mut snapshots,
+            request,
+            leader.storage_binding()
+        ),
+        Err(ReadinessError::Capability)
+    );
     verify_learner_readiness(
         &learner,
         &app,

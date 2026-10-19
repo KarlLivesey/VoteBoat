@@ -86,7 +86,7 @@ fn full_service_counter_retry_history_fits_selected_native_wire_versions() {
         image.len(),
         required.snapshot_bytes - limits.registrations() * 24
     );
-    assert_eq!(required.snapshot_bytes, 213_556);
+    assert_eq!(required.snapshot_bytes, 279_092);
     let bootstrap = bootstrap(1, 3);
     let membership = Membership::replay(&bootstrap, &[], 0).unwrap();
     let record = record(1);
@@ -107,7 +107,7 @@ fn full_service_counter_retry_history_fits_selected_native_wire_versions() {
             unreachable!()
         };
         snapshot.metadata.index = applied;
-        snapshot.metadata.application_schema = COUNTER_SCHEMA;
+        snapshot.metadata.application_schema = Counter::schema(limits);
         snapshot.application = image.clone();
         if codec.format_version() == 1 {
             snapshot.metadata.membership = None;

@@ -322,9 +322,13 @@ where
     fn applied_index(&self) -> u64 {
         self.inner.applied_index()
     }
-    /// Wraps lifetime-bounded routed owners until DR2/DH1 (audit S3, S4).
+    /// Wraps lifetime-bounded routed owners until DR2/DH1 (audit S3, S4). An undeclared
+    /// inner application stays undeclared.
     fn retention(&self) -> crate::application::Retention {
-        crate::application::Retention::LifetimeBounded
+        crate::application::Retention::wrapping(
+            crate::application::Retention::LifetimeBounded,
+            self.inner.retention(),
+        )
     }
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
         Some(self.readiness_requirements())

@@ -20,6 +20,8 @@ use voteboat::{
     retention::{SessionLimits, SessionRefusal},
 };
 
+#[path = "application/finality.rs"]
+mod finality;
 #[path = "application/ready_admission.rs"]
 mod ready_admission;
 #[path = "application/sessions.rs"]
@@ -71,11 +73,21 @@ fn noop(index: u64) -> LogEntry {
 fn counter_envelope_is_a_steady_state_bound_that_survives_restore() {
     let mut counter = Counter::new(3).unwrap();
     let required = counter.readiness_requirements();
-    assert_eq!(required.application_schema, COUNTER_SCHEMA);
-    assert_eq!(required.application_schema, 2);
+    // Format 4 in the low byte, then sessions − 1, window − 1 and
+    // registrations − 1: the schema identifies the limits exactly.
+    assert_eq!(
+        required.application_schema,
+        Counter::schema(SessionLimits::single(3).unwrap())
+    );
+    assert_eq!(required.application_schema, 0x0200_0004);
+    assert_eq!(
+        required.application_schema & 0xff,
+        u64::from(COUNTER_FORMAT)
+    );
     assert_eq!(required.command_bytes, 16);
-    // Header 24, ledger header 28, one session 28 + 3 receipts of 25, one nonce 24.
-    assert_eq!(required.snapshot_bytes, 24 + 28 + 28 + 3 * 25 + 24);
+    // Header 24, ledger header 28, one session 28 + 3 receipts of 33
+    // (sequence, acknowledgement, delta, outcome), one nonce 24.
+    assert_eq!(required.snapshot_bytes, 24 + 28 + 28 + 3 * 33 + 24);
     assert_eq!(
         counter.retention(),
         Retention::Sessions(SessionLimits::single(3).unwrap())
@@ -124,9 +136,17 @@ fn counter_envelope_is_a_steady_state_bound_that_survives_restore() {
     }
     assert!(restored.validate_readiness_requirements(required).is_ok());
     assert!(restored.validate_deployment_requirements(required).is_ok());
+    // Other limits are another schema; even when the schema is forced, the
+    // ledger refuses the limits it encodes.
+    assert_eq!(
+        Counter::new(4)
+            .unwrap()
+            .restore_checkpoint(required.application_schema, 3, &image),
+        Err(ApplicationError::UnsupportedSchema)
+    );
     assert!(Counter::new(4)
         .unwrap()
-        .restore_checkpoint(COUNTER_SCHEMA, 3, &image)
+        .restore_checkpoint(Counter::new(4).unwrap().schema_version(), 3, &image)
         .is_err());
 }
 
@@ -221,8 +241,18 @@ fn invalid_batches_never_partly_advance_and_a_full_window_is_a_typed_outcome() {
         assert_eq!(counter.checkpoint(4096).unwrap(), before);
         assert_eq!(counter.applied_index(), 0);
     }
-    // A committed command beyond the window is a typed refusal that executes
-    // nothing but advances the applied index: replay can never crash-loop.
+    // Admission refuses a command beyond its own acknowledgement plus the
+    // window; the same sequence acknowledging the first outcome fits.
+    assert_eq!(
+        counter.validate_proposal(op(1, 2), &Counter::command(0, 2), std::iter::empty()),
+        Err(ApplicationError::SessionWindow)
+    );
+    assert!(counter
+        .validate_proposal(op(1, 2), &Counter::command(1, 2), std::iter::empty())
+        .is_ok());
+    // Committed anyway, it is a typed refusal that executes nothing but
+    // advances the applied index (replay can never crash-loop), and it closes
+    // the session so no later copy of the sequence executes.
     let receipts = counter
         .apply_batch(&[command(1, 1, 7), command(2, 2, 2)])
         .unwrap();
@@ -234,11 +264,15 @@ fn invalid_batches_never_partly_advance_and_a_full_window_is_a_typed_outcome() {
     assert!(!receipts[1].duplicate);
     assert_eq!(counter.applied_index(), 2);
     assert_eq!(counter.read_applied(2), Ok(7));
-    assert_eq!(counter.lookup_operation(op(1, 2)), CounterLookup::Unknown);
-    // The same sequence fits once the client acknowledges its first outcome.
+    assert_eq!(counter.lookup_operation(op(1, 2)), CounterLookup::Expired);
+    assert_eq!(counter.live_sessions(), 0);
     let receipts = counter.apply_batch(&[add(3, 1, 2, 1, 2)]).unwrap();
-    assert_eq!(receipts[0].outcome, CounterOutcome::Value(9));
-    assert_eq!(counter.retained_receipts(), 1);
+    assert_eq!(
+        receipts[0].outcome,
+        CounterOutcome::Refused(SessionRefusal::Expired)
+    );
+    assert_eq!(counter.read_applied(3), Ok(7));
+    assert_eq!(counter.retained_receipts(), 0);
 }
 
 #[test]
@@ -283,7 +317,7 @@ fn mixed_retry_sources_preserve_original_outcomes_at_exact_window() {
     let image = counter.checkpoint(1024).unwrap();
     let mut restored = Counter::new(4).unwrap();
     restored
-        .restore_checkpoint(COUNTER_SCHEMA, 10, &image)
+        .restore_checkpoint(restored.schema_version(), 10, &image)
         .unwrap();
     let retries = restored
         .apply_batch(&[command(11, 4, 1), command(12, 2, 1)])
@@ -336,7 +370,6 @@ fn late_batch_failures_preserve_full_history_and_leave_rejected_operations_novel
             command(129, 129, 7),
             command(130, 129, 9),
             command(131, 130, 2),
-            command(132, 131, 1),
         ])
         .unwrap();
     assert_eq!(receipts[0].outcome, CounterOutcome::Value(135));
@@ -345,20 +378,21 @@ fn late_batch_failures_preserve_full_history_and_leave_rejected_operations_novel
     assert!(receipts[1].duplicate);
     assert_eq!(receipts[2].outcome, CounterOutcome::Value(137));
     assert!(!receipts[2].duplicate);
+    // The window is exactly full: one more is refused at admission.
     assert_eq!(
-        receipts[3].outcome,
-        CounterOutcome::Refused(SessionRefusal::Window)
+        counter.validate_proposal(op(1, 131), &Counter::command(0, 1), std::iter::empty()),
+        Err(ApplicationError::SessionWindow)
     );
     assert_eq!(counter.retained_receipts(), 130);
     let image = counter.checkpoint(8192).unwrap();
     let mut restored = Counter::new(130).unwrap();
     restored
-        .restore_checkpoint(COUNTER_SCHEMA, 132, &image)
+        .restore_checkpoint(restored.schema_version(), 131, &image)
         .unwrap();
-    let historical = restored.apply_batch(&[command(133, 1, 1)]).unwrap();
+    let historical = restored.apply_batch(&[command(132, 1, 1)]).unwrap();
     assert_eq!(historical[0].outcome, CounterOutcome::Value(1));
     assert!(historical[0].duplicate);
-    assert_eq!(restored.read_applied(133), Ok(137));
+    assert_eq!(restored.read_applied(132), Ok(137));
 }
 
 #[test]
@@ -425,7 +459,7 @@ fn checkpoint_restores_retry_content_original_outcomes_overflow_and_window() {
     let bytes = original.checkpoint(1024).unwrap();
     let mut restored = Counter::new(5).unwrap();
     restored
-        .restore_checkpoint(COUNTER_SCHEMA, 3, &bytes)
+        .restore_checkpoint(restored.schema_version(), 3, &bytes)
         .unwrap();
     assert_eq!(restored.checkpoint(1024).unwrap(), bytes);
     assert_eq!(restored.retained_receipts(), 3);
@@ -456,8 +490,8 @@ mod layout {
     pub const FLOOR: usize = 60;
     pub const LAST_INDEX: usize = 68;
     pub const FIRST_RECEIPT: usize = 80;
-    pub const SECOND_RECEIPT: usize = 105;
-    pub const LENGTH: usize = 130;
+    pub const SECOND_RECEIPT: usize = 113;
+    pub const LENGTH: usize = 146;
 }
 
 #[test]
@@ -474,7 +508,7 @@ fn malformed_or_incompatible_checkpoints_never_partly_restore_counter() {
     let previous = target.checkpoint(1024).unwrap();
     for cut in 0..bytes.len() {
         assert!(target
-            .restore_checkpoint(COUNTER_SCHEMA, 2, &bytes[..cut])
+            .restore_checkpoint(target.schema_version(), 2, &bytes[..cut])
             .is_err());
         assert_eq!(target.checkpoint(1024).unwrap(), previous);
     }
@@ -482,7 +516,7 @@ fn malformed_or_incompatible_checkpoints_never_partly_restore_counter() {
         bytes[at..at + value.len()].copy_from_slice(value);
     };
     type Mutation<'a> = &'a dyn Fn(&mut Vec<u8>);
-    let mutations: [Mutation<'_>; 13] = [
+    let mutations: [Mutation<'_>; 14] = [
         &|b| b[0] ^= 1,
         &|b| set(b, APPLIED, &1u64.to_le_bytes()),
         &|b| set(b, WINDOW, &11u32.to_le_bytes()),
@@ -493,15 +527,17 @@ fn malformed_or_incompatible_checkpoints_never_partly_restore_counter() {
         &|b| set(b, FLOOR, &1u64.to_le_bytes()),
         &|b| set(b, LAST_INDEX, &3u64.to_le_bytes()),
         &|b| set(b, SECOND_RECEIPT, &1u64.to_le_bytes()),
-        &|b| b[FIRST_RECEIPT + 16] = 9,
-        &|b| set(b, FIRST_RECEIPT + 16, &[1, 7]),
+        &|b| b[FIRST_RECEIPT + 24] = 9,
+        &|b| set(b, FIRST_RECEIPT + 24, &[1, 7]),
+        // An acknowledgement at its own sequence.
+        &|b| set(b, FIRST_RECEIPT + 8, &1u64.to_le_bytes()),
         &|b| b.push(0),
     ];
     for mutate in mutations {
         let mut invalid = bytes.clone();
         mutate(&mut invalid);
         assert_eq!(
-            target.restore_checkpoint(COUNTER_SCHEMA, 2, &invalid),
+            target.restore_checkpoint(target.schema_version(), 2, &invalid),
             Err(ApplicationError::InvalidCheckpoint)
         );
         assert_eq!(target.checkpoint(1024).unwrap(), previous);
@@ -513,11 +549,11 @@ fn malformed_or_incompatible_checkpoints_never_partly_restore_counter() {
     assert!(original.checkpoint(bytes.len() - 1).is_err());
     let mut incompatible = Counter::new(9).unwrap();
     assert!(incompatible
-        .restore_checkpoint(COUNTER_SCHEMA, 2, &bytes)
+        .restore_checkpoint(incompatible.schema_version(), 2, &bytes)
         .is_err());
     assert_eq!(incompatible.applied_index(), 0);
     target
-        .restore_checkpoint(COUNTER_SCHEMA, 2, &bytes)
+        .restore_checkpoint(target.schema_version(), 2, &bytes)
         .unwrap();
     assert_eq!(target.checkpoint(1024).unwrap(), bytes);
 }

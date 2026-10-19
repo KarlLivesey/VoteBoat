@@ -17,8 +17,11 @@
 //! index 1 and a v1 `Begin` at index 2). Old bytes are refused typed, never
 //! reinterpreted; v2 bytes are pinned exactly. DR1 regenerated `v2-empty.bin`,
 //! `v2-populated.bin` and `v2-profile.bin`: only the embedded inner Counter
-//! checkpoint (`VBCTR001` → `VBCTR002`) and the inner schema field (1 → 2)
-//! changed; the wrapper layout is unchanged.
+//! checkpoint (`VBCTR001` → `VBCTR002`) and the inner schema field (1 →
+//! `Counter::schema` of one session × 16 × one nonce, `0x0F00_0004`) changed;
+//! the wrapper layout is unchanged. DR1 round 2 regenerated them again: each
+//! retained Counter receipt now carries its acknowledgement (8 bytes), and the
+//! inner schema encodes the session limits.
 use super::*;
 const OLD_SCHEMA: u64 = 0x5642_4143_5449_0001;
 const V1_EMPTY: &[u8] = include_bytes!("formats/v1-empty.bin");

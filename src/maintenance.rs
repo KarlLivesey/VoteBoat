@@ -97,6 +97,11 @@ pub enum LeadershipAction {
 }
 /// A separate explicit application schema. Construct from a pristine inner
 /// application; an existing unwrapped store needs migration, not hot wrapping.
+/// Readiness compares this schema, not the inner one, so it must also identify
+/// the inner configuration: build every replica's inner application with the
+/// same configuration (for a Counter, the same `SessionLimits`), or derive the
+/// schema from it (for example `SessionLimits::schema`). Checkpoint restore
+/// still refuses an inner checkpoint of another inner schema.
 /// Data and administrative operation IDs occupy distinct framed namespaces.
 /// Select this as the outer application so Node checks its proposal context.
 #[derive(Clone)]

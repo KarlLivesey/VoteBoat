@@ -26,6 +26,29 @@
 //! Retained receipts never exceed `sessions × window`, whatever the uptime.
 //! A sequence at or below the acknowledged prefix, or in an evicted session, is
 //! answered with [`SessionRefusal::Expired`] and never executed again.
+//!
+//! The window rule is a function of the command alone: `sequence −
+//! consumed_through ≤ window`. Admission refuses a command outside it on every
+//! leader, whatever that leader has applied, so an admitted command never
+//! meets the rule at apply. A committed command outside it (admission
+//! bypassed) is refused [`SessionRefusal::Window`] and closes its session, so
+//! that sequence can never execute later under a larger acknowledgement.
+//!
+//! Registration evicts first a session with nothing retained: no receipt (it
+//! never executed) and no registration nonce (the untouched built-in session,
+//! or a registration whose nonce was dropped before first use). Then it evicts
+//! the least recently used session. Ties go to the lower last-use index, then
+//! the lower session ID. A session whose nonce is still retained counts as
+//! used, so a client between registering and its first command is not
+//! displaced by the next registration. A late copy of a registration whose
+//! nonce is no longer retained allocates a new session and can therefore evict
+//! a live one; it is indistinguishable from a fresh registration.
+//!
+//! Every retained receipt keeps the acknowledgement its command carried. The
+//! command that last raised a session's floor is above that floor, so it is
+//! retained until a later raise supersedes it: the floor always equals the
+//! largest retained acknowledgement (0 with none), and restore refuses any
+//! other value.
 use crate::{application::ApplicationError, identity::OperationId};
 use std::collections::{BTreeMap, VecDeque};
 
@@ -90,6 +113,18 @@ impl SessionLimits {
     /// Upper bound on retained receipts: `sessions × window`.
     pub fn retained_receipts(self) -> usize {
         self.sessions() * self.window as usize
+    }
+    /// An application schema that identifies `format` and these limits
+    /// exactly: `format` in the low byte, then `sessions − 1` (16 bits),
+    /// `window − 1` (20 bits) and `registrations − 1` (16 bits). Replicas
+    /// compare schemas by equality at readiness, snapshot install and restore,
+    /// so replicas built with different limits refuse each other instead of
+    /// deciding the same committed entry differently.
+    pub fn schema(self, format: u8) -> u64 {
+        u64::from(format)
+            | u64::from(self.sessions - 1) << 8
+            | u64::from(self.window - 1) << 24
+            | u64::from(self.registrations - 1) << 44
     }
 }
 
@@ -212,9 +247,13 @@ pub fn envelope(consumed_through: u64, inner: &[u8]) -> Vec<u8> {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum SessionRefusal {
     /// The outcome is no longer retained: the sequence is acknowledged or its
-    /// session was evicted. It may have executed once; it never executes again.
+    /// session was evicted or closed. It may have executed once; it never
+    /// executes again.
     Expired,
-    /// More than `window` outcomes would be unacknowledged. Acknowledge first.
+    /// The command's sequence is more than `window` above its own
+    /// acknowledgement. Admission refuses such a command; a committed one
+    /// (admission bypassed) is refused once and closes its session, so the
+    /// sequence never executes. Register a new session to continue.
     Window,
     /// The session was never allocated.
     UnknownSession,
@@ -262,16 +301,27 @@ impl SessionRecord for [u8; 8] {
     }
 }
 
+/// One retained outcome and the acknowledgement its command carried.
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct Receipt<C, R> {
+    sequence: u64,
+    consumed_through: u64,
+    content: C,
+    outcome: R,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct Session<C, R> {
-    /// Contiguous acknowledged prefix: every sequence at or below it is retired.
+    /// Contiguous acknowledged prefix: every sequence at or below it is
+    /// retired. Always the largest retained `consumed_through` (0 with none).
     floor: u64,
     /// Index of the entry that last executed in, or registered, this session.
     last_index: u64,
     /// Registration nonce, kept until the session's first execution.
     nonce: Option<u64>,
-    /// Ascending sequences in `(floor, floor + window]`.
-    retained: VecDeque<(u64, C, R)>,
+    /// Ascending sequences in `(floor, floor + window]`. Never empty once the
+    /// session has executed: the latest sequence is above every floor.
+    retained: VecDeque<Receipt<C, R>>,
 }
 
 impl<C, R> Session<C, R> {
@@ -285,7 +335,7 @@ impl<C, R> Session<C, R> {
     }
     fn position(&self, sequence: u64) -> Result<usize, usize> {
         self.retained
-            .binary_search_by_key(&sequence, |(q, _, _)| *q)
+            .binary_search_by_key(&sequence, |r| r.sequence)
     }
 }
 
@@ -348,21 +398,25 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
         self.sessions.get(&session).map(|s| s.floor)
     }
 
-    /// Admission check against applied state only. Refuses a command that
-    /// would exceed the window even after its own acknowledgement; admits
+    /// Admission check. Refuses a command whose sequence is more than
+    /// `window` above its own acknowledgement. The rule reads only the
+    /// command, so every leader decides it the same way whatever it has
+    /// applied (a leader that has not yet applied the session's registration
+    /// included), and apply never meets it for an admitted command. Admits
     /// everything else (registrations, duplicates, expired and unknown
-    /// sessions) so a client always obtains committed terminal truth. Apply
-    /// re-checks with a floor that can only have risen, so pending commands
-    /// need no scan.
+    /// sessions) so a client always obtains committed terminal truth; pending
+    /// commands need no scan.
     pub fn admit(&self, command: SessionCommand) -> Result<(), ApplicationError> {
-        let Some(s) = self.sessions.get(&command.session) else {
-            return Ok(());
-        };
-        let floor = s.floor.max(command.consumed_through);
-        if command.sequence > floor && command.sequence - floor > self.limits.window() {
+        if Self::outside_window(command, self.limits.window()) {
             return Err(ApplicationError::SessionWindow);
         }
         Ok(())
+    }
+    /// The window rule, a function of the command alone. The command's own
+    /// acknowledgement counts, so a client with a full window can always
+    /// deliver the acknowledgement that frees it.
+    fn outside_window(command: SessionCommand, window: u64) -> bool {
+        command.sequence.saturating_sub(command.consumed_through) > window
     }
 
     /// Apply a registration at `index`. Never fails: the registration path is
@@ -389,7 +443,9 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
     }
 
     /// Apply a command at `index`, executing it with `execute` only when it is
-    /// new and fits the window. Checks happen before any mutation.
+    /// new and fits the window. Checks happen before any mutation. A new
+    /// command outside the window is refused and closes its session, so the
+    /// refusal is final for that sequence: every later copy is `Expired`.
     pub fn apply(
         &mut self,
         index: u64,
@@ -415,27 +471,37 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
         }
         let position = match s.position(sequence) {
             Ok(found) => {
-                let (_, original, outcome) = &s.retained[found];
-                return if *original == content {
-                    SessionApply::Duplicate(outcome.clone())
+                let kept = &s.retained[found];
+                return if kept.content == content {
+                    SessionApply::Duplicate(kept.outcome.clone())
                 } else {
                     SessionApply::Conflict
                 };
             }
             Err(position) => position,
         };
-        // The command's own acknowledgement counts: otherwise a client whose
-        // window is full could never deliver the acknowledgement that frees
-        // it. Both the floor and `consumed_through` are below `sequence`.
-        let floor = s.floor.max(consumed_through);
-        if sequence - floor > window {
+        if Self::outside_window(command, window) {
+            // Close the session: no later copy of this sequence, whatever
+            // acknowledgement it carries, can execute.
+            if let Some(nonce) = self.sessions.remove(&session).and_then(|s| s.nonce) {
+                self.registrations.remove(&nonce);
+            }
             return SessionApply::Refused(SessionRefusal::Window);
         }
+        // `sequence − floor ≤ sequence − consumed_through ≤ window`.
+        let floor = s.floor.max(consumed_through);
         let outcome = execute();
-        s.retained
-            .insert(position, (sequence, content, outcome.clone()));
+        s.retained.insert(
+            position,
+            Receipt {
+                sequence,
+                consumed_through,
+                content,
+                outcome: outcome.clone(),
+            },
+        );
         s.floor = floor;
-        while s.retained.front().is_some_and(|(q, _, _)| *q <= floor) {
+        while s.retained.front().is_some_and(|r| r.sequence <= floor) {
             s.retained.pop_front();
         }
         s.last_index = index;
@@ -464,8 +530,11 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
                     return Lookup::Expired;
                 }
                 s.position(sequence).map_or(Lookup::Unknown, |found| {
-                    let (_, content, outcome) = &s.retained[found];
-                    Lookup::Retained { content, outcome }
+                    let kept = &s.retained[found];
+                    Lookup::Retained {
+                        content: &kept.content,
+                        outcome: &kept.outcome,
+                    }
                 })
             }
             Err(_) => Lookup::Unknown,
@@ -473,13 +542,18 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
     }
 
     fn evict_least_recent(&mut self) {
-        // Deterministic from log order: last_index values are distinct, so the
-        // minimum is unique. Registration is rare, so a scan beats an index
+        // Sessions with nothing retained (no receipt, no nonce) go first, so
+        // live clients keep their outcomes; then the least recently used. The
+        // key is a function of applied entries and unique (last-use indexes
+        // are distinct). Registration is rare, so a scan beats an index
         // maintained on every write.
         let Some(victim) = self
             .sessions
             .iter()
-            .min_by_key(|(id, s)| (s.last_index, **id))
+            .min_by_key(|(id, s)| {
+                let holds = !s.retained.is_empty() || s.nonce.is_some();
+                (holds, s.last_index, **id)
+            })
             .map(|(id, _)| *id)
         else {
             return;
@@ -513,7 +587,7 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
             + limits.registrations() * REGISTRATION_BYTES
     }
     const fn receipt_bytes() -> usize {
-        8 + C::BYTES + R::BYTES
+        16 + C::BYTES + R::BYTES
     }
     /// Exact encoded length.
     pub fn encoded_len(&self) -> usize {
@@ -524,8 +598,9 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
     }
 
     /// Canonical encoding: limits, `next_session`, counts, sessions in
-    /// ascending ID with receipts in ascending sequence, then registrations in
-    /// ascending nonce. Nothing below a floor is encoded.
+    /// ascending ID with receipts (sequence, acknowledgement, content,
+    /// outcome) in ascending sequence, then registrations in ascending nonce.
+    /// Nothing below a floor is encoded.
     pub fn encode(&self, out: &mut Vec<u8>) {
         out.extend(self.limits.sessions.to_le_bytes());
         out.extend(self.limits.window.to_le_bytes());
@@ -538,10 +613,11 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
             out.extend(s.floor.to_le_bytes());
             out.extend(s.last_index.to_le_bytes());
             out.extend((s.retained.len() as u32).to_le_bytes());
-            for (sequence, content, outcome) in &s.retained {
-                out.extend(sequence.to_le_bytes());
-                content.encode(out);
-                outcome.encode(out);
+            for r in &s.retained {
+                out.extend(r.sequence.to_le_bytes());
+                out.extend(r.consumed_through.to_le_bytes());
+                r.content.encode(out);
+                r.outcome.encode(out);
             }
         }
         for (nonce, (session, index)) in &self.registrations {
@@ -583,8 +659,9 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
         {
             return Err(ApplicationError::InvalidCheckpoint);
         }
+        let mut lru = Lru::default();
         for _ in 0..session_count {
-            ledger.decode_session(&mut reader, applied)?;
+            ledger.decode_session(&mut reader, applied, &mut lru)?;
         }
         for _ in 0..registration_count {
             ledger.decode_registration(&mut reader, applied)?;
@@ -602,8 +679,10 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
         &mut self,
         reader: &mut Reader<'_>,
         applied: u64,
+        lru: &mut Lru,
     ) -> Result<(), ApplicationError> {
         let invalid = ApplicationError::InvalidCheckpoint;
+        let window = self.limits.window();
         let id = reader.u64()?;
         let floor = reader.u64()?;
         let last_index = reader.u64()?;
@@ -612,27 +691,51 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
             .sessions
             .last_key_value()
             .is_none_or(|(last, _)| id > *last);
-        let built_in = self.default_session && id == DEFAULT_SESSION;
         if id == 0
             || id >= self.next_session
             || !ascending
             || last_index > applied
-            || (last_index == 0 && !built_in)
-            || count as u64 > self.limits.window()
+            || count as u64 > window
         {
             return Err(invalid);
         }
         let mut session = Session::new(last_index, None);
         session.floor = floor;
+        let mut acknowledged = 0;
         for _ in 0..count {
             let sequence = reader.u64()?;
+            let consumed_through = reader.u64()?;
             let content = C::decode(reader.take(C::BYTES)?).ok_or(invalid)?;
             let outcome = R::decode(reader.take(R::BYTES)?).ok_or(invalid)?;
-            let previous = session.retained.back().map_or(floor, |(q, _, _)| *q);
-            if sequence <= previous || sequence - floor > self.limits.window() {
+            let previous = session.retained.back().map_or(floor, |r| r.sequence);
+            let command = SessionCommand {
+                session: id,
+                sequence,
+                consumed_through,
+            };
+            if sequence <= previous
+                || sequence - floor > window
+                || consumed_through >= sequence
+                || Self::outside_window(command, window)
+            {
                 return Err(invalid);
             }
-            session.retained.push_back((sequence, content, outcome));
+            acknowledged = acknowledged.max(consumed_through);
+            session.retained.push_back(Receipt {
+                sequence,
+                consumed_through,
+                content,
+                outcome,
+            });
+        }
+        // The command that last raised the floor is retained (its sequence
+        // is above the floor), so the floor equals the largest retained
+        // acknowledgement exactly: a lowered floor would re-execute an
+        // acknowledged sequence, a raised one would expire an unacknowledged
+        // one. With nothing retained the session never executed: floor 0.
+        let built_in = self.default_session && id == DEFAULT_SESSION;
+        if floor != acknowledged || !lru.admit(built_in, &session) {
+            return Err(invalid);
         }
         self.sessions.insert(id, session);
         Ok(())
@@ -667,6 +770,34 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
         }
         self.registrations.insert(nonce, (id, index));
         Ok(())
+    }
+}
+
+/// Reachable last-use indexes, checked in ascending session order. Each applied
+/// entry updates at most one session, so indexes are distinct; only the
+/// untouched built-in session has index 0 (a used session's index is the
+/// entry that used it); and sessions are allocated in log order, so a session
+/// that has not executed since registration (index = registration index) is
+/// older than every session with a higher ID.
+#[derive(Default)]
+struct Lru {
+    seen: std::collections::BTreeSet<u64>,
+    /// Largest registration index of an unused registered session so far.
+    unused_registration: u64,
+}
+
+impl Lru {
+    fn admit<C, R>(&mut self, built_in: bool, s: &Session<C, R>) -> bool {
+        let unused = s.retained.is_empty();
+        let valid = if built_in && unused {
+            s.last_index == 0
+        } else {
+            s.last_index > self.unused_registration && self.seen.insert(s.last_index)
+        };
+        if unused && !built_in {
+            self.unused_registration = s.last_index;
+        }
+        valid
     }
 }
 

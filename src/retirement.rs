@@ -463,9 +463,13 @@ where
     fn validate_group(&self, group: GroupIdentity) -> Result<(), ApplicationError> {
         self.initial.validate_group(group)
     }
-    /// Wraps lifetime-bounded transfer owners until DR2/AD1 (audit S3, T4).
+    /// Wraps lifetime-bounded transfer owners until DR2/AD1 (audit S3, T4). An undeclared
+    /// inner application stays undeclared.
     fn retention(&self) -> crate::application::Retention {
-        crate::application::Retention::LifetimeBounded
+        crate::application::Retention::wrapping(
+            crate::application::Retention::LifetimeBounded,
+            self.initial.retention(),
+        )
     }
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(self.readiness_requirements())

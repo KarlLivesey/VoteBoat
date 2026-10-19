@@ -23,7 +23,7 @@ fn retention_is_exactly_sessions_times_window_at_the_boundary() {
     let required = counter.readiness_requirements();
     assert_eq!(
         required.snapshot_bytes,
-        24 + 28 + 4 * (28 + 8 * 25) + 4 * 24
+        24 + 28 + 4 * (28 + 8 * 33) + 4 * 24
     );
     let index = std::cell::Cell::new(0);
     let next = |entry: &dyn Fn(u64) -> LogEntry, counter: &mut Counter| {
@@ -51,22 +51,14 @@ fn retention_is_exactly_sessions_times_window_at_the_boundary() {
     assert_eq!(counter.retained_registrations(), 0);
     let image = counter.checkpoint(required.snapshot_bytes).unwrap();
     assert_eq!(image.len(), required.snapshot_bytes - 4 * 24);
-    // One more outcome in any session is refused at admission and, if
-    // committed anyway, is a typed refusal that changes nothing.
+    // One more outcome in any session is refused at admission.
     for session in 1..=sessions {
         let bytes = Counter::command(0, 1);
         assert_eq!(
             counter.validate_proposal(op(session, window + 1), &bytes, std::iter::empty()),
             Err(ApplicationError::SessionWindow)
         );
-        let r = next(&|i| add(i, session, window + 1, 0, 1), &mut counter);
-        assert_eq!(r.outcome, CounterOutcome::Refused(SessionRefusal::Window));
     }
-    assert_eq!(counter.retained_receipts(), limits.retained_receipts());
-    assert_eq!(
-        counter.read_applied(index.get()),
-        Ok((sessions * window) as i64)
-    );
     // Acknowledging one outcome admits exactly one more.
     let r = next(&|i| add(i, 2, window + 1, 1, 1), &mut counter);
     assert_eq!(
@@ -84,6 +76,19 @@ fn retention_is_exactly_sessions_times_window_at_the_boundary() {
     );
     assert_eq!(counter.live_sessions(), sessions as usize);
     assert_eq!(counter.lookup_operation(op(1, 1)), CounterLookup::Expired);
+    // A command outside its window committed anyway (admission bypassed) is
+    // refused once and closes its session: no later copy executes.
+    let value = counter.read_applied(index.get()).unwrap();
+    let r = next(&|i| add(i, 3, window + 1, 0, 1), &mut counter);
+    assert_eq!(r.outcome, CounterOutcome::Refused(SessionRefusal::Window));
+    assert_eq!(
+        counter.retained_receipts(),
+        limits.retained_receipts() - 2 * window as usize
+    );
+    assert_eq!(counter.live_sessions(), sessions as usize - 1);
+    let r = next(&|i| add(i, 3, window + 1, window, 1), &mut counter);
+    assert_eq!(r.outcome, CounterOutcome::Refused(SessionRefusal::Expired));
+    assert_eq!(counter.read_applied(index.get()), Ok(value));
 }
 
 #[test]
@@ -108,12 +113,12 @@ fn limits_are_validated_and_capped_at_one_million_retained_receipts() {
         ),
         (256, 32, 64)
     );
-    // 24 + 28 + 256 × (28 + 32 × 25) + 64 × 24.
+    // 24 + 28 + 256 × (28 + 32 × 33) + 64 × 24.
     assert_eq!(
         Counter::with_limits(service)
             .unwrap()
             .readiness_requirements()
             .snapshot_bytes,
-        213_556
+        279_092
     );
 }

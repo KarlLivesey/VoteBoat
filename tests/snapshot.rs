@@ -34,7 +34,7 @@ fn metadata(index: u64) -> SnapshotMetadata {
         bootstrap: bootstrap(1, 1),
         index,
         term: 1,
-        application_schema: COUNTER_SCHEMA,
+        application_schema: Counter::new(20).unwrap().schema_version(),
     }
 }
 fn command(index: u64, operation: u128, delta: i64) -> LogEntry {
@@ -158,7 +158,8 @@ fn checkpoint_plus_tail_preserves_dedup_and_host_application_schema() {
             if schema != 22 {
                 return Err(ApplicationError::UnsupportedSchema);
             }
-            self.0.restore_checkpoint(COUNTER_SCHEMA, index, bytes)
+            self.0
+                .restore_checkpoint(self.0.schema_version(), index, bytes)
         }
     }
     let core = committed_core();
@@ -196,7 +197,7 @@ fn invalid_snapshot_binding_boundary_schema_or_tail_never_partly_restores() {
             0 => s.metadata.index = 5,
             1 => s.metadata.term = 2,
             2 => s.metadata.bootstrap.configuration = ConfigurationId::new(2).unwrap(),
-            3 => s.metadata.application_schema = COUNTER_SCHEMA + 1,
+            3 => s.metadata.application_schema = Counter::new(20).unwrap().schema_version() + 1,
             4 => {
                 s.application[8..16].copy_from_slice(&1u64.to_le_bytes());
             }

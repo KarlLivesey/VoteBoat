@@ -46,9 +46,13 @@ where
         }
         self.inner.validate_group(group)
     }
-    /// Activation intents kept for life until AI3 (audit L2).
+    /// Activation intents kept for life until AI3 (audit L2). An undeclared
+    /// inner application stays undeclared.
     fn retention(&self) -> crate::application::Retention {
-        crate::application::Retention::LifetimeBounded
+        crate::application::Retention::wrapping(
+            crate::application::Retention::LifetimeBounded,
+            self.inner.retention(),
+        )
     }
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         let inner = self.inner.deployment_requirements()?;

@@ -3,7 +3,7 @@
 use super::*;
 
 #[test]
-fn retained_capacity_refuses_novel_id_but_original_retry_keeps_exact_outcome() {
+fn unacknowledged_window_refuses_novel_id_but_original_retry_keeps_exact_outcome() {
     let (mut owner, mut worker, mut clients, mut results, mut apps) = wrapped(1, false);
     let original = clients
         .submit(
@@ -31,6 +31,16 @@ fn retained_capacity_refuses_novel_id_but_original_retry_keeps_exact_outcome() {
         refused.reason,
         ClientError::Application(ApplicationError::SessionWindow)
     );
+    // The window is the client's acknowledgement, not a lifetime table: the
+    // same sequence acknowledging sequence 1 is admitted.
+    let acknowledged = apps[&group(1)].data(&Counter::command(1, 1)).unwrap();
+    assert!(apps[&group(1)]
+        .validate_proposal(
+            Counter::operation(1, 2).unwrap(),
+            &acknowledged,
+            std::iter::empty()
+        )
+        .is_ok());
     let tickets: Vec<_> = [9, 7]
         .into_iter()
         .map(|delta| {

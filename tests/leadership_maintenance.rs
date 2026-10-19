@@ -252,7 +252,13 @@ fn command_codec_rejects_truncation_and_operation_mismatch_and_old_profiles() {
     };
     assert!(app(1).apply_batch(&[e]).is_err());
     assert!(Counter::new(1).unwrap().apply_batch(&[c]).is_err());
-    assert!(Maintenance::new(group(1), COUNTER_SCHEMA, 1, Counter::new(1).unwrap()).is_err());
+    assert!(Maintenance::new(
+        group(1),
+        Counter::new(1).unwrap().schema_version(),
+        1,
+        Counter::new(1).unwrap()
+    )
+    .is_err());
     let mut old = Counter::new(1).unwrap();
     old.apply_batch(&[LogEntry {
         index: 1,
@@ -356,4 +362,105 @@ fn every_torn_native_record_recovers_old_or_complete_administrative_state() {
             }
         }
     }
+}
+
+#[test]
+fn maintenance_around_an_undeclared_application_is_refused_at_readiness() {
+    // A host application that reports an envelope but declares no retention
+    // rule. Maintenance keeps a lifetime table of its own, but it must not
+    // hide the inner application's missing declaration.
+    #[derive(Clone)]
+    struct Legacy;
+    impl StateMachine for Legacy {
+        type Receipt = ();
+        fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
+            Some(Counter::new(1).unwrap().readiness_requirements())
+        }
+        fn applied_index(&self) -> u64 {
+            0
+        }
+        fn apply_batch(&mut self, _: &[LogEntry]) -> Result<Vec<()>, ApplicationError> {
+            Ok(vec![])
+        }
+    }
+    impl CheckpointStateMachine for Legacy {
+        fn schema_version(&self) -> u64 {
+            7
+        }
+        fn checkpoint(&self, _: usize) -> Result<Vec<u8>, ApplicationError> {
+            Ok(vec![])
+        }
+        fn restore_checkpoint(&mut self, _: u64, _: u64, _: &[u8]) -> Result<(), ApplicationError> {
+            Ok(())
+        }
+    }
+    let wrapped = Maintenance::new(group(1), 3, 64, Legacy).unwrap();
+    let declared = wrapped.deployment_requirements().unwrap();
+    assert_eq!(wrapped.retention(), Retention::Undeclared);
+    assert_eq!(
+        wrapped.validate_deployment_requirements(declared),
+        Err(ApplicationError::RetentionUndeclared)
+    );
+    // A declared inner application keeps the wrapper's own rule.
+    let counter = Maintenance::new(group(1), 3, 64, Counter::new(1).unwrap()).unwrap();
+    assert_eq!(counter.retention(), Retention::LifetimeBounded);
+    let declared = counter.deployment_requirements().unwrap();
+    assert_eq!(counter.validate_deployment_requirements(declared), Ok(()));
+    // The rule a wrapper reports is the weaker of its own and its inner one.
+    let sessions = Retention::Sessions(voteboat::retention::SessionLimits::default());
+    for (own, inner, reported) in [
+        (
+            Retention::LifetimeBounded,
+            Retention::Undeclared,
+            Retention::Undeclared,
+        ),
+        (
+            Retention::Stateless,
+            Retention::Undeclared,
+            Retention::Undeclared,
+        ),
+        (
+            Retention::LifetimeBounded,
+            sessions,
+            Retention::LifetimeBounded,
+        ),
+        (
+            Retention::Stateless,
+            Retention::LifetimeBounded,
+            Retention::LifetimeBounded,
+        ),
+        (Retention::Fenced, sessions, sessions),
+    ] {
+        assert_eq!(Retention::wrapping(own, inner), reported);
+    }
+}
+
+#[test]
+fn an_old_schema_two_maintenance_checkpoint_is_refused_by_schema_before_replay() {
+    // Before DR1 the leadership-maintenance profile was schema 2, and DR1's
+    // first Counter was schema 2 as well. Counter schemas now carry format 4
+    // in the low byte, so no Counter schema equals 1, 2 or 3 and an old
+    // profile checkpoint is refused by the exact schema check that snapshot
+    // install performs before restore and replay.
+    let old = Maintenance::new(group(1), 2, 64, Counter::new(4).unwrap()).unwrap();
+    let image = old.checkpoint(usize::MAX).unwrap();
+    for window in [1, 4, 32] {
+        assert_eq!(
+            Counter::new(window).unwrap().schema_version() & 0xff,
+            u64::from(COUNTER_FORMAT)
+        );
+    }
+    let mut plain = Counter::new(4).unwrap();
+    assert_eq!(
+        plain.restore_checkpoint(old.schema_version(), 0, &image),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+    // The current profile (schema 3) refuses it too; snapshot install
+    // compares the schema exactly before calling restore at all.
+    let mut profile = Maintenance::new(group(1), 3, 64, Counter::new(4).unwrap()).unwrap();
+    assert_eq!(
+        profile.restore_checkpoint(old.schema_version(), 0, &image),
+        Err(ApplicationError::InvalidCheckpoint)
+    );
+    assert_ne!(profile.schema_version(), old.schema_version());
 }

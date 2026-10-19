@@ -163,7 +163,7 @@ fn publish_uninstalled(log: &impl LogStore, snapshots: &mut impl SnapshotRetenti
     let state = log.state(group(1)).unwrap();
     let mut app = Counter::new(16).unwrap();
     let old = snapshots.load_pinned(state.snapshot.unwrap()).unwrap();
-    app.restore_checkpoint(COUNTER_SCHEMA, old.metadata.index, &old.application)
+    app.restore_checkpoint(app.schema_version(), old.metadata.index, &old.application)
         .unwrap();
     app.apply_batch(&state.entries[..(state.commit_index - state.base_index()) as usize])
         .unwrap();
@@ -175,7 +175,7 @@ fn publish_uninstalled(log: &impl LogStore, snapshots: &mut impl SnapshotRetenti
                 membership: state.checkpoint_membership(state.commit_index).unwrap(),
                 index: state.commit_index,
                 term: state.term_at(state.commit_index).unwrap(),
-                application_schema: COUNTER_SCHEMA,
+                application_schema: Counter::new(16).unwrap().schema_version(),
             },
             bytes.len(),
         )

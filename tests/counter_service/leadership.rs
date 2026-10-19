@@ -168,6 +168,34 @@ fn history(quic: bool) {
 }
 
 #[test]
+fn maintenance_profile_registers_sessions_and_keeps_their_outcomes_across_recovery() {
+    // The cluster has already added 7 in the built-in session.
+    let mut c = cluster(false);
+    let write = |c: &Cluster, args: &[&str]| authenticated_write(c, args);
+    assert!(write(&c, &["register", "77"]).contains("outcome=Registered(2) duplicate=false"));
+    assert!(write(&c, &["register", "77"]).contains("outcome=Registered(2) duplicate=true"));
+    assert!(write(&c, &["add", "2", "1", "0", "5"]).contains("outcome=Value(12) duplicate=false"));
+    assert!(write(&c, &["add", "2", "1", "0", "5"]).contains("outcome=Value(12) duplicate=true"));
+    assert!(write(&c, &["add", "2", "2", "1", "3"]).contains("outcome=Value(15) duplicate=false"));
+    assert!(write(&c, &["add", "2", "1", "0", "5"]).contains("outcome=Refused(Expired)"));
+    assert_eq!(c.routed(&["read"]), "OK value=15\n");
+    for id in 1..=3 {
+        c.ok(id, &["checkpoint"]);
+    }
+    c.stop();
+    for id in 1..=3 {
+        c.start(id, "recover");
+    }
+    c.leader();
+    // The restored session keeps sequence 2's outcome and 1's expiry.
+    assert!(write(&c, &["add", "2", "2", "1", "3"]).contains("outcome=Value(15) duplicate=true"));
+    assert!(write(&c, &["add", "2", "1", "0", "5"]).contains("outcome=Refused(Expired)"));
+    assert_eq!(c.routed(&["read"]), "OK value=15\n");
+    c.stop();
+    fs::remove_dir_all(&c.root).unwrap();
+}
+
+#[test]
 fn authenticated_cancel_deadline_and_permission_boundaries() {
     let mut c = cluster(false);
     let source = c.leader();

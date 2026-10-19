@@ -11,7 +11,7 @@ pub(super) fn plan() -> LogicalEnrollmentPlan {
         operation: OperationId::new(10).unwrap(),
         expected: ConfigurationId::new(1).unwrap(),
         configuration: ConfigurationId::new(2).unwrap(),
-        source_application_schema: crate::application::COUNTER_SCHEMA,
+        source_application_schema: Counter::new(16).unwrap().schema_version(),
     }
 }
 pub(super) fn candidate() -> LogicalApplication {
@@ -62,7 +62,7 @@ pub(super) fn import(a: &LogicalApplication) -> LogicalLearnerImport {
             membership: Some(Box::new(membership)),
             index: 1,
             term: 1,
-            application_schema: crate::application::COUNTER_SCHEMA,
+            application_schema: Counter::new(16).unwrap().schema_version(),
         },
         application: counter.checkpoint(4096).unwrap(),
     };

@@ -19,8 +19,11 @@ use crate::retention::{
     SessionRequest,
 };
 
-/// Counter application schema (checkpoint `VBCTR002`, 16-byte commands).
-pub const COUNTER_SCHEMA: u64 = 2;
+/// Counter checkpoint format (`VBCTR002`, 16-byte commands): the low byte of
+/// every Counter application schema. The full schema also encodes the session
+/// limits ([`Counter::schema`]), so it never equals an earlier Counter schema
+/// (1) or a leadership-maintenance profile schema (2 before DR1, now 3).
+pub const COUNTER_FORMAT: u8 = 4;
 /// Bytes of an operation command: `consumed_through` (u64 LE), delta (i64 LE).
 /// A registration command has no bytes.
 pub const COUNTER_COMMAND_BYTES: usize = 16;
@@ -120,13 +123,17 @@ pub struct Counter {
 impl Counter {
     /// One session (the built-in one) with at most `window` unacknowledged
     /// outcomes. A client that never acknowledges can make `window`
-    /// operations; acknowledging frees the window.
+    /// operations; acknowledging frees the window. The table holds one
+    /// session, so the first registration evicts the built-in session
+    /// permanently (its IDs then read `Expired`); use [`Self::with_limits`]
+    /// for registered clients.
     pub fn new(window: usize) -> Result<Self, ApplicationError> {
         let window = u32::try_from(window).map_err(|_| ApplicationError::DedupCapacity)?;
         Self::with_limits(SessionLimits::single(window)?)
     }
-    /// Limits are an application-schema parameter, identical on all replicas.
-    /// Restore refuses a checkpoint written with different limits.
+    /// Limits are part of the application schema ([`Self::schema`]), so every
+    /// replica must use the same values: readiness, snapshot install and
+    /// restore refuse a replica or checkpoint with different ones.
     pub fn with_limits(limits: SessionLimits) -> Result<Self, ApplicationError> {
         Ok(Self {
             value: 0,
@@ -136,6 +143,12 @@ impl Counter {
     }
     pub fn limits(&self) -> SessionLimits {
         self.ledger.limits()
+    }
+    /// The application schema for `limits`: [`COUNTER_FORMAT`] plus the
+    /// limits, so replicas that would decide a committed entry differently
+    /// have different schemas.
+    pub fn schema(limits: SessionLimits) -> u64 {
+        limits.schema(COUNTER_FORMAT)
     }
     /// Command bytes for adding `delta` after consuming every outcome up to
     /// `consumed_through` in the same session.
@@ -183,17 +196,18 @@ impl Counter {
     }
     /// Steady-state envelope under the session retention rule: the largest
     /// command and the largest checkpoint the configured limits allow. It is
-    /// independent of occupancy and uptime.
+    /// independent of occupancy and uptime. The schema identifies the limits.
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
-            application_schema: COUNTER_SCHEMA,
+            application_schema: Self::schema(self.limits()),
             command_bytes: COUNTER_COMMAND_BYTES,
             snapshot_bytes: HEADER_BYTES
                 + SessionLedger::<[u8; 8], Executed>::bound_bytes(self.limits()),
         }
     }
     /// Check an administrator's declaration against enforced application bounds.
-    /// Larger byte envelopes are allowed; the schema must match exactly.
+    /// Larger byte envelopes are allowed; the schema, which encodes the session
+    /// limits, must match exactly, so a replica with other limits is refused.
     pub fn validate_readiness_requirements(
         &self,
         declared: crate::raft::ReadinessRequirements,
@@ -368,7 +382,7 @@ impl BoundedReadableStateMachine for Counter {
 
 impl CheckpointStateMachine for Counter {
     fn schema_version(&self) -> u64 {
-        COUNTER_SCHEMA
+        Self::schema(self.limits())
     }
     /// `VBCTR002`, applied index, value, then the ledger: limits, the session
     /// allocation mark, live sessions with their acknowledged prefixes and
@@ -394,7 +408,7 @@ impl CheckpointStateMachine for Counter {
         applied: u64,
         bytes: &[u8],
     ) -> Result<(), ApplicationError> {
-        if schema != COUNTER_SCHEMA {
+        if schema != self.schema_version() {
             return Err(ApplicationError::UnsupportedSchema);
         }
         let Some((header, rest)) = bytes.split_first_chunk::<HEADER_BYTES>() else {

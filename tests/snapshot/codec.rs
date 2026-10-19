@@ -73,7 +73,7 @@ fn assert_retry(snapshot: &Snapshot) {
     assert_eq!(snapshot.application, checkpoint(&application()));
     let mut restored = Counter::new(20).unwrap();
     restored
-        .restore_checkpoint(COUNTER_SCHEMA, 3, &snapshot.application)
+        .restore_checkpoint(restored.schema_version(), 3, &snapshot.application)
         .unwrap();
     restored.apply_batch(&[command(4, 1, 7)]).unwrap();
     assert_eq!(

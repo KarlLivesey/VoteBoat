@@ -224,7 +224,11 @@ impl Soak {
                     client.reset();
                 }
             }
-            CounterOutcome::Refused(SessionRefusal::Window) => self.stats.window += 1,
+            // Admission applies the same window rule to the command alone, so
+            // an admitted command is never refused for its window at apply.
+            CounterOutcome::Refused(SessionRefusal::Window) => {
+                panic!("admitted command {session}:{sequence} refused for its window")
+            }
             other => panic!("unexpected outcome {other:?} for {session}:{sequence}"),
         }
     }
@@ -237,7 +241,7 @@ impl Soak {
         assert!(self.counter.retained_registrations() <= self.limits.registrations());
         let mut restored = Counter::with_limits(self.limits).unwrap();
         restored
-            .restore_checkpoint(COUNTER_SCHEMA, self.index, &image)
+            .restore_checkpoint(restored.schema_version(), self.index, &image)
             .unwrap();
         assert_eq!(restored.checkpoint(image.len()).unwrap(), image);
         self.counter = restored;

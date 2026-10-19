@@ -89,9 +89,13 @@ impl<A: StateMachine + Clone> StateMachine for Maintenance<A> {
     fn validate_group(&self, group: GroupIdentity) -> Result<(), ApplicationError> {
         self.check_group(group)
     }
-    /// Lifetime leadership records until DR2 (audit S2).
+    /// Lifetime leadership records until DR2 (audit S2). An undeclared
+    /// inner application stays undeclared.
     fn retention(&self) -> crate::application::Retention {
-        crate::application::Retention::LifetimeBounded
+        crate::application::Retention::wrapping(
+            crate::application::Retention::LifetimeBounded,
+            self.inner.retention(),
+        )
     }
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
         let inner = self.inner.deployment_requirements()?;

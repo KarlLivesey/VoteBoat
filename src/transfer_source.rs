@@ -289,9 +289,13 @@ where
     fn validate_group(&self, group: GroupIdentity) -> Result<(), ApplicationError> {
         self.routed.validate_group(group)
     }
-    /// Wraps lifetime-bounded routed owners until DR2 (audit S3).
+    /// Wraps lifetime-bounded routed owners until DR2 (audit S3). An undeclared
+    /// inner application stays undeclared.
     fn retention(&self) -> crate::application::Retention {
-        crate::application::Retention::LifetimeBounded
+        crate::application::Retention::wrapping(
+            crate::application::Retention::LifetimeBounded,
+            self.routed.retention(),
+        )
     }
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(self.readiness_requirements())

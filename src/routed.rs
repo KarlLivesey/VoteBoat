@@ -472,9 +472,13 @@ where
         }
         self.inner.validate_group(group)
     }
-    /// Lifetime history until DR2 (audit S3).
+    /// Lifetime history until DR2 (audit S3). An undeclared
+    /// inner application stays undeclared.
     fn retention(&self) -> crate::application::Retention {
-        crate::application::Retention::LifetimeBounded
+        crate::application::Retention::wrapping(
+            crate::application::Retention::LifetimeBounded,
+            self.inner.retention(),
+        )
     }
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(self.readiness_requirements())
