@@ -37701,7 +37701,10 @@ checkout (raw logs in `proof-pr4-final-logs/`).
 | E4 copies failed | 30/60 | 9/60 |
 | Test/environment keys failing more often on this side | 135 | 11 |
 
-The port class is closed: the PR had no port failure in any environment.
+The port class is closed for the matrix and the converted fixtures: the PR had
+no port failure in any environment. An unconverted bind-then-drop race remains
+at `tests/logical_activation_driver/cohort/members.rs:56` (parent 5/10, PR
+1/10 whole-binary runs in the close-root study below), a TR1b follow-up.
 
 The strict criterion is not met: 13 matched observations failed on the PR and
 passed on the parent, over 11 test/environment keys, each by one run in three.
@@ -37716,7 +37719,20 @@ passed on the parent, over 11 test/environment keys, each by one run in three.
   `cohort::pressure::controls::genuine_native_observer_refusals_preserve_original_ownership_tcp`).
   Eight are PoisonError cascades from the unchanged `HISTORY.lock().unwrap()`
   sites; one root, `Network(Session(Closed))` at `cohort/close/progress.rs:126`,
-  appeared only on the PR (E3 rep 3). Failed runs are equal (2/3 each side), but
+  appeared only on the PR (E3 rep 3) in the matrix. A follow-up study on the
+  final source (`validation/reliability/tr1b/close-root/report.md` and
+  `table.md`; raw logs under the orchestrator's
+  `target/claude/research-ci/pr4-close-root-logs/`) reproduced the identical
+  root and caller on the parent: E3 0/10 vs 0/10 (whole binary) and 0/30 vs
+  0/30 (`--exact`); with the test pinned to one core beside owned burners,
+  parent 17/31 vs PR 14/31 (3 burners: 13/13 on both sides). The test, its
+  fixtures and every library file on the failure path are byte-identical on
+  both sides; the only PR-changed code compiled into the binary (the
+  `Cluster::new` port lease) is never called by this test. The mechanism, a
+  real-clock election timer (3–5 s) sending to a peer that has already drained
+  and closed, is inferred from the code and the timing (passes when the test
+  completes within about 5.6 s), not instrumented. It is the TR2 real-clock
+  pacing class. Failed runs are equal (2/3 each side), but
   the failing-test total is 53 against the parent's 44: three repetitions cannot
   exclude a small timing regression there.
 - `logical_activation_driver`, E4 rep 1 copy 2, `bindings::…before_transfer`:
@@ -37732,7 +37748,8 @@ passed on the parent, over 11 test/environment keys, each by one run in three.
   the 15 s close-drain timeout at `cluster.rs:216`; parent and PR both failed
   3/6 copies (not an extra key).
 
-The roots are the parent's own timing classes: `DedupCapacity` (6/6 E4 copies
+The roots are the parent's own timing classes (the one root first seen only on
+the PR was reproduced on the parent afterwards, see above): `DedupCapacity` (6/6 E4 copies
 on both sides), `Read(Consensus(NotLeader))` at `cohort/progress.rs:70`, and
 the wall-clock deadlines above. Where the PR removed port and poison failures
 (`logical_nested_native` E3: parent 20 failing tests, PR 7), previously hidden
@@ -37751,15 +37768,21 @@ Classes left to other slices, not fixed here:
 - TR1a/R1 (PR 5, stacked on this branch): `logical_activation_driver`
   wall-clock fixture time, `DedupCapacity`/`NotLeader` timing roots and the
   `HISTORY.lock().unwrap()` poison cascades.
+- TR2 (real-clock pacing): the `cohort/close/progress.rs:126`
+  `Session(Closed)` close root above, the `route_discovery` tests' wall-clock
+  deadline and 10 s `Instant` assertion (`src/bin/support/route_discovery/tests.rs`),
+  and the `logical_nested_native` election/functional deadlines now visible
+  under E3.
 - TR4: `logical_activation_nested` 15 s close-drain timeout
-  (`cluster.rs:216`) and `business.rs:43/58` deadlines, and the
-  `logical_nested_native` election/functional deadlines now visible under E3.
+  (`cluster.rs:216`) and `business.rs:43/58` deadlines.
 
 Against the approved criterion: no port failure in any environment is met
 (0). PoisonError cascades remain (202), all in `logical_activation_driver`,
 whose files this PR does not touch. "No new failures versus the parent" is not
 met on the strict reading: the 13 observations above exist. Their roots are the
-parent's own timing classes, and the orchestrator assigns them to TR1a and TR4.
+parent's own timing classes (the close root by the follow-up study), and the
+orchestrator assigns them to TR1a, TR2 and TR4. The merge decision is the
+documented causal, port-focused one, not a pass of the strict gate.
 They are recorded here, not relabelled as passes.
 
 #### Round 3 schema (before editing)
