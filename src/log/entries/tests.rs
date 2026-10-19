@@ -504,6 +504,42 @@ fn a_narrow_message_from_a_wide_backing_is_charged_like_a_plain_copy() {
     }
 }
 
+/// What the outbound queue charges one Append beyond its retained entries:
+/// the message itself and the batch header.
+const ENVELOPE: usize = std::mem::size_of::<crate::raft::Message>() + 256;
+
+#[test]
+fn recovered_backings_never_push_an_append_over_the_outbound_budget() {
+    // A recovered log is one backing: a Noop, then uniform commands. Near the
+    // byte limit, the hidden rest of the backing must not fill the selector's
+    // unused wire allowance (131 × 7,900 B once cost 1,049,160 B).
+    let budget = 1 << 20;
+    let mut kept = 0;
+    for size in (2_000..=16_000).step_by(100) {
+        for extra in [0, 2, 4, 8, 16, 64] {
+            let count = (budget - 256) / (37 + size) + extra;
+            let mut entries = vec![noop(1, 1)];
+            entries.extend((2..=count as u64 + 1).map(|index| command(index, 1, size)));
+            let log = EntryLog::from(entries.clone());
+            assert_eq!(log.to_batch().backing_count(), 1);
+            for offset in [1, count.saturating_sub(64).max(1)] {
+                let message = log.replication_range(offset, 64, budget);
+                let visible = &entries[offset..offset + message.len()];
+                assert_eq!(message, visible);
+                let plain = plain_charge(visible);
+                let charge = message.retained_bytes().unwrap();
+                assert!(
+                    charge == plain || ENVELOPE + charge <= budget,
+                    "{count} × {size} from {offset}: {charge} (plain {plain})"
+                );
+                kept += usize::from(charge > plain);
+            }
+        }
+    }
+    // Sharing still happens where the headroom allows it.
+    assert!(kept > 0);
+}
+
 #[test]
 fn messages_keep_at_most_the_bounded_hidden_charge() {
     let mut rng = Rng(55);
@@ -524,6 +560,8 @@ fn messages_keep_at_most_the_bounded_hidden_charge() {
         }
         for offset in (0..all.len()).step_by(7) {
             for max_entries in [1, 17, 64, 1024] {
+                // Each budget is both `max_batch_bytes` and the outbound
+                // batch budget.
                 for budget in [600, 2_000, 40_000, 1 << 20] {
                     let message = log.replication_range(offset, max_entries, budget);
                     let visible = &all[offset..offset + message.len()];
@@ -531,9 +569,16 @@ fn messages_keep_at_most_the_bounded_hidden_charge() {
                     let used = message.len() * 37 + message.payload_bytes();
                     let room = (budget - 256).saturating_sub(used);
                     let plain = plain_charge(visible);
-                    let hidden = message.retained_bytes().unwrap() - plain;
+                    let charge = message.retained_bytes().unwrap();
+                    let hidden = charge - plain;
                     let allowance = room.min(MESSAGE_HIDDEN_MAX + 2 * plain);
                     assert!(hidden <= allowance, "{case} {offset}");
+                    // Kept hidden bytes never push the message's batch charge
+                    // over the outbound budget.
+                    assert!(
+                        hidden == 0 || ENVELOPE + charge <= budget,
+                        "{case} {offset} {max_entries} {budget}: {hidden} {charge}"
+                    );
                     let end = offset + message.len();
                     let retry = log.shared_range(offset..end).unwrap().for_message(budget);
                     assert_eq!(retry.retained_bytes(), message.retained_bytes());

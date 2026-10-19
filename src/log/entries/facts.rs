@@ -133,7 +133,8 @@ impl IndexNeed {
 
 /// Most spare capacity a frozen backing keeps. With the index of a whole
 /// backing at the receive ceiling (1,025 prefixes) it stays within
-/// `MESSAGE_HIDDEN_MAX`, so whole frozen proposals are always shared.
+/// `MESSAGE_HIDDEN_MAX`, so whole frozen proposals are shared wherever the
+/// outbound byte headroom allows (see `EntryBatch::for_message`).
 pub(super) const SPARE_MAX: usize = 4 * 1024;
 
 /// One immutable backing and its facts. Nothing here is mutable after

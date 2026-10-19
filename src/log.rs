@@ -28,6 +28,7 @@ mod owned;
 pub(crate) mod transition;
 mod volatile;
 pub use command_bytes::CommandBytes;
+pub(crate) use command_bytes::RETAINED_EXTRA_MAX;
 pub(crate) use comparison::CheckpointComparison;
 pub use comparison::{CheckpointLineage, CheckpointLog};
 pub(crate) use entries::IndexNeed;

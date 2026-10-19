@@ -1259,16 +1259,70 @@ fn native_restart_and_failed_read_term_sync_never_release_old_authority() {
 
 /// A restarted leader recovers its whole retained log from one checkpoint,
 /// decoded as one shared backing. Entries a follower lacks must still reach
-/// it under the default outbound budget: every Append is charged about as a
-/// plain copy of its visible entries, never as the whole recovered backing.
+/// it under the default outbound budget: an Append keeps hidden bytes of that
+/// backing only while its whole batch charge stays within `max_batch_bytes`,
+/// otherwise it is charged as a plain copy of its visible entries.
+/// What the native outbound queue charges one message submitted alone under
+/// the default limits with `batch_bytes`.
+#[cfg(feature = "native")]
+fn native_send_charge(message: &Message, batch_bytes: usize) -> Result<usize, ()> {
+    use voteboat::outbound::{batch_cost, OutboundBinding, OutboundLimits};
+    let binding = OutboundBinding {
+        node: message.from,
+        store: message.sender,
+        generation: OutboundGeneration::new(1).unwrap(),
+    };
+    let limits = OutboundLimits {
+        batch_bytes,
+        ..OutboundLimits::default()
+    };
+    batch_cost(binding, std::slice::from_ref(message), 1, limits)
+        .map(|(_, _, usage)| usage.bytes)
+        .map_err(|_| ())
+}
+/// Deliver every queued message the default outbound budget admits, and
+/// check each admitted non-empty Append's charge against the exact budget and
+/// one byte under it. Returns the refused count and the largest Append charge.
+#[cfg(feature = "native")]
+fn deliver_within_outbound_budget(
+    cluster: &mut Cluster<NativeLogStore<ModelIo>>,
+) -> (usize, usize) {
+    let budget = voteboat::outbound::OutboundLimits::default().batch_bytes;
+    let (mut refused, mut largest, mut rounds) = (0, 0, 0);
+    while let Some(message) = cluster.messages.pop_front() {
+        rounds += 1;
+        assert!(rounds < 100_000, "non-quiescent simulation");
+        match native_send_charge(&message, budget) {
+            Ok(bytes) => {
+                if matches!(&message.rpc, Rpc::Append { entries, .. } if !entries.is_empty()) {
+                    assert_eq!(native_send_charge(&message, bytes), Ok(bytes));
+                    assert!(native_send_charge(&message, bytes - 1).is_err());
+                    largest = largest.max(bytes);
+                }
+                cluster.deliver(message)
+            }
+            Err(()) => refused += 1,
+        }
+    }
+    (refused, largest)
+}
+
 #[test]
 #[cfg(feature = "native")]
 fn recovered_checkpoint_entries_replicate_and_commit_under_default_outbound_budget() {
-    use voteboat::outbound::{message_cost, OutboundLimits};
-    let budget = OutboundLimits::default().batch_bytes;
+    let budget = voteboat::outbound::OutboundLimits::default().batch_bytes;
     let limits = LogLimits::default();
-    // Small commands near the retained-entry limit, and ~1,000 KiB commands.
-    for (count, size) in [(limits.max_entries_per_group - 128, 8usize), (1_000, 1024)] {
+    assert!(budget >= limits.max_batch_bytes);
+    for (count, size) in [
+        // Small commands near the retained-entry limit, and 1 KiB commands.
+        (limits.max_entries_per_group - 128, 8usize),
+        (1_000, 1024),
+        // Appends near the byte limit whose hidden bytes of the recovered
+        // backing would fill the selector's unused wire allowance.
+        (131, 7_900),
+        (138, 7_500),
+        (172, 6_000),
+    ] {
         let images: BTreeMap<u64, ModelIo> = (1..=3).map(|id| (id, ModelIo::default())).collect();
         let mut cluster = Cluster::new(bootstrap(1, 3), |id| {
             NativeLogStore::create(images[&id].clone(), identity(u128::from(id)), limits).unwrap()
@@ -1325,25 +1379,75 @@ fn recovered_checkpoint_entries_replicate_and_commit_under_default_outbound_budg
         // Node 2 is gone; node 1 needs node 3 for every commit.
         cluster.partition(&[1, 3]);
         cluster.act(1, Event::Campaign);
-        let mut refused = 0;
-        let mut rounds = 0;
-        while let Some(message) = cluster.messages.pop_front() {
-            rounds += 1;
-            assert!(rounds < 100_000, "non-quiescent simulation");
-            match message_cost(&message, budget) {
-                Ok(_) => cluster.deliver(message),
-                Err(_) => refused += 1,
-            }
-        }
+        let (refused, largest) = deliver_within_outbound_budget(&mut cluster);
         assert_eq!(
             refused, 0,
             "{count} × {size}: Appends refused by the budget"
         );
+        // A full 64-entry Append reached node 3.
+        assert!(largest > 64 * size, "{count} × {size}");
         let leader = cluster.replicas[&1].core.state();
         assert_eq!(cluster.replicas[&1].core.role(), Role::Leader);
         assert_eq!(leader.commit_index, leader.last_index());
         assert!(leader.last_index() > last);
         assert_eq!(cluster.replicas[&3].core.state().entries, leader.entries);
         assert_eq!(cluster.applied[&3].len() as u64, leader.commit_index);
+    }
+}
+
+/// Uncommitted term-1 commands written from index 1, so the recovered log is
+/// one uniform backing whose hidden tail (four commands) once fitted the
+/// selector's unused wire allowance (61,728 of 63,552 B) while the Append's
+/// batch charge rose from 987,904 to 1,049,632 B: both followers refused it on
+/// every heartbeat. Every Append must stay within the default budget.
+#[test]
+#[cfg(feature = "native")]
+fn recovered_uncommitted_commands_near_the_byte_limit_replicate_and_commit() {
+    let (count, size) = (68u64, 15_350usize);
+    let limits = LogLimits::default();
+    let budget = voteboat::outbound::OutboundLimits::default().batch_bytes;
+    let images: BTreeMap<u64, ModelIo> = (1..=3).map(|id| (id, ModelIo::default())).collect();
+    let mut cluster = Cluster::new(bootstrap(1, 3), |id| {
+        NativeLogStore::create(images[&id].clone(), identity(u128::from(id)), limits).unwrap()
+    });
+    let mut store = cluster.replicas.remove(&1).unwrap().store;
+    for first in [1, count / 2 + 1] {
+        let entries: Vec<_> = (first..first + count / 2)
+            .map(|index| LogEntry {
+                index,
+                term: 1,
+                payload: EntryPayload::Command {
+                    operation: OperationId::new(u128::from(index) + 100).unwrap(),
+                    bytes: vec![index as u8; size].into(),
+                },
+            })
+            .collect();
+        let state = store.state(group(1)).unwrap();
+        let suffix = Suffix {
+            from: first,
+            entries: entries.into(),
+        };
+        append(&mut store, vec![update(&state, 1, 0, Some(suffix))]);
+    }
+    // Checkpoint, lose power and recover node 1 from that image.
+    store.reclaim(limits.max_wal_bytes).unwrap();
+    drop(store);
+    images[&1].0.borrow_mut().power_loss();
+    let store = NativeLogStore::recover(images[&1].clone(), identity(1), limits).unwrap();
+    let state = store.state(group(1)).unwrap();
+    assert_eq!(state.entries.len() as u64, count);
+    assert_eq!(state.commit_index, 0);
+    let core = Raft::recover(node(1), store.binding(), state, store.limits()).unwrap();
+    cluster.replicas.insert(1, Replica { core, store });
+    cluster.act(1, Event::Campaign);
+    let (refused, largest) = deliver_within_outbound_budget(&mut cluster);
+    assert_eq!(refused, 0, "Appends refused by the budget");
+    assert!(largest > budget / 2);
+    let leader = cluster.replicas[&1].core.state();
+    assert_eq!(cluster.replicas[&1].core.role(), Role::Leader);
+    assert_eq!(leader.last_index(), count + 1);
+    assert_eq!(leader.commit_index, leader.last_index());
+    for id in [2, 3] {
+        assert_eq!(cluster.replicas[&id].core.state().entries, leader.entries);
     }
 }

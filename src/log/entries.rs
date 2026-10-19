@@ -43,10 +43,11 @@ pub use range::{EntryRange, Slices as EntrySlices};
 pub(crate) const SHARE_MIN: usize = 16;
 
 /// Fixed part of what a leader's Append may keep alive beyond plain copies of
-/// its visible entries (see [`EntryBatch::for_message`]). It covers a whole backing's
-/// kept spare capacity (at most 4 KiB) and the index of a mixed backing at
-/// the receive ceiling (1,025 × 24 bytes), so whole frozen proposals are
-/// shared whatever their content.
+/// its visible entries (see [`EntryBatch::for_message`]). It covers a whole
+/// backing's kept spare capacity (at most 4 KiB) and the index of a mixed
+/// backing at the receive ceiling (1,025 × 24 bytes), so this part never
+/// stops a whole frozen proposal being shared. The outbound byte headroom
+/// can: near `max_batch_bytes` such a proposal is copied.
 pub(crate) const MESSAGE_HIDDEN_MAX: usize = 32 * 1024;
 
 /// One ordered piece of entries.
@@ -461,20 +462,34 @@ impl EntryBatch {
     ///
     /// A shared piece pins its whole backing, which can be far wider than the
     /// message (a recovered log is one backing). Shared pieces are kept while
-    /// what they keep alive beyond plain copies of their visible entries
-    /// totals at most [`MESSAGE_HIDDEN_MAX`] plus twice the plain copy of the
-    /// visible entries, and at most the selection budget the visible entries
-    /// leave unused (`max_batch_bytes - 256 - (37 + payload)` per entry); any
-    /// other piece is copied, as a plain vector would hold it. So a message's
-    /// retained charge is at most three times that of a plain vector of its
-    /// visible entries plus `MESSAGE_HIDDEN_MAX` (a narrow slice of a wide
-    /// backing is copied), and it stays within the per-message bound the
-    /// core reserves for its effects
-    /// (`max_batch_bytes` plus one record per entry: a retained payload
-    /// exceeds its length by at most 23 bytes, so records, payloads and the
-    /// hidden bytes together stay within `max_batch_bytes - 256` plus `size_of
-    /// LogEntry - 14` per entry). The visible entries, and so the protocol,
-    /// are unchanged.
+    /// what they keep alive beyond plain copies of their visible entries (the
+    /// hidden bytes) totals at most the allowance; any other piece is copied,
+    /// as a plain vector would hold it. The allowance is the smaller of
+    ///
+    /// - [`MESSAGE_HIDDEN_MAX`] plus twice the plain copy of the visible
+    ///   entries, so a message's retained charge is at most three times that
+    ///   of a plain vector of its visible entries plus `MESSAGE_HIDDEN_MAX`;
+    /// - what the outbound charge of the message sent alone leaves within
+    ///   `max_batch_bytes`: `max_batch_bytes` less the message and batch
+    ///   header ([`SOLE_MESSAGE_ENVELOPE`]) and an upper bound of the plain
+    ///   copy (a record per entry, and each payload, which retains at most
+    ///   [`RETAINED_EXTRA_MAX`] beyond its length), saturating at zero.
+    ///
+    /// So keeping any hidden byte leaves the Append's [`batch_cost`] within
+    /// `max_batch_bytes`, and an Append that keeps none is charged as a plain
+    /// vector of its visible entries, as before sharing: with an outbound
+    /// `batch_bytes` of at least `max_batch_bytes` (which native startup
+    /// derives), the queue refuses no Append that a plain copy would fit.
+    /// Near the byte limit the allowance is small, so even a whole frozen
+    /// proposal is copied there, and a narrow slice of a wide backing is
+    /// copied whenever its hidden bytes exceed the allowance. Either way the
+    /// retained charge stays within the per-message bound the core reserves
+    /// for its effects. The visible entries, and so the protocol, are
+    /// unchanged.
+    ///
+    /// [`SOLE_MESSAGE_ENVELOPE`]: crate::outbound::SOLE_MESSAGE_ENVELOPE
+    /// [`RETAINED_EXTRA_MAX`]: crate::log::RETAINED_EXTRA_MAX
+    /// [`batch_cost`]: crate::outbound::batch_cost
     pub(crate) fn for_message(self, max_batch_bytes: usize) -> Self {
         let spans = self.spans.as_slice();
         // An exact owned copy (every narrow selection) keeps nothing hidden.
@@ -484,15 +499,21 @@ impl EntryBatch {
             }
         }
         let (len, payload) = (self.len(), self.payload_bytes());
-        let selected = len
-            .checked_mul(37)
-            .and_then(|bytes| bytes.checked_add(payload));
-        let room = selected
-            .and_then(|selected| max_batch_bytes.checked_sub(256)?.checked_sub(selected))
+        let record = std::mem::size_of::<LogEntry>();
+        // At most what a plain copy of the visible entries retains.
+        let copy_max = len
+            .checked_mul(record + crate::log::RETAINED_EXTRA_MAX)
+            .and_then(|records| records.checked_add(payload));
+        let room = copy_max
+            .and_then(|copy| {
+                max_batch_bytes
+                    .checked_sub(crate::outbound::SOLE_MESSAGE_ENVELOPE)?
+                    .checked_sub(copy)
+            })
             .unwrap_or(0);
         // A plain copy of the visible entries holds at least this much.
         let plain = len
-            .checked_mul(std::mem::size_of::<LogEntry>())
+            .checked_mul(record)
             .and_then(|records| records.checked_add(payload))
             .and_then(|plain| plain.checked_mul(2))
             .and_then(|twice| twice.checked_add(MESSAGE_HIDDEN_MAX))

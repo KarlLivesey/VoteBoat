@@ -17,6 +17,13 @@ use std::{
 #[derive(Clone, Default)]
 pub struct CommandBytes(Option<Arc<[u8]>>);
 
+/// Most a command's retained charge exceeds its length: the shared header and
+/// the padding to its alignment (23 bytes on 64-bit targets).
+pub(crate) const RETAINED_EXTRA_MAX: usize = {
+    let align = std::mem::align_of::<AtomicUsize>();
+    std::mem::size_of::<[AtomicUsize; 2]>() + if align > 2 { align } else { 2 } - 1
+};
+
 impl CommandBytes {
     pub fn as_slice(&self) -> &[u8] {
         self.0.as_deref().unwrap_or(&[])

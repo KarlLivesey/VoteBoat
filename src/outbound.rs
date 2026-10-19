@@ -288,6 +288,14 @@ pub trait OutboundQueue {
     }
 }
 
+/// Fixed charge of one outbound batch beside its messages.
+pub(crate) const BATCH_HEADER_BYTES: usize = 256;
+/// What [`batch_cost`] charges one message submitted alone beyond the content
+/// [`message_cost`] retains for it: the message itself and the batch header.
+/// A leader's Append keeps hidden backing bytes only while this envelope, a
+/// plain copy of its visible entries and those bytes fit `max_batch_bytes`.
+pub(crate) const SOLE_MESSAGE_ENVELOPE: usize = size_of::<Message>() + BATCH_HEADER_BYTES;
+
 /// Conservative retained capacity accounting shared with runtime ingress.
 /// Counts owned payloads/index units, not allocator metadata or exact RSS.
 pub fn message_cost(
@@ -406,7 +414,7 @@ pub fn batch_cost(
     }
     let mut bytes = capacity
         .checked_mul(size_of::<Message>())
-        .and_then(|v| v.checked_add(256))
+        .and_then(|v| v.checked_add(BATCH_HEADER_BYTES))
         .ok_or(OutboundError::BatchTooLarge)?;
     let mut class = MessageClass::Control;
     for message in messages {
