@@ -209,6 +209,9 @@ pub struct NativeSnapshotStore<I: SnapshotIo, C: SnapshotCodec = NativeSnapshotC
     stage: Option<Stage>,
     next_generation: u64,
     fenced: bool,
+    /// The generation this session sealed and published for the log; the
+    /// publishing job compares it byte for byte before anything uses it.
+    verified: Option<SnapshotGeneration>,
 }
 impl<I: SnapshotIo> NativeSnapshotStore<I> {
     pub fn create(
@@ -270,6 +273,7 @@ impl<I: SnapshotIo, C: SnapshotCodec> NativeSnapshotStore<I, C> {
             stage: None,
             next_generation: 0,
             fenced: false,
+            verified: None,
         })
     }
     pub fn recover_with_codec(
@@ -334,7 +338,51 @@ impl<I: SnapshotIo, C: SnapshotCodec> NativeSnapshotStore<I, C> {
             stage: None,
             next_generation,
             fenced: false,
+            verified: None,
         })
+    }
+    /// Install a sealed image as the root, and with `pin` also as a log
+    /// anchor, in one manifest publication. `seal` already read back and
+    /// decoded the stored bytes in this session and nothing writes a staged
+    /// slot, so the pin needs no second read (ST2 round 2).
+    fn publish_root(
+        &mut self,
+        sealed: SealedSnapshot,
+        pin: bool,
+    ) -> Result<SnapshotReceipt, StorageError> {
+        let stage = self.active_stage(sealed.ticket)?;
+        if stage.sealed != Some(sealed) {
+            return Err(StorageError::StaleTicket);
+        }
+        let root = Root {
+            slot: stage.slot,
+            generation: sealed.ticket.generation,
+            length: sealed.file_bytes,
+            checksum: sealed.checksum,
+            metadata: stage.metadata.clone(),
+        };
+        let mut pins = self.pins.clone();
+        if pin {
+            if pins.len() >= 2 {
+                return Err(StorageError::Rejected("snapshot pin budget"));
+            }
+            pins.insert(root.generation, root.clone());
+        }
+        if let Err(e) =
+            self.io
+                .publish_manifest(&manifest(self.identity, self.binding, Some(&root), &pins))
+        {
+            return Err(self.failed(e));
+        }
+        let receipt = SnapshotReceipt {
+            sealed,
+            metadata: root.metadata.clone(),
+        };
+        self.verified = pin.then_some(root.generation);
+        self.root = Some(root);
+        self.pins = pins;
+        self.stage = None;
+        Ok(receipt)
     }
     fn live(&self) -> Result<(), StorageError> {
         if self.fenced {
@@ -517,32 +565,7 @@ impl<I: SnapshotIo, C: SnapshotCodec> SnapshotStore for NativeSnapshotStore<I, C
         Ok(sealed)
     }
     fn publish(&mut self, sealed: SealedSnapshot) -> Result<SnapshotReceipt, StorageError> {
-        let stage = self.active_stage(sealed.ticket)?;
-        if stage.sealed != Some(sealed) {
-            return Err(StorageError::StaleTicket);
-        }
-        let root = Root {
-            slot: stage.slot,
-            generation: sealed.ticket.generation,
-            length: sealed.file_bytes,
-            checksum: sealed.checksum,
-            metadata: stage.metadata.clone(),
-        };
-        if let Err(e) = self.io.publish_manifest(&manifest(
-            self.identity,
-            self.binding,
-            Some(&root),
-            &self.pins,
-        )) {
-            return Err(self.failed(e));
-        }
-        let receipt = SnapshotReceipt {
-            sealed,
-            metadata: root.metadata.clone(),
-        };
-        self.root = Some(root);
-        self.stage = None;
-        Ok(receipt)
+        self.publish_root(sealed, false)
     }
     fn abort(&mut self, ticket: SnapshotTicket) -> Result<(), StorageError> {
         self.active_stage(ticket)?;
@@ -643,6 +666,17 @@ fn recover_root<I: SnapshotIo, C: SnapshotCodec>(
     })
 }
 impl<I: SnapshotIo, C: SnapshotCodec> SnapshotRetention for NativeSnapshotStore<I, C> {
+    fn publish_for_log(&mut self, sealed: SealedSnapshot) -> Result<SnapshotReceipt, StorageError> {
+        self.publish_root(sealed, true)
+    }
+    fn verified_this_session(&self, reference: SnapshotRef) -> bool {
+        !self.fenced
+            && self.verified == Some(reference.generation)
+            && self
+                .pins
+                .get(&reference.generation)
+                .is_some_and(|p| p.reference(self.identity) == reference)
+    }
     fn latest_reference(&self) -> Result<Option<SnapshotRef>, StorageError> {
         self.live()?;
         Ok(self.root.as_ref().map(|r| r.reference(self.identity)))
@@ -731,6 +765,19 @@ impl<I: SnapshotIo, C: SnapshotCodec> SnapshotRetention for NativeSnapshotStore<
             .as_ref()
             .map(|r| BTreeMap::from([(r.generation, r.clone())]))
             .unwrap_or_default();
+        // Already the durable state: every manifest publication of a live
+        // store completed before memory changed, so rewriting identical
+        // contents would add only flushes.
+        if self.root.as_ref().map(Root::descriptor) == root.as_ref().map(Root::descriptor)
+            && self.pins.len() == pins.len()
+            && self
+                .pins
+                .iter()
+                .zip(&pins)
+                .all(|((g, p), (h, q))| g == h && p.descriptor() == q.descriptor())
+        {
+            return Ok(());
+        }
         if let Err(e) =
             self.io
                 .publish_manifest(&manifest(self.identity, self.binding, root.as_ref(), &pins))

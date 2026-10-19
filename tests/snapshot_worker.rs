@@ -1454,14 +1454,24 @@ mod faults {
         fn publish_manifest(&mut self, bytes: &[u8]) -> io::Result<()> {
             let mut d = self.0.lock().unwrap();
             d.roots += 1;
-            // First root is reconcile(None), second is publication, third pin.
+            // Counted from the test's reset. An unchanged reconcile is not
+            // rewritten, so from a fresh store the first root is the
+            // publication, which also carries the log pin (one manifest: pin
+            // faults are publication faults). The reconcile test resets the
+            // count just before the reconcile that releases the old pin.
             let before = matches!(
                 (d.fault, d.roots),
-                (Fault::RootBefore, 2) | (Fault::PinBefore, 3) | (Fault::ReconcileBefore, 4)
+                (
+                    Fault::RootBefore | Fault::PinBefore | Fault::ReconcileBefore,
+                    1
+                )
             );
             let after = matches!(
                 (d.fault, d.roots),
-                (Fault::RootAfter, 2) | (Fault::PinAfter, 3) | (Fault::ReconcileAfter, 4)
+                (
+                    Fault::RootAfter | Fault::PinAfter | Fault::ReconcileAfter,
+                    1
+                )
             );
             if before {
                 return Err(io::Error::other("root publication failed"));
@@ -1491,9 +1501,48 @@ mod faults {
                 store: identity(2),
                 group: group(1),
             };
-            let store =
+            let mut store =
                 NativeSnapshotStore::create(io.clone(), sid, SnapshotLimits::default()).unwrap();
-            io.0.lock().unwrap().roots = 0;
+            // An earlier checkpoint at index 1 is the durable anchor, so the
+            // reconcile after the next checkpoint releases its pin: a real
+            // manifest change (an unchanged reconcile is not rewritten).
+            let (_, mut log) = follower();
+            let commands = [7i64, 3]
+                .into_iter()
+                .enumerate()
+                .map(|(i, delta)| LogEntry {
+                    index: i as u64 + 1,
+                    term: 1,
+                    payload: EntryPayload::Command {
+                        operation: OperationId::new(i as u128 + 1).unwrap(),
+                        bytes: delta.to_le_bytes().to_vec().into(),
+                    },
+                })
+                .collect::<Vec<_>>();
+            let mutation = update(
+                &log.state(group(1)).unwrap(),
+                1,
+                2,
+                Some(Suffix {
+                    from: 1,
+                    entries: commands.clone(),
+                }),
+            );
+            append(&mut log, vec![mutation]);
+            let mut core = Raft::recover(
+                node(2),
+                log.binding(),
+                log.state(group(1)).unwrap(),
+                log.limits(),
+            )
+            .unwrap();
+            let mut app = Counter::new(20).unwrap();
+            app.apply_batch(&commands[..1]).unwrap();
+            let old = checkpoint_application(&core, &app, &mut store)
+                .unwrap()
+                .reference();
+            compact_replica(&mut core, &mut log, &mut store, &app, old).unwrap();
+            app.apply_batch(&commands[1..]).unwrap();
             let mut worker = NativeSnapshotWorker::spawn(
                 [(group(1), store)].into(),
                 binding(),
@@ -1501,7 +1550,6 @@ mod faults {
                 Arc::new(ThreadWake::current()),
             )
             .unwrap();
-            let (mut core, mut log, mut app) = checkpoint_source();
             let effect = core.step(Event::Checkpoint).unwrap().remove(0);
             let Effect::CheckpointRequired { context } = effect else {
                 panic!()
@@ -1519,7 +1567,11 @@ mod faults {
             };
             let effects = persist_effect(&mut core, &mut log, update.clone()).unwrap();
             assert!(matches!(effects[0], Effect::CheckpointCompacted(_)));
-            io.0.lock().unwrap().fault = fault;
+            {
+                let mut device = io.0.lock().unwrap();
+                device.fault = fault;
+                device.roots = 0;
+            }
             let work = prepare_snapshot_work(&core, &app, visit(), &effects[0], binding()).unwrap();
             let ticket = worker.submit(work).unwrap();
             let event = wait(&mut worker);
@@ -1534,7 +1586,7 @@ mod faults {
             )
             .is_err());
             assert!(core.is_fenced());
-            assert_eq!(core.state().base_index(), 1);
+            assert_eq!(core.state().base_index(), 2);
             worker.close();
             let until = Instant::now() + Duration::from_secs(10);
             loop {
@@ -1555,9 +1607,9 @@ mod faults {
             let mut app = Counter::new(20).unwrap();
             let (core, _) =
                 recover_replica(node(2), group(1), &log, &mut recovered, &mut app).unwrap();
-            assert_eq!(core.state().base_index(), 1);
+            assert_eq!(core.state().base_index(), 2);
             assert!(!core.has_pending_dependency());
-            assert_eq!(app.read_applied(1), Ok(7));
+            assert_eq!(app.read_applied(2), Ok(10));
         }
     }
     #[test]
@@ -1637,7 +1689,7 @@ mod faults {
             let published = recovered.load().unwrap();
             assert_eq!(
                 published.is_some(),
-                matches!(fault, Fault::RootAfter | Fault::PinBefore | Fault::PinAfter)
+                matches!(fault, Fault::RootAfter | Fault::PinAfter)
             );
             // No durable WAL anchor exists: recovery discards any uncertain
             // publication/pin instead of activating or acknowledging it.
