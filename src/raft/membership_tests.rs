@@ -3708,3 +3708,39 @@ fn lose_joint_repair_campaign(
     }
     (denied_learner_votes, denied_stale_votes)
 }
+
+/// ST2 round 4 (R4-2, GPT-6.1-Sol round-3 P2-1): the leader's per-peer stall
+/// map is a retained structure bounded by the current replicas. Voters 1, 2
+/// and 3 stay; each of 64 committed `Learners` records replaces one
+/// unavailable learner, and the real heartbeat stall counter runs every
+/// round. On 522a08c8 the map kept every departed learner (66 entries for 3
+/// peers); now it never holds more than the current peers, and the reported
+/// stall is always a current replica.
+#[test]
+fn stall_map_holds_only_current_replicas_through_learner_churn() {
+    let mut core = core();
+    for k in 0..64u64 {
+        let effects = accept(
+            &mut core,
+            200 + u128::from(k),
+            ConfigurationChange::Learners(configuration(2 + k, &[1, 2, 3], &[1000 + k])),
+        );
+        durable(&mut core, effects);
+        let last = core.durable.last_index();
+        committed_fixture(&mut core, last);
+        for _ in 0..2 {
+            core.count_stalled_replicas();
+        }
+        let peers = core.peers();
+        assert!(
+            core.stalled_rounds.len() <= peers.len(),
+            "after {} replacements: {} stall entries for {} current peers",
+            k + 1,
+            core.stalled_rounds.len(),
+            peers.len()
+        );
+        let (stalled, _) = core.replica_stall().unwrap();
+        assert!(peers.contains(&stalled), "{stalled:?} is not a replica");
+    }
+    assert!(!core.stalled_rounds.contains_key(&node(1000)));
+}

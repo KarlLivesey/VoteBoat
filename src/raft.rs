@@ -769,15 +769,20 @@ impl Raft {
     }
     /// As leader, the peer that has gone longest without a successful append
     /// acknowledgement while lagging the last index, in heartbeat rounds. A
-    /// follower that keeps declining (or is down) shows here. Local
-    /// scheduling observation, not quorum evidence.
+    /// follower that keeps declining (or is down) shows here. Only current
+    /// replicas are tracked (at most the current replica count minus one
+    /// entries; cleared at every configuration change). Local scheduling
+    /// observation, not quorum evidence.
     pub fn replica_stall(&self) -> Option<(NodeId, u64)> {
         if self.role != Role::Leader {
             return None;
         }
+        let membership = self.membership();
         self.stalled_rounds
             .iter()
-            .filter(|(_, rounds)| **rounds > 0)
+            .filter(|(node, rounds)| {
+                **rounds > 0 && membership.replicas().any(|(replica, _)| replica == **node)
+            })
             .max_by_key(|(_, rounds)| **rounds)
             .map(|(node, rounds)| (*node, *rounds))
     }
@@ -1694,6 +1699,10 @@ impl Raft {
         self.repair_requests.clear();
         self.progress.clear();
         self.next_index.clear();
+        // The stall map is bounded by the current replicas (R4-2): a removed
+        // peer is never visited again, and a changed store identity starts
+        // from zero like its progress.
+        self.stalled_rounds.clear();
         if self.role == Role::Candidate {
             self.role = Role::Follower;
         }
