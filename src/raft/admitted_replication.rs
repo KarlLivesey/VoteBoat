@@ -113,14 +113,14 @@ impl Raft {
             || !matches!(pending.after, After::LeaderAppend)
             || self.durable.last_index() != self.durable.commit_index
             || self.durable.term_at(self.durable.commit_index) != Some(self.durable.hard_state.term)
-            || pending.next.update().hard_state != self.durable.hard_state
+            || next.hard_state != self.durable.hard_state
             || next.ballot_origin != self.durable.ballot_origin
             || next.generation != self.durable.generation
-            || pending.next.update().commit_index != self.durable.commit_index
+            || next.commit_index != self.durable.commit_index
         {
             return None;
         }
-        let suffix = pending.next.update().suffix.as_ref()?;
+        let suffix = pending.next.suffix()?;
         if self.durable.last_index().checked_add(1) != Some(suffix.from)
             || suffix.entries.is_empty()
             || suffix.entries.len() > self.batch_limits.max_replication_entries

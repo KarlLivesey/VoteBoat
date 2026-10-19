@@ -43,7 +43,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done H2: ready-snapshot collection in the matched harness (merged 8b3c1e6c; main re-baselined) | The VoteBoat actor cut each proposal pass as soon as a peer message was queued, so batch width tracked follower reply latency and any faster replication path paid extra wake/park rounds at 16 workers (V3b: rounds 7.7k → 17.3k, sys 30 → 50 ns/write). A pass now takes only the requests queued when it starts; peer progress arriving during it is handled before the next pass. This changes the instrument for VoteBoat's actor only | H1 merged (`30a1f6c5`); researcher note `target/claude/research-r3/v3b-regression.md`. Next steps in order: merge V2 (PR 3); merge H2 and re-baseline main under it; V3b-s (width-1 per-round overhead); then re-measure V3a/V3b rebased on V2 | Actor tests that a mid-pass peer message neither truncates the pass nor waits past the next pass, and that a request queued after the pass reads its ready count waits for the next pass; existing deferral/capacity tests; 73 matched tests; root and matched fmt; matched and four root strict Clippy builds; quiet-Mac 5 interleaved pairs × 4 cells against `30a1f6c5`; attribution parity controls side by side; main re-baselined before any later gate | T4 |
 | Done H1: server worker flag (merged `30a1f6c5`) | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`) | Matched source byte-identical to flag-only `297aec15`; matched tests; both fmt checks and five strict Clippy configurations; independent review | T4 |
 | Done V1: core-canonical volatile log (merged 041fc3fb; Mac −18.8% bulk, −16.3% singleton CPU/write) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
-| Next V2 merge (PR 3) (H2 merged and main re-baselined 19 Oct) | V2: commit-only rounds (~2.3 per singleton original) still build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices. Both reviews approved and its benchmark accepted (Mac singleton −4.1%, old rule). Once V2 and H2 are on main, main is re-baselined under H2 so later gates compare like with like | V1 measured; H2 reviews | V2 full suites on its head, then merge; H2 merge; quiet-Mac main baseline, 4 cells, under H2 | T4 |
+| Done V2: scalar commit-advance plan and smaller `Pending` (merged 19 October 2026, PR 3 head 3a5c1cd4; Mac singleton −4.1%, old rule) | Commit-only rounds (~2.3 of 5.3 persistence rounds per singleton original) only advance the commit index, yet each built, validated, stored and compared a full `LogUpdate`/`OwnedAppend` plan inside a 1,728-byte `Pending`; a core-only scalar `CommitAdvance` plan and boxed cold parts cut `Pending` to 1,088 B | V1 (merged 041fc3fb) | Both reviews approved; suites on 3a5c1cd4: default 2,451 (one load-sensitive `native_relay` flake, parent and PR 10/10 on rerun), all-features 2,766, no-default 1,245, native-only 1,806, matched 71, `logical_activation_nested` solo 3×8/8; fmt + five strict Clippy clean; runner pairs round 1 ACCEPT | T4 |
 | Following V3b-s, then V3a/V3b re-measured on V2 | V3b-s removes width-1 per-round overhead, which H2's narrower one-worker passes weight about 20% more. V3a (PR 6, entry staging) and V3b (`cpu/shared-batches`, shared immutable batches removing the remaining in-process per-peer clones) are rebased on V2 and re-measured against the H2 main baseline | H2 merged and main re-baselined; V2 merged | Framework pairs on all four cells against the H2 baseline; compaction/snapshot suites | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
 | Done C15: batched admission uses the pending bound | Same fast path for ready batches | C14 | Linux/Mac pairs; suites | T4 |
@@ -223,6 +223,130 @@ start fails the round-1 test at once ("actor loop ended before the next pass")
 instead of hanging. No non-test code path changed, so the round-1 measurements
 stand and were not repeated. Not run: root test suites (no root source changed),
 remote CI.
+#### V2 implemented: scalar commit-advance plan (merged 19 October 2026, PR 3)
+
+Design: `target/claude/research-r1/architect-plan.md` section 5 item 1, with
+the section 6 decision: durable stores keep the `LogUpdate` shape (no new
+`LogMutation`, no codec change) and only the core's plan becomes scalar.
+
+Schema plan (written before editing; the plan's last revision is marked):
+
+- Data/API. A private `CommitAdvance { predecessor: LogMetadata, summary:
+  LogSummary }` becomes `OwnedChange::Commit`, built by a new core-only
+  `OwnedNextLog::plan_commit(view, summary, commit_index, limits)`.
+  `plan_owned` and `plan_copy` never build it, so native stores never see the
+  variant; the native install match refuses it (fail closed). The cold
+  `OwnedChange::Other` keeps its `NextLog` behind a `Box`, and so do
+  `Pending.membership` (every full-replacement plan: configuration entries,
+  a new ballot over a configured history, truncating suffixes and snapshot
+  installs; never an ordinary append or a scalar commit round) and the
+  `SnapshotRef` of the two snapshot `After` variants. (Corrected in review
+  round 2; the first wording said configuration changes only.) No public API change.
+- Revised during implementation: the first shape (`predecessor: LogSummary,
+  revision, commit_index`, 352 B) made `OwnedChange` trip Clippy's
+  `large_enum_variant` (`Append` was 880 B). The cause was fixed rather than
+  allowed. `OwnedAppend` no longer keeps a copy of the whole admitted
+  `LogUpdate`: it keeps `{ predecessor, summary, suffix }` (672 B), because the
+  update's other fields are the predecessor's group and revision, the next
+  ballot and commit index, and no snapshot. `matches_update` compares those
+  fields (`matches_plain`); admission rejects any other update before planning,
+  so the answers are the same. The commit advance is then an empty append
+  without a suffix (640 B).
+- Selection. `Raft::persist` takes the scalar path exactly when `suffix` is
+  `None` and the hard state equals the durable one; snapshots and compaction go
+  through `persist_update` with `snapshot: Some(..)`, so they never qualify.
+  Today such an update always takes the `OwnedChange::Append` path
+  (`append_eligible` holds), so the scalar plan replaces exactly that plan.
+- Validation. `plan_commit` runs the checks `validate_base` and
+  `validate_append_metadata` make for that update, in the same order with the
+  same errors: limits, stale summary, ballot follows, ballot fields, commit
+  regression or gap or hard term behind the log, revision exhaustion. The group
+  and expected revision come from the core's own log, so they match by
+  construction. The ballot origin is retained (unchanged hard state), and the
+  next summary is `append_summary(summary, next, None)`, as before.
+- Effects. A volatile core emits the same `PersistVolatile` token. A durable
+  core emits the same `Effect::Persist(LogUpdate { group, expected_revision,
+  hard_state, commit_index, suffix: None, snapshot: None, snapshot_membership:
+  None })` as before; the plan no longer holds a clone of it.
+- State transitions and ownership. Unchanged: step → `Pending { next:
+  Commit }` → completion (`finish_completion` or `finish_volatile`) →
+  `install_pending`, which checks the predecessor metadata, installs the header
+  (revision and commit index; every other field stays the same) and returns the
+  next summary. `metadata`, `term_at`, `entry_at`, `full`,
+  `preserves_checkpoint_prefix` and `early_suffix` answer as they did for the
+  empty append (`early_suffix` already returned `None` for it).
+- Failure and cleanup. A wrong binding, stale token, failed barrier or failed
+  install still fences and drops the pending plan; `state()` stays at the last
+  completed transition. No partial progress exists because install is one
+  synchronous call and the predecessor check runs before any mutation. Restart
+  behaviour is unchanged: durable stores receive the same mutation bytes; a
+  volatile core has no cross-process restart.
+- Acceptance. Scalar-vs-`plan_owned` equivalence of metadata, summary, install
+  result and errors; the volatile scalar round has no update or suffix and
+  installs only the commit index; the durable round emits the identical
+  `LogUpdate` and completes through a store's full validation; an incomplete
+  scalar round fences and keeps `state()`; a stale scalar token is refused;
+  hard-state changes, new entries and snapshots do not take the scalar path;
+  size-of tests for `Pending` and `OwnedNextLog`; existing suites in all
+  configurations.
+
+Implemented evidence (measurement pending (runner)). Shape as planned, after
+the revision above. `Raft::persist` routes commit-only rounds to
+`persist_commit`, which calls `plan_commit`. A volatile core emits the token
+(with PR 1's incarnation); a durable core emits the identical `LogUpdate`. Both
+go through `stage_pending`, the tail `persist_update` already used.
+`PreparedOwnedLog::Append` now carries the checked `OwnedAppend`, so it stays
+within the lint's variant bound; a prepared commit advance is an `OwnedAppend`
+with no suffix. `NextLog::prepare_install` is unchanged. Test-only
+`OwnedNextLog::update()` rebuilds the admitted update; `suffix()` borrows the
+planned suffix.
+
+Sizes on x86_64 (`size_of` in a debug test build; "before" is PR 1's tip):
+`Pending` 1,728 → 1,088 B and `OwnedNextLog` 912 → 672 B, both measured.
+`After` 144 → at most 16 B and `Pending.membership` 288 → at most 8 B, both
+asserted. Computed from field sizes (`LogMetadata` 304 B, `LogSummary` 336 B,
+`Option<Suffix>` 32 B): `OwnedAppend` 880 → 672 B and the new `CommitAdvance`
+640 B. `pending_and_plan_sizes` keeps the measured values as upper bounds.
+
+Tests: `log::transition::tests::incoming::scalar_commit_plan_matches_the_owned_empty_append`
+(valid, voted, unvalidated-vote, term-behind, revision-exhausted and
+regressed-commit states over every commit index, a stale summary and invalid
+limits: equal errors, metadata, term lookups, `matches_update` truth tables
+against seven mutated updates, predecessor refusal, installed state and
+summary). `src/raft/commit_advance_tests.rs`: volatile scalar round (no suffix
+or update, the entries buffer is not moved, only revision and commit change,
+the committed interval is borrowed), durable round (identical `LogUpdate`,
+mutated updates refused, completion through a modelled store's full
+`apply_batch` gives the store's state), incomplete rounds fence (wrong binding,
+failed barrier, failed predecessor check; then `recover_volatile` completes a
+new round), stale and forged-generation tokens refused, new-term, new-vote,
+new-entry and compaction rounds not scalar, and the size test.
+
+Checks run on the builder's loaded machine (17 October 2026, load average
+40 to 150) on the tree rebased onto `cpu/volatile-log` b40d22b7:
+`cargo +stable fmt --all -- --check`, and strict Clippy with default, all
+features, no default features and native only, all zero diagnostics. Default
+suite: 85 test binaries done with 1,804 passed and 0 failed, including the 452
+library unit tests and `raft` (79). `representative_relay_model` was still
+running at publication, after 51 minutes single-threaded. `volatile` (7),
+`snapshot` (27), `runtime` (57), `effect_owner` (210) and `worker` (9) also
+pass. The `--all-features` and `--no-default-features` suites and the matched
+workspace's fmt, Clippy and tests were queued behind it; the PR lists their
+results when they finish. Before the rebase, the same change on 622bc411 passed
+85 default binaries (1,802 tests, 0 failures) before that run was stopped for
+the rebase.
+
+Review round 1 (both reviewers APPROVE, P3 findings only) and the round 1
+runner report are PR 3 comments on `8093c722`. The runner reported Mac
+singleton CPU/write 26,490 → 25,397 ns (−4.13%, 7/7 pairs) and Mac bulk
+281 → 282 ns (+0.36%, within the 1% guard), verdict ACCEPT; full suites are
+the suite runner's. Round 2 (this merge of `main` plus review follow-ups)
+changes no production code path: one comment in `src/raft.rs`, this
+documentation, a wider scalar-vs-`plan_owned` oracle
+(`scalar_commit_plan_matches_on_configured_and_compacted_logs`: learner,
+joint and final histories, checkpointed bases, a term-zero vote and revision
+exhaustion) and the `Option<Pending>` niche assertion relaxed to an upper
+bound.
 
 #### H1 schema plan: worker setting and shared harness costs
 
