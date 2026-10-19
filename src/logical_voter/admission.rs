@@ -151,20 +151,22 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone> Propos
                 return Err(ApplicationError::DedupCapacity);
             }
         }
+        if self.retired(operation) {
+            // Applies as `Expired` whatever is pending: it needs no room, so
+            // pending entries cannot refuse it `DedupCapacity`.
+            return Ok(std::mem::size_of::<LogicalReceipt>());
+        }
         let mut commands: Vec<_> = distinct
             .into_iter()
             .map(|(id, (bytes, control))| (id, bytes, control))
             .collect();
-        // A retired proposal reserves nothing; a live one is credited only
-        // with its own planned prune, computed on the applied state.
-        let plan = if self.retired(operation) {
-            None
-        } else {
-            commands.push((operation, bytes, c.control(self.control_profile.as_ref())));
-            // A retained duplicate applies as its original receipt: no prune.
-            self.retirement_plan(&c)
-                .filter(|_| !self.state.records.contains_key(&operation))
-        };
+        commands.push((operation, bytes, c.control(self.control_profile.as_ref())));
+        // A live proposal is credited only with its own planned prune,
+        // computed on the applied state. A retained duplicate applies as its
+        // original receipt: no prune.
+        let plan = self
+            .retirement_plan(&c)
+            .filter(|_| !self.state.records.contains_key(&operation));
         self.reserve(&commands, plan)?;
         Ok(std::mem::size_of::<LogicalReceipt>())
     }

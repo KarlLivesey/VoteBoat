@@ -524,6 +524,18 @@ fn admission_admits_retired_ids_and_credits_only_its_own_prune() {
             std::iter::repeat_n((first.operation, retired.as_slice()), 8)
         )
         .is_ok());
+    // Sequence 3 is admitted only through its own prune credit, so live plus
+    // pending now exceeds the table; the retired ID still needs no room.
+    assert!(a
+        .validate_proposal(third.operation, &third_bytes, std::iter::empty())
+        .is_ok());
+    assert!(a
+        .validate_proposal(
+            first.operation,
+            &retired,
+            std::iter::once((third.operation, third_bytes.as_slice()))
+        )
+        .is_ok());
     let r = apply(&mut a, &first);
     assert_eq!(r.outcome, EXPIRED);
     assert!(r.duplicate);
