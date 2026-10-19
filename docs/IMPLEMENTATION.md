@@ -18,7 +18,7 @@ design pack is unchanged.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current N0: three-process cluster harness | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
+| Current N0: three-process cluster harness (implemented; in review on `net/n0-cluster-harness`; baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
 | Next N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline | Plan §5.3 tests and §5.4 gate | NW1 |
 | Then N2: per-peer frame coalescing | One frame per peer per round across groups | N1; a G=4 cell on the N0 harness (see N0 limits) | Plan §4 row 2 | NW1 |
 
@@ -87,6 +87,83 @@ design pack is unchanged.
   ≥ 1 and `received` ≥ 1 on every node, waits = immediate + ready + timeout).
   The existing counter, directory and transfer service suites cover the move.
   fmt, the four strict Clippy builds and matched fmt/Clippy at zero diagnostics.
+
+### N0 implemented (evidence, 19–20 October 2026)
+
+- **Move.** Commit 1 moves `HostWait`, `HOST_GATHER` and `HOST_MAX_WAIT` to
+  `src/native/readiness/host_wait.rs` (`#![deny(unsafe_code)]`, re-exported as
+  `voteboat::native::readiness::{HostWait, HOST_GATHER, HOST_MAX_WAIT}`). A diff
+  of the old block against the new file shows only path spellings
+  (`voteboat::` → `crate::`/`super::`), the wake argument on `new`/`with` and two
+  doc lines; the `wait` body is byte-identical. `service_setup` re-exports
+  `HostWait`; the counter, directory and transfer call sites pass
+  `service_setup::host_wake()`, the same process `Arc` as before. Commit 2 makes
+  `wait` return `HostWaitOutcome` (additive; services ignore it), with a unit
+  test for each outcome (no wall-clock assertion).
+- **Harness.** `examples/benchmark/cluster.rs` (child of `offered.rs`, reusing
+  its `Ledger`, `Offerer`, `outputs` and `percentile`). `native_benchmark.rs`
+  gains `replica_startup` (the one `NativeStartup` constructor used by
+  `open_recorded` and by node mode), `finish_open`, `OFFERED_TIMERS` (also used
+  by `shared.rs`), `join` (split out of `close`), `parse_protocol` (no-QUIC
+  hint) and peer `sends`/`received` in `PollTotals`. The single-process paths
+  behave as before (`native.py` smoke on Linux: 2,000/2,000 applied).
+- **Script.** `benchmarks/tools/cluster.py` (tracked; Python 3.9 standard
+  library). Cross-check on every measured run: |Σ per-process CPU −
+  `RUSAGE_CHILDREN` delta| = 0.0 s.
+- **Tests.** `offered::cluster::tests` in the `native_benchmark` example: TCP
+  three-process run (and QUIC under `--features quic`), argument checks, no-QUIC
+  refusal (default build). The test re-executes its own test binary as the three
+  nodes, so it never runs a stale `target/debug` executable. Mutation: removing
+  the wait-count increment fails the TCP test. Ports: offsets 8..10 of 128-port
+  blocks in 1024..9984 and 20096..32767, locked in the shared lease namespace and
+  probe-bound until the nodes start.
+- **Checks run (Linux, cores 10–15).** fmt; strict Clippy default, all-features,
+  no-default-features, native-only; matched fmt and Clippy: zero diagnostics.
+  Default features: counter_service 144, directory_service 18, startup 48,
+  transfer_service 25, native_benchmark example 52 passed. All features: 203,
+  22, 63, 33, 60 passed. `--lib readiness` 9 passed.
+- **Observed while building (not acted on).** Under QUIC the leader makes ~3.5
+  poll rounds per write against ~0.22 under TCP, almost all `Ready` wakes (see
+  baseline): sizing input for N8/N3.
+
+### N0 baseline (quiet Mac M2 Max, 20 October 2026)
+
+Binary: branch head `d0f7a7a7` (main `fdf0c002` plus this harness; the replica
+code measured is main's), release, `--all-features`. Node directories on the
+RAM disk `/Volumes/vbram`; load average below 1.0 before each cell (recorded in
+the raw file); no builds during timing; 5 runs per cell, all valid (applied =
+offers, `window_refused=0`, term 1 → 1, every child exit 0). Window 1024,
+`ready_visit_items` 1024, one group, production `HostWait`. CPU is user+sys of
+each whole node process (startup, campaign, warmup, offered phase, drain);
+busy cores = CPU / process wall. Medians. Raw lines:
+`target/claude/research-r4/n0-baseline-d0f7a7a7.txt` (main checkout, untracked).
+
+| Cell | Rate/s | p99 ms | CPU µs/write total (n1 / n2 / n3) | Busy cores total (n1 / n2 / n3) | Rounds/write n1 / n2 / n3 | Frames sent/write n1 / n2 / n3 | n1 waits/write immediate / ready / timeout |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| TCP 1,000/s, 16,000 offers | 999 | 18.0 | 500.1 (283.5 / 108.5 / 108.2) | 0.498 (0.282 / 0.108 / 0.108) | 2.892 / 1.142 / 1.141 | 0.404 / 0.203 / 0.202 | 0.985 / 1.908 / 0.002 |
+| TCP 4,000/s, 16,000 offers | 3,989 | 17.6 | 126.4 (72.7 / 27.1 / 26.5) | 0.497 (0.286 / 0.107 / 0.104) | 0.712 / 0.277 / 0.278 | 0.099 / 0.049 / 0.049 | 0.240 / 0.473 / 0.001 |
+| TCP 15,000/s, 2,000 offers | 14,225 | 14.6 | 31.5 (16.6 / 7.6 / 7.3) | 0.365 (0.193 / 0.089 / 0.087) | 0.262 / 0.119 / 0.116 | 0.040 / 0.020 / 0.020 | 0.089 / 0.169 / 0.000 |
+| TCP 15,000/s, 16,000 offers | 14,891 | 16.7 | 24.2 (14.0 / 5.1 / 5.1) | 0.349 (0.203 / 0.074 / 0.075) | 0.218 / 0.090 / 0.092 | 0.032 / 0.016 / 0.016 | 0.075 / 0.143 / 0.000 |
+| QUIC 15,000/s, 2,000 offers | 14,431 | 10.1 | 64.6 (39.5 / 11.6 / 11.5) | 0.497 (0.304 / 0.092 / 0.089) | 3.086 / 0.360 / 0.370 | 0.044 / 0.021 / 0.024 | 0.068 / 3.007 / 0.004 |
+| QUIC 15,000/s, 16,000 offers | 14,912 | 18.9 | 55.2 (40.8 / 8.0 / 8.3) | 0.737 (0.549 / 0.103 / 0.107) | 3.489 / 0.266 / 0.288 | 0.034 / 0.017 / 0.017 | 0.061 / 3.429 / 0.001 |
+| Idle TCP 20/s, 600 offers (30 s) | 20 | 16.5 | 7,483 (3,171 / 2,184 / 2,102) | 0.149 (0.063 / 0.044 / 0.042) | 26.4 / 16.9 / 16.9 | 5.98 / 2.99 / 2.99 | 10.36 / 12.62 / 3.44 |
+| TCP 15,000/s G=4 | not run: `NativeStartup` bootstraps one group (see limits) | | | | | | |
+
+Marginal CPU per write, (CPU at 16,000 offers − CPU at 2,000) / 14,000, per
+round, then the median:
+
+| Cell | Total | n1 | n2 | n3 | Rounds (total) |
+| --- | --- | --- | --- | --- | --- |
+| TCP 15,000/s | 23.01 µs | 13.63 | 4.71 | 4.76 | 22.47, 22.69, 23.01, 27.78, 45.48 |
+| QUIC 15,000/s | 54.97 µs | 41.01 | 7.42 | 7.91 | 53.45, 54.20, 57.47, 54.97, 61.63 |
+| Secondary: single-process `native.py` (svc.sh loop, shared assembly, witness publication), same binary | 20.74 µs | — | — | — | 20.74, 21.17, 21.85, 19.51, 15.29 |
+
+Reading (for N1 sizing, not acted on here): at 1,000/s and 4,000/s the cluster
+burns the same ~0.50 busy cores, and node 1 runs ~2,900 rounds/s at every TCP
+rate (2.89 rounds/write × 1,000/s; 0.218 × 15,000/s ≈ 3,270/s), so light-load
+CPU follows rounds driven by time (1 ms offer ticks, wakes, 200 µs gathers),
+not writes. The followers each cost about a third of the leader. Under QUIC
+the leader's waits end `Ready` ~3.4 times per write: it spins on readiness.
 
 ## Lifetime bounds track (opened 19 October 2026)
 
