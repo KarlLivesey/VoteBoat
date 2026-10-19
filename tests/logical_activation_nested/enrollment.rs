@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
+use super::harness;
 use super::{lower::Lower, progress, setup, Middle, Top, UpperBridge};
-use std::time::{Duration, Instant};
 use voteboat::{
     application::CheckpointStateMachine, logical_voter::*, outbound::OutboundQueue, runtime::*,
 };
@@ -35,7 +35,7 @@ pub fn export_for(
         })
         .unwrap();
     bridge.checkpoint_backing(0).unwrap();
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&lower.clock, harness::LIVENESS_MS);
     while !bridge
         .inspect_backing(0, |p| {
             p.owner
@@ -48,7 +48,7 @@ pub fn export_for(
         .unwrap()
     {
         progress::driver_step(lower, bridge, driver, count);
-        assert!(Instant::now() < end, "actual source checkpoint");
+        assert!(end.within(&lower.clock), "actual source checkpoint");
     }
     let ticket = loop {
         match bridge.export_checkpoint_backing(0) {
@@ -58,7 +58,7 @@ pub fn export_for(
             }
             error => panic!("original source export {error:?}"),
         }
-        assert!(Instant::now() < end, "original export admission");
+        assert!(end.within(&lower.clock), "original export admission");
     };
     loop {
         progress::driver_step(lower, bridge, driver, count);
@@ -77,7 +77,7 @@ pub fn export_for(
             );
             return output;
         }
-        assert!(Instant::now() < end, "original source export output");
+        assert!(end.within(&lower.clock), "original source export output");
     }
 }
 pub fn detach<'a>(
@@ -93,7 +93,7 @@ pub fn detach_for<'a>(
     driver: &mut ChildActivationDriver<'_, Top>,
     count: usize,
 ) -> (LogicalActivationContinuation, &'a mut [Middle]) {
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&lower.clock, harness::LIVENESS_MS);
     loop {
         match driver.detach_child(bridge) {
             Ok(detached) => return detached,
@@ -101,7 +101,7 @@ pub fn detach_for<'a>(
         }
         progress::driver_step(lower, &mut bridge, driver, count);
         assert!(
-            Instant::now() < end,
+            end.within(&lower.clock),
             "original bridge observations handback"
         );
     }
@@ -115,7 +115,7 @@ pub fn target(
     target
         .begin_enrollment(voteboat::identity::OperationId::new(356200).unwrap(), grant)
         .unwrap_or_else(|e| panic!("actual target admission {:?}", e.reason));
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&lower.clock, harness::LIVENESS_MS);
     let before: Vec<_> = nodes
         .iter()
         .map(|n| n.local().outbound.peer_usage(super::support::node(204)))
@@ -161,7 +161,7 @@ pub fn target(
             return image;
         }
         assert!(
-            Instant::now() < end,
+            end.within(&lower.clock),
             "actual candidate Applied and correlated fresh reads"
         );
     }

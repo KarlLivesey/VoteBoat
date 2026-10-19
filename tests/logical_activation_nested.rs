@@ -2,15 +2,19 @@
 // Copyright (c) 2026 Karl Livesey
 #![cfg(feature = "tls")]
 //! Actual nine original physical owners and three genuine learner backing owners.
+#[path = "logical_voter_native/aliases.rs"]
+pub mod aliases;
 #[path = "logical_activation_application/application.rs"]
 mod application;
 #[path = "logical_activation_nested/assembly.rs"]
 mod assembly;
+#[path = "logical_activation_nested/borrowed_dials.rs"]
+mod borrowed_dials;
 #[path = "logical_activation_nested/business.rs"]
 mod business;
 #[path = "logical_activation_nested/channels.rs"]
 mod channels;
-#[path = "logical_nested_native/cleanup.rs"]
+#[path = "logical_voter_native/cleanup.rs"]
 mod cleanup;
 #[path = "logical_activation_nested/cluster.rs"]
 mod cluster;
@@ -24,8 +28,12 @@ mod cold_target;
 mod controls;
 #[path = "logical_activation_nested/diagnostic.rs"]
 mod diagnostic;
+#[path = "logical_activation_nested/dials.rs"]
+mod dials;
 #[path = "logical_activation_nested/enrollment.rs"]
 mod enrollment;
+#[path = "logical_voter_native/harness.rs"]
+pub mod harness;
 #[path = "logical_activation_nested/history.rs"]
 mod history;
 #[path = "logical_activation_nested/lower.rs"]
@@ -60,3 +68,17 @@ type Top = LogicalNode<
     LogicalActivationApplication<application::App>,
 >;
 type UpperBridge<'a> = LogicalBackingBridge<'a, Middle>;
+
+// HISTORY only serializes test-owned hosts and guards no data, so a test that
+// panics fails alone: the next test recovers the guard (`cluster::serial`).
+#[test]
+fn serial_history_recovers_after_a_test_panic() {
+    let failed = std::panic::catch_unwind(|| {
+        let _serial = cluster::serial();
+        panic!("intentional test-local serialization poison");
+    });
+    assert!(failed.is_err());
+    let _serial = cluster::serial();
+    assert!(cluster::HISTORY.is_poisoned());
+    cluster::HISTORY.clear_poison();
+}

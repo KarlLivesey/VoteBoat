@@ -1,8 +1,13 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 //! Same actual physical backing owners are pumped while middle borrows move.
-use super::{cluster::Cluster, repeated::Session, setup, Middle, UpperBridge};
-use std::time::{Duration, Instant};
+use super::{
+    cluster::Cluster,
+    harness::{self, FixtureClock, Observed, SimClock},
+    repeated::Session,
+    setup, Middle, UpperBridge,
+};
+use std::time::Duration;
 use voteboat::{
     identity::OperationId, logical_voter::*, runtime::*, transport::TransportPollBudget,
 };
@@ -13,11 +18,11 @@ struct Retired {
 }
 pub struct Lower<'a> {
     pub bridges: Vec<Bridge<'a>>,
-    pub clock: Instant,
+    pub clock: SimClock,
     retired: Vec<Retired>,
 }
 impl<'a> Lower<'a> {
-    pub fn new(clusters: &'a mut [Cluster], clock: Instant) -> Self {
+    pub fn new(clusters: &'a mut [Cluster], clock: &SimClock) -> Self {
         Self {
             bridges: clusters
                 .iter_mut()
@@ -30,12 +35,12 @@ impl<'a> Lower<'a> {
                     .unwrap()
                 })
                 .collect(),
-            clock,
+            clock: clock.clone(),
             retired: Vec::new(),
         }
     }
     pub fn now(&self) -> MonoTime {
-        MonoTime(self.clock.elapsed().as_millis() as u64)
+        self.clock.now()
     }
     pub fn budget() -> LogicalBridgeBudget {
         LogicalBridgeBudget {
@@ -46,7 +51,25 @@ impl<'a> Lower<'a> {
         }
     }
     pub fn advance(&mut self) {
-        let now = self.now();
+        self.advance_with(Observed::default());
+    }
+    /// Start one complete fixture round: decide its protocol time from what
+    /// the previous round left (every lower bridge's native children, the
+    /// retired sessions, and `upper`, the caller's other participants), then
+    /// poll the lower layer. Each fixture loop calls this exactly once per
+    /// round; the rest of the round reuses [`Lower::now`].
+    pub fn advance_with(&mut self, upper: Observed) {
+        let retired = self
+            .retired
+            .iter()
+            .map(|owned| owned.session.work_is_drained())
+            .collect::<Vec<_>>();
+        let observed = self
+            .bridges
+            .iter()
+            .fold(upper, Observed::bridge)
+            .progress(retired);
+        let now = self.clock.round(observed);
         for owned in &mut self.retired {
             owned
                 .session
@@ -85,13 +108,13 @@ impl<'a> Lower<'a> {
         self.bridges[slot]
             .begin_claim(OperationId::new(operation).unwrap())
             .unwrap();
-        let end = Instant::now() + Duration::from_secs(15);
+        let end = harness::Wait::new(&self.clock, harness::LIVENESS_MS);
         loop {
             self.advance();
             if let Some(image) = self.bridges[slot].take_image() {
                 return image;
             }
-            assert!(Instant::now() < end, "original lower Claim {slot}");
+            assert!(end.within(&self.clock), "original lower Claim {slot}");
             std::thread::park_timeout(Duration::from_millis(1));
         }
     }
@@ -123,14 +146,23 @@ impl<'a> Lower<'a> {
         }
     }
     pub fn middle(&mut self, nodes: &mut [Middle]) {
+        self.middle_with(nodes, Observed::default());
+    }
+    /// One round over the lower layer and these middle nodes; `other` adds
+    /// any separately borrowed bridge the caller polls in the same round.
+    pub fn middle_with(&mut self, nodes: &mut [Middle], other: Observed) {
         self.pump(nodes);
-        self.advance();
+        self.advance_with(Self::observed(nodes, other));
         self.pump(nodes);
         let now = self.now();
         for node in nodes {
             node.poll(now, LogicalNodePollBudget::default()).unwrap();
         }
         std::thread::park_timeout(Duration::from_millis(1));
+    }
+    /// Replica state of middle nodes the caller owns directly.
+    pub fn observed(nodes: &[Middle], other: Observed) -> Observed {
+        nodes.iter().fold(other, |o, node| o.local(node.local()))
     }
     pub fn close(self) {
         assert!(self.retired.is_empty(), "original channels handed to close");

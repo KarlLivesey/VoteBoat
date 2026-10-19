@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
+use super::harness::SimClock;
 use super::{
     business,
     cluster::{serial, Cluster},
@@ -7,7 +8,6 @@ use super::{
     lower::Lower,
     parts, progress, setup, Top,
 };
-use std::time::Instant;
 use voteboat::{application::StateMachine, logical_voter::*, native::connect::NativePeerProtocol};
 #[test]
 fn tcp_twelve_native_owners_original_logical_learner_activation() {
@@ -62,12 +62,12 @@ fn history(
     uncommitted: bool,
 ) {
     let _serial = serial();
-    let clock = Instant::now();
+    let clock = SimClock::default();
     eprintln!("356 original_nine_bootstraps");
     let mut clusters = (0..3)
-        .map(|slot| Cluster::new(protocol, slot, clock))
+        .map(|slot| Cluster::new(protocol, slot, &clock))
         .collect::<Vec<_>>();
-    let mut lower = Lower::new(&mut clusters, clock);
+    let mut lower = Lower::new(&mut clusters, &clock);
     let images = (0..3)
         .map(|slot| lower.claim(slot, 356010 + slot as u128))
         .collect::<Vec<_>>();
@@ -97,7 +97,7 @@ fn history(
     let (continuation, _) = enrollment::detach(&mut lower, bridge, &mut driver);
     let grant = super::controls::grant(&mut driver, &mut middle, output);
     assert!(middle[0].poll_checkpoint_export().is_none());
-    let mut target_cluster = Cluster::new(protocol, 3, clock);
+    let mut target_cluster = Cluster::new(protocol, 3, &clock);
     let target_channels = target_member(
         &mut lower,
         &mut middle,
@@ -123,7 +123,7 @@ fn history(
     let count = if repeat {
         let (second_driver, continuation, output) =
             super::repeated::prepare(&mut lower, bridge, returned);
-        let cluster = second_cluster.insert(Cluster::new(protocol, 4, clock));
+        let cluster = second_cluster.insert(Cluster::new(protocol, 4, &clock));
         add_lower(&mut lower, cluster);
         let (next_bridge, channels) = super::repeated::finish(
             &mut lower,
@@ -206,11 +206,10 @@ pub(super) fn reclaim_middle(
             .into_iter()
             .chain(retired)
             .chain(lower.take_retired_for_close()),
-        lower.now(),
     );
-    target_channels.close(std::iter::empty(), lower.now());
+    target_channels.close(std::iter::empty());
     if let Some(channels) = second_channels {
-        channels.close(std::iter::empty(), lower.now());
+        channels.close(std::iter::empty());
     }
 }
 
@@ -271,21 +270,14 @@ pub(super) fn target_member<'a>(
     };
     super::assembly::target(lower, middle, descriptors, &target_image, mode.0)
 }
-fn finish_clusters(mut originals: Vec<Cluster>, mut first: Cluster, mut second: Option<Cluster>) {
-    for cluster in &mut originals {
-        cluster.checkpoint();
-    }
-    first.checkpoint();
-    if let Some(cluster) = &mut second {
-        cluster.checkpoint();
-    }
-    for cluster in originals {
-        cluster.finish();
-    }
-    first.finish();
-    if let Some(cluster) = second {
-        cluster.finish();
-    }
+fn finish_clusters(originals: Vec<Cluster>, first: Cluster, second: Option<Cluster>) {
+    // Every cluster is checkpointed and closed in lockstep, so none sits
+    // unpolled while shared protocol time advances (see `Cluster::wait_all`).
+    let mut clusters = originals;
+    clusters.push(first);
+    clusters.extend(second);
+    Cluster::checkpoint_all(&mut clusters);
+    Cluster::finish_all(clusters);
 }
 
 fn add_lower<'a>(lower: &mut Lower<'a>, cluster: &'a mut Cluster) {

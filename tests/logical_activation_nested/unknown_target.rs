@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 //! Unknown observation preserves the original import; fresh cold Claim resolves truth.
+use super::harness::{self, Observed};
 use super::{cluster::Cluster, lower::Lower, setup, Middle};
-use std::time::{Duration, Instant};
 use voteboat::{
     application::{ReadableStateMachine, StateMachine},
     identity::{OperationId, StoreBinding},
@@ -46,15 +46,15 @@ pub fn recover<'a>(
     bridge
         .begin_claim(OperationId::new(368262).unwrap())
         .unwrap();
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&lower.clock, harness::LIVENESS_MS);
     let fresh = loop {
-        lower.middle(source);
+        lower.middle_with(source, Observed::default().bridge(&bridge));
         bridge.advance(lower.now(), Lower::budget()).unwrap();
         if let Some(image) = bridge.take_image() {
             break image;
         }
         assert!(
-            Instant::now() < end,
+            end.within(&lower.clock),
             "fresh cold Unknown import lineage resolution"
         );
     };
@@ -114,9 +114,9 @@ pub(super) fn cancel(
     bridge
         .begin_enrollment(OperationId::new(356200).unwrap(), grant)
         .unwrap_or_else(|e| panic!("genuine source grant {:?}", e.reason));
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&lower.clock, harness::LIVENESS_MS);
     let (ticket, bytes) = loop {
-        lower.middle(source);
+        lower.middle_with(source, Observed::default().bridge(&bridge));
         bridge.advance(lower.now(), Lower::budget()).unwrap();
         if let Some(work) = bridge.inspect_work(|w| {
             w.and_then(|w| {
@@ -130,7 +130,7 @@ pub(super) fn cancel(
         }) {
             break work;
         }
-        assert!(Instant::now() < end, "original import client admission");
+        assert!(end.within(&lower.clock), "original import client admission");
     };
     let LogicalBridgeChildTicket::Client(ticket) = ticket else {
         panic!("actual import client")
@@ -142,7 +142,7 @@ pub(super) fn cancel(
         LogicalBridgeChildTicket::Client(ticket)
     );
     loop {
-        lower.middle(source);
+        lower.middle_with(source, Observed::default().bridge(&bridge));
         bridge
             .advance(
                 lower.now(),
@@ -174,7 +174,7 @@ pub(super) fn cancel(
         }
         assert!(bridge.take_image().is_none());
         assert!(
-            Instant::now() < end,
+            end.within(&lower.clock),
             "same original Unknown observation settles"
         );
     }
@@ -185,12 +185,12 @@ pub(super) fn cancel(
     (recovery, bytes)
 }
 fn materialized(cluster: &mut Cluster, bytes: Vec<u8>) -> Facts {
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&cluster.clock, harness::LIVENESS_MS);
     loop {
         cluster.poll();
         if cluster.nodes.iter().all(|n|matches!(n.local().applications[&setup::bottom(3).group].read_at(n.local().applications[&setup::bottom(3).group].applied_index(),LogicalQuery::Enrollment).unwrap(),LogicalRead::Enrollment(v) if v.record.is_some())) { break; }
         assert!(
-            Instant::now() < end,
+            end.within(&cluster.clock),
             "accepted original import actually commits after Unknown"
         );
     }

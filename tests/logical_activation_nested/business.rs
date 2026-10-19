@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
-use super::{lower::Lower, progress, setup, Top, UpperBridge};
-use std::time::{Duration, Instant};
+use super::{harness, lower::Lower, progress, setup, Top, UpperBridge};
 use voteboat::{application::CounterOutcome, identity::OperationId, logical_voter::*, runtime::*};
 pub fn request(
     lower: &mut Lower<'_>,
@@ -23,7 +22,8 @@ pub fn request(
             bytes,
         })
         .unwrap();
-    let end = Instant::now() + Duration::from_secs(15);
+    // The original 15 s bound over all three waits, in protocol time.
+    let end = harness::Wait::new(&lower.clock, harness::LIVENESS_MS);
     loop {
         progress::step(lower, bridge, top, count);
         if let Some(output) = top.poll_client() {
@@ -40,7 +40,7 @@ pub fn request(
             assert_eq!(receipt.index, position.index);
             break;
         }
-        assert!(Instant::now() < end, "actual top business result");
+        assert!(end.within(&lower.clock), "actual top business result");
     }
     let ticket = top
         .read(setup::top().group, ActivationQuery::Business(()))
@@ -55,10 +55,13 @@ pub fn request(
             );
             break;
         }
-        assert!(Instant::now() < end, "actual top quorum read");
+        assert!(end.within(&lower.clock), "actual top quorum read");
     }
     while !top.work_is_drained() || !bridge.observations_are_drained() {
         progress::step(lower, bridge, top, count);
-        assert!(Instant::now() < end, "business original observations drain");
+        assert!(
+            end.within(&lower.clock),
+            "business original observations drain"
+        );
     }
 }
