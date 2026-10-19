@@ -938,8 +938,14 @@ corrected).
 native-only, and the matched workspace fmt and strict Clippy: zero
 diagnostics. The previous builder's last two benchmark commits failed
 Clippy's `too_many_lines` (fixed in `4be97a91`). Suites on Linux cores 4–9,
-one configuration at a time: see the final-head counts in the PR; on
-`4be97a91` default features: lib 502, counter_service 146, directory_service
+one configuration at a time. Final code (`4f673b2c` plus docs and the
+fixture fix below), default features: lib 502, counter_service 146,
+directory_service 18, effect_owner 216, log_reclaim 11, log_store 21,
+maintenance 9, raft 79, runtime 57, snapshot 27, snapshot_worker 14, startup
+51, transfer_service 25; all-features: lib 504, counter_service 205,
+directory_service 23, effect_owner 216, log_reclaim 11, log_store 21,
+maintenance 9, raft 79, runtime 57, snapshot 27, snapshot_worker 14, startup
+66, transfer_service 34; all passed. Earlier, on `4be97a91`, default features: lib 502, counter_service 146, directory_service
 18, effect_owner 216, log_reclaim 11, log_store 21, maintenance 9, raft 79,
 runtime 57, snapshot 27, snapshot_worker 14, startup 51, transfer_service 25,
 all passed; all-features: lib 504, counter_service 205, directory_service 23,
@@ -948,8 +954,13 @@ runtime 57, snapshot 27, snapshot_worker 14, startup 66, transfer_service 34,
 all passed. One all-features `startup` run failed
 `maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_tcp_wal`
 with `AddrInUse` binding a UDP socket to the port the OS had just given its
-TCP listener (another process on the shared host held it; file untouched by
-this PR); the rerun passed.
+TCP listener (another process on the shared host held it); the rerun
+passed. The same fixture pattern failed twice more on the final head
+(`multi::native_multi_startup_tcp_shares_one_store_and_recovers_every_group`,
+`maintenance::durable_leadership_handoff_reopens_pending_and_completed_intents_tcp`)
+while the host was at load 6–9, so `tests/startup/multi.rs` and
+`tests/startup/maintenance.rs` now retry the TCP/UDP pair up to 32 times, as
+the other startup fixtures already did (test-only).
 
 **Existing test contracts changed.**
 - `maintenance_uses_data_admission_and_preserves_control_reserve` →

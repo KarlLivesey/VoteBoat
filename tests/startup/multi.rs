@@ -66,9 +66,15 @@ impl History {
         std::fs::create_dir(&root).unwrap();
         let sockets = (0..3)
             .map(|_| {
-                let tcp = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
-                let udp = std::net::UdpSocket::bind(tcp.local_addr().unwrap()).unwrap();
-                (tcp, udp)
+                // The UDP port can be held by another process; retry as the
+                // other startup fixtures do.
+                (0..32)
+                    .find_map(|_| {
+                        let tcp = std::net::TcpListener::bind("127.0.0.1:0").ok()?;
+                        let udp = std::net::UdpSocket::bind(tcp.local_addr().ok()?).ok()?;
+                        Some((tcp, udp))
+                    })
+                    .expect("available TCP/UDP endpoint")
             })
             .collect::<Vec<_>>();
         let addresses = sockets
