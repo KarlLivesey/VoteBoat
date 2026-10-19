@@ -132,9 +132,6 @@ impl OwnedNextLog {
             .entries
             .get(usize::try_from(index.checked_sub(suffix.from)?).ok()?)
     }
-    // Inlined so a caller's owned plan installs in place rather than being
-    // copied into an argument slot (the plan is close to 1 KiB).
-    #[inline]
     pub(crate) fn prepare_install(
         self,
         current: &GroupLog,
@@ -152,7 +149,6 @@ impl OwnedNextLog {
                 .map(PreparedOwnedLog::Other),
         }
     }
-    #[inline]
     pub(crate) fn install(self, current: &mut GroupLog) -> Result<LogSummary, StorageError> {
         Ok(self.prepare_install(current)?.install(current))
     }
@@ -227,7 +223,6 @@ impl PreparedOwnedLog {
             Self::Other(prepared) => prepared.preserves_checkpoint_prefix(),
         }
     }
-    #[inline]
     pub(crate) fn install(self, current: &mut GroupLog) -> LogSummary {
         match self {
             Self::Append { update, summary } => install_append(current, update, summary),
@@ -235,7 +230,6 @@ impl PreparedOwnedLog {
         }
     }
 }
-#[inline]
 fn install_append(current: &mut GroupLog, update: LogUpdate, summary: LogSummary) -> LogSummary {
     if let Some(suffix) = update.suffix {
         current.entries.append(suffix.entries);
