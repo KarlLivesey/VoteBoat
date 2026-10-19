@@ -5,9 +5,11 @@
 #[path = "logical_voter_native/cleanup.rs"]
 mod cleanup;
 #[path = "logical_voter_native/cluster.rs"]
-mod cluster;
+pub mod cluster;
 #[path = "logical_voter_native/drive.rs"]
 mod drive;
+#[path = "logical_voter_native/harness.rs"]
+pub mod harness;
 #[path = "logical_voter_native/history.rs"]
 mod history;
 #[path = "logical_voter_native/setup.rs"]

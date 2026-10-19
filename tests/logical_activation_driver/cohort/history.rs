@@ -24,8 +24,8 @@ fn three_logical_parents_ten_native_owners_replace_distinct_child_quic() {
     history(NativePeerProtocol::Quic);
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = cluster::HISTORY.lock().unwrap();
-    let clock = Instant::now();
+    let _serial = crate::history_guard();
+    let clock = &harness::SimClock::default();
     eprintln!("332 stage=original_native_bootstraps");
     let mut target_members = members::Members::new(protocol, 0, clock);
     let mut own_members = members::Members::new(protocol, 1, clock);
@@ -39,12 +39,11 @@ fn history(protocol: NativePeerProtocol) {
         drive::claim_in(&mut sibling, clock, 33203, false),
     ];
     let representative = images[0].representative();
-    let now = MonoTime(clock.elapsed().as_millis() as u64);
-    let (channels, [left, mut parent, right]) = assembly::parents(&images, protocol, now);
+    let (channels, [left, mut parent, right]) = assembly::parents(&images, protocol, clock);
     let mut peers = progress::Peers {
         parents: [left, right],
         bridges: [own, sibling],
-        clock,
+        clock: clock.clone(),
     };
     eprintln!("332 stage=three_parent_election");
     peers.elect(&mut parent, &mut target);
@@ -111,7 +110,6 @@ fn history(protocol: NativePeerProtocol) {
             .into_values()
             .chain(middle.sessions.into_values())
             .chain(right.sessions.into_values()),
-        MonoTime(clock.elapsed().as_millis() as u64),
     );
     target_members.finish();
     own_members.finish();
@@ -124,7 +122,7 @@ fn settle(
     intent: &ChildActivationIntent,
 ) {
     use voteboat::application::StateMachine;
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&peers.clock, harness::LIVENESS_MS);
     loop {
         peers.initial(parent, target);
         let status = parent.local().applications[&intent.mapping().parent]
@@ -152,7 +150,7 @@ fn settle(
             return;
         }
         assert!(
-            Instant::now() < end,
+            end.within(&peers.clock),
             "actual terminal parent/child convergence"
         );
     }

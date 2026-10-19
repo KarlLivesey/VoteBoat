@@ -66,8 +66,8 @@ impl Observed {
 }
 #[test]
 fn requested_logical_shutdown_settles_original_partial_send_on_real_native_peer_close() {
-    let _serial = cluster::HISTORY.lock().unwrap();
-    let clock = Instant::now();
+    let _serial = crate::history_guard();
+    let clock = &harness::SimClock::default();
     let mut first = members::Members::new(NativePeerProtocol::TcpTls, 0, clock);
     let mut second = members::Members::new(NativePeerProtocol::TcpTls, 1, clock);
     let mut third = members::Members::new(NativePeerProtocol::TcpTls, 2, clock);
@@ -81,7 +81,7 @@ fn requested_logical_shutdown_settles_original_partial_send_on_real_native_peer_
     ];
     let gate = gate::Observed::default();
     let (channels, [mut sender, mut opposite, mut idle]) =
-        assembly::parents(&images, progress::now(clock), gate.clone());
+        assembly::parents(&images, clock, gate.clone());
     refuse_running(&mut sender, clock, &gate);
     progress::hold(&mut a, &mut sender, clock, &gate);
     let binding = sender.local().outbound.binding();
@@ -118,13 +118,16 @@ fn requested_logical_shutdown_settles_original_partial_send_on_real_native_peer_
             .into_values()
             .chain(opposite.sessions.into_values())
             .chain(idle.sessions.into_values()),
-        progress::now(clock),
     );
     first.finish();
     second.finish();
     third.finish();
 }
-fn refuse_running(sender: &mut fixture::FacadeNode, clock: Instant, gate: &gate::Observed) {
+fn refuse_running(
+    sender: &mut fixture::FacadeNode,
+    clock: &harness::SimClock,
+    gate: &gate::Observed,
+) {
     let owner = sender.local().owner.usage();
     let queue = sender.local().outbound.usage();
     let rejected = sender
@@ -138,7 +141,11 @@ fn refuse_running(sender: &mut fixture::FacadeNode, clock: Instant, gate: &gate:
     assert_eq!(sender.local().outbound.usage(), queue);
     assert_eq!(gate.borrow().accepted, 0);
 }
-fn begin(sender: &mut fixture::FacadeNode, clock: Instant, gate: &gate::Observed) -> Observed {
+fn begin(
+    sender: &mut fixture::FacadeNode,
+    clock: &harness::SimClock,
+    gate: &gate::Observed,
+) -> Observed {
     let before = sender.local().outbound.usage();
     assert_eq!(before.messages, 2);
     sender.close_intake().unwrap();
@@ -167,17 +174,16 @@ fn begin(sender: &mut fixture::FacadeNode, clock: Instant, gate: &gate::Observed
 fn drain(
     sender: &mut fixture::FacadeNode,
     bridge: &mut aliases::Bridge<'_>,
-    clock: Instant,
+    clock: &harness::SimClock,
     observed: &mut Observed,
 ) {
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     while !sender.is_drained() {
-        bridge
-            .advance(progress::now(clock), fixture::budget(4))
-            .unwrap();
+        let now = progress::round(bridge, clock);
+        bridge.advance(now, fixture::budget(4)).unwrap();
         super::super::progress::pump(bridge, sender);
         let output = sender
-            .poll_shutdown(progress::now(clock), LogicalNodePollBudget::default())
+            .poll_shutdown(now, LogicalNodePollBudget::default())
             .unwrap_or_else(|e| {
                 panic!(
                     "original shutdown rejection {:?} completions={:?} closures={:?}",
@@ -186,7 +192,7 @@ fn drain(
             });
         observed.retain(output);
         assert_ne!(sender.state(), NodeState::RecoveryRequired);
-        assert!(Instant::now() < end, "original requested sender close");
+        assert!(end.within(clock), "original requested sender close");
         std::thread::park_timeout(Duration::from_millis(1));
     }
     assert!(sender.local().persistence.is_drained());

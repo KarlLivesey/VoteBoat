@@ -135,7 +135,7 @@ fn client(
         })
         .unwrap();
     ownership::refused(parent); // accepted but not stepped: no observation authority.
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&peers.clock, harness::LIVENESS_MS);
     loop {
         peers.initial(parent, target);
         ownership::refused(parent); // also true just before a real ready output is exported.
@@ -155,7 +155,7 @@ fn client(
             }
             return output;
         }
-        assert!(Instant::now() < end, "original held client output");
+        assert!(end.within(&peers.clock), "original held client output");
     }
 }
 pub fn read(
@@ -166,7 +166,7 @@ pub fn read(
 ) -> Read {
     let ticket = parent.read(groups::mapping(1).parent, query).unwrap();
     ownership::refused(parent);
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&peers.clock, harness::LIVENESS_MS);
     loop {
         peers.initial(parent, target);
         ownership::refused(parent);
@@ -184,6 +184,6 @@ pub fn read(
             }
             return output;
         }
-        assert!(Instant::now() < end, "original held quorum read");
+        assert!(end.within(&peers.clock), "original held quorum read");
     }
 }

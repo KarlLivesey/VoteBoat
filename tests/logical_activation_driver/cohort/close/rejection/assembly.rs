@@ -17,10 +17,11 @@ use super::*;
 use voteboat::outbound::OutboundQueue;
 pub fn parents(
     images: &[VerifiedLogicalImage; 3],
-    now: MonoTime,
+    clock: &harness::SimClock,
     observed: gate::Observed,
     fault: fault::Fault,
 ) -> (channels::Channels, [fixture::FacadeNode; 3]) {
+    let now = harness::FixtureClock::now(clock);
     let descriptors = images
         .iter()
         .enumerate()
@@ -45,7 +46,7 @@ pub fn parents(
         &descriptors,
         &bindings,
         NativePeerProtocol::TcpTls,
-        now,
+        clock,
         |from, to, session| {
             if (from, to) == (0, 1) {
                 fault::wrap(gate::Gate::wrap(session, observed.clone()), fault.clone())

@@ -35,9 +35,9 @@ fn original_readiness_admission_stop_retains_authorization_until_dispatch_quic()
     history(NativePeerProtocol::Quic, true);
 }
 fn history(protocol: NativePeerProtocol, stop: bool) {
-    let _serial = cluster::HISTORY.lock().unwrap();
+    let _serial = crate::history_guard();
     let mut cohort = member::Member::new(protocol);
-    let clock = cohort.clock;
+    let clock = &cohort.clock.clone();
     let mut bridge =
         LogicalChildBridge::new(&mut cohort.nodes, setup::mapping(), support::node(1)).unwrap();
     let image = drive::claim_in(&mut bridge, clock, 5201, false);
@@ -112,7 +112,7 @@ fn history(protocol: NativePeerProtocol, stop: bool) {
         node
     };
     node.close_intake().unwrap();
-    progress::until(&mut bridge, node, clock, fixture::FacadeNode::is_drained);
+    progress::drain(&mut bridge, node, clock);
     bridge.close();
     assert!(bridge.is_drained());
     drop(bridge);
@@ -126,17 +126,17 @@ fn history(protocol: NativePeerProtocol, stop: bool) {
 fn phase(
     driver: &mut ChildActivationDriver<'_, fixture::FacadeNode>,
     bridge: &mut aliases::Bridge<'_>,
-    clock: Instant,
+    clock: &harness::SimClock,
     wanted: ChildActivationDriverPhase,
 ) {
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     loop {
         progress::child_step(driver, bridge, clock, 4);
         if driver.phase() == wanted && bridge.is_drained() {
             return;
         }
         assert!(
-            Instant::now() < end,
+            end.within(clock),
             "actual child phase {:?} expected {:?}",
             driver.phase(),
             wanted
@@ -146,10 +146,10 @@ fn phase(
 fn export(
     driver: &mut ChildActivationDriver<'_, fixture::FacadeNode>,
     bridge: &mut aliases::Bridge<'_>,
-    clock: Instant,
+    clock: &harness::SimClock,
 ) -> Snapshot {
     bridge.checkpoint_backing(0).unwrap();
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     loop {
         progress::child_step(driver, bridge, clock, 3);
         if bridge
@@ -166,7 +166,7 @@ fn export(
         {
             break;
         }
-        assert!(Instant::now() < end, "original durable checkpoint anchor");
+        assert!(end.within(clock), "original durable checkpoint anchor");
     }
     let ticket = loop {
         match bridge.export_checkpoint_backing(0) {
@@ -175,7 +175,7 @@ fn export(
             Err(reason) => panic!("original export admission {reason:?}"),
         }
         assert!(
-            Instant::now() < end,
+            end.within(clock),
             "original maintenance before export admission"
         );
     };
@@ -184,7 +184,7 @@ fn export(
         if let Some(output) = bridge.poll_checkpoint_export_backing(0) {
             break output;
         }
-        assert!(Instant::now() < end, "original Node export result");
+        assert!(end.within(clock), "original Node export result");
     };
     assert_eq!(output.ticket(), ticket);
     assert_eq!(
@@ -254,9 +254,9 @@ fn assert_terminal(
 fn stop_original_readiness<'p>(
     mut driver: ChildActivationDriver<'p, fixture::FacadeNode>,
     bridge: &mut aliases::Bridge<'_>,
-    clock: Instant,
+    clock: &harness::SimClock,
 ) -> &'p mut fixture::FacadeNode {
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     loop {
         progress::child_step(&mut driver, bridge, clock, 4);
         let usage = bridge.usage();
@@ -266,7 +266,7 @@ fn stop_original_readiness<'p>(
         {
             break;
         }
-        assert!(Instant::now() < end, "original readiness admission");
+        assert!(end.within(clock), "original readiness admission");
     }
     driver.stop_waiting_with_child(bridge).unwrap();
     progress::child_step(&mut driver, bridge, clock, 0);
@@ -276,7 +276,7 @@ fn stop_original_readiness<'p>(
     while !driver.is_drained() {
         progress::child_step(&mut driver, bridge, clock, 4);
         assert!(
-            Instant::now() < end,
+            end.within(clock),
             "original readiness/cancel dispatch cleanup"
         );
     }

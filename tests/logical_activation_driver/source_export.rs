@@ -16,7 +16,7 @@ fn source_enrollment_without_original_authorization_returns_same_live_export_qui
     history(NativePeerProtocol::Quic);
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = cluster::HISTORY.lock().unwrap();
+    let _serial = crate::history_guard();
     let mut parent_stores = member::Member::new(protocol);
     let mut source_stores = member::Member::new(protocol);
     let mut parent_bridge =
@@ -25,8 +25,8 @@ fn history(protocol: NativePeerProtocol) {
     let mut source_bridge =
         LogicalChildBridge::new(&mut source_stores.nodes, setup::mapping(), support::node(1))
             .unwrap();
-    let parent_image = drive::claim_in(&mut parent_bridge, parent_stores.clock, 351000, false);
-    let source_image = drive::claim_in(&mut source_bridge, source_stores.clock, 351100, false);
+    let parent_image = drive::claim_in(&mut parent_bridge, &parent_stores.clock, 351000, false);
+    let source_image = drive::claim_in(&mut source_bridge, &source_stores.clock, 351100, false);
     let mut parent = fixture::FacadeNode::from_parts(
         &parent_image,
         fixture::build(&parent_image),
@@ -41,22 +41,12 @@ fn history(protocol: NativePeerProtocol) {
         MonoTime(0),
     )
     .unwrap_or_else(|r| panic!("{:?}", r.reason));
-    let output = export(&mut source_bridge, &mut source, source_stores.clock);
+    let output = export(&mut source_bridge, &mut source, &source_stores.clock);
     refuse(&mut parent, &mut source, &mut source_bridge, output);
     source.close_intake().unwrap();
-    progress::until(
-        &mut source_bridge,
-        &mut source,
-        source_stores.clock,
-        fixture::FacadeNode::is_drained,
-    );
+    progress::drain(&mut source_bridge, &mut source, &source_stores.clock);
     parent.close_intake().unwrap();
-    progress::until(
-        &mut parent_bridge,
-        &mut parent,
-        parent_stores.clock,
-        fixture::FacadeNode::is_drained,
-    );
+    progress::drain(&mut parent_bridge, &mut parent, &parent_stores.clock);
     drop(
         source
             .into_parts()
@@ -131,10 +121,10 @@ fn refuse(
 fn export(
     bridge: &mut aliases::Bridge<'_>,
     node: &mut fixture::FacadeNode,
-    clock: Instant,
+    clock: &harness::SimClock,
 ) -> SnapshotExportCompletion {
     bridge.checkpoint_backing(0).unwrap();
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     while !bridge
         .inspect_backing(0, |p| {
             p.owner
@@ -147,14 +137,14 @@ fn export(
         .unwrap()
     {
         progress::step(bridge, node, clock, 4);
-        assert!(Instant::now() < end, "original backing checkpoint");
+        assert!(end.within(clock), "original backing checkpoint");
     }
     let ticket = loop {
         match bridge.export_checkpoint_backing(0) {
             Ok(ticket) => break ticket,
             Err(SnapshotRouteError::Overloaded) => {
                 progress::step(bridge, node, clock, 4);
-                assert!(Instant::now() < end, "original checkpoint ownership drain");
+                assert!(end.within(clock), "original checkpoint ownership drain");
             }
             error => panic!("original export admission {error:?}"),
         }
@@ -165,7 +155,7 @@ fn export(
             assert_eq!(output.ticket(), ticket);
             return output;
         }
-        assert!(Instant::now() < end, "original backing load");
+        assert!(end.within(clock), "original backing load");
     }
 }
 fn candidate() -> LogicalApplication {

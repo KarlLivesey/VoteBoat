@@ -35,6 +35,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | T2 Cheaper durable barrier | Fewer physical syncs per group commit on CoW and non-CoW volumes | Only with a complete recovery/damage proof and no relaxation of acknowledged state; Btrfs, ext4/XFS, APFS |
 | T3 Wider group commit | Barrier cost amortized over everything queued | Native loaded writes/s and p99 improve with lower CPU/original; unchanged durability contract |
 | T4 Per-original CPU | Framework CPU/original materially below the main baseline (old-rule, pre-H2 targets: 248 ns bulk / 14.6 µs singleton; to be re-measured under H2 when main is re-baselined) | Profile-selected removals of per-original allocation/handoff with no semantic change |
+| Q1 Reliable suites on any host (user, 18 October 2026) | Every suite passes on any hardware, from a Raspberry Pi to large servers and GitHub's 3–4 core runners | No outcome depends on wall-clock speed, core count, disk latency or scheduling; no assertion weakened, no test ignored or retried, no library capacity changed; Platform feedback green |
 
 ### Mini plan
 
@@ -42,6 +43,10 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | --- | --- | --- | --- | --- |
 | Done H2: ready-snapshot collection in the matched harness (merged 8b3c1e6c; main re-baselined) | The VoteBoat actor cut each proposal pass as soon as a peer message was queued, so batch width tracked follower reply latency and any faster replication path paid extra wake/park rounds at 16 workers (V3b: rounds 7.7k → 17.3k, sys 30 → 50 ns/write). A pass now takes only the requests queued when it starts; peer progress arriving during it is handled before the next pass. This changes the instrument for VoteBoat's actor only | H1 merged (`30a1f6c5`); researcher note `target/claude/research-r3/v3b-regression.md`. Next steps in order: merge V2 (PR 3); merge H2 and re-baseline main under it; V3b-s (width-1 per-round overhead); then re-measure V3a/V3b rebased on V2 | Actor tests that a mid-pass peer message neither truncates the pass nor waits past the next pass, and that a request queued after the pass reads its ready count waits for the next pass; existing deferral/capacity tests; 73 matched tests; root and matched fmt; matched and four root strict Clippy builds; quiet-Mac 5 interleaved pairs × 4 cells against `30a1f6c5`; attribution parity controls side by side; main re-baselined before any later gate | T4 |
 | Done H1: server worker flag (merged `30a1f6c5`) | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`) | Matched source byte-identical to flag-only `297aec15`; matched tests; both fmt checks and five strict Clippy configurations; independent review | T4 |
+| Done TR1a (PR 5, formerly R1; merged 19 October 2026 on TR1b): deterministic simulated time in the activation driver fixtures | Platform feedback has failed on every main run since 17 October: the activation driver fixtures turned elapsed wall time into protocol time, so a slow host produced more heartbeats and exhausted child group 802's 128 retained actions; the first panic then poisoned the shared serialization lock for 25 more tests. Round 2 restores every liveness bound in protocol time, holds time while dial work or replicated progress is in flight, asserts the 64-action protocol budget and owns each port for the whole test. Round 3 draws every port from TR1b's shared pool and keeps the outer channels' unused half bound | Research report `target/claude/research-ci/dedup-capacity-root-cause.md`; architect plan TR1 (b), (c), (f); TR1b / PR 4 (`03127ec5`, PR 5's base) for the shared port pool and exclusions | Round 3 (cores 0-3, nice, no retries): `logical_activation_driver` 35/35 ×5 and serial, `logical_voter_native` 42/42 ×5, serial and two concurrent copies, `logical_nested_native` 15/15 ×5 and serial, `logical_activation_nested` 14/14 ×3 with 12/14 and 13/14 in two runs (QUIC close-drain timeouts at `cluster.rs:216`, TR4; serial passes split into consecutive `--test-threads=1` runs); two of the four binaries are unchanged by TR1a; round 2: parent `30a1f6c5` under E3; `logical_activation_driver` (`--all-features`) E1 ×10, E2 ×5, E3 ×10, E4 ×5 pairs, E5 ×3 with every run passing; retained protocol actions ≤ 64 in every cohort run; fmt, four strict Clippy configurations, matched workspace fmt + Clippy; all-feature full suite (other configurations: suite runner); two reviews | Q1 (M1, M2, M3) |
+| Next TR1b (PR 4, TR1a's base): CI runs every binary, shared port leases, explicit accept mode | Covers the architect TR1 items this slice does not: (d) `set_nonblocking` in the bin tests (`route_discovery`, the macOS `WouldBlock`), (e) CI `--no-fail-fast` for all three configurations, (g) `validation/reliability-proof.sh`, and leases for the seven other port ladders. Since TR1a round 3, `harness::PortLease` is a protocol split of this slice's `support::ports::PortLease`, so PR 5 depends on it and merges after it | Architect plan; PR 4 review rounds | PR 4's own proof and reviews | Q1 (M1, M3) |
+| Following TR2/TR3: inventory, then the logical-voter family on the same clock | `logical_voter_native` still keeps wall-clock protocol time (its waits keep exactly their old 15 s wall bounds through the shared `Wait`), and `logical_activation_nested` has its own clocks and the same 128-action budget. A read-only bridge seam (L1) would let borrowed children's dial work and readiness hold time too | TR1a harness; TR1b CI visibility | Same matrix per binary; inventory of newly visible CI failures | Q1 (M2, M5) |
+| In progress H1: review round 3, preserve the benchmark instrument | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`); pinned matched workspace; quiet-Mac 30-pair buffer attribution result | All matched source byte-identical to flag-only `297aec15`; raw evidence preserved; matched tests; both fmt checks and five strict Clippy configurations; independent review of the reduced scope | T4 |
 | Done V1: core-canonical volatile log (merged 041fc3fb; Mac −18.8% bulk, −16.3% singleton CPU/write) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
 | Done V2: scalar commit-advance plan and smaller `Pending` (merged 19 October 2026, PR 3 head 3a5c1cd4; Mac singleton −4.1%, old rule) | Commit-only rounds (~2.3 of 5.3 persistence rounds per singleton original) only advance the commit index, yet each built, validated, stored and compared a full `LogUpdate`/`OwnedAppend` plan inside a 1,728-byte `Pending`; a core-only scalar `CommitAdvance` plan and boxed cold parts cut `Pending` to 1,088 B | V1 (merged 041fc3fb) | Both reviews approved; suites on 3a5c1cd4: default 2,451 (one load-sensitive `native_relay` flake, parent and PR 10/10 on rerun), all-features 2,766, no-default 1,245, native-only 1,806, matched 71, `logical_activation_nested` solo 3×8/8; fmt + five strict Clippy clean; runner pairs round 1 ACCEPT | T4 |
 | Following V3b-s, then V3a/V3b re-measured on V2 | V3b-s removes width-1 per-round overhead, which H2's narrower one-worker passes weight about 20% more. V3a (PR 6, entry staging) and V3b (`cpu/shared-batches`, shared immutable batches removing the remaining in-process per-peer clones) are rebased on V2 and re-measured against the H2 main baseline | H2 merged and main re-baselined; V2 merged | Framework pairs on all four cells against the H2 baseline; compaction/snapshot suites | T4 |
@@ -347,6 +352,350 @@ documentation, a wider scalar-vs-`plan_owned` oracle
 joint and final histories, checkpointed bases, a term-zero vote and revision
 exhaustion) and the `Option<Pending>` niche assertion relaxed to an upper
 bound.
+#### TR1a schema plan (formerly R1): deterministic simulated time in the activation driver fixtures
+
+(Named R1 in round 1; renamed TR1a to match the architect plan's TR track and to
+avoid the earlier R1 storage-recovery slice below. Round-1 text follows; the
+round-2 amendment after it supersedes the hold rule, hang guard and ports.)
+
+- Data/API: one test-local `SimClock` (shared `Rc`) per independent node domain (one per
+  test, except `source_export`, whose two member domains each have their own) supplies
+  every `MonoTime` the fixture hands to native children, logical parents, the
+  activation driver and the outer parent sessions. Shared fixture helpers take
+  `impl FixtureClock`; `Instant` keeps its wall-clock behaviour for
+  `logical_voter_native`, which is not converted in this slice.
+- State transitions: each complete fixture poll round calls
+  `round(settled)`. Time advances one millisecond only when no native node polled
+  in that round has durable log or snapshot worker requests in flight
+  (`persistence.usage().requests` and `snapshots.worker.usage().requests`,
+  owner-side counters that change only when the node polls). Reads never advance
+  time. Bootstrap, claims, outer handshakes, the workflow, enrollment, cleanup and
+  shutdown all use the same clock, so no handoff can jump time backwards.
+- Ownership: the clock belongs to the test; members, the cohort `Peers`, the
+  outer `Channels` and single-cohort fixtures hold clones of one handle.
+- Failure/cleanup: worker I/O always completes without protocol time, so a held
+  clock cannot stall progress. Real `Instant` deadlines remain only as one
+  documented hang guard, `harness::HANG` (300 s per wait). Each node's address is
+  reserved on an OS-assigned TCP+UDP pair and held until that node binds it.
+  `HISTORY` waits recover a poisoned guard because the mutex only serializes.
+- Acceptance: the unpatched constrained failure reproduced; group 802's retained
+  high-water mark independent of CPU constraint and disk latency; the proof runs
+  and full suites in the mini plan.
+
+#### TR1a round 1 implemented (formerly R1): deterministic simulated time in the activation driver fixtures
+
+Root cause (research report `target/claude/research-ci/dedup-capacity-root-cause.md`):
+the cohort fixtures converted `Instant::elapsed()` into protocol time. On a slow
+runner more parent heartbeat and election deadlines expired between the same
+workflow milestones, and every parent protocol send consumes a child-committed
+Authorize action. Child group 802's contracted 128-action history (the preflight
+budgets 64 protocol actions and proves the 516,640-byte checkpoint bound) filled
+with 111 Authorize records and admission returned `DedupCapacity`. The first
+panic poisoned `cluster::HISTORY`, failing 25 later tests with `PoisonError`.
+
+The research patch stepped a `Peers` clock one millisecond per round. Measured
+with temporary admission instrumentation (not committed), that removed the CPU
+dependence but not the disk dependence: rounds park for 1 ms while waiting for a
+sync, so a slow disk still turns into protocol time. With every
+`fsync`/`fdatasync` delayed 20 ms (an `LD_PRELOAD` shim; a Raspberry Pi SD-card
+class disk), the research patch failed 10 of 32 tests with group 802 at 128/128.
+R1 therefore holds protocol time still while durable worker I/O is in flight.
+
+Peak retained actions per child group (serial runs, `--nocapture`):
+
+| Condition | Research patch 801/802/803 | R1 801/802/803 | R1 result |
+| --- | --- | --- | --- |
+| Unconstrained | 54/103/52 | 47/93/49 | 32/32 |
+| 3 CPUs, nice 19, two owned burners (host load 49 → 150) | 52/104/55 | 48/92/48 | 32/32 |
+| Every sync delayed 20 ms | 66/**128**/65 (10 failed) | 47/90/47 | 32/32 |
+
+Worst test shown; byte-pressure, ordinary-pressure and replacement histories
+all stay at 87–93 for group 802 under R1 in every condition.
+
+What changed (tests only; no `src/` change, no capacity, timer, lint or
+assertion change):
+
+- `tests/logical_voter_native/harness.rs` (shared by both binaries):
+  `FixtureClock`, `SimClock`, `bridge_settled`/`nodes_settled`, `hang_guard`,
+  and `Reservation` (OS-assigned TCP+UDP pair, retried if the UDP half is taken;
+  `reclaim` rebinds a released address to prove release).
+- `Cluster<C: FixtureClock = Instant>`: `Cluster::simulated` for this binary;
+  wall-clock `new`/`new_with_application` unchanged for `logical_voter_native`.
+  Fixed probing from port 20000 replaced by held ephemeral reservations, which are
+  re-taken at `close` so a reopen cannot lose its address. `drive::claim_in` is
+  generic over the clock.
+- Activation-driver `Member`, cohort `Members`, cohort `Peers`, outer `Channels`,
+  single-cohort `progress` helpers and close-family helpers use the shared clock;
+  the research patch's timestamp hand-offs (`enroll(now)`, `finish_at`,
+  cleanup returning a time) are unnecessary with one clock and were dropped.
+- Port race: CI run 39065324507 failed with `AddrInUse` at the
+  `original_enrollment` stage, i.e. learner 4 binding its address. That address
+  was reserved and released when the first cohort started and bound only at
+  enrollment, while other ephemeral binds ran. It is now held until the node binds.
+- Drain race: single-cohort tests and `close_peer` waited only for the parent
+  facade to drain, then sampled `bridge.is_drained()` once. That predicate also
+  covers child follower persistence, which the bridge documentation says the
+  host must keep pumping. `progress::drain` and `close_peer` now pump until
+  both have settled; the assertion is unchanged. The research patch failed
+  `learners` TCP on this race once, unconstrained.
+- All 15 s and 10 s real watchdogs in the binary and shared helpers became
+  `harness::hang_guard()` (300 s). A 20 ms-sync run takes 270 s for the binary,
+  so second-scale guards would themselves depend on hardware.
+- Poison: all 16 `HISTORY` waits use `history_guard()`, plus the research
+  regression test that recovers and clears a deliberately poisoned guard.
+
+What did not change: production code, admission limits (128 actions, 4 control,
+206,944 bytes), checkpoint capacity and the 516,640-byte preflight proof,
+timer profiles, assertion predicates, native I/O. Rounds and I/O completion order
+remain asynchronous: this is deterministic protocol time, not a deterministic
+network simulator. The CI cleanup timeout at `cohort/members.rs:224` was a 15 s
+real wait in native member shutdown; it was not reproduced locally, and is
+covered by the same clock (shutdown in protocol time) and the 300 s guard.
+
+#### TR1a round 2 schema amendment (before editing, 18 October 2026)
+
+Round-1 reviews: Opus P1 (42 liveness waits widened to a 300 s real guard), Opus
+P2 (the TR1 (f) budget check missing), Sol P2 ×2 (clock advances during dial
+work; ports not continuously owned), seven Opus P3s.
+
+- Waits: `harness::Wait { start: MonoTime, limit_ms, guard }`. Each wait that was
+  15 s or 10 s of wall time asserts `now - start < 15_000` (or `10_000`) ms of the
+  fixture clock with its original message: exactly the old wall bound for the
+  `Instant` clock (`logical_voter_native`), the same number in protocol time for
+  `SimClock`. A separate `HangGuard` (600 s real, the plan's value) panics with
+  "hang guard …, not a timing assertion" and the clock's hold state, and warns once
+  past 150 s. Thread joins after close contain no protocol time and keep only the
+  guard.
+- Clock: `FixtureClock::round(Observed)`. `Observed` sums durable worker requests,
+  connector attempts in `Stage::Dialing` (owned nodes through
+  `peers().connector_usage()`, outer connectors through `usage()`), and hashes the
+  replica state (term, ballot, commit, last index, applied index per group) of
+  every polled node plus connector and session progress. `SimClock` advances 1 ms
+  only when durable = 0, dialing = 0 and the hash equals the previous round's.
+  Each hold ends without protocol time: worker and dial threads finish on their
+  own (dial `connect_timeout` is real time), and a hash change is finite committed
+  or applied progress. Raw descriptor readiness is deliberately not a hold signal:
+  write readiness of queued output waiting on a reconnect backoff would freeze
+  the very timer that clears it. Bridges expose no connector, so borrowed nodes'
+  dial work is not visible (seam L1 in TR3).
+- Budget: `cohort/retained.rs` classifies every retained record by its encoded
+  body and capsule-origin tag, cross-checked against the public receipt outcome
+  and operation id, at the end of each cohort workflow (records are insert-only,
+  so that is the peak), and asserts protocol actions ≤ 64 per child group. If the
+  count exceeded 64, stop and report; the budget is not raised.
+- Ports: `harness::PortLease` (same namespace `/tmp/voteboat-test-ports` with
+  `VOTEBOAT_TEST_PORT_LEASE_DIR` override, shared 0666 lock files and pool as PR
+  4's round-2 amendment): ports outside 1024–32767 and the kernel ephemeral range;
+  *(Round-3 correction: the pool was not the same. It omitted TR1b's directory and
+  transfer service residues above 32767.)*
+  file lock for the lease lifetime; the unused protocol half bound for the whole
+  test including reopen; the node's half held until `handoff` immediately before
+  its bind and from `reclaim` (the release check) onward, per node as soon as that
+  node joins. A held TCP half closes each accepted connection on a small thread, so
+  an absent TCP node refuses promptly. Outer channels adopt both bound halves and
+  prove both released at close. *(Round-3 correction: as implemented, the outer
+  connectors dropped the unused half at once, so it was unbound for the whole
+  workflow and `reclaim_both` could panic. Fixed in round 3.)*
+- Acceptance: a delayed-dial regression test (with the round-1 policy as a
+  negative control), a lease test, and the proof matrix in the mini plan.
+
+#### TR1a round 2 implemented and validated (18 October 2026)
+
+Implemented at `8be8f84c` (tests only; `git diff origin/main...HEAD -- src` is
+empty). Round-1 review findings and their resolution are in PR 5's "Builder
+response (round 2)" comment.
+
+- `harness::Wait` restores every 15 s / 10 s liveness wait in protocol time:
+  42 sites in the activation-driver files and the shared `Cluster::wait`,
+  `Cluster::read` and `claim_in`, plus `progress::drain` and `close_peer`.
+  `HangGuard` is 600 s per wait, warns past 150 s and prints the clock's hold
+  state (protocol time, consecutive held rounds, last hold reason).
+- `SimClock` quiescence: durable worker requests, dial attempts and a hash of
+  observed replica, connector and session progress. Outer channel establishment
+  and close no longer advance time while dialing.
+  `delayed_dial_completion_holds_protocol_time_until_ingested` delays a completion
+  by 20,000 host rounds; its negative control (the round-1 policy) gets
+  `ConnectError::Timeout` for an existing connection.
+- `cohort/retained.rs` and the per-group assertion in `Members::finish`
+  (`336 retained …` trace).
+- `harness::PortLease` replaces `Reservation` in `Cluster`, cohort `Members`,
+  single-cohort `Member` and outer `Channels`, with per-node reclaim.
+  `port_lease_owns_both_halves_and_refuses_while_the_node_is_absent` covers it.
+
+Group 802 protocol actions with `--nocapture` (own measurement runs, not part of
+the proof matrix):
+
+| Clock policy | Condition | QUIC | TCP | Max total of 128 |
+| --- | --- | --- | --- | --- |
+| Round 1 (durable hold only) | 4 runs, 3 owned burners | 56–62 | 48–53 | 94 |
+| Round 2 (quiescent) | 5 runs, 3 owned burners, absolute nice 19 | 52–59 | 48–52 | 91 |
+| Round 2 | unconstrained serial | 54–58 | 48–50 | 90 |
+
+Simulated workflow time fell from ~750 to ~390 ms (TCP) and from ~1,880 to
+~1,560 ms (QUIC). QUIC's extra ~1.1 s is spent in the fourth-member enrollment
+stage, waiting on QUIC handshake retransmission to a member that was not yet
+listening; that is protocol time, not a fixture artifact. The count still varies
+with the real completion order of worker I/O, so 64 holds with a margin of at
+least 5 in every measured run but is not proven.
+
+Proof matrix (`logical_activation_driver`, `--all-features`):
+
+Own processes only: each test binary was built once with `cargo +stable test --locked --offline --all-features --test logical_activation_driver --no-run` and run directly. The CPU burners were the runner's own `taskset -c N sh -c 'while :; do :; done'` processes on CPUs 1–3, killed by PID after each run. Every sample of the test process (114 of 114) showed affinity 0–3 at absolute nice 19 (`nice -n 39` clamps to 19, so `ananicy-cpp` or an inherited niceness cannot lower it). Other sessions kept the host load average at 13–21 throughout. Every execution is counted; there were no reruns.
+
+| Env | Command | Commit | Reps | Result | Wall time (s) |
+| --- | --- | --- | --- | --- | --- |
+| E0 parent | E3 below on the unpatched binary | `30a1f6c5` | 1 | **5 passed / 26 failed** (`DedupCapacity` at `cohort/progress.rs:41`, then `PoisonError` cascade; the original CI pattern) | 10.1 |
+| E1 | `taskset -c 0-3 nice -n 39 $BIN` | `8be8f84c` | 10 | 10/10 runs 34/34 | 26.5–32.6 |
+| E2 | E1 + `--test-threads=1` | `8be8f84c` | 5 | 5/5 runs 34/34 | 27.5–33.9 |
+| E3 | E1 + 3 owned burners on CPUs 1, 2, 3 | `8be8f84c` | 10 | 10/10 runs 34/34 | 53.8–145.8 |
+| E4 | two E1 copies started together | `8be8f84c` | 5 pairs (10 executions) | 10/10 executions 34/34 | 27.7–30.9 |
+| E5 | `cargo +stable test --locked --offline --all-features --test logical_activation_driver` (default threads, no pinning) | `8be8f84c` | 3 | 3/3 runs 34/34 | 25.3–27.8 |
+
+Notes on the matrix:
+- Hang-guard warnings across all executions: **0**.
+- The test count is 34: the original 31, round 1's poison-recovery test, and round 2's delayed-dial and port-lease tests.
+- An earlier attempt of the same E0 run passed 13 and failed 18 (32 s by its own summary). That attempt is excluded only because my runner script had a sampler bug that stalled the matrix; I fixed the script and restarted the whole matrix from E0.
+- Retained-action budget: the ≤ 64 protocol-action assertion ran at the end of every cohort workflow in all of these executions and never failed. Logs and `results.tsv` are in `target/claude/r2/proof/` in the builder worktree.
+
+Other validation at `8be8f84c`:
+- `cargo +stable fmt --all -- --check`: clean.
+- The four strict Clippy configurations: zero diagnostics.
+- Matched workspace fmt and strict Clippy: clean.
+- The enabled pre-push hook passed on push.
+- `cargo +stable test --locked --offline --all-features --no-fail-fast`
+  (7,143 s, loaded host): 2,760 passed, 1 failed. `logical_activation_driver`
+  passed 34/34 and `logical_voter_native` 42/42. The failure is
+  `native_relay::provider_refusal::actual_tcp_decoder_violation_returns_original_authenticated_frame_and_messages`
+  (`helper failure Session(Io(BrokenPipe))` at `tests/native_relay/cluster.rs:130`).
+  That binary shares no file with this change; it is relay fixture timing (TR5)
+  and was not rerun.
+- Slow disk (not in the matrix): with every `fsync`/`fdatasync` delayed 20 ms by
+  an `LD_PRELOAD` shim, the binary passed 34/34 under E1 in 403 s. Group 802 held
+  QUIC 53–56 and TCP 47–52 protocol actions, as on a fast disk, and there were no
+  hang-guard warnings. The research patch failed 10 of 32 tests under the same
+  delay.
+- The default-feature, no-default-feature and native-only full suites are the
+  suite runner's job and were not run here.
+
+Remote CI on the round-1 head (run 39119775187): `logical_activation_driver`
+passed 32/32 on both ubuntu and macOS. The run then failed in
+`logical_activation_nested`, which is unchanged here (TR4).
+
+Residuals:
+- Dial work and readiness of nodes borrowed by a bridge are invisible without
+  seam L1.
+- The startup bind window needs a pre-bound `listen` seam
+  (`src/native/startup.rs:878–909`). Only a process binding that exact port and
+  protocol outside the lease protocol could use it.
+- `logical_voter_native` keeps wall-clock protocol time with its exact old bounds
+  (TR3).
+
+#### TR1a round 3 schema amendment (before editing, 19 October 2026)
+
+Both round-2 reviews were REQUEST CHANGES, one P2 each (Opus also carried P3-1 to P3-4):
+- Opus P2-1: outer `Channels` dropped the unused protocol half
+  (`channels.rs:279`, `:296`). `reclaim_both` then rebound both halves with
+  `unwrap`, so it could panic after a correct shutdown.
+- Sol P2: the harness pool (`harness.rs:328`) accepted every high non-ephemeral
+  port. It omitted TR1b's directory and transfer service residues; macOS port
+  32789, for example, is transfer's command port at `k=18`, slot 2, node 1.
+
+Dependency: PR 5 is rebased onto TR1b (`ci/tr1b-ci-ports-accept`, `03127ec5`)
+and retargeted to it, so it reuses that pool and does not copy it. The rebase
+had one conflict (`logical_voter_native/cluster.rs`). It keeps TR1a's per-node
+leases and TR1b's `serial()` helper. Apart from those TR1b lines, the rebased PR 5
+diff is line-for-line the round-2 diff.
+
+- Shape: `harness::PortLease { address, protocol, selected: Option<Held>,
+  _other: Held, _shared: support::ports::PortLease }`. `acquire(protocol)` takes
+  one `support::ports::PortLease::acquire(1)`, then splits its bound pair by
+  protocol. Pool, exclusions, lock namespace, fallback and in-process registry are
+  TR1b's, unchanged. The duplicated `lease_directory`, `lock`, `bind_pair` and
+  `ephemeral_range` are removed. `tests/support/ports.rs` is not modified.
+- Transitions: the unused half is bound from `acquire` until the lease drops; it
+  never leaves. The selected half leaves only through `handoff()` (a node binds
+  it) or `adopt_tcp()` / `adopt_udp()` (an outer connector adopts the bound
+  socket). It comes back only through `reclaim()`, which rebinds it as the
+  release proof. `take_sockets` and `reclaim_both` are removed.
+- Failure and cleanup: `reclaim()` panics, naming the address, only if the
+  selected half is still bound. Fields drop in order, so both halves close before
+  TR1b's lease releases the lock and registry entry.
+- Acceptance: `port_lease_adoption_keeps_the_unused_half_and_proves_release`
+  checks both protocols. The unused half is bound throughout adoption; for QUIC,
+  the held TCP half also refuses connections. Reclaim fails while the adopted
+  socket is open, then succeeds, and leaves both halves bound. The port is a member
+  of `support::ports::candidates`. Then the proof runs below.
+
+#### TR1a round 3 implemented and validated (19 October 2026)
+
+Implemented at `a4bd657d` on TR1b `03127ec5` (tests only; no `src` change).
+
+- `harness::PortLease` is built on `support::ports::PortLease` as above. The
+  native `Cluster`, cohort `Members`, single-cohort `Member` and outer
+  `Channels` all lease from TR1b's pool.
+- Outer `Channels`: `connector()` takes the lease and adopts only its protocol's
+  half. Close calls `reclaim()` per lease after every connector and dialer has
+  finished.
+- `cohort/channels/dial.rs` imports `TcpListener` itself, because `channels.rs`
+  no longer does. Its `127.0.0.1:0` connectors use the kernel's ephemeral range,
+  which is outside the lease pool.
+- TR1b's own nested and network channel fixtures still drop the unused half
+  after `support::ports::PortLease::take_sockets()`. That is TR1b/TR4 code, which
+  this slice does not change. It is recorded here for those slices.
+
+Proof at `a4bd657d` (all features). The binaries were built once with
+`taskset -c 0-3 nice -n 19 cargo +stable test --locked --offline --all-features
+--no-run -j 2` and run directly as `taskset -c 0-3 nice -n 19 $BIN`. The shell
+runs at nice −4, so the absolute nice was 15; affinity was CPUs 0–3. Runs were
+sequential except the concurrent pair. There were no reruns or filters, apart from
+the split serial passes noted below. Hang-guard lines in every log: 0.
+
+| Binary | Runs 1–5 (parallel test threads) | `--test-threads=1` | Concurrent pair |
+| --- | --- | --- | --- |
+| `logical_activation_driver` | 5/5 runs 35/35 (62.1–73.4 s) | 35/35 (69.3 s) | — |
+| `logical_voter_native` | 5/5 runs 42/42 (15.8–25.2 s) | 42/42 (24.3 s) | both copies 42/42 (28.6 s, 29.8 s) |
+| `logical_activation_nested` (no PR 5 change) | runs 2, 3, 5: 14/14; **run 1: 12/14; run 4: 13/14** (169.6–426.1 s) | 14/14 in three serial parts (155.1 s total) | — |
+| `logical_nested_native` (no PR 5 change) | 5/5 runs 15/15 (221.2–247.2 s) | 15/15 in two serial parts (224.0 s total) | — |
+
+- The driver count is 35: round 2's 34 plus the new adoption test, which passed
+  in all six runs.
+- Split serial passes: a single serial run of the two nested binaries could
+  exceed this agent's 10-minute foreground command limit. Each was therefore run
+  as consecutive `--test-threads=1` invocations whose filters cover every listed
+  test exactly once: `history::quic`, `history::tcp`, `cold_joint:: profile::`
+  for `logical_activation_nested`; `history:: cold_recovery::` and
+  `handoff_control:: maintenance_controls:: protocol_close:: setup::` for
+  `logical_nested_native`.
+- The three `logical_activation_nested` failures are all
+  `native logical child timeout … stage=CloseDrained` at
+  `tests/logical_activation_nested/cluster.rs:216`, after 15 s of wall time, in
+  QUIC histories:
+  - run 1: `quic_fifteen_native_owners_two_original_logical_replacements` and
+    `quic_original_import_lost_image_target_stores_cold_claim_then_activation`;
+  - run 4: `quic_original_unknown_import_target_cold_resolves_then_activation`.
+
+  In each, one node is still `Draining` with one outbound batch and one roster
+  connection, the other two are `Drained`, and no node has a provider failure.
+  This is the same assertion and signature that TR1b recorded on its own head
+  (above). PR 5 changes no file in that binary, and it still uses wall-clock
+  time, so this belongs to TR4 and is not a port or lease failure. The
+  assertion is unchanged and nothing was rerun.
+- Logs and `results.tsv` were in `target/claude/r3/` in the builder worktree;
+  they were removed with `target/` under the disk budget. The table above is the
+  record.
+
+Other validation at `a4bd657d`: `cargo +stable fmt --all -- --check` clean. The
+four strict Clippy configurations (default, `--all-features`,
+`--no-default-features`, `--no-default-features --features native`, each
+`--locked --offline --keep-going --all-targets -- -D warnings`) report zero
+diagnostics. The pre-push hook runs them again on push. Full suites in other
+configurations are the suite runner's job and were not run here.
+
+Residuals (unchanged from round 2): seam L1 for bridge-borrowed nodes; the
+startup and reclaim bind windows, where only a non-cooperating bind of that exact
+port and protocol, outside the ephemeral range and the legacy ladders, could
+interfere; `logical_voter_native` wall-clock protocol time (TR3). Not addressed
+here (non-blocking): Opus P3-1 to P3-4.
 
 #### H1 schema plan: worker setting and shared harness costs
 

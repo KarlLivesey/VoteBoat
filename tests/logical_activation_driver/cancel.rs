@@ -24,9 +24,9 @@ fn original_cancel_before_configuration_dispatch_retains_owning_driver_quic() {
     history(NativePeerProtocol::Quic);
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = cluster::HISTORY.lock().unwrap();
+    let _serial = crate::history_guard();
     let mut cohort = member::Member::new(protocol);
-    let clock = cohort.clock;
+    let clock = &cohort.clock.clone();
     let mut bridge =
         LogicalChildBridge::new(&mut cohort.nodes, setup::mapping(), support::node(1)).unwrap();
     let image = drive::claim_in(&mut bridge, clock, 5101, false);
@@ -45,7 +45,7 @@ fn history(protocol: NativePeerProtocol) {
         ChildActivationDriverLimits::default(),
     )
     .unwrap_or_else(|e| panic!("actual driver {:?}", e.reason));
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     loop {
         progress::child_step(&mut driver, &mut bridge, clock, 3);
         // No child work/read is held; the sole attempt is the exact original
@@ -54,7 +54,7 @@ fn history(protocol: NativePeerProtocol) {
         if usage.actions == 0 && usage.child_attempts == 1 {
             break;
         }
-        assert!(Instant::now() < end, "original configuration admission");
+        assert!(end.within(clock), "original configuration admission");
     }
     assert_old(&bridge);
     driver.stop_waiting_with_child(&mut bridge).unwrap();
@@ -66,7 +66,7 @@ fn history(protocol: NativePeerProtocol) {
     assert!(!bridge.is_drained());
     while !driver.is_drained() {
         progress::child_step(&mut driver, &mut bridge, clock, 3);
-        assert!(Instant::now() < end, "actual original dispatch settles");
+        assert!(end.within(clock), "actual original dispatch settles");
     }
     assert_eq!(bridge.usage().child_attempts, 0);
     let node = driver
@@ -78,7 +78,7 @@ fn history(protocol: NativePeerProtocol) {
         .outcome
         .is_none());
     node.close_intake().unwrap();
-    progress::until(&mut bridge, node, clock, fixture::FacadeNode::is_drained);
+    progress::drain(&mut bridge, node, clock);
     bridge.close();
     assert!(bridge.is_drained());
     drop(bridge);

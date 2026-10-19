@@ -25,8 +25,8 @@ fn original_readiness_and_cancel_admissions_match_real_follower_steps_quic() {
     history(NativePeerProtocol::Quic);
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = cluster::HISTORY.lock().unwrap();
-    let mut host = cluster::Cluster::new_with_application(protocol, fixture::child_application());
+    let _serial = crate::history_guard();
+    let mut host = cluster::Cluster::simulated(protocol, fixture::child_application());
     let leader = host.leader().unwrap();
     let follower = (0..3).find(|i| *i != leader).unwrap();
     let peer = host.nodes[leader]
@@ -80,13 +80,13 @@ fn history(protocol: NativePeerProtocol) {
     host.finish();
 }
 fn original_step(
-    host: &mut cluster::Cluster,
+    host: &mut cluster::Cluster<harness::SimClock>,
     selected: usize,
     ticket: AdmissionTicket,
 ) -> OwnerStep {
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&host.clock, harness::LIVENESS_MS);
     loop {
-        let now = host.now();
+        let now = harness::FixtureClock::round(&host.clock, harness::Observed::nodes(&host.nodes));
         let mut observed = None;
         for (i, n) in host.nodes.iter_mut().enumerate() {
             let p = n.poll(now, NodePollBudget::default()).unwrap();
@@ -100,7 +100,7 @@ fn original_step(
             return s;
         }
         assert!(
-            Instant::now() < end,
+            end.within(&host.clock),
             "exact original admission must execute"
         );
         std::thread::park_timeout(Duration::from_millis(1));

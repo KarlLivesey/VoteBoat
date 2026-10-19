@@ -14,12 +14,8 @@
 // rights and limitations under the RPL.
 //! Actual authenticated parent sessions retaining original envelope ownership.
 use super::{groups as setup, support};
-use std::{
-    collections::BTreeMap,
-    net::{SocketAddr, TcpListener, UdpSocket},
-    sync::Arc,
-    time::{Duration, Instant},
-};
+use crate::harness::{self, FixtureClock, Observed, PortLease, SimClock};
+use std::{collections::BTreeMap, net::SocketAddr, sync::Arc, time::Duration};
 use voteboat::{
     connect::*,
     dial::*,
@@ -31,20 +27,27 @@ use voteboat::{
     secure::*,
     transport::*,
 };
+#[path = "channels/dial.rs"]
+mod dial;
 type Session = LogicalPeerSession<Box<dyn SecureSession>>;
 pub struct Channels {
     connectors: Vec<NativeServiceConnector>,
     sessions: BTreeMap<(usize, usize), Session>,
     addresses: Vec<SocketAddr>,
+    // Each connector adopts only its own protocol's bound half. The lease
+    // keeps the unused half bound and the lock held for the whole workflow,
+    // and rebinds the adopted half after close to prove its release.
+    leases: Vec<PortLease>,
+    clock: SimClock,
 }
 impl Channels {
     pub fn new(
         descriptors: &[LogicalPeerDescriptor],
         bindings: &[(RuntimeAuthorization, OutboundBinding)],
         protocol: NativePeerProtocol,
-        now: MonoTime,
+        clock: &SimClock,
     ) -> Self {
-        Self::new_wrapped(descriptors, bindings, protocol, now, |_, _, session| {
+        Self::new_wrapped(descriptors, bindings, protocol, clock, |_, _, session| {
             session
         })
     }
@@ -52,29 +55,25 @@ impl Channels {
         descriptors: &[LogicalPeerDescriptor],
         bindings: &[(RuntimeAuthorization, OutboundBinding)],
         protocol: NativePeerProtocol,
-        now: MonoTime,
+        clock: &SimClock,
         mut wrap: impl FnMut(usize, usize, Box<dyn SecureSession>) -> Box<dyn SecureSession>,
     ) -> Self {
-        let held = (0..3)
-            .map(|_| {
-                let tcp = TcpListener::bind("127.0.0.1:0").unwrap();
-                let udp = UdpSocket::bind(tcp.local_addr().unwrap()).unwrap();
-                (tcp, udp)
-            })
+        let now = clock.now();
+        let mut leases = (0..3)
+            .map(|_| PortLease::acquire(protocol))
             .collect::<Vec<_>>();
-        let addresses = held
-            .iter()
-            .map(|(tcp, _)| tcp.local_addr().unwrap())
-            .collect::<Vec<_>>();
-        let connectors = held
-            .into_iter()
+        let addresses = leases.iter().map(PortLease::address).collect::<Vec<_>>();
+        let connectors = leases
+            .iter_mut()
             .enumerate()
-            .map(|(slot, sockets)| connector(slot, descriptors, &addresses, sockets, protocol, now))
+            .map(|(slot, lease)| connector(slot, descriptors, &addresses, lease, protocol, now))
             .collect();
         let mut result = Self {
             connectors,
             sessions: BTreeMap::new(),
             addresses,
+            leases,
+            clock: clock.clone(),
         };
         result.establish(descriptors, bindings, now, &mut wrap);
         result
@@ -111,9 +110,9 @@ impl Channels {
                     .unwrap();
             }
         }
-        let clock = Instant::now();
+        let end = harness::Wait::new(&self.clock, harness::HANDSHAKE_MS);
         while self.sessions.len() < 6 {
-            let now = MonoTime(start.0 + clock.elapsed().as_millis() as u64);
+            let now = self.clock.round(self.observed());
             for (from, connector) in self.connectors.iter_mut().enumerate() {
                 for output in connector.poll(now, ConnectPollBudget::default()).unwrap() {
                     let to = descriptors
@@ -144,10 +143,7 @@ impl Channels {
                     assert!(self.sessions.insert((from, to), session).is_none());
                 }
             }
-            assert!(
-                clock.elapsed() < Duration::from_secs(10),
-                "actual outer handshake timeout"
-            );
+            assert!(end.within(&self.clock), "actual outer handshake timeout");
             std::thread::park_timeout(Duration::from_millis(1));
         }
     }
@@ -171,7 +167,7 @@ impl Channels {
             })
             .collect()
     }
-    pub fn close(mut self, sessions: impl IntoIterator<Item = Session>, start: MonoTime) {
+    pub fn close(mut self, sessions: impl IntoIterator<Item = Session>) {
         assert!(self.sessions.is_empty());
         self.sessions = sessions
             .into_iter()
@@ -184,11 +180,11 @@ impl Channels {
         for connector in &mut self.connectors {
             connector.close();
         }
-        let clock = Instant::now();
+        let end = harness::Wait::new(&self.clock, harness::LIVENESS_MS);
         while !self.sessions.values().all(Session::is_drained)
             || !self.connectors.iter().all(PeerConnector::is_drained)
         {
-            let now = MonoTime(start.0 + clock.elapsed().as_millis() as u64);
+            let now = self.clock.round(self.observed());
             for session in self.sessions.values_mut() {
                 if !session.is_drained() {
                     session.poll(now, TransportPollBudget::default()).unwrap();
@@ -200,10 +196,7 @@ impl Channels {
                     .unwrap()
                     .is_empty());
             }
-            assert!(
-                clock.elapsed() < Duration::from_secs(15),
-                "actual outer close timeout"
-            );
+            assert!(end.within(&self.clock), "actual outer close timeout");
             std::thread::park_timeout(Duration::from_millis(1));
         }
         self.sessions.clear();
@@ -213,24 +206,30 @@ impl Channels {
                 .unwrap_or_else(|_| panic!("outer connector drain"))
             {
                 while !dialer.try_finish().unwrap() {
-                    assert!(clock.elapsed() < Duration::from_secs(15));
+                    assert!(end.within(&self.clock), "actual outer dialer join");
                     std::thread::park_timeout(Duration::from_millis(1));
                 }
             }
         }
-        for address in self.addresses {
-            drop((
-                TcpListener::bind(address).unwrap(),
-                UdpSocket::bind(address).unwrap(),
-            ));
+        for lease in &mut self.leases {
+            lease.reclaim();
         }
+    }
+    /// Dial work holds protocol time; so does any session or connector
+    /// progress since the previous round.
+    fn observed(&self) -> Observed {
+        let drained = self.sessions.values().filter(|s| s.is_drained()).count();
+        self.connectors
+            .iter()
+            .fold(Observed::default(), Observed::connector)
+            .progress((self.sessions.len(), drained))
     }
 }
 fn connector(
     slot: usize,
     descriptors: &[LogicalPeerDescriptor],
     _addresses: &[SocketAddr],
-    sockets: (TcpListener, UdpSocket),
+    lease: &mut PortLease,
     protocol: NativePeerProtocol,
     now: MonoTime,
 ) -> NativeServiceConnector {
@@ -264,7 +263,6 @@ fn connector(
         .with_logical_profile();
     match protocol {
         NativePeerProtocol::TcpTls => {
-            drop(sockets.1);
             let dialer = NativeTcpDialer::spawn(
                 local,
                 peers
@@ -276,12 +274,12 @@ fn connector(
             )
             .unwrap();
             NativeServiceConnector::Tcp(Box::new(
-                NativePeerConnector::new(config, tls, peers, dialer, Some(sockets.0), now).unwrap(),
+                NativePeerConnector::new(config, tls, peers, dialer, Some(lease.adopt_tcp()), now)
+                    .unwrap(),
             ))
         }
         #[cfg(feature = "quic")]
         NativePeerProtocol::Quic => {
-            drop(sockets.0);
             let peers = peers
                 .into_iter()
                 .map(|(id, p)| {
@@ -294,7 +292,11 @@ fn connector(
                 .collect();
             NativeServiceConnector::Quic(Box::new(
                 voteboat::native::quic_connect::NativeQuicConnector::new(
-                    config, tls, peers, sockets.1, now,
+                    config,
+                    tls,
+                    peers,
+                    lease.adopt_udp(),
+                    now,
                 )
                 .map_err(|e| e.reason)
                 .unwrap(),

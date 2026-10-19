@@ -16,9 +16,9 @@
 use super::*;
 #[test]
 fn genuine_native_observer_refusals_preserve_original_ownership_tcp() {
-    let _serial = cluster::HISTORY.lock().unwrap();
+    let _serial = crate::history_guard();
     let protocol = NativePeerProtocol::TcpTls;
-    let clock = Instant::now();
+    let clock = &harness::SimClock::default();
     let mut target_members = members::Members::new(protocol, 0, clock);
     let mut own_members = members::Members::new(protocol, 1, clock);
     let mut sibling_members = members::Members::new(protocol, 2, clock);
@@ -30,12 +30,11 @@ fn genuine_native_observer_refusals_preserve_original_ownership_tcp() {
         drive::claim_in(&mut own, clock, 33502, false),
         drive::claim_in(&mut sibling, clock, 33503, false),
     ];
-    let now = MonoTime(clock.elapsed().as_millis() as u64);
-    let (channels, [left, mut parent, right]) = construction::parents(&images, protocol, now);
+    let (channels, [left, mut parent, right]) = construction::parents(&images, protocol, clock);
     let mut peers = progress::Peers {
         parents: [left, right],
         bridges: [own, sibling],
-        clock,
+        clock: clock.clone(),
     };
     peers.elect(&mut parent, &mut target);
     ownership::cancellation(&mut peers, &mut parent, &mut target);
@@ -57,7 +56,6 @@ fn genuine_native_observer_refusals_preserve_original_ownership_tcp() {
             .into_values()
             .chain(middle.sessions.into_values())
             .chain(right.sessions.into_values()),
-        MonoTime(clock.elapsed().as_millis() as u64),
     );
     target_members.finish();
     own_members.finish();

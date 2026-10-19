@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
-use super::{cleanup, setup, support};
+use super::{
+    cleanup,
+    harness::{self, FixtureClock, Observed, PortLease, SimClock},
+    setup, support,
+};
 use std::{
-    net::{SocketAddr, TcpListener, UdpSocket},
+    net::SocketAddr,
     path::PathBuf,
     sync::{
         atomic::{AtomicU64, Ordering},
@@ -28,12 +32,15 @@ pub fn serial() -> std::sync::MutexGuard<'static, ()> {
     support::serial::serial(&HISTORY)
 }
 static NEXT: AtomicU64 = AtomicU64::new(1);
-pub struct Cluster {
+/// Three native child voters. `C` supplies protocol time: wall-clock
+/// `Instant` by default, or a deterministic [`SimClock`].
+pub struct Cluster<C: FixtureClock = Instant> {
     pub nodes: Vec<ChildNode>,
-    pub clock: Instant,
+    pub clock: C,
     root: PathBuf,
     addresses: [SocketAddr; 3],
-    ports: support::ports::PortLease,
+    // Owned for the whole test, across close and reopen.
+    leases: [PortLease; 3],
     protocol: NativePeerProtocol,
     application: LogicalApplication,
 }
@@ -45,28 +52,37 @@ impl Cluster {
         protocol: NativePeerProtocol,
         application: LogicalApplication,
     ) -> Self {
+        Self::build(protocol, application, Instant::now())
+    }
+}
+impl Cluster<SimClock> {
+    pub fn simulated(protocol: NativePeerProtocol, application: LogicalApplication) -> Self {
+        Self::build(protocol, application, SimClock::default())
+    }
+}
+impl<C: FixtureClock> Cluster<C> {
+    fn build(protocol: NativePeerProtocol, application: LogicalApplication, clock: C) -> Self {
         let root = std::env::temp_dir().join(format!(
             "voteboat-logical-child-{}-{}",
             std::process::id(),
             NEXT.fetch_add(1, Ordering::Relaxed)
         ));
         std::fs::create_dir(&root).unwrap();
-        let ports = support::ports::PortLease::acquire(3);
+        let leases: [PortLease; 3] = std::array::from_fn(|_| PortLease::acquire(protocol));
         let mut host = Self {
             nodes: Vec::new(),
-            clock: Instant::now(),
+            clock,
             root,
-            addresses: ports.addresses(),
-            ports,
+            addresses: leases.each_ref().map(PortLease::address),
+            leases,
             protocol,
             application,
         };
-        host.ports.handoff();
         host.open(NativeOpenMode::Create);
         host
     }
     pub fn now(&self) -> MonoTime {
-        MonoTime(self.clock.elapsed().as_millis() as u64)
+        self.clock.now()
     }
     fn config(&self, id: u64, mode: NativeOpenMode) -> NativeStartup {
         NativeStartup {
@@ -99,22 +115,21 @@ impl Cluster {
     }
     pub fn open(&mut self, mode: NativeOpenMode) {
         assert!(self.nodes.is_empty());
-        self.clock = Instant::now();
-        self.nodes = (1..=3)
-            .map(|id| {
-                self.config(id, mode)
-                    .open_with_protocol_and_timers(
-                        self.protocol,
-                        NativeTimingProfile::Throughput.timers(),
-                        self.application.clone(),
-                        Arc::new(ThreadWake::current()),
-                        self.now(),
-                    )
-                    .unwrap_or_else(|error| {
-                        panic!("actual logical child startup: {:?}", error.reason)
-                    })
-            })
-            .collect();
+        self.clock.reopened();
+        for id in 1..=3 {
+            self.leases[id as usize - 1].handoff();
+            let node = self
+                .config(id, mode)
+                .open_with_protocol_and_timers(
+                    self.protocol,
+                    NativeTimingProfile::Throughput.timers(),
+                    self.application.clone(),
+                    Arc::new(ThreadWake::current()),
+                    self.now(),
+                )
+                .unwrap_or_else(|error| panic!("actual logical child startup: {:?}", error.reason));
+            self.nodes.push(node);
+        }
         self.nodes[0]
             .control(setup::mapping().child, NodeControl::Campaign)
             .unwrap();
@@ -132,18 +147,18 @@ impl Cluster {
         })
     }
     pub fn poll(&mut self) {
-        let now = self.now();
+        let now = self.clock.round(Observed::nodes(&self.nodes));
         for node in &mut self.nodes {
             node.poll(now, NodePollBudget::default()).unwrap();
         }
         std::thread::park_timeout(Duration::from_millis(1));
     }
     pub fn wait(&mut self, mut done: impl FnMut(&Self) -> bool) {
-        let end = Instant::now() + Duration::from_secs(15);
+        let end = harness::Wait::new(&self.clock, harness::LIVENESS_MS);
         while !done(self) {
             self.poll();
             assert!(
-                Instant::now() < end,
+                end.within(&self.clock),
                 "native logical child timeout: {}",
                 self.root.display()
             );
@@ -192,14 +207,11 @@ impl Cluster {
             node.begin_shutdown();
         }
         self.wait(|host| host.nodes.iter().all(ChildNode::is_drained));
-        for node in self.nodes.drain(..) {
+        // Rebinding each address as soon as its own node has joined proves
+        // the node released it, then holds it for a later reopen.
+        for (node, lease) in self.nodes.drain(..).zip(&mut self.leases) {
             cleanup::join(node);
-        }
-        for address in self.addresses {
-            drop((
-                TcpListener::bind(address).unwrap(),
-                UdpSocket::bind(address).unwrap(),
-            ));
+            lease.reclaim();
         }
     }
     pub fn finish(mut self) {
