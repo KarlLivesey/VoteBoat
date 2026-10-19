@@ -630,6 +630,18 @@ cpu/write ×1.028 (pairs 0.99 0.97 1.00 1.14 1.03), single ×0.995, bulk with
 one server worker ×1.005, single with one ×0.976; no regression. The core's
 follower path gained one boolean test and the CRC change applies there.
 
+**Checks (round 2).** `cargo +stable fmt --all -- --check`; strict Clippy
+(`-D warnings`, `--all-targets`) for default, all-features, no-default and
+native-only: zero diagnostics; matched workspace fmt and strict Clippy: zero.
+Suites, run sequentially per target on Linux cores 4–9 (every `tests/*.rs`
+except `representative_relay_model`, plus `--lib --bins`): default features
+2,450 passed, 0 failed (116 targets); all-features 2,756 passed, 0 failed
+(lib and bins 566, test files 2,190). One flake in the first all-features
+`--bins` run: `drain_runner::observation_tests::lost_source_status_reply_repeats_only_original_observation`
+panicked on a `Truncated` socket read while the shared host was at load
+9–15; it passed six isolated reruns (22 drain-runner tests each) and the full
+`--lib --bins` rerun. That code is not touched here.
+
 **Remaining gaps (recorded).**
 - A group whose own live log (not dead bytes) fills the WAL while its next
   data batch is held on the WAL thread cannot checkpoint until the batch is
