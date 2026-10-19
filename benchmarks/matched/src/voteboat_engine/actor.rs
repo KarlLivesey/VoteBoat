@@ -66,7 +66,9 @@ pub(super) struct Actor<const TRACE: bool = false> {
     attribution: Recorder<TRACE>,
     pending: PendingReplies<Reply>,
     deferred: Option<Request>,
-    /// The one effect queue the core fills in place; empty between calls.
+    /// The one effect queue the core fills in place. Empty between successful
+    /// calls: every drain leaves it empty, and any failure that skips the
+    /// drain (such as `record_proposals` after a core call) ends the actor.
     queue: VecDeque<Effect>,
     last_snapshot_at: u64,
     last_contact: Instant,

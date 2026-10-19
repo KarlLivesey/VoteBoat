@@ -757,7 +757,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done in review: PR 10 round 2, review fixes and singleton overhead (head 46e1ffb4) | Both reviews requested changes: a narrow Append from a wide shared backing was charged the whole backing, so entries recovered from a checkpoint could exceed every outbound budget and never replicate (P1, narrowed by round 2 and closed by round 3); the wire decoder froze 16+ mixed entries with an uncharged index (P2); an empty view charged an owned batch by capacity (P2); and both singleton cells stayed above +1% against main. Bound what an Append pins, charge the decoded index before allocating it, charge empty-view appends as the log holds them, and remove what singleton overhead the library and PR 10's own harness edits still add | PR 10 round 1 (head 6fecd1fb) and both reviews | Recover-then-replicate test under default limits (fails before the fix); narrow-message and hidden-charge bound tests; wire budget at exact/one-below for widths 15/16 uniform/mixed and shared source subranges; empty-view charge test; restored spare-capacity checks; asserted composed sizes; fmt, four strict root Clippy builds and the matched workspace; default and all-features suites; driver widths 1/231/515 on Linux (exact x86 counts) and the Mac; quiet-Mac 5 pairs × 4 cells against b72d1ee3; attribution controls | T4 |
 | Done: runner re-measured the composed V2+V3a+V3b+V3b-s head (65bb5041 vs main b72d1ee3, quiet Mac, H2 rule, 5 pairs: bulk-16 −12.1%, bulk-1 −13.8%, single-16 +2.0%, single-1 +2.2%; singleton regression accepted by the user on 19 October 2026) | The stack now carries V2 (merged main b72d1ee3); the runner measures all four cells of PR 10's head against the H2 main baseline. The remaining singleton excess (V3a staging, a harness effect-loop copy that V3b's types trigger) is re-profiled on the composed tree before any further slice | V2 merged; PR 10 merged with main | Framework pairs on all four cells against the H2 baseline; compaction/snapshot suites | T4 |
 | Done V3c profile: whole-cost profile of the merged V2+V3 tree (`target/claude/research-r4/v3c-profile.md`) | Choose the next whole cost class from a fresh profile instead of adding helpers | V3 merged (`d379783d`) | Re-baseline recorded below; ranked slices with arithmetic | T4 |
-| Done in review V3c: host-owned effect sink and `ProposalBatch::push` fix (branch `cpu/effect-sink`, code head 783265a4; quiet Mac vs `d379783d`, 5 pairs: bulk-16 −1.4%, single-16 −4.7%, bulk-1 −2.1%, single-1 −9.5% CPU per write; driver width 1 −13.2%, allocations 30 → 15 per write) | Every core call returns a fresh `Vec<Effect>` built from nested per-function Vecs, and the matched actor grows and frees a `VecDeque` per call: at width 1 about 30 allocations per write, 9 of them effect vectors (profile §4), ≈ 628 ns/write of allocator time in single-1. The host owns one reusable queue that the core fills in place (`step_into`, `propose_entries_into`, `persist_volatile_into`); the Vec APIs become wrappers. Ride-along: `push` built and dropped an `Exhausted` error on every success (bulk ≈ 1.4%) | Profile above; V3 merged | Effect-sequence oracle (Vec vs sink forms over the twin histories, FIFO insertion of committed intervals); rollback with sentinel effects on refused steps, stale tokens and fenced cores; reused queue keeps its capacity and allocation with no stale effects over 1,000 width-1 rounds; existing effect-order, twin, golden and facts oracles unchanged; driver widths 1/231/515 with allocation counts; quiet-Mac 5 pairs × 4 cells against `d379783d`; attribution controls; fmt, four strict root Clippy builds and the matched workspace | T4 |
+| Done in review V3c: host-owned effect sink and `ProposalBatch::push` fix (branch `cpu/effect-sink`, code head 783265a4; quiet Mac vs `d379783d`, 5 pairs: bulk-16 −1.4%, single-16 −4.7%, bulk-1 −2.1%, single-1 −9.5% CPU per write; driver width 1 −13.2%, allocations 30 → 15 per write) | Every core call returns a fresh `Vec<Effect>` built from nested per-function Vecs, and the matched actor grows and frees a `VecDeque` per call: at width 1 about 30 allocations per write, 9 of them effect vectors (profile §4), ≈ 628 ns/write of allocator time in single-1. The host owns one reusable queue that the core fills in place (`step_into`, `propose_entries_into`, `persist_volatile_into`); the Vec APIs become wrappers. Ride-along: `push` built and dropped an `Exhausted` error on every success (bulk ≈ 1.4%) | Profile above; V3 merged | Effect-sequence oracle (Vec vs sink forms over the twin histories, FIFO insertion of committed intervals); rollback with sentinel effects on refused steps, stale tokens and fenced cores; reused queue keeps its capacity and allocation with no stale effects over 1,000 width-1 rounds; existing effect-order, twin, golden and facts oracles unchanged; driver widths 1/231/515 with allocation counts; quiet-Mac 5 pairs × 4 cells against `d379783d`; attribution controls; fmt, four strict root Clippy builds and the matched workspace. Review round 2 (tests and docs only): granted-vote sentinel and election-reset comparison, each proved by mutating the two queue reads; wrapped-queue late exhaustion; durable, transfer, stale-append, learner-configuration and retirement-reply sink oracles | T4 |
 | Current V3d: per-step recomputation | `effect_reservation` rebuilds and compares `LogMetadata` twice per harness step, plus other metadata compares (profile slice 2: single-1 −2.4 to −3.5%) | V3c (same `raft.rs` chain) | Reservation equals the old value over histories; quiet-Mac pairs | T4 |
 | Next V3e: peer slots | Outstanding replication per peer in a fixed slot instead of a `BTreeMap` emptied and refilled each round; stack-bounded `peers()` and quorum frontier (profile slice 3: single-1 −2.3 to −3.1%) | V3d | Replication/frontier oracles; quiet-Mac pairs | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
@@ -1895,7 +1895,9 @@ from `11adcb33` (main after the `d379783d` re-baseline).
   moving it onto the sink changes that public visit contract and is not
   measured by the T4 cells, so it stays on the Vec wrappers in this slice.
 - **Ride-along (separate commit).** `ProposalBatch::push` and `next_capacity`
-  construct `RaftError::Exhausted` only on the failure branch (let-else), so the
+  construct `RaftError::Exhausted` only on the failure branch
+  (`ok_or_else(exhausted)` with a `#[cold] fn exhausted`, replacing
+  `ok_or(RaftError::Exhausted)` at the same sites in the same order), so the
   success path builds and drops no error. Same refusals and messages.
 - **Acceptance.** Oracle: the volatile twin histories (`history`,
   `snapshot_history`) run through the Vec forms and through the sink forms with
@@ -1917,8 +1919,19 @@ Commits `7ca201d2` (effect sink, matched actor, oracle tests) and `783265a4`
   `Raft::propose_entries_into(batch, &mut VecDeque<Effect>) -> Result<(),
   RaftError>` and `raft::persist_volatile_into(raft, log, persist, out) ->
   Result<Option<EntryRange<'a>>, RaftError>`. `step`, `propose_entries`,
-  `propose_batch` and `persist_volatile` keep their signatures and results and
-  now wrap the sink forms.
+  `propose_batch` and `persist_volatile` keep their signatures and effect
+  sequences and now wrap the sink forms over a fresh `VecDeque`. Their returned
+  capacity changed (found in review round 2): a one-effect result now has
+  capacity 4, std's minimum non-empty `VecDeque`, where `main`'s
+  `stage_pending` returned `vec![effect]` with capacity 1. `size_of::<Effect>()`
+  is 272 B, so such a step allocates 1,088 B instead of 272 B.
+- **Durable completions: no sink form.** There is no `persist_effect_into`.
+  `persist_effect`, `persist_effect_borrowed` and `Raft::complete` still build
+  a new `Vec` of following effects per completion. Each durable completion
+  already pays a store submission and barrier, the native runtime keeps its
+  owned per-visit effects, and no T4 cell drives a durable completion, so a
+  sink form would be an unmeasured API. Durable hosts get `step_into` and
+  `propose_entries_into`; their completions still allocate.
 - **Matched harness.** The VoteBoat actor change is effect plumbing only: one
   owned `queue`, the `_into` calls, an in-place drain, and the committed
   interval inserted at the pre-call length when earlier work is queued (the
@@ -1931,7 +1944,13 @@ Commits `7ca201d2` (effect sink, matched actor, oracle tests) and `783265a4`
   changes that budget contract and the public visit API, and no T4 cell
   measures it. It keeps the Vec wrappers, which already gain the removed
   nested Vecs (one top-level allocation per step remains). A later slice can
-  move it with a reservation review.
+  move it with a reservation review. Because of the capacity change above, the
+  effect owner's charge for a one-effect step (`effect_bytes`: capacity × 4 ×
+  272 B, plus payloads) rises from 1,088 B to 4,352 B. That is inside the
+  reservation slack (`reserve_effects` alone has a fixed 65,536 B term, plus
+  `(peers + 2) × 2` message terms), and the `effect_owner` and runtime suites
+  pass, but the native path's CPU and memory effect of the larger allocation
+  is not measured.
 - **Tests.** `tests/volatile.rs`: `sink_forms_match_vec_forms_over_the_twin_histories`
   (both twin scripts through `step`/`propose_batch`, through
   `propose_entries`, and through the sink forms with two sentinel effects
@@ -1999,8 +2018,16 @@ final frontiers everywhere):
   more often. With one shared server worker, a cheaper core call returns the
   leader to collection sooner, so fewer requests wait per batch; the collection
   code and its limits are unchanged. Followers do the same work (the base's
-  bimodal 1.9k/21k follower runs are scheduling). The gate's −2.1% includes
-  these extra leader rounds, so it understates the per-round saving.
+  bimodal 1.9k/21k follower runs are scheduling). This mechanism is an
+  explanation, not a measurement: the table shows the narrower batches, not
+  their cause. As both reviewers judged, −2.1% is the end-to-end CPU result for
+  this dynamically batched workload, not an isolated per-round library saving;
+  the extra leader rounds do not by themselves show that it understates the
+  saving, because follower and message scheduling also change. Both bulk cells
+  landed below their summed estimates (bulk-16 −1.4% against −2.4 to −3.3%;
+  bulk-1 −2.1% against −2.5 to −3.4%). The fixed-width driver (−5.7%
+  instructions per write at width 231, −5.3% at 515) is the separate evidence
+  for a per-round core saving.
 
 Checks (Linux, cores 0–3): `cargo +stable fmt --all -- --check` and matched fmt;
 strict Clippy with default, `--all-features`, `--no-default-features` and
@@ -2009,6 +2036,49 @@ diagnostics; `cargo test --lib --test volatile --test snapshot --test raft
 --test log_owned --test worker --test runtime` in default (525 lib + 189) and
 all features (527 lib + 189), one configuration at a time; matched tests 75/75
 (default and all features).
+
+#### V3c round 2: review tests and docs (19 October 2026)
+
+Reviews on PR 16 (head `8686c38a`): GPT-6.1-Sol approved with suggested
+permanent regressions; Claude Opus 5.5 requested one test (P2-1) and docs and
+coverage items (P3). Neither found a code defect. This round changes tests,
+comments and docs only; no production statement changed.
+
+Schema plan. No data/API shape, state or ownership change. Tests compare a
+sink-form core with a Vec-form twin on the same inputs: equal effects after
+the caller's retained ones, equal state and counters (`request_sequence`,
+`election_reset`, granted-vote memory, leader contact, replication cursors),
+and on error equal fencing with the queue truncated to exactly its earlier
+effects. `request_sequence` is private, so the exhaustion cases are unit tests
+in `src/raft/volatile_tests.rs`; one test helper (`membership_tests::reply`)
+became `pub(super)`.
+
+| Finding | Test | Proof it detects the defect |
+| --- | --- | --- |
+| Opus P2-1: the two queue reads (`remember_granted_vote(out.range(mark..))` in `install_pending_into` and `receive_into`) were untested: sentinels held no grant and `assert_same` ignored the election timer | `tests/volatile.rs`: `sentinels()` now includes a granted `Voted`; `assert_same` compares `election_reset_sequence()` | `receive_into` read changed to `out.iter()`: `sink_forms_match_vec_forms…` 23 vs 7, `refused_sink_calls…` 12 vs 2, new durable oracle 27 vs 11, `sink_receipt_never_remembers…` fails. `install_pending_into` read changed: 19 vs 7, 7 vs 2, `sink_volatile_completion…` fails. All pass on the restored code |
+| Sol (a): wrapped deque, late exhaustion on heartbeat | `sink_heartbeat_on_a_wrapped_queue_matches_vec_form_through_late_exhaustion`: two granted votes at the end of an 8-slot ring; success output wraps to the start (checked by `as_slices`, capacity unchanged); at `request_sequence = u64::MAX − 1` the first append is built (`request_sequence` reaches `u64::MAX`) and the second exhausts: same `Exhausted`, queue holds exactly the prefix, same state and counters | Fails if a partial append survives or if either form diverges |
+| Sol (b): late exhaustion in volatile completion | `sink_volatile_completion_never_reads_earlier_votes_and_fences_like_vec_form`: success with grants queued (same following effects, no remembered grant, no reset), then the same late exhaustion after a proposal: both fence, no following output, same completed state (entry 2 installed), sink queue back to its prefix | `install_pending_into` mutant fails it (granted reply set, reset 1 vs 0) |
+| Sol (c): authenticated `Appended` with old grants queued | `sink_receipt_never_remembers_or_resets_for_earlier_queued_votes` (unit), plus the sentinel change above (integration) | `receive_into` mutant fails both |
+| Sol (d), Opus P3-2 durable cores | `durable_sink_forms_match_vec_forms_through_histories_and_a_learner_configuration`: durable replicas with configuration replication, Sink vs Entries vs Vec, each of `history`, `snapshot_history` and `transfer_history` followed by a committed learner configuration; full traces, states, roles, fences, election resets and applications equal | `receive_into` mutant: 27 vs 11. The `install_pending_into` read is unreachable with retained effects here: durable completions have no sink form |
+| Opus P3-2 transfer ordering and lower-term refusal | `transfer_history` (volatile and durable oracles): transfer to a lagging target, whose `TimeoutNow` comes from `drive_transfer` after the body of the leader's receive step; then an earlier term's `Append` delivered to a follower of the new term, refused with `Appended { success: false }` | Trace equality over these steps |
+| Opus P3-2 retirement-commit reply | `retiring_leader_announces_only_after_final_durability…` now runs `receive_retirement_notice` for the Vec form and for a sink form with an earlier granted vote queued, on twin receivers, and compares their state and counters | `receive_into` mutant: the reset assertion fails |
+| Opus P3-1, P3-4, P3-5, durable note | Docs above (capacity 1 → 4 and the 1,088 → 4,352 B charge; `ok_or_else` with a cold function; durable completions have no sink form), rustdoc on `Raft::step` and `persist_effect_borrowed`, matched actor comment ("empty between successful calls"; every `record_proposals` failure ends the actor) | Not applicable |
+
+These oracles compare the sink forms with the Vec forms, which wrap the same
+implementation: they detect a sink call that reads, keeps or reorders the
+caller's effects, not a defect shared by both forms. The existing
+effect-order, twin, golden and facts tests remain the evidence for the shared
+code. The mutation runs used temporary edits to `src/raft.rs` that were
+restored before commit.
+
+Checks (Linux, cores 10–15, `-j 4`): `cargo +stable fmt --all -- --check` and
+matched fmt; strict Clippy with default, `--all-features`,
+`--no-default-features` and `--no-default-features --features native`, and
+the matched workspace, zero diagnostics; default `--lib --test volatile --test
+raft --test snapshot --test log_owned --test worker --test runtime` (528 lib,
+1 ignored, + 11/81/27/5/9/57); all features, the same plus `--test
+effect_owner` (530 lib, 1 ignored, + 11/81/27/5/9/57/210), one configuration
+at a time; matched tests 75/75 in default and all features.
 
 #### H2 round 2: review fixes (19 October 2026)
 

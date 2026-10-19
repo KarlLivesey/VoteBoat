@@ -227,7 +227,7 @@ fn joint(weighted: bool) -> Raft {
     durable(&mut core, effects);
     core
 }
-fn reply(core: &Raft, from: u64, context: RequestContext, rpc: Rpc) -> Message {
+pub(super) fn reply(core: &Raft, from: u64, context: RequestContext, rpc: Rpc) -> Message {
     Message {
         group: core.durable.bootstrap.group,
         configuration: core.membership().id(),
@@ -2234,16 +2234,20 @@ fn retiring_leader(removed: bool) -> Raft {
 fn retiring_leader_announces_only_after_final_durability_and_receivers_preserve_authority() {
     for removed in [false, true] {
         let mut leader = retiring_leader(removed);
-        let mut receiver = Raft::recover_member(
-            node(4),
-            StoreBinding {
-                identity: store(4),
-                session: StoreSession::new(7).unwrap(),
-            },
-            leader.state().clone(),
-            leader.limits,
-        )
-        .unwrap();
+        let member = || {
+            Raft::recover_member(
+                node(4),
+                StoreBinding {
+                    identity: store(4),
+                    session: StoreSession::new(7).unwrap(),
+                },
+                leader.state().clone(),
+                leader.limits,
+            )
+            .unwrap()
+        };
+        let mut receiver = member();
+        let mut twin = member();
         assert!(acknowledge(&mut leader, 2).is_empty());
         let commit = acknowledge(&mut leader, 3);
         assert!(matches!(&commit[..],[Effect::Persist(u)] if u.commit_index==4));
@@ -2271,7 +2275,12 @@ fn retiring_leader_announces_only_after_final_durability_and_receivers_preserve_
             && matches!(&m.rpc,Rpc::Append { previous_index:4,previous_term:1,entries,leader_commit:4 } if entries.is_empty())));
         assert!(reservation > notices.len() * std::mem::size_of::<Message>());
         let notice = notices.into_iter().find(|m| m.to == node(4)).unwrap();
-        receive_retirement_notice(&mut receiver, notice);
+        receive_retirement_notice(&mut receiver, notice.clone(), Raft::step);
+        receive_retirement_notice(&mut twin, notice, sink_step);
+        assert_eq!(
+            super::volatile_tests::observed(&twin),
+            super::volatile_tests::observed(&receiver)
+        );
         assert!(leader.step(Event::Heartbeat).unwrap().is_empty());
     }
 }
@@ -3628,10 +3637,24 @@ fn check_snapshot_ack_then_retry(
         Err(RaftError::WrongCompletion)
     ));
 }
-fn receive_retirement_notice(receiver: &mut Raft, notice: Message) {
+/// [`Raft::step_into`] with a granted vote this core never emitted queued
+/// first; it must stay first, unread, and the call's own effects follow it.
+fn sink_step(core: &mut Raft, event: Event) -> Result<Vec<Effect>, RaftError> {
+    let context = RequestContext {
+        origin: core.binding,
+        sequence: 1,
+    };
+    let earlier = Effect::Send(core.message(node(2), context, Rpc::Voted { granted: true }));
+    let mut queue = VecDeque::from([earlier.clone()]);
+    let result = core.step_into(event, &mut queue);
+    assert_eq!(queue.pop_front(), Some(earlier));
+    result.map(|()| queue.into())
+}
+type Step = fn(&mut Raft, Event) -> Result<Vec<Effect>, RaftError>;
+fn receive_retirement_notice(receiver: &mut Raft, notice: Message, step: Step) {
     let reset = receiver.election_reset_sequence();
     let hard = receiver.state().hard_state;
-    let effects = receiver.step(Event::Receive(notice.clone())).unwrap();
+    let effects = step(receiver, Event::Receive(notice.clone())).unwrap();
     assert!(
         matches!(&effects[..],[Effect::Persist(u)] if u.commit_index==4 && u.suffix.is_none() && u.hard_state==hard)
     );
@@ -3649,7 +3672,7 @@ fn receive_retirement_notice(receiver: &mut Raft, notice: Message) {
         |e| matches!(e,Effect::Committed(entries) if entries.len()==1 && entries[0].index==4)
     ));
     assert!(effects.iter().any(|e|matches!(e,Effect::Send(m) if m.to==node(1) && matches!(m.rpc,Rpc::Appended{success:true,matching_index:4}))));
-    let duplicate = receiver.step(Event::Receive(notice)).unwrap();
+    let duplicate = step(receiver, Event::Receive(notice)).unwrap();
     assert!(matches!(&duplicate[..], [Effect::Send(_)]));
     assert_eq!(receiver.election_reset_sequence(), reset);
 }

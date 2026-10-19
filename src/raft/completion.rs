@@ -83,6 +83,12 @@ impl Raft {
 /// a committed interval borrowed only after all completion checks succeed.
 /// Exact update validation precedes submission; any pipeline error fences the
 /// core. Networking and application remain the host's responsibility.
+///
+/// Durable completions have no host-owned queue form (there is no
+/// `persist_effect_into`, unlike [`persist_volatile_into`]): each one already
+/// pays a store submission and barrier, the native runtime keeps its owned
+/// per-visit effects, and no measured caller drives this path. Its following
+/// effects are a new `Vec` per completion.
 pub fn persist_effect_borrowed<'a, S: LogStore>(
     raft: &'a mut Raft,
     store: &mut S,

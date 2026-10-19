@@ -1016,6 +1016,12 @@ impl Raft {
         }
     }
 
+    /// Handle one event, returning its effects in a new `Vec`. This wraps
+    /// [`Self::step_into`] over a fresh queue, so a non-empty result has at
+    /// least the standard library's minimum non-empty capacity: four effects
+    /// (4 × 272 B on 64-bit targets) for a one-effect result. A host that
+    /// charges memory by capacity sees that; reuse one queue with `step_into`
+    /// to allocate no effect storage per call.
     pub fn step(&mut self, event: Event) -> Result<Vec<Effect>, RaftError> {
         let mut effects = VecDeque::new();
         self.step_into(event, &mut effects)?;

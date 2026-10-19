@@ -384,3 +384,172 @@ fn wide_batches_share_one_backing_from_proposal_to_every_follower() {
         }
     }
 }
+
+/// Every core counter and cursor a sink call could disturb by reading the
+/// caller's earlier effects or by failing after partial output.
+pub(super) fn observed(core: &Raft) -> impl Eq + std::fmt::Debug + use<> {
+    let requests: Vec<_> = core
+        .requests
+        .iter()
+        .map(|(peer, r)| (*peer, r.context, r.start, r.end))
+        .collect();
+    (
+        (
+            core.state().clone(),
+            core.role,
+            core.fenced,
+            core.pending.is_some(),
+        ),
+        (core.request_sequence, core.election_reset),
+        (
+            core.granted_vote_reply,
+            core.leader_contact,
+            core.vote_context,
+        ),
+        (requests, core.progress.clone(), core.next_index.clone()),
+    )
+}
+
+/// Two granted votes this core never emitted, already queued at the end of
+/// an eight-slot ring so that the call's own effects wrap to its start.
+fn wrapped_granted_votes(core: &Raft) -> (VecDeque<Effect>, Vec<Effect>) {
+    let granted: Vec<_> = (2..=3)
+        .map(|peer| {
+            let to = NodeId::new(peer).unwrap();
+            let context = RequestContext {
+                origin: core.binding,
+                sequence: 1,
+            };
+            Effect::Send(core.message(to, context, Rpc::Voted { granted: true }))
+        })
+        .collect();
+    let filler = Effect::Send(core.message(
+        NodeId::new(2).unwrap(),
+        RequestContext {
+            origin: core.binding,
+            sequence: 1,
+        },
+        Rpc::ReadProbe,
+    ));
+    let mut queue = VecDeque::with_capacity(8);
+    let capacity = queue.capacity();
+    queue.extend(std::iter::repeat_n(filler, capacity - granted.len()));
+    // Popping, unlike `clear`, leaves the ring's head where it stopped.
+    while queue.pop_front().is_some() {}
+    queue.extend(granted.iter().cloned());
+    assert_eq!(queue.as_slices().0.len(), granted.len());
+    assert_eq!(queue.capacity(), capacity);
+    (queue, granted)
+}
+
+fn twins() -> ((Raft, VolatileLog), (Raft, VolatileLog)) {
+    (volatile(), volatile())
+}
+
+#[test]
+fn sink_heartbeat_on_a_wrapped_queue_matches_vec_form_through_late_exhaustion() {
+    // Success: the call's effects follow the retained ones across the wrap.
+    let ((mut sink, _), (mut vec, _)) = twins();
+    let (mut queue, granted) = wrapped_granted_votes(&sink);
+    let capacity = queue.capacity();
+    sink.step_into(Event::Heartbeat, &mut queue).unwrap();
+    let expected = vec.step(Event::Heartbeat).unwrap();
+    assert_eq!(expected.len(), 2);
+    assert_eq!(queue.as_slices(), (&granted[..], &expected[..]));
+    assert_eq!(queue.capacity(), capacity);
+    assert_eq!(observed(&sink), observed(&vec));
+    assert!(sink.granted_vote_reply.is_none());
+    // The first peer's append is built before the second exhausts the request
+    // counter: both forms fail alike and the sink keeps exactly its prefix.
+    let ((mut sink, _), (mut vec, _)) = twins();
+    for core in [&mut sink, &mut vec] {
+        core.request_sequence = u64::MAX - 1;
+    }
+    let (mut queue, granted) = wrapped_granted_votes(&sink);
+    assert_eq!(
+        sink.step_into(Event::Heartbeat, &mut queue),
+        Err(RaftError::Exhausted)
+    );
+    assert_eq!(vec.step(Event::Heartbeat), Err(RaftError::Exhausted));
+    assert_eq!(queue.as_slices(), (&granted[..], &[][..]));
+    assert_eq!(
+        sink.request_sequence,
+        u64::MAX,
+        "first peer output was built"
+    );
+    assert_eq!(observed(&sink), observed(&vec));
+}
+
+#[test]
+fn sink_volatile_completion_never_reads_earlier_votes_and_fences_like_vec_form() {
+    // Success: following effects match, and the queued grants are neither
+    // remembered nor counted as an election reset.
+    let ((mut sink, sink_log), (mut vec, vec_log)) = twins();
+    let sink_token = token(&propose(&mut sink, 9, vec![1]));
+    let vec_token = token(&propose(&mut vec, 9, vec![1]));
+    let (mut queue, granted) = wrapped_granted_votes(&sink);
+    let resets = sink.election_reset;
+    let committed = persist_volatile_into(&mut sink, &sink_log, sink_token, &mut queue)
+        .unwrap()
+        .map(|entries| entries.to_vec());
+    let (vec_committed, following) = persist_volatile(&mut vec, &vec_log, vec_token)
+        .unwrap()
+        .into_parts();
+    assert_eq!(committed, vec_committed.map(|entries| entries.to_vec()));
+    assert_eq!(following.len(), 2);
+    assert_eq!(queue.as_slices(), (&granted[..], &following[..]));
+    assert_eq!(observed(&sink), observed(&vec));
+    assert!(sink.granted_vote_reply.is_none());
+    assert_eq!(sink.election_reset, resets);
+    // Late exhaustion after the first peer's append: both forms fence, show
+    // no following output and keep the same completed state; the sink drops
+    // its partially appended peer effect.
+    let ((mut sink, sink_log), (mut vec, vec_log)) = twins();
+    let sink_token = token(&propose(&mut sink, 9, vec![1]));
+    let vec_token = token(&propose(&mut vec, 9, vec![1]));
+    for core in [&mut sink, &mut vec] {
+        core.request_sequence = u64::MAX - 1;
+    }
+    let (mut queue, granted) = wrapped_granted_votes(&sink);
+    assert!(matches!(
+        persist_volatile_into(&mut sink, &sink_log, sink_token, &mut queue),
+        Err(RaftError::Exhausted)
+    ));
+    assert!(matches!(
+        persist_volatile(&mut vec, &vec_log, vec_token),
+        Err(RaftError::Exhausted)
+    ));
+    assert_eq!(queue.as_slices(), (&granted[..], &[][..]));
+    assert_eq!(
+        sink.request_sequence,
+        u64::MAX,
+        "first peer output was built"
+    );
+    assert!(sink.is_fenced() && !sink.has_pending_dependency());
+    assert_eq!(sink.state().last_index(), 2);
+    assert_eq!(observed(&sink), observed(&vec));
+}
+
+#[test]
+fn sink_receipt_never_remembers_or_resets_for_earlier_queued_votes() {
+    let ((mut sink, _), (mut vec, _)) = twins();
+    for core in [&mut sink, &mut vec] {
+        core.step(Event::Heartbeat).unwrap();
+    }
+    let sent = sink.requests[&NodeId::new(2).unwrap()];
+    let appended = Rpc::Appended {
+        success: true,
+        matching_index: sent.end,
+    };
+    let message = membership_tests::reply(&sink, 2, sent.context, appended);
+    let (mut queue, granted) = wrapped_granted_votes(&sink);
+    let resets = sink.election_reset;
+    sink.step_into(Event::Receive(message.clone()), &mut queue)
+        .unwrap();
+    let expected = vec.step(Event::Receive(message)).unwrap();
+    assert!(queue.iter().take(2).eq(granted.iter()));
+    assert!(queue.iter().skip(2).eq(expected.iter()));
+    assert_eq!(observed(&sink), observed(&vec));
+    assert!(sink.granted_vote_reply.is_none());
+    assert_eq!(sink.election_reset, resets);
+}
