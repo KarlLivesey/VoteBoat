@@ -66,6 +66,8 @@ pub(super) struct Actor<const TRACE: bool = false> {
     attribution: Recorder<TRACE>,
     pending: PendingReplies<Reply>,
     deferred: Option<Request>,
+    /// The one effect queue the core fills in place; empty between calls.
+    queue: VecDeque<Effect>,
     last_snapshot_at: u64,
     last_contact: Instant,
     #[cfg(test)]
@@ -82,6 +84,7 @@ impl<const TRACE: bool> Actor<TRACE> {
             attribution: Recorder::default(),
             pending,
             deferred: None,
+            queue: VecDeque::new(),
             last_snapshot_at: 0,
             last_contact: Instant::now(),
             #[cfg(test)]
@@ -222,11 +225,11 @@ impl<const TRACE: bool> Actor<TRACE> {
         };
         self.reserve(input)?;
         let started = Recorder::<TRACE>::start();
-        let result = self.parts.core.step(event);
+        let result = self.parts.core.step_into(event, &mut self.queue);
         self.attribution
             .finish(Phase::Core, started, result.is_err(), 0);
-        let effects = result.map_err(debug_error)?;
-        self.effects(effects)
+        result.map_err(debug_error)?;
+        self.drain()
     }
     fn requests(&mut self, first: Request) -> Result<(), Failure> {
         let started = Recorder::<TRACE>::start();
@@ -241,16 +244,17 @@ impl<const TRACE: bool> Actor<TRACE> {
         let width = collected.len();
         let started = Recorder::<TRACE>::start();
         let result = match collected {
-            Collected::One(operation, bytes) => {
-                self.parts.core.step(Event::Propose { operation, bytes })
-            }
-            Collected::Batch(batch) => self.parts.core.propose_entries(batch),
+            Collected::One(operation, bytes) => self
+                .parts
+                .core
+                .step_into(Event::Propose { operation, bytes }, &mut self.queue),
+            Collected::Batch(batch) => self.parts.core.propose_entries_into(batch, &mut self.queue),
         };
         self.attribution
             .finish(Phase::Core, started, result.is_err(), width);
-        let effects = result.map_err(debug_error)?;
+        result.map_err(debug_error)?;
         self.parts.stats[self.parts.slot].record_proposals(width)?;
-        self.effects(effects)
+        self.drain()
     }
     fn collect(&mut self, first: Request) -> Result<Collected, Failure> {
         let capacity = self.parts.core.batch_limits().max_proposal_entries;
@@ -339,11 +343,24 @@ impl<const TRACE: bool> Actor<TRACE> {
         }
         Ok((operation, bytes))
     }
+    /// Handle owned effects from a helper that returns them.
     fn effects(&mut self, initial: Vec<Effect>) -> Result<(), Failure> {
-        let mut effects = VecDeque::from(initial);
+        self.queue.extend(initial);
+        self.drain()
+    }
+    /// Handle every queued effect in order. Completions append to the same
+    /// queue, which is put back empty so its allocation is reused.
+    fn drain(&mut self) -> Result<(), Failure> {
+        let mut effects = std::mem::take(&mut self.queue);
+        let result = self.handle(&mut effects);
+        effects.clear();
+        self.queue = effects;
+        result
+    }
+    fn handle(&mut self, effects: &mut VecDeque<Effect>) -> Result<(), Failure> {
         while let Some(effect) = effects.pop_front() {
             match effect {
-                Effect::PersistVolatile(persist) => self.persist(persist, &mut effects)?,
+                Effect::PersistVolatile(persist) => self.persist(persist, effects)?,
                 Effect::Persist(_) => {
                     return Err("volatile replica emitted durable persistence".into())
                 }
@@ -377,12 +394,19 @@ impl<const TRACE: bool> Actor<TRACE> {
             .persistence_units
             .fetch_add(1, Ordering::Relaxed);
         let started = Recorder::<TRACE>::start();
-        let result = persist_volatile(&mut self.parts.core, &self.parts.store.log, persist);
-        if effects.is_empty() {
+        let queued = effects.len();
+        let result = persist_volatile_into(
+            &mut self.parts.core,
+            &self.parts.store.log,
+            persist,
+            effects,
+        );
+        if queued == 0 {
             self.attribution
                 .finish(Phase::PersistHelper, started, result.is_err(), 0);
-            let (committed, following) = result.map_err(debug_error)?.into_parts();
-            if let Some(entries) = committed {
+            // The following effects wait in the queue until this interval
+            // is applied.
+            if let Some(entries) = result.map_err(debug_error)? {
                 Self::apply_entries(
                     &mut self.parts.application,
                     &mut self.pending,
@@ -391,13 +415,16 @@ impl<const TRACE: bool> Actor<TRACE> {
                     |application| application.apply_entries(entries),
                 )?;
             }
-            effects.extend(following);
         } else {
             // Existing FIFO work precedes every newly completed effect.
-            let result = result.map(CompletionEffects::into_owned);
+            let result = result.map(|committed| {
+                if let Some(entries) = committed {
+                    effects.insert(queued, Effect::Committed(entries.to_vec()));
+                }
+            });
             self.attribution
                 .finish(Phase::PersistHelper, started, result.is_err(), 0);
-            effects.extend(result.map_err(debug_error)?);
+            result.map_err(debug_error)?;
         }
         Ok(())
     }

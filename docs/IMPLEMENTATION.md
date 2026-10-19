@@ -756,7 +756,10 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done in review: PR 10 round 3, outbound admission of kept backing bytes (head 85e5d98a; both reviews approve on correctness) | Both round-2 reviews requested changes on one P1: round 2's allowance was measured against the selector's wire estimate (`37 + payload`), not the outbound charge (`size_of::<Message>()`, the 256 B batch header, 64 B records and retained payloads), so near the byte limit a kept recovered backing pushed an Append over the default 1 MiB budget that main's plain copy fits, and the follower never caught up. Measure the allowance against the outbound charge, derive the native outbound budget from `max_batch_bytes`, and correct the sharing claims in comments and this record. No singleton CPU work: that trade is with the user | PR 10 round 2 (head 46e1ffb4) and both round-2 reviews | The restart test with 131 × 7,900, 138 × 7,500 and 172 × 6,000 B and Sol's 68 × 15,350 B recipe (each fails on 46e1ffb4); hidden-charge property against the outbound envelope; recovered-backing sweep; exact/one-under budget checks on every admitted Append; startup derivation test; fmt, four strict root Clippy builds and the matched workspace; default and all-features suites; quiet-Mac 5 pairs × 4 cells against b72d1ee3 | T4 |
 | Done in review: PR 10 round 2, review fixes and singleton overhead (head 46e1ffb4) | Both reviews requested changes: a narrow Append from a wide shared backing was charged the whole backing, so entries recovered from a checkpoint could exceed every outbound budget and never replicate (P1, narrowed by round 2 and closed by round 3); the wire decoder froze 16+ mixed entries with an uncharged index (P2); an empty view charged an owned batch by capacity (P2); and both singleton cells stayed above +1% against main. Bound what an Append pins, charge the decoded index before allocating it, charge empty-view appends as the log holds them, and remove what singleton overhead the library and PR 10's own harness edits still add | PR 10 round 1 (head 6fecd1fb) and both reviews | Recover-then-replicate test under default limits (fails before the fix); narrow-message and hidden-charge bound tests; wire budget at exact/one-below for widths 15/16 uniform/mixed and shared source subranges; empty-view charge test; restored spare-capacity checks; asserted composed sizes; fmt, four strict root Clippy builds and the matched workspace; default and all-features suites; driver widths 1/231/515 on Linux (exact x86 counts) and the Mac; quiet-Mac 5 pairs × 4 cells against b72d1ee3; attribution controls | T4 |
 | Done: runner re-measured the composed V2+V3a+V3b+V3b-s head (65bb5041 vs main b72d1ee3, quiet Mac, H2 rule, 5 pairs: bulk-16 −12.1%, bulk-1 −13.8%, single-16 +2.0%, single-1 +2.2%; singleton regression accepted by the user on 19 October 2026) | The stack now carries V2 (merged main b72d1ee3); the runner measures all four cells of PR 10's head against the H2 main baseline. The remaining singleton excess (V3a staging, a harness effect-loop copy that V3b's types trigger) is re-profiled on the composed tree before any further slice | V2 merged; PR 10 merged with main | Framework pairs on all four cells against the H2 baseline; compaction/snapshot suites | T4 |
-| Next V3c: profile the merged V2+V3 tree | Choose the next whole cost class (remaining materialization, rounds, refcounts) from a fresh profile instead of adding helpers | V3b measured, V2 merged or rejected | Bounded schema with application/FIFO/durability semantics preserved; independent CPU pairs | T4 |
+| Done V3c profile: whole-cost profile of the merged V2+V3 tree (`target/claude/research-r4/v3c-profile.md`) | Choose the next whole cost class from a fresh profile instead of adding helpers | V3 merged (`d379783d`) | Re-baseline recorded below; ranked slices with arithmetic | T4 |
+| Current V3c: host-owned effect sink and `ProposalBatch::push` fix (branch `cpu/effect-sink`) | Every core call returns a fresh `Vec<Effect>` built from nested per-function Vecs, and the matched actor grows and frees a `VecDeque` per call: at width 1 about 30 allocations per write, 9 of them effect vectors (profile §4), ≈ 628 ns/write of allocator time in single-1. The host owns one reusable queue that the core fills in place (`step_into`, `propose_entries_into`, `persist_volatile_into`); the Vec APIs become wrappers. Ride-along: `push` built and dropped an `Exhausted` error on every success (bulk ≈ 1.4%) | Profile above; V3 merged | Effect-sequence oracle (Vec vs sink forms over the twin histories, FIFO insertion of committed intervals); rollback with sentinel effects on refused steps, stale tokens and fenced cores; reused queue keeps its capacity and allocation with no stale effects over 1,000 width-1 rounds; existing effect-order, twin, golden and facts oracles unchanged; driver widths 1/231/515 with allocation counts; quiet-Mac 5 pairs × 4 cells against `d379783d`; attribution controls; fmt, four strict root Clippy builds and the matched workspace | T4 |
+| Next V3d: per-step recomputation | `effect_reservation` rebuilds and compares `LogMetadata` twice per harness step, plus other metadata compares (profile slice 2: single-1 −2.4 to −3.5%) | V3c (same `raft.rs` chain) | Reservation equals the old value over histories; quiet-Mac pairs | T4 |
+| Following V3e: peer slots | Outstanding replication per peer in a fixed slot instead of a `BTreeMap` emptied and refilled each round; stack-bounded `peers()` and quorum frontier (profile slice 3: single-1 −2.3 to −3.1%) | V3d | Replication/frontier oracles; quiet-Mac pairs | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
 | Done C15: batched admission uses the pending bound | Same fast path for ready batches | C14 | Linux/Mac pairs; suites | T4 |
 | Done C14: proposal validation from a pending bound | Admission no longer scans every pending command when the count already settles it | — | Linux/Mac pairs; unit test; suites | T4 |
@@ -1846,6 +1849,63 @@ rule, both engines, five runs per cell, whole-process CPU per completed write
 These are the T4 reference values from here on. Profile and next slices:
 `target/claude/research-r4/v3c-profile.md` (library share ≈ 21% of single-1 and
 10–15% of bulk CPU; the rest is harness reply handling and thread wake/park).
+
+#### V3c schema plan: host-owned effect sink (19 October 2026)
+
+Brief: `target/claude/research-r4/v3c-profile.md` §6. Branch `cpu/effect-sink`
+from `11adcb33` (main after the `d379783d` re-baseline).
+
+- **Public API (additive).** `Raft::step_into(event, &mut VecDeque<Effect>)`
+  and `Raft::propose_entries_into(batch, &mut VecDeque<Effect>)` return
+  `Result<(), RaftError>` and append this call's effects, in today's order, to
+  the back of the queue. `persist_volatile_into(raft, log, persist, out)`
+  appends the following effects and returns the committed interval
+  (`Option<EntryRange<'a>>`), which precedes them. A host whose queue already
+  held work before the call keeps FIFO by inserting
+  `Effect::Committed(range.to_vec())` at the pre-call length (the rule the
+  harness already applied through `into_owned`). `step`, `propose_entries`,
+  `propose_batch` and `persist_volatile` stay, as wrappers over a fresh queue
+  (`Vec::from(VecDeque)` reuses the allocation when the head never moved).
+- **Ownership.** The host owns the queue and its capacity; the core keeps no
+  reference after a call. Effects already in the queue are never read or
+  changed by the core.
+- **State transitions and failure.** Unchanged: the same functions run in the
+  same order. Each `_into` records `mark = out.len()` and truncates to it on any
+  `Err`, so a refused or failed call leaves exactly the caller's earlier effects,
+  as the Vec form returns none. `persist_volatile_into` still fences the core
+  (`storage_failed`) on any error. Granted-vote memory scans only this call's
+  effects (`out.range(mark..)`), as it scanned only the call's Vec.
+- **Internal chain.** The hot path writes to the queue instead of returning
+  nested Vecs: `stage_pending`, `persist_update`, `persist_commit`, `persist`,
+  `persist_proposal_entries`, `propose`, `maybe_commit`, `broadcast`,
+  `broadcast_append_progress`/`_commit_progress`/`_ready_peers`/`_after_admission`,
+  `after_durable`, `install_pending`, `finish_volatile`, `receive`,
+  `receive_inner`, `receive_append`, `receive_appended`, `finish_step`. Each
+  keeps a Vec-returning wrapper for its cold callers; cold paths (votes,
+  snapshots, configuration, repair, reads) keep returning Vecs that are
+  appended with `extend`.
+- **Harness.** The VoteBoat actor gains one `queue: VecDeque<Effect>`. `step`
+  and `requests` call the `_into` forms into it; the drain takes the queue, pops
+  until empty (persist completions append to the same queue, with the FIFO
+  rule above), clears it on error and puts it back, so steady state allocates
+  no effect storage. Collection, batching, reply delivery and the OpenRaft
+  engine are untouched.
+- **Native runtime.** Its `Stepped.result` hands an owned `Vec<Effect>` to the
+  caller, which the effect owner turns into its per-visit queue without a copy;
+  moving it onto the sink changes that public visit contract and is not
+  measured by the T4 cells, so it stays on the Vec wrappers in this slice.
+- **Ride-along (separate commit).** `ProposalBatch::push` and `next_capacity`
+  construct `RaftError::Exhausted` only on the failure branch (let-else), so the
+  success path builds and drops no error. Same refusals and messages.
+- **Acceptance.** Oracle: the volatile twin histories (`history`,
+  `snapshot_history`) run through the Vec forms and through the sink forms with
+  one reused queue per replica; traces, states, roles and applied values equal.
+  Rollback: sentinel-prefilled queues survive NotLeader/Busy/Fenced steps,
+  refused batches and stale tokens unchanged, with the same core state as the
+  Vec path. Survival: after warm-up, 1,000 width-1 rounds keep each queue's
+  capacity and allocation, and every drain leaves it empty. Driver allocations
+  per write at width 1 fall from 30 to the count recorded below; the four-cell
+  gate and attribution controls as in the brief.
 
 #### H2 round 2: review fixes (19 October 2026)
 

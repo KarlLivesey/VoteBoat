@@ -198,6 +198,33 @@ impl Raft {
     /// `propose_batch`. A refused batch leaves no pending log state.
     /// Success returns a persistence request, not commitment or application.
     pub fn propose_entries(&mut self, batch: ProposalBatch) -> Result<Vec<Effect>, RaftError> {
+        let mut effects = VecDeque::new();
+        self.propose_entries_into(batch, &mut effects)?;
+        Ok(effects.into())
+    }
+
+    /// [`Self::propose_entries`] into a host-owned queue: the effects are
+    /// appended, in the same order, after any effects `out` already holds,
+    /// which are never read or changed. A refused batch leaves `out` exactly
+    /// as it was and no pending log state.
+    pub fn propose_entries_into(
+        &mut self,
+        batch: ProposalBatch,
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
+        let mark = out.len();
+        let result = self.stage_entry_batch(batch, out);
+        if result.is_err() {
+            out.truncate(mark);
+        }
+        result
+    }
+
+    fn stage_entry_batch(
+        &mut self,
+        batch: ProposalBatch,
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
         self.begin_step()?;
         self.check_proposal_role()?;
         let first = self.validate_entry_batch(&batch)?;
@@ -209,8 +236,8 @@ impl Raft {
             entry.index = first + offset as u64;
             entry.term = term;
         }
-        let effects = self.persist_proposal_entries(first, entries)?;
-        self.finish_step(effects)
+        self.persist_proposal_entries_into(first, entries, out)?;
+        self.finish_step_into(out)
     }
 
     fn validate_entry_batch(&self, batch: &ProposalBatch) -> Result<u64, RaftError> {

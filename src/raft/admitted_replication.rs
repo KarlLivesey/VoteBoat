@@ -232,8 +232,10 @@ impl Raft {
         self.admitted_ranges.clear();
         self.empty_append_aliases.clear();
     }
-    pub(super) fn broadcast_after_admission(&mut self) -> Result<Vec<Effect>, RaftError> {
-        let mut effects = Vec::new();
+    pub(super) fn broadcast_after_admission_into(
+        &mut self,
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
         for peer in self.peers() {
             if self.admitted_ranges.get(&peer).is_some_and(|range| {
                 range.ticket.revision == self.durable.revision
@@ -244,9 +246,9 @@ impl Raft {
             }) {
                 continue;
             }
-            effects.push(self.append_for(peer)?);
+            out.push_back(self.append_for(peer)?);
         }
-        Ok(effects)
+        Ok(())
     }
 }
 
