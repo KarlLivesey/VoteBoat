@@ -279,12 +279,7 @@ pub(super) fn timed_shard_profile(
         shard,
         checked(DeadlineQueue::new(owner_id, groups))?,
         JitterEntropy::new(n + 17),
-        TimerConfig {
-            heartbeat_ms: 50,
-            election_min_ms: 10000,
-            election_spread_ms: 10000,
-            expirations_per_poll: 32,
-        },
+        OFFERED_TIMERS,
         now,
     ))?;
     Ok((now, timed))

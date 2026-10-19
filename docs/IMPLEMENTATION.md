@@ -1,5 +1,93 @@
 # Implementation record
 
+## Networked CPU track (pillar 2, opened 19 October 2026)
+
+Score: CPU (user+sys) per completed write, summed over every node process, at
+equal cores on the networked native path. Design: the R4 research plan
+`target/claude/research-r4/pillar2-network-plan.md` (main checkout, untracked;
+§3.1 harness, §3.2 cells, §3.3 attribution, §3.4 noise, §4 candidates). The
+design pack is unchanged.
+
+### Macro plan (this track)
+
+| Milestone | User-visible outcome | Acceptance |
+| --- | --- | --- |
+| NW1 Cheaper networked writes | A three-process TCP/TLS or QUIC deployment spends less CPU per write at light, moderate and loaded rates, without buying the rate with extra cores | Each slice gated on the N0 harness: 5 interleaved pairs per §3.2 cell, median total CPU per write, busy cores and p99 reported |
+
+### Mini plan
+
+| Deliverable | Purpose | Dependencies | Completion checks | Advances |
+| --- | --- | --- | --- | --- |
+| Current N0: three-process cluster harness | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
+| Next N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline | Plan §5.3 tests and §5.4 gate | NW1 |
+| Then N2: per-peer frame coalescing | One frame per peer per round across groups | N1; a G=4 cell on the N0 harness (see N0 limits) | Plan §4 row 2 | NW1 |
+
+### N0 schema plan (before editing, 19 October 2026)
+
+- **Library change: one pure move.** `HostWait`, `HOST_GATHER` and
+  `HOST_MAX_WAIT` move from `src/bin/support/service_setup.rs` into
+  `voteboat::native::readiness` (in a child module that denies `unsafe`, so the
+  audited `poll(2)` scope does not widen). The only difference in the moved
+  code: the process wake is a constructor argument instead of a call to the
+  binaries' `service_setup::host_wake()` static, so the library holds no
+  process-global. The three service call sites pass `service_setup::host_wake()`,
+  the same `Arc` as before. A second, additive step makes `wait` return which
+  way it ended (`Immediate`, `Ready`, `Timeout`); the services ignore it, the
+  harness counts it. No policy constant, branch or call order changes.
+- **CLI.** `native_benchmark node N DIRECTORY tcp|quic BASE_PORT OFFERS WINDOW RATE
+  [--ready-items K]`. Every node gets the same arguments (followers need the same
+  `Counter` capacity). Each process opens only replica N through `NativeStartup`
+  with the configuration `open_recorded` builds (one shared constructor, so the
+  two cannot drift): listen `127.0.0.1:BASE+N`, peers `BASE+1..3`, fixture
+  certificates, `ready_visit_items`, entropy seed `N+17`, default limits. Timers
+  are the offered mode's (heartbeat 50 ms, election 10,000 + 10,000 ms, 32
+  expirations), also from one shared constant. The worker wake is a
+  `HostWake`, and every round waits with the library `HostWait` at its
+  production defaults (200 µs gather only when work is queued, 10 ms cap).
+- **Process protocol (stdin/stdout lines).** Each node prints `ready node=N` once
+  open. Node 1 then waits for a `start` line on stdin (EOF first aborts cleanly);
+  it campaigns until it leads with a commit in its term, runs a 64-write closed
+  warmup, records its term, runs the offered phase (the `offered.rs` `Ledger`,
+  `Offerer` and receipt handling), checks the term again, checks the ledger
+  history, performs one quorum read that must equal the expected counter value,
+  writes `run.txt`, `offers.csv` and `summary.txt` and prints a `mode=cluster`
+  summary. Nodes 2 and 3 run until stdin reaches EOF. Every node then shuts down,
+  drains, joins its workers and prints one line
+  `node_counters node=N poll_rounds= host_waits= host_waits_immediate=
+  host_waits_ready= host_waits_timeout= sends= received= persistence_batches=`
+  covering the whole process lifetime (the same span as its CPU).
+- **Ownership and cleanup.** A stdin reader thread owns stdin; it sets an atomic
+  flag and wakes the host (`HostWake` is a `WorkerWake`), so an idle follower
+  sleeps in `poll(2)`. Errors after open still drain and join the workers, as the
+  single-process path does. No Raft, runtime, wire or WAL behaviour changes.
+- **Parent script** `benchmarks/tools/cluster.py` (tracked; the main checkout's
+  `target/claude/tools` is not in git). Spawns three children, waits for three
+  `ready` lines, writes `start` to node 1, closes the followers' stdin when
+  node 1's summary arrives, reaps each child with `os.wait4` (per-process
+  user+sys), cross-checks the sum against `RUSAGE_CHILDREN` deltas and prints
+  busy cores (CPU / wall) per process. Rate lists give marginal CPU per write
+  ((CPU at 16,000 offers − CPU at 2,000) / 14,000) per process and in total.
+  ABAB pairs over two binaries. A run is invalid unless applied = offers,
+  window_refused = 0 and the leader term is unchanged.
+- **Failure paths.** A child that exits non-zero, prints no `ready` or loses
+  leadership makes the run invalid; the parent kills and reaps every remaining
+  child before reporting. A no-QUIC build refuses `quic` before creating any file
+  with the service binaries' hint ("QUIC support requires building with --features
+  quic").
+- **Restart and partial progress.** Nothing is recovered: every run uses fresh
+  directories. A crash leaves a retained directory under DIRECTORY for diagnosis.
+- **Limits.** One group only: `NativeStartup` bootstraps one group, so the §3.2
+  G=4 cell needs a shared-assembly node mode (planned with N2). No recovery
+  re-open (each process sees one replica); the quorum read replaces it.
+- **Acceptance checks.** A deterministic test in the `native_benchmark` example
+  re-executes its own test binary as three node processes on a leased
+  contiguous port block, runs 100 offers at 50/s, and asserts applied = 100,
+  the read value, `window_refused=0`, the unchanged term, clean exits and counter
+  bounds that hold on any hardware (node 1 `persistence_batches` ≥ 1, `sends`
+  ≥ 1 and `received` ≥ 1 on every node, waits = immediate + ready + timeout).
+  The existing counter, directory and transfer service suites cover the move.
+  fmt, the four strict Clippy builds and matched fmt/Clippy at zero diagnostics.
+
 ## Lifetime bounds track (opened 19 October 2026)
 
 User rule (19 October 2026): this is infrastructure, so failing after X time,
