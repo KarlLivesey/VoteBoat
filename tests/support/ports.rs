@@ -16,14 +16,17 @@ static PORTS: Mutex<BTreeSet<u16>> = Mutex::new(BTreeSet::new());
 
 pub(crate) struct Reservation {
     pub(crate) address: SocketAddr,
-    // Drop closes probes, removes the registry entry, then drops the file lock.
-    pub(crate) sockets: Option<(TcpListener, UdpSocket)>,
+    // Drop closes both probe halves, removes the registry entry, then drops
+    // the file lock.
+    pub(crate) tcp: Option<TcpListener>,
+    pub(crate) udp: Option<UdpSocket>,
     pub(crate) _lock: File,
 }
 
 impl Drop for Reservation {
     fn drop(&mut self) {
-        self.sockets.take();
+        self.tcp.take();
+        self.udp.take();
         PORTS
             .lock()
             .unwrap_or_else(PoisonError::into_inner)
@@ -81,7 +84,7 @@ impl PortLease {
                 Err(std::fs::TryLockError::WouldBlock) => continue,
                 Err(error) => panic!("port lease {port}: {error}"),
             }
-            let sockets = match bind_pair(port) {
+            let (tcp, udp) = match bind_pair(port) {
                 Ok(sockets) => sockets,
                 Err(error)
                     if matches!(
@@ -93,11 +96,12 @@ impl PortLease {
                 }
                 Err(error) => panic!("port reservation {port}: {error}"),
             };
-            let address = sockets.0.local_addr().unwrap();
+            let address = tcp.local_addr().unwrap();
             local.insert(port);
             held.push(Reservation {
                 address,
-                sockets: Some(sockets),
+                tcp: Some(tcp),
+                udp: Some(udp),
                 _lock: lock,
             });
             if held.len() == count {
@@ -114,29 +118,79 @@ impl PortLease {
     }
 
     pub fn addresses<const N: usize>(&self) -> [SocketAddr; N] {
-        self.held
-            .iter()
-            .map(|r| r.address)
-            .collect::<Vec<_>>()
-            .try_into()
-            .unwrap()
+        self.address_list().try_into().unwrap()
+    }
+
+    pub fn address_list(&self) -> Vec<SocketAddr> {
+        self.held.iter().map(|r| r.address).collect()
     }
 
     /// Only release probes when the owner is ready to bind. Locks stay held.
     pub fn handoff(&mut self) {
         for reservation in &mut self.held {
-            reservation.sockets.take();
+            reservation.tcp.take();
+            reservation.udp.take();
         }
     }
 
-    /// Move probes directly into a connector that accepts already-bound sockets.
-    /// The caller retains this lease through connector shutdown/release checks.
+    /// Move both probes directly into an owner that accepts already-bound
+    /// sockets. The caller retains this lease through shutdown/release checks.
     pub fn take_sockets(&mut self) -> Vec<(TcpListener, UdpSocket)> {
         self.held
             .iter_mut()
-            .map(|r| r.sockets.take().expect("bound socket ownership"))
+            .map(|r| {
+                let tcp = r.tcp.take().expect("bound TCP socket ownership");
+                let udp = r.udp.take().expect("bound UDP socket ownership");
+                (tcp, udp)
+            })
             .collect()
     }
+
+    /// Move one reservation's bound TCP listener into a connector that adopts
+    /// it. The unused UDP half and the lock stay here for the whole lease, so
+    /// no other binder can occupy the port; [`PortLease::reclaim`] proves the
+    /// listener's release after the connector closes.
+    pub fn adopt_tcp(&mut self, slot: usize) -> TcpListener {
+        self.held[slot]
+            .tcp
+            .take()
+            .expect("a held TCP half before adoption")
+    }
+
+    /// Move one reservation's bound UDP socket into a connector that adopts
+    /// it. The unused TCP half and the lock stay here for the whole lease;
+    /// [`PortLease::reclaim`] proves the socket's release after the connector
+    /// closes.
+    pub fn adopt_udp(&mut self, slot: usize) -> UdpSocket {
+        self.held[slot]
+            .udp
+            .take()
+            .expect("a held UDP half before adoption")
+    }
+
+    /// After every adopting owner closed: bind each reservation's adopted half
+    /// again. This proves its owner released it and holds it until the lease
+    /// ends. The unused half never left the lease, so it is never rebound.
+    pub fn reclaim(&mut self) {
+        for reservation in &mut self.held {
+            let address = reservation.address;
+            match (reservation.tcp.is_some(), reservation.udp.is_some()) {
+                (false, true) => {
+                    reservation.tcp = Some(released(address, TcpListener::bind(address)));
+                }
+                (true, false) => {
+                    reservation.udp = Some(released(address, UdpSocket::bind(address)));
+                }
+                (tcp, udp) => panic!(
+                    "{address}: reclaim proves exactly one adopted half (TCP held {tcp}, UDP held {udp})"
+                ),
+            }
+        }
+    }
+}
+
+fn released<T>(address: SocketAddr, bound: io::Result<T>) -> T {
+    bound.unwrap_or_else(|error| panic!("{address} not released by its owner: {error}"))
 }
 
 pub fn shared_directory() -> PathBuf {

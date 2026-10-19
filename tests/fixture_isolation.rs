@@ -8,7 +8,7 @@ mod serial;
 
 use std::{
     fs::OpenOptions,
-    net::{TcpListener, UdpSocket},
+    net::{SocketAddr, TcpListener, UdpSocket},
     os::unix::fs::{MetadataExt, PermissionsExt},
     process::Command,
     sync::Mutex,
@@ -101,6 +101,31 @@ fn lease_holds_across_handoff_and_processes() {
 }
 
 #[test]
+fn adoption_keeps_the_unused_half_and_reclaim_proves_release() {
+    fn check<T>(adopt: fn(&mut ports::PortLease) -> T, unused_held: fn(SocketAddr) -> bool) {
+        let mut lease = ports::PortLease::acquire(1);
+        let [address] = lease.addresses();
+        let adopted = adopt(&mut lease);
+        // The unused half stays bound in the lease while its owner runs, so
+        // no other binder can take it before the release check.
+        assert!(unused_held(address), "{address}: unused half released");
+        // Negative control: an owner that still holds its half fails the check.
+        let open = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| lease.reclaim()));
+        assert!(
+            open.is_err(),
+            "reclaim must fail while the adopted half is open"
+        );
+        drop(adopted);
+        lease.reclaim();
+        // Both halves are held again until the lease ends.
+        assert!(TcpListener::bind(address).is_err());
+        assert!(UdpSocket::bind(address).is_err());
+    }
+    check(|l| l.adopt_tcp(0), |a| UdpSocket::bind(a).is_err());
+    check(|l| l.adopt_udp(0), |a| TcpListener::bind(a).is_err());
+}
+
+#[test]
 fn panic_releases_port_lease_and_serial_guard_without_cascades() {
     let _spawn = serial::serial(&SPAWN);
     static LOCK: Mutex<()> = Mutex::new(());
@@ -117,7 +142,8 @@ fn panic_releases_port_lease_and_serial_guard_without_cascades() {
             directory: directory.clone(),
             held: vec![ports::Reservation {
                 address: "127.0.0.1:0".parse().unwrap(),
-                sockets: None,
+                tcp: None,
+                udp: None,
                 _lock: lock,
             }],
         };

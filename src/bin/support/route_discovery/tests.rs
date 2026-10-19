@@ -47,10 +47,32 @@ pub(super) fn stalled_authority() -> (Discovery, Endpoint, TcpListener, Manifest
     )
 }
 
+/// The attempt connects synchronously inside the call before
+/// [`assert_attempt_closed`], so its connection is already queued. This bound
+/// only turns a regression that never connects into a prompt failure instead
+/// of a hang until the CI job limit; it is not a performance assertion.
+const ACCEPT_HANG_GUARD: Duration = Duration::from_secs(30);
+
+fn accept_attempt(listener: &TcpListener) -> TcpStream {
+    let guard = Instant::now() + ACCEPT_HANG_GUARD;
+    listener.set_nonblocking(true).unwrap();
+    loop {
+        match listener.accept() {
+            Ok((stream, _)) => return blocking_fixture_stream(stream),
+            Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                assert!(
+                    Instant::now() < guard,
+                    "no connection attempt reached the stalled authority"
+                );
+                std::thread::sleep(Duration::from_millis(1));
+            }
+            Err(error) => panic!("stalled authority accept: {error}"),
+        }
+    }
+}
+
 fn assert_attempt_closed(listener: &TcpListener) {
-    listener.set_nonblocking(false).unwrap();
-    let (stream, _) = listener.accept().unwrap();
-    let stream = blocking_fixture_stream(stream);
+    let stream = accept_attempt(listener);
     stream
         .set_read_timeout(Some(Duration::from_secs(1)))
         .unwrap();

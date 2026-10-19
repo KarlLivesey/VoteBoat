@@ -42,6 +42,7 @@ mod lanes;
 mod shared;
 #[cfg(test)]
 #[path = "../tests/support/ports.rs"]
+#[allow(dead_code)] // The shared test lease; these fixtures use only part of it.
 mod test_ports;
 type Failure = Box<dyn std::error::Error>;
 type Replica<
