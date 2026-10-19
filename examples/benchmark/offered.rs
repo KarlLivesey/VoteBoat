@@ -513,48 +513,28 @@ pub(super) fn run<L: LogStore + Send + 'static>(
     let joined = close(replicas, clock);
     checked_stage(root, "verification", verified, joined)?;
     observe::capture(&mut storage, "after_create_join", &traces);
-    // Measurement harness only: with VOTEBOAT_BENCH_SKIP_RECOVERY set, end
-    // after the serving workload, so the process CPU is serving CPU and not
-    // the post-run recovery check (ST2 round 3 CPU reporting).
-    if std::env::var_os("VOTEBOAT_BENCH_SKIP_RECOVERY").is_some() {
-        eprintln!("phase=recovery-verification mode=offered skipped");
-        config.publication.write_storage(root, &storage)?;
-        return report_offered(
-            &config,
-            rate,
-            CompletedRun {
-                placement: &placement,
-                ledger: &ledger,
-                totals: &totals,
-                maintenance: &maintenance,
-                elapsed,
-                expected: &expected,
-                retries: 0,
-            },
-        );
-    }
-    eprintln!("phase=recovery-verification mode=offered");
-    let (mut replicas, recovered_traces) = open_cluster(NativeOpenMode::Recover)?;
-    let recovered_bases = maintenance.bases(&replicas);
-    let recovered = verify_offered_recovery(
-        &mut replicas,
-        clock,
-        groups,
-        &maintenance,
-        RecoveryCheck {
+    let retries = if serving_only(" mode=offered") {
+        0
+    } else {
+        eprintln!("phase=recovery-verification mode=offered");
+        let (mut replicas, recovered_traces) = open_cluster(NativeOpenMode::Recover)?;
+        let recovered_bases = maintenance.bases(&replicas);
+        let check = RecoveryCheck {
             warmup: &warmup,
             ledger: &ledger,
             expected: &expected,
             compacted_bases: &compacted_bases,
             last: &last,
-        },
-    );
-    let joined = close(replicas, clock);
-    let retries = checked_stage(root, "recovery", recovered, joined)?;
-    if maintenance_config.is_some() {
-        write_bases(root, &compacted_bases, &recovered_bases)?;
-    }
-    observe::capture(&mut storage, "after_recover_join", &recovered_traces);
+        };
+        let recovered = verify_offered_recovery(&mut replicas, clock, groups, &maintenance, check);
+        let joined = close(replicas, clock);
+        let retries = checked_stage(root, "recovery", recovered, joined)?;
+        if maintenance_config.is_some() {
+            write_bases(root, &compacted_bases, &recovered_bases)?;
+        }
+        observe::capture(&mut storage, "after_recover_join", &recovered_traces);
+        retries
+    };
     config.publication.write_storage(root, &storage)?;
     report_offered(
         &config,

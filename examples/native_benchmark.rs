@@ -977,34 +977,9 @@ fn run<L: LogStore + Send + 'static>(
     verify(&mut replicas, clock, capacity, groups, &last)?;
     close(replicas, clock)?;
     observe::capture(&mut storage, "after_create_join", &traces);
-    // Measurement harness only: with VOTEBOAT_BENCH_SKIP_RECOVERY set, end
-    // after the serving workload, so the process CPU is serving CPU and not
-    // the post-run recovery check (ST2 round 3 CPU reporting).
-    if std::env::var_os("VOTEBOAT_BENCH_SKIP_RECOVERY").is_some() {
-        eprintln!("phase=recovery-verification skipped");
-        return write_run_reports(
-            &config,
-            &placement,
-            &warmup,
-            &measured,
-            0,
-            &storage,
-            !traces.is_empty(),
-        );
-    }
-    eprintln!("phase=recovery-verification");
-    let (mut replicas, recovered_traces) = open_cluster(NativeOpenMode::Recover)?;
-    let recovery_retries = verify_recovered_workload(
-        &mut replicas,
-        clock,
-        groups,
-        &last,
-        &warmup,
-        &measured,
-        capacity,
-    )?;
-    close(replicas, clock)?;
-    observe::capture(&mut storage, "after_recover_join", &recovered_traces);
+    let recovery_retries = recovery_phase(&open_cluster, clock, &mut storage, |replicas| {
+        verify_recovered_workload(replicas, clock, groups, &last, &warmup, &measured, capacity)
+    })?;
     write_run_reports(
         &config,
         &placement,
@@ -1014,6 +989,32 @@ fn run<L: LogStore + Send + 'static>(
         &storage,
         !traces.is_empty(),
     )
+}
+/// Measurement harness only: with `VOTEBOAT_BENCH_SKIP_RECOVERY` set, a run
+/// ends after the serving workload, so the process CPU is serving CPU and not
+/// the post-run recovery check (ST2 round 3 CPU reporting).
+fn serving_only(mode: &str) -> bool {
+    let skip = std::env::var_os("VOTEBOAT_BENCH_SKIP_RECOVERY").is_some();
+    if skip {
+        eprintln!("phase=recovery-verification{mode} skipped");
+    }
+    skip
+}
+fn recovery_phase<L: LogStore + Send + 'static>(
+    open_cluster: impl Fn(NativeOpenMode) -> Result<(Vec<Replica<L>>, Vec<observe::Trace>), Failure>,
+    clock: &Instant,
+    storage: &mut Vec<(String, usize, observe::Totals)>,
+    verify: impl FnOnce(&mut [Replica<L>]) -> Result<usize, Failure>,
+) -> Result<usize, Failure> {
+    if serving_only("") {
+        return Ok(0);
+    }
+    eprintln!("phase=recovery-verification");
+    let (mut replicas, recovered_traces) = open_cluster(NativeOpenMode::Recover)?;
+    let retries = verify(&mut replicas)?;
+    close(replicas, clock)?;
+    observe::capture(storage, "after_recover_join", &recovered_traces);
+    Ok(retries)
 }
 fn write_run_reports(
     config: &RunConfig<'_>,
