@@ -75,7 +75,7 @@ impl History {
                     mode,
                     version,
                 );
-                let app = Maintenance::new(group(), 9001, 4, app()).unwrap();
+                let app = Maintenance::new(group(), 1, 4, app()).unwrap();
                 let wake = Arc::new(ThreadWake::current());
                 if self.member && mode != NativeOpenMode::Create {
                     NativeMemberStartup {
