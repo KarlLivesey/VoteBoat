@@ -40,25 +40,22 @@ struct NodeArgs {
     n: u64,
     root: PathBuf,
     protocol: NativePeerProtocol,
-    base: u16,
+    /// Listen port of node 1, 2 and 3.
+    ports: [u16; 3],
     count: usize,
     window: usize,
     rate: usize,
     ready_visit_items: usize,
 }
-const USAGE: &str = "usage: native_benchmark node N(1..3) FRESH_DIRECTORY tcp|quic BASE_PORT(listens on BASE+N) OFFERS(1..50000) WINDOW RATE(1..100000) [--ready-items K]";
+pub(crate) const USAGE: &str = "native_benchmark node N(1..3) FRESH_DIRECTORY tcp|quic PORTS(BASE_PORT: node N listens on BASE+N | P1,P2,P3: three distinct ports) OFFERS(1..50000) WINDOW RATE(1..100000) [--ready-items K]; every node takes the same PORTS; the example needs the tls feature (native-only builds have no cluster mode) and quic needs --features quic";
 fn parse(args: &[String], ready_visit_items: usize) -> Result<NodeArgs, Failure> {
-    let [n, root, protocol, base, count, window, rate] = args else {
-        return Err(USAGE.into());
+    let [n, root, protocol, ports, count, window, rate] = args else {
+        return Err(format!("usage: {USAGE}").into());
     };
     let n = n.parse::<u64>()?;
-    let base = base.parse::<u16>()?;
-    if !(1..=3).contains(&n)
-        || base == 0
-        || base > u16::MAX - 3
-        || !(1..=1024).contains(&ready_visit_items)
-    {
-        return Err(USAGE.into());
+    let ports = parse_ports(ports)?;
+    if !(1..=3).contains(&n) || !(1..=1024).contains(&ready_visit_items) {
+        return Err(format!("usage: {USAGE}").into());
     }
     let protocol = parse_protocol(protocol)?;
     let (count, window, rate) = (count.parse()?, window.parse()?, rate.parse()?);
@@ -68,12 +65,34 @@ fn parse(args: &[String], ready_visit_items: usize) -> Result<NodeArgs, Failure>
         n,
         root: PathBuf::from(root),
         protocol,
-        base,
+        ports,
         count,
         window,
         rate,
         ready_visit_items,
     })
+}
+
+/// `BASE` (ports BASE+1..3, a convenience for manual runs) or `P1,P2,P3`.
+fn parse_ports(text: &str) -> Result<[u16; 3], Failure> {
+    let ports = if text.contains(',') {
+        let list = text
+            .split(',')
+            .map(str::parse::<u16>)
+            .collect::<Result<Vec<_>, _>>()?;
+        <[u16; 3]>::try_from(list).map_err(|_| format!("usage: {USAGE}"))?
+    } else {
+        let base = text.parse::<u16>()?;
+        if base > u16::MAX - 3 {
+            return Err(format!("usage: {USAGE}").into());
+        }
+        [base + 1, base + 2, base + 3]
+    };
+    let [a, b, c] = ports;
+    if ports.contains(&0) || a == b || a == c || b == c {
+        return Err(format!("usage: {USAGE}").into());
+    }
+    Ok(ports)
 }
 
 /// Run one cluster node; `args` follow `node`. Only `--ready-items` (default
@@ -111,10 +130,8 @@ pub(crate) fn run(args: &[String], ready: Option<usize>, plain: bool) -> Result<
 
 fn open_node(args: &NodeArgs, clock: &Instant, wake: Arc<HostWake>) -> Result<Replica, Failure> {
     let addresses = (1..=3u64)
-        .map(|p| {
-            let port = args.base + p as u16;
-            (p, std::net::SocketAddr::from(([127, 0, 0, 1], port)))
-        })
+        .zip(args.ports)
+        .map(|(p, port)| (p, std::net::SocketAddr::from(([127, 0, 0, 1], port))))
         .collect();
     let config = replica_startup(
         &args.root,
@@ -295,9 +312,11 @@ fn lead(
     std::fs::write(
         args.root.join("run.txt"),
         format!(
-            "mode=cluster node=1 protocol={:?} base_port={} offers={} offered_rate={} window={} groups=1 warmup={WARMUP} {}\n",
+            "mode=cluster node=1 protocol={:?} ports={},{},{} offers={} offered_rate={} window={} groups=1 warmup={WARMUP} {}\n",
             args.protocol,
-            args.base,
+            args.ports[0],
+            args.ports[1],
+            args.ports[2],
             args.count,
             args.rate,
             args.window,
@@ -525,8 +544,8 @@ fn summary(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_ports;
     use std::{
+        collections::BTreeSet,
         fs::File,
         io::BufReader,
         process::{Child, Command, Stdio},
@@ -547,64 +566,29 @@ mod tests {
         run(&args, None, true).unwrap();
     }
 
-    /// Ports BASE+1..3 at offsets 8..10 of a 128-port block below every
-    /// ephemeral range. No other suite uses these offsets: counter blocks use
-    /// 1..4, 11..14, 101..104 and 111..114, directory ladders land on 5..7 and
-    /// 33..35, transfer ladders sit in 10000..20000 (skipped here) and the
-    /// shared lease pool never takes offsets below 17 in this band. Lock files
-    /// in the shared lease namespace keep concurrent runs of this test apart
-    /// for the whole run; probe binds prove the ports free until the nodes
-    /// start.
-    struct Block {
-        base: u16,
-        _locks: Vec<File>,
-        probes: Vec<(TcpListener, UdpSocket)>,
-    }
-    fn block() -> Block {
-        let shared = test_ports::shared_directory();
-        let directory = match test_ports::prepare_directory(&shared) {
-            Ok(()) => shared,
-            Err(error) => {
-                let fallback = test_ports::fallback_directory(&shared, &error);
-                test_ports::prepare_directory(&fallback).unwrap();
-                fallback
-            }
-        };
-        let blocks = (0..248u16)
-            .map(|k| 1024 + 128 * k)
-            .filter(|b| !(9984..20096).contains(b));
-        for block in blocks {
-            let base = block + 7;
-            let ports = [base + 1, base + 2, base + 3];
-            let Ok(locks) = ports
-                .iter()
-                .map(|p| {
-                    let lock = test_ports::open_lock(&directory.join(format!("{p}.lock")))?;
-                    lock.try_lock().map_err(std::io::Error::other)?;
-                    Ok::<_, std::io::Error>(lock)
-                })
-                .collect::<Result<Vec<_>, _>>()
-            else {
-                continue;
-            };
-            let Ok(probes) = ports
-                .iter()
-                .map(|p| {
-                    let tcp = TcpListener::bind(("127.0.0.1", *p))?;
-                    let udp = UdpSocket::bind(("127.0.0.1", *p))?;
-                    Ok::<_, std::io::Error>((tcp, udp))
-                })
-                .collect::<Result<Vec<_>, _>>()
-            else {
-                continue;
-            };
-            return Block {
-                base,
-                _locks: locks,
-                probes,
-            };
-        }
-        panic!("no free cluster port block");
+    /// Three OS-selected loopback ports, each held for TCP and UDP (the
+    /// acquisition the native startup fixtures use), as the `P1,P2,P3`
+    /// argument. The nodes bind them after the holds are released; a binder
+    /// that takes one in between makes that node fail to open with
+    /// `AddrInUse`, and `cluster` retries the whole cluster on fresh ports.
+    fn reserve() -> (String, Vec<(TcpListener, UdpSocket)>) {
+        let held = (0..3)
+            .map(|_| {
+                (0..32)
+                    .find_map(|_| {
+                        let tcp = TcpListener::bind("127.0.0.1:0").ok()?;
+                        let udp = UdpSocket::bind(tcp.local_addr().ok()?).ok()?;
+                        Some((tcp, udp))
+                    })
+                    .expect("available TCP/UDP endpoint")
+            })
+            .collect::<Vec<_>>();
+        let ports = held
+            .iter()
+            .map(|(tcp, _)| tcp.local_addr().unwrap().port().to_string())
+            .collect::<Vec<_>>()
+            .join(",");
+        (ports, held)
     }
 
     /// Children are killed and reaped if the test fails before they exit.
@@ -644,7 +628,7 @@ mod tests {
     type Events = mpsc::Receiver<(u64, Option<String>)>;
     /// Start three nodes re-executing this binary; their stdout lines arrive
     /// on the returned channel, `None` when a stream ends.
-    fn spawn(root: &Path, protocol: &str, base: u16) -> (Children, Events) {
+    fn spawn(root: &Path, protocol: &str, ports: &str) -> (Children, Events) {
         let exe = std::env::current_exe().unwrap();
         let (sender, events) = mpsc::channel();
         let mut children = Children(Vec::new());
@@ -653,7 +637,7 @@ mod tests {
                 n.to_string(),
                 root.join(format!("node{n}")).display().to_string(),
                 protocol.to_string(),
-                base.to_string(),
+                ports.to_string(),
                 "100".into(),
                 "1024".into(),
                 "50".into(),
@@ -688,11 +672,18 @@ mod tests {
         (children, events)
     }
 
+    enum Outcome {
+        /// Every node exited 0; each node's stdout lines.
+        Done(BTreeMap<u64, Vec<String>>),
+        /// This node failed to open with `AddrInUse` before `ready`.
+        Collision(u64),
+    }
+
     /// The parent protocol of `cluster.py`: `start` once all three are ready,
-    /// stdin closed once node 1 has reported. Returns each node's lines.
-    fn drive(children: &mut Children, events: &Events, root: &Path) -> BTreeMap<u64, Vec<String>> {
+    /// stdin closed once node 1 has reported or any node has ended.
+    fn drive(children: &mut Children, events: &Events, root: &Path) -> Outcome {
         let mut lines = BTreeMap::<u64, Vec<String>>::new();
-        let (mut ready, mut open) = (0, 3);
+        let (mut ready, mut open) = (BTreeSet::new(), 3);
         let release = |children: &mut Children| {
             for child in &mut children.0 {
                 drop(child.stdin.take());
@@ -710,8 +701,8 @@ mod tests {
                 continue;
             };
             if line.contains("ready node=") {
-                ready += 1;
-                if ready == 3 {
+                ready.insert(n);
+                if ready.len() == 3 {
                     let stdin = children.0[0].stdin.as_mut().unwrap();
                     writeln!(stdin, "start").unwrap();
                 }
@@ -721,16 +712,23 @@ mod tests {
             }
             lines.entry(n).or_default().push(line);
         }
-        for (n, child) in children.0.iter_mut().enumerate() {
-            let status = child.wait().unwrap();
-            assert!(
-                status.success(),
-                "node {} exited {status}; logs in {}",
-                n + 1,
-                root.display()
-            );
+        let failed = (1..=3u64)
+            .zip(&mut children.0)
+            .filter_map(|(n, child)| {
+                let status = child.wait().unwrap();
+                (!status.success()).then_some((n, status))
+            })
+            .collect::<Vec<_>>();
+        if failed.is_empty() {
+            return Outcome::Done(lines);
         }
-        lines
+        for (n, _) in &failed {
+            let log = std::fs::read_to_string(root.join(format!("node{n}.err"))).unwrap();
+            if !ready.contains(n) && log.contains("AddrInUse") {
+                return Outcome::Collision(*n);
+            }
+        }
+        panic!("nodes exited {failed:?}; logs in {}", root.display());
     }
 
     fn check(lines: &BTreeMap<u64, Vec<String>>) {
@@ -783,21 +781,74 @@ mod tests {
         assert!(received <= sends);
     }
 
-    fn cluster(protocol: &str) {
-        let mut block = block();
-        let root = std::env::temp_dir().join(format!(
-            "voteboat-cluster-{}-{protocol}",
-            std::process::id()
-        ));
+    fn fresh_root(name: &str) -> PathBuf {
+        let root =
+            std::env::temp_dir().join(format!("voteboat-cluster-{}-{name}", std::process::id()));
         let _ = std::fs::remove_dir_all(&root);
         std::fs::create_dir(&root).unwrap();
-        // The nodes bind their own listeners; release the probes first. The
-        // locks stay held until the nodes have exited.
-        block.probes.clear();
-        let (mut children, events) = spawn(&root, protocol, block.base);
-        let lines = drive(&mut children, &events, &root);
-        check(&lines);
+        root
+    }
+
+    /// Bounds the retries; each needs another binder to take one of three
+    /// fresh OS-selected ports in the moment between release and bind.
+    const ATTEMPTS: usize = 8;
+
+    fn cluster(protocol: &str) {
+        for attempt in 0..ATTEMPTS {
+            let root = fresh_root(&format!("{protocol}-{attempt}"));
+            let (ports, held) = reserve();
+            // The nodes bind their own listeners: release the holds first.
+            drop(held);
+            let (mut children, events) = spawn(&root, protocol, &ports);
+            match drive(&mut children, &events, &root) {
+                Outcome::Done(lines) => {
+                    check(&lines);
+                    std::fs::remove_dir_all(&root).unwrap();
+                    return;
+                }
+                Outcome::Collision(n) => {
+                    eprintln!("node {n} lost port {ports} to another binder; retrying");
+                    drop(children);
+                    std::fs::remove_dir_all(&root).unwrap();
+                }
+            }
+        }
+        panic!("{ATTEMPTS} attempts each lost a port to another binder");
+    }
+
+    #[test]
+    fn a_node_whose_port_is_taken_is_reported_as_a_collision() {
+        let root = fresh_root("collision");
+        let (ports, mut held) = reserve();
+        // Keep node 3's TCP and UDP holds: its open fails exactly as if
+        // another binder had taken the port. Nodes 1 and 2 are released by
+        // EOF and exit; nothing is offered.
+        let taken = held.pop().unwrap();
+        drop(held);
+        let (mut children, events) = spawn(&root, "tcp", &ports);
+        let outcome = drive(&mut children, &events, &root);
+        assert!(matches!(outcome, Outcome::Collision(3)));
+        drop((children, taken));
         std::fs::remove_dir_all(&root).unwrap();
+    }
+
+    /// The parent script's own tests (round pairing, per-process exit stamps,
+    /// retained invalid runs), on fixture nodes; needs `python3` (3.9+).
+    #[test]
+    fn cluster_script_self_test_passes() {
+        let script = concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/benchmarks/tools/cluster_test.py"
+        );
+        let output = Command::new("python3")
+            .args(["-I", script])
+            .output()
+            .expect("python3 runs benchmarks/tools/cluster_test.py");
+        assert!(
+            output.status.success(),
+            "{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
     }
 
     #[test]
@@ -839,8 +890,12 @@ mod tests {
         for args in [
             vec!["0", dir, "tcp", "4000", "100", "1024", "50"],
             vec!["4", dir, "tcp", "4000", "100", "1024", "50"],
-            vec!["1", dir, "tcp", "0", "100", "1024", "50"],
             vec!["1", dir, "tcp", "65533", "100", "1024", "50"],
+            vec!["1", dir, "tcp", "0,4002,4003", "100", "1024", "50"],
+            vec!["1", dir, "tcp", "4001,4002,4001", "100", "1024", "50"],
+            vec!["1", dir, "tcp", "4001,4002", "100", "1024", "50"],
+            vec!["1", dir, "tcp", "4001,4002,4003,4004", "100", "1024", "50"],
+            vec!["1", dir, "tcp", "4001,,4003", "100", "1024", "50"],
             vec!["1", dir, "tcp", "4000", "0", "1024", "50"],
             vec!["1", dir, "tcp", "4000", "100", "0", "50"],
             vec!["1", dir, "tcp", "4000", "100", "1024", "0"],
@@ -855,7 +910,15 @@ mod tests {
         assert!(run(&args, Some(5000), true).is_err());
         assert!(!root.exists());
         let parsed = parse(&args, 1024).unwrap();
-        assert_eq!((parsed.n, parsed.base, parsed.count), (1, 4000, 100));
+        assert_eq!(
+            (parsed.n, parsed.ports, parsed.count),
+            (1, [4001, 4002, 4003], 100)
+        );
         assert_eq!((parsed.window, parsed.rate), (1024, 50));
+        let explicit =
+            ["2", dir, "tcp", "50007,40001,61000", "100", "1024", "50"].map(String::from);
+        assert_eq!(parse(&explicit, 1024).unwrap().ports, [50007, 40001, 61000]);
+        let base = ["3", dir, "tcp", "0", "100", "1024", "50"].map(String::from);
+        assert_eq!(parse(&base, 1024).unwrap().ports, [1, 2, 3]);
     }
 }
