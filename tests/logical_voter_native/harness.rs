@@ -6,13 +6,11 @@
 //! own idle polling rounds, never on CPU speed, core count, disk latency or
 //! thread scheduling. Every liveness wait keeps its original bound in
 //! protocol time; real time is only a generous hang guard for deadlocks.
-use super::{aliases::Bridge, cluster::ChildNode};
+use super::{aliases::Bridge, cluster::ChildNode, support::ports};
 use std::{
     cell::Cell,
-    fs::{File, OpenOptions},
     hash::{DefaultHasher, Hash, Hasher},
-    io,
-    net::{Ipv4Addr, SocketAddr, TcpListener, TcpStream, UdpSocket},
+    net::{SocketAddr, TcpListener, TcpStream, UdpSocket},
     rc::Rc,
     sync::{
         atomic::{AtomicBool, Ordering},
@@ -295,63 +293,50 @@ where
 
 /// One loopback port owned by a test for its whole lifetime.
 ///
-/// Leases come from outside the kernel's automatic (ephemeral) port range,
-/// so no outgoing connection or `:0` bind can take one, and outside
-/// 1024..32768, where other suites allocate fixed port blocks. Each is
-/// claimed with a cross-process file lock in one namespace shared by every
-/// user and `TMPDIR`. The protocol the node does not use stays bound by the
-/// lease for its whole lifetime, so no TCP+UDP pair probe can claim the port.
-/// The node's own half is held until the instant the node binds it, and again
-/// from the moment its release is proven until the lease ends. While a TCP
-/// node is absent its held listener closes each accepted connection at once,
-/// so peers dialling an absent node fail promptly instead of hanging until
-/// their deadline.
-///
-/// The lock namespace and port pool follow the shared `support::ports` lease
-/// (PR 4), so this can be swapped for it once that lands.
+/// The port, its cross-process lock and the in-process registry entry come
+/// from the shared [`ports::PortLease`] (TR1b), so every fixture draws from one
+/// pool: outside the kernel's automatic (ephemeral) range and outside every
+/// legacy fixed-port ladder (counter, routed, directory and transfer
+/// services). This type only splits that lease's bound TCP/UDP pair by
+/// protocol. The half the node or connector does not use stays bound here for
+/// the whole lease, so no TCP+UDP pair probe can claim the port. The selected
+/// half is held until the instant its owner binds or adopts it, and again from
+/// the moment [`PortLease::reclaim`] proves its release until the lease ends.
+/// While a TCP owner is absent the held listener closes each accepted
+/// connection at once, so peers dialling an absent node fail promptly instead
+/// of hanging until their deadline.
 pub struct PortLease {
     address: SocketAddr,
     protocol: NativePeerProtocol,
     selected: Option<Held>,
     // The unused protocol half, bound for the lease lifetime.
-    other: Option<Held>,
-    _lock: File,
+    _other: Held,
+    // Declared last: fields drop in order, so both halves close before the
+    // lock and registry entry are released.
+    _shared: ports::PortLease,
 }
 enum Held {
     Tcp(Refusing),
-    Udp(UdpSocket),
+    // Read only by QUIC adoption; otherwise held for its binding alone.
+    Udp { _socket: UdpSocket },
 }
 impl PortLease {
     pub fn acquire(protocol: NativePeerProtocol) -> Self {
-        let directory = lease_directory();
-        let ephemeral = ephemeral_range();
-        for port in 32768..=u16::MAX {
-            if ephemeral.contains(&port) {
-                continue;
-            }
-            let Some(lock) = lock(&directory, port) else {
-                continue;
-            };
-            let (tcp, udp) = match bind_pair(port) {
-                Ok(pair) => pair,
-                Err(error) if error.kind() == io::ErrorKind::AddrInUse => continue,
-                Err(error) => panic!("port lease {port}: {error}"),
-            };
-            let address = tcp.local_addr().unwrap();
-            let (selected, other) = match protocol {
-                NativePeerProtocol::TcpTls => (Held::tcp(tcp), Held::Udp(udp)),
-                #[cfg(feature = "quic")]
-                NativePeerProtocol::Quic => (Held::Udp(udp), Held::tcp(tcp)),
-            };
-            return Self {
-                address,
-                protocol,
-                selected: Some(selected),
-                other: Some(other),
-                _lock: lock,
-            };
+        let mut shared = ports::PortLease::acquire(1);
+        let [address] = shared.addresses();
+        let [(tcp, udp)]: [(TcpListener, UdpSocket); 1] = shared.take_sockets().try_into().unwrap();
+        let (selected, other) = match protocol {
+            NativePeerProtocol::TcpTls => (Held::tcp(tcp), Held::Udp { _socket: udp }),
+            #[cfg(feature = "quic")]
+            NativePeerProtocol::Quic => (Held::Udp { _socket: udp }, Held::tcp(tcp)),
+        };
+        Self {
+            address,
+            protocol,
+            selected: Some(selected),
+            _other: other,
+            _shared: shared,
         }
-        panic!("no TCP/UDP test port lease outside 1024..32768 and {ephemeral:?}");
     }
     pub fn address(&self) -> SocketAddr {
         self.address
@@ -360,32 +345,42 @@ impl PortLease {
     pub fn handoff(&mut self) {
         drop(self.selected.take().expect("held before handoff"));
     }
-    /// Bind the node's half again: this proves the node released it, and
-    /// holds it for a later reopen.
-    pub fn reclaim(&mut self) {
-        assert!(self.selected.is_none());
-        self.selected = Some(match self.protocol {
-            NativePeerProtocol::TcpTls => Held::tcp(TcpListener::bind(self.address).unwrap()),
-            #[cfg(feature = "quic")]
-            NativePeerProtocol::Quic => Held::Udp(UdpSocket::bind(self.address).unwrap()),
-        });
-    }
-    /// Move both bound sockets into a connector that adopts them; the lock
-    /// stays here until [`PortLease::reclaim_both`].
-    pub fn take_sockets(&mut self) -> (TcpListener, UdpSocket) {
-        match (self.selected.take(), self.other.take()) {
-            (Some(Held::Tcp(tcp)), Some(Held::Udp(udp)))
-            | (Some(Held::Udp(udp)), Some(Held::Tcp(tcp))) => (tcp.stop(), udp),
-            _ => panic!("both halves held before adoption"),
+    /// Move the selected TCP listener into a connector that adopts it. The
+    /// unused UDP half and the lock stay here; [`PortLease::reclaim`] proves
+    /// the release after the connector closes.
+    pub fn adopt_tcp(&mut self) -> TcpListener {
+        match self.selected.take() {
+            Some(Held::Tcp(tcp)) => tcp.stop(),
+            _ => panic!("a held TCP half before adoption"),
         }
     }
-    /// After an adopting connector closed: prove both halves were released.
-    pub fn reclaim_both(&mut self) {
-        assert!(self.selected.is_none() && self.other.is_none());
-        let (tcp, udp) = bind_pair(self.address.port()).unwrap();
-        self.selected = Some(Held::Udp(udp));
-        self.other = Some(Held::tcp(tcp));
+    /// Move the selected UDP socket into a connector that adopts it. The
+    /// unused TCP half and the lock stay here; [`PortLease::reclaim`] proves
+    /// the release after the connector closes.
+    #[cfg(feature = "quic")]
+    pub fn adopt_udp(&mut self) -> UdpSocket {
+        match self.selected.take() {
+            Some(Held::Udp { _socket: udp }) => udp,
+            _ => panic!("a held UDP half before adoption"),
+        }
     }
+    /// Bind the selected half again: this proves its owner released it, and
+    /// holds it for a later reopen. Only the selected half ever leaves the
+    /// lease, so this is the only rebind.
+    pub fn reclaim(&mut self) {
+        assert!(self.selected.is_none(), "selected half already held");
+        let address = self.address;
+        self.selected = Some(match self.protocol {
+            NativePeerProtocol::TcpTls => Held::tcp(released(address, TcpListener::bind(address))),
+            #[cfg(feature = "quic")]
+            NativePeerProtocol::Quic => Held::Udp {
+                _socket: released(address, UdpSocket::bind(address)),
+            },
+        });
+    }
+}
+fn released<T>(address: SocketAddr, bound: std::io::Result<T>) -> T {
+    bound.unwrap_or_else(|error| panic!("{address} not released by its owner: {error}"))
 }
 impl Held {
     fn tcp(listener: TcpListener) -> Self {
@@ -437,81 +432,5 @@ impl Refusing {
 impl Drop for Refusing {
     fn drop(&mut self) {
         self.halt();
-    }
-}
-/// One namespace for every process that shares the loopback port space,
-/// independent of each user's `TMPDIR`; sticky and world-writable like `/tmp`.
-fn lease_directory() -> std::path::PathBuf {
-    use std::os::unix::fs::PermissionsExt;
-    let directory = std::env::var_os("VOTEBOAT_TEST_PORT_LEASE_DIR").map_or_else(
-        || "/tmp/voteboat-test-ports".into(),
-        std::path::PathBuf::from,
-    );
-    std::fs::create_dir_all(&directory).unwrap();
-    let mode = std::fs::metadata(&directory).unwrap().permissions().mode();
-    if mode & 0o1777 != 0o1777 {
-        // Only the owner can repair the mode; another user's directory that
-        // is already shared needs no change.
-        drop(std::fs::set_permissions(
-            &directory,
-            std::fs::Permissions::from_mode(0o1777),
-        ));
-    }
-    directory
-}
-/// Lock files persist so every process locks the same inode. Existing files
-/// are opened without `O_CREAT` (another user's file in a sticky directory
-/// refuses it), and read-only when they are not writable for this user: an
-/// advisory lock needs no write access.
-fn lock(directory: &std::path::Path, port: u16) -> Option<File> {
-    use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
-    let path = directory.join(format!("{port}.lock"));
-    let file = loop {
-        match OpenOptions::new().read(true).write(true).open(&path) {
-            Ok(file) => break file,
-            Err(e) if e.kind() == io::ErrorKind::PermissionDenied => {
-                break File::open(&path).ok()?
-            }
-            Err(e) if e.kind() == io::ErrorKind::NotFound => {}
-            Err(e) => panic!("port lease {port}: {e}"),
-        }
-        match OpenOptions::new()
-            .read(true)
-            .write(true)
-            .create_new(true)
-            .mode(0o666)
-            .open(&path)
-        {
-            Ok(file) => {
-                // Independent of this process's umask.
-                file.set_permissions(std::fs::Permissions::from_mode(0o666))
-                    .unwrap();
-                break file;
-            }
-            Err(e) if e.kind() == io::ErrorKind::AlreadyExists => continue,
-            Err(e) => panic!("port lease {port}: {e}"),
-        }
-    };
-    match file.try_lock() {
-        Ok(()) => Some(file),
-        Err(std::fs::TryLockError::WouldBlock) => None,
-        Err(error) => panic!("port lease {port}: {error}"),
-    }
-}
-fn bind_pair(port: u16) -> io::Result<(TcpListener, UdpSocket)> {
-    let tcp = TcpListener::bind((Ipv4Addr::LOCALHOST, port))?;
-    let udp = UdpSocket::bind(tcp.local_addr()?)?;
-    Ok((tcp, udp))
-}
-fn ephemeral_range() -> std::ops::RangeInclusive<u16> {
-    #[cfg(target_os = "linux")]
-    {
-        let text = std::fs::read_to_string("/proc/sys/net/ipv4/ip_local_port_range").unwrap();
-        let mut ports = text.split_whitespace().map(|p| p.parse::<u16>().unwrap());
-        ports.next().unwrap()..=ports.next().unwrap()
-    }
-    #[cfg(not(target_os = "linux"))]
-    {
-        49152..=65535
     }
 }

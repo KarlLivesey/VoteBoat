@@ -15,12 +15,7 @@
 //! Actual authenticated parent sessions retaining original envelope ownership.
 use super::{groups as setup, support};
 use crate::harness::{self, FixtureClock, Observed, PortLease, SimClock};
-use std::{
-    collections::BTreeMap,
-    net::{SocketAddr, TcpListener, UdpSocket},
-    sync::Arc,
-    time::Duration,
-};
+use std::{collections::BTreeMap, net::SocketAddr, sync::Arc, time::Duration};
 use voteboat::{
     connect::*,
     dial::*,
@@ -39,8 +34,9 @@ pub struct Channels {
     connectors: Vec<NativeServiceConnector>,
     sessions: BTreeMap<(usize, usize), Session>,
     addresses: Vec<SocketAddr>,
-    // Each connector adopts its lease's bound sockets; the leases keep the
-    // ports until both halves are proven released after close.
+    // Each connector adopts only its own protocol's bound half. The lease
+    // keeps the unused half bound and the lock held for the whole workflow,
+    // and rebinds the adopted half after close to prove its release.
     leases: Vec<PortLease>,
     clock: SimClock,
 }
@@ -70,16 +66,7 @@ impl Channels {
         let connectors = leases
             .iter_mut()
             .enumerate()
-            .map(|(slot, lease)| {
-                connector(
-                    slot,
-                    descriptors,
-                    &addresses,
-                    lease.take_sockets(),
-                    protocol,
-                    now,
-                )
-            })
+            .map(|(slot, lease)| connector(slot, descriptors, &addresses, lease, protocol, now))
             .collect();
         let mut result = Self {
             connectors,
@@ -225,7 +212,7 @@ impl Channels {
             }
         }
         for lease in &mut self.leases {
-            lease.reclaim_both();
+            lease.reclaim();
         }
     }
     /// Dial work holds protocol time; so does any session or connector
@@ -242,7 +229,7 @@ fn connector(
     slot: usize,
     descriptors: &[LogicalPeerDescriptor],
     _addresses: &[SocketAddr],
-    sockets: (TcpListener, UdpSocket),
+    lease: &mut PortLease,
     protocol: NativePeerProtocol,
     now: MonoTime,
 ) -> NativeServiceConnector {
@@ -276,7 +263,6 @@ fn connector(
         .with_logical_profile();
     match protocol {
         NativePeerProtocol::TcpTls => {
-            drop(sockets.1);
             let dialer = NativeTcpDialer::spawn(
                 local,
                 peers
@@ -288,12 +274,12 @@ fn connector(
             )
             .unwrap();
             NativeServiceConnector::Tcp(Box::new(
-                NativePeerConnector::new(config, tls, peers, dialer, Some(sockets.0), now).unwrap(),
+                NativePeerConnector::new(config, tls, peers, dialer, Some(lease.adopt_tcp()), now)
+                    .unwrap(),
             ))
         }
         #[cfg(feature = "quic")]
         NativePeerProtocol::Quic => {
-            drop(sockets.0);
             let peers = peers
                 .into_iter()
                 .map(|(id, p)| {
@@ -306,7 +292,11 @@ fn connector(
                 .collect();
             NativeServiceConnector::Quic(Box::new(
                 voteboat::native::quic_connect::NativeQuicConnector::new(
-                    config, tls, peers, sockets.1, now,
+                    config,
+                    tls,
+                    peers,
+                    lease.adopt_udp(),
+                    now,
                 )
                 .map_err(|e| e.reason)
                 .unwrap(),

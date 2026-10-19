@@ -19,6 +19,7 @@
 //! expire an attempt whose connection already exists. The fixture clock holds
 //! protocol time while any attempt waits for its dial worker.
 use super::*;
+use std::net::TcpListener;
 use voteboat::native::tls::NativeTlsSession;
 
 fn local(id: u64) -> LocalIdentity {
