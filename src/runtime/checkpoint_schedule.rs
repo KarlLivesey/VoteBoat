@@ -68,6 +68,12 @@ pub struct CheckpointStatus {
     pub pending: BTreeMap<GroupIdentity, ScheduledCheckpoint>,
     pub last_result: Option<CheckpointResult>,
     pub last_admission_error: Option<(GroupIdentity, RuntimeError)>,
+    /// A leader defers a due checkpoint while another replica has not yet
+    /// acknowledged its applied index (compacting there would send that
+    /// replica a full snapshot), but only until the applied entries beyond
+    /// the base reach this cap, halfway from the threshold to the
+    /// retained-entry limit, and never under WAL pressure.
+    defer_cap: u64,
 }
 impl CheckpointStatus {
     /// `max_entries` is the smallest retained-entry budget of the node's groups.
@@ -108,6 +114,9 @@ impl CheckpointStatus {
         } else {
             None
         };
+        self.defer_cap = policy.map_or(0, |p| {
+            p.min_entries + (max_entries as u64).saturating_sub(p.min_entries) / 2
+        });
         self.policy = policy;
         self.next_scan = next;
         self.cursor = None;
@@ -205,9 +214,11 @@ impl CheckpointStatus {
                 continue;
             };
             let applied = app.applied_index();
+            let beyond = applied.saturating_sub(core.state().base_index());
             if core.has_pending_dependency()
                 || applied > core.state().commit_index
-                || applied.saturating_sub(core.state().base_index()) < min_entries
+                || beyond < min_entries
+                || (!pressure && beyond < self.defer_cap && !core.replicas_acknowledged(applied))
             {
                 continue;
             }

@@ -714,6 +714,18 @@ impl Raft {
     pub(crate) fn set_storage_pressure(&mut self, on: bool) {
         self.storage_pressure = on;
     }
+    /// As leader, whether every other replica has acknowledged `index`, so a
+    /// compaction there leaves no replica behind the new base (which would
+    /// need a full snapshot). Always true for a non-leader. Local scheduling
+    /// input only, not quorum evidence.
+    pub fn replicas_acknowledged(&self, index: u64) -> bool {
+        self.role != Role::Leader
+            || self
+                .membership()
+                .replicas()
+                .filter(|(node, _)| *node != self.node)
+                .all(|(node, _)| self.progress.get(&node).is_some_and(|p| *p >= index))
+    }
     pub fn role(&self) -> Role {
         self.role
     }
