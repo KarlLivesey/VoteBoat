@@ -28,6 +28,7 @@ fn enable(nodes: &mut [Replica<SharedLog>]) {
             interval_ms: 1,
             retry_ms: 1,
             max_bytes: LogLimits::default().max_wal_bytes,
+            min_reclaim_bytes: 0,
         }))
         .unwrap();
     }

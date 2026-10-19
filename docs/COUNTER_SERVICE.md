@@ -1025,50 +1025,95 @@ old-view-voter trust checks; disk formats are unchanged. Existing interruption
 histories were rerun with TCP and QUIC wire7 peers. Forced network execution of
 the new final-checkpoint path remains a separate acceptance history.
 
-## Optional automatic WAL reclamation
+## Store maintenance (on by default)
 
-Append `--wal-reclaim-ms 60000` to a serve/recover command to request periodic
-physical reclamation every minute. Omit it to retain manual operation. A positive
-interval is required; each node schedules its own selected worker. Inspect the
-local, volatile result with:
+Since ST2 (19 October 2026) every service binary (`voteboat-counter`,
+`voteboat-directory`, `voteboat-transfer`) and every library node checkpoints
+and reclaims its WAL by default. Without maintenance each group stopped
+accepting writes at 16,384 retained entries or 64 MiB of WAL, and a full WAL
+failed the node.
+
+Defaults, derived from the store limits:
+
+- **Checkpoints.** A group is checkpointed once its applied log is half the
+  retained-entry limit (8,192 entries) beyond its durable snapshot base. The
+  scan runs every 10 ms, examines at most 64 groups and allows at most 4
+  automatic requests. The count includes noops and configuration entries.
+- **WAL reclaim.** Every 1000 ms the live image is rewritten if at least a
+  sixteenth of the usable capacity (about 4 MiB) is reclaimable; otherwise the
+  deadline moves on one interval (counted in `skipped`). Any refusal or failed
+  completion retries after 100 ms.
+- **Occupancy.** When the WAL reaches half its usable capacity
+  (`max_wal_bytes − control_reserve_bytes`), checkpoints run for every group
+  with applied entries beyond its base, and a rewrite runs as soon as at least an
+  eighth of the capacity is reclaimable. Large commands therefore cannot fill the
+  WAL before 8,192 entries accumulate.
+
+Overrides, accepted by `serve` in all three binaries:
 
 ```sh
-target/debug/voteboat-counter client 43000 1 maintenance
+--checkpoint-entries N   # 1..=8192: checkpoint threshold in applied entries
+--wal-reclaim-ms MS      # positive: rewrite interval (retry is min(MS, 100))
 ```
 
-The latest completion reports the worker sequence and before/after byte counts;
-it is not a quorum receipt. One job runs at a time, overload retries after the
-interval, and shutdown drains admitted work. The native worker bounds each
-replacement image by its configured WAL ceiling. This rewrites the live image
-and can delay foreground work on that worker; it is not incremental cleaning.
-Reclamation cannot remove the live log suffix or advance the durable application
-boundary by itself. Use manual `client ... checkpoint` or the automatic policy
-below to authorize checkpoint progression.
+Opt-out, accepted only with the exact acknowledgement:
 
-Rust hosts use `Node::configure_wal_maintenance(Some(WalMaintenancePolicy {
-interval_ms, retry_ms, max_bytes }))` and inspect `Node::wal_maintenance()`.
-`PersistenceWorker::reclaim_limit()` advertises support; default host providers
-decline it. Poll with monotonic host time as usual; no extra thread or clock is
-created. Manual `reclaim` results stay in `poll_reclaim`, while scheduled results
-replace only the latest maintenance diagnostic. Disabling/changing the policy
-requires its admitted job to finish. On restart, configure a new schedule after
-normal durable recovery.
+```sh
+--no-maintenance I-accept-a-bounded-log
+```
 
-## Automatic checkpoints
+It disables both and cannot be combined with either override. Each group then
+stops accepting writes at its store limits; a leader elected at the entry limit
+stays leader and refuses writes with a typed `Rejected(..)` until an operator
+checkpoint (`client ... checkpoint`) frees space. Any other value, a duplicate
+flag, or a threshold above half the retained-entry limit is refused before any
+file or listener is created. Supply the same flags again on recovery.
 
-Append `--checkpoint-entries 1024` to a serve/recover command to checkpoint when
-the applied log is at least 1024 entries beyond its durable snapshot base. The
-count includes noops and applied configuration entries. The service checks every
-100ms, examines at most64 groups and allows at most4 automatic requests. It uses
-the same application, snapshot worker, retention and WAL path as manual
-checkpoints. Combine with `--wal-reclaim-ms 60000` for physical reclamation.
-Both policies are opt-in and should be supplied again on recovery.
+Startup prints the selection, for example:
 
-`client ... maintenance` reports `checkpoint_enabled`, `checkpoint_pending` and
-`checkpoint_base` for the local replica. The base is durable local state, not a
-quorum acknowledgement. Admission is not completion. Pending/busy groups are
-skipped and missed scan intervals coalesce. Shutdown stops new scans and drains
-already accepted requests.
+```text
+maintenance retention=maintained checkpoint_entries=8192 checkpoint_scan_ms=10 wal_reclaim_ms=1000 wal_retry_ms=100
+maintenance retention=lifetime-bounded checkpoint_entries=off checkpoint_scan_ms=off wal_reclaim_ms=off wal_retry_ms=off
+```
+
+`client ... maintenance` (all three binaries; Inspect permission) reports the
+local, volatile state of one group:
+
+| Field | Meaning |
+| --- | --- |
+| `retention` | `maintained` or `lifetime-bounded` |
+| `enabled`, `pending`, `next_ms` | WAL schedule installed, a rewrite in flight, next interval deadline |
+| `last_sequence` | worker sequence of the latest rewrite completion |
+| `wal_bytes`, `wal_capacity` | published WAL occupancy and usable capacity |
+| `last_reclaim_ms`, `before_bytes`, `after_bytes` | latest successful rewrite |
+| `failures` | refusals and failed completions since the last success |
+| `skipped` | interval deadlines passed with too little to reclaim |
+| `admission_error`, `completion_error` | latest typed refusal or failure |
+| `checkpoint_enabled`, `checkpoint_entries`, `checkpoint_pending` | checkpoint schedule and in-flight requests |
+| `checkpoint_last`, `checkpoint_admission_error` | latest checkpoint result and refusal |
+| `leader_noop_pending` | a leader elected at the entry limit has not appended its noop yet |
+| `checkpoint_base` | durable local snapshot base (kept last) |
+
+None of these is a quorum receipt. Maintenance never switches itself off: every
+refusal or failed completion is retried and counted in `failures`. A fatal
+storage error (`Uncertain`, `Corrupt`, `Fenced`) still stops the node for
+recovery, as any WAL fault does. A rewrite rewrites the live image and can delay
+foreground work on that worker; it is not incremental cleaning. It cannot remove
+the live log suffix; checkpoints authorize that.
+
+Rust hosts get the same defaults from `NodeLimits::default()`
+(`retention: RetentionMode::Maintained`). Construction is refused with
+`NodeError::Maintenance(MaintenanceError::CheckpointsUnavailable)` when a group
+has no checkpoint-capable snapshot worker; such a host selects
+`RetentionMode::LifetimeBounded` explicitly. `Node::configure_checkpoints` and
+`Node::configure_wal_maintenance` replace the defaults; passing `None` on a
+maintained node returns `MaintenanceError::DisableRequiresLifetimeBounded`. A
+WAL policy's `max_bytes` must equal `PersistenceWorker::reclaim_limit()`, and a
+checkpoint threshold above half the retained-entry limit returns
+`MaintenanceError::CheckpointThresholdUnreachable`. Inspect
+`Node::wal_maintenance()`, `Node::checkpoints()`, `Node::wal_usage()` and
+`Node::retention()`. Manual `reclaim` results stay in `poll_reclaim`; a manual
+request while an automatic rewrite is in flight is refused as `Overloaded`.
 
 Rust hosts can choose `CheckpointPolicy { min_entries, interval_ms, scan_groups,
 max_in_flight }` through `Node::configure_checkpoints`. Inspect tracked admissions

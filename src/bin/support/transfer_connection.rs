@@ -152,6 +152,7 @@ impl Connection {
                     node.local().reads.usage().requests
                 ));
             }
+            ["maintenance"] => self.reply(super::setup::maintenance_status(node, b.group)),
             ["quit"] => {
                 *quit = true;
                 self.reply("OK shutting_down".into());

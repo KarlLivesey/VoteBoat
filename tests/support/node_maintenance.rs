@@ -18,23 +18,62 @@ fn policy() -> WalMaintenancePolicy {
     WalMaintenancePolicy {
         interval_ms: 10,
         retry_ms: 3,
-        max_bytes: 1024,
+        max_bytes: 4096,
+        min_reclaim_bytes: 0,
     }
 }
 fn tick(n: &mut Boat, time: u64) {
     n.poll(MonoTime(time), NodePollBudget::default()).unwrap();
 }
+/// An explicit schedule on an opted-out node, so each test controls every
+/// deadline. `Maintained` nodes get the same mechanics from construction.
 fn enabled() -> Boat {
     let mut p = parts(1, false);
     p.local.persistence.reclaim_supported = true;
-    let mut n = boat(p);
+    let mut n = bounded(p);
     n.configure_wal_maintenance(Some(policy())).unwrap();
     n
 }
 #[test]
-fn policy_is_optional_validated_before_work_and_clock_does_not_wrap() {
+fn default_schedule_is_installed_and_cannot_be_removed_without_opt_out() {
+    let mut p = parts(1, false);
+    p.local.persistence.reclaim_supported = true;
+    let mut n = boat(p);
+    assert_eq!(n.retention(), RetentionMode::Maintained);
+    assert_eq!(
+        n.wal_maintenance().policy,
+        Some(WalMaintenancePolicy::for_ceiling(4096))
+    );
+    assert_eq!(n.wal_maintenance().next_deadline, Some(MonoTime(1000)));
+    let before = n.wal_maintenance().clone();
+    assert_eq!(
+        n.configure_wal_maintenance(None),
+        Err(NodeError::Maintenance(
+            MaintenanceError::DisableRequiresLifetimeBounded
+        ))
+    );
+    assert_eq!(n.wal_maintenance(), &before);
+    tick(&mut n, 999);
+    assert!(n.wal_maintenance().pending.is_none());
+    tick(&mut n, 1000);
+    assert!(n.wal_maintenance().pending.is_some());
+    tick(&mut n, 1001);
+    assert_eq!(n.wal_maintenance().next_deadline, Some(MonoTime(2001)));
+    assert!(n.wal_maintenance().last_reclaimed.is_some());
+    // An override replaces the default; removing it still needs the opt-out.
+    n.configure_wal_maintenance(Some(policy())).unwrap();
+    assert_eq!(n.wal_maintenance().policy, Some(policy()));
+    assert!(n.configure_wal_maintenance(None).is_err());
+    let mut n = bounded(parts(1, false));
+    assert_eq!(n.wal_maintenance(), &WalMaintenanceStatus::default());
+    n.configure_wal_maintenance(None).unwrap();
+}
+#[test]
+fn policy_is_validated_before_work_and_clock_does_not_wrap() {
     let mut n = boat(parts(1, false));
     tick(&mut n, 100);
+    // The test provider has no reclaim: no WAL schedule, and asking for one
+    // is refused as unsupported.
     assert_eq!(n.wal_maintenance(), &WalMaintenanceStatus::default());
     assert!(matches!(
         n.configure_wal_maintenance(Some(policy())),
@@ -60,6 +99,11 @@ fn policy_is_optional_validated_before_work_and_clock_does_not_wrap() {
         },
         WalMaintenancePolicy {
             max_bytes: 4097,
+            ..policy()
+        },
+        // Smaller than the provider ceiling: could be refused for ever.
+        WalMaintenancePolicy {
+            max_bytes: 1024,
             ..policy()
         },
     ] {
@@ -149,7 +193,7 @@ fn overload_and_storage_refusal_back_off_without_a_poll_loop() {
     p.local.persistence.reclaim_supported = true;
     p.local.persistence.reclaim_reject = Some(WorkerError::Overloaded);
     p.local.persistence.reclaim_error = Some(StorageError::Rejected("budget"));
-    let mut n = boat(p);
+    let mut n = bounded(p);
     n.configure_wal_maintenance(Some(policy())).unwrap();
     tick(&mut n, 10);
     assert_eq!(n.wal_maintenance().next_deadline, Some(MonoTime(13)));
@@ -182,7 +226,7 @@ fn held_job_drains_on_shutdown_and_abort_retains_recovery_ticket() {
         p.local.persistence.reclaim_supported = true;
         let hold = p.local.persistence.reclaim_hold.clone();
         hold.set(true);
-        let mut n = boat(p);
+        let mut n = bounded(p);
         n.configure_wal_maintenance(Some(policy())).unwrap();
         tick(&mut n, 10);
         let ticket = n.wal_maintenance().pending.unwrap();
@@ -221,7 +265,7 @@ fn fatal_completion_preserves_diagnostics_and_wrong_receipt_preserves_ownership(
         p.local.persistence.reclaim_supported = true;
         p.local.persistence.reclaim_wrong = wrong;
         p.local.persistence.reclaim_error = Some(StorageError::Uncertain("publication".into()));
-        let mut n = boat(p);
+        let mut n = bounded(p);
         n.configure_wal_maintenance(Some(policy())).unwrap();
         tick(&mut n, 10);
         let ticket = n.wal_maintenance().pending.unwrap();
@@ -238,20 +282,28 @@ fn fatal_completion_preserves_diagnostics_and_wrong_receipt_preserves_ownership(
         }
     }
 }
+/// RT4: a refusal that used to stop the schedule for good (audit RT4) is now
+/// retried after `retry_ms` with a typed, counted diagnostic, and the node
+/// keeps serving.
 #[test]
-fn permanent_admission_refusal_stops_schedule_but_service_stays_running() {
+fn permanent_admission_refusal_retries_and_service_stays_running() {
     let mut p = parts(1, false);
     p.local.persistence.reclaim_supported = true;
     p.local.persistence.reclaim_reject = Some(WorkerError::Unsupported);
     let mut n = boat(p);
     n.configure_wal_maintenance(Some(policy())).unwrap();
     tick(&mut n, 10);
-    tick(&mut n, 100);
     assert_eq!(n.state(), NodeState::Running);
     assert_eq!(
         n.wal_maintenance().last_admission_error,
         Some(WorkerError::Unsupported)
     );
-    assert!(n.wal_maintenance().next_deadline.is_none());
+    assert_eq!(n.wal_maintenance().consecutive_failures, 1);
+    assert_eq!(n.wal_maintenance().next_deadline, Some(MonoTime(13)));
     assert!(n.wal_maintenance().pending.is_none());
+    tick(&mut n, 13);
+    assert!(n.wal_maintenance().pending.is_some());
+    tick(&mut n, 14);
+    assert_eq!(n.wal_maintenance().consecutive_failures, 0);
+    assert_eq!(n.wal_maintenance().next_deadline, Some(MonoTime(24)));
 }

@@ -92,6 +92,9 @@ pub struct NodeLimits {
     pub replica: ReplicaDriverLimits,
     pub peers: PeerDriverLimits,
     pub configuration: ConfigurationRequestLimits,
+    /// Automatic checkpoints and WAL reclaim by default; disabling them is a
+    /// named choice that leaves every group bounded by its store limits.
+    pub retention: RetentionMode,
 }
 #[derive(Clone, Copy, Debug, Default)]
 pub struct NodePollBudget {
@@ -124,6 +127,7 @@ pub enum NodeError {
     Client(ClientError),
     Read(ReadInvocationError),
     Configuration(ConfigurationRequestError),
+    Maintenance(MaintenanceError),
 }
 pub struct NodeRejected<P> {
     pub reason: NodeError,
@@ -225,6 +229,7 @@ pub struct NetworkNode<
     configuration: ConfigurationRequests,
     maintenance: WalMaintenanceStatus,
     checkpoints: CheckpointStatus,
+    retention: RetentionMode,
     drain: Option<drain::LocalDrain>,
     drain_history: Option<crate::drain::DrainRecord>,
 }
@@ -286,9 +291,10 @@ where
                 .transpose()?;
             let replica = ReplicaDriver::new(&parts.local.as_parts(), limits.replica, now)
                 .map_err(NodeError::Replica)?;
-            Ok((replica, budget, configuration))
+            let schedules = Self::default_schedules(&parts.local, limits.retention, now)?;
+            Ok((replica, budget, configuration, schedules))
         })();
-        let (replica, budget, configuration) = match checked {
+        let (replica, budget, configuration, (checkpoints, maintenance)) = match checked {
             Ok(driver) => driver,
             Err(reason) => {
                 return Err(NodeRejected {
@@ -329,11 +335,64 @@ where
             now,
             failure: None,
             configuration,
-            maintenance: WalMaintenanceStatus::default(),
-            checkpoints: CheckpointStatus::default(),
+            maintenance,
+            checkpoints,
+            retention: limits.retention,
             drain: None,
             drain_history: None,
         })
+    }
+    /// Install the default maintenance a `Maintained` node runs from its first
+    /// poll. Every refusal here is a construction error, never a silent stop.
+    fn default_schedules(
+        local: &NodeLocalParts<S, T, E, A, W, O, H>,
+        retention: RetentionMode,
+        now: MonoTime,
+    ) -> Result<(CheckpointStatus, WalMaintenanceStatus), NodeError> {
+        let mut checkpoints = CheckpointStatus::default();
+        let mut maintenance = WalMaintenanceStatus::default();
+        if retention == RetentionMode::LifetimeBounded {
+            return Ok((checkpoints, maintenance));
+        }
+        if !Self::checkpoints_supported(local) {
+            return Err(NodeError::Maintenance(
+                MaintenanceError::CheckpointsUnavailable,
+            ));
+        }
+        let limits = Self::smallest_log_limits(local);
+        checkpoints.configure(
+            Some(CheckpointPolicy::for_limits(limits)),
+            now,
+            limits.max_entries_per_group,
+        )?;
+        if let Some(ceiling) = local.persistence.reclaim_limit() {
+            maintenance.configure(
+                Some(WalMaintenancePolicy::for_ceiling(ceiling)),
+                now,
+                Some(ceiling),
+            )?;
+        }
+        Ok((checkpoints, maintenance))
+    }
+    fn checkpoints_supported(local: &NodeLocalParts<S, T, E, A, W, O, H>) -> bool {
+        local.snapshots.as_ref().is_some_and(|snapshots| {
+            local.owner.groups().all(|group| {
+                snapshots
+                    .worker
+                    .checkpoint_bytes(group)
+                    .is_some_and(|n| n != 0)
+            })
+        })
+    }
+    /// The tightest retained-entry budget among the groups (store defaults
+    /// when there are none yet).
+    fn smallest_log_limits(local: &NodeLocalParts<S, T, E, A, W, O, H>) -> crate::log::LogLimits {
+        local
+            .owner
+            .groups()
+            .filter_map(|group| local.owner.core(group).map(|core| core.log_limits()))
+            .min_by_key(|limits| limits.max_entries_per_group)
+            .unwrap_or_default()
     }
     fn validate_group_parts(
         parts: &NetworkNodeParts<S, T, E, A, W, O, H, N>,
@@ -504,11 +563,24 @@ where
         if self.state != NodeState::Running {
             return Err(NodeError::Closed);
         }
+        if policy.is_none() && self.retention == RetentionMode::Maintained {
+            return Err(NodeError::Maintenance(
+                MaintenanceError::DisableRequiresLifetimeBounded,
+            ));
+        }
         self.maintenance
             .configure(policy, self.now, self.local.persistence.reclaim_limit())
     }
     pub fn wal_maintenance(&self) -> &WalMaintenanceStatus {
         &self.maintenance
+    }
+    /// The retention mode chosen at construction.
+    pub fn retention(&self) -> RetentionMode {
+        self.retention
+    }
+    /// Latest physical WAL occupancy the persistence provider published.
+    pub fn wal_usage(&self) -> Option<crate::log::WalUsage> {
+        self.local.persistence.wal_usage()
     }
     /// Configure fair, bounded local checkpoints. This never bypasses the
     /// selected snapshot worker, application validation or durable log update.
@@ -518,6 +590,11 @@ where
     ) -> Result<(), NodeError> {
         if self.state != NodeState::Running {
             return Err(NodeError::Closed);
+        }
+        if policy.is_none() && self.retention == RetentionMode::Maintained {
+            return Err(NodeError::Maintenance(
+                MaintenanceError::DisableRequiresLifetimeBounded,
+            ));
         }
         if policy.is_some() {
             let snapshots = self
@@ -535,7 +612,8 @@ where
                 }
             }
         }
-        self.checkpoints.configure(policy, self.now)
+        let max_entries = Self::smallest_log_limits(&self.local).max_entries_per_group;
+        self.checkpoints.configure(policy, self.now, max_entries)
     }
     pub fn checkpoints(&self) -> &CheckpointStatus {
         &self.checkpoints
@@ -1094,21 +1172,45 @@ where
             self.enter_recovery(reason.clone());
         }
         if result.is_ok() && self.state == NodeState::Running {
-            self.checkpoints
-                .schedule(&mut self.local.owner, &self.local.applications, now);
-            if let Err(reason) = self.schedule_wal_maintenance(now) {
+            let usage = self.local.persistence.wal_usage();
+            let pressure = super::maintenance::pressure(usage);
+            self.checkpoints.schedule(
+                &mut self.local.owner,
+                &self.local.applications,
+                now,
+                pressure,
+            );
+            if let Err(reason) = self.schedule_wal_maintenance(now, usage, pressure) {
                 self.enter_recovery(reason.clone());
                 return Err(reason);
             }
         }
         result
     }
-    fn schedule_wal_maintenance(&mut self, now: MonoTime) -> Result<(), NodeError> {
-        let Some(policy) = self.maintenance.due(now) else {
+    fn schedule_wal_maintenance(
+        &mut self,
+        now: MonoTime,
+        usage: Option<crate::log::WalUsage>,
+        pressure: bool,
+    ) -> Result<(), NodeError> {
+        // The live estimate is O(groups); compute it only when a rewrite may
+        // be due (under pressure or at the interval deadline).
+        let live = if pressure || self.maintenance.interval_due(now) {
+            self.local
+                .owner
+                .groups()
+                .filter_map(|g| self.local.owner.core(g))
+                .fold(0usize, |sum, core| {
+                    sum.saturating_add(core.live_log_bytes())
+                })
+        } else {
+            0
+        };
+        let Some(policy) = self.maintenance.due(now, usage, live) else {
             return Ok(());
         };
         match self.reclaim(policy.max_bytes) {
-            Ok(ticket) => self.maintenance.submitted(ticket),
+            Ok(ticket) => self.maintenance.submitted(ticket, now),
             Err(NodeError::Replica(ReplicaError::Worker(error))) => {
                 self.maintenance.rejected(error.clone(), now);
                 if self.state == NodeState::RecoveryRequired {

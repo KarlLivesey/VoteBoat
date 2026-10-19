@@ -210,7 +210,12 @@ pub(super) fn nodes() -> Vec<HostNode> {
                     local: local_parts(slot),
                     peers: None,
                 },
-                NodeLimits::default(),
+                // Short conformance runs without a snapshot worker: the
+                // explicit lifetime-bounded opt-out.
+                NodeLimits {
+                    retention: RetentionMode::LifetimeBounded,
+                    ..Default::default()
+                },
                 MonoTime(0),
             )
             .unwrap_or_else(|e| panic!("{:?}", e.reason))

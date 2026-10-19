@@ -34,6 +34,8 @@ mod local_drain;
 mod peer_credentials;
 #[path = "node_readiness.rs"]
 mod readiness;
+#[path = "node_retention.rs"]
+mod retention;
 #[path = "node_network.rs"]
 mod selected_network;
 type Parts = NodeParts<
@@ -66,6 +68,18 @@ fn parts(voters: u64, networking: bool) -> Parts {
 fn boat(parts: Parts) -> Boat {
     Boat::from_parts(parts, NodeLimits::default(), MonoTime(0))
         .unwrap_or_else(|r| panic!("{:?}", r.reason))
+}
+/// The explicit opt-out: no automatic maintenance is installed.
+fn bounded(parts: Parts) -> Boat {
+    Boat::from_parts(
+        parts,
+        NodeLimits {
+            retention: RetentionMode::LifetimeBounded,
+            ..Default::default()
+        },
+        MonoTime(0),
+    )
+    .unwrap_or_else(|r| panic!("{:?}", r.reason))
 }
 fn settle(n: &mut Boat) {
     for _ in 0..100 {
@@ -900,7 +914,19 @@ fn unsupported_snapshot_and_invalid_driver_limits_reject_before_any_service_or_i
     assert!(!rejected.parts.local.persistence.closed);
     let mut p = *rejected.parts;
     p.local.snapshots = None;
-    let mut n = boat(p);
+    // A snapshot-less node cannot checkpoint, so it is lifetime-bounded by
+    // construction: the default refuses it and returns every part.
+    let rejected = match Boat::from_parts(p, NodeLimits::default(), MonoTime(0)) {
+        Err(r) => r,
+        Ok(_) => panic!("snapshot-less node must choose LifetimeBounded"),
+    };
+    assert_eq!(
+        rejected.reason,
+        NodeError::Maintenance(MaintenanceError::CheckpointsUnavailable)
+    );
+    assert!(!rejected.parts.local.persistence.closed);
+    let mut n = bounded(*rejected.parts);
+    assert_eq!(n.retention(), RetentionMode::LifetimeBounded);
     assert_eq!(
         n.control(group(1), NodeControl::Checkpoint),
         Err(NodeError::MissingSnapshots)

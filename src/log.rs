@@ -276,6 +276,15 @@ pub struct LogReclaimed {
     pub after_bytes: usize,
 }
 
+/// Physical log occupancy against the bytes applications may use
+/// (`max_wal_bytes − control_reserve_bytes`). Scheduling input and operator
+/// diagnostics only: never durability evidence.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct WalUsage {
+    pub bytes: usize,
+    pub capacity: usize,
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct LogLimits {
     pub max_groups: usize,
@@ -366,6 +375,11 @@ pub trait LogStore {
     fn barrier(&mut self, dependencies: &[LogTicket]) -> Result<DurableLog, StorageError>;
     fn supports_reclaim(&self) -> bool {
         false
+    }
+    /// Current physical log occupancy when the store keeps a bounded physical
+    /// log that `reclaim` rewrites; None otherwise. Must be cheap.
+    fn physical_usage(&self) -> Option<WalUsage> {
+        None
     }
     /// Optional physical maintenance. Preserve every current durable group,
     /// including its snapshot reference and full surviving suffix. Logical

@@ -399,6 +399,9 @@ pub struct Raft {
     readiness_check: Option<Message>,
     transfer: Option<LeadershipTransfer>,
     leader_contact: Option<(StoreBinding, NodeId, u64)>,
+    // A leader elected while its retained log was at `max_entries_per_group`
+    // owes its current-term noop; it appends it once compaction frees space.
+    leader_noop_pending: bool,
     // The core's log is the only copy: completions use `PersistVolatile` tokens.
     volatile: bool,
     // Nonzero only for a volatile core: the `recover_volatile` call that made it.
@@ -527,6 +530,7 @@ impl Raft {
             readiness_check: None,
             transfer: None,
             leader_contact: None,
+            leader_noop_pending: false,
             volatile: false,
             incarnation: 0,
         })
@@ -679,6 +683,23 @@ impl Raft {
         Ok(())
     }
 
+    /// The selected store limits this core enforces, including the
+    /// retained-entry budget that automatic checkpoints keep it under.
+    pub fn log_limits(&self) -> LogLimits {
+        self.limits
+    }
+    /// In-memory bytes of the retained log beyond the durable base (entry
+    /// records plus payloads): the live part a WAL rewrite must keep. An
+    /// estimate for maintenance scheduling, never durability evidence.
+    pub fn live_log_bytes(&self) -> usize {
+        self.retained_log_bytes().unwrap_or(usize::MAX)
+    }
+    /// True while a leader elected at the retained-entry limit has not yet
+    /// appended its current-term noop. Proposals and reads refuse with typed
+    /// errors until a checkpoint frees space; the role stays stable.
+    pub fn leader_noop_pending(&self) -> bool {
+        self.role == Role::Leader && self.leader_noop_pending
+    }
     pub fn role(&self) -> Role {
         self.role
     }
@@ -1039,7 +1060,8 @@ impl Raft {
                     transfer.signal_sent = false;
                 }
                 if self.role == Role::Leader {
-                    let mut effects = self.broadcast()?;
+                    let mut effects = self.retry_leader_noop()?;
+                    effects.extend(self.broadcast()?);
                     effects.extend(self.read_probes());
                     Ok(effects)
                 } else {
@@ -1601,6 +1623,38 @@ impl Raft {
             .checked_add(1)
             .ok_or(RaftError::Exhausted)?;
         self.initialize_replication()?;
+        self.leader_noop_pending = false;
+        if self.durable.entries.len() >= self.limits.max_entries_per_group {
+            // A lifetime-bounded store at its retained-entry limit (or a
+            // maintained one above its sustainable rate). Refusing the noop
+            // here used to fail the node from inside the vote completion, and
+            // a restart replayed the same refusal. Lead without it: followers
+            // stay quiet, proposals and reads refuse typed, and the noop is
+            // appended once a checkpoint frees space.
+            self.leader_noop_pending = true;
+            return self.broadcast();
+        }
+        self.append_leader_noop(next)
+    }
+    /// Append the deferred noop when space allows and nothing is staged. Any
+    /// current-term entry already serves the noop's commit purpose.
+    fn retry_leader_noop(&mut self) -> Result<Vec<Effect>, RaftError> {
+        if !self.leader_noop_pending || self.pending.is_some() {
+            return Ok(Vec::new());
+        }
+        let last = self.durable.last_index();
+        if self.durable.term_at(last) == Some(self.durable.hard_state.term) {
+            self.leader_noop_pending = false;
+            return Ok(Vec::new());
+        }
+        if self.durable.entries.len() >= self.limits.max_entries_per_group {
+            return Ok(Vec::new());
+        }
+        let effects = self.append_leader_noop(last.checked_add(1).ok_or(RaftError::Exhausted)?)?;
+        self.leader_noop_pending = false;
+        Ok(effects)
+    }
+    fn append_leader_noop(&mut self, next: u64) -> Result<Vec<Effect>, RaftError> {
         let entry = LogEntry {
             index: next,
             term: self.durable.hard_state.term,

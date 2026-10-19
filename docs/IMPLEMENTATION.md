@@ -1,5 +1,313 @@
 # Implementation record
 
+## Lifetime-bounds track (opened 19 October 2026)
+
+User rule (19 October 2026): this is infrastructure that may run for decades and
+receive enormous message volumes. A failure that arrives after X seconds, entries
+or messages is a defect, and "fixed by restart" does not count. Every retained
+structure must be reclaimed behind a replicated fact, proved unreachable by
+arithmetic, or refused in a typed way that recovers without losing committed
+data. Design: `target/claude/research-lv/architect-plan-lifetime-bounds.md`
+(slices ST2 … LBZ) over the audit `target/claude/research-lv/lifetime-audit.md`.
+Both live in the main checkout, not tracked. The design pack is unchanged.
+
+### Macro plan (this track)
+
+| Milestone | User-visible outcome | Acceptance |
+| --- | --- | --- |
+| LB Infrastructure runs indefinitely | The three service binaries and every library embedding run for unbounded uptime at any sustained rate. Every retained structure has a replicated reclaim rule, a recorded widening proof, or a typed fail-closed refusal with a non-lossy, non-hanging recovery path. No transport or listener event is node-fatal | Every P1/P2 audit row closed by a slice with a fail@main exhaustion test and a simulated-time soak; an inventory table maps each audit row to its slice and test; LBZ cross-binary soak |
+
+The logical milestones LR1 and LR3 (logical-voter track below) stay where they
+are; LB references them for the audit's L1–L3 rows.
+
+### Mini plan
+
+| Deliverable | Purpose | Dependencies | Completion checks | Advances |
+| --- | --- | --- | --- | --- |
+| Current ST2: checkpoints and WAL reclaim on by default (audit C3, C4, RT4; probes U1, U5) | With default flags all three binaries never checkpointed and never reclaimed the WAL, so every group stopped at 16,384 retained entries or 64 MiB of WAL, and a failed automatic reclaim switched maintenance off silently. Make maintenance the library and binary default, make the opt-out explicit and visible, keep maintenance running through every non-fatal failure, and make a new leader at the retained-entry cap refuse typed instead of failing the node | — | Fail@main runtime and native soaks (recorded) pass past 16,384 entries and 64 MiB; opt-out plus cap gives a typed refusal and a stable leader; startup rejects maintenance settings that would fail at runtime; restart mid-checkpoint and mid-reclaim; native durable CPU/write A/B; fmt, four strict Clippy configurations and matched fmt/Clippy; affected suites in default and all-features | LB |
+| Next NT1: connection generations and listener (audit N1, N3, N6) | Survivors no longer go to recovery after ~27.8 h with one peer down; a port scan cannot kill a node | Rebases on ST2's `native/startup.rs` hunk | Architect plan §3.3 row 2 | LB |
+| Following DR1: application deduplication retirement (audit S1–S3) | `counter_service` no longer refuses every write after 10,000 lifetime writes; the generic `SessionLedger` | — | Architect plan §3.3; Q1 probe harness | LB |
+
+Later in this track: ST2b (found in ST2: a WAL that fills at append time is
+node-fatal; refuse data batches at the persistence worker as retryable
+`Overloaded` before the data ceiling, so a burst above the sustainable rate is
+backpressure), then DR2, NT2, MB1, ST1, TX1, DH1, AD1, NT3, ST3 and LBZ
+(architect plan §3.3).
+
+### ST2 schema plan (written before editing, 19 October 2026)
+
+Base `main` 3d552e2e. Pack amendment realised: ch04 "Retention and reclamation"
+(see "Design-pack amendment" below).
+
+**Measured before editing (fail@main probe, runtime node, default construction,
+single voter, simulated clock, one leader election per round so every round
+appends one noop):** rounds 0–16,383 succeed; the election at round 16,384 makes
+the new leader's noop exceed the 16,384 retained-entry limit and the whole node
+enters `RecoveryRequired` with
+`Replica(Owner(Worker(Consensus(Storage(Rejected("group entry limit"))))))`.
+That is U1: the refusal reaches the core through the self-vote's durable
+completion, so the owner is fenced. A restart replays the same log into the same
+refusal at the next election, so restart is not a recovery path.
+
+**Data/API shape.**
+- `runtime::RetentionMode { Maintained (default), LifetimeBounded }`, a new
+  `NodeLimits::retention` field. Every `NetworkNode`/`NativeNode` constructed
+  through `from_parts` (all three binaries, every native startup path and every
+  `NetworkNode` embedding; not `LogicalNode`) gets it.
+- `Maintained` installs at construction:
+  - `CheckpointPolicy::for_limits(log)`: `min_entries = max_entries_per_group / 4`
+    (4,096 at defaults; 8,192 and 10 ms after amendment 2), `interval_ms = 100`, `scan_groups = 64`,
+    `max_in_flight = 4`. Construction is refused with
+    `NodeError::Maintenance(MaintenanceError::CheckpointsUnavailable)` when a
+    group has no checkpoint-capable snapshot worker, because such a node is
+    lifetime-bounded by construction; the embedder must choose
+    `LifetimeBounded` explicitly.
+  - `WalMaintenancePolicy::for_ceiling(reclaim_limit)`: `interval_ms = 1000`,
+    `retry_ms = 100`, `max_bytes = reclaim_limit` (= `max_wal_bytes` natively),
+    when the persistence provider supports reclaim. A provider without reclaim
+    has no physical log to rewrite through this seam; its status says so
+    (`policy: None` with `retention: Maintained`) and the striped store is ST3's
+    row.
+  - An occupancy trigger: `PersistenceWorker::wal_usage() -> Option<WalUsage
+    { bytes, capacity }>` (default `None`; native reads one atomic the WAL
+    thread publishes after each window and reclaim; `capacity = max_wal_bytes −
+    control_reserve_bytes`). Reclaim is due early when `bytes ≥ capacity / 2`
+    and `bytes ≥ last_after + capacity / 8` and at least `retry_ms` has passed
+    since the last attempt. The second clause stops a store whose live image is
+    above half capacity from rewriting itself every retry.
+- `LogLimits` reach the node through a new read-only `Raft::log_limits()`.
+- `configure_checkpoints(None)` and `configure_wal_maintenance(None)` on a
+  `Maintained` node return `NodeError::Maintenance(DisableRequiresLifetimeBounded)`;
+  an explicit policy still replaces the default (binary flags).
+- U5 / Q7, configuration-class refusals move to `configure`:
+  `min_entries > max_entries_per_group / 2` →
+  `Maintenance(CheckpointThresholdUnreachable)` (the threshold could never be met
+  with room left for writes during the checkpoint); `max_bytes ≠ reclaim_limit`
+  → `InvalidLimits` (a smaller image budget can be refused for ever once live
+  state grows, so it is no longer accepted).
+- Operator status (all three binaries): `retention`, checkpoint policy, last
+  checkpoint result and base index, WAL policy, `wal_bytes`/`wal_capacity`, last
+  reclaim (before/after bytes and time), last error, consecutive failures, next
+  deadline. Startup prints one `maintenance …` line.
+- Binary flags: `--checkpoint-entries N` and `--wal-reclaim-ms MS` override the
+  defaults (now in all three binaries); `--no-maintenance I-accept-a-bounded-log`
+  selects `LifetimeBounded` and is the only way to disable it. Any other value,
+  or combining it with either override, is refused at startup.
+
+**State transitions (WAL schedule; RT4).** `configure → Scheduled(deadline)`;
+`due (deadline or occupancy) → submit → Pending(ticket)`; admission refusal of
+any kind → `Scheduled(now + retry_ms)`, `failures += 1`, typed
+`last_admission_error`; completion `Ok` → `Scheduled(now + interval_ms)`,
+`failures = 0`, `last_reclaimed`; completion `Err` → `Scheduled(now +
+retry_ms)`, `failures += 1`. A fatal storage error (`Uncertain`, `Corrupt`,
+`Fenced`) still fails the replica, so the node enters `RecoveryRequired` through
+the existing path with the event retained. The only remaining `None` deadline is
+`u64` millisecond exhaustion (584 million years, P3-8). Checkpoints already
+reschedule every scan; their admission and execution errors stay typed in
+`last_admission_error`/`last_result`.
+
+**U1 / Q6.** `Raft::become_leader` checks the retained-entry budget before
+staging the noop. If the noop does not fit, the core still becomes leader
+(heartbeats keep followers stable), records `leader_noop_pending`, and appends
+the noop on a later heartbeat once compaction frees space and nothing is
+staged; a current-term entry from any proposal also clears it. Until then
+proposals refuse with the existing typed `Rejected("proposal retained entry
+budget")` and reads refuse through the existing current-term check. No
+`enter_recovery`, no step-down loop, no term churn. Followers already refuse an
+over-budget append as a non-fatal step error.
+
+**Ownership.** The node owns the schedules; providers own physical bytes; the
+binaries only pass overrides or the acknowledged opt-out. No new durable state
+and **no format change**.
+
+**Failure and cleanup / restart.** Policies are reinstalled at every
+construction. A crash during a checkpoint leaves the previous durable snapshot
+pair and the uncompacted log; a crash during reclaim leaves the old WAL pair
+(`replace_log` publishes the new image before the manifest). Both reopen to the
+same applied state.
+
+**Acceptance checks.**
+1. Runtime soak (fail@main): default `NodeLimits`, counter binary's application
+   (`Counter::new(10000)`), simulated clock, 200,000 writes (op IDs cycle through
+   the application's own capacity so S1, DR1's row, is not what is measured)
+   with an election every 2,000 writes; every write applied; retained entries ≤
+   `min_entries + headroom` at every 10% sample; checkpoint count increasing.
+2. Native soak (fail@main): `NativeStartup` (the binaries' open path), default
+   limits, simulated clock, ≥ 128 MiB of WAL appended and ≥ 32,768 entries;
+   every write applied; WAL bytes and retained entries bounded at each sample.
+3. U1: `LifetimeBounded`, fill to the cap, re-elect repeatedly: typed refusal,
+   stable `Leader`, node `Running`; manual checkpoint then frees space and the
+   deferred noop commits.
+4. RT4 fault matrix: every `WorkerError` admission refusal and every
+   `StorageError` completion: after each event `next_deadline.is_some()` or the
+   node is `RecoveryRequired`.
+5. U5: configure-time refusals; binary startup refusals for the opt-out value,
+   conflicting flags and zero intervals.
+6. Restart mid-checkpoint and mid-reclaim (native): reopen gives the same
+   applied state and accepts writes.
+7. Native durable CPU per write A/B (5 pairs, ABAB).
+
+#### ST2 schema amendment (during implementation, before editing the triggers)
+
+Writing the native soak showed the entry threshold alone does not bound the
+WAL: with large commands the WAL fills long before 4,096 entries accumulate
+(64 KiB × ~1,000 entries is 64 MiB), and a full WAL at append time fails the
+node (measured below). The occupancy rule changed from "grown by an eighth since
+the last rewrite" to:
+
+- **Pressure** = published occupancy ≥ half the usable capacity.
+- Under pressure the checkpoint scan runs whenever no automatic checkpoint is
+  pending (not only every 100 ms) and checkpoints every group with any applied
+  entry beyond its base.
+- A rewrite is due early under pressure when occupancy minus the live estimate
+  (`Σ Raft::live_log_bytes()`, computed only under pressure) is at least an
+  eighth of the capacity, at most once per `retry_ms` from the last attempt.
+
+
+#### ST2 schema amendment 2 (after the first macOS measurement)
+
+The first candidate (threshold a quarter of the limit, 100 ms scan, rewrite at
+every 1 s deadline) cost +9% to +17% native durable CPU per write on the Mac
+(below). Per the orchestrator's Q5 rule (raise the checkpoint interval, never
+disable), the defaults became:
+
+- `min_entries = max_entries_per_group / 2` (8,192): the largest threshold the
+  U5 check accepts. The checkpoint cost is dominated by four `F_FULLFSYNC`s per
+  snapshot publication on macOS and by the benchmark application's growing
+  receipt table (audit S1).
+- Scan every 10 ms instead of 100 ms. A scan compares counters of at most 64
+  groups; scanning sooner finds a due checkpoint before the limit without
+  checkpointing more often.
+- An interval deadline rewrites the WAL only when at least 1/16 of the usable
+  capacity is reclaimable; otherwise the deadline moves on one interval
+  (`skipped`). The live estimate is computed at the deadline as well.
+
+No other part of the plan changed.
+
+#### ST2 implemented (19 October 2026)
+
+**What changed.**
+- `runtime`: `RetentionMode` (`Maintained` default, `LifetimeBounded`) in
+  `NodeLimits`; `MaintenanceError`; `NodeError::Maintenance`.
+  `NetworkNode::from_parts` installs `CheckpointPolicy::for_limits` and, when
+  the provider supports reclaim, `WalMaintenancePolicy::for_ceiling`, or refuses
+  a node that cannot checkpoint. New `retention()` and `wal_usage()`.
+  `configure_*(None)` on a maintained node is refused; a WAL `max_bytes` other
+  than the ceiling and a checkpoint threshold above half the entry limit are
+  refused at configuration.
+- RT4 (`runtime/maintenance.rs`): every admission refusal and non-fatal failed
+  completion reschedules after `retry_ms` with `consecutive_failures` and the
+  typed error retained; success records `last_reclaimed`; only `u64` clock
+  exhaustion (584 million years) leaves no deadline, and fatal storage errors
+  leave the existing `RecoveryRequired` path.
+- U1 (`raft.rs`): `become_leader` checks the retained-entry budget before the
+  noop; a leader at the limit keeps the role, heartbeats, refuses typed and
+  appends the noop on a later heartbeat once a checkpoint frees space
+  (`Raft::leader_noop_pending`).
+- Persistence seam: `LogStore::physical_usage` (native: WAL length and usable
+  capacity), `PersistenceWorker::wal_usage` (native: one relaxed atomic the WAL
+  thread stores after each window and rewrite), `Raft::log_limits` and
+  `Raft::live_log_bytes`.
+- Binaries: shared `service_setup::MaintenanceOptions` (`--checkpoint-entries`,
+  `--wal-reclaim-ms`, `--no-maintenance I-accept-a-bounded-log`), validated
+  before any file; a `maintenance …` startup line; a shared `maintenance`
+  status command (now also in the directory and transfer services). The
+  `native_benchmark` example's explicit `--maintenance` mode opts out so its
+  manual checkpoints and rewrites do not contend with the automatic ones; its
+  plain runs keep the defaults. Operator documentation:
+  `docs/COUNTER_SERVICE.md` "Store maintenance (on by default)".
+- **No format change**; no migration. Public API additions/breaks:
+  `NodeLimits::retention`, `NodeError::Maintenance`, `CheckpointStatus`/
+  `WalMaintenanceStatus` fields, `PersistenceWorker::wal_usage` (defaulted),
+  `LogStore::physical_usage` (defaulted).
+
+**Fail@main evidence (3d552e2e, the same tests with main's API).**
+- Runtime soak (`default_node_keeps_accepting_past_the_retained_entry_limit`):
+  write 16,377 is refused at log index 16,384 with
+  `NotProposed(Storage(Rejected("group entry limit")))` (16,376 writes plus 8
+  election noops). Every later write is refused the same way, for ever.
+- Native soak (`default_native_node_keeps_accepting_past_the_wal_and_entry_limits`):
+  at log index 15,162 (about 62 MiB of 4 KiB writes) the node fails with
+  `Replica(Owner(Worker(Consensus(Storage(Rejected("WAL capacity/control reserve"))))))`
+  and enters `RecoveryRequired`. A full WAL is therefore node-fatal, not a
+  typed transient refusal.
+- U1 probe (single voter, default construction, one election per round): the
+  election at round 16,384 fails the node with
+  `Replica(Owner(Worker(Consensus(Storage(Rejected("group entry limit"))))))`
+  from inside the self-vote completion; a restart replays into the same refusal.
+
+**Soaks and tests (simulated protocol time).**
+
+| Test | Result |
+| --- | --- |
+| Runtime soak, default `NodeLimits`, counter binary application (`Counter::new(10000)`), 40,960 writes (2.5× the limit) with an election every 2,048, 64 writes per simulated millisecond | All applied; final log index 40,980; peak retained 14,347 entries (< 16,384 asserted: threshold 8,192 plus writes during a checkpoint); checkpoint base 0 → 10,247 → 18,439 at the two samples; 40 s debug |
+| Same, `VOTEBOAT_ST2_SOAK_WRITES=200000` (12×), release | RELEASE_SOAK |
+| Native soak, `NativeStartup::open_with_protocol_and_timers` (the binaries' path), default limits, 32,768 writes of 4 KiB (128 MiB appended, 2× both limits), clock at 1 ms per 100 polls | All applied; peak WAL 33,031,095 B = 50.0% of the 66,060,288 B usable capacity (the pressure threshold); last rewrite 33,030,992 → 370 B; peak retained 7,582; checkpoint bases [0, 7582, 15163, 22744, 30325]; 4 rewrites in 2,442 simulated ms (the interval alone allows 3); the three native ST2 tests take about 47 s debug and passed three consecutive runs |
+| U1 (`lifetime_bounded_leader_at_the_entry_limit_refuses_typed_and_stays_leader`) | Fill to 16,384; three re-elections: `Running`, `Leader`, term +1 each, `leader_noop_pending`, typed refusal; operator checkpoint frees space; the deferred noop commits in the current term; the next write applies |
+| RT4 fault matrix (`every_reclaim_failure_reschedules_or_recovers_visibly`) | 10 `WorkerError` admission kinds and 7 `StorageError` completion kinds: non-fatal → `Running`, deadline `now + retry_ms`, `failures = 1`, the retry succeeds; `Closed`/`Fenced` admission and `Uncertain`/`Corrupt`/`Fenced` completion → `RecoveryRequired` |
+| Restart mid-checkpoint and mid-reclaim (native) | Host stops (abort, then drain of the workers' terminal events and provider release) with a checkpoint, then a rewrite, in flight; reopen restores the same applied index and a byte-identical application checkpoint, or exactly the one write that was accepted when the host stopped; 5,000 more writes apply and checkpoints continue. Torn publication at file level stays covered by `snapshot.rs` and `log_reclaim.rs` crash-point tests |
+| U5 | Library: `CheckpointThresholdUnreachable`, `max_bytes ≠ ceiling` → `InvalidLimits`, `CheckpointsUnavailable`; binaries (all three): wrong acknowledgement, opt-out plus override, duplicate opt-out and `--checkpoint-entries 8193` refused before any file |
+| Operator visibility | Counter: defaults and opt-out in the startup line and `maintenance`; directory and transfer: defaults in `maintenance` and the startup line |
+
+Existing tests whose contract changed: `policy_is_opt_in…` became
+`policy_is_on_by_default…` plus an opt-out test;
+`permanent_admission_refusal_stops_schedule…` became
+`…_retries_and_service_stays_running` (RT4); fixtures without a snapshot
+worker (`transaction_driver`) and tests that drive hand-made schedules select
+`LifetimeBounded` explicitly; WAL test policies use the provider ceiling.
+
+**Native durable CPU per write (quiet Mac, `nat.sh` protocol).** Marginal CPU
+per original = (cpu at 16,000 − cpu at 2,000) / 14,000 at 15,000/s offered,
+`NOCAP=1 MAINT=0`, TCP, ABAB pairs, release builds of `native_benchmark`
+(`--all-features`) on the Mac (`src-st2-*`/`nat-st2-*` trees, removed
+afterwards). The Mac is fsync-bound at about 7,000–8,000 applied/s, so the
+offered 15,000/s is refused in part on both sides. The base never checkpoints
+or rewrites (and would stop at 16,384 entries); the candidate does both inside
+the measured window.
+
+| Run | Base → candidate | marg µs/orig | p99 | applied/s | pairs (marg) |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 3d552e2e → quarter threshold, 100 ms scan, rewrite at every deadline | 30.09 → 32.79 (×1.090) | 162 → 406 ms | 7,301 → 6,320 | 1.24 1.08 1.29 1.24 1.21 |
+| 2 | 3d552e2e → as 1 plus the 1/16 rewrite skip | 28.10 → 32.78 (×1.166) | 161 → 353 ms | 7,620 → 6,139 | 1.13 1.09 1.13 1.16 1.52 |
+| 3 | 3d552e2e → half threshold, 100 ms scan, skip | 30.03 → 31.38 (×1.045) | 157 → 203 ms | 7,707 → 7,170 | 0.95 1.04 1.23 1.08 1.06 |
+| 4 | 3d552e2e → final (half threshold, 10 ms scan, skip) | 29.96 → 32.90 (×1.098) | 161 → 211 ms | 7,849 → 7,030 | 0.97 1.14 1.23 0.95 1.09 |
+| 5 | 3d552e2e → final, repeat | 29.76 → 30.67 (×1.030) | 154 → 215 ms | 7,648 → 6,951 | 1.42 1.14 1.05 1.05 1.03 |
+| 6 | run 3 → final (scan interval only) | 28.46 → 31.69 (×1.113) | 229 → 213 ms | 6,919 → 7,112 | 1.03 1.94 1.72 1.18 0.91 |
+
+Runs 4 and 5 pooled (8 parsed pairs): marginal 29.87 → 31.50 µs (×1.054,
+median pair 1.07, range 0.95–1.23), p99 158 → 214 ms (×1.36), applied rate
+7,806 → 6,991/s (×0.90). Run 6 does not separate the 10 ms scan from noise.
+This is a measured regression beyond noise on this host, and it is the cost of
+the maintenance the base never did: each checkpoint publishes a snapshot with
+four `F_FULLFSYNC`s and encodes the benchmark's growing receipt table (16,000
+receipts, audit S1). The threshold is already at the largest value U5 allows.
+Follow-ups that would reduce it without disabling anything: the snapshot store's
+macOS sync primitive (it uses `sync_all`, a full device flush, where the WAL
+uses the approved barrier fsync; needs a durability decision) and DR1's bounded
+receipt table. Framework (matched) cells are unaffected by construction: the
+matched workspace builds no node (`grep from_parts benchmarks/matched/src` is
+empty).
+
+**Remaining gaps (recorded, not hidden).**
+- A WAL that fills at append time is still node-fatal. With maintenance on, the
+  occupancy path holds the WAL at about half capacity under a write rate far
+  above the intervals, but a burst that outruns one checkpoint-and-rewrite
+  cycle (about 31 MiB of headroom) still fails the node. Follow-up row ST2b:
+  admission backpressure at the persistence worker (refuse a data batch as
+  retryable `Overloaded` when published occupancy plus in-flight bytes would
+  pass the data ceiling).
+- `LogicalNode` (logical-voter track) has its own construction path and gets
+  no defaults here; LR1/LR3 own it.
+- The striped store reports no `physical_usage` and keeps its own limits
+  (ST3's row).
+
+#### Design-pack amendment realised by ST2 (pack preserved)
+
+| Pack text | Amendment |
+| --- | --- |
+| ch04 "Retention and reclamation" (checkpoint floor, prefix reclamation, cleaning as capabilities a host may schedule; earlier slices implemented them opt-in: Slice165 periodic reclamation, Slice166 automatic checkpoints) | Checkpoint and WAL reclaim are mandatory defaults for every node, driven by entry count, a scan interval and WAL occupancy. A lifetime-bounded store is an explicit, named opt-in (`RetentionMode::LifetimeBounded`; services: `--no-maintenance I-accept-a-bounded-log`) recorded at startup and in the status. Maintenance never stops itself: every non-fatal failure is retried and counted; fatal storage errors fence as before. A leader elected at the retained-entry limit keeps its role and refuses typed instead of failing the node |
+| ch10 "Checkpointing, compaction and snapshot traffic must occur during sufficiently long runs" | Now true of every default native benchmark run, not only `--maintenance` runs |
+
 ## Logical-voter reliability track (opened 18 October 2026)
 
 Goal: logical parents and their backing children run indefinitely with bounded

@@ -173,6 +173,7 @@ struct Cluster {
     quic: bool,
     wal_reclaim_ms: Option<u64>,
     checkpoint_entries: Option<u64>,
+    no_maintenance: bool,
     leadership_maintenance: bool,
     node_drain: bool,
     membership_drain: Option<(usize, PathBuf)>,
@@ -221,6 +222,7 @@ impl Cluster {
             quic: false,
             wal_reclaim_ms: None,
             checkpoint_entries: None,
+            no_maintenance: false,
             leadership_maintenance: false,
             node_drain: false,
             membership_drain: None,
@@ -290,6 +292,9 @@ impl Cluster {
         }
         if let Some(entries) = self.checkpoint_entries {
             command.arg("--checkpoint-entries").arg(entries.to_string());
+        }
+        if self.no_maintenance {
+            command.args(["--no-maintenance", "I-accept-a-bounded-log"]);
         }
         if let Some(path) = &self.admin_plan {
             command

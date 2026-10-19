@@ -38,6 +38,15 @@ use voteboat::{
 };
 #[path = "benchmark/lanes.rs"]
 mod lanes;
+/// Automatic checkpoints and WAL reclaim run unless `--maintenance` drives
+/// explicit ones, which the automatic schedule would contend with.
+static RETENTION: std::sync::OnceLock<RetentionMode> = std::sync::OnceLock::new();
+fn node_limits() -> NodeLimits {
+    NodeLimits {
+        retention: RETENTION.get().copied().unwrap_or_default(),
+        ..Default::default()
+    }
+}
 #[path = "benchmark/shared.rs"]
 mod shared;
 #[cfg(test)]
@@ -196,7 +205,7 @@ fn open_recorded(
                 .collect(),
             tls: tls(n),
             entropy_seed: n + 17,
-            limits: NodeLimits::default(),
+            limits: node_limits(),
             ready_visit_items,
         };
         let timers = TimerConfig {
@@ -838,6 +847,9 @@ fn run_selected(
     let ready_visit_items = config.ready_visit_items;
     let capacity_profile = config.capacity_profile;
     let publication = config.publication;
+    if config.maintenance.is_some() {
+        let _ = RETENTION.set(RetentionMode::LifetimeBounded);
+    }
     if config.shared {
         run(config, clock, |mode| {
             shared::open_partition(

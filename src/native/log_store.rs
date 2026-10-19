@@ -443,6 +443,12 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
     fn supports_reclaim(&self) -> bool {
         self.io.supports_replacement() && self.codec.supports_checkpoint()
     }
+    fn physical_usage(&self) -> Option<crate::log::WalUsage> {
+        Some(crate::log::WalUsage {
+            bytes: self.length,
+            capacity: self.limits.max_wal_bytes - self.limits.control_reserve_bytes,
+        })
+    }
     fn reclaim(&mut self, max_bytes: usize) -> Result<LogReclaimed, StorageError> {
         if self.fenced {
             return Err(StorageError::Fenced);

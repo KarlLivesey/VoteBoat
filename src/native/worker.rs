@@ -20,6 +20,7 @@ use crate::{contracts::StorageError, identity::*, log::*, runtime::VisitTicket, 
 use std::{
     collections::{BTreeMap, BTreeSet},
     sync::{
+        atomic::{AtomicUsize, Ordering},
         mpsc::{self, Receiver, SyncSender, TryRecvError, TrySendError},
         Arc,
     },
@@ -76,6 +77,10 @@ pub struct NativeLogWorker<L: LogStore + Send + 'static> {
     usage: WorkerUsage,
     data: WorkerUsage,
     fenced: bool,
+    // Physical log bytes the WAL thread publishes after each window and
+    // reclaim, with the store's fixed usable capacity.
+    wal_bytes: Arc<AtomicUsize>,
+    wal_capacity: Option<usize>,
 }
 impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
     /// The supplied store must be quiescent. Recover group states/cores before
@@ -102,6 +107,10 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
         let max_pending_units = store.limits().max_pending_units;
         let reclaim_supported = store.supports_reclaim();
         let max_reclaim_bytes = store.limits().max_wal_bytes;
+        let initial = store.physical_usage();
+        let wal_capacity = initial.map(|u| u.capacity);
+        let wal_bytes = Arc::new(AtomicUsize::new(initial.map_or(0, |u| u.bytes)));
+        let published = wal_bytes.clone();
         let (sender, requests) = mpsc::sync_channel::<Work>(limits.max_requests);
         let (out, events) = mpsc::sync_channel(limits.max_requests * 2);
         let (reclaim_out, reclaims) = mpsc::sync_channel(1);
@@ -137,6 +146,7 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
                             if result.as_ref().is_err_and(fatal) {
                                 fenced = true;
                             }
+                            publish_usage(&store, &published);
                             let _ = reclaim_out.send(ReclaimEvent {
                                 request: ticket,
                                 result,
@@ -148,6 +158,7 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
                     let batches =
                         ready_window(batch, &requests, &mut deferred, limits, max_pending_units);
                     persist_window(&mut store, batches, binding, &mut fenced, &out, &*wake);
+                    publish_usage(&store, &published);
                 }
                 store
             })
@@ -168,6 +179,8 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
             usage: WorkerUsage::default(),
             data: WorkerUsage::default(),
             fenced: false,
+            wal_bytes,
+            wal_capacity,
         })
     }
     fn admission(
@@ -419,6 +432,12 @@ fn finish_persist_window<L: LogStore>(
     }
 }
 
+/// One relaxed store per window: a scheduling hint, never an ordering edge.
+fn publish_usage<L: LogStore>(store: &L, published: &AtomicUsize) {
+    if let Some(usage) = store.physical_usage() {
+        published.store(usage.bytes, Ordering::Relaxed);
+    }
+}
 fn fatal(error: &StorageError) -> bool {
     matches!(
         error,
@@ -437,6 +456,12 @@ impl<L: LogStore + Send + 'static> PersistenceWorker for NativeLogWorker<L> {
     }
     fn reclaim_limit(&self) -> Option<usize> {
         self.reclaim_supported.then_some(self.max_reclaim_bytes)
+    }
+    fn wal_usage(&self) -> Option<WalUsage> {
+        self.wal_capacity.map(|capacity| WalUsage {
+            bytes: self.wal_bytes.load(Ordering::Relaxed),
+            capacity,
+        })
     }
     fn submit_reclaim(&mut self, max_bytes: usize) -> Result<ReclaimTicket, WorkerError> {
         if self.fenced {

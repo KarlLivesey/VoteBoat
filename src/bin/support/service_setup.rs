@@ -411,3 +411,185 @@ fn load_deployment(
     }
     Ok(())
 }
+/// The acknowledgement `--no-maintenance` requires; any other value is refused.
+pub const NO_MAINTENANCE_ACK: &str = "I-accept-a-bounded-log";
+/// Store maintenance choices shared by the three service binaries. Defaults
+/// (no flags) keep automatic checkpoints and WAL reclaim on.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct MaintenanceOptions {
+    pub checkpoint_entries: Option<u64>,
+    pub wal_reclaim_ms: Option<u64>,
+    pub lifetime_bounded: bool,
+}
+impl MaintenanceOptions {
+    pub fn is_flag(flag: &str) -> bool {
+        matches!(
+            flag,
+            "--checkpoint-entries" | "--wal-reclaim-ms" | "--no-maintenance"
+        )
+    }
+    /// Record one flag pair. Each flag may appear once.
+    pub fn parse(&mut self, flag: &str, value: &str) -> Result<(), Failure> {
+        let positive = |name: &str| -> Result<u64, Failure> {
+            match value.parse::<u64>()? {
+                0 => Err(format!("{name} must be positive").into()),
+                n => Ok(n),
+            }
+        };
+        match flag {
+            "--checkpoint-entries" if self.checkpoint_entries.is_none() => {
+                self.checkpoint_entries = Some(positive("checkpoint entry threshold")?);
+            }
+            "--wal-reclaim-ms" if self.wal_reclaim_ms.is_none() => {
+                self.wal_reclaim_ms = Some(positive("WAL reclaim interval")?);
+            }
+            "--no-maintenance" if !self.lifetime_bounded => {
+                if value != NO_MAINTENANCE_ACK {
+                    return Err(format!(
+                        "--no-maintenance disables checkpoints and WAL reclaim; every group then stops accepting writes at its store limits. Pass --no-maintenance {NO_MAINTENANCE_ACK} to accept that"
+                    )
+                    .into());
+                }
+                self.lifetime_bounded = true;
+            }
+            _ => return Err("duplicate or unsupported maintenance option".into()),
+        }
+        Ok(())
+    }
+    /// Refuse, before any file is opened, a selection that would fail or be
+    /// ignored once serving.
+    pub fn validate(&self) -> Result<(), Failure> {
+        if self.lifetime_bounded
+            && (self.checkpoint_entries.is_some() || self.wal_reclaim_ms.is_some())
+        {
+            return Err(
+                "--no-maintenance cannot be combined with --checkpoint-entries or --wal-reclaim-ms"
+                    .into(),
+            );
+        }
+        let max = LogLimits::default().max_entries_per_group / 2;
+        if self.checkpoint_entries.is_some_and(|n| n > max as u64) {
+            return Err(format!(
+                "--checkpoint-entries must be at most {max} (half the retained-entry limit) so a checkpoint can start before the limit"
+            )
+            .into());
+        }
+        Ok(())
+    }
+    /// Select the retention mode before the node is constructed.
+    pub fn select(&self, limits: &mut NodeLimits) {
+        limits.retention = if self.lifetime_bounded {
+            RetentionMode::LifetimeBounded
+        } else {
+            RetentionMode::Maintained
+        };
+    }
+    /// Replace default policies with explicit overrides after construction.
+    pub fn apply<A>(&self, node: &mut NativeNode<A, NativeServiceConnector>) -> Result<(), Failure>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
+        if let Some(min_entries) = self.checkpoint_entries {
+            let policy = node
+                .checkpoints()
+                .policy
+                .ok_or("automatic checkpoints unavailable")?;
+            checked(node.configure_checkpoints(Some(CheckpointPolicy {
+                min_entries,
+                ..policy
+            })))?;
+        }
+        if let Some(interval_ms) = self.wal_reclaim_ms {
+            let policy = node
+                .wal_maintenance()
+                .policy
+                .ok_or("WAL reclaim unavailable")?;
+            checked(node.configure_wal_maintenance(Some(WalMaintenancePolicy {
+                interval_ms,
+                retry_ms: interval_ms.min(policy.retry_ms),
+                ..policy
+            })))?;
+        }
+        Ok(())
+    }
+}
+/// One startup line recording the retention mode and active policies.
+pub fn maintenance_startup<A>(node: &NativeNode<A, NativeServiceConnector>) -> String
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    let checkpoint = node.checkpoints().policy;
+    let wal = node.wal_maintenance().policy;
+    format!(
+        "maintenance retention={} checkpoint_entries={} checkpoint_scan_ms={} wal_reclaim_ms={} wal_retry_ms={}",
+        retention_name(node.retention()),
+        checkpoint.map_or("off".into(), |p| p.min_entries.to_string()),
+        checkpoint.map_or("off".into(), |p| p.interval_ms.to_string()),
+        wal.map_or("off".into(), |p| p.interval_ms.to_string()),
+        wal.map_or("off".into(), |p| p.retry_ms.to_string()),
+    )
+}
+fn retention_name(mode: RetentionMode) -> &'static str {
+    match mode {
+        RetentionMode::Maintained => "maintained",
+        RetentionMode::LifetimeBounded => "lifetime-bounded",
+    }
+}
+/// Operator-visible maintenance state for one group: retention mode,
+/// checkpoint policy, last result and base, WAL occupancy, last reclaim, last
+/// error and consecutive failures. Local observation, not quorum evidence.
+pub fn maintenance_status<A>(
+    node: &NativeNode<A, NativeServiceConnector>,
+    group: GroupIdentity,
+) -> String
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    let wal = node.wal_maintenance();
+    let checkpoints = node.checkpoints();
+    let usage = node.wal_usage();
+    let reclaimed = wal.last_reclaimed;
+    let completion_error = wal
+        .last_completion
+        .as_ref()
+        .and_then(|e| e.result.as_ref().err());
+    let checkpoint_result = match &checkpoints.last_result {
+        None => "none".to_owned(),
+        Some(CheckpointResult::Completed { index, .. }) => format!("completed@{index}"),
+        Some(CheckpointResult::Rejected { error, .. }) => format!("rejected:{error:?}"),
+    };
+    format!(
+        "OK retention={} enabled={} pending={} next_ms={:?} last_sequence={} wal_bytes={} wal_capacity={} last_reclaim_ms={:?} before_bytes={} after_bytes={} failures={} skipped={} admission_error={:?} completion_error={:?} checkpoint_enabled={} checkpoint_entries={} checkpoint_pending={} checkpoint_last={} checkpoint_admission_error={:?} leader_noop_pending={} checkpoint_base={}",
+        retention_name(node.retention()),
+        wal.policy.is_some(),
+        wal.pending.is_some(),
+        wal.next_deadline.map(|d| d.0),
+        wal.last_completion.as_ref().map_or(0, |e| e.request.sequence),
+        usage.map_or(0, |u| u.bytes),
+        usage.map_or(0, |u| u.capacity),
+        reclaimed.map(|(t, _)| t.0),
+        reclaimed.map_or(0, |(_, r)| r.before_bytes),
+        reclaimed.map_or(0, |(_, r)| r.after_bytes),
+        wal.consecutive_failures,
+        wal.skipped,
+        wal.last_admission_error,
+        completion_error,
+        checkpoints.policy.is_some(),
+        checkpoints.policy.map_or(0, |p| p.min_entries),
+        checkpoints.pending.len(),
+        checkpoint_result,
+        checkpoints.last_admission_error.as_ref().map(|(_, e)| e),
+        node.local()
+            .owner
+            .core(group)
+            .is_some_and(|c| c.leader_noop_pending()),
+        // Kept last: existing operator tooling reads it as the final field.
+        node.local()
+            .owner
+            .core(group)
+            .map_or(0, |c| c.state().base_index()),
+    )
+}

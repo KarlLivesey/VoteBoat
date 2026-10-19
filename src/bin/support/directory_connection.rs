@@ -194,6 +194,7 @@ impl Connection {
                     core.state().commit_index,core.state().base_index(),pending_reads
                 ));
             }
+            ["maintenance"] => self.reply(super::setup::maintenance_status(owner.node(), c.group)),
             ["initialize"] => self.submit(owner, c, c.bootstrap)?,
             ["publish", operation] => {
                 self.submit(owner, c, super::directory_plan::op(operation)?)?

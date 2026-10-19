@@ -325,6 +325,20 @@ fn history(quic: bool) {
     finish(rig);
 }
 fn initialize(rig: &Cluster) {
+    // ST2: every transfer group checkpoints and reclaims by default.
+    let text = rig.ok(1, &["maintenance"]);
+    for field in [
+        "retention=maintained",
+        "enabled=true",
+        "checkpoint_entries=8192",
+    ] {
+        assert!(text.contains(field), "{field}: {text}");
+    }
+    let log = fs::read_to_string(rig.root.join("20-1.log")).unwrap();
+    assert!(
+        log.contains("maintenance retention=maintained checkpoint_entries=8192"),
+        "{log}"
+    );
     initialization::command(rig, 1, "initialize");
     initialization::command(rig, 1, "grant");
     initialization::command(rig, 20, "initialize");
@@ -359,6 +373,42 @@ fn finish(mut rig: Cluster) {
     let root = rig.root.clone();
     drop(rig);
     fs::remove_dir_all(root).unwrap();
+}
+/// ST2 / U5: a maintenance selection that would be refused or ignored once
+/// serving is refused before any file exists.
+#[test]
+fn maintenance_selection_is_validated_before_storage() {
+    let root = std::env::temp_dir().join(format!(
+        "voteboat-transfer-maintenance-{}",
+        std::process::id()
+    ));
+    let ack = "I-accept-a-bounded-log";
+    for (args, message) in [
+        (vec!["--no-maintenance", "yes"], "Pass --no-maintenance"),
+        (
+            vec!["--no-maintenance", ack, "--wal-reclaim-ms", "5"],
+            "cannot be combined",
+        ),
+        (vec!["--checkpoint-entries", "8193"], "at most 8192"),
+    ] {
+        let out = run(Command::new(BIN)
+            .args(["serve", "create"])
+            .arg(&root)
+            .args([
+                "1",
+                "20000",
+                "missing-tls",
+                "missing-profile",
+                "1",
+                "missing-access",
+                "tcp",
+            ])
+            .args(&args));
+        assert!(!out.status.success(), "{args:?}");
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert!(stderr.contains(message), "{args:?}: {stderr}");
+        assert!(!root.exists(), "{args:?}");
+    }
 }
 #[test]
 fn tcp_authenticated_operator_starts_a_split_and_children_survive_parent_shutdown() {

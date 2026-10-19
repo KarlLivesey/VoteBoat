@@ -340,6 +340,44 @@ fn history(quic: bool) {
         "wrong refusal: {error}"
     );
 }
+/// ST2: checkpoints and WAL reclaim are on by default and visible; an
+/// unacknowledged opt-out or a conflicting selection is refused before any
+/// storage exists.
+#[test]
+fn maintenance_defaults_are_visible_and_selection_is_validated_before_storage() {
+    let mut c = Cluster::new(false);
+    let leader = initialize(&mut c);
+    let text = c.ok(leader, &["maintenance"]);
+    for field in [
+        "retention=maintained",
+        "enabled=true",
+        "checkpoint_enabled=true",
+        "checkpoint_entries=8192",
+    ] {
+        assert!(text.contains(field), "{field}: {text}");
+    }
+    let log = fs::read_to_string(c.root.join(format!("{leader}.log"))).unwrap();
+    assert!(
+        log.contains("maintenance retention=maintained checkpoint_entries=8192"),
+        "{log}"
+    );
+    c.stop();
+    let ack = "I-accept-a-bounded-log";
+    for (args, message) in [
+        (vec!["--no-maintenance", "yes"], "Pass --no-maintenance"),
+        (
+            vec!["--no-maintenance", ack, "--checkpoint-entries", "5"],
+            "cannot be combined",
+        ),
+        (vec!["--checkpoint-entries", "8193"], "at most 8192"),
+    ] {
+        let out = c.server(9, "create").args(&args).fixture_output().unwrap();
+        assert!(!out.status.success(), "{args:?}");
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert!(stderr.contains(message), "{args:?}: {stderr}");
+        assert!(!c.root.join("9").exists(), "{args:?}");
+    }
+}
 #[test]
 fn directory_publication_remote_reads_and_checkpoint_recovery_tcp() {
     history(false);

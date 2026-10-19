@@ -3060,7 +3060,7 @@ mod snapshot_routes {
         reject: bool,
         bad_ticket: bool,
         closed: bool,
-        allowance: usize,
+        pub(super) allowance: usize,
         images: BTreeMap<GroupIdentity, Snapshot>,
         pub(super) hold: std::rc::Rc<std::cell::Cell<Option<GroupIdentity>>>,
         pub(super) checkpoint_supported: bool,

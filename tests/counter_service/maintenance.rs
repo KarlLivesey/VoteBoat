@@ -53,8 +53,8 @@ fn history(quic: bool) {
         c.ok(id, &["checkpoint"]);
     }
     let first = wait_maintenance(&c, 1, 0);
-    // A second matched worker sequence proves the scheduler, rather than a
-    // one-off startup/manual request, continues to drive physical maintenance.
+    // Further progress proves the scheduler, rather than a one-off
+    // startup/manual request, continues to drive physical maintenance.
     wait_maintenance(&c, 1, first);
     c.stop();
     for id in 1..=3 {
@@ -82,14 +82,19 @@ fn wait_maintenance(c: &Cluster, id: usize, after: u64) -> u64 {
                 text.contains("enabled=true") && text.contains("completion_error=None"),
                 "{text}"
             );
-            let sequence = text
-                .split_whitespace()
-                .find_map(|s| s.strip_prefix("last_sequence="))
-                .unwrap()
-                .parse::<u64>()
-                .unwrap();
-            if sequence > after {
-                return sequence;
+            let field = |name: &str| {
+                text.split_whitespace()
+                    .find_map(|s| s.strip_prefix(name))
+                    .unwrap()
+                    .parse::<u64>()
+                    .unwrap()
+            };
+            // Each interval either rewrites (a new worker sequence) or, with
+            // too little to reclaim, moves on (`skipped`): both show the
+            // schedule is still running.
+            let progress = field("last_sequence=") + field("skipped=");
+            if progress > after {
+                return progress;
             }
         }
         assert!(Instant::now() < deadline, "maintenance did not complete");
@@ -183,6 +188,107 @@ fn invalid_checkpoint_schedule_precedes_resource_creation() {
             .args(["--checkpoint-entries", value]));
         assert!(!out.status.success());
         assert!(!target.exists());
+    }
+    fs::remove_dir_all(&c.root).unwrap();
+}
+
+/// ST2: with no flags the service checkpoints and reclaims by default, and the
+/// explicit opt-out is recorded at startup and in the status.
+#[test]
+fn maintenance_defaults_and_opt_out_are_operator_visible() {
+    let mut c = Cluster::new();
+    c.start(1, "create");
+    let text = wait_status(&c, 1);
+    for field in [
+        "retention=maintained",
+        "enabled=true",
+        "checkpoint_enabled=true",
+        "checkpoint_entries=8192",
+        "failures=0",
+        "wal_capacity=66060288",
+    ] {
+        assert!(text.contains(field), "{field}: {text}");
+    }
+    c.stop();
+    let log = c.service_log(1);
+    assert!(
+        log.contains("maintenance retention=maintained checkpoint_entries=8192 checkpoint_scan_ms=10 wal_reclaim_ms=1000 wal_retry_ms=100"),
+        "{log}"
+    );
+    c.no_maintenance = true;
+    c.start(1, "recover");
+    let text = wait_status(&c, 1);
+    for field in [
+        "retention=lifetime-bounded",
+        "enabled=false",
+        "checkpoint_enabled=false",
+    ] {
+        assert!(text.contains(field), "{field}: {text}");
+    }
+    c.stop();
+    let log = c.service_log(1);
+    assert!(
+        log.contains("maintenance retention=lifetime-bounded checkpoint_entries=off checkpoint_scan_ms=off wal_reclaim_ms=off wal_retry_ms=off"),
+        "{log}"
+    );
+    fs::remove_dir_all(&c.root).unwrap();
+}
+fn wait_status(c: &Cluster, id: usize) -> String {
+    let deadline = Instant::now() + Duration::from_secs(10);
+    loop {
+        let out = c.request(id, &["maintenance"]);
+        if out.status.success() {
+            return String::from_utf8_lossy(&out.stdout).into_owned();
+        }
+        assert!(
+            Instant::now() < deadline,
+            "maintenance status unavailable: {}",
+            c.service_log(id)
+        );
+        std::thread::sleep(Duration::from_millis(10));
+    }
+}
+/// U5: a maintenance selection that would be refused or ignored once serving
+/// is refused at startup, before any file or listener exists.
+#[test]
+fn maintenance_selection_is_validated_before_files_or_listeners() {
+    let c = Cluster::new();
+    let target = c.root.join("invalid-maintenance");
+    let ack = "I-accept-a-bounded-log";
+    for (args, message) in [
+        (
+            vec!["--no-maintenance", "yes"],
+            "Pass --no-maintenance I-accept-a-bounded-log",
+        ),
+        (
+            vec!["--no-maintenance", "i-accept-a-bounded-log"],
+            "Pass --no-maintenance",
+        ),
+        (
+            vec!["--no-maintenance", ack, "--checkpoint-entries", "5"],
+            "cannot be combined",
+        ),
+        (
+            vec!["--no-maintenance", ack, "--wal-reclaim-ms", "5"],
+            "cannot be combined",
+        ),
+        (
+            vec!["--no-maintenance", ack, "--no-maintenance", ack],
+            "duplicate",
+        ),
+        (vec!["--checkpoint-entries", "8193"], "at most 8192"),
+    ] {
+        let out = run(Command::new(BIN)
+            .args(["serve", "create"])
+            .arg(&target)
+            .arg("1")
+            .arg(c.base.to_string())
+            .arg("missing-tls")
+            .args(&args));
+        assert!(!out.status.success(), "{args:?}");
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert!(stderr.contains(message), "{args:?}: {stderr}");
+        assert!(!target.exists(), "{args:?}");
     }
     fs::remove_dir_all(&c.root).unwrap();
 }

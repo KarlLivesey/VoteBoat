@@ -39,6 +39,8 @@ mod multi;
 mod peer_rotation;
 #[path = "startup/ready_items.rs"]
 mod ready_items;
+#[path = "startup/retention.rs"]
+mod retention;
 #[path = "startup/shutdown_clock.rs"]
 mod shutdown_clock;
 #[path = "startup/timing_profile.rs"]
