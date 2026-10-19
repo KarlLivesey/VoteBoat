@@ -344,6 +344,27 @@ impl Raft {
     ) -> Option<Result<Vec<Effect>, RaftError>> {
         let offset = suffix_offset?;
         let new = &entries[offset..];
+        // Every ordinary append: no pressure, and the whole retained log plus
+        // the new entries fits (the kept prefix is never longer than the log).
+        if !self.storage_pressure
+            && self.durable.entries.len().saturating_add(new.len())
+                <= self.limits.retained_entry_capacity()
+        {
+            return None;
+        }
+        self.decline_new_data_slow(new, offset, previous_index, leader_commit, hard, old)
+    }
+    #[cold]
+    #[inline(never)]
+    fn decline_new_data_slow(
+        &mut self,
+        new: &[LogEntry],
+        offset: usize,
+        previous_index: u64,
+        leader_commit: u64,
+        hard: HardState,
+        old: HardState,
+    ) -> Option<Result<Vec<Effect>, RaftError>> {
         let from = new[0].index;
         let data = new.iter().any(|e| !matches!(e.payload, EntryPayload::Noop));
         let kept = from.saturating_sub(self.durable.base_index() + 1);
@@ -472,7 +493,9 @@ impl Raft {
             if matching_index != sent.end {
                 return Err(RaftError::InvalidMessage);
             }
-            self.stalled_rounds.remove(&m.from);
+            if !self.stalled_rounds.is_empty() {
+                self.stalled_rounds.remove(&m.from);
+            }
             let prefix = self.progress[&m.from].max(matching_index);
             self.progress.insert(m.from, prefix);
             self.next_index.insert(m.from, prefix + 1);

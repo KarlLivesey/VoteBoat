@@ -783,18 +783,24 @@ impl Raft {
     }
     /// Refuse new data entries once the retained log is at the data budget;
     /// the noop reserve above it is the current leader's alone (I1).
+    #[inline]
     fn check_data_budget(&mut self, count: usize) -> Result<(), RaftError> {
         if self
             .durable
             .entries
             .len()
             .checked_add(count)
-            .is_none_or(|n| n > self.limits.max_entries_per_group)
+            .is_some_and(|n| n <= self.limits.max_entries_per_group)
         {
-            self.entry_budget_refusals = self.entry_budget_refusals.saturating_add(1);
-            return Err(RaftError::StoragePressure);
+            return Ok(());
         }
-        Ok(())
+        self.refuse_data_budget()
+    }
+    #[cold]
+    #[inline(never)]
+    fn refuse_data_budget(&mut self) -> Result<(), RaftError> {
+        self.entry_budget_refusals = self.entry_budget_refusals.saturating_add(1);
+        Err(RaftError::StoragePressure)
     }
     /// Host-set WAL high-water state (ST2b). While set, a follower keeps
     /// leader contact, term and commit records but declines appends that
