@@ -513,6 +513,26 @@ pub(super) fn run<L: LogStore + Send + 'static>(
     let joined = close(replicas, clock);
     checked_stage(root, "verification", verified, joined)?;
     observe::capture(&mut storage, "after_create_join", &traces);
+    // Measurement harness only: with VOTEBOAT_BENCH_SKIP_RECOVERY set, end
+    // after the serving workload, so the process CPU is serving CPU and not
+    // the post-run recovery check (ST2 round 3 CPU reporting).
+    if std::env::var_os("VOTEBOAT_BENCH_SKIP_RECOVERY").is_some() {
+        eprintln!("phase=recovery-verification mode=offered skipped");
+        config.publication.write_storage(root, &storage)?;
+        return report_offered(
+            &config,
+            rate,
+            CompletedRun {
+                placement: &placement,
+                ledger: &ledger,
+                totals: &totals,
+                maintenance: &maintenance,
+                elapsed,
+                expected: &expected,
+                retries: 0,
+            },
+        );
+    }
     eprintln!("phase=recovery-verification mode=offered");
     let (mut replicas, recovered_traces) = open_cluster(NativeOpenMode::Recover)?;
     let recovered_bases = maintenance.bases(&replicas);
