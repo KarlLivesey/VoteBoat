@@ -100,9 +100,23 @@ impl Span {
             }
         }
     }
-    /// The visible entries as a plain owned copy, held as a vector is.
-    fn copied(&self) -> Self {
-        Self::Owned(self.entries().to_vec())
+    /// The visible entries copied into a backing of their own, frozen as a
+    /// received batch would be when its index (if any) fits `room` hidden
+    /// bytes, otherwise held as a plain vector. Returns the hidden bytes kept.
+    fn copied(&self, room: usize) -> (Self, usize) {
+        let visible = self.entries();
+        if visible.len() >= SHARE_MIN {
+            let mut need = IndexNeed::default();
+            for entry in visible {
+                need.push(entry);
+            }
+            if let Some(index) = need.bytes().filter(|bytes| *bytes <= room) {
+                if let Some(span) = Self::new(visible.to_vec()) {
+                    return (span, index);
+                }
+            }
+        }
+        (Self::Owned(visible.to_vec()), 0)
     }
     #[inline]
     fn entries(&self) -> &[LogEntry] {
@@ -485,7 +499,9 @@ impl EntryBatch {
             .unwrap_or(usize::MAX);
         let allowance = room.min(plain);
         // Pieces are kept in order while the running total stays within the
-        // allowance; a piece that would exceed it is copied instead.
+        // allowance; a piece that would exceed it is copied instead, into a
+        // frozen backing of its own when its index still fits (so receivers
+        // hold it as they hold any received wide batch).
         let keeps = |span: &Span, hidden: &mut usize| match span
             .hidden()
             .and_then(|bytes| hidden.checked_add(bytes))
@@ -506,7 +522,9 @@ impl EntryBatch {
             if keeps(span, &mut hidden) {
                 pieces.push(span.clone());
             } else {
-                pieces.push(span.copied());
+                let (piece, kept) = span.copied(allowance - hidden);
+                hidden += kept;
+                pieces.push(piece);
             }
         }
         pieces.finish()

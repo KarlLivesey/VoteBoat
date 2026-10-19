@@ -97,11 +97,25 @@ fn differential(core: &mut Raft) -> EntryBatch {
         panic!("ordinary append required")
     };
     assert_eq!(entries, old);
-    // A wide selection shares the canonical entries; a small one is copied.
+    // A wide selection shares the canonical entries unless its backing would
+    // pin too much; a small one, or one that pins too much, is a copy (a wide
+    // copy in a backing of its own).
     if let Some(first) = entries.first() {
         let ordinal = (next - state.base_index() - 1) as usize;
         let canonical = &core.state().entries[ordinal];
-        assert_eq!(std::ptr::eq(first, canonical), entries.is_shared());
+        let backing = core
+            .state()
+            .entries
+            .shared_range(ordinal..ordinal + 1)
+            .unwrap()
+            .first_backing_ptr();
+        assert_eq!(
+            std::ptr::eq(first, canonical),
+            entries.is_shared() && entries.first_backing_ptr() == backing
+        );
+        if !std::ptr::eq(first, canonical) {
+            assert_eq!(entries.retained_bytes(), entries.log_charge());
+        }
     }
     assert_eq!(previous_index, next - 1);
     assert_eq!(previous_term, state.term_at(next - 1).unwrap());
