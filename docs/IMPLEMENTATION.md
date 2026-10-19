@@ -45,8 +45,9 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done H1: server worker flag (merged `30a1f6c5`) | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`) | Matched source byte-identical to flag-only `297aec15`; matched tests; both fmt checks and five strict Clippy configurations; independent review | T4 |
 | Done TR1a (PR 5, formerly R1; merged 19 October 2026 on TR1b): deterministic simulated time in the activation driver fixtures | Platform feedback has failed on every main run since 17 October: the activation driver fixtures turned elapsed wall time into protocol time, so a slow host produced more heartbeats and exhausted child group 802's 128 retained actions; the first panic then poisoned the shared serialization lock for 25 more tests. Round 2 restores every liveness bound in protocol time, holds time while dial work or replicated progress is in flight, asserts the 64-action protocol budget and owns each port for the whole test. Round 3 draws every port from TR1b's shared pool and keeps the outer channels' unused half bound | Research report `target/claude/research-ci/dedup-capacity-root-cause.md`; architect plan TR1 (b), (c), (f); TR1b / PR 4 (`03127ec5`, PR 5's base) for the shared port pool and exclusions | Round 3 (cores 0-3, nice, no retries): `logical_activation_driver` 35/35 ×5 and serial, `logical_voter_native` 42/42 ×5, serial and two concurrent copies, `logical_nested_native` 15/15 ×5 and serial, `logical_activation_nested` 14/14 ×3 with 12/14 and 13/14 in two runs (QUIC close-drain timeouts at `cluster.rs:216`, TR4; serial passes split into consecutive `--test-threads=1` runs); two of the four binaries are unchanged by TR1a; round 2: parent `30a1f6c5` under E3; `logical_activation_driver` (`--all-features`) E1 ×10, E2 ×5, E3 ×10, E4 ×5 pairs, E5 ×3 with every run passing; retained protocol actions ≤ 64 in every cohort run; fmt, four strict Clippy configurations, matched workspace fmt + Clippy; all-feature full suite (other configurations: suite runner); two reviews | Q1 (M1, M2, M3) |
 | Done TR1b (PR 4, TR1a's base; merged 19 October 2026): CI runs every binary, shared port leases, explicit accept mode | Covers the architect TR1 items this slice does not: (d) `set_nonblocking` in the bin tests (`route_discovery`, the macOS `WouldBlock`), (e) CI `--no-fail-fast` for all three configurations, (g) `validation/reliability-proof.sh`, and leases for the seven other port ladders. Since TR1a round 3, `harness::PortLease` is a protocol split of this slice's `support::ports::PortLease`, so PR 5 depends on it and merges after it | Architect plan; PR 4 review rounds | PR 4's own proof and reviews | Q1 (M1, M3) |
-| Current TR4: deterministic time and poison-free history in `logical_activation_nested` | The nested binary still turned elapsed wall time into protocol time and bounded every wait with 15 s (or 10 s / 90 s) of real time; under load a QUIC child is still closing at the deadline (`cluster.rs:216`) and the business waits (`business.rs:43/58`) expire. TR4 moves the binary onto TR1a's clock and hold rule and adds the poison regression test for its `HISTORY` | TR1a `harness`; TR1b `serial()` and port pool | See the reliability mini plan (TR4 row) and the TR4 sections at the end of this file | Q1 (M1, M2, M3) |
-| Following TR2/TR3: inventory, then the logical-voter family on the same clock | `logical_voter_native` still keeps wall-clock protocol time (its waits keep exactly their old 15 s wall bounds through the shared `Wait`), and `logical_activation_nested` has its own clocks and the same 128-action budget. A read-only bridge seam (L1) would let borrowed children's dial work and readiness hold time too | TR1a harness; TR1b CI visibility | Same matrix per binary; inventory of newly visible CI failures | Q1 (M2, M5) |
+| Current TR4: deterministic time and poison-free history in `logical_activation_nested` | The nested binary still turned elapsed wall time into protocol time and bounded every wait with 15 s (or 10 s / 90 s) of real time; under load a QUIC child is still closing at the deadline (`cluster.rs:216`) and the business waits (`business.rs:43/58`) expire. TR4 moves the binary onto TR1a's clock and hold rule and adds the poison regression test for its `HISTORY`. Round 2 makes bridge-borrowed children's dial work hold that clock too | TR1a `harness`; TR1b `serial()` and port pool | See the reliability mini plan (TR4 row) and the TR4 sections at the end of this file | Q1 (M1, M2, M3) |
+| Next TR4b: deterministic time in `logical_nested_native` | The rest of the architect's TR4 row. This binary still turns wall time into protocol time and bounds its phases with a 90 s absolute / 30 s inactivity real-time watchdog; its parent failed 20 tests under E3 in the TR1b proof (recorded below), and TR1b's port fix left 7 election and functional deadline failures visible there. Same conversion as TR4: shared `SimClock`, hold rule including child dial work (`DialWork`), every bound kept in protocol time | TR4 merged (`harness::DialWork`, generic `Observed::bridge`, the nested `dials` wrapper pattern); TR1b port pool | Every wall wait converted with the same number and message; E1 ×10, `--test-threads=1` ×1, E3 ×10, two simultaneous copies ×3 (cores 0-3, no retries); the other harness binaries once; fmt and four strict Clippy profiles | Q1 (M1, M2) |
+| Following TR2/TR3: inventory, then the logical-voter family on the same clock | `logical_voter_native` still keeps wall-clock protocol time (its waits keep exactly their old 15 s wall bounds through the shared `Wait`), and `logical_nested_native` has its own wall clock and watchdog (TR4b). The driver and voter binaries' bridge-borrowed native children still hide their dial work from the hold rule; TR4's `DialWork` reporting connector closes that without a library seam. A read-only bridge seam (L1) would still be needed to let borrowed children's readiness hold time | TR1a harness; TR1b CI visibility | Same matrix per binary; inventory of newly visible CI failures | Q1 (M2, M5) |
 | In progress H1: review round 3, preserve the benchmark instrument | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`); pinned matched workspace; quiet-Mac 30-pair buffer attribution result | All matched source byte-identical to flag-only `297aec15`; raw evidence preserved; matched tests; both fmt checks and five strict Clippy configurations; independent review of the reduced scope | T4 |
 | Done V1: core-canonical volatile log (merged 041fc3fb; Mac −18.8% bulk, −16.3% singleton CPU/write) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
 | Done V2: scalar commit-advance plan and smaller `Pending` (merged 19 October 2026, PR 3 head 3a5c1cd4; Mac singleton −4.1%, old rule) | Commit-only rounds (~2.3 of 5.3 persistence rounds per singleton original) only advance the commit index, yet each built, validated, stored and compared a full `LogUpdate`/`OwnedAppend` plan inside a 1,728-byte `Pending`; a core-only scalar `CommitAdvance` plan and boxed cold parts cut `Pending` to 1,088 B | V1 (merged 041fc3fb) | Both reviews approved; suites on 3a5c1cd4: default 2,451 (one load-sensitive `native_relay` flake, parent and PR 10/10 on rerun), all-features 2,766, no-default 1,245, native-only 1,806, matched 71, `logical_activation_nested` solo 3×8/8; fmt + five strict Clippy clean; runner pairs round 1 ACCEPT | T4 |
@@ -37368,7 +37369,7 @@ cancels stale pull-request runs; push-to-main runs remain uncancelled.
 
 | Milestone | User-visible result | Status |
 | --- | --- | --- |
-| M1 | CI feedback is truthful and green | In progress: TR1b (PR 4) and TR1a (PR 5) merged 19 October 2026; TR4 current for `logical_activation_nested`; then TR2 inventory |
+| M1 | CI feedback is truthful and green | In progress: TR1b (PR 4) and TR1a (PR 5) merged 19 October 2026; TR4 current for `logical_activation_nested`; TR4b next for `logical_nested_native`; then TR2 inventory |
 | M2 | Simulated time wherever protocol time is simulated | Planned across TR1–TR11 |
 | M3 | Isolation: no cascades or collisions | In progress in TR1; remaining fixtures through TR15; binding-seam/host-policy limit remains |
 | M4 | Real-time tests bounded by events and ratios | Planned TR12–TR16 |
@@ -37380,8 +37381,9 @@ cancels stale pull-request runs; push-to-main runs remain uncancelled.
 | --- | --- | --- | --- | --- | --- |
 | TR1b | Done: merged 19 October 2026 (PR 4) | Exposes all CI failures, isolates the port ladders through one shared lease pool, and makes accept mode explicit | Architect classification; existing native startup contracts | Final-source parent-versus-PR matrix (recorded below: ports parent 26 → PR 0); round-3 fixes; fmt/four strict Clippy profiles; runner and two reviews | M1, M3 |
 | TR1a (R1) | Done: merged 19 October 2026 (PR 5) | Replaces activation-driver fixture time and poison cascades on the shared TR1b pool | TR1b lease and CI visibility; existing injected clock contracts | Parent-versus-PR matrix for `logical_activation_driver`; fmt/four strict Clippy profiles; runner and two reviews | M1, M2, M3 |
-| TR4 | Current: PR 11 open (branch `ci/tr4-nested-deterministic-time`; proof recorded below) | Removes every wall-clock dependence in `logical_activation_nested` (the 15 s close-drain `cluster.rs:216`, `business.rs:43/58` and the other 15 s / 10 s / 90 s waits) by putting the binary on TR1a's `SimClock` and hold rule, and proves a failing test cannot poison the rest of the binary | TR1a `harness` (`SimClock`, `FixtureClock`, `Observed`, `Wait`, `HangGuard`); TR1b `serial()` and port pool | Schema plan below; every assertion kept; E1 ×10, `--test-threads=1` ×1, E3 ×10, two simultaneous copies ×3 (cores 0-3, no retries); driver binary once; fmt and four strict Clippy profiles | M1, M2, M3 |
-| TR2 | Next, after TR4 | Inventory all newly visible failures, ratchet hardware dependencies, probe retained-action exhaustion | TR1 CI visibility and deterministic fixture clocks | All configurations/binaries inventoried; std-only ratchet; idle-leader probe result and ranked follow-ups recorded | M1, M2, M5 |
+| TR4 | Current: PR 11 open, review round 2 (branch `ci/tr4-nested-deterministic-time`; proof recorded below) | Removes every wall-clock dependence in `logical_activation_nested` (the 15 s close-drain `cluster.rs:216`, `business.rs:43/58` and the other 15 s / 10 s / 90 s waits) by putting the binary on TR1a's `SimClock` and hold rule, including the dial work of bridge-borrowed children (round 2), and proves a failing test cannot poison the rest of the binary | TR1a `harness` (`SimClock`, `FixtureClock`, `Observed`, `Wait`, `HangGuard`); TR1b `serial()` and port pool | Schema plan below; every assertion kept; borrowed-dial hold test and its blind-clock control; E1 ×10, `--test-threads=1` ×1, E3 ×10, two simultaneous copies ×3 (cores 0-3, no retries); driver and voter binaries once; fmt and four strict Clippy profiles | M1, M2, M3 |
+| TR4b | Next, after TR4 | Puts `logical_nested_native` on the same clock: its wall-clock fixture time and 90 s / 30 s real-time watchdog become protocol time; its parent recorded 20 failing tests under E3 (TR1b proof below) | TR4 merged (`DialWork`, generic `Observed::bridge`, the reporting-connector pattern); TR1b port pool | Every wall wait converted with the same number and message; E1 ×10, `--test-threads=1` ×1, E3 ×10, two simultaneous copies ×3 (cores 0-3, no retries); other harness binaries once; fmt and four strict Clippy profiles | M1, M2 |
+| TR2 | Next, after TR4b | Inventory all newly visible failures, ratchet hardware dependencies, probe retained-action exhaustion | TR1 CI visibility and deterministic fixture clocks | All configurations/binaries inventoried; std-only ratchet; idle-leader probe result and ranked follow-ups recorded | M1, M2, M5 |
 | TR3 | Planned | Quiescent pacing and logical-voter family isolation | TR2 inventory; read-only backing usage seam L1; existing readiness contracts | Logical voter/network suites and activation driver re-proved, including disk contention; TestDir adopted locally | M2, M3 |
 
 ### TR1b schema plan (18 October 2026, before editing)
@@ -38270,12 +38272,25 @@ binary.
   protocol time moves only while no node has durable or dial work in flight
   and nothing changed, so QUIC's own close and idle timers fire after the same
   protocol interval on any host.
-- Equivalence: a protocol-time bound is the same liveness claim the wall bound
-  made on an infinitely fast host (one idle round costs at least 1 ms of real
-  time, so protocol time never runs ahead of real time); it is stronger where
-  the old wall bound passed only because real time ran ahead (more heartbeats,
-  elections and retained actions on a slow host). Hangs still fail, through the
-  hang guard, with the clock's hold state.
+- Equivalence *(corrected in round 2; the first version claimed that an idle
+  round costs at least 1 ms of real time, so protocol time never runs ahead of
+  real time. That is false: `park_timeout` has no minimum duration, a
+  `ThreadWake` unpark or a spurious wake returns early, and the restore `claim`
+  loop did not park at all)*: the argument does not rely on real time. Every
+  liveness bound keeps its number, now counted in protocol time, and protocol
+  time advances only in an idle round: no durable worker I/O or child dial
+  pending anywhere in the test (round 2 adds the bridge-borrowed children's
+  dials), and no observed replica or application state change. Provider latency
+  (disk, dial worker, thread scheduling) therefore adds rounds but no protocol
+  time, so a bound is a claim about how many idle protocol milliseconds the
+  protocol needs, not about real time. Real time only decides how many rounds
+  run per second; the 1 ms park is a CPU yield, not a measure. This deliberately
+  changes the property tested: a close that needed more than 15 s of real disk
+  or CPU time while time was held used to fail and now passes, while a close
+  that needs more than 15 s of idle protocol time (timers, retransmission, QUIC
+  close periods) still fails. A wait whose hold never clears, or whose state
+  changes every round forever, stops protocol time and fails through the
+  separate 600 s real-time hang guard, with the clock's hold state.
 - Ownership: the test owns the clock; clones are handles to one `Rc` state.
   The guard on `HISTORY` stays per test. Port leases are unchanged (TR1b).
 - Failure and cleanup: a panicking test drops its clusters, leases and
@@ -38294,12 +38309,19 @@ The new per-peer drain diagnostic named the state: node 14's last session to
 node 13 was `Closing`, flushed, close started, with a live close timer at
 `MonoTime(21159)`, 1.4 s after the 15,000 ms bound expired at `MonoTime(19736)`. The
 close was running, just very long. quinn sets the close timer to
-`now + 3 × (srtt + 4·rttvar + max_ack_delay)` (`quinn-proto` 0.11.9,
-`set_close_timer`). `finish_clusters` checkpointed and closed the five child
+`now + 3 × pto(highest_space)`, and for the data space
+`pto = srtt + max(4·rttvar, 1 ms) + max_ack_delay` *(citation corrected in
+round 2; the lock pins `quinn-proto` 0.11.19: `set_close_timer` at
+`src/connection/mod.rs:3494-3497`, `pto` at `:1920-1926` (no `max_ack_delay`
+for the Initial and Handshake spaces), `RttEstimator::pto_base` at
+`src/connection/paths.rs:331-333`, `TIMER_GRANULARITY` = 1 ms at
+`src/lib.rs:334`; the RTT update is at `paths.rs:335-354`)*. `finish_clusters` checkpointed and closed the five child
 clusters one after another, so each later cluster sat unpolled while shared
 protocol time advanced. A packet in flight across that gap returns one RTT
-sample of the whole gap G, adding about G to `4·rttvar`, so the close period
-grows to about 3.4 G: a gap of about 4.4 s is enough to exceed 15 s. The last cluster
+sample of the whole gap G: the update sets `rttvar ← (3·rttvar + |srtt − G|)/4`
+and `srtt ← (7·srtt + G)/8`, so for G much larger than the earlier RTT,
+`4·rttvar` gains about G and `srtt` about G/8, and the close period grows to
+about 3 × 1.125 G = 3.4 G: a gap of about 4.4 s is enough to exceed 15 s. The last cluster
 (slot 4, both failures) has the longest gap, the sum of the earlier closes.
 Under wall-clock time the gaps grow with load, which explains the higher rate
 recorded in PRs 4 and 5. This is a fixture defect inside this binary, not a
@@ -38411,4 +38433,102 @@ Remaining classes, assigned elsewhere:
   still leave those clusters unpolled for their duration (short, followed by
   long all-cluster phases). Making the lower host poll unborrowed clusters
   would need the L1 bridge seam (TR3).
-- Dial work of bridge-borrowed nodes stays invisible to the hold rule (L1, TR3).
+- Dial work of bridge-borrowed nodes was invisible to the hold rule at
+  `ad81e1f3`; closed for this binary in round 2 (below).
+
+#### TR4 round 2 (19 October 2026)
+
+Review of `2f2590b9` (code `ad81e1f3`): Claude Opus 5.5 approved with docs
+findings; GPT-6.1-Sol requested changes on one code-level P2.
+
+Schema plan (before editing):
+
+- Data/API: the shared harness gains `DialWork`, a shared count of child dial
+  attempts waiting for their worker, held by each `SimClock`
+  (`SimClock::dial_work()`); `SimClock::round` adds it to the round's own
+  `Observed` dial count. It stays zero in the driver and voter binaries, whose
+  clock semantics are otherwise unchanged. `Observed::bridge` becomes generic
+  over the bridge's child type (its body is unchanged). In the nested binary,
+  `dials::Probed` wraps each child node's `NativeServiceConnector`
+  (`ChildNode = NativeNode<LogicalApplication, Probed>`), installed by
+  `dials::probe` on the selected native parts before `Node::from_parts`.
+- State transitions: an attempt enters and leaves the connector's `Dialing`
+  stage only inside `submit`, `cancel`, `poll` and `close`, so the wrapper
+  reports `usage().dialing` after each of those calls (replacing its own
+  previous contribution) and the count is exact between calls. Every round of
+  the test's clock, wherever it is taken, therefore holds while any child
+  dial is pending, including on nodes a bridge borrows.
+- Ownership: each cluster owns a `DialControl` (dial outcome counts and a
+  test-only switch that withholds its connectors' polls, off by default);
+  each wrapper owns its contribution to `DialWork` and withdraws it on drop.
+- Failure and cleanup: `Probed::into_dialer` hands back the drained
+  connector's dial worker as before (`cleanup::join` and the aborted
+  target's join are unchanged). A contribution that never clears freezes
+  protocol time and fails through the 600 s hang guard, as every hold does.
+- Acceptance: a test that keeps a borrowed child's dial pending for more
+  rounds than the attempt deadline sees no protocol time pass and every dial
+  connect afterwards; a control proves the same dials are lost on a clock that
+  does not see them; the full matrix again on the new code.
+
+| Finding | Change | Test | Proof |
+| --- | --- | --- | --- |
+| Sol P2: borrowed native dial work must hold the clock (`lower.rs:70-72`) | `harness.rs`: `DialWork`, `SimClock::dial_work`, round adds it; generic `Observed::bridge`. New `dials.rs`: reporting connector wrapper and `DialControl`; `cluster.rs`: `ChildNode` uses it, `Cluster::unelected` opens without polling; `abort.rs` recovery alias. No `src/` change: the bridge exposes only local parts, but the native parts accept any `PeerConnector` before `Node::from_parts`, so the observation point is a test-side wrapper | `borrowed_dials::tcp_borrowed_child_dial_holds_protocol_time`: one TCP cluster borrowed through `Lower`, connector polls withheld after the first round submits its dials (a dial worker's completion not yet collected), then `connect_timeout_ms` + 1 rounds: protocol time does not move in any of them; released, every submitted dial connects and none is lost. `…_is_lost_on_a_clock_blind_to_it`: the same withheld dials on a clock that does not see the reports pass their deadline and are lost. Mutation check (not committed): with the `DialWork` term removed from `SimClock::round`, the hold test fails in round 0 (`protocol time MonoTime(1) … dialing=0`) | All matrix runs below, 17/17 |
+| Opus P3-1 and Sol P3: "protocol time never runs ahead of real time" is not exact | Restore `claim` loop (`cold_joint/restore.rs`) parks 1 ms like every other loop, as a CPU yield. The equivalence paragraph in the schema plan above is rewritten as a protocol-time argument that uses no minimum park | — | — |
+| Sol P3: quinn citation | Corrected to the locked 0.11.19 with file and line, and the `max(4·rttvar, 1 ms)` term (amendment above) | — | — |
+| Opus P2-1: TR4b not in the plans; row "Following TR2/TR3" out of date | TR4b rows in both mini plans and the M1 status; the "Following TR2/TR3" row now names `logical_nested_native` and the other binaries' borrowed dials | — | — |
+| Opus P3-2: margin and residual variation | `Cluster::wait_all` prints each wait's protocol time on success (`native logical child wait: stage=…; elapsed_ms=…`, shown with `--show-output`) | — | Margins below |
+
+Proof on `9659076a` (code; the docs commit follows), all features, built with
+`taskset -c 0-3 nice -n 19 cargo +stable test -j 2 --locked --offline
+--all-features --no-run`, each run `taskset -c 0-3 nice -n 19 BIN
+--show-output` (nice 15; affinity mask `f` and nice recorded at the top of
+each log from E1 run 6 on; runs 1-5 used the same command). E3: three owned
+`taskset -c N nice -n 19 sh -c 'while :; do :; done'` on CPUs 1, 2, 3,
+measured at 91.5-100 % CPU each before every run and killed and confirmed gone
+after it. Every execution is recorded; nothing was rerun. Lines matching
+`AddrInUse`, `Address already in use`, `PoisonError`, `hang-guard` or
+`hang guard` in all 29 logs: 0.
+
+| Env | Runs | Result | libtest time (s) |
+| --- | --- | --- | --- |
+| E1 | 10 | **10/10 runs 17/17** | 91.2, 91.4, 90.7, 90.2, 89.7, 89.7, 90.4, 95.7, 95.8, 97.3 |
+| E2 `--test-threads=1` | 1 | **17/17** | 98.1 |
+| E3 (3 burners) | 10 | **10/10 runs 17/17** | 107.0, 104.0, 103.7, 105.8, 127.5, 110.6, 101.6, 103.3, 102.3, 109.0 |
+| E4 two copies | 3 pairs | **6/6 copies 17/17** | 96.9/97.0, 95.0/95.1, 97.8/98.6 |
+| `logical_activation_driver` E1 | 1 | 35/35 | 25.2 |
+| `logical_voter_native` E1 | 1 | 42/42 | 9.6 |
+
+Protocol time used per wait stage, largest across all 27 nested runs (each
+stage is logged once per `wait_all` call, including single-cluster calls):
+
+| Stage | Bound (ms) | Waits logged | Largest `elapsed_ms` |
+| --- | --- | --- | --- |
+| `CloseDrained` | 15,000 | 540 | **91** (slots 0-3); the largest per run was 88 in 25 runs, 87 and 91 once each |
+| `CheckpointPublished` | 90,000 | 324 | **0**: publication is durable snapshot work, which holds time until it completes |
+| `CloseCatchUp` | 15,000 | 540 | 2 |
+| `CheckpointCatchUp` | 15,000 | 324 | 1 |
+| `Election` | 15,000 | 1,620 | 121 |
+
+Residual run-to-run variation. The 1-of-8 failure at `cf6029d2` was not the
+dial gap closed here: it failed on QUIC, and the QUIC connector never reports
+dial work (`src/native/quic_connect.rs:245-255` leaves `dialing` at its
+default 0; there is no dial worker). It was the sequential-cluster gap that
+`ad81e1f3` removed (amendment above); with lockstep clusters the largest
+close used 91 ms of the 15,000 ms bound, and the signature did not recur in
+the 30 final runs of round 1, the reviewers' runs or the 27 runs here. What
+still varies between runs is which round collects a worker completion or a
+loopback packet. Holds stop time while durable or dial work is pending, but
+socket delivery between polls is not a hold signal, so a datagram or segment
+not yet delivered when a round starts lets that idle round advance 1 ms, and
+the order of later events can shift by a few rounds. This is the likely
+source of the 87-91 ms spread of the largest close above (not instrumented);
+the spread is two orders of magnitude inside every bound.
+
+Remaining after round 2:
+
+- TR4b (`logical_nested_native`), now in both mini plans.
+- The driver and voter binaries' bridge-borrowed children still hide their
+  dial work (their `ChildNode` keeps the plain connector); TR3 can reuse
+  `DialWork` with the same wrapper.
+- Single-cluster waits while other clusters are borrowed by the lower host
+  still leave those clusters unpolled for their duration (unchanged).
