@@ -757,9 +757,9 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done in review: PR 10 round 2, review fixes and singleton overhead (head 46e1ffb4) | Both reviews requested changes: a narrow Append from a wide shared backing was charged the whole backing, so entries recovered from a checkpoint could exceed every outbound budget and never replicate (P1, narrowed by round 2 and closed by round 3); the wire decoder froze 16+ mixed entries with an uncharged index (P2); an empty view charged an owned batch by capacity (P2); and both singleton cells stayed above +1% against main. Bound what an Append pins, charge the decoded index before allocating it, charge empty-view appends as the log holds them, and remove what singleton overhead the library and PR 10's own harness edits still add | PR 10 round 1 (head 6fecd1fb) and both reviews | Recover-then-replicate test under default limits (fails before the fix); narrow-message and hidden-charge bound tests; wire budget at exact/one-below for widths 15/16 uniform/mixed and shared source subranges; empty-view charge test; restored spare-capacity checks; asserted composed sizes; fmt, four strict root Clippy builds and the matched workspace; default and all-features suites; driver widths 1/231/515 on Linux (exact x86 counts) and the Mac; quiet-Mac 5 pairs × 4 cells against b72d1ee3; attribution controls | T4 |
 | Done: runner re-measured the composed V2+V3a+V3b+V3b-s head (65bb5041 vs main b72d1ee3, quiet Mac, H2 rule, 5 pairs: bulk-16 −12.1%, bulk-1 −13.8%, single-16 +2.0%, single-1 +2.2%; singleton regression accepted by the user on 19 October 2026) | The stack now carries V2 (merged main b72d1ee3); the runner measures all four cells of PR 10's head against the H2 main baseline. The remaining singleton excess (V3a staging, a harness effect-loop copy that V3b's types trigger) is re-profiled on the composed tree before any further slice | V2 merged; PR 10 merged with main | Framework pairs on all four cells against the H2 baseline; compaction/snapshot suites | T4 |
 | Done V3c profile: whole-cost profile of the merged V2+V3 tree (`target/claude/research-r4/v3c-profile.md`) | Choose the next whole cost class from a fresh profile instead of adding helpers | V3 merged (`d379783d`) | Re-baseline recorded below; ranked slices with arithmetic | T4 |
-| Current V3c: host-owned effect sink and `ProposalBatch::push` fix (branch `cpu/effect-sink`) | Every core call returns a fresh `Vec<Effect>` built from nested per-function Vecs, and the matched actor grows and frees a `VecDeque` per call: at width 1 about 30 allocations per write, 9 of them effect vectors (profile §4), ≈ 628 ns/write of allocator time in single-1. The host owns one reusable queue that the core fills in place (`step_into`, `propose_entries_into`, `persist_volatile_into`); the Vec APIs become wrappers. Ride-along: `push` built and dropped an `Exhausted` error on every success (bulk ≈ 1.4%) | Profile above; V3 merged | Effect-sequence oracle (Vec vs sink forms over the twin histories, FIFO insertion of committed intervals); rollback with sentinel effects on refused steps, stale tokens and fenced cores; reused queue keeps its capacity and allocation with no stale effects over 1,000 width-1 rounds; existing effect-order, twin, golden and facts oracles unchanged; driver widths 1/231/515 with allocation counts; quiet-Mac 5 pairs × 4 cells against `d379783d`; attribution controls; fmt, four strict root Clippy builds and the matched workspace | T4 |
-| Next V3d: per-step recomputation | `effect_reservation` rebuilds and compares `LogMetadata` twice per harness step, plus other metadata compares (profile slice 2: single-1 −2.4 to −3.5%) | V3c (same `raft.rs` chain) | Reservation equals the old value over histories; quiet-Mac pairs | T4 |
-| Following V3e: peer slots | Outstanding replication per peer in a fixed slot instead of a `BTreeMap` emptied and refilled each round; stack-bounded `peers()` and quorum frontier (profile slice 3: single-1 −2.3 to −3.1%) | V3d | Replication/frontier oracles; quiet-Mac pairs | T4 |
+| Done in review V3c: host-owned effect sink and `ProposalBatch::push` fix (branch `cpu/effect-sink`, code head 783265a4; quiet Mac vs `d379783d`, 5 pairs: bulk-16 −1.4%, single-16 −4.7%, bulk-1 −2.1%, single-1 −9.5% CPU per write; driver width 1 −13.2%, allocations 30 → 15 per write) | Every core call returns a fresh `Vec<Effect>` built from nested per-function Vecs, and the matched actor grows and frees a `VecDeque` per call: at width 1 about 30 allocations per write, 9 of them effect vectors (profile §4), ≈ 628 ns/write of allocator time in single-1. The host owns one reusable queue that the core fills in place (`step_into`, `propose_entries_into`, `persist_volatile_into`); the Vec APIs become wrappers. Ride-along: `push` built and dropped an `Exhausted` error on every success (bulk ≈ 1.4%) | Profile above; V3 merged | Effect-sequence oracle (Vec vs sink forms over the twin histories, FIFO insertion of committed intervals); rollback with sentinel effects on refused steps, stale tokens and fenced cores; reused queue keeps its capacity and allocation with no stale effects over 1,000 width-1 rounds; existing effect-order, twin, golden and facts oracles unchanged; driver widths 1/231/515 with allocation counts; quiet-Mac 5 pairs × 4 cells against `d379783d`; attribution controls; fmt, four strict root Clippy builds and the matched workspace | T4 |
+| Current V3d: per-step recomputation | `effect_reservation` rebuilds and compares `LogMetadata` twice per harness step, plus other metadata compares (profile slice 2: single-1 −2.4 to −3.5%) | V3c (same `raft.rs` chain) | Reservation equals the old value over histories; quiet-Mac pairs | T4 |
+| Next V3e: peer slots | Outstanding replication per peer in a fixed slot instead of a `BTreeMap` emptied and refilled each round; stack-bounded `peers()` and quorum frontier (profile slice 3: single-1 −2.3 to −3.1%) | V3d | Replication/frontier oracles; quiet-Mac pairs | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
 | Done C15: batched admission uses the pending bound | Same fast path for ready batches | C14 | Linux/Mac pairs; suites | T4 |
 | Done C14: proposal validation from a pending bound | Admission no longer scans every pending command when the count already settles it | — | Linux/Mac pairs; unit test; suites | T4 |
@@ -1906,6 +1906,109 @@ from `11adcb33` (main after the `d379783d` re-baseline).
   capacity and allocation, and every drain leaves it empty. Driver allocations
   per write at width 1 fall from 30 to the count recorded below; the four-cell
   gate and attribution controls as in the brief.
+
+#### V3c implemented: host-owned effect sink (19 October 2026)
+
+Commits `7ca201d2` (effect sink, matched actor, oracle tests) and `783265a4`
+(`ProposalBatch::push` ride-along) on `cpu/effect-sink`, as planned above.
+
+- **Public API change (additive; nothing removed).** `Raft::step_into(event,
+  &mut VecDeque<Effect>) -> Result<(), RaftError>`,
+  `Raft::propose_entries_into(batch, &mut VecDeque<Effect>) -> Result<(),
+  RaftError>` and `raft::persist_volatile_into(raft, log, persist, out) ->
+  Result<Option<EntryRange<'a>>, RaftError>`. `step`, `propose_entries`,
+  `propose_batch` and `persist_volatile` keep their signatures and results and
+  now wrap the sink forms.
+- **Matched harness.** The VoteBoat actor change is effect plumbing only: one
+  owned `queue`, the `_into` calls, an in-place drain, and the committed
+  interval inserted at the pre-call length when earlier work is queued (the
+  order `into_owned` produced). Collection, batching, reply delivery,
+  attribution phases and the OpenRaft engine are unchanged.
+- **Native runtime: not moved (difference from the brief).** `Stepped.result`
+  is a public owned `Vec<Effect>`, and the effect owner charges each visit's
+  queue against its memory reservation by capacity and drops the queue when a
+  visit drains (`effects = VecDeque::new()`). Reusing one queue across visits
+  changes that budget contract and the public visit API, and no T4 cell
+  measures it. It keeps the Vec wrappers, which already gain the removed
+  nested Vecs (one top-level allocation per step remains). A later slice can
+  move it with a reservation review.
+- **Tests.** `tests/volatile.rs`: `sink_forms_match_vec_forms_over_the_twin_histories`
+  (both twin scripts through `step`/`propose_batch`, through
+  `propose_entries`, and through the sink forms with two sentinel effects
+  queued ahead of every call; equal traces, states, roles, fences and
+  applications; committed intervals inserted behind queued work),
+  `refused_sink_calls_keep_earlier_effects_and_match_the_vec_forms`
+  (NotLeader, Busy, stale token and fenced core leave exactly the sentinels and
+  the Vec path's state) and
+  `reused_sink_queues_keep_their_allocation_and_hold_nothing_between_calls`
+  (1,000 width-1 rounds after warm-up: same capacity and buffer, empty after
+  each drain). Existing effect-order, volatile/durable twin, byte-golden and
+  facts-vs-scan tests are unchanged and pass. `ProposalBatch` refusal tests
+  return the same errors.
+
+Deterministic driver (`R3_DRIVE`, one thread, `research-r4/tools-r4/drive.py`;
+the counter build adds `counters.py` with its receive-step hook moved to the
+new `drain` call), quiet Mac, 3 interleaved pairs, medians:
+
+| Width | ns/write | instructions/write | cycles/write | allocations/write (bytes) |
+| ---: | ---: | ---: | ---: | ---: |
+| 1 | 4,064.5 → 3,527.4 (−13.2%) | 59,448 → 52,467 (−11.7%) | 12,784 → 11,121 (−13.0%) | 30.03 (12,138 B) → 15.03 (715 B); reallocs 1.00 → 0 |
+| 231 | 101.4 → 95.3 (−6.0%) | 1,906.2 → 1,796.8 (−5.7%) | 380.2 → 356.9 (−6.1%) | 1.398 (198 B) → 1.332 (149 B) |
+| 515 | 92.5 → 89.3 (−3.5%) | 1,981.4 → 1,877.3 (−5.3%) | 393.9 → 384.2 (−2.5%) | 1.334 (171 B) → 1.305 (149 B) |
+
+Width 1 met the expected ≈ −14% within noise. The profile's stretch target of
+≤ 8 allocations per write was not reached: the 15 left are messages, entry
+batches, the client's request and reply, and replication bookkeeping
+(V3e's per-round `BTreeMap`), not effect storage.
+
+Gate: `target/claude/tools/fwmac.sh d379783d 783265a4 5` (quiet Mac, five
+interleaved pairs, whole-process CPU per completed write):
+
+| Cell | `d379783d` ns/write | V3c ns/write | Change | Pair ratios | Expected |
+| --- | ---: | ---: | ---: | --- | ---: |
+| bulk 4096/4, 16 workers | 217 | 214 | −1.4% | 0.97 0.99 1.02 0.98 0.99 | −1.0 to −1.4% (+ push −1.4 to −1.9%) |
+| singleton 1/1, 16 workers | 22,670 | 21,613 | −4.7% | 0.95 0.95 0.95 0.95 0.98 | −2.2 to −2.8% |
+| bulk 4096/4, 1 worker | 190 | 186 | −2.1% | 0.97 0.98 0.99 0.97 1.02 | −1.2 to −1.4% (+ push −1.3 to −2.0%) |
+| singleton 1/1, 1 worker | 12,910 | 11,687 | −9.5% | 0.93 0.91 0.89 0.90 0.91 | −3.9 to −4.9% |
+
+Rates rose 2.7%, 5.6%, 1.5% and 16.7%. Singleton cells beat their estimate
+(the profile counted only allocator time; the removed moves, frees and the
+harness's per-call deque also count). Bulk gains are at or below the summed
+estimate; their pairs keep one sign in 4 of 5.
+
+Attribution controls (`--attribution true`, one run per cell per revision;
+bulk-1 and bulk-16 repeated 3 more times each; 0 phase failures and equal
+final frontiers everywhere):
+
+| Cell | Leader persists | Leader batches (max width) | Follower persists | Follower sends |
+| --- | --- | --- | --- | --- |
+| single-16 | 264,195 → 264,195 | 132,096 → 132,096 (1 → 1) | 242,925 / 248,595 → 241,159 / 248,409 | 242,967 / 248,648 → 241,197 / 248,462 |
+| single-1 | 264,195 → 264,195 | 132,096 → 132,096 (1 → 1) | 241,911 / 259,484 → 244,897 / 257,858 | 241,946 / 259,541 → 244,932 / 257,915 |
+| bulk-16 (4 runs) | 14,477–14,673 → 14,737–15,005 | 8,696–8,784 → 8,817–9,230 | ≈ 5,790–5,980 each, both | ≈ 6,800–7,050 each, both |
+| bulk-1 (4 runs) | 20,164–23,244 → 27,272–28,922 | 15,232–18,254 → 22,265–23,964 | 1,875–5,930 → 5,427–5,916 | 6,695–21,612 → 6,556–9,425 |
+
+- Singleton: leader persists exactly 264,195 at width 1 in both revisions.
+  Follower totals differ by −0.4% (16 workers) and +0.3% (1 worker); single-1's
+  first follower moves +1.2% while the other moves −0.6%. The split between
+  followers is scheduling (the earlier profile's base run had 244,562 for that
+  follower, 1.1% from this base run), not a change in work.
+- Bulk-16: leader batches +2 to +5%, persists +2%, followers unchanged; within
+  the ±15% single-run spread.
+- Bulk-1: outside the ±15% spread. The candidate's leader forms about 38% more,
+  narrower proposal batches (mean width ≈ 170 vs ≈ 235) and persists about 30%
+  more often. With one shared server worker, a cheaper core call returns the
+  leader to collection sooner, so fewer requests wait per batch; the collection
+  code and its limits are unchanged. Followers do the same work (the base's
+  bimodal 1.9k/21k follower runs are scheduling). The gate's −2.1% includes
+  these extra leader rounds, so it understates the per-round saving.
+
+Checks (Linux, cores 0–3): `cargo +stable fmt --all -- --check` and matched fmt;
+strict Clippy with default, `--all-features`, `--no-default-features` and
+`--no-default-features --features native`, and the matched workspace, zero
+diagnostics; `cargo test --lib --test volatile --test snapshot --test raft
+--test log_owned --test worker --test runtime` in default (525 lib + 189) and
+all features (527 lib + 189), one configuration at a time; matched tests 75/75
+(default and all features).
 
 #### H2 round 2: review fixes (19 October 2026)
 
