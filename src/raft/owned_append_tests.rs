@@ -119,10 +119,11 @@ fn delayed_completion(receiver: &mut Raft, effects: &[Effect]) -> Vec<Effect> {
 
 fn check_independent_pending(receiver: &Raft, effects: &[Effect]) {
     let original = update(effects);
-    let pending = receiver.pending.as_ref().unwrap().next.update();
-    assert_eq!(original, pending);
+    let pending = &receiver.pending.as_ref().unwrap().next;
+    assert_eq!(*original, pending.update());
+    assert!(pending.matches_update(original));
     let raw = original.suffix.as_ref().unwrap();
-    let owned = pending.suffix.as_ref().unwrap();
+    let owned = pending.suffix().unwrap();
     // A small batch is an owned value, so the store's input and the core's
     // plan are independent copies; a wide one would share its backing.
     assert_eq!(

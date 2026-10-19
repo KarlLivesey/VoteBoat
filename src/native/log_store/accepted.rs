@@ -185,8 +185,14 @@ impl Accepted {
                             append.check_install(current)?;
                             self.install_owned_append(group, append)?;
                         }
+                        // plan_owned never yields the core's scalar plan.
+                        OwnedChange::Commit(_) => {
+                            return Err(StorageError::Rejected(
+                                "commit advance plans are core-private",
+                            ));
+                        }
                         OwnedChange::Other { next, update } => {
-                            self.install_update(durable, group, next, update)?
+                            self.install_update(durable, group, *next, update)?
                         }
                     }
                 }

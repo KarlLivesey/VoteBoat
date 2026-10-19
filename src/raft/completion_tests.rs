@@ -304,7 +304,7 @@ fn snapshot_install_completion_suppresses_committed_output_until_application_ins
                     suffix: None,
                     snapshot: Some(reference),
                 },
-                After::SnapshotInstall(reference),
+                After::SnapshotInstall(Box::new(reference)),
                 Some(response),
             )
             .unwrap();
@@ -416,15 +416,15 @@ fn borrowed_retirement_keeps_committed_first_and_all_announcements_afterward() {
     assert!(borrowed.progress.is_empty());
 }
 
-struct ModeledStore {
-    binding: StoreBinding,
+pub(super) struct ModeledStore {
+    pub(super) binding: StoreBinding,
     states: BTreeMap<GroupIdentity, GroupLog>,
     batch: u64,
-    fail_barrier: bool,
-    submissions: usize,
+    pub(super) fail_barrier: bool,
+    pub(super) submissions: usize,
 }
 impl ModeledStore {
-    fn new(core: &Raft) -> Self {
+    pub(super) fn new(core: &Raft) -> Self {
         Self {
             binding: core.binding,
             states: [(core.state().bootstrap.group, core.state().clone())]

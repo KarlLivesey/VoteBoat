@@ -31,7 +31,7 @@ fn persist_effect_captures_raw_proposal_once_and_pending_shares_exact_immutable_
             .next_multiple_of(std::mem::align_of::<std::sync::atomic::AtomicUsize>().max(2))
     );
     let next = &core.pending.as_ref().unwrap().next;
-    let owned = next.update().suffix.as_ref().unwrap();
+    let owned = next.suffix().unwrap();
     let EntryPayload::Command { bytes, .. } = &owned.entries[0].payload else {
         unreachable!()
     };

@@ -43,11 +43,11 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done H2: ready-snapshot collection in the matched harness (merged 8b3c1e6c; main re-baselined) | The VoteBoat actor cut each proposal pass as soon as a peer message was queued, so batch width tracked follower reply latency and any faster replication path paid extra wake/park rounds at 16 workers (V3b: rounds 7.7k → 17.3k, sys 30 → 50 ns/write). A pass now takes only the requests queued when it starts; peer progress arriving during it is handled before the next pass. This changes the instrument for VoteBoat's actor only | H1 merged (`30a1f6c5`); researcher note `target/claude/research-r3/v3b-regression.md`. Next steps in order: merge V2 (PR 3); merge H2 and re-baseline main under it; V3b-s (width-1 per-round overhead); then re-measure V3a/V3b rebased on V2 | Actor tests that a mid-pass peer message neither truncates the pass nor waits past the next pass, and that a request queued after the pass reads its ready count waits for the next pass; existing deferral/capacity tests; 73 matched tests; root and matched fmt; matched and four root strict Clippy builds; quiet-Mac 5 interleaved pairs × 4 cells against `30a1f6c5`; attribution parity controls side by side; main re-baselined before any later gate | T4 |
 | Done H1: server worker flag (merged `30a1f6c5`) | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`) | Matched source byte-identical to flag-only `297aec15`; matched tests; both fmt checks and five strict Clippy configurations; independent review | T4 |
 | Done V1: core-canonical volatile log (merged 041fc3fb; Mac −18.8% bulk, −16.3% singleton CPU/write) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
-| Done V2: scalar commit-advance plan and smaller `Pending` (PR 3, merged 19 Oct 02:32 UTC) | Commit-only rounds no longer build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices (Mac singleton −4.1%, old rule) | V1 | Full suites and both reviews before merge | T4 |
-| In review V3b-s: width-1 per-round overhead of shared batches (`cpu/shared-batches-s`, stacked on V3a/PR 6 and V3b) | V3b's shared batches cost singletons +6.3% driver instructions and +4–5% whole-process CPU per write (research `target/claude/research-r3/v3b-regression.md`), all in per-round code paths, copies and inlining around one-entry batches. Remove that overhead without losing V3b's −13% bulk gain: one-piece fast paths for owned batches and the last log piece, general paths out of line, no install-chain inline hints, and 24-byte pieces so `Suffix`/`LogUpdate` return to main's size | V3a (PR 6), V3b (`cpu/shared-batches` 91ab285d), H2 merged (main 65fe6701) | Driver width-1 instructions and time vs main and V3b at widths 1/231/515; quiet-Mac 5 pairs × 4 cells vs main 65fe6701 and vs V3b merged with main; singleton attribution floor (leader persists 264,195, width 1); oracle tests for every owned fast path; facts-vs-scan, selection, validator and charge oracles unchanged; fmt, four strict root Clippy builds and the matched workspace | T4 |
-| Following V3a/V3b/V3b-s rebased on V2 and re-measured | V2 merged; the orchestrator rebases the stack and re-measures all four cells against the H2 main baseline. The remaining singleton excess (V3a staging, a harness effect-loop copy that V3b's types trigger) is re-profiled on the composed tree before any further slice | V2 merged; V3b-s reviewed | Framework pairs on all four cells; compaction/snapshot suites | T4 |
-| In review V3a: direct entry staging (PR 6, round 2) | Proposals are built twice: the host stages a `Vec<Proposal>` and `propose_batch` scans it twice and collects a second `Vec<LogEntry>` (3.3% of bulk process CPU, plus the host's staging Vec). A bounded `ProposalBatch` builder creates final-shaped entries once and does its budget accounting while inserting; `Raft::propose_entries` stamps index/term in place and hands the same Vec to the existing planner | V1 (design: `target/claude/research-r1/architect-plan-pr3x.md` §§1, 2.2, 3.1, 3.12) | Builder/legacy equivalence at widths 1/2/max, cross-core and old-term builders, failed-push and drop cleanup, allocation-survival, last-index boundary and legacy-boundary tests; harness collection on the builder with unchanged receipt/attribution counts; fmt + strict Clippy (four configurations and the matched workspace); runner pairs on both framework cells (pending) | T4 |
-| In progress V3b: shared frozen batches with validation reuse | The batch V3a stages becomes one immutable shared batch (`Arc` backing plus facts computed once) carried by `Suffix`, `Rpc::Append`, the pending plan and a chunked canonical `EntryLog`; planning, follower validation, fan-out selection, ingress costing and install use the cached facts, removing the per-peer `to_vec`, the install/compaction record moves and the repeated per-entry validation/accounting walks (profile-r2-pr1 §§3, 5: ~19% of bulk process CPU, overlapping classes) | V3a (PR 6 branch `cpu/entry-staging`; design `architect-plan-pr3x.md` §§2.3–2.8, 3, 4) | Facts-versus-scan oracle over subranges and multi-span joins; fast/slow validator equivalence and the old rejection conditions; prefix selection oracle against the old loop; overlap content checks across distinct allocations; old RPCs keep their contents after truncate/compaction; retained charge equals a fresh oracle; wire/WAL byte goldens captured before encoder edits; durable, native, compaction and snapshot suites unchanged in meaning; harness width/persist/send parity; fmt + four strict Clippy + matched; indicative composed pairs (≥4% bulk gate is the runner's) | T4 |
+| Done V2: scalar commit-advance plan and smaller `Pending` (merged 19 October 2026, PR 3 head 3a5c1cd4; Mac singleton −4.1%, old rule) | Commit-only rounds (~2.3 of 5.3 persistence rounds per singleton original) only advance the commit index, yet each built, validated, stored and compared a full `LogUpdate`/`OwnedAppend` plan inside a 1,728-byte `Pending`; a core-only scalar `CommitAdvance` plan and boxed cold parts cut `Pending` to 1,088 B | V1 (merged 041fc3fb) | Both reviews approved; suites on 3a5c1cd4: default 2,451 (one load-sensitive `native_relay` flake, parent and PR 10/10 on rerun), all-features 2,766, no-default 1,245, native-only 1,806, matched 71, `logical_activation_nested` solo 3×8/8; fmt + five strict Clippy clean; runner pairs round 1 ACCEPT | T4 |
+| In review as one stack, PR 10: V3a, direct entry staging (PR 6 content, carried by PR 10; PR 6 closes when PR 10 merges) | Proposals are built twice: the host stages a `Vec<Proposal>` and `propose_batch` scans it twice and collects a second `Vec<LogEntry>` (3.3% of bulk process CPU, plus the host's staging Vec). A bounded `ProposalBatch` builder creates final-shaped entries once and does its budget accounting while inserting; `Raft::propose_entries` stamps index/term in place and hands the same Vec to the existing planner | V1 (design: `target/claude/research-r1/architect-plan-pr3x.md` §§1, 2.2, 3.1, 3.12) | Builder/legacy equivalence at widths 1/2/max, cross-core and old-term builders, failed-push and drop cleanup, allocation-survival, last-index boundary and legacy-boundary tests; harness collection on the builder with unchanged receipt/attribution counts; fmt + strict Clippy (four configurations and the matched workspace); runner pairs on both framework cells (pending) | T4 |
+| In review as one stack, PR 10: V3b, shared frozen batches with validation reuse (`cpu/shared-batches` content, carried by PR 10) | The batch V3a stages becomes one immutable shared batch (`Arc` backing plus facts computed once) carried by `Suffix`, `Rpc::Append`, the pending plan and a chunked canonical `EntryLog`; planning, follower validation, fan-out selection, ingress costing and install use the cached facts, removing the per-peer `to_vec`, the install/compaction record moves and the repeated per-entry validation/accounting walks (profile-r2-pr1 §§3, 5: ~19% of bulk process CPU, overlapping classes) | V3a (PR 6 branch `cpu/entry-staging`; design `architect-plan-pr3x.md` §§2.3–2.8, 3, 4) | Facts-versus-scan oracle over subranges and multi-span joins; fast/slow validator equivalence and the old rejection conditions; prefix selection oracle against the old loop; overlap content checks across distinct allocations; old RPCs keep their contents after truncate/compaction; retained charge equals a fresh oracle; wire/WAL byte goldens captured before encoder edits; durable, native, compaction and snapshot suites unchanged in meaning; harness width/persist/send parity; fmt + four strict Clippy + matched; indicative composed pairs (≥4% bulk gate is the runner's) | T4 |
+| In review as one stack, PR 10: V3b-s, width-1 per-round overhead of shared batches (`cpu/shared-batches-s`, on V3a and V3b, merged with main b72d1ee3 so V2 is composed) | V3b's shared batches cost singletons +6.3% driver instructions and +4–5% whole-process CPU per write (research `target/claude/research-r3/v3b-regression.md`), all in per-round code paths, copies and inlining around one-entry batches. Remove that overhead without losing V3b's −13% bulk gain: one-piece fast paths for owned batches and the last log piece, general paths out of line, no install-chain inline hints, and 24-byte pieces so `Suffix`/`LogUpdate` return to main's size | V3a (PR 6), V3b (`cpu/shared-batches` 91ab285d), H2 merged (main 65fe6701) | Driver width-1 instructions and time vs main and V3b at widths 1/231/515; quiet-Mac 5 pairs × 4 cells vs main 65fe6701 and vs V3b merged with main; singleton attribution floor (leader persists 264,195, width 1); oracle tests for every owned fast path; facts-vs-scan, selection, validator and charge oracles unchanged; fmt, four strict root Clippy builds and the matched workspace | T4 |
+| Following: runner re-measures the composed V2+V3a+V3b+V3b-s head | The stack now carries V2 (merged main b72d1ee3); the runner measures all four cells of PR 10's head against the H2 main baseline. The remaining singleton excess (V3a staging, a harness effect-loop copy that V3b's types trigger) is re-profiled on the composed tree before any further slice | V2 merged; PR 10 merged with main | Framework pairs on all four cells against the H2 baseline; compaction/snapshot suites | T4 |
 | Following V3c: profile the composed V2+V3 tree | Choose the next whole cost class (remaining materialization, rounds, refcounts) from a fresh profile instead of adding helpers | V3b measured, V2 merged or rejected | Bounded schema with application/FIFO/durability semantics preserved; independent CPU pairs | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
 | Done C15: batched admission uses the pending bound | Same fast path for ready batches | C14 | Linux/Mac pairs; suites | T4 |
@@ -74,6 +74,69 @@ implemented or benchmarked; unsafe variants are not offered as options.
 Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider than
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
+
+#### V3 stack composed with V2: main b72d1ee3 merged into PR 10 (19 October 2026)
+
+`cpu/shared-batches-s` (V3a + V3b + V3b-s, head b8e16221) merged with main
+b72d1ee3, which carries V2 (PR 3). A merge, not a rebase, so the stack's
+commits and PR 10's history stay intact. Implemented evidence only; the
+runner measures the merged head.
+
+Conflicts and resolutions (both sides' semantics kept):
+
+- `src/log/transition/incoming.rs`: V2's shape throughout (`OwnedAppend {
+  predecessor, summary, suffix }`, `CommitAdvance`, `plan_commit`,
+  `matches_plain`, boxed `OwnedChange::Other.next`), with the stack's three
+  changes applied to it: `OwnedAppend::new` takes the `LogView` so
+  `append_summary(view, ..)` can charge an adjoining piece exactly (also in
+  `plan_commit`, with no suffix); `normalize_append` is gone because frozen
+  entries keep their allocation; `install_append` uses `EntryLog::append`.
+- `src/raft.rs` `persist_update`: V2's structure (`persist` routes commit-only
+  rounds to `persist_commit`/`plan_commit`; appends reach `plan_owned` or
+  `plan_copy` and `stage_pending`); the stack's only change there was a
+  comment, kept on the volatile branch. Appends therefore take V3a/V3b's
+  staged shared-batch path; commit-only rounds take V2's scalar plan.
+- `src/raft/volatile_tests.rs` and `src/raft/owned_append_tests.rs`: V2's
+  borrowing `next.suffix()` / `pending.suffix()` accessor with the stack's
+  sharing assertions (`backing_count`, `first_backing_ptr` against
+  `is_shared`).
+- Not textual conflicts but required to compile: V2's new tests used `Vec`
+  entry fields; `Suffix.entries` literals take `.into()`, `committed()` maps
+  `EntryRange::len`, and the commit-only round's "entries not moved / interval
+  borrowed" check uses `std::ptr::eq` on indexed entries (the stack's idiom)
+  instead of `as_ptr`.
+- Mini plan: V2 Done; V3a, V3b and V3b-s "In review as one stack, PR 10".
+
+Sizes on x86_64, debug test builds (`composed_type_sizes` on the merged tree,
+same in default and all-features; the V3b-s column from the same print in an
+uncommitted test on b8e16221; the V2 column from V2's record):
+
+| Type | V2 (main b72d1ee3) | V3b-s (b8e16221, no V2) | Merged |
+| --- | ---: | ---: | ---: |
+| `Pending` | 1,088 | 1,728 | 1,088 |
+| `OwnedNextLog` | 672 | 912 | 672 |
+| `OwnedChange` | 672 | 912 | 672 |
+| `OwnedAppend` | 672 (computed) | 880 (holds a whole `LogUpdate`) | 672 |
+| `LogUpdate` | 240 | 240 | 240 |
+| `Suffix` | 32 | 32 | 32 |
+| `EntryBatch` | 24 (`Vec`) | 24 | 24 |
+| `GroupLog` | 384 | 432 | 432 |
+
+`GroupLog` keeps V3b-s's cached tail (+48 B); it lives inside `Raft` and is
+not moved per round, and is outside `Pending`, so V2's bounds still hold.
+
+Checks on the merged tree (Linux, cores 14–15): `cargo +stable fmt --all --
+--check`; strict Clippy default, all features, no default features and native
+only, zero diagnostics; matched fmt and strict all-target Clippy, zero
+diagnostics. Default: `--lib` 480, `volatile` 7, `snapshot` 27, `raft` 79,
+`log_store` 19, `log_owned` 5, `worker` 9. All features: `--lib` 482 and the
+same counts for the other six. Run by name in both configurations: V2's
+scalar-vs-`plan_owned` oracles (`scalar_commit_plan_matches_the_owned_empty_append`,
+`scalar_commit_plan_matches_on_configured_and_compacted_logs`), all seven
+`commit_advance_tests`, V3b's twelve `log::entries::tests` (facts-vs-scan,
+selection, validator, charge and vector-model oracles) and the
+`entry_encodings_are_byte_identical_for_every_partition` wire/WAL/checkpoint
+goldens. Matched tests 74/74. Not run: the full root suites and remote CI.
 
 #### V3b-s schema plan: width-1 per-round overhead of shared batches (19 October 2026)
 
@@ -773,6 +836,130 @@ start fails the round-1 test at once ("actor loop ended before the next pass")
 instead of hanging. No non-test code path changed, so the round-1 measurements
 stand and were not repeated. Not run: root test suites (no root source changed),
 remote CI.
+#### V2 implemented: scalar commit-advance plan (merged 19 October 2026, PR 3)
+
+Design: `target/claude/research-r1/architect-plan.md` section 5 item 1, with
+the section 6 decision: durable stores keep the `LogUpdate` shape (no new
+`LogMutation`, no codec change) and only the core's plan becomes scalar.
+
+Schema plan (written before editing; the plan's last revision is marked):
+
+- Data/API. A private `CommitAdvance { predecessor: LogMetadata, summary:
+  LogSummary }` becomes `OwnedChange::Commit`, built by a new core-only
+  `OwnedNextLog::plan_commit(view, summary, commit_index, limits)`.
+  `plan_owned` and `plan_copy` never build it, so native stores never see the
+  variant; the native install match refuses it (fail closed). The cold
+  `OwnedChange::Other` keeps its `NextLog` behind a `Box`, and so do
+  `Pending.membership` (every full-replacement plan: configuration entries,
+  a new ballot over a configured history, truncating suffixes and snapshot
+  installs; never an ordinary append or a scalar commit round) and the
+  `SnapshotRef` of the two snapshot `After` variants. (Corrected in review
+  round 2; the first wording said configuration changes only.) No public API change.
+- Revised during implementation: the first shape (`predecessor: LogSummary,
+  revision, commit_index`, 352 B) made `OwnedChange` trip Clippy's
+  `large_enum_variant` (`Append` was 880 B). The cause was fixed rather than
+  allowed. `OwnedAppend` no longer keeps a copy of the whole admitted
+  `LogUpdate`: it keeps `{ predecessor, summary, suffix }` (672 B), because the
+  update's other fields are the predecessor's group and revision, the next
+  ballot and commit index, and no snapshot. `matches_update` compares those
+  fields (`matches_plain`); admission rejects any other update before planning,
+  so the answers are the same. The commit advance is then an empty append
+  without a suffix (640 B).
+- Selection. `Raft::persist` takes the scalar path exactly when `suffix` is
+  `None` and the hard state equals the durable one; snapshots and compaction go
+  through `persist_update` with `snapshot: Some(..)`, so they never qualify.
+  Today such an update always takes the `OwnedChange::Append` path
+  (`append_eligible` holds), so the scalar plan replaces exactly that plan.
+- Validation. `plan_commit` runs the checks `validate_base` and
+  `validate_append_metadata` make for that update, in the same order with the
+  same errors: limits, stale summary, ballot follows, ballot fields, commit
+  regression or gap or hard term behind the log, revision exhaustion. The group
+  and expected revision come from the core's own log, so they match by
+  construction. The ballot origin is retained (unchanged hard state), and the
+  next summary is `append_summary(summary, next, None)`, as before.
+- Effects. A volatile core emits the same `PersistVolatile` token. A durable
+  core emits the same `Effect::Persist(LogUpdate { group, expected_revision,
+  hard_state, commit_index, suffix: None, snapshot: None, snapshot_membership:
+  None })` as before; the plan no longer holds a clone of it.
+- State transitions and ownership. Unchanged: step → `Pending { next:
+  Commit }` → completion (`finish_completion` or `finish_volatile`) →
+  `install_pending`, which checks the predecessor metadata, installs the header
+  (revision and commit index; every other field stays the same) and returns the
+  next summary. `metadata`, `term_at`, `entry_at`, `full`,
+  `preserves_checkpoint_prefix` and `early_suffix` answer as they did for the
+  empty append (`early_suffix` already returned `None` for it).
+- Failure and cleanup. A wrong binding, stale token, failed barrier or failed
+  install still fences and drops the pending plan; `state()` stays at the last
+  completed transition. No partial progress exists because install is one
+  synchronous call and the predecessor check runs before any mutation. Restart
+  behaviour is unchanged: durable stores receive the same mutation bytes; a
+  volatile core has no cross-process restart.
+- Acceptance. Scalar-vs-`plan_owned` equivalence of metadata, summary, install
+  result and errors; the volatile scalar round has no update or suffix and
+  installs only the commit index; the durable round emits the identical
+  `LogUpdate` and completes through a store's full validation; an incomplete
+  scalar round fences and keeps `state()`; a stale scalar token is refused;
+  hard-state changes, new entries and snapshots do not take the scalar path;
+  size-of tests for `Pending` and `OwnedNextLog`; existing suites in all
+  configurations.
+
+Implemented evidence (measurement pending (runner)). Shape as planned, after
+the revision above. `Raft::persist` routes commit-only rounds to
+`persist_commit`, which calls `plan_commit`. A volatile core emits the token
+(with PR 1's incarnation); a durable core emits the identical `LogUpdate`. Both
+go through `stage_pending`, the tail `persist_update` already used.
+`PreparedOwnedLog::Append` now carries the checked `OwnedAppend`, so it stays
+within the lint's variant bound; a prepared commit advance is an `OwnedAppend`
+with no suffix. `NextLog::prepare_install` is unchanged. Test-only
+`OwnedNextLog::update()` rebuilds the admitted update; `suffix()` borrows the
+planned suffix.
+
+Sizes on x86_64 (`size_of` in a debug test build; "before" is PR 1's tip):
+`Pending` 1,728 → 1,088 B and `OwnedNextLog` 912 → 672 B, both measured.
+`After` 144 → at most 16 B and `Pending.membership` 288 → at most 8 B, both
+asserted. Computed from field sizes (`LogMetadata` 304 B, `LogSummary` 336 B,
+`Option<Suffix>` 32 B): `OwnedAppend` 880 → 672 B and the new `CommitAdvance`
+640 B. `pending_and_plan_sizes` keeps the measured values as upper bounds.
+
+Tests: `log::transition::tests::incoming::scalar_commit_plan_matches_the_owned_empty_append`
+(valid, voted, unvalidated-vote, term-behind, revision-exhausted and
+regressed-commit states over every commit index, a stale summary and invalid
+limits: equal errors, metadata, term lookups, `matches_update` truth tables
+against seven mutated updates, predecessor refusal, installed state and
+summary). `src/raft/commit_advance_tests.rs`: volatile scalar round (no suffix
+or update, the entries buffer is not moved, only revision and commit change,
+the committed interval is borrowed), durable round (identical `LogUpdate`,
+mutated updates refused, completion through a modelled store's full
+`apply_batch` gives the store's state), incomplete rounds fence (wrong binding,
+failed barrier, failed predecessor check; then `recover_volatile` completes a
+new round), stale and forged-generation tokens refused, new-term, new-vote,
+new-entry and compaction rounds not scalar, and the size test.
+
+Checks run on the builder's loaded machine (17 October 2026, load average
+40 to 150) on the tree rebased onto `cpu/volatile-log` b40d22b7:
+`cargo +stable fmt --all -- --check`, and strict Clippy with default, all
+features, no default features and native only, all zero diagnostics. Default
+suite: 85 test binaries done with 1,804 passed and 0 failed, including the 452
+library unit tests and `raft` (79). `representative_relay_model` was still
+running at publication, after 51 minutes single-threaded. `volatile` (7),
+`snapshot` (27), `runtime` (57), `effect_owner` (210) and `worker` (9) also
+pass. The `--all-features` and `--no-default-features` suites and the matched
+workspace's fmt, Clippy and tests were queued behind it; the PR lists their
+results when they finish. Before the rebase, the same change on 622bc411 passed
+85 default binaries (1,802 tests, 0 failures) before that run was stopped for
+the rebase.
+
+Review round 1 (both reviewers APPROVE, P3 findings only) and the round 1
+runner report are PR 3 comments on `8093c722`. The runner reported Mac
+singleton CPU/write 26,490 → 25,397 ns (−4.13%, 7/7 pairs) and Mac bulk
+281 → 282 ns (+0.36%, within the 1% guard), verdict ACCEPT; full suites are
+the suite runner's. Round 2 (this merge of `main` plus review follow-ups)
+changes no production code path: one comment in `src/raft.rs`, this
+documentation, a wider scalar-vs-`plan_owned` oracle
+(`scalar_commit_plan_matches_on_configured_and_compacted_logs`: learner,
+joint and final histories, checkpointed bases, a term-zero vote and revision
+exhaustion) and the `Option<Pending>` niche assertion relaxed to an upper
+bound.
 
 #### H1 schema plan: worker setting and shared harness costs
 

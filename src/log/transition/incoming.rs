@@ -3,33 +3,42 @@
 //! Sealed owned incoming updates; scalar admission precedes copying/normalization.
 use super::*;
 
+/// An admitted plain append. Every other field of its update is the
+/// predecessor's or the next summary's, so only the suffix is retained.
 pub(crate) struct OwnedAppend {
     predecessor: LogMetadata,
-    update: LogUpdate,
+    summary: LogSummary,
+    suffix: Option<Suffix>,
+}
+/// The core's own commit-only round: an empty append planned without an
+/// update. Providers never receive one.
+pub(crate) struct CommitAdvance {
+    predecessor: LogMetadata,
     summary: LogSummary,
 }
 pub(crate) enum OwnedChange {
     Append(OwnedAppend),
-    Other { next: NextLog, update: LogUpdate },
+    Commit(CommitAdvance),
+    // Ballot, configuration, snapshot and compaction plans are cold.
+    Other {
+        next: Box<NextLog>,
+        update: LogUpdate,
+    },
 }
 pub(crate) struct OwnedNextLog(OwnedChange);
 pub(crate) enum PreparedOwnedLog {
-    Append {
-        update: LogUpdate,
-        summary: LogSummary,
-    },
+    /// Checked against its predecessor; a commit advance has no suffix.
+    Append(OwnedAppend),
     Other(PreparedLog),
 }
 impl OwnedNextLog {
     pub(crate) fn preserves_checkpoint_prefix(&self) -> bool {
-        matches!(
-            &self.0,
-            OwnedChange::Append(_)
-                | OwnedChange::Other {
-                    next: NextLog::Delta(_) | NextLog::Compact(_),
-                    ..
-                }
-        )
+        match &self.0 {
+            OwnedChange::Append(_) | OwnedChange::Commit(_) => true,
+            OwnedChange::Other { next, .. } => {
+                matches!(**next, NextLog::Delta(_) | NextLog::Compact(_))
+            }
+        }
     }
     /// Core needs one independent normalized copy while its original crosses
     /// the public owned provider boundary. Inspect the raw input first.
@@ -46,11 +55,11 @@ impl OwnedNextLog {
                 view,
                 summary,
                 metadata,
-                update.clone(),
+                update.suffix.clone(),
             ))))
         } else {
             Ok(Self(OwnedChange::Other {
-                next: NextLog::plan(view, summary, update, limits)?,
+                next: Box::new(NextLog::plan(view, summary, update, limits)?),
                 update: update.clone(),
             }))
         }
@@ -67,20 +76,107 @@ impl OwnedNextLog {
         if append_eligible(view, summary, &update) {
             let metadata = validate_append_metadata(view, &update, limits)?;
             Ok(Self(OwnedChange::Append(OwnedAppend::new(
-                view, summary, metadata, update,
+                view,
+                summary,
+                metadata,
+                update.suffix,
             ))))
         } else {
-            let next = NextLog::plan(view, summary, &update, limits)?;
+            let next = Box::new(NextLog::plan(view, summary, &update, limits)?);
             Ok(Self(OwnedChange::Other { next, update }))
         }
     }
-    pub(crate) fn update(&self) -> &LogUpdate {
+    /// The core's own commit-only round: the update `plan_owned` would get has
+    /// this log's group, revision and hard state, no suffix and no snapshot.
+    /// Runs the checks `validate_base` and `validate_append_metadata` make for
+    /// it, in the same order with the same errors, and keeps no update.
+    pub(crate) fn plan_commit(
+        view: &LogView<'_>,
+        summary: &LogSummary,
+        commit_index: u64,
+        limits: LogLimits,
+    ) -> Result<Self, StorageError> {
+        limits.validate()?;
+        if !summary.matches_metadata(view.metadata()) {
+            return Err(StorageError::Rejected("stale log summary"));
+        }
+        let current = view.metadata();
+        if !current.hard_state.follows(current.hard_state) {
+            return Err(StorageError::Rejected("stale revision or invalid ballot"));
+        }
+        // An unchanged ballot retains its validated origin.
+        validate_ballot_fields(view.bootstrap(), current.hard_state, current.ballot_origin)?;
+        if commit_index < current.commit_index
+            || commit_index > current.last_index
+            || current.last_term > current.hard_state.term
+        {
+            return Err(StorageError::Rejected(
+                "commit regression/gap or hard term behind log",
+            ));
+        }
+        let revision = current
+            .revision
+            .get()
+            .checked_add(1)
+            .and_then(LogRevision::new)
+            .ok_or(StorageError::Rejected("revision exhausted"))?;
+        let next = LogMetadata {
+            revision,
+            commit_index,
+            ..*current
+        };
+        Ok(Self(OwnedChange::Commit(CommitAdvance {
+            predecessor: *current,
+            summary: append_summary(view, summary, next, None),
+        })))
+    }
+    /// The planned suffix, borrowed; a commit advance has none.
+    pub(crate) fn suffix(&self) -> Option<&Suffix> {
         match &self.0 {
-            OwnedChange::Append(append) => &append.update,
-            OwnedChange::Other { update, .. } => update,
+            OwnedChange::Append(append) => append.suffix.as_ref(),
+            OwnedChange::Commit(_) => None,
+            OwnedChange::Other { update, .. } => update.suffix.as_ref(),
         }
     }
+    /// The exact update this plan was admitted from (or stands for).
+    #[cfg(test)]
+    pub(crate) fn update(&self) -> LogUpdate {
+        match &self.0 {
+            OwnedChange::Append(append) => plain_update(
+                &append.predecessor,
+                &append.summary.metadata,
+                append.suffix.clone(),
+            ),
+            OwnedChange::Commit(commit) => {
+                plain_update(&commit.predecessor, &commit.summary.metadata, None)
+            }
+            OwnedChange::Other { update, .. } => update.clone(),
+        }
+    }
+    #[cfg(test)]
+    pub(crate) fn is_commit(&self) -> bool {
+        matches!(self.0, OwnedChange::Commit(_))
+    }
     pub(crate) fn matches_update(&self, original: &LogUpdate) -> bool {
+        let owned = match &self.0 {
+            OwnedChange::Append(append) => {
+                return matches_plain(
+                    original,
+                    &append.predecessor,
+                    &append.summary.metadata,
+                    append.suffix.as_ref(),
+                );
+            }
+            OwnedChange::Commit(commit) => {
+                return matches_plain(
+                    original,
+                    &commit.predecessor,
+                    &commit.summary.metadata,
+                    None,
+                );
+            }
+            OwnedChange::Other { update, .. } => update,
+        };
         let LogUpdate {
             group,
             expected_revision,
@@ -90,7 +186,6 @@ impl OwnedNextLog {
             snapshot,
             snapshot_membership,
         } = original;
-        let owned = self.update();
         *group == owned.group
             && *expected_revision == owned.expected_revision
             && *hard_state == owned.hard_state
@@ -102,12 +197,13 @@ impl OwnedNextLog {
     pub(crate) fn metadata(&self) -> LogMetadata {
         match &self.0 {
             OwnedChange::Append(append) => append.metadata(),
+            OwnedChange::Commit(commit) => commit.summary.metadata,
             OwnedChange::Other { next, .. } => next.metadata(),
         }
     }
     pub(crate) fn full(&self) -> Option<&GroupLog> {
         match &self.0 {
-            OwnedChange::Append(_) => None,
+            OwnedChange::Append(_) | OwnedChange::Commit(_) => None,
             OwnedChange::Other { next, .. } => next.full(),
         }
     }
@@ -120,14 +216,15 @@ impl OwnedNextLog {
                 .entry_at(index)
                 .map(|entry| entry.term)
                 .or_else(|| current.term_at(index)),
+            OwnedChange::Commit(_) => current.term_at(index),
             OwnedChange::Other { next, update } => next.term_at(current, update, index),
         }
     }
     pub(crate) fn entry_at(&self, index: u64) -> Option<&LogEntry> {
-        if !self.is_append() {
+        let OwnedChange::Append(append) = &self.0 else {
             return None;
-        }
-        let suffix = self.update().suffix.as_ref()?;
+        };
+        let suffix = append.suffix.as_ref()?;
         suffix
             .entries
             .get(usize::try_from(index.checked_sub(suffix.from)?).ok()?)
@@ -139,12 +236,21 @@ impl OwnedNextLog {
         match self.0 {
             OwnedChange::Append(append) => {
                 append.check_install(LogMetadata::from_log(current))?;
-                Ok(PreparedOwnedLog::Append {
-                    update: append.update,
-                    summary: append.summary,
-                })
+                Ok(PreparedOwnedLog::Append(append))
             }
-            OwnedChange::Other { next, update } => next
+            OwnedChange::Commit(CommitAdvance {
+                predecessor,
+                summary,
+            }) => {
+                let append = OwnedAppend {
+                    predecessor,
+                    summary,
+                    suffix: None,
+                };
+                append.check_install(LogMetadata::from_log(current))?;
+                Ok(PreparedOwnedLog::Append(append))
+            }
+            OwnedChange::Other { next, update } => (*next)
                 .prepare_install(current, &update)
                 .map(PreparedOwnedLog::Other),
         }
@@ -165,11 +271,11 @@ impl OwnedNextLog {
         let mut next = view.materialize();
         apply_update(&mut next, update, limits)?;
         Ok(Self(OwnedChange::Other {
-            next: NextLog::Full {
+            next: Box::new(NextLog::Full {
                 predecessor: *view.metadata(),
                 next: Box::new(next),
                 update: update.clone(),
-            },
+            }),
             update: update.clone(),
         }))
     }
@@ -179,12 +285,12 @@ impl OwnedAppend {
         view: &LogView<'_>,
         summary: &LogSummary,
         metadata: LogMetadata,
-        update: LogUpdate,
+        suffix: Option<Suffix>,
     ) -> Self {
         Self {
             predecessor: *view.metadata(),
-            summary: append_summary(view, summary, metadata, update.suffix.as_ref()),
-            update,
+            summary: append_summary(view, summary, metadata, suffix.as_ref()),
+            suffix,
         }
     }
     pub(crate) fn metadata(&self) -> LogMetadata {
@@ -209,29 +315,76 @@ impl OwnedAppend {
     }
     #[cfg(feature = "native")]
     pub(crate) fn into_suffix(self) -> Option<Suffix> {
-        self.update.suffix
+        self.suffix
     }
     #[cfg(feature = "native")]
     pub(crate) fn install(self, current: &mut GroupLog) -> LogSummary {
-        install_append(current, self.update, self.summary)
+        install_append(current, self.suffix, self.summary)
     }
 }
 impl PreparedOwnedLog {
     pub(crate) fn preserves_checkpoint_prefix(&self) -> bool {
         match self {
-            Self::Append { .. } => true,
+            Self::Append(_) => true,
             Self::Other(prepared) => prepared.preserves_checkpoint_prefix(),
         }
     }
     pub(crate) fn install(self, current: &mut GroupLog) -> LogSummary {
         match self {
-            Self::Append { update, summary } => install_append(current, update, summary),
+            Self::Append(append) => install_append(current, append.suffix, append.summary),
             Self::Other(prepared) => prepared.install(current),
         }
     }
 }
-fn install_append(current: &mut GroupLog, update: LogUpdate, summary: LogSummary) -> LogSummary {
-    if let Some(suffix) = update.suffix {
+/// A plain plan's update had the predecessor's group and revision, the next
+/// ballot and commit index, the planned suffix and no snapshot; admission
+/// rejects any other update before planning. Comparing these fields therefore
+/// gives the same answer as comparing with a retained copy of that update.
+fn matches_plain(
+    original: &LogUpdate,
+    predecessor: &LogMetadata,
+    next: &LogMetadata,
+    planned: Option<&Suffix>,
+) -> bool {
+    let LogUpdate {
+        group,
+        expected_revision,
+        hard_state,
+        commit_index,
+        suffix,
+        snapshot,
+        snapshot_membership,
+    } = original;
+    *group == predecessor.group
+        && *expected_revision == predecessor.revision
+        && *hard_state == next.hard_state
+        && *commit_index == next.commit_index
+        && suffix.as_ref() == planned
+        && snapshot.is_none()
+        && snapshot_membership.is_none()
+}
+#[cfg(test)]
+fn plain_update(
+    predecessor: &LogMetadata,
+    next: &LogMetadata,
+    suffix: Option<Suffix>,
+) -> LogUpdate {
+    LogUpdate {
+        group: predecessor.group,
+        expected_revision: predecessor.revision,
+        hard_state: next.hard_state,
+        commit_index: next.commit_index,
+        suffix,
+        snapshot: None,
+        snapshot_membership: None,
+    }
+}
+fn install_append(
+    current: &mut GroupLog,
+    suffix: Option<Suffix>,
+    summary: LogSummary,
+) -> LogSummary {
+    if let Some(suffix) = suffix {
         current.entries.append(suffix.entries);
     }
     summary.metadata.install_header(current);

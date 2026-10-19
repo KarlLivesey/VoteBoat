@@ -61,7 +61,7 @@ fn accept(state: &GroupLog, operation: u128, change: ConfigurationChange) -> Gro
 fn commit(state: &GroupLog, index: u64) -> GroupLog {
     stage_update(state, &proposal(state, index, None), LogLimits::default()).unwrap()
 }
-fn histories() -> Vec<GroupLog> {
+pub(super) fn histories() -> Vec<GroupLog> {
     let mut initial = current();
     let mut promise = update(&initial, 1, 2, None);
     promise.hard_state.voted_for = Some(node(1));
@@ -103,7 +103,7 @@ fn proposal(state: &GroupLog, commit: u64, suffix: Option<Suffix>) -> LogUpdate 
     proposal.hard_state = state.hard_state;
     proposal
 }
-fn checkpoint(state: &GroupLog, index: u64) -> GroupLog {
+pub(super) fn checkpoint(state: &GroupLog, index: u64) -> GroupLog {
     let mut proposal = proposal(state, state.commit_index, None);
     let membership = state.checkpoint_membership(index).unwrap();
     proposal.snapshot = Some(SnapshotRef {

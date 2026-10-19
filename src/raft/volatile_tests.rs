@@ -46,7 +46,7 @@ fn volatile_persist_carries_no_entries_and_installs_the_exact_proposal() {
     // Nothing is installed before completion; the plan owns the only copy.
     assert_eq!(core.state(), &before);
     let pending = core.pending.as_ref().unwrap();
-    let planned = &pending.next.update().suffix.as_ref().unwrap().entries;
+    let planned = &pending.next.suffix().unwrap().entries;
     assert_eq!(planned.backing_count(), 1);
     let planned_bytes = command_bytes(&planned[0]);
     let (committed, following) = persist_volatile(&mut core, &log, persist)
@@ -94,7 +94,7 @@ fn volatile_step_is_busy_until_persist_completes() {
 fn volatile_core_rejects_durable_seam_calls() {
     let (mut core, log) = volatile();
     let persist = token(&propose(&mut core, 9, vec![1]));
-    let update = core.pending.as_ref().unwrap().next.update().clone();
+    let update = core.pending.as_ref().unwrap().next.update();
     let next = core.pending.as_ref().unwrap().next.metadata();
     let ticket = LogTicket {
         binding: core.binding,
@@ -238,8 +238,8 @@ fn proposal_batches_collect_a_tight_suffix_before_owned_planning() {
         // not reallocate to normalize capacity. std does not promise this, so
         // it is checked here rather than asserted in `propose_batch`.
         let persist = token(&core.propose_batch(proposals).unwrap());
-        let suffix = &core.pending.as_ref().unwrap().next.update().suffix;
-        let entries = &suffix.as_ref().unwrap().entries;
+        let suffix = core.pending.as_ref().unwrap().next.suffix();
+        let entries = &suffix.unwrap().entries;
         assert_eq!(entries.len(), width);
         assert_eq!(entries.backing_count(), 1);
         persist_volatile(&mut core, &log, persist).unwrap();
@@ -278,7 +278,7 @@ fn volatile_plan_moves_the_input_suffix_allocation() {
             )
             .unwrap();
         let pending = core.pending.as_ref().unwrap();
-        let planned = &pending.next.update().suffix.as_ref().unwrap().entries;
+        let planned = &pending.next.suffix().unwrap().entries;
         assert_eq!(planned.len(), 2);
         (effects, input, planned.first_backing_ptr().unwrap())
     }

@@ -8,7 +8,7 @@ fn compare_pending_connections(core: &mut Raft) {
     assert!(pending.next.full().is_none());
     assert!(pending.membership.is_none());
     let update = pending.next.update();
-    let next = OwnedNextLog::full_oracle(LogView::new(core.state()), update, core.limits).unwrap();
+    let next = OwnedNextLog::full_oracle(LogView::new(core.state()), &update, core.limits).unwrap();
     let delta = std::mem::replace(&mut core.pending.as_mut().unwrap().next, next);
     let oracle = core.connection_replicas(6).unwrap();
     let refusal = core.connection_replicas(oracle.len() - 1);
