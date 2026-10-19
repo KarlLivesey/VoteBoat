@@ -372,3 +372,83 @@ fn joined_overlay_charges_equal_the_materialized_log() {
         }
     }
 }
+
+#[test]
+fn small_owned_pieces_take_the_original_loops_exactly() {
+    let mut rng = Rng(99);
+    for width in 1..SHARE_MIN {
+        for defect in 0..5 {
+            let mut entries = history(&mut rng, 4, width, defect % 2 == 0);
+            let last = width - 1;
+            match defect {
+                0 => {}
+                1 => entries[last].index += 1,
+                2 => entries[0].term = 0,
+                3 => entries[last].term = 0,
+                _ => entries[last].term = entries[last.saturating_sub(1)].term.saturating_sub(1),
+            }
+            let batch: EntryBatch = entries.clone().into();
+            assert!(!batch.is_shared());
+            if defect == 0 {
+                check_facts(&batch, &entries);
+            } else {
+                check_validators(&batch, &entries);
+            }
+            // The one-walk message charge equals its two separate queries.
+            assert_eq!(
+                batch.retained_bytes_and_data(),
+                Some((batch.retained_bytes().unwrap(), batch.has_data()))
+            );
+            assert_eq!((batch.len(), batch.is_empty()), (width, false));
+            assert_eq!(
+                (batch.first(), batch.last()),
+                (entries.first(), entries.last())
+            );
+            for offset in 0..=width {
+                assert_eq!(batch.get(offset), entries.get(offset));
+            }
+        }
+    }
+    let empty = EntryBatch::default();
+    assert_eq!((empty.len(), empty.is_empty()), (0, true));
+    assert_eq!(empty.retained_bytes_and_data(), Some((0, false)));
+    let shared: EntryBatch = history(&mut rng, 1, 40, false).into();
+    assert_eq!(
+        shared.retained_bytes_and_data(),
+        Some((shared.retained_bytes().unwrap(), shared.has_data()))
+    );
+}
+
+#[test]
+fn a_last_owned_piece_answers_like_every_other_piece() {
+    let mut rng = Rng(101);
+    // A shared piece, then small batches gathered into one owned last piece.
+    let mut log = EntryLog::default();
+    let mut all = history(&mut rng, 1, 30, false);
+    log.append(all.clone().into());
+    while all.len() < 60 {
+        let width = 1 + rng.below(SHARE_MIN as u64 - 1) as usize;
+        let batch = history(&mut rng, all.len() as u64 + 1, width, false);
+        all.extend(batch.iter().cloned());
+        log.append(batch.into());
+        check_log(&log, &all);
+    }
+    let many = log.to_batch();
+    assert_eq!(many.backing_count(), 2);
+    assert_eq!((many.len(), many.is_empty()), (all.len(), false));
+    for start in 0..=all.len() {
+        for end in start..=all.len() {
+            assert_eq!(log.borrowed(start..end).unwrap(), all[start..end]);
+        }
+        for max_entries in [0, 1, 2, 5, 1024] {
+            for budget in [256, 292, 293, 330, 600, 1 << 20] {
+                assert_eq!(
+                    log.replication_range(start, max_entries, budget),
+                    old_selection(all.get(start..).unwrap_or(&[]), max_entries, budget),
+                    "{start} {max_entries} {budget}"
+                );
+            }
+        }
+    }
+    assert!(log.borrowed(0..all.len() + 1).is_none());
+}
