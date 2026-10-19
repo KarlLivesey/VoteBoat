@@ -21,12 +21,12 @@ fn exact_original_entries_and_additive_query_encoding_roundtrip() {
         assert_eq!(a.query_encoding_bound(&q).unwrap(), 26);
         let mut query = [0; 26];
         assert_eq!(a.encode_query(&q, &mut query).unwrap(), 26);
-        assert_eq!(&query[..10], b"VBLOGR01\x01\x04");
+        assert_eq!(&query[..10], b"VBLOGR03\x01\x04");
         assert_eq!(&query[10..], &operation.to_le_bytes());
     }
     let mut old = [0; 10];
     a.encode_query(&LogicalQuery::Metadata, &mut old).unwrap();
-    assert_eq!(&old, b"VBLOGR01\x01\x03");
+    assert_eq!(&old, b"VBLOGR03\x01\x03");
     for entries in [prefix(), suffix()] {
         a.apply_batch(&entries).unwrap();
         for operation in [10, 11, 999] {

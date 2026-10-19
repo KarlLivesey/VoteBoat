@@ -3,6 +3,9 @@
 use super::*;
 use crate::logical_voter::codec::Decoder;
 
+const V6_EMPTY: &[u8] = include_bytes!("../formats/v6-candidate-empty.bin");
+const V6_ENROLLED: &[u8] = include_bytes!("../formats/v6-candidate-enrolled.bin");
+/// LV1 outputs (candidate checkpoint v3, schema 4), now legacy fixtures.
 const V4_EMPTY: &[u8] = include_bytes!("../formats/v4-candidate-empty.bin");
 const V4_ENROLLED: &[u8] = include_bytes!("../formats/v4-candidate-enrolled.bin");
 /// Generated on `origin/main` 30a1f6c5 by the same fixture (applied 0 and 1).
@@ -15,13 +18,13 @@ fn enrolled() -> LogicalApplication {
     a
 }
 #[test]
-fn candidate_v4_configuration_checkpoint_and_schema_are_explicit() {
+fn candidate_v6_configuration_checkpoint_and_schema_are_explicit() {
     let a = candidate();
     let bytes = a.checkpoint(usize::MAX).unwrap();
-    assert_eq!(&bytes[..8], b"VBLOGC04");
+    assert_eq!(&bytes[..8], b"VBLOGC06");
     assert_eq!(&a.configuration[..8], b"VBENRL02");
-    assert_eq!(LOGICAL_ENROLLMENT_APPLICATION_SCHEMA, 4);
-    assert_eq!(a.deployment_requirements().unwrap().application_schema, 4);
+    assert_eq!(LOGICAL_ENROLLMENT_APPLICATION_SCHEMA, 6);
+    assert_eq!(a.deployment_requirements().unwrap().application_schema, 6);
     assert_eq!(
         a.logical_response_schema(),
         LOGICAL_ENROLLMENT_RESPONSE_SCHEMA
@@ -36,6 +39,8 @@ fn candidate_v4_configuration_checkpoint_and_schema_are_explicit() {
         (1, 0, &include_bytes!("v1-empty.bin")[..]),
         (2, 0, V2_EMPTY),
         (2, 1, V2_ENROLLED),
+        (4, 0, V4_EMPTY),
+        (4, 1, V4_ENROLLED),
     ] {
         assert_eq!(
             restored.restore_checkpoint(schema, applied, old),
@@ -55,8 +60,8 @@ fn candidate_v4_configuration_checkpoint_and_schema_are_explicit() {
     assert_eq!(restored.checkpoint(usize::MAX).unwrap(), before);
 }
 #[test]
-fn candidate_v4_goldens_round_trip_exactly() {
-    for (a, golden) in [(candidate(), V4_EMPTY), (enrolled(), V4_ENROLLED)] {
+fn candidate_v6_goldens_round_trip_exactly() {
+    for (a, golden) in [(candidate(), V6_EMPTY), (enrolled(), V6_ENROLLED)] {
         let bytes = a.checkpoint(usize::MAX).unwrap();
         assert_eq!(bytes, golden);
         let mut b = candidate();
@@ -74,7 +79,7 @@ fn candidate_v4_goldens_round_trip_exactly() {
     assert!(a.state.enrollment.is_some());
     // An ordinary application refuses candidate bytes and vice versa.
     assert_eq!(
-        app().restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, 1, V4_ENROLLED),
+        app().restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, 1, V6_ENROLLED),
         Err(ApplicationError::InvalidCheckpoint)
     );
 }
@@ -147,7 +152,7 @@ fn exact_candidate_command_reserve_boundary_and_measured_envelope() {
     let phase = a.enrollment_entry_bytes(&input.learners).unwrap();
     let snapshot = a.snapshot_bytes(&input.snapshot).unwrap();
     let bytes = a.encode_command(&enrollment(input, 11), minimum).unwrap();
-    assert_eq!(&bytes[..8], b"VBLOGA02");
+    assert_eq!(&bytes[..8], b"VBLOGA04");
     assert!(
         bytes.len() - phase.len() - snapshot.len()
             <= crate::logical_voter::enrollment::ENROLLMENT_FIXED_ENVELOPE_ALLOWANCE
@@ -159,7 +164,7 @@ fn exact_candidate_command_reserve_boundary_and_measured_envelope() {
     assert!(fixture::candidate_with_limits(limits).is_err());
 }
 #[test]
-fn complete_v2_enrollment_response_retains_plan_entry_origin_and_target_floor() {
+fn complete_v4_enrollment_response_retains_plan_entry_origin_and_target_floor() {
     let mut a = candidate();
     let c = enrollment(import(&a), 11);
     apply(&mut a, &c);
@@ -173,7 +178,7 @@ fn complete_v2_enrollment_response_retains_plan_entry_origin_and_target_floor() 
     let mut bytes = vec![0; bound];
     let used = a.encode_read(&value, &mut bytes).unwrap();
     bytes.truncate(used);
-    assert_eq!(&bytes[..8], b"VBLOGR02");
+    assert_eq!(&bytes[..8], b"VBLOGR04");
     let mut d = Decoder::new(&bytes[8..]);
     assert_eq!(d.u8().unwrap(), 2);
     assert_eq!(d.u8().unwrap(), 6);

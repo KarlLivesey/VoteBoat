@@ -5,7 +5,7 @@ use super::*;
 mod capability;
 pub use capability::{LogicalEnrollmentRejected, LogicalLearnerEnrollment};
 
-pub const LOGICAL_ENROLLMENT_APPLICATION_SCHEMA: u64 = 4;
+pub const LOGICAL_ENROLLMENT_APPLICATION_SCHEMA: u64 = 6;
 // Conservative space for the fixed command header, plan, export/owner/visit lineage,
 // two blob lengths and selected native journal framing. Actual encoding remains bounded
 // and checked; this reserve grants neither provider capacity nor import authority.

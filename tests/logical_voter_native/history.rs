@@ -115,8 +115,10 @@ fn history(protocol: NativePeerProtocol) {
     assert_ne!(third.binding().session, second.binding().session);
     cluster.finish();
 }
+/// Claim records stay retained until the claimed session's first command
+/// (none runs here), so both claims survive the cold reopen.
 fn retained(cluster: &mut Cluster, id: u128, receipt: LogicalReceipt) {
-    let LogicalRead::Outcome(Some(status)) =
+    let LogicalRead::Outcome(LogicalOutcomeLookup::Retained(status)) =
         cluster.read(LogicalQuery::Outcome(OperationId::new(id).unwrap()))
     else {
         panic!("original committed claim missing after cold checkpoint+suffix reopen")

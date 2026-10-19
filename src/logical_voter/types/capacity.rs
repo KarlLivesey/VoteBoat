@@ -104,6 +104,7 @@ fn coherent_checkpoint_restores_the_original_command_and_duplicate_receipt() {
             physical_session: StoreSession::new(1).unwrap(),
             logical_session: StoreSession::new(1).unwrap(),
         },
+        consumed_through: 0,
         body: CommandBody::Claim {
             expected_epoch: None,
         },

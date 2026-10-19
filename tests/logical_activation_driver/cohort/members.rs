@@ -234,7 +234,8 @@ impl Members {
         }
     }
     pub fn finish(mut self) {
-        // Retained records are never removed, so this is the workflow's peak.
+        // The live retained set at the end of the workflow (consumed records
+        // are retired since LV2), within the lifetime preflight budget.
         let retained = retained::group(&self.nodes, self.slot);
         eprintln!(
             "336 retained group={} protocol_time={:?} {retained:?}",

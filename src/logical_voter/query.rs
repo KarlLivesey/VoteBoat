@@ -18,6 +18,16 @@ mod configurations;
 impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
     LogicalApplication<C, S, W>
 {
+    /// Tri-state lookup (architect §2.4): retained, retired, or unknown.
+    pub(crate) fn lookup(&self, operation: OperationId) -> LogicalOutcomeLookup {
+        if let Some(status) = self.state.records.get(&operation) {
+            LogicalOutcomeLookup::Retained(Box::new(status.clone()))
+        } else if self.retired(operation) {
+            LogicalOutcomeLookup::Expired
+        } else {
+            LogicalOutcomeLookup::Unknown
+        }
+    }
     pub fn metadata(&self) -> LogicalMetadata {
         LogicalMetadata {
             mapping: self.mapping,
@@ -27,6 +37,7 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
             retained_action_bytes: self.state.bytes,
             parent_revision: self.state.parent.as_ref().map(|p| p.revision),
             parent_generation: self.state.parent.as_ref().map(|p| p.generation),
+            retired_below: self.state.retired_below,
         }
     }
 }
@@ -53,9 +64,7 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone> Readab
                 Box::new(self.configuration_operation(operation)?),
             ),
             LogicalQuery::Metadata => LogicalRead::Metadata(Box::new(self.metadata())),
-            LogicalQuery::Outcome(id) => {
-                LogicalRead::Outcome(self.state.records.get(&id).cloned().map(Box::new))
-            }
+            LogicalQuery::Outcome(id) => LogicalRead::Outcome(self.lookup(id)),
             LogicalQuery::Snapshot(reference) => self
                 .state
                 .snapshots
@@ -160,7 +169,7 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
             ),
             LogicalRead::Snapshot(s) => snapshot_charge(s),
             LogicalRead::Metadata(_) => size_of::<LogicalMetadata>(),
-            LogicalRead::Outcome(Some(s)) => {
+            LogicalRead::Outcome(LogicalOutcomeLookup::Retained(s)) => {
                 size_of::<LogicalActionStatus>().saturating_add(s.command.capacity())
             }
             _ => 0,

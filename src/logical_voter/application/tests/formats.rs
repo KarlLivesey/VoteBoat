@@ -12,16 +12,20 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-//! Checkpoint v3 goldens, legacy-format refusal, direct-decode restore
-//! equivalence with the former replay restore, and the snapshot-generation
+//! Checkpoint v4 goldens (schema 5), legacy-format refusal, direct-decode
+//! restore equivalence with full-history replay, and the snapshot-generation
 //! high-water mark.
 use super::*;
 mod history;
 mod refusals;
 mod restore;
-pub(super) use restore::assert_restore_equivalent;
-use restore::{legacy_generation, legacy_replay};
+pub(super) use restore::{assert_restore_equivalent, assert_step_replays};
+use restore::{genesis_replay, legacy_generation};
 
+const V5_EMPTY: &[u8] = include_bytes!("formats/v5-empty.bin");
+const V5_POPULATED: &[u8] = include_bytes!("formats/v5-populated.bin");
+/// LV1 outputs (checkpoint v3, schema 3, command format v2), kept as legacy
+/// fixtures: LV2 changed the embedded command format.
 const V3_EMPTY: &[u8] = include_bytes!("formats/v3-empty.bin");
 const V3_POPULATED: &[u8] = include_bytes!("formats/v3-populated.bin");
 /// Generated on `origin/main` 30a1f6c5 by `history::populated` (applied 10).
@@ -35,11 +39,11 @@ fn restored(bytes: &[u8], applied: u64) -> LogicalApplication {
     a
 }
 #[test]
-fn v3_goldens_round_trip_exactly() {
-    assert_eq!(LOGICAL_APPLICATION_SCHEMA, 3);
-    for (a, golden) in [(app(), V3_EMPTY), (history::populated(), V3_POPULATED)] {
+fn v5_goldens_round_trip_exactly() {
+    assert_eq!(LOGICAL_APPLICATION_SCHEMA, 5);
+    for (a, golden) in [(app(), V5_EMPTY), (history::populated(), V5_POPULATED)] {
         let bytes = a.checkpoint(usize::MAX).unwrap();
-        assert_eq!(&bytes[..8], b"VBLOGC03");
+        assert_eq!(&bytes[..8], b"VBLOGC05");
         assert_eq!(bytes, golden);
         let b = restored(golden, a.applied_index());
         assert_eq!(b.state, a.state);
@@ -47,18 +51,34 @@ fn v3_goldens_round_trip_exactly() {
     }
     let a = history::populated();
     assert_eq!(a.applied_index(), 10);
-    assert_eq!(a.state.records.len(), 8);
+    // Retirement left the reconcile refusal and the final mutation.
+    assert_eq!(
+        a.state
+            .records
+            .keys()
+            .map(|op| op.get())
+            .collect::<Vec<_>>(),
+        [
+            command::session_operation(1, 7),
+            command::session_operation(1, 8)
+        ]
+    );
     assert_eq!(a.state.snapshot_generation, 2);
-    assert_eq!(a.state.retired_below, 0);
+    assert_eq!(a.state.retired_below, command::session_operation(1, 6));
 }
 #[test]
-fn legacy_v1_checkpoints_are_typed_refusals_and_leave_state_unchanged() {
+fn legacy_checkpoints_are_typed_refusals_and_leave_state_unchanged() {
     let mut a = history::populated();
     let before = a.checkpoint(usize::MAX).unwrap();
-    for (bytes, applied) in [(V1_EMPTY, 0), (V1_POPULATED, 10)] {
-        assert_eq!(&bytes[..8], b"VBLOGC01");
+    for (bytes, applied, schema, magic) in [
+        (V1_EMPTY, 0, 1, b"VBLOGC01"),
+        (V1_POPULATED, 10, 1, b"VBLOGC01"),
+        (V3_EMPTY, 0, 3, b"VBLOGC03"),
+        (V3_POPULATED, 10, 3, b"VBLOGC03"),
+    ] {
+        assert_eq!(&bytes[..8], magic);
         assert_eq!(
-            a.restore_checkpoint(1, applied, bytes),
+            a.restore_checkpoint(schema, applied, bytes),
             Err(ApplicationError::UnsupportedSchema)
         );
         assert_eq!(
@@ -67,11 +87,22 @@ fn legacy_v1_checkpoints_are_typed_refusals_and_leave_state_unchanged() {
         );
         assert_eq!(a.checkpoint(usize::MAX).unwrap(), before);
     }
-    // A v3 checkpoint presented under the old schema number is also refused.
+    // Current checkpoints presented under an old schema number are refused.
+    for schema in [1, 3, 4] {
+        assert_eq!(
+            a.restore_checkpoint(schema, 10, &before),
+            Err(ApplicationError::UnsupportedSchema)
+        );
+    }
+    // LV1 bytes renamed to the new magic still fail: their commands use the
+    // old command format.
+    let mut renamed = V3_POPULATED.to_vec();
+    renamed[..8].copy_from_slice(b"VBLOGC05");
     assert_eq!(
-        a.restore_checkpoint(1, 10, &before),
-        Err(ApplicationError::UnsupportedSchema)
+        a.restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, 10, &renamed),
+        Err(ApplicationError::InvalidCheckpoint)
     );
+    assert_eq!(a.checkpoint(usize::MAX).unwrap(), before);
 }
 #[test]
 fn direct_restore_matches_the_replay_restore_and_next_generation() {
@@ -79,7 +110,7 @@ fn direct_restore_matches_the_replay_restore_and_next_generation() {
     let bytes = a.checkpoint(usize::MAX).unwrap();
     let mut direct = restored(&bytes, a.applied_index());
     let mut replayed = a.clone();
-    replayed.state = legacy_replay(&a);
+    replayed.state = genesis_replay(&a).unwrap();
     assert_eq!(direct.state, a.state);
     assert_eq!(replayed.state, a.state);
     for (op, r) in &a.state.records {
@@ -132,17 +163,41 @@ fn header(a: &LogicalApplication) -> usize {
 fn every_corruption_class_is_refused_without_partial_restore() {
     let a = history::populated();
     let good = a.checkpoint(usize::MAX).unwrap();
+    assert_eq!(good, V5_POPULATED);
     let h = header(&a);
     let mut cases: Vec<(&str, Vec<u8>)> = Vec::new();
-    let mut retired = good.clone();
-    retired[h] = 1;
-    cases.push(("nonzero watermark", retired));
-    for delta in [1u64, u64::MAX] {
-        let mut generation = good.clone();
-        let n = u64::from_le_bytes(good[h + 16..h + 24].try_into().unwrap());
-        generation[h + 16..h + 24].copy_from_slice(&n.wrapping_add(delta).to_le_bytes());
-        cases.push(("generation mark", generation));
+    // The watermark is (1 << 64) | 6, set by the final mutation's
+    // acknowledgement of sequence 5; the live keys are sequences 7 and 8.
+    for (name, watermark) in [
+        ("zero watermark", 0),
+        ("lowered watermark", command::session_operation(1, 1)),
+        // Raised by one: still at or below every live key, so only the
+        // equality with the highest retained acknowledgement refuses it.
+        ("raised watermark", command::session_operation(1, 7)),
+        (
+            "watermark below its acknowledgement",
+            command::session_operation(1, 5),
+        ),
+        (
+            "watermark above a live key",
+            command::session_operation(1, 8),
+        ),
+        (
+            "watermark in another session",
+            command::session_operation(2, 6),
+        ),
+        ("watermark at sequence 0", command::session_operation(1, 0)),
+    ] {
+        let mut retired = good.clone();
+        retired[h..h + 16].copy_from_slice(&watermark.to_le_bytes());
+        cases.push((name, retired));
     }
+    // A lower generation mark is refused; a higher one is history-dependent
+    // once publication records are pruned (see `generation_mark_*`).
+    let mut generation = good.clone();
+    let n = u64::from_le_bytes(good[h + 16..h + 24].try_into().unwrap());
+    generation[h + 16..h + 24].copy_from_slice(&(n - 1).to_le_bytes());
+    cases.push(("generation mark below a retained generation", generation));
     let mut bytes_total = good.clone();
     let n = bytes_total.len();
     let total = u64::from_le_bytes(good[n - 8..].try_into().unwrap());
@@ -180,35 +235,48 @@ fn every_corruption_class_is_refused_without_partial_restore() {
     );
 }
 #[test]
+fn raised_watermark_right_after_a_claim_is_refused() {
+    let mut a = app();
+    claim(&mut a);
+    let session = a.state.representative.unwrap().logical_session.get();
+    let floor = command::session_operation(session, 1);
+    assert_eq!(a.state.retired_below, floor);
+    let good = a.checkpoint(usize::MAX).unwrap();
+    let h = header(&a);
+    assert_eq!(good[h..h + 16], floor.to_le_bytes());
+    // No session record exists, so no live key bounds a raised value.
+    let mut raised = good.clone();
+    raised[h..h + 16].copy_from_slice(&command::session_operation(session, 2).to_le_bytes());
+    let mut b = a.clone();
+    assert_eq!(
+        b.restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, a.applied_index(), &raised),
+        Err(ApplicationError::InvalidCheckpoint)
+    );
+    assert_eq!(b.state, a.state);
+    assert_eq!(b.checkpoint(usize::MAX).unwrap(), good);
+}
+#[test]
 fn generation_mark_is_monotonic_and_independent_of_retained_records() {
     let mut a = history::populated();
     let mark = a.state.snapshot_generation;
-    assert_eq!(mark, legacy_generation(&a.state));
-    // Simulate future retirement of every publication record: the old
-    // derivation would fall back to 0 and reuse generation 1.
-    let published: Vec<_> = a
+    assert_eq!(mark, 2);
+    // Retirement pruned both publication records: the former derivation
+    // would fall back to 0 and reuse generation 1.
+    assert!(!a
         .state
         .records
-        .iter()
-        .filter(|(_, r)| matches!(r.receipt.outcome, LogicalOutcome::SnapshotPublished(_)))
-        .map(|(op, _)| *op)
-        .collect();
-    assert_eq!(published.len(), 2);
-    for op in published {
-        let r = a.state.records.remove(&op).unwrap();
-        a.state.bytes -= r.command.len();
-    }
-    assert!(legacy_generation(&a.state) < mark);
+        .values()
+        .any(|r| matches!(r.receipt.outcome, LogicalOutcome::SnapshotPublished(_))));
+    assert_eq!(legacy_generation(&a.state), 0);
     let s = history::later_snapshot(&a);
-    let LogicalOutcome::SnapshotPublished(r) = history::publish_unchecked(&mut a, 9, s).outcome
-    else {
-        panic!("publication after record removal");
+    let LogicalOutcome::SnapshotPublished(r) = history::publish(&mut a, 9, s).outcome else {
+        panic!("publication after record retirement");
     };
     assert_eq!(r.generation.get(), mark + 1);
     assert_eq!(a.state.snapshot_generation, mark + 1);
     // Reusing an existing identical snapshot allocates nothing.
     let s = a.state.snapshots.last().unwrap().1.clone();
-    let reused = history::publish_unchecked(&mut a, 10, s).outcome;
+    let reused = history::publish(&mut a, 10, s).outcome;
     assert_eq!(reused, LogicalOutcome::SnapshotPublished(r));
     assert_eq!(a.state.snapshot_generation, mark + 1);
 }
@@ -236,7 +304,7 @@ fn restore_cost_report() {
         }
         let bytes = a.checkpoint(usize::MAX).unwrap();
         let started = std::time::Instant::now();
-        let replayed = legacy_replay(&a);
+        let replayed = genesis_replay(&a).unwrap();
         let replay = started.elapsed();
         let mut b = app();
         let started = std::time::Instant::now();

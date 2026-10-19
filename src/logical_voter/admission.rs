@@ -17,14 +17,26 @@ use super::*;
 impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
     LogicalApplication<C, S, W>
 {
+    /// Count and byte budgets for `commands` on top of the records that stay
+    /// live after `plan`'s prune (architect §2.4 step 5). Apply passes its own
+    /// plan; admission passes the proposed command's plan only, never credit
+    /// for pending entries, so apply-time occupancy never exceeds it.
     pub(super) fn reserve(
         &self,
         commands: &[(OperationId, &[u8], bool)],
+        plan: Option<u128>,
     ) -> Result<(), ApplicationError> {
         let mut distinct = BTreeMap::new();
+        let mut live = 0usize;
+        let mut live_bytes = 0usize;
         let mut ordinary = 0usize;
         let mut ordinary_bytes = 0usize;
-        for old in self.state.records.values() {
+        for (op, old) in &self.state.records {
+            if self.prunable(*op, old, plan)? {
+                continue;
+            }
+            live += 1;
+            live_bytes += old.command.len();
             if !self
                 .decode_command(&old.command)?
                 .control(self.control_profile.as_ref())
@@ -46,7 +58,7 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
                 }
             }
         }
-        let mut total = self.state.bytes;
+        let mut total = live_bytes;
         for (bytes, control) in distinct.values() {
             total = total
                 .checked_add(bytes.len())
@@ -58,7 +70,7 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
                     .ok_or(ApplicationError::DedupCapacity)?;
             }
         }
-        if self.state.records.len() + distinct.len() > self.limits.max_actions
+        if live + distinct.len() > self.limits.max_actions
             || total > self.limits.max_retained_action_bytes
             || ordinary > self.limits.max_actions - self.limits.control_actions
             || ordinary_bytes
@@ -88,6 +100,11 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone> Propos
             } else {
                 Err(ApplicationError::OperationConflict)
             };
+        }
+        if self.retired(operation) {
+            // Admitted like a duplicate so a stranded bridge can obtain the
+            // committed terminal `Expired`; apply never executes it.
+            return Ok(());
         }
         if core
             .membership()
@@ -120,6 +137,9 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone> Propos
                 }
                 continue;
             }
+            if self.retired(id) {
+                continue; // Applies as `Expired`: no record, no bytes.
+            }
             if let Some((old, _)) =
                 distinct.insert(id, (bytes, c.control(self.control_profile.as_ref())))
             {
@@ -131,12 +151,23 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone> Propos
                 return Err(ApplicationError::DedupCapacity);
             }
         }
+        if self.retired(operation) {
+            // Applies as `Expired` whatever is pending: it needs no room, so
+            // pending entries cannot refuse it `DedupCapacity`.
+            return Ok(std::mem::size_of::<LogicalReceipt>());
+        }
         let mut commands: Vec<_> = distinct
             .into_iter()
             .map(|(id, (bytes, control))| (id, bytes, control))
             .collect();
         commands.push((operation, bytes, c.control(self.control_profile.as_ref())));
-        self.reserve(&commands)?;
+        // A live proposal is credited only with its own planned prune,
+        // computed on the applied state. A retained duplicate applies as its
+        // original receipt: no prune.
+        let plan = self
+            .retirement_plan(&c)
+            .filter(|_| !self.state.records.contains_key(&operation));
+        self.reserve(&commands, plan)?;
         Ok(std::mem::size_of::<LogicalReceipt>())
     }
 }

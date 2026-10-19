@@ -12,15 +12,16 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-//! Versioned checkpoint v3: the materialised child state, restored by direct
+//! Versioned checkpoint v4: the materialised child state, restored by direct
 //! decode and verified by exact canonical re-encoding (no record replay).
+//! The layout is LV1's v3; v4 embeds command format v3 (`consumed_through`).
 use super::*;
 use codec::Encoder;
 mod restore;
-/// Ordinary checkpoint v3 (application schema 3).
-const CHECKPOINT: &[u8; 8] = b"VBLOGC03";
-/// Enrollment-candidate checkpoint v3 (application schema 4).
-const CANDIDATE_CHECKPOINT: &[u8; 8] = b"VBLOGC04";
+/// Ordinary checkpoint v4 (application schema 5).
+const CHECKPOINT: &[u8; 8] = b"VBLOGC05";
+/// Enrollment-candidate checkpoint v4 (application schema 6).
+const CANDIDATE_CHECKPOINT: &[u8; 8] = b"VBLOGC06";
 impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
     LogicalApplication<C, S, W>
 {
@@ -135,6 +136,7 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
                     LogicalRefusal::SnapshotConflict => 4,
                     LogicalRefusal::InvalidResponse => 5,
                     LogicalRefusal::OperationConflict => 6,
+                    LogicalRefusal::Expired => 7,
                 })
             }
         }

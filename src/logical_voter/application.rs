@@ -30,8 +30,9 @@ pub(super) struct State {
     pub published: Option<SnapshotRef>,
     pub bytes: usize,
     pub enrollment: Option<Box<LogicalEnrollmentRecord>>,
-    /// Session-space retirement watermark (a contiguous prefix). Always 0
-    /// until retirement is implemented; carried by checkpoint v3.
+    /// Session-space retirement watermark (a contiguous prefix of the
+    /// session-ordered ID space, maintained as a maximum). Every
+    /// session-space ID below it is `Expired`.
     pub retired_below: u128,
     /// High-water mark (a maximum) of allocated parent snapshot generations,
     /// so numbering never depends on retained records.
@@ -112,6 +113,7 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
         operation: OperationId,
         bytes: &[u8],
     ) -> Result<LogicalReceipt, ApplicationError> {
+        // Every check runs before any mutation (architect plan §2.4).
         let command = self.decode_command(bytes)?;
         if command.operation != operation {
             return Err(ApplicationError::InvalidCommand);
@@ -125,18 +127,31 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
             receipt.duplicate = true;
             return Ok(receipt);
         }
-        self.reserve(&[(
-            operation,
-            bytes,
-            command.control(self.control_profile.as_ref()),
-        )])?;
+        if self.retired(operation) {
+            // Never executed again, never recorded: the original outcome (if
+            // any) was consumed, or its session was closed by a claim.
+            return Ok(LogicalReceipt {
+                index: entry.index,
+                operation,
+                first_index: entry.index,
+                outcome: LogicalOutcome::Refused(LogicalRefusal::Expired),
+                parent_revision: self.state.parent.as_ref().map(|p| p.revision),
+                parent_generation: self.state.parent.as_ref().map(|p| p.generation),
+                epoch: self.state.representative.map(|r| r.epoch),
+                duplicate: true,
+            });
+        }
+        let plan = self.retirement_plan(&command);
+        self.reserve(
+            &[(
+                operation,
+                bytes,
+                command.control(self.control_profile.as_ref()),
+            )],
+            plan,
+        )?;
         let configuration = self.state.membership.id();
-        let outcome = if self
-            .state
-            .membership
-            .voter_store(command.representative.physical.node)
-            != Some(command.representative.physical.store)
-        {
+        let outcome = if !self.eligible(&command.representative) {
             LogicalOutcome::Refused(LogicalRefusal::Ineligible)
         } else {
             self.execute(&command, entry.index, entry.term)?
@@ -167,7 +182,96 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
                 receipt,
             },
         );
+        if let Some(watermark) = plan {
+            // The current representative acknowledged its consumed outcomes:
+            // retire them, and every claim that can no longer execute.
+            self.retire(watermark, true)?;
+        } else if command.is_claim() && outcome == LogicalOutcome::Claimed {
+            // A new session closes every older one. Claim records stay until
+            // the new session's first command proves this claim consumed.
+            let session = command.representative.logical_session.get();
+            self.retire(command::session_operation(session, 1), false)?;
+        }
         Ok(receipt)
+    }
+    /// A session-space ID below the watermark (architect §2.4 step 3).
+    pub(super) fn retired(&self, operation: OperationId) -> bool {
+        operation.get() >= command::SESSION_SPACE && operation.get() < self.state.retired_below
+    }
+    /// Whether the representative's physical store is a current child voter.
+    pub(super) fn eligible(&self, r: &RepresentativeBinding) -> bool {
+        self.state.membership.voter_store(r.physical.node) == Some(r.physical.store)
+    }
+    /// The watermark this command moves to, if it may move it: only a
+    /// session command of the current, eligible representative does.
+    pub(super) fn retirement_plan(&self, c: &Command) -> Option<u128> {
+        if c.is_claim()
+            || self.state.representative != Some(c.representative)
+            || !self.eligible(&c.representative)
+        {
+            return None;
+        }
+        // `consumed_through < sequence` (decode), so this is at most the
+        // command's own ID and cannot overflow the sequence half.
+        let acknowledged = command::session_operation(
+            c.representative.logical_session.get(),
+            c.consumed_through + 1,
+        );
+        Some(self.state.retired_below.max(acknowledged))
+    }
+    /// Whether a retained record would be pruned by `plan` (none without a
+    /// plan): session keys below it, and claims whose expected epoch is
+    /// older than the current one (they can only refuse if re-applied).
+    pub(super) fn prunable(
+        &self,
+        operation: OperationId,
+        record: &LogicalActionStatus,
+        plan: Option<u128>,
+    ) -> Result<bool, ApplicationError> {
+        let Some(watermark) = plan else {
+            return Ok(false);
+        };
+        if operation.get() >= command::SESSION_SPACE {
+            return Ok(operation.get() < watermark);
+        }
+        let expected = self
+            .decode_command(&record.command)?
+            .claim_expectation()
+            .ok_or(ApplicationError::InvalidCommand)?;
+        Ok(expected.map(RepresentativeEpoch::get)
+            < self.state.representative.map(|r| r.epoch.get()))
+    }
+    /// Raise the watermark and drop retired session records and, when
+    /// `claims` is set, dead claim records, with their retained bytes.
+    fn retire(&mut self, watermark: u128, claims: bool) -> Result<(), ApplicationError> {
+        self.state.retired_below = self.state.retired_below.max(watermark);
+        let below = self.state.retired_below;
+        let session = OperationId::new(command::SESSION_SPACE).expect("nonzero");
+        // Session keys sort above every claim key, so this is a prefix range.
+        let mut doomed: Vec<OperationId> = self
+            .state
+            .records
+            .range(session..)
+            .map(|(op, _)| *op)
+            .take_while(|op| op.get() < below)
+            .collect();
+        if claims {
+            let plan = Some(below);
+            for (op, record) in self.state.records.range(..session) {
+                if self.prunable(*op, record, plan)? {
+                    doomed.push(*op);
+                }
+            }
+        }
+        for op in doomed {
+            let record = self.state.records.remove(&op).expect("listed record");
+            self.state.bytes = self
+                .state
+                .bytes
+                .checked_sub(record.command.len())
+                .ok_or(ApplicationError::InvalidCommand)?;
+        }
+        Ok(())
     }
 }
 

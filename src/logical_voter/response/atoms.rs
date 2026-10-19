@@ -43,6 +43,7 @@ pub(super) fn outcome(e: &mut Encoder, r: LogicalOutcome) -> Result<(), Applicat
                 LogicalRefusal::SnapshotConflict => 4,
                 LogicalRefusal::InvalidResponse => 5,
                 LogicalRefusal::OperationConflict => 6,
+                LogicalRefusal::Expired => 7,
             })
         }
     }
@@ -81,5 +82,5 @@ pub(super) fn metadata(e: &mut Encoder, m: &LogicalMetadata) -> Result<(), Appli
     ] {
         e.u64(n)?;
     }
-    Ok(())
+    e.u128(m.retired_below)
 }

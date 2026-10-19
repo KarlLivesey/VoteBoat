@@ -73,6 +73,10 @@ pub struct LogicalApplication<C = NativeLogCodec, S = NativeSnapshotCodec, W = N
     control_profile: Option<LogicalActivationControlProfile>,
     state: application::State,
     initialization: LogicalInitialization,
+    /// Test-only record of every entry applied since construction (`None`
+    /// after a restore), so tests can replay the full history.
+    #[cfg(test)]
+    journal: Option<Vec<LogEntry>>,
 }
 impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
     LogicalApplication<C, S, W>
@@ -146,6 +150,8 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
             configuration: Vec::new(),
             control_profile: None,
             state,
+            #[cfg(test)]
+            journal: Some(Vec::new()),
             initialization,
         };
         app.configuration = app.configuration_bytes()?;

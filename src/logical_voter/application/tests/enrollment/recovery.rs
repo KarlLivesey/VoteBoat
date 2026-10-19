@@ -81,7 +81,7 @@ fn original_joint_then_final_parent_updates_promote_without_changing_candidate_s
             .voter_store(NodeId::new(3).unwrap()),
         Some(store(3))
     );
-    assert_eq!(a.schema_version(), 4);
+    assert_eq!(a.schema_version(), 6);
     assert_eq!(
         a.initialization(),
         LogicalInitialization::EnrollmentCandidate(fixture::plan())
@@ -123,9 +123,14 @@ fn mutate_parent(
         snapshot_membership: snapshot.and_then(|s| s.1),
     };
     let c = Command {
-        operation: OperationId::new(operation).unwrap(),
+        operation: OperationId::new(command::session_operation(
+            a.state.representative.unwrap().logical_session.get(),
+            u64::try_from(operation).unwrap(),
+        ))
+        .unwrap(),
         origin_configuration: a.state.membership.id(),
         representative: a.state.representative.unwrap(),
+        consumed_through: 0,
         body: CommandBody::Mutate {
             expected_generation: parent.generation,
             update,
@@ -237,7 +242,7 @@ fn candidate_checkpoint_suffix_reclaim_and_original_retry_preserve_import() {
     restored.apply_batch(&[suffix]).unwrap();
     assert_eq!(restored.state, a.state);
     assert_eq!(restored.state.enrollment, first);
-    assert_eq!(restored.schema_version(), 4);
+    assert_eq!(restored.schema_version(), 6);
     assert_eq!(
         restored.state.representative.unwrap().logical_session.get(),
         2

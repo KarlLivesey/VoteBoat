@@ -55,8 +55,13 @@ impl<'a, N: LogicalBackingChild> LogicalBackingBridge<'a, N> {
     }
 }
 impl<N: LogicalBackingChild> LogicalBackingBridge<'_, N> {
+    /// Host claim IDs live in claim space (`< 2^64`); session space belongs
+    /// to the bridge's own sequences.
     pub fn begin_claim(&mut self, operation: OperationId) -> Result<(), LogicalBridgeError> {
         self.intake()?;
+        if operation.get() >= command::SESSION_SPACE {
+            return Err(LogicalBridgeError::InvalidAssembly);
+        }
         self.work = Some(BridgeWork::new(
             BridgeStage::BeforeClaim(operation),
             self.nodes[0].local().applications[&self.mapping.child].candidate(),
@@ -170,9 +175,10 @@ impl<N: LogicalBackingChild> LogicalBackingBridge<'_, N> {
             .sequence
             .checked_add(1)
             .ok_or(LogicalBridgeError::Exhausted)?;
-        let operation = OperationId::new(
-            (u128::from(representative.logical_session.get()) << 64) | u128::from(sequence),
-        )
+        let operation = OperationId::new(command::session_operation(
+            representative.logical_session.get(),
+            sequence,
+        ))
         .ok_or(LogicalBridgeError::Exhausted)?;
         let node = self.route().ok_or(LogicalBridgeError::InvalidAssembly)?;
         let core = self.nodes[node]
@@ -184,6 +190,9 @@ impl<N: LogicalBackingChild> LogicalBackingBridge<'_, N> {
             operation,
             representative,
             origin_configuration: core.membership().id(),
+            // `intake` proved the previous sequence's outcome was consumed:
+            // the child may retire it and everything before it.
+            consumed_through: self.sequence,
             body,
         };
         let app = &self.nodes[node].local().applications[&self.mapping.child];

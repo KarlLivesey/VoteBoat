@@ -66,6 +66,7 @@ fn receipts_preserve_all_outcomes_and_original_fields() {
         LogicalRefusal::SnapshotConflict,
         LogicalRefusal::InvalidResponse,
         LogicalRefusal::OperationConflict,
+        LogicalRefusal::Expired,
     ] {
         let r = LogicalReceipt {
             outcome: LogicalOutcome::Refused(refusal),
@@ -140,7 +141,7 @@ fn exact_query_variants_and_every_snapshot_reference_field_are_distinct() {
     let mut golden = [0u8; 10];
     a.encode_query(&LogicalQuery::Metadata, &mut golden)
         .unwrap();
-    assert_eq!(&golden, b"VBLOGR01\x01\x03");
+    assert_eq!(&golden, b"VBLOGR03\x01\x03");
     let original = encoded_receipt(&a, &receipt());
     for r in references() {
         let receipt = LogicalReceipt {
