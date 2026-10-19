@@ -26,7 +26,8 @@ use std::{
 
 /// Exclusive per-replica native snapshot I/O. begin_slot truncates only the
 /// inactive slot. append must finish all bytes or fail. sync_slot covers data
-/// and its directory entry before any root may reference it;
+/// and its directory entry before any root may reference it (an entry already
+/// made durable in this session need not be synchronized again);
 /// publish_manifest must sync a temporary file, replace the root atomically,
 /// then sync its directory. Reads refuse oversize data before allocating.
 pub trait SnapshotIo {
@@ -41,6 +42,12 @@ pub trait SnapshotIo {
 pub struct FileSnapshotIo {
     directory: PathBuf,
     _lock: File,
+    /// Whether each slot file's directory entry was made durable in this
+    /// session. A slot is rewritten in place (same inode, truncated), so after
+    /// the first directory sync only its data and size need syncing. Starts
+    /// false in every session: a file created by a crashed earlier session
+    /// may have a volatile entry.
+    entry_durable: [bool; 2],
 }
 impl FileSnapshotIo {
     fn lock(directory: &Path) -> io::Result<File> {
@@ -77,6 +84,7 @@ impl FileSnapshotIo {
         Ok(Self {
             directory,
             _lock: lock,
+            entry_durable: [false; 2],
         })
     }
     pub fn open(directory: impl AsRef<Path>) -> io::Result<Self> {
@@ -86,6 +94,7 @@ impl FileSnapshotIo {
         Ok(Self {
             directory,
             _lock: lock,
+            entry_durable: [false; 2],
         })
     }
     fn slot_path(&self, slot: u8) -> io::Result<PathBuf> {
@@ -116,12 +125,21 @@ impl SnapshotIo for FileSnapshotIo {
         Self::read_bounded(&self.slot_path(slot)?, limit)
     }
     fn begin_slot(&mut self, slot: u8, prefix: &[u8]) -> io::Result<()> {
-        OpenOptions::new()
-            .write(true)
-            .create(true)
-            .truncate(true)
-            .open(self.slot_path(slot)?)?
-            .write_all(prefix)
+        let path = self.slot_path(slot)?;
+        let mut file = match OpenOptions::new().write(true).truncate(true).open(&path) {
+            Ok(file) => file,
+            Err(e) if e.kind() == io::ErrorKind::NotFound => {
+                // A new directory entry: the next sync_slot must persist it.
+                self.entry_durable[usize::from(slot)] = false;
+                OpenOptions::new()
+                    .write(true)
+                    .create(true)
+                    .truncate(true)
+                    .open(&path)?
+            }
+            Err(e) => return Err(e),
+        };
+        file.write_all(prefix)
     }
     fn append_slot(&mut self, slot: u8, bytes: &[u8]) -> io::Result<()> {
         OpenOptions::new()
@@ -134,7 +152,16 @@ impl SnapshotIo for FileSnapshotIo {
             .write(true)
             .open(self.slot_path(slot)?)?
             .sync_all()?;
-        File::open(&self.directory)?.sync_all()
+        // Ordering O4 (docs/IMPLEMENTATION.md, ST2 round 2): the entry must be
+        // durable before a durable root references the slot. Once synced in
+        // this session it cannot change: the store never removes or renames a
+        // slot, and begin_slot truncates the same inode in place.
+        let entry = &mut self.entry_durable[usize::from(slot)];
+        if !*entry {
+            File::open(&self.directory)?.sync_all()?;
+            *entry = true;
+        }
+        Ok(())
     }
     fn publish_manifest(&mut self, bytes: &[u8]) -> io::Result<()> {
         let temp = self.directory.join("MANIFEST.next");
