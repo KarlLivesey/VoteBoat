@@ -140,10 +140,10 @@ mod tests {
             },
         )
         .err()
-        .expect("second distinct ID must exceed the application envelope");
+        .expect("an unacknowledged second write must exceed the one-outcome window");
         let original = error.to_string();
         assert!(
-            original.contains("DedupCapacity"),
+            original.contains("SessionWindow"),
             "unexpected failure: {original}"
         );
         let cleanup: Result<(), Failure> = cleanup(replicas, &clock, &root, error);

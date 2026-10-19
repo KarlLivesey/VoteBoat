@@ -158,7 +158,7 @@ fn foreground(
             .propose(ClientRequest {
                 group: group_id(GROUPS),
                 operation: Counter::operation(1, FOREGROUND).unwrap(),
-                bytes: Counter::command(FOREGROUND - 1, 0),
+                bytes: Counter::command(0, 0),
             })
             .map_err(|e| format!("foreground refused: {:?}", e.reason))?;
         *pending = Some((n, ticket));
@@ -294,7 +294,7 @@ fn retry_foreground(h: &Harness, nodes: &mut [Replica<SharedLog>]) {
         .propose(ClientRequest {
             group: group_id(GROUPS),
             operation: Counter::operation(1, FOREGROUND).unwrap(),
-            bytes: Counter::command(FOREGROUND - 1, 0),
+            bytes: Counter::command(0, 0),
         })
         .unwrap();
     until(nodes, &h.clock, |ns| {

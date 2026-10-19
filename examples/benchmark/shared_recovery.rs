@@ -192,9 +192,9 @@ fn checkpoint_survivors(
         .collect()
 }
 
-/// The foreground write's sequence in the built-in session. It acknowledges
-/// every earlier sequence, so it fits the window whatever the workload size.
-const FOREGROUND: u64 = 900_001;
+/// The foreground write's sequence in the built-in session: distinct from the
+/// workload's sequences (at most 4 × GROUPS) and inside the 128-entry window.
+const FOREGROUND: u64 = 100;
 fn repair(h: &Harness, replicas: &mut [Replica<SharedLog>], forced: &BTreeMap<GroupIdentity, u64>) {
     let mut totals = PollTotals::default();
     for g in 1..=GROUPS {
@@ -222,7 +222,7 @@ fn repair(h: &Harness, replicas: &mut [Replica<SharedLog>], forced: &BTreeMap<Gr
                     .propose(ClientRequest {
                         group: group_id(GROUPS),
                         operation: Counter::operation(1, FOREGROUND).unwrap(),
-                        bytes: Counter::command(FOREGROUND - 1, 0),
+                        bytes: Counter::command(0, 0),
                     })
                     .map_err(|e| format!("foreground refused: {:?}", e.reason))?;
                 foreground = Some((n, ticket));

@@ -592,7 +592,7 @@ fn history(protocol: NativePeerProtocol, mixed: bool) {
     assert!(!h.nodes[0]
         .membership_drain_ready(&h.plan, &h.journal)
         .unwrap());
-    h.write(group_id(1), 501, 2, false, 9);
+    h.write(group_id(1), 50, 2, false, 9);
     let batch = driver
         .coordinator
         .poll(&h.journal, h.plan.assignments().len(), |g| {
@@ -638,7 +638,7 @@ fn history(protocol: NativePeerProtocol, mixed: bool) {
         h.write(group_id(g), 100 + g as u128, 7, true, 7);
         h.write(
             group_id(g),
-            600 + g as u128,
+            60 + g as u128,
             1,
             false,
             if g == 1 { 10 } else { 8 },

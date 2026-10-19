@@ -830,7 +830,7 @@ mod tests {
             ),
             sequence,
             group: l.rows[row].group,
-            operation: OperationId::new(l.rows[row].operation as u128).unwrap(),
+            operation: Counter::operation(1, l.rows[row].operation as u64).unwrap(),
         }
     }
     fn applied(ticket: ClientTicket, index: u64, value: i64) -> ClientOutcome<CounterReceipt> {
