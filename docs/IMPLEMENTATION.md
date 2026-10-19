@@ -19,7 +19,7 @@ maximum sustainable rate. Design: `target/claude/research-lv/architect-plan-life
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current NT1: connection generations and listener (`lb/nt1-connection-generations`) | Audit N1, N3, N6, P3-6 and the P3-16 discovery form: survivors no longer enter recovery after ~27.8 h with one peer down, and a port scan or fd spike cannot kill a node | — (ST2 runs in parallel and also edits `native/startup.rs`, in a different function; a rebase reconciles) | Q2 probe written up; native soak of more than 10,000 connect attempts fails on the base and passes; restart uniqueness; injected accept errors; two-node native reconnect past the old boundary; fmt, four strict Clippy configurations and matched fmt/Clippy; transport, peers, connect, startup, runtime-peer, logical_voter_native and counter_service suites in default and all-features | LB |
+| Current NT1: connection generations and listener (`lb/nt1-connection-generations`; implemented, in review) | Audit N1, N3, N6, P3-6 and the P3-16 discovery form: survivors no longer enter recovery after ~27.8 h with one peer down, and a port scan or fd spike cannot kill a node | — (ST2 runs in parallel and also edits `native/startup.rs`, in a different function; a rebase reconciles) | Q2 probe written up; native soak of more than 10,000 connect attempts fails on the base and passes; restart uniqueness; injected accept errors; two-node native reconnect past the old boundary; fmt, four strict Clippy configurations and matched fmt/Clippy; transport, peers, connect, startup, runtime-peer, logical_voter_native and counter_service suites in default and all-features | LB |
 | Next NT2: roster, budget and cache reclaim | Audit N2, RT3, N4, N5: re-provisioning a node or churning members never kills survivors | NT1 (same files) | U6 probe as fail@main; churn soak | LB |
 | Then DR1: Counter session ledger | Audit S1, RT2 for Counter through the generic `SessionLedger` | ST2 merged | 200,000-write soak fails on the base; restart and exactly-once tests | LB |
 
@@ -216,6 +216,22 @@ matched framework links none of these (no roster, driver, connector or node in
 `benchmarks/matched/src`), so framework cells are unaffected by construction.
 Native durable A/B pairs (`svc.sh`/`nat.sh`) run on the remote Mac and were not
 run under this task's host rules (Linux cores 0-3 only).
+
+**Validation (this branch, Linux, cores 0-3, each binary run directly and
+sequentially).** `cargo +stable fmt --all -- --check`; strict Clippy default,
+all-features, no-default-features and native-only; matched fmt and Clippy: zero
+diagnostics. `node validation/check-inventory.mjs` passes. All-features: lib 485,
+`voteboat-counter` 53, transport 37, peers 20, connect 21, dial 6, discovery 9,
+remote_discovery 29, startup 63, effect_owner 210, peer_rotation 7,
+quic_connect 15, striped_node 2, native_member_startup 50, learners 24,
+member_recovery 44, logical_voter_native 42, counter_service 203, routed 192,
+logical_nested_native 15, logical_activation_nested 17: all pass. Default
+features: lib 483, `voteboat-counter` 50, transport 37, peers 20, connect 21,
+dial 6, discovery 9, remote_discovery 29, startup 48, effect_owner 210,
+peer_rotation 5, striped_node 1, learners 23, member_recovery 43,
+logical_voter_native 25, counter_service 144: all pass. Mutation check: putting
+back the base rule (any accept error but `WouldBlock`/`EINTR` is fatal) fails 3
+of the 5 listener tests.
 
 **Q8 record (certificate validity).** The three service binaries generate no
 certificates: they load operator-supplied DER material, so `notAfter` is the
