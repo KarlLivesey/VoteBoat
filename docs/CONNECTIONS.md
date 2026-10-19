@@ -106,7 +106,12 @@ listener; QUIC reports `None`. The peer driver turns the counts into per-poll
 `NetworkHealth` and `EventKind::Pressure`. The service binary's `metrics`
 command prints them (`accept_errors`, `accept_backoffs`, `accept_paused`, and
 the live `peer_accept_*` fields), so a node that has stopped accepting is never
-silent.
+silent. The same path carries `generations_exhausted`: set for a sample in which
+the roster could issue no attempt or a discovery source reported `Exhausted`
+for a dial; the attempt counts as a `connection_failures` entry and the roster
+backs off and retries, so the flag can be set while other attempts proceed.
+The directory and transfer binaries print the same fields in their `status`
+and `metrics` output.
 
 The accepted deadline must be later than submission time and no farther than the
 configured timeout (default 10000 ms, hard ceiling 60000 ms). Pass the exact live

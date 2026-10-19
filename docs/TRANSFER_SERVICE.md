@@ -104,6 +104,12 @@ store in place of a missing one.
 Restart a replica with `serve recover`, its original directory, group, TLS and
 profile. Then use `client ... resume`. It re-reads every phase using the original
 operation IDs. `step` executes at most one next action; `status` only reads.
+Every `status` reply also carries the replica's listener health as
+`peer_accept_listener`, `peer_accept_errors`, `peer_accept_backoffs`,
+`peer_accept_paused`, `peer_accept_last_os_error` and
+`peer_generations_exhausted` (see `docs/CONNECTIONS.md`), so a replica that has
+stopped accepting peers or issuing connection attempts is visible from the
+client without a separate metrics command.
 The client stops after128 attempts or roughly120 seconds plus the current round's
 bounded request deadlines. A pending/unknown result remains unresolved; resume the same profile.
 There is no timeout unfreeze or rollback.

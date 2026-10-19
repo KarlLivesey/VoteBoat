@@ -79,7 +79,10 @@ pub struct NetworkHealth {
     /// The listener is backing off (out of descriptors, buffers or memory)
     /// and accepts no connection until its retry time.
     pub accept_paused: bool,
-    /// The peer roster can issue no further connection attempt.
+    /// Connection attempts were refused for lack of identity space during
+    /// this sample: the peer roster could issue no further attempt, or a
+    /// discovery source reported `Exhausted` for a dial. The roster backs off
+    /// and retries, so this can be set while other attempts still proceed.
     pub generations_exhausted: bool,
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
