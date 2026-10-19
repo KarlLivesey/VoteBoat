@@ -82,10 +82,12 @@ untracked scratch copies (no kernel policy change), folded stacks read as text.
   applied where a leader builds an Append (`EntryLog::replication_range` and
   the retry's `shared_range`). It keeps shared pieces in order while what they
   keep alive beyond plain copies of their visible entries totals at most
-  `MESSAGE_HIDDEN_MAX` (32 KiB) and at most the selection budget the visible
-  entries leave unused; any other piece is copied into an owned piece, as a
-  vector would hold it. Per piece the hidden bytes are exact for a whole
-  backing and for alike entries, otherwise bounded above from payload lengths.
+  `MESSAGE_HIDDEN_MAX` (32 KiB) plus twice the plain copy of the visible
+  entries, and at most the selection budget the visible entries leave unused;
+  any other piece is copied (16 or more entries into an exact frozen backing
+  of their own when its index still fits, otherwise a plain vector). Per
+  piece the hidden bytes are exact for a whole backing and for alike entries,
+  otherwise bounded above from payload lengths.
   No state transition, wire or protocol change: the visible entries are the
   original selection. Failure: none new (a copy allocates as main always
   did). Freezing keeps at most `SPARE_MAX` (4 KiB) of spare capacity, so a
@@ -108,7 +110,7 @@ untracked scratch copies (no kernel policy change), folded stacks read as text.
 
 | Finding | Change | Test | Measurement |
 | --- | --- | --- | --- |
-| P1 (Opus): a 1-entry Append from a recovered 16,384 × 8 B backing cost 1,441,792 B against 88 B visible and the 1 MiB outbound budget, so recovered entries could never reach a follower | `EntryBatch::for_message` on selection and retry (bound above); frozen backings keep ≤ 4 KiB spare; checkpoint/WAL decode allocates exactly | `recovered_checkpoint_entries_replicate_and_commit_under_default_outbound_budget` (`tests/raft.rs`; 16,256 × 8 B and 1,000 × 1 KiB, checkpoint, power loss, restart, partition so the restarted leader needs the empty follower; refused Appends counted; fails without the fix: "16256 × 8: Appends refused"); `a_narrow_message_from_a_wide_backing_is_charged_like_a_plain_copy`; `messages_keep_at_most_the_bounded_hidden_charge` (random mixed/uniform/truncated backings, every 7th offset, four entry and byte limits); `hidden_charges_are_exact_where_claimed_and_never_low` | Linux driver widths 231/515: 1,658.3 → 1,656.8 and 1,529.8 → 1,530.8 x86 instructions per write (round 1 → round 2) |
+| P1 (Opus): a 1-entry Append from a recovered 16,384 × 8 B backing cost 1,441,792 B against 88 B visible and the 1 MiB outbound budget, so recovered entries could never reach a follower | `EntryBatch::for_message` on selection and retry (bound below); a copied wide piece is frozen into its own exact backing; frozen backings keep ≤ 4 KiB spare; checkpoint/WAL decode allocates exactly | `recovered_checkpoint_entries_replicate_and_commit_under_default_outbound_budget` (`tests/raft.rs`; 16,256 × 8 B and 1,000 × 1 KiB, checkpoint, power loss, restart, partition so the restarted leader needs the empty follower; refused Appends counted; fails without the fix: "16256 × 8: Appends refused"); `a_narrow_message_from_a_wide_backing_is_charged_like_a_plain_copy`; `messages_keep_at_most_the_bounded_hidden_charge` (random mixed/uniform/truncated backings, every 7th offset, four entry and byte limits); `hidden_charges_are_exact_where_claimed_and_never_low` | Linux driver widths 231/515: 1,658.3 → 1,657.1 and 1,529.8 → 1,531.2 x86 instructions per write (round 1 → final round 2); quiet-Mac bulk cells keep round 1's gain (below) |
 | P2 (Sol): a mixed 16-entry Append decoded under a 1,472 B budget retained 1,880 B (uncharged 408 B index) | `IndexNeed` shared by freezing and the codec; decoder admits the index before allocating it; encoder charges it | `decoded_memory_budget_charges_the_index_of_the_decoded_entries_exactly` (`tests/wire.rs`; widths 15/16 uniform and mixed, a uniform and a mixed subrange of a mixed source; decode and encode succeed at the retained charge and fail one byte below; fails without the fix at 1,879 B) | Wire bytes unchanged (byte goldens pass) |
 | P2 (Opus): appending to an empty view charged an owned batch by capacity (536 B vs 88 B) | `LogView::appended_charge` uses `EntryBatch::log_charge`; comments in `raft.rs`, `view.rs` and this record corrected | `appending_to_an_empty_log_charges_what_the_installed_log_holds` (widths 1, 3, 16 with spare capacity; summary equals a fresh recount and the log's charge) | — |
 | Singleton cost (both reviewers) | Harness: a pass of one original with nothing queued uses `Event::Propose` (main's harness path), wider passes use the builder; empty batches answer `len`/`last`/`payload_bytes`/validators/`has_configuration`/charge inline | `width_one_passes_use_the_propose_event_and_staging_matches_it`, `a_lone_original_with_queued_work_is_staged_with_it` (matched 75/75) | Linux driver width 1: 53,253 → 52,914 (harness), 52,958 → 52,794 (empty paths, same session) x86 instructions per round; main 51,356–51,405 |
@@ -117,10 +119,13 @@ untracked scratch copies (no kernel policy change), folded stacks read as text.
 Message budgets and shared batches. A shared piece keeps its whole backing
 alive, so every charge of a batch counts the whole backing. What a
 leader-built Append keeps beyond plain copies of its visible entries is at
-most `MESSAGE_HIDDEN_MAX` = 32 KiB and at most `max_batch_bytes − 256 −
-Σ(37 + payload)` over its visible entries. So (1) an Append's retained charge
-exceeds main's charge for the same visible entries by at most 32 KiB, and
-(2) it stays inside the per-message bound the core already reserves
+most `MESSAGE_HIDDEN_MAX` (32 KiB) plus twice the plain copy of its visible
+entries, and at most `max_batch_bytes − 256 − Σ(37 + payload)` over its
+visible entries. So (1) an Append's retained charge is at most three times
+main's charge for the same visible entries plus 32 KiB (a narrow slice of a
+wide backing, such as one recovered entry, is copied and charged exactly as
+main charges it), and (2) it stays inside the per-message bound the core
+already reserves
 (`reserve_effects`: `max_batch_bytes` plus one record per entry): a retained
 payload exceeds its length by at most 23 bytes, so records, payloads and
 hidden bytes stay within `max_batch_bytes − 256 + (size_of::<LogEntry>() −
@@ -128,7 +133,17 @@ hidden bytes stay within `max_batch_bytes − 256 + (size_of::<LogEntry>() −
 plus a mixed index of ≤ 1,025 × 24 B) are shared; a narrow slice of a wide
 backing is copied. Wire-decoded Appends hold exactly their visible entries
 plus, for 16 or more mixed entries, the charged index. Headroom: an outbound
-budget sized for main's Appends needs at most 32 KiB more per Append. The
+budget sized for main's Appends needs up to three times their charge plus
+32 KiB per Append, never more than the core's per-message reservation. A
+strict 32 KiB allowance was measured first and rejected: the harness proposes
+batches of thousands of entries while an Append carries at most 1,024, so
+most bulk Appends hold part of a wider backing; it copied most of them (scratch
+count at 16 workers: 2,070 copied pieces against 367 Appends kept whole) and
+cut the quiet-Mac bulk-16 gain from −12.8% to −9.2%. Copies held as plain
+vectors were also rejected: a lagging follower then gathered large owned
+pieces that every compaction shifts, and two of four bulk-1 attribution runs
+showed one follower at a third of its persists with sends per original
+doubled; frozen copies restore round 1's behaviour (four runs). The
 canonical log still charges a partly trimmed shared piece its whole backing
 (conservative); a recovered log's backing was counted when the owner limits
 were derived at startup.
@@ -139,9 +154,12 @@ lengths, so set-up and warm-up cancel; scratch build, not committed):
 
 | Width | main b72d1ee3 | round 1 6fecd1fb | round 2 head |
 | ---: | ---: | ---: | ---: |
-| 1 (per round) | 51,356 | 53,283 (+3.8%) | 52,794 (+2.8%) |
-| 231 (per write) | 2,023.6 | 1,658.3 (−18.1%) | 1,657.8 (−18.1%) |
-| 515 (per write) | 1,909.4 | 1,529.8 (−19.9%) | 1,531.9 (−19.8%) |
+| 1 (per round) | 51,352–51,405 | 53,283 (+3.8%) | 52,794–52,871 (+2.8–3.0%) |
+| 231 (per write) | 2,023.6–2,025.0 | 1,658.3 (−18.1%) | 1,657.1 (−18.2%) |
+| 515 (per write) | 1,907.9–1,909.4 | 1,529.8 (−19.9%) | 1,531.2 (−19.8%) |
+
+Repeated two-run measurements of one binary vary by up to about ±70
+instructions per round between sessions; same-session pairs are compared.
 
 Mac driver (3 interleaved pairs, medians, `/usr/bin/time -l` instructions per
 write including set-up; `dmac.sh`):
@@ -151,6 +169,60 @@ write including set-up; `dmac.sh`):
 | 1 | 56,974–56,990 | 59,402 (+4.3%) | 59,256 (+4.0%) | 3,950–3,957 | 4,088 (+3.3%) | 4,062 (+2.8%) |
 | 231 | 2,516.5 | 2,062.3 (−18.1%) | 2,059.2 (−18.2%) | 130.7 | 101.1 (−22.0%) | 100.8 (−22.9%) |
 | 515 | 2,817.1 | 2,243.7 (−20.4%) | 2,242.8 (−20.4%) | 119.3 | 93.1 (−21.8%) | 93.4 (−21.7%) |
+
+Mac driver at the final head 2c6f46f5 (3 pairs): width 1 59,213 vs 56,972
+instructions per write (+3.9%), 4,019 vs 3,949 ns (+1.8%); width 231 2,058.7 vs
+2,516.3 (−18.2%), 100.3 vs 129.8 ns (−22.7%); width 515 2,240.8 vs 2,817.2
+(−20.5%), 93.1 vs 119.0 ns (−21.8%).
+
+Quiet Mac, whole process, 5 interleaved pairs (`fwmac.sh b72d1ee3 <head> 5`,
+CPU ns/write medians; Mac load 0.3–1.9 at start):
+
+| Cell | main b72d1ee3 | round 1 6fecd1fb | 6721cf4a | 0000b6f0 | final 2c6f46f5 | final pairs |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| bulk-16 | 249 | 218 (−12.8%) | 226 (−9.2%) | 218 (−12.4%) | 217 (−12.9%) | 0.86 0.88 0.88 0.87 0.88 |
+| single-16 | 22,414 | 22,867 (+2.6%) | 22,723 (+2.3%) | 22,524 (+1.9%) | 22,575 (+0.7%) | 0.99 1.00 1.00 1.07 1.02 |
+| bulk-1 | 216 | 189 (−12.9%) | 189 (−13.3%) | 188 (−13.0%) | 190 (−12.0%) | 0.88 0.86 0.87 0.91 0.86 |
+| single-1 | 12,580 | 13,185 (+1.1%) | 12,848 (+1.4%) | 12,925 (+3.1%) | 12,864 (+2.3%) | 1.01 1.01 1.06 1.01 1.02 |
+
+Each column's change is against its own session's main medians (round 1 from
+the runner's `fwmac-pr10-6fecd1fb.txt`). 6721cf4a had the strict 32 KiB
+allowance; 0000b6f0 the scaled allowance with owned copies; 2c6f46f5 adds
+frozen copies. The singleton cells carry no Append copies (width 1 is never
+shared), so their spread across the last three sessions (single-1 +1.4% to
++3.1% for the same singleton code) is session noise around about +2%.
+
+Attribution controls at the final head (one `--attribution true` run per cell
+and revision; bulk-1 at 0000b6f0, 9607ae03 and 6fecd1fb in the text below):
+
+| Cell | Revision | Leader proposals | Max width | Mean width | Leader persists | Follower persists | Persists/original | Sends/original | Phase failures |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| single | main | 132,096 | 1 | 1.00 | **264,195** | 241,422 / 249,912 | 5.719545 | 7.440452 | 0 |
+| single | 2c6f46f5 | 132,096 | 1 | 1.00 | **264,195** | 242,522 / 249,106 | 5.721771 | 7.444904 | 0 |
+| single1 | main | 132,096 | 1 | 1.00 | **264,195** | 247,358 / 258,434 | 5.828996 | 7.659369 | 0 |
+| single1 | 2c6f46f5 | 132,096 | 1 | 1.00 | **264,195** | 247,453 / 259,811 | 5.840139 | 7.681656 | 0 |
+| bulk | main | 7,813 | 2,328 | 511.80 | 12,824 | 5,607 / 5,415 | 0.005963 | 0.007711 | 0 |
+| bulk | 2c6f46f5 | 8,844 | 1,868 | 452.14 | 14,476 | 5,836 / 5,895 | 0.006554 | 0.006932 | 0 |
+| bulk1 | main | 15,231 | 1,964 | 262.54 | 20,180 | 5,786 / 5,526 | 0.007876 | 0.007042 | 0 |
+| bulk1 | 2c6f46f5 | 15,583 | 1,588 | 256.61 | 20,541 | 5,779 / 5,552 | 0.007971 | 0.007643 | 0 |
+
+The singleton floor holds exactly (leader persists 264,195, width 1, 132,096
+proposals); singleton follower persists and per-original counts are within
+0.4% of main. Bulk follows round 1: faster replication gives narrower,
+more numerous leader proposals (bulk-16 8,844 vs 7,813), so persists per
+original rise and sends per original fall at 16 workers, as V3b-s recorded
+(8,934 proposals, 0.006671 / 0.006922). Bulk-1 at 0000b6f0 (owned copies)
+showed one follower at 2,025–2,696 persists with sends per original
+0.0133–0.0147 in two of four runs; round 1 (6fecd1fb, four runs: follower
+persists ≥ 4,598, sends 0.0074–0.0078) and the frozen-copy commit (9607ae03,
+four runs: ≥ 5,168, 0.0076–0.0078) never did, so that mode was a round-2
+effect and is gone.
+
+Targets: bulk cells within 1 point of round 1's gain (met: −12.9% / −12.0%
+against −12.8% / −12.9%). Not met: single-1 ≤ +1.0% (+2.3% in the final gate,
++1.4% to +3.1% across three sessions), driver width-1 instructions ≤ +2%
+(Mac +3.9%, Linux +3.0%). Single-16 is +0.7% in the final gate (+1.9% and
++2.3% in the two earlier sessions).
 
 Remaining singleton gap, measured cause. Exact per-operation counters in a
 scratch driver (a counter read around each harness → core call; x86, main →
@@ -180,8 +252,8 @@ Checks on the round-2 tree (Linux, cores 14–15): `cargo +stable fmt --all --
 --check`; strict Clippy default, all features, no default features and native
 only, zero diagnostics; matched fmt and strict all-target Clippy, zero
 diagnostics. Default: `--lib` 486, `volatile` 7, `snapshot` 27, `raft` 80,
-`log_store` 19, `log_owned` 5, `worker` 9, `wire` 20, `native_relay` 13. All
-features: `--lib` 488, `native_relay` 22 and the same counts for the others.
+`log_store` 19, `log_owned` 5, `worker` 9, `wire` 20, `native_relay` 13 (also
+after the final commit). All features: `--lib` 488, `native_relay` 22 and the same counts for the others.
 Matched tests 75/75. Not run: the full root suites and remote CI.
 
 #### V3 stack composed with V2: main b72d1ee3 merged into PR 10 (19 October 2026)
