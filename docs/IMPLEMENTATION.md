@@ -36723,8 +36723,9 @@ on the same matrix, remaining failures pre-existing and assigned to TR3/TR4/TR6*
 This is a documented departure from architect plan §4's **every counted run
 passes** rule, not a declaration that red executions pass. It applies to bounded
 TR1b acceptance; M1/M3/M5 and the full hardware-independent suite goal remain
-open. The independent parent-versus-PR matrix runner's report will be attached
-when it lands; unchanged deadline source alone is not evidence of equivalence.
+open. The independent final-source parent-versus-PR matrix is recorded under
+"TR1b final-source matrix and round 3" below; unchanged deadline source alone
+is not evidence of equivalence.
 The builder runs the full all-features suite to completion here; the other
 feature configurations and matched-parent matrix are the suite runner's job.
 
@@ -36739,7 +36740,7 @@ cancels stale pull-request runs; push-to-main runs remain uncancelled.
 
 | Milestone | User-visible result | Status |
 | --- | --- | --- |
-| M1 | CI feedback is truthful and green | In progress: TR1 (R1 + TR1b), then TR2 inventory |
+| M1 | CI feedback is truthful and green | In progress: TR1b in review round 3 (PR 4); TR1a/R1 stacked on it (PR 5); TR4 next for `logical_activation_nested`; then TR2 inventory |
 | M2 | Simulated time wherever protocol time is simulated | Planned across TR1–TR11 |
 | M3 | Isolation: no cascades or collisions | In progress in TR1; remaining fixtures through TR15; binding-seam/host-policy limit remains |
 | M4 | Real-time tests bounded by events and ratios | Planned TR12–TR16 |
@@ -36747,11 +36748,13 @@ cancels stale pull-request runs; push-to-main runs remain uncancelled.
 
 ### Reliability mini plan (planned)
 
-| Deliverable | Purpose | Dependencies | Completion checks | Milestone |
-| --- | --- | --- | --- | --- |
-| TR1 (R1 + TR1b) | R1 replaces activation-driver fixture time and poison cascades; TR1b exposes all CI failures, isolates seven port ladders and makes accept mode explicit | Architect classification; independent builder branches; existing injected clock/native startup contracts | Parent failure evidence; per-binary reliability matrix; fmt/four strict Clippy profiles/matched checks; sequential full suites; runner and two reviews | M1, M2, M3 |
-| TR2 | Inventory all newly visible failures, ratchet hardware dependencies, probe retained-action exhaustion | TR1 CI visibility and deterministic fixture clocks | All configurations/binaries inventoried; std-only ratchet; idle-leader probe result and ranked follow-ups recorded | M1, M2, M5 |
-| TR3 | Quiescent pacing and logical-voter family isolation | TR2 inventory; read-only backing usage seam L1; existing readiness contracts | Logical voter/network suites and activation driver re-proved, including disk contention; TestDir adopted locally | M2, M3 |
+| Deliverable | Status | Purpose | Dependencies | Completion checks | Milestone |
+| --- | --- | --- | --- | --- | --- |
+| TR1b | Current: in review round 3 (PR 4) | Exposes all CI failures, isolates the port ladders through one shared lease pool, and makes accept mode explicit | Architect classification; existing native startup contracts | Final-source parent-versus-PR matrix (recorded below: ports parent 26 → PR 0); round-3 fixes; fmt/four strict Clippy profiles; runner and two reviews | M1, M3 |
+| TR1a (R1) | Next: stacked on TR1b (PR 5) | Replaces activation-driver fixture time and poison cascades on the shared TR1b pool | TR1b lease and CI visibility; existing injected clock contracts | Parent-versus-PR matrix for `logical_activation_driver`; fmt/four strict Clippy profiles; runner and two reviews | M1, M2, M3 |
+| TR4 | Next for `logical_activation_nested` | Removes the 15 s wall-clock close-drain and child-deadline failures (`cluster.rs:216`, `business.rs:43/58`) without weakening assertions | TR1b lease; TR1a clock pattern | Same matrix for `logical_activation_nested`, including two simultaneous copies; no assertion weakened | M2, M3 |
+| TR2 | Planned after TR1a/TR4 | Inventory all newly visible failures, ratchet hardware dependencies, probe retained-action exhaustion | TR1 CI visibility and deterministic fixture clocks | All configurations/binaries inventoried; std-only ratchet; idle-leader probe result and ranked follow-ups recorded | M1, M2, M5 |
+| TR3 | Planned | Quiescent pacing and logical-voter family isolation | TR2 inventory; read-only backing usage seam L1; existing readiness contracts | Logical voter/network suites and activation driver re-proved, including disk contention; TestDir adopted locally | M2, M3 |
 
 ### TR1b schema plan (18 October 2026, before editing)
 
@@ -37390,3 +37393,169 @@ one of them. The matrix report will be attached when it lands. Other full
 feature configurations belong to the suite runner. M1/M3/M5 remain open; the
 macro review keeps M3 through TR15 and records the binding-seam/host-policy
 limit without making online membership or split/merge release prerequisites.
+
+### TR1b final-source matrix and round 3 (19 October 2026)
+
+#### Final-source parent-versus-PR matrix (runner, `03127ec5` against parent `30a1f6c5`)
+
+Status line:
+`COMPLETE MATRIX — VIOLATIONS: (a) 13 PR-fail/parent-pass matched test observations; (b) AddrInUse/port failures: parent 26, PR 0; (c) PoisonError cascades: parent 508, PR 202`
+
+Method: 10 binaries (`logical_voter_network`, `logical_network`,
+`transaction_driver`, `program_transaction_driver`, `striped_node`,
+`logical_voter_native`, `logical_activation_driver`,
+`logical_activation_nested`, `logical_nested_native`, `voteboat-directory`
+bin tests), all-features build, each run directly as
+`taskset -c 0-3 nice -n 19 BIN`. E1 plain, E3 with three runner-owned busy
+loops on cores 1–3, E4 two simultaneous copies; three repetitions (three pairs
+in E4), parent then PR in each repetition, no retries. 240/240 matched
+executions and 24/24 supplemental PR-only `fixture_isolation` runs (all-features
+and native-only) completed; every `fixture_isolation` run passed. Linux only;
+E2, E3d, E5, E6 and macOS were not covered. Report:
+`target/claude/research-ci/proof-pr4-final-03127ec5.md` in the orchestrator's
+checkout (raw logs in `proof-pr4-final-logs/`).
+
+| Measure | Parent | PR |
+| --- | --- | --- |
+| AddrInUse/port failures | 26 | 0 |
+| PoisonError cascades | 508 | 202 (all in `logical_activation_driver`, whose files this PR does not touch) |
+| Failed executions | 40 | 15 |
+| E4 copies failed | 30/60 | 9/60 |
+| Test/environment keys failing more often on this side | 135 | 11 |
+
+The port class is closed: the PR had no port failure in any environment.
+
+The strict criterion is not met: 13 matched observations failed on the PR and
+passed on the parent, over 11 test/environment keys, each by one run in three.
+
+- `logical_activation_driver`, E3, 9 keys (rep 1: `bindings::original_verified_profile_rejects_changed_or_missing_parent_before_transfer`,
+  `cancel::original_cancel_before_configuration_dispatch_retains_owning_driver_tcp`;
+  rep 3: `cohort::close::rejection::shutdown_rejection_retains_original_cancellation_before_later_provider_fault`,
+  `cohort::close::running_logical_owner_retains_original_partial_send_on_real_native_peer_close`,
+  `cohort::byte_pressure::history::full_child_replacement_retains_original_client_byte_and_read_count_pressure_tcp`,
+  `cohort::history::three_logical_parents_ten_native_owners_replace_distinct_child_quic`,
+  `cohort::pressure::history::…_pressure_tcp` and `…_pressure_quic`,
+  `cohort::pressure::controls::genuine_native_observer_refusals_preserve_original_ownership_tcp`).
+  Eight are PoisonError cascades from the unchanged `HISTORY.lock().unwrap()`
+  sites; one root, `Network(Session(Closed))` at `cohort/close/progress.rs:126`,
+  appeared only on the PR (E3 rep 3). Failed runs are equal (2/3 each side), but
+  the failing-test total is 53 against the parent's 44: three repetitions cannot
+  exclude a small timing regression there.
+- `logical_activation_driver`, E4 rep 1 copy 2, `bindings::…before_transfer`:
+  a PoisonError cascade; parent and PR both failed 2/6 copies (not an extra key).
+- `logical_activation_nested`, E3 rep 2, 2 keys:
+  `cold_joint::quic_all_twelve_stores_joint_and_parent_intent_cold_reconstruct_then_final`
+  (`business.rs:43`) and
+  `history::quic_original_uncommitted_unknown_import_wal_cold_then_real_activation`
+  (`business.rs:58`): the 15 s `Instant` deadline in unchanged `business.rs`,
+  which the parent also hits at `business.rs:58` in E3.
+- `logical_activation_nested`, E4 rep 2 copy 1,
+  `history::quic_fifteen_native_owners_two_original_logical_replacements`:
+  the 15 s close-drain timeout at `cluster.rs:216`; parent and PR both failed
+  3/6 copies (not an extra key).
+
+The roots are the parent's own timing classes: `DedupCapacity` (6/6 E4 copies
+on both sides), `Read(Consensus(NotLeader))` at `cohort/progress.rs:70`, and
+the wall-clock deadlines above. Where the PR removed port and poison failures
+(`logical_nested_native` E3: parent 20 failing tests, PR 7), previously hidden
+election and functional deadlines now run to completion and show; the parent
+failed each of those tests 2/3 or 3/3 in E3.
+
+Full all-features suite on `03127ec5` (`--no-fail-fast`, cores 0–3, about
+90 minutes): **2,757 passed, 9 failed, 0 ignored**, exit 101.
+`logical_activation_driver` 23/8: root `learners.rs:95` (bridge usage stays
+zero before the wall-clock deadline) plus 7 PoisonError cascades, the same set
+the parent produced in E1 rep 3. `logical_activation_nested` 13/1: the 15 s
+child timeout at `cluster.rs:216`. No port failure anywhere.
+
+Classes left to other slices, not fixed here:
+
+- TR1a/R1 (PR 5, stacked on this branch): `logical_activation_driver`
+  wall-clock fixture time, `DedupCapacity`/`NotLeader` timing roots and the
+  `HISTORY.lock().unwrap()` poison cascades.
+- TR4: `logical_activation_nested` 15 s close-drain timeout
+  (`cluster.rs:216`) and `business.rs:43/58` deadlines, and the
+  `logical_nested_native` election/functional deadlines now visible under E3.
+
+Against the approved criterion: no port failure in any environment is met
+(0). PoisonError cascades remain (202), all in `logical_activation_driver`,
+whose files this PR does not touch. "No new failures versus the parent" is not
+met on the strict reading: the 13 observations above exist. Their roots are the
+parent's own timing classes, and the orchestrator assigns them to TR1a and TR4.
+They are recorded here, not relabelled as passes.
+
+#### Round 3 schema (before editing)
+
+- P2 (routed from PR 5 round 3): the three outer-channel fixtures took both
+  halves of every leased port with `take_sockets()`, dropped the unused
+  protocol's half, then rebound both halves at close with `unwrap`. A
+  non-cooperating binder could occupy the dropped half and fail the release
+  check falsely. Data/API: `Reservation` holds `tcp: Option<TcpListener>` and
+  `udp: Option<UdpSocket>` separately. `PortLease::adopt_tcp(slot)` /
+  `adopt_udp(slot)` move only the selected half to its connector; the unused
+  half and the lock stay in the lease for the whole workflow.
+  `PortLease::reclaim()` rebinds exactly the one adopted half of each
+  reservation, panicking with "not released by its owner" if the owner still
+  holds it and rejecting a reservation with zero or two halves adopted.
+  Drop still closes both halves, then the registry entry, then the lock.
+  `take_sockets` stays for `fixture_isolation` (which drops both halves on
+  purpose) and the benchmark recovery harness. This is the shape PR 5 used for
+  its cohort channels (`a4bd657d`); PR 5 put it on its
+  `logical_voter_native` wrapper, which other test binaries cannot share, so
+  the methods live on the single shared pool in `tests/support/ports.rs`.
+  `a4bd657d` added nothing to `ports.rs`, so there was no hunk to cherry-pick.
+- P3-b (Opus round 2): the route-discovery fixture's blocking `accept()` had
+  no bound. The attempt connects synchronously before the accept, so its
+  connection is already queued; a nonblocking accept retried until a 30 s
+  hang guard (then switched to blocking for the reads) turns a regression
+  that never connects into a prompt failure instead of a 360-minute hang. It
+  is not a performance assertion.
+- `native_benchmark` includes `ports.rs` directly via `#[path]` and uses part
+  of it, so its `mod test_ports` carries the same `dead_code` allowance as
+  `tests/support/mod.rs`. No lint level elsewhere changed.
+
+Checks: new `fixture_isolation` test for both protocols and the negative
+control; mutants (adoption drops the unused half; reclaim skips the release
+proof) each fail it; the three binaries five times each plus two simultaneous
+copies, cores 0–3; fmt and the four strict Clippy profiles.
+
+#### Round 3 implemented evidence
+
+Commit `ce390fd7` (code), on top of `03127ec5`. Linux, 16-core host with other
+work on cores 4–15; every build and test pinned to cores 0–3 with `nice -n 19`
+and `-j 2`. Test binaries from
+`taskset -c 0-3 nice -n 19 cargo +stable test --locked --offline --all-features --no-run -j 2`,
+each run directly as `taskset -c 0-3 nice -n 19 BIN`, sequentially, then two
+simultaneous copies once. No retries; a failure is recorded as found.
+
+| Binary | Sequential runs (tests passed/failed, libtest time) | Two simultaneous copies |
+| --- | --- | --- |
+| `logical_voter_network` | 5/5 pass: 4/0 each; 36.8 s, 10.9 s, 31.8 s, 24.7 s, 17.1 s | both pass, 4/0; 31.6 s / 30.9 s |
+| `logical_nested_native` | 5/5 pass: 15/0 each; 211.6 s, 210.2 s, 204.1 s, 218.2 s, 220.6 s | both pass, 15/0; 189.7 s / 221.5 s |
+| `logical_activation_nested` | 4/5 pass: 14/0 in runs 1, 3, 4, 5 (145.2 s, 166.0 s, 140.3 s, 155.7 s); run 2 13/1 (154.9 s) | both pass, 14/0; 142.7 s / 164.7 s |
+
+Zero AddrInUse, "Address already in use" or PoisonError lines in any of the
+21 executions. The single failure, `logical_activation_nested` run 2,
+`history::quic_twelve_native_owners_original_logical_learner_activation`, is
+the known TR4 class: `native logical child timeout … stage=CloseDrained;
+slot=2 … elapsed=15.000941457s` at `cluster.rs:216`. Node 9 was still
+`Draining` with one QUIC peer connection in its roster. That is inside the
+native child cluster, not the outer channels this round changes; it is left
+to TR4 and was not retried.
+
+| Check | Result |
+| --- | --- |
+| `cargo +stable fmt --all -- --check` | pass |
+| Strict all-target Clippy: default, all-features, no-default, native-only | all exit 0, zero diagnostics (72 targets rechecked after touching `ports.rs`) |
+| All-features `fixture_isolation` | 8 pass / 0 fail (new adoption test included) |
+| Mutant: `adopt_tcp` also drops the UDP half | new test fails at `fixture_isolation.rs:111` |
+| Mutant: `reclaim` ignores a failed TCP rebind | new test fails at `fixture_isolation.rs:114` |
+| All-features `voteboat-directory route_discovery` | 8 pass / 0 fail, 1.60 s |
+
+Not run in this round: the full suite, macOS, the parent side (the matrix
+above covers it), and E3 contention. Open non-blocking P3s from round 2 that
+this round does not change: P3-a (the docs' "push-to-main runs remain
+uncancelled" wording: GitHub keeps at most one pending run per concurrency
+group), P3-c (an unusable explicit `VOTEBOAT_TEST_PORT_LEASE_DIR` still falls
+back), P3-d (no macOS fallback coverage) and P3-e (the per-user fallback
+directory is left behind).
