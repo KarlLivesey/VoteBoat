@@ -41,8 +41,8 @@ implemented or benchmarked; unsafe variants are not offered as options.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| In progress TR1a (PR 5, formerly R1), review round 2: deterministic simulated time in the activation driver fixtures | Platform feedback has failed on every main run since 17 October: the activation driver fixtures turned elapsed wall time into protocol time, so a slow host produced more heartbeats and exhausted child group 802's 128 retained actions; the first panic then poisoned the shared serialization lock for 25 more tests. Round 2 restores every liveness bound in protocol time, holds time while dial work or replicated progress is in flight, asserts the 64-action protocol budget and owns each port for the whole test | Research report `target/claude/research-ci/dedup-capacity-root-cause.md`; architect plan TR1 (b), (c), (f) | Parent `30a1f6c5` under E3; `logical_activation_driver` (`--all-features`) E1 ×10, E2 ×5, E3 ×10, E4 ×5 pairs, E5 ×3 with every run passing; retained protocol actions ≤ 64 in every cohort run; fmt, four strict Clippy configurations, matched workspace fmt + Clippy; all-feature full suite (other configurations: suite runner); two reviews | Q1 (M1, M2, M3) |
-| Next TR1b (PR 4, parallel): CI runs every binary, shared port leases, explicit accept mode | Covers the architect TR1 items this slice does not: (d) `set_nonblocking` in the bin tests (`route_discovery`, the macOS `WouldBlock`), (e) CI `--no-fail-fast` for all three configurations, (g) `validation/reliability-proof.sh`, and leases for the seven other port ladders. TR1a's in-binary `PortLease` uses the same namespace and pool and is swapped for the shared helper once both land | Architect plan; PR 4 review rounds | PR 4's own proof and reviews | Q1 (M1, M3) |
+| In progress TR1a (PR 5, formerly R1), review round 3, stacked on TR1b: deterministic simulated time in the activation driver fixtures | Platform feedback has failed on every main run since 17 October: the activation driver fixtures turned elapsed wall time into protocol time, so a slow host produced more heartbeats and exhausted child group 802's 128 retained actions; the first panic then poisoned the shared serialization lock for 25 more tests. Round 2 restores every liveness bound in protocol time, holds time while dial work or replicated progress is in flight, asserts the 64-action protocol budget and owns each port for the whole test. Round 3 draws every port from TR1b's shared pool and keeps the outer channels' unused half bound | Research report `target/claude/research-ci/dedup-capacity-root-cause.md`; architect plan TR1 (b), (c), (f); TR1b / PR 4 (`03127ec5`, PR 5's base) for the shared port pool and exclusions | Round 3: four affected binaries ×5 plus one serial pass, two concurrent `logical_voter_native` copies; round 2: parent `30a1f6c5` under E3; `logical_activation_driver` (`--all-features`) E1 ×10, E2 ×5, E3 ×10, E4 ×5 pairs, E5 ×3 with every run passing; retained protocol actions ≤ 64 in every cohort run; fmt, four strict Clippy configurations, matched workspace fmt + Clippy; all-feature full suite (other configurations: suite runner); two reviews | Q1 (M1, M2, M3) |
+| Next TR1b (PR 4, TR1a's base): CI runs every binary, shared port leases, explicit accept mode | Covers the architect TR1 items this slice does not: (d) `set_nonblocking` in the bin tests (`route_discovery`, the macOS `WouldBlock`), (e) CI `--no-fail-fast` for all three configurations, (g) `validation/reliability-proof.sh`, and leases for the seven other port ladders. Since TR1a round 3, `harness::PortLease` is a protocol split of this slice's `support::ports::PortLease`, so PR 5 depends on it and merges after it | Architect plan; PR 4 review rounds | PR 4's own proof and reviews | Q1 (M1, M3) |
 | Following TR2/TR3: inventory, then the logical-voter family on the same clock | `logical_voter_native` still keeps wall-clock protocol time (its waits keep exactly their old 15 s wall bounds through the shared `Wait`), and `logical_activation_nested` has its own clocks and the same 128-action budget. A read-only bridge seam (L1) would let borrowed children's dial work and readiness hold time too | TR1a harness; TR1b CI visibility | Same matrix per binary; inventory of newly visible CI failures | Q1 (M2, M5) |
 | In progress H1: review round 3, preserve the benchmark instrument | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`); pinned matched workspace; quiet-Mac 30-pair buffer attribution result | All matched source byte-identical to flag-only `297aec15`; raw evidence preserved; matched tests; both fmt checks and five strict Clippy configurations; independent review of the reduced scope | T4 |
 | Done V1: core-canonical volatile log (merged 041fc3fb; Mac −18.8% bulk, −16.3% singleton CPU/write) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
@@ -208,12 +208,16 @@ work; ports not continuously owned), seven Opus P3s.
 - Ports: `harness::PortLease` (same namespace `/tmp/voteboat-test-ports` with
   `VOTEBOAT_TEST_PORT_LEASE_DIR` override, shared 0666 lock files and pool as PR
   4's round-2 amendment): ports outside 1024–32767 and the kernel ephemeral range;
+  *(Round-3 correction: the pool was not the same. It omitted TR1b's directory and
+  transfer service residues above 32767.)*
   file lock for the lease lifetime; the unused protocol half bound for the whole
   test including reopen; the node's half held until `handoff` immediately before
   its bind and from `reclaim` (the release check) onward, per node as soon as that
   node joins. A held TCP half closes each accepted connection on a small thread, so
   an absent TCP node refuses promptly. Outer channels adopt both bound halves and
-  prove both released at close.
+  prove both released at close. *(Round-3 correction: as implemented, the outer
+  connectors dropped the unused half at once, so it was unbound for the whole
+  workflow and `reclaim_both` could panic. Fixed in round 3.)*
 - Acceptance: a delayed-dial regression test (with the round-1 policy as a
   negative control), a lease test, and the proof matrix in the mini plan.
 
@@ -307,6 +311,113 @@ Residuals:
   protocol outside the lease protocol could use it.
 - `logical_voter_native` keeps wall-clock protocol time with its exact old bounds
   (TR3).
+
+#### TR1a round 3 schema amendment (before editing, 19 October 2026)
+
+Round-2 reviews each requested one P2 change and otherwise approved:
+- Opus P2-1: outer `Channels` dropped the unused protocol half
+  (`channels.rs:279`, `:296`). `reclaim_both` then rebound both halves with
+  `unwrap`, so it could panic after a correct shutdown.
+- Sol P2: the harness pool (`harness.rs:328`) accepted every high non-ephemeral
+  port. It omitted TR1b's directory and transfer service residues; macOS port
+  32789, for example, is transfer's command port at `k=18`, slot 2, node 1.
+
+Dependency: PR 5 is rebased onto TR1b (`ci/tr1b-ci-ports-accept`, `03127ec5`)
+and retargeted to it, so it reuses that pool and does not copy it. The rebase
+had one conflict (`logical_voter_native/cluster.rs`). It keeps TR1a's per-node
+leases and TR1b's `serial()` helper. Apart from those TR1b lines, the rebased PR 5
+diff is line-for-line the round-2 diff.
+
+- Shape: `harness::PortLease { address, protocol, selected: Option<Held>,
+  _other: Held, _shared: support::ports::PortLease }`. `acquire(protocol)` takes
+  one `support::ports::PortLease::acquire(1)`, then splits its bound pair by
+  protocol. Pool, exclusions, lock namespace, fallback and in-process registry are
+  TR1b's, unchanged. The duplicated `lease_directory`, `lock`, `bind_pair` and
+  `ephemeral_range` are removed. `tests/support/ports.rs` is not modified.
+- Transitions: the unused half is bound from `acquire` until the lease drops; it
+  never leaves. The selected half leaves only through `handoff()` (a node binds
+  it) or `adopt_tcp()` / `adopt_udp()` (an outer connector adopts the bound
+  socket). It comes back only through `reclaim()`, which rebinds it as the
+  release proof. `take_sockets` and `reclaim_both` are removed.
+- Failure and cleanup: `reclaim()` panics, naming the address, only if the
+  selected half is still bound. Fields drop in order, so both halves close before
+  TR1b's lease releases the lock and registry entry.
+- Acceptance: `port_lease_adoption_keeps_the_unused_half_and_proves_release`
+  checks both protocols. The unused half is bound throughout adoption; for QUIC,
+  the held TCP half also refuses connections. Reclaim fails while the adopted
+  socket is open, then succeeds, and leaves both halves bound. The port is a member
+  of `support::ports::candidates`. Then the proof runs below.
+
+#### TR1a round 3 implemented and validated (19 October 2026)
+
+Implemented at `a4bd657d` on TR1b `03127ec5` (tests only; no `src` change).
+
+- `harness::PortLease` is built on `support::ports::PortLease` as above. The
+  native `Cluster`, cohort `Members`, single-cohort `Member` and outer
+  `Channels` all lease from TR1b's pool.
+- Outer `Channels`: `connector()` takes the lease and adopts only its protocol's
+  half. Close calls `reclaim()` per lease after every connector and dialer has
+  finished.
+- `cohort/channels/dial.rs` imports `TcpListener` itself, because `channels.rs`
+  no longer does. Its `127.0.0.1:0` connectors use the kernel's ephemeral range,
+  which is outside the lease pool.
+- TR1b's own nested and network channel fixtures still drop the unused half
+  after `support::ports::PortLease::take_sockets()`. That is TR1b/TR4 code, which
+  this slice does not change. It is recorded here for those slices.
+
+Proof at `a4bd657d` (all features). The binaries were built once with
+`taskset -c 0-3 nice -n 19 cargo +stable test --locked --offline --all-features
+--no-run -j 2` and run directly as `taskset -c 0-3 nice -n 19 $BIN`. The shell
+runs at nice −4, so the absolute nice was 15; affinity was CPUs 0–3. Runs were
+sequential except the concurrent pair. There were no reruns or filters, apart from
+the split serial passes noted below. Hang-guard lines in every log: 0.
+
+| Binary | Runs 1–5 (parallel test threads) | `--test-threads=1` | Concurrent pair |
+| --- | --- | --- | --- |
+| `logical_activation_driver` | 5/5 runs 35/35 (62.1–73.4 s) | 35/35 (69.3 s) | — |
+| `logical_voter_native` | 5/5 runs 42/42 (15.8–25.2 s) | 42/42 (24.3 s) | both copies 42/42 (28.6 s, 29.8 s) |
+| `logical_activation_nested` (no PR 5 change) | runs 2, 3, 5: 14/14; **run 1: 12/14; run 4: 13/14** (169.6–426.1 s) | 14/14 in three serial parts (155.1 s total) | — |
+| `logical_nested_native` (no PR 5 change) | 5/5 runs 15/15 (221.2–247.2 s) | 15/15 in two serial parts (224.0 s total) | — |
+
+- The driver count is 35: round 2's 34 plus the new adoption test, which passed
+  in all six runs.
+- Split serial passes: a single serial run of the two nested binaries could
+  exceed this agent's 10-minute foreground command limit. Each was therefore run
+  as consecutive `--test-threads=1` invocations whose filters cover every listed
+  test exactly once: `history::quic`, `history::tcp`, `cold_joint:: profile::`
+  for `logical_activation_nested`; `history:: cold_recovery::` and
+  `handoff_control:: maintenance_controls:: protocol_close:: setup::` for
+  `logical_nested_native`.
+- The three `logical_activation_nested` failures are all
+  `native logical child timeout … stage=CloseDrained` at
+  `tests/logical_activation_nested/cluster.rs:216`, after 15 s of wall time, in
+  QUIC histories:
+  - run 1: `quic_fifteen_native_owners_two_original_logical_replacements` and
+    `quic_original_import_lost_image_target_stores_cold_claim_then_activation`;
+  - run 4: `quic_original_unknown_import_target_cold_resolves_then_activation`.
+
+  In each, one node is still `Draining` with one outbound batch and one roster
+  connection, the other two are `Drained`, and no node has a provider failure.
+  This is the same assertion and signature that TR1b recorded on its own head
+  (above). PR 5 changes no file in that binary, and it still uses wall-clock
+  time, so this belongs to TR4 and is not a port or lease failure. The
+  assertion is unchanged and nothing was rerun.
+- Logs and `results.tsv` were in `target/claude/r3/` in the builder worktree;
+  they were removed with `target/` under the disk budget. The table above is the
+  record.
+
+Other validation at `a4bd657d`: `cargo +stable fmt --all -- --check` clean. The
+four strict Clippy configurations (default, `--all-features`,
+`--no-default-features`, `--no-default-features --features native`, each
+`--locked --offline --keep-going --all-targets -- -D warnings`) report zero
+diagnostics. The pre-push hook runs them again on push. Full suites in other
+configurations are the suite runner's job and were not run here.
+
+Residuals (unchanged from round 2): seam L1 for bridge-borrowed nodes; the
+startup and reclaim bind windows, where only a non-cooperating bind of that exact
+port and protocol, outside the ephemeral range and the legacy ladders, could
+interfere; `logical_voter_native` wall-clock protocol time (TR3). Not addressed
+here (non-blocking): Opus P3-1 to P3-4.
 
 #### H1 schema plan: worker setting and shared harness costs
 
