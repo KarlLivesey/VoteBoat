@@ -193,6 +193,10 @@ impl EntryLog {
     /// piece extends the last one instead of adding its backing again; owned
     /// entries add their logical charge wherever they are stored.
     pub(crate) fn appended_charge(&self, retained: usize, batch: &EntryBatch) -> Option<usize> {
+        // An owned piece never adjoins: its logical charge is added.
+        if let Spans::One(Span::Owned(entries)) = &batch.spans {
+            return retained.checked_add(facts::charge_of(entries, entries.len())?);
+        }
         let mut pieces = batch.spans.as_slice();
         if let (Some(last), Some(first)) = (self.spans.last(), pieces.first()) {
             if last.adjoins(first) {
@@ -268,15 +272,16 @@ impl EntryLog {
         // The appended entries end the log; an empty piece leaves the tail.
         let tail = span.entries().last().map(|last| (last.index, last.term));
         match (self.spans.last_mut(), span) {
-            (Some(last), span) if last.adjoins(&span) => {
-                last.extend_to(&span);
+            // Small batches gather into one owned piece, like the flat log.
+            // Owned pieces never adjoin, so this precedes the shared check.
+            (Some(Span::Owned(last)), Span::Owned(mut entries)) => {
+                last.append(&mut entries);
                 if let Some(end) = self.ends.last_mut() {
                     *end = ordinal;
                 }
             }
-            // Small batches gather into one owned piece, like the flat log.
-            (Some(Span::Owned(last)), Span::Owned(mut entries)) => {
-                last.append(&mut entries);
+            (Some(last), span) if last.adjoins(&span) => {
+                last.extend_to(&span);
                 if let Some(end) = self.ends.last_mut() {
                     *end = ordinal;
                 }

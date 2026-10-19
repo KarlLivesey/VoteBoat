@@ -310,10 +310,11 @@ pub fn message_cost(
         Rpc::Append { entries, .. } => {
             // Every shared backing the message keeps alive, in full, from its
             // cached charge; the class depends only on the visible entries.
-            add(entries
-                .retained_bytes()
-                .ok_or(OutboundError::BatchTooLarge)?)?;
-            if entries.has_data() {
+            let (retained, data) = entries
+                .retained_bytes_and_data()
+                .ok_or(OutboundError::BatchTooLarge)?;
+            add(retained)?;
+            if data {
                 MessageClass::Data
             } else {
                 MessageClass::Control

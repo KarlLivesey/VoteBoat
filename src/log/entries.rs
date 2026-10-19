@@ -407,6 +407,22 @@ impl EntryBatch {
         }
         has_configuration(self.spans.as_slice())
     }
+    /// [`Self::retained_bytes`] and [`Self::has_data`] together, in one walk
+    /// of a small owned batch; `None` when the charge overflows.
+    pub(crate) fn retained_bytes_and_data(&self) -> Option<(usize, bool)> {
+        if let Spans::One(Span::Owned(entries)) = &self.spans {
+            let mut data = false;
+            let mut charge = entries
+                .capacity()
+                .checked_mul(std::mem::size_of::<LogEntry>())?;
+            for entry in entries {
+                charge = charge.checked_add(entry.retained_payload_bytes())?;
+                data |= !matches!(entry.payload, EntryPayload::Noop);
+            }
+            return Some((charge, data));
+        }
+        Some((self.retained_bytes()?, self.has_data()))
+    }
     /// Any visible command or configuration.
     pub(crate) fn has_data(&self) -> bool {
         if let Spans::One(Span::Owned(entries)) = &self.spans {
