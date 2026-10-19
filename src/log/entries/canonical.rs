@@ -362,7 +362,7 @@ impl EntryLog {
                 start: piece_start,
                 end,
                 ..
-            } => *end = *piece_start + (len - start),
+            } => *end = *piece_start + (len - start) as u32,
             Span::Owned(entries) => entries.truncate(len - start),
         }
         self.ends[position] = len;
@@ -382,7 +382,7 @@ impl EntryLog {
         self.spans.drain(..keep);
         self.ends.drain(..keep);
         match &mut self.spans[0] {
-            Span::Shared { start, .. } => *start += count - first_start,
+            Span::Shared { start, .. } => *start += (count - first_start) as u32,
             Span::Owned(entries) => {
                 entries.drain(..count - first_start);
             }

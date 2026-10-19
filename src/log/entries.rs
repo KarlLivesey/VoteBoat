@@ -45,11 +45,13 @@ pub(crate) const SHARE_MIN: usize = 16;
 /// One ordered piece of entries.
 #[derive(Clone)]
 enum Span {
-    /// Exact visible range of one shared immutable backing.
+    /// Exact visible range of one shared immutable backing. Backings hold at
+    /// most `u32::MAX` entries, so the range fits beside the pointer and a
+    /// piece is as small as a vector.
     Shared {
         data: Arc<BatchData>,
-        start: usize,
-        end: usize,
+        start: u32,
+        end: u32,
     },
     /// A small batch held directly. It is copied when shared, and its facts
     /// are read from its entries when needed, exactly as before sharing.
@@ -64,13 +66,17 @@ impl Span {
         if entries.len() < SHARE_MIN {
             return Some(Self::Owned(entries));
         }
-        Some(Self::freeze(entries))
+        // A (practically impossible) wider batch stays owned and is scanned.
+        Some(match u32::try_from(entries.len()) {
+            Ok(end) => Self::freeze(entries, end),
+            Err(_) => Self::Owned(entries),
+        })
     }
-    /// Freeze a wide batch into a shared backing, measuring its facts.
+    /// Freeze a wide batch of `end` entries into a shared backing, measuring
+    /// its facts.
     #[inline(never)]
-    fn freeze(entries: Vec<LogEntry>) -> Self {
+    fn freeze(entries: Vec<LogEntry>, end: u32) -> Self {
         let data = Arc::new(BatchData::new(entries));
-        let end = data.entries.len();
         Self::Shared {
             data,
             start: 0,
@@ -80,25 +86,26 @@ impl Span {
     #[inline]
     fn entries(&self) -> &[LogEntry] {
         match self {
-            Self::Shared { data, start, end } => &data.entries[*start..*end],
+            Self::Shared { data, start, end } => &data.entries[*start as usize..*end as usize],
             Self::Owned(entries) => entries,
         }
     }
     #[inline]
     fn len(&self) -> usize {
         match self {
-            Self::Shared { start, end, .. } => end - start,
+            Self::Shared { start, end, .. } => (end - start) as usize,
             Self::Owned(entries) => entries.len(),
         }
     }
-    /// Subrange relative to this piece; the caller checked the bounds. An
-    /// owned piece is copied.
+    /// Subrange relative to this piece; the caller checked the bounds, so
+    /// a shared range stays within its backing (and `u32`). An owned piece
+    /// is copied.
     fn part(&self, range: Range<usize>) -> Self {
         match self {
             Self::Shared { data, start, .. } => Self::Shared {
                 data: Arc::clone(data),
-                start: start + range.start,
-                end: start + range.end,
+                start: start + range.start as u32,
+                end: start + range.end as u32,
             },
             Self::Owned(entries) => Self::Owned(entries[range].to_vec()),
         }
@@ -139,13 +146,13 @@ impl Span {
     }
     fn summary(&self) -> Option<Summary> {
         match self {
-            Self::Shared { data, start, end } => data.summary(*start..*end),
+            Self::Shared { data, start, end } => data.summary(*start as usize..*end as usize),
             Self::Owned(entries) => facts::summarize(entries),
         }
     }
     fn totals(&self) -> Option<Totals> {
         match self {
-            Self::Shared { data, start, end } => data.totals(*start..*end),
+            Self::Shared { data, start, end } => data.totals(*start as usize..*end as usize),
             Self::Owned(entries) => facts::totals_of(entries),
         }
     }
@@ -176,6 +183,7 @@ impl Span {
     fn indexed_payload(&self, range: Range<usize>) -> Option<usize> {
         match self {
             Self::Shared { data, start, .. } => {
+                let start = *start as usize;
                 data.payload(start + range.start..start + range.end)
             }
             Self::Owned(_) => None,
@@ -229,11 +237,9 @@ impl fmt::Debug for Span {
 struct SpanBuilder {
     spans: Spans,
     many: Vec<Span>,
-    len: usize,
 }
 impl SpanBuilder {
     fn push(&mut self, span: Span) {
-        self.len += span.len();
         match &mut self.spans {
             Spans::Empty if self.many.is_empty() => self.spans = Spans::One(span),
             Spans::One(last) if last.adjoins(&span) => last.extend_to(&span),
@@ -255,10 +261,7 @@ impl SpanBuilder {
         } else {
             Spans::Many(self.many.into_boxed_slice())
         };
-        EntryBatch {
-            spans,
-            len: self.len,
-        }
+        EntryBatch { spans }
     }
 }
 
@@ -285,24 +288,29 @@ impl Spans {
 /// are logical: two batches are equal when their visible entries are equal,
 /// however they are partitioned. There is no mutable access; edit a copy from
 /// [`Self::to_vec`] and convert it back, which inspects it again.
+///
+/// The batch is as small as a vector: its length is read from its pieces.
 #[derive(Clone, Default)]
 pub struct EntryBatch {
     spans: Spans,
-    len: usize,
 }
 impl EntryBatch {
     fn single(span: Span) -> Self {
-        let len = span.len();
         Self {
             spans: Spans::One(span),
-            len,
         }
     }
+    #[inline]
     pub fn len(&self) -> usize {
-        self.len
+        match &self.spans {
+            Spans::Empty => 0,
+            Spans::One(span) => span.len(),
+            Spans::Many(spans) => spans.iter().map(Span::len).sum(),
+        }
     }
+    #[inline]
     pub fn is_empty(&self) -> bool {
-        self.len == 0
+        self.len() == 0
     }
     #[inline]
     pub fn first(&self) -> Option<&LogEntry> {
@@ -343,8 +351,8 @@ impl EntryBatch {
     }
     pub fn iter(&self) -> Iter<'_> {
         match &self.spans {
-            Spans::One(span) => Iter::from_parts(span.entries(), &[], &[], self.len),
-            spans => Iter::new(spans.as_slice(), 0, 0, self.len),
+            Spans::One(span) => Iter::from_parts(span.entries(), &[], &[], span.len()),
+            spans => Iter::new(spans.as_slice(), 0, 0, self.len()),
         }
     }
     /// Contiguous pieces in order; their concatenation is this batch.
@@ -353,7 +361,7 @@ impl EntryBatch {
     }
     /// Shared subrange; `None` for a reversed or out-of-bounds range.
     pub fn slice(&self, range: Range<usize>) -> Option<Self> {
-        if range.start > range.end || range.end > self.len {
+        if range.start > range.end || range.end > self.len() {
             return None;
         }
         let mut spans = SpanBuilder::default();
@@ -379,7 +387,7 @@ impl EntryBatch {
         }
     }
     pub fn to_vec(&self) -> Vec<LogEntry> {
-        let mut entries = Vec::with_capacity(self.len);
+        let mut entries = Vec::with_capacity(self.len());
         for slice in self.slices() {
             entries.extend_from_slice(slice);
         }
@@ -668,10 +676,8 @@ impl From<Vec<LogEntry>> for EntryBatch {
     /// wherever it is used.
     #[inline]
     fn from(entries: Vec<LogEntry>) -> Self {
-        let len = entries.len();
         Self {
             spans: Span::new(entries).map_or(Spans::Empty, Spans::One),
-            len,
         }
     }
 }
@@ -719,7 +725,7 @@ impl fmt::Debug for EntryBatch {
 impl PartialEq for EntryBatch {
     fn eq(&self, other: &Self) -> bool {
         let (left, right) = (self.spans.as_slice(), other.spans.as_slice());
-        self.len == other.len
+        self.len() == other.len()
             && ((left.len() == right.len() && left.iter().zip(right).all(|(a, b)| a.same(b)))
                 || self.iter().eq(other.iter()))
     }
@@ -727,7 +733,7 @@ impl PartialEq for EntryBatch {
 impl Eq for EntryBatch {}
 impl PartialEq<[LogEntry]> for EntryBatch {
     fn eq(&self, other: &[LogEntry]) -> bool {
-        self.len == other.len() && self.iter().eq(other)
+        self.len() == other.len() && self.iter().eq(other)
     }
 }
 impl PartialEq<Vec<LogEntry>> for EntryBatch {
