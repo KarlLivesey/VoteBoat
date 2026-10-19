@@ -241,6 +241,13 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
     pub(crate) fn set_storage_pressure(&mut self, on: bool) {
         self.shard.set_storage_pressure(on);
     }
+    pub(crate) fn set_wal_budget(&mut self, budget: Option<super::WalBudget>) {
+        self.shard.set_wal_budget(budget);
+    }
+    /// Staged WAL bytes and data refusals (ST2 round 3, I5).
+    pub fn wal_account(&self) -> super::WalAccount {
+        self.shard.wal_account()
+    }
     pub fn owner(&self) -> RuntimeOwner {
         self.shard.owner
     }

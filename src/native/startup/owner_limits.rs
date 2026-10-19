@@ -23,7 +23,7 @@ pub(super) fn startup_owner_limits(
     // Selected native storage supplies bounded retained-log growth headroom;
     // every actual prospective event still checks its own reservation.
     let growth = log
-        .max_entries_per_group
+        .retained_entry_capacity()
         .checked_mul(std::mem::size_of::<LogEntry>())
         .and_then(|bytes| bytes.checked_add(log.max_wal_bytes))
         .and_then(|bytes| bytes.checked_add(log.max_batch_bytes))
@@ -116,7 +116,7 @@ mod tests {
         let selected = startup_owner_limits(&[core], event_bytes, log).unwrap();
         let growth = log.max_wal_bytes
             + log.max_batch_bytes
-            + log.max_entries_per_group * std::mem::size_of::<LogEntry>();
+            + log.retained_entry_capacity() * std::mem::size_of::<LogEntry>();
         assert_eq!(selected.control_bytes, required + growth);
         assert_eq!(
             selected.reserved_bytes - selected.control_bytes,

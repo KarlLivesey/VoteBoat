@@ -218,6 +218,10 @@ impl Connection {
             {
                 c.reply(match result {
                     ClientOutcome::Applied { receipt, .. } => format!("OK receipt={receipt:?}"),
+                    // Retryable backpressure, nothing proposed (ST2 round 3).
+                    ClientOutcome::NotProposed(voteboat::raft::RaftError::StoragePressure) => {
+                        "ERR StoragePressure".into()
+                    }
                     other => format!("UNKNOWN {other:?}"),
                 });
             }

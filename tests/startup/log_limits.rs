@@ -30,6 +30,11 @@ fn selected() -> LogLimits {
     LogLimits {
         max_command_bytes: COMMAND_BYTES,
         max_batch_bytes: 33_587_200,
+        // ST2 round 3 (I5): the WAL above the 75% high-water mark must hold
+        // the largest batch plus the control reserve, or a batch could wait
+        // for ever for room; with the default 64 MiB WAL these limits are
+        // refused at construction (`WalHeadroomTooSmall`).
+        max_wal_bytes: 160 * 1024 * 1024,
         ..Default::default()
     }
 }

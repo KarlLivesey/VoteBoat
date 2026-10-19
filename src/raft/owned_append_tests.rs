@@ -457,3 +457,136 @@ fn follower_under_storage_pressure_keeps_contact_but_takes_no_new_data() {
     delayed_completion(&mut receiver, &effects);
     assert_eq!(receiver.state().last_index(), 6);
 }
+
+/// `incoming` with an explicit predecessor and leader commit.
+fn append_after(
+    receiver: &Raft,
+    previous: (u64, u64),
+    entries: Vec<LogEntry>,
+    leader_commit: u64,
+) -> Message {
+    let mut message = incoming(receiver, entries);
+    let Rpc::Append {
+        previous_index,
+        previous_term,
+        leader_commit: commit,
+        ..
+    } = &mut message.rpc
+    else {
+        unreachable!()
+    };
+    (*previous_index, *previous_term, *commit) = (previous.0, previous.1, leader_commit);
+    message
+}
+
+/// ST2 round 3 (I3, Opus P2-1): under WAL pressure an append that conflicts
+/// with held entries still truncates them (a control record with no entries;
+/// the divergent suffix is what keeps a deposed leader's WAL full), takes no
+/// new data and sends no reply. The resend is then a plain extension,
+/// declined until the pressure clears, then taken.
+#[test]
+fn conflicting_suffix_under_storage_pressure_is_truncated_without_new_data() {
+    let mut receiver = follower(core(), 1);
+    let effects = receiver
+        .step(Event::Receive(append_after(
+            &receiver,
+            (1, 1),
+            plain_entries(),
+            1,
+        )))
+        .unwrap();
+    delayed_completion(&mut receiver, &effects);
+    assert_eq!(receiver.state().last_index(), 5);
+    let newer = vec![
+        LogEntry {
+            index: 2,
+            term: 2,
+            payload: EntryPayload::Noop,
+        },
+        command(3, 2, 99, vec![4; 32]),
+    ];
+    receiver.set_storage_pressure(true);
+    let effects = receiver
+        .step(Event::Receive(append_after(
+            &receiver,
+            (1, 1),
+            newer.clone(),
+            1,
+        )))
+        .unwrap();
+    let truncation = suffix(&effects);
+    assert_eq!((truncation.from, truncation.entries.len()), (2, 0));
+    assert_eq!(update(&effects).hard_state.term, 2);
+    delayed_completion(&mut receiver, &effects);
+    assert_eq!(receiver.state().last_index(), 1);
+    assert_eq!(receiver.declined_appends(), 1);
+    // Still under pressure: the resend is a plain extension with data.
+    let effects = receiver
+        .step(Event::Receive(append_after(
+            &receiver,
+            (1, 1),
+            newer.clone(),
+            1,
+        )))
+        .unwrap();
+    assert!(effects.is_empty(), "{effects:?}");
+    assert_eq!(receiver.declined_appends(), 2);
+    receiver.set_storage_pressure(false);
+    let effects = receiver
+        .step(Event::Receive(append_after(&receiver, (1, 1), newer, 1)))
+        .unwrap();
+    assert_eq!(suffix(&effects).from, 2);
+    delayed_completion(&mut receiver, &effects);
+    assert_eq!(receiver.state().last_index(), 3);
+    assert_eq!(receiver.state().last_term(), 2);
+}
+
+/// ST2 round 3 (I3): an append whose new entries would exceed the follower's
+/// retained-entry capacity is declined without a reply, but its commit for
+/// the verified prefix is kept (so the follower can apply and checkpoint),
+/// instead of failing the step and dropping the commit advance.
+#[test]
+fn append_past_entry_capacity_keeps_commit_and_takes_no_entries() {
+    let mut receiver = follower(core(), 1);
+    receiver.limits.max_entries_per_group = 4;
+    assert_eq!(receiver.limits.retained_entry_capacity(), 8);
+    let effects = receiver
+        .step(Event::Receive(append_after(
+            &receiver,
+            (1, 1),
+            plain_entries(),
+            1,
+        )))
+        .unwrap();
+    delayed_completion(&mut receiver, &effects);
+    assert_eq!(receiver.state().commit_index, 1);
+    let more: Vec<_> = (6..=9)
+        .map(|i| command(i, 1, u128::from(i), vec![1]))
+        .collect();
+    let effects = receiver
+        .step(Event::Receive(append_after(
+            &receiver,
+            (5, 1),
+            more.clone(),
+            9,
+        )))
+        .unwrap();
+    let kept = update(&effects);
+    assert!(kept.suffix.is_none());
+    assert_eq!(kept.commit_index, 5);
+    delayed_completion(&mut receiver, &effects);
+    assert_eq!(receiver.state().last_index(), 5);
+    assert_eq!(receiver.declined_appends(), 1);
+    // A smaller range that fits is taken.
+    let effects = receiver
+        .step(Event::Receive(append_after(
+            &receiver,
+            (5, 1),
+            more[..3].to_vec(),
+            9,
+        )))
+        .unwrap();
+    assert_eq!(suffix(&effects).entries.len(), 3);
+    delayed_completion(&mut receiver, &effects);
+    assert_eq!(receiver.state().last_index(), 8);
+}

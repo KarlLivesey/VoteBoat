@@ -246,6 +246,35 @@ pub struct LogUpdate {
     /// original bootstrap only, and cannot discard committed configuration work.
     pub snapshot_membership: Option<Box<crate::membership::Membership>>,
 }
+/// Upper bound of the WAL bytes one update adds beyond its entries: batch
+/// framing, the update header (group, revision, hard state, commit), a
+/// snapshot reference and the suffix header. ST2 round 3 (I5); checked against
+/// the native codec in its tests.
+pub const UPDATE_WAL_OVERHEAD: usize = 512;
+/// Upper bound of one entry's encoded fields besides its payload: index,
+/// term, payload tag, operation and length.
+pub const ENTRY_WAL_OVERHEAD: usize = 64;
+/// Upper bound of the WAL bytes one entry with `payload` bytes adds.
+pub fn entry_wal_bound(payload: usize) -> usize {
+    ENTRY_WAL_OVERHEAD.saturating_add(payload)
+}
+impl LogUpdate {
+    /// Upper bound of this update's WAL encoding, for exact in-flight
+    /// accounting against the WAL high-water mark. Not durability evidence.
+    pub fn wal_bound(&self) -> usize {
+        let mut bytes = UPDATE_WAL_OVERHEAD.saturating_add(
+            self.snapshot_membership
+                .as_ref()
+                .map_or(0, |m| m.retained_bytes()),
+        );
+        if let Some(suffix) = &self.suffix {
+            for entry in &suffix.entries {
+                bytes = bytes.saturating_add(entry_wal_bound(entry.payload_bytes()));
+            }
+        }
+        bytes
+    }
+}
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LogMutation {
     Create(Bootstrap),
@@ -331,10 +360,25 @@ impl Default for LogLimits {
     }
 }
 impl LogLimits {
+    /// Entries beyond `max_entries_per_group` that only a leader's own
+    /// current-term noop may occupy (ST2 round 3, I1): a leader elected over a
+    /// log at the data budget can always append the entry that lets it commit
+    /// the old-term suffix. 256 at the default budget.
+    pub fn leader_noop_reserve(self) -> usize {
+        (self.max_entries_per_group / 64).max(4)
+    }
+    /// Retained entries a group's log may hold: the data budget
+    /// `max_entries_per_group` (proposals, configuration entries and replicated
+    /// data are admitted only below it) plus [`Self::leader_noop_reserve`].
+    /// The store, recovery and decoding bound.
+    pub fn retained_entry_capacity(self) -> usize {
+        self.max_entries_per_group
+            .saturating_add(self.leader_noop_reserve())
+    }
     pub fn validate(self) -> Result<Self, StorageError> {
         if self.max_groups == 0
             || self.max_entries_per_group == 0
-            || self.max_entries_per_group > u32::MAX as usize
+            || self.retained_entry_capacity() > u32::MAX as usize
             || self.max_command_bytes == 0
             || self.max_snapshot_bytes == 0
             || self.max_snapshot_bytes > 256 * 1024 * 1024
@@ -797,7 +841,7 @@ fn apply_suffix(
     }
     let start = usize::try_from(suffix.from - current.base_index() - 1)
         .map_err(|_| StorageError::Rejected("index overflow"))?;
-    if suffix.entries.len() > limits.max_entries_per_group.saturating_sub(start) {
+    if suffix.entries.len() > limits.retained_entry_capacity().saturating_sub(start) {
         return Err(StorageError::Rejected("group entry limit"));
     }
     validate_suffix_entries(

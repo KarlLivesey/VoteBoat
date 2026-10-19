@@ -347,6 +347,13 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     pub(crate) fn set_storage_pressure(&mut self, on: bool) {
         self.runtime.set_storage_pressure(on);
     }
+    pub(crate) fn set_wal_budget(&mut self, budget: Option<super::WalBudget>) {
+        self.runtime.set_wal_budget(budget);
+    }
+    /// Staged WAL bytes and data refusals (ST2 round 3, I5).
+    pub fn wal_account(&self) -> super::WalAccount {
+        self.runtime.wal_account()
+    }
     /// Includes queued effects and a Send lease held by a downstream driver.
     pub fn has_pending_send(&self, peer: NodeId) -> bool {
         self.active.values().any(|a| {

@@ -323,11 +323,16 @@ impl Raft {
             Ok(vec![Effect::Send(reply)])
         }
     }
-    /// ST2b: while the node's WAL is above its high-water mark, a follower
-    /// keeps leader contact, term and commit for the matching prefix (control
-    /// records) but takes no new data and sends no reply, so the leader
-    /// resends the range on its next heartbeat. The core stays free to apply,
-    /// checkpoint and compact, which frees the space. Noop-only suffixes pass.
+    /// ST2b and round 3 (I3): a follower declines the new entries of an
+    /// append when they carry data while its node is above the WAL high-water
+    /// mark (or the host's in-flight byte budget is spent), or when they would
+    /// exceed its retained-entry capacity. It keeps leader contact, term and
+    /// commit for the verified prefix and sends no reply, so the leader resends
+    /// the range on its next heartbeat; the core stays free to apply,
+    /// checkpoint and compact. A suffix that conflicts with held entries is
+    /// still truncated (a control record with no entries): truncation is what
+    /// frees a deposed leader's space, and declining it could last for ever on
+    /// an idle group. Noop-only suffixes that fit pass.
     fn decline_new_data(
         &mut self,
         entries: &[LogEntry],
@@ -337,15 +342,33 @@ impl Raft {
         hard: HardState,
         old: HardState,
     ) -> Option<Result<Vec<Effect>, RaftError>> {
-        let offset = suffix_offset.filter(|&offset| {
-            self.storage_pressure
-                && entries[offset..]
-                    .iter()
-                    .any(|e| !matches!(e.payload, EntryPayload::Noop))
-        })?;
-        let matching = previous_index + offset as u64;
+        let offset = suffix_offset?;
+        let new = &entries[offset..];
+        let from = new[0].index;
+        let data = new.iter().any(|e| !matches!(e.payload, EntryPayload::Noop));
+        let kept = from.saturating_sub(self.durable.base_index() + 1);
+        let fits =
+            kept.saturating_add(new.len() as u64) <= self.limits.retained_entry_capacity() as u64;
+        if fits && !(self.storage_pressure && data) {
+            return None;
+        }
+        self.declined_appends = self.declined_appends.saturating_add(1);
+        let matching = from - 1;
+        debug_assert_eq!(matching, previous_index + offset as u64);
         let commit = self.durable.commit_index.max(leader_commit.min(matching));
-        Some(if hard != old || commit != self.durable.commit_index {
+        let conflict = from <= self.durable.last_index();
+        Some(if conflict {
+            self.persist(
+                hard,
+                commit,
+                Some(Suffix {
+                    from,
+                    entries: Vec::new(),
+                }),
+                After::Reply,
+                None,
+            )
+        } else if hard != old || commit != self.durable.commit_index {
             self.persist(hard, commit, None, After::Reply, None)
         } else {
             Ok(Vec::new())
@@ -449,6 +472,7 @@ impl Raft {
             if matching_index != sent.end {
                 return Err(RaftError::InvalidMessage);
             }
+            self.stalled_rounds.remove(&m.from);
             let prefix = self.progress[&m.from].max(matching_index);
             self.progress.insert(m.from, prefix);
             self.next_index.insert(m.from, prefix + 1);

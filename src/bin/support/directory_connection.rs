@@ -261,6 +261,10 @@ impl Connection {
                         receipt.outcome,
                         receipt.duplicate
                     ),
+                    // Retryable backpressure, nothing proposed (ST2 round 3).
+                    ClientOutcome::NotProposed(voteboat::raft::RaftError::StoragePressure) => {
+                        "ERR StoragePressure".into()
+                    }
                     other => format!("UNKNOWN {other:?}; retry original plan operation"),
                 });
             }

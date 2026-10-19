@@ -40,7 +40,13 @@ impl Raft {
     pub fn propose_batch(&mut self, proposals: Vec<Proposal>) -> Result<Vec<Effect>, RaftError> {
         self.begin_step()?;
         self.check_proposal_role()?;
-        let first = self.validate_proposal_batch(&proposals, proposals.capacity())?;
+        let first = self
+            .validate_proposal_batch(&proposals, proposals.capacity())
+            .inspect_err(|e| {
+                if *e == RaftError::StoragePressure {
+                    self.entry_budget_refusals = self.entry_budget_refusals.saturating_add(1);
+                }
+            })?;
         self.validate_conversion_peak(&proposals, proposals.capacity())?;
         let entries = proposals
             .into_iter()
@@ -87,6 +93,7 @@ impl Raft {
         if bytes.len() > self.limits.max_command_bytes {
             return Err(StorageError::Rejected("command byte budget").into());
         }
+        self.check_data_budget(1)?;
         let index = self
             .durable
             .last_index()
@@ -122,7 +129,8 @@ impl Raft {
             .checked_add(count)
             .is_none_or(|n| n > self.limits.max_entries_per_group)
         {
-            return Err(StorageError::Rejected("proposal retained entry budget").into());
+            // The noop reserve above the data budget is the leader's (I1).
+            return Err(RaftError::StoragePressure);
         }
         let first = self
             .durable

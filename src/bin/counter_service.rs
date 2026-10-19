@@ -339,6 +339,10 @@ fn outputs(
             c.reply(match result {
                 ClientOutcome::Applied { receipt, .. } => leadership_commands::receipt(&receipt),
                 ClientOutcome::NotProposed(RaftError::NotLeader) => "ERR NOT_LEADER".into(),
+                // Retryable backpressure, nothing proposed (ST2 round 3).
+                ClientOutcome::NotProposed(RaftError::StoragePressure) => {
+                    "ERR StoragePressure".into()
+                }
                 ClientOutcome::NotProposed(e) => format!("ERR not_proposed={e:?}"),
                 ClientOutcome::Unknown(e) => {
                     format!("UNKNOWN {e:?}; retry the same operation ID and delta")

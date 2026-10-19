@@ -314,7 +314,7 @@ fn validate_append_metadata(
     if let Some(suffix) = &update.suffix {
         if suffix.entries.len()
             > limits
-                .max_entries_per_group
+                .retained_entry_capacity()
                 .saturating_sub(current.entries_len)
         {
             return Err(StorageError::Rejected("group entry limit"));

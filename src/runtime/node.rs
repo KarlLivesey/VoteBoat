@@ -230,6 +230,9 @@ pub struct NetworkNode<
     maintenance: WalMaintenanceStatus,
     // Whether the cores were last told the WAL is above high water.
     core_pressure: bool,
+    // The data budget (`max_entries_per_group`) of the node's groups. They
+    // share one store, so one set of log limits.
+    entry_budget: usize,
     checkpoints: CheckpointStatus,
     retention: RetentionMode,
     drain: Option<drain::LocalDrain>,
@@ -296,15 +299,16 @@ where
             let schedules = Self::default_schedules(&parts.local, limits.retention, now)?;
             Ok((replica, budget, configuration, schedules))
         })();
-        let (replica, budget, configuration, (checkpoints, maintenance)) = match checked {
-            Ok(driver) => driver,
-            Err(reason) => {
-                return Err(NodeRejected {
-                    reason,
-                    parts: Box::new(parts),
-                })
-            }
-        };
+        let (replica, budget, configuration, (checkpoints, maintenance, entry_budget)) =
+            match checked {
+                Ok(driver) => driver,
+                Err(reason) => {
+                    return Err(NodeRejected {
+                        reason,
+                        parts: Box::new(parts),
+                    })
+                }
+            };
         let mut peers = if let Some(network) = parts.peers.take() {
             match N::build(
                 network,
@@ -339,6 +343,7 @@ where
             configuration,
             maintenance,
             core_pressure: false,
+            entry_budget,
             checkpoints,
             retention: limits.retention,
             drain: None,
@@ -351,18 +356,26 @@ where
         local: &NodeLocalParts<S, T, E, A, W, O, H>,
         retention: RetentionMode,
         now: MonoTime,
-    ) -> Result<(CheckpointStatus, WalMaintenanceStatus), NodeError> {
+    ) -> Result<(CheckpointStatus, WalMaintenanceStatus, usize), NodeError> {
         let mut checkpoints = CheckpointStatus::default();
         let mut maintenance = WalMaintenanceStatus::default();
+        let limits = Self::smallest_log_limits(local);
+        // I5 / U5: whatever the retention mode, the WAL above the high-water
+        // mark must hold the largest batch, or a batch could wait for ever.
+        super::maintenance::check_wal_headroom(
+            local.persistence.wal_usage(),
+            maintenance.high_water_percent(),
+            limits.max_batch_bytes,
+            limits.control_reserve_bytes,
+        )?;
         if retention == RetentionMode::LifetimeBounded {
-            return Ok((checkpoints, maintenance));
+            return Ok((checkpoints, maintenance, limits.max_entries_per_group));
         }
         if !Self::checkpoints_supported(local) {
             return Err(NodeError::Maintenance(
                 MaintenanceError::CheckpointsUnavailable,
             ));
         }
-        let limits = Self::smallest_log_limits(local);
         checkpoints.configure(
             Some(CheckpointPolicy::for_limits(limits)),
             now,
@@ -375,7 +388,7 @@ where
                 Some(ceiling),
             )?;
         }
-        Ok((checkpoints, maintenance))
+        Ok((checkpoints, maintenance, limits.max_entries_per_group))
     }
     fn checkpoints_supported(local: &NodeLocalParts<S, T, E, A, W, O, H>) -> bool {
         local.snapshots.as_ref().is_some_and(|snapshots| {
@@ -571,11 +584,24 @@ where
                 MaintenanceError::DisableRequiresLifetimeBounded,
             ));
         }
+        if let Some(p) = policy {
+            let limits = Self::smallest_log_limits(&self.local);
+            super::maintenance::check_wal_headroom(
+                self.local.persistence.wal_usage(),
+                p.high_water_percent,
+                limits.max_batch_bytes,
+                limits.control_reserve_bytes,
+            )?;
+        }
         self.maintenance
             .configure(policy, self.now, self.local.persistence.reclaim_limit())
     }
     pub fn wal_maintenance(&self) -> &WalMaintenanceStatus {
         &self.maintenance
+    }
+    /// Protocol time of the latest poll (local monotonic clock).
+    pub fn poll_time(&self) -> MonoTime {
+        self.now
     }
     /// The retention mode chosen at construction.
     pub fn retention(&self) -> RetentionMode {
@@ -719,6 +745,9 @@ where
         // ST2b: the only capacity refusal a client sees, made before the
         // request reaches any core or log. Admitted requests are never refused
         // for capacity later; the WAL thread holds what does not fit yet.
+        let account = self.local.owner.wal_account();
+        self.maintenance
+            .note_budget_refusals(account.refused.saturating_add(account.declined));
         if self
             .maintenance
             .update_high_water(self.local.persistence.wal_usage())
@@ -728,6 +757,28 @@ where
                 reason: ClientError::StoragePressure,
                 request,
             });
+        }
+        // ST2 round 3 (I2): the group's retained-entry budget gets the same
+        // typed, retryable refusal, with the same hysteresis, while
+        // checkpoints are on to bring it back down (an opt-out node refuses
+        // at the budget itself, also typed).
+        if let Some(core) = self
+            .local
+            .owner
+            .core(request.group)
+            .filter(|_| self.retention == RetentionMode::Maintained)
+        {
+            if self.maintenance.entry_high_water(
+                request.group,
+                core.state().entries.len(),
+                core.log_limits().max_entries_per_group,
+            ) {
+                self.maintenance.refused_entry_proposal();
+                return Err(ClientRejected {
+                    reason: ClientError::StoragePressure,
+                    request,
+                });
+            }
         }
         self.local
             .clients
@@ -1188,7 +1239,33 @@ where
             self.enter_recovery(reason.clone());
         }
         let usage = self.local.persistence.wal_usage();
+        let account = self.local.owner.wal_account();
+        self.maintenance
+            .note_budget_refusals(account.refused.saturating_add(account.declined));
         let high_water = self.maintenance.update_high_water(usage);
+        if usage.is_some_and(|u| u.parked > 0) {
+            self.maintenance.held_since.get_or_insert(now);
+        } else {
+            self.maintenance.held_since = None;
+        }
+        // I5: the shard checks every data staging against this mark.
+        let budget = usage.filter(|u| u.capacity > 0).map(|u| super::WalBudget {
+            limit: self.maintenance.high_water_bytes(u.capacity),
+            published: u.bytes,
+        });
+        self.local.owner.set_wal_budget(budget);
+        // I2: groups leave the entry gate without waiting for a proposal.
+        if !self.maintenance.entry_high_water.is_empty() {
+            for group in self.maintenance.entry_high_water.clone() {
+                if let Some(core) = self.local.owner.core(group) {
+                    let (retained, max) = (
+                        core.state().entries.len(),
+                        core.log_limits().max_entries_per_group,
+                    );
+                    self.maintenance.entry_high_water(group, retained, max);
+                }
+            }
+        }
         // Followers decline new data while the WAL is above high water. Set
         // on every poll while it lasts (groups may be added), cleared once.
         if high_water || self.core_pressure {
@@ -1200,11 +1277,16 @@ where
             && matches!(self.state, NodeState::Quiescing | NodeState::Draining);
         if result.is_ok() && (self.state == NodeState::Running || held) {
             let pressure = high_water || super::maintenance::pressure(usage);
+            let entry_high = super::maintenance::percent_of(
+                self.entry_budget,
+                self.maintenance.high_water_percent(),
+            ) as u64;
             self.checkpoints.schedule(
                 &mut self.local.owner,
                 &self.local.applications,
                 now,
                 pressure,
+                entry_high,
             );
             if let Err(reason) = self.schedule_wal_maintenance(now, usage, pressure) {
                 self.enter_recovery(reason.clone());

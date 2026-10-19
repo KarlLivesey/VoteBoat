@@ -30,7 +30,7 @@ use voteboat::{
         transport::NativeTransportFactory,
         wire::NativeWireCodec,
     },
-    raft::{Raft, Role},
+    raft::{Raft, RaftError, Role},
     worker::*,
 };
 
@@ -249,6 +249,9 @@ struct Writes {
     applied: u64,
     progress_ms: u64,
     refused: u64,
+    // ST2 round 3 (I5): admitted writes refused, typed, when they reached
+    // the core because their WAL bytes no longer fitted under the mark.
+    refused_at_step: u64,
     first_refusal_ms: Option<u64>,
     last_refusal_ms: Option<u64>,
 }
@@ -290,6 +293,12 @@ impl Writes {
         while let Some(output) = n.poll_client() {
             match n.complete_client(output).unwrap() {
                 ClientOutcome::Applied { .. } => self.applied += 1,
+                // Nothing was proposed; the client retries (the next offer
+                // re-issues a write).
+                ClientOutcome::NotProposed(RaftError::StoragePressure) => {
+                    self.issued -= 1;
+                    self.refused_at_step += 1;
+                }
                 other => panic!(
                     "accepted write {} not applied at log index {}: {other:?}",
                     self.applied,
@@ -328,6 +337,7 @@ fn write_burst_past_a_slow_rewrite_is_backpressure_not_a_node_failure() {
     let usage = nodes[0].wal_usage().unwrap();
     let cap = usage.capacity + LogLimits::default().control_reserve_bytes;
     let (mut peak, mut peak_held, mut released_ms) = (0, 0, None);
+    let mut parked = 0;
     let mut writes = Writes::default();
     while writes.applied < TOTAL {
         writes.offer(&mut nodes[0], TOTAL, clock.now);
@@ -337,6 +347,7 @@ fn write_burst_past_a_slow_rewrite_is_backpressure_not_a_node_failure() {
         writes.check(&nodes, clock.now, applied);
         let u = nodes[0].wal_usage().unwrap();
         peak = peak.max(u.bytes);
+        parked = parked.max(u.parked);
         assert!(u.bytes <= cap, "WAL {} past its cap {cap}", u.bytes);
         if released_ms.is_none() {
             peak_held = peak;
@@ -358,13 +369,22 @@ fn write_burst_past_a_slow_rewrite_is_backpressure_not_a_node_failure() {
     assert!(writes.last_refusal_ms.unwrap() >= released);
     assert!(status.high_water_entries >= 1);
     assert_eq!(status.refused_proposals, writes.refused);
+    // I5: admission accounts for every staged byte, so data never exceeds the
+    // high-water mark and no batch is ever held on the WAL thread.
+    assert_eq!(parked, 0, "a batch was held");
+    assert!(peak <= usage.capacity * 3 / 4 + LogLimits::default().control_reserve_bytes);
+    assert_eq!(
+        n.local().owner.wal_account().refused,
+        writes.refused_at_step
+    );
     assert!(status.last_reclaimed.is_some_and(|(t, _)| t.0 >= released));
     assert_eq!(core(n).role(), Role::Leader);
     assert_eq!(core(n).state().hard_state.term, term);
     eprintln!(
-        "ST2b native burst: writes={TOTAL} bytes={} refused={} first_refusal_ms={:?} released_ms={released} last_refusal_ms={:?} peak_wal_while_held={peak_held} peak_wal={peak} cap={cap} usable={} high_water_entries={} last_reclaim={:?} simulated_ms={}",
+        "ST2b native burst: writes={TOTAL} bytes={} refused={} refused_at_step={} first_refusal_ms={:?} released_ms={released} last_refusal_ms={:?} peak_wal_while_held={peak_held} peak_wal={peak} cap={cap} usable={} high_water_entries={} last_reclaim={:?} simulated_ms={}",
         TOTAL * PADDED as u64,
         writes.refused,
+        writes.refused_at_step,
         writes.first_refusal_ms,
         writes.last_refusal_ms,
         usage.capacity,

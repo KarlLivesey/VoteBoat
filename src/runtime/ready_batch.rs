@@ -155,6 +155,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
         }
         let limits = self.limits;
         let ordinary = self.control_profile.is_none();
+        let room = self.wal.room();
         let group = self.live(ticket)?;
         if group.core.has_pending_dependency() {
             return Err(RuntimeError::DependencyPending);
@@ -165,10 +166,35 @@ impl<Q: ReadyScheduler> Shard<Q> {
         else {
             return self.step_next_checked(ticket, now, |core, event| check(core, event, &[]));
         };
+        // I5: the batch's WAL bound must fit under the high-water mark; a
+        // first proposal that does not is refused on its own (and counted)
+        // by the single-step path, later ones wait for the next visit.
+        let mut check = |core: &Raft, event: &Event, selected: &[ReadyProposal]| {
+            check(core, event, selected)?;
+            let Some(room) = room else {
+                return Ok(());
+            };
+            let Event::Propose { bytes, .. } = event else {
+                return Ok(());
+            };
+            let bound = selected
+                .iter()
+                .fold(super::wal_account::proposal_bound(bytes.len()), |sum, p| {
+                    sum.saturating_add(crate::log::entry_wal_bound(p.command.bytes.len()))
+                });
+            if bound > room {
+                Err(RaftError::StoragePressure)
+            } else {
+                Ok(())
+            }
+        };
         if let Err(error) = check(&group.core, &group.queues[1].front().unwrap().event, &[]) {
             return self.step_next_checked(ticket, now, |_, _| Err(error.clone()));
         }
+        let before = group.core.pending_wal_bytes();
         let stepped = collect(group, window, &mut check);
+        let after = group.core.pending_wal_bytes();
+        self.wal.track(before, after);
         if stepped.result.is_ok() && !self.connections_steady() {
             self.retain_connection_history(ticket.group)?;
         }

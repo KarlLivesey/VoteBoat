@@ -15,11 +15,13 @@
 //! Store maintenance on by default: physical WAL reclaim scheduling driven by
 //! the host clock and the store's published occupancy.
 use super::{MonoTime, NodeError, ReplicaError};
+use crate::identity::GroupIdentity;
 use crate::{
     contracts::StorageError,
     log::{LogReclaimed, WalUsage},
     worker::*,
 };
+use std::collections::BTreeSet;
 
 /// How a node keeps retained storage bounded for unbounded uptime.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -51,6 +53,39 @@ pub enum MaintenanceError {
         min_entries: u64,
         max_entries_per_group: usize,
     },
+    /// The WAL space above the high-water mark (`headroom` bytes) cannot hold
+    /// the largest batch the store may encode plus the control reserve
+    /// (`required`), so a batch could wait for ever for a rewrite to make
+    /// room (ST2 round 3, I5).
+    WalHeadroomTooSmall { headroom: usize, required: usize },
+}
+/// Longest accepted maintenance or scan interval (24 hours): a larger value
+/// could overflow the next deadline and stop the schedule without a signal
+/// (ST2 round 3, I6).
+pub const MAX_SCHEDULE_MS: u64 = 24 * 60 * 60 * 1000;
+/// The space above the WAL high-water mark must hold the largest batch the
+/// store may encode plus its control reserve: data never exceeds the mark
+/// (the shard's admission account), so after a rewrite a held batch fits
+/// above the live data and control records (I5).
+pub(super) fn check_wal_headroom(
+    usage: Option<WalUsage>,
+    high_water_percent: u8,
+    max_batch_bytes: usize,
+    control_reserve_bytes: usize,
+) -> Result<(), NodeError> {
+    let Some(u) = usage.filter(|u| u.capacity > 0) else {
+        return Ok(());
+    };
+    let headroom = u
+        .capacity
+        .saturating_sub(percent_of(u.capacity, high_water_percent));
+    let required = max_batch_bytes.saturating_add(control_reserve_bytes);
+    if headroom < required {
+        return Err(NodeError::Maintenance(
+            MaintenanceError::WalHeadroomTooSmall { headroom, required },
+        ));
+    }
+    Ok(())
 }
 
 /// Physical replacement only: logical retention and checkpoint authorization
@@ -126,15 +161,32 @@ pub struct WalMaintenanceStatus {
     pub high_water: bool,
     /// Times the high-water state was entered (saturating).
     pub high_water_entries: u64,
-    /// Client proposals refused by the high-water state (saturating).
+    /// Client proposals refused by the high-water state or the entry gate
+    /// (saturating).
     pub refused_proposals: u64,
+    /// Groups whose retained entries are in the entry high-water state (ST2
+    /// round 3, I2): entered at `high_water_percent` of
+    /// `max_entries_per_group`, left below `low_water_percent`; their new
+    /// proposals are refused with `ClientError::StoragePressure`.
+    pub entry_high_water: BTreeSet<GroupIdentity>,
+    /// Proposals refused by the entry gate (saturating; included in
+    /// `refused_proposals`).
+    pub refused_entry_proposals: u64,
+    /// Since when the WAL thread has held at least one batch that does not
+    /// fit yet (protocol time of the poll that first saw it); None when
+    /// nothing is held.
+    pub held_since: Option<MonoTime>,
+    // Data refusals by the shard's byte account seen so far, and whether a
+    // new one arrived since the state was last evaluated (I5).
+    budget_refusals: u64,
+    budget_exhausted: bool,
 }
 /// WAL occupancy at or above half the usable capacity: checkpoints stop
 /// waiting for their entry threshold and reclaim may run early.
 pub(super) fn pressure(usage: Option<WalUsage>) -> bool {
     usage.is_some_and(|u| u.capacity > 0 && u.bytes >= u.capacity / 2)
 }
-fn percent_of(capacity: usize, percent: u8) -> usize {
+pub(super) fn percent_of(capacity: usize, percent: u8) -> usize {
     (capacity as u128 * u128::from(percent) / 100) as usize
 }
 impl WalMaintenanceStatus {
@@ -152,6 +204,8 @@ impl WalMaintenanceStatus {
         let next = if let Some(p) = policy {
             if p.interval_ms == 0
                 || p.retry_ms == 0
+                || p.interval_ms > MAX_SCHEDULE_MS
+                || p.retry_ms > MAX_SCHEDULE_MS
                 || p.max_bytes == 0
                 || p.low_water_percent == 0
                 || p.low_water_percent >= p.high_water_percent
@@ -193,7 +247,8 @@ impl WalMaintenanceStatus {
             (DEFAULT_HIGH_WATER_PERCENT, DEFAULT_LOW_WATER_PERCENT),
             |p| (p.high_water_percent, p.low_water_percent),
         );
-        if u.parked > 0 || u.bytes >= percent_of(u.capacity, high) {
+        let exhausted = std::mem::take(&mut self.budget_exhausted);
+        if u.parked > 0 || exhausted || u.bytes >= percent_of(u.capacity, high) {
             if !self.high_water {
                 self.high_water_entries = self.high_water_entries.saturating_add(1);
             }
@@ -202,6 +257,51 @@ impl WalMaintenanceStatus {
             self.high_water = false;
         }
         self.high_water
+    }
+    /// The shard's running total of data refused or declined for the byte
+    /// account (I5). A new refusal enters the high-water state like a held
+    /// batch: admission closes before more data reaches a core.
+    pub(super) fn note_budget_refusals(&mut self, total: u64) {
+        if total > self.budget_refusals {
+            self.budget_refusals = total;
+            self.budget_exhausted = true;
+        }
+    }
+    /// The high-water mark in bytes of a WAL with `capacity` usable bytes.
+    pub fn high_water_bytes(&self, capacity: usize) -> usize {
+        percent_of(capacity, self.high_water_percent())
+    }
+    pub(super) fn high_water_percent(&self) -> u8 {
+        self.policy
+            .map_or(DEFAULT_HIGH_WATER_PERCENT, |p| p.high_water_percent)
+    }
+    pub(super) fn low_water_percent(&self) -> u8 {
+        self.policy
+            .map_or(DEFAULT_LOW_WATER_PERCENT, |p| p.low_water_percent)
+    }
+    /// The entry gate for `group` holding `retained` entries of its data
+    /// budget `max_entries`, with the same hysteresis as the WAL gate.
+    pub(super) fn entry_high_water(
+        &mut self,
+        group: GroupIdentity,
+        retained: usize,
+        max_entries: usize,
+    ) -> bool {
+        if retained < percent_of(max_entries, self.low_water_percent()) {
+            if !self.entry_high_water.is_empty() {
+                self.entry_high_water.remove(&group);
+            }
+            return false;
+        }
+        if retained >= percent_of(max_entries, self.high_water_percent()) {
+            self.entry_high_water.insert(group);
+            return true;
+        }
+        self.entry_high_water.contains(&group)
+    }
+    pub(super) fn refused_entry_proposal(&mut self) {
+        self.refused_entry_proposals = self.refused_entry_proposals.saturating_add(1);
+        self.refused_proposal();
     }
     pub(super) fn refused_proposal(&mut self) {
         self.refused_proposals = self.refused_proposals.saturating_add(1);
@@ -489,5 +589,85 @@ mod tests {
         assert_eq!(state.due(MonoTime(2020), usage(106), 100), Some(policy));
         // The interval still runs with no occupancy signal at all.
         assert_eq!(state.due(MonoTime(2020), None, 0), Some(policy));
+    }
+    /// ST2 round 3 (I2): the entry gate has the WAL gate's hysteresis.
+    #[test]
+    fn entry_gate_enters_at_the_high_mark_and_leaves_below_the_low_mark() {
+        let mut state = WalMaintenanceStatus::default();
+        let group = crate::identity::GroupIdentity {
+            id: crate::identity::GroupId::new(1).unwrap(),
+            incarnation: crate::identity::GroupIncarnation::new(1).unwrap(),
+        };
+        assert!(!state.entry_high_water(group, 12_287, 16_384));
+        assert!(state.entry_high_water(group, 12_288, 16_384));
+        assert!(state.entry_high_water(group, 8_192, 16_384));
+        assert_eq!(state.entry_high_water.len(), 1);
+        assert!(!state.entry_high_water(group, 8_191, 16_384));
+        assert!(state.entry_high_water.is_empty());
+        state.refused_entry_proposal();
+        assert_eq!(
+            (state.refused_entry_proposals, state.refused_proposals),
+            (1, 1)
+        );
+    }
+    /// ST2 round 3 (I5, U5): the space above the high-water mark must hold the
+    /// largest batch plus the control reserve; no bounded WAL, no check.
+    #[test]
+    fn wal_headroom_must_hold_the_largest_batch_and_the_reserve() {
+        let wal = |capacity| {
+            Some(WalUsage {
+                bytes: 0,
+                capacity,
+                parked: 0,
+            })
+        };
+        // Defaults: 63 MiB usable, 75% mark, 1 MiB batches and reserve.
+        let usable = 63 * 1024 * 1024;
+        assert_eq!(
+            check_wal_headroom(wal(usable), 75, 1 << 20, 1 << 20),
+            Ok(())
+        );
+        // The round-2 Codex case: 4 KiB usable, 8 KiB batches, 4 KiB reserve.
+        assert_eq!(
+            check_wal_headroom(wal(4096), 75, 8192, 4096),
+            Err(NodeError::Maintenance(
+                MaintenanceError::WalHeadroomTooSmall {
+                    headroom: 1024,
+                    required: 12_288,
+                }
+            ))
+        );
+        assert_eq!(check_wal_headroom(None, 75, usize::MAX, 0), Ok(()));
+        // An out-of-range mark cannot underflow the check.
+        assert!(check_wal_headroom(wal(4096), 200, 1, 0).is_err());
+    }
+    /// ST2 round 3 (I6): intervals that could overflow a deadline are refused.
+    #[test]
+    fn schedules_longer_than_a_day_are_refused_at_configuration() {
+        let mut state = WalMaintenanceStatus::default();
+        let policy = WalMaintenancePolicy::for_ceiling(100);
+        for bad in [
+            WalMaintenancePolicy {
+                interval_ms: MAX_SCHEDULE_MS + 1,
+                ..policy
+            },
+            WalMaintenancePolicy {
+                retry_ms: u64::MAX,
+                ..policy
+            },
+        ] {
+            assert_eq!(
+                state.configure(Some(bad), MonoTime(0), Some(100)),
+                Err(NodeError::InvalidLimits)
+            );
+        }
+        let longest = WalMaintenancePolicy {
+            interval_ms: MAX_SCHEDULE_MS,
+            ..policy
+        };
+        state
+            .configure(Some(longest), MonoTime(0), Some(100))
+            .unwrap();
+        assert_eq!(state.next_deadline, Some(MonoTime(MAX_SCHEDULE_MS)));
     }
 }

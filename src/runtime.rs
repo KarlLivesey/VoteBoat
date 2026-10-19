@@ -46,6 +46,7 @@ mod replica;
 mod snapshot_send;
 mod snapshots;
 mod timed;
+mod wal_account;
 pub use administration::*;
 pub use applications::*;
 pub use checkpoint_schedule::*;
@@ -64,6 +65,7 @@ pub use reads::*;
 pub use replica::*;
 pub use snapshots::*;
 pub use timed::{TimedShard, TimerConfig, TimerProgress};
+pub use wal_account::{WalAccount, WalBudget};
 
 /// Milliseconds on one local monotonic clock domain, never a lease or term.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
@@ -425,6 +427,10 @@ pub struct Shard<Q: ReadyScheduler> {
     control_profile: Option<crate::logical_voter::LogicalActivationControlProfile>,
     now: MonoTime,
     closed: bool,
+    // ST2 round 3 (I5): staged WAL bytes against the node's high-water mark,
+    // and the node's WAL high-water state every core was last given.
+    wal: WalAccount,
+    pressure: bool,
 }
 impl<Q: ReadyScheduler> Shard<Q> {
     pub fn new(
@@ -448,6 +454,8 @@ impl<Q: ReadyScheduler> Shard<Q> {
             control_profile: None,
             now: MonoTime(0),
             closed: false,
+            wal: WalAccount::default(),
+            pressure: false,
         })
     }
     pub fn register(&mut self, core: Raft) -> Result<(), RuntimeError> {
@@ -509,9 +517,19 @@ impl<Q: ReadyScheduler> Shard<Q> {
     /// Volatile host input for every core (ST2b WAL high-water state); not a
     /// step, so it reaches cores that wait on a persistence dependency.
     pub(crate) fn set_storage_pressure(&mut self, on: bool) {
+        self.pressure = on;
         for g in self.groups.values_mut() {
             g.core.set_storage_pressure(on);
         }
+    }
+    /// The node's latest bounded-WAL view (I5); `None` without a bounded WAL.
+    /// Called once per node poll.
+    pub(crate) fn set_wal_budget(&mut self, budget: Option<WalBudget>) {
+        self.wal.refresh(budget);
+    }
+    /// Staged WAL bytes and data refusals (I5). Local observation only.
+    pub fn wal_account(&self) -> WalAccount {
+        self.wal
     }
     pub fn usage(&self) -> Usage {
         sum(&self.usage)
@@ -813,6 +831,8 @@ impl<Q: ReadyScheduler> Shard<Q> {
             self.reserved_connection_peers()?;
         }
         let limits = self.limits;
+        let room = self.wal.room();
+        let pressure = self.pressure;
         let g = self.live(ticket)?;
         if g.core.has_pending_dependency() {
             return Err(RuntimeError::DependencyPending);
@@ -822,6 +842,11 @@ impl<Q: ReadyScheduler> Shard<Q> {
         };
         g.turn = (turn + 1) % 4;
         let q = g.queues[class].pop_front().unwrap();
+        // I5: data whose WAL bound no longer fits under the high-water mark.
+        let over =
+            room.is_some_and(|room| wal_account::data_bound(&q.event).is_some_and(|b| b > room));
+        let proposal = matches!(q.event, Event::Propose { .. } | Event::Configure(_));
+        let before = g.core.pending_wal_bytes();
         if connections::changes_connections(&q.event) {
             g.queued_connection_changes -= 1;
         }
@@ -847,13 +872,26 @@ impl<Q: ReadyScheduler> Shard<Q> {
         let result = if stale_timer {
             Ok(Vec::new())
         } else {
-            if matches!(q.event, Event::Propose { .. } | Event::Configure(_)) {
-                check(&g.core, &q.event)
+            let checked = if proposal {
+                check(&g.core, &q.event).and(if over {
+                    Err(RaftError::StoragePressure)
+                } else {
+                    Ok(())
+                })
             } else {
                 Ok(())
+            };
+            if over && !proposal {
+                // A follower append: decline its data for this step.
+                g.core.set_storage_pressure(true);
             }
-            .and_then(|_| g.core.step(q.event))
+            let result = checked.and_then(|_| g.core.step(q.event));
+            if over && !proposal {
+                g.core.set_storage_pressure(pressure);
+            }
+            result
         };
+        let after = g.core.pending_wal_bytes();
         let proposed = operation.and_then(|operation| result.as_ref().ok()?.iter().find_map(|e| {
             let Effect::Persist(update) = e else { return None; };
             let entry = update.suffix.as_ref()?.entries.first()?;
@@ -871,6 +909,14 @@ impl<Q: ReadyScheduler> Shard<Q> {
             result,
             batch_members: Vec::new(),
         };
+        self.wal.track(before, after);
+        if over && !stale_timer {
+            if proposal {
+                self.wal.refused = self.wal.refused.saturating_add(1);
+            } else {
+                self.wal.declined = self.wal.declined.saturating_add(1);
+            }
+        }
         if stepped.result.is_ok() && !self.connections_steady() {
             self.retain_connection_history(ticket.group)?;
         }
@@ -887,13 +933,18 @@ impl<Q: ReadyScheduler> Shard<Q> {
         self.live(ticket)?;
         let steady = self.connections_steady();
         let group = self.live(ticket)?;
+        let before = group.core.pending_wal_bytes();
         let result = f(&mut group.core);
-        if steady && group.core.connections_are_bootstrap() {
+        let after = group.core.pending_wal_bytes();
+        let bootstrap = group.core.connections_are_bootstrap();
+        let fenced = group.core.is_fenced();
+        self.wal.track(before, after);
+        if steady && bootstrap {
             // The connection set was the fixed bootstrap set before and still
             // is: the reserved union and retained history cannot have changed.
             return Ok(result);
         }
-        if group.core.is_fenced() {
+        if fenced {
             // Preserve the callback's failure (for example, a failed storage
             // barrier). A fenced core cannot expand its peer set. Keep existing
             // reservations until the caller explicitly stops/reclaims it;
@@ -935,7 +986,9 @@ impl<Q: ReadyScheduler> Shard<Q> {
             .ok_or(RuntimeError::UnknownGroup)?;
         self.scheduler.cancel(group);
         let had_active_visit = g.visit.take().is_some();
+        let before = g.core.pending_wal_bytes();
         g.core.storage_failed();
+        self.wal.track(before, 0);
         g.fenced = true;
         g.timer = None;
         let mut admissions = Vec::new();

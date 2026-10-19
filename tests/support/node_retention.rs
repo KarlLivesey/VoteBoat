@@ -56,14 +56,13 @@ fn core(n: &Boat) -> &Raft {
 fn retained(n: &Boat) -> u64 {
     core(n).state().last_index() - core(n).state().base_index()
 }
-/// The typed, non-fatal refusals at the retained-entry limit: the batched
-/// admission check, or the single-proposal transition plan.
+/// The typed, retryable refusal at the retained-entry data budget (ST2
+/// round 3, I2; round 2 reported `Storage(Rejected("proposal retained entry
+/// budget" | "group entry limit"))`).
 fn at_entry_limit(outcome: &ClientOutcome<CounterReceipt>) -> bool {
     matches!(
         outcome,
-        ClientOutcome::NotProposed(RaftError::Storage(StorageError::Rejected(
-            "proposal retained entry budget" | "group entry limit"
-        )))
+        ClientOutcome::NotProposed(RaftError::StoragePressure)
     )
 }
 fn stop(n: &mut Boat, clock: &mut Clock) {
@@ -136,24 +135,18 @@ fn drive_until(
     done
 }
 
-/// Fail@main (3d552e2e): the default node refuses write 16,384 with a typed
-/// `NotProposed(Storage(Rejected(..)))` at the retained-entry limit. With ST2
-/// it applies 2.5× that many writes (10× and more with
-/// `VOTEBOAT_ST2_SOAK_WRITES`, recorded in release) plus an election every
-/// 2,048; the retained log stays below the limit (the threshold of 8,192 plus
-/// writes that arrive while a checkpoint runs), so no write is refused.
-#[test]
-fn default_node_keeps_accepting_past_the_retained_entry_limit() {
+/// One soak: `total` writes with an election every `ELECTION_EVERY`. Returns
+/// the trace sampled after every election (writes, last index, base, term,
+/// retained, largest retained so far, checkpoints completed).
+fn soak(total: u64) -> Vec<(u64, u64, u64, u64, u64, u64)> {
     const ELECTION_EVERY: u64 = 2_048;
-    // VOTEBOAT_ST2_SOAK_WRITES runs longer (release builds).
-    let total: u64 = std::env::var("VOTEBOAT_ST2_SOAK_WRITES")
-        .map_or(5 * ENTRY_LIMIT / 2, |v| v.parse().unwrap())
-        .next_multiple_of(ELECTION_EVERY);
+    let total = total.next_multiple_of(ELECTION_EVERY);
     let mut n = boat(counter_parts());
     let mut clock = Clock(0);
     elect(&mut n, &mut clock);
     let mut max_retained = 0;
     let mut bases = vec![core(&n).state().base_index()];
+    let mut trace = Vec::new();
     // Sample every tenth of the run, and at most once per 16,384 writes: the
     // writes arrive at 64 per simulated millisecond, so one 100 ms scan
     // interval spans 6,400 of them and a checkpoint must land between samples.
@@ -165,6 +158,15 @@ fn default_node_keeps_accepting_past_the_retained_entry_limit() {
         });
         written += ELECTION_EVERY;
         elect(&mut n, &mut clock);
+        let state = core(&n).state();
+        trace.push((
+            written,
+            state.last_index(),
+            state.base_index(),
+            state.hard_state.term,
+            retained(&n),
+            max_retained,
+        ));
         if written >= sample {
             // Every tenth of the run: bounded, still checkpointing, serving.
             sample += every;
@@ -186,16 +188,45 @@ fn default_node_keeps_accepting_past_the_retained_entry_limit() {
         Some(CheckpointResult::Completed { .. })
     ));
     eprintln!(
-        "ST2 runtime soak: writes={total} last_index={last} max_retained={max_retained} bases={bases:?}"
+        "ST2 runtime soak: writes={total} last_index={last} max_retained={max_retained} bases={bases:?} refused={} simulated_ms={}",
+        n.wal_maintenance().refused_proposals,
+        clock.0
     );
     stop(&mut n, &mut clock);
+    trace
+}
+/// Fail@main (3d552e2e): the default node refuses write 16,384 with a typed
+/// `NotProposed(Storage(Rejected(..)))` at the retained-entry limit. With ST2
+/// it applies 2.5× that many writes (10× and more with
+/// `VOTEBOAT_ST2_SOAK_WRITES`, recorded in release) plus an election every
+/// 2,048; the retained log stays below the limit (the threshold of 8,192 plus
+/// writes that arrive while a checkpoint runs). A refused write (typed
+/// `StoragePressure` at the entry gate) is retried.
+#[test]
+fn default_node_keeps_accepting_past_the_retained_entry_limit() {
+    // VOTEBOAT_ST2_SOAK_WRITES runs longer (release builds).
+    let total: u64 = std::env::var("VOTEBOAT_ST2_SOAK_WRITES")
+        .map_or(5 * ENTRY_LIMIT / 2, |v| v.parse().unwrap());
+    soak(total);
+}
+/// ST2 round 3 (I8, checklist 8): the soak runs in simulated protocol time on
+/// in-process providers, so two runs give byte-identical traces.
+#[test]
+fn two_soak_runs_in_simulated_time_have_identical_traces() {
+    let first = soak(ENTRY_LIMIT + ENTRY_LIMIT / 2);
+    let second = soak(ENTRY_LIMIT + ENTRY_LIMIT / 2);
+    assert!(first.len() >= 12);
+    assert_eq!(first, second);
 }
 
-/// U1 / Q6: with maintenance explicitly disabled, a leader elected at the
-/// retained-entry limit stays leader and refuses typed (on 3d552e2e the node
-/// entered `RecoveryRequired` with `Storage(Rejected("group entry limit"))`
-/// from inside the vote completion). An operator checkpoint then frees space
-/// and the deferred noop commits.
+/// U1 / Q6 with the noop reserve (ST2 round 3, I1). With maintenance
+/// explicitly disabled (on 3d552e2e the node entered `RecoveryRequired` with
+/// `Storage(Rejected("group entry limit"))` from inside the vote completion):
+/// a leader elected at the data budget appends its current-term noop from the
+/// reserve and commits, while data refuses typed (`StoragePressure`). Only
+/// once repeated elections have used the whole reserve does a leader defer its
+/// noop; it stays leader and refuses typed, and an operator checkpoint lets
+/// the noop commit and data resume.
 #[test]
 fn lifetime_bounded_leader_at_the_entry_limit_refuses_typed_and_stays_leader() {
     let mut n = bounded(counter_parts());
@@ -215,17 +246,35 @@ fn lifetime_bounded_leader_at_the_entry_limit_refuses_typed_and_stays_leader() {
         panic!("no outcome");
     };
     assert!(at_entry_limit(&refused(&mut n, &mut clock)));
-    for _ in 0..3 {
-        let term = core(&n).state().hard_state.term;
+    let campaign = |n: &mut Boat, clock: &mut Clock| {
+        let term = core(n).state().hard_state.term;
         n.control(group(1), NodeControl::Campaign).unwrap();
         for _ in 0..200 {
-            clock.poll(&mut n);
+            clock.poll(n);
         }
         assert_eq!(n.state(), NodeState::Running);
-        assert_eq!(core(&n).role(), Role::Leader);
-        assert_eq!(core(&n).state().hard_state.term, term + 1);
+        assert_eq!(core(n).role(), Role::Leader);
+        assert_eq!(core(n).state().hard_state.term, term + 1);
+    };
+    let capacity = core(&n).log_limits().retained_entry_capacity() as u64;
+    let mut elections = 0;
+    while retained(&n) < capacity {
+        campaign(&mut n, &mut clock);
+        elections += 1;
+        // The noop came from the reserve and committed.
+        let state = core(&n).state();
+        assert!(!core(&n).leader_noop_pending());
+        assert_eq!(state.last_term(), state.hard_state.term);
+        assert_eq!(state.commit_index, state.last_index());
+        if elections <= 3 {
+            assert!(at_entry_limit(&refused(&mut n, &mut clock)));
+        }
+    }
+    assert_eq!(elections, capacity - ENTRY_LIMIT);
+    for _ in 0..2 {
+        campaign(&mut n, &mut clock);
         assert!(core(&n).leader_noop_pending());
-        assert_eq!(retained(&n), ENTRY_LIMIT);
+        assert_eq!(retained(&n), capacity);
         assert!(at_entry_limit(&refused(&mut n, &mut clock)));
     }
     n.control(group(1), NodeControl::Checkpoint).unwrap();

@@ -467,6 +467,16 @@ impl MaintenanceOptions {
                     .into(),
             );
         }
+        if self
+            .wal_reclaim_ms
+            .is_some_and(|ms| ms > voteboat::runtime::MAX_SCHEDULE_MS)
+        {
+            return Err(format!(
+                "--wal-reclaim-ms must be at most {} (24 hours) so the schedule cannot overflow",
+                voteboat::runtime::MAX_SCHEDULE_MS
+            )
+            .into());
+        }
         let max = LogLimits::default().max_entries_per_group / 2;
         if self.checkpoint_entries.is_some_and(|n| n > max as u64) {
             return Err(format!(
@@ -561,8 +571,13 @@ where
         Some(CheckpointResult::Completed { index, .. }) => format!("completed@{index}"),
         Some(CheckpointResult::Rejected { error, .. }) => format!("rejected:{error:?}"),
     };
+    let core = node.local().owner.core(group);
+    let limits = core.map(|c| c.log_limits()).unwrap_or_default();
+    let account = node.local().owner.wal_account();
+    let (step_downs, last_step_down) = core.map_or((0, None), |c| c.capacity_step_downs());
+    let stall = core.and_then(|c| c.replica_stall());
     format!(
-        "OK retention={} enabled={} pending={} next_ms={:?} last_sequence={} wal_bytes={} wal_capacity={} last_reclaim_ms={:?} before_bytes={} after_bytes={} failures={} skipped={} admission_error={:?} completion_error={:?} checkpoint_enabled={} checkpoint_entries={} checkpoint_pending={} checkpoint_last={} checkpoint_admission_error={:?} leader_noop_pending={} high_water={} high_water_entries={} refused_proposals={} wal_parked={} checkpoint_base={}",
+        "OK retention={} enabled={} pending={} next_ms={:?} last_sequence={} wal_bytes={} wal_capacity={} last_reclaim_ms={:?} before_bytes={} after_bytes={} failures={} skipped={} admission_error={:?} completion_error={:?} checkpoint_enabled={} checkpoint_entries={} checkpoint_pending={} checkpoint_last={} checkpoint_admission_error={:?} leader_noop_pending={} high_water={} high_water_entries={} refused_proposals={} wal_parked={} retained_entries={} retained_budget={} retained_capacity={} entry_high_water={} entry_high_water_groups={} refused_entry_proposals={} checkpoint_failures={} wal_pending_bytes={} wal_refused_proposals={} wal_declined_appends={} wal_held_ms={} declined_appends={} replica_stall={} step_downs={} last_step_down={} checkpoint_base={}",
         retention_name(node.retention()),
         wal.policy.is_some(),
         wal.pending.is_some(),
@@ -590,6 +605,22 @@ where
         wal.high_water_entries,
         wal.refused_proposals,
         usage.map_or(0, |u| u.parked),
+        core.map_or(0, |c| c.state().entries.len()),
+        limits.max_entries_per_group,
+        limits.retained_entry_capacity(),
+        wal.entry_high_water.contains(&group),
+        wal.entry_high_water.len(),
+        wal.refused_entry_proposals,
+        checkpoints.failures,
+        account.pending,
+        account.refused,
+        account.declined,
+        wal.held_since
+            .map_or(0, |since| node.poll_time().0.saturating_sub(since.0)),
+        core.map_or(0, |c| c.declined_appends()),
+        stall.map_or("none".to_owned(), |(peer, rounds)| format!("{}:{rounds}", peer.get())),
+        step_downs,
+        last_step_down.map_or("none".to_owned(), |d| format!("{:?}@{}", d.reason, d.term)),
         // Kept last: existing operator tooling reads it as the final field.
         node.local()
             .owner

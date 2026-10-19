@@ -308,6 +308,11 @@ pub enum RaftError {
     StaleRead,
     StaleTransfer,
     NotApplied,
+    /// Retryable backpressure, nothing proposed: the group's retained log is
+    /// at its data budget (`LogLimits::max_entries_per_group`) until a
+    /// checkpoint compacts it, or the node's WAL has no room for more data
+    /// until a rewrite. Clients see it as `StoragePressure`.
+    StoragePressure,
     Storage(StorageError),
 }
 impl From<StorageError> for RaftError {
@@ -315,6 +320,25 @@ impl From<StorageError> for RaftError {
         Self::Storage(e)
     }
 }
+
+/// Why a leader gave up its role without a higher term (ST2 round 3, I1).
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum StepDownReason {
+    /// Elected with a retained log at `LogLimits::retained_entry_capacity`
+    /// whose uncommitted part alone fills it, so no checkpoint can make room
+    /// for the current-term noop. Another replica, with a shorter log, can win
+    /// and truncate that suffix.
+    RetainedEntryCapacity,
+}
+/// A recorded step-down: the term the leader gave up and why.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct StepDown {
+    pub term: u64,
+    pub reason: StepDownReason,
+}
+/// Election timeouts a replica lets pass without campaigning after a
+/// capacity step-down, so a replica with a shorter log can win first.
+const CAPACITY_CAMPAIGN_HOLDOFF: u8 = 2;
 
 #[derive(Clone, Debug)]
 enum After {
@@ -336,6 +360,9 @@ struct Pending {
     membership: Option<Box<Membership>>,
     ticket: Option<LogTicket>,
     after: After,
+    // Upper bound of the durable update's WAL bytes (zero for a volatile
+    // core), counted by the host until the transition completes (I5).
+    wal_bytes: usize,
     reply: Option<Message>,
 }
 #[derive(Clone, Copy)]
@@ -405,6 +432,18 @@ pub struct Raft {
     /// Volatile host input (ST2b): the node's WAL is above its high-water
     /// mark, so as a follower this core takes no new data entries.
     storage_pressure: bool,
+    // ST2 round 3 (I1): capacity step-downs, the last one, and how many
+    // election timeouts this replica still lets pass without campaigning.
+    capacity_step_downs: u64,
+    last_step_down: Option<StepDown>,
+    campaign_holdoff: u8,
+    // Follower appends whose new data this core declined (I3, saturating), and
+    // proposals refused at the retained-entry data budget (I2, saturating).
+    declined_appends: u64,
+    entry_budget_refusals: u64,
+    // As leader, per peer: heartbeat rounds since its last successful append
+    // acknowledgement while it lags the last index (I3, volatile).
+    stalled_rounds: BTreeMap<NodeId, u64>,
     // The core's log is the only copy: completions use `PersistVolatile` tokens.
     volatile: bool,
     // Nonzero only for a volatile core: the `recover_volatile` call that made it.
@@ -535,6 +574,12 @@ impl Raft {
             leader_contact: None,
             leader_noop_pending: false,
             storage_pressure: false,
+            capacity_step_downs: 0,
+            last_step_down: None,
+            campaign_holdoff: 0,
+            declined_appends: 0,
+            entry_budget_refusals: 0,
+            stalled_rounds: BTreeMap::new(),
             volatile: false,
             incarnation: 0,
         })
@@ -611,7 +656,7 @@ impl Raft {
             || state.last_term() > state.hard_state.term
             || !state.hard_state.follows(HardState::default())
             || state.validate_ballot().is_err()
-            || state.entries.len() > limits.max_entries_per_group
+            || state.entries.len() > limits.retained_entry_capacity()
             || state
                 .snapshot_membership
                 .as_ref()
@@ -703,6 +748,53 @@ impl Raft {
     /// errors until a checkpoint frees space; the role stays stable.
     pub fn leader_noop_pending(&self) -> bool {
         self.role == Role::Leader && self.leader_noop_pending
+    }
+    /// Upper bound of the WAL bytes of the staged durable transition, until
+    /// it completes or the core fails; zero when nothing is staged.
+    pub fn pending_wal_bytes(&self) -> usize {
+        self.pending.as_ref().map_or(0, |p| p.wal_bytes)
+    }
+    /// Capacity step-downs of this core (see [`StepDownReason`]) and the last.
+    pub fn capacity_step_downs(&self) -> (u64, Option<StepDown>) {
+        (self.capacity_step_downs, self.last_step_down)
+    }
+    /// Follower appends whose new data entries this core declined, for WAL
+    /// pressure, the in-flight byte budget or its retained-entry capacity.
+    pub fn declined_appends(&self) -> u64 {
+        self.declined_appends
+    }
+    /// Proposals refused at the retained-entry data budget.
+    pub fn entry_budget_refusals(&self) -> u64 {
+        self.entry_budget_refusals
+    }
+    /// As leader, the peer that has gone longest without a successful append
+    /// acknowledgement while lagging the last index, in heartbeat rounds. A
+    /// follower that keeps declining (or is down) shows here. Local
+    /// scheduling observation, not quorum evidence.
+    pub fn replica_stall(&self) -> Option<(NodeId, u64)> {
+        if self.role != Role::Leader {
+            return None;
+        }
+        self.stalled_rounds
+            .iter()
+            .filter(|(_, rounds)| **rounds > 0)
+            .max_by_key(|(_, rounds)| **rounds)
+            .map(|(node, rounds)| (*node, *rounds))
+    }
+    /// Refuse new data entries once the retained log is at the data budget;
+    /// the noop reserve above it is the current leader's alone (I1).
+    fn check_data_budget(&mut self, count: usize) -> Result<(), RaftError> {
+        if self
+            .durable
+            .entries
+            .len()
+            .checked_add(count)
+            .is_none_or(|n| n > self.limits.max_entries_per_group)
+        {
+            self.entry_budget_refusals = self.entry_budget_refusals.saturating_add(1);
+            return Err(RaftError::StoragePressure);
+        }
+        Ok(())
     }
     /// Host-set WAL high-water state (ST2b). While set, a follower keeps
     /// leader contact, term and commit records but declines appends that
@@ -1086,7 +1178,12 @@ impl Raft {
                     transfer.signal_sent = false;
                 }
                 if self.role == Role::Leader {
+                    self.count_stalled_replicas();
                     let mut effects = self.retry_leader_noop()?;
+                    if self.role != Role::Leader {
+                        // Stepped down at capacity: no more heartbeats.
+                        return self.finish_step(effects);
+                    }
                     effects.extend(self.broadcast()?);
                     effects.extend(self.read_probes());
                     Ok(effects)
@@ -1132,6 +1229,13 @@ impl Raft {
         }
         if !self.local_voter() {
             return Err(RaftError::NotVoter);
+        }
+        if self.campaign_holdoff > 0 && self.role != Role::Leader {
+            // After a capacity step-down: let this election timeout pass so
+            // a replica with a shorter log can win first (I1).
+            self.campaign_holdoff -= 1;
+            self.reset_election()?;
+            return Ok(Vec::new());
         }
         self.reset_election()?;
         self.transfer = None;
@@ -1515,6 +1619,7 @@ impl Raft {
             .transpose()
             .map_err(|_| RaftError::InvalidRecovery)?;
         let metadata = next.metadata();
+        let wal_bytes = update.as_ref().map_or(0, LogUpdate::wal_bound);
         let effect = match update {
             Some(update) => Effect::Persist(update),
             None => Effect::PersistVolatile(VolatilePersist {
@@ -1548,6 +1653,7 @@ impl Raft {
             ticket: None,
             after,
             reply,
+            wal_bytes,
         });
         Ok(vec![effect])
     }
@@ -1650,17 +1756,69 @@ impl Raft {
             .ok_or(RaftError::Exhausted)?;
         self.initialize_replication()?;
         self.leader_noop_pending = false;
-        if self.durable.entries.len() >= self.limits.max_entries_per_group {
-            // A lifetime-bounded store at its retained-entry limit (or a
-            // maintained one above its sustainable rate). Refusing the noop
-            // here used to fail the node from inside the vote completion, and
-            // a restart replayed the same refusal. Lead without it: followers
-            // stay quiet, proposals and reads refuse typed, and the noop is
-            // appended once a checkpoint frees space.
+        self.stalled_rounds.clear();
+        if self.durable.entries.len() >= self.limits.retained_entry_capacity() {
+            // Only reachable when the noop reserve above the data budget is
+            // used up (I1). If a checkpoint up to the commit index could make
+            // room, lead without the noop until it does: followers stay
+            // quiet, proposals and reads refuse typed. Otherwise no step of
+            // this leader can ever commit; step down so a replica with a
+            // shorter log can win.
+            if self.noop_unplaceable() {
+                return self.step_down_for_capacity();
+            }
             self.leader_noop_pending = true;
             return self.broadcast();
         }
         self.append_leader_noop(next)
+    }
+    /// At capacity with an uncommitted part that alone fills it: compaction
+    /// stops at the commit index, which only this term's noop can advance.
+    fn noop_unplaceable(&self) -> bool {
+        self.durable
+            .last_index()
+            .saturating_sub(self.durable.commit_index)
+            >= self.limits.retained_entry_capacity() as u64
+    }
+    fn step_down_for_capacity(&mut self) -> Result<Vec<Effect>, RaftError> {
+        self.role = Role::Follower;
+        self.leader_noop_pending = false;
+        self.transfer = None;
+        self.leader_contact = None;
+        self.clear_reads();
+        self.votes.clear();
+        self.vote_context = None;
+        self.clear_replication_requests();
+        self.repair_requests.clear();
+        self.progress.clear();
+        self.next_index.clear();
+        self.stalled_rounds.clear();
+        self.cancel_learner_readiness();
+        self.capacity_step_downs = self.capacity_step_downs.saturating_add(1);
+        self.last_step_down = Some(StepDown {
+            term: self.durable.hard_state.term,
+            reason: StepDownReason::RetainedEntryCapacity,
+        });
+        self.campaign_holdoff = CAPACITY_CAMPAIGN_HOLDOFF;
+        self.reset_election()?;
+        Ok(Vec::new())
+    }
+    /// As leader, once per heartbeat: a peer that lags the last index and
+    /// has had no successful acknowledgement since the last heartbeat adds a
+    /// round; a successful acknowledgement or catching up clears it.
+    fn count_stalled_replicas(&mut self) {
+        let last = self.durable.last_index();
+        for peer in self.peers() {
+            if self.progress.get(&peer).is_some_and(|p| *p >= last) {
+                self.stalled_rounds.remove(&peer);
+            } else {
+                // Absent: acknowledged since the last heartbeat (or new).
+                self.stalled_rounds
+                    .entry(peer)
+                    .and_modify(|rounds| *rounds = rounds.saturating_add(1))
+                    .or_insert(0);
+            }
+        }
     }
     /// Append the deferred noop when space allows and nothing is staged. Any
     /// current-term entry already serves the noop's commit purpose.
@@ -1673,7 +1831,10 @@ impl Raft {
             self.leader_noop_pending = false;
             return Ok(Vec::new());
         }
-        if self.durable.entries.len() >= self.limits.max_entries_per_group {
+        if self.durable.entries.len() >= self.limits.retained_entry_capacity() {
+            if self.noop_unplaceable() {
+                return self.step_down_for_capacity();
+            }
             return Ok(Vec::new());
         }
         let effects = self.append_leader_noop(last.checked_add(1).ok_or(RaftError::Exhausted)?)?;
@@ -2168,6 +2329,8 @@ pub fn persist_effect<S: LogStore>(
 #[cfg(test)]
 #[path = "raft/append_prefix_tests.rs"]
 mod append_prefix_tests;
+#[cfg(test)]
+mod capacity_tests;
 #[cfg(test)]
 mod checkpoint_tests;
 #[cfg(test)]
