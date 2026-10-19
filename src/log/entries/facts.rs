@@ -103,7 +103,9 @@ pub(crate) struct IndexNeed {
 }
 impl IndexNeed {
     pub(crate) fn push(&mut self, entry: &LogEntry) {
-        let metrics = Metrics::of(entry);
+        self.add(Metrics::of(entry));
+    }
+    fn add(&mut self, metrics: Metrics) {
         match self.first {
             None => {
                 self.first = Some(metrics);
@@ -129,12 +131,17 @@ impl IndexNeed {
     }
 }
 
+/// Most spare capacity a frozen backing keeps. With the index of a whole
+/// backing at the receive ceiling (1,025 prefixes) it stays within
+/// `MESSAGE_HIDDEN_MAX`, so whole frozen proposals are always shared.
+pub(super) const SPARE_MAX: usize = 4 * 1024;
+
 /// One immutable backing and its facts. Nothing here is mutable after
 /// construction and no caller can supply or replace a fact.
 #[derive(Debug)]
 pub(super) struct BatchData {
-    /// Exactly the frozen entries: spare capacity is released when the
-    /// backing is built and the allocation is never resized afterwards.
+    /// Never resized after construction; spare capacity beyond `SPARE_MAX`
+    /// is released when the backing is built, and what is kept is charged.
     pub(super) entries: Vec<LogEntry>,
     /// Consecutive indices from the first, every term positive and
     /// nondecreasing. Without it the old full validators run.
@@ -146,9 +153,8 @@ pub(super) struct BatchData {
     max_configuration: Option<ConfigurationId>,
     /// Entry storage, every retained payload and the metrics index.
     charge: Option<usize>,
-    /// What a plain vector of all the entries would hold: entry records and
-    /// retained payloads, without the index.
-    copy_charge: Option<usize>,
+    /// Every retained payload.
+    payloads: Option<usize>,
 }
 
 /// Exact facts of a visible range, or of several joined ranges.
@@ -213,7 +219,9 @@ impl BatchData {
         mut entries: Vec<LogEntry>,
         admit_index: impl FnOnce(usize) -> Result<(), E>,
     ) -> Result<Self, E> {
-        if entries.capacity() != entries.len() {
+        // Spare capacity is released once it exceeds `SPARE_MAX`; below that
+        // a reallocation costs more than the slots it would free.
+        if (entries.capacity() - entries.len()).saturating_mul(size_of::<LogEntry>()) > SPARE_MAX {
             entries.shrink_to_fit();
         }
         let mut need = IndexNeed::default();
@@ -229,9 +237,10 @@ impl BatchData {
                         && previous.term <= entry.term
                 });
             previous = Some(entry);
-            need.push(entry);
+            let metrics = Metrics::of(entry);
+            need.add(metrics);
             payloads = payloads.and_then(|sum| sum.checked_add(entry.retained_payload_bytes()));
-            max_payload = max_payload.max(entry.payload_bytes());
+            max_payload = max_payload.max(metrics.payload);
             max_configuration = max_configuration.max(activated_configuration(entry));
         }
         let index = match (need.total, need.first) {
@@ -245,7 +254,7 @@ impl BatchData {
                 prefixes(&entries).map_or(MetricsIndex::Unavailable, MetricsIndex::Mixed)
             }
         };
-        let copy_charge = entries
+        let stored = entries
             .capacity()
             .checked_mul(size_of::<LogEntry>())
             .and_then(|records| records.checked_add(payloads?));
@@ -253,8 +262,8 @@ impl BatchData {
             MetricsIndex::Mixed(prefixes) => prefixes
                 .len()
                 .checked_mul(size_of::<Prefix>())
-                .and_then(|bytes| copy_charge?.checked_add(bytes)),
-            MetricsIndex::Uniform(_) | MetricsIndex::Unavailable => copy_charge,
+                .and_then(|bytes| stored?.checked_add(bytes)),
+            MetricsIndex::Uniform(_) | MetricsIndex::Unavailable => stored,
         };
         Ok(Self {
             entries,
@@ -263,23 +272,23 @@ impl BatchData {
             max_payload,
             max_configuration,
             charge,
-            copy_charge,
+            payloads,
         })
     }
     pub(super) fn charge(&self) -> Option<usize> {
         self.charge
     }
     /// Upper bound of what `range` keeps alive beyond a plain copy of its
-    /// entries (records and retained payloads): the index and every entry
-    /// outside the range. Exact for the whole backing and for uniform
+    /// entries (records and retained payloads): spare capacity, the index and
+    /// every entry outside the range. Exact for the whole backing and for uniform
     /// content; otherwise the copy is bounded below by its payload lengths,
     /// which never exceed the retained payloads. `None` when unknown.
     pub(super) fn hidden(&self, range: Range<usize>) -> Option<usize> {
         let count = range.end - range.start;
-        let copy = if count == self.entries.len() {
-            self.copy_charge?
+        let payloads = if count == self.entries.len() {
+            self.payloads?
         } else {
-            let payloads = match &self.index {
+            match &self.index {
                 // Alike entries retain alike payloads.
                 MetricsIndex::Uniform(_) => count.checked_mul(
                     self.entries
@@ -288,11 +297,11 @@ impl BatchData {
                 )?,
                 MetricsIndex::Mixed(_) => self.payload(range)?,
                 MetricsIndex::Unavailable => return None,
-            };
-            count
-                .checked_mul(size_of::<LogEntry>())?
-                .checked_add(payloads)?
+            }
         };
+        let copy = count
+            .checked_mul(size_of::<LogEntry>())?
+            .checked_add(payloads)?;
         self.charge?.checked_sub(copy)
     }
     /// Exact payload total of `range` from the index, sealed or not; `None`

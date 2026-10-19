@@ -1444,7 +1444,7 @@ impl Raft {
             // The plan moves the update's batch without reallocating it. A
             // narrow owned batch keeps any spare capacity (the plan charges
             // it, the installed log charges the visible entries); a wide
-            // batch was frozen with its spare capacity released.
+            // batch was frozen, releasing spare capacity beyond 4 KiB.
             let next = OwnedNextLog::plan_owned(
                 &LogView::new(&self.durable),
                 &self.log_summary,

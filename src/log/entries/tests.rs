@@ -484,21 +484,24 @@ fn a_narrow_message_from_a_wide_backing_is_charged_like_a_plain_copy() {
         assert_eq!(retry, visible);
         assert_eq!(retry.retained_bytes(), Some(plain_charge(visible)));
     }
-    // Whole frozen proposals are still shared, at a plain copy's charge.
-    let mut log = EntryLog::default();
-    for first in (1..=256).step_by(64) {
-        let mut batch = Vec::with_capacity(100);
-        batch.extend((first..first + 64).map(|index| command(index, 1, 8)));
-        log.append(batch.into());
+    // Whole frozen proposals are still shared: small spare capacity is kept
+    // (and charged), larger spare capacity was released when they froze.
+    for (capacity, kept) in [(100, 36), (1_000, 0)] {
+        let mut log = EntryLog::default();
+        for first in (1..=256).step_by(64) {
+            let mut batch = Vec::with_capacity(capacity);
+            batch.extend((first..first + 64).map(|index| command(index, 1, 8)));
+            log.append(batch.into());
+        }
+        let message = log.replication_range(64, 128, 1 << 20);
+        assert!(message.is_shared());
+        assert_eq!(message.backing_count(), 2);
+        assert_eq!(message.allocated_entries(), 128 + 2 * kept);
+        assert_eq!(
+            message.retained_bytes(),
+            Some(plain_charge(&log.to_vec()[64..192]) + 2 * kept * std::mem::size_of::<LogEntry>())
+        );
     }
-    let message = log.replication_range(64, 128, 1 << 20);
-    assert!(message.is_shared());
-    assert_eq!(message.backing_count(), 2);
-    assert_eq!(message.allocated_entries(), 128);
-    assert_eq!(
-        message.retained_bytes(),
-        Some(plain_charge(&log.to_vec()[64..192]))
-    );
 }
 
 #[test]
@@ -564,24 +567,33 @@ fn hidden_charges_are_exact_where_claimed_and_never_low() {
 }
 
 #[test]
-fn freezing_releases_spare_capacity_and_owned_batches_keep_it() {
+fn freezing_keeps_at_most_spare_max_and_owned_batches_keep_their_capacity() {
     let mut rng = Rng(77);
+    let slot = std::mem::size_of::<LogEntry>();
+    let most = facts::SPARE_MAX / slot;
     for width in [1, SHARE_MIN - 1, SHARE_MIN, 40] {
-        let mut entries = Vec::with_capacity(width + 9);
-        entries.extend(history(&mut rng, 1, width, width % 2 == 0));
-        let plain = plain_charge(&entries);
-        let batch: EntryBatch = entries.into();
-        let spare = 9 * std::mem::size_of::<LogEntry>();
-        if width < SHARE_MIN {
-            // Owned: messages and plans charge the allocation, the log the
-            // visible entries.
-            assert_eq!(batch.allocated_entries(), width + 9);
-            assert_eq!(batch.retained_bytes(), Some(plain + spare));
-            assert_eq!(batch.log_charge(), Some(plain));
-        } else {
-            assert_eq!(batch.allocated_entries(), width);
-            assert_eq!(batch.retained_bytes(), batch.log_charge());
-            assert!(batch.retained_bytes().unwrap() >= plain);
+        for spare in [9, most, most + 1] {
+            let mut entries = Vec::with_capacity(width + spare);
+            entries.extend(history(&mut rng, 1, width, width % 2 == 0));
+            let spare = entries.capacity() - width;
+            let plain = plain_charge(&entries);
+            let batch: EntryBatch = entries.into();
+            if width < SHARE_MIN {
+                // Owned: messages and plans charge the allocation, the log
+                // the visible entries.
+                assert_eq!(batch.allocated_entries(), width + spare);
+                assert_eq!(batch.retained_bytes(), Some(plain + spare * slot));
+                assert_eq!(batch.log_charge(), Some(plain));
+            } else {
+                let kept = if spare * slot > facts::SPARE_MAX {
+                    0
+                } else {
+                    spare
+                };
+                assert_eq!(batch.allocated_entries(), width + kept, "{width} {spare}");
+                assert_eq!(batch.retained_bytes(), batch.log_charge());
+                assert!(batch.retained_bytes().unwrap() >= plain + kept * slot);
+            }
         }
     }
 }

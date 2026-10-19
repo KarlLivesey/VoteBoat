@@ -230,8 +230,8 @@ fn spare_outer_is_kept_by_a_narrow_batch_and_command_input_capacity_is_normalize
         assert_eq!(retained, &expected);
         // A batch this narrow stays owned: the input allocation is kept,
         // spare outer capacity included (messages and pending plans charge
-        // it; the installed log charges the visible entries). Wide inputs are
-        // frozen with their spare capacity released.
+        // it; the installed log charges the visible entries). A wide input
+        // is frozen, releasing spare capacity beyond 4 KiB.
         assert!(expected.len() < crate::log::SHARE_MIN);
         assert_eq!(retained.first_backing_ptr(), Some(input_pointer));
         assert_eq!(

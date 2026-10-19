@@ -391,7 +391,8 @@ fn scalar_commit_plan_matches_on_configured_and_compacted_logs() {
 fn appending_to_an_empty_log_charges_what_the_installed_log_holds() {
     // An owned batch keeps its spare capacity; on a log with no entries left
     // the summary still charges the visible entries, as the installed log and
-    // a fresh recount do. A wide batch is frozen without spare capacity.
+    // a fresh recount do. A wide batch is frozen and charged with the small
+    // spare capacity it keeps.
     let mut states = BTreeMap::new();
     let bootstrap = current().bootstrap;
     apply_batch(
@@ -415,8 +416,7 @@ fn appending_to_an_empty_log_charges_what_the_installed_log_holds() {
                 entries: entries.into(),
             }),
         );
-        let spare = change.suffix.as_ref().unwrap().entries.allocated_entries() > width;
-        assert_eq!(spare, width < crate::log::SHARE_MIN);
+        assert!(change.suffix.as_ref().unwrap().entries.allocated_entries() > width);
         let plan = OwnedNextLog::plan_owned(
             &LogView::new(&state),
             &LogSummary::from_validated(&state),

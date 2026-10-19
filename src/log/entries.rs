@@ -43,9 +43,10 @@ pub use range::{EntryRange, Slices as EntrySlices};
 pub(crate) const SHARE_MIN: usize = 16;
 
 /// Most a leader's Append may keep alive beyond plain copies of its visible
-/// entries (see [`EntryBatch::for_message`]). It covers the index of a whole
-/// mixed backing at the receive ceiling (1,025 × 24 bytes), so whole frozen
-/// proposals are shared whatever their content.
+/// entries (see [`EntryBatch::for_message`]). It covers a whole backing's
+/// kept spare capacity (at most 4 KiB) and the index of a mixed backing at
+/// the receive ceiling (1,025 × 24 bytes), so whole frozen proposals are
+/// shared whatever their content.
 pub(crate) const MESSAGE_HIDDEN_MAX: usize = 32 * 1024;
 
 /// One ordered piece of entries.
