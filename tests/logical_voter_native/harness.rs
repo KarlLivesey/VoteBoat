@@ -6,14 +6,14 @@
 //! own idle polling rounds, never on CPU speed, core count, disk latency or
 //! thread scheduling. Every liveness wait keeps its original bound in
 //! protocol time; real time is only a generous hang guard for deadlocks.
-use super::{aliases::Bridge, cluster::ChildNode, support::ports};
+use super::{cluster::ChildNode, support::ports};
 use std::{
     cell::Cell,
     hash::{DefaultHasher, Hash, Hasher},
     net::{SocketAddr, TcpListener, TcpStream, UdpSocket},
     rc::Rc,
     sync::{
-        atomic::{AtomicBool, Ordering},
+        atomic::{AtomicBool, AtomicUsize, Ordering},
         Arc,
     },
     thread::JoinHandle,
@@ -150,6 +150,11 @@ impl<C: FixtureClock> FixtureClock for &C {
 /// Every held signal completes without protocol time: worker and dial
 /// threads finish on their own, and a state change is finite committed or
 /// applied progress. Holding time therefore cannot stall progress.
+///
+/// Dial work counts wherever its node is: the round's [`Observed`] input
+/// covers nodes and connectors the fixture can reach, and [`DialWork`] adds
+/// connectors that report to this clock themselves, so a node borrowed by a
+/// bridge still holds time while one of its dials waits for its worker.
 #[derive(Clone, Default)]
 pub struct SimClock(Rc<SimState>);
 #[derive(Default)]
@@ -157,6 +162,7 @@ struct SimState {
     now: Cell<u64>,
     state: Cell<Option<u64>>,
     held: Cell<u64>,
+    dials: DialWork,
     // Durable requests, dial attempts and state change of the last hold.
     reason: Cell<(usize, usize, bool)>,
 }
@@ -167,14 +173,13 @@ impl FixtureClock for SimClock {
     fn round(&self, observed: Observed) -> MonoTime {
         let state = observed.state.finish();
         let changed = self.0.state.replace(Some(state)) != Some(state);
-        if observed.durable == 0 && observed.dialing == 0 && !changed {
+        let dialing = observed.dialing + self.0.dials.get();
+        if observed.durable == 0 && dialing == 0 && !changed {
             self.0.now.set(self.0.now.get().checked_add(1).unwrap());
             self.0.held.set(0);
         } else {
             self.0.held.set(self.0.held.get() + 1);
-            self.0
-                .reason
-                .set((observed.durable, observed.dialing, changed));
+            self.0.reason.set((observed.durable, dialing, changed));
         }
         self.now()
     }
@@ -186,6 +191,33 @@ impl FixtureClock for SimClock {
             self.now(),
             self.0.held.get(),
         )
+    }
+}
+
+impl SimClock {
+    /// The count that connectors outside the fixture's reach report their
+    /// dial attempts to; every round of this clock holds while it is nonzero.
+    pub fn dial_work(&self) -> DialWork {
+        self.0.dials.clone()
+    }
+}
+
+/// Connection attempts waiting for a dial worker, reported by connectors
+/// that a round cannot inspect (a node borrowed by a bridge exposes only its
+/// local parts). Each reporter replaces its own previous contribution.
+#[derive(Clone, Default)]
+pub struct DialWork(Arc<AtomicUsize>);
+impl DialWork {
+    pub fn get(&self) -> usize {
+        self.0.load(Ordering::Acquire)
+    }
+    /// Replace one reporter's contribution `from` with `to`.
+    pub fn report(&self, from: usize, to: usize) {
+        if to > from {
+            self.0.fetch_add(to - from, Ordering::AcqRel);
+        } else {
+            self.0.fetch_sub(from - to, Ordering::AcqRel);
+        }
     }
 }
 
@@ -208,8 +240,9 @@ impl Observed {
         self
     }
     /// The same for every native node borrowed by a bridge. A bridge exposes
-    /// no connector, so dial work of borrowed nodes is not visible here.
-    pub fn bridge(mut self, bridge: &Bridge<'_>) -> Self {
+    /// no connector, so dial work of borrowed nodes is not visible here; it
+    /// reaches the clock through [`DialWork`] where the fixture wires it.
+    pub fn bridge<N: LogicalBackingChild>(mut self, bridge: &LogicalBackingBridge<'_, N>) -> Self {
         for i in 0.. {
             let Ok(work) = bridge.inspect_backing(i, |local| {
                 replicas(local, &mut self.state);

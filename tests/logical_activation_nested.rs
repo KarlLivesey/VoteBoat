@@ -8,6 +8,8 @@ pub mod aliases;
 mod application;
 #[path = "logical_activation_nested/assembly.rs"]
 mod assembly;
+#[path = "logical_activation_nested/borrowed_dials.rs"]
+mod borrowed_dials;
 #[path = "logical_activation_nested/business.rs"]
 mod business;
 #[path = "logical_activation_nested/channels.rs"]
@@ -26,6 +28,8 @@ mod cold_target;
 mod controls;
 #[path = "logical_activation_nested/diagnostic.rs"]
 mod diagnostic;
+#[path = "logical_activation_nested/dials.rs"]
+mod dials;
 #[path = "logical_activation_nested/enrollment.rs"]
 mod enrollment;
 #[path = "logical_voter_native/harness.rs"]

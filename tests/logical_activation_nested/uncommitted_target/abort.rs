@@ -5,10 +5,7 @@ use super::*;
 use crate::harness::{FixtureClock, HangGuard, SimClock};
 use std::time::Duration;
 use voteboat::{
-    native::{
-        connect::NativeServiceConnector, node::NativeLocalParts, transport::NativeTransportFactory,
-        wire::NativeWireCodec,
-    },
+    native::{node::NativeLocalParts, transport::NativeTransportFactory, wire::NativeWireCodec},
     outbound::OutboundQueue,
     runtime::{NodeError, NodeRecovery, PeerDriverBudget, PeerDriverProgress},
     snapshot_worker::{SnapshotWorkEvent, SnapshotWorker},
@@ -17,7 +14,7 @@ use voteboat::{
 type Recovery = NodeRecovery<
     NativeLocalParts<LogicalApplication>,
     LogicalReceipt,
-    NativeServiceConnector,
+    crate::dials::Probed,
     NativeTransportFactory<NativeWireCodec>,
 >;
 pub(super) struct Domain {

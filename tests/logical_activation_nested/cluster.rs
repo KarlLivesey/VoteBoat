@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Karl Livesey
 use super::{
     cleanup,
+    dials::{self, DialControl, Probed},
     harness::{self, FixtureClock, Observed, SimClock},
     setup, support,
 };
@@ -17,16 +18,13 @@ use std::{
 use voteboat::{
     application::StateMachine,
     logical_voter::*,
-    native::{
-        connect::{NativePeerProtocol, NativeServiceConnector},
-        node::NativeNode,
-        startup::*,
-        worker::ThreadWake,
-    },
+    native::{connect::NativePeerProtocol, node::NativeNode, startup::*, worker::ThreadWake},
     raft::Role,
     runtime::*,
 };
-pub type ChildNode = NativeNode<LogicalApplication, NativeServiceConnector>;
+/// A native child node whose connector reports its dial work to the test's
+/// clock, so time holds on it even while a bridge borrows the node.
+pub type ChildNode = NativeNode<LogicalApplication, Probed>;
 #[derive(Clone, Copy, Debug)]
 enum NativeWaitStage {
     Election,
@@ -45,6 +43,7 @@ pub struct Cluster {
     pub slot: usize,
     pub representative: voteboat::identity::NodeId,
     pub clock: SimClock,
+    pub dials: DialControl,
     root: PathBuf,
     addresses: [SocketAddr; 3],
     ports: support::ports::PortLease,
@@ -52,6 +51,12 @@ pub struct Cluster {
 }
 impl Cluster {
     pub fn new(protocol: NativePeerProtocol, slot: usize, clock: &SimClock) -> Self {
+        let mut host = Self::unelected(protocol, slot, clock);
+        host.elect();
+        host
+    }
+    /// Open the three nodes without polling them, so none has dialled yet.
+    pub fn unelected(protocol: NativePeerProtocol, slot: usize, clock: &SimClock) -> Self {
         let root = std::env::temp_dir().join(format!(
             "voteboat-logical-nested-child-{}-{}",
             std::process::id(),
@@ -64,13 +69,14 @@ impl Cluster {
             slot,
             representative: support::node(slot as u64 * 3 + 1),
             clock: clock.clone(),
+            dials: DialControl::default(),
             root,
             addresses: ports.addresses(),
             ports,
             protocol,
         };
         host.ports.handoff();
-        host.open(NativeOpenMode::Create);
+        host.open_before_election(NativeOpenMode::Create);
         host
     }
     pub fn now(&self) -> MonoTime {
@@ -159,6 +165,7 @@ impl Cluster {
                 )
                 .unwrap();
                 super::physical::select(&mut parts, id, self.now());
+                let parts = dials::probe(parts, self.clock.dial_work(), self.dials.clone());
                 Node::from_parts(parts, NodeLimits::default(), self.now())
                     .unwrap_or_else(|e| panic!("actual selected native parts {:?}", e.reason))
             })
@@ -273,6 +280,12 @@ impl Cluster {
                 super::cluster_inspection::retained(host.slot, &host.nodes),
             );
         }
+        // The protocol time this wait used, for the margin against its bound.
+        let slots = clusters.iter().map(|host| host.slot).collect::<Vec<_>>();
+        eprintln!(
+            "native logical child wait: stage={stage:?}; slots={slots:?}; elapsed_ms={}",
+            clock.now().0 - started.0
+        );
     }
     /// Failure-only: each node's per-peer connection drain state.
     fn peer_drain(&mut self) -> Vec<String> {

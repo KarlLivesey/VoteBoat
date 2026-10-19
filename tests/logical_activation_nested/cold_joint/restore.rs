@@ -134,5 +134,7 @@ fn claim(lower: &mut Lower<'_>, bridge: &mut UpperBridge<'_>) -> VerifiedLogical
             return image;
         }
         assert!(end.within(&lower.clock), "fresh upper Claim at Joint");
+        // A CPU yield like every other fixture loop's; no timing depends on it.
+        std::thread::park_timeout(std::time::Duration::from_millis(1));
     }
 }
