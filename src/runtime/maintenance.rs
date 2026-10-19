@@ -180,6 +180,15 @@ pub struct WalMaintenanceStatus {
     // new one arrived since the state was last evaluated (I5).
     budget_refusals: u64,
     budget_exhausted: bool,
+    /// Noop transitions refused by the shard's account (R4-1) since the last
+    /// successful rewrite: like a held batch, a rewrite is then due whenever
+    /// the WAL grew since the last one, so dead records alone can never keep
+    /// a group without a leader.
+    pub noop_starved: bool,
+    noop_refusals: u64,
+    /// The control reserve: room above the high-water mark that only noop
+    /// transitions may use (R4-1). Set at construction from the store limits.
+    pub(super) noop_reserve: usize,
 }
 /// WAL occupancy at or above half the usable capacity: checkpoints stop
 /// waiting for their entry threshold and reclaim may run early.
@@ -248,7 +257,8 @@ impl WalMaintenanceStatus {
             |p| (p.high_water_percent, p.low_water_percent),
         );
         let exhausted = std::mem::take(&mut self.budget_exhausted);
-        if u.parked > 0 || exhausted || u.bytes >= percent_of(u.capacity, high) {
+        if u.parked > 0 || exhausted || self.noop_starved || u.bytes >= percent_of(u.capacity, high)
+        {
             if !self.high_water {
                 self.high_water_entries = self.high_water_entries.saturating_add(1);
             }
@@ -265,6 +275,15 @@ impl WalMaintenanceStatus {
         if total > self.budget_refusals {
             self.budget_refusals = total;
             self.budget_exhausted = true;
+        }
+    }
+    /// The shard's running total of refused noop transitions (R4-1). A new
+    /// one enters the high-water state and makes a rewrite due once the WAL
+    /// has grown since the last rewrite, until a rewrite succeeds.
+    pub(super) fn note_noop_refusals(&mut self, total: u64) {
+        if total > self.noop_refusals {
+            self.noop_refusals = total;
+            self.noop_starved = true;
         }
     }
     /// The high-water mark in bytes of a WAL with `capacity` usable bytes.
@@ -319,8 +338,9 @@ impl WalMaintenanceStatus {
     /// reclaimable, at most once per `retry_ms`. In the high-water state the
     /// early rewrite needs only `min_reclaim_bytes`; with a held batch, any
     /// growth since the last rewrite (compaction records mean checkpoints
-    /// freed space the live estimate may not show). A provider that
-    /// publishes no occupancy is rewritten at every deadline.
+    /// freed space the live estimate may not show), and the same after a
+    /// refused noop (R4-1). A provider that publishes no occupancy is
+    /// rewritten at every deadline.
     pub(super) fn due(
         &mut self,
         now: MonoTime,
@@ -351,7 +371,8 @@ impl WalMaintenanceStatus {
             let grown = self
                 .last_reclaimed
                 .is_none_or(|(_, r)| usage.bytes > r.after_bytes);
-            reclaimable >= policy.min_reclaim_bytes.max(1) || (usage.parked > 0 && grown)
+            reclaimable >= policy.min_reclaim_bytes.max(1)
+                || ((usage.parked > 0 || self.noop_starved) && grown)
         } else {
             reclaimable >= usage.capacity / 8
         };
@@ -381,6 +402,7 @@ impl WalMaintenanceStatus {
                 self.next_deadline = self.after(now, false);
                 self.last_reclaimed = Some((now, *reclaimed));
                 self.consecutive_failures = 0;
+                self.noop_starved = false;
             }
             Err(error) => {
                 // A fatal storage error has already failed the replica, so the
@@ -589,6 +611,60 @@ mod tests {
         assert_eq!(state.due(MonoTime(2020), usage(106), 100), Some(policy));
         // The interval still runs with no occupancy signal at all.
         assert_eq!(state.due(MonoTime(2020), None, 0), Some(policy));
+    }
+    /// ST2 round 4 (R4-1): a refused noop enters high water and makes a
+    /// rewrite due whenever the WAL grew since the last rewrite (dead vote
+    /// and commit records), never when it did not (an irreducible live
+    /// image: no rewrite storm). A successful rewrite clears the state.
+    #[test]
+    fn a_refused_noop_rewrites_only_while_the_wal_grows() {
+        let mut state = WalMaintenanceStatus::default();
+        let policy = WalMaintenancePolicy::for_ceiling(1600);
+        state
+            .configure(Some(policy), MonoTime(0), Some(1600))
+            .unwrap();
+        // Below the mark, live estimate equal to occupancy: nothing due.
+        assert!(!state.update_high_water(usage(600, 0)));
+        assert_eq!(state.due(MonoTime(10), usage(600, 0), 600), None);
+        state.note_noop_refusals(1);
+        assert!(state.noop_starved);
+        assert!(state.update_high_water(usage(600, 0)));
+        assert_eq!(state.due(MonoTime(10), usage(600, 0), 600), Some(policy));
+        let ticket = ReclaimTicket {
+            binding: WorkerBinding {
+                store: crate::identity::StoreBinding {
+                    identity: crate::identity::StoreIdentity {
+                        id: crate::identity::StoreId::new(1).unwrap(),
+                        incarnation: crate::identity::StoreIncarnation::new(1).unwrap(),
+                    },
+                    session: crate::identity::StoreSession::new(1).unwrap(),
+                },
+                generation: crate::identity::StorageWorkerGeneration::new(1).unwrap(),
+            },
+            sequence: 1,
+        };
+        state.submitted(ticket, MonoTime(10));
+        state.completed(
+            ReclaimEvent {
+                request: ticket,
+                result: Ok(LogReclaimed {
+                    before_bytes: 600,
+                    after_bytes: 590,
+                }),
+            },
+            MonoTime(20),
+        );
+        assert!(!state.noop_starved);
+        // Refused again with nothing grown: no rewrite.
+        state.note_noop_refusals(2);
+        assert_eq!(state.due(MonoTime(200), usage(590, 0), 590), None);
+        // An unchanged total is not a new refusal.
+        state.noop_starved = false;
+        state.note_noop_refusals(2);
+        assert!(!state.noop_starved);
+        state.note_noop_refusals(3);
+        // Grown since the last rewrite: due again, spaced by `retry_ms`.
+        assert_eq!(state.due(MonoTime(200), usage(591, 0), 591), Some(policy));
     }
     /// ST2 round 3 (I2): the entry gate has the WAL gate's hysteresis.
     #[test]

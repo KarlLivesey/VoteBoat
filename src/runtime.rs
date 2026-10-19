@@ -531,6 +531,15 @@ impl<Q: ReadyScheduler> Shard<Q> {
     pub fn wal_account(&self) -> WalAccount {
         self.wal
     }
+    /// Count noops `group`'s core refused since `before` (R4-1). Only called
+    /// when one leader noop did not fit, so off the ordinary path.
+    #[cold]
+    fn note_noop_refusals(&mut self, group: GroupIdentity, before: u64) {
+        if let Some(g) = self.groups.get(&group) {
+            let refused = g.core.wal_noop_refusals().saturating_sub(before);
+            self.wal.noop_refused = self.wal.noop_refused.saturating_add(refused);
+        }
+    }
     pub fn usage(&self) -> Usage {
         sum(&self.usage)
     }
@@ -831,7 +840,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
             self.reserved_connection_peers()?;
         }
         let limits = self.limits;
-        let room = self.wal.room();
+        let wal = self.wal;
         let pressure = self.pressure;
         let g = self.live(ticket)?;
         if g.core.has_pending_dependency() {
@@ -842,9 +851,13 @@ impl<Q: ReadyScheduler> Shard<Q> {
         };
         g.turn = (turn + 1) % 4;
         let q = g.queues[class].pop_front().unwrap();
-        // I5: data whose WAL bound no longer fits under the high-water mark.
-        let over =
-            room.is_some_and(|room| wal_account::data_bound(&q.event).is_some_and(|b| b > room));
+        // I5 and R4-1: live growth whose WAL bound no longer fits.
+        let (over, noop_over) = wal.over(&q.event);
+        // R4-1: whether this core may campaign or place a leader noop.
+        let noop_fits = wal.noop_fits();
+        g.core.set_wal_noop_room(noop_fits && !noop_over);
+        let noop_refusals = (!noop_fits).then(|| g.core.wal_noop_refusals());
+        let over = over || noop_over;
         let proposal = matches!(q.event, Event::Propose { .. } | Event::Configure(_));
         let before = g.core.pending_wal_bytes();
         if connections::changes_connections(&q.event) {
@@ -910,12 +923,11 @@ impl<Q: ReadyScheduler> Shard<Q> {
             batch_members: Vec::new(),
         };
         self.wal.track(before, after);
-        if over && !stale_timer {
-            if proposal {
-                self.wal.refused = self.wal.refused.saturating_add(1);
-            } else {
-                self.wal.declined = self.wal.declined.saturating_add(1);
-            }
+        if !stale_timer {
+            self.wal.count_refusal(proposal, over, noop_over);
+        }
+        if let Some(before) = noop_refusals {
+            self.note_noop_refusals(ticket.group, before);
         }
         if stepped.result.is_ok() && !self.connections_steady() {
             self.retain_connection_history(ticket.group)?;
@@ -932,13 +944,20 @@ impl<Q: ReadyScheduler> Shard<Q> {
     ) -> Result<R, RuntimeError> {
         self.live(ticket)?;
         let steady = self.connections_steady();
+        let noop_fits = self.wal.noop_fits();
         let group = self.live(ticket)?;
         let before = group.core.pending_wal_bytes();
+        // R4-1: a completion can make this core leader (its vote record).
+        group.core.set_wal_noop_room(noop_fits);
+        let noop_refusals = (!noop_fits).then(|| group.core.wal_noop_refusals());
         let result = f(&mut group.core);
         let after = group.core.pending_wal_bytes();
         let bootstrap = group.core.connections_are_bootstrap();
         let fenced = group.core.is_fenced();
         self.wal.track(before, after);
+        if let Some(before) = noop_refusals {
+            self.note_noop_refusals(ticket.group, before);
+        }
         if steady && bootstrap {
             // The connection set was the fixed bootstrap set before and still
             // is: the reserved union and retained history cannot have changed.

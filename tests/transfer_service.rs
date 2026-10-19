@@ -342,6 +342,10 @@ fn initialize(rig: &Cluster) {
         "wal_held_ms=0",
         "step_downs=0",
         "last_step_down=none",
+        // ST2 round 4 (R4-1).
+        "wal_noop_refused=0",
+        "noop_refusals=0",
+        "wal_noop_starved=false",
     ] {
         assert!(text.contains(field), "{field}: {text}");
     }

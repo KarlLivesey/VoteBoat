@@ -262,7 +262,10 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
 /// The WAL thread's state: the store, its fence, and the batches it holds
 /// because their encoding does not fit yet (ST2b). Nothing of a held batch
 /// was written; held batches are retried after each successful rewrite,
-/// before newer work, and never reported as failed for capacity.
+/// before newer work. One that still does not fit right after a successful
+/// rewrite (the WAL is then its live image) is reported failed with the
+/// typed, non-fatal `Rejected("WAL live image leaves no room")` (R4-1); a
+/// node's WAL account keeps that from happening there.
 struct WalThread<L: LogStore> {
     store: L,
     binding: WorkerBinding,
@@ -322,7 +325,22 @@ impl<L: LogStore> WalThread<L> {
         // batches first, so their events precede the reclaim event.
         if result.is_ok() && !self.fenced && !self.parked.is_empty() {
             let batches = self.parked.drain(..).collect();
-            self.persist(batches);
+            self.persist_window(batches);
+            // ST2 round 4 (R4-1): the WAL now holds only its live image, so a
+            // batch that still does not fit never will until the live log
+            // shrinks. Report it typed and non-fatal instead of holding it
+            // for ever. A node's WAL account makes this unreachable there (the
+            // live image stays under the high-water mark plus the reserve).
+            if !self.fenced {
+                fail_held(
+                    &mut self.parked,
+                    StorageError::Rejected("WAL live image leaves no room"),
+                    &self.out,
+                    &*self.wake,
+                );
+            }
+            fail_parked(&mut self.parked, self.fenced, &self.out, &*self.wake);
+            publish_usage(&self.store, &self.published, &self.parked);
         } else {
             fail_parked(&mut self.parked, self.fenced, &self.out, &*self.wake);
             publish_usage(&self.store, &self.published, &self.parked);
@@ -567,14 +585,21 @@ fn fail_parked(
     out: &SyncSender<WorkerEvent>,
     wake: &dyn WorkerWake,
 ) {
-    if !fenced {
-        return;
+    if fenced {
+        fail_held(parked, StorageError::Fenced, out, wake);
     }
+}
+fn fail_held(
+    parked: &mut VecDeque<Batch>,
+    error: StorageError,
+    out: &SyncSender<WorkerEvent>,
+    wake: &dyn WorkerWake,
+) {
     for batch in parked.drain(..) {
         let _ = out.send(WorkerEvent::Failed {
             request: batch.ticket,
             visits: batch.units.iter().map(|u| u.visit).collect(),
-            error: StorageError::Fenced,
+            error: error.clone(),
         });
         wake.wake();
     }

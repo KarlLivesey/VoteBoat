@@ -561,3 +561,105 @@ fn leader_whose_uncommitted_log_fills_the_capacity_steps_down_and_another_wins()
     assert_eq!(cluster.cores[&1].state().term_at(101), Some(3));
     assert_eq!(cluster.trace.snapshot_sends, 0);
 }
+
+impl Cluster {
+    /// Model the shard's WAL account for node `n` (R4-1): `room` is whether
+    /// one leader noop still fits under the high-water mark plus the reserve;
+    /// without it the node is also above the high-water mark.
+    fn wal_room(&mut self, n: u64, room: bool) {
+        let core = self.cores.get_mut(&n).unwrap();
+        core.set_wal_noop_room(room);
+        core.set_storage_pressure(!room);
+    }
+}
+
+/// ST2 round 4 (R4-1): replicas whose WAL account has no room for a noop
+/// (live noops and data fill the WAL up to the mark plus the reserve) do not
+/// campaign: no vote record and no noop that could never be written. The
+/// state is typed and counted, terms do not move, and once room returns (a
+/// rewrite, or a reopen with a larger budget) the group elects and commits.
+#[test]
+fn replicas_without_wal_room_for_a_noop_refuse_elections_until_room_returns() {
+    let mut cluster = Cluster::new((1..=3).map(|n| recovered(n, 100)).collect());
+    for n in 1..=3 {
+        cluster.wal_room(n, false);
+    }
+    for _ in 0..PROGRESS_ROUNDS {
+        cluster.round();
+    }
+    assert_eq!(cluster.leader(), None);
+    for (n, core) in &cluster.cores {
+        assert_eq!(core.state().hard_state.term, 1, "node {n} wrote a vote");
+        assert!(core.wal_noop_refusals() >= 2, "node {n}");
+        assert_eq!(core.state().last_index(), 100);
+    }
+    assert!(cluster.trace.step_errors.is_empty());
+    for n in 1..=3 {
+        cluster.wal_room(n, true);
+    }
+    let rounds = cluster
+        .commit_new_write(1 << 103)
+        .unwrap_or_else(|e| panic!("{e}"));
+    assert!(rounds <= PROGRESS_ROUNDS);
+    // Every old entry is still there and now committed.
+    let leader = cluster.leader().unwrap();
+    assert!(cluster.cores[&leader].state().commit_index > 100);
+}
+
+/// ST2 round 4 (R4-1): a candidate wins while other groups fill the node's
+/// WAL account, so its noop no longer fits. It steps down in the same term
+/// with `StepDownReason::WalCapacity` (counted, no noop appended) instead of
+/// staging a noop the WAL might never hold; a replica with room wins.
+#[test]
+fn leader_elected_without_wal_room_steps_down_typed_and_a_replica_with_room_wins() {
+    let mut cluster = Cluster::new((1..=3).map(|n| recovered(n, 100)).collect());
+    cluster.step(1, Event::Campaign).unwrap();
+    cluster.wal_room(1, false);
+    cluster.pump();
+    let core = &cluster.cores[&1];
+    assert_ne!(core.role(), Role::Leader);
+    assert_eq!(
+        core.capacity_step_downs(),
+        (
+            1,
+            Some(StepDown {
+                term: 2,
+                reason: StepDownReason::WalCapacity
+            })
+        )
+    );
+    assert_eq!(core.wal_noop_refusals(), 1);
+    assert_eq!(core.state().last_index(), 100, "no noop appended");
+    let rounds = cluster
+        .commit_new_write(1 << 104)
+        .unwrap_or_else(|e| panic!("{e}"));
+    assert!(rounds <= PROGRESS_ROUNDS);
+    assert_ne!(cluster.leader(), Some(1));
+}
+
+/// ST2 round 4 (R4-1): a follower whose WAL account has no room above the
+/// mark declines a noop-only append (no reply, nothing taken) and takes it
+/// once room returns, still under data pressure: noop-only appends need room
+/// under the mark plus the reserve, data appends under the mark.
+#[test]
+fn follower_without_wal_room_declines_noop_only_appends_until_room_returns() {
+    let mut cluster = Cluster::new((1..=3).map(|n| recovered(n, 100)).collect());
+    cluster.wal_room(3, false);
+    while cluster.leader().is_none() {
+        cluster.round();
+    }
+    let leader = cluster.leader().unwrap();
+    assert_ne!(leader, 3);
+    cluster.round();
+    assert_eq!(cluster.cores[&leader].state().last_index(), 101);
+    assert!(cluster.cores[&leader].state().commit_index >= 101);
+    let follower = &cluster.cores[&3];
+    assert_eq!(follower.state().last_index(), 100, "took the noop");
+    assert!(follower.declined_appends() >= 1);
+    // Room for noops again, data pressure still on.
+    let core = cluster.cores.get_mut(&3).unwrap();
+    core.set_wal_noop_room(true);
+    core.set_storage_pressure(true);
+    cluster.round();
+    assert_eq!(cluster.cores[&3].state().last_index(), 101);
+}

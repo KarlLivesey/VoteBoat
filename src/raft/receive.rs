@@ -332,7 +332,8 @@ impl Raft {
     /// checkpoint and compact. A suffix that conflicts with held entries is
     /// still truncated (a control record with no entries): truncation is what
     /// frees a deposed leader's space, and declining it could last for ever on
-    /// an idle group. Noop-only suffixes that fit pass.
+    /// an idle group. Noop-only suffixes pass unless the node's WAL has no
+    /// room for them above the mark (R4-1).
     fn decline_new_data(
         &mut self,
         entries: &[LogEntry],
@@ -370,7 +371,9 @@ impl Raft {
         let kept = from.saturating_sub(self.durable.base_index() + 1);
         let fits =
             kept.saturating_add(new.len() as u64) <= self.limits.retained_entry_capacity() as u64;
-        if fits && !(self.storage_pressure && data) {
+        // R4-1: noop-only entries are declined only when the node's WAL has
+        // no room for them under the mark plus the reserve.
+        if fits && !(self.storage_pressure && (data || !self.wal_noop_room)) {
             return None;
         }
         self.declined_appends = self.declined_appends.saturating_add(1);

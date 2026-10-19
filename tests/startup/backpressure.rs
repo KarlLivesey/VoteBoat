@@ -103,6 +103,29 @@ fn open(config: NativeStartup, hold: Arc<AtomicBool>) -> Held {
             MonoTime(0),
         )
         .unwrap_or_else(|e| panic!("{:?}", e.reason));
+    wrap(parts, limits, hold)
+}
+/// As `open`, with explicit store limits (the rewrite never held).
+fn open_limited(config: NativeStartup, log: LogLimits) -> Held {
+    let limits = config.limits;
+    let wake = Arc::new(ThreadWake::current());
+    let parts = config
+        .prepare_for_discovery_with_log_limits(
+            NativePeerProtocol::TcpTls,
+            TimerConfig::default(),
+            log,
+            Padded(app()),
+            wake,
+            MonoTime(0),
+        )
+        .unwrap_or_else(|e| panic!("{:?}", e.reason));
+    wrap(parts, limits, Arc::new(AtomicBool::new(false)))
+}
+fn wrap(
+    parts: NativeNodeParts<Padded, NativeServiceConnector>,
+    limits: NodeLimits,
+    hold: Arc<AtomicBool>,
+) -> Held {
     let NetworkNodeParts { local, peers } = parts;
     let NodeLocalParts {
         owner,
@@ -633,6 +656,158 @@ fn absent_follower_does_not_stop_the_leader_checkpointing() {
         leader.replica_stall(),
         clock.now
     );
+    stop(nodes, &mut clock);
+    std::fs::remove_dir_all(directory).unwrap();
+}
+
+/// Append uncommitted noops at increasing terms (halving the suffix length
+/// when one does not fit, rewriting when even one does not) until a rewrite
+/// frees nothing; the last index.
+fn fill_with_live_noops(store: &mut NativeLogStore<FileLogIo>, max_wal_bytes: usize) -> u64 {
+    let mut chunk = 8192u64;
+    loop {
+        let state = store.state(group()).unwrap();
+        let from = state.last_index() + 1;
+        let first_term = state.hard_state.term + 1;
+        let entries = (0..chunk)
+            .map(|k| LogEntry {
+                index: from + k,
+                term: first_term + k,
+                payload: EntryPayload::Noop,
+            })
+            .collect();
+        let noops = LogMutation::Update(LogUpdate {
+            snapshot_membership: None,
+            group: group(),
+            expected_revision: state.revision,
+            hard_state: voteboat::contracts::HardState {
+                term: first_term + chunk - 1,
+                voted_for: None,
+            },
+            commit_index: state.commit_index,
+            snapshot: None,
+            suffix: Some(Suffix { from, entries }),
+        });
+        match store.append_batch_within_capacity(vec![noops]) {
+            Ok(tickets) => {
+                store.barrier(&tickets).unwrap();
+            }
+            Err(AppendRefused::Full(_)) if chunk > 1 => chunk /= 2,
+            Err(AppendRefused::Full(_)) => {
+                let reclaimed = store.reclaim(max_wal_bytes).unwrap();
+                if reclaimed.after_bytes == reclaimed.before_bytes {
+                    break state.last_index();
+                }
+            }
+            Err(AppendRefused::Failed(e)) => panic!("{e:?}"),
+        }
+    }
+}
+
+/// ST2 round 4 (R4-1, GPT-6.1-Sol round-3 P1-1) through a real native node:
+/// a single-voter store whose live log is noops at increasing terms with
+/// nothing committed (elections whose leaders never learned an
+/// acknowledgement), written until the live image fills the WAL, as in Sol's
+/// worker run. Native startup needs 1 MiB batches, so the WAL is 4.5 MiB
+/// (64 KiB reserve) and the entry budget is raised to hold that many noops.
+/// The node's WAL account has no room for another noop, so the replica does
+/// not campaign (typed and counted) instead of writing a vote and a noop the
+/// WAL can never hold; nothing is held, the node keeps running, and
+/// maintenance rewrites only while the WAL grows. Recovery: the operator
+/// reopens the unchanged store with a larger WAL; the replica elects,
+/// commits every noop and applies a new write.
+#[test]
+fn live_noops_past_the_reserve_refuse_elections_typed_until_a_larger_wal_is_opened() {
+    let directory = root();
+    let small = LogLimits {
+        max_wal_bytes: 4608 * 1024,
+        control_reserve_bytes: 64 * 1024,
+        max_entries_per_group: 400_000,
+        ..Default::default()
+    };
+    let mut clock = Clock::new();
+    let created = open_limited(config(directory.clone(), NativeOpenMode::Create), small);
+    stop(vec![created], &mut clock);
+    // Fill the live log with uncommitted noops, as Sol's worker run does.
+    let identity = config(directory.clone(), NativeOpenMode::Recover).store;
+    let mut store =
+        NativeLogStore::recover(FileLogIo::open(&directory).unwrap(), identity, small).unwrap();
+    let noops = fill_with_live_noops(&mut store, small.max_wal_bytes);
+    let filled = store.physical_usage().unwrap().bytes;
+    let term = store.state(group()).unwrap().hard_state.term;
+    assert_eq!(store.state(group()).unwrap().commit_index, 0);
+    drop(store);
+    let mut nodes = vec![open_limited(
+        config(directory.clone(), NativeOpenMode::Recover),
+        small,
+    )];
+    let _ = nodes[0].control(group(), NodeControl::Campaign);
+    let mut max_parked = 0;
+    while clock.now < 3_000 {
+        clock.poll(&mut nodes);
+        max_parked = max_parked.max(nodes[0].wal_usage().unwrap().parked);
+    }
+    let c = core(&nodes[0]);
+    let rewrites = nodes[0]
+        .wal_maintenance()
+        .last_completion
+        .as_ref()
+        .map_or(0, |e| e.request.sequence);
+    let refusals = c.wal_noop_refusals();
+    let account = nodes[0].local().owner.wal_account();
+    eprintln!(
+        "R4-1 node: noops={noops} filled={filled} term={term} refusals={refusals} account_noop_refused={} rewrites={rewrites} max_parked={max_parked} status_starved={} simulated_ms={}",
+        account.noop_refused,
+        nodes[0].wal_maintenance().noop_starved,
+        clock.now
+    );
+    assert_ne!(c.role(), Role::Leader);
+    assert_eq!(c.state().hard_state.term, term, "a vote was written");
+    assert_eq!(c.state().last_index(), noops);
+    assert!(refusals >= 2, "{refusals} campaign refusals");
+    assert!(account.noop_refused >= refusals);
+    assert_eq!(max_parked, 0, "a batch was held");
+    // Rewrites run only while the WAL grows: nothing grows here.
+    assert!(rewrites <= 2, "{rewrites} rewrites");
+    assert_eq!(nodes[0].state(), NodeState::Running);
+    stop(nodes, &mut clock);
+    // The operator raises the WAL budget and reopens the unchanged store.
+    let larger = LogLimits {
+        max_wal_bytes: 16 << 20,
+        ..small
+    };
+    let mut nodes = vec![open_limited(
+        config(directory.clone(), NativeOpenMode::Recover),
+        larger,
+    )];
+    let _ = nodes[0].control(group(), NodeControl::Campaign);
+    while !(core(&nodes[0]).role() == Role::Leader && core(&nodes[0]).state().commit_index > noops)
+    {
+        clock.poll(&mut nodes);
+        assert!(
+            clock.now < 30_000,
+            "no leader after reopening{}",
+            dump(&nodes)
+        );
+    }
+    let request = ClientRequest {
+        group: group(),
+        operation: OperationId::new(1).unwrap(),
+        bytes: 1i64.to_le_bytes().to_vec(),
+    };
+    nodes[0].propose(request).unwrap();
+    let applied = loop {
+        clock.poll(&mut nodes);
+        if let Some(output) = nodes[0].poll_client() {
+            break nodes[0].complete_client(output).unwrap();
+        }
+        assert!(clock.now < 60_000, "write not applied{}", dump(&nodes));
+    };
+    assert!(
+        matches!(applied, ClientOutcome::Applied { .. }),
+        "{applied:?}"
+    );
+    assert!(core(&nodes[0]).state().commit_index > noops + 1);
     stop(nodes, &mut clock);
     std::fs::remove_dir_all(directory).unwrap();
 }

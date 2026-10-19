@@ -595,7 +595,7 @@ where
     let (step_downs, last_step_down) = core.map_or((0, None), |c| c.capacity_step_downs());
     let stall = core.and_then(|c| c.replica_stall());
     format!(
-        "OK retention={} enabled={} pending={} next_ms={:?} last_sequence={} wal_bytes={} wal_capacity={} last_reclaim_ms={:?} before_bytes={} after_bytes={} failures={} skipped={} admission_error={:?} completion_error={:?} checkpoint_enabled={} checkpoint_entries={} checkpoint_pending={} checkpoint_last={} checkpoint_admission_error={:?} leader_noop_pending={} high_water={} high_water_entries={} refused_proposals={} wal_parked={} retained_entries={} retained_budget={} retained_capacity={} entry_high_water={} entry_high_water_groups={} refused_entry_proposals={} checkpoint_failures={} wal_pending_bytes={} wal_refused_proposals={} wal_declined_appends={} wal_held_ms={} declined_appends={} replica_stall={} step_downs={} last_step_down={} checkpoint_base={}",
+        "OK retention={} enabled={} pending={} next_ms={:?} last_sequence={} wal_bytes={} wal_capacity={} last_reclaim_ms={:?} before_bytes={} after_bytes={} failures={} skipped={} admission_error={:?} completion_error={:?} checkpoint_enabled={} checkpoint_entries={} checkpoint_pending={} checkpoint_last={} checkpoint_admission_error={:?} leader_noop_pending={} high_water={} high_water_entries={} refused_proposals={} wal_parked={} retained_entries={} retained_budget={} retained_capacity={} entry_high_water={} entry_high_water_groups={} refused_entry_proposals={} checkpoint_failures={} wal_pending_bytes={} wal_refused_proposals={} wal_declined_appends={} wal_held_ms={} declined_appends={} replica_stall={} step_downs={} last_step_down={} wal_noop_refused={} noop_refusals={} wal_noop_starved={} checkpoint_base={}",
         retention_name(node.retention()),
         wal.policy.is_some(),
         wal.pending.is_some(),
@@ -639,6 +639,9 @@ where
         stall.map_or("none".to_owned(), |(peer, rounds)| format!("{}:{rounds}", peer.get())),
         step_downs,
         last_step_down.map_or("none".to_owned(), |d| format!("{:?}@{}", d.reason, d.term)),
+        account.noop_refused,
+        core.map_or(0, |c| c.wal_noop_refusals()),
+        wal.noop_starved,
         // Kept last: existing operator tooling reads it as the final field.
         node.local()
             .owner

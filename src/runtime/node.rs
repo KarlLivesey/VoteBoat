@@ -333,7 +333,7 @@ where
             parts.local.owner.install_connection_budget(budget);
             peers.as_mut().unwrap().install_admission_routes(routes);
         }
-        Ok(Self {
+        let mut node = Self {
             local: parts.local,
             replica,
             peers,
@@ -348,7 +348,21 @@ where
             retention: limits.retention,
             drain: None,
             drain_history: None,
-        })
+        };
+        // R4-1: the shard knows its WAL budget before any step, so a campaign
+        // requested before the first poll is already checked.
+        let usage = node.local.persistence.wal_usage();
+        node.publish_wal_budget(usage);
+        Ok(node)
+    }
+    /// I5 / R4-1: the shard checks every live staging against this budget.
+    fn publish_wal_budget(&mut self, usage: Option<crate::log::WalUsage>) {
+        let budget = usage.filter(|u| u.capacity > 0).map(|u| super::WalBudget {
+            limit: self.maintenance.high_water_bytes(u.capacity),
+            published: u.bytes,
+            reserve: self.maintenance.noop_reserve,
+        });
+        self.local.owner.set_wal_budget(budget);
     }
     /// Install the default maintenance a `Maintained` node runs from its first
     /// poll. Every refusal here is a construction error, never a silent stop.
@@ -360,6 +374,7 @@ where
         let mut checkpoints = CheckpointStatus::default();
         let mut maintenance = WalMaintenanceStatus::default();
         let limits = Self::smallest_log_limits(local);
+        maintenance.noop_reserve = limits.control_reserve_bytes;
         // I5 / U5: whatever the retention mode, the WAL above the high-water
         // mark must hold the largest batch, or a batch could wait for ever.
         super::maintenance::check_wal_headroom(
@@ -1242,18 +1257,14 @@ where
         let account = self.local.owner.wal_account();
         self.maintenance
             .note_budget_refusals(account.refused.saturating_add(account.declined));
+        self.maintenance.note_noop_refusals(account.noop_refused);
         let high_water = self.maintenance.update_high_water(usage);
         if usage.is_some_and(|u| u.parked > 0) {
             self.maintenance.held_since.get_or_insert(now);
         } else {
             self.maintenance.held_since = None;
         }
-        // I5: the shard checks every data staging against this mark.
-        let budget = usage.filter(|u| u.capacity > 0).map(|u| super::WalBudget {
-            limit: self.maintenance.high_water_bytes(u.capacity),
-            published: u.bytes,
-        });
-        self.local.owner.set_wal_budget(budget);
+        self.publish_wal_budget(usage);
         // I2: groups leave the entry gate without waiting for a proposal.
         if !self.maintenance.entry_high_water.is_empty() {
             for group in self.maintenance.entry_high_water.clone() {

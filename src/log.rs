@@ -258,6 +258,11 @@ pub const ENTRY_WAL_OVERHEAD: usize = 64;
 pub fn entry_wal_bound(payload: usize) -> usize {
     ENTRY_WAL_OVERHEAD.saturating_add(payload)
 }
+/// WAL bound of a leader's current-term noop transition (one update with one
+/// noop entry): what the shard's account must still hold under the
+/// high-water mark plus the control reserve before a core may campaign or
+/// place its noop (ST2 round 4, R4-1).
+pub const NOOP_WAL_BOUND: usize = UPDATE_WAL_OVERHEAD + ENTRY_WAL_OVERHEAD;
 impl LogUpdate {
     /// Upper bound of this update's WAL encoding, for exact in-flight
     /// accounting against the WAL high-water mark. Not durability evidence.

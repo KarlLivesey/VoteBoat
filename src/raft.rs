@@ -329,6 +329,11 @@ pub enum StepDownReason {
     /// for the current-term noop. Another replica, with a shorter log, can win
     /// and truncate that suffix.
     RetainedEntryCapacity,
+    /// Elected while the node's WAL account had no room for the
+    /// current-term noop under the high-water mark plus the control reserve
+    /// (ST2 round 4, R4-1). Nothing was appended; the replica does not
+    /// campaign again until one noop fits.
+    WalCapacity,
 }
 /// A recorded step-down: the term the leader gave up and why.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -432,6 +437,14 @@ pub struct Raft {
     /// Volatile host input (ST2b): the node's WAL is above its high-water
     /// mark, so as a follower this core takes no new data entries.
     storage_pressure: bool,
+    /// Volatile host input (R4-1): the node's WAL account holds one more
+    /// leader noop under the high-water mark plus the control reserve. While
+    /// false this core does not campaign, steps down instead of placing its
+    /// noop, and (with `storage_pressure`) declines noop-only appends.
+    wal_noop_room: bool,
+    /// Campaigns not started and step-downs because no noop fitted
+    /// (saturating).
+    wal_noop_refusals: u64,
     // ST2 round 3 (I1): capacity step-downs, the last one, and how many
     // election timeouts this replica still lets pass without campaigning.
     capacity_step_downs: u64,
@@ -574,6 +587,8 @@ impl Raft {
             leader_contact: None,
             leader_noop_pending: false,
             storage_pressure: false,
+            wal_noop_room: true,
+            wal_noop_refusals: 0,
             capacity_step_downs: 0,
             last_step_down: None,
             campaign_holdoff: 0,
@@ -816,6 +831,17 @@ impl Raft {
     }
     pub(crate) fn set_storage_pressure(&mut self, on: bool) {
         self.storage_pressure = on;
+    }
+    /// Host-set (R4-1): whether the node's WAL account holds one more leader
+    /// noop. Volatile scheduling input, set before every step and completion.
+    #[inline]
+    pub(crate) fn set_wal_noop_room(&mut self, room: bool) {
+        self.wal_noop_room = room;
+    }
+    /// Campaigns this replica did not start, and leader roles it gave up,
+    /// because the node's WAL had no room for a noop (R4-1, saturating).
+    pub fn wal_noop_refusals(&self) -> u64 {
+        self.wal_noop_refusals
     }
     /// As leader, whether every other replica has acknowledged `index`, so a
     /// compaction there leaves no replica behind the new base (which would
@@ -1248,6 +1274,13 @@ impl Raft {
             self.reset_election()?;
             return Ok(Vec::new());
         }
+        if !self.wal_noop_room && self.role != Role::Leader {
+            // R4-1: a leader could not place its noop, so it could never
+            // commit. Wait for room (a rewrite, or a larger budget).
+            self.wal_noop_refusals = self.wal_noop_refusals.saturating_add(1);
+            self.reset_election()?;
+            return Ok(Vec::new());
+        }
         self.reset_election()?;
         self.transfer = None;
         self.leader_contact = None;
@@ -1546,6 +1579,19 @@ impl Raft {
         after: After,
         reply: Option<Message>,
     ) -> Result<Vec<Effect>, RaftError> {
+        self.persist_bounded(hard_state, commit_index, suffix, after, reply, None)
+    }
+    /// As `persist`, with the update's WAL bound when the caller already
+    /// computed it while building the entries (R4-3).
+    fn persist_bounded(
+        &mut self,
+        hard_state: HardState,
+        commit_index: u64,
+        suffix: Option<Suffix>,
+        after: After,
+        reply: Option<Message>,
+        wal_bound: Option<usize>,
+    ) -> Result<Vec<Effect>, RaftError> {
         if suffix.is_none() && hard_state == self.durable.hard_state {
             return self.persist_commit(commit_index, after, reply);
         }
@@ -1558,7 +1604,7 @@ impl Raft {
             suffix,
             snapshot: None,
         };
-        self.persist_update(update, after, reply)
+        self.persist_update_bounded(update, after, reply, wal_bound)
     }
     /// A round that only advances the commit index (or only the revision) plans
     /// a scalar advance. A durable store still receives the same update.
@@ -1587,13 +1633,22 @@ impl Raft {
                 snapshot: None,
             })
         };
-        self.stage_pending(next, update, after, reply)
+        self.stage_pending(next, update, after, reply, None)
     }
     fn persist_update(
         &mut self,
         update: LogUpdate,
         after: After,
         reply: Option<Message>,
+    ) -> Result<Vec<Effect>, RaftError> {
+        self.persist_update_bounded(update, after, reply, None)
+    }
+    fn persist_update_bounded(
+        &mut self,
+        update: LogUpdate,
+        after: After,
+        reply: Option<Message>,
+        wal_bound: Option<usize>,
     ) -> Result<Vec<Effect>, RaftError> {
         // A volatile core is the only owner of its log: move the update into
         // the plan instead of keeping a copy for a store to validate again.
@@ -1604,7 +1659,7 @@ impl Raft {
                 update,
                 self.limits,
             )?;
-            self.stage_pending(next, None, after, reply)
+            self.stage_pending(next, None, after, reply, None)
         } else {
             let next = OwnedNextLog::plan_copy(
                 &LogView::new(&self.durable),
@@ -1612,7 +1667,7 @@ impl Raft {
                 &update,
                 self.limits,
             )?;
-            self.stage_pending(next, Some(update), after, reply)
+            self.stage_pending(next, Some(update), after, reply, wal_bound)
         }
     }
     /// Make `next` the single pending transition. `update` is the durable
@@ -1623,6 +1678,7 @@ impl Raft {
         update: Option<LogUpdate>,
         after: After,
         reply: Option<Message>,
+        wal_bound: Option<usize>,
     ) -> Result<Vec<Effect>, RaftError> {
         let membership = next
             .full()
@@ -1630,7 +1686,13 @@ impl Raft {
             .transpose()
             .map_err(|_| RaftError::InvalidRecovery)?;
         let metadata = next.metadata();
-        let wal_bytes = update.as_ref().map_or(0, LogUpdate::wal_bound);
+        let wal_bytes = update.as_ref().map_or(0, |update| match wal_bound {
+            Some(bound) => {
+                debug_assert_eq!(bound, update.wal_bound());
+                bound
+            }
+            None => update.wal_bound(),
+        });
         let effect = match update {
             Some(update) => Effect::Persist(update),
             None => Effect::PersistVolatile(VolatilePersist {
@@ -1772,6 +1834,9 @@ impl Raft {
         self.initialize_replication()?;
         self.leader_noop_pending = false;
         self.stalled_rounds.clear();
+        if !self.wal_noop_room {
+            return self.step_down_for(StepDownReason::WalCapacity);
+        }
         if self.durable.entries.len() >= self.limits.retained_entry_capacity() {
             // Only reachable when the noop reserve above the data budget is
             // used up (I1). If a checkpoint up to the commit index could make
@@ -1780,7 +1845,7 @@ impl Raft {
             // this leader can ever commit; step down so a replica with a
             // shorter log can win.
             if self.noop_unplaceable() {
-                return self.step_down_for_capacity();
+                return self.step_down_for(StepDownReason::RetainedEntryCapacity);
             }
             self.leader_noop_pending = true;
             return self.broadcast();
@@ -1795,7 +1860,7 @@ impl Raft {
             .saturating_sub(self.durable.commit_index)
             >= self.limits.retained_entry_capacity() as u64
     }
-    fn step_down_for_capacity(&mut self) -> Result<Vec<Effect>, RaftError> {
+    fn step_down_for(&mut self, reason: StepDownReason) -> Result<Vec<Effect>, RaftError> {
         self.role = Role::Follower;
         self.leader_noop_pending = false;
         self.transfer = None;
@@ -1810,9 +1875,12 @@ impl Raft {
         self.stalled_rounds.clear();
         self.cancel_learner_readiness();
         self.capacity_step_downs = self.capacity_step_downs.saturating_add(1);
+        if reason == StepDownReason::WalCapacity {
+            self.wal_noop_refusals = self.wal_noop_refusals.saturating_add(1);
+        }
         self.last_step_down = Some(StepDown {
             term: self.durable.hard_state.term,
-            reason: StepDownReason::RetainedEntryCapacity,
+            reason,
         });
         self.campaign_holdoff = CAPACITY_CAMPAIGN_HOLDOFF;
         self.reset_election()?;
@@ -1848,9 +1916,12 @@ impl Raft {
         }
         if self.durable.entries.len() >= self.limits.retained_entry_capacity() {
             if self.noop_unplaceable() {
-                return self.step_down_for_capacity();
+                return self.step_down_for(StepDownReason::RetainedEntryCapacity);
             }
             return Ok(Vec::new());
+        }
+        if !self.wal_noop_room {
+            return self.step_down_for(StepDownReason::WalCapacity);
         }
         let effects = self.append_leader_noop(last.checked_add(1).ok_or(RaftError::Exhausted)?)?;
         self.leader_noop_pending = false;

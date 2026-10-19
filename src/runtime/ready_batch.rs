@@ -168,7 +168,11 @@ impl<Q: ReadyScheduler> Shard<Q> {
         };
         // I5: the batch's WAL bound must fit under the high-water mark; a
         // first proposal that does not is refused on its own (and counted)
-        // by the single-step path, later ones wait for the next visit.
+        // by the single-step path, later ones wait for the next visit. The
+        // selected prefix's bound is kept running (R4-3): each selected
+        // proposal is added once, not once per later candidate.
+        let mut counted = 0;
+        let mut selected_bound = 0usize;
         let mut check = |core: &Raft, event: &Event, selected: &[ReadyProposal]| {
             check(core, event, selected)?;
             let Some(room) = room else {
@@ -177,11 +181,13 @@ impl<Q: ReadyScheduler> Shard<Q> {
             let Event::Propose { bytes, .. } = event else {
                 return Ok(());
             };
-            let bound = selected
-                .iter()
-                .fold(super::wal_account::proposal_bound(bytes.len()), |sum, p| {
-                    sum.saturating_add(crate::log::entry_wal_bound(p.command.bytes.len()))
-                });
+            for p in selected.get(counted..).unwrap_or_default() {
+                selected_bound = selected_bound
+                    .saturating_add(crate::log::entry_wal_bound(p.command.bytes.len()));
+            }
+            counted = selected.len();
+            let bound =
+                super::wal_account::proposal_bound(bytes.len()).saturating_add(selected_bound);
             if bound > room {
                 Err(RaftError::StoragePressure)
             } else {

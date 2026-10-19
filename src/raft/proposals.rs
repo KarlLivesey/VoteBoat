@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Karl Livesey
 //! Bounded original commands sharing one ordered persistence transition.
 use super::*;
+use crate::log::entry_wal_bound;
 use std::mem::size_of;
 
 /// Default original-command count for one direct Core batch.
@@ -48,19 +49,24 @@ impl Raft {
                 }
             })?;
         self.validate_conversion_peak(&proposals, proposals.capacity())?;
+        // The staged update's WAL bound, built in the same pass (R4-3).
+        let mut wal_bound = crate::log::UPDATE_WAL_OVERHEAD;
         let entries = proposals
             .into_iter()
             .enumerate()
-            .map(|(offset, proposal)| LogEntry {
-                index: first + offset as u64,
-                term: self.durable.hard_state.term,
-                payload: EntryPayload::Command {
-                    operation: proposal.operation,
-                    bytes: proposal.bytes.into(),
-                },
+            .map(|(offset, proposal)| {
+                wal_bound = wal_bound.saturating_add(entry_wal_bound(proposal.bytes.len()));
+                LogEntry {
+                    index: first + offset as u64,
+                    term: self.durable.hard_state.term,
+                    payload: EntryPayload::Command {
+                        operation: proposal.operation,
+                        bytes: proposal.bytes.into(),
+                    },
+                }
             })
             .collect();
-        let effects = self.persist_proposal_entries(first, entries)?;
+        let effects = self.persist_proposal_entries(first, entries, wal_bound)?;
         self.finish_step(effects)
     }
 
@@ -99,6 +105,8 @@ impl Raft {
             .last_index()
             .checked_add(1)
             .ok_or(RaftError::Exhausted)?;
+        let wal_bound =
+            crate::log::UPDATE_WAL_OVERHEAD.saturating_add(entry_wal_bound(bytes.len()));
         let entry = LogEntry {
             index,
             term: self.durable.hard_state.term,
@@ -107,7 +115,7 @@ impl Raft {
                 bytes: bytes.into(),
             },
         };
-        self.persist_proposal_entries(index, vec![entry])
+        self.persist_proposal_entries(index, vec![entry], wal_bound)
     }
 
     fn validate_proposal_batch(
@@ -194,8 +202,9 @@ impl Raft {
         &mut self,
         first: u64,
         entries: Vec<LogEntry>,
+        wal_bound: usize,
     ) -> Result<Vec<Effect>, RaftError> {
-        self.persist(
+        self.persist_bounded(
             self.durable.hard_state,
             self.durable.commit_index,
             Some(Suffix {
@@ -204,6 +213,7 @@ impl Raft {
             }),
             After::LeaderAppend,
             None,
+            Some(wal_bound),
         )
     }
     fn check_proposal_role(&self) -> Result<(), RaftError> {

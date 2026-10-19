@@ -364,6 +364,10 @@ fn maintenance_defaults_are_visible_and_selection_is_validated_before_storage() 
         "wal_held_ms=0",
         "step_downs=0",
         "last_step_down=none",
+        // ST2 round 4 (R4-1).
+        "wal_noop_refused=0",
+        "noop_refusals=0",
+        "wal_noop_starved=false",
     ] {
         assert!(text.contains(field), "{field}: {text}");
     }
