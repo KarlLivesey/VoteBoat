@@ -172,15 +172,29 @@ pub enum LogicalOutcome {
     CapsuleAuthorized,
     Refused(LogicalRefusal),
 }
+/// The committed result of one applied command.
+///
+/// For a `Refused(Expired)` receipt every field describes the refusal at
+/// `index`, not an earlier execution: `Expired` means the ID can no longer
+/// execute, and it may never have executed (an unseen ID of a closed session
+/// is also `Expired`).
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct LogicalReceipt {
     pub index: u64,
     pub operation: OperationId,
+    /// The entry that first applied this ID. For `Expired` it is `index`,
+    /// the refusal entry; it does not establish where, or whether, the ID
+    /// executed before.
     pub first_index: u64,
     pub outcome: LogicalOutcome,
+    /// For `Expired`, the current parent at `index`, not the parent at any
+    /// original execution (likewise `parent_generation` and `epoch`).
     pub parent_revision: Option<LogRevision>,
     pub parent_generation: Option<LogGeneration>,
     pub epoch: Option<RepresentativeEpoch>,
+    /// Whether this receipt repeats an earlier result rather than executing.
+    /// Always `true` for `Expired`, which never executes; it does not mean
+    /// the ID previously executed, or establish its original outcome.
     pub duplicate: bool,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]

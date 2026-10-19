@@ -314,7 +314,9 @@ Written before editing, from architect plan §2.2–§2.10 and the LV1 state.
   record's command decodes under the partition and matches its ID; session
   keys `≥ retired_below`; no representative ⇒ `retired_below == 0`; a
   representative of session `s` ⇒ `retired_below >> 64 == s` and its low half
-  `≥ 1`; `snapshot_generation ≥` the retained floor (was `==`); the
+  `≥ 1`, and (round 2) `retired_below` equals the larger of `(s << 64) | 1`
+  and the highest acknowledgement retained from the current binding;
+  `snapshot_generation ≥` the retained floor (was `==`); the
   enrollment record matches its `EnrollmentClaim` record while that record is
   retained, and once pruned (legitimate after the first session command) only
   the record's own fields are checked, with its ID in claim space. Claim
@@ -336,9 +338,16 @@ Written before editing, from architect plan §2.2–§2.10 and the LV1 state.
   retired ID through and apply commits `Refused(Expired)`, which takes the
   path above. `Expired` is never treated as "not committed".
 - **Failure/cleanup.** Late or lower acknowledgements cannot lower the
-  watermark (maximum). A corrupted lower watermark below a live key, a key
-  below it, or a session mismatch is `InvalidCheckpoint`; anything else is
-  caught by the exact re-encode. LV1 checkpoints → `UnsupportedSchema` under
+  watermark (maximum). Restore refuses with `InvalidCheckpoint`: a live
+  session key below the watermark, a watermark in another session or at
+  sequence 0, and (round 2) any watermark other than the claim floor or the
+  highest acknowledgement retained from the current binding, so a lowered or
+  raised value. The exact re-encode catches only non-canonical encodings,
+  not values that are encoded verbatim. Not caught: a raised generation mark
+  (legitimate once publication records are pruned) and history-dependent
+  claim-space retention. These fields rely on the storage-integrity boundary
+  (the checksummed container), as every history-dependent field has since
+  LV1. LV1 checkpoints → `UnsupportedSchema` under
   their old schema numbers and `InvalidCheckpoint` (magic) under the new ones.
   Checkpoints are taken between applies, so no partial retirement is captured.
 - **Acceptance checks.** Architect §5.1 (72,000-action leader stream with a
@@ -452,12 +461,16 @@ Branch `lv/retire-watermark`, stacked on LV1 (`lv/checkpoint-v3` 3a8f6328).
   `StaleRepresentative`), `authority::term_zero_actual_request…` (the retry
   before replacement still returns the original receipt),
   `snapshots::recovery::anchored_orphan…`; `control_reserve_and_pending_content_are_enforced`
-  asserted that a full table refuses the recovery claim (the defect); it now
-  fills the table with claims refused at the current epoch, which retirement
-  keeps, so the total count still bounds control actions. Format and schema
+  still asserts that a full table refuses a claim. What changed is that the
+  recovery claim now retires the old session's records, so the test refills
+  the table with claims refused at the current epoch (control records, which
+  retirement keeps) to keep the total-count bound under test. Recovery-claim
+  admission at the limit is LV5. Format and schema
   constants in the format tests; `LogicalRead::Outcome` matches in
-  `logical_activation_nested` (`Retained` with the byte checks, or `Unknown`
-  only after the fresh session), `logical_voter_native` (history, authority:
+  `logical_activation_nested` (`Retained` with the byte checks and the
+  watermark at or below the fresh session's first ID; round 2 removed the
+  former `Unknown` alternative, which these fixtures never reach),
+  `logical_voter_native` (history, authority:
   still `Retained`, documented why), `logical_nested_native` diagnostics and
   `logical_activation_driver` retained counting (command header offset +8,
   comments now say the count is the live set).
@@ -467,13 +480,13 @@ Branch `lv/retire-watermark`, stacked on LV1 (`lv/checkpoint-v3` 3a8f6328).
   too (the plan named only command and response magic), so every changed
   format has a new name. (3) The plan says the exact re-encode catches a
   lowered watermark; it does not (the field is encoded verbatim). Restore
-  instead requires the watermark to cover every retained acknowledgement
-  of the current binding; the record that last raised it is never pruned, so
-  any lowering is refused. (4) A raised generation mark is no longer
-  detectable once publication records are pruned (history-dependent, like a
-  raised watermark that stays below every live key); both are harmless to
-  uniqueness and covered by the checksummed container, as for every other
-  history-dependent field since LV1. LV1's "+1 generation" corruption case
+  instead requires the watermark to equal the claim floor or the highest
+  acknowledgement retained from the current binding (round 2; the first
+  round required only `≥`). The record that last raised it is never pruned,
+  so any lowering or raising is refused. (4) A raised generation mark is no
+  longer detectable once publication records are pruned (history-dependent);
+  it is harmless to uniqueness and covered by the checksummed container, as
+  for every other history-dependent field since LV1. LV1's "+1 generation" corruption case
   was dropped for this reason. (5) Claim-space retention after the epoch
   moves depends on history (a later prune, or a re-executed pruned copy that
   is recorded again), so restore checks claim records structurally only.
@@ -507,6 +520,62 @@ Branch `lv/retire-watermark`, stacked on LV1 (`lv/checkpoint-v3` 3a8f6328).
 
   No failures, so no port collision or close-drain timeout occurred in these
   runs. Full suites are left to the orchestrator.
+
+#### LV2 round 2 (review follow-ups, PR 12)
+
+- **Nested lookups assert the branch that occurs.** `unknown_target` and
+  `uncommitted_target` accepted `Retained` or `Unknown`. A temporary print
+  showed `Retained` on all three nodes, TCP and QUIC, with the watermark at
+  `(2 << 64) | 1`. That is the only reachable branch: session commands come
+  only from `submit_body`, whose `intake` refuses while the bridge holds the
+  image, and neither fixture submits anything before the inspection. Both now
+  assert `Retained` (bytes, and the first index where known) and a watermark
+  at or below the fresh session's first ID, which holds whatever a node has
+  applied.
+- **Restore requires watermark equality.** `valid_watermark` now requires the
+  watermark to equal `max((s << 64) | 1, highest retained acknowledgement of
+  the current binding)` instead of `≥`. The shared per-apply oracle
+  (`assert_restore_equivalent`, which restores after every apply of states
+  with at most 64 records) passed on every application test, so no reachable
+  state it covers violates equality. New failing inputs: the v5 populated
+  golden with its watermark raised by one (`(1 << 64) | 7`, which is at a
+  live key, so it passed before), and a watermark raised to `(s << 64) | 2`
+  right after a claim. Both are `InvalidCheckpoint` with the state unchanged,
+  and both restored under the round-1 check. The lowered cases stay.
+- **Retired re-proposals need no room (was LV5 candidate, done here).**
+  `validate_proposal` returns as soon as it finds a retired proposal (after
+  the pending decode and conflict checks), so pending live entries cannot
+  turn the committed `Expired` into a non-retryable `DedupCapacity`. The E7
+  admission test now adds a pending live command, admitted only through its
+  own prune credit, beside the retired re-proposal. That assertion fails on
+  the round-1 code.
+- **Docs.** The integrity boundary statement lists what restore catches and
+  what it leaves to the checksummed container; the control-test note says
+  what changed; `LogicalReceipt` documents that `first_index`, `duplicate`
+  and the parent/epoch fields of an `Expired` receipt describe the refusal,
+  not a prior execution.
+- **Validation (round 2).** Linux, cores 10–14, `nice -n 19`, `-j 4`.
+
+  | Check | Result |
+  | --- | --- |
+  | `cargo +stable fmt --all -- --check` | clean |
+  | Strict Clippy: all-features, default, no-default, native-only | 0 diagnostics each |
+  | Matched workspace fmt and strict all-target Clippy | clean |
+  | `--lib logical_voter`, default features | 111 passed, 1 ignored |
+  | `--lib logical_voter`, all features | 112 passed, 1 ignored |
+  | New cases on round-1 code (restore check / admission reverted) | fail as intended (2 restore tests, 1 admission test) |
+  | `logical_voter_native`, all features, once | 42 passed (10 s) |
+  | `logical_activation_nested`, all features, final run | 13 passed, 1 failed (121 s) |
+
+  The nested failure is the known QUIC close-drain timeout (TR4):
+  `quic_original_unknown_import_target_cold_resolves_then_activation` hit
+  `native logical child timeout … stage=CloseDrained` at `cluster.rs:216`
+  (15 s wall clock, load average about 7). The changed assertions are
+  read-only, and the TCP variant passed in the same run. The two earlier
+  probe runs (with the temporary print, before the edit) gave 14/14 and 13/14,
+  the latter with the same timeout in
+  `quic_fifteen_native_owners_two_original_logical_replacements`; in that run
+  both QUIC changed fixtures passed.
 
 #### AI1 schema plan
 
