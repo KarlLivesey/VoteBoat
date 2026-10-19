@@ -18,7 +18,7 @@ design pack is unchanged.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current N0: three-process cluster harness (implemented; in review on `net/n0-cluster-harness`; baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
+| Current N0: three-process cluster harness (implemented; in review as PR 17; baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
 | Next N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline | Plan §5.3 tests and §5.4 gate | NW1 |
 | Then N2: per-peer frame coalescing | One frame per peer per round across groups | N1; a G=4 cell on the N0 harness (see N0 limits) | Plan §4 row 2 | NW1 |
 
