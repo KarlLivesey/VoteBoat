@@ -47,20 +47,20 @@ impl ProposalBatch {
         if length > self.max_command_bytes {
             return Err(StorageError::Rejected("command byte budget").into());
         }
-        let shared = CommandBytes::retained_bytes_for_len(length).ok_or(RaftError::Exhausted)?;
+        let shared = CommandBytes::retained_bytes_for_len(length).ok_or_else(exhausted)?;
         // Everything alive at once while this original converts, besides the
         // entry allocation: the Vec header, staged shared bytes and the input.
         let held = self
             .shared
             .checked_add(HEADER)
             .and_then(|n| n.checked_add(bytes.capacity()))
-            .ok_or(RaftError::Exhausted)?;
+            .ok_or_else(exhausted)?;
         let capacity = self.entries.capacity();
         let (grown, peak) = if len < capacity {
             let peak = entry_bytes(capacity)
                 .and_then(|n| n.checked_add(held))
                 .and_then(|n| n.checked_add(shared))
-                .ok_or(RaftError::Exhausted)?;
+                .ok_or_else(exhausted)?;
             (None, peak)
         } else {
             let next = self.next_capacity(held, shared)?;
@@ -71,7 +71,7 @@ impl ProposalBatch {
             let peak = growing
                 .zip(converting)
                 .map(|(a, b)| a.max(b))
-                .ok_or(RaftError::Exhausted)?;
+                .ok_or_else(exhausted)?;
             (Some(next), peak)
         };
         let peak = peak.max(self.peak);
@@ -145,7 +145,7 @@ impl ProposalBatch {
         let fixed = entry_bytes(capacity)
             .map(|n| n.max(shared))
             .and_then(|n| n.checked_add(held))
-            .ok_or(RaftError::Exhausted)?;
+            .ok_or_else(exhausted)?;
         let fits = self.max_batch_bytes.saturating_sub(fixed) / ENTRY;
         let next = doubled.min(fits);
         if next <= len {
@@ -153,6 +153,13 @@ impl ProposalBatch {
         }
         Ok(next)
     }
+}
+
+/// Built only when a check fails, so a successful push creates and drops no
+/// error value.
+#[cold]
+fn exhausted() -> RaftError {
+    RaftError::Exhausted
 }
 
 fn entry_bytes(count: usize) -> Option<usize> {
