@@ -1493,6 +1493,50 @@ mod faults {
             std::thread::park_timeout(Duration::from_millis(1));
         }
     }
+    /// Two committed commands, an earlier checkpoint at index 1 compacted
+    /// into the log, and the second command applied: the next checkpoint's
+    /// reconcile releases a real pin (an unchanged reconcile is not
+    /// rewritten).
+    fn anchored_source(store: &mut NativeSnapshotStore<Io>) -> (Raft, HostLogStore, Counter) {
+        let (_, mut log) = follower();
+        let commands = [7i64, 3]
+            .into_iter()
+            .enumerate()
+            .map(|(i, delta)| LogEntry {
+                index: i as u64 + 1,
+                term: 1,
+                payload: EntryPayload::Command {
+                    operation: OperationId::new(i as u128 + 1).unwrap(),
+                    bytes: delta.to_le_bytes().to_vec().into(),
+                },
+            })
+            .collect::<Vec<_>>();
+        let mutation = update(
+            &log.state(group(1)).unwrap(),
+            1,
+            2,
+            Some(Suffix {
+                from: 1,
+                entries: commands.clone(),
+            }),
+        );
+        append(&mut log, vec![mutation]);
+        let mut core = Raft::recover(
+            node(2),
+            log.binding(),
+            log.state(group(1)).unwrap(),
+            log.limits(),
+        )
+        .unwrap();
+        let mut app = Counter::new(20).unwrap();
+        app.apply_batch(&commands[..1]).unwrap();
+        let old = checkpoint_application(&core, &app, store)
+            .unwrap()
+            .reference();
+        compact_replica(&mut core, &mut log, store, &app, old).unwrap();
+        app.apply_batch(&commands[1..]).unwrap();
+        (core, log, app)
+    }
     #[test]
     fn checkpoint_retention_failure_fences_and_recovers_the_durable_anchor() {
         for fault in [Fault::ReconcileBefore, Fault::ReconcileAfter] {
@@ -1503,46 +1547,7 @@ mod faults {
             };
             let mut store =
                 NativeSnapshotStore::create(io.clone(), sid, SnapshotLimits::default()).unwrap();
-            // An earlier checkpoint at index 1 is the durable anchor, so the
-            // reconcile after the next checkpoint releases its pin: a real
-            // manifest change (an unchanged reconcile is not rewritten).
-            let (_, mut log) = follower();
-            let commands = [7i64, 3]
-                .into_iter()
-                .enumerate()
-                .map(|(i, delta)| LogEntry {
-                    index: i as u64 + 1,
-                    term: 1,
-                    payload: EntryPayload::Command {
-                        operation: OperationId::new(i as u128 + 1).unwrap(),
-                        bytes: delta.to_le_bytes().to_vec().into(),
-                    },
-                })
-                .collect::<Vec<_>>();
-            let mutation = update(
-                &log.state(group(1)).unwrap(),
-                1,
-                2,
-                Some(Suffix {
-                    from: 1,
-                    entries: commands.clone(),
-                }),
-            );
-            append(&mut log, vec![mutation]);
-            let mut core = Raft::recover(
-                node(2),
-                log.binding(),
-                log.state(group(1)).unwrap(),
-                log.limits(),
-            )
-            .unwrap();
-            let mut app = Counter::new(20).unwrap();
-            app.apply_batch(&commands[..1]).unwrap();
-            let old = checkpoint_application(&core, &app, &mut store)
-                .unwrap()
-                .reference();
-            compact_replica(&mut core, &mut log, &mut store, &app, old).unwrap();
-            app.apply_batch(&commands[1..]).unwrap();
+            let (mut core, mut log, mut app) = anchored_source(&mut store);
             let mut worker = NativeSnapshotWorker::spawn(
                 [(group(1), store)].into(),
                 binding(),
