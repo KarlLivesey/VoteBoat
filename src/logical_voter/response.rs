@@ -20,11 +20,14 @@ mod atoms;
 mod configurations;
 mod values;
 /// Schema for exact typed logical receipts, queries and read values.
-pub const LOGICAL_RESPONSE_SCHEMA: u64 = 0x5642_4c52_5350_0001;
-pub const LOGICAL_ENROLLMENT_RESPONSE_SCHEMA: u64 = 0x5642_4c52_5350_0002;
-const MAGIC: &[u8; 8] = b"VBLOGR01";
+pub const LOGICAL_RESPONSE_SCHEMA: u64 = 0x5642_4c52_5350_0003;
+pub const LOGICAL_ENROLLMENT_RESPONSE_SCHEMA: u64 = 0x5642_4c52_5350_0004;
+/// Response format v3: `Expired`, the tri-state outcome lookup and the
+/// metadata watermark.
+const MAGIC: &[u8; 8] = b"VBLOGR03";
+const CANDIDATE_MAGIC: &[u8; 8] = b"VBLOGR04";
 const RECEIPT_BOUND: usize = 171;
-const METADATA_BOUND: usize = 187;
+const METADATA_BOUND: usize = 203;
 const OUTCOME_OVERHEAD: usize = 221;
 
 fn encoder(kind: u8, limit: usize, candidate: bool) -> Result<Encoder, ApplicationError> {
@@ -33,7 +36,7 @@ fn encoder(kind: u8, limit: usize, candidate: bool) -> Result<Encoder, Applicati
     if e.bytes.capacity() > limit {
         return Err(ApplicationError::ReceiptBudget);
     }
-    e.put(if candidate { b"VBLOGR02" } else { MAGIC })?;
+    e.put(if candidate { CANDIDATE_MAGIC } else { MAGIC })?;
     e.u8(kind)?;
     Ok(e)
 }

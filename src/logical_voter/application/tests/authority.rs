@@ -176,6 +176,11 @@ fn term_zero_actual_request_and_denial_keep_distinct_configuration_scopes() {
     );
     let c = authorized(&mut a, 3, reply);
     let original = a.state.records[&c.operation].receipt;
+    // While the session is current, a retry returns the original receipt.
+    let retained = apply(&mut a, &c);
+    assert!(retained.duplicate);
+    assert_eq!(retained.outcome, original.outcome);
+    assert_eq!(retained.first_index, original.first_index);
     let replace = command(
         4,
         2,
@@ -184,10 +189,14 @@ fn term_zero_actual_request_and_denial_keep_distinct_configuration_scopes() {
         },
     );
     assert_eq!(apply(&mut a, &replace).outcome, LogicalOutcome::Claimed);
+    // The replacement closed the old session: the superseded authorisation
+    // can no longer be obtained, and it is never re-executed.
     let duplicate = apply(&mut a, &c);
     assert!(duplicate.duplicate);
-    assert_eq!(duplicate.outcome, original.outcome);
-    assert_eq!(duplicate.first_index, original.first_index);
+    assert_eq!(
+        duplicate.outcome,
+        LogicalOutcome::Refused(LogicalRefusal::Expired)
+    );
     assert_eq!(a.state.parent.as_ref().unwrap().hard_state.term, 0);
 }
 #[test]

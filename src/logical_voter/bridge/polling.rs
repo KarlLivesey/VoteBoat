@@ -140,6 +140,8 @@ impl<N: LogicalBackingChild> LogicalBackingBridge<'_, N> {
         if receipt.operation != command.operation
             || receipt.first_index == 0
             || receipt.first_index > receipt.index
+            || (receipt.outcome == LogicalOutcome::Refused(LogicalRefusal::Expired)
+                && !receipt.duplicate)
         {
             return Err(LogicalBridgeError::ProviderViolation);
         }
@@ -164,6 +166,14 @@ impl<N: LogicalBackingChild> LogicalBackingBridge<'_, N> {
             }
             Ok(false)
         } else {
+            if receipt.outcome == LogicalOutcome::Refused(LogicalRefusal::Expired) {
+                // The session is closed or this view is inconsistent: the
+                // host must re-claim. Fail first so the host sees the cause,
+                // then hand the committed refusal to its consumer, which
+                // settles it without granting anything.
+                self.failure
+                    .get_or_insert(LogicalBridgeError::Refused(LogicalRefusal::Expired));
+            }
             self.action = Some(CommittedLogicalAction {
                 mapping: self.mapping,
                 command: command.clone(),

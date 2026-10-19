@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 //! Real authenticated native transport; no parent message simulation.
-use super::{setup, support};
-use std::{
-    collections::BTreeMap,
-    net::SocketAddr,
-    sync::Arc,
-    time::{Duration, Instant},
+use super::{
+    harness::{self, FixtureClock, Observed, SimClock},
+    setup, support,
 };
+use std::{collections::BTreeMap, net::SocketAddr, sync::Arc, time::Duration};
 use voteboat::{
     connect::*,
     dial::*,
@@ -28,15 +26,17 @@ pub struct Channels {
     // keeps the unused half bound and the lock held for the whole workflow,
     // and rebinds the adopted half after close to prove its release.
     ports: support::ports::PortLease,
+    clock: SimClock,
 }
 impl Channels {
     pub fn new(
         descriptors: &[LogicalPeerDescriptor],
         bindings: &[(RuntimeAuthorization, OutboundBinding)],
         protocol: NativePeerProtocol,
-        now: MonoTime,
+        clock: &SimClock,
         target_links: bool,
     ) -> Self {
+        let now = clock.now();
         let mut ports = support::ports::PortLease::acquire(descriptors.len());
         let addresses = ports.address_list();
         let connectors = (0..addresses.len())
@@ -47,6 +47,7 @@ impl Channels {
             sessions: BTreeMap::new(),
             addresses,
             ports,
+            clock: clock.clone(),
         };
         result.establish(descriptors, bindings, now, target_links);
         result
@@ -88,7 +89,7 @@ impl Channels {
                     .unwrap();
             }
         }
-        let clock = Instant::now();
+        let end = harness::Wait::new(&self.clock, harness::HANDSHAKE_MS);
         while self.sessions.len()
             < if target_links {
                 2 * (descriptors.len() - 1)
@@ -96,7 +97,7 @@ impl Channels {
                 descriptors.len() * (descriptors.len() - 1)
             }
         {
-            let now = MonoTime(start.0 + clock.elapsed().as_millis() as u64);
+            let now = self.clock.round(self.observed());
             for (from, connector) in self.connectors.iter_mut().enumerate() {
                 for output in connector.poll(now, ConnectPollBudget::default()).unwrap() {
                     let to = descriptors
@@ -127,10 +128,7 @@ impl Channels {
                     assert!(self.sessions.insert((from, to), session).is_none());
                 }
             }
-            assert!(
-                clock.elapsed() < Duration::from_secs(10),
-                "actual outer handshake timeout"
-            );
+            assert!(end.within(&self.clock), "actual outer handshake timeout");
             std::thread::park_timeout(Duration::from_millis(1));
         }
     }
@@ -154,7 +152,7 @@ impl Channels {
             })
             .collect()
     }
-    pub fn close(mut self, sessions: impl IntoIterator<Item = Session>, start: MonoTime) {
+    pub fn close(mut self, sessions: impl IntoIterator<Item = Session>) {
         assert!(self.sessions.is_empty());
         self.sessions = sessions
             .into_iter()
@@ -167,11 +165,11 @@ impl Channels {
         for connector in &mut self.connectors {
             connector.close();
         }
-        let clock = Instant::now();
+        let end = harness::Wait::new(&self.clock, harness::LIVENESS_MS);
         while !self.sessions.values().all(Session::is_drained)
             || !self.connectors.iter().all(PeerConnector::is_drained)
         {
-            let now = MonoTime(start.0 + clock.elapsed().as_millis() as u64);
+            let now = self.clock.round(self.observed());
             for session in self.sessions.values_mut() {
                 if !session.is_drained() {
                     session.poll(now, TransportPollBudget::default()).unwrap();
@@ -183,10 +181,7 @@ impl Channels {
                     .unwrap()
                     .is_empty());
             }
-            assert!(
-                clock.elapsed() < Duration::from_secs(15),
-                "actual outer close timeout"
-            );
+            assert!(end.within(&self.clock), "actual outer close timeout");
             std::thread::park_timeout(Duration::from_millis(1));
         }
         self.sessions.clear();
@@ -195,13 +190,24 @@ impl Channels {
                 .into_dialer()
                 .unwrap_or_else(|_| panic!("outer connector drain"))
             {
+                // Joining the dial worker takes no protocol time: only the
+                // hang guard applies.
                 while !dialer.try_finish().unwrap() {
-                    assert!(clock.elapsed() < Duration::from_secs(15));
+                    assert!(end.within(&self.clock), "actual outer dialer join");
                     std::thread::park_timeout(Duration::from_millis(1));
                 }
             }
         }
         self.ports.reclaim();
+    }
+    /// Dial work holds protocol time; so does any session or connector
+    /// progress since the previous round.
+    fn observed(&self) -> Observed {
+        let drained = self.sessions.values().filter(|s| s.is_drained()).count();
+        self.connectors
+            .iter()
+            .fold(Observed::default(), Observed::connector)
+            .progress((self.sessions.len(), drained))
     }
 }
 fn connector(

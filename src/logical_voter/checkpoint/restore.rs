@@ -12,7 +12,7 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-//! Direct decode of checkpoint v3. Every field is decoded once, checked
+//! Direct decode of checkpoint v4. Every field is decoded once, checked
 //! structurally, and the rebuilt state must re-encode to the exact input.
 //! No retained record is replayed, so restore is linear in the checkpoint.
 use super::*;
@@ -60,13 +60,17 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
         next.state = state;
         // The retained set must fit every budget admission enforces (G6):
         // reserving nothing re-runs the exact admission check on it.
-        next.reserve(&[])
+        next.reserve(&[], None)
             .map_err(|_| ApplicationError::InvalidCheckpoint)?;
         next.validate_read_envelopes()?;
         if next.encode_state(self.limits.max_child_checkpoint_bytes)? != bytes {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         self.state = next.state;
+        #[cfg(test)]
+        {
+            self.journal = None;
+        }
         Ok(())
     }
     /// Records in ascending operation ID with their original receipts.
@@ -258,15 +262,14 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
                 4 => LogicalRefusal::SnapshotConflict,
                 5 => LogicalRefusal::InvalidResponse,
                 6 => LogicalRefusal::OperationConflict,
+                // `Expired` is answered, never recorded: no retained record
+                // can carry it.
                 _ => return Err(ApplicationError::InvalidCheckpoint),
             }),
             _ => return Err(ApplicationError::InvalidCheckpoint),
         })
     }
-    /// Cross-field rules. The last two are LV1 reachable-state rules: nothing
-    /// is retired yet, so the watermark is 0 and the generation high-water
-    /// mark equals the floor derived from retained records. Retirement (LV2)
-    /// relaxes the latter to `>=`.
+    /// Cross-field rules, each a reachable-state invariant of apply.
     fn validate_restored(&self, state: &application::State) -> Result<(), ApplicationError> {
         let epoch = state.representative.map_or(0, |r| r.epoch.get());
         let retained = |reference: Option<SnapshotRef>| {
@@ -280,8 +283,9 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
                 .records
                 .values()
                 .any(|r| r.receipt.epoch.map_or(0, RepresentativeEpoch::get) > epoch)
-            || state.retired_below != 0
-            || state.snapshot_generation != Self::retained_generation_floor(state)
+            // Pruning may drop publication records, never the mark.
+            || state.snapshot_generation < Self::retained_generation_floor(state)
+            || !self.valid_watermark(state)?
         {
             return Err(ApplicationError::InvalidCheckpoint);
         }
@@ -290,18 +294,85 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
             None => Ok(()),
         }
     }
-    /// The enrollment record is the materialised result of its retained
-    /// `EnrollmentClaim` record. LV1 retains that record; LV2 may retire it
-    /// and then checks only the fields the record itself carries.
+    /// The watermark is 0 until the first claim; every claim sets it to
+    /// `(session << 64) | 1` for the new session and only that session's
+    /// acknowledgements raise it further. Live session keys are never below
+    /// it (pruning removes them in the same apply). A session record applied
+    /// under the current binding (its receipt epoch is the current epoch) by
+    /// an eligible representative (not refused `Ineligible`) planned
+    /// `(session << 64) | (consumed_through + 1)`. The record that last raised
+    /// the watermark has an ID at or above that value, so it is never pruned
+    /// (a later raise supersedes it). The watermark therefore equals the
+    /// larger of the claim floor and the highest such retained
+    /// acknowledgement, and both a lowered and a raised watermark are refused.
+    fn valid_watermark(&self, state: &application::State) -> Result<bool, ApplicationError> {
+        let watermark = state.retired_below;
+        let session = OperationId::new(command::SESSION_SPACE).expect("nonzero");
+        if state
+            .records
+            .range(session..)
+            .next()
+            .is_some_and(|(op, _)| op.get() < watermark)
+        {
+            return Ok(false);
+        }
+        let Some(r) = state.representative else {
+            return Ok(watermark == 0);
+        };
+        if watermark >> 64 != u128::from(r.logical_session.get()) || watermark as u64 == 0 {
+            return Ok(false);
+        }
+        let mut expected = command::session_operation(r.logical_session.get(), 1);
+        for record in state.records.range(session..).map(|(_, record)| record) {
+            let c = self.decode_command(&record.command)?;
+            if c.representative == r
+                && record.receipt.epoch == Some(r.epoch)
+                && record.receipt.outcome != LogicalOutcome::Refused(LogicalRefusal::Ineligible)
+            {
+                expected = expected.max(command::session_operation(
+                    r.logical_session.get(),
+                    c.consumed_through + 1,
+                ));
+            }
+        }
+        Ok(watermark == expected)
+    }
+    /// The enrollment record is the materialised result of its
+    /// `EnrollmentClaim` record. That claim is dead once the enrollment made
+    /// a representative, so the first session command prunes it; until then
+    /// the record must match it exactly. Once pruned, only the fields the
+    /// enrollment record itself carries are checked (plan and envelope by
+    /// decode and the exact re-encode, its ID in claim space here).
     fn validate_enrollment(
         &self,
         state: &application::State,
         e: &LogicalEnrollmentRecord,
     ) -> Result<(), ApplicationError> {
-        let record = state
-            .records
-            .get(&e.operation)
-            .ok_or(ApplicationError::InvalidCheckpoint)?;
+        if e.operation.get() >= command::SESSION_SPACE {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        let Some(record) = state.records.get(&e.operation) else {
+            let position_free = !state
+                .records
+                .values()
+                .any(|r| r.first_index == e.first_index)
+                && !state
+                    .configurations
+                    .iter()
+                    .any(|c| c.index == e.first_index);
+            let target = e.target_reference;
+            return if position_free
+                && (1..=state.applied).contains(&e.first_index)
+                && (1..=state.applied_term).contains(&e.first_term)
+                && target.generation.get() == 1
+                && target.store == self.mapping.store
+                && target.group == self.mapping.parent
+            {
+                Ok(())
+            } else {
+                Err(ApplicationError::InvalidCheckpoint)
+            };
+        };
         let CommandBody::EnrollmentClaim(import) = self.decode_command(&record.command)?.body
         else {
             return Err(ApplicationError::InvalidCheckpoint);

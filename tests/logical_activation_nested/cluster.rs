@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
-use super::{cleanup, setup, support};
+use super::{
+    cleanup,
+    dials::{self, DialControl, Probed},
+    harness::{self, FixtureClock, Observed, SimClock},
+    setup, support,
+};
 use std::{
     net::{SocketAddr, TcpListener, UdpSocket},
     path::PathBuf,
@@ -8,21 +13,18 @@ use std::{
         atomic::{AtomicU64, Ordering},
         Arc, Mutex,
     },
-    time::{Duration, Instant},
+    time::Duration,
 };
 use voteboat::{
     application::StateMachine,
     logical_voter::*,
-    native::{
-        connect::{NativePeerProtocol, NativeServiceConnector},
-        node::NativeNode,
-        startup::*,
-        worker::ThreadWake,
-    },
+    native::{connect::NativePeerProtocol, node::NativeNode, startup::*, worker::ThreadWake},
     raft::Role,
     runtime::*,
 };
-pub type ChildNode = NativeNode<LogicalApplication, NativeServiceConnector>;
+/// A native child node whose connector reports its dial work to the test's
+/// clock, so time holds on it even while a bridge borrows the node.
+pub type ChildNode = NativeNode<LogicalApplication, Probed>;
 #[derive(Clone, Copy, Debug)]
 enum NativeWaitStage {
     Election,
@@ -40,14 +42,21 @@ pub struct Cluster {
     pub nodes: Vec<ChildNode>,
     pub slot: usize,
     pub representative: voteboat::identity::NodeId,
-    pub clock: Instant,
+    pub clock: SimClock,
+    pub dials: DialControl,
     root: PathBuf,
     addresses: [SocketAddr; 3],
     ports: support::ports::PortLease,
     protocol: NativePeerProtocol,
 }
 impl Cluster {
-    pub fn new(protocol: NativePeerProtocol, slot: usize, clock: Instant) -> Self {
+    pub fn new(protocol: NativePeerProtocol, slot: usize, clock: &SimClock) -> Self {
+        let mut host = Self::unelected(protocol, slot, clock);
+        host.elect();
+        host
+    }
+    /// Open the three nodes without polling them, so none has dialled yet.
+    pub fn unelected(protocol: NativePeerProtocol, slot: usize, clock: &SimClock) -> Self {
         let root = std::env::temp_dir().join(format!(
             "voteboat-logical-nested-child-{}-{}",
             std::process::id(),
@@ -59,18 +68,19 @@ impl Cluster {
             nodes: Vec::new(),
             slot,
             representative: support::node(slot as u64 * 3 + 1),
-            clock,
+            clock: clock.clone(),
+            dials: DialControl::default(),
             root,
             addresses: ports.addresses(),
             ports,
             protocol,
         };
         host.ports.handoff();
-        host.open(NativeOpenMode::Create);
+        host.open_before_election(NativeOpenMode::Create);
         host
     }
     pub fn now(&self) -> MonoTime {
-        MonoTime(self.clock.elapsed().as_millis() as u64)
+        self.clock.now()
     }
     fn config(&self, id: u64, mode: NativeOpenMode) -> NativeStartup {
         NativeStartup {
@@ -105,8 +115,7 @@ impl Cluster {
         }
     }
     pub fn open(&mut self, mode: NativeOpenMode) {
-        self.open_before_election(mode);
-        self.elect();
+        Self::open_all(std::slice::from_mut(self), mode);
     }
     pub fn open_before_election(&mut self, mode: NativeOpenMode) {
         assert!(self.nodes.is_empty());
@@ -156,24 +165,40 @@ impl Cluster {
                 )
                 .unwrap();
                 super::physical::select(&mut parts, id, self.now());
+                let parts = dials::probe(parts, self.clock.dial_work(), self.dials.clone());
                 Node::from_parts(parts, NodeLimits::default(), self.now())
                     .unwrap_or_else(|e| panic!("actual selected native parts {:?}", e.reason))
             })
             .collect();
     }
     pub fn elect(&mut self) {
-        let selected = self
-            .nodes
-            .iter()
-            .position(|n| {
-                n.local().owner.identity().store.identity
-                    == support::identity(1000 + u128::from(self.representative.get()))
-            })
-            .unwrap();
-        self.nodes[selected]
-            .control(setup::lower_mapping(self.slot).child, NodeControl::Campaign)
-            .unwrap();
-        self.wait(NativeWaitStage::Election, |host| host.leader().is_some());
+        Self::elect_all(std::slice::from_mut(self));
+    }
+    /// Campaign in every cluster, then wait for every leader in lockstep.
+    pub fn elect_all(clusters: &mut [Self]) {
+        for host in &mut *clusters {
+            let selected = host
+                .nodes
+                .iter()
+                .position(|n| {
+                    n.local().owner.identity().store.identity
+                        == support::identity(1000 + u128::from(host.representative.get()))
+                })
+                .unwrap();
+            host.nodes[selected]
+                .control(setup::lower_mapping(host.slot).child, NodeControl::Campaign)
+                .unwrap();
+        }
+        Self::wait_all(clusters, NativeWaitStage::Election, |host| {
+            host.leader().is_some()
+        });
+    }
+    /// Reopen every cluster, then elect them together.
+    pub fn open_all(clusters: &mut [Self], mode: NativeOpenMode) {
+        for host in &mut *clusters {
+            host.open_before_election(mode);
+        }
+        Self::elect_all(clusters);
     }
     pub fn all(&self) -> impl Iterator<Item = &ChildNode> {
         self.nodes.iter()
@@ -197,37 +222,88 @@ impl Cluster {
         self.poll_with_budget(NodePollBudget::default());
     }
     pub fn poll_with_budget(&mut self, budget: NodePollBudget) {
-        let now = self.now();
-        for node in self.nodes.iter_mut() {
+        Self::poll_all(std::slice::from_mut(self), budget);
+    }
+    /// One complete round over every node of these clusters; protocol time
+    /// moves only if the previous round left them all idle (TR1a's hold rule).
+    fn poll_all(clusters: &mut [Self], budget: NodePollBudget) {
+        let observed = clusters.iter().fold(Observed::default(), |o, host| {
+            host.nodes.iter().fold(o, Observed::node)
+        });
+        let now = clusters[0].clock.round(observed);
+        for node in clusters.iter_mut().flat_map(|host| host.nodes.iter_mut()) {
             node.poll(now, budget).unwrap();
         }
         std::thread::park_timeout(Duration::from_millis(1));
     }
-    fn wait(&mut self, stage: NativeWaitStage, mut done: impl FnMut(&Self) -> bool) {
-        let started = Instant::now();
-        let end = started
-            + Duration::from_secs(if matches!(stage, NativeWaitStage::CheckpointPublished) {
-                90
+    /// The original 15 s (90 s for checkpoint publication) bounds, now in
+    /// protocol time, for each of these clusters. They are polled together:
+    /// a cluster left unpolled while shared protocol time advances would see
+    /// that gap as one QUIC round-trip sample, and QUIC's close period is three
+    /// probe timeouts derived from it, so a sequential close made the last
+    /// cluster's drain depend on how long the others took. A close drains by
+    /// polling to quiescence: the transports' own close timers then fire after
+    /// the same protocol interval on any host.
+    fn wait_all(
+        clusters: &mut [Self],
+        stage: NativeWaitStage,
+        mut done: impl FnMut(&Self) -> bool,
+    ) {
+        let clock = clusters[0].clock.clone();
+        let started = clock.now();
+        let end = harness::Wait::new(
+            &clock,
+            if matches!(stage, NativeWaitStage::CheckpointPublished) {
+                90_000
             } else {
-                15
-            });
-        while !done(self) {
-            self.poll();
+                harness::LIVENESS_MS
+            },
+        );
+        while let Some(pending) = clusters.iter().position(|host| !done(host)) {
+            Self::poll_all(clusters, NodePollBudget::default());
+            let within = end.within(&clock);
+            let peers = if within {
+                Vec::new()
+            } else {
+                clusters[pending].peer_drain()
+            };
+            let host = &clusters[pending];
             assert!(
-                Instant::now() < end,
-                "native logical child timeout: {}; stage={stage:?}; slot={}; group={:?}; now={:?}; elapsed={:?}; original_nodes={:?}",
-                self.root.display(),
-                self.slot,
-                setup::bottom(self.slot).group,
-                self.now(),
-                started.elapsed(),
-                super::cluster_inspection::retained(self.slot, &self.nodes),
+                within,
+                "native logical child timeout: {}; stage={stage:?}; slot={}; group={:?}; now={:?}; elapsed_ms={}; clock={}; original_nodes={:?}; peer_drain={peers:?}",
+                host.root.display(),
+                host.slot,
+                setup::bottom(host.slot).group,
+                host.now(),
+                host.now().0 - started.0,
+                clock.describe(),
+                super::cluster_inspection::retained(host.slot, &host.nodes),
             );
         }
+        // The protocol time this wait used, for the margin against its bound.
+        let slots = clusters.iter().map(|host| host.slot).collect::<Vec<_>>();
+        eprintln!(
+            "native logical child wait: stage={stage:?}; slots={slots:?}; elapsed_ms={}",
+            clock.now().0 - started.0
+        );
     }
-    fn catch_up(&mut self, stage: NativeWaitStage) {
-        let group = setup::lower_mapping(self.slot).child;
-        self.wait(stage, |host| {
+    /// Failure-only: each node's per-peer connection drain state.
+    fn peer_drain(&mut self) -> Vec<String> {
+        let ids = setup::physical_ids(self.slot).collect::<Vec<_>>();
+        self.nodes
+            .iter_mut()
+            .map(|node| {
+                let statuses = ids
+                    .iter()
+                    .filter_map(|id| node.peer_drain_status(support::node(*id)))
+                    .collect::<Vec<_>>();
+                format!("{statuses:?}")
+            })
+            .collect()
+    }
+    fn catch_up_all(clusters: &mut [Self], stage: NativeWaitStage) {
+        Self::wait_all(clusters, stage, |host| {
+            let group = setup::lower_mapping(host.slot).child;
             host.leader().is_some_and(|leader| {
                 let commit = host.nodes[leader]
                     .local()
@@ -242,12 +318,18 @@ impl Cluster {
         });
     }
     pub fn checkpoint(&mut self) {
-        let group = setup::lower_mapping(self.slot).child;
-        self.catch_up(NativeWaitStage::CheckpointCatchUp);
-        for node in self.nodes.iter_mut() {
-            node.control(group, NodeControl::Checkpoint).unwrap();
+        Self::checkpoint_all(std::slice::from_mut(self));
+    }
+    pub fn checkpoint_all(clusters: &mut [Self]) {
+        Self::catch_up_all(clusters, NativeWaitStage::CheckpointCatchUp);
+        for host in &mut *clusters {
+            let group = setup::lower_mapping(host.slot).child;
+            for node in host.nodes.iter_mut() {
+                node.control(group, NodeControl::Checkpoint).unwrap();
+            }
         }
-        self.wait(NativeWaitStage::CheckpointPublished, |host| {
+        Self::wait_all(clusters, NativeWaitStage::CheckpointPublished, |host| {
+            let group = setup::lower_mapping(host.slot).child;
             host.all().all(|node| {
                 node.checkpoints().pending.is_empty()
                     && node.local().owner.core(group).unwrap().state().base_index() > 0
@@ -256,17 +338,22 @@ impl Cluster {
         });
     }
     pub fn close(&mut self) {
-        self.catch_up(NativeWaitStage::CloseCatchUp);
-        for node in self.nodes.iter_mut() {
+        Self::close_all(std::slice::from_mut(self));
+    }
+    pub fn close_all(clusters: &mut [Self]) {
+        Self::catch_up_all(clusters, NativeWaitStage::CloseCatchUp);
+        for node in clusters.iter_mut().flat_map(|host| host.nodes.iter_mut()) {
             node.begin_shutdown();
         }
-        self.wait(NativeWaitStage::CloseDrained, |host| {
+        Self::wait_all(clusters, NativeWaitStage::CloseDrained, |host| {
             host.all().all(ChildNode::is_drained)
         });
-        for node in self.nodes.drain(..) {
-            cleanup::join(node);
+        for host in clusters {
+            for node in host.nodes.drain(..) {
+                cleanup::join(node);
+            }
+            host.rebind();
         }
-        self.rebind();
     }
     pub fn rebind(&self) {
         for address in self.addresses {
@@ -276,8 +363,10 @@ impl Cluster {
             ));
         }
     }
-    pub fn finish(mut self) {
-        self.close();
-        std::fs::remove_dir_all(self.root).unwrap();
+    pub fn finish_all(mut clusters: Vec<Self>) {
+        Self::close_all(&mut clusters);
+        for host in clusters {
+            std::fs::remove_dir_all(host.root).unwrap();
+        }
     }
 }

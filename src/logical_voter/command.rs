@@ -19,6 +19,10 @@ pub(crate) struct Command {
     pub operation: OperationId,
     pub origin_configuration: ConfigurationId,
     pub representative: RepresentativeBinding,
+    /// The bridge's highest consumed sequence in this logical session: every
+    /// earlier session-space outcome of this representative may be retired.
+    /// Always 0 for claim bodies.
+    pub consumed_through: u64,
     pub body: CommandBody,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -45,7 +49,42 @@ pub(crate) enum CommandBody {
     Authorize(LogicalCapsule),
     EnrollmentClaim(Box<LogicalLearnerImport>),
 }
+/// Claim-space operation IDs are below this bound; session-space IDs are
+/// `(logical_session << 64) | sequence` and therefore at or above it.
+pub(crate) const SESSION_SPACE: u128 = 1 << 64;
+/// Session-space ID of `sequence` in `session`.
+pub(crate) fn session_operation(session: u64, sequence: u64) -> u128 {
+    (u128::from(session) << 64) | u128::from(sequence)
+}
 impl Command {
+    /// Whether the body is a claim, which lives in claim space.
+    pub(super) fn is_claim(&self) -> bool {
+        matches!(
+            self.body,
+            CommandBody::Claim { .. } | CommandBody::EnrollmentClaim(_)
+        )
+    }
+    /// The operation-ID partition and acknowledgement rule (architect §2.2).
+    pub(super) fn partitioned(&self) -> bool {
+        let op = self.operation.get();
+        if self.is_claim() {
+            op < SESSION_SPACE && self.consumed_through == 0
+        } else {
+            let sequence = op as u64;
+            op >> 64 == u128::from(self.representative.logical_session.get())
+                && sequence >= 1
+                && self.consumed_through < sequence
+        }
+    }
+    /// The epoch a claim body expects; enrollment claims predate every
+    /// representative. `None` for session bodies.
+    pub(super) fn claim_expectation(&self) -> Option<Option<RepresentativeEpoch>> {
+        match self.body {
+            CommandBody::Claim { expected_epoch } => Some(expected_epoch),
+            CommandBody::EnrollmentClaim(_) => Some(None),
+            _ => None,
+        }
+    }
     pub(super) fn control(&self, profile: Option<&LogicalActivationControlProfile>) -> bool {
         match &self.body {
             CommandBody::Mutate { update, .. } => mutation_control(update, profile),

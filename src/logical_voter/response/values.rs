@@ -38,10 +38,14 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
                 e.u8(0)?;
                 self.response_image(e, i)
             }
-            LogicalRead::Outcome(status) => {
+            LogicalRead::Outcome(lookup) => {
                 e.u8(1)?;
-                e.u8(u8::from(status.is_some()))?;
-                if let Some(s) = status {
+                e.u8(match lookup {
+                    LogicalOutcomeLookup::Unknown => 0,
+                    LogicalOutcomeLookup::Retained(_) => 1,
+                    LogicalOutcomeLookup::Expired => 2,
+                })?;
+                if let LogicalOutcomeLookup::Retained(s) = lookup {
                     if s.command.len() > self.limits.max_command_bytes {
                         return Err(ApplicationError::ReceiptBudget);
                     }

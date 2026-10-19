@@ -19,6 +19,7 @@ impl<N: LogicalBackingChild> LogicalBackingBridge<'_, N> {
         let checked = self.intake().and_then(|()| {
             let app = &self.nodes[0].local().applications[&self.mapping.child];
             if enrollment.mapping != self.mapping
+                || operation.get() >= command::SESSION_SPACE
                 || app.initialization()
                     != LogicalInitialization::EnrollmentCandidate(enrollment.import.plan)
                 || import_charge(&enrollment.import)? > app.limits().max_command_bytes

@@ -7,7 +7,7 @@ use voteboat::{application::CounterReceipt, outbound::OutboundQueue};
 pub(super) fn complete(
     clusters: &mut [Cluster],
     protocol: NativePeerProtocol,
-    clock: Instant,
+    clock: &SimClock,
     facts: Facts,
 ) {
     let mut lower = Lower::new(clusters, clock);
@@ -82,7 +82,7 @@ pub(super) fn complete(
                 .into_values()
         })
         .collect::<Vec<_>>();
-    channels.close(sessions, lower.now());
+    channels.close(sessions);
     lower.close();
 }
 fn middle(
@@ -103,7 +103,7 @@ fn middle(
         .iter()
         .map(|p| (p.local.owner.authorization(), p.local.outbound.binding()))
         .collect::<Vec<_>>();
-    let mut channels = Channels::new(&descriptors, &bindings, protocol, lower.now(), false);
+    let mut channels = Channels::new(&descriptors, &bindings, protocol, &lower.clock, false);
     let nodes = originals
         .drain(..)
         .enumerate()
@@ -124,15 +124,17 @@ fn claim(lower: &mut Lower<'_>, bridge: &mut UpperBridge<'_>) -> VerifiedLogical
     bridge
         .begin_claim(voteboat::identity::OperationId::new(367200).unwrap())
         .unwrap();
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&lower.clock, harness::LIVENESS_MS);
     loop {
         lower.pump_bridge(bridge, 4);
-        lower.advance();
+        lower.advance_with(harness::Observed::default().backing(bridge));
         lower.pump_bridge(bridge, 4);
         bridge.advance(lower.now(), progress::budget()).unwrap();
         if let Some(image) = bridge.take_image() {
             return image;
         }
-        assert!(Instant::now() < end, "fresh upper Claim at Joint");
+        assert!(end.within(&lower.clock), "fresh upper Claim at Joint");
+        // A CPU yield like every other fixture loop's; no timing depends on it.
+        std::thread::park_timeout(std::time::Duration::from_millis(1));
     }
 }

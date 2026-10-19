@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 //! Actual logical admission and original execution, without forged readiness.
+use super::harness::{self, Observed};
 use super::{lower::Lower, setup, support, Middle};
-use std::time::{Duration, Instant};
+use std::time::Duration;
 use voteboat::{logical_voter::*, raft::*, runtime::*};
 pub fn cancellation(lower: &mut Lower<'_>, nodes: &mut [Middle]) {
     let wrong = setup::top().group;
@@ -57,10 +58,10 @@ fn original_step(
     nodes: &mut [Middle],
     ticket: AdmissionTicket,
 ) -> OwnerStep {
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&lower.clock, harness::LIVENESS_MS);
     loop {
         lower.pump(nodes);
-        lower.advance();
+        lower.advance_with(Lower::observed(nodes, Observed::default()));
         lower.pump(nodes);
         let mut observed = None;
         for (slot, node) in nodes.iter_mut().enumerate() {
@@ -78,7 +79,7 @@ fn original_step(
             return step;
         }
         assert!(
-            Instant::now() < end,
+            end.within(&lower.clock),
             "same logical tracked admission must execute"
         );
         std::thread::park_timeout(Duration::from_millis(1));

@@ -2,9 +2,9 @@
 // Copyright (c) 2026 Karl Livesey
 //! Second opaque source grant and candidate, keeping the first lineage current.
 use super::{
-    channels::Channels, lower::Lower, parts, progress, setup, support, Middle, Top, UpperBridge,
+    channels::Channels, harness, lower::Lower, parts, progress, setup, support, Middle, Top,
+    UpperBridge,
 };
-use std::time::{Duration, Instant};
 use voteboat::{
     identity::*, logical_voter::*, native::connect::NativePeerProtocol, outbound::OutboundQueue,
     secure::SecureSession,
@@ -107,7 +107,7 @@ fn retire(lower: &mut Lower<'_>, nodes: &mut [Middle], peer: NodeId) {
     );
     assert_eq!(nodes[0].local().outbound.usage(), original);
     let mut pending = vec![0, 1, 3];
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&lower.clock, harness::LIVENESS_MS);
     while !pending.is_empty() {
         let mut next = Vec::new();
         for slot in pending {
@@ -128,7 +128,7 @@ fn retire(lower: &mut Lower<'_>, nodes: &mut [Middle], peer: NodeId) {
         if !pending.is_empty() {
             lower.middle(nodes);
         }
-        assert!(Instant::now() < end, "original obsolete session drain");
+        assert!(end.within(&lower.clock), "original obsolete session drain");
     }
 }
 fn target(
@@ -144,7 +144,7 @@ fn target(
         .map(super::controls::deferred)
         .collect::<Vec<_>>();
     assert!(original.iter().any(|b| !b.is_empty()));
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&lower.clock, harness::LIVENESS_MS);
     loop {
         lower.middle(nodes);
         if let Some(image) = lower.bridges[4].take_image() {
@@ -156,7 +156,7 @@ fn target(
             return image;
         }
         assert!(
-            Instant::now() < end,
+            end.within(&lower.clock),
             "second Applied/fresh Enrollment/Image/Snapshot"
         );
     }
@@ -193,7 +193,7 @@ fn attach(
             target.local.outbound.binding(),
         )))
         .collect::<Vec<_>>();
-    let mut channels = Channels::new(&descriptors, &bindings, protocol, lower.now(), true);
+    let mut channels = Channels::new(&descriptors, &bindings, protocol, &lower.clock, true);
     for (slot, node) in selected.into_iter().enumerate() {
         let session = channels
             .take_sessions(slot, &descriptors)

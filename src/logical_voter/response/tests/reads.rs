@@ -17,7 +17,8 @@ use super::*;
 fn all_read_variants_preserve_exact_typed_values() {
     let mut a = app();
     assert_read(&a, LogicalRead::Uninitialized);
-    assert_read(&a, LogicalRead::Outcome(None));
+    assert_read(&a, LogicalRead::Outcome(LogicalOutcomeLookup::Unknown));
+    assert_read(&a, LogicalRead::Outcome(LogicalOutcomeLookup::Expired));
     claim(&mut a);
     for q in [
         LogicalQuery::Image,
@@ -56,7 +57,7 @@ fn complete_outcome_status_and_maximum_command_fit_the_static_bound() {
         command: vec![0x3a; a.limits.max_command_bytes],
         receipt: receipt(),
     };
-    let value = LogicalRead::Outcome(Some(Box::new(s.clone())));
+    let value = LogicalRead::Outcome(LogicalOutcomeLookup::Retained(Box::new(s.clone())));
     let b = encoded(&a, &value);
     assert_eq!(
         b.len(),
@@ -75,7 +76,7 @@ fn complete_outcome_status_and_maximum_command_fit_the_static_bound() {
     for change in changes {
         let mut other = s.clone();
         change(&mut other);
-        let value = LogicalRead::Outcome(Some(Box::new(other)));
+        let value = LogicalRead::Outcome(LogicalOutcomeLookup::Retained(Box::new(other)));
         assert_ne!(encoded(&a, &value), b);
         assert_read(&a, value);
     }

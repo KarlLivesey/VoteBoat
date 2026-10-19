@@ -2,11 +2,10 @@
 // Copyright (c) 2026 Karl Livesey
 //! Inert aborted owners stay owned while the actual native providers finish.
 use super::*;
+use crate::harness::{FixtureClock, HangGuard, SimClock};
+use std::time::Duration;
 use voteboat::{
-    native::{
-        connect::NativeServiceConnector, node::NativeLocalParts, transport::NativeTransportFactory,
-        wire::NativeWireCodec,
-    },
+    native::{node::NativeLocalParts, transport::NativeTransportFactory, wire::NativeWireCodec},
     outbound::OutboundQueue,
     runtime::{NodeError, NodeRecovery, PeerDriverBudget, PeerDriverProgress},
     snapshot_worker::{SnapshotWorkEvent, SnapshotWorker},
@@ -15,7 +14,7 @@ use voteboat::{
 type Recovery = NodeRecovery<
     NativeLocalParts<LogicalApplication>,
     LogicalReceipt,
-    NativeServiceConnector,
+    crate::dials::Probed,
     NativeTransportFactory<NativeWireCodec>,
 >;
 pub(super) struct Domain {
@@ -39,7 +38,9 @@ pub(super) fn join(cluster: &mut Cluster) -> Domain {
             .into_recovery()
             .unwrap_or_else(|_| panic!("actual original aborted target"));
         assert_eq!(recovery.reason, NodeError::Aborted);
-        domain.network.extend(network(&mut recovery, cluster.clock));
+        domain
+            .network
+            .extend(network(&mut recovery, &cluster.clock));
         workers(&mut recovery, &mut domain);
         // No core poll, fake success or discard_failed on this possibly nonfailed owner.
         domain.original.push(recovery);
@@ -47,16 +48,21 @@ pub(super) fn join(cluster: &mut Cluster) -> Domain {
     cluster.rebind();
     domain
 }
-fn network(recovery: &mut Recovery, clock: Instant) -> Vec<PeerDriverProgress> {
+fn network(recovery: &mut Recovery, clock: &SimClock) -> Vec<PeerDriverProgress> {
     let mut terminal = Vec::new();
     let peers = recovery.peers.as_mut().unwrap();
     peers.close();
-    let end = Instant::now() + Duration::from_secs(10);
+    // The original 10 s bound, in protocol time. Only dial work holds the
+    // clock here: the drain reports every still-open peer on every poll, so
+    // its output is not finite progress, and a closing QUIC connection needs
+    // protocol time to finish.
+    let end = harness::Wait::new(clock, 10_000);
     while !peers.is_drained() {
+        let now = clock.round(Observed::default().dialing(peers.connector_usage().dialing));
         let progress = peers
             .drain(
                 &mut recovery.local.outbound,
-                voteboat::runtime::MonoTime(clock.elapsed().as_millis() as u64),
+                now,
                 PeerDriverBudget::default(),
             )
             .unwrap();
@@ -71,7 +77,7 @@ fn network(recovery: &mut Recovery, clock: Instant) -> Vec<PeerDriverProgress> {
             );
         }
         assert!(
-            Instant::now() < end,
+            end.within(clock),
             "same original aborted target network credits drain"
         );
         std::thread::park_timeout(Duration::from_millis(1));
@@ -87,15 +93,18 @@ fn network(recovery: &mut Recovery, clock: Instant) -> Vec<PeerDriverProgress> {
         .connector
         .into_dialer()
         .unwrap_or_else(|_| panic!("original connector drained"));
+    // Joining the dial worker takes no protocol time: only the hang guard applies.
     while dialer.as_mut().is_some_and(|d| !d.try_finish().unwrap()) {
-        assert!(Instant::now() < end, "original target dialer joins");
+        assert!(end.within(clock), "original target dialer joins");
         std::thread::park_timeout(Duration::from_millis(1));
     }
     assert!(parts.roster.is_drained() && parts.ingress.is_drained());
     terminal
 }
 fn workers(recovery: &mut Recovery, domain: &mut Domain) {
-    let end = Instant::now() + Duration::from_secs(10);
+    // Collecting terminal worker events and joining the worker threads takes
+    // no protocol time, so this wait has only the real-time hang guard.
+    let end = HangGuard::new();
     let mut wal = false;
     let mut snapshots = false;
     loop {
@@ -114,10 +123,7 @@ fn workers(recovery: &mut Recovery, domain: &mut Domain) {
         if wal && snapshots {
             break;
         }
-        assert!(
-            Instant::now() < end,
-            "actual aborted target worker terminal events and joins"
-        );
+        end.check("actual aborted target worker terminal events and joins");
         std::thread::park_timeout(Duration::from_millis(1));
     }
     assert!(recovery.local.persistence.is_drained());

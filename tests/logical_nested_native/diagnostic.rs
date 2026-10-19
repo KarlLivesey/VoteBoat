@@ -102,7 +102,7 @@ fn actions(host: &Host<'_, '_>) -> Vec<String> {
                     .filter_map(|sequence| {
                         let op = OperationId::new((u128::from(session) << 64) | sequence).unwrap();
                         match app.read_at(at, LogicalQuery::Outcome(op)).unwrap() {
-                            LogicalRead::Outcome(Some(s)) => {
+                            LogicalRead::Outcome(LogicalOutcomeLookup::Retained(s)) => {
                                 Some((op, s.first_index, s.receipt.outcome, s.command.len()))
                             }
                             _ => None,

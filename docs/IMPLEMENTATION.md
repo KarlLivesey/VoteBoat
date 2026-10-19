@@ -473,7 +473,7 @@ Both plans live in the main checkout, not tracked. The LV plan builds on the
 researcher report `target/claude/research-ci/retained-action-growth.md`. The
 design pack is unchanged.
 
-### Known defect (open; LV2 closes it)
+### Known defect (cause removed in the child application by LV2; end-to-end proof is LV3)
 
 Measured on `origin/main` 30a1f6c5, simulated parent time: in an idle, healthy
 three-voter logical parent at `TimerConfig::default()` (50 ms heartbeat), the
@@ -504,8 +504,9 @@ ordinary physical groups are not.
 | --- | --- | --- | --- | --- |
 | Done AI1: activation operation-ID space (merged 19 October 2026, PR 7 head e557bb75) | The wrapper kept every business ID forever only to keep business IDs apart from activation phase IDs, so write 16,385 was refused for life. Make the split structural: phase IDs carry a fixed 64-bit tag, business IDs must not; delete the set, its limit, its checkpoint section and its per-admission clone | Architect plan AI1 (§2, §4.1, §6.2: strict `reserved(n)` layout, named tag, command format bump, intent retirement deferred). Not a logical dependency on LV2. Shares five files with LV1 (`lv/checkpoint-v3`); only this document conflicts textually (see AI1 implemented) | 200,000-write deterministic soak fails on the base at write 16,385 and passes; tag refusal at admission and apply; partition, alias, order-independence, restart and old-format tests; existing activation suites green with reserved IDs; fmt, four strict Clippy configurations and matched workspace at zero diagnostics; default, all-features and no-default suites | LR2 |
 | Done LV1 (merged 19 October 2026, PR 8 head 3a8f6328): child checkpoint v3 with direct-decode restore and a snapshot-generation high-water mark (PR 8; main eab59343 merged in, with AI1's v1-embedding test reworked for the v3 frame) | Pruning (LV2) needs restore that does not replay retained records, and generation numbering that does not derive from them (`execute.rs` derived the next generation from `SnapshotPublished` records). Also removes the O(n²) replay restore. Behaviour-neutral: nothing is pruned | — | v3 golden round trips (empty, populated, candidate); old v1/v2 checkpoints refused with `UnsupportedSchema`; restore equals the old replay path on representative histories (state, outcomes, next snapshot generation); restore performs no apply; restore enforces the admission budgets and reachable-state invariants, each with a failing input; linear restore-cost note; generation monotonic across checkpoint/restore; fmt, four strict Clippy configurations, matched fmt/Clippy; default, all-features and no-default-features suites | LVM |
-| Next LV2: retirement core | Closes the known defect: `consumed_through` in child commands (a command-format change, so LV2 bumps both application schemas and LV1 stores fail `UnsupportedSchema`), operation-ID partition, replicated `retired_below` watermark, pruning, `LogicalRefusal::Expired` and tri-state outcome lookup, bridge acknowledgement | LV1 | App-level 72,000-action soak with retention ≤ 1, exactly-once across retirement boundaries, restart/checkpoint at any point, replacement retires older sessions; fails on 30a1f6c5 | LVM |
+| Done LV2: retirement core (merged 19 October 2026, PR 12 head b0cdb5c2) | Closes the known defect at the application layer: `consumed_through` in child commands (a command-format change, so LV2 bumps both application schemas and LV1 stores fail `UnsupportedSchema`), operation-ID partition, replicated `retired_below` watermark, pruning, `LogicalRefusal::Expired` and tri-state outcome lookup, bridge acknowledgement and `Expired` handling | LV1 (restore without replay, generation high-water mark) | App-level 72,000-action soak with retention ≤ 1 live original (fails with `DedupCapacity` at 4,096 when pruning is removed); exactly-once across retirement boundaries (retired retry → `Expired`, never re-executed; retained retry → original receipt); checkpoint between every apply equals replay; replacement retires older sessions; restore validates the new fields; fmt, four strict Clippy configurations, matched fmt/Clippy; `--lib logical_voter` in three feature sets; four logical integration binaries once | LVM |
 | Following LV3: end-to-end soak evidence | Prove the bound on the real bridge/driver/coordinator path | LV2 | Deterministic simulated-clock 30-minute idle and writes soaks, native restart/replacement/checkpoint tests, existing-test intent updates | LVM |
+| Following LV4: retirement in the model checker | Check the watermark, `Expired`, late copies, claim session closure and checkpoint/restore at any point exhaustively | LV2 (parallel with LV3) | `logical_voter_promises` extended and uncapped; mutants (disable the `Expired` step, regress the watermark) are found | LVM |
 | Later AI2: router-level activation soak | Prove LR2 through the real client router with restart, on the LV3 simulated-clock harness | LV3, AI1 | 20,000 router writes, restart from checkpoint, competing `Begin`, identical traces on two runs | LR2 |
 | Later LV5: fail closed at the retained-action limit | Fence the owner with typed results instead of a permanent refusal | LV2 | Fence and claim-recovery tests | LR3 |
 
@@ -702,6 +703,340 @@ Evidence only (planned work is in the rows and schema plan above).
   runs. Round 1 (16b07757, reviewers): default lib 83 passed, all-features 84,
   `logical_voter_native` 25 (before the merge of main).
 
+### LV2 schema plan
+
+Written before editing, from architect plan §2.2–§2.10 and the LV1 state.
+
+- **Data/API shape.**
+  - `Command` gains `consumed_through: u64` (encoded after the representative).
+    Command magic `VBLOGA01`/`02` → `VBLOGA03`/`04`.
+  - Operation-ID partition, enforced in `decode_command` (so at admission,
+    apply, restore and in the bridge): `Claim`/`EnrollmentClaim` use claim
+    space `op < 2^64` with `consumed_through == 0`; every other body uses
+    session space `op = (s << 64) | q` with `s ==
+    representative.logical_session`, `q ≥ 1` and `consumed_through < q`.
+    Violations are `InvalidCommand`. `begin_claim`/`begin_enrollment` with
+    `op ≥ 2^64` fail early (`InvalidAssembly`).
+  - `State.retired_below` (reserved at 0 by LV1) becomes live.
+  - Public: `LogicalRefusal::Expired` (checkpoint outcome `5,7`, response atom
+    `7`); `LogicalRead::Outcome(LogicalOutcomeLookup)` with
+    `LogicalOutcomeLookup::{Retained(Box<LogicalActionStatus>), Expired,
+    Unknown}`; `LogicalMetadata.retired_below: u128`. Response magic
+    `VBLOGR01`/`02` → `VBLOGR03`/`04`; response schema IDs `…0001`/`…0002` →
+    `…0003`/`…0004`; metadata read bound 187 → 203 bytes.
+  - Schemas: `LOGICAL_APPLICATION_SCHEMA` 3 → 5 and
+    `LOGICAL_ENROLLMENT_APPLICATION_SCHEMA` 4 → 6, continuing LV1's
+    odd/even pairing (1/2 → 3/4 → 5/6). The literal 3 → 4 would make the new
+    ordinary schema equal LV1's candidate schema, so an LV1 candidate
+    checkpoint would no longer be a typed `UnsupportedSchema` for an ordinary
+    application. Checkpoint magic `VBLOGC03`/`04` → `VBLOGC05`/`06` (layout
+    unchanged; the embedded commands changed).
+- **State transitions** (`apply_command`; every check before any mutation).
+  1. Decode with the partition rules; `command.operation == op`.
+  2. Retained `op`: same bytes → original receipt (`duplicate: true`);
+     different bytes → `OperationConflict`.
+  3. Retired (session space, `op < retired_below`): receipt
+     `Refused(Expired)`, `duplicate: true`, `first_index = index`, current
+     parent revision/generation/epoch. No execution, no record, no byte change.
+  4. Plan: `Some(max(retired_below, (s << 64) | (consumed_through + 1)))` iff
+     session space, `state.representative == Some(command.representative)` and
+     the representative's store is a current child voter; otherwise `None`.
+     `consumed_through < q` keeps the plan ≤ `op`, so the command never prunes
+     its own record.
+  5. `reserve` counts live records after the planned prune (session keys
+     below the plan; claim records with `expected_epoch <` current epoch,
+     enrollment claims counting as `expected_epoch = None`) plus this command.
+  6. Execute (Ineligible check, then `execute`) as before.
+  7. Insert the record.
+  8. With a plan: `retired_below = plan`; remove session keys below it (a
+     `BTreeMap` range: session keys sort above all claim keys); remove dead
+     claim records; subtract their command lengths from `bytes`.
+  9. A `Claimed` outcome (claim or enrollment claim for session `s'`):
+     `retired_below = max(retired_below, (s' << 64) | 1)` and remove session
+     keys below it. Claim records are kept, so the new claim stays resolvable
+     until its first session command (step 8) proves it was consumed.
+  - Lookup `Outcome(op)`: retained → `Retained`; session space and below the
+    watermark → `Expired`; otherwise `Unknown` (including pruned claims, whose
+    later copies re-execute and refuse: `claim` needs `expected == current`
+    and the epoch never decreases; `enroll` needs no representative).
+  - Admission mirrors apply conservatively. A retired session ID is admitted
+    like a duplicate (no reservation), so a stranded bridge can get committed
+    `Expired`. Pending entries are counted without retirement credit; credit is
+    given only for the proposed command's own plan, computed on the applied
+    state. Apply-time occupancy cannot exceed that estimate: entries before
+    this one in its committed log are exactly the leader's prefix at append
+    time; a successful claim among them retires this command (no record); with
+    none, the representative and epoch are unchanged, the watermark only
+    rises, and `validate_proposal_context` (run at submit and at append) has
+    already required the representative to be a voter under the log-tip
+    membership, which is the membership in force when the entry applies.
+- **Restore** (LV1 direct decode, extended; exact re-encode kept). Every
+  record's command decodes under the partition and matches its ID; session
+  keys `≥ retired_below`; no representative ⇒ `retired_below == 0`; a
+  representative of session `s` ⇒ `retired_below >> 64 == s` and its low half
+  `≥ 1`, and (round 2) `retired_below` equals the larger of `(s << 64) | 1`
+  and the highest acknowledgement retained from the current binding;
+  `snapshot_generation ≥` the retained floor (was `==`); the
+  enrollment record matches its `EnrollmentClaim` record while that record is
+  retained, and once pruned (legitimate after the first session command) only
+  the record's own fields are checked, with its ID in claim space. Claim
+  retention after the epoch moves depends on history (a later prune or a
+  re-executed pruned copy), so restore checks claim records structurally;
+  the exact re-encode and the checksummed container cover the rest (as for
+  every other history-dependent field since LV1). LV1's redundant checks
+  (ascending IDs, configuration order, two-snapshot limit) stay.
+- **Ownership.** `consumed_through` belongs to the bridge that owns the
+  session (one action in flight; `submit_body` sets it to the previous
+  sequence, whose outcome `intake` proves was consumed; the drained activation
+  continuation carries the sequence verbatim). `retired_below`, records and
+  `bytes` are replicated child state in the child log and checkpoint.
+- **Bridge.** Committed `Refused(Expired)` for the in-flight action: set the
+  sticky failure `Refused(Expired)` first, then hand the committed action to
+  its consumer as for any committed refusal (the release coordinator settles it
+  in a failed domain and never mints a permit from it). Lookup `Expired` or
+  `Unknown` while resolving: re-propose the same bytes; admission lets a
+  retired ID through and apply commits `Refused(Expired)`, which takes the
+  path above. `Expired` is never treated as "not committed".
+- **Failure/cleanup.** Late or lower acknowledgements cannot lower the
+  watermark (maximum). Restore refuses with `InvalidCheckpoint`: a live
+  session key below the watermark, a watermark in another session or at
+  sequence 0, and (round 2) any watermark other than the claim floor or the
+  highest acknowledgement retained from the current binding, so a lowered or
+  raised value. The exact re-encode catches only non-canonical encodings,
+  not values that are encoded verbatim. Not caught: a raised generation mark
+  (legitimate once publication records are pruned) and history-dependent
+  claim-space retention. These fields rely on the storage-integrity boundary
+  (the checksummed container), as every history-dependent field has since
+  LV1. LV1 checkpoints → `UnsupportedSchema` under
+  their old schema numbers and `InvalidCheckpoint` (magic) under the new ones.
+  Checkpoints are taken between applies, so no partial retirement is captured.
+- **Acceptance checks.** Architect §5.1 (72,000-action leader stream with a
+  `Mutate` every 1,000, 36,000-action follower stream, batches of 64,
+  checkpoint/restore every 5,000, retention ≤ 1 after the first session
+  command), §5.2 E1–E7, §5.3 R1–R4, §5.4 P1–P4; the soak fails with
+  `DedupCapacity` at 4,096 when pruning is removed (old behaviour); LV1's
+  shared per-apply oracle becomes "restore of the checkpoint taken before each
+  apply, then replay of that entry, equals the state". LV3 (end-to-end soak)
+  and LV4 (model) are later slices.
+
+#### LV2 implemented
+
+Evidence only (planned work is in the rows and the schema plan above).
+Branch `lv/retire-watermark`, stacked on LV1 (`lv/checkpoint-v3` 3a8f6328).
+
+- **Code.** `Command.consumed_through` and the partition rules
+  (`command.rs`, enforced in `codec.rs::decode_command`); `apply_command`
+  steps 1–9 with `retired`, `retirement_plan`, `prunable` and `retire`
+  (`application.rs`); `reserve(commands, plan)` counting live records after
+  the planned prune, and the retired-ID admission paths (`admission.rs`);
+  `LogicalApplication::lookup` and `LogicalMetadata.retired_below`
+  (`query.rs`); response v3 (`response.rs`, `response/values.rs`,
+  `response/atoms.rs`); restore rules (`checkpoint/restore.rs`); bridge:
+  `submit_body` sends `consumed_through = previous sequence`, claims send 0,
+  `begin_claim`/`begin_enrollment` refuse IDs `≥ 2^64`, a committed
+  `Refused(Expired)` sets the sticky `Refused(Expired)` failure before the
+  action is handed on, a receipt claiming `Expired` without `duplicate` is a
+  provider violation, and `Resolving` re-proposes on `Expired` or `Unknown`
+  (`bridge/construction.rs`, `bridge/polling.rs`, `bridge/consume/reads.rs`).
+  Committed `Expired` reaches consumers as any committed refusal: the
+  persistence and snapshot ports fence, the release coordinator mints no
+  permit (it settles it only in a failed domain).
+- **Formats.** Command `VBLOGA03`/`04`; checkpoint `VBLOGC05`/`06` (LV1
+  layout); response `VBLOGR03`/`04`, schema IDs `0x5642_4c52_5350_0003`/`…0004`;
+  application schemas 5/6. New goldens `v5-empty`, `v5-populated` (the
+  populated history's last mutation now acknowledges sequences 1–5: two
+  records retained, watermark `(1 << 64) | 6`, generation mark 2 with both
+  publication records pruned), `v6-candidate-empty`, `v6-candidate-enrolled`.
+  LV1's `v3-*`/`v4-candidate-*` files are now legacy fixtures: refused with
+  `UnsupportedSchema` under schemas 3/4 and `InvalidCheckpoint` under 5/6
+  (also when renamed to the new magic, since their commands use the old
+  format); current bytes under schemas 1, 3 and 4 are `UnsupportedSchema`.
+- **Soak (architect §5.1,
+  `application/tests/retirement.rs::idle_heartbeat_streams_retain_one_original`).**
+  Real encoded commands in bridge order (claim, then sequence `q`
+  acknowledging `q − 1`), heartbeats batched 64 per apply (singly for the
+  first 64), a checkpoint/restore every 5,000 actions continuing from the
+  restored copy.
+
+  | Stream | Actions | Retained after every batch | Retained bytes | Checkpoint bytes | Result |
+  | --- | ---: | --- | --- | --- | --- |
+  | Leader child: `Append` heartbeats, a `Mutate` every 1,000 | 72,000 | 1 (the last action) | 427 (heartbeat) / 496 (mutation) | 1,551 / 1,620 | pass |
+  | Follower child: `Appended` responses | 36,000 | 1 | 477 | 1,601 | pass |
+  | Same leader stream on LV1 code (3a8f6328, throwaway test, not committed) | 4,095 | grows by 1 per action | — | — | `DedupCapacity` at heartbeat 4,095 with 4,096 retained |
+
+  Both LV2 streams together take 1.3 s in the unoptimised test build; the
+  4,095 actions on LV1 took 26.4 s (each apply re-encodes every retained
+  record). A one-off mutation that disables retirement on the LV2 code fails
+  the soak at once (the watermark assertion after the claim).
+- **Exactly-once and retirement tests** (`retirement.rs`, nine tests):
+  E1–E3 (retry before acknowledgement returns the original receipt; a late
+  copy after it is `Expired` with `duplicate: true`, state unchanged apart
+  from the applied index; the same capsule under a fresh ID would authorise
+  again, so the guard matters); E4 tri-state lookup including a pruned claim
+  (`Unknown`; its re-applied copy refuses `StaleRepresentative` and never
+  claims); E5 seven partition violations refused at decode, encode,
+  admission and apply with nothing installed; E6 lower acknowledgement,
+  another binding in the session, a future session and an ineligible current
+  representative never move the watermark; E7 and the admission credit (a
+  full table admits only a command that acknowledges a live record; a pending
+  copy earns no credit; a retired ID is admitted with eight pending copies and
+  commits `Expired` without a record); P1/P2 replacement retires the old
+  session (lookup and re-proposal `Expired`, later old-session commands
+  `Expired`); P3/P4 claim records (the new claim resolves `Retained` until
+  its session's first command prunes it; a claim refused `Ineligible` at the
+  current epoch survives session commands until the epoch moves); R1–R3 a
+  checkpoint between every apply of an 18-entry history (retries, a late
+  retired copy, a refused claim, replacement, a superseded command) restores
+  exactly, replays the suffix to identical state, receipts and checkpoint
+  bytes, and a retired copy stays `Expired` after restore.
+- **Shared per-apply oracle.** LV1's oracle replayed the retained records;
+  that stops being meaningful once records are pruned. The application-test
+  `apply` helper now checks after every apply: the watermark invariants; the
+  generation mark `≥` the former derivation; direct restore equals the state
+  with no replay (≤ 64 records); restoring the checkpoint taken just before
+  the entry and replaying it gives the same state and receipts; and, while the
+  history is short, a replay of the whole applied history from a fresh
+  application (a `cfg(test)` journal of applied entries, kept out of the
+  per-batch working copy) equals the state.
+- **Restore rules (R4).** Refused with `InvalidCheckpoint` and no partial
+  restore: zero watermark with a representative, a watermark lowered below a
+  retained acknowledgement, above a live key, in another session, at
+  sequence 0, a generation mark below a retained generation, a recorded
+  `Expired` outcome, an out-of-range refusal tag; the LV1 classes (swapped,
+  colliding and duplicate positions, decreasing terms, representative/image
+  pairing, receipt epoch, third snapshot, outcome tag, retained bytes,
+  truncations, trailing byte, budgets at and past each limit) still apply on
+  the new two-record populated golden. A candidate whose enrollment claim
+  was pruned restores; a mismatching retained claim, or an enrollment record
+  whose position is taken, is refused.
+- **Native evidence (small; the soak is LV3).** In
+  `logical_voter_native::persistence` the real bridge's actions leave the
+  child with exactly one retained original after two sessions (watermark in
+  session 2), and the recovery claim leaves only itself with the watermark at
+  `(3 << 64) | 1`.
+- **Existing tests updated, intent kept.** Old-session retries after a
+  replacement now expect `Expired` (stronger than the former original
+  receipt or `StaleRepresentative`): `exact_retry_keeps_original_outcome_after_replacement`
+  (plus a new same-session forged-binding case that still records
+  `StaleRepresentative`), `authority::term_zero_actual_request…` (the retry
+  before replacement still returns the original receipt),
+  `snapshots::recovery::anchored_orphan…`; `control_reserve_and_pending_content_are_enforced`
+  still asserts that a full table refuses a claim. What changed is that the
+  recovery claim now retires the old session's records, so the test refills
+  the table with claims refused at the current epoch (control records, which
+  retirement keeps) to keep the total-count bound under test. Recovery-claim
+  admission at the limit is LV5. Format and schema
+  constants in the format tests; `LogicalRead::Outcome` matches in
+  `logical_activation_nested` (`Retained` with the byte checks and the
+  watermark at or below the fresh session's first ID; round 2 removed the
+  former `Unknown` alternative, which these fixtures never reach),
+  `logical_voter_native` (history, authority:
+  still `Retained`, documented why), `logical_nested_native` diagnostics and
+  `logical_activation_driver` retained counting (command header offset +8,
+  comments now say the count is the live set).
+- **Deviations from the architect plan.** (1) Schemas 5/6, not 3 → 4 / 4 → 5:
+  the literal numbers would make the new ordinary schema equal LV1's
+  candidate schema. (2) Checkpoint magic and response schema IDs are bumped
+  too (the plan named only command and response magic), so every changed
+  format has a new name. (3) The plan says the exact re-encode catches a
+  lowered watermark; it does not (the field is encoded verbatim). Restore
+  instead requires the watermark to equal the claim floor or the highest
+  acknowledgement retained from the current binding (round 2; the first
+  round required only `≥`). The record that last raised it is never pruned,
+  so any lowering or raising is refused. (4) A raised generation mark is no
+  longer detectable once publication records are pruned (history-dependent);
+  it is harmless to uniqueness and covered by the checksummed container, as
+  for every other history-dependent field since LV1. LV1's "+1 generation" corruption case
+  was dropped for this reason. (5) Claim-space retention after the epoch
+  moves depends on history (a later prune, or a re-executed pruned copy that
+  is recorded again), so restore checks claim records structurally only.
+  (6) Admission gives no prune credit to a retained duplicate (it applies as
+  its original receipt and prunes nothing). (7) A pruned enrollment claim is
+  checked by its own fields: claim-space ID, positions within the applied
+  range and unoccupied, generation-1 target in this store and parent group.
+- **Hooks for later slices.** `LogicalMetadata.retired_below` and
+  `retained_actions` for the LV3 soak; `command_bytes` (unchecked encoder,
+  in-crate) for LV5's rogue at-limit commands; `retirement_plan`/`prunable`
+  are pure functions of state for the LV4 model.
+- **Stage-1 score.** Changed paths: `src/logical_voter/**`, `tests/logical_*`,
+  `docs/`. No shared `src/` file changed, so the matched CPU-per-write score
+  is unaffected by construction.
+- **Validation.** Linux, cores 10–14, `nice -n 19`, `-j 4`; each
+  integration binary run once, directly, all features.
+
+  | Check | Result |
+  | --- | --- |
+  | `cargo +stable fmt --all -- --check` | clean |
+  | Strict Clippy: all-features, default, no-default, native-only | 0 diagnostics each |
+  | Matched workspace fmt and strict all-target Clippy | clean |
+  | `--lib logical_voter`, default features | 110 passed, 1 ignored (timing report) |
+  | `--lib logical_voter`, all features | 111 passed, 1 ignored |
+  | `--lib logical_voter`, no default features | 109 passed, 1 ignored |
+  | `logical_voter_native` | 42 passed (10 s) |
+  | `logical_activation_driver` | 35 passed (24 s) |
+  | `logical_activation_nested` | 14 passed (121 s) |
+  | `logical_nested_native` | 15 passed (65 s) |
+  | Also run once: `logical_configuration_history`, `logical_voter_application`, `logical_voter_promises`, `logical_relay_native` | 7, 8, 6, 2 passed |
+
+  No failures, so no port collision or close-drain timeout occurred in these
+  runs. Full suites are left to the orchestrator.
+
+#### LV2 round 2 (review follow-ups, PR 12)
+
+- **Nested lookups assert the branch that occurs.** `unknown_target` and
+  `uncommitted_target` accepted `Retained` or `Unknown`. A temporary print
+  showed `Retained` on all three nodes, TCP and QUIC, with the watermark at
+  `(2 << 64) | 1`. That is the only reachable branch: session commands come
+  only from `submit_body`, whose `intake` refuses while the bridge holds the
+  image, and neither fixture submits anything before the inspection. Both now
+  assert `Retained` (bytes, and the first index where known) and a watermark
+  at or below the fresh session's first ID, which holds whatever a node has
+  applied.
+- **Restore requires watermark equality.** `valid_watermark` now requires the
+  watermark to equal `max((s << 64) | 1, highest retained acknowledgement of
+  the current binding)` instead of `≥`. The shared per-apply oracle
+  (`assert_restore_equivalent`, which restores after every apply of states
+  with at most 64 records) passed on every application test, so no reachable
+  state it covers violates equality. New failing inputs: the v5 populated
+  golden with its watermark raised by one (`(1 << 64) | 7`, which is at a
+  live key, so it passed before), and a watermark raised to `(s << 64) | 2`
+  right after a claim. Both are `InvalidCheckpoint` with the state unchanged,
+  and both restored under the round-1 check. The lowered cases stay.
+- **Retired re-proposals need no room (was LV5 candidate, done here).**
+  `validate_proposal` returns as soon as it finds a retired proposal (after
+  the pending decode and conflict checks), so pending live entries cannot
+  turn the committed `Expired` into a non-retryable `DedupCapacity`. The E7
+  admission test now adds a pending live command, admitted only through its
+  own prune credit, beside the retired re-proposal. That assertion fails on
+  the round-1 code.
+- **Docs.** The integrity boundary statement lists what restore catches and
+  what it leaves to the checksummed container; the control-test note says
+  what changed; `LogicalReceipt` documents that `first_index`, `duplicate`
+  and the parent/epoch fields of an `Expired` receipt describe the refusal,
+  not a prior execution.
+- **Validation (round 2).** Linux, cores 10–14, `nice -n 19`, `-j 4`.
+
+  | Check | Result |
+  | --- | --- |
+  | `cargo +stable fmt --all -- --check` | clean |
+  | Strict Clippy: all-features, default, no-default, native-only | 0 diagnostics each |
+  | Matched workspace fmt and strict all-target Clippy | clean |
+  | `--lib logical_voter`, default features | 111 passed, 1 ignored |
+  | `--lib logical_voter`, all features | 112 passed, 1 ignored |
+  | New cases on round-1 code (restore check / admission reverted) | fail as intended (2 restore tests, 1 admission test) |
+  | `logical_voter_native`, all features, once | 42 passed (10 s) |
+  | `logical_activation_nested`, all features, final run | 13 passed, 1 failed (121 s) |
+
+  The nested failure is the known QUIC close-drain timeout (TR4):
+  `quic_original_unknown_import_target_cold_resolves_then_activation` hit
+  `native logical child timeout … stage=CloseDrained` at `cluster.rs:216`
+  (15 s wall clock, load average about 7). The changed assertions are
+  read-only, and the TCP variant passed in the same run. The two earlier
+  probe runs (with the temporary print, before the edit) gave 14/14 and 13/14,
+  the latter with the same timeout in
+  `quic_fifteen_native_owners_two_original_logical_replacements`; in that run
+  both QUIC changed fixtures passed.
+
 #### AI1 schema plan
 
 - **Data/API.** New public `ACTIVATION_OPERATION_TAG: u64 = 0x5642_4143_5450_4831`
@@ -867,8 +1202,10 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done H2: ready-snapshot collection in the matched harness (merged 8b3c1e6c; main re-baselined) | The VoteBoat actor cut each proposal pass as soon as a peer message was queued, so batch width tracked follower reply latency and any faster replication path paid extra wake/park rounds at 16 workers (V3b: rounds 7.7k → 17.3k, sys 30 → 50 ns/write). A pass now takes only the requests queued when it starts; peer progress arriving during it is handled before the next pass. This changes the instrument for VoteBoat's actor only | H1 merged (`30a1f6c5`); researcher note `target/claude/research-r3/v3b-regression.md`. Next steps in order: merge V2 (PR 3); merge H2 and re-baseline main under it; V3b-s (width-1 per-round overhead); then re-measure V3a/V3b rebased on V2 | Actor tests that a mid-pass peer message neither truncates the pass nor waits past the next pass, and that a request queued after the pass reads its ready count waits for the next pass; existing deferral/capacity tests; 73 matched tests; root and matched fmt; matched and four root strict Clippy builds; quiet-Mac 5 interleaved pairs × 4 cells against `30a1f6c5`; attribution parity controls side by side; main re-baselined before any later gate | T4 |
 | Done H1: server worker flag (merged `30a1f6c5`) | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`) | Matched source byte-identical to flag-only `297aec15`; matched tests; both fmt checks and five strict Clippy configurations; independent review | T4 |
 | Done TR1a (PR 5, formerly R1; merged 19 October 2026 on TR1b): deterministic simulated time in the activation driver fixtures | Platform feedback has failed on every main run since 17 October: the activation driver fixtures turned elapsed wall time into protocol time, so a slow host produced more heartbeats and exhausted child group 802's 128 retained actions; the first panic then poisoned the shared serialization lock for 25 more tests. Round 2 restores every liveness bound in protocol time, holds time while dial work or replicated progress is in flight, asserts the 64-action protocol budget and owns each port for the whole test. Round 3 draws every port from TR1b's shared pool and keeps the outer channels' unused half bound | Research report `target/claude/research-ci/dedup-capacity-root-cause.md`; architect plan TR1 (b), (c), (f); TR1b / PR 4 (`03127ec5`, PR 5's base) for the shared port pool and exclusions | Round 3 (cores 0-3, nice, no retries): `logical_activation_driver` 35/35 ×5 and serial, `logical_voter_native` 42/42 ×5, serial and two concurrent copies, `logical_nested_native` 15/15 ×5 and serial, `logical_activation_nested` 14/14 ×3 with 12/14 and 13/14 in two runs (QUIC close-drain timeouts at `cluster.rs:216`, TR4; serial passes split into consecutive `--test-threads=1` runs); two of the four binaries are unchanged by TR1a; round 2: parent `30a1f6c5` under E3; `logical_activation_driver` (`--all-features`) E1 ×10, E2 ×5, E3 ×10, E4 ×5 pairs, E5 ×3 with every run passing; retained protocol actions ≤ 64 in every cohort run; fmt, four strict Clippy configurations, matched workspace fmt + Clippy; all-feature full suite (other configurations: suite runner); two reviews | Q1 (M1, M2, M3) |
-| Next TR1b (PR 4, TR1a's base): CI runs every binary, shared port leases, explicit accept mode | Covers the architect TR1 items this slice does not: (d) `set_nonblocking` in the bin tests (`route_discovery`, the macOS `WouldBlock`), (e) CI `--no-fail-fast` for all three configurations, (g) `validation/reliability-proof.sh`, and leases for the seven other port ladders. Since TR1a round 3, `harness::PortLease` is a protocol split of this slice's `support::ports::PortLease`, so PR 5 depends on it and merges after it | Architect plan; PR 4 review rounds | PR 4's own proof and reviews | Q1 (M1, M3) |
-| Following TR2/TR3: inventory, then the logical-voter family on the same clock | `logical_voter_native` still keeps wall-clock protocol time (its waits keep exactly their old 15 s wall bounds through the shared `Wait`), and `logical_activation_nested` has its own clocks and the same 128-action budget. A read-only bridge seam (L1) would let borrowed children's dial work and readiness hold time too | TR1a harness; TR1b CI visibility | Same matrix per binary; inventory of newly visible CI failures | Q1 (M2, M5) |
+| Done TR1b (PR 4, TR1a's base; merged 19 October 2026): CI runs every binary, shared port leases, explicit accept mode | Covers the architect TR1 items this slice does not: (d) `set_nonblocking` in the bin tests (`route_discovery`, the macOS `WouldBlock`), (e) CI `--no-fail-fast` for all three configurations, (g) `validation/reliability-proof.sh`, and leases for the seven other port ladders. Since TR1a round 3, `harness::PortLease` is a protocol split of this slice's `support::ports::PortLease`, so PR 5 depends on it and merges after it | Architect plan; PR 4 review rounds | PR 4's own proof and reviews | Q1 (M1, M3) |
+| Done TR4 (merged 19 October 2026, PR 11 head 0a98f898): deterministic time and poison-free history in `logical_activation_nested` | The nested binary still turned elapsed wall time into protocol time and bounded every wait with 15 s (or 10 s / 90 s) of real time; under load a QUIC child is still closing at the deadline (`cluster.rs:216`) and the business waits (`business.rs:43/58`) expire. TR4 moves the binary onto TR1a's clock and hold rule and adds the poison regression test for its `HISTORY`. Round 2 makes bridge-borrowed children's dial work hold that clock too | TR1a `harness`; TR1b `serial()` and port pool | See the reliability mini plan (TR4 row) and the TR4 sections at the end of this file | Q1 (M1, M2, M3) |
+| Next TR4b: deterministic time in `logical_nested_native` | The rest of the architect's TR4 row. This binary still turns wall time into protocol time and bounds its phases with a 90 s absolute / 30 s inactivity real-time watchdog; its parent failed 20 tests under E3 in the TR1b proof (recorded below), and TR1b's port fix left 7 election and functional deadline failures visible there. Same conversion as TR4: shared `SimClock`, hold rule including child dial work (`DialWork`), every bound kept in protocol time | TR4 merged (`harness::DialWork`, generic `Observed::bridge`, the nested `dials` wrapper pattern); TR1b port pool | Every wall wait converted with the same number and message; E1 ×10, `--test-threads=1` ×1, E3 ×10, two simultaneous copies ×3 (cores 0-3, no retries); the other harness binaries once; fmt and four strict Clippy profiles | Q1 (M1, M2) |
+| Following TR2/TR3: inventory, then the logical-voter family on the same clock | `logical_voter_native` still keeps wall-clock protocol time (its waits keep exactly their old 15 s wall bounds through the shared `Wait`), and `logical_nested_native` has its own wall clock and watchdog (TR4b). The driver and voter binaries' bridge-borrowed native children still hide their dial work from the hold rule; TR4's `DialWork` reporting connector closes that without a library seam. A read-only bridge seam (L1) would still be needed to let borrowed children's readiness hold time | TR1a harness; TR1b CI visibility | Same matrix per binary; inventory of newly visible CI failures | Q1 (M2, M5) |
 | In progress H1: review round 3, preserve the benchmark instrument | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`); pinned matched workspace; quiet-Mac 30-pair buffer attribution result | All matched source byte-identical to flag-only `297aec15`; raw evidence preserved; matched tests; both fmt checks and five strict Clippy configurations; independent review of the reduced scope | T4 |
 | Done V1: core-canonical volatile log (merged 041fc3fb; Mac −18.8% bulk, −16.3% singleton CPU/write) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
 | Done V2: scalar commit-advance plan and smaller `Pending` (merged 19 October 2026, PR 3 head 3a5c1cd4; Mac singleton −4.1%, old rule) | Commit-only rounds (~2.3 of 5.3 persistence rounds per singleton original) only advance the commit index, yet each built, validated, stored and compared a full `LogUpdate`/`OwnedAppend` plan inside a 1,728-byte `Pending`; a core-only scalar `CommitAdvance` plan and boxed cold parts cut `Pending` to 1,088 B | V1 (merged 041fc3fb) | Both reviews approved; suites on 3a5c1cd4: default 2,451 (one load-sensitive `native_relay` flake, parent and PR 10/10 on rerun), all-features 2,766, no-default 1,245, native-only 1,806, matched 71, `logical_activation_nested` solo 3×8/8; fmt + five strict Clippy clean; runner pairs round 1 ACCEPT | T4 |
@@ -38190,7 +38527,7 @@ cancels stale pull-request runs; push-to-main runs remain uncancelled.
 
 | Milestone | User-visible result | Status |
 | --- | --- | --- |
-| M1 | CI feedback is truthful and green | In progress: TR1b in review round 3 (PR 4); TR1a/R1 stacked on it (PR 5); TR4 next for `logical_activation_nested`; then TR2 inventory |
+| M1 | CI feedback is truthful and green | In progress: TR1b (PR 4) and TR1a (PR 5) merged 19 October 2026; TR4 current for `logical_activation_nested`; TR4b next for `logical_nested_native`; then TR2 inventory |
 | M2 | Simulated time wherever protocol time is simulated | Planned across TR1–TR11 |
 | M3 | Isolation: no cascades or collisions | In progress in TR1; remaining fixtures through TR15; binding-seam/host-policy limit remains |
 | M4 | Real-time tests bounded by events and ratios | Planned TR12–TR16 |
@@ -38200,10 +38537,11 @@ cancels stale pull-request runs; push-to-main runs remain uncancelled.
 
 | Deliverable | Status | Purpose | Dependencies | Completion checks | Milestone |
 | --- | --- | --- | --- | --- | --- |
-| TR1b | Current: in review round 3 (PR 4) | Exposes all CI failures, isolates the port ladders through one shared lease pool, and makes accept mode explicit | Architect classification; existing native startup contracts | Final-source parent-versus-PR matrix (recorded below: ports parent 26 → PR 0); round-3 fixes; fmt/four strict Clippy profiles; runner and two reviews | M1, M3 |
-| TR1a (R1) | Next: stacked on TR1b (PR 5) | Replaces activation-driver fixture time and poison cascades on the shared TR1b pool | TR1b lease and CI visibility; existing injected clock contracts | Parent-versus-PR matrix for `logical_activation_driver`; fmt/four strict Clippy profiles; runner and two reviews | M1, M2, M3 |
-| TR4 | Next for `logical_activation_nested` | Removes the 15 s wall-clock close-drain and child-deadline failures (`cluster.rs:216`, `business.rs:43/58`) without weakening assertions | TR1b lease; TR1a clock pattern | Same matrix for `logical_activation_nested`, including two simultaneous copies; no assertion weakened | M2, M3 |
-| TR2 | Planned after TR1a/TR4 | Inventory all newly visible failures, ratchet hardware dependencies, probe retained-action exhaustion | TR1 CI visibility and deterministic fixture clocks | All configurations/binaries inventoried; std-only ratchet; idle-leader probe result and ranked follow-ups recorded | M1, M2, M5 |
+| TR1b | Done: merged 19 October 2026 (PR 4) | Exposes all CI failures, isolates the port ladders through one shared lease pool, and makes accept mode explicit | Architect classification; existing native startup contracts | Final-source parent-versus-PR matrix (recorded below: ports parent 26 → PR 0); round-3 fixes; fmt/four strict Clippy profiles; runner and two reviews | M1, M3 |
+| TR1a (R1) | Done: merged 19 October 2026 (PR 5) | Replaces activation-driver fixture time and poison cascades on the shared TR1b pool | TR1b lease and CI visibility; existing injected clock contracts | Parent-versus-PR matrix for `logical_activation_driver`; fmt/four strict Clippy profiles; runner and two reviews | M1, M2, M3 |
+| TR4 | Done: PR 11 merged 19 October 2026 (head 0a98f898; proof recorded below) | Removes every wall-clock dependence in `logical_activation_nested` (the 15 s close-drain `cluster.rs:216`, `business.rs:43/58` and the other 15 s / 10 s / 90 s waits) by putting the binary on TR1a's `SimClock` and hold rule, including the dial work of bridge-borrowed children (round 2), and proves a failing test cannot poison the rest of the binary | TR1a `harness` (`SimClock`, `FixtureClock`, `Observed`, `Wait`, `HangGuard`); TR1b `serial()` and port pool | Schema plan below; every assertion kept; borrowed-dial hold test and its blind-clock control; E1 ×10, `--test-threads=1` ×1, E3 ×10, two simultaneous copies ×3 (cores 0-3, no retries); driver and voter binaries once; fmt and four strict Clippy profiles | M1, M2, M3 |
+| TR4b | Next, after TR4 | Puts `logical_nested_native` on the same clock: its wall-clock fixture time and 90 s / 30 s real-time watchdog become protocol time; its parent recorded 20 failing tests under E3 (TR1b proof below) | TR4 merged (`DialWork`, generic `Observed::bridge`, the reporting-connector pattern); TR1b port pool | Every wall wait converted with the same number and message; E1 ×10, `--test-threads=1` ×1, E3 ×10, two simultaneous copies ×3 (cores 0-3, no retries); other harness binaries once; fmt and four strict Clippy profiles | M1, M2 |
+| TR2 | Next, after TR4b | Inventory all newly visible failures, ratchet hardware dependencies, probe retained-action exhaustion | TR1 CI visibility and deterministic fixture clocks | All configurations/binaries inventoried; std-only ratchet; idle-leader probe result and ranked follow-ups recorded | M1, M2, M5 |
 | TR3 | Planned | Quiescent pacing and logical-voter family isolation | TR2 inventory; read-only backing usage seam L1; existing readiness contracts | Logical voter/network suites and activation driver re-proved, including disk contention; TestDir adopted locally | M2, M3 |
 
 ### TR1b schema plan (18 October 2026, before editing)
@@ -39032,3 +39370,323 @@ uncancelled" wording: GitHub keeps at most one pending run per concurrency
 group), P3-c (an unusable explicit `VOTEBOAT_TEST_PORT_LEASE_DIR` still falls
 back), P3-d (no macOS fallback coverage) and P3-e (the per-user fallback
 directory is left behind).
+
+### TR4 schema plan (19 October 2026, before editing)
+
+Scope: `logical_activation_nested` and the fixtures it compiles in via
+`#[path]`. Base `main` `906c7a9b` (TR1b and TR1a merged). Tests only; no
+`src/` change, no capacity, timer, lint or assertion change.
+
+Known failures this slice removes (all pre-existing; PR 4 and PR 5 proofs):
+the real 15 s `CloseDrained` wait at `cluster.rs:206-216` (a QUIC child is
+still closing one peer connection at the deadline under load), the 15 s
+`Instant` deadlines at `business.rs:43/58`, and every other wall-clock wait in
+the binary. The `HISTORY` poison cascade (`history.rs:64:34`) was already
+removed by TR1b: `cluster::serial()` uses `support::serial::serial`, which
+recovers the `()` guard. This slice adds the regression test for it in this
+binary.
+
+- Data/API: the binary includes TR1a's `logical_voter_native/harness.rs` (and
+  its `aliases.rs`) instead of a second clock. One `SimClock` per test, created
+  where the test created its `Instant`, is cloned into every `Cluster`, the
+  `Lower` host and every outer `Channels`. `Cluster::new`, `Lower::new` and
+  `Channels::new` take `&SimClock`; `Channels::close` drops its `start`
+  argument and uses the shared clock. `Observed` gains two small generic
+  inputs: `backing(&LogicalBackingBridge<N>)` (replica and application state of
+  every node a bridge borrows, without holding on their persistence) and
+  `dialing(n)` (dial attempts of a driver outside a node). The `cleanup`
+  module switches to `logical_voter_native/cleanup.rs`, the same join with a
+  hang guard instead of a 10 s real bound; `logical_nested_native` keeps its
+  own copy unchanged.
+- State transitions: every fixture round calls `SimClock::round(observed)`
+  exactly once, through one place per loop shape:
+  - `Cluster::poll_with_budget` observes its three native nodes;
+  - `Lower::advance_with(upper)` observes every lower bridge's native children
+    (durable worker I/O plus replica state), the retired sessions and
+    whatever the caller adds: the upper bridge's middle replicas
+    (`progress::step`, `driver_step`, `claim_upper`, restore `claim`), the
+    middle nodes themselves (`Lower::middle_with`, `shutdown::middle`,
+    `readiness`), or a separately borrowed target bridge (cold, unknown and
+    uncommitted target loops);
+  - `Channels` observe connectors and session counts (TR1a's shape);
+  - the aborted target's peer drain observes its dial attempts only. *(Amended
+    after the first run: its drain output reports every still-open peer on
+    every poll, so holding on it froze the clock that closes QUIC connections
+    and the test hit its 4096-observation bound.)*
+
+  Time advances 1 ms only after an idle round (TR1a rule). A logical node's
+  persistence is deliberately not a hold signal: it completes only through its
+  backing group's consensus, which may itself need protocol time (an
+  election or a retransmission), so holding on it could stall the clock that
+  completes it. Its effect is still visible as backing replica progress.
+- Bounds: each wall wait becomes `harness::Wait` with the same number in
+  protocol time: 15 s → `LIVENESS_MS`, 10 s outer handshake →
+  `HANDSHAKE_MS`, 10 s aborted-network drain → 10,000 ms, 90 s checkpoint
+  publication → 90,000 ms, and the phase watchdog's 90 s absolute / 30 s
+  inactivity → 90,000 / 30,000 ms. Each keeps its message. Thread joins after
+  close (`cleanup::join`, the aborted target's worker and dialer joins, outer
+  dialer joins) contain no protocol time and keep only the 600 s hang guard,
+  as in TR1a. The close drain therefore completes by polling to quiescence:
+  protocol time moves only while no node has durable or dial work in flight
+  and nothing changed, so QUIC's own close and idle timers fire after the same
+  protocol interval on any host.
+- Equivalence *(corrected in round 2; the first version claimed that an idle
+  round costs at least 1 ms of real time, so protocol time never runs ahead of
+  real time. That is false: `park_timeout` has no minimum duration, a
+  `ThreadWake` unpark or a spurious wake returns early, and the restore `claim`
+  loop did not park at all)*: the argument does not rely on real time. Every
+  liveness bound keeps its number, now counted in protocol time, and protocol
+  time advances only in an idle round: no durable worker I/O or child dial
+  pending anywhere in the test (round 2 adds the bridge-borrowed children's
+  dials), and no observed replica or application state change. Provider latency
+  (disk, dial worker, thread scheduling) therefore adds rounds but no protocol
+  time, so a bound is a claim about how many idle protocol milliseconds the
+  protocol needs, not about real time. Real time only decides how many rounds
+  run per second; the 1 ms park is a CPU yield, not a measure. This deliberately
+  changes the property tested: a close that needed more than 15 s of real disk
+  or CPU time while time was held used to fail and now passes, while a close
+  that needs more than 15 s of idle protocol time (timers, retransmission, QUIC
+  close periods) still fails. A wait whose hold never clears, or whose state
+  changes every round forever, stops protocol time and fails through the
+  separate 600 s real-time hang guard, with the clock's hold state.
+- Ownership: the test owns the clock; clones are handles to one `Rc` state.
+  The guard on `HISTORY` stays per test. Port leases are unchanged (TR1b).
+- Failure and cleanup: a panicking test drops its clusters, leases and
+  sessions while unwinding; the next test recovers the `()` guard and runs on
+  its own clock, ports and directories. `serial_history_recovers_after_a_test_panic`
+  proves recovery, as in the driver binary.
+- Acceptance: compile and four strict Clippy profiles clean; the proof matrix
+  in the TR4 mini-plan row with every execution recorded; a deliberate
+  single-test failure (uncommitted experiment) fails that test alone.
+
+#### TR4 schema amendment: lockstep child clusters (before editing, 19 October 2026)
+
+The first two rounds of the proof (below) still failed twice with the old
+signature (`CloseDrained`, slot 4, a QUIC child one session short of drained).
+The new per-peer drain diagnostic named the state: node 14's last session to
+node 13 was `Closing`, flushed, close started, with a live close timer at
+`MonoTime(21159)`, 1.4 s after the 15,000 ms bound expired at `MonoTime(19736)`. The
+close was running, just very long. quinn sets the close timer to
+`now + 3 × pto(highest_space)`, and for the data space
+`pto = srtt + max(4·rttvar, 1 ms) + max_ack_delay` *(citation corrected in
+round 2; the lock pins `quinn-proto` 0.11.19: `set_close_timer` at
+`src/connection/mod.rs:3494-3497`, `pto` at `:1920-1926` (no `max_ack_delay`
+for the Initial and Handshake spaces), `RttEstimator::pto_base` at
+`src/connection/paths.rs:331-333`, `TIMER_GRANULARITY` = 1 ms at
+`src/lib.rs:334`; the RTT update is at `paths.rs:335-354`)*. `finish_clusters` checkpointed and closed the five child
+clusters one after another, so each later cluster sat unpolled while shared
+protocol time advanced. A packet in flight across that gap returns one RTT
+sample of the whole gap G: the update sets `rttvar ← (3·rttvar + |srtt − G|)/4`
+and `srtt ← (7·srtt + G)/8`, so for G much larger than the earlier RTT,
+`4·rttvar` gains about G and `srtt` about G/8, and the close period grows to
+about 3 × 1.125 G = 3.4 G: a gap of about 4.4 s is enough to exceed 15 s. The last cluster
+(slot 4, both failures) has the longest gap, the sum of the earlier closes.
+Under wall-clock time the gaps grow with load, which explains the higher rate
+recorded in PRs 4 and 5. This is a fixture defect inside this binary, not a
+library one.
+
+- Shape: `Cluster` operations take slices: `elect_all`, `open_all`,
+  `checkpoint_all`, `close_all`, `finish_all`, over a shared `poll_all` /
+  `wait_all`. Each round polls every node of every listed cluster at one
+  protocol time; each cluster keeps its own predicate and its original 15 s
+  (90 s for checkpoint publication) bound, measured from the common start.
+  Single-cluster methods delegate with a one-element slice.
+- Callers: `history::finish_clusters` checkpoints and finishes all clusters
+  together; `cold_joint` closes, reopens and finishes its four clusters
+  together. A single cluster's own waits while others are borrowed by the
+  lower host (target-store close and reopen) are short and followed by
+  minutes of polling of all clusters, so they keep the one-element form.
+- Acceptance: the full matrix again, from scratch, on the new commit.
+
+#### TR4 implemented and validated (19 October 2026)
+
+Commits on `ci/tr4-nested-deterministic-time` (tests and docs only;
+`git diff origin/main -- src` is empty): `3aac1a57` (clock, bounds, poison
+test), `cf6029d2` (per-peer drain diagnostic), `ad81e1f3` (lockstep
+clusters). 15 tests: the 14 originals and
+`serial_history_recovers_after_a_test_panic`.
+
+Converted sites (before on `906c7a9b` → after on `ad81e1f3`; all in
+`tests/logical_activation_nested/` unless named):
+
+| Before | Was | After |
+| --- | --- | --- |
+| `cluster.rs:40,66-73` | `clock: Instant`, `MonoTime(elapsed)` | `clock: SimClock`, `now()` = `clock.now()` |
+| `cluster.rs:198-205` | poll at elapsed wall time | `poll_all` `:226`: `clock.round(Observed)` over every polled node |
+| `cluster.rs:206-226` (`:216` CloseDrained) | 15 s / 90 s real (`Instant`) | `wait_all` `:247`: `harness::Wait` 15,000 / 90,000 ms protocol, lockstep clusters, per-peer drain diagnostic on failure |
+| `cluster.rs:267` → `logical_nested_native/cleanup.rs:17` | 10 s real worker join | `logical_voter_native/cleanup.rs`: hang guard only (joins take no protocol time) |
+| `lower.rs:16,38,49` | `Instant` clock, elapsed time per advance | `SimClock`; `advance_with` `:61-72` is the round point (lower bridges' durable work and replicas, retired sessions, caller's upper participants) |
+| `lower.rs:88-95` | 15 s real | `:111` `Wait` 15,000 ms |
+| `business.rs:26,43,58,62` | 15 s real over three waits | `:26` one `Wait` 15,000 ms, same three assertions |
+| `progress.rs:62-96` | 90 s absolute / 30 s inactivity real | `:67` 90,000 ms `Wait` / 30,000 ms protocol inactivity |
+| `progress.rs:101,132,147` | 15 s real | `:107,138,153` `Wait` 15,000 ms; `step`/`driver_step`/`claim_upper` observe the upper bridge (`:12,41,141`) |
+| `channels.rs:91-131` | 10 s real handshake, own `Instant` offset | `:92` `Wait` `HANDSHAKE_MS`, `:100` shared-clock round over connectors |
+| `channels.rs:170-199` | 15 s real close, dialer join | `:168,172` `Wait` 15,000 ms, shared-clock round; join under the guard |
+| `readiness.rs:60-81` | 15 s real | `:61` `Wait`, `:64` round observes middle nodes |
+| `enrollment.rs:38,93,115` | 15 s real | `Wait` 15,000 ms (same lines) |
+| `shutdown.rs:7,23` | 15 s real | `:11,27` `Wait`; `:30` round observes middle nodes |
+| `repeated.rs:110,147` | 15 s real | `Wait` (same lines) |
+| `cold_joint.rs:39,139` | `Instant::now()`, 15 s real | `:39` `SimClock`, `:133` `Wait`; lockstep close/open/finish |
+| `cold_joint/restore.rs:127` | 15 s real | `Wait`; `:130` round observes the upper bridge |
+| `cold_target.rs:129,144` | 15 s real | `Wait`; `:131,146` round also observes the separately borrowed target bridge |
+| `unknown_target.rs:49,117,188` | 15 s real | `Wait` (`:188` on the cluster clock); `:51,119,145` observe the target bridge |
+| `uncommitted_target.rs:68,122` | 15 s real | `Wait` (`:122` on the cluster clock); `:70` observes the target bridge |
+| `uncommitted_target/abort.rs:54-77,91` | 10 s real drain at `clock.elapsed()` | `:62` `Wait` 10,000 ms, `:64` round holding on dial work only; dialer join under the guard |
+| `uncommitted_target/abort.rs:98-118` | 10 s real worker join | `:110` `HangGuard` only |
+| `history.rs:65` | `Instant::now()` | `SimClock::default()`; lockstep `finish_clusters` |
+
+`logical_voter_native/harness.rs` (shared with the driver and voter binaries)
+gains `Observed::backing` and `Observed::dialing` only; the driver and voter
+binaries were run once each below.
+
+Proof (all features). Binaries built with
+`taskset -c 0-3 nice -n 19 cargo +stable test --locked --offline --all-features --no-run -j 2`
+and run directly as `taskset -c 0-3 nice -n 19 BIN` (absolute nice 15, as the
+shell runs at −4; affinity mask `f` recorded in every log). E3 burners: three owned
+`taskset -c N sh -c 'while :; do :; done'` at the same nice on CPUs 1, 2, 3,
+measured at 93–100 % CPU each before every run and killed after it. Every
+execution is recorded; nothing was rerun. Lines matching `AddrInUse`,
+`Address already in use`, `PoisonError` or `hang-guard` in every log: 0.
+
+| Round (commit) | Env | Runs | Result | libtest time (s) |
+| --- | --- | --- | --- | --- |
+| 1 (`3aac1a57`) | E1 | 10 | 10/10 runs 15/15 | 96.1–113.6 |
+| 1 | E2 `--test-threads=1` | 1 | 15/15 | 99.7 |
+| 1 | E3 (3 burners) | 10 | 10/10 runs 15/15 | 108.1–135.1 |
+| 1 | E4 two copies | 2 pairs | 3 of 4 copies 15/15; **pair 1 copy A 14/15**: `quic_fifteen_native_owners_two_original_logical_replacements`, CloseDrained slot 4 | 103.9–121.6 |
+| 2 (`cf6029d2`, diagnostic) | E1 | 8 | 7/8 runs 15/15; **run 6 14/15**: same test and signature, diagnostic captured (amendment above) | 96.2–123.2 |
+| **Final (`ad81e1f3`)** | E1 | 10 | **10/10 runs 15/15** | 88.7–92.4 |
+| Final | E2 `--test-threads=1` | 1 | **15/15** | 101.9 |
+| Final | E3 (3 burners) | 10 | **10/10 runs 15/15** | 93.9–125.0 |
+| Final | E4 two copies | 3 pairs | **6/6 copies 15/15** | 95.1–101.8 |
+| Final | `logical_activation_driver` E1 | 1 | 35/35 | 25.5 |
+| Final | `logical_voter_native` E1 | 1 | 42/42 | 9.5 |
+| Final | deliberate failure (uncommitted experiment: one assertion forced false in `tcp_twelve…`, while holding `HISTORY`) | 1 | **14/15: only that test failed**, no `PoisonError` | 91.1 |
+
+Round 1 stopped after two E4 pairs to investigate. Investigation-only runs
+between rounds 1 and 2 (not part of the matrix): 6 more full-binary copies
+under two copies plus three burners and 137 focused QUIC test executions, all
+passing; a temporary probe that opened a QUIC child cluster, jumped protocol
+time 0.9–3.2 s unpolled and closed it, 900 iterations plain and about 240 with a
+checkpoint first, all passing (the gap there was too short to stretch the
+close past 15 s). The probe and the experiment were never committed.
+
+Before TR4 the same binary failed this class in PR 4/5 proofs (wall-clock time:
+3 failing tests in 2 of 5 runs in TR1a round 3, 1 of 7 executions in TR1b round 3). Final runs take about
+90 s on 4 cores and vary by 4 % in E1 (previously 140–430 s), because protocol
+time no longer depends on host speed.
+
+Checks at `ad81e1f3`: `cargo +stable fmt --all -- --check` clean; strict
+Clippy default, `--all-features`, `--no-default-features`,
+`--no-default-features --features native` (each `--locked --offline
+--keep-going --all-targets -- -D warnings`) zero diagnostics; the pre-push
+hook ran them again on every push. Full suites in other configurations are the
+suite runner's job and were not run here.
+
+Remaining classes, assigned elsewhere:
+- `logical_nested_native` (shares only `cluster_inspection.rs` now) keeps its
+  wall-clock fixtures and 90/30 s watchdog: the rest of the architect's TR4
+  row (TR4b), not in this slice's brief.
+- Single-cluster waits while other clusters are borrowed by the lower host
+  still leave those clusters unpolled for their duration (short, followed by
+  long all-cluster phases). Making the lower host poll unborrowed clusters
+  would need the L1 bridge seam (TR3).
+- Dial work of bridge-borrowed nodes was invisible to the hold rule at
+  `ad81e1f3`; closed for this binary in round 2 (below).
+
+#### TR4 round 2 (19 October 2026)
+
+Review of `2f2590b9` (code `ad81e1f3`): Claude Opus 5.5 approved with docs
+findings; GPT-6.1-Sol requested changes on one code-level P2.
+
+Schema plan (before editing):
+
+- Data/API: the shared harness gains `DialWork`, a shared count of child dial
+  attempts waiting for their worker, held by each `SimClock`
+  (`SimClock::dial_work()`); `SimClock::round` adds it to the round's own
+  `Observed` dial count. It stays zero in the driver and voter binaries, whose
+  clock semantics are otherwise unchanged. `Observed::bridge` becomes generic
+  over the bridge's child type (its body is unchanged). In the nested binary,
+  `dials::Probed` wraps each child node's `NativeServiceConnector`
+  (`ChildNode = NativeNode<LogicalApplication, Probed>`), installed by
+  `dials::probe` on the selected native parts before `Node::from_parts`.
+- State transitions: an attempt enters and leaves the connector's `Dialing`
+  stage only inside `submit`, `cancel`, `poll` and `close`, so the wrapper
+  reports `usage().dialing` after each of those calls (replacing its own
+  previous contribution) and the count is exact between calls. Every round of
+  the test's clock, wherever it is taken, therefore holds while any child
+  dial is pending, including on nodes a bridge borrows.
+- Ownership: each cluster owns a `DialControl` (dial outcome counts and a
+  test-only switch that withholds its connectors' polls, off by default);
+  each wrapper owns its contribution to `DialWork` and withdraws it on drop.
+- Failure and cleanup: `Probed::into_dialer` hands back the drained
+  connector's dial worker as before (`cleanup::join` and the aborted
+  target's join are unchanged). A contribution that never clears freezes
+  protocol time and fails through the 600 s hang guard, as every hold does.
+- Acceptance: a test that keeps a borrowed child's dial pending for more
+  rounds than the attempt deadline sees no protocol time pass and every dial
+  connect afterwards; a control proves the same dials are lost on a clock that
+  does not see them; the full matrix again on the new code.
+
+| Finding | Change | Test | Proof |
+| --- | --- | --- | --- |
+| Sol P2: borrowed native dial work must hold the clock (`lower.rs:70-72`) | `harness.rs`: `DialWork`, `SimClock::dial_work`, round adds it; generic `Observed::bridge`. New `dials.rs`: reporting connector wrapper and `DialControl`; `cluster.rs`: `ChildNode` uses it, `Cluster::unelected` opens without polling; `abort.rs` recovery alias. No `src/` change: the bridge exposes only local parts, but the native parts accept any `PeerConnector` before `Node::from_parts`, so the observation point is a test-side wrapper | `borrowed_dials::tcp_borrowed_child_dial_holds_protocol_time`: one TCP cluster borrowed through `Lower`, connector polls withheld after the first round submits its dials (a dial worker's completion not yet collected), then `connect_timeout_ms` + 1 rounds: protocol time does not move in any of them; released, every submitted dial connects and none is lost. `…_is_lost_on_a_clock_blind_to_it`: the same withheld dials on a clock that does not see the reports pass their deadline and are lost. Mutation check (not committed): with the `DialWork` term removed from `SimClock::round`, the hold test fails in round 0 (`protocol time MonoTime(1) … dialing=0`) | All matrix runs below, 17/17 |
+| Opus P3-1 and Sol P3: "protocol time never runs ahead of real time" is not exact | Restore `claim` loop (`cold_joint/restore.rs`) parks 1 ms like every other loop, as a CPU yield. The equivalence paragraph in the schema plan above is rewritten as a protocol-time argument that uses no minimum park | — | — |
+| Sol P3: quinn citation | Corrected to the locked 0.11.19 with file and line, and the `max(4·rttvar, 1 ms)` term (amendment above) | — | — |
+| Opus P2-1: TR4b not in the plans; row "Following TR2/TR3" out of date | TR4b rows in both mini plans and the M1 status; the "Following TR2/TR3" row now names `logical_nested_native` and the other binaries' borrowed dials | — | — |
+| Opus P3-2: margin and residual variation | `Cluster::wait_all` prints each wait's protocol time on success (`native logical child wait: stage=…; elapsed_ms=…`, shown with `--show-output`) | — | Margins below |
+
+Proof on `9659076a` (code; the docs commit follows), all features, built with
+`taskset -c 0-3 nice -n 19 cargo +stable test -j 2 --locked --offline
+--all-features --no-run`, each run `taskset -c 0-3 nice -n 19 BIN
+--show-output` (nice 15; affinity mask `f` and nice recorded at the top of
+each log from E1 run 6 on; runs 1-5 used the same command). E3: three owned
+`taskset -c N nice -n 19 sh -c 'while :; do :; done'` on CPUs 1, 2, 3,
+measured at 91.5-100 % CPU each before every run and killed and confirmed gone
+after it. Every execution is recorded; nothing was rerun. Lines matching
+`AddrInUse`, `Address already in use`, `PoisonError`, `hang-guard` or
+`hang guard` in all 29 logs: 0.
+
+| Env | Runs | Result | libtest time (s) |
+| --- | --- | --- | --- |
+| E1 | 10 | **10/10 runs 17/17** | 91.2, 91.4, 90.7, 90.2, 89.7, 89.7, 90.4, 95.7, 95.8, 97.3 |
+| E2 `--test-threads=1` | 1 | **17/17** | 98.1 |
+| E3 (3 burners) | 10 | **10/10 runs 17/17** | 107.0, 104.0, 103.7, 105.8, 127.5, 110.6, 101.6, 103.3, 102.3, 109.0 |
+| E4 two copies | 3 pairs | **6/6 copies 17/17** | 96.9/97.0, 95.0/95.1, 97.8/98.6 |
+| `logical_activation_driver` E1 | 1 | 35/35 | 25.2 |
+| `logical_voter_native` E1 | 1 | 42/42 | 9.6 |
+
+Protocol time used per wait stage, largest across all 27 nested runs (each
+stage is logged once per `wait_all` call, including single-cluster calls):
+
+| Stage | Bound (ms) | Waits logged | Largest `elapsed_ms` |
+| --- | --- | --- | --- |
+| `CloseDrained` | 15,000 | 540 | **91** (slots 0-3); the largest per run was 88 in 25 runs, 87 and 91 once each |
+| `CheckpointPublished` | 90,000 | 324 | **0**: publication is durable snapshot work, which holds time until it completes |
+| `CloseCatchUp` | 15,000 | 540 | 2 |
+| `CheckpointCatchUp` | 15,000 | 324 | 1 |
+| `Election` | 15,000 | 1,620 | 121 |
+
+Residual run-to-run variation. The 1-of-8 failure at `cf6029d2` was not the
+dial gap closed here: it failed on QUIC, and the QUIC connector never reports
+dial work (`src/native/quic_connect.rs:245-255` leaves `dialing` at its
+default 0; there is no dial worker). It was the sequential-cluster gap that
+`ad81e1f3` removed (amendment above); with lockstep clusters the largest
+close used 91 ms of the 15,000 ms bound, and the signature did not recur in
+the 30 final runs of round 1, the reviewers' runs or the 27 runs here. What
+still varies between runs is which round collects a worker completion or a
+loopback packet. Holds stop time while durable or dial work is pending, but
+socket delivery between polls is not a hold signal, so a datagram or segment
+not yet delivered when a round starts lets that idle round advance 1 ms, and
+the order of later events can shift by a few rounds. This is the likely
+source of the 87-91 ms spread of the largest close above (not instrumented);
+the spread is two orders of magnitude inside every bound.
+
+Remaining after round 2:
+
+- TR4b (`logical_nested_native`), now in both mini plans.
+- The driver and voter binaries' bridge-borrowed children still hide their
+  dial work (their `ChildNode` keeps the plain connector); TR3 can reuse
+  `DialWork` with the same wrapper.
+- Single-cluster waits while other clusters are borrowed by the lower host
+  still leave those clusters unpolled for their duration (unchanged).

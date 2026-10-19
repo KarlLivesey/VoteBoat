@@ -139,13 +139,14 @@ fn reordered_colliding_and_field_corruptions_are_refused() {
     let good = a.checkpoint(usize::MAX).unwrap();
     let l = layout(&a, &good);
     let (r0, r1) = (&l.records[0], &l.records[1]);
-    // The populated history: the child configuration entry at index 1, then
-    // the claim (op 1) at index 2 and a mutation (op 2) at index 3, term 1,
-    // both after configuration 2; the last record is at term 2.
-    assert_eq!(l.records.len(), 8);
+    // The populated history: the child configuration entry at index 1; after
+    // retirement the reconcile refusal (sequence 7) at index 8, term 1, and
+    // the final mutation (sequence 8) at index 10, term 2, are retained, both
+    // after configuration 2.
+    assert_eq!(l.records.len(), 2);
     assert_eq!(l.configurations.len(), 1);
-    assert_eq!([read(&good, r0.index()), read(&good, r1.index())], [2, 3]);
-    assert_eq!([read(&good, r0.term()), read(&good, r1.term())], [1, 1]);
+    assert_eq!([read(&good, r0.index()), read(&good, r1.index())], [8, 10]);
+    assert_eq!([read(&good, r0.term()), read(&good, r1.term())], [1, 2]);
     assert_eq!(read(&good, r0.preceding()), 2);
     assert_eq!(read(&good, r0.epoch()), 1);
     assert_eq!(read(&good, l.mark), 2);
@@ -165,7 +166,7 @@ fn reordered_colliding_and_field_corruptions_are_refused() {
     let collide = write(&write(&good, r0.index(), 1), r0.preceding(), 1);
     cases.push(("record and configuration at one index", collide));
     // Two records at one index, otherwise consistent.
-    cases.push(("duplicate record index", write(&good, r1.index(), 2)));
+    cases.push(("duplicate record index", write(&good, r1.index(), 8)));
     // A configuration entry twice.
     let c = l.configurations[0].clone();
     let twice = [
@@ -177,9 +178,10 @@ fn reordered_colliding_and_field_corruptions_are_refused() {
     ]
     .concat();
     cases.push(("duplicate configuration entry", twice));
-    // Index 2 at term 2 before index 3 at term 1; term 2 is within
+    // Index 8 at term 2 before index 10 at term 1; both terms are within
     // `applied_term`, so only the order is wrong.
-    cases.push(("terms decrease", write(&good, r0.term(), 2)));
+    let decrease = write(&write(&good, r0.term(), 2), r1.term(), 1);
+    cases.push(("terms decrease", decrease));
     // The representative is present exactly when the parent image is.
     let no_parent = splice(&good, l.parent.clone(), &[0]);
     cases.push(("representative without parent image", no_parent));
@@ -200,15 +202,18 @@ fn reordered_colliding_and_field_corruptions_are_refused() {
     let end = l.snapshots[1].end;
     let three = splice(&write(&good, l.snapshot_count, 3), end..end, &e.bytes);
     cases.push(("three snapshots", write(&three, l.mark, 3)));
-    // Outcome tags: 0..=5, refusal reasons 0..=6.
+    // Outcome tags: 0..=5, recorded refusal reasons 0..=6. Reason 7
+    // (`Expired`) is answered but never recorded.
     let mut outcome = good.clone();
-    assert_eq!(outcome[r0.outcome], 0);
-    outcome[r0.outcome] = 6;
+    assert_eq!(outcome[r1.outcome], 1);
+    outcome[r1.outcome] = 6;
     cases.push(("outcome tag", outcome));
-    let refused = l.records.iter().find(|r| good[r.outcome] == 5).unwrap();
-    let mut reason = good.clone();
-    reason[refused.outcome + 1] = 7;
-    cases.push(("refusal reason", reason));
+    assert_eq!(good[r0.outcome], 5);
+    for (name, tag) in [("recorded Expired", 7), ("refusal reason", 8)] {
+        let mut reason = good.clone();
+        reason[r0.outcome + 1] = tag;
+        cases.push((name, reason));
+    }
     let mut b = history::populated();
     for (name, bytes) in cases {
         assert_refused(&mut b, 10, &bytes, name);
@@ -297,12 +302,21 @@ fn unretained_published_or_durable_snapshot_is_refused() {
     }
 }
 /// Appends `n` retained copies of the record `template` with fresh
-/// operation IDs at the next indexes, as apply stores an original whose
-/// admission succeeded. Nothing else in the state changes.
-fn retain_copies(a: &mut LogicalApplication, template: u128, n: u128) {
-    let t = a.state.records[&OperationId::new(template).unwrap()].clone();
+/// operation IDs (in its partition) at the next indexes, as apply stores an
+/// original whose admission succeeded. Nothing else in the state changes.
+fn retain_copies(a: &mut LogicalApplication, template: OperationId, n: u128) {
+    let t = a.state.records[&template].clone();
     let mut c = a.decode_command(&t.command).unwrap();
-    let next = a.state.records.keys().next_back().unwrap().get() + 1;
+    let session = template.get() >= command::SESSION_SPACE;
+    let next = a
+        .state
+        .records
+        .keys()
+        .map(|op| op.get())
+        .filter(|op| (*op >= command::SESSION_SPACE) == session)
+        .max()
+        .unwrap()
+        + 1;
     for id in next..next + n {
         c.operation = OperationId::new(id).unwrap();
         let command = a.encode_command(&c, usize::MAX).unwrap();
@@ -319,7 +333,9 @@ fn retain_copies(a: &mut LogicalApplication, template: u128, n: u128) {
         a.state.records.insert(c.operation, r);
     }
 }
-fn stale_claim(a: &mut LogicalApplication) {
+/// A claim refused at a later epoch with no expected epoch; kept because no
+/// session command of the current representative has run since.
+fn stale_claim(a: &mut LogicalApplication) -> OperationId {
     let c = command(
         2,
         2,
@@ -331,10 +347,12 @@ fn stale_claim(a: &mut LogicalApplication) {
         apply(a, &c).outcome,
         LogicalOutcome::Refused(LogicalRefusal::StaleRepresentative)
     );
+    c.operation
 }
 /// An ordinary (non-control) original: a parent mutation carrying a client
-/// command, refused for a stale representative.
-fn stale_ordinary(a: &mut LogicalApplication) {
+/// command, refused for a stale (future-session) representative, so it does
+/// not move the watermark.
+fn stale_ordinary(a: &mut LogicalApplication) -> OperationId {
     let suffix = Suffix {
         from: 1,
         entries: vec![LogEntry {
@@ -346,26 +364,36 @@ fn stale_ordinary(a: &mut LogicalApplication) {
             },
         }],
     };
-    let mut c = mutate(a, 2, update(a, 1, Some(suffix)));
-    c.representative = representative(2);
+    let c = command(
+        2,
+        2,
+        CommandBody::Mutate {
+            expected_generation: a.state.parent.as_ref().unwrap().generation,
+            update: update(a, 1, Some(suffix)),
+            origin: origin(),
+        },
+    );
     assert!(!c.control(None));
     assert_eq!(
         apply(a, &c).outcome,
         LogicalOutcome::Refused(LogicalRefusal::StaleRepresentative)
     );
+    c.operation
 }
 /// `a` restores exactly; one more copy of `template` is refused by restore
 /// and by admission alike.
-fn assert_boundary(mut a: LogicalApplication, template: u128, name: &str) {
+fn assert_boundary(mut a: LogicalApplication, template: OperationId, name: &str) {
     let bytes = a.checkpoint(usize::MAX).unwrap();
     let mut b = a.clone();
     b.state = application::State::new(&a.child_bootstrap).unwrap();
     b.restore_checkpoint(a.schema_version(), a.applied_index(), &bytes)
         .unwrap();
     assert_eq!(b.state, a.state, "{name}");
-    let t = &a.state.records[&OperationId::new(template).unwrap()];
-    let mut c = a.decode_command(&t.command).unwrap();
-    c.operation = OperationId::new(1 << 100).unwrap();
+    let mut c = a
+        .decode_command(&a.state.records[&template].command)
+        .unwrap();
+    // A fresh ID in the template's partition.
+    c.operation = OperationId::new(template.get() | (1 << 60)).unwrap();
     let e = entry(&a, &c, a.applied_index() + 1);
     assert_eq!(
         a.apply_batch(&[e]),
@@ -385,14 +413,14 @@ fn restore_enforces_the_retained_byte_budget() {
     };
     let mut a = app_with_limits(limits);
     claim(&mut a);
-    stale_claim(&mut a);
-    let each = a.state.records[&OperationId::new(2).unwrap()].command.len();
+    let template = stale_claim(&mut a);
+    let each = a.state.records[&template].command.len();
     let room = (limits.max_retained_action_bytes - a.state.bytes) / each;
-    retain_copies(&mut a, 2, room as u128);
+    retain_copies(&mut a, template, room as u128);
     assert!(a.state.bytes <= limits.max_retained_action_bytes);
     assert!(a.state.bytes + each > limits.max_retained_action_bytes);
     assert!(a.state.records.len() < limits.max_actions);
-    assert_boundary(a, 2, "retained bytes");
+    assert_boundary(a, template, "retained bytes");
 }
 #[test]
 fn restore_enforces_the_ordinary_count_reserve() {
@@ -403,18 +431,18 @@ fn restore_enforces_the_ordinary_count_reserve() {
     };
     let mut a = app_with_limits(limits);
     claim(&mut a);
-    stale_ordinary(&mut a);
-    retain_copies(&mut a, 2, 31);
+    let template = stale_ordinary(&mut a);
+    retain_copies(&mut a, template, 31);
     // 32 ordinary originals plus the control claim, well under 64 actions.
     assert_eq!(a.state.records.len(), 33);
-    assert_boundary(a, 2, "ordinary count");
+    assert_boundary(a, template, "ordinary count");
 }
 #[test]
 fn restore_enforces_the_ordinary_byte_reserve() {
     let mut a = app();
     claim(&mut a);
-    stale_ordinary(&mut a);
-    let each = a.state.records[&OperationId::new(2).unwrap()].command.len();
+    let template = stale_ordinary(&mut a);
+    let each = a.state.records[&template].command.len();
     // Room for exactly three ordinary originals; the total budget and every
     // count stay far from their limits.
     let max = 256 * 1024;
@@ -425,18 +453,18 @@ fn restore_enforces_the_ordinary_byte_reserve() {
     };
     let mut b = app_with_limits(limits);
     claim(&mut b);
-    stale_ordinary(&mut b);
-    retain_copies(&mut b, 2, 2);
+    let template = stale_ordinary(&mut b);
+    retain_copies(&mut b, template, 2);
     assert!(b.state.bytes + each < max);
-    assert_boundary(b, 2, "ordinary bytes");
+    assert_boundary(b, template, "ordinary bytes");
 }
 #[test]
 fn restore_accepts_exactly_max_actions_records() {
     let mut a = app();
     claim(&mut a);
-    stale_claim(&mut a);
+    let template = stale_claim(&mut a);
     let max = a.limits.max_actions;
-    retain_copies(&mut a, 2, (max - 2) as u128);
+    retain_copies(&mut a, template, (max - 2) as u128);
     assert_eq!(a.state.records.len(), max);
-    assert_boundary(a, 2, "max actions");
+    assert_boundary(a, template, "max actions");
 }

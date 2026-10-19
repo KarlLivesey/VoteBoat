@@ -111,9 +111,14 @@ fn anchored_orphan_recovery_reuses_bytes_then_keeps_generations_after_reconcile(
     );
     assert_eq!(recovered.state.published, Some(first));
     assert_eq!(recovered.state.snapshots.len(), 1);
+    // The recovery claim closed the old session: the historical retry is
+    // answered `Expired` and never executed again.
     let duplicate = apply(&mut recovered, &old);
     assert!(duplicate.duplicate);
-    assert_eq!(duplicate.outcome, LogicalOutcome::SnapshotPublished(orphan));
+    assert_eq!(
+        duplicate.outcome,
+        LogicalOutcome::Refused(LogicalRefusal::Expired)
+    );
     assert_eq!(
         recovered.state.snapshots.len(),
         1,

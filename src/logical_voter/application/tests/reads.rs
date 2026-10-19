@@ -50,7 +50,7 @@ fn read_bound_is_stable_across_growth_and_actual_allocations_are_charged() {
         Err(ApplicationError::ReceiptBudget)
     );
     let outcome = a.read_at(2, LogicalQuery::Outcome(c.operation)).unwrap();
-    let LogicalRead::Outcome(Some(s)) = &outcome else {
+    let LogicalRead::Outcome(LogicalOutcomeLookup::Retained(s)) = &outcome else {
         panic!("retained action");
     };
     assert_eq!(

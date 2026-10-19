@@ -49,8 +49,19 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone> StateM
         &mut self,
         entries: &[LogEntry],
     ) -> Result<Vec<LogicalReceipt>, ApplicationError> {
+        // The test journal stays out of the working copy.
+        #[cfg(test)]
+        let mut journal = self.journal.take();
         let mut next = self.clone();
-        let receipts = next.apply_entries(entries)?;
+        let result = next.apply_entries(entries);
+        #[cfg(test)]
+        {
+            if let (Ok(_), Some(journal)) = (&result, &mut journal) {
+                journal.extend_from_slice(entries);
+            }
+            self.journal = journal;
+        }
+        let receipts = result?;
         self.state = next.state;
         Ok(receipts)
     }
