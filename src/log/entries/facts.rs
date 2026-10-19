@@ -321,6 +321,7 @@ pub(super) fn totals_of(entries: &[LogEntry]) -> Option<Totals> {
     })
 }
 /// `slots` entry records plus every retained payload.
+#[inline]
 pub(super) fn charge_of(entries: &[LogEntry], slots: usize) -> Option<usize> {
     entries
         .iter()
