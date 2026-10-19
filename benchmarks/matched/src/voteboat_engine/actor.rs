@@ -17,6 +17,29 @@ mod tests;
 mod pending_replies;
 use pending_replies::PendingReplies;
 
+/// One collection pass's originals.
+enum Collected {
+    /// A lone original, proposed with `Event::Propose`.
+    One(OperationId, Vec<u8>),
+    /// Two or more originals, staged once in the core's builder.
+    Batch(ProposalBatch),
+}
+impl Collected {
+    fn len(&self) -> usize {
+        match self {
+            Self::One(..) => 1,
+            Self::Batch(batch) => batch.len(),
+        }
+    }
+    #[cfg(test)]
+    fn into_batch(self) -> ProposalBatch {
+        match self {
+            Self::One(..) => panic!("a lone original is not staged"),
+            Self::Batch(batch) => batch,
+        }
+    }
+}
+
 pub(super) struct Parts<const TRACE: bool = false> {
     pub slot: usize,
     pub core: Raft,
@@ -207,32 +230,30 @@ impl<const TRACE: bool> Actor<TRACE> {
     }
     fn requests(&mut self, first: Request) -> Result<(), Failure> {
         let started = Recorder::<TRACE>::start();
-        let batch = self.collect(first);
+        let collected = self.collect(first);
         self.attribution.finish(
             Phase::HostAdmission,
             started,
-            batch.is_err(),
-            batch.as_ref().map_or(0, ProposalBatch::len),
+            collected.is_err(),
+            collected.as_ref().map_or(0, Collected::len),
         );
-        let batch = batch?;
-        let width = batch.len();
+        let collected = collected?;
+        let width = collected.len();
         let started = Recorder::<TRACE>::start();
-        let result = self.parts.core.propose_entries(batch);
+        let result = match collected {
+            Collected::One(operation, bytes) => {
+                self.parts.core.step(Event::Propose { operation, bytes })
+            }
+            Collected::Batch(batch) => self.parts.core.propose_entries(batch),
+        };
         self.attribution
             .finish(Phase::Core, started, result.is_err(), width);
         let effects = result.map_err(debug_error)?;
         self.parts.stats[self.parts.slot].record_proposals(width)?;
         self.effects(effects)
     }
-    fn collect(&mut self, first: Request) -> Result<ProposalBatch, Failure> {
+    fn collect(&mut self, first: Request) -> Result<Collected, Failure> {
         let capacity = self.parts.core.batch_limits().max_proposal_entries;
-        // An oversized request still reaches the shape check in `include`.
-        let mut batch = self
-            .parts
-            .core
-            .proposal_batch(first.originals.len().min(capacity))
-            .map_err(debug_error)?;
-        self.include(first, &mut batch)?;
         // Only requests already queued when the pass starts. Peer progress that
         // arrives during the pass is handled before the next pass, not by cutting
         // this one, so batch width does not track follower reply latency.
@@ -243,6 +264,20 @@ impl<const TRACE: bool> Actor<TRACE> {
                 arrival();
             }
         }
+        // A pass of one original takes the core's single-proposal event, as
+        // before the builder; the builder stages wider passes once.
+        if ready == 0 && first.originals.len() == 1 {
+            let (operation, bytes) = self.include_one(first)?;
+            self.reserve(size_of::<Event>() + bytes.capacity())?;
+            return Ok(Collected::One(operation, bytes));
+        }
+        // An oversized request still reaches the shape check in `include`.
+        let mut batch = self
+            .parts
+            .core
+            .proposal_batch(first.originals.len().min(capacity))
+            .map_err(debug_error)?;
+        self.include(first, &mut batch)?;
         while batch.len() < capacity && ready > 0 {
             ready -= 1;
             match self.parts.receiver.try_recv() {
@@ -260,9 +295,9 @@ impl<const TRACE: bool> Actor<TRACE> {
             }
         }
         self.reserve(batch.retained_bytes())?;
-        Ok(batch)
+        Ok(Collected::Batch(batch))
     }
-    fn include(&mut self, request: Request, batch: &mut ProposalBatch) -> Result<(), Failure> {
+    fn admissible(&self, request: &Request) -> Result<(), Failure> {
         if request.originals.is_empty()
             || request.originals.len() > self.parts.core.batch_limits().max_proposal_entries
         {
@@ -271,6 +306,10 @@ impl<const TRACE: bool> Actor<TRACE> {
         if self.pending.len() + request.originals.len() > self.parts.settings.clients * 4 + 1 {
             return Err("original result budget exceeded".into());
         }
+        Ok(())
+    }
+    fn include(&mut self, request: Request, batch: &mut ProposalBatch) -> Result<(), Failure> {
+        self.admissible(&request)?;
         for Original {
             operation,
             bytes,
@@ -283,6 +322,22 @@ impl<const TRACE: bool> Actor<TRACE> {
             batch.push(operation, bytes).map_err(debug_error)?;
         }
         Ok(())
+    }
+    /// `include` for a request of exactly one original, without a builder.
+    fn include_one(&mut self, request: Request) -> Result<(OperationId, Vec<u8>), Failure> {
+        self.admissible(&request)?;
+        let Some(Original {
+            operation,
+            bytes,
+            reply,
+        }) = request.originals.into_iter().next()
+        else {
+            return Err("original proposal/reply shape differs".into());
+        };
+        if self.pending.insert(operation, reply).is_some() {
+            return Err("duplicate original admission".into());
+        }
+        Ok((operation, bytes))
     }
     fn effects(&mut self, initial: Vec<Effect>) -> Result<(), Failure> {
         let mut effects = VecDeque::from(initial);
