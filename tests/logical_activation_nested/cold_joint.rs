@@ -41,17 +41,11 @@ fn run(protocol: NativePeerProtocol) {
         .map(|slot| Cluster::new(protocol, slot, &clock))
         .collect::<Vec<_>>();
     let facts = original(&mut clusters, protocol, &clock);
-    for cluster in &mut clusters {
-        cluster.close();
-    }
+    Cluster::close_all(&mut clusters);
     eprintln!("367 all12 original physical workers joined and sockets rebound at Joint");
-    for cluster in &mut clusters {
-        cluster.open(NativeOpenMode::Recover);
-    }
+    Cluster::open_all(&mut clusters, NativeOpenMode::Recover);
     restore::complete(&mut clusters, protocol, &clock, facts);
-    for cluster in clusters {
-        cluster.finish();
-    }
+    Cluster::finish_all(clusters);
     eprintln!("367 restored all12 original provider owners joined and sockets rebound");
 }
 fn original(clusters: &mut [Cluster], protocol: NativePeerProtocol, clock: &SimClock) -> Facts {

@@ -270,21 +270,14 @@ pub(super) fn target_member<'a>(
     };
     super::assembly::target(lower, middle, descriptors, &target_image, mode.0)
 }
-fn finish_clusters(mut originals: Vec<Cluster>, mut first: Cluster, mut second: Option<Cluster>) {
-    for cluster in &mut originals {
-        cluster.checkpoint();
-    }
-    first.checkpoint();
-    if let Some(cluster) = &mut second {
-        cluster.checkpoint();
-    }
-    for cluster in originals {
-        cluster.finish();
-    }
-    first.finish();
-    if let Some(cluster) = second {
-        cluster.finish();
-    }
+fn finish_clusters(originals: Vec<Cluster>, first: Cluster, second: Option<Cluster>) {
+    // Every cluster is checkpointed and closed in lockstep, so none sits
+    // unpolled while shared protocol time advances (see `Cluster::wait_all`).
+    let mut clusters = originals;
+    clusters.push(first);
+    clusters.extend(second);
+    Cluster::checkpoint_all(&mut clusters);
+    Cluster::finish_all(clusters);
 }
 
 fn add_lower<'a>(lower: &mut Lower<'a>, cluster: &'a mut Cluster) {
