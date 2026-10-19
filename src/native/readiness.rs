@@ -26,7 +26,7 @@ use std::{
 };
 
 mod host_wait;
-pub use host_wait::{HostWait, HOST_GATHER, HOST_MAX_WAIT};
+pub use host_wait::{HostWait, HostWaitOutcome, HOST_GATHER, HOST_MAX_WAIT};
 
 /// Reusable descriptor buffer, so steady-state waits do not allocate.
 #[derive(Default)]
