@@ -18,8 +18,11 @@ use crate::{
     quorum::{Limits as PolicyLimits, Policy, Tree},
 };
 mod control_profile;
+mod formats;
+mod partition;
 mod recovery;
 mod semantics;
+mod soak;
 fn group(id: u128) -> GroupIdentity {
     GroupIdentity {
         id: GroupId::new(id).unwrap(),
@@ -66,16 +69,14 @@ fn mapping() -> LogicalStoreMapping {
     )
     .unwrap()
 }
-fn intent(id: u128) -> ChildActivationIntent {
+fn ops(n: u64) -> ChildActivationOperations {
+    ChildActivationOperations::reserved(n).unwrap()
+}
+/// Activation number `n` with its reserved phase IDs.
+fn intent(n: u64) -> ChildActivationIntent {
     ChildActivationIntent::new(
         mapping(),
-        ChildActivationOperations {
-            begin: op(id),
-            learners: op(id + 1),
-            membership: op(id + 2),
-            outcome: op(id + 3),
-            release: op(id + 4),
-        },
+        ChildActivationOperations::reserved(n).unwrap(),
         &config([1, 2, 3], 1),
         ConfigurationId::new(2).unwrap(),
         ConfigurationId::new(3).unwrap(),
@@ -83,16 +84,15 @@ fn intent(id: u128) -> ChildActivationIntent {
     )
     .unwrap()
 }
-fn app(intents: usize, business: usize) -> LogicalActivationApplication<Counter> {
+fn app(intents: usize) -> LogicalActivationApplication<Counter> {
     LogicalActivationApplication::new(
         group(1),
         vec![mapping()],
         LogicalActivationLimits {
             intents,
-            business_operations: business,
             ..LogicalActivationLimits::default()
         },
-        Counter::new(business).unwrap(),
+        Counter::new(16).unwrap(),
     )
     .unwrap()
 }

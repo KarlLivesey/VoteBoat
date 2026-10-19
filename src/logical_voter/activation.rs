@@ -33,7 +33,7 @@ mod state;
 mod tests;
 mod traits;
 use state::{ControlCommand, ControlState};
-pub const LOGICAL_ACTIVATION_SCHEMA: u64 = 0x5642_4143_5449_0001;
+pub const LOGICAL_ACTIVATION_SCHEMA: u64 = 0x5642_4143_5449_0002;
 pub const LOGICAL_ACTIVATION_RESPONSE_SCHEMA: u64 = 0x5642_4143_5452_0001;
 const CONTROL_BYTES: usize = 480;
 const BUSINESS_HEADER: usize = 9;
@@ -45,7 +45,6 @@ pub struct LogicalActivationApplication<A> {
     limits: LogicalActivationLimits,
     inner: A,
     control: ControlState,
-    business_operations: BTreeSet<OperationId>,
 }
 impl<A: ProposalAdmission + CheckpointStateMachine> LogicalActivationApplication<A>
 where
@@ -83,7 +82,6 @@ where
             limits,
             inner,
             control: ControlState::default(),
-            business_operations: BTreeSet::new(),
         };
         a.checkpoint(limits.checkpoint_bytes)?;
         Ok(a)

@@ -14,8 +14,9 @@
 // rights and limitations under the RPL.
 //! Genuine bootstrap files and member Nodes; no configuration or proof seeding.
 use super::*;
+use harness::{FixtureClock, Observed, PortLease, SimClock};
 use std::{
-    net::{SocketAddr, TcpListener, UdpSocket},
+    net::SocketAddr,
     path::PathBuf,
     sync::{
         atomic::{AtomicU64, Ordering},
@@ -36,13 +37,16 @@ use voteboat::{
 pub struct Members {
     pub slot: usize,
     pub nodes: Vec<cluster::ChildNode>,
-    pub clock: Instant,
+    pub clock: SimClock,
     pub root: PathBuf,
     pub protocol: NativePeerProtocol,
     addresses: Vec<SocketAddr>,
+    // Owned for the whole test, including the enrolled learner's address
+    // before enrollment.
+    leases: Vec<PortLease>,
 }
 impl Members {
-    pub fn new(protocol: NativePeerProtocol, slot: usize, clock: Instant) -> Self {
+    pub fn new(protocol: NativePeerProtocol, slot: usize, clock: &SimClock) -> Self {
         static NEXT: AtomicU64 = AtomicU64::new(1);
         let root = std::env::temp_dir().join(format!(
             "voteboat-activation-member-{}-{}",
@@ -50,34 +54,26 @@ impl Members {
             NEXT.fetch_add(1, Ordering::Relaxed)
         ));
         std::fs::create_dir(&root).unwrap();
-        let sockets: Vec<_> = (0..groups::ids(slot).len())
-            .map(|_| {
-                let tcp = TcpListener::bind("127.0.0.1:0").unwrap();
-                let udp = UdpSocket::bind(tcp.local_addr().unwrap()).unwrap();
-                (tcp, udp)
-            })
-            .collect();
-        let addresses = sockets
-            .iter()
-            .map(|(t, _)| t.local_addr().unwrap())
+        let leases = (0..groups::ids(slot).len())
+            .map(|_| PortLease::acquire(protocol))
             .collect::<Vec<_>>();
-        drop(sockets);
+        let addresses = leases.iter().map(PortLease::address).collect();
         let mut host = Self {
             root,
             slot,
             protocol,
             addresses,
-            clock,
+            leases,
+            clock: clock.clone(),
             nodes: Vec::new(),
         };
         for id in groups::ids(slot).into_iter().take(3) {
             host.create_bootstrap(id);
         }
-        host.nodes = groups::ids(slot)
-            .into_iter()
-            .take(3)
-            .map(|id| host.open(id))
-            .collect();
+        for id in groups::ids(slot).into_iter().take(3) {
+            let node = host.open(id);
+            host.nodes.push(node);
+        }
         host.nodes[0]
             .control(groups::mapping(slot).child, NodeControl::Campaign)
             .unwrap();
@@ -149,7 +145,15 @@ impl Members {
             provisioned_stores: groups::stores(self.slot),
         }
     }
-    pub fn open(&self, id: u64) -> cluster::ChildNode {
+    fn position(&self, id: u64) -> usize {
+        groups::ids(self.slot)
+            .iter()
+            .position(|n| *n == id)
+            .unwrap()
+    }
+    pub fn open(&mut self, id: u64) -> cluster::ChildNode {
+        let slot = self.position(id);
+        self.leases[slot].handoff();
         let selected = self.config(id);
         let limits = selected.startup.limits;
         let now = self.now();
@@ -191,10 +195,11 @@ impl Members {
                 groups::physical_log_limits(),
             )
             .unwrap();
-        self.nodes.push(self.open(4));
+        let node = self.open(4);
+        self.nodes.push(node);
     }
     pub fn now(&self) -> MonoTime {
-        MonoTime(self.clock.elapsed().as_millis() as u64)
+        self.clock.now()
     }
     pub fn leader(&self) -> Option<usize> {
         self.nodes.iter().position(|n| {
@@ -211,36 +216,48 @@ impl Members {
         })
     }
     pub fn poll(&mut self) {
-        let now = self.now();
+        let now = self.clock.round(Observed::nodes(&self.nodes));
         for n in &mut self.nodes {
             n.poll(now, NodePollBudget::default()).unwrap();
         }
         std::thread::park_timeout(Duration::from_millis(1));
     }
     pub fn wait(&mut self, done: impl Fn(&Self) -> bool) {
-        let end = Instant::now() + Duration::from_secs(15);
+        let end = harness::Wait::new(&self.clock, harness::LIVENESS_MS);
         while !done(self) {
             self.poll();
             assert!(
-                Instant::now() < end,
+                end.within(&self.clock),
                 "actual member progress: {}",
                 self.root.display()
             );
         }
     }
     pub fn finish(mut self) {
+        // Retained records are never removed, so this is the workflow's peak.
+        let retained = retained::group(&self.nodes, self.slot);
+        eprintln!(
+            "336 retained group={} protocol_time={:?} {retained:?}",
+            groups::mapping(self.slot).child.id.get(),
+            self.clock.now(),
+        );
+        assert!(
+            retained.protocol <= retained::PROTOCOL_ACTIONS,
+            "group {} retained {} protocol actions; the lifetime preflight budgets {}",
+            groups::mapping(self.slot).child.id.get(),
+            retained.protocol,
+            retained::PROTOCOL_ACTIONS
+        );
         for n in &mut self.nodes {
             n.begin_shutdown();
         }
         self.wait(|h| h.nodes.iter().all(|n| n.is_drained()));
-        for n in self.nodes.drain(..) {
+        // Rebind each address as soon as its own node has joined: this proves
+        // the node released it, while the lease still owns the port.
+        // Nodes are opened in `groups::ids` order, the same order as leases.
+        for (n, lease) in self.nodes.drain(..).zip(&mut self.leases) {
             super::super::cleanup::join(n);
-        }
-        for address in self.addresses {
-            drop((
-                TcpListener::bind(address).unwrap(),
-                UdpSocket::bind(address).unwrap(),
-            ));
+            lease.reclaim();
         }
         std::fs::remove_dir_all(self.root).unwrap();
     }

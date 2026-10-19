@@ -5,7 +5,7 @@
 //! authenticated complete parent quorum or nine-owner native network history.
 use super::{
     aliases::Bridge,
-    cluster::{Cluster, HISTORY},
+    cluster::{serial, Cluster},
     drive::claim_in,
     parent::Parent,
     setup, support,
@@ -301,7 +301,7 @@ fn consume_read(parent: &mut Parent, output: ReadCompletion<i64>) {
     assert_eq!(parent.apps[&setup::mapping().parent].read_calls(), 1);
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut cluster = Cluster::new(protocol);
     let clock = cluster.clock;
     let mut bridge =
@@ -352,7 +352,7 @@ fn discard(parent: &mut Parent) {
 }
 #[test]
 fn defective_bounded_read_codec_fences_once_and_preserves_original_nonpositive_completion() {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut cluster = Cluster::new(NativePeerProtocol::TcpTls);
     let clock = cluster.clock;
     let mut bridge =

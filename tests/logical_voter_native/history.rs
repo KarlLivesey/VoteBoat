@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::{
-    cluster::{Cluster, HISTORY},
+    cluster::{serial, Cluster},
     setup, support,
 };
 use voteboat::{
@@ -63,7 +63,7 @@ fn inspect_recovery_views(image: &VerifiedLogicalImage) {
     assert_eq!(snapshots.identity().group, setup::mapping().parent);
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut cluster = Cluster::new(protocol);
     let first = cluster.claim(1, 7001, true);
     inspect(&first, 1, 1);
@@ -136,7 +136,7 @@ fn quic_child_claim_checkpoint_suffix_and_cold_reopen() {
 }
 #[test]
 fn incompatible_mapping_refuses_without_consuming_child_ownership() {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut cluster = Cluster::new(NativePeerProtocol::TcpTls);
     let wrong = LogicalStoreMapping {
         store: support::identity(102),

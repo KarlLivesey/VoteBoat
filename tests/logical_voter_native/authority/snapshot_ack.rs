@@ -3,7 +3,7 @@
 //! Trusted local snapshot inputs; original Raft outputs require real child permits.
 use super::super::{
     aliases::Bridge,
-    cluster::{Cluster, HISTORY},
+    cluster::{serial, Cluster},
     drive::claim_in,
     parent::Parent,
     persistence::{append, input, pump_providers, settle},
@@ -75,7 +75,7 @@ fn acknowledge(
     );
 }
 fn history(protocol: NativePeerProtocol) {
-    let _guard = HISTORY.lock().unwrap();
+    let _guard = serial();
     let mut cluster = Cluster::new(protocol);
     let clock = cluster.clock;
     let mut bridge =

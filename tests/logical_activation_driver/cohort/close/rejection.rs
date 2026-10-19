@@ -25,8 +25,8 @@ mod fault;
 
 #[test]
 fn shutdown_rejection_retains_original_cancellation_before_later_provider_fault() {
-    let _serial = cluster::HISTORY.lock().unwrap();
-    let clock = Instant::now();
+    let _serial = crate::history_guard();
+    let clock = &harness::SimClock::default();
     let mut first = members::Members::new(NativePeerProtocol::TcpTls, 0, clock);
     let mut second = members::Members::new(NativePeerProtocol::TcpTls, 1, clock);
     let mut third = members::Members::new(NativePeerProtocol::TcpTls, 2, clock);
@@ -41,7 +41,7 @@ fn shutdown_rejection_retains_original_cancellation_before_later_provider_fault(
     let gate = gate::Observed::default();
     let fault = fault::Fault::default();
     let (channels, [mut sender, mut opposite, mut idle]) =
-        assembly::parents(&images, progress::now(clock), gate.clone(), fault.clone());
+        assembly::parents(&images, clock, gate.clone(), fault.clone());
     progress::hold(&mut a, &mut sender, clock, &gate);
     assert!(progress::lower_drained(&mut sender, &a));
     assert_eq!(gate.borrow().accepted, 7);
@@ -80,7 +80,6 @@ fn shutdown_rejection_retains_original_cancellation_before_later_provider_fault(
             .into_values()
             .chain(opposite.sessions.into_values())
             .chain(idle.sessions.into_values()),
-        progress::now(clock),
     );
     first.finish();
     second.finish();
@@ -89,7 +88,7 @@ fn shutdown_rejection_retains_original_cancellation_before_later_provider_fault(
 
 fn reject(
     sender: &mut fixture::FacadeNode,
-    clock: Instant,
+    clock: &harness::SimClock,
     fault: &fault::Fault,
     binding: OutboundBinding,
 ) {

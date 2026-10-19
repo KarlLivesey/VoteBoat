@@ -15,9 +15,9 @@
 use super::*;
 #[test]
 fn one_replicated_slot_retains_busy_terminal_and_first_positions() {
-    let mut a = app(3, 2);
-    let i = intent(10);
-    let competing = intent(20);
+    let mut a = app(3);
+    let i = intent(1);
+    let competing = intent(2);
     let business = a.business(&5i64.to_le_bytes()).unwrap();
     let r = a.apply_batch(&[entry(1, op(100), business)]).unwrap();
     assert!(
@@ -26,8 +26,8 @@ fn one_replicated_slot_retains_busy_terminal_and_first_positions() {
     let first = begin(&mut a, &i);
     assert_eq!(first.first, ActivationPosition { index: 2, term: 4 });
     let busy = begin(&mut a, &competing);
-    assert_eq!(busy.outcome, ChildActivationOutcome::Busy(op(10)));
-    assert_eq!(a.active(), Some(op(10)));
+    assert_eq!(busy.outcome, ChildActivationOutcome::Busy(ops(1).begin));
+    assert_eq!(a.active(), Some(ops(1).begin));
     assert_eq!(a.inner.read_at(3, ()).unwrap(), 5);
     finish(&mut a, &i);
     assert_eq!(a.active(), None);
@@ -40,20 +40,20 @@ fn one_replicated_slot_retains_busy_terminal_and_first_positions() {
     assert_eq!(late_busy.first, busy.first);
     assert_eq!(late_busy.outcome, busy.outcome);
     assert_eq!(a.active(), None);
-    begin(&mut a, &intent(30));
-    assert_eq!(a.active(), Some(op(30)));
+    begin(&mut a, &intent(3));
+    assert_eq!(a.active(), Some(ops(3).begin));
     assert_eq!(a.inner.applied_index(), a.applied_index());
 }
 #[test]
-fn reserved_terminal_capacity_survives_full_business_and_intent_lifetimes() {
-    let mut a = app(1, 1);
-    let i = intent(10);
+fn reserved_terminal_capacity_survives_full_intent_lifetime() {
+    let mut a = app(1);
+    let i = intent(1);
     let bytes = a.business(&7i64.to_le_bytes()).unwrap();
     a.apply_batch(&[entry(1, op(100), bytes)]).unwrap();
     begin(&mut a, &i);
-    let fresh = a.begin(&intent(20)).unwrap();
+    let fresh = a.begin(&intent(2)).unwrap();
     assert_eq!(
-        a.validate_proposal(op(20), &fresh, std::iter::empty()),
+        a.validate_proposal(ops(2).begin, &fresh, std::iter::empty()),
         Err(ApplicationError::DedupCapacity)
     );
     let outcome = codec::command(&final_command(&i), CONTROL_BYTES).unwrap();
@@ -75,11 +75,11 @@ fn reserved_terminal_capacity_survives_full_business_and_intent_lifetimes() {
 }
 #[test]
 fn malformed_late_and_unprepared_phases_do_not_partially_apply() {
-    let mut a = app(2, 2);
-    let i = intent(10);
+    let mut a = app(2);
+    let i = intent(1);
     begin(&mut a, &i);
     let absent = ControlCommand::Release {
-        begin: op(10),
+        begin: ops(1).begin,
         outcome: ActivationPosition { index: 1, term: 4 },
     };
     let checkpoint = a.checkpoint(usize::MAX).unwrap();
@@ -87,7 +87,11 @@ fn malformed_late_and_unprepared_phases_do_not_partially_apply() {
     assert!(a
         .apply_batch(&[
             entry(2, op(100), business),
-            entry(3, op(14), codec::command(&absent, CONTROL_BYTES).unwrap())
+            entry(
+                3,
+                ops(1).release,
+                codec::command(&absent, CONTROL_BYTES).unwrap()
+            )
         ])
         .is_err());
     assert_eq!(checkpoint, a.checkpoint(usize::MAX).unwrap());
@@ -97,16 +101,16 @@ fn malformed_late_and_unprepared_phases_do_not_partially_apply() {
     }
     assert!(a
         .validate_proposal(
-            op(13),
+            ops(1).outcome,
             &codec::command(&wrong, CONTROL_BYTES).unwrap(),
             std::iter::empty()
         )
         .is_err());
-    let busy = intent(20);
+    let busy = intent(2);
     begin(&mut a, &busy);
     assert!(a
         .validate_proposal(
-            op(23),
+            ops(2).outcome,
             &codec::command(&final_command(&busy), CONTROL_BYTES).unwrap(),
             std::iter::empty()
         )
@@ -114,7 +118,7 @@ fn malformed_late_and_unprepared_phases_do_not_partially_apply() {
     let outcome = apply(&mut a, final_command(&i));
     assert!(a
         .validate_proposal(
-            op(14),
+            ops(1).release,
             &codec::command(&absent, CONTROL_BYTES).unwrap(),
             std::iter::empty()
         )
@@ -122,7 +126,7 @@ fn malformed_late_and_unprepared_phases_do_not_partially_apply() {
     apply(
         &mut a,
         ControlCommand::Release {
-            begin: op(10),
+            begin: ops(1).begin,
             outcome: outcome.first,
         },
     );
@@ -130,70 +134,96 @@ fn malformed_late_and_unprepared_phases_do_not_partially_apply() {
     assert_eq!(conflict.outcome, ChildActivationOutcome::OperationConflict);
     assert_eq!(conflict.first, outcome.first);
     assert_eq!(
-        a.status(op(10)).unwrap().outcome.unwrap().outcome,
+        a.status(ops(1).begin).unwrap().outcome.unwrap().outcome,
         ChildActivationOutcome::Completed
     );
 }
 #[test]
 fn all_pending_and_retained_phase_aliases_refuse() {
-    let mut a = app(2, 2);
-    let i = intent(10);
+    let mut a = app(2);
+    let i = intent(1);
     let begin_bytes = a.begin(&i).unwrap();
     let business = a.business(&1i64.to_le_bytes()).unwrap();
+    // The ID space is split: a business write can never use a phase ID, with
+    // or without a pending Begin that reserves it.
     for id in i.operations.ids() {
+        assert_eq!(
+            a.validate_proposal(id, &business, std::iter::empty()),
+            Err(ApplicationError::InvalidCommand)
+        );
         assert_eq!(
             a.validate_proposal(
                 id,
                 &business,
-                std::iter::once((op(10), begin_bytes.as_slice()))
+                std::iter::once((ops(1).begin, begin_bytes.as_slice()))
             ),
-            Err(ApplicationError::OperationConflict)
+            Err(ApplicationError::InvalidCommand)
         );
         assert_eq!(
             a.validate_proposal(
-                op(10),
+                ops(1).begin,
                 &begin_bytes,
                 std::iter::once((id, business.as_slice()))
             ),
-            Err(ApplicationError::OperationConflict)
+            Err(ApplicationError::InvalidCommand)
         );
     }
-    let colliding = intent(14);
+    // Two different intents claiming the same phase IDs still conflict.
+    let colliding = ChildActivationIntent::new(
+        mapping(),
+        ops(1),
+        &config([1, 2, 3], 1),
+        ConfigurationId::new(2).unwrap(),
+        ConfigurationId::new(3).unwrap(),
+        &config([1, 2, 4], 5),
+    )
+    .unwrap();
+    assert_ne!(colliding, i);
     let other = a.begin(&colliding).unwrap();
     assert_eq!(
         a.validate_proposal(
-            op(14),
+            ops(1).begin,
             &other,
-            std::iter::once((op(10), begin_bytes.as_slice()))
+            std::iter::once((ops(1).begin, begin_bytes.as_slice()))
         ),
         Err(ApplicationError::OperationConflict)
     );
-    a.apply_batch(&[entry(1, op(12), business)]).unwrap();
+    // Apply refuses a reserved business ID atomically, even after a valid one.
+    let checkpoint = a.checkpoint(usize::MAX).unwrap();
     assert_eq!(
-        a.validate_proposal(op(10), &begin_bytes, std::iter::empty()),
-        Err(ApplicationError::OperationConflict)
+        a.apply_batch(&[
+            entry(1, op(100), business.clone()),
+            entry(2, ops(1).membership, business)
+        ])
+        .err(),
+        Some(ApplicationError::InvalidCommand)
     );
+    assert_eq!(a.checkpoint(usize::MAX).unwrap(), checkpoint);
+    assert_eq!(a.applied_index(), 0);
+    assert!(a
+        .validate_proposal(ops(1).begin, &begin_bytes, std::iter::empty())
+        .is_ok());
 }
 #[test]
 fn malformed_configuration_or_cross_incarnation_cannot_begin() {
-    let mut i = intent(10);
+    let mut i = intent(1);
     i.target[2] = ActivationVoter {
         node: NodeId::new(5).unwrap(),
         store: i.old[0].store,
     };
     assert!(i.validate().is_err());
-    i = intent(10);
+    i = intent(1);
     i.target[0].store.incarnation = StoreIncarnation::new(2).unwrap();
     assert!(i.validate().is_err());
-    i = intent(10);
+    i = intent(1);
     i.operations.release = i.operations.outcome;
     assert!(i.validate().is_err());
-    i = intent(10);
+    i = intent(1);
     i.mapping.parent.incarnation = GroupIncarnation::new(2).unwrap();
-    assert!(app(1, 1).begin(&i).is_err());
+    assert!(app(1).begin(&i).is_err());
     assert!(ChildActivationIntent::new(
         mapping(),
-        intent(10).operations,
+        intent(1).operations,
         &config([1, 2, 3], 1),
         ConfigurationId::new(2).unwrap(),
         ConfigurationId::new(3).unwrap(),

@@ -28,8 +28,8 @@ mod rejection;
 mod shutdown;
 #[test]
 fn running_logical_owner_retains_original_partial_send_on_real_native_peer_close() {
-    let _serial = cluster::HISTORY.lock().unwrap();
-    let clock = Instant::now();
+    let _serial = crate::history_guard();
+    let clock = &harness::SimClock::default();
     let mut first = members::Members::new(NativePeerProtocol::TcpTls, 0, clock);
     let mut second = members::Members::new(NativePeerProtocol::TcpTls, 1, clock);
     let mut third = members::Members::new(NativePeerProtocol::TcpTls, 2, clock);
@@ -43,7 +43,7 @@ fn running_logical_owner_retains_original_partial_send_on_real_native_peer_close
     ];
     let observed = gate::Observed::default();
     let (channels, [mut sender, mut opposite, mut idle]) =
-        assembly::parents(&images, progress::now(clock), observed.clone());
+        assembly::parents(&images, clock, observed.clone());
     progress::hold(&mut a, &mut sender, clock, &observed);
     progress::close_peer(&mut b, &mut opposite, clock);
     progress::fail_running(&mut a, &mut sender, clock);
@@ -66,7 +66,6 @@ fn running_logical_owner_retains_original_partial_send_on_real_native_peer_close
             .into_values()
             .chain(opposite.sessions.into_values())
             .chain(idle.sessions.into_values()),
-        progress::now(clock),
     );
     first.finish();
     second.finish();

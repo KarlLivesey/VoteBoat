@@ -38,7 +38,7 @@ fn complete(host: &mut Cluster, original: &Program) {
     assert!(driver.is_drained());
 }
 fn cold(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut host = Cluster::new(protocol, 8, [100, 100]);
     let original = program(20, 0, 91);
     pause_at(&mut host, &original, ProgramDriverStage::Prepare(0), true);
@@ -135,7 +135,7 @@ fn quic_original_prepares_checkpoint_suffix_cold_reopen() {
     cold(NativePeerProtocol::Quic)
 }
 fn contention(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut host = Cluster::new(protocol, 8, [100, 100]);
     let original = program(30, 0, 95);
     pause_at(&mut host, &original, ProgramDriverStage::Prepare(2), true);
@@ -177,7 +177,7 @@ fn quic_read_dependency_locks_contention_abort_and_real_leader_replacement() {
     contention(NativePeerProtocol::Quic)
 }
 fn lost(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut host = Cluster::new(protocol, 8, [100, 100]);
     for (version, stage) in [
         ProgramDriverStage::Decide,

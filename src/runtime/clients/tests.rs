@@ -79,7 +79,7 @@ fn selected() -> ClientRouter<CounterReceipt> {
         .unwrap()
 }
 fn release() -> ClientRequest {
-    let mut bytes = b"VBACTA01\x03".to_vec();
+    let mut bytes = b"VBACTA02\x03".to_vec();
     bytes.extend_from_slice(&10u128.to_le_bytes());
     bytes.extend_from_slice(&4u64.to_le_bytes());
     bytes.extend_from_slice(&1u64.to_le_bytes());

@@ -14,7 +14,7 @@
 // rights and limitations under the RPL.
 use super::*;
 use state::FinalFact;
-pub(super) const COMMAND: &[u8; 8] = b"VBACTA01";
+pub(super) const COMMAND: &[u8; 8] = b"VBACTA02";
 pub(super) struct Encoder {
     pub bytes: Vec<u8>,
     limit: usize,

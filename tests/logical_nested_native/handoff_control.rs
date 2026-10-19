@@ -3,7 +3,7 @@
 //! Original bridge observations settle while an actual child checkpoint stays owned.
 use super::{
     aliases::Top,
-    cluster::{Cluster, HISTORY},
+    cluster::{serial, Cluster},
     host::Host,
     lower::Lower,
     middle, setup,
@@ -16,7 +16,7 @@ use voteboat::{
 mod held;
 #[test]
 fn tcp_observation_handoff_retains_original_child_checkpoint_until_actual_drain() {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let clock = Instant::now();
     let protocol = NativePeerProtocol::TcpTls;
     let mut bottom = (0..9)

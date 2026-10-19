@@ -22,7 +22,7 @@ fn prepared(host: &mut Cluster, original: &TransferSpec) {
     }
 }
 fn cold_resume(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut host = Cluster::new(protocol, 8, [100, 10]);
     let original = spec(20, 9, true);
     let clock = host.clock;
@@ -123,7 +123,7 @@ fn native_quic_lost_prepare_checkpoint_suffix_and_cold_resume() {
 }
 
 fn locked_and_leader(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut host = Cluster::new(protocol, 8, [50, 20]);
     let original = spec(30, 5, false);
     let clock = host.clock;
@@ -182,7 +182,7 @@ fn native_quic_locked_refusal_absent_abort_and_leader_replacement() {
 }
 
 fn lost_release_and_finish(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut host = Cluster::new(protocol, 8, [50, 0]);
     for (id, stage) in [(50, DriverStage::Release(0)), (51, DriverStage::Finish)] {
         let original = spec(id, 2, false);

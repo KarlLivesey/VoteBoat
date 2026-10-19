@@ -4,7 +4,7 @@ use super::{cluster::*, drive::*};
 use voteboat::{native::connect::NativePeerProtocol, transaction::*};
 
 fn commit_refusal(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut host = Cluster::new(protocol, 4, [50, 20]);
     let clock = host.clock;
     let first = spec(1, 7, false);
@@ -55,7 +55,7 @@ fn native_quic_commit_retry_reverse_and_durable_refusal() {
 }
 
 fn capacity(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut host = Cluster::new(protocol, 1, [10, 0]);
     let clock = host.clock;
     let first = spec(10, 2, false);

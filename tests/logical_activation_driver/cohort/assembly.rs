@@ -18,8 +18,9 @@ use voteboat::outbound::OutboundQueue;
 pub fn parents(
     images: &[VerifiedLogicalImage; 3],
     protocol: NativePeerProtocol,
-    now: MonoTime,
+    clock: &harness::SimClock,
 ) -> (channels::Channels, [fixture::FacadeNode; 3]) {
+    let now = harness::FixtureClock::now(clock);
     let descriptors = images
         .iter()
         .enumerate()
@@ -40,7 +41,7 @@ pub fn parents(
         .iter()
         .map(|p| (p.local.owner.authorization(), p.local.outbound.binding()))
         .collect::<Vec<_>>();
-    let mut channels = channels::Channels::new(&descriptors, &bindings, protocol, now);
+    let mut channels = channels::Channels::new(&descriptors, &bindings, protocol, clock);
     for (i, part) in parts.iter_mut().enumerate() {
         part.sessions = channels.take_sessions(i, &descriptors);
     }

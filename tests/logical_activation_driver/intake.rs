@@ -26,9 +26,9 @@ fn held_ordinary_client_quota_preserves_begin_retry_and_fresh_status_quic() {
     history(NativePeerProtocol::Quic);
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = cluster::HISTORY.lock().unwrap();
-    let mut cohort = cluster::Cluster::new_with_application(protocol, fixture::child_application());
-    let clock = cohort.clock;
+    let _serial = crate::history_guard();
+    let mut cohort = cluster::Cluster::simulated(protocol, fixture::child_application());
+    let clock = &cohort.clock.clone();
     let mut bridge =
         LogicalChildBridge::new(&mut cohort.nodes, setup::mapping(), support::node(1)).unwrap();
     let image = drive::claim_in(&mut bridge, clock, 330_001, false);
@@ -72,12 +72,7 @@ fn history(protocol: NativePeerProtocol) {
     node.complete_client(second).unwrap();
     assert!(node.local().clients.is_drained());
     node.close_intake().unwrap();
-    progress::until(
-        &mut bridge,
-        &mut node,
-        clock,
-        fixture::FacadeNode::is_drained,
-    );
+    progress::drain(&mut bridge, &mut node, clock);
     bridge.close();
     assert!(bridge.is_drained());
     drop(bridge);
@@ -91,24 +86,24 @@ fn history(protocol: NativePeerProtocol) {
 fn wait(
     bridge: &mut aliases::Bridge<'_>,
     node: &mut fixture::FacadeNode,
-    clock: Instant,
+    clock: &harness::SimClock,
     ticket: ClientTicket,
 ) -> Output {
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     loop {
         progress::step(bridge, node, clock, 4);
         if let Some(output) = node.poll_client() {
             assert_eq!(output.ticket(), ticket);
             return output;
         }
-        assert!(Instant::now() < end, "original client outcome");
+        assert!(end.within(clock), "original client outcome");
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }
 fn business(
     bridge: &mut aliases::Bridge<'_>,
     node: &mut fixture::FacadeNode,
-    clock: Instant,
+    clock: &harness::SimClock,
     operation: u128,
     delta: i64,
     value: i64,
@@ -159,7 +154,7 @@ fn ordinary_refusal(node: &mut fixture::FacadeNode) {
 fn begin(
     bridge: &mut aliases::Bridge<'_>,
     node: &mut fixture::FacadeNode,
-    clock: Instant,
+    clock: &harness::SimClock,
     intent: &ChildActivationIntent,
     duplicate: bool,
 ) -> ActivationPosition {
@@ -198,7 +193,7 @@ fn begin(
 fn fresh_status(
     bridge: &mut aliases::Bridge<'_>,
     node: &mut fixture::FacadeNode,
-    clock: Instant,
+    clock: &harness::SimClock,
     intent: &ChildActivationIntent,
     first: ActivationPosition,
 ) {
@@ -208,7 +203,7 @@ fn fresh_status(
             ActivationQuery::Status(intent.operations().begin),
         )
         .unwrap();
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(clock, harness::LIVENESS_MS);
     loop {
         progress::step(bridge, node, clock, 4);
         if let Some(output) = node.poll_read() {
@@ -230,7 +225,7 @@ fn fresh_status(
                 other => panic!("original fresh Status {other:?}"),
             }
         }
-        assert!(Instant::now() < end, "original fresh Status progress");
+        assert!(end.within(clock), "original fresh Status progress");
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }

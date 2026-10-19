@@ -24,8 +24,8 @@ fn full_child_replacement_retains_original_client_byte_and_read_count_pressure_q
     history(NativePeerProtocol::Quic);
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = cluster::HISTORY.lock().unwrap();
-    let clock = Instant::now();
+    let _serial = crate::history_guard();
+    let clock = &harness::SimClock::default();
     eprintln!("338 stage=actual_native_bootstraps");
     let mut target_members = members::Members::new(protocol, 0, clock);
     let mut own_members = members::Members::new(protocol, 1, clock);
@@ -39,12 +39,11 @@ fn history(protocol: NativePeerProtocol) {
         drive::claim_in(&mut sibling, clock, 33503, false),
     ];
     let representative = images[0].representative();
-    let now = MonoTime(clock.elapsed().as_millis() as u64);
-    let (channels, [left, mut parent, right]) = construction::parents(&images, protocol, now);
+    let (channels, [left, mut parent, right]) = construction::parents(&images, protocol, clock);
     let mut peers = progress::Peers {
         parents: [left, right],
         bridges: [own, sibling],
-        clock,
+        clock: clock.clone(),
     };
     peers.elect(&mut parent, &mut target);
     eprintln!("338 stage=original_business_outputs_and_pressure");
@@ -113,7 +112,6 @@ fn history(protocol: NativePeerProtocol) {
             .into_values()
             .chain(middle.sessions.into_values())
             .chain(right.sessions.into_values()),
-        MonoTime(clock.elapsed().as_millis() as u64),
     );
     target_members.finish();
     own_members.finish();
@@ -152,7 +150,7 @@ fn settle(
     intent: &ChildActivationIntent,
 ) {
     use voteboat::application::StateMachine;
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&peers.clock, harness::LIVENESS_MS);
     loop {
         peers.initial(parent, target);
         let status = parent.local().applications[&intent.mapping().parent]
@@ -179,6 +177,9 @@ fn settle(
         if parents && child {
             return;
         }
-        assert!(Instant::now() < end, "actual full pressured convergence");
+        assert!(
+            end.within(&peers.clock),
+            "actual full pressured convergence"
+        );
     }
 }

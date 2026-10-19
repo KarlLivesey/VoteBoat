@@ -132,7 +132,7 @@ fn selected(limits: ShardLimits) -> Shard<Ready> {
     shard
 }
 fn release() -> Event {
-    let mut bytes = b"VBACTA01\x03".to_vec();
+    let mut bytes = b"VBACTA02\x03".to_vec();
     bytes.extend_from_slice(&10_u128.to_le_bytes());
     bytes.extend_from_slice(&4_u64.to_le_bytes());
     bytes.extend_from_slice(&1_u64.to_le_bytes());

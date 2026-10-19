@@ -5,7 +5,7 @@ use std::time::{Duration, Instant};
 use voteboat::{native::connect::NativePeerProtocol, transaction::*};
 
 fn unavailable(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut host = Cluster::new(protocol, 8, [40, 10]);
     let original = spec(60, 4, false);
     let clock = host.clock;

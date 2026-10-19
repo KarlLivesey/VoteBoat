@@ -69,3 +69,85 @@ and its separate artifact/representation disclosure when examining that experime
 
 Election/scheduling, operation identity and engine-owned application-worker choices
 are recorded engine differences; existing features are preserved.
+
+## Collection-pass rule (H2, 18 October 2026)
+
+This changes the measuring instrument for VoteBoat's actor only; the OpenRaft
+engine and the shared driver are unchanged. Results from before H2 are not
+comparable with results after it: re-baseline main with H2 before gating any
+VoteBoat change on it.
+
+Before H2, a VoteBoat collection pass stopped taking ready client requests as
+soon as any peer message was queued. Batch width therefore tracked follower reply
+latency. A library change that made replication faster was charged extra
+proposal rounds, and so extra Tokio and kernel wake/park work, at 16 server
+workers. Researcher measurement on the quiet Mac (bulk 4096×4, 16 workers): the
+V3b candidate cut library CPU per write by 22%, but proposal rounds rose from
+about 7.7k to 17.3k (mean width 516 → 229), 94% of passes were cut by a queued
+peer message (57% on main), system CPU rose from 30 to 50 ns/write and
+whole-process CPU per write rose 14%. At one worker no pass was cut.
+
+From H2, a pass takes only the requests already queued when it starts, within
+the same `max_proposal_entries` ceiling and the same deferral rule. Peer messages
+queued before a pass are still handled first by the biased loop; peer progress
+that arrives during a pass is handled before the next pass, so it waits at most
+one bounded pass. One path is excepted: a request deferred because it would
+cross the ceiling runs as the next pass before the biased select, so peer
+progress can then wait two passes (more under repeated deferrals). That path
+cannot occur in any valid scoring configuration: each proposal ceiling is the
+request capacity times the request width (1 or 4, `envelopes.rs:18-27`), and
+singleton warmup ends before measurement starts. H2 trades two SCHEMA.md clauses: it reads "already-ready
+original proposals" more literally, and it relaxes "peer progress precedes more
+data" from per request (the old mid-pass check) to per pass. Raft safety,
+persistence, per-original reply order and admission bounds are unchanged.
+
+What the pinned OpenRaft core does (rev `e88bb407`). Its API receiver merges
+consecutive client writes in `BatchRaftMsgReceiver::merge_client_writes`
+(`openraft/src/core/merged_raft_msg_receiver.rs:188-232`, loop at 201-229): it
+takes up to `api_batch_capacity` messages (default 4,096, `config/config.rs:76`;
+64 under Common64) with `api_batch_linger_ms` 0 (`config.rs:77`). Each step calls
+`mpsc_recv_deadline` (`rt/src/async_runtime.rs:282-298`), which tries the
+receiver before checking the deadline, so with zero linger it takes every
+message already available, including ones that arrive while it is merging, and
+stops on an empty queue or a non-mergeable API message. Follower and log
+notifications never cut a merge: the only notification check,
+`rx_notification.peek()` in `process_raft_msg` (`core/raft_core.rs:1427`), sits
+between API messages and applies only when `broadcast_submitted_on_append` is
+on, which defaults to off (`config.rs:736-737`); the harness sets neither option.
+So OpenRaft was never subject to the old VoteBoat cut, and it is not a ready
+snapshot either: it drains until empty.
+
+The alternative was measured. The researcher's V3b study tried "drop the
+mid-pass peer check and keep taking requests until the queue is empty" (quiet
+Mac, three pairs, CPU per write against main in the same session): main bulk-16
++1.6%, bulk-1 −0.9%; V3b bulk-16 −12.0%, bulk-1 −14.6%. It removes the same
+feedback loop, leaves one-worker batching unchanged (the peer cut never fired at
+one worker) and is closer to OpenRaft's merge.
+
+This PR keeps the ready snapshot instead. A pass whose width is fixed when it
+starts is independent of both follower reply timing and client arrival timing
+during the pass, so batch width tracks offered load only; that is the
+"already-ready original proposals" reading of SCHEMA.md. Drain-until-empty would
+make width depend on how many clients the scheduler wakes while the pass runs.
+Both engines share that scheduler effect, but it is still not library work. At
+one worker this makes VoteBoat's passes about 18% narrower than main's and than
+an OpenRaft-like drain.
+
+That +17% in bulk 1-worker leader persists is accepted even though H1's buffer
+candidate was rejected for widening merges by 5.9%. H1's width change was an
+unintended side effect of a runtime change that altered server work under the
+same rule. H2's is the stated rule itself, applied to base and candidate alike,
+and main is re-baselined under it before any gate.
+
+**Old rule.** Every absolute bulk 1-worker number from before H2, and every
+VoteBoat-versus-OpenRaft comparison from before H2, was measured under the old
+rule and is not comparable with H2 results.
+
+Researcher measurement of H2 alone on main (quiet Mac): bulk-16 +0.4%, bulk-1
++0.9%, singletons within ±1% CPU per write, p99 unchanged. Builder measurement
+(five pairs, `validation/performance/h2/`): CPU per write ×1.008 bulk-16, ×0.991
+bulk-1, ×0.993 single-16, ×1.009 single-1. Bulk-16 rounds and width are
+unchanged. At one worker passes are about 18% narrower (rounds +22%), because
+main's one-worker passes, never cut by a peer message, also took requests that
+arrived during the pass. Singleton attribution parity is exact (leader persists
+264,195, width 1).

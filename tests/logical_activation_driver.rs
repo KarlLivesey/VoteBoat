@@ -15,7 +15,7 @@
 #![cfg(feature = "tls")]
 //! Actual three physical child voters and one logical parent voter. This target
 //! qualifies original parent observation ownership, not membership activation.
-use std::time::{Duration, Instant};
+use std::time::Duration;
 use voteboat::{
     identity::*, logical_voter::*, native::connect::NativePeerProtocol, raft::Role, runtime::*,
 };
@@ -39,6 +39,8 @@ pub mod drive;
 mod enrollment;
 #[path = "logical_activation_driver/fixture.rs"]
 mod fixture;
+#[path = "logical_voter_native/harness.rs"]
+pub mod harness;
 #[path = "logical_activation_driver/history.rs"]
 mod history;
 #[path = "logical_activation_driver/intake.rs"]
@@ -58,3 +60,124 @@ pub mod setup;
 #[path = "logical_activation_driver/source_export.rs"]
 mod source_export;
 pub mod support;
+
+// HISTORY serializes independent test-owned hosts; it contains no shared state
+// that another test must discard after a panic.
+fn history_guard() -> std::sync::MutexGuard<'static, ()> {
+    cluster::HISTORY
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+}
+
+#[test]
+fn serial_history_recovers_after_a_test_panic() {
+    let failed = std::panic::catch_unwind(|| {
+        let _serial = history_guard();
+        panic!("intentional test-local serialization poison");
+    });
+    assert!(failed.is_err());
+    let _serial = history_guard();
+    assert!(cluster::HISTORY.is_poisoned());
+    cluster::HISTORY.clear_poison();
+}
+
+#[test]
+fn port_lease_owns_both_halves_and_refuses_while_the_node_is_absent() {
+    use std::{
+        io::{ErrorKind, Read},
+        net::{TcpListener, TcpStream, UdpSocket},
+    };
+    let mut lease = harness::PortLease::acquire(NativePeerProtocol::TcpTls);
+    let address = lease.address();
+    // An absent node's held listener closes each connection at once.
+    let mut stream = TcpStream::connect(address).unwrap();
+    stream.set_read_timeout(Some(harness::HANG)).unwrap();
+    match stream.read(&mut [0]) {
+        Ok(n) => assert_eq!(n, 0),
+        Err(e) => assert_eq!(e.kind(), ErrorKind::ConnectionReset),
+    }
+    // No other socket or lease can take either half.
+    assert_eq!(
+        TcpListener::bind(address).unwrap_err().kind(),
+        ErrorKind::AddrInUse
+    );
+    assert_eq!(
+        UdpSocket::bind(address).unwrap_err().kind(),
+        ErrorKind::AddrInUse
+    );
+    assert_ne!(
+        harness::PortLease::acquire(NativePeerProtocol::TcpTls).address(),
+        address
+    );
+    // The node binds its own half; the unused half stays with the lease.
+    lease.handoff();
+    let node = TcpListener::bind(address).unwrap();
+    assert_eq!(
+        UdpSocket::bind(address).unwrap_err().kind(),
+        ErrorKind::AddrInUse
+    );
+    drop(node);
+    lease.reclaim();
+    assert_eq!(
+        TcpListener::bind(address).unwrap_err().kind(),
+        ErrorKind::AddrInUse
+    );
+}
+
+/// Outer connectors adopt only their own protocol's half. The unused half
+/// stays bound by the lease for the whole workflow, and the lease port comes
+/// from the same pool, with the same legacy-service exclusions, as every
+/// other fixture's `support::ports` lease.
+#[test]
+fn port_lease_adoption_keeps_the_unused_half_and_proves_release() {
+    use std::{
+        io::ErrorKind,
+        net::{TcpListener, UdpSocket},
+        panic::{catch_unwind, AssertUnwindSafe},
+    };
+    let in_use = |error: std::io::Error| assert_eq!(error.kind(), ErrorKind::AddrInUse);
+    let shared_pool = |port: u16| support::ports::candidates(&(0..=0)).any(|p| p == port);
+
+    let mut lease = harness::PortLease::acquire(NativePeerProtocol::TcpTls);
+    let address = lease.address();
+    assert!(
+        shared_pool(address.port()),
+        "{address} outside the shared pool"
+    );
+    let adopted = lease.adopt_tcp();
+    assert_eq!(adopted.local_addr().unwrap(), address);
+    in_use(UdpSocket::bind(address).unwrap_err());
+    // Reclaim is the release proof: it fails while the owner still binds it.
+    assert!(catch_unwind(AssertUnwindSafe(|| lease.reclaim())).is_err());
+    drop(adopted);
+    in_use(UdpSocket::bind(address).unwrap_err());
+    lease.reclaim();
+    in_use(TcpListener::bind(address).unwrap_err());
+    in_use(UdpSocket::bind(address).unwrap_err());
+
+    #[cfg(feature = "quic")]
+    {
+        use std::{io::Read, net::TcpStream};
+        let mut lease = harness::PortLease::acquire(NativePeerProtocol::Quic);
+        let address = lease.address();
+        assert!(
+            shared_pool(address.port()),
+            "{address} outside the shared pool"
+        );
+        let adopted = lease.adopt_udp();
+        assert_eq!(adopted.local_addr().unwrap(), address);
+        // The unused TCP half stays bound and closes every connection.
+        in_use(TcpListener::bind(address).unwrap_err());
+        let mut stream = TcpStream::connect(address).unwrap();
+        stream.set_read_timeout(Some(harness::HANG)).unwrap();
+        match stream.read(&mut [0]) {
+            Ok(n) => assert_eq!(n, 0),
+            Err(e) => assert_eq!(e.kind(), ErrorKind::ConnectionReset),
+        }
+        assert!(catch_unwind(AssertUnwindSafe(|| lease.reclaim())).is_err());
+        drop(adopted);
+        lease.reclaim();
+        in_use(UdpSocket::bind(address).unwrap_err());
+        in_use(TcpListener::bind(address).unwrap_err());
+    }
+}

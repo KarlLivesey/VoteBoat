@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Karl Livesey
 //! All original physical stores restart from real committed Joint membership.
 use super::{
-    cluster::{Cluster, HISTORY},
+    cluster::{serial, Cluster},
     history,
     lower::Lower,
     progress, setup, Middle, Top, UpperBridge,
@@ -35,7 +35,7 @@ fn quic_all_twelve_stores_joint_and_parent_intent_cold_reconstruct_then_final() 
     run(NativePeerProtocol::Quic);
 }
 fn run(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let clock = Instant::now();
     let mut clusters = (0..4)
         .map(|slot| Cluster::new(protocol, slot, clock))

@@ -207,7 +207,6 @@ pub fn app_with_mappings(
         mappings,
         LogicalActivationLimits {
             intents: 2,
-            business_operations: 16,
             command_bytes: 1024,
             checkpoint_bytes: 64 * 1024,
         },

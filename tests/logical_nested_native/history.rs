@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::{
-    cluster::{Cluster, HISTORY},
+    cluster::{serial, Cluster},
     host::Host,
     lower::Lower,
     middle,
@@ -11,7 +11,7 @@ use super::{
 use std::time::Instant;
 use voteboat::native::connect::NativePeerProtocol;
 fn history(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let clock = Instant::now();
     let mut bottom = (0..9)
         .map(|i| Cluster::new(protocol, i, clock))

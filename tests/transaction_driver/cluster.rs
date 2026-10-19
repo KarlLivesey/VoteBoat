@@ -6,7 +6,7 @@ use std::{
     net::{SocketAddr, TcpListener, UdpSocket},
     path::PathBuf,
     sync::{
-        atomic::{AtomicU64, AtomicUsize, Ordering},
+        atomic::{AtomicU64, Ordering},
         Arc, Mutex,
     },
     time::{Duration, Instant},
@@ -22,8 +22,10 @@ use voteboat::{
 
 pub type TransferNode = NativeNode<TransferApplication, NativeServiceConnector>;
 pub static HISTORY: Mutex<()> = Mutex::new(());
+pub fn serial() -> std::sync::MutexGuard<'static, ()> {
+    support::serial::serial(&HISTORY)
+}
 static NEXT: AtomicU64 = AtomicU64::new(1);
-static LISTENER: AtomicUsize = AtomicUsize::new(0);
 
 pub fn groups() -> [GroupIdentity; 3] {
     [77, 78, 79].map(|id| GroupIdentity {
@@ -78,6 +80,7 @@ pub struct Cluster {
     pub clock: Instant,
     root: PathBuf,
     addresses: [SocketAddr; 3],
+    ports: support::ports::PortLease,
     protocol: NativePeerProtocol,
     capacity: usize,
     opening: [i64; 2],
@@ -90,36 +93,19 @@ impl Cluster {
             NEXT.fetch_add(1, Ordering::Relaxed),
         ));
         std::fs::create_dir(&root).unwrap();
-        // Keep all listener candidates outside both hosts' ephemeral dial pool.
-        let reservations = (0..3)
-            .map(|_| {
-                (0..32)
-                    .find_map(|_| {
-                        let port = 20000 + LISTENER.fetch_add(1, Ordering::Relaxed) % 10000;
-                        let tcp =
-                            TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, port as u16)).ok()?;
-                        let udp = UdpSocket::bind(tcp.local_addr().ok()?).ok()?;
-                        Some((tcp, udp))
-                    })
-                    .expect("owned native TCP/UDP listener")
-            })
-            .collect::<Vec<_>>();
-        let addresses = reservations
-            .iter()
-            .map(|(tcp, _)| tcp.local_addr().unwrap())
-            .collect::<Vec<_>>()
-            .try_into()
-            .unwrap();
-        drop(reservations);
+        let ports = support::ports::PortLease::acquire(3);
+        let addresses = ports.addresses();
         let mut host = Self {
             nodes: Vec::new(),
             clock: Instant::now(),
             root,
             addresses,
+            ports,
             protocol,
             capacity,
             opening,
         };
+        host.ports.handoff();
         host.open(NativeOpenMode::Create);
         host
     }

@@ -13,7 +13,9 @@ use voteboat::{
     snapshot_format::NativeSnapshotCodec,
     wire_format::NativeWireCodec,
 };
-pub const BASE: u128 = 356000;
+/// Activation numbers of `intent()` and `second_intent()`.
+pub const FIRST: u64 = 356_000;
+pub const SECOND: u64 = 356_100;
 pub fn physical_ids(slot: usize) -> std::ops::RangeInclusive<u64> {
     (slot as u64 * 3 + 1)..=(slot as u64 * 3 + 3)
 }
@@ -87,7 +89,6 @@ pub fn top_app() -> LogicalActivationApplication<application::App> {
         vec![upper_mapping()],
         LogicalActivationLimits {
             intents: 2,
-            business_operations: 16,
             command_bytes: 1024,
             checkpoint_bytes: 32 * 1024,
         },
@@ -188,7 +189,11 @@ pub fn lower_app(slot: usize) -> LogicalApplication {
                     node: support::node(201 + slot as u64),
                     store: support::identity(2001 + slot as u128),
                 },
-                operation: OperationId::new(BASE + if slot == 3 { 1 } else { 101 }).unwrap(),
+                operation: if slot == 3 {
+                    intent().operations().learners
+                } else {
+                    second_intent().operations().learners
+                },
                 expected: ConfigurationId::new(if slot == 3 { 1 } else { 4 }).unwrap(),
                 configuration: ConfigurationId::new(if slot == 3 { 2 } else { 5 }).unwrap(),
                 source_application_schema: LOGICAL_APPLICATION_SCHEMA,
@@ -230,16 +235,9 @@ pub fn intent() -> ChildActivationIntent {
         BTreeMap::new(),
     )
     .unwrap();
-    let op = |n| OperationId::new(BASE + n).unwrap();
     ChildActivationIntent::new(
         upper_mapping(),
-        ChildActivationOperations {
-            begin: op(0),
-            learners: op(1),
-            membership: op(2),
-            outcome: op(3),
-            release: op(4),
-        },
+        ChildActivationOperations::reserved(FIRST).unwrap(),
         &old,
         ConfigurationId::new(2).unwrap(),
         ConfigurationId::new(3).unwrap(),
@@ -295,16 +293,9 @@ pub fn read_limits() -> ReadInvocationLimits {
 pub fn second_intent() -> ChildActivationIntent {
     let old = current_configuration(4, [201, 202, 204]);
     let target = current_configuration(7, [201, 204, 205]);
-    let op = |n| OperationId::new(BASE + 100 + n).unwrap();
     ChildActivationIntent::new(
         upper_mapping(),
-        ChildActivationOperations {
-            begin: op(0),
-            learners: op(1),
-            membership: op(2),
-            outcome: op(3),
-            release: op(4),
-        },
+        ChildActivationOperations::reserved(SECOND).unwrap(),
         &old,
         ConfigurationId::new(5).unwrap(),
         ConfigurationId::new(6).unwrap(),

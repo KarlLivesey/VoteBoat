@@ -30,7 +30,7 @@ type Recovery = LogicalNodeRecovery<
 pub fn recover(
     sender: fixture::FacadeNode,
     bridge: &mut aliases::Bridge<'_>,
-    clock: Instant,
+    clock: &harness::SimClock,
 ) -> fixture::Parts {
     let mut recovery: Recovery = sender
         .into_recovery()

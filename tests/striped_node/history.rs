@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: RPL-1.5
-use super::cluster::{Cluster, HISTORY};
+use super::cluster::{serial, Cluster};
 use std::time::{Duration, Instant};
 use voteboat::{
     application::{CounterOutcome, CounterReceipt},
@@ -104,7 +104,7 @@ fn files(host: &Cluster) {
     }
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut host = Cluster::new(protocol);
     host.campaign();
     write(&mut host, 1, 7, 7, false);

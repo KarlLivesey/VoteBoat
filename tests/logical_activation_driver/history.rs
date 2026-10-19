@@ -29,7 +29,7 @@ fn original_parent_begin_fresh_status_retry_busy_and_cancel_tcp() {
 fn original_parent_begin_fresh_status_retry_busy_and_cancel_quic() {
     history(NativePeerProtocol::Quic);
 }
-pub(super) fn intent(base: u128) -> ChildActivationIntent {
+pub(super) fn intent(number: u64) -> ChildActivationIntent {
     let c = |nodes: [u64; 3], id| {
         Configuration::new(
             ConfigurationId::new(id).unwrap(),
@@ -46,16 +46,10 @@ pub(super) fn intent(base: u128) -> ChildActivationIntent {
         )
         .unwrap()
     };
-    let op = |offset| OperationId::new(base + offset).unwrap();
     ChildActivationIntent::new(
         setup::mapping(),
-        ChildActivationOperations {
-            begin: op(0),
-            learners: op(1),
-            membership: op(2),
-            outcome: op(3),
-            release: op(4),
-        },
+        // Each distinct `number` is a distinct activation with its reserved IDs.
+        ChildActivationOperations::reserved(number).unwrap(),
         &c([1, 2, 3], 1),
         ConfigurationId::new(2).unwrap(),
         ConfigurationId::new(3).unwrap(),
@@ -80,9 +74,9 @@ fn driver(
     )
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = cluster::HISTORY.lock().unwrap();
-    let mut cohort = cluster::Cluster::new_with_application(protocol, fixture::child_application());
-    let clock = cohort.clock;
+    let _serial = crate::history_guard();
+    let mut cohort = cluster::Cluster::simulated(protocol, fixture::child_application());
+    let clock = &cohort.clock.clone();
     let mut bridge =
         LogicalChildBridge::new(&mut cohort.nodes, setup::mapping(), support::node(1)).unwrap();
     let image = drive::claim_in(&mut bridge, clock, 8000, false);
@@ -164,7 +158,7 @@ fn history(protocol: NativePeerProtocol) {
         Some(original.operations().begin)
     );
     node.close_intake().unwrap();
-    progress::until(&mut bridge, node, clock, fixture::FacadeNode::is_drained);
+    progress::drain(&mut bridge, node, clock);
     bridge.close();
     assert!(bridge.is_drained());
     drop(bridge);

@@ -13,7 +13,7 @@ mod inspection;
 mod phases;
 use inspection::Held;
 fn history(protocol: NativePeerProtocol) {
-    let _serial = super::cluster::HISTORY.lock().unwrap();
+    let _serial = super::cluster::serial();
     let mut children = std::array::from_fn(|slot| Cluster::new(protocol, slot));
     let mut host = Host::new(&mut children, protocol, 9401);
     host.elect(0);

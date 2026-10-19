@@ -21,7 +21,7 @@ pub fn snapshot(
     target: &mut aliases::Bridge<'_>,
 ) -> Snapshot {
     target.checkpoint_backing(0).unwrap();
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&peers.clock, harness::LIVENESS_MS);
     loop {
         peers.step(driver, target);
         if target
@@ -38,7 +38,7 @@ pub fn snapshot(
             break;
         }
         assert!(
-            Instant::now() < end,
+            end.within(&peers.clock),
             "original target durable checkpoint anchor"
         );
     }
@@ -48,7 +48,7 @@ pub fn snapshot(
             Err(SnapshotRouteError::Overloaded) => peers.step(driver, target),
             Err(reason) => panic!("original target export {reason:?}"),
         }
-        assert!(Instant::now() < end, "not-admitted export retry");
+        assert!(end.within(&peers.clock), "not-admitted export retry");
     };
     loop {
         peers.step(driver, target);
@@ -71,6 +71,9 @@ pub fn snapshot(
                 SnapshotExportOutcome::Failed(reason) => panic!("original target load {reason:?}"),
             };
         }
-        assert!(Instant::now() < end, "original target export completion");
+        assert!(
+            end.within(&peers.clock),
+            "original target export completion"
+        );
     }
 }

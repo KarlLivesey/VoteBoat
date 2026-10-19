@@ -1,0 +1,4 @@
+pid=2528180 constrained=yes executable=/home/karllivesey/.t3/worktrees/VoteBoat/t3-bd1523a2/target/debug/deps/logical_voter_network-cf78fc4641aef592
+64.68 73.20 80.05 81/4786 2528182
+2528180  15 logical_voter_n
+pid 2528180's current affinity list: 0-3

@@ -1,0 +1,102 @@
+{
+  "fullSuite": {
+    "sourceHead": "44a64ea1b07d4ecaeda5056ce20669d6a0d9e80a",
+    "command": "cargo +stable test --locked --offline --all-features --no-fail-fast",
+    "exit": 101,
+    "seconds": 6761,
+    "summaries": 125,
+    "passed": 2765,
+    "failed": 1,
+    "ignored": 0,
+    "failedCase": "shared::recovery::tcp_each_stale_group_requires_snapshot_after_transport_restart",
+    "failureLocation": "examples/benchmark/shared_recovery.rs:45:70",
+    "failure": "AddrInUse at UDP bind after TCP :0",
+    "rerunAfterFix": false
+  },
+  "finalSource": {
+    "inputSha256": {
+      "tests/support/ports.rs": "1ca712d1eb94e5ae2ac98e18f87a77155731b779505566834eae840b57e61dc1",
+      "tests/fixture_isolation.rs": "4ef063e9e15cf96ca1a937435e9f4ac09c6b67c0483c631d7718e76f9d4cc291",
+      "src/bin/support/route_discovery/tests.rs": "22488f16f9a34980894dde4f59965c177c7100d941c388426c8d5a76cb87af4f",
+      "examples/native_benchmark.rs": "7b30ac06e0637eb3b98b3a54b110209f7ec1d3aabcedd7d85d656594e64079a9",
+      "examples/benchmark/shared_recovery.rs": "8840c2ca052f0374489ef3af2b9ba39c2f1575c23b0b9a0d718edda2e0ff2193",
+      "examples/benchmark/shared_drain.rs": "5eb9df0f511e0468160acb1a7cef6f0338ea65028282440c0691a6dff1e90933",
+      ".github/workflows/platform-feedback.yml": "3873559d51066599914b333ea5b3a0bfb4e52145c1c8f70689c16c739c9add70",
+      "Cargo.toml": "0119303ea1ba49df7838b6ff164d8a8aefe532d83890462d5364c0113b5b287d",
+      "Cargo.lock": "bd0777853a829872128d0ee80aa44f7e1e515093ceb57b1800840e61dffef6f0"
+    },
+    "fixture": [
+      {
+        "status": "ok",
+        "passed": 7,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 0.09
+      }
+    ],
+    "umask077": [
+      {
+        "status": "ok",
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 0
+      }
+    ],
+    "example": [
+      {
+        "status": "ok",
+        "passed": 56,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 18.35
+      }
+    ],
+    "route": [
+      {
+        "status": "ok",
+        "passed": 8,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 1.6
+      }
+    ],
+    "voterPair": {
+      "affinity": "0-3",
+      "copies": [
+        [
+          {
+            "status": "ok",
+            "passed": 42,
+            "failed": 0,
+            "ignored": 0,
+            "seconds": 14.17
+          }
+        ],
+        [
+          {
+            "status": "ok",
+            "passed": 42,
+            "failed": 0,
+            "ignored": 0,
+            "seconds": 14.18
+          }
+        ]
+      ],
+      "controllerStatuses": "copy A exit 0; copy B exit 0"
+    },
+    "lint": "root fmt and all four strict profiles; matched fmt/strict all-targets; zero diagnostics"
+  },
+  "qualification": "Pending final-source matched-parent matrix, other full feature suites and round-2 reviews. Failed full run retained; focused example correction is56/56, not whole-suite requalification.",
+  "constraints": {
+    "noProductionLibraryOrBenchmarkChanges": true,
+    "activationDriverUntouched": true,
+    "noNewCrates": true,
+    "noNewUnsafe": true,
+    "noLintWeakening": true,
+    "noIgnoredTests": true,
+    "noThresholdChanges": true,
+    "noDetachedJobs": true,
+    "noForeignProcessManipulation": true
+  }
+}

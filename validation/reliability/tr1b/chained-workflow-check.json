@@ -1,0 +1,82 @@
+[
+  {
+    "injected_failure": "test",
+    "executed": [
+      "test",
+      "test_no_default",
+      "test_native"
+    ],
+    "exits": [
+      101,
+      0,
+      0
+    ],
+    "workflow_red": true
+  },
+  {
+    "injected_failure": "test_no_default",
+    "executed": [
+      "test",
+      "test_no_default",
+      "test_native"
+    ],
+    "exits": [
+      0,
+      101,
+      0
+    ],
+    "workflow_red": true
+  },
+  {
+    "injected_failure": "test_native",
+    "executed": [
+      "test",
+      "test_no_default",
+      "test_native"
+    ],
+    "exits": [
+      0,
+      0,
+      101
+    ],
+    "workflow_red": true
+  },
+  {
+    "injected_failure": "none",
+    "executed": [
+      "test",
+      "test_no_default",
+      "test_native"
+    ],
+    "exits": [
+      0,
+      0,
+      0
+    ],
+    "workflow_red": false
+  },
+  {
+    "dependency_result": "success",
+    "workflow_cancelled": false,
+    "expected_next_condition": true
+  },
+  {
+    "dependency_result": "failure",
+    "workflow_cancelled": false,
+    "expected_next_condition": true
+  },
+  {
+    "dependency_result": "timed_out",
+    "workflow_cancelled": false,
+    "expected_next_condition": true
+  },
+  {
+    "dependency_result": "skipped",
+    "workflow_cancelled": false,
+    "expected_next_condition": true
+  },
+  {
+    "workflow_cancelled": true,
+    "expected_next_condition": false
+  }
+]
