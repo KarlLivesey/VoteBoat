@@ -1039,8 +1039,8 @@ Defaults, derived from the store limits:
   retained-entry limit (8,192 entries) beyond its durable snapshot base. The
   scan runs every 10 ms, examines at most 64 groups and allows at most 4
   automatic requests. The count includes noops and configuration entries.
-- **WAL reclaim.** Every 1000 ms the live image is rewritten if at least a
-  sixteenth of the usable capacity (about 4 MiB) is reclaimable; otherwise the
+- **WAL reclaim.** Every 1000 ms the live image is rewritten if at least
+  `min_reclaim_bytes` (a sixteenth of the WAL ceiling, 4 MiB) is reclaimable; otherwise the
   deadline moves on one interval (counted in `skipped`). Any refusal or failed
   completion retries after 100 ms.
 - **Occupancy.** When the WAL reaches half its usable capacity
@@ -1106,7 +1106,8 @@ Rust hosts get the same defaults from `NodeLimits::default()`
 `NodeError::Maintenance(MaintenanceError::CheckpointsUnavailable)` when a group
 has no checkpoint-capable snapshot worker; such a host selects
 `RetentionMode::LifetimeBounded` explicitly. `Node::configure_checkpoints` and
-`Node::configure_wal_maintenance` replace the defaults; passing `None` on a
+`Node::configure_wal_maintenance` replace the defaults (a WAL policy with
+`min_reclaim_bytes: 0` rewrites at every deadline); passing `None` on a
 maintained node returns `MaintenanceError::DisableRequiresLifetimeBounded`. A
 WAL policy's `max_bytes` must equal `PersistenceWorker::reclaim_limit()`, and a
 checkpoint threshold above half the retained-entry limit returns

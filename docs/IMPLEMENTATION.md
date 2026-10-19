@@ -24,7 +24,7 @@ are; LB references them for the audit's L1–L3 rows.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current ST2: checkpoints and WAL reclaim on by default (audit C3, C4, RT4; probes U1, U5) | With default flags all three binaries never checkpointed and never reclaimed the WAL, so every group stopped at 16,384 retained entries or 64 MiB of WAL, and a failed automatic reclaim switched maintenance off silently. Make maintenance the library and binary default, make the opt-out explicit and visible, keep maintenance running through every non-fatal failure, and make a new leader at the retained-entry cap refuse typed instead of failing the node | — | Fail@main runtime and native soaks (recorded) pass past 16,384 entries and 64 MiB; opt-out plus cap gives a typed refusal and a stable leader; startup rejects maintenance settings that would fail at runtime; restart mid-checkpoint and mid-reclaim; native durable CPU/write A/B; fmt, four strict Clippy configurations and matched fmt/Clippy; affected suites in default and all-features | LB |
+| Current ST2 (implemented; in review): checkpoints and WAL reclaim on by default (audit C3, C4, RT4; probes U1, U5) | With default flags all three binaries never checkpointed and never reclaimed the WAL, so every group stopped at 16,384 retained entries or 64 MiB of WAL, and a failed automatic reclaim switched maintenance off silently. Make maintenance the library and binary default, make the opt-out explicit and visible, keep maintenance running through every non-fatal failure, and make a new leader at the retained-entry cap refuse typed instead of failing the node | — | Fail@main runtime and native soaks (recorded) pass past 16,384 entries and 64 MiB; opt-out plus cap gives a typed refusal and a stable leader; startup rejects maintenance settings that would fail at runtime; restart mid-checkpoint and mid-reclaim; native durable CPU/write A/B; fmt, four strict Clippy configurations and matched fmt/Clippy; affected suites in default and all-features | LB |
 | Next NT1: connection generations and listener (audit N1, N3, N6) | Survivors no longer go to recovery after ~27.8 h with one peer down; a port scan cannot kill a node | Rebases on ST2's `native/startup.rs` hunk | Architect plan §3.3 row 2 | LB |
 | Following DR1: application deduplication retirement (audit S1–S3) | `counter_service` no longer refuses every write after 10,000 lifetime writes; the generic `SessionLedger` | — | Architect plan §3.3; Q1 probe harness | LB |
 
@@ -178,9 +178,12 @@ disable), the defaults became:
 - Scan every 10 ms instead of 100 ms. A scan compares counters of at most 64
   groups; scanning sooner finds a due checkpoint before the limit without
   checkpointing more often.
-- An interval deadline rewrites the WAL only when at least 1/16 of the usable
-  capacity is reclaimable; otherwise the deadline moves on one interval
-  (`skipped`). The live estimate is computed at the deadline as well.
+- An interval deadline rewrites the WAL only when at least
+  `WalMaintenancePolicy::min_reclaim_bytes` (default: the ceiling / 16, 4 MiB)
+  is reclaimable; otherwise the deadline moves on one interval (`skipped`).
+  Without it a large live image would be rewritten every second. Zero keeps
+  the old "every deadline" behaviour, which tests with hand-made schedules
+  select explicitly. The live estimate is computed at the deadline as well.
 
 No other part of the plan changed.
 
@@ -241,7 +244,7 @@ No other part of the plan changed.
 | Test | Result |
 | --- | --- |
 | Runtime soak, default `NodeLimits`, counter binary application (`Counter::new(10000)`), 40,960 writes (2.5× the limit) with an election every 2,048, 64 writes per simulated millisecond | All applied; final log index 40,980; peak retained 14,347 entries (< 16,384 asserted: threshold 8,192 plus writes during a checkpoint); checkpoint base 0 → 10,247 → 18,439 at the two samples; 40 s debug |
-| Same, `VOTEBOAT_ST2_SOAK_WRITES=200000` (12×), release | RELEASE_SOAK |
+| Same, `VOTEBOAT_ST2_SOAK_WRITES=200000` (rounded to 200,704; 12×), release | All applied; final index 200,802; peak retained 14,347; base advanced at every sample: [0, 18439, 40979, 55325, 77864, 86057, 108595, 131135, 153673, 176213, 198751]; 49 s |
 | Native soak, `NativeStartup::open_with_protocol_and_timers` (the binaries' path), default limits, 32,768 writes of 4 KiB (128 MiB appended, 2× both limits), clock at 1 ms per 100 polls | All applied; peak WAL 33,031,095 B = 50.0% of the 66,060,288 B usable capacity (the pressure threshold); last rewrite 33,030,992 → 370 B; peak retained 7,582; checkpoint bases [0, 7582, 15163, 22744, 30325]; 4 rewrites in 2,442 simulated ms (the interval alone allows 3); the three native ST2 tests take about 47 s debug and passed three consecutive runs |
 | U1 (`lifetime_bounded_leader_at_the_entry_limit_refuses_typed_and_stays_leader`) | Fill to 16,384; three re-elections: `Running`, `Leader`, term +1 each, `leader_noop_pending`, typed refusal; operator checkpoint frees space; the deferred noop commits in the current term; the next write applies |
 | RT4 fault matrix (`every_reclaim_failure_reschedules_or_recovers_visibly`) | 10 `WorkerError` admission kinds and 7 `StorageError` completion kinds: non-fatal → `Running`, deadline `now + retry_ms`, `failures = 1`, the retry succeeds; `Closed`/`Fenced` admission and `Uncertain`/`Corrupt`/`Fenced` completion → `RecoveryRequired` |
@@ -274,7 +277,9 @@ the measured window.
 | 5 | 3d552e2e → final, repeat | 29.76 → 30.67 (×1.030) | 154 → 215 ms | 7,648 → 6,951 | 1.42 1.14 1.05 1.05 1.03 |
 | 6 | run 3 → final (scan interval only) | 28.46 → 31.69 (×1.113) | 229 → 213 ms | 6,919 → 7,112 | 1.03 1.94 1.72 1.18 0.91 |
 
-Runs 4 and 5 pooled (8 parsed pairs): marginal 29.87 → 31.50 µs (×1.054,
+Runs 4–6 measured `2eb0ff79`; the pushed commit differs only by making the
+skip threshold a policy field (ceiling / 16 instead of capacity / 16: 4.00
+versus 3.94 MiB) and one status field. Runs 4 and 5 pooled (8 parsed pairs): marginal 29.87 → 31.50 µs (×1.054,
 median pair 1.07, range 0.95–1.23), p99 158 → 214 ms (×1.36), applied rate
 7,806 → 6,991/s (×0.90). Run 6 does not separate the 10 ms scan from noise.
 This is a measured regression beyond noise on this host, and it is the cost of
@@ -287,6 +292,19 @@ uses the approved barrier fsync; needs a durability decision) and DR1's bounded
 receipt table. Framework (matched) cells are unaffected by construction: the
 matched workspace builds no node (`grep from_parts benchmarks/matched/src` is
 empty).
+
+**Checks (final commit).** `cargo +stable fmt --all -- --check`; strict Clippy
+(`-D warnings`, `--all-targets`) for default, all-features, no-default and
+native-only: zero diagnostics (re-linted after touching `src/lib.rs`); matched
+workspace fmt and strict Clippy: zero. Suites, run sequentially: every test
+target (`--lib --bins` and all `tests/*.rs` except `representative_relay_model`,
+a 40+ minute protocol model this slice does not touch): default features 2,428
+passed, 0 failed; all-features 2,734 passed, 0 failed. During development an
+earlier full default run passed its first 86 test binaries before it was
+stopped as stale. Two existing tests changed contract in this round:
+`automatic_reclaim_service_*_recovers_and_retries` counts rewrites plus
+skipped deadlines, and the native hundred-group checkpoint tests' hand-made
+1 ms schedules set `min_reclaim_bytes: 0`.
 
 **Remaining gaps (recorded, not hidden).**
 - A WAL that fills at append time is still node-fatal. With maintenance on, the
