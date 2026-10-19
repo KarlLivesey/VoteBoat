@@ -13,7 +13,7 @@ Both plans live in the main checkout, not tracked. The LV plan builds on the
 researcher report `target/claude/research-ci/retained-action-growth.md`. The
 design pack is unchanged.
 
-### Known defect (open; LV2 closes it)
+### Known defect (cause removed in the child application by LV2; end-to-end proof is LV3)
 
 Measured on `origin/main` 30a1f6c5, simulated parent time: in an idle, healthy
 three-voter logical parent at `TimerConfig::default()` (50 ms heartbeat), the
@@ -43,9 +43,10 @@ ordinary physical groups are not.
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Done AI1: activation operation-ID space (merged 19 October 2026, PR 7 head e557bb75) | The wrapper kept every business ID forever only to keep business IDs apart from activation phase IDs, so write 16,385 was refused for life. Make the split structural: phase IDs carry a fixed 64-bit tag, business IDs must not; delete the set, its limit, its checkpoint section and its per-admission clone | Architect plan AI1 (§2, §4.1, §6.2: strict `reserved(n)` layout, named tag, command format bump, intent retirement deferred). Not a logical dependency on LV2. Shares five files with LV1 (`lv/checkpoint-v3`); only this document conflicts textually (see AI1 implemented) | 200,000-write deterministic soak fails on the base at write 16,385 and passes; tag refusal at admission and apply; partition, alias, order-independence, restart and old-format tests; existing activation suites green with reserved IDs; fmt, four strict Clippy configurations and matched workspace at zero diagnostics; default, all-features and no-default suites | LR2 |
-| In review round 2 LV1: child checkpoint v3 with direct-decode restore and a snapshot-generation high-water mark (PR 8; main eab59343 merged in, with AI1's v1-embedding test reworked for the v3 frame) | Pruning (LV2) needs restore that does not replay retained records, and generation numbering that does not derive from them (`execute.rs` derived the next generation from `SnapshotPublished` records). Also removes the O(n²) replay restore. Behaviour-neutral: nothing is pruned | — | v3 golden round trips (empty, populated, candidate); old v1/v2 checkpoints refused with `UnsupportedSchema`; restore equals the old replay path on representative histories (state, outcomes, next snapshot generation); restore performs no apply; restore enforces the admission budgets and reachable-state invariants, each with a failing input; linear restore-cost note; generation monotonic across checkpoint/restore; fmt, four strict Clippy configurations, matched fmt/Clippy; default, all-features and no-default-features suites | LVM |
+| Approved LV1 (both reviewers, round 2; merging): child checkpoint v3 with direct-decode restore and a snapshot-generation high-water mark (PR 8; main eab59343 merged in, with AI1's v1-embedding test reworked for the v3 frame) | Pruning (LV2) needs restore that does not replay retained records, and generation numbering that does not derive from them (`execute.rs` derived the next generation from `SnapshotPublished` records). Also removes the O(n²) replay restore. Behaviour-neutral: nothing is pruned | — | v3 golden round trips (empty, populated, candidate); old v1/v2 checkpoints refused with `UnsupportedSchema`; restore equals the old replay path on representative histories (state, outcomes, next snapshot generation); restore performs no apply; restore enforces the admission budgets and reachable-state invariants, each with a failing input; linear restore-cost note; generation monotonic across checkpoint/restore; fmt, four strict Clippy configurations, matched fmt/Clippy; default, all-features and no-default-features suites | LVM |
 | In progress LV2: retirement core (branch `lv/retire-watermark`, PR stacked on LV1) | Closes the known defect at the application layer: `consumed_through` in child commands (a command-format change, so LV2 bumps both application schemas and LV1 stores fail `UnsupportedSchema`), operation-ID partition, replicated `retired_below` watermark, pruning, `LogicalRefusal::Expired` and tri-state outcome lookup, bridge acknowledgement and `Expired` handling | LV1 (restore without replay, generation high-water mark) | App-level 72,000-action soak with retention ≤ 1 live original (fails with `DedupCapacity` at 4,096 when pruning is removed); exactly-once across retirement boundaries (retired retry → `Expired`, never re-executed; retained retry → original receipt); checkpoint between every apply equals replay; replacement retires older sessions; restore validates the new fields; fmt, four strict Clippy configurations, matched fmt/Clippy; `--lib logical_voter` in three feature sets; four logical integration binaries once | LVM |
 | Following LV3: end-to-end soak evidence | Prove the bound on the real bridge/driver/coordinator path | LV2 | Deterministic simulated-clock 30-minute idle and writes soaks, native restart/replacement/checkpoint tests, existing-test intent updates | LVM |
+| Following LV4: retirement in the model checker | Check the watermark, `Expired`, late copies, claim session closure and checkpoint/restore at any point exhaustively | LV2 (parallel with LV3) | `logical_voter_promises` extended and uncapped; mutants (disable the `Expired` step, regress the watermark) are found | LVM |
 | Later AI2: router-level activation soak | Prove LR2 through the real client router with restart, on the LV3 simulated-clock harness | LV3, AI1 | 20,000 router writes, restart from checkpoint, competing `Begin`, identical traces on two runs | LR2 |
 | Later LV5: fail closed at the retained-action limit | Fence the owner with typed results instead of a permanent refusal | LV2 | Fence and claim-recovery tests | LR3 |
 
@@ -348,6 +349,164 @@ Written before editing, from architect plan §2.2–§2.10 and the LV1 state.
   shared per-apply oracle becomes "restore of the checkpoint taken before each
   apply, then replay of that entry, equals the state". LV3 (end-to-end soak)
   and LV4 (model) are later slices.
+
+#### LV2 implemented
+
+Evidence only (planned work is in the rows and the schema plan above).
+Branch `lv/retire-watermark`, stacked on LV1 (`lv/checkpoint-v3` 3a8f6328).
+
+- **Code.** `Command.consumed_through` and the partition rules
+  (`command.rs`, enforced in `codec.rs::decode_command`); `apply_command`
+  steps 1–9 with `retired`, `retirement_plan`, `prunable` and `retire`
+  (`application.rs`); `reserve(commands, plan)` counting live records after
+  the planned prune, and the retired-ID admission paths (`admission.rs`);
+  `LogicalApplication::lookup` and `LogicalMetadata.retired_below`
+  (`query.rs`); response v3 (`response.rs`, `response/values.rs`,
+  `response/atoms.rs`); restore rules (`checkpoint/restore.rs`); bridge:
+  `submit_body` sends `consumed_through = previous sequence`, claims send 0,
+  `begin_claim`/`begin_enrollment` refuse IDs `≥ 2^64`, a committed
+  `Refused(Expired)` sets the sticky `Refused(Expired)` failure before the
+  action is handed on, a receipt claiming `Expired` without `duplicate` is a
+  provider violation, and `Resolving` re-proposes on `Expired` or `Unknown`
+  (`bridge/construction.rs`, `bridge/polling.rs`, `bridge/consume/reads.rs`).
+  Committed `Expired` reaches consumers as any committed refusal: the
+  persistence and snapshot ports fence, the release coordinator mints no
+  permit (it settles it only in a failed domain).
+- **Formats.** Command `VBLOGA03`/`04`; checkpoint `VBLOGC05`/`06` (LV1
+  layout); response `VBLOGR03`/`04`, schema IDs `0x5642_4c52_5350_0003`/`…0004`;
+  application schemas 5/6. New goldens `v5-empty`, `v5-populated` (the
+  populated history's last mutation now acknowledges sequences 1–5: two
+  records retained, watermark `(1 << 64) | 6`, generation mark 2 with both
+  publication records pruned), `v6-candidate-empty`, `v6-candidate-enrolled`.
+  LV1's `v3-*`/`v4-candidate-*` files are now legacy fixtures: refused with
+  `UnsupportedSchema` under schemas 3/4 and `InvalidCheckpoint` under 5/6
+  (also when renamed to the new magic, since their commands use the old
+  format); current bytes under schemas 1, 3 and 4 are `UnsupportedSchema`.
+- **Soak (architect §5.1,
+  `application/tests/retirement.rs::idle_heartbeat_streams_retain_one_original`).**
+  Real encoded commands in bridge order (claim, then sequence `q`
+  acknowledging `q − 1`), heartbeats batched 64 per apply (singly for the
+  first 64), a checkpoint/restore every 5,000 actions continuing from the
+  restored copy.
+
+  | Stream | Actions | Retained after every batch | Retained bytes | Checkpoint bytes | Result |
+  | --- | ---: | --- | --- | --- | --- |
+  | Leader child: `Append` heartbeats, a `Mutate` every 1,000 | 72,000 | 1 (the last action) | 427 (heartbeat) / 496 (mutation) | 1,551 / 1,620 | pass |
+  | Follower child: `Appended` responses | 36,000 | 1 | 477 | 1,601 | pass |
+  | Same leader stream on LV1 code (3a8f6328, throwaway test, not committed) | 4,095 | grows by 1 per action | — | — | `DedupCapacity` at heartbeat 4,095 with 4,096 retained |
+
+  Both LV2 streams together take 1.3 s in the unoptimised test build; the
+  4,095 actions on LV1 took 26.4 s (each apply re-encodes every retained
+  record). A one-off mutation that disables retirement on the LV2 code fails
+  the soak at once (the watermark assertion after the claim).
+- **Exactly-once and retirement tests** (`retirement.rs`, nine tests):
+  E1–E3 (retry before acknowledgement returns the original receipt; a late
+  copy after it is `Expired` with `duplicate: true`, state unchanged apart
+  from the applied index; the same capsule under a fresh ID would authorise
+  again, so the guard matters); E4 tri-state lookup including a pruned claim
+  (`Unknown`; its re-applied copy refuses `StaleRepresentative` and never
+  claims); E5 seven partition violations refused at decode, encode,
+  admission and apply with nothing installed; E6 lower acknowledgement,
+  another binding in the session, a future session and an ineligible current
+  representative never move the watermark; E7 and the admission credit (a
+  full table admits only a command that acknowledges a live record; a pending
+  copy earns no credit; a retired ID is admitted with eight pending copies and
+  commits `Expired` without a record); P1/P2 replacement retires the old
+  session (lookup and re-proposal `Expired`, later old-session commands
+  `Expired`); P3/P4 claim records (the new claim resolves `Retained` until
+  its session's first command prunes it; a claim refused `Ineligible` at the
+  current epoch survives session commands until the epoch moves); R1–R3 a
+  checkpoint between every apply of an 18-entry history (retries, a late
+  retired copy, a refused claim, replacement, a superseded command) restores
+  exactly, replays the suffix to identical state, receipts and checkpoint
+  bytes, and a retired copy stays `Expired` after restore.
+- **Shared per-apply oracle.** LV1's oracle replayed the retained records;
+  that stops being meaningful once records are pruned. The application-test
+  `apply` helper now checks after every apply: the watermark invariants; the
+  generation mark `≥` the former derivation; direct restore equals the state
+  with no replay (≤ 64 records); restoring the checkpoint taken just before
+  the entry and replaying it gives the same state and receipts; and, while the
+  history is short, a replay of the whole applied history from a fresh
+  application (a `cfg(test)` journal of applied entries, kept out of the
+  per-batch working copy) equals the state.
+- **Restore rules (R4).** Refused with `InvalidCheckpoint` and no partial
+  restore: zero watermark with a representative, a watermark lowered below a
+  retained acknowledgement, above a live key, in another session, at
+  sequence 0, a generation mark below a retained generation, a recorded
+  `Expired` outcome, an out-of-range refusal tag; the LV1 classes (swapped,
+  colliding and duplicate positions, decreasing terms, representative/image
+  pairing, receipt epoch, third snapshot, outcome tag, retained bytes,
+  truncations, trailing byte, budgets at and past each limit) still apply on
+  the new two-record populated golden. A candidate whose enrollment claim
+  was pruned restores; a mismatching retained claim, or an enrollment record
+  whose position is taken, is refused.
+- **Native evidence (small; the soak is LV3).** In
+  `logical_voter_native::persistence` the real bridge's actions leave the
+  child with exactly one retained original after two sessions (watermark in
+  session 2), and the recovery claim leaves only itself with the watermark at
+  `(3 << 64) | 1`.
+- **Existing tests updated, intent kept.** Old-session retries after a
+  replacement now expect `Expired` (stronger than the former original
+  receipt or `StaleRepresentative`): `exact_retry_keeps_original_outcome_after_replacement`
+  (plus a new same-session forged-binding case that still records
+  `StaleRepresentative`), `authority::term_zero_actual_request…` (the retry
+  before replacement still returns the original receipt),
+  `snapshots::recovery::anchored_orphan…`; `control_reserve_and_pending_content_are_enforced`
+  asserted that a full table refuses the recovery claim (the defect); it now
+  fills the table with claims refused at the current epoch, which retirement
+  keeps, so the total count still bounds control actions. Format and schema
+  constants in the format tests; `LogicalRead::Outcome` matches in
+  `logical_activation_nested` (`Retained` with the byte checks, or `Unknown`
+  only after the fresh session), `logical_voter_native` (history, authority:
+  still `Retained`, documented why), `logical_nested_native` diagnostics and
+  `logical_activation_driver` retained counting (command header offset +8,
+  comments now say the count is the live set).
+- **Deviations from the architect plan.** (1) Schemas 5/6, not 3 → 4 / 4 → 5:
+  the literal numbers would make the new ordinary schema equal LV1's
+  candidate schema. (2) Checkpoint magic and response schema IDs are bumped
+  too (the plan named only command and response magic), so every changed
+  format has a new name. (3) The plan says the exact re-encode catches a
+  lowered watermark; it does not (the field is encoded verbatim). Restore
+  instead requires the watermark to cover every retained acknowledgement
+  of the current binding; the record that last raised it is never pruned, so
+  any lowering is refused. (4) A raised generation mark is no longer
+  detectable once publication records are pruned (history-dependent, like a
+  raised watermark that stays below every live key); both are harmless to
+  uniqueness and covered by the checksummed container, as for every other
+  history-dependent field since LV1. LV1's "+1 generation" corruption case
+  was dropped for this reason. (5) Claim-space retention after the epoch
+  moves depends on history (a later prune, or a re-executed pruned copy that
+  is recorded again), so restore checks claim records structurally only.
+  (6) Admission gives no prune credit to a retained duplicate (it applies as
+  its original receipt and prunes nothing). (7) A pruned enrollment claim is
+  checked by its own fields: claim-space ID, positions within the applied
+  range and unoccupied, generation-1 target in this store and parent group.
+- **Hooks for later slices.** `LogicalMetadata.retired_below` and
+  `retained_actions` for the LV3 soak; `command_bytes` (unchecked encoder,
+  in-crate) for LV5's rogue at-limit commands; `retirement_plan`/`prunable`
+  are pure functions of state for the LV4 model.
+- **Stage-1 score.** Changed paths: `src/logical_voter/**`, `tests/logical_*`,
+  `docs/`. No shared `src/` file changed, so the matched CPU-per-write score
+  is unaffected by construction.
+- **Validation.** Linux, cores 10–14, `nice -n 19`, `-j 4`; each
+  integration binary run once, directly, all features.
+
+  | Check | Result |
+  | --- | --- |
+  | `cargo +stable fmt --all -- --check` | clean |
+  | Strict Clippy: all-features, default, no-default, native-only | 0 diagnostics each |
+  | Matched workspace fmt and strict all-target Clippy | clean |
+  | `--lib logical_voter`, default features | 110 passed, 1 ignored (timing report) |
+  | `--lib logical_voter`, all features | 111 passed, 1 ignored |
+  | `--lib logical_voter`, no default features | 109 passed, 1 ignored |
+  | `logical_voter_native` | 42 passed (10 s) |
+  | `logical_activation_driver` | 35 passed (24 s) |
+  | `logical_activation_nested` | 14 passed (121 s) |
+  | `logical_nested_native` | 15 passed (65 s) |
+  | Also run once: `logical_configuration_history`, `logical_voter_application`, `logical_voter_promises`, `logical_relay_native` | 7, 8, 6, 2 passed |
+
+  No failures, so no port collision or close-drain timeout occurred in these
+  runs. Full suites are left to the orchestrator.
 
 #### AI1 schema plan
 

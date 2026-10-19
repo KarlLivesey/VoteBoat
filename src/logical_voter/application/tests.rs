@@ -340,6 +340,37 @@ fn pending_conflict(a: &LogicalApplication, c: &Command, b: &[u8]) {
         Err(ApplicationError::OperationConflict)
     );
 }
+/// A retry of a retired action is answered `Expired`, never re-executed, and
+/// reserves nothing however many copies are pending.
+fn assert_retired_retry(a: &mut LogicalApplication, c: &Command, b: &[u8]) {
+    let retry = apply(a, c);
+    assert!(retry.duplicate);
+    assert_eq!(
+        retry.outcome,
+        LogicalOutcome::Refused(LogicalRefusal::Expired)
+    );
+    assert!(a
+        .validate_proposal(c.operation, b, std::iter::repeat_n((c.operation, b), 8))
+        .is_ok());
+}
+/// Claims refused at the current epoch (2) stay retained: their copies
+/// could not yet differ. They fill the table so the total count bounds
+/// control actions too.
+fn refuse_claims_at_current_epoch(a: &mut LogicalApplication, ids: std::ops::Range<u128>) {
+    for id in ids {
+        let refused = command(
+            id,
+            4,
+            CommandBody::Claim {
+                expected_epoch: Some(representative(2).epoch),
+            },
+        );
+        assert_eq!(
+            apply(a, &refused).outcome,
+            LogicalOutcome::Refused(LogicalRefusal::StaleRepresentative)
+        );
+    }
+}
 #[test]
 fn control_reserve_and_pending_content_are_enforced() {
     let mut a = app_with_limits(LogicalLimits {
@@ -417,38 +448,10 @@ fn control_reserve_and_pending_content_are_enforced() {
         .outcome,
         LogicalOutcome::Claimed
     );
-    // The new claim closed session 1: its records are retired, and a retry
-    // of the old control action is answered `Expired`, never re-executed.
+    // The new claim closed session 1: its records are retired.
     assert_eq!(a.state.records.len(), 1);
-    let retry = apply(&mut a, &control);
-    assert!(retry.duplicate);
-    assert_eq!(
-        retry.outcome,
-        LogicalOutcome::Refused(LogicalRefusal::Expired)
-    );
-    // Retired IDs reserve nothing, however many copies are pending.
-    assert!(a
-        .validate_proposal(
-            control.operation,
-            &b,
-            std::iter::repeat_n((control.operation, b.as_slice()), 8)
-        )
-        .is_ok());
-    // The total count still bounds control actions: claims refused at the
-    // current epoch stay retained (their copies could not differ yet).
-    for id in 7..10 {
-        let refused = command(
-            id,
-            4,
-            CommandBody::Claim {
-                expected_epoch: Some(representative(2).epoch),
-            },
-        );
-        assert_eq!(
-            apply(&mut a, &refused).outcome,
-            LogicalOutcome::Refused(LogicalRefusal::StaleRepresentative)
-        );
-    }
+    assert_retired_retry(&mut a, &control, &b);
+    refuse_claims_at_current_epoch(&mut a, 7..10);
     assert_eq!(a.state.records.len(), 4);
     let full = command(
         6,
