@@ -12,8 +12,8 @@ fn node(id: u64) -> NodeId {
 fn proposals(count: u128) -> Vec<Proposal> {
     (1..=count)
         .map(|id| Proposal {
-            operation: OperationId::new(id).unwrap(),
-            bytes: 1_i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, id as u64).unwrap(),
+            bytes: Counter::command(0, 1),
         })
         .collect()
 }
@@ -179,7 +179,10 @@ fn partial_prefixes_commit_all_originals_without_replaying_other_peer() {
         let receipts = counter.apply_batch(&committed(&effects)).unwrap();
         assert_eq!(receipts.len(), 2);
         for receipt in receipts {
-            assert_eq!(receipt.operation.get(), u128::from(receipt.index - 1));
+            assert_eq!(
+                receipt.operation,
+                Counter::operation(1, receipt.index - 1).unwrap()
+            );
             assert_eq!(
                 receipt.outcome,
                 CounterOutcome::Value((receipt.index - 1) as i64)

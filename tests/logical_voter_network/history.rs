@@ -8,7 +8,6 @@ use super::{
 use std::time::{Duration, Instant};
 use voteboat::{
     application::*,
-    identity::*,
     native::{connect::NativePeerProtocol, startup::NativeOpenMode},
     runtime::*,
     worker::PersistenceWorker,
@@ -32,8 +31,8 @@ fn write(host: &mut Host<'_>, duplicate: bool, outage: bool) {
             &parent.apps[&parent.mapping.parent],
             ClientRequest {
                 group: parent.mapping.parent,
-                operation: OperationId::new(10001).unwrap(),
-                bytes: 5_i64.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, 1).unwrap(),
+                bytes: Counter::command(0, 5),
             },
         )
         .unwrap();

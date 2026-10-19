@@ -1228,6 +1228,10 @@ where
         }
         self.inner.validate_group(group)
     }
+    /// Lifetime partial and adoption ledgers until AD1 (audit S7, T4).
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::LifetimeBounded
+    }
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(self.readiness_requirements())
     }

@@ -89,7 +89,7 @@ groups; it cannot silently open only group1.
 Commands select the exact group and incarnation:
 
 ```sh
-voteboat-counter client 40000 auto group 7 3 add 42 5 --service-tls ./tls --principal 3
+voteboat-counter client 40000 auto group 7 3 add 1 42 0 5 --service-tls ./tls --principal 3
 voteboat-counter client 40000 auto group 7 3 read --service-tls ./tls --principal 3
 voteboat-counter client 40000 1 group 7 3 status --service-tls ./tls --principal 3
 voteboat-counter client 40000 1 group 7 3 checkpoint --service-tls ./tls --principal 3
@@ -169,7 +169,7 @@ when admitting a command and when executing its configuration proposal.
 ## Group leadership maintenance
 
 Add `--leadership-maintenance enabled` consistently on every peer to use
-the existing schema2 maintenance application for each declared group. Create
+the existing schema3 maintenance application for each declared group. Create
 fresh stores with that profile and retain it on recovery. Existing plain-counter
 stores require migration; changing the flag does not convert their records or
 checkpoints. The profile uses the existing wire8 transport.
@@ -191,7 +191,7 @@ Each group has its own attempt, deadline, cancellation and completed record.
 Different groups may reuse an operation ID. A cancellation in one group cannot
 cancel another group's same-ID handoff. Restart resumes durable pending work;
 completed records remain idempotent. The existing group administration plans
-also use schema2 readiness requirements in this profile. This enables individual
+also use schema3 readiness requirements in this profile. This enables individual
 group handoffs. Multi-group source drain controls and the bounded foreground
 runner are available as described below.
 

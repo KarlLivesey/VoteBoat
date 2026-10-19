@@ -678,8 +678,8 @@ mod raft_cluster {
             if !proposed && replicas.iter().all(|r| r.application.applied_index() >= 1) {
                 assert_eq!(replicas[0].core.role(), Role::Leader);
                 replicas[0].input(raft::Event::Propose {
-                    operation: OperationId::new(70).unwrap(),
-                    bytes: 7i64.to_le_bytes().to_vec(),
+                    operation: Counter::operation(1, 1).unwrap(),
+                    bytes: Counter::command(0, 7),
                 });
                 proposed = true;
             }

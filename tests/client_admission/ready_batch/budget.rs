@@ -23,7 +23,7 @@ fn fixture(groups: u128) -> Fixture {
         + std::mem::size_of::<LogEntry>();
     // Leave enough room for all four original writes' retained history. Only
     // batching's extra transient observation metadata must exceed this slack.
-    let growth = 4 * (std::mem::size_of::<LogEntry>() + 8);
+    let growth = 4 * (std::mem::size_of::<LogEntry>() + COUNTER_COMMAND_BYTES);
     assert!(4 * std::mem::size_of::<OwnerStep>() > growth);
     let mut worker = HostWorker::new(store);
     let mut owner = EffectOwner::new(
@@ -178,7 +178,7 @@ fn drain(f: &mut Fixture) {
 #[test]
 fn tight_bulk_output_budget_shrinks_ready_prefix_instead_of_fencing_or_starving() {
     let mut f = fixture(1);
-    let tickets = submit(&mut f, 1, 100, 4);
+    let tickets = submit(&mut f, 1, 50, 4);
     let before = f.owner.core(group(1)).unwrap().state().clone();
     let steps = advance(&mut f, 64);
     assert_eq!(steps.len(), 1);
@@ -198,7 +198,7 @@ fn tight_bulk_output_budget_shrinks_ready_prefix_instead_of_fencing_or_starving(
 #[test]
 fn held_visit_reduces_current_global_or_bulk_room_without_blocking_a_fitting_singleton() {
     let mut idle = fixture(2);
-    let tickets = submit(&mut idle, 2, 100, 4);
+    let tickets = submit(&mut idle, 2, 50, 4);
     assert_eq!(advance(&mut idle, 64).len(), 4);
     let persist = idle.owner.take_effect().unwrap().unwrap();
     finish(&mut idle, vec![persist], &tickets);
@@ -220,7 +220,7 @@ fn held_visit_reduces_current_global_or_bulk_room_without_blocking_a_fitting_sin
         // Total configured bulk capacity permits a four-command batch. Its
         // current available room does not: the held control visit spends only
         // global room, while a held data visit also spends bulk room.
-        let second = submit(&mut f, 2, 100, 4);
+        let second = submit(&mut f, 2, 50, 4);
         let steps = advance(&mut f, 64);
         assert_eq!(steps.len(), 1);
         assert_eq!(steps[0].visit.group, group(2));

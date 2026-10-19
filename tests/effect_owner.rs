@@ -53,8 +53,8 @@ mod application_results {
     }
     fn propose(id: u128, value: i64) -> Event {
         Event::Propose {
-            operation: OperationId::new(id).unwrap(),
-            bytes: value.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, id as u64).unwrap(),
+            bytes: Counter::command(0, value),
         }
     }
     fn start(owner: &mut Owner, worker: &mut HostWorker, g: u128, app: &mut Counter) {
@@ -106,7 +106,7 @@ mod application_results {
         );
         assert!(!r.is_drained());
         let receipts = r.complete(output).unwrap();
-        assert_eq!(receipts[0].operation, OperationId::new(5).unwrap());
+        assert_eq!(receipts[0].operation, Counter::operation(1, 5).unwrap());
         assert_eq!(r.usage(), ApplicationResultUsage::default());
         assert!(r.is_drained());
     }
@@ -370,8 +370,8 @@ mod client_admission {
         let mut store = HostLogStore::new(1);
         let mut runtime = timed(1, &mut store, 1, 1);
         let event = || Event::Propose {
-            operation: OperationId::new(1).unwrap(),
-            bytes: 7i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, 1).unwrap(),
+            bytes: Counter::command(0, 7),
         };
         let first = runtime.admit_tracked(group(1), event()).unwrap();
         runtime.admit(group(1), Event::Heartbeat).unwrap();
@@ -437,8 +437,8 @@ mod client_admission {
     fn request(g: u128, id: u128, delta: i64) -> ClientRequest {
         ClientRequest {
             group: group(g),
-            operation: OperationId::new(id).unwrap(),
-            bytes: delta.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, id as u64).unwrap(),
+            bytes: Counter::command(0, delta),
         }
     }
     fn drive<A: ProposalAdmission>(
@@ -502,7 +502,7 @@ mod client_admission {
             .unwrap_err();
         assert_eq!(
             rejected.reason,
-            ClientError::Application(ApplicationError::DedupCapacity)
+            ClientError::Application(ApplicationError::SessionWindow)
         );
         assert_eq!(apps[&group(1)].applied_index(), 1);
         drive(
@@ -554,14 +554,14 @@ mod client_admission {
         assert_eq!(
             clients.usage(),
             charge,
-            "queued command still owns its dedup reservation"
+            "queued command still owns its router charge"
         );
         assert_eq!(
             clients
                 .submit(&mut owner, &apps[&group(1)], request(1, 2, 8))
                 .unwrap_err()
                 .reason,
-            ClientError::Application(ApplicationError::DedupCapacity)
+            ClientError::Application(ApplicationError::SessionWindow)
         );
         drive(
             &mut owner,
@@ -636,8 +636,8 @@ mod client_admission {
             .admit(
                 group(1),
                 Event::Propose {
-                    operation: OperationId::new(1).unwrap(),
-                    bytes: 7i64.to_le_bytes().to_vec(),
+                    operation: Counter::operation(1, 1).unwrap(),
+                    bytes: Counter::command(0, 7),
                 },
             )
             .unwrap();
@@ -668,7 +668,7 @@ mod client_admission {
                 .submit(&mut owner, &apps[&group(1)], request(1, 2, 5))
                 .unwrap_err()
                 .reason,
-            ClientError::Application(ApplicationError::DedupCapacity)
+            ClientError::Application(ApplicationError::SessionWindow)
         );
         clients
             .submit(&mut owner, &apps[&group(1)], request(1, 1, 7))
@@ -888,7 +888,7 @@ mod client_admission {
             pending: impl Iterator<Item = (OperationId, &'a [u8])>,
         ) -> Result<usize, ApplicationError> {
             // A host's deterministic command syntax can be stricter than Counter.
-            if bytes != 7i64.to_le_bytes() {
+            if bytes.get(8..) != Some(&7i64.to_le_bytes()[..]) {
                 return Err(ApplicationError::InvalidCommand);
             }
             self.0
@@ -1552,8 +1552,8 @@ fn application_boundary_and_one_use_read_are_checked_before_release() {
         .admit(
             group(1),
             Event::Propose {
-                operation: OperationId::new(1).unwrap(),
-                bytes: 7i64.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, 1).unwrap(),
+                bytes: Counter::command(0, 7),
             },
         )
         .unwrap();
@@ -1704,8 +1704,8 @@ fn bulk_leases_leave_a_reserved_visit_for_control() {
             .admit(
                 group(g),
                 Event::Propose {
-                    operation: OperationId::new(1).unwrap(),
-                    bytes: 7i64.to_le_bytes().to_vec(),
+                    operation: Counter::operation(1, 1).unwrap(),
+                    bytes: Counter::command(0, 7),
                 },
             )
             .unwrap();
@@ -2321,8 +2321,8 @@ mod native {
                     &n.apps[&group(g)],
                     ClientRequest {
                         group: group(g),
-                        operation: OperationId::new(operation).unwrap(),
-                        bytes: delta.to_le_bytes().to_vec(),
+                        operation: Counter::operation(1, operation as u64).unwrap(),
+                        bytes: Counter::command(0, delta),
                     },
                 )
                 .unwrap();
@@ -2501,8 +2501,8 @@ mod native {
                     &n.apps[&group],
                     ClientRequest {
                         group,
-                        operation: OperationId::new(operation).unwrap(),
-                        bytes: delta.to_le_bytes().to_vec(),
+                        operation: Counter::operation(1, operation as u64).unwrap(),
+                        bytes: Counter::command(0, delta),
                     },
                 )
                 .unwrap();
@@ -2539,8 +2539,8 @@ mod native {
                     &n.apps[&group],
                     ClientRequest {
                         group,
-                        operation: OperationId::new(99).unwrap(),
-                        bytes: 100i64.to_le_bytes().to_vec(),
+                        operation: Counter::operation(1, 99).unwrap(),
+                        bytes: Counter::command(0, 100),
                     },
                 )
                 .unwrap();
@@ -2701,8 +2701,8 @@ mod native {
                                 index: 1,
                                 term: 1,
                                 payload: EntryPayload::Command {
-                                    operation: OperationId::new(1).unwrap(),
-                                    bytes: 7i64.to_le_bytes().to_vec().into(),
+                                    operation: Counter::operation(1, 1).unwrap(),
+                                    bytes: Counter::command(0, 7).into(),
                                 },
                             }],
                         }),
@@ -3212,8 +3212,8 @@ mod snapshot_routes {
             index: 1,
             term: 1,
             payload: EntryPayload::Command {
-                operation: OperationId::new(1).unwrap(),
-                bytes: 7i64.to_le_bytes().to_vec().into(),
+                operation: Counter::operation(1, 1).unwrap(),
+                bytes: Counter::command(0, 7).into(),
             },
         }])
         .unwrap();
@@ -3719,8 +3719,8 @@ mod ingress {
                     index: 1,
                     term: 1,
                     payload: EntryPayload::Command {
-                        operation: OperationId::new(g).unwrap(),
-                        bytes: 1i64.to_le_bytes().to_vec().into(),
+                        operation: Counter::operation(1, g as u64).unwrap(),
+                        bytes: Counter::command(0, 1).into(),
                     },
                 }],
             },

@@ -14,8 +14,8 @@ fn deferred_heartbeat_batch_preserves_duplicate_conflict_and_original_applicatio
                 .admit_tracked(
                     group(),
                     Event::Propose {
-                        operation: OperationId::new(id).unwrap(),
-                        bytes: delta.to_le_bytes().to_vec(),
+                        operation: Counter::operation(1, id as u64).unwrap(),
+                        bytes: Counter::command(0, delta),
                     },
                 )
                 .unwrap()
@@ -58,7 +58,10 @@ fn deferred_heartbeat_batch_preserves_duplicate_conflict_and_original_applicatio
         assert_eq!(receipts[offset].index, offset as u64 + 2);
         assert_eq!(receipts[offset].outcome, outcome);
         assert_eq!(receipts[offset].duplicate, offset >= 2);
-        assert_eq!(receipts[offset].operation.get(), [1, 2, 1, 1][offset]);
+        assert_eq!(
+            receipts[offset].operation.get() as u64,
+            [1, 2, 1, 1][offset]
+        );
     }
     assert_eq!(counter.read_applied(5), Ok(9));
     assert_eq!(shard.groups[&group()].queues[0].len(), 1);

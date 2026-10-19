@@ -101,7 +101,7 @@ fn history(protocol: NativePeerProtocol) {
     held.refused(node);
     eprintln!("338 stage=original_outputs_completed_and_business_after");
     held.complete(node);
-    business::requests(&mut peers, &mut parent, &mut target, 33302, 5, 12);
+    business::requests(&mut peers, &mut parent, &mut target, 2, 5, 12);
     let [left, right] = cleanup::close(peers, &mut parent, &mut target);
     drop(target);
     let middle = parent

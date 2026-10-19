@@ -60,7 +60,8 @@ impl StateMachine for EmptyApplication {
 }
 impl CheckpointStateMachine for EmptyApplication {
     fn schema_version(&self) -> u64 {
-        1
+        // The fixture plan's source schema (the Counter's).
+        crate::application::COUNTER_SCHEMA
     }
     fn checkpoint(&self, _: usize) -> Result<Vec<u8>, ApplicationError> {
         Ok(Vec::new())
@@ -71,7 +72,7 @@ impl CheckpointStateMachine for EmptyApplication {
         index: u64,
         bytes: &[u8],
     ) -> Result<(), ApplicationError> {
-        if schema != 1 || !bytes.is_empty() {
+        if schema != crate::application::COUNTER_SCHEMA || !bytes.is_empty() {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         self.applied = index;

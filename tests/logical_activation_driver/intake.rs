@@ -53,8 +53,8 @@ fn history(protocol: NativePeerProtocol) {
     let mut node = fixture::FacadeNode::from_parts(&image, parts, fixture::limits(), MonoTime(0))
         .unwrap_or_else(|e| panic!("actual selected parent {:?}", e.reason));
     progress::elect(&mut bridge, &mut node, clock);
-    let first = business(&mut bridge, &mut node, clock, 330_010, 2, 2);
-    let second = business(&mut bridge, &mut node, clock, 330_011, 3, 5);
+    let first = business(&mut bridge, &mut node, clock, 10, 2, 2);
+    let second = business(&mut bridge, &mut node, clock, 11, 3, 5);
     assert_eq!(node.local().clients.usage().requests, 2);
     ordinary_refusal(&mut node);
     let intent = super::history::intent(330_100);
@@ -108,12 +108,14 @@ fn business(
     delta: i64,
     value: i64,
 ) -> Output {
-    let operation = OperationId::new(operation).unwrap();
+    let operation = voteboat::application::Counter::operation(1, operation as u64).unwrap();
     let ticket = node
         .propose(ClientRequest {
             group: setup::mapping().parent,
             operation,
-            bytes: fixture::app().business(&delta.to_le_bytes()).unwrap(),
+            bytes: fixture::app()
+                .business(&voteboat::application::Counter::command(0, delta))
+                .unwrap(),
         })
         .unwrap();
     let output = wait(bridge, node, clock, ticket);
@@ -132,12 +134,14 @@ fn business(
     output
 }
 fn ordinary_refusal(node: &mut fixture::FacadeNode) {
-    let bytes = fixture::app().business(&1_i64.to_le_bytes()).unwrap();
+    let bytes = fixture::app()
+        .business(&voteboat::application::Counter::command(0, 1_i64))
+        .unwrap();
     let pointer = bytes.as_ptr();
     let capacity = bytes.capacity();
     let request = ClientRequest {
         group: setup::mapping().parent,
-        operation: OperationId::new(330_012).unwrap(),
+        operation: voteboat::application::Counter::operation(1, 12).unwrap(),
         bytes,
     };
     let usage = node.local().clients.usage();
@@ -147,7 +151,9 @@ fn ordinary_refusal(node: &mut fixture::FacadeNode) {
     assert_eq!(rejected.request.bytes.capacity(), capacity);
     assert_eq!(
         rejected.request.bytes,
-        fixture::app().business(&1_i64.to_le_bytes()).unwrap()
+        fixture::app()
+            .business(&voteboat::application::Counter::command(0, 1_i64))
+            .unwrap()
     );
     assert_eq!(node.local().clients.usage(), usage);
 }

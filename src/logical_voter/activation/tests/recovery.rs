@@ -19,8 +19,8 @@ fn own_checkpoint_and_original_suffix_restore_busy_and_active_state() {
     let i = intent(1);
     begin(&mut a, &i);
     begin(&mut a, &intent(2));
-    let bytes = a.business(&6i64.to_le_bytes()).unwrap();
-    a.apply_batch(&[entry(3, op(100), bytes)]).unwrap();
+    let bytes = a.business(&Counter::command(0, 6)).unwrap();
+    a.apply_batch(&[entry(3, business_op(1), bytes)]).unwrap();
     let checkpoint = a.checkpoint(usize::MAX).unwrap();
     let mut restored = app(3);
     restored
@@ -45,7 +45,11 @@ fn own_checkpoint_and_original_suffix_restore_busy_and_active_state() {
         )
         .unwrap(),
     );
-    let retry = entry(6, op(100), a.business(&6i64.to_le_bytes()).unwrap());
+    let retry = entry(
+        6,
+        business_op(1),
+        a.business(&Counter::command(0, 6)).unwrap(),
+    );
     for e in [outcome, release, retry] {
         a.apply_batch(std::slice::from_ref(&e)).unwrap();
         restored.apply_batch(&[e]).unwrap();

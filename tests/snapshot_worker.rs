@@ -44,8 +44,8 @@ fn image(g: u128) -> Snapshot {
         index: 1,
         term: 1,
         payload: EntryPayload::Command {
-            operation: OperationId::new(1).unwrap(),
-            bytes: 7i64.to_le_bytes().to_vec().into(),
+            operation: Counter::operation(1, 1).unwrap(),
+            bytes: Counter::command(0, 7).into(),
         },
     }])
     .unwrap();
@@ -234,8 +234,8 @@ fn checkpoint_source() -> (Raft, HostLogStore, Counter) {
         index: 1,
         term: 1,
         payload: EntryPayload::Command {
-            operation: OperationId::new(1).unwrap(),
-            bytes: 7i64.to_le_bytes().to_vec().into(),
+            operation: Counter::operation(1, 1).unwrap(),
+            bytes: Counter::command(0, 7).into(),
         },
     };
     let mutation = update(
@@ -709,8 +709,8 @@ mod native {
             index: 1,
             term: 1,
             payload: EntryPayload::Command {
-                operation: OperationId::new(1).unwrap(),
-                bytes: 7i64.to_le_bytes().to_vec().into(),
+                operation: Counter::operation(1, 1).unwrap(),
+                bytes: Counter::command(0, 7).into(),
             },
         };
         let state = log.state(group(1)).unwrap();
@@ -1107,8 +1107,8 @@ mod native {
                 index: i as u64 + 1,
                 term: 1,
                 payload: EntryPayload::Command {
-                    operation: OperationId::new(i as u128 + 1).unwrap(),
-                    bytes: delta.to_le_bytes().to_vec().into(),
+                    operation: Counter::operation(1, (i as u128 + 1) as u64).unwrap(),
+                    bytes: Counter::command(0, delta).into(),
                 },
             })
             .collect::<Vec<_>>()
@@ -1333,8 +1333,8 @@ mod native {
                         index: 2,
                         term: 2,
                         payload: EntryPayload::Command {
-                            operation: OperationId::new(1).unwrap(),
-                            bytes: 7i64.to_le_bytes().to_vec().into(),
+                            operation: Counter::operation(1, 1).unwrap(),
+                            bytes: Counter::command(0, 7).into(),
                         },
                     }])
                     .unwrap();

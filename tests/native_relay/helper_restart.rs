@@ -109,7 +109,7 @@ fn replace(c: &mut Cluster, mut channels: Vec<RelayHop<Box<dyn SecureSession>>>)
 fn history(protocol: NativePeerProtocol) {
     let mut c = Cluster::new(protocol);
     c.campaign();
-    write(&mut c, 35231, 3);
+    write(&mut c, 31, 3);
     c.until(|c| c.value(2) == 3);
     c.held_read_acks.extend([node(2), node(3)]);
     let request = c.boats[0].read(group(352), ()).unwrap();

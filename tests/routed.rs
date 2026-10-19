@@ -95,9 +95,14 @@ fn limits() -> RoutedLimits {
     RoutedLimits {
         operations: 64,
         semantic_bytes: 4096,
-        payload_bytes: 8,
+        payload_bytes: COUNTER_COMMAND_BYTES,
         inner_checkpoint_bytes: 32 + 33 * 64,
     }
+}
+/// Operation `n`: sequence `n` of the inner counter's built-in session. Routed
+/// control commands accept any ID, so every test operation uses this layout.
+fn op(n: u128) -> OperationId {
+    Counter::operation(1, n as u64).unwrap()
 }
 fn fresh() -> RoutedApplication<Counter, HostPolicy> {
     RoutedApplication::new(
@@ -114,7 +119,7 @@ fn entry(index: u64, operation: u128, bytes: Vec<u8>) -> LogEntry {
         index,
         term: 1,
         payload: EntryPayload::Command {
-            operation: OperationId::new(operation).unwrap(),
+            operation: op(operation),
             bytes: bytes.into(),
         },
     }
@@ -132,7 +137,7 @@ fn data(key: u8, delta: i64) -> Vec<u8> {
     encode_routed(
         hint(key),
         &[key],
-        &delta.to_le_bytes(),
+        &Counter::command(0, delta),
         MAX_ROUTED_COMMAND_BYTES,
     )
     .unwrap()
@@ -150,7 +155,7 @@ fn bootstrap_binds_owner_namespace_policy_and_initial_application_before_service
         Err(ApplicationError::InvalidCommand)
     );
     let bytes = data(10, 7);
-    let operation = OperationId::new(1).unwrap();
+    let operation = op(1);
     assert_eq!(
         app.validate_proposal(operation, &bytes, std::iter::empty()),
         Err(ApplicationError::NotApplied)
@@ -202,7 +207,7 @@ fn bootstrap_binds_owner_namespace_policy_and_initial_application_before_service
 fn admission_and_apply_recheck_context_and_bind_retries_to_key_and_payload() {
     let mut app = initialized();
     let bytes = data(10, 7);
-    app.validate_proposal(OperationId::new(1).unwrap(), &bytes, std::iter::empty())
+    app.validate_proposal(op(1), &bytes, std::iter::empty())
         .unwrap();
     let first = app.apply_batch(&[entry(2, 1, bytes)]).unwrap().remove(0);
     assert!(matches!(
@@ -215,7 +220,7 @@ fn admission_and_apply_recheck_context_and_bind_retries_to_key_and_payload() {
     ));
     let mut refreshed = hint(10);
     refreshed.generation = RouteGeneration::new(99).unwrap();
-    let retry = encode_routed(refreshed, &[10], &7i64.to_le_bytes(), 1000).unwrap();
+    let retry = encode_routed(refreshed, &[10], &Counter::command(0, 7), 1000).unwrap();
     assert!(matches!(
         app.apply_batch(&[entry(3, 1, retry)]).unwrap()[0].outcome,
         RoutedOutcome::Applied(CounterReceipt {
@@ -242,9 +247,9 @@ fn admission_and_apply_recheck_context_and_bind_retries_to_key_and_payload() {
             4 => changed.bucket = 11,
             _ => changed.scheme.version = 2,
         }
-        let bytes = encode_routed(changed, &[10], &5i64.to_le_bytes(), 1000).unwrap();
+        let bytes = encode_routed(changed, &[10], &Counter::command(0, 5), 1000).unwrap();
         assert!(app
-            .validate_proposal(OperationId::new(2).unwrap(), &bytes, std::iter::empty())
+            .validate_proposal(op(2), &bytes, std::iter::empty())
             .is_err());
         assert!(matches!(
             app.apply_batch(&[entry(6 + field, 2, bytes)]).unwrap()[0].outcome,
@@ -261,11 +266,11 @@ fn durable_local_fence_rejects_previously_admitted_data_and_reads_without_thaw()
     let mut app = initialized();
     app.apply_batch(&[entry(2, 1, data(10, 7))]).unwrap();
     let queued = data(10, 3);
-    app.validate_proposal(OperationId::new(2).unwrap(), &queued, std::iter::empty())
+    app.validate_proposal(op(2), &queued, std::iter::empty())
         .unwrap();
     let epoch = grant().input().epoch;
     let fence = encode_fence(epoch);
-    app.validate_proposal(OperationId::new(500).unwrap(), &fence, std::iter::empty())
+    app.validate_proposal(op(500), &fence, std::iter::empty())
         .unwrap();
     let receipt = app
         .apply_batch(&[entry(3, 500, fence.clone()), entry(4, 2, queued)])
@@ -290,11 +295,7 @@ fn durable_local_fence_rejects_previously_admitted_data_and_reads_without_thaw()
         RoutedRead::Rejected(RoutingError::Fenced)
     );
     assert!(app
-        .validate_proposal(
-            OperationId::new(1).unwrap(),
-            &data(10, 7),
-            std::iter::empty()
-        )
+        .validate_proposal(op(1), &data(10, 7), std::iter::empty())
         .is_err());
     assert_eq!(
         app.apply_batch(&[entry(5, 500, fence.clone())]).unwrap()[0].outcome,
@@ -366,7 +367,7 @@ fn malformed_commands_and_failed_batches_leave_the_application_unchanged() {
 fn semantic_and_inner_capacity_reservations_preserve_control_space() {
     let mut config = limits();
     config.operations = 1;
-    config.semantic_bytes = 9;
+    config.semantic_bytes = 1 + COUNTER_COMMAND_BYTES;
     let mut app = RoutedApplication::new(
         group(20),
         grant(),
@@ -379,26 +380,18 @@ fn semantic_and_inner_capacity_reservations_preserve_control_space() {
     app.apply_batch(&[entry(1, 10000, binding)]).unwrap();
     let bytes = data(10, 7);
     assert!(app
-        .validate_proposal(
-            OperationId::new(1).unwrap(),
-            &bytes,
-            [(OperationId::new(1).unwrap(), bytes.as_slice())].into_iter()
-        )
+        .validate_proposal(op(1), &bytes, [(op(1), bytes.as_slice())].into_iter())
         .is_ok());
     assert_eq!(
-        app.validate_proposal(
-            OperationId::new(2).unwrap(),
-            &bytes,
-            [(OperationId::new(1).unwrap(), bytes.as_slice())].into_iter()
-        ),
+        app.validate_proposal(op(2), &bytes, [(op(1), bytes.as_slice())].into_iter()),
         Err(ApplicationError::DedupCapacity)
     );
     app.apply_batch(&[entry(2, 1, bytes.clone())]).unwrap();
     assert!(app
-        .validate_proposal(OperationId::new(1).unwrap(), &bytes, std::iter::empty())
+        .validate_proposal(op(1), &bytes, std::iter::empty())
         .is_ok());
     assert_eq!(
-        app.validate_proposal(OperationId::new(2).unwrap(), &bytes, std::iter::empty()),
+        app.validate_proposal(op(2), &bytes, std::iter::empty()),
         Err(ApplicationError::DedupCapacity)
     );
     let before = app.checkpoint(100000).unwrap();
@@ -408,7 +401,7 @@ fn semantic_and_inner_capacity_reservations_preserve_control_space() {
     );
     assert_eq!(app.checkpoint(100000).unwrap(), before);
     let fence = encode_fence(grant().input().epoch);
-    app.validate_proposal(OperationId::new(99).unwrap(), &fence, std::iter::empty())
+    app.validate_proposal(op(99), &fence, std::iter::empty())
         .unwrap();
     app.apply_batch(&[entry(3, 99, fence)]).unwrap();
     assert!(app.fence().is_some());

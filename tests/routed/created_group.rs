@@ -206,7 +206,13 @@ fn exercise(
 ) -> (CounterReceipt, BTreeMap<NodeId, GroupLog>) {
     let mut nodes = open(targets, clock, protocol, || Counter::new(64).unwrap());
     campaign(&mut nodes, clock, 100);
-    let original = propose(&mut nodes, clock, 100, 20000, 7i64.to_le_bytes().to_vec());
+    let original = propose(
+        &mut nodes,
+        clock,
+        100,
+        counter_op(1),
+        Counter::command(0, 7),
+    );
     assert_eq!(original.outcome, CounterOutcome::Value(7));
     assert_eq!(read(&mut nodes, clock, 100, ()), 7);
     for node in &mut nodes {
@@ -268,7 +274,13 @@ fn recover_service(
     }
     let mut nodes = open(targets, clock, protocol, || Counter::new(64).unwrap());
     campaign(&mut nodes, clock, 100);
-    let retry = propose(&mut nodes, clock, 100, 20000, 7i64.to_le_bytes().to_vec());
+    let retry = propose(
+        &mut nodes,
+        clock,
+        100,
+        counter_op(1),
+        Counter::command(0, 7),
+    );
     assert!(retry.duplicate);
     // Counter receipts name the retry's applied entry, while preserving the
     // original semantic operation/outcome across checkpoint recovery.
@@ -276,11 +288,25 @@ fn recover_service(
     assert_eq!(retry.operation, original.operation);
     assert_eq!(retry.outcome, original.outcome);
     assert_eq!(
-        propose(&mut nodes, clock, 100, 20000, 8i64.to_le_bytes().to_vec()).outcome,
+        propose(
+            &mut nodes,
+            clock,
+            100,
+            counter_op(1),
+            Counter::command(0, 8)
+        )
+        .outcome,
         CounterOutcome::OperationConflict
     );
     assert_eq!(
-        propose(&mut nodes, clock, 100, 20001, 5i64.to_le_bytes().to_vec()).outcome,
+        propose(
+            &mut nodes,
+            clock,
+            100,
+            counter_op(2),
+            Counter::command(0, 5)
+        )
+        .outcome,
         CounterOutcome::Value(12)
     );
     assert_eq!(read(&mut nodes, clock, 100, ()), 12);

@@ -19,11 +19,11 @@ use super::*;
 pub(super) struct LargeApplication(pub(super) HostApplication);
 fn canonical(bytes: &[u8]) -> Result<&[u8], ApplicationError> {
     if ![COMMAND_BYTES, DEFAULT_REFUSAL_BYTES].contains(&bytes.len())
-        || bytes[8..].iter().any(|b| *b != 0)
+        || bytes[COUNTER_COMMAND_BYTES..].iter().any(|b| *b != 0)
     {
         return Err(ApplicationError::InvalidCommand);
     }
-    Ok(&bytes[..8])
+    Ok(&bytes[..COUNTER_COMMAND_BYTES])
 }
 fn entries(input: &[LogEntry]) -> Result<Vec<LogEntry>, ApplicationError> {
     input

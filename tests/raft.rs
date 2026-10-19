@@ -978,8 +978,8 @@ fn counter_read_waits_for_application_and_cannot_reuse_or_move_barrier() {
     cluster.act(
         1,
         Event::Propose {
-            operation: OperationId::new(1).unwrap(),
-            bytes: 13i64.to_le_bytes().to_vec(),
+            operation: voteboat::application::Counter::operation(1, 1).unwrap(),
+            bytes: voteboat::application::Counter::command(0, 13),
         },
     );
     cluster.pump();

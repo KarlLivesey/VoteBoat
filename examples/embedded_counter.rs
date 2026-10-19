@@ -73,7 +73,7 @@ fn main() -> Result<(), Failure> {
     let args = std::env::args().skip(1).collect::<Vec<_>>();
     let [mode, root, tls, operation, delta] = args.as_slice() else {
         return Err(
-            "usage: embedded_counter create|recover DIRECTORY TLS_DIRECTORY OPERATION_ID DELTA"
+            "usage: embedded_counter create|recover DIRECTORY TLS_DIRECTORY SEQUENCE DELTA (SEQUENCE numbers writes 1, 2, ... in the counter's built-in session)"
                 .into(),
         );
     };
@@ -82,7 +82,7 @@ fn main() -> Result<(), Failure> {
         "recover" => NativeOpenMode::Recover,
         _ => return Err("expected create or recover".into()),
     };
-    let operation = OperationId::new(operation.parse()?).ok_or("nonzero operation ID required")?;
+    let operation = Counter::operation(1, operation.parse()?).ok_or("nonzero sequence required")?;
     let delta: i64 = delta.parse()?;
     let tls = Path::new(tls);
     let config = startup(root, tls, mode)?;
@@ -117,7 +117,7 @@ fn main() -> Result<(), Failure> {
     let ticket = check(node.propose(ClientRequest {
         group,
         operation,
-        bytes: delta.to_le_bytes().to_vec(),
+        bytes: Counter::command(0, delta),
     }))?;
     drive(&mut node, start, |n| {
         let Some(output) = n.poll_client() else {

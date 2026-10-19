@@ -121,11 +121,11 @@ fn write(node: &mut Boat, clock: Instant, command_bytes: usize) -> ClientOutcome
             && n.local().applications[&group()].applied_index() > 0
     });
     let mut bytes = vec![0; command_bytes];
-    bytes[..8].copy_from_slice(&7i64.to_le_bytes());
+    bytes[..COUNTER_COMMAND_BYTES].copy_from_slice(&Counter::command(0, 7));
     let ticket = node
         .propose(ClientRequest {
             group: group(),
-            operation: OperationId::new(1).unwrap(),
+            operation: Counter::operation(1, 1).unwrap(),
             bytes,
         })
         .unwrap_or_else(|e| {

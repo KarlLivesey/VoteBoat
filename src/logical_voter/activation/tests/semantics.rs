@@ -18,10 +18,12 @@ fn one_replicated_slot_retains_busy_terminal_and_first_positions() {
     let mut a = app(3);
     let i = intent(1);
     let competing = intent(2);
-    let business = a.business(&5i64.to_le_bytes()).unwrap();
-    let r = a.apply_batch(&[entry(1, op(100), business)]).unwrap();
+    let business = a.business(&Counter::command(0, 5)).unwrap();
+    let r = a
+        .apply_batch(&[entry(1, business_op(1), business)])
+        .unwrap();
     assert!(
-        matches!(&r[0], ActivationReceipt::Business(CounterReceipt { outcome: CounterOutcome::Value(5), operation, .. }) if *operation == op(100))
+        matches!(&r[0], ActivationReceipt::Business(CounterReceipt { outcome: CounterOutcome::Value(5), operation, .. }) if *operation == business_op(1))
     );
     let first = begin(&mut a, &i);
     assert_eq!(first.first, ActivationPosition { index: 2, term: 4 });
@@ -48,8 +50,8 @@ fn one_replicated_slot_retains_busy_terminal_and_first_positions() {
 fn reserved_terminal_capacity_survives_full_intent_lifetime() {
     let mut a = app(1);
     let i = intent(1);
-    let bytes = a.business(&7i64.to_le_bytes()).unwrap();
-    a.apply_batch(&[entry(1, op(100), bytes)]).unwrap();
+    let bytes = a.business(&Counter::command(0, 7)).unwrap();
+    a.apply_batch(&[entry(1, business_op(1), bytes)]).unwrap();
     begin(&mut a, &i);
     let fresh = a.begin(&intent(2)).unwrap();
     assert_eq!(
@@ -83,10 +85,10 @@ fn malformed_late_and_unprepared_phases_do_not_partially_apply() {
         outcome: ActivationPosition { index: 1, term: 4 },
     };
     let checkpoint = a.checkpoint(usize::MAX).unwrap();
-    let business = a.business(&9i64.to_le_bytes()).unwrap();
+    let business = a.business(&Counter::command(0, 9)).unwrap();
     assert!(a
         .apply_batch(&[
-            entry(2, op(100), business),
+            entry(2, business_op(1), business),
             entry(
                 3,
                 ops(1).release,
@@ -143,7 +145,7 @@ fn all_pending_and_retained_phase_aliases_refuse() {
     let mut a = app(2);
     let i = intent(1);
     let begin_bytes = a.begin(&i).unwrap();
-    let business = a.business(&1i64.to_le_bytes()).unwrap();
+    let business = a.business(&Counter::command(0, 1)).unwrap();
     // The ID space is split: a business write can never use a phase ID, with
     // or without a pending Begin that reserves it.
     for id in i.operations.ids() {
@@ -192,7 +194,7 @@ fn all_pending_and_retained_phase_aliases_refuse() {
     let checkpoint = a.checkpoint(usize::MAX).unwrap();
     assert_eq!(
         a.apply_batch(&[
-            entry(1, op(100), business.clone()),
+            entry(1, business_op(1), business.clone()),
             entry(2, ops(1).membership, business)
         ])
         .err(),

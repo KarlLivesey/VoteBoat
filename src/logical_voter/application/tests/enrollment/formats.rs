@@ -3,6 +3,8 @@
 use super::*;
 use crate::logical_voter::codec::Decoder;
 
+// DR1 regenerated both v6 files: the parent is a Counter, whose schema (in the
+// enrollment plan) is now 2 and whose embedded checkpoints are `VBCTR002`.
 const V6_EMPTY: &[u8] = include_bytes!("../formats/v6-candidate-empty.bin");
 const V6_ENROLLED: &[u8] = include_bytes!("../formats/v6-candidate-enrolled.bin");
 /// LV1 outputs (candidate checkpoint v3, schema 4), now legacy fixtures.

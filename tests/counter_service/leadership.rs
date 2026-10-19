@@ -25,7 +25,7 @@ fn cluster(quic: bool) -> Cluster {
         c.start(id, "create");
     }
     c.leader();
-    assert!(authenticated_write(&c, &["add", "96000", "7"]).contains("Value(7)"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "7"]).contains("Value(7)"));
     c
 }
 fn stop_one(c: &mut Cluster, id: usize) {
@@ -151,8 +151,8 @@ fn history(quic: bool) {
     assert!(c
         .ok(leader, &["resume-leadership", op])
         .contains("phase=Completed"));
-    assert!(authenticated_write(&c, &["add", "96000", "7"]).contains("duplicate=true"));
-    assert!(authenticated_write(&c, &["add", "96001", "3"]).contains("Value(10)"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "2", "0", "3"]).contains("Value(10)"));
     assert_eq!(c.routed(&["read"]), "OK value=10\n");
     for id in 1..=3 {
         c.ok(id, &["checkpoint"]);
@@ -202,7 +202,7 @@ fn authenticated_cancel_deadline_and_permission_boundaries() {
         );
         std::thread::sleep(Duration::from_millis(10));
     }
-    assert!(authenticated_write(&c, &["add", "96101", "1"]).contains("Value(8)"));
+    assert!(authenticated_write(&c, &["add", "1", "3", "0", "1"]).contains("Value(8)"));
     let resumed = leader_request(&mut c, &["resume-leadership", "96100"]);
     assert!(resumed.contains("phase=Pending"));
     cancellation::same_intent(&first, &resumed);
@@ -259,7 +259,7 @@ fn lost_begin_reply_retains_exact_intent_and_data() {
     }
     let (_, completed) = status(&mut c, "96200", "phase=Completed");
     check_identity(&completed, "96200", source, target);
-    assert!(authenticated_write(&c, &["add", "96000", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "7"]).contains("duplicate=true"));
     c.stop();
     fs::remove_dir_all(&c.root).unwrap();
 }
@@ -303,7 +303,9 @@ fn maintenance_profile_refuses_existing_plain_counter_data() {
     // Reopen the replica that applied the acknowledged command. A follower
     // stopped immediately after the reply may not have learned that commit.
     let node = c.leader();
-    assert!(c.ok(node, &["add", "96310", "7"]).contains("Value(7)"));
+    assert!(c
+        .ok(node, &["add", "1", "4", "0", "7"])
+        .contains("Value(7)"));
     c.stop();
     c.leadership_maintenance = true;
     let access = c.root.join("access.txt");

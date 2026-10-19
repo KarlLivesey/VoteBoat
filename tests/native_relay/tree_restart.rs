@@ -103,7 +103,7 @@ fn replace(c: &mut Cluster, fresh: FreshBranch) {
 fn history(protocol: NativePeerProtocol) {
     let mut c = Cluster::new_tree(protocol);
     c.campaign();
-    write(&mut c, 36411, 3);
+    write(&mut c, 71, 3);
     c.until(|c| c.value(2) == 3);
     let old = c.boats[0]
         .peers()

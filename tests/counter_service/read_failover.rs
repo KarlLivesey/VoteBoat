@@ -155,7 +155,9 @@ fn authenticated(quic: bool) {
         c.start(node, "create");
     }
     let leader = c.leader();
-    assert!(c.ok(leader, &["add", "19901", "7"]).contains("Value(7)"));
+    assert!(c
+        .ok(leader, &["add", "1", "1", "0", "7"])
+        .contains("Value(7)"));
     let first = peer(listener, None);
     let start = Instant::now();
     let output = c.target("auto", &["read"]);

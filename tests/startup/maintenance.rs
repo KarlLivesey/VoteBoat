@@ -402,8 +402,8 @@ fn handoff(protocol: NativePeerProtocol, checkpoint: bool) {
     assert!(matches!(
         h.submit(
             1,
-            OperationId::new(20).unwrap(),
-            Maintenance::<HostApplication>::data(&7i64.to_le_bytes(), 100).unwrap()
+            Counter::operation(1, 20).unwrap(),
+            Maintenance::<HostApplication>::data(&Counter::command(0, 7), 100).unwrap()
         ),
         ClientOutcome::Applied { .. }
     ));

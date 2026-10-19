@@ -64,8 +64,8 @@ fn history(quic: bool) {
     assert_eq!(observed, reopened);
     let duplicate = leader_request(&mut c, &["cancel-leadership", op]);
     assert_eq!(duplicate, reopened);
-    assert!(authenticated_write(&c, &["add", "96000", "7"]).contains("duplicate=true"));
-    assert!(authenticated_write(&c, &["add", "96401", "3"]).contains("Value(10)"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "6", "0", "3"]).contains("Value(10)"));
     assert_eq!(c.routed(&["read"]), "OK value=10\n");
     c.stop();
     fs::remove_dir_all(&c.root).unwrap();

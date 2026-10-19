@@ -86,8 +86,8 @@ fn command_message() -> Message {
                 index: 2,
                 term: 2,
                 payload: EntryPayload::Command {
-                    operation: OperationId::new(7).unwrap(),
-                    bytes: 7i64.to_le_bytes().to_vec().into(),
+                    operation: Counter::operation(1, 7).unwrap(),
+                    bytes: Counter::command(0, 7).into(),
                 },
             }],
             leader_commit: 2,
@@ -531,8 +531,8 @@ fn joint_or_policy_transition_cannot_use_learner_recovery_to_open_dynamic_voting
 
 fn readiness_requirements() -> ReadinessRequirements {
     ReadinessRequirements {
-        application_schema: 1,
-        command_bytes: 8,
+        application_schema: voteboat::application::COUNTER_SCHEMA,
+        command_bytes: voteboat::application::COUNTER_COMMAND_BYTES,
         snapshot_bytes: 4096,
     }
 }
@@ -2359,8 +2359,8 @@ fn advance_readiness_commit(
     } if entries.is_empty()));
     let effects = leader
         .step(Event::Propose {
-            operation: OperationId::new(99).unwrap(),
-            bytes: 7i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, 99).unwrap(),
+            bytes: Counter::command(0, 7),
         })
         .unwrap();
     assert_eq!(

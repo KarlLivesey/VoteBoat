@@ -16,15 +16,15 @@ use super::*;
 #[test]
 fn original_business_content_retry_and_contiguous_control_positions() {
     let mut a = app();
-    let business = a.business(&7i64.to_le_bytes()).unwrap();
+    let business = a.business(&Counter::command(0, 7)).unwrap();
     assert!(a
-        .validate_proposal(op(100), &business, std::iter::empty())
+        .validate_proposal(business_op(), &business, std::iter::empty())
         .is_ok());
     let receipts = a
         .apply_batch(&[
-            entry(1, op(100), business.clone()),
+            entry(1, business_op(), business.clone()),
             entry(2, begin_op(), a.begin(&intent()).unwrap()),
-            entry(3, op(100), business),
+            entry(3, business_op(), business),
         ])
         .unwrap();
     let ActivationReceipt::Business(first) = receipts[0] else {
@@ -33,7 +33,7 @@ fn original_business_content_retry_and_contiguous_control_positions() {
     let ActivationReceipt::Business(retry) = receipts[2] else {
         panic!("business retry")
     };
-    assert_eq!(first.operation, op(100));
+    assert_eq!(first.operation, business_op());
     assert_eq!(first.outcome, CounterOutcome::Value(7));
     assert!(retry.duplicate);
     assert_eq!(a.inner().applied_index(), 3);
@@ -51,7 +51,11 @@ fn original_business_content_retry_and_contiguous_control_positions() {
     assert_eq!(reopened.checkpoint(usize::MAX).unwrap(), bytes);
     let status = reopened.status(begin_op()).unwrap();
     assert_eq!(status.begin.first, ActivationPosition { index: 2, term: 1 });
-    let suffix = entry(4, op(100), reopened.business(&7i64.to_le_bytes()).unwrap());
+    let suffix = entry(
+        4,
+        business_op(),
+        reopened.business(&Counter::command(0, 7)).unwrap(),
+    );
     let receipt = reopened.apply_batch(&[suffix]).unwrap();
     assert!(matches!(
         &receipt[0],
@@ -70,7 +74,11 @@ fn bounded_receipts_reads_and_faithful_response_tags() {
     let mut a = app();
     let entries = [
         entry(1, begin_op(), a.begin(&intent()).unwrap()),
-        entry(2, op(100), a.business(&3i64.to_le_bytes()).unwrap()),
+        entry(
+            2,
+            business_op(),
+            a.business(&Counter::command(0, 3)).unwrap(),
+        ),
     ];
     let receipt_bound = a.receipt_bytes_bound(&entries).unwrap();
     let encoded_bound = a.receipt_encoding_bound(&entries).unwrap();
@@ -225,10 +233,12 @@ fn selected_inner_context_is_forwarded_without_freezing_parent_configuration() {
         LogLimits::default(),
     )
     .unwrap();
-    let bytes = a.business(&7i64.to_le_bytes()).unwrap();
-    assert!(a.validate_proposal_context(&core, op(100), &bytes).is_ok());
+    let bytes = a.business(&Counter::command(0, 7)).unwrap();
+    assert!(a
+        .validate_proposal_context(&core, business_op(), &bytes)
+        .is_ok());
     assert_eq!(
-        a.validate_proposal_context(&core, op(900), &bytes),
+        a.validate_proposal_context(&core, Counter::operation(1, 9).unwrap(), &bytes),
         Err(ApplicationError::InvalidCommand)
     );
     assert!(a
@@ -288,7 +298,7 @@ fn public_operation_space_split_refuses_tagged_business_writes() {
         .begin
         .get()
         .eq(&((u128::from(ACTIVATION_OPERATION_TAG) << 64) | 8)));
-    let business = a.business(&7i64.to_le_bytes()).unwrap();
+    let business = a.business(&Counter::command(0, 7)).unwrap();
     assert_eq!(
         a.validate_proposal(tagged, &business, std::iter::empty()),
         Err(ApplicationError::InvalidCommand)
@@ -317,6 +327,6 @@ fn public_operation_space_split_refuses_tagged_business_writes() {
     )
     .is_err());
     assert!(a
-        .validate_proposal(op(100), &business, std::iter::empty())
+        .validate_proposal(business_op(), &business, std::iter::empty())
         .is_ok());
 }

@@ -48,7 +48,7 @@ fn history(protocol: NativePeerProtocol) {
     eprintln!("332 stage=three_parent_election");
     peers.elect(&mut parent, &mut target);
     eprintln!("332 stage=original_business_before");
-    business::requests(&mut peers, &mut parent, &mut target, 33301, 7, 7);
+    business::requests(&mut peers, &mut parent, &mut target, 1, 7, 7);
     let original = super::super::history::intent(33400);
     let mut driver = ChildActivationDriver::new(
         &mut parent,
@@ -98,7 +98,7 @@ fn history(protocol: NativePeerProtocol) {
     settle(node, &mut peers, &mut target, &original);
     assertions::terminal(node, &peers, &target, &original, first, representative);
     eprintln!("332 stage=original_business_after");
-    business::requests(&mut peers, &mut parent, &mut target, 33302, 5, 12);
+    business::requests(&mut peers, &mut parent, &mut target, 2, 5, 12);
     eprintln!("332 stage=original_independent_cleanup");
     let [left, right] = cleanup::close(peers, &mut parent, &mut target);
     drop(target);

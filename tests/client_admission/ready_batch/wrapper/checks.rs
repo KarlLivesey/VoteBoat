@@ -29,7 +29,7 @@ fn retained_capacity_refuses_novel_id_but_original_retry_keeps_exact_outcome() {
         .unwrap_err();
     assert_eq!(
         refused.reason,
-        ClientError::Application(ApplicationError::DedupCapacity)
+        ClientError::Application(ApplicationError::SessionWindow)
     );
     let tickets: Vec<_> = [9, 7]
         .into_iter()
@@ -124,7 +124,7 @@ fn maintenance_wrapper_keeps_actual_capability_and_singleton_data_order() {
         inner.supports_ready_batch()
     );
     assert!(!apps[&group(1)].supports_ready_batch());
-    assert_eq!(apps[&group(1)].schema_version(), 2);
+    assert_eq!(apps[&group(1)].schema_version(), 3);
     let tickets: Vec<_> = [(1, 7), (1, 9), (1, 7)]
         .into_iter()
         .map(|(id, delta)| {

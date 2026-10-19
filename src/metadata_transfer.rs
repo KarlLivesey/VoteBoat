@@ -716,6 +716,10 @@ impl StateMachine for MetadataAuthoritySource {
     fn validate_group(&self, g: GroupIdentity) -> Result<(), ApplicationError> {
         self.initial.validate_group(g)
     }
+    /// Lifetime history until DH1 (audit S8, T6).
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::LifetimeBounded
+    }
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
         Some(self.readiness_requirements())
     }

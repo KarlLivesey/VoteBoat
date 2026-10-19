@@ -215,11 +215,11 @@ fn terminal(protocol: NativePeerProtocol) {
     }
     let released = h.transfer(leader).is_none();
     let data = h.nodes[leader].local().applications[&setup::group()]
-        .data(2)
+        .data(&voteboat::application::Counter::command(0, 2))
         .unwrap();
     let result = h.nodes[leader].propose(ClientRequest {
         group: setup::group(),
-        operation: OperationId::new(19703).unwrap(),
+        operation: voteboat::application::Counter::operation(1, 1).unwrap(),
         bytes: data,
     });
     let outcome = result.ok().map(|ticket| h.completion(leader, ticket));

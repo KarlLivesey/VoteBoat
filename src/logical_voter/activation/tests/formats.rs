@@ -15,7 +15,10 @@
 //! Format pins. The v1 files were written by the code at 30a1f6c5 with the same
 //! fixture (two intents, `Counter::new(16)`; populated = business `op(100)` at
 //! index 1 and a v1 `Begin` at index 2). Old bytes are refused typed, never
-//! reinterpreted; v2 bytes are pinned exactly.
+//! reinterpreted; v2 bytes are pinned exactly. DR1 regenerated `v2-empty.bin`,
+//! `v2-populated.bin` and `v2-profile.bin`: only the embedded inner Counter
+//! checkpoint (`VBCTR001` → `VBCTR002`) and the inner schema field (1 → 2)
+//! changed; the wrapper layout is unchanged.
 use super::*;
 const OLD_SCHEMA: u64 = 0x5642_4143_5449_0001;
 const V1_EMPTY: &[u8] = include_bytes!("formats/v1-empty.bin");
@@ -28,8 +31,9 @@ const V2_BEGIN: &[u8] = include_bytes!("formats/v2-begin.bin");
 const V2_PROFILE: &[u8] = include_bytes!("formats/v2-profile.bin");
 fn populated() -> (LogicalActivationApplication<Counter>, Vec<u8>) {
     let mut a = app(2);
-    let business = a.business(&5i64.to_le_bytes()).unwrap();
-    a.apply_batch(&[entry(1, op(100), business)]).unwrap();
+    let business = a.business(&Counter::command(0, 5)).unwrap();
+    a.apply_batch(&[entry(1, business_op(1), business)])
+        .unwrap();
     let begin_bytes = a.begin(&intent(1)).unwrap();
     a.apply_batch(&[entry(2, ops(1).begin, begin_bytes.clone())])
         .unwrap();

@@ -17,8 +17,8 @@ pub fn submit(host: &mut Host<'_, '_>, operation: u128, value: i64) -> ClientTic
     let ticket = host.nodes[0]
         .propose(ClientRequest {
             group: setup::top().group,
-            operation: OperationId::new(operation).unwrap(),
-            bytes: value.to_le_bytes().to_vec(),
+            operation: voteboat::application::Counter::operation(1, operation as u64).unwrap(),
+            bytes: voteboat::application::Counter::command(0, value),
         })
         .unwrap();
     host.until(|h| {

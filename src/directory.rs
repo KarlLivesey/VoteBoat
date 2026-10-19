@@ -1748,6 +1748,10 @@ impl StateMachine for Directory {
         }
         Ok(())
     }
+    /// Lifetime history until DH1 (audit S4).
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::LifetimeBounded
+    }
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(self.readiness_requirements())
     }

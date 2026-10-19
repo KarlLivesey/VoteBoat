@@ -67,7 +67,7 @@ fn history(quic: bool) {
     let session = field(&first, "store_session");
     assert_eq!(field(&first, "event_generation"), 1);
     assert_eq!(field(&first, "next"), 1);
-    assert!(authenticated_write(&cluster, &["add", "19001", "7"]).contains("Value(7)"));
+    assert!(authenticated_write(&cluster, &["add", "1", "1", "0", "7"]).contains("Value(7)"));
     // Local checkpoint submission is independent of leadership and returns admission only.
     cluster.ok(leader, &["checkpoint"]);
     let deadline = Instant::now() + Duration::from_secs(10);
@@ -119,7 +119,7 @@ fn history(quic: bool) {
         }
     }
     cluster.leader();
-    assert!(authenticated_write(&cluster, &["add", "19001", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&cluster, &["add", "1", "1", "0", "7"]).contains("duplicate=true"));
     assert_eq!(cluster.routed(&["read"]), "OK value=7\n");
     cluster.stop();
     fs::remove_dir_all(&cluster.root).unwrap();

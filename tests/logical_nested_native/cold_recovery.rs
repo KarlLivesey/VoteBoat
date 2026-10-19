@@ -46,10 +46,10 @@ fn history(protocol: NativePeerProtocol) {
     middle::elect(&mut lower, &mut middle_nodes);
     let mut host = Host::new(lower, &mut middle_nodes, protocol, 200000, &channels);
     host.elect();
-    write::write(&mut host, 300000, 5, false);
+    write::write(&mut host, 1, 5, false);
     settle(&mut host);
     checkpoint(&mut host);
-    let suffix = write::write(&mut host, 300001, 0, false);
+    let suffix = write::write(&mut host, 2, 0, false);
     settle(&mut host);
     super::read::read(&mut host);
     let facts = capture(&host, middle_bindings, suffix.position.index);
@@ -79,8 +79,8 @@ fn history(protocol: NativePeerProtocol) {
     let mut host = Host::new(lower, &mut middle_nodes, protocol, 600000, &channels);
     restored(&host, &facts);
     host.elect();
-    write::write(&mut host, 300000, 5, true);
-    write::write(&mut host, 300001, 0, true);
+    write::write(&mut host, 1, 5, true);
+    write::write(&mut host, 2, 0, true);
     super::read::read(&mut host);
     super::convergence::finish(&mut host);
     let mut lower = host.close();
@@ -145,7 +145,7 @@ fn capture(host: &Host<'_, '_>, middle_bindings: Vec<StoreBinding>, suffix_index
             assert!(suffix.index > anchor.index);
             assert!(
                 matches!(&suffix.payload, EntryPayload::Command { operation, bytes }
-            if operation.get() == 300001 && bytes.as_slice() == 0i64.to_le_bytes())
+            if *operation == voteboat::application::Counter::operation(1, 2).unwrap() && bytes.as_slice() == voteboat::application::Counter::command(0, 0))
             );
             assert_eq!(
                 local.applications[&group].applied_index(),

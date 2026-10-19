@@ -178,8 +178,8 @@ fn unknown_completion_waits_for_actual_native_reservation_release() {
         fresh,
     );
     campaign(&mut nodes, &clock, 1);
-    let operation = OperationId::new(4244).unwrap();
-    let bytes = 9i64.to_le_bytes().to_vec();
+    let operation = Counter::operation(1, 2).unwrap();
+    let bytes = Counter::command(0, 9);
     let ticket = nodes[0]
         .propose(ClientRequest {
             group: group(1),
@@ -253,8 +253,8 @@ fn accepted_unknown_must_not_be_an_applied_unread_cut() {
         fresh,
     );
     campaign(&mut nodes, &clock, 1);
-    let operation = OperationId::new(4243).unwrap();
-    let bytes = 7i64.to_le_bytes().to_vec();
+    let operation = Counter::operation(1, 1).unwrap();
+    let bytes = Counter::command(0, 7);
     let mut faulted = false;
     write(
         &mut nodes,

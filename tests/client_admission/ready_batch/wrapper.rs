@@ -60,8 +60,8 @@ fn wrapped(capacity: usize, maintenance: bool) -> WrappedSetup {
 fn wrapped_request(app: &Application, id: u128, delta: i64) -> ClientRequest {
     ClientRequest {
         group: group(1),
-        operation: OperationId::new(id).unwrap(),
-        bytes: app.data(delta).unwrap(),
+        operation: Counter::operation(1, id as u64).unwrap(),
+        bytes: app.data(&Counter::command(0, delta)).unwrap(),
     }
 }
 fn applied(
@@ -116,7 +116,7 @@ fn plain_service_wrapper_batches_originals_with_full_wrapper_receipt_bounds() {
         .unwrap_err();
     assert_eq!(
         refused.reason,
-        ClientError::Application(ApplicationError::DedupCapacity)
+        ClientError::Application(ApplicationError::SessionWindow)
     );
     let steps = clients
         .advance(&mut owner, MonoTime(400), 8, |g| apps.get(&g))

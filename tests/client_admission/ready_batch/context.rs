@@ -27,7 +27,7 @@ impl ProposalAdmission for ContextOnly {
         operation: OperationId,
         _: &[u8],
     ) -> Result<(), ApplicationError> {
-        if operation.get() == 2 && core.state().last_index() != 1 {
+        if operation == Counter::operation(1, 2).unwrap() && core.state().last_index() != 1 {
             Err(ApplicationError::InvalidCommand)
         } else {
             Ok(())

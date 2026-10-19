@@ -18,13 +18,16 @@ trait Scenario {
         + CheckpointStateMachine
         + ReadableStateMachine
         + BoundedStateMachine;
-    type Reply: std::fmt::Debug + Eq;
+    type Reply: std::fmt::Debug + Eq + Clone;
     type Value: std::fmt::Debug + Eq;
     fn fresh(capacity: usize) -> Self::App;
     fn requirements() -> Option<voteboat::raft::ReadinessRequirements>;
     fn command(index: u64, operation: u128, value: i64) -> LogEntry;
     fn reply(receipt: &<Self::App as StateMachine>::Receipt) -> Self::Reply;
     fn replies(replay: bool) -> Vec<Self::Reply>;
+    /// Reply to a committed novel command beyond the retention capacity: a
+    /// typed refusal, never an apply error.
+    fn overflow() -> Self::Reply;
     fn query() -> <Self::App as ReadableStateMachine>::Query;
     fn value(result: <Self::App as ReadableStateMachine>::ReadResult) -> Self::Value;
     fn expected_value(replay: bool) -> Self::Value;
@@ -46,8 +49,8 @@ impl Scenario for CounterCase {
             index,
             term: 1,
             payload: EntryPayload::Command {
-                operation: OperationId::new(operation).unwrap(),
-                bytes: value.to_le_bytes().to_vec().into(),
+                operation: Counter::operation(1, operation as u64).unwrap(),
+                bytes: Counter::command(0, value).into(),
             },
         }
     }
@@ -68,6 +71,12 @@ impl Scenario for CounterCase {
                 (CounterOutcome::Value(18), false),
             ]
         }
+    }
+    fn overflow() -> Self::Reply {
+        (
+            CounterOutcome::Refused(voteboat::retention::SessionRefusal::Window),
+            false,
+        )
     }
     fn query() {}
     fn value(result: i64) -> i64 {

@@ -133,8 +133,8 @@ fn facade_proposals<F: voteboat::transport::PeerTransportFactory<Session>>(
         nodes[0]
             .propose(ClientRequest {
                 group: group(g),
-                operation: OperationId::new(operation).unwrap(),
-                bytes: delta.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, operation as u64).unwrap(),
+                bytes: Counter::command(0, delta),
             })
             .unwrap();
     }

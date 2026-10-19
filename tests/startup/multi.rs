@@ -153,8 +153,8 @@ impl History {
         let ticket = self.nodes[leader]
             .propose(ClientRequest {
                 group,
-                operation: OperationId::new(operation).unwrap(),
-                bytes: delta.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, operation as u64).unwrap(),
+                bytes: Counter::command(0, delta),
             })
             .unwrap();
         let start = Instant::now();
@@ -167,7 +167,10 @@ impl History {
                 else {
                     panic!("write lost leadership");
                 };
-                assert_eq!(receipt.operation.get(), operation);
+                assert_eq!(
+                    receipt.operation,
+                    Counter::operation(1, operation as u64).unwrap()
+                );
                 assert_eq!(receipt.outcome, CounterOutcome::Value(expected));
                 assert_eq!(receipt.duplicate, duplicate);
                 break position;

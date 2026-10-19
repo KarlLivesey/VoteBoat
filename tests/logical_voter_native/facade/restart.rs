@@ -14,9 +14,7 @@
 // rights and limitations under the RPL.
 use super::*;
 use voteboat::{
-    identity::{OperationId, StoreBinding},
-    log::GroupLog,
-    native::startup::NativeOpenMode,
+    identity::StoreBinding, log::GroupLog, native::startup::NativeOpenMode,
     snapshot_worker::SnapshotWorker,
 };
 
@@ -69,8 +67,8 @@ pub(super) fn write(
     let ticket = node
         .propose(ClientRequest {
             group: setup::mapping().parent,
-            operation: OperationId::new(operation).unwrap(),
-            bytes: delta.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, operation as u64).unwrap(),
+            bytes: Counter::command(0, delta),
         })
         .unwrap();
     let end = Instant::now() + Duration::from_secs(15);
@@ -83,7 +81,10 @@ pub(super) fn write(
             else {
                 panic!("original applied receipt required")
             };
-            assert_eq!(receipt.operation, OperationId::new(operation).unwrap());
+            assert_eq!(
+                receipt.operation,
+                Counter::operation(1, operation as u64).unwrap()
+            );
             assert_eq!(position.index, receipt.index);
             until(bridge, node, clock, FacadeNode::work_is_drained);
             return receipt;
@@ -153,11 +154,11 @@ fn prepare(cohort: &mut Cluster) -> (StoreBinding, GroupLog, CounterReceipt) {
     let old_binding = image.binding();
     let mut parent = node(&image);
     elect(&mut bridge, &mut parent, clock);
-    let first = write(&mut bridge, &mut parent, clock, 8910, 5);
+    let first = write(&mut bridge, &mut parent, clock, 1, 5);
     assert_eq!(first.outcome, CounterOutcome::Value(5));
     checkpoint(&mut bridge, &mut parent, clock);
     assert_eq!(
-        write(&mut bridge, &mut parent, clock, 8911, 2).outcome,
+        write(&mut bridge, &mut parent, clock, 2, 2).outcome,
         CounterOutcome::Value(7)
     );
     let expected = state(&parent).clone();
@@ -230,14 +231,14 @@ fn history(protocol: NativePeerProtocol) {
     assert_eq!(app.0.read_applied(expected.commit_index).unwrap(), 7);
     super::super::recovery::refusal_is_atomic(&recovered, app);
     elect(&mut bridge, &mut parent, clock);
-    let duplicate = write(&mut bridge, &mut parent, clock, 8910, 5);
+    let duplicate = write(&mut bridge, &mut parent, clock, 1, 5);
     assert!(duplicate.duplicate);
     assert!(duplicate.index > expected.commit_index);
     assert_eq!(duplicate.index, state(&parent).commit_index);
     assert_eq!(duplicate.outcome, first.outcome);
     assert_eq!(read(&mut bridge, &mut parent, clock), 7);
     assert_eq!(
-        write(&mut bridge, &mut parent, clock, 8912, 3).outcome,
+        write(&mut bridge, &mut parent, clock, 3, 3).outcome,
         CounterOutcome::Value(10)
     );
     close(&mut bridge, &mut parent, clock);

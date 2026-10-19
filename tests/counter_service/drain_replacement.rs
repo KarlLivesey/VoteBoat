@@ -88,7 +88,7 @@ fn enroll(c: &mut Cluster) {
         String::from_utf8_lossy(&imported.stderr)
     );
     let original = stored(c, 4);
-    assert_eq!(original.snapshot.unwrap().application_schema, 2);
+    assert_eq!(original.snapshot.unwrap().application_schema, 3);
     c.leadership_maintenance = false;
     assert!(!c.enroll("recover", 4, &destination, 1).status.success());
     assert_eq!(
@@ -121,9 +121,9 @@ fn verify_maintenance_checkpoint(c: &Cluster, original: &GroupLog) {
     let image = snapshots.load_pinned(original.snapshot.unwrap()).unwrap();
     let mut app = Maintenance::new(
         original.bootstrap.group,
-        2,
+        3,
         64,
-        Counter::new(10000).unwrap(),
+        Counter::with_limits(voteboat::retention::SessionLimits::default()).unwrap(),
     )
     .unwrap();
     app.restore_checkpoint(
@@ -277,8 +277,8 @@ fn replacement_history(quic: bool, lost_reply: bool) {
     drain::joined(&mut c, 1);
     // Losing another original voter now requires the new exact store's vote.
     drain::kill(&mut c, 3);
-    assert!(authenticated_write(&c, &["add", "19772", "3"]).contains("Value(10)"));
-    assert!(authenticated_write(&c, &["add", "19700", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "4", "0", "3"]).contains("Value(10)"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "7"]).contains("duplicate=true"));
     c.stop();
     for id in [2, 4] {
         let saved = stored(&c, id);
@@ -296,8 +296,8 @@ fn replacement_history(quic: bool, lost_reply: bool) {
         c.node_drain = id != 4;
         c.start(id, "recover-member");
     }
-    assert!(authenticated_write(&c, &["add", "19772", "3"]).contains("duplicate=true"));
-    assert!(authenticated_write(&c, &["add", "19773", "1"]).contains("Value(11)"));
+    assert!(authenticated_write(&c, &["add", "1", "4", "0", "3"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "5", "0", "1"]).contains("Value(11)"));
     if let Some(receipt) = receipt {
         let (_, recovered) = leadership::status(&mut c, "19750", "phase=Completed");
         assert_eq!(recovered, receipt);

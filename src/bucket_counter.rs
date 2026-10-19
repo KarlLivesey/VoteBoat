@@ -367,6 +367,10 @@ impl<P: PartitionPolicy + Clone> BucketCounter<P> {
 }
 impl<P: PartitionPolicy + Clone> StateMachine for BucketCounter<P> {
     type Receipt = BucketReceipt;
+    /// Lifetime operation table until DR2 (audit S3).
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::LifetimeBounded
+    }
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(self.readiness_requirements())
     }

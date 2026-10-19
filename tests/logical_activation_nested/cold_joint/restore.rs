@@ -61,8 +61,8 @@ pub(super) fn complete(
         .try_reclaim()
         .unwrap_or_else(|_| panic!("fresh driver original observations drained"));
     history::terminal(returned, &bridge, &setup::intent());
-    business::request(&mut lower, &mut bridge, returned, 4, 356300, 7, 7);
-    business::request(&mut lower, &mut bridge, returned, 4, 367301, 5, 12);
+    business::request(&mut lower, &mut bridge, returned, 4, 1, 7, 7);
+    business::request(&mut lower, &mut bridge, returned, 4, 2, 5, 12);
     super::super::shutdown::close(&mut lower, &mut bridge, returned, 4);
     bridge.close();
     assert!(bridge.observations_are_drained());

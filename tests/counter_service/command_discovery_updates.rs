@@ -60,7 +60,7 @@ fn history(quic: bool) {
         c.start(id, "create");
     }
     wait_for_source(&mut c);
-    let unavailable = c.request(2, &["add", "20901", "9"]);
+    let unavailable = c.request(2, &["add", "1", "1", "0", "9"]);
     assert!(!unavailable.status.success());
     assert!(!String::from_utf8_lossy(&unavailable.stdout).contains("UNKNOWN"));
     // Node2 may be leader while its discovery hint is deliberately stale.
@@ -75,7 +75,7 @@ fn history(quic: bool) {
     let endpoint = format!("127.0.0.1:{}", c.base + 112);
     check_update(&mut c, &endpoint);
     assert!(c.ok(2, &["status"]).contains("OK role="));
-    assert!(authenticated_write(&c, &["add", "20901", "9"]).contains("Value(9)"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "9"]).contains("Value(9)"));
     assert_eq!(c.routed(&["read"]), "OK value=9\n");
     // Publishing never silently rewrites administrator-owned startup files.
     assert!(fs::read_to_string(c.discovery_peers.as_ref().unwrap())
@@ -96,7 +96,7 @@ fn history(quic: bool) {
     wait_for_source(&mut c);
     assert!(c.ok(1, &["discovery-status"]).contains("generation=11"));
     assert!(c.ok(2, &["status"]).contains("OK role="));
-    assert!(authenticated_write(&c, &["add", "20901", "9"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "9"]).contains("duplicate=true"));
     assert_eq!(c.routed(&["read"]), "OK value=9\n");
     c.stop();
     fs::remove_dir_all(&c.root).unwrap();

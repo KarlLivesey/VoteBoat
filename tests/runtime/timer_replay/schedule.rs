@@ -137,8 +137,8 @@ impl Replay {
                     .admit(
                         group(g),
                         Event::Propose {
-                            operation: OperationId::new(operation).unwrap(),
-                            bytes: delta.to_le_bytes().to_vec(),
+                            operation: Counter::operation(1, operation as u64).unwrap(),
+                            bytes: Counter::command(0, delta),
                         },
                     )
                     .unwrap();
@@ -173,7 +173,7 @@ impl Trace {
         actions.extend((40..=120).step_by(stride).map(Action::At));
         actions.extend([
             Action::At(120),
-            Action::Write(2, 9911, 7),
+            Action::Write(2, 1, 7),
             Action::At(121),
             Action::Read(2, seed),
             Action::At(122),
@@ -185,14 +185,14 @@ impl Trace {
         actions.extend((123..=200).step_by(stride).map(Action::At));
         actions.extend([
             Action::At(200),
-            Action::Write(1, 9911, 7),
+            Action::Write(1, 1, 7),
             Action::At(201),
             Action::CrashLeader(seed.is_multiple_of(2)),
         ]);
         actions.extend((202..=300).step_by(stride).map(Action::At));
         actions.extend([
             Action::At(300),
-            Action::Write(1, 9911, 7),
+            Action::Write(1, 1, 7),
             Action::At(301),
             Action::Read(1, seed + 1000),
             Action::At(302),
@@ -317,7 +317,7 @@ fn replay(trace: &Trace) -> Vec<Point> {
     for n in &run.nodes {
         for app in n.apps.values() {
             assert_eq!(app.read_applied(app.applied_index()), Ok(7));
-            assert_eq!(app.remaining_operations(), 9);
+            assert_eq!(app.retained_receipts(), 1);
         }
     }
     points

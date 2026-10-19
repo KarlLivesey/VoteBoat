@@ -479,8 +479,8 @@ fn recursive_joint_recovery_catches_up_old_voter_and_commits_after_election() {
     let leader = peers.get_mut(&2).unwrap();
     let effects = leader
         .step(Event::Propose {
-            operation: operation(900),
-            bytes: 7i64.to_le_bytes().to_vec(),
+            operation: crate::application::Counter::operation(1, 1).unwrap(),
+            bytes: crate::application::Counter::command(0, 7),
         })
         .unwrap();
     queue.extend(durable(leader, effects));

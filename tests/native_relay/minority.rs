@@ -6,7 +6,7 @@ use super::{
     history::{finish, read},
     support::*,
 };
-use voteboat::{identity::OperationId, native::connect::NativePeerProtocol, runtime::*};
+use voteboat::{native::connect::NativePeerProtocol, runtime::*};
 fn history(protocol: NativePeerProtocol) {
     let mut c = Cluster::new(protocol);
     c.campaign();
@@ -33,8 +33,8 @@ fn history(protocol: NativePeerProtocol) {
     let write = c.boats[0]
         .propose(ClientRequest {
             group: group(352),
-            operation: OperationId::new(35241).unwrap(),
-            bytes: 5i64.to_le_bytes().to_vec(),
+            operation: voteboat::application::Counter::operation(1, 41).unwrap(),
+            bytes: voteboat::application::Counter::command(0, 5),
         })
         .unwrap();
     let query = c.boats[0].read(group(352), ()).unwrap();

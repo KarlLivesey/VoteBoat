@@ -149,13 +149,13 @@ fn decoded_begin_with_untagged_phase_ids_is_invalid() {
 }
 #[test]
 fn business_then_begin_and_begin_then_business_keep_both_meanings() {
-    let business = app(2).business(&5i64.to_le_bytes()).unwrap();
+    let business = app(2).business(&Counter::command(0, 5)).unwrap();
     let i = intent(1);
     for business_first in [true, false] {
         let mut a = app(2);
         let begin_bytes = a.begin(&i).unwrap();
         let mut log = vec![
-            (op(100), business.clone()),
+            (business_op(1), business.clone()),
             (i.operations.begin, begin_bytes),
         ];
         if !business_first {
@@ -168,10 +168,10 @@ fn business_then_begin_and_begin_then_business_keep_both_meanings() {
         // A lost-receipt retry of the business write still reaches the inner
         // application and gets its original outcome.
         assert!(a
-            .validate_proposal(op(100), &business, std::iter::empty())
+            .validate_proposal(business_op(1), &business, std::iter::empty())
             .is_ok());
         let retry = a
-            .apply_batch(&[entry(3, op(100), business.clone())])
+            .apply_batch(&[entry(3, business_op(1), business.clone())])
             .unwrap();
         assert!(matches!(
             retry[0],

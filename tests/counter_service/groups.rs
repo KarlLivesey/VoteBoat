@@ -63,7 +63,10 @@ pub(super) fn leader(c: &mut Cluster, group: &str, incarnation: &str) -> usize {
 }
 fn data(c: &mut Cluster, duplicate: bool) {
     for (group, incarnation, value) in [("1", "1", "3"), ("7", "3", "5"), ("8", "2", "9")] {
-        let text = authenticated_write(c, &["group", group, incarnation, "add", "42", value]);
+        let text = authenticated_write(
+            c,
+            &["group", group, incarnation, "add", "1", "1", "0", value],
+        );
         let retained = format!("OK outcome=Value({value}) duplicate=true\n");
         if duplicate {
             assert_eq!(text, retained);
@@ -74,7 +77,10 @@ fn data(c: &mut Cluster, duplicate: bool) {
             assert!(text == first || text == retained, "{text}");
         }
         assert_eq!(
-            authenticated_write(c, &["group", group, incarnation, "add", "42", value]),
+            authenticated_write(
+                c,
+                &["group", group, incarnation, "add", "1", "1", "0", value]
+            ),
             retained
         );
         assert_eq!(
@@ -92,7 +98,7 @@ fn authorization(c: &mut Cluster) {
     c.command_principal = Some(1);
     assert_eq!(c.ok(n, &["group", "7", "3", "read"]), "OK value=5\n");
     for args in [
-        vec!["group", "7", "3", "add", "44", "1"],
+        vec!["group", "7", "3", "add", "1", "4", "0", "1"],
         vec!["group", "1", "1", "read"],
         vec!["group", "7", "4", "read"],
     ] {
@@ -101,7 +107,10 @@ fn authorization(c: &mut Cluster) {
         assert!(String::from_utf8_lossy(&output.stdout).contains("AUTHORIZATION"));
     }
     c.command_principal = Some(2);
-    assert!(authenticated_write(c, &["group", "7", "3", "add", "43", "0"]).contains("Value(5)"));
+    assert!(
+        authenticated_write(c, &["group", "7", "3", "add", "1", "2", "0", "0"])
+            .contains("Value(5)")
+    );
     c.command_principal = Some(3);
     let missing = c.request(n, &["group", "99", "1", "status"]);
     assert!(!missing.status.success());
@@ -145,7 +154,10 @@ fn history(quic: bool) {
     let mut child = c.children[lost - 1].take().unwrap();
     child.kill().unwrap();
     child.wait().unwrap();
-    assert!(authenticated_write(&c, &["group", "7", "3", "add", "45", "0"]).contains("Value(5)"));
+    assert!(
+        authenticated_write(&c, &["group", "7", "3", "add", "1", "5", "0", "0"])
+            .contains("Value(5)")
+    );
     c.start(lost, "recover");
     leader(&mut c, "7", "3");
     c.stop();
@@ -222,13 +234,13 @@ fn group_routing_preserves_exact_request_and_stops_after_uncertainty() {
         let second = reply_peer(c.take_listener(102), reply);
         let third = c.take_listener(103);
         third.set_nonblocking(true).unwrap();
-        let output = c.target("auto", &["group", "7", "3", "add", "42", "7"]);
+        let output = c.target("auto", &["group", "7", "3", "add", "1", "1", "0", "7"]);
         assert_eq!(
             output.status.success(),
             reply.is_some_and(|r| r.starts_with(b"OK"))
         );
-        assert_eq!(first.join().unwrap(), b"group 7 3 add 42 7\n");
-        assert_eq!(second.join().unwrap(), b"group 7 3 add 42 7\n");
+        assert_eq!(first.join().unwrap(), b"group 7 3 add 1 1 0 7\n");
+        assert_eq!(second.join().unwrap(), b"group 7 3 add 1 1 0 7\n");
         if !output.status.success() {
             assert!(String::from_utf8_lossy(&output.stdout).starts_with("UNKNOWN"));
         }

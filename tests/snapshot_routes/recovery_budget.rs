@@ -281,8 +281,8 @@ fn append(owner: &mut Owner, wal: &mut HostWorker, app: &mut Counter) {
                         index: 1,
                         term: 1,
                         payload: EntryPayload::Command {
-                            operation: OperationId::new(50).unwrap(),
-                            bytes: 9i64.to_le_bytes().to_vec().into(),
+                            operation: Counter::operation(1, 5).unwrap(),
+                            bytes: Counter::command(0, 9).into(),
                         },
                     }],
                 },

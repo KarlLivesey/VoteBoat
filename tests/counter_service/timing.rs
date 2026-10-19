@@ -58,7 +58,7 @@ fn history(quic: bool) {
     let leader = cluster.leader();
     let before = sample(&cluster, leader);
     assert!(count(&before, "PollCompleted") > 0);
-    assert!(authenticated_write(&cluster, &["add", "17601", "7"]).contains("Value(7)"));
+    assert!(authenticated_write(&cluster, &["add", "1", "1", "0", "7"]).contains("Value(7)"));
     let stream =
         std::net::TcpStream::connect((Ipv4Addr::LOCALHOST, cluster.base + 100 + leader as u16))
             .unwrap();

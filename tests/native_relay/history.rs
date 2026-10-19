@@ -7,8 +7,8 @@ pub fn write(c: &mut Cluster, id: u128, delta: i64) -> CounterReceipt {
     let ticket = c.boats[0]
         .propose(ClientRequest {
             group: group(352),
-            operation: voteboat::identity::OperationId::new(id).unwrap(),
-            bytes: delta.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, id as u64).unwrap(),
+            bytes: Counter::command(0, delta),
         })
         .unwrap();
     let mut receipt = None;
@@ -51,7 +51,7 @@ pub fn complete_read(c: &mut Cluster, ticket: ReadInvocationTicket) -> i64 {
 fn history(protocol: NativePeerProtocol) {
     let mut c = Cluster::new(protocol);
     c.campaign();
-    write(&mut c, 35201, 3);
+    write(&mut c, 1, 3);
     c.until(|c| c.boats.iter().enumerate().all(|(i, _)| c.value(i) == 3));
     let view = c.boats[0].peers().unwrap().source_view(node(2)).unwrap();
     assert_eq!(view.source().node, node(2));
@@ -59,9 +59,9 @@ fn history(protocol: NativePeerProtocol) {
     assert!(view.direct_access().is_none());
     c.gates[2].reads.set(true);
     c.gates[2].writes.set(true);
-    write(&mut c, 35202, 4);
+    write(&mut c, 2, 4);
     assert_eq!(read(&mut c), 7);
-    write(&mut c, 35203, 5);
+    write(&mut c, 3, 5);
     assert_eq!(read(&mut c), 12);
     assert_eq!(
         c.value(2),

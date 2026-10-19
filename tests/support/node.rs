@@ -175,8 +175,8 @@ fn admin_request(group_id: u128, operation: u128, finalizing: bool) -> Configura
             },
             readiness: vec![],
             requirements: ReadinessRequirements {
-                application_schema: 1,
-                command_bytes: 8,
+                application_schema: voteboat::application::COUNTER_SCHEMA,
+                command_bytes: voteboat::application::COUNTER_COMMAND_BYTES,
                 snapshot_bytes: 4096,
             },
         },
@@ -258,7 +258,7 @@ fn configuration_receipts_wait_for_durability_and_joint_then_final_commit() {
         ConfigurationId::new(3).unwrap()
     );
     // Administration uses the same polling path as application admission.
-    n.propose(request(500)).unwrap();
+    n.propose(request(5)).unwrap();
     admin_settle(&mut n);
     let reply = n.poll_client().unwrap();
     assert!(matches!(
@@ -581,8 +581,8 @@ fn configuration_status_resumes_a_lost_joint_reply_through_fresh_authorization()
 fn request(op: u128) -> ClientRequest {
     ClientRequest {
         group: group(1),
-        operation: OperationId::new(op).unwrap(),
-        bytes: 7i64.to_le_bytes().to_vec(),
+        operation: Counter::operation(1, op as u64).unwrap(),
+        bytes: Counter::command(0, 7),
     }
 }
 fn shutdown(n: &mut Boat) {

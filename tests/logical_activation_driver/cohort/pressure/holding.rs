@@ -29,8 +29,8 @@ impl Held {
         parent: &mut fixture::FacadeNode,
         target: &mut aliases::Bridge<'_>,
     ) -> Self {
-        let first = client(peers, parent, target, 33301, 7, 7, false);
-        let second = client(peers, parent, target, 33301, 7, 7, true);
+        let first = client(peers, parent, target, 1, 7, 7, false);
+        let second = client(peers, parent, target, 1, 7, 7, true);
         let a = read(peers, parent, target, ActivationQuery::Business(()));
         let b = read(peers, parent, target, ActivationQuery::Business(()));
         for output in [&a, &b] {
@@ -125,13 +125,15 @@ fn client(
     value: i64,
     duplicate: bool,
 ) -> Client {
-    let operation = OperationId::new(id).unwrap();
+    let operation = voteboat::application::Counter::operation(1, id as u64).unwrap();
     let app = fixture::app_with_mappings((0..3).map(groups::mapping).collect());
     let ticket = parent
         .propose(ClientRequest {
             group: groups::mapping(1).parent,
             operation,
-            bytes: app.business(&delta.to_le_bytes()).unwrap(),
+            bytes: app
+                .business(&voteboat::application::Counter::command(0, delta))
+                .unwrap(),
         })
         .unwrap();
     ownership::refused(parent); // accepted but not stepped: no observation authority.

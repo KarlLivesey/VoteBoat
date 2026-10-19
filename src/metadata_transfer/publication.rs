@@ -221,6 +221,10 @@ impl StateMachine for MetadataPublishingSource {
     fn applied_index(&self) -> u64 {
         self.inner.applied_index()
     }
+    /// Lifetime history until DH1 (audit S8).
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::LifetimeBounded
+    }
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
         Some(self.readiness_requirements())
     }

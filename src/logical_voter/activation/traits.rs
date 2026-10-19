@@ -46,6 +46,10 @@ where
         }
         self.inner.validate_group(group)
     }
+    /// Activation intents kept for life until AI3 (audit L2).
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::LifetimeBounded
+    }
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         let inner = self.inner.deployment_requirements()?;
         if inner.application_schema != self.inner.schema_version()

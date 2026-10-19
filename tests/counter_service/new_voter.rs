@@ -31,7 +31,7 @@ fn setup(quic: bool) -> Cluster {
         cluster.start(id, "create");
     }
     cluster.leader();
-    assert!(leader_request(&mut cluster, &["add", "700", "42"]).contains("Value(42)"));
+    assert!(leader_request(&mut cluster, &["add", "1", "2", "0", "42"]).contains("Value(42)"));
     cluster.stop();
     let plan = cluster.root.join("new-voter.plan");
     let original =
@@ -41,7 +41,7 @@ fn setup(quic: bool) -> Cluster {
     for id in 1..=3 {
         cluster.start(id, "recover-member");
     }
-    finish_lifecycle_operation(&cluster, &[1, 2], "1001", "701");
+    finish_lifecycle_operation(&cluster, &[1, 2], "1001", "22");
     cluster.stop();
     deployment(&mut cluster);
     let provisioned =
@@ -50,7 +50,7 @@ fn setup(quic: bool) -> Cluster {
     for id in [1, 2] {
         cluster.start(id, "recover-member");
     }
-    finish_lifecycle_operation(&cluster, &[1, 2], "1002", "702");
+    finish_lifecycle_operation(&cluster, &[1, 2], "1002", "23");
     for id in [1, 2] {
         cluster.ok(id, &["checkpoint"]);
     }
@@ -141,7 +141,7 @@ fn interrupted_preparation(cluster: &mut Cluster) {
         cluster.start(id, "recover-member");
     }
     cluster.leader();
-    assert!(leader_request(cluster, &["add", "19000", "0"]).contains("Value(42)"));
+    assert!(leader_request(cluster, &["add", "1", "16", "0", "0"]).contains("Value(42)"));
     let leader = cluster.leader();
     let unread = UnobservedCommand::send(cluster, leader, &format!("configure-record {JOINT}"));
     wait_administration_event(
@@ -165,7 +165,7 @@ fn interrupted_preparation(cluster: &mut Cluster) {
     cluster.leader();
     phase(cluster, &[1, 2], "inconclusive_local_absence");
     cluster.start(4, "recover-member");
-    assert!(leader_request(cluster, &["add", "19000", "0"]).contains("duplicate=true"));
+    assert!(leader_request(cluster, &["add", "1", "16", "0", "0"]).contains("duplicate=true"));
     catch_up(cluster);
     phase(cluster, MEMBERS, "inconclusive_local_absence");
 }
@@ -202,7 +202,7 @@ fn interrupted_joint(cluster: &mut Cluster, checkpoint: bool) {
     phase(cluster, &[leader], "committed=Joint");
     phase(cluster, &[leader], "action=wait_for_commit");
     cluster.start(4, "recover-member");
-    finish_lifecycle_operation(cluster, MEMBERS, OPERATION, "19002");
+    finish_lifecycle_operation(cluster, MEMBERS, OPERATION, "24");
     unread.disconnect();
     assert!(leader_request(cluster, &["configure-record", FINAL]).contains("duplicate=true"));
 }
@@ -213,7 +213,7 @@ fn history(quic: bool, checkpoint: bool) {
     interrupted_preparation(&mut cluster);
     eprintln!("new-voter quic={quic} checkpoint={checkpoint} joint");
     interrupted_joint(&mut cluster, checkpoint);
-    assert!(leader_request(&mut cluster, &["add", "19003", "1"]).contains("Value(43)"));
+    assert!(leader_request(&mut cluster, &["add", "1", "17", "0", "1"]).contains("Value(43)"));
     assert_eq!(leader_request(&mut cluster, &["read"]), "OK value=43\n");
     catch_up(&mut cluster);
     cluster.stop();
@@ -231,9 +231,9 @@ fn history(quic: bool, checkpoint: bool) {
     }
     assert!(matches!(cluster.leader(), 2 | 4));
     assert!(leader_request(&mut cluster, &["configure-record", FINAL]).contains("duplicate=true"));
-    let original = leader_request(&mut cluster, &["add", "700", "42"]);
+    let original = leader_request(&mut cluster, &["add", "1", "2", "0", "42"]);
     assert!(original.contains("duplicate=true") && original.contains("Value(42)"));
-    assert!(leader_request(&mut cluster, &["add", "19003", "1"]).contains("duplicate=true"));
+    assert!(leader_request(&mut cluster, &["add", "1", "17", "0", "1"]).contains("duplicate=true"));
     assert_eq!(leader_request(&mut cluster, &["read"]), "OK value=43\n");
     cluster.stop();
     inspect_lifecycle(

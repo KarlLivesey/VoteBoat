@@ -35,6 +35,10 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone> StateM
             Err(ApplicationError::InvalidCommand)
         }
     }
+    /// Configuration entries kept for life until AI3 (audit F5); actions retire by the LV2 watermark.
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::LifetimeBounded
+    }
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(crate::raft::ReadinessRequirements {
             application_schema: self.application_schema(),

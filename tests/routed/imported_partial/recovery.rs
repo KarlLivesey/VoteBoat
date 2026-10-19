@@ -70,8 +70,8 @@ impl RunCore {
     }
     fn write(&mut self, id: u128, delta: i64) -> CounterReceipt {
         self.event(Event::Propose {
-            operation: OperationId::new(id).unwrap(),
-            bytes: delta.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, id as u64).unwrap(),
+            bytes: Counter::command(0, delta),
         })
         .pop()
         .unwrap()
@@ -107,7 +107,7 @@ impl RunCore {
 #[test]
 fn restart_expectation_includes_actual_campaign_noop_after_capture() {
     let mut run = RunCore::new();
-    assert_eq!(run.write(9911, 7).outcome, CounterOutcome::Value(7));
+    assert_eq!(run.write(1, 7).outcome, CounterOutcome::Value(7));
     let captured = run.app.clone();
     run.event(Event::Campaign);
     assert!(run.app.applied_index() > captured.applied_index());
@@ -120,16 +120,16 @@ fn restart_expectation_includes_actual_campaign_noop_after_capture() {
 #[test]
 fn restart_expectation_preserves_actual_committed_tail_and_original_retry() {
     let mut run = RunCore::new();
-    assert_eq!(run.write(9911, 7).outcome, CounterOutcome::Value(7));
+    assert_eq!(run.write(1, 7).outcome, CounterOutcome::Value(7));
     let captured = run.app.clone();
-    assert_eq!(run.write(9912, 3).outcome, CounterOutcome::Value(10));
+    assert_eq!(run.write(2, 3).outcome, CounterOutcome::Value(10));
     let mut run = run.reopened();
     let expected = expected(&captured, run.core.state());
     assert_eq!(expected.checkpoint(4096), run.app.checkpoint(4096));
     run.event(Event::Campaign);
-    let receipt = run.write(9911, 7);
+    let receipt = run.write(1, 7);
     assert!(receipt.duplicate);
     assert_eq!(receipt.outcome, CounterOutcome::Value(7));
     assert_eq!(run.app.read_applied(run.app.applied_index()), Ok(10));
-    assert_eq!(run.app.remaining_operations(), 6);
+    assert_eq!(run.app.retained_receipts(), 2);
 }

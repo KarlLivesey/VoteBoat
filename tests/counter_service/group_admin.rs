@@ -144,8 +144,14 @@ fn histories(quic: bool) {
     for n in 1..=3 {
         c.start(n, "create");
     }
-    assert!(authenticated_write(&c, &["group", "1", "1", "add", "42", "3"]).contains("Value(3)"));
-    assert!(authenticated_write(&c, &["group", "7", "3", "add", "42", "5"]).contains("Value(5)"));
+    assert!(
+        authenticated_write(&c, &["group", "1", "1", "add", "1", "1", "0", "3"])
+            .contains("Value(3)")
+    );
+    assert!(
+        authenticated_write(&c, &["group", "7", "3", "add", "1", "1", "0", "5"])
+            .contains("Value(5)")
+    );
     let leader = groups::leader(&mut c, "7", "3");
     authorization(&mut c, leader);
     joint(&mut c, "7", "3");
@@ -176,9 +182,13 @@ fn histories(quic: bool) {
         configure(&mut c, g, inc);
     }
     assert!(
-        authenticated_write(&c, &["group", "7", "3", "add", "42", "5"]).contains("duplicate=true")
+        authenticated_write(&c, &["group", "7", "3", "add", "1", "1", "0", "5"])
+            .contains("duplicate=true")
     );
-    assert!(authenticated_write(&c, &["group", "7", "3", "add", "43", "2"]).contains("Value(7)"));
+    assert!(
+        authenticated_write(&c, &["group", "7", "3", "add", "1", "2", "0", "2"])
+            .contains("Value(7)")
+    );
     assert_eq!(c.routed(&["group", "1", "1", "read"]), "OK value=3\n");
     status(&c, 1, "1", "1", "action=inconclusive_local_absence");
     c.stop();

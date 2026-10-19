@@ -53,7 +53,7 @@ fn query() -> NamespaceQuery<()> {
     })
 }
 fn data() -> Vec<u8> {
-    encode_routed(hint(), &[4], &7i64.to_le_bytes(), 1024).unwrap()
+    encode_routed(hint(), &[4], &Counter::command(0, 7), 1024).unwrap()
 }
 fn reserve(
     parents: &mut [Node<Directory>],
@@ -193,7 +193,11 @@ impl Service {
         campaign(&mut self.nodes, &self.clock, 100);
         let bytes = data();
         assert!(self.nodes[0].local().applications[&group(100)]
-            .validate_proposal(OperationId::new(20000).unwrap(), &bytes, std::iter::empty())
+            .validate_proposal(
+                OperationId::new(counter_op(1)).unwrap(),
+                &bytes,
+                std::iter::empty()
+            )
             .is_err());
         assert_eq!(
             read_recovering(&mut self.nodes, &self.clock, 100, query()),
@@ -495,9 +499,14 @@ impl Service {
     }
     fn exercise(&mut self) {
         let bytes = data();
-        let (original, uncertain) =
-            propose_recovering_observed(&mut self.nodes, &self.clock, 100, 20000, bytes.clone());
-        assert_eq!(original.operation, OperationId::new(20000).unwrap());
+        let (original, uncertain) = propose_recovering_observed(
+            &mut self.nodes,
+            &self.clock,
+            100,
+            counter_op(1),
+            bytes.clone(),
+        );
+        assert_eq!(original.operation, OperationId::new(counter_op(1)).unwrap());
         assert!(matches!(
             original.outcome,
             NamespaceOutcome::Data(RoutedReceipt {
@@ -542,7 +551,7 @@ impl Service {
             propose_recovering(&mut self.nodes, &self.clock, 100, 10003, activation).outcome,
             NamespaceOutcome::Activated
         );
-        let retry = propose_recovering(&mut self.nodes, &self.clock, 100, 20000, bytes);
+        let retry = propose_recovering(&mut self.nodes, &self.clock, 100, counter_op(1), bytes);
         assert!(matches!(
             retry.outcome,
             NamespaceOutcome::Data(RoutedReceipt {

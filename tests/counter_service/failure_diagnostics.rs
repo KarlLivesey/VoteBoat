@@ -148,7 +148,7 @@ fn failure_diagnostics_preserve_scope_and_never_reissue_the_failed_write() {
     let text = collect(
         start + Duration::from_secs(3),
         &[1, 2, 3],
-        &["group", "7", "3", "add", "43", "5"],
+        &["group", "7", "3", "add", "1", "1", "0", "5"],
         |node, words, _| {
             calls.push((node, words.join(" ")));
             "observed".into()

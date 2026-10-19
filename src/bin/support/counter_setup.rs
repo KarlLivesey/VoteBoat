@@ -26,13 +26,17 @@ fn node(id: u64) -> NodeId {
     NodeId::new(id).unwrap()
 }
 pub fn application() -> Result<Counter, Failure> {
-    let app = checked(Counter::new(10000))?;
-    // Bind the service declaration to the same capacity enforced by admission,
-    // application and restore, including future retry history growth.
+    // 256 sessions × 32 unacknowledged outcomes, 64 registration nonces: the
+    // retained retry state is at most 8,192 receipts whatever the uptime.
+    let app = checked(Counter::with_limits(
+        voteboat::retention::SessionLimits::default(),
+    ))?;
+    // Bind the service declaration to the same steady-state envelope enforced
+    // by admission, application and restore.
     let requirements = voteboat::raft::ReadinessRequirements {
-        application_schema: 1,
-        command_bytes: 8,
-        snapshot_bytes: 330032,
+        application_schema: COUNTER_SCHEMA,
+        command_bytes: COUNTER_COMMAND_BYTES,
+        snapshot_bytes: 213_556,
     };
     checked(app.validate_readiness_requirements(requirements))?;
     let wire = voteboat::wire::WireLimits::default();

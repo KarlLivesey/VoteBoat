@@ -34,7 +34,7 @@ fn metadata(index: u64) -> SnapshotMetadata {
         bootstrap: bootstrap(1, 1),
         index,
         term: 1,
-        application_schema: 1,
+        application_schema: COUNTER_SCHEMA,
     }
 }
 fn command(index: u64, operation: u128, delta: i64) -> LogEntry {
@@ -42,8 +42,8 @@ fn command(index: u64, operation: u128, delta: i64) -> LogEntry {
         index,
         term: 1,
         payload: EntryPayload::Command {
-            operation: OperationId::new(operation).unwrap(),
-            bytes: delta.to_le_bytes().to_vec().into(),
+            operation: Counter::operation(1, operation as u64).unwrap(),
+            bytes: Counter::command(0, delta).into(),
         },
     }
 }
@@ -158,7 +158,7 @@ fn checkpoint_plus_tail_preserves_dedup_and_host_application_schema() {
             if schema != 22 {
                 return Err(ApplicationError::UnsupportedSchema);
             }
-            self.0.restore_checkpoint(1, index, bytes)
+            self.0.restore_checkpoint(COUNTER_SCHEMA, index, bytes)
         }
     }
     let core = committed_core();
@@ -176,7 +176,7 @@ fn checkpoint_plus_tail_preserves_dedup_and_host_application_schema() {
     assert_eq!(result.replay_receipts[0].outcome, CounterOutcome::Value(7));
     assert!(result.replay_receipts[0].duplicate);
     assert_eq!(restored.0.read_applied(4), Ok(8));
-    assert_eq!(restored.0.remaining_operations(), 17);
+    assert_eq!(restored.0.retained_receipts(), 3);
     assert_eq!(
         restore_application(&core, &mut restored, &mut snapshots).err(),
         Some(CheckpointError::InvalidBoundary)
@@ -196,7 +196,7 @@ fn invalid_snapshot_binding_boundary_schema_or_tail_never_partly_restores() {
             0 => s.metadata.index = 5,
             1 => s.metadata.term = 2,
             2 => s.metadata.bootstrap.configuration = ConfigurationId::new(2).unwrap(),
-            3 => s.metadata.application_schema = 2,
+            3 => s.metadata.application_schema = COUNTER_SCHEMA + 1,
             4 => {
                 s.application[8..16].copy_from_slice(&1u64.to_le_bytes());
             }
@@ -1209,8 +1209,8 @@ impl<L: LogStore, S: SnapshotRetention> SnapshotCluster<L, S> {
         self.act(
             id,
             voteboat::raft::Event::Propose {
-                operation: OperationId::new(operation).unwrap(),
-                bytes: delta.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, operation as u64).unwrap(),
+                bytes: Counter::command(0, delta),
             },
         );
         self.pump();
@@ -1245,8 +1245,8 @@ fn capture_buffered_appends<L: LogStore, S: SnapshotRetention>(
     cluster.act(
         1,
         Event::Propose {
-            operation: OperationId::new(1).unwrap(),
-            bytes: 7i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, 1).unwrap(),
+            bytes: Counter::command(0, 7),
         },
     );
     let mut buffered = Vec::new();

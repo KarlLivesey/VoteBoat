@@ -34,6 +34,10 @@ fn group(id: u128) -> GroupIdentity {
         incarnation: GroupIncarnation::new(1).unwrap(),
     }
 }
+/// A business write: sequence 1 of the inner counter's built-in session.
+fn business_op() -> OperationId {
+    Counter::operation(1, 1).unwrap()
+}
 fn op(id: u128) -> OperationId {
     OperationId::new(id).unwrap()
 }

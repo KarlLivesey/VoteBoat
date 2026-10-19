@@ -37,6 +37,6 @@ fn history(quic: bool) {
     drain::wait_status(&c, source, "phase=Active");
     c.ok(source, &["cancel-drain", "1", "19701"]);
     drain::wait_status(&c, source, "resuming=false");
-    assert!(authenticated_write(&c, &["add", "19700", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "7"]).contains("duplicate=true"));
     c.stop();
 }

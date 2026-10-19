@@ -69,7 +69,10 @@ fn apply_chunk(core: &mut Raft, request: Message, app: &mut Counter, end: u64) -
     let receipts = app.apply_batch(&committed).unwrap();
     assert_eq!(receipts.len(), 1024);
     for receipt in receipts {
-        assert_eq!(receipt.operation.get(), u128::from(receipt.index - 1));
+        assert_eq!(
+            receipt.operation,
+            Counter::operation(1, receipt.index - 1).unwrap()
+        );
         assert_eq!(
             receipt.outcome,
             CounterOutcome::Value((receipt.index - 1) as i64)
@@ -89,8 +92,8 @@ fn aggregate_partial1024_quorum_prefixes_keep_all_results_delayed_peer_and_finit
         .propose_batch(
             (1..=16384)
                 .map(|id| Proposal {
-                    operation: OperationId::new(id).unwrap(),
-                    bytes: 1i64.to_le_bytes().to_vec(),
+                    operation: Counter::operation(1, id as u64).unwrap(),
+                    bytes: Counter::command(0, 1),
                 })
                 .collect(),
         )

@@ -65,7 +65,7 @@ Clients select their certificate and the same principal number:
 
 ```sh
 target/debug/voteboat-counter client 43000 auto read --service-tls tests/fixtures/tls --principal 1
-target/debug/voteboat-counter client 43000 auto add 11001 7 --service-tls tests/fixtures/tls --principal 2
+target/debug/voteboat-counter client 43000 auto add 1 1 0 7 --service-tls tests/fixtures/tls --principal 2
 target/debug/voteboat-counter client 43000 1 checkpoint --service-tls tests/fixtures/tls --principal 3
 ```
 

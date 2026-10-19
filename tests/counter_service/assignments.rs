@@ -27,7 +27,7 @@ fn original_retry(c: &Cluster) {
     // recover its exact retained receipt, never treat UNKNOWN as success.
     let text = write_recovery::invoke(
         c,
-        &["group", "7", "3", "add", "42", "5"],
+        &["group", "7", "3", "add", "1", "1", "0", "5"],
         Duration::from_secs(15),
     );
     assert_eq!(text, "OK outcome=Value(5) duplicate=true\n");
@@ -47,7 +47,7 @@ fn history(quic: bool) {
     assert!(first.contains("evidence=local_accepted_configuration"));
     assert_eq!(field(&first, "assignments"), "1:1:1:1:-");
     let cursor = field(&first, "next").to_owned();
-    authenticated_write(&c, &["group", "7", "3", "add", "42", "5"]);
+    authenticated_write(&c, &["group", "7", "3", "add", "1", "1", "0", "5"]);
     let second = page(&c, &cursor, "1");
     assert_eq!(field(&second, "assignments"), "7:3:9:9:-");
     let third = page(&c, field(&second, "next"), "1");
@@ -93,7 +93,7 @@ fn history(quic: bool) {
     assert!(!stale.status.success());
     assert!(String::from_utf8_lossy(&stale.stdout).contains("stale assignment cursor"));
     original_retry(&c);
-    let conflict = authenticated_write(&c, &["group", "7", "3", "add", "42", "6"]);
+    let conflict = authenticated_write(&c, &["group", "7", "3", "add", "1", "1", "0", "6"]);
     assert_eq!(conflict, "OK outcome=OperationConflict duplicate=true\n");
     assert_eq!(c.routed(&["group", "7", "3", "read"]), "OK value=5\n");
     c.stop();

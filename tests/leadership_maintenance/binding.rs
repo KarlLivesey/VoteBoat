@@ -89,7 +89,9 @@ fn accepted_begin_rollback_replays_only_the_surviving_exact_binding() {
 #[test]
 fn pending_and_applied_bindings_refuse_changed_identity_before_admission() {
     let mut a = app(2);
-    let i = intent(10, 2);
+    // An ID that is also a valid counter operation, so the same ID can frame
+    // both an administrative and a data command.
+    let i = intent(Counter::operation(1, 1).unwrap().get(), 2);
     let begin = LeadershipCommand::Begin(i).encode().unwrap();
     let mut changed = i;
     changed.source = PeerIdentity {
@@ -117,7 +119,7 @@ fn pending_and_applied_bindings_refuse_changed_identity_before_admission() {
     assert!(a
         .validate_proposal(
             i.request.operation,
-            &Maintenance::<Counter>::data(&7i64.to_le_bytes(), 100).unwrap(),
+            &Maintenance::<Counter>::data(&Counter::command(0, 7), 100).unwrap(),
             [(i.request.operation, begin.as_slice())].into_iter()
         )
         .is_ok());

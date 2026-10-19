@@ -99,8 +99,8 @@ const HELP: &str =
     "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--timing-profile throughput|edge|legacy] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--command-listen ADDRESS] [--discovery-peers FILE] [--wal-reclaim-ms MS] [--checkpoint-entries N] [--gather-us US] [--host-wait-ms MS]\n\
 voteboat-counter placement-plan INPUT learner OPERATION | replace RETIRING LEARNER_OPERATION VOTER_OPERATION retire|retain | voters OPERATION retire|retain POLICY\n\
 voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE] [--leadership-maintenance enabled]\n\
-voteboat-counter client BASE_PORT NODE status|metrics|timings|maintenance|configuration-status OPERATION_ID|configure OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
-voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
+voteboat-counter client BASE_PORT NODE status|metrics|timings|maintenance|configuration-status OPERATION_ID|configure OPERATION_ID|read|register NONCE|add SESSION SEQUENCE ACK DELTA|checkpoint|quit\n\
+voteboat-counter client BASE_PORT auto read|register NONCE|add SESSION SEQUENCE ACK DELTA\n\
 voteboat-counter client BASE_PORT NODE events SESSION AFTER LIMIT\n\
 voteboat-counter client BASE_PORT NODE explain-quorum NODES_CSV_OR_DASH OFFSET COUNT\n\
 Default peer ports are BASE+1..3; local command ports are BASE+101..103.\n\
@@ -118,8 +118,8 @@ Versioned discovery source: discovery-status; discovery-update EXPECTED NEXT NOD
 Remote command routing: client ... --command-peers FILE --service-tls TLS_DIRECTORY --principal ID.\n\
 --wal-reclaim-ms enables physical reclamation; --checkpoint-entries enables automatic checkpoints.\n\
 --gather-us (default 200, at most 10000) is the host loop's gather window before a round with queued work: longer windows mean fewer, fuller rounds (less CPU per write, more latency); --host-wait-ms (default 10) caps how long the host waits with nothing announced.\n\
-Use the same operation ID and delta when retrying an unknown write.\n\
-Maintenance profile: serve ... --service-access FILE --leadership-maintenance enabled; all peers use schema2/wire8.\n\
+Writes: register NONCE allocates a session (OK outcome=Registered(SESSION)); session 1 is built in. add SESSION SEQUENCE ACK DELTA numbers writes 1, 2, ... per session; ACK is the highest sequence whose outcome you have consumed (all lower included). Retry an unknown write with the same SESSION SEQUENCE DELTA. Refused(Expired) means the outcome is no longer retained: never resend the delta under a new sequence; read instead, and register again if the session was evicted.\n\
+Maintenance profile: serve ... --service-access FILE --leadership-maintenance enabled; all peers use schema3/wire8.\n\
 Commands: move-leader OP CONFIG SOURCE SOURCE_STORE SOURCE_INC TARGET TARGET_STORE TARGET_INC; leadership-status OP; resume-leadership OP; cancel-leadership OP.\n\
 Retained-replica drain: --node-drain enabled requires the maintenance profile.\n\
 Commands: drain-node SEQUENCE OP CONFIG TARGET STORE INC; drain-status|resume-drain|cancel-drain|drain-stop SEQUENCE OP.\n\
@@ -127,7 +127,7 @@ Membership drain: source uses --membership-drain FILE and all peers use --remote
 voteboat-counter drain-run BASE SOURCE SEQUENCE OP --service-tls TLS_DIRECTORY --principal ADMIN [--command-peers FILE]\n\
 Authenticated local credential reload: reload-access REQUEST EXPECTED NEXT; credential-status REQUEST. Peer rotation: --peer-credentials FILE enables reload-peers REQUEST EXPECTED NEXT and peer-credential-status REQUEST.\n\
 Multi-group data service: --groups FILE requires --service-access; see docs/MULTI_GROUP_STARTUP.md.\n\
-Commands: group ID INC status|read|add OP DELTA|checkpoint; auto routing supports group reads and adds.\n\
+Commands: group ID INC status|read|register NONCE|add SESSION SEQUENCE ACK DELTA|checkpoint; auto routing supports group reads, registrations and adds.\n\
 Local inventory: list-assigned-groups CURSOR LIMIT (start with -; limit 1..8); requires Inspect on every local group.\n\
 Multi-group membership: --group-admin-plans FILE selects per-group trusted plans; requires --groups and --service-access.\n\
 Commands: group ID INC configure OP|configuration-status OP; address the selected group's leader for configure.\n\
@@ -285,18 +285,13 @@ fn command(
                 core.state().commit_index
             )
         }
-        ["add", operation, delta] => {
-            let operation = operation
-                .parse::<u128>()
-                .ok()
-                .and_then(OperationId::new)
-                .ok_or("invalid operation ID")?;
-            let delta = delta.parse::<i64>().map_err(|_| "invalid delta")?;
+        ["register" | "add", ..] => {
+            let (operation, bytes) = counter_request(&words)?;
             let ticket = service
                 .propose(ClientRequest {
                     group,
                     operation,
-                    bytes: service.local().applications.get(&group).ok_or("missing group")?.data(delta)?,
+                    bytes: service.local().applications.get(&group).ok_or("missing group")?.data(&bytes)?,
                 })
                 .map_err(|r| match r.reason {
                     ClientError::Consensus(RaftError::NotLeader) => "NOT_LEADER".into(),
@@ -322,13 +317,44 @@ fn command(
             "OK shutting_down".into()
         }
         _ => {
-            return Err("expected status, metrics, timings, explain-quorum NODES OFFSET COUNT, events SESSION AFTER LIMIT, maintenance, configuration-status OPERATION_ID, read, add OPERATION_ID DELTA, checkpoint or quit".into())
+            return Err("expected status, metrics, timings, explain-quorum NODES OFFSET COUNT, events SESSION AFTER LIMIT, maintenance, configuration-status OPERATION_ID, read, register NONCE, add SESSION SEQUENCE ACK DELTA, checkpoint or quit".into())
         }
     };
     Ok(Phase::Output {
         bytes: format!("{reply}\n").into_bytes(),
         sent: 0,
     })
+}
+/// `register NONCE` or `add SESSION SEQUENCE ACK DELTA` as a counter
+/// operation ID and command bytes. `ACK` is the highest sequence whose outcome
+/// the client has consumed (all lower ones included) and is below `SEQUENCE`.
+fn counter_request(words: &[&str]) -> Result<(OperationId, Vec<u8>), String> {
+    let number =
+        |word: &str, what: &str| word.parse::<u64>().map_err(|_| format!("invalid {what}"));
+    match words {
+        ["register", nonce] => {
+            let nonce = number(nonce, "registration nonce")?;
+            let operation = voteboat::retention::SessionOperation::Register { nonce }
+                .operation()
+                .ok_or("invalid registration nonce")?;
+            Ok((operation, Vec::new()))
+        }
+        ["add", session, sequence, ack, delta] => {
+            let (session, sequence) = (number(session, "session")?, number(sequence, "sequence")?);
+            let ack = number(ack, "acknowledgement")?;
+            let delta = delta.parse::<i64>().map_err(|_| "invalid delta")?;
+            let operation = voteboat::application::Counter::operation(session, sequence)
+                .ok_or("invalid session or sequence")?;
+            if ack >= sequence {
+                return Err("acknowledgement must be below the sequence".into());
+            }
+            Ok((
+                operation,
+                voteboat::application::Counter::command(ack, delta),
+            ))
+        }
+        _ => Err("expected register NONCE or add SESSION SEQUENCE ACK DELTA".into()),
+    }
 }
 fn outputs(
     service: &mut Service,

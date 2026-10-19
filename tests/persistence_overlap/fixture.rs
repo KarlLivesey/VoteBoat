@@ -42,8 +42,8 @@ fn stage_inner(replica: &mut Replica, remaining: Option<usize>) -> WorkerEvent {
         .admit(
             group(1),
             Event::Propose {
-                operation: OperationId::new(71).unwrap(),
-                bytes: 7i64.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, 71).unwrap(),
+                bytes: Counter::command(0, 7),
             },
         )
         .unwrap();

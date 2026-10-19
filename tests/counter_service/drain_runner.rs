@@ -33,8 +33,8 @@ pub(super) fn command(c: &Cluster, source: usize, operation: &str, principal: u6
 fn finish(c: &mut Cluster, source: usize) {
     confirmed(c, source, 19701);
     drain::joined(c, source);
-    assert!(authenticated_write(c, &["add", "19760", "3"]).contains("Value(10)"));
-    assert!(authenticated_write(c, &["add", "19700", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(c, &["add", "1", "10", "0", "3"]).contains("Value(10)"));
+    assert!(authenticated_write(c, &["add", "1", "1", "0", "7"]).contains("duplicate=true"));
     c.stop();
 }
 #[test]

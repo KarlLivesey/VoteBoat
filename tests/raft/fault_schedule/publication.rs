@@ -80,7 +80,7 @@ fn ambiguous_commit_publication_recovers_counter_and_original_retry_once() {
             run.action(&Action::Campaign(1)).unwrap();
             run.action(&Action::Pump).unwrap();
             run.action(&Action::Delay(1)).unwrap();
-            run.action(&Action::TryCounter(1, 9911, 9)).unwrap();
+            run.action(&Action::TryCounter(1, 1, 9)).unwrap();
             run.action(&Action::Sync(1)).unwrap();
             run.action(&Action::Complete(1)).unwrap();
             run.action(&Action::Pump).unwrap();
@@ -98,7 +98,7 @@ fn ambiguous_commit_publication_recovers_counter_and_original_retry_once() {
             run.action(&Action::Heartbeat(1)).unwrap();
             run.action(&Action::Pump).unwrap();
             assert!(run.point().held.is_empty());
-            run.action(&Action::TryCounter(1, 9911, 9)).unwrap();
+            run.action(&Action::TryCounter(1, 1, 9)).unwrap();
             finish_local(&mut run, 1);
             // Publish the durable retry frontier through an explicit heartbeat
             // rather than relying on another peer's progress to replay it.
@@ -135,7 +135,7 @@ fn short_write_and_manifest_failures_share_exact_composed_replay() {
     for _ in 0..3 {
         actions.extend([Action::Sync(1), Action::Complete(1), Action::Pump]);
     }
-    actions.push(Action::TryCounter(1, 9911, 9));
+    actions.push(Action::TryCounter(1, 1, 9));
     for _ in 0..2 {
         actions.extend([Action::Sync(1), Action::Complete(1), Action::Pump]);
     }

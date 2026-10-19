@@ -289,6 +289,10 @@ where
     fn validate_group(&self, group: GroupIdentity) -> Result<(), ApplicationError> {
         self.routed.validate_group(group)
     }
+    /// Wraps lifetime-bounded routed owners until DR2 (audit S3).
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::LifetimeBounded
+    }
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(self.readiness_requirements())
     }

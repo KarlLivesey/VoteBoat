@@ -27,6 +27,10 @@ impl StateMachine for ProgramApplication {
             Err(ApplicationError::InvalidCommand)
         }
     }
+    /// Lifetime transaction records until TX1 (audit S6).
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::LifetimeBounded
+    }
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
         Some(ReadinessRequirements {
             application_schema: PROGRAM_SCHEMA,

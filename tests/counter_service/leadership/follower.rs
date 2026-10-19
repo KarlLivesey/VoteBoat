@@ -52,11 +52,11 @@ fn history(quic: bool) {
         leader_request(&mut c, &["cancel-leadership", op]),
         completed
     );
-    let retry = authenticated_write(&c, &["add", "96000", "7"]);
+    let retry = authenticated_write(&c, &["add", "1", "1", "0", "7"]);
     assert!(retry.contains("Value(7)") && retry.contains("duplicate=true"));
-    assert!(authenticated_write(&c, &["add", "96000", "8"]).contains("OperationConflict"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "8"]).contains("OperationConflict"));
     assert_eq!(c.routed(&["read"]), "OK value=7\n");
-    assert!(authenticated_write(&c, &["add", "96501", "3"]).contains("Value(10)"));
+    assert!(authenticated_write(&c, &["add", "1", "7", "0", "3"]).contains("Value(10)"));
     c.stop();
     fs::remove_dir_all(&c.root).unwrap();
 }

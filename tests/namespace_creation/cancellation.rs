@@ -128,10 +128,10 @@ fn cancelled_ready_target_cannot_publish_or_serve_and_original_receipt_recovers(
         t.read_at(t.applied_index(), query()).unwrap(),
         NamespaceRead::NotActive
     );
-    let (op, bytes) = data(80, 4);
+    let (op, bytes) = data(1, 4);
     assert!(t.validate_proposal(op, &bytes, std::iter::empty()).is_err());
     assert_eq!(
-        commit(&mut t, 80, bytes).outcome,
+        commit(&mut t, op.get(), bytes).outcome,
         NamespaceOutcome::NotActive
     );
     assert_eq!(d.manifest(identity_of(1)), Some(&parent));
@@ -194,8 +194,8 @@ fn published_and_activated_namespace_rejects_cancellation_after_recovery() {
         .group_creation_at(d.applied_index(), group(100))
         .unwrap()
         .is_some());
-    let (_, bytes) = data(81, 7);
-    commit(&mut t, 81, bytes);
+    let (op, bytes) = data(2, 7);
+    commit(&mut t, op.get(), bytes);
     assert_eq!(
         t.read_at(t.applied_index(), query()).unwrap(),
         NamespaceRead::Data(RoutedRead::Served(7))

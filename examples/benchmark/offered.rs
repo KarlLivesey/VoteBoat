@@ -111,7 +111,7 @@ impl<'a> Ledger<'a> {
                 >= self.window.div_ceil(self.groups)
     }
     fn admit(&mut self, row: usize, replica: usize, ticket: ClientTicket) -> Result<(), Failure> {
-        if ticket.operation.get() != self.rows[row].operation as u128
+        if ticket.operation != Counter::operation(1, self.rows[row].operation as u64).unwrap()
             || ticket.group != self.rows[row].group
             || self.pending.contains_key(&(replica, ticket.sequence))
             || self.full(ticket.group)
@@ -301,8 +301,8 @@ fn measure<L: LogStore + Send + 'static>(
             };
             let request = ClientRequest {
                 group,
-                operation: OperationId::new(ledger.rows[row].operation as u128).unwrap(),
-                bytes: 1i64.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, ledger.rows[row].operation as u64).unwrap(),
+                bytes: Counter::command(0, 1),
             };
             match replicas[replica].propose(request) {
                 Ok(ticket) => ledger.admit(row, replica, ticket)?,

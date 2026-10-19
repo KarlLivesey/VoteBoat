@@ -391,8 +391,8 @@ fn register_refuses_volatile_core() {
 }
 fn proposal(operation: u128) -> Event {
     Event::Propose {
-        operation: OperationId::new(operation).unwrap(),
-        bytes: 7i64.to_le_bytes().to_vec(),
+        operation: Counter::operation(1, operation as u64).unwrap(),
+        bytes: Counter::command(0, 7),
     }
 }
 fn shard_overload_history<Q: ReadyScheduler>(scheduler: Q) {
@@ -1003,8 +1003,8 @@ fn hundred_group_history<L: LogStore, Q: ReadyScheduler, T: TimerService>(
             .admit(
                 group(g),
                 Event::Propose {
-                    operation: OperationId::new(2).unwrap(),
-                    bytes: 3i64.to_le_bytes().to_vec(),
+                    operation: Counter::operation(1, 2).unwrap(),
+                    bytes: Counter::command(0, 3),
                 },
             )
             .unwrap();
@@ -1802,8 +1802,8 @@ fn partition_auto_leader<L: LogStore, Q: ReadyScheduler, T: TimerService, E: Ele
         .admit(
             group(1),
             Event::Propose {
-                operation: OperationId::new(2).unwrap(),
-                bytes: 3i64.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, 2).unwrap(),
+                bytes: Counter::command(0, 3),
             },
         )
         .unwrap();

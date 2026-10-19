@@ -31,7 +31,7 @@ pub fn hold_duplicate(
     let original_capacity = bytes.capacity();
     let before = parent.local().clients.usage();
     assert_eq!(before.requests, 0);
-    let operation = OperationId::new(33301).unwrap();
+    let operation = voteboat::application::Counter::operation(1, 1).unwrap();
     let first = parent
         .propose(ClientRequest {
             group: groups::mapping(1).parent,
@@ -112,7 +112,7 @@ impl ByteCharge {
         let rejected = parent
             .propose(ClientRequest {
                 group: groups::mapping(1).parent,
-                operation: OperationId::new(33302).unwrap(),
+                operation: voteboat::application::Counter::operation(1, 2).unwrap(),
                 bytes,
             })
             .unwrap_err();
@@ -125,7 +125,7 @@ impl ByteCharge {
 }
 fn canonical(delta: i64) -> Vec<u8> {
     fixture::app_with_mappings((0..3).map(groups::mapping).collect())
-        .business(&delta.to_le_bytes())
+        .business(&voteboat::application::Counter::command(0, delta))
         .unwrap()
 }
 fn wait(

@@ -41,7 +41,7 @@ fn source_lineage_membership_and_conflicting_imports_are_refused_without_materia
             3 => input.origin.export.visit.group = group(99),
             4 => input.origin.export.request.binding.store.session = StoreSession::new(2).unwrap(),
             _ => {
-                input.snapshot.metadata.application_schema = 2;
+                input.snapshot.metadata.application_schema = crate::application::COUNTER_SCHEMA + 1;
                 input.origin.export.reference = SnapshotRef {
                     store: store(1),
                     ..a.snapshot_reference(&input.snapshot, SnapshotGeneration::new(9).unwrap())

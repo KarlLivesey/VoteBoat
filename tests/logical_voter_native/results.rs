@@ -137,8 +137,8 @@ fn submit(parent: &mut Parent) -> ClientTicket {
             &parent.apps[&setup::mapping().parent],
             ClientRequest {
                 group: setup::mapping().parent,
-                operation: OperationId::new(8201).unwrap(),
-                bytes: 5_i64.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, 9).unwrap(),
+                bytes: Counter::command(0, 5),
             },
         )
         .unwrap()

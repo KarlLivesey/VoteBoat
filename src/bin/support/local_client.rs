@@ -42,7 +42,9 @@ pub(super) fn exchange(
 fn retryable_reply(command: &[String], response: &str) -> bool {
     let command = super::group_command::payload(command);
     response == NOT_LEADER
-        || matches!(command, [add, _, _] if add == "add") && response == "ERR Draining\n"
+        || matches!(command, [add, _, _, _, _] if add == "add") && response == "ERR Draining\n"
+        || matches!(command, [register, _] if register == "register")
+            && response == "ERR Draining\n"
         || command == ["read"]
             && matches!(
                 response,
@@ -67,6 +69,8 @@ fn interrupted(command: &[String], reason: &str) -> Result<(), Failure> {
     let command = super::group_command::payload(command);
     if command.first().is_some_and(|c| c == "add") {
         println!("UNKNOWN {reason}; retry the same operation ID and delta");
+    } else if command.first().is_some_and(|c| c == "register") {
+        println!("UNKNOWN {reason}; retry the same registration nonce");
     } else if command
         .first()
         .is_some_and(|c| c == "configure" || c == "configure-record")
@@ -170,11 +174,20 @@ pub fn run(base: u16, id: Option<u64>, input: &[String]) -> Result<(), Failure> 
     if id.is_none() {
         match super::group_command::payload(command) {
             [cmd] if cmd == "read" => (),
-            [cmd, operation, delta]
+            [cmd, nonce] if cmd == "register" && nonce.parse::<u64>().is_ok_and(|n| n != 0) => {}
+            [cmd, session, sequence, ack, delta]
                 if cmd == "add"
-                    && operation.parse::<u128>().is_ok_and(|n| n != 0)
+                    && session.parse::<u64>().is_ok_and(|n| n != 0)
+                    && sequence
+                        .parse::<u64>()
+                        .is_ok_and(|q| ack.parse::<u64>().is_ok_and(|a| a < q))
                     && delta.parse::<i64>().is_ok() => {}
-            _ => return Err("auto accepts only read or add NONZERO_OPERATION_ID DELTA".into()),
+            _ => {
+                return Err(
+                    "auto accepts only read, register NONCE or add SESSION SEQUENCE ACK DELTA"
+                        .into(),
+                )
+            }
         }
     }
     let bytes = command.iter().try_fold(0usize, |bytes, part| {
@@ -261,8 +274,9 @@ mod tests {
     #[test]
     fn draining_reroutes_only_exact_unaccepted_data_commands() {
         for words in [
-            vec!["add", "42", "5"],
-            vec!["group", "7", "3", "add", "42", "5"],
+            vec!["add", "1", "42", "0", "5"],
+            vec!["group", "7", "3", "add", "1", "42", "0", "5"],
+            vec!["register", "42"],
             vec!["read"],
         ] {
             let command = words.into_iter().map(str::to_owned).collect::<Vec<_>>();
@@ -276,7 +290,12 @@ mod tests {
                 assert!(!retryable_reply(&command, terminal));
             }
         }
-        for words in [vec!["configure", "42"], vec!["add", "42"], vec!["quit"]] {
+        for words in [
+            vec!["configure", "42"],
+            vec!["add", "42"],
+            vec!["add", "42", "5"],
+            vec!["quit"],
+        ] {
             let command = words.into_iter().map(str::to_owned).collect::<Vec<_>>();
             assert!(!retryable_reply(&command, "ERR Draining\n"));
         }

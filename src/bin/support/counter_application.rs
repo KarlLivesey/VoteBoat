@@ -13,6 +13,9 @@ pub enum Application {
     Counter(Counter),
     Maintenance(Maintenance<Counter>),
 }
+/// Application schema of the leadership-maintenance profile. It must differ
+/// from the inner Counter's schema (2), so the profile is schema 3.
+pub const MAINTENANCE_SCHEMA: u64 = 3;
 macro_rules! delegate {
     ($self:expr, $app:ident => $expression:expr) => {
         match $self {
@@ -31,7 +34,12 @@ impl Application {
         enabled: bool,
     ) -> Result<Self, Failure> {
         Ok(if enabled {
-            Self::Maintenance(checked(Maintenance::new(group, 2, 64, counter))?)
+            Self::Maintenance(checked(Maintenance::new(
+                group,
+                MAINTENANCE_SCHEMA,
+                64,
+                counter,
+            ))?)
         } else {
             Self::Counter(counter)
         })
@@ -42,13 +50,13 @@ impl Application {
             _ => Err("leadership maintenance profile disabled".into()),
         }
     }
-    pub fn data(&self, delta: i64) -> Result<Vec<u8>, String> {
-        let bytes = delta.to_le_bytes();
+    /// Frame counter command bytes (a registration's empty bytes or
+    /// `Counter::command`) for the selected profile.
+    pub fn data(&self, bytes: &[u8]) -> Result<Vec<u8>, String> {
         match self {
             Self::Counter(_) => Ok(bytes.to_vec()),
-            Self::Maintenance(_) => {
-                Maintenance::<Counter>::data(&bytes, 17).map_err(|e| format!("{e:?}"))
-            }
+            Self::Maintenance(_) => Maintenance::<Counter>::data(bytes, 9 + COUNTER_COMMAND_BYTES)
+                .map_err(|e| format!("{e:?}")),
         }
     }
 }
@@ -59,6 +67,9 @@ impl StateMachine for Application {
     }
     fn deployment_requirements(&self) -> Option<voteboat::raft::ReadinessRequirements> {
         delegate!(self, app => app.deployment_requirements())
+    }
+    fn retention(&self) -> Retention {
+        delegate!(self, app => app.retention())
     }
     fn applied_index(&self) -> u64 {
         delegate!(self, app => app.applied_index())

@@ -29,7 +29,7 @@ fn history(protocol: NativePeerProtocol) {
 }
 fn history_in(mut c: Cluster) {
     c.campaign();
-    write(&mut c, 35211, 3);
+    write(&mut c, 11, 3);
     c.until(|c| c.value(2) == 3);
     c.held_read_acks.insert(node(3));
     if c.tree.max_hops() > 1 {

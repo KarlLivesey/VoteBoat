@@ -13,7 +13,6 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 use super::*;
-use voteboat::identity::OperationId;
 
 #[test]
 fn logical_facade_cancelled_waits_retain_actual_child_work_tcp() {
@@ -54,8 +53,8 @@ fn write_cancel(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: Instant) 
     let ticket = node
         .propose(ClientRequest {
             group: setup::mapping().parent,
-            operation: OperationId::new(8995).unwrap(),
-            bytes: 9_i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, 5).unwrap(),
+            bytes: Counter::command(0, 9),
         })
         .unwrap();
     until(bridge, node, clock, |n| {
@@ -73,7 +72,7 @@ fn write_cancel(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: Instant) 
         ClientOutcome::Unknown(ClientUnknown::CancelledWait)
     ));
     retain(bridge, node, clock);
-    let duplicate = restart::write(bridge, node, clock, 8995, 9);
+    let duplicate = restart::write(bridge, node, clock, 5, 9);
     assert!(duplicate.duplicate);
     assert_eq!(duplicate.outcome, CounterOutcome::Value(9));
     assert_eq!(restart::read(bridge, node, clock), 9);

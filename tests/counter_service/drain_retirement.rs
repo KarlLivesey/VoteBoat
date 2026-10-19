@@ -62,8 +62,8 @@ fn finish_retirement(c: &mut Cluster, survivors: &[usize], source: usize, quic: 
     assert!(c
         .ok(leader, &["configure", RETIRE])
         .contains("action=completed"));
-    assert!(authenticated_write(c, &["add", "19781", "3"]).contains("Value(10)"));
-    assert!(authenticated_write(c, &["add", "19700", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(c, &["add", "1", "7", "0", "3"]).contains("Value(10)"));
+    assert!(authenticated_write(c, &["add", "1", "1", "0", "7"]).contains("duplicate=true"));
     if quic {
         for &id in survivors {
             c.ok(id, &["checkpoint"]);
@@ -79,13 +79,13 @@ fn finish_retirement(c: &mut Cluster, survivors: &[usize], source: usize, quic: 
     assert!(c
         .ok(leader, &["configure", RETIRE])
         .contains("action=completed"));
-    assert!(authenticated_write(c, &["add", "19781", "3"]).contains("duplicate=true"));
-    assert!(authenticated_write(c, &["add", "19782", "1"]).contains("Value(11)"));
+    assert!(authenticated_write(c, &["add", "1", "7", "0", "3"]).contains("duplicate=true"));
+    assert!(authenticated_write(c, &["add", "1", "8", "0", "1"]).contains("Value(11)"));
     // Old source files still describe the retained learner. Recovery must keep
     // the active gate; removing a remote assignment never erases local intent.
     c.start(source, "recover-member");
     drain::wait_status(c, source, "phase=Active");
-    let blocked = c.request(source, &["add", "19783", "100"]);
+    let blocked = c.request(source, &["add", "1", "9", "0", "100"]);
     assert!(!blocked.status.success());
     assert!(String::from_utf8_lossy(&blocked.stdout).contains("Draining"));
     assert_eq!(c.routed(&["read"]), "OK value=11\n");

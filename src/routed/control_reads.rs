@@ -59,6 +59,9 @@ where
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         self.0.deployment_requirements()
     }
+    fn retention(&self) -> crate::application::Retention {
+        self.0.retention()
+    }
     fn validate_deployment_requirements(
         &self,
         r: crate::raft::ReadinessRequirements,

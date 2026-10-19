@@ -52,8 +52,8 @@ fn history(quic: bool) {
         leadership::status(&mut c, "19701", "phase=Completed").1,
         completed
     );
-    assert!(authenticated_write(&c, &["add", "19760", "3"]).contains("duplicate=true"));
-    assert!(authenticated_write(&c, &["add", "19700", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "10", "0", "3"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "7"]).contains("duplicate=true"));
     assert_eq!(c.routed(&["read"]), "OK value=10\n");
     c.stop();
 }

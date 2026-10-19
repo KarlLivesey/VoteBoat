@@ -22,7 +22,7 @@ pub(super) fn setup(quic: bool) -> Cluster {
         c.start(n, "create");
     }
     for (g, inc, delta) in [("1", "1", "3"), ("7", "3", "5"), ("8", "2", "8")] {
-        authenticated_write(&c, &["group", g, inc, "add", "42", delta]);
+        authenticated_write(&c, &["group", g, inc, "add", "1", "1", "0", delta]);
     }
     group_admin::configure(&mut c, "1", "1");
     group_admin::configure(&mut c, "1", "1");
@@ -125,7 +125,7 @@ fn history(quic: bool) {
     lost.disconnect();
     assert!(before.contains("groups=3"));
     denied(&c, &["drain-stop", "1", OP]);
-    denied(&c, &["group", "7", "3", "add", "50", "1"]);
+    denied(&c, &["group", "7", "3", "add", "1", "3", "0", "1"]);
     for offset in ["0", "1", "2"] {
         assert!(
             c.ok(SOURCE, &["drain-group", "1", OP, offset])
@@ -170,9 +170,13 @@ fn history(quic: bool) {
     c.ok(SOURCE, &["drain-stop", "1", OP]);
     drain::joined(&mut c, SOURCE);
     assert!(
-        authenticated_write(&c, &["group", "7", "3", "add", "42", "5"]).contains("duplicate=true")
+        authenticated_write(&c, &["group", "7", "3", "add", "1", "1", "0", "5"])
+            .contains("duplicate=true")
     );
-    assert!(authenticated_write(&c, &["group", "8", "2", "add", "43", "1"]).contains("Value(9)"));
+    assert!(
+        authenticated_write(&c, &["group", "8", "2", "add", "1", "2", "0", "1"])
+            .contains("Value(9)")
+    );
     c.stop();
 }
 #[test]

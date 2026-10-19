@@ -2,8 +2,7 @@
 use super::cluster::{serial, Cluster};
 use std::time::{Duration, Instant};
 use voteboat::{
-    application::{CounterOutcome, CounterReceipt},
-    identity::OperationId,
+    application::{Counter, CounterOutcome, CounterReceipt},
     native::connect::NativePeerProtocol,
     runtime::*,
 };
@@ -19,8 +18,8 @@ fn write(
     let ticket = host.nodes[leader]
         .propose(ClientRequest {
             group: host.group,
-            operation: OperationId::new(operation).unwrap(),
-            bytes: add.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, operation as u64).unwrap(),
+            bytes: Counter::command(0, add),
         })
         .unwrap();
     let end = Instant::now() + Duration::from_secs(15);

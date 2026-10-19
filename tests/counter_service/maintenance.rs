@@ -47,7 +47,7 @@ fn history(quic: bool) {
         c.start(id, "create");
     }
     c.leader();
-    assert!(c.routed(&["add", "91001", "7"]).contains("Value(7)"));
+    assert!(c.routed(&["add", "1", "1", "0", "7"]).contains("Value(7)"));
     assert_eq!(c.routed(&["read"]), "OK value=7\n");
     for id in 1..=3 {
         c.ok(id, &["checkpoint"]);
@@ -61,12 +61,12 @@ fn history(quic: bool) {
         c.start(id, "recover");
     }
     c.leader();
-    let retry = c.routed(&["add", "91001", "7"]);
+    let retry = c.routed(&["add", "1", "1", "0", "7"]);
     assert!(
         retry.contains("Value(7)") && retry.contains("duplicate=true"),
         "{retry}"
     );
-    assert!(c.routed(&["add", "91002", "3"]).contains("Value(10)"));
+    assert!(c.routed(&["add", "1", "2", "0", "3"]).contains("Value(10)"));
     assert_eq!(c.routed(&["read"]), "OK value=10\n");
     wait_maintenance(&c, 1, 0);
     c.stop();
@@ -115,12 +115,12 @@ fn checkpoint_history(quic: bool) {
         c.start(id, "create");
     }
     c.leader();
-    assert!(authenticated_write(&c, &["add", "92001", "7"]).contains("Value(7)"));
+    assert!(authenticated_write(&c, &["add", "1", "3", "0", "7"]).contains("Value(7)"));
     for id in 1..=3 {
         wait_checkpoint(&c, id, 2);
     }
-    assert!(authenticated_write(&c, &["add", "92002", "3"]).contains("Value(10)"));
-    assert!(authenticated_write(&c, &["add", "92003", "4"]).contains("Value(14)"));
+    assert!(authenticated_write(&c, &["add", "1", "4", "0", "3"]).contains("Value(10)"));
+    assert!(authenticated_write(&c, &["add", "1", "5", "0", "4"]).contains("Value(14)"));
     for id in 1..=3 {
         wait_checkpoint(&c, id, 4);
     }
@@ -132,13 +132,13 @@ fn checkpoint_history(quic: bool) {
         c.start(id, "recover");
     }
     c.leader();
-    let retry = authenticated_write(&c, &["add", "92001", "7"]);
+    let retry = authenticated_write(&c, &["add", "1", "3", "0", "7"]);
     assert!(
         retry.contains("Value(7)") && retry.contains("duplicate=true"),
         "{retry}"
     );
     assert_eq!(c.routed(&["read"]), "OK value=14\n");
-    assert!(authenticated_write(&c, &["add", "92004", "5"]).contains("Value(19)"));
+    assert!(authenticated_write(&c, &["add", "1", "6", "0", "5"]).contains("Value(19)"));
     c.stop();
     fs::remove_dir_all(&c.root).unwrap();
 }

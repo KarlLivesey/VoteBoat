@@ -4,7 +4,7 @@ use super::*;
 
 fn unread_write(c: &mut Cluster, group: &str, incarnation: &str, value: &str) {
     let end = Instant::now() + Duration::from_secs(20);
-    let command = format!("group {group} {incarnation} add 42 {value}");
+    let command = format!("group {group} {incarnation} add 1 1 0 {value}");
     let mut pending = Vec::new();
     for _ in 0..8 {
         let node = leader(c, group, incarnation);
@@ -91,7 +91,10 @@ fn history(quic: bool) {
     // First observed successes must allow retained receipts after unread writes.
     data(&mut c, false);
     for (group, incarnation, value) in [("1", "1", "3"), ("7", "3", "5"), ("8", "2", "9")] {
-        let conflict = authenticated_write(&c, &["group", group, incarnation, "add", "42", "1"]);
+        let conflict = authenticated_write(
+            &c,
+            &["group", group, incarnation, "add", "1", "1", "0", "1"],
+        );
         assert_eq!(conflict, "OK outcome=OperationConflict duplicate=true\n");
         assert_eq!(
             c.routed(&["group", group, incarnation, "read"]),

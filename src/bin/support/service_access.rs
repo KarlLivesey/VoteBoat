@@ -433,7 +433,7 @@ impl Channel {
                 | "discover",
             ) => ServiceAction::Inspect,
             Some("read" | "manifest-session" | "transfer-read") => ServiceAction::Read,
-            Some("add") => ServiceAction::Write,
+            Some("add" | "register") => ServiceAction::Write,
             Some("checkpoint") => ServiceAction::Checkpoint,
             Some("quit" | "drain-stop") => ServiceAction::Shutdown,
             Some(

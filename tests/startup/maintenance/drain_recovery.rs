@@ -95,8 +95,8 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
     assert!(matches!(
         h.submit(
             0,
-            OperationId::new(201).unwrap(),
-            Maintenance::<HostApplication>::data(&7i64.to_le_bytes(), 100).unwrap()
+            Counter::operation(1, 21).unwrap(),
+            Maintenance::<HostApplication>::data(&Counter::command(0, 7), 100).unwrap()
         ),
         ClientOutcome::Applied { .. }
     ));

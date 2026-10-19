@@ -89,6 +89,10 @@ impl<A: StateMachine + Clone> StateMachine for Maintenance<A> {
     fn validate_group(&self, group: GroupIdentity) -> Result<(), ApplicationError> {
         self.check_group(group)
     }
+    /// Lifetime leadership records until DR2 (audit S2).
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::LifetimeBounded
+    }
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
         let inner = self.inner.deployment_requirements()?;
         Some(ReadinessRequirements {

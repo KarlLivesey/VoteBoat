@@ -27,8 +27,8 @@ checks; see [peer credential rollout](CREDENTIAL_REFRESH.md#executable-peer-rota
 
 An opt-in [leadership maintenance profile](MAINTENANCE.md#authenticated-counter-executable)
 adds authenticated move/status/resume/cancel commands with durable original IDs.
-It requires a new schema2/wire8 deployment; existing plain counter data is not
-automatically converted.
+It requires a new schema3/wire8 deployment (the plain counter is schema 2); existing
+plain counter data is not automatically converted.
 The optional [retained-replica drain commands](MAINTENANCE.md#retained-replica-node-drain)
 add durable maintenance/reboot with a restored admission gate.
 The [membership-drain workflow](MAINTENANCE.md#executable-membership-drain-workflow)
@@ -150,7 +150,7 @@ voteboat-command-peers-v1
 ```
 
 ```sh
-target/debug/voteboat-counter client 43000 auto add 1 7 --command-peers commands.txt --service-tls /your/client-tls --principal 2
+target/debug/voteboat-counter client 43000 auto add 1 1 0 7 --command-peers commands.txt --service-tls /your/client-tls --principal 2
 target/debug/voteboat-counter client 43000 1 status --command-peers commands.txt --service-tls /your/client-tls --principal 1
 ```
 
@@ -423,16 +423,34 @@ For the local three-process quickstart, use `auto` to find a willing leader
 without a manual status lookup:
 
 ```sh
-target/debug/voteboat-counter client 43000 auto add 1 7
+target/debug/voteboat-counter client 43000 auto add 1 1 0 7
 # OK outcome=Value(7) duplicate=false
-target/debug/voteboat-counter client 43000 1 add 1 7
+target/debug/voteboat-counter client 43000 1 add 1 1 0 7
 # OK outcome=Value(7) duplicate=true
 target/debug/voteboat-counter client 43000 auto read
 # OK value=7
 ```
 
-An operation ID is a nonzero u128 and the delta is an i64. Keep the same ID and
-payload when retrying. A timeout, disconnection or Unknown response can follow an
+A write is `add SESSION SEQUENCE ACK DELTA`. Session 1 is built into every
+counter for a single writer; other writers first run `register NONCE` (any
+nonzero u64 chosen by the client) and use the session in the reply
+(`OK outcome=Registered(S) duplicate=false`); a retried registration with the
+same nonce returns the same session. Number writes 1, 2, 3, … within a session.
+`ACK` is the highest sequence whose outcome you have consumed, every lower one
+included (0 for none); it must be below `SEQUENCE`. The service retains at most
+32 unacknowledged outcomes per session and 256 sessions, so its retry state is
+bounded whatever the uptime: a write more than 32 beyond your acknowledgement is
+refused with `ERR not_proposed=Admission(SessionWindow)` until you acknowledge.
+Registering a session when 256 are live evicts the least recently used one.
+
+Keep the same session, sequence and delta when retrying (the acknowledgement may
+grow). Within the window a retry returns the original outcome with
+`duplicate=true`. `outcome=Refused(Expired)` means the outcome is no longer
+retained: the sequence was acknowledged or its session evicted. It may have
+executed once and is never executed again; do not resend the delta under a new
+sequence, read the value instead. `Refused(Expired)` for a sequence above your
+own acknowledgement means the session was evicted: register again.
+`Refused(UnknownSession)` names a session that was never allocated. A timeout, disconnection or Unknown response can follow an
 accepted write that later commits. A changed payload under the same ID yields the
 application's conflict outcome. Read success requires a fresh quorum barrier and
 application completion; a live process or local applied value is insufficient.
@@ -446,7 +464,8 @@ deadlines and connections closed before a complete request or any reply bytes.
 Partial/invalid replies, certificate failures and other errors remain terminal.
 Explicit node selection makes one attempt. Uncertain writes are never
 automatically resent to another node. A lost write
-reply prints Unknown; retry manually using the same operation ID and delta.
+reply prints Unknown; retry manually using the same session, sequence and delta
+(the printed "operation ID" is that pair).
 
 Automatic mode scans three local command ports by default, or the configured
 command endpoint list, with one active socket, at
@@ -528,7 +547,7 @@ cargo run --locked --offline --example embedded_counter -- create /tmp/voteboat-
 cargo run --locked --offline --example embedded_counter -- recover /tmp/voteboat-embedded tests/fixtures/tls 1 7
 # Retry: duplicate=true and linearizable_value=7
 cargo run --locked --offline --example embedded_counter -- recover /tmp/voteboat-embedded tests/fixtures/tls 2 3
-# New operation: linearizable_value=10
+# New operation (sequence 2 of the built-in session): linearizable_value=10
 ```
 
 The embedding example is a single-voter group with its own directory. The service
@@ -738,14 +757,15 @@ this endpoint submits no final record. It is available on followers as historica
 local evidence, without claiming a fresh quorum-backed read. Automatic client
 routing remains restricted to application add/read commands.
 
-The service binds schema 1, eight-byte commands and a 330,032-byte application
-checkpoint envelope to Counter's configured 10,000 retained operation IDs. Counter
-admission reserves pending IDs, application refuses further distinct IDs at
-capacity, and restore requires the identical configured capacity. Retries keep
-their original outcomes. `Counter::readiness_requirements` reports the whole
-configured lifetime envelope (32 + 33 * maximum operations), including when the
-counter is empty; `validate_readiness_requirements` rejects a smaller declaration
-or a different schema. Service startup compares this declaration with its selected
+The service binds schema 2, sixteen-byte commands and a 213,556-byte application
+checkpoint envelope to Counter's session limits (256 sessions × 32 outcomes, 64
+registration nonces). Admission refuses a write beyond its session window using
+applied state only; a committed write beyond it is a typed refusal, never an apply
+error; restore requires the identical limits. Retries keep their original
+outcomes while retained. `Counter::readiness_requirements` reports the
+steady-state envelope (24 + 28 + 256 × (28 + 32 × 25) + 64 × 24 bytes), which
+holds for any uptime; `validate_readiness_requirements` rejects a smaller
+declaration or a different schema. Service startup compares this declaration with its selected
 native command/checkpoint payload limits before opening resources.
 
 A full counter checkpoint round-trips through native wire versions 1–4 in tests.

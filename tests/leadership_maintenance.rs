@@ -41,8 +41,8 @@ fn data(index: u64, op: u128, value: i64) -> LogEntry {
         index,
         term: 1,
         payload: EntryPayload::Command {
-            operation: OperationId::new(op).unwrap(),
-            bytes: Maintenance::<Counter>::data(&value.to_le_bytes(), 100)
+            operation: Counter::operation(1, op as u64).unwrap(),
+            bytes: Maintenance::<Counter>::data(&Counter::command(0, value), 100)
                 .unwrap()
                 .into(),
         },
@@ -59,22 +59,25 @@ fn recorded(app: &mut Maintenance<Counter>, entry: LogEntry) -> LeadershipRecord
 }
 #[test]
 fn data_and_administration_retries_remain_independent_and_survive_checkpoint() {
+    // The data command (sequence 1 of the counter's built-in session) and the
+    // administrative intent share one operation ID in separate namespaces.
+    const SHARED: u128 = 1 << 64 | 1;
     let mut a = app(2);
-    a.apply_batch(&[data(1, 10, 7)]).unwrap();
+    a.apply_batch(&[data(1, 1, 7)]).unwrap();
     let original = recorded(
         &mut a,
-        command(2, 1, LeadershipCommand::Begin(intent(10, 2))),
+        command(2, 1, LeadershipCommand::Begin(intent(SHARED, 2))),
     );
     assert_eq!(a.inner().read_applied(2), Ok(7));
     assert_eq!(
         recorded(
             &mut a,
-            command(3, 1, LeadershipCommand::Begin(intent(10, 2)))
+            command(3, 1, LeadershipCommand::Begin(intent(SHARED, 2)))
         ),
         original
     );
     let complete = LeadershipCommand::Complete {
-        intent: intent(10, 2),
+        intent: intent(SHARED, 2),
         index: 2,
         term: 2,
     };
@@ -87,11 +90,11 @@ fn data_and_administration_retries_remain_independent_and_survive_checkpoint() {
     let mut recovered = app(2);
     recovered.restore_checkpoint(8001, 4, &bytes).unwrap();
     assert_eq!(
-        recovered.record(OperationId::new(10).unwrap()),
+        recovered.record(OperationId::new(SHARED).unwrap()),
         Some(result)
     );
     assert_eq!(recorded(&mut recovered, command(5, 3, complete)), result);
-    let receipt = recovered.apply_batch(&[data(6, 10, 7)]).unwrap().remove(0);
+    let receipt = recovered.apply_batch(&[data(6, 1, 7)]).unwrap().remove(0);
     assert!(matches!(
         receipt,
         MaintenanceReceipt::Data(CounterReceipt {
@@ -249,7 +252,7 @@ fn command_codec_rejects_truncation_and_operation_mismatch_and_old_profiles() {
     };
     assert!(app(1).apply_batch(&[e]).is_err());
     assert!(Counter::new(1).unwrap().apply_batch(&[c]).is_err());
-    assert!(Maintenance::new(group(1), 1, 1, Counter::new(1).unwrap()).is_err());
+    assert!(Maintenance::new(group(1), COUNTER_SCHEMA, 1, Counter::new(1).unwrap()).is_err());
     let mut old = Counter::new(1).unwrap();
     old.apply_batch(&[LogEntry {
         index: 1,

@@ -129,8 +129,8 @@ fn pooled_write(
         nodes[0]
             .propose(ClientRequest {
                 group: group(g),
-                operation: OperationId::new(operation).unwrap(),
-                bytes: delta.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, operation as u64).unwrap(),
+                bytes: Counter::command(0, delta),
             })
             .unwrap();
     }
@@ -139,7 +139,7 @@ fn pooled_write(
         while let Some(reply) = nodes[0].poll_client() {
             match nodes[0].complete_client(reply).unwrap() {
                 ClientOutcome::Applied { receipt, .. } => {
-                    assert_eq!(receipt.operation, OperationId::new(operation).unwrap());
+                    assert_eq!(receipt.operation, Counter::operation(1, operation as u64).unwrap());
                     assert_eq!(receipt.duplicate, duplicate);
                     replies += 1;
                 }

@@ -67,7 +67,9 @@ fn limits() -> SnapshotLimits {
     SnapshotLimits {
         max_application_bytes: MAX_FAULT_BYTES,
         max_metadata_bytes: 4096,
-        max_chunk_bytes: 96,
+        // One chunk for a one-receipt Counter image (105 bytes), two for the
+        // two-receipt replacement (130 bytes), as the histories expect.
+        max_chunk_bytes: 128,
     }
 }
 fn fresh() -> Counter {

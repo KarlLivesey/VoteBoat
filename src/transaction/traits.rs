@@ -41,6 +41,10 @@ impl StateMachine for TransferApplication {
             Err(ApplicationError::InvalidCommand)
         }
     }
+    /// Lifetime transaction records until TX1 (audit S5).
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::LifetimeBounded
+    }
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
         Some(ReadinessRequirements {
             application_schema: TRANSFER_SCHEMA,

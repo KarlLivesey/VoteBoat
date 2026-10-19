@@ -59,7 +59,7 @@ fn publish_without_observing_reply(cluster: &Cluster, id: usize) {
 fn verify_revocation(cluster: &mut Cluster) {
     cluster.command_principal = Some(2);
     for id in 1..=3 {
-        let denied = cluster.request(id, &["add", "18001", "7"]);
+        let denied = cluster.request(id, &["add", "1", "1", "0", "7"]);
         assert!(!denied.status.success());
         assert_eq!(
             String::from_utf8(denied.stdout).unwrap(),
@@ -68,7 +68,7 @@ fn verify_revocation(cluster: &mut Cluster) {
     }
     assert_eq!(cluster.routed(&["read"]), "OK value=7\n");
     cluster.command_principal = Some(3);
-    assert!(authenticated_write(cluster, &["add", "18001", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(cluster, &["add", "1", "1", "0", "7"]).contains("duplicate=true"));
 }
 fn failed_preparation(cluster: &Cluster, path: &std::path::Path) {
     fs::write(path, "voteboat-service-access-v1 3\n3 invalid-role 1 1\n").unwrap();
@@ -120,7 +120,7 @@ fn history(quic: bool) {
     }
     let leader = cluster.leader();
     cluster.command_principal = Some(2);
-    assert!(authenticated_write(&cluster, &["add", "18001", "7"]).contains("Value(7)"));
+    assert!(authenticated_write(&cluster, &["add", "1", "1", "0", "7"]).contains("Value(7)"));
     let denied = cluster.request(leader, &["reload-access", "1", "1", "2"]);
     assert_eq!(
         String::from_utf8(denied.stdout).unwrap(),

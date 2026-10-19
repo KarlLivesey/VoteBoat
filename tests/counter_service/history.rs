@@ -83,7 +83,13 @@ impl Tape {
         let args = match action {
             Action::Read => vec!["read".to_string()],
             Action::Write { operation, delta } => {
-                vec!["add".into(), operation.to_string(), delta.to_string()]
+                vec![
+                    "add".into(),
+                    "1".into(),
+                    operation.to_string(),
+                    "0".into(),
+                    delta.to_string(),
+                ]
             }
         };
         let args = args.iter().map(String::as_str).collect::<Vec<_>>();
@@ -179,7 +185,7 @@ fn unknown(
     let mut stream =
         std::net::TcpStream::connect((Ipv4Addr::LOCALHOST, cluster.base + 100 + id as u16))
             .unwrap();
-    writeln!(stream, "add {operation} {delta}").unwrap();
+    writeln!(stream, "add 1 {operation} 0 {delta}").unwrap();
     (call, stream)
 }
 fn overlapping(cluster: &mut Cluster, tape: &mut Tape) {
@@ -194,7 +200,9 @@ fn overlapping(cluster: &mut Cluster, tape: &mut Tape) {
                     &cluster.base.to_string(),
                     &leader.to_string(),
                     "add",
+                    "1",
                     &operation.to_string(),
+                    "0",
                     &delta.to_string(),
                 ])
                 .stdout(Stdio::piped())

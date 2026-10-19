@@ -1694,8 +1694,8 @@ fn local_configuration_admission_uses_retained_pins_and_prevents_queued_route_wi
         record: *record,
         readiness: vec![],
         requirements: ReadinessRequirements {
-            application_schema: 1,
-            command_bytes: 8,
+            application_schema: voteboat::application::COUNTER_SCHEMA,
+            command_bytes: voteboat::application::COUNTER_COMMAND_BYTES,
             snapshot_bytes: 4096,
         },
     }));

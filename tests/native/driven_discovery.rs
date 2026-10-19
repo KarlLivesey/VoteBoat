@@ -187,8 +187,8 @@ impl Cluster {
         let ticket = self.nodes[0]
             .propose(ClientRequest {
                 group: group(1),
-                operation: OperationId::new(operation).unwrap(),
-                bytes: delta.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, operation as u64).unwrap(),
+                bytes: Counter::command(0, delta),
             })
             .unwrap();
         let mut completed = None;
@@ -199,7 +199,10 @@ impl Cluster {
                 let ClientOutcome::Applied { receipt, .. } = outcome else {
                     panic!("operation {operation}: {outcome:?}");
                 };
-                assert_eq!(receipt.operation, OperationId::new(operation).unwrap());
+                assert_eq!(
+                    receipt.operation,
+                    Counter::operation(1, operation as u64).unwrap()
+                );
                 completed = Some(receipt);
             }
             completed.is_some()
@@ -399,8 +402,8 @@ fn owning_node_repairs_closed_discovery_source_without_stopping_healthy_quorum()
     let ticket = cluster.nodes[0]
         .propose(ClientRequest {
             group: group(1),
-            operation: OperationId::new(2).unwrap(),
-            bytes: 3_i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, 2).unwrap(),
+            bytes: Counter::command(0, 3),
         })
         .unwrap();
     let mut applied = false;

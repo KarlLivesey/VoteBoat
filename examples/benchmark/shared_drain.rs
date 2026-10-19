@@ -291,8 +291,8 @@ impl Harness {
         let ticket = self.nodes[leader]
             .propose(ClientRequest {
                 group: g,
-                operation: OperationId::new(operation).unwrap(),
-                bytes: delta.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, operation as u64).unwrap(),
+                bytes: Counter::command(0, delta),
             })
             .unwrap();
         let until = Instant::now() + Duration::from_secs(10);
@@ -302,7 +302,7 @@ impl Harness {
                 assert_eq!(output.ticket(), ticket);
                 let result = self.nodes[leader].complete_client(output).unwrap();
                 assert!(
-                    matches!(result,ClientOutcome::Applied{receipt:CounterReceipt{duplicate:found,operation:op,outcome:CounterOutcome::Value(value),..},..} if found==duplicate && op.get()==operation && value==expected),
+                    matches!(result,ClientOutcome::Applied{receipt:CounterReceipt{duplicate:found,operation:op,outcome:CounterOutcome::Value(value),..},..} if found==duplicate && u128::from(op.get() as u64)==operation && value==expected),
                     "{result:?}"
                 );
                 return;

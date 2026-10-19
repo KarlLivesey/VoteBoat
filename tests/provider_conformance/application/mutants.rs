@@ -8,6 +8,9 @@ impl<const MODE: u8> StateMachine for Broken<MODE> {
     fn deployment_requirements(&self) -> Option<voteboat::raft::ReadinessRequirements> {
         self.0.deployment_requirements()
     }
+    fn retention(&self) -> Retention {
+        self.0.retention()
+    }
     fn applied_index(&self) -> u64 {
         self.0.applied_index()
     }
@@ -88,6 +91,9 @@ impl<const MODE: u8> Scenario for BrokenCase<MODE> {
     }
     fn replies(replay: bool) -> Vec<Self::Reply> {
         CounterCase::replies(replay)
+    }
+    fn overflow() -> Self::Reply {
+        CounterCase::overflow()
     }
     fn query() {}
     fn value(result: i64) -> i64 {

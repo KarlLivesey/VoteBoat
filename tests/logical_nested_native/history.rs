@@ -22,8 +22,8 @@ fn history(protocol: NativePeerProtocol) {
     middle::elect(&mut lower, &mut middle);
     let mut host = Host::new(lower, &mut middle, protocol, 200000, &channels);
     host.elect();
-    let first = write(&mut host, 300000, 5, false);
-    let duplicate = write(&mut host, 300000, 5, true);
+    let first = write(&mut host, 1, 5, false);
+    let duplicate = write(&mut host, 1, 5, true);
     assert_eq!(first.receipt.operation, duplicate.receipt.operation);
     assert!(duplicate.receipt.duplicate);
     read(&mut host);

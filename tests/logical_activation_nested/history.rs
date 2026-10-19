@@ -136,7 +136,7 @@ fn history(
         );
         bridge = next_bridge;
         second_channels = Some(channels);
-        business::request(&mut lower, &mut bridge, returned, 5, 356302, 4, 16);
+        business::request(&mut lower, &mut bridge, returned, 5, 3, 4, 16);
         5
     } else {
         4
@@ -226,7 +226,7 @@ pub(super) fn initial_top(lower: &mut Lower<'_>, bridge: &mut super::UpperBridge
     )
     .unwrap_or_else(|e| panic!("actual top {:?}", e.reason));
     progress::elect_top(lower, bridge, &mut top);
-    business::request(lower, bridge, &mut top, 3, 356300, 7, 7);
+    business::request(lower, bridge, &mut top, 3, 1, 7, 7);
     top
 }
 
@@ -303,6 +303,6 @@ fn finish_first<'p>(
         .try_reclaim()
         .unwrap_or_else(|_| panic!("actual parent original observations drain"));
     terminal(top, bridge, intent);
-    business::request(lower, bridge, top, 4, 356301, 5, 12);
+    business::request(lower, bridge, top, 4, 2, 5, 12);
     top
 }

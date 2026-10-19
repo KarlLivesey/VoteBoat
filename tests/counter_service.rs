@@ -97,6 +97,8 @@ mod preparing_command;
 mod quorum;
 #[path = "counter_service/read_failover.rs"]
 mod read_failover;
+#[path = "counter_service/sessions.rs"]
+mod sessions;
 #[path = "counter_service/shutdown.rs"]
 mod shutdown;
 #[path = "counter_service/timing.rs"]
@@ -634,7 +636,9 @@ fn trusted_administration_history(quic: bool) {
         cluster.leader();
         // A real application write establishes this leader's current-term
         // commitment. Administration never manufactures an application write.
-        assert!(cluster.routed(&["add", "900", "1"]).contains("Value(1)"));
+        assert!(cluster
+            .routed(&["add", "1", "1", "0", "1"])
+            .contains("Value(1)"));
         let deadline = Instant::now() + Duration::from_secs(25);
         for id in 1..=3 {
             loop {
@@ -808,7 +812,7 @@ fn member_service_history(quic: bool) {
                 .wait_configuration_status(id, "500")
                 .contains(expected));
         }
-        assert!(leader_request(&mut cluster, &["add", "700", "42"]).contains("Value(42)"));
+        assert!(leader_request(&mut cluster, &["add", "1", "2", "0", "42"]).contains("Value(42)"));
         assert_eq!(leader_request(&mut cluster, &["read"]), "OK value=42\n");
         // Configuration intake remains closed even in explicit member mode.
         assert!(!cluster
@@ -842,7 +846,9 @@ fn member_service_history(quic: bool) {
             cluster.start(id, "recover-member");
         }
         cluster.leader();
-        assert!(leader_request(&mut cluster, &["add", "700", "42"]).contains("duplicate=true"));
+        assert!(
+            leader_request(&mut cluster, &["add", "1", "2", "0", "42"]).contains("duplicate=true")
+        );
         assert_eq!(leader_request(&mut cluster, &["read"]), "OK value=42\n");
         for id in 1..=3 {
             assert!(cluster
@@ -851,7 +857,10 @@ fn member_service_history(quic: bool) {
         }
         if final_view {
             assert!(cluster.ok(3, &["status"]).contains("role=Follower"));
-            assert!(!cluster.request(3, &["add", "701", "1"]).status.success());
+            assert!(!cluster
+                .request(3, &["add", "1", "3", "0", "1"])
+                .status
+                .success());
         }
         cluster.stop();
         for id in 1..=3 {
@@ -911,8 +920,8 @@ fn checkpoint_source(root: &std::path::Path, id: u64, operation: u128, delta: i6
                     index,
                     term: state.hard_state.term,
                     payload: EntryPayload::Command {
-                        operation: OperationId::new(operation).unwrap(),
-                        bytes: delta.to_le_bytes().to_vec().into(),
+                        operation: Counter::operation(1, operation as u64).unwrap(),
+                        bytes: Counter::command(0, delta).into(),
                     },
                 }],
             }),
@@ -930,7 +939,7 @@ fn checkpoint_source(root: &std::path::Path, id: u64, operation: u128, delta: i6
         SnapshotLimits::default(),
     )
     .unwrap();
-    let mut app = Counter::new(10000).unwrap();
+    let mut app = Counter::with_limits(voteboat::retention::SessionLimits::default()).unwrap();
     let (mut core, _) = recover_member_replica(
         NodeId::new(id).unwrap(),
         group,
@@ -965,7 +974,7 @@ fn enrolled_state_for(
     local: u64,
     identity: voteboat::identity::StoreIdentity,
 ) -> voteboat::log::GroupLog {
-    recovered_state_for(root, local, identity, 42, (700, 42))
+    recovered_state_for(root, local, identity, 42, (2, 42))
 }
 fn recovered_state_for(
     root: &std::path::Path,
@@ -1001,7 +1010,7 @@ fn recovered_state_for(
         SnapshotLimits::default(),
     )
     .unwrap();
-    let mut app = Counter::new(10000).unwrap();
+    let mut app = Counter::with_limits(voteboat::retention::SessionLimits::default()).unwrap();
     let (core, _) = recover_member_replica(
         NodeId::new(local).unwrap(),
         group,
@@ -1021,8 +1030,8 @@ fn recovered_state_for(
             index: app.applied_index() + 1,
             term: 1,
             payload: EntryPayload::Command {
-                operation: OperationId::new(retry_command.0).unwrap(),
-                bytes: retry_command.1.to_le_bytes().to_vec().into(),
+                operation: Counter::operation(1, retry_command.0 as u64).unwrap(),
+                bytes: Counter::command(0, retry_command.1).into(),
             },
         }])
         .unwrap();
@@ -1034,7 +1043,7 @@ fn enrolled_service_history(quic: bool) {
     let mut cluster = Cluster::new();
     cluster.quic = quic;
     seed_member_service(&cluster.root, true, false);
-    checkpoint_source(&cluster.root, 1, 700, 42);
+    checkpoint_source(&cluster.root, 1, 2, 42);
     let destination = cluster.root.join("3");
     let created = cluster.enroll("create", 3, &destination, 1);
     assert!(
@@ -1068,11 +1077,11 @@ fn enrolled_service_history(quic: bool) {
     let leader = cluster.leader();
     assert_ne!(leader, 3);
     assert!(cluster
-        .ok(leader, &["add", "700", "42"])
+        .ok(leader, &["add", "1", "2", "0", "42"])
         .contains("duplicate=true"));
     assert_eq!(cluster.ok(leader, &["read"]), "OK value=42\n");
     assert!(cluster
-        .ok(leader, &["add", "701", "1"])
+        .ok(leader, &["add", "1", "3", "0", "1"])
         .contains("Value(43)"));
     cluster.ok(leader, &["checkpoint"]);
     cluster.stop();
@@ -1081,7 +1090,7 @@ fn enrolled_service_history(quic: bool) {
     }
     let leader = cluster.leader();
     assert!(cluster
-        .ok(leader, &["add", "701", "1"])
+        .ok(leader, &["add", "1", "3", "0", "1"])
         .contains("duplicate=true"));
     assert_eq!(cluster.ok(leader, &["read"]), "OK value=43\n");
     cluster.stop();
@@ -1107,7 +1116,7 @@ fn enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_cre
             !target.exists(),
             "no pinned source must not create destination"
         );
-        checkpoint_source(&cluster.root, 1, 700, 42);
+        checkpoint_source(&cluster.root, 1, 2, 42);
         let voter = cluster.root.join("voter-import");
         assert!(!cluster.enroll("create", 2, &voter, 1).status.success());
         assert!(!voter.exists());
@@ -1122,7 +1131,7 @@ fn enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_cre
         } else {
             assert!(cluster.enroll("create", 3, &target, 1).status.success());
             let before = enrolled_state(&target);
-            checkpoint_source(&cluster.root, 1, 701, 1);
+            checkpoint_source(&cluster.root, 1, 3, 1);
             assert!(!cluster.enroll("recover", 3, &target, 1).status.success());
             assert_eq!(
                 enrolled_state(&target),
@@ -1204,7 +1213,7 @@ fn deployment_history(quic: bool) {
         incarnation: StoreIncarnation::new(7).unwrap(),
     };
     seed_fourth_learner(&cluster, fourth);
-    checkpoint_source(&cluster.root, 1, 700, 42);
+    checkpoint_source(&cluster.root, 1, 2, 42);
     configure_fourth_tls(&mut cluster);
     let declaration = format!("voteboat-deployment-v1\n1 1 1 127.0.0.1:{} node1.voteboat.test\n2 2 1 127.0.0.1:{} node2.voteboat.test\n4 404 7 127.0.0.1:{} node3.voteboat.test\n",
         cluster.base + 1, cluster.base + 2, cluster.base + 4);
@@ -1241,10 +1250,10 @@ fn deployment_history(quic: bool) {
     let leader = cluster.leader();
     assert!(leader == 1 || leader == 2);
     assert!(cluster
-        .ok(leader, &["add", "700", "42"])
+        .ok(leader, &["add", "1", "2", "0", "42"])
         .contains("duplicate=true"));
     assert!(cluster
-        .ok(leader, &["add", "701", "1"])
+        .ok(leader, &["add", "1", "3", "0", "1"])
         .contains("Value(43)"));
     // Observe node 4 after the new write, rather than counting a provisioned route
     // as evidence of catch-up. Its exact store must durably receive replication.
@@ -1273,7 +1282,10 @@ fn deployment_history(quic: bool) {
         assert!(Instant::now() < deadline, "new learner did not catch up");
         std::thread::sleep(Duration::from_millis(10));
     }
-    assert!(!cluster.request(4, &["add", "702", "1"]).status.success());
+    assert!(!cluster
+        .request(4, &["add", "1", "4", "0", "1"])
+        .status
+        .success());
     cluster.ok(leader, &["checkpoint"]);
     cluster.stop();
     for id in [1, 2, 4] {
@@ -1281,7 +1293,7 @@ fn deployment_history(quic: bool) {
     }
     let leader = cluster.leader();
     assert!(cluster
-        .ok(leader, &["add", "701", "1"])
+        .ok(leader, &["add", "1", "3", "0", "1"])
         .contains("duplicate=true"));
     assert_eq!(cluster.ok(leader, &["read"]), "OK value=43\n");
     assert!(cluster.ok(4, &["status"]).contains("role=Follower"));
@@ -1322,7 +1334,7 @@ fn finish_lifecycle_operation(cluster: &Cluster, ids: &[usize], operation: &str,
                     .parse::<u64>()
                     .unwrap();
                 if !established.contains(&(id, term)) {
-                    let output = cluster.request(id, &["add", write, "0"]);
+                    let output = cluster.request(id, &["add", "1", write, "0", "0"]);
                     let text = String::from_utf8_lossy(&output.stdout);
                     if output.status.success() {
                         assert!(text.contains("Value(42)"));
@@ -1350,6 +1362,8 @@ fn finish_lifecycle_operation(cluster: &Cluster, ids: &[usize], operation: &str,
         std::thread::sleep(Duration::from_millis(25));
     }
 }
+/// The lifecycle histories' first write (sequence 2 of the built-in session).
+const FIRST_WRITE: [&str; 5] = ["add", "1", "2", "0", "42"];
 fn complete_executable_membership_history(quic: bool) {
     let mut cluster = Cluster::new();
     cluster.quic = quic;
@@ -1360,7 +1374,7 @@ fn complete_executable_membership_history(quic: bool) {
         cluster.start(id, "create");
     }
     cluster.leader();
-    assert!(cluster.routed(&["add", "700", "42"]).contains("Value(42)"));
+    assert!(cluster.routed(&FIRST_WRITE).contains("Value(42)"));
     cluster.stop();
     let plan = cluster.root.join("lifecycle.plan");
     let legacy =
@@ -1370,7 +1384,7 @@ fn complete_executable_membership_history(quic: bool) {
     for id in 1..=3 {
         cluster.start(id, "recover-member");
     }
-    finish_lifecycle_operation(&cluster, &[1, 2], "1001", "701");
+    finish_lifecycle_operation(&cluster, &[1, 2], "1001", "3");
     cluster.stop();
     inspect_lifecycle(&cluster, &[1, 2], 4, &[1, 2], &[], &[1000, 1001], 42);
 
@@ -1387,7 +1401,7 @@ fn complete_executable_membership_history(quic: bool) {
     for id in [1, 2] {
         cluster.start(id, "recover-member");
     }
-    finish_lifecycle_operation(&cluster, &[1, 2], "1002", "702");
+    finish_lifecycle_operation(&cluster, &[1, 2], "1002", "4");
     for id in [1, 2] {
         cluster.ok(id, &["checkpoint"]);
     }
@@ -1410,7 +1424,7 @@ fn complete_executable_membership_history(quic: bool) {
     for id in [2, 4] {
         cluster.start(id, "recover-member");
     }
-    finish_lifecycle_operation(&cluster, &[2, 4], "1005", "705");
+    finish_lifecycle_operation(&cluster, &[2, 4], "1005", "18");
     for id in [2, 4] {
         cluster.ok(id, &["checkpoint"]);
     }
@@ -1441,11 +1455,9 @@ fn complete_executable_membership_history(quic: bool) {
         cluster.start(id, "recover-member");
     }
     let leader = cluster.leader();
+    assert!(cluster.ok(leader, &FIRST_WRITE).contains("duplicate=true"));
     assert!(cluster
-        .ok(leader, &["add", "700", "42"])
-        .contains("duplicate=true"));
-    assert!(cluster
-        .ok(leader, &["add", "706", "1"])
+        .ok(leader, &["add", "1", "5", "0", "1"])
         .contains("Value(43)"));
     assert_eq!(cluster.ok(leader, &["read"]), "OK value=43\n");
     cluster.stop();
@@ -1585,8 +1597,10 @@ fn replicated_history(quic: bool) {
             .status
             .success());
     }
-    assert!(cluster.routed(&["add", "1", "7"]).contains("Value(7)"));
-    let retry = cluster.routed(&["add", "1", "7"]);
+    assert!(cluster
+        .routed(&["add", "1", "6", "0", "7"])
+        .contains("Value(7)"));
+    let retry = cluster.routed(&["add", "1", "6", "0", "7"]);
     assert!(retry.contains("Value(7)") && retry.contains("duplicate=true"));
     assert_eq!(cluster.routed(&["read"]), "OK value=7\n");
     // A local applied value cannot make a follower's read linearizable.
@@ -1600,7 +1614,9 @@ fn replicated_history(quic: bool) {
     let mut killed = cluster.children[leader - 1].take().unwrap();
     killed.kill().unwrap();
     killed.wait().unwrap();
-    assert!(cluster.routed(&["add", "2", "3"]).contains("Value(10)"));
+    assert!(cluster
+        .routed(&["add", "1", "7", "0", "3"])
+        .contains("Value(10)"));
     let replacement = cluster.leader();
     assert_ne!(replacement, leader);
     assert_eq!(cluster.routed(&["read"]), "OK value=10\n");
@@ -1630,7 +1646,7 @@ fn replicated_history(quic: bool) {
         cluster.start(id, "recover");
     }
     assert!(cluster
-        .routed(&["add", "2", "3"])
+        .routed(&["add", "1", "7", "0", "3"])
         .contains("duplicate=true"));
     assert_eq!(cluster.routed(&["read"]), "OK value=10\n");
     cluster.stop();
@@ -1725,12 +1741,15 @@ fn bounded_commands_and_quorum_loss_preserve_retry_identity() {
     let mut response = String::new();
     stream.take(4096).read_to_string(&mut response).unwrap();
     assert_eq!(response, "ERR command too long\n");
-    assert!(!cluster.request(leader, &["add", "0", "7"]).status.success());
     assert!(!cluster
-        .request(leader, &["add", "1", "not-a-number"])
+        .request(leader, &["add", "1", "0", "0", "7"])
         .status
         .success());
-    assert!(leader_request(&mut cluster, &["add", "1", "7"]).contains("Value(7)"));
+    assert!(!cluster
+        .request(leader, &["add", "1", "6", "0", "not-a-number"])
+        .status
+        .success());
+    assert!(leader_request(&mut cluster, &["add", "1", "6", "0", "7"]).contains("Value(7)"));
     for id in 1..=3 {
         if id != leader {
             let mut child = cluster.children[id - 1].take().unwrap();
@@ -1740,7 +1759,7 @@ fn bounded_commands_and_quorum_loss_preserve_retry_identity() {
     }
     // The local process and applied counter are alive, but fresh reads need quorum.
     assert!(!cluster.request(leader, &["read"]).status.success());
-    let unknown = cluster.request(leader, &["add", "2", "3"]);
+    let unknown = cluster.request(leader, &["add", "1", "7", "0", "3"]);
     assert!(!unknown.status.success());
     assert!(!String::from_utf8_lossy(&unknown.stdout).contains("OK outcome="));
     for id in 1..=3 {
@@ -1753,7 +1772,7 @@ fn bounded_commands_and_quorum_loss_preserve_retry_identity() {
     let deadline = Instant::now() + Duration::from_secs(30);
     let leader = loop {
         let candidate = cluster.leader();
-        let output = cluster.request(candidate, &["add", "2", "3"]);
+        let output = cluster.request(candidate, &["add", "1", "7", "0", "3"]);
         let reply = String::from_utf8(output.stdout).unwrap();
         if output.status.success() {
             assert!(reply.contains("Value(10)"));
@@ -1773,7 +1792,7 @@ fn bounded_commands_and_quorum_loss_preserve_retry_identity() {
     drain::kill(&mut cluster, leader);
     assert_eq!(leader_request(&mut cluster, &["read"]), "OK value=10\n");
     assert_eq!(
-        leader_request(&mut cluster, &["add", "2", "3"]),
+        leader_request(&mut cluster, &["add", "1", "7", "0", "3"]),
         "OK outcome=Value(10) duplicate=true\n"
     );
     cluster.start(leader, "recover");
@@ -1781,9 +1800,9 @@ fn bounded_commands_and_quorum_loss_preserve_retry_identity() {
     for id in 1..=3 {
         cluster.start(id, "recover");
     }
-    for (operation, delta, value) in [("1", "7", "7"), ("2", "3", "10")] {
+    for (operation, delta, value) in [("6", "7", "7"), ("7", "3", "10")] {
         assert_eq!(
-            leader_request(&mut cluster, &["add", operation, delta]),
+            leader_request(&mut cluster, &["add", "1", operation, "0", delta]),
             format!("OK outcome=Value({value}) duplicate=true\n")
         );
     }
@@ -1850,12 +1869,12 @@ fn automatic_client_reuses_original_command_after_only_proven_non_acceptance() {
         );
         let third = cluster.take_listener(103);
         third.set_nonblocking(true).unwrap();
-        let reply = cluster.routed(&["add", "42", "7"]);
+        let reply = cluster.routed(&["add", "1", "8", "0", "7"]);
         assert!(reply.contains("Value(7)"));
         if let Some(first) = first {
-            assert_eq!(first.join().unwrap(), b"add 42 7\n");
+            assert_eq!(first.join().unwrap(), b"add 1 8 0 7\n");
         }
-        assert_eq!(second.join().unwrap(), b"add 42 7\n");
+        assert_eq!(second.join().unwrap(), b"add 1 8 0 7\n");
         assert_eq!(
             third.accept().unwrap_err().kind(),
             std::io::ErrorKind::WouldBlock
@@ -1879,7 +1898,7 @@ fn automatic_client_never_reroutes_uncertain_writes_or_other_errors() {
         let second = reply_peer(cluster.take_listener(102), reply);
         let third = cluster.take_listener(103);
         third.set_nonblocking(true).unwrap();
-        let result = cluster.target("auto", &["add", "42", "7"]);
+        let result = cluster.target("auto", &["add", "1", "8", "0", "7"]);
         assert!(!result.status.success());
         let stdout = String::from_utf8(result.stdout).unwrap();
         if reply.is_none()
@@ -1887,8 +1906,8 @@ fn automatic_client_never_reroutes_uncertain_writes_or_other_errors() {
         {
             assert!(stdout.starts_with("UNKNOWN "), "{stdout}");
         }
-        assert_eq!(first.join().unwrap(), b"add 42 7\n");
-        assert_eq!(second.join().unwrap(), b"add 42 7\n");
+        assert_eq!(first.join().unwrap(), b"add 1 8 0 7\n");
+        assert_eq!(second.join().unwrap(), b"add 1 8 0 7\n");
         assert_eq!(
             third.accept().unwrap_err().kind(),
             std::io::ErrorKind::WouldBlock
@@ -1999,15 +2018,15 @@ fn trickled_reply_cannot_extend_the_clients_absolute_routing_deadline() {
         request[..used].to_vec()
     });
     let start = Instant::now();
-    let output = cluster.target("auto", &["add", "42", "7"]);
+    let output = cluster.target("auto", &["add", "1", "8", "0", "7"]);
     assert!(
         start.elapsed() < Duration::from_millis(11500),
         "routing deadline was extended"
     );
     assert!(!output.status.success());
     assert!(String::from_utf8_lossy(&output.stdout).starts_with("UNKNOWN "));
-    assert_eq!(first.join().unwrap(), b"add 42 7\n");
-    assert_eq!(slow.join().unwrap(), b"add 42 7\n");
+    assert_eq!(first.join().unwrap(), b"add 1 8 0 7\n");
+    assert_eq!(slow.join().unwrap(), b"add 1 8 0 7\n");
     assert_eq!(
         third.accept().unwrap_err().kind(),
         std::io::ErrorKind::WouldBlock
@@ -2048,8 +2067,8 @@ fn metrics_history(quic: bool) {
     let leader = cluster.leader();
     let before = metrics(&cluster, leader);
     assert!(before["polls"] > 0);
-    assert!(authenticated_write(&cluster, &["add", "1", "7"]).contains("Value(7)"));
-    assert!(authenticated_write(&cluster, &["add", "1", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&cluster, &["add", "1", "6", "0", "7"]).contains("Value(7)"));
+    assert!(authenticated_write(&cluster, &["add", "1", "6", "0", "7"]).contains("duplicate=true"));
     assert!(cluster.routed(&["read"]).contains("value=7"));
     // The sampled peer may have lost leadership. Wait for its actual replay/
     // replication counters; another peer's metrics cannot satisfy this check.
@@ -2092,9 +2111,9 @@ fn metrics_history(quic: bool) {
         cluster.start(id, "recover");
     }
     cluster.leader();
-    assert!(authenticated_write(&cluster, &["add", "1", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&cluster, &["add", "1", "6", "0", "7"]).contains("duplicate=true"));
     assert!(cluster.routed(&["read"]).contains("value=7"));
-    assert!(authenticated_write(&cluster, &["add", "2", "3"]).contains("Value(10)"));
+    assert!(authenticated_write(&cluster, &["add", "1", "7", "0", "3"]).contains("Value(10)"));
     cluster.stop();
     fs::remove_dir_all(&cluster.root).unwrap();
 }
@@ -2130,7 +2149,11 @@ fn authenticated_command_history(quic: bool) {
     let leader = cluster.leader();
     cluster.command_principal = Some(1);
     assert_eq!(cluster.routed(&["read"]), "OK value=0\n");
-    for args in [vec!["add", "11001", "7"], vec!["checkpoint"], vec!["quit"]] {
+    for args in [
+        vec!["add", "1", "9", "0", "7"],
+        vec!["checkpoint"],
+        vec!["quit"],
+    ] {
         let denied = cluster.request(leader, &args);
         assert!(!denied.status.success());
         assert_eq!(
@@ -2139,8 +2162,8 @@ fn authenticated_command_history(quic: bool) {
         );
     }
     cluster.command_principal = Some(2);
-    assert!(authenticated_write(&cluster, &["add", "11001", "7"]).contains("Value(7)"));
-    assert!(authenticated_write(&cluster, &["add", "11001", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&cluster, &["add", "1", "9", "0", "7"]).contains("Value(7)"));
+    assert!(authenticated_write(&cluster, &["add", "1", "9", "0", "7"]).contains("duplicate=true"));
     assert_eq!(cluster.routed(&["read"]), "OK value=7\n");
     assert_eq!(
         String::from_utf8(cluster.request(leader, &["quit"]).stdout).unwrap(),
@@ -2149,7 +2172,7 @@ fn authenticated_command_history(quic: bool) {
     // Plain commands cannot use the TLS-only access mode or change state.
     cluster.command_principal = None;
     assert!(!cluster
-        .request(leader, &["add", "11002", "100"])
+        .request(leader, &["add", "1", "10", "0", "100"])
         .status
         .success());
     refuse_spoofed_reader(&cluster);
@@ -2165,7 +2188,7 @@ fn authenticated_command_history(quic: bool) {
             incarnation: voteboat::identity::StoreIncarnation::new(1).unwrap(),
         },
         7,
-        (11001, 7),
+        (9, 7),
     );
     assert!(state.base_index() > 0);
     // Restart selects a fresh access generation and revokes the former writer.
@@ -2180,13 +2203,13 @@ fn authenticated_command_history(quic: bool) {
     let leader = cluster.leader();
     cluster.command_principal = Some(2);
     assert_eq!(
-        String::from_utf8(cluster.request(leader, &["add", "11001", "7"]).stdout).unwrap(),
+        String::from_utf8(cluster.request(leader, &["add", "1", "9", "0", "7"]).stdout).unwrap(),
         "ERR AUTHORIZATION\n"
     );
     assert_eq!(cluster.routed(&["read"]), "OK value=7\n");
     cluster.command_principal = Some(3);
-    assert!(authenticated_write(&cluster, &["add", "11001", "7"]).contains("duplicate=true"));
-    assert!(authenticated_write(&cluster, &["add", "11003", "3"]).contains("Value(10)"));
+    assert!(authenticated_write(&cluster, &["add", "1", "9", "0", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&cluster, &["add", "1", "11", "0", "3"]).contains("Value(10)"));
     cluster.stop();
     for id in 1..=3 {
         assert!(
@@ -2269,7 +2292,7 @@ fn remote_configuration_history(quic: bool) {
         cluster.start(id, "create");
     }
     cluster.leader();
-    assert!(authenticated_write(&cluster, &["add", "15000", "42"]).contains("Value(42)"));
+    assert!(authenticated_write(&cluster, &["add", "1", "12", "0", "42"]).contains("Value(42)"));
     cluster.stop();
     let plan = cluster.root.join("remote-plan.txt");
     fs::write(&plan, "voteboat-counter-admin-v1\nplacement 2 false\nreplica 1 1\nreplica 2 2\nreplica 3 3\nlearners 15001 1 2 - m:3 v:1 v:2 v:3\njoint 15003 2 3 4 - m:3 v:1 v:2 v:3\nfinal 15003 3 4\n").unwrap();
@@ -2312,7 +2335,9 @@ fn remote_configuration_history(quic: bool) {
     assert!(remote_plan_command(&mut cluster, "15003", true).contains("committed_index="));
     assert!(remote_plan_command(&mut cluster, "15003", true).contains("committed_index="));
     assert!(remote_plan_command(&mut cluster, "15003", true).contains("action=completed"));
-    assert!(authenticated_write(&cluster, &["add", "15000", "42"]).contains("duplicate=true"));
+    assert!(
+        authenticated_write(&cluster, &["add", "1", "12", "0", "42"]).contains("duplicate=true")
+    );
     assert_eq!(cluster.routed(&["read"]), "OK value=42\n");
     for id in 1..=3 {
         cluster.ok(id, &["checkpoint"]);
@@ -2323,7 +2348,9 @@ fn remote_configuration_history(quic: bool) {
     }
     cluster.leader();
     assert!(remote_plan_command(&mut cluster, "15001", true).contains("action=completed"));
-    assert!(authenticated_write(&cluster, &["add", "15000", "42"]).contains("duplicate=true"));
+    assert!(
+        authenticated_write(&cluster, &["add", "1", "12", "0", "42"]).contains("duplicate=true")
+    );
     assert_eq!(cluster.routed(&["read"]), "OK value=42\n");
     cluster.stop();
     fs::remove_dir_all(&cluster.root).unwrap();
@@ -2376,7 +2403,7 @@ fn retryable_leader_response(args: &[&str], text: &str) -> bool {
     match args {
         ["read"] => matches!(text, "ERR NOT_LEADER\n" | "ERR NotRead(ReadNotReady)\n" | "ERR Unavailable(LeadershipChanged)\n"),
         ["resume-leadership" | "leadership-status", _] => matches!(text, "ERR NOT_LEADER\n" | "ERR NotRead(ReadNotReady)\n" | "ERR Unavailable(LeadershipChanged)\n"),
-        ["add", _, _] => matches!(text, "ERR NOT_LEADER\n" | "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n"),
+        ["add", _, _, _, _] | ["register", _] => matches!(text, "ERR NOT_LEADER\n" | "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n"),
         ["move-leader", _, _, _, _, _, _, _, _] => matches!(text,
             "ERR NOT_LEADER\n"
             | "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n"
@@ -2424,7 +2451,7 @@ fn client_supplied_configuration_history(quic: bool) {
         cluster.start(id, "create");
     }
     cluster.leader();
-    assert!(authenticated_write(&cluster, &["add", "16000", "42"]).contains("Value(42)"));
+    assert!(authenticated_write(&cluster, &["add", "1", "13", "0", "42"]).contains("Value(42)"));
     cluster.stop();
     let policy = cluster.root.join("target-policy.txt");
     // No predeclared operation identity or target configuration.
@@ -2489,7 +2516,9 @@ fn client_supplied_configuration_history(quic: bool) {
         ]
     )
     .contains("committed_index="));
-    assert!(authenticated_write(&cluster, &["add", "16000", "42"]).contains("duplicate=true"));
+    assert!(
+        authenticated_write(&cluster, &["add", "1", "13", "0", "42"]).contains("duplicate=true")
+    );
     assert_eq!(cluster.routed(&["read"]), "OK value=42\n");
     let oversized = "x".repeat(257);
     let refused = cluster.request(leader, &["configure-record", &oversized]);
@@ -2666,7 +2695,7 @@ fn interrupted_native_configuration_history(quic: bool) {
         cluster.start(id, "create");
     }
     cluster.leader();
-    assert!(authenticated_write(&cluster, &["add", "17000", "42"]).contains("Value(42)"));
+    assert!(authenticated_write(&cluster, &["add", "1", "14", "0", "42"]).contains("Value(42)"));
     cluster.stop();
     let policy = cluster.root.join("interruption-policy.txt");
     fs::write(
@@ -2743,11 +2772,13 @@ fn interrupted_native_configuration_history(quic: bool) {
     lost.disconnect();
     let replacement = cluster.leader();
     assert_ne!(replacement, leader);
-    assert!(authenticated_write(&cluster, &["add", "17014", "0"]).contains("Value(42)"));
+    assert!(authenticated_write(&cluster, &["add", "1", "15", "0", "0"]).contains("Value(42)"));
     assert!(leader_request(&mut cluster, &["configure-record", record]).contains("duplicate=true"));
     check_interrupted_record_conflict(&cluster, replacement);
     cluster.start(leader, "recover-member");
-    assert!(authenticated_write(&cluster, &["add", "17000", "42"]).contains("duplicate=true"));
+    assert!(
+        authenticated_write(&cluster, &["add", "1", "14", "0", "42"]).contains("duplicate=true")
+    );
     assert_eq!(cluster.routed(&["read"]), "OK value=42\n");
     cluster.stop();
     check_interrupted_membership(&cluster);
@@ -2820,7 +2851,9 @@ fn seed_fourth_learner(cluster: &Cluster, fourth: voteboat::identity::StoreIdent
 fn wait_recovered_quic(cluster: &Cluster, leader: usize, replacement: usize) {
     // Wait for the surviving peers' idle detection and fresh session lease,
     // then prove the recovered former leader receives newly committed work.
-    assert!(cluster.routed(&["add", "3", "0"]).contains("Value(10)"));
+    assert!(cluster
+        .routed(&["add", "1", "16", "0", "0"])
+        .contains("Value(10)"));
     let deadline = Instant::now() + Duration::from_secs(20);
     loop {
         let recovered = cluster.request(leader, &["status"]);
@@ -2961,7 +2994,7 @@ fn check_interrupted_membership(cluster: &Cluster) {
                 incarnation: StoreIncarnation::new(1).unwrap(),
             },
             42,
-            (17000, 42),
+            (14, 42),
         );
         let membership = state.membership_at(state.commit_index).unwrap();
         assert_eq!(membership.id().get(), 6);
@@ -2999,7 +3032,7 @@ fn inspect_lifecycle(
             id as u64,
             lifecycle_store(id),
             value,
-            (700, 42),
+            (2, 42),
         );
         let membership = state.membership_at(state.commit_index).unwrap();
         assert_eq!(membership.id().get(), configuration);
@@ -3044,13 +3077,7 @@ fn plan_fourth_learner(cluster: &Cluster, plan: &std::path::Path, provisioned: &
     use voteboat::identity::*;
     // Plan from actual recovered membership, then carry the ordinary record
     // through the same trusted executable administration path as a Rust host.
-    let state = recovered_state_for(
-        &cluster.root.join("1"),
-        1,
-        lifecycle_store(1),
-        42,
-        (700, 42),
-    );
+    let state = recovered_state_for(&cluster.root.join("1"), 1, lifecycle_store(1), 42, (2, 42));
     let current = state.membership_at(state.commit_index).unwrap();
     let candidates = [1usize, 2, 4].map(|n| voteboat::placement::PlacementCandidate {
         node: NodeId::new(n as u64).unwrap(),
@@ -3155,7 +3182,7 @@ fn promote_fourth(cluster: &mut Cluster, plan: &std::path::Path, provisioned: &s
     }
     let leader = cluster.leader();
     assert!(cluster
-        .ok(leader, &["add", "703", "0"])
+        .ok(leader, &["add", "1", "17", "0", "0"])
         .contains("Value(42)"));
     // Enrollment alone is not live promotion readiness. With 4 offline, the
     // old voters can still write, but must not accept the promotion intent.
@@ -3170,12 +3197,12 @@ fn promote_fourth(cluster: &mut Cluster, plan: &std::path::Path, provisioned: &s
         std::thread::sleep(Duration::from_millis(25));
     }
     cluster.start(4, "recover-member");
-    finish_lifecycle_operation(cluster, &[1, 2, 4], "1003", "703");
+    finish_lifecycle_operation(cluster, &[1, 2, 4], "1003", "17");
     // Lose original voter 1 abruptly, then keep it absent through retirement.
     let mut failed = cluster.children[0].take().unwrap();
     failed.kill().unwrap();
     failed.wait().unwrap();
-    finish_lifecycle_operation(cluster, &[2, 4], "1003", "704");
+    finish_lifecycle_operation(cluster, &[2, 4], "1003", "19");
     cluster.stop();
 }
 

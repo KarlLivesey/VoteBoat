@@ -555,8 +555,8 @@ fn worker_pump<W: PersistenceWorker>(nodes: &mut [WorkerNode<W>], isolated: Opti
 }
 fn propose(operation: u128, delta: i64) -> Event {
     Event::Propose {
-        operation: OperationId::new(operation).unwrap(),
-        bytes: delta.to_le_bytes().to_vec(),
+        operation: Counter::operation(1, operation as u64).unwrap(),
+        bytes: Counter::command(0, delta),
     }
 }
 fn worker_cluster_history<W: PersistenceWorker>(nodes: &mut [WorkerNode<W>]) {

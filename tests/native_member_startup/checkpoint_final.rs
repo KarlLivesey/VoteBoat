@@ -49,8 +49,8 @@ fn seed_checkpoint(path: &Path, local: u64, joint_checkpoint: bool) {
             index: 2,
             term: 1,
             payload: EntryPayload::Command {
-                operation: OperationId::new(901).unwrap(),
-                bytes: 11i64.to_le_bytes().to_vec().into(),
+                operation: Counter::operation(1, 11).unwrap(),
+                bytes: Counter::command(0, 11).into(),
             },
         },
     );
@@ -180,8 +180,8 @@ fn apply(
     let ticket = nodes[0]
         .propose(ClientRequest {
             group: group(),
-            operation: OperationId::new(operation).unwrap(),
-            bytes: delta.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, operation as u64).unwrap(),
+            bytes: Counter::command(0, delta),
         })
         .unwrap_or_else(|r| panic!("{:?}", r.reason));
     let deadline = Instant::now() + Duration::from_secs(15);
@@ -305,8 +305,8 @@ fn history(protocol: NativePeerProtocol, joint_checkpoint: bool) {
                     && n.local().applications[&group()].applied_index() >= 5
             })
     });
-    apply(&mut nodes, &clock, 902, 7, 18, false);
-    apply(&mut nodes, &clock, 901, 11, 18, true);
+    apply(&mut nodes, &clock, 12, 7, 18, false);
+    apply(&mut nodes, &clock, 11, 11, 18, true);
     recursive::shutdown(nodes, &clock);
     check_final_files(&root, checkpoint);
     std::fs::remove_dir_all(root).unwrap();

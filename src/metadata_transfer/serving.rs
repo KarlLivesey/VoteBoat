@@ -456,6 +456,10 @@ impl StateMachine for MetadataServingTarget {
     fn applied_index(&self) -> u64 {
         self.target.applied_index()
     }
+    /// Lifetime history until DH1 (audit S4, S8).
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::LifetimeBounded
+    }
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
         Some(self.readiness_requirements())
     }

@@ -463,6 +463,10 @@ where
     fn validate_group(&self, group: GroupIdentity) -> Result<(), ApplicationError> {
         self.initial.validate_group(group)
     }
+    /// Wraps lifetime-bounded transfer owners until DR2/AD1 (audit S3, T4).
+    fn retention(&self) -> crate::application::Retention {
+        crate::application::Retention::LifetimeBounded
+    }
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(self.readiness_requirements())
     }

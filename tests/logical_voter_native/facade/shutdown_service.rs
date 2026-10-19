@@ -13,7 +13,7 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 use super::*;
-use voteboat::{identity::OperationId, outbound::OutboundQueue};
+use voteboat::outbound::OutboundQueue;
 
 fn held_client(
     bridge: &mut Bridge<'_>,
@@ -23,8 +23,8 @@ fn held_client(
     let ticket = node
         .propose(ClientRequest {
             group: setup::mapping().parent,
-            operation: OperationId::new(9501).unwrap(),
-            bytes: 5_i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, 8).unwrap(),
+            bytes: Counter::command(0, 5),
         })
         .unwrap();
     let end = Instant::now() + Duration::from_secs(15);

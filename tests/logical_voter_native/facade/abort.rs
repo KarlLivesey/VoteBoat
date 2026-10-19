@@ -14,7 +14,7 @@
 // rights and limitations under the RPL.
 use super::*;
 use fixture::FacadeRecovery;
-use voteboat::{identity::OperationId, outbound::OutboundQueue, worker::PersistenceWorker};
+use voteboat::{outbound::OutboundQueue, worker::PersistenceWorker};
 
 #[test]
 fn logical_facade_abort_retains_original_child_attempt_and_resolves_unknown_tcp() {
@@ -33,8 +33,8 @@ fn accept_capsule(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: Instant
     let ticket = node
         .propose(ClientRequest {
             group: setup::mapping().parent,
-            operation: OperationId::new(8990).unwrap(),
-            bytes: 9_i64.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, 4).unwrap(),
+            bytes: Counter::command(0, 9),
         })
         .unwrap();
     until(bridge, node, clock, |n| {
@@ -140,7 +140,7 @@ fn history(protocol: NativePeerProtocol) {
     let app = &node.local().applications[&setup::mapping().parent];
     assert_eq!(app.0.read_applied(app.applied_index()).unwrap(), 9);
     restart::elect(&mut bridge, &mut node, clock);
-    let result = restart::write(&mut bridge, &mut node, clock, 8990, 9);
+    let result = restart::write(&mut bridge, &mut node, clock, 4, 9);
     assert!(result.duplicate);
     assert_eq!(result.outcome, CounterOutcome::Value(9));
     assert_eq!(restart::read(&mut bridge, &mut node, clock), 9);

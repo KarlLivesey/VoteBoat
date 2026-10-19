@@ -54,8 +54,8 @@ fn history(quic: bool) {
         leader_request(&mut c, &bound.each_ref().map(String::as_str)).trim(),
         completed.split(" evidence=").next().unwrap()
     );
-    assert!(authenticated_write(&c, &["add", "96000", "7"]).contains("duplicate=true"));
-    assert!(authenticated_write(&c, &["add", "23912", "3"]).contains("Value(10)"));
+    assert!(authenticated_write(&c, &["add", "1", "1", "0", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&c, &["add", "1", "5", "0", "3"]).contains("Value(10)"));
     c.stop();
     fs::remove_dir_all(&c.root).unwrap();
 }

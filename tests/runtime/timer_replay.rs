@@ -248,7 +248,7 @@ fn held_timer_campaign_does_not_stall_other_group_or_lose_cold_retries() {
             .unwrap();
         run.nodes[other]
             .runtime
-            .admit(group(2), proposal(9911))
+            .admit(group(2), proposal(1))
             .unwrap();
         run.advance(121);
         for n in &run.nodes {
@@ -292,7 +292,7 @@ fn held_timer_campaign_does_not_stall_other_group_or_lose_cold_retries() {
             .unwrap();
         run.nodes[current]
             .runtime
-            .admit(group(1), proposal(9911))
+            .admit(group(1), proposal(1))
             .unwrap();
         run.advance(201);
         for n in &run.nodes {
@@ -312,7 +312,7 @@ fn held_timer_campaign_does_not_stall_other_group_or_lose_cold_retries() {
             .unwrap();
         run.nodes[current]
             .runtime
-            .admit(group(1), proposal(9911))
+            .admit(group(1), proposal(1))
             .unwrap();
         run.advance(301);
         for n in &run.nodes {

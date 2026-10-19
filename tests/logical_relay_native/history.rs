@@ -41,7 +41,7 @@ fn run(protocol: NativePeerProtocol) {
         &mut bridge,
         &mut facade,
         clock,
-        371010,
+        10,
         7,
         7,
     );
@@ -87,7 +87,7 @@ fn run(protocol: NativePeerProtocol) {
         &mut bridge,
         &mut facade,
         clock,
-        371010,
+        10,
         7,
         7,
     );
@@ -96,7 +96,7 @@ fn run(protocol: NativePeerProtocol) {
         &mut bridge,
         &mut facade,
         clock,
-        371011,
+        11,
         5,
         12,
     );
@@ -210,8 +210,8 @@ fn write(
     let ticket = f
         .propose(ClientRequest {
             group: setup::mapping().parent,
-            operation: OperationId::new(id).unwrap(),
-            bytes: delta.to_le_bytes().to_vec(),
+            operation: Counter::operation(1, id as u64).unwrap(),
+            bytes: Counter::command(0, delta),
         })
         .unwrap();
     let end = Instant::now() + Duration::from_secs(15);

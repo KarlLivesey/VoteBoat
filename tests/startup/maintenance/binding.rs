@@ -33,8 +33,8 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
     assert!(matches!(
         h.submit(
             0,
-            OperationId::new(23902).unwrap(),
-            Maintenance::<HostApplication>::data(&7i64.to_le_bytes(), 100).unwrap()
+            Counter::operation(1, 2).unwrap(),
+            Maintenance::<HostApplication>::data(&Counter::command(0, 7), 100).unwrap()
         ),
         ClientOutcome::Applied { .. }
     ));
@@ -70,8 +70,8 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
     assert!(matches!(
         h.submit(
             1,
-            OperationId::new(23902).unwrap(),
-            Maintenance::<HostApplication>::data(&7i64.to_le_bytes(), 100).unwrap()
+            Counter::operation(1, 2).unwrap(),
+            Maintenance::<HostApplication>::data(&Counter::command(0, 7), 100).unwrap()
         ),
         ClientOutcome::Applied {
             receipt: MaintenanceReceipt::Data(CounterReceipt {

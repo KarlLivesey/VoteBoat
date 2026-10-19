@@ -178,8 +178,14 @@ fn write(
         children,
         clock,
         20,
-        operation,
-        encode_routed(route, &[10], &delta.to_le_bytes(), MAX_ROUTED_COMMAND_BYTES).unwrap(),
+        counter_op(operation as u64),
+        encode_routed(
+            route,
+            &[10],
+            &Counter::command(0, delta),
+            MAX_ROUTED_COMMAND_BYTES,
+        )
+        .unwrap(),
     );
     assert!(
         matches!(receipt.outcome,

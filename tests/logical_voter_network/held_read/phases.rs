@@ -11,8 +11,8 @@ pub fn write(host: &mut Host<'_>) {
             &parent.apps[&parent.mapping.parent],
             ClientRequest {
                 group: parent.mapping.parent,
-                operation: OperationId::new(10101).unwrap(),
-                bytes: 5_i64.to_le_bytes().to_vec(),
+                operation: Counter::operation(1, 2).unwrap(),
+                bytes: Counter::command(0, 5),
             },
         )
         .unwrap();
