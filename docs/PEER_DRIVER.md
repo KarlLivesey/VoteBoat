@@ -45,7 +45,9 @@ cannot spend a generation or start while its old provider work remains retained.
 Late returned sessions close without attaching. Existing roster backoff and
 store-session-scoped generations remain authoritative; restart persists a fresh
 store session. A spent generation space (unreachable: see PEER_ROSTER.md) issues
-no ticket and is never a driver error. These IDs are allocation/lifetime scopes, not durability tokens
+no ticket and is never a driver error; each poll reports it as
+`generations_exhausted`, with the listener's `accept_errors`, `accept_backoffs`
+and `accept_paused`, for observability. These IDs are allocation/lifetime scopes, not durability tokens
 or contiguous log prefixes. `next_deadline` combines connector/eligible roster
 hints and omits retries blocked by retained canceled work; separately schedule
 the core's timer deadlines and provider readiness.
@@ -110,7 +112,8 @@ payloads. Whole-node shutdown must also check the external outbound queue,
 local/service owners and workers, and finish consumer-held outputs. Drive at
 least once after close for externally queued batches. `into_parts` returns owned
 providers only after local drain, enabling explicit native dial-worker join and
-generation-range handoff.
+the serialized drained handoff: a replacement roster in the same store session
+starts at the closed predecessor's `reclaim_generation()`, never alongside it.
 
 ## Evidence boundary
 

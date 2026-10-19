@@ -571,12 +571,19 @@ impl<P: PeerTransport> PeerRoster<P> {
             .and_then(SecureSessionGeneration::new)
             .ok_or(PeerRosterError::Exhausted)
     }
-    /// Whether every generation of this store session has been issued. Not
-    /// reachable in practice (2^64 attempts; see docs/PEER_ROSTER.md). When
+    /// Whether this roster can issue no further connection attempt: every
+    /// generation of the store session has been issued, or an attempt
+    /// deadline would pass `u64::MAX` ms. Not reachable in practice (2^64
+    /// attempts, or 5.8e8 years of uptime; see docs/PEER_ROSTER.md). When
     /// set, no peer gets a new attempt and nothing fails: established
     /// transports keep working, and a restart opens a fresh store session.
     pub fn generations_exhausted(&self) -> bool {
         self.sequence == u64::MAX
+            || self
+                .now
+                .0
+                .checked_add(self.limits.connect_timeout_ms)
+                .is_none()
     }
     fn time(&mut self, now: MonoTime) -> Result<(), PeerRosterError> {
         if now < self.now {
@@ -626,13 +633,13 @@ impl<P: PeerTransport> PeerRoster<P> {
         if limit == 0 || self.peers.is_empty() {
             return Ok(Vec::new());
         }
-        // Preflight exhaustion before creating any ticket that a returned error
-        // could hide from its owner.
-        let expires = MonoTime(
-            now.0
-                .checked_add(self.limits.connect_timeout_ms)
-                .ok_or(PeerRosterError::Exhausted)?,
-        );
+        // An attempt deadline past `u64::MAX` ms (about 5.8e8 years of
+        // uptime) is the same per-peer condition as a spent generation space:
+        // no ticket and no error, reported by `generations_exhausted`.
+        let Some(expires) = now.0.checked_add(self.limits.connect_timeout_ms) else {
+            return Ok(Vec::new());
+        };
+        let expires = MonoTime(expires);
         let mut usage = self.usage();
         let mut tickets = Vec::new();
         for id in self.keys_after(self.connect_cursor, limit) {

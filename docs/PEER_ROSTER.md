@@ -33,12 +33,15 @@ transmits a generation outside its binding: the TLS hello carries none, and the
 relay frame carries it only next to both full store bindings. No new durable
 generation or remote progress watermark is introduced.
 
-Arithmetic: at most 65,536 peers with a retry floor of 1 ms, one attempt per
-peer per 10 ms is 6.55 × 10^6 attempts/s; 2^64 attempts then last about 89,000
-years (8,900 years at the 1 ms floor). Defaults (1,024 peers, 100 ms minimum
-retry) give about 5.7 × 10^7 years. If the space is ever spent,
-`generations_exhausted()` is set and peers simply get no further attempt;
-`due_connections` returns no ticket and no error, so it can never fail a node.
+Arithmetic, worst case first: the limits allow at most 65,536 peers and a
+retry floor of 1 ms, so at most 6.55 × 10^7 attempts/s; 2^64 attempts then last
+about 8,900 years. At one attempt per peer per 10 ms it is about 89,000 years,
+and with the defaults (1,024 peers, 100 ms minimum retry) about 5.7 × 10^7
+years. If the space is ever spent, `generations_exhausted()` is set and peers
+simply get no further attempt; `due_connections` returns no ticket and no
+error, so it can never fail a node. The same holds when an attempt deadline
+would pass `u64::MAX` ms (2^64 ms of uptime, about 5.8 × 10^8 years). The peer
+driver reports the flag in every poll's progress for observability.
 
 `due_connections(now, limit)` examines at most `limit` peers with a rotating
 cursor. It reserves connection capacity before returning a ConnectTicket. The

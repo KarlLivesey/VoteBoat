@@ -17,7 +17,10 @@
 //! 10 s retry cap exhausted that in ~27.8 h and sent the node to recovery.
 use super::*;
 use voteboat::{
-    native::connect::NativePeerProtocol,
+    native::{
+        connect::NativePeerProtocol,
+        log_store::{FileLogIo, JournalIo, NativeLogStore},
+    },
     raft::Role,
     secure::SessionBinding,
     transport::{ConnectTicket, PeerPoll},
@@ -25,6 +28,12 @@ use voteboat::{
 
 /// The old per-process range held 10,000 generations.
 const OLD_RANGE: u64 = 10_000;
+/// Real-time ceiling for a wait that contains no protocol time (joining
+/// worker threads). It only turns a deadlock into a failure; no outcome or
+/// assertion depends on how fast the host is.
+const HANG: Duration = Duration::from_secs(600);
+/// Liveness bound of the two-node reconnect, in protocol time.
+const LIVENESS_MS: u64 = 60_000;
 const LOCAL: u64 = 2;
 const PEER: u64 = 1;
 
@@ -156,8 +165,19 @@ impl Soak {
         }
     }
     /// Step simulated time in 10 s increments until `count` attempts expired.
+    /// Each attempt takes two steps (timeout, then retry cap), so a node that
+    /// silently stopped issuing fails after `3 * count` polls instead of
+    /// looping forever.
     fn run_until(&mut self, node: &mut WireNode, count: usize) {
+        let limit = 3 * count.saturating_sub(self.attempts.len());
+        let mut polls = 0;
         while self.attempts.len() < count {
+            polls += 1;
+            assert!(
+                polls <= limit,
+                "no new connect attempt after {} expired: issuing stopped",
+                self.attempts.len()
+            );
             self.now += 10_000;
             self.poll(node);
         }
@@ -190,7 +210,7 @@ fn close_node(n: WireNode, from: u64) {
         .into_dialer()
         .unwrap_or_else(|_| panic!("connector"));
     let mut s = p.local.snapshots.take().unwrap();
-    let deadline = Instant::now() + Duration::from_secs(5);
+    let guard = Instant::now();
     let (mut log, mut snap) = (false, false);
     loop {
         let dial = d.as_mut().is_none_or(|d| d.try_finish().unwrap());
@@ -203,7 +223,10 @@ fn close_node(n: WireNode, from: u64) {
         if dial && log && snap {
             break;
         }
-        assert!(Instant::now() < deadline);
+        assert!(
+            guard.elapsed() < HANG,
+            "hang guard ({HANG:?} of real time), not a timing assertion: workers did not join"
+        );
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }
@@ -237,35 +260,131 @@ fn native_node_survives_more_connect_attempts_than_the_old_per_process_range() {
     std::fs::remove_dir_all(directory).unwrap();
 }
 
+/// A recovery that dies before its session write: the manifest publication
+/// fails and nothing is written, as after a crash at that point.
+struct CrashBeforePublish(FileLogIo);
+impl JournalIo for CrashBeforePublish {
+    fn read_manifest(&mut self) -> std::io::Result<Vec<u8>> {
+        self.0.read_manifest()
+    }
+    fn read_log(&mut self, limit: usize) -> std::io::Result<Vec<u8>> {
+        self.0.read_log(limit)
+    }
+    fn append(&mut self, bytes: &[u8]) -> std::io::Result<()> {
+        self.0.append(bytes)
+    }
+    fn sync_log(&mut self) -> std::io::Result<()> {
+        self.0.sync_log()
+    }
+    fn truncate_log(&mut self, length: u64) -> std::io::Result<()> {
+        self.0.truncate_log(length)
+    }
+    fn publish_manifest(&mut self, _: &[u8]) -> std::io::Result<()> {
+        Err(std::io::Error::other("crash before the session write"))
+    }
+    fn publish_barrier(&mut self, _: &[u8]) -> std::io::Result<()> {
+        Err(std::io::Error::other("crash before the session write"))
+    }
+}
+
+/// One process lifetime of the accepting node: open, replay every earlier
+/// ticket against the live roster while its first attempt is open, expire
+/// 50 attempts, close. Returns this lifetime's expired tickets.
+fn lifetime(
+    directory: &std::path::Path,
+    addresses: [std::net::SocketAddr; 2],
+    mode: NativeOpenMode,
+    now: &mut u64,
+    earlier: &[ConnectTicket],
+) -> Vec<ConnectTicket> {
+    let mut node = open_pair_node(directory, addresses, LOCAL, mode, MonoTime(*now));
+    let mut soak = Soak::new(*now);
+    soak.poll(&mut node);
+    let live = node
+        .peer_drain_status(NodeId::new(PEER).unwrap())
+        .and_then(|s| s.attempt)
+        .expect("the first accept attempt is open");
+    assert_eq!(live.generation.get(), 1, "each store session starts at 1");
+    let roster = node.peers().unwrap().roster();
+    assert!(roster.attempt_deadline(live).is_some());
+    if let Some(first) = earlier.first() {
+        // Equal numeric generation (every earlier session issued 1) and a
+        // higher one from a long-lived earlier process.
+        let higher = ConnectTicket {
+            generation: SecureSessionGeneration::new(50_000).unwrap(),
+            ..*first
+        };
+        assert!(earlier.iter().any(|t| t.generation == live.generation));
+        for old in earlier.iter().copied().chain([higher]) {
+            assert!(old.local.store.session < live.local.store.session);
+            assert_eq!(roster.attempt_deadline(old), None, "{old:?}");
+        }
+    }
+    soak.run_until(&mut node, 50);
+    assert_strictly_increasing(&soak.attempts);
+    assert_eq!(soak.attempts[0], live);
+    assert_eq!(
+        live.local.store.session,
+        node.local().owner.identity().store.session
+    );
+    *now = soak.now + 1;
+    close_node(node, *now);
+    *now += 20_001;
+    soak.attempts
+}
+
 /// Generations restart in each store session; the store session is persisted
-/// and strictly increases on every recovery, so no `(session, generation)`
-/// pair, ticket or binding of an earlier process can be reused.
+/// and strictly increases on every recovery that exposes a store, so no
+/// `(session, generation)` pair, ticket or binding of an earlier process can
+/// be reused. Earlier tickets with an equal or a higher numeric generation
+/// are replayed against each recovered roster (see also the roster,
+/// connector and relay replay tests). Two interrupted recoveries run between
+/// the second and third lifetimes: one dies after its session write, one
+/// before it.
 #[test]
 fn connect_generations_are_unique_across_store_session_restarts() {
     let directory = root();
     std::fs::create_dir(&directory).unwrap();
     let (_lease, addresses) = leased_pair();
-    let mut runs = Vec::new();
+    let store_directory = directory.join(LOCAL.to_string());
+    let store = pair_bootstrap().voter_stores[&NodeId::new(LOCAL).unwrap()];
     let mut now = 0;
-    for mode in [
-        NativeOpenMode::Create,
-        NativeOpenMode::Recover,
-        NativeOpenMode::Recover,
-    ] {
-        let mut node = open_pair_node(&directory, addresses, LOCAL, mode, MonoTime(now));
-        let mut soak = Soak::new(now);
-        soak.poll(&mut node);
-        soak.run_until(&mut node, 50);
-        assert_strictly_increasing(&soak.attempts);
-        assert_eq!(
-            soak.attempts[0].local.store.session,
-            node.local().owner.identity().store.session
-        );
-        now = soak.now + 1;
-        close_node(node, now);
-        now += 20_001;
-        runs.push(soak.attempts);
+    let mut runs: Vec<Vec<ConnectTicket>> = Vec::new();
+    for mode in [NativeOpenMode::Create, NativeOpenMode::Recover] {
+        let earlier = runs.concat();
+        runs.push(lifetime(&directory, addresses, mode, &mut now, &earlier));
     }
+    // Crash after the session write: recovery publishes a new session, then
+    // the process dies before any connection work.
+    let after = NativeLogStore::recover(
+        FileLogIo::open(&store_directory).unwrap(),
+        store,
+        LogLimits::default(),
+    )
+    .unwrap()
+    .binding()
+    .session;
+    assert!(after > runs[1][0].local.store.session);
+    // Crash before the session write: no store is exposed and nothing is
+    // published.
+    let before = NativeLogStore::recover(
+        CrashBeforePublish(FileLogIo::open(&store_directory).unwrap()),
+        store,
+        LogLimits::default(),
+    );
+    assert!(before.is_err(), "a failed publication exposes no store");
+    let earlier = runs.concat();
+    runs.push(lifetime(
+        &directory,
+        addresses,
+        NativeOpenMode::Recover,
+        &mut now,
+        &earlier,
+    ));
+    let third = runs[2][0].local.store.session;
+    // The crash after the write is skipped; the crash before it proposed the
+    // same next number, which is reused here because nothing exposed it.
+    assert_eq!(third.get(), after.get() + 1, "{after:?} {third:?}");
     for pair in runs.windows(2) {
         let (old, new) = (
             pair[0][0].local.store.session,
@@ -335,8 +454,9 @@ fn native_pair_reconnects_with_a_generation_past_the_old_range() {
     // One more step issues the next accept attempt, open for 10 s.
     soak.now += 10_000;
     soak.poll(&mut accepting);
-    // The stopped peer starts. Both clocks now follow wall time from their
-    // current simulated origins so the real handshake can complete.
+    // The stopped peer starts. Both nodes advance 1 ms of protocol time per
+    // round from their own origins, independent of host speed; the real
+    // sockets and dial worker make progress between rounds.
     let start = soak.now;
     let mut dialing = open_pair_node(
         &directory,
@@ -345,24 +465,30 @@ fn native_pair_reconnects_with_a_generation_past_the_old_range() {
         NativeOpenMode::Create,
         MonoTime(0),
     );
-    let clock = Instant::now();
-    let drive = |accepting: &mut WireNode,
-                 dialing: &mut WireNode,
-                 done: &dyn Fn(&WireNode, &WireNode) -> bool| {
+    let guard = Instant::now();
+    let mut tick = 0;
+    let mut drive = |accepting: &mut WireNode,
+                     dialing: &mut WireNode,
+                     done: &dyn Fn(&WireNode, &WireNode) -> bool| {
+        let began = tick;
         loop {
-            let elapsed = clock.elapsed().as_millis() as u64;
+            tick += 1;
             accepting
-                .poll(MonoTime(start + elapsed), NodePollBudget::default())
+                .poll(MonoTime(start + tick), NodePollBudget::default())
                 .unwrap();
             dialing
-                .poll(MonoTime(elapsed), NodePollBudget::default())
+                .poll(MonoTime(tick), NodePollBudget::default())
                 .unwrap();
             if done(accepting, dialing) {
-                return clock.elapsed().as_millis() as u64;
+                return tick;
             }
             assert!(
-                clock.elapsed() < Duration::from_secs(60),
-                "pair did not converge"
+                tick - began < LIVENESS_MS,
+                "pair did not converge in {LIVENESS_MS} ms of protocol time"
+            );
+            assert!(
+                guard.elapsed() < HANG,
+                "hang guard ({HANG:?} of real time), not a timing assertion"
             );
             std::thread::park_timeout(Duration::from_millis(1));
         }

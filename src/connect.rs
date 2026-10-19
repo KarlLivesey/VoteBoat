@@ -88,6 +88,18 @@ impl ConnectLimits {
         Ok(self)
     }
 }
+/// Listener health, for observability only. Grants no authority.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct AcceptStatus {
+    /// Accept errors that did not stop the listener (saturating; diagnostic).
+    pub transient_errors: u64,
+    /// Times the listener stopped accepting for a delay (saturating).
+    pub backoffs: u64,
+    pub last_error: Option<ErrorKind>,
+    pub last_os_error: Option<i32>,
+    /// While set, the listener is not polled before this time.
+    pub retry_at: Option<MonoTime>,
+}
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct ConnectUsage {
     pub requests: usize,
@@ -160,6 +172,11 @@ pub trait PeerConnector {
     fn readiness_fds(&self, _out: &mut Vec<crate::worker::ReadinessFd>) {}
 
     fn next_deadline(&self) -> Option<MonoTime>;
+    /// Listener health of a provider that accepts sockets; `None` for one that
+    /// does not. Wrappers report their inner connector's status.
+    fn accept_status(&self) -> Option<AcceptStatus> {
+        None
+    }
     /// Exact construction-provisioned credential identity, for membership-driven
     /// connection admission. False by default; hints never provision trust.
     fn supports_peer(&self, _peer: PeerIdentity) -> bool {

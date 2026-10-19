@@ -16,6 +16,7 @@
 //! The supplied PeerDialer is the sole address executor. No hidden listener or
 //! thread is created here. Routing hints select expectations, never authority.
 use super::{dial::NativeTcpDialer, tls::*};
+pub use crate::connect::AcceptStatus;
 use crate::{
     connect::*, dial::*, identity::*, runtime::MonoTime, secure::*, transport::ConnectTicket,
 };
@@ -152,9 +153,14 @@ pub fn classify_accept(error: &io::Error) -> AcceptAction {
             | libc::EHOSTDOWN
             | libc::EHOSTUNREACH
             | libc::EOPNOTSUPP
-            | libc::ENETUNREACH => AcceptAction::Retry,
+            | libc::ENETUNREACH
+            | libc::ESOCKTNOSUPPORT
+            | libc::EPROTONOSUPPORT => AcceptAction::Retry,
             #[cfg(target_os = "linux")]
             libc::ENONET => AcceptAction::Retry,
+            // Linux `accept(2)` also lists these per-connection errors.
+            #[cfg(any(target_os = "linux", target_vendor = "apple"))]
+            libc::ENOSR => AcceptAction::Retry,
             _ if code == libc::EAGAIN || code == libc::EWOULDBLOCK => AcceptAction::Idle,
             _ => AcceptAction::Backoff,
         };
@@ -168,16 +174,6 @@ pub fn classify_accept(error: &io::Error) -> AcceptAction {
     }
 }
 
-/// Listener health, for observability only. Grants no authority.
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
-pub struct AcceptStatus {
-    /// Accept errors that did not stop the listener (saturating; diagnostic).
-    pub transient_errors: u64,
-    pub last_error: Option<io::ErrorKind>,
-    pub last_os_error: Option<i32>,
-    /// While set, the listener is not polled before this time.
-    pub retry_at: Option<MonoTime>,
-}
 fn next_key<V>(map: &BTreeMap<NodeId, V>, cursor: Option<NodeId>) -> Option<NodeId> {
     cursor
         .and_then(|c| {
@@ -266,10 +262,6 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> NativePeerConnec
             now,
             closed: false,
         })
-    }
-    /// Transient accept errors survived and any current accept backoff.
-    pub fn accept_status(&self) -> AcceptStatus {
-        self.accept_status
     }
     pub fn listener_addr(&self) -> io::Result<Option<SocketAddr>> {
         self.listener
@@ -422,6 +414,7 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> NativePeerConnec
         let delay =
             (ACCEPT_BACKOFF_MIN_MS << self.accept_failures.min(7)).min(ACCEPT_BACKOFF_MAX_MS);
         self.accept_failures = self.accept_failures.saturating_add(1);
+        self.accept_status.backoffs = self.accept_status.backoffs.saturating_add(1);
         self.accept_status.retry_at = Some(MonoTime(self.now.0.saturating_add(delay)));
     }
     fn accept(&mut self, calls: &mut usize) -> Result<(), ConnectError> {
@@ -677,6 +670,10 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> PeerConnector
     }
     type Endpoint = SocketAddr;
     type Session = Session;
+    /// Transient accept errors survived and any current accept backoff.
+    fn accept_status(&self) -> Option<AcceptStatus> {
+        Some(self.accept_status)
+    }
     fn local(&self) -> LocalIdentity {
         self.config.local
     }
@@ -924,14 +921,6 @@ impl super::peer_credentials::NativePeerMaterialProvider for NativeServiceConnec
     }
 }
 impl NativeServiceConnector {
-    /// Listener status of a TCP connector; `None` for the other variants.
-    pub fn accept_status(&self) -> Option<AcceptStatus> {
-        match self {
-            Self::Tcp(c) => Some(c.accept_status()),
-            Self::RotatingTcp(c) => Some(c.inner().accept_status()),
-            _ => None,
-        }
-    }
     /// Attach an explicitly owned source before any data requests are accepted.
     /// Rejection returns both owners; closed sources must drain their own work.
     pub fn with_discovery(
@@ -1027,6 +1016,19 @@ impl PeerConnector for NativeServiceConnector {
     }
     type Endpoint = SocketAddr;
     type Session = Box<dyn SecureSession>;
+    /// Listener status of the TCP connector inside any variant (including
+    /// `Discovered`); QUIC has no accept loop and reports `None`.
+    fn accept_status(&self) -> Option<AcceptStatus> {
+        match self {
+            Self::Discovered(c) => c.accept_status(),
+            Self::Tcp(c) => c.accept_status(),
+            Self::RotatingTcp(c) => c.accept_status(),
+            #[cfg(feature = "quic")]
+            Self::Quic(c) => c.accept_status(),
+            #[cfg(feature = "quic")]
+            Self::RotatingQuic(c) => c.accept_status(),
+        }
+    }
     fn supports_peer(&self, peer: PeerIdentity) -> bool {
         match self {
             Self::Discovered(c) => c.supports_peer(peer),
@@ -1175,6 +1177,8 @@ impl PeerCredentialControl for NativeServiceConnector {
 }
 
 #[cfg(test)]
+mod health_tests;
+#[cfg(test)]
 mod accept_tests {
     use super::*;
     use crate::native::{tls::TlsCredentials, worker::ThreadWake};
@@ -1193,6 +1197,12 @@ mod accept_tests {
         }
     }
     fn connector() -> NativePeerConnector {
+        connector_with(local(), BTreeMap::new())
+    }
+    fn connector_with(
+        local: LocalIdentity,
+        peers: BTreeMap<NodeId, TlsPeer>,
+    ) -> NativePeerConnector {
         let tls = NativeTlsConfig::new(TlsCredentials {
             roots: vec![include_bytes!("../../tests/fixtures/tls/ca.der").to_vec()],
             certificate_chain: vec![include_bytes!("../../tests/fixtures/tls/node1.der").to_vec()],
@@ -1200,7 +1210,7 @@ mod accept_tests {
         })
         .unwrap();
         let dialer = NativeTcpDialer::spawn(
-            local(),
+            local,
             BTreeMap::new(),
             DialLimits::default(),
             Arc::new(ThreadWake::current()),
@@ -1208,7 +1218,7 @@ mod accept_tests {
         .unwrap();
         NativePeerConnector::new(
             NativeConnectConfig {
-                local: local(),
+                local,
                 limits: ConnectLimits {
                     requests: 4,
                     anonymous: 4,
@@ -1217,7 +1227,7 @@ mod accept_tests {
                 session: SessionLimits::default(),
             },
             tls,
-            BTreeMap::new(),
+            peers,
             dialer,
             Some(TcpListener::bind("127.0.0.1:0").unwrap()),
             MonoTime(0),
@@ -1243,7 +1253,10 @@ mod accept_tests {
             }
             std::thread::park_timeout(Duration::from_millis(1));
         }
-        panic!("listener stopped accepting: {:?}", c.accept_status());
+        panic!(
+            "listener stopped accepting: {:?}",
+            c.accept_status().unwrap()
+        );
     }
     fn finish(mut c: NativePeerConnector) {
         c.close();
@@ -1275,6 +1288,9 @@ mod accept_tests {
             (libc::EHOSTUNREACH, Retry),
             (libc::EOPNOTSUPP, Retry),
             (libc::ENETUNREACH, Retry),
+            (libc::ESOCKTNOSUPPORT, Retry),
+            (libc::EPROTONOSUPPORT, Retry),
+            (libc::ENOSR, Retry),
             (libc::EMFILE, Backoff),
             (libc::ENFILE, Backoff),
             (libc::ENOBUFS, Backoff),
@@ -1316,7 +1332,7 @@ mod accept_tests {
         );
         c.poll(MonoTime(1), ConnectPollBudget::default()).unwrap();
         assert!(c.injected_accept_errors.is_empty());
-        let status = c.accept_status();
+        let status = c.accept_status().unwrap();
         assert_eq!(status.transient_errors, 4);
         assert_eq!(status.last_os_error, Some(libc::ECONNRESET));
         assert_eq!(status.retry_at, None);
@@ -1333,7 +1349,7 @@ mod accept_tests {
         c.poll(MonoTime(100), ConnectPollBudget::default()).unwrap();
         // One resource error stops this accept phase for 10 ms.
         assert_eq!(c.injected_accept_errors.len(), 2);
-        assert_eq!(c.accept_status().retry_at, Some(MonoTime(110)));
+        assert_eq!(c.accept_status().unwrap().retry_at, Some(MonoTime(110)));
         assert_eq!(c.next_deadline(), Some(MonoTime(110)));
         assert!(
             !listener_polled(&c),
@@ -1347,20 +1363,20 @@ mod accept_tests {
         );
         // Consecutive failures double the delay, capped at one second.
         c.poll(MonoTime(110), ConnectPollBudget::default()).unwrap();
-        assert_eq!(c.accept_status().retry_at, Some(MonoTime(130)));
+        assert_eq!(c.accept_status().unwrap().retry_at, Some(MonoTime(130)));
         c.poll(MonoTime(130), ConnectPollBudget::default()).unwrap();
-        assert_eq!(c.accept_status().retry_at, Some(MonoTime(170)));
+        assert_eq!(c.accept_status().unwrap().retry_at, Some(MonoTime(170)));
         for _ in 0..10 {
             c.injected_accept_errors.push_back(os(libc::EMFILE));
-            let at = c.accept_status().retry_at.unwrap();
+            let at = c.accept_status().unwrap().retry_at.unwrap();
             c.poll(at, ConnectPollBudget::default()).unwrap();
         }
-        let at = c.accept_status().retry_at.unwrap();
-        assert_eq!(c.accept_status().transient_errors, 13);
-        assert_eq!(c.accept_status().last_os_error, Some(libc::EMFILE));
+        let at = c.accept_status().unwrap().retry_at.unwrap();
+        assert_eq!(c.accept_status().unwrap().transient_errors, 13);
+        assert_eq!(c.accept_status().unwrap().last_os_error, Some(libc::EMFILE));
         // After the delay the listener is polled again and accepts for real.
         c.poll(at, ConnectPollBudget::default()).unwrap();
-        assert_eq!(c.accept_status().retry_at, None);
+        assert_eq!(c.accept_status().unwrap().retry_at, None);
         assert!(listener_polled(&c));
         let _client = accept_real_connection(&mut c, at.0);
         // A success resets the delay to its minimum. Idle accept phases may
@@ -1372,7 +1388,10 @@ mod accept_tests {
             }
             c.poll(at, ConnectPollBudget::default()).unwrap();
         }
-        assert_eq!(c.accept_status().retry_at, Some(MonoTime(at.0 + 10)));
+        assert_eq!(
+            c.accept_status().unwrap().retry_at,
+            Some(MonoTime(at.0 + 10))
+        );
         finish(c);
     }
 
@@ -1384,7 +1403,7 @@ mod accept_tests {
         for _ in 0..12 {
             c.injected_accept_errors.push_back(os(libc::ENOMEM));
             c.poll(MonoTime(now), ConnectPollBudget::default()).unwrap();
-            let at = c.accept_status().retry_at.unwrap().0;
+            let at = c.accept_status().unwrap().retry_at.unwrap().0;
             delays.push(at - now);
             now = at;
         }
@@ -1403,7 +1422,63 @@ mod accept_tests {
             c.poll(MonoTime(1), ConnectPollBudget::default()),
             Err(ConnectError::Io(_))
         ));
-        assert_eq!(c.accept_status().transient_errors, 0);
+        assert_eq!(c.accept_status().unwrap().transient_errors, 0);
+        finish(c);
+    }
+
+    /// NT1 round 2 (Sol 2): generations restart at 1 in every store session,
+    /// so a ticket of the previous process can carry an equal or a higher
+    /// numeric generation than the recovered connector's. Neither is
+    /// admitted: the complete local identity, including the store session, is
+    /// compared before the per-peer generation order.
+    #[test]
+    fn a_recovered_connector_refuses_tickets_of_the_previous_session() {
+        let session = |n| LocalIdentity {
+            store: StoreBinding {
+                session: StoreSession::new(n).unwrap(),
+                ..local().store
+            },
+            ..local()
+        };
+        let peer = PeerIdentity {
+            node: NodeId::new(2).unwrap(),
+            store: local().store.identity,
+        };
+        let pin = TlsPeer {
+            identity: peer,
+            certificate: include_bytes!("../../tests/fixtures/tls/node2.der").to_vec(),
+            server_name: "node2.voteboat.test".into(),
+        };
+        let mut c = connector_with(session(2), [(peer.node, pin)].into());
+        let request = |local, generation| ConnectRequest {
+            ticket: ConnectTicket {
+                local,
+                peer,
+                generation: SecureSessionGeneration::new(generation).unwrap(),
+            },
+            direction: ConnectDirection::Accept,
+            deadline: MonoTime(1_000),
+        };
+        let refused = |c: &mut NativePeerConnector, r| {
+            c.submit(r, MonoTime(1)).map_err(|e| e.reason).unwrap_err()
+        };
+        // Higher and equal numeric generations of the old session.
+        for generation in [50_000, 1] {
+            let old = request(session(1), generation);
+            assert_eq!(refused(&mut c, old), ConnectError::WrongBinding);
+        }
+        // The recovered session's own first generation is admitted.
+        c.submit(request(session(2), 1), MonoTime(1)).unwrap();
+        assert_eq!(c.usage().requests, 1);
+        // An old ticket replayed while that attempt is live is still refused
+        // for its binding, not merely for overload.
+        let old = request(session(1), 2);
+        assert_eq!(refused(&mut c, old), ConnectError::WrongBinding);
+        let live = request(session(2), 1).ticket;
+        assert!(c.cancel(live));
+        let done = c.poll(MonoTime(2), ConnectPollBudget::default()).unwrap();
+        assert_eq!(done.len(), 1);
+        assert_eq!(done[0].ticket, live);
         finish(c);
     }
 }

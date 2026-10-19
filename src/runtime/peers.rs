@@ -143,6 +143,15 @@ pub struct PeerDriverProgress {
     pub ingress_blocked: usize,
     pub ingress: IngressProgress,
     pub peers: Vec<PeerPoll>,
+    /// Listener accept errors survived during this poll (diagnostic).
+    pub accept_errors: u64,
+    /// Times the listener started an accept backoff during this poll.
+    pub accept_backoffs: u64,
+    /// The listener is currently backing off and accepts nothing.
+    pub accept_paused: bool,
+    /// The roster can issue no further connection attempt (see
+    /// `PeerRoster::generations_exhausted`).
+    pub generations_exhausted: bool,
 }
 /// Explicit recovery handoff. Original queue payloads remain charged until the
 /// host resolves them against their exact queue; no field establishes delivery.
@@ -180,6 +189,8 @@ pub struct PeerDriver<C: PeerConnector, F: PeerTransportFactory<C::Session>> {
     /// retained admission route plan is replaced, so no change counter is
     /// needed (and none can overflow).
     steady: Option<SteadyAssignments>,
+    /// Cumulative connector accept errors and backoffs at the last poll.
+    accept_seen: (u64, u64),
 }
 /// While these inputs are unchanged and every core's connection set is its
 /// fixed bootstrap voter set, reconciliation would again find the roster
@@ -334,6 +345,7 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
             closed: false,
             failed: None,
             steady: None,
+            accept_seen: (0, 0),
         })
     }
     pub fn usage(&self) -> PeerDriverUsage {
@@ -911,7 +923,22 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         self.start_connections(now, b.connection_visits, &mut out)?;
         self.poll_peer_io(outbound, b.peer_visits, &mut out)?;
         self.submit_sends(outbound, b.sends, &mut out)?;
+        self.report_health(&mut out);
         Ok(out)
+    }
+    /// Listener and roster health for observability: no silent stuck state.
+    fn report_health(&mut self, out: &mut PeerDriverProgress) {
+        out.generations_exhausted = self.parts.roster.generations_exhausted();
+        let Some(status) = self.parts.connector.accept_status() else {
+            return;
+        };
+        // A count below the last one is a different inner connector: count
+        // from zero again rather than losing its events.
+        let increase = |now: u64, seen: u64| now.checked_sub(seen).unwrap_or(now);
+        out.accept_errors = increase(status.transient_errors, self.accept_seen.0);
+        out.accept_backoffs = increase(status.backoffs, self.accept_seen.1);
+        out.accept_paused = status.retry_at.is_some_and(|at| self.now < at);
+        self.accept_seen = (status.transient_errors, status.backoffs);
     }
     fn poll_connections<O: OutboundQueue>(
         &mut self,

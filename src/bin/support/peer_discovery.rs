@@ -81,17 +81,22 @@ impl Prepared {
         })
     }
 }
-/// Take the next source connection generation. A spent space is a typed
-/// refusal, never a silent stop of discovery.
-fn take_generation(
+/// End-to-end bound of one source connection attempt.
+const ATTEMPT_MS: u64 = 5000;
+/// Take the next source connection generation and attempt deadline. A spent
+/// generation space, or a deadline past `u64::MAX` ms, takes nothing: the
+/// source then refuses lookups with the typed `DiscoveryError::Exhausted`.
+fn take_attempt(
     next: &mut Option<SecureSessionGeneration>,
-) -> Result<SecureSessionGeneration, DiscoveryError> {
-    let generation = next.ok_or(DiscoveryError::Exhausted)?;
+    now: MonoTime,
+) -> Option<(SecureSessionGeneration, MonoTime)> {
+    let generation = (*next)?;
+    let deadline = MonoTime(now.0.checked_add(ATTEMPT_MS)?);
     *next = generation
         .get()
         .checked_add(1)
         .and_then(SecureSessionGeneration::new);
-    Ok(generation)
+    Some((generation, deadline))
 }
 struct Attempt {
     ticket: ConnectTicket,
@@ -103,8 +108,10 @@ pub struct Source {
     dialer: NativeTcpDialer,
     remote: Option<NativeRemotePeerDiscovery<Box<dyn SecureSession>>>,
     attempt: Option<Attempt>,
-    /// Next source connection generation; `None` once `u64::MAX` was used
-    /// (at the 100 ms retry floor that takes 5.8e10 years).
+    /// Next source connection generation; `None` once `u64::MAX` was used.
+    /// After an attach and a failure there is no retry delay, so the floor is
+    /// one TCP+TLS handshake per attempt: at 10^4 handshakes/s, 2^64
+    /// attempts take about 5.8e7 years.
     next: Option<SecureSessionGeneration>,
     retry_at: MonoTime,
     now: MonoTime,
@@ -116,6 +123,11 @@ impl Source {
     fn source_failed(&self) -> bool {
         self.remote.as_ref().is_none_or(|r| r.source_failed())
     }
+    /// No further source connection can be started. Never node-fatal:
+    /// lookups that need a connection fail with `Exhausted`, per attempt.
+    fn exhausted(&self) -> bool {
+        self.next.is_none() || self.now.0.checked_add(ATTEMPT_MS).is_none()
+    }
     fn time(&mut self, now: MonoTime) -> Result<(), DiscoveryError> {
         if now < self.now {
             return Err(DiscoveryError::TimeWentBack);
@@ -123,14 +135,11 @@ impl Source {
         self.now = now;
         Ok(())
     }
-    fn begin(&mut self) -> Result<(), DiscoveryError> {
-        let generation = take_generation(&mut self.next)?;
-        let deadline = self
-            .now
-            .0
-            .checked_add(5000)
-            .map(MonoTime)
-            .ok_or(DiscoveryError::Exhausted)?;
+    fn begin(&mut self) {
+        let Some((generation, deadline)) = take_attempt(&mut self.next, self.now) else {
+            self.wanted = false;
+            return;
+        };
         let ticket = ConnectTicket {
             local: self.prepared.access.local,
             peer: service_access::transport_identity(self.prepared.endpoint.node, false),
@@ -150,7 +159,6 @@ impl Source {
             }
             Err(_) => self.retry_at = MonoTime(self.now.0.saturating_add(100)),
         }
-        Ok(())
     }
     fn progress(&mut self, budget: SessionPollBudget) -> Result<(), DiscoveryError> {
         let mut attempt = self.attempt.take().expect("active source attempt");
@@ -217,9 +225,12 @@ impl PeerDiscovery for Source {
             .remote
             .as_mut()
             .map_or(Err(DiscoveryError::Unavailable), |r| r.resolve(peer, now));
+        if result.is_err() && self.source_failed() && self.exhausted() {
+            // Typed and per lookup: the connector fails this attempt, the
+            // roster backs off and counts it; the node stays in service.
+            return Err(DiscoveryError::Exhausted);
+        }
         if result.is_err() {
-            // A spent generation space surfaces as `Exhausted` from the next
-            // discovery poll rather than silently stopping lookups.
             self.wanted = true;
         }
         result
@@ -266,7 +277,7 @@ impl DiscoveryDriver for Source {
                 .map_err(|_| DiscoveryError::Unavailable)?;
         } else if self.source_failed() {
             if self.wanted && now >= self.retry_at {
-                self.begin()?;
+                self.begin();
             }
         } else if let Some(r) = &mut self.remote {
             let pending = r.pending().is_some();
@@ -303,18 +314,91 @@ impl DiscoveryDriver for Source {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::{net::TcpListener, time::Duration};
 
     #[test]
-    fn source_generations_end_in_a_typed_refusal_not_a_silent_stop() {
+    fn source_attempts_end_at_the_generation_space_and_the_clock() {
         let mut next = SecureSessionGeneration::new(u64::MAX - 1);
-        assert_eq!(take_generation(&mut next).unwrap().get(), u64::MAX - 1);
-        assert_eq!(take_generation(&mut next).unwrap().get(), u64::MAX);
-        for _ in 0..2 {
-            assert_eq!(take_generation(&mut next), Err(DiscoveryError::Exhausted));
-        }
-        assert!(!DiscoveryError::Exhausted.retryable());
+        let now = MonoTime(7);
+        let (first, deadline) = take_attempt(&mut next, now).unwrap();
+        assert_eq!((first.get(), deadline), (u64::MAX - 1, MonoTime(5007)));
+        assert_eq!(take_attempt(&mut next, now).unwrap().0.get(), u64::MAX);
+        assert_eq!(next, None);
+        assert_eq!(take_attempt(&mut next, now), None);
+        // A deadline past `u64::MAX` takes no generation.
         let mut fresh = SecureSessionGeneration::new(1);
-        assert_eq!(take_generation(&mut fresh).unwrap().get(), 1);
-        assert_eq!(fresh.unwrap().get(), 2);
+        assert_eq!(take_attempt(&mut fresh, MonoTime(u64::MAX - 4999)), None);
+        assert_eq!(fresh.unwrap().get(), 1);
+        assert!(!DiscoveryError::Exhausted.retryable());
+    }
+
+    fn source(listener: &TcpListener) -> Source {
+        let endpoint = Endpoint {
+            node: 1,
+            address: listener.local_addr().unwrap(),
+            server_name: "node1.voteboat.test".into(),
+        };
+        let access = ClientAccess::load(
+            &Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls"),
+            1,
+            std::slice::from_ref(&endpoint),
+        )
+        .unwrap();
+        Prepared { endpoint, access }
+            .start(StoreSession::new(1).unwrap())
+            .unwrap()
+    }
+
+    /// Joins the dial worker. The bound only turns a deadlock into a
+    /// failure; it is not a timing assertion.
+    fn finish(mut source: Source, now: MonoTime) {
+        source.close();
+        for _ in 0..600_000 {
+            source
+                .poll_discovery(now, SessionPollBudget::default())
+                .unwrap();
+            if !source.discovery_pending() {
+                return;
+            }
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
+        panic!("hang guard: the source dial worker did not join");
+    }
+
+    /// Opus round 1: a spent source generation space returned `Exhausted`
+    /// from `poll_discovery`, which the discovery connector, peer driver and
+    /// node turned into node recovery. Now only the lookup is refused.
+    #[test]
+    fn a_spent_source_refuses_lookups_without_failing_the_node() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let peer = service_access::transport_identity(2, false);
+        let budget = SessionPollBudget::default();
+        for (spent, now) in [(true, 1), (false, u64::MAX - 4999)] {
+            let mut s = source(&listener);
+            if spent {
+                s.next = None;
+            }
+            let now = MonoTime(now);
+            assert_eq!(s.resolve(peer, now), Err(DiscoveryError::Exhausted));
+            assert!(!s.discovery_pending(), "no busy retry");
+            assert_eq!(s.discovery_deadline(), None);
+            s.poll_discovery(now, budget).unwrap();
+            assert!(s.attempt.is_none());
+            // Every later lookup is refused the same way.
+            assert_eq!(s.resolve(peer, now), Err(DiscoveryError::Exhausted));
+            finish(s, now);
+        }
+        // Control: a fresh source wants a connection and starts generation 1.
+        let mut s = source(&listener);
+        assert_eq!(
+            s.resolve(peer, MonoTime(1)),
+            Err(DiscoveryError::Unavailable)
+        );
+        assert!(s.discovery_pending());
+        s.poll_discovery(MonoTime(1), budget).unwrap();
+        let attempt = s.attempt.as_ref().unwrap();
+        assert_eq!(attempt.ticket.generation.get(), 1);
+        assert_eq!(attempt.deadline, MonoTime(5001));
+        finish(s, MonoTime(1));
     }
 }

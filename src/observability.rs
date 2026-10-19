@@ -37,6 +37,10 @@ pub struct NodeCounters {
     pub peer_received: u64,
     pub ingress_blocked: u64,
     pub connection_failures: u64,
+    /// Listener accept errors that did not stop the listener.
+    pub accept_errors: u64,
+    /// Times the listener stopped accepting for a bounded delay.
+    pub accept_backoffs: u64,
 }
 impl NodeCounters {
     pub fn saturating_add(self, other: Self) -> Self {
@@ -63,8 +67,20 @@ impl NodeCounters {
             connection_failures: self
                 .connection_failures
                 .saturating_add(other.connection_failures),
+            accept_errors: self.accept_errors.saturating_add(other.accept_errors),
+            accept_backoffs: self.accept_backoffs.saturating_add(other.accept_backoffs),
         }
     }
+}
+/// Current network conditions that stop progress without failing the node,
+/// as of one sample. Never consensus evidence.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct NetworkHealth {
+    /// The listener is backing off (out of descriptors, buffers or memory)
+    /// and accepts no connection until its retry time.
+    pub accept_paused: bool,
+    /// The peer roster can issue no further connection attempt.
+    pub generations_exhausted: bool,
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct NodeObservation {
@@ -72,6 +88,7 @@ pub struct NodeObservation {
     pub sampled_at: MonoTime,
     pub state: NodeState,
     pub counters: NodeCounters,
+    pub network: NetworkHealth,
 }
 impl NodeObservation {
     /// Capture after poll returns. Failed polls expose no partial progress here.
@@ -87,6 +104,7 @@ impl NodeObservation {
             failed_polls: u64::from(result.is_err()),
             ..NodeCounters::default()
         };
+        let mut network = NetworkHealth::default();
         if let Ok(progress) = result {
             if let Some(r) = &progress.replica {
                 counters.owner_steps = r.steps.len() as u64;
@@ -103,6 +121,12 @@ impl NodeObservation {
                 counters.peer_received = p.received as u64;
                 counters.ingress_blocked = p.ingress_blocked as u64;
                 counters.connection_failures = p.connection_failures as u64;
+                counters.accept_errors = p.accept_errors;
+                counters.accept_backoffs = p.accept_backoffs;
+                network = NetworkHealth {
+                    accept_paused: p.accept_paused,
+                    generations_exhausted: p.generations_exhausted,
+                };
             }
         }
         Self {
@@ -110,6 +134,7 @@ impl NodeObservation {
             sampled_at,
             state,
             counters,
+            network,
         }
     }
 }
@@ -119,6 +144,8 @@ pub struct CounterSnapshot {
     pub sampled_at: Option<MonoTime>,
     pub state: Option<NodeState>,
     pub counters: NodeCounters,
+    /// Network health of the latest accepted sample.
+    pub network: NetworkHealth,
     pub closed: bool,
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

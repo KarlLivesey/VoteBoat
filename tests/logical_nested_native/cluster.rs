@@ -212,6 +212,10 @@ impl Cluster {
             transport,
         )
         .unwrap();
+        // The contract for a replacement roster in the same store session:
+        // close the drained predecessor and start at its reclaimed generation.
+        peers.roster.close();
+        let first_generation = peers.roster.reclaim_generation().unwrap();
         peers.roster = PeerRoster::new(
             PeerRosterConfig {
                 local: LocalIdentity {
@@ -219,8 +223,7 @@ impl Cluster {
                     store: owner.store,
                 },
                 outbound: parts.local.outbound.binding(),
-                // The store session scopes generations (startup does the same).
-                first_generation: voteboat::identity::SecureSessionGeneration::new(1).unwrap(),
+                first_generation,
                 wire_version: 8,
                 limits: PeerRosterLimits::default(),
                 transport_limits: transport,

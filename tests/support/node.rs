@@ -1530,6 +1530,7 @@ fn refusing_diagnostics_cannot_change_original_node_write_read_or_shutdown() {
             sampled_at: None,
             state: None,
             counters: NodeCounters::default(),
+            network: NetworkHealth::default(),
             closed: false,
         },
         attempts: 0,

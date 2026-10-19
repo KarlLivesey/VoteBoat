@@ -2,7 +2,12 @@
 // Copyright (c) 2026 Karl Livesey
 use super::setup::Service;
 use std::fmt::Write;
-use voteboat::{outbound::*, runtime::PeerDriverUsage, transport::PeerRosterUsage};
+use voteboat::{
+    connect::{AcceptStatus, PeerConnector},
+    outbound::*,
+    runtime::PeerDriverUsage,
+    transport::PeerRosterUsage,
+};
 
 const DETAILS: usize = 8;
 struct Peer {
@@ -12,6 +17,9 @@ struct Peer {
 }
 struct Snapshot {
     driver: Option<(PeerDriverUsage, PeerRosterUsage)>,
+    /// Live listener health; `None` without a TCP listener (QUIC).
+    accept: Option<AcceptStatus>,
+    generations_exhausted: bool,
     authorized: usize,
     bound: usize,
     tracked: usize,
@@ -22,6 +30,8 @@ impl Snapshot {
     fn capture(service: &Service) -> Self {
         let mut value = Self {
             driver: None,
+            accept: None,
+            generations_exhausted: false,
             authorized: 0,
             bound: 0,
             tracked: 0,
@@ -31,6 +41,8 @@ impl Snapshot {
         if let Some(driver) = service.peers() {
             let roster = driver.roster();
             value.driver = Some((driver.usage(), roster.usage()));
+            value.accept = driver.connector().accept_status();
+            value.generations_exhausted = roster.generations_exhausted();
             value.authorized = roster.authorized_peers().count();
             value.bound = roster
                 .authorized_peers()
@@ -56,6 +68,11 @@ impl Snapshot {
             u8::from(d.failed_send), u8::from(d.failed_receive), r.connections, r.connecting,
             r.reserved_bytes, self.authorized, self.bound, self.tracked,
             self.outbound.batches, self.outbound.messages, self.outbound.bytes).unwrap();
+        let a = self.accept.unwrap_or_default();
+        write!(reply, " peer_accept_listener={} peer_accept_errors={} peer_accept_backoffs={} peer_accept_paused={} peer_accept_last_os_error={} peer_generations_exhausted={}",
+            u8::from(self.accept.is_some()), a.transient_errors, a.backoffs,
+            u8::from(a.retry_at.is_some()), a.last_os_error.unwrap_or(0),
+            u8::from(self.generations_exhausted)).unwrap();
         let count = self.peers.len().min(DETAILS);
         write!(
             reply,
@@ -110,6 +127,14 @@ mod tests {
                     reserved_bytes: usize::MAX,
                 },
             )),
+            accept: Some(AcceptStatus {
+                transient_errors: u64::MAX,
+                backoffs: u64::MAX,
+                last_error: Some(std::io::ErrorKind::Other),
+                last_os_error: Some(i32::MAX),
+                retry_at: Some(voteboat::runtime::MonoTime(u64::MAX)),
+            }),
+            generations_exhausted: true,
             authorized: usize::MAX,
             bound: usize::MAX,
             tracked: 16,
@@ -127,6 +152,11 @@ mod tests {
         snapshot.append(&mut reply);
         assert!(reply.len() < 4096, "reply length={}", reply.len());
         assert!(reply.contains("peer_details=8 peer_omitted=8"));
+        assert!(reply.contains(&format!(
+            "peer_accept_listener=1 peer_accept_errors={0} peer_accept_backoffs={0} peer_accept_paused=1 peer_accept_last_os_error={1} peer_generations_exhausted=1",
+            u64::MAX,
+            i32::MAX
+        )));
         assert!(reply.contains(&format!("peer_{}_bytes={}", u64::MAX - 7, usize::MAX)));
         assert!(!reply.contains(&format!("peer_{}_bound=", u64::MAX - 8)));
         for field in reply.split_whitespace().skip(1) {

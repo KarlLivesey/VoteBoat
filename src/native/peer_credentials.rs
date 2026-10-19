@@ -108,10 +108,6 @@ impl<C: NativePeerMaterialProvider> RotatingPeerConnector<C> {
             closed: false,
         })
     }
-    /// Read-only view of the wrapped provider (status only; grants nothing).
-    pub fn inner(&self) -> &C {
-        &self.inner
-    }
     /// Reclaim the provider after close and all accepted receipts have drained.
     pub fn into_inner(self) -> Result<C, Self> {
         if self.closed && self.pending.is_empty() && self.inner.is_drained() {
@@ -170,6 +166,9 @@ impl<C: NativePeerMaterialProvider> PeerConnector for RotatingPeerConnector<C> {
     }
     fn next_deadline(&self) -> Option<MonoTime> {
         self.inner.next_deadline()
+    }
+    fn accept_status(&self) -> Option<crate::connect::AcceptStatus> {
+        self.inner.accept_status()
     }
     fn supports_peer(&self, peer: PeerIdentity) -> bool {
         self.inner.supports_peer(peer)

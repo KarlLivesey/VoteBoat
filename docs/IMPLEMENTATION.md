@@ -19,9 +19,34 @@ maximum sustainable rate. Design: `target/claude/research-lv/architect-plan-life
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current NT1: connection generations and listener (`lb/nt1-connection-generations`; implemented, in review) | Audit N1, N3, N6, P3-6 and the P3-16 discovery form: survivors no longer enter recovery after ~27.8 h with one peer down, and a port scan or fd spike cannot kill a node | — (ST2 runs in parallel and also edits `native/startup.rs`, in a different function; a rebase reconciles) | Q2 probe written up; native soak of more than 10,000 connect attempts fails on the base and passes; restart uniqueness; injected accept errors; two-node native reconnect past the old boundary; fmt, four strict Clippy configurations and matched fmt/Clippy; transport, peers, connect, startup, runtime-peer, logical_voter_native and counter_service suites in default and all-features | LB |
+| Current NT1: connection generations and listener (`lb/nt1-connection-generations`; round 2 in review) | Audit N1, N3, N6, P3-6 and the P3-16 discovery form: survivors no longer enter recovery after ~27.8 h with one peer down, and a port scan or fd spike cannot kill a node | — (ST2 runs in parallel and also edits `native/startup.rs`, in a different function; a rebase reconciles) | Q2 probe written up; native soak of more than 10,000 connect attempts fails on the base and passes; restart uniqueness; injected accept errors; two-node native reconnect past the old boundary; listener health and exhaustion reach `NodeObservation`, Pressure events and `metrics`; no counter class node-fatal; fmt, four strict Clippy configurations and matched fmt/Clippy; transport, peers, connect, startup, runtime-peer, logical_voter_native and counter_service suites in default and all-features | LB |
 | Next NT2: roster, budget and cache reclaim | Audit N2, RT3, N4, N5: re-provisioning a node or churning members never kills survivors | NT1 (same files) | U6 probe as fail@main; churn soak | LB |
 | Then DR1: Counter session ledger | Audit S1, RT2 for Counter through the generic `SessionLedger` | ST2 merged | 200,000-write soak fails on the base; restart and exactly-once tests | LB |
+
+### Inventory (rows owned by NT1, and the leftovers it hands on)
+
+Dispositions per plan §1.2: W = widened with recorded arithmetic (100 years at
+the maximum rate), F = fail closed per connection or lookup, never node-fatal.
+LBZ completes this table for every audit row.
+
+| Row | Site | Disposition | Slice | Evidence |
+| --- | --- | --- | --- | --- |
+| N1 | `native/startup.rs` per-process range; `transport/peers.rs` `due_connections` | W: u64 per store session; ≥ 8,900 years at 65,536 peers × 1 ms; spent space issues no ticket and no error | NT1 | native soak, restart replay, roster soak, `spent_generation_space_issues_no_ticket_and_no_error` |
+| N1 (round 2) | `transport/peers.rs` `due_connections` deadline `now + connect_timeout_ms` | W: no ticket and no error, reported by `generations_exhausted()`; 2^64 ms ≈ 5.8 × 10^8 years of uptime | NT1 | `an_attempt_deadline_past_the_clock_issues_no_ticket_and_no_error` |
+| N3 | `native/connect.rs` `accept()` | F per connection or bounded backoff (10 ms to 1 s); counts and pause surfaced in `NodeObservation`, Pressure and `metrics`; counters saturate (diagnostic, ≥ 58,000 years at 10^7/s) | NT1 | `accept_tests`, `injected_emfile_reaches_counters_events_and_connector_status` |
+| N6 | `native/remote_discovery/reconnect.rs` | W: ≥ 584 million years at the 1 ms retry | NT1 | `retry_continues_past_the_old_reserved_range` |
+| P3-6 | `runtime/peers.rs` `routes_generation` | Removed (no counter) | NT1 | existing reconciliation tests |
+| P3-16 (discovery source) | `bin/support/peer_discovery.rs` generations and attempt deadline | F per lookup (`DiscoveryError::Exhausted`, not node-fatal); W: ≈ 5.8 × 10^7 years at 10^4 handshakes/s | NT1 | `a_spent_source_refuses_lookups_without_failing_the_node` |
+| P3-16 (other sites) | counter, directory and transfer client-session sequences | W: ≥ 5.8 × 10^9 years (plan Q12) | LBZ | recorded at inventory close |
+| Q8a | certificate `notAfter` on loaded operator material | Warn at a quarter of the remaining validity; recovery stays credential reload | NT4 | planned |
+| Q8b | TCP half-open session after a remote `kill -9` | Measure detection time and bound it (keepalive or idle expiry) | NT4 | planned |
+
+**NT4 (new, after NT3): certificate validity warning and half-open
+measurement.** Purpose: the two Q8 leftovers from NT1, so a node never fails
+silently on an expiring credential or a peer that vanished without a FIN.
+Dependencies: NT1 (connection status reporting), NT3 (principal rebind). Checks:
+a simulated-time test of the quarter-validity warning reaching `metrics`, and a
+recorded half-open measurement with its bound. Advances LB.
 
 ### NT1 schema plan (before editing, 19 October 2026)
 
@@ -93,8 +118,10 @@ current source session (the same domain rule: generations are scoped by
 - `Fatal` (listener gone or misused; a bug, not an environmental event):
   `EBADF`, `EINVAL`, `ENOTSOCK`, `EFAULT`. Unchanged `ConnectError::Io`.
 - Observability: `NativePeerConnector::accept_status()` returns
-  `AcceptStatus { transient_errors, last_error, retry_at }`
+  `AcceptStatus { transient_errors, last_error, last_os_error, retry_at }`
   (`transient_errors` saturates: diagnostic only, 58,000 years at 10^7/s).
+  Round 2 adds `backoffs`, moves the type to `crate::connect` and surfaces it
+  to operators (see the round 2 plan below).
 - Test seam: a `#[cfg(test)]` queue of injected `io::Error`s consulted before
   `listener.accept()`; release builds are unchanged.
 
@@ -106,8 +133,11 @@ current source session (the same domain rule: generations are scoped by
 - P3-16 (`bin/support/peer_discovery.rs:113-117` `unwrap_or(0)`): the next
   generation becomes `Option<SecureSessionGeneration>`; when it is spent,
   `poll_discovery` returns a typed `DiscoveryError::Exhausted` (new,
-  non-retryable) instead of silently stopping (arithmetic: 100 ms minimum retry,
-  ≥ 5.8 × 10^10 years).
+  non-retryable) instead of silently stopping. Corrected in round 2: that error
+  was node-fatal, so `resolve` now returns it per lookup instead; and the floor
+  is not a 100 ms retry, because after an attach and a failure there is no
+  delay, so it is one TCP+TLS handshake per attempt (≈ 5.8 × 10^7 years at
+  10^4 handshakes/s).
 
 **Ownership, failure and cleanup.** No new owner or thread. Accept backoff is
 volatile connector state; close/drain semantics are unchanged (the backoff
@@ -240,8 +270,78 @@ peer rotation) replaces it without data loss. The test fixtures
 (`tests/fixtures/tls`, `tests/fixtures/four-node-tls`) are valid from
 2020-01-01 to 2050-01-01 (checked with `openssl x509 -enddate`). A handshake
 failure after expiry stays a per-peer connect failure, which after this slice no
-longer exhausts anything. Still open (not in NT1): a warning at a quarter of the
-remaining validity, and the TCP half-open measurement after a remote `kill -9`.
+longer exhausts anything. Still open (not in NT1; owned by NT4 in the
+inventory): a warning at a quarter of the remaining validity, and the TCP
+half-open measurement after a remote `kill -9`.
+
+### NT1 round 2 schema plan (before editing, 19 October 2026)
+
+Reviews of bdd204e7: Sol approved with two P3s; Opus requested changes (one P2,
+ten P3s). Each finding maps to one change below.
+
+**Listener health reaches the operator (Opus P2).** No silent stuck state.
+- Data: `AcceptStatus` moves to `crate::connect` (re-exported from
+  `native::connect`) and gains `backoffs: u64` (saturating count of backoffs
+  entered). `PeerConnector::accept_status(&self) -> Option<AcceptStatus>`,
+  default `None`; the native TCP connector returns `Some`, and every wrapper
+  (`DiscoveryConnector`, `RotatingPeerConnector`, all `NativeServiceConnector`
+  variants including `Discovered`) delegates to its inner connector.
+- Transitions: the peer driver remembers the last cumulative error and backoff
+  counts and reports the per-poll increase in `PeerDriverProgress`
+  (`accept_errors`, `accept_backoffs`), plus the current `accept_paused` and
+  roster `generations_exhausted` flags. A count that goes down (a different
+  inner connector) counts from zero again.
+- Output: `NodeCounters` gains the two counts (summed); `NodeObservation` and
+  `CounterSnapshot` gain `network: NetworkHealth { accept_paused,
+  generations_exhausted }` (latest sample). `EventKind::Pressure` gains the two
+  counts and the exhaustion flag; the reporter emits Pressure when a count is
+  nonzero or when exhaustion is first seen (not on every poll, so it cannot
+  flood the bounded event ring). The binary's `metrics` reply adds the counts
+  and flags, and its peer section reads the live connector status directly.
+- Failure/cleanup: read-only; no new owner, allocation per poll or authority.
+- Check: an injected `EMFILE` in a real native connector wrapped as
+  `Discovered` is visible through `accept_status`; a driver whose connector
+  reports it produces the progress counts, a Pressure event and the metrics
+  fields.
+
+**No counter class is node-fatal (Opus 2, 9).**
+- Discovery source: a spent generation space, or an attempt deadline past
+  `u64::MAX` ms, starts no attempt and returns `Ok` from `poll_discovery`;
+  `resolve` returns the typed, non-retryable `DiscoveryError::Exhausted`, which
+  the discovery connector turns into a per-attempt `ConnectError::Discovery`
+  failure (the roster backs off and the failure is counted). Not pending, no
+  deadline, so no busy loop. Floor correction: after an attach and a failure
+  there is no delay, so one attempt per TCP+TLS handshake; at 10^4/s,
+  2^64 attempts take ≈ 5.8 × 10^7 years.
+- Roster: `due_connections` returns `Ok([])` instead of `Err(Exhausted)` when
+  `now + connect_timeout_ms` overflows; `generations_exhausted()` also covers
+  that case, so `next_deadline` stays quiet. Reached only after ≈ 5.8 × 10^8
+  years of millisecond uptime.
+
+**Accept classifier (Opus 8).** `ENOSR`, `ESOCKTNOSUPPORT`, `EPROTONOSUPPORT`
+move to Retry (Linux `accept(2)` lists them as per-connection errors).
+
+**Tests (Opus 4, 5, 6; Sol 2).**
+- The native soak's `run_until` is bounded by `3 × count` polls.
+- No wall-clock assertion remains in `tests/startup/connection_generations.rs`:
+  the pair test steps protocol time by 1 ms per round (bounded in protocol
+  time), and worker joins use a 600 s real-time hang guard that only turns a
+  deadlock into a failure.
+- Replacement rosters in `logical_nested_native` and `logical_activation_nested`
+  close the predecessor and start at its `reclaim_generation()`.
+- Replay: old-session tickets and completions (equal and higher numeric
+  generation) are refused by a recovered roster (`tests/peers.rs`) and a
+  recovered connector (`native/connect.rs`); stale relay captures by a
+  recovered helper's path check (`native/relay/network/plan`); and the startup
+  test covers interrupted recovery: a crash after the session write (the next
+  open skips that session) and a crash before it (the same unexposed number is
+  proposed again, and the abandoned attempt exposed nothing).
+
+**Docs (Opus 3, 7, 10; Sol 1).** CONNECTIONS and PEER_DRIVER describe the
+serialized drained handoff instead of disjoint ranges; DIALING states
+uniqueness per owner lineage with full-binding equality; PEER_ROSTER leads with
+the worst case (≈ 8,900 years at the 1 ms floor); the `AcceptStatus` field list
+is complete; the Q8 leftovers get an owning slice (NT4) in an inventory table.
 
 ## Logical-voter reliability track (opened 18 October 2026)
 

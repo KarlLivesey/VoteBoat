@@ -594,10 +594,9 @@ fn construction_exhaustion_and_rejection_preserve_resources() {
     q.complete(*rejected.batch, LocalSendResult::Failed)
         .unwrap();
     assert!(q.is_drained());
-    assert_eq!(
-        r.due_connections(MonoTime(u64::MAX), 2),
-        Err(PeerRosterError::Exhausted)
-    );
+    // A deadline past the clock is a per-peer condition, never an error.
+    assert_eq!(r.due_connections(MonoTime(u64::MAX), 2), Ok(Vec::new()));
+    assert!(r.generations_exhausted());
     assert_eq!(r.usage(), PeerRosterUsage::default());
     assert!(r.due_connections(MonoTime(u64::MAX), 0).unwrap().is_empty());
 }
@@ -706,6 +705,89 @@ fn spent_generation_space_issues_no_ticket_and_no_error() {
     assert_eq!(r.due_connections(MonoTime(2), 2), Ok(Vec::new()));
     r.abort();
     assert_eq!(r.reclaim_generation(), Err(PeerRosterError::Exhausted));
+}
+
+/// NT1 round 2 (Opus 9): an attempt deadline past `u64::MAX` ms (about
+/// 5.8e8 years of uptime) returned `Err(Exhausted)`, which the peer driver
+/// turned into node recovery. It is now the same per-peer condition as a
+/// spent generation space: no ticket, no error and no busy deadline.
+#[test]
+fn an_attempt_deadline_past_the_clock_issues_no_ticket_and_no_error() {
+    let l = limits();
+    let last = MonoTime(u64::MAX - l.connect_timeout_ms);
+    let mut r = PeerRoster::<Host>::new(config(l), [(node(2), identity(2))].into(), last).unwrap();
+    // Exactly at the limit an attempt still fits.
+    let ticket = r.due_connections(last, 1).unwrap()[0];
+    assert_eq!(r.attempt_deadline(ticket), Some(MonoTime(u64::MAX)));
+    assert!(!r.generations_exhausted());
+    r.connect_failed(ticket, last).unwrap();
+    let now = MonoTime(u64::MAX);
+    assert_eq!(r.due_connections(now, 1), Ok(Vec::new()));
+    assert!(r.generations_exhausted());
+    assert_eq!(r.next_deadline(), None);
+    assert_eq!(r.usage().connecting, 0);
+}
+
+/// NT1 round 2 (Sol 2): after recovery the store session is higher and the
+/// roster restarts at generation 1. Tickets and completions of the previous
+/// session, with an equal or a higher numeric generation, grant nothing and
+/// leave the recovered roster's own attempts intact.
+#[test]
+fn a_recovered_roster_refuses_tickets_and_completions_of_the_previous_session() {
+    let recovered = LocalIdentity {
+        store: StoreBinding {
+            session: StoreSession::new(2).unwrap(),
+            ..local().store
+        },
+        ..local()
+    };
+    let mut old = roster(limits());
+    let stale = old.due_connections(MonoTime(0), 2).unwrap();
+    old.abort();
+    let mut new = PeerRoster::<Host>::new(
+        PeerRosterConfig {
+            local: recovered,
+            outbound: OutboundBinding {
+                store: recovered.store,
+                ..outbound()
+            },
+            ..config(limits())
+        },
+        [(node(2), identity(2)), (node(3), identity(3))].into(),
+        MonoTime(0),
+    )
+    .unwrap();
+    let fresh = new.due_connections(MonoTime(0), 2).unwrap();
+    let numbers = |t: &[ConnectTicket]| t.iter().map(|t| t.generation).collect::<Vec<_>>();
+    assert_eq!(
+        numbers(&fresh),
+        numbers(&stale),
+        "equal numeric generations"
+    );
+    let higher = ConnectTicket {
+        generation: SecureSessionGeneration::new(50_000).unwrap(),
+        ..stale[0]
+    };
+    for old in stale.iter().copied().chain([higher]) {
+        assert_ne!(old.local, recovered);
+        assert_eq!(new.attempt_deadline(old), None);
+        assert_eq!(
+            new.connect_failed(old, MonoTime(1)),
+            Err(PeerRosterError::StaleConnection)
+        );
+        assert_eq!(
+            new.attach(old, Host::new(old, 1), MonoTime(1))
+                .unwrap_err()
+                .reason,
+            PeerRosterError::StaleConnection
+        );
+    }
+    assert_eq!(new.usage().connecting, 2);
+    for ticket in fresh {
+        new.attach(ticket, Host::new(ticket, 1), MonoTime(1))
+            .unwrap();
+    }
+    assert_eq!(new.usage().connections, 2);
 }
 
 /// Simulated-time soak: 1,000,000 failed attempts across three stopped peers
