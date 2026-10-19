@@ -33,7 +33,17 @@ mod state;
 mod tests;
 mod traits;
 use state::{ControlCommand, ControlState};
+/// The activation wrapper's format. Its application schema is
+/// [`logical_activation_schema`] of the inner schema, not this constant.
 pub const LOGICAL_ACTIVATION_SCHEMA: u64 = 0x5642_4143_5449_0002;
+/// The application schema of an activation wrapper around an application with
+/// schema `inner`: `LOGICAL_ACTIVATION_SCHEMA ^ inner`. For the one activation
+/// format this is a bijection of the inner schema, so wrapped replicas whose
+/// inner applications differ in identity (for a Counter, its session limits)
+/// refuse each other at readiness, snapshot install and restore.
+pub const fn logical_activation_schema(inner: u64) -> u64 {
+    LOGICAL_ACTIVATION_SCHEMA ^ inner
+}
 pub const LOGICAL_ACTIVATION_RESPONSE_SCHEMA: u64 = 0x5642_4143_5452_0001;
 const CONTROL_BYTES: usize = 480;
 const BUSINESS_HEADER: usize = 9;
@@ -62,6 +72,7 @@ where
             || mappings.is_empty()
             || mappings.len() > 16
             || inner.schema_version() == 0
+            || logical_activation_schema(inner.schema_version()) == 0
         {
             return Err(ApplicationError::InvalidCommand);
         }

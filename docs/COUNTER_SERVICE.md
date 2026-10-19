@@ -811,8 +811,8 @@ local evidence, without claiming a fresh quorum-backed read. Automatic client
 routing remains restricted to application add/read commands.
 
 The service binds the Counter schema for its session limits (256 sessions × 32
-outcomes, 64 registration nonces), sixteen-byte commands and a 279,092-byte
-application checkpoint envelope. The schema carries the checkpoint format (4) in
+outcomes, 64 registration nonces), sixteen-byte commands and a 279,108-byte
+application checkpoint envelope. The schema carries the checkpoint format (5) in
 its low byte and the three limits above it (`Counter::schema`), so peers built
 with different limits refuse each other at readiness, snapshot install and
 restore instead of deciding the same committed write differently. Admission
@@ -820,15 +820,23 @@ refuses a write more than the window beyond its own acknowledgement, a rule that
 reads only the command; a committed write beyond it is a typed refusal, never an
 apply error, and closes its session. Retries keep their original outcomes while
 retained. `Counter::readiness_requirements` reports the steady-state envelope
-(24 + 28 + 256 × (28 + 32 × 33) + 64 × 24 bytes; a retained outcome is its
-sequence, acknowledgement, delta and result), which holds for any uptime;
-`validate_readiness_requirements` rejects a smaller declaration or a different
-schema. An embedder must build every replica with the same `SessionLimits`. A
-wrapper that declares its own schema (the leadership-maintenance profile, a
-logical activation wrapper) hides the inner Counter's schema from readiness, so
-every replica behind it needs the same limits, or the wrapper schema must be
-derived from them (`SessionLimits::schema`); this executable's peers all run its
-fixed limits.
+(24 + 44 + 256 × (28 + 32 × 33) + 64 × 24 bytes; the ledger header holds the
+limits, the session allocation mark, counts and a closure record, and a
+retained outcome is its sequence, acknowledgement, delta and result), which
+holds for any uptime; `validate_readiness_requirements` rejects a smaller
+declaration or a different schema. The wrappers carry the inner schema in
+their own, so the same refusal holds through them: the leadership-maintenance
+profile's schema is `maintenance_schema(3, Counter::schema(limits))` (the
+profile format in the top four bits, the Counter's schema below), and a logical
+activation wrapper's is `logical_activation_schema(inner)`. A peer whose inner
+limits differ is refused at readiness before it applies any entry.
+Restore refuses a checkpoint whose watermarks disagree with their evidence (an
+acknowledgement floor that is not the largest retained acknowledgement, an
+allocation mark that is not the newest live session or the closure record).
+It does not authenticate checkpoint bytes: a consistent rewrite of a watermark
+together with all of its evidence restores. Checkpoints are trusted deployment
+input, protected against accidental corruption by the snapshot and log
+integrity checks.
 `Counter::new(window)` holds a single session, so the first registration
 evicts the built-in session; use `Counter::with_limits` for registered clients. Service startup compares this declaration with its selected
 native command/checkpoint payload limits before opening resources.

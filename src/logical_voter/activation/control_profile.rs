@@ -56,7 +56,7 @@ impl LogicalActivationControlProfile {
         self.inner_schema
     }
     pub fn application_schema(&self) -> u64 {
-        LOGICAL_ACTIVATION_SCHEMA
+        logical_activation_schema(self.inner_schema)
     }
     pub fn response_schema(&self) -> u64 {
         LOGICAL_ACTIVATION_RESPONSE_SCHEMA

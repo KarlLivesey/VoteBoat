@@ -371,8 +371,10 @@ install. Formats change again (no migration; the crate is unpublished).
   a session's floor has a sequence above that floor, so it stays retained until
   a later raise supersedes it: the floor always equals the largest retained
   acknowledgement, or 0 with nothing retained. Restore requires that equality,
-  so a lowered floor, a raised floor and a non-zero floor with no receipts are
-  refused. Tests: `tests/application/finality.rs`
+  so a floor lowered or raised alone, and a non-zero floor with no receipts,
+  are refused. (Round 3, Sol P3: a floor rewritten together with every retained
+  acknowledgement is consistent and restores; see the round-3 trust boundary.)
+  Tests: `tests/application/finality.rs`
   (`a_lowered_acknowledgement_floor_is_refused_…`, `a_raised_…`), ledger
   mutations in `src/retention/tests.rs`.
 - **Reachable LRU state (Sol P2, Opus P3-5).** Restore refuses index 0 for any
@@ -385,12 +387,9 @@ install. Formats change again (no migration; the crate is unpublished).
   `window − 1` (20 bits), `registrations − 1` (16 bits); the limits' ranges fit,
   so the map is injective. Readiness, snapshot install and restore compare it
   exactly, so replicas with windows 32 and 64 refuse each other's declaration
-  with `UnsupportedSchema`. Embedder rule: build every replica with the same
-  `SessionLimits`; a wrapper that reports its own schema (`Maintenance`, the
-  logical activation wrapper) hides the inner schema from readiness, so give
-  every replica behind it the same limits or derive the wrapper schema from
-  them (`SessionLimits::schema`). The service's peers all run its fixed limits,
-  so its maintenance profile stays schema 3. Test:
+  with `UnsupportedSchema`. Round 2 left wrappers as a documented embedder rule
+  (Sol round 2 P2 showed it still diverged); round 3 enforces it by composing
+  the inner schema into `Maintenance`'s and the activation wrapper's. Test:
   `replicas_with_different_session_limits_refuse_the_same_declaration`;
   `readiness_refuses_a_learner_whose_session_limits_differ` (tests/learners.rs).
 - **Wrappers forward an undeclared inner rule (Opus P2-1).**
@@ -406,8 +405,12 @@ install. Formats change again (no migration; the crate is unpublished).
   meets the rule at apply. A committed command outside it (admission bypassed)
   is refused `Window` and closes its session, so every later copy is
   `Expired` and never executes. Recording the refusal as a receipt was
-  rejected: its sequence lies outside the retained window, which would break
-  the S·K bound. Test: `a_committed_window_refusal_is_final_for_its_sequence`;
+  rejected, but not because one refusal could never fit (round 3 correction,
+  Sol): a refused sequence inside the floor's window, with a free slot, could
+  be charged to that slot. What cannot be kept under S·K is a refusal for an
+  arbitrary far-future sequence, or one arriving when K receipts are already
+  held; closing the session is bounded in every case. Closure amends plan §1.4
+  step 2 (round 3 record). Test: `a_committed_window_refusal_is_final_for_its_sequence`;
   `admission_reads_the_command_alone` and
   `a_committed_window_refusal_closes_the_session_…` in `src/retention/tests.rs`.
 - **Client rules (Sol P2-3, Opus P2-3).** `docs/COUNTER_SERVICE.md` "Client rules

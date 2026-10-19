@@ -155,7 +155,7 @@ fn same_term_completion_recovers_and_older_completion_cannot_escape() {
     assert_eq!(done.phase, LeadershipPhase::Completed { index: 2, term: 2 });
     let bytes = a.checkpoint(10000).unwrap();
     let mut restored = app(2);
-    restored.restore_checkpoint(8001, 2, &bytes).unwrap();
+    restored.restore_checkpoint(schema(), 2, &bytes).unwrap();
     assert_eq!(restored.record(i.request.operation), Some(done));
     assert_eq!(
         recorded(&mut restored, command(3, 3, LeadershipCommand::Begin(i))),

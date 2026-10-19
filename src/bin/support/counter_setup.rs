@@ -36,7 +36,7 @@ pub fn application() -> Result<Counter, Failure> {
     let requirements = voteboat::raft::ReadinessRequirements {
         application_schema: Counter::schema(limits),
         command_bytes: COUNTER_COMMAND_BYTES,
-        snapshot_bytes: 279_092,
+        snapshot_bytes: 279_108,
     };
     checked(app.validate_readiness_requirements(requirements))?;
     let wire = voteboat::wire::WireLimits::default();

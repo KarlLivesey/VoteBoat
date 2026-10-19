@@ -19,15 +19,16 @@ use crate::retention::{
     SessionRequest,
 };
 
-/// Counter checkpoint format (`VBCTR002`, 16-byte commands): the low byte of
+/// Counter checkpoint format (`VBCTR003`, 16-byte commands): the low byte of
 /// every Counter application schema. The full schema also encodes the session
 /// limits ([`Counter::schema`]), so it never equals an earlier Counter schema
-/// (1) or a leadership-maintenance profile schema (2 before DR1, now 3).
-pub const COUNTER_FORMAT: u8 = 4;
+/// (1, or format 4 for `VBCTR002`) or a leadership-maintenance profile schema
+/// (2 before DR1; maintenance schemas now use the top four bits).
+pub const COUNTER_FORMAT: u8 = 5;
 /// Bytes of an operation command: `consumed_through` (u64 LE), delta (i64 LE).
 /// A registration command has no bytes.
 pub const COUNTER_COMMAND_BYTES: usize = 16;
-const MAGIC: &[u8; 8] = b"VBCTR002";
+const MAGIC: &[u8; 8] = b"VBCTR003";
 const HEADER_BYTES: usize = 24;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -384,8 +385,8 @@ impl CheckpointStateMachine for Counter {
     fn schema_version(&self) -> u64 {
         Self::schema(self.limits())
     }
-    /// `VBCTR002`, applied index, value, then the ledger: limits, the session
-    /// allocation mark, live sessions with their acknowledged prefixes and
+    /// `VBCTR003`, applied index, value, then the ledger: limits, the session
+    /// allocation mark and its closure record, live sessions with their acknowledged prefixes and
     /// retained receipts, and retained registration nonces.
     fn checkpoint(&self, max_bytes: usize) -> Result<Vec<u8>, ApplicationError> {
         let length = HEADER_BYTES + self.ledger.encoded_len();

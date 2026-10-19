@@ -21,7 +21,11 @@
 //! `Counter::schema` of one session × 16 × one nonce, `0x0F00_0004`) changed;
 //! the wrapper layout is unchanged. DR1 round 2 regenerated them again: each
 //! retained Counter receipt now carries its acknowledgement (8 bytes), and the
-//! inner schema encodes the session limits.
+//! inner schema encodes the session limits. DR1 round 3 regenerated
+//! `v2-empty.bin`, `v2-populated.bin` and `v2-profile.bin` once more: the
+//! inner Counter checkpoint is `VBCTR003` (16 more ledger-header bytes for the
+//! closure record), the inner schema's format byte is 5, and the profile's
+//! application schema is `logical_activation_schema` of the inner schema.
 use super::*;
 const OLD_SCHEMA: u64 = 0x5642_4143_5449_0001;
 const V1_EMPTY: &[u8] = include_bytes!("formats/v1-empty.bin");
@@ -60,13 +64,13 @@ fn v2_encodings_are_pinned_and_round_trip() {
     for (applied, bytes) in [(0, V2_EMPTY), (2, V2_POPULATED)] {
         let mut restored = app(2);
         restored
-            .restore_checkpoint(LOGICAL_ACTIVATION_SCHEMA, applied, bytes)
+            .restore_checkpoint(app(2).schema_version(), applied, bytes)
             .unwrap();
         assert_eq!(restored.checkpoint(usize::MAX).unwrap(), bytes);
     }
     let mut restored = app(2);
     restored
-        .restore_checkpoint(LOGICAL_ACTIVATION_SCHEMA, 2, V2_POPULATED)
+        .restore_checkpoint(app(2).schema_version(), 2, V2_POPULATED)
         .unwrap();
     assert_eq!(restored.active(), Some(ops(1).begin));
     assert_eq!(restored.inner.read_at(2, ()).unwrap(), 5);
@@ -76,12 +80,12 @@ fn v1_checkpoints_commands_and_profiles_are_refused_typed() {
     assert_eq!(&V1_EMPTY[..8], b"VBACTC01");
     assert_eq!(&V1_BEGIN[..8], b"VBACTA01");
     assert_eq!(&V1_PROFILE[..8], b"VBACTP01");
-    assert_ne!(LOGICAL_ACTIVATION_SCHEMA, OLD_SCHEMA);
+    assert_ne!(app(2).schema_version(), OLD_SCHEMA);
     let mut a = app(2);
     let before = a.checkpoint(usize::MAX).unwrap();
     for (applied, bytes) in [(0, V1_EMPTY), (2, V1_POPULATED)] {
         assert_eq!(
-            a.restore_checkpoint(LOGICAL_ACTIVATION_SCHEMA, applied, bytes),
+            a.restore_checkpoint(app(2).schema_version(), applied, bytes),
             Err(ApplicationError::InvalidCheckpoint)
         );
         assert_eq!(

@@ -203,21 +203,23 @@ mod at {
     pub const NEXT: usize = 12;
     pub const SESSION_COUNT: usize = 20;
     pub const REGISTRATION_COUNT: usize = 24;
-    pub const FIRST_ID: usize = 28;
-    pub const FIRST_FLOOR: usize = 36;
-    pub const FIRST_LAST_INDEX: usize = 44;
-    pub const FIRST_COUNT: usize = 52;
-    pub const FIRST_RECEIPT: usize = 56;
-    pub const FIRST_RECEIPT_ACK: usize = 64;
-    pub const SECOND_RECEIPT: usize = 88;
-    pub const SECOND_RECEIPT_ACK: usize = 96;
-    pub const SECOND_ID: usize = 120;
-    pub const SECOND_FLOOR: usize = 128;
-    pub const SECOND_LAST_INDEX: usize = 136;
-    pub const NONCE: usize = 148;
-    pub const NONCE_SESSION: usize = 156;
-    pub const NONCE_INDEX: usize = 164;
-    pub const END: usize = 172;
+    pub const CLOSED: usize = 28;
+    pub const CLOSED_AT: usize = 36;
+    pub const FIRST_ID: usize = 44;
+    pub const FIRST_FLOOR: usize = 52;
+    pub const FIRST_LAST_INDEX: usize = 60;
+    pub const FIRST_COUNT: usize = 68;
+    pub const FIRST_RECEIPT: usize = 72;
+    pub const FIRST_RECEIPT_ACK: usize = 80;
+    pub const SECOND_RECEIPT: usize = 104;
+    pub const SECOND_RECEIPT_ACK: usize = 112;
+    pub const SECOND_ID: usize = 136;
+    pub const SECOND_FLOOR: usize = 144;
+    pub const SECOND_LAST_INDEX: usize = 152;
+    pub const NONCE: usize = 164;
+    pub const NONCE_SESSION: usize = 172;
+    pub const NONCE_INDEX: usize = 180;
+    pub const END: usize = 188;
 }
 
 #[test]
@@ -326,6 +328,18 @@ fn mutations(bytes: &[u8]) -> Vec<(&'static str, Vec<u8>)> {
         (
             "nonce on a session with a floor",
             put(at::SECOND_FLOOR, &1u64.to_le_bytes()),
+        ),
+        (
+            "allocation mark above the newest session",
+            put(at::NEXT, &4u64.to_le_bytes()),
+        ),
+        (
+            "closure record for a live session",
+            put(at::CLOSED, &2u64.to_le_bytes()),
+        ),
+        (
+            "closure index without a session",
+            put(at::CLOSED_AT, &3u64.to_le_bytes()),
         ),
     ]
 }
@@ -443,5 +457,187 @@ fn registration_eviction_drops_the_least_recent_session_and_its_nonce() {
     assert_eq!(
         Ledger::bound_bytes(limits(2, 4, 4)),
         LEDGER_HEADER_BYTES + 2 * SESSION_HEADER_BYTES + 8 * 32 + 4 * REGISTRATION_BYTES
+    );
+}
+
+/// Sol's round-2 P1 history on the bare ledger: session 2 registered at 1,
+/// executes sequence 1 at 2, and is closed by a window refusal at 3.
+fn closed_newest() -> (Ledger, Vec<u8>) {
+    let mut ledger = Ledger::with_default_session(limits(2, 4, 2));
+    assert_eq!(ledger.register(1, 77), Ok((2, false)));
+    assert_eq!(
+        run(&mut ledger, 2, command(2, 1, 0), 7),
+        SessionApply::Executed([8; 8])
+    );
+    assert_eq!(
+        run(&mut ledger, 3, command(2, 5, 0), 9),
+        SessionApply::Refused(SessionRefusal::Window)
+    );
+    let bytes = encoded(&ledger);
+    (ledger, bytes)
+}
+
+#[test]
+fn closing_the_newest_session_keeps_the_allocation_fence() {
+    let (ledger, bytes) = closed_newest();
+    assert_eq!(ledger.live_sessions(), 1);
+    assert_eq!(ledger.next_session(), 3);
+    assert_eq!(
+        bytes[at::CLOSED..at::CLOSED_AT + 8],
+        [2u64.to_le_bytes(), 3u64.to_le_bytes()].concat()
+    );
+    assert_eq!(ledger.decode(&bytes, 3).unwrap().0, ledger);
+    let put = |at: usize, value: u64| {
+        let mut b = bytes.clone();
+        b[at..at + 8].copy_from_slice(&value.to_le_bytes());
+        b
+    };
+    let mut no_record = put(at::CLOSED, 0);
+    no_record[at::CLOSED_AT..at::CLOSED_AT + 8].copy_from_slice(&0u64.to_le_bytes());
+    for (name, image) in [
+        // The rollback: session 2 would be allocated again.
+        ("allocation mark lowered", put(at::NEXT, 2)),
+        ("closure record dropped", no_record),
+        (
+            "closure record moved to the built-in session",
+            put(at::CLOSED, 1),
+        ),
+        (
+            "closure at the closed session's registration",
+            put(at::CLOSED_AT, 1),
+        ),
+        ("closure at index zero", put(at::CLOSED_AT, 0)),
+        ("closure after applied", put(at::CLOSED_AT, 4)),
+    ] {
+        assert_eq!(
+            ledger.decode(&image, 3).err(),
+            Some(ApplicationError::InvalidCheckpoint),
+            "{name}"
+        );
+    }
+    // The intact image keeps the fence: the closed session's IDs are
+    // expired and the next registration gets a new session, which clears the
+    // record.
+    let (mut restored, _) = ledger.decode(&bytes, 3).unwrap();
+    assert_eq!(
+        run(&mut restored, 4, command(2, 1, 0), 7),
+        SessionApply::Refused(SessionRefusal::Expired)
+    );
+    assert_eq!(restored.register(5, 88), Ok((3, false)));
+    let bytes = encoded(&restored);
+    assert_eq!(bytes[at::CLOSED..at::CLOSED_AT + 8], [0; 16]);
+    assert_eq!(restored.decode(&bytes, 5).unwrap().0, restored);
+}
+
+#[test]
+fn a_closure_record_is_a_closure_entry() {
+    // The built-in session used at 1 and 2, session 2 registered at 3 and
+    // closed at 5 after the built-in session's use at 4.
+    let mut ledger = Ledger::with_default_session(limits(3, 4, 3));
+    run(&mut ledger, 1, command(1, 1, 0), 1);
+    run(&mut ledger, 2, command(1, 2, 0), 1);
+    assert_eq!(ledger.register(3, 10), Ok((2, false)));
+    run(&mut ledger, 4, command(1, 3, 0), 1);
+    assert_eq!(
+        run(&mut ledger, 5, command(2, 9, 0), 1),
+        SessionApply::Refused(SessionRefusal::Window)
+    );
+    let bytes = encoded(&ledger);
+    assert_eq!(ledger.decode(&bytes, 5).unwrap().0, ledger);
+    let mut used_entry = bytes.clone();
+    used_entry[at::CLOSED_AT..at::CLOSED_AT + 8].copy_from_slice(&4u64.to_le_bytes());
+    assert_eq!(
+        ledger.decode(&used_entry, 5).err(),
+        Some(ApplicationError::InvalidCheckpoint),
+        "closure at an entry that used a live session"
+    );
+    // Closing an older session keeps no record: the newest is still live.
+    assert_eq!(ledger.register(6, 11), Ok((3, false)));
+    assert_eq!(
+        run(&mut ledger, 7, command(1, 9, 0), 1),
+        SessionApply::Refused(SessionRefusal::Window)
+    );
+    let bytes = encoded(&ledger);
+    assert_eq!(bytes[at::CLOSED..at::CLOSED_AT + 8], [0; 16]);
+    assert_eq!(ledger.decode(&bytes, 7).unwrap().0, ledger);
+}
+
+#[test]
+fn restore_refuses_an_allocation_mark_no_history_reaches() {
+    // At applied index 0 nothing was registered, so the mark is the first
+    // allocatable session, whatever evidence the image claims.
+    let ledger = Ledger::with_default_session(limits(2, 4, 2));
+    let bytes = encoded(&ledger);
+    assert_eq!(ledger.decode(&bytes, 0).unwrap().0, ledger);
+    let mut far = bytes.clone();
+    far[at::NEXT..at::NEXT + 8].copy_from_slice(&100u64.to_le_bytes());
+    assert!(ledger.decode(&far, 0).is_err(), "mark 100 at index 0");
+    let mut claimed = far.clone();
+    claimed[at::CLOSED..at::CLOSED + 8].copy_from_slice(&99u64.to_le_bytes());
+    claimed[at::CLOSED_AT..at::CLOSED_AT + 8].copy_from_slice(&1u64.to_le_bytes());
+    // Fewer entries than allocations, or a closure before session 99 can
+    // have been registered (the 98th registration is at index 98 or later).
+    for applied in [0, 1, 97, 99, 1000] {
+        assert!(
+            ledger.decode(&claimed, applied).is_err(),
+            "mark 100 with a closure at index 1, applied {applied}"
+        );
+    }
+    // The same shape from a history: each registration closed at once.
+    let mut history = ledger.clone();
+    for n in 1..=98 {
+        assert_eq!(history.register(2 * n - 1, n), Ok((n + 1, false)));
+        let closed = run(&mut history, 2 * n, command(n + 1, 9, 0), 1);
+        assert_eq!(closed, SessionApply::Refused(SessionRefusal::Window));
+    }
+    let bytes = encoded(&history);
+    assert_eq!(history.next_session(), 100);
+    assert_eq!(history.decode(&bytes, 196).unwrap().0, history);
+    // A live session's last use is no earlier than its registration.
+    let mut live = Ledger::with_default_session(limits(2, 4, 2));
+    for (index, nonce) in [(1, 10), (2, 11), (3, 12)] {
+        live.register(index, nonce).unwrap();
+    }
+    let bytes = encoded(&live);
+    assert_eq!(live.decode(&bytes, 3).unwrap().0, live);
+    let last_index = last_index_offsets(&bytes);
+    let mut early = bytes.clone();
+    early[last_index[0]..last_index[0] + 8].copy_from_slice(&1u64.to_le_bytes());
+    let nonce_index = bytes.len() - 2 * REGISTRATION_BYTES + 16;
+    early[nonce_index..nonce_index + 8].copy_from_slice(&1u64.to_le_bytes());
+    assert!(
+        live.decode(&early, 3).is_err(),
+        "session 3 used before index 2"
+    );
+}
+
+#[test]
+fn restore_refuses_an_unused_session_whose_nonce_no_history_dropped() {
+    // Three nonces for three sessions: no registration ever drops one.
+    let mut ledger = Ledger::with_default_session(limits(3, 4, 3));
+    assert_eq!(ledger.register(1, 10), Ok((2, false)));
+    let bytes = encoded(&ledger);
+    assert_eq!(ledger.decode(&bytes, 1).unwrap().0, ledger);
+    let mut dropped = bytes[..bytes.len() - REGISTRATION_BYTES].to_vec();
+    dropped[at::REGISTRATION_COUNT..at::REGISTRATION_COUNT + 4]
+        .copy_from_slice(&0u32.to_le_bytes());
+    assert_eq!(
+        ledger.decode(&dropped, 1).err(),
+        Some(ApplicationError::InvalidCheckpoint)
+    );
+    // With one nonce, registration drops the oldest: session 1 loses its
+    // nonce to session 2. The newer session cannot be the one without.
+    let mut ledger = Ledger::new(limits(4, 4, 1));
+    assert_eq!(ledger.register(1, 10), Ok((1, false)));
+    assert_eq!(ledger.register(2, 11), Ok((2, false)));
+    let bytes = encoded(&ledger);
+    assert_eq!(ledger.decode(&bytes, 2).unwrap().0, ledger);
+    let mut moved = bytes.clone();
+    let session = bytes.len() - REGISTRATION_BYTES + 8;
+    moved[session..session + 8].copy_from_slice(&1u64.to_le_bytes());
+    moved[session + 8..session + 16].copy_from_slice(&1u64.to_le_bytes());
+    assert_eq!(
+        ledger.decode(&moved, 2).err(),
+        Some(ApplicationError::InvalidCheckpoint)
     );
 }

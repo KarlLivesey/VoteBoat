@@ -24,7 +24,11 @@ fn intent(op: u128, target: u64) -> LeadershipIntent {
     }
 }
 fn app(capacity: usize) -> Maintenance<Counter> {
-    Maintenance::new(group(1), 8001, capacity, Counter::new(1).unwrap()).unwrap()
+    Maintenance::new(group(1), 1, capacity, Counter::new(1).unwrap()).unwrap()
+}
+/// The schema of `app`: format 1 above the inner Counter's schema.
+fn schema() -> u64 {
+    maintenance_schema(1, Counter::new(1).unwrap().schema_version()).unwrap()
 }
 fn command(index: u64, term: u64, c: LeadershipCommand) -> LogEntry {
     LogEntry {
@@ -88,7 +92,7 @@ fn data_and_administration_retries_remain_independent_and_survive_checkpoint() {
     );
     let bytes = a.checkpoint(10000).unwrap();
     let mut recovered = app(2);
-    recovered.restore_checkpoint(8001, 4, &bytes).unwrap();
+    recovered.restore_checkpoint(schema(), 4, &bytes).unwrap();
     assert_eq!(
         recovered.record(OperationId::new(SHARED).unwrap()),
         Some(result)
@@ -211,20 +215,18 @@ fn malformed_batches_and_checkpoint_refusals_leave_the_original_state_unchanged(
     assert!(a.apply_batch(&[data(2, 1, 7), invalid]).is_err());
     assert_eq!(a.checkpoint(10000).unwrap(), original);
     for end in 0..original.len() {
-        assert!(a.restore_checkpoint(8001, 1, &original[..end]).is_err());
+        assert!(a.restore_checkpoint(schema(), 1, &original[..end]).is_err());
         assert_eq!(a.checkpoint(10000).unwrap(), original);
     }
     let mut trailing = original.clone();
     trailing.push(0);
-    assert!(a.restore_checkpoint(8001, 1, &trailing).is_err());
+    assert!(a.restore_checkpoint(schema(), 1, &trailing).is_err());
     assert!(a.restore_checkpoint(8002, 1, &original).is_err());
-    assert!(app(1).restore_checkpoint(8001, 1, &original).is_err());
-    assert!(
-        Maintenance::new(group(2), 8001, 2, Counter::new(1).unwrap())
-            .unwrap()
-            .restore_checkpoint(8001, 1, &original)
-            .is_err()
-    );
+    assert!(app(1).restore_checkpoint(schema(), 1, &original).is_err());
+    assert!(Maintenance::new(group(2), 1, 2, Counter::new(1).unwrap())
+        .unwrap()
+        .restore_checkpoint(schema(), 1, &original)
+        .is_err());
     assert_eq!(a.checkpoint(10000).unwrap(), original);
 }
 #[test]
@@ -252,13 +254,13 @@ fn command_codec_rejects_truncation_and_operation_mismatch_and_old_profiles() {
     };
     assert!(app(1).apply_batch(&[e]).is_err());
     assert!(Counter::new(1).unwrap().apply_batch(&[c]).is_err());
-    assert!(Maintenance::new(
-        group(1),
-        Counter::new(1).unwrap().schema_version(),
-        1,
-        Counter::new(1).unwrap()
-    )
-    .is_err());
+    // The wrapper's schema never equals the inner one, even for a format
+    // numerically equal to the inner schema (5 for `Counter::new(1)`): the
+    // format sits above every bit of the inner schema.
+    let inner = Counter::new(1).unwrap().schema_version();
+    let numbered = Maintenance::new(group(1), inner, 1, Counter::new(1).unwrap()).unwrap();
+    assert_eq!(numbered.schema_version(), inner << 60 | inner);
+    assert_ne!(numbered.schema_version(), inner);
     let mut old = Counter::new(1).unwrap();
     old.apply_batch(&[LogEntry {
         index: 1,
@@ -266,7 +268,7 @@ fn command_codec_rejects_truncation_and_operation_mismatch_and_old_profiles() {
         payload: EntryPayload::Noop,
     }])
     .unwrap();
-    assert!(Maintenance::new(group(1), 8001, 1, old).is_err());
+    assert!(Maintenance::new(group(1), 1, 1, old).is_err());
 }
 
 #[cfg(feature = "native")]
@@ -438,10 +440,11 @@ fn maintenance_around_an_undeclared_application_is_refused_at_readiness() {
 #[test]
 fn an_old_schema_two_maintenance_checkpoint_is_refused_by_schema_before_replay() {
     // Before DR1 the leadership-maintenance profile was schema 2, and DR1's
-    // first Counter was schema 2 as well. Counter schemas now carry format 4
-    // in the low byte, so no Counter schema equals 1, 2 or 3 and an old
-    // profile checkpoint is refused by the exact schema check that snapshot
-    // install performs before restore and replay.
+    // first Counter was schema 2 as well. Counter schemas now carry format 5
+    // in the low byte and maintenance schemas a format in the top four bits,
+    // so neither equals 1, 2 or 3, and a checkpoint of another profile format
+    // is refused by the exact schema check that snapshot install performs
+    // before restore and replay.
     let old = Maintenance::new(group(1), 2, 64, Counter::new(4).unwrap()).unwrap();
     let image = old.checkpoint(usize::MAX).unwrap();
     for window in [1, 4, 32] {
@@ -455,12 +458,66 @@ fn an_old_schema_two_maintenance_checkpoint_is_refused_by_schema_before_replay()
         plain.restore_checkpoint(old.schema_version(), 0, &image),
         Err(ApplicationError::UnsupportedSchema)
     );
-    // The current profile (schema 3) refuses it too; snapshot install
+    // The current profile (format 3) refuses it too; snapshot install
     // compares the schema exactly before calling restore at all.
     let mut profile = Maintenance::new(group(1), 3, 64, Counter::new(4).unwrap()).unwrap();
+    for schema in [old.schema_version(), profile.schema_version()] {
+        assert!(schema >> 60 != 0 && ![1, 2, 3].contains(&schema));
+    }
     assert_eq!(
         profile.restore_checkpoint(old.schema_version(), 0, &image),
         Err(ApplicationError::InvalidCheckpoint)
     );
     assert_ne!(profile.schema_version(), old.schema_version());
+}
+
+#[test]
+fn wrapped_counters_with_different_session_limits_refuse_each_other_before_any_entry() {
+    use voteboat::retention::SessionLimits;
+    // Reviewer reproducer (round 2, P2): the same profile format and
+    // maintenance capacity around Counters with 2 and 3 sessions. With one
+    // schema for both, both accepted the larger declaration, and after
+    // registrations 77, 88, 99 the command (2, 1, 0, +7) was `Expired`
+    // (value 0) on one replica and executed (value 7) on the other.
+    let wrap = |sessions| {
+        let limits = SessionLimits::new(sessions, 4, 4).unwrap();
+        Maintenance::new(group(1), 3, 64, Counter::with_limits(limits).unwrap()).unwrap()
+    };
+    let (small, large) = (wrap(2), wrap(3));
+    assert_ne!(small.schema_version(), large.schema_version());
+    for (replica, leader) in [(&small, &large), (&large, &small)] {
+        let declared = leader.deployment_requirements().unwrap();
+        assert_eq!(leader.validate_deployment_requirements(declared), Ok(()));
+        assert_eq!(
+            replica.validate_deployment_requirements(declared),
+            Err(ApplicationError::UnsupportedSchema)
+        );
+        assert_eq!(replica.applied_index(), 0);
+    }
+    // The schema is the format above the inner identity, exactly.
+    let inner = Counter::schema(SessionLimits::new(2, 4, 4).unwrap());
+    assert_eq!(
+        small.schema_version(),
+        maintenance_schema(3, inner).unwrap()
+    );
+    assert_eq!(small.schema_version(), 3 << 60 | inner);
+    // The service profile: format 3 around the service's Counter limits.
+    let service = Maintenance::new(
+        group(1),
+        3,
+        64,
+        Counter::with_limits(SessionLimits::default()).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(
+        service.schema_version(),
+        maintenance_schema(3, Counter::schema(SessionLimits::default())).unwrap()
+    );
+    // Formats outside 1..=15 and inner schemas using the top four bits are
+    // refused, so the map stays injective.
+    for format in [0, MAX_MAINTENANCE_FORMAT + 1, 8001] {
+        assert!(Maintenance::new(group(1), format, 64, Counter::new(1).unwrap()).is_err());
+    }
+    assert_eq!(maintenance_schema(1, 1 << 60), None);
+    assert!(Maintenance::new(group(1), 1, 64, service).is_err());
 }

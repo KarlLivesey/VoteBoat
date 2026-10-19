@@ -12,17 +12,21 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-//! Exactly-once guards found in review: the acknowledged floor is validated
-//! exactly on restore, replicas cannot disagree on the session limits, and a
-//! committed window refusal is final for its sequence.
+//! Exactly-once guards found in review: the acknowledged floor and the
+//! session allocation mark are validated against their evidence on restore,
+//! replicas cannot disagree on the session limits, and a committed window
+//! refusal is final for its sequence.
 use super::*;
 
 fn limits(sessions: u32, window: u32, registrations: u32) -> SessionLimits {
     SessionLimits::new(sessions, window, registrations).unwrap()
 }
 /// Offset of the built-in session's floor in a Counter checkpoint: the
-/// 24-byte Counter header, the 28-byte ledger header, then the session ID.
-const BUILT_IN_FLOOR: usize = 24 + 28 + 8;
+/// 24-byte Counter header, the 44-byte ledger header, then the session ID.
+const BUILT_IN_FLOOR: usize = 24 + 44 + 8;
+/// Offset of the session allocation mark: the Counter header, then the
+/// ledger's three 4-byte limits.
+const NEXT_SESSION: usize = 24 + 12;
 
 fn with_floor(image: &[u8], floor: u64) -> Vec<u8> {
     let mut image = image.to_vec();
@@ -150,4 +154,46 @@ fn a_committed_window_refusal_is_final_for_its_sequence() {
         counter.lookup_operation(op(2, 5)),
         CounterLookup::Retained(_)
     ));
+}
+
+#[test]
+fn a_lowered_allocation_mark_after_closure_is_refused_so_a_retired_session_is_never_reallocated() {
+    // Reviewer reproducer (round 2, P1): session 2 executes +7, then a
+    // committed window refusal closes it, so session 2 is the newest
+    // allocated session and is not live.
+    let limits = limits(2, 4, 2);
+    let mut counter = Counter::with_limits(limits).unwrap();
+    let receipts = counter
+        .apply_batch(&[register(1, 77), add(2, 2, 1, 0, 7), add(3, 2, 5, 0, 9)])
+        .unwrap();
+    assert_eq!(receipts[0].outcome, CounterOutcome::Registered(2));
+    assert_eq!(receipts[1].outcome, CounterOutcome::Value(7));
+    assert_eq!(
+        receipts[2].outcome,
+        CounterOutcome::Refused(SessionRefusal::Window)
+    );
+    assert_eq!(counter.lookup_operation(op(2, 1)), CounterLookup::Expired);
+    let image = counter.checkpoint(usize::MAX).unwrap();
+    assert_eq!(image[NEXT_SESSION..NEXT_SESSION + 8], 3u64.to_le_bytes());
+    // Lowering only the mark 3 → 2 would hand session 2 to the next
+    // registration, and the retry of (2, 1) would execute again (7 → 14).
+    let mut lowered = image.clone();
+    lowered[NEXT_SESSION..NEXT_SESSION + 8].copy_from_slice(&2u64.to_le_bytes());
+    assert_eq!(
+        restore(limits, 3, &lowered).err(),
+        Some(ApplicationError::InvalidCheckpoint)
+    );
+    // The intact image: the next registration gets a new session and the
+    // retry stays expired.
+    let mut restored = restore(limits, 3, &image).unwrap();
+    let after = restored
+        .apply_batch(&[register(4, 88), add(5, 2, 1, 0, 7)])
+        .unwrap();
+    assert_eq!(after[0].outcome, CounterOutcome::Registered(3));
+    assert_eq!(
+        after[1].outcome,
+        CounterOutcome::Refused(SessionRefusal::Expired)
+    );
+    assert!(!after[1].duplicate);
+    assert_eq!(restored.read_applied(5), Ok(7));
 }

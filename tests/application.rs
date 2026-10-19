@@ -73,21 +73,22 @@ fn noop(index: u64) -> LogEntry {
 fn counter_envelope_is_a_steady_state_bound_that_survives_restore() {
     let mut counter = Counter::new(3).unwrap();
     let required = counter.readiness_requirements();
-    // Format 4 in the low byte, then sessions − 1, window − 1 and
+    // Format 5 in the low byte, then sessions − 1, window − 1 and
     // registrations − 1: the schema identifies the limits exactly.
     assert_eq!(
         required.application_schema,
         Counter::schema(SessionLimits::single(3).unwrap())
     );
-    assert_eq!(required.application_schema, 0x0200_0004);
+    assert_eq!(required.application_schema, 0x0200_0005);
     assert_eq!(
         required.application_schema & 0xff,
         u64::from(COUNTER_FORMAT)
     );
     assert_eq!(required.command_bytes, 16);
-    // Header 24, ledger header 28, one session 28 + 3 receipts of 33
-    // (sequence, acknowledgement, delta, outcome), one nonce 24.
-    assert_eq!(required.snapshot_bytes, 24 + 28 + 28 + 3 * 33 + 24);
+    // Header 24, ledger header 44 (with the closure record), one session
+    // 28 + 3 receipts of 33 (sequence, acknowledgement, delta, outcome), one
+    // nonce 24.
+    assert_eq!(required.snapshot_bytes, 24 + 44 + 28 + 3 * 33 + 24);
     assert_eq!(
         counter.retention(),
         Retention::Sessions(SessionLimits::single(3).unwrap())
@@ -486,12 +487,12 @@ mod layout {
     pub const WINDOW: usize = 28;
     pub const NEXT_SESSION: usize = 36;
     pub const SESSION_COUNT: usize = 44;
-    pub const SESSION_ID: usize = 52;
-    pub const FLOOR: usize = 60;
-    pub const LAST_INDEX: usize = 68;
-    pub const FIRST_RECEIPT: usize = 80;
-    pub const SECOND_RECEIPT: usize = 113;
-    pub const LENGTH: usize = 146;
+    pub const SESSION_ID: usize = 68;
+    pub const FLOOR: usize = 76;
+    pub const LAST_INDEX: usize = 84;
+    pub const FIRST_RECEIPT: usize = 96;
+    pub const SECOND_RECEIPT: usize = 129;
+    pub const LENGTH: usize = 162;
 }
 
 #[test]

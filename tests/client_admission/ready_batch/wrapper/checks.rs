@@ -134,7 +134,12 @@ fn maintenance_wrapper_keeps_actual_capability_and_singleton_data_order() {
         inner.supports_ready_batch()
     );
     assert!(!apps[&group(1)].supports_ready_batch());
-    assert_eq!(apps[&group(1)].schema_version(), 3);
+    // Profile format 3 in the top four bits, the inner Counter's schema below.
+    assert_eq!(apps[&group(1)].schema_version() >> 60, 3);
+    assert_eq!(
+        apps[&group(1)].schema_version() & ((1 << 60) - 1),
+        inner.inner().schema_version()
+    );
     let tickets: Vec<_> = [(1, 7), (1, 9), (1, 7)]
         .into_iter()
         .map(|(id, delta)| {

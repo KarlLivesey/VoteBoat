@@ -11,6 +11,20 @@ mod state;
 use codec::{decode, Envelope};
 
 pub const MAX_MAINTENANCE_RECORDS: usize = 1024;
+/// Largest maintenance profile format (the top four bits of the schema).
+pub const MAX_MAINTENANCE_FORMAT: u64 = 15;
+/// The application schema of a maintenance profile `format`
+/// (`1..=MAX_MAINTENANCE_FORMAT`) around an application with schema `inner`:
+/// `format << 60 | inner`. `None` if either is out of range (`inner` must be
+/// non-zero and leave the top four bits clear). The map is injective, so two
+/// maintenance schemas are equal only if both the formats and the inner
+/// schemas are, and no maintenance schema equals a schema below 2^60.
+pub const fn maintenance_schema(format: u64, inner: u64) -> Option<u64> {
+    if format == 0 || format > MAX_MAINTENANCE_FORMAT || inner == 0 || inner >> 60 != 0 {
+        return None;
+    }
+    Some(format << 60 | inner)
+}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct LeadershipIntent {
@@ -97,11 +111,11 @@ pub enum LeadershipAction {
 }
 /// A separate explicit application schema. Construct from a pristine inner
 /// application; an existing unwrapped store needs migration, not hot wrapping.
-/// Readiness compares this schema, not the inner one, so it must also identify
-/// the inner configuration: build every replica's inner application with the
-/// same configuration (for a Counter, the same `SessionLimits`), or derive the
-/// schema from it (for example `SessionLimits::schema`). Checkpoint restore
-/// still refuses an inner checkpoint of another inner schema.
+/// The schema is [`maintenance_schema`] of the profile format and the inner
+/// schema, so readiness, snapshot install and restore compare the inner
+/// identity too (for a Counter, its session limits): wrapped replicas whose
+/// inner applications would decide an entry differently refuse each other.
+/// Checkpoint restore also refuses an inner checkpoint of another inner schema.
 /// Data and administrative operation IDs occupy distinct framed namespaces.
 /// Select this as the outer application so Node checks its proposal context.
 #[derive(Clone)]
@@ -113,20 +127,22 @@ pub struct Maintenance<A> {
     records: BTreeMap<OperationId, LeadershipRecord>,
 }
 impl<A: CheckpointStateMachine> Maintenance<A> {
+    /// `format` is the maintenance profile, `1..=MAX_MAINTENANCE_FORMAT`.
     pub fn new(
         group: GroupIdentity,
-        schema: u64,
+        format: u64,
         capacity: usize,
         inner: A,
     ) -> Result<Self, ApplicationError> {
-        if schema == 0
-            || schema == inner.schema_version()
+        if !(1..=MAX_MAINTENANCE_FORMAT).contains(&format)
             || inner.applied_index() != 0
             || capacity == 0
             || capacity > MAX_MAINTENANCE_RECORDS
         {
             return Err(ApplicationError::InvalidCheckpoint);
         }
+        let schema = maintenance_schema(format, inner.schema_version())
+            .ok_or(ApplicationError::UnsupportedSchema)?;
         inner.validate_group(group)?;
         Ok(Self {
             group,

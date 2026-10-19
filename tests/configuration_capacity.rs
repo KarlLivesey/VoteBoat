@@ -86,7 +86,7 @@ fn full_service_counter_retry_history_fits_selected_native_wire_versions() {
         image.len(),
         required.snapshot_bytes - limits.registrations() * 24
     );
-    assert_eq!(required.snapshot_bytes, 279_092);
+    assert_eq!(required.snapshot_bytes, 279_108);
     let bootstrap = bootstrap(1, 3);
     let membership = Membership::replay(&bootstrap, &[], 0).unwrap();
     let record = record(1);

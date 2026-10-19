@@ -46,7 +46,7 @@ fn original_business_content_retry_and_contiguous_control_positions() {
     let bytes = a.checkpoint(usize::MAX).unwrap();
     let mut reopened = app();
     reopened
-        .restore_checkpoint(LOGICAL_ACTIVATION_SCHEMA, 3, &bytes)
+        .restore_checkpoint(a.schema_version(), 3, &bytes)
         .unwrap();
     assert_eq!(reopened.checkpoint(usize::MAX).unwrap(), bytes);
     let status = reopened.status(begin_op()).unwrap();
@@ -153,11 +153,14 @@ fn canonical_status_and_active_queries_have_complete_distinct_envelopes() {
 #[test]
 fn explicit_schema_mapping_and_lifetime_envelopes() {
     let mut a = app();
-    assert_eq!(a.schema_version(), LOGICAL_ACTIVATION_SCHEMA);
+    assert_eq!(
+        a.schema_version(),
+        logical_activation_schema(a.inner().schema_version())
+    );
     assert!(a.validate_group(group(1)).is_ok());
     assert!(a.validate_group(group(2)).is_err());
     let deployment = a.deployment_requirements().unwrap();
-    assert_eq!(deployment.application_schema, LOGICAL_ACTIVATION_SCHEMA);
+    assert_eq!(deployment.application_schema, a.schema_version());
     assert!(a.validate_deployment_requirements(deployment).is_ok());
     assert!(a
         .validate_deployment_requirements(voteboat::raft::ReadinessRequirements {
@@ -262,7 +265,7 @@ fn opaque_control_profile_is_derived_from_exact_actual_wrapper_configuration() {
     assert_eq!(profile.mappings(), a.mappings());
     assert_eq!(profile.limits(), a.limits());
     assert_eq!(profile.inner_schema(), a.inner().schema_version());
-    assert_eq!(profile.application_schema(), LOGICAL_ACTIVATION_SCHEMA);
+    assert_eq!(profile.application_schema(), a.schema_version());
     assert_eq!(
         profile.response_schema(),
         LOGICAL_ACTIVATION_RESPONSE_SCHEMA
@@ -282,7 +285,7 @@ fn opaque_control_profile_is_derived_from_exact_actual_wrapper_configuration() {
     let original = a.checkpoint(usize::MAX).unwrap();
     let mut restored = app();
     restored
-        .restore_checkpoint(LOGICAL_ACTIVATION_SCHEMA, 0, &original)
+        .restore_checkpoint(a.schema_version(), 0, &original)
         .unwrap();
     assert_eq!(profile, restored.control_profile());
 }

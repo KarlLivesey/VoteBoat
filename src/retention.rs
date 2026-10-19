@@ -49,6 +49,18 @@
 //! retained until a later raise supersedes it: the floor always equals the
 //! largest retained acknowledgement (0 with none), and restore refuses any
 //! other value.
+//!
+//! The allocation mark `next_session` has the same kind of evidence. The
+//! newest allocated session is live unless a window refusal closed it
+//! (eviction happens only inside a registration, which allocates a newer
+//! session), and the ledger then keeps one closure record naming it until the
+//! next allocation. Restore requires the newest allocated session to be
+//! exactly one of the two, so a lowered mark cannot hand out a retired ID.
+//!
+//! These checks detect a watermark that disagrees with its evidence. They do
+//! not authenticate a checkpoint: a consistent rewrite of a watermark and all
+//! of its evidence restores. Checkpoint bytes are trusted input, protected
+//! against accidental corruption by the snapshot and log integrity checks.
 use crate::{application::ApplicationError, identity::OperationId};
 use std::collections::{BTreeMap, VecDeque};
 
@@ -63,8 +75,9 @@ pub const MAX_RETAINED_RECEIPTS: u64 = 1_000_000;
 /// The session that ledgers built with [`SessionLedger::with_default_session`]
 /// hold from construction.
 pub const DEFAULT_SESSION: u64 = 1;
-/// Encoded bytes of the ledger header: limits, `next_session` and counts.
-pub const LEDGER_HEADER_BYTES: usize = 28;
+/// Encoded bytes of the ledger header: limits, `next_session`, counts and the
+/// closure record.
+pub const LEDGER_HEADER_BYTES: usize = 44;
 /// Encoded bytes of one session header, excluding its receipts.
 pub const SESSION_HEADER_BYTES: usize = 28;
 /// Encoded bytes of one retained registration nonce.
@@ -347,6 +360,10 @@ pub struct SessionLedger<C, R> {
     /// Allocation high-water mark (a maximum): every session below it was
     /// allocated once; one that is not live has expired.
     next_session: u64,
+    /// `(session, index)` when the newest allocated session was closed by a
+    /// window refusal at `index`: the evidence for `next_session` while that
+    /// session is not live. One record, cleared by the next allocation.
+    closed_newest: Option<(u64, u64)>,
     sessions: BTreeMap<u64, Session<C, R>>,
     /// Retained registration nonces: nonce → (session, registration index).
     registrations: BTreeMap<u64, (u64, u64)>,
@@ -359,6 +376,7 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
             limits,
             default_session: false,
             next_session: 1,
+            closed_newest: None,
             sessions: BTreeMap::new(),
             registrations: BTreeMap::new(),
         }
@@ -436,6 +454,7 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
             self.drop_oldest_registration();
         }
         self.next_session = session + 1;
+        self.closed_newest = None;
         self.sessions
             .insert(session, Session::new(index, Some(nonce)));
         self.registrations.insert(nonce, (session, index));
@@ -482,7 +501,11 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
         };
         if Self::outside_window(command, window) {
             // Close the session: no later copy of this sequence, whatever
-            // acknowledgement it carries, can execute.
+            // acknowledgement it carries, can execute. Closing the newest
+            // session keeps a record of it, the evidence for `next_session`.
+            if session == self.next_session - 1 {
+                self.closed_newest = Some((session, index));
+            }
             if let Some(nonce) = self.sessions.remove(&session).and_then(|s| s.nonce) {
                 self.registrations.remove(&nonce);
             }
@@ -597,7 +620,8 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
             + self.registrations.len() * REGISTRATION_BYTES
     }
 
-    /// Canonical encoding: limits, `next_session`, counts, sessions in
+    /// Canonical encoding: limits, `next_session`, counts, the closure record
+    /// (zeros without one), sessions in
     /// ascending ID with receipts (sequence, acknowledgement, content,
     /// outcome) in ascending sequence, then registrations in ascending nonce.
     /// Nothing below a floor is encoded.
@@ -608,6 +632,9 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
         out.extend(self.next_session.to_le_bytes());
         out.extend((self.sessions.len() as u32).to_le_bytes());
         out.extend((self.registrations.len() as u32).to_le_bytes());
+        let (closed, closed_at) = self.closed_newest.unwrap_or((0, 0));
+        out.extend(closed.to_le_bytes());
+        out.extend(closed_at.to_le_bytes());
         for (id, s) in &self.sessions {
             out.extend(id.to_le_bytes());
             out.extend(s.floor.to_le_bytes());
@@ -642,29 +669,33 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
             limits,
             default_session: self.default_session,
             next_session: reader.u64()?,
+            closed_newest: None,
             sessions: BTreeMap::new(),
             registrations: BTreeMap::new(),
         };
-        let first = if self.default_session {
-            DEFAULT_SESSION + 1
-        } else {
-            1
-        };
         let session_count = reader.u32()? as usize;
         let registration_count = reader.u32()? as usize;
+        let closed = (reader.u64()?, reader.u64()?);
+        // Each allocation is its own applied entry.
+        let allocations = ledger.next_session.checked_sub(ledger.first());
         if limits != self.limits
-            || ledger.next_session < first
+            || allocations.is_none_or(|n| n > applied)
             || session_count > limits.sessions()
             || registration_count > limits.registrations()
+            || (closed.0 == 0 && closed.1 != 0)
         {
             return Err(ApplicationError::InvalidCheckpoint);
         }
+        ledger.closed_newest = (closed.0 != 0).then_some(closed);
         let mut lru = Lru::default();
         for _ in 0..session_count {
             ledger.decode_session(&mut reader, applied, &mut lru)?;
         }
         for _ in 0..registration_count {
             ledger.decode_registration(&mut reader, applied)?;
+        }
+        if !ledger.allocation_fence_holds(applied, &lru) || !ledger.nonces_are_reachable() {
+            return Err(ApplicationError::InvalidCheckpoint);
         }
         let used = reader.at;
         let mut canonical = Vec::with_capacity(used);
@@ -691,10 +722,15 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
             .sessions
             .last_key_value()
             .is_none_or(|(last, _)| id > *last);
+        let built_in = self.default_session && id == DEFAULT_SESSION;
+        // Session `id` was allocated by the `id − first + 1`th registration,
+        // at that index or later; its last use is no earlier.
+        let registered_by = (id + 1).saturating_sub(self.first());
         if id == 0
             || id >= self.next_session
             || !ascending
             || last_index > applied
+            || (!built_in && last_index < registered_by)
             || count as u64 > window
         {
             return Err(invalid);
@@ -730,15 +766,77 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
         }
         // The command that last raised the floor is retained (its sequence
         // is above the floor), so the floor equals the largest retained
-        // acknowledgement exactly: a lowered floor would re-execute an
+        // acknowledgement exactly: a floor lowered alone would re-execute an
         // acknowledged sequence, a raised one would expire an unacknowledged
         // one. With nothing retained the session never executed: floor 0.
-        let built_in = self.default_session && id == DEFAULT_SESSION;
+        // (A floor rewritten together with every retained acknowledgement is
+        // consistent and not detected; see the module documentation.)
         if floor != acknowledged || !lru.admit(built_in, &session) {
             return Err(invalid);
         }
         self.sessions.insert(id, session);
         Ok(())
+    }
+
+    /// The first ID registration allocates.
+    fn first(&self) -> u64 {
+        if self.default_session {
+            DEFAULT_SESSION + 1
+        } else {
+            1
+        }
+    }
+
+    /// The newest allocated session (`next_session − 1`, if any was ever
+    /// allocated) is exactly one of: live, or the closure record. Then a
+    /// lowered allocation mark, a dropped record or a moved one is refused.
+    /// The record's index is a closure entry: after the session's
+    /// registration (so after every older unused registration), no later
+    /// than `applied`, and not an entry that used a live session.
+    fn allocation_fence_holds(&self, applied: u64, lru: &Lru) -> bool {
+        let newest = self.next_session - 1;
+        if newest == 0 {
+            return self.closed_newest.is_none();
+        }
+        match self.closed_newest {
+            None => self.sessions.contains_key(&newest),
+            Some((id, at)) => {
+                let built_in = self.default_session && id == DEFAULT_SESSION;
+                let earliest = if built_in {
+                    1
+                } else {
+                    // Registered at `id − first + 1` or later, closed after.
+                    (id - self.first()).saturating_add(2)
+                };
+                id == newest
+                    && !self.sessions.contains_key(&id)
+                    && at >= earliest
+                    && at <= applied
+                    && at > lru.unused_registration
+                    && !lru.seen.contains(&at)
+            }
+        }
+    }
+
+    /// Registered sessions that have not executed lose their nonce only when a
+    /// registration finds `registrations` nonces held, oldest first. At most
+    /// `sessions − 1` sessions hold one then, so with `registrations ≥
+    /// sessions` none is ever dropped; otherwise every unused session without
+    /// its nonce is older (lower ID) than every unused session with one.
+    fn nonces_are_reachable(&self) -> bool {
+        let drops_possible = self.limits.registrations < self.limits.sessions;
+        let mut holder_seen = false;
+        for (id, s) in &self.sessions {
+            if !s.retained.is_empty() || (self.default_session && *id == DEFAULT_SESSION) {
+                continue;
+            }
+            match s.nonce {
+                Some(_) => holder_seen = true,
+                None if holder_seen || !drops_possible => return false,
+                None => {}
+            }
+        }
+        true
     }
 
     fn decode_registration(

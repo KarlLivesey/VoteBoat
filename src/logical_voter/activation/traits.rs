@@ -66,7 +66,7 @@ where
             return None;
         }
         Some(crate::raft::ReadinessRequirements {
-            application_schema: LOGICAL_ACTIVATION_SCHEMA,
+            application_schema: logical_activation_schema(inner.application_schema),
             command_bytes: self.limits.command_bytes,
             snapshot_bytes: self.limits.checkpoint_bytes,
         })

@@ -233,11 +233,56 @@ fn limits_carry_no_business_bound() {
     let a = app(2);
     let inner = a.inner.deployment_requirements().unwrap();
     let wrapped = a.deployment_requirements().unwrap();
-    assert_eq!(wrapped.application_schema, LOGICAL_ACTIVATION_SCHEMA);
+    assert_eq!(
+        wrapped.application_schema,
+        LOGICAL_ACTIVATION_SCHEMA ^ inner.application_schema
+    );
+    assert_eq!(wrapped.application_schema, a.schema_version());
     assert_eq!(wrapped.command_bytes, a.limits().command_bytes);
     assert_eq!(wrapped.snapshot_bytes, a.limits().checkpoint_bytes);
     assert!(
         inner.snapshot_bytes + a.limits().control_checkpoint_bound().unwrap()
             <= wrapped.snapshot_bytes
+    );
+}
+
+#[test]
+fn activation_wrappers_around_counters_with_different_limits_refuse_each_other() {
+    // The same activation limits around Counters with windows 16 and 32: the
+    // byte envelope is the activation's own, so only the schema can tell the
+    // replicas apart, and it carries the inner Counter's limits.
+    let wrap = |window| {
+        LogicalActivationApplication::new(
+            group(1),
+            vec![mapping()],
+            LogicalActivationLimits::default(),
+            Counter::new(window).unwrap(),
+        )
+        .unwrap()
+    };
+    let (small, large) = (wrap(16), wrap(32));
+    assert_ne!(small.schema_version(), large.schema_version());
+    for (replica, leader) in [(&small, &large), (&large, &small)] {
+        let declared = leader.deployment_requirements().unwrap();
+        assert_eq!(
+            declared.snapshot_bytes,
+            replica.deployment_requirements().unwrap().snapshot_bytes
+        );
+        assert_eq!(leader.validate_deployment_requirements(declared), Ok(()));
+        assert_eq!(
+            replica.validate_deployment_requirements(declared),
+            Err(ApplicationError::UnsupportedSchema)
+        );
+        // A checkpoint of the other replica is refused by schema too.
+        let image = leader.checkpoint(usize::MAX).unwrap();
+        let mut target = replica.clone();
+        assert_eq!(
+            target.restore_checkpoint(leader.schema_version(), 0, &image),
+            Err(ApplicationError::UnsupportedSchema)
+        );
+    }
+    assert_eq!(
+        small.control_profile().application_schema(),
+        small.schema_version()
     );
 }

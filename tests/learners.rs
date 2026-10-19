@@ -1542,6 +1542,55 @@ fn readiness_refuses_a_learner_whose_session_limits_differ() {
 }
 
 #[test]
+fn readiness_refuses_a_wrapped_learner_whose_inner_session_limits_differ() {
+    use voteboat::{maintenance::Maintenance, retention::SessionLimits};
+    // Leader and learner both run leadership maintenance (format 3, capacity
+    // 2) around a Counter; only the inner session count differs. The wrapper
+    // schema carries the inner identity, so readiness refuses the learner
+    // before it applies any command.
+    let mut log = HostLogStore::new(4);
+    let (mut leader, learner, _, _leader_log) = readiness_cluster(&mut log);
+    let mut snapshots = snapshots();
+    let wrapped = |sessions| {
+        let limits = SessionLimits::new(sessions, 4, 4).unwrap();
+        let counter = Counter::with_limits(limits).unwrap();
+        let mut app = Maintenance::new(group(1), 3, 2, counter).unwrap();
+        app.apply_batch(learner.replay_committed()).unwrap();
+        app
+    };
+    let (small, large) = (wrapped(2), wrapped(3));
+    let declared = large.deployment_requirements().unwrap();
+    let requirements = ReadinessRequirements {
+        snapshot_bytes: 4096,
+        ..declared
+    };
+    assert!(small.deployment_requirements().unwrap().snapshot_bytes <= 4096);
+    let request = leader
+        .begin_learner_readiness(learner_peer(), log.binding().session, requirements)
+        .unwrap();
+    assert_eq!(
+        verify_learner_readiness(
+            &learner,
+            &small,
+            &log,
+            &mut snapshots,
+            request,
+            leader.storage_binding()
+        ),
+        Err(ReadinessError::Capability)
+    );
+    verify_learner_readiness(
+        &learner,
+        &large,
+        &log,
+        &mut snapshots,
+        request,
+        leader.storage_binding(),
+    )
+    .unwrap();
+}
+
+#[test]
 fn readiness_requires_pinned_compacted_data_and_rechecks_configuration_and_commit() {
     let mut log = HostLogStore::new(4);
     let (mut leader, mut learner, app, _leader_log) = readiness_cluster(&mut log);

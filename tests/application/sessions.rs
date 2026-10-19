@@ -158,23 +158,49 @@ fn registration_nonces_are_bounded_oldest_first() {
 
 #[test]
 fn session_exhaustion_is_a_typed_refusal_and_commands_keep_working() {
-    let counter = Counter::new(2).unwrap();
-    let mut image = counter.checkpoint(1024).unwrap();
-    // Next session u64::MAX: 2^64 registrations at 10^6/s take 584,000 years.
-    image[36..44].copy_from_slice(&u64::MAX.to_le_bytes());
-    let mut exhausted = Counter::new(2).unwrap();
-    exhausted
-        .restore_checkpoint(exhausted.schema_version(), 0, &image)
-        .unwrap();
+    // The state after 2^64 − 3 registrations at indexes 1 ..= 2^64 − 3 (at
+    // 10^6/s, 584,000 years), the last one, session 2^64 − 2, not yet used:
+    // the next allocation would be u64::MAX. Restore checks the mark against
+    // the applied index and the newest session, so the image needs both.
+    let (newest, applied) = (u64::MAX - 1, u64::MAX - 2);
+    let mut image = Vec::new();
+    image.extend(b"VBCTR003");
+    image.extend(applied.to_le_bytes());
+    image.extend(0i64.to_le_bytes());
+    for limit in [1u32, 2, 1] {
+        image.extend(limit.to_le_bytes());
+    }
+    image.extend(u64::MAX.to_le_bytes());
+    image.extend(1u32.to_le_bytes());
+    image.extend(1u32.to_le_bytes());
+    image.extend([0; 16]);
+    for field in [newest, 0, applied] {
+        image.extend(field.to_le_bytes());
+    }
+    image.extend(0u32.to_le_bytes());
+    for field in [5, newest, applied] {
+        image.extend(field.to_le_bytes());
+    }
+    let restored = || {
+        let mut exhausted = Counter::new(2).unwrap();
+        exhausted
+            .restore_checkpoint(exhausted.schema_version(), applied, &image)
+            .unwrap();
+        assert_eq!(exhausted.checkpoint(1024).unwrap(), image);
+        exhausted
+    };
+    let mut exhausted = restored();
     let r = exhausted
-        .apply_batch(&[register(1, 5), command(2, 1, 4)])
+        .apply_batch(&[register(u64::MAX - 1, 6), add(u64::MAX, newest, 1, 0, 4)])
         .unwrap();
     assert_eq!(
         r[0].outcome,
         CounterOutcome::Refused(SessionRefusal::Exhausted)
     );
     assert_eq!(r[1].outcome, CounterOutcome::Value(4));
-    let unknown = exhausted.apply_batch(&[add(3, u64::MAX, 1, 0, 1)]).unwrap();
+    let unknown = restored()
+        .apply_batch(&[add(u64::MAX - 1, u64::MAX, 1, 0, 1)])
+        .unwrap();
     assert_eq!(
         unknown[0].outcome,
         CounterOutcome::Refused(SessionRefusal::UnknownSession)

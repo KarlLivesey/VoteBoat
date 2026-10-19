@@ -23,7 +23,7 @@ fn retention_is_exactly_sessions_times_window_at_the_boundary() {
     let required = counter.readiness_requirements();
     assert_eq!(
         required.snapshot_bytes,
-        24 + 28 + 4 * (28 + 8 * 33) + 4 * 24
+        24 + 44 + 4 * (28 + 8 * 33) + 4 * 24
     );
     let index = std::cell::Cell::new(0);
     let next = |entry: &dyn Fn(u64) -> LogEntry, counter: &mut Counter| {
@@ -113,12 +113,12 @@ fn limits_are_validated_and_capped_at_one_million_retained_receipts() {
         ),
         (256, 32, 64)
     );
-    // 24 + 28 + 256 × (28 + 32 × 33) + 64 × 24.
+    // 24 + 44 + 256 × (28 + 32 × 33) + 64 × 24.
     assert_eq!(
         Counter::with_limits(service)
             .unwrap()
             .readiness_requirements()
             .snapshot_bytes,
-        279_092
+        279_108
     );
 }

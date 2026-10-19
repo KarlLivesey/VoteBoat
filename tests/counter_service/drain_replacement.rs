@@ -88,7 +88,15 @@ fn enroll(c: &mut Cluster) {
         String::from_utf8_lossy(&imported.stderr)
     );
     let original = stored(c, 4);
-    assert_eq!(original.snapshot.unwrap().application_schema, 3);
+    // The maintenance profile: format 3 above the service Counter's schema.
+    assert_eq!(
+        original.snapshot.unwrap().application_schema,
+        voteboat::maintenance::maintenance_schema(
+            3,
+            voteboat::application::Counter::schema(voteboat::retention::SessionLimits::default())
+        )
+        .unwrap()
+    );
     c.leadership_maintenance = false;
     assert!(!c.enroll("recover", 4, &destination, 1).status.success());
     assert_eq!(

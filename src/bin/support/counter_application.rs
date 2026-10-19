@@ -13,12 +13,12 @@ pub enum Application {
     Counter(Counter),
     Maintenance(Maintenance<Counter>),
 }
-/// Application schema of the leadership-maintenance profile. It must differ
-/// from the inner Counter's schema, whose low byte is the Counter format (4),
-/// and from the pre-DR1 profile (2), so the profile is schema 3. The profile's
-/// readiness declaration does not carry the inner session limits: every peer
-/// runs this binary's fixed limits (`SessionLimits::default()`).
-pub const MAINTENANCE_SCHEMA: u64 = 3;
+/// Format of the leadership-maintenance profile. Its application schema is
+/// `maintenance_schema(3, Counter::schema(limits))`: the top four bits are the
+/// format and the rest is the inner Counter's schema, so it differs from the
+/// pre-DR1 profile (2) and every plain Counter schema, and a peer whose inner
+/// session limits differ refuses this profile's readiness declaration.
+pub const MAINTENANCE_FORMAT: u64 = 3;
 macro_rules! delegate {
     ($self:expr, $app:ident => $expression:expr) => {
         match $self {
@@ -39,7 +39,7 @@ impl Application {
         Ok(if enabled {
             Self::Maintenance(checked(Maintenance::new(
                 group,
-                MAINTENANCE_SCHEMA,
+                MAINTENANCE_FORMAT,
                 64,
                 counter,
             ))?)
