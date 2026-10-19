@@ -589,6 +589,129 @@ new ledger; the target is untouched on refusal).
    path changes only by one comparison on closure (`session == next_session −
    1`), which is off the hot path.
 
+#### DR1 round 3 implemented (20 October 2026, PR 15)
+
+Implemented as planned above; the deviations are noted inline.
+
+- **Allocation fence across closure (Sol P1).** `SessionLedger` keeps
+  `closed_newest: Option<(session, index)>`, set when a committed window
+  refusal closes the newest allocated session and cleared by the next
+  allocation. Restore (`allocation_fence_holds`) requires the newest allocated
+  session to be live, or exactly that record, and the record's index to be a
+  closure entry (after the session's registration, ≤ applied, not a live
+  session's last-use index, after every unused registration). Bound of the
+  evidence: one 16-byte field, overwritten rather than accumulated; it is the
+  same size after any number of closures, so the 100-year rule holds trivially
+  (the counters it holds are the existing u64 session ID and log index). Tests:
+  `a_lowered_allocation_mark_after_closure_is_refused_…` (Sol's exact
+  reproduction, `tests/application/finality.rs`),
+  `closing_the_newest_session_keeps_the_allocation_fence` and
+  `a_closure_record_is_a_closure_entry` (`src/retention/tests.rs`), three new
+  rows in the ledger mutation table.
+- **Impossible restore states (Sol judgement).** `next_session − first ≤
+  applied`; a live session `n` (not built-in) has last use ≥ `n − first + 1`;
+  `nonces_are_reachable`: with `Rg ≥ S` every unused registered session holds
+  its nonce, and for any `Rg` nonce-less unused sessions precede (lower ID)
+  every unused session with one. Tests:
+  `restore_refuses_an_allocation_mark_no_history_reaches` (mark 100 at index
+  0, and with a claimed closure record) and
+  `restore_refuses_an_unused_session_whose_nonce_no_history_dropped`. The
+  exhaustion test (`session_exhaustion_is_a_typed_refusal_…`) now builds an
+  image consistent with these bounds (mark u64::MAX at applied 2^64 − 3)
+  instead of patching the mark of an empty image.
+- **Wrapped identity (Sol P2), enforced.** `maintenance_schema(format, inner)
+  = format << 60 | inner` (`format` 1..=15, inner below 2^60, else
+  `UnsupportedSchema`/`InvalidCheckpoint` at `Maintenance::new`);
+  `logical_activation_schema(inner) = LOGICAL_ACTIVATION_SCHEMA ^ inner`
+  (construction refuses an inner schema that would make it 0). Each is the
+  wrapper's `schema_version`, readiness declaration, checkpoint schema and (for
+  activation) control-profile application schema. The counter service's
+  maintenance profile is format 3 (`MAINTENANCE_FORMAT`). The other six
+  `Retention::wrapping` sites are unchanged: each commits a bootstrap binding
+  that contains the inner schema, so a skewed replica stops loudly on the first
+  entry instead of diverging. Tests:
+  `wrapped_counters_with_different_session_limits_refuse_each_other_before_any_entry`
+  (tests/leadership_maintenance.rs),
+  `readiness_refuses_a_wrapped_learner_whose_inner_session_limits_differ`
+  (tests/learners.rs; the host learner readiness path, `verify_learner_readiness`,
+  rather than a native one: the plan said "native", the host path is the same
+  check without the transport), and
+  `activation_wrappers_around_counters_with_different_limits_refuse_each_other`.
+- **Trust boundary (Sol P3).** Stated in `src/retention.rs` (module docs and
+  the floor check), docs/COUNTER_SERVICE.md and the narrowed round-2 bullet
+  above. The checks detect a watermark that disagrees with its evidence (the
+  floor against the retained acknowledgements, the allocation mark against the
+  newest live session or the closure record); they do not detect a consistent
+  rewrite of a watermark with all of its evidence. Checkpoints are trusted
+  input under the pack's non-Byzantine model; authentication is out of the
+  plan's scope (§1.4 lists corrupted-watermark checks only).
+- **Closure as a contract amendment (Sol judgement).** Amends plan §1.4 step 2
+  ("a refused outcome is not recorded and does not mutate retained state"):
+  a committed `Refused(Window)` removes its session (and its nonce), and keeps
+  the closure record if it was the newest. Client-visible semantics: an
+  executed in-flight original of that session keeps its single effect; a
+  pending one may never execute; both then answer `Expired`; neither may be
+  re-sent under a new session. Trade-off kept: once no empty session exists,
+  registration churn can evict live sessions (LRU). Plan §1.6 step 3 ("no
+  tombstone") is amended the same way: one record, for the newest session only.
+  The refusal-storage rationale in the round-2 record is corrected.
+
+**Before/after.** Temporary probe target (`tests/zz_round3_probes.rs`, not
+committed): the five finality tests with the floor offset taken from
+`LEDGER_HEADER_BYTES`, Sol's three extra round-2 probes re-created (the 10 → 17
+retry, the committed-window retry, used index 0) and five round-3 probes. Run
+with 120e9cab's, then ece18fc4's, then this branch's `src/` in this worktree.
+
+| Probe | 120e9cab | ece18fc4 | Branch |
+| --- | --- | --- | --- |
+| Round-2 finality tests (4) and Sol's 3 round-2 probes | all 7 fail (`Value(17)`, `Value(5)`, index 0 accepted, …) | pass | pass |
+| P1: mark 3 → 2 after closure | restore refused (no closure existed yet) | restore `Ok`, re-encodes exactly; register 88 → `Registered(2)`; retry (2,1,0,+7) → `Value(14)`, duplicate=false | `InvalidCheckpoint`, state unchanged; intact image: register → session 3, retry `Expired`, value 7 |
+| P2: `Maintenance<Counter>` S=2 vs S=3, format/schema 3 | both schema `0x3`; small accepts large's declaration | same | schemas `0x3000300003000105` / `…0205`; `UnsupportedSchema` both ways |
+| P2: wrapped learner readiness (host path) | — | readiness receipt issued (`Ok`) | `Err(Capability)` |
+| P2: activation wrappers, windows 16 vs 32 | both `0x5642414354490002`, accept | same | different schemas, `UnsupportedSchema` |
+| Mark 100 at applied 0 | `Ok` | `Ok` | `InvalidCheckpoint` |
+| Unused session without nonce, Rg = S = 3 | `Ok` | `Ok` | `InvalidCheckpoint` |
+
+If both skewed Maintenance replicas were forced to apply Sol's history anyway
+(readiness bypassed), they still compute 0 and 7; the fix is that no readiness
+path admits the pair.
+
+**Formats.** Ledger header 28 → 44 bytes (closure record); Counter `VBCTR003`,
+`COUNTER_FORMAT` 5; service envelope 279,108 bytes (24 + 44 + 256 × (28 + 32 ×
+33) + 64 × 24). Maintenance schemas are `format << 60 | inner`; the
+`Maintenance::new` schema argument is now the profile format (1..=15).
+Activation schema is composed. Goldens regenerated: activation `v2-empty`,
+`v2-populated`, `v2-profile` and enrollment `v6-candidate-empty`,
+`v6-candidate-enrolled` (only the inner Counter format byte, the embedded
+ledger header and the profile's application schema differ; `v2-begin` is
+unchanged). The fault-schedule harness's chunk size is 160 (a one-receipt
+image is now 129 bytes).
+
+**CPU (quiet Mac, `svc.sh`, native durable, TCP, WAL on the RAM disk, 15,000
+writes/s offered; marginal = (cpu at 16,000 − cpu at 2,000) / 14,000).** Base
+4920534e (merge base) vs 8741fc0d (code identical to the pushed head).
+
+| 7 ABAB pairs | Marginal µs/original | Pairs (cand/base) | Rate/s | p99 ms |
+| --- | --- | --- | --- | --- |
+| Set 1 | 15.6 → **14.7 (×0.940)** | 0.67 0.94 0.93 0.96 0.93 0.93 0.96 | 14,874 → 14,831 | 20.0 → 20.6 |
+| Set 2 | 15.8 → **15.2 (×0.957)** | 0.85 0.90 0.95 1.02 0.94 0.97 0.96 | 14,860 → 14,839 | 19.8 → 20.1 |
+
+No regression; the round-1 gain (×0.954/×0.959) stands with the round-2
+receipt field and the round-3 closure check. p99 pairs range 0.90–1.11, noise.
+The Mac's load average before the runs was 0.8.
+
+**Checks (Linux, cores 0–3, nice 19, `-j 2`).** fmt; strict Clippy default,
+all-features, no-default-features, native-only: zero. All-features: lib 503
+(+1 ignored), application 31, provider_conformance 42, lifetime_apply_never_errs
+4, effect_owner 210, leadership_maintenance 12, learners 26, counter_service
+205, logical_activation_application 7, startup 60, raft 79, routed 192 (in
+chunks), and every other integration target (109, one batch at a time) except
+`representative_relay_model` (unchanged, no Counter, over 15 minutes in debug).
+Default: lib 501 (+1 ignored), application 31, provider_conformance 42,
+lifetime 4, effect_owner 210, leadership_maintenance 12, learners 25,
+logical_activation_application 7, counter_service 146. Matched workspace: by
+the pre-push hook.
+
 ## Logical-voter reliability track (opened 18 October 2026)
 
 Goal: logical parents and their backing children run indefinitely with bounded
