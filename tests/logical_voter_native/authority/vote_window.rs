@@ -151,7 +151,7 @@ fn settle(
 }
 #[test]
 fn original_accepted_votes_refresh_and_invalidate_queued_election_after_refusal() {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut cluster = Cluster::new(NativePeerProtocol::TcpTls);
     let clock = cluster.clock;
     let mut bridge = LogicalChildBridge::new(
@@ -279,7 +279,7 @@ fn accept_originals(
 #[test]
 fn postaccept_timer_exhaustion_fences_but_keeps_original_queue_proof() {
     use voteboat::worker::PersistenceWorker;
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut cluster = Cluster::new(NativePeerProtocol::TcpTls);
     let clock = cluster.clock;
     let mut bridge = LogicalChildBridge::new(
@@ -355,7 +355,7 @@ fn postaccept_timer_exhaustion_fences_but_keeps_original_queue_proof() {
 
 #[test]
 fn original_granted_reply_acceptance_preserves_full_follower_window() {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut cluster = Cluster::new(NativePeerProtocol::TcpTls);
     let clock = cluster.clock;
     let mut bridge = LogicalChildBridge::new(

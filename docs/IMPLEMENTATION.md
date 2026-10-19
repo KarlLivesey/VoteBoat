@@ -36951,3 +36951,889 @@ User requests current-chain wrap-up, everything committed/pushed, then stop. All
 
 
 Final487 wrap-up archive verification passes: Linux1208payload/1205original/278gzip, Mac1097/1094/44, independent central119/115/50. All recursive seals, original hashes/lengths/modes and lossless containers match. Root's final central reader initially expected a redundant older container_bytes manifest field; the focused parser correction retains exact container SHA/recursive seal/original length checks, with the initial script/error preserved and no data/workload rerun. All owned benchmark, collection, analysis and archive jobs are terminal; final enabled-hook commit/push and clean-tree verification precede pause. No next profiling or optimization is started.
+
+## Active reliability track — started 18 October 2026
+
+### TR1b round 2 schema amendment (before editing)
+
+M3 needs a single accessible coordination namespace, independent of `TMPDIR`.
+Use `/tmp/voteboat-test-ports` on Unix, optionally overridden by
+`VOTEBOAT_TEST_PORT_LEASE_DIR` for CI sandboxes sharing the same socket namespace.
+Create/repair sticky 01777 directories and 0666 persistent lock files independent
+of umask. Open existing files without O_CREAT (Linux protected_regular applies
+to other users' files in sticky directories); std File advisory locks remain
+the cross-process ownership mechanism. If a legacy directory/file cannot be
+repaired or used, drop partial reservations and use a per-user fallback with an
+explicit diagnostic that cross-user handoff/reopen coordination is lost.
+
+Keep acquire -> bound probes -> handoff -> owner/reopen/release -> drop.
+Cleanup closes probes, removes the local registry entry, then drops the file
+lock. Replace private socket-allocating cleanup controls with shared namespace
+leases, retaining the fork gate and lock-release assertion. Namespace controls
+exercise permissions without binding private-namespace sockets.
+
+For the smallest bounded compatibility path, exclude the counter-service range
+1024–32767 and all directory/transfer ladder residues from the candidate pool;
+their block allocator conversion remains TR12/TR15. Search the remaining
+unprivileged space outside the actual Linux ephemeral range, including above
+its maximum. macOS/unreadable-proc fallback assumes 49152–65535; customized
+macOS ranges remain a documented limitation. An ephemeral range covering every
+unprivileged port leaves no safe handoff pool: diagnose exhaustion rather than
+silently reintroduce outgoing-dial collisions. A bound-listener production seam
+would be needed to remove that host limitation and is outside this slice.
+
+M1 needs current PR feedback: cancel older runs only for pull_request, retaining
+the per-ref group and uncancelled push runs. The route-discovery fixture selects
+blocking mode before accept as well as before read. Checks: permission/fallback,
+different-TMPDIR subprocess ownership, pool selection, unwind, accept tests;
+two concurrent four-core voter copies; full all-feature suite; all lint gates.
+
+The binding target is reliable suites from Raspberry Pis to large hosts,
+including GitHub's 3–4 core runners, without weakened assertions, ignored tests,
+retries or changed library guarantees. The architect's TR track remains active;
+TR1b is a bounded isolation/CI slice, not full hardware-independence qualification.
+
+### TR1b acceptance decision (orchestrator-approved, round 2)
+
+The orchestrator explicitly approves this slice's acceptance as **no AddrInUse
+or poison cascade in any proof environment, no new failures versus the parent
+on the same matrix, remaining failures pre-existing and assigned to TR3/TR4/TR6**.
+This is a documented departure from architect plan §4's **every counted run
+passes** rule, not a declaration that red executions pass. It applies to bounded
+TR1b acceptance; M1/M3/M5 and the full hardware-independent suite goal remain
+open. The independent final-source parent-versus-PR matrix is recorded under
+"TR1b final-source matrix and round 3" below; unchanged deadline source alone
+is not evidence of equivalence.
+The builder runs the full all-features suite to completion here; the other
+feature configurations and matched-parent matrix are the suite runner's job.
+
+The 360-minute workflow guard is also supported by hosted run
+[39124019601](https://github.com/KarlLivesey/VoteBoat/actions/runs/39124019601):
+both OS all-feature jobs exceeded the previous 90-minute guard and the chained
+no-default jobs nevertheless started. That hosted observation is distinct from
+the earlier local injected-exit controls. Round 2 keeps per-ref concurrency but
+cancels stale pull-request runs; push-to-main runs remain uncancelled.
+
+### Reliability macro plan (planned)
+
+| Milestone | User-visible result | Status |
+| --- | --- | --- |
+| M1 | CI feedback is truthful and green | In progress: TR1b in review round 3 (PR 4); TR1a/R1 stacked on it (PR 5); TR4 next for `logical_activation_nested`; then TR2 inventory |
+| M2 | Simulated time wherever protocol time is simulated | Planned across TR1–TR11 |
+| M3 | Isolation: no cascades or collisions | In progress in TR1; remaining fixtures through TR15; binding-seam/host-policy limit remains |
+| M4 | Real-time tests bounded by events and ratios | Planned TR12–TR16 |
+| M5 | Full-suite proof | Planned TR17; every earlier slice records bounded evidence |
+
+### Reliability mini plan (planned)
+
+| Deliverable | Status | Purpose | Dependencies | Completion checks | Milestone |
+| --- | --- | --- | --- | --- | --- |
+| TR1b | Current: in review round 3 (PR 4) | Exposes all CI failures, isolates the port ladders through one shared lease pool, and makes accept mode explicit | Architect classification; existing native startup contracts | Final-source parent-versus-PR matrix (recorded below: ports parent 26 → PR 0); round-3 fixes; fmt/four strict Clippy profiles; runner and two reviews | M1, M3 |
+| TR1a (R1) | Next: stacked on TR1b (PR 5) | Replaces activation-driver fixture time and poison cascades on the shared TR1b pool | TR1b lease and CI visibility; existing injected clock contracts | Parent-versus-PR matrix for `logical_activation_driver`; fmt/four strict Clippy profiles; runner and two reviews | M1, M2, M3 |
+| TR4 | Next for `logical_activation_nested` | Removes the 15 s wall-clock close-drain and child-deadline failures (`cluster.rs:216`, `business.rs:43/58`) without weakening assertions | TR1b lease; TR1a clock pattern | Same matrix for `logical_activation_nested`, including two simultaneous copies; no assertion weakened | M2, M3 |
+| TR2 | Planned after TR1a/TR4 | Inventory all newly visible failures, ratchet hardware dependencies, probe retained-action exhaustion | TR1 CI visibility and deterministic fixture clocks | All configurations/binaries inventoried; std-only ratchet; idle-leader probe result and ranked follow-ups recorded | M1, M2, M5 |
+| TR3 | Planned | Quiescent pacing and logical-voter family isolation | TR2 inventory; read-only backing usage seam L1; existing readiness contracts | Logical voter/network suites and activation driver re-proved, including disk contention; TestDir adopted locally | M2, M3 |
+
+### TR1b schema plan (18 October 2026, before editing)
+
+Data/API: a test-only `PortLease` owns TCP/UDP reservations and exclusive
+cross-process file locks, with addresses read from bound sockets. Seven cluster
+fixtures own the lease after their node fields, so nodes drop before locks.
+Startup releases reservation sockets immediately before binding, while file
+locks survive close/reopen and listener-release assertions. Linux ephemeral
+ranges are excluded so outgoing dials cannot claim a fixture port. Persistent
+lock files are never unlinked (unlinking permits two lock inodes); kernel locks
+release on exit and unwind. An in-process registry prevents local reuse.
+
+State transitions: acquire lock + both sockets -> handoff sockets -> native
+startup -> optional shutdown/reopen -> release checks -> drop lease. Failed
+allocation drops partial reservations; startup failure drops nodes then leases.
+Each owning binary gets one poison-recovering `serial()` helper for its `()`
+mutex; the independent R1 builder owns activation-driver call sites.
+
+The lease helper is needed for M3 because peers require addresses before
+startup; probe/drop alone leaves the confirmed cross-process race. No production
+startup API or dependency is added. The native listener already explicitly sets
+accepted streams nonblocking (`src/native/connect.rs`); service listeners do too.
+The route-discovery fixture instead needs explicit blocking mode. A Linux test
+will simulate inherited nonblocking mode and inspect the resulting socket flag.
+
+CI keeps configurations sequential, adds `--no-fail-fast` within each, records
+all three statuses, and exits nonzero if any failed. Operator recovery also
+continues through its selected binaries. Acceptance: parent two-copy failure,
+required direct-binary proof matrix, unchanged release assertions, mode/lease/
+poison tests, all lint gates, and sequential full-suite counts. Failures remain
+evidence and are classified, never retried unchanged into a passing claim.
+
+#### TR1b implemented
+
+Implementation and qualification in progress. Evidence is added here only after
+commands finish; planned checks above are not claimed as passes.
+
+TR1b implementation: both workflows now request `--no-fail-fast`; platform
+configuration exits are aggregated without overlapping executable builds. All
+seven port ladders use the shared lease helper; owning serial call sites recover
+poison on `()` only (including the shared logical-network fixture). The native
+listener and the other two cited bin-fixture accept helpers already explicitly
+select nonblocking mode. Only route-discovery's blocking-read fixture needed a
+mode reset; **there are no production changes**.
+
+Parent evidence at `30a1f6c5`: simultaneous all-feature logical-voter-native
+copies yielded A **0/42** (one `AddrInUse`, then 41 poison cascades) and B **42/42**
+in 17.58 s. Raw logs are in `validation/reliability/tr1b/`. The CI shell was
+executed with a stub cargo failing each configuration in turn: all three always
+ran, and every injected failure left exit 1; the all-pass control exited 0.
+Initial focused isolation 3/3 and route-discovery 8/8 passed. A stronger cleanup
+check then failed because a released shared port was legitimately reacquired by
+another test before the check. The focused fix gives that lock-release check a
+private namespace (probes never handed off), while shared-namespace socket
+release is asserted only under an owned lease. The failed check is retained;
+no production assertion, timeout or guarantee was weakened. The private helper
+is needed solely to prove cleanup without assuming a freed port stays free.
+
+The first repeated proof at `146524a2` stopped at fixture-isolation E5 run 2:
+36 executions passed, then its private lock-release assertion saw `WouldBlock`.
+Private namespaces exclude another allocator, exposing transient descriptor
+inheritance during the sibling test's fork/exec (CLOEXEC closes only at exec).
+The cleanup test now shares a spawn guard with the subprocess test, so its
+last-descriptor-close assertion cannot overlap that fork window. The same lock
+release assertion remains. Focused corrected isolation is 3/3; the full matrix
+restarts only after this source change. The initial matrix and failure remain
+in the evidence; they are not counted as a passing proof.
+
+Workflow review also tightened the status record: each feature configuration's
+actual exit code is now printed before computing the overall job result.
+Stubbed exit-101 failures at each of the three positions prove all later
+configurations still run, their exact statuses are printed, and the step exits
+1; the all-pass control exits 0. This workflow-only refinement does not change
+the test artifacts qualified at `5651d512`.
+
+TR1b observational checkpoint (18 October 2026; environment qualification superseded below):
+
+| All-feature binary | Tests/run | E1 | E2 | E3 | E4 | E5 | Pass/fail executions |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `fixture_isolation` | 3 | 10 | 5 | 10 | 5 pairs / 10 copies | 3 | 38/0 |
+| `bin:voteboat-directory` | 12 | 10 | 5 | 10 | 5 pairs / 10 copies | 3 | 38/0 |
+| `logical_voter_native` | 42 | 10 | 5 | 10 | 5 pairs / 10 copies | 3 | 38/0 |
+
+E1: CPUs 0–3, relative nice +19; E2: E1 + `--test-threads=1`; E3:
+E1 plus three owned CPU burners; E4: two E1 copies together; E5: direct binary
+with default affinity/priority. Constrained nice samples include 11, 15 and −4;
+the wrapper-based matrix is not an accepted priority-environment proof.
+The parent port-race reproducer failed 42/42; all five corrected voter pairs
+pass 42/42 per copy. Source commit: `5651d512`; later commits change only CI/
+documentation/evidence. Every corrected execution is counted, including the
+extra CPU-contended runs. Full raw outputs and per-execution wall seconds are
+in `validation/reliability/tr1b/checkpoint-5651d512.tar.gz`.
+
+Both enabled push hooks passed root fmt, all four strict Clippy profiles and
+matched fmt/strict Clippy (zero diagnostics). No hang-guard warnings observed
+in these completed executions. TR2 ratchet: not introduced in this slice.
+The remaining all-feature binaries and full-suite final counts are pending;
+this checkpoint does not qualify the complete reliability track.
+
+### TR1b focused schema amendment (before editing)
+
+The first matrix is **not an accepted environment proof**. `ananicy-cpp`
+actively assigns Bash the `Doc-View` nice −4 policy. The Bash prologue between
+`nice` and `exec` therefore races that policy: constrained logs contain nice
+11, 15 and −4. Keep every execution, supersede the earlier uniform-nice claim,
+launch the test executable directly after `taskset`/`nice`, and observe its
+`/proc/<owned pid>/exe`, priority and affinity from the parent. Never alter the
+host daemon or other processes. Short tests may finish before observation;
+record that explicitly rather than claiming a sampled priority.
+
+The matrix also independently stopped on network-voter E3 run 3: UDP binding
+failed after TCP had successfully bound `:0` (`channels.rs:39`). TCP port
+allocation says nothing about the UDP namespace. The three identical outer
+channel fixtures in the touched voter/nested binaries need the existing paired
+lease too. Add `PortLease::take_sockets()` to move still-bound sockets straight
+to the existing connector constructor; the Channels owner retains the file
+lease through drain and its unchanged TCP/UDP release assertions. This is
+smaller than a new production binding API. Acceptance: bound-socket transfer
+control, corrected direct-binary proof, all lint gates and final full suites.
+No activation-driver file or production code changes.
+
+
+TR1b amendment implemented: the three outer-channel fixtures now transfer
+leased, already-bound TCP/UDP sockets to their existing connectors and keep
+leases through their unchanged close-release checks. The failure was specifically
+UDP allocation after a TCP `:0` bind, not TCP probe/drop at this site. The transfer
+control passes 3/3. The runner now launches `taskset -c 0-3 nice -n 19 "$BIN"`
+directly, recording metadata from its parent; it contains no Bash intermediary
+that can receive the host's Bash priority rule. The stopped earlier matrix is
+retained in `failed-proof-5651d512/raw-matrices.tar.gz`. It had 131 passing and
+1 failing all-feature executions (network voter E3 run 3, UDP `AddrInUse`);
+priority resets invalidate the claimed environment, not the observed outcomes.
+Corrected proof starts on the new source; no host service was changed.
+
+Corrected direct matrix at `1ec4a1dc`: isolation passes all 38 executions. The
+first all-feature network-voter E1 run samples nice **15**, affinity **0–3**,
+and fails **1 passed / 3 failed** in 132.92 s, with independent wall-clock
+progress/client/child timeouts (`host.rs:116`, `history.rs:67`, `cluster.rs:177`).
+No port collision or poison cascade occurs. These fixtures still derive
+`MonoTime` from `Instant::elapsed()` and assert real 15 s deadlines; the architect
+assigns that conversion/quiescent pacing to TR3. This is an unresolved hardware-
+dependence defect, not a passing proof. The failed binary is not retried
+unchanged; remaining binary proofs continue independently. Actual host load
+rises above the brief's 30–80 range (roughly 64 at launch, above 140 later);
+no foreign process, host daemon or priority is changed to make tests pass.
+
+Runner concurrency refinement: both E4 processes are now launched before any
+metadata collection. This matters for sub-millisecond isolation/feature-gated
+binaries: observing the first process must not postpone launching the second.
+The isolation control is requalified under this corrected launch ordering;
+long-running binaries already overlap but retain their original runner/source
+provenance in the evidence. This changes no Rust inputs or assertions.
+
+Additional direct evidence (Rust inputs unchanged from `1ec4a1dc`):
+`logical_network` first E1 fails 1/4 pass, with three independent 15 s native-
+child timeouts (64.19 s total, sampled nice15/CPUs0–3). `transaction_driver`
+passes E1×10 and E2×5, then its first E3 run fails 13/14 pass at the unchanged
+phase boundary (`drive.rs:135`, Decide outstanding; 85.23 s total, nice15/0–3).
+The architect assigns these to TR3 and TR6 respectively. Neither failed binary
+is retried unchanged. Complete successful prefixes and failing outputs are
+retained under `failed-proof-1ec4a1dc/`. No `AddrInUse` or poison cascade occurs
+in these failures. Program/striped/nested/voter/directory qualification continues.
+
+Corrected passing checkpoint: isolation passes all 38 runs in all-feature and
+native-only configurations (no-native is compiled out). Striped-node and the
+12-test directory binary each pass all 38 all-feature executions under the direct
+launcher with both E4 copies started before observation. Raw logs, per-run
+priority/affinity metadata, command build records and wall seconds are in
+`passing-direct-checkpoint.tar.gz`; these supersede the wrapper-based checkpoint
+for qualification. Production changes remain none.
+
+Program transaction passes E1×10/E2×5, then stops at its first E3 run: 10/14
+pass, four independent existing fixture/phase deadline failures, 96.71 s,
+sampled nice15/CPUs0–3. No port error or poison cascade occurs. This is remaining
+TR6 work; the complete successful prefix and failure are archived in
+`failed-proof-1ec4a1dc/program_transaction_driver.tar.gz`. Voter and nested proof
+and sequential full suites remain in progress.
+
+Fresh voter proof: E1×10/E2×5 pass, then E3 run 1 stops with **41/42 pass**,
+296.48 s, at the unchanged child-claim deadline (`drive.rs:110`), sampled nice15/
+CPUs0–3. There is no port failure or poison cascade. Final-runner E4/E5 remain
+unqualified; five older observed passing pairs are retained but not substituted
+for the requested complete proof. The full successful prefix/failure is archived
+in `failed-proof-1ec4a1dc/logical_voter_native.tar.gz`. First activation-nested E1
+passes all 14 tests in 393.07 s; its remaining repetitions continue as requested.
+
+Priority provenance: corrected long binaries consistently sample nice15. The
+very short isolation control also samples nice11 before the parent is assigned
+its Bash policy, and often finishes before sampling; all use the literal relative
+`nice -n 19` command. Missing samples are reported, never invented. No negative
+nice sample is seen in the corrected direct test executable metadata.
+
+Activation-nested E1 run 2 fails 13/14 pass in 417.30 s, following its first
+14/14 pass in 393.07 s. Root: the original 15 s CloseDrained deadline at
+`cluster.rs:216`; its complete diagnostic shows two nodes Drained and one still Draining, all
+without provider failure. This remains a close/deadline investigation for TR4;
+the underlying cause is not yet established. It is not a port failure. The assertion is unchanged, the
+failing row is not retried, and later repetitions stop. Both runs and complete
+diagnostics are archived in `failed-proof-1ec4a1dc/logical_activation_nested.tar.gz`.
+The final touched nested-native binary and full suites remain active.
+
+Diagnostic correction: the prior short summary incorrectly described all three
+nodes as Drained. A parse of the complete preserved diagnostic returns
+`[(Drained,None,true), (Draining,None,false), (Drained,None,true)]`. The summary
+and PR are corrected; no raw evidence changes. No claim that the done predicate
+was already true, or that a library close defect is ruled out, is justified.
+
+### TR1b CI schema amendment and macro review (before editing)
+
+The owned default full-suite cargo process has run 5,780 s (96 minutes) and is
+still inside representative-relay enumeration. A single 90-minute job containing
+all configurations can therefore lose every later configuration on a job timeout,
+even with correct exit aggregation. This new measured dependency advances M1's
+scope: separate the three configurations into three chained OS-matrix jobs,
+each retaining the 90-minute limit. Explicit failure-tolerant `needs` conditions
+start the next configuration after the prior matrix completes unsuccessfully;
+manual workflow cancellation remains respected. Each job records/returns cargo's
+actual exit and keeps `--no-fail-fast`. No configuration overlaps its predecessor.
+
+Ownership/cleanup: each job gets its own runner checkout and target directory;
+GitHub owns job cleanup/timeouts. A failed/timed-out configuration stays red while
+later jobs proceed. Keep the pinned toolchain, fetch, macOS fd limit, both OSes
+and per-matrix fail-fast=false. Duplicate the small setup rather than introducing
+a new reusable action prerequisite. Acceptance: parse the workflow, verify the
+chain/conditions and three exact cargo invocations, execute every job script with
+controlled failures, and retain nonzero workflow/job results. Full-suite runtime
+and any remaining per-configuration timeout still belong in TR2's inventory;
+this change does not claim every configuration fits its 90-minute budget.
+
+CI amendment implemented: all-feature → no-default → native-only OS-matrix
+jobs are chained with `needs` and `always() && !cancelled()`. Each keeps its
+90-minute budget, both OSes and macOS fd limit. Each runs/returns its exact cargo
+status with `--no-fail-fast`; there is no continue-on-error. This is the
+[documented GitHub dependency/conditional pattern](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-jobs).
+Static YAML/chain checks and executed exit101 controls pass at all three failure
+positions, with all three scripts executed and the failed status preserved.
+Timeout/cancellation entries in the JSON are explicit expected policy, not an
+executed GitHub engine simulation; actual hosted validation remains outstanding.
+No Rust input changes or additional test retries are involved.
+
+### TR1b allocator compatibility amendment (before editing)
+
+The completed default baseline is 2,444 pass / 4 fail / 0 ignored across 125
+summaries, exit101, 6,716 s. Driver contributes three failures; routed contributes
+one at `native.rs:73` (`available TCP/UDP endpoint`, underlying errors discarded).
+Routed has an additional legacy ladder, **10000 + counter % 10000**, with only32
+probes. Our lowest-first lease pool occupied that same band, and a deep fixture
+can hold39 endpoints. Thus the new pool can exhaust routed's entire probe window
+under cross-binary concurrency. The exact OS error was not preserved by routed,
+but this avoidable overlap is established and must not be left as a regression.
+
+Keep the lease API, ownership, handoff and cleanup unchanged. Exclude legacy
+10000–19999, prefer30000–32767 (also away from the seven original20k ladders),
+then use20000–29999 as overflow. Continue excluding the actual Linux ephemeral
+range; both bands are below the default Linux/macOS ephemeral pools. Add an
+actual leased-address invariant for the legacy exclusion, without assuming a
+particular free port. No routed fixture rewrite or lifetime-leaking registry is
+needed. This is M3 compatibility for the phased allocator adoption; routed's
+own ladder still belongs to TR9.
+
+Both owned validation families were identified by exact cwd/command and stopped
+with their owned descendants before changing common Rust inputs. The completed
+default baseline remains intact; its all-feature successor and the second deep
+nested execution are explicitly **interrupted/superseded**, never passes or
+ignored tests. All original files are preserved. Restart final full suites on a
+consistent corrected source tree after focused controls/gates. No foreign model,
+worker, daemon or priority was touched.
+
+Focused proof support: the runner's default still executes E1–E5 unchanged.
+An explicit `RELIABILITY_ENVIRONMENTS` selection records its phases in the output
+manifest and is labeled partial, for a slice's separately required extra check
+(such as the port-race E4). Unknown/duplicate phases are rejected. This permits
+current-allocator concurrency evidence without repeating an already-failed,
+unchanged clock row. It filters environments only: every libtest case still
+runs, with no ignore/retry/test-name filter. A focused pass cannot qualify the
+full matrix; the preserved clock failures remain blockers.
+
+Focused-phase input controls execute with empty/whitespace, duplicate and unknown
+selections: each exits2 before a build/run, preventing an empty matrix from
+returning a misleading success. Bash syntax check passes. Default selection
+remains all five environments.
+
+#### Current allocator focused acceptance (Rust inputs 717a3261)
+
+Ownership/compatibility control: all-feature/native each38/38 passing executions
+(core feature-off target has0 tests and is not substantive proof). Striped-node:
+38/38 all-feature executions pass. Fresh voter extra acceptance: **E4 five pairs,
+all ten copies42/42**, plus **E5 three defaults42/42** pass. The manifest selects
+E4/E5 explicitly; no already-failed E3 clock row was retried or erased. This
+satisfies the concurrent port-race acceptance on the final allocator, not the
+complete hardware-independence matrix. Raw outputs, build records, priority/
+affinity observations and exact per-run times are in
+`final-policy-focused-proof.tar.gz`, with machine-readable counts in
+`final-policy-focused-summary.json`. Failed earlier clock environments remain
+blockers for TR3/TR4/TR6. Final full suites are still running on corrected inputs.
+
+### TR1b CI budget correction (schema before editing)
+
+The completed baseline takes6,716s (112minutes), already beyond each
+new90-minute configuration budget. Chaining makes later configurations run,
+but does not itself prevent a known premature cut-off within one configuration.
+For M1 visibility, allow360minutes per test job, the GitHub default, retaining
+the sequential chain and failure status. This adjusts the workflow guard only;
+no test deadline, assertion, feature selection or library guarantee changes.
+Runner ownership/cleanup and cancellation stay with GitHub. Acceptance: assert
+all three budgets in parsed YAML, keep all three exact no-fail-fast commands,
+and execute the three scripts with an injected failure at every position.
+The actual hosted six-hour limit still bounds execution, so this is evidence-
+based headroom, not a claim that arbitrary hardware completes within a bound.
+See [GitHub workflow timeout semantics](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idtimeout-minutes).
+
+CI budget correction implemented: all three test jobs now allow360minutes.
+Parsed YAML verifies budgets, exact no-fail-fast commands, matrix isolation,
+sequential needs and failure-tolerant conditions. All three extracted scripts
+execute for each injected exit101 position and the all-success case, exercising
+both RUNNER_OS shell branches on Linux. Every injected status stays101; no
+continue-on-error is used. Raw outcomes are in `ci-budget-check.json`. This is
+not a macOS run or GitHub timeout-engine simulation. Current corrected-source
+default suite has passed beyond activation-driver's root learners failure and
+four poison cascades (14pass/5fail), reaching exhaustive relay enumeration.
+These files remain owned by the independent R1 builder and untouched here.
+
+### TR1b round 2 implemented and focused validation (18 October 2026)
+
+Opus P2-1 / Sol P2-2: one Unix namespace `/tmp/voteboat-test-ports`, with sticky
+01777 directory and 0666 files explicitly repaired after creation, regardless
+of umask. Existing files open without O_CREAT, avoiding Linux protected_regular;
+exclusive std File locks use the Unix flock protocol across accounts. Unusable
+legacy ownership/modes or read-only mounts trigger a per-effective-uid namespace
+only after the shared attempt fails; partial leases unwind before fallback.
+The diagnostic explicitly says CROSS-USER COORDINATION IS LOST. No privileged
+execution was needed: a child points the override at pre-existing read-only
+`/sys`, acquires via fallback, and its diagnostic is asserted. Owned 0500/0600
+legacy modes are repaired and fresh directory/file modes are checked too.
+
+Sol P2-1 / Opus P3-2: TMPDIR no longer selects lock inodes. The deterministic
+child control uses a different TMPDIR after the parent's TCP/UDP probes close,
+asserts the parent's file is locked, and cannot lease its port. CI sandboxes may
+set VOTEBOAT_TEST_PORT_LEASE_DIR; **all processes sharing loopback must use the
+same override**. Different overrides or the diagnosed per-user fallback lose
+cross-namespace handoff/reopen coordination. The fixed `/tmp` path trades normal
+per-user temporary-directory isolation for required cross-user socket exclusion.
+
+Opus P3-1: pool excludes counter's entire 1024–32767 band, directory's residues
+5–7 and 33–35 modulo128 (20000+128k, offsets1–3/101–103), and transfer's four
+128-wide slots at 14000+1024k with those offsets. A source-derived exhaustive
+candidate control checks every reachable base, including u16 wrap. Conversion
+of those service allocators remains TR12/TR15; their own cross-copy races are
+not solved here. Private cleanup no longer allocates real ports: a lock-only
+Reservation exercises the exact lease Drop path and unchanged lock-release
+assertion, while the live handoff/rebind check uses the shared pool. Reservation
+fields are visible only within the test crate to construct that ownership control.
+
+Opus P3-2: candidates scan32768–65535 outside the detected Linux ephemeral
+range, so ranges starting below20000 can use the high band (tested15000–65000
+and1024–20000). macOS and missing/unparseable Linux proc data assume49152–65535,
+with a diagnostic. Customized macOS ephemeral ranges remain a host limitation.
+A range1024–65535 has mathematically no unprivileged non-ephemeral port; the
+control proves the candidate set empty and allocation diagnoses exhaustion.
+It cannot honestly be called supported without a bound-listener production seam
+or host port-range adjustment. Noncooperating programs explicitly binding a
+leased port during handoff/reopen remain outside advisory-lock protection.
+
+Opus P2-2: per-ref concurrency cancels only pull_request events; main push runs
+remain uncancelled. Opus P3-3: blocking mode is selected before fixture accept,
+as well as before read; the Linux inheritance regression uses a blocking accept
+then simulates inherited nonblocking mode on the stream. Opus P3-4: the comment
+now gives the actual probes -> registry -> file-lock release order.
+
+Actual focused checks on the round-2 Rust inputs (hashes and raw logs in
+`validation/reliability/tr1b/round2/`): root fmt and all four strict Clippy
+commands plus matched fmt/all-target strict Clippy pass, zero diagnostics.
+Fixture isolation7/7; additional umask077 control1/1; directory route-discovery
+8/8. Exactly one simultaneous pair of all-feature logical_voter_native binaries
+under taskset -c0-3: **42/42 each**, exits0,13.22s/13.10s, no AddrInUse or poison.
+No process was detached; the foreground controller waited for both owned PIDs.
+No activation-driver, production library, Cargo dependency, assertion threshold,
+lint level, ignored-test or unsafe-code change. The full all-feature run follows
+this checked publication; counts will be recorded after completion, rather than
+inferred from these focused checks. Other full configurations and the matched
+parent comparison remain assigned to the suite runner.
+
+### TR1b round 2 pool follow-up schema (before editing; planned)
+
+The full all-feature command is running against published44a64ea1; keep its
+compiled inputs unchanged through completion. A final source audit finds that
+excluding counter-service's entire1024–32767 band is unnecessarily restrictive
+when the ephemeral maximum is65535 (for example15000–65535 or32768–65535), even
+though usable unprivileged gaps exist. M3 needs those hosts supported without
+converting the service harness prematurely. After recording the completed run,
+retain the existing high-band preference and add a low-band fallback excluding
+routed10000–19999 plus counter's actual endpoint bands within each128-wide
+block. Conservatively reserve residues0–16 and96–127 for counter blocks; all
+actual bound offsets1–4/11–14/101–104/111–114 lie inside them. The directory and
+transfer residue exclusions remain global. Exhaustively check every counter
+base and both wide ephemeral configurations. The all-unprivileged ephemeral
+case1024–65535 still has no possible safe pool.
+
+Also handle stale effective-uid probe names after PID reuse by advancing the
+create_new name on AlreadyExists. A stale-name control belongs in the existing
+unwritable-namespace child. No lease state/API/ownership/handoff transition or
+production code changes. Focused lease/property controls, fmt/four Clippy/
+matched gates and the final-head concurrent voter pair qualify these changes;
+full-suite results must name their exact source head, never be silently
+relabelled after this follow-up. The runner still owns the matched-parent
+matrix and other feature suites.
+
+Additional focused negative control (same44a64ea1 inputs, separate from the
+full-suite execution): `VOTEBOAT_TEST_PORT_LEASE_DIR=/sys fixture_isolation
+--exact lease_holds_across_handoff_and_processes --nocapture` exits101. Parent
+allocation correctly falls back, but lease_child opens `/sys/<port>.lock`
+instead of the parent's actual per-uid namespace and fails NotFound. Keep this
+failed control; it is a fixture-path defect, not evidence that fallback failed.
+Before editing: retain the actual namespace path in PortLease and pass it only
+to the child's direct lock assertion. Child acquire must still independently
+select its namespace, preserving the different-TMPDIR regression's ability to
+detect a split. UID probes themselves use fixed `/tmp`, so a different or absent
+TMPDIR cannot defeat fallback. The unwritable-namespace child will exercise the
+whole handoff/subprocess ownership control too. These changes are needed to
+make the specified fallback genuinely usable by the lease regression suite.
+
+Staging follow-up evidence (root Rust sources still unchanged): std-only copied
+fixture compiles with warnings/unsafe forbidden and strict Clippy including the
+repository complexity/length thresholds,7/7 pass. The original failing direct
+/sys handoff control passes1/1 after the fix. The child now additionally asserts
+its selected namespace equals the parent's, independent of which free port it
+finds. An intentionally TMPDIR-based staged mutant exits101 at that exact
+namespace assertion, proving the regression control detects namespace splits
+without relying on candidate selection or scheduling. All negative-control
+outputs remain separately labeled; none are full-suite rows.
+
+Before editing, correct the unavailable-proc assumption too: the intermediate
+helper used the macOS49152–65535 fallback on Linux, potentially leaving the
+common Linux32768–49151 outgoing band exposed. Linux's missing/unparseable-proc
+fallback conservatively excludes32768–65535 and uses the newly available low
+safe gaps; macOS retains its documented49152–65535 assumption. Unknown tuned
+ranges cannot be inferred when the host hides configuration, so that limitation
+remains explicit. The candidate control already checks32768–65535. This changes
+no behavior on this proof host, whose proc range is readable32768–60999.
+
+### Permission-control concurrency correction (before editing staged follow-up)
+
+A permission simulation must not introduce another private socket namespace
+while healthy concurrent suites use the shared one. Keep the TCP/UDP exclusivity
+assertions under a normal shared lease in the parent; make the /sys child
+exercise directory selection, UID-probe restart handling, 01777/0666 modes and
+exclusive advisory locks only. It binds no ports. The separately recorded
+one-off real fallback handoff control already validates the actual namespace
+field fix; regular proof matrices must not acquire uncoordinated private ports.
+The failed original control stays archived. This directly completes Opus P3-1's
+private-control finding rather than transferring its race into the new test.
+
+A small test-only fresh control-directory allocator is needed for M3 filesystem
+controls: create_dir atomically advances on AlreadyExists, so stale PID names or
+shared PID namespaces do not fail mode/unwind controls. It reserves paths, not
+ports, and successful controls remove only their own newly created directories.
+No lease API/state transition or production change accompanies this test fix.
+
+Final allocation failure-path audit (before editing staged follow-up): one
+inaccessible legacy lock file does not make the entire shared namespace
+unusable. Skip such candidates while retaining the first namespace error; only
+fall back after the shared scan cannot satisfy the request. This preserves
+cross-user coordination whenever other shared candidates are usable, including
+partially migrated root-owned file tables. Partial successful reservations still
+drop before fallback. Treat an OS-denied socket port as unavailable just like
+AddrInUse, so a customized unprivileged-port threshold does not abort a safe
+low-band search. No binding assertion is relaxed: only candidates successfully
+bound for both transports enter a lease. Path nonces use AtomicUsize rather than
+adding a needless64-bit atomic requirement.
+
+Use `/proc/sys` for the final Linux unwritable-directory control, rather than
+`/sys`: sysctl directory inode operations reject mode/owner changes even under
+sudo, so the control cannot repair or alter a live system directory. Verified
+against Linux's [proc_sys_setattr and proc_sys_dir_operations](https://github.com/torvalds/linux/blob/master/fs/proc/proc_sysctl.c), including the proc_sys_init assignment for `/proc/sys`.
+Earlier `/sys` negative/staged controls ran unprivileged and remain labeled with
+their actual paths. The final simulation remains filesystem-only and retains
+the parent's shared-lease TCP/UDP exclusivity assertions.
+
+Refine the final failure-path rule before editing: an accessible but busy shared
+pool must never cause fallback merely because another candidate had a legacy
+permission error. Record whether any candidate lock file was accessible; after
+an unsuccessful scan, return the stored namespace error only if none were.
+Otherwise report pool exhaustion without changing namespace. A read-only
+filesystem error proves the namespace unusable immediately and may fall back
+without scanning every filename. This keeps cooperating owners protected when
+the pool is busy and avoids a slow readonly-directory scan.
+
+Shared-file validation amendment (before editing staged follow-up): because the
+namespace is writable by all users, mode repair must apply only to actual lock
+entries. Open with O_NOFOLLOW/O_NONBLOCK from the existing Unix libc dependency
+(no crate/lock changes or unsafe code), and require a regular, single-linked
+file before chmod. Never follow a per-port symlink or repair an aliased inode.
+Directory aliases remain permitted; the contract is about the final lock entry.
+Private filesystem controls verify symlink/hardlink rejection and preservation
+of the target's0600 mode. This is M3 ownership hygiene for the required shared
+writable namespace, with no additional real-port binding or library change.
+
+Filesystem-control setup uses create_new and descriptor-based permission
+changes too: the owned fresh control directory does not justify overwriting
+an unexpected path. Alias checks retain the target's0600 assertion unchanged.
+
+### TR1b round 2 full-suite result and focused example amendment (schema before editing)
+
+The requested foreground command `cargo +stable test --locked --offline
+--all-features --no-fail-fast` completed on published44a64ea1:
+**2765 passed / 1 failed / 0 ignored**,125 target summaries, exit101,
+6761s (14:39:12–16:31:54UTC). Relay-model9/9 completed in3768.80s;
+routed192/192 passed. No process was detached or interrupted. This is a failed
+full-suite result, not a green qualification, and will not be relabelled as a
+run on the subsequent source changes. Other feature suites remain the runner's
+job. The initial /usr/bin/time launch error happened before cargo started and
+is retained separately as zero test executions.
+
+The sole failure is example native_benchmark's
+`shared::recovery::tcp_each_stale_group_requires_snapshot_after_transport_restart`:
+UDP bind at examples/benchmark/shared_recovery.rs:45 returns AddrInUse after
+TCP `:0` succeeds. TCP port availability does not imply UDP availability. The
+example files are identical to parent30a1f6c5, and their chosen ephemeral ports
+are disjoint from this host's61000+ leased band. This establishes an unchanged
+allocator defect and excludes direct lease-band overlap; it does not establish
+matched-parent runtime equivalence. The runner's comparison is still required.
+Do not classify this as a TR3/TR4/TR6 deadline or erase the failed execution.
+
+M3's smallest complete fix reuses PortLease in the two test-only benchmark
+harnesses with the same unchecked TCP0/UDP-same-port allocator: shared recovery
+and shared drain. Their inclusion is already cfg(test). Add one cfg(test) module
+reference to the existing helper in the example; no production benchmark or
+library behavior changes. Recovery keeps the same bound TCP/UDP reservation
+vector through constructor completion and owns its lease for every later
+open/reopen. Drain owns the lease after its nodes field and hands off immediately
+before initial open. Recovery callers declare nodes after Harness, so normal and
+unwind drops release nodes before its lease (no explicit early Harness drops).
+Failed construction drops probes and file locks; no new retry/ignore/deadline
+policy is added. A namespace diagnostic identifies the actual selected lease
+path in recovery fixtures. Check all56 native-benchmark example tests after
+this source fix, with all original history/recovery assertions intact, plus the
+final lease/mode/voter checks and every strict lint gate. Passing focused checks
+will resolve this allocator defect, not retroactively qualify the archived
+whole-suite run or the remaining parent matrix.
+
+### Final permitted-port refinement (before editing)
+
+Do not overstate the1024–65535 limitation: Linux may lower its privileged-port
+threshold, and a caller may have binding capability. Append1–1023 only as a
+last resort after high ports and conventional low gaps. The existing bind step
+skips PermissionDenied and AddrInUse, so the kernel decides which extra ports
+are permitted; never try port0. Counter's block exclusions apply only to its
+actual1024–32767 range. No new query, crate, API, permission or library seam is
+needed. Keep the directory/transfer exclusions global, including wrapped low
+ports. The pure candidate control must find low candidates outside1024–65535
+and none outside1–65535. Ordinary callers denied all low ports still cannot
+obtain a safe pool when every permitted port is ephemeral; that conditional
+case needs a host adjustment or production bound-listener seam. This supersedes
+historical wording treating1024–65535 as universally all unprivileged ports.
+Repeat the focused affected checks and strict gates on these final Rust inputs;
+retain earlier positive/negative outputs under their own names.
+
+### TR1b round 2 final implemented evidence (18 October 2026)
+
+All Opus P2-1/P2-2/P3-1–P3-4 and Sol P2-1/P2-2 responses are implemented.
+The final test-only helper records its actual namespace; child ownership checks
+assert the exact independently selected namespace after probe closure, even
+with a different nonexistent TMPDIR. Sticky01777/0666 permission repair is
+umask-independent; existing opens omit O_CREAT and reject final symlinks,
+nonregular/multilink entries before chmod using existing libc flags and std
+metadata. Inaccessible candidates are skipped; a working but busy namespace
+never triggers fallback. Unusable namespaces diagnose per-effective-uid fallback
+and explicitly warn CROSS-USER COORDINATION IS LOST. UID probes use fixed/tmp,
+advance on stale names and use machine-sized atomics. No privileged execution
+or second real UID was used for the permission simulation.
+
+The final permission simulation is filesystem-only at Linux/proc/sys, with
+shared-lease socket-exclusivity assertions retained in its parent. Unwind uses
+an actual lock-only Reservation and preserves its lock-release assertion. Fresh
+control directories skip existing names; none of these private controls binds
+uncoordinated real ports. Staged negative controls are separately archived:
+nominal-versus-actual fallback namespace failure, deliberately TMPDIR-based
+mutant, and pre-guard alias acceptance. Each was followed by a source fix or an
+expected negative assertion, never a retry of unchanged failing production code.
+
+Pool policy: prefer32768–65535, then1024–32767 gaps, then1–1023 only as a last
+resort when the kernel permits binding. Never allocate port0. Exclude the actual
+Linux ephemeral range, routed10000–19999, counter residues0–16/96–127 modulo128
+inside1024–32767, directory residues5–7/33–35 modulo128, and transfer's four slots
+at14000+1024k with offsets1–3/101–103. Exhaustive controls check every legacy
+base and low/wide ranges, including15000–65535/32768–65535 and low candidates
+outside1024–65535. The all-positive-port range1–65535 has no outside candidate.
+Denied ports are skipped without claiming them. Missing Linux proc conservatively
+excludes32768–65535; macOS assumes49152–65535. Hidden customized ranges remain
+an assumption, and if no permitted port remains outside the detected range,
+this strategy needs a host adjustment or a production bound-listener seam.
+
+All processes sharing loopback must use the same underlying filesystem/inodes
+for the lease directory. CI containers with private/tmp and shared networking
+need a common mounted directory plus VOTEBOAT_TEST_PORT_LEASE_DIR. Different
+overrides, the diagnosed per-user fallback, or noncooperating explicit binders
+can still lose handoff/reopen coordination. These are disclosed limits, not
+full hardware-independent qualification. Counter conversion remains TR12,
+directory/transfer TR15; their own cross-copy races are not solved by exclusion.
+
+The full-suite-discovered benchmark allocator defect is fixed in both test-only
+recovery/drain harnesses with the existing lease helper. Recovery retains file
+leases through every caller-owned replica lifetime; drain drops nodes before
+its lease and preserves reopen ownership. Production benchmark/library logic
+and all original recovery/history assertions are unchanged. The actual source
+is cfg(test), including the one new module reference in the example root.
+
+Final-source completed checks (raw outputs and exact input hashes under
+validation/reliability/tr1b/round2):
+
+| Check | Actual result |
+| --- | --- |
+| Root cargo +stable fmt --all -- --check | pass |
+| Default/all-features/no-default/native-only strict all-target Clippy | all pass, zero diagnostics |
+| Matched workspace fmt and locked/offline strict all-target Clippy | pass, zero diagnostics |
+| All-feature fixture_isolation | 7 pass / 0 fail / 0 ignored |
+| Additional umask077 mode/alias control | 1 pass / 0 fail |
+| All-feature native_benchmark example after allocator change | 56 pass / 0 fail / 0 ignored,18.35s |
+| All-feature directory route_discovery | 8 pass / 0 fail / 0 ignored,1.60s |
+| One simultaneous final-source voter pair, each taskset -c0-3 | both42/42, exits0,14.17s/14.18s; zero AddrInUse/PoisonError |
+
+Earlier checked variants and their successful pairs are retained separately,
+including44a64ea1's13.22s/13.10s pair and the pre-permitted-port variant's
+14.36s/13.84s pair. They are not substituted for the final-source pair. All
+controllers waited for their own children; no detach/nohup, foreign process
+stop/renice, unsafe addition, dependency change, lint weakening, ignored test,
+assertion-threshold change or activation-driver file change occurred.
+
+The full command's **2765/1/0, exit101,6761s at44a64ea1** remains a failed
+archived whole-suite execution. Its sole allocator failure has a focused56/56
+passing correction; the whole suite was not rerun or relabelled after that fix.
+The orchestrator-approved acceptance criterion remains conditional on the
+independent final-source parent-versus-PR matrix. The earlier clock failures
+remain recorded for TR3/TR4/TR6; the benchmark failure is not misclassified as
+one of them. The matrix report will be attached when it lands. Other full
+feature configurations belong to the suite runner. M1/M3/M5 remain open; the
+macro review keeps M3 through TR15 and records the binding-seam/host-policy
+limit without making online membership or split/merge release prerequisites.
+
+### TR1b final-source matrix and round 3 (19 October 2026)
+
+#### Final-source parent-versus-PR matrix (runner, `03127ec5` against parent `30a1f6c5`)
+
+Status line:
+`COMPLETE MATRIX — VIOLATIONS: (a) 13 PR-fail/parent-pass matched test observations; (b) AddrInUse/port failures: parent 26, PR 0; (c) PoisonError cascades: parent 508, PR 202`
+
+Method: 10 binaries (`logical_voter_network`, `logical_network`,
+`transaction_driver`, `program_transaction_driver`, `striped_node`,
+`logical_voter_native`, `logical_activation_driver`,
+`logical_activation_nested`, `logical_nested_native`, `voteboat-directory`
+bin tests), all-features build, each run directly as
+`taskset -c 0-3 nice -n 19 BIN`. E1 plain, E3 with three runner-owned busy
+loops on cores 1–3, E4 two simultaneous copies; three repetitions (three pairs
+in E4), parent then PR in each repetition, no retries. 240/240 matched
+executions and 24/24 supplemental PR-only `fixture_isolation` runs (all-features
+and native-only) completed; every `fixture_isolation` run passed. Linux only;
+E2, E3d, E5, E6 and macOS were not covered. Report:
+`target/claude/research-ci/proof-pr4-final-03127ec5.md` in the orchestrator's
+checkout (raw logs in `proof-pr4-final-logs/`).
+
+| Measure | Parent | PR |
+| --- | --- | --- |
+| AddrInUse/port failures | 26 | 0 |
+| PoisonError cascades | 508 | 202 (all in `logical_activation_driver`, whose files this PR does not touch) |
+| Failed executions | 40 | 15 |
+| E4 copies failed | 30/60 | 9/60 |
+| Test/environment keys failing more often on this side | 135 | 11 |
+
+The port class is closed: the PR had no port failure in any environment.
+
+The strict criterion is not met: 13 matched observations failed on the PR and
+passed on the parent, over 11 test/environment keys, each by one run in three.
+
+- `logical_activation_driver`, E3, 9 keys (rep 1: `bindings::original_verified_profile_rejects_changed_or_missing_parent_before_transfer`,
+  `cancel::original_cancel_before_configuration_dispatch_retains_owning_driver_tcp`;
+  rep 3: `cohort::close::rejection::shutdown_rejection_retains_original_cancellation_before_later_provider_fault`,
+  `cohort::close::running_logical_owner_retains_original_partial_send_on_real_native_peer_close`,
+  `cohort::byte_pressure::history::full_child_replacement_retains_original_client_byte_and_read_count_pressure_tcp`,
+  `cohort::history::three_logical_parents_ten_native_owners_replace_distinct_child_quic`,
+  `cohort::pressure::history::…_pressure_tcp` and `…_pressure_quic`,
+  `cohort::pressure::controls::genuine_native_observer_refusals_preserve_original_ownership_tcp`).
+  Eight are PoisonError cascades from the unchanged `HISTORY.lock().unwrap()`
+  sites; one root, `Network(Session(Closed))` at `cohort/close/progress.rs:126`,
+  appeared only on the PR (E3 rep 3). Failed runs are equal (2/3 each side), but
+  the failing-test total is 53 against the parent's 44: three repetitions cannot
+  exclude a small timing regression there.
+- `logical_activation_driver`, E4 rep 1 copy 2, `bindings::…before_transfer`:
+  a PoisonError cascade; parent and PR both failed 2/6 copies (not an extra key).
+- `logical_activation_nested`, E3 rep 2, 2 keys:
+  `cold_joint::quic_all_twelve_stores_joint_and_parent_intent_cold_reconstruct_then_final`
+  (`business.rs:43`) and
+  `history::quic_original_uncommitted_unknown_import_wal_cold_then_real_activation`
+  (`business.rs:58`): the 15 s `Instant` deadline in unchanged `business.rs`,
+  which the parent also hits at `business.rs:58` in E3.
+- `logical_activation_nested`, E4 rep 2 copy 1,
+  `history::quic_fifteen_native_owners_two_original_logical_replacements`:
+  the 15 s close-drain timeout at `cluster.rs:216`; parent and PR both failed
+  3/6 copies (not an extra key).
+
+The roots are the parent's own timing classes: `DedupCapacity` (6/6 E4 copies
+on both sides), `Read(Consensus(NotLeader))` at `cohort/progress.rs:70`, and
+the wall-clock deadlines above. Where the PR removed port and poison failures
+(`logical_nested_native` E3: parent 20 failing tests, PR 7), previously hidden
+election and functional deadlines now run to completion and show; the parent
+failed each of those tests 2/3 or 3/3 in E3.
+
+Full all-features suite on `03127ec5` (`--no-fail-fast`, cores 0–3, about
+90 minutes): **2,757 passed, 9 failed, 0 ignored**, exit 101.
+`logical_activation_driver` 23/8: root `learners.rs:95` (bridge usage stays
+zero before the wall-clock deadline) plus 7 PoisonError cascades, the same set
+the parent produced in E1 rep 3. `logical_activation_nested` 13/1: the 15 s
+child timeout at `cluster.rs:216`. No port failure anywhere.
+
+Classes left to other slices, not fixed here:
+
+- TR1a/R1 (PR 5, stacked on this branch): `logical_activation_driver`
+  wall-clock fixture time, `DedupCapacity`/`NotLeader` timing roots and the
+  `HISTORY.lock().unwrap()` poison cascades.
+- TR4: `logical_activation_nested` 15 s close-drain timeout
+  (`cluster.rs:216`) and `business.rs:43/58` deadlines, and the
+  `logical_nested_native` election/functional deadlines now visible under E3.
+
+Against the approved criterion: no port failure in any environment is met
+(0). PoisonError cascades remain (202), all in `logical_activation_driver`,
+whose files this PR does not touch. "No new failures versus the parent" is not
+met on the strict reading: the 13 observations above exist. Their roots are the
+parent's own timing classes, and the orchestrator assigns them to TR1a and TR4.
+They are recorded here, not relabelled as passes.
+
+#### Round 3 schema (before editing)
+
+- P2 (routed from PR 5 round 3): the three outer-channel fixtures took both
+  halves of every leased port with `take_sockets()`, dropped the unused
+  protocol's half, then rebound both halves at close with `unwrap`. A
+  non-cooperating binder could occupy the dropped half and fail the release
+  check falsely. Data/API: `Reservation` holds `tcp: Option<TcpListener>` and
+  `udp: Option<UdpSocket>` separately. `PortLease::adopt_tcp(slot)` /
+  `adopt_udp(slot)` move only the selected half to its connector; the unused
+  half and the lock stay in the lease for the whole workflow.
+  `PortLease::reclaim()` rebinds exactly the one adopted half of each
+  reservation, panicking with "not released by its owner" if the owner still
+  holds it and rejecting a reservation with zero or two halves adopted.
+  Drop still closes both halves, then the registry entry, then the lock.
+  `take_sockets` stays for `fixture_isolation` (which drops both halves on
+  purpose) and the benchmark recovery harness. This is the shape PR 5 used for
+  its cohort channels (`a4bd657d`); PR 5 put it on its
+  `logical_voter_native` wrapper, which other test binaries cannot share, so
+  the methods live on the single shared pool in `tests/support/ports.rs`.
+  `a4bd657d` added nothing to `ports.rs`, so there was no hunk to cherry-pick.
+- P3-b (Opus round 2): the route-discovery fixture's blocking `accept()` had
+  no bound. The attempt connects synchronously before the accept, so its
+  connection is already queued; a nonblocking accept retried until a 30 s
+  hang guard (then switched to blocking for the reads) turns a regression
+  that never connects into a prompt failure instead of a 360-minute hang. It
+  is not a performance assertion.
+- `native_benchmark` includes `ports.rs` directly via `#[path]` and uses part
+  of it, so its `mod test_ports` carries the same `dead_code` allowance as
+  `tests/support/mod.rs`. No lint level elsewhere changed.
+
+Checks: new `fixture_isolation` test for both protocols and the negative
+control; mutants (adoption drops the unused half; reclaim skips the release
+proof) each fail it; the three binaries five times each plus two simultaneous
+copies, cores 0–3; fmt and the four strict Clippy profiles.
+
+#### Round 3 implemented evidence
+
+Commit `ce390fd7` (code), on top of `03127ec5`. Linux, 16-core host with other
+work on cores 4–15; every build and test pinned to cores 0–3 with `nice -n 19`
+and `-j 2`. Test binaries from
+`taskset -c 0-3 nice -n 19 cargo +stable test --locked --offline --all-features --no-run -j 2`,
+each run directly as `taskset -c 0-3 nice -n 19 BIN`, sequentially, then two
+simultaneous copies once. No retries; a failure is recorded as found.
+
+| Binary | Sequential runs (tests passed/failed, libtest time) | Two simultaneous copies |
+| --- | --- | --- |
+| `logical_voter_network` | 5/5 pass: 4/0 each; 36.8 s, 10.9 s, 31.8 s, 24.7 s, 17.1 s | both pass, 4/0; 31.6 s / 30.9 s |
+| `logical_nested_native` | 5/5 pass: 15/0 each; 211.6 s, 210.2 s, 204.1 s, 218.2 s, 220.6 s | both pass, 15/0; 189.7 s / 221.5 s |
+| `logical_activation_nested` | 4/5 pass: 14/0 in runs 1, 3, 4, 5 (145.2 s, 166.0 s, 140.3 s, 155.7 s); run 2 13/1 (154.9 s) | both pass, 14/0; 142.7 s / 164.7 s |
+
+Zero AddrInUse, "Address already in use" or PoisonError lines in any of the
+21 executions. The single failure, `logical_activation_nested` run 2,
+`history::quic_twelve_native_owners_original_logical_learner_activation`, is
+the known TR4 class: `native logical child timeout … stage=CloseDrained;
+slot=2 … elapsed=15.000941457s` at `cluster.rs:216`. Node 9 was still
+`Draining` with one QUIC peer connection in its roster. That is inside the
+native child cluster, not the outer channels this round changes; it is left
+to TR4 and was not retried.
+
+| Check | Result |
+| --- | --- |
+| `cargo +stable fmt --all -- --check` | pass |
+| Strict all-target Clippy: default, all-features, no-default, native-only | all exit 0, zero diagnostics (72 targets rechecked after touching `ports.rs`) |
+| All-features `fixture_isolation` | 8 pass / 0 fail (new adoption test included) |
+| Mutant: `adopt_tcp` also drops the UDP half | new test fails at `fixture_isolation.rs:111` |
+| Mutant: `reclaim` ignores a failed TCP rebind | new test fails at `fixture_isolation.rs:114` |
+| All-features `voteboat-directory route_discovery` | 8 pass / 0 fail, 1.60 s |
+
+Not run in this round: the full suite, macOS, the parent side (the matrix
+above covers it), and E3 contention. Open non-blocking P3s from round 2 that
+this round does not change: P3-a (the docs' "push-to-main runs remain
+uncancelled" wording: GitHub keeps at most one pending run per concurrency
+group), P3-c (an unusable explicit `VOTEBOAT_TEST_PORT_LEASE_DIR` still falls
+back), P3-d (no macOS fallback coverage) and P3-e (the per-user fallback
+directory is left behind).

@@ -98,7 +98,7 @@ fn absent_resume(host: &mut Cluster) {
     }
 }
 fn ownership(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut host = Cluster::new(protocol, 8, [50, 0]);
     nonempty_stream(&mut host);
     stale_completion(&mut host);

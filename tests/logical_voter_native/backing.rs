@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::{
-    cluster::{ChildNode, Cluster, HISTORY},
+    cluster::{serial, ChildNode, Cluster},
     drive, setup, support,
 };
 use std::cell::Cell;
@@ -11,7 +11,7 @@ use voteboat::{
     runtime::{MonoTime, NodeError, NodePollBudget},
 };
 fn history(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut cluster = Cluster::new(protocol);
     let clock = cluster.clock;
     {

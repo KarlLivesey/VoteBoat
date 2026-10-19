@@ -8,7 +8,7 @@ use std::{
     net::{SocketAddr, TcpListener, UdpSocket},
     path::PathBuf,
     sync::{
-        atomic::{AtomicU64, AtomicUsize, Ordering},
+        atomic::{AtomicU64, Ordering},
         Mutex,
     },
     time::{Duration, Instant},
@@ -21,13 +21,16 @@ use voteboat::{
     runtime::*,
 };
 pub static HISTORY: Mutex<()> = Mutex::new(());
+pub fn serial() -> std::sync::MutexGuard<'static, ()> {
+    support::serial::serial(&HISTORY)
+}
 static NEXT: AtomicU64 = AtomicU64::new(1);
-static PORT: AtomicUsize = AtomicUsize::new(0);
 pub struct Cluster {
     pub nodes: Vec<Boat>,
     pub root: PathBuf,
     pub group: GroupIdentity,
     pub addresses: [SocketAddr; 3],
+    ports: support::ports::PortLease,
     pub protocol: NativePeerProtocol,
     clock: Instant,
 }
@@ -42,14 +45,17 @@ impl Cluster {
         for id in 1..=3 {
             std::fs::create_dir(root.join(id.to_string())).unwrap();
         }
+        let ports = support::ports::PortLease::acquire(3);
         let mut host = Self {
             nodes: Vec::new(),
             root,
             group: support::group(318),
-            addresses: addresses(),
+            addresses: ports.addresses(),
+            ports,
             protocol,
             clock: Instant::now(),
         };
+        host.ports.handoff();
         host.open(false);
         host
     }
@@ -163,25 +169,4 @@ impl Cluster {
         self.close();
         std::fs::remove_dir_all(self.root).unwrap();
     }
-}
-fn addresses() -> [SocketAddr; 3] {
-    let reservations = (0..3)
-        .map(|_| {
-            (0..64)
-                .find_map(|_| {
-                    let port = 20000 + PORT.fetch_add(1, Ordering::Relaxed) % 10000;
-                    let tcp =
-                        TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, port as u16)).ok()?;
-                    let udp = UdpSocket::bind(tcp.local_addr().ok()?).ok()?;
-                    Some((tcp, udp))
-                })
-                .expect("private TCP/UDP listener")
-        })
-        .collect::<Vec<_>>();
-    reservations
-        .iter()
-        .map(|(tcp, _)| tcp.local_addr().unwrap())
-        .collect::<Vec<_>>()
-        .try_into()
-        .unwrap()
 }

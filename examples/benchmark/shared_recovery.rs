@@ -27,6 +27,8 @@ struct Harness {
     addresses: BTreeMap<u64, std::net::SocketAddr>,
     recovery: Option<SnapshotRecoveryLimits>,
     ingress: IngressLimits,
+    // Callers declare replicas after Harness, keeping this through their drop.
+    _ports: crate::test_ports::PortLease,
 }
 impl Harness {
     fn new(protocol: NativePeerProtocol) -> Self {
@@ -39,13 +41,12 @@ impl Harness {
                 .as_nanos()
         ));
         std::fs::create_dir(&root).unwrap();
-        let reservations = (0..3)
-            .map(|_| {
-                let tcp = TcpListener::bind("127.0.0.1:0").unwrap();
-                let udp = UdpSocket::bind(tcp.local_addr().unwrap()).unwrap();
-                (tcp, udp)
-            })
-            .collect::<Vec<_>>();
+        let mut ports = crate::test_ports::PortLease::acquire(3);
+        eprintln!(
+            "shared recovery fixture port namespace: {}",
+            ports.directory.display()
+        );
+        let reservations = ports.take_sockets();
         let addresses = (1..=3)
             .zip(reservations.iter().map(|(s, _)| s.local_addr().unwrap()))
             .collect();
@@ -70,6 +71,7 @@ impl Harness {
             addresses,
             recovery: None,
             ingress: IngressLimits::default(),
+            _ports: ports,
         }
     }
     fn open(&self, n: u64, mode: NativeOpenMode) -> Replica<SharedLog> {

@@ -192,7 +192,7 @@ pub(super) fn read(bridge: &mut Bridge<'_>, node: &mut FacadeNode, clock: Instan
     }
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut cohort = Cluster::new_with_application(protocol, fixture::child_application());
     let (old_binding, expected, first) = prepare(&mut cohort);
     cohort.checkpoint();

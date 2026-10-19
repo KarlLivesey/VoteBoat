@@ -1,0 +1,36 @@
+{
+  "time": "2026-10-18T12:02:00.223870+00:00",
+  "reason": "Superseded allocator policy: avoid legacy routed 10000-19999 band; preserve all old results and restart corrected-source validation. Interrupted executions are not passes.",
+  "owned_processes_stopped": [
+    {
+      "pid": 1650467,
+      "start": "13669115",
+      "comm": "bash"
+    },
+    {
+      "pid": 1432161,
+      "start": "14340767",
+      "comm": "cargo"
+    },
+    {
+      "pid": 1727996,
+      "start": "14390283",
+      "comm": "logical_activat"
+    },
+    {
+      "pid": 2583482,
+      "start": "13821937",
+      "comm": "bash"
+    },
+    {
+      "pid": 152547,
+      "start": "14111621",
+      "comm": "bash"
+    },
+    {
+      "pid": 1480292,
+      "start": "14350862",
+      "comm": "logical_nested_"
+    }
+  ]
+}

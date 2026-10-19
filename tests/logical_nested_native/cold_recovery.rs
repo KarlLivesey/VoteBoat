@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Karl Livesey
 //! Recover two logical tiers exclusively from the same closed physical stores.
 use super::{
-    cluster::{Cluster, HISTORY},
+    cluster::{serial, Cluster},
     host::Host,
     lower::Lower,
     middle, setup, write,
@@ -34,7 +34,7 @@ fn quic_two_levels_recover_actual_checkpoint_suffix_and_retry_from_closed_stores
 }
 
 fn history(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let clock = Instant::now();
     let mut bottom = (0..9)
         .map(|i| Cluster::new(protocol, i, clock))

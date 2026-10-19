@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::*;
-use std::{io::Read, net::TcpListener, path::Path};
+use std::{
+    io::Read,
+    net::{TcpListener, TcpStream},
+    path::Path,
+};
 
 pub(super) fn stalled_authority() -> (Discovery, Endpoint, TcpListener, ManifestLookup) {
     let listener = TcpListener::bind(("127.0.0.1", 0)).unwrap();
@@ -43,8 +47,32 @@ pub(super) fn stalled_authority() -> (Discovery, Endpoint, TcpListener, Manifest
     )
 }
 
+/// The attempt connects synchronously inside the call before
+/// [`assert_attempt_closed`], so its connection is already queued. This bound
+/// only turns a regression that never connects into a prompt failure instead
+/// of a hang until the CI job limit; it is not a performance assertion.
+const ACCEPT_HANG_GUARD: Duration = Duration::from_secs(30);
+
+fn accept_attempt(listener: &TcpListener) -> TcpStream {
+    let guard = Instant::now() + ACCEPT_HANG_GUARD;
+    listener.set_nonblocking(true).unwrap();
+    loop {
+        match listener.accept() {
+            Ok((stream, _)) => return blocking_fixture_stream(stream),
+            Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                assert!(
+                    Instant::now() < guard,
+                    "no connection attempt reached the stalled authority"
+                );
+                std::thread::sleep(Duration::from_millis(1));
+            }
+            Err(error) => panic!("stalled authority accept: {error}"),
+        }
+    }
+}
+
 fn assert_attempt_closed(listener: &TcpListener) {
-    let (stream, _) = listener.accept().unwrap();
+    let stream = accept_attempt(listener);
     stream
         .set_read_timeout(Some(Duration::from_secs(1)))
         .unwrap();
@@ -95,4 +123,35 @@ fn authority_authentication_cannot_extend_the_lookup_deadline() {
         .unwrap_err()
         .to_string()
         .contains("recursive lookup deadline expired"));
+}
+
+// Accepted sockets inherit O_NONBLOCK on macOS. These fixture reads deliberately
+// block; production native/service listeners explicitly choose nonblocking mode.
+fn blocking_fixture_stream(stream: TcpStream) -> TcpStream {
+    stream.set_nonblocking(false).unwrap();
+    stream
+}
+
+#[cfg(target_os = "linux")]
+#[test]
+fn accepted_fixture_stream_explicitly_clears_nonblocking_mode() {
+    use std::os::fd::AsRawFd;
+    let listener = TcpListener::bind(("127.0.0.1", 0)).unwrap();
+    let _client = TcpStream::connect(listener.local_addr().unwrap()).unwrap();
+    let (stream, _) = listener.accept().unwrap();
+    // Simulate macOS inheritance on Linux, so removing the explicit mode reset
+    // also breaks this test on Linux. Inspect flags without unsafe fcntl calls.
+    stream.set_nonblocking(true).unwrap();
+    let flags = |stream: &TcpStream| {
+        let info =
+            std::fs::read_to_string(format!("/proc/self/fdinfo/{}", stream.as_raw_fd())).unwrap();
+        let flags = info
+            .lines()
+            .find_map(|line| line.strip_prefix("flags:\t"))
+            .unwrap();
+        u32::from_str_radix(flags, 8).unwrap() & libc::O_NONBLOCK as u32
+    };
+    assert_ne!(flags(&stream), 0);
+    let stream = blocking_fixture_stream(stream);
+    assert_eq!(flags(&stream), 0);
 }

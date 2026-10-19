@@ -7,7 +7,7 @@ use super::{
 };
 use std::{
     collections::BTreeMap,
-    net::{SocketAddr, TcpListener, UdpSocket},
+    net::SocketAddr,
     sync::Arc,
     time::{Duration, Instant},
 };
@@ -28,6 +28,10 @@ pub struct Channels {
     sessions: BTreeMap<(usize, usize), Session>,
     addresses: Vec<SocketAddr>,
     observations: Vec<Observation>,
+    // Each connector adopts only its own protocol's bound half. The lease
+    // keeps the unused half bound and the lock held for the whole workflow,
+    // and rebinds the adopted half after close to prove its release.
+    ports: support::ports::PortLease,
 }
 impl Channels {
     pub fn new(
@@ -36,27 +40,17 @@ impl Channels {
         protocol: NativePeerProtocol,
         now: MonoTime,
     ) -> Self {
-        let held = (0..3)
-            .map(|_| {
-                let tcp = TcpListener::bind("127.0.0.1:0").unwrap();
-                let udp = UdpSocket::bind(tcp.local_addr().unwrap()).unwrap();
-                (tcp, udp)
-            })
-            .collect::<Vec<_>>();
-        let addresses = held
-            .iter()
-            .map(|(tcp, _)| tcp.local_addr().unwrap())
-            .collect::<Vec<_>>();
-        let connectors = held
-            .into_iter()
-            .enumerate()
-            .map(|(slot, sockets)| connector(slot, descriptors, &addresses, sockets, protocol, now))
+        let mut ports = support::ports::PortLease::acquire(3);
+        let addresses = ports.address_list();
+        let connectors = (0..addresses.len())
+            .map(|slot| connector(slot, descriptors, &addresses, &mut ports, protocol, now))
             .collect();
         let mut result = Self {
             connectors,
             sessions: BTreeMap::new(),
             addresses,
             observations: Vec::new(),
+            ports,
         };
         result.establish(descriptors, bindings, now);
         result
@@ -209,19 +203,14 @@ impl Channels {
                 }
             }
         }
-        for address in self.addresses {
-            drop((
-                TcpListener::bind(address).unwrap(),
-                UdpSocket::bind(address).unwrap(),
-            ));
-        }
+        self.ports.reclaim();
     }
 }
 fn connector(
     slot: usize,
     descriptors: &[LogicalPeerDescriptor],
     _addresses: &[SocketAddr],
-    sockets: (TcpListener, UdpSocket),
+    ports: &mut support::ports::PortLease,
     protocol: NativePeerProtocol,
     now: MonoTime,
 ) -> NativeServiceConnector {
@@ -255,7 +244,6 @@ fn connector(
         .with_logical_profile();
     match protocol {
         NativePeerProtocol::TcpTls => {
-            drop(sockets.1);
             let dialer = NativeTcpDialer::spawn(
                 local,
                 peers
@@ -267,12 +255,19 @@ fn connector(
             )
             .unwrap();
             NativeServiceConnector::Tcp(Box::new(
-                NativePeerConnector::new(config, tls, peers, dialer, Some(sockets.0), now).unwrap(),
+                NativePeerConnector::new(
+                    config,
+                    tls,
+                    peers,
+                    dialer,
+                    Some(ports.adopt_tcp(slot)),
+                    now,
+                )
+                .unwrap(),
             ))
         }
         #[cfg(feature = "quic")]
         NativePeerProtocol::Quic => {
-            drop(sockets.0);
             let peers = peers
                 .into_iter()
                 .map(|(id, p)| {
@@ -285,7 +280,11 @@ fn connector(
                 .collect();
             NativeServiceConnector::Quic(Box::new(
                 voteboat::native::quic_connect::NativeQuicConnector::new(
-                    config, tls, peers, sockets.1, now,
+                    config,
+                    tls,
+                    peers,
+                    ports.adopt_udp(slot),
+                    now,
                 )
                 .map_err(|e| e.reason)
                 .unwrap(),

@@ -7632,3 +7632,163 @@ review qualifies runtime behavior; changed Linux/Mac histories remain required.
 Final384 runs frozen383 source with unchanged production379, and has seven later
 fixture deltas versus current388. CURRENT_COMPARISON388.json records the exact
 scope; no final whole-current matrix claim is made while it runs.
+
+## TR1b reliability track — 18 October 2026 (qualification in progress)
+
+The parent `30a1f6c5` port race is reproduced: simultaneous all-feature
+`logical_voter_native` copies pinned to CPUs 0–3 at relative nice +19 produced
+0/42 (`AddrInUse` + 41 poison cascades) and 42/42. CI now exposes all binaries
+and configurations; seven fixture ladders use held cross-process port leases,
+and their serial helpers recover poison. The route-discovery accepted socket
+now explicitly selects blocking mode; production listeners already set their
+required mode, so this slice changes no production behavior.
+
+Focused tests: fixture isolation 3/3 and route-discovery 8/8. A subsequent new
+cleanup check's own free-port race failed; it is fixed by an isolated lock-test
+namespace and then passes 3/3. Raw failure is retained. CI stub controls verify
+all three configurations execute and the overall step remains red on any
+failure. Full repeated proof and suites are pending, not implied by these
+focused results. See the reliability section in `docs/IMPLEMENTATION.md` and
+`validation/reliability/tr1b/` for source-bound outcomes.
+
+TR1b first proof at `146524a2`: 36 passing fixture-isolation executions then
+one E5 failure in the new cleanup control. The isolated lock namespace rules
+out allocator reuse; a sibling fork can transiently inherit even CLOEXEC fds.
+A shared spawn guard makes the unchanged last-close assertion valid. The
+failed matrix is retained separately and is not a successful proof. The
+corrected focused control passes 3/3; qualification continues on the fix.
+
+TR1b checkpoint at source `5651d512`: fixture isolation (3 tests/run), directory
+unit binary (12) and logical voter native (42) each pass all 38 executions:
+10 constrained, 5 serial, 10 CPU-contended, 5 concurrent pairs and 3 defaults.
+The five corrected voter pairs all pass both copies, versus the parent port
+collision. Root fmt/four strict Clippy profiles and matched fmt/Clippy pass with
+zero diagnostics through enabled pushes. Remaining proof and final full-suite
+counts are pending. The default full suite has continued beyond an activation-
+driver failure (root learners bridge-usage assertion + two poison cascades);
+those files belong to R1 and are unchanged here.
+
+TR1b environment correction supersedes the previous checkpoint's nice claim:
+`ananicy-cpp` applies Bash's Doc-View nice −4 policy to the intermediary wrapper.
+Recorded values were 11, 15 and −4. The passing outcomes remain evidence, but
+that matrix does not qualify the requested priority environment. The direct
+launcher now has no intermediary Bash and samples its owned executable from the
+parent. The old matrix independently stopped at a new UDP `AddrInUse` in the
+network-voter outer-channel fixture (TCP `:0` had not reserved UDP). The paired
+lease now transfers prebound sockets into the three identical channel fixtures;
+its ownership control passes 3/3. Both stopped matrices remain retained; no host
+daemon or foreign process was changed. Final proof is pending on corrected source.
+
+Corrected TR1b direct launcher at `1ec4a1dc`: isolation passes all 38 executions.
+Network voter first E1 samples nice15/CPUs0–3 and fails 3/4 on independent real-
+time deadlines in host/history/cluster, with no port or poison failure. This
+blocks complete reliability qualification; TR3's planned clock/quiescent pacing
+remains necessary. No unchanged retry or increased bound is used. Actual host
+load exceeded the stated 30–80 range. Remaining binaries are being checked
+independently; complete-track success is not claimed.
+
+Direct follow-up failures: logical-network E1 run 1 has three child progress
+timeouts (1 pass/3 fail, 64.19s); transaction driver passes 10 constrained and
+5 serial runs, then E3 run 1 has one phase-boundary timeout (13 pass/1 fail,
+85.23s). Both sample nice15/CPUs0–3; no port error or poison cascade. These
+remain TR3/TR6 work, without unchanged retries or altered assertions. Evidence
+is archived under `validation/reliability/tr1b/failed-proof-1ec4a1dc/`.
+
+Corrected direct checkpoint: isolation (all/native), striped-node and directory
+all pass 38 executions each, including five genuinely concurrent launch pairs.
+The 12-test directory matrix includes the accepted-socket-mode regression.
+Program transaction passes 10 constrained and 5 serial executions, then E3 run 1
+fails four original fixture/phase deadlines (10/14 pass, 96.71s, nice15/CPUs0–3).
+It is stopped without unchanged retry; remaining TR6 clock work is explicit.
+Complete positive and negative raw evidence is archived under reliability/tr1b.
+
+Fresh voter proof passes 10 constrained and 5 serial executions, then E3 run 1
+fails the existing child-claim deadline (41/42 pass, 296.48s, nice15/CPUs0–3).
+E4/E5 are unqualified; old observed passing pairs are not substituted. Complete
+raw prefix/failure is retained. Activation-nested first E1 passes14 in393.07s;
+requested repetitions continue. Corrected direct metadata has positive nice11/
+15 (relative +19 from inherited −8/−4), with explicit missing samples for very
+short tests, and no observed negative-priority reset.
+
+Activation-nested's second constrained execution fails 13/14 in417.30s after
+first14/14 in393.07s. The original CloseDrained real deadline fails with two diagnostic nodes
+Drained and one still Draining, all without provider failure. No assertion
+or bound is changed; further repetitions stop and both outcomes are archived.
+Remaining TR4 clock/observation work blocks its complete reliability proof.
+
+CI runtime amendment: the first default full command exceeds96 minutes before
+completion, so the earlier one-job sequence could still lose later configurations
+on its 90-minute timeout. Platform feedback now uses three globally sequential
+OS-matrix jobs with failure-tolerant dependencies, 90 minutes each, exact cargo
+exit propagation and `--no-fail-fast`. YAML/chain checks and executed exit101
+controls pass; actual GitHub timeout execution remains unvalidated. The M1/M5
+macro goals stay incomplete; per-configuration duration/sharding is TR2 inventory.
+
+Pre-compatibility default baseline completes:2444 pass/4 fail/0 ignored,
+125target summaries, exit101,6716s. Driver16/19 and routed109/110 fail. Routed
+silently discards bind errors after32 probes in10000–19999; the old lowest-first
+lease policy could occupy39 endpoints in that same band. The precise OS error
+was lost, but this avoidable overlap is corrected by excluding that band,
+preferring30000–32767 then20000–29999, with actual leased-address invariant.
+The focused ownership/compatibility control passes3/3. No deadline or production
+input changes. Old all-feature successor/deep nested repetition are explicitly
+interrupted/superseded for consistent-source validation, not successes. Verified
+owned families only were stopped; original baseline/partial outputs and exact
+interruption record are retained. Final suites restart on corrected inputs.
+
+Final allocator focused acceptance (Rust717a3261): ownership/compatibility
+all/native38/38 each, striped38/38. Fresh voter E4 five concurrent pairs all
+copies42/42 and E5 three defaults42/42 pass. The E4/E5 selection is explicit,
+not a full matrix or a retry of failed E3. Current-policy raw evidence/counts
+are archived. Earlier clock failures remain blockers; final full suites pending.
+
+CI budget correction: a112-minute measured default baseline exceeds the
+intermediate90-minute per-configuration budget. All three sequential test jobs
+now allow360minutes; test deadlines/assertions stay unchanged. Parsed budgets
+and all three extracted scripts with each injected exit101 pass, for Linux and
+macOS RUNNER_OS branches executed on Linux (`ci-budget-check.json`). Hosted
+execution remains separate. Final default has14pass/5fail in unchanged R1
+driver (learners root plus4poison), continues into exhaustive relay model.
+
+TR1b round2: shared fixed Unix lease namespace now repairs01777/0666 modes,
+opens existing files without O_CREAT, and diagnoses per-uid fallback when shared
+ownership/permissions are unusable. Different-TMPDIR handoff, unwritable /sys,
+mode repair/fresh creation, restrictive umask077, unwind and exhaustive legacy/
+ephemeral exclusion controls pass. Service allocators remain TR12/TR15, with
+all their candidate residues/bands excluded. All-ephemeral1024–65535 has no safe
+unprivileged handoff pool; customized macOS ephemeral ranges and noncooperating
+explicit binders remain documented limitations. PR-only stale-run cancellation
+and blocking fixture accept are implemented. Root fmt/four strict Clippy plus
+matched fmt/strict Clippy pass. Isolation7/7; route discovery8/8; umask control1/1.
+One simultaneous four-core all-feature voter pair passes42/42 each in13.22/13.10s,
+no AddrInUse or poison. Full all-feature suite counts follow on completion;
+other feature suites and parent comparison belong to the independent runner.
+The orchestrator explicitly approves class-specific TR1b acceptance, departing
+from architect §4's every-counted-run-passes rule; full qualification stays open.
+
+TR1b round2 completion: full foreground all-feature/no-fail-fast run on44a64ea1
+finishes2765pass/1fail/0ignored,125summaries,exit101,6761s. Sole failure is
+native_benchmark shared_recovery UDP bind after TCP0, an unchanged-parent
+allocator outside the leased band; this source fact is not matched-parent
+runtime proof. Raw failure stays archived. Both test-only benchmark recovery/
+drain harnesses now retain shared leases through nodes/reopen; final affected
+example56/56 passes after the actual allocator fix, with unchanged assertions.
+The full command is not relabelled as a final-source green run.
+
+Final-source fixture7/7, restrictive-umask mode/alias1/1, route8/8, and exactly
+one final simultaneous taskset0-3 voter pair42/42 each,14.17s/14.18s, exits0,
+zero port/poison diagnostics. Earlier passing source-variant pairs are retained
+separately. Root fmt/four strict Clippy profiles and matched fmt/strict Clippy
+pass zero diagnostics. Fixed TMPDIR-independent shared namespace, explicit
+01777/0666 repair, actual-path child assertion, filesystem-only unwritable
+/proc/sys control, stale-name handling, lock-alias rejection using existing
+libc flags, and safe namespace exhaustion policy are checked. Pools exclude
+legacy service/routed endpoints and actual ephemeral range, use permitted low
+ports only last, and never choose0. Missing-proc Linux/macOS assumptions and
+no-permitted-outside-range limitation are documented. Diagnostic fallback loses
+cross-user coordination; common loopback needs common filesystem/inodes.
+
+No new crate/unsafe/lint weakening/test ignore/threshold or activation-driver
+change, production benchmark or library change, detached job, or foreign process
+manipulation. Final-source whole-suite/matched-parent qualification, other
+configs and both reviews follow with the runner; macro goals stay open.

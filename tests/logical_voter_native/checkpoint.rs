@@ -3,7 +3,7 @@
 //! Original parent checkpoint leases, real child publication and pin release.
 use super::{
     aliases::Bridge,
-    cluster::{Cluster, HISTORY},
+    cluster::{serial, Cluster},
     drive::claim_in,
     parent::Parent,
     persistence::{append, input, pump_providers, settle},
@@ -200,7 +200,7 @@ fn suffix(cluster: &mut Cluster, anchored: &GroupLog) -> GroupLog {
     parent.close()
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut cluster = Cluster::new(protocol);
     let anchored = prepare(&mut cluster);
     cluster.checkpoint();

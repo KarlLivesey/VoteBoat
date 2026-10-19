@@ -3,7 +3,7 @@
 //! Real parent-generated persistence over one actual child cohort.
 use super::{
     aliases::Bridge,
-    cluster::{Cluster, HISTORY},
+    cluster::{serial, Cluster},
     drive::claim_in,
     parent::Parent,
     setup, support,
@@ -225,7 +225,7 @@ fn assert_state(state: &GroupLog, entries: usize) {
     );
 }
 fn history(protocol: NativePeerProtocol) {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut cluster = Cluster::new(protocol);
     let first = phase(&mut cluster, true);
     assert_state(&first, 1);

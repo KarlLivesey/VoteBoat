@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::{
-    cluster::{Cluster, HISTORY},
+    cluster::{serial, Cluster},
     setup,
 };
 #[path = "authority/vote_window.rs"]
@@ -88,7 +88,7 @@ fn physical_constructors_reject(owner: &Owner) {
 }
 #[test]
 fn actual_verified_child_authority_blocks_raw_transfer_and_physical_router_construction() {
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut cluster = Cluster::new(NativePeerProtocol::TcpTls);
     let image = cluster.claim(1, 7020, false);
     let mut owner = owner(&image);
@@ -176,7 +176,7 @@ fn pure_reply(parent: &mut super::parent::Parent) {
 fn accepted_capsule_retains_original_parent_credits_until_actual_failed_cleanup_observation() {
     use std::time::{Duration, Instant};
     use voteboat::{outbound::OutboundQueue, worker::PersistenceWorker};
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut cluster = Cluster::new(NativePeerProtocol::TcpTls);
     let clock = cluster.clock;
     let mut bridge = LogicalChildBridge::new(
@@ -351,7 +351,7 @@ fn pending_append(
 fn already_admitted_append_cannot_overtake_retained_original_vote_capsule() {
     use std::time::{Duration, Instant};
     use voteboat::{log::*, raft::Rpc};
-    let _serial = HISTORY.lock().unwrap();
+    let _serial = serial();
     let mut cluster = Cluster::new(NativePeerProtocol::TcpTls);
     let clock = cluster.clock;
     let mut bridge = LogicalChildBridge::new(
