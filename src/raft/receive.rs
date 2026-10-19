@@ -322,7 +322,17 @@ impl Raft {
     /// Offset of the first entry not already held. Same-term overlap is
     /// compared by content: a separately allocated batch with the same index
     /// and term must still be identical.
+    #[inline]
     fn first_new_entry(&self, entries: &EntryBatch) -> Result<Option<usize>, RaftError> {
+        // Usually the first entry is not held at all: the loop's first step.
+        match entries.first() {
+            None => return Ok(None),
+            Some(first) if self.durable.entry_at(first.index).is_none() => return Ok(Some(0)),
+            Some(_) => {}
+        }
+        self.first_new_overlapping(entries)
+    }
+    fn first_new_overlapping(&self, entries: &EntryBatch) -> Result<Option<usize>, RaftError> {
         let mut offset = 0;
         for slice in entries.slices() {
             for entry in slice {
