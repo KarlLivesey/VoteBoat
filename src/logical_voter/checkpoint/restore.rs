@@ -55,9 +55,13 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
         }
         self.decode_materialized(&mut d, &mut state)?;
         d.finish()?;
-        Self::validate_restored(&state)?;
+        self.validate_restored(&state)?;
         let mut next = self.clone();
         next.state = state;
+        // The retained set must fit every budget admission enforces (G6):
+        // reserving nothing re-runs the exact admission check on it.
+        next.reserve(&[])
+            .map_err(|_| ApplicationError::InvalidCheckpoint)?;
         next.validate_read_envelopes()?;
         if next.encode_state(self.limits.max_child_checkpoint_bytes)? != bytes {
             return Err(ApplicationError::InvalidCheckpoint);
@@ -263,15 +267,53 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
     /// is retired yet, so the watermark is 0 and the generation high-water
     /// mark equals the floor derived from retained records. Retirement (LV2)
     /// relaxes the latter to `>=`.
-    fn validate_restored(state: &application::State) -> Result<(), ApplicationError> {
+    fn validate_restored(&self, state: &application::State) -> Result<(), ApplicationError> {
         let epoch = state.representative.map_or(0, |r| r.epoch.get());
+        let retained = |reference: Option<SnapshotRef>| {
+            reference.is_none_or(|r| state.snapshots.iter().any(|(s, _)| *s == r))
+        };
         if state.representative.is_some() != state.parent.is_some()
+            || (self.candidate() && state.representative.is_some() != state.enrollment.is_some())
+            || !retained(state.published)
+            || !retained(state.parent.as_ref().and_then(|p| p.snapshot))
             || state
                 .records
                 .values()
                 .any(|r| r.receipt.epoch.map_or(0, RepresentativeEpoch::get) > epoch)
             || state.retired_below != 0
             || state.snapshot_generation != Self::retained_generation_floor(state)
+        {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        match &state.enrollment {
+            Some(e) => self.validate_enrollment(state, e),
+            None => Ok(()),
+        }
+    }
+    /// The enrollment record is the materialised result of its retained
+    /// `EnrollmentClaim` record. LV1 retains that record; LV2 may retire it
+    /// and then checks only the fields the record itself carries.
+    fn validate_enrollment(
+        &self,
+        state: &application::State,
+        e: &LogicalEnrollmentRecord,
+    ) -> Result<(), ApplicationError> {
+        let record = state
+            .records
+            .get(&e.operation)
+            .ok_or(ApplicationError::InvalidCheckpoint)?;
+        let CommandBody::EnrollmentClaim(import) = self.decode_command(&record.command)?.body
+        else {
+            return Err(ApplicationError::InvalidCheckpoint);
+        };
+        if record.first_index != e.first_index
+            || record.first_term != e.first_term
+            || record.receipt.outcome != LogicalOutcome::Claimed
+            || import.plan != e.plan
+            || import.origin != e.origin
+            || import.learners != e.learners
+            || self.snapshot_reference(&import.snapshot, SnapshotGeneration::new(1).unwrap())?
+                != e.target_reference
         {
             return Err(ApplicationError::InvalidCheckpoint);
         }

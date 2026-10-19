@@ -78,6 +78,63 @@ fn candidate_v4_goldens_round_trip_exactly() {
         Err(ApplicationError::InvalidCheckpoint)
     );
 }
+/// A candidate's representative exists exactly when its enrollment does, and
+/// the enrollment record is the result of its retained `EnrollmentClaim`.
+#[test]
+fn candidate_restore_checks_enrollment_against_its_claim() {
+    let a = enrolled();
+    let applied = a.applied_index();
+    let edit = |f: fn(&mut LogicalEnrollmentRecord)| {
+        let mut b = a.clone();
+        f(b.state.enrollment.as_mut().unwrap());
+        b
+    };
+    let mut cases = vec![
+        (
+            "enrollment operation",
+            edit(|e| e.operation = OperationId::new(999).unwrap()),
+        ),
+        ("enrollment first index", edit(|e| e.first_index += 1)),
+        ("enrollment first term", edit(|e| e.first_term += 1)),
+        (
+            "enrollment target",
+            edit(|e| e.target_reference.checksum ^= 1),
+        ),
+        ("enrollment learners", edit(|e| e.learners.term += 1)),
+    ];
+    let mut b = a.clone();
+    b.state.enrollment = None;
+    cases.push(("representative without enrollment", b));
+    // With the image and receipt epochs gone too, so only the pairing with
+    // the enrollment is wrong.
+    let mut b = a.clone();
+    b.state.representative = None;
+    b.state.parent = None;
+    for r in b.state.records.values_mut() {
+        r.receipt.epoch = None;
+    }
+    cases.push(("enrollment without representative", b));
+    for (name, broken) in cases {
+        let bytes = broken.checkpoint(usize::MAX).unwrap();
+        let mut target = candidate();
+        let before = target.checkpoint(usize::MAX).unwrap();
+        assert_eq!(
+            target.restore_checkpoint(LOGICAL_ENROLLMENT_APPLICATION_SCHEMA, applied, &bytes),
+            Err(ApplicationError::InvalidCheckpoint),
+            "{name}"
+        );
+        assert_eq!(target.checkpoint(usize::MAX).unwrap(), before, "{name}");
+    }
+    let mut target = candidate();
+    target
+        .restore_checkpoint(
+            LOGICAL_ENROLLMENT_APPLICATION_SCHEMA,
+            applied,
+            &a.checkpoint(usize::MAX).unwrap(),
+        )
+        .unwrap();
+    assert_eq!(target.state, a.state);
+}
 #[test]
 fn exact_candidate_command_reserve_boundary_and_measured_envelope() {
     let mut limits = LogicalLimits::default();

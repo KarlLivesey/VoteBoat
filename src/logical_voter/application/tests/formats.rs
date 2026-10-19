@@ -17,6 +17,7 @@
 //! high-water mark.
 use super::*;
 mod history;
+mod refusals;
 mod restore;
 pub(super) use restore::assert_restore_equivalent;
 use restore::{legacy_generation, legacy_replay};
