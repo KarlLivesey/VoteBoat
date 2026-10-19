@@ -1829,6 +1829,24 @@ compares base and candidate under this rule in the same session. Earlier
 absolute 1-worker bulk numbers and earlier VoteBoat-versus-OpenRaft ratios are
 old-rule and not comparable.
 
+#### Re-baseline after the V3 merge (19 October 2026, `d379783d`)
+
+Quiet-Mac baseline of main `d379783d` (V2 + V3a + V3b + V3b-s) under the H2
+rule, both engines, five runs per cell, whole-process CPU per completed write
+(`target/claude/tools/baseline-mac.sh`, raw lines in
+`target/claude/research-r4/baseline-h2-d379783d.txt`):
+
+| Cell | VoteBoat ns/write | OpenRaft ns/write | VB/OR | vs `8b3c1e6c` baseline |
+| --- | ---: | ---: | ---: | ---: |
+| bulk 4096/4, 16 workers | 223 | 976 | 0.228 | −10.4% |
+| singleton 1/1, 16 workers | 22,575 | 82,693 | 0.273 | −3.5% |
+| bulk 4096/4, 1 worker | 189 | 670 | 0.282 | −13.7% |
+| singleton 1/1, 1 worker | 12,951 | 30,348 | 0.427 | −4.1% |
+
+These are the T4 reference values from here on. Profile and next slices:
+`target/claude/research-r4/v3c-profile.md` (library share ≈ 21% of single-1 and
+10–15% of bulk CPU; the rest is harness reply handling and thread wake/park).
+
 #### H2 round 2: review fixes (19 October 2026)
 
 Schema plan. No data/API shape or scheduling change. One test-only seam:
