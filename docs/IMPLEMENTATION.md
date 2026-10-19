@@ -38285,3 +38285,130 @@ binary.
 - Acceptance: compile and four strict Clippy profiles clean; the proof matrix
   in the TR4 mini-plan row with every execution recorded; a deliberate
   single-test failure (uncommitted experiment) fails that test alone.
+
+#### TR4 schema amendment: lockstep child clusters (before editing, 19 October 2026)
+
+The first two rounds of the proof (below) still failed twice with the old
+signature (`CloseDrained`, slot 4, a QUIC child one session short of drained).
+The new per-peer drain diagnostic named the state: node 14's last session to
+node 13 was `Closing`, flushed, close started, with a live close timer at
+`MonoTime(21159)`, 1.4 s after the 15,000 ms bound expired at `MonoTime(19736)`. The
+close was running, just very long. quinn sets the close timer to
+`now + 3 × (srtt + 4·rttvar + max_ack_delay)` (`quinn-proto` 0.11.9,
+`set_close_timer`). `finish_clusters` checkpointed and closed the five child
+clusters one after another, so each later cluster sat unpolled while shared
+protocol time advanced. A packet in flight across that gap returns one RTT
+sample of the whole gap G, adding about G to `4·rttvar`, so the close period
+grows to about 3.4 G: a gap of about 4.4 s is enough to exceed 15 s. The last cluster
+(slot 4, both failures) has the longest gap, the sum of the earlier closes.
+Under wall-clock time the gaps grow with load, which explains the higher rate
+recorded in PRs 4 and 5. This is a fixture defect inside this binary, not a
+library one.
+
+- Shape: `Cluster` operations take slices: `elect_all`, `open_all`,
+  `checkpoint_all`, `close_all`, `finish_all`, over a shared `poll_all` /
+  `wait_all`. Each round polls every node of every listed cluster at one
+  protocol time; each cluster keeps its own predicate and its original 15 s
+  (90 s for checkpoint publication) bound, measured from the common start.
+  Single-cluster methods delegate with a one-element slice.
+- Callers: `history::finish_clusters` checkpoints and finishes all clusters
+  together; `cold_joint` closes, reopens and finishes its four clusters
+  together. A single cluster's own waits while others are borrowed by the
+  lower host (target-store close and reopen) are short and followed by
+  minutes of polling of all clusters, so they keep the one-element form.
+- Acceptance: the full matrix again, from scratch, on the new commit.
+
+#### TR4 implemented and validated (19 October 2026)
+
+Commits on `ci/tr4-nested-deterministic-time` (tests and docs only;
+`git diff origin/main -- src` is empty): `3aac1a57` (clock, bounds, poison
+test), `cf6029d2` (per-peer drain diagnostic), `ad81e1f3` (lockstep
+clusters). 15 tests: the 14 originals and
+`serial_history_recovers_after_a_test_panic`.
+
+Converted sites (before on `906c7a9b` → after on `ad81e1f3`; all in
+`tests/logical_activation_nested/` unless named):
+
+| Before | Was | After |
+| --- | --- | --- |
+| `cluster.rs:40,66-73` | `clock: Instant`, `MonoTime(elapsed)` | `clock: SimClock`, `now()` = `clock.now()` |
+| `cluster.rs:198-205` | poll at elapsed wall time | `poll_all` `:226`: `clock.round(Observed)` over every polled node |
+| `cluster.rs:206-226` (`:216` CloseDrained) | 15 s / 90 s real (`Instant`) | `wait_all` `:247`: `harness::Wait` 15,000 / 90,000 ms protocol, lockstep clusters, per-peer drain diagnostic on failure |
+| `cluster.rs:267` → `logical_nested_native/cleanup.rs:17` | 10 s real worker join | `logical_voter_native/cleanup.rs`: hang guard only (joins take no protocol time) |
+| `lower.rs:16,38,49` | `Instant` clock, elapsed time per advance | `SimClock`; `advance_with` `:61-72` is the round point (lower bridges' durable work and replicas, retired sessions, caller's upper participants) |
+| `lower.rs:88-95` | 15 s real | `:111` `Wait` 15,000 ms |
+| `business.rs:26,43,58,62` | 15 s real over three waits | `:26` one `Wait` 15,000 ms, same three assertions |
+| `progress.rs:62-96` | 90 s absolute / 30 s inactivity real | `:67` 90,000 ms `Wait` / 30,000 ms protocol inactivity |
+| `progress.rs:101,132,147` | 15 s real | `:107,138,153` `Wait` 15,000 ms; `step`/`driver_step`/`claim_upper` observe the upper bridge (`:12,41,141`) |
+| `channels.rs:91-131` | 10 s real handshake, own `Instant` offset | `:92` `Wait` `HANDSHAKE_MS`, `:100` shared-clock round over connectors |
+| `channels.rs:170-199` | 15 s real close, dialer join | `:168,172` `Wait` 15,000 ms, shared-clock round; join under the guard |
+| `readiness.rs:60-81` | 15 s real | `:61` `Wait`, `:64` round observes middle nodes |
+| `enrollment.rs:38,93,115` | 15 s real | `Wait` 15,000 ms (same lines) |
+| `shutdown.rs:7,23` | 15 s real | `:11,27` `Wait`; `:30` round observes middle nodes |
+| `repeated.rs:110,147` | 15 s real | `Wait` (same lines) |
+| `cold_joint.rs:39,139` | `Instant::now()`, 15 s real | `:39` `SimClock`, `:133` `Wait`; lockstep close/open/finish |
+| `cold_joint/restore.rs:127` | 15 s real | `Wait`; `:130` round observes the upper bridge |
+| `cold_target.rs:129,144` | 15 s real | `Wait`; `:131,146` round also observes the separately borrowed target bridge |
+| `unknown_target.rs:49,117,188` | 15 s real | `Wait` (`:188` on the cluster clock); `:51,119,145` observe the target bridge |
+| `uncommitted_target.rs:68,122` | 15 s real | `Wait` (`:122` on the cluster clock); `:70` observes the target bridge |
+| `uncommitted_target/abort.rs:54-77,91` | 10 s real drain at `clock.elapsed()` | `:62` `Wait` 10,000 ms, `:64` round holding on dial work only; dialer join under the guard |
+| `uncommitted_target/abort.rs:98-118` | 10 s real worker join | `:110` `HangGuard` only |
+| `history.rs:65` | `Instant::now()` | `SimClock::default()`; lockstep `finish_clusters` |
+
+`logical_voter_native/harness.rs` (shared with the driver and voter binaries)
+gains `Observed::backing` and `Observed::dialing` only; the driver and voter
+binaries were run once each below.
+
+Proof (all features). Binaries built with
+`taskset -c 0-3 nice -n 19 cargo +stable test --locked --offline --all-features --no-run -j 2`
+and run directly as `taskset -c 0-3 nice -n 19 BIN` (absolute nice 15, as the
+shell runs at −4; affinity mask `f` recorded in every log). E3 burners: three owned
+`taskset -c N sh -c 'while :; do :; done'` at the same nice on CPUs 1, 2, 3,
+measured at 93–100 % CPU each before every run and killed after it. Every
+execution is recorded; nothing was rerun. Lines matching `AddrInUse`,
+`Address already in use`, `PoisonError` or `hang-guard` in every log: 0.
+
+| Round (commit) | Env | Runs | Result | libtest time (s) |
+| --- | --- | --- | --- | --- |
+| 1 (`3aac1a57`) | E1 | 10 | 10/10 runs 15/15 | 96.1–113.6 |
+| 1 | E2 `--test-threads=1` | 1 | 15/15 | 99.7 |
+| 1 | E3 (3 burners) | 10 | 10/10 runs 15/15 | 108.1–135.1 |
+| 1 | E4 two copies | 2 pairs | 3 of 4 copies 15/15; **pair 1 copy A 14/15**: `quic_fifteen_native_owners_two_original_logical_replacements`, CloseDrained slot 4 | 103.9–121.6 |
+| 2 (`cf6029d2`, diagnostic) | E1 | 8 | 7/8 runs 15/15; **run 6 14/15**: same test and signature, diagnostic captured (amendment above) | 96.2–123.2 |
+| **Final (`ad81e1f3`)** | E1 | 10 | **10/10 runs 15/15** | 88.7–92.4 |
+| Final | E2 `--test-threads=1` | 1 | **15/15** | 101.9 |
+| Final | E3 (3 burners) | 10 | **10/10 runs 15/15** | 93.9–125.0 |
+| Final | E4 two copies | 3 pairs | **6/6 copies 15/15** | 95.1–101.8 |
+| Final | `logical_activation_driver` E1 | 1 | 35/35 | 25.5 |
+| Final | `logical_voter_native` E1 | 1 | 42/42 | 9.5 |
+| Final | deliberate failure (uncommitted experiment: one assertion forced false in `tcp_twelve…`, while holding `HISTORY`) | 1 | **14/15: only that test failed**, no `PoisonError` | 91.1 |
+
+Round 1 stopped after two E4 pairs to investigate. Investigation-only runs
+between rounds 1 and 2 (not part of the matrix): 6 more full-binary copies
+under two copies plus three burners and 137 focused QUIC test executions, all
+passing; a temporary probe that opened a QUIC child cluster, jumped protocol
+time 0.9–3.2 s unpolled and closed it, 900 iterations plain and about 240 with a
+checkpoint first, all passing (the gap there was too short to stretch the
+close past 15 s). The probe and the experiment were never committed.
+
+Before TR4 the same binary failed this class in PR 4/5 proofs (wall-clock time:
+3 failing tests in 2 of 5 runs in TR1a round 3, 1 of 7 executions in TR1b round 3). Final runs take about
+90 s on 4 cores and vary by 4 % in E1 (previously 140–430 s), because protocol
+time no longer depends on host speed.
+
+Checks at `ad81e1f3`: `cargo +stable fmt --all -- --check` clean; strict
+Clippy default, `--all-features`, `--no-default-features`,
+`--no-default-features --features native` (each `--locked --offline
+--keep-going --all-targets -- -D warnings`) zero diagnostics; the pre-push
+hook ran them again on every push. Full suites in other configurations are the
+suite runner's job and were not run here.
+
+Remaining classes, assigned elsewhere:
+- `logical_nested_native` (shares only `cluster_inspection.rs` now) keeps its
+  wall-clock fixtures and 90/30 s watchdog: the rest of the architect's TR4
+  row (TR4b), not in this slice's brief.
+- Single-cluster waits while other clusters are borrowed by the lower host
+  still leave those clusters unpolled for their duration (short, followed by
+  long all-cluster phases). Making the lower host poll unborrowed clusters
+  would need the L1 bridge seam (TR3).
+- Dial work of bridge-borrowed nodes stays invisible to the hold rule (L1, TR3).
