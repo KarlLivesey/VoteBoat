@@ -229,7 +229,7 @@ fn run(
     let mut sequence = 0u64;
     let mut quit = false;
     let mut shutdown = None;
-    let mut host = service_setup::HostWait::new();
+    let mut host = service_setup::HostWait::new(service_setup::host_wake());
     println!(
         "ready directory node={id} authority={:?} command={}",
         plan.authority,

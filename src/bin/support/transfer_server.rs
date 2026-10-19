@@ -286,7 +286,7 @@ struct Host<'a, A: App> {
 }
 impl<A: App> Host<'_, A> {
     fn drive(&mut self) -> Result<(), Failure> {
-        let mut host = super::service_setup::HostWait::new();
+        let mut host = super::service_setup::HostWait::new(super::service_setup::host_wake());
         loop {
             let now = MonoTime(self.start.elapsed().as_millis().min(u64::MAX as u128) as u64);
             let peer_failure = !self.quit && self.peers.as_mut().is_some_and(|p| p.poll(self.node));

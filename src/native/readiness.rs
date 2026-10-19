@@ -25,6 +25,9 @@ use std::{
     time::Duration,
 };
 
+mod host_wait;
+pub use host_wait::{HostWait, HOST_GATHER, HOST_MAX_WAIT};
+
 /// Reusable descriptor buffer, so steady-state waits do not allocate.
 #[derive(Default)]
 pub struct Readiness {

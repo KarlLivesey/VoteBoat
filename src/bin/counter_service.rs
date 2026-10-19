@@ -392,11 +392,13 @@ struct PreparedService {
 /// The host loop's readiness wait, with any operator-chosen gather window
 /// and wait cap.
 fn host_wait(options: &StartupOptions) -> service_setup::HostWait {
+    use voteboat::native::readiness::{HOST_GATHER, HOST_MAX_WAIT};
     match (options.gather_us, options.host_wait_ms) {
-        (None, None) => service_setup::HostWait::new(),
+        (None, None) => service_setup::HostWait::new(service_setup::host_wake()),
         (gather, cap) => service_setup::HostWait::with(
-            gather.map_or(service_setup::HOST_GATHER, Duration::from_micros),
-            cap.map_or(service_setup::HOST_MAX_WAIT, Duration::from_millis),
+            service_setup::host_wake(),
+            gather.map_or(HOST_GATHER, Duration::from_micros),
+            cap.map_or(HOST_MAX_WAIT, Duration::from_millis),
         ),
     }
 }
