@@ -74,6 +74,20 @@ rewrite. It keeps the node owner and other selected lanes independent, but makes
 no latency, foreground fairness or throughput claim. Incremental cleaning and
 automatic scheduling/throttling remain future work.
 
+## A full WAL is held, not failed (ST2b)
+
+`LogStore::append_batch_within_capacity` refuses a batch that does not fit the
+physical log with `AppendRefused::Full`, handing the unchanged mutations back
+with no state changed (the default implementation never does). The native WAL
+thread holds such a batch instead of reporting it failed, publishes its cost as
+`WalUsage::parked`, and retries held batches after each successful rewrite,
+before newer work, so their events precede the rewrite's event. A held batch
+keeps its admission credits; a fatal store error fails it with the fence; a
+batch still held when the worker closes gets one more rewrite and is then
+reported `Rejected("WAL capacity at close")` (never written). The node uses
+`parked > 0` as part of its high-water state ([counter service: store
+maintenance](COUNTER_SERVICE.md#store-maintenance-on-by-default)).
+
 ## Evidence
 
 Four host-node tests cover held-result shutdown, unsupported/safe rejection and

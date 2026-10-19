@@ -1058,9 +1058,11 @@ Defaults, derived from the store limits:
   and nothing is held. Writes admitted before the state began are never
   refused for capacity: a write that does not fit is held on the WAL thread and
   written after the next rewrite. Heartbeats, votes, terms, commit records and
-  checkpoints are never refused; the leader keeps its role and followers keep
-  replicating (a follower whose WAL is full holds the batch and acknowledges
-  it after its rewrite). A full WAL no longer fails the node.
+  checkpoints are never refused; the leader keeps its role. A follower in the
+  high-water state keeps following the leader (heartbeats, term and commit)
+  but takes no new entries until its own rewrite brings it below 50%; the
+  leader commits with the other replicas and resends the range, and the
+  follower catches up. A full WAL no longer fails the node.
 
 Overrides, accepted by `serve` in all three binaries:
 

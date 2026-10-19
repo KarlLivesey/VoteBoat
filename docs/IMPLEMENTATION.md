@@ -24,15 +24,13 @@ are; LB references them for the audit's L1–L3 rows.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current ST2 (implemented; PR 14 in review): checkpoints and WAL reclaim on by default (audit C3, C4, RT4; probes U1, U5) | With default flags all three binaries never checkpointed and never reclaimed the WAL, so every group stopped at 16,384 retained entries or 64 MiB of WAL, and a failed automatic reclaim switched maintenance off silently. Make maintenance the library and binary default, make the opt-out explicit and visible, keep maintenance running through every non-fatal failure, and make a new leader at the retained-entry cap refuse typed instead of failing the node | — | Fail@main runtime and native soaks (recorded) pass past 16,384 entries and 64 MiB; opt-out plus cap gives a typed refusal and a stable leader; startup rejects maintenance settings that would fail at runtime; restart mid-checkpoint and mid-reclaim; native durable CPU/write A/B; fmt, four strict Clippy configurations and matched fmt/Clippy; affected suites in default and all-features | LB |
+| Current ST2 (implemented; PR 14 round 2 in review): checkpoints and WAL reclaim on by default, and a full WAL as retryable backpressure (audit C3, C4, RT4; probes U1, U5; ST2b) | With default flags all three binaries never checkpointed and never reclaimed the WAL, so every group stopped at 16,384 retained entries or 64 MiB of WAL, a failed automatic reclaim switched maintenance off silently, and a WAL that filled at append time failed the node. Make maintenance the library and binary default, make the opt-out explicit and visible, keep maintenance running through every non-fatal failure, make a new leader at the retained-entry cap refuse typed, and turn a full WAL into a typed retryable refusal with no node failure | — | Fail@main runtime and native soaks (recorded) pass past 16,384 entries and 64 MiB; slow-rewrite burst and follower tests fail node-fatally on 47646b4c and pass; opt-out plus cap gives a typed refusal and a stable leader; startup rejects maintenance settings that would fail at runtime; restart mid-checkpoint and mid-reclaim; native durable CPU/write within +2% of main; fmt, four strict Clippy configurations and matched fmt/Clippy; affected suites in default and all-features | LB |
 | Next NT1: connection generations and listener (audit N1, N3, N6) | Survivors no longer go to recovery after ~27.8 h with one peer down; a port scan cannot kill a node | Rebases on ST2's `native/startup.rs` hunk | Architect plan §3.3 row 2 | LB |
 | Following DR1: application deduplication retirement (audit S1–S3) | `counter_service` no longer refuses every write after 10,000 lifetime writes; the generic `SessionLedger` | — | Architect plan §3.3; Q1 probe harness | LB |
 
-Later in this track: ST2b (found in ST2: a WAL that fills at append time is
-node-fatal; refuse data batches at the persistence worker as retryable
-`Overloaded` before the data ceiling, so a burst above the sustainable rate is
-backpressure), then DR2, NT2, MB1, ST1, TX1, DH1, AD1, NT3, ST3 and LBZ
-(architect plan §3.3).
+Later in this track: DR2, NT2, MB1, ST1, TX1, DH1, AD1, NT3, ST3 and LBZ
+(architect plan §3.3). ST2b (a WAL that fills at append time was node-fatal)
+became part of ST2 in PR 14 round 2.
 
 ### ST2 schema plan (written before editing, 19 October 2026)
 
@@ -452,6 +450,195 @@ before a durable root references it.
 - (1), (3) and (4) each carry a distinct ordering (O1, O2, O3) and stay.
 - Threshold unchanged. Re-measure with the round-1 protocol (8 pairs, base =
   the branch's merge base with current main after merging main).
+
+#### ST2 round 2: schema amendment (during implementation, before editing the follower path)
+
+The first three-node run of the slow-rewrite test (follower's rewrite held)
+showed that holding a follower's data batch on the WAL thread blocks that
+group's core (one pending persistence dependency per group): it cannot
+process heartbeats or checkpoint, so it campaigned once the batch was
+written (term 1 → 4 after a 1 s hold; no write lost, every node `Running`).
+Added before changing the follower path: the node passes its high-water
+state to every core (`Raft::set_storage_pressure`, a volatile host input set
+outside a step, so it reaches a core that is waiting on persistence), and a
+follower in that state keeps leader contact, term and commit for the
+matching prefix but declines an append that carries new non-noop entries,
+without a reply; the leader resends the same range on its next heartbeat.
+The core stays free to apply, checkpoint and compact, which is what frees the
+space. Holding on the WAL thread stays as the exact backstop for batches
+already accepted when the state began.
+
+#### ST2 round 2 implemented (19 October 2026)
+
+**ST2b: a full WAL is backpressure, never a node failure.**
+
+- *Seam.* The client-visible refusal is at proposal admission
+  (`NetworkNode::propose`/`propose_maintenance`), before the request reaches
+  any core or log: `ClientError::StoragePressure`, retryable, nothing
+  admitted. The safety property is at the persistence worker:
+  `LogStore::append_batch_within_capacity` returns `AppendRefused::Full` with
+  the unchanged mutations (checked before planning, so no sequence, accepted
+  state, file or durable state changes) and the native WAL thread holds the
+  batch, retrying it after each successful rewrite before newer work.
+  `AppendRefused` is not a `StorageError`, so it cannot reach
+  `WorkerEvent::Failed`, `Raft::storage_failed` or a client. Followers above
+  high water decline new data at step time (amendment above).
+- *Why both.* Admission alone cannot be exact: followers write data they
+  never admitted and the published occupancy lags the WAL thread. The worker
+  alone would turn a burst into unbounded latency and, on a follower, block
+  the core. The owner side cannot refuse at `submit` exactly because the
+  encoded size is only known inside the store (a 1 MiB per-batch bound times
+  64 requests would refuse data at an empty WAL).
+- *U2-style invariant.* No entry that is in any log is ever refused for
+  capacity: the only capacity refusal a client sees precedes the log, a
+  follower's decline is not a refusal (the leader resends; the follower takes
+  the range once below low water), and the WAL thread's `Full` is a hold.
+  Checked by `a_batch_that_does_not_fit_is_held_until_a_rewrite_and_never_failed`
+  (no event until the rewrite, then `Written`/`Durable` before the rewrite's
+  own event), `a_full_wal_hands_the_batch_back_unchanged` (bytes, usage and
+  state unchanged; the next control append still succeeds) and the two node
+  tests below (every admitted write applied).
+- *State.* `WalMaintenancePolicy::{high_water_percent: 75, low_water_percent:
+  50}` (validated `0 < low < high <= 100`; the opt-out uses the same default
+  marks); `WalMaintenanceStatus::{high_water, high_water_entries,
+  refused_proposals}`; `WalUsage::parked`. In high water the checkpoint scan
+  runs with pressure and a rewrite is due once `min_reclaim_bytes` is
+  reclaimable, or with a held batch once the WAL has grown since the last
+  rewrite. Maintenance keeps running during a drain while a batch is held. A
+  batch still held when the owner closes the worker gets one more rewrite,
+  then `Failed(Rejected("WAL capacity at close"))` (never written).
+- *Operator surface.* `ERR StoragePressure` in all three binaries; the
+  `maintenance` status gains `high_water`, `high_water_entries`,
+  `refused_proposals` and `wal_parked` (`checkpoint_base` stays last).
+  `docs/COUNTER_SERVICE.md`, `docs/DIRECTORY_SERVICE.md`,
+  `docs/TRANSFER_SERVICE.md`.
+
+**Before/after evidence (deterministic simulated protocol time; the rewrite
+is held by a wrapper around the native WAL worker that refuses reclaim
+submissions, which maintenance retries every `retry_ms`).** Both tests open
+storage through `NativeStartup::prepare_for_discovery`, the binaries' storage
+path; on 47646b4c they ran with the typed-refusal match replaced by "any
+refusal fails the test" and the new status fields removed.
+
+| Test | On 47646b4c | With ST2b |
+| --- | --- | --- |
+| `write_burst_past_a_slow_rewrite_is_backpressure_not_a_node_failure`: one node, 4 KiB writes, 64 outstanding, rewrite held until 1 s after the first refusal, 24,576 writes (96 MiB) | Node 1 at 16,287 ms: `Replica(Owner(Worker(Consensus(Storage(Rejected("WAL capacity/control reserve"))))))` | All 24,576 applied; 10,640 `StoragePressure` refusals from 10,780 ms; rewrite released at 11,780 ms, last refusal 11,844 ms; peak WAL 49,832,941 B (75.4% of the 66,060,288 B usable capacity; cap 67,108,864); `Leader`, term unchanged, `Running` throughout |
+| `follower_with_a_slow_rewrite_declines_new_data_instead_of_failing`: three nodes over TCP/TLS, node 3's rewrite held for 1 s once it reaches high water, 20,480 writes | Node 3 at 2,877 ms: the same node-fatal error | All applied; node 3 high water at 2,070 ms, released 3,070 ms; peak WAL 49,557,114 B; nothing held (`parked` 0); no refusal at the leader; term 1 throughout; node 3 caught up to 20,481 |
+
+The same follower test before the amendment (holding without declining)
+passed every safety check but went through two elections (term 1 → 4) after
+the follower's batch was written.
+
+Unit tests: worker hold and close paths; store `Full`; gate hysteresis,
+held-batch entry and policy validation; rewrite rules in high water; the core
+follower decline (contact and commit kept, no data, no reply; noop-only
+suffix accepted; the same range taken once cleared).
+
+**Checkpoint cost.**
+
+- *Barrier fsync (brief item 2a): not done.* The WAL does not use
+  `F_BARRIERFSYNC`: the approved change was measured and parked because
+  identifying an internal Apple SSD needed subprocesses (which broke a crash
+  test through a shared `flock`) or IOKit FFI (declined), and enabling it on
+  every macOS volume was declined (section "Apple barrier publication
+  measured; parked on device detection"). There is no existing gating to
+  reuse; the snapshot store keeps `F_FULLFSYNC` (`sync_all`).
+- *Flush analysis.* A checkpoint cycle was not four flushes but ten, with four
+  full read-back decodes of the same image:
+
+  | Step | Flushes before | After | Reads/decodes before | After |
+  | --- | --- | --- | --- | --- |
+  | Publish job: `reconcile_log(durable)` | 2 (temp file, directory) | 0 when unchanged (steady state: the previous cycle's final reconcile already wrote exactly this root and pin) | — | — |
+  | `seal`: slot file, slot directory | 2 | 1 (directory once per slot per store session, or after the file is created) | 1 (read back, CRC, decode, compare) | 1 |
+  | `publish` | 2 | 2 (`publish_for_log`: root and log pin in one manifest) | — | — |
+  | `pin_for_log` | 2 | 0 (merged above) | 1 (validation) | 0 (seal read the same bytes this session; nothing writes a staged slot) |
+  | Publish job's final check | — | — | 1 (exact comparison with the input) | 1 (kept: the one byte-exact check) |
+  | Reconcile job after compaction | 2 | 2 (releases the previous pin) | 1 | 0 when this session published the image through `publish_for_log` and it is still pinned |
+  | **Total** | **10** | **5** | **4** | **2** |
+
+  Orderings kept: O1 slot bytes durable before a durable root references them
+  (slot `sync_all` before the manifest); O2 manifest bytes durable before the
+  rename that installs them (`MANIFEST.next` sync); O3 the new root durable
+  before the log compaction is persisted (the publication completes before
+  the job reports); O4 the slot's directory entry durable before a durable
+  root references it (first `sync_slot` of each slot in each session, so a
+  file created by a crashed earlier session is covered; a slot is never
+  removed or renamed and `begin_slot` truncates the same inode). Skipping an
+  identical manifest is exact because every publication of a live store
+  completes before memory changes (a failure fences the store). The combined
+  root-and-pin manifest exposes only states the two separate publications
+  could (no intermediate root without its pin). The fault-injection tests
+  follow the new sequence; the reconcile fault test now starts from an
+  earlier checkpoint so its reconcile releases a real pin.
+- *Benchmark harness.* `examples/benchmark/observe.rs` (`ObservedLog`) did not
+  forward `physical_usage` or `append_batch_within_capacity`. Without an
+  occupancy signal maintenance rewrites at every 1 s deadline (by design for
+  such providers), so the benchmark rewrote every replica's WAL each second
+  while production nodes do not. Harness only; round 1's measurements
+  included this.
+- *Leader deferral.* The leader cleared its in-flight replication requests at
+  checkpoint compaction, so a follower whose acknowledgement crossed the new
+  base was sent a full snapshot (seen in two of three 16,000-write runs). The
+  scan now defers a leader's checkpoint while another replica has not
+  acknowledged the applied index, only below a cap halfway from the threshold
+  to the entry limit (12,288) and never under WAL pressure; no installs in 17
+  later runs. Keeping answerable requests across compaction in the core was
+  rejected for this slice: the outbound request-window validation checks
+  queued appends against durable entries, so it needs its own change.
+- *CRC32C.* Every CRC32C (snapshot images, WAL batches, wire frames) was a
+  byte-at-a-time table loop; the checkpoint computes it over the image several
+  times per replica. Slicing-by-8 (safe Rust, 8 KiB of static tables, checked
+  against the original bitwise form at every offset and length up to 4 KiB)
+  computes the same function. A general speedup, measured separately below.
+
+**Measurements (quiet Mac, `nat.sh` protocol: marginal CPU per original =
+(cpu at 16,000 − cpu at 2,000) / 14,000, 15,000/s offered, `NOCAP=1 MAINT=0`,
+TCP, release `native_benchmark --all-features`, WAL on the internal APFS
+SSD; own `src-st2r2-*`/`nat-st2r2-*` trees, removed afterwards).** Base is
+current `main` 4920534e (the branch merges it). The Mac showed occasional
+stalls on both sides (rate below half, p99 about five times), reported and
+excluded symmetrically.
+
+| Run | Comparison | pairs | marginal µs/write | p99 | rate |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 4920534e → 9fca7cc5 (ST2b + slot directory once) | 8 | 29.19 → 31.12 (×1.066) | ×1.45 | ×0.91 |
+| 2 | 4920534e → 14f92e08 (+ one manifest, harness fix, deferral) | 8 | 29.00 → 29.31 (×1.011) | ×0.96 | ×1.00 |
+| 4 | same | 8 | 29.36 → 29.57 (×1.007) | ×1.01 | ×0.97 |
+| 5 | same, stalls excluded | 13 | 29.16 → 31.37 (×1.076) | ×0.99 | ×0.97 |
+| 6 | 4920534e → 3111eb4f (main + CRC only, measurement-only commit, not pushed), stalls excluded | 11 rounds | 29.39 → 28.02 (×0.954) | ×1.02 | ×0.99 |
+| 6 | 4920534e → c46ea48a (final candidate) | 11 rounds | 29.39 → 28.79 (×0.980; median pair ×0.995) | ×1.02 | ×0.97 |
+| 6 | 3111eb4f → c46ea48a (ST2's own cost with the same CRC) | 10 rounds | 28.03 → 29.05 (×1.036; median pair ×1.061) | ×1.00 | ×0.99 |
+
+Run 6 interleaved the three binaries in every round (12 rounds, rotating
+order). Linux tmpfs pairs (8, cores 4–9, on a shared host whose load rose
+from 5 to 15) gave ×1.080 → ×1.041 for the publication changes and were not
+used for the final decision.
+
+Result against current `main`: within the +2% target (×0.980). That is
+because the general CRC speedup (×0.954 on `main` alone) offsets most of
+ST2's own cost. With the same CRC on both sides ST2 still costs +3.6% median
+(+6.1% median pair; on-CPU profile +2.2 ms per 16,000-write run, +1.9%).
+Remaining cause (Mac profile, blocked samples excluded): the benchmark's
+recovery-verification phase restores each replica from its checkpoint
+(Counter `restore_checkpoint`, 2.9 ms per run) where the base replays the
+WAL, then snapshot decode and CRC passes (seal's read-back check, codec
+footer and decode, the final exact comparison; 2.6 ms) and the checkpoint
+encode. p99 and rate are back to the base (round 1: ×1.36 and ×0.90).
+
+Framework (matched, `fwmac.sh` protocol, 5 pairs, 4920534e → c46ea48a): bulk
+cpu/write ×1.028 (pairs 0.99 0.97 1.00 1.14 1.03), single ×0.995, bulk with
+one server worker ×1.005, single with one ×0.976; no regression. The core's
+follower path gained one boolean test and the CRC change applies there.
+
+**Remaining gaps (recorded).**
+- A group whose own live log (not dead bytes) fills the WAL while its next
+  data batch is held on the WAL thread cannot checkpoint until the batch is
+  written. The follower decline and the admission gate keep new data out from
+  75%, so this needs in-flight data of a quarter of the WAL at the moment the
+  state begins; it is a hold, never a failure.
+- A leader still clears in-flight replication requests at compaction; the
+  deferral avoids most resulting snapshot sends but is bounded (12,288).
+- Snapshot store barrier fsync: needs a device-identification decision.
 
 #### Design-pack amendment realised by ST2 (pack preserved)
 
