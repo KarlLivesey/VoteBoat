@@ -23,7 +23,7 @@ fn original_business_content_retry_and_contiguous_control_positions() {
     let receipts = a
         .apply_batch(&[
             entry(1, op(100), business.clone()),
-            entry(2, op(10), a.begin(&intent()).unwrap()),
+            entry(2, begin_op(), a.begin(&intent()).unwrap()),
             entry(3, op(100), business),
         ])
         .unwrap();
@@ -38,7 +38,7 @@ fn original_business_content_retry_and_contiguous_control_positions() {
     assert!(retry.duplicate);
     assert_eq!(a.inner().applied_index(), 3);
     assert_eq!(a.applied_index(), 3);
-    assert_eq!(a.active(), Some(op(10)));
+    assert_eq!(a.active(), Some(begin_op()));
     assert_eq!(
         a.read_at(3, ActivationQuery::Business(())).unwrap(),
         ActivationRead::Business(7)
@@ -49,7 +49,7 @@ fn original_business_content_retry_and_contiguous_control_positions() {
         .restore_checkpoint(LOGICAL_ACTIVATION_SCHEMA, 3, &bytes)
         .unwrap();
     assert_eq!(reopened.checkpoint(usize::MAX).unwrap(), bytes);
-    let status = reopened.status(op(10)).unwrap();
+    let status = reopened.status(begin_op()).unwrap();
     assert_eq!(status.begin.first, ActivationPosition { index: 2, term: 1 });
     let suffix = entry(4, op(100), reopened.business(&7i64.to_le_bytes()).unwrap());
     let receipt = reopened.apply_batch(&[suffix]).unwrap();
@@ -69,7 +69,7 @@ fn original_business_content_retry_and_contiguous_control_positions() {
 fn bounded_receipts_reads_and_faithful_response_tags() {
     let mut a = app();
     let entries = [
-        entry(1, op(10), a.begin(&intent()).unwrap()),
+        entry(1, begin_op(), a.begin(&intent()).unwrap()),
         entry(2, op(100), a.business(&3i64.to_le_bytes()).unwrap()),
     ];
     let receipt_bound = a.receipt_bytes_bound(&entries).unwrap();
@@ -89,7 +89,7 @@ fn bounded_receipts_reads_and_faithful_response_tags() {
     );
     for q in [
         ActivationQuery::Business(()),
-        ActivationQuery::Status(op(10)),
+        ActivationQuery::Status(begin_op()),
         ActivationQuery::Status(op(99)),
         ActivationQuery::Active,
     ] {
@@ -232,7 +232,7 @@ fn selected_inner_context_is_forwarded_without_freezing_parent_configuration() {
         Err(ApplicationError::InvalidCommand)
     );
     assert!(a
-        .validate_proposal_context(&core, op(10), &a.begin(&intent()).unwrap())
+        .validate_proposal_context(&core, begin_op(), &a.begin(&intent()).unwrap())
         .is_ok());
     assert_eq!(
         core.membership().stable().id(),
@@ -257,7 +257,7 @@ fn opaque_control_profile_is_derived_from_exact_actual_wrapper_configuration() {
         profile.response_schema(),
         LOGICAL_ACTIVATION_RESPONSE_SCHEMA
     );
-    assert_eq!(profile.format_version(), 1);
+    assert_eq!(profile.format_version(), 2);
     let changed = LogicalActivationApplication::new(
         a.parent(),
         a.mappings().to_vec(),
@@ -275,4 +275,48 @@ fn opaque_control_profile_is_derived_from_exact_actual_wrapper_configuration() {
         .restore_checkpoint(LOGICAL_ACTIVATION_SCHEMA, 0, &original)
         .unwrap();
     assert_eq!(profile, restored.control_profile());
+}
+
+#[test]
+fn public_operation_space_split_refuses_tagged_business_writes() {
+    let mut a = app();
+    let tagged = OperationId::new((u128::from(ACTIVATION_OPERATION_TAG) << 64) | 77).unwrap();
+    assert!(ChildActivationOperations::is_reserved(tagged));
+    assert!(!ChildActivationOperations::is_reserved(op(100)));
+    assert!(ChildActivationOperations::reserved(1)
+        .unwrap()
+        .begin
+        .get()
+        .eq(&((u128::from(ACTIVATION_OPERATION_TAG) << 64) | 8)));
+    let business = a.business(&7i64.to_le_bytes()).unwrap();
+    assert_eq!(
+        a.validate_proposal(tagged, &business, std::iter::empty()),
+        Err(ApplicationError::InvalidCommand)
+    );
+    let before = a.checkpoint(usize::MAX).unwrap();
+    assert_eq!(
+        a.apply_batch(&[entry(1, tagged, business.clone())]).err(),
+        Some(ApplicationError::InvalidCommand)
+    );
+    assert_eq!(a.checkpoint(usize::MAX).unwrap(), before);
+    // Hand-built untagged phase IDs are not an intent.
+    let untagged = ChildActivationOperations {
+        begin: op(10),
+        learners: op(11),
+        membership: op(12),
+        outcome: op(13),
+        release: op(14),
+    };
+    assert!(ChildActivationIntent::new(
+        mapping(),
+        untagged,
+        &config([1, 2, 3], 1),
+        ConfigurationId::new(2).unwrap(),
+        ConfigurationId::new(3).unwrap(),
+        &config([1, 2, 4], 4),
+    )
+    .is_err());
+    assert!(a
+        .validate_proposal(op(100), &business, std::iter::empty())
+        .is_ok());
 }

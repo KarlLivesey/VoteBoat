@@ -30,7 +30,7 @@ fn only_full_original_control_envelopes_use_selected_capacity() {
     zero.bytes[9..25].fill(0);
     assert_eq!(r.request_control(&zero), Ok(false));
     let mut wrapped = release();
-    let mut bytes = b"VBACTA01\x00".to_vec();
+    let mut bytes = b"VBACTA02\x00".to_vec();
     bytes.extend_from_slice(&wrapped.bytes);
     wrapped.bytes = bytes;
     assert_eq!(r.request_control(&wrapped), Ok(false));

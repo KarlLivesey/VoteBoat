@@ -1,5 +1,151 @@
 # Implementation record
 
+## Logical-voter reliability track (opened 18 October 2026)
+
+Goal: logical parents and their backing children run indefinitely with bounded
+retained state, and every refusal at a remaining bound is typed and fail-closed.
+Designs: `target/claude/research-lv/architect-plan-retained-retirement.md`
+(LV1–LV6, backing-child retention) and
+`target/claude/research-lv/architect-plan-activation-ids.md` (AI1–AI2, parent
+activation wrapper).
+
+### Macro plan (this track)
+
+| Milestone | User-visible outcome | Acceptance |
+| --- | --- | --- |
+| LR1 Unbounded-uptime logical children | An idle or busy logical parent never dies from retained child actions | LV1–LV3: retirement watermark, deterministic soak |
+| LR2 Unbounded business writes on activation parents | A parent wrapped in `LogicalActivationApplication` accepts any number of distinct business writes; retention is exactly the inner application's contract | AI1 app-level soak; AI2 router-level soak |
+| LR3 Fail closed at any remaining bound | A bug that still hits a bound fences the owner with typed results | LV5 |
+
+### Mini plan
+
+| Deliverable | Purpose | Dependencies | Completion checks | Advances |
+| --- | --- | --- | --- | --- |
+| In review (PR 7) AI1: activation operation-ID space | The wrapper kept every business ID forever only to keep business IDs apart from activation phase IDs, so write 16,385 was refused for life. Make the split structural: phase IDs carry a fixed 64-bit tag, business IDs must not; delete the set, its limit, its checkpoint section and its per-admission clone | Architect plan AI1 (§2, §4.1, §6.2: strict `reserved(n)` layout, named tag, command format bump, intent retirement deferred). Not a logical dependency on LV2. Shares five files with LV1 (`lv/checkpoint-v3`); only this document conflicts textually (see AI1 implemented) | 200,000-write deterministic soak fails on the base at write 16,385 and passes; tag refusal at admission and apply; partition, alias, order-independence, restart and old-format tests; existing activation suites green with reserved IDs; fmt, four strict Clippy configurations and matched workspace at zero diagnostics; default, all-features and no-default suites | LR2 |
+| Next AI2: router-level activation soak | Prove LR2 through the real client router with restart, on the LV3 simulated-clock harness | LV3, AI1 | 20,000 router writes, restart from checkpoint, competing `Begin`, identical traces on two runs | LR2 |
+| Following LV5: fail closed at the retained-action limit | Fence the owner with typed results instead of a permanent refusal | LV2 | Fence and claim-recovery tests | LR3 |
+
+#### AI1 schema plan
+
+- **Data/API.** New public `ACTIVATION_OPERATION_TAG: u64 = 0x5642_4143_5450_4831`
+  ("VBACTPH1"). `ChildActivationOperations::reserved(n)` for `n < 2^61` gives
+  `(TAG << 64) | (8n + k)` with `k` = 0 begin, 1 learners, 2 membership,
+  3 outcome, 4 release; `is_reserved(id)` is `id >> 64 == TAG`.
+  `ChildActivationIntent::validate` requires `operations == reserved(n)` for the
+  `n` of its begin ID. `LogicalActivationLimits.business_operations` is removed.
+- **State transitions.** Business command: reserved ID → `InvalidCommand` at
+  admission and at apply (batch atomic, nothing installed); otherwise forwarded to
+  the inner application with nothing recorded by the wrapper. `Begin`/`Outcome`/
+  `Release`: unchanged, minus the business-alias check, which is now
+  unsatisfiable. Every recorded phase ID passed `validate` (reserved) and every
+  business ID that reaches the inner application's proposal validation or
+  `apply_batch` passed `check_business` (not reserved), so the two sets are
+  disjoint for the life of the group with no state. The inner
+  `validate_proposal_context` and `receipt_bytes_bound` hooks can still see a
+  reserved ID before the wrapper refuses it; they record nothing.
+- **Ownership.** Business IDs and outcomes: the inner application only. Phase IDs:
+  the host that builds the intent. Tag and layout: the activation format.
+- **Formats.** `LOGICAL_ACTIVATION_SCHEMA` `…0001` → `…0002`; checkpoint
+  `VBACTC01` → `VBACTC02` without the business section; profile `VBACTP01` → `VBACTP02`,
+  `format_version` 2, without the business limit; child-configuration embedding
+  tag `VBACTP02`; command `VBACTA01` → `VBACTA02` (layout unchanged, validity rule
+  changed). Old checkpoints, log entries and child stores fail typed; no migration
+  (unpublished crate). Response schema unchanged.
+- **Failure/cleanup.** Restart restores inner state plus replayed control history,
+  verified by exact re-encode; nothing to rebuild for business IDs. Torn or
+  edited checkpoints still fail closed into a clone.
+- **Acceptance.** The soak and partition tests above; the base must fail the soak
+  at write 16,385.
+- **Deferred.** The `intents` lifetime bound (64 `Begin`s, max 16,384) is the same
+  class of bound but operator-driven; retiring old intents is a later AI3.
+
+#### AI1 implemented (evidence, PR 7)
+
+Measured, not planned. Base is `main` 30a1f6c5; branch `lv/activation-id-space`.
+
+- **Base failure.** The soak, ported to base-style intents and run on
+  30a1f6c5, is refused at write 16,385: operation `(7<<64)|16385`
+  (`129127208515966877697`) returns `DedupCapacity` (after 18.9 s debug). With
+  its checkpoint-share assertion left on, the base fails earlier: the wrapper's
+  share grows by 16 B per write from the first batch.
+- **Soak on AI1.** 200,000 distinct business writes in batches of 64, driven by
+  log index only, pass in about 2.4 s debug (1.7–2.5 s observed on this host).
+  Every batch checks a lost-receipt retry (`duplicate`) and a late retry
+  (`Expired`, not executed). There are four complete `Begin`/`Outcome`/`Release`
+  cycles, each with a competing `Busy` `Begin`. The wrapper's checkpoint share is
+  constant between control events. Eight checkpoints are taken, each restored
+  and byte-identical, and each restored copy then applies 1,000 more entries with
+  the primary and matches its receipts and checkpoint. Round 2 added the
+  follow-up writes for the last copy, which round 1 skipped.
+- **Mutation checks (run once, not committed).** `is_reserved` always false fails
+  15 of 18 activation unit tests. Accepting reserved business IDs fails the
+  alias test. A 16-write business cap fails the soak. Making the primary skip one
+  entry before the final follow-up writes fails the soak in the last restored
+  copy (`IndexGap`).
+- **Format changes.** `LOGICAL_ACTIVATION_SCHEMA` `0x5642_4143_5449_0002`;
+  checkpoint `VBACTC02` without the business section; profile `VBACTP02`,
+  `format_version()` 2, without the business limit; child-configuration
+  embedding tag `VBACTP02`; commands `VBACTA02` (layout unchanged, validity rule
+  changed). `LOGICAL_ACTIVATION_RESPONSE_SCHEMA` is unchanged. Old parent
+  checkpoints are refused `InvalidCheckpoint`, or `UnsupportedSchema` under the
+  old schema number. Old log entries are refused `UnsupportedSchema`. A child
+  checkpoint with the v1 embedding is refused `InvalidCheckpoint` with state
+  unchanged. No migration. All v1 goldens were written by the 30a1f6c5 code:
+  parent empty, populated, `Begin` and profile in
+  `activation/tests/formats/`, and the selected child checkpoint in
+  `application/tests/control_profile/v1-selected-checkpoint.bin`. Before the
+  embedded profile, that child checkpoint differs from v2 only in the
+  configuration length (+8 B, the removed limit). The base restores it
+  byte-identically.
+- **API.** Removed `LogicalActivationLimits.business_operations`. Added
+  `ACTIVATION_OPERATION_TAG`, `ChildActivationOperations::reserved(n)` and
+  `ChildActivationOperations::is_reserved(id)`. A business write on a reserved
+  ID is `InvalidCommand` (was `OperationConflict` for an alias). The wrapper
+  never returns `DedupCapacity` for business writes.
+- **Changed paths.** Production: `src/logical_voter/activation.rs`,
+  `src/logical_voter/activation/{admission,checkpoint,codec,control_profile,traits,types}.rs`
+  and `src/logical_voter/codec.rs` (the embedding tag). Tests:
+  `src/logical_voter/activation/tests.rs`,
+  `src/logical_voter/activation/tests/{control_profile,formats,partition,recovery,semantics,soak}.rs`,
+  `src/logical_voter/activation/tests/formats/{v1,v2}-{begin,empty,populated,profile}.bin`,
+  `src/logical_voter/application/tests/control_profile.rs`,
+  `src/logical_voter/application/tests/control_profile/v1-selected-checkpoint.bin`,
+  `src/runtime/applications/tests/classification.rs`,
+  `src/runtime/clients/tests.rs`, `src/runtime/clients/tests/classification.rs`,
+  `src/runtime/logical_intake/tests.rs` (command magic `VBACTA01` → `VBACTA02`
+  only), `tests/logical_activation_application.rs`,
+  `tests/logical_activation_application/contracts.rs`,
+  `tests/logical_activation_driver/{fixture,history,source_export}.rs` and
+  `tests/logical_activation_nested/{profile,setup}.rs`. Docs: this file.
+- **Overlap with LV1** (`lv/checkpoint-v3`, 16b07757). Five files are shared:
+  `docs/IMPLEMENTATION.md`,
+  `src/logical_voter/application/tests/control_profile.rs`,
+  `src/logical_voter/codec.rs`, `tests/logical_activation_nested/profile.rs` and
+  `tests/logical_activation_nested/setup.rs`. `git merge-tree` reports a textual
+  conflict only in `docs/IMPLEMENTATION.md`; the other four merge cleanly.
+
+| Check (head of PR 7) | Result |
+| --- | --- |
+| `cargo +stable fmt --all -- --check` | clean |
+| Strict Clippy: default, all-features, no-default, native-only | 0 diagnostics each |
+| Matched workspace fmt and strict Clippy (pre-push hook) | clean |
+| `--lib -- logical_voter::activation` | 18 passed |
+| `--lib -- logical_voter` | 86 passed (85 in round 1, plus the v1 child-embedding test) |
+| `--lib -- runtime::` | 76 passed |
+| `--test logical_activation_application` | 7 passed |
+| `logical_activation_driver` / `logical_activation_nested` (round 1, targeted) | 19 / 8 passed |
+| Full default, all-features and no-default suites | Not run by the builder; left to the suite runner |
+
+**Known defects still open on this track.** AI1 removes only the parent
+wrapper's business-ID bound. Backing children still keep every retained action
+until LV1–LV3 land (an idle logical parent dies in about 1.7 minutes). The
+`intents` lifetime bound (64 `Begin`s by default) remains (AI3). `Outcome`/
+`Release` classification does not yet check the reserved layout, so an untagged
+one uses control-lane capacity until admission refuses it. The inner
+`validate_proposal_context` hook can see a reserved business ID before the
+wrapper refuses it. The existing wall-clock guards in the driver and nested
+suites are unchanged.
+
 ## Active P9 plan — resumed 15 October 2026 (protocol-work track)
 
 Resumed at the user's request. Goal: make VoteBoat as fast as possible on minimal

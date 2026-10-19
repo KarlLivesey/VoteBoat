@@ -23,7 +23,6 @@ fn wrapper(command_bytes: usize) -> LogicalActivationApplication<Counter> {
         LogicalActivationLimits {
             command_bytes,
             intents: 2,
-            business_operations: 8,
             ..LogicalActivationLimits::default()
         },
         Counter::new(8).unwrap(),
@@ -58,13 +57,7 @@ fn configuration(nodes: [u64; 3], id: u64) -> Configuration {
 fn begin() -> Vec<u8> {
     let intent = ChildActivationIntent::new(
         app().mapping(),
-        ChildActivationOperations {
-            begin: OperationId::new(100).unwrap(),
-            learners: OperationId::new(101).unwrap(),
-            membership: OperationId::new(102).unwrap(),
-            outcome: OperationId::new(103).unwrap(),
-            release: OperationId::new(104).unwrap(),
-        },
+        ChildActivationOperations::reserved(1).unwrap(),
         &configuration([2, 3, 4], 1),
         ConfigurationId::new(2).unwrap(),
         ConfigurationId::new(3).unwrap(),
@@ -72,6 +65,10 @@ fn begin() -> Vec<u8> {
     )
     .unwrap();
     wrapper(4096).begin(&intent).unwrap()
+}
+/// The parent operation of the selected-profile `Begin`.
+fn begin_operation() -> u128 {
+    ChildActivationOperations::reserved(1).unwrap().begin.get()
 }
 fn parent_entry(index: u64, operation: u128, bytes: Vec<u8>) -> LogEntry {
     LogEntry {
@@ -115,6 +112,10 @@ fn selected_profile_is_immutable_and_checkpoint_binding_is_exact() {
         .with_activation_control_profile(wrapper(4096).control_profile())
         .unwrap();
     assert!(selected.configuration.starts_with(&original));
+    // The child binds the v2 profile: its embedding tag and the profile's magic.
+    let tail = &selected.configuration[original.len()..];
+    assert_eq!(&tail[..8], b"VBACTP02");
+    assert_eq!(&tail[16..24], b"VBACTP02");
     assert!(!selected.same_configuration(&ordinary));
     assert!(!selected.same_configuration(
         &ordinary
@@ -170,7 +171,7 @@ fn original_mixed_action_uses_reserved_capacity_and_replays_without_splitting() 
         4,
         vec![
             parent_entry(2, 201, business),
-            parent_entry(3, 100, begin()),
+            parent_entry(3, begin_operation(), begin()),
         ],
     );
     let bytes = a.encode_command(&mixed, usize::MAX).unwrap();
@@ -219,7 +220,7 @@ fn malformed_and_business_wrapped_controls_do_not_use_reserved_capacity() {
     let mut trailing = begin();
     trailing.push(0);
     for bytes in [trailing, wrapper(4096).business(&begin()).unwrap()] {
-        let c = append(&a, 3, vec![parent_entry(2, 100, bytes)]);
+        let c = append(&a, 3, vec![parent_entry(2, begin_operation(), bytes)]);
         assert!(!c.control(a.activation_control_profile()));
         assert_eq!(admitted(&a, &c), Err(ApplicationError::DedupCapacity));
     }
@@ -243,7 +244,7 @@ fn control_capsule(a: &LogicalApplication) -> Command {
                     generation: ClientRouterGeneration::new(1).unwrap(),
                     sequence: 1,
                     group: group(1),
-                    operation: OperationId::new(100).unwrap(),
+                    operation: OperationId::new(begin_operation()).unwrap(),
                 },
                 position: ProposalPosition { index: 1, term: 1 },
             },
@@ -299,4 +300,43 @@ fn control_result_reservation_requires_exact_schema_group_and_operation() {
         a.state.records[&original.operation].command,
         a.encode_command(&original, usize::MAX).unwrap()
     );
+}
+/// Written by the code at 30a1f6c5: `selected().checkpoint(usize::MAX)`, an
+/// unclaimed child whose configuration embeds the v1 activation profile.
+const V1_SELECTED_CHECKPOINT: &[u8] = include_bytes!("control_profile/v1-selected-checkpoint.bin");
+#[test]
+fn child_checkpoint_with_v1_profile_embedding_is_refused_typed() {
+    let find = |bytes: &[u8], tag: &[u8; 8]| {
+        bytes
+            .windows(8)
+            .enumerate()
+            .filter(|(_, w)| w == tag)
+            .map(|(at, _)| at)
+            .collect::<Vec<_>>()
+    };
+    let v2 = selected().checkpoint(usize::MAX).unwrap();
+    // The embedding tag and the profile's magic, at the same offsets as in v2.
+    let at = find(V1_SELECTED_CHECKPOINT, b"VBACTP01");
+    assert_eq!(at.len(), 2);
+    assert_eq!(at, find(&v2, b"VBACTP02"));
+    assert!(find(V1_SELECTED_CHECKPOINT, b"VBACTP02").is_empty());
+    // Before the embedded profile only the configuration length differs: the
+    // v1 profile carries one more u64, the removed business limit. So the
+    // refusal comes from the profile binding alone.
+    let length = |bytes: &[u8]| u64::from_le_bytes(bytes[8..16].try_into().unwrap());
+    assert_eq!(length(V1_SELECTED_CHECKPOINT), length(&v2) + 8);
+    assert_eq!(V1_SELECTED_CHECKPOINT.len(), v2.len() + 8);
+    assert_eq!(V1_SELECTED_CHECKPOINT[..8], v2[..8]);
+    assert_eq!(V1_SELECTED_CHECKPOINT[16..at[0]], v2[16..at[0]]);
+    for mut child in [selected(), app()] {
+        let before = child.checkpoint(usize::MAX).unwrap();
+        assert_eq!(
+            child.restore_checkpoint(1, 0, V1_SELECTED_CHECKPOINT),
+            Err(ApplicationError::InvalidCheckpoint)
+        );
+        assert_eq!(child.checkpoint(usize::MAX).unwrap(), before);
+    }
+    let mut child = selected();
+    child.restore_checkpoint(1, 0, &v2).unwrap();
+    assert_eq!(child.checkpoint(usize::MAX).unwrap(), v2);
 }

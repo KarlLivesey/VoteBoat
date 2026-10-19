@@ -24,9 +24,9 @@ fn entry(index: u64, operation: u128, bytes: Vec<u8>) -> LogEntry {
     }
 }
 fn release() -> Vec<u8> {
-    // Complete v1 Release grammar. This is capacity classification, never a
+    // Complete v2 Release grammar. This is capacity classification, never a
     // consumed activation observation or permission to release a parent effect.
-    let mut bytes = b"VBACTA01\x03".to_vec();
+    let mut bytes = b"VBACTA02\x03".to_vec();
     bytes.extend_from_slice(&10u128.to_le_bytes());
     bytes.extend_from_slice(&4u64.to_le_bytes());
     bytes.extend_from_slice(&1u64.to_le_bytes());

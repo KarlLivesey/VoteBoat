@@ -33,14 +33,11 @@ where
         state.execute(c.clone(), 1, 1, self.limits)?;
         Ok(())
     }
-    pub(super) fn check_business(&self, operation: OperationId) -> Result<(), ApplicationError> {
-        if self.control.contains_operation(operation) {
-            return Err(ApplicationError::OperationConflict);
-        }
-        if !self.business_operations.contains(&operation)
-            && self.business_operations.len() == self.limits.business_operations
-        {
-            return Err(ApplicationError::DedupCapacity);
+    /// Stateless: every phase ID is reserved and no business ID may be, so the
+    /// two kinds stay disjoint for the group's life without any history.
+    pub(super) fn check_business(operation: OperationId) -> Result<(), ApplicationError> {
+        if ChildActivationOperations::is_reserved(operation) {
+            return Err(ApplicationError::InvalidCommand);
         }
         Ok(())
     }
@@ -72,7 +69,6 @@ where
     ) -> Result<usize, ApplicationError> {
         let mut beginnings = BTreeMap::new();
         let mut business = Vec::new();
-        let mut business_ids = self.business_operations.clone();
         let mut inputs = Vec::new();
         let mut retained_bytes = 0usize;
         for (id, encoded) in pending {
@@ -92,8 +88,7 @@ where
             let id = *id;
             match codec::decode(encoded, self.limits.command_bytes)? {
                 Envelope::Business(raw) => {
-                    self.check_business(id)?;
-                    business_ids.insert(id);
+                    Self::check_business(id)?;
                     business.push((id, raw));
                 }
                 Envelope::Control(c) => {
@@ -111,10 +106,7 @@ where
                 return Err(ApplicationError::DedupCapacity);
             }
         }
-        if business_ids.len() > self.limits.business_operations {
-            return Err(ApplicationError::DedupCapacity);
-        }
-        self.check_reservations(&beginnings, &business_ids)?;
+        self.check_reservations(&beginnings)?;
         let mut bound = std::mem::size_of::<ActivationReceipt<A::Receipt>>();
         if let Envelope::Business(raw) = codec::decode(bytes, self.limits.command_bytes)? {
             bound = bound
@@ -134,7 +126,6 @@ where
     fn check_reservations(
         &self,
         beginnings: &BTreeMap<OperationId, Box<ChildActivationIntent>>,
-        business: &BTreeSet<OperationId>,
     ) -> Result<(), ApplicationError> {
         let mut reservations = BTreeMap::new();
         let mut ids = BTreeSet::new();
@@ -147,9 +138,6 @@ where
         {
             ids.insert(intent.operations.begin);
             for phase in intent.operations.ids() {
-                if business.contains(&phase) {
-                    return Err(ApplicationError::OperationConflict);
-                }
                 if let Some(existing) = reservations.insert(phase, intent.operations.begin) {
                     if existing != intent.operations.begin {
                         return Err(ApplicationError::OperationConflict);
@@ -170,15 +158,6 @@ where
         term: u64,
     ) -> Result<ChildActivationReceipt, ApplicationError> {
         self.check_control(operation, &c)?;
-        if let ControlCommand::Begin(i) = &c {
-            if i.operations
-                .ids()
-                .iter()
-                .any(|id| self.business_operations.contains(id))
-            {
-                return Err(ApplicationError::OperationConflict);
-            }
-        }
         self.control.execute(c, index, term, self.limits)
     }
 }

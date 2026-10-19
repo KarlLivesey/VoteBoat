@@ -193,7 +193,7 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
             e.u64(n as u64)?;
         }
         if let Some(profile) = &self.control_profile {
-            e.put(b"VBACTP01")?;
+            e.put(b"VBACTP02")?;
             e.blob(&profile.configuration_bytes(self.limits.max_child_checkpoint_bytes)?)?;
         }
         Ok(e.bytes)

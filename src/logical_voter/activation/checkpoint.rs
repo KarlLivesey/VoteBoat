@@ -14,7 +14,7 @@
 // rights and limitations under the RPL.
 use super::*;
 use codec::{Decoder, Encoder};
-const MAGIC: &[u8; 8] = b"VBACTC01";
+const MAGIC: &[u8; 8] = b"VBACTC02";
 impl<A: ProposalAdmission + CheckpointStateMachine> LogicalActivationApplication<A>
 where
     A::Receipt: ApplicationReceipt,
@@ -25,7 +25,6 @@ where
         e.u64(self.inner.schema_version())?;
         for n in [
             self.limits.intents,
-            self.limits.business_operations,
             self.limits.command_bytes,
             self.limits.checkpoint_bytes,
             self.mappings.len(),
@@ -63,10 +62,6 @@ where
             .checked_sub(self.limits.control_checkpoint_bound()?)
             .ok_or(ApplicationError::ReceiptBudget)?;
         e.blob(&self.inner.checkpoint(inner_max)?)?;
-        e.u64(self.business_operations.len() as u64)?;
-        for id in &self.business_operations {
-            e.u128(id.get())?;
-        }
         let phases = self.control.phases();
         e.u64(phases.len() as u64)?;
         for phase in phases {
@@ -89,7 +84,6 @@ where
         }
         let mut next = self.clone();
         next.control = ControlState::default();
-        next.business_operations.clear();
         next.inner.restore_checkpoint(
             self.inner.schema_version(),
             applied,
@@ -97,12 +91,6 @@ where
         )?;
         if next.inner.applied_index() != applied {
             return Err(ApplicationError::InvalidCheckpoint);
-        }
-        let count = self.count(&mut d, self.limits.business_operations)?;
-        for _ in 0..count {
-            if !next.business_operations.insert(d.id()?) {
-                return Err(ApplicationError::InvalidCheckpoint);
-            }
         }
         let count = self.count(&mut d, self.limits.intents * 3)?;
         let mut previous = 0;
@@ -125,8 +113,8 @@ where
                 return Err(ApplicationError::InvalidCheckpoint);
             }
         }
-        // Comparison includes original history, materialized receipts/slot, inner
-        // state and sorted business IDs. Input cannot repair itself via getters.
+        // Comparison includes original history, materialized receipts/slot and
+        // inner state. Input cannot repair itself via getters.
         let expected = next.checkpoint_bytes(self.limits.checkpoint_bytes)?;
         if expected != bytes {
             return Err(ApplicationError::InvalidCheckpoint);

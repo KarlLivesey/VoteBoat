@@ -133,15 +133,15 @@ fn entries() -> Vec<LogEntry> {
         Default::default(),
     )
     .unwrap();
-    let op = |n| OperationId::new(setup::BASE + n).unwrap();
+    let ids = setup::intent().operations();
     [
         ConfigurationRecord {
-            operation: op(1),
+            operation: ids.learners,
             expected: old.id(),
             change: ConfigurationChange::Learners(learners),
         },
         ConfigurationRecord {
-            operation: op(2),
+            operation: ids.membership,
             expected: ConfigurationId::new(2).unwrap(),
             change: ConfigurationChange::Joint {
                 id: ConfigurationId::new(3).unwrap(),
@@ -149,7 +149,7 @@ fn entries() -> Vec<LogEntry> {
             },
         },
         ConfigurationRecord {
-            operation: op(2),
+            operation: ids.membership,
             expected: ConfigurationId::new(3).unwrap(),
             change: ConfigurationChange::Final {
                 id: ConfigurationId::new(4).unwrap(),
