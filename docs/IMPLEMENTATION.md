@@ -24,7 +24,7 @@ are; LB references them for the audit's L1–L3 rows.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current ST2 (implemented; PR 14 round 2 in review): checkpoints and WAL reclaim on by default, and a full WAL as retryable backpressure (audit C3, C4, RT4; probes U1, U5; ST2b) | With default flags all three binaries never checkpointed and never reclaimed the WAL, so every group stopped at 16,384 retained entries or 64 MiB of WAL, a failed automatic reclaim switched maintenance off silently, and a WAL that filled at append time failed the node. Make maintenance the library and binary default, make the opt-out explicit and visible, keep maintenance running through every non-fatal failure, make a new leader at the retained-entry cap refuse typed, and turn a full WAL into a typed retryable refusal with no node failure | — | Fail@main runtime and native soaks (recorded) pass past 16,384 entries and 64 MiB; slow-rewrite burst and follower tests fail node-fatally on 47646b4c and pass; opt-out plus cap gives a typed refusal and a stable leader; startup rejects maintenance settings that would fail at runtime; restart mid-checkpoint and mid-reclaim; native durable CPU/write within +2% of main; fmt, four strict Clippy configurations and matched fmt/Clippy; affected suites in default and all-features | LB |
+| Current ST2 (PR 14 round 3 in progress; rounds 1 and 2 implemented): checkpoints and WAL reclaim on by default, and a full WAL as retryable backpressure (audit C3, C4, RT4; probes U1, U5; ST2b) | With default flags all three binaries never checkpointed and never reclaimed the WAL, so every group stopped at 16,384 retained entries or 64 MiB of WAL, a failed automatic reclaim switched maintenance off silently, and a WAL that filled at append time failed the node. Make maintenance the library and binary default, make the opt-out explicit and visible, keep maintenance running through every non-fatal failure, make a new leader at the retained-entry cap refuse typed, and turn a full WAL into a typed retryable refusal with no node failure | — | Fail@main runtime and native soaks (recorded) pass past 16,384 entries and 64 MiB; slow-rewrite burst and follower tests fail node-fatally on 47646b4c and pass; opt-out plus cap gives a typed refusal and a stable leader; startup rejects maintenance settings that would fail at runtime; restart mid-checkpoint and mid-reclaim; native durable CPU/write within +2% of main; fmt, four strict Clippy configurations and matched fmt/Clippy; affected suites in default and all-features | LB |
 | Next NT1: connection generations and listener (audit N1, N3, N6) | Survivors no longer go to recovery after ~27.8 h with one peer down; a port scan cannot kill a node | Rebases on ST2's `native/startup.rs` hunk | Architect plan §3.3 row 2 | LB |
 | Following DR1: application deduplication retirement (audit S1–S3) | `counter_service` no longer refuses every write after 10,000 lifetime writes; the generic `SessionLedger` | — | Architect plan §3.3; Q1 probe harness | LB |
 
@@ -651,6 +651,196 @@ panicked on a `Truncated` socket read while the shared host was at load
 - A leader still clears in-flight replication requests at compaction; the
   deferral avoids most resulting snapshot sends but is bounded (12,288).
 - Snapshot store barrier fsync: needs a device-identification decision.
+
+#### ST2 round 3 schema plan (written before editing, 19 October 2026)
+
+Base: PR 14 head 73da0196 (merge base with `main` 4920534e). Both round-2
+reviews (Codex 5575305544, Claude Opus 5575352663) reproduced liveness
+defects at the capacity boundary. Rule for this round: no capacity condition
+may stop a group, a node or a replica permanently. A bounded condition either
+makes progress by itself or fails closed in a typed, operator-visible,
+recoverable state. Every Raft guarantee is kept; no `unsafe`, no new crates;
+tests run in simulated protocol time; no assertion is weakened.
+
+**I1. A leader can always place its current-term noop in every state this
+code can reach (Codex P1-3, Opus P1-1, plan Q6).** Cause: `become_leader`
+defers the noop while the retained log is at `max_entries_per_group`; only a
+checkpoint frees space, a checkpoint compacts only up to the commit index, and
+the commit index cannot pass old-term entries without a current-term entry
+(§5.4.2). With 16,384 uncommitted term-1 entries no step can ever succeed.
+- *Mechanism: a noop reserve.* `max_entries_per_group` stays the **data**
+  budget: proposals, configuration entries and ready batches are admitted only
+  while retained entries are below it. New `LogLimits::leader_noop_reserve()`
+  = max(4, max/64) (256 at defaults) and `LogLimits::retained_entry_capacity()`
+  = max + reserve. The capacity is the store and recovery bound: the plain
+  and full transition plans, mutation-suffix decoding (the WAL rewrite image
+  writes a group's whole retained log as one suffix), recovery validation and
+  the startup owner growth budget. Only a leader's own noop may occupy the
+  reserve. So a leader elected over a full data suffix (16,384 term-1 entries,
+  commit 0, as a store written by `main` or round 2 can hold) appends its noop
+  at 16,385, replicates it and commits the whole suffix by the ordinary rule.
+  Proposals then refuse with typed backpressure (I2) until a checkpoint
+  compacts. No commit rule changes and no entry is discarded.
+- *Why the reserve cannot run out except under an adversary.* Every data entry
+  is appended while the appending leader's retained count is below `max`, and
+  that leader's base is at most the commit index, so data indexes never exceed
+  the commit index at append time plus `max`. Every entry beyond that bound is
+  a noop of a distinct term. Filling the reserve on every electable replica
+  needs 256 consecutive leaders that each replicate their noop to a majority
+  and lose leadership before learning of any acknowledgement, with no commit
+  in between.
+- *Residual, fail-closed.* (a) The checkpoint scan treats a group whose leader
+  noop is pending, or whose retained entries reach the entry high-water mark
+  (I2), as due at any applied entry beyond its base, with no follower
+  deferral. (b) If the leader is at capacity and `last − commit ≥ capacity`
+  (no checkpoint can make room), it steps down in the same term with
+  `StepDownReason::RetainedEntryCapacity`, recorded in the core and counted,
+  and skips its next two election timeouts (a campaign hold-off), so a replica
+  whose log is shorter can win and truncate the uncommitted suffix. The
+  operator recovery for the adversarial case is a restart with a larger
+  `max_entries_per_group`.
+- *Pre-vote and check-quorum: not added.* Both change every election path and
+  election test. Capacity liveness needs only that a stuck leader stop
+  heartbeating, which the step-down does. Without check-quorum a partitioned
+  leader keeps admitting writes until the entry gate refuses them (typed);
+  recorded as a follow-up.
+- *Tests.* An in-crate three-replica cluster with exact delivery and
+  heartbeat rounds: Codex's case (16,384 term-1 entries, commit 0, node 2 wins
+  term 2); Opus's case (the leader is cut off from both followers, keeps
+  writing to its data budget, the partition heals, the old leader wins a later
+  election); the step-down case (one replica full to capacity, two shorter
+  ones). Each must commit a new write within a bounded number of heartbeat
+  rounds. Recorded on 73da0196 first.
+
+**I2. A write refused at the retained-entry budget gets the same typed,
+retryable backpressure as WAL pressure (Opus P2-2, Codex §5.9).**
+- *Mechanism.* A per-group entry gate at `NetworkNode::propose` (and
+  `propose_maintenance`): enter when retained entries reach the WAL policy's
+  high-water percent of `max_entries_per_group` (12,288), leave below its
+  low-water percent (8,192) → `ClientError::StoragePressure`, counted in
+  `refused_proposals`. The core's own data-budget refusal becomes the typed
+  `RaftError::StoragePressure` (was `Storage(Rejected("proposal retained entry
+  budget"))`, or `"group entry limit"` from the transition plan for a single
+  proposal); the binaries print `ERR StoragePressure` for both.
+- *Leader deferral.* Deferring a due checkpoint while a replica lags now
+  stops at the midpoint between the threshold and the entry gate (10,240), so
+  it can never push the leader into the gate; it is also bounded in protocol
+  time (250 ms per due checkpoint, Codex §5.14), and never applies under WAL
+  pressure or with a noop pending. A follower that is down therefore delays a
+  checkpoint by at most 250 ms.
+- *Tests.* Gate hysteresis and counting; core refusal type; deferral bounded
+  by entries and time; a three-node TCP run with one follower never started,
+  writing three times past the entry budget through the leader.
+
+**I3. A follower never refuses the append that truncates its own divergent
+suffix, and a follower at its entry capacity makes progress (Opus P2-1).**
+- *Under WAL pressure.* An append whose first new entry conflicts with a held
+  entry persists a truncation-only update (`Suffix { from, entries: [] }`),
+  with the term and the commit index for the verified prefix, and sends no
+  reply. It carries no data entries, so the store writes it as a control
+  record within the reserve. The divergent suffix becomes dead and the next
+  rewrite reclaims it. The leader's next resend is a plain extension,
+  declined until the WAL is below low water, then accepted: the follower
+  catches up without a snapshot on an idle group.
+- *At entry capacity.* An append whose new entries would exceed the
+  follower's retained capacity is handled the same way (truncate a conflict if
+  there is one, keep term and commit for the verified prefix, no reply)
+  instead of today's non-fatal step error, which also dropped the commit
+  advance. The entry-pressure scan rule (I1a) then checkpoints the follower.
+- *Leader-side signal.* Per peer, the leader counts heartbeat rounds since the
+  peer's last successful append acknowledgement while it lags the last index
+  (`Raft::replica_stall()`: worst peer and rounds). The follower counts its
+  declines (`Raft::declined_appends()`).
+- *Tests.* A conflicting suffix under pressure (truncates, takes no data,
+  sends no reply, then catches up without a snapshot once below low water);
+  an append past entry capacity (commit advances, no data, no reply, then
+  accepted after a checkpoint).
+
+**I4. A WAL rewrite can always be admitted (Codex P1-1).** Cause: the native
+worker admitted `submit_reclaim` against the data credits that parked batches
+keep.
+- *Mechanism.* Reclaim gets its own admission slot: it is not charged to the
+  request or byte credits (data or total), at most one is in flight
+  (`reclaim_pending`), and the request channel has one extra slot, so
+  `try_send` cannot be full because of queued or parked data.
+- *Test.* Codex's reproduction: `WorkerLimits { max_requests: 4,
+  control_requests: 1 }`, three groups each with one parked data request, a
+  store that frees space on reclaim; the first reclaim submission is admitted
+  and every parked batch is written (on 73da0196: 100 submissions, all
+  `Overloaded`).
+
+**I5. No permanently impossible batch is admitted, and every admitted batch
+progresses (Codex P1-2, Opus P3-1).**
+- *Configuration (U5).* A node whose persistence publishes occupancy refuses
+  construction and `configure_wal_maintenance` when the space above the high
+  water mark, `U − high(U)` with `U = max_wal_bytes − control_reserve_bytes`,
+  is smaller than `max_batch_bytes + control_reserve_bytes`:
+  `MaintenanceError::WalHeadroomTooSmall`. `NativeLogWorker::spawn` refuses a
+  store whose `max_batch_bytes` exceeds `U` (`WorkerError::InvalidLimits`).
+  Codex's case (8 KiB WAL, 4 KiB reserve, 8 KiB batches, a 4,000-byte
+  command) is refused at configuration.
+- *Exact in-flight accounting at admission.* Every staged core transition
+  records an upper bound of its WAL encoding (`Raft::pending_wal_bytes`,
+  computed when staged; checked against the native codec in a test). The shard
+  keeps the sum over its groups incrementally. At every poll the node gives
+  the shard the published occupancy `P` and the high-water byte mark; the WAL
+  thread now publishes its length before it sends a window's events, so a
+  completed transition's bytes are in `P` by the next poll, and the shard keeps
+  bytes completed since that refresh counted until then. Before stepping an
+  event that stages data (a proposal or batch of proposals, a configuration
+  entry, a follower append with data entries) the shard checks
+  `P + pending + completed_since_refresh + bound ≤ high`. Otherwise a proposal
+  is refused `RaftError::StoragePressure` before the log, and a follower
+  declines that append as in I3. Control transitions are never refused. Hence
+  data bytes in the WAL never exceed the high-water mark. A batch can still be
+  held behind control records; its exit is a rewrite, after which live data
+  is at most the mark plus the live control records, and the configuration
+  rule makes the largest batch fit above that.
+- *Tests.* Configuration refusals (library and binaries); a node burst with
+  a slow rewrite where nothing is ever held (`parked` stays 0) and every
+  write applies; the bound against the codec.
+
+**I6. Maintenance schedules cannot silently stop (Opus P3-2).** Both policies
+refuse `interval_ms` and `retry_ms` above 24 hours at configuration
+(`InvalidLimits`); the binaries refuse `--wal-reclaim-ms` above that at
+parse.
+
+**I7. Observability (Opus P3-6).** The shared `maintenance` status of all
+three binaries adds `retained_entries`/`retained_capacity` (largest group),
+`entry_high_water_groups`, `checkpoint_failures`, `replica_stall_rounds`,
+`declined_appends`, `step_downs` and `wal_held_ms` (how long the oldest held
+batch has waited), keeping `checkpoint_base` last.
+
+**I8. Tests (Opus P3-5).** The counter `history` maintenance test again
+proves that a rewrite happens (`last_sequence` advances while bytes are
+reclaimable); a native soak at ≥ 10× the old bounds (release-only
+environment variant, run and recorded); two runs of the runtime soak in
+simulated time with byte-identical traces.
+
+**I9. CPU (Opus P3-3/P3-4, Codex §5.11).** Report the serving-only marginal
+CPU per write (the benchmark's post-run recovery verification measured
+separately) and framework cells with ≥ 7 pairs, `nat.sh`/`svc.sh` and
+`fwmac.sh` on the quiet Mac against the merge base with `main`.
+
+**I10. Docs.** Correct the follower catch-up and entry-cap claims; operator
+docs for the typed refusals and the new status fields; rounds 1 and 2 stay
+as recorded.
+
+**Ownership, restart and partial progress.** No new durable state. The noop
+reserve changes bounds only; a store this branch writes with more than
+`max_entries_per_group` retained entries is refused by older code (downgrade
+note). A truncation-only update uses the existing replacement path (a new
+generation). The step-down record, campaign hold-off, stall counters and the
+shard's byte account are volatile and rebuilt at construction; the byte
+account starts from the recovered cores (nothing pending) and the store's
+published occupancy.
+
+**Acceptance checks.** Every test above fails on 73da0196 where it can be
+expressed there, and passes here; fmt; the four strict Clippy configurations
+and matched fmt/Clippy; runtime, log_store, maintenance, snapshot,
+snapshot_worker, raft, native startup, counter_service, directory_service
+and transfer_service suites in default and all-features, one configuration at
+a time.
 
 #### Design-pack amendment realised by ST2 (pack preserved)
 
