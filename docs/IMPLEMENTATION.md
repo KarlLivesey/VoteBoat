@@ -18,7 +18,7 @@ design pack is unchanged.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current N0: three-process cluster harness (implemented; in review as PR 17; baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
+| Current N0: three-process cluster harness (implemented; in review as PR 17, round 2 below; baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test on OS-selected ports; script self-test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
 | Next N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline | Plan §5.3 tests and §5.4 gate | NW1 |
 | Then N2: per-peer frame coalescing | One frame per peer per round across groups | N1; a G=4 cell on the N0 harness (see N0 limits) | Plan §4 row 2 | NW1 |
 
@@ -114,9 +114,10 @@ design pack is unchanged.
   three-process run (and QUIC under `--features quic`), argument checks, no-QUIC
   refusal (default build). The test re-executes its own test binary as the three
   nodes, so it never runs a stale `target/debug` executable. Mutation: removing
-  the wait-count increment fails the TCP test. Ports: offsets 8..10 of 128-port
-  blocks in 1024..9984 and 20096..32767, locked in the shared lease namespace and
-  probe-bound until the nodes start.
+  the wait-count increment fails the TCP test. Ports (round 1; replaced in round
+  2, see below): offsets 8..10 of 128-port blocks in 1024..9984 and
+  20096..32767, locked in the shared lease namespace and probe-bound until the
+  nodes start.
 - **Checks run (Linux, cores 10–15).** fmt; strict Clippy default, all-features,
   no-default-features, native-only; matched fmt and Clippy: zero diagnostics.
   Default features: counter_service 144, directory_service 18, startup 48,
@@ -134,18 +135,21 @@ RAM disk `/Volumes/vbram`; load average below 1.0 before each cell (recorded in
 the raw file); no builds during timing; 5 runs per cell, all valid (applied =
 offers, `window_refused=0`, term 1 → 1, every child exit 0). Window 1024,
 `ready_visit_items` 1024, one group, production `HostWait`. CPU is user+sys of
-each whole node process (startup, campaign, warmup, offered phase, drain);
-busy cores = CPU / process wall. Medians. Raw lines:
+each whole node process (startup, campaign, warmup, offered phase, drain).
+Busy cores = CPU / the run's common interval (first spawn to last child exit),
+per process and in total, so the per-process figures add up to the total (round
+2 definition; the per-process figures below were recomputed from the raw lines
+as `nN_cpu / wall_s`, see "N0 review round 2"). Medians. Raw lines:
 `target/claude/research-r4/n0-baseline-d0f7a7a7.txt` (main checkout, untracked).
 
 | Cell | Rate/s | p99 ms | CPU µs/write total (n1 / n2 / n3) | Busy cores total (n1 / n2 / n3) | Rounds/write n1 / n2 / n3 | Frames sent/write n1 / n2 / n3 | n1 waits/write immediate / ready / timeout |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | TCP 1,000/s, 16,000 offers | 999 | 18.0 | 500.1 (283.5 / 108.5 / 108.2) | 0.498 (0.282 / 0.108 / 0.108) | 2.892 / 1.142 / 1.141 | 0.404 / 0.203 / 0.202 | 0.985 / 1.908 / 0.002 |
 | TCP 4,000/s, 16,000 offers | 3,989 | 17.6 | 126.4 (72.7 / 27.1 / 26.5) | 0.497 (0.286 / 0.107 / 0.104) | 0.712 / 0.277 / 0.278 | 0.099 / 0.049 / 0.049 | 0.240 / 0.473 / 0.001 |
-| TCP 15,000/s, 2,000 offers | 14,225 | 14.6 | 31.5 (16.6 / 7.6 / 7.3) | 0.365 (0.193 / 0.089 / 0.087) | 0.262 / 0.119 / 0.116 | 0.040 / 0.020 / 0.020 | 0.089 / 0.169 / 0.000 |
-| TCP 15,000/s, 16,000 offers | 14,891 | 16.7 | 24.2 (14.0 / 5.1 / 5.1) | 0.349 (0.203 / 0.074 / 0.075) | 0.218 / 0.090 / 0.092 | 0.032 / 0.016 / 0.016 | 0.075 / 0.143 / 0.000 |
-| QUIC 15,000/s, 2,000 offers | 14,431 | 10.1 | 64.6 (39.5 / 11.6 / 11.5) | 0.497 (0.304 / 0.092 / 0.089) | 3.086 / 0.360 / 0.370 | 0.044 / 0.021 / 0.024 | 0.068 / 3.007 / 0.004 |
-| QUIC 15,000/s, 16,000 offers | 14,912 | 18.9 | 55.2 (40.8 / 8.0 / 8.3) | 0.737 (0.549 / 0.103 / 0.107) | 3.489 / 0.266 / 0.288 | 0.034 / 0.017 / 0.017 | 0.061 / 3.429 / 0.001 |
+| TCP 15,000/s, 2,000 offers | 14,225 | 14.6 | 31.5 (16.6 / 7.6 / 7.3) | 0.365 (0.193 / 0.088 / 0.086) | 0.262 / 0.119 / 0.116 | 0.040 / 0.020 / 0.020 | 0.089 / 0.169 / 0.000 |
+| TCP 15,000/s, 16,000 offers | 14,891 | 16.7 | 24.2 (14.0 / 5.1 / 5.1) | 0.349 (0.203 / 0.074 / 0.074) | 0.218 / 0.090 / 0.092 | 0.032 / 0.016 / 0.016 | 0.075 / 0.143 / 0.000 |
+| QUIC 15,000/s, 2,000 offers | 14,431 | 10.1 | 64.6 (39.5 / 11.6 / 11.5) | 0.497 (0.304 / 0.091 / 0.086) | 3.086 / 0.360 / 0.370 | 0.044 / 0.021 / 0.024 | 0.068 / 3.007 / 0.004 |
+| QUIC 15,000/s, 16,000 offers | 14,912 | 18.9 | 55.2 (40.8 / 8.0 / 8.3) | 0.737 (0.549 / 0.102 / 0.106) | 3.489 / 0.266 / 0.288 | 0.034 / 0.017 / 0.017 | 0.061 / 3.429 / 0.001 |
 | Idle TCP 20/s, 600 offers (30 s) | 20 | 16.5 | 7,483 (3,171 / 2,184 / 2,102) | 0.149 (0.063 / 0.044 / 0.042) | 26.4 / 16.9 / 16.9 | 5.98 / 2.99 / 2.99 | 10.36 / 12.62 / 3.44 |
 | TCP 15,000/s G=4 | not run: `NativeStartup` bootstraps one group (see limits) | | | | | | |
 
@@ -164,6 +168,94 @@ rate (2.89 rounds/write × 1,000/s; 0.218 × 15,000/s ≈ 3,270/s), so light-loa
 CPU follows rounds driven by time (1 ms offer ticks, wakes, 200 µs gathers),
 not writes. The followers each cost about a third of the leader. Under QUIC
 the leader's waits end `Ready` ~3.4 times per write: it spins on readiness.
+
+### N0 review round 2 schema plan (before editing, 20 October 2026)
+
+Review: GPT-6.1-Sol round 1 on `d4da3cfa` (PR 17), four P2 findings, no P1.
+No library change; only the harness, its script and its tests change.
+
+- **Rounds (finding 1).** `cluster.py` keeps every run as (round, label,
+  offers, result). A round is valid only when every binary at every offer
+  count has a valid run in it. Marginal CPU per write and B/A ratios are formed
+  inside one round; their medians are over valid rounds; the report lists each
+  dropped round with the runs that invalidated it. Per-cell summary lines stay
+  medians over that cell's valid runs (they describe a cell; they pair nothing).
+- **Wall (finding 2).** A child's `wait4` CPU covers its whole life, so the
+  denominator must cover it too. Busy cores = CPU / the run's common interval,
+  first spawn to last child exit, per process and in total. Each child gets a
+  watcher thread that blocks in `wait4` and stamps the exit when it returns, so
+  the interval ends at the last actual exit, not when the parent has drained
+  every stream. Per-child exit stamps are printed (`nN_exit_s`).
+- **Failures (finding 3).** `run_once` always returns a result: an exit
+  before node 1's summary releases every stdin; the `--timeout` guard kills
+  what is left; spawn or harness errors are recorded. Invalid reasons name the
+  rule (`nN_exit=`, `no_summary`, `applied=`, `window_refused=`, `term=`,
+  `nN_no_counters`, `timeout`, `error=`). `finally` closes every stdin, kills
+  only children whose watcher has not reaped them (under the watcher's lock)
+  and joins every watcher, so no child outlives the run.
+- **Ports (finding 4).** The node mode's port argument takes `BASE` (manual
+  runs, BASE+1..3) or `P1,P2,P3`. The test reserves three OS-selected ports,
+  each held for TCP and UDP (the `tests/startup.rs` acquisition), passes them as
+  `P1,P2,P3` and releases the holds just before the nodes bind. Another binder
+  can take a released ephemeral port in that moment; that node then fails to
+  open with `AddrInUse` before `ready`, and the test retries the whole cluster
+  on fresh ports (at most 8 attempts). Any other failure still fails the test.
+- **Builds (Sol's validation note).** `native_benchmark` has
+  `required-features = ["tls"]`, so a native-only build has no cluster mode;
+  `native,tls` runs TCP clusters and refuses `quic`; QUIC needs `--features
+  quic`. Stated in the usage text and the script's help.
+- **Acceptance.** A Python self-test, run by `cargo test`, that fails on the
+  round-1 pairing and passes now; fixture-node checks for exit stamps and
+  retained failures; a deterministic collision test; the cluster tests 20 times
+  in a row in all-features and in `native,tls`; fmt, four strict Clippy builds,
+  matched fmt/Clippy; startup, counter_service and the example in all-features,
+  native-only and `native,tls`.
+
+### N0 review round 2 implemented (evidence, 20 October 2026)
+
+- **Finding 1 → round-paired figures.** `rounds()` splits rounds into valid and
+  dropped (with reasons); `marginal_rows()` and the ratio lines use valid rounds
+  only and print their round numbers. Runs are keyed by label, so one binary
+  may be both A and B (round 1 merged them: found by the smoke run below). Test:
+  `benchmarks/tools/cluster_test.py` `Pairing`, Sol's reproduction (A valid
+  deltas 1 and 3 in rounds 0 and 2, B 20 and 30 in rounds 1 and 2) must give
+  `pairs=[10.000]`; on the round-1 script (`CLUSTER_PY=` the `d4da3cfa` copy)
+  it fails with `[20.0, 10.0] != [10.0]`.
+- **Finding 2 → common interval.** `wall_s` = first spawn to last exit,
+  `busy` and `nN_busy` = CPU / `wall_s`, `nN_exit_s` per child, all stated in
+  the script help and its header line. Test: fixture run asserts `wall_s` =
+  max exit stamp, every stamp in (0, `wall_s`], per-process busy summing to the
+  total. Only the denominator changed, so the baseline was recomputed from the
+  raw lines, not re-measured: totals are unchanged (they already used the
+  longest wall) and follower figures move by at most 0.003 cores (they were
+  spawned a few ms after node 1). The CPU, rate, p99, counter and marginal
+  columns are untouched.
+- **Finding 3 → retained invalid runs.** Tests: node 1 exiting 7 after `start`
+  gives `valid=no(n1_exit=7,n1_no_counters,no_summary)`, followers exit 0 on
+  EOF, the next round runs and is valid; a follower that never exits trips a
+  1 s guard and is reported `timeout,n2_exit=-9`; after each, `waitpid(-1,
+  WNOHANG)` finds no child. Real-binary check: `--ready 5000` (every node
+  refuses at once) gave two retained invalid runs and a completed report.
+- **Finding 4 → OS-selected ports.** `parse_ports` accepts `BASE` or three
+  distinct non-zero `P1,P2,P3`; `run.txt` records `ports=`. The cluster tests
+  use the reservation and retry above; `a_node_whose_port_is_taken_is_reported_
+  as_a_collision` holds node 3's port and requires the collision outcome.
+  Repeats (Linux, cores 10–15, other agents' suites running): all-features
+  20/20 runs of the 6 cluster tests passed, one run retrying once after a real
+  collision (node 1 lost a released port); `native,tls` 20/20, no retries.
+- **Checks run (Linux, cores 10–15).** Script self-test 6/6. All features:
+  startup 63, counter_service 203, native_benchmark example 62 passed.
+  `native,tls`: 48, 144, 54 passed. Native-only: startup and counter_service
+  build with 0 runnable tests (gated on `tls`); the example is refused by
+  Cargo's `requires the features: tls` gate. fmt, four strict Clippy builds,
+  matched fmt and Clippy: zero diagnostics. Smoke: `cluster.py` with the debug
+  binary as A and B, offers 50,100, 2 rounds: 8/8 valid, Σ CPU =
+  `RUSAGE_CHILDREN` delta on every run.
+- **Not re-measured.** Findings 1 and 3 change only reporting and failure
+  handling, and all 35 baseline runs were valid, so no round would drop and no
+  figure changes. Finding 2 changes only the busy-cores denominator
+  (recomputed above). Finding 4 changes the port argument's parsing, not what a
+  node does once open.
 
 ## Lifetime bounds track (opened 19 October 2026)
 
