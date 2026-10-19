@@ -60,6 +60,8 @@ fn automatic_checkpoint_waves(nodes: &mut [Facade]) -> MonoTime {
             retry_ms: 1,
             max_bytes: LogLimits::default().max_wal_bytes,
             min_reclaim_bytes: 0,
+            high_water_percent: 75,
+            low_water_percent: 50,
         }))
         .unwrap();
     }

@@ -326,11 +326,22 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
         &mut self,
         mutations: Vec<LogMutation>,
     ) -> Result<Vec<LogTicket>, StorageError> {
+        self.append_batch_within_capacity(mutations)
+            .map_err(|refused| match refused {
+                AppendRefused::Full(_) => StorageError::Rejected("WAL capacity/control reserve"),
+                AppendRefused::Failed(error) => error,
+            })
+    }
+    fn append_batch_within_capacity(
+        &mut self,
+        mutations: Vec<LogMutation>,
+    ) -> Result<Vec<LogTicket>, AppendRefused> {
+        use AppendRefused::Failed;
         if self.fenced {
-            return Err(StorageError::Fenced);
+            return Err(Failed(StorageError::Fenced));
         }
         if mutations.iter().any(|m|matches!(m,LogMutation::Update(u) if u.snapshot.is_some_and(|r|r.store!=self.binding.identity))) {
-            return Err(StorageError::WrongIdentity);
+            return Err(Failed(StorageError::WrongIdentity));
         }
         if mutations.len()
             > self
@@ -338,19 +349,23 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
                 .max_pending_units
                 .saturating_sub(self.pending.len())
         {
-            return Err(StorageError::Rejected("outstanding transition budget"));
+            return Err(Failed(StorageError::Rejected(
+                "outstanding transition budget",
+            )));
         }
         let sequence = self
             .sequence
             .checked_add(1)
-            .ok_or(StorageError::Rejected("batch sequence exhausted"))?;
-        let bytes = self.codec.encode_batch(sequence, &mutations, self.limits)?;
+            .ok_or(Failed(StorageError::Rejected("batch sequence exhausted")))?;
+        let bytes = self
+            .codec
+            .encode_batch(sequence, &mutations, self.limits)
+            .map_err(Failed)?;
         if bytes.len() < HEADER + TRAILER || bytes.len() > self.limits.max_batch_bytes {
-            return Err(StorageError::Rejected(
+            return Err(Failed(StorageError::Rejected(
                 "codec encoded length outside budget",
-            ));
+            )));
         }
-        let groups: Vec<_> = mutations.iter().map(accepted::mutation_group).collect();
         let control = mutations.iter().all(|m| match m {
             LogMutation::Create(_) => true,
             LogMutation::Update(u) => u.suffix.as_ref().is_none_or(|s| {
@@ -359,17 +374,21 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
                     .all(|e| matches!(e.payload, EntryPayload::Noop))
             }),
         });
-        let next = self
-            .accepted
-            .plan_batch(&self.durable, mutations, self.limits)?;
         let ceiling = if control {
             self.limits.max_wal_bytes
         } else {
             self.limits.max_wal_bytes - self.limits.control_reserve_bytes
         };
+        // Checked before planning consumes the batch: a full log changes
+        // nothing and hands the mutations back for a retry after a rewrite.
         if bytes.len() > ceiling.saturating_sub(self.length) {
-            return Err(StorageError::Rejected("WAL capacity/control reserve"));
+            return Err(AppendRefused::Full(mutations));
         }
+        let groups: Vec<_> = mutations.iter().map(accepted::mutation_group).collect();
+        let next = self
+            .accepted
+            .plan_batch(&self.durable, mutations, self.limits)
+            .map_err(Failed)?;
         let tickets: Vec<_> = groups
             .iter()
             .map(|&g| {
@@ -386,7 +405,7 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
             })
             .collect();
         if let Err(e) = self.io.append(&bytes) {
-            return Err(self.failed(e));
+            return Err(Failed(self.failed(e)));
         }
         // A suffix fence invalidates outstanding evidence for the old suffix.
         self.pending.retain(|t| {
@@ -396,9 +415,9 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
         if let Err(error) = self.accepted.install(&self.durable, next) {
             self.fenced = true;
             self.checkpoint_comparisons.clear();
-            return Err(StorageError::Uncertain(format!(
+            return Err(Failed(StorageError::Uncertain(format!(
                 "accepted install invariant: {error:?}"
-            )));
+            ))));
         }
         self.pending.extend(tickets.iter().copied());
         self.sequence = sequence;
@@ -447,6 +466,7 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
         Some(crate::log::WalUsage {
             bytes: self.length,
             capacity: self.limits.max_wal_bytes - self.limits.control_reserve_bytes,
+            parked: 0,
         })
     }
     fn reclaim(&mut self, max_bytes: usize) -> Result<LogReclaimed, StorageError> {

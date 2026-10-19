@@ -206,6 +206,9 @@ fn maintenance_defaults_and_opt_out_are_operator_visible() {
         "checkpoint_entries=8192",
         "failures=0",
         "wal_capacity=66060288",
+        "high_water=false",
+        "refused_proposals=0",
+        "wal_parked=0",
     ] {
         assert!(text.contains(field), "{field}: {text}");
     }

@@ -238,6 +238,9 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
     pub fn core(&self, group: GroupIdentity) -> Option<&Raft> {
         self.shard.core(group)
     }
+    pub(crate) fn set_storage_pressure(&mut self, on: bool) {
+        self.shard.set_storage_pressure(on);
+    }
     pub fn owner(&self) -> RuntimeOwner {
         self.shard.owner
     }

@@ -228,6 +228,8 @@ pub struct NetworkNode<
     failure: Option<NodeError>,
     configuration: ConfigurationRequests,
     maintenance: WalMaintenanceStatus,
+    // Whether the cores were last told the WAL is above high water.
+    core_pressure: bool,
     checkpoints: CheckpointStatus,
     retention: RetentionMode,
     drain: Option<drain::LocalDrain>,
@@ -336,6 +338,7 @@ where
             failure: None,
             configuration,
             maintenance,
+            core_pressure: false,
             checkpoints,
             retention: limits.retention,
             drain: None,
@@ -713,6 +716,19 @@ where
                 request,
             });
         };
+        // ST2b: the only capacity refusal a client sees, made before the
+        // request reaches any core or log. Admitted requests are never refused
+        // for capacity later; the WAL thread holds what does not fit yet.
+        if self
+            .maintenance
+            .update_high_water(self.local.persistence.wal_usage())
+        {
+            self.maintenance.refused_proposal();
+            return Err(ClientRejected {
+                reason: ClientError::StoragePressure,
+                request,
+            });
+        }
         self.local
             .clients
             .submit(&mut self.local.owner, app, request)
@@ -1171,9 +1187,19 @@ where
         if let Err(reason) = &result {
             self.enter_recovery(reason.clone());
         }
-        if result.is_ok() && self.state == NodeState::Running {
-            let usage = self.local.persistence.wal_usage();
-            let pressure = super::maintenance::pressure(usage);
+        let usage = self.local.persistence.wal_usage();
+        let high_water = self.maintenance.update_high_water(usage);
+        // Followers decline new data while the WAL is above high water. Set
+        // on every poll while it lasts (groups may be added), cleared once.
+        if high_water || self.core_pressure {
+            self.local.owner.set_storage_pressure(high_water);
+            self.core_pressure = high_water;
+        }
+        // A held batch only a rewrite can unpark must not stall a drain.
+        let held = usage.is_some_and(|u| u.parked > 0)
+            && matches!(self.state, NodeState::Quiescing | NodeState::Draining);
+        if result.is_ok() && (self.state == NodeState::Running || held) {
+            let pressure = high_water || super::maintenance::pressure(usage);
             self.checkpoints.schedule(
                 &mut self.local.owner,
                 &self.local.applications,

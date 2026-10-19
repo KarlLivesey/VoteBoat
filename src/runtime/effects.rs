@@ -344,6 +344,9 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     pub fn core(&self, group: GroupIdentity) -> Option<&Raft> {
         self.runtime.core(group)
     }
+    pub(crate) fn set_storage_pressure(&mut self, on: bool) {
+        self.runtime.set_storage_pressure(on);
+    }
     /// Includes queued effects and a Send lease held by a downstream driver.
     pub fn has_pending_send(&self, peer: NodeId) -> bool {
         self.active.values().any(|a| {

@@ -407,3 +407,53 @@ fn failed_ownership_fences_without_install_and_restart_retries_original() {
         assert_eq!(recovered.state().entries[1..], plain_entries());
     }
 }
+
+/// ST2b: a follower whose node is above its WAL high-water mark keeps leader
+/// contact (election reset) and commits what it already holds, but takes no
+/// new data entries and sends no reply, so the leader resends the same range
+/// later. Noop-only suffixes (control) still append, and the same append is
+/// taken once the pressure clears.
+#[test]
+fn follower_under_storage_pressure_keeps_contact_but_takes_no_new_data() {
+    let mut receiver = follower(core(), 1);
+    receiver.set_storage_pressure(true);
+    let before = receiver.state().clone();
+    let reset = receiver.election_reset_sequence();
+    let effects = receiver
+        .step(Event::Receive(incoming(&receiver, plain_entries())))
+        .unwrap();
+    assert!(receiver.election_reset_sequence() > reset);
+    assert!(
+        effects.iter().all(|e| match e {
+            Effect::Persist(u) => u.suffix.is_none(),
+            _ => false,
+        }),
+        "{effects:?}"
+    );
+    if !effects.is_empty() {
+        delayed_completion(&mut receiver, &effects);
+    }
+    assert_eq!(receiver.state().last_index(), before.last_index());
+    // Pressure cleared: the same range is taken as usual.
+    receiver.set_storage_pressure(false);
+    let effects = receiver
+        .step(Event::Receive(incoming(&receiver, plain_entries())))
+        .unwrap();
+    assert_eq!(suffix(&effects).from, 2);
+    delayed_completion(&mut receiver, &effects);
+    assert_eq!(receiver.state().last_index(), 5);
+    // Control: under pressure a noop-only new suffix still appends.
+    receiver.set_storage_pressure(true);
+    let mut entries = plain_entries();
+    entries.push(LogEntry {
+        index: 6,
+        term: 1,
+        payload: EntryPayload::Noop,
+    });
+    let effects = receiver
+        .step(Event::Receive(incoming(&receiver, entries)))
+        .unwrap();
+    assert_eq!(suffix(&effects).from, 6);
+    delayed_completion(&mut receiver, &effects);
+    assert_eq!(receiver.state().last_index(), 6);
+}

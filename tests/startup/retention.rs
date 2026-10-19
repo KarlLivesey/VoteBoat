@@ -19,11 +19,11 @@ use voteboat::{native::connect::NativeServiceConnector, raft::Role};
 
 /// A canonical zero-padded Counter command: each write puts 4 KiB in the WAL,
 /// so 64 MiB passes in about 16,000 writes. Capacity probe only.
-const PADDED: usize = 4096;
+pub(super) const PADDED: usize = 4096;
 const ENTRY_LIMIT: u64 = 16_384;
 const WINDOW: u64 = 64;
 #[derive(Clone)]
-struct Padded(HostApplication);
+pub(super) struct Padded(pub(super) HostApplication);
 fn canonical(bytes: &[u8]) -> Result<&[u8], ApplicationError> {
     if bytes.len() != PADDED || bytes[8..].iter().any(|b| *b != 0) {
         return Err(ApplicationError::InvalidCommand);
@@ -108,7 +108,7 @@ impl CheckpointStateMachine for Padded {
 type Boat = NativeNode<Padded, NativeServiceConnector>;
 /// Write `k`: operation IDs cycle through the application's capacity (100),
 /// so repeats are client retries and every write is a new log entry.
-fn write(k: u64) -> ClientRequest {
+pub(super) fn write(k: u64) -> ClientRequest {
     let mut bytes = vec![0; PADDED];
     bytes[..8].copy_from_slice(&1i64.to_le_bytes());
     ClientRequest {

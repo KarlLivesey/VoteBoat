@@ -20,6 +20,8 @@ fn policy() -> WalMaintenancePolicy {
         retry_ms: 3,
         max_bytes: 4096,
         min_reclaim_bytes: 0,
+        high_water_percent: 75,
+        low_water_percent: 50,
     }
 }
 fn tick(n: &mut Boat, time: u64) {

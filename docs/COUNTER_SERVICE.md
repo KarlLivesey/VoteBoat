@@ -1048,6 +1048,19 @@ Defaults, derived from the store limits:
   with applied entries beyond its base, and a rewrite runs as soon as at least an
   eighth of the capacity is reclaimable. Large commands therefore cannot fill the
   WAL before 8,192 entries accumulate.
+- **High water (backpressure).** When the WAL reaches 75% of its usable
+  capacity, or the WAL thread holds a write that does not fit yet, the node
+  enters the high-water state. New writes are refused with the retryable error
+  `ERR StoragePressure` (Rust: `ClientError::StoragePressure`) before they
+  reach the log; nothing was admitted, so the client retries after a backoff.
+  Checkpoints run for every group and a rewrite runs as soon as a sixteenth of
+  the ceiling (4 MiB) is reclaimable. Writes resume once occupancy is below 50%
+  and nothing is held. Writes admitted before the state began are never
+  refused for capacity: a write that does not fit is held on the WAL thread and
+  written after the next rewrite. Heartbeats, votes, terms, commit records and
+  checkpoints are never refused; the leader keeps its role and followers keep
+  replicating (a follower whose WAL is full holds the batch and acknowledges
+  it after its rewrite). A full WAL no longer fails the node.
 
 Overrides, accepted by `serve` in all three binaries:
 
@@ -1092,6 +1105,10 @@ local, volatile state of one group:
 | `checkpoint_enabled`, `checkpoint_entries`, `checkpoint_pending` | checkpoint schedule and in-flight requests |
 | `checkpoint_last`, `checkpoint_admission_error` | latest checkpoint result and refusal |
 | `leader_noop_pending` | a leader elected at the entry limit has not appended its noop yet |
+| `high_water` | the node refuses new writes with `StoragePressure` (WAL at or above 75%, or a write held) |
+| `high_water_entries` | times the high-water state began since startup |
+| `refused_proposals` | writes refused with `StoragePressure` since startup |
+| `wal_parked` | bytes of admitted writes the WAL thread holds until a rewrite makes room (0 normally) |
 | `checkpoint_base` | durable local snapshot base (kept last) |
 
 None of these is a quorum receipt. Maintenance never switches itself off: every
@@ -1115,6 +1132,12 @@ checkpoint threshold above half the retained-entry limit returns
 `Node::wal_maintenance()`, `Node::checkpoints()`, `Node::wal_usage()` and
 `Node::retention()`. Manual `reclaim` results stay in `poll_reclaim`; a manual
 request while an automatic rewrite is in flight is refused as `Overloaded`.
+`WalMaintenancePolicy::high_water_percent` (75) and `low_water_percent` (50)
+set the backpressure marks (`0 < low < high <= 100`, else `InvalidLimits`);
+`WalMaintenanceStatus::{high_water, high_water_entries, refused_proposals}`
+and `WalUsage::parked` report it. With the explicit opt-out the same default
+marks apply, so a lifetime-bounded node refuses writes typed at 75% instead of
+failing when its WAL fills.
 
 Rust hosts can choose `CheckpointPolicy { min_entries, interval_ms, scan_groups,
 max_in_flight }` through `Node::configure_checkpoints`. Inspect tracked admissions

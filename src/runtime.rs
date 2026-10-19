@@ -506,6 +506,13 @@ impl<Q: ReadyScheduler> Shard<Q> {
     pub fn core(&self, group: GroupIdentity) -> Option<&Raft> {
         self.groups.get(&group).map(|g| &g.core)
     }
+    /// Volatile host input for every core (ST2b WAL high-water state); not a
+    /// step, so it reaches cores that wait on a persistence dependency.
+    pub(crate) fn set_storage_pressure(&mut self, on: bool) {
+        for g in self.groups.values_mut() {
+            g.core.set_storage_pressure(on);
+        }
+    }
     pub fn usage(&self) -> Usage {
         sum(&self.usage)
     }

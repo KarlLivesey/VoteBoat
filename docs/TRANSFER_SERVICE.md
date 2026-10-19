@@ -248,3 +248,16 @@ authorize a target that later loses ownership. Arbitrary persistence cuts,
 concurrent membership changes, recursive profiles, general retention policy,
 macOS and separate-host deployment remain distinct acceptance work. See
 [split recovery](SPLIT_RECOVERY.md) and the [baseline ledger](BASELINE_ACCEPTANCE.md).
+
+## Store maintenance and write backpressure
+
+`voteboat-transfer` uses the same storage maintenance as the counter service
+(see [Store maintenance](COUNTER_SERVICE.md#store-maintenance-on-by-default)):
+checkpoints and WAL reclaim are on by default, `--checkpoint-entries`,
+`--wal-reclaim-ms` and `--no-maintenance I-accept-a-bounded-log` are accepted
+by `serve`, and `client ... maintenance` reports the same fields. When the WAL
+passes its high-water mark (75% of usable capacity, or a write is held until a
+rewrite) a new transfer command is answered `ERR StoragePressure`: nothing was
+admitted, and the operation can be retried unchanged after a backoff. The
+`maintenance` fields `high_water`, `high_water_entries`, `refused_proposals`
+and `wal_parked` show the state. A full WAL does not fail the node.

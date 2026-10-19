@@ -562,7 +562,7 @@ where
         Some(CheckpointResult::Rejected { error, .. }) => format!("rejected:{error:?}"),
     };
     format!(
-        "OK retention={} enabled={} pending={} next_ms={:?} last_sequence={} wal_bytes={} wal_capacity={} last_reclaim_ms={:?} before_bytes={} after_bytes={} failures={} skipped={} admission_error={:?} completion_error={:?} checkpoint_enabled={} checkpoint_entries={} checkpoint_pending={} checkpoint_last={} checkpoint_admission_error={:?} leader_noop_pending={} checkpoint_base={}",
+        "OK retention={} enabled={} pending={} next_ms={:?} last_sequence={} wal_bytes={} wal_capacity={} last_reclaim_ms={:?} before_bytes={} after_bytes={} failures={} skipped={} admission_error={:?} completion_error={:?} checkpoint_enabled={} checkpoint_entries={} checkpoint_pending={} checkpoint_last={} checkpoint_admission_error={:?} leader_noop_pending={} high_water={} high_water_entries={} refused_proposals={} wal_parked={} checkpoint_base={}",
         retention_name(node.retention()),
         wal.policy.is_some(),
         wal.pending.is_some(),
@@ -586,6 +586,10 @@ where
             .owner
             .core(group)
             .is_some_and(|c| c.leader_noop_pending()),
+        wal.high_water,
+        wal.high_water_entries,
+        wal.refused_proposals,
+        usage.map_or(0, |u| u.parked),
         // Kept last: existing operator tooling reads it as the final field.
         node.local()
             .owner

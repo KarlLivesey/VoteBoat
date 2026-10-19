@@ -353,6 +353,8 @@ fn maintenance_defaults_are_visible_and_selection_is_validated_before_storage() 
         "enabled=true",
         "checkpoint_enabled=true",
         "checkpoint_entries=8192",
+        "high_water=false",
+        "wal_parked=0",
     ] {
         assert!(text.contains(field), "{field}: {text}");
     }

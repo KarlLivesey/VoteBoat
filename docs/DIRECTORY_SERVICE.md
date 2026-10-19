@@ -193,3 +193,16 @@ open. The full P0–P7 roadmap is not complete.
 plan and prints its scopes, placement and payload bounds without submitting it.
 See [the profile and Rust contract](TRANSFER_PREVIEW.md). It does not recover
 live data or begin a transfer; operator lifecycle execution remains separate.
+
+## Store maintenance and write backpressure
+
+`voteboat-directory` uses the same storage maintenance as the counter service
+(see [Store maintenance](COUNTER_SERVICE.md#store-maintenance-on-by-default)):
+checkpoints and WAL reclaim are on by default, `--checkpoint-entries`,
+`--wal-reclaim-ms` and `--no-maintenance I-accept-a-bounded-log` are accepted
+by `serve`, and `client ... maintenance` reports the same fields. When the WAL
+passes its high-water mark (75% of usable capacity, or a write is held until a
+rewrite) a new proposal is answered `ERR StoragePressure`: nothing was
+admitted, and the operation can be retried unchanged after a backoff. The
+`maintenance` fields `high_water`, `high_water_entries`, `refused_proposals`
+and `wal_parked` show the state. A full WAL does not fail the node.

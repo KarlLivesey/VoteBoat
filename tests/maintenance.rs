@@ -202,7 +202,7 @@ fn maintenance(w: &mut impl PersistenceWorker) -> ReclaimEvent {
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }
-fn finish(w: &mut NativeLogWorker<Store>) -> Result<Store, StorageError> {
+fn finish<L: LogStore + Send + 'static>(w: &mut NativeLogWorker<L>) -> Result<L, StorageError> {
     w.close();
     let deadline = Instant::now() + Duration::from_secs(5);
     loop {
@@ -366,4 +366,159 @@ fn capability_and_byte_limits_reject_before_ownership_or_sequence_consumption() 
     release(&gate);
     assert_eq!(maintenance(&mut worker).result.unwrap().after_bytes, 1);
     drop(finish(&mut worker).unwrap());
+}
+
+/// A store whose physical log is "full" for data until a rewrite frees it
+/// (when `frees` is set): the shape of `NativeLogStore`'s capacity refusal.
+struct FullStore {
+    inner: HostLogStore,
+    full: bool,
+    frees: bool,
+    trace: Arc<Mutex<Vec<&'static str>>>,
+}
+impl LogStore for FullStore {
+    fn binding(&self) -> StoreBinding {
+        self.inner.binding()
+    }
+    fn limits(&self) -> LogLimits {
+        self.inner.limits()
+    }
+    fn state(&self, g: GroupIdentity) -> Result<GroupLog, StorageError> {
+        self.inner.state(g)
+    }
+    fn append_batch(&mut self, m: Vec<LogMutation>) -> Result<Vec<LogTicket>, StorageError> {
+        self.inner.append_batch(m)
+    }
+    fn append_batch_within_capacity(
+        &mut self,
+        m: Vec<LogMutation>,
+    ) -> Result<Vec<LogTicket>, AppendRefused> {
+        let data = m.iter().any(
+            |m| matches!(m, LogMutation::Update(u) if u.suffix.as_ref().is_some_and(|s| !s.entries.is_empty())),
+        );
+        if self.full && data {
+            self.trace.lock().unwrap().push("full");
+            return Err(AppendRefused::Full(m));
+        }
+        self.trace.lock().unwrap().push("append");
+        self.inner.append_batch(m).map_err(AppendRefused::Failed)
+    }
+    fn barrier(&mut self, t: &[LogTicket]) -> Result<DurableLog, StorageError> {
+        self.inner.barrier(t)
+    }
+    fn fetch_range(
+        &self,
+        g: GroupIdentity,
+        v: LogGeneration,
+        f: u64,
+        n: usize,
+        b: usize,
+    ) -> Result<Vec<LogEntry>, StorageError> {
+        self.inner.fetch_range(g, v, f, n, b)
+    }
+    fn supports_reclaim(&self) -> bool {
+        true
+    }
+    fn physical_usage(&self) -> Option<WalUsage> {
+        Some(WalUsage {
+            bytes: if self.full { 1000 } else { 10 },
+            capacity: 1000,
+            parked: 0,
+        })
+    }
+    fn reclaim(&mut self, _max_bytes: usize) -> Result<LogReclaimed, StorageError> {
+        self.trace.lock().unwrap().push("reclaim");
+        if self.frees {
+            self.full = false;
+        }
+        Ok(LogReclaimed {
+            before_bytes: 1000,
+            after_bytes: if self.full { 1000 } else { 10 },
+        })
+    }
+}
+fn full_worker(frees: bool) -> (NativeLogWorker<FullStore>, Arc<Mutex<Vec<&'static str>>>) {
+    let mut inner = HostLogStore::new(1);
+    append(
+        &mut inner,
+        vec![
+            LogMutation::Create(bootstrap(1, 3)),
+            LogMutation::Create(bootstrap(2, 3)),
+        ],
+    );
+    let trace = Arc::new(Mutex::new(Vec::new()));
+    let worker = NativeLogWorker::spawn(
+        FullStore {
+            inner,
+            full: true,
+            frees,
+            trace: trace.clone(),
+        },
+        StorageWorkerGeneration::new(1).unwrap(),
+        WorkerLimits::default(),
+        Arc::new(ThreadWake::current()),
+    )
+    .unwrap();
+    (worker, trace)
+}
+fn wait_parked(w: &impl PersistenceWorker, parked: bool) {
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while (w.wal_usage().unwrap().parked > 0) != parked {
+        assert!(Instant::now() < deadline);
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+}
+
+/// ST2b: a batch that does not fit is held on the WAL thread, never failed:
+/// no event at all until a rewrite makes room, control work for other groups
+/// still passes, and after the rewrite the held batch is written and durable
+/// before the rewrite's own event. No capacity refusal reaches a core.
+#[test]
+fn a_batch_that_does_not_fit_is_held_until_a_rewrite_and_never_failed() {
+    let (mut w, trace) = full_worker(true);
+    let data = w.submit(unit(&w, 1, true)).unwrap();
+    wait_parked(&w, true);
+    assert!(w.poll(8).is_empty(), "a held batch reports nothing");
+    assert_eq!(w.usage().requests, 1, "its admission credit is kept");
+    // Control work (here a hard-state update for another group) still runs.
+    let control = w.submit(unit(&w, 2, false)).unwrap();
+    assert!(matches!(event(&mut w), WorkerEvent::Written { request, .. } if request == control));
+    assert!(matches!(event(&mut w), WorkerEvent::Durable { request, .. } if request == control));
+    // The same group cannot queue behind its held batch.
+    assert_eq!(
+        w.submit(unit(&w, 1, true)).unwrap_err().reason,
+        WorkerError::Overloaded
+    );
+    let reclaim = w.submit_reclaim(1024).unwrap();
+    assert!(matches!(event(&mut w), WorkerEvent::Written { request, .. } if request == data));
+    assert!(matches!(event(&mut w), WorkerEvent::Durable { request, .. } if request == data));
+    assert_eq!(maintenance(&mut w).request, reclaim);
+    wait_parked(&w, false);
+    let store = finish(&mut w).unwrap();
+    assert_eq!(store.inner.state(group(1)).unwrap().last_index(), 1);
+    assert_eq!(
+        *trace.lock().unwrap(),
+        vec!["full", "append", "reclaim", "append"]
+    );
+}
+
+/// Closed while a batch is still held and a rewrite cannot free room: the
+/// WAL thread rewrites once, then reports the never-written batch as a
+/// non-fatal refusal so the owner can finish shutting down.
+#[test]
+fn a_batch_still_held_at_close_is_refused_after_one_rewrite() {
+    let (mut w, trace) = full_worker(false);
+    let data = w.submit(unit(&w, 1, true)).unwrap();
+    wait_parked(&w, true);
+    w.close();
+    match event(&mut w) {
+        WorkerEvent::Failed { request, error, .. } => {
+            assert_eq!(request, data);
+            assert_eq!(error, StorageError::Rejected("WAL capacity at close"));
+        }
+        other => panic!("{other:?}"),
+    }
+    let store = finish(&mut w).unwrap();
+    assert_eq!(store.inner.state(group(1)).unwrap().last_index(), 0);
+    assert_eq!(*trace.lock().unwrap(), vec!["full", "reclaim", "full"]);
 }

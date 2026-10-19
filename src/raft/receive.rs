@@ -289,19 +289,16 @@ impl Raft {
                 Ok(vec![Effect::Send(reply)])
             };
         }
-        let mut suffix_offset = None;
-        for (offset, entry) in entries.iter().enumerate() {
-            match self.durable.entry_at(entry.index) {
-                Some(old_entry) if old_entry.term == entry.term => {
-                    if old_entry != entry {
-                        return Err(RaftError::InvalidMessage);
-                    }
-                }
-                _ => {
-                    suffix_offset = Some(offset);
-                    break;
-                }
-            }
+        let suffix_offset = self.first_new_entry(entries)?;
+        if let Some(declined) = self.decline_new_data(
+            entries,
+            suffix_offset,
+            previous_index,
+            leader_commit,
+            hard,
+            old,
+        ) {
+            return declined;
         }
         let matching = entries.last().map_or(previous_index, |e| e.index);
         let commit = self.durable.commit_index.max(leader_commit.min(matching));
@@ -325,6 +322,49 @@ impl Raft {
         } else {
             Ok(vec![Effect::Send(reply)])
         }
+    }
+    /// ST2b: while the node's WAL is above its high-water mark, a follower
+    /// keeps leader contact, term and commit for the matching prefix (control
+    /// records) but takes no new data and sends no reply, so the leader
+    /// resends the range on its next heartbeat. The core stays free to apply,
+    /// checkpoint and compact, which frees the space. Noop-only suffixes pass.
+    fn decline_new_data(
+        &mut self,
+        entries: &[LogEntry],
+        suffix_offset: Option<usize>,
+        previous_index: u64,
+        leader_commit: u64,
+        hard: HardState,
+        old: HardState,
+    ) -> Option<Result<Vec<Effect>, RaftError>> {
+        let offset = suffix_offset.filter(|&offset| {
+            self.storage_pressure
+                && entries[offset..]
+                    .iter()
+                    .any(|e| !matches!(e.payload, EntryPayload::Noop))
+        })?;
+        let matching = previous_index + offset as u64;
+        let commit = self.durable.commit_index.max(leader_commit.min(matching));
+        Some(if hard != old || commit != self.durable.commit_index {
+            self.persist(hard, commit, None, After::Reply, None)
+        } else {
+            Ok(Vec::new())
+        })
+    }
+    /// Offset of the first entry this log does not already hold with the
+    /// same term; a held entry with the same term must be identical.
+    fn first_new_entry(&self, entries: &[LogEntry]) -> Result<Option<usize>, RaftError> {
+        for (offset, entry) in entries.iter().enumerate() {
+            match self.durable.entry_at(entry.index) {
+                Some(old_entry) if old_entry.term == entry.term => {
+                    if old_entry != entry {
+                        return Err(RaftError::InvalidMessage);
+                    }
+                }
+                _ => return Ok(Some(offset)),
+            }
+        }
+        Ok(None)
     }
     fn take_append_suffix(
         entries: &mut Vec<LogEntry>,

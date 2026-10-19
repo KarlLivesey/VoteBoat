@@ -331,6 +331,8 @@ fn initialize(rig: &Cluster) {
         "retention=maintained",
         "enabled=true",
         "checkpoint_entries=8192",
+        "high_water=false",
+        "wal_parked=0",
     ] {
         assert!(text.contains(field), "{field}: {text}");
     }

@@ -71,7 +71,18 @@ pub struct WalMaintenancePolicy {
     /// would buy nothing. Zero rewrites at every deadline. Providers that
     /// publish no occupancy are rewritten at every deadline.
     pub min_reclaim_bytes: usize,
+    /// WAL high-water mark, in percent of the usable capacity: at or above it
+    /// (or while the WAL thread holds a batch that does not fit) new client
+    /// proposals are refused with the retryable `ClientError::StoragePressure`
+    /// and a rewrite is due as soon as `min_reclaim_bytes` is reclaimable.
+    pub high_water_percent: u8,
+    /// Proposals resume once occupancy is below this percentage and no batch
+    /// is held. `0 < low_water_percent < high_water_percent <= 100`.
+    pub low_water_percent: u8,
 }
+/// Water marks that apply when no WAL policy is installed (explicit opt-out).
+pub const DEFAULT_HIGH_WATER_PERCENT: u8 = 75;
+pub const DEFAULT_LOW_WATER_PERCENT: u8 = 50;
 impl WalMaintenancePolicy {
     /// The default schedule for a provider whose reclaim ceiling is `ceiling`.
     pub fn for_ceiling(ceiling: usize) -> Self {
@@ -81,6 +92,8 @@ impl WalMaintenancePolicy {
             max_bytes: ceiling,
             // About 4 MiB at the default 64 MiB WAL.
             min_reclaim_bytes: ceiling / 16,
+            high_water_percent: DEFAULT_HIGH_WATER_PERCENT,
+            low_water_percent: DEFAULT_LOW_WATER_PERCENT,
         }
     }
 }
@@ -106,11 +119,23 @@ pub struct WalMaintenanceStatus {
     /// Interval deadlines passed without a rewrite because too little was
     /// reclaimable (saturating; diagnostic only).
     pub skipped: u64,
+    /// WAL high-water state (ST2b): new client proposals are refused with
+    /// `ClientError::StoragePressure` until occupancy falls below the low-water
+    /// mark and no batch is held. Heartbeats, votes, commit records and
+    /// checkpoints are never refused by it.
+    pub high_water: bool,
+    /// Times the high-water state was entered (saturating).
+    pub high_water_entries: u64,
+    /// Client proposals refused by the high-water state (saturating).
+    pub refused_proposals: u64,
 }
 /// WAL occupancy at or above half the usable capacity: checkpoints stop
 /// waiting for their entry threshold and reclaim may run early.
 pub(super) fn pressure(usage: Option<WalUsage>) -> bool {
     usage.is_some_and(|u| u.capacity > 0 && u.bytes >= u.capacity / 2)
+}
+fn percent_of(capacity: usize, percent: u8) -> usize {
+    (capacity as u128 * u128::from(percent) / 100) as usize
 }
 impl WalMaintenanceStatus {
     pub(super) fn configure(
@@ -125,7 +150,13 @@ impl WalMaintenanceStatus {
             )));
         }
         let next = if let Some(p) = policy {
-            if p.interval_ms == 0 || p.retry_ms == 0 || p.max_bytes == 0 {
+            if p.interval_ms == 0
+                || p.retry_ms == 0
+                || p.max_bytes == 0
+                || p.low_water_percent == 0
+                || p.low_water_percent >= p.high_water_percent
+                || p.high_water_percent > 100
+            {
                 return Err(NodeError::InvalidLimits);
             }
             let ceiling = ceiling.ok_or(NodeError::Replica(ReplicaError::Worker(
@@ -150,6 +181,31 @@ impl WalMaintenanceStatus {
         self.consecutive_failures = 0;
         Ok(())
     }
+    /// Re-evaluate the high-water state from the latest published occupancy:
+    /// enter at the high-water mark or while a batch is held, leave below the
+    /// low-water mark with nothing held. Without occupancy it is never set.
+    pub(super) fn update_high_water(&mut self, usage: Option<WalUsage>) -> bool {
+        let Some(u) = usage.filter(|u| u.capacity > 0) else {
+            self.high_water = false;
+            return false;
+        };
+        let (high, low) = self.policy.map_or(
+            (DEFAULT_HIGH_WATER_PERCENT, DEFAULT_LOW_WATER_PERCENT),
+            |p| (p.high_water_percent, p.low_water_percent),
+        );
+        if u.parked > 0 || u.bytes >= percent_of(u.capacity, high) {
+            if !self.high_water {
+                self.high_water_entries = self.high_water_entries.saturating_add(1);
+            }
+            self.high_water = true;
+        } else if u.bytes < percent_of(u.capacity, low) {
+            self.high_water = false;
+        }
+        self.high_water
+    }
+    pub(super) fn refused_proposal(&mut self) {
+        self.refused_proposals = self.refused_proposals.saturating_add(1);
+    }
     /// True when the interval deadline has passed and no rewrite is in flight.
     pub(super) fn interval_due(&self, now: MonoTime) -> bool {
         self.policy.is_some()
@@ -160,8 +216,11 @@ impl WalMaintenanceStatus {
     /// reclaimable (occupancy minus the `live` retained-log estimate); a
     /// deadline with less just moves on one interval. Due early when the
     /// occupancy passes half the capacity and at least an eighth of it is
-    /// reclaimable, at most once per `retry_ms`. A provider that publishes no
-    /// occupancy is rewritten at every deadline.
+    /// reclaimable, at most once per `retry_ms`. In the high-water state the
+    /// early rewrite needs only `min_reclaim_bytes`; with a held batch, any
+    /// growth since the last rewrite (compaction records mean checkpoints
+    /// freed space the live estimate may not show). A provider that
+    /// publishes no occupancy is rewritten at every deadline.
     pub(super) fn due(
         &mut self,
         now: MonoTime,
@@ -183,11 +242,20 @@ impl WalMaintenanceStatus {
             self.skipped = self.skipped.saturating_add(1);
             return None;
         }
-        let usage = usage.filter(|u| pressure(Some(*u)))?;
+        let usage = usage.filter(|u| self.high_water || pressure(Some(*u)))?;
         let spaced = self
             .last_attempt
             .is_none_or(|t| now.0 >= t.0.saturating_add(policy.retry_ms));
-        (spaced && usage.bytes.saturating_sub(live) >= usage.capacity / 8).then_some(policy)
+        let reclaimable = usage.bytes.saturating_sub(live);
+        let due = if self.high_water {
+            let grown = self
+                .last_reclaimed
+                .is_none_or(|(_, r)| usage.bytes > r.after_bytes);
+            reclaimable >= policy.min_reclaim_bytes.max(1) || (usage.parked > 0 && grown)
+        } else {
+            reclaimable >= usage.capacity / 8
+        };
+        (spaced && due).then_some(policy)
     }
     pub(super) fn submitted(&mut self, ticket: ReclaimTicket, now: MonoTime) {
         self.pending = Some(ticket);
@@ -248,6 +316,8 @@ mod tests {
             retry_ms: 2,
             max_bytes: 100,
             min_reclaim_bytes: 0,
+            high_water_percent: 75,
+            low_water_percent: 50,
         };
         state
             .configure(Some(policy), MonoTime(u64::MAX - 10), Some(100))
@@ -260,6 +330,106 @@ mod tests {
             .configure(Some(policy), MonoTime(u64::MAX), Some(100))
             .is_err());
     }
+    fn usage(bytes: usize, parked: usize) -> Option<WalUsage> {
+        Some(WalUsage {
+            bytes,
+            capacity: 1000,
+            parked,
+        })
+    }
+    #[test]
+    fn high_water_enters_at_the_mark_or_a_held_batch_and_leaves_below_low_water() {
+        let mut state = WalMaintenanceStatus::default();
+        // No policy (explicit opt-out): the default marks, 75% and 50%.
+        assert!(!state.update_high_water(usage(749, 0)));
+        assert!(state.update_high_water(usage(750, 0)));
+        assert_eq!(state.high_water_entries, 1);
+        // Hysteresis: stays set until below the low-water mark.
+        assert!(state.update_high_water(usage(500, 0)));
+        assert!(!state.update_high_water(usage(499, 0)));
+        // A held batch forces the state at any occupancy, and holds it.
+        assert!(state.update_high_water(usage(10, 1)));
+        assert_eq!(state.high_water_entries, 2);
+        assert!(state.update_high_water(usage(10, 1)));
+        assert_eq!(state.high_water_entries, 2);
+        assert!(!state.update_high_water(usage(10, 0)));
+        // No published occupancy: never set.
+        assert!(state.update_high_water(usage(900, 0)));
+        assert!(!state.update_high_water(None));
+        // Policy marks apply when configured.
+        let policy = WalMaintenancePolicy {
+            high_water_percent: 90,
+            low_water_percent: 20,
+            ..WalMaintenancePolicy::for_ceiling(100)
+        };
+        state
+            .configure(Some(policy), MonoTime(0), Some(100))
+            .unwrap();
+        assert!(!state.update_high_water(usage(899, 0)));
+        assert!(state.update_high_water(usage(900, 0)));
+        assert!(state.update_high_water(usage(200, 0)));
+        assert!(!state.update_high_water(usage(199, 0)));
+        for (high, low) in [(75, 0), (50, 50), (50, 75), (101, 50)] {
+            let bad = WalMaintenancePolicy {
+                high_water_percent: high,
+                low_water_percent: low,
+                ..policy
+            };
+            assert_eq!(
+                state.configure(Some(bad), MonoTime(0), Some(100)),
+                Err(NodeError::InvalidLimits)
+            );
+        }
+    }
+    #[test]
+    fn high_water_rewrites_once_a_sixteenth_is_reclaimable_or_a_held_batch_may_fit() {
+        let mut state = WalMaintenanceStatus::default();
+        let policy = WalMaintenancePolicy::for_ceiling(1600);
+        state
+            .configure(Some(policy), MonoTime(0), Some(1600))
+            .unwrap();
+        assert_eq!(policy.min_reclaim_bytes, 100);
+        // Below the high-water mark the pressure rule needs an eighth (125).
+        assert!(!state.update_high_water(usage(700, 0)));
+        assert_eq!(state.due(MonoTime(10), usage(700, 0), 590), None);
+        // In high water a sixteenth of the ceiling (100) is enough.
+        assert!(state.update_high_water(usage(800, 0)));
+        assert_eq!(state.due(MonoTime(10), usage(800, 0), 701), None);
+        assert_eq!(state.due(MonoTime(10), usage(800, 0), 700), Some(policy));
+        // With a held batch: any growth since the last rewrite, even when
+        // the live estimate says nothing is reclaimable.
+        assert!(state.update_high_water(usage(300, 7)));
+        assert_eq!(state.due(MonoTime(10), usage(300, 7), 400), Some(policy));
+        let ticket = ReclaimTicket {
+            binding: WorkerBinding {
+                store: crate::identity::StoreBinding {
+                    identity: crate::identity::StoreIdentity {
+                        id: crate::identity::StoreId::new(1).unwrap(),
+                        incarnation: crate::identity::StoreIncarnation::new(1).unwrap(),
+                    },
+                    session: crate::identity::StoreSession::new(1).unwrap(),
+                },
+                generation: crate::identity::StorageWorkerGeneration::new(1).unwrap(),
+            },
+            sequence: 1,
+        };
+        state.submitted(ticket, MonoTime(10));
+        state.completed(
+            ReclaimEvent {
+                request: ticket,
+                result: Ok(LogReclaimed {
+                    before_bytes: 990,
+                    after_bytes: 300,
+                }),
+            },
+            MonoTime(20),
+        );
+        // Unchanged since that rewrite: another would free nothing.
+        assert_eq!(state.due(MonoTime(200), usage(300, 7), 400), None);
+        assert_eq!(state.due(MonoTime(200), usage(301, 7), 400), Some(policy));
+        // Spaced by `retry_ms` from the last attempt.
+        assert_eq!(state.due(MonoTime(109), usage(301, 7), 400), None);
+    }
     #[test]
     fn occupancy_triggers_only_when_half_full_reclaimable_and_spaced() {
         let mut state = WalMaintenanceStatus::default();
@@ -271,6 +441,7 @@ mod tests {
             Some(WalUsage {
                 bytes,
                 capacity: 800,
+                parked: 0,
             })
         };
         assert_eq!(state.due(MonoTime(10), usage(399), 0), None);

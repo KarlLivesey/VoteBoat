@@ -283,6 +283,23 @@ pub struct LogReclaimed {
 pub struct WalUsage {
     pub bytes: usize,
     pub capacity: usize,
+    /// Owner-side cost of batches the WAL thread holds because their encoding
+    /// does not fit yet. They are written after the next successful rewrite;
+    /// nonzero means the node is in the WAL high-water state.
+    pub parked: usize,
+}
+
+/// A refusal from [`LogStore::append_batch_within_capacity`].
+#[derive(Debug)]
+pub enum AppendRefused {
+    /// The encoded batch does not fit the physical log's remaining capacity
+    /// for its class (data, or control within the reserve). Nothing was
+    /// written and no store state changed; the unchanged mutations are
+    /// returned so the caller can retry after a rewrite. Never a
+    /// `StorageError`, so it cannot fail a core.
+    Full(Vec<LogMutation>),
+    /// Any other refusal, exactly as `append_batch` reports it.
+    Failed(StorageError),
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -372,6 +389,16 @@ pub trait LogStore {
     }
     fn append_batch(&mut self, mutations: Vec<LogMutation>)
         -> Result<Vec<LogTicket>, StorageError>;
+    /// `append_batch`, except that a batch refused only because the physical
+    /// log is full comes back unchanged as [`AppendRefused::Full`], with no
+    /// state changed. Stores without a bounded physical log never refuse for
+    /// capacity (the default delegates to `append_batch`).
+    fn append_batch_within_capacity(
+        &mut self,
+        mutations: Vec<LogMutation>,
+    ) -> Result<Vec<LogTicket>, AppendRefused> {
+        self.append_batch(mutations).map_err(AppendRefused::Failed)
+    }
     fn barrier(&mut self, dependencies: &[LogTicket]) -> Result<DurableLog, StorageError>;
     fn supports_reclaim(&self) -> bool {
         false

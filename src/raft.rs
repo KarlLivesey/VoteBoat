@@ -402,6 +402,9 @@ pub struct Raft {
     // A leader elected while its retained log was at `max_entries_per_group`
     // owes its current-term noop; it appends it once compaction frees space.
     leader_noop_pending: bool,
+    /// Volatile host input (ST2b): the node's WAL is above its high-water
+    /// mark, so as a follower this core takes no new data entries.
+    storage_pressure: bool,
     // The core's log is the only copy: completions use `PersistVolatile` tokens.
     volatile: bool,
     // Nonzero only for a volatile core: the `recover_volatile` call that made it.
@@ -531,6 +534,7 @@ impl Raft {
             transfer: None,
             leader_contact: None,
             leader_noop_pending: false,
+            storage_pressure: false,
             volatile: false,
             incarnation: 0,
         })
@@ -699,6 +703,16 @@ impl Raft {
     /// errors until a checkpoint frees space; the role stays stable.
     pub fn leader_noop_pending(&self) -> bool {
         self.role == Role::Leader && self.leader_noop_pending
+    }
+    /// Host-set WAL high-water state (ST2b). While set, a follower keeps
+    /// leader contact, term and commit records but declines appends that
+    /// carry new data entries; the leader resends the same range on its next
+    /// heartbeat. Volatile scheduling input, never persisted or replicated.
+    pub fn storage_pressure(&self) -> bool {
+        self.storage_pressure
+    }
+    pub(crate) fn set_storage_pressure(&mut self, on: bool) {
+        self.storage_pressure = on;
     }
     pub fn role(&self) -> Role {
         self.role
