@@ -344,6 +344,7 @@ impl EntryBatch {
     pub fn last(&self) -> Option<&LogEntry> {
         match &self.spans {
             Spans::One(Span::Owned(entries)) => entries.last(),
+            Spans::Empty => None,
             _ => self.last_shared(),
         }
     }
@@ -538,12 +539,13 @@ impl EntryBatch {
     }
     #[inline]
     pub(crate) fn has_configuration(&self) -> bool {
-        if let Spans::One(Span::Owned(entries)) = &self.spans {
-            return entries
+        match &self.spans {
+            Spans::One(Span::Owned(entries)) => entries
                 .iter()
-                .any(|entry| matches!(entry.payload, EntryPayload::Configuration(_)));
+                .any(|entry| matches!(entry.payload, EntryPayload::Configuration(_))),
+            Spans::Empty => false,
+            spans => has_configuration(spans.as_slice()),
         }
-        has_configuration(self.spans.as_slice())
     }
     /// [`Self::retained_bytes`] and [`Self::has_data`] together, in one walk
     /// of a small owned batch; `None` when the charge overflows.
@@ -560,14 +562,21 @@ impl EntryBatch {
             }
             return Some((charge, data));
         }
+        if let Spans::Empty = &self.spans {
+            return Some((0, false));
+        }
         Some((self.retained_bytes()?, self.has_data()))
     }
     /// Any visible command or configuration.
     pub(crate) fn has_data(&self) -> bool {
-        if let Spans::One(Span::Owned(entries)) = &self.spans {
-            return entries
-                .iter()
-                .any(|entry| !matches!(entry.payload, EntryPayload::Noop));
+        match &self.spans {
+            Spans::Empty => return false,
+            Spans::One(Span::Owned(entries)) => {
+                return entries
+                    .iter()
+                    .any(|entry| !matches!(entry.payload, EntryPayload::Noop))
+            }
+            _ => {}
         }
         self.totals().map_or_else(
             || {
@@ -581,10 +590,11 @@ impl EntryBatch {
     /// index is unavailable.
     #[inline]
     pub(crate) fn payload_bytes(&self) -> usize {
-        if let Spans::One(Span::Owned(entries)) = &self.spans {
-            return entries.iter().map(LogEntry::payload_bytes).sum();
+        match &self.spans {
+            Spans::One(Span::Owned(entries)) => entries.iter().map(LogEntry::payload_bytes).sum(),
+            Spans::Empty => 0,
+            _ => self.payload_bytes_shared(),
         }
-        self.payload_bytes_shared()
     }
     fn payload_bytes_shared(&self) -> usize {
         self.totals().map_or_else(
@@ -603,7 +613,8 @@ impl EntryBatch {
         hard_term: u64,
         max_command_bytes: usize,
     ) -> bool {
-        // A small owned batch is validated by the original loop.
+        // A small owned batch is validated by the original loop; an empty one
+        // passes it.
         if let Spans::One(Span::Owned(entries)) = &self.spans {
             return valid_sequence(
                 std::iter::once(entries.as_slice()),
@@ -612,6 +623,9 @@ impl EntryBatch {
                 hard_term,
                 max_command_bytes,
             );
+        }
+        if let Spans::Empty = &self.spans {
+            return true;
         }
         self.valid_suffix_shared(from, predecessor_term, hard_term, max_command_bytes)
     }
@@ -651,7 +665,8 @@ impl EntryBatch {
         configuration: ConfigurationId,
         max_command_bytes: usize,
     ) -> bool {
-        // A small owned batch is validated by the original loop.
+        // A small owned batch is validated by the original loop; an empty one
+        // passes it.
         if let Spans::One(Span::Owned(entries)) = &self.spans {
             return valid_append_sequence(
                 std::iter::once(entries.as_slice()),
@@ -661,6 +676,9 @@ impl EntryBatch {
                 configuration,
                 max_command_bytes,
             );
+        }
+        if let Spans::Empty = &self.spans {
+            return true;
         }
         self.valid_append_shared(
             previous_index,
