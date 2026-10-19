@@ -27,7 +27,8 @@ checks; see [peer credential rollout](CREDENTIAL_REFRESH.md#executable-peer-rota
 
 An opt-in [leadership maintenance profile](MAINTENANCE.md#authenticated-counter-executable)
 adds authenticated move/status/resume/cancel commands with durable original IDs.
-It requires a new schema3/wire8 deployment (the plain counter is schema 2); existing
+It requires a new schema3/wire8 deployment (the plain counter's schema encodes its
+session limits, with format 4 in the low byte, so it never equals 3); existing
 plain counter data is not automatically converted.
 The optional [retained-replica drain commands](MAINTENANCE.md#retained-replica-node-drain)
 add durable maintenance/reboot with a restored admission gate.
@@ -150,7 +151,7 @@ voteboat-command-peers-v1
 ```
 
 ```sh
-target/debug/voteboat-counter client 43000 auto add 1 1 0 7 --command-peers commands.txt --service-tls /your/client-tls --principal 2
+target/debug/voteboat-counter client 43000 auto register 8813190407123305 --command-peers commands.txt --service-tls /your/client-tls --principal 2
 target/debug/voteboat-counter client 43000 1 status --command-peers commands.txt --service-tls /your/client-tls --principal 1
 ```
 
@@ -420,38 +421,90 @@ target/debug/voteboat-counter client 43000 3 status
 ```
 
 For the local three-process quickstart, use `auto` to find a willing leader
-without a manual status lookup:
+without a manual status lookup. Register a session first (with a fresh random
+nonce) and write in it:
 
 ```sh
-target/debug/voteboat-counter client 43000 auto add 1 1 0 7
+target/debug/voteboat-counter client 43000 auto register 8813190407123305
+# OK outcome=Registered(2) duplicate=false
+target/debug/voteboat-counter client 43000 auto add 2 1 0 7
 # OK outcome=Value(7) duplicate=false
-target/debug/voteboat-counter client 43000 1 add 1 1 0 7
+target/debug/voteboat-counter client 43000 auto add 2 1 0 7
 # OK outcome=Value(7) duplicate=true
 target/debug/voteboat-counter client 43000 auto read
 # OK value=7
 ```
 
-A write is `add SESSION SEQUENCE ACK DELTA`. Session 1 is built into every
-counter for a single writer; other writers first run `register NONCE` (any
-nonzero u64 chosen by the client) and use the session in the reply
-(`OK outcome=Registered(S) duplicate=false`); a retried registration with the
-same nonce returns the same session. Number writes 1, 2, 3, … within a session.
-`ACK` is the highest sequence whose outcome you have consumed, every lower one
-included (0 for none); it must be below `SEQUENCE`. The service retains at most
-32 unacknowledged outcomes per session and 256 sessions, so its retry state is
-bounded whatever the uptime: a write more than 32 beyond your acknowledgement is
-refused with `ERR not_proposed=Admission(SessionWindow)` until you acknowledge.
-Registering a session when 256 are live evicts the least recently used one.
+A write is `add SESSION SEQUENCE ACK DELTA`. A writer first runs
+`register NONCE` and uses the session in the reply
+(`OK outcome=Registered(S) duplicate=false`). Number writes 1, 2, 3, … within a
+session. `ACK` is the highest sequence whose outcome you have consumed, every
+lower one included (0 for none); it must be below `SEQUENCE`. The service
+retains at most 32 unacknowledged outcomes per session and 256 sessions, so its
+retry state is bounded whatever the uptime.
 
-Keep the same session, sequence and delta when retrying (the acknowledgement may
-grow). Within the window a retry returns the original outcome with
-`duplicate=true`. `outcome=Refused(Expired)` means the outcome is no longer
-retained: the sequence was acknowledged or its session evicted. It may have
-executed once and is never executed again; do not resend the delta under a new
-sequence, read the value instead. `Refused(Expired)` for a sequence above your
-own acknowledgement means the session was evicted: register again.
-`Refused(UnknownSession)` names a session that was never allocated. A timeout, disconnection or Unknown response can follow an
-accepted write that later commits. A changed payload under the same ID yields the
+#### Client rules for exactly-once writes
+
+The service executes a write at most once, and while its outcome is retained
+every retry returns that outcome. Exactly once holds only if every client keeps
+these rules; breaking one can lose a write or apply it twice.
+
+1. **One writer per session.** Session 1 is built into every counter for
+   exactly one writer per group, for the life of the group; every other writer
+   registers its own session. Two writers in one session alias each other: the
+   second writer's `add 1 5 4 7` after the first one's identical `add 1 5 4 7`
+   returns `duplicate=true` and never executes, and one writer's ACK retires the
+   other's unconsumed outcomes.
+2. **Registration nonces are unique and owned.** Use a fresh random nonzero
+   64-bit value for each registration (from the operating system's random
+   source), owned by one client and used for one registration. Two clients
+   using the same nonce while it is retained receive the same session and
+   alias as in rule 1.
+3. **Adopt exactly one session.** Registration is at least once. A retried
+   registration returns the same session while the nonce is retained: until
+   the session's first write, or until 64 newer registrations. After that a
+   late copy allocates another session with no effect on the counter (it is
+   reclaimed later), and when 256 sessions are live it evicts one (see rule
+   10). Adopt the first `Registered(S)` reply for your nonce and ignore any
+   later or different one.
+4. **Keep your position across restarts.** Store the session, the next
+   sequence and the ACK durably, or register again after a restart. A
+   restarted client that resends `add 1 1 0 7` for a new write gets the old
+   outcome with `duplicate=true`, and the new write never executes.
+5. **Never reuse a (session, sequence) for a different write.** Retry with the
+   same session, sequence and delta; only the ACK may grow. A different delta
+   under the same pair is answered `OperationConflict` while retained.
+6. **Stay inside your window.** Keep `SEQUENCE − ACK ≤ 32`. A write beyond it
+   is refused before proposal with `ERR not_proposed=Admission(SessionWindow)`;
+   nothing was committed, so consume outcomes and resend the same sequence
+   with a larger ACK. Every leader applies this rule to the command alone, so
+   the answer does not depend on which node you reach. `outcome=Refused(Window)`
+   appears only if such a write was committed without admission; it is final:
+   that sequence never executes, the session is closed, and its other
+   unanswered writes are uncertain (rule 8). Register a new session; the refused
+   write itself never executed and may be sent there.
+7. **Acknowledge only what you have consumed.** After an ACK covers a sequence,
+   its retries return `Refused(Expired)` instead of the outcome.
+8. **An uncertain write stays in its session.** A timeout, disconnection,
+   `Unknown` reply or lost reply means the write may or may not have committed.
+   Retry the same session, sequence and delta, through any node, until you get
+   an outcome. `Refused(Expired)` for a sequence above your ACK means the
+   session was evicted or closed: that write may have executed once and never
+   executes again. Read the counter to reconcile; never resend an uncertain
+   delta under a new sequence or session.
+9. **Ignore stale replies.** Match each reply to the operation you are waiting
+   for (the printed operation ID is its session and sequence) and drop replies
+   for any other operation, including late registration replies.
+10. **Eviction.** Registering when 256 sessions are live evicts first a session
+    holding nothing (no retained outcome and no retained nonce: the unused
+    built-in session, or a registration whose nonce was dropped before its first
+    write), otherwise the least recently used session. A late registration copy
+    whose nonce was already dropped is indistinguishable from a new registration,
+    so it can evict a live session.
+
+`Refused(UnknownSession)` names a session that was never allocated: use only
+sessions returned by `register`. A timeout, disconnection or Unknown response
+can follow an accepted write that later commits. A changed payload under the same ID yields the
 application's conflict outcome. Read success requires a fresh quorum barrier and
 application completion; a live process or local applied value is insufficient.
 Followers reject service writes/reads. Automatic routing retries the exact original
@@ -757,15 +810,27 @@ this endpoint submits no final record. It is available on followers as historica
 local evidence, without claiming a fresh quorum-backed read. Automatic client
 routing remains restricted to application add/read commands.
 
-The service binds schema 2, sixteen-byte commands and a 213,556-byte application
-checkpoint envelope to Counter's session limits (256 sessions × 32 outcomes, 64
-registration nonces). Admission refuses a write beyond its session window using
-applied state only; a committed write beyond it is a typed refusal, never an apply
-error; restore requires the identical limits. Retries keep their original
-outcomes while retained. `Counter::readiness_requirements` reports the
-steady-state envelope (24 + 28 + 256 × (28 + 32 × 25) + 64 × 24 bytes), which
-holds for any uptime; `validate_readiness_requirements` rejects a smaller
-declaration or a different schema. Service startup compares this declaration with its selected
+The service binds the Counter schema for its session limits (256 sessions × 32
+outcomes, 64 registration nonces), sixteen-byte commands and a 279,092-byte
+application checkpoint envelope. The schema carries the checkpoint format (4) in
+its low byte and the three limits above it (`Counter::schema`), so peers built
+with different limits refuse each other at readiness, snapshot install and
+restore instead of deciding the same committed write differently. Admission
+refuses a write more than the window beyond its own acknowledgement, a rule that
+reads only the command; a committed write beyond it is a typed refusal, never an
+apply error, and closes its session. Retries keep their original outcomes while
+retained. `Counter::readiness_requirements` reports the steady-state envelope
+(24 + 28 + 256 × (28 + 32 × 33) + 64 × 24 bytes; a retained outcome is its
+sequence, acknowledgement, delta and result), which holds for any uptime;
+`validate_readiness_requirements` rejects a smaller declaration or a different
+schema. An embedder must build every replica with the same `SessionLimits`. A
+wrapper that declares its own schema (the leadership-maintenance profile, a
+logical activation wrapper) hides the inner Counter's schema from readiness, so
+every replica behind it needs the same limits, or the wrapper schema must be
+derived from them (`SessionLimits::schema`); this executable's peers all run its
+fixed limits.
+`Counter::new(window)` holds a single session, so the first registration
+evicts the built-in session; use `Counter::with_limits` for registered clients. Service startup compares this declaration with its selected
 native command/checkpoint payload limits before opening resources.
 
 A full counter checkpoint round-trips through native wire versions 1–4 in tests.

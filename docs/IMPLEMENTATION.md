@@ -353,6 +353,128 @@ and Routed (S3), transactions (S5, S6), Directory and metadata (S4, S8),
 adoption and partials (S7, T4), logical configuration history and activation
 intents (F5, L2).
 
+#### DR1 round 2: review fixes (19 October 2026, PR 15)
+
+Both reviewers (GPT-6.1-Sol 5575066422, Claude Opus 5.5 5575106044) requested
+changes. Schema plan before editing: the ledger keeps, per retained receipt, the
+acknowledgement its command carried, so restore can recompute the floor;
+restore also checks the last-use indexes against what apply can produce; the
+window rule becomes a function of the command alone, and a committed refusal
+closes its session; the session limits become part of the Counter's application
+schema; wrappers report the weaker of their own and their inner retention rule.
+Failure/cleanup: every new restore refusal is `InvalidCheckpoint` before any
+install. Formats change again (no migration; the crate is unpublished).
+
+**Implemented and tested.**
+- **Floor evidence (Sol P1, Opus P3-5).** A receipt now stores
+  `(sequence, consumed_through, content, outcome)`. The command that last raised
+  a session's floor has a sequence above that floor, so it stays retained until
+  a later raise supersedes it: the floor always equals the largest retained
+  acknowledgement, or 0 with nothing retained. Restore requires that equality,
+  so a lowered floor, a raised floor and a non-zero floor with no receipts are
+  refused. Tests: `tests/application/finality.rs`
+  (`a_lowered_acknowledgement_floor_is_refused_…`, `a_raised_…`), ledger
+  mutations in `src/retention/tests.rs`.
+- **Reachable LRU state (Sol P2, Opus P3-5).** Restore refuses index 0 for any
+  session except the untouched built-in one, duplicate last-use indexes, and a
+  session whose index is not above every older unused registration (sessions
+  are allocated in log order). Test:
+  `restore_refuses_last_use_indexes_that_no_history_produces`.
+- **Limits are replicated identity (Opus P2-2).** `Counter::schema(limits)` is
+  `COUNTER_FORMAT` (4) in the low byte, then `sessions − 1` (16 bits),
+  `window − 1` (20 bits), `registrations − 1` (16 bits); the limits' ranges fit,
+  so the map is injective. Readiness, snapshot install and restore compare it
+  exactly, so replicas with windows 32 and 64 refuse each other's declaration
+  with `UnsupportedSchema`. Embedder rule: build every replica with the same
+  `SessionLimits`; a wrapper that reports its own schema (`Maintenance`, the
+  logical activation wrapper) hides the inner schema from readiness, so give
+  every replica behind it the same limits or derive the wrapper schema from
+  them (`SessionLimits::schema`). The service's peers all run its fixed limits,
+  so its maintenance profile stays schema 3. Test:
+  `replicas_with_different_session_limits_refuse_the_same_declaration`;
+  `readiness_refuses_a_learner_whose_session_limits_differ` (tests/learners.rs).
+- **Wrappers forward an undeclared inner rule (Opus P2-1).**
+  `Retention::wrapping(own, inner)`: undeclared on either side is undeclared,
+  otherwise a lifetime table on either side is lifetime-bounded, otherwise the
+  inner rule. Used by Maintenance, the logical activation wrapper, Routed, the
+  scoped and transfer sources, transfer target, namespace creation and the
+  retirement guard. Test: `maintenance_around_an_undeclared_application_is_refused_at_readiness`.
+- **Committed window refusal is final (Opus P2-3d).** The window rule is now
+  `sequence − consumed_through ≤ window`, read from the command alone, so every
+  leader decides admission identically whatever it has applied (the
+  not-yet-applied registration case is gone) and an admitted command never
+  meets the rule at apply. A committed command outside it (admission bypassed)
+  is refused `Window` and closes its session, so every later copy is
+  `Expired` and never executes. Recording the refusal as a receipt was
+  rejected: its sequence lies outside the retained window, which would break
+  the S·K bound. Test: `a_committed_window_refusal_is_final_for_its_sequence`;
+  `admission_reads_the_command_alone` and
+  `a_committed_window_refusal_closes_the_session_…` in `src/retention/tests.rs`.
+- **Client rules (Sol P2-3, Opus P2-3).** `docs/COUNTER_SERVICE.md` "Client rules
+  for exactly-once writes" (one writer per session, session 1 for exactly one
+  writer; unique random nonce per registration; adopt exactly one session; keep
+  session, next sequence and ACK across restarts or register again; never reuse
+  a (session, sequence); window; ACK only consumed outcomes; an uncertain write
+  stays in its session; ignore stale replies; eviction). Quick-start and
+  AUTHORIZATION examples register first; the `--help` text states the rules.
+- **Eviction order (Opus P3-4).** Registration evicts first a session holding
+  nothing (no receipt and no nonce), then the least recently used; ties by
+  last-use index, then session ID. A late registration copy whose nonce was
+  dropped can evict a live session (documented). Test:
+  `registration_evicts_a_session_holding_nothing_before_the_least_recent`.
+- **Pending-reservation tests restored (Opus P3-7).** A pending-aware
+  `Reserving` host layer in `tests/effect_owner.rs` drives
+  `cancelled_queued_wait_retains_capacity_…` and the ready-batch wrapper test
+  with a window of 4, so the refusal can only come from the queued command; each
+  test then shows the same command is admitted once the queue drains.
+- **Schema reuse (Opus P3-8).** Counter schemas carry format 4 in the low byte,
+  so none equals 1, 2 or 3. Recovering a store under the other profile:
+  with a checkpoint, `restore_application_from` (`src/snapshot.rs`) compares the
+  stored schema before restore and replay and stops startup with
+  `InvalidBoundary`; with no checkpoint the store records no schema, and replay
+  refuses the first entry of the other profile with `Application(InvalidCommand)`
+  before readiness and without installing anything (as on main). Tests:
+  `group_maintenance_schema_cannot_reinterpret_existing_counter_stores` (both
+  directions, with and without a checkpoint),
+  `an_old_schema_two_maintenance_checkpoint_is_refused_by_schema_before_replay`.
+- **Smaller gaps (Opus P3-9).** End-to-end `register` through the maintenance
+  profile, with recovery:
+  `maintenance_profile_registers_sessions_and_keeps_their_outcomes_across_recovery`.
+  `Counter::new(window)` documents that its one-session table loses the built-in
+  session to the first registration.
+
+**Before/after (new tests run against 120e9cab's sources, then the branch).**
+
+| Finding | 120e9cab | Branch |
+| --- | --- | --- |
+| Lowered floor 1 → 0 | restore `Ok` (Sol: retry of sequence 1 then executes, 10 → 17) | `InvalidCheckpoint`, state unchanged; retry `Expired`, value 10 |
+| Raised floor 1 → 2 | restore `Ok` | `InvalidCheckpoint` |
+| Window 32 vs 64 replicas | both accept the larger declaration | the 32-window replica: `UnsupportedSchema` (and the reverse) |
+| Beyond-window command at a leader without the session | admitted (`Ok(48)`) | `SessionWindow` |
+| Committed `Refused(Window)`, then retry with ACK 1 | executes, `Value(5)` | `Refused(Expired)`, value 0 |
+
+**Format and API changes in round 2.** Receipts gain 8 bytes, so the service
+envelope is 279,092 bytes (24 + 28 + 256 × (28 + 32 × 33) + 64 × 24), was
+213,556. `COUNTER_SCHEMA` is replaced by `COUNTER_FORMAT` and
+`Counter::schema(limits)`; `SessionLimits::schema`; `Retention::wrapping`. The
+five logical-voter goldens that embed a Counter checkpoint or schema are
+regenerated again. A client that sends an ACK below its session's floor is now
+refused at admission if `SEQUENCE − ACK` exceeds the window (it was measured
+against the floor before).
+
+**Measured.** Soak: 1,000,010 writes / 1,357,440 entries, 106,430
+registrations, 106,175 evictions, 101,884 duplicates, 127,041 `Expired`, 6
+window refusals (all at admission; an apply-time one fails the soak), peak 693
+receipts (bound 8,192), peak checkpoint 28,958 bytes (bound 279,092). U2 probe:
+26,394 proposals, 17,624 admitted, 1,965 refused, 98,053 applied entries, 8,333
+restarts, 8,391 checkpoints, 7,260 leader terms, no apply error. Not re-measured:
+CPU per write (the write path gains one 8-byte field per receipt and loses a
+map lookup at admission; DR1's Mac A/B stands until the next measurement).
+
+**Still open.** U2 probe for Maintenance (DR2, Opus P3-6). The other lifetime
+tables listed above. `Refused(UnknownSession)` is not final, by design: it only
+answers a session ID the service never handed out.
+
 ## Logical-voter reliability track (opened 18 October 2026)
 
 Goal: logical parents and their backing children run indefinitely with bounded

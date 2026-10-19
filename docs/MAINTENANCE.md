@@ -70,8 +70,9 @@ On a new three-node cluster, append these options to **every** serve command:
 ```
 
 Use the same options on recovery. This explicitly selects counter application
-schema3 (the plain counter is schema 2), wire8 and 64 permanent maintenance records. The existing plain counter
-profile stays schema1. Do not enable the new profile on existing plain data or
+schema3 (the plain counter's schema encodes its session limits with format 4 in
+the low byte, so it never equals 3), wire8 and 64 permanent maintenance records.
+The existing plain counter profile keeps its own schema. Do not enable the new profile on existing plain data or
 mix the profiles between replicas. Membership administration uses explicitly
 requested `--remote-admin-plan` operations and the wrapper's actual readiness
 requirements. Automatic administration is refused with this profile. There is
