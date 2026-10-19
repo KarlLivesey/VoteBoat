@@ -21,7 +21,7 @@ pub fn originals(
         .map(|p| (p.local.owner.authorization(), p.local.outbound.binding()))
         .collect::<Vec<_>>();
     let mut original_channels =
-        Channels::new(&descriptors, &bindings, protocol, lower.now(), false);
+        Channels::new(&descriptors, &bindings, protocol, &lower.clock, false);
     let middle = originals
         .drain(..)
         .enumerate()
@@ -67,7 +67,7 @@ pub fn target(
             target.local.outbound.binding(),
         )))
         .collect::<Vec<_>>();
-    let mut target_channels = Channels::new(descriptors, &bindings, protocol, lower.now(), true);
+    let mut target_channels = Channels::new(descriptors, &bindings, protocol, &lower.clock, true);
     for slot in 0..middle.len() {
         let mut sessions = target_channels.take_sessions(slot, descriptors);
         assert_eq!(sessions.len(), 1);

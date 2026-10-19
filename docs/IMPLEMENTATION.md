@@ -44,7 +44,8 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done H2: ready-snapshot collection in the matched harness (merged 8b3c1e6c; main re-baselined) | The VoteBoat actor cut each proposal pass as soon as a peer message was queued, so batch width tracked follower reply latency and any faster replication path paid extra wake/park rounds at 16 workers (V3b: rounds 7.7k → 17.3k, sys 30 → 50 ns/write). A pass now takes only the requests queued when it starts; peer progress arriving during it is handled before the next pass. This changes the instrument for VoteBoat's actor only | H1 merged (`30a1f6c5`); researcher note `target/claude/research-r3/v3b-regression.md`. Next steps in order: merge V2 (PR 3); merge H2 and re-baseline main under it; V3b-s (width-1 per-round overhead); then re-measure V3a/V3b rebased on V2 | Actor tests that a mid-pass peer message neither truncates the pass nor waits past the next pass, and that a request queued after the pass reads its ready count waits for the next pass; existing deferral/capacity tests; 73 matched tests; root and matched fmt; matched and four root strict Clippy builds; quiet-Mac 5 interleaved pairs × 4 cells against `30a1f6c5`; attribution parity controls side by side; main re-baselined before any later gate | T4 |
 | Done H1: server worker flag (merged `30a1f6c5`) | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`) | Matched source byte-identical to flag-only `297aec15`; matched tests; both fmt checks and five strict Clippy configurations; independent review | T4 |
 | Done TR1a (PR 5, formerly R1; merged 19 October 2026 on TR1b): deterministic simulated time in the activation driver fixtures | Platform feedback has failed on every main run since 17 October: the activation driver fixtures turned elapsed wall time into protocol time, so a slow host produced more heartbeats and exhausted child group 802's 128 retained actions; the first panic then poisoned the shared serialization lock for 25 more tests. Round 2 restores every liveness bound in protocol time, holds time while dial work or replicated progress is in flight, asserts the 64-action protocol budget and owns each port for the whole test. Round 3 draws every port from TR1b's shared pool and keeps the outer channels' unused half bound | Research report `target/claude/research-ci/dedup-capacity-root-cause.md`; architect plan TR1 (b), (c), (f); TR1b / PR 4 (`03127ec5`, PR 5's base) for the shared port pool and exclusions | Round 3 (cores 0-3, nice, no retries): `logical_activation_driver` 35/35 ×5 and serial, `logical_voter_native` 42/42 ×5, serial and two concurrent copies, `logical_nested_native` 15/15 ×5 and serial, `logical_activation_nested` 14/14 ×3 with 12/14 and 13/14 in two runs (QUIC close-drain timeouts at `cluster.rs:216`, TR4; serial passes split into consecutive `--test-threads=1` runs); two of the four binaries are unchanged by TR1a; round 2: parent `30a1f6c5` under E3; `logical_activation_driver` (`--all-features`) E1 ×10, E2 ×5, E3 ×10, E4 ×5 pairs, E5 ×3 with every run passing; retained protocol actions ≤ 64 in every cohort run; fmt, four strict Clippy configurations, matched workspace fmt + Clippy; all-feature full suite (other configurations: suite runner); two reviews | Q1 (M1, M2, M3) |
-| Next TR1b (PR 4, TR1a's base): CI runs every binary, shared port leases, explicit accept mode | Covers the architect TR1 items this slice does not: (d) `set_nonblocking` in the bin tests (`route_discovery`, the macOS `WouldBlock`), (e) CI `--no-fail-fast` for all three configurations, (g) `validation/reliability-proof.sh`, and leases for the seven other port ladders. Since TR1a round 3, `harness::PortLease` is a protocol split of this slice's `support::ports::PortLease`, so PR 5 depends on it and merges after it | Architect plan; PR 4 review rounds | PR 4's own proof and reviews | Q1 (M1, M3) |
+| Done TR1b (PR 4, TR1a's base; merged 19 October 2026): CI runs every binary, shared port leases, explicit accept mode | Covers the architect TR1 items this slice does not: (d) `set_nonblocking` in the bin tests (`route_discovery`, the macOS `WouldBlock`), (e) CI `--no-fail-fast` for all three configurations, (g) `validation/reliability-proof.sh`, and leases for the seven other port ladders. Since TR1a round 3, `harness::PortLease` is a protocol split of this slice's `support::ports::PortLease`, so PR 5 depends on it and merges after it | Architect plan; PR 4 review rounds | PR 4's own proof and reviews | Q1 (M1, M3) |
+| Current TR4: deterministic time and poison-free history in `logical_activation_nested` | The nested binary still turned elapsed wall time into protocol time and bounded every wait with 15 s (or 10 s / 90 s) of real time; under load a QUIC child is still closing at the deadline (`cluster.rs:216`) and the business waits (`business.rs:43/58`) expire. TR4 moves the binary onto TR1a's clock and hold rule and adds the poison regression test for its `HISTORY` | TR1a `harness`; TR1b `serial()` and port pool | See the reliability mini plan (TR4 row) and the TR4 sections at the end of this file | Q1 (M1, M2, M3) |
 | Following TR2/TR3: inventory, then the logical-voter family on the same clock | `logical_voter_native` still keeps wall-clock protocol time (its waits keep exactly their old 15 s wall bounds through the shared `Wait`), and `logical_activation_nested` has its own clocks and the same 128-action budget. A read-only bridge seam (L1) would let borrowed children's dial work and readiness hold time too | TR1a harness; TR1b CI visibility | Same matrix per binary; inventory of newly visible CI failures | Q1 (M2, M5) |
 | In progress H1: review round 3, preserve the benchmark instrument | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`); pinned matched workspace; quiet-Mac 30-pair buffer attribution result | All matched source byte-identical to flag-only `297aec15`; raw evidence preserved; matched tests; both fmt checks and five strict Clippy configurations; independent review of the reduced scope | T4 |
 | Done V1: core-canonical volatile log (merged 041fc3fb; Mac −18.8% bulk, −16.3% singleton CPU/write) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
@@ -37367,7 +37368,7 @@ cancels stale pull-request runs; push-to-main runs remain uncancelled.
 
 | Milestone | User-visible result | Status |
 | --- | --- | --- |
-| M1 | CI feedback is truthful and green | In progress: TR1b in review round 3 (PR 4); TR1a/R1 stacked on it (PR 5); TR4 next for `logical_activation_nested`; then TR2 inventory |
+| M1 | CI feedback is truthful and green | In progress: TR1b (PR 4) and TR1a (PR 5) merged 19 October 2026; TR4 current for `logical_activation_nested`; then TR2 inventory |
 | M2 | Simulated time wherever protocol time is simulated | Planned across TR1–TR11 |
 | M3 | Isolation: no cascades or collisions | In progress in TR1; remaining fixtures through TR15; binding-seam/host-policy limit remains |
 | M4 | Real-time tests bounded by events and ratios | Planned TR12–TR16 |
@@ -37377,10 +37378,10 @@ cancels stale pull-request runs; push-to-main runs remain uncancelled.
 
 | Deliverable | Status | Purpose | Dependencies | Completion checks | Milestone |
 | --- | --- | --- | --- | --- | --- |
-| TR1b | Current: in review round 3 (PR 4) | Exposes all CI failures, isolates the port ladders through one shared lease pool, and makes accept mode explicit | Architect classification; existing native startup contracts | Final-source parent-versus-PR matrix (recorded below: ports parent 26 → PR 0); round-3 fixes; fmt/four strict Clippy profiles; runner and two reviews | M1, M3 |
-| TR1a (R1) | Next: stacked on TR1b (PR 5) | Replaces activation-driver fixture time and poison cascades on the shared TR1b pool | TR1b lease and CI visibility; existing injected clock contracts | Parent-versus-PR matrix for `logical_activation_driver`; fmt/four strict Clippy profiles; runner and two reviews | M1, M2, M3 |
-| TR4 | Next for `logical_activation_nested` | Removes the 15 s wall-clock close-drain and child-deadline failures (`cluster.rs:216`, `business.rs:43/58`) without weakening assertions | TR1b lease; TR1a clock pattern | Same matrix for `logical_activation_nested`, including two simultaneous copies; no assertion weakened | M2, M3 |
-| TR2 | Planned after TR1a/TR4 | Inventory all newly visible failures, ratchet hardware dependencies, probe retained-action exhaustion | TR1 CI visibility and deterministic fixture clocks | All configurations/binaries inventoried; std-only ratchet; idle-leader probe result and ranked follow-ups recorded | M1, M2, M5 |
+| TR1b | Done: merged 19 October 2026 (PR 4) | Exposes all CI failures, isolates the port ladders through one shared lease pool, and makes accept mode explicit | Architect classification; existing native startup contracts | Final-source parent-versus-PR matrix (recorded below: ports parent 26 → PR 0); round-3 fixes; fmt/four strict Clippy profiles; runner and two reviews | M1, M3 |
+| TR1a (R1) | Done: merged 19 October 2026 (PR 5) | Replaces activation-driver fixture time and poison cascades on the shared TR1b pool | TR1b lease and CI visibility; existing injected clock contracts | Parent-versus-PR matrix for `logical_activation_driver`; fmt/four strict Clippy profiles; runner and two reviews | M1, M2, M3 |
+| TR4 | Current (branch `ci/tr4-nested-deterministic-time`) | Removes every wall-clock dependence in `logical_activation_nested` (the 15 s close-drain `cluster.rs:216`, `business.rs:43/58` and the other 15 s / 10 s / 90 s waits) by putting the binary on TR1a's `SimClock` and hold rule, and proves a failing test cannot poison the rest of the binary | TR1a `harness` (`SimClock`, `FixtureClock`, `Observed`, `Wait`, `HangGuard`); TR1b `serial()` and port pool | Schema plan below; every assertion kept; E1 ×10, `--test-threads=1` ×1, E3 ×10, two simultaneous copies ×3 (cores 0-3, no retries); driver binary once; fmt and four strict Clippy profiles | M1, M2, M3 |
+| TR2 | Next, after TR4 | Inventory all newly visible failures, ratchet hardware dependencies, probe retained-action exhaustion | TR1 CI visibility and deterministic fixture clocks | All configurations/binaries inventoried; std-only ratchet; idle-leader probe result and ranked follow-ups recorded | M1, M2, M5 |
 | TR3 | Planned | Quiescent pacing and logical-voter family isolation | TR2 inventory; read-only backing usage seam L1; existing readiness contracts | Logical voter/network suites and activation driver re-proved, including disk contention; TestDir adopted locally | M2, M3 |
 
 ### TR1b schema plan (18 October 2026, before editing)
@@ -38209,3 +38210,76 @@ uncancelled" wording: GitHub keeps at most one pending run per concurrency
 group), P3-c (an unusable explicit `VOTEBOAT_TEST_PORT_LEASE_DIR` still falls
 back), P3-d (no macOS fallback coverage) and P3-e (the per-user fallback
 directory is left behind).
+
+### TR4 schema plan (19 October 2026, before editing)
+
+Scope: `logical_activation_nested` and the fixtures it compiles in via
+`#[path]`. Base `main` `906c7a9b` (TR1b and TR1a merged). Tests only; no
+`src/` change, no capacity, timer, lint or assertion change.
+
+Known failures this slice removes (all pre-existing; PR 4 and PR 5 proofs):
+the real 15 s `CloseDrained` wait at `cluster.rs:206-216` (a QUIC child is
+still closing one peer connection at the deadline under load), the 15 s
+`Instant` deadlines at `business.rs:43/58`, and every other wall-clock wait in
+the binary. The `HISTORY` poison cascade (`history.rs:64:34`) was already
+removed by TR1b: `cluster::serial()` uses `support::serial::serial`, which
+recovers the `()` guard. This slice adds the regression test for it in this
+binary.
+
+- Data/API: the binary includes TR1a's `logical_voter_native/harness.rs` (and
+  its `aliases.rs`) instead of a second clock. One `SimClock` per test, created
+  where the test created its `Instant`, is cloned into every `Cluster`, the
+  `Lower` host and every outer `Channels`. `Cluster::new`, `Lower::new` and
+  `Channels::new` take `&SimClock`; `Channels::close` drops its `start`
+  argument and uses the shared clock. `Observed` gains two small generic
+  inputs: `backing(&LogicalBackingBridge<N>)` (replica and application state of
+  every node a bridge borrows, without holding on their persistence) and
+  `dialing(n)` (dial attempts of a driver outside a node). The `cleanup`
+  module switches to `logical_voter_native/cleanup.rs`, the same join with a
+  hang guard instead of a 10 s real bound; `logical_nested_native` keeps its
+  own copy unchanged.
+- State transitions: every fixture round calls `SimClock::round(observed)`
+  exactly once, through one place per loop shape:
+  - `Cluster::poll_with_budget` observes its three native nodes;
+  - `Lower::advance_with(upper)` observes every lower bridge's native children
+    (durable worker I/O plus replica state), the retired sessions and
+    whatever the caller adds: the upper bridge's middle replicas
+    (`progress::step`, `driver_step`, `claim_upper`, restore `claim`), the
+    middle nodes themselves (`Lower::middle_with`, `shutdown::middle`,
+    `readiness`), or a separately borrowed target bridge (cold, unknown and
+    uncommitted target loops);
+  - `Channels` observe connectors and session counts (TR1a's shape);
+  - the aborted target's peer drain observes its dial attempts and terminal
+    progress.
+
+  Time advances 1 ms only after an idle round (TR1a rule). A logical node's
+  persistence is deliberately not a hold signal: it completes only through its
+  backing group's consensus, which may itself need protocol time (an
+  election or a retransmission), so holding on it could stall the clock that
+  completes it. Its effect is still visible as backing replica progress.
+- Bounds: each wall wait becomes `harness::Wait` with the same number in
+  protocol time: 15 s → `LIVENESS_MS`, 10 s outer handshake →
+  `HANDSHAKE_MS`, 10 s aborted-network drain → 10,000 ms, 90 s checkpoint
+  publication → 90,000 ms, and the phase watchdog's 90 s absolute / 30 s
+  inactivity → 90,000 / 30,000 ms. Each keeps its message. Thread joins after
+  close (`cleanup::join`, the aborted target's worker and dialer joins, outer
+  dialer joins) contain no protocol time and keep only the 600 s hang guard,
+  as in TR1a. The close drain therefore completes by polling to quiescence:
+  protocol time moves only while no node has durable or dial work in flight
+  and nothing changed, so QUIC's own close and idle timers fire after the same
+  protocol interval on any host.
+- Equivalence: a protocol-time bound is the same liveness claim the wall bound
+  made on an infinitely fast host (one idle round costs at least 1 ms of real
+  time, so protocol time never runs ahead of real time); it is stronger where
+  the old wall bound passed only because real time ran ahead (more heartbeats,
+  elections and retained actions on a slow host). Hangs still fail, through the
+  hang guard, with the clock's hold state.
+- Ownership: the test owns the clock; clones are handles to one `Rc` state.
+  The guard on `HISTORY` stays per test. Port leases are unchanged (TR1b).
+- Failure and cleanup: a panicking test drops its clusters, leases and
+  sessions while unwinding; the next test recovers the `()` guard and runs on
+  its own clock, ports and directories. `serial_history_recovers_after_a_test_panic`
+  proves recovery, as in the driver binary.
+- Acceptance: compile and four strict Clippy profiles clean; the proof matrix
+  in the TR4 mini-plan row with every execution recorded; a deliberate
+  single-test failure (uncommitted experiment) fails that test alone.

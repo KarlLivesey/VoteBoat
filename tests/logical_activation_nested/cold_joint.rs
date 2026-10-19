@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 //! All original physical stores restart from real committed Joint membership.
+use super::harness::{self, SimClock};
 use super::{
     cluster::{serial, Cluster},
     history,
     lower::Lower,
     progress, setup, Middle, Top, UpperBridge,
 };
-use std::time::{Duration, Instant};
 use voteboat::{
     application::{ReadableStateMachine, StateMachine},
     identity::{ConfigurationId, StoreBinding},
@@ -36,11 +36,11 @@ fn quic_all_twelve_stores_joint_and_parent_intent_cold_reconstruct_then_final() 
 }
 fn run(protocol: NativePeerProtocol) {
     let _serial = serial();
-    let clock = Instant::now();
+    let clock = SimClock::default();
     let mut clusters = (0..4)
-        .map(|slot| Cluster::new(protocol, slot, clock))
+        .map(|slot| Cluster::new(protocol, slot, &clock))
         .collect::<Vec<_>>();
-    let facts = original(&mut clusters, protocol, clock);
+    let facts = original(&mut clusters, protocol, &clock);
     for cluster in &mut clusters {
         cluster.close();
     }
@@ -48,13 +48,13 @@ fn run(protocol: NativePeerProtocol) {
     for cluster in &mut clusters {
         cluster.open(NativeOpenMode::Recover);
     }
-    restore::complete(&mut clusters, protocol, clock, facts);
+    restore::complete(&mut clusters, protocol, &clock, facts);
     for cluster in clusters {
         cluster.finish();
     }
     eprintln!("367 restored all12 original provider owners joined and sockets rebound");
 }
-fn original(clusters: &mut [Cluster], protocol: NativePeerProtocol, clock: Instant) -> Facts {
+fn original(clusters: &mut [Cluster], protocol: NativePeerProtocol, clock: &SimClock) -> Facts {
     let (source, target) = clusters.split_at_mut(3);
     let mut lower = Lower::new(source, clock);
     let images = (0..3)
@@ -136,7 +136,7 @@ fn stop_joint<'p>(
     bridge: &mut UpperBridge<'_>,
     mut driver: ChildActivationDriver<'p, Top>,
 ) -> &'p mut Top {
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&lower.clock, harness::LIVENESS_MS);
     loop {
         progress::driver_step(lower, bridge, &mut driver, 4);
         let committed = bridge
@@ -154,7 +154,7 @@ fn stop_joint<'p>(
             break;
         }
         assert!(
-            Instant::now() < end,
+            end.within(&lower.clock),
             "actual committed Joint before Final admission"
         );
     }
@@ -162,7 +162,7 @@ fn stop_joint<'p>(
     while !driver.is_drained() {
         progress::driver_step(lower, bridge, &mut driver, 4);
         assert!(
-            Instant::now() < end,
+            end.within(&lower.clock),
             "same original stopped Joint observations drain"
         );
     }

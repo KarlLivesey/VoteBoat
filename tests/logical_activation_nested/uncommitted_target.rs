@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 //! Original one-WAL import becomes committed only through recovered protocol.
+use super::harness::{self, Observed};
 use super::{cluster::Cluster, lower::Lower, setup, Middle};
-use std::time::{Duration, Instant};
 use voteboat::{
     application::{ReadableStateMachine, StateMachine},
     identity::OperationId,
@@ -65,15 +65,15 @@ pub fn recover<'a>(
     bridge
         .begin_claim(OperationId::new(370262).unwrap())
         .unwrap();
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&lower.clock, harness::LIVENESS_MS);
     let fresh = loop {
-        lower.middle(source);
+        lower.middle_with(source, Observed::default().bridge(&bridge));
         bridge.advance(lower.now(), Lower::budget()).unwrap();
         if let Some(image) = bridge.take_image() {
             break image;
         }
         assert!(
-            Instant::now() < end,
+            end.within(&lower.clock),
             "fresh recovered actual Claim and original import lineage"
         );
     };
@@ -119,7 +119,7 @@ pub fn recover<'a>(
     (fresh, bridge)
 }
 fn persist(cluster: &mut Cluster, bytes: &[u8]) -> LogEntry {
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&cluster.clock, harness::LIVENESS_MS);
     loop {
         cluster.poll_with_budget(partition_budget());
         let node = &cluster.nodes[0];
@@ -135,7 +135,7 @@ fn persist(cluster: &mut Cluster, bytes: &[u8]) -> LogEntry {
             return entry.clone();
         }
         assert!(
-            Instant::now() < end,
+            end.within(&cluster.clock),
             "original target import reaches durable one-owner WAL without quorum"
         );
     }

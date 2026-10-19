@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 //! Target-only cold reconstruction from durable import, never the lost image.
+use super::harness::{self, Observed};
 use super::{
     cluster::{ChildNode, Cluster},
     lower::Lower,
     setup, Middle,
 };
-use std::time::{Duration, Instant};
 use voteboat::{
     application::{ReadableStateMachine, StateMachine},
     identity::OperationId,
@@ -126,27 +126,27 @@ fn image(
     source: &mut [Middle],
     bridge: &mut Bridge<'_>,
 ) -> VerifiedLogicalImage {
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&lower.clock, harness::LIVENESS_MS);
     loop {
-        lower.middle(source);
+        lower.middle_with(source, Observed::default().bridge(bridge));
         bridge.advance(lower.now(), Lower::budget()).unwrap();
         if let Some(image) = bridge.take_image() {
             return image;
         }
         assert!(
-            Instant::now() < end,
+            end.within(&lower.clock),
             "actual imported candidate fresh Claim/Enrollment/Image/Snapshot"
         );
     }
 }
 fn close_bridge(lower: &mut Lower<'_>, source: &mut [Middle], mut bridge: Bridge<'_>) {
     bridge.close();
-    let end = Instant::now() + Duration::from_secs(15);
+    let end = harness::Wait::new(&lower.clock, harness::LIVENESS_MS);
     while !bridge.is_drained() {
-        lower.middle(source);
+        lower.middle_with(source, Observed::default().bridge(&bridge));
         bridge.advance(lower.now(), Lower::budget()).unwrap();
         assert!(
-            Instant::now() < end,
+            end.within(&lower.clock),
             "same actual target original observation drain"
         );
     }

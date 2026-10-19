@@ -22,6 +22,7 @@ use std::{
 use voteboat::{
     application::{ApplicationReceipt, ReadableStateMachine, StateMachine},
     connect::PeerConnector,
+    logical_voter::{LogicalBackingBridge, LogicalBackingChild},
     native::connect::NativePeerProtocol,
     outbound::OutboundQueue,
     runtime::{ElectionEntropy, MonoTime, NodeLocalParts, ReadyScheduler, TimerService},
@@ -218,6 +219,26 @@ impl Observed {
             };
             self.durable += work;
         }
+        self
+    }
+    /// Replica and application state of every node borrowed by any bridge,
+    /// without holding on their persistence. A logical node's persistence
+    /// completes only through its own backing group's consensus, which can
+    /// itself need protocol time (an election or a retransmission), so
+    /// holding on it could stall the clock that completes it. Its effect is
+    /// still visible here as replica progress.
+    pub fn backing<N: LogicalBackingChild>(mut self, bridge: &LogicalBackingBridge<'_, N>) -> Self {
+        for i in 0.. {
+            let Ok(()) = bridge.inspect_backing(i, |local| replicas(local, &mut self.state)) else {
+                break;
+            };
+        }
+        self
+    }
+    /// Connection attempts waiting for a dial worker outside any node or
+    /// connector seen here, such as a closed peer driver's.
+    pub fn dialing(mut self, attempts: usize) -> Self {
+        self.dialing += attempts;
         self
     }
     /// A connector's attempts waiting for its dial worker, and its progress.

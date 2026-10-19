@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
-use super::{cleanup, setup, support};
+use super::{
+    cleanup,
+    harness::{self, FixtureClock, Observed, SimClock},
+    setup, support,
+};
 use std::{
     net::{SocketAddr, TcpListener, UdpSocket},
     path::PathBuf,
@@ -8,7 +12,7 @@ use std::{
         atomic::{AtomicU64, Ordering},
         Arc, Mutex,
     },
-    time::{Duration, Instant},
+    time::Duration,
 };
 use voteboat::{
     application::StateMachine,
@@ -40,14 +44,14 @@ pub struct Cluster {
     pub nodes: Vec<ChildNode>,
     pub slot: usize,
     pub representative: voteboat::identity::NodeId,
-    pub clock: Instant,
+    pub clock: SimClock,
     root: PathBuf,
     addresses: [SocketAddr; 3],
     ports: support::ports::PortLease,
     protocol: NativePeerProtocol,
 }
 impl Cluster {
-    pub fn new(protocol: NativePeerProtocol, slot: usize, clock: Instant) -> Self {
+    pub fn new(protocol: NativePeerProtocol, slot: usize, clock: &SimClock) -> Self {
         let root = std::env::temp_dir().join(format!(
             "voteboat-logical-nested-child-{}-{}",
             std::process::id(),
@@ -59,7 +63,7 @@ impl Cluster {
             nodes: Vec::new(),
             slot,
             representative: support::node(slot as u64 * 3 + 1),
-            clock,
+            clock: clock.clone(),
             root,
             addresses: ports.addresses(),
             ports,
@@ -70,7 +74,7 @@ impl Cluster {
         host
     }
     pub fn now(&self) -> MonoTime {
-        MonoTime(self.clock.elapsed().as_millis() as u64)
+        self.clock.now()
     }
     fn config(&self, id: u64, mode: NativeOpenMode) -> NativeStartup {
         NativeStartup {
@@ -196,31 +200,40 @@ impl Cluster {
     pub fn poll(&mut self) {
         self.poll_with_budget(NodePollBudget::default());
     }
+    /// One complete round over this cluster's nodes; protocol time moves only
+    /// if the previous round left them idle (TR1a's hold rule).
     pub fn poll_with_budget(&mut self, budget: NodePollBudget) {
-        let now = self.now();
+        let now = self.clock.round(Observed::nodes(&self.nodes));
         for node in self.nodes.iter_mut() {
             node.poll(now, budget).unwrap();
         }
         std::thread::park_timeout(Duration::from_millis(1));
     }
+    /// The original 15 s (90 s for checkpoint publication) bounds, now in
+    /// protocol time. A close drains by polling to quiescence: protocol time
+    /// moves only through idle rounds, so the transports' own close timers
+    /// fire after the same protocol interval on any host.
     fn wait(&mut self, stage: NativeWaitStage, mut done: impl FnMut(&Self) -> bool) {
-        let started = Instant::now();
-        let end = started
-            + Duration::from_secs(if matches!(stage, NativeWaitStage::CheckpointPublished) {
-                90
+        let started = self.now();
+        let end = harness::Wait::new(
+            &self.clock,
+            if matches!(stage, NativeWaitStage::CheckpointPublished) {
+                90_000
             } else {
-                15
-            });
+                harness::LIVENESS_MS
+            },
+        );
         while !done(self) {
             self.poll();
             assert!(
-                Instant::now() < end,
-                "native logical child timeout: {}; stage={stage:?}; slot={}; group={:?}; now={:?}; elapsed={:?}; original_nodes={:?}",
+                end.within(&self.clock),
+                "native logical child timeout: {}; stage={stage:?}; slot={}; group={:?}; now={:?}; elapsed_ms={}; clock={}; original_nodes={:?}",
                 self.root.display(),
                 self.slot,
                 setup::bottom(self.slot).group,
                 self.now(),
-                started.elapsed(),
+                self.now().0 - started.0,
+                self.clock.describe(),
                 super::cluster_inspection::retained(self.slot, &self.nodes),
             );
         }
