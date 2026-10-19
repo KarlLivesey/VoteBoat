@@ -43,8 +43,9 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done H2: ready-snapshot collection in the matched harness (merged 8b3c1e6c; main re-baselined) | The VoteBoat actor cut each proposal pass as soon as a peer message was queued, so batch width tracked follower reply latency and any faster replication path paid extra wake/park rounds at 16 workers (V3b: rounds 7.7k → 17.3k, sys 30 → 50 ns/write). A pass now takes only the requests queued when it starts; peer progress arriving during it is handled before the next pass. This changes the instrument for VoteBoat's actor only | H1 merged (`30a1f6c5`); researcher note `target/claude/research-r3/v3b-regression.md`. Next steps in order: merge V2 (PR 3); merge H2 and re-baseline main under it; V3b-s (width-1 per-round overhead); then re-measure V3a/V3b rebased on V2 | Actor tests that a mid-pass peer message neither truncates the pass nor waits past the next pass, and that a request queued after the pass reads its ready count waits for the next pass; existing deferral/capacity tests; 73 matched tests; root and matched fmt; matched and four root strict Clippy builds; quiet-Mac 5 interleaved pairs × 4 cells against `30a1f6c5`; attribution parity controls side by side; main re-baselined before any later gate | T4 |
 | Done H1: server worker flag (merged `30a1f6c5`) | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`) | Matched source byte-identical to flag-only `297aec15`; matched tests; both fmt checks and five strict Clippy configurations; independent review | T4 |
 | Done V1: core-canonical volatile log (merged 041fc3fb; Mac −18.8% bulk, −16.3% singleton CPU/write) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
-| Next V2 merge (PR 3) (H2 merged and main re-baselined 19 Oct) | V2: commit-only rounds (~2.3 per singleton original) still build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices. Both reviews approved and its benchmark accepted (Mac singleton −4.1%, old rule). Once V2 and H2 are on main, main is re-baselined under H2 so later gates compare like with like | V1 measured; H2 reviews | V2 full suites on its head, then merge; H2 merge; quiet-Mac main baseline, 4 cells, under H2 | T4 |
-| Following V3b-s, then V3a/V3b re-measured on V2 | V3b-s removes width-1 per-round overhead, which H2's narrower one-worker passes weight about 20% more. V3a (PR 6, entry staging) and V3b (`cpu/shared-batches`, shared immutable batches removing the remaining in-process per-peer clones) are rebased on V2 and re-measured against the H2 main baseline | H2 merged and main re-baselined; V2 merged | Framework pairs on all four cells against the H2 baseline; compaction/snapshot suites | T4 |
+| Done V2: scalar commit-advance plan and smaller `Pending` (PR 3, merged 19 Oct 02:32 UTC) | Commit-only rounds no longer build the full `LogUpdate`/`OwnedAppend` plan; in volatile mode the token suffices (Mac singleton −4.1%, old rule) | V1 | Full suites and both reviews before merge | T4 |
+| In review V3b-s: width-1 per-round overhead of shared batches (`cpu/shared-batches-s`, stacked on V3a/PR 6 and V3b) | V3b's shared batches cost singletons +6.3% driver instructions and +4–5% whole-process CPU per write (research `target/claude/research-r3/v3b-regression.md`), all in per-round code paths, copies and inlining around one-entry batches. Remove that overhead without losing V3b's −13% bulk gain: one-piece fast paths for owned batches and the last log piece, general paths out of line, no install-chain inline hints, and 24-byte pieces so `Suffix`/`LogUpdate` return to main's size | V3a (PR 6), V3b (`cpu/shared-batches` 91ab285d), H2 merged (main 65fe6701) | Driver width-1 instructions and time vs main and V3b at widths 1/231/515; quiet-Mac 5 pairs × 4 cells vs main 65fe6701 and vs V3b merged with main; singleton attribution floor (leader persists 264,195, width 1); oracle tests for every owned fast path; facts-vs-scan, selection, validator and charge oracles unchanged; fmt, four strict root Clippy builds and the matched workspace | T4 |
+| Following V3a/V3b/V3b-s rebased on V2 and re-measured | V2 merged; the orchestrator rebases the stack and re-measures all four cells against the H2 main baseline. The remaining singleton excess (V3a staging, a harness effect-loop copy that V3b's types trigger) is re-profiled on the composed tree before any further slice | V2 merged; V3b-s reviewed | Framework pairs on all four cells; compaction/snapshot suites | T4 |
 | In review V3a: direct entry staging (PR 6, round 2) | Proposals are built twice: the host stages a `Vec<Proposal>` and `propose_batch` scans it twice and collects a second `Vec<LogEntry>` (3.3% of bulk process CPU, plus the host's staging Vec). A bounded `ProposalBatch` builder creates final-shaped entries once and does its budget accounting while inserting; `Raft::propose_entries` stamps index/term in place and hands the same Vec to the existing planner | V1 (design: `target/claude/research-r1/architect-plan-pr3x.md` §§1, 2.2, 3.1, 3.12) | Builder/legacy equivalence at widths 1/2/max, cross-core and old-term builders, failed-push and drop cleanup, allocation-survival, last-index boundary and legacy-boundary tests; harness collection on the builder with unchanged receipt/attribution counts; fmt + strict Clippy (four configurations and the matched workspace); runner pairs on both framework cells (pending) | T4 |
 | In progress V3b: shared frozen batches with validation reuse | The batch V3a stages becomes one immutable shared batch (`Arc` backing plus facts computed once) carried by `Suffix`, `Rpc::Append`, the pending plan and a chunked canonical `EntryLog`; planning, follower validation, fan-out selection, ingress costing and install use the cached facts, removing the per-peer `to_vec`, the install/compaction record moves and the repeated per-entry validation/accounting walks (profile-r2-pr1 §§3, 5: ~19% of bulk process CPU, overlapping classes) | V3a (PR 6 branch `cpu/entry-staging`; design `architect-plan-pr3x.md` §§2.3–2.8, 3, 4) | Facts-versus-scan oracle over subranges and multi-span joins; fast/slow validator equivalence and the old rejection conditions; prefix selection oracle against the old loop; overlap content checks across distinct allocations; old RPCs keep their contents after truncate/compaction; retained charge equals a fresh oracle; wire/WAL byte goldens captured before encoder edits; durable, native, compaction and snapshot suites unchanged in meaning; harness width/persist/send parity; fmt + four strict Clippy + matched; indicative composed pairs (≥4% bulk gate is the runner's) | T4 |
 | Following V3c: profile the composed V2+V3 tree | Choose the next whole cost class (remaining materialization, rounds, refcounts) from a fresh profile instead of adding helpers | V3b measured, V2 merged or rejected | Bounded schema with application/FIFO/durability semantics preserved; independent CPU pairs | T4 |
@@ -73,6 +74,147 @@ implemented or benchmarked; unsafe variants are not offered as options.
 Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider than
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
+
+#### V3b-s schema plan: width-1 per-round overhead of shared batches (19 October 2026)
+
+Shape: no public API or wire change. Inside `src/log/entries*`, every hot
+accessor keeps the case singleton rounds hit (one owned piece, or the last
+piece of the canonical log) small and inlinable and calls an out-of-line
+function for the general case. A shared piece stores its range as `u32`
+(a backing wider than `u32::MAX` entries stays owned and is scanned), so a
+piece is 24 bytes, and `EntryBatch` reads its length from its pieces instead of
+storing it. State transitions, ownership and cleanup are unchanged: a fast path
+computes the same value from the same entries (never assumes validity) and the
+general path is the previous code. Failure paths: the original validators and
+selection loops still run on owned content; facts are still used only when the
+summary exists. Acceptance: driver width-1 instructions and time against main
+and V3b, bulk driver widths unchanged, the four quiet-Mac cells against main and
+against V3b merged with main, the singleton attribution floor, oracle tests for
+each fast path, and the existing facts/selection/validator/charge oracles.
+
+#### V3b-s implemented: width-1 per-round overhead of shared batches
+
+Base: `cpu/shared-batches` 91ab285d merged with main 65fe6701 (H2) as
+`bc7393de`; stacked on V3a (PR 6) and V3b; not rebased on V2 (PR 3, merged
+during this slice). Eight measured commits:
+
+| Step | Change | x86 instructions / singleton round |
+| --- | --- | ---: |
+| main 65fe6701 | — | 55,804 |
+| V3a 30ffd5e9 (for reference) | — | 56,692 |
+| V3b (`bc7393de`) | — | 59,626 |
+| 1 | Tail from the appended entries; `get`/`borrowed`/`replication_range` answer from the last piece; owned selection with the original loop; validators skip `summary()` for an owned batch and loop over slices | 58,963 |
+| 2 | One walk for an owned message charge (`retained_bytes_and_data`); owned appended charge; owned pieces gather before the adjoin check | 58,743 |
+| 3 | No `#[inline]` hints on the owned install chain (`prepare_install`/`install`/`install_append`) | 58,485 |
+| 4 | One-piece paths inlinable, general paths out of line (`EntryBatch` first/last/get/has_configuration/payload_bytes/validators/`From`, `EntryLog` get/borrowed/append/appended_charge/replication_range, freezing) | 58,068 |
+| 5 | `first_new_entry` returns at once when the first entry is new | 58,049 |
+| 6 | 24-byte pieces, length-free `EntryBatch` | 58,346 |
+| 7 | Inline the owned charge loop | 58,272 |
+| 8 | Tests (no code change) | 58,278 |
+
+x86 counts come from a scratch perf-counter build of the driver on Linux cores
+14–15 (user-mode instructions per round after warm-up; deterministic to a few
+instructions, not committed). Step 6 adds instructions on x86 but removes about
+2% of Mac driver cycles (16,018 → 15,705 per write), so it is kept. Forcing
+`#[inline(always)]` on the wrappers was measured at +107 and not kept.
+
+Mac driver (`R3_DRIVE`, single thread, 3 interleaved pairs, medians;
+instructions from `/usr/bin/time -l`):
+
+| Width | main instr/write | V3b | V3b-s | main ns/write | V3b | V3b-s |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 67,831 | 72,064 (+6.2%) | 71,058 (+4.8%) | 4,963.9 | 5,040.0 (+1.5%) | 4,959.6 (−0.1%) |
+| 231 | 2,385.7 | 1,951.3 (−18.2%) | 1,952.7 (−18.1%) | 134.8 | 105.0 (−22.1%) | 104.8 (−22.3%) |
+| 515 | 2,519.0 | 1,998.4 (−20.7%) | 1,994.9 (−20.8%) | 121.8 | 94.4 (−22.5%) | 94.3 (−22.6%) |
+
+Width-1 cycles per write: main 15,656, V3b 15,893 (+1.5%), V3b-s 15,633 (−0.1%).
+
+Quiet Mac, whole process, 5 interleaved pairs (`fwmac.sh`, CPU ns/write medians):
+
+| Cell | main 65fe6701 | V3b-s | ratio | pairs |
+| --- | ---: | ---: | ---: | --- |
+| bulk-16 | 251 | 218 | 0.869 | 0.86 0.86 0.87 0.87 0.88 |
+| single-16 | 23,529 | 23,742 | 1.009 | 1.02 1.00 1.03 1.01 1.01 |
+| bulk-1 | 219 | 193 | 0.881 | 0.85 0.86 0.89 0.89 0.88 |
+| single-1 | 13,373 | 13,927 | 1.041 | 1.02 1.03 1.06 1.04 1.04 |
+
+| Cell | V3b (`bc7393de`) | V3b-s | ratio | pairs |
+| --- | ---: | ---: | ---: | --- |
+| bulk-16 | 218 | 217 | 0.995 | 0.95 1.00 1.00 0.99 1.00 |
+| single-16 | 24,198 | 23,961 | 0.990 | 0.99 0.99 0.99 0.98 0.99 |
+| bulk-1 | 190 | 190 | 1.000 | 0.97 1.01 1.01 1.02 1.02 |
+| single-1 | 13,974 | 13,852 | 0.991 | 0.99 0.99 0.99 0.99 0.99 |
+
+An earlier session of step 6 against main gave single-16 +1.5% and single-1
++3.2% (bulk −14.2%, bulk-1 −12.4%). Single-1 user/system split (4 runs each,
+`/usr/bin/time -l`; the V3b-s binary here is the driver-patched build, whose
+patch is inactive without `R3_DRIVE`): main 9,606 / 3,759 ns, V3b-s 10,015 / 3,871 ns, V3b
+10,164 / 3,927 ns per write; process instructions per write 115,267 / 117,848
+/ 119,038. In the hot driver loop the remaining extra instructions retire at
+high IPC and cost no time; in the real one-worker process they cost cycles in
+proportion, in user and system time alike (wake and park patterns follow).
+
+Attribution controls (one `--attribution true` run per cell and revision):
+
+| Cell | Revision | Leader proposals | Max width | Mean width | Leader persists | Follower persists | Persists/original | Sends/original | Phase failures |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| single | main | 132,096 | 1 | 1.00 | **264,195** | 241,141 / 248,906 | 5.709802 | 7.421027 | 0 |
+| single | V3b | 132,096 | 1 | 1.00 | **264,195** | 237,915 / 249,659 | 5.691081 | 7.383585 | 0 |
+| single | V3b-s | 132,096 | 1 | 1.00 | **264,195** | 238,126 / 248,852 | 5.686569 | 7.374576 | 0 |
+| single1 | main | 132,096 | 1 | 1.00 | **264,195** | 245,991 / 260,922 | 5.837482 | 7.676341 | 0 |
+| single1 | V3b | 132,096 | 1 | 1.00 | **264,195** | 249,355 / 260,922 | 5.862948 | 7.727304 | 0 |
+| single1 | V3b-s | 132,096 | 1 | 1.00 | **264,195** | 247,320 / 260,381 | 5.843447 | 7.688333 | 0 |
+| bulk | main | 7,872 | 2,376 | 583.78 | 12,931 | 5,635 / 5,363 | 0.005984 | 0.007623 | 0 |
+| bulk | V3b | 8,886 | 1,804 | 508.48 | 14,921 | 5,855 / 5,991 | 0.006694 | 0.006917 | 0 |
+| bulk | V3b-s | 8,934 | 1,788 | 505.40 | 14,865 | 5,836 / 5,975 | 0.006671 | 0.006922 | 0 |
+| bulk1 | main | 13,828 | 1,660 | 312.22 | 18,778 | 5,784 / 5,558 | 0.007532 | 0.007053 | 0 |
+| bulk1 | V3b | 19,957 | 1,548 | 211.15 | 24,916 | 5,657 / 5,664 | 0.009062 | 0.007879 | 0 |
+| bulk1 | V3b-s | 17,110 | 1,444 | 248.52 | 22,071 | 5,479 / 5,787 | 0.008337 | 0.007800 | 0 |
+
+The singleton floor holds exactly (leader persists 264,195, width 1, 132,096
+proposals) on all three revisions. Singleton follower persists are within
+1.3% of main and persists/original and sends/original within 0.7%, as for V3b:
+a follower's commit-only round depends on whether the next append carries the
+commit first, which follows timing, not the library rule. Bulk counters move between single runs with batching timing (the bulk-1
+leader rounds differ by 14% between V3b and V3b-s in one run each; the paired
+CPU cells above show no bulk change). Every run completed all originals with
+equal frontiers (132,097 singleton, 3,998,721 bulk).
+
+Sizes (bytes): `EntryBatch` 40 → 24 (main's `Vec` 24), `Span` 32 → 24,
+`Suffix` 48 → 32 (main 32), `LogUpdate` 256 → 240 (main 240); `Effect` 272 and
+`Message` 256 unchanged. `GroupLog` stays 432 (main 384): it lives inside
+`Raft` and is not moved per round, and the cached tail and length it carries
+are read on almost every step.
+
+Targets, honestly: the driver's width-1 time now equals main (−0.1%) and
+single-16 is within +1% (+0.9%); bulk keeps V3b's gain. Not met: driver width-1
+instructions are +4.8% (target +1%) and single-1 is +3–4% against main. Of the
+remaining x86 excess (2,474 instructions per singleton round), V3a's staging
+path accounts for 888 (`ProposalBatch` creation, `push`, `validate_entry_batch`
+and the harness `include`). Most of the rest is a harness code-generation
+artifact that V3b's types trigger: in the matched actor's `effects` loop each
+popped 272-byte `Effect` is copied twice instead of once and each sent
+`Message` twice more (four 256-byte copies per send instead of two). V3a's
+build does not do this; inline hints on the harness `apply_entries` or
+`persist`, a slice-based apply path and the size change above did not remove
+it, so it is recorded rather than worked around in the harness. The remainder
+is 12–30 instructions per call in validators, charges, install and the
+committed range (`CompletionEffects` now borrows a 56-byte `EntryRange`).
+Instruction-sampled profiling was tried and dropped: interrupt skid on this AMD
+host piles samples after syscalls.
+
+Checks run: `cargo +stable fmt --all -- --check`; strict Clippy (default,
+`--all-features`, `--no-default-features`, `--no-default-features --features
+native`) at zero diagnostics; matched workspace fmt and strict all-target Clippy;
+`cargo test --lib` (469 default, 471 all features, including 13 entries tests:
+two new ones check small owned batches of every width, valid and with each
+defect, against the original validators and fact scans, the one-walk message
+charge against its two queries, and a log whose last piece is gathered owned
+entries against the vector model, every borrowed interval and the original
+selection loop with `max_entries` 0..1024); `--test volatile` 7, `--test
+snapshot` 27, `--test raft` 79, `--test log_store` 19, `--test log_owned` 5 in
+both the default and all-features configurations; matched tests 74/74. Not run:
+the full root suites (orchestrator after review) and remote CI.
 
 #### V3b implemented: shared frozen batches with validation reuse (measurement pending (runner))
 
