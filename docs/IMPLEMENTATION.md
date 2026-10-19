@@ -38249,8 +38249,10 @@ binary.
     `readiness`), or a separately borrowed target bridge (cold, unknown and
     uncommitted target loops);
   - `Channels` observe connectors and session counts (TR1a's shape);
-  - the aborted target's peer drain observes its dial attempts and terminal
-    progress.
+  - the aborted target's peer drain observes its dial attempts only. *(Amended
+    after the first run: its drain output reports every still-open peer on
+    every poll, so holding on it froze the clock that closes QUIC connections
+    and the test hit its 4096-observation bound.)*
 
   Time advances 1 ms only after an idle round (TR1a rule). A logical node's
   persistence is deliberately not a hold signal: it completes only through its

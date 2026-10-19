@@ -225,9 +225,15 @@ impl Cluster {
         );
         while !done(self) {
             self.poll();
+            let within = end.within(&self.clock);
+            let peers = if within {
+                Vec::new()
+            } else {
+                self.peer_drain()
+            };
             assert!(
-                end.within(&self.clock),
-                "native logical child timeout: {}; stage={stage:?}; slot={}; group={:?}; now={:?}; elapsed_ms={}; clock={}; original_nodes={:?}",
+                within,
+                "native logical child timeout: {}; stage={stage:?}; slot={}; group={:?}; now={:?}; elapsed_ms={}; clock={}; original_nodes={:?}; peer_drain={peers:?}",
                 self.root.display(),
                 self.slot,
                 setup::bottom(self.slot).group,
@@ -237,6 +243,20 @@ impl Cluster {
                 super::cluster_inspection::retained(self.slot, &self.nodes),
             );
         }
+    }
+    /// Failure-only: each node's per-peer connection drain state.
+    fn peer_drain(&mut self) -> Vec<String> {
+        let ids = setup::physical_ids(self.slot).collect::<Vec<_>>();
+        self.nodes
+            .iter_mut()
+            .map(|node| {
+                let statuses = ids
+                    .iter()
+                    .filter_map(|id| node.peer_drain_status(support::node(*id)))
+                    .collect::<Vec<_>>();
+                format!("{statuses:?}")
+            })
+            .collect()
     }
     fn catch_up(&mut self, stage: NativeWaitStage) {
         let group = setup::lower_mapping(self.slot).child;
