@@ -68,3 +68,22 @@ fn payload_boundaries_and_chunked_updates_match_original() {
         }
     }
 }
+
+#[test]
+fn sliced_words_match_original_at_every_offset_and_length() {
+    let bytes: Vec<u8> = (0..4099u32)
+        .map(|i| (i.wrapping_mul(2_654_435_761) >> 13) as u8)
+        .collect();
+    for offset in 0..9 {
+        for len in (0..80).chain([511, 512, 513, 4090 - offset]) {
+            let slice = &bytes[offset..offset + len];
+            for previous in [0, u32::MAX, 0x8123_4567] {
+                assert_eq!(
+                    crc32c_extend(previous, slice),
+                    bitwise_extend(previous, slice),
+                    "offset {offset}, length {len}"
+                );
+            }
+        }
+    }
+}
