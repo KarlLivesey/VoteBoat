@@ -1,5 +1,184 @@
 # Implementation record
 
+## Lifetime bounds track (opened 19 October 2026)
+
+User rule (19 October 2026): this is infrastructure, so failing after X time,
+writes or messages is a defect; "fixed by restart" does not count; a bound is
+acceptable only with recorded arithmetic that it survives 100 years at the
+maximum sustainable rate. Design: `target/claude/research-lv/architect-plan-lifetime-bounds.md`
+(contract §1, `SessionLedger` §1.6, slices §3) and the audit
+`target/claude/research-lv/lifetime-audit.md` (main checkout, untracked). The
+design pack is unchanged; its amendments are recorded below.
+
+### Macro plan (this track)
+
+| Milestone | User-visible outcome | Acceptance |
+| --- | --- | --- |
+| LB Infrastructure runs indefinitely | The three service binaries and every library embedding run for unbounded uptime at any sustained rate. Every retained structure has a replicated reclaim rule, a recorded widening proof, or a typed fail-closed refusal with a non-lossy, non-hanging recovery path. No transport or listener event is node-fatal | Every P1/P2 audit row closed by a slice with a fail@main exhaustion test and a simulated-time soak; an inventory table maps each audit row to its slice and test; LBZ cross-binary soak |
+
+### Mini plan (applications lane)
+
+| Deliverable | Purpose | Dependencies | Completion checks | Advances |
+| --- | --- | --- | --- | --- |
+| Current DR1: `SessionLedger`, Counter and the steady-state application contract (`lb/dr1-session-ledger`) | Audit S1 and RT2, and the U2 probe: the shipped counter service stops refusing every write after 10,000 lifetime operations; one shared session mechanism lands in the core; `deployment_requirements` means a steady-state bound under a declared retention rule, readiness refuses an application that declares none, and the Counter's apply never returns `Err` for a capacity reason | — (ST2 and NT1 run in parallel; only this document conflicts textually) | 1,000,000-write soak from 1,000 rotating clients fails on the base at write 10,001 with `DedupCapacity` and passes with retention ≤ S·K at every checkpoint; exactly-once across eviction, restart and a checkpoint between every apply; consumed retry → `Expired`; evicted-session retry → `Expired` (never a second execution); boundary at exactly S·K; U2 probe (1,000 seeded three-node schedules) shows apply never errors; readiness refuses an undeclared application; native durable CPU per write before/after; fmt, four strict Clippy configurations and matched fmt/Clippy; application, counter_service, runtime, snapshot, checkpoint, log_store and native startup suites in default and all-features | LB |
+| Next DR2: Maintenance, BucketCounter/Routed and outbox acknowledgement | Audit S2, S3: transfer_service stops refusing after 32 writes; leadership maintenance survives more than 64 transfers. Reuses `SessionLedger` and the U2 probe | DR1 (ledger, `Retention`, probe harness) | Fail@main tests (65 `Begin`/`Complete` pairs; 33 transfer writes); soaks with splits/merges and leader changes; U2 probe run for Maintenance; transfer suites | LB |
+| Then TX1: transaction participants and coordinators | Audit S5, S6: transaction services run indefinitely; a coordinator incarnation is a session at each participant | DR1 (ledger, `Expired` vocabulary) | Fail@main at 4,097 transactions (program: 257); 200,000-transaction soak with coordinator restarts and lost decision receipts | LB |
+
+### DR1 schema plan (19 October 2026, before editing)
+
+**Why these pieces and no others.** S1 is closed only if the shipped service's
+counter stops keeping a lifetime table, which needs the generic ledger (plan
+§1.6) and the counter moved onto it. RT2 is the contract text plus a checkable
+`retention()` declaration, without which a new lifetime table would still pass
+readiness. The U2 probe harness is asked for by the brief and closes the
+question for the counter; DR2/TX1 reuse it. Nothing else is added.
+
+**Data/API shape (new `src/retention.rs`, public `voteboat::retention`).**
+- `SessionLimits { sessions: S, window: K, registrations: Rg }`, validated:
+  1 ≤ S ≤ 65,536, 1 ≤ K ≤ 1,000,000, 1 ≤ Rg ≤ 65,536 and S·K ≤ 1,000,000 (the
+  old Counter maximum of retained receipts). `SessionLimits::default()` is the
+  orchestrator's counter default S = 256, K = 32, Rg = 64;
+  `SessionLimits::single(K)` is one session.
+- Operation-ID layout `(session << 64) | sequence`, `session ≥ 1`,
+  `sequence ≥ 1`; registration IDs are `(0 << 64) | nonce` (nonce ≥ 1, implied
+  by a non-zero ID). `SessionOperation::{Register { nonce }, Command { session,
+  sequence }}` decodes it; the layout is enforced wherever the ledger decodes
+  (admission, apply, lookup, restore).
+- `SessionLedger<C, R>` over fixed-size records (`SessionRecord` trait: encoded
+  length, encode, canonical decode). State:
+  - `next_session: u64` — a **maximum** (allocation high-water mark).
+  - `sessions: BTreeMap<u64, Session>`, `len ≤ S`; `Session { floor: u64
+    (contiguous acknowledged prefix), last_index: u64, nonce: Option<u64>,
+    retained: BTreeMap<u64 seq, (C, R)> }` with retained keys in
+    `(floor, floor + K]`.
+  - `lru: BTreeSet<(last_index, session)>`.
+  - `registrations: BTreeMap<nonce, (session, index)>`, `len ≤ Rg`, plus an
+    `(index, nonce)` order for oldest-first eviction.
+  - Built-in **default session 1** (`SessionLedger::with_default_session`):
+    live from construction with `floor = 0`, `last_index = 0`, no nonce, and
+    `next_session = 2`. It is a fixed rule of the Counter schema (not a
+    parameter), so replicas cannot disagree. It serves single-writer
+    embeddings without a registration round trip, and keeps the existing test
+    suites' log shapes. It is an ordinary session: LRU evicts it first (index
+    0), after which its IDs read `Expired` and it is never reallocated.
+- Outcomes: `SessionRefusal::{Expired, Window, UnknownSession, Exhausted}`;
+  `Lookup::{Retained, Expired, Unknown}` (pack ch08 `lookup_operation`).
+
+**Transitions (apply; all checks before any mutation; deterministic from log
+order).**
+1. Register `nonce` at index `i`: nonce retained → same session, duplicate.
+   Else if `next_session == u64::MAX` → `Refused(Exhausted)` (W: 2^64
+   registrations at 10^6/s ≈ 584,000 years). Else if `sessions.len() == S`,
+   evict the minimum `(last_index, session)` with its nonce. If
+   `registrations.len() == Rg`, drop the oldest nonce (the session stays
+   live). Allocate `next_session`, insert `Session { floor 0, last_index i,
+   nonce }`. Registration has no business effect, so a duplicate registration
+   after its nonce was dropped only creates a spare session that LRU reclaims.
+2. Command `(s, q, consumed_through c, content)`; decode requires `c < q`:
+   `s ≥ next_session` → `Refused(UnknownSession)`; `s` not live →
+   `Refused(Expired)` (no tombstone: allocated and not live means expired);
+   `q ≤ floor` → `Refused(Expired)`; `q` retained → original outcome
+   (`duplicate = true`) if the content matches, else `OperationConflict`;
+   `q > max(floor, c) + K` → `Refused(Window)`; otherwise execute, retain
+   `q → (content, outcome)`, `floor = max(floor, c)`, delete retained keys
+   `≤ floor`, `last_index = i`, refresh LRU, drop the session's nonce.
+   Using the command's own acknowledgement in the window check is required:
+   otherwise a client whose window is full could never deliver the
+   acknowledgement that frees it.
+3. Refusals and duplicates mutate nothing but `applied`.
+
+**Invariant I-LB (one predicate, four places).** `P`: `sessions ≤ S`; every
+session's retained keys lie in `(floor, floor + K]`; `registrations ≤ Rg`;
+every nonce names a live session with no executed command (`floor = 0`, no
+receipts, `last_index` = its registration index); ids `< next_session`.
+- Admission (`validate_proposal`, `validate_proposal_bounded`, ready batch):
+  decode and layout; registration always admits; a live session's command is
+  refused (`ApplicationError::SessionWindow`, retryable) iff
+  `q > max(applied floor, c) + K`; expired, unknown and retained IDs admit
+  without reservation so a stranded client reads committed terminal truth.
+  **No pending scan**: the bound holds at apply whatever is pending, because
+  apply re-checks with a floor that can only have risen.
+- Apply: transitions above. **Apply never returns `Err` for a capacity or
+  window reason**; `Err` remains for `IndexGap` and malformed bytes only, both
+  checked for the whole batch before any mutation.
+- Checkpoint: exactly the live sessions, their retained receipts, the
+  registrations and `next_session`; nothing below a floor.
+- Restore: direct decode, then refuse with `InvalidCheckpoint` unless `P`
+  holds, limits equal the configured ones, ids/seqs/nonces are strictly
+  ascending, `last_index ≤ applied`, `last_index = 0` only for the default
+  session, and the canonical re-encode is byte-exact.
+- Watermarks: `floor` is a contiguous-prefix acknowledgement per session
+  (raised to the maximum client claim); `next_session` is a maximum. Restart
+  rebuilds both from checkpoint plus suffix replay; a stale copy below either
+  is answered `Expired`, never re-executed.
+- Bound (G-LB): retained receipts ≤ S·K, sessions ≤ S, registrations ≤ Rg,
+  independent of uptime. Counter `snapshot_bytes = 24 (header) + 24 (ledger
+  header) + S·(28 + 25·K) + 24·Rg`; for S = 256, K = 32, Rg = 64 that is
+  213,552 bytes (old service envelope 330,032).
+
+**Counter (application schema 1 → 2; command, checkpoint and response formats
+change; no migration — unpublished crate, user accepted format breaks).**
+- `Counter { value, applied, ledger: SessionLedger<[u8; 8], Executed> }`;
+  `Counter::new(window)` = `SessionLimits::single(window)` (kept so the many
+  test call sites that use the counter only as a deterministic application
+  keep their meaning: one session, at most `window` unacknowledged outcomes);
+  `Counter::with_limits(SessionLimits)` for services.
+- Command: registration `(0 << 64) | nonce` with empty bytes; operation
+  `(s << 64) | q` with 16 bytes `consumed_through u64 LE ‖ delta i64 LE`
+  (+8 bytes per command). `Counter::command(consumed, delta)` builds them.
+- `CounterOutcome` gains `Registered(session)` and `Refused(SessionRefusal)`.
+- Checkpoint `VBCTR002`: magic, applied, value, then the ledger section
+  (limits, `next_session`, counts, sessions with receipts, registrations).
+  `VBCTR001`/schema 1 → `UnsupportedSchema`.
+- `Counter::lookup_operation(op) -> Lookup`.
+
+**Contract restatement (`src/application.rs`).** `deployment_requirements`
+documents a steady-state bound under the declared retention rule (plan §1.3
+text). New `StateMachine::retention() -> Retention` with
+`Retention::{Undeclared (default), Sessions(SessionLimits), Fenced,
+Stateless, LifetimeBounded}`. The default `validate_deployment_requirements`
+refuses `Undeclared` with the new `ApplicationError::RetentionUndeclared`, so
+readiness (`raft/readiness.rs`) and membership configuration admission
+(`runtime/clients/ready.rs`) refuse such an application. Every in-tree
+application declares: Counter `Sessions`; wrappers forward their inner
+declaration unless they keep their own lifetime table; Maintenance,
+BucketCounter, Routed, Directory, transaction/program, metadata/namespace,
+transfer/retirement, logical activation and logical voter declare
+`LifetimeBounded` until DR2/TX1/DH1/AD1/AI3 migrate them. `CheckpointStateMachine`
+docs change to "retained state plus every watermark needed to refuse retired IDs".
+
+**Counter service protocol (no migration).** `register NONCE` → `OK
+outcome=Registered(S)`; `add SESSION SEQ ACK DELTA` (`ACK` = highest sequence
+whose outcome the client has consumed, all lower ones included; retry with the
+same `SESSION SEQ DELTA`); multi-group `group ID INC add …` and `auto add …`
+follow. Client-side rule: after `Refused(Expired)` for an unacknowledged
+sequence the outcome is not retained (it may have executed once); never resend
+the delta under a new sequence, read the counter instead. After
+`Refused(UnknownSession)` or `Refused(Expired)` for a whole session, register
+again.
+
+**U2 probe harness (`tests/support/apply_probe.rs`).** Three raw `Raft` cores
+on `HostLogStore` with a deterministic message queue (no clock, no ports), one
+application per node, admission exactly as the client router does it (pending =
+the node's unapplied log commands), apply of every `Committed` batch, restarts
+that restore the application from its last checkpoint and replay. Scenario:
+fill to capacity − 1, propose two novel operations at the leader, replicate
+one, partition the leader, elect a follower, propose there, heal and commit;
+then 1,000 seeded schedules of proposals, partitions, campaigns, heartbeats,
+duplicates and restarts. Oracle: `apply_batch` never returns `Err`, every
+replica's receipts for the same index are equal, and restored state equals
+replayed state. Generic over the application and a command generator.
+
+**Failure and cleanup.** Torn or non-canonical checkpoint → `InvalidCheckpoint`
+with no partial install (decode into a fresh value, swap at the end). Late copy
+after acknowledgement or eviction → `Expired`. Old formats →
+`UnsupportedSchema`. No new thread, owner or I/O.
+
+**Acceptance checks.** As in the mini-plan row, plus: CPU per write measured
+with `nat.sh`/`svc.sh` (native durable path changes: +8 bytes per command,
+ledger lookups, no pending scan); matched benchmark unaffected by construction
+(`grep 'Counter' benchmarks/matched/src` is empty).
+
 ## Logical-voter reliability track (opened 18 October 2026)
 
 Goal: logical parents and their backing children run indefinitely with bounded
