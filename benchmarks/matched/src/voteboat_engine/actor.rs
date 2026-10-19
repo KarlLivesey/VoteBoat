@@ -47,6 +47,9 @@ pub(super) struct Actor<const TRACE: bool = false> {
     last_contact: Instant,
     #[cfg(test)]
     tick_paused: bool,
+    /// Test-only: runs once, right after a pass reads its ready count.
+    #[cfg(test)]
+    after_ready: Option<Box<dyn FnOnce() + Send>>,
 }
 impl<const TRACE: bool> Actor<TRACE> {
     pub fn new(parts: Parts<TRACE>) -> Self {
@@ -60,6 +63,8 @@ impl<const TRACE: bool> Actor<TRACE> {
             last_contact: Instant::now(),
             #[cfg(test)]
             tick_paused: false,
+            #[cfg(test)]
+            after_ready: None,
         }
     }
     pub async fn run(mut self) -> Result<Option<Attribution>, Failure> {
@@ -228,7 +233,18 @@ impl<const TRACE: bool> Actor<TRACE> {
             .proposal_batch(first.originals.len().min(capacity))
             .map_err(debug_error)?;
         self.include(first, &mut batch)?;
-        while batch.len() < capacity && self.parts.peer_receiver.is_empty() {
+        // Only requests already queued when the pass starts. Peer progress that
+        // arrives during the pass is handled before the next pass, not by cutting
+        // this one, so batch width does not track follower reply latency.
+        let mut ready = self.parts.receiver.len();
+        #[cfg(test)]
+        {
+            if let Some(arrival) = self.after_ready.take() {
+                arrival();
+            }
+        }
+        while batch.len() < capacity && ready > 0 {
+            ready -= 1;
             match self.parts.receiver.try_recv() {
                 Ok(request) if batch.len() + request.originals.len() <= capacity => {
                     self.include(request, &mut batch)?;
