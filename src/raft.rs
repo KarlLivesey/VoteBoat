@@ -1441,8 +1441,10 @@ impl Raft {
         // A volatile core is the only owner of its log: move the update into
         // the plan instead of keeping a copy for a store to validate again.
         if self.volatile {
-            // Frozen entries keep their allocation (spare capacity included,
-            // and charged); no plan reallocates them.
+            // The plan moves the update's batch without reallocating it. A
+            // narrow owned batch keeps any spare capacity (the plan charges
+            // it, the installed log charges the visible entries); a wide
+            // batch was frozen with its spare capacity released.
             let next = OwnedNextLog::plan_owned(
                 &LogView::new(&self.durable),
                 &self.log_summary,

@@ -27,6 +27,7 @@ impl Raft {
                 .entries
                 .shared_range(start..end)
                 .ok_or(RaftError::WrongCompletion)?
+                .for_message(self.limits.max_batch_bytes)
         };
         Ok(Effect::Send(
             self.scoped_message(

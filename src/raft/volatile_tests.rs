@@ -48,6 +48,7 @@ fn volatile_persist_carries_no_entries_and_installs_the_exact_proposal() {
     let pending = core.pending.as_ref().unwrap();
     let planned = &pending.next.suffix().unwrap().entries;
     assert_eq!(planned.backing_count(), 1);
+    assert_eq!(planned.allocated_entries(), planned.len());
     let planned_bytes = command_bytes(&planned[0]);
     let (committed, following) = persist_volatile(&mut core, &log, persist)
         .unwrap()
@@ -242,6 +243,7 @@ fn proposal_batches_collect_a_tight_suffix_before_owned_planning() {
         let entries = &suffix.unwrap().entries;
         assert_eq!(entries.len(), width);
         assert_eq!(entries.backing_count(), 1);
+        assert_eq!(entries.allocated_entries(), width);
         persist_volatile(&mut core, &log, persist).unwrap();
         assert_eq!(core.state().last_index(), 1 + width as u64);
     }

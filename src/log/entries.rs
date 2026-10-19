@@ -31,7 +31,7 @@ mod range;
 #[cfg(test)]
 mod tests;
 pub use canonical::EntryLog;
-pub(crate) use facts::activated_configuration;
+pub(crate) use facts::{activated_configuration, IndexNeed};
 use facts::{BatchData, Summary, Totals};
 use iter::Iter;
 pub use iter::Iter as EntryIter;
@@ -41,6 +41,12 @@ pub use range::{EntryRange, Slices as EntrySlices};
 /// of a shared backing (allocation, reference counts, descriptors) exceeds
 /// what sharing and cached facts save per entry.
 pub(crate) const SHARE_MIN: usize = 16;
+
+/// Most a leader's Append may keep alive beyond plain copies of its visible
+/// entries (see [`EntryBatch::for_message`]). It covers the index of a whole
+/// mixed backing at the receive ceiling (1,025 × 24 bytes), so whole frozen
+/// proposals are shared whatever their content.
+pub(crate) const MESSAGE_HIDDEN_MAX: usize = 32 * 1024;
 
 /// One ordered piece of entries.
 #[derive(Clone)]
@@ -82,6 +88,20 @@ impl Span {
             start: 0,
             end,
         }
+    }
+    /// What this piece keeps alive beyond a plain copy of its visible
+    /// entries (an upper bound); `None` when unknown.
+    fn hidden(&self) -> Option<usize> {
+        match self {
+            Self::Shared { data, start, end } => data.hidden(*start as usize..*end as usize),
+            Self::Owned(entries) => {
+                (entries.capacity() - entries.len()).checked_mul(std::mem::size_of::<LogEntry>())
+            }
+        }
+    }
+    /// The visible entries as a plain owned copy, held as a vector is.
+    fn copied(&self) -> Self {
+        Self::Owned(self.entries().to_vec())
     }
     #[inline]
     fn entries(&self) -> &[LogEntry] {
@@ -364,6 +384,10 @@ impl EntryBatch {
         if range.start > range.end || range.end > self.len() {
             return None;
         }
+        // An empty range holds no piece, so it keeps no backing alive.
+        if range.is_empty() {
+            return Some(Self::default());
+        }
         let mut spans = SpanBuilder::default();
         let mut base = 0;
         for span in self.spans.as_slice() {
@@ -408,6 +432,90 @@ impl EntryBatch {
             .as_slice()
             .iter()
             .try_fold(0usize, |sum, span| sum.checked_add(span.charge()?))
+    }
+    /// Charge as a canonical log holds these pieces on their own: shared
+    /// pieces their whole backing, owned pieces their visible entries.
+    pub(crate) fn log_charge(&self) -> Option<usize> {
+        self.spans
+            .as_slice()
+            .iter()
+            .try_fold(0usize, |sum, span| sum.checked_add(span.log_charge()?))
+    }
+    /// This batch as a leader's outbound Append keeps it.
+    ///
+    /// A shared piece pins its whole backing, which can be far wider than the
+    /// message (a recovered log is one backing). Shared pieces are kept while
+    /// what they keep alive beyond plain copies of their visible entries
+    /// totals at most [`MESSAGE_HIDDEN_MAX`] and at most the selection budget
+    /// the visible entries leave unused (`max_batch_bytes - 256 - (37 +
+    /// payload)` per entry); any other piece is copied, as a plain vector
+    /// would hold it. So a message's retained charge exceeds that of a plain
+    /// vector of its visible entries by at most `MESSAGE_HIDDEN_MAX`, and it
+    /// stays within the per-message bound the core reserves for its effects
+    /// (`max_batch_bytes` plus one record per entry: a retained payload
+    /// exceeds its length by at most 23 bytes, so records, payloads and the
+    /// hidden bytes together stay within `max_batch_bytes - 256` plus `size_of
+    /// LogEntry - 14` per entry). The visible entries, and so the protocol,
+    /// are unchanged.
+    pub(crate) fn for_message(self, max_batch_bytes: usize) -> Self {
+        let spans = self.spans.as_slice();
+        // An exact owned copy (every narrow selection) keeps nothing hidden.
+        if let [Span::Owned(entries)] = spans {
+            if entries.capacity() == entries.len() {
+                return self;
+            }
+        }
+        let visible = self
+            .len()
+            .checked_mul(37)
+            .and_then(|bytes| bytes.checked_add(self.payload_bytes()));
+        let allowance = visible
+            .and_then(|visible| max_batch_bytes.checked_sub(256)?.checked_sub(visible))
+            .unwrap_or(0)
+            .min(MESSAGE_HIDDEN_MAX);
+        // Pieces are kept in order while the running total stays within the
+        // allowance; a piece that would exceed it is copied instead.
+        let keeps = |span: &Span, hidden: &mut usize| match span
+            .hidden()
+            .and_then(|bytes| hidden.checked_add(bytes))
+        {
+            Some(total) if total <= allowance => {
+                *hidden = total;
+                true
+            }
+            _ => false,
+        };
+        let mut hidden = 0;
+        if spans.iter().all(|span| keeps(span, &mut hidden)) {
+            return self;
+        }
+        let mut hidden = 0;
+        let mut pieces = SpanBuilder::default();
+        for span in spans {
+            if keeps(span, &mut hidden) {
+                pieces.push(span.clone());
+            } else {
+                pieces.push(span.copied());
+            }
+        }
+        pieces.finish()
+    }
+    /// Freeze decoded entries like `From<Vec<LogEntry>>`, admitting the
+    /// bytes of any index with `admit_index` before it is allocated.
+    pub(crate) fn decoded<E>(
+        entries: Vec<LogEntry>,
+        admit_index: impl FnOnce(usize) -> Result<(), E>,
+    ) -> Result<Self, E> {
+        if entries.len() < SHARE_MIN || u32::try_from(entries.len()).is_err() {
+            return Ok(entries.into());
+        }
+        let end = entries.len() as u32;
+        let data = Arc::new(BatchData::charged(entries, admit_index)?);
+        Ok(Self::single(Span::Shared {
+            data,
+            start: 0,
+            end,
+        }))
     }
     /// Exact intrinsic facts of the visible entries; `None` when any piece is
     /// unsealed or a join does not continue the sequence.
@@ -597,6 +705,19 @@ impl EntryBatch {
             || self
                 .iter()
                 .all(|entry| entry.payload_bytes() <= max_command_bytes)
+    }
+    /// Entry slots allocated by the pieces: a shared piece's whole backing,
+    /// an owned piece's capacity.
+    #[cfg(test)]
+    pub(crate) fn allocated_entries(&self) -> usize {
+        self.spans
+            .as_slice()
+            .iter()
+            .map(|span| match span {
+                Span::Shared { data, .. } => data.entries.capacity(),
+                Span::Owned(entries) => entries.capacity(),
+            })
+            .sum()
     }
     #[cfg(test)]
     pub(crate) fn backing_count(&self) -> usize {

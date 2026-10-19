@@ -89,12 +89,52 @@ enum MetricsIndex {
     Unavailable,
 }
 
+/// Index allocation that freezing a sequence will make: `len + 1` prefixes
+/// when its entries are not all alike and their totals fit, otherwise none.
+///
+/// Freezing and the wire codec both use this, so the decoded-memory budget
+/// charges exactly the index the decoder will allocate, before it does.
+#[derive(Clone, Copy, Debug, Default)]
+pub(crate) struct IndexNeed {
+    first: Option<Metrics>,
+    mixed: bool,
+    total: Option<Prefix>,
+    count: usize,
+}
+impl IndexNeed {
+    pub(crate) fn push(&mut self, entry: &LogEntry) {
+        let metrics = Metrics::of(entry);
+        match self.first {
+            None => {
+                self.first = Some(metrics);
+                self.total = Some(Prefix::default());
+            }
+            Some(first) => self.mixed |= first != metrics,
+        }
+        self.total = self.total.and_then(|sum| sum.add(metrics));
+        self.count += 1;
+    }
+    /// Bytes of the index that freezing these entries allocates: none for a
+    /// batch that stays owned (narrower than `SHARE_MIN` or wider than
+    /// `u32::MAX`), for alike entries or when a total overflows.
+    pub(crate) fn bytes(&self) -> Option<usize> {
+        if !self.mixed
+            || self.total.is_none()
+            || self.count < super::SHARE_MIN
+            || u32::try_from(self.count).is_err()
+        {
+            return Some(0);
+        }
+        self.count.checked_add(1)?.checked_mul(size_of::<Prefix>())
+    }
+}
+
 /// One immutable backing and its facts. Nothing here is mutable after
 /// construction and no caller can supply or replace a fact.
 #[derive(Debug)]
 pub(super) struct BatchData {
-    /// Never resized after construction; spare capacity is kept (and
-    /// charged) rather than reallocated away.
+    /// Exactly the frozen entries: spare capacity is released when the
+    /// backing is built and the allocation is never resized afterwards.
     pub(super) entries: Vec<LogEntry>,
     /// Consecutive indices from the first, every term positive and
     /// nondecreasing. Without it the old full validators run.
@@ -104,9 +144,11 @@ pub(super) struct BatchData {
     /// accepted from the bound; otherwise its visible entries are checked.
     max_payload: usize,
     max_configuration: Option<ConfigurationId>,
-    /// Entry storage (allocated capacity), every retained payload and the
-    /// metrics index.
+    /// Entry storage, every retained payload and the metrics index.
     charge: Option<usize>,
+    /// What a plain vector of all the entries would hold: entry records and
+    /// retained payloads, without the index.
+    copy_charge: Option<usize>,
 }
 
 /// Exact facts of a visible range, or of several joined ranges.
@@ -160,54 +202,98 @@ impl BatchData {
     /// Inspect every entry once. Invalid content is still frozen, unsealed.
     /// A mixed backing takes a second pass to build its prefix index.
     pub(super) fn new(entries: Vec<LogEntry>) -> Self {
-        let first = entries.first().map(Metrics::of);
+        match Self::charged(entries, |_| Ok::<(), std::convert::Infallible>(())) {
+            Ok(data) => data,
+            Err(never) => match never {},
+        }
+    }
+    /// [`Self::new`], admitting the index's bytes with `admit_index` before
+    /// the index is allocated; a refusal drops the entries.
+    pub(super) fn charged<E>(
+        mut entries: Vec<LogEntry>,
+        admit_index: impl FnOnce(usize) -> Result<(), E>,
+    ) -> Result<Self, E> {
+        if entries.capacity() != entries.len() {
+            entries.shrink_to_fit();
+        }
+        let mut need = IndexNeed::default();
         let mut sealed = true;
-        let mut uniform = true;
-        let mut total = Some(Prefix::default());
-        let mut retained = entries.capacity().checked_mul(size_of::<LogEntry>());
+        let mut payloads = Some(0usize);
         let mut max_payload = 0;
         let mut max_configuration = None;
         let mut previous: Option<&LogEntry> = None;
         for entry in &entries {
-            let metrics = Metrics::of(entry);
             sealed &= entry.term != 0
                 && previous.is_none_or(|previous| {
                     previous.index.checked_add(1) == Some(entry.index)
                         && previous.term <= entry.term
                 });
             previous = Some(entry);
-            uniform &= first == Some(metrics);
-            total = total.and_then(|sum| sum.add(metrics));
-            retained = retained.and_then(|sum| sum.checked_add(entry.retained_payload_bytes()));
-            max_payload = max_payload.max(metrics.payload);
+            need.push(entry);
+            payloads = payloads.and_then(|sum| sum.checked_add(entry.retained_payload_bytes()));
+            max_payload = max_payload.max(entry.payload_bytes());
             max_configuration = max_configuration.max(activated_configuration(entry));
         }
-        let index = match (total, first) {
+        let index = match (need.total, need.first) {
             (None, _) => MetricsIndex::Unavailable,
             (Some(_), None) => MetricsIndex::Uniform(Metrics::EMPTY),
-            (Some(_), Some(first)) if uniform => MetricsIndex::Uniform(first),
+            (Some(_), Some(first)) if !need.mixed => MetricsIndex::Uniform(first),
             (Some(_), Some(_)) => {
+                if let Some(bytes) = need.bytes() {
+                    admit_index(bytes)?;
+                }
                 prefixes(&entries).map_or(MetricsIndex::Unavailable, MetricsIndex::Mixed)
             }
         };
+        let copy_charge = entries
+            .capacity()
+            .checked_mul(size_of::<LogEntry>())
+            .and_then(|records| records.checked_add(payloads?));
         let charge = match &index {
             MetricsIndex::Mixed(prefixes) => prefixes
                 .len()
                 .checked_mul(size_of::<Prefix>())
-                .and_then(|bytes| retained?.checked_add(bytes)),
-            MetricsIndex::Uniform(_) | MetricsIndex::Unavailable => retained,
+                .and_then(|bytes| copy_charge?.checked_add(bytes)),
+            MetricsIndex::Uniform(_) | MetricsIndex::Unavailable => copy_charge,
         };
-        Self {
+        Ok(Self {
             entries,
             sealed,
             index,
             max_payload,
             max_configuration,
             charge,
-        }
+            copy_charge,
+        })
     }
     pub(super) fn charge(&self) -> Option<usize> {
         self.charge
+    }
+    /// Upper bound of what `range` keeps alive beyond a plain copy of its
+    /// entries (records and retained payloads): the index and every entry
+    /// outside the range. Exact for the whole backing and for uniform
+    /// content; otherwise the copy is bounded below by its payload lengths,
+    /// which never exceed the retained payloads. `None` when unknown.
+    pub(super) fn hidden(&self, range: Range<usize>) -> Option<usize> {
+        let count = range.end - range.start;
+        let copy = if count == self.entries.len() {
+            self.copy_charge?
+        } else {
+            let payloads = match &self.index {
+                // Alike entries retain alike payloads.
+                MetricsIndex::Uniform(_) => count.checked_mul(
+                    self.entries
+                        .first()
+                        .map_or(0, LogEntry::retained_payload_bytes),
+                )?,
+                MetricsIndex::Mixed(_) => self.payload(range)?,
+                MetricsIndex::Unavailable => return None,
+            };
+            count
+                .checked_mul(size_of::<LogEntry>())?
+                .checked_add(payloads)?
+        };
+        self.charge?.checked_sub(copy)
     }
     /// Exact payload total of `range` from the index, sealed or not; `None`
     /// when the index is unavailable. The caller checked the bounds.

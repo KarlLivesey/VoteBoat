@@ -199,7 +199,7 @@ fn tight_owned_append_matches_forced_clone_with_independent_delayed_completion()
 }
 
 #[test]
-fn spare_outer_falls_back_and_command_input_capacity_is_normalized_at_capture() {
+fn spare_outer_is_kept_by_a_narrow_batch_and_command_input_capacity_is_normalized_at_capture() {
     for shape in 0..3 {
         let mut receiver = follower(core(), 1);
         let mut entries = plain_entries();
@@ -228,11 +228,17 @@ fn spare_outer_falls_back_and_command_input_capacity_is_normalized_at_capture() 
             .unwrap();
         let retained = &suffix(&effects).entries;
         assert_eq!(retained, &expected);
-        // Spare outer capacity is released when the input is frozen; a tight
-        // input keeps its allocation.
-        if shape != 0 {
-            assert_eq!(retained.first_backing_ptr(), Some(input_pointer));
-        }
+        // A batch this narrow stays owned: the input allocation is kept,
+        // spare outer capacity included (messages and pending plans charge
+        // it; the installed log charges the visible entries). Wide inputs are
+        // frozen with their spare capacity released.
+        assert!(expected.len() < crate::log::SHARE_MIN);
+        assert_eq!(retained.first_backing_ptr(), Some(input_pointer));
+        assert_eq!(
+            retained.allocated_entries() > retained.len(),
+            shape == 0,
+            "{shape}"
+        );
         assert_eq!(bytes(&retained[1]).as_ptr(), payload_pointer);
         assert_eq!(retained.backing_count(), 1);
         assert_eq!(bytes(&retained[0]).retained_bytes(), 0);

@@ -1256,3 +1256,94 @@ fn native_restart_and_failed_read_term_sync_never_release_old_authority() {
     let recovered = NativeLogStore::recover(io, identity(2), LogLimits::default()).unwrap();
     assert_eq!(recovered.state(group(1)).unwrap().hard_state.term, 0);
 }
+
+/// A restarted leader recovers its whole retained log from one checkpoint,
+/// decoded as one shared backing. Entries a follower lacks must still reach
+/// it under the default outbound budget: every Append is charged about as a
+/// plain copy of its visible entries, never as the whole recovered backing.
+#[test]
+#[cfg(feature = "native")]
+fn recovered_checkpoint_entries_replicate_and_commit_under_default_outbound_budget() {
+    use voteboat::outbound::{message_cost, OutboundLimits};
+    let budget = OutboundLimits::default().batch_bytes;
+    let limits = LogLimits::default();
+    // Small commands near the retained-entry limit, and ~1,000 KiB commands.
+    for (count, size) in [(limits.max_entries_per_group - 128, 8usize), (1_000, 1024)] {
+        let images: BTreeMap<u64, ModelIo> = (1..=3).map(|id| (id, ModelIo::default())).collect();
+        let mut cluster = Cluster::new(bootstrap(1, 3), |id| {
+            NativeLogStore::create(images[&id].clone(), identity(u128::from(id)), limits).unwrap()
+        });
+        cluster.act(1, Event::Campaign);
+        cluster.pump();
+        assert_eq!(cluster.replicas[&1].core.role(), Role::Leader);
+        // Node 3 misses every command; the last batch is not committed.
+        cluster.partition(&[1, 2]);
+        let mut operation = 1u128;
+        let mut left = count;
+        while left > 0 {
+            if left <= 64 {
+                cluster.partition(&[1]);
+            }
+            let width = left.min(64);
+            left -= width;
+            let proposals = (0..width)
+                .map(|_| {
+                    operation += 1;
+                    Proposal {
+                        operation: OperationId::new(operation).unwrap(),
+                        bytes: vec![operation as u8; size],
+                    }
+                })
+                .collect();
+            let effects = cluster
+                .replicas
+                .get_mut(&1)
+                .unwrap()
+                .core
+                .propose_batch(proposals)
+                .unwrap();
+            cluster.effects(1, effects);
+            cluster.pump();
+        }
+        let last = cluster.replicas[&1].core.state().last_index();
+        assert!(cluster.replicas[&1].core.state().commit_index < last);
+        // Checkpoint node 1's retained log, then restart it from that image.
+        let replica = cluster.replicas.get_mut(&1).unwrap();
+        replica.store.reclaim(limits.max_wal_bytes).unwrap();
+        let before = replica.core.state().clone();
+        cluster.replicas.remove(&1);
+        images[&1].0.borrow_mut().power_loss();
+        let store = NativeLogStore::recover(images[&1].clone(), identity(1), limits).unwrap();
+        let state = store.state(group(1)).unwrap();
+        assert_eq!(state.entries, before.entries);
+        // The hazard is present: one recovered entry shares a backing whose
+        // whole charge exceeds the outbound budget.
+        let one = state.entries.shared_range(1..2).unwrap();
+        assert!(one.retained_bytes().unwrap() > budget, "{count} × {size}");
+        let core = Raft::recover(node(1), store.binding(), state, store.limits()).unwrap();
+        cluster.replicas.insert(1, Replica { core, store });
+        // Node 2 is gone; node 1 needs node 3 for every commit.
+        cluster.partition(&[1, 3]);
+        cluster.act(1, Event::Campaign);
+        let mut refused = 0;
+        let mut rounds = 0;
+        while let Some(message) = cluster.messages.pop_front() {
+            rounds += 1;
+            assert!(rounds < 100_000, "non-quiescent simulation");
+            match message_cost(&message, budget) {
+                Ok(_) => cluster.deliver(message),
+                Err(_) => refused += 1,
+            }
+        }
+        assert_eq!(
+            refused, 0,
+            "{count} × {size}: Appends refused by the budget"
+        );
+        let leader = cluster.replicas[&1].core.state();
+        assert_eq!(cluster.replicas[&1].core.role(), Role::Leader);
+        assert_eq!(leader.commit_index, leader.last_index());
+        assert!(leader.last_index() > last);
+        assert_eq!(cluster.replicas[&3].core.state().entries, leader.entries);
+        assert_eq!(cluster.applied[&3].len() as u64, leader.commit_index);
+    }
+}

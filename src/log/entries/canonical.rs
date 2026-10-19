@@ -400,7 +400,8 @@ impl EntryLog {
     /// Largest prefix from `offset` that the replication selector admits,
     /// shared: at most `max_entries`, each costing `37 + payload` with a
     /// 256-byte allowance, stopping before the first entry that would exceed
-    /// `max_batch_bytes`, exactly as the original per-entry loop.
+    /// `max_batch_bytes`, exactly as the original per-entry loop. The result
+    /// is held as an outbound Append may hold it ([`EntryBatch::for_message`]).
     #[inline]
     pub(crate) fn replication_range(
         &self,
@@ -443,7 +444,7 @@ impl EntryLog {
             if taken == 0 {
                 return EntryBatch::default();
             }
-            return EntryBatch::single(first.part(skip..skip + taken));
+            return EntryBatch::single(first.part(skip..skip + taken)).for_message(max_batch_bytes);
         }
         let mut count = taken;
         let mut bytes = bytes;
@@ -465,7 +466,7 @@ impl EntryLog {
                 break;
             }
         }
-        spans.finish()
+        spans.finish().for_message(max_batch_bytes)
     }
 }
 

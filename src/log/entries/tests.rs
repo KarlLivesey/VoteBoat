@@ -452,3 +452,148 @@ fn a_last_owned_piece_answers_like_every_other_piece() {
     }
     assert!(log.borrowed(0..all.len() + 1).is_none());
 }
+
+/// What a plain vector of exactly `entries` is charged: records and retained
+/// payloads, as main charged every Append.
+fn plain_charge(entries: &[LogEntry]) -> usize {
+    facts::charge_of(entries, entries.len()).unwrap()
+}
+
+#[test]
+fn a_narrow_message_from_a_wide_backing_is_charged_like_a_plain_copy() {
+    // A recovered log: one backing of 16,384 eight-byte commands, whose whole
+    // charge exceeds the default 1 MiB outbound batch budget.
+    let entries: Vec<_> = (1..=16_384).map(|index| command(index, 1, 8)).collect();
+    let log = EntryLog::from(entries.clone());
+    assert_eq!(log.to_batch().backing_count(), 1);
+    assert!(log.retained_bytes().unwrap() > 1 << 20);
+    for (offset, count) in [(0, 1), (8_000, 1), (16_383, 1), (100, 64), (0, 1024)] {
+        let visible = &entries[offset..offset + count];
+        let message = log.replication_range(offset, count, 1 << 20);
+        assert_eq!(message, visible);
+        assert_eq!(
+            message.retained_bytes_and_data(),
+            Some((plain_charge(visible), true)),
+            "{offset} {count}"
+        );
+        // A retry of the same range is held the same way.
+        let retry = log
+            .shared_range(offset..offset + count)
+            .unwrap()
+            .for_message(1 << 20);
+        assert_eq!(retry, visible);
+        assert_eq!(retry.retained_bytes(), Some(plain_charge(visible)));
+    }
+    // Whole frozen proposals are still shared, at a plain copy's charge.
+    let mut log = EntryLog::default();
+    for first in (1..=256).step_by(64) {
+        let mut batch = Vec::with_capacity(100);
+        batch.extend((first..first + 64).map(|index| command(index, 1, 8)));
+        log.append(batch.into());
+    }
+    let message = log.replication_range(64, 128, 1 << 20);
+    assert!(message.is_shared());
+    assert_eq!(message.backing_count(), 2);
+    assert_eq!(message.allocated_entries(), 128);
+    assert_eq!(
+        message.retained_bytes(),
+        Some(plain_charge(&log.to_vec()[64..192]))
+    );
+}
+
+#[test]
+fn messages_keep_at_most_the_bounded_hidden_charge() {
+    let mut rng = Rng(55);
+    for case in 0..8 {
+        // Backings from 1 to 600 entries, uniform or mixed, some truncated.
+        let mut log = EntryLog::default();
+        let mut all = Vec::new();
+        let mut next = 1;
+        while all.len() < 1_500 {
+            let width = 1 + rng.below(600) as usize;
+            let mut batch = history(&mut rng, next, width, case % 2 == 0);
+            if rng.below(4) == 0 {
+                batch.truncate(1 + width / 2);
+            }
+            next += batch.len() as u64;
+            all.extend(batch.iter().cloned());
+            log.append(batch.into());
+        }
+        for offset in (0..all.len()).step_by(7) {
+            for max_entries in [1, 17, 64, 1024] {
+                for budget in [600, 2_000, 40_000, 1 << 20] {
+                    let message = log.replication_range(offset, max_entries, budget);
+                    let visible = &all[offset..offset + message.len()];
+                    assert_eq!(message, visible);
+                    let used = message.len() * 37 + message.payload_bytes();
+                    let room = (budget - 256).saturating_sub(used);
+                    let hidden = message.retained_bytes().unwrap() - plain_charge(visible);
+                    assert!(hidden <= room.min(MESSAGE_HIDDEN_MAX), "{case} {offset}");
+                    let end = offset + message.len();
+                    let retry = log.shared_range(offset..end).unwrap().for_message(budget);
+                    assert_eq!(retry.retained_bytes(), message.retained_bytes());
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn hidden_charges_are_exact_where_claimed_and_never_low() {
+    for uniform in [true, false] {
+        let mut rng = Rng(66);
+        let entries = history(&mut rng, 1, 40, uniform);
+        let batch: EntryBatch = entries.clone().into();
+        let Spans::One(span @ Span::Shared { .. }) = &batch.spans else {
+            panic!("a wide batch is shared")
+        };
+        let whole = span.log_charge().unwrap();
+        for start in 0..=entries.len() {
+            for end in start..=entries.len() {
+                let part = span.part(start..end);
+                let exact = whole - plain_charge(&entries[start..end]);
+                let hidden = part.hidden().unwrap();
+                if uniform || end - start == entries.len() {
+                    assert_eq!(hidden, exact, "{uniform} {start} {end}");
+                } else {
+                    assert!(hidden >= exact, "{start} {end}");
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn freezing_releases_spare_capacity_and_owned_batches_keep_it() {
+    let mut rng = Rng(77);
+    for width in [1, SHARE_MIN - 1, SHARE_MIN, 40] {
+        let mut entries = Vec::with_capacity(width + 9);
+        entries.extend(history(&mut rng, 1, width, width % 2 == 0));
+        let plain = plain_charge(&entries);
+        let batch: EntryBatch = entries.into();
+        let spare = 9 * std::mem::size_of::<LogEntry>();
+        if width < SHARE_MIN {
+            // Owned: messages and plans charge the allocation, the log the
+            // visible entries.
+            assert_eq!(batch.allocated_entries(), width + 9);
+            assert_eq!(batch.retained_bytes(), Some(plain + spare));
+            assert_eq!(batch.log_charge(), Some(plain));
+        } else {
+            assert_eq!(batch.allocated_entries(), width);
+            assert_eq!(batch.retained_bytes(), batch.log_charge());
+            assert!(batch.retained_bytes().unwrap() >= plain);
+        }
+    }
+}
+
+#[test]
+fn empty_slices_keep_no_backing_alive() {
+    let mut rng = Rng(88);
+    let batch: EntryBatch = history(&mut rng, 1, 40, true).into();
+    for at in [0, 7, 40] {
+        let empty = batch.slice(at..at).unwrap();
+        assert!(empty.is_empty());
+        assert_eq!(empty.backing_count(), 0);
+        assert_eq!(empty.retained_bytes(), Some(0));
+    }
+}

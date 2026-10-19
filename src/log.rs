@@ -30,6 +30,7 @@ mod volatile;
 pub use command_bytes::CommandBytes;
 pub(crate) use comparison::CheckpointComparison;
 pub use comparison::{CheckpointLineage, CheckpointLog};
+pub(crate) use entries::IndexNeed;
 #[cfg(test)]
 pub(crate) use entries::SHARE_MIN;
 pub use entries::{EntryBatch, EntryIter, EntryLog, EntryRange, EntrySlices};

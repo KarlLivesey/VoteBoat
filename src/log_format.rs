@@ -447,7 +447,8 @@ impl<'a> Decoder<'a> {
                 {
                     return Err(StorageError::Corrupt("entry count budget"));
                 }
-                let mut entries = Vec::new();
+                // `count` is bounded by the remaining input above.
+                let mut entries = Vec::with_capacity(count);
                 for _ in 0..count {
                     entries.push(self.mutation_entry(limits)?);
                 }

@@ -137,15 +137,18 @@ impl<'a> LogView<'a> {
                 .joined_trimmed_charge(self.removed, tail, count),
         }
     }
-    /// Retained charge after appending `batch` to this view's entries. A view
-    /// with an owner-held tail charges every piece of `batch` in full.
+    /// Retained charge after appending `batch` to this view's entries, as
+    /// the installed log will hold them: a first piece adjoining the view's
+    /// last piece extends it, other shared pieces add their whole backing and
+    /// owned pieces their visible entries. A view with no entries left has
+    /// nothing to adjoin.
     pub(crate) fn appended_charge(&self, retained: usize, batch: &EntryBatch) -> Option<usize> {
         match self.tail {
             Some(tail) => tail.appended_charge(retained, batch),
             None if self.removed < self.base.entries.len() => {
                 self.base.entries.appended_charge(retained, batch)
             }
-            None => retained.checked_add(batch.retained_bytes()?),
+            None => retained.checked_add(batch.log_charge()?),
         }
     }
 }

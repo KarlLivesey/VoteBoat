@@ -319,27 +319,27 @@ fn pending_and_plan_sizes() {
 const PENDING_BYTES: usize = 1_088;
 const PLAN_BYTES: usize = 672;
 
-/// Prints the plan and log type sizes on the composed V2 + V3 tree so they
-/// can be recorded; run with `--nocapture`. Asserts nothing beyond the test above.
+/// Bounds the plan and log types on the composed V2 + V3 tree at their
+/// measured 64-bit sizes, as `pending_and_plan_sizes` bounds V2's: a shared
+/// batch is no larger than the vector it replaced, and `Suffix`/`LogUpdate`
+/// keep main's sizes. `GroupLog` carries the cached tail (+48 B over main).
 #[test]
+#[cfg(target_pointer_width = "64")]
 fn composed_type_sizes() {
-    println!(
-        "sizes: Pending {} OwnedNextLog {} LogUpdate {} Suffix {} EntryBatch {} GroupLog {}",
-        size_of::<Pending>(),
-        size_of::<OwnedNextLog>(),
-        size_of::<LogUpdate>(),
-        size_of::<Suffix>(),
-        size_of::<EntryBatch>(),
-        size_of::<GroupLog>(),
-    );
+    let sizes = [
+        ("EntryBatch", size_of::<EntryBatch>(), 24),
+        ("Suffix", size_of::<Suffix>(), 32),
+        ("LogUpdate", size_of::<LogUpdate>(), 240),
+        ("GroupLog", size_of::<GroupLog>(), 432),
+    ];
+    for (name, size, bound) in sizes {
+        assert!(size <= bound, "{name} is {size} B, bound {bound} B");
+    }
     // These plan parts are only re-exported where native stores install them.
     #[cfg(feature = "native")]
     {
         use crate::log::transition::{OwnedAppend, OwnedChange};
-        println!(
-            "sizes: OwnedAppend {} OwnedChange {}",
-            size_of::<OwnedAppend>(),
-            size_of::<OwnedChange>(),
-        );
+        assert!(size_of::<OwnedAppend>() <= PLAN_BYTES);
+        assert!(size_of::<OwnedChange>() <= PLAN_BYTES);
     }
 }

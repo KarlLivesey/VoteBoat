@@ -590,6 +590,89 @@ mod native {
             .is_ok());
     }
 
+    #[test]
+    fn decoded_memory_budget_charges_the_index_of_the_decoded_entries_exactly() {
+        use std::mem::size_of;
+        use voteboat::outbound::message_cost;
+        let noop = |index: u64| LogEntry {
+            index,
+            term: 1,
+            payload: EntryPayload::Noop,
+        };
+        // Alternating Noop and one-byte commands are mixed; commands alone
+        // are alike.
+        let entries = |first: u64, count: u64, mixed: bool| -> Vec<LogEntry> {
+            (first..first + count)
+                .map(|index| {
+                    if mixed && index % 2 == 0 {
+                        noop(index)
+                    } else {
+                        entry(index, 1, 1)
+                    }
+                })
+                .collect()
+        };
+        // A uniform subrange of a mixed source backing: the source's index
+        // stays with the sender and is not decoded.
+        let mut source = entries(1, 24, true);
+        source.extend(entries(25, 16, false));
+        let source: EntryBatch = source.into();
+        let mut cases: Vec<(u64, EntryBatch, bool)> = Vec::new();
+        for count in [15, 16] {
+            for mixed in [false, true] {
+                cases.push((0, entries(1, count, mixed).into(), mixed));
+            }
+        }
+        cases.push((24, source.slice(24..40).unwrap(), false));
+        cases.push((20, source.slice(20..40).unwrap(), true));
+        for (previous_index, batch, mixed) in cases {
+            let count = batch.len();
+            let plain = size_of::<Message>()
+                + count * size_of::<LogEntry>()
+                + batch
+                    .iter()
+                    .map(LogEntry::retained_payload_bytes)
+                    .sum::<usize>();
+            let input = message(Rpc::Append {
+                previous_index,
+                previous_term: u64::from(previous_index != 0),
+                entries: batch,
+                leader_commit: 0,
+            });
+            let frame = codec()
+                .encode_batch(scope(), std::slice::from_ref(&input))
+                .unwrap();
+            let decoded = codec().decode_batch(scope(), &frame).unwrap().remove(0);
+            assert_eq!(decoded, input);
+            let retained = message_cost(&decoded, usize::MAX).unwrap().1;
+            let index = if mixed && count >= 16 {
+                (count + 1) * 3 * size_of::<usize>()
+            } else {
+                0
+            };
+            assert_eq!(retained, plain + index, "{previous_index} {count} {mixed}");
+            for (max_decoded_bytes, fits) in [(retained - 1, false), (retained, true)] {
+                let limited = NativeWireCodec::new(WireLimits {
+                    max_decoded_bytes,
+                    ..WireLimits::default()
+                })
+                .unwrap();
+                assert_eq!(
+                    limited.decode_batch(scope(), &frame).is_ok(),
+                    fits,
+                    "{previous_index} {count} {mixed} {max_decoded_bytes}"
+                );
+                assert_eq!(
+                    limited
+                        .encode_batch(scope(), std::slice::from_ref(&input))
+                        .is_ok(),
+                    fits,
+                    "{previous_index} {count} {mixed} {max_decoded_bytes}"
+                );
+            }
+        }
+    }
+
     fn membership_codec() -> NativeWireCodec {
         NativeWireCodec::with_membership(WireLimits::default()).unwrap()
     }
