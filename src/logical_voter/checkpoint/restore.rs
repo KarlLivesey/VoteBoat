@@ -297,12 +297,14 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
     /// The watermark is 0 until the first claim; every claim sets it to
     /// `(session << 64) | 1` for the new session and only that session's
     /// acknowledgements raise it further. Live session keys are never below
-    /// it (pruning removes them in the same apply). It also covers every
-    /// retained acknowledgement that moved it: a session record applied under
-    /// the current binding (its receipt epoch is the current epoch) by an
-    /// eligible representative (not refused `Ineligible`) planned
+    /// it (pruning removes them in the same apply). A session record applied
+    /// under the current binding (its receipt epoch is the current epoch) by
+    /// an eligible representative (not refused `Ineligible`) planned
     /// `(session << 64) | (consumed_through + 1)`. The record that last raised
-    /// the watermark is never pruned, so a lowered watermark is refused.
+    /// the watermark has an ID at or above that value, so it is never pruned
+    /// (a later raise supersedes it). The watermark therefore equals the
+    /// larger of the claim floor and the highest such retained
+    /// acknowledgement, and both a lowered and a raised watermark are refused.
     fn valid_watermark(&self, state: &application::State) -> Result<bool, ApplicationError> {
         let watermark = state.retired_below;
         let session = OperationId::new(command::SESSION_SPACE).expect("nonzero");
@@ -320,18 +322,20 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
         if watermark >> 64 != u128::from(r.logical_session.get()) || watermark as u64 == 0 {
             return Ok(false);
         }
+        let mut expected = command::session_operation(r.logical_session.get(), 1);
         for record in state.records.range(session..).map(|(_, record)| record) {
             let c = self.decode_command(&record.command)?;
             if c.representative == r
                 && record.receipt.epoch == Some(r.epoch)
                 && record.receipt.outcome != LogicalOutcome::Refused(LogicalRefusal::Ineligible)
-                && watermark
-                    < command::session_operation(r.logical_session.get(), c.consumed_through + 1)
             {
-                return Ok(false);
+                expected = expected.max(command::session_operation(
+                    r.logical_session.get(),
+                    c.consumed_through + 1,
+                ));
             }
         }
-        Ok(true)
+        Ok(watermark == expected)
     }
     /// The enrollment record is the materialised result of its
     /// `EnrollmentClaim` record. That claim is dead once the enrollment made

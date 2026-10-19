@@ -163,6 +163,7 @@ fn header(a: &LogicalApplication) -> usize {
 fn every_corruption_class_is_refused_without_partial_restore() {
     let a = history::populated();
     let good = a.checkpoint(usize::MAX).unwrap();
+    assert_eq!(good, V5_POPULATED);
     let h = header(&a);
     let mut cases: Vec<(&str, Vec<u8>)> = Vec::new();
     // The watermark is (1 << 64) | 6, set by the final mutation's
@@ -170,6 +171,9 @@ fn every_corruption_class_is_refused_without_partial_restore() {
     for (name, watermark) in [
         ("zero watermark", 0),
         ("lowered watermark", command::session_operation(1, 1)),
+        // Raised by one: still at or below every live key, so only the
+        // equality with the highest retained acknowledgement refuses it.
+        ("raised watermark", command::session_operation(1, 7)),
         (
             "watermark below its acknowledgement",
             command::session_operation(1, 5),
@@ -229,6 +233,27 @@ fn every_corruption_class_is_refused_without_partial_restore() {
         b.restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, 9, &good),
         Err(ApplicationError::InvalidCheckpoint)
     );
+}
+#[test]
+fn raised_watermark_right_after_a_claim_is_refused() {
+    let mut a = app();
+    claim(&mut a);
+    let session = a.state.representative.unwrap().logical_session.get();
+    let floor = command::session_operation(session, 1);
+    assert_eq!(a.state.retired_below, floor);
+    let good = a.checkpoint(usize::MAX).unwrap();
+    let h = header(&a);
+    assert_eq!(good[h..h + 16], floor.to_le_bytes());
+    // No session record exists, so no live key bounds a raised value.
+    let mut raised = good.clone();
+    raised[h..h + 16].copy_from_slice(&command::session_operation(session, 2).to_le_bytes());
+    let mut b = a.clone();
+    assert_eq!(
+        b.restore_checkpoint(LOGICAL_APPLICATION_SCHEMA, a.applied_index(), &raised),
+        Err(ApplicationError::InvalidCheckpoint)
+    );
+    assert_eq!(b.state, a.state);
+    assert_eq!(b.checkpoint(usize::MAX).unwrap(), good);
 }
 #[test]
 fn generation_mark_is_monotonic_and_independent_of_retained_records() {
