@@ -4,6 +4,9 @@
 use super::*;
 use std::mem::size_of;
 
+mod batch;
+pub use batch::ProposalBatch;
+
 /// Default original-command count for one direct Core batch.
 /// Startup BatchLimits can select a larger bounded envelope.
 pub const MAX_PROPOSAL_BATCH_ENTRIES: usize = 64;
@@ -190,9 +193,11 @@ impl Raft {
         self.persist(
             self.durable.hard_state,
             self.durable.commit_index,
+            // Freezing measures the batch's intrinsic facts once; planning,
+            // fan-out and every follower reuse them.
             Some(Suffix {
                 from: first,
-                entries,
+                entries: entries.into(),
             }),
             After::LeaderAppend,
             None,

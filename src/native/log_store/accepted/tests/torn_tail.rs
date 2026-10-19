@@ -14,7 +14,7 @@ fn append_unacknowledged(store: &mut Store, index: u64) {
         0,
         Some(Suffix {
             from: index,
-            entries: vec![entry(index, 1)],
+            entries: vec![entry(index, 1)].into(),
         }),
     );
     store.append_batch(vec![update]).unwrap();
@@ -86,7 +86,7 @@ fn damage_inside_the_acknowledged_prefix_remains_corruption() {
         0,
         Some(Suffix {
             from: 1,
-            entries: vec![entry(1, 1)],
+            entries: vec![entry(1, 1)].into(),
         }),
     );
     commit(&mut store, vec![update]);

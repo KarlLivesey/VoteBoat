@@ -86,7 +86,7 @@ fn message(sequence: u64) -> Message {
         rpc: Rpc::Append {
             previous_index: 0,
             previous_term: 0,
-            entries: Vec::new(),
+            entries: Vec::new().into(),
             leader_commit: 0,
         },
     }

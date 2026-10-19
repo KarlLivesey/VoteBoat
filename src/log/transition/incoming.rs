@@ -52,7 +52,7 @@ impl OwnedNextLog {
         if append_eligible(view, summary, update) {
             let metadata = validate_append_metadata(view, update, limits)?;
             Ok(Self(OwnedChange::Append(OwnedAppend::new(
-                *view.metadata(),
+                view,
                 summary,
                 metadata,
                 update.suffix.clone(),
@@ -64,20 +64,19 @@ impl OwnedNextLog {
             }))
         }
     }
-    /// A provider already owns this exact input. Only admitted new append
-    /// allocations are normalized; no retained canonical history is copied.
+    /// A provider already owns this exact input. Its shared entries move into
+    /// the plan; no retained canonical history is copied.
     pub(crate) fn plan_owned(
         view: &LogView<'_>,
         summary: &LogSummary,
-        mut update: LogUpdate,
+        update: LogUpdate,
         limits: LogLimits,
     ) -> Result<Self, StorageError> {
         let limits = validate_base(view, summary, &update, limits)?;
         if append_eligible(view, summary, &update) {
             let metadata = validate_append_metadata(view, &update, limits)?;
-            normalize_append(&mut update);
             Ok(Self(OwnedChange::Append(OwnedAppend::new(
-                *view.metadata(),
+                view,
                 summary,
                 metadata,
                 update.suffix,
@@ -128,7 +127,7 @@ impl OwnedNextLog {
         };
         Ok(Self(OwnedChange::Commit(CommitAdvance {
             predecessor: *current,
-            summary: append_summary(summary, next, None),
+            summary: append_summary(view, summary, next, None),
         })))
     }
     /// The planned suffix, borrowed; a commit advance has none.
@@ -283,14 +282,14 @@ impl OwnedNextLog {
 }
 impl OwnedAppend {
     fn new(
-        predecessor: LogMetadata,
+        view: &LogView<'_>,
         summary: &LogSummary,
         metadata: LogMetadata,
         suffix: Option<Suffix>,
     ) -> Self {
         Self {
-            predecessor,
-            summary: append_summary(summary, metadata, suffix.as_ref()),
+            predecessor: *view.metadata(),
+            summary: append_summary(view, summary, metadata, suffix.as_ref()),
             suffix,
         }
     }
@@ -386,7 +385,7 @@ fn install_append(
     summary: LogSummary,
 ) -> LogSummary {
     if let Some(suffix) = suffix {
-        current.entries.extend(suffix.entries);
+        current.entries.append(suffix.entries);
     }
     summary.metadata.install_header(current);
     summary
@@ -405,13 +404,4 @@ fn validate_base(
         return Err(StorageError::Rejected("stale log summary"));
     }
     Ok(limits)
-}
-fn normalize_append(update: &mut LogUpdate) {
-    if let Some(suffix) = &mut update.suffix {
-        if suffix.entries.capacity() != suffix.entries.len() {
-            suffix.entries = std::mem::take(&mut suffix.entries)
-                .into_boxed_slice()
-                .into_vec();
-        }
-    }
 }

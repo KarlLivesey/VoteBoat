@@ -19,15 +19,15 @@ impl Raft {
             });
         }
         let entries = if sent.start > sent.end {
-            Vec::new()
+            EntryBatch::default()
         } else {
             let start = (sent.start - self.durable.base_index() - 1) as usize;
             let end = (sent.end - self.durable.base_index()) as usize;
             self.durable
                 .entries
-                .get(start..end)
+                .shared_range(start..end)
                 .ok_or(RaftError::WrongCompletion)?
-                .to_vec()
+                .for_message(self.limits.max_batch_bytes)
         };
         Ok(Effect::Send(
             self.scoped_message(

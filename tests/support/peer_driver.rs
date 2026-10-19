@@ -1315,7 +1315,8 @@ pub(super) fn prospective_event(learners: &[u64]) -> Event {
                 expected: ConfigurationId::new(1).unwrap(),
                 change: ConfigurationChange::Learners(next),
             })),
-        }],
+        }]
+        .into(),
     };
     Event::Receive(m)
 }
@@ -1681,13 +1682,13 @@ fn local_configuration_admission_uses_retained_pins_and_prevents_queued_route_wi
         .set_admission_routes(&mut f.owner, plan(&[2, 3]), MonoTime(0))
         .unwrap_or_else(|r| panic!("{:?}", r.reason));
     let Event::Receive(Message {
-        rpc: Rpc::Append { mut entries, .. },
+        rpc: Rpc::Append { entries, .. },
         ..
     }) = prospective_event(&[4])
     else {
         unreachable!()
     };
-    let EntryPayload::Configuration(record) = entries.remove(0).payload else {
+    let EntryPayload::Configuration(record) = entries[0].clone().payload else {
         unreachable!()
     };
     let event = Event::Configure(Box::new(ConfigurationProposal {

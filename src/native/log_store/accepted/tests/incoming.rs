@@ -10,7 +10,7 @@ fn received_append_payload_moves_into_accepted_tail_and_canonical_after_subset_b
         1,
         Some(Suffix {
             from: 1,
-            entries: vec![entry(1, 1)],
+            entries: vec![entry(1, 1)].into(),
         }),
     );
     let LogMutation::Update(update) = &change else {

@@ -93,7 +93,7 @@ fn generated_rpc_mutations_enforce_framing_scope_and_public_reencoding() {
         message(Rpc::Append {
             previous_index: 0,
             previous_term: 0,
-            entries: vec![entry(1, 1, 7), entry(2, 1, 3)],
+            entries: vec![entry(1, 1, 7), entry(2, 1, 3)].into(),
             leader_commit: 0,
         }),
         message(Rpc::ReadAck),

@@ -765,7 +765,8 @@ fn prospective_assignments_keep_other_groups_without_admitting_input() {
                     expected: ConfigurationId::new(1).unwrap(),
                     change: ConfigurationChange::Learners(next),
                 })),
-            }],
+            }]
+            .into(),
         },
     });
     let plan = PeerAssignments::for_event(local(), [&a, &b], group(1), &event, 3).unwrap();

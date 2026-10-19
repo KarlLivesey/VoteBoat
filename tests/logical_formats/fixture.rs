@@ -54,7 +54,7 @@ pub fn mutations() -> Vec<LogMutation> {
         commit_index: 2,
         suffix: Some(Suffix {
             from: 1,
-            entries: entries(),
+            entries: entries().into(),
         }),
         snapshot: None,
         snapshot_membership: None,
@@ -110,7 +110,7 @@ pub fn messages() -> Vec<Message> {
         rpc: Rpc::Append {
             previous_index: 0,
             previous_term: 0,
-            entries: entries(),
+            entries: entries().into(),
             leader_commit: 2,
         },
     }]

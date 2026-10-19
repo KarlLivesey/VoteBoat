@@ -302,7 +302,8 @@ fn durable_term_vote_and_prefix_survive_checkpoint() {
                     index: 1,
                     term: 1,
                     payload: EntryPayload::Noop,
-                }],
+                }]
+                .into(),
             }),
         )
     };
@@ -394,7 +395,8 @@ fn control_reserve_and_pending_content_are_enforced() {
                         operation: OperationId::new(101).unwrap(),
                         bytes: vec![1].into(),
                     },
-                }],
+                }]
+                .into(),
             }),
         ),
     );
@@ -419,7 +421,8 @@ fn control_reserve_and_pending_content_are_enforced() {
                         operation: OperationId::new(102).unwrap(),
                         bytes: vec![2].into(),
                     },
-                }],
+                }]
+                .into(),
             }),
         ),
     );

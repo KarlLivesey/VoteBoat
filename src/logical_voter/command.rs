@@ -98,7 +98,7 @@ fn mutation_control(update: &LogUpdate, profile: Option<&LogicalActivationContro
         return true;
     };
     match profile {
-        Some(profile) => profile.is_control_batch(update.group, &suffix.entries),
+        Some(profile) => profile.is_control_batch(update.group, &suffix.entries.contiguous()),
         None => !suffix
             .entries
             .iter()

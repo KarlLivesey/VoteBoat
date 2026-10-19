@@ -67,12 +67,13 @@ fn repeated_trim_of_base_and_unpublished_tail_matches_materialized_oracle() {
             8,
             Some(Suffix {
                 from: 3,
-                entries: tail.clone(),
+                entries: tail.clone().into(),
             }),
         ),
         LogLimits::default(),
     )
     .unwrap();
+    let tail = EntryLog::from(tail);
     let view = LogView::trimmed_overlay(&base, &tail, LogMetadata::from_log(&accepted), 1);
     assert_eq!(view.materialize(), accepted);
     for index in 2..=8 {

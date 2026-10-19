@@ -174,7 +174,7 @@ fn reject_oversized_append(cores: &mut BTreeMap<NodeId, Raft>, effects: &[Effect
     };
     let mut extra = entries.last().unwrap().clone();
     extra.index += 1;
-    entries.push(extra);
+    entries.edit(|entries| entries.push(extra));
     assert_eq!(entries.len(), 1025);
     let receiver = cores.get_mut(&message.to).unwrap();
     let before = receiver.state().clone();

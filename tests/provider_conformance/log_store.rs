@@ -90,7 +90,7 @@ fn suffix_and_ranges(store: &mut impl LogStore, one_entry_bytes: usize) {
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 7), entry(2, 1, 8)],
+                entries: vec![entry(1, 1, 7), entry(2, 1, 8)].into(),
             }),
         )],
     );
@@ -103,7 +103,7 @@ fn suffix_and_ranges(store: &mut impl LogStore, one_entry_bytes: usize) {
             1,
             Some(Suffix {
                 from: 3,
-                entries: vec![entry(3, 1, 9)],
+                entries: vec![entry(3, 1, 9)].into(),
             }),
         )])
         .unwrap();
@@ -115,7 +115,7 @@ fn suffix_and_ranges(store: &mut impl LogStore, one_entry_bytes: usize) {
         1,
         Some(Suffix {
             from: 2,
-            entries: vec![entry(2, 2, 10), entry(3, 2, 11)],
+            entries: vec![entry(2, 2, 10), entry(3, 2, 11)].into(),
         }),
     );
     let LogMutation::Update(change) = &mut replacement else {
@@ -180,7 +180,7 @@ fn refusal_and_reclamation(store: &mut impl LogStore) {
             1,
             Some(Suffix {
                 from: 4,
-                entries: vec![oversized],
+                entries: vec![oversized].into(),
             })
         )])
         .is_err());
@@ -220,7 +220,7 @@ pub fn reopened(store: &mut impl LogStore, old: StoreBinding, states: &[GroupLog
             1,
             Some(Suffix {
                 from: 4,
-                entries: vec![entry(4, 2, 12)],
+                entries: vec![entry(4, 2, 12)].into(),
             }),
         )])
         .unwrap();

@@ -64,7 +64,7 @@ fn pending_entries(core: &mut Raft, entries: Vec<LogEntry>, after: After) -> Log
             commit,
             Some(Suffix {
                 from: entries[0].index,
-                entries,
+                entries: entries.into(),
             }),
             after,
             Some(response),
@@ -115,7 +115,7 @@ fn borrowed_and_owned_completion_preserve_full_entries_configuration_and_reply_o
     let reference = owned.complete(&exact).unwrap();
     let exact = admit(&mut borrowed);
     let result = borrowed.complete_borrowed(&exact).unwrap();
-    assert_eq!(result.committed(), Some(entries.as_slice()));
+    assert_eq!(result.committed().unwrap(), entries.as_slice());
     assert!(matches!(result.following(), [Effect::Send(_)]));
     assert_eq!(result.into_owned(), reference);
     assert_eq!(borrowed.state(), owned.state());
@@ -138,13 +138,16 @@ fn borrowed_commit_only_interval_is_canonical_and_owned_materialization_is_indep
         .persist(
             core.state().hard_state,
             1,
-            Some(Suffix { from: 2, entries }),
+            Some(Suffix {
+                from: 2,
+                entries: entries.into(),
+            }),
             After::Reply,
             None,
         )
         .unwrap();
     assert!(durable(&mut core, effects).is_empty());
-    let canonical = core.state().entries[1..].as_ptr();
+    let canonical: *const LogEntry = &core.state().entries[1];
     let EntryPayload::Command { bytes, .. } = &core.state().entries[1].payload else {
         unreachable!()
     };
@@ -154,7 +157,7 @@ fn borrowed_commit_only_interval_is_canonical_and_owned_materialization_is_indep
     let exact = admit(&mut core);
     let result = core.complete_borrowed(&exact).unwrap();
     let committed = result.committed().unwrap();
-    assert_eq!(committed.as_ptr(), canonical);
+    assert!(std::ptr::eq(&committed[0], canonical));
     let EntryPayload::Command { bytes, .. } = &committed[0].payload else {
         unreachable!()
     };
@@ -171,7 +174,7 @@ fn borrowed_commit_only_interval_is_canonical_and_owned_materialization_is_indep
     let mut replacement = bytes.to_vec();
     replacement[0] = 255;
     *bytes = replacement.into();
-    assert_ne!(materialized, core.state().entries[1..]);
+    assert_ne!(materialized, core.state().entries.to_vec()[1..]);
     core.persist(core.state().hard_state, 3, None, After::Reply, None)
         .unwrap();
     let exact = admit(&mut core);
@@ -380,7 +383,7 @@ fn retiring() -> Raft {
                 2.min(index),
                 Some(Suffix {
                     from: index,
-                    entries,
+                    entries: entries.into(),
                 }),
                 After::Reply,
                 None,
@@ -506,16 +509,14 @@ fn borrowed_persistence_helper_keeps_preflight_exactness_barrier_and_late_error_
         );
         match failure {
             0 => store.binding.session = StoreSession::new(2).unwrap(),
-            1 => {
-                let EntryPayload::Command { bytes, .. } =
-                    &mut update.suffix.as_mut().unwrap().entries[0].payload
-                else {
+            1 => update.suffix.as_mut().unwrap().entries.edit(|entries| {
+                let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
                     unreachable!()
                 };
                 let mut replacement = bytes.to_vec();
                 replacement[0] = 8;
                 *bytes = replacement.into();
-            }
+            }),
             2 => store.fail_barrier = true,
             3 => core.request_sequence = u64::MAX,
             _ => unreachable!(),

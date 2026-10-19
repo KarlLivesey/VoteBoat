@@ -7,6 +7,7 @@ use crate::quorum::{Limits, Policy, Tree};
 #[path = "tests/batch_limits.rs"]
 mod batch_limit_tests;
 mod compact;
+mod entries;
 mod incoming;
 
 fn node(value: u64) -> NodeId {
@@ -19,6 +20,9 @@ fn proposal(value: u128) -> Proposal {
     }
 }
 fn leader() -> Raft {
+    leader_at(1)
+}
+fn leader_at(term: u64) -> Raft {
     let stores: BTreeMap<_, _> = (1..=3)
         .map(|n| {
             (
@@ -58,7 +62,7 @@ fn leader() -> Raft {
         group: bootstrap.group,
         expected_revision: states[&bootstrap.group].revision,
         hard_state: HardState {
-            term: 1,
+            term,
             voted_for: None,
         },
         commit_index: 1,
@@ -68,7 +72,8 @@ fn leader() -> Raft {
                 index: 1,
                 term: 1,
                 payload: EntryPayload::Noop,
-            }],
+            }]
+            .into(),
         }),
         snapshot: None,
         snapshot_membership: None,
@@ -430,7 +435,9 @@ fn direct_batch_uses_the_same_fence_dependency_and_transfer_guards() {
 #[test]
 fn index_exhaustion_is_rejected_before_pending_state() {
     let mut core = leader();
-    core.durable.entries.last_mut().unwrap().index = u64::MAX - 1;
+    core.durable
+        .entries
+        .edit(|entries| entries.last_mut().unwrap().index = u64::MAX - 1);
     assert_eq!(
         core.propose_batch(vec![proposal(1), proposal(2)]),
         Err(RaftError::Exhausted)

@@ -33,6 +33,8 @@ use crate::{
 };
 use std::{collections::BTreeMap, net::SocketAddr, net::TcpListener, path::PathBuf, sync::Arc};
 mod multi;
+#[cfg(test)]
+mod outbound_budget;
 mod owner_limits;
 mod peer_rotation;
 #[cfg(test)]
@@ -136,7 +138,8 @@ impl NativeMemberStartup {
     }
     /// Import through one explicitly selected WAL capability. The same limits
     /// must be selected when reopening the member; import grants no readiness.
-    /// Invalid limits are refused before opening files, including on retry.
+    /// Invalid limits, and a batch no outbound budget can hold, are refused
+    /// before opening files, including on retry.
     pub fn enroll_snapshot_with_log_limits<A: CheckpointStateMachine>(
         &self,
         incoming: &Snapshot,
@@ -144,6 +147,8 @@ impl NativeMemberStartup {
         log_limits: LogLimits,
     ) -> Result<(), NativeStartupError> {
         let log_limits = checked(log_limits.validate())?;
+        // A member that every later start would refuse is not enrolled.
+        startup_outbound_limits(log_limits)?;
         validate_bootstrap_selection(&self.startup, log_limits)?;
         self.startup.validate_stores(&self.provisioned_stores)?;
         if self.startup.tls.wire_version() < 2
@@ -982,6 +987,7 @@ fn validate_storage_selection(
     let limits = checked(limits.validate())?;
     let worker = startup_worker_limits(limits)?;
     startup_shard_limits(limits, 1, config.ready_visit_items)?;
+    startup_outbound_limits(limits)?;
     if worker.batch_units > limits.max_batch_units || worker.batch_bytes > limits.max_batch_bytes {
         return Err(error(
             "storage limits",
@@ -999,6 +1005,31 @@ fn startup_worker_limits(limits: LogLimits) -> Result<WorkerLimits, NativeStartu
         .ok_or_else(|| error("storage limits", "worker byte budget overflow"))?;
     worker.max_bytes = worker.max_bytes.max(ordinary_and_control);
     checked(worker.validate())
+}
+/// Outbound limits that carry every Append the core selects under `limits`
+/// that keeps hidden backing bytes: the batch budget is at least
+/// `max_batch_bytes` (an Append keeps them only while its charge stays within
+/// that), and the peer and node byte budgets each hold one such data batch
+/// beside their control reserve. An Append that keeps none is a plain copy,
+/// charged as on main; main's selector can pick a plain copy at the byte limit
+/// whose charge exceeds `max_batch_bytes` (a pre-existing edge, not closed
+/// here). Defaults are kept up to 1 MiB.
+fn startup_outbound_limits(limits: LogLimits) -> Result<OutboundLimits, NativeStartupError> {
+    let mut outbound = OutboundLimits::default();
+    let batch = limits.max_batch_bytes;
+    if batch > outbound.batch_bytes {
+        outbound.batch_bytes = batch;
+        for budget in [&mut outbound.peer, &mut outbound.node] {
+            let data = budget
+                .control
+                .bytes
+                .checked_add(batch)
+                .ok_or_else(|| error("outbound limits", "byte budget overflow"))?;
+            budget.max.bytes = budget.max.bytes.max(data);
+        }
+        outbound.node.max.bytes = outbound.node.max.bytes.max(outbound.peer.max.bytes);
+    }
+    outbound.validate().map_err(|e| error("outbound limits", e))
 }
 fn validate_ready_items(items: usize) -> Result<(), NativeStartupError> {
     if crate::raft::BatchLimits::for_ready_visit(items).is_err() {
@@ -1238,7 +1269,7 @@ fn prepare_runtime<S: SecureSession>(
             store: owner_id.store,
             generation: OutboundGeneration::new(1).unwrap(),
         },
-        OutboundLimits::default(),
+        startup_outbound_limits(log_limits)?,
     ))?;
     let roster = checked(PeerRoster::new(
         PeerRosterConfig {

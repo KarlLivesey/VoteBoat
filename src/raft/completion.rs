@@ -20,13 +20,15 @@ pub(super) struct PreparedCompletion {
 /// [`Self::into_owned`] without changing effect order.
 #[derive(Debug)]
 pub struct CompletionEffects<'a> {
-    committed: Option<&'a [LogEntry]>,
+    committed: Option<EntryRange<'a>>,
     following: Vec<Effect>,
 }
 
 impl<'a> CompletionEffects<'a> {
     /// Newly committed contiguous entries, before all following effects.
-    pub fn committed(&self) -> Option<&[LogEntry]> {
+    /// The interval may span several shared pieces; apply it in one call,
+    /// for example with [`crate::application::StateMachine::apply_entries`].
+    pub fn committed(&self) -> Option<EntryRange<'a>> {
         self.committed
     }
 
@@ -37,7 +39,7 @@ impl<'a> CompletionEffects<'a> {
 
     /// Consume the result for immediate application and later effect handling.
     /// The interval continues to borrow the core until its last use.
-    pub fn into_parts(self) -> (Option<&'a [LogEntry]>, Vec<Effect>) {
+    pub fn into_parts(self) -> (Option<EntryRange<'a>>, Vec<Effect>) {
         (self.committed, self.following)
     }
 
@@ -66,7 +68,12 @@ impl Raft {
 
     fn borrow_completion(&self, prepared: PreparedCompletion) -> CompletionEffects<'_> {
         CompletionEffects {
-            committed: prepared.committed.map(|range| &self.durable.entries[range]),
+            committed: prepared.committed.map(|range| {
+                self.durable
+                    .entries
+                    .borrowed(range)
+                    .expect("committed interval is retained")
+            }),
             following: prepared.following,
         }
     }

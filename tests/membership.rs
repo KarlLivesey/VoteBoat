@@ -112,7 +112,7 @@ fn status_conformance<S: LogStore>(mut store: S) {
             2,
             Some(Suffix {
                 from: 3,
-                entries: vec![self::final_record()],
+                entries: vec![self::final_record()].into(),
             }),
         )],
     );
@@ -140,7 +140,7 @@ fn status_conformance<S: LogStore>(mut store: S) {
             2,
             Some(Suffix {
                 from: 3,
-                entries: vec![],
+                entries: vec![].into(),
             }),
         )],
     );
@@ -159,7 +159,7 @@ fn status_conformance<S: LogStore>(mut store: S) {
             3,
             Some(Suffix {
                 from: 3,
-                entries: vec![final_entry],
+                entries: vec![final_entry].into(),
             }),
         )],
     );
@@ -473,7 +473,7 @@ fn journal_conformance<S: LogStore>(mut store: S) {
             0,
             Some(Suffix {
                 from: 1,
-                entries: vec![learners()],
+                entries: vec![learners()].into(),
             }),
         )])
         .unwrap();
@@ -488,7 +488,7 @@ fn journal_conformance<S: LogStore>(mut store: S) {
             1,
             Some(Suffix {
                 from: 2,
-                entries: vec![joint()],
+                entries: vec![joint()].into(),
             }),
         )])
         .unwrap();
@@ -505,7 +505,7 @@ fn journal_conformance<S: LogStore>(mut store: S) {
                 1,
                 Some(Suffix {
                     from: 3,
-                    entries: vec![final_record()]
+                    entries: vec![final_record()].into()
                 })
             )
         ])
@@ -520,7 +520,7 @@ fn journal_conformance<S: LogStore>(mut store: S) {
             2,
             Some(Suffix {
                 from: 3,
-                entries: vec![final_record()],
+                entries: vec![final_record()].into(),
             }),
         )],
     );
@@ -535,7 +535,7 @@ fn journal_conformance<S: LogStore>(mut store: S) {
             2,
             Some(Suffix {
                 from: 3,
-                entries: vec![entry(3, 2, 3)],
+                entries: vec![entry(3, 2, 3)].into(),
             }),
         )],
     );
@@ -553,7 +553,7 @@ fn journal_conformance<S: LogStore>(mut store: S) {
             2,
             Some(Suffix {
                 from: 2,
-                entries: vec![]
+                entries: vec![].into()
             })
         )])
         .is_err());
@@ -583,7 +583,7 @@ fn replacement_removes_uncommitted_joint_and_reconstructs_previous_learners() {
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![learners(), joint()],
+                entries: vec![learners(), joint()].into(),
             }),
         )],
     );
@@ -596,7 +596,7 @@ fn replacement_removes_uncommitted_joint_and_reconstructs_previous_learners() {
             1,
             Some(Suffix {
                 from: 2,
-                entries: vec![entry(2, 2, 7)],
+                entries: vec![entry(2, 2, 7)].into(),
             }),
         )],
     );
@@ -626,7 +626,7 @@ fn static_core_refuses_journal_recovery_and_host_injected_configuration_rpc() {
         rpc: Rpc::Append {
             previous_index: 0,
             previous_term: 0,
-            entries: vec![learners()],
+            entries: vec![learners()].into(),
             leader_commit: 0,
         },
     };
@@ -640,7 +640,7 @@ fn static_core_refuses_journal_recovery_and_host_injected_configuration_rpc() {
             0,
             Some(Suffix {
                 from: 1,
-                entries: vec![learners()],
+                entries: vec![learners()].into(),
             }),
         )],
     );
@@ -678,7 +678,7 @@ fn wire_capability_does_not_bypass_live_core_configuration_refusal() {
         rpc: Rpc::Append {
             previous_index: 0,
             previous_term: 0,
-            entries: vec![learners()],
+            entries: vec![learners()].into(),
             leader_commit: 0,
         },
     };
@@ -732,7 +732,7 @@ fn snapshots_cannot_erase_the_only_recoverable_configuration() {
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![learners(), joint()],
+                entries: vec![learners(), joint()].into(),
             }),
         )],
     );
@@ -783,7 +783,7 @@ mod crash {
                     1,
                     Some(Suffix {
                         from: 1,
-                        entries: vec![learners()],
+                        entries: vec![learners()].into(),
                     }),
                 )],
             );
@@ -798,7 +798,7 @@ mod crash {
                     2,
                     Some(Suffix {
                         from: 2,
-                        entries: vec![joint()],
+                        entries: vec![joint()].into(),
                     }),
                 )],
             );
@@ -813,7 +813,7 @@ mod crash {
                     2,
                     Some(Suffix {
                         from: 3,
-                        entries: vec![final_record()],
+                        entries: vec![final_record()].into(),
                     }),
                 )],
             );
@@ -828,7 +828,15 @@ mod crash {
             3 => (3, vec![entry(3, 2, 9)], 2, 2),
             _ => unreachable!(),
         };
-        update(s, term, commit, Some(Suffix { from, entries }))
+        update(
+            s,
+            term,
+            commit,
+            Some(Suffix {
+                from,
+                entries: entries.into(),
+            }),
+        )
     }
     #[test]
     fn every_torn_configuration_and_replacement_frame_recovers_one_complete_state() {
@@ -986,7 +994,7 @@ mod crash {
                 2,
                 Some(Suffix {
                     from: 1,
-                    entries: vec![learners(), joint()],
+                    entries: vec![learners(), joint()].into(),
                 }),
             )],
         );
@@ -1019,7 +1027,7 @@ mod crash {
                 3,
                 Some(Suffix {
                     from: 3,
-                    entries: vec![final_record()],
+                    entries: vec![final_record()].into(),
                 }),
             )],
         );
@@ -1081,7 +1089,7 @@ mod crash {
                         3,
                         Some(Suffix {
                             from: 4,
-                            entries: vec![reused]
+                            entries: vec![reused].into()
                         })
                     )])
                     .is_err());
@@ -1116,7 +1124,7 @@ mod crash {
                 0,
                 Some(Suffix {
                     from: 1,
-                    entries: vec![learners()]
+                    entries: vec![learners()].into()
                 })
             )],
             limits
@@ -1144,7 +1152,7 @@ fn configuration_ingress_charges_owned_metadata_to_data_budget() {
         rpc: Rpc::Append {
             previous_index: 0,
             previous_term: 0,
-            entries: vec![learners()],
+            entries: vec![learners()].into(),
             leader_commit: 0,
         },
     };
@@ -1152,7 +1160,7 @@ fn configuration_ingress_charges_owned_metadata_to_data_budget() {
     assert_eq!(class, MessageClass::Data);
     assert!(message_cost(&message, cost - 1).is_err());
     if let Rpc::Append { entries, .. } = &mut message.rpc {
-        entries[0].payload = EntryPayload::Noop;
+        entries.edit(|entries| entries[0].payload = EntryPayload::Noop);
     }
     let (noop_class, noop_cost) = message_cost(&message, 65536).unwrap();
     assert_eq!(noop_class, MessageClass::Control);
@@ -1241,13 +1249,15 @@ mod configuration_snapshots {
                 3,
                 Some(Suffix {
                     from: 1,
-                    entries: history(),
+                    entries: history().into(),
                 }),
             )],
         );
         let original = log.state(group(1)).unwrap();
         let mut application = Counter::new(10).unwrap();
-        application.apply_batch(&original.entries[..3]).unwrap();
+        application
+            .apply_entries(original.entries.borrowed(0..3).unwrap())
+            .unwrap();
         let bytes = application.checkpoint(16384).unwrap();
         let receipt = publish(&mut snapshots, metadata(&original, 3), &bytes);
         check_joint_snapshot(&receipt);
@@ -1263,11 +1273,11 @@ mod configuration_snapshots {
                 3,
                 Some(Suffix {
                     from: 4,
-                    entries: vec![LogEntry {
+                    entries: EntryBatch::from(vec![LogEntry {
                         index: 4,
                         term: 2,
                         payload: EntryPayload::Noop,
-                    }],
+                    }]),
                 }),
             )],
         );
@@ -1292,7 +1302,7 @@ mod configuration_snapshots {
                 5,
                 Some(Suffix {
                     from: 4,
-                    entries: vec![final_entry, command(5, 3)],
+                    entries: vec![final_entry, command(5, 3)].into(),
                 }),
             )],
         );
@@ -1302,7 +1312,7 @@ mod configuration_snapshots {
         restored
             .restore_checkpoint(1, 3, &saved.application)
             .unwrap();
-        let receipts = restored.apply_batch(&finished.entries).unwrap();
+        let receipts = restored.apply_batch(&finished.entries.to_vec()).unwrap();
         assert_eq!(receipts.len(), 1);
         assert!(receipts[0].duplicate);
         assert_eq!(receipts[0].outcome, CounterOutcome::Value(7));
@@ -1429,7 +1439,7 @@ mod configuration_snapshots {
                 5,
                 Some(Suffix {
                     from: 6,
-                    entries: vec![reused]
+                    entries: vec![reused].into()
                 })
             )])
             .is_err());
@@ -1448,7 +1458,7 @@ mod configuration_snapshots {
                 5,
                 Some(Suffix {
                     from: 6,
-                    entries: vec![next],
+                    entries: vec![next].into(),
                 }),
             )],
         );
@@ -1475,7 +1485,7 @@ mod configuration_snapshots {
                 2,
                 Some(Suffix {
                     from: 1,
-                    entries: vec![learners(), joint()],
+                    entries: vec![learners(), joint()].into(),
                 }),
             )],
             LogLimits::default(),
@@ -1512,13 +1522,14 @@ mod configuration_snapshots {
                             term: 2,
                             payload: EntryPayload::Noop,
                         },
-                    ],
+                    ]
+                    .into(),
                 }),
             )],
         );
         let state = log.state(group(1)).unwrap();
         let mut app = Counter::new(10).unwrap();
-        app.apply_batch(&state.entries).unwrap();
+        app.apply_batch(&state.entries.to_vec()).unwrap();
         let receipt = publish(
             &mut snapshots,
             metadata(&state, 3),
@@ -1555,7 +1566,7 @@ mod configuration_snapshots {
         let mut log = HostLogStore::new(1);
         append(&mut log, vec![LogMutation::Create(bootstrap(1, 3))]);
         let mut malformed = log.state(group(1)).unwrap();
-        malformed.entries = vec![entry(77, 1, 1)];
+        malformed.entries = vec![entry(77, 1, 1)].into();
         assert_eq!(
             malformed.membership_at(2),
             Err(MembershipError::InvalidHistory)
@@ -1638,7 +1649,7 @@ mod configuration_snapshots {
                 3,
                 Some(Suffix {
                     from: 1,
-                    entries: vec![learners(), joint(), final_record()],
+                    entries: vec![learners(), joint(), final_record()].into(),
                 }),
             )],
         );
@@ -1791,12 +1802,15 @@ mod configuration_snapshots {
         journal.update.snapshot_membership = None;
         journal.update.suffix = Some(Suffix {
             from: 1,
-            entries: vec![learners()],
+            entries: vec![learners()].into(),
         });
         let (cost, control) =
             batch_cost(std::slice::from_ref(&journal), 1, WorkerLimits::default()).unwrap();
         assert!(!control);
-        journal.update.suffix.as_mut().unwrap().entries[0].payload = EntryPayload::Noop;
+        let suffix = journal.update.suffix.as_mut().unwrap();
+        suffix
+            .entries
+            .edit(|entries| entries[0].payload = EntryPayload::Noop);
         let (noop_cost, control) = batch_cost(&[journal], 1, WorkerLimits::default()).unwrap();
         assert!(control);
         assert_eq!(cost - noop_cost, learners().retained_payload_bytes());
@@ -1921,7 +1935,7 @@ mod configuration_snapshots {
                     3,
                     Some(Suffix {
                         from: 1,
-                        entries: history(),
+                        entries: history().into(),
                     }),
                 )],
             );
@@ -1966,7 +1980,7 @@ mod configuration_snapshots {
             app.restore_checkpoint(1, reference.index, &snapshot.application)
                 .unwrap();
             app.apply_batch(
-                &expected.entries[..(expected.commit_index - reference.index) as usize],
+                &expected.entries.to_vec()[..(expected.commit_index - reference.index) as usize],
             )
             .unwrap();
             assert_eq!(app.applied_index(), expected.commit_index);
@@ -2274,7 +2288,7 @@ fn commit_status_joint<S: LogStore>(store: &mut S) -> ConfigurationOperationStat
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![learners()],
+                entries: vec![learners()].into(),
             }),
         )],
     );
@@ -2286,7 +2300,7 @@ fn commit_status_joint<S: LogStore>(store: &mut S) -> ConfigurationOperationStat
             1,
             Some(Suffix {
                 from: 2,
-                entries: vec![joint()],
+                entries: vec![joint()].into(),
             }),
         )])
         .unwrap();

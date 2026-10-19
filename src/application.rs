@@ -174,6 +174,16 @@ pub trait StateMachine {
     fn applied_index(&self) -> u64;
     fn apply_batch(&mut self, entries: &[LogEntry])
         -> Result<Vec<Self::Receipt>, ApplicationError>;
+    /// Apply one completion's committed interval in one call, with the same
+    /// contract as [`Self::apply_batch`]. The interval may span several shared
+    /// pieces; the default borrows a single piece and otherwise copies the
+    /// interval once. An implementation may iterate the pieces directly.
+    fn apply_entries(
+        &mut self,
+        entries: crate::log::EntryRange<'_>,
+    ) -> Result<Vec<Self::Receipt>, ApplicationError> {
+        self.apply_batch(&entries.contiguous())
+    }
 }
 
 /// One ordered command outcome. Nested retained capacity excludes the inline

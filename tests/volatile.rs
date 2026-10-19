@@ -623,7 +623,8 @@ fn durable_helpers_refuse_volatile_core() {
                     operation: OperationId::new(2).unwrap(),
                     bytes: vec![1, 0, 0, 0, 0, 0, 0, 0].into(),
                 },
-            }],
+            }]
+            .into(),
         }),
         snapshot: None,
         snapshot_membership: None,
