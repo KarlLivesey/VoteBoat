@@ -34,6 +34,7 @@ pub struct EntryLog {
     len: usize,
 }
 impl EntryLog {
+    #[inline]
     pub fn len(&self) -> usize {
         self.len
     }
@@ -44,6 +45,7 @@ impl EntryLog {
         self.spans.first()?.entries().first()
     }
     /// Index and term of the last entry, without visiting it.
+    #[inline]
     pub fn last_index_term(&self) -> Option<(u64, u64)> {
         (!self.ends.is_empty()).then_some(self.tail)
     }
@@ -84,12 +86,16 @@ impl EntryLog {
             .checked_sub(1)
             .map_or(0, |previous| self.ends[previous])
     }
+    #[inline]
     pub fn get(&self, ordinal: usize) -> Option<&LogEntry> {
         // Most lookups fall in the last piece; past the end its `get` is `None`.
         let last = self.spans.last()?;
         if let Some(offset) = ordinal.checked_sub(self.len - last.len()) {
             return last.entries().get(offset);
         }
+        self.get_earlier(ordinal)
+    }
+    fn get_earlier(&self, ordinal: usize) -> Option<&LogEntry> {
         let (position, start) = self.locate(ordinal)?;
         self.spans[position].entries().get(ordinal - start)
     }
@@ -101,12 +107,10 @@ impl EntryLog {
         self.borrowed(range).map(|range| range.iter())
     }
     /// Borrowed interval; `None` if reversed or out of bounds.
+    #[inline]
     pub fn borrowed(&self, range: Range<usize>) -> Option<EntryRange<'_>> {
         if range.start > range.end || range.end > self.len() {
             return None;
-        }
-        if range.is_empty() {
-            return Some(EntryRange::EMPTY);
         }
         // Newly committed intervals usually lie in the last piece.
         if let Some(last) = self.spans.last() {
@@ -114,6 +118,13 @@ impl EntryLog {
                 let len = range.end - range.start;
                 return Some(EntryRange::single(&last.entries()[head..head + len]));
             }
+        }
+        self.borrowed_pieces(range)
+    }
+    /// `borrowed` for a checked range starting before the last piece.
+    fn borrowed_pieces(&self, range: Range<usize>) -> Option<EntryRange<'_>> {
+        if range.is_empty() {
+            return Some(EntryRange::EMPTY);
         }
         let (first, first_start) = self.locate(range.start)?;
         // The interval usually ends in the same or a following nearby piece.
@@ -192,11 +203,15 @@ impl EntryLog {
     /// Charge this log would have after `append(batch)`: an adjoining first
     /// piece extends the last one instead of adding its backing again; owned
     /// entries add their logical charge wherever they are stored.
+    #[inline]
     pub(crate) fn appended_charge(&self, retained: usize, batch: &EntryBatch) -> Option<usize> {
         // An owned piece never adjoins: its logical charge is added.
         if let Spans::One(Span::Owned(entries)) = &batch.spans {
             return retained.checked_add(facts::charge_of(entries, entries.len())?);
         }
+        self.appended_pieces_charge(retained, batch)
+    }
+    fn appended_pieces_charge(&self, retained: usize, batch: &EntryBatch) -> Option<usize> {
         let mut pieces = batch.spans.as_slice();
         if let (Some(last), Some(first)) = (self.spans.last(), pieces.first()) {
             if last.adjoins(first) {
@@ -228,6 +243,7 @@ impl EntryLog {
             .try_fold(first, |sum, span| sum.checked_add(span.log_charge()?))
     }
     /// Append a batch's pieces after the last entry, sharing their backings.
+    #[inline]
     pub fn append(&mut self, batch: EntryBatch) {
         match batch.spans {
             Spans::Empty => {}
@@ -267,19 +283,30 @@ impl EntryLog {
         };
         head.checked_add(joined)
     }
+    #[inline]
     fn append_span(&mut self, span: Span) {
-        let ordinal = self.len() + span.len();
-        // The appended entries end the log; an empty piece leaves the tail.
-        let tail = span.entries().last().map(|last| (last.index, last.term));
         match (self.spans.last_mut(), span) {
             // Small batches gather into one owned piece, like the flat log.
             // Owned pieces never adjoin, so this precedes the shared check.
             (Some(Span::Owned(last)), Span::Owned(mut entries)) => {
+                let Some(tail) = entries.last().map(|entry| (entry.index, entry.term)) else {
+                    return;
+                };
+                self.len += entries.len();
                 last.append(&mut entries);
                 if let Some(end) = self.ends.last_mut() {
-                    *end = ordinal;
+                    *end = self.len;
                 }
+                self.tail = tail;
             }
+            (_, span) => self.append_piece(span),
+        }
+    }
+    fn append_piece(&mut self, span: Span) {
+        let ordinal = self.len() + span.len();
+        // The appended entries end the log; an empty piece leaves the tail.
+        let tail = span.entries().last().map(|last| (last.index, last.term));
+        match (self.spans.last_mut(), span) {
             (Some(last), span) if last.adjoins(&span) => {
                 last.extend_to(&span);
                 if let Some(end) = self.ends.last_mut() {
@@ -374,7 +401,29 @@ impl EntryLog {
     /// shared: at most `max_entries`, each costing `37 + payload` with a
     /// 256-byte allowance, stopping before the first entry that would exceed
     /// `max_batch_bytes`, exactly as the original per-entry loop.
+    #[inline]
     pub(crate) fn replication_range(
+        &self,
+        offset: usize,
+        max_entries: usize,
+        max_batch_bytes: usize,
+    ) -> EntryBatch {
+        // Within a last owned piece: the original loop and one copy.
+        if let Some(Span::Owned(entries)) = self.spans.last() {
+            if let Some(skip) = offset.checked_sub(self.len - entries.len()) {
+                if skip < entries.len() {
+                    let limit = (entries.len() - skip).min(max_entries);
+                    let (taken, _) = select_scan(&entries[skip..skip + limit], 0, max_batch_bytes);
+                    if taken == 0 {
+                        return EntryBatch::default();
+                    }
+                    return EntryBatch::single(Span::Owned(entries[skip..skip + taken].to_vec()));
+                }
+            }
+        }
+        self.replication_pieces(offset, max_entries, max_batch_bytes)
+    }
+    fn replication_pieces(
         &self,
         offset: usize,
         max_entries: usize,

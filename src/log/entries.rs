@@ -56,6 +56,7 @@ enum Span {
     Owned(Vec<LogEntry>),
 }
 impl Span {
+    #[inline]
     fn new(entries: Vec<LogEntry>) -> Option<Self> {
         if entries.is_empty() {
             return None;
@@ -63,20 +64,27 @@ impl Span {
         if entries.len() < SHARE_MIN {
             return Some(Self::Owned(entries));
         }
+        Some(Self::freeze(entries))
+    }
+    /// Freeze a wide batch into a shared backing, measuring its facts.
+    #[inline(never)]
+    fn freeze(entries: Vec<LogEntry>) -> Self {
         let data = Arc::new(BatchData::new(entries));
         let end = data.entries.len();
-        Some(Self::Shared {
+        Self::Shared {
             data,
             start: 0,
             end,
-        })
+        }
     }
+    #[inline]
     fn entries(&self) -> &[LogEntry] {
         match self {
             Self::Shared { data, start, end } => &data.entries[*start..*end],
             Self::Owned(entries) => entries,
         }
     }
+    #[inline]
     fn len(&self) -> usize {
         match self {
             Self::Shared { start, end, .. } => end - start,
@@ -296,19 +304,31 @@ impl EntryBatch {
     pub fn is_empty(&self) -> bool {
         self.len == 0
     }
+    #[inline]
     pub fn first(&self) -> Option<&LogEntry> {
         match &self.spans {
-            Spans::One(span) => span.entries().first(),
+            Spans::One(Span::Owned(entries)) => entries.first(),
             spans => spans.as_slice().first()?.entries().first(),
         }
     }
+    #[inline]
     pub fn last(&self) -> Option<&LogEntry> {
         match &self.spans {
-            Spans::One(span) => span.entries().last(),
-            spans => spans.as_slice().last()?.entries().last(),
+            Spans::One(Span::Owned(entries)) => entries.last(),
+            _ => self.last_shared(),
         }
     }
+    fn last_shared(&self) -> Option<&LogEntry> {
+        self.spans.as_slice().last()?.entries().last()
+    }
+    #[inline]
     pub fn get(&self, offset: usize) -> Option<&LogEntry> {
+        match &self.spans {
+            Spans::One(Span::Owned(entries)) => entries.get(offset),
+            _ => self.get_shared(offset),
+        }
+    }
+    fn get_shared(&self, offset: usize) -> Option<&LogEntry> {
         if let Spans::One(span) = &self.spans {
             return span.entries().get(offset);
         }
@@ -399,6 +419,7 @@ impl EntryBatch {
     pub(crate) fn totals(&self) -> Option<Totals> {
         totals(self.spans.as_slice())
     }
+    #[inline]
     pub(crate) fn has_configuration(&self) -> bool {
         if let Spans::One(Span::Owned(entries)) = &self.spans {
             return entries
@@ -409,6 +430,7 @@ impl EntryBatch {
     }
     /// [`Self::retained_bytes`] and [`Self::has_data`] together, in one walk
     /// of a small owned batch; `None` when the charge overflows.
+    #[inline]
     pub(crate) fn retained_bytes_and_data(&self) -> Option<(usize, bool)> {
         if let Spans::One(Span::Owned(entries)) = &self.spans {
             let mut data = false;
@@ -440,10 +462,14 @@ impl EntryBatch {
     }
     /// Visible payload total, summed as the old unchecked loop did when the
     /// index is unavailable.
+    #[inline]
     pub(crate) fn payload_bytes(&self) -> usize {
         if let Spans::One(Span::Owned(entries)) = &self.spans {
             return entries.iter().map(LogEntry::payload_bytes).sum();
         }
+        self.payload_bytes_shared()
+    }
+    fn payload_bytes_shared(&self) -> usize {
         self.totals().map_or_else(
             || self.iter().map(LogEntry::payload_bytes).sum(),
             |totals| totals.payload,
@@ -452,6 +478,7 @@ impl EntryBatch {
     /// The planner's suffix rule: indices from `from`, positive terms, each at
     /// least the previous (starting at the predecessor) and at most
     /// `hard_term`, payloads within `max_command_bytes`.
+    #[inline]
     pub(crate) fn valid_suffix(
         &self,
         from: u64,
@@ -460,12 +487,32 @@ impl EntryBatch {
         max_command_bytes: usize,
     ) -> bool {
         // A small owned batch is validated by the original loop.
-        let summary = match &self.spans {
-            Spans::One(Span::Owned(_)) => None,
-            _ => self.summary(),
-        };
-        let Some(summary) = summary else {
-            return self.valid_sequence(from, predecessor_term, hard_term, max_command_bytes);
+        if let Spans::One(Span::Owned(entries)) = &self.spans {
+            return valid_sequence(
+                std::iter::once(entries.as_slice()),
+                from,
+                predecessor_term,
+                hard_term,
+                max_command_bytes,
+            );
+        }
+        self.valid_suffix_shared(from, predecessor_term, hard_term, max_command_bytes)
+    }
+    fn valid_suffix_shared(
+        &self,
+        from: u64,
+        predecessor_term: u64,
+        hard_term: u64,
+        max_command_bytes: usize,
+    ) -> bool {
+        let Some(summary) = self.summary() else {
+            return valid_sequence(
+                self.slices(),
+                from,
+                predecessor_term,
+                hard_term,
+                max_command_bytes,
+            );
         };
         let Some((first, last)) = summary.bounds else {
             return true;
@@ -478,7 +525,35 @@ impl EntryBatch {
     /// The follower's append rule: the suffix rule after `previous_index`,
     /// bounded by the message term, and no configuration newer than the
     /// message's configuration scope.
+    #[inline]
     pub(crate) fn valid_append(
+        &self,
+        previous_index: u64,
+        previous_term: u64,
+        message_term: u64,
+        configuration: ConfigurationId,
+        max_command_bytes: usize,
+    ) -> bool {
+        // A small owned batch is validated by the original loop.
+        if let Spans::One(Span::Owned(entries)) = &self.spans {
+            return valid_append_sequence(
+                std::iter::once(entries.as_slice()),
+                previous_index,
+                previous_term,
+                message_term,
+                configuration,
+                max_command_bytes,
+            );
+        }
+        self.valid_append_shared(
+            previous_index,
+            previous_term,
+            message_term,
+            configuration,
+            max_command_bytes,
+        )
+    }
+    fn valid_append_shared(
         &self,
         previous_index: u64,
         previous_term: u64,
@@ -490,12 +565,9 @@ impl EntryBatch {
             self.iter()
                 .all(|entry| activated_configuration(entry).is_none_or(|id| id <= configuration))
         };
-        let summary = match &self.spans {
-            Spans::One(Span::Owned(_)) => None,
-            _ => self.summary(),
-        };
-        let Some(summary) = summary else {
-            return self.valid_append_sequence(
+        let Some(summary) = self.summary() else {
+            return valid_append_sequence(
+                self.slices(),
                 previous_index,
                 previous_term,
                 message_term,
@@ -518,58 +590,6 @@ impl EntryBatch {
                 .iter()
                 .all(|entry| entry.payload_bytes() <= max_command_bytes)
     }
-    /// The original follower loop, for content without facts.
-    fn valid_append_sequence(
-        &self,
-        previous_index: u64,
-        mut previous_term: u64,
-        message_term: u64,
-        configuration: ConfigurationId,
-        max_command_bytes: usize,
-    ) -> bool {
-        let mut expected = previous_index.checked_add(1);
-        for slice in self.slices() {
-            for entry in slice {
-                if activated_configuration(entry).is_some_and(|id| id > configuration)
-                    || expected != Some(entry.index)
-                    || entry.term == 0
-                    || entry.term < previous_term
-                    || entry.term > message_term
-                    || entry.payload_bytes() > max_command_bytes
-                {
-                    return false;
-                }
-                previous_term = entry.term;
-                expected = entry.index.checked_add(1);
-            }
-        }
-        true
-    }
-    /// The original per-entry loop, for content without facts.
-    fn valid_sequence(
-        &self,
-        from: u64,
-        mut previous_term: u64,
-        hard_term: u64,
-        max_command_bytes: usize,
-    ) -> bool {
-        let mut expected = Some(from);
-        for slice in self.slices() {
-            for entry in slice {
-                if expected != Some(entry.index)
-                    || entry.term == 0
-                    || entry.term < previous_term
-                    || entry.term > hard_term
-                    || entry.payload_bytes() > max_command_bytes
-                {
-                    return false;
-                }
-                previous_term = entry.term;
-                expected = entry.index.checked_add(1);
-            }
-        }
-        true
-    }
     #[cfg(test)]
     pub(crate) fn backing_count(&self) -> usize {
         self.spans.as_slice().len()
@@ -589,9 +609,64 @@ impl EntryBatch {
             .all(|span| matches!(span, Span::Shared { .. }))
     }
 }
+/// The original follower loop over the visible pieces, for content without facts.
+#[inline]
+fn valid_append_sequence<'a>(
+    slices: impl IntoIterator<Item = &'a [LogEntry]>,
+    previous_index: u64,
+    mut previous_term: u64,
+    message_term: u64,
+    configuration: ConfigurationId,
+    max_command_bytes: usize,
+) -> bool {
+    let mut expected = previous_index.checked_add(1);
+    for slice in slices {
+        for entry in slice {
+            if activated_configuration(entry).is_some_and(|id| id > configuration)
+                || expected != Some(entry.index)
+                || entry.term == 0
+                || entry.term < previous_term
+                || entry.term > message_term
+                || entry.payload_bytes() > max_command_bytes
+            {
+                return false;
+            }
+            previous_term = entry.term;
+            expected = entry.index.checked_add(1);
+        }
+    }
+    true
+}
+/// The original per-entry loop over the visible pieces, for content without facts.
+#[inline]
+fn valid_sequence<'a>(
+    slices: impl IntoIterator<Item = &'a [LogEntry]>,
+    from: u64,
+    mut previous_term: u64,
+    hard_term: u64,
+    max_command_bytes: usize,
+) -> bool {
+    let mut expected = Some(from);
+    for slice in slices {
+        for entry in slice {
+            if expected != Some(entry.index)
+                || entry.term == 0
+                || entry.term < previous_term
+                || entry.term > hard_term
+                || entry.payload_bytes() > max_command_bytes
+            {
+                return false;
+            }
+            previous_term = entry.term;
+            expected = entry.index.checked_add(1);
+        }
+    }
+    true
+}
 impl From<Vec<LogEntry>> for EntryBatch {
     /// Freeze and inspect once; invalid content is kept and validated in full
     /// wherever it is used.
+    #[inline]
     fn from(entries: Vec<LogEntry>) -> Self {
         let len = entries.len();
         Self {
