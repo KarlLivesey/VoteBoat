@@ -46,8 +46,13 @@ Late returned sessions close without attaching. Existing roster backoff and
 store-session-scoped generations remain authoritative; restart persists a fresh
 store session. A spent generation space (unreachable: see PEER_ROSTER.md) issues
 no ticket and is never a driver error; each poll reports it as
-`generations_exhausted`, with the listener's `accept_errors`, `accept_backoffs`
-and `accept_paused`, for observability. These IDs are allocation/lifetime scopes, not durability tokens
+`generations_exhausted`. A discovery source that refuses a lookup as
+`DiscoveryError::Exhausted` (its own counter is spent) fails only that
+attempt: the driver counts a connection failure, the roster backs off, and
+`generations_exhausted` stays set for the driver. Both are reported with the
+listener's `accept_errors`, `accept_backoffs` and `accept_paused` (paused while
+the driver's last poll time is before the listener's `retry_at`), for
+observability. These IDs are allocation/lifetime scopes, not durability tokens
 or contiguous log prefixes. `next_deadline` combines connector/eligible roster
 hints and omits retries blocked by retained canceled work; separately schedule
 the core's timer deadlines and provider readiness.

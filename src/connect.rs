@@ -100,6 +100,13 @@ pub struct AcceptStatus {
     /// While set, the listener is not polled before this time.
     pub retry_at: Option<MonoTime>,
 }
+impl AcceptStatus {
+    /// The listener accepts nothing at `now`. `retry_at` stays set until the
+    /// next accept phase after it, so it alone would overstate a pause.
+    pub fn paused(&self, now: MonoTime) -> bool {
+        self.retry_at.is_some_and(|at| now < at)
+    }
+}
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct ConnectUsage {
     pub requests: usize,

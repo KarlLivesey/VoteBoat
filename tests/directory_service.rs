@@ -310,6 +310,7 @@ fn history(quic: bool) {
         assert!(Instant::now() < deadline);
         std::thread::sleep(Duration::from_millis(5));
     }
+    listener_health(&c.ok(leader, &["status"]), quic);
     c.stop();
     for id in 1..=3 {
         c.start(id, "recover");
@@ -339,6 +340,28 @@ fn history(quic: bool) {
         error.contains("InvalidCheckpoint") || error.contains("InvalidCommand"),
         "wrong refusal: {error}"
     );
+}
+/// `status` carries the peer listener and generation health (NT1 round 3).
+/// Only QUIC has no TCP listener to report.
+fn listener_health(status: &str, quic: bool) {
+    let field = |key: &str| {
+        status
+            .split_whitespace()
+            .find_map(|w| w.strip_prefix(key)?.strip_prefix('='))
+            .unwrap_or_else(|| panic!("{key} missing: {status}"))
+            .parse::<u64>()
+            .unwrap_or_else(|e| panic!("{key}: {e}: {status}"))
+    };
+    assert_eq!(field("peer_accept_listener"), u64::from(!quic), "{status}");
+    assert_eq!(field("peer_generations_exhausted"), 0, "{status}");
+    for key in [
+        "peer_accept_errors",
+        "peer_accept_backoffs",
+        "peer_accept_paused",
+        "peer_accept_last_os_error",
+    ] {
+        field(key);
+    }
 }
 #[test]
 fn directory_publication_remote_reads_and_checkpoint_recovery_tcp() {

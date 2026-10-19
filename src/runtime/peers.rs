@@ -150,7 +150,9 @@ pub struct PeerDriverProgress {
     /// The listener is currently backing off and accepts nothing.
     pub accept_paused: bool,
     /// The roster can issue no further connection attempt (see
-    /// `PeerRoster::generations_exhausted`).
+    /// `PeerRoster::generations_exhausted`), or the discovery source has
+    /// refused a lookup with `DiscoveryError::Exhausted`: its own connection
+    /// generations are spent, so dials that need a fresh lookup fail.
     pub generations_exhausted: bool,
 }
 /// Explicit recovery handoff. Original queue payloads remain charged until the
@@ -191,6 +193,12 @@ pub struct PeerDriver<C: PeerConnector, F: PeerTransportFactory<C::Session>> {
     steady: Option<SteadyAssignments>,
     /// Cumulative connector accept errors and backoffs at the last poll.
     accept_seen: (u64, u64),
+    /// A discovery source refused a lookup as `Exhausted`. Its counter never
+    /// resets within the source session, so the report stays set.
+    discovery_exhausted: bool,
+}
+fn is_discovery_exhausted(reason: ConnectError) -> bool {
+    reason == ConnectError::Discovery(crate::discovery::DiscoveryError::Exhausted)
 }
 /// While these inputs are unchanged and every core's connection set is its
 /// fixed bootstrap voter set, reconciliation would again find the roster
@@ -346,6 +354,7 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
             failed: None,
             steady: None,
             accept_seen: (0, 0),
+            discovery_exhausted: false,
         })
     }
     pub fn usage(&self) -> PeerDriverUsage {
@@ -396,6 +405,19 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
     /// health. Grants no submit, cancel or close authority.
     pub fn connector(&self) -> &C {
         &self.parts.connector
+    }
+    /// The listener is backing off at the last poll time; the same value the
+    /// last poll reported in `PeerDriverProgress::accept_paused`.
+    pub fn accept_paused(&self) -> bool {
+        self.parts
+            .connector
+            .accept_status()
+            .is_some_and(|s| s.paused(self.now))
+    }
+    /// As reported in `PeerDriverProgress::generations_exhausted`: the
+    /// roster's spent generations, or a discovery source refused as spent.
+    pub fn generations_exhausted(&self) -> bool {
+        self.parts.roster.generations_exhausted() || self.discovery_exhausted
     }
     pub fn connector_usage(&self) -> ConnectUsage {
         self.parts.connector.usage()
@@ -928,7 +950,7 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
     }
     /// Listener and roster health for observability: no silent stuck state.
     fn report_health(&mut self, out: &mut PeerDriverProgress) {
-        out.generations_exhausted = self.parts.roster.generations_exhausted();
+        out.generations_exhausted = self.generations_exhausted();
         let Some(status) = self.parts.connector.accept_status() else {
             return;
         };
@@ -937,7 +959,7 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         let increase = |now: u64, seen: u64| now.checked_sub(seen).unwrap_or(now);
         out.accept_errors = increase(status.transient_errors, self.accept_seen.0);
         out.accept_backoffs = increase(status.backoffs, self.accept_seen.1);
-        out.accept_paused = status.retry_at.is_some_and(|at| self.now < at);
+        out.accept_paused = status.paused(self.now);
         self.accept_seen = (status.transient_errors, status.backoffs);
     }
     fn poll_connections<O: OutboundQueue>(
@@ -975,7 +997,8 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
                 continue;
             }
             match event.result {
-                Err(_) => {
+                Err(reason) => {
+                    self.discovery_exhausted |= is_discovery_exhausted(reason);
                     self.parts
                         .roster
                         .connect_failed(event.ticket, now)
@@ -1058,11 +1081,17 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
                             .roster
                             .connect_failed(ticket, now)
                             .map_err(PeerDriverError::Roster)?;
+                        // A spent discovery source fails this attempt only:
+                        // the roster backs off and the condition is reported
+                        // with `generations_exhausted`; the node stays in service.
+                        let exhausted = is_discovery_exhausted(rejected.reason);
                         if rejected.reason != ConnectError::Overloaded
+                            && !exhausted
                             && !matches!(rejected.reason, ConnectError::Discovery(e) if e.retryable())
                         {
                             return Err(PeerDriverError::Connect(rejected.reason));
                         }
+                        self.discovery_exhausted |= exhausted;
                         out.connection_failures += 1;
                     }
                 }

@@ -226,8 +226,10 @@ impl PeerDiscovery for Source {
             .as_mut()
             .map_or(Err(DiscoveryError::Unavailable), |r| r.resolve(peer, now));
         if result.is_err() && self.source_failed() && self.exhausted() {
-            // Typed and per lookup: the connector fails this attempt, the
-            // roster backs off and counts it; the node stays in service.
+            // Typed and per lookup, never node-fatal. A dial's `submit` refuses
+            // at once and the peer driver counts a connection failure; a
+            // waiting lookup ends its attempt. Either way the roster backs off
+            // and the driver reports `generations_exhausted`.
             return Err(DiscoveryError::Exhausted);
         }
         if result.is_err() {

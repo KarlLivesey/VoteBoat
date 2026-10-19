@@ -19,7 +19,7 @@ maximum sustainable rate. Design: `target/claude/research-lv/architect-plan-life
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current NT1: connection generations and listener (`lb/nt1-connection-generations`; round 2 in review) | Audit N1, N3, N6, P3-6 and the P3-16 discovery form: survivors no longer enter recovery after ~27.8 h with one peer down, and a port scan or fd spike cannot kill a node | — (ST2 runs in parallel and also edits `native/startup.rs`, in a different function; a rebase reconciles) | Q2 probe written up; native soak of more than 10,000 connect attempts fails on the base and passes; restart uniqueness; injected accept errors; two-node native reconnect past the old boundary; listener health and exhaustion reach `NodeObservation`, Pressure events and `metrics`; no counter class node-fatal; fmt, four strict Clippy configurations and matched fmt/Clippy; transport, peers, connect, startup, runtime-peer, logical_voter_native and counter_service suites in default and all-features | LB |
+| Current NT1: connection generations and listener (`lb/nt1-connection-generations`; round 3 in review) | Audit N1, N3, N6, P3-6 and the P3-16 discovery form: survivors no longer enter recovery after ~27.8 h with one peer down, and a port scan or fd spike cannot kill a node | — (ST2 runs in parallel and also edits `native/startup.rs`, in a different function; a rebase reconciles) | Q2 probe written up; native soak of more than 10,000 connect attempts fails on the base and passes; restart uniqueness; injected accept errors; two-node native reconnect past the old boundary; listener health and exhaustion reach `NodeObservation`, Pressure events and `metrics`; no counter class node-fatal; fmt, four strict Clippy configurations and matched fmt/Clippy; transport, peers, connect, startup, runtime-peer, logical_voter_native and counter_service suites in default and all-features | LB |
 | Next NT2: roster, budget and cache reclaim | Audit N2, RT3, N4, N5: re-provisioning a node or churning members never kills survivors | NT1 (same files) | U6 probe as fail@main; churn soak | LB |
 | Then DR1: Counter session ledger | Audit S1, RT2 for Counter through the generic `SessionLedger` | ST2 merged | 200,000-write soak fails on the base; restart and exactly-once tests | LB |
 
@@ -36,7 +36,7 @@ LBZ completes this table for every audit row.
 | N3 | `native/connect.rs` `accept()` | F per connection or bounded backoff (10 ms to 1 s); counts and pause surfaced in `NodeObservation`, Pressure and `metrics`; counters saturate (diagnostic, ≥ 58,000 years at 10^7/s) | NT1 | `accept_tests`, `injected_emfile_reaches_counters_events_and_connector_status` |
 | N6 | `native/remote_discovery/reconnect.rs` | W: ≥ 584 million years at the 1 ms retry | NT1 | `retry_continues_past_the_old_reserved_range` |
 | P3-6 | `runtime/peers.rs` `routes_generation` | Removed (no counter) | NT1 | existing reconciliation tests |
-| P3-16 (discovery source) | `bin/support/peer_discovery.rs` generations and attempt deadline | F per lookup (`DiscoveryError::Exhausted`, not node-fatal); W: ≈ 5.8 × 10^7 years at 10^4 handshakes/s | NT1 | `a_spent_source_refuses_lookups_without_failing_the_node` |
+| P3-16 (discovery source) | `bin/support/peer_discovery.rs` generations and attempt deadline | F per lookup (`DiscoveryError::Exhausted`): on a dial `submit` (round 3) and on a waiting lookup the peer driver counts a connection failure, the roster backs off and `generations_exhausted` reports it; not node-fatal. W: ≈ 5.8 × 10^7 years at 10^4 handshakes/s | NT1 | `a_spent_source_refuses_lookups_without_failing_the_node` (source); `an_exhausted_discovery_source_fails_the_dial_without_failing_the_node` (real native node and driver) |
 | P3-16 (other sites) | counter, directory and transfer client-session sequences | W: ≥ 5.8 × 10^9 years (plan Q12) | LBZ | recorded at inventory close |
 | Q8a | certificate `notAfter` on loaded operator material | Warn at a quarter of the remaining validity; recovery stays credential reload | NT4 | planned |
 | Q8b | TCP half-open session after a remote `kill -9` | Measure detection time and bound it (keepalive or idle expiry) | NT4 | planned |
@@ -309,7 +309,10 @@ ten P3s). Each finding maps to one change below.
   `u64::MAX` ms, starts no attempt and returns `Ok` from `poll_discovery`;
   `resolve` returns the typed, non-retryable `DiscoveryError::Exhausted`, which
   the discovery connector turns into a per-attempt `ConnectError::Discovery`
-  failure (the roster backs off and the failure is counted). Not pending, no
+  failure. Round 2 made only the waiting-lookup path per attempt: a dial's
+  `submit` resolves synchronously, and the driver still treated that rejection
+  as node-fatal. Round 3 (below) makes both paths count a connection failure
+  while the roster backs off. Not pending, no
   deadline, so no busy loop. Floor correction: after an attach and a failure
   there is no delay, so one attempt per TCP+TLS handshake; at 10^4/s,
   2^64 attempts take ≈ 5.8 × 10^7 years.
@@ -385,6 +388,62 @@ remote_discovery 29, startup 48, effect_owner 210, logical_voter_native 25,
 logical_nested_native 13, logical_activation_nested 11, counter_service 144.
 All pass. Not run: macOS (the classifier's errno constants come from `libc`
 for both targets), native durable A/B (no write-path change).
+
+### NT1 round 3 schema plan (before editing, 19 October 2026)
+
+Both round-2 reviews approved with one P3 in common: a discovery source's
+`DiscoveryError::Exhausted` was still node-fatal on the dial path. Opus also
+asked for listener health in the directory and transfer `status` replies, and
+for one definition of "paused".
+
+- Data/API: `PeerDriver` keeps `discovery_exhausted: bool`.
+  `PeerDriverProgress::generations_exhausted` becomes "roster generations
+  spent, or a discovery source refused a lookup as `Exhausted`".
+  New read-only accessors `PeerDriver::accept_paused()` and
+  `PeerDriver::generations_exhausted()` return what the last poll reported.
+  `AcceptStatus::paused(now)` is the single pause definition
+  (`retry_at` set and `now < retry_at`).
+- Transitions: on a `submit` rejection, `connect_failed` already ran. A reason
+  of `Discovery(Exhausted)` is now counted in `connection_failures` like a
+  retryable discovery error, and sets the flag. An `Err` completion with that
+  reason also sets it. The flag never clears within a driver, because the
+  source's counter never resets within its session.
+- Ownership and cleanup: no new owner or allocation. The flag is not carried
+  through recovery handoff; a new driver sets it again on its first refusal.
+- Output: a shared `bin/support/accept_health.rs` formatter writes the six
+  `peer_accept_*`/`peer_generations_exhausted` fields. The counter's `metrics`
+  reply and the directory and transfer `status` replies use it.
+- Checks: a real native node whose dial goes through an exhausted source must
+  fail on a45e541d and pass after the fix. The directory and transfer `status`
+  replies carry the fields (TCP listener = 1, QUIC = 0).
+
+### NT1 round 3 implemented (evidence, 19 October 2026)
+
+| Finding | Change | Test |
+| --- | --- | --- |
+| Sol 1 / Opus 1: discovery `Exhausted` node-fatal on the dial `submit` path | Driver rejection branch counts `Discovery(Exhausted)` as a connection failure (roster backs off) and reports it through `generations_exhausted` (progress, `NetworkHealth`, Pressure, `metrics`); completion path sets the same flag | `native::connect::health_tests::an_exhausted_discovery_source_fails_the_dial_without_failing_the_node`: real two-voter native node, `Discovered` connector, simulated time. Fails on a45e541d with `Peer(Connect(Discovery(Exhausted)))` from `node.poll`; passes after the fix |
+| Opus 2: no listener health in `voteboat-directory`/`voteboat-transfer` | Their `status` replies append the shared `AcceptHealth` fields | `directory_publication_remote_reads_and_checkpoint_recovery_{tcp,quic}`; `tcp_retirement_recovers_unread_proposal_and_original_release_from_wal`; `quic_retirement_recovers_unread_proposal_and_retired_checkpoint` |
+| Opus 3: two "paused" definitions | `AcceptStatus::paused(now)`, used by the driver; `metrics` reads `PeerDriver::accept_paused()` | `peer_metrics` maximum-reply test; `injected_emfile_reaches_counters_events_and_connector_status` |
+
+**Public API changes (round 3).** `AcceptStatus::paused`,
+`PeerDriver::accept_paused` and `PeerDriver::generations_exhausted` are added.
+`PeerDriverProgress::generations_exhausted` also covers a discovery source
+refused as `Exhausted`. The directory and transfer `status` lines gain six
+trailing key=value fields. Nothing else changes: no format, no migration, and
+no per-write CPU.
+
+**Validation (Linux, cores 0-3, nice 19, `-j 2`, sequential).** fmt; strict
+Clippy default, all-features, no-default-features and native-only; matched fmt
+and Clippy (the pre-push hook run directly): zero diagnostics.
+`validation/check-inventory.mjs` passes. All-features: lib 489 (1 ignored),
+`voteboat-counter` 55, `voteboat-directory` 12, `voteboat-transfer` 7, connect
+21, effect_owner 210, logical_voter_native 42, observability 11, peers 22,
+remote_discovery 29, startup 63, counter_service 203, directory_service 22,
+transfer_service 33. Default features: lib 487 (1 ignored), `voteboat-counter`
+52, `voteboat-directory` 12, `voteboat-transfer` 7, connect 21, effect_owner
+210, logical_voter_native 25, observability 11, peers 22, remote_discovery 29,
+startup 48, counter_service 144, directory_service 17, transfer_service 24.
+All pass. Not run: macOS, and native durable A/B (no write-path change).
 
 ## Logical-voter reliability track (opened 18 October 2026)
 
