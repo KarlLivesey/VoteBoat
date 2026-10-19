@@ -47,6 +47,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | In review as one stack, PR 10: V3a, direct entry staging (PR 6 content, carried by PR 10; PR 6 closes when PR 10 merges) | Proposals are built twice: the host stages a `Vec<Proposal>` and `propose_batch` scans it twice and collects a second `Vec<LogEntry>` (3.3% of bulk process CPU, plus the host's staging Vec). A bounded `ProposalBatch` builder creates final-shaped entries once and does its budget accounting while inserting; `Raft::propose_entries` stamps index/term in place and hands the same Vec to the existing planner | V1 (design: `target/claude/research-r1/architect-plan-pr3x.md` §§1, 2.2, 3.1, 3.12) | Builder/legacy equivalence at widths 1/2/max, cross-core and old-term builders, failed-push and drop cleanup, allocation-survival, last-index boundary and legacy-boundary tests; harness collection on the builder with unchanged receipt/attribution counts; fmt + strict Clippy (four configurations and the matched workspace); runner pairs on both framework cells (pending) | T4 |
 | In review as one stack, PR 10: V3b, shared frozen batches with validation reuse (`cpu/shared-batches` content, carried by PR 10) | The batch V3a stages becomes one immutable shared batch (`Arc` backing plus facts computed once) carried by `Suffix`, `Rpc::Append`, the pending plan and a chunked canonical `EntryLog`; planning, follower validation, fan-out selection, ingress costing and install use the cached facts, removing the per-peer `to_vec`, the install/compaction record moves and the repeated per-entry validation/accounting walks (profile-r2-pr1 §§3, 5: ~19% of bulk process CPU, overlapping classes) | V3a (PR 6 branch `cpu/entry-staging`; design `architect-plan-pr3x.md` §§2.3–2.8, 3, 4) | Facts-versus-scan oracle over subranges and multi-span joins; fast/slow validator equivalence and the old rejection conditions; prefix selection oracle against the old loop; overlap content checks across distinct allocations; old RPCs keep their contents after truncate/compaction; retained charge equals a fresh oracle; wire/WAL byte goldens captured before encoder edits; durable, native, compaction and snapshot suites unchanged in meaning; harness width/persist/send parity; fmt + four strict Clippy + matched; indicative composed pairs (≥4% bulk gate is the runner's) | T4 |
 | In review as one stack, PR 10: V3b-s, width-1 per-round overhead of shared batches (`cpu/shared-batches-s`, on V3a and V3b, merged with main b72d1ee3 so V2 is composed) | V3b's shared batches cost singletons +6.3% driver instructions and +4–5% whole-process CPU per write (research `target/claude/research-r3/v3b-regression.md`), all in per-round code paths, copies and inlining around one-entry batches. Remove that overhead without losing V3b's −13% bulk gain: one-piece fast paths for owned batches and the last log piece, general paths out of line, no install-chain inline hints, and 24-byte pieces so `Suffix`/`LogUpdate` return to main's size | V3a (PR 6), V3b (`cpu/shared-batches` 91ab285d), H2 merged (main 65fe6701) | Driver width-1 instructions and time vs main and V3b at widths 1/231/515; quiet-Mac 5 pairs × 4 cells vs main 65fe6701 and vs V3b merged with main; singleton attribution floor (leader persists 264,195, width 1); oracle tests for every owned fast path; facts-vs-scan, selection, validator and charge oracles unchanged; fmt, four strict root Clippy builds and the matched workspace | T4 |
+| Current: PR 10 round 2, review fixes and singleton overhead (branch `cpu/shared-batches-s`) | Both reviews requested changes: a narrow Append from a wide shared backing was charged the whole backing, so entries recovered from a checkpoint could exceed every outbound budget and never replicate (P1); the wire decoder froze 16+ mixed entries with an uncharged index (P2); an empty view charged an owned batch by capacity (P2); and both singleton cells stayed above +1% against main. Bound what an Append pins, charge the decoded index before allocating it, charge empty-view appends as the log holds them, and remove what singleton overhead the library and PR 10's own harness edits still add | PR 10 round 1 (head 6fecd1fb) and both reviews | Recover-then-replicate test under default limits (fails before the fix); narrow-message and hidden-charge bound tests; wire budget at exact/one-below for widths 15/16 uniform/mixed and shared source subranges; empty-view charge test; restored spare-capacity checks; asserted composed sizes; fmt, four strict root Clippy builds and the matched workspace; default and all-features suites; driver widths 1/231/515 on Linux (exact x86 counts) and the Mac; quiet-Mac 5 pairs × 4 cells against b72d1ee3; attribution controls | T4 |
 | Following: runner re-measures the composed V2+V3a+V3b+V3b-s head | The stack now carries V2 (merged main b72d1ee3); the runner measures all four cells of PR 10's head against the H2 main baseline. The remaining singleton excess (V3a staging, a harness effect-loop copy that V3b's types trigger) is re-profiled on the composed tree before any further slice | V2 merged; PR 10 merged with main | Framework pairs on all four cells against the H2 baseline; compaction/snapshot suites | T4 |
 | Following V3c: profile the composed V2+V3 tree | Choose the next whole cost class (remaining materialization, rounds, refcounts) from a fresh profile instead of adding helpers | V3b measured, V2 merged or rejected | Bounded schema with application/FIFO/durability semantics preserved; independent CPU pairs | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
@@ -60,7 +61,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done C17: gather window and wait cap as service options | Operators choose the CPU/latency point (200 µs default; 400 µs −20% CPU for disk-bound deployments) | C13 | counter/directory/transfer suites | T4 |
 | Done C18: per-round host costs re-profiled | Fresh profile and syscall counts at head; dedup hash map and quiet-socket read skipping measured and rejected; staged-batch deadline scan bounded | E1 | Five tmpfs pairs each; syscall shim counts; library, peers, runtime, owner, transport suites; fmt + strict Clippy | T4 |
 | Parked D1a: a leader append overlaps a commit-only persistence | Measured +12–30% at window 1,024 and +18% at 2,048 on APFS, CPU neutral, but one run in nine stalled; branch removed, patch and local tag kept outside the tree | C6, E1 | Stall reproduced and fixed with a test before any re-apply; three-configuration suites; APFS pairs | T3 |
-| Later P3: shared Append entries | `Rpc::Append` copies entries per peer (~5%); 81 construction sites | — | Framework and native pairs | T4 |
+| Superseded P3: shared Append entries (delivered by V3b in PR 10) | `Rpc::Append` copied entries per peer (~5%). V3b's frozen batches are shared by every Append from proposal to follower for batches of 16 or more entries; narrower batches are still copied per peer, by design (V3b record) | — | Covered by PR 10's checks and measurements | T4 |
 | Later M1: macOS kqueue readiness | `poll(2)` is ~19% of Mac host CPU under load | E1 | Mac pairs | T4 |
 | Later C10: remaining per-poll fixed costs | Idle profile after C9: connector poll/accept, TLS reads of idle sockets, scheduler map scans, connection-union recheck per step | C9 | Same idle/loaded CPU pairs | T4 |
 | Done C6: a poll never truncates a ready visit | The default replica step budget (128) silently cut every 256-original visit in half, capping each leader barrier at 128 originals; defaults now let one barrier carry a whole 1,024-original visit | C3a/C3b | Mac APFS loaded pairs, 31:1 skew, window 1, RAM-disk CPU/original; three-configuration suite; fmt + strict Clippy | T3 |
@@ -74,6 +75,114 @@ implemented or benchmarked; unsafe variants are not offered as options.
 Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider than
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
+
+#### PR 10 round 2 schema plan: review fixes and singleton overhead (19 October 2026)
+
+- Message charge (P1). Shape: `EntryBatch::for_message(max_batch_bytes)`,
+  applied where a leader builds an Append (`EntryLog::replication_range` and
+  the retry's `shared_range`). It keeps shared pieces in order while what they
+  keep alive beyond plain copies of their visible entries totals at most
+  `MESSAGE_HIDDEN_MAX` (32 KiB) and at most the selection budget the visible
+  entries leave unused; any other piece is copied into an owned piece, as a
+  vector would hold it. Per piece the hidden bytes are exact for a whole
+  backing and for alike entries, otherwise bounded above from payload lengths.
+  No state transition, wire or protocol change: the visible entries are the
+  original selection. Failure: none new (a copy allocates as main always
+  did). Freezing keeps at most `SPARE_MAX` (4 KiB) of spare capacity, so a
+  whole frozen proposal of up to 1,024 entries is always shared.
+- Decoded index (P2, Sol). One `IndexNeed` accumulator decides the index
+  freezing allocates; the wire decoder admits those bytes in its budget before
+  allocating the index, and the encoder charges the same bytes for the visible
+  entries.
+- Empty-view charge (P2, Opus). `LogView::appended_charge` on a view with no
+  entries charges the batch as a log holds it (`EntryBatch::log_charge`).
+- Singleton overhead. A width-1 pass in the harness proposes with
+  `Event::Propose` as main's harness did; empty batches answer the receive and
+  costing queries inline.
+- Acceptance: the tests in the table below; driver widths 1/231/515; quiet-Mac
+  four cells against b72d1ee3; attribution controls. Restart/partial-progress
+  case: a leader restarted from a checkpoint holds its whole retained log as
+  one backing; messages from it are copies until compaction trims it.
+
+#### PR 10 round 2 implemented (19 October 2026)
+
+| Finding | Change | Test | Measurement |
+| --- | --- | --- | --- |
+| P1 (Opus): a 1-entry Append from a recovered 16,384 × 8 B backing cost 1,441,792 B against 88 B visible and the 1 MiB outbound budget, so recovered entries could never reach a follower | `EntryBatch::for_message` on selection and retry (bound above); frozen backings keep ≤ 4 KiB spare; checkpoint/WAL decode allocates exactly | `recovered_checkpoint_entries_replicate_and_commit_under_default_outbound_budget` (`tests/raft.rs`; 16,256 × 8 B and 1,000 × 1 KiB, checkpoint, power loss, restart, partition so the restarted leader needs the empty follower; refused Appends counted; fails without the fix: "16256 × 8: Appends refused"); `a_narrow_message_from_a_wide_backing_is_charged_like_a_plain_copy`; `messages_keep_at_most_the_bounded_hidden_charge` (random mixed/uniform/truncated backings, every 7th offset, four entry and byte limits); `hidden_charges_are_exact_where_claimed_and_never_low` | Linux driver widths 231/515: 1,658.3 → 1,656.8 and 1,529.8 → 1,530.8 x86 instructions per write (round 1 → round 2) |
+| P2 (Sol): a mixed 16-entry Append decoded under a 1,472 B budget retained 1,880 B (uncharged 408 B index) | `IndexNeed` shared by freezing and the codec; decoder admits the index before allocating it; encoder charges it | `decoded_memory_budget_charges_the_index_of_the_decoded_entries_exactly` (`tests/wire.rs`; widths 15/16 uniform and mixed, a uniform and a mixed subrange of a mixed source; decode and encode succeed at the retained charge and fail one byte below; fails without the fix at 1,879 B) | Wire bytes unchanged (byte goldens pass) |
+| P2 (Opus): appending to an empty view charged an owned batch by capacity (536 B vs 88 B) | `LogView::appended_charge` uses `EntryBatch::log_charge`; comments in `raft.rs`, `view.rs` and this record corrected | `appending_to_an_empty_log_charges_what_the_installed_log_holds` (widths 1, 3, 16 with spare capacity; summary equals a fresh recount and the log's charge) | — |
+| Singleton cost (both reviewers) | Harness: a pass of one original with nothing queued uses `Event::Propose` (main's harness path), wider passes use the builder; empty batches answer `len`/`last`/`payload_bytes`/validators/`has_configuration`/charge inline | `width_one_passes_use_the_propose_event_and_staging_matches_it`, `a_lone_original_with_queued_work_is_staged_with_it` (matched 75/75) | Linux driver width 1: 53,253 → 52,914 (harness), 52,958 → 52,794 (empty paths, same session) x86 instructions per round; main 51,356–51,405 |
+| P3 | `composed_type_sizes` asserts 64-bit bounds; spare-capacity checks restored (`volatile_tests` allocated == len; `plan_copy` input with 100 spare slots kept by the input, copy exact; narrow owned input keeps its allocation); `EntryBatch::slice(k..k)` holds no backing; count of entries tests corrected; "Later P3" row marked superseded; V3b section labelled historical | `freezing_keeps_at_most_spare_max_and_owned_batches_keep_their_capacity`, `empty_slices_keep_no_backing_alive`, the restored assertions | — |
+
+Message budgets and shared batches. A shared piece keeps its whole backing
+alive, so every charge of a batch counts the whole backing. What a
+leader-built Append keeps beyond plain copies of its visible entries is at
+most `MESSAGE_HIDDEN_MAX` = 32 KiB and at most `max_batch_bytes − 256 −
+Σ(37 + payload)` over its visible entries. So (1) an Append's retained charge
+exceeds main's charge for the same visible entries by at most 32 KiB, and
+(2) it stays inside the per-message bound the core already reserves
+(`reserve_effects`: `max_batch_bytes` plus one record per entry): a retained
+payload exceeds its length by at most 23 bytes, so records, payloads and
+hidden bytes stay within `max_batch_bytes − 256 + (size_of::<LogEntry>() −
+14)` per entry. Whole frozen proposals of up to 1,024 entries (≤ 4 KiB spare
+plus a mixed index of ≤ 1,025 × 24 B) are shared; a narrow slice of a wide
+backing is copied. Wire-decoded Appends hold exactly their visible entries
+plus, for 16 or more mixed entries, the charged index. Headroom: an outbound
+budget sized for main's Appends needs at most 32 KiB more per Append. The
+canonical log still charges a partly trimmed shared piece its whole backing
+(conservative); a recovered log's backing was counted when the owner limits
+were derived at startup.
+
+Linux driver (`R3_DRIVE`, single thread, cores 14–15; exact user-mode x86
+instructions from a `perf_event_open` counter around two runs of different
+lengths, so set-up and warm-up cancel; scratch build, not committed):
+
+| Width | main b72d1ee3 | round 1 6fecd1fb | round 2 head |
+| ---: | ---: | ---: | ---: |
+| 1 (per round) | 51,356 | 53,283 (+3.8%) | 52,794 (+2.8%) |
+| 231 (per write) | 2,023.6 | 1,658.3 (−18.1%) | 1,657.8 (−18.1%) |
+| 515 (per write) | 1,909.4 | 1,529.8 (−19.9%) | 1,531.9 (−19.8%) |
+
+Mac driver (3 interleaved pairs, medians, `/usr/bin/time -l` instructions per
+write including set-up; `dmac.sh`):
+
+| Width | main | ae409c3b | 3d913c8b | main ns/write | ae409c3b | 3d913c8b |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 56,974–56,990 | 59,402 (+4.3%) | 59,256 (+4.0%) | 3,950–3,957 | 4,088 (+3.3%) | 4,062 (+2.8%) |
+| 231 | 2,516.5 | 2,062.3 (−18.1%) | 2,059.2 (−18.2%) | 130.7 | 101.1 (−22.0%) | 100.8 (−22.9%) |
+| 515 | 2,817.1 | 2,243.7 (−20.4%) | 2,242.8 (−20.4%) | 119.3 | 93.1 (−21.8%) | 93.4 (−21.7%) |
+
+Remaining singleton gap, measured cause. Exact per-operation counters in a
+scratch driver (a counter read around each harness → core call; x86, main →
+round 2 before the empty-batch paths, instructions per round): followers' core
+work +706 (+266/+224 on the entry-carrying Append, +108/+108 on the empty
+commit notification, of which the empty paths since removed about 110),
+every effects pass +135 to +265 (+825 in all; the library work inside it,
+`persist_volatile` with install and fan-out, is about +180), the leader's
+propose path +362, and the harness's own pre-step checks −180. Library-level
+counters split the core work into small per-call dispatch costs: owned
+planning (`plan_owned`) about +100 per call (metadata validation, the
+eligibility check, the appended charge), the install about +30, the new-entry
+check about +45, each fan-out selection about +40. Instruction sampling
+attributes the effects-pass excess to the harness loop itself: each popped
+264-byte `Effect` is copied twice and each sent `Message` twice more, which
+main's build does not do (V3b-s recorded the same). Restoring main's harness
+shape for applying committed intervals did not change it, and handling each
+effect in one non-inlined call removed only about 160 instructions on this
+branch and was neutral on main, so no harness PR (H3) is proposed; the
+harness loop is unchanged here as the brief requires. In round 2 terms: about
+half of the remaining x86 width-1 excess is library dispatch spread over many
+calls (none above ~100 instructions), about half the harness copies.
+Slice-specialised validator loops and inlining the owned configuration scan
+were measured within noise (±40) and not kept.
+
+Checks on the round-2 tree (Linux, cores 14–15): `cargo +stable fmt --all --
+--check`; strict Clippy default, all features, no default features and native
+only, zero diagnostics; matched fmt and strict all-target Clippy, zero
+diagnostics. Default: `--lib` 486, `volatile` 7, `snapshot` 27, `raft` 80,
+`log_store` 19, `log_owned` 5, `worker` 9, `wire` 20, `native_relay` 13. All
+features: `--lib` 488, `native_relay` 22 and the same counts for the others.
+Matched tests 75/75. Not run: the full root suites and remote CI.
 
 #### V3 stack composed with V2: main b72d1ee3 merged into PR 10 (19 October 2026)
 
@@ -89,8 +198,11 @@ Conflicts and resolutions (both sides' semantics kept):
   `matches_plain`, boxed `OwnedChange::Other.next`), with the stack's three
   changes applied to it: `OwnedAppend::new` takes the `LogView` so
   `append_summary(view, ..)` can charge an adjoining piece exactly (also in
-  `plan_commit`, with no suffix); `normalize_append` is gone because frozen
-  entries keep their allocation; `install_append` uses `EntryLog::append`.
+  `plan_commit`, with no suffix); `normalize_append` is gone because the
+  plan moves the update's batch without reallocating it (a narrow owned
+  batch keeps its spare capacity, which plans and messages charge and the
+  installed log does not; since round 2 a frozen batch keeps at most 4 KiB
+  of it, charged); `install_append` uses `EntryLog::append`.
 - `src/raft.rs` `persist_update`: V2's structure (`persist` routes commit-only
   rounds to `persist_commit`/`plan_commit`; appends reach `plan_owned` or
   `plan_copy` and `stage_pending`); the stack's only change there was a
@@ -133,7 +245,7 @@ diagnostics. Default: `--lib` 480, `volatile` 7, `snapshot` 27, `raft` 79,
 same counts for the other six. Run by name in both configurations: V2's
 scalar-vs-`plan_owned` oracles (`scalar_commit_plan_matches_the_owned_empty_append`,
 `scalar_commit_plan_matches_on_configured_and_compacted_logs`), all seven
-`commit_advance_tests`, V3b's twelve `log::entries::tests` (facts-vs-scan,
+`commit_advance_tests`, the thirteen `log::entries::tests` (V3b's eleven and V3b-s's two: facts-vs-scan,
 selection, validator, charge and vector-model oracles) and the
 `entry_encodings_are_byte_identical_for_every_partition` wire/WAL/checkpoint
 goldens. Matched tests 74/74. Not run: the full root suites and remote CI.
@@ -280,6 +392,13 @@ both the default and all-features configurations; matched tests 74/74. Not run:
 the full root suites (orchestrator after review) and remote CI.
 
 #### V3b implemented: shared frozen batches with validation reuse (measurement pending (runner))
+
+Historical record, written before V3b-s and PR 10 round 2. Superseded there:
+the sizes (`EntryBatch` 40 → 24, `Suffix` 48 → 32, `LogUpdate` back to 240),
+the inline hints on the install chain (removed in V3b-s step 3), the charge
+of a shared piece inside a message (bounded by `EntryBatch::for_message` in
+round 2) and the spare capacity a frozen backing keeps (at most 4 KiB since
+round 2). The rest describes the current design.
 
 Design: `target/claude/research-r1/architect-plan-pr3x.md` §2.3 (3x-B) with
 the parts of §§2.4–2.8, 3 and 4 that apply. Base: PR 6 (`cpu/entry-staging`)
