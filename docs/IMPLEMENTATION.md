@@ -19,7 +19,7 @@ design pack is unchanged.
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Done N0: three-process cluster harness (merged 20 October 2026 in PR 17, head 73605e48; rounds 1–4 and baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test on OS-selected ports; script self-test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
-| Current N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5): a `Send` made in node poll *k* is encoded in poll *k*+1 and written in poll *k*+2; after N1 it is written and completed inside poll *k* whenever the socket takes the bytes, so the host waits on input instead of write interest | N0 baseline and harness (merged) | Schema plan below; deterministic driver, roster and node tests (write-only budget, same-poll completion, durability gate, partial and refused writes, close, budgets, cursor, poll-count golden against the parent); relay provider tests unmodified; fmt, four strict Clippy builds, matched fmt/Clippy; suites in default and all-features; N0 cells on the quiet Mac, 5 interleaved rounds against main, per-process CPU, busy cores, rounds and the wait split | NW1 |
+| Current N1: same-poll send flush (in review; implemented and measured, see "N1 implemented") | Remove the two-round effect-to-wire lag (plan §5): a `Send` made in node poll *k* was encoded in poll *k*+1 and written in poll *k*+2; now it is written and completed inside poll *k* whenever the socket takes the bytes, so the host waits on input instead of write interest | N0 baseline and harness (merged) | Done: schema plan below; deterministic driver, roster, transport and node tests (write-only budget, same-poll completion, durability gate, partial and refused writes, close, budgets, cursors, poll-count golden against the parent) with four mutations caught; relay provider tests unmodified; fmt, four strict Clippy builds, matched fmt/Clippy; suites in default and all-features; N0 cells on the quiet Mac. Gate: met at TCP 1,000/s (−8 to −10%, 5/5 pairs), QUIC and idle; TCP 15,000/s flat; the single-process Linux loop +10% (follower batching loss, see "Risks observed") | NW1 |
 | Then N2: per-peer frame coalescing | One frame per peer per round across groups | N1; a G=4 cell on the N0 harness (see N0 limits) | Plan §4 row 2 | NW1 |
 
 ### N1 schema plan (before editing, 20 October 2026)
@@ -86,6 +86,199 @@ Base: `origin/main` `2d798a19` (N0 merged). Plan §5.2, refined against the code
   completion, captured on the parent first. Mutations: drop step 4, use the
   default (reading) budget, remove the call site, move a cursor. Relay
   provider tests unmodified. N0 cells as the mini plan says.
+
+### N1 added prerequisite: snapshot send keeps its place (schema plan, 20 October 2026)
+
+Why it is needed for NW1: with the flush, replies reach the leader sooner, and
+`quic_promoted_leader_witness_installs_compacted_final_snapshot` (all
+features) failed 7 of 7 runs with `Replica(Owner(ProviderContract))`. Trace:
+one leader visit emitted `[SnapshotRequired, Persist]`; releasing the
+`SnapshotRequired` (image loaded) appended its Snapshot `Send` behind the
+queued Persist, and `submit_persists` refuses a Persist with anything queued
+after it (a Persist must be the visit's last queued effect; the Written/Durable
+continuation paths rely on that). On the parent the shape is reachable too,
+only not with this test's timing.
+
+- **Shape.** In `EffectOwner::complete_effect_inner`, the continuation of a
+  released `SnapshotRequired` is pushed to the front of the visit's queue (in
+  order), taking the released effect's place, instead of being appended. Every
+  other effect kind is unchanged.
+- **Why it keeps the guarantees.** `SnapshotRequired` is what
+  `append_for(peer)`/`retry_replication` emit in place of an Append `Send`
+  when the peer needs an image; the core placed it before the step's Persist
+  (an early send). Its continuation is `snapshot_send` or
+  `repair_snapshot_send`: `&self`, exactly one `Send(Rpc::Snapshot)` built
+  from the request the core recorded. So the send leaves where a synchronous
+  load would have put it, and no effect the core ordered after a Persist moves
+  ahead of it. (A `SnapshotRequired` after a Persist would already fail
+  `submit_persists`, so that shape never reaches release.)
+- **Failure/cleanup.** Unchanged: rejection paths, reservation checks and
+  `refresh` are as before.
+- **Acceptance.** The failing suite passes (50/50); snapshot, snapshot_worker,
+  raft, member_recovery, volatile, directory, effect_owner suites pass. No
+  separate unit test: building a `[SnapshotRequired, Persist]` visit through
+  the owner needs the native snapshot router, and the deterministic suite test
+  above fails without the change.
+
+### N1 implemented (evidence, 20 October 2026)
+
+Commits: `2a07014c` (flush, tests, plan) and `5986c826` (snapshot-send order).
+
+- **Library.** `PeerNetwork::flush` (default no-op; `NativeRelayNetwork`
+  untouched); `PeerDriver::flush` = entry checks as `poll` (a fenced owner or
+  driver is left for the next `poll`, as without a flush), then
+  `complete_sends` → `submit_sends` → `roster.flush_peer` with the write-only
+  budget for at most `peer_visits` peers from the cursor (not moved) →
+  `complete_sends`. `complete_send` is factored out of `poll_peer_io`.
+  `PeerRoster::flush_peer` visits only a peer whose transport holds the
+  accepted, unfinished send, through `poll_transport`, the per-peer body
+  factored out of `poll` (same checks, retirement, backoff, `Disconnected`).
+  `NetworkNode::poll_inner` calls it after the replica step and the second
+  `reconcile_planned_membership`, adding to the poll's `PeerDriverProgress`.
+  The budget doc records the "at most twice the send work" bound.
+- **Tests (deterministic, no wall clock).** Driver (`tests/support/peer_driver_flush.rs`,
+  in `effect_owner`): one-call write and completion with an empty queue and a
+  recorded write-only budget; partial accept keeps the rest of the peer's queue
+  in order, each once; a refused write is retried by the next poll without a
+  duplicate; a transport failing between submit and flush completes `Failed`
+  once with credits released; `sends = 0` and `peer_visits = 1` bounds, and a
+  second flush visits the same peer (cursor not moved); after `close()` queued
+  output fails and the accepted send completes; a provider violation fences
+  owner and driver like `poll`. Roster (`tests/peers.rs`): `flush_peer` visits
+  only a pending send, does not move the fair cursor, and handles a failure as
+  `poll` does. Transport (`tests/native/poll_progress.rs`): a write-only
+  budget writes and completes a native frame in one poll and reads nothing; the
+  waiting input is read by the next ordinary poll. Node (`tests/support/node_flush.rs`):
+  three voters with simulated peers, the outbound queue is empty after every
+  poll, no vote request reaches a transport before its term and vote are in
+  the store's durable image, and exact poll counts against the parent (main
+  `2d798a19`, captured before the library edit): Campaign → first vote request
+  on the wire 5 → 3, → leader 6 → 5, propose → Append on the wire 4 → 2,
+  → client completion 7 → 6 (the commit leg is now bounded by the leader's own
+  three-poll persist, which the Append no longer waits behind).
+- **Mutations (each failed a test, then reverted).** Drop step 4: 6 tests
+  fail. Reading budget in the flush: the write-only test fails. No call site:
+  the node test fails. Move the driver cursor per flush visit: 3 tests fail.
+  Set the roster's `poll_cursor` in `flush_peer`: the roster test fails.
+- **Checks run (Linux, cores 0–3, `-j 2`).** fmt; strict Clippy default,
+  all-features, no-default-features, native-only; matched fmt and Clippy:
+  zero diagnostics. Default features, final code (`5986c826`): lib 538,
+  runtime 57, peers 23, transport 38, connect 21, startup 48, counter_service
+  144, directory_service 18, transfer_service 25, native_relay 13,
+  effect_owner 218, native_member_startup 27, peer_rotation 5, striped_node 1,
+  logical_relay_native 1, snapshot_worker 14, snapshot 27, raft 81,
+  member_recovery 43, volatile 11, directory 31, logical_voter_native 25,
+  native_benchmark example 56: all passed, except one counter_service run in
+  which `drain::failed_journal_publication_stops_service_and_preserves_recovery_evidence`
+  reported a node process exiting while it waited for a leader (log not
+  captured). Not reproduced: 30 of 30 alone, and the whole counter_service
+  suite 4 of 4 (144) before and after. All features (final code): lib 540,
+  runtime 57, peers 23, transport 38, connect 21, startup 63, counter_service
+  203, directory_service 22, transfer_service 33, native_relay 22,
+  effect_owner 218, native_member_startup 50, peer_rotation 7, striped_node 2,
+  logical_relay_native 2, quic 25, quic_connect 15, snapshot_worker 14,
+  snapshot 27, raft 81, member_recovery 44, volatile 11, directory 31,
+  logical_voter_native 42: all passed; the native_benchmark example passed
+  64/64 in 34 of 39 runs (see the flake below).
+- **Outstanding flake (pre-existing, not caused by N1).** In the all-features
+  example suite, `lanes::tests::uneven_three_lane_workload_keeps_exact_global_counts`
+  or `tcp_two_lanes_share_groups_and_recover` sometimes fails with `lock
+  acquisition failed because the operation would block`: reopening a closed
+  replica's WAL finds its directory `LOCK` still held (WAL worker already
+  joined). Rate: 3 of 27 suite runs with the flush, 2 of 25 with the flush call
+  disabled (parent behaviour), 0 of 30 with the process-spawning
+  `offered::cluster` tests skipped. Likely cause: those tests (N0) spawn
+  children from the same test process, and a child holds duplicates of the
+  parent's descriptors (flock locks included) until it execs. One further
+  failure in the skip runs was an unrelated `Address already in use` in a lane
+  startup. Filed here as a test-reliability item; not fixed in this slice.
+
+### N1 measurement (quiet Mac M2 Max, 20 October 2026)
+
+Binaries: A = main `2d798a19`, B = head `5986c826`, both release
+`--all-features`, built in `/tmp/voteboat-claude-loop/n1-{base,head}-*` before
+timing. `cluster.py` from N0, WAL on `/Volumes/vbram`, window 1024, ready items
+1024, production `HostWait`; ABBA rounds; each cell started only once the
+1-minute load was below 1.0 with no other benchmark running (one exception
+kept separately: the first TCP 4,000/s set started at load 2.96). Every listed
+run valid unless stated (applied = offers, `window_refused=0`, term 1 → 1, all
+exits 0, CPU cross-check exact). Medians; ratio = median of per-round B/A.
+Raw lines: `target/claude/research-r4/n1-results/` (main checkout, untracked).
+
+| Cell | Pairs | CPU µs/write total A → B (n1 / n2 / n3 of B) | B/A ratio, pairs better | Busy cores A → B | Rounds/write n1 A → B (n2) | Frames sent/write n1 A → B | n2 persist batches/write A → B | n1 waits/write imm/ready/timeout A → B | p99 ms A → B | Rate A → B |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| TCP 1,000/s, 16,000 | 5 | 474.8 → 436.3 (232.1 / 101.6 / 102.6) | 0.902, 5/5 | 0.473 → 0.434 | 2.881 → 2.441 (1.111 → 0.847) | 0.397 → 0.440 | 0.179 → 0.203 | 0.97/1.91/0.003 → 1.06/1.38/0.002 | 18.1 → 17.1 | 999.5 → 999.4 |
+| TCP 4,000/s, 16,000 | 7 | 126.9 → 118.4 (64.4 / 27.4 / 26.9) | 0.983, 5/7 | 0.499 → 0.466 | 0.708 → 0.609 (0.273 → 0.210) | 0.097 → 0.109 | 0.044 → 0.050 | 0.24/0.47/0.001 → 0.26/0.35/0.000 | 18.1 → 17.7 | 3,989 → 3,991 |
+| TCP 4,000/s, 16,000 (started at load 2.96; not gated) | 5 | 122.8 → 114.2 | 0.894, 4/5 | 0.482 → 0.449 | 0.712 → 0.609 | 0.097 → 0.110 | 0.044 → 0.051 | | 19.5 → 16.7 | 3,988 → 3,988 |
+| TCP 15,000/s, 2,000 | 7 | 34.8 → 28.2 (14.6 / 7.1 / 6.7) | — | 0.378 → 0.319 | 0.238 → 0.253 (0.111 → 0.096) | 0.038 → 0.046 | 0.017 → 0.022 | 0.08/0.15/0 → 0.11/0.14/0 | 17.0 → 13.9 | 14,020 → 14,104 |
+| TCP 15,000/s, 16,000 | 7 | 40.4 → 40.6 (24.4 / 8.1 / 7.9) | — | 0.570 → 0.577 | 0.167 → 0.151 (0.067 → 0.049) | 0.024 → 0.026 | 0.0106 → 0.0117 | 0.06/0.11/0 → 0.06/0.09/0 | 25.4 → 25.1 | 14,779 → 14,794 |
+| QUIC 15,000/s, 2,000 | 7 | 68.2 → 50.6 (25.6 / 12.3 / 12.5) | — | 0.518 → 0.383 | 4.503 → 0.882 (0.363 → 0.380) | 0.041 → 0.062 | 0.019 → 0.029 | 0.06/4.43/0.004 → 0.09/0.78/0.004 | 14.7 → 8.0 | 14,317 → 14,263 |
+| QUIC 15,000/s, 16,000 | 7 | 53.7 → 44.5 (27.3 / 8.9 / 9.1) | — | 0.689 → 0.572 | 3.994 → 0.844 (0.290 → 0.234) | 0.033 → 0.030 | 0.015 → 0.014 | 0.06/3.93/0.001 → 0.05/0.80/0.001 | 21.9 → 23.8 | 14,853 → 14,879 |
+| Idle TCP 20/s, 600 (30 s) | 5 | 7,350 → 6,970 (3,015 / 2,039 / 1,911) | 0.941, 5/5 | 0.147 → 0.139 | 26.5 → 21.1 (16.9 → 12.0) | 5.98 → 5.98 | 2.008 → 2.008 | 10.4/12.7/3.4 → 10.8/6.8/3.5 | 16.8 → 16.4 | 20 → 20 |
+
+Marginal CPU per write, (CPU at 16,000 offers − CPU at 2,000) / 14,000:
+
+| Cell | A total (n1 / n2 / n3) | B total (n1 / n2 / n3) | B/A per-round ratio median, pairs better |
+| --- | --- | --- | --- |
+| TCP 15,000/s, 7 pairs | 39.51 (23.95 / 7.94 / 7.87) | 41.25 (25.23 / 8.04 / 7.98) | 0.924, 5/7 (pairs 0.71 0.92 0.92 1.13 0.94 1.22 0.89) |
+| TCP 15,000/s, first 5-pair set | 38.56 | 41.56 | 1.045, 1/5 |
+| QUIC 15,000/s, 7 pairs | 51.93 (40.64 / 6.31 / 6.54) | 43.47 (27.57 / 8.40 / 8.24) | 0.790, 7/7 |
+| QUIC 15,000/s, first 5-pair set (rounds 0–1 dropped: window refusals A 51, B 860 and 644, p99 64–120 ms) | 57.05 | 32.63 | 0.575, 3/3 |
+| Secondary: single-process `nat.sh` loop on Linux (tmpfs, cores 0–3, same two revisions built in this worktree; other users' load 7.9) | 9.74 | 10.72 | 1.10, 0/5 (p99 7.0 → 5.2 ms, rate equal) |
+
+Reading:
+
+- **Rounds fall everywhere; CPU follows only where rounds dominate.** Leader
+  rounds per write −15% at 1,000/s, −14% at 4,000/s, −10% at 15,000/s and
+  −79% under QUIC; follower rounds −14 to −29% in every TCP cell. The fall is
+  in `Ready` waits (write interest gone: −28% at 1,000/s, −26% at 4,000/s,
+  −47% idle, −80% QUIC). Total CPU per write: −8% (1,000/s), −7% (4,000/s),
+  −5% idle, −17% (QUIC, 16,000 offers), flat at TCP 15,000/s. The plan's
+  −30 to −50% rounds at light load did not materialise because light-load
+  rounds are mostly driven by time (1 ms offer ticks, timers), not by the lag.
+- **Why TCP 15,000/s is flat (attribution).** Removing the lag also removes
+  free batching: the leader keeps one Append in flight per follower, so a
+  shorter round trip means more Appends with fewer entries each. Frames per
+  write rise (+11% at 1,000/s, +21% at 15,000/s and 2,000 offers) and so do
+  follower persistence batches per write (+13% at 1,000/s, +10% at
+  15,000/s). In the single-process loop the follower WAL barriers per 16,000
+  writes rise from ~430 to ~737 (commands per barrier 37 → 22) while host
+  rounds stay equal (−2%; one host thread polls all three replicas there, so
+  the lag never cost whole rounds), which is the +10% there. In the cluster the
+  saved rounds and the extra frames/persists roughly cancel at 15,000/s.
+- **QUIC.** Under QUIC the leader no longer spins on readiness: its waits ended
+  `Ready` ~3.9 times per write because queued output kept write interest on a
+  UDP socket that is always writable. That is most of the QUIC gain.
+- **Noise.** Per run, CPU per write is bimodal on this Mac at 15,000/s (TCP A
+  ~22 or ~40 µs, QUIC B ~34 or ~48 µs, with p99 ~8 ms or ~24 ms), in both
+  binaries; the N0 baseline (24.2 µs, an earlier main) was taken mostly in
+  the fast regime. Medians therefore move with the mix of regimes; the per-round
+  ratios are the steadier figure. The QUIC 16,000-offer p99 median rose
+  21.9 → 23.8 ms in the 7-pair set (B runs: 8.4, 24.1, 26.5, 20.7, 23.8, 24.5,
+  8.2 ms) and fell 20.3 → 8.2 ms in the first set.
+- **Gate (plan §5.4).** Met: ≥4% lower total CPU per write in a TCP cell with
+  ≥4/5 pairs better (1,000/s: −8%, 5/5); rate within ±2% in every cell; busy
+  cores fall in every cell except TCP 15,000/s at 16,000 offers (0.570 → 0.577
+  at equal rate, +1%, within noise); idle CPU −5%. Not met: the secondary
+  single-process loop is +10% (all pairs), and the TCP 15,000/s marginal median
+  of totals is +4% (per-round ratio median 0.92). The G=4 cell is not run
+  (N0 limit: one group). Accepting N1 as is trades a lower p99 and less light-load
+  and QUIC CPU for lost batching at high TCP load; see the risks.
+
+### N1 risks observed
+
+- **Batching loss at high load** (above). Candidates, not built here: let N2
+  coalesce queued Appends per peer (it does not restore entries per Append);
+  allow more than one Append in flight per follower, or delay a non-urgent
+  Append by up to one round when the follower already has one in flight, so a
+  persist covers more entries; or flush only when the poll's replica step
+  produced control-class or latency-critical output. Each needs its own
+  measurement; the single-process loop is the most sensitive cell.
+- **Effect order.** The flush made a latent `[SnapshotRequired, Persist]`
+  ordering failure deterministic (fixed above). Other effect kinds still
+  append their continuation; no other failing shape was observed.
+- **Busy round length.** `max_host_poll_ms` in the single-process runs
+  0.10–0.66 ms for both revisions; no growth seen.
 
 ### N0 schema plan (before editing, 19 October 2026)
 
