@@ -24,7 +24,7 @@ are; LB references them for the audit's L1–L3 rows.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current ST2 (PR 14; rounds 1–4 implemented; round 5 implemented, in review: the append byte check on the validated new suffix, starvation rewrites at deadlines, documentation): checkpoints and WAL reclaim on by default, and a full WAL as retryable backpressure (audit C3, C4, RT4; probes U1, U5; ST2b) | With default flags all three binaries never checkpointed and never reclaimed the WAL, so every group stopped at 16,384 retained entries or 64 MiB of WAL, a failed automatic reclaim switched maintenance off silently, and a WAL that filled at append time failed the node. Make maintenance the library and binary default, make the opt-out explicit and visible, keep maintenance running through every non-fatal failure, make a new leader at the retained-entry cap refuse typed, and turn a full WAL into a typed retryable refusal with no node failure | — | Fail@main runtime and native soaks (recorded) pass past 16,384 entries and 64 MiB; slow-rewrite burst and follower tests fail node-fatally on 47646b4c and pass; opt-out plus cap gives a typed refusal and a stable leader; startup rejects maintenance settings that would fail at runtime; restart mid-checkpoint and mid-reclaim; native durable CPU/write within +2% of main; fmt, four strict Clippy configurations and matched fmt/Clippy; affected suites in default and all-features | LB |
+| Current ST2 (PR 14; rounds 1–5 implemented; round 6 implemented, in review: followers with a WAL room decide on bytes alone, admission reads the polled latch, documentation): checkpoints and WAL reclaim on by default, and a full WAL as retryable backpressure (audit C3, C4, RT4; probes U1, U5; ST2b) | With default flags all three binaries never checkpointed and never reclaimed the WAL, so every group stopped at 16,384 retained entries or 64 MiB of WAL, a failed automatic reclaim switched maintenance off silently, and a WAL that filled at append time failed the node. Make maintenance the library and binary default, make the opt-out explicit and visible, keep maintenance running through every non-fatal failure, make a new leader at the retained-entry cap refuse typed, and turn a full WAL into a typed retryable refusal with no node failure | — | Fail@main runtime and native soaks (recorded) pass past 16,384 entries and 64 MiB; slow-rewrite burst and follower tests fail node-fatally on 47646b4c and pass; opt-out plus cap gives a typed refusal and a stable leader; startup rejects maintenance settings that would fail at runtime; restart mid-checkpoint and mid-reclaim; native durable CPU/write within +2% of main; fmt, four strict Clippy configurations and matched fmt/Clippy; affected suites in default and all-features | LB |
 | Next NT1: connection generations and listener (audit N1, N3, N6) | Survivors no longer go to recovery after ~27.8 h with one peer down; a port scan cannot kill a node | Rebases on ST2's `native/startup.rs` hunk | Architect plan §3.3 row 2 | LB |
 | Following DR1: application deduplication retirement (audit S1–S3) | `counter_service` no longer refuses every write after 10,000 lifetime writes; the generic `SessionLedger` | — | Architect plan §3.3; Q1 probe harness | LB |
 
@@ -1545,6 +1545,100 @@ cd90fb7a has; `wal_admission_tests.rs` calls `Raft::wal_declined_appends()`
 **R6-4: docs.** `COUNTER_SERVICE.md` high-water and noop-reserve bullets:
 followers take data that fits under the mark whatever the latch; the stuck
 quorum cases and exactly which counters move in each; node and core comments.
+
+#### ST2 round 6 implemented and validated (20 October 2026)
+
+Code: `712485a9` (R6-1), `5b520bd2` (R6-3a), `b853f3ee` (R6-2, R6-4
+documentation), then this record. "Before" = the new tests run with
+1a90d7fc's `src/raft/receive.rs` (the only file R6-1 changes; the tests use
+no API newer than 1a90d7fc).
+
+| Finding | Mechanism | Test | 1a90d7fc | This branch |
+| --- | --- | --- | --- | --- |
+| Opus P2-1: latched followers decline data that fits | With a WAL room (`wal_room.is_some()`, always the case in a node while the high-water state can be set) a follower decides on the validated new suffix's bytes alone (data under `H`, noop-only under `H + R`); the latch declines data only for a host that gives no room. Client admission keeps the 75%/50% hysteresis | `capacity_tests::latched_followers_with_byte_room_take_the_leaders_old_term_tail` (Opus's procedure: node 1 holds 100 term-1 entries, nodes 2 and 3 hold 90; followers latched with 1 MiB data / 2 MiB noop room; node 1 campaigns) | Both followers latched: no commit (commit 0 after every one of 40 rounds; Opus: 400 rounds, `declined_appends` 401 each, `wal_declined_appends` (0, 0)). One latched (control): the group commits in the election's exchange, but the latched follower stays at index 90, declining | Both cases commit in the election's own exchange (before any heartbeat round); both followers at 101; no decline counted |
+| same, indicators | — | `a_stuck_follower_quorum_moves_exactly_the_documented_counters`: both followers short of data room under `H`; short of noop room under `H + R` (holding the tail, so the new suffix is the noop alone); past the retained-entry capacity | Passes (pins behaviour common to both) | Passes: in each case the leader keeps role and term 2, commit 0, no step-down, `replica_stall` ≥ 39 rounds; per follower `declined_appends` ≥ 40 and `wal_declined_appends` = (declined, 0), (declined, declined) and (0, 0) respectively, `wal_noop_refusals` 0; with room again the group commits, no snapshot |
+| Opus P3-1, P3-2 | — | — | — | round-5 evidence row and "before" note corrected (room set before received messages only; the one dropped assertion named) |
+| Opus P3-3 (a) | `Node::propose_maintenance` reads the latch the last poll computed; the byte bound is still enforced at every proposal's step | existing suites (runtime, startup backpressure, counter service, soaks) unchanged | — | — |
+| Opus P3-3 (b) | Not done: neither measured path runs the `Shard` with no budget (the framework drives `Raft` directly; a native node always has one), and skipping it needs a reset path for stale core inputs | — | — | — |
+| Docs | — | — | — | `COUNTER_SERVICE.md`: the high-water state refuses only client writes, followers take what fits the account; the three stuck-quorum cases with exactly the counters that move (`declined_appends`, `wal_declined_appends`, `wal_noop_refused`, `high_water`, `wal_noop_starved`, the leader's `replica_stall`) and their recovery; core and node comments |
+
+No assertion weakened, no existing test changed, no `allow` attribute added.
+
+**CPU (quiet Mac; own script copies in this worktree's `target/`, own
+private directory and RAM-disk WAL path on the Mac, removed afterwards; every
+batch waited for 5 quiet minutes and recorded foreign benchmark or build
+processes before and after each pair).** Serving only, round 4/5 protocol
+(`svc.sh`, RAM-disk WAL, `VOTEBOAT_BENCH_SKIP_RECOVERY=1` on both sides,
+15,000/s offered, marginal CPU per completed write between 2,000 and 16,000
+writes). Same-CRC base rebuilt by cherry-pick: 4920534e + `ba372cb4`,
+`5c9b6906`, `4be97a91` + `cf3de849` = local commit `d7a4283d` (not pushed;
+same content as round 4's `ad7ab7dc`).
+
+| Comparison | pairs | marginal µs/write (session medians) |
+| --- | --- | --- |
+| same-CRC base → b853f3ee, three sessions | 3 × 9 | 13.28 → 13.36 (×1.006), 13.16 → 13.96 (×1.061), 13.61 → 13.86 (×1.019) |
+| b853f3ee → same-CRC base (reversed), two sessions | 2 × 9 | 13.74 → 13.53 (×1.016 for the head), 13.62 → 13.29 (×1.025) |
+| **pairwise pooled** | **45** | **median pair ×1.039, mean ×1.049, 32 of 45 above 1** |
+| three builds interleaved, order rotated each round (base, round 5 1a90d7fc, round 6 b853f3ee), three sessions | 33 rounds | medians 13.44 / 13.97 / 13.70 |
+| **interleaved: base → round 6** | 33 | **×1.020** (pair median ×1.021, mean ×1.023, 22 of 33 above 1; sessions ×1.013, ×1.041, ×1.020) |
+| interleaved: base → round 5 | 33 | ×1.040 (sessions ×0.995, ×1.063, ×1.048) |
+| interleaved: round 5 → round 6 | 33 | ×0.981 (pair median ×0.992, 14 of 33 above 1) |
+| 1a90d7fc ↔ b853f3ee pairwise, both orders | 2 × 9 | ×0.959 and ×0.850 for round 6 (both sessions ran hot: medians 15.5–19.0 µs); pooled median pair ×0.969 |
+
+One further same-CRC session is discarded: another agent's build started
+during it (medians 18.6 µs, pairs 0.75–1.07). Applied rate ×1.00
+everywhere. **ST2's own serving cost on the final head is +2.0% CPU per
+completed write in the interleaved measurement (the fairest one: all three
+builds in the same minutes) and +3.9% by the pairwise pooled pair median;
+session medians range from +0.6% to +6.1%.** Round 6 itself measured
+×0.98–0.99 against round 5 in the same sessions, in the expected direction
+for removing per-proposal work but inside the session spread, so it is not
+claimed as a saving. The cost is not offset by the CRC change or by cheaper
+recovery and needs the user's explicit acceptance.
+
+Framework (`fwmac.sh` protocol, 4920534e → b853f3ee, two sessions of 7
+pairs; the framework drives `Raft` cores directly, so round 6 changes no
+framework path except one reordered condition in the follower check):
+
+| Cell | session 1 | session 2 | pooled 14 pairs (ns/write) |
+| --- | --- | --- | --- |
+| bulk | ×0.996 | ×0.996 | 249 → 248 (×0.996) |
+| single | ×1.013 | ×1.001 | 22,234 → 22,344 (×1.005) |
+| bulk-1 | ×1.005 | ×1.000 | 216 → 216 (×1.000) |
+| **single-1** | ×1.005 (5/7 above 1) | ×1.020 (6/7) | **12,812 → 12,926 (×1.009; pair median ×1.011, 11 of 14 above 1)** |
+
+single-1 instructions retired (`/usr/bin/time -l`, 7 interleaved runs each,
+medians): 4920534e 13.708 G, b853f3ee 13.777 G (+0.5%); cycles 4.654 G →
+4.683 G (+0.6%). **single-1 is about +1% CPU and +0.5% instructions against
+the merge base** (round 5 recorded ×1.018 and +1.4% in other sessions); it
+predates this round and is put to the user for explicit acceptance.
+
+**Checks.** `cargo +stable fmt --all -- --check`; strict Clippy (`-D
+warnings`, `--all-targets`) default, all-features, no-default-features and
+native-only, and matched fmt and strict Clippy: zero diagnostics. Suites on
+Linux cores 10–15, one configuration at a time. Default: lib 516 (1
+ignored), runtime 57, log_store 21, maintenance 10, snapshot 27,
+snapshot_worker 14, raft 79, log_reclaim 11, startup 52, effect_owner 216,
+counter_service 146, directory_service 18, transfer_service 25.
+All-features: lib 518 (1 ignored), runtime 57, log_store 21, maintenance 10,
+snapshot 27, snapshot_worker 14, raft 79, log_reclaim 11, startup 67,
+effect_owner 216, counter_service 205, directory_service 23,
+transfer_service 34. All passed. Soaks (release, all features): runtime
+163,840 writes, last index 163,920, max retained 12,298, 75 typed retried
+refusals; native 163,840 writes, 671,088,640 bytes, max WAL 33,031,095 of
+66,060,288, max retained 7,582, 21 rewrites;
+`two_soak_runs_in_simulated_time_have_identical_traces` identical (24,588,
+10,247, 122,978 ms) — the same values as rounds 3–5. Pre-push hook ran and
+passed (not bypassed).
+
+**Open.** Unchanged from round 5: snapshot-install anchor growth argued, not
+tested; a live state recovered past `H + R` is reported through capacity
+refusal, not refused at construction; an exhausted quorum (now only when
+the bytes or entries do not fit, not at the 50% latch) keeps its leader
+until the operator gives the full replicas room. Still open from rounds 2–4:
+snapshot-store barrier fsync (device identification); a leader clears
+in-flight replication requests at compaction; pre-vote/check-quorum not
+added.
 
 #### Design-pack amendment realised by ST2 (pack preserved)
 
