@@ -1,5 +1,59 @@
 # Implementation record
 
+## PR23 cumulative source reconciliation (21 October 2026; planned, qualification pending)
+
+This is reconciliation of existing N1c, not a new slice or a keep decision.
+Pinned inputs: N1c `44b95083e96f7b09ab4e900ed4e1c25042896c2a` and DR1
+`b0ff8c0fa9b2f777363352ebc38ae4f477030431`. DR1 contains main
+`bd714771e181d59c2cfaece3fc93dc411ce41ddb` (V3f retained) and **unqualified**
+ST2 `219ad7bb8489c19012c8298d1021ddd959861782`. These dependencies are not
+claimed merged or fully green. DR1's reported 390 focused tests and lint/hook
+checks pass; its full gate and two fresh independent Sol confirmations are
+pending. ST2 default startup is reported 52 pass / 3 fail; its clock hypothesis
+is unverified and diagnosis/repair belongs to its owner, not this reconciliation.
+
+### Linked macro and mini plans
+
+Macro NW1 remains cheaper usable networked writes and Rust embedding. This
+reconciliation advances source composition only; no roadmap expansion, online
+membership prerequisite, N1 flush, N1d release or d2 deadline change is added.
+
+| Mini deliverable | Purpose | Dependencies | Completion checks | Macro |
+| --- | --- | --- | --- | --- |
+| Current: reconcile PR23 cumulative source | Preserve both histories and approved holds with V3c sink, V3d stamp, V3e peer slots, V3f in-place install, EO1 order, ST2 admission/WAL/no-op/slots and DR1 EntryBatch/readiness/session protocol | Exact pins above, existing APIs | Focused default/all holds, original effect-owner 7/logical-voter 2, terminal and Counter integration; root fmt, four strict Clippy configs, matched fmt/Clippy and actual enabled pre-push hook; publish nonforce to existing PR23 | NW1 |
+| Next: parent dependency/source qualification | Establish reviewable stable cumulative inputs | Replacement ST2 dependency from owner; DR1 gates; published reconciliation | Fresh independent Sol confirmations and parent-owned full suites; record failures honestly | NW1 |
+| Following: parent exact cumulative comparison/decision | Judge this composition fairly | Stable qualified cumulative candidate and baseline | Parent measures exact heads with matching 16-byte Counter/session protocol and flags, then keep/reject/main integration decision | NW1 |
+
+### Reconciliation/schema plan (before source editing)
+
+- Data/API: reuse N1c's peer-bounded volatile held marks/ack order and per-group
+  timer deadlines. Adapt only existing interfaces for DR1 EntryBatch and Counter
+  session-1 operation IDs/16-byte commands; preserve history/index/window and
+  retained-byte assertions. No new public API, hold policy or batching strategy.
+- State/ownership: one correlated request per follower; holds require nonzero
+  confirmed prefix (data >= batch floor; notices >= last). In-flight coverage
+  must extend that prefix and decides scheduling only, never durable commitment.
+  Exact ack/frontier/current-term rules remain fixed. Commit notices may be held
+  in any group size, including two voters; data needs quorum coverage without
+  that peer. Byte-truncated release can safely rehold the spare mid-batch.
+- Failure/cleanup: preserve learner/catch-up/probe/configuration/transfer/
+  compaction/rejection/heartbeat paths and EO1 continuation position. Existing
+  explicit ReleaseHeldAppends fixtures and intentionally frozen clocks remain;
+  facade Heartbeat is admitted only after owner drain. No blanket eager sends.
+- Restart/partial progress: holds are volatile and cleared on role/configuration
+  reset; ST2 durable no-op/WAL/admission and DR1 session/checkpoint behavior remain
+  authoritative. Partial byte-limited sends retain exact correlated ranges;
+  late polls and per-group deadlines must still release via real timer admission.
+- Checks: focused integration only, sequential features, cores 10–11/nice 19/two
+  Cargo jobs/CARGO_INCREMENTAL=0; guard before builds; no full matrix, research,
+  performance/Mac rerun or competing ST2 diagnosis. Record actual commands/logs
+  separately from historical evidence, then sweep only this checkout.
+
+### Implemented evidence
+
+Pending: no source reconciliation, checks or cumulative qualification claimed
+at plan creation. Historical N1c evidence below remains historical context.
+
 ## Networked CPU track (pillar 2, opened 19 October 2026)
 
 Score: CPU (user+sys) per completed write, summed over every node process, at
