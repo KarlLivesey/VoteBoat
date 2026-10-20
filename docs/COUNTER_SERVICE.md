@@ -1152,8 +1152,11 @@ Defaults, derived from the store limits:
   once they have room again.
 - **Configuration checks.** Startup refuses store limits under which a write
   could never fit: the WAL space above the 75% mark must hold the largest
-  batch plus the control reserve (`MaintenanceError::WalHeadroomTooSmall`),
-  and a log worker refuses a batch limit larger than the usable WAL
+  batch plus the control reserve (`MaintenanceError::WalHeadroomTooSmall`):
+  with the default mark, `max_wal_bytes` must be at least
+  `4 × (max_batch_bytes + control_reserve_bytes) + control_reserve_bytes`
+  (the defaults, 1 MiB batches, a 1 MiB reserve and a 64 MiB WAL, leave
+  15.75 MiB for 2 MiB), and a log worker refuses a batch limit larger than the usable WAL
   (`WorkerError::InvalidLimits`). Maintenance intervals above 24 hours are
   refused (`InvalidLimits`, or a startup error for `--wal-reclaim-ms`), so a
   huge interval cannot overflow the next deadline. This is not a proof that

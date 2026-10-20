@@ -24,7 +24,7 @@ are; LB references them for the audit's L1–L3 rows.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current ST2 (PR 14; rounds 1–5 implemented; round 6 implemented, in review: followers with a WAL room decide on bytes alone, admission reads the polled latch, documentation): checkpoints and WAL reclaim on by default, and a full WAL as retryable backpressure (audit C3, C4, RT4; probes U1, U5; ST2b) | With default flags all three binaries never checkpointed and never reclaimed the WAL, so every group stopped at 16,384 retained entries or 64 MiB of WAL, a failed automatic reclaim switched maintenance off silently, and a WAL that filled at append time failed the node. Make maintenance the library and binary default, make the opt-out explicit and visible, keep maintenance running through every non-fatal failure, make a new leader at the retained-entry cap refuse typed, and turn a full WAL into a typed retryable refusal with no node failure | — | Fail@main runtime and native soaks (recorded) pass past 16,384 entries and 64 MiB; slow-rewrite burst and follower tests fail node-fatally on 47646b4c and pass; opt-out plus cap gives a typed refusal and a stable leader; startup rejects maintenance settings that would fail at runtime; restart mid-checkpoint and mid-reclaim; native durable CPU/write within +2% of main; fmt, four strict Clippy configurations and matched fmt/Clippy; affected suites in default and all-features | LB |
+| Current ST2 (PR 14; rounds 1–6 implemented; round 7 implemented, in review: the nested logical fixture's physical WAL is sized for the I5 headroom rule; full default and all-features suites pass): checkpoints and WAL reclaim on by default, and a full WAL as retryable backpressure (audit C3, C4, RT4; probes U1, U5; ST2b) | With default flags all three binaries never checkpointed and never reclaimed the WAL, so every group stopped at 16,384 retained entries or 64 MiB of WAL, a failed automatic reclaim switched maintenance off silently, and a WAL that filled at append time failed the node. Make maintenance the library and binary default, make the opt-out explicit and visible, keep maintenance running through every non-fatal failure, make a new leader at the retained-entry cap refuse typed, and turn a full WAL into a typed retryable refusal with no node failure | — | Fail@main runtime and native soaks (recorded) pass past 16,384 entries and 64 MiB; slow-rewrite burst and follower tests fail node-fatally on 47646b4c and pass; opt-out plus cap gives a typed refusal and a stable leader; startup rejects maintenance settings that would fail at runtime; restart mid-checkpoint and mid-reclaim; native durable CPU/write within +2% of main; fmt, four strict Clippy configurations and matched fmt/Clippy; affected suites in default and all-features | LB |
 | Next NT1: connection generations and listener (audit N1, N3, N6) | Survivors no longer go to recovery after ~27.8 h with one peer down; a port scan cannot kill a node | Rebases on ST2's `native/startup.rs` hunk | Architect plan §3.3 row 2 | LB |
 | Following DR1: application deduplication retirement (audit S1–S3) | `counter_service` no longer refuses every write after 10,000 lifetime writes; the generic `SessionLedger` | — | Architect plan §3.3; Q1 probe harness | LB |
 
@@ -1639,6 +1639,104 @@ until the operator gives the full replicas room. Still open from rounds 2–4:
 snapshot-store barrier fsync (device identification); a leader clears
 in-flight replication requests at compaction; pre-vote/check-quorum not
 added.
+
+#### ST2 round 7 schema plan (written before editing, 20 October 2026)
+
+*Finding.* The orchestrator's exclusive full default-feature run on
+`27ac5bbe` failed five `tests/logical_nested_native` tests (no builder round
+had run that binary): `actual logical child assembly:
+Maintenance(WalHeadroomTooSmall { headroom: 16515072, required: 34635776 })`
+at `cluster.rs:170`.
+
+*Diagnosis.* The failing node is the nested child's *physical* native node,
+built from `setup::profile::physical_log_limits()`: `max_command_bytes` =
+the lower logical command (1,069,056), `max_batch_bytes = max(2 × command,
+transport decoded_bytes)` = `max(2,138,112, 33,587,200)` = 33,587,200, and
+`LogLimits::default()` for the rest (`max_wal_bytes` 64 MiB,
+`control_reserve_bytes` 1 MiB). So `U` = 66,060,288, `H` = 75% of `U` =
+49,545,216, headroom `U − H` = 16,515,072, and `required` =
+`max_batch_bytes + R` = 33,587,200 + 1,048,576 = 34,635,776. The ~32 MiB
+term is the fixture's own batch ceiling (`decoded_bytes` = 2 × the 16 MiB
+child-checkpoint frame), not a default ST2 introduced; ST2 only made the
+check run at construction (U5). The logical setup limits named in the brief
+(8,192 and 64 KiB) are the logical *parent* logs inside the application;
+their persistence publishes no WAL occupancy (`wal_usage()` is `None`), so
+the check does not apply to them.
+
+*Decision: (a), test fixture only.* I5 as proved (rounds 3–4): the live
+image a rewrite produces satisfies `L ≤ H + R`; the configuration rule
+`U − H ≥ max_batch_bytes + R` then gives `L + max_batch_bytes ≤ U`, so any
+held batch, whatever records it carries, fits after one rewrite. The proof
+does not use that a held batch's entries are already inside `A`; that would
+also need a bound on the records a batch carries outside the account (vote,
+term, commit, truncation and per-group image records, up to
+`max_groups` = 4,096 groups per batch here), which no code establishes. With
+this fixture `L + max_batch_bytes` can reach 49,545,216 + 1,048,576 +
+33,587,200 = 84,180,992 > `U` = 66,060,288: the guarantee cannot be shown, so
+the typed construction refusal is the correct outcome and loosening the rule
+would drop a proved guarantee for an unproved one. Change: the fixture sizes
+its physical WAL from the rule, `max_wal_bytes = 4 × (max_batch_bytes + R) +
+R` = 139,591,680 (`U` = 138,543,104, `H` = 103,907,328, headroom exactly
+34,635,776), plus a fixture assertion of the rule. No test assertion
+changes. The store does not preallocate (`set_len` only on rewrite), so the
+larger ceiling costs no disk until written; the owner effect budget grows by
+the WAL ceiling (`startup_owner_limits`), still under its 4 GiB cap (checked
+by the run).
+
+*Deployments.* `LogLimits::default()` (1 MiB batch, 1 MiB reserve, 64 MiB
+WAL: headroom 16,515,072 ≥ 2,097,152) is what the three service binaries
+(`counter_setup`, and `prepare_for_discovery`'s default limits) and the
+native benchmark use: unaffected. The logical voter's parent/child logical
+logs publish no WAL occupancy: unaffected. Only a host choosing
+`max_batch_bytes + R` above a quarter of the usable WAL is refused, typed, at
+construction; `COUNTER_SERVICE.md` gets the sizing rule.
+
+*Checks.* The five tests pass; the full default suite and the full
+all-features suite (`representative_relay_model` alone), every failure named;
+fmt, four strict Clippy configurations, matched fmt/Clippy, the two soaks and
+the identical-trace test. No CPU re-measure: no library code changes.
+
+#### ST2 round 7 implemented and validated (20 October 2026)
+
+Change: `tests/logical_nested_native/setup/profile.rs` only (decision (a)
+above): `physical_log_limits()` sets `max_wal_bytes = 4 × (max_batch_bytes +
+control_reserve_bytes) + control_reserve_bytes` = 139,591,680, and the
+profile test asserts that value and the headroom rule. No library code, no
+test assertion and no existing expectation changed; `COUNTER_SERVICE.md`
+states the sizing rule. No CPU re-measure: the per-write path is unchanged.
+
+| Finding | Before (27ac5bbe) | After |
+| --- | --- | --- |
+| Five `logical_nested_native` tests refused at child assembly | `WalHeadroomTooSmall { headroom: 16515072, required: 34635776 }` at `cluster.rs:170` in all five | all 13 tests of the binary pass (15 with all features) |
+
+**Full suites (Linux cores 10–15, `-j 4`, one configuration at a time, every
+target run: lib, bins, examples, doc tests and all 116 integration test
+binaries).** The 10-minute tool limit per command meant running target by
+target: `routed` (all features) in six filter chunks covering its 192 tests,
+and `representative_relay_model`'s exhaustive
+`strict_physical_voter_relay_graphs_exhaust_without_unsafe_release` in a
+release build of the same test (542 s default, 465 s all features; it does
+not finish within 10 minutes in a debug build), its other 8 tests in debug.
+
+| Configuration | passed | failed | ignored |
+| --- | --- | --- | --- |
+| default | 2,557 | 0 | 1 |
+| `--all-features` | 2,871 | 0 | 1 |
+
+No failing test in either configuration. fmt; strict Clippy default,
+all-features, no-default-features and native-only; matched fmt and strict
+Clippy: zero diagnostics. Soaks (release, all features): runtime 163,840
+writes, last index 163,920, max retained 12,298, 75 typed retried refusals;
+native 163,840 writes, 671,088,640 bytes, max WAL 33,031,095 of 66,060,288,
+max retained 7,582, 21 rewrites;
+`two_soak_runs_in_simulated_time_have_identical_traces` identical (24,588,
+10,247, 122,978 ms) — the same values as rounds 3–6.
+
+**Open.** A tighter headroom rule (counting only the records a held batch
+carries outside the WAL account, instead of the whole batch) would admit
+configurations like this fixture's default 64 MiB WAL; it needs a proven
+bound on those records and is not part of ST2. Everything else unchanged
+from round 6.
 
 #### Design-pack amendment realised by ST2 (pack preserved)
 
