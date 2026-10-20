@@ -712,6 +712,115 @@ lifetime 4, effect_owner 210, leadership_maintenance 12, learners 25,
 logical_activation_application 7, counter_service 146. Matched workspace: by
 the pre-push hook.
 
+#### DR1 round 4 schema plan (20 October 2026, before editing; PR 15)
+
+GPT-6.1-Sol's round-3 review (5579277176) requested changes: no P1; three P2s
+(nested activation identity cancels, Routed and the other bootstrap-binding
+wrappers admit a skewed inner profile at readiness, an unchecked add in the
+restore history bound) and one P3 (two more unreachable restore states). Why
+these pieces and no others: each closes one reviewed defect in the identity or
+restore checks this PR added; nothing here is a new feature, and nothing
+touches the per-write path.
+
+1. **Composed schemas are injective; nesting is refused (P2-1).**
+   - *Cause.* `LOGICAL_ACTIVATION_SCHEMA ^ inner` is an involution, so
+     `Activation<Activation<Counter>>` reports the plain Counter's schema.
+     `Maintenance`'s `format << 60 | inner` has the same weakness across
+     wrappers: `Activation<Maintenance<..>>` XORs into the same top nibble.
+   - *Data shape.* One layer table, `crate::application::layered_schema(tag,
+     inner)`: `tag << 60 | inner`, defined only for `tag` in a reserved set and
+     `inner` non-zero below 2^60. Tags: maintenance profile formats 1..=4
+     (`MAX_MAINTENANCE_FORMAT` 15 → 4), logical activation 8. Nibble 5 stays
+     free because in-tree leaf schemas above 2^60 all start with ASCII `V`
+     (0x56); other nibbles are reserved. `maintenance_schema(f, inner) =
+     layered_schema(f, inner)`, `logical_activation_schema(inner) =
+     layered_schema(8, inner)` returning `Option`.
+   - *Why injective.* A composed schema decodes uniquely to (tag, inner); every
+     composed schema is at or above 2^60 and every accepted inner is below, so
+     one layer never equals a leaf, and a second composing layer is impossible
+     (its inner would be at or above 2^60). So the in-tree domain {leaves below
+     2^60} ∪ {one maintenance or activation layer over such a leaf} is mapped
+     injectively, and every other composition is refused at construction.
+   - *Failure path.* `LogicalActivationApplication::new` and `Maintenance::new`
+     return `Err(UnsupportedSchema)` for an inner schema at or above 2^60 (a
+     nested composed wrapper, or a leaf outside the domain); nothing is
+     constructed. `LogicalActivationControlProfile` refuses the same inner
+     schemas.
+   - *Formats.* Activation schemas change from `0x5642…^inner` to `8 << 60 |
+     inner`: the activation goldens (`v2-empty/-populated/-profile`, enrollment
+     `v6-candidate-*`) are regenerated, only the schema fields and CRCs change.
+     Maintenance formats 5..=15 become invalid (none is used).
+   - *Tests.* Sol's `p2_nested_activation_identity_cancels` kept permanently,
+     asserting the double wrapper is refused at construction; a domain test that
+     every pair among {Counter limits sample} × {plain, maintenance 1..=4,
+     activation} has distinct schemas and every nested pair is refused.
+2. **Readiness compares the whole wrapper stack (P2-2).**
+   - *Cause.* `RoutedApplication`, the scoped and plain transfer sources, the
+     transfer target, `CreatedNamespace` and `RetirementGuard` declare a fixed
+     outer schema; the inner profile reaches peers only in the committed
+     bootstrap binding, so a skewed replica is admitted and then fails a
+     committed entry. Those outer schemas are protocol constants (shared with
+     transfer images, routed checkpoints and directory status), and the stack
+     below them (for example `ScopedTransferSource → Routed → Counter`) does not
+     fit a 64-bit identity, so the fix carries the stack beside the schema.
+   - *Data shape.* `crate::raft::InnerProfile`: a hash-free structural identity,
+     the readiness schemas of the applications below the outer one, outermost
+     first, at most `MAX_INNER_PROFILE_LAYERS` = 7 (`Copy`, fixed array plus a
+     length; an overflow marker if a generic stack is deeper). New field
+     `ReadinessRequirements::inner_profile`; `InnerProfile::LEAF` (no layers)
+     for leaf applications. A wrapper sets it to `InnerProfile::wrapping(inner)`
+     = the inner's schema followed by the inner's own profile, from the inner's
+     declared requirements (or its `schema_version` if it declares none).
+     Wrappers: Maintenance, activation, Routed, `TransferSource`,
+     `ScopedTransferSource`, `TransferTarget`, `CreatedNamespace`,
+     `RetirementGuard`; `RoutedControlReads` forwards.
+   - *Readiness compare.* `validate_deployment_requirements` (default and the
+     Counter's override) refuses `UnsupportedSchema` unless the declared profile
+     equals the actual one layer for layer, and refuses an overflowed profile.
+     The learner readiness wire frame carries the profile (a count byte, then
+     u64 schemas; the decoder refuses a count above 7 or a zero schema, the
+     encoder refuses an overflowed profile). No persisted format holds
+     requirements, so only the wire frame changes (unpublished; no migration).
+   - *Ownership/cleanup.* Pure values; no state, nothing to clean up. The
+     committed startup record stays as defence in depth.
+   - *Tests.* Sol's `startup_binding_does_not_refuse_skew_at_readiness`
+     permanently (both directions refused before any entry), plus one per
+     wrapper family whose readiness is reachable in a unit test, and a wire
+     round trip with a two-layer profile and refusals of 8 layers and a zero
+     layer. Docs: correct the claim that Routed's only in-tree inner
+     application is `BucketCounter` (`tests/routed.rs` wraps Counter).
+3. **Restore never panics on a decoded value (P2-3).**
+   - *Cause.* `(id + 1).saturating_sub(first)` runs before `id < next_session`
+     is checked; `id = u64::MAX` overflows.
+   - *Change.* Check `id == 0 || id >= next_session` first, then compute the
+     bound with checked arithmetic. Audit of every `+`, `-`, `*` on a decoded
+     value in the ledger decoder (`decode`, `decode_session`,
+     `decode_registration`, `allocation_fence_holds`, `nonces_are_reachable`,
+     `Lru`) and the Counter restore: each made checked or shown guarded, listed
+     in the implemented record.
+   - *Tests.* Sol's `restore_invalid_max_session_id_must_not_panic` (bare
+     ledger) and `restore_counter_invalid_max_session_id_must_not_panic` (Counter
+     bytes 68..76), both `InvalidCheckpoint` with the target unchanged.
+4. **Two more unreachable restore states (P3).**
+   - (a) A nonce-less unused session is dropped by a later registration, which
+     allocates a newer ID, and one registration drops at most one nonce. Check:
+     with nonce-less unused sessions `u_1 < … < u_k`, the sessions allocated
+     after `u_j` number at least `k − j + 1` (`next_session − 1 − u_j ≥ k − j +
+     1`). Sol's state (newest session nonce-less, `Rg = 1`) fails it.
+   - (b) Each retained receipt is a distinct execution entry after the
+     session's registration. Check: last use ≥ registered-by + retained count
+     (registered-by 0 for the built-in session). Sibling, global: allocations +
+     total retained receipts + (1 if a closure record) ≤ applied, since each of
+     those is its own entry.
+   - These remain structural checks, not a reachability proof; the record says
+     so.
+   - *Tests.* Sol's two states and the global sibling, `InvalidCheckpoint`.
+5. **Regression and CPU.** Keep every earlier fix and test. Before/after: a
+   temporary probe target run with 120e9cab's, ece18fc4's, 3a824ff5's and this
+   branch's `src/` in this worktree. CPU: not re-measured. Readiness profiles are
+   built and compared only on the membership/readiness paths, and the decoder
+   runs only on restore; the Counter apply and admission paths are unchanged.
+
 ## Logical-voter reliability track (opened 18 October 2026)
 
 Goal: logical parents and their backing children run indefinitely with bounded
