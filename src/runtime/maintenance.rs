@@ -332,14 +332,14 @@ impl WalMaintenanceStatus {
     }
     /// Due at the interval deadline when at least `min_reclaim_bytes` are
     /// reclaimable (occupancy minus the `live` retained-log estimate); a
-    /// deadline with less just moves on one interval. Due early when the
-    /// occupancy passes half the capacity and at least an eighth of it is
-    /// reclaimable, at most once per `retry_ms`. In the high-water state the
-    /// early rewrite needs only `min_reclaim_bytes`; with a held batch, any
-    /// growth since the last rewrite (compaction records mean checkpoints
-    /// freed space the live estimate may not show), and the same after a
-    /// refused noop (R4-1). A provider that publishes no occupancy is
-    /// rewritten at every deadline.
+    /// deadline with less moves on one interval and is then checked like any
+    /// other poll (R5-2). Due early when the occupancy passes half the
+    /// capacity and at least an eighth of it is reclaimable, at most once per
+    /// `retry_ms`. In the high-water state the early rewrite needs only
+    /// `min_reclaim_bytes`; with a held batch, any growth since the last
+    /// rewrite (compaction records mean checkpoints freed space the live
+    /// estimate may not show), and the same after a refused noop (R4-1). A
+    /// provider that publishes no occupancy is rewritten at every deadline.
     pub(super) fn due(
         &mut self,
         now: MonoTime,
@@ -359,7 +359,8 @@ impl WalMaintenanceStatus {
             }
             self.next_deadline = self.after(now, false);
             self.skipped = self.skipped.saturating_add(1);
-            return None;
+            // R5-2: a poll that lands on every deadline must still reach the
+            // early rules below (held batch, refused noop), or they never run.
         }
         let usage = usage.filter(|u| self.high_water || pressure(Some(*u)))?;
         let spaced = self
@@ -664,6 +665,139 @@ mod tests {
         state.note_noop_refusals(3);
         // Grown since the last rewrite: due again, spaced by `retry_ms`.
         assert_eq!(state.due(MonoTime(200), usage(591, 0), 591), Some(policy));
+    }
+    fn ticket(sequence: u64) -> ReclaimTicket {
+        ReclaimTicket {
+            binding: WorkerBinding {
+                store: crate::identity::StoreBinding {
+                    identity: crate::identity::StoreIdentity {
+                        id: crate::identity::StoreId::new(1).unwrap(),
+                        incarnation: crate::identity::StoreIncarnation::new(1).unwrap(),
+                    },
+                    session: crate::identity::StoreSession::new(1).unwrap(),
+                },
+                generation: crate::identity::StorageWorkerGeneration::new(1).unwrap(),
+            },
+            sequence,
+        }
+    }
+    /// Submit and complete one successful rewrite at `now` to `after_bytes`.
+    fn rewrite(state: &mut WalMaintenanceStatus, sequence: u64, now: MonoTime, after_bytes: usize) {
+        state.submitted(ticket(sequence), now);
+        state.completed(
+            ReclaimEvent {
+                request: ticket(sequence),
+                result: Ok(LogReclaimed {
+                    before_bytes: after_bytes,
+                    after_bytes,
+                }),
+            },
+            now,
+        );
+    }
+    /// ST2 round 5 (R5-2), Sol's round-4 reproduction: every host poll lands
+    /// on the interval deadline, where too little is reclaimable for the
+    /// interval rule. The refused-noop rule must still run there: the WAL
+    /// grew since the last rewrite, so a rewrite is due. On cd90fb7a the
+    /// deadline branch returned first: 0 rewrites in 100 polls, `skipped`
+    /// 100, `noop_starved` still set.
+    #[test]
+    fn refused_noop_gets_a_rewrite_when_every_poll_is_a_deadline() {
+        let ceiling = 4608 * 1024;
+        let capacity = ceiling - 64 * 1024;
+        assert_eq!(capacity, 4_653_056);
+        check_wal_headroom(
+            Some(WalUsage {
+                bytes: 0,
+                capacity,
+                parked: 0,
+            }),
+            DEFAULT_HIGH_WATER_PERCENT,
+            1024 * 1024,
+            64 * 1024,
+        )
+        .unwrap();
+        let mut state = WalMaintenanceStatus::default();
+        let policy = WalMaintenancePolicy::for_ceiling(ceiling);
+        assert_eq!(policy.min_reclaim_bytes, 294_912);
+        state
+            .configure(Some(policy), MonoTime(0), Some(ceiling))
+            .unwrap();
+        state.note_noop_refusals(1);
+        let live = 3_554_000;
+        let mut rewrites = 0;
+        for n in 1..=100u64 {
+            let now = MonoTime(1000 * n);
+            let usage = Some(WalUsage {
+                bytes: 3_555_000 + n as usize / 2,
+                capacity,
+                parked: 0,
+            });
+            assert!(state.update_high_water(usage));
+            if state.due(now, usage, live).is_some() {
+                rewrites += 1;
+                break;
+            }
+        }
+        assert_eq!(rewrites, 1, "skipped {}", state.skipped);
+        assert_eq!(state.skipped, 1, "the deadline still moved on");
+    }
+    /// R5-2: at deadlines the starvation rule keeps its `retry_ms` spacing
+    /// and its "grown since the last rewrite" condition. Here the interval
+    /// (10 ms) is shorter than the spacing (100 ms) and every poll is a
+    /// deadline: rewrites come at most once per 100 ms while the WAL grows
+    /// and refusals continue, and never once it stops growing.
+    #[test]
+    fn starvation_rewrites_at_deadlines_keep_their_spacing_and_need_growth() {
+        let ceiling = 1600;
+        let mut state = WalMaintenanceStatus::default();
+        let policy = WalMaintenancePolicy {
+            interval_ms: 10,
+            retry_ms: 100,
+            ..WalMaintenancePolicy::for_ceiling(ceiling)
+        };
+        state
+            .configure(Some(policy), MonoTime(0), Some(ceiling))
+            .unwrap();
+        let usage = |bytes| {
+            Some(WalUsage {
+                bytes,
+                capacity: ceiling,
+                parked: 0,
+            })
+        };
+        let mut attempts = Vec::new();
+        let mut bytes = 600;
+        let mut refusals = 0;
+        for n in 1..=100u64 {
+            let now = MonoTime(10 * n);
+            assert_eq!(state.next_deadline, Some(now), "every poll a deadline");
+            bytes += 1;
+            refusals += 1;
+            state.note_noop_refusals(refusals);
+            state.update_high_water(usage(bytes));
+            if state.due(now, usage(bytes), bytes).is_some() {
+                attempts.push(now.0);
+                rewrite(&mut state, n, now, bytes);
+            }
+        }
+        assert!(attempts.len() >= 2, "{attempts:?}");
+        assert!(
+            attempts.windows(2).all(|w| w[1] - w[0] >= policy.retry_ms),
+            "{attempts:?}"
+        );
+        // A rewrite at the current size, then no growth: no rewrite at any
+        // later deadline, however many refusals follow.
+        rewrite(&mut state, 101, MonoTime(1000), bytes);
+        let last = attempts.len();
+        for n in 101..=200u64 {
+            let now = MonoTime(10 * n);
+            refusals += 1;
+            state.note_noop_refusals(refusals);
+            state.update_high_water(usage(bytes));
+            assert_eq!(state.due(now, usage(bytes), bytes), None, "at {}", now.0);
+        }
+        assert_eq!(attempts.len(), last);
     }
     /// ST2 round 3 (I2): the entry gate has the WAL gate's hysteresis.
     #[test]
