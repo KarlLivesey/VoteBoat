@@ -19,9 +19,20 @@ design pack is unchanged.
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Done N0: three-process cluster harness (merged 20 October 2026 in PR 17, head 73605e48; rounds 1–4 and baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test on OS-selected ports; script self-test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
-| Current EO1: effect-owner continuations keep the released effect's position (split from PR 19; implemented, evidence below, PR open) | Remove a pre-existing availability loss: a loaded snapshot's Send queued behind a same-step Persist fenced the owner during snapshot catch-up under write load | — (on main) | Owner unit tests below fail on main and pass with the rule; mutation reverts fail both; witness test ×10 all-features; fmt, four strict Clippy builds, matched fmt/Clippy; effect_owner, runtime, native_member_startup, snapshot, snapshot_worker, counter_service in default and all-features | NW1 (unblocks N1) |
+| Done EO1: effect-owner continuations keep the released effect's position (split from PR 19; merged 20 October 2026 in PR 20, head 364b45f9) | Remove a pre-existing availability loss: a loaded snapshot's Send queued behind a same-step Persist fenced the owner during snapshot catch-up under write load | — (on main) | Owner unit tests below fail on main and pass with the rule; mutation reverts fail both; witness test ×10 all-features; fmt, four strict Clippy builds, matched fmt/Clippy; effect_owner, runtime, native_member_startup, snapshot, snapshot_worker, counter_service in default and all-features | NW1 (unblocks N1) |
 | Then N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline; EO1 (PR 19 rebases on it) | Plan §5.3 tests and §5.4 gate | NW1 |
 | Then N2: per-peer frame coalescing | One frame per peer per round across groups | N1; a G=4 cell on the N0 harness (see N0 limits) | Plan §4 row 2 | NW1 |
+
+### EO1 merge record (20 October 2026, PR 20 → main)
+
+Reviews: GPT-6.1-Sol approve round 1; Claude Opus 5.5 approve round 1 with a
+P2 asking for a real-core regression, folded in round 2 (orchestrator) as
+`tests/snapshot_routes/eo1_repro.rs`: on main it fails with `ProviderContract`
+at the commit Persist, with the rule it passes. Exclusive suites on head
+`364b45f9` (`target/claude/research-r4/pr20-suites/`): checks 7/7 clean;
+default 2,597 / 0; no-default 1,331 / 0 plus `representative_relay_model`
+9 / 0 alone; all-features 2,900 / 0 plus the relay model 9 / 0 alone;
+native-only 1,918 / 0; matched 75 / 0.
 
 ### EO1 schema plan (before editing, 20 October 2026)
 
