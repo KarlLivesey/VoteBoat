@@ -26,7 +26,11 @@ design pack is unchanged.
 ### EO1 schema plan (before editing, 20 October 2026)
 
 - **Bug (on main).** A leader step can emit `[SnapshotRequired, Persist]`
-  (`After::LeaderAppend`: `broadcast_append_progress_into` re-emits
+  when the leader alone forms a quorum and a non-voting replica needs the
+  image (for example a compacted single-voter group growing by a learner);
+  with a three-voter majority the same shape needs N1's earlier sends, because
+  follower acknowledgements are only processed after the leader's own
+  durability (`After::LeaderAppend`: `broadcast_append_progress_into` re-emits
   `SnapshotRequired` for a follower in snapshot catch-up, then
   `maybe_commit_into` pushes `Persist(commit)` last). The owner leases the
   front effect; when the image loads, `complete_effect_inner` appended the
@@ -87,7 +91,10 @@ design pack is unchanged.
   deterministic, no I/O, white-box queue construction on the existing fixture,
   generalised to N groups).** (1) `[SnapshotRequired, Persist]`, complete the
   lease with one Send: the next leases are Send then Persist, and
-  `submit_persists` accepts the Persist. Fails on main with `ProviderContract`.
+  `submit_persists` accepts the Persist. Under the `extend` mutation it fails at
+  the queue assertion before `submit_persists` runs; the real-core regression
+  `snapshot_routes::eo1_repro` (reviewer-supplied) fails on main with
+  `ProviderContract`.
   (2) Two visits each `[SnapshotRequired, …, Persist]`, both leased, the later
   lease completes first (with a two-Send continuation): each queue keeps the
   continuation in the released effect's place and order, and both Persists
