@@ -20,7 +20,7 @@ design pack is unchanged.
 | --- | --- | --- | --- | --- |
 | Done N0: three-process cluster harness (merged 20 October 2026 in PR 17, head 73605e48; rounds 1–4 and baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test on OS-selected ports; script self-test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
 | Current N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline | Plan §5.3 tests and §5.4 gate | NW1 |
-| Current N1c: held follower Appends (quorum-first; PR against main) | Restore follower Append size under N1 without commit latency: each new leader batch goes at once only to the followers a quorum needs; a ready, caught-up follower the quorum does not need is held until the next leader batch is durable (bounded by `TimerConfig::append_hold_ms`, default 1 ms, and the heartbeat) | N1 (PR 19) and the N1b step-0 counters (PR 22, measurement only); main `12fb21de` | Schema plan below; deterministic core and simulated-time runtime tests (a)–(f) with two mutations; N1c alone and N1c + N1 against main on the five N0 cells (5 ABBA rounds) and `nat.sh` (5 pairs) with the PR 22 counters; the N1b gate | NW1 |
+| Current N1c: held follower Appends (quorum-first; PR against main; built, gate not cleared at the 1 ms default, evidence below) | Restore follower Append size under N1 without commit latency: each new leader batch goes at once only to the followers a quorum needs; a ready, caught-up follower the quorum does not need is held until the next leader batch is durable (bounded by `TimerConfig::append_hold_ms`, default 1 ms, and the heartbeat) | N1 (PR 19) and the N1b step-0 counters (PR 22, measurement only); main `12fb21de` | Done: schema plan and evidence below; deterministic core and simulated-time runtime tests (a)–(f) with two mutations; N1c alone and N1c + N1 against main on the five N0 cells (5 ABBA rounds) and `nat.sh` (5 pairs); full hold measured. Open: the `nat.sh` and p99 gates, which need a user decision on the bound | NW1 |
 | Then N2: per-peer frame coalescing | One frame per peer per round across groups | N1; a G=4 cell on the N0 harness (see N0 limits) | Plan §4 row 2 | NW1 |
 
 ### N1c schema plan (before editing, 20 October 2026)
@@ -138,6 +138,137 @@ transport, WAL, wire or worker changes.
   QUIC 15,000/s, idle 20/s), 5 ABBA rounds each; `nat.sh` 5 pairs on Linux
   cores 10–15 with the zero-command column and follower barriers. Gate (B2 vs A):
   the N1b gate.
+
+### N1c implemented (evidence, 20 October 2026)
+
+Branch `net/n1c-held-appends` on main `12fb21de`. Library: `src/raft/append_hold.rs`
+(rule, release, early quorum), call sites in `progress_broadcast.rs`, `receive.rs`,
+`admitted_replication.rs` and `raft.rs` (state, `Event::ReleaseHeldAppends`,
+`batch_floor`, `configuration_notice`), `runtime/timed.rs` (bound),
+`runtime/ready_batch.rs` (routine control). No wire, WAL, transport, worker or
+crate change; no `unsafe`.
+
+**Differences from the plan, each found by measurement (Linux `nat.sh` loop with
+benchmark-only hold-decision counters on a local branch):**
+
+1. *Held commit notices.* With only data Appends held, the follower that carried a
+   batch acked before the next one, the commit advanced and the leader sent it an
+   Append whose only news was the commit: follower zero-command units rose from
+   ~8 to ~126 per 16,000 writes and follower barriers did not fall. While holds
+   are on, a voter's commit-only notice is now held like a data Append (it rides
+   on that voter's next data Append or the heartbeat). The first commit that
+   covers the latest configuration entry is never held (`configuration_notice`,
+   cleared by the next heartbeat or any role change); learners are never held.
+   A held notice is not "due" at the next batch: it is decided afresh.
+2. *Pre-barrier early path.* `replicate_admitted` sent each batch to every
+   caught-up follower, including one whose notice was held, so holds never
+   batched anything (775 of ~830 holds ended in another `append_for`). With
+   holds on it now sends only to the caught-up voters a quorum needs (most recent
+   ack first) plus every non-voter.
+3. *Due follower counts first in the early path.* A held voter that owes entries
+   is released with the batch once it is durable and then covers it, so the
+   early path does not also send that batch to a caught-up follower. Without
+   this every early-path batch cost two follower Appends.
+
+Not changed from the plan: the decision point, the data-hold rule (coverage,
+`batch_floor`, one Append), the bound and its `TimedShard` delivery, the cleared
+states, and every non-progress mode. The deadline is per group and is not moved
+while any hold exists, so under steady alternation it fires every
+`append_hold_ms` and ends whichever hold exists then: conservative, never
+longer than the bound.
+
+**Tests (all deterministic: core steps, or simulated whole milliseconds).**
+
+| Brief | Test | What it pins |
+| --- | --- | --- |
+| (a) | `quorum_follower_is_sent_at_once_and_the_held_one_gets_both_batches_next` | 2 gets batch 1 at once, 3 is held; 2's notice is held too; batch 2 releases 3 with one Append for 2..=5 and holds 2; batch 3 releases 2 with 4..=7 and commit 5 |
+| (a) | `early_path_sends_only_to_the_quorum_follower_before_the_barrier`, `a_held_follower_due_at_the_batch_counts_toward_the_early_quorum` | pre-barrier sends: one follower (holds off: both); a due held follower makes the early send unnecessary |
+| (b) | runtime `hold_ends_exactly_at_the_configured_bound` | held at ms T with a 2 ms bound: still held at T+1, released at T+2, heartbeat unchanged at T+4 |
+| (b) | runtime `heartbeat_ends_a_hold_before_a_later_bound`; core `heartbeat_and_release_event_each_end_a_hold` | bound = heartbeat: released by the heartbeat at T+4, not the bound at T+5; release event idempotent |
+| (c) | `lagging_follower_is_never_held` | a follower behind the latest batch gets its catch-up Append at once although the quorum is covered |
+| (d) | `step_down_clears_holds_and_a_release_then_emits_nothing`, `transfer_start_releases_holds_through_its_broadcast`, `membership_change_clears_holds_and_keeps_todays_broadcast`, `compaction_releases_holds_and_a_snapshot_peer_is_never_held`, `commit_covering_a_configuration_entry_is_never_held` | holds cleared; sends identical to holds off on the membership change; snapshot peer never held; configuration commit notice at once |
+| (e) | `every_batch_commits_on_its_first_follower_ack_as_with_holds_off` | six batches, holds off and on: each commits on the first follower ack, in the same step |
+| (f) | existing oracles with holds on (`timer_config()` now has `append_hold_ms = 1`) | runtime histories (elections, partitions, restarts, power loss, timer replay) pass; four checks of "every node applied the write in the same millisecond" now advance by the bound first (`replicate_first_write`, `settled()`, timer replay) — the only assertion change |
+| (g) | measured, Mac TCP 15,000/s | follower Appends per write at 16,000 offers: main 0.0122, N1c 0.0096, N1c + N1 0.0100 |
+
+Mutations (each run, then restored): no deadline arming in `sync_hold` →
+`hold_ends_exactly_at_the_configured_bound` fails (held still at T+2); holding the
+quorum follower too (`|| true` on the coverage test) →
+`every_batch_commits_on_its_first_follower_ack_as_with_holds_off` fails ("no
+immediate Append") along with six other hold tests.
+
+**Checks (Linux, cores 10–15, `-j 4`).** `cargo +stable fmt --all -- --check`;
+strict Clippy default, `--all-features`, `--no-default-features`,
+`--no-default-features --features native`: zero diagnostics; matched fmt and
+Clippy clean. Tests, default and all-features (one configuration at a time):
+lib 560/562, raft 81, volatile 11, snapshot 27, membership 32, learners 23/24,
+retirement 7, runtime 60, peers 22, startup 48/63, native member startup
+27/50, counter service 144/203, examples (native benchmark 56/64 incl. the
+three-process cluster test, framework 9, journal 5, log staging 5, transfer 1):
+all pass. Matched tests 75 pass; `cluster_test.py` 12 pass.
+
+**Measurement.** A = main + PR 22's counters (`e9ad393b`, example code only);
+B1 = N1c + the counters; B2 = N1c + PR 19's code (`2a07014c`, `5986c826`) + the
+counters (local branches, not pushed). Release, `--all-features`. The hold bound
+is 1 ms (default) unless stated; a measurement-only environment override gave
+the 5 ms point.
+
+Mac, quiet M2 Max, `/Volumes/vbram`, load < 1.0 before each cell, 5 ABBA rounds,
+every run valid. Ratio = median of per-round ratios against A (marginal CPU per
+write between 2,000 and 16,000 offers for the 15k cells, total CPU per write
+otherwise).
+
+| Cell | A µs/write | N1c alone | N1c + N1 | N1c + N1, 5 ms | p99 ms A / N1c / N1c+N1 / 5 ms | Busy A / N1c+N1 | Follower Appends per write A / N1c / N1c+N1 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| TCP 1,000/s | 483.1 | 0.860 | 0.803 | 0.788 | 17.8 / 17.6 / 16.4 / 15.2 | 0.481 / 0.387 | 0.199 / 0.167 / 0.174 |
+| TCP 4,000/s | 127.0 | 0.910 | 0.912 | 0.876 | 18.2 / 16.9 / 18.8 / 16.3 | 0.500 / 0.441 | 0.048 / 0.042 / 0.042 |
+| TCP 15,000/s | 40.54 | 0.984 | 0.967 | 0.999 | 24.4 / 28.7 / 29.3 / 23.6 | 0.586 / 0.555 | 0.0122 / 0.0096 / 0.0100 |
+| QUIC 15,000/s | 52.44 | 0.897 | 0.559 | 0.542 | 18.2 / 19.1 / 19.6 / 11.4 | 0.753 / 0.430 | 0.0169 / 0.0170 / 0.0142 |
+| Idle 20/s | 7,365 | 0.863 | 0.817 | not run | 16.6 / 16.0 / 16.1 / — | 0.147 / 0.120 | 2.99 / 2.49 / 2.49 |
+
+Rates are within ±0.3% of A in every cell. For reference, PR 19 (N1 alone)
+measured p99 25.5 → 24.3 ms (TCP 15k) and 20.3 → 8.2 ms (QUIC 15k) in its own
+runs; at 1 ms N1c gives part of that back in those two cells, at 5 ms it does not.
+
+Full hold (both followers held, ≤ 1 ms, early path off; measurement-only knob),
+A vs full hold, 5 ABBA rounds: TCP 1,000/s ×0.869 (p99 18.1 → 15.0 ms), TCP
+15,000/s ×0.957 (26.2 → 29.0), QUIC 15,000/s ×0.643 (17.6 → 18.1). No better
+than the quorum-first variant; its p99 cost is within this cell's noise.
+
+Linux `nat.sh` loop (single process, WAL on `/dev/shm`, 15,000/s, 5 pairs,
+`taskset -c 10-15 nice -n 19`; other users' load 6–9 on the host, so CPU ratios
+are noisy and the counts are not). Per 16,000 offers; follower barriers are per
+follower.
+
+| Build | Marginal µs/write (median) | Per-pair ratio median | Pairs ≤ 1.00 | Follower barriers | Leader barriers (commit-only) | p99 ms |
+| --- | --- | --- | --- | --- | --- | --- |
+| A main | 9.52 | 1.000 | — | 436 | ~1,390 (~500) | 6.7 |
+| B1 N1c | 9.19 | 1.018 | 2/5 | 440 | ~1,680 (~750) | 6.6 |
+| B2 N1c + N1 | 11.17 | 1.122 | 1/5 | 578 | ~1,730 (~870) | 4.3 |
+| B2, 5 ms | 11.35 | 1.149 | 1/5 | 456 | ~1,760 (~880) | 4.2 |
+
+Earlier runs of the same comparison (same host, before or between the last two
+library commits): B1 ×0.966 (3/5), B2 ×1.011 (2/5) and ×1.034 (1/5); full hold
+×1.058, 604 follower barriers; N1 alone ≈ 613 follower barriers (N1b step 0).
+
+Why the loop does not clear: (1) its leader batches are ~1.6–1.9 ms apart, so a
+1 ms bound ends nearly every hold before the next batch arrives; with a 5 ms
+bound follower barriers return to main's level (456 vs 436); (2) without N1's
+lag every batch commits on its own, so leader commit-only persists rise from
+~500 to ~870 per 16,000 writes; holds cannot remove that without adding the
+latency back.
+
+**Gate (N1c + N1 against main, 1 ms default).** Five N0 cells per-round median
+≤ 1.02: pass (0.80, 0.91, 0.97, 0.56, 0.82). TCP 1,000/s ≤ 0.93: pass (0.803).
+QUIC 15,000/s ≤ 0.88: pass (0.559). Busy cores ≤ main + 2% at a rate within
+±2%: pass (lower in every cell). `nat.sh` per-pair median ≤ 1.00 with ≥ 3 of 5
+and follower barriers ≤ main's: **fail** (1.011–1.122; 578 vs 436). p99 ≤ main +
+5%: **fail** in TCP 15k (+20%) and QUIC 15k (+8%), pass in the other three.
+**Verdict: not cleared.** The 5 ms bound clears p99 in every measured cell and
+brings follower barriers to within 5% of main, but the loop's CPU stays above
+main because of the leader's per-batch commit persists. The bound (it caps the
+extra commit wait when the covering follower stalls) and whether to keep N1's
+latency at that leader cost are user decisions.
 
 ### N0 schema plan (before editing, 19 October 2026)
 
