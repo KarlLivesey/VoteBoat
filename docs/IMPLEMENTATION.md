@@ -1919,6 +1919,53 @@ matched fmt and matched strict Clippy with zero diagnostics. The hook remains
 enabled for the non-force push. All builds, including matched, used this
 checkout's sole target; observed use after qualification was 923 MiB.
 
+##### PR14 cumulative-source reconciliation plan (20 October 2026)
+
+Scope is completion of existing PR14 only. The qualification branch starts at
+`3fa6435be2e55352665a1a712299b44443348c7d`. PR24 owns the main-writer lease;
+no main merge or final full suite starts before the parent supplies its merged
+main SHA and releases that dependency. ST2 remains in review until the final
+cumulative source, read-only confirmation and exclusive matrix are qualified.
+
+**Data/API shape and transitions.** Preserve ST2's typed capacity refusals,
+`Pending` WAL-byte bound, deferred leader noop, maintenance defaults and retry
+schedules. Reconcile V3f's borrowed in-place pending-plan installation with
+V3c's effect sink, V3d's summarized log/stamp and V3e's bounded peer slots.
+A pending transition is installed only after durable completion; successful
+installation empties its slot, while refusal leaves the log/summary/stamp and
+plan intact until the existing fence discards it. Membership changes still
+clear leader/stall slots. No new public API, durable format or feature scope.
+
+**Ownership, failure and restart.** The core owns one pending transition and
+volatile peer state; providers own durable bytes; the node owns maintenance
+schedules. Preserve all refusal-before-mutation guarantees and existing
+storage-failure fencing. A crash before checkpoint/reclaim publication retains
+the previous durable image; restart reconstructs the same committed/applied
+prefix and maintenance policy. Fixture leases remain held through child
+shutdown/reopen, children are reaped, and lane/reader workers joined. Keep
+both documentation tracks and all prior evidence with its original head.
+
+**Acceptance.** Inspect actual merge conflicts against both parents and record
+the exact resolution. Run root formatting, strict Clippy in default/all-feature/
+no-default/native-only configurations, and matched formatting/strict Clippy.
+Push the checked reconciliation non-force through the enabled hook to existing
+PR14, then notify the parent for pinned-object source confirmation. Exclusively
+run all four complete root configurations and matched, sequentially, including
+examples, every built test executable, the exhaustive representative relay case
+alone and doctests. Audit build success and each executable's exit/results;
+retain original failures and repair only demonstrated causes. Run diskguard
+before each build/configuration/launch, use only this checkout's target, cores
+12–15, nice 19 and at most four Cargo jobs. Source/input changes reset affected
+final-head gates. Documentation-only records are identified separately.
+
+The LB macro milestone stays active. Current deliverable is this existing ST2
+qualification (depends on merged PR24; checks above); next NT1 and following DR1
+retain the purpose, dependencies and checks in the linked mini plan. They are
+not started by this reconciliation. Main integration additionally requires the
+parent's explicit main-writer lease and final source approval; it records exact
+reviews, tested head/counts and the accepted +2% serving CPU/write (+4% allowance;
+singleton +0.9%). Planned checks above are not passing evidence.
+
 #### Design-pack amendment realised by ST2 (pack preserved)
 
 | Pack text | Amendment |
