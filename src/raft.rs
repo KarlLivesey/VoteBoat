@@ -340,9 +340,16 @@ enum After {
     LeaderAppend,
     Commit,
     Compact,
-    // Snapshot references are boxed: every round moves `Pending`.
+    // Snapshot references are boxed: every round stages a `Pending`.
     CheckpointCompact(Box<SnapshotRef>),
     SnapshotInstall(Box<SnapshotRef>),
+}
+/// What the core still uses of an installed `Pending` once its plan is spent.
+struct Installed {
+    membership: Option<Box<Membership>>,
+    after: After,
+    reply: Option<Message>,
+    preserves_checkpoint_prefix: bool,
 }
 struct Pending {
     next: OwnedNextLog,
@@ -357,13 +364,6 @@ struct Pending {
     // The stamp of the view `next` was planned from; the install skips the
     // predecessor comparison only if it is still the log's current one.
     planned: Option<LogStamp>,
-}
-/// What the core still uses of an installed `Pending` once its plan is spent.
-struct Installed {
-    membership: Option<Box<Membership>>,
-    after: After,
-    reply: Option<Message>,
-    preserves_checkpoint_prefix: bool,
 }
 #[derive(Clone, Copy)]
 struct Replication {
