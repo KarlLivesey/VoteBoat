@@ -1,0 +1,15 @@
+{
+  "reason": "Later integration handoff assigns final review/exclusive suites to sole integration owner mcp:be34a230-eae3-498a-b658-e5ecdcbe1b74; implementation winds down after focused validation and pre-push checks.",
+  "full-default": {
+    "status": "not run",
+    "executed": 0,
+    "passed": null,
+    "failed": null
+  },
+  "full-all-features": {
+    "status": "not run",
+    "executed": 0,
+    "passed": null,
+    "failed": null
+  }
+}

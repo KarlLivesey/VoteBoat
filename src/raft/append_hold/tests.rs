@@ -595,8 +595,27 @@ fn an_optimistic_cursor_alone_never_justifies_a_hold() {
         .insert(node(3), leader.state().last_index());
     assert_eq!(leader.progress[&node(3)], 0);
     assert!(!leader.hold_append(node(3)));
+    // Positive evidence can still fall short of the required batch prefix.
+    leader.progress.insert(node(3), 1);
+    assert!(!leader.hold_append(node(3)));
     leader
         .progress
         .insert(node(3), leader.state().last_index() - 1);
     assert!(leader.hold_append(node(3)), "acknowledged prefix: holdable");
+}
+
+#[test]
+fn a_commit_notice_needs_the_entire_positive_acknowledged_prefix() {
+    let mut leader = held(AppendHold::QuorumFirst);
+    batch(&mut leader, 1, 2);
+    // Before the new no-op becomes durable, the optimistic cursor is past the
+    // old tip. Even a positive acknowledgement below that tip is insufficient.
+    let _pending = leader.become_leader().unwrap();
+    let tip = leader.state().last_index();
+    assert!(tip > 1);
+    assert_eq!(leader.next_index[&node(3)], tip + 1);
+    leader.progress.insert(node(3), tip - 1);
+    assert!(!leader.hold_append(node(3)));
+    leader.progress.insert(node(3), tip);
+    assert!(leader.hold_append(node(3)));
 }

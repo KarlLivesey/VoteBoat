@@ -24,8 +24,9 @@ pub struct TimerConfig {
     /// Longest a leader holds a ready follower's next Append under
     /// [`AppendHold::QuorumFirst`] (the next durable leader batch or heartbeat
     /// usually ends it sooner). Zero turns holds off. At most `heartbeat_ms`.
-    /// Protocol time: it bounds when the release is admitted, not when it
-    /// runs under admission or output backpressure.
+    /// A host must advance protocol time and poll. Expiry is admitted on the
+    /// first poll at/after the deadline, subject to the timer budget and admission
+    /// capacity; execution/output backpressure can delay delivery further.
     pub append_hold_ms: u64,
 }
 impl Default for TimerConfig {

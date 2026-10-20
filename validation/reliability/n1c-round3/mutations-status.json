@@ -1,0 +1,157 @@
+[
+  {
+    "name": "zero-progress",
+    "path": "src/raft/append_hold.rs",
+    "before": "        if acked == 0 {\n            return false;\n        }\n",
+    "after": "",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--lib",
+      "fresh_group_no_op_reaches_every_follower_at_once",
+      "--",
+      "--test-threads=2"
+    ],
+    "status": 101,
+    "killed": true,
+    "seconds": 9.034
+  },
+  {
+    "name": "deadline-arm",
+    "path": "src/runtime/timed.rs",
+    "before": "    fn sync_hold(&mut self, group: GroupIdentity, now: MonoTime) {\n        if self.config.append_hold_ms == 0 {",
+    "after": "    fn sync_hold(&mut self, group: GroupIdentity, now: MonoTime) {\n        if self.config.append_hold_ms > 0 {",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--test",
+      "runtime",
+      "hold_ends_exactly_at_the_configured_bound",
+      "--",
+      "--test-threads=2"
+    ],
+    "status": 101,
+    "killed": true,
+    "seconds": 5.905
+  },
+  {
+    "name": "quorum-coverage",
+    "path": "src/raft/append_hold.rs",
+    "before": "            && self.covered_without(peer, last)",
+    "after": "            && (self.covered_without(peer, last) || true)",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--lib",
+      "every_batch_commits_on_its_first_follower_ack_as_with_holds_off",
+      "--",
+      "--test-threads=2"
+    ],
+    "status": 101,
+    "killed": true,
+    "seconds": 4.1
+  },
+  {
+    "name": "notice-prefix",
+    "path": "src/raft/append_hold.rs",
+    "before": "return acked >= last && !self.configuration_notice;",
+    "after": "return !self.configuration_notice;",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--lib",
+      "a_commit_notice_needs_the_entire_positive_acknowledged_prefix",
+      "--",
+      "--test-threads=2"
+    ],
+    "status": 101,
+    "killed": true,
+    "seconds": 6.13
+  },
+  {
+    "name": "data-prefix",
+    "path": "src/raft/append_hold.rs",
+    "before": "            && acked >= self.batch_floor\n",
+    "after": "",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--lib",
+      "an_optimistic_cursor_alone_never_justifies_a_hold",
+      "--",
+      "--test-threads=2"
+    ],
+    "status": 101,
+    "killed": true,
+    "seconds": 6.4
+  },
+  {
+    "name": "probe-coverage",
+    "path": "src/raft/append_hold.rs",
+    "before": "sent.snapshot.is_none() && sent.start <= acked.saturating_add(1)",
+    "after": "sent.snapshot.is_none()",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--lib",
+      "a_probe_that_may_be_rejected_does_not_cover_a_hold",
+      "--",
+      "--test-threads=2"
+    ],
+    "status": 101,
+    "killed": true,
+    "seconds": 8.246
+  },
+  {
+    "name": "rejection-release",
+    "path": "src/raft/receive.rs",
+    "before": "            self.release_on_rejection_into(out)?;\n",
+    "after": "",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--lib",
+      "quorum_follower_rejection_releases_the_held_follower_at_once",
+      "--",
+      "--test-threads=2"
+    ],
+    "status": 101,
+    "killed": true,
+    "seconds": 6.784
+  }
+]

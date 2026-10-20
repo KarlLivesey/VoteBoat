@@ -142,10 +142,6 @@ pub enum NodeControl {
     },
     Campaign,
     Heartbeat,
-    /// End every held follower Append now ([`crate::raft::Event::ReleaseHeldAppends`]).
-    /// `TimedShard` delivers it at `TimerConfig::append_hold_ms`; a host that
-    /// holds protocol time constant delivers it itself. Idempotent.
-    ReleaseHeldAppends,
     Checkpoint,
     /// Queue a direct old-view witness query. Requires an authority-capable
     /// peer assembly; admission is neither a grant nor a durability receipt.
@@ -720,7 +716,6 @@ where
             NodeControl::Campaign if self.drain.is_some() => return Err(NodeError::Draining),
             NodeControl::Campaign => Event::Campaign,
             NodeControl::Heartbeat => Event::Heartbeat,
-            NodeControl::ReleaseHeldAppends => Event::ReleaseHeldAppends,
             NodeControl::Checkpoint => {
                 if self.local.snapshots.is_none() {
                     return Err(NodeError::MissingSnapshots);

@@ -271,3 +271,26 @@ fn groups_sharing_a_shard_each_release_at_their_own_bound() {
     assert_eq!(deadline(&nodes, 1), MonoTime(beat + 4));
     assert_eq!(deadline(&nodes, 2), MonoTime(beat + 5));
 }
+
+#[test]
+fn a_late_host_poll_releases_an_expired_hold_on_that_poll() {
+    let mut nodes = cluster(2);
+    let (leader, beat) = elected(&mut nodes);
+    let held = propose_and_hold(&mut nodes, leader, beat);
+    let tip = last_index(&nodes[leader]);
+    assert!(holding(&nodes[leader], 1));
+    // The host misses beat + 2. Its next poll is one millisecond late and
+    // still before the heartbeat: the hold deadline must suffice by itself.
+    let progress = nodes[leader]
+        .runtime
+        .poll_timers(MonoTime(beat + 3))
+        .unwrap();
+    assert_eq!(progress.released, 1, "first late poll admits the release");
+    pump(&mut nodes, beat + 3);
+    assert_eq!(last_index(&nodes[held]), tip);
+    assert!(!holding(&nodes[leader], 1));
+    assert_eq!(
+        nodes[leader].runtime.deadline(group(1)).unwrap().deadline,
+        MonoTime(beat + 4)
+    );
+}

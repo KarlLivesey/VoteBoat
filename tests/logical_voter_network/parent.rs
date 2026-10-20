@@ -113,9 +113,9 @@ impl Parent {
             .poll(&mut parts, MonoTime(0), ReplicaPollBudget::default())
             .unwrap();
         assert!(progress.steps.iter().all(|step| step.error.is_none()));
-        // The parent holds protocol time constant, so no `append_hold_ms`
-        // deadline expires; the host parks at least that long per round, so
-        // deliver the expiry here while the parent group holds an Append.
+        // Parent time is frozen in this persistence/transport fixture. Explicitly
+        // flush held replication without running unrelated election timers.
+        // Runtime tests cover real deadline delivery; parking is not an expiry.
         let parent = self.mapping.parent;
         if self.owner.core(parent).is_some_and(Raft::has_held_appends) {
             if let Err(rejected) = self.owner.admit(parent, Event::ReleaseHeldAppends) {

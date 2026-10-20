@@ -1,0 +1,11 @@
+[
+  {
+    "name": "pre-push",
+    "command": [
+      "sh",
+      ".githooks/pre-push"
+    ],
+    "status": 0,
+    "seconds": 160.386
+  }
+]

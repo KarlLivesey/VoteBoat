@@ -124,14 +124,16 @@ fn facade_drive_at<F: voteboat::transport::PeerTransportFactory<Session>>(
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }
-/// The facade fixtures hold protocol time constant, so no `append_hold_ms`
-/// deadline expires; each round parks for at least that long, so the fixture
-/// delivers the expiry itself for every group still holding a follower Append.
+/// These lifecycle fixtures freeze protocol time. Drive the existing heartbeat
+/// control explicitly to flush held replication without firing unrelated election,
+/// reconnect or WAL-maintenance timers. Only enqueue after owner drain so a
+/// still-held core cannot enqueue repeated heartbeats ahead of its queued flush.
+/// Hold timing is tested in runtime tests.
 fn facade_release_held<F: voteboat::transport::PeerTransportFactory<Session>>(
     nodes: &mut [Facade<F>],
 ) {
     for n in nodes.iter_mut() {
-        if n.state() != NodeState::Running {
+        if n.state() != NodeState::Running || !n.local().owner.is_drained() {
             continue;
         }
         let owner = &n.local().owner;
@@ -140,7 +142,7 @@ fn facade_release_held<F: voteboat::transport::PeerTransportFactory<Session>>(
             .filter(|g| owner.core(*g).is_some_and(Raft::has_held_appends))
             .collect::<Vec<_>>();
         for g in groups {
-            match n.control(g, NodeControl::ReleaseHeldAppends) {
+            match n.control(g, NodeControl::Heartbeat) {
                 Ok(()) | Err(NodeError::Owner(EffectOwnerError::Runtime(RuntimeError::Overloaded))) => {}
                 Err(other) => panic!("hold release: {other:?}"),
             }

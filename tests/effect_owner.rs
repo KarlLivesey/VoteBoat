@@ -2174,10 +2174,9 @@ mod native {
             std::thread::park_timeout(Duration::from_millis(1));
         }
     }
-    /// These fixtures hold protocol time constant, so no `append_hold_ms`
-    /// deadline expires. Once the cluster is otherwise idle the fixture
-    /// delivers that expiry itself, as `TimedShard` would: true while any
-    /// group still holds a follower Append.
+    /// These lifecycle fixtures freeze protocol time. Once otherwise idle,
+    /// explicitly flush held replication; this is a host-directed release,
+    /// not evidence of timer expiry. Runtime tests exercise the actual deadline.
     fn release_held(nodes: &mut [Node]) -> bool {
         let mut held = false;
         for n in nodes.iter_mut() {

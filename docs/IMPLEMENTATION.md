@@ -20,7 +20,7 @@ design pack is unchanged.
 | --- | --- | --- | --- | --- |
 | Done N0: three-process cluster harness (merged 20 October 2026 in PR 17, head 73605e48; rounds 1–4 and baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test on OS-selected ports; script self-test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
 | Current N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline | Plan §5.3 tests and §5.4 gate | NW1 |
-| Current N1c: held follower Appends (quorum-first; PR 23 against main, merging alone; round 2 fixes the review's P2 and measures the TCP 15k p99, evidence below) | Restore follower Append size under N1 without commit latency: each new leader batch goes at once only to the followers a quorum needs; a ready, caught-up follower the quorum does not need is held until the next leader batch is durable (bounded by `TimerConfig::append_hold_ms`, default 1 ms, and the heartbeat) | N1 (PR 19) and the N1b step-0 counters (PR 22, measurement only); main `12fb21de` | Done: schema plan and evidence below; deterministic core and simulated-time runtime tests (a)–(f) with two mutations; N1c alone and N1c + N1 against main on the five N0 cells (5 ABBA rounds) and `nat.sh` (5 pairs); full hold measured. Round 2: holds need acknowledged prefix evidence (Sol's test and a runtime regression); a rejection releases held followers; the TCP 15k p99 explained (regime mix, plus a ~5% leader-side hold cost); N0 cells and `nat.sh` re-run. Open: the bound and the leader commit-persist trade remain user decisions | NW1 |
+| Current N1c: held follower Appends (quorum-first; PR 23 against main, merging alone; round 3 fixes the fresh-group boundary and frozen-clock fixtures; integration suites pending) | Restore follower Append size under N1 without commit latency: each new leader batch goes at once only to the followers a quorum needs; a ready, caught-up follower the quorum does not need is held until the next leader batch is durable (bounded by `TimerConfig::append_hold_ms`, default 1 ms, and the heartbeat) | N1 (PR 19) and the N1b step-0 counters (PR 22, measurement only); main `12fb21de` | Done: schema plan and evidence below; deterministic core and simulated-time runtime tests (a)–(f) with two mutations; N1c alone and N1c + N1 against main on the five N0 cells (5 ABBA rounds) and `nat.sh` (5 pairs); full hold measured. Round 2: holds need acknowledged prefix evidence (Sol's test and a runtime regression); a rejection releases held followers; the TCP 15k p99 explained (regime mix, plus a ~5% leader-side hold cost); N0 cells and `nat.sh` re-run. Round 3: nine original failures pass, core/runtime regressions and seven negative mutations pass; strict checks and focused all-feature results below. Full exclusive suites are assigned to the sole integration owner by the later handoff. Open: full-suite qualification, final-head N0 remeasurement, and the bound/leader commit-persist trade | NW1 |
 | Then N2: per-peer frame coalescing | One frame per peer per round across groups | N1; a G=4 cell on the N0 harness (see N0 limits) | Plan §4 row 2 | NW1 |
 
 ### N1c schema plan (before editing, 20 October 2026)
@@ -275,6 +275,134 @@ brings follower barriers to within 5% of main, but the loop's CPU stays above
 main because of the leader's per-batch commit persists. The bound (it caps the
 extra commit wait when the covering follower stalls) and whether to keep N1's
 latency at that leader cost are user decisions.
+
+### N1c review round 3 schema plan (before audit edits, 20 October 2026)
+
+Resume `e6ee5070` after the exclusive default suite on `98c878dd` failed nine
+named tests. The macro milestone remains NW1; this is correctness qualification,
+not a new performance claim. The current mini-plan item remains N1c (dependencies:
+N0, acknowledged-prefix rule, real timer delivery; completion: nine regressions,
+full default/all-feature suites, N1c mutations and all strict lint profiles).
+The next two deliverables remain N1 same-poll flush (N0/N1c qualification;
+completion: its network tests and N0 gate) and N2 frame coalescing (N1 and G=4
+N0 cell; completion: per-peer frame and CPU gate), both advancing NW1.
+
+- Data/API: retain the `progress != 0` guard: zero is absence of evidence even
+  when `batch_floor == 0`. Remove the new public `NodeControl::ReleaseHeldAppends`:
+  a frozen-time facade fixture can use its existing `Heartbeat` control to
+  flush held replication. No new production seam is needed for these fixtures.
+- Transitions/ownership: retain manual `Event::ReleaseHeldAppends` in the
+  frozen-time owner/parent fixtures as explicit host-directed flushes. They
+  exercise persistence, transport and lifecycle, not hold timing. A real host
+  must advance protocol time and poll; do not describe wall-clock parking as
+  delivering a protocol deadline. Advancing all fixture time would also run
+  unrelated elections, reconnect and exact WAL-maintenance deadlines.
+- Failure/cleanup: overloaded control admission retries on the next fixture
+  turn; close/drain ownership remains unchanged. No durable state or wire
+  change. New leaders/restarts begin with progress zero and no holds.
+- Terminal intent: keep Cancel appended but uncommitted before admitting the
+  transfer. Pause both followers until append and transfer-start assertions
+  pass, then resume the non-target to commit Cancel. This specifies the intended
+  input ordering without changing scheduler or service behavior.
+- Acceptance: keep every existing assertion; core fresh-empty-log no-op test;
+  per-group timer test; add a simulated late-poll test that proves release on
+  the first poll after expiry. Run the nine failures, full suites sequentially,
+  focused holds and negative mutations, fmt and four strict Clippy profiles,
+  matched fmt/Clippy. No Mac run. Steady-state acknowledged followers have
+  positive progress, so the zero guard does not change N0 steady-state hold
+  decisions/counters. N0 CPU and `node_counters` include startup, so aggregate
+  equality is not claimed: remeasurement is needed for final-head performance
+  qualification. The old round-2 measurements remain historical evidence.
+
+### N1c review round 3 implementation / integration handoff (20 October 2026)
+
+PR [23](https://github.com/KarlLivesey/VoteBoat/pull/23), remote branch
+`net/n1c-held-appends`, local audit branch `n1c-r3`. The final audit commit
+contains this record; its exact SHA is recorded in the PR's Round 3 section.
+Resume commit: `e6ee5070d49945921b9658f41c8f0605030edceb`.
+No taskId was supplied to this implementation thread or exposed in its task
+ID environment. Sole integration owner: `mcp:be34a230-eae3-498a-b658-e5ecdcbe1b74`.
+Only this PR branch is published; main is not modified or merged.
+
+**Audit verdict.** Retained the zero-progress fix. A new leader starts every
+follower at acknowledged progress zero. In a fresh group, `batch_floor` is also
+zero, so the old comparison held a follower without evidence; `early_quorum`
+then counted that held follower and produced no pre-barrier send. A caught-up
+steady-state follower has positive acknowledged progress, so its hold decision
+is unchanged. Startup can change whole-process N0 CPU/frame/round counts, which
+include campaign and warmup: final-head aggregate performance needs
+remeasurement. No Mac was used; previous numbers remain historical.
+
+Explicit release is legitimate for a host-driven fixture whose protocol clock
+is deliberately frozen. It does not establish timer liveness. Removed the
+public `NodeControl::ReleaseHeldAppends` added solely for those fixtures;
+facades use existing `Heartbeat`, only after owner drain to avoid duplicate
+broadcasts while a flush is queued. Owner/parent fixtures explicitly send the
+existing core release event. They retain their exact time-sensitive maintenance
+and reconnect schedules. The real timer path is exercised independently by
+exact-bound, heartbeat, multi-group and late-host-poll regressions.
+
+A production host must advance protocol time and poll. Let H be `append_hold_ms`
+and P the maximum interval between timer polls. With available admission and
+one eligible hold, admission occurs by H + P after arming. If K expired holds
+precede it and each poll can admit L releases, the conservative bound is
+H + ceil((K + 1) / L) * P, assuming those polls have admission capacity. Queue
+execution, persistence and output backpressure add delay; with unbounded
+backpressure or an unbounded poll interval there is no finite wall-clock bound.
+`next_deadline()` exposes the hold's deadline. The new late-poll regression
+asserts release admission on the first late timer poll, before any heartbeat.
+
+The terminal-intent test change is an ordering fix: Cancel must already be
+appended but uncommitted when transfer starts. Both followers pause until the
+append and transfer-start assertions pass, then only the target stays paused.
+The service/scheduler behavior and every prior assertion are unchanged.
+
+| Original failure (test target) | Cause | Fix / regression |
+| --- | --- | --- |
+| `native::automatic_hundred_group_checkpoints_reclaim_and_reopen` (`effect_owner`) | Frozen facade time never releases spare Appends/commit notices | Explicit existing heartbeat after owner drain; original full-history assertions retained |
+| `native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport` (`effect_owner`) | Drain returned with a held Append; follower prefix stopped before expected index 4 | Explicit held flush before declaring drain; compaction/catch-up assertions retained |
+| `native::hundred_groups_run_through_reserved_owner_native_wal_and_secure_transport` (`effect_owner`) | Drain returned with held data/notice; follower value remained 7 instead of 10 | Same drain fix; original all-group values and reservation assertions retained |
+| `native::native_shared_peer_quota_pressure_reconnect_restart_and_retry` (`effect_owner`) | Frozen facade time leaves held replication behind pressure/reconnect work | Existing heartbeat flush; quota, restart and original retry assertions retained |
+| `native::owning_native_facade_checkpoints_restarts_and_retries_hundred_groups` (`effect_owner`) | Frozen facade time leaves followers at the earlier applied prefix | Existing heartbeat flush; checkpoint/reopen/dedup assertions retained |
+| `persistence_overlap::follower_can_persist_before_local_barrier_and_held_send_survives_durable` (`effect_owner`) | Empty-log no-op held an unacknowledged follower; early quorum counted it, so no early effect existed | `progress != 0`; `fresh_group_no_op_reaches_every_follower_at_once`; original early-send/persist checks retained |
+| `persistence_overlap::local_failure_after_early_send_fences_and_retains_external_charge` (`effect_owner`) | Same empty-prefix early-send omission | Same guard/regression; original fencing and retained-charge assertions retained |
+| `history::tcp_three_logical_voters_use_nine_native_child_owners_and_real_quorum_results` (`logical_voter_network`) | Parent group time fixed at zero; held replication cannot expire | Explicit parent hold flush; original real nine-child quorum assertions retained |
+| `held_read::tcp_original_read_inspection_retains_and_resumes_real_nine_child_quorum` (`logical_voter_network`) | Same frozen parent clock blocks progress before read inspection | Same flush; retained original read/credit/resume assertions |
+
+**Actual local validation.** Every build/test/check used Linux cores 10–11,
+nice 19, two Cargo jobs, and this checkout's `target/`. Configurations are
+sequential. Evidence is under `validation/reliability/n1c-round3/`.
+
+- Targeted original failures: effect-owner **7 passed, 0 failed**;
+  logical-voter-network **2 passed, 0 failed**.
+- Focused default: N1c core **18 passed**, runtime **7 passed**, terminal intent
+  TCP **1 passed**; zero failures. Added positive-but-insufficient prefix cases
+  ensure the zero guard cannot mask the independent notice/data prefix checks.
+- Seven negative mutations, each compiled and failed its named regression,
+  then restored: zero-progress guard; deadline arming; quorum coverage;
+  notice prefix; data prefix; probe coverage; rejection release. Exact edits,
+  commands and exit statuses are preserved with the logs.
+- Audit attempt failure (retained evidence): sending fixture heartbeats every
+  poll overfed control/broadcast work. Automatic checkpoint, shared-peer quota
+  and owning-facade tests timed out (4 passed / 3 failed). Restricting heartbeat
+  admission to owner drain fixed all three; the subsequent seven-test run passed.
+- Full default and full all-features: **not run here (0 executed)**. The later
+  integration handoff explicitly assigns final review/exclusive suites to the
+  sole integration owner. These remain required before full-suite qualification;
+  do not report the focused pass as a complete suite pass.
+
+- Focused all-features: N1c core **18 passed**, runtime **7 passed**, terminal
+  intent TCP + QUIC **2 passed**; zero failures.
+- `sh .githooks/pre-push`: **exit 0**, 160.386 s. Root fmt plus strict Clippy
+  default, all-features, no-default-features, native-only, matched fmt and strict
+  all-target Clippy: zero diagnostics. `CARGO_TARGET_DIR` selected this checkout's
+  existing root `target/` for the comparison workspace too. Dependencies were
+  already available offline. The hook stays enabled for the real push.
+
+No outstanding focused-test or lint failures remain. Full-suite qualification
+and final-head N0 aggregate performance qualification remain open for integration.
+Cleanup follows successful publication: remove this checkout's build/scratch and
+its worktree, leaving the report and validation evidence on the PR branch.
 
 ### N1c review round 2 schema plan (before editing, 20 October 2026)
 

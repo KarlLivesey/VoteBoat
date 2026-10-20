@@ -1,0 +1,76 @@
+[
+  {
+    "name": "nine-logical-voter",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--test",
+      "logical_voter_network",
+      "--",
+      "--test-threads=2"
+    ],
+    "status": 0,
+    "seconds": 10.962
+  },
+  {
+    "name": "n1c-core",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--lib",
+      "append_hold",
+      "--",
+      "--test-threads=2"
+    ],
+    "status": 0,
+    "seconds": 31.048
+  },
+  {
+    "name": "n1c-runtime",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--test",
+      "runtime",
+      "append_hold",
+      "--",
+      "--test-threads=2"
+    ],
+    "status": 0,
+    "seconds": 5.373
+  },
+  {
+    "name": "terminal-intent",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--bin",
+      "voteboat-counter",
+      "terminal",
+      "--",
+      "--test-threads=2"
+    ],
+    "status": 0,
+    "seconds": 8.203
+  }
+]

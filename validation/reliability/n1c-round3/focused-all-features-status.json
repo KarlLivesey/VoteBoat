@@ -1,0 +1,61 @@
+[
+  {
+    "name": "n1c-core-all-features",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--all-features",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--lib",
+      "append_hold",
+      "--",
+      "--test-threads=2"
+    ],
+    "status": 0,
+    "seconds": 39.456
+  },
+  {
+    "name": "n1c-runtime-all-features",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--all-features",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--test",
+      "runtime",
+      "append_hold",
+      "--",
+      "--test-threads=2"
+    ],
+    "status": 0,
+    "seconds": 35.183
+  },
+  {
+    "name": "terminal-intent-all-features",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--all-features",
+      "--locked",
+      "--offline",
+      "-j",
+      "2",
+      "--bin",
+      "voteboat-counter",
+      "terminal",
+      "--",
+      "--test-threads=2"
+    ],
+    "status": 0,
+    "seconds": 9.033
+  }
+]
