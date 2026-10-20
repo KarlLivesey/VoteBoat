@@ -139,6 +139,7 @@ pub(super) mod tests {
     thread_local! {
         static CHECKS: Cell<u64> = const { Cell::new(0) };
     }
+    #[cfg(debug_assertions)]
     pub(super) fn count_check() {
         CHECKS.with(|c| c.set(c.get() + 1));
     }

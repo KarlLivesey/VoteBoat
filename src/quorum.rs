@@ -255,8 +255,8 @@ fn frontier_buffered(tree: &Tree, progress: &BTreeMap<NodeId, u64>) -> u64 {
     }
 }
 
-/// The previous implementation, kept as the debug-build oracle.
-#[cfg(debug_assertions)]
+/// The previous implementation, kept as the debug-build and test oracle.
+#[cfg(any(test, debug_assertions))]
 fn reference_frontier(tree: &Tree, progress: &BTreeMap<NodeId, u64>) -> u64 {
     match tree {
         Tree::Voter(id) => *progress.get(id).unwrap_or(&0),
@@ -295,6 +295,7 @@ pub(crate) mod tests {
     thread_local! {
         static CHECKS: Cell<u64> = const { Cell::new(0) };
     }
+    #[cfg(debug_assertions)]
     pub(super) fn count_check() {
         CHECKS.with(|c| c.set(c.get() + 1));
     }
