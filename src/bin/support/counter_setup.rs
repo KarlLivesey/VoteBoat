@@ -35,6 +35,7 @@ pub fn application() -> Result<Counter, Failure> {
     // so a peer built with other limits refuses this declaration.
     let requirements = voteboat::raft::ReadinessRequirements {
         application_schema: Counter::schema(limits),
+        identity: voteboat::raft::LayerIdentity::family(voteboat::raft::ApplicationFamily::COUNTER),
         inner_profile: voteboat::raft::InnerProfile::LEAF,
         command_bytes: COUNTER_COMMAND_BYTES,
         snapshot_bytes: 279_108,

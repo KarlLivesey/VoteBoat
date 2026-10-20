@@ -504,10 +504,8 @@ fn member_histories(protocol: NativePeerProtocol) {
                     group(),
                     OperationId::new(101).unwrap(),
                     ReadinessRequirements {
-                        application_schema: Counter::new(100).unwrap().schema_version(),
-                        inner_profile: voteboat::raft::InnerProfile::LEAF,
-                        command_bytes: voteboat::application::COUNTER_COMMAND_BYTES,
                         snapshot_bytes: 4096,
+                        ..Counter::new(100).unwrap().readiness_requirements()
                     }
                 )
                 .unwrap(),

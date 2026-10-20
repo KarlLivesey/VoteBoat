@@ -381,6 +381,14 @@ impl<'a> Encoder<'a> {
     fn u32(&mut self, v: u32) -> Result<(), WireError> {
         self.put(&v.to_le_bytes())
     }
+    /// Family (u16), then the configuration words (u64 each).
+    fn layer_identity(&mut self, identity: crate::raft::LayerIdentity) -> Result<(), WireError> {
+        self.put(&identity.family.get().to_le_bytes())?;
+        for word in identity.configuration {
+            self.u64(word)?;
+        }
+        Ok(())
+    }
     fn u64(&mut self, v: u64) -> Result<(), WireError> {
         self.put(&v.to_le_bytes())
     }
@@ -730,14 +738,16 @@ impl<'a> Encoder<'a> {
         self.u64(r.requirements.application_schema)?;
         self.u64(u64::try_from(r.requirements.command_bytes).map_err(|_| WireError::TooLarge)?)?;
         self.u64(u64::try_from(r.requirements.snapshot_bytes).map_err(|_| WireError::TooLarge)?)?;
+        self.layer_identity(r.requirements.identity)?;
         let layers = r
             .requirements
             .inner_profile
             .layers()
             .ok_or(WireError::InvalidMessage("readiness inner profile depth"))?;
         self.u8(layers.len() as u8)?;
-        for schema in layers {
-            self.u64(*schema)?;
+        for layer in layers {
+            self.u64(layer.schema)?;
+            self.layer_identity(layer.identity)?;
         }
         if let Rpc::LearnerReadinessReply { ready, .. } = &m.rpc {
             self.u8(u8::from(*ready))?;
@@ -850,6 +860,17 @@ impl<'a> Decoder<'a> {
     }
     fn u32(&mut self) -> Result<u32, WireError> {
         Ok(u32::from_le_bytes(self.take(4)?.try_into().unwrap()))
+    }
+    fn layer_identity(&mut self) -> Result<crate::raft::LayerIdentity, WireError> {
+        let family = u16::from_le_bytes(self.take(2)?.try_into().unwrap());
+        let mut configuration = [0; crate::raft::LAYER_CONFIGURATION_WORDS];
+        for word in &mut configuration {
+            *word = self.u64()?;
+        }
+        Ok(crate::raft::LayerIdentity::new(
+            crate::raft::ApplicationFamily::from_wire(family),
+            configuration,
+        ))
     }
     fn u64(&mut self) -> Result<u64, WireError> {
         Ok(u64::from_le_bytes(self.take(8)?.try_into().unwrap()))
@@ -1372,25 +1393,30 @@ impl<'a> Decoder<'a> {
     }
 }
 impl Decoder<'_> {
-    /// Schema, command and snapshot bytes, then the inner profile: a layer
-    /// count (at most `MAX_INNER_PROFILE_LAYERS`) and that many non-zero
-    /// schemas, outermost first.
+    /// Schema, command and snapshot bytes, the application's own identity
+    /// (family u16, four u64 configuration words), then the inner profile: a
+    /// layer count (at most `MAX_INNER_PROFILE_LAYERS`) and that many layers,
+    /// outermost first, each a non-zero schema and its identity.
     fn readiness_requirements(&mut self) -> Result<ReadinessRequirements, WireError> {
         let application_schema = self.u64()?;
         let command_bytes = usize::try_from(self.u64()?).map_err(|_| WireError::TooLarge)?;
         let snapshot_bytes = usize::try_from(self.u64()?).map_err(|_| WireError::TooLarge)?;
+        let identity = self.layer_identity()?;
         let count = usize::from(self.u8()?);
         if count > crate::raft::MAX_INNER_PROFILE_LAYERS {
             return Err(WireError::InvalidMessage("readiness inner profile depth"));
         }
-        let mut layers = [0; crate::raft::MAX_INNER_PROFILE_LAYERS];
+        let mut layers =
+            [crate::raft::InnerLayer::unregistered(0); crate::raft::MAX_INNER_PROFILE_LAYERS];
         for layer in &mut layers[..count] {
-            *layer = self.u64()?;
+            let schema = self.u64()?;
+            *layer = crate::raft::InnerLayer::new(schema, self.layer_identity()?);
         }
         let inner_profile = crate::raft::InnerProfile::from_layers(&layers[..count])
             .ok_or(WireError::InvalidMessage("readiness inner profile schema"))?;
         Ok(ReadinessRequirements {
             application_schema,
+            identity,
             inner_profile,
             command_bytes,
             snapshot_bytes,

@@ -330,6 +330,59 @@ fn p2_nested_activation_identity_cancels() {
 }
 
 #[test]
+fn activation_limits_are_compared_exactly_at_readiness() {
+    // Round 5 (Opus P3-1): intent capacity, command bytes and checkpoint
+    // bytes decide committed entries or the checkpoint encoding, so they are
+    // the layer's configuration words. A replica with other limits is refused
+    // at readiness even when the declared envelope covers it.
+    let base = app(64);
+    let declared = base.deployment_requirements().unwrap();
+    assert_eq!(
+        declared.identity.family,
+        crate::raft::ApplicationFamily::LOGICAL_ACTIVATION
+    );
+    assert_eq!(base.validate_deployment_requirements(declared), Ok(()));
+    let defaults = LogicalActivationLimits {
+        intents: 64,
+        ..LogicalActivationLimits::default()
+    };
+    let with = |limits| {
+        LogicalActivationApplication::new(
+            group(1),
+            vec![mapping()],
+            limits,
+            Counter::new(16).unwrap(),
+        )
+        .unwrap()
+    };
+    for other in [
+        app(65),
+        with(LogicalActivationLimits {
+            command_bytes: defaults.command_bytes - 1,
+            ..defaults
+        }),
+        with(LogicalActivationLimits {
+            checkpoint_bytes: defaults.checkpoint_bytes - 1,
+            ..defaults
+        }),
+    ] {
+        assert_eq!(other.schema_version(), base.schema_version());
+        for (replica, leader) in [(&base, &other), (&other, &base)] {
+            let theirs = leader.deployment_requirements().unwrap();
+            let widest = crate::raft::ReadinessRequirements {
+                command_bytes: theirs.command_bytes.max(declared.command_bytes),
+                snapshot_bytes: theirs.snapshot_bytes.max(declared.snapshot_bytes),
+                ..theirs
+            };
+            assert_eq!(
+                replica.validate_deployment_requirements(widest),
+                Err(ApplicationError::UnsupportedSchema)
+            );
+        }
+    }
+}
+
+#[test]
 fn composed_schemas_are_distinct_and_composed_applications_do_not_nest() {
     use crate::maintenance::{maintenance_schema, Maintenance, MAX_MAINTENANCE_FORMAT};
     use crate::retention::SessionLimits;

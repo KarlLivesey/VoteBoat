@@ -15,6 +15,8 @@
 //! Explicit host-authorized learner enrollment through the public storage,
 //! core, application and snapshot contracts. No network bootstrap is inferred.
 mod support;
+#[path = "transfer_source/fixtures.rs"]
+mod transfer_fixtures;
 use support::*;
 use voteboat::{application::*, identity::*, log::*, membership::*, raft::*, snapshot::*};
 fn cid(n: u64) -> ConfigurationId {
@@ -532,6 +534,7 @@ fn joint_or_policy_transition_cannot_use_learner_recovery_to_open_dynamic_voting
 fn readiness_requirements() -> ReadinessRequirements {
     ReadinessRequirements {
         application_schema: Counter::new(16).unwrap().schema_version(),
+        identity: voteboat::raft::LayerIdentity::family(voteboat::raft::ApplicationFamily::COUNTER),
         inner_profile: voteboat::raft::InnerProfile::LEAF,
         command_bytes: voteboat::application::COUNTER_COMMAND_BYTES,
         snapshot_bytes: 4096,
@@ -648,7 +651,7 @@ fn readiness_exchange_suspends_verification_rejects_stale_completion_and_denies_
             .step(Event::CheckLearnerReadiness {
                 learner: learner_peer(),
                 session: log.binding().session,
-                requirements,
+                requirements: Box::new(requirements),
             })
             .unwrap();
         let query = sent(&effects, 4);
@@ -728,7 +731,7 @@ fn readiness_storage_failure_fences_without_reply_and_recovery_discards_pending_
             .step(Event::CheckLearnerReadiness {
                 learner: learner_peer(),
                 session: log.binding().session,
-                requirements: readiness_requirements(),
+                requirements: Box::new(readiness_requirements()),
             })
             .unwrap(),
         4,
@@ -1106,7 +1109,7 @@ mod native_exchange {
                     .step(Event::CheckLearnerReadiness {
                         learner: learner_peer(),
                         session: self.log.binding().session,
-                        requirements,
+                        requirements: Box::new(requirements),
                     })
                     .unwrap(),
                 4,
@@ -1589,6 +1592,123 @@ fn readiness_refuses_a_wrapped_learner_whose_inner_session_limits_differ() {
         leader.storage_binding(),
     )
     .unwrap();
+}
+
+/// Real learner readiness for one declaration: a fresh leader/learner cluster,
+/// the learner's application (from `build`) caught up on the committed prefix,
+/// then the leader's request and the learner's `verify_learner_readiness`.
+fn learner_verdict<A: CheckpointStateMachine>(
+    declared: ReadinessRequirements,
+    build: impl Fn() -> A,
+) -> Result<LearnerReadinessReceipt, ReadinessError> {
+    let mut log = HostLogStore::new(4);
+    let (mut leader, learner, _, _leader_log) = readiness_cluster(&mut log);
+    let mut snapshots = snapshots();
+    let mut app = build();
+    app.apply_batch(learner.replay_committed()).unwrap();
+    let request = leader
+        .begin_learner_readiness(learner_peer(), log.binding().session, declared)
+        .unwrap();
+    verify_learner_readiness(
+        &learner,
+        &app,
+        &log,
+        &mut snapshots,
+        request,
+        leader.storage_binding(),
+    )
+}
+/// Each application gets a receipt for its own declaration and is refused,
+/// with the typed readiness error, for the other's.
+fn assert_learners_refuse_each_other<A: CheckpointStateMachine, B: CheckpointStateMachine>(
+    a: impl Fn() -> A,
+    b: impl Fn() -> B,
+    widen: impl Fn(ReadinessRequirements) -> ReadinessRequirements,
+) {
+    let (da, db) = (
+        widen(a().deployment_requirements().unwrap()),
+        widen(b().deployment_requirements().unwrap()),
+    );
+    assert!(learner_verdict(da, &a).is_ok());
+    assert!(learner_verdict(db, &b).is_ok());
+    assert_eq!(learner_verdict(db, &a), Err(ReadinessError::Capability));
+    assert_eq!(learner_verdict(da, &b), Err(ReadinessError::Capability));
+}
+
+#[test]
+fn readiness_refuses_another_wrapper_family_with_the_same_schema_numbers() {
+    use transfer_fixtures::{nested_routed_in, source_in};
+    // Sol, round 4: TransferSource<BucketCounter> and
+    // Routed<Routed<BucketCounter>> have schema 1 over inner schemas [1, 1]
+    // and equal envelopes; both learners received receipts for the same
+    // request. The families now differ, so each learner is refused for the
+    // other's declaration, even with a common envelope.
+    let source = || source_in(group(1));
+    let nested = || nested_routed_in(group(1));
+    let (s, n) = (
+        source().deployment_requirements().unwrap(),
+        nested().deployment_requirements().unwrap(),
+    );
+    assert_eq!(s.application_schema, n.application_schema);
+    assert_eq!(s.inner_profile.schemas(), n.inner_profile.schemas());
+    assert_eq!(s.identity.family, ApplicationFamily::TRANSFER_SOURCE);
+    assert_eq!(n.identity.family, ApplicationFamily::ROUTED);
+    let common = |r: ReadinessRequirements| ReadinessRequirements {
+        command_bytes: s.command_bytes.max(n.command_bytes),
+        snapshot_bytes: s.snapshot_bytes.max(n.snapshot_bytes),
+        ..r
+    };
+    assert_learners_refuse_each_other(source, nested, common);
+}
+
+#[test]
+fn readiness_refuses_a_learner_whose_wrapper_configuration_differs() {
+    use transfer_fixtures::{bucket_limits, grant_for, range, Policy};
+    use voteboat::{
+        bucket_counter::BucketCounter, maintenance::Maintenance, retention::SessionLimits,
+        routed::*,
+    };
+    // Sol and Opus, round 4: Maintenance capacity 2 and 4 around the same
+    // Counter accepted each other's declarations and the capacity-2 learner
+    // got a receipt (it then stopped with DedupCapacity at the third Begin).
+    // The capacity is now the layer's configuration, compared exactly, so the
+    // larger envelope no longer admits it.
+    let maintenance = |capacity| {
+        move || {
+            let counter = Counter::with_limits(SessionLimits::new(2, 4, 4).unwrap()).unwrap();
+            Maintenance::new(group(1), 3, capacity, counter).unwrap()
+        }
+    };
+    let envelope = |r: ReadinessRequirements| ReadinessRequirements {
+        snapshot_bytes: 4096,
+        ..r
+    };
+    assert_learners_refuse_each_other(maintenance(2), maintenance(4), envelope);
+    // Sol, round 4: RoutedLimits.operations 4 and 7 around identical inners
+    // accepted each other and diverged on the first bootstrap entry.
+    let routed = |operations| {
+        move || {
+            RoutedApplication::new(
+                group(1),
+                grant_for(group(1)),
+                BucketCounter::new(range(0, 256), Policy, bucket_limits()).unwrap(),
+                Policy,
+                RoutedLimits {
+                    operations,
+                    semantic_bytes: 8192,
+                    payload_bytes: 1024,
+                    inner_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
+                },
+            )
+            .unwrap_or_else(|r| panic!("{:?}", r.error))
+        }
+    };
+    let widest = |r: ReadinessRequirements| ReadinessRequirements {
+        snapshot_bytes: r.snapshot_bytes + 1024,
+        command_bytes: r.command_bytes + 1024,
+        ..r
+    };
+    assert_learners_refuse_each_other(routed(4), routed(7), widest);
 }
 
 #[test]

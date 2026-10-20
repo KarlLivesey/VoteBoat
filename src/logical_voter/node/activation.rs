@@ -64,7 +64,7 @@ where
                         store: source.identity,
                     },
                     session: source.session,
-                    requirements,
+                    requirements: Box::new(requirements),
                 },
             )
             .map_err(|r| LogicalNodeError::Owner(EffectOwnerError::Runtime(r.reason)))

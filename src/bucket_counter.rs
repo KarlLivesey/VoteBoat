@@ -200,6 +200,17 @@ impl<P: PartitionPolicy + Clone> BucketCounter<P> {
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
             application_schema: BUCKET_COUNTER_SCHEMA,
+            // Words: operation and retained-byte limits, which decide
+            // committed commands. Scope and policy are the deployment plan.
+            identity: crate::raft::LayerIdentity::new(
+                crate::raft::ApplicationFamily::BUCKET_COUNTER,
+                [
+                    self.limits.operations as u64,
+                    self.limits.semantic_bytes as u64,
+                    0,
+                    0,
+                ],
+            ),
             inner_profile: crate::raft::InnerProfile::LEAF,
             command_bytes: MAX_BUCKET_COMMAND_BYTES,
             snapshot_bytes: self.limits.checkpoint_bound().expect("validated limits"),

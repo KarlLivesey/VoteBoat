@@ -52,6 +52,14 @@ pub(super) struct PartialState {
     export_bytes: usize,
     events: Vec<Event>,
 }
+impl PartialState {
+    pub(super) fn maximum(&self) -> usize {
+        self.maximum
+    }
+    pub(super) fn export_bytes(&self) -> usize {
+        self.export_bytes
+    }
+}
 pub(super) fn control(bytes: &[u8]) -> bool {
     bytes.starts_with(b"VBTINT06")
         || bytes.starts_with(b"VBSADP01")

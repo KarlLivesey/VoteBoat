@@ -47,6 +47,10 @@ pub fn op(n: u128) -> OperationId {
     OperationId::new(n).unwrap()
 }
 pub fn grant() -> ResponsibilityManifest {
+    grant_for(group(20))
+}
+/// The fixture grant with its single route targeting `local`.
+pub fn grant_for(local: GroupIdentity) -> ResponsibilityManifest {
     ResponsibilityManifest::new(ManifestInput {
         responsibility: ResponsibilityIdentity {
             id: ResponsibilityId::new(10).unwrap(),
@@ -67,7 +71,7 @@ pub fn grant() -> ResponsibilityManifest {
             survive_any_single_domain_loss: false,
         },
         state: ResponsibilityState::Active,
-        execution: ExecutionMode::Single(group(20)),
+        execution: ExecutionMode::Single(local),
     })
     .unwrap()
 }
@@ -95,9 +99,12 @@ pub fn bucket_limits() -> BucketCounterLimits {
     }
 }
 pub fn routed() -> RoutedApplication<BucketCounter<Policy>, Policy> {
+    routed_in(group(20))
+}
+pub fn routed_in(local: GroupIdentity) -> RoutedApplication<BucketCounter<Policy>, Policy> {
     RoutedApplication::new(
-        group(20),
-        grant(),
+        local,
+        grant_for(local),
         BucketCounter::new(range(0, 256), Policy, bucket_limits()).unwrap(),
         Policy,
         RoutedLimits {
@@ -108,6 +115,31 @@ pub fn routed() -> RoutedApplication<BucketCounter<Policy>, Policy> {
         },
     )
     .unwrap_or_else(|r| panic!("{:?}", r.error))
+}
+pub type NestedRouted = RoutedApplication<RoutedApplication<BucketCounter<Policy>, Policy>, Policy>;
+/// Sol's round-4 composition: Routed around the fixture Routed owner, with
+/// limits chosen so that its schema, inner schemas and envelopes equal
+/// [`fresh`]'s.
+pub fn nested_routed() -> NestedRouted {
+    nested_routed_in(group(20))
+}
+pub fn nested_routed_in(local: GroupIdentity) -> NestedRouted {
+    RoutedApplication::new(
+        local,
+        grant_for(local),
+        routed_in(local),
+        Policy,
+        RoutedLimits {
+            operations: 32,
+            semantic_bytes: 8192,
+            payload_bytes: 28555,
+            inner_checkpoint_bytes: 41676,
+        },
+    )
+    .unwrap_or_else(|r| panic!("{:?}", r.error))
+}
+pub fn source_in(local: GroupIdentity) -> Source {
+    TransferSource::new(routed_in(local), 65536).unwrap_or_else(|r| panic!("{:?}", r.0))
 }
 pub fn fresh() -> Source {
     TransferSource::new(routed(), 65536).unwrap_or_else(|r| panic!("{:?}", r.0))

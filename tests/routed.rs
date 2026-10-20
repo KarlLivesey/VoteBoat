@@ -225,8 +225,8 @@ fn startup_binding_does_not_refuse_skew_at_readiness() {
     for (replica, leader) in [(&small, &large), (&large, &small)] {
         let declared = leader.deployment_requirements().unwrap();
         assert_eq!(
-            declared.inner_profile.layers(),
-            Some(&[leader.application().schema_version()][..])
+            declared.inner_profile.schemas(),
+            Some(vec![leader.application().schema_version()])
         );
         assert_eq!(leader.validate_deployment_requirements(declared), Ok(()));
         assert_eq!(
@@ -247,6 +247,105 @@ fn startup_binding_does_not_refuse_skew_at_readiness() {
         Some(ApplicationError::InvalidCommand)
     );
     assert_eq!(skewed.applied_index(), 0);
+}
+#[test]
+fn wrapper_own_routed_limits_are_refused_at_readiness() {
+    // Sol, round 4: identical Counter::new(4) inners and only
+    // RoutedLimits.operations differing (4 / 7). The smaller replica accepted
+    // the larger declaration, then failed the first bootstrap entry. Routed's
+    // own limits are now its configuration words, compared exactly, so each
+    // refuses the other at readiness; every other limit field likewise.
+    let routed = |config: RoutedLimits| {
+        RoutedApplication::new(
+            group(20),
+            grant(),
+            Counter::new(4).unwrap(),
+            HostPolicy,
+            config,
+        )
+        .unwrap_or_else(|r| panic!("{:?}", r.error))
+    };
+    let base = limits();
+    let skews = [
+        (
+            RoutedLimits {
+                operations: 4,
+                ..base
+            },
+            RoutedLimits {
+                operations: 7,
+                ..base
+            },
+        ),
+        (
+            base,
+            RoutedLimits {
+                semantic_bytes: base.semantic_bytes - 1,
+                ..base
+            },
+        ),
+        (
+            base,
+            RoutedLimits {
+                payload_bytes: base.payload_bytes - 1,
+                ..base
+            },
+        ),
+        (
+            base,
+            RoutedLimits {
+                inner_checkpoint_bytes: base.inner_checkpoint_bytes + 1,
+                ..base
+            },
+        ),
+    ];
+    for (small, large) in skews {
+        let (small, large) = (routed(small), routed(large));
+        assert_eq!(small.schema_version(), large.schema_version());
+        for (replica, leader) in [(&small, &large), (&large, &small)] {
+            let declared = leader.deployment_requirements().unwrap();
+            let actual = replica.deployment_requirements().unwrap();
+            assert_eq!(declared.inner_profile, actual.inner_profile);
+            assert_ne!(declared.identity, actual.identity);
+            assert_eq!(leader.validate_deployment_requirements(declared), Ok(()));
+            assert_eq!(
+                replica.validate_deployment_requirements(declared),
+                Err(ApplicationError::UnsupportedSchema)
+            );
+        }
+    }
+    // Sol's exact pair, and the binding still stops a forced bootstrap.
+    let small = routed(RoutedLimits {
+        operations: 4,
+        ..base
+    });
+    let mut large = routed(RoutedLimits {
+        operations: 7,
+        ..base
+    });
+    let bootstrap = large.bootstrap_command(MAX_ROUTED_COMMAND_BYTES).unwrap();
+    large
+        .apply_batch(&[entry(1, 10000, bootstrap.clone())])
+        .unwrap();
+    assert_eq!(large.applied_index(), 1);
+    let mut skewed = small.clone();
+    assert_eq!(
+        skewed.apply_batch(&[entry(1, 10000, bootstrap)]).err(),
+        Some(ApplicationError::InvalidCommand)
+    );
+    assert_eq!(skewed.applied_index(), 0);
+    // The scoped-fence limit is configuration too.
+    let scoped = |maximum| {
+        routed(base)
+            .with_scoped_fencing(maximum)
+            .unwrap_or_else(|r| panic!("{:?}", r.0))
+    };
+    let (two, three) = (scoped(2), scoped(3));
+    assert_eq!(two.schema_version(), three.schema_version());
+    assert_eq!(
+        two.validate_deployment_requirements(three.deployment_requirements().unwrap()),
+        Err(ApplicationError::UnsupportedSchema)
+    );
 }
 #[test]
 fn admission_and_apply_recheck_context_and_bind_retries_to_key_and_payload() {

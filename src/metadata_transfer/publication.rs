@@ -151,6 +151,7 @@ impl MetadataPublishingSource {
     pub fn readiness_requirements(&self) -> ReadinessRequirements {
         let mut r = self.inner.readiness_requirements();
         r.application_schema = self.schema_version();
+        r.identity.family = crate::raft::ApplicationFamily::METADATA_PUBLISHING;
         r.command_bytes = r.command_bytes.max(PUBLICATION_BYTES);
         r.snapshot_bytes += 56 + PUBLICATION_BYTES;
         r

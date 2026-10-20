@@ -21,9 +21,18 @@ use crate::{
 
 /// Required capabilities for this group's promotion. Placement/failure-domain
 /// authorization belongs to the host's validated administration plan.
+///
+/// Readiness compares `application_schema`, `identity` and `inner_profile`
+/// exactly: together they name every layer's protocol family, schema and
+/// decision-affecting configuration. `command_bytes` and `snapshot_bytes` are
+/// storage reservations, accepted when the declaration is at least the actual
+/// bound.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ReadinessRequirements {
     pub application_schema: u64,
+    /// This application's own protocol family and decision-affecting
+    /// configuration (the outermost layer).
+    pub identity: LayerIdentity,
     /// The applications inside this one, if it wraps any. Readiness compares it
     /// with the schema, so a wrapper whose own schema is a fixed protocol
     /// constant still refuses a replica whose inner application differs.
@@ -32,66 +41,199 @@ pub struct ReadinessRequirements {
     pub snapshot_bytes: usize,
 }
 
+/// Protocol family of one application layer. Schema numbers are chosen per
+/// family (in-tree families reuse 1, 2, ...), so readiness compares the family
+/// with the schema: two layers match only if both are equal.
+///
+/// The registry of in-tree families is the list of constants below; values
+/// `1..FIRST_EXTERNAL` are reserved for it. Third-party applications use
+/// [`ApplicationFamily::external`], or `UNREGISTERED` to be identified by their
+/// schema and configuration alone (the provider then keeps its schemas
+/// distinct from every other family it may be composed with).
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct ApplicationFamily(u16);
+impl ApplicationFamily {
+    /// Identified by schema and configuration alone.
+    pub const UNREGISTERED: Self = Self(0);
+    /// `application::Counter`.
+    pub const COUNTER: Self = Self(1);
+    /// `maintenance::Maintenance`.
+    pub const MAINTENANCE: Self = Self(2);
+    /// `logical_voter::LogicalActivationApplication`.
+    pub const LOGICAL_ACTIVATION: Self = Self(3);
+    /// `routed::RoutedApplication` (all of its schemas).
+    pub const ROUTED: Self = Self(4);
+    /// `transfer_source::TransferSource`.
+    pub const TRANSFER_SOURCE: Self = Self(5);
+    /// `scoped_source::ScopedTransferSource`.
+    pub const SCOPED_TRANSFER_SOURCE: Self = Self(6);
+    /// `transfer_target::TransferTarget`.
+    pub const TRANSFER_TARGET: Self = Self(7);
+    /// `namespace_creation::CreatedNamespace`.
+    pub const CREATED_NAMESPACE: Self = Self(8);
+    /// `retirement::RetirementGuard`.
+    pub const RETIREMENT_GUARD: Self = Self(9);
+    /// `bucket_counter::BucketCounter`.
+    pub const BUCKET_COUNTER: Self = Self(10);
+    /// `directory::Directory`.
+    pub const DIRECTORY: Self = Self(11);
+    /// `metadata_transfer::MetadataAuthoritySource`.
+    pub const METADATA_SOURCE: Self = Self(12);
+    /// `metadata_transfer::MetadataAuthorityTarget`.
+    pub const METADATA_TARGET: Self = Self(13);
+    /// `metadata_transfer::MetadataServingTarget`.
+    pub const METADATA_SERVING: Self = Self(14);
+    /// `metadata_transfer::MetadataPublishingSource`.
+    pub const METADATA_PUBLISHING: Self = Self(15);
+    /// `logical_voter::LogicalVoterApplication`.
+    pub const LOGICAL_VOTER: Self = Self(16);
+    /// `transaction::TransferApplication`.
+    pub const TRANSFER_TRANSACTION: Self = Self(17);
+    /// `program_transaction::ProgramApplication`.
+    pub const PROGRAM_TRANSACTION: Self = Self(18);
+    /// First value available to third-party families.
+    pub const FIRST_EXTERNAL: u16 = 0x8000;
+    /// A third-party family; `None` for a value reserved for in-tree families.
+    pub const fn external(value: u16) -> Option<Self> {
+        if value < Self::FIRST_EXTERNAL {
+            None
+        } else {
+            Some(Self(value))
+        }
+    }
+    /// Decoded from a readiness frame; any value is representable.
+    pub const fn from_wire(value: u16) -> Self {
+        Self(value)
+    }
+    pub const fn get(self) -> u16 {
+        self.0
+    }
+}
+
+/// Configuration words compared per layer.
+pub const LAYER_CONFIGURATION_WORDS: usize = 4;
+
+/// One layer's protocol family and the configuration that changes how it
+/// decides committed entries or encodes its checkpoint (limits, capacities,
+/// enabled modes). Compared exactly; storage reservations are not part of it.
+/// Each family documents its word layout where it declares requirements.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct LayerIdentity {
+    pub family: ApplicationFamily,
+    pub configuration: [u64; LAYER_CONFIGURATION_WORDS],
+}
+impl LayerIdentity {
+    /// No registered family and no configuration words.
+    pub const UNREGISTERED: Self = Self::new(ApplicationFamily::UNREGISTERED, [0; 4]);
+    pub const fn new(
+        family: ApplicationFamily,
+        configuration: [u64; LAYER_CONFIGURATION_WORDS],
+    ) -> Self {
+        Self {
+            family,
+            configuration,
+        }
+    }
+    /// A family whose configuration is fully named by its schema.
+    pub const fn family(family: ApplicationFamily) -> Self {
+        Self::new(family, [0; LAYER_CONFIGURATION_WORDS])
+    }
+    /// Two values below 2^32 in one configuration word, `high` first. Callers
+    /// pass values their constructors already bound below 2^32.
+    pub const fn pair(high: usize, low: usize) -> u64 {
+        ((high as u64) << 32) | (low as u64 & 0xffff_ffff)
+    }
+}
+
+/// One application below the outer one: its schema and identity.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct InnerLayer {
+    pub schema: u64,
+    pub identity: LayerIdentity,
+}
+impl InnerLayer {
+    pub const fn new(schema: u64, identity: LayerIdentity) -> Self {
+        Self { schema, identity }
+    }
+    /// A layer identified by its schema alone (`LayerIdentity::UNREGISTERED`).
+    pub const fn unregistered(schema: u64) -> Self {
+        Self::new(schema, LayerIdentity::UNREGISTERED)
+    }
+}
+
 /// Most application layers an [`InnerProfile`] records.
 pub const MAX_INNER_PROFILE_LAYERS: usize = 7;
 
 /// Hash-free structural identity of the applications inside a wrapper: the
-/// readiness schema of each application below the outer one, outermost first
-/// (a leaf application has none). Readiness compares it layer for layer, so
-/// two stacks match only if every layer's schema does. A generic stack deeper
-/// than [`MAX_INNER_PROFILE_LAYERS`] gets an overflowed profile, which
-/// readiness refuses (`UnsupportedSchema`) rather than truncating.
+/// schema and identity (family and configuration) of each application below
+/// the outer one, outermost first (a leaf application has none). Readiness
+/// compares it layer for layer, so two stacks match only if every layer's
+/// family, schema and configuration do. A generic stack deeper than
+/// [`MAX_INNER_PROFILE_LAYERS`] gets an overflowed profile, which readiness
+/// refuses (`UnsupportedSchema`) rather than truncating.
+///
+/// A wrapper must set it with [`InnerProfile::wrapping`] or
+/// [`InnerProfile::of`]; a transparent wrapper forwards its inner
+/// application's requirements unchanged. Declaring `LEAF` around an inner
+/// application hides that application from readiness: a trusted-provider
+/// obligation, not something readiness can detect.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct InnerProfile {
     /// Layers in use, or `u8::MAX` once overflowed.
     len: u8,
-    layers: [u64; MAX_INNER_PROFILE_LAYERS],
+    layers: [InnerLayer; MAX_INNER_PROFILE_LAYERS],
 }
 impl InnerProfile {
+    const UNUSED: InnerLayer = InnerLayer::unregistered(0);
     /// No inner application.
     pub const LEAF: Self = Self {
         len: 0,
-        layers: [0; MAX_INNER_PROFILE_LAYERS],
+        layers: [Self::UNUSED; MAX_INNER_PROFILE_LAYERS],
     };
     const OVERFLOWED: Self = Self {
         len: u8::MAX,
-        layers: [0; MAX_INNER_PROFILE_LAYERS],
+        layers: [Self::UNUSED; MAX_INNER_PROFILE_LAYERS],
     };
     /// The profile of a wrapper whose inner application declares `inner`: the
-    /// inner schema, then the inner application's own profile.
+    /// inner schema and identity, then the inner application's own profile.
     pub fn wrapping(inner: ReadinessRequirements) -> Self {
         let Some(below) = inner.inner_profile.layers() else {
             return Self::OVERFLOWED;
         };
-        let mut layers = Vec::with_capacity(below.len() + 1);
-        layers.push(inner.application_schema);
-        layers.extend_from_slice(below);
-        Self::from_layers(&layers).unwrap_or(Self::OVERFLOWED)
+        let mut layers = [Self::UNUSED; MAX_INNER_PROFILE_LAYERS + 1];
+        layers[0] = InnerLayer::new(inner.application_schema, inner.identity);
+        layers[1..=below.len()].copy_from_slice(below);
+        Self::from_layers(&layers[..=below.len()]).unwrap_or(Self::OVERFLOWED)
     }
     /// The profile of a wrapper around `inner`: from its declared
     /// requirements, or its checkpoint schema alone if it declares none.
     pub fn of<A: CheckpointStateMachine>(inner: &A) -> Self {
         match inner.deployment_requirements() {
             Some(declared) => Self::wrapping(declared),
-            None => Self::from_layers(&[inner.schema_version()]).unwrap_or(Self::OVERFLOWED),
+            None => Self::from_layers(&[InnerLayer::unregistered(inner.schema_version())])
+                .unwrap_or(Self::OVERFLOWED),
         }
     }
     /// An explicit profile; `None` above [`MAX_INNER_PROFILE_LAYERS`] layers or
     /// with a zero schema.
-    pub fn from_layers(schemas: &[u64]) -> Option<Self> {
-        if schemas.len() > MAX_INNER_PROFILE_LAYERS || schemas.contains(&0) {
+    pub fn from_layers(layers: &[InnerLayer]) -> Option<Self> {
+        if layers.len() > MAX_INNER_PROFILE_LAYERS || layers.iter().any(|l| l.schema == 0) {
             return None;
         }
-        let mut layers = [0; MAX_INNER_PROFILE_LAYERS];
-        layers[..schemas.len()].copy_from_slice(schemas);
+        let mut all = [Self::UNUSED; MAX_INNER_PROFILE_LAYERS];
+        all[..layers.len()].copy_from_slice(layers);
         Some(Self {
-            len: schemas.len() as u8,
-            layers,
+            len: layers.len() as u8,
+            layers: all,
         })
     }
-    /// The inner schemas, outermost first; `None` if overflowed.
-    pub fn layers(&self) -> Option<&[u64]> {
+    /// The inner layers, outermost first; `None` if overflowed.
+    pub fn layers(&self) -> Option<&[InnerLayer]> {
         self.layers.get(..usize::from(self.len))
+    }
+    /// The inner schemas, outermost first; `None` if overflowed.
+    pub fn schemas(&self) -> Option<Vec<u64>> {
+        Some(self.layers()?.iter().map(|l| l.schema).collect())
     }
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -228,7 +370,7 @@ impl Raft {
             index_term,
             requirements,
         };
-        self.learner_readiness = Some(request);
+        self.learner_readiness = Some(Box::new(request));
         self.ready_learner = None;
         Ok(request)
     }
@@ -239,12 +381,12 @@ impl Raft {
     /// Inspect the original volatile exchange still owned by this core.
     /// This is pending-work inspection, never promotion readiness or authority.
     pub fn pending_learner_readiness(&self) -> Option<LearnerReadinessRequest> {
-        self.learner_readiness
+        self.learner_readiness.as_deref().copied()
     }
     /// Volatile native-exchange result. Promotion must still recheck its scope
     /// and current authenticated peer binding at execution.
     pub fn ready_learner(&self) -> Option<&ReadyLearner> {
-        self.ready_learner.as_ref()
+        self.ready_learner.as_deref()
     }
     pub(crate) fn readiness_check_matches(&self, message: &Message) -> bool {
         self.readiness_check.as_ref() == Some(message)
@@ -286,16 +428,16 @@ impl Raft {
                     request,
                     binding: message.sender,
                 };
-                if self.learner_readiness != Some(request)
+                if self.learner_readiness.as_deref() != Some(&request)
                     || self.check_ready_scope(&receipt, message.sender).is_err()
                 {
                     return Ok(Vec::new());
                 }
                 if ready {
-                    self.ready_learner = Some(
+                    self.ready_learner = Some(Box::new(
                         self.accept_learner_readiness(receipt, message.sender)
                             .map_err(|_| RaftError::InvalidMessage)?,
-                    );
+                    ));
                 } else {
                     self.cancel_learner_readiness();
                 }
@@ -448,7 +590,7 @@ impl Raft {
         authenticated: StoreBinding,
     ) -> Result<ReadyLearner, ReadinessError> {
         self.check_ready_scope(&receipt, authenticated)?;
-        if self.learner_readiness.as_ref() != Some(&receipt.request) {
+        if self.learner_readiness.as_deref() != Some(&receipt.request) {
             return Err(ReadinessError::Stale);
         }
         self.learner_readiness = None;

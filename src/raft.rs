@@ -165,10 +165,12 @@ pub enum Event {
     CancelLeadershipTransfer {
         context: RequestContext,
     },
+    /// Boxed so the requirements' full application identity does not widen
+    /// every `Event`.
     CheckLearnerReadiness {
         learner: PeerIdentity,
         session: StoreSession,
-        requirements: ReadinessRequirements,
+        requirements: Box<ReadinessRequirements>,
     },
     CancelLearnerReadiness,
     /// Host-authorized administrative input; public network configuration
@@ -394,8 +396,10 @@ pub struct Raft {
     election_reset: u64,
     authority_request: Option<authority::PendingAuthority>,
     replication_permit: Option<authority::ReplicationPermit>,
-    learner_readiness: Option<LearnerReadinessRequest>,
-    ready_learner: Option<ReadyLearner>,
+    // Boxed: readiness requirements carry the full application identity
+    // (about 400 bytes), which the per-write core state need not hold inline.
+    learner_readiness: Option<Box<LearnerReadinessRequest>>,
+    ready_learner: Option<Box<ReadyLearner>>,
     readiness_check: Option<Message>,
     transfer: Option<LeadershipTransfer>,
     leader_contact: Option<(StoreBinding, NodeId, u64)>,
@@ -1007,7 +1011,7 @@ impl Raft {
                 learner,
                 session,
                 requirements,
-            } => self.request_learner_readiness(learner, session, requirements),
+            } => self.request_learner_readiness(learner, session, *requirements),
             Event::CancelLearnerReadiness => {
                 self.cancel_learner_readiness();
                 Ok(Vec::new())
@@ -1478,7 +1482,7 @@ impl Raft {
         let accepted_membership = membership.as_deref().unwrap_or(&self.membership);
         if self
             .learner_readiness
-            .as_ref()
+            .as_deref()
             .or_else(|| self.ready_learner.as_ref().map(|r| r.request()))
             .is_some_and(|r| {
                 r.term != metadata.hard_state.term

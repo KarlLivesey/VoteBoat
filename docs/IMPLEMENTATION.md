@@ -21,7 +21,7 @@ design pack is unchanged; its amendments are recorded below.
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Current DR1: `SessionLedger`, Counter and the steady-state application contract (`lb/dr1-session-ledger`, in review; see DR1 implemented) | Audit S1 and RT2, and the U2 probe: the shipped counter service stops refusing every write after 10,000 lifetime operations; one shared session mechanism lands in the core; `deployment_requirements` means a steady-state bound under a declared retention rule, readiness refuses an application that declares none, and the Counter's apply never returns `Err` for a capacity reason | — (ST2 and NT1 run in parallel; only this document conflicts textually) | 1,000,000-write soak from 1,000 rotating clients fails on the base at write 10,001 with `DedupCapacity` and passes with retention ≤ S·K at every checkpoint; exactly-once across eviction, restart and a checkpoint between every apply; consumed retry → `Expired`; evicted-session retry → `Expired` (never a second execution); boundary at exactly S·K; U2 probe (1,000 seeded three-node schedules) shows apply never errors; readiness refuses an undeclared application; native durable CPU per write before/after; fmt, four strict Clippy configurations and matched fmt/Clippy; application, counter_service, runtime, snapshot, checkpoint, log_store and native startup suites in default and all-features | LB |
-| Next DR2: Maintenance, BucketCounter/Routed and outbox acknowledgement | Audit S2, S3: transfer_service stops refusing after 32 writes; leadership maintenance survives more than 64 transfers. Reuses `SessionLedger` and the U2 probe | DR1 (ledger, `Retention`, probe harness) | Fail@main tests (65 `Begin`/`Complete` pairs; 33 transfer writes); soaks with splits/merges and leader changes; U2 probe run for Maintenance; transfer suites | LB |
+| Next DR2: Maintenance, BucketCounter/Routed and outbox acknowledgement | Audit S2, S3: transfer_service stops refusing after 32 writes; leadership maintenance survives more than 64 transfers. Reuses `SessionLedger` and the U2 probe. Also owns application deployment-recovery admission (recorded in DR1 round 5): static bootstrap exchanges no application requirements, and a voter reopening a WAL with no checkpoint replays under its current configuration; plus the leaf configurations not yet compared at readiness (metadata transfer's inner directory history, metadata serving/publishing). AI3 owns activation's counterpart (parent and store mappings); LV the logical voter's limits; TX1 the transaction applications' | DR1 (ledger, `Retention`, probe harness, readiness identity) | Fail@main tests (65 `Begin`/`Complete` pairs; 33 transfer writes); soaks with splits/merges and leader changes; U2 probe run for Maintenance; transfer suites; a static bootstrap with two voters of different application configuration, and a checkpoint-less restart under changed limits (Sol's 7-vs-10 probe), each refused with a typed error before any entry applies | LB |
 | Then TX1: transaction participants and coordinators | Audit S5, S6: transaction services run indefinitely; a coordinator incarnation is a session at each participant | DR1 (ledger, `Expired` vocabulary) | Fail@main at 4,097 transactions (program: 257); 200,000-transaction soak with coordinator restarts and lost decision receipts | LB |
 
 ### DR1 schema plan (19 October 2026, before editing)
@@ -1054,6 +1054,150 @@ here touches the per-write path or a persisted format.
    e32d0511's and this branch's `src/` in this worktree. Goldens: no schema
    changes, so none should change. CPU: readiness and construction only; the
    admission and apply paths are untouched.
+
+#### DR1 round 5 implemented (20 October 2026, PR 15)
+
+Implemented as planned above; deviations are noted inline.
+
+- **Family and configuration per layer (Sol P2-1, Sol P2-2 = Opus P3-1).**
+  `raft::ApplicationFamily(u16)` with the registry of in-tree families as its
+  constants (Counter 1, Maintenance 2, logical activation 3, Routed 4,
+  `TransferSource` 5, `ScopedTransferSource` 6, `TransferTarget` 7,
+  `CreatedNamespace` 8, `RetirementGuard` 9, `BucketCounter` 10, `Directory`
+  11, metadata source/target/serving/publishing 12–15, logical voter 16,
+  transfer and program transactions 17–18; 0 = `UNREGISTERED`, 0x8000.. via
+  `ApplicationFamily::external`). `raft::LayerIdentity { family,
+  configuration: [u64; 4] }`. `ReadinessRequirements::identity` is the
+  outer layer's; each `InnerProfile` layer is now `InnerLayer { schema,
+  identity }` (`InnerProfile::schemas()` lists the schemas). The default
+  `validate_deployment_requirements` and the Counter's
+  `validate_readiness_requirements` compare schema, identity and inner
+  profile exactly (`UnsupportedSchema`) before the two reservation envelopes,
+  so a configuration skew is refused in both directions with the same error
+  (Opus's case was `Ok` one way and `InvalidCheckpoint` the other). The
+  classification table of every wrapper's fields (exact schema, exact
+  configuration words, deployment plan) is in
+  docs/APPLICATION_ENVELOPES.md#compared-identity: the eight generic wrappers
+  plus `BucketCounter` and `Directory` (limits and every enabled profile)
+  carry their configuration; metadata source/target carry the export bound;
+  metadata serving/publishing, logical voter and the transaction leaves carry
+  their family only, with owners recorded. Deviation: Directory's full
+  profile flag set (15 flags) is one configuration word, because its schema
+  names only the highest profile; ScopedTransferSource, TransferTarget and
+  Routed likewise record every mode bit, not only the schema's.
+- **No persisted change.** Schemas are unchanged (the family is a separate
+  field), so no checkpoint, image or golden changed: `git status` shows no
+  binary under `tests/` or `src/`, and the library's format-golden tests pass
+  unmodified.
+- **Wire.** Learner readiness tags 12/13 carry the outer identity (u16 family
+  + 4 × u64) after the envelopes and an identity after each profile layer's
+  schema (docs/WIRE_FORMAT.md). Unpublished-format break, no format number: a
+  mixed-revision frame cannot be consumed exactly by the other decoder (old
+  frame 1 + 8n bytes after the envelopes, new 35 + 42m; 8n = 34 + 42m has no
+  solution for n ≤ 7), so it fails typed (`Truncated`, trailing bytes, depth
+  or zero-schema refusal). Reasoned from the decoders, not run across two
+  builds.
+- **Sizes.** `ReadinessRequirements` 88 → 408 bytes, `LearnerReadinessRequest`
+  288 → 608. To keep the per-write types unchanged, `Event::CheckLearnerReadiness`
+  boxes its requirements (public API change), and `Raft`'s pending request and
+  ready learner, the request-window `Boundary::Readiness` and the logical
+  bridge's waiting attempt are boxed. Measured with a temporary probe, same
+  build settings: `Event` 256 → 256, `Message` 256 → 256, `Raft` 5,120 →
+  4,512 bytes. `RequestWindow` (allocated per outbound request) shrinks as
+  well: it no longer holds the readiness request inline (it did at e32d0511),
+  and `Boundary`/`RequestWindow` lose `Copy`.
+- **Docs (P3).** COUNTER_SERVICE.md and MAINTENANCE.md: Counter format 5, the
+  maintenance profile is format 3 with schema `maintenance_schema(3,
+  Counter::schema(limits))`, and the record capacity is compared; the
+  `--help` line says so. APPLICATION_ENVELOPES.md gains "Compared identity"
+  (classification table, third-party wrapper obligation) and "What readiness
+  does not cover" (static bootstrap; checkpoint-less recovery with Sol's 7 vs
+  10 example; host obligation; owner DR2, activation AI3). MULTI_GROUP_STARTUP.md
+  wording. The DR2 mini-plan row carries the ownership and checks.
+- **Tests (permanent).** Cross-family: `distinct_wrapper_families_are_refused_at_readiness`
+  (tests/transfer_source.rs; Sol's pair, both ways, plus the bypassed
+  bootstrap still `Ok` / `InvalidCommand`),
+  `namespace_and_transfer_source_families_are_refused_at_readiness`
+  (tests/namespace_creation/source.rs; Sol's second pair with a common
+  envelope), `readiness_refuses_another_wrapper_family_with_the_same_schema_numbers`
+  (tests/learners.rs; the first pair through the real cluster and
+  `verify_learner_readiness`: each gets a receipt for its own declaration and
+  `Capability` for the other's). Configuration:
+  `opus_r4_maintenance_capacity_skew` and `wrapper_own_capacity_is_refused_at_readiness`
+  (tests/leadership_maintenance.rs; Opus's and Sol's cases, with the apply
+  divergence they would cause), `wrapper_own_routed_limits_are_refused_at_readiness`
+  (tests/routed.rs; Sol's 4/7 and every other limit and the scoped-fence
+  limit), `readiness_refuses_a_learner_whose_wrapper_configuration_differs`
+  (tests/learners.rs; Maintenance 2/4 and Routed 4/7 through the learner
+  verifier), `activation_limits_are_compared_exactly_at_readiness` (library),
+  `scoped_source_configuration_is_compared_exactly_at_readiness`,
+  `target_configuration_is_compared_exactly_at_readiness`, the export bound in
+  `readiness_declares_and_compares_the_whole_inner_stack`, and the wire test
+  now round-trips identities and checks their offsets. The namespace pair is
+  not run through the learner cluster (its plan fixture is built from a
+  directory workflow in another test crate); the verifier calls the same
+  `validate_deployment_requirements`, and the first pair covers that path.
+
+**Before/after.** Temporary probe target (`tests/zz_r5_probes.rs`, not
+committed; only APIs present at both revisions): the six
+`tests/application/finality.rs` tests, three round-3 regressions (Maintenance
+S = 2/3, Routed `Counter::new(4)`/`new(7)`, nested maintenance), Sol's and
+Opus's round-4 cases directly and through the learner verifier, Sol's
+checkpoint-less replay, and the type sizes. Built with e32d0511's and this
+branch's `src/` in this worktree; `git diff --exit-code -- src` after
+restoring.
+
+| Probe | e32d0511 | Branch |
+| --- | --- | --- |
+| Finality (6) and round-3 regressions (3) | pass | pass |
+| P2-1 `TransferSource<BC>` vs `Routed<Routed<BC>>`, direct | both accept (`Ok`/`Ok`) | `UnsupportedSchema` both ways |
+| P2-1 same pair, learner verifier | both learners get receipts for the other's request | `Capability` both ways; own declaration still gets a receipt |
+| P2-1 bypassed bootstrap (defence in depth) | source `Ok` / nested `InvalidCommand` | unchanged |
+| P2-2 Maintenance capacity 2/4 (Sol: `Counter::new(4)`; Opus: `Counter::new(1)`), widened envelope | `Ok`/`Ok` | `UnsupportedSchema` both ways |
+| P2-2 Maintenance 2/4, learner verifier | receipts both ways | `Capability` both ways |
+| P2-2 `RoutedLimits.operations` 4/7 | `Ok`/`Ok` (bypassed bootstrap: large applied 1, small `InvalidCommand`) | `UnsupportedSchema` both ways |
+| P2-2 Routed 4/7, learner verifier | receipts both ways | `Capability` both ways |
+| P3 checkpoint-less replay, `Counter::new(2)` vs `new(1)` | 10 / 7 | 10 / 7 (limitation, DR2) |
+| Sizes `Event`/`Message`/`Raft`/requirements/request | 256 / 256 / 5,120 / 88 / 288 | 256 / 256 / 4,512 / 408 / 608 |
+
+Totals: e32d0511 9/15 probes pass (the six failures are exactly the round-4
+findings); branch 15/15.
+
+**CPU.** Not re-measured. The identity is built and compared only on the
+readiness, membership and wire readiness paths. Counter admission and apply,
+the ledger, and the per-write frames are unchanged; `Event` and `Message`
+keep their sizes, `Raft` and the per-request window allocation are smaller.
+No Mac was used.
+
+**Checks (Linux, cores 0–3, nice 19, `-j 2`, suites on cores 1–3 with two
+test threads, one configuration at a time).** fmt; strict Clippy default,
+all-features, no-default-features, native-only: zero; matched fmt/Clippy by
+the pre-push hook. All-features: every test target (116 of 117) plus the
+library: lib 509 (+1 ignored; includes the activation and enrollment format
+goldens), application 33, counter_service 205, effect_owner 210,
+leadership_maintenance 14, learners 28, routed 194, transfer_source 9,
+namespace_creation 19, logical_activation_application 7, wire 18,
+provider_conformance 42, lifetime_apply_never_errs (U2) 4, raft 79, startup
+60, native_member_startup 50, volatile 7, logical_relay_native 2,
+configuration_capacity 5, logical_activation_driver 35,
+logical_activation_nested 17, logical_voter_application 8, scoped_source 6,
+transfer_target 10, transfer_service 33, all others green. Not run:
+`representative_relay_model` (a standalone model that uses neither the
+readiness types nor `tests/support`; stopped after 32 minutes). The long
+suites ran as exact-name chunks under the 10-minute tool limit. One
+counter_service failure in the first chunk,
+`unknown_configuration_reply_keeps_original_durable_record_without_rerouting`
+("configuration did not settle"), is its 10-second wall-clock deadline under
+machine load (load average about 7.6); it passed 3/3 alone, each about 9.8 s.
+That deadline is a pre-existing test-reliability defect, not changed here.
+Default: lib 507 (+1 ignored), application 33, counter_service 146,
+effect_owner 210, leadership_maintenance 14, learners 27, routed 112,
+transfer_source 9, namespace_creation 19, logical_activation_application 7,
+wire 18, provider_conformance 42, lifetime_apply_never_errs 4, raft 79,
+startup 45, native_member_startup 27, volatile 7, logical_relay_native 1,
+configuration_capacity 5, logical_activation_driver 23,
+logical_activation_nested 11, logical_voter_application 8, scoped_source 6,
+transfer_target 10.
 
 ## Logical-voter reliability track (opened 18 October 2026)
 

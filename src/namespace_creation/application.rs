@@ -290,6 +290,11 @@ where
         let r = self.inner.owner_requirements();
         ReadinessRequirements {
             application_schema: O::SCHEMA,
+            // No configuration of its own: its routed limits are the inner
+            // Routed layer's, and the plan is the group's deployment plan.
+            identity: crate::raft::LayerIdentity::family(
+                crate::raft::ApplicationFamily::CREATED_NAMESPACE,
+            ),
             inner_profile: crate::raft::InnerProfile::wrapping(r),
             command_bytes: r
                 .command_bytes

@@ -15,16 +15,17 @@
 //! One tracked admission/cancellation and one exact volatile exchange.
 use super::*;
 use crate::raft::{LearnerReadinessRequest, RaftError};
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub(in crate::logical_voter::bridge) enum ReadinessAttempt {
     Admitted {
         node: usize,
         ticket: AdmissionTicket,
         cancel: bool,
     },
+    /// Boxed: the request carries the full application identity.
     Waiting {
         node: usize,
-        request: LearnerReadinessRequest,
+        request: Box<LearnerReadinessRequest>,
     },
 }
 impl<N: LogicalActivationBackingChild> LogicalBackingBridge<'_, N> {
@@ -62,7 +63,10 @@ impl<N: LogicalActivationBackingChild> LogicalBackingBridge<'_, N> {
         if !cancel {
             if let Some(request) = self.nodes[node].pending_activation_readiness(self.mapping.child)
             {
-                self.readiness = Some(ReadinessAttempt::Waiting { node, request });
+                self.readiness = Some(ReadinessAttempt::Waiting {
+                    node,
+                    request: Box::new(request),
+                });
             }
         }
     }
@@ -74,7 +78,8 @@ impl<N: LogicalActivationBackingChild> LogicalBackingBridge<'_, N> {
         if let Some(ReadinessAttempt::Admitted { .. }) = self.readiness {
             return Ok(false);
         }
-        if let Some(ReadinessAttempt::Waiting { node, request }) = self.readiness {
+        if let Some(ReadinessAttempt::Waiting { node, ref request }) = self.readiness {
+            let request = **request;
             let current = self.nodes[node].activation_peer_binding(learner.node);
             if current
                 != Some(StoreBinding {

@@ -231,7 +231,10 @@ pub trait StateMachine {
         {
             return Err(ApplicationError::InvalidCheckpoint);
         }
+        // Exact: every layer's family, schema and decision-affecting
+        // configuration. Only the two reservation sizes below may be larger.
         if declared.application_schema != actual.application_schema
+            || declared.identity != actual.identity
             || declared.inner_profile != actual.inner_profile
             || actual.inner_profile.layers().is_none()
         {

@@ -872,7 +872,7 @@ where
                         store: source.source().store.identity,
                     },
                     session: source.source().store.session,
-                    requirements,
+                    requirements: Box::new(requirements),
                 },
             )
             .map_err(|r| NodeError::Owner(EffectOwnerError::Runtime(r.reason)))

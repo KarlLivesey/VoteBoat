@@ -500,6 +500,23 @@ where
             } else {
                 SCOPED_TRANSFER_SOURCE_SCHEMA
             },
+            // Words: 0 = export image bound; 1 = parent adoption limit; 2 =
+            // modes (bit 0 bound intents, 1 retained grants, 2 parent slots,
+            // 3 metadata adoption, 4 metadata locator adoption). The schema
+            // names only the highest mode, so the word records them all.
+            identity: crate::raft::LayerIdentity::new(
+                crate::raft::ApplicationFamily::SCOPED_TRANSFER_SOURCE,
+                [
+                    self.export_bytes as u64,
+                    self.parent_limit as u64,
+                    u64::from(self.bound_intents)
+                        | u64::from(self.retained_grants) << 1
+                        | u64::from(self.parent_slots) << 2
+                        | u64::from(self.metadata_adoption) << 3
+                        | u64::from(self.metadata_locator_adoption) << 4,
+                    0,
+                ],
+            ),
             inner_profile: crate::raft::InnerProfile::wrapping(inner),
             command_bytes: (inner.command_bytes + if self.parent_limit == 0 { 20 } else { 22 })
                 .max(if self.metadata_adoption {

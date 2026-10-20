@@ -603,6 +603,13 @@ impl MetadataAuthoritySource {
         let inner = self.initial.readiness_requirements();
         ReadinessRequirements {
             application_schema: self.schema_version(),
+            // Word 0: the export image bound. The fixed inner directory
+            // history is not a separate layer (its depth grows with repeated
+            // transfers); its limits are a recorded follow-up (DR2).
+            identity: crate::raft::LayerIdentity::new(
+                crate::raft::ApplicationFamily::METADATA_SOURCE,
+                [self.export_bytes as u64, 0, 0, 0],
+            ),
             inner_profile: crate::raft::InnerProfile::LEAF,
             command_bytes: inner
                 .command_bytes

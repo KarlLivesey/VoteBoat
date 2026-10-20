@@ -274,6 +274,12 @@ where
         let inner = self.routed.readiness_requirements();
         crate::raft::ReadinessRequirements {
             application_schema: TRANSFER_SOURCE_SCHEMA,
+            // Configuration word 0: the export image bound, which decides
+            // whether a committed freeze can export the scope.
+            identity: crate::raft::LayerIdentity::new(
+                crate::raft::ApplicationFamily::TRANSFER_SOURCE,
+                [self.export_bytes as u64, 0, 0, 0],
+            ),
             inner_profile: crate::raft::InnerProfile::wrapping(inner),
             command_bytes: (inner.command_bytes + 20).max(8 + MAX_TRANSFER_INTENT_BYTES),
             snapshot_bytes: inner.snapshot_bytes + 40 + MAX_TRANSFER_INTENT_BYTES,

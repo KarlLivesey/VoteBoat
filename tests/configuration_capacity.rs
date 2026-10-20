@@ -39,6 +39,7 @@ fn record(expected: u64) -> ConfigurationRecord {
 fn app() -> ReadinessRequirements {
     ReadinessRequirements {
         application_schema: 1,
+        identity: voteboat::raft::LayerIdentity::UNREGISTERED,
         inner_profile: voteboat::raft::InnerProfile::LEAF,
         command_bytes: 64,
         snapshot_bytes: 4096,

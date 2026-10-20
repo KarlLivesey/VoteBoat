@@ -18,8 +18,21 @@ use super::*;
 use voteboat::{
     identity::{GroupId, GroupIdentity, GroupIncarnation},
     maintenance::Maintenance,
-    raft::{InnerProfile, ReadinessRequirements, MAX_INNER_PROFILE_LAYERS},
+    raft::{
+        ApplicationFamily, InnerLayer, InnerProfile, LayerIdentity, ReadinessRequirements,
+        MAX_INNER_PROFILE_LAYERS,
+    },
 };
+
+fn u(schema: u64) -> InnerLayer {
+    InnerLayer::unregistered(schema)
+}
+fn counter_layer(counter: &Counter) -> InnerLayer {
+    InnerLayer::new(
+        counter.schema_version(),
+        LayerIdentity::family(ApplicationFamily::COUNTER),
+    )
+}
 
 fn group() -> GroupIdentity {
     GroupIdentity {
@@ -40,14 +53,21 @@ fn inner_profiles_are_exact_bounded_and_refuse_overflow() {
     let declared = wrapped.deployment_requirements().unwrap();
     assert_eq!(
         declared.inner_profile.layers(),
-        Some(&[counter.schema_version()][..])
+        Some(&[counter_layer(&counter)][..])
     );
     assert_eq!(declared.inner_profile, InnerProfile::of(&counter));
     // A profile that differs in any layer, or in depth, is refused.
     for other in [
         InnerProfile::LEAF,
-        InnerProfile::from_layers(&[Counter::new(5).unwrap().schema_version()]).unwrap(),
-        InnerProfile::from_layers(&[counter.schema_version(), 9]).unwrap(),
+        InnerProfile::from_layers(&[counter_layer(&Counter::new(5).unwrap())]).unwrap(),
+        InnerProfile::from_layers(&[counter_layer(&counter), u(9)]).unwrap(),
+        // The same schema under another family, or with no family.
+        InnerProfile::from_layers(&[u(counter.schema_version())]).unwrap(),
+        InnerProfile::from_layers(&[InnerLayer::new(
+            counter.schema_version(),
+            LayerIdentity::family(ApplicationFamily::BUCKET_COUNTER),
+        )])
+        .unwrap(),
     ] {
         assert_eq!(
             wrapped.validate_deployment_requirements(ReadinessRequirements {
@@ -70,18 +90,19 @@ fn inner_profiles_are_exact_bounded_and_refuse_overflow() {
     }
     assert_eq!(wrapped.validate_deployment_requirements(declared), Ok(()));
     // Explicit profiles: at most seven non-zero layers.
-    let seven = [7; MAX_INNER_PROFILE_LAYERS];
+    let seven = [u(7); MAX_INNER_PROFILE_LAYERS];
     let full = InnerProfile::from_layers(&seven).unwrap();
     assert_eq!(full.layers(), Some(&seven[..]));
     assert_eq!(
-        InnerProfile::from_layers(&[7; MAX_INNER_PROFILE_LAYERS + 1]),
+        InnerProfile::from_layers(&[u(7); MAX_INNER_PROFILE_LAYERS + 1]),
         None
     );
-    assert_eq!(InnerProfile::from_layers(&[7, 0]), None);
+    assert_eq!(InnerProfile::from_layers(&[u(7), u(0)]), None);
     // Wrapping a seven-layer stack overflows; readiness refuses an overflowed
     // profile even when the declaration matches it.
     let deep = ReadinessRequirements {
         application_schema: 3,
+        identity: voteboat::raft::LayerIdentity::UNREGISTERED,
         inner_profile: full,
         command_bytes: 8,
         snapshot_bytes: 8,
@@ -101,8 +122,8 @@ fn inner_profiles_are_exact_bounded_and_refuse_overflow() {
             inner_profile: six,
             ..deep
         })
-        .layers(),
-        Some(&[3, 7, 7, 7, 7, 7, 7][..])
+        .schemas(),
+        Some(vec![3, 7, 7, 7, 7, 7, 7])
     );
     let app = Deep(deep);
     assert_eq!(

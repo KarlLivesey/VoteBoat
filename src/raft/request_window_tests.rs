@@ -145,12 +145,13 @@ fn relay_readiness_owns_the_exact_session_and_cancel_retires_it() {
                 store: store(4),
             },
             session: StoreSession::new(7).unwrap(),
-            requirements: ReadinessRequirements {
+            requirements: Box::new(ReadinessRequirements {
                 application_schema: 1,
+                identity: crate::raft::LayerIdentity::UNREGISTERED,
                 inner_profile: crate::raft::InnerProfile::LEAF,
                 command_bytes: 128,
                 snapshot_bytes: 256,
-            },
+            }),
         })
         .unwrap(),
         4,

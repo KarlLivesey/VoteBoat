@@ -113,6 +113,7 @@ fn host_fixture_uses_only_public_wire_contract_without_native_features() {
             committed_index: 0,
             application: ReadinessRequirements {
                 application_schema: 1,
+                identity: voteboat::raft::LayerIdentity::UNREGISTERED,
                 inner_profile: voteboat::raft::InnerProfile::LEAF,
                 command_bytes: 8,
                 snapshot_bytes: 4096,
@@ -1062,6 +1063,7 @@ mod native {
             index_term: 2,
             requirements: ReadinessRequirements {
                 application_schema: 1,
+                identity: voteboat::raft::LayerIdentity::UNREGISTERED,
                 inner_profile: voteboat::raft::InnerProfile::LEAF,
                 command_bytes: 8,
                 snapshot_bytes: 4096,
@@ -1139,17 +1141,24 @@ mod native {
         fixture_roundtrip(codec, membership_snapshot(true));
         verify_readiness_profiles(codec, &query, request);
     }
-    /// The inner profile travels after the snapshot bytes: a count, then that
-    /// many schemas. Depth above seven and zero schemas are refused.
+    /// The application's identity (family u16 and four u64 configuration
+    /// words) travels after the snapshot bytes, then the inner profile: a
+    /// count and that many layers, each a schema and an identity. Depth above
+    /// seven and zero schemas are refused.
     fn verify_readiness_profiles(
         codec: NativeWireCodec,
         query: &Message,
         request: LearnerReadinessRequest,
     ) {
-        use voteboat::raft::{InnerProfile, MAX_INNER_PROFILE_LAYERS};
-        let with = |layers: &[u64]| Message {
+        use voteboat::raft::{
+            ApplicationFamily, InnerLayer, InnerProfile, LayerIdentity, MAX_INNER_PROFILE_LAYERS,
+        };
+        const LAYER: usize = 8 + 2 + 8 * 4;
+        let identity = LayerIdentity::new(ApplicationFamily::MAINTENANCE, [2, 0, 0, 0]);
+        let with = |layers: &[InnerLayer]| Message {
             rpc: Rpc::LearnerReadinessRequest(Box::new(LearnerReadinessRequest {
                 requirements: ReadinessRequirements {
+                    identity,
                     inner_profile: InnerProfile::from_layers(layers).unwrap(),
                     ..request.requirements
                 },
@@ -1158,30 +1167,56 @@ mod native {
             ..query.clone()
         };
         let leaf = codec.encode_batch(scope(), &[with(&[])]).unwrap();
-        for layers in [&[5, 1][..], &[9; MAX_INNER_PROFILE_LAYERS][..]] {
+        fixture_roundtrip(codec, with(&[]));
+        let routed = LayerIdentity::new(ApplicationFamily::ROUTED, [u64::MAX, 7, 1 << 40, 3]);
+        let two = [
+            InnerLayer::new(5, routed),
+            InnerLayer::new(1, LayerIdentity::family(ApplicationFamily::BUCKET_COUNTER)),
+        ];
+        let seven = [InnerLayer::new(9, routed); MAX_INNER_PROFILE_LAYERS];
+        for layers in [&two[..], &seven[..]] {
             let input = with(layers);
             fixture_roundtrip(codec, input.clone());
             let frame = codec
                 .encode_batch(scope(), std::slice::from_ref(&input))
                 .unwrap();
-            assert_eq!(frame.len(), leaf.len() + 8 * layers.len());
+            assert_eq!(frame.len(), leaf.len() + LAYER * layers.len());
             assert_eq!(codec.decode_batch(scope(), &frame).unwrap(), vec![input]);
-            // Trailer: the profile count, the schemas, then the 4-byte CRC.
-            let count = frame.len() - 5 - 8 * layers.len();
+            // Trailer: the profile count, the layers, then the 4-byte CRC.
+            let count = frame.len() - 5 - LAYER * layers.len();
             assert_eq!(frame[count], layers.len() as u8);
+            // The outer identity sits just before the count.
+            let family = count - 34;
+            assert_eq!(
+                frame[family..family + 2],
+                ApplicationFamily::MAINTENANCE.get().to_le_bytes()
+            );
             assert_eq!(
                 codec
                     .decode_batch(scope(), &change(&frame, count, &[8]))
                     .err(),
                 Some(WireError::InvalidMessage("readiness inner profile depth"))
             );
-            let last = frame.len() - 12;
+            let last = frame.len() - 4 - LAYER;
             assert_eq!(
                 codec
                     .decode_batch(scope(), &change(&frame, last, &[0; 8]))
                     .err(),
                 Some(WireError::InvalidMessage("readiness inner profile schema"))
             );
+            // A changed family or configuration word decodes to a different,
+            // unequal identity, which readiness then refuses.
+            let other = codec
+                .decode_batch(scope(), &change(&frame, family, &[9, 0]))
+                .unwrap();
+            let Rpc::LearnerReadinessRequest(r) = &other[0].rpc else {
+                panic!("readiness request")
+            };
+            assert_eq!(
+                r.requirements.identity.family,
+                ApplicationFamily::RETIREMENT_GUARD
+            );
+            assert_ne!(r.requirements.identity, identity);
         }
     }
 

@@ -197,10 +197,12 @@ impl Counter {
     }
     /// Steady-state envelope under the session retention rule: the largest
     /// command and the largest checkpoint the configured limits allow. It is
-    /// independent of occupancy and uptime. The schema identifies the limits.
+    /// independent of occupancy and uptime. The schema identifies the limits,
+    /// so the family's configuration words are zero.
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
             application_schema: Self::schema(self.limits()),
+            identity: crate::raft::LayerIdentity::family(crate::raft::ApplicationFamily::COUNTER),
             inner_profile: crate::raft::InnerProfile::LEAF,
             command_bytes: COUNTER_COMMAND_BYTES,
             snapshot_bytes: HEADER_BYTES
@@ -209,13 +211,15 @@ impl Counter {
     }
     /// Check an administrator's declaration against enforced application bounds.
     /// Larger byte envelopes are allowed; the schema, which encodes the session
-    /// limits, must match exactly, so a replica with other limits is refused.
+    /// limits, and the family must match exactly, so a replica with other
+    /// limits, or another application family, is refused.
     pub fn validate_readiness_requirements(
         &self,
         declared: crate::raft::ReadinessRequirements,
     ) -> Result<(), ApplicationError> {
         let actual = self.readiness_requirements();
         if declared.application_schema != actual.application_schema
+            || declared.identity != actual.identity
             || declared.inner_profile != actual.inner_profile
         {
             return Err(ApplicationError::UnsupportedSchema);

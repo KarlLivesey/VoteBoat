@@ -966,9 +966,45 @@ impl Directory {
         }
         Ok(())
     }
+    /// Decision-affecting configuration, compared exactly at readiness. Words:
+    /// 0 = operation limit; 1 = history byte limit; 2 = every enabled profile
+    /// (the schema names only the highest). The plan is the group's
+    /// deployment plan.
+    fn layer_identity(&self) -> crate::raft::LayerIdentity {
+        let modes = [
+            self.group_creation,
+            self.creation_cancellation,
+            self.namespace_creation,
+            self.namespace_transfers,
+            self.responsibility_insertion,
+            self.recursive_insertion,
+            self.cross_authority_insertion,
+            self.retained_insertion,
+            self.remaining_transfer,
+            self.namespace_deletion,
+            self.child_slot_retirement,
+            self.local_reparenting,
+            self.reparent_guards,
+            self.cross_reparenting,
+            self.metadata_locators,
+        ]
+        .iter()
+        .enumerate()
+        .fold(0, |word, (bit, on)| word | u64::from(*on) << bit);
+        crate::raft::LayerIdentity::new(
+            crate::raft::ApplicationFamily::DIRECTORY,
+            [
+                self.limits.operations as u64,
+                self.limits.history_bytes as u64,
+                modes,
+                0,
+            ],
+        )
+    }
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
             application_schema: self.schema_version(),
+            identity: self.layer_identity(),
             inner_profile: crate::raft::InnerProfile::LEAF,
             command_bytes: self
                 .control_command_limit()

@@ -191,7 +191,7 @@ Each group has its own attempt, deadline, cancellation and completed record.
 Different groups may reuse an operation ID. A cancellation in one group cannot
 cancel another group's same-ID handoff. Restart resumes durable pending work;
 completed records remain idempotent. The existing group administration plans
-also use schema3 readiness requirements in this profile. This enables individual
+also use the maintenance profile's (format 3) readiness requirements in this profile. This enables individual
 group handoffs. Multi-group source drain controls and the bounded foreground
 runner are available as described below.
 

@@ -27,9 +27,12 @@ checks; see [peer credential rollout](CREDENTIAL_REFRESH.md#executable-peer-rota
 
 An opt-in [leadership maintenance profile](MAINTENANCE.md#authenticated-counter-executable)
 adds authenticated move/status/resume/cancel commands with durable original IDs.
-It requires a new schema3/wire8 deployment (the plain counter's schema encodes its
-session limits, with format 4 in the low byte, so it never equals 3); existing
-plain counter data is not automatically converted.
+It requires a new deployment with maintenance profile format 3 and wire format
+8. Its application schema is `maintenance_schema(3, Counter::schema(limits))`
+(format 3 in the top four bits above the counter's own schema), not the number
+3, and the counter's own schema (format 5 in its low byte, then its session
+limits) never collides with it; existing plain counter data is not
+automatically converted.
 The optional [retained-replica drain commands](MAINTENANCE.md#retained-replica-node-drain)
 add durable maintenance/reboot with a restored admission gate.
 The [membership-drain workflow](MAINTENANCE.md#executable-membership-drain-workflow)
@@ -824,12 +827,18 @@ retained. `Counter::readiness_requirements` reports the steady-state envelope
 limits, the session allocation mark, counts and a closure record, and a
 retained outcome is its sequence, acknowledgement, delta and result), which
 holds for any uptime; `validate_readiness_requirements` rejects a smaller
-declaration or a different schema. The wrappers carry the inner schema in
-their own, so the same refusal holds through them: the leadership-maintenance
+declaration, a different schema or another application family. The wrappers
+carry the inner schema in their own, and their own configuration (for example
+the maintenance record capacity) as compared configuration words, so the same
+refusal holds through them: the leadership-maintenance
 profile's schema is `maintenance_schema(3, Counter::schema(limits))` (the
 profile format in the top four bits, the Counter's schema below), and a logical
 activation wrapper's is `logical_activation_schema(inner)`. A peer whose inner
-limits differ is refused at readiness before it applies any entry.
+limits, or wrapper configuration, differ is refused at readiness before it
+applies any entry. Readiness does not cover static bootstrap or recovery
+without a checkpoint: start every voter with identical limits and keep them
+unchanged across such a recovery (see
+[what readiness does not cover](APPLICATION_ENVELOPES.md#what-readiness-does-not-cover)).
 Restore refuses a checkpoint whose watermarks disagree with their evidence (an
 acknowledgement floor that is not the largest retained acknowledgement, an
 allocation mark that is not the newest live session or the closure record).

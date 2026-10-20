@@ -150,6 +150,11 @@ impl MetadataAuthorityTarget {
     pub fn readiness_requirements(&self) -> ReadinessRequirements {
         ReadinessRequirements {
             application_schema: self.schema_version(),
+            // Word 0: the source's export image bound.
+            identity: crate::raft::LayerIdentity::new(
+                crate::raft::ApplicationFamily::METADATA_TARGET,
+                [self.source.export_bytes as u64, 0, 0, 0],
+            ),
             inner_profile: crate::raft::InnerProfile::LEAF,
             command_bytes: 244
                 + MAX_METADATA_PLAN_BYTES

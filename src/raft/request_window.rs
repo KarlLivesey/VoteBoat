@@ -6,7 +6,7 @@ use crate::secure::LocalIdentity;
 mod replication;
 mod special;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 enum Boundary {
     Vote {
         index: u64,
@@ -18,7 +18,9 @@ enum Boundary {
     },
     Snapshot(SnapshotRef),
     Read,
-    Readiness(LearnerReadinessRequest),
+    /// Boxed: the request carries the full application identity, and every
+    /// window (one per outbound request) holds a `Boundary` inline.
+    Readiness(Box<LearnerReadinessRequest>),
     Authority {
         candidate: PeerIdentity,
         configuration: ConfigurationId,
@@ -29,7 +31,7 @@ enum Boundary {
     },
     RepairSnapshot(SnapshotRef),
 }
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct RequestWindow {
     group: GroupIdentity,
     configuration: ConfigurationId,
@@ -167,7 +169,7 @@ impl RequestWindow {
             && self.reply_family(&m.rpc)
     }
     fn reply_family(&self, rpc: &Rpc) -> bool {
-        match (self.boundary, rpc) {
+        match (&self.boundary, rpc) {
             (Boundary::Vote { .. }, Rpc::Voted { .. })
             | (Boundary::Append { .. }, Rpc::Appended { .. } | Rpc::Compacted { .. })
             | (Boundary::Snapshot(_), Rpc::SnapshotAck { .. } | Rpc::Compacted { .. })
@@ -177,7 +179,7 @@ impl RequestWindow {
                 Rpc::LearnerRepaired { .. },
             ) => true,
             (Boundary::Readiness(expected), Rpc::LearnerReadinessReply { request, .. }) => {
-                **request == expected
+                **request == **expected
             }
             (
                 Boundary::Authority {
@@ -189,7 +191,7 @@ impl RequestWindow {
                     configuration,
                     ..
                 },
-            ) => *candidate == expected && *configuration == wanted,
+            ) => candidate == expected && configuration == wanted,
             _ => false,
         }
     }

@@ -59,6 +59,9 @@ pub(super) fn source_and_original_controls(c: &mut cluster::Cluster) {
             support::node(1),
             ReadinessRequirements {
                 application_schema: voteboat::logical_voter::LOGICAL_APPLICATION_SCHEMA,
+                identity: voteboat::raft::LayerIdentity::family(
+                    voteboat::raft::ApplicationFamily::LOGICAL_VOTER,
+                ),
                 inner_profile: voteboat::raft::InnerProfile::LEAF,
                 command_bytes: 1,
                 snapshot_bytes: 1,
@@ -158,6 +161,9 @@ fn configure(c: &mut cluster::Cluster) {
                 readiness: Vec::new(),
                 requirements: ReadinessRequirements {
                     application_schema: voteboat::logical_voter::LOGICAL_APPLICATION_SCHEMA,
+                    identity: voteboat::raft::LayerIdentity::family(
+                        voteboat::raft::ApplicationFamily::LOGICAL_VOTER,
+                    ),
                     inner_profile: voteboat::raft::InnerProfile::LEAF,
                     command_bytes: setup::limits().max_command_bytes,
                     snapshot_bytes: setup::limits().max_child_checkpoint_bytes,

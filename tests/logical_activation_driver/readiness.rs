@@ -45,6 +45,7 @@ fn history(protocol: NativePeerProtocol) {
     });
     let requirements = ReadinessRequirements {
         application_schema: 1,
+        identity: voteboat::raft::LayerIdentity::UNREGISTERED,
         inner_profile: voteboat::raft::InnerProfile::LEAF,
         command_bytes: 1,
         snapshot_bytes: 1,

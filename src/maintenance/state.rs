@@ -101,6 +101,13 @@ impl<A: StateMachine + Clone> StateMachine for Maintenance<A> {
         let inner = self.inner.deployment_requirements()?;
         Some(ReadinessRequirements {
             application_schema: self.schema,
+            // Configuration word 0: the leadership record capacity, which
+            // decides whether a committed Begin is recorded. The profile format
+            // is in the schema.
+            identity: LayerIdentity::new(
+                ApplicationFamily::MAINTENANCE,
+                [self.capacity as u64, 0, 0, 0],
+            ),
             inner_profile: crate::raft::InnerProfile::wrapping(inner),
             command_bytes: inner.command_bytes.checked_add(9)?.max(113),
             snapshot_bytes: inner

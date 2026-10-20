@@ -8,7 +8,7 @@ impl Raft {
     pub(super) fn special_window(&self, m: &Message) -> Option<(PeerIdentity, Boundary)> {
         match &m.rpc {
             Rpc::LearnerReadinessRequest(request)
-                if self.learner_readiness == Some(**request)
+                if self.learner_readiness.as_deref() == Some(&**request)
                     && request.group == m.group
                     && request.configuration == m.configuration
                     && request.leader == m.from
@@ -19,7 +19,7 @@ impl Raft {
                     && self.local_voter()
                     && self.membership().id() == m.configuration =>
             {
-                Some((request.learner, Boundary::Readiness(**request)))
+                Some((request.learner, Boundary::Readiness(request.clone())))
             }
             Rpc::AuthorityRequest {
                 candidate,
@@ -79,11 +79,11 @@ impl RequestWindow {
                             && !r.acknowledgements.contains(&self.recipient.node)
                     })
             }
-            Boundary::Readiness(request) => {
+            Boundary::Readiness(ref request) => {
                 core.role == Role::Leader
                     && core.local_voter()
                     && core.membership().id() == self.configuration
-                    && core.learner_readiness == Some(request)
+                    && core.learner_readiness.as_deref() == Some(&**request)
             }
             Boundary::Authority {
                 candidate,

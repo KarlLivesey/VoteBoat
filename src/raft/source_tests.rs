@@ -63,12 +63,13 @@ fn source_preflight_allows_actual_not_caught_up_readiness_reply() {
                     store: store(4),
                 },
                 session: StoreSession::new(7).unwrap(),
-                requirements: ReadinessRequirements {
+                requirements: Box::new(ReadinessRequirements {
                     application_schema: 1,
+                    identity: crate::raft::LayerIdentity::UNREGISTERED,
                     inner_profile: crate::raft::InnerProfile::LEAF,
                     command_bytes: 128,
                     snapshot_bytes: 256,
-                },
+                }),
             })
             .unwrap(),
         4,

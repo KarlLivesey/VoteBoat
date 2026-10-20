@@ -523,3 +523,95 @@ fn wrapped_counters_with_different_session_limits_refuse_each_other_before_any_e
     assert_eq!(maintenance_schema(1, 1 << 60), None);
     assert!(Maintenance::new(group(1), 1, 64, service).is_err());
 }
+
+/// Begin and Complete operation `op` at `index` and `index + 1`.
+fn begin_and_complete(app: &mut Maintenance<Counter>, op: u128, index: u64) {
+    let begin = LeadershipCommand::Begin(intent(op, 2));
+    recorded(app, command(index, 1, begin));
+    let complete = LeadershipCommand::Complete {
+        intent: intent(op, 2),
+        index,
+        term: 1,
+    };
+    recorded(app, command(index + 1, 1, complete));
+}
+
+#[test]
+fn opus_r4_maintenance_capacity_skew() {
+    // Opus, round 4 (P3-1): capacity 2 and 4 around Counter::new(1). The
+    // capacity-2 replica accepted the capacity-4 declaration (a larger
+    // snapshot envelope); the reverse was InvalidCheckpoint. The capacity is
+    // now the layer's configuration word, so both directions are refused
+    // with the same typed compatibility error before any entry.
+    let (small, large) = (app(2), app(4));
+    assert_eq!(small.schema_version(), large.schema_version());
+    let (s, l) = (
+        small.deployment_requirements().unwrap(),
+        large.deployment_requirements().unwrap(),
+    );
+    assert_eq!(s.inner_profile, l.inner_profile);
+    assert_eq!(s.identity.configuration[0], 2);
+    assert_eq!(l.identity.configuration[0], 4);
+    assert_eq!(
+        small.validate_deployment_requirements(l),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+    assert_eq!(
+        large.validate_deployment_requirements(s),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+    // A larger envelope is still accepted for the same configuration.
+    assert_eq!(
+        small.validate_deployment_requirements(voteboat::raft::ReadinessRequirements {
+            snapshot_bytes: l.snapshot_bytes,
+            ..s
+        }),
+        Ok(())
+    );
+    // Why readiness must refuse: the committed stream diverges at the third
+    // Begin (the capacity table itself is DR2's reclamation work).
+    let (mut small, mut large) = (small, large);
+    for (op, index) in [(10, 1), (11, 3)] {
+        begin_and_complete(&mut small, op, index);
+        begin_and_complete(&mut large, op, index);
+    }
+    let third = command(5, 1, LeadershipCommand::Begin(intent(12, 2)));
+    assert_eq!(
+        small.apply_batch(std::slice::from_ref(&third)).err(),
+        Some(ApplicationError::DedupCapacity)
+    );
+    assert!(large.apply_batch(&[third]).is_ok());
+}
+
+#[test]
+fn wrapper_own_capacity_is_refused_at_readiness() {
+    // Sol, round 4: capacity 2 and 4 around Counter::new(4); the smaller
+    // replica accepted the larger declaration, then returned DedupCapacity
+    // at index 5 and stayed at applied 4. Now refused at readiness for every
+    // pair of distinct capacities, in both directions.
+    let wrap =
+        |capacity| Maintenance::new(group(1), 3, capacity, Counter::new(4).unwrap()).unwrap();
+    for (a, b) in [(2, 4), (1, 2), (63, 64), (64, MAX_MAINTENANCE_RECORDS)] {
+        let (a, b) = (wrap(a), wrap(b));
+        for (replica, leader) in [(&a, &b), (&b, &a)] {
+            let declared = leader.deployment_requirements().unwrap();
+            assert_eq!(leader.validate_deployment_requirements(declared), Ok(()));
+            assert_eq!(
+                replica.validate_deployment_requirements(declared),
+                Err(ApplicationError::UnsupportedSchema)
+            );
+        }
+    }
+    let (mut small, mut large) = (wrap(2), wrap(4));
+    for (op, index) in [(1, 1), (2, 3)] {
+        begin_and_complete(&mut small, op, index);
+        begin_and_complete(&mut large, op, index);
+    }
+    let third = command(5, 1, LeadershipCommand::Begin(intent(3, 2)));
+    assert!(large.apply_batch(std::slice::from_ref(&third)).is_ok());
+    assert_eq!(
+        small.apply_batch(&[third]).err(),
+        Some(ApplicationError::DedupCapacity)
+    );
+    assert_eq!(small.applied_index(), 4);
+}

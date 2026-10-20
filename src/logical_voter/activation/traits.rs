@@ -67,6 +67,19 @@ where
         }
         Some(crate::raft::ReadinessRequirements {
             application_schema: self.schema,
+            // Configuration words: intent capacity, command decode bound and
+            // checkpoint bound; each decides committed entries or the
+            // checkpoint encoding. The parent and store mappings are the
+            // group's deployment plan (host obligation, AI3).
+            identity: crate::raft::LayerIdentity::new(
+                crate::raft::ApplicationFamily::LOGICAL_ACTIVATION,
+                [
+                    self.limits.intents as u64,
+                    self.limits.command_bytes as u64,
+                    self.limits.checkpoint_bytes as u64,
+                    0,
+                ],
+            ),
             inner_profile: crate::raft::InnerProfile::wrapping(inner),
             command_bytes: self.limits.command_bytes,
             snapshot_bytes: self.limits.checkpoint_bytes,
