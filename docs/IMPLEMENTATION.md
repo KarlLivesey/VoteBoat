@@ -18,8 +18,8 @@ design pack is unchanged.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current N0: three-process cluster harness (implemented; in review as PR 17, round 4 below; baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test on OS-selected ports; script self-test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
-| Next N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline | Plan §5.3 tests and §5.4 gate | NW1 |
+| Done N0: three-process cluster harness (merged 20 October 2026 in PR 17, head 73605e48; rounds 1–4 and baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test on OS-selected ports; script self-test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
+| Current N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline | Plan §5.3 tests and §5.4 gate | NW1 |
 | Then N2: per-peer frame coalescing | One frame per peer per round across groups | N1; a G=4 cell on the N0 harness (see N0 limits) | Plan §4 row 2 | NW1 |
 
 ### N0 schema plan (before editing, 19 October 2026)
@@ -394,6 +394,21 @@ library edit is `host_wait.rs` `deny(unsafe_code)` → `forbid(unsafe_code)`.
   (all features), 20 solo runs on cores 10–15 with other agents' suites
   running: 17 passed, 3 failed, each at `shared_drain.rs:304` with
   `Unknown(LeadershipChanged)`.
+
+### N0 merge record (20 October 2026, PR 17 → main `16919c73`)
+
+Reviews: GPT-6.1-Sol request-changes round 1 (four P2s), approve rounds 2–3
+confirmation and round 4; Claude Opus 5.5 request-changes round 2 (one P2:
+node 1 outliving a killed parent), approve rounds 3 and 4. Exclusive suites on
+head `73605e48` (`target/claude/tools/suites.sh`, exclusive checkout, logs
+`target/claude/research-r4/pr17-suites/`): checks 7/7 clean; default 2,576 / 0;
+no-default 1,321 / 0; all-features 2,879 / 0 plus `representative_relay_model`
+9 / 0 run alone; native-only 1,897 / 0; matched 75 / 0.
+
+Known pre-existing flake observed during review, not touched by this PR and
+filed as a test-reliability item: `shared::drain::quic_mixed_voter_and_learner_assignments_resume_together`
+(examples/benchmark/shared_drain.rs, all-features) failed 3 of 20 solo runs on a
+loaded host with `Unknown(LeadershipChanged)`.
 
 ### N0 review round 4 schema plan (before editing, 20 October 2026)
 
