@@ -20,7 +20,124 @@ design pack is unchanged.
 | --- | --- | --- | --- | --- |
 | Done N0: three-process cluster harness (merged 20 October 2026 in PR 17, head 73605e48; rounds 1–4 and baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test on OS-selected ports; script self-test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
 | Current N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline | Plan §5.3 tests and §5.4 gate | NW1 |
+| Current N1c: held follower Appends (quorum-first; PR against main) | Restore follower Append size under N1 without commit latency: each new leader batch goes at once only to the followers a quorum needs; a ready, caught-up follower the quorum does not need is held until the next leader batch is durable (bounded by `TimerConfig::append_hold_ms`, default 1 ms, and the heartbeat) | N1 (PR 19) and the N1b step-0 counters (PR 22, measurement only); main `12fb21de` | Schema plan below; deterministic core and simulated-time runtime tests (a)–(f) with two mutations; N1c alone and N1c + N1 against main on the five N0 cells (5 ABBA rounds) and `nat.sh` (5 pairs) with the PR 22 counters; the N1b gate | NW1 |
 | Then N2: per-peer frame coalescing | One frame per peer per round across groups | N1; a G=4 cell on the N0 harness (see N0 limits) | Plan §4 row 2 | NW1 |
+
+### N1c schema plan (before editing, 20 October 2026)
+
+Inputs: the N1b step-0 evidence and fallback brief (PR 22, `net/n1b-commit-notices`
+`463c50d4`: under N1 a ready follower gets an Append at almost every leader batch,
+so follower Appends halve, 52 → 26 commands per follower barrier in `nat.sh`);
+research `target/claude/research-r4/n1b-batching.md` (main checkout, untracked);
+GPT-6.1-Sol's PR 19 review "Batching recommendation" (decide before the Append
+effect exists; control and idle traffic stay immediate; keep the single post-poll
+flush and the WAL-worker grouping). Built on main as its own PR; nothing in the
+transport, WAL, wire or worker changes.
+
+- **Data/API.**
+  - `TimerConfig::append_hold_ms: u64`, default `TimerConfig::DEFAULT_APPEND_HOLD_MS`
+    = 1; 0 turns holds off; `validate` refuses a value above `heartbeat_ms`.
+  - `Event::ReleaseHeldAppends`: control class, routine like `Heartbeat` (it does
+    not break a ready-proposal visit), idempotent; on a non-leader or with no
+    holds it emits nothing.
+  - `Raft::set_append_hold(AppendHold)`, `Raft::append_hold()`,
+    `Raft::has_held_appends()`; `pub enum AppendHold { Off, QuorumFirst }`. The
+    core default is `Off`, so a host that drives the core directly sees no change;
+    `TimedShard` sets `QuorumFirst` on every core it owns (construction and
+    `register`) when `append_hold_ms > 0`, because it is the owner that can
+    deliver the deadline.
+  - Core state, leader only, all bounded by the peer count: `held:
+    BTreeMap<NodeId, u64>` (held peer → leader durable tip when it was held);
+    `ack_order: Vec<NodeId>` (voter peers, most recent successful `Appended`
+    first); `batch_floor: u64` (leader durable tip before the most recent leader
+    batch became durable). No counters.
+  - `TimedShard`: `hold_deadlines: BTreeMap<GroupIdentity, MonoTime>` with its
+    ordered index `BTreeSet<(MonoTime, GroupIdentity)>`, at most one per group.
+    `next_deadline()` includes the earliest one.
+- **Decision point (before `append_for` creates the Append).** Only the
+  ordinary-progress call sites ask `hold_append(P)`: `broadcast_ready_peers_into`
+  (after `After::LeaderAppend` and `After::Commit`) and the success path of
+  `receive_appended_into`. `append_for` itself is unchanged and never holds, and
+  every call of it removes P from `held`. So heartbeats and their retries,
+  transfer start, compaction, the after-admission broadcast of non-progress
+  modes, rejection rewinds and snapshot sends are never held. The pre-barrier
+  early path (`replicate_admitted`, used only when everything is committed) is
+  unchanged: light load keeps today's frames.
+- **The rule.** `hold_append(P)` is true only when all hold: mode `QuorumFirst`;
+  leader and local voter; `progress_sends_enabled()` (no transfer, no joint
+  configuration, last configuration committed); P is a voter with no request
+  outstanding; next = `next_index[P]` with base < next ≤ last (a data Append, no
+  snapshot); next > `batch_floor` (P already holds everything before the latest
+  leader batch: it is not lagging); last − next + 1 ≤ `max_replication_entries`
+  (one Append carries it); and **the latest entry is already covered by a quorum
+  without P**: {leader} ∪ {voter Q ≠ P : reach(Q) ≥ last} satisfies the
+  membership policy, reach(Q) = max(`progress[Q]`, end of Q's outstanding
+  ordinary request). A held P gets mark = last.
+- **Order inside a broadcast.** First the held peers whose mark < last (a later
+  leader batch is durable): released through `append_for`, carrying every batch
+  since. Then the other peers in `ack_order` (most recent ack first), then
+  non-voters. So the immediate quorum set is filled first by followers that get
+  the batch anyway and then by recency, which is the brief's "minimum set of
+  followers needed for a quorum, chosen by recency". Expected at load with three
+  voters: the follower released at batch k carries k−1 and k and covers k; the
+  other follower is ready and caught up and is held until k+1. The followers
+  alternate: every batch reaches one follower at once (no added commit latency
+  while both are healthy) and each follower gets one Append per two leader
+  batches (N1: one per batch). A "full hold" (hold even a needed follower) gives
+  the same Append count and adds latency, so it is not built unless the
+  measurements say otherwise.
+- **Release and bound.** A hold ends at the first of: a decision point with a
+  later durable leader batch; `Event::Heartbeat` (`broadcast_into`); the
+  `TimedShard` deadline (armed at now + `append_hold_ms` after the first step
+  that leaves the core with a hold, disarmed after a step that leaves none,
+  delivered as `Event::ReleaseHeldAppends`; the clock is in whole milliseconds,
+  so a hold lasts at most `append_hold_ms` plus queueing); any `append_for` for
+  that peer. `held` is cleared with `clear_replication_requests` (every
+  step-down, `become_leader`, `configuration_changed`, compaction) and by
+  `initialize_replication`. Admission of the release event: `Overloaded` keeps
+  the deadline for the next poll; any other refusal (closed, fenced, unknown
+  group) drops it. `stop_group` and `close_admission` drop the group's deadline.
+- **Modes.** Election (step-down, new leader): cleared, nothing held until the
+  first batch after the no-op. Membership change, joint configuration,
+  uncommitted final configuration, leadership transfer: `progress_sends_enabled()`
+  is false, so nothing is held and today's eager broadcasts run (a transfer's
+  `broadcast` releases any hold). Learners and learner catch-up: never held (not
+  voters). Snapshot: never held (next ≤ base), compaction clears. Lagging
+  follower: never held (next ≤ `batch_floor` or more than one Append behind).
+  Idle: the early path sends at once; a hold made at load ends at the deadline
+  or the heartbeat.
+- **Guarantees.** The rule only decides whether a ready peer's next data Append
+  is created now or at its release; the Append content (`append_for`), request
+  bookkeeping, acks, the commit rule and follower persistence are untouched. Log
+  matching, leader completeness, commit only on a quorum of durable acks, one
+  Append in flight and per-peer FIFO hold by construction (a held peer has no
+  request outstanding and is released through `append_for`). Holds are volatile:
+  a restarted or new leader starts with none.
+- **Known limit, measured not assumed.** A hold saves a follower cycle only when
+  the next leader batch becomes durable within the bound. N1b step 0 recorded
+  ~1.6 ms between leader data batches in `nat.sh` (641 per 16,064 commands at
+  15,000/s) and longer on the Mac, so the 1 ms default may save little. The
+  measurement reports the default and, separately, a longer bound as a
+  sensitivity point; changing the default is a user decision (it bounds the
+  extra commit wait when the covering follower stalls).
+- **Acceptance (deterministic; core steps or simulated milliseconds).**
+  (a) quorum follower immediate, the other held, then one Append with both
+  batches after the next durable leader batch; (b) runtime: the hold ends at
+  exactly now + `append_hold_ms` (not a millisecond earlier) and, with a longer
+  bound, at the leader's heartbeat; (c) a lagging follower is never held;
+  (d) election, membership change, transfer and snapshot clear holds and keep
+  today's messages; (e) the commit index advances on the quorum ack exactly as
+  with holds off; (f) the existing FIFO and one-in-flight oracles pass unchanged
+  with holds on (runtime histories) and the held peer's release reuses
+  `append_for`; (g) measured: follower Appends per write in the TCP 15,000/s
+  cell. Mutations: drop the deadline arming ((b) fails); hold the quorum
+  follower too ((e) fails).
+- **Measurement.** A = main + the PR 22 counters (`e9ad393b`, example code only);
+  B1 = N1c + the counters; B2 = N1c + PR 19's code + the counters (local
+  measurement branch, not pushed). Mac N0 cells (TCP 1,000/s, 4,000/s, 15,000/s,
+  QUIC 15,000/s, idle 20/s), 5 ABBA rounds each; `nat.sh` 5 pairs on Linux
+  cores 10–15 with the zero-command column and follower barriers. Gate (B2 vs A):
+  the N1b gate.
 
 ### N0 schema plan (before editing, 19 October 2026)
 
