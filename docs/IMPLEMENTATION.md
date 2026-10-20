@@ -1239,7 +1239,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done: runner re-measured the composed V2+V3a+V3b+V3b-s head (65bb5041 vs main b72d1ee3, quiet Mac, H2 rule, 5 pairs: bulk-16 −12.1%, bulk-1 −13.8%, single-16 +2.0%, single-1 +2.2%; singleton regression accepted by the user on 19 October 2026) | The stack now carries V2 (merged main b72d1ee3); the runner measures all four cells of PR 10's head against the H2 main baseline. The remaining singleton excess (V3a staging, a harness effect-loop copy that V3b's types trigger) is re-profiled on the composed tree before any further slice | V2 merged; PR 10 merged with main | Framework pairs on all four cells against the H2 baseline; compaction/snapshot suites | T4 |
 | Done V3c profile: whole-cost profile of the merged V2+V3 tree (`target/claude/research-r4/v3c-profile.md`) | Choose the next whole cost class from a fresh profile instead of adding helpers | V3 merged (`d379783d`) | Re-baseline recorded below; ranked slices with arithmetic | T4 |
 | Done V3c: host-owned effect sink and `ProposalBatch::push` fix (merged 20 October 2026 in PR 16, head 36de6dd0; code head 783265a4; quiet Mac vs `d379783d`, 5 pairs: bulk-16 −1.4%, single-16 −4.7%, bulk-1 −2.1%, single-1 −9.5% CPU per write; driver width 1 −13.2%, allocations 30 → 15 per write) | Every core call returns a fresh `Vec<Effect>` built from nested per-function Vecs, and the matched actor grows and frees a `VecDeque` per call: at width 1 about 30 allocations per write, 9 of them effect vectors (profile §4), ≈ 628 ns/write of allocator time in single-1. The host owns one reusable queue that the core fills in place (`step_into`, `propose_entries_into`, `persist_volatile_into`); the Vec APIs become wrappers. Ride-along: `push` built and dropped an `Exhausted` error on every success (bulk ≈ 1.4%) | Profile above; V3 merged | Effect-sequence oracle (Vec vs sink forms over the twin histories, FIFO insertion of committed intervals); rollback with sentinel effects on refused steps, stale tokens and fenced cores; reused queue keeps its capacity and allocation with no stale effects over 1,000 width-1 rounds; existing effect-order, twin, golden and facts oracles unchanged; driver widths 1/231/515 with allocation counts; quiet-Mac 5 pairs × 4 cells against `d379783d`; attribution controls; fmt, four strict root Clippy builds and the matched workspace. Review round 2 (tests and docs only): granted-vote sentinel and election-reset comparison, each proved by mutating the two queue reads; wrapped-queue late exhaustion; durable, transfer, stale-append, learner-configuration and retirement-reply sink oracles | T4 |
-| Done in review V3d: per-step recomputation (PR 18, code head 08ebc5c3, round 2 code head 0ea00498; quiet Mac vs `bc8fafb6`, 3 × 5 pairs: single-16 −3.0%, single-1 −1.8 to −3.5%, bulk-16 and bulk-1 flat; driver width 1 −13.0%, instructions −14.4%) | `effect_reservation` rebuilt and compared `LogMetadata` twice per harness step, and every plan and install rebuilt or compared it again (profile slice 2). The core's log changes only at install, so its summary is now kept valid there by type (`SummarizedLog`), plans from its own view skip the comparison, and an install version token skips the predecessor check while nothing changed; a plain log's replica count no longer walks the membership | V3c (same `raft.rs` chain) | Implemented evidence in the V3d sections below: summary/version tracking tests over every mutating path (fail without the bump or refresh), reservation test, unchanged transition/twin/snapshot/truncation/facts/golden tests, fixed-schedule counts and reservation checksums identical, per-site samply attribution, three gate runs, attribution controls, fmt + four strict Clippy builds + matched workspace. Review round 2 (Opus P3s): the install skip is bound to the stamp (log identity and version) of the view the plan came from, so a plan moved to another core is refused in debug and release; moved-version checked install tested; the skip still taken on ordinary appends and commit rounds (test counter); mutation edits recorded exactly; width-1 driver within noise (3 pairs: +0.2% ns, +0.17% instructions) | T4 |
+| Done in review V3d: per-step recomputation (PR 18, code head 08ebc5c3, round 2 code head 0ea00498, round 3 code 4ba17fbf; quiet Mac vs `bc8fafb6`, 3 × 5 pairs: single-16 −3.0%, single-1 −1.8 to −3.5%, bulk-16 and bulk-1 flat; driver width 1 −13.0%, instructions −14.4%) | `effect_reservation` rebuilt and compared `LogMetadata` twice per harness step, and every plan and install rebuilt or compared it again (profile slice 2). The core's log changes only at install, so its summary is now kept valid there by type (`SummarizedLog`), plans from its own view skip the comparison, and an install version token skips the predecessor check while nothing changed; a plain log's replica count no longer walks the membership | V3c (same `raft.rs` chain) | Implemented evidence in the V3d sections below: summary/version tracking tests over every mutating path (fail without the bump or refresh), reservation test, unchanged transition/twin/snapshot/truncation/facts/golden tests, fixed-schedule counts and reservation checksums identical, per-site samply attribution, three gate runs, attribution controls, fmt + four strict Clippy builds + matched workspace. Review round 2 (Opus P3s): the install skip is bound to the stamp (log identity and version) of the view the plan came from, so a plan moved to another core is refused in debug and release; moved-version checked install tested; the skip still taken on ordinary appends and commit rounds (test counter); mutation edits recorded exactly; width-1 driver within noise (3 pairs: +0.2% ns, +0.17% instructions). Review round 3 (Sol): 16 B stamps (u64 identity issued once, u64 version, ≈ 584 years each at 10^9/s) that never repeat and fail closed to checked installs, with `observability::unidentified_logs()`; allocator- and version-bound tests in debug and release; nine named mutations; `Pending` 1,088 → 1,104 B; width-1 driver −0.2% ns, +0.25% instructions; single-1 vs `bc8fafb6` still −1.8% (5 pairs) | T4 |
 | Current V3e: peer slots | Outstanding replication per peer in a fixed slot instead of a `BTreeMap` emptied and refilled each round; stack-bounded `peers()` and quorum frontier (profile slice 3: single-1 −2.3 to −3.1%) | V3d (same `raft.rs` chain) | Replication/frontier oracles; quiet-Mac pairs against the V3d merge | T4 |
 | Next V3f: in-place install | Install the pending transition through `&mut` and clear it after success instead of moving `Pending` (1,088 B), `OwnedNextLog` and large `Result`s by value (profile slice 4: single-1 −1.9 to −2.5%; V3d's in-place summary write is the first piece) | V3e | A failed install keeps the pending transition intact and fences as today; twin and completion oracles; quiet-Mac pairs | T4 |
 | Following H-a: harness reply index | Bulk cells: the matched harness's `PendingReplies` (SipHash `HashMap<u128,_>`) remove + insert is about 23 ns of 214 per write, harness not library work (profile H-a: bulk −7 to −10%) | Separate harness PR on main with an H2-style fairness review, main re-baselined after; independent of V3e/V3f | Reply-order and fairness tests; OpenRaft engine untouched; quiet-Mac pairs with attribution parity | T4 |
@@ -2639,7 +2639,8 @@ Step 2 (if the driver supports it): make the invariant structural.
   skips a comparison whose result it already knows. The version uses
   `wrapping_add` (no lifetime bound): equality without mutation is the only
   production case, and a wrap would need 2^64 installs between one plan and its
-  install, where there are none.
+  install, where there are none. (Superseded: round 2 bound the skip to a
+  stamp, and round 3 made the stamp never repeat; see "V3d review round 3".)
 - **Reads.** `rollback_replicas`, `retained_log_bytes`,
   `connections_are_bootstrap`, `connection_replicas` and
   `checkpoint_membership` read the summary directly; the stale-summary
@@ -2898,6 +2899,10 @@ Schema plan (sketched before editing).
   identities repeat after 2^32 constructions in one process; that matters
   only for a plan moved between cores, which the core cannot do, so the
   identity is a second guard. Nothing fails or slows down when either wraps.
+  (Superseded by round 3: GPT-6.1-Sol showed that the wrapping identity
+  gives constructions 2^32 and 2^32 + 1 the same stamp, so the guard was
+  not unconditional. Stamps are now 16 B, never repeat, and fail closed;
+  see "V3d review round 3".)
 - **Restart.** A recovered core gets a fresh identity at version 0 and no
   pending plan.
 - **Acceptance.** A plan moved to another core at the same version is
@@ -3045,8 +3050,8 @@ Schema plan (sketched before editing).
   `administration.rs`, `ingress.rs`, `clients.rs` and `read_requests.rs` are
   their own request types), and the effect owner charges effect queues and
   payloads, not core size. The 16 B is one more 16-byte copy when a plan is
-  staged and installed. `LogView` grows by 8 B (its stamp slot becomes
-  `Option<LogStamp>`).
+  staged and installed. `LogView`'s stamp slot becomes `Option<LogStamp>`
+  (expected +8 B; measured: unchanged, see below).
 - **Per-write path.** The stamp store and the install compare widen from 8 B
   to 16 B, plus an `Option` test on the stamp at install. No atomic,
   allocation or metadata comparison per write.
@@ -3082,6 +3087,114 @@ Schema plan (sketched before editing).
     compare, `None == None` match, never skip, summary writes, version bump.
   - Width-1 driver vs `0ea00498` (3 pairs) and, since `Pending` grows, the
     single-1 cell 5 pairs vs `bc8fafb6`.
+
+Implemented evidence (code commit `4ba17fbf`; the Mac builds below were made
+from `a5937602`, the same tree before its commit message was reworded).
+
+- **Code.** `src/log/transition/summarized.rs`: `LogStamp { log: NonZeroU64,
+  version: u64 }`; `LogIdentities { next, refused }` with the checked
+  `fetch_update` issue and a saturating refused count; `SummarizedLog.stamp:
+  Option<LogStamp>`; `install` skips only on `planned.is_some_and(|planned|
+  self.stamp == Some(planned))`; `advance()` (`checked_add`, cold `renew()`
+  to a fresh identity or `None`). `view.rs`: the view's stamp slot is
+  `Option<LogStamp>` and `LogView::stamp()` flattens it. `observability.rs`:
+  `pub fn unidentified_logs() -> u64`. `raft.rs` is unchanged: the three
+  staging sites already pass `view.stamp()`.
+- **Sizes** (x86_64, measured by a temporary print, removed):
+  `Option<LogStamp>` 16 B; `Pending` 1,088 → 1,104 B; `Option<Pending>`
+  1,088 → 1,104 B (niche kept); `OwnedNextLog` 672 B and `LogView` 352 B
+  unchanged (the wider slot fits `LogView`'s padding).
+  `pending_and_plan_sizes` bound `PENDING_BYTES` 1,088 → 1,104 with the
+  reason in a comment; `PLAN_BYTES` and `composed_type_sizes` unchanged.
+- **Tests.**
+  - `summarized::tests` (allocator, no logs built):
+    `identities_are_issued_once_in_order_from_one` (1, 2, 3);
+    `identities_stop_at_the_bound_and_never_wrap` (from 2^64 − 3: issues
+    2^64 − 3 and 2^64 − 2, then refuses three times, refused count 3,
+    `next` stays `u64::MAX`); `the_refused_count_saturates`.
+  - `a_plan_moved_at_the_identity_bound_is_refused` (thread-local
+    allocator from 2^64 − 3): two consecutive cores get the last two
+    identities (distinct), the identified core keeps the fast path, three
+    recovered cores and one new core get no stamp (refused count 4); the
+    last identified core's plan moved to an unidentified core, and a plan
+    moved between two unidentified cores, are each refused with
+    `Rejected`, one checked install each, the target fenced with no
+    pending dependency and its log and summary unchanged; the new
+    unidentified core's own append and commit round take two checked
+    installs and install.
+  - `the_version_bound_keeps_the_fast_path_or_fails_closed`: at
+    `u64::MAX − 1` an append (→ `u64::MAX`) and a commit round (→ fresh
+    identity, version 0) and the next append are all fast; a plan staged
+    at `u64::MAX`, then a test `edit` across the bound, takes one checked
+    install and installs; with the allocator exhausted, the install at
+    `u64::MAX` is fast and leaves the log unstamped (refused count 1),
+    then an append and a commit round take two checked installs and
+    install, unfenced, summary fresh.
+  - Kept unchanged apart from the accessor (`version()` → `stamp()`,
+    compared as stamps): the two tracking tests, ordinary-skip,
+    moved-version and moved-plan (same version) tests.
+  - Debug and `cargo test --release --lib summarized`, default and all
+    features: 11/11.
+- **Mutations** (temporary edits on `4ba17fbf`'s tree, restored by checkout; lib
+  tests, 549 in debug default features):
+
+  | Edit | Debug | Release (`summarized`) |
+  | --- | --- | --- |
+  | M1 round-2-style wrapping allocator: `issue` returns `Some(NonZeroU64::new(self.next.fetch_add(1, Relaxed)).unwrap_or(NonZeroU64::MIN))` | 4 fail: both bound allocator tests, the identity-bound and version-bound tests | same 4 fail |
+  | M2 compare only the version: `self.stamp.map(\|s\| s.version) == Some(planned.version)` | 1 fails: moved plan at the same version (skipped check's `debug_assert`) | 1 fails (refusal assertion) |
+  | M3 let two unstamped logs match: `if planned == self.stamp` | 2 fail: identity-bound (unidentified → unidentified transplant) and version-bound (fail-closed count) | same 2 fail (refusal assertion; count) |
+  | M4 never skip: `if false && ..` | 3 fail: ordinary-skip, identity-bound, version-bound | not run |
+  | M5 wrap the version without renewing: `stamp.version = stamp.version.wrapping_add(1)` | 1 fails: version-bound (same identity after the bound) | not run |
+  | M6 no version bump in `install` (`self.advance();` deleted) | 3 fail: both tracking tests, version-bound | not run |
+  | M7 both `install_unchanged` summary writes (`incoming.rs:275,279`, `*summary = install_append(..)` → `let _ = ..`) | 159 fail (round 2: 157; the two new tests also install) | not run |
+  | M8 append arm only (`incoming.rs:275`) | 103 fail (round 2: 101) | not run |
+  | M9 checked path's summary write (`self.summary = next.install(..)?` → `next.install(..)?`) | 3 fail: moved-version, identity-bound, version-bound | not run |
+
+- **Per-write path.** The staged stamp and the install compare are 16 B
+  instead of 8 B, plus the `Option` test and a `checked_add` at install;
+  `Pending` is 16 B larger. No atomic, allocation or metadata comparison per
+  write.
+
+Deterministic driver at width 1 (`R3_DRIVE=200000,1,1`, `drive.py`, builds of
+`0ea00498` and `a5937602`, quiet Mac, load 1.9, no other benchmark process,
+3 interleaved pairs, instructions and cycles from `/usr/bin/time -l`):
+
+| Pair | `0ea00498` ns/write | `a5937602` ns/write | Ratio | Instructions/write | Cycles/write |
+| ---: | ---: | ---: | ---: | --- | --- |
+| 1 | 3,032.9 | 3,029.8 | 0.999 | 44,919 → 45,050 | 9,606 → 9,614 |
+| 2 | 3,025.3 | 3,026.5 | 1.000 | 44,915 → 45,028 | 9,512 → 9,509 |
+| 3 | 3,031.6 | 3,022.3 | 0.997 | 44,897 → 45,027 | 9,523 → 9,493 |
+
+Medians: 3,031.6 → 3,026.5 ns (−0.2%), 44,915 → 45,028 instructions
+(+0.25%, about 19 per persistence round at 6 rounds per write; every pair
+higher), 9,523 → 9,509 cycles (−0.1%). Time within noise.
+
+Because `Pending` grew, the single-1 cell against `bc8fafb6` (`run.py`, 1
+client, batch 1, 131,072 writes, `--server-workers 1`, whole-process CPU
+ns per write, 5 interleaved pairs, same session):
+
+| Pair | `bc8fafb6` | `a5937602` | Ratio |
+| ---: | ---: | ---: | ---: |
+| 1 | 11,758 | 11,521 | 0.980 |
+| 2 | 11,474 | 11,382 | 0.992 |
+| 3 | 11,594 | 11,352 | 0.979 |
+| 4 | 11,800 | 11,592 | 0.982 |
+| 5 | 11,594 | 11,362 | 0.980 |
+
+Median 11,594 → 11,382 (−1.8%; median pair ratio 0.980). Round 1's single-1
+result (−1.8 to −3.5%, 15-pair median ratio 0.98) stands, so the four-cell
+result stands; the other three cells were not rerun (Sol's round-2 review:
+not required for a construction-side change and a per-write delta within
+noise).
+
+Checks (Linux, cores 4–9, `-j 4`): `cargo +stable fmt --all -- --check` and
+matched fmt; strict Clippy with default, `--all-features`,
+`--no-default-features` and `--no-default-features --features native`, and
+the matched workspace, zero diagnostics; default `--lib --test volatile --test
+raft --test snapshot --test log_owned --test worker --test runtime` (548 lib,
+1 ignored, + 11/81/27/5/9/57) and all features (550 lib, 1 ignored, + the
+same), one configuration at a time; `--release --lib summarized` 11/11 in
+default and all features; matched tests 75/75 in default and all features.
 
 #### H2 round 2: review fixes (19 October 2026)
 
