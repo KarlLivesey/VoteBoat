@@ -14,6 +14,8 @@
 // rights and limitations under the RPL.
 //! Explicit host-authorized learner enrollment through the public storage,
 //! core, application and snapshot contracts. No network bootstrap is inferred.
+#[path = "learners/readiness_plans.rs"]
+mod readiness_plans;
 mod support;
 #[path = "transfer_source/fixtures.rs"]
 mod transfer_fixtures;
@@ -2698,4 +2700,95 @@ fn readiness_file_stores(
     )
     .unwrap();
     (log, snapshots, si)
+}
+
+/// DR1 round 6 (Sol, round 5): a captured readiness request's window owns a
+/// separately allocated copy of the request, so relay capture charges it.
+#[cfg(feature = "native")]
+mod relay_budget {
+    use super::*;
+    use std::mem::size_of;
+    use voteboat::{
+        native::{outbound::NativeOutbound, relay::*},
+        outbound::*,
+        runtime::*,
+    };
+    /// Whether a real leader's pending readiness request, taken from the
+    /// native queue, is captured under `metadata_bytes` (refused: too large).
+    fn captured(metadata_bytes: usize) -> bool {
+        let mut log = HostLogStore::new(4);
+        let (leader, _learner, _, _leader_log) = readiness_cluster(&mut log);
+        let store = leader.storage_binding();
+        let mut owner = queued_promotion_owner(leader);
+        owner
+            .admit(
+                group(1),
+                Event::CheckLearnerReadiness {
+                    learner: learner_peer(),
+                    session: log.binding().session,
+                    requirements: Box::new(readiness_requirements()),
+                },
+            )
+            .unwrap();
+        owner.advance(MonoTime(0), 1).unwrap();
+        let mut outbound = NativeOutbound::new(
+            OutboundBinding {
+                node: node(1),
+                store,
+                generation: OutboundGeneration::new(1).unwrap(),
+            },
+            OutboundLimits::default(),
+        )
+        .unwrap();
+        let lease = owner.take_effect().unwrap().unwrap();
+        let Effect::Send(message) = lease.effect else {
+            panic!("expected the readiness request")
+        };
+        assert!(matches!(message.rpc, Rpc::LearnerReadinessRequest(_)));
+        outbound.submit(vec![message]).unwrap();
+        owner.release_transferred_send(lease.ticket).unwrap();
+        assert!(owner.take_effect().unwrap().is_none());
+        let limits = RelayOutputLimits {
+            metadata_bytes,
+            ..RelayOutputLimits::default()
+        };
+        let accepted = match NativeRelayBatch::capture(&owner, &mut outbound, limits) {
+            Ok(Some(batch)) => {
+                let _ = batch.complete(&mut outbound, LocalSendResult::Cancelled);
+                true
+            }
+            Err(rejected) => {
+                assert_eq!(rejected.reason, RelayOutputError::TooLarge);
+                for batch in rejected.batches {
+                    outbound
+                        .complete(batch, LocalSendResult::Cancelled)
+                        .unwrap();
+                }
+                false
+            }
+            Ok(None) => panic!("missing original"),
+        };
+        accepted
+    }
+    #[test]
+    fn captured_readiness_metadata_covers_owned_request() {
+        let (mut refused, mut accepted) = (size_of::<NativeRelayBatch>(), 1 << 16);
+        assert!(!captured(refused));
+        assert!(captured(accepted));
+        while accepted - refused > 1 {
+            let mid = refused + (accepted - refused) / 2;
+            if captured(mid) {
+                accepted = mid;
+            } else {
+                refused = mid;
+            }
+        }
+        // The batch owner and the window's own copy of the request alone need
+        // this much; the scope and window fields come on top. Round 5 accepted
+        // 624 bytes against at least 848.
+        assert!(
+            accepted > size_of::<NativeRelayBatch>() + size_of::<LearnerReadinessRequest>(),
+            "least accepted {accepted}"
+        );
+    }
 }

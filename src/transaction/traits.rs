@@ -46,12 +46,27 @@ impl StateMachine for TransferApplication {
         crate::application::Retention::LifetimeBounded
     }
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
+        use crate::raft::DeploymentPlan;
+        // Plan: this group, which with the profile decides the role, then the
+        // profile's coordinator and two participants (3 words each).
+        let [first, second] = self.profile.participants();
+        let plan = [self.group, self.profile.coordinator(), first, second]
+            .map(DeploymentPlan::group_words)
+            .concat();
         Some(ReadinessRequirements {
             application_schema: TRANSFER_SCHEMA,
-            identity: crate::raft::LayerIdentity::family(
+            // Words: transaction and account capacities, each of which
+            // decides whether a committed command is recorded.
+            identity: crate::raft::LayerIdentity::new(
                 crate::raft::ApplicationFamily::TRANSFER_TRANSACTION,
+                [
+                    self.limits.transactions() as u64,
+                    self.limits.accounts() as u64,
+                    0,
+                    0,
+                ],
             ),
-            inner_profile: crate::raft::InnerProfile::LEAF,
+            inner_profile: crate::raft::InnerProfile::LEAF.planned(&plan),
             command_bytes: TRANSFER_COMMAND_BYTES,
             snapshot_bytes: codec::checkpoint_bound(self),
         })

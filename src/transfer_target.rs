@@ -1380,14 +1380,14 @@ where
         bytes: &[u8],
         pending: impl Iterator<Item = (OperationId, &'a [u8])>,
     ) -> Result<usize, ApplicationError> {
-        if bytes.len() > self.readiness_requirements().command_bytes {
+        // Computed once: the requirements value carries the whole identity.
+        let command_bytes = self.readiness_requirements().command_bytes;
+        if bytes.len() > command_bytes {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut next = self.clone();
         for (position, (operation, bytes)) in pending.enumerate() {
-            if position >= crate::routed::MAX_ROUTED_PENDING
-                || bytes.len() > self.readiness_requirements().command_bytes
-            {
+            if position >= crate::routed::MAX_ROUTED_PENDING || bytes.len() > command_bytes {
                 return Err(ApplicationError::ReceiptBudget);
             }
             let index = next

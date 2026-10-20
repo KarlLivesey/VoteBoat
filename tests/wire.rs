@@ -1140,11 +1140,97 @@ mod native {
         }
         fixture_roundtrip(codec, membership_snapshot(true));
         verify_readiness_profiles(codec, &query, request);
+        verify_readiness_plans(codec, &query, request);
+    }
+    /// The deployment plan follows the profile: a word count and the words.
+    /// Non-canonical plans and oversized counts are refused.
+    fn verify_readiness_plans(
+        codec: NativeWireCodec,
+        query: &Message,
+        request: LearnerReadinessRequest,
+    ) {
+        use voteboat::raft::{
+            ApplicationFamily, InnerLayer, InnerProfile, LayerIdentity, MAX_DEPLOYMENT_PLAN_WORDS,
+        };
+        const LAYER: usize = 8 + 2 + 8 * 4;
+        let identity = LayerIdentity::new(ApplicationFamily::MAINTENANCE, [2, 0, 0, 0]);
+        let profiled = |inner_profile: InnerProfile| Message {
+            rpc: Rpc::LearnerReadinessRequest(Box::new(LearnerReadinessRequest {
+                requirements: ReadinessRequirements {
+                    identity,
+                    inner_profile,
+                    ..request.requirements
+                },
+                ..request
+            })),
+            ..query.clone()
+        };
+        let leaf = codec
+            .encode_batch(scope(), &[profiled(InnerProfile::LEAF)])
+            .unwrap();
+        let routed = LayerIdentity::new(ApplicationFamily::ROUTED, [u64::MAX, 7, 1 << 40, 3]);
+        let two = [
+            InnerLayer::new(5, routed),
+            InnerLayer::new(1, LayerIdentity::family(ApplicationFamily::BUCKET_COUNTER)),
+        ];
+        // The owner's segment and an inner layer's travel exactly.
+        let leaf_plan = [7, u64::MAX, 1 << 63];
+        let stack = InnerProfile::from_layers(&two).unwrap();
+        let planned = InnerProfile::wrapping(ReadinessRequirements {
+            application_schema: 5,
+            identity: routed,
+            inner_profile: InnerProfile::LEAF.planned(&leaf_plan),
+            ..request.requirements
+        })
+        .planned(&[42]);
+        assert_eq!(
+            planned.plan().segments().collect::<Vec<_>>(),
+            vec![(0, &[42][..]), (1, &leaf_plan[..])]
+        );
+        for (profile, words) in [(planned, 2 + 1 + 3), (stack.planned(&[1; 191]), 192)] {
+            let input = profiled(profile);
+            fixture_roundtrip(codec, input.clone());
+            let frame = codec
+                .encode_batch(scope(), std::slice::from_ref(&input))
+                .unwrap();
+            let layers = profile.layers().unwrap().len();
+            assert_eq!(frame.len(), leaf.len() + LAYER * layers + 8 * words);
+            assert_eq!(codec.decode_batch(scope(), &frame).unwrap(), vec![input]);
+            let plan_count = frame.len() - 5 - 8 * words;
+            assert_eq!(usize::from(frame[plan_count]), words);
+            // A zero-length first segment and an oversized count are refused.
+            for (at, bytes) in [
+                (plan_count + 1, &0u64.to_le_bytes()[..]),
+                (plan_count, &[MAX_DEPLOYMENT_PLAN_WORDS as u8 + 1][..]),
+            ] {
+                assert_eq!(
+                    codec
+                        .decode_batch(scope(), &change(&frame, at, bytes))
+                        .err(),
+                    Some(WireError::InvalidMessage("readiness deployment plan"))
+                );
+            }
+        }
+        // A segment deeper than the profile's layers is refused.
+        let frame = codec
+            .encode_batch(scope(), &[profiled(InnerProfile::LEAF.planned(&[3]))])
+            .unwrap();
+        let header = frame.len() - 4 - 16;
+        assert_eq!(
+            codec
+                .decode_batch(
+                    scope(),
+                    &change(&frame, header, &(1u64 << 32 | 1).to_le_bytes())
+                )
+                .err(),
+            Some(WireError::InvalidMessage("readiness deployment plan"))
+        );
     }
     /// The application's identity (family u16 and four u64 configuration
     /// words) travels after the snapshot bytes, then the inner profile: a
-    /// count and that many layers, each a schema and an identity. Depth above
-    /// seven and zero schemas are refused.
+    /// count and that many layers, each a schema and an identity, then the
+    /// deployment plan: a word count and the words. Depth above seven, zero
+    /// schemas and non-canonical plans are refused.
     fn verify_readiness_profiles(
         codec: NativeWireCodec,
         query: &Message,
@@ -1155,17 +1241,18 @@ mod native {
         };
         const LAYER: usize = 8 + 2 + 8 * 4;
         let identity = LayerIdentity::new(ApplicationFamily::MAINTENANCE, [2, 0, 0, 0]);
-        let with = |layers: &[InnerLayer]| Message {
+        let profiled = |inner_profile: InnerProfile| Message {
             rpc: Rpc::LearnerReadinessRequest(Box::new(LearnerReadinessRequest {
                 requirements: ReadinessRequirements {
                     identity,
-                    inner_profile: InnerProfile::from_layers(layers).unwrap(),
+                    inner_profile,
                     ..request.requirements
                 },
                 ..request
             })),
             ..query.clone()
         };
+        let with = |layers: &[InnerLayer]| profiled(InnerProfile::from_layers(layers).unwrap());
         let leaf = codec.encode_batch(scope(), &[with(&[])]).unwrap();
         fixture_roundtrip(codec, with(&[]));
         let routed = LayerIdentity::new(ApplicationFamily::ROUTED, [u64::MAX, 7, 1 << 40, 3]);
@@ -1182,8 +1269,10 @@ mod native {
                 .unwrap();
             assert_eq!(frame.len(), leaf.len() + LAYER * layers.len());
             assert_eq!(codec.decode_batch(scope(), &frame).unwrap(), vec![input]);
-            // Trailer: the profile count, the layers, then the 4-byte CRC.
-            let count = frame.len() - 5 - LAYER * layers.len();
+            // Trailer: the profile count, the layers, the (empty) plan's
+            // word count, then the 4-byte CRC.
+            let count = frame.len() - 6 - LAYER * layers.len();
+            assert_eq!(frame[frame.len() - 5], 0);
             assert_eq!(frame[count], layers.len() as u8);
             // The outer identity sits just before the count.
             let family = count - 34;
@@ -1197,7 +1286,7 @@ mod native {
                     .err(),
                 Some(WireError::InvalidMessage("readiness inner profile depth"))
             );
-            let last = frame.len() - 4 - LAYER;
+            let last = frame.len() - 5 - LAYER;
             assert_eq!(
                 codec
                     .decode_batch(scope(), &change(&frame, last, &[0; 8]))

@@ -238,11 +238,15 @@ first, each a non-zero application schema (`u64`) and its layer identity,
 naming the applications inside a wrapper (zero layers for a leaf
 application). A count above 7 or a zero schema is refused, and an overflowed
 profile is never encoded. Any family value decodes; an unknown one simply
-never equals the receiver's own. Tag 13 appends one Boolean readiness byte.
+never equals the receiver's own. The deployment plan follows: a word count
+(`u8`, at most 128) and that many `u64` words, segments of a header word
+(`depth << 32 | count`, count at least 1) and the layer's own words, depths
+strictly increasing and at most the profile's layer count (`raft::DeploymentPlan`);
+a plan that is not canonical is refused. Tag 13 appends one Boolean readiness byte.
 Byte counts convert to `usize` with checked conversion. They are capability
 requirements, not payload lengths or allocation requests. The inner profile
-was added by DR1 round 4 and the layer identities by DR1 round 5 (PR 15),
-without a new format number: the crate is unpublished and mixed-revision peers
+was added by DR1 round 4, the layer identities by DR1 round 5 and the
+deployment plan by DR1 round 6 (PR 15), without a new format number: the crate is unpublished and mixed-revision peers
 fail the frame with a typed decode error (`Truncated`, or trailing bytes)
 rather than misreading it.
 

@@ -749,6 +749,11 @@ impl<'a> Encoder<'a> {
             self.u64(layer.schema)?;
             self.layer_identity(layer.identity)?;
         }
+        let plan = r.requirements.inner_profile.plan().words();
+        self.u8(plan.len() as u8)?;
+        for word in plan {
+            self.u64(*word)?;
+        }
         if let Rpc::LearnerReadinessReply { ready, .. } = &m.rpc {
             self.u8(u8::from(*ready))?;
         }
@@ -1396,7 +1401,9 @@ impl Decoder<'_> {
     /// Schema, command and snapshot bytes, the application's own identity
     /// (family u16, four u64 configuration words), then the inner profile: a
     /// layer count (at most `MAX_INNER_PROFILE_LAYERS`) and that many layers,
-    /// outermost first, each a non-zero schema and its identity.
+    /// outermost first, each a non-zero schema and its identity; then the
+    /// deployment plan: a word count (at most `MAX_DEPLOYMENT_PLAN_WORDS`) and
+    /// that many words, which must be canonical for the profile.
     fn readiness_requirements(&mut self) -> Result<ReadinessRequirements, WireError> {
         let application_schema = self.u64()?;
         let command_bytes = usize::try_from(self.u64()?).map_err(|_| WireError::TooLarge)?;
@@ -1414,6 +1421,17 @@ impl Decoder<'_> {
         }
         let inner_profile = crate::raft::InnerProfile::from_layers(&layers[..count])
             .ok_or(WireError::InvalidMessage("readiness inner profile schema"))?;
+        let words = usize::from(self.u8()?);
+        if words > crate::raft::MAX_DEPLOYMENT_PLAN_WORDS {
+            return Err(WireError::InvalidMessage("readiness deployment plan"));
+        }
+        let mut plan = [0; crate::raft::MAX_DEPLOYMENT_PLAN_WORDS];
+        for word in &mut plan[..words] {
+            *word = self.u64()?;
+        }
+        let inner_profile = crate::raft::DeploymentPlan::from_words(&plan[..words], count)
+            .and_then(|plan| inner_profile.with_plan(plan))
+            .ok_or(WireError::InvalidMessage("readiness deployment plan"))?;
         Ok(ReadinessRequirements {
             application_schema,
             identity,

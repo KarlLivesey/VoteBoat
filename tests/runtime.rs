@@ -2418,3 +2418,82 @@ fn prospective_reservation_peeks_the_exact_queue_choice_without_consumption() {
         "expired inspection leaves input queued"
     );
 }
+
+/// DR1 round 6 (Sol, round 5): `Event::CheckLearnerReadiness` owns its boxed
+/// requirements while queued, so the event's admission cost includes them.
+mod event_budget {
+    use super::*;
+    use std::mem::size_of;
+    fn shard(max_event_bytes: usize) -> Shard<HostReady> {
+        let mut log = HostLogStore::new(1);
+        append(&mut log, vec![LogMutation::Create(bootstrap(1, 3))]);
+        let mut shard = Shard::new(
+            owner(log.binding()),
+            ShardLimits {
+                max_groups: 1,
+                max_event_bytes,
+                ..ShardLimits::default()
+            },
+            HostReady::new(1),
+        )
+        .unwrap();
+        shard
+            .register(
+                Raft::recover(
+                    node(1),
+                    log.binding(),
+                    log.state(group(1)).unwrap(),
+                    log.limits(),
+                )
+                .unwrap(),
+            )
+            .unwrap();
+        shard
+    }
+    fn readiness() -> Event {
+        Event::CheckLearnerReadiness {
+            learner: voteboat::secure::PeerIdentity {
+                node: node(4),
+                store: identity(4),
+            },
+            session: StoreSession::new(1).unwrap(),
+            requirements: Box::new(ReadinessRequirements {
+                application_schema: Counter::new(4).unwrap().schema_version(),
+                identity: LayerIdentity::family(ApplicationFamily::COUNTER),
+                inner_profile: InnerProfile::LEAF,
+                command_bytes: COUNTER_COMMAND_BYTES,
+                snapshot_bytes: 4096,
+            }),
+        }
+    }
+    #[test]
+    fn readiness_event_heap_is_counted() {
+        let inline = size_of::<Event>();
+        let full = inline + size_of::<ReadinessRequirements>();
+        // Before round 6 the event cost the inline size alone and was
+        // accepted at `inline`, under-charging every queue and visit quota.
+        for limit in [inline, full - 1] {
+            let mut shard = shard(limit);
+            let rejected = shard.admit(group(1), readiness()).unwrap_err();
+            assert_eq!(rejected.reason, RuntimeError::EventTooLarge, "{limit}");
+            assert_eq!(*rejected.event, readiness());
+            assert_eq!(shard.usage(), Usage { items: 0, bytes: 0 });
+        }
+        let mut shard = shard(full);
+        shard.admit(group(1), readiness()).unwrap();
+        assert_eq!(
+            shard.usage(),
+            Usage {
+                items: 1,
+                bytes: full
+            }
+        );
+        assert_eq!(
+            shard.group_usage(group(1)),
+            Some(Usage {
+                items: 1,
+                bytes: full
+            })
+        );
+    }
+}

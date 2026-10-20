@@ -983,6 +983,8 @@ fn event_cost(event: &Event, limit: usize) -> Result<(Class, usize), RuntimeErro
                 .ok_or(RuntimeError::EventTooLarge)?;
             (Class::Control, extra)
         }
+        // The boxed requirements are retained with the queued event.
+        Event::CheckLearnerReadiness { .. } => (Class::Control, size_of::<ReadinessRequirements>()),
         Event::Checkpoint => (Class::Background, 0),
         Event::Read { .. } => (Class::Data, 0),
         Event::Propose { bytes, .. } => (Class::Data, bytes.capacity()),

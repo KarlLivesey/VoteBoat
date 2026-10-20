@@ -201,7 +201,7 @@ impl<P: PartitionPolicy + Clone> BucketCounter<P> {
         crate::raft::ReadinessRequirements {
             application_schema: BUCKET_COUNTER_SCHEMA,
             // Words: operation and retained-byte limits, which decide
-            // committed commands. Scope and policy are the deployment plan.
+            // committed commands.
             identity: crate::raft::LayerIdentity::new(
                 crate::raft::ApplicationFamily::BUCKET_COUNTER,
                 [
@@ -211,7 +211,22 @@ impl<P: PartitionPolicy + Clone> BucketCounter<P> {
                     0,
                 ],
             ),
-            inner_profile: crate::raft::InnerProfile::LEAF,
+            // Plan: the scope (start high, end low), which refuses keys
+            // outside it, and the partition scheme (id high, id low, version)
+            // its checkpoint names. The bucket function itself is the policy
+            // type's code.
+            inner_profile: crate::raft::InnerProfile::LEAF.planned(&{
+                let scheme = self.policy.scheme();
+                [
+                    crate::raft::LayerIdentity::pair(
+                        self.scope.start().into(),
+                        self.scope.end().into(),
+                    ),
+                    (scheme.id.get() >> 64) as u64,
+                    scheme.id.get() as u64,
+                    scheme.version.into(),
+                ]
+            }),
             command_bytes: MAX_BUCKET_COMMAND_BYTES,
             snapshot_bytes: self.limits.checkpoint_bound().expect("validated limits"),
         }

@@ -12,7 +12,10 @@ use crate::{
 
 type Owner = EffectOwner<FairScheduler, DeadlineQueue, JitterEntropy>;
 fn fixture() -> (Owner, NativeOutbound, Message, *const Message) {
-    let core = core();
+    fixture_with(core(), Event::Heartbeat)
+}
+/// `core` in a one-group owner after `event`, every send in the native queue.
+fn fixture_with(core: Raft, event: Event) -> (Owner, NativeOutbound, Message, *const Message) {
     let group = core.state().bootstrap.group;
     let id = RuntimeOwner {
         store: core.binding,
@@ -49,7 +52,7 @@ fn fixture() -> (Owner, NativeOutbound, Message, *const Message) {
     )
     .unwrap();
     let mut outbound = NativeOutbound::new(binding, OutboundLimits::default()).unwrap();
-    owner.admit(group, Event::Heartbeat).unwrap();
+    owner.admit(group, event).unwrap();
     owner.advance(MonoTime(0), 1).unwrap();
     let mut first = None;
     while let Some(lease) = owner.take_effect().unwrap() {
@@ -232,5 +235,40 @@ fn relay_native_stale_capture_returns_original_allocation_for_explicit_local_can
             .complete(batch, LocalSendResult::Cancelled)
             .unwrap();
     }
+    cleanup(&mut outbound);
+}
+
+#[test]
+fn relay_native_readiness_scope_charges_the_owned_request() {
+    // DR1 round 6 (Sol, round 5): a readiness window owns a boxed copy of the
+    // request; capture and the retained scopes both charge it.
+    let readiness = Event::CheckLearnerReadiness {
+        learner: PeerIdentity {
+            node: node(4),
+            store: store(4),
+        },
+        session: StoreSession::new(7).unwrap(),
+        requirements: Box::new(ReadinessRequirements {
+            application_schema: 1,
+            identity: crate::raft::LayerIdentity::UNREGISTERED,
+            inner_profile: crate::raft::InnerProfile::LEAF,
+            command_bytes: 128,
+            snapshot_bytes: 256,
+        }),
+    };
+    let (owner, mut outbound, original, _) = fixture_with(staged(), readiness);
+    assert!(matches!(original.rpc, Rpc::LearnerReadinessRequest(_)));
+    let request = size_of::<LearnerReadinessRequest>();
+    let held = capture(&owner, &mut outbound, RelayOutputLimits::default());
+    let completed = held
+        .complete(&mut outbound, LocalSendResult::Cancelled)
+        .unwrap_or_else(|r| panic!("{:?}", r.reason));
+    assert_eq!(
+        completed.requests.retained_bytes(),
+        size_of::<crate::native::relay::RelayRequestScopes>()
+            + size_of::<OriginalScope>()
+            + size_of::<RequestWindow>()
+            + request
+    );
     cleanup(&mut outbound);
 }

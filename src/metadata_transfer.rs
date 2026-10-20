@@ -599,16 +599,27 @@ impl MetadataAuthoritySource {
                 .collect(),
         })
     }
+    /// Word 0: the export image bound. Words 1–3: the initial directory's
+    /// operation limit, history byte limit and enabled profiles, which decide
+    /// its entries and the source's rejection capacity. That directory is not
+    /// a separate layer (its depth grows with repeated transfers), so its
+    /// configuration words are carried here.
+    pub(super) fn configuration_words(&self) -> [u64; crate::raft::LAYER_CONFIGURATION_WORDS] {
+        let [operations, history, profiles, _] = self
+            .initial
+            .directory()
+            .readiness_requirements()
+            .identity
+            .configuration;
+        [self.export_bytes as u64, operations, history, profiles]
+    }
     pub fn readiness_requirements(&self) -> ReadinessRequirements {
         let inner = self.initial.readiness_requirements();
         ReadinessRequirements {
             application_schema: self.schema_version(),
-            // Word 0: the export image bound. The fixed inner directory
-            // history is not a separate layer (its depth grows with repeated
-            // transfers); its limits are a recorded follow-up (DR2).
             identity: crate::raft::LayerIdentity::new(
                 crate::raft::ApplicationFamily::METADATA_SOURCE,
-                [self.export_bytes as u64, 0, 0, 0],
+                self.configuration_words(),
             ),
             inner_profile: crate::raft::InnerProfile::LEAF,
             command_bytes: inner
@@ -773,10 +784,10 @@ impl ProposalAdmission for MetadataAuthoritySource {
     ) -> Result<usize, ApplicationError> {
         let mut next = self.clone();
         let mut count = 0;
+        // Computed once: the requirements value carries the whole identity.
+        let command_bytes = self.readiness_requirements().command_bytes;
         let mut admit = |op, bytes: &[u8]| -> Result<(), ApplicationError> {
-            if count >= MAX_DIRECTORY_PENDING
-                || bytes.len() > self.readiness_requirements().command_bytes
-            {
+            if count >= MAX_DIRECTORY_PENDING || bytes.len() > command_bytes {
                 return Err(ApplicationError::ReceiptBudget);
             }
             count += 1;

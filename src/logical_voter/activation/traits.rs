@@ -69,8 +69,7 @@ where
             application_schema: self.schema,
             // Configuration words: intent capacity, command decode bound and
             // checkpoint bound; each decides committed entries or the
-            // checkpoint encoding. The parent and store mappings are the
-            // group's deployment plan (host obligation, AI3).
+            // checkpoint encoding.
             identity: crate::raft::LayerIdentity::new(
                 crate::raft::ApplicationFamily::LOGICAL_ACTIVATION,
                 [
@@ -80,7 +79,10 @@ where
                     0,
                 ],
             ),
-            inner_profile: crate::raft::InnerProfile::wrapping(inner),
+            // The parent and every store mapping decide whether a committed
+            // `Begin` is accepted (`check_intent`), and no committed entry
+            // binds them, so they are this layer's deployment plan.
+            inner_profile: crate::raft::InnerProfile::wrapping(inner).planned(&self.plan_words()),
             command_bytes: self.limits.command_bytes,
             snapshot_bytes: self.limits.checkpoint_bytes,
         })
@@ -182,6 +184,20 @@ impl<A: ProposalAdmission + CheckpointStateMachine> LogicalActivationApplication
 where
     A::Receipt: ApplicationReceipt,
 {
+    /// Deployment plan words: the parent group (3 words), then each mapping
+    /// in the constructor's voter order: voter, store (3), child (3). Every
+    /// mapping's parent is the parent (constructor check). At most
+    /// 3 + 16 × 7 = 115 words.
+    fn plan_words(&self) -> Vec<u64> {
+        let mut words = Vec::with_capacity(3 + 7 * self.mappings.len());
+        words.extend(crate::raft::DeploymentPlan::group_words(self.parent));
+        for m in &self.mappings {
+            words.push(m.voter.get());
+            words.extend(crate::raft::DeploymentPlan::store_words(m.store));
+            words.extend(crate::raft::DeploymentPlan::group_words(m.child));
+        }
+        words
+    }
     pub(super) fn inner_entries(
         &self,
         entries: &[LogEntry],

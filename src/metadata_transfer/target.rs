@@ -147,15 +147,26 @@ impl MetadataAuthorityTarget {
     pub fn imported_image(&self) -> Option<&MetadataImage> {
         self.imported.as_ref().map(|i| &i.image)
     }
+    /// Operation (id high, id low) and source configuration.
+    pub(super) fn plan_words(&self) -> [u64; 3] {
+        let operation = self.operation.get();
+        [
+            (operation >> 64) as u64,
+            operation as u64,
+            self.source_configuration.get(),
+        ]
+    }
     pub fn readiness_requirements(&self) -> ReadinessRequirements {
         ReadinessRequirements {
             application_schema: self.schema_version(),
-            // Word 0: the source's export image bound.
+            // Words: the source's (export bound and initial directory).
             identity: crate::raft::LayerIdentity::new(
                 crate::raft::ApplicationFamily::METADATA_TARGET,
-                [self.source.export_bytes as u64, 0, 0, 0],
+                self.source.configuration_words(),
             ),
-            inner_profile: crate::raft::InnerProfile::LEAF,
+            // Plan: the transfer operation, which decides `Conflict` before
+            // any anchor check, and the source configuration.
+            inner_profile: crate::raft::InnerProfile::LEAF.planned(&self.plan_words()),
             command_bytes: 244
                 + MAX_METADATA_PLAN_BYTES
                 + self.source.export_bytes
@@ -437,10 +448,10 @@ impl ProposalAdmission for MetadataAuthorityTarget {
     ) -> Result<usize, ApplicationError> {
         let mut next = self.clone();
         let mut count = 0;
+        // Computed once: the requirements value carries the whole identity.
+        let command_bytes = self.readiness_requirements().command_bytes;
         let mut admit = |op, bytes: &[u8]| -> Result<(), ApplicationError> {
-            if count >= MAX_DIRECTORY_PENDING
-                || bytes.len() > self.readiness_requirements().command_bytes
-            {
+            if count >= MAX_DIRECTORY_PENDING || bytes.len() > command_bytes {
                 return Err(ApplicationError::ReceiptBudget);
             }
             count += 1;

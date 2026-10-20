@@ -144,6 +144,14 @@ impl RequestWindow {
     pub(crate) fn group(&self) -> GroupIdentity {
         self.group
     }
+    /// Bytes this window owns outside its own allocation: the boxed readiness
+    /// request, else none.
+    pub(crate) fn owned_bytes(&self) -> usize {
+        match self.boundary {
+            Boundary::Readiness(_) => std::mem::size_of::<LearnerReadinessRequest>(),
+            _ => 0,
+        }
+    }
     pub(crate) fn current(&self, core: &Raft) -> bool {
         if core.fenced
             || core.binding != self.sender

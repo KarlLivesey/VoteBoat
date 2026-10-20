@@ -67,10 +67,27 @@ pub struct NativeRelayBatch {
     limits: RelayOutputLimits,
 }
 impl NativeRelayBatch {
+    /// Most metadata a batch of `messages` retains: every message a request
+    /// window that owns a readiness request. Sizes the relay's own output
+    /// limits, so no valid batch is refused by them.
     pub(in crate::native::relay) fn metadata_bound(messages: usize) -> Option<usize> {
         messages
-            .checked_mul(size_of::<OriginalScope>() + size_of::<RequestWindow>())
+            .checked_mul(
+                size_of::<OriginalScope>()
+                    + size_of::<RequestWindow>()
+                    + size_of::<crate::raft::LearnerReadinessRequest>(),
+            )
             .and_then(|n| n.checked_add(size_of::<Self>()))
+    }
+    /// Metadata this batch's scopes actually retain.
+    fn metadata_bytes(scopes: &[OriginalScope]) -> Option<usize> {
+        scopes.iter().try_fold(size_of::<Self>(), |sum, scope| {
+            let owned = match scope {
+                OriginalScope::Request(w) => size_of::<RequestWindow>() + w.owned_bytes(),
+                _ => 0,
+            };
+            sum.checked_add(size_of::<OriginalScope>() + owned)
+        })
     }
     pub fn capture<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy, O: OutboundQueue>(
         owner: &EffectOwner<Q, T, E>,
@@ -130,9 +147,14 @@ impl NativeRelayBatch {
         {
             return Err(RelayOutputError::WrongBinding);
         }
-        let metadata =
-            Self::metadata_bound(batch.messages.len()).ok_or(RelayOutputError::TooLarge)?;
-        if batch.messages.len() > limits.batch_messages || metadata > limits.metadata_bytes {
+        // Before allocating: the scopes and windows alone must fit.
+        let windows = batch
+            .messages
+            .len()
+            .checked_mul(size_of::<OriginalScope>() + size_of::<RequestWindow>())
+            .and_then(|n| n.checked_add(size_of::<Self>()))
+            .ok_or(RelayOutputError::TooLarge)?;
+        if batch.messages.len() > limits.batch_messages || windows > limits.metadata_bytes {
             return Err(RelayOutputError::TooLarge);
         }
         let mut scopes = Vec::with_capacity(batch.messages.len());
@@ -146,6 +168,10 @@ impl NativeRelayBatch {
                 return Err(RelayOutputError::RetiredRequest);
             }
             scopes.push(scope);
+        }
+        // Exactly what is retained, including each window's readiness request.
+        if Self::metadata_bytes(&scopes).is_none_or(|n| n > limits.metadata_bytes) {
+            return Err(RelayOutputError::TooLarge);
         }
         Ok(scopes)
     }
