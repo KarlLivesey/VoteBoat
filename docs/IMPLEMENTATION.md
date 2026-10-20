@@ -1481,6 +1481,113 @@ metadata_transfer 43, logical_voter_application 10, logical_relay_native 1.
 One routed command ran past the tool's 10-minute foreground limit and finished
 in the background (exit 0, 30 + 31 passed); no other detached work.
 
+#### DR1 round 7 schema plan (20 October 2026, before editing; PR 15)
+
+GPT-6.1-Sol's round-6 review (5583441554) requested changes: no P1, the three
+round-5 findings resolved, two P2s and a P3. Both P2s are positive readiness
+receipts for replicas that then disagree on an admitted entry. The
+orchestrator adopted Sol's position: under the binding rule both belong in
+DR1 (the bootstrap window was recorded for DR2 in round 6 and moves here);
+reclamation stays DR2/TX1. Why these pieces and no others: readiness is the
+admission point this PR owns; nothing here touches the per-write path.
+
+1. **A committed bootstrap binding applies before positive readiness (Sol
+   P2-1).**
+   - *Cause.* Inputs outside the identity that a family's bootstrap entry
+     compares (Routed grant, local group and initial inner checkpoint;
+     Directory plan; target, namespace and metadata bindings) are attested
+     only once that entry applies. The verifier round-trips the learner's
+     own checkpoint into its own clone, so two `RoutedApplication<Counter>`
+     with grant epochs 1 and 2 (equal requirements) both got receipts after
+     the configuration/Noop prefix, then `Bootstrapped` vs
+     `Err(InvalidCommand)` at index 3. Receipt freshness does not close it:
+     promotion can precede the application bootstrap.
+   - *API.* `StateMachine::deployment_bound(&self) -> bool`, default `true`
+     (an application with no committed binding entry). A family with one
+     returns whether its binding entry has applied in its applied state, and
+     a wrapper ANDs its inner application's (every in-tree wrapper forwards).
+     New `ReadinessError::BootstrapPending`.
+   - *Why the learner's own applied state is enough.* Each family applies its
+     binding entry only when the committed bytes equal its own binding (else
+     `Err(InvalidCommand)`; `TransferTarget` records `OperationConflict`
+     without staging), and its restore compares the checkpoint's binding (or
+     the inputs it encodes) with its own exactly. So a replica whose flag is
+     set holds the binding of the committed entry, whichever leader admitted
+     it. Per family: Routed `initialized` (decode compares the binding);
+     Directory `initialized` (restore compares authority, limits, manifests);
+     `TransferTarget` `staged` (restore compares the binding);
+     `CreatedNamespace` `ready` (restore compares the binding) and its owner;
+     `MetadataAuthoritySource` `bootstrap` (restore rebuilds from the initial
+     directory and requires its bootstrap); `MetadataAuthorityTarget`
+     `staged` (anchor compared at apply and restore); serving and publishing
+     forward to the layer that applies their forwarded bootstrap;
+     `TransferSource`, `ScopedTransferSource`, `RoutedControlReads`,
+     `RetirementGuard` (its anchor is the owner's initial checkpoint, a
+     function of the owner's binding), `Maintenance`,
+     `LogicalActivationApplication`, `LifecycleDirectory` and the service
+     binary's `Application` forward. Counter, BucketCounter and the
+     transaction leaves have no binding entry (`true`).
+   - *Where.* `verify_readiness_evidence`, after
+     `validate_deployment_requirements`: the host verifier returns
+     `BootstrapPending`; the native exchange (`finish_readiness_check`)
+     replies `ready: false`, like `Capability`. An incompatible declaration
+     still reports `Capability` first.
+   - *State, ownership, cleanup.* No new state, storage, wire field or byte
+     declaration: a read of existing applied state. Lifetime byte
+     declarations are unchanged and do not depend on the flag. Restart: the
+     flag comes from the checkpoint, whose restore compares the binding.
+     Failure: a learner verified before the entry applies is refused; the
+     host asks again after it commits (a new round, since commit advance
+     already stales a receipt).
+2. **Opening images are part of the plan (Sol P2-2).**
+   - *Cause.* Participant opening balances are constructor inputs with no
+     committed initialization entry. Balances 4 and 10 gave equal
+     declarations, receipts both ways, then `Refused(InsufficientFunds)` vs
+     `Prepared { before: 10, after: 5 }` on the same admitted Prepare.
+   - *Change.* `TransferApplication` participant: its own segment is the 12
+     group words, then per account in ascending id order `id, opening` (2
+     words). Bound: 1 + 12 + 2a ≤ 192, so a ≤ 89 accounts bare (inside
+     Routed too; another wrapper's own words reduce it). `ProgramApplication`
+     participant: its segment (at most 54 words), then per key `id, opening`:
+     1 + 6 + 3(c + p) + 2k ≤ 192 (k ≤ 68 at the largest catalog, 89 at the
+     smallest). Coordinators have no image and keep their plans. Exact:
+     account and key ids are distinct u64 values, openings non-negative i64,
+     the count is the header's.
+   - *Above the bound.* `InnerProfile::planned` overflows the profile;
+     readiness and configuration execution refuse it (`UnsupportedSchema`,
+     readiness `Capability`). Never truncated. Stable: openings never change
+     after construction (Transfer restore requires each opening equal;
+     Program restore rebuilds keys from the constructed catalog), so the
+     declaration does not depend on applied state.
+   - *Audit of constructor-supplied initial state.* Counter, BucketCounter
+     and every coordinator start empty. Directory plan, Routed initial inner
+     checkpoint, `TransferTarget` initial inner checkpoint, metadata initial
+     directory, namespace plan and `RetirementGuard` anchor are bound by a
+     committed entry (item 1). Transfer and Program participants: item 2.
+     The logical voter's child and parent bootstraps are configuration of
+     its parent-log replica; their status is decided and recorded with the
+     implementation (they are up to 4,096 voters, so they cannot always fit
+     192 words).
+3. **WIRE_FORMAT.md (Sol P3).** The plan limit is 192 words.
+4. **Docs.** APPLICATION_ENVELOPES.md: the gate, the per-family flags, the
+   image words and the precise remainder outside the identity, with why it
+   cannot cause divergence after a receipt (or that it can, if so). The DR2
+   row loses the bootstrap-window item.
+5. **Tests (permanent).** Sol's `rr6_routed_bootstrap_receipt_gap` (real
+   learner verifier and `accept_learner_readiness`/`check_learner_readiness`:
+   pre-bootstrap `BootstrapPending` for both; after the admitted bootstrap
+   commits at index 3, the matching learner gets an accepted receipt and the
+   other has failed the entry), the Directory analogue, and
+   `rr6_participant_initial_image_receipt_gap` (the Prepare divergence,
+   `Capability` both ways, each own declaration accepted) with a
+   within-budget success case, an 89/90-account bound case and the Program
+   counterpart. Existing positive Routed-family receipts in tests bootstrap
+   first; their assertions are kept.
+6. **Regression and CPU.** Keep every earlier fix and test. Before/after: the
+   new probes in a temporary target with a02f5734's and this branch's `src/`
+   swapped in this worktree. Counter admission/apply, the ledger and
+   per-write frames are untouched.
+
 ## Logical-voter reliability track (opened 18 October 2026)
 
 Goal: logical parents and their backing children run indefinitely with bounded
