@@ -761,16 +761,15 @@ where
                 request,
             });
         };
-        // ST2b: the only capacity refusal a client sees, made before the
-        // request reaches any core or log. Admitted requests are never refused
-        // for capacity later; the WAL thread holds what does not fit yet.
-        let account = self.local.owner.wal_account();
-        self.maintenance
-            .note_budget_refusals(account.refused.saturating_add(account.declined));
-        if self
-            .maintenance
-            .update_high_water(self.local.persistence.wal_usage())
-        {
+        // ST2b: the high-water state refuses a client before the request
+        // reaches any core or log. R6-3: admission reads the state the last
+        // poll computed (each poll folds in the WAL's published occupancy and
+        // the shard's refusals) instead of recomputing it per proposal. The
+        // byte bound itself is checked for every proposal at its step
+        // (`WalAccount::over`, the same typed `StoragePressure`), so one that
+        // arrives before the next poll notices the WAL thread's latest
+        // publication is refused there, never admitted past the mark.
+        if self.maintenance.high_water {
             self.maintenance.refused_proposal();
             return Err(ClientRejected {
                 reason: ClientError::StoragePressure,
@@ -1281,8 +1280,10 @@ where
                 }
             }
         }
-        // Followers decline new data while the WAL is above high water. Set
-        // on every poll while it lasts (groups may be added), cleared once.
+        // Cores report the high-water state (`Raft::storage_pressure`). Their
+        // followers decide on the byte room the shard gives before every
+        // received message (R6-1), not on this latch. Set on every poll
+        // while it lasts (groups may be added), cleared once.
         if high_water || self.core_pressure {
             self.local.owner.set_storage_pressure(high_water);
             self.core_pressure = high_water;
