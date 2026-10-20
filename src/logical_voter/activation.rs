@@ -33,16 +33,19 @@ mod state;
 mod tests;
 mod traits;
 use state::{ControlCommand, ControlState};
-/// The activation wrapper's format. Its application schema is
+/// The activation wrapper's format identifier. Its application schema is
 /// [`logical_activation_schema`] of the inner schema, not this constant.
 pub const LOGICAL_ACTIVATION_SCHEMA: u64 = 0x5642_4143_5449_0002;
 /// The application schema of an activation wrapper around an application with
-/// schema `inner`: `LOGICAL_ACTIVATION_SCHEMA ^ inner`. For the one activation
-/// format this is a bijection of the inner schema, so wrapped replicas whose
-/// inner applications differ in identity (for a Counter, its session limits)
-/// refuse each other at readiness, snapshot install and restore.
-pub const fn logical_activation_schema(inner: u64) -> u64 {
-    LOGICAL_ACTIVATION_SCHEMA ^ inner
+/// schema `inner`: [`layered_schema`]`(`[`LOGICAL_ACTIVATION_LAYER`]`, inner)`.
+/// `None` for an inner schema of zero or at or above 2^60, which includes
+/// every composed (activation or maintenance) schema, so wrappers do not
+/// nest. Within that domain the map is injective and disjoint from plain and
+/// maintenance schemas: wrapped replicas whose inner applications differ in
+/// identity (for a Counter, its session limits) refuse each other at
+/// readiness, snapshot install and restore.
+pub const fn logical_activation_schema(inner: u64) -> Option<u64> {
+    layered_schema(LOGICAL_ACTIVATION_LAYER, inner)
 }
 pub const LOGICAL_ACTIVATION_RESPONSE_SCHEMA: u64 = 0x5642_4143_5452_0001;
 const CONTROL_BYTES: usize = 480;
@@ -54,6 +57,8 @@ pub struct LogicalActivationApplication<A> {
     mappings: Vec<LogicalStoreMapping>,
     limits: LogicalActivationLimits,
     inner: A,
+    /// [`logical_activation_schema`] of the inner schema, fixed at construction.
+    schema: u64,
     control: ControlState,
 }
 impl<A: ProposalAdmission + CheckpointStateMachine> LogicalActivationApplication<A>
@@ -68,14 +73,12 @@ where
     ) -> Result<Self, ApplicationError> {
         let limits = limits.validate()?;
         inner.validate_group(parent)?;
-        if inner.applied_index() != 0
-            || mappings.is_empty()
-            || mappings.len() > 16
-            || inner.schema_version() == 0
-            || logical_activation_schema(inner.schema_version()) == 0
-        {
+        if inner.applied_index() != 0 || mappings.is_empty() || mappings.len() > 16 {
             return Err(ApplicationError::InvalidCommand);
         }
+        // Refuses a nested wrapper and any inner schema outside the domain.
+        let schema = logical_activation_schema(inner.schema_version())
+            .ok_or(ApplicationError::UnsupportedSchema)?;
         mappings.sort_by_key(|m| m.voter);
         for (i, m) in mappings.iter().enumerate() {
             if m.parent != parent
@@ -92,6 +95,7 @@ where
             mappings,
             limits,
             inner,
+            schema,
             control: ControlState::default(),
         };
         a.checkpoint(limits.checkpoint_bytes)?;

@@ -134,7 +134,7 @@ where
     A::Receipt: ApplicationReceipt,
 {
     fn schema_version(&self) -> u64 {
-        logical_activation_schema(self.inner.schema_version())
+        self.schema
     }
     fn checkpoint(&self, max: usize) -> Result<Vec<u8>, ApplicationError> {
         self.checkpoint_bytes(max)

@@ -27,6 +27,27 @@ pub use counter::{
 
 pub const PROPOSAL_ADMISSION_CONTRACT_VERSION: u32 = 1;
 
+/// Layer tags of composed application schemas ([`layered_schema`]). Tags
+/// 1..=4 are the leadership-maintenance profile formats
+/// ([`crate::maintenance::maintenance_schema`]); tag 5 is never assigned
+/// (in-tree schemas at or above 2^60 begin with ASCII `V`, 0x56); the others
+/// are reserved.
+pub const LOGICAL_ACTIVATION_LAYER: u64 = 8;
+/// The schema of one wrapper layer `tag` (1..=15) around an application with
+/// schema `inner`: `tag << 60 | inner`. `None` unless `inner` is non-zero and
+/// below 2^60. A composed schema decodes to exactly one (tag, inner), is at or
+/// above 2^60 while every accepted inner schema is below it, and so no layer
+/// equals a leaf schema below 2^60, and a composed application cannot be
+/// wrapped again (its schema is not an accepted inner one). Over leaves below
+/// 2^60 with at most one maintenance or activation layer, distinct
+/// compositions have distinct schemas; every other composition is refused.
+pub const fn layered_schema(tag: u64, inner: u64) -> Option<u64> {
+    if tag == 0 || tag > 0xF || inner == 0 || inner >> 60 != 0 {
+        return None;
+    }
+    Some(tag << 60 | inner)
+}
+
 /// Optional validation state for one synchronous already-ready prefix. The
 /// capability borrows immutable application state and owns retained pending
 /// data; it must not borrow temporary iterator items. Successful checks reserve

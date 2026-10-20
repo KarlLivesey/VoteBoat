@@ -26,6 +26,9 @@
 //! inner Counter checkpoint is `VBCTR003` (16 more ledger-header bytes for the
 //! closure record), the inner schema's format byte is 5, and the profile's
 //! application schema is `logical_activation_schema` of the inner schema.
+//! DR1 round 4 regenerated `v2-profile.bin` only: its application schema
+//! field (bytes 160..168) is now the layered `8 << 60 | inner`; the other
+//! three files are unchanged.
 use super::*;
 const OLD_SCHEMA: u64 = 0x5642_4143_5449_0001;
 const V1_EMPTY: &[u8] = include_bytes!("formats/v1-empty.bin");

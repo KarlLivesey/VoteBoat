@@ -12,18 +12,20 @@ use codec::{decode, Envelope};
 
 pub const MAX_MAINTENANCE_RECORDS: usize = 1024;
 /// Largest maintenance profile format (the top four bits of the schema).
-pub const MAX_MAINTENANCE_FORMAT: u64 = 15;
+pub const MAX_MAINTENANCE_FORMAT: u64 = 4;
 /// The application schema of a maintenance profile `format`
 /// (`1..=MAX_MAINTENANCE_FORMAT`) around an application with schema `inner`:
-/// `format << 60 | inner`. `None` if either is out of range (`inner` must be
-/// non-zero and leave the top four bits clear). The map is injective, so two
-/// maintenance schemas are equal only if both the formats and the inner
-/// schemas are, and no maintenance schema equals a schema below 2^60.
+/// [`crate::application::layered_schema`]`(format, inner)`, the format in the
+/// top four bits. `None` if either is out of range (`inner` must be non-zero
+/// and leave the top four bits clear, so a composed application, maintenance
+/// or activation, cannot be wrapped). Two maintenance schemas are equal only
+/// if both the formats and the inner schemas are, and no maintenance schema
+/// equals an activation schema or a schema below 2^60.
 pub const fn maintenance_schema(format: u64, inner: u64) -> Option<u64> {
-    if format == 0 || format > MAX_MAINTENANCE_FORMAT || inner == 0 || inner >> 60 != 0 {
+    if format == 0 || format > MAX_MAINTENANCE_FORMAT {
         return None;
     }
-    Some(format << 60 | inner)
+    crate::application::layered_schema(format, inner)
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

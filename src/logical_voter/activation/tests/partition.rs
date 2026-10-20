@@ -235,7 +235,7 @@ fn limits_carry_no_business_bound() {
     let wrapped = a.deployment_requirements().unwrap();
     assert_eq!(
         wrapped.application_schema,
-        LOGICAL_ACTIVATION_SCHEMA ^ inner.application_schema
+        logical_activation_schema(inner.application_schema).unwrap()
     );
     assert_eq!(wrapped.application_schema, a.schema_version());
     assert_eq!(wrapped.command_bytes, a.limits().command_bytes);
@@ -284,5 +284,112 @@ fn activation_wrappers_around_counters_with_different_limits_refuse_each_other()
     assert_eq!(
         small.control_profile().application_schema(),
         small.schema_version()
+    );
+}
+
+/// Limits large enough for an activation wrapper around another one.
+fn outer_limits() -> LogicalActivationLimits {
+    let inner = LogicalActivationLimits::default();
+    LogicalActivationLimits {
+        intents: inner.intents,
+        command_bytes: inner.command_bytes * 2,
+        checkpoint_bytes: inner.checkpoint_bytes * 4,
+    }
+}
+
+#[test]
+fn p2_nested_activation_identity_cancels() {
+    // Sol, round 3: with `LOGICAL_ACTIVATION_SCHEMA ^ inner`, wrapping twice
+    // gave the plain Counter's schema back, so the two accepted each other's
+    // declarations and then decided a committed entry differently. Nesting is
+    // now refused at construction, before anything can be declared.
+    let plain = Counter::new(4).unwrap();
+    let once = LogicalActivationApplication::new(
+        group(1),
+        vec![mapping()],
+        LogicalActivationLimits::default(),
+        Counter::new(4).unwrap(),
+    )
+    .unwrap();
+    assert_ne!(once.schema_version(), plain.schema_version());
+    assert_eq!(
+        LogicalActivationApplication::new(group(1), vec![mapping()], outer_limits(), once.clone())
+            .err(),
+        Some(ApplicationError::UnsupportedSchema)
+    );
+    // The single wrapper and the plain Counter still refuse each other.
+    let declared = once.deployment_requirements().unwrap();
+    assert_eq!(
+        plain.validate_deployment_requirements(declared),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+    assert_eq!(
+        once.validate_deployment_requirements(plain.deployment_requirements().unwrap()),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+}
+
+#[test]
+fn composed_schemas_are_distinct_and_composed_applications_do_not_nest() {
+    use crate::maintenance::{maintenance_schema, Maintenance, MAX_MAINTENANCE_FORMAT};
+    use crate::retention::SessionLimits;
+    let counters: Vec<u64> = [
+        SessionLimits::new(1, 1, 1),
+        SessionLimits::new(2, 4, 2),
+        SessionLimits::new(3, 4, 2),
+        SessionLimits::new(2, 32, 4),
+        Ok(SessionLimits::default()),
+    ]
+    .into_iter()
+    .map(|l| Counter::schema(l.unwrap()))
+    .collect();
+    // Every composition in the domain: a plain Counter, one maintenance
+    // profile or one activation layer.
+    let mut seen = std::collections::BTreeMap::new();
+    for &c in &counters {
+        let mut all = vec![("plain", 0, c)];
+        for format in 1..=MAX_MAINTENANCE_FORMAT {
+            all.push((
+                "maintenance",
+                format,
+                maintenance_schema(format, c).unwrap(),
+            ));
+        }
+        all.push(("activation", 0, logical_activation_schema(c).unwrap()));
+        for (kind, format, schema) in all {
+            assert!(
+                seen.insert(schema, (kind, format, c)).is_none(),
+                "{kind} {format} {c:#x} collides"
+            );
+        }
+    }
+    // A composed schema is never an accepted inner one: no layer nests.
+    for (&schema, &(kind, _, _)) in &seen {
+        let composed = kind != "plain";
+        assert_eq!(logical_activation_schema(schema).is_none(), composed);
+        assert_eq!(maintenance_schema(1, schema).is_none(), composed);
+    }
+    let counter = || Counter::new(4).unwrap();
+    let maintained = Maintenance::new(group(1), 1, 4, counter()).unwrap();
+    assert_eq!(
+        LogicalActivationApplication::new(
+            group(1),
+            vec![mapping()],
+            outer_limits(),
+            maintained.clone()
+        )
+        .err(),
+        Some(ApplicationError::UnsupportedSchema)
+    );
+    assert_eq!(
+        Maintenance::new(group(1), 1, 4, maintained).err(),
+        Some(ApplicationError::UnsupportedSchema)
+    );
+    let activated =
+        LogicalActivationApplication::new(group(1), vec![mapping()], outer_limits(), counter())
+            .unwrap();
+    assert_eq!(
+        Maintenance::new(group(1), 1, 4, activated).err(),
+        Some(ApplicationError::UnsupportedSchema)
     );
 }

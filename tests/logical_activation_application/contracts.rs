@@ -155,7 +155,7 @@ fn explicit_schema_mapping_and_lifetime_envelopes() {
     let mut a = app();
     assert_eq!(
         a.schema_version(),
-        logical_activation_schema(a.inner().schema_version())
+        logical_activation_schema(a.inner().schema_version()).unwrap()
     );
     assert!(a.validate_group(group(1)).is_ok());
     assert!(a.validate_group(group(2)).is_err());

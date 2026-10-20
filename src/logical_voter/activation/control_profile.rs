@@ -21,6 +21,7 @@ pub struct LogicalActivationControlProfile {
     mappings: Vec<LogicalStoreMapping>,
     limits: LogicalActivationLimits,
     inner_schema: u64,
+    application_schema: u64,
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum LogicalActivationCommandClass {
@@ -39,6 +40,7 @@ where
             mappings: self.mappings.clone(),
             limits: self.limits,
             inner_schema: self.inner.schema_version(),
+            application_schema: self.schema,
         }
     }
 }
@@ -56,7 +58,7 @@ impl LogicalActivationControlProfile {
         self.inner_schema
     }
     pub fn application_schema(&self) -> u64 {
-        logical_activation_schema(self.inner_schema)
+        self.application_schema
     }
     pub fn response_schema(&self) -> u64 {
         LOGICAL_ACTIVATION_RESPONSE_SCHEMA

@@ -254,13 +254,15 @@ fn command_codec_rejects_truncation_and_operation_mismatch_and_old_profiles() {
     };
     assert!(app(1).apply_batch(&[e]).is_err());
     assert!(Counter::new(1).unwrap().apply_batch(&[c]).is_err());
-    // The wrapper's schema never equals the inner one, even for a format
-    // numerically equal to the inner schema (5 for `Counter::new(1)`): the
-    // format sits above every bit of the inner schema.
+    // The wrapper's schema never equals the inner one for any format: the
+    // format sits above every bit of the inner schema (5 for
+    // `Counter::new(1)`).
     let inner = Counter::new(1).unwrap().schema_version();
-    let numbered = Maintenance::new(group(1), inner, 1, Counter::new(1).unwrap()).unwrap();
-    assert_eq!(numbered.schema_version(), inner << 60 | inner);
-    assert_ne!(numbered.schema_version(), inner);
+    for format in 1..=MAX_MAINTENANCE_FORMAT {
+        let numbered = Maintenance::new(group(1), format, 1, Counter::new(1).unwrap()).unwrap();
+        assert_eq!(numbered.schema_version(), format << 60 | inner);
+        assert_ne!(numbered.schema_version(), inner);
+    }
     let mut old = Counter::new(1).unwrap();
     old.apply_batch(&[LogEntry {
         index: 1,
