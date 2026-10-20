@@ -1721,6 +1721,124 @@ program_transaction_application and the library were re-run in both
 configurations after it, and transaction_driver and
 program_transaction_driver in all-features.
 
+#### DR1 round 8 schema plan (20 October 2026, before editing; PR 15)
+
+Claude Opus 5.5's round-7 review (5585336992) requested changes: no P1, one
+P2 (the open logical-voter parent bootstrap, which also affects enrollment
+candidates) and five P3 documentation/accounting notes; every finding from
+GPT-6.1-Sol's rounds 4–6 is resolved. The orchestrator chose Opus's option
+(c): a committed binding entry with the exact bytes, gated by
+`deployment_bound` (the round-7 mechanism). Not (a), carrying the bootstrap in
+the plan: `PolicyLimits` allow 4,096 voters and only 3 fit beside the
+174-word plan. Not (b), raising the plan bound: 20k–49k words in every
+readiness event and request. Why these pieces and no others: the binding entry
+already exists for both kinds of logical voter (the first `Claim` creates the
+parent image; the `EnrollmentClaim` carries the source snapshot), so the
+smallest complete fix is to make those entries carry and compare the exact
+bootstrap and to gate readiness on them. Nothing here touches the per-write
+path.
+
+1. **Parent bootstrap bound by the voter's first claim (P2-1).**
+   - *Cause.* `LogicalApplication::parent_bootstrap` is a constructor input
+     outside the identity and the plan. Bootstrap voter: the first `Claim`
+     creates the parent image from the replica's own bootstrap, so replicas
+     built with parent configuration 1 and 7 both apply `Claimed` with
+     different images and a later `Publish` is refused on one
+     (`execute.rs` `claim`/`publish`). Candidate: two candidates whose
+     parent bootstraps differ in one voter's store apply the same committed
+     `EnrollmentClaim` as `Claimed` and `Refused(SnapshotConflict)`
+     (`enrollment.rs` `valid_import`), a typed outcome on both, so both kept
+     receipts. `deployment_bound` was the default `true`.
+   - *Data/API.* Bootstrap voter: the `Claim` body with no expected epoch
+     (every claim that can create the parent image) gains one blob after the
+     epoch, the exact parent-bootstrap bytes: the parent log codec's
+     `Create(bootstrap)` batch under the parent log limits, the same bytes
+     the configuration (and so restore) already embeds. The application keeps
+     the offset of those bytes inside `configuration` (no second copy).
+     Decode compares the blob with its own bytes exactly; any difference is
+     `InvalidCommand`. Claims with an expected epoch are unchanged: they can
+     only succeed after a representative exists, which needs a first claim or
+     an enrollment. `CommandBody` is unchanged (the binding is derived from
+     the application that encodes). Candidate: no new bytes; the
+     `EnrollmentClaim` already carries the source snapshot, whose metadata
+     holds the parent bootstrap. Decode compares it with the candidate's own
+     exactly (`InvalidCommand`); `valid_import` keeps its typed refusal for
+     the bridge's pre-proposal check only.
+   - *Where it is enforced.* `decode_command`, which admission
+     (`validate_proposal_context`, `validate_proposal`), apply and restore of
+     retained records all use. So a mismatching claim is refused at
+     admission, and at apply it is `Err(InvalidCommand)`: the replica stops
+     and stays `NotCaughtUp`. This is a local deployment fault, the precedent
+     being Routed's binding check at decode. Every other import-validity
+     failure stays a typed `Refused`, because it is the same on every
+     replica.
+   - *Gate.* `deployment_bound`: bootstrap voter `state.parent.is_some()`;
+     candidate `state.enrollment.is_some()`. Before the binding entry applies
+     a learner gets `BootstrapPending`; the activation wrapper already
+     forwards the inner flag.
+   - *Construction.* A bootstrap voter whose first claim (fixed header plus
+     the binding blob) would exceed `max_command_bytes` is refused at
+     construction (`InvalidCommand`), the precedent being Routed's
+     `MAX_ROUTED_COMMAND_BYTES` check: uniform and before any authority.
+     Claims are control commands and `max_retained_action_bytes ≥
+     max_command_bytes`, so a first claim that fits the command bound also
+     fits the retained bound. Candidates already reserve room for a full
+     snapshot file (`validate_enrollment_limits`).
+   - *Restore.* Already exact: the checkpoint's configuration blob, which
+     embeds the parent bootstrap bytes, must equal the replica's own, else
+     `InvalidCheckpoint` (`checkpoint/restore.rs`). A test pins it.
+   - *State, lifetime, cleanup.* No new state field: the flag is derived from
+     the parent image or enrollment record. One binding entry per voter or
+     candidate. The first claim's record is retained like any claim and
+     pruned by the same rule (an older epoch, once the next session command
+     moves the watermark), so nothing grows. Partial progress: a refused
+     claim leaves state unchanged; a replica that fails the entry stays
+     stopped at its applied index.
+   - *Format.* Command format v3 changes only for an epoch-0 claim; schema
+     numbers and magics are unchanged. Compatibility: replicas built before
+     this PR already fail this PR's readiness exchange (the round-6 plan
+     changed the readiness frames), and a checkpoint retaining a pre-change
+     first claim is refused on restore (`InvalidCheckpoint`).
+2. **P3s.**
+   - APPLICATION_ENVELOPES.md: `RoutedControlReads` has no bootstrap of its
+     own and forwards the raw Routed bootstrap (fix the row).
+   - "No hashing": the metadata source, target, serving, publishing and
+     `RetirementGuard` gates compare through pre-existing SHA-256 anchors, so
+     those are exact only up to collision resistance; this PR adds no hashing.
+   - Activation over the largest logical voter needs 116 + 174 = 290 plan
+     words: type-valid, refused for every replica (`UnsupportedSchema`,
+     `Capability` at readiness). State the per-stack budget and the host rule,
+     and pin it with a test.
+   - `LifecycleDirectory` declares no requirements or retention, so readiness
+     refuses it (`Capability`) before reading the flag: not gated or
+     attested; say so.
+   - Relay capture (`native/relay.rs`): count each `LearnerReadinessRequest`
+     message's owned request in the pre-allocation check, so a caller-supplied
+     `metadata_bytes` is never exceeded, even briefly. The pre-check stays an
+     upper bound of the exact check and equals it when every message is a
+     request window, so the least accepted limit in the existing test is
+     unchanged.
+3. **Tests (permanent, in-crate, through the real learner verifier).**
+   Opus's two pairs: candidates differing in one parent voter's store, and
+   bootstrap voters differing in the parent configuration id. Each test
+   builds a real leader and learner (raw `Raft` cores, real replication of
+   the binding entry) and asserts:
+   - requirements equal;
+   - both `BootstrapPending` before the binding entry;
+   - the entry commits; the matching replica's receipt is accepted
+     (`accept_learner_readiness`, `check_learner_readiness`);
+   - the other replica gets `Err(InvalidCommand)` and is `NotCaughtUp`.
+   Also: admission refuses the mismatching entry; restore across parent
+   bootstraps is `InvalidCheckpoint`; the oversized-bootstrap constructor
+   refusal; and the 290-word activation stack refusal. The two pairs fail on
+   7045de08 and pass after the change. The relay change is not observable
+   in outcomes (the same `TooLarge`, only earlier); the existing relay budget
+   tests must keep their least accepted limits.
+4. **Regression and CPU.** Keep every earlier fix and test. Before/after: the
+   probes with 7045de08's and this branch's `src/` swapped in this worktree.
+   Counter admission/apply, the ledger and per-write frames are untouched;
+   the logical voter's claim path is not a per-write path.
+
 ## Logical-voter reliability track (opened 18 October 2026)
 
 Goal: logical parents and their backing children run indefinitely with bounded
