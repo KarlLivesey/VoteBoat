@@ -20,7 +20,120 @@ design pack is unchanged.
 | --- | --- | --- | --- | --- |
 | Done N0: three-process cluster harness (merged 20 October 2026 in PR 17, head 73605e48; rounds 1–4 and baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test on OS-selected ports; script self-test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
 | Current N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline | Plan §5.3 tests and §5.4 gate | NW1 |
+| Current N1b: commit notices ride on data | Stop sending a caught-up voter an Append whose only news is a newer commit index; the commit rides on the next data Append or heartbeat. Removes one follower Append cycle (two frames and one follower WAL barrier) per leader commit at idle and light load, and N1's extra follower barriers (research `n1b-batching.md`) | N0 harness; main `12fb21de`; independent of N1 (PR 19 rebases on it) | Step 0 counter diagnostic passes the stop rule; deterministic core tests (no commit-only Append to a caught-up voter, commit on next data Append, commit within one heartbeat, every exempt mode unchanged, existing commit oracles) with two mutations; fmt, four strict Clippy builds, matched fmt/Clippy; suites in default and all-features; five N0 cells and `nat.sh` vs main (no regression), then N1b+N1 vs main against the gate | NW1 |
 | Then N2: per-peer frame coalescing | One frame per peer per round across groups | N1; a G=4 cell on the N0 harness (see N0 limits) | Plan §4 row 2 | NW1 |
+
+### N1b schema plan (before editing, 20 October 2026)
+
+Research: `target/claude/research-r4/n1b-batching.md` (main checkout,
+untracked), option F; GPT-6.1-Sol's PR 19 review, "Batching recommendation".
+Built on main `12fb21de` as its own PR; N1 (PR 19) rebases on it afterwards.
+
+- **Step 0, diagnostic first (example code only, no library change).** Two
+  benchmark-only counters, both in `examples/` and both off the library's
+  per-write path:
+  - Single-process mode (`nat.sh`, shared assembly): the existing
+    `ObservedLog` wrapper counts `zero_command_units`, WAL update units that
+    carry no `Command` entry (no suffix, or only no-op/configuration entries).
+    It already sees every `append_batch`; the count is one more add under the
+    lock it already takes. Printed as a new last column of `storage.csv`.
+  - Cluster mode (`node_counters`): after every poll, node N reads its own
+    core's durable `(last_index, commit_index)` (two field reads). A poll where
+    `last_index` rose counts one `log_persists`; a poll where only
+    `commit_index` rose counts one `commit_only_persists`. A follower has one
+    Append in flight, so a poll sees at most one of its persists complete in
+    practice. `entryless_frames` is derived, not observed: `received −
+    log_persists` (frames that delivered no new entry). `cluster.py` passes the
+    three through as `nN_lp`, `nN_cop`, `nN_ef` and per-write medians.
+  - Run once: the N0 TCP 15,000/s cell (2,000 and 16,000 offers) on the quiet
+    Mac and `nat.sh` (2 pairs) on Linux, main + diagnostic (A) against PR 19
+    head `ff9faec8` + diagnostic (B).
+  - **Stop rule.** If B − A in follower zero-command units explains less than
+    half of B − A in follower barriers (≈ 307 per follower per 16,000 writes in
+    the research run), stop: write the finding and the fallback brief (L, a
+    bounded ≤ 1 ms linger before the next Append, with its latency cost), push
+    the diagnostic alone, and report.
+- **Data/API.** No public type, wire, WAL, runtime or transport change. One
+  private leader flag in the core, `configuration_notice: bool`. No new
+  per-peer state: the owed commit is implicit (`durable.commit_index` against
+  what the next Append or heartbeat carries).
+- **The rule (decides only whether to send; never order).** In *quiet mode*
+  the leader does not send an Append whose only news for a peer is a newer
+  `leader_commit`. Quiet mode for peer P holds when all of:
+  `progress_sends_enabled()` (no transfer, no joint configuration, last
+  configuration committed), `!configuration_notice`, and P is a voter.
+  - `broadcast_ready_peers_into` (after `After::LeaderAppend` and
+    `After::Commit`): skip a ready peer with no request outstanding when
+    `next_index[P] > durable.last_index()` (`append_for` would send no
+    entries). A peer with a snapshot request keeps today's re-emission.
+  - `receive_appended_into`: after a successful ack, send at once only if
+    `prefix < durable.last_index()`; the `commit_at_start < commit_index`
+    clause applies only outside quiet mode (today it already applies only
+    when `progress_sends_enabled()`).
+- **Modes and why each keeps or drops the immediate notice.**
+  - Normal operation, voter peer: drops it. Every later data Append carries the
+    current `leader_commit` with a range that covers it; the heartbeat
+    (`Event::Heartbeat` → `broadcast_into`, every `TimerConfig::heartbeat_ms`,
+    50 ms by default, also in the benchmark and services) reaches every peer.
+  - Joint configuration, uncommitted final configuration, leadership transfer:
+    keep (today's eager `broadcast_into` on `After::Commit`; unchanged code).
+  - The commit that covers the last configuration entry (final, or any
+    configuration committed by a new leader's no-op): keeps. Today it already
+    goes out through the normal-mode path, because `progress_sends_enabled()`
+    is evaluated after the commit advanced. `install_pending_into` sets
+    `configuration_notice` when `previous_commit < last_configuration_index <=
+    commit_index` on a leader; while set, both send sites behave exactly as
+    today. The leader's next heartbeat clears it after its `broadcast_into`
+    (that broadcast tells every peer the commit). Cleared also on any role
+    change.
+  - Learners (non-voters, including learner catch-up and readiness): keep.
+    `begin_learner_readiness` asks the learner to hold the leader's current
+    commit; a delayed commit would turn readiness into a spurious `ready:
+    false`. Learners carry no quorum load, so this costs nothing on the write
+    path.
+  - Snapshot catch-up: keeps (snapshot requests, their acks and the post-install
+    `append_for` paths are unchanged).
+  - Retirement announcements (`retirement_announcements`) are a separate path:
+    unchanged.
+- **Bound.** A voter that holds the entries learns a commit no later than the
+  leader's first heartbeat after that commit became durable at the leader
+  (≤ `heartbeat_ms`, 50 ms at defaults), plus delivery and its own persist: at
+  that tick it gets either a fresh empty Append (`previous_index` = leader
+  last ≥ commit) or a retry of its outstanding request. A retry delivers
+  `min(commit, end)`; if `end < commit` the follower is behind, its ack gets a
+  data Append at once (unchanged path), and that Append carries the commit.
+- **Readers and client completion.** Leader-only: `begin_read` returns
+  `NotLeader` on a follower (`raft.rs`), `Committed` effects and client
+  completion follow the leader's own commit persist. No follower-side read
+  path exists. Follower apply and follower checkpoints lag by at most the bound
+  above: finite, not lifetime-bounded growth.
+- **Guarantees.** Commit index monotone (the follower still takes
+  `max(own, min(leader_commit, matching))`); never ahead of what the follower
+  can verify (the same `matching` cap); log matching and leader completeness
+  untouched (no entry, term or vote path changes); the durability gate, the
+  one-Append-in-flight rule and per-peer FIFO hold by construction because only
+  the decision to emit a commit-only Append changes.
+- **Restart/partial progress.** A follower that restarts before it learns a
+  commit re-learns it from the next Append or heartbeat, as after any crash
+  today. A leader that restarts loses the flag with its role.
+- **Acceptance (deterministic core tests, explicit steps, no clock).**
+  (a) caught-up voter gets no commit-only Append after `After::Commit` or after
+  its ack; the next proposal's Append carries the new commit;
+  (b) with no further data, one `Event::Heartbeat` delivers the commit to every
+  voter (exact: one heartbeat step);
+  (c) one test per kept mode: joint, uncommitted final, committed-final
+  crossing (until the next heartbeat), transfer, learner, snapshot;
+  (d) existing commit oracles unchanged (follower commit capped by matching and
+  monotone; reference-host and fault-schedule suites);
+  existing tests that pinned the old notices move to the new contract (deliver
+  by heartbeat) without loosening their assertions.
+  Mutations: drop the mode exemption ((c) fails); drop the heartbeat carriage
+  ((b) fails).
+- **Measurement.** Base = main + the step-0 diagnostic (same library as main,
+  so both binaries carry the same counters), candidate = this branch. Five N0
+  cells × 5 ABBA rounds on the quiet Mac, `nat.sh` 5 pairs on Linux (cores
+  10–15). Then N1b + PR 19's code (local throwaway branch, not pushed) against
+  the same base for the gate.
 
 ### N0 schema plan (before editing, 19 October 2026)
 

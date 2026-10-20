@@ -22,6 +22,9 @@ pub(super) struct Totals {
     append_calls: u64,
     append_units: u64,
     append_commands: u64,
+    /// Update units carrying no command entry: commit-only or hard-state-only
+    /// persists, plus no-op/configuration-only appends (N1b diagnostic).
+    zero_command_units: u64,
     append_ns: u128,
     append_max_ns: u128,
     barrier_calls: u64,
@@ -165,17 +168,20 @@ impl<L: LogStore> LogStore for ObservedLog<L> {
     ) -> Result<Vec<LogTicket>, StorageError> {
         let units = mutations.len();
         let mut commands = 0;
+        let mut zero_command_units = 0;
         let mut groups = Vec::with_capacity(units);
         for mutation in &mutations {
             groups.push(match mutation {
                 LogMutation::Create(b) => b.group.id.get(),
                 LogMutation::Update(u) => {
-                    commands += u.suffix.as_ref().map_or(0, |s| {
+                    let unit = u.suffix.as_ref().map_or(0, |s| {
                         s.entries
                             .iter()
                             .filter(|e| matches!(e.payload, EntryPayload::Command { .. }))
                             .count()
                     });
+                    commands += unit;
+                    zero_command_units += u64::from(unit == 0);
                     u.group.id.get()
                 }
             });
@@ -187,6 +193,7 @@ impl<L: LogStore> LogStore for ObservedLog<L> {
             t.append_calls += 1;
             t.append_units += units as u64;
             t.append_commands += commands as u64;
+            t.zero_command_units += zero_command_units;
             t.append_ns += ns;
             t.append_max_ns = t.append_max_ns.max(ns);
             t.errors += u64::from(result.is_err());
@@ -232,7 +239,7 @@ pub(super) fn write_csv(
     file: &mut File,
     snapshots: &[(String, usize, Totals)],
 ) -> Result<(), Failure> {
-    writeln!(file, "stage,replica,append_calls,append_units,append_commands,append_ns,append_max_ns,barrier_calls,barrier_tickets,barrier_ns,barrier_max_ns,errors,encoded_bytes,io_append_calls,io_append_ns,sync_calls,sync_ns,publish_calls,publish_ns,batch_histogram,group_units")?;
+    writeln!(file, "stage,replica,append_calls,append_units,append_commands,append_ns,append_max_ns,barrier_calls,barrier_tickets,barrier_ns,barrier_max_ns,errors,encoded_bytes,io_append_calls,io_append_ns,sync_calls,sync_ns,publish_calls,publish_ns,batch_histogram,group_units,zero_command_units")?;
     for (stage, replica, t) in snapshots {
         let histogram = t
             .histogram
@@ -246,8 +253,8 @@ pub(super) fn write_csv(
             .map(|(g, c)| format!("{g}:{c}"))
             .collect::<Vec<_>>()
             .join("|");
-        writeln!(file, "{stage},{replica},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{histogram},{groups}",
-            t.append_calls,t.append_units,t.append_commands,t.append_ns,t.append_max_ns,t.barrier_calls,t.barrier_tickets,t.barrier_ns,t.barrier_max_ns,t.errors,t.encoded_bytes,t.io_append_calls,t.io_append_ns,t.sync_calls,t.sync_ns,t.publish_calls,t.publish_ns)?;
+        writeln!(file, "{stage},{replica},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{histogram},{groups},{}",
+            t.append_calls,t.append_units,t.append_commands,t.append_ns,t.append_max_ns,t.barrier_calls,t.barrier_tickets,t.barrier_ns,t.barrier_max_ns,t.errors,t.encoded_bytes,t.io_append_calls,t.io_append_ns,t.sync_calls,t.sync_ns,t.publish_calls,t.publish_ns,t.zero_command_units)?;
     }
     file.sync_all()?;
     Ok(())

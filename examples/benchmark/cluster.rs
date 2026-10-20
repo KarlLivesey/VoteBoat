@@ -180,6 +180,7 @@ fn run(args: &[String], ready: Option<usize>, plain: bool) -> Result<(), Failure
         nodes: vec![replica],
         wait: HostWait::new(wake.clone()),
         totals: PollTotals::default(),
+        watch: DurableWatch::default(),
         clock,
         control: control.clone(),
         armed: None,
@@ -196,7 +197,7 @@ fn run(args: &[String], ready: Option<usize>, plain: bool) -> Result<(), Failure
             // Abandon the run before any output: a graceful drain would wait
             // for pending writes that cannot commit without the followers.
             host.nodes[0].abort();
-            let counters = Counters::of(&host.totals);
+            let counters = Counters::of(&host.totals, &host.watch);
             note(format_args!("node {} failed: {error}\n", args.n));
             say(format_args!(
                 "stdin_closed node={} phase={} rounds_to_notice={}\n",
@@ -317,6 +318,7 @@ struct Host {
     nodes: Vec<Replica>,
     wait: HostWait,
     totals: PollTotals,
+    watch: DurableWatch,
     clock: Instant,
     control: Control,
     /// The node-1 phase that stops on closed stdin; `None` for followers and
@@ -326,6 +328,7 @@ struct Host {
 impl Host {
     fn round(&mut self) -> Result<(), Failure> {
         poll(&mut self.nodes, &self.clock, &mut self.totals)?;
+        self.watch.observe(&self.nodes[0]);
         let Some(phase) = self.armed else {
             return Ok(());
         };
@@ -375,9 +378,38 @@ impl Host {
         self.armed = None;
         self.nodes[0].begin_shutdown();
         self.until(Some(PHASE_LIMIT), |ns| Ok(ns[0].is_drained()))?;
-        let counters = Counters::of(&self.totals);
+        let counters = Counters::of(&self.totals, &self.watch);
         join(self.nodes)?;
         Ok(counters)
+    }
+}
+
+/// N1b diagnostic, benchmark-only: this node's durable log end and commit
+/// index after every poll (two field reads; nothing in the library). A poll in
+/// which the durable log grew counts one log persist; a poll in which only the
+/// durable commit grew counts one commit-only persist. A follower has one
+/// Append in flight, so in practice a poll completes at most one of its
+/// persists; two completing in one poll count once (an undercount).
+#[derive(Clone, Copy, Default)]
+struct DurableWatch {
+    last: Option<(u64, u64)>,
+    log_persists: usize,
+    commit_only_persists: usize,
+}
+impl DurableWatch {
+    fn observe(&mut self, node: &Replica) {
+        let Some(core) = node.local().owner.core(group()) else {
+            return;
+        };
+        let now = (core.state().last_index(), core.state().commit_index);
+        if let Some((last, commit)) = self.last {
+            if now.0 > last {
+                self.log_persists += 1;
+            } else if now.1 > commit {
+                self.commit_only_persists += 1;
+            }
+        }
+        self.last = Some(now);
     }
 }
 
@@ -392,9 +424,11 @@ struct Counters {
     sends: usize,
     received: usize,
     persistence_batches: usize,
+    log_persists: usize,
+    commit_only_persists: usize,
 }
 impl Counters {
-    fn of(t: &PollTotals) -> Self {
+    fn of(t: &PollTotals, watch: &DurableWatch) -> Self {
         Self {
             poll_rounds: t.rounds,
             host_waits: t.waits,
@@ -404,6 +438,8 @@ impl Counters {
             sends: t.peer_sends,
             received: t.peer_received,
             persistence_batches: t.persistence_batches,
+            log_persists: watch.log_persists,
+            commit_only_persists: watch.commit_only_persists,
         }
     }
     fn since(self, before: Self) -> Self {
@@ -416,11 +452,13 @@ impl Counters {
             sends: self.sends - before.sends,
             received: self.received - before.received,
             persistence_batches: self.persistence_batches - before.persistence_batches,
+            log_persists: self.log_persists - before.log_persists,
+            commit_only_persists: self.commit_only_persists - before.commit_only_persists,
         }
     }
     fn line(self) -> String {
         format!(
-            "poll_rounds={} host_waits={} host_waits_immediate={} host_waits_ready={} host_waits_timeout={} sends={} received={} persistence_batches={}",
+            "poll_rounds={} host_waits={} host_waits_immediate={} host_waits_ready={} host_waits_timeout={} sends={} received={} persistence_batches={} log_persists={} commit_only_persists={} entryless_frames={}",
             self.poll_rounds,
             self.host_waits,
             self.host_waits_immediate,
@@ -428,7 +466,11 @@ impl Counters {
             self.host_waits_timeout,
             self.sends,
             self.received,
-            self.persistence_batches
+            self.persistence_batches,
+            self.log_persists,
+            self.commit_only_persists,
+            // Derived: received frames that delivered no new entry.
+            self.received.saturating_sub(self.log_persists)
         )
     }
 }
@@ -478,7 +520,7 @@ fn lead(host: &mut Host, args: &NodeArgs, wake: Arc<HostWake>) -> Result<(), Fai
     let warmup = warm_up(host, args.window)?;
     let term_start = term(&host.nodes);
     let mut ledger = Ledger::new(args.count, args.rate, args.window, 1, None);
-    let before = Counters::of(&host.totals);
+    let before = Counters::of(&host.totals, &host.watch);
     let (host_ns, max_host_ns) = (host.totals.host_ns, host.totals.max_host_ns);
     host.armed = Some("offering");
     note(format_args!(
@@ -487,7 +529,7 @@ fn lead(host: &mut Host, args: &NodeArgs, wake: Arc<HostWake>) -> Result<(), Fai
     ));
     say(format_args!("offering node=1\n"));
     let elapsed = offer(host, &mut ledger, wake)?;
-    let phase = Counters::of(&host.totals).since(before);
+    let phase = Counters::of(&host.totals, &host.watch).since(before);
     let host_ms = (host.totals.host_ns - host_ns) as f64 / 1e6;
     let max_host_ms = host.totals.max_host_ns.max(max_host_ns) as f64 / 1e6;
     let term_end = term(&host.nodes);
@@ -1025,6 +1067,18 @@ mod tests {
             for key in ["sends", "received", "persistence_batches"] {
                 assert!(number(&c, key) >= 1, "node {n} {key}");
             }
+            // Every node's durable log grew (campaign no-op, warmup, offers),
+            // and the diagnostic split never exceeds the persists made.
+            assert!(number(&c, "log_persists") >= 1, "node {n}");
+            assert!(
+                number(&c, "log_persists") + number(&c, "commit_only_persists")
+                    <= number(&c, "persistence_batches"),
+                "node {n}"
+            );
+            assert_eq!(
+                number(&c, "entryless_frames"),
+                number(&c, "received").saturating_sub(number(&c, "log_persists"))
+            );
             sends += number(&c, "sends");
             received += number(&c, "received");
             if n == 1 {

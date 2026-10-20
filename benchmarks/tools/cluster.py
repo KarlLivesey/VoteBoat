@@ -84,10 +84,16 @@ import threading
 import time
 
 COUNTERS = ("poll_rounds", "host_waits", "host_waits_immediate", "host_waits_ready",
-            "host_waits_timeout", "sends", "received", "persistence_batches")
+            "host_waits_timeout", "sends", "received", "persistence_batches",
+            "log_persists", "commit_only_persists", "entryless_frames")
 SHORT = {"poll_rounds": "rounds", "host_waits": "waits", "host_waits_immediate": "imm",
          "host_waits_ready": "rdy", "host_waits_timeout": "tmo", "sends": "sends",
-         "received": "recv", "persistence_batches": "pb"}
+         "received": "recv", "persistence_batches": "pb", "log_persists": "lp",
+         "commit_only_persists": "cop", "entryless_frames": "ef"}
+# Per-write medians in the summary; a counter is skipped for a cell when any of
+# its runs lacks it (a binary built before the N1b diagnostic counters).
+PER_WRITE = ("poll_rounds", "sends", "received", "persistence_batches",
+             "log_persists", "commit_only_persists", "entryless_frames")
 NODES = (1, 2, 3)
 # |sum of per-child wait4 CPU - RUSAGE_CHILDREN delta| above this invalidates a
 # run. Both come from the same kernel accounting at microsecond resolution.
@@ -494,7 +500,9 @@ def report(runs, bins, offers, out=None):
                 line += " n%d_cpu_us_per_write=%.1f n%d_busy=%.3f" % (
                     n, median([r["node"][n]["cpu"] * 1e6 / o for r in ok]),
                     n, median([busy(r["node"][n]["cpu"], r["wall"]) for r in ok]))
-                for k in ("poll_rounds", "sends", "received", "persistence_batches"):
+                for k in PER_WRITE:
+                    if any(k not in r["node"][n]["counters"] for r in ok):
+                        continue
                     line += " n%d_%s_per_write=%.3f" % (n, SHORT[k], median(
                         [int(r["node"][n]["counters"][k]) / o for r in ok]))
             line += " rate=%.1f p99_us=%.1f" % (
