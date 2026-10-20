@@ -32,14 +32,19 @@ within --timeout. An invalid run is retained and printed with its reasons; the
 experiment continues.
 
 No child outlives the run. While this script runs, every path (a failure, the
---timeout guard, SIGINT, SIGTERM or SIGHUP: their handlers raise so that
-cleanup runs, and one arriving during cleanup waits for it to finish) closes every stdin, kills whatever has not exited and reaps every
-child; a child is signalled only while it is known not to have been reaped, so
-a freed PID is never signalled. If this script is killed with SIGKILL, the
-kernel closes the children's stdin: followers exit on that EOF as usual, and
-node 1 stops at the first poll round that sees it in any phase before its
-summary, aborts its node (a drain cannot finish without the followers),
-prints node_counters and exits with status 4 (n1_exit=4).
+--timeout guard, SIGINT, SIGTERM or SIGHUP) closes every stdin, kills whatever
+has not exited and reaps every child. During a run a signal is only recorded:
+the run loop acts on it within 0.5 s and the cleanup then finishes before the
+script exits with 128 + the signal, so no signal can land between a spawn and
+its registration or cut the cleanup short. A child is signalled only while it
+is known not to have been reaped, so a freed PID is never signalled. If this
+script is killed with SIGKILL, the kernel closes the children's stdin and the
+read ends of their stdout: followers exit on that EOF as usual (status 0 after
+their drain), and node 1 stops at the first poll round that sees it in any
+phase before its summary, aborts its node (a drain cannot finish without the
+followers) and exits with status 4. Both ignore their failed writes to stdout
+(stdin_closed, node_counters), so nobody records these statuses; the run is
+abandoned and its directory kept.
 
 Rounds and pairs. Round i runs every binary at every --offers value. Even
 rounds run A small, A big, B small, B big ...; odd rounds run that sequence
@@ -176,15 +181,16 @@ def wait_exited(pid):
 
 
 CLEANUP_SIGNALS = (signal.SIGTERM, signal.SIGHUP, signal.SIGINT)
-# While a run's cleanup is in progress, a signal is recorded here and raised
-# once cleanup ends, so it cannot cut the kill-and-reap short.
+# While a run is in progress (from before its first spawn to the end of its
+# cleanup), a signal is recorded here; the run loop stops on it and it is
+# raised once cleanup ends, so it cannot cut the kill-and-reap short.
 _cleanup = {"depth": 0, "pending": None}
 
 
 def raise_on_signal(signum, _frame):
     """Handler for CLEANUP_SIGNALS (installed when run as a script): raise
-    SystemExit so every `finally` runs (close stdin, kill, reap) instead of
-    dying with children still running; deferred while cleanup runs."""
+    SystemExit so the script exits instead of dying with children still
+    running; deferred (recorded) while a run is in progress."""
     if _cleanup["depth"]:
         _cleanup["pending"] = signum
         return
@@ -309,6 +315,9 @@ def run_once(binary, args, offers, root):
     lines = {n: [] for n in NODES}
     errors, summary, base = [], None, None
     extra = ["--ready-items", args.ready] if args.ready else []
+    # Signals are deferred from here to the end of the cleanup: one cannot
+    # raise between a spawn and its registration, or before cleanup starts.
+    _cleanup["depth"] += 1
     try:
         base = free_base(args.base)
         for n in NODES:
@@ -320,10 +329,12 @@ def run_once(binary, args, offers, root):
         released = False
         deadline = time.monotonic() + args.timeout
         while len(exited) < len(NODES) or open_streams:
+            if _cleanup["pending"] is not None:
+                break  # a deferred signal: clean up, then raise it below
             left = deadline - time.monotonic()
             try:
                 # At most 0.5 s per wait: on macOS a lock wait is not woken by
-                # signals, and a SIGTERM handler must run promptly.
+                # signals, and a deferred signal must be acted on promptly.
                 kind, n, line = cluster.events.get(timeout=min(0.5, max(0.01, left)))
             except queue.Empty:
                 if time.monotonic() < deadline:
@@ -365,8 +376,7 @@ def run_once(binary, args, offers, root):
         errors.append("error=%s" % type(e).__name__)
         print("# run error: %r" % (e,), file=sys.stderr, flush=True)
     finally:
-        # A signal arriving now waits until every child is reaped.
-        _cleanup["depth"] += 1
+        # A signal arriving now still waits until every child is reaped.
         try:
             cluster.close_stdin()
             cluster.kill()

@@ -18,7 +18,7 @@ design pack is unchanged.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current N0: three-process cluster harness (implemented; in review as PR 17, round 3 below; baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test on OS-selected ports; script self-test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
+| Current N0: three-process cluster harness (implemented; in review as PR 17, round 4 below; baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test on OS-selected ports; script self-test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
 | Next N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline | Plan §5.3 tests and §5.4 gate | NW1 |
 | Then N2: per-peer frame coalescing | One frame per peer per round across groups | N1; a G=4 cell on the N0 harness (see N0 limits) | Plan §4 row 2 | NW1 |
 
@@ -26,7 +26,7 @@ design pack is unchanged.
 
 - **Library change: one pure move.** `HostWait`, `HOST_GATHER` and
   `HOST_MAX_WAIT` move from `src/bin/support/service_setup.rs` into
-  `voteboat::native::readiness` (in a child module that denies `unsafe`, so the
+  `voteboat::native::readiness` (in a child module that forbids `unsafe`, so the
   audited `poll(2)` scope does not widen). The only difference in the moved
   code: the process wake is a constructor argument instead of a call to the
   binaries' `service_setup::host_wake()` static, so the library holds no
@@ -91,7 +91,8 @@ design pack is unchanged.
 ### N0 implemented (evidence, 19–20 October 2026)
 
 - **Move.** Commit 1 moves `HostWait`, `HOST_GATHER` and `HOST_MAX_WAIT` to
-  `src/native/readiness/host_wait.rs` (`#![deny(unsafe_code)]`, re-exported as
+  `src/native/readiness/host_wait.rs` (`#![forbid(unsafe_code)]`, `deny` until
+  review round 3; re-exported as
   `voteboat::native::readiness::{HostWait, HOST_GATHER, HOST_MAX_WAIT}`). A diff
   of the old block against the new file shows only path spellings
   (`voteboat::` → `crate::`/`super::`), the wake argument on `new`/`with` and two
@@ -160,7 +161,7 @@ round, then the median:
 | --- | --- | --- | --- | --- | --- |
 | TCP 15,000/s | 23.01 µs | 13.63 | 4.71 | 4.76 | 22.47, 22.69, 23.01, 27.78, 45.48 |
 | QUIC 15,000/s | 54.97 µs | 41.01 | 7.42 | 7.91 | 53.45, 54.20, 57.47, 54.97, 61.63 |
-| Secondary: single-process `native.py` (svc.sh loop, shared assembly, witness publication), same binary | 20.74 µs | — | — | — | 20.74, 21.17, 21.85, 19.51, 15.29 |
+| Secondary: single-process `native.py` (svc.sh loop, shared assembly, witness publication, its own gather loop rather than `HostWait`), same binary | 20.74 µs | — | — | — | 20.74, 21.17, 21.85, 19.51, 15.29 |
 
 Reading (for N1 sizing, not acted on here): at 1,000/s and 4,000/s the cluster
 burns the same ~0.50 busy cores, and node 1 runs ~2,900 rounds/s at every TCP
@@ -393,6 +394,97 @@ library edit is `host_wait.rs` `deny(unsafe_code)` → `forbid(unsafe_code)`.
   (all features), 20 solo runs on cores 10–15 with other agents' suites
   running: 17 passed, 3 failed, each at `shared_drain.rs:304` with
   `Unknown(LeadershipChanged)`.
+
+### N0 review round 4 schema plan (before editing, 20 October 2026)
+
+Review: Claude Opus 5.5 round 3 on `b47b2538` approved with four P3s
+(GPT-6.1-Sol also approved). This round folds those P3s and changes nothing
+else: only the node stop path in `examples/benchmark/cluster.rs`,
+`cluster.py`, `cluster_test.py` and these docs. No library change.
+
+- **P3 1: the documented dead-parent exit is not the one taken.** A dead
+  parent also closes the read end of every node's stdout, so node 1's
+  `println!("stdin_closed …")` panicked (`failed printing to stdout: Broken
+  pipe`, status 101) before reaching `abort()`, and the followers panicked at
+  `node_counters` after their drain. Shape: two helpers, `say` (stdout, then
+  flush) and `note` (stderr), write through the locked stream and discard the
+  error; every node-process print uses them (a parent can die between any two
+  prints, and `println!` is equivalent when the write succeeds: one locked,
+  line-buffered write). On a `StdinClosed` stop node 1 aborts and takes its
+  counters before any output. The node-child test exits 0 after a successful
+  run, as the binary's `main` does, so libtest's closing report cannot fail
+  on a closed stdout. Acceptance: a new test in which each test-side reader
+  closes its read end (followers after `ready`, node 1 after `offering
+  node=1`) before any stdin is closed requires statuses [4, 0, 0] and no
+  `panicked` in any log; it must fail with `println!`.
+- **P3 2: the SIGTERM self-test could signal a reused PID.** It probed and
+  killed fixture PIDs after `cluster.py` had reaped them. Shape: no PID is
+  read or signalled. Every fixture holds the write end of a FIFO (`alive`)
+  until it exits; once `cluster.py` has exited (so has reaped every child),
+  EOF on the test's non-blocking read end means no fixture survives. A node 1
+  that survives a failure blocks reading a second FIFO (`leash`) whose only
+  writer is the test, and exits when the test closes it. Audit: every other
+  `kill` signals the caller's own unreaped child (`Popen.kill`/`send_signal`
+  on the script; `Cluster.kill` under the lock, not marked exited).
+- **P3 4: two narrow signal windows in `cluster.py`.** A signal between
+  `Popen` returning and registration, or between entering `finally` and
+  raising the cleanup depth, skipped part of the cleanup. Shape: the depth is
+  raised before the run's `try` (before the first spawn) and lowered after
+  the cleanup, so during a run a signal is only recorded; the run loop checks
+  for it at each event wait (at most 0.5 s) and breaks, the cleanup runs, and
+  the signal is raised as `SystemExit(128 + signal)`. Acceptance: a test
+  calls the handler between `Popen` and registration and requires
+  `SystemExit(143)` with no unreaped child; it must fail on the round-3
+  script.
+- **P3 3: docs.** `forbid(unsafe_code)` where the docs said `deny`; the
+  baseline's single-process row carries the wait-loop qualifier.
+- **Baseline unchanged.** The stop path runs only after a run is already
+  invalid (stdin closed before the summary), and the other prints write the
+  same bytes through the same locked, line-buffered stdout, a constant few
+  per run (none in the offered phase), which a marginal per write cancels.
+- **Checks.** fmt, four strict Clippy configurations (and `native,tls`),
+  matched fmt/Clippy; readiness, startup, counter_service, directory and
+  transfer services and the example suite in all-features and `native,tls`;
+  script self-test; cluster tests 10 times in a row in each; SIGTERM, SIGHUP,
+  SIGINT and SIGKILL of a live `cluster.py` with exit codes recorded.
+
+### N0 review round 4 implemented (evidence, 20 October 2026)
+
+- **P3 1 → nodes take the documented exits when the parent is gone.** As
+  planned. Test `every_node_takes_its_documented_exit_when_the_parent_is_gone`
+  (TCP, 15,000 offers at 50/s): statuses [4, 0, 0], node 1's log says `stdin
+  closed during offering … after 1 further poll round(s)`, no `panicked` in
+  any log. Mutation: with `say`/`note` as `print!`/`eprint!` the statuses are
+  [101, 101, 101] and every log has `failed printing to stdout: Broken pipe`
+  (Opus's reproduction). The stdin-only test is unchanged and passes.
+- **P3 2 → no PID is probed or signalled by the SIGTERM self-test.** As
+  planned (FIFOs `alive` and `leash`). Against the round-2 script (which
+  exits −15 and leaves node 1 running) the survivor check fires (`children
+  outlived cluster.py`, asserted first in a scratch copy) and closing the
+  leash ends the survivor: no fixture process remains.
+- **P3 4 → signals are deferred for the whole run.** As planned. The new
+  self-test fails on the round-3 script (`a child was left unreaped`) and
+  passes here. Cost: a signal now takes effect at the run loop's next wait,
+  within 0.5 s (live: 0.46–0.51 s), instead of at once.
+- **P3 3.** As planned.
+- **Checks run (Linux, cores 10–15, `-j 4`).** fmt; strict Clippy default,
+  all-features, no-default-features, native-only and `native,tls`; matched
+  fmt and Clippy: zero diagnostics. Script self-test 12/12; on the round-3
+  script 1 fails (the new spawn-window test), on the round-2 script 4 fail and
+  2 error. All features: `--lib readiness` 9, startup 63, counter_service
+  203, directory_service 22, transfer_service 33, native_benchmark example
+  64 passed. `native,tls`: 9, 48, 144, 18, 25, 56 passed. Cluster tests (8),
+  10 runs in a row in each configuration: 10/10 and 10/10, no port retries,
+  no node process left after any run.
+- **Live parent death (debug `--all-features` binary, `cluster.py` at TCP
+  15,000 offers and 50/s, signalled once `node1.err` shows `phase=offering`;
+  the driver is a child subreaper, so a node that outlives `cluster.py`
+  becomes its child and its status is recorded).** SIGTERM, SIGHUP, SIGINT:
+  `cluster.py` exits 143, 129, 130, and no node outlives it. SIGKILL, 3 runs:
+  the orphaned nodes exit [4, 0, 0] every time, all within 0.002–0.052 s,
+  node 1's log ends `Error: stdin closed during offering … after 1 further
+  poll round(s)`, and no log contains `panicked`.
+- **Baseline unchanged**, for the reason in the plan; not re-measured.
 
 ## Lifetime bounds track (opened 19 October 2026)
 

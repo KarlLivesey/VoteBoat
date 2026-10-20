@@ -26,10 +26,16 @@
 //! closes the pipe when the parent dies, however it dies). For node 1 every
 //! phase from waiting for `start` to the quorum read stops at the first poll
 //! round that sees it closed; only the final drain ignores it. Node 1 then
-//! prints `stdin_closed node=1 phase=P rounds_to_notice=K`, aborts its node
-//! (pending writes become unknown), prints `node_counters` and exits with
+//! aborts its node (pending writes become unknown), prints `stdin_closed
+//! node=1 phase=P rounds_to_notice=K` and `node_counters`, and exits with
 //! [`STDIN_CLOSED_STATUS`]. It does not drain: a graceful drain waits for every
 //! pending write to resolve, which cannot happen once the followers are gone.
+//!
+//! A dead parent also closes the read end of every node's stdout (and of
+//! stderr, when that is a pipe), so a node ignores failed writes to both
+//! ([`say`], [`note`]) rather than panic in `println!` (status 101). The exits
+//! stay as documented whether or not anyone still reads: 4 for node 1 stopped
+//! by closed stdin, 0 for a follower that drained after EOF.
 use super::*;
 use std::{
     io::BufRead,
@@ -67,9 +73,21 @@ impl std::fmt::Display for StdinClosed {
 }
 impl std::error::Error for StdinClosed {}
 
+/// Write `text` to stdout and flush, ignoring a failed write: once the parent
+/// is gone, so is the read end of this pipe.
+fn say(text: std::fmt::Arguments<'_>) {
+    let mut out = std::io::stdout().lock();
+    let _ = out.write_fmt(text).and_then(|()| out.flush());
+}
+/// [`say`] for stderr.
+fn note(text: std::fmt::Arguments<'_>) {
+    let _ = std::io::stderr().lock().write_fmt(text);
+}
+
 /// [`run`] for a node process: a stop on closed stdin exits with
-/// [`STDIN_CLOSED_STATUS`] once the node is aborted and its counters printed.
-/// Exiting ends its worker threads; the run's directory is abandoned.
+/// [`STDIN_CLOSED_STATUS`] once the node is aborted and its counters printed
+/// (or their write has failed). Exiting ends its worker threads; the run's
+/// directory is abandoned.
 pub(crate) fn run_process(
     args: &[String],
     ready: Option<usize>,
@@ -78,7 +96,7 @@ pub(crate) fn run_process(
     let result = run(args, ready, plain);
     if let Err(error) = &result {
         if error.is::<StdinClosed>() {
-            eprintln!("Error: {error}");
+            note(format_args!("Error: {error}\n"));
             let _ = std::io::stdout().flush();
             std::process::exit(STDIN_CLOSED_STATUS);
         }
@@ -166,7 +184,7 @@ fn run(args: &[String], ready: Option<usize>, plain: bool) -> Result<(), Failure
         control: control.clone(),
         armed: None,
     };
-    println!("ready node={}", args.n);
+    say(format_args!("ready node={}\n", args.n));
     let result = if args.n == 1 {
         lead(&mut host, &args, wake)
     } else {
@@ -174,25 +192,34 @@ fn run(args: &[String], ready: Option<usize>, plain: bool) -> Result<(), Failure
         host.until(None, |_| Ok(control.closed()))
     };
     if let Err(error) = &result {
-        eprintln!("node {} failed: {error}", args.n);
         if let Some(closed) = error.downcast_ref::<StdinClosed>() {
-            println!(
-                "stdin_closed node={} phase={} rounds_to_notice={}",
+            // Abandon the run before any output: a graceful drain would wait
+            // for pending writes that cannot commit without the followers.
+            host.nodes[0].abort();
+            let counters = Counters::of(&host.totals);
+            note(format_args!("node {} failed: {error}\n", args.n));
+            say(format_args!(
+                "stdin_closed node={} phase={} rounds_to_notice={}\n",
                 args.n,
                 closed.phase.replace(' ', "_"),
                 closed.rounds_to_notice
-            );
-            // Abandon the run: a graceful drain would wait for pending writes
-            // that cannot commit without the followers.
-            host.nodes[0].abort();
-            let counters = Counters::of(&host.totals);
-            println!("node_counters node={} {}", args.n, counters.line());
+            ));
+            say(format_args!(
+                "node_counters node={} {}\n",
+                args.n,
+                counters.line()
+            ));
             return result;
         }
+        note(format_args!("node {} failed: {error}\n", args.n));
     }
     // Drain and join even after a failure, as the single-process mode does.
     let finished = host.finish();
-    println!("node_counters node={} {}", args.n, finished?.line());
+    say(format_args!(
+        "node_counters node={} {}\n",
+        args.n,
+        finished?.line()
+    ));
     result
 }
 
@@ -454,11 +481,11 @@ fn lead(host: &mut Host, args: &NodeArgs, wake: Arc<HostWake>) -> Result<(), Fai
     let before = Counters::of(&host.totals);
     let (host_ns, max_host_ns) = (host.totals.host_ns, host.totals.max_host_ns);
     host.armed = Some("offering");
-    eprintln!(
-        "phase=offering node=1 operations={} rate={}",
+    note(format_args!(
+        "phase=offering node=1 operations={} rate={}\n",
         args.count, args.rate
-    );
-    println!("offering node=1");
+    ));
+    say(format_args!("offering node=1\n"));
     let elapsed = offer(host, &mut ledger, wake)?;
     let phase = Counters::of(&host.totals).since(before);
     let host_ms = (host.totals.host_ns - host_ns) as f64 / 1e6;
@@ -488,7 +515,7 @@ fn lead(host: &mut Host, args: &NodeArgs, wake: Arc<HostWake>) -> Result<(), Fai
     let mut file = exclusive(&args.root.join("summary.txt"))?;
     file.write_all(summary.as_bytes())?;
     file.sync_all()?;
-    print!("{summary}");
+    say(format_args!("{summary}"));
     if term_start != term_end || !ready_leader(&host.nodes) {
         return Err("leadership changed during the offered phase; the run is invalid".into());
     }
@@ -685,8 +712,11 @@ mod tests {
             return;
         };
         let args = spec.split(SEPARATOR).map(String::from).collect::<Vec<_>>();
-        // As in the binary: a stop on closed stdin exits STDIN_CLOSED_STATUS.
+        // As in the binary: a stop on closed stdin exits STDIN_CLOSED_STATUS,
+        // and success exits 0 with nothing more on stdout (libtest's closing
+        // report would fail once the parent's reader is gone).
         run_process(&args, None, true).unwrap();
+        std::process::exit(0);
     }
 
     /// Three OS-selected loopback ports, each held for TCP and UDP (the
@@ -761,9 +791,29 @@ mod tests {
         rate: 50,
     };
 
+    /// In hang-up mode, the line after which the test parent stops reading
+    /// node `n`: node 1's `release` line, and a follower's `ready` (its last
+    /// line before `node_counters`).
+    fn last_read(n: u64, release: &str) -> &str {
+        if n == 1 {
+            release
+        } else {
+            "ready node="
+        }
+    }
+
     /// Start three nodes re-executing this binary; their stdout lines arrive
-    /// on the returned channel, `None` when a stream ends.
-    fn spawn(root: &Path, protocol: &str, ports: &str, load: Load) -> (Children, Events) {
+    /// on the returned channel, `None` when a stream ends. With `hang_up`
+    /// (node 1's release line) each reader closes its read end at
+    /// [`last_read`] before passing that line on, as a dead parent would, so
+    /// the node's later writes fail.
+    fn spawn(
+        root: &Path,
+        protocol: &str,
+        ports: &str,
+        load: Load,
+        hang_up: Option<&'static str>,
+    ) -> (Children, Events) {
         let exe = std::env::current_exe().unwrap();
         let (sender, events) = mpsc::channel();
         let mut children = Children(Vec::new());
@@ -794,8 +844,14 @@ mod tests {
             let stdout = child.stdout.take().unwrap();
             let sender = sender.clone();
             std::thread::spawn(move || {
-                for line in BufReader::new(stdout).lines() {
-                    let Ok(line) = line else { break };
+                let mut lines = BufReader::new(stdout).lines();
+                while let Some(Ok(line)) = lines.next() {
+                    if hang_up.is_some_and(|release| line.contains(last_read(n, release))) {
+                        // Closed before the driver can act on this line.
+                        drop(lines);
+                        let _ = sender.send((n, Some(line)));
+                        return;
+                    }
                     if sender.send((n, Some(line))).is_err() {
                         return;
                     }
@@ -817,8 +873,15 @@ mod tests {
 
     /// The parent protocol of `cluster.py`: `start` once all three are ready,
     /// every stdin closed once node 1 prints a line containing `release` or
-    /// any node has ended.
-    fn drive(children: &mut Children, events: &Events, root: &Path, release: &str) -> Outcome {
+    /// any node has ended. With `hang_up` (see [`spawn`]) a stream counts as
+    /// ended at its [`last_read`] line.
+    fn drive(
+        children: &mut Children,
+        events: &Events,
+        root: &Path,
+        release: &str,
+        hang_up: bool,
+    ) -> Outcome {
         let mut lines = BTreeMap::<u64, Vec<String>>::new();
         let (mut ready, mut open) = (BTreeSet::new(), 3);
         let close_all = |children: &mut Children| {
@@ -848,6 +911,9 @@ mod tests {
             if n == 1 && line.contains(release) {
                 close_all(children);
             }
+            if hang_up && line.contains(last_read(n, release)) {
+                open -= 1;
+            }
             lines.entry(n).or_default().push(line);
         }
         let statuses = children
@@ -874,7 +940,8 @@ mod tests {
         name: &str,
         protocol: &str,
         load: Load,
-        release: &str,
+        release: &'static str,
+        hang_up: bool,
     ) -> (PathBuf, BTreeMap<u64, Vec<String>>, Vec<ExitStatus>) {
         let mut collisions = Vec::new();
         for attempt in 0..ATTEMPTS {
@@ -882,8 +949,9 @@ mod tests {
             let (ports, held) = reserve();
             // The nodes bind their own listeners: release the holds first.
             drop(held);
-            let (mut children, events) = spawn(&root, protocol, &ports, load);
-            match drive(&mut children, &events, &root, release) {
+            let (mut children, events) =
+                spawn(&root, protocol, &ports, load, hang_up.then_some(release));
+            match drive(&mut children, &events, &root, release, hang_up) {
                 Outcome::Done(lines, statuses) => return (root, lines, statuses),
                 Outcome::Collision(n) => {
                     let port = ports.split(',').nth(n as usize - 1).unwrap();
@@ -982,7 +1050,8 @@ mod tests {
     }
 
     fn cluster(protocol: &str) {
-        let (root, lines, statuses) = run_cluster(protocol, protocol, CHECKED, "mode=cluster ");
+        let (root, lines, statuses) =
+            run_cluster(protocol, protocol, CHECKED, "mode=cluster ", false);
         all_succeeded(&root, &statuses);
         check(&lines);
         std::fs::remove_dir_all(&root).unwrap();
@@ -997,8 +1066,8 @@ mod tests {
         // EOF and exit; nothing is offered.
         let taken = held.pop().unwrap();
         drop(held);
-        let (mut children, events) = spawn(&root, "tcp", &ports, CHECKED);
-        let outcome = drive(&mut children, &events, &root, "mode=cluster ");
+        let (mut children, events) = spawn(&root, "tcp", &ports, CHECKED, None);
+        let outcome = drive(&mut children, &events, &root, "mode=cluster ", false);
         assert!(matches!(outcome, Outcome::Collision(3)));
         drop((children, taken));
         std::fs::remove_dir_all(&root).unwrap();
@@ -1035,7 +1104,8 @@ mod tests {
             offers: 15_000,
             rate: 50,
         };
-        let (root, lines, statuses) = run_cluster("stdin-closed", "tcp", load, "offering node=1");
+        let (root, lines, statuses) =
+            run_cluster("stdin-closed", "tcp", load, "offering node=1", false);
         let codes = statuses.iter().map(ExitStatus::code).collect::<Vec<_>>();
         assert_eq!(
             codes,
@@ -1052,6 +1122,43 @@ mod tests {
         assert!(marked(&lines[&1], "mode=cluster ").is_empty());
         for n in 1..=3u64 {
             assert_eq!(marked(&lines[&n], "node_counters ").len(), 1, "node {n}");
+        }
+        std::fs::remove_dir_all(&root).unwrap();
+    }
+
+    /// Review round 3, P3 1: a dead parent closes the read end of every
+    /// node's stdout as well as its stdin, so every later write fails. The
+    /// nodes must still take the documented exits (node 1 aborts and exits 4,
+    /// the followers drain and exit 0) rather than panic in `println!` (101).
+    /// Every read end is closed before any stdin; the followers' after their
+    /// `ready` (nothing else reaches their stdout before `node_counters`).
+    #[test]
+    fn every_node_takes_its_documented_exit_when_the_parent_is_gone() {
+        let load = Load {
+            offers: 15_000,
+            rate: 50,
+        };
+        let (root, lines, statuses) = run_cluster("hang-up", "tcp", load, "offering node=1", true);
+        let codes = statuses.iter().map(ExitStatus::code).collect::<Vec<_>>();
+        assert_eq!(
+            codes,
+            [Some(STDIN_CLOSED_STATUS), Some(0), Some(0)],
+            "logs in {}",
+            root.display()
+        );
+        // Nothing was read after each node's last line.
+        for n in 1..=3u64 {
+            assert!(marked(&lines[&n], "node_counters ").is_empty(), "node {n}");
+        }
+        let log = |n: u64| std::fs::read_to_string(root.join(format!("node{n}.err"))).unwrap();
+        let stop = log(1);
+        assert!(
+            stop.contains("node 1 failed: stdin closed during offering")
+                && (stop.contains("after 0 further poll") || stop.contains("after 1 further poll")),
+            "{stop}"
+        );
+        for n in 1..=3u64 {
+            assert!(!log(n).contains("panicked"), "node {n}: {}", log(n));
         }
         std::fs::remove_dir_all(&root).unwrap();
     }

@@ -195,17 +195,21 @@ fail = os.environ["FIXTURE"]
 wal = os.path.dirname(os.path.dirname(root))
 marker = os.path.join(wal, "failed-once")
 if fail == "linger":
-    with open(os.path.join(wal, "pid%d.tmp" % n), "w") as f:
-        f.write(str(os.getpid()))
-    os.rename(os.path.join(wal, "pid%d.tmp" % n), os.path.join(wal, "pid%d" % n))
+    # Held until this process ends: the test reads EOF from this FIFO only
+    # once every fixture is gone, without naming or signalling a PID.
+    alive = os.open(os.path.join(wal, "alive"), os.O_WRONLY | os.O_NONBLOCK)
+    open(os.path.join(wal, "up%d" % n), "w").close()
 if n == 1:
     for line in sys.stdin:
         if line.strip() == "start":
             break
     else:
         sys.exit(4)
-    if fail == "linger":  # ignores EOF: only a kill ends it
-        time.sleep(3600)
+    if fail == "linger":  # ignores EOF: a kill, or the test closing the leash, ends it
+        leash = os.open(os.path.join(wal, "leash"), os.O_RDONLY | os.O_NONBLOCK)
+        os.set_blocking(leash, True)
+        os.read(leash, 1)
+        sys.exit(9)
     if fail == "leader-once" and not os.path.exists(marker):
         open(marker, "w").close()
         sys.exit(7)
@@ -245,7 +249,7 @@ class Processes(unittest.TestCase):
         with self.assertRaises(ChildProcessError):
             os.waitpid(-1, os.WNOHANG)
 
-    def run_fixture(self, mode, **kw):
+    def wrapper(self, mode):
         os.environ["FIXTURE"] = mode
         # The fixture takes the mode first; native_benchmark's argv follows.
         wrapper = os.path.join(self.dir, "wrapper-" + mode)
@@ -253,6 +257,10 @@ class Processes(unittest.TestCase):
             f.write("#!/bin/sh\nexec %s \"$FIXTURE\" \"$2\" \"$3\" \"$4\" \"$5\" \"$6\" \"$7\" \"$8\"\n"
                     % self.bin)
         os.chmod(wrapper, 0o755)
+        return wrapper
+
+    def run_fixture(self, mode, **kw):
+        wrapper = self.wrapper(mode)
         return wrapper, cluster.run_once(wrapper, self.args(**kw), 100,
                                          os.path.join(self.wal, mode))
 
@@ -332,47 +340,86 @@ class Processes(unittest.TestCase):
         self.assertEqual(signalled, [])
         self.assert_no_children()
 
+    def test_a_signal_during_a_spawn_is_deferred_until_every_child_is_reaped(self):
+        """Review round 3 (Opus) P3 finding 4: a signal between Popen returning
+        and the child's registration (the handler is called at that point)
+        must not leave that child out of the kill-and-reap. The children are
+        this test process's own; it signals none of them."""
+        wrapper = self.wrapper("ok")
+        started, real_popen = [], cluster.subprocess.Popen
+
+        def popen(*a, **kw):
+            p = real_popen(*a, **kw)
+            started.append(p)
+            if len(started) == 1:
+                cluster.raise_on_signal(signal.SIGTERM, None)
+            return p
+
+        cluster.subprocess.Popen = popen
+        stop, left = None, None
+        try:
+            try:
+                cluster.run_once(wrapper, self.args(), 100, os.path.join(self.wal, "signal"))
+            except SystemExit as e:
+                stop = e.code
+            try:
+                os.waitpid(-1, os.WNOHANG)
+                left = True
+            except ChildProcessError:
+                left = False
+        finally:
+            cluster.subprocess.Popen = real_popen
+            for p in started:  # only on failure: EOF ends a fixture, then reap it
+                if p.returncode is None:
+                    p.stdin.close()
+                    p.wait()
+            cluster._cleanup.update(depth=0, pending=None)
+        self.assertEqual(stop, 128 + signal.SIGTERM)
+        self.assertFalse(left, "a child was left unreaped")
+
     def test_sigterm_to_the_script_kills_and_reaps_every_child(self):
         """Review round 2 (Opus) P2 finding 1, parent side: SIGTERM runs the
-        cleanup. Node 1 here ignores EOF, so only the script's kill ends it."""
-        os.environ["FIXTURE"] = "linger"
-        wrapper = os.path.join(self.dir, "wrapper-linger")
-        with open(wrapper, "w") as f:
-            f.write("#!/bin/sh\nexec %s \"$FIXTURE\" \"$2\" \"$3\" \"$4\" \"$5\" \"$6\" \"$7\" \"$8\"\n"
-                    % self.bin)
-        os.chmod(wrapper, 0o755)
+        cleanup. Node 1 here ignores EOF, so only the script's kill ends it.
+        Round 3 P3 finding 2: the test never signals a PID it did not spawn.
+        Every fixture holds the write end of the FIFO `alive` open, so EOF on
+        it means every fixture has exited; a node 1 that survives a failure
+        is released by closing the FIFO `leash` it blocks on."""
+        wrapper = self.wrapper("linger")
+        alive_path, leash_path = (os.path.join(self.wal, x) for x in ("alive", "leash"))
+        os.mkfifo(alive_path)
+        os.mkfifo(leash_path)
+        alive = os.open(alive_path, os.O_RDONLY | os.O_NONBLOCK)
+        # A write end needs a reader to open without blocking; keep the writer only.
+        reader = os.open(leash_path, os.O_RDONLY | os.O_NONBLOCK)
+        leash = os.open(leash_path, os.O_WRONLY | os.O_NONBLOCK)
+        os.close(reader)
         script = subprocess.Popen([sys.executable, "-I", SCRIPT, "--wal", self.wal, "--offers",
                                    "100", "--rate", "50", wrapper],
                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        children, code = [], None
+        code, survivors = None, None
         try:
-            pids = [os.path.join(self.wal, "pid%d" % n) for n in (1, 2, 3)]
+            ups = [os.path.join(self.wal, "up%d" % n) for n in (1, 2, 3)]
             # A failure guard only: the fixtures write these at once.
             limit = time.monotonic() + 600
-            while not all(os.path.exists(p) for p in pids):
+            while not all(os.path.exists(p) for p in ups):
                 self.assertIsNone(script.poll(), "cluster.py ended early")
                 self.assertLess(time.monotonic(), limit, "fixtures never started")
                 time.sleep(0.01)
-            for p in pids:
-                with open(p) as f:
-                    children.append(int(f.read()))
             script.send_signal(signal.SIGTERM)
             code = script.wait(timeout=600)
+            # Nothing is ever written: EOF (b"") means no fixture holds it now.
+            try:
+                survivors = os.read(alive, 1) != b""
+            except BlockingIOError:
+                survivors = True
         finally:
-            if script.poll() is None:
+            if script.poll() is None:  # this test's own child
                 script.kill()
                 script.wait()
-            alive = []
-            for pid in children:
-                try:
-                    os.kill(pid, 0)
-                    alive.append(pid)
-                except ProcessLookupError:
-                    pass  # cluster.py reaped it before exiting
-            for pid in alive:  # only on failure: do not leave the fixture behind
-                os.kill(pid, signal.SIGKILL)
+            os.close(leash)  # a surviving node 1 reads EOF and exits
+            os.close(alive)
         self.assertEqual(code, 128 + signal.SIGTERM)
-        self.assertEqual(alive, [], "children outlived cluster.py")
+        self.assertFalse(survivors, "children outlived cluster.py")
 
 
 if __name__ == "__main__":
