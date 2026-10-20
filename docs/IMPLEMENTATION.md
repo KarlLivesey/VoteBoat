@@ -1865,7 +1865,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done V3c: host-owned effect sink and `ProposalBatch::push` fix (merged 20 October 2026 in PR 16, head 36de6dd0; code head 783265a4; quiet Mac vs `d379783d`, 5 pairs: bulk-16 −1.4%, single-16 −4.7%, bulk-1 −2.1%, single-1 −9.5% CPU per write; driver width 1 −13.2%, allocations 30 → 15 per write) | Every core call returns a fresh `Vec<Effect>` built from nested per-function Vecs, and the matched actor grows and frees a `VecDeque` per call: at width 1 about 30 allocations per write, 9 of them effect vectors (profile §4), ≈ 628 ns/write of allocator time in single-1. The host owns one reusable queue that the core fills in place (`step_into`, `propose_entries_into`, `persist_volatile_into`); the Vec APIs become wrappers. Ride-along: `push` built and dropped an `Exhausted` error on every success (bulk ≈ 1.4%) | Profile above; V3 merged | Effect-sequence oracle (Vec vs sink forms over the twin histories, FIFO insertion of committed intervals); rollback with sentinel effects on refused steps, stale tokens and fenced cores; reused queue keeps its capacity and allocation with no stale effects over 1,000 width-1 rounds; existing effect-order, twin, golden and facts oracles unchanged; driver widths 1/231/515 with allocation counts; quiet-Mac 5 pairs × 4 cells against `d379783d`; attribution controls; fmt, four strict root Clippy builds and the matched workspace. Review round 2 (tests and docs only): granted-vote sentinel and election-reset comparison, each proved by mutating the two queue reads; wrapped-queue late exhaustion; durable, transfer, stale-append, learner-configuration and retirement-reply sink oracles | T4 |
 | Done V3d: per-step recomputation (merged 20 October 2026 in PR 18, head 1fb878da; code head 08ebc5c3, round 2 code head 0ea00498, round 3 code 4ba17fbf; quiet Mac vs `bc8fafb6`, 3 × 5 pairs: single-16 −3.0%, single-1 −1.8 to −3.5%, bulk-16 and bulk-1 flat; driver width 1 −13.0%, instructions −14.4%) | `effect_reservation` rebuilt and compared `LogMetadata` twice per harness step, and every plan and install rebuilt or compared it again (profile slice 2). The core's log changes only at install, so its summary is now kept valid there by type (`SummarizedLog`), plans from its own view skip the comparison, and an install version token skips the predecessor check while nothing changed; a plain log's replica count no longer walks the membership | V3c (same `raft.rs` chain) | Implemented evidence in the V3d sections below: summary/version tracking tests over every mutating path (fail without the bump or refresh), reservation test, unchanged transition/twin/snapshot/truncation/facts/golden tests, fixed-schedule counts and reservation checksums identical, per-site samply attribution, three gate runs, attribution controls, fmt + four strict Clippy builds + matched workspace. Review round 2 (Opus P3s): the install skip is bound to the stamp (log identity and version) of the view the plan came from, so a plan moved to another core is refused in debug and release; moved-version checked install tested; the skip still taken on ordinary appends and commit rounds (test counter); mutation edits recorded exactly; width-1 driver within noise (3 pairs: +0.2% ns, +0.17% instructions). Review round 3 (Sol): 16 B stamps (u64 identity issued once, u64 version, ≈ 584 years each at 10^9/s) that never repeat and fail closed to checked installs, with `observability::unidentified_logs()`; allocator- and version-bound tests in debug and release; nine named mutations; `Pending` 1,088 → 1,104 B; width-1 driver −0.2% ns, +0.25% instructions; single-1 vs `bc8fafb6` still −1.8% (5 pairs) | T4 |
 | Done V3e: per-peer replication slots (merged 20 October 2026 in PR 21, head 5a316689; code head 713ead7c; quiet Mac vs `e7520ce1`, 3 × 5 pairs: single-16 −0.5 to −1.9%, bulk-16 and bulk-1 flat, single-1 +1.5 to +2.1% from a park threshold in the one-worker harness (control below); driver width 1 −12.5%, instructions −8.9%) | Outstanding replication per peer in a fixed slot instead of a `BTreeMap` emptied and refilled each round; a cached peer order and stack-buffered quorum frontier instead of per-broadcast `Vec`s (profile slice 3: single-1 −2.3 to −3.1%, single-16 −1.3 to −1.8%, bulk ~0) | V3d (same `raft.rs` chain) | Slot and frontier oracles against the map form over membership-change, retirement, lagging and truncation histories; no slot for a departed peer; same-id replacement; named mutations; driver 1/231/515 with per-site attribution; quiet-Mac gate against `e7520ce1`; spin control for single-1; fmt, strict Clippy, suites ("V3e implemented" below) | T4 |
-| Next V3f: in-place install | Install the pending transition through `&mut` and clear it after success instead of moving `Pending` (1,088 B), `OwnedNextLog` and large `Result`s by value (profile slice 4: single-1 −1.9 to −2.5%; V3d's in-place summary write is the first piece) | V3e | A failed install keeps the pending transition intact and fences as today; twin and completion oracles; quiet-Mac pairs | T4 |
+| Done in review V3f: in-place install (PR 24 on branch `cpu/in-place-install`, code head e3471f31; quiet Mac vs `379668af`: driver width 1 −3.2% ns and −5.1% instructions, width 231 −1.2%; four cells flat within noise over 3 × 5 pairs, single-1 guard not adverse; install-side memmove 179 → 19 ns per write at width 1) | Install the pending transition through `&mut` and clear it after success instead of moving `Pending` (1,104 B), `OwnedNextLog` (672 B) and large `Result`s by value (profile slice 4: single-1 −1.9 to −2.5%; V3d's in-place summary write is the first piece). Base width-1 driver profile on `379668af`: library memmove 266.6 ns per write at the install and staging sites | V3d (merged); independent of V3e's peer slots (merge checked locally) | A failed install (predecessor mismatch, foreign stamp, cold-plan refusal) leaves `Pending` intact at the failure and the core fences as today, in debug and `--release`; success clears the slot (debug assertion, mutation proof); twin, completion, volatile/durable and V3d stamp tests unchanged; size bounds unchanged; per-site memmove before/after; driver 1/231/515; four-cell gate against `379668af`; attribution controls; fmt, strict Clippy, suites ("V3f schema plan" below) | T4 |
 | Following H-a: harness reply index | Bulk cells: the matched harness's `PendingReplies` (SipHash `HashMap<u128,_>`) remove + insert is about 23 ns of 214 per write, harness not library work (profile H-a: bulk −7 to −10%) | Separate harness PR on main with an H2-style fairness review, main re-baselined after; independent of V3e/V3f | Reply-order and fairness tests; OpenRaft engine untouched; quiet-Mac pairs with attribution parity | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
 | Done C15: batched admission uses the pending bound | Same fast path for ready batches | C14 | Linux/Mac pairs; suites | T4 |
@@ -4172,6 +4172,295 @@ Next candidates found here (not done): `progress` and `next_index` are still
 maps (`BTreeMap` get/index 119 ns per write at width 1); moving them into the
 slots would remove most of it. The single-1 park threshold above is a
 harness topology item for the orchestrator.
+
+#### V3f schema plan: in-place install (20 October 2026)
+
+Brief: `target/claude/research-r4/v3c-profile.md` §3 (class "Pending /
+OwnedNextLog / Result by-value moves", ~350 ns at driver width 1 on
+`d379783d`) and §5 item 4. Branch `cpu/in-place-install` from main `379668af`
+(V3d and EO1 merged; V3e's peer slots in review on `cpu/peer-slots`, not
+included: this slice touches only the install path).
+
+Base profile (`379668af`, width-1 driver, samply 8 kHz, 2 runs, sampled
+3,519 ns per write against 3,734–3,786 measured), memmove self time by
+nearest library owner frame, ns per write: `install_pending_into` 124.5,
+`stage_pending_into` 60.3, `OwnedNextLog::install_unchanged` 31.2,
+`SummarizedLog::install` 23.3, `persist_update_into` 15.9, `OwnedAppend::new`
+11.4 (266.6 in all); `Result::branch` self 37.2 (all callers).
+
+By-value moves on the install path today (each run on every persistence
+round; six rounds per write at width 1):
+
+| # | Site | Moved | After this slice |
+| ---: | --- | --- | --- |
+| 1 | `install_pending_into`: `self.pending.take()` | the whole `Pending` (1,104 B) out of the core onto the stack | `self.pending.as_mut()`: the plan is installed where it lies |
+| 2 | `self.durable.install(p.next, p.planned)` | `OwnedNextLog` (672 B) into `SummarizedLog::install` | `&mut p.next` |
+| 3 | `install_unchanged(self, ..)` / `install(self, ..)` (`match self.0`) | the `OwnedAppend` / `CommitAdvance` out of the plan | `match &mut self.0`; only the suffix (32 B) is taken, and only after every check passed |
+| 4 | `install_append(current, suffix, summary) -> LogSummary`, then `*summary = …` | the planned `LogSummary` (336 B) in by value and out by value | one copy, from the plan into the log's summary |
+| 5 | checked path: `prepare_install(self) -> Result<PreparedOwnedLog, _>`, `.install(self) -> LogSummary`, `Result<LogSummary, _>` back to `SummarizedLog::install` | the plan into a large `Result`, out again, and the summary through a second `Result` | checks by reference, then install; the in-place call returns `Result<(), StorageError>` |
+| 6 | `after_durable(p.after, p.reply, ..)` | `After` (16 B) and `Option<Message>` (256 B) out of the stack copy | taken from the slot (`mem::replace`, `Option::take`); same sizes |
+
+Kept by value: `OwnedNextLog::install` / `prepare_install` and
+`PreparedOwnedLog` for the owned provider (`log/owned.rs`) and the
+transition tests, and the native store's `into_change` path (no T4 cell runs
+them). Their checks and errors are the same functions the in-place path
+calls.
+
+- **Data/API shape (all crate-private).**
+  - `OwnedNextLog::install_in_place(&mut self, current: &mut GroupLog,
+    summary: &mut LogSummary, unchanged: bool) -> Result<(), StorageError>`
+    replaces `install_unchanged`. `unchanged` is the V3d stamp decision: an
+    append or commit advance skips its predecessor comparison only then
+    (debug builds still assert it); otherwise, and for every cold `Other`
+    plan, the full check runs first. Every check precedes the first
+    mutation of `current`, `summary` or the plan.
+  - `NextLog::check_install(&self, current, update)` (the body of today's
+    `prepare_install`, which now calls it) and
+    `NextLog::install_in_place(&mut self, current, update) ->
+    Result<LogSummary, StorageError>` for the cold plans: a `Full` plan
+    swaps its planned log into `current` (the old log stays in the spent
+    plan and is dropped when the slot is cleared, a few instructions later);
+    a delta takes its suffix; a compaction trims as before.
+  - `SummarizedLog::install(&mut self, next: &mut OwnedNextLog, planned:
+    Option<LogStamp>)`: the stamp rule is unchanged (skip only when
+    `planned` is `Some` and equal to the log's own stamp; the stamp still
+    travels in `Pending.planned`). On error nothing changes: log, summary,
+    stamp and the plan.
+  - `Raft::install_pending_plan(&mut self) -> Result<Installed,
+    RaftError>` is the only caller. It installs `self.pending`'s plan in
+    place; on `Ok` it takes `membership`, `after` and `reply` out (a
+    16-byte-aligned 8 + 16 + 256 B, the parts the core still uses) and sets
+    the slot to `None`; on `Err` it returns before touching the slot.
+    `install_pending_into` calls it and, on `Err`, calls `storage_failed()`
+    exactly as today.
+  - `Pending` and `OwnedNextLog` keep their fields and sizes (1,104 B and
+    672 B): no size-bound change.
+- **State transitions of the pending slot.** Empty → Staged
+  (`stage_pending_into`) → install attempt. Failure: the plan is intact in
+  the slot when the install returns; `storage_failed()` then fences the
+  core and empties the slot, as today (so a failed install still leaves no
+  pending dependency, and the existing V3d tests are unchanged). Success:
+  the plan is spent (its suffix now belongs to the log, a `Full` plan holds
+  the old log) and the slot is emptied before any fallible step
+  (`configuration_changed`, retirement announcements, `after_durable`) and
+  before anything can stage again: the same point at which `take()` emptied
+  it before.
+- **What guards "cleared only after success".** Structure: the clear is on
+  the `Ok` arm of `install_pending_plan` only, and the install returns its
+  error before any mutation. A debug assertion in `stage_pending_into` that
+  the slot is empty: a spent plan left behind, or a live plan overwritten,
+  trips it on the next round in every debug test. Tests: below.
+- **Failure and cleanup.** Every install error kind keeps today's result:
+  the same `RaftError::Storage(StorageError::Rejected(..))`, the core fenced,
+  no pending dependency, log and summary unchanged.
+- **Restart and partial progress.** Unchanged: plans and stamps are not
+  persisted; a recovered core has no pending plan. A spent plan exists only
+  inside `install_pending_plan`.
+- **Public API.** None.
+- **Acceptance.**
+  - New tests (debug and `--release`), each failure kind through
+    `install_pending_plan` and then through the public completion path:
+    (1) predecessor mismatch: an append and a commit advance staged, the log
+    then changed behind them (test `edit`), so the stamp moved and the
+    checked compare refuses; (2) foreign stamp: a plan moved to another core
+    at the same version, refused by the checked compare; (3) cold-plan
+    refusal: a full plan (configuration entry) whose `NextLog` check refuses
+    after the log changed (the store-validation path the owned provider also
+    uses). Each checks that the returned error is today's, that `Pending`
+    is intact (same update, metadata, suffix, ticket, `After`, reply, stamp
+    and membership), and that the log, summary and stamp are unchanged; then
+    that the public path returns the same error and leaves the core fenced
+    with no pending dependency. A success test: after an install the slot is
+    empty and the installed log equals the oracle.
+  - Mutation proofs: without the clear on success, the success test fails
+    (and the stage assertion fires across the suite); with the suffix taken
+    before the check, the intact test fails.
+  - Unchanged: twin, completion, volatile/durable, sink and V3d stamp tests;
+    `pending_and_plan_sizes`.
+  - Measurement: per-site memmove before/after from width-1 driver samply
+    folds (2 runs per build); driver widths 1/231/515 (3 pairs); the gate
+    `fwmac.sh 379668af <head> 5`; attribution controls once (singleton
+    leader persists exactly 264,195 at width 1; bulk followers side by side).
+    Single-1 judging rule (PR 21's reviewers): judge by the driver, single-16
+    and both bulk cells; single-1 is a guard, and an adverse move counts only
+    if a control (head plus a busy loop adding back the removed time) does
+    not explain it; if it moves adversely, run that control once.
+  - Checks: fmt, the four strict Clippy builds, matched fmt/Clippy; `--lib`
+    (debug, and `--release` for the install tests), `volatile`, `raft`,
+    `snapshot`, `log_owned`, `worker`, `runtime`, `effect_owner`, matched
+    tests, in default and all features, one configuration at a time.
+- **Step 2 (staging side), only if the step-1 profile supports it.** The
+  staging moves (`stage_pending_into` 60.3, `persist_update_into` 15.9,
+  `Result::branch` on the plan) are a separate step, planned as an addendum
+  here before editing, after the step-1 profile shows what is left.
+
+#### V3f implemented: in-place install (20 October 2026)
+
+Commits on `cpu/in-place-install` (from main `379668af`): `7b1a3038` (the
+schema plan above), `f4803a4d` (step 1: in-place install, clear after
+success, staging assertion, tests) and `e3471f31` (`Installed` declared
+beside `Pending`, so the code merges with V3e without a conflict; comment
+wording). Code head: `e3471f31`. The driver and the profiles used
+`f4803a4d`; `e3471f31` changes only a declaration's position and a comment.
+
+- **Public API: no change.** Internal: `OwnedNextLog::install_in_place`
+  replaces `install_unchanged`; `NextLog::check_install` and
+  `NextLog::install_in_place` (cold plans), `CompactDelta::install_ref`;
+  `SummarizedLog::install` takes `&mut OwnedNextLog`;
+  `Raft::install_pending_plan` and the `Installed` parts struct. The
+  by-value `OwnedNextLog::install` is now test-only (the owned provider uses
+  `prepare_install`, unchanged). `Pending` 1,104 B and `OwnedNextLog` 672 B
+  are unchanged; `pending_and_plan_sizes` is unchanged and passes.
+- **Guarantees kept.** Every install still checks exactly what it checked:
+  the V3d stamp rule decides the skip (`planned` must be `Some` and equal to
+  the log's own stamp; the stamp still travels in `Pending.planned`), and
+  every other install, and every cold plan, runs the same comparisons with
+  the same errors. All checks precede the first change, so a refused install
+  changes nothing, the plan included; the core then fences through the same
+  `storage_failed()` call as before, which empties the slot as before. The
+  existing V3d tests that assert "fenced, no pending dependency, log
+  unchanged" after a refused install are unchanged and pass.
+- **Difference from the plan.** Step 2 (staging) was not done. The step-1
+  profile leaves `stage_pending_into` at 65.0 ns memmove per write (its
+  `self.pending = Some(Pending { .. })` line: the 672 B plan argument and
+  the 256 B reply written into the slot; the x86 code writes them straight
+  into the slot, no stack temporary) and `persist_update_into` 14.1 ns (the
+  `?` on `plan_owned`'s `Result`). Removing the plan copy would need the
+  plan built inside the slot expression, that is a second, core-only,
+  two-phase planning API beside `plan_owned` / `plan_commit` / `plan_copy`,
+  for at most about 45 ns per write at width 1 (about 1.5% of the driver,
+  0.4% of a singleton write). Not worth a second planning path; recorded as
+  a candidate.
+- **Tests** (`src/raft/install_in_place_tests.rs`, debug and `--release`,
+  default and all features):
+  `a_failed_install_after_a_predecessor_mismatch_leaves_the_plan_intact`
+  (a follower append with its reply, and a commit advance, each staged and
+  then the log changed behind it),
+  `a_failed_install_of_a_foreign_plan_leaves_the_plan_intact` (a plan moved
+  to another core at the same version),
+  `a_failed_install_of_a_refused_full_plan_leaves_the_plan_intact` (a durable
+  leader's configuration entry, a full plan with a membership and an
+  admitted ticket, refused by the `NextLog` check) and
+  `a_successful_install_empties_the_slot`. Each failure test checks, after
+  `install_pending_plan`: today's error (`Storage(Rejected("transition plan
+  predecessor or update mismatch"))`), the pending transition intact (its
+  update, metadata, kind, full log, membership, ticket, `After`, reply and
+  stamp), the log, summary and stamp unchanged, the core not yet fenced; then
+  the public completion (`persist_volatile`, `complete`, or the completions'
+  install for the moved plan): the same error, fenced, no pending
+  dependency, log unchanged.
+- **Mutations** (temporary edits, restored by checkout):
+
+  | Edit | Result |
+  | --- | --- |
+  | M1 no `self.pending = None` after a successful install | debug lib: 146 of 555 fail (113 by the staging assertion); release `install_in_place`: the success test fails |
+  | M2 the append's suffix taken before its check | 2 of 4 install tests fail (predecessor mismatch, foreign plan) |
+  | M3 a full plan swapped into the log before its check | 2 of 4 fail (refused full plan; the success test's configuration) |
+  | M4 a commit advance's summary written before its check | 1 of 4 fails (predecessor mismatch) |
+
+Deterministic driver (`R3_DRIVE`, `research-r4/tools-r4/drive.py` on both
+trees, one thread), quiet Mac (load 1.1–1.3), 3 interleaved pairs, medians:
+
+| Width | `379668af` ns/write | `f4803a4d` ns/write | Pair ratios | Instructions/write | Cycles/write |
+| ---: | ---: | ---: | --- | --- | --- |
+| 1 | 3,010.7 | 2,914.6 (−3.2%) | 0.97 0.98 0.96 | 45,021.5 → 42,745.5 (−5.1%) | 9,496.8 → 9,139.1 (−3.8%) |
+| 231 | 93.1 | 92.0 (−1.2%) | 1.01 0.99 0.98 | 1,758.9 → 1,746.4 (−0.7%) | 349.2 → 344.9 (−1.2%) |
+| 515 | 87.5 | 87.3 (−0.2%) | 0.99 1.00 1.00 | 1,855.3 → 1,850.7 (−0.2%) | 373.9 → 372.3 (−0.4%) |
+
+Per-site attribution: samply at 8 kHz on the width-1 driver
+(`R3_DRIVE=300000,1,1`), 2 runs per build, `expand_mac.py` folds,
+CPU-weighted ns per write (sampled totals 3,519 → 3,427):
+
+| Site | `379668af` | `f4803a4d` | Change |
+| --- | ---: | ---: | ---: |
+| memmove in `install_pending_into` (`take()` 69.7 at the `Pending` take, 47.7 at the plan move into `install`) | 124.5 | 0 | −124.5 |
+| memmove in `install_unchanged` → `install_in_place` (the plan moved in; now only the 336 B summary written to the log) | 31.2 | 19.4 | −11.8 |
+| memmove in `SummarizedLog::install` (the plan moved on) | 23.3 | 0 | −23.3 |
+| memmove, install side in all | 179.0 | 19.4 | −159.6 |
+| new: dropping the spent plan at the clear (`Option<Pending>` drop glue) and taking the reply (`Option::take`) | — | 27.2 + 15.8 | +43.0 |
+| memmove in `stage_pending_into` / `persist_update_into` / `OwnedAppend::new` (not changed) | 60.3 / 15.9 / 11.4 | 65.0 / 14.1 / 12.1 | ~0 |
+| `install_pending_into` inclusive / self | 773.2 / 31.5 | 604.1 / 27.3 | −169.1 |
+| `SummarizedLog::install` inclusive | 132.1 | 90.3 | −41.8 |
+| `finish_volatile_into` inclusive | 782.1 | 615.2 | −166.9 |
+| All sampled | 3,519 | 3,427 | −92 |
+
+The profile's estimate for this slice was the library memmove at these
+sites, 250–330 ns of 356 on `d379783d` (single-1 running view); on
+`379668af` the install side was 179 ns of memmove at width 1 and 160 of it
+is gone. The staging side (about 90 ns) is the part left (above).
+
+Gate: `target/claude/tools/fwmac.sh 379668af 98e77aef 5` (`98e77aef` is the
+first pushed head; its code is `e3471f31`), quiet Mac (load 0.4–2.9, no
+other benchmark process), whole-process CPU per completed write, run three
+times:
+
+| Cell | Run 1 | Run 2 | Run 3 | 15-pair median ratio | Expected |
+| --- | --- | --- | --- | ---: | ---: |
+| bulk 4096/4, 16 workers | 212 → 217 (+2.4%) | 212 → 213 (+0.5%) | 213 → 213 (0.0%) | 1.00 | ~0 |
+| singleton 1/1, 16 workers | 21,057 → 20,970 (−0.4%) | 21,251 → 21,123 (−0.6%) | 21,113 → 21,176 (+0.3%) | 1.00 | about −0.5% (below) |
+| bulk 4096/4, 1 worker | 185 → 188 (+1.6%) | 189 → 187 (−1.1%) | 186 → 190 (+2.2%) | 1.01 | ~0 |
+| singleton 1/1, 1 worker | 11,446 → 11,273 (−1.5%) | 11,359 → 11,395 (+0.3%) | 11,391 → 11,380 (−0.1%) | 1.00 | about −0.9% (below) |
+
+Pair ratios, run 1 / 2 / 3: bulk-16 `0.98 1.02 0.99 1.01 1.02` / `0.99 1.01
+1.00 1.00 1.05` / `1.05 1.00 1.00 0.99 1.00`; single-16 `1.00 1.00 0.98 1.01
+1.00` / `0.99 0.97 0.99 1.00 1.06` / `1.02 1.00 1.00 1.00 0.99`; bulk-1 `1.01
+0.97 1.01 1.02 1.03` / `0.98 1.01 0.99 1.02 0.90` / `1.02 1.02 1.02 1.02
+0.97`; single-1 `0.99 0.98 0.99 0.98 0.97` / `1.02 1.00 1.00 1.00 0.99` /
+`1.00 1.00 0.99 1.00 1.00`.
+
+Judgement (PR 21's rule: the driver, single-16 and both bulk cells decide;
+single-1 is a guard). The driver improves at widths 1 and 231 in every pair
+(−3.2% and −1.2%). The four cells are flat within noise (15-pair median
+ratios 1.00 / 1.00 / 1.01 / 1.00). That is the expected size: the install
+saving is about 100–170 ns per write at six persistence rounds (width 1),
+about 0.5% of a single-16 write (21.1 µs) and 0.9% of a single-1 write
+(11.4 µs), below these cells' run-to-run spread (single-16 pairs 0.97–1.06).
+A bulk round installs once per few hundred writes (under 0.5 ns per write),
+so bulk's run medians (+2.4 / +0.5 / 0.0% and +1.6 / −1.1 / +2.2%) are
+noise, with both signs across runs; the per-round evidence is the
+fixed-width driver. Single-1 did not move adversely (−1.5 / +0.3 / −0.1%,
+median ratio 1.00), so the busy-loop control was not needed and not run.
+
+Attribution controls (`--attribution true`, one run per cell per revision,
+`379668af` → `98e77aef`; 0 phase failures, all 131,072 / 3,997,696 writes
+completed, equal final frontiers 132,097 / 3,998,721 everywhere):
+
+| Cell | Leader persists | Leader admissions | Follower persists (sum) | Follower sends (sum) |
+| --- | --- | --- | --- | --- |
+| single-16 | 264,195 → 264,195 | 132,096 → 132,096 | 487,524 → 488,940 (+0.3%) | 487,611 → 489,029 |
+| single-1 | 264,195 → 264,195 | 132,096 → 132,096 | 496,937 → 503,071 (+1.2%) | 497,027 → 503,161 |
+| bulk-16 | 14,651 → 14,587 | 8,856 → 8,810 | 11,758 → 11,759 | 13,942 → 13,918 |
+| bulk-1 | 24,667 → 27,135 | 19,715 → 22,137 | 11,295 → 11,307 | 15,757 → 15,702 |
+
+- Singleton: the leader persists exactly 264,195 at width 1 in both. The
+  single-1 followers' +1.2% is inside the ~2% run-to-run spread V3d and V3e
+  recorded for this count in both builds.
+- Bulk: followers and sends are side by side (within 0.4%). The bulk-1
+  leader's admission count moves +12%, inside the 17–32% spread of this
+  one-worker cell recorded in V3c, V3d and V3e.
+
+Checks (Linux, cores 4–9, `-j 4`): `cargo +stable fmt --all -- --check` and
+matched fmt; strict Clippy with default, `--all-features`,
+`--no-default-features` and `--no-default-features --features native`, and
+the matched workspace, zero diagnostics (pre-push hook, enabled, passed on
+every push); default `--lib --test volatile --test raft --test snapshot
+--test log_owned --test worker --test runtime --test effect_owner` (555 lib,
+1 ignored, + 11/81/27/5/9/57/211) and all features (557 lib, 1 ignored, +
+the same), one configuration at a time; with all features also `log_store`
+19, `membership` 32, `learners` 24, `retirement` 7, `member_recovery` 44;
+`--release --lib -- install_in_place summarized commit_advance completion`
+40/40 in default and all features; matched tests 75/75 in default and all
+features.
+
+V3e conflict check (`git merge --no-commit --no-ff origin/cpu/peer-slots` at
+`5a316689` in this worktree, then `git merge --abort`): the code merges
+without conflict (`src/raft.rs` auto-merges once `Installed` sits beside
+`Pending`; the first check, with it beside `Replication`, conflicted on
+V3e's derive line), and the merged tree passes `--lib` 562/562 (1 ignored,
+both slices' tests and V3e's debug oracles), `volatile` 11, `raft` 81 and
+`snapshot` 27. `docs/IMPLEMENTATION.md` conflicts in three places, all
+"take both": the adjacent V3e/V3f mini-plan rows, and both slices' sections
+inserted before "H2 round 2".
 
 #### H2 round 2: review fixes (19 October 2026)
 

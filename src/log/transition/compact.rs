@@ -45,6 +45,9 @@ impl CompactDelta {
         Ok(())
     }
     pub(crate) fn install(self, current: &mut GroupLog) -> LogSummary {
+        self.install_ref(current)
+    }
+    pub(crate) fn install_ref(&self, current: &mut GroupLog) -> LogSummary {
         current.entries.trim_prefix(self.removed);
         self.metadata().install_header(current);
         self.summary
