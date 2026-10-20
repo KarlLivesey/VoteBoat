@@ -204,6 +204,51 @@ fn bootstrap_binds_owner_namespace_policy_and_initial_application_before_service
 }
 
 #[test]
+fn startup_binding_does_not_refuse_skew_at_readiness() {
+    // Sol, round 3: Routed's own schema is a fixed constant, so Routed around
+    // Counter::new(4) and Counter::new(7) declared the same requirements and
+    // the smaller replica failed the committed bootstrap entry instead of
+    // being refused at readiness. The inner profile is now declared and
+    // compared, so each refuses the other before any entry.
+    let routed = |window| {
+        RoutedApplication::new(
+            group(20),
+            grant(),
+            Counter::new(window).unwrap(),
+            HostPolicy,
+            limits(),
+        )
+        .unwrap_or_else(|r| panic!("{:?}", r.error))
+    };
+    let (small, large) = (routed(4), routed(7));
+    assert_eq!(small.schema_version(), large.schema_version());
+    for (replica, leader) in [(&small, &large), (&large, &small)] {
+        let declared = leader.deployment_requirements().unwrap();
+        assert_eq!(
+            declared.inner_profile.layers(),
+            Some(&[leader.application().schema_version()][..])
+        );
+        assert_eq!(leader.validate_deployment_requirements(declared), Ok(()));
+        assert_eq!(
+            replica.validate_deployment_requirements(declared),
+            Err(ApplicationError::UnsupportedSchema)
+        );
+    }
+    // Defence in depth, unchanged: had readiness been bypassed, the committed
+    // binding still stops the skewed replica before any data.
+    let bootstrap = large.bootstrap_command(MAX_ROUTED_COMMAND_BYTES).unwrap();
+    let mut leader = large.clone();
+    assert!(leader
+        .apply_batch(&[entry(1, 10000, bootstrap.clone())])
+        .is_ok());
+    let mut skewed = small.clone();
+    assert_eq!(
+        skewed.apply_batch(&[entry(1, 10000, bootstrap)]).err(),
+        Some(ApplicationError::InvalidCommand)
+    );
+    assert_eq!(skewed.applied_index(), 0);
+}
+#[test]
 fn admission_and_apply_recheck_context_and_bind_retries_to_key_and_payload() {
     let mut app = initialized();
     let bytes = data(10, 7);

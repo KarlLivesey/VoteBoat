@@ -969,6 +969,7 @@ impl Directory {
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
             application_schema: self.schema_version(),
+            inner_profile: crate::raft::InnerProfile::LEAF,
             command_bytes: self
                 .control_command_limit()
                 .max(46 + self.plan.encoded_len())

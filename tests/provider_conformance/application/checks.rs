@@ -215,6 +215,7 @@ fn deployment<S: Scenario>(app: &S::App) {
         assert_eq!(
             app.validate_deployment_requirements(ReadinessRequirements {
                 application_schema: 1,
+                inner_profile: voteboat::raft::InnerProfile::LEAF,
                 command_bytes: 8,
                 snapshot_bytes: 4096,
             }),

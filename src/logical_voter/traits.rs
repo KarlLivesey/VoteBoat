@@ -42,6 +42,7 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone> StateM
     fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
         Some(crate::raft::ReadinessRequirements {
             application_schema: self.application_schema(),
+            inner_profile: crate::raft::InnerProfile::LEAF,
             command_bytes: self.limits.max_command_bytes,
             snapshot_bytes: self.limits.max_child_checkpoint_bytes,
         })

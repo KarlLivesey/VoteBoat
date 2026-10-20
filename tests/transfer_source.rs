@@ -267,3 +267,38 @@ fn status_query_is_prefix_checked_and_charges_fixed_and_nested_capacity() {
     assert_eq!(status.fence, s.fence().unwrap());
     assert_eq!(status.intent, intent());
 }
+
+#[test]
+fn readiness_declares_and_compares_the_whole_inner_stack() {
+    // The source's schema is a protocol constant, so the routed owner and its
+    // bucket counter below it are declared as the inner profile and compared
+    // layer for layer: a replica with any other stack is refused at readiness.
+    let s = fresh();
+    let declared = s.deployment_requirements().unwrap();
+    assert_eq!(declared.application_schema, TRANSFER_SOURCE_SCHEMA);
+    let routed = routed().deployment_requirements().unwrap();
+    assert_eq!(
+        declared.inner_profile.layers(),
+        Some(&[ROUTED_APPLICATION_SCHEMA, BUCKET_COUNTER_SCHEMA][..])
+    );
+    assert_eq!(
+        declared.inner_profile,
+        voteboat::raft::InnerProfile::wrapping(routed)
+    );
+    assert_eq!(s.validate_deployment_requirements(declared), Ok(()));
+    for layers in [
+        &[][..],
+        &[ROUTED_APPLICATION_SCHEMA][..],
+        &[SCOPED_ROUTED_APPLICATION_SCHEMA, BUCKET_COUNTER_SCHEMA][..],
+        &[ROUTED_APPLICATION_SCHEMA, BUCKET_COUNTER_SCHEMA, 1][..],
+    ] {
+        assert_eq!(
+            s.validate_deployment_requirements(voteboat::raft::ReadinessRequirements {
+                inner_profile: voteboat::raft::InnerProfile::from_layers(layers).unwrap(),
+                ..declared
+            }),
+            Err(ApplicationError::UnsupportedSchema),
+            "{layers:?}"
+        );
+    }
+}

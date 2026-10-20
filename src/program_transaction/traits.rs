@@ -34,6 +34,7 @@ impl StateMachine for ProgramApplication {
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
         Some(ReadinessRequirements {
             application_schema: PROGRAM_SCHEMA,
+            inner_profile: crate::raft::InnerProfile::LEAF,
             command_bytes: PROGRAM_COMMAND_BYTES,
             snapshot_bytes: codec::checkpoint_bound(self),
         })

@@ -447,6 +447,7 @@ where
         let inner = self.initial.retirement_requirements();
         ReadinessRequirements {
             application_schema: RETIREMENT_GUARD_SCHEMA,
+            inner_profile: crate::raft::InnerProfile::wrapping(inner),
             command_bytes: inner.command_bytes.max(MAX_RETIREMENT_COMMAND_BYTES),
             snapshot_bytes: 80
                 + inner.snapshot_bytes.max(

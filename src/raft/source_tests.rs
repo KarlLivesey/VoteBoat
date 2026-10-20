@@ -65,6 +65,7 @@ fn source_preflight_allows_actual_not_caught_up_readiness_reply() {
                 session: StoreSession::new(7).unwrap(),
                 requirements: ReadinessRequirements {
                     application_schema: 1,
+                    inner_profile: crate::raft::InnerProfile::LEAF,
                     command_bytes: 128,
                     snapshot_bytes: 256,
                 },

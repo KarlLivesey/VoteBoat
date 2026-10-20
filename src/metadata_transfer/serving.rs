@@ -268,6 +268,7 @@ impl MetadataServingTarget {
         let inner = self.target.readiness_requirements();
         ReadinessRequirements {
             application_schema: self.schema_version(),
+            inner_profile: crate::raft::InnerProfile::LEAF,
             command_bytes: inner
                 .command_bytes
                 .max(ACTIVATION_BYTES)

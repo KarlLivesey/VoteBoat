@@ -730,6 +730,15 @@ impl<'a> Encoder<'a> {
         self.u64(r.requirements.application_schema)?;
         self.u64(u64::try_from(r.requirements.command_bytes).map_err(|_| WireError::TooLarge)?)?;
         self.u64(u64::try_from(r.requirements.snapshot_bytes).map_err(|_| WireError::TooLarge)?)?;
+        let layers = r
+            .requirements
+            .inner_profile
+            .layers()
+            .ok_or(WireError::InvalidMessage("readiness inner profile depth"))?;
+        self.u8(layers.len() as u8)?;
+        for schema in layers {
+            self.u64(*schema)?;
+        }
         if let Rpc::LearnerReadinessReply { ready, .. } = &m.rpc {
             self.u8(u8::from(*ready))?;
         }
@@ -1350,11 +1359,7 @@ impl<'a> Decoder<'a> {
                 .ok_or(WireError::InvalidMessage("zero readiness session"))?,
             index: self.u64()?,
             index_term: self.u64()?,
-            requirements: ReadinessRequirements {
-                application_schema: self.u64()?,
-                command_bytes: usize::try_from(self.u64()?).map_err(|_| WireError::TooLarge)?,
-                snapshot_bytes: usize::try_from(self.u64()?).map_err(|_| WireError::TooLarge)?,
-            },
+            requirements: self.readiness_requirements()?,
         };
         Ok(if kind == 12 {
             Rpc::LearnerReadinessRequest(Box::new(request))
@@ -1363,6 +1368,32 @@ impl<'a> Decoder<'a> {
                 request: Box::new(request),
                 ready: bool_value(self.u8()?)?,
             }
+        })
+    }
+}
+impl Decoder<'_> {
+    /// Schema, command and snapshot bytes, then the inner profile: a layer
+    /// count (at most `MAX_INNER_PROFILE_LAYERS`) and that many non-zero
+    /// schemas, outermost first.
+    fn readiness_requirements(&mut self) -> Result<ReadinessRequirements, WireError> {
+        let application_schema = self.u64()?;
+        let command_bytes = usize::try_from(self.u64()?).map_err(|_| WireError::TooLarge)?;
+        let snapshot_bytes = usize::try_from(self.u64()?).map_err(|_| WireError::TooLarge)?;
+        let count = usize::from(self.u8()?);
+        if count > crate::raft::MAX_INNER_PROFILE_LAYERS {
+            return Err(WireError::InvalidMessage("readiness inner profile depth"));
+        }
+        let mut layers = [0; crate::raft::MAX_INNER_PROFILE_LAYERS];
+        for layer in &mut layers[..count] {
+            *layer = self.u64()?;
+        }
+        let inner_profile = crate::raft::InnerProfile::from_layers(&layers[..count])
+            .ok_or(WireError::InvalidMessage("readiness inner profile schema"))?;
+        Ok(ReadinessRequirements {
+            application_schema,
+            inner_profile,
+            command_bytes,
+            snapshot_bytes,
         })
     }
 }

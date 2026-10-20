@@ -817,6 +817,7 @@ where
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
             application_schema: self.schema_version(),
+            inner_profile: crate::raft::InnerProfile::of(&self.inner),
             command_bytes: self
                 .binding
                 .len()

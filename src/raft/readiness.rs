@@ -24,8 +24,75 @@ use crate::{
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ReadinessRequirements {
     pub application_schema: u64,
+    /// The applications inside this one, if it wraps any. Readiness compares it
+    /// with the schema, so a wrapper whose own schema is a fixed protocol
+    /// constant still refuses a replica whose inner application differs.
+    pub inner_profile: InnerProfile,
     pub command_bytes: usize,
     pub snapshot_bytes: usize,
+}
+
+/// Most application layers an [`InnerProfile`] records.
+pub const MAX_INNER_PROFILE_LAYERS: usize = 7;
+
+/// Hash-free structural identity of the applications inside a wrapper: the
+/// readiness schema of each application below the outer one, outermost first
+/// (a leaf application has none). Readiness compares it layer for layer, so
+/// two stacks match only if every layer's schema does. A generic stack deeper
+/// than [`MAX_INNER_PROFILE_LAYERS`] gets an overflowed profile, which
+/// readiness refuses (`UnsupportedSchema`) rather than truncating.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct InnerProfile {
+    /// Layers in use, or `u8::MAX` once overflowed.
+    len: u8,
+    layers: [u64; MAX_INNER_PROFILE_LAYERS],
+}
+impl InnerProfile {
+    /// No inner application.
+    pub const LEAF: Self = Self {
+        len: 0,
+        layers: [0; MAX_INNER_PROFILE_LAYERS],
+    };
+    const OVERFLOWED: Self = Self {
+        len: u8::MAX,
+        layers: [0; MAX_INNER_PROFILE_LAYERS],
+    };
+    /// The profile of a wrapper whose inner application declares `inner`: the
+    /// inner schema, then the inner application's own profile.
+    pub fn wrapping(inner: ReadinessRequirements) -> Self {
+        let Some(below) = inner.inner_profile.layers() else {
+            return Self::OVERFLOWED;
+        };
+        let mut layers = Vec::with_capacity(below.len() + 1);
+        layers.push(inner.application_schema);
+        layers.extend_from_slice(below);
+        Self::from_layers(&layers).unwrap_or(Self::OVERFLOWED)
+    }
+    /// The profile of a wrapper around `inner`: from its declared
+    /// requirements, or its checkpoint schema alone if it declares none.
+    pub fn of<A: CheckpointStateMachine>(inner: &A) -> Self {
+        match inner.deployment_requirements() {
+            Some(declared) => Self::wrapping(declared),
+            None => Self::from_layers(&[inner.schema_version()]).unwrap_or(Self::OVERFLOWED),
+        }
+    }
+    /// An explicit profile; `None` above [`MAX_INNER_PROFILE_LAYERS`] layers or
+    /// with a zero schema.
+    pub fn from_layers(schemas: &[u64]) -> Option<Self> {
+        if schemas.len() > MAX_INNER_PROFILE_LAYERS || schemas.contains(&0) {
+            return None;
+        }
+        let mut layers = [0; MAX_INNER_PROFILE_LAYERS];
+        layers[..schemas.len()].copy_from_slice(schemas);
+        Some(Self {
+            len: schemas.len() as u8,
+            layers,
+        })
+    }
+    /// The inner schemas, outermost first; `None` if overflowed.
+    pub fn layers(&self) -> Option<&[u64]> {
+        self.layers.get(..usize::from(self.len))
+    }
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct LearnerReadinessRequest {

@@ -500,6 +500,7 @@ where
             } else {
                 SCOPED_TRANSFER_SOURCE_SCHEMA
             },
+            inner_profile: crate::raft::InnerProfile::wrapping(inner),
             command_bytes: (inner.command_bytes + if self.parent_limit == 0 { 20 } else { 22 })
                 .max(if self.metadata_adoption {
                     MAX_RETAINED_ADOPTION_BYTES.max(MAX_METADATA_ADOPTION_BYTES)

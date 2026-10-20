@@ -845,6 +845,7 @@ fn learners_proposal(state: &GroupLog) -> ConfigurationProposal {
         readiness: Vec::new(),
         requirements: ReadinessRequirements {
             application_schema: 1,
+            inner_profile: voteboat::raft::InnerProfile::LEAF,
             command_bytes: 1024,
             snapshot_bytes: 1024,
         },

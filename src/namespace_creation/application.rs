@@ -290,6 +290,7 @@ where
         let r = self.inner.owner_requirements();
         ReadinessRequirements {
             application_schema: O::SCHEMA,
+            inner_profile: crate::raft::InnerProfile::wrapping(r),
             command_bytes: r
                 .command_bytes
                 .max(self.binding.len())

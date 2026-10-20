@@ -113,6 +113,7 @@ fn host_fixture_uses_only_public_wire_contract_without_native_features() {
             committed_index: 0,
             application: ReadinessRequirements {
                 application_schema: 1,
+                inner_profile: voteboat::raft::InnerProfile::LEAF,
                 command_bytes: 8,
                 snapshot_bytes: 4096,
             },
@@ -1061,6 +1062,7 @@ mod native {
             index_term: 2,
             requirements: ReadinessRequirements {
                 application_schema: 1,
+                inner_profile: voteboat::raft::InnerProfile::LEAF,
                 command_bytes: 8,
                 snapshot_bytes: 4096,
             },
@@ -1135,6 +1137,52 @@ mod native {
                 .is_err());
         }
         fixture_roundtrip(codec, membership_snapshot(true));
+        verify_readiness_profiles(codec, &query, request);
+    }
+    /// The inner profile travels after the snapshot bytes: a count, then that
+    /// many schemas. Depth above seven and zero schemas are refused.
+    fn verify_readiness_profiles(
+        codec: NativeWireCodec,
+        query: &Message,
+        request: LearnerReadinessRequest,
+    ) {
+        use voteboat::raft::{InnerProfile, MAX_INNER_PROFILE_LAYERS};
+        let with = |layers: &[u64]| Message {
+            rpc: Rpc::LearnerReadinessRequest(Box::new(LearnerReadinessRequest {
+                requirements: ReadinessRequirements {
+                    inner_profile: InnerProfile::from_layers(layers).unwrap(),
+                    ..request.requirements
+                },
+                ..request
+            })),
+            ..query.clone()
+        };
+        let leaf = codec.encode_batch(scope(), &[with(&[])]).unwrap();
+        for layers in [&[5, 1][..], &[9; MAX_INNER_PROFILE_LAYERS][..]] {
+            let input = with(layers);
+            fixture_roundtrip(codec, input.clone());
+            let frame = codec
+                .encode_batch(scope(), std::slice::from_ref(&input))
+                .unwrap();
+            assert_eq!(frame.len(), leaf.len() + 8 * layers.len());
+            assert_eq!(codec.decode_batch(scope(), &frame).unwrap(), vec![input]);
+            // Trailer: the profile count, the schemas, then the 4-byte CRC.
+            let count = frame.len() - 5 - 8 * layers.len();
+            assert_eq!(frame[count], layers.len() as u8);
+            assert_eq!(
+                codec
+                    .decode_batch(scope(), &change(&frame, count, &[8]))
+                    .err(),
+                Some(WireError::InvalidMessage("readiness inner profile depth"))
+            );
+            let last = frame.len() - 12;
+            assert_eq!(
+                codec
+                    .decode_batch(scope(), &change(&frame, last, &[0; 8]))
+                    .err(),
+                Some(WireError::InvalidMessage("readiness inner profile schema"))
+            );
+        }
     }
 
     #[test]

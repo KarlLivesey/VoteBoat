@@ -176,6 +176,7 @@ fn admin_request(group_id: u128, operation: u128, finalizing: bool) -> Configura
             readiness: vec![],
             requirements: ReadinessRequirements {
                 application_schema: Counter::new(100).unwrap().schema_version(),
+                inner_profile: voteboat::raft::InnerProfile::LEAF,
                 command_bytes: voteboat::application::COUNTER_COMMAND_BYTES,
                 snapshot_bytes: 4096,
             },

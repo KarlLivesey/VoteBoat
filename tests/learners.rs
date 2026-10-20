@@ -532,6 +532,7 @@ fn joint_or_policy_transition_cannot_use_learner_recovery_to_open_dynamic_voting
 fn readiness_requirements() -> ReadinessRequirements {
     ReadinessRequirements {
         application_schema: Counter::new(16).unwrap().schema_version(),
+        inner_profile: voteboat::raft::InnerProfile::LEAF,
         command_bytes: voteboat::application::COUNTER_COMMAND_BYTES,
         snapshot_bytes: 4096,
     }

@@ -253,6 +253,7 @@ fn native_administration_receipts_commit_joint_and_final_and_reopen_exact_histor
                     operation,
                     ReadinessRequirements {
                         application_schema: Counter::new(100).unwrap().schema_version(),
+                        inner_profile: voteboat::raft::InnerProfile::LEAF,
                         command_bytes: voteboat::application::COUNTER_COMMAND_BYTES,
                         snapshot_bytes: 4096,
                     },
@@ -771,6 +772,7 @@ fn startup_configuration_request(
             readiness: vec![],
             requirements: ReadinessRequirements {
                 application_schema: Counter::new(100).unwrap().schema_version(),
+                inner_profile: voteboat::raft::InnerProfile::LEAF,
                 command_bytes: voteboat::application::COUNTER_COMMAND_BYTES,
                 snapshot_bytes: 4096,
             },

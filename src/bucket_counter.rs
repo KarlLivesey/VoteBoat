@@ -200,6 +200,7 @@ impl<P: PartitionPolicy + Clone> BucketCounter<P> {
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
             application_schema: BUCKET_COUNTER_SCHEMA,
+            inner_profile: crate::raft::InnerProfile::LEAF,
             command_bytes: MAX_BUCKET_COMMAND_BYTES,
             snapshot_bytes: self.limits.checkpoint_bound().expect("validated limits"),
         }

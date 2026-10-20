@@ -274,6 +274,7 @@ where
         let inner = self.routed.readiness_requirements();
         crate::raft::ReadinessRequirements {
             application_schema: TRANSFER_SOURCE_SCHEMA,
+            inner_profile: crate::raft::InnerProfile::wrapping(inner),
             command_bytes: (inner.command_bytes + 20).max(8 + MAX_TRANSFER_INTENT_BYTES),
             snapshot_bytes: inner.snapshot_bytes + 40 + MAX_TRANSFER_INTENT_BYTES,
         }

@@ -231,7 +231,10 @@ pub trait StateMachine {
         {
             return Err(ApplicationError::InvalidCheckpoint);
         }
-        if declared.application_schema != actual.application_schema {
+        if declared.application_schema != actual.application_schema
+            || declared.inner_profile != actual.inner_profile
+            || actual.inner_profile.layers().is_none()
+        {
             return Err(ApplicationError::UnsupportedSchema);
         }
         if declared.command_bytes < actual.command_bytes

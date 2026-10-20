@@ -541,7 +541,10 @@ new ledger; the target is untouched on refusal).
      with `Err(InvalidCommand)` (a loud stop, never a different outcome). Their
      only in-tree inner application, `BucketCounter`, has one fixed schema.
      `RoutedControlReads` forwards the inner schema unchanged. So those six are
-     recorded, not changed. Maintenance's own `capacity` is not in its schema:
+     recorded, not changed. *(Corrected in round 4: the inner-application
+     claim was wrong, `tests/routed.rs` wraps `Counter`; and a failed committed
+     binding is an apply-time stop, not the required readiness refusal. Round
+     4 adds the inner profile to the readiness declaration instead.)* Maintenance's own `capacity` is not in its schema:
      a mismatch fails a committed `Begin` with `Err(DedupCapacity)` on the
      smaller replica (loud), and DR2 replaces that table.
    - *Test.* Two `Maintenance<Counter>` with format 3 and inner limits
@@ -629,7 +632,8 @@ Implemented as planned above; the deviations are noted inline.
   maintenance profile is format 3 (`MAINTENANCE_FORMAT`). The other six
   `Retention::wrapping` sites are unchanged: each commits a bootstrap binding
   that contains the inner schema, so a skewed replica stops loudly on the first
-  entry instead of diverging. Tests:
+  entry instead of diverging (*superseded in round 4*: that stop happens after
+  the replica is admitted; readiness now compares the inner profile). Tests:
   `wrapped_counters_with_different_session_limits_refuse_each_other_before_any_entry`
   (tests/leadership_maintenance.rs),
   `readiness_refuses_a_wrapped_learner_whose_inner_session_limits_differ`

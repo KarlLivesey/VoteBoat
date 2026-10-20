@@ -101,6 +101,7 @@ impl<A: StateMachine + Clone> StateMachine for Maintenance<A> {
         let inner = self.inner.deployment_requirements()?;
         Some(ReadinessRequirements {
             application_schema: self.schema,
+            inner_profile: crate::raft::InnerProfile::wrapping(inner),
             command_bytes: inner.command_bytes.checked_add(9)?.max(113),
             snapshot_bytes: inner
                 .snapshot_bytes

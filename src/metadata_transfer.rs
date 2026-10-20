@@ -603,6 +603,7 @@ impl MetadataAuthoritySource {
         let inner = self.initial.readiness_requirements();
         ReadinessRequirements {
             application_schema: self.schema_version(),
+            inner_profile: crate::raft::InnerProfile::LEAF,
             command_bytes: inner
                 .command_bytes
                 .max(44 + MAX_METADATA_PLAN_BYTES)

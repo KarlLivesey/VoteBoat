@@ -22,6 +22,8 @@ use voteboat::{
 
 #[path = "application/finality.rs"]
 mod finality;
+#[path = "application/profiles.rs"]
+mod profiles;
 #[path = "application/ready_admission.rs"]
 mod ready_admission;
 #[path = "application/sessions.rs"]

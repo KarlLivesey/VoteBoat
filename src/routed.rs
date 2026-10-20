@@ -356,6 +356,7 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
             } else {
                 SCOPED_ROUTED_APPLICATION_SCHEMA
             },
+            inner_profile: crate::raft::InnerProfile::of(&self.inner),
             command_bytes: self
                 .binding
                 .len()

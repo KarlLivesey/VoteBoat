@@ -67,6 +67,7 @@ where
         }
         Some(crate::raft::ReadinessRequirements {
             application_schema: self.schema,
+            inner_profile: crate::raft::InnerProfile::wrapping(inner),
             command_bytes: self.limits.command_bytes,
             snapshot_bytes: self.limits.checkpoint_bytes,
         })

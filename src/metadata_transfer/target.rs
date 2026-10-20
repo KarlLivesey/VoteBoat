@@ -150,6 +150,7 @@ impl MetadataAuthorityTarget {
     pub fn readiness_requirements(&self) -> ReadinessRequirements {
         ReadinessRequirements {
             application_schema: self.schema_version(),
+            inner_profile: crate::raft::InnerProfile::LEAF,
             command_bytes: 244
                 + MAX_METADATA_PLAN_BYTES
                 + self.source.export_bytes

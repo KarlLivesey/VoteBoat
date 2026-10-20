@@ -201,6 +201,7 @@ impl Counter {
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
             application_schema: Self::schema(self.limits()),
+            inner_profile: crate::raft::InnerProfile::LEAF,
             command_bytes: COUNTER_COMMAND_BYTES,
             snapshot_bytes: HEADER_BYTES
                 + SessionLedger::<[u8; 8], Executed>::bound_bytes(self.limits()),
@@ -214,7 +215,9 @@ impl Counter {
         declared: crate::raft::ReadinessRequirements,
     ) -> Result<(), ApplicationError> {
         let actual = self.readiness_requirements();
-        if declared.application_schema != actual.application_schema {
+        if declared.application_schema != actual.application_schema
+            || declared.inner_profile != actual.inner_profile
+        {
             return Err(ApplicationError::UnsupportedSchema);
         }
         if declared.command_bytes < actual.command_bytes

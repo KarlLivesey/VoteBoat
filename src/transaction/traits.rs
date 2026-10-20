@@ -48,6 +48,7 @@ impl StateMachine for TransferApplication {
     fn deployment_requirements(&self) -> Option<ReadinessRequirements> {
         Some(ReadinessRequirements {
             application_schema: TRANSFER_SCHEMA,
+            inner_profile: crate::raft::InnerProfile::LEAF,
             command_bytes: TRANSFER_COMMAND_BYTES,
             snapshot_bytes: codec::checkpoint_bound(self),
         })
