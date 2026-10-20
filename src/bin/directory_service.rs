@@ -41,6 +41,8 @@ mod peer_credentials;
 mod policy_input;
 #[path = "support/preview_input.rs"]
 mod preview_input;
+#[path = "support/quic_hint.rs"]
+mod quic_hint;
 #[path = "support/route_client.rs"]
 mod route_client;
 #[path = "support/route_discovery.rs"]
@@ -123,9 +125,7 @@ fn options(args: &[String]) -> Result<Options, Failure> {
                     #[cfg(feature = "quic")]
                     "quic" => NativePeerProtocol::Quic,
                     #[cfg(not(feature = "quic"))]
-                    "quic" => {
-                        return Err("QUIC support requires building with --features quic".into())
-                    }
+                    "quic" => return Err(quic_hint::QuicNotBuilt.into()),
                     _ => return Err("unsupported transport".into()),
                 };
             }

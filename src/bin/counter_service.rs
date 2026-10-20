@@ -70,6 +70,8 @@ mod placement_input;
 mod placement_plan;
 #[path = "support/policy_input.rs"]
 mod policy_input;
+#[path = "support/quic_hint.rs"]
+mod quic_hint;
 #[path = "support/quorum_diagnostics.rs"]
 mod quorum_diagnostics;
 #[path = "support/service_access.rs"]
@@ -1200,7 +1202,7 @@ fn parse_protocol(value: &str) -> Result<NativePeerProtocol, Failure> {
         #[cfg(feature = "quic")]
         "quic" => Ok(NativePeerProtocol::Quic),
         #[cfg(not(feature = "quic"))]
-        "quic" => Err("QUIC support requires building with --features quic".into()),
+        "quic" => Err(quic_hint::QuicNotBuilt.into()),
         _ => Err("expected --transport tcp or --transport quic".into()),
     }
 }

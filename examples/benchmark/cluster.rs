@@ -21,11 +21,20 @@
 //! history and one quorum read, and prints a `mode=cluster` summary. Nodes 2
 //! and 3 run until stdin reaches EOF. Every node then drains, joins its workers
 //! and prints one `node_counters` line covering its whole lifetime.
+//!
+//! Stdin closing is how a node learns that its parent is gone (the kernel
+//! closes the pipe when the parent dies, however it dies). For node 1 every
+//! phase from waiting for `start` to the quorum read stops at the first poll
+//! round that sees it closed; only the final drain ignores it. Node 1 then
+//! prints `stdin_closed node=1 phase=P rounds_to_notice=K`, aborts its node
+//! (pending writes become unknown), prints `node_counters` and exits with
+//! [`STDIN_CLOSED_STATUS`]. It does not drain: a graceful drain waits for every
+//! pending write to resolve, which cannot happen once the followers are gone.
 use super::*;
 use std::{
     io::BufRead,
     path::PathBuf,
-    sync::atomic::{AtomicBool, Ordering},
+    sync::atomic::{AtomicBool, AtomicUsize, Ordering},
 };
 use voteboat::{
     native::readiness::{HostWait, HostWaitOutcome, HostWake},
@@ -34,6 +43,48 @@ use voteboat::{
 
 /// Bound on any one node-1 phase; a run that needs longer is invalid.
 const PHASE_LIMIT: Duration = Duration::from_secs(120);
+/// Exit status of a node 1 that stopped because its stdin closed before it
+/// reported (its parent is gone or released it); distinct from 1, any other
+/// failure.
+pub(crate) const STDIN_CLOSED_STATUS: i32 = 4;
+
+/// Node 1's stdin closed during `phase`, before the summary.
+#[derive(Debug)]
+struct StdinClosed {
+    phase: &'static str,
+    /// Poll rounds that began after the close and before node 1 stopped: 0 or
+    /// 1, because every round of an armed phase checks (see [`Control`]).
+    rounds_to_notice: usize,
+}
+impl std::fmt::Display for StdinClosed {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "stdin closed during {} (the parent is gone or released this node) after {} further poll round(s); the run is abandoned",
+            self.phase, self.rounds_to_notice
+        )
+    }
+}
+impl std::error::Error for StdinClosed {}
+
+/// [`run`] for a node process: a stop on closed stdin exits with
+/// [`STDIN_CLOSED_STATUS`] once the node is aborted and its counters printed.
+/// Exiting ends its worker threads; the run's directory is abandoned.
+pub(crate) fn run_process(
+    args: &[String],
+    ready: Option<usize>,
+    plain: bool,
+) -> Result<(), Failure> {
+    let result = run(args, ready, plain);
+    if let Err(error) = &result {
+        if error.is::<StdinClosed>() {
+            eprintln!("Error: {error}");
+            let _ = std::io::stdout().flush();
+            std::process::exit(STDIN_CLOSED_STATUS);
+        }
+    }
+    result
+}
 
 #[derive(Debug)]
 struct NodeArgs {
@@ -97,7 +148,7 @@ fn parse_ports(text: &str) -> Result<[u16; 3], Failure> {
 
 /// Run one cluster node; `args` follow `node`. Only `--ready-items` (default
 /// 1024, as in the services) may accompany them (`plain`).
-pub(crate) fn run(args: &[String], ready: Option<usize>, plain: bool) -> Result<(), Failure> {
+fn run(args: &[String], ready: Option<usize>, plain: bool) -> Result<(), Failure> {
     if !plain {
         return Err("node mode takes only --ready-items".into());
     }
@@ -112,15 +163,32 @@ pub(crate) fn run(args: &[String], ready: Option<usize>, plain: bool) -> Result<
         wait: HostWait::new(wake.clone()),
         totals: PollTotals::default(),
         clock,
+        control: control.clone(),
+        armed: None,
     };
     println!("ready node={}", args.n);
     let result = if args.n == 1 {
-        lead(&mut host, &args, &control, wake)
+        lead(&mut host, &args, wake)
     } else {
+        // EOF is a follower's normal end, not an abort.
         host.until(None, |_| Ok(control.closed()))
     };
     if let Err(error) = &result {
         eprintln!("node {} failed: {error}", args.n);
+        if let Some(closed) = error.downcast_ref::<StdinClosed>() {
+            println!(
+                "stdin_closed node={} phase={} rounds_to_notice={}",
+                args.n,
+                closed.phase.replace(' ', "_"),
+                closed.rounds_to_notice
+            );
+            // Abandon the run: a graceful drain would wait for pending writes
+            // that cannot commit without the followers.
+            host.nodes[0].abort();
+            let counters = Counters::of(&host.totals);
+            println!("node_counters node={} {}", args.n, counters.line());
+            return result;
+        }
     }
     // Drain and join even after a failure, as the single-process mode does.
     let finished = host.finish();
@@ -146,38 +214,74 @@ fn open_node(args: &NodeArgs, clock: &Instant, wake: Arc<HostWake>) -> Result<Re
 }
 
 /// Lines on stdin: `start` (node 1 only) and EOF. A reader thread owns stdin
-/// and wakes the host, so an idle node sleeps in its readiness wait.
-struct Control {
-    started: Arc<AtomicBool>,
-    closed: Arc<AtomicBool>,
+/// and wakes the host, so an idle node sleeps in its readiness wait; while it
+/// is blocked in `read` it costs nothing.
+///
+/// Noticing a close in a bounded number of rounds: an armed host stores its
+/// round count, then loads `closed`, every round; the reader stores `closed`,
+/// then loads the round count into `closed_at`. All four are `SeqCst`, and the
+/// host stops storing once it has noticed. Every round whose store follows the
+/// reader's load therefore sees `closed`, so the host stops at round
+/// `closed_at` or `closed_at + 1`.
+#[derive(Clone)]
+struct Control(Arc<ControlState>);
+struct ControlState {
+    started: AtomicBool,
+    closed: AtomicBool,
+    rounds: AtomicUsize,
+    closed_at: AtomicUsize,
 }
 impl Control {
     fn spawn(wake: Arc<HostWake>) -> Self {
-        let started = Arc::new(AtomicBool::new(false));
-        let closed = Arc::new(AtomicBool::new(false));
-        let (s, c) = (started.clone(), closed.clone());
+        let state = Arc::new(ControlState {
+            started: AtomicBool::new(false),
+            closed: AtomicBool::new(false),
+            rounds: AtomicUsize::new(0),
+            closed_at: AtomicUsize::new(usize::MAX),
+        });
+        let reader = state.clone();
         std::thread::Builder::new()
             .name("cluster-control".into())
             .spawn(move || {
                 for line in std::io::stdin().lock().lines() {
                     match line {
-                        Ok(line) if line.trim() == "start" => s.store(true, Ordering::SeqCst),
+                        Ok(line) if line.trim() == "start" => {
+                            reader.started.store(true, Ordering::SeqCst);
+                        }
                         Ok(_) => continue,
                         Err(_) => break,
                     }
                     wake.wake();
                 }
-                c.store(true, Ordering::SeqCst);
+                reader.closed.store(true, Ordering::SeqCst);
+                let at = reader.rounds.load(Ordering::SeqCst);
+                reader.closed_at.store(at, Ordering::SeqCst);
                 wake.wake();
             })
             .expect("cluster control thread");
-        Self { started, closed }
+        Self(state)
     }
     fn started(&self) -> bool {
-        self.started.load(Ordering::SeqCst)
+        self.0.started.load(Ordering::SeqCst)
     }
     fn closed(&self) -> bool {
-        self.closed.load(Ordering::SeqCst)
+        self.0.closed.load(Ordering::SeqCst)
+    }
+    /// An armed host's per-round check: the round count the reader recorded
+    /// when stdin closed, or `None` while it is open.
+    fn observe(&self, round: usize) -> Option<usize> {
+        self.0.rounds.store(round, Ordering::SeqCst);
+        if !self.closed() {
+            return None;
+        }
+        // The reader is between its two stores; it records at once.
+        loop {
+            let at = self.0.closed_at.load(Ordering::SeqCst);
+            if at != usize::MAX {
+                return Some(at);
+            }
+            std::thread::yield_now();
+        }
     }
 }
 
@@ -187,10 +291,25 @@ struct Host {
     wait: HostWait,
     totals: PollTotals,
     clock: Instant,
+    control: Control,
+    /// The node-1 phase that stops on closed stdin; `None` for followers and
+    /// for the final drain.
+    armed: Option<&'static str>,
 }
 impl Host {
     fn round(&mut self) -> Result<(), Failure> {
-        poll(&mut self.nodes, &self.clock, &mut self.totals)
+        poll(&mut self.nodes, &self.clock, &mut self.totals)?;
+        let Some(phase) = self.armed else {
+            return Ok(());
+        };
+        let Some(at) = self.control.observe(self.totals.rounds) else {
+            return Ok(());
+        };
+        self.armed = None;
+        Err(Box::new(StdinClosed {
+            phase,
+            rounds_to_notice: self.totals.rounds - at,
+        }))
     }
     fn wait(&mut self) -> Result<(), Failure> {
         let node = &self.nodes[0];
@@ -225,6 +344,8 @@ impl Host {
         }
     }
     fn finish(mut self) -> Result<Counters, Failure> {
+        // The drain ends the process either way: closed stdin cannot shorten it.
+        self.armed = None;
         self.nodes[0].begin_shutdown();
         self.until(Some(PHASE_LIMIT), |ns| Ok(ns[0].is_drained()))?;
         let counters = Counters::of(&self.totals);
@@ -303,12 +424,7 @@ fn term(nodes: &[Replica]) -> u64 {
 }
 
 /// Node 1: campaign, warm up, offer, check, report.
-fn lead(
-    host: &mut Host,
-    args: &NodeArgs,
-    control: &Control,
-    wake: Arc<HostWake>,
-) -> Result<(), Failure> {
+fn lead(host: &mut Host, args: &NodeArgs, wake: Arc<HostWake>) -> Result<(), Failure> {
     std::fs::write(
         args.root.join("run.txt"),
         format!(
@@ -323,23 +439,26 @@ fn lead(
             ready_items::settings(args.ready_visit_items)
         ),
     )?;
-    host.until(None, |_| Ok(control.started() || control.closed()))?;
-    if !control.started() {
-        return Err("stdin closed before start".into());
-    }
+    let control = host.control.clone();
+    host.armed = Some("waiting for start");
+    host.until(None, |_| Ok(control.started()))?;
+    host.armed = Some("campaign");
     if !ready_leader(&host.nodes) {
         checked(host.nodes[0].control(group(), NodeControl::Campaign))?;
     }
     host.until(Some(PHASE_LIMIT), |ns| Ok(ready_leader(ns)))?;
+    host.armed = Some("warmup");
     let warmup = warm_up(host, args.window)?;
     let term_start = term(&host.nodes);
     let mut ledger = Ledger::new(args.count, args.rate, args.window, 1, None);
     let before = Counters::of(&host.totals);
     let (host_ns, max_host_ns) = (host.totals.host_ns, host.totals.max_host_ns);
+    host.armed = Some("offering");
     eprintln!(
         "phase=offering node=1 operations={} rate={}",
         args.count, args.rate
     );
+    println!("offering node=1");
     let elapsed = offer(host, &mut ledger, wake)?;
     let phase = Counters::of(&host.totals).since(before);
     let host_ms = (host.totals.host_ns - host_ns) as f64 / 1e6;
@@ -347,7 +466,10 @@ fn lead(
     let term_end = term(&host.nodes);
     ledger.write(&mut exclusive(&args.root.join("offers.csv"))?)?;
     let (expected, last) = ledger.history(&warmup)?;
+    host.armed = Some("quorum read");
     let value = quorum_read(host, last[&group()])?;
+    // No more rounds before the summary; the drain is not armed.
+    host.armed = None;
     if value != expected[&group()] {
         return Err(format!(
             "quorum read {value} disagrees with the history {}",
@@ -548,7 +670,7 @@ mod tests {
         collections::BTreeSet,
         fs::File,
         io::BufReader,
-        process::{Child, Command, Stdio},
+        process::{Child, Command, ExitStatus, Stdio},
         sync::mpsc,
     };
 
@@ -563,7 +685,8 @@ mod tests {
             return;
         };
         let args = spec.split(SEPARATOR).map(String::from).collect::<Vec<_>>();
-        run(&args, None, true).unwrap();
+        // As in the binary: a stop on closed stdin exits STDIN_CLOSED_STATUS.
+        run_process(&args, None, true).unwrap();
     }
 
     /// Three OS-selected loopback ports, each held for TCP and UDP (the
@@ -626,9 +749,21 @@ mod tests {
     }
 
     type Events = mpsc::Receiver<(u64, Option<String>)>;
+    /// The node workload: offers and offered rate.
+    #[derive(Clone, Copy)]
+    struct Load {
+        offers: usize,
+        rate: usize,
+    }
+    /// The checked run: 100 offers at 50/s.
+    const CHECKED: Load = Load {
+        offers: 100,
+        rate: 50,
+    };
+
     /// Start three nodes re-executing this binary; their stdout lines arrive
     /// on the returned channel, `None` when a stream ends.
-    fn spawn(root: &Path, protocol: &str, ports: &str) -> (Children, Events) {
+    fn spawn(root: &Path, protocol: &str, ports: &str, load: Load) -> (Children, Events) {
         let exe = std::env::current_exe().unwrap();
         let (sender, events) = mpsc::channel();
         let mut children = Children(Vec::new());
@@ -638,9 +773,9 @@ mod tests {
                 root.join(format!("node{n}")).display().to_string(),
                 protocol.to_string(),
                 ports.to_string(),
-                "100".into(),
+                load.offers.to_string(),
                 "1024".into(),
-                "50".into(),
+                load.rate.to_string(),
             ]
             .join(&SEPARATOR.to_string());
             let mut child = Command::new(&exe)
@@ -673,18 +808,20 @@ mod tests {
     }
 
     enum Outcome {
-        /// Every node exited 0; each node's stdout lines.
-        Done(BTreeMap<u64, Vec<String>>),
+        /// Every node exited: each node's stdout lines and exit status (node
+        /// 1 first).
+        Done(BTreeMap<u64, Vec<String>>, Vec<ExitStatus>),
         /// This node failed to open with `AddrInUse` before `ready`.
         Collision(u64),
     }
 
     /// The parent protocol of `cluster.py`: `start` once all three are ready,
-    /// stdin closed once node 1 has reported or any node has ended.
-    fn drive(children: &mut Children, events: &Events, root: &Path) -> Outcome {
+    /// every stdin closed once node 1 prints a line containing `release` or
+    /// any node has ended.
+    fn drive(children: &mut Children, events: &Events, root: &Path, release: &str) -> Outcome {
         let mut lines = BTreeMap::<u64, Vec<String>>::new();
         let (mut ready, mut open) = (BTreeSet::new(), 3);
-        let release = |children: &mut Children| {
+        let close_all = |children: &mut Children| {
             for child in &mut children.0 {
                 drop(child.stdin.take());
             }
@@ -697,38 +834,91 @@ mod tests {
             let Some(line) = line else {
                 // A node that ends before node 1 reports releases the others.
                 open -= 1;
-                release(children);
+                close_all(children);
                 continue;
             };
             if line.contains("ready node=") {
                 ready.insert(n);
-                if ready.len() == 3 {
-                    let stdin = children.0[0].stdin.as_mut().unwrap();
-                    writeln!(stdin, "start").unwrap();
+                // Stdin is gone once a node has ended; that node's exit status
+                // and log then say why, so a failed write is not a failure here.
+                if let (3, Some(stdin)) = (ready.len(), children.0[0].stdin.as_mut()) {
+                    let _ = writeln!(stdin, "start");
                 }
             }
-            if line.contains("mode=cluster ") {
-                release(children);
+            if n == 1 && line.contains(release) {
+                close_all(children);
             }
             lines.entry(n).or_default().push(line);
         }
-        let failed = (1..=3u64)
-            .zip(&mut children.0)
-            .filter_map(|(n, child)| {
-                let status = child.wait().unwrap();
-                (!status.success()).then_some((n, status))
-            })
+        let statuses = children
+            .0
+            .iter_mut()
+            .map(|child| child.wait().unwrap())
             .collect::<Vec<_>>();
-        if failed.is_empty() {
-            return Outcome::Done(lines);
-        }
-        for (n, _) in &failed {
+        for (n, status) in (1..=3u64).zip(&statuses) {
             let log = std::fs::read_to_string(root.join(format!("node{n}.err"))).unwrap();
-            if !ready.contains(n) && log.contains("AddrInUse") {
-                return Outcome::Collision(*n);
+            if !status.success() && !ready.contains(&n) && log.contains("AddrInUse") {
+                return Outcome::Collision(n);
             }
         }
-        panic!("nodes exited {failed:?}; logs in {}", root.display());
+        Outcome::Done(lines, statuses)
+    }
+
+    /// Bounds the retries; each needs a node to fail to bind one of three
+    /// fresh OS-selected ports in the moment between release and bind.
+    const ATTEMPTS: usize = 8;
+
+    /// Run a cluster, retrying on fresh ports after a collision. Returns the
+    /// run's directory (logs), each node's stdout lines and exit statuses.
+    fn run_cluster(
+        name: &str,
+        protocol: &str,
+        load: Load,
+        release: &str,
+    ) -> (PathBuf, BTreeMap<u64, Vec<String>>, Vec<ExitStatus>) {
+        let mut collisions = Vec::new();
+        for attempt in 0..ATTEMPTS {
+            let root = fresh_root(&format!("{name}-{attempt}"));
+            let (ports, held) = reserve();
+            // The nodes bind their own listeners: release the holds first.
+            drop(held);
+            let (mut children, events) = spawn(&root, protocol, &ports, load);
+            match drive(&mut children, &events, &root, release) {
+                Outcome::Done(lines, statuses) => return (root, lines, statuses),
+                Outcome::Collision(n) => {
+                    let port = ports.split(',').nth(n as usize - 1).unwrap();
+                    let what = format!("node {n} (port {port} of {ports})");
+                    eprintln!("{what} failed to open with AddrInUse before ready; retrying");
+                    collisions.push(what);
+                    drop(children);
+                    // Keep the last attempt's logs for the panic below.
+                    if attempt + 1 < ATTEMPTS {
+                        std::fs::remove_dir_all(&root).unwrap();
+                    }
+                }
+            }
+        }
+        // Known: in every attempt the named node's open failed with AddrInUse
+        // before `ready`. Not known: whether another program took the released
+        // port or a node bound a port that is not its own.
+        panic!(
+            "{ATTEMPTS} attempts each had a node fail to open with AddrInUse before ready: {}; the port was taken by another program or by a node that bound a port not its own (logs of the last attempt in {})",
+            collisions.join(", "),
+            fresh_root_path(&format!("{name}-{}", ATTEMPTS - 1)).display()
+        );
+    }
+
+    /// The statuses must all be success; otherwise name them and the logs.
+    fn all_succeeded(root: &Path, statuses: &[ExitStatus]) {
+        let failed = (1..=3u64)
+            .zip(statuses)
+            .filter(|(_, status)| !status.success())
+            .collect::<Vec<_>>();
+        assert!(
+            failed.is_empty(),
+            "nodes exited {failed:?}; logs in {}",
+            root.display()
+        );
     }
 
     fn check(lines: &BTreeMap<u64, Vec<String>>) {
@@ -781,39 +971,21 @@ mod tests {
         assert!(received <= sends);
     }
 
+    fn fresh_root_path(name: &str) -> PathBuf {
+        std::env::temp_dir().join(format!("voteboat-cluster-{}-{name}", std::process::id()))
+    }
     fn fresh_root(name: &str) -> PathBuf {
-        let root =
-            std::env::temp_dir().join(format!("voteboat-cluster-{}-{name}", std::process::id()));
+        let root = fresh_root_path(name);
         let _ = std::fs::remove_dir_all(&root);
         std::fs::create_dir(&root).unwrap();
         root
     }
 
-    /// Bounds the retries; each needs another binder to take one of three
-    /// fresh OS-selected ports in the moment between release and bind.
-    const ATTEMPTS: usize = 8;
-
     fn cluster(protocol: &str) {
-        for attempt in 0..ATTEMPTS {
-            let root = fresh_root(&format!("{protocol}-{attempt}"));
-            let (ports, held) = reserve();
-            // The nodes bind their own listeners: release the holds first.
-            drop(held);
-            let (mut children, events) = spawn(&root, protocol, &ports);
-            match drive(&mut children, &events, &root) {
-                Outcome::Done(lines) => {
-                    check(&lines);
-                    std::fs::remove_dir_all(&root).unwrap();
-                    return;
-                }
-                Outcome::Collision(n) => {
-                    eprintln!("node {n} lost port {ports} to another binder; retrying");
-                    drop(children);
-                    std::fs::remove_dir_all(&root).unwrap();
-                }
-            }
-        }
-        panic!("{ATTEMPTS} attempts each lost a port to another binder");
+        let (root, lines, statuses) = run_cluster(protocol, protocol, CHECKED, "mode=cluster ");
+        all_succeeded(&root, &statuses);
+        check(&lines);
+        std::fs::remove_dir_all(&root).unwrap();
     }
 
     #[test]
@@ -825,8 +997,8 @@ mod tests {
         // EOF and exit; nothing is offered.
         let taken = held.pop().unwrap();
         drop(held);
-        let (mut children, events) = spawn(&root, "tcp", &ports);
-        let outcome = drive(&mut children, &events, &root);
+        let (mut children, events) = spawn(&root, "tcp", &ports, CHECKED);
+        let outcome = drive(&mut children, &events, &root, "mode=cluster ");
         assert!(matches!(outcome, Outcome::Collision(3)));
         drop((children, taken));
         std::fs::remove_dir_all(&root).unwrap();
@@ -849,6 +1021,39 @@ mod tests {
             "{}",
             String::from_utf8_lossy(&output.stderr)
         );
+    }
+
+    /// Review round 2, P2: a parent that dies mid-run closes every node's
+    /// stdin (the kernel closes the pipes). Node 1 must stop within one poll
+    /// round instead of running to its phase limits, abort and exit 4; the
+    /// followers drain and exit 0.
+    /// 15,000 offers at 50/s is a 300 s horizon, so the offered phase is
+    /// nowhere near done when the test closes stdin.
+    #[test]
+    fn node_1_stops_within_one_round_when_stdin_closes_in_the_offered_phase() {
+        let load = Load {
+            offers: 15_000,
+            rate: 50,
+        };
+        let (root, lines, statuses) = run_cluster("stdin-closed", "tcp", load, "offering node=1");
+        let codes = statuses.iter().map(ExitStatus::code).collect::<Vec<_>>();
+        assert_eq!(
+            codes,
+            [Some(STDIN_CLOSED_STATUS), Some(0), Some(0)],
+            "logs in {}",
+            root.display()
+        );
+        let closed = marked(&lines[&1], "stdin_closed ");
+        assert_eq!(closed.len(), 1, "logs in {}", root.display());
+        let closed = fields(closed[0]);
+        assert_eq!(closed["phase"], "offering");
+        assert!(number(&closed, "rounds_to_notice") <= 1, "{closed:?}");
+        // Node 1 stopped before reporting; every node reported its counters.
+        assert!(marked(&lines[&1], "mode=cluster ").is_empty());
+        for n in 1..=3u64 {
+            assert_eq!(marked(&lines[&n], "node_counters ").len(), 1, "node {n}");
+        }
+        std::fs::remove_dir_all(&root).unwrap();
     }
 
     #[test]

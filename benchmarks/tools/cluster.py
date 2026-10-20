@@ -6,7 +6,9 @@
 Runs `native_benchmark node N ...` as three child processes on loopback, starts
 node 1's offered load once all three print `ready`, closes every child's stdin
 once node 1 prints its summary, and reaps every child with os.wait4 for its own
-user+sys CPU. The sum is cross-checked against the RUSAGE_CHILDREN delta.
+user+sys CPU. The sum must equal the RUSAGE_CHILDREN delta within
+CROSSCHECK_TOLERANCE_S (0.01 s), or the run is invalid (cpu_crosscheck=SUM:DELTA):
+a child of a child or a reaping fault cannot pass silently.
 
   cluster.py [options] BIN [BIN ...]
 
@@ -15,23 +17,41 @@ warmup, offered phase, drain, exit), and every child's life lies inside the
 run's common interval: from the first spawn to the last child's exit. wall_s is
 that interval; busy (total) and nN_busy (per process) are CPU / wall_s, so the
 per-process figures add up to the total. Each child's exit is stamped when it
-happens (a watcher thread per child blocks in wait4), not when the parent gets
-round to it; nN_exit_s is that stamp, measured from the first spawn.
+happens (a watcher thread per child waits for it), not when the parent gets
+round to it; nN_exit_s is that stamp, measured from the first spawn. Busy cores
+is an average. It hides peak concurrency (work moved onto extra threads at the
+same total CPU looks the same), it includes fixed startup, campaign, warmup and
+drain time (which dilutes small offer counts), and it excludes kernel work done
+outside the node processes (softirq, kworker and writeback threads), which
+wait4 never sees.
 
 Validity. A run is invalid unless every child exits 0, node 1 prints its
 summary, applied == offers, window_refused == 0, the leader term is unchanged,
-every node prints node_counters and the run ends within --timeout. An invalid
-run is retained and printed with its reasons; the experiment continues. A
-failure never leaves a child behind: on any path the parent closes every stdin,
-kills whatever has not exited and reaps every child.
+every node prints node_counters, the CPU cross-check holds and the run ends
+within --timeout. An invalid run is retained and printed with its reasons; the
+experiment continues.
 
-Rounds and pairs. Round i runs every binary at every --offers value, in order
-(A B A B ... over rounds). Per-cell summary lines are medians over that cell's
+No child outlives the run. While this script runs, every path (a failure, the
+--timeout guard, SIGINT, SIGTERM or SIGHUP: their handlers raise so that
+cleanup runs, and one arriving during cleanup waits for it to finish) closes every stdin, kills whatever has not exited and reaps every
+child; a child is signalled only while it is known not to have been reaped, so
+a freed PID is never signalled. If this script is killed with SIGKILL, the
+kernel closes the children's stdin: followers exit on that EOF as usual, and
+node 1 stops at the first poll round that sees it in any phase before its
+summary, aborts its node (a drain cannot finish without the followers),
+prints node_counters and exits with status 4 (n1_exit=4).
+
+Rounds and pairs. Round i runs every binary at every --offers value. Even
+rounds run A small, A big, B small, B big ...; odd rounds run that sequence
+reversed, so over each pair of rounds (ABBA) a linear drift (heat, caches,
+background load) falls on every binary and offer count alike. Use an even
+--pairs for that balance. Per-cell summary lines are medians over that cell's
 valid runs. Marginal CPU per write between the smallest and largest offers,
 (CPU(big) - CPU(small)) / (big - small), and B/A ratios are formed within a
 round only; one invalid run drops its whole round from them (every binary and
 offer count) and the report names each dropped round and why. Their medians
-are over the remaining valid rounds.
+are over the remaining valid rounds. --offers values must be distinct positive
+integers.
 
 Builds. The node mode is in the native_benchmark example, which needs the tls
 feature (default features include it). A native-only build
@@ -46,7 +66,9 @@ Example (the N0 marginal cell):
 import argparse
 import os
 import queue
+import errno
 import resource
+import select
 import shutil
 import signal
 import socket
@@ -62,6 +84,36 @@ SHORT = {"poll_rounds": "rounds", "host_waits": "waits", "host_waits_immediate":
          "host_waits_ready": "rdy", "host_waits_timeout": "tmo", "sends": "sends",
          "received": "recv", "persistence_batches": "pb"}
 NODES = (1, 2, 3)
+# |sum of per-child wait4 CPU - RUSAGE_CHILDREN delta| above this invalidates a
+# run. Both come from the same kernel accounting at microsecond resolution.
+CROSSCHECK_TOLERANCE_S = 0.01
+# A node 1 that stopped because its stdin closed before its summary.
+STDIN_CLOSED_STATUS = 4
+
+
+class OffersError(ValueError):
+    """--offers is not a list of distinct positive integers."""
+
+
+def parse_offers(text):
+    """Sorted distinct positive offer counts, or OffersError."""
+    try:
+        offers = [int(x) for x in text.split(",")]
+    except ValueError:
+        raise OffersError("--offers must be a comma list of integers, got %r" % text)
+    if any(o <= 0 for o in offers):
+        raise OffersError("--offers values must be positive, got %r" % text)
+    if len(set(offers)) != len(offers):
+        raise OffersError("--offers values must be distinct (a marginal needs two "
+                          "different offer counts), got %r" % text)
+    return sorted(offers)
+
+
+def schedule(round_index, labels, offers):
+    """The (label, offers) order of one round: forward in even rounds and
+    reversed in odd ones (ABBA over consecutive rounds)."""
+    order = [(label, o) for label in labels for o in offers]
+    return order if round_index % 2 == 0 else order[::-1]
 
 
 def kv(line):
@@ -101,19 +153,59 @@ def exit_code(status):
     return os.WEXITSTATUS(status) if os.WIFEXITED(status) else -os.WTERMSIG(status)
 
 
+def wait_exited(pid):
+    """Block until child `pid` has exited, without reaping it: its PID stays
+    allocated (a zombie) until wait4. waitid(WNOWAIT) where Python has it
+    (Linux); kqueue NOTE_EXIT otherwise (macOS, whose Python has no waitid)."""
+    if hasattr(os, "waitid"):
+        os.waitid(os.P_PID, pid, os.WEXITED | os.WNOWAIT)
+        return
+    kq = select.kqueue()
+    try:
+        ev = select.kevent(pid, filter=select.KQ_FILTER_PROC,
+                           flags=select.KQ_EV_ADD | select.KQ_EV_ONESHOT,
+                           fflags=select.KQ_NOTE_EXIT)
+        for got in kq.control([ev], 1, None):
+            # ESRCH: the child had already exited (it is our unreaped zombie).
+            if got.flags & select.KQ_EV_ERROR and got.data not in (0, errno.ESRCH):
+                raise OSError(got.data, os.strerror(got.data))
+    except ProcessLookupError:
+        pass
+    finally:
+        kq.close()
+
+
+CLEANUP_SIGNALS = (signal.SIGTERM, signal.SIGHUP, signal.SIGINT)
+# While a run's cleanup is in progress, a signal is recorded here and raised
+# once cleanup ends, so it cannot cut the kill-and-reap short.
+_cleanup = {"depth": 0, "pending": None}
+
+
+def raise_on_signal(signum, _frame):
+    """Handler for CLEANUP_SIGNALS (installed when run as a script): raise
+    SystemExit so every `finally` runs (close stdin, kill, reap) instead of
+    dying with children still running; deferred while cleanup runs."""
+    if _cleanup["depth"]:
+        _cleanup["pending"] = signum
+        return
+    raise SystemExit(128 + signum)
+
+
 class Cluster:
     """Three children, each with a stdout reader and an exit watcher thread.
 
-    The watcher is the only reaper of its child: it blocks in wait4, stamps the
-    exit time at once and records status and rusage. `kill` signals only a
-    child whose watcher has not yet reaped it, under the same lock the watcher
-    takes after wait4 returns.
+    The watcher is the only reaper of its child. It waits for the exit without
+    reaping (waitid with WNOWAIT, so the PID stays the child's), stamps the
+    time, marks the child exited under the lock, and only then reaps it with
+    wait4 for its status and rusage. `kill` signals a child only under that
+    lock and only if it is not marked exited, so it never signals a PID that
+    has been freed (a zombie still owns its PID; signalling it is harmless).
     """
 
     def __init__(self):
         self.events = queue.Queue()
         self.procs, self.spawned, self.watchers = {}, {}, {}
-        self.reaped, self.lock = {}, threading.Lock()
+        self.reaped, self.exited, self.lock = {}, set(), threading.Lock()
 
     def spawn(self, n, cmd, err):
         self.spawned[n] = time.monotonic()
@@ -129,10 +221,16 @@ class Cluster:
 
         def watcher():
             try:
+                wait_exited(p.pid)
+            except ChildProcessError:  # reaped elsewhere
+                pass
+            at = time.monotonic()
+            with self.lock:
+                self.exited.add(n)
+            try:
                 _, status, usage = os.wait4(p.pid, 0)
             except ChildProcessError:  # reaped elsewhere: no status or rusage
                 status = usage = None
-            at = time.monotonic()
             with self.lock:
                 self.reaped[n] = (at, status, usage)
                 p.returncode = -255 if status is None else exit_code(status)
@@ -160,7 +258,7 @@ class Cluster:
     def kill(self):
         for n, p in self.procs.items():
             with self.lock:
-                if n not in self.reaped:
+                if n not in self.exited:
                     try:
                         os.kill(p.pid, signal.SIGKILL)
                     except ProcessLookupError:
@@ -183,6 +281,11 @@ def check(result, offers):
             reasons.append("n%d_exit=%d" % (n, v["exit"]))
         if not v["counters"]:
             reasons.append("n%d_no_counters" % n)
+    nodes = result["node"].values()
+    if len(result["node"]) == len(NODES) and "children_cpu" in result:
+        cpu = sum(v["cpu"] for v in nodes)
+        if abs(cpu - result["children_cpu"]) > CROSSCHECK_TOLERANCE_S:
+            reasons.append("cpu_crosscheck=%.4f:%.4f" % (cpu, result["children_cpu"]))
     if not s:
         reasons.append("no_summary")
     else:
@@ -219,8 +322,12 @@ def run_once(binary, args, offers, root):
         while len(exited) < len(NODES) or open_streams:
             left = deadline - time.monotonic()
             try:
-                kind, n, line = cluster.events.get(timeout=max(0.01, left))
+                # At most 0.5 s per wait: on macOS a lock wait is not woken by
+                # signals, and a SIGTERM handler must run promptly.
+                kind, n, line = cluster.events.get(timeout=min(0.5, max(0.01, left)))
             except queue.Empty:
+                if time.monotonic() < deadline:
+                    continue
                 if "timeout" not in errors:
                     errors.append("timeout")
                     cluster.close_stdin()
@@ -238,8 +345,8 @@ def run_once(binary, args, offers, root):
                 exited.add(n)
                 if summary is None and not released:
                     # A child ended before node 1 reported: release the others
-                    # so the run ends (followers exit on EOF; node 1 exits on
-                    # EOF before `start`).
+                    # so the run ends (followers exit on EOF; node 1 stops on
+                    # EOF in any phase before its summary, status 4).
                     cluster.close_stdin()
                     released = True
             else:
@@ -258,11 +365,19 @@ def run_once(binary, args, offers, root):
         errors.append("error=%s" % type(e).__name__)
         print("# run error: %r" % (e,), file=sys.stderr, flush=True)
     finally:
-        cluster.close_stdin()
-        cluster.kill()
-        cluster.wait_all()
-        for f in errs.values():
-            f.close()
+        # A signal arriving now waits until every child is reaped.
+        _cleanup["depth"] += 1
+        try:
+            cluster.close_stdin()
+            cluster.kill()
+            cluster.wait_all()
+            for f in errs.values():
+                f.close()
+        finally:
+            _cleanup["depth"] -= 1
+        if _cleanup["pending"] is not None and not _cleanup["depth"]:
+            signum, _cleanup["pending"] = _cleanup["pending"], None
+            raise SystemExit(128 + signum)
     first = min(cluster.spawned.values()) if cluster.spawned else 0.0
     result = {"base": base, "summary": summary or {}, "node": {}, "errors": errors,
               "children_cpu": children_cpu() - before}
@@ -353,6 +468,8 @@ def marginal_rows(runs, binary, small, big, valid):
 
 def report(runs, bins, offers, out=None):
     out = out or sys.stdout
+    if len(set(offers)) != len(offers):
+        raise OffersError("--offers values must be distinct, got %r" % (offers,))
     print("# summary (medians over each cell's valid runs)", file=out)
     for b in bins:
         for o in offers:
@@ -436,26 +553,32 @@ def main(argv=None):
     ap.add_argument("--timeout", type=float, default=900.0, help="per-run guard, seconds")
     ap.add_argument("--keep", action="store_true", help="keep node directories")
     args = ap.parse_args(sys.argv[1:] if argv is None else argv)
-    offers = sorted(int(x) for x in args.offers.split(","))
+    try:
+        offers = parse_offers(args.offers)
+    except OffersError as e:
+        ap.error(str(e))
     # Runs are keyed by label, so one binary may be both A and B (A/A noise).
     labels = [chr(ord("A") + i) for i in range(len(args.bins))]
     print("# cluster.py proto=%s rate=%d window=%d offers=%s pairs=%d load=%s" % (
         args.proto, args.rate, args.window, offers, args.pairs, os.getloadavg()), flush=True)
     print("# wall_s = first spawn to last child exit; busy = CPU / wall_s (per process and total)",
           flush=True)
+    print("# order: even rounds A..Z small..big, odd rounds reversed (ABBA)", flush=True)
     for label, b in zip(labels, args.bins):
         print("# %s=%s" % (label, b), flush=True)
     runs = []  # (round, label, offers, result)
+    binary = dict(zip(labels, args.bins))
     for i in range(args.pairs):
-        for label, b in zip(labels, args.bins):
-            for o in offers:
-                root = os.path.join(args.wal, "cluster-%d-%d-%s-%d" % (os.getpid(), i, label, o))
-                r = run_once(b, args, o, root)
-                runs.append((i, label, o, r))
-                print(describe("run round=%d" % i, label, o, r), flush=True)
+        for label, o in schedule(i, labels, offers):
+            root = os.path.join(args.wal, "cluster-%d-%d-%s-%d" % (os.getpid(), i, label, o))
+            r = run_once(binary[label], args, o, root)
+            runs.append((i, label, o, r))
+            print(describe("run round=%d" % i, label, o, r), flush=True)
     report(runs, labels, offers)
     return 0
 
 
 if __name__ == "__main__":
+    for sig in CLEANUP_SIGNALS:
+        signal.signal(sig, raise_on_signal)
     sys.exit(main())

@@ -31,7 +31,7 @@ fn protocol(transport: &str) -> Result<NativePeerProtocol, Failure> {
         #[cfg(feature = "quic")]
         "quic" => Ok(NativePeerProtocol::Quic),
         #[cfg(not(feature = "quic"))]
-        "quic" => Err("QUIC support requires building with --features quic".into()),
+        "quic" => Err(super::quic_hint::QuicNotBuilt.into()),
         _ => Err("unsupported transport".into()),
     }
 }

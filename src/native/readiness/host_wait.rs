@@ -3,7 +3,7 @@
 //! The host loop's wait policy, shared by the service binaries and the
 //! benchmark's cluster mode. Safe code only: the audited `poll(2)` stays in
 //! the parent module.
-#![deny(unsafe_code)]
+#![forbid(unsafe_code)]
 
 use super::{HostWake, Readiness};
 use crate::runtime::MonoTime;

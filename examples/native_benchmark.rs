@@ -38,6 +38,8 @@ use voteboat::{
 };
 #[path = "benchmark/lanes.rs"]
 mod lanes;
+#[path = "../src/bin/support/quic_hint.rs"]
+mod quic_hint;
 #[path = "benchmark/shared.rs"]
 mod shared;
 #[cfg(test)]
@@ -762,7 +764,7 @@ fn main() -> Result<(), Failure> {
     if args.first().is_some_and(|arg| arg == "node") {
         let plain =
             (capacity_profile, publication, raw_group_weights.is_some()) == Default::default();
-        return offered::cluster::run(&args[1..], selected_ready_items, plain);
+        return offered::cluster::run_process(&args[1..], selected_ready_items, plain);
     }
     if args.first().is_some_and(|arg| arg == "--lanes") {
         capacity_profile.validate(false, 1, 16)?;
@@ -863,7 +865,7 @@ fn parse_protocol(protocol: &str) -> Result<NativePeerProtocol, Failure> {
         #[cfg(feature = "quic")]
         "quic" => Ok(NativePeerProtocol::Quic),
         #[cfg(not(feature = "quic"))]
-        "quic" => Err("QUIC support requires building with --features quic".into()),
+        "quic" => Err(quic_hint::QuicNotBuilt.into()),
         _ => Err("unsupported protocol".into()),
     }
 }

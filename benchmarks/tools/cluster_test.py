@@ -19,8 +19,11 @@ import io
 import os
 import re
 import shutil
+import signal
+import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from types import SimpleNamespace
 
@@ -57,6 +60,61 @@ def run_main(argv):
     finally:
         sys.argv = saved
     return code, out.getvalue()
+
+
+class Checks(unittest.TestCase):
+    """Review round 2 (Opus) P3 findings 3 and 4: the CPU cross-check is
+    enforced, and duplicate offer counts are a typed error."""
+
+    def test_a_cpu_crosscheck_mismatch_invalidates_the_run(self):
+        r = fake_result(100, 3.0, False)
+        self.assertEqual(cluster.check(r, 100), [])
+        r["children_cpu"] = 99.0  # RUSAGE_CHILDREN saw 99 s; wait4 saw 3 s
+        self.assertEqual(cluster.check(r, 100), ["cpu_crosscheck=3.0000:99.0000"])
+        # Within the stated tolerance the run stays valid.
+        r["children_cpu"] = 3.0 + cluster.CROSSCHECK_TOLERANCE_S / 2
+        self.assertEqual(cluster.check(r, 100), [])
+
+    def test_duplicate_offers_are_a_typed_error_not_a_division_by_zero(self):
+        with self.assertRaises(cluster.OffersError):
+            cluster.parse_offers("2000,2000")
+        for bad in ("2000,0", "x", "2000,-1"):
+            with self.assertRaises(cluster.OffersError):
+                cluster.parse_offers(bad)
+        self.assertEqual(cluster.parse_offers("16000,2000"), [2000, 16000])
+        with self.assertRaises(cluster.OffersError):
+            cluster.report([(0, "A", 2000, fake_result(2000, 1.0, False))], ["A"],
+                           [2000, 2000], io.StringIO())
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err), self.assertRaises(SystemExit) as stop:
+            cluster.main(["--wal", "/nonexistent", "--offers", "2000,2000", "A"])
+        self.assertEqual(stop.exception.code, 2)
+        self.assertIn("--offers values must be distinct", err.getvalue())
+
+
+class Order(unittest.TestCase):
+    """Review round 2 (Opus) P3 finding 5: the order alternates (ABBA)."""
+
+    def test_odd_rounds_run_the_sequence_reversed(self):
+        calls = []
+
+        def fake_run_once(binary, args, offers, root):
+            calls.append((binary, offers))
+            return fake_result(offers, 1.0, False)
+
+        saved = cluster.run_once
+        cluster.run_once = fake_run_once
+        try:
+            code, out = run_main(["--wal", "/nonexistent", "--offers", "1000,2000",
+                                  "--pairs", "2", "binA", "binB"])
+        finally:
+            cluster.run_once = saved
+        self.assertEqual(code, 0)
+        forward = [("binA", 1000), ("binA", 2000), ("binB", 1000), ("binB", 2000)]
+        self.assertEqual(calls, forward + forward[::-1])
+        runs = [l.split()[1:4] for l in out.splitlines() if l.startswith("run round=")]
+        self.assertEqual(runs[4], ["round=1", "bin=B", "offers=2000"])
+        self.assertIn("ABBA", out)
 
 
 class Pairing(unittest.TestCase):
@@ -134,13 +192,20 @@ os.makedirs(root)
 print("ready node=%d" % n, flush=True)
 counters = "node_counters node=%d poll_rounds=2 host_waits=1 host_waits_immediate=1 host_waits_ready=0 host_waits_timeout=0 sends=1 received=1 persistence_batches=1" % n
 fail = os.environ["FIXTURE"]
-marker = os.path.join(os.path.dirname(os.path.dirname(root)), "failed-once")
+wal = os.path.dirname(os.path.dirname(root))
+marker = os.path.join(wal, "failed-once")
+if fail == "linger":
+    with open(os.path.join(wal, "pid%d.tmp" % n), "w") as f:
+        f.write(str(os.getpid()))
+    os.rename(os.path.join(wal, "pid%d.tmp" % n), os.path.join(wal, "pid%d" % n))
 if n == 1:
     for line in sys.stdin:
         if line.strip() == "start":
             break
     else:
-        sys.exit(3)
+        sys.exit(4)
+    if fail == "linger":  # ignores EOF: only a kill ends it
+        time.sleep(3600)
     if fail == "leader-once" and not os.path.exists(marker):
         open(marker, "w").close()
         sys.exit(7)
@@ -236,6 +301,78 @@ class Processes(unittest.TestCase):
         self.assertIn("timeout", reasons)
         self.assertIn("n2_exit=-9", reasons)
         self.assert_no_children()
+
+    def test_a_child_is_marked_exited_before_it_is_reaped_and_never_signalled_after(self):
+        """Review round 2 (Opus) P3 finding 2: kill must not signal a freed PID."""
+        c = cluster.Cluster()
+        seen, signalled = [], []
+        real_wait4, real_kill = cluster.os.wait4, cluster.os.kill
+
+        def wait4(pid, options):
+            with c.lock:  # the PID is still ours here: marked exited, unreaped
+                seen.append(any(c.procs[n].pid == pid for n in getattr(c, "exited", ())))
+            return real_wait4(pid, options)
+
+        def kill(pid, sig):
+            signalled.append(pid)
+            return real_kill(pid, sig)
+
+        cluster.os.wait4, cluster.os.kill = wait4, kill
+        try:
+            c.spawn(1, [sys.executable, "-I", "-c", "pass"], subprocess.DEVNULL)
+            kinds = set()
+            while "exit" not in kinds:
+                kinds.add(c.events.get(timeout=600)[0])
+            c.close_stdin()
+            c.kill()
+            c.wait_all()
+        finally:
+            cluster.os.wait4, cluster.os.kill = real_wait4, real_kill
+        self.assertEqual(seen, [True])
+        self.assertEqual(signalled, [])
+        self.assert_no_children()
+
+    def test_sigterm_to_the_script_kills_and_reaps_every_child(self):
+        """Review round 2 (Opus) P2 finding 1, parent side: SIGTERM runs the
+        cleanup. Node 1 here ignores EOF, so only the script's kill ends it."""
+        os.environ["FIXTURE"] = "linger"
+        wrapper = os.path.join(self.dir, "wrapper-linger")
+        with open(wrapper, "w") as f:
+            f.write("#!/bin/sh\nexec %s \"$FIXTURE\" \"$2\" \"$3\" \"$4\" \"$5\" \"$6\" \"$7\" \"$8\"\n"
+                    % self.bin)
+        os.chmod(wrapper, 0o755)
+        script = subprocess.Popen([sys.executable, "-I", SCRIPT, "--wal", self.wal, "--offers",
+                                   "100", "--rate", "50", wrapper],
+                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        children, code = [], None
+        try:
+            pids = [os.path.join(self.wal, "pid%d" % n) for n in (1, 2, 3)]
+            # A failure guard only: the fixtures write these at once.
+            limit = time.monotonic() + 600
+            while not all(os.path.exists(p) for p in pids):
+                self.assertIsNone(script.poll(), "cluster.py ended early")
+                self.assertLess(time.monotonic(), limit, "fixtures never started")
+                time.sleep(0.01)
+            for p in pids:
+                with open(p) as f:
+                    children.append(int(f.read()))
+            script.send_signal(signal.SIGTERM)
+            code = script.wait(timeout=600)
+        finally:
+            if script.poll() is None:
+                script.kill()
+                script.wait()
+            alive = []
+            for pid in children:
+                try:
+                    os.kill(pid, 0)
+                    alive.append(pid)
+                except ProcessLookupError:
+                    pass  # cluster.py reaped it before exiting
+            for pid in alive:  # only on failure: do not leave the fixture behind
+                os.kill(pid, signal.SIGKILL)
+        self.assertEqual(code, 128 + signal.SIGTERM)
+        self.assertEqual(alive, [], "children outlived cluster.py")
 
 
 if __name__ == "__main__":

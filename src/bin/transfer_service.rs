@@ -23,6 +23,8 @@ mod credential_worker;
 mod peer_credentials;
 #[path = "support/transfer_profile.rs"]
 mod profile;
+#[path = "support/quic_hint.rs"]
+mod quic_hint;
 #[path = "support/transfer_retirement.rs"]
 mod retirement;
 #[path = "support/transfer_server.rs"]
