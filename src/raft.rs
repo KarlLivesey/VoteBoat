@@ -747,14 +747,16 @@ impl Raft {
     /// Covers the accepted head and every configuration reachable by truncating
     /// its uncommitted suffix. Use `event_effect_reservation` for incoming growth.
     pub fn effect_reservation(&self, input_bytes: usize) -> Option<usize> {
-        self.reserve_effects(input_bytes, self.rollback_replicas())
+        let fresh = self.log_summary.matches(&self.durable);
+        self.reserve_effects_with(input_bytes, self.rollback_replicas_with(fresh), fresh)
     }
     /// Reserve before executing an event, including prospective membership in
     /// incoming append/snapshot data. This is a memory bound, never authority to
     /// accept that data; configuration ingress still has its protocol gates.
     pub fn event_effect_reservation(&self, event: &Event, input_bytes: usize) -> Option<usize> {
         use crate::membership::ConfigurationChange;
-        let mut peers = self.rollback_replicas();
+        let fresh = self.log_summary.matches(&self.durable);
+        let mut peers = self.rollback_replicas_with(fresh);
         if let Event::Configure(proposal) = event {
             if let crate::membership::ConfigurationChange::Learners(next)
             | crate::membership::ConfigurationChange::Joint { next, .. } =
@@ -807,10 +809,16 @@ impl Raft {
                 _ => (),
             }
         }
-        self.reserve_effects(input_bytes, peers)
+        self.reserve_effects_with(input_bytes, peers, fresh)
     }
+    #[cfg(test)]
     fn rollback_replicas(&self) -> usize {
-        if self.log_summary.matches(&self.durable) && self.log_summary.is_plain() {
+        self.rollback_replicas_with(self.log_summary.matches(&self.durable))
+    }
+    /// `fresh`: the cached summary describes the canonical log
+    /// (`log_summary.matches(&durable)`), computed once per reservation.
+    fn rollback_replicas_with(&self, fresh: bool) -> usize {
+        if fresh && self.log_summary.is_plain() {
             return self
                 .durable
                 .bootstrap
@@ -865,9 +873,13 @@ impl Raft {
         }
         maximum.max(count(stable, joint))
     }
+    #[cfg(test)]
     fn reserve_effects(&self, input_bytes: usize, peers: usize) -> Option<usize> {
+        self.reserve_effects_with(input_bytes, peers, self.log_summary.matches(&self.durable))
+    }
+    fn reserve_effects_with(&self, input_bytes: usize, peers: usize, fresh: bool) -> Option<usize> {
         use std::mem::size_of;
-        let log = self.retained_log_bytes()?;
+        let log = self.retained_log_bytes_with(fresh)?;
         // A heartbeat can produce append and read probes for every peer. Each
         // append uses its configured entry count and max_batch_bytes framing.
         // Other paths add bounded persist/commit/snapshot-reference metadata.

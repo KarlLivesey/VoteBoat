@@ -4,8 +4,13 @@
 use super::*;
 
 impl Raft {
+    #[cfg(test)]
     pub(super) fn retained_log_bytes(&self) -> Option<usize> {
-        if self.log_summary.matches(&self.durable) {
+        self.retained_log_bytes_with(self.log_summary.matches(&self.durable))
+    }
+    /// `fresh` is `log_summary.matches(&durable)`, computed by the caller.
+    pub(super) fn retained_log_bytes_with(&self, fresh: bool) -> Option<usize> {
+        if fresh {
             return self.log_summary.retained_bytes();
         }
         // A stale summary is never an admission authority. Preserve the
