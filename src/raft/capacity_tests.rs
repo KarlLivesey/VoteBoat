@@ -672,3 +672,159 @@ fn follower_without_wal_room_declines_noop_only_appends_until_room_returns() {
     cluster.round();
     assert_eq!(cluster.cores[&3].state().last_index(), 101);
 }
+
+impl Cluster {
+    /// Model a node in the WAL high-water state (the 75%/50% latch) whose
+    /// account still has `room` (R6-1).
+    fn latched(&mut self, n: u64, room: WalRoom) {
+        let core = self.cores.get_mut(&n).unwrap();
+        core.set_storage_pressure(true);
+        core.set_wal_noop_room(room.noop >= crate::log::NOOP_WAL_BOUND);
+        core.set_wal_room(Some(room));
+    }
+    /// The first of at most `PROGRESS_ROUNDS` heartbeat rounds after which
+    /// `leader` has committed `index`.
+    fn rounds_to_commit(&mut self, leader: u64, index: u64) -> Option<u64> {
+        if self.cores[&leader].state().commit_index >= index {
+            return Some(0);
+        }
+        (1..=PROGRESS_ROUNDS).find(|_| {
+            self.round();
+            self.cores[&leader].state().commit_index >= index
+        })
+    }
+}
+
+/// ST2 round 6 (R6-1, Opus round-5 P2-1): node 1 holds an old-term tail
+/// (indexes 91–100) its followers lack, so its term-2 noop at 101 can only
+/// commit once they take that data. The followers' nodes are in the WAL
+/// high-water state (the 75%/50% latch, e.g. occupancy between 50% and 75%
+/// after a rewrite) with ample bytes under the mark. A follower decides on
+/// bytes alone, so both cases commit in the election's own exchange and both
+/// followers take the tail, with no decline counted. On 1a90d7fc both
+/// followers latched never commit (commit 0 after every round; Opus measured
+/// 400 rounds, `declined_appends` 401 each, `wal_declined_appends` (0, 0)),
+/// and with one latched the group commits but that follower stays at 90.
+#[test]
+fn latched_followers_with_byte_room_take_the_leaders_old_term_tail() {
+    let room = WalRoom {
+        data: 1 << 20,
+        noop: 2 << 20,
+    };
+    for latched in [vec![2u64, 3], vec![2]] {
+        let mut cluster = Cluster::new(vec![recovered(1, 100), recovered(2, 90), recovered(3, 90)]);
+        for &n in &latched {
+            cluster.latched(n, room);
+        }
+        cluster.step(1, Event::Campaign).unwrap();
+        cluster.pump();
+        assert_eq!(cluster.leader(), Some(1));
+        let rounds = cluster.rounds_to_commit(1, 101);
+        let leader = &cluster.cores[&1];
+        // Committed by the election's own exchange, before any heartbeat.
+        assert_eq!(
+            rounds,
+            Some(0),
+            "latched {latched:?}: commit {}",
+            leader.state().commit_index
+        );
+        assert_eq!(leader.state().hard_state.term, 2);
+        for n in [2, 3] {
+            let core = &cluster.cores[&n];
+            assert_eq!(core.state().last_index(), 101, "node {n}");
+            assert_eq!(core.declined_appends(), 0, "node {n}");
+            assert_eq!(core.wal_declined_appends(), (0, 0), "node {n}");
+        }
+        assert!(cluster.trace.step_errors.is_empty());
+    }
+}
+
+/// ST2 round 6 (R6-1): the three ways a follower quorum can stop a leader
+/// from committing, and exactly which core counters move in each (the
+/// operator status shows them as `declined_appends`, `wal_declined_appends`,
+/// `wal_noop_refused` and the leader's `replica_stall`). In every case the
+/// leader keeps its role and term, nothing is dropped, and the group commits
+/// once the followers have room again.
+#[test]
+fn a_stuck_follower_quorum_moves_exactly_the_documented_counters() {
+    #[derive(Clone, Copy, Debug)]
+    enum Short {
+        /// Data under the mark: the new suffix carries data that does not fit.
+        Data,
+        /// Noop-only new suffix that does not fit under the mark plus reserve.
+        Noop,
+        /// The follower's retained-entry capacity.
+        Entries,
+    }
+    for short in [Short::Data, Short::Noop, Short::Entries] {
+        // Data and entry cases: the followers lack the old-term tail 91–100.
+        // Noop case: they hold it, so the new suffix is the noop alone.
+        let held = if matches!(short, Short::Noop) {
+            100
+        } else {
+            90
+        };
+        let mut cluster = Cluster::new(vec![
+            recovered(1, 100),
+            recovered(2, held),
+            recovered(3, held),
+        ]);
+        for n in [2, 3] {
+            match short {
+                Short::Data => cluster.latched(
+                    n,
+                    WalRoom {
+                        data: 0,
+                        noop: 2 << 20,
+                    },
+                ),
+                Short::Noop => cluster.wal_room(n, false),
+                // 90 held plus 91–101 is 101 entries; leave room for 95.
+                Short::Entries => {
+                    let core = cluster.cores.get_mut(&n).unwrap();
+                    core.limits.max_entries_per_group = 91;
+                    assert_eq!(core.limits.retained_entry_capacity(), 95);
+                }
+            }
+        }
+        cluster.step(1, Event::Campaign).unwrap();
+        cluster.pump();
+        assert_eq!(cluster.leader(), Some(1), "{short:?}");
+        assert_eq!(cluster.rounds_to_commit(1, 101), None, "{short:?}");
+        let leader = &cluster.cores[&1];
+        assert_eq!(leader.role(), Role::Leader, "{short:?}");
+        assert_eq!(leader.state().hard_state.term, 2, "{short:?}");
+        assert_eq!(leader.state().commit_index, 0, "{short:?}");
+        assert_eq!(leader.capacity_step_downs().0, 0, "{short:?}");
+        let (_, stalled) = leader.replica_stall().expect("a stalled replica");
+        assert!(stalled >= PROGRESS_ROUNDS - 1, "{short:?}: {stalled}");
+        for n in [2, 3] {
+            let core = &cluster.cores[&n];
+            assert_eq!(core.state().last_index(), held, "{short:?} node {n}");
+            // One decline per resend: the election's noop, then every round.
+            let declined = core.declined_appends();
+            assert!(
+                declined >= PROGRESS_ROUNDS,
+                "{short:?} node {n}: {declined}"
+            );
+            let expected = match short {
+                Short::Data => (declined, 0),
+                Short::Noop => (declined, declined),
+                Short::Entries => (0, 0),
+            };
+            assert_eq!(core.wal_declined_appends(), expected, "{short:?} node {n}");
+            assert_eq!(core.wal_noop_refusals(), 0, "{short:?} node {n}");
+        }
+        assert!(cluster.trace.step_errors.is_empty(), "{short:?}");
+        // Room again (the operator's larger store, or a checkpoint): commits.
+        for n in [2, 3] {
+            let core = cluster.cores.get_mut(&n).unwrap();
+            core.limits = LogLimits::default();
+            core.set_storage_pressure(false);
+            core.set_wal_noop_room(true);
+            core.set_wal_room(None);
+        }
+        assert!(cluster.rounds_to_commit(1, 101).is_some(), "{short:?}");
+        assert_eq!(cluster.trace.snapshot_sends, 0, "{short:?}");
+    }
+}

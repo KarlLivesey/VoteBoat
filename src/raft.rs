@@ -444,8 +444,10 @@ pub struct Raft {
     // A leader elected while its retained log was at `max_entries_per_group`
     // owes its current-term noop; it appends it once compaction frees space.
     leader_noop_pending: bool,
-    /// Volatile host input (ST2b): the node's WAL is above its high-water
-    /// mark, so as a follower this core takes no new data entries.
+    /// Volatile host input (ST2b): the node's WAL is in its high-water
+    /// state. Only a host that gives no `wal_room` makes a follower decline
+    /// new data entries on it; with a room the follower decides on bytes
+    /// alone (R6-1).
     storage_pressure: bool,
     /// Volatile host input (R4-1): the node's WAL account holds one more
     /// leader noop under the high-water mark plus the control reserve. While
@@ -845,10 +847,13 @@ impl Raft {
         self.entry_budget_refusals = self.entry_budget_refusals.saturating_add(1);
         Err(RaftError::StoragePressure)
     }
-    /// Host-set WAL high-water state (ST2b). While set, a follower keeps
-    /// leader contact, term and commit records but declines appends that
-    /// carry new data entries; the leader resends the same range on its next
-    /// heartbeat. Volatile scheduling input, never persisted or replicated.
+    /// Host-set WAL high-water state (ST2b). While set on a core whose host
+    /// gives no WAL room (`set_wal_room(None)`), a follower keeps leader
+    /// contact, term and commit records but declines appends that carry new
+    /// data entries; the leader resends the same range on its next heartbeat.
+    /// With a room the follower takes whatever fits it (R6-1): a node uses
+    /// the state only for client admission. Volatile scheduling input, never
+    /// persisted or replicated.
     pub fn storage_pressure(&self) -> bool {
         self.storage_pressure
     }

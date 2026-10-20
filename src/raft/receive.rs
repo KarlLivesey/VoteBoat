@@ -325,8 +325,7 @@ impl Raft {
         }
     }
     /// ST2b and round 3 (I3): a follower declines the new entries of an
-    /// append when they carry data while its node is above the WAL high-water
-    /// mark (or the host's in-flight byte budget is spent), or when they would
+    /// append when they do not fit its node's WAL room, or when they would
     /// exceed its retained-entry capacity. It keeps leader contact, term and
     /// commit for the verified prefix and sends no reply, so the leader resends
     /// the range on its next heartbeat; the core stays free to apply,
@@ -339,6 +338,9 @@ impl Raft {
     /// again, so they are not counted. One walk over the new suffix gives its
     /// bound and whether it carries data; the bound is returned for staging.
     /// A volatile core without a bounded WAL stages no bytes and skips it.
+    /// R6-1: with a WAL room the decision is on bytes alone; the high-water
+    /// latch (`storage_pressure`) is for client admission and declines data
+    /// here only for a host that gives no room.
     fn decline_new_data(
         &mut self,
         entries: &[LogEntry],
@@ -355,15 +357,13 @@ impl Raft {
         let new = &entries[offset..];
         let growth = (!self.volatile || self.wal_room.is_some()).then(|| suffix_growth(new));
         let bound = growth.map(|(bound, _)| bound);
-        // Every ordinary append: no pressure, the new suffix fits under the
-        // mark, and the whole retained log plus the new entries fits (the
-        // kept prefix is never longer than the log).
-        if !self.storage_pressure
-            && self
-                .wal_room
-                .is_none_or(|room| bound.is_some_and(|bound| bound <= room.data))
-            && self.durable.entries.len().saturating_add(new.len())
-                <= self.limits.retained_entry_capacity()
+        // Every ordinary append: the new suffix fits under the mark (or,
+        // without a room, no latch), and the whole retained log plus the new
+        // entries fits (the kept prefix is never longer than the log).
+        if self.wal_room.map_or(!self.storage_pressure, |room| {
+            bound.is_some_and(|bound| bound <= room.data)
+        }) && self.durable.entries.len().saturating_add(new.len())
+            <= self.limits.retained_entry_capacity()
         {
             return ControlFlow::Continue(bound);
         }
@@ -396,7 +396,8 @@ impl Raft {
             let bound = growth.map_or(usize::MAX, |(bound, _)| bound);
             bound > if data { room.data } else { room.noop }
         });
-        if fits && !wal_over && !(data && self.storage_pressure) {
+        let latched = data && self.storage_pressure && self.wal_room.is_none();
+        if fits && !wal_over && !latched {
             return None;
         }
         self.declined_appends = self.declined_appends.saturating_add(1);
