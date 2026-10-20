@@ -41,8 +41,10 @@ impl StateMachine for ProgramApplication {
         // plan overflows the profile and readiness refuses it.
         let (coordinators, participants) =
             (self.profile.coordinators(), self.profile.participants());
+        let limit = crate::raft::MAX_DEPLOYMENT_PLAN_WORDS;
         let mut plan = Vec::with_capacity(
-            6 + 3 * (coordinators.len() + participants.len()) + 2 * self.keys.len(),
+            (6 + 3 * (coordinators.len() + participants.len()) + 2 * self.keys.len())
+                .min(limit + 2),
         );
         plan.extend(DeploymentPlan::group_words(self.group));
         plan.extend([
@@ -54,6 +56,11 @@ impl StateMachine for ProgramApplication {
             plan.extend(DeploymentPlan::group_words(*group));
         }
         for (id, key) in &self.keys {
+            // Past the bound the profile overflows whatever follows, so stop
+            // building (a refusal, never a truncated plan).
+            if plan.len() >= limit {
+                break;
+            }
             plan.extend([id.get(), key.opening as u64]);
         }
         Some(ReadinessRequirements {

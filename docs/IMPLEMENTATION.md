@@ -21,7 +21,7 @@ design pack is unchanged; its amendments are recorded below.
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Current DR1: `SessionLedger`, Counter and the steady-state application contract (`lb/dr1-session-ledger`, in review; see DR1 implemented) | Audit S1 and RT2, and the U2 probe: the shipped counter service stops refusing every write after 10,000 lifetime operations; one shared session mechanism lands in the core; `deployment_requirements` means a steady-state bound under a declared retention rule, readiness refuses an application that declares none, and the Counter's apply never returns `Err` for a capacity reason | — (ST2 and NT1 run in parallel; only this document conflicts textually) | 1,000,000-write soak from 1,000 rotating clients fails on the base at write 10,001 with `DedupCapacity` and passes with retention ≤ S·K at every checkpoint; exactly-once across eviction, restart and a checkpoint between every apply; consumed retry → `Expired`; evicted-session retry → `Expired` (never a second execution); boundary at exactly S·K; U2 probe (1,000 seeded three-node schedules) shows apply never errors; readiness refuses an undeclared application; native durable CPU per write before/after; fmt, four strict Clippy configurations and matched fmt/Clippy; application, counter_service, runtime, snapshot, checkpoint, log_store and native startup suites in default and all-features | LB |
-| Next DR2: Maintenance, BucketCounter/Routed and outbox acknowledgement | Audit S2, S3: transfer_service stops refusing after 32 writes; leadership maintenance survives more than 64 transfers. Reuses `SessionLedger` and the U2 probe. Also owns application deployment-recovery admission (recorded in DR1 round 5): static bootstrap exchanges no application requirements, and a voter reopening a WAL with no checkpoint replays under its current configuration; plus readiness before a bootstrap entry commits (DR1 round 6: inputs outside the readiness identity but compared by a committed bootstrap entry protect a learner only once that entry is in its verified prefix; refuse readiness until the family's bootstrap entry has applied). AI3 owns activation's counterpart. (The leaf configurations deferred in round 5, including activation mappings, the logical voter's limits and the transaction applications', are compared since DR1 round 6.) | DR1 (ledger, `Retention`, probe harness, readiness identity) | Fail@main tests (65 `Begin`/`Complete` pairs; 33 transfer writes); soaks with splits/merges and leader changes; U2 probe run for Maintenance; transfer suites; a static bootstrap with two voters of different application configuration, a checkpoint-less restart under changed limits (Sol's 7-vs-10 probe), and a learner with another directory or Routed plan verified before the bootstrap entry commits, each refused with a typed error before any entry applies | LB |
+| Next DR2: Maintenance, BucketCounter/Routed and outbox acknowledgement | Audit S2, S3: transfer_service stops refusing after 32 writes; leadership maintenance survives more than 64 transfers. Reuses `SessionLedger` and the U2 probe. Also owns application deployment-recovery admission (recorded in DR1 round 5): static bootstrap exchanges no application requirements, and a voter reopening a WAL with no checkpoint replays under its current configuration. AI3 owns activation's counterpart. (The leaf configurations deferred in round 5, including activation mappings, the logical voter's limits and the transaction applications', are compared since DR1 round 6; readiness before a bootstrap entry commits, recorded here in round 6, moved into DR1 round 7, which also carries participant opening images. Open from round 7, owner to be decided: a logical voter's parent bootstrap is outside the identity; see APPLICATION_ENVELOPES.md.) | DR1 (ledger, `Retention`, probe harness, readiness identity) | Fail@main tests (65 `Begin`/`Complete` pairs; 33 transfer writes); soaks with splits/merges and leader changes; U2 probe run for Maintenance; transfer suites; a static bootstrap with two voters of different application configuration, and a checkpoint-less restart under changed limits (Sol's 7-vs-10 probe), each refused with a typed error before any entry applies | LB |
 | Then TX1: transaction participants and coordinators | Audit S5, S6: transaction services run indefinitely; a coordinator incarnation is a session at each participant | DR1 (ledger, `Expired` vocabulary) | Fail@main at 4,097 transactions (program: 257); 200,000-transaction soak with coordinator restarts and lost decision receipts | LB |
 
 ### DR1 schema plan (19 October 2026, before editing)
@@ -1587,6 +1587,139 @@ admission point this PR owns; nothing here touches the per-write path.
    new probes in a temporary target with a02f5734's and this branch's `src/`
    swapped in this worktree. Counter admission/apply, the ledger and
    per-write frames are untouched.
+
+#### DR1 round 7 implemented (20 October 2026, PR 15)
+
+Implemented as planned above (schema plan 4ee8dac6); deviations inline.
+
+- **Bootstrap binding before positive readiness (Sol P2-1).**
+  `StateMachine::deployment_bound` (default `true`) and
+  `ReadinessError::BootstrapPending`. `verify_readiness_evidence` checks it
+  after the identity and capacity checks, so the host verifier returns
+  `BootstrapPending` and the native exchange replies not ready; an
+  incompatible declaration is still `Capability`. Flags: Routed
+  `initialized` AND inner; `TransferSource`, `ScopedTransferSource`,
+  `RoutedControlReads` the Routed layer's; `TransferTarget` `staged` AND
+  inner; `CreatedNamespace` `ready` AND owner; `Directory` `initialized`
+  (`LifecycleDirectory` forwards); metadata source its recorded bootstrap,
+  target `staged`, serving the target's, publishing the source's;
+  `RetirementGuard` the owner's (retired: `true`, the retirement applied the
+  exact anchor); `Maintenance`, `LogicalActivationApplication` and the
+  service binary's `Application` forward. Checked per family before
+  editing: each applies its bootstrap only as its exact binding and its
+  restore compares the binding (Routed decode, `TransferTarget`,
+  `CreatedNamespace`, Directory, metadata source and target); both transfer
+  sources refuse a raw Routed bootstrap. No state, storage, wire or byte
+  declaration change.
+- **Opening images in the plan (Sol P2-2).** `TransferApplication`: its own
+  segment is the 12 group words then per account `id, opening`
+  (1 + 12 + 2a ≤ 192: 89 accounts). `ProgramApplication`: its segment then
+  per key `id, opening`. Coordinators unchanged. Deviation: construction stops
+  adding words once the plan is past the bound (so a 4,096-account image
+  builds at most 194 words, not 8,204); the profile then overflows exactly as
+  it would with the full image, so the result is a refusal, never a
+  truncated plan.
+- **Audit of constructor-supplied initial state.** Counter, BucketCounter and
+  coordinators start empty. Bootstrap-bound (item 1): Directory plan, Routed
+  and `TransferTarget` initial inner checkpoints, metadata initial directory,
+  namespace plan, `RetirementGuard` anchor. In the plan (item 2): Transfer
+  accounts, Program keys. **Open, not closed:** a logical voter's parent
+  bootstrap (the initial state of its parent-log replica; no committed entry
+  binds it for a bootstrap voter) and its child bootstrap (host-checked
+  against the Raft core's bootstrap). Carried exactly it would overflow the
+  192-word plan for the largest valid configuration (174 words), refusing a
+  configuration the round-6 test requires to fit; the alternatives (raise the
+  bound, a committed binding entry) change wire sizes or the protocol.
+  Recorded in APPLICATION_ENVELOPES.md for a decision.
+- **WIRE_FORMAT.md (Sol P3).** The plan word count is at most 192.
+- **Docs.** APPLICATION_ENVELOPES.md: the gate and per-family table, the
+  image bound, and "What remains outside the identity" (bootstrap-bound
+  inputs, attested once applied; policy/codec code, a trusted-provider
+  obligation; Maintenance's group, equal by the core binding; the logical
+  voter bootstraps, open). The round-6 "readiness before a bootstrap entry
+  commits" gap is removed; the DR2 row loses it.
+- **Tests (permanent).** tests/learners/bootstrap_bindings.rs:
+  `rr6_routed_bootstrap_receipt_gap` and `rr6_directory_bootstrap_receipt_gap`
+  (equal requirements; both `BootstrapPending` at index 2 through the real
+  verifier; the admitted bootstrap commits at index 3 by actual replication,
+  one replica `Bootstrapped`/`Initialized`, the other
+  `Err(InvalidCommand)`; the bound one's receipt is accepted by
+  `accept_learner_readiness` and `check_learner_readiness` is `Ok`; the
+  other is `NotCaughtUp`), `bootstrap_binding_is_propagated_through_wrappers`
+  (Maintenance around Routed), `rr6_participant_initial_image_receipt_gap`
+  (Sol's Prepare divergence, `Capability` both ways, own receipts),
+  `participant_images_within_the_plan_bound_get_receipts_and_larger_ones_are_refused`
+  (1 and 89 accounts get receipts; 90 and 4,096 overflow, refused) and
+  `program_participant_opening_keys_are_compared_exactly`. The Directory
+  test's host log raises the command limit to 128 KiB (a bare Directory
+  declares 64 KiB + 128; the fixture default is 64 KiB). tests/learners.rs
+  gains `commit_command` (actual replication of one command to the learner)
+  and `assert_bound_learners_refuse_each_other`; the three round-4/5 tests
+  whose positive receipts were for Routed-family replicas
+  (TransferSource vs nested Routed, Routed operations 4/7,
+  `Routed<TransferApplication>` capacity 1/2) now also assert
+  `BootstrapPending` before their bootstrap and keep every earlier assertion.
+  The permanent tests do not compile against a02f5734 (new API); the probe
+  below shows the same cases behaviourally.
+
+**Before/after.** Temporary probe target (`tests/zz_r7_probes.rs`, not
+committed; only APIs present at both revisions; host logs with a 128 KiB
+command limit), built with a02f5734's and this branch's `src/` in this
+worktree; `git diff -- src` identical to the saved patch after restoring.
+
+| Probe (real verifier, then leader accept/check) | a02f5734 | Branch |
+| --- | --- | --- |
+| Routed grant epoch 1 / 2: requirements equal | yes | yes |
+| Routed epoch 1, 2 at index 2 (no bootstrap) | receipts, accepted, check `Ok` (both) | `BootstrapPending` (both) |
+| Routed epoch 2 after its bootstrap (index 3) | receipt, accepted | receipt, accepted |
+| Routed epoch 1 after epoch 2's bootstrap | apply `Err(InvalidCommand)`, `NotCaughtUp` | same |
+| Directory epoch 1, 2 at index 2 | receipts, accepted (both) | `BootstrapPending` (both) |
+| Directory epoch 2 after its bootstrap / epoch 1 | receipt / `Err(InvalidCommand)`, `NotCaughtUp` | same |
+| `Maintenance<Routed>` at index 2 | receipt, accepted | `BootstrapPending` |
+| Transfer opening 4 / 10: requirements equal | yes | no |
+| Transfer 4 for 10's, 10 for 4's | receipts, accepted (both) | `Capability` (both) |
+| Transfer 4, 10 own; 89 accounts own | receipts | receipts |
+| Transfer 90 accounts own | receipt | `Capability` (plan overflows) |
+| Program key opening 4 / 10: equal; cross; own | yes; receipts both ways; receipt | no; `Capability` both ways; receipt |
+
+**CPU.** Not re-measured; no Mac. Counter admission and apply, the ledger and
+per-write frames are untouched: `deployment_bound` is called only by the
+readiness verifier, and the transaction plans are built only where
+`deployment_requirements` is (readiness, membership, wire readiness, and
+`Routed` restore around a transaction leaf), bounded at 194 words.
+`Event`, `Message`, `Raft` and the requirements/request sizes are unchanged
+(no field added).
+
+**Checks (Linux, cores 0–3, nice 19, `-j 2`, suites on cores 1–3, two test
+threads, one configuration at a time).** fmt; strict Clippy default,
+all-features, no-default-features, native-only: zero diagnostics (re-run after
+the last source change); matched fmt/Clippy by the pre-push hook.
+All-features, every test target except `representative_relay_model`
+(unchanged standalone model, not run, as in rounds 5 and 6), plus the library
+and the three binaries' unit tests: lib 510 (+1 ignored), learners 42, routed
+194 (exact-name chunks), counter_service 205 (three chunks), effect_owner
+210, directory 31, transaction_application 6, program_transaction_application
+3, metadata_transfer 43, logical_activation_application 7, wire 18,
+native_relay 22, provider_conformance 42, lifetime_apply_never_errs (U2) 4,
+raft 79, transfer_source 9, scoped_source 6, transfer_target 10,
+namespace_creation 19, retained_insertion 39, runtime 58, startup 60,
+native_member_startup 50, logical_activation_driver 35,
+logical_activation_nested 17, logical_nested_native 15, logical_voter_native
+42, transfer_service 33, directory_service 22, transaction_driver 14,
+program_transaction_driver 14, and every other target green; binaries 52 /
+12 / 7. Default: lib 508, learners 41, routed 112, counter_service 146,
+effect_owner 210, directory 31, transaction_application 6,
+program_transaction_application 3, metadata_transfer 43,
+logical_activation_application 7, wire 18, native_relay 13,
+provider_conformance 42, lifetime_apply_never_errs 4, raft 79, and
+transfer_source, scoped_source, transfer_target, namespace_creation,
+retained_insertion, application, leadership_maintenance, runtime,
+logical_voter_application, snapshot, delegation, retirement, startup. The
+plan-construction cap (the last source change, transaction leaves only) came
+after these runs; learners, transaction_application,
+program_transaction_application and the library were re-run in both
+configurations after it, and transaction_driver and
+program_transaction_driver in all-features.
 
 ## Logical-voter reliability track (opened 18 October 2026)
 

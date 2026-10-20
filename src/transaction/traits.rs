@@ -54,11 +54,17 @@ impl StateMachine for TransferApplication {
         // at most 89 accounts fit; a larger image overflows the profile and
         // readiness refuses it rather than truncating.
         let [first, second] = self.profile.participants();
-        let mut plan = Vec::with_capacity(12 + 2 * self.accounts.len());
+        let limit = crate::raft::MAX_DEPLOYMENT_PLAN_WORDS;
+        let mut plan = Vec::with_capacity((12 + 2 * self.accounts.len()).min(limit + 2));
         for group in [self.group, self.profile.coordinator(), first, second] {
             plan.extend(DeploymentPlan::group_words(group));
         }
         for (id, account) in &self.accounts {
+            // Past the bound the profile overflows whatever follows, so stop
+            // building (a refusal, never a truncated plan).
+            if plan.len() >= limit {
+                break;
+            }
             plan.extend([id.get(), account.opening as u64]);
         }
         Some(ReadinessRequirements {

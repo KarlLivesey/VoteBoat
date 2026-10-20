@@ -375,6 +375,9 @@ fn participant_images_within_the_plan_bound_get_receipts_and_larger_ones_are_ref
         learner_verdict(over, image(90)),
         Err(ReadinessError::Capability)
     );
+    // The largest image the limits allow overflows the same way.
+    let largest = image(4096)().deployment_requirements().unwrap();
+    assert_eq!(largest.inner_profile.layers(), None);
     // A coordinator has no image; its plan is the 12 group words.
     let coordinator = TransferApplication::coordinator(
         group(3),
