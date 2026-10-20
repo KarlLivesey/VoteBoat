@@ -1837,7 +1837,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | T0 Recovery always works | A crash at any point never prevents restart and never loses acknowledged state | Exhaustive damaged-tail recovery for native log and vote stores; acknowledged-prefix damage still detected |
 | T2 Cheaper durable barrier | Fewer physical syncs per group commit on CoW and non-CoW volumes | Only with a complete recovery/damage proof and no relaxation of acknowledged state; Btrfs, ext4/XFS, APFS |
 | T3 Wider group commit | Barrier cost amortized over everything queued | Native loaded writes/s and p99 improve with lower CPU/original; unchanged durability contract |
-| T4 Per-original CPU | Framework CPU/original materially below the H2 main baseline; reference values are re-measured on main after each merge (post-V3 merge of 19 October 2026: to be re-baselined; the accepted singleton trade is recorded in the PR 10 row) | Profile-selected removals of per-original allocation/handoff with no semantic change |
+| T4 Per-original CPU | Framework CPU/original materially below the H2 main baseline; reference values are re-measured on main after each merge (post-V3 merge of 19 October 2026: to be re-baselined; the accepted singleton trade is recorded in the PR 10 row) | Profile-selected removals of per-original allocation/handoff with no semantic change; V3f is done in PR 24 ([merge record](#v3f-merge-record-pr-24)); T4 remains open |
 | Q1 Reliable suites on any host (user, 18 October 2026) | Every suite passes on any hardware, from a Raspberry Pi to large servers and GitHub's 3–4 core runners | No outcome depends on wall-clock speed, core count, disk latency or scheduling; no assertion weakened, no test ignored or retried, no library capacity changed; Platform feedback green |
 
 ### Mini plan
@@ -1865,7 +1865,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done V3c: host-owned effect sink and `ProposalBatch::push` fix (merged 20 October 2026 in PR 16, head 36de6dd0; code head 783265a4; quiet Mac vs `d379783d`, 5 pairs: bulk-16 −1.4%, single-16 −4.7%, bulk-1 −2.1%, single-1 −9.5% CPU per write; driver width 1 −13.2%, allocations 30 → 15 per write) | Every core call returns a fresh `Vec<Effect>` built from nested per-function Vecs, and the matched actor grows and frees a `VecDeque` per call: at width 1 about 30 allocations per write, 9 of them effect vectors (profile §4), ≈ 628 ns/write of allocator time in single-1. The host owns one reusable queue that the core fills in place (`step_into`, `propose_entries_into`, `persist_volatile_into`); the Vec APIs become wrappers. Ride-along: `push` built and dropped an `Exhausted` error on every success (bulk ≈ 1.4%) | Profile above; V3 merged | Effect-sequence oracle (Vec vs sink forms over the twin histories, FIFO insertion of committed intervals); rollback with sentinel effects on refused steps, stale tokens and fenced cores; reused queue keeps its capacity and allocation with no stale effects over 1,000 width-1 rounds; existing effect-order, twin, golden and facts oracles unchanged; driver widths 1/231/515 with allocation counts; quiet-Mac 5 pairs × 4 cells against `d379783d`; attribution controls; fmt, four strict root Clippy builds and the matched workspace. Review round 2 (tests and docs only): granted-vote sentinel and election-reset comparison, each proved by mutating the two queue reads; wrapped-queue late exhaustion; durable, transfer, stale-append, learner-configuration and retirement-reply sink oracles | T4 |
 | Done V3d: per-step recomputation (merged 20 October 2026 in PR 18, head 1fb878da; code head 08ebc5c3, round 2 code head 0ea00498, round 3 code 4ba17fbf; quiet Mac vs `bc8fafb6`, 3 × 5 pairs: single-16 −3.0%, single-1 −1.8 to −3.5%, bulk-16 and bulk-1 flat; driver width 1 −13.0%, instructions −14.4%) | `effect_reservation` rebuilt and compared `LogMetadata` twice per harness step, and every plan and install rebuilt or compared it again (profile slice 2). The core's log changes only at install, so its summary is now kept valid there by type (`SummarizedLog`), plans from its own view skip the comparison, and an install version token skips the predecessor check while nothing changed; a plain log's replica count no longer walks the membership | V3c (same `raft.rs` chain) | Implemented evidence in the V3d sections below: summary/version tracking tests over every mutating path (fail without the bump or refresh), reservation test, unchanged transition/twin/snapshot/truncation/facts/golden tests, fixed-schedule counts and reservation checksums identical, per-site samply attribution, three gate runs, attribution controls, fmt + four strict Clippy builds + matched workspace. Review round 2 (Opus P3s): the install skip is bound to the stamp (log identity and version) of the view the plan came from, so a plan moved to another core is refused in debug and release; moved-version checked install tested; the skip still taken on ordinary appends and commit rounds (test counter); mutation edits recorded exactly; width-1 driver within noise (3 pairs: +0.2% ns, +0.17% instructions). Review round 3 (Sol): 16 B stamps (u64 identity issued once, u64 version, ≈ 584 years each at 10^9/s) that never repeat and fail closed to checked installs, with `observability::unidentified_logs()`; allocator- and version-bound tests in debug and release; nine named mutations; `Pending` 1,088 → 1,104 B; width-1 driver −0.2% ns, +0.25% instructions; single-1 vs `bc8fafb6` still −1.8% (5 pairs) | T4 |
 | Done V3e: per-peer replication slots (merged 20 October 2026 in PR 21, head 5a316689; code head 713ead7c; quiet Mac vs `e7520ce1`, 3 × 5 pairs: single-16 −0.5 to −1.9%, bulk-16 and bulk-1 flat, single-1 +1.5 to +2.1% from a park threshold in the one-worker harness (control below); driver width 1 −12.5%, instructions −8.9%) | Outstanding replication per peer in a fixed slot instead of a `BTreeMap` emptied and refilled each round; a cached peer order and stack-buffered quorum frontier instead of per-broadcast `Vec`s (profile slice 3: single-1 −2.3 to −3.1%, single-16 −1.3 to −1.8%, bulk ~0) | V3d (same `raft.rs` chain) | Slot and frontier oracles against the map form over membership-change, retirement, lagging and truncation histories; no slot for a departed peer; same-id replacement; named mutations; driver 1/231/515 with per-site attribution; quiet-Mac gate against `e7520ce1`; spin control for single-1; fmt, strict Clippy, suites ("V3e implemented" below) | T4 |
-| Done in review V3f: in-place install (PR 24 on branch `cpu/in-place-install`, code head e3471f31; quiet Mac vs `379668af`: driver width 1 −3.2% ns and −5.1% instructions, width 231 −1.2%; four cells flat within noise over 3 × 5 pairs, single-1 guard not adverse; install-side memmove 179 → 19 ns per write at width 1) | Install the pending transition through `&mut` and clear it after success instead of moving `Pending` (1,104 B), `OwnedNextLog` (672 B) and large `Result`s by value (profile slice 4: single-1 −1.9 to −2.5%; V3d's in-place summary write is the first piece). Base width-1 driver profile on `379668af`: library memmove 266.6 ns per write at the install and staging sites | V3d (merged); independent of V3e's peer slots (merge checked locally) | A failed install (predecessor mismatch, foreign stamp, cold-plan refusal) leaves `Pending` intact at the failure and the core fences as today, in debug and `--release`; success clears the slot (debug assertion, mutation proof); twin, completion, volatile/durable and V3d stamp tests unchanged; size bounds unchanged; per-site memmove before/after; driver 1/231/515; four-cell gate against `379668af`; attribution controls; fmt, strict Clippy, suites ("V3f schema plan" below) | T4 |
+| Done V3f: in-place install (merged 21 October 2026 in PR 24, final head deaf8121, code head e3471f31; [merge record](#v3f-merge-record-pr-24); quiet Mac vs `379668af`: driver width 1 −3.2% ns and −5.1% instructions, width 231 −1.2%; four cells flat within noise over 3 × 5 pairs, single-1 guard not adverse; install-side memmove 179 → 19 ns per write at width 1) | Install the pending transition through `&mut` and clear it after success instead of moving `Pending` (1,104 B), `OwnedNextLog` (672 B) and large `Result`s by value (profile slice 4: single-1 −1.9 to −2.5%; V3d's in-place summary write is the first piece). Base width-1 driver profile on `379668af`: library memmove 266.6 ns per write at the install and staging sites | V3d (merged); V3e peer slots merged on main; combined source checked below | A failed install (predecessor mismatch, foreign stamp, cold-plan refusal) leaves `Pending` intact at the failure and the core fences as today, in debug and `--release`; success clears the slot (debug assertion, mutation proof); twin, completion, volatile/durable and V3d stamp tests unchanged; size bounds unchanged; per-site memmove before/after; driver 1/231/515; four-cell gate against `379668af`; attribution controls; fmt, strict Clippy, suites ("V3f schema plan" below) | T4 |
 | Following H-a: harness reply index | Bulk cells: the matched harness's `PendingReplies` (SipHash `HashMap<u128,_>`) remove + insert is about 23 ns of 214 per write, harness not library work (profile H-a: bulk −7 to −10%) | Separate harness PR on main with an H2-style fairness review, main re-baselined after; independent of V3e/V3f | Reply-order and fairness tests; OpenRaft engine untouched; quiet-Mac pairs with attribution parity | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
 | Done C15: batched admission uses the pending bound | Same fast path for ready batches | C14 | Linux/Mac pairs; suites | T4 |
@@ -4173,6 +4173,55 @@ maps (`BTreeMap` get/index 119 ns per write at width 1); moving them into the
 slots would remove most of it. The single-1 park threshold above is a
 harness topology item for the orchestrator.
 
+#### V3f merge record (PR 24)
+
+Merged 21 October 2026 as `1e56e9f5` from final PR head
+`deaf8121e700bc1c2f6f86440d2699c560da7114`. Both reviewers approved
+`7845992b` (production code `e3471f31`):
+[GPT-6.1-Sol, review 5587412347](https://github.com/KarlLivesey/VoteBoat/pull/24#pullrequestreview-5587412347)
+and [Claude Opus 5.5, review 5587699240](https://github.com/KarlLivesey/VoteBoat/pull/24#pullrequestreview-5587699240).
+Their APPROVE verdicts are posted as comments because GitHub disallows
+self-approval. Round 2 folds the reviewer-supplied Compact/Delta refusal
+and spent-plan regressions plus documentation corrections; production code
+is unchanged from the reviewed head.
+
+Full exclusive-checkout gate on `deaf8121` (Linux, cores 4–9): default
+2,603 / 0; all-features 2,906 / 0 plus relay 9 / 0 (2,915 total);
+no-default-features 1,337 / 0 plus relay 9 / 0 (1,346 total);
+native-only 1,924 / 0; matched 75 / 0. Every expected executable has its
+own passing result: 124 default, 124 all-feature, 118 no-default, 120
+native-only and one matched executable. No filters were applied; the
+existing ignored library test remains in each root configuration.
+The original pre-fold default run was 2,601 / 0; the final-head rerun adds
+exactly the two library regressions and keeps every other target's count.
+Root fmt, four strict all-target Clippy configurations and matched
+fmt/Clippy passed (7/7, zero diagnostics). The split runner omits
+doctests, so `cargo +stable test --doc --locked --offline` was run
+separately with `--all-features` and `--no-default-features` after the
+sequence completed: both passed with zero doctest cases. Default and
+native full Cargo runs include their doctest result. Logs and per-binary
+audits are local in the main checkout at
+`target/claude/research-r4/pr24-suites/` (`gate-audit.json`);
+`test-default-final.log` preserves the final-head run separately.
+
+The code merged automatically with V3e. All three documentation conflicts
+retain both slices' complete sections, main's Done V3e row and its
+single-1 judging rule. On merged source `1e56e9f5`, default library
+564 / 0 and all-feature library 566 / 0 passed, each with volatile 11 / 0,
+Raft 81 / 0 and snapshot 27 / 0 (683 and 685 total); matched passed
+75 / 0. The enabled tracked pre-push hook also passed all seven checks
+on the merged source with zero diagnostics. Feature configurations ran
+sequentially in the owned checkout; later builds used
+`CARGO_INCREMENTAL=0` to bound compiler cache growth.
+
+P3 disposition: round 2 corrects `install_pending_plan`'s return type to
+`RaftError` and the peer-slots documentation conflict count to three.
+This merge record corrects the driver pair-consistency and bulk run-median
+wording and explicitly records the unattributed ~75 ns sampling gap below.
+The optional release-mode Busy refusal and installer-body consolidation
+remain deferred. T4 remains open: V3f is complete as a measured
+library/driver improvement, with no demonstrated whole-process cell gain.
+
 #### V3f schema plan: in-place install (20 October 2026)
 
 Brief: `target/claude/research-r4/v3c-profile.md` §3 (class "Pending /
@@ -4384,6 +4433,10 @@ CPU-weighted ns per write (sampled totals 3,519 → 3,427):
 | `finish_volatile_into` inclusive | 782.1 | 615.2 | −166.9 |
 | All sampled | 3,519 | 3,427 | −92 |
 
+The 166.9 ns reduction in `finish_volatile_into` inclusive time exceeds
+the 92 ns whole-sample reduction by about 75 ns. That change elsewhere is
+unattributed; the two 8 kHz sample runs do not identify a cause.
+
 The profile's estimate for this slice was the library memmove at these
 sites, 250–330 ns of 356 on `d379783d` (single-1 running view); on
 `379668af` the install side was 179 ns of memmove at width 1 and 160 of it
@@ -4409,16 +4462,19 @@ Pair ratios, run 1 / 2 / 3: bulk-16 `0.98 1.02 0.99 1.01 1.02` / `0.99 1.01
 `1.00 1.00 0.99 1.00 1.00`.
 
 Judgement (PR 21's rule: the driver, single-16 and both bulk cells decide;
-single-1 is a guard). The driver improves at widths 1 and 231 in every pair
-(−3.2% and −1.2%). The four cells are flat within noise (15-pair median
+single-1 is a guard). The driver medians improve at widths 1 and 231
+(−3.2% and −1.2%); width 231 includes one adverse pair (ratios
+1.01 / 0.99 / 0.98). The four cells are flat within noise (15-pair median
 ratios 1.00 / 1.00 / 1.01 / 1.00). That is the expected size: the install
 saving is about 100–170 ns per write at six persistence rounds (width 1),
 about 0.5% of a single-16 write (21.1 µs) and 0.9% of a single-1 write
 (11.4 µs), below these cells' run-to-run spread (single-16 pairs 0.97–1.06).
 A bulk round installs once per few hundred writes (under 0.5 ns per write),
-so bulk's run medians (+2.4 / +0.5 / 0.0% and +1.6 / −1.1 / +2.2%) are
-noise, with both signs across runs; the per-round evidence is the
-fixed-width driver. Single-1 did not move adversely (−1.5 / +0.3 / −0.1%,
+so these bulk medians stay within the observed run-to-run spread.
+Individual pair ratios have both signs in both bulk cells; bulk-16 run
+medians are all nonnegative, while bulk-1 run medians have both signs.
+The per-round evidence is the fixed-width driver. Single-1 did not move
+adversely (−1.5 / +0.3 / −0.1%,
 median ratio 1.00), so the busy-loop control was not needed and not run.
 
 Attribution controls (`--attribution true`, one run per cell per revision,
