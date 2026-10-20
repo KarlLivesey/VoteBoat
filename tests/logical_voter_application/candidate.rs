@@ -251,7 +251,7 @@ fn the_largest_logical_voter_plan_fits_the_deployment_plan_bound() {
     );
     let largest = construct(plan(), limits)
         .unwrap()
-        .with_activation_control_profile(full)
+        .with_activation_control_profile(full.clone())
         .unwrap()
         .deployment_requirements()
         .unwrap();
@@ -259,5 +259,44 @@ fn the_largest_logical_voter_plan_fits_the_deployment_plan_bound() {
     assert_eq!(largest.inner_profile.plan().words().len(), 1 + 173);
     assert!(
         largest.inner_profile.plan().words().len() <= voteboat::raft::MAX_DEPLOYMENT_PLAN_WORDS
+    );
+    // DR1 round 8 (Opus round 7, P3-4): the per-stack budget. Activation
+    // around that voter is type-valid, but its 16-mapping segment (116 words)
+    // and the voter's (174) need 290 plan words: the profile overflows, and
+    // readiness refuses the stack for every replica, never truncating it.
+    let largest_app = || {
+        construct(plan(), limits)
+            .unwrap()
+            .with_activation_control_profile(full.clone())
+            .unwrap()
+    };
+    // The wrapped voter runs in its child group, 2: the stack's parent.
+    let stack = LogicalActivationApplication::new(
+        group(2),
+        (1..=16)
+            .map(|n| {
+                LogicalStoreMapping::new(
+                    group(2),
+                    NodeId::new(n).unwrap(),
+                    store(500 + n as u128),
+                    group(600 + n as u128),
+                )
+                .unwrap()
+            })
+            .collect(),
+        // Room for the voter's own command and checkpoint bounds.
+        LogicalActivationLimits {
+            command_bytes: limits.max_command_bytes + 64,
+            checkpoint_bytes: limits.max_child_checkpoint_bytes + 1024 * 1024,
+            ..LogicalActivationLimits::default()
+        },
+        largest_app(),
+    )
+    .unwrap();
+    let declared = stack.deployment_requirements().unwrap();
+    assert_eq!(declared.inner_profile.layers(), None);
+    assert_eq!(
+        stack.validate_deployment_requirements(declared),
+        Err(ApplicationError::UnsupportedSchema)
     );
 }

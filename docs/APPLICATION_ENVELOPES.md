@@ -34,8 +34,24 @@ of every layer exactly (`UnsupportedSchema`), so two families that reuse
 schema numbers, or two replicas configured differently, refuse each other
 before any entry. Only `command_bytes` and `snapshot_bytes` are storage
 reservations, accepted when the declaration is at least the actual bound. No
-hashing: the identity is fixed width, and a plan that does not fit overflows
-the profile, which readiness refuses rather than truncating.
+hashing is added: the identity is fixed width, and a plan that does not fit
+overflows the profile, which readiness refuses rather than truncating. (The
+bootstrap gates below compare exact bytes, except where a family's binding was
+already a SHA-256 anchor before DR1: the metadata source, target, serving and
+publishing bindings and `RetirementGuard`'s retirement anchor. Those gates are
+exact up to SHA-256 collision resistance; DR1 adds no digest.)
+
+**Per-stack budget.** The 192 plan words are shared by every layer of a
+stack. Example: `LogicalActivationApplication` around a logical voter is
+type-valid, but activation's own segment is 4 + 7m words for m mappings (116
+at 16) and the largest logical voter's is 174 (a candidate with a 16-mapping
+control profile), so that stack needs 290 words. Its profile overflows and
+readiness refuses it for every replica (`UnsupportedSchema`, `Capability` at
+the verifier); nothing is truncated. A logical voter's segment is 41 words
+for a bootstrap voter without a control profile, 12 more for a candidate,
+plus the profile's words when it has one. Host rule: size such a stack so
+that the sum of its layers' segments is at most 192, for example fewer
+activation mappings or no control profile on the inner voter.
 
 **Bootstrap bindings (DR1 round 7).** Some construction inputs are too large
 for the identity but are compared exactly by the family's committed bootstrap
@@ -58,22 +74,37 @@ refused first (`Capability`).
 | Family | Flag (`deployment_bound`) | Why it attests the binding |
 | --- | --- | --- |
 | `RoutedApplication` | `initialized`, and its inner application's | bootstrap applies only as the exact binding (grant, local group, limits, inner schema and initial checkpoint); checkpoint decode compares the binding |
-| `TransferSource`, `ScopedTransferSource`, `RoutedControlReads` | the Routed layer's | their own exact bootstrap embeds the Routed binding; a raw Routed bootstrap is refused |
+| `TransferSource`, `ScopedTransferSource` | the Routed layer's | their own exact bootstrap embeds the Routed binding; a raw Routed bootstrap is refused |
+| `RoutedControlReads` | the Routed layer's | no bootstrap of its own: it forwards the raw Routed bootstrap unchanged, and Routed compares it exactly |
 | `TransferTarget` | `staged`, and its inner application's | only the exact binding stages it; restore compares the binding |
 | `CreatedNamespace` | `ready`, and its owner's | only the exact namespace binding makes it ready; restore compares it |
-| `Directory` (and `LifecycleDirectory`) | `initialized` | only the exact bootstrap initializes; restore compares authority, limits and every manifest |
+| `Directory` | `initialized` | only the exact bootstrap initializes; restore compares authority, limits and every manifest |
+| `LogicalApplication` (logical voter), bootstrap voter | parent image created (`parent` present) | the first claim (no expected epoch, the only claim that can create the parent image) carries the exact parent-bootstrap bytes; decode compares them with the replica's own, so admission refuses another and apply returns `Err(InvalidCommand)`; restore compares them through the configuration |
+| `LogicalApplication`, enrollment candidate | enrolled (`enrollment` present) | the `EnrollmentClaim` carries the source snapshot, whose metadata holds the parent bootstrap; decode compares it with the candidate's own (admission refuses, apply `Err(InvalidCommand)`); restore compares it through the configuration |
 | `MetadataAuthoritySource` | its recorded bootstrap operation | only the exact bootstrap (anchor, export bound, initial directory bootstrap) records it; restore requires the directory's bootstrap |
 | `MetadataAuthorityTarget`; serving | `staged`; the target's | only the exact anchor stages it; the serving bootstrap is compared and forwarded as the target's |
 | `MetadataPublishingSource` | the source's | its exact bootstrap is forwarded as the source's; a raw source bootstrap is refused |
 | `RetirementGuard` | the owner's (retired: the applied retirement) | the anchor is the owner's initial checkpoint, fixed by the owner's binding; a retirement applies only with the exact anchor |
 | `Maintenance`, `LogicalActivationApplication`, the service `Application` | the inner application's | no binding of their own |
-| Counter, BucketCounter, transaction leaves, logical voter | `true` | no committed binding entry |
+| Counter, BucketCounter, transaction leaves | `true` | no committed binding entry |
+
+`LifecycleDirectory` forwards `Directory`'s flag, but it declares no
+`deployment_requirements` and no retention rule, so readiness refuses it with
+`Capability` before the flag is read: it is never attested, and a learner of
+a lifecycle directory gets no receipt.
+
+A logical voter's binding entry is one per voter or candidate (its first
+successful claim, or its enrollment). The claim's record is retained and
+pruned like any claim; no state is added, so nothing grows. A bootstrap voter
+whose first claim (fixed fields plus the parent-bootstrap bytes) would exceed
+its `max_command_bytes` is refused at construction, for every replica alike.
+A new learner waits until the first claim or enrollment commits.
 
 A third-party wrapper must AND its inner application's flag; reporting `true`
 around an unbound inner application hides it, the same trusted-provider
 obligation as declaring `InnerProfile::LEAF`.
 
-**What remains outside the identity.** After round 7, readiness attests every
+**What remains outside the identity.** After round 8, readiness attests every
 numeric and data construction input of the in-tree families except these:
 
 - *Inputs bound by a committed bootstrap entry* (the table above): attested
@@ -86,26 +117,18 @@ numeric and data construction input of the in-tree families except these:
 - *`Maintenance`'s group.* Bound by the host to the core's bootstrap group,
   which readiness requires to equal the request's group: equal on every
   replica.
-- *A logical voter's child and parent bootstraps (open).* The child bootstrap
-  is checked against the Raft core's bootstrap when the bridge is built. The
-  parent bootstrap is the initial state of the voter's parent-log replica (a
-  `Claim` creates it; `Publish` and enrollment compare snapshots with it), and
-  no committed entry binds it for a bootstrap voter. A physical learner built
-  with another parent bootstrap can therefore get a receipt and then diverge.
-  It is not carried because it is unbounded (up to 4,096 voters and a policy
-  tree): carried exactly it would overflow the 192-word plan for the largest
-  valid logical-voter configuration (174 words with a 16-mapping control
-  profile), which readiness would then refuse. Closing it needs a decision:
-  carry it and refuse configurations that do not fit, raise the plan bound,
-  or add a committed binding entry. Until then, a host builds every replica
-  of a logical voter from one plan (within one host,
-  `LogicalPeerDescriptor::from_verified` checks the parent bootstrap against
-  the verified image and `LogicalPeerPlan::new` that peers agree on it).
+- *A logical voter's child bootstrap.* It is checked against the Raft
+  core's bootstrap when the bridge is built, so it equals the group's
+  bootstrap, which the static-bootstrap gap below covers. (Its parent
+  bootstrap was outside until DR1 round 8, for bootstrap voters and
+  enrollment candidates alike; it is now bound by the first claim or the
+  enrollment, in the table above. It is not in the plan: it is unbounded, up
+  to 4,096 voters and a policy tree.)
 
 Transaction participants' opening images are no longer outside: they are in
 the plan (below); one that does not fit is refused, not truncated.
 
-Classification (DR1 rounds 5 to 7). *Words* and *plan* are compared exactly;
+Classification (DR1 rounds 5 to 8). *Words* and *plan* are compared exactly;
 *bootstrap-bound* inputs are attested by the flag above; *outside* is what
 readiness does not attest.
 
@@ -126,7 +149,7 @@ readiness does not attest.
 | Metadata source / publishing | the mode's schema | 0 export bytes; 1–3 the initial directory's operations, history bytes and profiles | — | bootstrap-bound: initial directory plan and history (anchor) |
 | Metadata target | the mode's schema | as the source's | operation; source configuration | bootstrap-bound: move plan (target anchor) |
 | Metadata serving | the mode's schema | as the source's | operation; source and target configurations | bootstrap-bound: move plan (serving profile, the target's anchor) |
-| `LogicalApplication` (logical voter) | candidate or ordinary schema | 0–3 action count, retained action bytes, control actions, control action bytes | mapping; parent log, parent snapshot, command, capsule and checkpoint limits; codec format versions and wire limits; the enrollment plan; the activation control profile | outside (open, above): child bootstrap (checked against the Raft core's bootstrap by the host), parent bootstrap |
+| `LogicalApplication` (logical voter) | candidate or ordinary schema | 0–3 action count, retained action bytes, control actions, control action bytes | mapping; parent log, parent snapshot, command, capsule and checkpoint limits; codec format versions and wire limits; the enrollment plan; the activation control profile | bootstrap-bound: parent bootstrap (first claim or enrollment); outside: child bootstrap (checked against the Raft core's bootstrap by the host) |
 | `TransferApplication` | constant | 0 transactions, 1 accounts | own group (decides the role); profile (coordinator, two participants); a participant's opening image, per account in id order: id, opening | — |
 | `ProgramApplication` | constant | 0 coordinator transactions, 1 keys | own group; profile version, coordinators and participants; a participant's opening keys, per key in id order: id, opening | — |
 

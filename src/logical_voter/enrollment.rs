@@ -112,6 +112,34 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
             LOGICAL_APPLICATION_SCHEMA
         }
     }
+    /// A bootstrap voter's first claim carries its exact parent bootstrap;
+    /// one that cannot fit the command bound is refused here, uniformly and
+    /// before any authority (every field but the binding is fixed width).
+    /// Claims are control commands and retained bytes are at least the
+    /// command bound, so it also fits the retained-action bound.
+    pub(super) fn validate_claim_limits(&self) -> Result<(), ApplicationError> {
+        if self.candidate() {
+            return Ok(());
+        }
+        let (node, store) = (self.mapping.voter, self.mapping.store);
+        let session = crate::identity::StoreSession::new(1).expect("nonzero");
+        let probe = Command {
+            operation: OperationId::new(1).expect("nonzero"),
+            origin_configuration: self.child_bootstrap.configuration,
+            representative: RepresentativeBinding {
+                epoch: RepresentativeEpoch::new(1).expect("nonzero"),
+                physical: crate::secure::PeerIdentity { node, store },
+                physical_session: session,
+                logical_session: session,
+            },
+            consumed_through: 0,
+            body: CommandBody::Claim {
+                expected_epoch: None,
+            },
+        };
+        self.command_bytes(&probe, self.limits.max_command_bytes)
+            .map(drop)
+    }
     pub(super) fn validate_enrollment_limits(&self) -> Result<(), ApplicationError> {
         if !self.candidate() {
             return Ok(());

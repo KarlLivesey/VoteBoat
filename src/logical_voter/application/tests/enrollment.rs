@@ -7,7 +7,7 @@ use crate::{
     snapshot_worker::*,
 };
 mod empty;
-mod fixture;
+pub(super) mod fixture;
 mod formats;
 mod recovery;
 mod refusals;

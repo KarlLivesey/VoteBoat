@@ -147,12 +147,23 @@ impl NativeRelayBatch {
         {
             return Err(RelayOutputError::WrongBinding);
         }
-        // Before allocating: the scopes and windows alone must fit.
+        // Before allocating: the scopes, windows and every readiness request a
+        // window would own must fit. This bounds the exact check below (equal
+        // when every message is a request window), so a caller's limit is
+        // never exceeded, even transiently.
+        let requests = batch
+            .messages
+            .iter()
+            .filter(|m| matches!(m.rpc, crate::raft::Rpc::LearnerReadinessRequest(_)))
+            .count()
+            .checked_mul(size_of::<crate::raft::LearnerReadinessRequest>());
         let windows = batch
             .messages
             .len()
             .checked_mul(size_of::<OriginalScope>() + size_of::<RequestWindow>())
             .and_then(|n| n.checked_add(size_of::<Self>()))
+            .zip(requests)
+            .and_then(|(n, r)| n.checked_add(r))
             .ok_or(RelayOutputError::TooLarge)?;
         if batch.messages.len() > limits.batch_messages || windows > limits.metadata_bytes {
             return Err(RelayOutputError::TooLarge);

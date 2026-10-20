@@ -59,6 +59,16 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone> StateM
             snapshot_bytes: self.limits.max_child_checkpoint_bytes,
         })
     }
+    /// Whether the binding entry of the parent bootstrap has applied: a
+    /// bootstrap voter's first successful claim (which carried the exact
+    /// bootstrap) or a candidate's enrollment (whose snapshot did). Restore
+    /// compares the bootstrap through the configuration.
+    fn deployment_bound(&self) -> bool {
+        match self.initialization {
+            LogicalInitialization::BootstrapVoter => self.state.parent.is_some(),
+            LogicalInitialization::EnrollmentCandidate(_) => self.state.enrollment.is_some(),
+        }
+    }
     fn applied_index(&self) -> u64 {
         self.state.applied
     }

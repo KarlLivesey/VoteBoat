@@ -14,16 +14,23 @@ pub(super) fn plan() -> LogicalEnrollmentPlan {
         source_application_schema: Counter::new(16).unwrap().schema_version(),
     }
 }
-pub(super) fn candidate() -> LogicalApplication {
+pub(in crate::logical_voter::application::tests) fn candidate() -> LogicalApplication {
     candidate_with_limits(LogicalLimits::default()).unwrap()
 }
 pub(super) fn candidate_with_limits(
     limits: LogicalLimits,
 ) -> Result<LogicalApplication, ApplicationError> {
+    candidate_with_parent(limits, bootstrap(group(1), 1, store(1)))
+}
+/// The fixture candidate built with another parent bootstrap.
+pub(in crate::logical_voter::application::tests) fn candidate_with_parent(
+    limits: LogicalLimits,
+    parent: Bootstrap,
+) -> Result<LogicalApplication, ApplicationError> {
     LogicalApplication::new_enrollment_candidate(
         LogicalStoreMapping::new(group(1), NodeId::new(3).unwrap(), store(3), group(2)).unwrap(),
         bootstrap(group(2), 2, store(2)),
-        bootstrap(group(1), 1, store(1)),
+        parent,
         limits,
         (
             NativeLogCodec,
@@ -33,7 +40,9 @@ pub(super) fn candidate_with_limits(
         plan(),
     )
 }
-pub(super) fn import(a: &LogicalApplication) -> LogicalLearnerImport {
+pub(in crate::logical_voter::application::tests) fn import(
+    a: &LogicalApplication,
+) -> LogicalLearnerImport {
     let bootstrap = a.parent_bootstrap.clone();
     let configuration = Configuration::new(
         ConfigurationId::new(2).unwrap(),
@@ -99,6 +108,9 @@ pub(super) fn import(a: &LogicalApplication) -> LogicalLearnerImport {
         },
     }
 }
-pub(super) fn enrollment(input: LogicalLearnerImport, operation: u128) -> Command {
+pub(in crate::logical_voter::application::tests) fn enrollment(
+    input: LogicalLearnerImport,
+    operation: u128,
+) -> Command {
     command(operation, 1, CommandBody::EnrollmentClaim(Box::new(input)))
 }

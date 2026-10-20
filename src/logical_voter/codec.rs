@@ -163,7 +163,24 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
         }
     }
     pub(super) fn configuration_bytes(&self) -> Result<Vec<u8>, ApplicationError> {
+        Ok(self.configuration_and_binding()?.0)
+    }
+    /// Store the configuration and where its parent-bootstrap bytes lie.
+    pub(super) fn set_configuration(&mut self) -> Result<(), ApplicationError> {
+        (self.configuration, self.parent_binding) = self.configuration_and_binding()?;
+        Ok(())
+    }
+    /// The exact parent-bootstrap bytes (the parent log codec's
+    /// `Create(bootstrap)` batch), which restore already compares as part of
+    /// the configuration and a first claim carries as its binding.
+    pub(super) fn parent_binding(&self) -> &[u8] {
+        &self.configuration[self.parent_binding.clone()]
+    }
+    fn configuration_and_binding(
+        &self,
+    ) -> Result<(Vec<u8>, std::ops::Range<usize>), ApplicationError> {
         let mut e = Encoder::new(self.limits.max_child_checkpoint_bytes);
+        let mut binding = 0..0;
         if let LogicalInitialization::EnrollmentCandidate(plan) = self.initialization {
             e.put(b"VBENRL02")?;
             e.enrollment_plan(plan)?;
@@ -178,6 +195,8 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
                 .encode_batch(1, &[LogMutation::Create(bootstrap.clone())], limits)
                 .map_err(|_| ApplicationError::InvalidCommand)?;
             e.blob(&bytes)?;
+            // The parent's bytes come last: the blob's payload.
+            binding = e.bytes.len() - bytes.len()..e.bytes.len();
         }
         let l = self.limits;
         let p = l.parent_log;
@@ -227,6 +246,6 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
             e.put(b"VBACTP02")?;
             e.blob(&profile.configuration_bytes(self.limits.max_child_checkpoint_bytes)?)?;
         }
-        Ok(e.bytes)
+        Ok((e.bytes, binding))
     }
 }

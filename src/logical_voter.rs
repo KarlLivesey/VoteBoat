@@ -70,6 +70,9 @@ pub struct LogicalApplication<C = NativeLogCodec, S = NativeSnapshotCodec, W = N
     snapshot_codec: S,
     wire_codec: W,
     configuration: Vec<u8>,
+    /// Where the exact parent-bootstrap bytes (the binding a first claim
+    /// carries) lie inside `configuration`; kept as a range, not a copy.
+    parent_binding: std::ops::Range<usize>,
     control_profile: Option<LogicalActivationControlProfile>,
     state: application::State,
     initialization: LogicalInitialization,
@@ -148,14 +151,16 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
             snapshot_codec,
             wire_codec,
             configuration: Vec::new(),
+            parent_binding: 0..0,
             control_profile: None,
             state,
             #[cfg(test)]
             journal: Some(Vec::new()),
             initialization,
         };
-        app.configuration = app.configuration_bytes()?;
+        app.set_configuration()?;
         app.validate_enrollment_limits()?;
+        app.validate_claim_limits()?;
         app.validate_initial_parent(&initial_parent)?;
         app.validate_read_envelopes()?;
         app.encode_state(limits.max_child_checkpoint_bytes)?;
