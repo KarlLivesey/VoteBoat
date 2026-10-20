@@ -358,6 +358,13 @@ struct Pending {
     // predecessor comparison only if it is still the log's current one.
     planned: Option<LogStamp>,
 }
+/// What the core still uses of an installed `Pending` once its plan is spent.
+struct Installed {
+    membership: Option<Box<Membership>>,
+    after: After,
+    reply: Option<Message>,
+    preserves_checkpoint_prefix: bool,
+}
 #[derive(Clone, Copy)]
 struct Replication {
     context: RequestContext,
@@ -1297,23 +1304,24 @@ impl Raft {
         &mut self,
         out: &mut VecDeque<Effect>,
     ) -> Result<Option<Range<usize>>, RaftError> {
-        let Some(p) = self.pending.take() else {
-            return Err(RaftError::WrongCompletion);
-        };
         let previous_commit = self.durable.commit_index;
-        let configuration_changed = p
+        let installed = match self.install_pending_plan() {
+            Ok(installed) => installed,
+            Err(RaftError::Storage(error)) => {
+                // The plan is intact; the fence discards it, as before.
+                self.storage_failed();
+                return Err(error.into());
+            }
+            Err(error) => return Err(error),
+        };
+        let configuration_changed = installed
             .membership
             .as_ref()
             .is_some_and(|membership| membership.id() != self.membership.id());
-        let preserves_checkpoint_prefix = p.next.preserves_checkpoint_prefix();
-        if let Err(error) = self.durable.install(p.next, p.planned) {
-            self.storage_failed();
-            return Err(error.into());
-        }
-        if !preserves_checkpoint_prefix {
+        if !installed.preserves_checkpoint_prefix {
             self.checkpoint_lineage = CheckpointLineage::new();
         }
-        if let Some(membership) = p.membership {
+        if let Some(membership) = installed.membership {
             self.membership = *membership;
         }
         if configuration_changed {
@@ -1344,7 +1352,7 @@ impl Raft {
             self.next_index.clear();
         }
         let committed = if self.durable.commit_index > previous_commit
-            && !matches!(p.after, After::SnapshotInstall(_))
+            && !matches!(installed.after, After::SnapshotInstall(_))
         {
             Some(
                 (previous_commit - self.durable.base_index()) as usize
@@ -1355,11 +1363,34 @@ impl Raft {
         };
         let mark = out.len();
         out.extend(retirement);
-        self.after_durable(p.after, p.reply, out)?;
+        self.after_durable(installed.after, installed.reply, out)?;
         if self.remember_granted_vote(out.range(mark..)) {
             self.reset_election()?;
         }
         Ok(committed)
+    }
+    /// Install the pending plan where it lies (no move of `Pending` or its
+    /// plan). On success the slot is emptied and the parts the core still
+    /// uses are returned; the spent plan is dropped with the slot. On error
+    /// nothing changes: the log, its summary and stamp, and the pending
+    /// transition are as they were (`Storage`). Without a pending transition
+    /// it returns `WrongCompletion`. The only installer of `self.pending`.
+    fn install_pending_plan(&mut self) -> Result<Installed, RaftError> {
+        let Some(p) = self.pending.as_mut() else {
+            return Err(RaftError::WrongCompletion);
+        };
+        let preserves_checkpoint_prefix = p.next.preserves_checkpoint_prefix();
+        self.durable.install(&mut p.next, p.planned)?;
+        let installed = Installed {
+            membership: p.membership.take(),
+            after: std::mem::replace(&mut p.after, After::Commit),
+            reply: p.reply.take(),
+            preserves_checkpoint_prefix,
+        };
+        // Cleared only here, after the install succeeded: nothing between
+        // this point and the end of the round can see the spent plan.
+        self.pending = None;
+        Ok(installed)
     }
     fn after_durable(
         &mut self,
@@ -1581,6 +1612,12 @@ impl Raft {
         {
             self.clear_reads();
         }
+        // A plan is staged only into an empty slot: a live plan is never
+        // replaced, and a spent one was cleared by its install.
+        debug_assert!(
+            self.pending.is_none(),
+            "a pending transition was replaced before its install or fence"
+        );
         self.pending = Some(Pending {
             next,
             membership,
@@ -2192,6 +2229,8 @@ mod checkpoint_tests;
 mod commit_advance_tests;
 #[cfg(test)]
 mod completion_tests;
+#[cfg(test)]
+mod install_in_place_tests;
 #[cfg(test)]
 #[path = "raft/membership_tests.rs"]
 mod membership_tests;

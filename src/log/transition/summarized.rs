@@ -145,23 +145,24 @@ impl SummarizedLog {
         self.debug_check();
         LogView::summarized(&self.log, &self.summary, self.stamp)
     }
-    /// Install `next`, planned from a view whose stamp was `planned`. When
-    /// that is this log's current stamp the log is the one the plan was made
-    /// from, so an append or commit advance skips its predecessor comparison;
-    /// otherwise (another log, a changed log, a log or view without a stamp)
-    /// the full checked install runs. On error nothing changes.
+    /// Install `next`, planned from a view whose stamp was `planned`, where
+    /// it lies. When that is this log's current stamp the log is the one the
+    /// plan was made from, so an append or commit advance skips its
+    /// predecessor comparison; otherwise (another log, a changed log, a log
+    /// or view without a stamp) the full checked install runs. On error
+    /// nothing changes, `next` included; on success `next` is spent and must
+    /// be dropped unused.
     pub(crate) fn install(
         &mut self,
-        next: OwnedNextLog,
+        next: &mut OwnedNextLog,
         planned: Option<LogStamp>,
     ) -> Result<(), StorageError> {
-        if planned.is_some_and(|planned| self.stamp == Some(planned)) {
-            next.install_unchanged(&mut self.log, &mut self.summary)?;
-        } else {
-            #[cfg(test)]
+        let unchanged = planned.is_some_and(|planned| self.stamp == Some(planned));
+        #[cfg(test)]
+        if !unchanged {
             checked_installs::note();
-            self.summary = next.install(&mut self.log)?;
         }
+        next.install_in_place(&mut self.log, &mut self.summary, unchanged)?;
         self.advance();
         self.debug_check();
         Ok(())
