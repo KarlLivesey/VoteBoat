@@ -24,7 +24,7 @@ are; LB references them for the audit's L1–L3 rows.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current ST2 (PR 14; rounds 1–3 implemented; round 4 in progress: live noop bytes in the WAL proof, the stall map bound, an O(n) batch check): checkpoints and WAL reclaim on by default, and a full WAL as retryable backpressure (audit C3, C4, RT4; probes U1, U5; ST2b) | With default flags all three binaries never checkpointed and never reclaimed the WAL, so every group stopped at 16,384 retained entries or 64 MiB of WAL, a failed automatic reclaim switched maintenance off silently, and a WAL that filled at append time failed the node. Make maintenance the library and binary default, make the opt-out explicit and visible, keep maintenance running through every non-fatal failure, make a new leader at the retained-entry cap refuse typed, and turn a full WAL into a typed retryable refusal with no node failure | — | Fail@main runtime and native soaks (recorded) pass past 16,384 entries and 64 MiB; slow-rewrite burst and follower tests fail node-fatally on 47646b4c and pass; opt-out plus cap gives a typed refusal and a stable leader; startup rejects maintenance settings that would fail at runtime; restart mid-checkpoint and mid-reclaim; native durable CPU/write within +2% of main; fmt, four strict Clippy configurations and matched fmt/Clippy; affected suites in default and all-features | LB |
+| Current ST2 (PR 14; rounds 1–3 implemented; round 4 implemented, in review: live noop bytes in the WAL proof, the stall map bound, an O(n) batch check): checkpoints and WAL reclaim on by default, and a full WAL as retryable backpressure (audit C3, C4, RT4; probes U1, U5; ST2b) | With default flags all three binaries never checkpointed and never reclaimed the WAL, so every group stopped at 16,384 retained entries or 64 MiB of WAL, a failed automatic reclaim switched maintenance off silently, and a WAL that filled at append time failed the node. Make maintenance the library and binary default, make the opt-out explicit and visible, keep maintenance running through every non-fatal failure, make a new leader at the retained-entry cap refuse typed, and turn a full WAL into a typed retryable refusal with no node failure | — | Fail@main runtime and native soaks (recorded) pass past 16,384 entries and 64 MiB; slow-rewrite burst and follower tests fail node-fatally on 47646b4c and pass; opt-out plus cap gives a typed refusal and a stable leader; startup rejects maintenance settings that would fail at runtime; restart mid-checkpoint and mid-reclaim; native durable CPU/write within +2% of main; fmt, four strict Clippy configurations and matched fmt/Clippy; affected suites in default and all-features | LB |
 | Next NT1: connection generations and listener (audit N1, N3, N6) | Survivors no longer go to recovery after ~27.8 h with one peer down; a port scan cannot kill a node | Rebases on ST2's `native/startup.rs` hunk | Architect plan §3.3 row 2 | LB |
 | Following DR1: application deduplication retirement (audit S1–S3) | `counter_service` no longer refuses every write after 10,000 lifetime writes; the generic `SessionLedger` | — | Architect plan §3.3; Q1 probe harness | LB |
 
@@ -779,7 +779,12 @@ keep.
   `Overloaded`).
 
 **I5. No permanently impossible batch is admitted, and every admitted batch
-progresses (Codex P1-2, Opus P3-1).**
+progresses (Codex P1-2, Opus P3-1).** *Corrected in round 4:* the second
+half did not hold. Noop entries (a leader's own noop, noop-only follower
+appends) were admitted as control and are live, so their bytes were in no
+bound; GPT-6.1-Sol's round-3 review held a noop through three successful
+rewrites with 3,830 live noops in a 64 KiB WAL. Round 4 (R4-1) adds them to
+the account; see "ST2 round 4".
 - *Configuration (U5).* A node whose persistence publishes occupancy refuses
   construction and `configure_wal_maintenance` when the space above the high
   water mark, `U − high(U)` with `U = max_wal_bytes − control_reserve_bytes`,
@@ -856,9 +861,11 @@ a time.
 Code: commits `583202cc` (I1–I7 mechanisms and the reproductions),
 `bb8286ac` (operator flag, deferral clock, soaks, binary checks), `ba372cb4`,
 `5c9b6906` and `4be97a91` (benchmark harness only: serving-only switch) and
-`4f673b2c` (fast paths for the new per-write checks). Everything in the
-schema plan above is implemented as written, with the departures listed at
-the end.
+`4f673b2c` (fast paths for the new per-write checks). The schema plan above
+was implemented as written, with the departures listed at the end.
+*Corrected in round 4:* as implemented, it did not meet its own I5 claim
+that every admitted batch progresses (live noop bytes, R4-1), and the leader
+stall map kept departed replicas (R4-2); both are fixed in round 4.
 
 **Invariant → mechanism → test → before (73da0196) / after.** "Before" runs
 put the new test files on 73da0196 in this worktree (minus assertions on new
@@ -874,7 +881,7 @@ for this record and then removed with the worktree's `target/`.
 | I3 Opus P2-1: follower never declines the truncation of its own divergent suffix | Conflict → truncation-only update (`Suffix { from, entries: [] }`, control record) with term and verified commit, no reply; append past capacity keeps commit, takes nothing; `declined_appends`, leader `replica_stall` | `owned_appends::conflicting_suffix_under_storage_pressure_is_truncated_without_new_data`; `append_past_entry_capacity_keeps_commit_and_takes_no_entries`; `capacity_tests::deposed_leader_under_pressure_truncates_its_suffix_and_catches_up_without_a_snapshot` | Fails: no update emitted for the conflicting append; deposed leader never caught up (last 101, term 1, vs leader 8/term 3 after 40 rounds) | Passes: truncates, then catches up without a snapshot on an idle group |
 | I4 Codex P1-1: reclaim cannot deadlock behind parked writes | Rewrite has its own admission (one in flight, an extra channel slot, no request/byte credits) | `maintenance::a_rewrite_is_admitted_while_parked_batches_hold_every_data_credit` (`max_requests: 4, control_requests: 1`, three groups each with a parked batch) | Fails: 100 consecutive `Overloaded` | Passes: admitted at the first attempt, all three parked batches durable |
 | I5 Codex P1-2: no permanently impossible batch | Worker refuses `max_batch_bytes` above usable WAL (`WorkerError::InvalidLimits`); nodes refuse WAL headroom above the high-water mark below batch + reserve (`MaintenanceError::WalHeadroomTooSmall`); shard-wide in-flight WAL account (`WalAccount`: published + staged + completed-since-refresh ≤ mark before any data step) | `maintenance::limits_under_which_a_batch_can_never_fit_are_refused_before_any_write` (8 KiB WAL, 4 KiB reserve, 8 KiB batches, 4,000-byte command); `wal_headroom_must_hold_the_largest_batch_and_the_reserve`; `log_store::wal_bound_covers_the_native_encoding_of_every_update_shape`; burst test asserts `parked == 0` | Fails: accepted, held 5,024 bytes after three rewrites, never written | Passes: refused `InvalidLimits` at spawn; burst: 24,576 writes, 10,806 refused at submission and 128 at step (typed, retried), peak WAL 49.5 MB of 66 MB, nothing ever held |
-| I6 Opus P3-2: schedules cannot overflow | Policies refuse `interval_ms`/`retry_ms` above 24 h (`MAX_SCHEDULE_MS`); binaries refuse `--wal-reclaim-ms` above it | `schedules_longer_than_a_day_are_refused_at_configuration` | Accepted a value near `u64::MAX`; per the review, the deadline then became `None` after the first completion (not rerun) | Refused |
+| I6 Opus P3-2: a huge interval cannot overflow the next deadline (qualified in round 4: within 24 h of `u64` millisecond clock exhaustion `after()` returns `None` and the schedule stops, the recorded clock-horizon contract, `deadline_exhaustion_stops_instead_of_wrapping_or_spinning`) | Policies refuse `interval_ms`/`retry_ms` above 24 h (`MAX_SCHEDULE_MS`); binaries refuse `--wal-reclaim-ms` above it | `schedules_longer_than_a_day_are_refused_at_configuration` | Accepted a value near `u64::MAX`; per the review, the deadline then became `None` after the first completion (not rerun) | Refused |
 | I7 Opus P3-6: observability | `maintenance` command of all three binaries: `retained_entries`, `retained_budget`, `retained_capacity`, `entry_high_water`, `entry_high_water_groups`, `refused_entry_proposals`, `checkpoint_failures`, `wal_pending_bytes`, `wal_refused_proposals`, `wal_declined_appends`, `wal_held_ms`, `declined_appends`, `replica_stall`, `step_downs`, `last_step_down`; `checkpoint_base` still last | Field checks in `counter_service`, `directory_service`, `transfer_service` tests | — | Present |
 | I8 Opus P3-5 tests | `--wal-reclaim-min-bytes 0` in the counter `history` maintenance test (rewrites at every interval) | `counter_service` maintenance history: `last_sequence` must advance; the default schedule's skips checked separately | Skips counted as progress | Physical rewrites proven |
 
@@ -985,7 +992,9 @@ the other startup fixtures already did (test-only).
   them typed; on healing it, or another replica, commits them or truncates
   them through the ordinary rules.
 - The step-down's hold-off also skips an explicit `Campaign` (operator or
-  leadership transfer) on that replica for two election timeouts.
+  leadership transfer) on that replica. *Corrected in round 4:* it counts two
+  campaign attempts, not elapsed time (each skipped attempt resets the
+  election timer), so one explicit `Campaign` can be a no-op while it lasts.
 - Status fields are in the `maintenance` command (all three binaries); the
   counter's `metrics` and the per-binary `status` lines are unchanged, so
   existing tooling that parses them is unaffected.
@@ -1143,6 +1152,117 @@ matched fmt/Clippy; runtime, log_store, maintenance, snapshot,
 snapshot_worker, raft, native startup, effect_owner, counter_service,
 directory_service and transfer_service suites in default and all-features,
 one configuration at a time.
+
+#### ST2 round 4 implemented and validated (20 October 2026)
+
+Code: `5c560fa3` (R4-2), `10780078` (R4-1, R4-3), `645e9a77` (the reserve is
+a node field, not status), then documentation. The plan above is
+implemented with the departures listed at the end. "Before" = the new tests
+run against 522a08c8's `src/` in this worktree (tests needing new API cut to
+what 522a08c8 can express).
+
+| Finding | Mechanism | Test | 522a08c8 | This branch |
+| --- | --- | --- | --- | --- |
+| Sol P1-1, worker level (his limits: 64 KiB WAL, 4 KiB reserve, 1 KiB batches, 512 B commands; term-increasing noops, commit 0, rewrite whenever held) | Worker backstop: a batch still held right after a successful rewrite completes typed, non-fatal `Rejected("WAL live image leaves no room")` | `maintenance::live_noops_that_fill_the_wal_fail_typed_after_a_rewrite_and_recover_with_a_larger_budget` | Fails: noop 3,831 held through three successful rewrites at 65,410 WAL bytes, no completion, no typed failure | Passes: typed failure at the first rewrite after the live image fills; the unchanged journal reopened with a 1 MiB WAL holds all 3,830 noops and writes the next |
+| Sol P1-1, node level | Noop transitions in the shard's WAL account (under mark + reserve); no campaign without room; maintenance rewrites while the WAL grows; budget given to the shard at construction | `startup::backpressure::live_noops_past_the_reserve_refuse_elections_typed_until_a_larger_wal_is_opened` (real native node, single voter, 4.5 MiB WAL, 64 KiB reserve, 277,544 live noops filling it) | Vote written (term +1), node Leader, its noop held (1,008 bytes) through 3 successful rewrites for the whole 3 s, no completion and no typed state | 14 campaign refusals in 3 s simulated (`noop_refusals`, `wal_noop_refused`), term unchanged, nothing held, 1 rewrite, `Running`; reopened with a 16 MiB WAL it elects, commits every noop and applies a write |
+| Sol P1-1, core | `wal_noop_room` input: campaign refused, `StepDownReason::WalCapacity`, noop-only append declined | `capacity_tests::{replicas_without_wal_room_for_a_noop_refuse_elections_until_room_returns, leader_elected_without_wal_room_steps_down_typed_and_a_replica_with_room_wins, follower_without_wal_room_declines_noop_only_appends_until_room_returns}` | API absent | Pass: no leader and no term change for 40 rounds without room, commit within 40 rounds once room returns; step-down in term 2 with no noop appended, another replica commits; follower declines the noop, takes it once noop room returns under data pressure |
+| Sol P1-1, units | Account classification and noop room; starvation-driven rewrite only while grown | `wal_account::tests::*`, `maintenance::tests::a_refused_noop_rewrites_only_while_the_wal_grows` | API absent | Pass |
+| Sol P2-1 | `configuration_changed` clears `stalled_rounds`; `replica_stall` reports only current replicas | `membership_tests::stall_map_holds_only_current_replicas_through_learner_churn` (voters 1–3, 64 committed `Learners` replacements of an unavailable learner, real stall counter each round) | Fails at the second replacement (4 entries, 3 peers); after 64: 66 entries for 3 peers | Passes: at most the current peers at every step, stall always a current replica |
+| Sol P3-1 | Running bound of the selected prefix in the ready-batch check (each proposal added once: n additions instead of n(n−1)/2 visits, 32,640 at n = 256); proposal staging takes the bound built with its entries (`debug_assert` against `LogUpdate::wal_bound`) | Existing batch/aggregate tests (same admission) | — | Framework bulk ×0.984 against 522a08c8 (7 pairs) |
+
+**Bounds (checklist §5.9).** Live WAL after any rewrite ≤ `H + R`
+(`R = control_reserve_bytes`, 1 MiB by default), shard-wide: noops of all
+groups share one `R`, so no `groups × noops × bytes` product and no
+registration limit. Retained noops per group remain bounded by
+`retained_entry_capacity` (16,640). Stall map ≤ current replicas − 1. New
+counters (`noop_refused`, `wal_noop_refusals`) saturate and are diagnostic;
+the byte check stays authoritative. One volatile bool per core and per node
+status. Classes of live growth and their bound: data and configuration
+entries (≤ `H`, round 3); noops (≤ `H + R`, this round); hard state, vote and
+commit (one fixed record per group in the image, dead after a rewrite);
+`Create` (synchronous store path before a worker owns the store, never in
+flight with an admitted batch); a snapshot install's anchor (one
+configuration per group, replaced, not cumulative; argued, no dedicated
+test).
+
+**CPU (quiet Mac, own script copies and trees, removed afterwards).**
+Serving only (`svc.sh` protocol, RAM-disk WAL, `VOTEBOAT_BENCH_SKIP_RECOVERY=1`
+on both sides, 15,000/s offered, marginal CPU per completed write between
+2,000 and 16,000 writes). Same-CRC base rebuilt by cherry-pick as in round 3:
+4920534e + `ba372cb4`, `5c9b6906`, `4be97a91` (harness) + `cf3de849`
+(CRC32C), local commit `ad7ab7dc`, not pushed.
+
+| Comparison | pairs | marginal µs/write | p99 |
+| --- | --- | --- | --- |
+| same-CRC base → 645e9a77, session 1 | 9 | 13.5 → 13.6 (×1.010) | ×1.045 |
+| same-CRC base → 645e9a77, session 2 | 9 | 13.6 → 14.1 (×1.037) | ×1.050 |
+| same-CRC base → 645e9a77, session 3 | 9 | 13.8 → 14.2 (×1.034) | — |
+| same-CRC base → 645e9a77, session 4 | 9 | 13.3 → 13.9 (×1.045) | — |
+| 645e9a77 → same-CRC base (reversed order) | 9 | 14.0 → 13.6 (×0.973, i.e. ×1.028) | — |
+| **Pooled, 45 pairs** | 45 | **median pair ratio ×1.030, mean ×1.027, 31 of 45 above 1** | |
+| same-CRC base → 522a08c8 (round 3) | 9 | 13.7 → 13.8 (×1.003) | ×1.12 |
+| 522a08c8 → 645e9a77 (round 4's own change) | 9 | 14.1 → 13.7 (×0.972) | ×1.02 |
+
+Applied rate ×1.00 everywhere (offered load met). Session-to-session spread
+is about ±3%, so round 4 against round 3 is within noise for serving.
+**ST2's remaining own serving cost is about +3.0% CPU per completed write**
+(sessions +1.0% to +4.5%), measured with the same CRC on both sides. It is the
+checkpoint and rewrite work the base never does while serving, plus the
+per-write capacity checks; it is not offset by the CRC change or by cheaper
+recovery, and needs the user's explicit acceptance.
+
+Framework (`fwmac.sh`, 7 pairs):
+
+| Comparison | bulk | single | bulk-1 | single-1 |
+| --- | --- | --- | --- | --- |
+| 4920534e → 645e9a77, session 1 | ×0.996 | ×0.994 | ×0.995 | ×1.030 |
+| 4920534e → 645e9a77, session 2 | ×1.000 | ×0.999 | ×1.005 | ×1.020 (6/7 pairs worse) |
+| 522a08c8 → 645e9a77 | ×0.984 | ×1.008 | ×0.995 | ×1.009 |
+
+single-1 instructions retired (`/usr/bin/time -l`, 5 runs each): 522a08c8
+13.85 G, 645e9a77 13.84 G (cycles 4.72 G, 4.74 G): round 4 adds no work.
+Against 4920534e: 13.69 G → 13.85 G (+1.2%), cycles +3.7%. So single-1's
++2–3% CPU against the merge base comes from rounds 1–3 (round 3 recorded
+×1.005 for this cell; this session did not reproduce that), not from round 4,
+and is reported for the same explicit acceptance.
+
+**Checks.** `cargo +stable fmt --all -- --check`; strict Clippy (`-D
+warnings`, `--all-targets`) default, all-features, no-default-features and
+native-only, and matched fmt and strict Clippy: zero diagnostics. Suites on
+Linux cores 4–9, one configuration at a time, final code. Default: lib 509,
+runtime 57, log_store 21, maintenance 10, snapshot 27, snapshot_worker 14,
+raft 79, log_reclaim 11, startup 52, effect_owner 216, counter_service 146,
+directory_service 18, transfer_service 25. All-features: lib 511, runtime 57,
+log_store 21, maintenance 10, snapshot 27, snapshot_worker 14, raft 79,
+log_reclaim 11, startup 67, effect_owner 216, counter_service 205,
+directory_service 23, transfer_service 34. All passed. Soaks (release,
+all-features): runtime 163,840 writes, last index 163,920, max retained
+12,298, 75 typed retried refusals; native 163,840 writes, 671,088,640 bytes,
+max WAL 33,031,095 of 66,060,288, max retained 7,582, 21 rewrites;
+`two_soak_runs_in_simulated_time_have_identical_traces` identical (24,588,
+10,247, 122,978 ms) — the same values as round 3. Pre-push hook ran and
+passed (not bypassed).
+
+**Existing contracts changed.** A `NativeLogWorker` batch that still does not
+fit right after a successful rewrite is now reported failed (typed,
+non-fatal) instead of held; no existing test relied on an indefinite hold
+(`a_batch_that_does_not_fit_is_held_until_a_rewrite_and_never_failed` still
+passes: its rewrite frees room). Follower appends whose entries are all noops
+are now declined when the node's WAL has no noop room (they were never
+refused). A replica without noop room does not campaign, including on an
+explicit `Campaign`. The three binary status tests check the three new fields.
+`tests/startup/backpressure.rs` factors its node assembly into `wrap` (test
+only). No assertion was weakened.
+
+**Departures and open items.**
+- The node-level reproduction uses a 4.5 MiB WAL and a raised entry budget
+  (400,000): native startup requires 1 MiB batches, so Sol's 64 KiB limits
+  cannot be opened as a node; his exact limits are the worker test.
+- Snapshot-install anchor growth is argued (non-cumulative, one configuration
+  per group), not tested separately.
+- Still open from rounds 2–3: snapshot-store barrier fsync (device
+  identification); a leader clears in-flight replication requests at
+  compaction; pre-vote/check-quorum not added.
 
 #### Design-pack amendment realised by ST2 (pack preserved)
 

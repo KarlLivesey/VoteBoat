@@ -341,8 +341,10 @@ pub struct StepDown {
     pub term: u64,
     pub reason: StepDownReason,
 }
-/// Election timeouts a replica lets pass without campaigning after a
-/// capacity step-down, so a replica with a shorter log can win first.
+/// Campaign attempts a replica skips after a capacity step-down, so a
+/// replica with a shorter log can win first. It counts attempts, not time,
+/// and also skips explicit, operator and transfer campaigns: one explicit
+/// `Campaign` can be a no-op while it lasts.
 const CAPACITY_CAMPAIGN_HOLDOFF: u8 = 2;
 
 #[derive(Clone, Debug)]

@@ -61,7 +61,9 @@ pub enum MaintenanceError {
 }
 /// Longest accepted maintenance or scan interval (24 hours): a larger value
 /// could overflow the next deadline and stop the schedule without a signal
-/// (ST2 round 3, I6).
+/// (ST2 round 3, I6). This bounds the interval, not the clock: within 24 hours
+/// of `u64` millisecond exhaustion the next deadline is `None` and the
+/// schedule stops, under the recorded protocol-clock horizon.
 pub const MAX_SCHEDULE_MS: u64 = 24 * 60 * 60 * 1000;
 /// The space above the WAL high-water mark must hold the largest batch the
 /// store may encode plus its control reserve: data never exceeds the mark

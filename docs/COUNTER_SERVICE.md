@@ -1094,18 +1094,46 @@ Defaults, derived from the store limits:
   checkpoints and accepts writes again. If the reserve is also used up (only
   possible after hundreds of consecutive failed leader terms) and nothing
   can be checkpointed, the leader steps down (`step_downs`,
-  `last_step_down=RetainedEntryCapacity@TERM`) and does not campaign for two
-  election timeouts, so a replica with a shorter log is elected. If every
-  replica is in that state, a library host recovers by restarting with a
-  larger `max_entries_per_group`. A store with more than 16,384 retained entries
-  (possible only through the reserve) is refused by older binaries.
+  `last_step_down=RetainedEntryCapacity@TERM`) and skips its next two
+  campaign attempts, so a replica with a shorter log is elected. The hold-off
+  counts attempts, not time, and also skips an explicit, operator or
+  leadership-transfer campaign on that replica: one such `Campaign` can be a
+  no-op while the hold-off lasts. If every replica is in that state, a library
+  host recovers by restarting with a larger `max_entries_per_group`. A store
+  with more than 16,384 retained entries (possible only through the reserve)
+  is refused by older binaries.
+- **WAL noop reserve.** A newly elected leader's first entry (a noop) and
+  follower appends carrying only such noops are live entries a rewrite must
+  keep, so they are admitted against the node's WAL account like writes, but
+  may use the control reserve above the 75% mark (1 MiB by default), shared
+  by all groups. Hence the live WAL after a rewrite never exceeds the mark
+  plus the reserve, and every write already accepted fits after one rewrite.
+  A replica whose WAL has no room for one more noop does not campaign
+  (`noop_refusals`), steps down if it wins (`last_step_down=WalCapacity@TERM`),
+  and declines noop-only appends (`wal_noop_refused` counts all three). While
+  that lasts maintenance rewrites whenever the WAL has grown since the last
+  rewrite (`wal_noop_starved`), so dead vote and commit records alone cannot
+  keep a group without a leader. If the live log itself fills it (only after
+  many elections whose leaders never learned an acknowledgement), the replica
+  stays in this typed state, writing nothing; recover by reopening the
+  unchanged store with a larger `max_wal_bytes`. A replica of a group whose
+  other voters have room is not stuck: they elect, and their commits let it
+  apply, checkpoint and rewrite.
 - **Configuration checks.** Startup refuses store limits under which a write
   could never fit: the WAL space above the 75% mark must hold the largest
   batch plus the control reserve (`MaintenanceError::WalHeadroomTooSmall`),
   and a log worker refuses a batch limit larger than the usable WAL
   (`WorkerError::InvalidLimits`). Maintenance intervals above 24 hours are
   refused (`InvalidLimits`, or a startup error for `--wal-reclaim-ms`), so a
-  schedule can never overflow and stop silently.
+  huge interval cannot overflow the next deadline. This is not a proof that
+  every deadline addition succeeds: the protocol clock is a `u64` millisecond
+  count, and within 24 hours of its end (about 584 million years after the
+  clock's origin) the next deadline is `None` and the schedule stops, as the
+  recorded clock-horizon contract states (tested by
+  `deadline_exhaustion_stops_instead_of_wrapping_or_spinning`).
+- **Stall map.** `replica_stall` tracks only the group's current replicas:
+  the leader clears it at every membership change, so removed replicas are
+  never kept or reported.
 
 Overrides, accepted by `serve` in all three binaries:
 
@@ -1168,7 +1196,10 @@ local, volatile state of one group:
 | `wal_held_ms` | how long the oldest write held by the WAL thread has waited (0 when none) |
 | `declined_appends` | appends whose new entries this replica declined (WAL pressure or retained-entry capacity) |
 | `replica_stall` | as leader, `NODE:ROUNDS` for the replica longest without acknowledging new entries, or `none` |
-| `step_downs`, `last_step_down` | capacity step-downs of this replica and the last one (`RetainedEntryCapacity@TERM`) |
+| `step_downs`, `last_step_down` | capacity step-downs of this replica and the last one (`RetainedEntryCapacity@TERM` or `WalCapacity@TERM`) |
+| `wal_noop_refused` | noop transitions the node's WAL account refused since startup (campaigns not started, step-downs, declined noop-only appends; all groups) |
+| `noop_refusals` | campaigns this replica did not start, and leader roles it gave up, because no noop fitted the WAL |
+| `wal_noop_starved` | a noop was refused since the last successful rewrite: a rewrite runs whenever the WAL has grown |
 | `checkpoint_base` | durable local snapshot base (kept last) |
 
 None of these is a quorum receipt. Maintenance never switches itself off: every
@@ -1201,8 +1232,13 @@ failing when its WAL fills. The core refuses data at the retained-entry
 budget with `RaftError::StoragePressure` (a client sees
 `ClientOutcome::NotProposed(RaftError::StoragePressure)` if the write was
 already submitted), and `Raft::{capacity_step_downs, declined_appends,
-entry_budget_refusals, replica_stall}` and `node.local().owner.wal_account()`
-expose the counters above.
+entry_budget_refusals, replica_stall, wal_noop_refusals}`,
+`WalMaintenanceStatus::noop_starved` and `node.local().owner.wal_account()`
+(including `noop_refused`) expose the counters above. A `NativeLogWorker`
+owned directly (without a node) completes a batch that still does not fit
+right after a successful rewrite with the non-fatal
+`StorageError::Rejected("WAL live image leaves no room")`; a node's WAL
+account keeps that from happening there.
 
 Rust hosts can choose `CheckpointPolicy { min_entries, interval_ms, scan_groups,
 max_in_flight }` through `Node::configure_checkpoints`. Inspect tracked admissions
