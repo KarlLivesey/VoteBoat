@@ -58,6 +58,9 @@ impl Default for PeerDriverLimits {
         }
     }
 }
+/// Work bounds for one `PeerDriver::poll`. The node's same-poll `flush` uses
+/// the same budget for its send half (`sends`, `peer_visits`, transport write
+/// bytes; it never reads), so one node poll does at most twice this send work.
 #[derive(Clone, Copy, Debug)]
 pub struct PeerDriverBudget {
     pub connection_visits: usize,
@@ -860,6 +863,104 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         }
         result
     }
+    /// Same-poll send flush (N1). After the host's replica step: complete
+    /// taken sends, admit queued batches, write them with a write-only budget
+    /// (no input is read or admitted), then take their completions, so output
+    /// made in this node poll leaves within it whenever the sockets take the
+    /// bytes. Same per-peer order and one accepted batch per peer as `poll`;
+    /// the fair cursors do not move. A fenced owner or driver is left for the
+    /// next `poll` to report, exactly as without a flush.
+    pub fn flush<O: OutboundQueue, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
+        &mut self,
+        owner: &mut EffectOwner<Q, T, E>,
+        outbound: &mut O,
+        now: MonoTime,
+        budget: PeerDriverBudget,
+        out: &mut PeerDriverProgress,
+    ) -> Result<(), PeerDriverError> {
+        if owner.identity() != self.owner || outbound.binding() != self.outbound {
+            return Err(PeerDriverError::WrongBinding);
+        }
+        budget.validate()?;
+        if now < self.now {
+            return Err(PeerDriverError::TimeWentBack);
+        }
+        if self.failed.is_some() || owner.is_failed() {
+            return Ok(());
+        }
+        self.now = now;
+        let result = self.flush_inner(outbound, now, budget, out);
+        if let Err(reason) = &result {
+            let _ = owner.fail::<()>(EffectOwnerError::ProviderContract);
+            self.fail_network(reason);
+        }
+        result
+    }
+    fn flush_inner<O: OutboundQueue>(
+        &mut self,
+        outbound: &mut O,
+        now: MonoTime,
+        b: PeerDriverBudget,
+        out: &mut PeerDriverProgress,
+    ) -> Result<(), PeerDriverError> {
+        if outbound.usage().batches > self.limits.staged_batches {
+            return Err(PeerDriverError::ProviderViolation);
+        }
+        self.complete_sends(outbound, b.peer_visits, out)?;
+        self.submit_sends(outbound, b.sends, out)?;
+        let write_only = TransportPollBudget {
+            session: SessionPollBudget {
+                read_bytes: 0,
+                ..b.transport.session
+            },
+            read_bytes: 0,
+            ..b.transport
+        };
+        let mut visits = 0;
+        for i in 0..self.peers.len() {
+            if visits == b.peer_visits {
+                break;
+            }
+            let peer = self.peers[(self.cursor + i) % self.peers.len()];
+            let Some(event) = self
+                .parts
+                .roster
+                .flush_peer(peer, now, write_only)
+                .map_err(PeerDriverError::Roster)?
+            else {
+                continue;
+            };
+            visits += 1;
+            if matches!(
+                event,
+                PeerPoll::Disconnected {
+                    error: Some(TransportError::ProviderViolation),
+                    ..
+                }
+            ) {
+                return Err(PeerDriverError::ProviderViolation);
+            }
+            out.peers.push(event);
+        }
+        if visits > 0 {
+            self.complete_sends(outbound, b.peer_visits, out)?;
+        }
+        Ok(())
+    }
+    /// Take ready send completions of up to `visits` peers from the cursor,
+    /// without moving it.
+    fn complete_sends<O: OutboundQueue>(
+        &mut self,
+        outbound: &mut O,
+        visits: usize,
+        out: &mut PeerDriverProgress,
+    ) -> Result<(), PeerDriverError> {
+        for i in 0..visits.min(self.peers.len()) {
+            let peer = self.peers[(self.cursor + i) % self.peers.len()];
+            self.complete_send(outbound, peer, out)?;
+        }
+        Ok(())
+    }
     /// After close, resolve network ownership without accessing a failed core.
     /// Held ingress is canceled explicitly, never admitted or executed.
     pub fn drain<O: OutboundQueue>(
@@ -1111,32 +1212,7 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         for _ in 0..visits.min(self.peers.len()) {
             let peer = self.peers[self.cursor];
             self.cursor = (self.cursor + 1) % self.peers.len();
-            match self.parts.roster.take_send(peer) {
-                Ok(Some(send)) => {
-                    let ticket = send.batch.ticket;
-                    match outbound.complete(send.batch, send.result) {
-                        Ok(done) => {
-                            if done.ticket != ticket || done.result != send.result {
-                                return Err(PeerDriverError::ProviderViolation);
-                            }
-                            out.completions.push(done);
-                        }
-                        Err(rejected) => {
-                            self.failed_send = Some(Box::new(TransportSend {
-                                connection: send.connection,
-                                batch: *rejected.batch,
-                                result: send.result,
-                            }));
-                            return Err(PeerDriverError::Outbound(rejected.reason));
-                        }
-                    }
-                }
-                Ok(None) => (),
-                Err(rejected) => {
-                    self.failed_send = Some(rejected.send);
-                    return Err(PeerDriverError::Roster(rejected.reason));
-                }
-            }
+            self.complete_send(outbound, peer, out)?;
             if !self.closed {
                 match self.parts.ingress.receive(&mut self.parts.roster, peer) {
                     Ok(Some(_)) => {
@@ -1163,6 +1239,41 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
             self.cursor = cursor;
         }
         Ok(())
+    }
+    /// Take one peer's ready send completion and resolve it in the queue.
+    fn complete_send<O: OutboundQueue>(
+        &mut self,
+        outbound: &mut O,
+        peer: NodeId,
+        out: &mut PeerDriverProgress,
+    ) -> Result<(), PeerDriverError> {
+        match self.parts.roster.take_send(peer) {
+            Ok(Some(send)) => {
+                let ticket = send.batch.ticket;
+                match outbound.complete(send.batch, send.result) {
+                    Ok(done) => {
+                        if done.ticket != ticket || done.result != send.result {
+                            return Err(PeerDriverError::ProviderViolation);
+                        }
+                        out.completions.push(done);
+                        Ok(())
+                    }
+                    Err(rejected) => {
+                        self.failed_send = Some(Box::new(TransportSend {
+                            connection: send.connection,
+                            batch: *rejected.batch,
+                            result: send.result,
+                        }));
+                        Err(PeerDriverError::Outbound(rejected.reason))
+                    }
+                }
+            }
+            Ok(None) => Ok(()),
+            Err(rejected) => {
+                self.failed_send = Some(rejected.send);
+                Err(PeerDriverError::Roster(rejected.reason))
+            }
+        }
     }
     fn submit_sends<O: OutboundQueue>(
         &mut self,

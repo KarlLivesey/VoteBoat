@@ -1138,7 +1138,7 @@ where
                     .map_err(NodeError::Peer)?;
             }
         }
-        let peers = self
+        let mut peers = self
             .peers
             .as_mut()
             .map(|p| {
@@ -1172,6 +1172,20 @@ where
                     .reconcile_planned_membership(&self.local.owner, &self.local.outbound, now)
                     .map_err(NodeError::Peer)?;
             }
+        }
+        // Same-poll send flush: output this poll's replica step queued leaves
+        // now instead of in the next two polls, so the host waits on input
+        // rather than on write interest.
+        if let (Some(network), Some(progress)) = (&mut self.peers, &mut peers) {
+            network
+                .flush(
+                    &mut self.local.owner,
+                    &mut self.local.outbound,
+                    now,
+                    budget.peers,
+                    progress,
+                )
+                .map_err(NodeError::Peer)?;
         }
         if self.state == NodeState::Quiescing
             && self.local.clients.is_drained()

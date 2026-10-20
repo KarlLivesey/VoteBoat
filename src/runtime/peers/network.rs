@@ -83,6 +83,16 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerNetwork for Peer
     {
         PeerDriver::poll(self, owner, outbound, now, budget)
     }
+    fn flush<O: OutboundQueue, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
+        &mut self,
+        owner: &mut EffectOwner<Q, T, E>,
+        outbound: &mut O,
+        now: MonoTime,
+        budget: PeerDriverBudget,
+        progress: &mut PeerDriverProgress,
+    ) -> Result<(), PeerDriverError> {
+        PeerDriver::flush(self, owner, outbound, now, budget, progress)
+    }
     fn drain<O: OutboundQueue>(
         &mut self,
         outbound: &mut O,

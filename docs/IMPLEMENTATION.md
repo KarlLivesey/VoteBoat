@@ -19,8 +19,73 @@ design pack is unchanged.
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Done N0: three-process cluster harness (merged 20 October 2026 in PR 17, head 73605e48; rounds 1–4 and baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test on OS-selected ports; script self-test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
-| Current N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline | Plan §5.3 tests and §5.4 gate | NW1 |
+| Current N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5): a `Send` made in node poll *k* is encoded in poll *k*+1 and written in poll *k*+2; after N1 it is written and completed inside poll *k* whenever the socket takes the bytes, so the host waits on input instead of write interest | N0 baseline and harness (merged) | Schema plan below; deterministic driver, roster and node tests (write-only budget, same-poll completion, durability gate, partial and refused writes, close, budgets, cursor, poll-count golden against the parent); relay provider tests unmodified; fmt, four strict Clippy builds, matched fmt/Clippy; suites in default and all-features; N0 cells on the quiet Mac, 5 interleaved rounds against main, per-process CPU, busy cores, rounds and the wait split | NW1 |
 | Then N2: per-peer frame coalescing | One frame per peer per round across groups | N1; a G=4 cell on the N0 harness (see N0 limits) | Plan §4 row 2 | NW1 |
+
+### N1 schema plan (before editing, 20 October 2026)
+
+Base: `origin/main` `2d798a19` (N0 merged). Plan §5.2, refined against the code.
+
+- **Data/API.** No wire, WAL or Raft change. One additive trait method,
+  `PeerNetwork::flush(&mut self, owner, outbound, now, budget, progress:
+  &mut PeerDriverProgress) -> Result<(), PeerDriverError>`, with a default
+  that does nothing, so `NativeRelayNetwork` and downstream networks are
+  unchanged. It adds to the poll's own `PeerDriverProgress` (sends,
+  completions, peer events, connection failures), so `NodeProgress`, the N0
+  `sends` counter and `made_progress` see flushed work without a new type.
+  One additive roster method, `PeerRoster::flush_peer(peer, now, budget) ->
+  Result<Option<PeerPoll>, PeerRosterError>`.
+- **`PeerDriver::flush` steps.** Same entry checks as `poll` (binding, budget,
+  clock, fenced owner/driver). (1) For each peer, `take_send` +
+  `outbound.complete` (the send half of `poll_peer_io`, factored into one
+  helper used by both). (2) `submit_sends` (existing, `budget.sends`; after
+  `close()` it completes staged work `Failed` and submits nothing, as
+  today). (3) `roster.flush_peer` for each peer holding an accepted send, at
+  most `budget.peer_visits` peers, starting at the driver cursor without moving
+  it. (4) The step 1 helper again. Write-only budget: the caller's
+  `TransportPollBudget` with `read_bytes: 0` and `session.read_bytes: 0` (TLS
+  `LimitedIo::read` refuses a zero count without a syscall; QUIC skips the
+  datagram read below one MTU), so no input is taken and ingress is unchanged.
+- **`PeerRoster::flush_peer`.** Polls only an authorized, non-retiring peer
+  whose transport holds the accepted send; the same validity checks,
+  retirement, backoff and `Disconnected` event as `poll` (the per-peer body is
+  factored into one helper); does not move `poll_cursor`.
+- **Call site.** `NetworkNode::poll_inner`, after `replica.poll_authorized`,
+  its observers and the second `reconcile_planned_membership`, before the
+  Quiescing/Draining checks; in Running, Quiescing and Draining (the
+  `p.poll` call already runs in all three). `drain()` produces no sends and is
+  unchanged.
+- **State transitions.** None in Raft or the node state machine. Roster:
+  as `poll`. Driver: as `poll`, plus nothing new.
+- **Ownership.** Unchanged chain queue → staged → transport → completion;
+  one accepted batch per peer (`p.accepted`), the same per-peer FIFO (the
+  queue's order and `submit_sends`' rotation are unchanged). Effects reach the
+  queue only from `replica.poll_authorized`, which already gates every `Send`
+  on its durability; the flush moves bytes earlier, never effects.
+- **Failure and cleanup.** An error takes the poll path: `owner.fail(ProviderContract)`
+  and `fail_network`, and the node enters recovery. A short write leaves the
+  batch sending with its write interest; the next poll continues (as today). A
+  transport that fails between submit and flush is retired, its send
+  completes `Failed` once (step 4) and its credits are released. A refused
+  write (no bytes taken) is retried by the next poll; nothing is duplicated.
+- **Restart and partial progress.** Nothing persisted. A crash mid-flush loses
+  only unsent frames, as today; Raft retransmits.
+- **Bounds.** Flush uses the same `PeerDriverBudget`, so one node poll does at
+  most twice the current peer send/transport work (documented beside the
+  budget). It never reads.
+- **Acceptance.** Driver tests (write-only budget recorded; same-call
+  completion with an empty queue; partial accept keeps the remainder queued in
+  order; refused write retried once without duplicate; transport failure
+  between submit and flush completes `Failed` once; `sends = 0` submits
+  nothing; `peer_visits` bounds transport visits; after `close()` staged work
+  fails and accepted sends complete). Roster test: `flush_peer` does not move
+  the fair poll cursor. Node tests: the outbound queue is empty at the end of
+  the poll that produced the send; no `RequestVote` reaches a transport before
+  its vote persist is durable; exact poll counts from `Campaign` to the first
+  vote request, from `propose` to the Append on the wire and to client
+  completion, captured on the parent first. Mutations: drop step 4, use the
+  default (reading) budget, remove the call site, move a cursor. Relay
+  provider tests unmodified. N0 cells as the mini plan says.
 
 ### N0 schema plan (before editing, 19 October 2026)
 

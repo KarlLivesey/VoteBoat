@@ -881,48 +881,82 @@ impl<P: PeerTransport> PeerRoster<P> {
                 Self::finish_retire(p);
                 continue;
             }
-            let Some(t) = &mut p.transport else {
-                continue;
-            };
-            let valid = |t: &P| {
-                let u = t.usage();
-                let l = t.limits();
-                t.binding() == p.binding.unwrap()
-                    && t.security() == SessionSecurity::Authenticated
-                    && l.validate().is_ok()
-                    && l.send_frame_bytes <= self.transport_limits.send_frame_bytes
-                    && l.receive_frame_bytes <= self.transport_limits.receive_frame_bytes
-                    && l.decoded_bytes <= self.transport_limits.decoded_bytes
-                    && u.send_frame_bytes <= l.send_frame_bytes
-                    && u.receive_frame_bytes <= l.receive_frame_bytes
-                    && u.decoded_bytes <= l.decoded_bytes
-            };
-            let result = if valid(t) {
-                t.poll(now, budget)
-            } else {
-                Err(TransportError::ProviderViolation)
-            };
-            let result = if valid(t) {
-                result
-            } else {
-                Err(TransportError::ProviderViolation)
-            };
-            let error = result.err();
-            if error.is_some()
-                || matches!(t.state(), TransportState::Closed | TransportState::Failed)
-            {
-                Self::retire(p);
-                Self::backoff(p, now, self.limits);
-                Self::finish_retire(p);
-                events.push(PeerPoll::Disconnected { peer: id, error });
-            } else {
-                events.push(PeerPoll::Progress {
-                    peer: id,
-                    progress: result.unwrap(),
-                });
+            if let Some(event) = self.poll_transport(id, now, budget) {
+                events.push(event);
             }
         }
         Ok(events)
+    }
+    /// Write-side visit of one peer that holds an accepted, unfinished send,
+    /// for a same-poll flush between fair polls. The same validity checks,
+    /// retirement, backoff and `Disconnected` report as `poll`, but the fair
+    /// poll cursor does not move. Peers without such a send, retiring peers
+    /// and a fenced roster are not visited (`Ok(None)`); `poll` handles them.
+    pub fn flush_peer(
+        &mut self,
+        peer: NodeId,
+        now: MonoTime,
+        budget: TransportPollBudget,
+    ) -> Result<Option<PeerPoll>, PeerRosterError> {
+        budget.validate().map_err(PeerRosterError::Transport)?;
+        self.time(now)?;
+        let Some(p) = self.peers.get(&peer) else {
+            return Ok(None);
+        };
+        if self.fenced
+            || p.retiring
+            || p.accepted.is_none()
+            || !p.transport.as_ref().is_some_and(|t| t.usage().sending)
+        {
+            return Ok(None);
+        }
+        Ok(self.poll_transport(peer, now, budget))
+    }
+    /// One transport poll with the roster's validity checks. A failed or closed
+    /// transport is retired and reported as `Disconnected`.
+    fn poll_transport(
+        &mut self,
+        id: NodeId,
+        now: MonoTime,
+        budget: TransportPollBudget,
+    ) -> Option<PeerPoll> {
+        let p = self.peers.get_mut(&id).unwrap();
+        let t = p.transport.as_mut()?;
+        let valid = |t: &P| {
+            let u = t.usage();
+            let l = t.limits();
+            t.binding() == p.binding.unwrap()
+                && t.security() == SessionSecurity::Authenticated
+                && l.validate().is_ok()
+                && l.send_frame_bytes <= self.transport_limits.send_frame_bytes
+                && l.receive_frame_bytes <= self.transport_limits.receive_frame_bytes
+                && l.decoded_bytes <= self.transport_limits.decoded_bytes
+                && u.send_frame_bytes <= l.send_frame_bytes
+                && u.receive_frame_bytes <= l.receive_frame_bytes
+                && u.decoded_bytes <= l.decoded_bytes
+        };
+        let result = if valid(t) {
+            t.poll(now, budget)
+        } else {
+            Err(TransportError::ProviderViolation)
+        };
+        let result = if valid(t) {
+            result
+        } else {
+            Err(TransportError::ProviderViolation)
+        };
+        let error = result.err();
+        if error.is_some() || matches!(t.state(), TransportState::Closed | TransportState::Failed) {
+            Self::retire(p);
+            Self::backoff(p, now, self.limits);
+            Self::finish_retire(p);
+            Some(PeerPoll::Disconnected { peer: id, error })
+        } else {
+            Some(PeerPoll::Progress {
+                peer: id,
+                progress: result.unwrap(),
+            })
+        }
     }
     pub fn take_send(
         &mut self,

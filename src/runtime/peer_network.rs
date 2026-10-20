@@ -58,6 +58,22 @@ pub trait PeerNetwork: Sized {
     ) -> Result<PeerDriverProgress, PeerDriverError>
     where
         Self::Endpoint: Clone;
+    /// Same-poll send flush, called by the node after its replica step in the
+    /// same node poll as `poll`: write and complete output queued since that
+    /// `poll`, without reading, adding to `progress`. It moves bytes only;
+    /// every `Send` reached the queue through the replica's durability gate.
+    /// An error has the same effect as a `poll` error. The default does
+    /// nothing: queued output then waits for the next `poll`.
+    fn flush<O: OutboundQueue, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
+        &mut self,
+        _owner: &mut EffectOwner<Q, T, E>,
+        _outbound: &mut O,
+        _now: MonoTime,
+        _budget: PeerDriverBudget,
+        _progress: &mut PeerDriverProgress,
+    ) -> Result<(), PeerDriverError> {
+        Ok(())
+    }
     fn drain<O: OutboundQueue>(
         &mut self,
         outbound: &mut O,

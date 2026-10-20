@@ -34,6 +34,8 @@ mod local_drain;
 mod peer_credentials;
 #[path = "node_readiness.rs"]
 mod readiness;
+#[path = "node_flush.rs"]
+mod same_poll_flush;
 #[path = "node_network.rs"]
 mod selected_network;
 type Parts = NodeParts<

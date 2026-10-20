@@ -201,6 +201,12 @@ struct TransportControl {
     readiness: Option<Message>,
     append: Option<Message>,
     submit_error: Option<TransportError>,
+    /// Every message this transport wrote, in write order.
+    sent: Vec<Message>,
+    /// Every poll budget this transport was given, in call order.
+    budgets: Vec<TransportPollBudget>,
+    /// Polls that take part of the accepted frame without finishing it.
+    short_writes: usize,
 }
 pub(super) struct Transport {
     session: Session,
@@ -253,10 +259,19 @@ impl PeerTransport for Transport {
     ) -> Result<TransportProgress, TransportError> {
         b.validate()?;
         let mut c = self.control.borrow_mut();
+        c.budgets.push(b);
         if c.blocked {
             return Ok(TransportProgress::default());
         }
+        if self.sending.is_some() && c.short_writes > 0 {
+            c.short_writes -= 1;
+            return Ok(TransportProgress {
+                written_bytes: 1,
+                ..Default::default()
+            });
+        }
         if let Some(batch) = self.sending.take() {
+            c.sent.extend(batch.messages.iter().cloned());
             for message in &batch.messages {
                 if matches!(message.rpc, Rpc::LearnerReadinessRequest(_)) {
                     assert!(c.readiness.replace(message.clone()).is_none());
@@ -350,17 +365,42 @@ impl PeerNetwork {
             .take()
     }
     pub(super) fn deliver(&self, peer: NodeId, message: Message) {
+        self.deliver_batch(peer, vec![message]);
+    }
+    /// One received frame carrying `messages` in order.
+    pub(super) fn deliver_batch(&self, peer: NodeId, messages: Vec<Message>) {
         let controls = self.controls.borrow();
         let mut c = controls[&peer].borrow_mut();
         assert!(c.incoming.is_none());
         let batch = ReceivedBatch {
             connection: c.binding,
-            messages: vec![message],
+            messages,
         };
         batch
             .info(TransportLimits::default().decoded_bytes)
             .unwrap();
         c.incoming = Some(batch);
+    }
+    /// Whether the peer's transport has no undelivered received frame.
+    pub(super) fn can_deliver(&self, peer: NodeId) -> bool {
+        self.controls
+            .borrow()
+            .get(&peer)
+            .is_some_and(|c| c.borrow().incoming.is_none())
+    }
+    pub(super) fn take_sent(&self, peer: NodeId) -> Vec<Message> {
+        self.controls
+            .borrow()
+            .get(&peer)
+            .map_or_else(Vec::new, |c| std::mem::take(&mut c.borrow_mut().sent))
+    }
+    /// Every peer's written messages not yet taken, without taking them.
+    pub(super) fn peek_sent(&self) -> Vec<Message> {
+        self.controls
+            .borrow()
+            .values()
+            .flat_map(|c| c.borrow().sent.clone())
+            .collect()
     }
     pub(super) fn restart_session(&self, peer: NodeId, session: StoreSession) {
         self.connect
@@ -398,6 +438,9 @@ impl PeerTransportFactory<Session> for Factory {
             readiness: None,
             append: None,
             submit_error: None,
+            sent: Vec::new(),
+            budgets: Vec::new(),
+            short_writes: 0,
         }));
         self.controls
             .borrow_mut()
@@ -415,6 +458,8 @@ type Driver = PeerDriver<Connector, Factory>;
 mod closed;
 #[path = "peer_driver_disconnected.rs"]
 mod disconnected;
+#[path = "peer_driver_flush.rs"]
+mod flush;
 #[path = "peer_receive_fairness.rs"]
 mod receive_fairness;
 struct Fixture {

@@ -223,3 +223,56 @@ fn overreported_session_progress_on_either_poll_fails_before_reusing_budget() {
         }
     }
 }
+#[test]
+fn a_write_only_budget_writes_and_completes_a_frame_in_one_poll_and_reads_nothing() {
+    let (mut transport, mut q, control, peer) = fixture();
+    control.lock().unwrap().first = SessionProgress::default();
+    let waiting = vec![message(2, 1, 2)];
+    let frame = codec()
+        .encode_batch(binding(2, 1).outgoing(), &waiting)
+        .unwrap();
+    peer.outgoing.lock().unwrap().input.extend(frame);
+    let sent = vec![message(1, 2, 1)];
+    transport.submit(batch(&mut q, sent.clone())).unwrap();
+    // The same-poll flush budget: the caller's write budget, no reads.
+    let write_only = TransportPollBudget {
+        session: SessionPollBudget {
+            read_bytes: 0,
+            ..Default::default()
+        },
+        read_bytes: 0,
+        ..Default::default()
+    };
+    let p = transport.poll(MonoTime(0), write_only).unwrap();
+    assert!(p.sent);
+    assert_eq!(
+        (p.read_bytes, p.received, p.session.read_bytes),
+        (0, false, 0)
+    );
+    assert!(control
+        .lock()
+        .unwrap()
+        .calls
+        .iter()
+        .all(|b| b.read_bytes == 0));
+    let done = transport.take_send().unwrap();
+    assert_eq!(done.result, LocalSendResult::Sent);
+    q.complete(done.batch, done.result).unwrap();
+    assert!(transport.take_received().is_none());
+    // The peer holds the whole frame; an ordinary poll then reads the input.
+    let peer_queue = queue(2);
+    let mut other =
+        NativePeerTransport::new(peer, codec(), &peer_queue, TransportLimits::default()).unwrap();
+    for _ in 0..8 {
+        other
+            .poll(MonoTime(0), TransportPollBudget::default())
+            .unwrap();
+    }
+    assert_eq!(other.take_received().unwrap().messages, sent);
+    for _ in 0..8 {
+        transport
+            .poll(MonoTime(0), TransportPollBudget::default())
+            .unwrap();
+    }
+    assert_eq!(transport.take_received().unwrap().messages, waiting);
+}

@@ -429,6 +429,63 @@ fn fair_visits_and_aggregate_capacity_bound_connection_resources() {
     assert_eq!(c.lock().unwrap().polls, 2);
 }
 #[test]
+fn flush_visits_only_a_pending_send_and_never_moves_the_fair_poll_cursor() {
+    let mut r = roster(limits());
+    let tickets = r.due_connections(MonoTime(0), 2).unwrap();
+    assert_eq!(tickets.len(), 2);
+    let mut controls = std::collections::BTreeMap::new();
+    for t in tickets {
+        let host = Host::new(t, 1);
+        controls.insert(t.peer.node, host.control.clone());
+        r.attach(t, host, MonoTime(0)).unwrap();
+    }
+    let polls = |peer: u64| controls[&node(peer)].lock().unwrap().polls;
+    let budget = TransportPollBudget::default();
+    r.poll(MonoTime(0), 1, budget).unwrap();
+    assert_eq!((polls(2), polls(3)), (1, 0));
+    // No accepted send: nothing to flush, no transport visit.
+    assert_eq!(r.flush_peer(node(2), MonoTime(0), budget), Ok(None));
+    assert_eq!(r.flush_peer(node(3), MonoTime(0), budget), Ok(None));
+    assert_eq!((polls(2), polls(3)), (1, 0));
+    let mut q = queue();
+    controls[&node(3)].lock().unwrap().blocked = true;
+    r.submit(send(&mut q, node(3))).unwrap();
+    assert!(matches!(
+        r.flush_peer(node(3), MonoTime(0), budget),
+        Ok(Some(PeerPoll::Progress { peer, .. })) if peer == node(3)
+    ));
+    assert_eq!((polls(2), polls(3)), (1, 1));
+    // The fair cursor still follows peer 2, so the next one-visit poll is
+    // peer 3's turn, not peer 2's.
+    r.poll(MonoTime(0), 1, budget).unwrap();
+    assert_eq!((polls(2), polls(3)), (1, 2));
+    // A failure seen by a flush is handled exactly as by a poll.
+    controls[&node(3)].lock().unwrap().fail = true;
+    assert_eq!(
+        r.flush_peer(node(3), MonoTime(0), budget),
+        Ok(Some(PeerPoll::Disconnected {
+            peer: node(3),
+            error: Some(TransportError::Truncated)
+        }))
+    );
+    let failed = r.take_send(node(3)).unwrap().unwrap();
+    assert_eq!(failed.result, LocalSendResult::Failed);
+    q.complete(failed.batch, failed.result).unwrap();
+    assert!(r.binding(node(3)).is_none());
+    assert_eq!(r.flush_peer(node(3), MonoTime(0), budget), Ok(None));
+    assert_eq!(
+        r.flush_peer(
+            node(3),
+            MonoTime(0),
+            TransportPollBudget {
+                plaintext_calls: 5000,
+                ..budget
+            }
+        ),
+        Err(PeerRosterError::Transport(TransportError::InvalidLimits))
+    );
+}
+#[test]
 fn receives_are_scoped_and_obsolete_input_is_discarded_before_reconnect() {
     let mut r = roster(limits());
     let t = r.due_connections(MonoTime(0), 1).unwrap()[0];
