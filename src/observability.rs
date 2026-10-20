@@ -72,11 +72,12 @@ impl NodeCounters {
         }
     }
 }
-/// Raft logs constructed in this process after every log identity was
-/// issued (saturating; zero unless 2^64 − 2 logs were constructed). Such a
-/// log has no install stamp, so every install takes the fully checked path:
-/// results are unchanged, only the append fast path is lost. Never consensus
-/// evidence.
+/// Raft logs in this process that have no install stamp: logs constructed
+/// after every log identity was issued, plus logs that reached the version
+/// limit and could not renew their identity (saturating; zero unless 2^64 − 2
+/// identities were issued). Every install on such a log takes the fully
+/// checked path: results are unchanged, only the append fast path is lost.
+/// Never consensus evidence.
 pub fn unidentified_logs() -> u64 {
     crate::log::transition::unidentified_logs()
 }
