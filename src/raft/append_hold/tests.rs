@@ -337,3 +337,74 @@ fn every_batch_commits_on_its_first_follower_ack_as_with_holds_off() {
         assert_eq!(leader.state().commit_index, 13);
     }
 }
+
+fn early_leader() -> Raft {
+    let mut leader = held(AppendHold::QuorumFirst);
+    for id in 2..=3 {
+        leader.progress.insert(node(id), 1);
+    }
+    leader
+}
+/// Propose a batch and bind its exact ticket; the pre-barrier sends follow.
+fn early_batch(leader: &mut Raft, first: u128, count: u128) -> (LogTicket, Vec<Effect>) {
+    leader.propose_batch(proposals(first, count)).unwrap();
+    let next = leader.pending.as_ref().unwrap().next.metadata();
+    let ticket = LogTicket {
+        binding: leader.binding,
+        batch: leader.last_batch + 1,
+        group: next.group,
+        revision: next.revision,
+        generation: next.generation,
+        last_index: next.last_index,
+        term: next.hard_state.term,
+    };
+    let early = leader.replicate_admitted(ticket).unwrap();
+    (ticket, early)
+}
+fn finish(leader: &mut Raft, ticket: LogTicket) -> Vec<Effect> {
+    let effects = leader
+        .complete(&DurableLog {
+            tickets: vec![ticket],
+        })
+        .unwrap();
+    run(leader, effects)
+}
+
+#[test]
+fn early_path_sends_only_to_the_quorum_follower_before_the_barrier() {
+    let mut off = early_leader();
+    off.set_append_hold(AppendHold::Off);
+    let (_, early) = early_batch(&mut off, 1, 2);
+    assert_eq!(early.len(), 2, "holds off: every caught-up follower");
+
+    let mut leader = early_leader();
+    let (ticket, early) = early_batch(&mut leader, 1, 2);
+    assert_eq!(early.len(), 1);
+    let two = sent(&early, 2).expect("most recent ack first");
+    assert_eq!(range(&two), (1, vec![2, 3]));
+    // Durable: 3 is ready and caught up, and 2's request covers the batch.
+    let effects = finish(&mut leader, ticket);
+    assert!(sent(&effects, 3).is_none());
+    assert_eq!(leader.held, BTreeMap::from([(node(3), 3)]));
+    reply(&mut leader, &two);
+    assert_eq!(leader.state().commit_index, 3);
+}
+
+#[test]
+fn a_held_follower_due_at_the_batch_counts_toward_the_early_quorum() {
+    let mut leader = early_leader();
+    let (ticket, early) = early_batch(&mut leader, 1, 2);
+    let two = sent(&early, 2).unwrap();
+    finish(&mut leader, ticket);
+    reply(&mut leader, &two);
+    // Everything is committed, 2's commit notice and 3's entries are held.
+    assert_eq!(leader.state().commit_index, leader.state().last_index());
+    assert_eq!(leader.held, BTreeMap::from([(node(2), 3), (node(3), 3)]));
+    // 3 is released with this batch once it is durable, so nothing goes early.
+    let (ticket, early) = early_batch(&mut leader, 3, 2);
+    assert!(early.is_empty());
+    let effects = finish(&mut leader, ticket);
+    assert_eq!(range(&sent(&effects, 3).unwrap()), (1, vec![2, 3, 4, 5]));
+    assert!(sent(&effects, 2).is_none());
+    assert_eq!(leader.held, BTreeMap::from([(node(2), 5)]));
+}
