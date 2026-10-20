@@ -197,3 +197,31 @@ fn a_lowered_allocation_mark_after_closure_is_refused_so_a_retired_session_is_ne
     assert!(!after[1].duplicate);
     assert_eq!(restored.read_applied(5), Ok(7));
 }
+
+/// Offset of the first live session's ID in a Counter checkpoint.
+const FIRST_SESSION_ID: usize = 24 + 44;
+
+#[test]
+fn restore_counter_invalid_max_session_id_must_not_panic() {
+    // Sol, round 3: a pristine checkpoint with only the first live session ID
+    // replaced by u64::MAX is refused typed, never a panic.
+    let limits = limits(2, 4, 2);
+    let mut counter = Counter::with_limits(limits).unwrap();
+    counter.apply_batch(&[add(1, 1, 1, 0, 7)]).unwrap();
+    let image = counter.checkpoint(usize::MAX).unwrap();
+    assert_eq!(
+        u64::from_le_bytes(
+            image[FIRST_SESSION_ID..FIRST_SESSION_ID + 8]
+                .try_into()
+                .unwrap()
+        ),
+        1
+    );
+    assert!(restore(limits, 1, &image).is_ok());
+    let mut bad = image.clone();
+    bad[FIRST_SESSION_ID..FIRST_SESSION_ID + 8].copy_from_slice(&u64::MAX.to_le_bytes());
+    assert_eq!(
+        restore(limits, 1, &bad).err(),
+        Some(ApplicationError::InvalidCheckpoint)
+    );
+}

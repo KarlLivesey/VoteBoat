@@ -694,7 +694,10 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
         for _ in 0..registration_count {
             ledger.decode_registration(&mut reader, applied)?;
         }
-        if !ledger.allocation_fence_holds(applied, &lru) || !ledger.nonces_are_reachable() {
+        if !ledger.allocation_fence_holds(applied, &lru)
+            || !ledger.nonces_are_reachable()
+            || !ledger.entries_fit(applied)
+        {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let used = reader.at;
@@ -722,17 +725,22 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
             .sessions
             .last_key_value()
             .is_none_or(|(last, _)| id > *last);
+        // The ID is checked before any arithmetic on it: `id < next_session`
+        // keeps `id + 1` in range.
+        if id == 0 || id >= self.next_session || !ascending || count as u64 > window {
+            return Err(invalid);
+        }
         let built_in = self.default_session && id == DEFAULT_SESSION;
         // Session `id` was allocated by the `id − first + 1`th registration,
-        // at that index or later; its last use is no earlier.
-        let registered_by = (id + 1).saturating_sub(self.first());
-        if id == 0
-            || id >= self.next_session
-            || !ascending
-            || last_index > applied
-            || (!built_in && last_index < registered_by)
-            || count as u64 > window
-        {
+        // at that index or later (the built-in session exists from index 0).
+        // Each retained receipt is a distinct later entry that executed in
+        // this session, so its last use is at least that many entries later.
+        let registered_by = if built_in {
+            0
+        } else {
+            (id + 1).saturating_sub(self.first())
+        };
+        if last_index > applied || last_index < registered_by.saturating_add(count as u64) {
             return Err(invalid);
         }
         let mut session = Session::new(last_index, None);
@@ -749,6 +757,7 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
                 sequence,
                 consumed_through,
             };
+            // `sequence > previous ≥ floor` before the subtraction.
             if sequence <= previous
                 || sequence - floor > window
                 || consumed_through >= sequence
@@ -794,6 +803,7 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
     /// registration (so after every older unused registration), no later
     /// than `applied`, and not an entry that used a live session.
     fn allocation_fence_holds(&self, applied: u64, lru: &Lru) -> bool {
+        // `decode` refused `next_session < first`, and `first ≥ 1`.
         let newest = self.next_session - 1;
         if newest == 0 {
             return self.closed_newest.is_none();
@@ -806,7 +816,7 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
                     1
                 } else {
                     // Registered at `id − first + 1` or later, closed after.
-                    (id - self.first()).saturating_add(2)
+                    id.saturating_sub(self.first()).saturating_add(2)
                 };
                 id == newest
                     && !self.sessions.contains_key(&id)
@@ -822,7 +832,9 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
     /// registration finds `registrations` nonces held, oldest first. At most
     /// `sessions − 1` sessions hold one then, so with `registrations ≥
     /// sessions` none is ever dropped; otherwise every unused session without
-    /// its nonce is older (lower ID) than every unused session with one.
+    /// its nonce is older (lower ID) than every unused session with one. A
+    /// drop is made by a later registration, which allocates a newer ID, so
+    /// the newest allocated session never lost its nonce.
     fn nonces_are_reachable(&self) -> bool {
         let drops_possible = self.limits.registrations < self.limits.sessions;
         let mut holder_seen = false;
@@ -832,11 +844,27 @@ impl<C: SessionRecord, R: SessionRecord> SessionLedger<C, R> {
             }
             match s.nonce {
                 Some(_) => holder_seen = true,
-                None if holder_seen || !drops_possible => return false,
+                // `decode` refused `next_session < first`, and `first ≥ 1`.
+                None if holder_seen || !drops_possible || *id == self.next_session - 1 => {
+                    return false;
+                }
                 None => {}
             }
         }
         true
+    }
+
+    /// Each allocation, each retained receipt and the closure are distinct
+    /// applied entries (an entry registers, executes or refuses one command),
+    /// so together they number at most `applied`.
+    fn entries_fit(&self, applied: u64) -> bool {
+        let receipts = self.retained_receipts() as u64;
+        let closure = u64::from(self.closed_newest.is_some());
+        // `decode` refused `next_session < first`.
+        (self.next_session - self.first())
+            .checked_add(receipts)
+            .and_then(|n| n.checked_add(closure))
+            .is_some_and(|n| n <= applied)
     }
 
     fn decode_registration(

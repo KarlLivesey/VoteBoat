@@ -641,3 +641,107 @@ fn restore_refuses_an_unused_session_whose_nonce_no_history_dropped() {
         Some(ApplicationError::InvalidCheckpoint)
     );
 }
+
+#[test]
+fn restore_invalid_max_session_id_must_not_panic() {
+    // Sol, round 3: the history bound added `1` to the decoded ID before the
+    // ID was checked against the allocation mark.
+    let (ledger, bytes) = populated();
+    let mut image = bytes.clone();
+    image[at::FIRST_ID..at::FIRST_ID + 8].copy_from_slice(&u64::MAX.to_le_bytes());
+    assert_eq!(
+        ledger.decode(&image, 4).err(),
+        Some(ApplicationError::InvalidCheckpoint)
+    );
+    let mut image = bytes.clone();
+    image[at::SECOND_ID..at::SECOND_ID + 8].copy_from_slice(&u64::MAX.to_le_bytes());
+    assert_eq!(
+        ledger.decode(&image, 4).err(),
+        Some(ApplicationError::InvalidCheckpoint)
+    );
+    // u64::MAX across any aligned eight bytes (content bytes are opaque and
+    // may be valid) decodes or is refused, never panics.
+    for at in (0..at::END - 7).filter(|at| at % 4 == 0) {
+        let mut image = bytes.clone();
+        image[at..at + 8].copy_from_slice(&u64::MAX.to_le_bytes());
+        for applied in [0, 4, u64::MAX] {
+            let _ = ledger.decode(&image, applied);
+        }
+    }
+    assert_eq!(ledger.decode(&bytes, 4).unwrap().0, ledger);
+}
+
+#[test]
+fn restore_refuses_a_newest_session_without_its_nonce() {
+    // Sol, round 3 (a): one nonce for two sessions, so drops are possible,
+    // but only a later registration drops one, and that registration would
+    // have allocated a newer session.
+    let mut ledger = Ledger::with_default_session(limits(2, 4, 1));
+    assert_eq!(ledger.register(1, 10), Ok((2, false)));
+    let bytes = encoded(&ledger);
+    assert_eq!(ledger.decode(&bytes, 1).unwrap().0, ledger);
+    let mut dropped = bytes[..bytes.len() - REGISTRATION_BYTES].to_vec();
+    dropped[at::REGISTRATION_COUNT..at::REGISTRATION_COUNT + 4]
+        .copy_from_slice(&0u32.to_le_bytes());
+    for applied in [1, 2, 9] {
+        assert_eq!(
+            ledger.decode(&dropped, applied).err(),
+            Some(ApplicationError::InvalidCheckpoint),
+            "applied {applied}"
+        );
+    }
+    // Reachable: each later registration drops the oldest nonce, so sessions
+    // 1 and 2 lose theirs and the newest, 3, keeps its own.
+    let mut ledger = Ledger::new(limits(4, 4, 1));
+    for (index, nonce) in [(1, 10), (2, 11), (3, 12)] {
+        assert_eq!(ledger.register(index, nonce), Ok((index, false)));
+    }
+    let bytes = encoded(&ledger);
+    assert_eq!(ledger.decode(&bytes, 3).unwrap().0, ledger);
+    let mut dropped = bytes[..bytes.len() - REGISTRATION_BYTES].to_vec();
+    dropped[at::REGISTRATION_COUNT..at::REGISTRATION_COUNT + 4]
+        .copy_from_slice(&0u32.to_le_bytes());
+    assert_eq!(
+        ledger.decode(&dropped, 3).err(),
+        Some(ApplicationError::InvalidCheckpoint)
+    );
+}
+
+#[test]
+fn restore_refuses_more_executions_than_entries() {
+    // Sol, round 3 (b): two retained executions of the built-in session
+    // cannot both precede index 1.
+    let mut ledger = Ledger::with_default_session(limits(2, 4, 2));
+    run(&mut ledger, 1, command(1, 1, 0), 1);
+    run(&mut ledger, 2, command(1, 2, 0), 2);
+    let bytes = encoded(&ledger);
+    assert_eq!(ledger.decode(&bytes, 2).unwrap().0, ledger);
+    let mut early = bytes.clone();
+    early[at::FIRST_LAST_INDEX..at::FIRST_LAST_INDEX + 8].copy_from_slice(&1u64.to_le_bytes());
+    for applied in [2, 9] {
+        assert_eq!(
+            ledger.decode(&early, applied).err(),
+            Some(ApplicationError::InvalidCheckpoint),
+            "applied {applied}"
+        );
+    }
+    // Sibling: each session's executions fit after its registration, but the
+    // allocation and the four executions together need five entries.
+    let mut ledger = Ledger::with_default_session(limits(2, 4, 2));
+    assert_eq!(ledger.register(1, 10), Ok((2, false)));
+    run(&mut ledger, 2, command(1, 1, 0), 1);
+    run(&mut ledger, 3, command(1, 2, 0), 2);
+    run(&mut ledger, 4, command(2, 1, 0), 3);
+    run(&mut ledger, 5, command(2, 2, 0), 4);
+    let bytes = encoded(&ledger);
+    assert_eq!(ledger.decode(&bytes, 5).unwrap().0, ledger);
+    let at = last_index_offsets(&bytes);
+    let mut packed = bytes.clone();
+    packed[at[0]..at[0] + 8].copy_from_slice(&2u64.to_le_bytes());
+    packed[at[1]..at[1] + 8].copy_from_slice(&3u64.to_le_bytes());
+    assert_eq!(
+        ledger.decode(&packed, 3).err(),
+        Some(ApplicationError::InvalidCheckpoint)
+    );
+    assert!(ledger.decode(&packed, 5).is_ok(), "five entries suffice");
+}
