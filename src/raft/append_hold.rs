@@ -25,10 +25,13 @@ pub enum AppendHold {
     /// Every ready follower gets its next Append at once (the core default).
     #[default]
     Off,
-    /// A ready, caught-up voter whose Append the current quorum does not need
-    /// waits until a later leader batch is durable. The host must deliver
+    /// A ready voter that has acknowledged everything before the latest leader
+    /// batch, and whose Append the current quorum does not need, waits until a
+    /// later leader batch is durable. A follower known only by an optimistic
+    /// cursor (a new leader's probe) is never held. The host must deliver
     /// [`Event::ReleaseHeldAppends`] within its own bound; `TimedShard` does so
-    /// after `TimerConfig::append_hold_ms`. Heartbeats also release holds.
+    /// after `TimerConfig::append_hold_ms`. Heartbeats and a voter's rejection
+    /// also release holds.
     QuorumFirst,
 }
 
