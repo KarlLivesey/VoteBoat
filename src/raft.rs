@@ -1619,6 +1619,8 @@ impl Raft {
     /// is not unique across a truncation (a follower's uncommitted entry can be
     /// replaced by another with the same id), so every election resets it.
     fn refresh_peer_order(&mut self) {
+        // Only a leader reads the cached order; a follower never refreshes it.
+        debug_assert_eq!(self.role, Role::Leader);
         let id = self.membership().id();
         if self.peer_order_for != Some(id) {
             let mut order = std::mem::take(&mut self.peer_order);

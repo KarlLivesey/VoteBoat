@@ -7,8 +7,11 @@
 //! and keeps its key, so the next round's `insert` for that peer writes in
 //! place and allocates nothing. `clear` drops every key. The leader clears at
 //! every configuration and leadership change, so keys never outlive the
-//! membership that created them. Reads see exactly the occupied slots, in
-//! `NodeId` order, as the map did.
+//! membership that created them. A same-id configuration replaced by a
+//! truncation does not clear the table; that only happens on a follower,
+//! whose slots are already empty, so the bound (keys ≤ installed replicas)
+//! still holds. Reads see exactly the occupied slots, in `NodeId` order, as
+//! the map did.
 use crate::identity::NodeId;
 #[cfg(debug_assertions)]
 use std::collections::BTreeMap;
