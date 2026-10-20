@@ -251,6 +251,9 @@ fn held_timer_campaign_does_not_stall_other_group_or_lose_cold_retries() {
             .admit(group(2), proposal(9911))
             .unwrap();
         run.advance(121);
+        // A follower the quorum did not need gets the write within the hold bound.
+        let settled = 121 + timer_config().append_hold_ms;
+        run.advance(settled);
         for n in &run.nodes {
             assert_eq!(
                 n.apps[&group(2)].read_applied(n.apps[&group(2)].applied_index()),
@@ -280,9 +283,9 @@ fn held_timer_campaign_does_not_stall_other_group_or_lose_cold_retries() {
                     .admit(message.group, Event::Receive(message.clone()))
                     .unwrap();
             }
-            run.advance(121);
+            run.advance(settled);
         }
-        for ms in 122..=200 {
+        for ms in settled + 1..=200 {
             run.advance(ms);
         }
         let current = run
