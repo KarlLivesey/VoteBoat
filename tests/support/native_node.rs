@@ -120,7 +120,31 @@ fn facade_drive_at<F: voteboat::transport::PeerTransportFactory<Session>>(
                 )
             }).collect::<Vec<_>>()
         );
+        facade_release_held(nodes);
         std::thread::park_timeout(Duration::from_millis(1));
+    }
+}
+/// The facade fixtures hold protocol time constant, so no `append_hold_ms`
+/// deadline expires; each round parks for at least that long, so the fixture
+/// delivers the expiry itself for every group still holding a follower Append.
+fn facade_release_held<F: voteboat::transport::PeerTransportFactory<Session>>(
+    nodes: &mut [Facade<F>],
+) {
+    for n in nodes.iter_mut() {
+        if n.state() != NodeState::Running {
+            continue;
+        }
+        let owner = &n.local().owner;
+        let groups = owner
+            .groups()
+            .filter(|g| owner.core(*g).is_some_and(Raft::has_held_appends))
+            .collect::<Vec<_>>();
+        for g in groups {
+            match n.control(g, NodeControl::ReleaseHeldAppends) {
+                Ok(()) | Err(NodeError::Owner(EffectOwnerError::Runtime(RuntimeError::Overloaded))) => {}
+                Err(other) => panic!("hold release: {other:?}"),
+            }
+        }
     }
 }
 fn facade_proposals<F: voteboat::transport::PeerTransportFactory<Session>>(

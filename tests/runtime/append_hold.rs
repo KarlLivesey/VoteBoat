@@ -212,3 +212,62 @@ fn a_silent_quorum_follower_delays_the_commit_by_exactly_the_bound() {
     }
     assert_eq!(found, 1);
 }
+
+fn tip_of(node: &Node, g: u128) -> u64 {
+    node.runtime.core(group(g)).unwrap().state().last_index()
+}
+fn holding(node: &Node, g: u128) -> bool {
+    node.runtime.core(group(g)).unwrap().has_held_appends()
+}
+
+#[test]
+fn groups_sharing_a_shard_each_release_at_their_own_bound() {
+    // Round 3: both groups share one shard, log store and timer service, and
+    // hold one millisecond apart. Each arms its own deadline in the shared
+    // index, and polling releases each exactly at its own bound.
+    let mut nodes = cluster(2);
+    let (leader, beat) = elected(&mut nodes);
+    let deadline = |nodes: &[Node], g| nodes[leader].runtime.deadline(group(g)).unwrap().deadline;
+    assert_eq!(
+        nodes[leader].runtime.core(group(2)).unwrap().role(),
+        Role::Leader,
+        "one shard leads both groups"
+    );
+    // The fixture's fixed schedule: no heartbeat of either group can end a
+    // hold before its bound.
+    assert_eq!(deadline(&nodes, 1), MonoTime(beat + 4));
+    assert_eq!(deadline(&nodes, 2), MonoTime(beat + 1));
+    let held = |nodes: &[Node], g: u128| {
+        let tip = tip_of(&nodes[leader], g);
+        (0..nodes.len())
+            .filter(|i| tip_of(&nodes[*i], g) < tip)
+            .collect::<Vec<_>>()
+    };
+    nodes[leader].runtime.admit(group(1), proposal(9)).unwrap();
+    pump(&mut nodes, beat);
+    assert!(holding(&nodes[leader], 1));
+    assert_eq!(held(&nodes, 1).len(), 1);
+    pump(&mut nodes, beat + 1); // group 2's heartbeat
+    nodes[leader].runtime.admit(group(2), proposal(9)).unwrap();
+    pump(&mut nodes, beat + 1);
+    assert!(holding(&nodes[leader], 1) && holding(&nodes[leader], 2));
+    assert_eq!(held(&nodes, 1).len(), 1);
+    assert_eq!(held(&nodes, 2).len(), 1);
+    assert_eq!(
+        nodes[leader].runtime.next_deadline(),
+        Some(MonoTime(beat + 2))
+    );
+    pump(&mut nodes, beat + 2);
+    assert!(held(&nodes, 1).is_empty(), "group 1 released at its bound");
+    assert!(!holding(&nodes[leader], 1));
+    assert_eq!(held(&nodes, 2).len(), 1, "group 2 not a millisecond early");
+    assert_eq!(
+        nodes[leader].runtime.next_deadline(),
+        Some(MonoTime(beat + 3))
+    );
+    pump(&mut nodes, beat + 3);
+    assert!(held(&nodes, 2).is_empty(), "group 2 released at its bound");
+    assert!(!holding(&nodes[leader], 2));
+    assert_eq!(deadline(&nodes, 1), MonoTime(beat + 4));
+    assert_eq!(deadline(&nodes, 2), MonoTime(beat + 5));
+}

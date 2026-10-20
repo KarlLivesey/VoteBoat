@@ -12,7 +12,7 @@ struct History {
     root: PathBuf,
     nodes: Vec<Service>,
     start: Instant,
-    paused: Option<usize>,
+    paused: Vec<usize>,
 }
 impl History {
     fn new(protocol: NativePeerProtocol) -> Self {
@@ -65,13 +65,13 @@ impl History {
             root,
             nodes,
             start: Instant::now(),
-            paused: None,
+            paused: Vec::new(),
         }
     }
     fn poll(&mut self) {
         let now = MonoTime(self.start.elapsed().as_millis() as u64);
         for (i, node) in self.nodes.iter_mut().enumerate() {
-            if self.paused != Some(i) {
+            if !self.paused.contains(&i) {
                 node.poll(now, NodePollBudget::default()).unwrap();
             }
         }
@@ -99,6 +99,15 @@ impl History {
         application(&self.nodes[id])
             .unwrap()
             .record(OperationId::new(19701).unwrap())
+    }
+    fn last_index(&self, id: usize) -> u64 {
+        self.nodes[id]
+            .local()
+            .owner
+            .core(setup::group())
+            .unwrap()
+            .state()
+            .last_index()
     }
     fn transfer(&self, id: usize) -> Option<LeadershipTransfer> {
         self.nodes[id]
@@ -145,7 +154,7 @@ impl History {
         assert_eq!(self.transfer(id), Some(before));
     }
     fn finish(mut self) {
-        self.paused = None;
+        self.paused.clear();
         for n in &mut self.nodes {
             n.begin_shutdown();
         }
@@ -187,7 +196,14 @@ fn terminal(protocol: NativePeerProtocol) {
     h.until(|h| h.record(leader).is_some());
     let original = h.record(leader).unwrap();
     assert_eq!(original.phase, LeadershipPhase::Pending);
-    h.paused = Some(target);
+    // The transfer must start with the Cancel appended but not committed.
+    // Both followers wait until the leader has appended it, because the
+    // shard's control and data turns otherwise decide whether the transfer
+    // (control) or the Cancel (data) reaches the core first; then only the
+    // target stays paused and the other follower commits the Cancel.
+    let other = 3 - leader - target;
+    h.paused = vec![target, other];
+    let tip = h.last_index(leader);
     let cancelled = h.submit(
         leader,
         LeadershipCommand::Cancel {
@@ -196,8 +212,12 @@ fn terminal(protocol: NativePeerProtocol) {
         },
     );
     assert_eq!(h.record(leader), Some(original));
+    h.until(|h| h.last_index(leader) > tip);
     let mut driver = Driver::new(setup::group());
     driver.tick(&mut h.nodes[leader], false).unwrap();
+    h.until(|h| h.transfer(leader).is_some());
+    assert_eq!(h.record(leader), Some(original));
+    h.paused = vec![target];
     h.until(|h| {
         h.record(leader)
             .is_some_and(|r| matches!(r.phase, LeadershipPhase::Cancelled { .. }))

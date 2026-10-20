@@ -4,7 +4,9 @@
 //! durable completions and no clock: each step is one named event.
 use super::*;
 use crate::membership::ConfigurationChange;
-use crate::raft::membership_tests::{accept, committed_fixture, configuration, core, durable};
+use crate::raft::membership_tests::{
+    accept, committed_fixture, configuration, core, durable, store,
+};
 
 fn node(id: u64) -> NodeId {
     NodeId::new(id).unwrap()
@@ -440,6 +442,76 @@ fn sol_review_new_leader_unknown_prefix_is_catchup_not_holdable() {
         sent(&effects, 3).is_some(),
         "probe unconfirmed prefixes eagerly"
     );
+    assert!(!leader.has_held_appends());
+}
+
+/// A group with an empty log whose voter 1 won term 1 and has not yet
+/// appended its no-op: `batch_floor` and every follower's progress are 0.
+fn fresh_leader(hold: AppendHold) -> Raft {
+    let initial = configuration(1, &[1, 2, 3], &[]);
+    let bootstrap = Bootstrap {
+        group: GroupIdentity {
+            id: GroupId::new(1).unwrap(),
+            incarnation: GroupIncarnation::new(1).unwrap(),
+        },
+        configuration: initial.id(),
+        policy: initial.policy().clone(),
+        voter_stores: initial.voter_stores().clone(),
+    };
+    let mut states = BTreeMap::new();
+    apply_batch(
+        &mut states,
+        &[LogMutation::Create(bootstrap.clone())],
+        LogLimits::default(),
+    )
+    .unwrap();
+    let revision = states[&bootstrap.group].revision;
+    let vote = LogUpdate {
+        group: bootstrap.group,
+        expected_revision: revision,
+        hard_state: HardState {
+            term: 1,
+            voted_for: Some(node(1)),
+        },
+        commit_index: 0,
+        suffix: None,
+        snapshot: None,
+        snapshot_membership: None,
+    };
+    apply_batch(
+        &mut states,
+        &[LogMutation::Update(vote)],
+        LogLimits::default(),
+    )
+    .unwrap();
+    let binding = StoreBinding {
+        identity: store(1),
+        session: StoreSession::new(1).unwrap(),
+    };
+    let mut leader = Raft::recover(
+        node(1),
+        binding,
+        states.remove(&bootstrap.group).unwrap(),
+        LogLimits::default(),
+    )
+    .unwrap();
+    leader.set_append_hold(hold);
+    assert_eq!(leader.state().last_index(), 0);
+    leader
+}
+
+#[test]
+fn fresh_group_no_op_reaches_every_follower_at_once() {
+    // Round 3: in an empty log `batch_floor` is 0, and so is the progress of
+    // a follower that has acknowledged nothing. That 0 is no evidence: the
+    // no-op goes to both followers, as after any election, and so the first
+    // batch's pre-barrier send is not displaced by a held no-op.
+    let mut leader = fresh_leader(AppendHold::QuorumFirst);
+    let effects = leader.become_leader().unwrap();
+    let effects = run(&mut leader, effects);
+    assert_eq!(leader.state().last_index(), 1);
+    assert_eq!(range(&sent(&effects, 2).unwrap()), (0, vec![1]));
+    assert_eq!(range(&sent(&effects, 3).unwrap()), (0, vec![1]));
     assert!(!leader.has_held_appends());
 }
 

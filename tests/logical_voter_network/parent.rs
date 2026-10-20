@@ -113,6 +113,15 @@ impl Parent {
             .poll(&mut parts, MonoTime(0), ReplicaPollBudget::default())
             .unwrap();
         assert!(progress.steps.iter().all(|step| step.error.is_none()));
+        // The parent holds protocol time constant, so no `append_hold_ms`
+        // deadline expires; the host parks at least that long per round, so
+        // deliver the expiry here while the parent group holds an Append.
+        let parent = self.mapping.parent;
+        if self.owner.core(parent).is_some_and(Raft::has_held_appends) {
+            if let Err(rejected) = self.owner.admit(parent, Event::ReleaseHeldAppends) {
+                assert_eq!(rejected.reason, RuntimeError::Overloaded);
+            }
+        }
         progress
     }
     pub fn is_drained(&self) -> bool {

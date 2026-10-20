@@ -2167,11 +2167,33 @@ mod native {
                 })
                 && nodes.iter().map(|n| n.sent).sum::<usize>()
                     == nodes.iter().map(|n| n.received).sum::<usize>()
+                && !release_held(nodes)
             {
                 return;
             }
             std::thread::park_timeout(Duration::from_millis(1));
         }
+    }
+    /// These fixtures hold protocol time constant, so no `append_hold_ms`
+    /// deadline expires. Once the cluster is otherwise idle the fixture
+    /// delivers that expiry itself, as `TimedShard` would: true while any
+    /// group still holds a follower Append.
+    fn release_held(nodes: &mut [Node]) -> bool {
+        let mut held = false;
+        for n in nodes.iter_mut() {
+            let groups = n
+                .owner
+                .groups()
+                .filter(|g| n.owner.core(*g).is_some_and(Raft::has_held_appends))
+                .collect::<Vec<_>>();
+            for g in groups {
+                held = true;
+                if let Err(rejected) = n.owner.admit(g, Event::ReleaseHeldAppends) {
+                    assert_eq!(rejected.reason, RuntimeError::Overloaded);
+                }
+            }
+        }
+        held
     }
     #[cfg(feature = "tls")]
     fn reconnect(nodes: &mut [Node], a: usize, b: usize, disconnected: MonoTime, ready: MonoTime) {

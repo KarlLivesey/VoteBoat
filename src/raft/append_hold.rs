@@ -95,8 +95,13 @@ impl Raft {
         };
         // Only acknowledged progress proves what the peer holds: a new
         // leader's optimistic `next_index` does not, so its first probe is
-        // never held.
+        // never held. Every leader starts each peer at progress 0, so 0 is no
+        // evidence even when the log before the batch is empty (a fresh
+        // cluster's no-op, where `batch_floor` is 0 too).
         let acked = self.progress.get(&peer).copied().unwrap_or(0);
+        if acked == 0 {
+            return false;
+        }
         if next > last {
             // Only a newer commit to report, to a peer that acknowledged every
             // entry: the next data Append or the heartbeat carries it, unless
