@@ -12,12 +12,12 @@ use volatile_tests::volatile_cluster;
 /// What one core call may change.
 struct Before {
     state: GroupLog,
-    version: u32,
+    stamp: Option<LogStamp>,
 }
 fn before(core: &Raft) -> Before {
     Before {
         state: core.state().clone(),
-        version: core.durable.version(),
+        stamp: core.durable.stamp(),
     }
 }
 /// After one core call: the cached summary is exactly a fresh summary of the
@@ -32,7 +32,7 @@ fn after(core: &Raft, before: &Before) -> bool {
     );
     let changed = core.state() != &before.state;
     assert_eq!(
-        core.durable.version() != before.version,
+        core.durable.stamp() != before.stamp,
         changed,
         "version moves exactly when the log changes"
     );
@@ -367,9 +367,9 @@ fn a_plan_whose_log_version_moved_takes_the_checked_install_and_installs() {
     let persist = stage_append(&mut replica, 2, 3);
     // Moves the version without changing the log: the plan still fits, but
     // the install can no longer know that without comparing.
-    let version = replica.durable.version();
+    let stamp = replica.durable.stamp();
     replica.durable.edit(|_| ());
-    assert_ne!(replica.durable.version(), version);
+    assert_ne!(replica.durable.stamp(), stamp);
     let start = count();
     persist_volatile(&mut replica, &log, persist).unwrap();
     assert_eq!(count(), start + 1);
@@ -396,7 +396,8 @@ fn a_plan_moved_to_another_core_at_the_same_version_is_refused() {
     let persist = stage_append(&mut grown, 2, 4);
     persist_volatile(&mut grown, &grown_log, persist).unwrap();
     let mut other = Raft::recover_volatile(grown.node, &grown_log, grown.state().clone()).unwrap();
-    assert_eq!((short.durable.version(), other.durable.version()), (0, 0));
+    let version = |core: &Raft| core.durable.stamp().map(LogStamp::version);
+    assert_eq!((version(&short), version(&other)), (Some(0), Some(0)));
     let before = other.state().clone();
     other.pending = short.pending.take();
     let start = count();
@@ -414,5 +415,146 @@ fn a_plan_moved_to_another_core_at_the_same_version_is_refused() {
     assert_eq!(
         *other.durable.summary(),
         LogSummary::from_validated(other.state())
+    );
+}
+
+/// Commit `commit` (a commit-only round) and install it.
+fn commit_round(core: &mut Raft, log: &VolatileLog, commit: u64) {
+    let effects = core
+        .persist(core.state().hard_state, commit, None, After::Commit, None)
+        .unwrap();
+    assert!(core.pending.as_ref().unwrap().next.is_commit());
+    persist_volatile(core, log, token(&effects)).unwrap();
+    assert_eq!(core.state().commit_index, commit);
+}
+/// Stage and install `from..=to`.
+fn append(core: &mut Raft, log: &VolatileLog, from: u64, to: u64) {
+    let persist = stage_append(core, from, to);
+    persist_volatile(core, log, persist).unwrap();
+    assert_eq!(core.state().last_index(), to);
+}
+/// Move `from`'s staged plan into `into`, whose log it does not fit: the
+/// install compares it, refuses it and fences `into`, changing nothing.
+fn refuse_moved_plan(from: &mut Raft, into: &mut Raft) {
+    use crate::log::transition::checked_installs::count;
+    let before = into.state().clone();
+    into.pending = from.pending.take();
+    let start = count();
+    let mut out = VecDeque::new();
+    assert!(matches!(
+        into.install_pending_into(&mut out),
+        Err(RaftError::Storage(StorageError::Rejected(
+            "transition plan predecessor or update mismatch"
+        )))
+    ));
+    assert_eq!(count(), start + 1);
+    assert!(into.is_fenced());
+    assert!(!into.has_pending_dependency());
+    assert_eq!(into.state(), &before);
+    assert_eq!(
+        *into.durable.summary(),
+        LogSummary::from_validated(into.state())
+    );
+}
+
+/// Round 2's identities wrapped, so two consecutively constructed cores could
+/// share a stamp. At the identity bound the last identities are still
+/// distinct, later cores get none, and a moved plan is refused whether it
+/// comes from the last identified core or from another unidentified one; an
+/// unidentified core installs its own plans through the checked path.
+#[test]
+fn a_plan_moved_at_the_identity_bound_is_refused() {
+    use crate::log::transition::{checked_installs::count, test_identities::with_log_identities};
+    let ((), refused) = with_log_identities(u64::MAX - 2, || {
+        let (mut short, short_log) = volatile_follower();
+        let (mut grown, grown_log) = volatile_follower();
+        let (first, last) = (short.durable.stamp(), grown.durable.stamp());
+        assert_eq!(first.map(LogStamp::log), Some(u64::MAX - 2));
+        assert_eq!(last.map(LogStamp::log), Some(u64::MAX - 1));
+        let start = count();
+        append(&mut grown, &grown_log, 2, 4);
+        assert_eq!(count(), start, "an identified core keeps the fast path");
+        // Every identity is issued: these cores have no stamp.
+        let mut beyond =
+            Raft::recover_volatile(grown.node, &grown_log, grown.state().clone()).unwrap();
+        let mut unidentified_short =
+            Raft::recover_volatile(short.node, &short_log, short.state().clone()).unwrap();
+        let mut unidentified_grown =
+            Raft::recover_volatile(grown.node, &grown_log, grown.state().clone()).unwrap();
+        for core in [&beyond, &unidentified_short, &unidentified_grown] {
+            assert_eq!(core.durable.stamp(), None);
+        }
+        // The last identified core's plan, moved past the bound.
+        stage_append(&mut short, 2, 3);
+        refuse_moved_plan(&mut short, &mut beyond);
+        // Between two unidentified cores (both stamps `None`).
+        stage_append(&mut unidentified_grown, 5, 6);
+        refuse_moved_plan(&mut unidentified_grown, &mut unidentified_short);
+        // An unidentified core's own appends and commit round: checked, and
+        // they install.
+        let (mut own, own_log) = volatile_follower();
+        assert_eq!(own.durable.stamp(), None);
+        let start = count();
+        append(&mut own, &own_log, 2, 3);
+        commit_round(&mut own, &own_log, 3);
+        assert_eq!(count(), start + 2);
+        assert!(!own.is_fenced());
+        assert_eq!(
+            *own.durable.summary(),
+            LogSummary::from_validated(own.state())
+        );
+    });
+    assert_eq!(refused, 4);
+}
+
+/// The version never wraps: at its bound the log takes a never-issued
+/// identity and keeps the fast path, a plan staged before the bound was
+/// crossed takes the checked install, and with no identity left the log
+/// installs everything through the checked path.
+#[test]
+fn the_version_bound_keeps_the_fast_path_or_fails_closed() {
+    use crate::log::transition::{checked_installs::count, test_identities::with_log_identities};
+    let version = |core: &Raft| core.durable.stamp().map(LogStamp::version);
+    let (mut replica, log) = volatile_follower();
+    let identity = replica.durable.stamp().unwrap().log();
+    replica.durable.set_version(u64::MAX - 1);
+    let start = count();
+    append(&mut replica, &log, 2, 3);
+    assert_eq!(version(&replica), Some(u64::MAX));
+    commit_round(&mut replica, &log, 3);
+    let renewed = replica.durable.stamp().unwrap();
+    assert_eq!(renewed.version(), 0);
+    assert_ne!(renewed.log(), identity, "a fresh identity past the bound");
+    append(&mut replica, &log, 4, 4);
+    assert_eq!(
+        count(),
+        start,
+        "both installs at the bound and the next were fast"
+    );
+    // A plan staged at `u64::MAX`, then the log moves across the bound.
+    replica.durable.set_version(u64::MAX);
+    let persist = stage_append(&mut replica, 5, 5);
+    replica.durable.edit(|_| ());
+    assert_eq!(version(&replica), Some(0));
+    persist_volatile(&mut replica, &log, persist).unwrap();
+    assert_eq!(count(), start + 1);
+    assert_eq!(replica.state().last_index(), 5);
+    // No identity left when the version reaches its bound: fail closed.
+    let ((), refused) = with_log_identities(u64::MAX, || {
+        replica.durable.set_version(u64::MAX);
+        let start = count();
+        append(&mut replica, &log, 6, 6);
+        assert_eq!(count(), start, "the install at the bound was fast");
+        assert_eq!(replica.durable.stamp(), None);
+        append(&mut replica, &log, 7, 7);
+        commit_round(&mut replica, &log, 7);
+        assert_eq!(count(), start + 2);
+    });
+    assert_eq!(refused, 1);
+    assert!(!replica.is_fenced());
+    assert_eq!(replica.state().last_index(), 7);
+    assert_eq!(
+        *replica.durable.summary(),
+        LogSummary::from_validated(replica.state())
     );
 }

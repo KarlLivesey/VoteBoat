@@ -2979,6 +2979,110 @@ same), one configuration at a time; `--release --lib summarized_log_tests`
 features.
 
 
+#### V3d review round 3: stamps that never repeat (20 October 2026)
+
+Round 2 was approved by Claude Opus 5.5 and returned CHANGES REQUIRED by
+GPT-6.1-Sol (review 5580603002). The orchestrator applies the project's
+lifetime rule: a guard meant to be unconditional must not rest on a wrapping
+counter, and every bound must either last at least 100 years at the highest
+sustainable rate (arithmetic recorded) or fail closed without losing the fast
+path for ordinary operation.
+
+Schema plan (sketched before editing).
+
+- **Finding.** `LogStamp { log: NonZeroU32, version: u32 }`. The relaxed
+  `NEXT_LOG.fetch_add(1)` wraps and `unwrap_or(NonZeroU32::MIN)` maps 0 to 1,
+  so constructions 2^32 and 2^32 + 1 both get identity 1 at version 0: two
+  consecutively rebuilt cores can carry equal stamps, and a foreign plan
+  between them would skip its predecessor check in release. The `u32`
+  version wraps after 2^32 installs (about 1.2 h at 10^6 installs/s). Today
+  that is safe only because the core's plan is private and consumed by its
+  own install, which is the restriction the stamp was added to back up.
+- **Choice: option (a), a 16-byte stamp.** `LogStamp { log: NonZeroU64,
+  version: u64 }`. (b) was rejected: a version half that lasts 100 years at
+  10^7 installs/s needs 55 bits (10^7 × 3.156 × 10^9 s ≈ 3.2 × 10^16 >
+  2^54), leaving at most 9 identity bits (512 constructions), which a
+  logical-voter parent activating children would exhaust at once, losing
+  the fast path. (c) was rejected: the log lives inline in `Raft`, which
+  moves, so its address is not an identity.
+- **Identity allocator.** A process-wide `LogIdentities { next: AtomicU64,
+  refused: AtomicU64 }`, starting at 1. `issue()` is
+  `next.fetch_update(Relaxed, Relaxed, |n| n.checked_add(1))`: it returns the
+  old value, so identities 1 ..= 2^64 − 2 are each issued exactly once, and
+  once `next` reaches `u64::MAX` every later call is refused, permanently;
+  the counter never wraps. A refused construction gets no stamp
+  (`SummarizedLog.stamp: Option<LogStamp>` is `None`) and adds one to
+  `refused` (saturating; only on the refused path).
+  Bound: 2^64 − 2 ≈ 1.8 × 10^19 identities; at 10^9 constructions/s (each
+  construction builds a `GroupLog` and a `Raft`, microseconds, so the real
+  rate is orders of magnitude lower) that is 1.8 × 10^10 s ≈ 584 years. One
+  relaxed CAS per constructed log, never per write.
+- **Version.** `u64`, `checked_add(1)` per install and per test `edit`. At
+  10^9 installs/s on one log, 2^64 − 1 installs take ≈ 584 years. If it ever
+  overflowed, the log draws a fresh identity at version 0 (cold path): a
+  plan stamped with the old identity cannot match a never-reissued
+  identity, so the fast path continues. If no identity is left the log has
+  no stamp. The version never wraps and never saturates.
+- **Fail closed.** A log without a stamp gives views without a stamp, so its
+  plans carry `None`, and `SummarizedLog::install` skips only when
+  `planned` is `Some` and equal to the log's own `Some` stamp
+  (`planned.is_some_and(|p| self.stamp == Some(p))`, so two unstamped logs
+  never match). An unstamped log installs every plan through the full
+  checked path forever, with unchanged results. Neither limit is reachable
+  in 100 years at the rates above.
+- **Observation.** `voteboat::observability::unidentified_logs() -> u64`:
+  the process-wide count of logs that got no identity (zero in any real
+  process). A typed counter, not a log line; read it to see that a process
+  has fallen back to checked installs.
+- **Sizes.** `Pending` is 16-byte aligned and has no padding (measured
+  layout: `next` 672 @0, `after` 16 @672, `reply` 256 @688, `ticket` 128
+  @944, `membership` 8 @1072, `planned` 8 @1080; sum 1,088). An
+  `Option<LogStamp>` of 16 B therefore takes `Pending` and `Option<Pending>`
+  to 1,104 B; `OwnedNextLog` stays 672 B. `PENDING_BYTES` goes 1,088 →
+  1,104. Why the budgets tolerate it: the raft `Pending` lives inline once
+  per core (`Raft.pending: Option<Pending>`); no runtime reservation charges
+  `size_of` of it (the runtime's `size_of::<Pending>()` terms in
+  `administration.rs`, `ingress.rs`, `clients.rs` and `read_requests.rs` are
+  their own request types), and the effect owner charges effect queues and
+  payloads, not core size. The 16 B is one more 16-byte copy when a plan is
+  staged and installed. `LogView` grows by 8 B (its stamp slot becomes
+  `Option<LogStamp>`).
+- **Per-write path.** The stamp store and the install compare widen from 8 B
+  to 16 B, plus an `Option` test on the stamp at install. No atomic,
+  allocation or metadata comparison per write.
+- **Restart and partial progress.** Unchanged: stamps and plans are not
+  persisted; a recovered core draws a new identity at version 0 and has no
+  pending plan. A refused install changes nothing and the core fences as
+  before.
+- **Test hooks (`cfg(test)` only).** A thread-local allocator override,
+  `with_log_identities(next, f)`, runs `f` with this thread's constructions
+  drawn from a private `LogIdentities` starting at `next` (the same `issue`
+  code), and returns its refused count, so a test reaches the boundary
+  without constructing 2^64 logs and without touching other tests' threads.
+  `SummarizedLog::set_version` places a log's version (for the overflow
+  test); `stamp()` replaces the test accessor `version()`.
+- **Acceptance.**
+  - Allocator boundary, debug and `--release`: with the allocator at
+    2^64 − 2, the next construction gets the last identity, the following
+    ones get none (refused count 2), and a plan moved from the last
+    identified core to an unidentified one, and between two unidentified
+    cores, is refused with `Rejected`, the target fenced and unchanged; an
+    unidentified core's own ordinary appends install through the checked
+    path and succeed.
+  - Version overflow, debug and `--release`: at `u64::MAX − 1`, two
+    installs take the fast path; the second draws a fresh identity at
+    version 0 and the next append is fast again; a plan staged at
+    `u64::MAX` whose log then moved takes the checked path; with the
+    allocator exhausted, the overflowing log becomes unstamped and every
+    later install is checked and succeeds.
+  - Kept: ordinary-skip, moved-version and moved-plan tests, the two
+    tracking tests, `composed_type_sizes`; `pending_and_plan_sizes` with
+    the 1,104 B bound.
+  - Mutations re-run with named edits: wrapping allocator, version-only
+    compare, `None == None` match, never skip, summary writes, version bump.
+  - Width-1 driver vs `0ea00498` (3 pairs) and, since `Pending` grows, the
+    single-1 cell 5 pairs vs `bc8fafb6`.
+
 #### H2 round 2: review fixes (19 October 2026)
 
 Schema plan. No data/API shape or scheduling change. One test-only seam:

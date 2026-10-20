@@ -324,7 +324,9 @@ fn pending_and_plan_sizes() {
     assert!(size_of::<After>() <= 16);
     assert!(size_of::<Option<Box<Membership>>>() <= 8);
 }
-const PENDING_BYTES: usize = 1_088;
+// V3d round 3: 1,088 → 1,104 B for the 16-byte install stamp (`Pending` is
+// 16-byte aligned and had no padding left).
+const PENDING_BYTES: usize = 1_104;
 const PLAN_BYTES: usize = 672;
 
 /// Bounds the plan and log types on the composed V2 + V3 tree at their

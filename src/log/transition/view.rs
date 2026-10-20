@@ -66,8 +66,8 @@ pub(crate) struct LogView<'a> {
     metadata: LogMetadata,
     removed: usize,
     // The summary this view's metadata was copied from, and the stamp of
-    // the summarized log it describes, if any.
-    summary: Option<(&'a LogSummary, LogStamp)>,
+    // the summarized log it describes (`None` if that log has none).
+    summary: Option<(&'a LogSummary, Option<LogStamp>)>,
 }
 impl<'a> LogView<'a> {
     pub(crate) fn new(base: &'a GroupLog) -> Self {
@@ -81,7 +81,11 @@ impl<'a> LogView<'a> {
     }
     /// `summary` describes `base` exactly and `stamp` is `base`'s current
     /// stamp ([`SummarizedLog`] keeps both so).
-    pub(super) fn summarized(base: &'a GroupLog, summary: &'a LogSummary, stamp: LogStamp) -> Self {
+    pub(super) fn summarized(
+        base: &'a GroupLog,
+        summary: &'a LogSummary,
+        stamp: Option<LogStamp>,
+    ) -> Self {
         Self {
             base,
             tail: None,
@@ -94,7 +98,7 @@ impl<'a> LogView<'a> {
     /// stage a plan made from this view with it.
     #[inline]
     pub(crate) fn stamp(&self) -> Option<LogStamp> {
-        self.summary.map(|(_, stamp)| stamp)
+        self.summary.and_then(|(_, stamp)| stamp)
     }
     /// Whether `summary` describes this view's metadata. A view copied from
     /// that same summary needs no comparison: it borrows the summary, which
