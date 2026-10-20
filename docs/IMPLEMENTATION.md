@@ -21,7 +21,7 @@ design pack is unchanged; its amendments are recorded below.
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Current DR1: `SessionLedger`, Counter and the steady-state application contract (`lb/dr1-session-ledger`, in review; see DR1 implemented) | Audit S1 and RT2, and the U2 probe: the shipped counter service stops refusing every write after 10,000 lifetime operations; one shared session mechanism lands in the core; `deployment_requirements` means a steady-state bound under a declared retention rule, readiness refuses an application that declares none, and the Counter's apply never returns `Err` for a capacity reason | — (ST2 and NT1 run in parallel; only this document conflicts textually) | 1,000,000-write soak from 1,000 rotating clients fails on the base at write 10,001 with `DedupCapacity` and passes with retention ≤ S·K at every checkpoint; exactly-once across eviction, restart and a checkpoint between every apply; consumed retry → `Expired`; evicted-session retry → `Expired` (never a second execution); boundary at exactly S·K; U2 probe (1,000 seeded three-node schedules) shows apply never errors; readiness refuses an undeclared application; native durable CPU per write before/after; fmt, four strict Clippy configurations and matched fmt/Clippy; application, counter_service, runtime, snapshot, checkpoint, log_store and native startup suites in default and all-features | LB |
-| Next DR2: Maintenance, BucketCounter/Routed and outbox acknowledgement | Audit S2, S3: transfer_service stops refusing after 32 writes; leadership maintenance survives more than 64 transfers. Reuses `SessionLedger` and the U2 probe. Also owns application deployment-recovery admission (recorded in DR1 round 5): static bootstrap exchanges no application requirements, and a voter reopening a WAL with no checkpoint replays under its current configuration. AI3 owns activation's counterpart. (The leaf configurations deferred in round 5, including activation mappings, the logical voter's limits and the transaction applications', are compared since DR1 round 6; readiness before a bootstrap entry commits, recorded here in round 6, moved into DR1 round 7, which also carries participant opening images. Open from round 7, owner to be decided: a logical voter's parent bootstrap is outside the identity; see APPLICATION_ENVELOPES.md.) | DR1 (ledger, `Retention`, probe harness, readiness identity) | Fail@main tests (65 `Begin`/`Complete` pairs; 33 transfer writes); soaks with splits/merges and leader changes; U2 probe run for Maintenance; transfer suites; a static bootstrap with two voters of different application configuration, and a checkpoint-less restart under changed limits (Sol's 7-vs-10 probe), each refused with a typed error before any entry applies | LB |
+| Next DR2: Maintenance, BucketCounter/Routed and outbox acknowledgement | Audit S2, S3: transfer_service stops refusing after 32 writes; leadership maintenance survives more than 64 transfers. Reuses `SessionLedger` and the U2 probe. Also owns application deployment-recovery admission (recorded in DR1 round 5): static bootstrap exchanges no application requirements, and a voter reopening a WAL with no checkpoint replays under its current configuration. AI3 owns activation's counterpart. (The leaf configurations deferred in round 5, including activation mappings, the logical voter's limits and the transaction applications', are compared since DR1 round 6; readiness before a bootstrap entry commits, recorded here in round 6, moved into DR1 round 7, which also carries participant opening images. The logical voter's parent bootstrap, open after round 7, is bound since round 8 by the first claim or the enrollment.) | DR1 (ledger, `Retention`, probe harness, readiness identity) | Fail@main tests (65 `Begin`/`Complete` pairs; 33 transfer writes); soaks with splits/merges and leader changes; U2 probe run for Maintenance; transfer suites; a static bootstrap with two voters of different application configuration, and a checkpoint-less restart under changed limits (Sol's 7-vs-10 probe), each refused with a typed error before any entry applies | LB |
 | Then TX1: transaction participants and coordinators | Audit S5, S6: transaction services run indefinitely; a coordinator incarnation is a session at each participant | DR1 (ledger, `Expired` vocabulary) | Fail@main at 4,097 transactions (program: 257); 200,000-transaction soak with coordinator restarts and lost decision receipts | LB |
 
 ### DR1 schema plan (19 October 2026, before editing)
@@ -1838,6 +1838,120 @@ path.
    probes with 7045de08's and this branch's `src/` swapped in this worktree.
    Counter admission/apply, the ledger and per-write frames are untouched;
    the logical voter's claim path is not a per-write path.
+
+#### DR1 round 8 implemented (20 October 2026, PR 15)
+
+Implemented as planned above (schema plan 345abd0b); deviations inline.
+
+- **Parent bootstrap bound by the first claim or the enrollment (Opus P2-1).**
+  `Claim` with no expected epoch encodes, after the epoch, a blob of the exact
+  parent-bootstrap bytes: the parent log codec's `Create(bootstrap)` batch
+  under the parent log limits, the same bytes the configuration embeds.
+  `LogicalApplication` keeps their range inside `configuration`
+  (`parent_binding`, set with the configuration; no second copy). Decode
+  compares the blob with the replica's own bytes (longer, shorter or
+  different: `InvalidCommand`); a candidate's decode compares the
+  `EnrollmentClaim` snapshot's bootstrap with its own. Admission, apply and
+  restore all decode, so a mismatch is refused at admission and is
+  `Err(InvalidCommand)` at apply; `valid_import`'s typed `SnapshotConflict`
+  stays for the bridge's pre-proposal check. `deployment_bound`: bootstrap
+  voter `state.parent.is_some()`, candidate `state.enrollment.is_some()`.
+  `validate_claim_limits` refuses at construction a bootstrap voter whose
+  first claim cannot fit `max_command_bytes`. Restore was already exact (the
+  checkpoint's configuration blob, which embeds the parent bootstrap, must
+  equal the replica's own); a test now pins it. No state field, schema or
+  magic change; no golden changed (no retained record in a golden is a first
+  claim).
+- **Lifetime bound.** One binding entry per voter or candidate. The first
+  claim's record is retained and pruned like any claim (an older epoch, once
+  the next session command moves the watermark); the gate reads existing
+  state. Nothing grows.
+- **P3s.** APPLICATION_ENVELOPES.md: the `RoutedControlReads` row (no
+  bootstrap of its own; forwards the raw Routed bootstrap, which Routed
+  compares); "No hashing is added", with the pre-existing SHA-256 anchors
+  named (metadata source, target, serving, publishing, `RetirementGuard`);
+  the per-stack plan budget (activation 4 + 7m words, the largest logical
+  voter 174, so 290 for that stack, refused for every replica) with the host
+  rule; `LifecycleDirectory` declares no requirements or retention, so
+  readiness refuses it (`Capability`) before reading the flag; the logical
+  voter moves to the gated table (both kinds), its parent bootstrap from
+  "outside" to bootstrap-bound. Relay capture now counts each
+  `LearnerReadinessRequest`'s owned request in the pre-allocation check, so a
+  caller-supplied `metadata_bytes` is never exceeded, even briefly (the
+  pre-check equals the exact check when every message is a request window;
+  the relay budget tests keep their least accepted limits).
+- **Tests (permanent).** `src/logical_voter/application/tests/bootstrap_binding.rs`
+  builds a real leader (voter 2) and learner (node 4) of the voters' child
+  group from raw `Raft` cores over memory logs, replicates for real, and runs
+  the real `verify_learner_readiness`, `accept_learner_readiness` and
+  `check_learner_readiness`:
+  `rr7_bootstrap_voter_parent_bootstrap_receipt_gap` (parent configuration 1
+  vs 7, both directions) and `rr7_candidate_parent_bootstrap_receipt_gap`
+  (parent voter 1's store 1 vs 5). Each asserts: equal requirements; both
+  `BootstrapPending` at index 2; admission refuses the binding entry on the
+  mismatching replica; it commits at index 3; the matching replica's
+  receipt is accepted and checked; the other gets `Err(InvalidCommand)` with
+  its checkpoint unchanged and is `NotCaughtUp`; restoring the bound
+  replica's checkpoint into it is `InvalidCheckpoint`.
+  `only_a_first_claim_carries_the_binding_and_it_must_fit_the_command_bound`
+  (exact layout; truncated, extended and misplaced bindings refused; a
+  48-voter parent bootstrap constructs at exactly the needed command bound
+  and is refused one byte below). `the_largest_logical_voter_plan_fits_the_deployment_plan_bound`
+  also asserts the 290-word activation stack overflows and is
+  `UnsupportedSchema`.
+
+**Before/after.** The same temporary probe (appended to the new test module,
+not committed; only APIs present at both revisions), run with 7045de08's and
+this branch's `src/` in this worktree (the new tests and fixture helpers
+applied to both; the constructor-bound test, which uses a new helper, left
+out of the before run). `git diff 7045de08 -- src` was identical to the saved
+patch after restoring.
+
+| Probe (real leader, learner and verifier) | 7045de08 | Branch |
+| --- | --- | --- |
+| Bootstrap voters, parent configuration 1 / 7: requirements equal | yes | yes |
+| Both at index 2 (before the first claim) | receipts, accepted by the leader | `BootstrapPending` (both) |
+| Admission of 1's first claim on 1 / on 7 | `Ok` / `Ok` | `Ok` / `Err(InvalidCommand)` |
+| The committed claim (index 3) on 1 / on 7 | `Claimed` / `Claimed` (different parent images) | `Claimed` / `Err(InvalidCommand)` |
+| Readiness at index 3, 1 / 7 | receipts, accepted (both) | receipt, accepted / `NotCaughtUp` |
+| Candidates, parent voter 1's store 1 / 5: requirements equal | yes | yes |
+| Both at index 2 (before enrollment) | receipts, accepted | `BootstrapPending` (both) |
+| Admission of the enrollment on store-1 / store-5 | `Ok` / `Ok` | `Ok` / `Err(InvalidCommand)` |
+| The committed enrollment (index 3) | `Claimed` / `Refused(SnapshotConflict)` | `Claimed` / `Err(InvalidCommand)` |
+| Readiness at index 3 | receipts, accepted (both) | receipt, accepted / `NotCaughtUp` |
+
+The two permanent `rr7_*` tests fail on 7045de08 (at the first
+`!deployment_bound()` assertion) and pass on the branch.
+
+**CPU.** Not re-measured; no Mac. The per-write path is untouched: Counter
+admission and apply, the ledger, per-write frames and `Raft` are unchanged.
+The logical voter's decode compares the binding only for an epoch-0 claim (a
+claim, not a write), and the relay pre-check adds one pass over the batch's
+messages, matching an enum tag, on relay capture only. No size changed.
+
+**Checks (Linux, cores 0–3, nice 19, `-j 2`, one configuration at a time).**
+fmt; strict Clippy default, all-features, no-default-features, native-only:
+zero diagnostics; matched fmt/Clippy by the pre-push hook. All-features: lib
+513 (+1 ignored), learners 42, routed 194, counter_service 205, directory 31,
+logical_voter_application 10, logical_activation_application 7,
+logical_voter_native 42, logical_nested_native 15, logical_activation_nested
+17, logical_relay_native 2, logical_activation_driver 35,
+logical_voter_activation 6, logical_voter_network 4, logical_voter_payload 5,
+logical_voter_promises 6, logical_network 4, logical_formats 9,
+logical_configuration_history 7, transaction_application 6,
+program_transaction_application 3, metadata_transfer 43, wire 18,
+native_relay 22, effect_owner 210, provider_conformance 42,
+lifetime_apply_never_errs (U2) 4, raft 79, runtime 58, application 33.
+Default: lib 511 (+1 ignored), learners 41, routed 112 and counter_service 146
+(exact-name chunks), directory 31, logical_voter_application 10,
+logical_activation_application 7, logical_voter_native 25,
+logical_nested_native 13, logical_activation_nested 11, logical_relay_native
+1, logical_activation_driver 23, logical_voter_activation 6, logical_formats
+9, logical_configuration_history 7, transaction_application 6,
+program_transaction_application 3, metadata_transfer 43, wire 18,
+native_relay 13, effect_owner 210, provider_conformance 42,
+lifetime_apply_never_errs 4, raft 79, runtime 58, application 33. Not run:
+the other unchanged targets and `representative_relay_model`.
 
 ## Logical-voter reliability track (opened 18 October 2026)
 
