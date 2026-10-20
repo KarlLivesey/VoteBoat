@@ -1199,6 +1199,133 @@ configuration_capacity 5, logical_activation_driver 23,
 logical_activation_nested 11, logical_voter_application 8, scoped_source 6,
 transfer_target 10.
 
+#### DR1 round 6 schema plan (20 October 2026, before editing; PR 15)
+
+GPT-6.1-Sol's round-5 review (5581714930) requested changes: no P1, the named
+round-4 cases resolved, three new P2s. Two are inputs still missing from the
+readiness compare (activation mappings; transaction limits); one is a byte
+budget that stopped counting what boxing moved to the heap. Why these pieces
+and no others: readiness is the admission point this PR owns, and the rule is
+that a learner gets no receipt if it would then fail to apply an entry the
+leader admits. Reclaiming lifetime tables stays TX1/LV/DR2/AI3.
+
+1. **Bounded deployment plans are compared exactly (Sol P2-1).**
+   - *Cause.* `LogicalActivationApplication::check_intent` refuses a `Begin`
+     whose mapping is not in the local `mappings`, at admission and at apply,
+     but the mappings are local construction inputs: no committed entry binds
+     them, and readiness carried only the three limits. Two parents with
+     mappings `(g1, n1, s1, g2)` / `(g1, n1, s1, g3)` presented equal
+     requirements; the learner got a receipt, then `Err(InvalidCommand)` on
+     the leader's `Begin`.
+   - *Data shape.* `raft::DeploymentPlan`: at most
+     `MAX_DEPLOYMENT_PLAN_WORDS` = 128 u64 words, private, unused words zero,
+     `Copy`. Content: segments, each a header word `depth << 32 | count`
+     (count ≥ 1) and `count` words of the layer's own layout; depth 0 is the
+     application that owns the profile, depth d the d-th layer below it.
+     Canonical: depths strictly increasing, depth ≤ the profile's layer
+     count. Exact equality of the whole value; no hashing, no digest.
+   - *Where it lives.* Inside `InnerProfile`, as `InnerProfile::plan()`.
+     `InnerProfile::wrapping(inner)` copies the inner profile's segments with
+     depth + 1, so every wrapper that already uses `wrapping`/`of` (all eight
+     in-tree wrappers) propagates a planned inner application with no edit,
+     and no new `ReadinessRequirements` field is needed (no struct-literal
+     churn). An application adds its own segment with
+     `InnerProfile::planned(&words)` (`LEAF.planned(..)` for a leaf). A plan
+     that does not fit, or a depth beyond the layer count, makes the profile
+     overflowed, which readiness already refuses (`UnsupportedSchema`):
+     fail closed, never truncated.
+   - *Activation layout.* Parent group (id high, id low, incarnation), then
+     per mapping in the constructor's canonical voter order: voter, store (id
+     high, id low, incarnation), child (id high, id low, incarnation). Every
+     mapping's parent equals the parent (constructor check), so it is not
+     repeated. At the 16-mapping limit: 1 + 3 + 16 × 7 = 116 words ≤ 128.
+     Exact: `LogicalStoreMapping` is four identities, each a fixed-width
+     integer tuple, so the words are injective for a fixed count, and the
+     count is the header's.
+   - *Why not a committed binding.* It would add an activation protocol
+     command, a checkpoint field (golden change) and a driver step before any
+     readiness, and still leaves the window before it commits. The plan
+     fits a bounded frame, so carrying it is the smaller complete fix.
+   - *Compare and wire.* No compare change: `inner_profile` is already
+     compared exactly by the default `validate_deployment_requirements` and
+     the Counter's override. Readiness tags 12/13 append, after the profile
+     layers, a u8 word count and the plan words; the decoder refuses a
+     non-canonical plan (`InvalidMessage("readiness deployment plan")`). Same
+     unpublished-format break as rounds 4 and 5.
+   - *Sizes.* `ReadinessRequirements` 408 → about 1,450 bytes, the
+     request about 1,650. Both are already boxed wherever they sit in a
+     per-write type (`Event`, `Message`, request window, `Raft` slots), so
+     those sizes do not change; checked before and after. The one
+     application that stores a whole `ReadinessRequirements` as state
+     (`MetadataServingTarget::directory_bound`, cloned with the application)
+     keeps only the two byte bounds it reads.
+2. **Leaf limits and bounded leaf plans (Sol P2-2, with the audit).**
+   - *Cause.* `TransferApplication` and `ProgramApplication` declared family
+     only; `TransferLimits.transactions` 1 vs 2 gave equal requirements and a
+     receipt, then `Err(DedupCapacity)` at the second `Start`.
+   - *Change.* Transfer: words `[transactions, accounts, 0, 0]`; plan: own
+     group and the profile (coordinator, two participants), 9 words. Program:
+     words `[coordinator_transactions, keys, 0, 0]`; plan: own group, profile
+     version, coordinator and participant counts and groups (at most 3 + 2 +
+     16 × 3 = 53 words). The group decides the role (coordinator or
+     participant slot). `Routed<TransferApplication>` carries them through
+     the profile with no Routed edit.
+   - *Audit.* Every other leaf whose limits were deferred (metadata transfer
+     source/serving/target/publishing, Directory, BucketCounter, logical
+     voter, Counter) is classified field by field: what decides a committed
+     entry or the checkpoint, and whether it is now carried (words or plan).
+     Bounded inputs that decide outcomes are carried. Unbounded inputs
+     (initial images such as participant accounts and initial inner
+     checkpoints, grant manifests, directory and namespace plans, anchors)
+     are outside what readiness attests; the table says so, and where a
+     committed bootstrap entry compares them it is named, with the window
+     before that entry commits recorded as a limitation (owner DR2).
+3. **Readiness storage is charged where it is retained (Sol P2-3).**
+   - *Cause.* Round 5 boxed `ReadinessRequirements` in
+     `Event::CheckLearnerReadiness` and the request in `Boundary::Readiness`,
+     but `event_cost` kept `(Control, 0)` and relay capture/retained-scope
+     accounting charged only the inline window.
+   - *Change.* `event_cost` charges `size_of::<ReadinessRequirements>()` for
+     that event (same checked sum, refused above `max_event_bytes`); the
+     queue, group and visit quotas all take that cost. `RequestWindow` reports
+     its owned heap (`size_of::<LearnerReadinessRequest>()` for a readiness
+     boundary, else 0). Capture refuses a batch whose exact metadata (the
+     existing bound plus every window's heap) exceeds `metadata_bytes`;
+     `RelayRequestScopes::retained_bytes` adds the same heap;
+     `NativeRelayBatch::metadata_bound`, used to size the relay's own output
+     limits and reserve, charges the worst case (a request per message), so
+     a valid readiness batch is never refused by the relay's own limits.
+   - *Audit.* Every `Box` added since e32d0511: the event and boundary (fixed
+     here), `Raft`'s pending and ready learner slots and the logical bridge's
+     waiting attempt (one slot each, fixed count, readiness-only, dropped on
+     completion/cancellation), `Rpc` readiness boxes (already charged by
+     `message_cost` through `size_of::<LearnerReadinessRequest>()`).
+4. **Docs.** APPLICATION_ENVELOPES.md: the table gains a plan column for what
+   is carried; mappings are no longer "deployment plan left to the host";
+   the four words plus the bounded plan do not make the identity injective
+   over everything a replica is built from: grants, initial images, unbounded
+   plans and anchors are outside, said explicitly. "Identity computed only on
+   readiness paths" becomes precise: several wrappers call
+   `readiness_requirements()` for admission and restore bounds. The
+   limitations record stays.
+5. **Tests (permanent).** Sol's `adversarial_activation_mapping` and
+   `adversarial_transaction_leaf_capacity` (plus the
+   `RoutedApplication<TransferApplication>` variant) through the real
+   learner verifier in tests/learners.rs: each shows the apply divergence
+   the configurations cause and that each learner is now refused
+   (`Capability`) for the other's declaration while its own gets a receipt.
+   `event_budget::readiness_event_heap_is_counted` (a one-group `Shard`:
+   refused at the inline-only limit, charged inline + boxed above it) and
+   `relay_budget::captured_readiness_metadata_covers_owned_request` (real
+   leader and `NativeRelayBatch::capture`, least accepted `metadata_bytes`
+   covers batch + window + owned request). Plan encoding: canonical
+   round trip on the wire, refusal of a non-canonical plan, overflow refused.
+6. **Regression and CPU.** Keep every earlier fix and test. Before/after: the
+   new probes in a temporary target built with 7b39cdc0's and this branch's
+   `src/` in this worktree. Counter admission/apply, the ledger and per-write
+   frames are untouched; the larger value is built only where
+   `readiness_requirements()` is called.
+
 ## Logical-voter reliability track (opened 18 October 2026)
 
 Goal: logical parents and their backing children run indefinitely with bounded
