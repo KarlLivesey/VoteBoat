@@ -857,11 +857,15 @@ impl<Q: ReadyScheduler> Shard<Q> {
         // R4-1: whether this core may campaign or place a leader noop.
         let noop_fits = wal.noop_fits();
         g.core.set_wal_noop_room(noop_fits);
-        // R5-1: a follower checks an append's validated new suffix itself.
-        g.core.set_wal_room(wal.rooms());
         let noop_refusals = (!noop_fits).then(|| g.core.wal_noop_refusals());
         let proposal = matches!(q.event, Event::Propose { .. } | Event::Configure(_));
-        let declines = matches!(q.event, Event::Receive(_)).then(|| g.core.wal_declined_appends());
+        // R5-1: a follower checks an append's validated new suffix itself,
+        // against this room. Only a received message reaches that check, so
+        // the room is set before every such step and nowhere else.
+        let declines = matches!(q.event, Event::Receive(_)).then(|| {
+            g.core.set_wal_room(wal.rooms());
+            g.core.wal_declined_appends()
+        });
         let before = g.core.pending_wal_bytes();
         if connections::changes_connections(&q.event) {
             g.queued_connection_changes -= 1;
@@ -950,12 +954,10 @@ impl<Q: ReadyScheduler> Shard<Q> {
         self.live(ticket)?;
         let steady = self.connections_steady();
         let noop_fits = self.wal.noop_fits();
-        let wal_room = self.wal.rooms();
         let group = self.live(ticket)?;
         let before = group.core.pending_wal_bytes();
         // R4-1: a completion can make this core leader (its vote record).
         group.core.set_wal_noop_room(noop_fits);
-        group.core.set_wal_room(wal_room);
         let noop_refusals = (!noop_fits).then(|| group.core.wal_noop_refusals());
         let result = f(&mut group.core);
         let after = group.core.pending_wal_bytes();

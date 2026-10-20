@@ -861,8 +861,9 @@ impl Raft {
     pub(crate) fn set_wal_noop_room(&mut self, room: bool) {
         self.wal_noop_room = room;
     }
-    /// Host-set (R5-1): the node's WAL account room for the next step or
-    /// completion. Volatile scheduling input, never persisted or replicated.
+    /// Host-set (R5-1): the node's WAL account room, set before every
+    /// received message is stepped (only an append reads it). Volatile
+    /// scheduling input, never persisted or replicated.
     #[inline]
     pub(crate) fn set_wal_room(&mut self, room: Option<WalRoom>) {
         self.wal_room = room;
