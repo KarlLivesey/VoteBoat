@@ -31,22 +31,22 @@ mod progress_broadcasts;
 mod relay_request_windows;
 use crate::{membership::*, quorum::*};
 
-fn node(n: u64) -> NodeId {
+pub(super) fn node(n: u64) -> NodeId {
     NodeId::new(n).unwrap()
 }
-fn cid(n: u64) -> ConfigurationId {
+pub(super) fn cid(n: u64) -> ConfigurationId {
     ConfigurationId::new(n).unwrap()
 }
 fn operation(n: u128) -> OperationId {
     OperationId::new(n).unwrap()
 }
-fn store(n: u64) -> StoreIdentity {
+pub(super) fn store(n: u64) -> StoreIdentity {
     StoreIdentity {
         id: StoreId::new(n as u128).unwrap(),
         incarnation: StoreIncarnation::new(1).unwrap(),
     }
 }
-fn configuration(id: u64, voters: &[u64], learners: &[u64]) -> Configuration {
+pub(super) fn configuration(id: u64, voters: &[u64], learners: &[u64]) -> Configuration {
     Configuration::new(
         cid(id),
         Policy::new(
@@ -143,7 +143,7 @@ pub(super) fn durable(core: &mut Raft, effects: Vec<Effect>) -> Vec<Effect> {
     })
     .unwrap()
 }
-fn accept(core: &mut Raft, op: u128, change: ConfigurationChange) -> Vec<Effect> {
+pub(super) fn accept(core: &mut Raft, op: u128, change: ConfigurationChange) -> Vec<Effect> {
     let entry = LogEntry {
         index: core.durable.last_index() + 1,
         term: core.durable.hard_state.term,
@@ -167,13 +167,13 @@ fn accept(core: &mut Raft, op: u128, change: ConfigurationChange) -> Vec<Effect>
 }
 /// Set up an already committed journal boundary, independently of the live
 /// quorum test under examination. The core still validates the logical update.
-fn committed_fixture(core: &mut Raft, index: u64) {
+pub(super) fn committed_fixture(core: &mut Raft, index: u64) {
     let effects = core
         .persist(core.durable.hard_state, index, None, After::Commit, None)
         .unwrap();
     durable(core, effects);
 }
-fn staged() -> Raft {
+pub(super) fn staged() -> Raft {
     let mut core = core();
     let effects = accept(
         &mut core,
@@ -573,7 +573,7 @@ fn joint_repair_rejects_overwrite_commit_claims_and_foreign_authority_before_mut
             }
             10 => receiver = follower(joint(false), 4),
             11 => {
-                receiver.durable.commit_index = 1;
+                receiver.durable.edit(|log| log.commit_index = 1);
             }
             12 => receiver.limits.max_command_bytes = 1,
             13 => edit_append(&mut message, |entries| {
@@ -1551,7 +1551,7 @@ fn a_reused_candidate_node_with_a_new_store_needs_a_new_term_ballot() {
     assert_eq!(core.durable.hard_state, before);
 }
 
-fn follower(mut core: Raft, id: u64) -> Raft {
+pub(super) fn follower(mut core: Raft, id: u64) -> Raft {
     core.node = node(id);
     core.binding.identity = store(id);
     core.role = Role::Follower;
@@ -1566,7 +1566,7 @@ fn sent(effect: Effect) -> Message {
     };
     message
 }
-fn one_reply(effects: Vec<Effect>) -> Message {
+pub(super) fn one_reply(effects: Vec<Effect>) -> Message {
     assert_eq!(effects.len(), 1);
     sent(effects.into_iter().next().unwrap())
 }

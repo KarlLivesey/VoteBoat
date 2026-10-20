@@ -18,11 +18,13 @@ use super::*;
 
 mod compact;
 mod incoming;
+mod summarized;
 mod view;
 pub(crate) use compact::CompactDelta;
 #[cfg(feature = "native")]
 pub(crate) use incoming::{OwnedAppend, OwnedChange};
 pub(crate) use incoming::{OwnedNextLog, PreparedOwnedLog};
+pub(crate) use summarized::SummarizedLog;
 pub(crate) use view::{LogMetadata, LogView};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -93,7 +95,7 @@ impl NextLog {
         if view.metadata().group != update.group {
             return Err(StorageError::Rejected("group not bootstrapped"));
         }
-        if !summary.matches_metadata(view.metadata()) {
+        if !view.summarized_by(summary) {
             return Err(StorageError::Rejected("stale log summary"));
         }
         if compact::eligible(view, summary, update) {

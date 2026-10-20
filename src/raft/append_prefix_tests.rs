@@ -224,12 +224,14 @@ fn full_configuration_and_nonempty_payload_copy_owns_independent_storage() {
         64,
         LogLimits::default().max_batch_bytes,
     );
-    core.durable.entries.edit(|entries| {
-        if let EntryPayload::Command { bytes, .. } = &mut entries[2].payload {
-            let mut raw = bytes.to_vec();
-            raw.reserve(257);
-            *bytes = raw.into();
-        }
+    core.durable.edit(|log| {
+        log.entries.edit(|entries| {
+            if let EntryPayload::Command { bytes, .. } = &mut entries[2].payload {
+                let mut raw = bytes.to_vec();
+                raw.reserve(257);
+                *bytes = raw.into();
+            }
+        })
     });
     let state = core.state().clone();
     let shared = differential(&mut core);

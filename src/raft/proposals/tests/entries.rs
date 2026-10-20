@@ -92,7 +92,7 @@ fn entry_batches_match_legacy_proposals_at_widths_one_two_and_max() {
         );
         assert_eq!(completed(&mut new), completed(&mut old));
         assert_eq!(new.state(), old.state());
-        assert!(new.log_summary.matches(new.state()));
+        assert!(new.durable.summary().matches(new.state()));
         assert_eq!(new.retained_log_bytes(), old.retained_log_bytes());
     }
 }
@@ -211,7 +211,7 @@ fn a_builder_from_an_older_term_and_index_takes_the_current_ones() {
     assert_eq!(stamped, [(4, 2), (5, 2), (6, 2)]);
     completed(&mut current);
     assert_eq!(current.state().last_index(), 6);
-    assert!(current.log_summary.matches(current.state()));
+    assert!(current.durable.summary().matches(current.state()));
 }
 
 #[test]

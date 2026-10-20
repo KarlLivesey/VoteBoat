@@ -97,7 +97,7 @@ impl OwnedNextLog {
         limits: LogLimits,
     ) -> Result<Self, StorageError> {
         limits.validate()?;
-        if !summary.matches_metadata(view.metadata()) {
+        if !view.summarized_by(summary) {
             return Err(StorageError::Rejected("stale log summary"));
         }
         let current = view.metadata();
@@ -258,6 +258,27 @@ impl OwnedNextLog {
     pub(crate) fn install(self, current: &mut GroupLog) -> Result<LogSummary, StorageError> {
         Ok(self.prepare_install(current)?.install(current))
     }
+    /// [`Self::install`] for a plan made from a [`SummarizedLog`] view of
+    /// `current`, with no change to `current` since (its version is
+    /// unchanged): the predecessor is `current`'s metadata, so an append or
+    /// commit advance installs without comparing it. Other plans keep every
+    /// check.
+    pub(super) fn install_unchanged(
+        self,
+        current: &mut GroupLog,
+    ) -> Result<LogSummary, StorageError> {
+        match self.0 {
+            OwnedChange::Append(append) => {
+                debug_assert!(append.check_install(LogMetadata::from_log(current)).is_ok());
+                Ok(install_append(current, append.suffix, append.summary))
+            }
+            OwnedChange::Commit(commit) => {
+                debug_assert_eq!(commit.predecessor, LogMetadata::from_log(current));
+                Ok(install_append(current, None, commit.summary))
+            }
+            other @ OwnedChange::Other { .. } => Self(other).install(current),
+        }
+    }
     #[cfg(feature = "native")]
     pub(crate) fn into_change(self) -> OwnedChange {
         self.0
@@ -400,7 +421,7 @@ fn validate_base(
     if view.metadata().group != update.group {
         return Err(StorageError::Rejected("group not bootstrapped"));
     }
-    if !summary.matches_metadata(view.metadata()) {
+    if !view.summarized_by(summary) {
         return Err(StorageError::Rejected("stale log summary"));
     }
     Ok(limits)

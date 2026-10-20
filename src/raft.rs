@@ -15,7 +15,9 @@
 //! Deterministic static-configuration Raft. Host drives elections and delivery.
 //! Every persistence-dependent send/application notification waits for its exact
 //! store/group/revision/generation ticket. No transport or clock is constructed.
-use crate::log::transition::{LogSummary, LogView, OwnedNextLog};
+#[cfg(test)]
+use crate::log::transition::{LogSummary, LogView};
+use crate::log::transition::{OwnedNextLog, SummarizedLog};
 use crate::{
     contracts::{HardState, StorageError},
     identity::*,
@@ -352,6 +354,8 @@ struct Pending {
     ticket: Option<LogTicket>,
     after: After,
     reply: Option<Message>,
+    // `durable.version()` when `next` was planned from `durable.view()`.
+    planned: u64,
 }
 #[derive(Clone, Copy)]
 struct Replication {
@@ -374,9 +378,9 @@ pub struct Raft {
     limits: LogLimits,
     batch_limits: BatchLimits,
     batch_limits_locked: bool,
-    durable: GroupLog,
+    // The canonical log and its summary, changed only together at install.
+    durable: SummarizedLog,
     checkpoint_lineage: CheckpointLineage,
-    log_summary: LogSummary,
     membership: Membership,
     role: Role,
     campaigning_enabled: bool,
@@ -503,8 +507,7 @@ impl Raft {
             limits,
             batch_limits: BatchLimits::default(),
             batch_limits_locked: false,
-            log_summary: LogSummary::from_validated(&state),
-            durable: state,
+            durable: SummarizedLog::new(state),
             checkpoint_lineage: CheckpointLineage::new(),
             membership,
             role: Role::Follower,
@@ -747,16 +750,14 @@ impl Raft {
     /// Covers the accepted head and every configuration reachable by truncating
     /// its uncommitted suffix. Use `event_effect_reservation` for incoming growth.
     pub fn effect_reservation(&self, input_bytes: usize) -> Option<usize> {
-        let fresh = self.log_summary.matches(&self.durable);
-        self.reserve_effects_with(input_bytes, self.rollback_replicas_with(fresh), fresh)
+        self.reserve_effects(input_bytes, self.rollback_replicas())
     }
     /// Reserve before executing an event, including prospective membership in
     /// incoming append/snapshot data. This is a memory bound, never authority to
     /// accept that data; configuration ingress still has its protocol gates.
     pub fn event_effect_reservation(&self, event: &Event, input_bytes: usize) -> Option<usize> {
         use crate::membership::ConfigurationChange;
-        let fresh = self.log_summary.matches(&self.durable);
-        let mut peers = self.rollback_replicas_with(fresh);
+        let mut peers = self.rollback_replicas();
         if let Event::Configure(proposal) = event {
             if let crate::membership::ConfigurationChange::Learners(next)
             | crate::membership::ConfigurationChange::Joint { next, .. } =
@@ -809,16 +810,10 @@ impl Raft {
                 _ => (),
             }
         }
-        self.reserve_effects_with(input_bytes, peers, fresh)
+        self.reserve_effects(input_bytes, peers)
     }
-    #[cfg(test)]
     fn rollback_replicas(&self) -> usize {
-        self.rollback_replicas_with(self.log_summary.matches(&self.durable))
-    }
-    /// `fresh`: the cached summary describes the canonical log
-    /// (`log_summary.matches(&durable)`), computed once per reservation.
-    fn rollback_replicas_with(&self, fresh: bool) -> usize {
-        if fresh && self.log_summary.is_plain() {
+        if self.durable.summary().is_plain() {
             return self
                 .durable
                 .bootstrap
@@ -873,13 +868,9 @@ impl Raft {
         }
         maximum.max(count(stable, joint))
     }
-    #[cfg(test)]
     fn reserve_effects(&self, input_bytes: usize, peers: usize) -> Option<usize> {
-        self.reserve_effects_with(input_bytes, peers, self.log_summary.matches(&self.durable))
-    }
-    fn reserve_effects_with(&self, input_bytes: usize, peers: usize, fresh: bool) -> Option<usize> {
         use std::mem::size_of;
-        let log = self.retained_log_bytes_with(fresh)?;
+        let log = self.retained_log_bytes()?;
         // A heartbeat can produce append and read probes for every peer. Each
         // append uses its configured entry count and max_batch_bytes framing.
         // Other paths add bounded persist/commit/snapshot-reference metadata.
@@ -1311,13 +1302,10 @@ impl Raft {
             .as_ref()
             .is_some_and(|membership| membership.id() != self.membership.id());
         let preserves_checkpoint_prefix = p.next.preserves_checkpoint_prefix();
-        self.log_summary = match p.next.install(&mut self.durable) {
-            Ok(summary) => summary,
-            Err(error) => {
-                self.storage_failed();
-                return Err(error.into());
-            }
-        };
+        if let Err(error) = self.durable.install(p.next, p.planned) {
+            self.storage_failed();
+            return Err(error.into());
+        }
         if !preserves_checkpoint_prefix {
             self.checkpoint_lineage = CheckpointLineage::new();
         }
@@ -1488,8 +1476,8 @@ impl Raft {
         out: &mut VecDeque<Effect>,
     ) -> Result<(), RaftError> {
         let next = OwnedNextLog::plan_commit(
-            &LogView::new(&self.durable),
-            &self.log_summary,
+            &self.durable.view(),
+            self.durable.summary(),
             commit_index,
             self.limits,
         )?;
@@ -1533,16 +1521,16 @@ impl Raft {
             // it, the installed log charges the visible entries); a wide
             // batch was frozen, releasing spare capacity beyond 4 KiB.
             let next = OwnedNextLog::plan_owned(
-                &LogView::new(&self.durable),
-                &self.log_summary,
+                &self.durable.view(),
+                self.durable.summary(),
                 update,
                 self.limits,
             )?;
             self.stage_pending_into(next, None, after, reply, out)
         } else {
             let next = OwnedNextLog::plan_copy(
-                &LogView::new(&self.durable),
-                &self.log_summary,
+                &self.durable.view(),
+                self.durable.summary(),
                 &update,
                 self.limits,
             )?;
@@ -1598,6 +1586,7 @@ impl Raft {
             ticket: None,
             after,
             reply,
+            planned: self.durable.version(),
         });
         out.push_back(effect);
         Ok(())
@@ -2026,7 +2015,7 @@ impl Raft {
         index: u64,
     ) -> Result<Option<Box<crate::membership::Membership>>, crate::membership::MembershipError>
     {
-        if self.log_summary.matches(&self.durable) && self.log_summary.is_plain() {
+        if self.durable.summary().is_plain() {
             if index < self.durable.base_index() || index > self.durable.last_index() {
                 return Err(crate::membership::MembershipError::InvalidHistory);
             }
@@ -2205,6 +2194,8 @@ mod completion_tests;
 #[cfg(test)]
 #[path = "raft/membership_tests.rs"]
 mod membership_tests;
+#[cfg(test)]
+mod summarized_log_tests;
 #[cfg(test)]
 mod volatile_tests;
 

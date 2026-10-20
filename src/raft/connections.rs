@@ -22,8 +22,7 @@ impl Raft {
     /// plan, staged snapshot or connection permit.
     pub(crate) fn connections_are_bootstrap(&self) -> bool {
         !self.fenced
-            && self.log_summary.matches(&self.durable)
-            && self.log_summary.is_plain()
+            && self.durable.summary().is_plain()
             && self
                 .pending
                 .as_ref()
@@ -49,13 +48,13 @@ impl Raft {
             peers.insert(node, store);
             Ok(())
         };
-        let plain = self.log_summary.matches(&self.durable) && self.log_summary.is_plain();
+        let plain = self.durable.summary().is_plain();
         if plain {
             for (&node, &store) in &self.durable.bootstrap.voter_stores {
                 add(node, store)?;
             }
         }
-        for state in std::iter::once(&self.durable)
+        for state in std::iter::once(&*self.durable)
             .filter(|_| !plain)
             .chain(self.pending.iter().filter_map(|p| p.next.full()))
         {
