@@ -55,6 +55,9 @@ mod shared;
 #[path = "../tests/support/ports.rs"]
 #[allow(dead_code)] // The shared test lease; these fixtures use only part of it.
 mod test_ports;
+#[cfg(test)]
+#[path = "benchmark/test_process.rs"]
+mod test_process;
 type Failure = Box<dyn std::error::Error>;
 type Replica<
     L = voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::FileLogIo>,

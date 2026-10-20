@@ -745,7 +745,7 @@ mod tests {
     }
 
     /// Children are killed and reaped if the test fails before they exit.
-    struct Children(Vec<Child>);
+    struct Children(Vec<Child>, Vec<std::thread::JoinHandle<()>>);
     impl Drop for Children {
         fn drop(&mut self) {
             for child in &mut self.0 {
@@ -753,6 +753,9 @@ mod tests {
                     let _ = child.kill();
                 }
                 let _ = child.wait();
+            }
+            for reader in self.1.drain(..) {
+                reader.join().expect("cluster stdout reader joined");
             }
         }
     }
@@ -816,7 +819,7 @@ mod tests {
     ) -> (Children, Events) {
         let exe = std::env::current_exe().unwrap();
         let (sender, events) = mpsc::channel();
-        let mut children = Children(Vec::new());
+        let mut children = Children(Vec::new(), Vec::new());
         for n in 1..=3u64 {
             let spec = [
                 n.to_string(),
@@ -828,22 +831,26 @@ mod tests {
                 load.rate.to_string(),
             ]
             .join(&SEPARATOR.to_string());
-            let mut child = Command::new(&exe)
-                .args([
-                    "--exact",
-                    "offered::cluster::tests::cluster_node_child",
-                    "--nocapture",
-                    "--test-threads=1",
-                ])
-                .env(CHILD, spec)
-                .stdin(Stdio::piped())
-                .stdout(Stdio::piped())
-                .stderr(File::create(root.join(format!("node{n}.err"))).unwrap())
-                .spawn()
-                .unwrap();
+            let mut child = {
+                let _spawn = crate::test_process::spawning();
+                Command::new(&exe)
+                    .args([
+                        "--exact",
+                        "offered::cluster::tests::cluster_node_child",
+                        "--nocapture",
+                        "--test-threads=1",
+                    ])
+                    .env(CHILD, spec)
+                    .stdin(Stdio::piped())
+                    .stdout(Stdio::piped())
+                    .stderr(File::create(root.join(format!("node{n}.err"))).unwrap())
+                    .spawn()
+                    .unwrap()
+            };
             let stdout = child.stdout.take().unwrap();
+            children.0.push(child);
             let sender = sender.clone();
-            std::thread::spawn(move || {
+            children.1.push(std::thread::spawn(move || {
                 let mut lines = BufReader::new(stdout).lines();
                 while let Some(Ok(line)) = lines.next() {
                     if hang_up.is_some_and(|release| line.contains(last_read(n, release))) {
@@ -857,8 +864,7 @@ mod tests {
                     }
                 }
                 let _ = sender.send((n, None));
-            });
-            children.0.push(child);
+            }));
         }
         (children, events)
     }
@@ -1081,10 +1087,16 @@ mod tests {
             env!("CARGO_MANIFEST_DIR"),
             "/benchmarks/tools/cluster_test.py"
         );
-        let output = Command::new("python3")
-            .args(["-I", script])
-            .output()
-            .expect("python3 runs benchmarks/tools/cluster_test.py");
+        let child = {
+            let _spawn = crate::test_process::spawning();
+            Command::new("python3")
+                .args(["-I", script])
+                .stdout(Stdio::piped())
+                .stderr(Stdio::piped())
+                .spawn()
+                .expect("python3 runs benchmarks/tools/cluster_test.py")
+        };
+        let output = child.wait_with_output().unwrap();
         assert!(
             output.status.success(),
             "{}",

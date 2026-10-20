@@ -102,6 +102,7 @@ fn lease_holds_across_handoff_and_processes() {
 
 #[test]
 fn adoption_keeps_the_unused_half_and_reclaim_proves_release() {
+    let _spawn = serial::serial(&SPAWN);
     fn check<T>(adopt: fn(&mut ports::PortLease) -> T, unused_held: fn(SocketAddr) -> bool) {
         let mut lease = ports::PortLease::acquire(1);
         let [address] = lease.addresses();
@@ -123,6 +124,31 @@ fn adoption_keeps_the_unused_half_and_reclaim_proves_release() {
     }
     check(|l| l.adopt_tcp(0), |a| UdpSocket::bind(a).is_err());
     check(|l| l.adopt_udp(0), |a| TcpListener::bind(a).is_err());
+}
+
+#[test]
+fn offset_layouts_keep_every_listener_pair_leased_through_handoff() {
+    let _spawn = serial::serial(&SPAWN);
+    let offsets = [1, 2, 101, 102];
+    let (base, mut lease) = ports::PortLease::acquire_offsets(&offsets);
+    let addresses = lease.address_list();
+    assert_eq!(
+        addresses.iter().map(|a| a.port()).collect::<Vec<_>>(),
+        ports::offset_ports(base, &offsets).unwrap()
+    );
+    for address in &addresses {
+        assert!(TcpListener::bind(address).is_err());
+        assert!(UdpSocket::bind(address).is_err());
+    }
+    lease.handoff();
+    let (_, other) = ports::PortLease::acquire_offsets(&offsets);
+    assert!(other.address_list().iter().all(|a| !addresses.contains(a)));
+    for address in addresses {
+        drop((
+            TcpListener::bind(address).unwrap(),
+            UdpSocket::bind(address).unwrap(),
+        ));
+    }
 }
 
 #[test]

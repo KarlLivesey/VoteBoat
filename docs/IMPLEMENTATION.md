@@ -1816,6 +1816,109 @@ reviewed ST2 head `bbb81f33` and main `b4e36472`. ST2 remains in review. Earlier
 rounds' measurements describe their named heads; no CPU measurement is repeated
 for this merge and the user's acceptance of ST2's cost remains unchanged.
 
+##### PR14 final merge-gate fixture repairs: plan (20 October 2026)
+
+This is the bounded repair of the three observed rebase-validation failures,
+required to finish the existing ST2 wind-down milestone. It adds no roadmap
+item. The macro/mini plans above remain authoritative; ST2 stays in review.
+Source confirmation approved exact `12a23d6d` (Sol review 5591363667); the
+accepted production rebase and CPU decision are unchanged.
+
+Before edits, the fixture schema/ownership plan is:
+
+- Transfer service: retain four groups, three nodes and both listener bands.
+  Extend the shared `PortLease` fixture for checked offset layouts, rather than
+  another allocator. Select a finite candidate layout, reserve TCP/UDP plus
+  shared locks, hand off probes at startup and retain locks through child
+  shutdown/reopen. Reject overflowing candidates before binding; release
+  partial collisions through RAII. A local boundary-case regression must fail
+  the old arithmetic without modifying the concurrent global allocator.
+- Lanes: trace the exact WAL path, original owner, worker join and concurrent
+  child-spawn lifetime. Repair the ownership/isolation boundary that permits a
+  live descriptor to retain `LOCK` across reopen; preserve every WAL/history
+  check. Use a finite causal control, not lock retries. Every spawned child
+  must be killed/reaped on failure and every host/worker joined.
+- Held snapshot: arm the stale replica with snapshot-completion consumption
+  disabled before the first receive/poll. Observe a real router-accepted request
+  before holding the replica, then resume ordinary receipt consumption only
+  after foreground quorum work, checkpoint and subsequent reclaim succeed.
+  Preserve real installs, bounded recovery usage and restart/dedup checks.
+  Completion-before-observation must be a regression control, without sleeps,
+  invented held state or larger timeouts.
+
+Acceptance is focused failing-before/passing-after evidence where feasible,
+the existing three histories and adjacent regressions, root fmt, all four
+strict Clippy configurations, matched fmt/Clippy and the enabled push hook.
+Build only in this checkout, cores 12–15, nice 19, four jobs, own build at most
+45 GiB; run diskguard before each build/task and after cleanup. No full suite
+is run here: the parent owns final exclusive qualification after PR15/24.
+Planned checks are not implemented evidence; actual results follow separately.
+
+##### PR14 final merge-gate fixture repairs: implementation and evidence
+
+All changes in this repair are test fixtures and validation records; production
+consensus, storage, service and rebase logic are unchanged.
+
+The transfer allocator's `14000 + 1024*k` ladder reaches base 65,200 at k=50;
+its largest listener offset is 487, exceeding `u16::MAX`. The shared port
+fixture now accepts fixed offset layouts, checks every addition before binding,
+uses the existing safe pool and cross-process locks, and drops partial layouts
+on collisions. Exhaustion is finite and cannot switch to an uncoordinated
+fallback namespace. Transfer keeps all 24 TCP/UDP pairs leased through the
+12 child processes' shutdown and recovery. The exact-boundary test also rejects
+base 65,200; an unchecked-addition mutation fails with the original overflow
+panic (0 passed, 1 failed). No global allocator state is modified by that test.
+
+Lane roots already include PID, protocol/label and nanoseconds; the conflicting
+resource is the lane's own `laneN/replicaN/LOCK`, held by `FileLogIo` inside the
+WAL worker. Joining returns and drops the original log, but a concurrent
+cluster `Command::spawn` can copy its CLOEXEC descriptor between fork and exec.
+That second reference retains the same file lock past the original owner's
+close. The bounded causal control passes a duplicate `LOCK` as a child's stderr
+and waits for its ready line: after the original reference closes, opening the
+same real `FileLogIo` returns typed `TryLockError::WouldBlock`. An explicit stdin
+command and child reap release it, and WAL recovery succeeds. The log records
+the path and child PID. This deliberately extends the fork window across exec;
+it does not claim to capture the earlier full run's transient child.
+
+A test-only read/write gate keeps concurrent lane owners shared and excludes
+only fork/exec while any lane can close/reopen its WAL. Both process-spawn sites
+in the benchmark tests use its writer side, released before waiting for child
+work. The cluster child guard also joins its stdout readers after killing and
+reaping children on failure. WAL reopen, per-group history, exact lane totals,
+deduplication and all join assertions are preserved. Six finite old-executable
+lane/cluster batches (14 tests each) did not reproduce the spontaneous lock
+failure; the deterministic child-descriptor control supplies ownership evidence.
+The adjacent default-feature shared-lease check exposed the same descriptor
+copy issue for sockets: `adoption_keeps_the_unused_half_and_reclaim_proves_release`
+failed its post-drop bind at port 61,004 while fixture children could fork.
+It omitted the file's existing `SPAWN` guard. Both that release assertion and
+the new offset-layout handoff check now take the existing guard; assertions
+and the shared lease namespace are unchanged. The failed check is retained.
+
+The snapshot failure was a compound observation race: ordinary arming polls
+could consume earlier groups' accepted recovery receipts while waiting for the
+foreground group's leader. The fixture now campaigns the first seven groups,
+stops at the first actual router-accepted request, asserts zero snapshot
+installs, and then campaigns/elects the foreground group using only the healthy
+quorum. The stale replica is never polled during that election or the held
+maintenance phase. Receipt consumption resumes only afterward. This refines the
+initial plan using ordering rather than a zero completion budget (the existing
+public poll budget requires nonzero credits). All held-request, foreground,
+checkpoint/reclaim, real-install, reopen and dedup assertions remain; no timeout,
+sleep, assertion or lint threshold is relaxed.
+
+Actual final commands, results and mutation limitations are recorded in
+`validation/st2-final-gate/REPORT.md`. The earlier rebase full-run failures remain
+in the tables above. This repair runs no full suite and does not mark ST2 done;
+the parent still owns final source confirmation and the exclusive full matrix.
+Focused benchmark selections passed 17/0 all features and 15/0 default;
+transfer passed 3/0 and 2/0; shared-lease checks passed 9/0 in both. The tracked
+hook's direct qualification passed root fmt, all four strict Clippy builds,
+matched fmt and matched strict Clippy with zero diagnostics. The hook remains
+enabled for the non-force push. All builds, including matched, used this
+checkout's sole target; observed use after qualification was 923 MiB.
+
 #### Design-pack amendment realised by ST2 (pack preserved)
 
 | Pack text | Amendment |

@@ -1,0 +1,12 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling voteboat v0.1.0 (/home/karllivesey/.t3/worktrees/VoteBoat/t3-aeca292e)
+    Finished `test` profile [unoptimized] target(s) in 3.31s
+     Running tests/transfer_service.rs (target/debug/deps/transfer_service-f7b7b6618fe11802)
+
+running 2 tests
+test listener_layout_rejects_the_exhausted_allocator_boundary_without_wrapping ... ok
+test tcp_authenticated_operator_starts_a_split_and_children_survive_parent_shutdown ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 25 filtered out; finished in 7.29s
+
