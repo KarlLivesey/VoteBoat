@@ -4,12 +4,12 @@
 use super::*;
 use std::mem::size_of;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) struct AdmittedRange {
     ticket: LogTicket,
     context: RequestContext,
 }
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) struct EmptyAppendAlias {
     original: Replication,
     successor: RequestContext,
@@ -236,7 +236,9 @@ impl Raft {
         &mut self,
         out: &mut VecDeque<Effect>,
     ) -> Result<(), RaftError> {
-        for peer in self.peers() {
+        self.refresh_peer_order();
+        for at in 0..self.peer_order.len() {
+            let peer = self.peer_order[at];
             if self.admitted_ranges.get(&peer).is_some_and(|range| {
                 range.ticket.revision == self.durable.revision
                     && self

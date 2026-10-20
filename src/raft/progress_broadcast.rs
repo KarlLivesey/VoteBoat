@@ -81,7 +81,9 @@ impl Raft {
     }
 
     fn broadcast_ready_peers_into(&mut self, out: &mut VecDeque<Effect>) -> Result<(), RaftError> {
-        for peer in self.peers() {
+        self.refresh_peer_order();
+        for at in 0..self.peer_order.len() {
+            let peer = self.peer_order[at];
             // Snapshot requests retain their existing fallback. An ordinary
             // request owns its exact range until ACK or explicit invalidation.
             if self

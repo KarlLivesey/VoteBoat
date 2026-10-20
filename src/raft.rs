@@ -41,6 +41,8 @@ pub use completion::{
 mod leadership;
 use admitted_replication::{AdmittedRange, EmptyAppendAlias};
 mod log_staging;
+mod peer_slots;
+use peer_slots::PeerSlots;
 mod progress_broadcast;
 mod proposals;
 pub use proposals::{Proposal, ProposalBatch, MAX_PROPOSAL_BATCH_ENTRIES};
@@ -358,7 +360,7 @@ struct Pending {
     // predecessor comparison only if it is still the log's current one.
     planned: Option<LogStamp>,
 }
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 struct Replication {
     context: RequestContext,
     configuration: ConfigurationId,
@@ -390,9 +392,14 @@ pub struct Raft {
     granted_vote_reply: Option<send_window::GrantedVoteReply>,
     progress: BTreeMap<NodeId, u64>,
     next_index: BTreeMap<NodeId, u64>,
-    requests: BTreeMap<NodeId, Replication>,
-    admitted_ranges: BTreeMap<NodeId, AdmittedRange>,
-    empty_append_aliases: BTreeMap<NodeId, EmptyAppendAlias>,
+    // Leader slots per peer: retired in place, cleared with every
+    // configuration or leadership change (see `peer_slots`).
+    requests: PeerSlots<Replication>,
+    admitted_ranges: PeerSlots<AdmittedRange>,
+    empty_append_aliases: PeerSlots<EmptyAppendAlias>,
+    // Hot broadcasts' peer order for one accepted configuration id.
+    peer_order: Vec<NodeId>,
+    peer_order_for: Option<ConfigurationId>,
     // Candidate-only transfer cursors; never quorum replication or ballots.
     repair_requests: BTreeMap<NodeId, Replication>,
     batched_joint_repair: bool,
@@ -518,9 +525,11 @@ impl Raft {
             granted_vote_reply: None,
             progress: BTreeMap::new(),
             next_index: BTreeMap::new(),
-            requests: BTreeMap::new(),
-            admitted_ranges: BTreeMap::new(),
-            empty_append_aliases: BTreeMap::new(),
+            requests: PeerSlots::new(),
+            admitted_ranges: PeerSlots::new(),
+            empty_append_aliases: PeerSlots::new(),
+            peer_order: Vec::new(),
+            peer_order_for: None,
             repair_requests: BTreeMap::new(),
             batched_joint_repair: false,
             snapshot_joint_repair: false,
@@ -1604,6 +1613,27 @@ impl Raft {
             .filter(|node| *node != self.node)
             .collect()
     }
+    /// Rebuild the hot broadcasts' peer order in place when the accepted
+    /// configuration id changed. Only a leader reads it, and a leader's
+    /// membership changes only through its own strictly increasing ids. An id
+    /// is not unique across a truncation (a follower's uncommitted entry can be
+    /// replaced by another with the same id), so every election resets it.
+    fn refresh_peer_order(&mut self) {
+        let id = self.membership().id();
+        if self.peer_order_for != Some(id) {
+            let mut order = std::mem::take(&mut self.peer_order);
+            order.clear();
+            order.extend(
+                self.membership()
+                    .replicas()
+                    .map(|(node, _)| node)
+                    .filter(|node| *node != self.node),
+            );
+            self.peer_order = order;
+            self.peer_order_for = Some(id);
+        }
+        debug_assert_eq!(self.peer_order, self.peers(), "cached peer order");
+    }
     fn voting_peers(&self) -> Vec<NodeId> {
         self.peers()
             .into_iter()
@@ -1680,6 +1710,8 @@ impl Raft {
     }
     fn become_leader(&mut self) -> Result<Vec<Effect>, RaftError> {
         self.role = Role::Leader;
+        // A configuration id seen while following may name other replicas.
+        self.peer_order_for = None;
         self.progress.clear();
         self.next_index.clear();
         self.clear_replication_requests();
@@ -1712,7 +1744,10 @@ impl Raft {
         Ok(effects.into())
     }
     fn broadcast_into(&mut self, out: &mut VecDeque<Effect>) -> Result<(), RaftError> {
-        for peer in self.peers() {
+        self.refresh_peer_order();
+        // `append_for` never changes membership, so the order stays fixed.
+        for at in 0..self.peer_order.len() {
+            let peer = self.peer_order[at];
             out.push_back(self.append_for(peer)?);
         }
         Ok(())
@@ -2195,6 +2230,8 @@ mod completion_tests;
 #[cfg(test)]
 #[path = "raft/membership_tests.rs"]
 mod membership_tests;
+#[cfg(test)]
+mod peer_slots_tests;
 #[cfg(test)]
 mod summarized_log_tests;
 #[cfg(test)]
