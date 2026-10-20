@@ -1080,12 +1080,15 @@ rewrites with no completion and no typed failure).
   noop-only appends (counted), refuses proposals with `StoragePressure`, and
   shows `last_step_down=WalCapacity` if it won before the account filled.
   Nothing is written, nothing admitted is dropped. Recovery: the operator
-  raises `max_wal_bytes` (or lowers the high-water percentage) and reopens;
+  raises `max_wal_bytes` and reopens (lowering the high-water percentage
+  *reduces* the noop room, so it cannot recover this; round-5 correction);
   the reopened node has room, elects, commits the old suffix through the
   ordinary rule and checkpoints. A replica of a group whose other voters have
   room is not stuck: the others elect, and their commits let this replica
   apply, checkpoint and rewrite.
-- *Backstop at the worker.* Unreachable in a node by the invariant, but a
+- *Backstop at the worker.* Argued unreachable in a node by the invariant
+  (round 5 narrows this: the proof covers admission on validated suffixes,
+  not recovered live states; see the round-5 record), but a
   direct worker owner (Sol's reproduction drives the worker without a node)
   must not wait for ever either: after a successful rewrite the WAL thread
   retries held batches, and a batch that still does not fit is completed with

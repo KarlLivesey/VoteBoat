@@ -264,8 +264,10 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
 /// was written; held batches are retried after each successful rewrite,
 /// before newer work. One that still does not fit right after a successful
 /// rewrite (the WAL is then its live image) is reported failed with the
-/// typed, non-fatal `Rejected("WAL live image leaves no room")` (R4-1); a
-/// node's WAL account keeps that from happening there.
+/// typed, non-fatal `Rejected("WAL live image leaves no room")` (R4-1). A
+/// node's WAL account keeps every transition it admits within the mark plus
+/// the reserve, so there this is reached only from a live state recovered
+/// past that point.
 struct WalThread<L: LogStore> {
     store: L,
     binding: WorkerBinding,
@@ -329,8 +331,9 @@ impl<L: LogStore> WalThread<L> {
             // ST2 round 4 (R4-1): the WAL now holds only its live image, so a
             // batch that still does not fit never will until the live log
             // shrinks. Report it typed and non-fatal instead of holding it
-            // for ever. A node's WAL account makes this unreachable there (the
-            // live image stays under the high-water mark plus the reserve).
+            // for ever. A node's WAL account keeps admitted transitions under
+            // the high-water mark plus the reserve; a live state recovered
+            // past it can still reach this, typed.
             if !self.fenced {
                 fail_held(
                     &mut self.parked,

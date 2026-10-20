@@ -1106,19 +1106,32 @@ Defaults, derived from the store limits:
   follower appends carrying only such noops are live entries a rewrite must
   keep, so they are admitted against the node's WAL account like writes, but
   may use the control reserve above the 75% mark (1 MiB by default), shared
-  by all groups. Hence the live WAL after a rewrite never exceeds the mark
-  plus the reserve, and every write already accepted fits after one rewrite.
+  by all groups. A follower append is checked on exactly the new entries it
+  would write (entries the replica already holds are not counted): data under
+  the mark, noop-only appends under the mark plus the reserve. So no
+  transition the account admits takes the live WAL after a rewrite past the
+  mark plus the reserve, and every write already accepted fits after one
+  rewrite. This covers admission only: a store reopened with a live log
+  already past that point (for example with smaller limits) is not refused at
+  startup; it shows the typed refusals below, and recovery with unchanged
+  limits is not promised. Growth from a snapshot install's anchor is argued
+  (at most one configuration per group), not tested.
   A replica whose WAL has no room for one more noop does not campaign
   (`noop_refusals`), steps down if it wins (`last_step_down=WalCapacity@TERM`),
   and declines noop-only appends (`wal_noop_refused` counts all three). While
   that lasts maintenance rewrites whenever the WAL has grown since the last
-  rewrite (`wal_noop_starved`), so dead vote and commit records alone cannot
-  keep a group without a leader. If the live log itself fills it (only after
-  many elections whose leaders never learned an acknowledgement), the replica
+  rewrite (`wal_noop_starved`), at most once per retry interval and also at
+  scheduled deadlines, so dead vote and commit records alone cannot keep a
+  group without a leader. If the live log itself fills it (only after many
+  elections whose leaders never learned an acknowledgement), the replica
   stays in this typed state, writing nothing; recover by reopening the
   unchanged store with a larger `max_wal_bytes`. A replica of a group whose
   other voters have room is not stuck: they elect, and their commits let it
-  apply, checkpoint and rewrite.
+  apply, checkpoint and rewrite. If a quorum lacks room (both followers of a
+  three-replica group), the leader keeps its role without stepping down and
+  commits nothing; `replica_stall` and the followers' `wal_noop_refused` and
+  `wal_declined_appends` show it. Recover with the same operator step on the
+  full replicas; the group commits once they have room again.
 - **Configuration checks.** Startup refuses store limits under which a write
   could never fit: the WAL space above the 75% mark must hold the largest
   batch plus the control reserve (`MaintenanceError::WalHeadroomTooSmall`),
@@ -1153,9 +1166,15 @@ It disables both and cannot be combined with any override. Each group then
 stops accepting writes at its store limits: a write at the retained-entry
 limit is refused `ERR StoragePressure`, which stays until an operator
 checkpoint (`client ... checkpoint`) frees space. A leader elected at the entry
-limit appends its first entry from the reserve and commits; only once the
-reserve is used up does it stay leader without it, refusing typed, until an
-operator checkpoint frees space. Any other value, a duplicate
+limit appends its first entry from the reserve and commits. Once the reserve
+is used up there are two cases. If a checkpoint up to the commit index could
+free room (part of the retained log is committed), the leader stays leader
+without its first entry (`leader_noop_pending=true`), refusing proposals and
+reads typed, until an operator checkpoint frees space; it then appends the
+entry. If the uncommitted part of its log alone fills the capacity, no
+checkpoint can help: it steps down at once (`last_step_down=RetainedEntryCapacity`,
+counted in `step_downs`) and skips its next two campaign attempts, so a
+replica with a shorter log can win and commit. Any other value, a duplicate
 flag, or a threshold above half the retained-entry limit is refused before any
 file or listener is created. Supply the same flags again on recovery.
 
