@@ -953,6 +953,108 @@ leadership_maintenance 12, learners 25, routed 111, logical_activation_applicati
 7, provider_conformance 42, lifetime_apply_never_errs 4, raft 79, wire 18,
 transfer_source 8. Matched workspace: by the pre-push hook.
 
+#### DR1 round 5 schema plan (20 October 2026, before editing; PR 15)
+
+GPT-6.1-Sol's round-4 review (5580545343) requested changes: no P1, two P2s in
+the compatibility contract and one P3. Claude Opus 5.5 approved (5580265645)
+with the same two gaps as P3s. The orchestrator adopted Sol's position:
+incompatible replicas are refused at readiness, so the identity fix belongs in
+DR1; reclaiming the Maintenance and activation lifetime tables stays DR2/AI3.
+Why these pieces and no others: readiness is the admission point this PR
+already owns, and both P2s are inputs missing from its exact compare. Nothing
+here touches the per-write path or a persisted format.
+
+1. **Wrapper families are part of the identity (Sol P2-1).**
+   - *Cause.* `InnerProfile` records schema numbers only, and in-tree families
+     reuse numbers (`ROUTED_APPLICATION_SCHEMA` = `TRANSFER_SOURCE_SCHEMA` =
+     `CREATED_NAMESPACE_SCHEMA` = `BUCKET_COUNTER_SCHEMA` = 1). So
+     `TransferSource<BucketCounter>` and `Routed<Routed<BucketCounter>>` both
+     declare schema 1 over `[1, 1]`, as do `CreatedNamespace` and
+     `TransferSource<Routed<…>>`.
+   - *Data shape.* `raft::ApplicationFamily(u16)`: a registry of in-tree
+     protocol families in one place (`src/raft/readiness.rs`), values
+     1..=0x7fff reserved for in-tree families, 0x8000.. for third parties
+     (`ApplicationFamily::external`), 0 = `UNREGISTERED` (identified by schema
+     alone, the behaviour before this round). Every layer is identified by
+     (family, schema, configuration), not by schema alone. Per-layer rather
+     than family bits inside the schema, because the schemas are also
+     checkpoint, image and directory-status constants: changing them would
+     change persisted formats and goldens for no readiness benefit.
+   - *Why it closes the collision.* Two stacks match only if every layer has
+     the same family, schema and configuration in the same order, so two
+     families can no longer present the same value, whatever numbers they use.
+     Fixed width (no hashing): at most 1 + 7 layers.
+2. **Decision-affecting configuration is compared exactly (Sol P2-2 = Opus
+   P3-1).**
+   - *Cause.* A wrapper's own limits (Maintenance capacity, `RoutedLimits`,
+     activation limits, export/import sizes, adoption and fence limits) change
+     outcomes but only reach readiness through the byte envelopes, which are
+     compared as `declared ≥ actual`.
+   - *Data shape.* `raft::LayerIdentity { family, configuration: [u64; 4] }`
+     (`LAYER_CONFIGURATION_WORDS` = 4). New field
+     `ReadinessRequirements::identity` (the application's own layer), and every
+     `InnerProfile` layer becomes `InnerLayer { schema, identity }`.
+     `InnerProfile::wrapping(inner)` pushes the inner's schema and identity,
+     then the inner's own layers; `InnerProfile::of` uses `UNREGISTERED` for an
+     inner that declares no requirements.
+   - *Compare.* `validate_deployment_requirements` (default and the Counter's
+     override) refuses `UnsupportedSchema` unless schema, identity and the whole
+     inner profile are equal; then `declared ≥ actual` applies only to
+     `command_bytes`/`snapshot_bytes`, which are storage reservations. Identity
+     is checked before the envelopes, so a capacity skew is refused both ways
+     with the same typed error.
+   - *Classification (audit of the eight generic wrappers; recorded as a
+     table in the implemented section).* Exact: every limit or mode the
+     wrapper consults when deciding a committed entry, and every limit bounding
+     its checkpoint encoding. Envelope: the two reservation sizes. Deployment
+     identity (group, grant manifest, plan, intent, store mappings, the
+     initial inner checkpoint embedded in a binding): the host's group plan,
+     shared by every replica of the group and bound in the committed
+     bootstrap entry; not carried by readiness (variable length, and comparing
+     it without hashing would need the whole plan in the frame). It is a host
+     obligation, recorded as a limitation with owner DR2.
+   - *Leaves.* Every in-tree leaf gets its family. The Counter's limits are
+     already in its injective schema (configuration zero); `BucketCounter` and
+     `Directory` limits join their configuration words. Metadata transfer,
+     logical voter and transaction leaves: family only in this round, each
+     classified in the table with its owner.
+   - *Wire.* The learner readiness frame (tags 12/13) carries the identity
+     (u16 family + 4 × u64) after the envelopes, and each profile layer as u64
+     schema + identity. Unpublished format break, as in round 4: a
+     mixed-revision frame fails with a typed decode error (`Truncated` or
+     trailing bytes); no migration.
+   - *Sizes.* `ReadinessRequirements` grows from 88 to about 400 bytes. To keep
+     the per-write types unchanged, `Event::CheckLearnerReadiness` boxes its
+     requirements and `Raft` keeps the pending request boxed; `Event`,
+     `Message` and `Raft` sizes are checked before and after.
+   - *Ownership/cleanup.* Pure values; no state, nothing to clean up. The
+     bootstrap bindings and restore checks stay as defence in depth.
+3. **Docs and the scoped guarantee (P3).** Counter format is 5 (COUNTER_SERVICE.md,
+   MAINTENANCE.md); the service's maintenance profile is format 3, schema
+   `maintenance_schema(3, Counter::schema(limits))`; `--help` says so.
+   Limitations with owner "DR2 / application deployment-recovery admission"
+   (activation: AI3): static bootstrap exchanges no application requirements,
+   and a voter reopening a WAL with no checkpoint replays under its current
+   configuration (Sol's probe: 7 vs 10). Host obligation: identical complete
+   application configuration at initial bootstrap, unchanged configuration for
+   checkpoint-less recovery. Third-party wrappers must propagate
+   `InnerProfile::wrapping`/`of` (or forward the inner requirements when
+   transparent) and declare their family and configuration: a trusted-provider
+   obligation.
+4. **Tests (permanent).** Sol's two cross-family pairs refused both ways with
+   `UnsupportedSchema`, directly and through the real learner verifier
+   (`tests/learners.rs` cluster, grant targeting group 1); Sol's Maintenance
+   capacity 2/4 and Routed operations 4/7 pairs, plus Opus's
+   `opus_r4_maintenance_capacity_skew`, refused at readiness both ways and
+   through the learner verifier; one exact-configuration case per wrapper whose
+   readiness is reachable in a unit test; wire round trip of identities and
+   refusal of a truncated frame.
+5. **Regression and CPU.** Keep every earlier fix and test. Before/after: the
+   finality tests and Sol's round-2/3/4 probes in a temporary target, run with
+   e32d0511's and this branch's `src/` in this worktree. Goldens: no schema
+   changes, so none should change. CPU: readiness and construction only; the
+   admission and apply paths are untouched.
+
 ## Logical-voter reliability track (opened 18 October 2026)
 
 Goal: logical parents and their backing children run indefinitely with bounded
