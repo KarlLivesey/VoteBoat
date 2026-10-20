@@ -290,7 +290,7 @@ impl Raft {
             };
         }
         let suffix_offset = self.first_new_entry(entries)?;
-        if let Some(declined) = self.decline_new_data(
+        let bound = match self.decline_new_data(
             entries,
             suffix_offset,
             previous_index,
@@ -298,8 +298,9 @@ impl Raft {
             hard,
             old,
         ) {
-            return declined;
-        }
+            std::ops::ControlFlow::Continue(bound) => bound,
+            std::ops::ControlFlow::Break(declined) => return declined,
+        };
         let matching = entries.last().map_or(previous_index, |e| e.index);
         let commit = self.durable.commit_index.max(leader_commit.min(matching));
         let mut reply = self.reply(
@@ -318,7 +319,7 @@ impl Raft {
             Self::take_append_suffix(entries, offset, tight_payloads)
         });
         if hard != old || suffix.is_some() || commit != self.durable.commit_index {
-            self.persist(hard, commit, suffix, After::Reply, Some(reply))
+            self.persist_bounded(hard, commit, suffix, After::Reply, Some(reply), bound)
         } else {
             Ok(vec![Effect::Send(reply)])
         }
@@ -332,8 +333,12 @@ impl Raft {
     /// checkpoint and compact. A suffix that conflicts with held entries is
     /// still truncated (a control record with no entries): truncation is what
     /// frees a deposed leader's space, and declining it could last for ever on
-    /// an idle group. Noop-only suffixes pass unless the node's WAL has no
-    /// room for them above the mark (R4-1).
+    /// an idle group. The WAL check (R4-1, R5-1) bounds exactly the validated
+    /// new suffix: data must fit under the mark, noop-only suffixes under the
+    /// mark plus the reserve. Entries the log already holds are not written
+    /// again, so they are not counted. One walk over the new suffix gives its
+    /// bound and whether it carries data; the bound is returned for staging.
+    /// A volatile core without a bounded WAL stages no bytes and skips it.
     fn decline_new_data(
         &mut self,
         entries: &[LogEntry],
@@ -342,43 +347,66 @@ impl Raft {
         leader_commit: u64,
         hard: HardState,
         old: HardState,
-    ) -> Option<Result<Vec<Effect>, RaftError>> {
-        let offset = suffix_offset?;
+    ) -> std::ops::ControlFlow<Result<Vec<Effect>, RaftError>, Option<usize>> {
+        use std::ops::ControlFlow;
+        let Some(offset) = suffix_offset else {
+            return ControlFlow::Continue(None);
+        };
         let new = &entries[offset..];
-        // Every ordinary append: no pressure, and the whole retained log plus
-        // the new entries fits (the kept prefix is never longer than the log).
+        let growth = (!self.volatile || self.wal_room.is_some()).then(|| suffix_growth(new));
+        let bound = growth.map(|(bound, _)| bound);
+        // Every ordinary append: no pressure, the new suffix fits under the
+        // mark, and the whole retained log plus the new entries fits (the
+        // kept prefix is never longer than the log).
         if !self.storage_pressure
+            && self
+                .wal_room
+                .is_none_or(|room| bound.is_some_and(|bound| bound <= room.data))
             && self.durable.entries.len().saturating_add(new.len())
                 <= self.limits.retained_entry_capacity()
         {
-            return None;
+            return ControlFlow::Continue(bound);
         }
-        self.decline_new_data_slow(new, offset, previous_index, leader_commit, hard, old)
+        debug_assert_eq!(new[0].index - 1, previous_index + offset as u64);
+        match self.decline_new_data_slow(new, growth, leader_commit, hard, old) {
+            Some(declined) => ControlFlow::Break(declined),
+            None => ControlFlow::Continue(bound),
+        }
     }
     #[cold]
     #[inline(never)]
     fn decline_new_data_slow(
         &mut self,
         new: &[LogEntry],
-        offset: usize,
-        previous_index: u64,
+        growth: Option<(usize, bool)>,
         leader_commit: u64,
         hard: HardState,
         old: HardState,
     ) -> Option<Result<Vec<Effect>, RaftError>> {
         let from = new[0].index;
-        let data = new.iter().any(|e| !matches!(e.payload, EntryPayload::Noop));
+        let data = growth.map_or_else(
+            || new.iter().any(|e| !matches!(e.payload, EntryPayload::Noop)),
+            |(_, data)| data,
+        );
         let kept = from.saturating_sub(self.durable.base_index() + 1);
         let fits =
             kept.saturating_add(new.len() as u64) <= self.limits.retained_entry_capacity() as u64;
-        // R4-1: noop-only entries are declined only when the node's WAL has
-        // no room for them under the mark plus the reserve.
-        if fits && !(self.storage_pressure && (data || !self.wal_noop_room)) {
+        // R5-1: the new suffix's bound against the room for its kind.
+        let wal_over = self.wal_room.is_some_and(|room| {
+            let bound = growth.map_or(usize::MAX, |(bound, _)| bound);
+            bound > if data { room.data } else { room.noop }
+        });
+        if fits && !wal_over && !(data && self.storage_pressure) {
             return None;
         }
         self.declined_appends = self.declined_appends.saturating_add(1);
+        if wal_over {
+            self.wal_declined_appends = self.wal_declined_appends.saturating_add(1);
+            if !data {
+                self.wal_noop_declined_appends = self.wal_noop_declined_appends.saturating_add(1);
+            }
+        }
         let matching = from - 1;
-        debug_assert_eq!(matching, previous_index + offset as u64);
         let commit = self.durable.commit_index.max(leader_commit.min(matching));
         let conflict = from <= self.durable.last_index();
         Some(if conflict {
@@ -710,4 +738,15 @@ impl Raft {
         }
         Ok(effects)
     }
+}
+/// WAL bound of persisting `new` as one follower update, and whether any of
+/// its entries is data (R5-1). Equal to `LogUpdate::wal_bound` of that update.
+fn suffix_growth(new: &[LogEntry]) -> (usize, bool) {
+    let mut bound = crate::log::UPDATE_WAL_OVERHEAD;
+    let mut data = false;
+    for entry in new {
+        bound = bound.saturating_add(crate::log::entry_wal_bound(entry.payload_bytes()));
+        data |= !matches!(entry.payload, EntryPayload::Noop);
+    }
+    (bound, data)
 }

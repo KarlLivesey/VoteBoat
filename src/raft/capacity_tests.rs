@@ -563,13 +563,18 @@ fn leader_whose_uncommitted_log_fills_the_capacity_steps_down_and_another_wins()
 }
 
 impl Cluster {
-    /// Model the shard's WAL account for node `n` (R4-1): `room` is whether
-    /// one leader noop still fits under the high-water mark plus the reserve;
-    /// without it the node is also above the high-water mark.
+    /// Model the shard's WAL account for node `n` (R4-1, R5-1): `room` is
+    /// whether one leader noop still fits under the high-water mark plus the
+    /// reserve; without it the node is also above the high-water mark, with
+    /// one byte less than a noop transition left above it.
     fn wal_room(&mut self, n: u64, room: bool) {
         let core = self.cores.get_mut(&n).unwrap();
         core.set_wal_noop_room(room);
         core.set_storage_pressure(!room);
+        core.set_wal_room((!room).then_some(WalRoom {
+            data: 0,
+            noop: crate::log::NOOP_WAL_BOUND - 1,
+        }));
     }
 }
 
@@ -660,6 +665,10 @@ fn follower_without_wal_room_declines_noop_only_appends_until_room_returns() {
     let core = cluster.cores.get_mut(&3).unwrap();
     core.set_wal_noop_room(true);
     core.set_storage_pressure(true);
+    core.set_wal_room(Some(WalRoom {
+        data: 0,
+        noop: crate::log::NOOP_WAL_BOUND,
+    }));
     cluster.round();
     assert_eq!(cluster.cores[&3].state().last_index(), 101);
 }

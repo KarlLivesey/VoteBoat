@@ -47,6 +47,8 @@ mod snapshot_send;
 mod snapshots;
 mod timed;
 mod wal_account;
+#[cfg(test)]
+mod wal_admission_tests;
 pub use administration::*;
 pub use applications::*;
 pub use checkpoint_schedule::*;
@@ -841,7 +843,6 @@ impl<Q: ReadyScheduler> Shard<Q> {
         }
         let limits = self.limits;
         let wal = self.wal;
-        let pressure = self.pressure;
         let g = self.live(ticket)?;
         if g.core.has_pending_dependency() {
             return Err(RuntimeError::DependencyPending);
@@ -851,14 +852,16 @@ impl<Q: ReadyScheduler> Shard<Q> {
         };
         g.turn = (turn + 1) % 4;
         let q = g.queues[class].pop_front().unwrap();
-        // I5 and R4-1: live growth whose WAL bound no longer fits.
-        let (over, noop_over) = wal.over(&q.event);
+        // I5: a proposal whose WAL bound no longer fits under the mark.
+        let over = wal.over(&q.event);
         // R4-1: whether this core may campaign or place a leader noop.
         let noop_fits = wal.noop_fits();
-        g.core.set_wal_noop_room(noop_fits && !noop_over);
+        g.core.set_wal_noop_room(noop_fits);
+        // R5-1: a follower checks an append's validated new suffix itself.
+        g.core.set_wal_room(wal.rooms());
         let noop_refusals = (!noop_fits).then(|| g.core.wal_noop_refusals());
-        let over = over || noop_over;
         let proposal = matches!(q.event, Event::Propose { .. } | Event::Configure(_));
+        let declines = matches!(q.event, Event::Receive(_)).then(|| g.core.wal_declined_appends());
         let before = g.core.pending_wal_bytes();
         if connections::changes_connections(&q.event) {
             g.queued_connection_changes -= 1;
@@ -894,16 +897,15 @@ impl<Q: ReadyScheduler> Shard<Q> {
             } else {
                 Ok(())
             };
-            if over && !proposal {
-                // A follower append: decline its data for this step.
-                g.core.set_storage_pressure(true);
-            }
-            let result = checked.and_then(|_| g.core.step(q.event));
-            if over && !proposal {
-                g.core.set_storage_pressure(pressure);
-            }
-            result
+            checked.and_then(|_| g.core.step(q.event))
         };
+        let declines = declines.map(|(before, noop_before)| {
+            let (after, noop_after) = g.core.wal_declined_appends();
+            (
+                after.saturating_sub(before),
+                noop_after.saturating_sub(noop_before),
+            )
+        });
         let after = g.core.pending_wal_bytes();
         let proposed = operation.and_then(|operation| result.as_ref().ok()?.iter().find_map(|e| {
             let Effect::Persist(update) = e else { return None; };
@@ -923,8 +925,11 @@ impl<Q: ReadyScheduler> Shard<Q> {
             batch_members: Vec::new(),
         };
         self.wal.track(before, after);
-        if !stale_timer {
-            self.wal.count_refusal(proposal, over, noop_over);
+        if !stale_timer && proposal && over {
+            self.wal.refused = self.wal.refused.saturating_add(1);
+        }
+        if let Some((declined, noop_declined)) = declines {
+            self.wal.count_declines(declined, noop_declined);
         }
         if let Some(before) = noop_refusals {
             self.note_noop_refusals(ticket.group, before);
@@ -945,10 +950,12 @@ impl<Q: ReadyScheduler> Shard<Q> {
         self.live(ticket)?;
         let steady = self.connections_steady();
         let noop_fits = self.wal.noop_fits();
+        let wal_room = self.wal.rooms();
         let group = self.live(ticket)?;
         let before = group.core.pending_wal_bytes();
         // R4-1: a completion can make this core leader (its vote record).
         group.core.set_wal_noop_room(noop_fits);
+        group.core.set_wal_room(wal_room);
         let noop_refusals = (!noop_fits).then(|| group.core.wal_noop_refusals());
         let result = f(&mut group.core);
         let after = group.core.pending_wal_bytes();

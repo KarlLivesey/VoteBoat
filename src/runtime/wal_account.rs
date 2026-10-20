@@ -26,24 +26,34 @@
 //! is written (rewrites only lower it).
 //!
 //! Live log growth is checked before it is staged:
-//! - data (a proposal, a configuration entry, a follower append carrying any
-//!   non-noop entry) needs `A + bound <= H`: a proposal that does not fit is
-//!   refused with `RaftError::StoragePressure` before the log, a follower
-//!   declines that append;
-//! - noops (a leader's own noop, a follower append whose entries are all
+//! - data (a proposal, a configuration entry, a follower append whose new
+//!   suffix carries any non-noop entry) needs `A + bound <= H`: a proposal
+//!   that does not fit is refused with `RaftError::StoragePressure` before
+//!   the log, a follower declines that append;
+//! - noops (a leader's own noop, a follower append whose new suffix is all
 //!   noops) need `A + bound <= H + R`: a follower declines such an append, and
 //!   a core is told before every step whether one leader noop fits, so it does
 //!   not campaign, or steps down typed, when it does not.
 //!
+//! Proposals are checked here. A follower append is checked by the core
+//! (R5-1) on exactly the validated new suffix it would persist, after the
+//! identity and log-matching checks, against the room this account gives it
+//! before every step ([`WalAccount::rooms`]); entries it already holds are
+//! not written again and are not counted. The core reports its declines,
+//! which this account counts.
+//!
 //! Vote, term, commit and truncation records add no live bytes (one fixed
-//! record per group in a rewrite image) and are never refused. Hence a
-//! rewrite's live image stays at most `H + R`, and the node's headroom rule
-//! (`U - H >= max_batch_bytes + R`) makes every admitted batch fit after one
-//! rewrite. All groups share the one account, so the bound does not grow with
-//! the number of groups.
+//! record per group in a rewrite image) and are never refused. Hence an
+//! admitted transition never takes a rewrite's live image past `H + R`, and
+//! the node's headroom rule (`U - H >= max_batch_bytes + R`) makes every
+//! admitted batch fit after one rewrite. This covers admission; a live state
+//! recovered above the mark (for example after lowering limits) is not
+//! refused at construction, it is reported through the same typed capacity
+//! refusals. All groups share the one account, so the bound does not grow
+//! with the number of groups.
 use crate::{
-    log::{entry_wal_bound, EntryPayload, NOOP_WAL_BOUND, UPDATE_WAL_OVERHEAD},
-    raft::{Event, Rpc},
+    log::{entry_wal_bound, NOOP_WAL_BOUND, UPDATE_WAL_OVERHEAD},
+    raft::{Event, WalRoom},
 };
 
 /// The node's latest view of its bounded WAL: the high-water byte mark data
@@ -69,9 +79,9 @@ pub struct WalAccount {
     pub refused: u64,
     /// Follower appends declined because their bound did not fit (saturating).
     pub declined: u64,
-    /// Noop transitions the account refused (R4-1, saturating): campaigns not
-    /// started and leader step-downs because one noop did not fit, and
-    /// declined noop-only follower appends.
+    /// Noop transitions refused (R4-1, saturating): campaigns not started
+    /// and leader step-downs because one noop did not fit, and follower
+    /// appends declined because their noop-only new suffix did not fit.
     pub noop_refused: u64,
 }
 impl WalAccount {
@@ -96,32 +106,28 @@ impl WalAccount {
     pub(super) fn noop_fits(&self) -> bool {
         self.noop_room().is_none_or(|room| room >= NOOP_WAL_BOUND)
     }
-    /// Whether `event`'s live growth no longer fits: data under the mark
-    /// (first), noop-only appends under the mark plus the reserve (second).
-    pub(super) fn over(&self, event: &Event) -> (bool, bool) {
-        let Some(room) = self.room() else {
-            return (false, false);
-        };
-        match growth_bound(event) {
-            Some((bound, true)) => (bound > room, false),
-            Some((bound, false)) => (false, self.noop_room().is_some_and(|r| bound > r)),
-            None => (false, false),
-        }
+    /// The room a core checks a follower append against (R5-1).
+    pub(super) fn rooms(&self) -> Option<WalRoom> {
+        self.budget.map(|b| {
+            let used = self.used(b);
+            WalRoom {
+                data: b.limit.saturating_sub(used),
+                noop: b.limit.saturating_add(b.reserve).saturating_sub(used),
+            }
+        })
     }
-    /// Count one stepped event whose growth did not fit (`over`, including
-    /// `noop_over`): a refused proposal or a declined follower append.
-    pub(super) fn count_refusal(&mut self, proposal: bool, over: bool, noop_over: bool) {
-        if !over {
-            return;
-        }
-        if proposal {
-            self.refused = self.refused.saturating_add(1);
-        } else {
-            self.declined = self.declined.saturating_add(1);
-        }
-        if noop_over {
-            self.noop_refused = self.noop_refused.saturating_add(1);
-        }
+    /// Whether a proposal's live growth no longer fits under the mark.
+    pub(super) fn over(&self, event: &Event) -> bool {
+        let Some(room) = self.room() else {
+            return false;
+        };
+        growth_bound(event).is_some_and(|bound| bound > room)
+    }
+    /// Count follower appends a core declined in one step because their new
+    /// suffix did not fit, `noop` of them noop-only (R5-1).
+    pub(super) fn count_declines(&mut self, declined: u64, noop: u64) {
+        self.declined = self.declined.saturating_add(declined);
+        self.noop_refused = self.noop_refused.saturating_add(noop);
     }
     pub(super) fn refresh(&mut self, budget: Option<WalBudget>) {
         self.budget = budget;
@@ -138,30 +144,14 @@ impl WalAccount {
         }
     }
 }
-/// Upper bound of the live bytes `event` would stage, and whether they are
-/// data (`true`) or noops only (`false`): a proposal or configuration entry
-/// (data), or a follower append with entries.
-pub(super) fn growth_bound(event: &Event) -> Option<(usize, bool)> {
+/// Upper bound of the live bytes a proposal or configuration entry would
+/// stage (always data). Follower appends are bounded by the core (R5-1).
+pub(super) fn growth_bound(event: &Event) -> Option<usize> {
     match event {
-        Event::Propose { bytes, .. } => Some((proposal_bound(bytes.len()), true)),
-        Event::Configure(proposal) => Some((
+        Event::Propose { bytes, .. } => Some(proposal_bound(bytes.len())),
+        Event::Configure(proposal) => Some(
             UPDATE_WAL_OVERHEAD.saturating_add(entry_wal_bound(proposal.record.retained_bytes())),
-            true,
-        )),
-        Event::Receive(message) => match &message.rpc {
-            Rpc::Append { entries, .. } if !entries.is_empty() => {
-                let data = entries
-                    .iter()
-                    .any(|e| !matches!(e.payload, EntryPayload::Noop));
-                Some((
-                    entries.iter().fold(UPDATE_WAL_OVERHEAD, |sum, e| {
-                        sum.saturating_add(entry_wal_bound(e.payload_bytes()))
-                    }),
-                    data,
-                ))
-            }
-            _ => None,
-        },
+        ),
         _ => None,
     }
 }
@@ -173,7 +163,11 @@ pub(super) fn proposal_bound(payload: usize) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{identity::*, log::LogEntry, raft::Message};
+    use crate::{
+        identity::*,
+        log::{EntryPayload, LogEntry},
+        raft::{Message, Rpc},
+    };
     fn append(payloads: &[Option<usize>]) -> Event {
         let id = |n| StoreIdentity {
             id: StoreId::new(n).unwrap(),
@@ -222,24 +216,34 @@ mod tests {
             },
         })
     }
-    /// R4-1: noop-only appends are live growth checked against the reserve;
-    /// heartbeats (no entries) are not growth; any data entry makes the whole
-    /// append data.
+    /// R5-1: the shard bounds proposals; a follower append, whatever its
+    /// entries, is bounded by the core on its validated new suffix
+    /// (`wal_admission_tests`), never here on the whole received range.
     #[test]
-    fn appends_are_classified_as_data_or_noop_growth() {
+    fn only_proposals_are_bounded_by_the_shard() {
         assert_eq!(growth_bound(&append(&[])), None);
+        assert_eq!(growth_bound(&append(&[None, None])), None);
+        assert_eq!(growth_bound(&append(&[None, Some(10)])), None);
+        let propose = Event::Propose {
+            operation: crate::identity::OperationId::new(1).unwrap(),
+            bytes: vec![0; 10],
+        };
+        assert_eq!(growth_bound(&propose), Some(proposal_bound(10)));
         assert_eq!(
-            growth_bound(&append(&[None, None])),
-            Some((UPDATE_WAL_OVERHEAD + 2 * entry_wal_bound(0), false))
-        );
-        assert_eq!(
-            growth_bound(&append(&[None, Some(10)])),
-            Some((
-                UPDATE_WAL_OVERHEAD + entry_wal_bound(0) + entry_wal_bound(10),
-                true
-            ))
+            proposal_bound(10),
+            UPDATE_WAL_OVERHEAD + entry_wal_bound(10)
         );
         assert_eq!(NOOP_WAL_BOUND, UPDATE_WAL_OVERHEAD + entry_wal_bound(0));
+        let mut account = WalAccount::default();
+        assert!(!account.over(&propose), "no bounded WAL");
+        account.refresh(Some(WalBudget {
+            limit: proposal_bound(10) - 1,
+            published: 0,
+            reserve: 10_000,
+        }));
+        assert!(account.over(&propose), "data never uses the reserve");
+        account.count_declines(2, 1);
+        assert_eq!((account.declined, account.noop_refused), (2, 1));
     }
     /// R4-1: data room ends at the mark, noop room at the mark plus the
     /// reserve; staged and recently completed bytes count against both.
@@ -247,6 +251,7 @@ mod tests {
     fn noop_room_extends_past_the_mark_by_the_reserve_only() {
         let mut account = WalAccount::default();
         assert!(account.noop_fits(), "no bounded WAL: always room");
+        assert_eq!(account.rooms(), None);
         account.refresh(Some(WalBudget {
             limit: 10_000,
             published: 9_000,
@@ -257,6 +262,13 @@ mod tests {
         account.track(0, 2_000);
         assert_eq!(account.room(), Some(0));
         assert_eq!(account.noop_room(), Some(1_000));
+        assert_eq!(
+            account.rooms(),
+            Some(WalRoom {
+                data: 0,
+                noop: 1_000
+            })
+        );
         assert!(account.noop_fits());
         account.track(2_000, 2_500);
         assert_eq!(account.noop_room(), Some(500));

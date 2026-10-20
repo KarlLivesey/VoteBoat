@@ -387,6 +387,14 @@ struct PendingRead {
     acknowledgements: BTreeSet<NodeId>,
 }
 
+/// The node's WAL account room for one step (ST2 round 5, R5-1): bytes left
+/// under the high-water mark (`data`) and under the mark plus the control
+/// reserve (`noop`). Volatile host input.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct WalRoom {
+    pub data: usize,
+    pub noop: usize,
+}
 pub struct Raft {
     node: NodeId,
     binding: StoreBinding,
@@ -441,12 +449,22 @@ pub struct Raft {
     storage_pressure: bool,
     /// Volatile host input (R4-1): the node's WAL account holds one more
     /// leader noop under the high-water mark plus the control reserve. While
-    /// false this core does not campaign, steps down instead of placing its
-    /// noop, and (with `storage_pressure`) declines noop-only appends.
+    /// false this core does not campaign and steps down instead of placing
+    /// its noop.
     wal_noop_room: bool,
+    /// Volatile host input (R5-1): the node's WAL account room for this step,
+    /// `None` without a bounded WAL. A follower checks the validated new
+    /// suffix of an append against it: data under the mark, noop-only under
+    /// the mark plus the reserve.
+    wal_room: Option<WalRoom>,
     /// Campaigns not started and step-downs because no noop fitted
     /// (saturating).
     wal_noop_refusals: u64,
+    /// Follower appends declined because their new suffix's WAL bound did
+    /// not fit `wal_room`, and of those the noop-only ones (R5-1,
+    /// saturating).
+    wal_declined_appends: u64,
+    wal_noop_declined_appends: u64,
     // ST2 round 3 (I1): capacity step-downs, the last one, and how many
     // election timeouts this replica still lets pass without campaigning.
     capacity_step_downs: u64,
@@ -590,7 +608,10 @@ impl Raft {
             leader_noop_pending: false,
             storage_pressure: false,
             wal_noop_room: true,
+            wal_room: None,
             wal_noop_refusals: 0,
+            wal_declined_appends: 0,
+            wal_noop_declined_appends: 0,
             capacity_step_downs: 0,
             last_step_down: None,
             campaign_holdoff: 0,
@@ -840,10 +861,22 @@ impl Raft {
     pub(crate) fn set_wal_noop_room(&mut self, room: bool) {
         self.wal_noop_room = room;
     }
+    /// Host-set (R5-1): the node's WAL account room for the next step or
+    /// completion. Volatile scheduling input, never persisted or replicated.
+    #[inline]
+    pub(crate) fn set_wal_room(&mut self, room: Option<WalRoom>) {
+        self.wal_room = room;
+    }
     /// Campaigns this replica did not start, and leader roles it gave up,
     /// because the node's WAL had no room for a noop (R4-1, saturating).
     pub fn wal_noop_refusals(&self) -> u64 {
         self.wal_noop_refusals
+    }
+    /// Follower appends declined because their new suffix's WAL bound did
+    /// not fit the node's WAL room, and of those the noop-only ones (R5-1,
+    /// saturating).
+    pub fn wal_declined_appends(&self) -> (u64, u64) {
+        (self.wal_declined_appends, self.wal_noop_declined_appends)
     }
     /// As leader, whether every other replica has acknowledged `index`, so a
     /// compaction there leaves no replica behind the new base (which would
