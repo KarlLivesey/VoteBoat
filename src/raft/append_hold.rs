@@ -13,9 +13,10 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Quorum-first held follower Appends. The rule decides only whether a ready
-//! voter's next data Append is created now or at its release; the Append itself
+//! voter's next Append is created now or at its release; the Append itself
 //! always comes from `append_for`, so its content, request bookkeeping, acks and
-//! the commit rule are unchanged.
+//! the commit rule are unchanged. A held voter's commit-only notice waits too:
+//! its next data Append or the heartbeat carries the commit.
 use super::*;
 
 /// Whether the leader may hold a ready follower's next data Append.
@@ -71,8 +72,8 @@ impl Raft {
         }
         self.membership().is_satisfied(&reached)
     }
-    /// The decision point, asked before `append_for` creates a data Append for
-    /// a ready peer on the ordinary-progress paths only.
+    /// The decision point, asked before `append_for` creates an Append for a
+    /// ready peer on the ordinary-progress paths only.
     pub(super) fn hold_append(&self, peer: NodeId) -> bool {
         if self.append_hold == AppendHold::Off
             || self.role != Role::Leader
@@ -87,6 +88,12 @@ impl Raft {
         let Some(&next) = self.next_index.get(&peer) else {
             return false;
         };
+        if next > last {
+            // Only a newer commit to report: the next data Append or the
+            // heartbeat carries it, unless it is the first commit covering the
+            // latest configuration entry, which goes out at once.
+            return !self.configuration_notice;
+        }
         // A data Append (no snapshot), from a peer that holds everything before
         // the latest leader batch and that one Append brings to the tip.
         next > self.durable.base_index()
@@ -99,6 +106,14 @@ impl Raft {
     pub(super) fn hold(&mut self, peer: NodeId) {
         self.held.insert(peer, self.durable.last_index());
     }
+    /// A held peer that owes entries up to its mark is released by any later
+    /// durable leader batch, so a held Append carries at most two batches. A
+    /// held commit notice (the peer had every entry) is decided afresh.
+    fn hold_due(&self, peer: NodeId, last: u64) -> bool {
+        self.held.get(&peer).is_some_and(|mark| {
+            *mark < last && self.next_index.get(&peer).is_some_and(|next| next <= mark)
+        })
+    }
     /// Ordinary-progress sends with holds on: due holds go first, so their
     /// Appends count toward the quorum; then voters by ack recency, then the
     /// remaining peers in membership order.
@@ -109,9 +124,9 @@ impl Raft {
         let last = self.durable.last_index();
         let mut order: Vec<NodeId> = self
             .held
-            .iter()
-            .filter(|(_, mark)| **mark < last)
-            .map(|(peer, _)| *peer)
+            .keys()
+            .copied()
+            .filter(|peer| self.hold_due(*peer, last))
             .collect();
         for peer in self.ack_order.iter().chain(&self.peers()) {
             if !order.contains(peer) {
@@ -128,9 +143,13 @@ impl Raft {
             {
                 continue;
             }
-            let due = self.held.get(&peer).is_some_and(|mark| *mark < last);
-            if !due && self.hold_append(peer) {
-                if !self.held.contains_key(&peer) {
+            if !self.hold_due(peer, last) && self.hold_append(peer) {
+                // A new hold, or a held commit notice that now owes entries.
+                if self
+                    .held
+                    .get(&peer)
+                    .is_none_or(|mark| self.next_index[&peer] > *mark)
+                {
                     self.hold(peer);
                 }
                 continue;

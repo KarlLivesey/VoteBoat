@@ -404,6 +404,9 @@ pub struct Raft {
     ack_order: Vec<NodeId>,
     // Leader durable tip before the most recent leader batch became durable.
     batch_floor: u64,
+    // Set when a leader's commit first covers its latest configuration entry;
+    // that commit notice is never held. Cleared by the next heartbeat.
+    configuration_notice: bool,
     admitted_ranges: BTreeMap<NodeId, AdmittedRange>,
     empty_append_aliases: BTreeMap<NodeId, EmptyAppendAlias>,
     // Candidate-only transfer cursors; never quorum replication or ballots.
@@ -536,6 +539,7 @@ impl Raft {
             held: BTreeMap::new(),
             ack_order: Vec::new(),
             batch_floor: 0,
+            configuration_notice: false,
             admitted_ranges: BTreeMap::new(),
             empty_append_aliases: BTreeMap::new(),
             repair_requests: BTreeMap::new(),
@@ -1106,6 +1110,7 @@ impl Raft {
                 }
                 if self.role == Role::Leader {
                     self.broadcast_into(out)?;
+                    self.configuration_notice = false;
                     out.extend(self.read_probes());
                 }
                 Ok(Vec::new())
@@ -1336,6 +1341,12 @@ impl Raft {
         }
         if configuration_changed {
             self.configuration_changed()?;
+        }
+        if self.role == Role::Leader
+            && previous_commit < self.membership.last_configuration_index()
+            && self.membership.last_configuration_index() <= self.durable.commit_index
+        {
+            self.configuration_notice = true;
         }
         // A retiring leader must publish its durable final commitment before
         // discarding replication state. These bounded announcements carry no

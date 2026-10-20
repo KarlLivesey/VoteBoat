@@ -230,6 +230,7 @@ impl Raft {
     pub(super) fn clear_replication_requests(&mut self) {
         self.requests.clear();
         self.held.clear();
+        self.configuration_notice = false;
         self.admitted_ranges.clear();
         self.empty_append_aliases.clear();
     }

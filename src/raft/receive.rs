@@ -428,7 +428,7 @@ impl Raft {
                     || (self.progress_sends_enabled()
                         && sent.commit_at_start < self.durable.commit_index))
             {
-                if prefix < self.durable.last_index() && self.hold_append(m.from) {
+                if self.hold_append(m.from) {
                     self.hold(m.from);
                 } else {
                     out.push_back(self.append_for(m.from)?);

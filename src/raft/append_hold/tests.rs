@@ -101,16 +101,14 @@ fn first_batch_holds_three(leader: &mut Raft) -> Message {
 fn quorum_follower_is_sent_at_once_and_the_held_one_gets_both_batches_next() {
     let mut leader = held(AppendHold::QuorumFirst);
     let two = first_batch_holds_three(&mut leader);
-    // The quorum ack commits; the commit notice goes to 2 only, 3 stays held.
+    // The quorum ack commits. 2's commit notice is held as well: its next
+    // data Append (or the heartbeat) carries the commit.
     let effects = reply(&mut leader, &two);
     assert_eq!(leader.state().commit_index, 3);
-    let notice = sent(&effects, 2).unwrap();
-    assert_eq!(range(&notice), (3, vec![]));
-    assert!(sent(&effects, 3).is_none());
-    assert!(reply(&mut leader, &notice).is_empty());
-    assert!(leader.held.contains_key(&node(3)));
+    assert!(effects.iter().all(|e| !matches!(e, Effect::Send(_))));
+    assert_eq!(leader.held, BTreeMap::from([(node(2), 3), (node(3), 3)]));
     // The next durable leader batch releases 3 with one Append for both
-    // batches; that Append covers the quorum, so the ready 2 is held now.
+    // batches; that Append covers the quorum, so 2 stays held, now owing 4..=5.
     let effects = batch(&mut leader, 3, 2);
     let three = sent(&effects, 3).unwrap();
     assert_eq!(range(&three), (1, vec![2, 3, 4, 5]));
@@ -118,6 +116,34 @@ fn quorum_follower_is_sent_at_once_and_the_held_one_gets_both_batches_next() {
     assert_eq!(leader.held, BTreeMap::from([(node(2), 5)]));
     reply(&mut leader, &three);
     assert_eq!(leader.state().commit_index, 5);
+    // The third batch releases 2 with both of its batches and the commit.
+    let effects = batch(&mut leader, 5, 2);
+    let two = sent(&effects, 2).unwrap();
+    assert_eq!(range(&two), (3, vec![4, 5, 6, 7]));
+    let Rpc::Append { leader_commit, .. } = two.rpc else {
+        unreachable!()
+    };
+    assert_eq!(leader_commit, 5);
+    assert!(sent(&effects, 3).is_none());
+}
+
+#[test]
+fn commit_covering_a_configuration_entry_is_never_held() {
+    let mut leader = held(AppendHold::QuorumFirst);
+    let change = ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[4]));
+    let effects = accept(&mut leader, 100, change);
+    let effects = run(&mut leader, effects);
+    let two = sent(&effects, 2).unwrap();
+    let effects = reply(&mut leader, &two);
+    assert_eq!(leader.state().commit_index, 2);
+    assert!(leader.progress_sends_enabled());
+    assert!(leader.configuration_notice);
+    let notice = sent(&effects, 2).expect("configuration commit notice at once");
+    assert_eq!(range(&notice), (2, vec![]));
+    assert!(leader.held.is_empty());
+    // The heartbeat tells every peer; later commit notices may be held again.
+    step(&mut leader, Event::Heartbeat);
+    assert!(!leader.configuration_notice);
 }
 
 #[test]
