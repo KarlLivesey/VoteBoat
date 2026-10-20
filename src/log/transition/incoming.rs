@@ -262,22 +262,25 @@ impl OwnedNextLog {
     /// `current`, with no change to `current` since (its version is
     /// unchanged): the predecessor is `current`'s metadata, so an append or
     /// commit advance installs without comparing it. Other plans keep every
-    /// check.
+    /// check. The installed log's summary is written to `summary`, which is
+    /// left unchanged on error.
     pub(super) fn install_unchanged(
         self,
         current: &mut GroupLog,
-    ) -> Result<LogSummary, StorageError> {
+        summary: &mut LogSummary,
+    ) -> Result<(), StorageError> {
         match self.0 {
             OwnedChange::Append(append) => {
                 debug_assert!(append.check_install(LogMetadata::from_log(current)).is_ok());
-                Ok(install_append(current, append.suffix, append.summary))
+                *summary = install_append(current, append.suffix, append.summary);
             }
             OwnedChange::Commit(commit) => {
                 debug_assert_eq!(commit.predecessor, LogMetadata::from_log(current));
-                Ok(install_append(current, None, commit.summary))
+                *summary = install_append(current, None, commit.summary);
             }
-            other @ OwnedChange::Other { .. } => Self(other).install(current),
+            other @ OwnedChange::Other { .. } => *summary = Self(other).install(current)?,
         }
+        Ok(())
     }
     #[cfg(feature = "native")]
     pub(crate) fn into_change(self) -> OwnedChange {

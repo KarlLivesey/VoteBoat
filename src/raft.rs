@@ -814,12 +814,15 @@ impl Raft {
     }
     fn rollback_replicas(&self) -> usize {
         if self.durable.summary().is_plain() {
-            return self
-                .durable
-                .bootstrap
-                .voter_stores
-                .len()
-                .max(self.membership().replicas().count());
+            // A plain log has no configuration entry or snapshot membership:
+            // its accepted membership is the bootstrap electorate. Only a
+            // pending full plan can name other replicas.
+            let voters = self.durable.bootstrap.voter_stores.len();
+            debug_assert_eq!(self.membership.replicas().count(), voters);
+            return match self.pending.as_ref().and_then(|p| p.membership.as_deref()) {
+                Some(pending) => voters.max(pending.replicas().count()),
+                None => voters,
+            };
         }
         use crate::membership::ConfigurationChange;
         let base = self.durable.snapshot_membership.as_deref();

@@ -250,3 +250,33 @@ fn summary_and_version_follow_durable_configuration_compaction_and_snapshot_inst
     // Configuration, two commits, proposals, compaction and the install.
     assert!(changes >= 6, "only {changes} log changes observed");
 }
+
+#[test]
+fn plain_log_reservation_counts_the_bootstrap_voters_and_a_pending_configuration() {
+    // A plain log's membership is the bootstrap electorate, counted without
+    // walking it; a pending full plan that adds replicas still widens the
+    // reservation before it is durable.
+    let mut leader = core();
+    assert!(leader.durable.summary().is_plain());
+    assert_eq!(leader.rollback_replicas(), 3);
+    assert_eq!(
+        leader.effect_reservation(100),
+        leader.reserve_effects(100, 3)
+    );
+    let effects = accept(
+        &mut leader,
+        100,
+        ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[4, 5])),
+    );
+    assert!(leader.durable.summary().is_plain());
+    assert!(leader.pending.as_ref().unwrap().membership.is_some());
+    assert_eq!(leader.membership().replicas().count(), 5);
+    assert_eq!(leader.rollback_replicas(), 5);
+    assert_eq!(
+        leader.effect_reservation(100),
+        leader.reserve_effects(100, 5)
+    );
+    durable(&mut leader, effects);
+    assert!(!leader.durable.summary().is_plain());
+    assert_eq!(leader.rollback_replicas(), 5);
+}

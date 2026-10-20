@@ -54,11 +54,11 @@ impl SummarizedLog {
     /// was made from, so its predecessor comparison is skipped; otherwise the
     /// full checked install runs. On error nothing changes.
     pub(crate) fn install(&mut self, next: OwnedNextLog, planned: u64) -> Result<(), StorageError> {
-        self.summary = if planned == self.version {
-            next.install_unchanged(&mut self.log)?
+        if planned == self.version {
+            next.install_unchanged(&mut self.log, &mut self.summary)?;
         } else {
-            next.install(&mut self.log)?
-        };
+            self.summary = next.install(&mut self.log)?;
+        }
         self.version = self.version.wrapping_add(1);
         self.debug_check();
         Ok(())
