@@ -1367,11 +1367,18 @@ cherry-pick, as in round 4), ≥ 7 pairs, and the framework single-1 cell
 Code: `a61a8ebf` (R5-1), `4460bbc3` (R5-2), `365ef635` (R5-3 documentation),
 `1e159727` (R5-1 trim after measurement: the room is set only before
 received messages), then this record. "Before" = the new tests run against cd90fb7a's `src/` in
-this worktree (the tests use only API cd90fb7a already has).
+this worktree. (Corrected in round 6, Opus round-5 P3-2: the tests do not
+all use API cd90fb7a has. `wal_admission_tests.rs` line 274,
+`assert_eq!(core.wal_declined_appends(), (1, 1))` in
+`matched_data_prefix_cannot_bypass_the_shared_noop_bound`, calls the round-5
+`Raft::wal_declined_appends`, so the file compiles on cd90fb7a only with that
+one assertion removed. Every recorded cd90fb7a failure is at an earlier
+assertion of its test, so removing it changes none of them; Opus reproduced
+exactly these failures that way.)
 
 | Finding | Mechanism | Test | cd90fb7a | This branch |
 | --- | --- | --- | --- | --- |
-| Sol P2-1: a matched data prefix bypasses the noop byte check | The core checks the validated new suffix it would persist against `WalRoom { data, noop }` (bytes under `H` and `H + R`, set by the shard before every step and completion); one walk gives the suffix's bound and data flag, reused as the staged bound. The shard bounds proposals only and adds the core's WAL declines to its account | `wal_admission_tests::matched_data_prefix_cannot_bypass_the_shared_noop_bound` (Sol's procedure: real `Shard`, `Raft`, `apply_batch`, native checkpoint codec; 4.5 MiB WAL, 64 KiB reserve, 1 MiB batches, 400,000 entries; two groups; 616 bytes of noop room; command 2 matching, 64 new noops at 3–66 in terms 2–65) | Fails: staged bound 4,608, re-encoded live image 3,555,800 > `H + R` = 3,555,328 (by 472) | Passes: suffix declined (`declined` 1, `noop_refused` 1, core `wal_declined_appends` (1, 1)), only the term record staged (512), live image unchanged at 3,554,712, term 65 kept |
+| Sol P2-1: a matched data prefix bypasses the noop byte check | The core checks the validated new suffix it would persist against `WalRoom { data, noop }` (bytes under `H` and `H + R`, set by the shard before every received message is stepped, the one path that reads it; corrected in round 6, Opus round-5 P3-1); one walk gives the suffix's bound and data flag, reused as the staged bound. The shard bounds proposals only and adds the core's WAL declines to its account | `wal_admission_tests::matched_data_prefix_cannot_bypass_the_shared_noop_bound` (Sol's procedure: real `Shard`, `Raft`, `apply_batch`, native checkpoint codec; 4.5 MiB WAL, 64 KiB reserve, 1 MiB batches, 400,000 entries; two groups; 616 bytes of noop room; command 2 matching, 64 new noops at 3–66 in terms 2–65) | Fails: staged bound 4,608, re-encoded live image 3,555,800 > `H + R` = 3,555,328 (by 472) | Passes: suffix declined (`declined` 1, `noop_refused` 1, core `wal_declined_appends` (1, 1)), only the term record staged (512), live image unchanged at 3,554,712, term 65 kept |
 | same, mixed suffix | unchanged rule for data | `a_new_suffix_with_data_is_still_declined_above_the_mark` (noops + new command 6, with and without a matching prefix) | Passes (declined) | Passes (declined, counted as data only) |
 | same, with room | exact new-suffix accounting | `a_matched_prefix_append_with_room_stages_only_the_new_suffix_bound` | Fails: the accepted append was counted as a decline (`declined` 1) | Passes: indexes 3–66 taken, staged 4,608 = the new suffix's bound, no decline counted |
 | Sol P2-2: normal deadlines suppress starvation rewrites | A below-threshold deadline moves on one interval, counts the skip, and the early rules then run as at any poll (same `retry_ms` spacing, same growth condition) | `maintenance::tests::refused_noop_gets_a_rewrite_when_every_poll_is_a_deadline` (Sol's numbers) | Fails: 0 rewrites in 100 polls, `skipped` 100 | Passes: rewrite due at the first deadline, `skipped` 1 |

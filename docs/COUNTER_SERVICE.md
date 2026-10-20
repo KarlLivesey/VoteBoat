@@ -1055,17 +1055,21 @@ Defaults, derived from the store limits:
   reach the log; nothing was admitted, so the client retries after a backoff.
   Checkpoints run for every group and a rewrite runs as soon as a sixteenth of
   the ceiling (4 MiB) is reclaimable. Writes resume once occupancy is below 50%
-  and nothing is held. Writes admitted before the state began are never
-  refused for capacity: a write that does not fit is held on the WAL thread and
+  and nothing is held. The state is checked once per node poll; a write that
+  arrives before the poll sees the WAL cross the mark is still checked against
+  the bytes (next bullet). A write that has reached the log is never refused
+  for capacity: one that does not fit yet is held on the WAL thread and
   written after the next rewrite. Heartbeats, votes, terms, commit records and
-  checkpoints are never refused; the leader keeps its role. A follower in the
-  high-water state keeps following the leader (heartbeats, term and commit)
-  but takes no new entries until its own rewrite brings it below 50%; the
-  leader commits with the other replicas and resends the range. If the
+  checkpoints are never refused; the leader keeps its role. The high-water
+  state refuses only client writes: a follower keeps following the leader
+  (heartbeats, term and commit) and takes every append whose new entries fit
+  the WAL account below (data under the 75% mark, noop-only appends under
+  the mark plus the control reserve), whatever its occupancy; one that does
+  not fit is declined without a reply and the leader resends the range. If the
   leader's entries conflict with the follower's own uncommitted suffix (a
   deposed leader), the follower still truncates that suffix (a small control
   record), which is what frees its space; it then takes the resent entries
-  once below 50%, without a snapshot, even on an idle group. A full WAL no
+  once they fit, without a snapshot, even on an idle group. A full WAL no
   longer fails the node.
 - **Admission accounting.** Each node also counts the WAL bytes of every
   write it has handed to the log but not yet written. A write that would take
@@ -1128,10 +1132,24 @@ Defaults, derived from the store limits:
   unchanged store with a larger `max_wal_bytes`. A replica of a group whose
   other voters have room is not stuck: they elect, and their commits let it
   apply, checkpoint and rewrite. If a quorum lacks room (both followers of a
-  three-replica group), the leader keeps its role without stepping down and
-  commits nothing; `replica_stall` and the followers' `wal_noop_refused` and
-  `wal_declined_appends` show it. Recover with the same operator step on the
-  full replicas; the group commits once they have room again.
+  three-replica group), the leader keeps its role and term without stepping
+  down and commits nothing; on the leader `replica_stall` names a follower
+  and its rounds keep growing. On each stuck follower, per resend:
+  - new entries carrying data that do not fit under the 75% mark:
+    `declined_appends` and `wal_declined_appends` grow, `high_water=true`,
+    `wal_noop_refused` does not move;
+  - new entries that are only noops and do not fit under the mark plus the
+    reserve: `declined_appends`, `wal_declined_appends` and `wal_noop_refused`
+    all grow, `high_water=true` and `wal_noop_starved=true`;
+  - new entries past the group's retained-entry capacity:
+    only `declined_appends` grows (`retained_entries` is near
+    `retained_capacity`); `wal_declined_appends` and `wal_noop_refused` do not
+    move.
+
+  `declined_appends` is per group; the `wal_*` counters are per node. Recover
+  with the same operator step on the full replicas (a larger `max_wal_bytes`,
+  or a larger `max_entries_per_group` for the last case); the group commits
+  once they have room again.
 - **Configuration checks.** Startup refuses store limits under which a write
   could never fit: the WAL space above the 75% mark must hold the largest
   batch plus the control reserve (`MaintenanceError::WalHeadroomTooSmall`),
@@ -1213,7 +1231,7 @@ local, volatile state of one group:
 | `wal_pending_bytes` | WAL bytes of writes handed to the log and not yet written |
 | `wal_refused_proposals`, `wal_declined_appends` | writes refused, and follower appends declined, by admission accounting |
 | `wal_held_ms` | how long the oldest write held by the WAL thread has waited (0 when none) |
-| `declined_appends` | appends whose new entries this replica declined (WAL pressure or retained-entry capacity) |
+| `declined_appends` | appends whose new entries this replica declined (no room in the WAL account, or past the retained-entry capacity) |
 | `replica_stall` | as leader, `NODE:ROUNDS` for the replica longest without acknowledging new entries, or `none` |
 | `step_downs`, `last_step_down` | capacity step-downs of this replica and the last one (`RetainedEntryCapacity@TERM` or `WalCapacity@TERM`) |
 | `wal_noop_refused` | noop transitions the node's WAL account refused since startup (campaigns not started, step-downs, declined noop-only appends; all groups) |
