@@ -3957,6 +3957,111 @@ calls.
   `Result::branch` on the plan) are a separate step, planned as an addendum
   here before editing, after the step-1 profile shows what is left.
 
+#### V3f implemented: in-place install (20 October 2026)
+
+Commits on `cpu/in-place-install` (from main `379668af`): `7b1a3038` (the
+schema plan above), `f4803a4d` (step 1: in-place install, clear after
+success, staging assertion, tests) and `e3471f31` (`Installed` declared
+beside `Pending`, so the code merges with V3e without a conflict; comment
+wording). Code head: `e3471f31`. The driver and the profiles used
+`f4803a4d`; `e3471f31` changes only a declaration's position and a comment.
+
+- **Public API: no change.** Internal: `OwnedNextLog::install_in_place`
+  replaces `install_unchanged`; `NextLog::check_install` and
+  `NextLog::install_in_place` (cold plans), `CompactDelta::install_ref`;
+  `SummarizedLog::install` takes `&mut OwnedNextLog`;
+  `Raft::install_pending_plan` and the `Installed` parts struct. The
+  by-value `OwnedNextLog::install` is now test-only (the owned provider uses
+  `prepare_install`, unchanged). `Pending` 1,104 B and `OwnedNextLog` 672 B
+  are unchanged; `pending_and_plan_sizes` is unchanged and passes.
+- **Guarantees kept.** Every install still checks exactly what it checked:
+  the V3d stamp rule decides the skip (`planned` must be `Some` and equal to
+  the log's own stamp; the stamp still travels in `Pending.planned`), and
+  every other install, and every cold plan, runs the same comparisons with
+  the same errors. All checks precede the first change, so a refused install
+  changes nothing, the plan included; the core then fences through the same
+  `storage_failed()` call as before, which empties the slot as before. The
+  existing V3d tests that assert "fenced, no pending dependency, log
+  unchanged" after a refused install are unchanged and pass.
+- **Difference from the plan.** Step 2 (staging) was not done. The step-1
+  profile leaves `stage_pending_into` at 65.0 ns memmove per write (its
+  `self.pending = Some(Pending { .. })` line: the 672 B plan argument and
+  the 256 B reply written into the slot; the x86 code writes them straight
+  into the slot, no stack temporary) and `persist_update_into` 14.1 ns (the
+  `?` on `plan_owned`'s `Result`). Removing the plan copy would need the
+  plan built inside the slot expression, that is a second, core-only,
+  two-phase planning API beside `plan_owned` / `plan_commit` / `plan_copy`,
+  for at most about 45 ns per write at width 1 (about 1.5% of the driver,
+  0.4% of a singleton write). Not worth a second planning path; recorded as
+  a candidate.
+- **Tests** (`src/raft/install_in_place_tests.rs`, debug and `--release`,
+  default and all features):
+  `a_failed_install_after_a_predecessor_mismatch_leaves_the_plan_intact`
+  (a follower append with its reply, and a commit advance, each staged and
+  then the log changed behind it),
+  `a_failed_install_of_a_foreign_plan_leaves_the_plan_intact` (a plan moved
+  to another core at the same version),
+  `a_failed_install_of_a_refused_full_plan_leaves_the_plan_intact` (a durable
+  leader's configuration entry, a full plan with a membership and an
+  admitted ticket, refused by the `NextLog` check) and
+  `a_successful_install_empties_the_slot`. Each failure test checks, after
+  `install_pending_plan`: today's error (`Storage(Rejected("transition plan
+  predecessor or update mismatch"))`), the pending transition intact (its
+  update, metadata, kind, full log, membership, ticket, `After`, reply and
+  stamp), the log, summary and stamp unchanged, the core not yet fenced; then
+  the public completion (`persist_volatile`, `complete`, or the completions'
+  install for the moved plan): the same error, fenced, no pending
+  dependency, log unchanged.
+- **Mutations** (temporary edits, restored by checkout):
+
+  | Edit | Result |
+  | --- | --- |
+  | M1 no `self.pending = None` after a successful install | debug lib: 146 of 555 fail (113 by the staging assertion); release `install_in_place`: the success test fails |
+  | M2 the append's suffix taken before its check | 2 of 4 install tests fail (predecessor mismatch, foreign plan) |
+  | M3 a full plan swapped into the log before its check | 2 of 4 fail (refused full plan; the success test's configuration) |
+  | M4 a commit advance's summary written before its check | 1 of 4 fails (predecessor mismatch) |
+
+Deterministic driver (`R3_DRIVE`, `research-r4/tools-r4/drive.py` on both
+trees, one thread), quiet Mac (load 1.1–1.3), 3 interleaved pairs, medians:
+
+| Width | `379668af` ns/write | `f4803a4d` ns/write | Pair ratios | Instructions/write | Cycles/write |
+| ---: | ---: | ---: | --- | --- | --- |
+| 1 | 3,010.7 | 2,914.6 (−3.2%) | 0.97 0.98 0.96 | 45,021.5 → 42,745.5 (−5.1%) | 9,496.8 → 9,139.1 (−3.8%) |
+| 231 | 93.1 | 92.0 (−1.2%) | 1.01 0.99 0.98 | 1,758.9 → 1,746.4 (−0.7%) | 349.2 → 344.9 (−1.2%) |
+| 515 | 87.5 | 87.3 (−0.2%) | 0.99 1.00 1.00 | 1,855.3 → 1,850.7 (−0.2%) | 373.9 → 372.3 (−0.4%) |
+
+Per-site attribution: samply at 8 kHz on the width-1 driver
+(`R3_DRIVE=300000,1,1`), 2 runs per build, `expand_mac.py` folds,
+CPU-weighted ns per write (sampled totals 3,519 → 3,427):
+
+| Site | `379668af` | `f4803a4d` | Change |
+| --- | ---: | ---: | ---: |
+| memmove in `install_pending_into` (`take()` 69.7 at the `Pending` take, 47.7 at the plan move into `install`) | 124.5 | 0 | −124.5 |
+| memmove in `install_unchanged` → `install_in_place` (the plan moved in; now only the 336 B summary written to the log) | 31.2 | 19.4 | −11.8 |
+| memmove in `SummarizedLog::install` (the plan moved on) | 23.3 | 0 | −23.3 |
+| memmove, install side in all | 179.0 | 19.4 | −159.6 |
+| new: dropping the spent plan at the clear (`Option<Pending>` drop glue) and taking the reply (`Option::take`) | — | 27.2 + 15.8 | +43.0 |
+| memmove in `stage_pending_into` / `persist_update_into` / `OwnedAppend::new` (not changed) | 60.3 / 15.9 / 11.4 | 65.0 / 14.1 / 12.1 | ~0 |
+| `install_pending_into` inclusive / self | 773.2 / 31.5 | 604.1 / 27.3 | −169.1 |
+| `SummarizedLog::install` inclusive | 132.1 | 90.3 | −41.8 |
+| `finish_volatile_into` inclusive | 782.1 | 615.2 | −166.9 |
+| All sampled | 3,519 | 3,427 | −92 |
+
+The profile's estimate for this slice was the library memmove at these
+sites, 250–330 ns of 356 on `d379783d` (single-1 running view); on
+`379668af` the install side was 179 ns of memmove at width 1 and 160 of it
+is gone. The staging side (about 90 ns) is the part left (above).
+
+V3e conflict check (`git merge --no-commit --no-ff origin/cpu/peer-slots` at
+`5a316689` in this worktree, then `git merge --abort`): the code merges
+without conflict (`src/raft.rs` auto-merges once `Installed` sits beside
+`Pending`; the first check, with it beside `Replication`, conflicted on
+V3e's derive line), and the merged tree passes `--lib` 562/562 (1 ignored,
+both slices' tests and V3e's debug oracles), `volatile` 11, `raft` 81 and
+`snapshot` 27. `docs/IMPLEMENTATION.md` conflicts in two places, both
+"take both": the adjacent V3e/V3f mini-plan rows, and both slices' sections
+inserted before "H2 round 2".
+
 #### H2 round 2: review fixes (19 October 2026)
 
 Schema plan. No data/API shape or scheduling change. One test-only seam:
