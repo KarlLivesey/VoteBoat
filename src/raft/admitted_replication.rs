@@ -58,8 +58,10 @@ impl Raft {
             .map(|(peer, _)| peer)
             .filter(|peer| self.early_peer(*peer))
             .collect();
+        let peers = self.early_quorum(peers);
         let mut effects = Vec::with_capacity(peers.len());
         for peer in peers {
+            self.held.remove(&peer);
             let suffix = self.early_suffix().ok_or(RaftError::WrongCompletion)?;
             let start = suffix.from;
             let entries = suffix.entries.clone();

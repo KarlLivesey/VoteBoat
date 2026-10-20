@@ -114,6 +114,28 @@ impl Raft {
             *mark < last && self.next_index.get(&peer).is_some_and(|next| next <= mark)
         })
     }
+    /// Pre-barrier sends with holds on: only the caught-up voters a quorum
+    /// needs (most recent ack first), plus every non-voter. The others are
+    /// decided by the hold rule when the leader's batch is durable.
+    pub(super) fn early_quorum(&self, peers: Vec<NodeId>) -> Vec<NodeId> {
+        if self.append_hold == AppendHold::Off
+            || !self.progress_sends_enabled()
+            || !self.local_voter()
+        {
+            return peers;
+        }
+        let mut reached = BTreeSet::from([self.node]);
+        for peer in self.ack_order.iter().filter(|p| peers.contains(p)) {
+            if self.membership().is_satisfied(&reached) {
+                break;
+            }
+            reached.insert(*peer);
+        }
+        peers
+            .into_iter()
+            .filter(|p| reached.contains(p) || !self.membership().is_voter(*p))
+            .collect()
+    }
     /// Ordinary-progress sends with holds on: due holds go first, so their
     /// Appends count toward the quorum; then voters by ack recency, then the
     /// remaining peers in membership order.
