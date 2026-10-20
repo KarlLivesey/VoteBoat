@@ -934,7 +934,19 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             if retained.is_none_or(|n| n > a.reserved) {
                 return self.fail(EffectOwnerError::ReservationTooLarge);
             }
-            a.effects.extend(effects);
+            if matches!(lease.effect, Effect::SnapshotRequired { .. }) {
+                // The loaded image's send is what the core emitted this effect
+                // in place of (a pure `snapshot_send`), so it keeps that place
+                // in the step's order: ahead of a later Persist of the same
+                // visit, which must be the last effect queued when it is
+                // submitted (`submit_persists`). Appending it behind that
+                // Persist failed the owner whenever the image loaded first.
+                for effect in effects.into_iter().rev() {
+                    a.effects.push_front(effect);
+                }
+            } else {
+                a.effects.extend(effects);
+            }
             a.leased = None;
             a.leased_bytes = 0;
             a.kind = None;
