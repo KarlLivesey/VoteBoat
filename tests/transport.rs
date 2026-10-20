@@ -407,7 +407,7 @@ mod native {
             m.rpc = Rpc::Append {
                 previous_index: 0,
                 previous_term: 0,
-                entries: vec![support::entry(1, 1, 7)],
+                entries: vec![support::entry(1, 1, 7)].into(),
                 leader_commit: 0,
             };
             m
@@ -543,7 +543,7 @@ mod native {
         data.rpc = Rpc::Append {
             previous_index: 0,
             previous_term: 0,
-            entries: vec![support::entry(1, 1, 7)],
+            entries: vec![support::entry(1, 1, 7)].into(),
             leader_commit: 0,
         };
         let mixed = vec![control.clone(), data];
@@ -994,7 +994,7 @@ mod native {
         data.rpc = Rpc::Append {
             previous_index: 0,
             previous_term: 0,
-            entries: vec![support::entry(1, 1, 7)],
+            entries: vec![support::entry(1, 1, 7)].into(),
             leader_commit: 0,
         };
         a.submit(batch(&mut qa, vec![data.clone()])).unwrap();
@@ -1546,7 +1546,7 @@ mod native {
             rpc: Rpc::Append {
                 previous_index: 0,
                 previous_term: 0,
-                entries: vec![entry],
+                entries: vec![entry].into(),
                 leader_commit: 0,
             },
             ..message(1, 2, 1)

@@ -38,12 +38,26 @@ use voteboat::{
 };
 #[path = "benchmark/lanes.rs"]
 mod lanes;
+#[path = "../src/bin/support/quic_hint.rs"]
+mod quic_hint;
+/// Automatic checkpoints and WAL reclaim run unless `--maintenance` drives
+/// explicit ones, which the automatic schedule would contend with.
+static RETENTION: std::sync::OnceLock<RetentionMode> = std::sync::OnceLock::new();
+fn node_limits() -> NodeLimits {
+    NodeLimits {
+        retention: RETENTION.get().copied().unwrap_or_default(),
+        ..Default::default()
+    }
+}
 #[path = "benchmark/shared.rs"]
 mod shared;
 #[cfg(test)]
 #[path = "../tests/support/ports.rs"]
 #[allow(dead_code)] // The shared test lease; these fixtures use only part of it.
 mod test_ports;
+#[cfg(test)]
+#[path = "benchmark/test_process.rs"]
+mod test_process;
 type Failure = Box<dyn std::error::Error>;
 type Replica<
     L = voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::FileLogIo>,
@@ -161,44 +175,11 @@ fn open_recorded(
                 .map(|(tcp, _)| tcp.local_addr().unwrap()),
         )
         .collect::<BTreeMap<_, _>>();
-    let bootstrap = Bootstrap {
-        group: group(),
-        configuration: ConfigurationId::new(1).unwrap(),
-        policy: checked(Policy::new(
-            Tree::Majority((1..=3).map(|n| Tree::Voter(node(n))).collect()),
-            Limits::default(),
-        ))?,
-        voter_stores: (1..=3).map(|n| (node(n), store(n))).collect(),
-    };
     drop(reservations);
     let mut replicas = Vec::new();
     let mut traces = Vec::new();
     for n in 1..=3 {
-        let config = NativeStartup {
-            directory: root.join(format!("replica{n}")),
-            mode,
-            node: node(n),
-            store: store(n),
-            bootstrap: bootstrap.clone(),
-            listen: addresses[&n],
-            peers: (1..=3)
-                .filter(|p| *p != n)
-                .map(|p| {
-                    (
-                        node(p),
-                        NativeStartupPeer {
-                            address: addresses[&p],
-                            certificate: cert(p).to_vec(),
-                            server_name: format!("node{p}.voteboat.test"),
-                        },
-                    )
-                })
-                .collect(),
-            tls: tls(n),
-            entropy_seed: n + 17,
-            limits: NodeLimits::default(),
-            ready_visit_items,
-        };
+        let config = replica_startup(root, mode, n, &addresses, ready_visit_items)?;
         let timers = TimerConfig {
             heartbeat_ms: 50,
             election_min_ms: 1000,
@@ -224,21 +205,79 @@ fn open_recorded(
         } else {
             config.open_with_protocol_and_timers(protocol, timers, app, wake, now)
         };
-        match opened {
-            Ok(r) => replicas.push(r),
-            Err(mut e) => {
-                let deadline = Instant::now() + Duration::from_secs(10);
-                while !e.try_cleanup()? {
-                    if Instant::now() > deadline {
-                        return Err("startup cleanup timed out".into());
-                    }
-                    std::thread::park_timeout(Duration::from_millis(1));
-                }
-                return Err(e.reason.into());
-            }
-        }
+        replicas.push(finish_open(opened)?);
     }
     Ok((replicas, traces))
+}
+/// Timers of the offered mode (the shared assembly's); cluster mode uses them.
+const OFFERED_TIMERS: TimerConfig = TimerConfig {
+    heartbeat_ms: 50,
+    election_min_ms: 10000,
+    election_spread_ms: 10000,
+    expirations_per_poll: 32,
+};
+/// Replica `n`'s native startup configuration: the one place the startup
+/// assembly is configured, for the single-process and cluster modes alike.
+fn replica_startup(
+    root: &Path,
+    mode: NativeOpenMode,
+    n: u64,
+    addresses: &BTreeMap<u64, std::net::SocketAddr>,
+    ready_visit_items: usize,
+) -> Result<NativeStartup, Failure> {
+    let bootstrap = Bootstrap {
+        group: group(),
+        configuration: ConfigurationId::new(1).unwrap(),
+        policy: checked(Policy::new(
+            Tree::Majority((1..=3).map(|n| Tree::Voter(node(n))).collect()),
+            Limits::default(),
+        ))?,
+        voter_stores: (1..=3).map(|n| (node(n), store(n))).collect(),
+    };
+    Ok(NativeStartup {
+        directory: root.join(format!("replica{n}")),
+        mode,
+        node: node(n),
+        store: store(n),
+        bootstrap,
+        listen: addresses[&n],
+        peers: (1..=3)
+            .filter(|p| *p != n)
+            .map(|p| {
+                (
+                    node(p),
+                    NativeStartupPeer {
+                        address: addresses[&p],
+                        certificate: cert(p).to_vec(),
+                        server_name: format!("node{p}.voteboat.test"),
+                    },
+                )
+            })
+            .collect(),
+        tls: tls(n),
+        entropy_seed: n + 17,
+        limits: node_limits(),
+        ready_visit_items,
+    })
+}
+/// A started replica, or the startup failure after its partial state is
+/// cleaned up.
+fn finish_open(
+    opened: Result<Replica, Box<NativeStartupRejected<Counter>>>,
+) -> Result<Replica, Failure> {
+    match opened {
+        Ok(r) => Ok(r),
+        Err(mut e) => {
+            let deadline = Instant::now() + Duration::from_secs(10);
+            while !e.try_cleanup()? {
+                if Instant::now() > deadline {
+                    return Err("startup cleanup timed out".into());
+                }
+                std::thread::park_timeout(Duration::from_millis(1));
+            }
+            Err(e.reason.into())
+        }
+    }
 }
 #[derive(Default)]
 struct PollTotals {
@@ -258,6 +297,9 @@ struct PollTotals {
     waits_immediate: usize,
     waits_ready: usize,
     waits_timeout: usize,
+    /// Batches submitted to peer transports and frames received from peers.
+    peer_sends: usize,
+    peer_received: usize,
 }
 #[path = "benchmark/checkpoint_steps.rs"]
 mod checkpoint_steps;
@@ -286,6 +328,10 @@ fn poll_selected<L: LogStore + Send + 'static>(
             .as_ref()
             .map(|_| batching::before(replica, now));
         let progress = checked(replica.poll(now, NodePollBudget::default()))?;
+        if let Some(p) = &progress.peers {
+            totals.peer_sends += p.sends;
+            totals.peer_received += p.received;
+        }
         if let Some(p) = progress.replica {
             if let (Some(batches), Some(before)) = (&mut totals.batching, &batch_before) {
                 batches.observe(i + 1, before, &p.steps)?;
@@ -680,6 +726,10 @@ fn close<L: LogStore + Send + 'static>(
     until(&mut replicas, clock, |ns| {
         Ok(ns.iter().all(|n| n.is_drained()))
     })?;
+    join(replicas)
+}
+/// Join the workers of drained replicas.
+fn join<L: LogStore + Send + 'static>(replicas: Vec<Replica<L>>) -> Result<(), Failure> {
     for n in replicas {
         let mut parts = n.into_parts().map_err(|_| "node not drained")?;
         let mut dialer = parts
@@ -723,6 +773,11 @@ fn main() -> Result<(), Failure> {
     let capacity_profile = CapacityProfile::extract(&mut args)?;
     let publication = Publication::extract(&mut args)?;
     let raw_group_weights = offered_groups::extract(&mut args)?;
+    if args.first().is_some_and(|arg| arg == "node") {
+        let plain =
+            (capacity_profile, publication, raw_group_weights.is_some()) == Default::default();
+        return offered::cluster::run_process(&args[1..], selected_ready_items, plain);
+    }
     if args.first().is_some_and(|arg| arg == "--lanes") {
         capacity_profile.validate(false, 1, 16)?;
         publication.validate(false)?;
@@ -743,21 +798,17 @@ fn main() -> Result<(), Failure> {
         }
     }
     if !matches!(args.len(), 4 | 5 | 7 | 9 | 11) {
-        return Err(
-            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..4*READY clamped to 64..4096; offered-capacity 4096 enables 1..4096) [--offered-capacity 4096 (offered only)] [--publication atomic|witness (offered only)] [--ready-items 1|16|32|64|128|256|512|1024 (default 256)] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
-                .into(),
-        );
+        return Err(format!(
+            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..4*READY clamped to 64..4096; offered-capacity 4096 enables 1..4096) [--offered-capacity 4096 (offered only)] [--publication atomic|witness (offered only)] [--ready-items 1|16|32|64|128|256|512|1024 (default 256)] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]] | {}",
+            offered::cluster::USAGE
+        )
+        .into());
     }
     let [root, protocol, operations, window] = &args[..4] else {
         unreachable!()
     };
     let (shared, groups) = benchmark_groups(&args)?;
-    let protocol = match protocol.as_str() {
-        "tcp" => NativePeerProtocol::TcpTls,
-        #[cfg(feature = "quic")]
-        "quic" => NativePeerProtocol::Quic,
-        _ => return Err("unsupported protocol".into()),
-    };
+    let protocol = parse_protocol(protocol)?;
     let count = operations.parse::<usize>()?;
     let window = window.parse::<usize>()?;
     let offered_rate = if args.len() >= 7 {
@@ -818,6 +869,18 @@ fn main() -> Result<(), Failure> {
     };
     run_selected(config, &clock, capacity, journal_timings)
 }
+/// The peer protocol; a build without QUIC refuses it with the service
+/// binaries' hint, before anything is created.
+fn parse_protocol(protocol: &str) -> Result<NativePeerProtocol, Failure> {
+    match protocol {
+        "tcp" => Ok(NativePeerProtocol::TcpTls),
+        #[cfg(feature = "quic")]
+        "quic" => Ok(NativePeerProtocol::Quic),
+        #[cfg(not(feature = "quic"))]
+        "quic" => Err(quic_hint::QuicNotBuilt.into()),
+        _ => Err("unsupported protocol".into()),
+    }
+}
 fn benchmark_groups(args: &[String]) -> Result<(bool, usize), Failure> {
     let shared = args.len() >= 5;
     let groups = if shared { args[4].parse::<usize>()? } else { 1 };
@@ -838,6 +901,9 @@ fn run_selected(
     let ready_visit_items = config.ready_visit_items;
     let capacity_profile = config.capacity_profile;
     let publication = config.publication;
+    if config.maintenance.is_some() {
+        let _ = RETENTION.set(RetentionMode::LifetimeBounded);
+    }
     if config.shared {
         run(config, clock, |mode| {
             shared::open_partition(
@@ -965,19 +1031,9 @@ fn run<L: LogStore + Send + 'static>(
     verify(&mut replicas, clock, capacity, groups, &last)?;
     close(replicas, clock)?;
     observe::capture(&mut storage, "after_create_join", &traces);
-    eprintln!("phase=recovery-verification");
-    let (mut replicas, recovered_traces) = open_cluster(NativeOpenMode::Recover)?;
-    let recovery_retries = verify_recovered_workload(
-        &mut replicas,
-        clock,
-        groups,
-        &last,
-        &warmup,
-        &measured,
-        capacity,
-    )?;
-    close(replicas, clock)?;
-    observe::capture(&mut storage, "after_recover_join", &recovered_traces);
+    let recovery_retries = recovery_phase(&open_cluster, clock, &mut storage, |replicas| {
+        verify_recovered_workload(replicas, clock, groups, &last, &warmup, &measured, capacity)
+    })?;
     write_run_reports(
         &config,
         &placement,
@@ -987,6 +1043,32 @@ fn run<L: LogStore + Send + 'static>(
         &storage,
         !traces.is_empty(),
     )
+}
+/// Measurement harness only: with `VOTEBOAT_BENCH_SKIP_RECOVERY` set, a run
+/// ends after the serving workload, so the process CPU is serving CPU and not
+/// the post-run recovery check (ST2 round 3 CPU reporting).
+fn serving_only(mode: &str) -> bool {
+    let skip = std::env::var_os("VOTEBOAT_BENCH_SKIP_RECOVERY").is_some();
+    if skip {
+        eprintln!("phase=recovery-verification{mode} skipped");
+    }
+    skip
+}
+fn recovery_phase<L: LogStore + Send + 'static>(
+    open_cluster: impl Fn(NativeOpenMode) -> Result<(Vec<Replica<L>>, Vec<observe::Trace>), Failure>,
+    clock: &Instant,
+    storage: &mut Vec<(String, usize, observe::Totals)>,
+    verify: impl FnOnce(&mut [Replica<L>]) -> Result<usize, Failure>,
+) -> Result<usize, Failure> {
+    if serving_only("") {
+        return Ok(0);
+    }
+    eprintln!("phase=recovery-verification");
+    let (mut replicas, recovered_traces) = open_cluster(NativeOpenMode::Recover)?;
+    let retries = verify(&mut replicas)?;
+    close(replicas, clock)?;
+    observe::capture(storage, "after_recover_join", &recovered_traces);
+    Ok(retries)
 }
 fn write_run_reports(
     config: &RunConfig<'_>,

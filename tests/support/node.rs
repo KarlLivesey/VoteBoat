@@ -34,6 +34,8 @@ mod local_drain;
 mod peer_credentials;
 #[path = "node_readiness.rs"]
 mod readiness;
+#[path = "node_retention.rs"]
+mod retention;
 #[path = "node_network.rs"]
 mod selected_network;
 type Parts = NodeParts<
@@ -66,6 +68,18 @@ fn parts(voters: u64, networking: bool) -> Parts {
 fn boat(parts: Parts) -> Boat {
     Boat::from_parts(parts, NodeLimits::default(), MonoTime(0))
         .unwrap_or_else(|r| panic!("{:?}", r.reason))
+}
+/// The explicit opt-out: no automatic maintenance is installed.
+fn bounded(parts: Parts) -> Boat {
+    Boat::from_parts(
+        parts,
+        NodeLimits {
+            retention: RetentionMode::LifetimeBounded,
+            ..Default::default()
+        },
+        MonoTime(0),
+    )
+    .unwrap_or_else(|r| panic!("{:?}", r.reason))
 }
 fn settle(n: &mut Boat) {
     for _ in 0..100 {
@@ -110,7 +124,6 @@ fn witness_controls_require_authority_wire_before_admission_and_close_with_node(
                     local: net.roster.local(),
                     outbound: net.roster.outbound_binding(),
                     first_generation: SecureSessionGeneration::new(1).unwrap(),
-                    last_generation: SecureSessionGeneration::new(100).unwrap(),
                     wire_version: 2,
                     limits: net.roster.limits(),
                     transport_limits: TransportLimits::default(),
@@ -727,7 +740,6 @@ fn constructor_requires_voter_store_authorization_and_returns_original_parts_bef
             local: net.roster.local(),
             outbound: net.roster.outbound_binding(),
             first_generation: SecureSessionGeneration::new(1).unwrap(),
-            last_generation: SecureSessionGeneration::new(100).unwrap(),
             wire_version: 1,
             limits: PeerRosterLimits {
                 connect_timeout_ms: 10,
@@ -793,7 +805,8 @@ fn constructor_requires_connections_for_rollback_reachable_recovered_learners() 
                     change: ConfigurationChange::Learners(config(3, Default::default())),
                 })),
             },
-        ];
+        ]
+        .into();
         state.hard_state.term = 1;
         state.commit_index = 1;
         let core = Raft::recover_member(node(1), id.store, state, LogLimits::default()).unwrap();
@@ -904,7 +917,19 @@ fn unsupported_snapshot_and_invalid_driver_limits_reject_before_any_service_or_i
     assert!(!rejected.parts.local.persistence.closed);
     let mut p = *rejected.parts;
     p.local.snapshots = None;
-    let mut n = boat(p);
+    // A snapshot-less node cannot checkpoint, so it is lifetime-bounded by
+    // construction: the default refuses it and returns every part.
+    let rejected = match Boat::from_parts(p, NodeLimits::default(), MonoTime(0)) {
+        Err(r) => r,
+        Ok(_) => panic!("snapshot-less node must choose LifetimeBounded"),
+    };
+    assert_eq!(
+        rejected.reason,
+        NodeError::Maintenance(MaintenanceError::CheckpointsUnavailable)
+    );
+    assert!(!rejected.parts.local.persistence.closed);
+    let mut n = bounded(*rejected.parts);
+    assert_eq!(n.retention(), RetentionMode::LifetimeBounded);
     assert_eq!(
         n.control(group(1), NodeControl::Checkpoint),
         Err(NodeError::MissingSnapshots)
@@ -1448,7 +1473,6 @@ fn selected_transport_capacity_rechecks_version_and_roster_budgets_before_persis
                 local: net.roster.local(),
                 outbound: net.roster.outbound_binding(),
                 first_generation: SecureSessionGeneration::new(1).unwrap(),
-                last_generation: SecureSessionGeneration::new(100).unwrap(),
                 wire_version: 4,
                 limits: net.roster.limits(),
                 transport_limits: TransportLimits {
@@ -1537,6 +1561,7 @@ fn refusing_diagnostics_cannot_change_original_node_write_read_or_shutdown() {
             sampled_at: None,
             state: None,
             counters: NodeCounters::default(),
+            network: NetworkHealth::default(),
             closed: false,
         },
         attempts: 0,

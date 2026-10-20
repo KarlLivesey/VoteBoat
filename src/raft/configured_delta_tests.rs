@@ -52,7 +52,8 @@ fn configured_pending_append_and_compacted_joint_commit_keep_connections_and_mem
                             operation: operation(555),
                             bytes: vec![7].into(),
                         },
-                    }],
+                    }]
+                    .into(),
                 }),
                 After::LeaderAppend,
                 None,
@@ -61,7 +62,7 @@ fn configured_pending_append_and_compacted_joint_commit_keep_connections_and_mem
         compare_pending_connections(&mut core);
         durable(&mut core, effects);
         assert_eq!(core.membership(), &membership);
-        assert!(!core.log_summary.is_plain());
+        assert!(!core.durable.summary().is_plain());
         let effects = core
             .persist(core.state().hard_state, 4, None, After::Commit, None)
             .unwrap();
@@ -69,7 +70,7 @@ fn configured_pending_append_and_compacted_joint_commit_keep_connections_and_mem
         durable(&mut core, effects);
         assert_eq!(core.membership(), &membership);
         assert_eq!(core.membership(), &core.state().membership().unwrap());
-        assert!(!core.log_summary.is_plain());
+        assert!(!core.durable.summary().is_plain());
     }
 }
 
@@ -91,7 +92,7 @@ fn configured_final_commit_delta_retires_only_after_original_completion() {
         assert_eq!(core.state().commit_index, 4);
         assert_eq!(core.role(), Role::Follower);
         assert_eq!(core.membership(), &membership);
-        assert!(!core.log_summary.is_plain());
+        assert!(!core.durable.summary().is_plain());
         let notices: Vec<_> = completed
             .iter()
             .filter_map(|effect| {

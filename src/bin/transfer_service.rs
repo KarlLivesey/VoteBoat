@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 //! Authenticated explicit split/merge administration over the native guarded apps.
+#[path = "support/accept_health.rs"]
+mod accept_health;
 #[path = "support/transfer_app.rs"]
 mod app;
 #[path = "support/transfer_binding.rs"]
@@ -21,6 +23,8 @@ mod credential_worker;
 mod peer_credentials;
 #[path = "support/transfer_profile.rs"]
 mod profile;
+#[path = "support/quic_hint.rs"]
+mod quic_hint;
 #[path = "support/transfer_retirement.rs"]
 mod retirement;
 #[path = "support/transfer_server.rs"]
@@ -33,7 +37,7 @@ use service_setup as setup;
 #[path = "support/transfer_wire.rs"]
 mod wire;
 use setup::Failure;
-const HELP: &str = "voteboat-transfer plan AUTHORITY SOURCE LEFT RIGHT RESPONSIBILITY SPLIT LIFECYCLE PUBLICATION [--retirement]\nvoteboat-transfer plan-merge AUTHORITY LEFT RIGHT TARGET RESPONSIBILITY SPLIT LIFECYCLE PUBLICATION\nvoteboat-transfer serve create|recover ROOT NODE BASE TLS PROFILE GROUP ACCESS tcp|quic [--timing-profile throughput|edge|legacy] [--deployment FILE] [--peer-credentials FILE]\nvoteboat-transfer client PROFILE ENDPOINTS TLS PRINCIPAL status|start|resume|step\nvoteboat-transfer client PROFILE ENDPOINTS TLS PRINCIPAL retire SOURCE RELEASE_ID\nvoteboat-transfer command PROFILE ENDPOINTS TLS PRINCIPAL GROUP COMMAND...\nPeer commands: reload-peers REQUEST EXPECTED NEXT; peer-credential-status REQUEST";
+const HELP: &str = "voteboat-transfer plan AUTHORITY SOURCE LEFT RIGHT RESPONSIBILITY SPLIT LIFECYCLE PUBLICATION [--retirement]\nvoteboat-transfer plan-merge AUTHORITY LEFT RIGHT TARGET RESPONSIBILITY SPLIT LIFECYCLE PUBLICATION\nvoteboat-transfer serve create|recover ROOT NODE BASE TLS PROFILE GROUP ACCESS tcp|quic [--timing-profile throughput|edge|legacy] [--deployment FILE] [--peer-credentials FILE] [--checkpoint-entries N] [--wal-reclaim-ms MS] [--wal-reclaim-min-bytes N] [--no-maintenance I-accept-a-bounded-log]\nvoteboat-transfer client PROFILE ENDPOINTS TLS PRINCIPAL status|start|resume|step\nvoteboat-transfer client PROFILE ENDPOINTS TLS PRINCIPAL retire SOURCE RELEASE_ID\nvoteboat-transfer command PROFILE ENDPOINTS TLS PRINCIPAL GROUP COMMAND...\nPeer commands: reload-peers REQUEST EXPECTED NEXT; peer-credential-status REQUEST";
 fn main() -> Result<(), Failure> {
     let args = std::env::args().skip(1).collect::<Vec<_>>();
     match args.as_slice() {

@@ -223,7 +223,7 @@ impl Raft {
         message.rpc = Rpc::Append {
             previous_index,
             previous_term,
-            entries,
+            entries: entries.into(),
             leader_commit: 0,
         };
         let mut effects = self.receive_inner(message)?;

@@ -189,9 +189,32 @@ fn binding_refusal(rig: &Cluster) {
         String::from_utf8_lossy(&out.stderr)
     );
 }
+/// `status` carries the peer listener and generation health (NT1 round 3).
+/// Only QUIC has no TCP listener to report.
+fn listener_health(status: &str, quic: bool) {
+    let field = |key: &str| {
+        status
+            .split_whitespace()
+            .find_map(|w| w.strip_prefix(key)?.strip_prefix('='))
+            .unwrap_or_else(|| panic!("{key} missing: {status}"))
+            .parse::<u64>()
+            .unwrap_or_else(|e| panic!("{key}: {e}: {status}"))
+    };
+    assert_eq!(field("peer_accept_listener"), u64::from(!quic), "{status}");
+    assert_eq!(field("peer_generations_exhausted"), 0, "{status}");
+    for key in [
+        "peer_accept_errors",
+        "peer_accept_backoffs",
+        "peer_accept_paused",
+        "peer_accept_last_os_error",
+    ] {
+        field(key);
+    }
+}
 fn history(quic: bool) {
     let mut rig = Cluster::with_retirement(quic, true);
     initialize(&rig);
+    listener_health(&require_success(rig.request(1, 3, 20, &["status"])), quic);
     assert!(!retire(&rig, "700").status.success());
     rig.operate("start");
     let original = proof(&rig);

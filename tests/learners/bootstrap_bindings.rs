@@ -127,7 +127,7 @@ fn bootstrap_receipt_gap<A: CheckpointStateMachine>(
     let (mut leader, mut learner, _) = readiness_cluster_with_stores(&mut log, &mut leader_log);
     let mut snapshots = snapshots();
     for app in [&mut one, &mut two] {
-        app.apply_batch(learner.replay_committed()).unwrap();
+        app.apply_entries(learner.replay_committed()).unwrap();
         assert_eq!(app.applied_index(), 2);
         assert!(!app.deployment_bound());
     }
@@ -159,7 +159,8 @@ fn bootstrap_receipt_gap<A: CheckpointStateMachine>(
         bootstrap,
     );
     assert_eq!(index, 3);
-    let entry = &learner.replay_committed()[2..];
+    let replay = learner.replay_committed().contiguous();
+    let entry = &replay[2..];
     assert_eq!(entry.len(), 1);
     let receipts = two.apply_batch(entry).unwrap();
     assert_eq!(
@@ -321,7 +322,7 @@ fn rr6_participant_initial_image_receipt_gap() {
     let mut log = HostLogStore::new(4);
     let (_, learner, _, _) = readiness_cluster(&mut log);
     for app in [&mut on_poor, &mut on_rich] {
-        app.apply_batch(learner.replay_committed()).unwrap();
+        app.apply_entries(learner.replay_committed()).unwrap();
     }
     let entry = prepare(3);
     assert_eq!(

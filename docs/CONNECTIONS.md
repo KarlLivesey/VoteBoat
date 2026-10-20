@@ -26,9 +26,15 @@ are independently configurable up to 1024, defaulting to 16 each. Attempts retai
 slots through dialing, preface transfer, TLS, and unpolled terminal results.
 Only terminal polling releases an attempt slot. One attempt per peer is allowed;
 accepted generations increase per peer, so another peer's newer generation can
-be submitted first. Hosts reserve disjoint ranges across simultaneous/replacement
-owners within a persisted local store session. Restart uses a fresh recovered
-store session. No network owner persists or invents these identities.
+be submitted first. Within one persisted local store session, generations are
+unique per owner lineage: a roster and the connector it feeds, then any
+replacement, which is serialized after its predecessor drains and starts at the
+predecessor's `reclaim_generation()`. Do not run two independent full-width
+allocators for the same local and peer binding at once; use a separate identity
+domain instead. Bindings are compared by the full `(local, peer, generation)`, so
+independent owners (a roster, a discovery source, a client session) may issue
+the same numbers. Restart uses a fresh recovered store session. No network owner
+persists or invents these identities.
 
 ## Native routing protocol
 
@@ -76,6 +82,36 @@ work per accepted socket. Scheduling readiness/deadline wakeups remains the
 host's responsibility; dial completions use the supplied dialer's wake handle.
 `next_deadline` includes anonymous/attempt expiry and immediately pollable
 terminal results. A canceled dial awaiting its actual receipt has no busy deadline.
+
+Listener `accept()` errors are classified by `classify_accept`, and only a
+listener that is gone or misused (`EBADF`, `EINVAL`, `ENOTSOCK`, `EFAULT`) returns
+`ConnectError::Io`. A connection that failed before acceptance (`ECONNABORTED`,
+`ECONNRESET`, `EINTR`, `EPERM`, `ETIMEDOUT` and the pending network errors that
+Linux `accept(2)` says to treat like `EAGAIN`) is skipped and accepting continues
+within the socket-call budget. Descriptor, buffer or memory exhaustion (`EMFILE`,
+`ENFILE`, `ENOBUFS`, `ENOMEM`) and unrecognised errors stop accepting for a
+delay that doubles from 10 ms to 1 s and resets after the next successful or
+empty accept. While backing off, the listener is left out of `readiness_fds` and
+`next_deadline` reports the retry time. A port scan, a client reset before
+acceptance or a descriptor spike is therefore never fatal to the node. `ENOSR`,
+`ESOCKTNOSUPPORT` and `EPROTONOSUPPORT`, which Linux `accept(2)` also lists, are
+skipped like the other per-connection errors.
+
+`PeerConnector::accept_status()` reports `AcceptStatus { transient_errors,
+backoffs, last_error, last_os_error, retry_at }` (counts saturate). Every
+wrapper, including the `Discovered` service connector, reports its inner TCP
+listener; QUIC reports `None`. The peer driver turns the counts into per-poll
+`accept_errors` and `accept_backoffs` plus an `accept_paused` flag in
+`PeerDriverProgress`, which `NodeObservation` carries into `NodeCounters`,
+`NetworkHealth` and `EventKind::Pressure`. The service binary's `metrics`
+command prints them (`accept_errors`, `accept_backoffs`, `accept_paused`, and
+the live `peer_accept_*` fields), so a node that has stopped accepting is never
+silent. The same path carries `generations_exhausted`: set for a sample in which
+the roster could issue no attempt or a discovery source reported `Exhausted`
+for a dial; the attempt counts as a `connection_failures` entry and the roster
+backs off and retries, so the flag can be set while other attempts proceed.
+The directory and transfer binaries print the same fields in their `status`
+and `metrics` output.
 
 The accepted deadline must be later than submission time and no farther than the
 configured timeout (default 10000 ms, hard ceiling 60000 ms). Pass the exact live

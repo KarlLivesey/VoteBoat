@@ -25,22 +25,27 @@ use voteboat::{
     secure::LocalIdentity,
 };
 pub type Node<A> = NativeNode<A, NativeServiceConnector>;
+fn protocol(transport: &str) -> Result<NativePeerProtocol, Failure> {
+    match transport {
+        "tcp" => Ok(NativePeerProtocol::TcpTls),
+        #[cfg(feature = "quic")]
+        "quic" => Ok(NativePeerProtocol::Quic),
+        #[cfg(not(feature = "quic"))]
+        "quic" => Err(super::quic_hint::QuicNotBuilt.into()),
+        _ => Err("unsupported transport".into()),
+    }
+}
 pub fn serve(args: &[String]) -> Result<(), Failure> {
     let [mode, root, id, base, tls, profile, group, access, transport, rest @ ..] = args else {
         return Err(super::HELP.into());
     };
-    let (peers, peer_path, timing_profile) = options(rest)?;
+    let protocol = protocol(transport)?;
+    let (peers, peer_path, timing_profile, maintenance) = options(rest)?;
     let timers = timing_profile.timers();
     let profile = Profile::load(Path::new(profile))?;
     let binding = profile.binding(group)?;
     let id = id.parse::<u64>()?;
     let base = base.parse::<u16>()?;
-    let protocol = match transport.as_str() {
-        "tcp" => NativePeerProtocol::TcpTls,
-        #[cfg(feature = "quic")]
-        "quic" => NativePeerProtocol::Quic,
-        _ => return Err("unsupported transport".into()),
-    };
     let create = match mode.as_str() {
         "create" => true,
         "recover" => false,
@@ -74,7 +79,7 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
             open(
                 config,
                 protocol,
-                timers,
+                (timers, maintenance),
                 app::metadata(&profile)?,
                 peers.as_ref(),
             )?,
@@ -91,7 +96,7 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
                 let node = open_source(
                     config,
                     protocol,
-                    timers,
+                    (timers, maintenance),
                     app,
                     source_binding,
                     create,
@@ -102,7 +107,7 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
             let node = open_source(
                 config,
                 protocol,
-                timers,
+                (timers, maintenance),
                 app::source(&profile, binding)?,
                 source_binding,
                 create,
@@ -114,7 +119,7 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
             open(
                 config,
                 protocol,
-                timers,
+                (timers, maintenance),
                 app::target(&profile, binding)?,
                 peers.as_ref(),
             )?,
@@ -148,6 +153,7 @@ fn options(
         setup::PeerInput<'_>,
         Option<&Path>,
         voteboat::native::startup::NativeTimingProfile,
+        setup::MaintenanceOptions,
     ),
     Failure,
 > {
@@ -156,6 +162,7 @@ fn options(
     }
     let (mut deployment, mut credentials) = (None, None);
     let mut timing_profile = None;
+    let mut maintenance = setup::MaintenanceOptions::default();
     for pair in args.as_chunks::<2>().0 {
         match pair[0].as_str() {
             "--timing-profile" if timing_profile.is_none() => {
@@ -165,23 +172,29 @@ fn options(
             "--peer-credentials" if credentials.is_none() => {
                 credentials = Some(Path::new(&pair[1]))
             }
+            flag if setup::MaintenanceOptions::is_flag(flag) => {
+                maintenance.parse(flag, &pair[1])?
+            }
             _ => return Err("unknown or duplicate transfer option".into()),
         }
     }
+    maintenance.validate()?;
     Ok((
         deployment.map_or(setup::PeerInput::Legacy(None), setup::PeerInput::Deployment),
         credentials,
         timing_profile.unwrap_or_default(),
+        maintenance,
     ))
 }
 fn open<A: App>(
-    config: voteboat::native::startup::NativeMemberStartup,
+    mut config: voteboat::native::startup::NativeMemberStartup,
     protocol: NativePeerProtocol,
-    timers: TimerConfig,
+    (timers, maintenance): (TimerConfig, setup::MaintenanceOptions),
     app: A,
     peers: Option<&Peers>,
 ) -> Result<Node<A>, Failure> {
-    match peers {
+    maintenance.select(&mut config.startup.limits);
+    let mut node = match peers {
         Some(p) => setup::open_application_with_rotation(
             config,
             protocol,
@@ -191,12 +204,15 @@ fn open<A: App>(
             Some(p.startup(protocol)),
         ),
         None => setup::open_application(config, protocol, timers, false, app),
-    }
+    }?;
+    maintenance.apply(&mut node)?;
+    println!("{}", setup::maintenance_startup(&node));
+    Ok(node)
 }
 fn open_source<A: App>(
     config: voteboat::native::startup::NativeMemberStartup,
     protocol: NativePeerProtocol,
-    timers: TimerConfig,
+    timers: (TimerConfig, setup::MaintenanceOptions),
     app: A,
     record: Option<super::binding::SourceBinding>,
     create: bool,
@@ -281,7 +297,7 @@ struct Host<'a, A: App> {
 }
 impl<A: App> Host<'_, A> {
     fn drive(&mut self) -> Result<(), Failure> {
-        let mut host = super::service_setup::HostWait::new();
+        let mut host = super::service_setup::HostWait::new(super::service_setup::host_wake());
         loop {
             let now = MonoTime(self.start.elapsed().as_millis().min(u64::MAX as u128) as u64);
             let peer_failure = !self.quit && self.peers.as_mut().is_some_and(|p| p.poll(self.node));

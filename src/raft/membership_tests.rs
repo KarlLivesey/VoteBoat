@@ -31,22 +31,22 @@ mod progress_broadcasts;
 mod relay_request_windows;
 use crate::{membership::*, quorum::*};
 
-fn node(n: u64) -> NodeId {
+pub(super) fn node(n: u64) -> NodeId {
     NodeId::new(n).unwrap()
 }
-fn cid(n: u64) -> ConfigurationId {
+pub(super) fn cid(n: u64) -> ConfigurationId {
     ConfigurationId::new(n).unwrap()
 }
 fn operation(n: u128) -> OperationId {
     OperationId::new(n).unwrap()
 }
-fn store(n: u64) -> StoreIdentity {
+pub(super) fn store(n: u64) -> StoreIdentity {
     StoreIdentity {
         id: StoreId::new(n as u128).unwrap(),
         incarnation: StoreIncarnation::new(1).unwrap(),
     }
 }
-fn configuration(id: u64, voters: &[u64], learners: &[u64]) -> Configuration {
+pub(super) fn configuration(id: u64, voters: &[u64], learners: &[u64]) -> Configuration {
     Configuration::new(
         cid(id),
         Policy::new(
@@ -92,7 +92,8 @@ pub(super) fn core() -> Raft {
                 index: 1,
                 term: 1,
                 payload: EntryPayload::Noop,
-            }],
+            }]
+            .into(),
         }),
         snapshot: None,
         snapshot_membership: None,
@@ -142,7 +143,7 @@ pub(super) fn durable(core: &mut Raft, effects: Vec<Effect>) -> Vec<Effect> {
     })
     .unwrap()
 }
-fn accept(core: &mut Raft, op: u128, change: ConfigurationChange) -> Vec<Effect> {
+pub(super) fn accept(core: &mut Raft, op: u128, change: ConfigurationChange) -> Vec<Effect> {
     let entry = LogEntry {
         index: core.durable.last_index() + 1,
         term: core.durable.hard_state.term,
@@ -157,7 +158,7 @@ fn accept(core: &mut Raft, op: u128, change: ConfigurationChange) -> Vec<Effect>
         core.durable.commit_index,
         Some(Suffix {
             from: entry.index,
-            entries: vec![entry],
+            entries: vec![entry].into(),
         }),
         After::LeaderAppend,
         None,
@@ -166,13 +167,13 @@ fn accept(core: &mut Raft, op: u128, change: ConfigurationChange) -> Vec<Effect>
 }
 /// Set up an already committed journal boundary, independently of the live
 /// quorum test under examination. The core still validates the logical update.
-fn committed_fixture(core: &mut Raft, index: u64) {
+pub(super) fn committed_fixture(core: &mut Raft, index: u64) {
     let effects = core
         .persist(core.durable.hard_state, index, None, After::Commit, None)
         .unwrap();
     durable(core, effects);
 }
-fn staged() -> Raft {
+pub(super) fn staged() -> Raft {
     let mut core = core();
     let effects = accept(
         &mut core,
@@ -226,7 +227,7 @@ fn joint(weighted: bool) -> Raft {
     durable(&mut core, effects);
     core
 }
-fn reply(core: &Raft, from: u64, context: RequestContext, rpc: Rpc) -> Message {
+pub(super) fn reply(core: &Raft, from: u64, context: RequestContext, rpc: Rpc) -> Message {
     Message {
         group: core.durable.bootstrap.group,
         configuration: core.membership().id(),
@@ -512,7 +513,8 @@ fn recursive_joint_recovery_catches_up_old_voter_and_commits_after_election() {
     for peer in peers.values() {
         let mut app = crate::application::Counter::new(100).unwrap();
         use crate::application::StateMachine;
-        app.apply_batch(peer.replay_committed()).unwrap();
+        app.apply_batch(&peer.replay_committed().contiguous())
+            .unwrap();
         assert_eq!(app.read_applied(5), Ok(7));
     }
 }
@@ -558,32 +560,28 @@ fn joint_repair_rejects_overwrite_commit_claims_and_foreign_authority_before_mut
                     *previous_term = 99;
                 }
             }
-            8 => {
-                if let Rpc::Append { entries, .. } = &mut message.rpc {
-                    entries.push(LogEntry {
-                        index: 4,
-                        term: 1,
-                        payload: EntryPayload::Noop,
-                    });
-                }
-            }
+            8 => edit_append(&mut message, |entries| {
+                entries.push(LogEntry {
+                    index: 4,
+                    term: 1,
+                    payload: EntryPayload::Noop,
+                })
+            }),
             9 => {
                 receiver = follower(staged(), 3);
                 message.to = node(3);
             }
             10 => receiver = follower(joint(false), 4),
             11 => {
-                receiver.durable.commit_index = 1;
+                receiver.durable.edit(|log| log.commit_index = 1);
             }
             12 => receiver.limits.max_command_bytes = 1,
-            13 => {
-                if let Rpc::Append { entries, .. } = &mut message.rpc {
-                    let EntryPayload::Configuration(record) = &mut entries[0].payload else {
-                        unreachable!()
-                    };
-                    record.expected = cid(1);
-                }
-            }
+            13 => edit_append(&mut message, |entries| {
+                let EntryPayload::Configuration(record) = &mut entries[0].payload else {
+                    unreachable!()
+                };
+                record.expected = cid(1);
+            }),
             _ => unreachable!(),
         }
         let state = receiver.state().clone();
@@ -623,6 +621,12 @@ fn joint_repair_rejects_overwrite_commit_claims_and_foreign_authority_before_mut
     assert!(restarted.local_voter());
 }
 
+/// Replace an append's entries with an edited copy.
+fn edit_append(message: &mut Message, edit: impl FnOnce(&mut Vec<LogEntry>)) {
+    if let Rpc::Append { entries, .. } = &mut message.rpc {
+        entries.edit(edit);
+    }
+}
 fn retained_repair_pair(gap: u64, overlap: usize) -> (Raft, Raft) {
     let mut state = joint(false).state().clone();
     let mut joint = state.entries.pop().unwrap();
@@ -706,26 +710,29 @@ fn joint_repair_refuses_forked_overlap_bad_ranges_and_out_of_window_learners() {
         let (mut source, mut receiver) =
             retained_repair_pair(if variant == 6 { 100 } else { 3 }, 1);
         let mut repair = emitted_repair(&mut source);
+        let term = repair.term;
         let Rpc::Append { entries, .. } = &mut repair.rpc else {
             unreachable!()
         };
+        let mut edited = entries.to_vec();
         match variant {
             0 => {
-                let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
+                let EntryPayload::Command { bytes, .. } = &mut edited[0].payload else {
                     unreachable!()
                 };
                 let mut replacement = bytes.to_vec();
                 replacement[0] ^= 1;
                 *bytes = replacement.into();
             }
-            1 => entries[1].term = repair.term + 1,
-            2 => entries[1].index += 1,
-            3 => entries[1].term = 0,
-            4 => entries[1].payload = source.state().entries[1].payload.clone(),
+            1 => edited[1].term = term + 1,
+            2 => edited[1].index += 1,
+            3 => edited[1].term = 0,
+            4 => edited[1].payload = source.state().entries[1].payload.clone(),
             5 => receiver.limits.max_batch_bytes = 256,
             6 => (),
             _ => unreachable!(),
         }
+        *entries = edited.into();
         let before = (
             receiver.state().clone(),
             receiver.role(),
@@ -812,10 +819,12 @@ fn joint_repair_trims_only_a_verified_compacted_overlap() {
             let Rpc::Append { entries, .. } = &mut message.rpc else {
                 unreachable!()
             };
-            entries
-                .iter_mut()
-                .filter(|e| e.index >= 4)
-                .for_each(|e| e.term = 2);
+            entries.edit(|entries| {
+                entries
+                    .iter_mut()
+                    .filter(|e| e.index >= 4)
+                    .for_each(|e| e.term = 2)
+            });
         }
         let before = receiver.state().clone();
         let effects = receiver.step(Event::Receive(message));
@@ -826,7 +835,10 @@ fn joint_repair_trims_only_a_verified_compacted_overlap() {
             assert!(receiver.local_voter());
             assert_eq!(receiver.state().commit_index, 4);
             assert_eq!(receiver.state().base_index(), 4);
-            assert_eq!(receiver.state().entries, source.state().entries[4..]);
+            assert_eq!(
+                receiver.state().entries,
+                source.state().entries.to_vec()[4..]
+            );
         } else {
             assert_eq!(effects, Err(RaftError::InvalidMessage));
             assert_eq!(receiver.state(), &before);
@@ -1373,7 +1385,8 @@ fn accepted_final_clears_prior_authority_and_rollback_restores_joint_base() {
                     index: 4,
                     term: 2,
                     payload: EntryPayload::Noop,
-                }],
+                }]
+                .into(),
             }),
             After::Reply,
             None,
@@ -1538,7 +1551,7 @@ fn a_reused_candidate_node_with_a_new_store_needs_a_new_term_ballot() {
     assert_eq!(core.durable.hard_state, before);
 }
 
-fn follower(mut core: Raft, id: u64) -> Raft {
+pub(super) fn follower(mut core: Raft, id: u64) -> Raft {
     core.node = node(id);
     core.binding.identity = store(id);
     core.role = Role::Follower;
@@ -1553,7 +1566,7 @@ fn sent(effect: Effect) -> Message {
     };
     message
 }
-fn one_reply(effects: Vec<Effect>) -> Message {
+pub(super) fn one_reply(effects: Vec<Effect>) -> Message {
     assert_eq!(effects.len(), 1);
     sent(effects.into_iter().next().unwrap())
 }
@@ -1621,7 +1634,8 @@ fn older_request_scope_can_roll_back_uncommitted_final_without_early_reply() {
                     index: 4,
                     term: 2,
                     payload: EntryPayload::Noop,
-                }],
+                }]
+                .into(),
             }),
             After::LeaderAppend,
             None,
@@ -1670,7 +1684,7 @@ fn partial_catch_up_scopes_matching_prefix_without_claiming_follower_activation(
         Rpc::Append {
             previous_index: 1,
             previous_term: 1,
-            entries: vec![leader.state().entries[1].clone()],
+            entries: vec![leader.state().entries[1].clone()].into(),
             leader_commit: 3,
         },
     );
@@ -1832,7 +1846,7 @@ fn request_scope_bridge_does_not_authorize_learners_or_reads() {
         Rpc::Append {
             previous_index: 2,
             previous_term: 1,
-            entries: vec![],
+            entries: vec![].into(),
             leader_commit: 2,
         },
     );
@@ -1866,7 +1880,7 @@ fn request_scope_bridge_does_not_authorize_learners_or_reads() {
     message.rpc = Rpc::Append {
         previous_index: 2,
         previous_term: 1,
-        entries: vec![leader.state().entries[2].clone()],
+        entries: vec![leader.state().entries[2].clone()].into(),
         leader_commit: 2,
     };
     assert_eq!(
@@ -2009,7 +2023,8 @@ fn prospective_reservation_is_pure_and_does_not_authorize_configuration_ingress(
                     expected: cid(1),
                     change: ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[4, 5, 6])),
                 })),
-            }],
+            }]
+            .into(),
         },
     );
     let event = Event::Receive(message);
@@ -2179,7 +2194,8 @@ fn prospective_connection_inspection_rejects_store_conflicts_and_wrong_scope_wit
                     expected: cid(1),
                     change: ConfigurationChange::Learners(next),
                 })),
-            }],
+            }]
+            .into(),
         },
     );
     assert_eq!(
@@ -2218,16 +2234,20 @@ fn retiring_leader(removed: bool) -> Raft {
 fn retiring_leader_announces_only_after_final_durability_and_receivers_preserve_authority() {
     for removed in [false, true] {
         let mut leader = retiring_leader(removed);
-        let mut receiver = Raft::recover_member(
-            node(4),
-            StoreBinding {
-                identity: store(4),
-                session: StoreSession::new(7).unwrap(),
-            },
-            leader.state().clone(),
-            leader.limits,
-        )
-        .unwrap();
+        let member = || {
+            Raft::recover_member(
+                node(4),
+                StoreBinding {
+                    identity: store(4),
+                    session: StoreSession::new(7).unwrap(),
+                },
+                leader.state().clone(),
+                leader.limits,
+            )
+            .unwrap()
+        };
+        let mut receiver = member();
+        let mut twin = member();
         assert!(acknowledge(&mut leader, 2).is_empty());
         let commit = acknowledge(&mut leader, 3);
         assert!(matches!(&commit[..],[Effect::Persist(u)] if u.commit_index==4));
@@ -2255,7 +2275,12 @@ fn retiring_leader_announces_only_after_final_durability_and_receivers_preserve_
             && matches!(&m.rpc,Rpc::Append { previous_index:4,previous_term:1,entries,leader_commit:4 } if entries.is_empty())));
         assert!(reservation > notices.len() * std::mem::size_of::<Message>());
         let notice = notices.into_iter().find(|m| m.to == node(4)).unwrap();
-        receive_retirement_notice(&mut receiver, notice);
+        receive_retirement_notice(&mut receiver, notice.clone(), Raft::step);
+        receive_retirement_notice(&mut twin, notice, sink_step);
+        assert_eq!(
+            super::volatile_tests::observed(&twin),
+            super::volatile_tests::observed(&receiver)
+        );
         assert!(leader.step(Event::Heartbeat).unwrap().is_empty());
     }
 }
@@ -2278,7 +2303,7 @@ fn retired_commit_exception_cannot_append_raise_terms_or_authorize_learners() {
         rpc: Rpc::Append {
             previous_index: 4,
             previous_term: 1,
-            entries: vec![],
+            entries: vec![].into(),
             leader_commit: 4,
         },
     };
@@ -2314,7 +2339,8 @@ fn retired_commit_exception_cannot_append_raise_terms_or_authorize_learners() {
                         index: 5,
                         term: 1,
                         payload: EntryPayload::Noop,
-                    }],
+                    }]
+                    .into(),
                     leader_commit: 4,
                 }
             }
@@ -2322,7 +2348,7 @@ fn retired_commit_exception_cannot_append_raise_terms_or_authorize_learners() {
                 invalid.rpc = Rpc::Append {
                     previous_index: 4,
                     previous_term: 2,
-                    entries: vec![],
+                    entries: vec![].into(),
                     leader_commit: 4,
                 }
             }
@@ -2330,7 +2356,7 @@ fn retired_commit_exception_cannot_append_raise_terms_or_authorize_learners() {
                 invalid.rpc = Rpc::Append {
                     previous_index: 4,
                     previous_term: 1,
-                    entries: vec![],
+                    entries: vec![].into(),
                     leader_commit: 5,
                 }
             }
@@ -2456,7 +2482,7 @@ fn witnessed_promoted_leader_catches_up_only_after_exact_durability() {
         Rpc::Append {
             previous_index: 2,
             previous_term: 1,
-            entries: vec![witness.durable.entries[2].clone()],
+            entries: vec![witness.durable.entries[2].clone()].into(),
             leader_commit: 3,
         },
     );
@@ -2655,7 +2681,7 @@ fn permit_survives_partial_progress_but_cannot_authorize_vote_read_or_other_head
         Rpc::Append {
             previous_index: 3,
             previous_term: 1,
-            entries: vec![],
+            entries: vec![].into(),
             leader_commit: 3,
         },
     );
@@ -2774,7 +2800,7 @@ fn promoted_term_observation_waits_for_storage_and_retains_same_base_permit() {
         Rpc::Append {
             previous_index: 2,
             previous_term: 1,
-            entries: vec![],
+            entries: vec![].into(),
             leader_commit: 2,
         },
     );
@@ -2852,7 +2878,7 @@ fn connection_retention_includes_pending_and_rollback_views_until_exact_commit()
             2,
             Some(Suffix {
                 from: 3,
-                entries: vec![],
+                entries: vec![].into(),
             }),
             After::Reply,
             None,
@@ -2964,7 +2990,7 @@ fn owner_connection_budget_retains_pending_and_rollback_history_and_fences_unres
                 2,
                 Some(Suffix {
                     from: 3,
-                    entries: vec![],
+                    entries: vec![].into(),
                 }),
                 After::Reply,
                 None,
@@ -3076,7 +3102,7 @@ fn finalized_repair_pair() -> (Raft, Raft) {
             joint_index + 1,
             Some(Suffix {
                 from: entry.index,
-                entries: vec![entry],
+                entries: vec![entry].into(),
             }),
             After::Commit,
             None,
@@ -3611,10 +3637,24 @@ fn check_snapshot_ack_then_retry(
         Err(RaftError::WrongCompletion)
     ));
 }
-fn receive_retirement_notice(receiver: &mut Raft, notice: Message) {
+/// [`Raft::step_into`] with a granted vote this core never emitted queued
+/// first; it must stay first, unread, and the call's own effects follow it.
+fn sink_step(core: &mut Raft, event: Event) -> Result<Vec<Effect>, RaftError> {
+    let context = RequestContext {
+        origin: core.binding,
+        sequence: 1,
+    };
+    let earlier = Effect::Send(core.message(node(2), context, Rpc::Voted { granted: true }));
+    let mut queue = VecDeque::from([earlier.clone()]);
+    let result = core.step_into(event, &mut queue);
+    assert_eq!(queue.pop_front(), Some(earlier));
+    result.map(|()| queue.into())
+}
+type Step = fn(&mut Raft, Event) -> Result<Vec<Effect>, RaftError>;
+fn receive_retirement_notice(receiver: &mut Raft, notice: Message, step: Step) {
     let reset = receiver.election_reset_sequence();
     let hard = receiver.state().hard_state;
-    let effects = receiver.step(Event::Receive(notice.clone())).unwrap();
+    let effects = step(receiver, Event::Receive(notice.clone())).unwrap();
     assert!(
         matches!(&effects[..],[Effect::Persist(u)] if u.commit_index==4 && u.suffix.is_none() && u.hard_state==hard)
     );
@@ -3632,7 +3672,7 @@ fn receive_retirement_notice(receiver: &mut Raft, notice: Message) {
         |e| matches!(e,Effect::Committed(entries) if entries.len()==1 && entries[0].index==4)
     ));
     assert!(effects.iter().any(|e|matches!(e,Effect::Send(m) if m.to==node(1) && matches!(m.rpc,Rpc::Appended{success:true,matching_index:4}))));
-    let duplicate = receiver.step(Event::Receive(notice)).unwrap();
+    let duplicate = step(receiver, Event::Receive(notice)).unwrap();
     assert!(matches!(&duplicate[..], [Effect::Send(_)]));
     assert_eq!(receiver.election_reset_sequence(), reset);
 }
@@ -3707,4 +3747,42 @@ fn lose_joint_repair_campaign(
         }
     }
     (denied_learner_votes, denied_stale_votes)
+}
+
+/// ST2 round 4 (R4-2, GPT-6.1-Sol round-3 P2-1): the leader's per-peer stall
+/// map is a retained structure bounded by the current replicas. Voters 1, 2
+/// and 3 stay; each of 64 committed `Learners` records replaces one
+/// unavailable learner, and the real heartbeat stall counter runs every
+/// round. On 522a08c8 the map kept every departed learner (66 entries for 3
+/// peers); now it never holds more than the current peers, and the reported
+/// stall is always a current replica.
+#[test]
+fn stall_map_holds_only_current_replicas_through_learner_churn() {
+    let mut core = core();
+    for k in 0..64u64 {
+        let effects = accept(
+            &mut core,
+            200 + u128::from(k),
+            ConfigurationChange::Learners(configuration(2 + k, &[1, 2, 3], &[1000 + k])),
+        );
+        durable(&mut core, effects);
+        let last = core.durable.last_index();
+        committed_fixture(&mut core, last);
+        for _ in 0..2 {
+            core.count_stalled_replicas();
+        }
+        let peers = core.peers();
+        assert!(
+            core.stalled_rounds.len() <= peers.len(),
+            "after {} replacements: {} stall entries for {} current peers",
+            k + 1,
+            core.stalled_rounds.len(),
+            peers.len()
+        );
+        assert!(core.stalled_rounds.keys().count() <= peers.len());
+        assert!(core.stalled_rounds.keys().all(|peer| peers.contains(&peer)));
+        let (stalled, _) = core.replica_stall().unwrap();
+        assert!(peers.contains(&stalled), "{stalled:?} is not a replica");
+    }
+    assert!(!core.stalled_rounds.contains_key(&node(1000)));
 }

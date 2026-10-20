@@ -30,6 +30,11 @@ fn selected() -> LogLimits {
     LogLimits {
         max_command_bytes: COMMAND_BYTES,
         max_batch_bytes: 33_587_200,
+        // ST2 round 3 (I5): the WAL above the 75% high-water mark must hold
+        // the largest batch plus the control reserve, or a batch could wait
+        // for ever for room; with the default 64 MiB WAL these limits are
+        // refused at construction (`WalHeadroomTooSmall`).
+        max_wal_bytes: 160 * 1024 * 1024,
         ..Default::default()
     }
 }
@@ -351,6 +356,22 @@ fn invalid_selected_enrollment_limits_leave_original_application_and_files_untou
             }
         )
         .is_err());
+    assert_eq!(application.checkpoint(4096).unwrap(), before);
+    assert!(!directory.exists());
+    // Valid WAL limits whose batch no outbound budget can hold are refused
+    // before any file is created, as every later start would refuse them.
+    let refused = selected
+        .enroll_snapshot_with_log_limits(
+            &incoming,
+            &mut application,
+            LogLimits {
+                max_batch_bytes: 1 << 30,
+                max_wal_bytes: 1 << 30,
+                ..Default::default()
+            },
+        )
+        .unwrap_err();
+    assert_eq!(refused.stage, "outbound limits");
     assert_eq!(application.checkpoint(4096).unwrap(), before);
     assert!(!directory.exists());
 }

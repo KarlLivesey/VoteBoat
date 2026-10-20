@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/.t3/worktrees/VoteBoat/t3-aeca292e)
+    Finished `test` profile [unoptimized] target(s) in 0.65s
+     Running tests/transfer_service.rs (target/debug/deps/transfer_service-a3eb1e85f443a06a)
+
+running 1 test
+
+thread 'listener_layout_rejects_the_exhausted_allocator_boundary_without_wrapping' (4079456) panicked at tests/support/ports.rs:212:28:
+attempt to add with overflow
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test listener_layout_rejects_the_exhausted_allocator_boundary_without_wrapping ... FAILED
+
+failures:
+
+failures:
+    listener_layout_rejects_the_exhausted_allocator_boundary_without_wrapping
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 34 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test transfer_service`

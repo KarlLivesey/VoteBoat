@@ -35,7 +35,7 @@ fn deferred_heartbeat_batch_preserves_duplicate_conflict_and_original_applicatio
     }
     let mut counter = Counter::new(4).unwrap();
     counter
-        .apply_batch(shard.core(group()).unwrap().replay_committed())
+        .apply_batch(&shard.core(group()).unwrap().replay_committed().contiguous())
         .unwrap();
     assert_eq!(counter.read_applied(1), Ok(0));
     assert_eq!(shard.core(group()).unwrap().state().commit_index, 1);
@@ -43,7 +43,7 @@ fn deferred_heartbeat_batch_preserves_duplicate_conflict_and_original_applicatio
         .with_core(visit, |core| finish(core, step.result.unwrap()))
         .unwrap();
     let receipts = counter
-        .apply_batch(&shard.core(group()).unwrap().replay_committed()[1..])
+        .apply_batch(&shard.core(group()).unwrap().replay_committed().contiguous()[1..])
         .unwrap();
     assert_eq!(receipts.len(), 4);
     for (offset, outcome) in [

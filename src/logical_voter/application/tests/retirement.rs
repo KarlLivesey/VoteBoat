@@ -70,7 +70,7 @@ fn heartbeat(a: &LogicalApplication, n: u64, leader: bool) -> CommandBody {
         Rpc::Append {
             previous_index: 0,
             previous_term: 0,
-            entries: Vec::new(),
+            entries: Vec::new().into(),
             leader_commit: 0,
         }
     } else {

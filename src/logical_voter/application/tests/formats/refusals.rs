@@ -362,7 +362,8 @@ fn stale_ordinary(a: &mut LogicalApplication) -> OperationId {
                 operation: OperationId::new(500).unwrap(),
                 bytes: vec![1; 64].into(),
             },
-        }],
+        }]
+        .into(),
     };
     let c = command(
         2,

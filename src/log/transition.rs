@@ -15,15 +15,18 @@
 //! Consensus log transitions and the host-replaceable storage contract.
 //! Private planned transitions; neither cached summaries nor plans are receipts.
 use super::*;
-use std::mem::size_of;
 
 mod compact;
 mod incoming;
+mod summarized;
 mod view;
 pub(crate) use compact::CompactDelta;
 #[cfg(feature = "native")]
 pub(crate) use incoming::{OwnedAppend, OwnedChange};
 pub(crate) use incoming::{OwnedNextLog, PreparedOwnedLog};
+#[cfg(test)]
+pub(crate) use summarized::{checked_installs, test_identities};
+pub(crate) use summarized::{unidentified_logs, LogStamp, SummarizedLog};
 pub(crate) use view::{LogMetadata, LogView};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -36,36 +39,20 @@ pub(crate) struct LogSummary {
 impl LogSummary {
     /// Caller has validated this canonical state and exclusively owns its mutations.
     pub(crate) fn from_validated(state: &GroupLog) -> Self {
-        let retained = state
-            .entries
-            .len()
-            .checked_mul(size_of::<LogEntry>())
-            .and_then(|bytes| {
-                state.entries.iter().try_fold(bytes, |sum, entry| {
-                    sum.checked_add(entry.retained_payload_bytes())
-                })
-            })
-            .and_then(|bytes| {
-                bytes.checked_add(
-                    state
-                        .snapshot_membership
-                        .as_ref()
-                        .map_or(0, |base| base.retained_bytes()),
-                )
-            });
+        let retained = state.entries.retained_bytes().and_then(|bytes| {
+            bytes.checked_add(
+                state
+                    .snapshot_membership
+                    .as_ref()
+                    .map_or(0, |base| base.retained_bytes()),
+            )
+        });
+        let configured = state.entries.has_configuration();
         Self {
             metadata: LogMetadata::from_log(state),
-            plain: state.snapshot_membership.is_none()
-                && !state
-                    .entries
-                    .iter()
-                    .any(|entry| matches!(entry.payload, EntryPayload::Configuration(_))),
+            plain: state.snapshot_membership.is_none() && !configured,
             retained,
-            clone_stable: state.entries.iter().all(|entry| match &entry.payload {
-                EntryPayload::Command { .. } => true,
-                EntryPayload::Noop => true,
-                EntryPayload::Configuration(_) => false,
-            }),
+            clone_stable: !configured,
         }
     }
     pub(crate) fn matches(&self, state: &GroupLog) -> bool {
@@ -110,7 +97,7 @@ impl NextLog {
         if view.metadata().group != update.group {
             return Err(StorageError::Rejected("group not bootstrapped"));
         }
-        if !summary.matches_metadata(view.metadata()) {
+        if !view.summarized_by(summary) {
             return Err(StorageError::Rejected("stale log summary"));
         }
         if compact::eligible(view, summary, update) {
@@ -188,7 +175,13 @@ impl NextLog {
         current: &GroupLog,
         update: &LogUpdate,
     ) -> Result<PreparedLog, StorageError> {
-        match &self {
+        self.check_install(current, update)?;
+        Ok(PreparedLog(self))
+    }
+    /// Refuse this plan unless `current` is its exact predecessor and
+    /// `update` its exact original.
+    fn check_install(&self, current: &GroupLog, update: &LogUpdate) -> Result<(), StorageError> {
+        match self {
             Self::Full {
                 predecessor,
                 update: original,
@@ -207,7 +200,28 @@ impl NextLog {
                 delta.check_install(LogMetadata::from_log(current), update)?;
             }
         }
-        Ok(PreparedLog(self))
+        Ok(())
+    }
+    /// [`Self::prepare_install`] then [`PreparedLog::install`], where the
+    /// plan lies. On error neither `current` nor the plan changes; on success
+    /// the plan is spent (a full plan holds the replaced log).
+    pub(crate) fn install_in_place(
+        &mut self,
+        current: &mut GroupLog,
+        update: &LogUpdate,
+    ) -> Result<LogSummary, StorageError> {
+        self.check_install(current, update)?;
+        Ok(match self {
+            Self::Full { next, .. } => swap_full(current, next),
+            Self::Delta(delta) => {
+                if let Some(suffix) = delta.append.take() {
+                    current.entries.append(suffix.entries);
+                }
+                delta.metadata().install_header(current);
+                delta.summary
+            }
+            Self::Compact(delta) => delta.install_ref(current),
+        })
     }
 }
 impl PreparedLog {
@@ -216,14 +230,11 @@ impl PreparedLog {
     }
     pub(crate) fn install(self, current: &mut GroupLog) -> LogSummary {
         match self.0 {
-            NextLog::Full { next, .. } => {
-                *current = *next;
-                LogSummary::from_validated(current)
-            }
+            NextLog::Full { next, .. } => install_full(current, next),
             NextLog::Delta(delta) => {
                 let metadata = delta.metadata();
                 if let Some(suffix) = delta.append {
-                    current.entries.extend(suffix.entries);
+                    current.entries.append(suffix.entries);
                 }
                 metadata.install_header(current);
                 delta.summary
@@ -231,6 +242,21 @@ impl PreparedLog {
             NextLog::Compact(delta) => delta.install(current),
         }
     }
+}
+/// Replacing the whole log is rare; keeping it (and dropping the old log's
+/// pieces) out of line keeps the ordinary install small enough to inline.
+#[cold]
+#[inline(never)]
+fn install_full(current: &mut GroupLog, next: Box<GroupLog>) -> LogSummary {
+    *current = *next;
+    LogSummary::from_validated(current)
+}
+/// [`install_full`] through `&mut`: the replaced log moves into the plan.
+#[cold]
+#[inline(never)]
+fn swap_full(current: &mut GroupLog, next: &mut GroupLog) -> LogSummary {
+    std::mem::swap(current, next);
+    LogSummary::from_validated(current)
 }
 impl PlainDelta {
     pub(crate) fn metadata(&self) -> LogMetadata {
@@ -267,7 +293,7 @@ fn plan_append_metadata(
     let append = update.suffix.clone();
     Ok(PlainDelta {
         predecessor: *view.metadata(),
-        summary: append_summary(summary, next, append.as_ref()),
+        summary: append_summary(view, summary, next, append.as_ref()),
         append,
     })
 }
@@ -277,10 +303,7 @@ fn append_eligible(view: &LogView<'_>, summary: &LogSummary, update: &LogUpdate)
         && update.snapshot_membership.is_none()
         && update.suffix.as_ref().is_none_or(|suffix| {
             view.metadata().last_index.checked_add(1) == Some(suffix.from)
-                && !suffix
-                    .entries
-                    .iter()
-                    .any(|entry| matches!(entry.payload, EntryPayload::Configuration(_)))
+                && !suffix.entries.has_configuration()
         })
 }
 fn validate_append_metadata(
@@ -314,7 +337,7 @@ fn validate_append_metadata(
     if let Some(suffix) = &update.suffix {
         if suffix.entries.len()
             > limits
-                .max_entries_per_group
+                .retained_entry_capacity()
                 .saturating_sub(current.entries_len)
         {
             return Err(StorageError::Rejected("group entry limit"));
@@ -351,19 +374,21 @@ fn validate_append_metadata(
     next.commit_index = update.commit_index;
     Ok(next)
 }
-fn append_summary(summary: &LogSummary, next: LogMetadata, append: Option<&Suffix>) -> LogSummary {
-    let extra = append.map_or(Some(0), |suffix| {
-        suffix
-            .entries
-            .len()
-            .checked_mul(size_of::<LogEntry>())
-            .and_then(|bytes| {
-                suffix.entries.iter().try_fold(bytes, |sum, entry| {
-                    sum.checked_add(entry.retained_payload_bytes())
-                })
-            })
-    });
-    let retained = summary.retained.and_then(|bytes| bytes.checked_add(extra?));
+/// Summary after appending `append` to the view's canonical log, charged
+/// exactly as the install will hold it: a piece that adjoins the log's last
+/// piece extends it and adds no backing.
+fn append_summary(
+    view: &LogView<'_>,
+    summary: &LogSummary,
+    next: LogMetadata,
+    append: Option<&Suffix>,
+) -> LogSummary {
+    let retained = match append {
+        None => summary.retained,
+        Some(suffix) => summary
+            .retained
+            .and_then(|bytes| view.appended_charge(bytes, &suffix.entries)),
+    };
     LogSummary {
         metadata: next,
         plain: summary.plain,

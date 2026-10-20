@@ -8,6 +8,14 @@ histories, exact PR14 dependency `219ad7bb8489c19012c8298d1021ddd959861782`
 (published `origin/lb/st2-maintenance-defaults`), including main
 `bd714771e181d59c2cfaece3fc93dc411ce41ddb` and fixture repair `3fa6435b`.
 PR15 remains based on main in GitHub; stacking does not qualify or merge PR14.
+Dependency warning from the parent during reconciliation: `219ad7bb` has a Sol
+source approval but its exclusive default matrix has actual startup failures in
+`backpressure::follower_with_a_slow_rewrite_declines_new_data_instead_of_failing`
+and `backpressure::absent_follower_does_not_stop_the_leader_checkpointing`.
+Their cause/fix is not yet known; ST2's owner owns diagnosis and repair. Passing
+DR1-adapted focused probes here neither diagnoses nor qualifies that dependency.
+If ST2 changes, parent must supply the replacement dependency for reconciliation
+and fresh focused checks; this pinned head is not final qualified main.
 The existing LB macro and application/storage mini plans remain the scope;
 DR2/TX1 and later milestones remain planned, not work authorized here.
 
@@ -49,6 +57,74 @@ Record focused results separately, push nonforce to existing PR15, save reports
 and logs under main target/claude/research-lv/pr15-final-reconcile, then sweep
 this task's own checkout/target and verify process/disk cleanup. No main writes.
 
+### Reconciliation findings and focused repair plan (before repairs)
+
+The automatic source merge exposed two integration boundaries: new DR1 readiness
+fixtures still use the old contiguous log API, while ST2's newly added retention
+and backpressure fixtures still emit pre-DR1 8-byte deltas and unscoped operation
+IDs. Neither indicates a change to the reviewed consensus/storage semantics.
+Adapt only those fixtures: `EntryBatch`/`EntryRange` and `apply_entries` for
+segmented replay; Counter session-1 IDs and 16-byte commands for both unpadded
+and zero-padded storage probes. Preserve the existing receipt count, repeated
+retry schedule, padding size, resource bounds and assertions. Keep the
+wire protocol selection at version 8; it is independent of command width.
+Add direct fixture admission/apply/restore and malformed-padding checks so the
+old encoding fails causally before the repaired probes run; preserve all WAL
+headroom, pressure and checkpoint assertions. Existing application, readiness,
+core/runtime and focused native pressure tests will check these boundaries.
+The same pre-DR1 command shape appears in main's newly added EO1 snapshot
+continuation regression and N0 cluster benchmark warmup/offering paths. Convert
+those call sites and the new snapshot-worker anchored-checkpoint fixture to
+the existing Counter helpers too; preserve continuation
+ordering, benchmark lifecycle/QUIC selection and workload/result checks.
+
+### Cumulative DR1 implemented evidence (21 October 2026; qualification pending)
+
+The source reconciliation preserves both histories. Its only textual conflicts
+were the two lifetime-track sections in this document; both application and
+storage histories/plans are retained (the inherited ST2 mini plan is marked
+historical). The live application mini plan now names exact ST2 dependency
+`219ad7bb8489c19012c8298d1021ddd959861782`, which remains unqualified as warned
+above. The Opus round-8 binding-consequence sentence is now in
+`APPLICATION_ENVELOPES.md` immediately before the family table.
+
+Necessary integration repairs are limited to the `EntryBatch`/`EntryRange`
+readiness fixtures and pre-DR1 Counter call sites in ST2 retention/backpressure
+probes, EO1's continuation regression, the snapshot-worker anchor fixture and
+N0 cluster warmup/offering. They use existing Counter helpers; storage probes
+keep their 4-KiB padding, receipt/window counts, retry schedules and assertions.
+No manual reconciliation line deletes an assertion. A new focused padded/small
+command test checks admission, apply, checkpoint/restore, idempotent retry and
+malformed-padding/old-command refusal. It fails before the encoding repair;
+the existing EO1, snapshot-anchor and cluster TCP tests also fail before their
+corresponding repair (`InvalidCommand`/warmup admission refusal).
+
+Default-focused validation: **254 passing test executions, zero failures in
+27 nonempty commands**. This includes ledger/floor/allocation/checkpoint
+mutations and soak; real readiness identity/opening-image/bootstrap and boxed
+charge checks; both `rr7_*` cases and exact first-claim size; runtime and
+aggregate admission; node retention/maintenance, native pressure and interrupted
+checkpoint/reclaim; Counter plain/leadership protocol and default maintenance;
+transfer port boundary plus the original interrupted-split TCP case; port
+leases; snapshot workers/EO1; N0 cluster lifecycle/no-QUIC and held recovery;
+and U2's 1,000 seeded schedules. These are focused checks of this cumulative
+source, not a full default suite. All-features focused validation also passed: **136 test executions, zero
+failures in 14 nonempty commands**, including TCP/QUIC service maintenance,
+cluster lifecycle and held recovery, both rr7 cases and wire/charge checks.
+The exact command/count record and causal logs are in
+`validation/pr15-final-reconcile/REPORT.md`. The enabled hook also passes **7/7 checks with zero diagnostics**: root fmt,
+four strict Clippy configurations and matched fmt/Clippy, all locked/offline
+where applicable. Its actual log and commands are committed with the evidence.
+The nonforce publication runs the same enabled hook again; its final head and
+publication result are recorded in the PR comment and main artifact report.
+
+**Macro review:** this reconciles the existing DR1 deliverable for LB and the
+usable service/Rust embedding. The dependency is pinned, not merged or qualified;
+DR1 stays in review with parent-owned fresh source confirmations and an exclusive
+final whole matrix still required. The existing next DR2 and TX1 rows remain
+planned and are not started by this reconciliation. No new prerequisite, helper,
+research, milestone or production protocol is introduced.
+
 ## Lifetime bounds track (opened 19 October 2026)
 
 User rule (19 October 2026): this is infrastructure, so failing after X time,
@@ -69,7 +145,7 @@ design pack is unchanged; its amendments are recorded below.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current DR1: `SessionLedger`, Counter and the steady-state application contract (`lb/dr1-session-ledger`, in review; see DR1 implemented) | Audit S1 and RT2, and the U2 probe: the shipped counter service stops refusing every write after 10,000 lifetime operations; one shared session mechanism lands in the core; `deployment_requirements` means a steady-state bound under a declared retention rule, readiness refuses an application that declares none, and the Counter's apply never returns `Err` for a capacity reason | — (ST2 and NT1 run in parallel; only this document conflicts textually) | 1,000,000-write soak from 1,000 rotating clients fails on the base at write 10,001 with `DedupCapacity` and passes with retention ≤ S·K at every checkpoint; exactly-once across eviction, restart and a checkpoint between every apply; consumed retry → `Expired`; evicted-session retry → `Expired` (never a second execution); boundary at exactly S·K; U2 probe (1,000 seeded three-node schedules) shows apply never errors; readiness refuses an undeclared application; native durable CPU per write before/after; fmt, four strict Clippy configurations and matched fmt/Clippy; application, counter_service, runtime, snapshot, checkpoint, log_store and native startup suites in default and all-features | LB |
+| Current DR1: `SessionLedger`, Counter and the steady-state application contract (`lb/dr1-session-ledger`, in review; see DR1 implemented) | Audit S1 and RT2, and the U2 probe: the shipped counter service stops refusing every write after 10,000 lifetime operations; one shared session mechanism lands in the core; `deployment_requirements` means a steady-state bound under a declared retention rule, readiness refuses an application that declares none, and the Counter's apply never returns `Err` for a capacity reason | Exact cumulative ST2 `219ad7bb8489c19012c8298d1021ddd959861782` (unmerged PR14; includes main `bd714771` and fixture fix `3fa6435b`); NT1 already in main | 1,000,000-write soak from 1,000 rotating clients fails on the base at write 10,001 with `DedupCapacity` and passes with retention ≤ S·K at every checkpoint; exactly-once across eviction, restart and a checkpoint between every apply; consumed retry → `Expired`; evicted-session retry → `Expired` (never a second execution); boundary at exactly S·K; U2 probe (1,000 seeded three-node schedules) shows apply never errors; readiness refuses an undeclared application; native durable CPU per write before/after; fmt, four strict Clippy configurations and matched fmt/Clippy; application, counter_service, runtime, snapshot, checkpoint, log_store and native startup suites in default and all-features | LB |
 | Next DR2: Maintenance, BucketCounter/Routed and outbox acknowledgement | Audit S2, S3: transfer_service stops refusing after 32 writes; leadership maintenance survives more than 64 transfers. Reuses `SessionLedger` and the U2 probe. Also owns application deployment-recovery admission (recorded in DR1 round 5): static bootstrap exchanges no application requirements, and a voter reopening a WAL with no checkpoint replays under its current configuration. AI3 owns activation's counterpart. (The leaf configurations deferred in round 5, including activation mappings, the logical voter's limits and the transaction applications', are compared since DR1 round 6; readiness before a bootstrap entry commits, recorded here in round 6, moved into DR1 round 7, which also carries participant opening images. The logical voter's parent bootstrap, open after round 7, is bound since round 8 by the first claim or the enrollment.) | DR1 (ledger, `Retention`, probe harness, readiness identity) | Fail@main tests (65 `Begin`/`Complete` pairs; 33 transfer writes); soaks with splits/merges and leader changes; U2 probe run for Maintenance; transfer suites; a static bootstrap with two voters of different application configuration, and a checkpoint-less restart under changed limits (Sol's 7-vs-10 probe), each refused with a typed error before any entry applies | LB |
 | Then TX1: transaction participants and coordinators | Audit S5, S6: transaction services run indefinitely; a coordinator incarnation is a session at each participant | DR1 (ledger, `Expired` vocabulary) | Fail@main at 4,097 transactions (program: 257); 200,000-transaction soak with coordinator restarts and lost decision receipts | LB |
 
@@ -2002,6 +2078,3090 @@ native_relay 13, effect_owner 210, provider_conformance 42,
 lifetime_apply_never_errs 4, raft 79, runtime 58, application 33. Not run:
 the other unchanged targets and `representative_relay_model`.
 
+The logical milestones LR1 and LR3 (logical-voter track below) stay where they
+are; LB references them for the audit's L1–L3 rows.
+
+### ST2 mini plan (historical, 19 October; inherited from PR14)
+
+| Deliverable | Purpose | Dependencies | Completion checks | Advances |
+| --- | --- | --- | --- | --- |
+| Current ST2 (PR 14; rounds 1–6 implemented; round 7 implemented, in review: the nested logical fixture's physical WAL is sized for the I5 headroom rule; both suites passed on bbb81f33; the rebase results, including full-run failures and isolated reruns, are recorded below): checkpoints and WAL reclaim on by default, and a full WAL as retryable backpressure (audit C3, C4, RT4; probes U1, U5; ST2b) | With default flags all three binaries never checkpointed and never reclaimed the WAL, so every group stopped at 16,384 retained entries or 64 MiB of WAL, a failed automatic reclaim switched maintenance off silently, and a WAL that filled at append time failed the node. Make maintenance the library and binary default, make the opt-out explicit and visible, keep maintenance running through every non-fatal failure, make a new leader at the retained-entry cap refuse typed, and turn a full WAL into a typed retryable refusal with no node failure | — | Fail@main runtime and native soaks (recorded) pass past 16,384 entries and 64 MiB; slow-rewrite burst and follower tests fail node-fatally on 47646b4c and pass; opt-out plus cap gives a typed refusal and a stable leader; startup rejects maintenance settings that would fail at runtime; restart mid-checkpoint and mid-reclaim; native durable CPU/write within +2% of main; fmt, four strict Clippy configurations and matched fmt/Clippy; affected suites in default and all-features | LB |
+| Next NT1: connection generations and listener (audit N1, N3, N6) | Survivors no longer go to recovery after ~27.8 h with one peer down; a port scan cannot kill a node | Rebases on ST2's `native/startup.rs` hunk | Architect plan §3.3 row 2 | LB |
+| Following DR1: application deduplication retirement (audit S1–S3) | `counter_service` no longer refuses every write after 10,000 lifetime writes; the generic `SessionLedger` | — | Architect plan §3.3; Q1 probe harness | LB |
+
+Later in this track: DR2, NT2, MB1, ST1, TX1, DH1, AD1, NT3, ST3 and LBZ
+(architect plan §3.3). ST2b (a WAL that fills at append time was node-fatal)
+became part of ST2 in PR 14 round 2.
+
+### ST2 schema plan (written before editing, 19 October 2026)
+
+Base `main` 3d552e2e. Pack amendment realised: ch04 "Retention and reclamation"
+(see "Design-pack amendment" below).
+
+**Measured before editing (fail@main probe, runtime node, default construction,
+single voter, simulated clock, one leader election per round so every round
+appends one noop):** rounds 0–16,383 succeed; the election at round 16,384 makes
+the new leader's noop exceed the 16,384 retained-entry limit and the whole node
+enters `RecoveryRequired` with
+`Replica(Owner(Worker(Consensus(Storage(Rejected("group entry limit"))))))`.
+That is U1: the refusal reaches the core through the self-vote's durable
+completion, so the owner is fenced. A restart replays the same log into the same
+refusal at the next election, so restart is not a recovery path.
+
+**Data/API shape.**
+- `runtime::RetentionMode { Maintained (default), LifetimeBounded }`, a new
+  `NodeLimits::retention` field. Every `NetworkNode`/`NativeNode` constructed
+  through `from_parts` (all three binaries, every native startup path and every
+  `NetworkNode` embedding; not `LogicalNode`) gets it.
+- `Maintained` installs at construction:
+  - `CheckpointPolicy::for_limits(log)`: `min_entries = max_entries_per_group / 4`
+    (4,096 at defaults; 8,192 and 10 ms after amendment 2), `interval_ms = 100`, `scan_groups = 64`,
+    `max_in_flight = 4`. Construction is refused with
+    `NodeError::Maintenance(MaintenanceError::CheckpointsUnavailable)` when a
+    group has no checkpoint-capable snapshot worker, because such a node is
+    lifetime-bounded by construction; the embedder must choose
+    `LifetimeBounded` explicitly.
+  - `WalMaintenancePolicy::for_ceiling(reclaim_limit)`: `interval_ms = 1000`,
+    `retry_ms = 100`, `max_bytes = reclaim_limit` (= `max_wal_bytes` natively),
+    when the persistence provider supports reclaim. A provider without reclaim
+    has no physical log to rewrite through this seam; its status says so
+    (`policy: None` with `retention: Maintained`) and the striped store is ST3's
+    row.
+  - An occupancy trigger: `PersistenceWorker::wal_usage() -> Option<WalUsage
+    { bytes, capacity }>` (default `None`; native reads one atomic the WAL
+    thread publishes after each window and reclaim; `capacity = max_wal_bytes −
+    control_reserve_bytes`). Reclaim is due early when `bytes ≥ capacity / 2`
+    and `bytes ≥ last_after + capacity / 8` and at least `retry_ms` has passed
+    since the last attempt. The second clause stops a store whose live image is
+    above half capacity from rewriting itself every retry.
+- `LogLimits` reach the node through a new read-only `Raft::log_limits()`.
+- `configure_checkpoints(None)` and `configure_wal_maintenance(None)` on a
+  `Maintained` node return `NodeError::Maintenance(DisableRequiresLifetimeBounded)`;
+  an explicit policy still replaces the default (binary flags).
+- U5 / Q7, configuration-class refusals move to `configure`:
+  `min_entries > max_entries_per_group / 2` →
+  `Maintenance(CheckpointThresholdUnreachable)` (the threshold could never be met
+  with room left for writes during the checkpoint); `max_bytes ≠ reclaim_limit`
+  → `InvalidLimits` (a smaller image budget can be refused for ever once live
+  state grows, so it is no longer accepted).
+- Operator status (all three binaries): `retention`, checkpoint policy, last
+  checkpoint result and base index, WAL policy, `wal_bytes`/`wal_capacity`, last
+  reclaim (before/after bytes and time), last error, consecutive failures, next
+  deadline. Startup prints one `maintenance …` line.
+- Binary flags: `--checkpoint-entries N` and `--wal-reclaim-ms MS` override the
+  defaults (now in all three binaries); `--no-maintenance I-accept-a-bounded-log`
+  selects `LifetimeBounded` and is the only way to disable it. Any other value,
+  or combining it with either override, is refused at startup.
+
+**State transitions (WAL schedule; RT4).** `configure → Scheduled(deadline)`;
+`due (deadline or occupancy) → submit → Pending(ticket)`; admission refusal of
+any kind → `Scheduled(now + retry_ms)`, `failures += 1`, typed
+`last_admission_error`; completion `Ok` → `Scheduled(now + interval_ms)`,
+`failures = 0`, `last_reclaimed`; completion `Err` → `Scheduled(now +
+retry_ms)`, `failures += 1`. A fatal storage error (`Uncertain`, `Corrupt`,
+`Fenced`) still fails the replica, so the node enters `RecoveryRequired` through
+the existing path with the event retained. The only remaining `None` deadline is
+`u64` millisecond exhaustion (584 million years, P3-8). Checkpoints already
+reschedule every scan; their admission and execution errors stay typed in
+`last_admission_error`/`last_result`.
+
+**U1 / Q6.** `Raft::become_leader` checks the retained-entry budget before
+staging the noop. If the noop does not fit, the core still becomes leader
+(heartbeats keep followers stable), records `leader_noop_pending`, and appends
+the noop on a later heartbeat once compaction frees space and nothing is
+staged; a current-term entry from any proposal also clears it. Until then
+proposals refuse with the existing typed `Rejected("proposal retained entry
+budget")` and reads refuse through the existing current-term check. No
+`enter_recovery`, no step-down loop, no term churn. Followers already refuse an
+over-budget append as a non-fatal step error.
+
+**Ownership.** The node owns the schedules; providers own physical bytes; the
+binaries only pass overrides or the acknowledged opt-out. No new durable state
+and **no format change**.
+
+**Failure and cleanup / restart.** Policies are reinstalled at every
+construction. A crash during a checkpoint leaves the previous durable snapshot
+pair and the uncompacted log; a crash during reclaim leaves the old WAL pair
+(`replace_log` publishes the new image before the manifest). Both reopen to the
+same applied state.
+
+**Acceptance checks.**
+1. Runtime soak (fail@main): default `NodeLimits`, counter binary's application
+   (`Counter::new(10000)`), simulated clock, 200,000 writes (op IDs cycle through
+   the application's own capacity so S1, DR1's row, is not what is measured)
+   with an election every 2,000 writes; every write applied; retained entries ≤
+   `min_entries + headroom` at every 10% sample; checkpoint count increasing.
+2. Native soak (fail@main): `NativeStartup` (the binaries' open path), default
+   limits, simulated clock, ≥ 128 MiB of WAL appended and ≥ 32,768 entries;
+   every write applied; WAL bytes and retained entries bounded at each sample.
+3. U1: `LifetimeBounded`, fill to the cap, re-elect repeatedly: typed refusal,
+   stable `Leader`, node `Running`; manual checkpoint then frees space and the
+   deferred noop commits.
+4. RT4 fault matrix: every `WorkerError` admission refusal and every
+   `StorageError` completion: after each event `next_deadline.is_some()` or the
+   node is `RecoveryRequired`.
+5. U5: configure-time refusals; binary startup refusals for the opt-out value,
+   conflicting flags and zero intervals.
+6. Restart mid-checkpoint and mid-reclaim (native): reopen gives the same
+   applied state and accepts writes.
+7. Native durable CPU per write A/B (5 pairs, ABAB).
+
+#### ST2 schema amendment (during implementation, before editing the triggers)
+
+Writing the native soak showed the entry threshold alone does not bound the
+WAL: with large commands the WAL fills long before 4,096 entries accumulate
+(64 KiB × ~1,000 entries is 64 MiB), and a full WAL at append time fails the
+node (measured below). The occupancy rule changed from "grown by an eighth since
+the last rewrite" to:
+
+- **Pressure** = published occupancy ≥ half the usable capacity.
+- Under pressure the checkpoint scan runs whenever no automatic checkpoint is
+  pending (not only every 100 ms) and checkpoints every group with any applied
+  entry beyond its base.
+- A rewrite is due early under pressure when occupancy minus the live estimate
+  (`Σ Raft::live_log_bytes()`, computed only under pressure) is at least an
+  eighth of the capacity, at most once per `retry_ms` from the last attempt.
+
+
+#### ST2 schema amendment 2 (after the first macOS measurement)
+
+The first candidate (threshold a quarter of the limit, 100 ms scan, rewrite at
+every 1 s deadline) cost +9% to +17% native durable CPU per write on the Mac
+(below). Per the orchestrator's Q5 rule (raise the checkpoint interval, never
+disable), the defaults became:
+
+- `min_entries = max_entries_per_group / 2` (8,192): the largest threshold the
+  U5 check accepts. The checkpoint cost is dominated by four `F_FULLFSYNC`s per
+  snapshot publication on macOS and by the benchmark application's growing
+  receipt table (audit S1).
+- Scan every 10 ms instead of 100 ms. A scan compares counters of at most 64
+  groups; scanning sooner finds a due checkpoint before the limit without
+  checkpointing more often.
+- An interval deadline rewrites the WAL only when at least
+  `WalMaintenancePolicy::min_reclaim_bytes` (default: the ceiling / 16, 4 MiB)
+  is reclaimable; otherwise the deadline moves on one interval (`skipped`).
+  Without it a large live image would be rewritten every second. Zero keeps
+  the old "every deadline" behaviour, which tests with hand-made schedules
+  select explicitly. The live estimate is computed at the deadline as well.
+
+No other part of the plan changed.
+
+#### ST2 implemented (19 October 2026)
+
+**What changed.**
+- `runtime`: `RetentionMode` (`Maintained` default, `LifetimeBounded`) in
+  `NodeLimits`; `MaintenanceError`; `NodeError::Maintenance`.
+  `NetworkNode::from_parts` installs `CheckpointPolicy::for_limits` and, when
+  the provider supports reclaim, `WalMaintenancePolicy::for_ceiling`, or refuses
+  a node that cannot checkpoint. New `retention()` and `wal_usage()`.
+  `configure_*(None)` on a maintained node is refused; a WAL `max_bytes` other
+  than the ceiling and a checkpoint threshold above half the entry limit are
+  refused at configuration.
+- RT4 (`runtime/maintenance.rs`): every admission refusal and non-fatal failed
+  completion reschedules after `retry_ms` with `consecutive_failures` and the
+  typed error retained; success records `last_reclaimed`; only `u64` clock
+  exhaustion (584 million years) leaves no deadline, and fatal storage errors
+  leave the existing `RecoveryRequired` path.
+- U1 (`raft.rs`): `become_leader` checks the retained-entry budget before the
+  noop; a leader at the limit keeps the role, heartbeats, refuses typed and
+  appends the noop on a later heartbeat once a checkpoint frees space
+  (`Raft::leader_noop_pending`). *(Corrected in round 3: a checkpoint cannot
+  pass the commit index, which only this term's noop can advance, so a log
+  that is mostly uncommitted never freed space and the group stopped for
+  ever; both reviewers reproduced it. Round 3 adds the noop reserve and the
+  capacity step-down, I1.)*
+- Persistence seam: `LogStore::physical_usage` (native: WAL length and usable
+  capacity), `PersistenceWorker::wal_usage` (native: one relaxed atomic the WAL
+  thread stores after each window and rewrite), `Raft::log_limits` and
+  `Raft::live_log_bytes`.
+- Binaries: shared `service_setup::MaintenanceOptions` (`--checkpoint-entries`,
+  `--wal-reclaim-ms`, `--no-maintenance I-accept-a-bounded-log`), validated
+  before any file; a `maintenance …` startup line; a shared `maintenance`
+  status command (now also in the directory and transfer services). The
+  `native_benchmark` example's explicit `--maintenance` mode opts out so its
+  manual checkpoints and rewrites do not contend with the automatic ones; its
+  plain runs keep the defaults. Operator documentation:
+  `docs/COUNTER_SERVICE.md` "Store maintenance (on by default)".
+- **No format change**; no migration. Public API additions/breaks:
+  `NodeLimits::retention`, `NodeError::Maintenance`, `CheckpointStatus`/
+  `WalMaintenanceStatus` fields, `PersistenceWorker::wal_usage` (defaulted),
+  `LogStore::physical_usage` (defaulted).
+
+**Fail@main evidence (3d552e2e, the same tests with main's API).**
+- Runtime soak (`default_node_keeps_accepting_past_the_retained_entry_limit`):
+  write 16,377 is refused at log index 16,384 with
+  `NotProposed(Storage(Rejected("group entry limit")))` (16,376 writes plus 8
+  election noops). Every later write is refused the same way, for ever.
+- Native soak (`default_native_node_keeps_accepting_past_the_wal_and_entry_limits`):
+  at log index 15,162 (about 62 MiB of 4 KiB writes) the node fails with
+  `Replica(Owner(Worker(Consensus(Storage(Rejected("WAL capacity/control reserve"))))))`
+  and enters `RecoveryRequired`. A full WAL is therefore node-fatal, not a
+  typed transient refusal.
+- U1 probe (single voter, default construction, one election per round): the
+  election at round 16,384 fails the node with
+  `Replica(Owner(Worker(Consensus(Storage(Rejected("group entry limit"))))))`
+  from inside the self-vote completion; a restart replays into the same refusal.
+
+**Soaks and tests (simulated protocol time).**
+
+| Test | Result |
+| --- | --- |
+| Runtime soak, default `NodeLimits`, counter binary application (`Counter::new(10000)`), 40,960 writes (2.5× the limit) with an election every 2,048, 64 writes per simulated millisecond | All applied; final log index 40,980; peak retained 14,347 entries (< 16,384 asserted: threshold 8,192 plus writes during a checkpoint); checkpoint base 0 → 10,247 → 18,439 at the two samples; 40 s debug |
+| Same, `VOTEBOAT_ST2_SOAK_WRITES=200000` (rounded to 200,704; 12×), release | All applied; final index 200,802; peak retained 14,347; base advanced at every sample: [0, 18439, 40979, 55325, 77864, 86057, 108595, 131135, 153673, 176213, 198751]; 49 s |
+| Native soak, `NativeStartup::open_with_protocol_and_timers` (the binaries' path), default limits, 32,768 writes of 4 KiB (128 MiB appended, 2× both limits), clock at 1 ms per 100 polls | All applied; peak WAL 33,031,095 B = 50.0% of the 66,060,288 B usable capacity (the pressure threshold); last rewrite 33,030,992 → 370 B; peak retained 7,582; checkpoint bases [0, 7582, 15163, 22744, 30325]; 4 rewrites in 2,442 simulated ms (the interval alone allows 3); the three native ST2 tests take about 47 s debug and passed three consecutive runs |
+| U1 (`lifetime_bounded_leader_at_the_entry_limit_refuses_typed_and_stays_leader`) | Fill to 16,384; three re-elections: `Running`, `Leader`, term +1 each, `leader_noop_pending`, typed refusal; operator checkpoint frees space; the deferred noop commits in the current term; the next write applies |
+| RT4 fault matrix (`every_reclaim_failure_reschedules_or_recovers_visibly`) | 10 `WorkerError` admission kinds and 7 `StorageError` completion kinds: non-fatal → `Running`, deadline `now + retry_ms`, `failures = 1`, the retry succeeds; `Closed`/`Fenced` admission and `Uncertain`/`Corrupt`/`Fenced` completion → `RecoveryRequired` |
+| Restart mid-checkpoint and mid-reclaim (native) | Host stops (abort, then drain of the workers' terminal events and provider release) with a checkpoint, then a rewrite, in flight; reopen restores the same applied index and a byte-identical application checkpoint, or exactly the one write that was accepted when the host stopped; 5,000 more writes apply and checkpoints continue. Torn publication at file level stays covered by `snapshot.rs` and `log_reclaim.rs` crash-point tests |
+| U5 | Library: `CheckpointThresholdUnreachable`, `max_bytes ≠ ceiling` → `InvalidLimits`, `CheckpointsUnavailable`; binaries (all three): wrong acknowledgement, opt-out plus override, duplicate opt-out and `--checkpoint-entries 8193` refused before any file |
+| Operator visibility | Counter: defaults and opt-out in the startup line and `maintenance`; directory and transfer: defaults in `maintenance` and the startup line |
+
+Existing tests whose contract changed: `policy_is_opt_in…` became
+`policy_is_on_by_default…` plus an opt-out test;
+`permanent_admission_refusal_stops_schedule…` became
+`…_retries_and_service_stays_running` (RT4); fixtures without a snapshot
+worker (`transaction_driver`) and tests that drive hand-made schedules select
+`LifetimeBounded` explicitly; WAL test policies use the provider ceiling.
+
+**Native durable CPU per write (quiet Mac, `nat.sh` protocol).** Marginal CPU
+per original = (cpu at 16,000 − cpu at 2,000) / 14,000 at 15,000/s offered,
+`NOCAP=1 MAINT=0`, TCP, ABAB pairs, release builds of `native_benchmark`
+(`--all-features`) on the Mac (`src-st2-*`/`nat-st2-*` trees, removed
+afterwards). The Mac is fsync-bound at about 7,000–8,000 applied/s, so the
+offered 15,000/s is refused in part on both sides. The base never checkpoints
+or rewrites (and would stop at 16,384 entries); the candidate does both inside
+the measured window.
+
+| Run | Base → candidate | marg µs/orig | p99 | applied/s | pairs (marg) |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 3d552e2e → quarter threshold, 100 ms scan, rewrite at every deadline | 30.09 → 32.79 (×1.090) | 162 → 406 ms | 7,301 → 6,320 | 1.24 1.08 1.29 1.24 1.21 |
+| 2 | 3d552e2e → as 1 plus the 1/16 rewrite skip | 28.10 → 32.78 (×1.166) | 161 → 353 ms | 7,620 → 6,139 | 1.13 1.09 1.13 1.16 1.52 |
+| 3 | 3d552e2e → half threshold, 100 ms scan, skip | 30.03 → 31.38 (×1.045) | 157 → 203 ms | 7,707 → 7,170 | 0.95 1.04 1.23 1.08 1.06 |
+| 4 | 3d552e2e → final (half threshold, 10 ms scan, skip) | 29.96 → 32.90 (×1.098) | 161 → 211 ms | 7,849 → 7,030 | 0.97 1.14 1.23 0.95 1.09 |
+| 5 | 3d552e2e → final, repeat | 29.76 → 30.67 (×1.030) | 154 → 215 ms | 7,648 → 6,951 | 1.42 1.14 1.05 1.05 1.03 |
+| 6 | run 3 → final (scan interval only) | 28.46 → 31.69 (×1.113) | 229 → 213 ms | 6,919 → 7,112 | 1.03 1.94 1.72 1.18 0.91 |
+
+Runs 4–6 measured `2eb0ff79`; the pushed commit differs only by making the
+skip threshold a policy field (ceiling / 16 instead of capacity / 16: 4.00
+versus 3.94 MiB) and one status field. Runs 4 and 5 pooled (8 parsed pairs): marginal 29.87 → 31.50 µs (×1.054,
+median pair 1.07, range 0.95–1.23), p99 158 → 214 ms (×1.36), applied rate
+7,806 → 6,991/s (×0.90). Run 6 does not separate the 10 ms scan from noise.
+This is a measured regression beyond noise on this host, and it is the cost of
+the maintenance the base never did: each checkpoint publishes a snapshot with
+four `F_FULLFSYNC`s and encodes the benchmark's growing receipt table (16,000
+receipts, audit S1). The threshold is already at the largest value U5 allows.
+Follow-ups that would reduce it without disabling anything: the snapshot store's
+macOS sync primitive (it uses `sync_all`, a full device flush, where the WAL
+uses the approved barrier fsync; needs a durability decision) and DR1's bounded
+receipt table. Framework (matched) cells are unaffected by construction: the
+matched workspace builds no node (`grep from_parts benchmarks/matched/src` is
+empty).
+
+**Checks (final commit).** `cargo +stable fmt --all -- --check`; strict Clippy
+(`-D warnings`, `--all-targets`) for default, all-features, no-default and
+native-only: zero diagnostics (re-linted after touching `src/lib.rs`); matched
+workspace fmt and strict Clippy: zero. Suites, run sequentially: every test
+target (`--lib --bins` and all `tests/*.rs` except `representative_relay_model`,
+a 40+ minute protocol model this slice does not touch): default features 2,428
+passed, 0 failed; all-features 2,734 passed, 0 failed. During development an
+earlier full default run passed its first 86 test binaries before it was
+stopped as stale. Two existing tests changed contract in this round:
+`automatic_reclaim_service_*_recovers_and_retries` counts rewrites plus
+skipped deadlines, and the native hundred-group checkpoint tests' hand-made
+1 ms schedules set `min_reclaim_bytes: 0`.
+
+**Remaining gaps (recorded, not hidden).**
+- A WAL that fills at append time is still node-fatal. With maintenance on, the
+  occupancy path holds the WAL at about half capacity under a write rate far
+  above the intervals, but a burst that outruns one checkpoint-and-rewrite
+  cycle (about 31 MiB of headroom) still fails the node. Follow-up row ST2b:
+  admission backpressure at the persistence worker (refuse a data batch as
+  retryable `Overloaded` when published occupancy plus in-flight bytes would
+  pass the data ceiling).
+- `LogicalNode` (logical-voter track) has its own construction path and gets
+  no defaults here; LR1/LR3 own it.
+- The striped store reports no `physical_usage` and keeps its own limits
+  (ST3's row).
+
+#### ST2 round 2: ST2b schema plan (written before editing, 19 October 2026)
+
+Review of round 1 blocked the merge on two points: a WAL that fills at append
+time is still node-fatal, and the checkpoint cost (+5.4% marginal native
+durable CPU/write). This plan covers ST2b; the checkpoint-cost plan follows.
+
+**Where the failure comes from.** `NativeLogStore::append_batch` refuses a
+batch whose encoding does not fit (`Rejected("WAL capacity/control reserve")`).
+On the WAL thread that refusal becomes `WorkerEvent::Failed`, and
+`worker::Task::Failed` calls `Raft::storage_failed`, which fences the core: the
+owner fails and the node enters `RecoveryRequired`. The entry is already in the
+core's pending transition (the core has one pending persistence dependency per
+group, `Raft::has_pending_dependency`), so the core cannot simply forget it.
+
+**Seam: the persistence worker for safety, proposal admission for the client.**
+- *Safety, at the WAL thread.* Only the WAL thread knows the exact encoded size
+  and the exact WAL length, and every byte any group writes (leader proposals,
+  follower replication, noops, compactions, hard state) passes through it.
+  A capacity refusal there is side-effect free: the check runs before the
+  store's sequence, accepted state or file change. So the WAL thread *parks*
+  the batch instead of failing it, and retries parked batches after each
+  successful rewrite (the only operation that shrinks the WAL). A parked batch
+  has no `Written` event, so a leader has not replicated it and a follower has
+  not acknowledged it; it is delayed, never refused. The owner side keeps the
+  batch's admission credits, so the existing one-outstanding-unit-per-group
+  rule keeps the group's later work behind it.
+- *Client, at proposal admission.* Parking alone would turn a burst into
+  unbounded latency. `NetworkNode::propose` (and `propose_maintenance`) refuse
+  a new client request with the typed, retryable
+  `ClientError::StoragePressure` while the node is in the high-water state.
+  This is the only capacity refusal a client sees, and it happens before the
+  request reaches any core or log, so it can never refer to an entry that is
+  in a log, let alone a committed one. Requests already admitted are not
+  refused later: they reach the core and the WAL (parking if they must).
+- Why not refuse at worker `submit` (owner side) instead of parking: the owner
+  does not know the encoded size (the codec is inside the store), and a
+  conservative bound per batch (`max_batch_bytes`, 1 MiB) times 64 outstanding
+  requests would refuse data at an empty WAL. Why not only at admission:
+  followers write data they never admitted, and the published occupancy lags
+  the WAL thread by a window.
+
+**U2-style invariant (no committed entry is refused by storage capacity).**
+Capacity refusals exist in exactly two places after this change: proposal
+admission (before any log) and the store's `append_batch_within_capacity`,
+whose refusal type (`AppendRefused::Full`) is not a `StorageError` and is
+consumed on the WAL thread, so it cannot reach `WorkerEvent::Failed`,
+`Raft::storage_failed` or any client. Checks: a worker test that a batch that
+does not fit produces no `Failed` event, is written after a rewrite, and is
+reported `Durable`; the node test asserts every admitted write is applied.
+
+**Data/API shape.**
+- `log::AppendRefused { Full(Vec<LogMutation>), Failed(StorageError) }` and
+  `LogStore::append_batch_within_capacity(mutations)`. The default delegates to
+  `append_batch` (never `Full`); `NativeLogStore` checks capacity before
+  planning and returns the unchanged mutations with `Full`.
+- `WalUsage` gains `parked: usize`: bytes (owner-side cost) of batches the WAL
+  thread holds for space. The native worker publishes it next to the length.
+- `WalMaintenancePolicy` gains `high_water_percent` (default 75) and
+  `low_water_percent` (default 50) of the usable capacity; `configure` refuses
+  `0 < low < high <= 100` violations with `InvalidLimits`. With no policy
+  (explicit opt-out) the same defaults apply to the gate.
+- `WalMaintenanceStatus` gains `high_water: bool`, `high_water_entries: u64`
+  (times the state was entered) and `refused_proposals: u64` (saturating).
+- `ClientError::StoragePressure`. Binaries report it as `ERR StoragePressure`.
+
+**State transitions.** `Normal → HighWater` when published `bytes ≥ high` or
+`parked > 0`; `HighWater → Normal` when `bytes < low` and `parked == 0`.
+Evaluated on every poll and at every proposal (one relaxed load). While in
+`HighWater`: proposals refuse typed; the checkpoint scan runs with pressure
+(every applied group, as at 50%); a rewrite is due once `min_reclaim_bytes`
+is reclaimable (instead of capacity / 8), spaced by `retry_ms`; with a parked
+batch it is due once any byte is reclaimable. Heartbeats, votes, terms, commit
+records and compactions are control batches, which use the control reserve
+and are never gated. The leader keeps its role; followers keep replicating
+(their data may park, which only delays their acknowledgement).
+
+**Ownership.** The WAL thread owns parked batches and retries them; the node
+owns the high-water state and the gate; the store owns the exact check.
+
+**Failure and cleanup.** A parked batch is retried after every successful
+rewrite, in arrival order, before new work. A fatal store error fails parked
+batches with the fatal error like any queued work. If the owner closes the
+worker with batches still parked, the WAL thread rewrites once and retries; a
+batch that still does not fit is reported `Failed(Rejected("WAL capacity at
+close"))` (nothing was written; the host is shutting down). Maintenance keeps
+running in `Quiescing`/`Draining` while a batch is parked, so a drain cannot
+wait for ever on a batch only a rewrite can unpark. No format change.
+
+**Acceptance checks.**
+1. Native node, the binaries' open path, a slow rewrite injected (the
+   persistence worker refuses reclaim submissions for a simulated interval),
+   4 KiB writes offered faster than the rewrite drains: no node leaves
+   `Running`; proposals get `StoragePressure` during the window; every admitted
+   write is applied; WAL bytes never exceed the usable capacity; proposals
+   resume after the rewrite. The same test on 47646b4c (with the typed match
+   replaced by `is_err()`) fails with the node-fatal error (recorded).
+2. Worker test: a batch that does not fit parks (no `Failed`), and is written
+   and reported `Durable` after a rewrite; parked bytes are published.
+3. Store test: `Full` returns the mutations unchanged and leaves state,
+   sequence and length unchanged.
+4. Gate unit tests: hysteresis, parked forces high water, policy validation.
+5. Operator docs and the `maintenance` status: `high_water`, `wal_parked`,
+   `refused_proposals`.
+
+#### ST2 round 2: checkpoint publication cost plan (before editing)
+
+A checkpoint publication does four full device flushes in
+`FileSnapshotIo` (`F_FULLFSYNC` on macOS through `File::sync_all`):
+(1) the slot file, (2) the directory after the slot, (3) `MANIFEST.next`,
+(4) the directory after the rename. The crash-model orderings are:
+O1 slot bytes durable before a durable root references them; O2 manifest bytes
+durable before (or with) the rename that installs them; O3 the new root durable
+before the log compaction that supersedes the WAL prefix is persisted
+(`publish` returns only after (4)); O4 the slot's directory entry durable
+before a durable root references it.
+
+- **Barrier fsync (brief item 2a): not applicable as briefed.** The WAL does not
+  use `F_BARRIERFSYNC`: the approved change was measured and then parked
+  (section "Apple barrier publication measured; parked on device detection"),
+  because identifying an internal Apple SSD needed subprocesses (which broke a
+  crash test through a shared `flock`) or IOKit FFI (declined), and enabling it
+  on every macOS volume was declined. There is no existing gating to reuse, so
+  adding it to the snapshot store would be a new durability decision. Not
+  done; recorded for the user.
+- **Flush (2) is redundant after the first publication of each slot in a store
+  session.** `begin_slot` truncates and rewrites the same inode, so the
+  directory entry does not change; (1) covers the inode's size and data. The
+  first `sync_slot` of each slot in each session still syncs the directory, so
+  O4 holds for a slot file created by a crashed earlier session. Steady state:
+  three flushes instead of four.
+- (1), (3) and (4) each carry a distinct ordering (O1, O2, O3) and stay.
+- Threshold unchanged. Re-measure with the round-1 protocol (8 pairs, base =
+  the branch's merge base with current main after merging main).
+
+#### ST2 round 2: schema amendment (during implementation, before editing the follower path)
+
+The first three-node run of the slow-rewrite test (follower's rewrite held)
+showed that holding a follower's data batch on the WAL thread blocks that
+group's core (one pending persistence dependency per group): it cannot
+process heartbeats or checkpoint, so it campaigned once the batch was
+written (term 1 → 4 after a 1 s hold; no write lost, every node `Running`).
+Added before changing the follower path: the node passes its high-water
+state to every core (`Raft::set_storage_pressure`, a volatile host input set
+outside a step, so it reaches a core that is waiting on persistence), and a
+follower in that state keeps leader contact, term and commit for the
+matching prefix but declines an append that carries new non-noop entries,
+without a reply; the leader resends the same range on its next heartbeat.
+The core stays free to apply, checkpoint and compact, which is what frees the
+space. Holding on the WAL thread stays as the exact backstop for batches
+already accepted when the state began.
+
+#### ST2 round 2 implemented (19 October 2026)
+
+**ST2b: a full WAL is backpressure, never a node failure.**
+
+- *Seam.* The client-visible refusal is at proposal admission
+  (`NetworkNode::propose`/`propose_maintenance`), before the request reaches
+  any core or log: `ClientError::StoragePressure`, retryable, nothing
+  admitted. The safety property is at the persistence worker:
+  `LogStore::append_batch_within_capacity` returns `AppendRefused::Full` with
+  the unchanged mutations (checked before planning, so no sequence, accepted
+  state, file or durable state changes) and the native WAL thread holds the
+  batch, retrying it after each successful rewrite before newer work.
+  `AppendRefused` is not a `StorageError`, so it cannot reach
+  `WorkerEvent::Failed`, `Raft::storage_failed` or a client. Followers above
+  high water decline new data at step time (amendment above).
+- *Why both.* Admission alone cannot be exact: followers write data they
+  never admitted and the published occupancy lags the WAL thread. The worker
+  alone would turn a burst into unbounded latency and, on a follower, block
+  the core. The owner side cannot refuse at `submit` exactly because the
+  encoded size is only known inside the store (a 1 MiB per-batch bound times
+  64 requests would refuse data at an empty WAL).
+- *U2-style invariant.* No entry that is in any log is ever refused for
+  capacity: the only capacity refusal a client sees precedes the log, a
+  follower's decline is not a refusal (the leader resends; the follower takes
+  the range once below low water), and the WAL thread's `Full` is a hold.
+  *(Corrected in round 3: a deposed leader whose own uncommitted suffix kept
+  it above low water also declined the append that would truncate that
+  suffix, so it never caught up on an idle group; and a batch could be
+  permanently impossible. Round 3, I3 and I5.)*
+  Checked by `a_batch_that_does_not_fit_is_held_until_a_rewrite_and_never_failed`
+  (no event until the rewrite, then `Written`/`Durable` before the rewrite's
+  own event), `a_full_wal_hands_the_batch_back_unchanged` (bytes, usage and
+  state unchanged; the next control append still succeeds) and the two node
+  tests below (every admitted write applied).
+- *State.* `WalMaintenancePolicy::{high_water_percent: 75, low_water_percent:
+  50}` (validated `0 < low < high <= 100`; the opt-out uses the same default
+  marks); `WalMaintenanceStatus::{high_water, high_water_entries,
+  refused_proposals}`; `WalUsage::parked`. In high water the checkpoint scan
+  runs with pressure and a rewrite is due once `min_reclaim_bytes` is
+  reclaimable, or with a held batch once the WAL has grown since the last
+  rewrite. Maintenance keeps running during a drain while a batch is held. A
+  batch still held when the owner closes the worker gets one more rewrite,
+  then `Failed(Rejected("WAL capacity at close"))` (never written).
+- *Operator surface.* `ERR StoragePressure` in all three binaries; the
+  `maintenance` status gains `high_water`, `high_water_entries`,
+  `refused_proposals` and `wal_parked` (`checkpoint_base` stays last).
+  `docs/COUNTER_SERVICE.md`, `docs/DIRECTORY_SERVICE.md`,
+  `docs/TRANSFER_SERVICE.md`.
+
+**Before/after evidence (deterministic simulated protocol time; the rewrite
+is held by a wrapper around the native WAL worker that refuses reclaim
+submissions, which maintenance retries every `retry_ms`).** Both tests open
+storage through `NativeStartup::prepare_for_discovery`, the binaries' storage
+path; on 47646b4c they ran with the typed-refusal match replaced by "any
+refusal fails the test" and the new status fields removed.
+
+| Test | On 47646b4c | With ST2b |
+| --- | --- | --- |
+| `write_burst_past_a_slow_rewrite_is_backpressure_not_a_node_failure`: one node, 4 KiB writes, 64 outstanding, rewrite held until 1 s after the first refusal, 24,576 writes (96 MiB) | Node 1 at 16,287 ms: `Replica(Owner(Worker(Consensus(Storage(Rejected("WAL capacity/control reserve"))))))` | All 24,576 applied; 10,640 `StoragePressure` refusals from 10,780 ms; rewrite released at 11,780 ms, last refusal 11,844 ms; peak WAL 49,832,941 B (75.4% of the 66,060,288 B usable capacity; cap 67,108,864); `Leader`, term unchanged, `Running` throughout |
+| `follower_with_a_slow_rewrite_declines_new_data_instead_of_failing`: three nodes over TCP/TLS, node 3's rewrite held for 1 s once it reaches high water, 20,480 writes | Node 3 at 2,877 ms: the same node-fatal error | All applied; node 3 high water at 2,070 ms, released 3,070 ms; peak WAL 49,557,114 B; nothing held (`parked` 0); no refusal at the leader; term 1 throughout; node 3 caught up to 20,481 |
+
+The same follower test before the amendment (holding without declining)
+passed every safety check but went through two elections (term 1 → 4) after
+the follower's batch was written.
+
+Unit tests: worker hold and close paths; store `Full`; gate hysteresis,
+held-batch entry and policy validation; rewrite rules in high water; the core
+follower decline (contact and commit kept, no data, no reply; noop-only
+suffix accepted; the same range taken once cleared).
+
+**Checkpoint cost.**
+
+- *Barrier fsync (brief item 2a): not done.* The WAL does not use
+  `F_BARRIERFSYNC`: the approved change was measured and parked because
+  identifying an internal Apple SSD needed subprocesses (which broke a crash
+  test through a shared `flock`) or IOKit FFI (declined), and enabling it on
+  every macOS volume was declined (section "Apple barrier publication
+  measured; parked on device detection"). There is no existing gating to
+  reuse; the snapshot store keeps `F_FULLFSYNC` (`sync_all`).
+- *Flush analysis.* A checkpoint cycle was not four flushes but ten, with four
+  full read-back decodes of the same image:
+
+  | Step | Flushes before | After | Reads/decodes before | After |
+  | --- | --- | --- | --- | --- |
+  | Publish job: `reconcile_log(durable)` | 2 (temp file, directory) | 0 when unchanged (steady state: the previous cycle's final reconcile already wrote exactly this root and pin) | — | — |
+  | `seal`: slot file, slot directory | 2 | 1 (directory once per slot per store session, or after the file is created) | 1 (read back, CRC, decode, compare) | 1 |
+  | `publish` | 2 | 2 (`publish_for_log`: root and log pin in one manifest) | — | — |
+  | `pin_for_log` | 2 | 0 (merged above) | 1 (validation) | 0 (seal read the same bytes this session; nothing writes a staged slot) |
+  | Publish job's final check | — | — | 1 (exact comparison with the input) | 1 (kept: the one byte-exact check) |
+  | Reconcile job after compaction | 2 | 2 (releases the previous pin) | 1 | 0 when this session published the image through `publish_for_log` and it is still pinned |
+  | **Total** | **10** | **5** | **4** | **2** |
+
+  Orderings kept: O1 slot bytes durable before a durable root references them
+  (slot `sync_all` before the manifest); O2 manifest bytes durable before the
+  rename that installs them (`MANIFEST.next` sync); O3 the new root durable
+  before the log compaction is persisted (the publication completes before
+  the job reports); O4 the slot's directory entry durable before a durable
+  root references it (first `sync_slot` of each slot in each session, so a
+  file created by a crashed earlier session is covered; a slot is never
+  removed or renamed and `begin_slot` truncates the same inode). Skipping an
+  identical manifest is exact because every publication of a live store
+  completes before memory changes (a failure fences the store). The combined
+  root-and-pin manifest exposes only states the two separate publications
+  could (no intermediate root without its pin). The fault-injection tests
+  follow the new sequence; the reconcile fault test now starts from an
+  earlier checkpoint so its reconcile releases a real pin.
+- *Benchmark harness.* `examples/benchmark/observe.rs` (`ObservedLog`) did not
+  forward `physical_usage` or `append_batch_within_capacity`. Without an
+  occupancy signal maintenance rewrites at every 1 s deadline (by design for
+  such providers), so the benchmark rewrote every replica's WAL each second
+  while production nodes do not. Harness only; round 1's measurements
+  included this.
+- *Leader deferral.* The leader cleared its in-flight replication requests at
+  checkpoint compaction, so a follower whose acknowledgement crossed the new
+  base was sent a full snapshot (seen in two of three 16,000-write runs). The
+  scan now defers a leader's checkpoint while another replica has not
+  acknowledged the applied index, only below a cap halfway from the threshold
+  to the entry limit (12,288) and never under WAL pressure; no installs in 17
+  later runs. Keeping answerable requests across compaction in the core was
+  rejected for this slice: the outbound request-window validation checks
+  queued appends against durable entries, so it needs its own change.
+- *CRC32C.* Every CRC32C (snapshot images, WAL batches, wire frames) was a
+  byte-at-a-time table loop; the checkpoint computes it over the image several
+  times per replica. Slicing-by-8 (safe Rust, 8 KiB of static tables, checked
+  against the original bitwise form at every offset and length up to 4 KiB)
+  computes the same function. A general speedup, measured separately below.
+
+**Measurements (quiet Mac, `nat.sh` protocol: marginal CPU per original =
+(cpu at 16,000 − cpu at 2,000) / 14,000, 15,000/s offered, `NOCAP=1 MAINT=0`,
+TCP, release `native_benchmark --all-features`, WAL on the internal APFS
+SSD; own `src-st2r2-*`/`nat-st2r2-*` trees, removed afterwards).** Base is
+current `main` 4920534e (the branch merges it). The Mac showed occasional
+stalls on both sides (rate below half, p99 about five times), reported and
+excluded symmetrically.
+
+| Run | Comparison | pairs | marginal µs/write | p99 | rate |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 4920534e → 9fca7cc5 (ST2b + slot directory once) | 8 | 29.19 → 31.12 (×1.066) | ×1.45 | ×0.91 |
+| 2 | 4920534e → 14f92e08 (+ one manifest, harness fix, deferral) | 8 | 29.00 → 29.31 (×1.011) | ×0.96 | ×1.00 |
+| 4 | same | 8 | 29.36 → 29.57 (×1.007) | ×1.01 | ×0.97 |
+| 5 | same, stalls excluded | 13 | 29.16 → 31.37 (×1.076) | ×0.99 | ×0.97 |
+| 6 | 4920534e → 3111eb4f (main + CRC only, measurement-only commit, not pushed), stalls excluded | 11 rounds | 29.39 → 28.02 (×0.954) | ×1.02 | ×0.99 |
+| 6 | 4920534e → c46ea48a (final candidate) | 11 rounds | 29.39 → 28.79 (×0.980; median pair ×0.995) | ×1.02 | ×0.97 |
+| 6 | 3111eb4f → c46ea48a (ST2's own cost with the same CRC) | 10 rounds | 28.03 → 29.05 (×1.036; median pair ×1.061) | ×1.00 | ×0.99 |
+
+Run 6 interleaved the three binaries in every round (12 rounds, rotating
+order). Linux tmpfs pairs (8, cores 4–9, on a shared host whose load rose
+from 5 to 15) gave ×1.080 → ×1.041 for the publication changes and were not
+used for the final decision.
+
+Result against current `main`: within the +2% target (×0.980). That is
+because the general CRC speedup (×0.954 on `main` alone) offsets most of
+ST2's own cost. With the same CRC on both sides ST2 still costs +3.6% median
+(+6.1% median pair; on-CPU profile +2.2 ms per 16,000-write run, +1.9%).
+Remaining cause (Mac profile, blocked samples excluded): the benchmark's
+recovery-verification phase restores each replica from its checkpoint
+(Counter `restore_checkpoint`, 2.9 ms per run) where the base replays the
+WAL, then snapshot decode and CRC passes (seal's read-back check, codec
+footer and decode, the final exact comparison; 2.6 ms) and the checkpoint
+encode. p99 and rate are back to the base (round 1: ×1.36 and ×0.90).
+
+Framework (matched, `fwmac.sh` protocol, 5 pairs, 4920534e → c46ea48a): bulk
+cpu/write ×1.028 (pairs 0.99 0.97 1.00 1.14 1.03), single ×0.995, bulk with
+one server worker ×1.005, single with one ×0.976; no regression. The core's
+follower path gained one boolean test and the CRC change applies there.
+
+**Checks (round 2).** `cargo +stable fmt --all -- --check`; strict Clippy
+(`-D warnings`, `--all-targets`) for default, all-features, no-default and
+native-only: zero diagnostics; matched workspace fmt and strict Clippy: zero.
+Suites, run sequentially per target on Linux cores 4–9 (every `tests/*.rs`
+except `representative_relay_model`, plus `--lib --bins`): default features
+2,450 passed, 0 failed (116 targets); all-features 2,756 passed, 0 failed
+(lib and bins 566, test files 2,190). One flake in the first all-features
+`--bins` run: `drain_runner::observation_tests::lost_source_status_reply_repeats_only_original_observation`
+panicked on a `Truncated` socket read while the shared host was at load
+9–15; it passed six isolated reruns (22 drain-runner tests each) and the full
+`--lib --bins` rerun. That code is not touched here.
+
+**Remaining gaps (recorded; round 3 closes the first and bounds the second's
+liveness effect, see I5 and I2).**
+- A group whose own live log (not dead bytes) fills the WAL while its next
+  data batch is held on the WAL thread cannot checkpoint until the batch is
+  written. The follower decline and the admission gate keep new data out from
+  75%, so this needs in-flight data of a quarter of the WAL at the moment the
+  state begins; it is a hold, never a failure.
+- A leader still clears in-flight replication requests at compaction; the
+  deferral avoids most resulting snapshot sends but is bounded (12,288).
+- Snapshot store barrier fsync: needs a device-identification decision.
+
+#### ST2 round 3 schema plan (written before editing, 19 October 2026)
+
+Base: PR 14 head 73da0196 (merge base with `main` 4920534e). Both round-2
+reviews (Codex 5575305544, Claude Opus 5575352663) reproduced liveness
+defects at the capacity boundary. Rule for this round: no capacity condition
+may stop a group, a node or a replica permanently. A bounded condition either
+makes progress by itself or fails closed in a typed, operator-visible,
+recoverable state. Every Raft guarantee is kept; no `unsafe`, no new crates;
+tests run in simulated protocol time; no assertion is weakened.
+
+**I1. A leader can always place its current-term noop in every state this
+code can reach (Codex P1-3, Opus P1-1, plan Q6).** Cause: `become_leader`
+defers the noop while the retained log is at `max_entries_per_group`; only a
+checkpoint frees space, a checkpoint compacts only up to the commit index, and
+the commit index cannot pass old-term entries without a current-term entry
+(§5.4.2). With 16,384 uncommitted term-1 entries no step can ever succeed.
+- *Mechanism: a noop reserve.* `max_entries_per_group` stays the **data**
+  budget: proposals, configuration entries and ready batches are admitted only
+  while retained entries are below it. New `LogLimits::leader_noop_reserve()`
+  = max(4, max/64) (256 at defaults) and `LogLimits::retained_entry_capacity()`
+  = max + reserve. The capacity is the store and recovery bound: the plain
+  and full transition plans, mutation-suffix decoding (the WAL rewrite image
+  writes a group's whole retained log as one suffix), recovery validation and
+  the startup owner growth budget. Only a leader's own noop may occupy the
+  reserve. So a leader elected over a full data suffix (16,384 term-1 entries,
+  commit 0, as a store written by `main` or round 2 can hold) appends its noop
+  at 16,385, replicates it and commits the whole suffix by the ordinary rule.
+  Proposals then refuse with typed backpressure (I2) until a checkpoint
+  compacts. No commit rule changes and no entry is discarded.
+- *Why the reserve cannot run out except under an adversary.* Every data entry
+  is appended while the appending leader's retained count is below `max`, and
+  that leader's base is at most the commit index, so data indexes never exceed
+  the commit index at append time plus `max`. Every entry beyond that bound is
+  a noop of a distinct term. Filling the reserve on every electable replica
+  needs 256 consecutive leaders that each replicate their noop to a majority
+  and lose leadership before learning of any acknowledgement, with no commit
+  in between.
+- *Residual, fail-closed.* (a) The checkpoint scan treats a group whose leader
+  noop is pending, or whose retained entries reach the entry high-water mark
+  (I2), as due at any applied entry beyond its base, with no follower
+  deferral. (b) If the leader is at capacity and `last − commit ≥ capacity`
+  (no checkpoint can make room), it steps down in the same term with
+  `StepDownReason::RetainedEntryCapacity`, recorded in the core and counted,
+  and skips its next two election timeouts (a campaign hold-off), so a replica
+  whose log is shorter can win and truncate the uncommitted suffix. The
+  operator recovery for the adversarial case is a restart with a larger
+  `max_entries_per_group`.
+- *Pre-vote and check-quorum: not added.* Both change every election path and
+  election test. Capacity liveness needs only that a stuck leader stop
+  heartbeating, which the step-down does. Without check-quorum a partitioned
+  leader keeps admitting writes until the entry gate refuses them (typed);
+  recorded as a follow-up.
+- *Tests.* An in-crate three-replica cluster with exact delivery and
+  heartbeat rounds: Codex's case (16,384 term-1 entries, commit 0, node 2 wins
+  term 2); Opus's case (the leader is cut off from both followers, keeps
+  writing to its data budget, the partition heals, the old leader wins a later
+  election); the step-down case (one replica full to capacity, two shorter
+  ones). Each must commit a new write within a bounded number of heartbeat
+  rounds. Recorded on 73da0196 first.
+
+**I2. A write refused at the retained-entry budget gets the same typed,
+retryable backpressure as WAL pressure (Opus P2-2, Codex §5.9).**
+- *Mechanism.* A per-group entry gate at `NetworkNode::propose` (and
+  `propose_maintenance`): enter when retained entries reach the WAL policy's
+  high-water percent of `max_entries_per_group` (12,288), leave below its
+  low-water percent (8,192) → `ClientError::StoragePressure`, counted in
+  `refused_proposals`. The core's own data-budget refusal becomes the typed
+  `RaftError::StoragePressure` (was `Storage(Rejected("proposal retained entry
+  budget"))`, or `"group entry limit"` from the transition plan for a single
+  proposal); the binaries print `ERR StoragePressure` for both.
+- *Leader deferral.* Deferring a due checkpoint while a replica lags now
+  stops at the midpoint between the threshold and the entry gate (10,240), so
+  it can never push the leader into the gate; it is also bounded in protocol
+  time (250 ms per due checkpoint, Codex §5.14), and never applies under WAL
+  pressure or with a noop pending. A follower that is down therefore delays a
+  checkpoint by at most 250 ms.
+- *Tests.* Gate hysteresis and counting; core refusal type; deferral bounded
+  by entries and time; a three-node TCP run with one follower never started,
+  writing three times past the entry budget through the leader.
+
+**I3. A follower never refuses the append that truncates its own divergent
+suffix, and a follower at its entry capacity makes progress (Opus P2-1).**
+- *Under WAL pressure.* An append whose first new entry conflicts with a held
+  entry persists a truncation-only update (`Suffix { from, entries: [] }`),
+  with the term and the commit index for the verified prefix, and sends no
+  reply. It carries no data entries, so the store writes it as a control
+  record within the reserve. The divergent suffix becomes dead and the next
+  rewrite reclaims it. The leader's next resend is a plain extension,
+  declined until the WAL is below low water, then accepted: the follower
+  catches up without a snapshot on an idle group.
+- *At entry capacity.* An append whose new entries would exceed the
+  follower's retained capacity is handled the same way (truncate a conflict if
+  there is one, keep term and commit for the verified prefix, no reply)
+  instead of today's non-fatal step error, which also dropped the commit
+  advance. The entry-pressure scan rule (I1a) then checkpoints the follower.
+- *Leader-side signal.* Per peer, the leader counts heartbeat rounds since the
+  peer's last successful append acknowledgement while it lags the last index
+  (`Raft::replica_stall()`: worst peer and rounds). The follower counts its
+  declines (`Raft::declined_appends()`).
+- *Tests.* A conflicting suffix under pressure (truncates, takes no data,
+  sends no reply, then catches up without a snapshot once below low water);
+  an append past entry capacity (commit advances, no data, no reply, then
+  accepted after a checkpoint).
+
+**I4. A WAL rewrite can always be admitted (Codex P1-1).** Cause: the native
+worker admitted `submit_reclaim` against the data credits that parked batches
+keep.
+- *Mechanism.* Reclaim gets its own admission slot: it is not charged to the
+  request or byte credits (data or total), at most one is in flight
+  (`reclaim_pending`), and the request channel has one extra slot, so
+  `try_send` cannot be full because of queued or parked data.
+- *Test.* Codex's reproduction: `WorkerLimits { max_requests: 4,
+  control_requests: 1 }`, three groups each with one parked data request, a
+  store that frees space on reclaim; the first reclaim submission is admitted
+  and every parked batch is written (on 73da0196: 100 submissions, all
+  `Overloaded`).
+
+**I5. No permanently impossible batch is admitted, and every admitted batch
+progresses (Codex P1-2, Opus P3-1).** *Corrected in round 4:* the second
+half did not hold. Noop entries (a leader's own noop, noop-only follower
+appends) were admitted as control and are live, so their bytes were in no
+bound; GPT-6.1-Sol's round-3 review held a noop through three successful
+rewrites with 3,830 live noops in a 64 KiB WAL. Round 4 (R4-1) adds them to
+the account; see "ST2 round 4".
+- *Configuration (U5).* A node whose persistence publishes occupancy refuses
+  construction and `configure_wal_maintenance` when the space above the high
+  water mark, `U − high(U)` with `U = max_wal_bytes − control_reserve_bytes`,
+  is smaller than `max_batch_bytes + control_reserve_bytes`:
+  `MaintenanceError::WalHeadroomTooSmall`. `NativeLogWorker::spawn` refuses a
+  store whose `max_batch_bytes` exceeds `U` (`WorkerError::InvalidLimits`).
+  Codex's case (8 KiB WAL, 4 KiB reserve, 8 KiB batches, a 4,000-byte
+  command) is refused at configuration.
+- *Exact in-flight accounting at admission.* Every staged core transition
+  records an upper bound of its WAL encoding (`Raft::pending_wal_bytes`,
+  computed when staged; checked against the native codec in a test). The shard
+  keeps the sum over its groups incrementally. At every poll the node gives
+  the shard the published occupancy `P` and the high-water byte mark; the WAL
+  thread now publishes its length before it sends a window's events, so a
+  completed transition's bytes are in `P` by the next poll, and the shard keeps
+  bytes completed since that refresh counted until then. Before stepping an
+  event that stages data (a proposal or batch of proposals, a configuration
+  entry, a follower append with data entries) the shard checks
+  `P + pending + completed_since_refresh + bound ≤ high`. Otherwise a proposal
+  is refused `RaftError::StoragePressure` before the log, and a follower
+  declines that append as in I3. Control transitions are never refused. Hence
+  data bytes in the WAL never exceed the high-water mark. A batch can still be
+  held behind control records; its exit is a rewrite, after which live data
+  is at most the mark plus the live control records, and the configuration
+  rule makes the largest batch fit above that.
+- *Tests.* Configuration refusals (library and binaries); a node burst with
+  a slow rewrite where nothing is ever held (`parked` stays 0) and every
+  write applies; the bound against the codec.
+
+**I6. Maintenance schedules cannot silently stop (Opus P3-2).** Both policies
+refuse `interval_ms` and `retry_ms` above 24 hours at configuration
+(`InvalidLimits`); the binaries refuse `--wal-reclaim-ms` above that at
+parse.
+
+**I7. Observability (Opus P3-6).** The shared `maintenance` status of all
+three binaries adds `retained_entries`/`retained_capacity` (largest group),
+`entry_high_water_groups`, `checkpoint_failures`, `replica_stall_rounds`,
+`declined_appends`, `step_downs` and `wal_held_ms` (how long the oldest held
+batch has waited), keeping `checkpoint_base` last.
+
+**I8. Tests (Opus P3-5).** The counter `history` maintenance test again
+proves that a rewrite happens (`last_sequence` advances while bytes are
+reclaimable); a native soak at ≥ 10× the old bounds (release-only
+environment variant, run and recorded); two runs of the runtime soak in
+simulated time with byte-identical traces.
+
+**I9. CPU (Opus P3-3/P3-4, Codex §5.11).** Report the serving-only marginal
+CPU per write (the benchmark's post-run recovery verification measured
+separately) and framework cells with ≥ 7 pairs, `nat.sh`/`svc.sh` and
+`fwmac.sh` on the quiet Mac against the merge base with `main`.
+
+**I10. Docs.** Correct the follower catch-up and entry-cap claims; operator
+docs for the typed refusals and the new status fields; rounds 1 and 2 stay
+as recorded.
+
+**Ownership, restart and partial progress.** No new durable state. The noop
+reserve changes bounds only; a store this branch writes with more than
+`max_entries_per_group` retained entries is refused by older code (downgrade
+note). A truncation-only update uses the existing replacement path (a new
+generation). The step-down record, campaign hold-off, stall counters and the
+shard's byte account are volatile and rebuilt at construction; the byte
+account starts from the recovered cores (nothing pending) and the store's
+published occupancy.
+
+**Acceptance checks.** Every test above fails on 73da0196 where it can be
+expressed there, and passes here; fmt; the four strict Clippy configurations
+and matched fmt/Clippy; runtime, log_store, maintenance, snapshot,
+snapshot_worker, raft, native startup, counter_service, directory_service
+and transfer_service suites in default and all-features, one configuration at
+a time.
+
+#### ST2 round 3 implemented and validated (19 October 2026)
+
+Code: commits `583202cc` (I1–I7 mechanisms and the reproductions),
+`bb8286ac` (operator flag, deferral clock, soaks, binary checks), `ba372cb4`,
+`5c9b6906` and `4be97a91` (benchmark harness only: serving-only switch) and
+`4f673b2c` (fast paths for the new per-write checks). The schema plan above
+was implemented as written, with the departures listed at the end.
+*Corrected in round 4:* as implemented, it did not meet its own I5 claim
+that every admitted batch progresses (live noop bytes, R4-1), and the leader
+stall map kept departed replicas (R4-2); both are fixed in round 4.
+
+**Invariant → mechanism → test → before (73da0196) / after.** "Before" runs
+put the new test files on 73da0196 in this worktree (minus assertions on new
+counters and the tests of new API only) and ran them there; logs were kept
+for this record and then removed with the worktree's `target/`.
+
+| Invariant | Mechanism | Test | 73da0196 | This branch |
+| --- | --- | --- | --- | --- |
+| I1 Codex P1-3: leader over 16,384 uncommitted term-1 entries, commit 0, three replicas | Noop reserve (`leader_noop_reserve` = max(4, max/64) = 256, `retained_entry_capacity` 16,640); data only below 16,384 | `raft::capacity_tests::leader_elected_over_a_full_uncommitted_suffix_commits_new_writes` | Fails: after 40 heartbeat rounds node 2 is Leader term 2, last 16,384, commit 0, `noop_pending`; proposals `Storage(Rejected("group entry limit"))` | Passes: the new write commits within the 40-round bound; every old entry committed, none discarded; no snapshot sent |
+| I1 Opus P1-1: partitioned leader fills its log with uncommitted writes, heals, wins again | Same reserve; urgent checkpoint while the noop is pending | `raft::capacity_tests::partitioned_leader_that_filled_its_log_wins_again_and_the_group_progresses` | Fails: node 1 Leader term 3, last 16,384, commit 1, `noop_pending` after 40 rounds (followers took its whole suffix but nothing can commit) | Passes within 40 rounds |
+| I1 residual: uncommitted part alone fills the whole capacity | Step-down in the same term (`StepDownReason::RetainedEntryCapacity`, counted, `last_step_down`) and two skipped election timeouts | `raft::capacity_tests::leader_whose_uncommitted_log_fills_the_capacity_steps_down_and_another_wins` | API absent | Passes: a shorter replica wins, truncates the suffix, commits; no snapshot |
+| I2 Opus P2-2: entry-cap refusal is retryable backpressure | Core `RaftError::StoragePressure`; per-group entry gate at `NetworkNode::propose` (75%/50% of the budget, WAL-gate hysteresis) → `ClientError::StoragePressure`, counted; binaries print `ERR StoragePressure`; leader deferral only below 10,240 retained and ≤ 250 ms protocol time per due checkpoint, never with a noop pending or WAL pressure | `entry_gate_enters_at_the_high_mark_and_leaves_below_the_low_mark`; `batch_limits::aggregate` (scenario 3 now typed); `startup::backpressure::absent_follower_does_not_stop_the_leader_checkpointing` (three nodes over TCP, node 3 never started, 49,152 small writes, three times the budget) | — (round 2: `NotProposed(Storage(Rejected(..)))`, deferral up to 12,288 with no time bound) | Passes: 49,152 applied, max retained 10,416 of 16,384, five checkpoints, `entry_budget_refusals` 0, term unchanged, `replica_stall` = node 3 at 510 rounds |
+| I3 Opus P2-1: follower never declines the truncation of its own divergent suffix | Conflict → truncation-only update (`Suffix { from, entries: [] }`, control record) with term and verified commit, no reply; append past capacity keeps commit, takes nothing; `declined_appends`, leader `replica_stall` | `owned_appends::conflicting_suffix_under_storage_pressure_is_truncated_without_new_data`; `append_past_entry_capacity_keeps_commit_and_takes_no_entries`; `capacity_tests::deposed_leader_under_pressure_truncates_its_suffix_and_catches_up_without_a_snapshot` | Fails: no update emitted for the conflicting append; deposed leader never caught up (last 101, term 1, vs leader 8/term 3 after 40 rounds) | Passes: truncates, then catches up without a snapshot on an idle group |
+| I4 Codex P1-1: reclaim cannot deadlock behind parked writes | Rewrite has its own admission (one in flight, an extra channel slot, no request/byte credits) | `maintenance::a_rewrite_is_admitted_while_parked_batches_hold_every_data_credit` (`max_requests: 4, control_requests: 1`, three groups each with a parked batch) | Fails: 100 consecutive `Overloaded` | Passes: admitted at the first attempt, all three parked batches durable |
+| I5 Codex P1-2: no permanently impossible batch | Worker refuses `max_batch_bytes` above usable WAL (`WorkerError::InvalidLimits`); nodes refuse WAL headroom above the high-water mark below batch + reserve (`MaintenanceError::WalHeadroomTooSmall`); shard-wide in-flight WAL account (`WalAccount`: published + staged + completed-since-refresh ≤ mark before any data step) | `maintenance::limits_under_which_a_batch_can_never_fit_are_refused_before_any_write` (8 KiB WAL, 4 KiB reserve, 8 KiB batches, 4,000-byte command); `wal_headroom_must_hold_the_largest_batch_and_the_reserve`; `log_store::wal_bound_covers_the_native_encoding_of_every_update_shape`; burst test asserts `parked == 0` | Fails: accepted, held 5,024 bytes after three rewrites, never written | Passes: refused `InvalidLimits` at spawn; burst: 24,576 writes, 10,806 refused at submission and 128 at step (typed, retried), peak WAL 49.5 MB of 66 MB, nothing ever held |
+| I6 Opus P3-2: a huge interval cannot overflow the next deadline (qualified in round 4: within 24 h of `u64` millisecond clock exhaustion `after()` returns `None` and the schedule stops, the recorded clock-horizon contract, `deadline_exhaustion_stops_instead_of_wrapping_or_spinning`) | Policies refuse `interval_ms`/`retry_ms` above 24 h (`MAX_SCHEDULE_MS`); binaries refuse `--wal-reclaim-ms` above it | `schedules_longer_than_a_day_are_refused_at_configuration` | Accepted a value near `u64::MAX`; per the review, the deadline then became `None` after the first completion (not rerun) | Refused |
+| I7 Opus P3-6: observability | `maintenance` command of all three binaries: `retained_entries`, `retained_budget`, `retained_capacity`, `entry_high_water`, `entry_high_water_groups`, `refused_entry_proposals`, `checkpoint_failures`, `wal_pending_bytes`, `wal_refused_proposals`, `wal_declined_appends`, `wal_held_ms`, `declined_appends`, `replica_stall`, `step_downs`, `last_step_down`; `checkpoint_base` still last | Field checks in `counter_service`, `directory_service`, `transfer_service` tests | — | Present |
+| I8 Opus P3-5 tests | `--wal-reclaim-min-bytes 0` in the counter `history` maintenance test (rewrites at every interval) | `counter_service` maintenance history: `last_sequence` must advance; the default schedule's skips checked separately | Skips counted as progress | Physical rewrites proven |
+
+**Soaks (release, Linux cores 4–9, simulated protocol time).**
+- Native node, `VOTEBOAT_ST2_NATIVE_SOAK_WRITES=163840` (10× the 16,384-entry
+  bound and 10× the 64 MiB WAL): 671,088,640 bytes appended, last index
+  163,841, max WAL 33.0 MB of 66.1 MB usable, max retained 7,582 entries,
+  checkpoint bases 0 → 37,906 → 75,811 → 121,297 → 159,202, 21 rewrites,
+  12.9 s simulated. Passed.
+- Runtime node, `VOTEBOAT_ST2_SOAK_WRITES=163840` with an election every
+  2,048 writes: last index 163,920, max retained 12,298, 10 checkpoints,
+  75 typed `StoragePressure` refusals (all retried and applied). Passed.
+- `two_soak_runs_in_simulated_time_have_identical_traces`: two 24,576-write
+  runs, identical traces (12 or more trace rows compared). Passed. (The native
+  soaks use real threads, files and TCP; they are not claimed as replay.)
+
+**CPU (quiet Mac, `svc.sh` protocol with WAL on the RAM disk, marginal CPU
+per write = (cpu at 16,000 − cpu at 2,000) / 14,000 at 15,000/s offered,
+`NOCAP=1 MAINT=0`; `fwmac.sh` for the framework; own copies of both scripts,
+own `src-`/`target-`/`fw-` trees on the Mac, removed afterwards).** Serving
+only (`VOTEBOAT_BENCH_SKIP_RECOVERY=1`, the benchmark stops before its
+post-run recovery verification) needs the switch on the base too, so the
+bases are measurement-only local commits: `629dca40` = merge base 4920534e +
+the three harness commits; `164c542f` = that + the CRC32C commit (same CRC as
+the branch).
+
+| Comparison | pairs | marginal µs/write | rate | p99 |
+| --- | --- | --- | --- | --- |
+| Serving only, 629dca40 → 4be97a91 | 9 | 13.6 → 13.8 (×1.009) | ×1.000 | ×1.04 |
+| Serving only, 164c542f → 4be97a91 (ST2's own cost, same CRC) | 9 | 13.3 → 13.7 (×1.026) | ×0.999 | ×1.07 |
+| Serving only, 629dca40 → 4f673b2c (final) | 9 | 14.2 → 14.3 (×1.007) | ×0.998 | ×1.02 |
+| Serving only, 164c542f → 4f673b2c (final, same CRC) | 9 | 13.7 → 14.4 (×1.049) | ×1.000 | ×1.06 |
+| End to end (with recovery verification), 629dca40 → 4be97a91 | 7 | 16.5 → 15.1 (×0.914) | ×1.001 | ×1.08 |
+| End to end, 629dca40 → 4f673b2c (final) | 7 | 16.0 → 15.8 (×0.983) | ×0.999 | ×1.07 |
+
+One further same-CRC run (17.8 → 18.7) had both sides' absolute values
+about 30% above every other session (Mac disturbed) and is excluded. ST2's
+own serving cost with the same CRC is therefore +2.6% to +4.9% between
+sessions (checkpoints and rewrites run during serving; round 2's
+whole-process figure was +3.6%); against the merge base it is within +1%.
+End to end the branch is cheaper because recovery starts from a checkpoint
+instead of replaying the whole log.
+
+Framework (`fwmac.sh`, 7 pairs, 4920534e → 4be97a91): bulk ×1.000, single
+×1.001, bulk with one worker ×0.995, single with one worker **×1.026** (6/7
+pairs worse). Attributed: 73da0196 → 4be97a91 single-1 ×1.021 (8/9), and
+reversed order ×0.971 (9/9), so round 3 added it; the Mac counts about +1%
+instructions retired and +2% cycles per run; work shape unchanged (same
+persistence units and proposal batches). Reverting only the new per-write
+checks (follower decline, leader data budget, stall map) recovered ×0.984
+(9 pairs). Commit `4f673b2c` keeps the behaviour but returns early on the
+common path (no pressure and the whole log plus the new entries fits; the
+exact checks in a cold helper): single-1 12,970 → 12,708 ns/write (×0.980,
+9 pairs). Final framework cells, 4920534e → 4f673b2c, 7 pairs: bulk ×1.000,
+single ×1.007, bulk-1 ×0.995, single-1 ×1.005. The framework links the core,
+so these cells were never "unaffected by construction" (round-1 wording,
+corrected).
+
+**Checks (round 3).** `cargo +stable fmt --all -- --check`; strict Clippy
+(`-D warnings`, `--all-targets`) for default, all-features, no-default and
+native-only, and the matched workspace fmt and strict Clippy: zero
+diagnostics. The previous builder's last two benchmark commits failed
+Clippy's `too_many_lines` (fixed in `4be97a91`). Suites on Linux cores 4–9,
+one configuration at a time. Final code (`4f673b2c` plus docs and the
+fixture fix below), default features: lib 502, counter_service 146,
+directory_service 18, effect_owner 216, log_reclaim 11, log_store 21,
+maintenance 9, raft 79, runtime 57, snapshot 27, snapshot_worker 14, startup
+51, transfer_service 25; all-features: lib 504, counter_service 205,
+directory_service 23, effect_owner 216, log_reclaim 11, log_store 21,
+maintenance 9, raft 79, runtime 57, snapshot 27, snapshot_worker 14, startup
+66, transfer_service 34; all passed. Earlier, on `4be97a91`, default features: lib 502, counter_service 146, directory_service
+18, effect_owner 216, log_reclaim 11, log_store 21, maintenance 9, raft 79,
+runtime 57, snapshot 27, snapshot_worker 14, startup 51, transfer_service 25,
+all passed; all-features: lib 504, counter_service 205, directory_service 23,
+effect_owner 216, log_reclaim 11, log_store 21, maintenance 9, raft 79,
+runtime 57, snapshot 27, snapshot_worker 14, startup 66, transfer_service 34,
+all passed. One all-features `startup` run failed
+`maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_tcp_wal`
+with `AddrInUse` binding a UDP socket to the port the OS had just given its
+TCP listener (another process on the shared host held it); the rerun
+passed. The same fixture pattern failed twice more on the final head
+(`multi::native_multi_startup_tcp_shares_one_store_and_recovers_every_group`,
+`maintenance::durable_leadership_handoff_reopens_pending_and_completed_intents_tcp`)
+while the host was at load 6–9, so `tests/startup/multi.rs` and
+`tests/startup/maintenance.rs` now retry the TCP/UDP pair up to 32 times, as
+the other startup fixtures already did (test-only).
+
+**Existing test contracts changed.**
+- `maintenance_uses_data_admission_and_preserves_control_reserve` →
+  `maintenance_has_its_own_admission_and_preserves_both_reserves`: the
+  rewrite no longer takes data credits (I4); the test now also proves both
+  persistence credits stay usable while it is in flight.
+- `batch_limits::aggregate` scenario 3 expects `RaftError::StoragePressure`
+  instead of `Rejected("proposal retained entry budget")` (I2); check order
+  unchanged.
+- `startup::log_limits::selected()` adds `max_wal_bytes: 160 MiB`: its
+  33.6 MB batch limit on the default 64 MiB WAL is now refused at
+  construction (I5, `WalHeadroomTooSmall`).
+- `FullStore::physical_usage` reports the usable capacity its limits imply
+  (the worker now refuses a store whose batch limit exceeds it).
+- The ST2b burst test additionally treats an admitted write refused at step
+  (`NotProposed(StoragePressure)`, I5) as retried, and asserts that nothing is
+  ever held.
+
+**Departures from the plan, and open items.**
+- Pre-vote and check-quorum are not added (reasons in the plan). A
+  partitioned leader keeps accepting writes until its entry gate refuses
+  them typed; on healing it, or another replica, commits them or truncates
+  them through the ordinary rules.
+- The step-down's hold-off also skips an explicit `Campaign` (operator or
+  leadership transfer) on that replica. *Corrected in round 4:* it counts two
+  campaign attempts, not elapsed time (each skipped attempt resets the
+  election timer), so one explicit `Campaign` can be a no-op while it lasts.
+- Status fields are in the `maintenance` command (all three binaries); the
+  counter's `metrics` and the per-binary `status` lines are unchanged, so
+  existing tooling that parses them is unaffected.
+- The deferral bounds are tested end to end (absent follower), not by a
+  dedicated schedule unit test.
+- Still open from round 2: snapshot store barrier fsync (device
+  identification); a leader still clears in-flight replication requests at
+  compaction (the deferral avoids most resulting snapshot sends).
+
+#### ST2 round 4 schema plan (written before editing, 20 October 2026)
+
+Base: PR 14 head 522a08c8. GPT-6.1-Sol's round-3 review (5578759038)
+confirms every round-2 finding resolved and requests changes for one P1, one
+P2 and one P3. Same rules as round 3: no capacity condition may stop a group,
+node or replica permanently; it progresses by itself or fails closed in a
+typed, operator-visible, recoverable state; no admitted or possibly committed
+entry is dropped; no `unsafe`, no new crates; deterministic tests; every
+retained structure has a configured bound.
+
+**R4-1. Live control growth is inside the WAL admission proof (Sol P1-1).**
+Cause: noop entries are live log entries a rewrite must keep, but round 3
+admitted them as control (never refused, `data_bound` = None): a leader's
+own noop, and follower appends whose entries are all noops. Their bytes were
+in no bound, so a finite run of elections without acknowledgements can leave
+a live image that leaves no room for the next batch (Sol: 3,830 live noops,
+65,410 of 65,536 bytes, the next noop held through three successful
+rewrites with no completion and no typed failure).
+- *Invariant.* With `U = max_wal_bytes − control_reserve_bytes`, the high-water
+  mark `H = high(U)` and `R = control_reserve_bytes`, the live image `L` a
+  rewrite produces satisfies `L ≤ H + R` at all times. The existing
+  configuration rule `U − H ≥ max_batch_bytes + R` (`WalHeadroomTooSmall`)
+  then gives `L + max_batch_bytes ≤ U`: every admitted batch, data or control,
+  fits after one rewrite. So in a node no admitted batch can be held across a
+  successful rewrite.
+- *Why `L ≤ H + R` holds.* The shard's account `A = published + pending +
+  released` is never below the WAL length once everything staged is written
+  (round 3), and `L ≤` that length (a rewrite only drops dead records; the
+  rewrite result is checked `after ≤ before`). `L` grows only when entries
+  are appended (a group's hard state, commit and anchor are one fixed record
+  each in the image, so vote, term and commit records are dead after a
+  rewrite; truncation shrinks `L`). Every append is now checked before it is
+  staged: data entries (proposals, configuration entries, follower appends
+  carrying any non-noop entry) need `A + bound ≤ H` (round 3); noop-only
+  transitions (a leader's own noop, follower appends whose entries are all
+  noops) need `A + bound ≤ H + R`. Groups are created only through the
+  synchronous store before a worker owns it, so a `Create` is never in
+  flight with an admitted batch; its bytes are in the first published length.
+  A follower's snapshot install replaces the group's log and anchor; the
+  anchor holds one configuration (≤ the voter limit), and its bytes were
+  admitted as a configuration entry on the leader's own WAL, not this one;
+  this is recorded as the remaining non-cumulative term (at most one anchor
+  configuration per group, replaced, never accumulated).
+- *Shared WAL (Sol's `groups × noops × bytes`).* The check is shard-wide over
+  the one WAL, so above `H` all groups together share one `R`; no product over
+  groups appears, and no registration limit is needed. Below `H` noops compete
+  with data exactly like data.
+- *Mechanism.* `WalBudget` gains `reserve` (`R`, from the smallest store
+  limits, as the headroom check already uses). `wal_account::bound(event)`
+  classifies follower appends as data or noop-only. Before every step and
+  every completion (`with_core`) the shard tells the core, as a volatile
+  input like the ST2b pressure bit, whether one more leader noop transition
+  (`UPDATE_WAL_OVERHEAD + ENTRY_WAL_OVERHEAD` = 576 bytes) fits under `H + R`.
+  The core:
+  - declines a noop-only append that does not fit (same no-reply decline as
+    data; truncation of a conflict still happens);
+  - in `become_leader` and `retry_leader_noop`, when the noop does not fit,
+    steps down in the same term with the new
+    `StepDownReason::WalCapacity` (counted, `last_step_down`, the two-attempt
+    campaign hold-off);
+  - in `campaign`, while the noop does not fit, does not start an election
+    (counted, `wal_campaign_refusals`): a replica that could not place its
+    noop never becomes a leader that cannot commit.
+- *Dead bytes cannot cause a permanent stop.* `A` counts dead records, so a
+  WAL full of old vote and commit records also refuses the noop. Every noop
+  refusal (shard count `noop_refused`) puts maintenance in the high-water
+  state and makes a rewrite due at its retry spacing whenever the WAL has
+  grown since the last rewrite, as a held batch already does. After that
+  rewrite `A` is `L`, so the next campaign succeeds unless `L` itself leaves
+  no room.
+- *Typed recoverable state (`L` itself leaves no room).* Possible only when
+  the live log of the replicas is uncommitted noops and data that no rewrite
+  can drop (Sol's run). Each replica refuses campaigns (counted), declines
+  noop-only appends (counted), refuses proposals with `StoragePressure`, and
+  shows `last_step_down=WalCapacity` if it won before the account filled.
+  Nothing is written, nothing admitted is dropped. Recovery: the operator
+  raises `max_wal_bytes` and reopens (lowering the high-water percentage
+  *reduces* the noop room, so it cannot recover this; round-5 correction);
+  the reopened node has room, elects, commits the old suffix through the
+  ordinary rule and checkpoints. A replica of a group whose other voters have
+  room is not stuck: the others elect, and their commits let this replica
+  apply, checkpoint and rewrite.
+- *Backstop at the worker.* Argued unreachable in a node by the invariant
+  (round 5 narrows this: the proof covers admission on validated suffixes,
+  not recovered live states; see the round-5 record), but a
+  direct worker owner (Sol's reproduction drives the worker without a node)
+  must not wait for ever either: after a successful rewrite the WAL thread
+  retries held batches, and a batch that still does not fit is completed with
+  the typed, non-fatal `StorageError::Rejected("WAL live image leaves no
+  room")` (as at close). In a node that fails the replica into
+  `RecoveryRequired`, recovered as above.
+- *Tests.* (1) Sol's reproduction as committed test (real `NativeLogStore`,
+  `NativeLogWorker`, in-memory journal, his limits, term-increasing noops,
+  rewrite whenever full): on 522a08c8 the noop stays held through three
+  successful rewrites; now it completes typed after the first rewrite; then
+  the same journal reopened with a larger `max_wal_bytes` accepts the noop
+  and every earlier noop is still there. (2) Core: a candidate without noop
+  room does not campaign; a leader elected without room steps down
+  `WalCapacity`; a follower declines a noop-only append without room and
+  still truncates a conflict. (3) Node/shard: the account classifies noop
+  appends, refusals reach maintenance and make a rewrite due; a three-node
+  in-crate run with the room taken away by the account cannot elect, shows
+  the typed state, and elects and commits once the budget is raised.
+  (4) Maintenance: `due` with noop starvation rewrites only when grown.
+
+**R4-2. The stall map holds only current replicas (Sol P2-1).** Cause:
+`configuration_changed` cleared progress but not `stalled_rounds`, and the
+heartbeat loop visits only current peers, so a removed learner's entry lived
+for the leader's lifetime.
+- *Invariant.* `stalled_rounds.len() ≤` current replicas − 1;
+  `replica_stall()` reports only a current replica.
+- *Mechanism.* `configuration_changed` clears the map (progress is cleared
+  there too; a changed store identity for the same node therefore also
+  starts from zero); `replica_stall` filters to current replicas as a second
+  guard.
+- *Test.* Sol's churn: voters 1/2/3 keep, 64 committed
+  `ConfigurationChange::Learners` records each replacing one unavailable
+  learner, the real stall counter run every round; on 522a08c8 the map holds
+  66 entries for 3 peers; now ≤ 3 and the reported stall is a current peer.
+
+**R4-3. The ready-batch WAL check is O(n) (Sol P3-1).** The check folded
+over every previously selected proposal for each candidate (32,640 visits for
+a 256-proposal batch). A running bound kept in the check closure adds each
+newly selected proposal once (identical value, same admission). The core's
+staged bound for a proposal batch is computed in the loop that builds the
+entries and passed to staging instead of a second pass (`debug_assert` against
+`LogUpdate::wal_bound`). Measure on the quiet Mac: serving-only CPU/write
+against the same-CRC base, ≥ 7 pairs, and the four framework cells, ≥ 5 pairs;
+report ST2's remaining cost as a number for the user to accept.
+
+**R4-4. Documentation.** Correct the round-3 claims "every admitted batch
+progresses" and "implemented as written"; qualify the 24 h schedule maximum
+under the recorded protocol-clock horizon (`after()` returns `None` near
+`u64` exhaustion, `deadline_exhaustion_stops_instead_of_wrapping_or_spinning`);
+state that the campaign hold-off counts two campaign attempts, not time, and
+also skips explicit, operator and transfer campaigns, so one explicit
+`Campaign` can be a no-op while it lasts; the stall-map bound.
+
+**Ownership, restart, partial progress.** No durable or wire change. The
+noop-room bit, refusal counters and the starvation flag are volatile and
+rebuilt at construction (the bit starts true; the first poll's budget sets
+it). A reopened store with a larger `max_wal_bytes` gives a larger `U`, `H`
+and `R`, so the same live image has room.
+
+**Acceptance.** Each new reproduction fails on 522a08c8 where it can be
+expressed there and passes here; round-2/3 tests, the 163,840-write soaks and
+the identical-trace test still pass; fmt, four strict Clippy configurations,
+matched fmt/Clippy; runtime, log_store, maintenance, snapshot,
+snapshot_worker, raft, native startup, effect_owner, counter_service,
+directory_service and transfer_service suites in default and all-features,
+one configuration at a time.
+
+#### ST2 round 4 implemented and validated (20 October 2026)
+
+Code: `5c560fa3` (R4-2), `10780078` (R4-1, R4-3), `645e9a77` (the reserve is
+a node field, not status), then documentation. The plan above is
+implemented with the departures listed at the end. "Before" = the new tests
+run against 522a08c8's `src/` in this worktree (tests needing new API cut to
+what 522a08c8 can express).
+
+| Finding | Mechanism | Test | 522a08c8 | This branch |
+| --- | --- | --- | --- | --- |
+| Sol P1-1, worker level (his limits: 64 KiB WAL, 4 KiB reserve, 1 KiB batches, 512 B commands; term-increasing noops, commit 0, rewrite whenever held) | Worker backstop: a batch still held right after a successful rewrite completes typed, non-fatal `Rejected("WAL live image leaves no room")` | `maintenance::live_noops_that_fill_the_wal_fail_typed_after_a_rewrite_and_recover_with_a_larger_budget` | Fails: noop 3,831 held through three successful rewrites at 65,410 WAL bytes, no completion, no typed failure | Passes: typed failure at the first rewrite after the live image fills; the unchanged journal reopened with a 1 MiB WAL holds all 3,830 noops and writes the next |
+| Sol P1-1, node level | Noop transitions in the shard's WAL account (under mark + reserve); no campaign without room; maintenance rewrites while the WAL grows; budget given to the shard at construction | `startup::backpressure::live_noops_past_the_reserve_refuse_elections_typed_until_a_larger_wal_is_opened` (real native node, single voter, 4.5 MiB WAL, 64 KiB reserve, 277,544 live noops filling it) | Vote written (term +1), node Leader, its noop held (1,008 bytes) through 3 successful rewrites for the whole 3 s, no completion and no typed state | 14 campaign refusals in 3 s simulated (`noop_refusals`, `wal_noop_refused`), term unchanged, nothing held, 1 rewrite, `Running`; reopened with a 16 MiB WAL it elects, commits every noop and applies a write |
+| Sol P1-1, core | `wal_noop_room` input: campaign refused, `StepDownReason::WalCapacity`, noop-only append declined | `capacity_tests::{replicas_without_wal_room_for_a_noop_refuse_elections_until_room_returns, leader_elected_without_wal_room_steps_down_typed_and_a_replica_with_room_wins, follower_without_wal_room_declines_noop_only_appends_until_room_returns}` | API absent | Pass: no leader and no term change for 40 rounds without room, commit within 40 rounds once room returns; step-down in term 2 with no noop appended, another replica commits; follower declines the noop, takes it once noop room returns under data pressure |
+| Sol P1-1, units | Account classification and noop room; starvation-driven rewrite only while grown | `wal_account::tests::*`, `maintenance::tests::a_refused_noop_rewrites_only_while_the_wal_grows` | API absent | Pass |
+| Sol P2-1 | `configuration_changed` clears `stalled_rounds`; `replica_stall` reports only current replicas | `membership_tests::stall_map_holds_only_current_replicas_through_learner_churn` (voters 1–3, 64 committed `Learners` replacements of an unavailable learner, real stall counter each round) | Fails at the second replacement (4 entries, 3 peers); after 64: 66 entries for 3 peers | Passes: at most the current peers at every step, stall always a current replica |
+| Sol P3-1 | Running bound of the selected prefix in the ready-batch check (each proposal added once: n additions instead of n(n−1)/2 visits, 32,640 at n = 256); proposal staging takes the bound built with its entries (`debug_assert` against `LogUpdate::wal_bound`) | Existing batch/aggregate tests (same admission) | — | Framework bulk ×0.984 against 522a08c8 (7 pairs) |
+
+**Bounds (checklist §5.9).** Live WAL after any rewrite ≤ `H + R`
+(`R = control_reserve_bytes`, 1 MiB by default), shard-wide: noops of all
+groups share one `R`, so no `groups × noops × bytes` product and no
+registration limit. Retained noops per group remain bounded by
+`retained_entry_capacity` (16,640). Stall map ≤ current replicas − 1. New
+counters (`noop_refused`, `wal_noop_refusals`) saturate and are diagnostic;
+the byte check stays authoritative. One volatile bool per core and per node
+status. Classes of live growth and their bound: data and configuration
+entries (≤ `H`, round 3); noops (≤ `H + R`, this round); hard state, vote and
+commit (one fixed record per group in the image, dead after a rewrite);
+`Create` (synchronous store path before a worker owns the store, never in
+flight with an admitted batch); a snapshot install's anchor (one
+configuration per group, replaced, not cumulative; argued, no dedicated
+test).
+
+**CPU (quiet Mac, own script copies and trees, removed afterwards).**
+Serving only (`svc.sh` protocol, RAM-disk WAL, `VOTEBOAT_BENCH_SKIP_RECOVERY=1`
+on both sides, 15,000/s offered, marginal CPU per completed write between
+2,000 and 16,000 writes). Same-CRC base rebuilt by cherry-pick as in round 3:
+4920534e + `ba372cb4`, `5c9b6906`, `4be97a91` (harness) + `cf3de849`
+(CRC32C), local commit `ad7ab7dc`, not pushed.
+
+| Comparison | pairs | marginal µs/write | p99 |
+| --- | --- | --- | --- |
+| same-CRC base → 645e9a77, session 1 | 9 | 13.5 → 13.6 (×1.010) | ×1.045 |
+| same-CRC base → 645e9a77, session 2 | 9 | 13.6 → 14.1 (×1.037) | ×1.050 |
+| same-CRC base → 645e9a77, session 3 | 9 | 13.8 → 14.2 (×1.034) | — |
+| same-CRC base → 645e9a77, session 4 | 9 | 13.3 → 13.9 (×1.045) | — |
+| 645e9a77 → same-CRC base (reversed order) | 9 | 14.0 → 13.6 (×0.973, i.e. ×1.028) | — |
+| **Pooled, 45 pairs** | 45 | **median pair ratio ×1.030, mean ×1.027, 31 of 45 above 1** | |
+| same-CRC base → 522a08c8 (round 3) | 9 | 13.7 → 13.8 (×1.003) | ×1.12 |
+| 522a08c8 → 645e9a77 (round 4's own change) | 9 | 14.1 → 13.7 (×0.972) | ×1.02 |
+
+Applied rate ×1.00 everywhere (offered load met). Session-to-session spread
+is about ±3%, so round 4 against round 3 is within noise for serving.
+**ST2's remaining own serving cost is about +3.0% CPU per completed write**
+(sessions +1.0% to +4.5%), measured with the same CRC on both sides. It is the
+checkpoint and rewrite work the base never does while serving, plus the
+per-write capacity checks; it is not offset by the CRC change or by cheaper
+recovery, and needs the user's explicit acceptance.
+
+Framework (`fwmac.sh`, 7 pairs):
+
+| Comparison | bulk | single | bulk-1 | single-1 |
+| --- | --- | --- | --- | --- |
+| 4920534e → 645e9a77, session 1 | ×0.996 | ×0.994 | ×0.995 | ×1.030 |
+| 4920534e → 645e9a77, session 2 | ×1.000 | ×0.999 | ×1.005 | ×1.020 (6/7 pairs worse) |
+| 522a08c8 → 645e9a77 | ×0.984 | ×1.008 | ×0.995 | ×1.009 |
+
+single-1 instructions retired (`/usr/bin/time -l`, 5 runs each): 522a08c8
+13.85 G, 645e9a77 13.84 G (cycles 4.72 G, 4.74 G): round 4 adds no work.
+Against 4920534e: 13.69 G → 13.85 G (+1.2%), cycles +3.7%. So single-1's
++2–3% CPU against the merge base comes from rounds 1–3 (round 3 recorded
+×1.005 for this cell; this session did not reproduce that), not from round 4,
+and is reported for the same explicit acceptance.
+
+**Checks.** `cargo +stable fmt --all -- --check`; strict Clippy (`-D
+warnings`, `--all-targets`) default, all-features, no-default-features and
+native-only, and matched fmt and strict Clippy: zero diagnostics. Suites on
+Linux cores 4–9, one configuration at a time, final code. Default: lib 509,
+runtime 57, log_store 21, maintenance 10, snapshot 27, snapshot_worker 14,
+raft 79, log_reclaim 11, startup 52, effect_owner 216, counter_service 146,
+directory_service 18, transfer_service 25. All-features: lib 511, runtime 57,
+log_store 21, maintenance 10, snapshot 27, snapshot_worker 14, raft 79,
+log_reclaim 11, startup 67, effect_owner 216, counter_service 205,
+directory_service 23, transfer_service 34. All passed. Soaks (release,
+all-features): runtime 163,840 writes, last index 163,920, max retained
+12,298, 75 typed retried refusals; native 163,840 writes, 671,088,640 bytes,
+max WAL 33,031,095 of 66,060,288, max retained 7,582, 21 rewrites;
+`two_soak_runs_in_simulated_time_have_identical_traces` identical (24,588,
+10,247, 122,978 ms) — the same values as round 3. Pre-push hook ran and
+passed (not bypassed).
+
+**Existing contracts changed.** A `NativeLogWorker` batch that still does not
+fit right after a successful rewrite is now reported failed (typed,
+non-fatal) instead of held; no existing test relied on an indefinite hold
+(`a_batch_that_does_not_fit_is_held_until_a_rewrite_and_never_failed` still
+passes: its rewrite frees room). Follower appends whose entries are all noops
+are now declined when the node's WAL has no noop room (they were never
+refused). A replica without noop room does not campaign, including on an
+explicit `Campaign`. The three binary status tests check the three new fields.
+`tests/startup/backpressure.rs` factors its node assembly into `wrap` (test
+only). No assertion was weakened.
+
+**Departures and open items.**
+- The node-level reproduction uses a 4.5 MiB WAL and a raised entry budget
+  (400,000): native startup requires 1 MiB batches, so Sol's 64 KiB limits
+  cannot be opened as a node; his exact limits are the worker test.
+- Snapshot-install anchor growth is argued (non-cumulative, one configuration
+  per group), not tested separately.
+- Still open from rounds 2–3: snapshot-store barrier fsync (device
+  identification); a leader clears in-flight replication requests at
+  compaction; pre-vote/check-quorum not added.
+
+#### ST2 round 5 schema plan (written before editing, 20 October 2026)
+
+GPT-6.1-Sol's round-4 review (5579339724) requests changes: no new P1; the
+round-3 parked-noop P1, the stall-map P2 and the O(n²) P3 are resolved. Two
+P2s remain in the capacity argument, plus documentation contradictions.
+Binding rules unchanged (no permanent capacity stop without a typed,
+operator-visible, recoverable state; no admitted or possibly committed entry
+dropped; every Raft check kept; no `unsafe`, no new crates, no weakened
+assertion; deterministic tests; CPU put to the user).
+
+**R5-1 (Sol P2-1): a matched data prefix bypasses the noop byte check.**
+Cause: the shard classifies and bounds the *whole received* `Append`
+(`wal_account::growth_bound`) before the step, the core accepts only the *new
+suffix* (`first_new_entry`). A received range that starts with an
+already-held command and continues with new noops is "data" to the shard
+(data check fails, sets storage pressure, `noop_over` stays false, so the
+core's `wal_noop_room` says only that *one* 576-byte noop fits), and
+"noop-only" to the core, which takes the whole noop suffix on that boolean.
+
+- *Shape.* The byte check moves to where the suffix is known. The shard
+  gives the core, before every step and completion, its exact room:
+  `Raft::set_wal_room(Option<WalRoom>)`, `WalRoom { data, noop }` = bytes
+  left under `H` and under `H + R` (`None`: no bounded WAL). The core, after
+  `validate_append_entries` and `first_new_entry`, walks the validated new
+  suffix **once**, accumulating `UPDATE_WAL_OVERHEAD + Σ entry_wal_bound` and
+  whether any entry is data. It declines the new entries when they are data
+  and `storage_pressure || bound > data`, or noop-only and `bound > noop`
+  (or, as before, past the retained-entry capacity). The same bound is
+  passed to staging (`persist_bounded`), so `LogUpdate::wal_bound` is not
+  walked again (its equality `debug_assert` stays).
+- *Ownership.* The core owns classification and the decision; the shard owns
+  the account and the counters. The core counts `wal_declined_appends` and
+  `wal_noop_declined_appends` (saturating); the shard adds their change over
+  each step to `WalAccount::declined` / `noop_refused`, as it already does
+  for `wal_noop_refusals`. `growth_bound` keeps proposals and configuration
+  entries only; the shard's per-step "decline this append" storage-pressure
+  toggle goes away. `wal_noop_room` (one leader noop fits) stays the
+  campaign / noop-placement input, now just `noop_fits`.
+- *State transitions.* Unchanged: a declined append keeps leader contact,
+  term and the verified-prefix commit, truncates a conflicting suffix with a
+  control record, sends no reply; the leader resends. Identity/log-matching
+  checks (`validate_append_entries`, `first_new_entry`'s equal-term
+  identity) run before the walk, exactly as now. Volatile cores without a
+  bounded WAL skip the walk (they stage no bytes).
+- *Failure/cleanup.* No new durable state or format. A declined noop counts
+  as a noop refusal, so maintenance enters the starvation state and rewrites
+  while the WAL grows (R5-2).
+- *CPU.* Today an ordinary follower append is walked three times for bytes
+  (shard `any` + `fold` over the whole message, then `wal_bound` at
+  staging); after this, once over the new suffix only. Leader and
+  single-proposal paths are unchanged. Re-measured on the quiet Mac (item 4).
+- *Acceptance.* (1) Sol's reproduction as a permanent test with the real
+  `Shard`, `Raft`, `apply_batch` planner and native checkpoint codec: two
+  groups share one account, the other group's uncommitted noops fill the
+  live image to 616 bytes under `H + R` (4.5 MiB WAL, 64 KiB reserve, 1 MiB
+  batches, 400,000-entry budget); an append of the matching command 2 and
+  64 new noops at indexes 3–66 in terms 2–65. Re-encoding the live state
+  after the step must satisfy `L ≤ H + R`; fails on cd90fb7a, passes now.
+  (2) The same append with a new data entry in the new suffix is declined as
+  before. (3) With room, the matched-prefix append is accepted and stages
+  exactly the new-suffix bound. Existing core capacity tests keep their
+  assertions (their WAL-room helper sets bytes instead of a boolean).
+
+**R5-2 (Sol P2-2): normal deadlines suppress every starvation rewrite.**
+Cause: `WalMaintenanceStatus::due` returns `None` after a below-threshold
+interval skip, before the high-water / held-batch / refused-noop rule; when
+every poll lands on a deadline, that rule never runs.
+- *Shape.* The deadline branch moves the deadline on, counts the skip and
+  falls through to the early rules (same `retry_ms` spacing, same "grown
+  since the last rewrite" condition). No new state.
+- *Acceptance.* Sol's reproduction (default policy for a 4.5 MiB ceiling,
+  usable 4,653,056, refused-noop high-water state, published
+  `3,555,000 + n/2`, live 3,554,000, polls at `1000·n` for n = 1..100) as a
+  permanent test: at least one rewrite; fails on cd90fb7a (0 of 100). A
+  second test: with polls at every deadline the trigger still respects
+  `retry_ms` (no two attempts closer than it) and does not fire when the WAL
+  has not grown since the last rewrite.
+
+**R5-3 (Sol P3-1): documentation.** `IMPLEMENTATION.md` round-4 plan:
+lowering the high-water percentage *reduces* noop room, so only a larger
+`max_wal_bytes` recovers; `WORKER_MAINTENANCE.md`: the immediate typed
+post-rewrite terminal; `COUNTER_SERVICE.md`: the capacity step-down when the
+uncommitted suffix cannot be checkpointed, distinguished from a deferred
+checkpointable noop. Narrow "unreachable in a node": the fit proof covers
+admission on validated suffixes; a recovered live state over the mark is
+reported through capacity refusal, not refused at construction; recovery
+with unchanged limits is not promised; snapshot-anchor growth is argued, not
+tested; an exhausted quorum (both followers without room) keeps its leader
+with no step-down and needs the visible operator recovery.
+
+**R5-4: CPU.** R5-1 changes the follower path, so ST2's own serving-only cost
+is re-measured on the quiet Mac against the same-CRC base (rebuilt by
+cherry-pick, as in round 4), ≥ 7 pairs, and the framework single-1 cell
+(5 pairs). Reported as measured, not offset by other changes.
+
+#### ST2 round 5 implemented and validated (20 October 2026)
+
+Code: `a61a8ebf` (R5-1), `4460bbc3` (R5-2), `365ef635` (R5-3 documentation),
+`1e159727` (R5-1 trim after measurement: the room is set only before
+received messages), then this record. "Before" = the new tests run against cd90fb7a's `src/` in
+this worktree. (Corrected in round 6, Opus round-5 P3-2: the tests do not
+all use API cd90fb7a has. `wal_admission_tests.rs` line 274,
+`assert_eq!(core.wal_declined_appends(), (1, 1))` in
+`matched_data_prefix_cannot_bypass_the_shared_noop_bound`, calls the round-5
+`Raft::wal_declined_appends`, so the file compiles on cd90fb7a only with that
+one assertion removed. Every recorded cd90fb7a failure is at an earlier
+assertion of its test, so removing it changes none of them; Opus reproduced
+exactly these failures that way.)
+
+| Finding | Mechanism | Test | cd90fb7a | This branch |
+| --- | --- | --- | --- | --- |
+| Sol P2-1: a matched data prefix bypasses the noop byte check | The core checks the validated new suffix it would persist against `WalRoom { data, noop }` (bytes under `H` and `H + R`, set by the shard before every received message is stepped, the one path that reads it; corrected in round 6, Opus round-5 P3-1); one walk gives the suffix's bound and data flag, reused as the staged bound. The shard bounds proposals only and adds the core's WAL declines to its account | `wal_admission_tests::matched_data_prefix_cannot_bypass_the_shared_noop_bound` (Sol's procedure: real `Shard`, `Raft`, `apply_batch`, native checkpoint codec; 4.5 MiB WAL, 64 KiB reserve, 1 MiB batches, 400,000 entries; two groups; 616 bytes of noop room; command 2 matching, 64 new noops at 3–66 in terms 2–65) | Fails: staged bound 4,608, re-encoded live image 3,555,800 > `H + R` = 3,555,328 (by 472) | Passes: suffix declined (`declined` 1, `noop_refused` 1, core `wal_declined_appends` (1, 1)), only the term record staged (512), live image unchanged at 3,554,712, term 65 kept |
+| same, mixed suffix | unchanged rule for data | `a_new_suffix_with_data_is_still_declined_above_the_mark` (noops + new command 6, with and without a matching prefix) | Passes (declined) | Passes (declined, counted as data only) |
+| same, with room | exact new-suffix accounting | `a_matched_prefix_append_with_room_stages_only_the_new_suffix_bound` | Fails: the accepted append was counted as a decline (`declined` 1) | Passes: indexes 3–66 taken, staged 4,608 = the new suffix's bound, no decline counted |
+| Sol P2-2: normal deadlines suppress starvation rewrites | A below-threshold deadline moves on one interval, counts the skip, and the early rules then run as at any poll (same `retry_ms` spacing, same growth condition) | `maintenance::tests::refused_noop_gets_a_rewrite_when_every_poll_is_a_deadline` (Sol's numbers) | Fails: 0 rewrites in 100 polls, `skipped` 100 | Passes: rewrite due at the first deadline, `skipped` 1 |
+| same, no storm | spacing and growth kept | `starvation_rewrites_at_deadlines_keep_their_spacing_and_need_growth` (interval 10 ms < spacing 100 ms, every poll a deadline) | Fails: no attempts | Passes: attempts ≥ 100 ms apart while the WAL grows; none in 100 further deadlines once it stops growing |
+| Sol P3-1 docs | — | — | — | `IMPLEMENTATION.md` round-4 plan (larger `max_wal_bytes` only; lower high water reduces noop room), `WORKER_MAINTENANCE.md` (immediate post-rewrite typed terminal and how a direct owner recovers), `COUNTER_SERVICE.md` (retained-entry step-down vs. deferred checkpointable noop; fit proof narrowed: admission on validated suffixes, recovered live states reported through capacity refusal, recovery with unchanged limits not promised, snapshot-anchor growth argued, exhausted quorum keeps its leader and needs the operator step), worker comments |
+
+Existing test contracts changed: `capacity_tests`' WAL-room helper sets the
+byte room (`WalRoom`) as well as the flags, since the noop decline now
+depends on bytes; `wal_account::tests::appends_are_classified_as_data_or_noop_growth`
+became `only_proposals_are_bounded_by_the_shard` (classification moved to the
+core). No assertion weakened; the core's `debug_assert` on the matching
+index moved before the slow path (now checked on every declined or slow
+append). No `allow` attribute added.
+
+**CPU (quiet Mac, own script copies in this worktree's `target/`, own trees
+removed afterwards).** Serving only, same protocol as round 4 (`svc.sh`,
+RAM-disk WAL, `VOTEBOAT_BENCH_SKIP_RECOVERY=1` on both sides, 15,000/s
+offered, marginal CPU per completed write between 2,000 and 16,000 writes).
+Same-CRC base: round 4's local cherry-pick `ad7ab7dc` (4920534e + the three
+harness commits + `cf3de849`).
+
+| Comparison | pairs | marginal µs/write |
+| --- | --- | --- |
+| same-CRC base → 365ef635, session 1 (just after the builds) | 9 | 13.8 → 13.8 (×1.003) |
+| same-CRC base → 365ef635, sessions 2–4 | 3 × 9 | ×1.026, ×1.027, ×1.066 |
+| 365ef635 → same-CRC base (reversed) | 9 | 13.8 → 13.3 (×0.969, i.e. ×1.032) |
+| **365ef635 pooled** | **45** | **median pair ×1.030, mean ×1.029, 29 of 45 above 1** |
+| cd90fb7a ↔ 365ef635 (round 5's own change), both orders | 2 × 9 | ×1.011; reversed ×0.993 (×1.007) |
+| same-CRC base → 1e159727 (final), sessions 1–3 | 3 × 9 | ×1.018, ×1.039, ×1.017 |
+| 1e159727 → same-CRC base, two sessions | 2 × 9 | ×0.988 (×1.012; disturbed: medians 19.6 µs vs the usual 13.5), ×1.005 (×0.995) |
+| **1e159727 pooled** | **45** | **median pair ×1.020, mean ×1.009, 29 of 45 above 1** (36 without the disturbed session: median ×1.015) |
+| cd90fb7a ↔ 1e159727, both orders | 2 × 9 | ×0.984; reversed ×0.990 (×1.010); pooled median ×1.005 |
+
+Applied rate ×1.00 everywhere. **ST2's own serving cost on the final head is
+about +2% CPU per completed write** (pooled median ×1.020; sessions −0.5% to
++3.9%). That is within the ±3% session spread of round 4's +3.0%, so this
+round is **not** claimed to recover CPU: round 4 → round 5 is ×1.005 pooled,
+no measurable change either way. The cost is not offset by the CRC change or
+cheaper recovery and needs the user's explicit acceptance.
+
+Framework (`fwmac.sh`, 7 pairs; single-1 is the cell put to the user):
+
+| Comparison | bulk | single | bulk-1 | single-1 |
+| --- | --- | --- | --- | --- |
+| 4920534e → 365ef635, session 1 | ×1.004 | ×1.005 | ×1.000 | ×1.025 |
+| 4920534e → 365ef635, sessions 2–3 | ×0.996, ×0.996 | ×1.003, ×1.007 | ×0.991, ×1.005 | ×1.032, ×1.029 |
+| cd90fb7a ↔ 365ef635, both orders | ×1.000, ×1.000 | ×1.012, ×0.993 | ×1.005, ×1.000 | ×0.998, ×1.013 |
+| **4920534e → 1e159727 (final)** | ×0.996 | ×1.000 | ×0.991 | **×1.018** (7 of 7 pairs ≥ 1.00) |
+| cd90fb7a → 1e159727 | ×0.992 | ×0.998 | ×1.005 | ×1.007 |
+
+(One cd90fb7a → 365ef635 run is discarded: another agent started building
+on the Mac during it, single-1 pairs 0.78–1.40. The Mac was idle for every
+run above, checked before each batch.)
+
+single-1 instructions retired (`/usr/bin/time -l`, median of 5 then 7
+interleaved runs): 4920534e 13.742 G; cd90fb7a 13.871 / 13.929 G; 365ef635
+13.956 / 13.966 G; trimmed (= 1e159727) 13.930 G. Setting the room on every
+step and completion cost about +0.3–0.6% instructions on single-1; setting it
+only before received messages (the one path that reads it) brings round 5
+back to round 4's count. **single-1 stays about +2–3% CPU and +1.4%
+instructions against the merge base**; that predates this round and is put
+to the user for explicit acceptance as in round 4.
+
+**Checks.** `cargo +stable fmt --all -- --check`; strict Clippy (`-D
+warnings`, `--all-targets`) default, all-features, no-default-features and
+native-only, and matched fmt and strict Clippy: zero diagnostics. Suites on
+Linux cores 4–9, one configuration at a time. Default: lib 514, runtime 57,
+log_store 21, maintenance 10, snapshot 27, snapshot_worker 14, raft 79,
+log_reclaim 11, startup 52, effect_owner 216, counter_service 146,
+directory_service 18, transfer_service 25. All-features: lib 516, runtime 57,
+log_store 21, maintenance 10, snapshot 27, snapshot_worker 14, raft 79,
+log_reclaim 11, startup 67, effect_owner 216, counter_service 205,
+directory_service 23, transfer_service 34. All passed. Soaks (release):
+runtime 163,840 writes, last index 163,920, max retained 12,298, 75 typed
+retried refusals; native 163,840 writes, 671,088,640 bytes, max WAL
+33,031,095 of 66,060,288, max retained 7,582, 21 rewrites;
+`two_soak_runs_in_simulated_time_have_identical_traces` identical (24,588,
+10,247, 122,978 ms) — the same values as rounds 3 and 4. Pre-push hook ran
+and passed (not bypassed).
+
+**Open.** Snapshot-install anchor growth is still argued, not tested; a
+live state recovered past `H + R` is reported through capacity refusal, not
+refused at construction; an exhausted quorum keeps its leader (no
+quorum-aware step-down) until the operator gives the full replicas room.
+Still open from rounds 2–4: snapshot-store barrier fsync (device
+identification); a leader clears in-flight replication requests at
+compaction; pre-vote/check-quorum not added.
+
+#### ST2 round 6 schema plan (written before editing, 20 October 2026)
+
+Claude Opus 5.5's round-5 review (5580087074) requests changes for one P2 and
+three P3s; every earlier finding from both reviewers is confirmed resolved.
+Binding rules unchanged.
+
+**R6-1 (Opus P2-1): followers decline data on the 50% latch, not on bytes.**
+Cause: `decline_new_data` (`src/raft/receive.rs`) declines every new suffix
+carrying data while `storage_pressure` is set, and the node sets it on every
+core for the whole high-water state (entered at 75%, a held batch, a starved
+noop or any refusal/decline; left only below 50% with nothing held). Since
+round 3 the follower also has the exact byte check (`bound <= room.data`), so
+the latch adds no safety and only refuses data that fits: a new leader whose
+noop sits after an old-term tail that two latched followers (occupancy 50–75%,
+uncommitted) lack never commits, and `wal_declined_appends` /
+`wal_noop_refused` stay 0.
+- *Shape.* Where the host gives a WAL room (`wal_room.is_some()`, which a
+  node always does: the high-water state needs a published usage, and the
+  same usage gives the budget), a follower decides on bytes alone: the
+  validated new suffix's bound must fit `room.data` if it carries data,
+  `room.noop` if noop-only. `storage_pressure` is consulted only without a
+  room (a host that gives the latch and no byte account, as the core-only
+  tests do). The 75%/50% hysteresis stays for client admission
+  (`Node::propose`), unchanged. No new state, no new counter.
+- *State transitions.* Unchanged otherwise: a declined append keeps leader
+  contact, term and verified-prefix commit, truncates a conflicting suffix
+  with a control record, sends no reply. The retained-entry check is
+  unchanged.
+- *Proof.* `L <= H + R` follows from the account alone (data `<= H`, noops
+  `<= H + R`, both on the validated new suffix); the latch never entered it.
+- *Acceptance.* Opus's reproduction as a permanent test in
+  `capacity_tests.rs` (three cores, node 1 holds 100 term-1 entries, nodes 2
+  and 3 hold 90; both followers latched with ample room; node 1 campaigns):
+  the leader must commit within `PROGRESS_ROUNDS` (fails on 1a90d7fc: commit
+  0 after 400 rounds) with no decline counted; the one-follower control
+  commits in round 1 on both revisions. A second test pins which counters
+  move in each stuck-quorum case (data short under `H`, noop-only short
+  under `H + R`, retained-entry capacity), so the operator docs can name
+  them exactly.
+
+**R6-2 (Opus P3-1, P3-2): record corrections.** The round-5 evidence row
+says the room is set before every step and completion; it is set only before
+received messages. The round-5 "before" note says the new tests use only API
+cd90fb7a has; `wal_admission_tests.rs` calls `Raft::wal_declined_appends()`
+(new in round 5), so name the one assertion dropped for the old-revision run.
+
+**R6-3 (Opus P3-3): the two unmeasured CPU candidates.**
+- (a) `Node::propose_maintenance` copies the shard's `WalAccount`, reruns
+  `note_budget_refusals` and `update_high_water(wal_usage())` (two relaxed
+  atomic loads and two percentage computations) on every proposal, which
+  `poll` already does once per poll. Change: admission reads the latch the
+  last poll computed (`maintenance.high_water`). Same admission guarantee:
+  the byte bound is enforced at the shard step for every proposal
+  (`WalAccount::over` → `NotProposed(StoragePressure)`, the same retryable
+  `ERR StoragePressure` in all three binaries); the latch may lag the WAL
+  thread's publication by at most one poll, so a proposal that arrives in
+  that window is refused at its step instead of at admission (counted in
+  `wal_refused_proposals` instead of `refused_proposals`). Nothing admitted is
+  dropped; the WAL thread never holds more than before.
+- (b) `Shard::step_next_checked` bookkeeping without a bounded-WAL budget.
+  Checked before editing: neither measured path runs it with `budget ==
+  None`. The framework (`benchmarks/matched`) drives `Raft` cores directly,
+  not the `Shard`; a native serving node always has a budget
+  (`NativeLogStore::physical_usage` is always `Some`). Skipping it would also
+  need a reset path for cores whose budget disappears (their
+  `wal_noop_room` / `wal_room` inputs would otherwise go stale) and a
+  recount of `pending` when a budget appears. So (b) cannot move either
+  number put to the user and adds a state transition; it is not done, and the
+  record says why.
+- *Measured* on the quiet Mac: ST2 serving-only CPU/write against the
+  same-CRC base (rebuilt by cherry-pick: 4920534e + `ba372cb4`, `5c9b6906`,
+  `4be97a91` + `cf3de849`), at least 7 pairs, and the framework single-1 cell
+  (5 pairs) against the merge base 4920534e; plus 1a90d7fc → final for the
+  round's own effect.
+
+**R6-4: docs.** `COUNTER_SERVICE.md` high-water and noop-reserve bullets:
+followers take data that fits under the mark whatever the latch; the stuck
+quorum cases and exactly which counters move in each; node and core comments.
+
+#### ST2 round 6 implemented and validated (20 October 2026)
+
+Code: `712485a9` (R6-1), `5b520bd2` (R6-3a), `b853f3ee` (R6-2, R6-4
+documentation), then this record. "Before" = the new tests run with
+1a90d7fc's `src/raft/receive.rs` (the only file R6-1 changes; the tests use
+no API newer than 1a90d7fc).
+
+| Finding | Mechanism | Test | 1a90d7fc | This branch |
+| --- | --- | --- | --- | --- |
+| Opus P2-1: latched followers decline data that fits | With a WAL room (`wal_room.is_some()`, always the case in a node while the high-water state can be set) a follower decides on the validated new suffix's bytes alone (data under `H`, noop-only under `H + R`); the latch declines data only for a host that gives no room. Client admission keeps the 75%/50% hysteresis | `capacity_tests::latched_followers_with_byte_room_take_the_leaders_old_term_tail` (Opus's procedure: node 1 holds 100 term-1 entries, nodes 2 and 3 hold 90; followers latched with 1 MiB data / 2 MiB noop room; node 1 campaigns) | Both followers latched: no commit (commit 0 after every one of 40 rounds; Opus: 400 rounds, `declined_appends` 401 each, `wal_declined_appends` (0, 0)). One latched (control): the group commits in the election's exchange, but the latched follower stays at index 90, declining | Both cases commit in the election's own exchange (before any heartbeat round); both followers at 101; no decline counted |
+| same, indicators | — | `a_stuck_follower_quorum_moves_exactly_the_documented_counters`: both followers short of data room under `H`; short of noop room under `H + R` (holding the tail, so the new suffix is the noop alone); past the retained-entry capacity | Passes (pins behaviour common to both) | Passes: in each case the leader keeps role and term 2, commit 0, no step-down, `replica_stall` ≥ 39 rounds; per follower `declined_appends` ≥ 40 and `wal_declined_appends` = (declined, 0), (declined, declined) and (0, 0) respectively, `wal_noop_refusals` 0; with room again the group commits, no snapshot |
+| Opus P3-1, P3-2 | — | — | — | round-5 evidence row and "before" note corrected (room set before received messages only; the one dropped assertion named) |
+| Opus P3-3 (a) | `Node::propose_maintenance` reads the latch the last poll computed; the byte bound is still enforced at every proposal's step | existing suites (runtime, startup backpressure, counter service, soaks) unchanged | — | — |
+| Opus P3-3 (b) | Not done: neither measured path runs the `Shard` with no budget (the framework drives `Raft` directly; a native node always has one), and skipping it needs a reset path for stale core inputs | — | — | — |
+| Docs | — | — | — | `COUNTER_SERVICE.md`: the high-water state refuses only client writes, followers take what fits the account; the three stuck-quorum cases with exactly the counters that move (`declined_appends`, `wal_declined_appends`, `wal_noop_refused`, `high_water`, `wal_noop_starved`, the leader's `replica_stall`) and their recovery; core and node comments |
+
+No assertion weakened, no existing test changed, no `allow` attribute added.
+
+**CPU (quiet Mac; own script copies in this worktree's `target/`, own
+private directory and RAM-disk WAL path on the Mac, removed afterwards; every
+batch waited for 5 quiet minutes and recorded foreign benchmark or build
+processes before and after each pair).** Serving only, round 4/5 protocol
+(`svc.sh`, RAM-disk WAL, `VOTEBOAT_BENCH_SKIP_RECOVERY=1` on both sides,
+15,000/s offered, marginal CPU per completed write between 2,000 and 16,000
+writes). Same-CRC base rebuilt by cherry-pick: 4920534e + `ba372cb4`,
+`5c9b6906`, `4be97a91` + `cf3de849` = local commit `d7a4283d` (not pushed;
+same content as round 4's `ad7ab7dc`).
+
+| Comparison | pairs | marginal µs/write (session medians) |
+| --- | --- | --- |
+| same-CRC base → b853f3ee, three sessions | 3 × 9 | 13.28 → 13.36 (×1.006), 13.16 → 13.96 (×1.061), 13.61 → 13.86 (×1.019) |
+| b853f3ee → same-CRC base (reversed), two sessions | 2 × 9 | 13.74 → 13.53 (×1.016 for the head), 13.62 → 13.29 (×1.025) |
+| **pairwise pooled** | **45** | **median pair ×1.039, mean ×1.049, 32 of 45 above 1** |
+| three builds interleaved, order rotated each round (base, round 5 1a90d7fc, round 6 b853f3ee), three sessions | 33 rounds | medians 13.44 / 13.97 / 13.70 |
+| **interleaved: base → round 6** | 33 | **×1.020** (pair median ×1.021, mean ×1.023, 22 of 33 above 1; sessions ×1.013, ×1.041, ×1.020) |
+| interleaved: base → round 5 | 33 | ×1.040 (sessions ×0.995, ×1.063, ×1.048) |
+| interleaved: round 5 → round 6 | 33 | ×0.981 (pair median ×0.992, 14 of 33 above 1) |
+| 1a90d7fc ↔ b853f3ee pairwise, both orders | 2 × 9 | ×0.959 and ×0.850 for round 6 (both sessions ran hot: medians 15.5–19.0 µs); pooled median pair ×0.969 |
+
+One further same-CRC session is discarded: another agent's build started
+during it (medians 18.6 µs, pairs 0.75–1.07). Applied rate ×1.00
+everywhere. **ST2's own serving cost on the final head is +2.0% CPU per
+completed write in the interleaved measurement (the fairest one: all three
+builds in the same minutes) and +3.9% by the pairwise pooled pair median;
+session medians range from +0.6% to +6.1%.** Round 6 itself measured
+×0.98–0.99 against round 5 in the same sessions, in the expected direction
+for removing per-proposal work but inside the session spread, so it is not
+claimed as a saving. The cost is not offset by the CRC change or by cheaper
+recovery and needs the user's explicit acceptance.
+
+Framework (`fwmac.sh` protocol, 4920534e → b853f3ee, two sessions of 7
+pairs; the framework drives `Raft` cores directly, so round 6 changes no
+framework path except one reordered condition in the follower check):
+
+| Cell | session 1 | session 2 | pooled 14 pairs (ns/write) |
+| --- | --- | --- | --- |
+| bulk | ×0.996 | ×0.996 | 249 → 248 (×0.996) |
+| single | ×1.013 | ×1.001 | 22,234 → 22,344 (×1.005) |
+| bulk-1 | ×1.005 | ×1.000 | 216 → 216 (×1.000) |
+| **single-1** | ×1.005 (5/7 above 1) | ×1.020 (6/7) | **12,812 → 12,926 (×1.009; pair median ×1.011, 11 of 14 above 1)** |
+
+single-1 instructions retired (`/usr/bin/time -l`, 7 interleaved runs each,
+medians): 4920534e 13.708 G, b853f3ee 13.777 G (+0.5%); cycles 4.654 G →
+4.683 G (+0.6%). **single-1 is about +1% CPU and +0.5% instructions against
+the merge base** (round 5 recorded ×1.018 and +1.4% in other sessions); it
+predates this round and is put to the user for explicit acceptance.
+
+**Checks.** `cargo +stable fmt --all -- --check`; strict Clippy (`-D
+warnings`, `--all-targets`) default, all-features, no-default-features and
+native-only, and matched fmt and strict Clippy: zero diagnostics. Suites on
+Linux cores 10–15, one configuration at a time. Default: lib 516 (1
+ignored), runtime 57, log_store 21, maintenance 10, snapshot 27,
+snapshot_worker 14, raft 79, log_reclaim 11, startup 52, effect_owner 216,
+counter_service 146, directory_service 18, transfer_service 25.
+All-features: lib 518 (1 ignored), runtime 57, log_store 21, maintenance 10,
+snapshot 27, snapshot_worker 14, raft 79, log_reclaim 11, startup 67,
+effect_owner 216, counter_service 205, directory_service 23,
+transfer_service 34. All passed. Soaks (release, all features): runtime
+163,840 writes, last index 163,920, max retained 12,298, 75 typed retried
+refusals; native 163,840 writes, 671,088,640 bytes, max WAL 33,031,095 of
+66,060,288, max retained 7,582, 21 rewrites;
+`two_soak_runs_in_simulated_time_have_identical_traces` identical (24,588,
+10,247, 122,978 ms) — the same values as rounds 3–5. Pre-push hook ran and
+passed (not bypassed).
+
+**Open.** Unchanged from round 5: snapshot-install anchor growth argued, not
+tested; a live state recovered past `H + R` is reported through capacity
+refusal, not refused at construction; an exhausted quorum (now only when
+the bytes or entries do not fit, not at the 50% latch) keeps its leader
+until the operator gives the full replicas room. Still open from rounds 2–4:
+snapshot-store barrier fsync (device identification); a leader clears
+in-flight replication requests at compaction; pre-vote/check-quorum not
+added.
+
+#### ST2 round 7 schema plan (written before editing, 20 October 2026)
+
+*Finding.* The orchestrator's exclusive full default-feature run on
+`27ac5bbe` failed five `tests/logical_nested_native` tests (no builder round
+had run that binary): `actual logical child assembly:
+Maintenance(WalHeadroomTooSmall { headroom: 16515072, required: 34635776 })`
+at `cluster.rs:170`.
+
+*Diagnosis.* The failing node is the nested child's *physical* native node,
+built from `setup::profile::physical_log_limits()`: `max_command_bytes` =
+the lower logical command (1,069,056), `max_batch_bytes = max(2 × command,
+transport decoded_bytes)` = `max(2,138,112, 33,587,200)` = 33,587,200, and
+`LogLimits::default()` for the rest (`max_wal_bytes` 64 MiB,
+`control_reserve_bytes` 1 MiB). So `U` = 66,060,288, `H` = 75% of `U` =
+49,545,216, headroom `U − H` = 16,515,072, and `required` =
+`max_batch_bytes + R` = 33,587,200 + 1,048,576 = 34,635,776. The ~32 MiB
+term is the fixture's own batch ceiling (`decoded_bytes` = 2 × the 16 MiB
+child-checkpoint frame), not a default ST2 introduced; ST2 only made the
+check run at construction (U5). The logical setup limits named in the brief
+(8,192 and 64 KiB) are the logical *parent* logs inside the application;
+their persistence publishes no WAL occupancy (`wal_usage()` is `None`), so
+the check does not apply to them.
+
+*Decision: (a), test fixture only.* I5 as proved (rounds 3–4): the live
+image a rewrite produces satisfies `L ≤ H + R`; the configuration rule
+`U − H ≥ max_batch_bytes + R` then gives `L + max_batch_bytes ≤ U`, so any
+held batch, whatever records it carries, fits after one rewrite. The proof
+does not use that a held batch's entries are already inside `A`; that would
+also need a bound on the records a batch carries outside the account (vote,
+term, commit, truncation and per-group image records, up to
+`max_groups` = 4,096 groups per batch here), which no code establishes. With
+this fixture `L + max_batch_bytes` can reach 49,545,216 + 1,048,576 +
+33,587,200 = 84,180,992 > `U` = 66,060,288: the guarantee cannot be shown, so
+the typed construction refusal is the correct outcome and loosening the rule
+would drop a proved guarantee for an unproved one. Change: the fixture sizes
+its physical WAL from the rule, `max_wal_bytes = 4 × (max_batch_bytes + R) +
+R` = 139,591,680 (`U` = 138,543,104, `H` = 103,907,328, headroom exactly
+34,635,776), plus a fixture assertion of the rule. No test assertion
+changes. The store does not preallocate (`set_len` only on rewrite), so the
+larger ceiling costs no disk until written; the owner effect budget grows by
+the WAL ceiling (`startup_owner_limits`), still under its 4 GiB cap (checked
+by the run).
+
+*Deployments.* `LogLimits::default()` (1 MiB batch, 1 MiB reserve, 64 MiB
+WAL: headroom 16,515,072 ≥ 2,097,152) is what the three service binaries
+(`counter_setup`, and `prepare_for_discovery`'s default limits) and the
+native benchmark use: unaffected. The logical voter's parent/child logical
+logs publish no WAL occupancy: unaffected. Only a host choosing
+`max_batch_bytes + R` above a quarter of the usable WAL is refused, typed, at
+construction; `COUNTER_SERVICE.md` gets the sizing rule.
+
+*Checks.* The five tests pass; the full default suite and the full
+all-features suite (`representative_relay_model` alone), every failure named;
+fmt, four strict Clippy configurations, matched fmt/Clippy, the two soaks and
+the identical-trace test. No CPU re-measure: no library code changes.
+
+#### ST2 round 7 implemented and validated (20 October 2026)
+
+Change: `tests/logical_nested_native/setup/profile.rs` only (decision (a)
+above): `physical_log_limits()` sets `max_wal_bytes = 4 × (max_batch_bytes +
+control_reserve_bytes) + control_reserve_bytes` = 139,591,680, and the
+profile test asserts that value and the headroom rule. No library code, no
+test assertion and no existing expectation changed; `COUNTER_SERVICE.md`
+states the sizing rule. No CPU re-measure: the per-write path is unchanged.
+
+| Finding | Before (27ac5bbe) | After |
+| --- | --- | --- |
+| Five `logical_nested_native` tests refused at child assembly | `WalHeadroomTooSmall { headroom: 16515072, required: 34635776 }` at `cluster.rs:170` in all five | all 13 tests of the binary pass (15 with all features) |
+
+**Full suites (Linux cores 10–15, `-j 4`, one configuration at a time, every
+target run: lib, bins, examples, doc tests and all 116 integration test
+binaries).** The 10-minute tool limit per command meant running target by
+target: `routed` (all features) in six filter chunks covering its 192 tests,
+and `representative_relay_model`'s exhaustive
+`strict_physical_voter_relay_graphs_exhaust_without_unsafe_release` in a
+release build of the same test (542 s default, 465 s all features; it does
+not finish within 10 minutes in a debug build), its other 8 tests in debug.
+
+| Configuration | passed | failed | ignored |
+| --- | --- | --- | --- |
+| default | 2,557 | 0 | 1 |
+| `--all-features` | 2,871 | 0 | 1 |
+
+No failing test in either configuration. fmt; strict Clippy default,
+all-features, no-default-features and native-only; matched fmt and strict
+Clippy: zero diagnostics. Soaks (release, all features): runtime 163,840
+writes, last index 163,920, max retained 12,298, 75 typed retried refusals;
+native 163,840 writes, 671,088,640 bytes, max WAL 33,031,095 of 66,060,288,
+max retained 7,582, 21 rewrites;
+`two_soak_runs_in_simulated_time_have_identical_traces` identical (24,588,
+10,247, 122,978 ms) — the same values as rounds 3–6.
+
+**Open.** A tighter headroom rule (counting only the records a held batch
+carries outside the WAL account, instead of the whole batch) would admit
+configurations like this fixture's default 64 MiB WAL; it needs a proven
+bound on those records and is not part of ST2. Everything else unchanged
+from round 6.
+
+#### Rebase onto main after V3c–V3e (20 October 2026)
+
+Schema plan before finishing the saved merge: keep ST2's public capacity and
+WAL-room APIs and its pending WAL-byte bound alongside V3d's `LogStamp` in
+`Pending`; retain `SummarizedLog` planning/install and V3c's caller-owned
+`VecDeque` effect sink. Capacity refusal, deferred noop, typed step-down,
+retry/rewrite deadlines and restart reconstruction stay unchanged. Move the
+volatile per-peer stall accounting onto V3e's `PeerSlots<u64>`; clear its
+retained keys on configuration change and capacity step-down just as the
+other leader tables are cleared. Successful append acknowledgements empty a
+slot and subsequent heartbeat rounds reuse it. No new durable state, effects,
+crates or cleanup owners. Remove the saved WIP's temporary lock diagnostics.
+Acceptance: unchanged ST2 and main tests plus slot-key bounds through churn,
+formatting, all four strict Clippy configurations, matched formatting/Clippy,
+full default/all-feature suites, both 163,840-write soaks and identical traces.
+
+| Conflicting file | Combined resolution |
+| --- | --- |
+| `docs/IMPLEMENTATION.md` | Preserve both tracks and main's V3c–V3e evidence; ST2 remains in review. |
+| `examples/native_benchmark.rs` | Keep main's benchmark and QUIC support with ST2 default retention, explicit-maintenance opt-out and serving-only recovery switch. |
+| `src/bin/support/transfer_server.rs` | Keep main's peer/timing setup with ST2 maintenance parsing, pre-open validation, limit selection and startup visibility. |
+| `src/raft.rs` | Preserve effect sink, summarized-log planning/install stamp and peer slots; carry ST2 WAL bounds, capacity/noop transitions and membership-cleared stall slots. |
+| `src/raft/proposals.rs` | Keep sink-based proposal staging and shared batches; accumulate ST2 WAL bounds during entry construction and preserve typed entry-budget refusal. |
+| `src/raft/receive.rs` | Keep sink-based append replies and main's slot acknowledgement bookkeeping; retain ST2 single-walk suffix byte admission, byte-only follower decisions and stall reset on successful acknowledgement. |
+| `tests/directory_service.rs` | Keep main listener-health assertions and ST2 maintenance-default/pre-storage validation assertions. |
+| `tests/startup.rs` | Register both main connection-generation tests and ST2 backpressure/retention tests. |
+
+##### Rebase validation (Linux, cores 12–15, four build jobs)
+
+Every configuration ran sequentially. Both full `--all-targets` runs executed
+129 targets (lib, bins, integration tests and examples), with the exhaustive
+`strict_physical_voter_relay_graphs_exhaust_without_unsafe_release` case
+run alone in release. Both isolated relay runs passed (655.58 s default,
+654.75 s all features). Both doctest commands passed (zero cases). The totals
+below include the isolated relay case and do not count diagnostic reruns twice.
+
+| Configuration | Passed | Failed | Ignored |
+| --- | --- | --- | --- |
+| Default, full targets + isolated release relay | 2,657 | 0 | 1 |
+| All features, full targets + isolated release relay | 2,966 | 3 | 1 |
+
+Every full-run failure, including the two benchmark failures printed at the
+end of that target:
+
+| Test | Full-run failure | Unchanged executable, isolated rerun |
+| --- | --- | --- |
+| `tcp_authenticated_operator_starts_a_split_and_children_survive_parent_shutdown` (`transfer_service`) | `tests/transfer_service.rs:89`: fixture port-base addition overflow; this arithmetic is unchanged from main | 1 passed, 0 failed |
+| `lanes::tests::tcp_two_lanes_share_groups_and_recover` (`native_benchmark`) | `lanes/tests.rs:85`: lock acquisition would block; failure report says host threads joined | 1 passed, 0 failed |
+| `shared::recovery::maintenance::quic_automatic_maintenance_progresses_with_held_snapshot_recovery` (`native_benchmark`) | `shared_recovery/maintenance.rs:146`: arming recovery timed out; final diagnostic showed the follower caught up with zero router requests | 1 passed, 0 failed |
+
+These full-run failures remain part of the result. The isolated reruns use
+the same all-feature executables and assertions; no assertion or timeout was
+changed in response. Final exclusive qualification belongs to the integration
+owner.
+
+The two longer soaks and trace check used the existing all-feature debug
+executables during the build-capacity hold, without creating build artifacts:
+
+| Check | Actual result |
+| --- | --- |
+| `VOTEBOAT_ST2_SOAK_WRITES=163840` | Passed: 163,840 writes; final index 163,920; max retained 12,298; 75 typed retried refusals; simulated time 819,849 ms |
+| `VOTEBOAT_ST2_NATIVE_SOAK_WRITES=163840` | Passed: 163,840 writes / 671,088,640 appended bytes; final index 163,841; max WAL 33,031,095 of 66,060,288 bytes; max retained 7,582; 21 rewrites; last rewrite 33,030,992 → 370 bytes |
+| `two_soak_runs_in_simulated_time_have_identical_traces` | Passed: two 24,576-write runs with identical traces; final index 24,588; max retained 10,247; simulated time 122,978 ms |
+
+Root formatting and strict Clippy in default, all-feature, no-default-feature
+and native-only configurations, plus matched formatting and strict Clippy:
+zero diagnostics. The tracked pre-push hook remains enabled. After the explicit
+capacity release, the existing read-only diskguard runs before each remaining
+Cargo invocation and after each task, with its default caps unchanged; an
+additional checkout check enforces the 61 GiB maximum and the 20 GiB growth
+reservation. Builds stay inside this checkout's targets. Reports are preserved
+here and in PR 14 before the required artifact/worktree sweep.
+
+The saved WIP merge commits are replaced by one merge whose parents are the
+reviewed ST2 head `bbb81f33` and main `b4e36472`. ST2 remains in review. Earlier
+rounds' measurements describe their named heads; no CPU measurement is repeated
+for this merge and the user's acceptance of ST2's cost remains unchanged.
+
+##### PR14 final merge-gate fixture repairs: plan (20 October 2026)
+
+This is the bounded repair of the three observed rebase-validation failures,
+required to finish the existing ST2 wind-down milestone. It adds no roadmap
+item. The macro/mini plans above remain authoritative; ST2 stays in review.
+Source confirmation approved exact `12a23d6d` (Sol review 5591363667); the
+accepted production rebase and CPU decision are unchanged.
+
+Before edits, the fixture schema/ownership plan is:
+
+- Transfer service: retain four groups, three nodes and both listener bands.
+  Extend the shared `PortLease` fixture for checked offset layouts, rather than
+  another allocator. Select a finite candidate layout, reserve TCP/UDP plus
+  shared locks, hand off probes at startup and retain locks through child
+  shutdown/reopen. Reject overflowing candidates before binding; release
+  partial collisions through RAII. A local boundary-case regression must fail
+  the old arithmetic without modifying the concurrent global allocator.
+- Lanes: trace the exact WAL path, original owner, worker join and concurrent
+  child-spawn lifetime. Repair the ownership/isolation boundary that permits a
+  live descriptor to retain `LOCK` across reopen; preserve every WAL/history
+  check. Use a finite causal control, not lock retries. Every spawned child
+  must be killed/reaped on failure and every host/worker joined.
+- Held snapshot: arm the stale replica with snapshot-completion consumption
+  disabled before the first receive/poll. Observe a real router-accepted request
+  before holding the replica, then resume ordinary receipt consumption only
+  after foreground quorum work, checkpoint and subsequent reclaim succeed.
+  Preserve real installs, bounded recovery usage and restart/dedup checks.
+  Completion-before-observation must be a regression control, without sleeps,
+  invented held state or larger timeouts.
+
+Acceptance is focused failing-before/passing-after evidence where feasible,
+the existing three histories and adjacent regressions, root fmt, all four
+strict Clippy configurations, matched fmt/Clippy and the enabled push hook.
+Build only in this checkout, cores 12–15, nice 19, four jobs, own build at most
+45 GiB; run diskguard before each build/task and after cleanup. No full suite
+is run here: the parent owns final exclusive qualification after PR15/24.
+Planned checks are not implemented evidence; actual results follow separately.
+
+##### PR14 final merge-gate fixture repairs: implementation and evidence
+
+All changes in this repair are test fixtures and validation records; production
+consensus, storage, service and rebase logic are unchanged.
+
+The transfer allocator's `14000 + 1024*k` ladder reaches base 65,200 at k=50;
+its largest listener offset is 487, exceeding `u16::MAX`. The shared port
+fixture now accepts fixed offset layouts, checks every addition before binding,
+uses the existing safe pool and cross-process locks, and drops partial layouts
+on collisions. Exhaustion is finite and cannot switch to an uncoordinated
+fallback namespace. Transfer keeps all 24 TCP/UDP pairs leased through the
+12 child processes' shutdown and recovery. The exact-boundary test also rejects
+base 65,200; an unchecked-addition mutation fails with the original overflow
+panic (0 passed, 1 failed). No global allocator state is modified by that test.
+
+Lane roots already include PID, protocol/label and nanoseconds; the conflicting
+resource is the lane's own `laneN/replicaN/LOCK`, held by `FileLogIo` inside the
+WAL worker. Joining returns and drops the original log, but a concurrent
+cluster `Command::spawn` can copy its CLOEXEC descriptor between fork and exec.
+That second reference retains the same file lock past the original owner's
+close. The bounded causal control passes a duplicate `LOCK` as a child's stderr
+and waits for its ready line: after the original reference closes, opening the
+same real `FileLogIo` returns typed `TryLockError::WouldBlock`. An explicit stdin
+command and child reap release it, and WAL recovery succeeds. The log records
+the path and child PID. This deliberately extends the fork window across exec;
+it does not claim to capture the earlier full run's transient child.
+
+A test-only read/write gate keeps concurrent lane owners shared and excludes
+only fork/exec while any lane can close/reopen its WAL. Both process-spawn sites
+in the benchmark tests use its writer side, released before waiting for child
+work. The cluster child guard also joins its stdout readers after killing and
+reaping children on failure. WAL reopen, per-group history, exact lane totals,
+deduplication and all join assertions are preserved. Six finite old-executable
+lane/cluster batches (14 tests each) did not reproduce the spontaneous lock
+failure; the deterministic child-descriptor control supplies ownership evidence.
+The adjacent default-feature shared-lease check exposed the same descriptor
+copy issue for sockets: `adoption_keeps_the_unused_half_and_reclaim_proves_release`
+failed its post-drop bind at port 61,004 while fixture children could fork.
+It omitted the file's existing `SPAWN` guard. Both that release assertion and
+the new offset-layout handoff check now take the existing guard; assertions
+and the shared lease namespace are unchanged. The failed check is retained.
+
+The snapshot failure was a compound observation race: ordinary arming polls
+could consume earlier groups' accepted recovery receipts while waiting for the
+foreground group's leader. The fixture now campaigns the first seven groups,
+stops at the first actual router-accepted request, asserts zero snapshot
+installs, and then campaigns/elects the foreground group using only the healthy
+quorum. The stale replica is never polled during that election or the held
+maintenance phase. Receipt consumption resumes only afterward. This refines the
+initial plan using ordering rather than a zero completion budget (the existing
+public poll budget requires nonzero credits). All held-request, foreground,
+checkpoint/reclaim, real-install, reopen and dedup assertions remain; no timeout,
+sleep, assertion or lint threshold is relaxed.
+
+Actual final commands, results and mutation limitations are recorded in
+`validation/st2-final-gate/REPORT.md`. The earlier rebase full-run failures remain
+in the tables above. This repair runs no full suite and does not mark ST2 done;
+the parent still owns final source confirmation and the exclusive full matrix.
+Focused benchmark selections passed 17/0 all features and 15/0 default;
+transfer passed 3/0 and 2/0; shared-lease checks passed 9/0 in both. The tracked
+hook's direct qualification passed root fmt, all four strict Clippy builds,
+matched fmt and matched strict Clippy with zero diagnostics. The hook remains
+enabled for the non-force push. All builds, including matched, used this
+checkout's sole target; observed use after qualification was 923 MiB.
+
+##### PR14 cumulative-source reconciliation plan (20 October 2026)
+
+Scope is completion of existing PR14 only. The qualification branch starts at
+`3fa6435be2e55352665a1a712299b44443348c7d`. PR24 owns the main-writer lease;
+no main merge or final full suite starts before the parent supplies its merged
+main SHA and releases that dependency. ST2 remains in review until the final
+cumulative source, read-only confirmation and exclusive matrix are qualified.
+
+**Data/API shape and transitions.** Preserve ST2's typed capacity refusals,
+`Pending` WAL-byte bound, deferred leader noop, maintenance defaults and retry
+schedules. Reconcile V3f's borrowed in-place pending-plan installation with
+V3c's effect sink, V3d's summarized log/stamp and V3e's bounded peer slots.
+A pending transition is installed only after durable completion; successful
+installation empties its slot, while refusal leaves the log/summary/stamp and
+plan intact until the existing fence discards it. Membership changes still
+clear leader/stall slots. No new public API, durable format or feature scope.
+
+**Ownership, failure and restart.** The core owns one pending transition and
+volatile peer state; providers own durable bytes; the node owns maintenance
+schedules. Preserve all refusal-before-mutation guarantees and existing
+storage-failure fencing. A crash before checkpoint/reclaim publication retains
+the previous durable image; restart reconstructs the same committed/applied
+prefix and maintenance policy. Fixture leases remain held through child
+shutdown/reopen, children are reaped, and lane/reader workers joined. Keep
+both documentation tracks and all prior evidence with its original head.
+
+**Acceptance.** Inspect actual merge conflicts against both parents and record
+the exact resolution. Run root formatting, strict Clippy in default/all-feature/
+no-default/native-only configurations, and matched formatting/strict Clippy.
+Push the checked reconciliation non-force through the enabled hook to existing
+PR14, then notify the parent for pinned-object source confirmation. Exclusively
+run all four complete root configurations and matched, sequentially, including
+examples, every built test executable, the exhaustive representative relay case
+alone and doctests. Audit build success and each executable's exit/results;
+retain original failures and repair only demonstrated causes. Run diskguard
+before each build/configuration/launch, use only this checkout's target, cores
+12–15, nice 19 and at most four Cargo jobs. Source/input changes reset affected
+final-head gates. Documentation-only records are identified separately.
+
+The LB macro milestone stays active. Current deliverable is this existing ST2
+qualification (depends on merged PR24; checks above); next NT1 and following DR1
+retain the purpose, dependencies and checks in the linked mini plan. They are
+not started by this reconciliation. Main integration additionally requires the
+parent's explicit main-writer lease and final source approval; it records exact
+reviews, tested head/counts and the accepted +2% serving CPU/write (+4% allowance;
+singleton +0.9%). Planned checks above are not passing evidence.
+
+##### PR14 cumulative-source reconciliation: source result (21 October 2026)
+
+The parent released dependency main
+`bd714771e181d59c2cfaece3fc93dc411ce41ddb` after PR24 merged and its owner
+swept. It is merged into qualification plan head
+`85ee73c5a8910d6b4e1ec7acfd02e469822a3be3` (production/test inputs identical
+to approved PR14 `3fa6435b`). The merge is automatic: **no conflict markers or
+manual production/test edits**. Relative to the qualification parent, the
+source changes are exactly main's V3f edits in `src/log/transition{.rs,/...}`,
+`src/raft.rs` and its in-place-install regressions; both documentation tracks
+survive. Relative to main, ST2's `retained_entry_capacity()` check remains in
+log-transition validation, and the core retains its pending WAL-byte bound,
+typed refusals/deferred noop, maintenance and bounded peer/stall slots. V3f
+installs through a mutable pending-plan borrow with the captured stamp, then
+clears the spent slot; failed installs retain the plan until the existing
+storage-failure fence. No durable format, dependency, lint or timeout changes.
+
+Source inspection and `git diff --check` passed. Required strict checks and
+the full exclusive matrix are pending here, not passing evidence. The parent
+owns final pinned-object source confirmation. Root main remains parent-owned;
+this dependency release does not authorize main integration. The LB macro and
+next two mini-plan deliverables are unchanged; this work only completes ST2.
+
+#### Design-pack amendment realised by ST2 (pack preserved)
+
+| Pack text | Amendment |
+| --- | --- |
+| ch04 "Retention and reclamation" (checkpoint floor, prefix reclamation, cleaning as capabilities a host may schedule; earlier slices implemented them opt-in: Slice165 periodic reclamation, Slice166 automatic checkpoints) | Checkpoint and WAL reclaim are mandatory defaults for every node, driven by entry count, a scan interval and WAL occupancy. A lifetime-bounded store is an explicit, named opt-in (`RetentionMode::LifetimeBounded`; services: `--no-maintenance I-accept-a-bounded-log`) recorded at startup and in the status. Maintenance never stops itself: every non-fatal failure is retried and counted; fatal storage errors fence as before. A leader elected at the retained-entry limit keeps its role and refuses typed instead of failing the node |
+| ch10 "Checkpointing, compaction and snapshot traffic must occur during sufficiently long runs" | Now true of every default native benchmark run, not only `--maintenance` runs |
+
+## Networked CPU track (pillar 2, opened 19 October 2026)
+
+Score: CPU (user+sys) per completed write, summed over every node process, at
+equal cores on the networked native path. Design: the R4 research plan
+`target/claude/research-r4/pillar2-network-plan.md` (main checkout, untracked;
+§3.1 harness, §3.2 cells, §3.3 attribution, §3.4 noise, §4 candidates). The
+design pack is unchanged.
+
+### Macro plan (this track)
+
+| Milestone | User-visible outcome | Acceptance |
+| --- | --- | --- |
+| NW1 Cheaper networked writes | A three-process TCP/TLS or QUIC deployment spends less CPU per write at light, moderate and loaded rates, without buying the rate with extra cores | Each slice gated on the N0 harness: 5 interleaved pairs per §3.2 cell, median total CPU per write, busy cores and p99 reported |
+
+### Mini plan
+
+| Deliverable | Purpose | Dependencies | Completion checks | Advances |
+| --- | --- | --- | --- | --- |
+| Done N0: three-process cluster harness (merged 20 October 2026 in PR 17, head 73605e48; rounds 1–4 and baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test on OS-selected ports; script self-test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
+| Done EO1: effect-owner continuations keep the released effect's position (split from PR 19; merged 20 October 2026 in PR 20, head 364b45f9) | Remove a pre-existing availability loss: a loaded snapshot's Send queued behind a same-step Persist fenced the owner during snapshot catch-up under write load | — (on main) | Owner unit tests below fail on main and pass with the rule; mutation reverts fail both; witness test ×10 all-features; fmt, four strict Clippy builds, matched fmt/Clippy; effect_owner, runtime, native_member_startup, snapshot, snapshot_worker, counter_service in default and all-features | NW1 (unblocks N1) |
+| Then N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline; EO1 (PR 19 rebases on it) | Plan §5.3 tests and §5.4 gate | NW1 |
+| Then N2: per-peer frame coalescing | One frame per peer per round across groups | N1; a G=4 cell on the N0 harness (see N0 limits) | Plan §4 row 2 | NW1 |
+
+### EO1 merge record (20 October 2026, PR 20 → main)
+
+Reviews: GPT-6.1-Sol approve round 1; Claude Opus 5.5 approve round 1 with a
+P2 asking for a real-core regression, folded in round 2 (orchestrator) as
+`tests/snapshot_routes/eo1_repro.rs`: on main it fails with `ProviderContract`
+at the commit Persist, with the rule it passes. Exclusive suites on head
+`364b45f9` (`target/claude/research-r4/pr20-suites/`): checks 7/7 clean;
+default 2,597 / 0; no-default 1,331 / 0 plus `representative_relay_model`
+9 / 0 alone; all-features 2,900 / 0 plus the relay model 9 / 0 alone;
+native-only 1,918 / 0; matched 75 / 0.
+
+### EO1 schema plan (before editing, 20 October 2026)
+
+- **Bug (on main).** A leader step can emit `[SnapshotRequired, Persist]`
+  when the leader alone forms a quorum and a non-voting replica needs the
+  image (for example a compacted single-voter group growing by a learner);
+  with a three-voter majority the same shape needs N1's earlier sends, because
+  follower acknowledgements are only processed after the leader's own
+  durability (`After::LeaderAppend`: `broadcast_append_progress_into` re-emits
+  `SnapshotRequired` for a follower in snapshot catch-up, then
+  `maybe_commit_into` pushes `Persist(commit)` last). The owner leases the
+  front effect; when the image loads, `complete_effect_inner` appended the
+  continuation (one `Send` from the pure `snapshot_send`/`repair_snapshot_send`),
+  giving `[Persist, Send]`. `submit_persists` refuses a Persist with a queued
+  tail (`ProviderContract`), the replica fences the owner and recovers.
+  Fail-closed: the Send was never emitted and the Persist never submitted, so
+  no false reply and no corrupt state; an availability loss that repeats on the
+  next leader while the follower still needs the image. Found by N1 (PR 19,
+  `5986c826`), reproduced on main by the PR 19 review with an owner fixture.
+- **Invariant.** A continuation (the effects a completion callback returns for a
+  released lease, an in-place expansion of that effect) takes the released
+  effect's position in its visit's queue, in its own order. Because a visit
+  holds at most one lease (`Active::leased: Option`) and `take_owned_effect`
+  always pops the front, that position is the queue front: the continuation is
+  prepended, never appended. This is the order a synchronous completion would
+  have produced, and it is the order the core's own list contract (a Persist is
+  last) is written against.
+- **Mechanism.** One code path in `complete_effect_inner`: push the
+  continuation to the front in reverse, so it keeps its own order ahead of the
+  remaining effects. No kind is special-cased. Byte accounting is unchanged
+  (the same retained total is checked before the move). The Persist-tail rule
+  in `submit_persists` is unchanged and still the fail-closed backstop.
+  Not changed: `install_continuation` (worker Written/Durable continuations of
+  an already-submitted Persist). That is not a lease expansion: the Persist
+  left the queue at submission, and only early Sends emitted after it can be
+  queued, so FIFO after them is correct.
+- **Audit (every `Effect` kind: producer shape, continuation, effect of the
+  rule).** The rule only differs from appending when the continuation is
+  non-empty and effects are queued behind the released one.
+  - `Send`, `ReadReady`: continuation is empty (`release`,
+    `release_owned_send`, read capture, `cancel_read`). No change.
+  - `Committed`: inserted at index 0 with following effects behind it
+    (`CompletionEffects::into_owned`, `completion.rs:50`), but every production
+    continuation is empty (`release`, `complete_applied_capture`). No change.
+  - `Persist`: never completed through a callback (`PersistenceEffect`); its
+    continuation arrives through `deliver_worker` (see above). No change.
+  - `PersistVolatile`: only from `Raft::recover_volatile` cores, which the owner
+    does not run; completed through `persist_volatile`, outside the owner.
+  - `VerifyLearnerReadiness` (`readiness.rs:215`), `CheckpointRequired`
+    (`raft.rs:1082`), `StageSnapshot` (`receive.rs:538`): each returned as its
+    step's only effect, so nothing is queued behind them. No change.
+  - `SnapshotInstalled`, `CheckpointCompacted`: pushed last by `after_durable`
+    (`raft.rs:1425`, `raft.rs:1432`); nothing is queued behind them. No change.
+  - `SnapshotRequired`: the only kind emitted inside a multi-effect step
+    (`progress_broadcast.rs:15`, `raft.rs:1745`, `snapshot_repair.rs:123`), with
+    other Sends, other `SnapshotRequired`s and a final Persist behind it. Its
+    continuation is exactly one Send (pure `&self` expansion). This is the fix.
+  - Public `complete_effect`/`complete_effect_with` (physical embedding API)
+    with an arbitrary callback: the rule applies uniformly. A continuation that
+    itself holds a Persist with a non-empty tail now fails closed at
+    `submit_persists` (as appending already did whenever a Persist was queued
+    behind); no internal producer makes that shape. Sends ahead of a queued
+    Persist are the core's normal step shape: the core emits a durability-
+    dependent reply only from `after_durable`.
+  - Conclusion: the general rule is not unsafe for any kind; no special case.
+- **Tests (owner unit tests in `src/runtime/effects/continuation_tests.rs`,
+  deterministic, no I/O, white-box queue construction on the existing fixture,
+  generalised to N groups).** (1) `[SnapshotRequired, Persist]`, complete the
+  lease with one Send: the next leases are Send then Persist, and
+  `submit_persists` accepts the Persist. Under the `extend` mutation it fails at
+  the queue assertion before `submit_persists` runs; the real-core regression
+  `snapshot_routes::eo1_repro` (reviewer-supplied) fails on main with
+  `ProviderContract`.
+  (2) Two visits each `[SnapshotRequired, …, Persist]`, both leased, the later
+  lease completes first (with a two-Send continuation): each queue keeps the
+  continuation in the released effect's place and order, and both Persists
+  are accepted in one batch. Mutation: restoring `extend` fails both.
+- **Measurement.** None: only snapshot-continuation releases change order;
+  per-write releases (`Send`, `Committed`) have empty continuations, so the
+  per-write path runs the same operations.
+
+### EO1 implemented (evidence, 20 October 2026, Linux cores 10–15, nice 19, `-j 4`)
+
+- **Change.** `complete_effect_inner` prepends the continuation in its own
+  order (one path, no kind special case); the rule is stated on
+  `EffectOwner`'s documentation. The in-crate owner fixture
+  (`effects/peer_ingress_tests.rs`) now builds one owner over N groups; its two
+  existing tests are unchanged.
+- **Tests.** `continuation_tests::loaded_snapshot_send_takes_its_place_ahead_of_the_steps_persist`
+  and `continuation_tests::continuations_released_out_of_lease_order_keep_their_positions`
+  pass. Each Persist is leased last and `submit_persists` accepts it (one
+  batch of two in the second test); the owner is not failed.
+- **Mutation.** Restoring main's `a.effects.extend(effects)` fails both: queue
+  `[Persist, Send(11)]` against `[Send(11), Persist]`, and
+  `[Persist, Send(21), Send(22)]` against `[Send(21), Send(22), Persist]`.
+  Restored afterwards.
+- **Checks.** `cargo +stable fmt --all -- --check` clean; strict Clippy
+  (`--locked --offline --keep-going --all-targets -D warnings`) clean in
+  default, `--all-features`, `--no-default-features` and
+  `--no-default-features --features native`; matched fmt and strict Clippy
+  clean.
+- **Suites, default features:** lib 551 (1 ignored), counter_service 144,
+  effect_owner 210, native_member_startup 27, runtime 57, snapshot 27,
+  snapshot_worker 14: all passed. **All features:** lib 553 (1 ignored),
+  counter_service 203, effect_owner 210, native_member_startup 50, runtime 57,
+  snapshot 27, snapshot_worker 14: all passed.
+- **Witness.** `quic_promoted_leader_witness_installs_compacted_final_snapshot`
+  (all features) passed 10/10. It does not reproduce the bug on main (that
+  needs N1's early sends); this shows no regression.
+- **Not measured.** No CPU measurement: per-write releases (`Send`,
+  `Committed`) have empty continuations, so the per-write path is unchanged.
+
+### N0 schema plan (before editing, 19 October 2026)
+
+- **Library change: one pure move.** `HostWait`, `HOST_GATHER` and
+  `HOST_MAX_WAIT` move from `src/bin/support/service_setup.rs` into
+  `voteboat::native::readiness` (in a child module that forbids `unsafe`, so the
+  audited `poll(2)` scope does not widen). The only difference in the moved
+  code: the process wake is a constructor argument instead of a call to the
+  binaries' `service_setup::host_wake()` static, so the library holds no
+  process-global. The three service call sites pass `service_setup::host_wake()`,
+  the same `Arc` as before. A second, additive step makes `wait` return which
+  way it ended (`Immediate`, `Ready`, `Timeout`); the services ignore it, the
+  harness counts it. No policy constant, branch or call order changes.
+- **CLI.** `native_benchmark node N DIRECTORY tcp|quic BASE_PORT OFFERS WINDOW RATE
+  [--ready-items K]`. Every node gets the same arguments (followers need the same
+  `Counter` capacity). Each process opens only replica N through `NativeStartup`
+  with the configuration `open_recorded` builds (one shared constructor, so the
+  two cannot drift): listen `127.0.0.1:BASE+N`, peers `BASE+1..3`, fixture
+  certificates, `ready_visit_items`, entropy seed `N+17`, default limits. Timers
+  are the offered mode's (heartbeat 50 ms, election 10,000 + 10,000 ms, 32
+  expirations), also from one shared constant. The worker wake is a
+  `HostWake`, and every round waits with the library `HostWait` at its
+  production defaults (200 µs gather only when work is queued, 10 ms cap).
+- **Process protocol (stdin/stdout lines).** Each node prints `ready node=N` once
+  open. Node 1 then waits for a `start` line on stdin (EOF first aborts cleanly);
+  it campaigns until it leads with a commit in its term, runs a 64-write closed
+  warmup, records its term, runs the offered phase (the `offered.rs` `Ledger`,
+  `Offerer` and receipt handling), checks the term again, checks the ledger
+  history, performs one quorum read that must equal the expected counter value,
+  writes `run.txt`, `offers.csv` and `summary.txt` and prints a `mode=cluster`
+  summary. Nodes 2 and 3 run until stdin reaches EOF. Every node then shuts down,
+  drains, joins its workers and prints one line
+  `node_counters node=N poll_rounds= host_waits= host_waits_immediate=
+  host_waits_ready= host_waits_timeout= sends= received= persistence_batches=`
+  covering the whole process lifetime (the same span as its CPU).
+- **Ownership and cleanup.** A stdin reader thread owns stdin; it sets an atomic
+  flag and wakes the host (`HostWake` is a `WorkerWake`), so an idle follower
+  sleeps in `poll(2)`. Errors after open still drain and join the workers, as the
+  single-process path does. No Raft, runtime, wire or WAL behaviour changes.
+- **Parent script** `benchmarks/tools/cluster.py` (tracked; the main checkout's
+  `target/claude/tools` is not in git). Spawns three children, waits for three
+  `ready` lines, writes `start` to node 1, closes the followers' stdin when
+  node 1's summary arrives, reaps each child with `os.wait4` (per-process
+  user+sys), cross-checks the sum against `RUSAGE_CHILDREN` deltas and prints
+  busy cores (CPU / wall) per process. Rate lists give marginal CPU per write
+  ((CPU at 16,000 offers − CPU at 2,000) / 14,000) per process and in total.
+  ABAB pairs over two binaries. A run is invalid unless applied = offers,
+  window_refused = 0 and the leader term is unchanged.
+- **Failure paths.** A child that exits non-zero, prints no `ready` or loses
+  leadership makes the run invalid; the parent kills and reaps every remaining
+  child before reporting. A no-QUIC build refuses `quic` before creating any file
+  with the service binaries' hint ("QUIC support requires building with --features
+  quic").
+- **Restart and partial progress.** Nothing is recovered: every run uses fresh
+  directories. A crash leaves a retained directory under DIRECTORY for diagnosis.
+- **Limits.** One group only: `NativeStartup` bootstraps one group, so the §3.2
+  G=4 cell needs a shared-assembly node mode (planned with N2). No recovery
+  re-open (each process sees one replica); the quorum read replaces it.
+- **Acceptance checks.** A deterministic test in the `native_benchmark` example
+  re-executes its own test binary as three node processes on a leased
+  contiguous port block, runs 100 offers at 50/s, and asserts applied = 100,
+  the read value, `window_refused=0`, the unchanged term, clean exits and counter
+  bounds that hold on any hardware (node 1 `persistence_batches` ≥ 1, `sends`
+  ≥ 1 and `received` ≥ 1 on every node, waits = immediate + ready + timeout).
+  The existing counter, directory and transfer service suites cover the move.
+  fmt, the four strict Clippy builds and matched fmt/Clippy at zero diagnostics.
+
+### N0 implemented (evidence, 19–20 October 2026)
+
+- **Move.** Commit 1 moves `HostWait`, `HOST_GATHER` and `HOST_MAX_WAIT` to
+  `src/native/readiness/host_wait.rs` (`#![forbid(unsafe_code)]`, `deny` until
+  review round 3; re-exported as
+  `voteboat::native::readiness::{HostWait, HOST_GATHER, HOST_MAX_WAIT}`). A diff
+  of the old block against the new file shows only path spellings
+  (`voteboat::` → `crate::`/`super::`), the wake argument on `new`/`with` and two
+  doc lines; the `wait` body is byte-identical. `service_setup` re-exports
+  `HostWait`; the counter, directory and transfer call sites pass
+  `service_setup::host_wake()`, the same process `Arc` as before. Commit 2 makes
+  `wait` return `HostWaitOutcome` (additive; services ignore it), with a unit
+  test for each outcome (no wall-clock assertion).
+- **Harness.** `examples/benchmark/cluster.rs` (child of `offered.rs`, reusing
+  its `Ledger`, `Offerer`, `outputs` and `percentile`). `native_benchmark.rs`
+  gains `replica_startup` (the one `NativeStartup` constructor used by
+  `open_recorded` and by node mode), `finish_open`, `OFFERED_TIMERS` (also used
+  by `shared.rs`), `join` (split out of `close`), `parse_protocol` (no-QUIC
+  hint) and peer `sends`/`received` in `PollTotals`. The single-process paths
+  behave as before (`native.py` smoke on Linux: 2,000/2,000 applied).
+- **Script.** `benchmarks/tools/cluster.py` (tracked; Python 3.9 standard
+  library). Cross-check on every measured run: |Σ per-process CPU −
+  `RUSAGE_CHILDREN` delta| = 0.0 s.
+- **Tests.** `offered::cluster::tests` in the `native_benchmark` example: TCP
+  three-process run (and QUIC under `--features quic`), argument checks, no-QUIC
+  refusal (default build). The test re-executes its own test binary as the three
+  nodes, so it never runs a stale `target/debug` executable. Mutation: removing
+  the wait-count increment fails the TCP test. Ports (round 1; replaced in round
+  2, see below): offsets 8..10 of 128-port blocks in 1024..9984 and
+  20096..32767, locked in the shared lease namespace and probe-bound until the
+  nodes start.
+- **Checks run (Linux, cores 10–15).** fmt; strict Clippy default, all-features,
+  no-default-features, native-only; matched fmt and Clippy: zero diagnostics.
+  Default features: counter_service 144, directory_service 18, startup 48,
+  transfer_service 25, native_benchmark example 52 passed. All features: 203,
+  22, 63, 33, 60 passed. `--lib readiness` 9 passed.
+- **Observed while building (not acted on).** Under QUIC the leader makes ~3.5
+  poll rounds per write against ~0.22 under TCP, almost all `Ready` wakes (see
+  baseline): sizing input for N8/N3.
+
+### N0 baseline (quiet Mac M2 Max, 20 October 2026)
+
+Binary: branch head `d0f7a7a7` (main `fdf0c002` plus this harness; the replica
+code measured is main's), release, `--all-features`. Node directories on the
+RAM disk `/Volumes/vbram`; load average below 1.0 before each cell (recorded in
+the raw file); no builds during timing; 5 runs per cell, all valid (applied =
+offers, `window_refused=0`, term 1 → 1, every child exit 0). Window 1024,
+`ready_visit_items` 1024, one group, production `HostWait`. CPU is user+sys of
+each whole node process (startup, campaign, warmup, offered phase, drain).
+Busy cores = CPU / the run's common interval (first spawn to last child exit),
+per process and in total, so the per-process figures add up to the total (round
+2 definition; the per-process figures below were recomputed from the raw lines
+as `nN_cpu / wall_s`, see "N0 review round 2"). Medians. Raw lines:
+`target/claude/research-r4/n0-baseline-d0f7a7a7.txt` (main checkout, untracked).
+
+| Cell | Rate/s | p99 ms | CPU µs/write total (n1 / n2 / n3) | Busy cores total (n1 / n2 / n3) | Rounds/write n1 / n2 / n3 | Frames sent/write n1 / n2 / n3 | n1 waits/write immediate / ready / timeout |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| TCP 1,000/s, 16,000 offers | 999 | 18.0 | 500.1 (283.5 / 108.5 / 108.2) | 0.498 (0.282 / 0.108 / 0.108) | 2.892 / 1.142 / 1.141 | 0.404 / 0.203 / 0.202 | 0.985 / 1.908 / 0.002 |
+| TCP 4,000/s, 16,000 offers | 3,989 | 17.6 | 126.4 (72.7 / 27.1 / 26.5) | 0.497 (0.286 / 0.107 / 0.104) | 0.712 / 0.277 / 0.278 | 0.099 / 0.049 / 0.049 | 0.240 / 0.473 / 0.001 |
+| TCP 15,000/s, 2,000 offers | 14,225 | 14.6 | 31.5 (16.6 / 7.6 / 7.3) | 0.365 (0.193 / 0.088 / 0.086) | 0.262 / 0.119 / 0.116 | 0.040 / 0.020 / 0.020 | 0.089 / 0.169 / 0.000 |
+| TCP 15,000/s, 16,000 offers | 14,891 | 16.7 | 24.2 (14.0 / 5.1 / 5.1) | 0.349 (0.203 / 0.074 / 0.074) | 0.218 / 0.090 / 0.092 | 0.032 / 0.016 / 0.016 | 0.075 / 0.143 / 0.000 |
+| QUIC 15,000/s, 2,000 offers | 14,431 | 10.1 | 64.6 (39.5 / 11.6 / 11.5) | 0.497 (0.304 / 0.091 / 0.086) | 3.086 / 0.360 / 0.370 | 0.044 / 0.021 / 0.024 | 0.068 / 3.007 / 0.004 |
+| QUIC 15,000/s, 16,000 offers | 14,912 | 18.9 | 55.2 (40.8 / 8.0 / 8.3) | 0.737 (0.549 / 0.102 / 0.106) | 3.489 / 0.266 / 0.288 | 0.034 / 0.017 / 0.017 | 0.061 / 3.429 / 0.001 |
+| Idle TCP 20/s, 600 offers (30 s) | 20 | 16.5 | 7,483 (3,171 / 2,184 / 2,102) | 0.149 (0.063 / 0.044 / 0.042) | 26.4 / 16.9 / 16.9 | 5.98 / 2.99 / 2.99 | 10.36 / 12.62 / 3.44 |
+| TCP 15,000/s G=4 | not run: `NativeStartup` bootstraps one group (see limits) | | | | | | |
+
+Marginal CPU per write, (CPU at 16,000 offers − CPU at 2,000) / 14,000, per
+round, then the median:
+
+| Cell | Total | n1 | n2 | n3 | Rounds (total) |
+| --- | --- | --- | --- | --- | --- |
+| TCP 15,000/s | 23.01 µs | 13.63 | 4.71 | 4.76 | 22.47, 22.69, 23.01, 27.78, 45.48 |
+| QUIC 15,000/s | 54.97 µs | 41.01 | 7.42 | 7.91 | 53.45, 54.20, 57.47, 54.97, 61.63 |
+| Secondary: single-process `native.py` (svc.sh loop, shared assembly, witness publication, its own gather loop rather than `HostWait`), same binary | 20.74 µs | — | — | — | 20.74, 21.17, 21.85, 19.51, 15.29 |
+
+Reading (for N1 sizing, not acted on here): at 1,000/s and 4,000/s the cluster
+burns the same ~0.50 busy cores, and node 1 runs ~2,900 rounds/s at every TCP
+rate (2.89 rounds/write × 1,000/s; 0.218 × 15,000/s ≈ 3,270/s), so light-load
+CPU follows rounds driven by time (1 ms offer ticks, wakes, 200 µs gathers),
+not writes. The followers each cost about a third of the leader. Under QUIC
+the leader's waits end `Ready` ~3.4 times per write: it spins on readiness.
+
+What busy cores hides (round 3): it is an average over the run's common
+interval, and at a fixed offered rate it is close to CPU per write × rate, so
+it adds little beyond the CPU column. It does not show peak concurrency (work
+moved onto extra threads at the same total CPU looks identical); it includes
+fixed startup, campaign, warmup and drain time, which dilutes the 2,000-offer
+cells (0.365 against 0.349 total at 15,000/s); and it excludes kernel work done
+outside the node processes' own context (softirq, kworker and writeback
+threads, APFS kernel threads), which `wait4` never sees. "All CPU of every
+node process" is exact; it is not all the CPU the cluster causes.
+
+### N0 review round 2 schema plan (before editing, 20 October 2026)
+
+Review: GPT-6.1-Sol round 1 on `d4da3cfa` (PR 17), four P2 findings, no P1.
+No library change; only the harness, its script and its tests change.
+
+- **Rounds (finding 1).** `cluster.py` keeps every run as (round, label,
+  offers, result). A round is valid only when every binary at every offer
+  count has a valid run in it. Marginal CPU per write and B/A ratios are formed
+  inside one round; their medians are over valid rounds; the report lists each
+  dropped round with the runs that invalidated it. Per-cell summary lines stay
+  medians over that cell's valid runs (they describe a cell; they pair nothing).
+- **Wall (finding 2).** A child's `wait4` CPU covers its whole life, so the
+  denominator must cover it too. Busy cores = CPU / the run's common interval,
+  first spawn to last child exit, per process and in total. Each child gets a
+  watcher thread that blocks in `wait4` and stamps the exit when it returns, so
+  the interval ends at the last actual exit, not when the parent has drained
+  every stream. Per-child exit stamps are printed (`nN_exit_s`).
+- **Failures (finding 3).** `run_once` always returns a result: an exit
+  before node 1's summary releases every stdin; the `--timeout` guard kills
+  what is left; spawn or harness errors are recorded. Invalid reasons name the
+  rule (`nN_exit=`, `no_summary`, `applied=`, `window_refused=`, `term=`,
+  `nN_no_counters`, `timeout`, `error=`). `finally` closes every stdin, kills
+  only children whose watcher has not reaped them (under the watcher's lock)
+  and joins every watcher, so no child outlives the run while the script is
+  alive. (Round 3: this held only while the script ran; a killed script left
+  node 1 running, see "N0 review round 3".)
+- **Ports (finding 4).** The node mode's port argument takes `BASE` (manual
+  runs, BASE+1..3) or `P1,P2,P3`. The test reserves three OS-selected ports,
+  each held for TCP and UDP (the `tests/startup.rs` acquisition), passes them as
+  `P1,P2,P3` and releases the holds just before the nodes bind. Another binder
+  can take a released ephemeral port in that moment; that node then fails to
+  open with `AddrInUse` before `ready`, and the test retries the whole cluster
+  on fresh ports (at most 8 attempts). Any other failure still fails the test.
+- **Builds (Sol's validation note).** `native_benchmark` has
+  `required-features = ["tls"]`, so a native-only build has no cluster mode;
+  `native,tls` runs TCP clusters and refuses `quic`; QUIC needs `--features
+  quic`. Stated in the usage text and the script's help.
+- **Acceptance.** A Python self-test, run by `cargo test`, that fails on the
+  round-1 pairing and passes now; fixture-node checks for exit stamps and
+  retained failures; a deterministic collision test; the cluster tests 20 times
+  in a row in all-features and in `native,tls`; fmt, four strict Clippy builds,
+  matched fmt/Clippy; startup, counter_service and the example in all-features,
+  native-only and `native,tls`.
+
+### N0 review round 2 implemented (evidence, 20 October 2026)
+
+- **Finding 1 → round-paired figures.** `rounds()` splits rounds into valid and
+  dropped (with reasons); `marginal_rows()` and the ratio lines use valid rounds
+  only and print their round numbers. Runs are keyed by label, so one binary
+  may be both A and B (round 1 merged them: found by the smoke run below). Test:
+  `benchmarks/tools/cluster_test.py` `Pairing`, Sol's reproduction (A valid
+  deltas 1 and 3 in rounds 0 and 2, B 20 and 30 in rounds 1 and 2) must give
+  `pairs=[10.000]`; on the round-1 script (`CLUSTER_PY=` the `d4da3cfa` copy)
+  it fails with `[20.0, 10.0] != [10.0]`.
+- **Finding 2 → common interval.** `wall_s` = first spawn to last exit,
+  `busy` and `nN_busy` = CPU / `wall_s`, `nN_exit_s` per child, all stated in
+  the script help and its header line. Test: fixture run asserts `wall_s` =
+  max exit stamp, every stamp in (0, `wall_s`], per-process busy summing to the
+  total. Only the denominator changed, so the baseline was recomputed from the
+  raw lines, not re-measured: totals are unchanged (they already used the
+  longest wall) and follower figures move by at most 0.003 cores (they were
+  spawned a few ms after node 1). The CPU, rate, p99, counter and marginal
+  columns are untouched.
+- **Finding 3 → retained invalid runs.** Tests: node 1 exiting 7 after `start`
+  gives `valid=no(n1_exit=7,n1_no_counters,no_summary)`, followers exit 0 on
+  EOF, the next round runs and is valid; a follower that never exits trips a
+  1 s guard and is reported `timeout,n2_exit=-9`; after each, `waitpid(-1,
+  WNOHANG)` finds no child. Real-binary check: `--ready 5000` (every node
+  refuses at once) gave two retained invalid runs and a completed report.
+- **Finding 4 → OS-selected ports.** `parse_ports` accepts `BASE` or three
+  distinct non-zero `P1,P2,P3`; `run.txt` records `ports=`. The cluster tests
+  use the reservation and retry above; `a_node_whose_port_is_taken_is_reported_
+  as_a_collision` holds node 3's port and requires the collision outcome.
+  Repeats (Linux, cores 10–15, other agents' suites running): all-features
+  20/20 runs of the 6 cluster tests passed, one run retrying once after a real
+  collision (node 1 lost a released port); `native,tls` 20/20, no retries.
+- **Checks run (Linux, cores 10–15).** Script self-test 6/6. All features:
+  startup 63, counter_service 203, native_benchmark example 62 passed.
+  `native,tls`: 48, 144, 54 passed. Native-only: startup and counter_service
+  build with 0 runnable tests (gated on `tls`); the example is refused by
+  Cargo's `requires the features: tls` gate. fmt, four strict Clippy builds,
+  matched fmt and Clippy: zero diagnostics. Smoke: `cluster.py` with the debug
+  binary as A and B, offers 50,100, 2 rounds: 8/8 valid, Σ CPU =
+  `RUSAGE_CHILDREN` delta on every run.
+- **Not re-measured.** Findings 1 and 3 change only reporting and failure
+  handling, and all 35 baseline runs were valid, so no round would drop and no
+  figure changes. Finding 2 changes only the busy-cores denominator
+  (recomputed above). Finding 4 changes the port argument's parsing, not what a
+  node does once open.
+
+### N0 review round 3 schema plan (before editing, 20 October 2026)
+
+Review: Claude Opus 5.5 round 2 on `7c2c1fdf` (PR 17), one P2 and P3s; Sol's
+four round-1 P2s confirmed resolved. No library behaviour change; the only
+library edit is `host_wait.rs` `deny(unsafe_code)` → `forbid(unsafe_code)`.
+
+- **P2: node 1 outlived a killed parent.** Node 1 checked stdin EOF only before
+  `start`; a SIGKILLed `cluster.py` (or killed test binary) left it running to
+  its phase limits (horizon + up to ~240 s) on the measuring host. Shape: the
+  existing reader thread already sets `closed` and wakes the host. `Control`
+  moves into `Host`, and `Host::armed: Option<phase>` names the node-1 phase
+  that stops on closed stdin: waiting for `start`, campaign, warmup, offering
+  and quorum read. `finish` (the final drain) and followers are not armed
+  (EOF is a follower's normal end). An armed `round()` checks after its poll
+  and returns a typed `StdinClosed { phase, rounds_to_notice }`; node 1 prints
+  `stdin_closed node=1 phase=P rounds_to_notice=K`, still drains, joins and
+  prints `node_counters`, then exits with status 4 (`STDIN_CLOSED_STATUS`;
+  any other failure stays 1). (Changed while testing, see the evidence: node
+  1 aborts its node instead of draining.) Bounded rounds without wall-clock: an armed host
+  stores its round count then loads `closed`; the reader stores `closed` then
+  loads the round count into `closed_at`; all `SeqCst`, and the host stops
+  storing once it has noticed, so the host stops at round `closed_at` or
+  `closed_at + 1` (K ≤ 1). Cost: node 1 adds one `SeqCst` store and one load
+  per round in armed phases (followers add nothing); the reader thread is
+  blocked in `read(2)` and costs nothing while idle. Measured on the quiet Mac
+  anyway (below), because it runs in the measured loop.
+- **P2, parent side.** `cluster.py` handles SIGTERM, SIGHUP and SIGINT by
+  raising `SystemExit` so `finally` closes, kills and reaps; a signal arriving
+  during that cleanup is deferred until it ends. Each event wait is capped at
+  0.5 s because a lock wait on macOS is not woken by signals. SIGKILL of the
+  parent is covered by the children: the kernel closes their stdin.
+- **P3s.** (a) Watchers wait for the exit without reaping (`waitid(WNOWAIT)` on
+  Linux; kqueue `NOTE_EXIT` on macOS, whose Python 3.9 has no `waitid`), mark
+  the child exited under the lock, then `wait4`; `kill` signals only children
+  not marked exited, so never a freed PID. (b) |Σ wait4 CPU − `RUSAGE_CHILDREN`
+  delta| > 0.01 s invalidates a run (`cpu_crosscheck=SUM:DELTA`). (c)
+  `--offers` must be distinct positive integers (`OffersError`, argparse exit
+  2); `report` refuses duplicates too. (d) Even rounds run A small, A big, B
+  small, B big; odd rounds the reverse (ABBA over consecutive rounds). (e) The
+  busy-cores caveat above. (f) `forbid`. (g) PR body qualifier for the
+  single-process comparison. (h) A shared typed hint, `QuicNotBuilt`, in
+  `src/bin/support/quic_hint.rs`, used by the three services and the
+  benchmark (no shared type existed; the text is unchanged). (i) The test's
+  `start` write no longer unwraps a taken stdin; a collision names the node
+  and its port, and exhausted retries say what is known (a node failed to
+  bind its port with `AddrInUse` before `ready`) and what is not (whether
+  another program or a node took it), keeping the last attempt's logs.
+- **Acceptance.** A Rust test closes every stdin once node 1 prints
+  `offering node=1` (15,000 offers at 50/s: a 300 s horizon) and requires
+  node 1 exit 4 with `phase=offering rounds_to_notice` ≤ 1, followers exit 0,
+  no summary and three `node_counters` lines; with the offered phase disarmed
+  it must fail. Script self-tests for (a)–(d) and SIGTERM that fail on the
+  round-2 script. fmt, four strict Clippy builds, matched fmt/Clippy; the
+  readiness, startup, counter_service and example suites in all-features and
+  `native,tls`; cluster tests 10 times in a row in both; TCP 15,000/s on the
+  quiet Mac, 5 rounds against `d0f7a7a7`.
+
+### N0 review round 3 implemented (evidence, 20 October 2026)
+
+- **P2 → node 1 stops on closed stdin.** As planned, with one change found by
+  the repeat runs: the first version drained after the stop, and 1 run in 10
+  in each configuration hit the 120 s drain limit. Cause: when the followers
+  leave while a write is in flight, it can never commit, and the node's
+  graceful drain (`begin_shutdown` → `Quiescing`) waits for every pending
+  client write. Node 1 now calls the node's `abort()` (pending writes are
+  reported unknown, workers closed), prints `node_counters` and exits 4
+  without draining; process exit ends its worker threads, and drops do not
+  join threads. A run stopped this way is abandoned (its directory is kept
+  for diagnosis). Test `node_1_stops_within_one_round_when_stdin_closes_in_the_
+  offered_phase` (TCP, 15,000 offers at 50/s, every stdin closed once node 1
+  prints `offering node=1`): node 1 exits 4 with `phase=offering
+  rounds_to_notice` ≤ 1 (1 in both retained failure logs), followers exit 0, no summary, three
+  `node_counters` lines; 30/30 solo runs after the change. Mutation: with
+  the offered phase disarmed (round-2 behaviour) node 1 ran on for 540 s
+  (horizon 300 s, then the offered drain and the final drain limits) and
+  exited 101, failing the test.
+- **P2, parent side.** Handlers for SIGTERM, SIGHUP and SIGINT raise
+  `SystemExit`; a signal during cleanup is deferred until the children are
+  reaped; event waits are capped at 0.5 s. Self-test: `cluster.py` run as a
+  process with fixture nodes whose node 1 ignores EOF; SIGTERM once all three
+  have started; the script exits 143 and every child PID is gone. On the
+  round-2 script it exits −15 and node 1 survives (the test then kills it).
+- **P3s.** (a) `wait_exited` (waitid `WNOWAIT` on Linux, kqueue `NOTE_EXIT` on
+  macOS) then mark-exited then `wait4`; self-test: `wait4` is entered only for
+  a child already marked exited, and `kill` after the exit sends no signal.
+  (b) `cpu_crosscheck`: 3 s against 99 s is invalid; within 0.005 s valid.
+  (c) `--offers 2000,2000` exits 2 with "--offers values must be distinct";
+  `report` raises `OffersError`. (d) ABBA: rounds 0 and 1 of A, B at 1000,2000
+  run A1000 A2000 B1000 B2000 then the reverse; the header says so. (e) Busy
+  cores caveat in the baseline section. (f) `#![forbid(unsafe_code)]` in
+  `host_wait.rs`. (g) PR body. (h) `QuicNotBuilt` in
+  `src/bin/support/quic_hint.rs` (cfg'd out with `quic`), used by the counter,
+  directory and transfer services and the benchmark; its `Debug` prints the
+  quoted message, so the binaries' stderr is byte-identical (`Error: "QUIC
+  support requires building with --features quic"`, checked by the services'
+  no-QUIC tests, which failed with a derived `Debug`). (i) Test messages as
+  planned. Each new self-test (5) fails on the round-2 script (`CLUSTER_PY=`).
+- **Checks run (Linux, cores 10–15, `-j 4`).** fmt; strict Clippy default,
+  all-features, no-default-features, native-only (and `native,tls`); matched
+  fmt and Clippy: zero diagnostics. Script self-test 11/11. All features:
+  `--lib readiness` 9, startup 63, counter_service 203, directory_service 22,
+  transfer_service 33, native_benchmark example 63 passed. `native,tls`: 9,
+  48, 144, 18, 25, 55 passed. Cluster tests (7) 10 runs in a row in each
+  configuration after the abort change: 10/10 and 10/10, no port retries.
+- **Instrument unchanged (quiet Mac M2 Max, 20 October 2026).** The only
+  change to what a node does once open is node 1's per-round check in armed
+  phases (one `SeqCst` store and one load; followers and the drain add
+  nothing). TCP 15,000/s, offers 2,000 and 16,000, release `--all-features`
+  builds of `d0f7a7a7` (A, the baseline binary) and `9e96f1e2` (B), RAM-disk
+  directories, 6 rounds in ABBA order (even, so the order balances), started
+  at load 0.31 / 0.96 (1 / 5 min): 24/24 runs valid, Σ CPU =
+  `RUSAGE_CHILDREN` delta on every run. B/A marginal ratio median 0.989
+  (pairs 0.984, 1.047, 0.994, 0.814, 1.011, 0.900). Marginal µs/write per
+  round, A: 23.02, 22.58, 22.46, 39.73, 43.42, 49.82; B: 22.65, 23.63, 22.32,
+  32.35, 43.88, 44.82. Rounds 0–2 reproduce the published 23.01 µs for both
+  binaries; rounds 3–5 drifted up for both alike (host noise, not the change).
+  CPU/write at 16,000 offers: A 31.7, B 28.8 (medians, drift included). An
+  earlier 5-round run started while the 5-minute load was still 2.4 after the
+  build gave B/A 0.998 and is not used. The baseline table is unchanged.
+- **Unrelated flake (not fixed here; file untouched).**
+  `shared::drain::quic_mixed_voter_and_learner_assignments_resume_together`
+  (all features), 20 solo runs on cores 10–15 with other agents' suites
+  running: 17 passed, 3 failed, each at `shared_drain.rs:304` with
+  `Unknown(LeadershipChanged)`.
+
+### N0 merge record (20 October 2026, PR 17 → main `16919c73`)
+
+Reviews: GPT-6.1-Sol request-changes round 1 (four P2s), approve rounds 2–3
+confirmation and round 4; Claude Opus 5.5 request-changes round 2 (one P2:
+node 1 outliving a killed parent), approve rounds 3 and 4. Exclusive suites on
+head `73605e48` (`target/claude/tools/suites.sh`, exclusive checkout, logs
+`target/claude/research-r4/pr17-suites/`): checks 7/7 clean; default 2,576 / 0;
+no-default 1,321 / 0; all-features 2,879 / 0 plus `representative_relay_model`
+9 / 0 run alone; native-only 1,897 / 0; matched 75 / 0.
+
+Known pre-existing flake observed during review, not touched by this PR and
+filed as a test-reliability item: `shared::drain::quic_mixed_voter_and_learner_assignments_resume_together`
+(examples/benchmark/shared_drain.rs, all-features) failed 3 of 20 solo runs on a
+loaded host with `Unknown(LeadershipChanged)`.
+
+### N0 review round 4 schema plan (before editing, 20 October 2026)
+
+Review: Claude Opus 5.5 round 3 on `b47b2538` approved with four P3s
+(GPT-6.1-Sol also approved). This round folds those P3s and changes nothing
+else: only the node stop path in `examples/benchmark/cluster.rs`,
+`cluster.py`, `cluster_test.py` and these docs. No library change.
+
+- **P3 1: the documented dead-parent exit is not the one taken.** A dead
+  parent also closes the read end of every node's stdout, so node 1's
+  `println!("stdin_closed …")` panicked (`failed printing to stdout: Broken
+  pipe`, status 101) before reaching `abort()`, and the followers panicked at
+  `node_counters` after their drain. Shape: two helpers, `say` (stdout, then
+  flush) and `note` (stderr), write through the locked stream and discard the
+  error; every node-process print uses them (a parent can die between any two
+  prints, and `println!` is equivalent when the write succeeds: one locked,
+  line-buffered write). On a `StdinClosed` stop node 1 aborts and takes its
+  counters before any output. The node-child test exits 0 after a successful
+  run, as the binary's `main` does, so libtest's closing report cannot fail
+  on a closed stdout. Acceptance: a new test in which each test-side reader
+  closes its read end (followers after `ready`, node 1 after `offering
+  node=1`) before any stdin is closed requires statuses [4, 0, 0] and no
+  `panicked` in any log; it must fail with `println!`.
+- **P3 2: the SIGTERM self-test could signal a reused PID.** It probed and
+  killed fixture PIDs after `cluster.py` had reaped them. Shape: no PID is
+  read or signalled. Every fixture holds the write end of a FIFO (`alive`)
+  until it exits; once `cluster.py` has exited (so has reaped every child),
+  EOF on the test's non-blocking read end means no fixture survives. A node 1
+  that survives a failure blocks reading a second FIFO (`leash`) whose only
+  writer is the test, and exits when the test closes it. Audit: every other
+  `kill` signals the caller's own unreaped child (`Popen.kill`/`send_signal`
+  on the script; `Cluster.kill` under the lock, not marked exited).
+- **P3 4: two narrow signal windows in `cluster.py`.** A signal between
+  `Popen` returning and registration, or between entering `finally` and
+  raising the cleanup depth, skipped part of the cleanup. Shape: the depth is
+  raised before the run's `try` (before the first spawn) and lowered after
+  the cleanup, so during a run a signal is only recorded; the run loop checks
+  for it at each event wait (at most 0.5 s) and breaks, the cleanup runs, and
+  the signal is raised as `SystemExit(128 + signal)`. Acceptance: a test
+  calls the handler between `Popen` and registration and requires
+  `SystemExit(143)` with no unreaped child; it must fail on the round-3
+  script.
+- **P3 3: docs.** `forbid(unsafe_code)` where the docs said `deny`; the
+  baseline's single-process row carries the wait-loop qualifier.
+- **Baseline unchanged.** The stop path runs only after a run is already
+  invalid (stdin closed before the summary), and the other prints write the
+  same bytes through the same locked, line-buffered stdout, a constant few
+  per run (none in the offered phase), which a marginal per write cancels.
+- **Checks.** fmt, four strict Clippy configurations (and `native,tls`),
+  matched fmt/Clippy; readiness, startup, counter_service, directory and
+  transfer services and the example suite in all-features and `native,tls`;
+  script self-test; cluster tests 10 times in a row in each; SIGTERM, SIGHUP,
+  SIGINT and SIGKILL of a live `cluster.py` with exit codes recorded.
+
+### N0 review round 4 implemented (evidence, 20 October 2026)
+
+- **P3 1 → nodes take the documented exits when the parent is gone.** As
+  planned. Test `every_node_takes_its_documented_exit_when_the_parent_is_gone`
+  (TCP, 15,000 offers at 50/s): statuses [4, 0, 0], node 1's log says `stdin
+  closed during offering … after 1 further poll round(s)`, no `panicked` in
+  any log. Mutation: with `say`/`note` as `print!`/`eprint!` the statuses are
+  [101, 101, 101] and every log has `failed printing to stdout: Broken pipe`
+  (Opus's reproduction). The stdin-only test is unchanged and passes.
+- **P3 2 → no PID is probed or signalled by the SIGTERM self-test.** As
+  planned (FIFOs `alive` and `leash`). Against the round-2 script (which
+  exits −15 and leaves node 1 running) the survivor check fires (`children
+  outlived cluster.py`, asserted first in a scratch copy) and closing the
+  leash ends the survivor: no fixture process remains.
+- **P3 4 → signals are deferred for the whole run.** As planned. The new
+  self-test fails on the round-3 script (`a child was left unreaped`) and
+  passes here. Cost: a signal now takes effect at the run loop's next wait,
+  within 0.5 s (live: 0.46–0.51 s), instead of at once.
+- **P3 3.** As planned.
+- **Checks run (Linux, cores 10–15, `-j 4`).** fmt; strict Clippy default,
+  all-features, no-default-features, native-only and `native,tls`; matched
+  fmt and Clippy: zero diagnostics. Script self-test 12/12; on the round-3
+  script 1 fails (the new spawn-window test), on the round-2 script 4 fail and
+  2 error. All features: `--lib readiness` 9, startup 63, counter_service
+  203, directory_service 22, transfer_service 33, native_benchmark example
+  64 passed. `native,tls`: 9, 48, 144, 18, 25, 56 passed. Cluster tests (8),
+  10 runs in a row in each configuration: 10/10 and 10/10, no port retries,
+  no node process left after any run.
+- **Live parent death (debug `--all-features` binary, `cluster.py` at TCP
+  15,000 offers and 50/s, signalled once `node1.err` shows `phase=offering`;
+  the driver is a child subreaper, so a node that outlives `cluster.py`
+  becomes its child and its status is recorded).** SIGTERM, SIGHUP, SIGINT:
+  `cluster.py` exits 143, 129, 130, and no node outlives it. SIGKILL, 3 runs:
+  the orphaned nodes exit [4, 0, 0] every time, all within 0.002–0.052 s,
+  node 1's log ends `Error: stdin closed during offering … after 1 further
+  poll round(s)`, and no log contains `panicked`.
+- **Baseline unchanged**, for the reason in the plan; not re-measured.
+
+## Lifetime bounds track (opened 19 October 2026)
+
+User rule (19 October 2026): this is infrastructure, so failing after X time,
+connections or messages is a defect; "fixed by restart" does not count; a bound
+is acceptable only with recorded arithmetic that it survives 100 years at the
+maximum sustainable rate. Design: `target/claude/research-lv/architect-plan-lifetime-bounds.md`
+(contract §1, slices §3) and the audit `target/claude/research-lv/lifetime-audit.md`
+(main checkout, untracked). The design pack is unchanged.
+
+### Macro plan (this track)
+
+| Milestone | User-visible outcome | Acceptance |
+| --- | --- | --- |
+| LB Infrastructure runs indefinitely | The three service binaries and every library embedding run for unbounded uptime at any sustained rate. Every retained structure has a replicated reclaim rule, a recorded widening proof, or a typed fail-closed refusal with a non-lossy, non-hanging recovery path. No transport or listener event is node-fatal | Every P1/P2 audit row closed by a slice with a fail@main exhaustion test and a simulated-time soak; an inventory table maps each audit row to its slice and test; LBZ cross-binary soak |
+
+### Mini plan
+
+| Deliverable | Purpose | Dependencies | Completion checks | Advances |
+| --- | --- | --- | --- | --- |
+| Done NT1: connection generations and listener (merged 19 October 2026 in PR 13) | Audit N1, N3, N6, P3-6 and the P3-16 discovery form: survivors no longer enter recovery after ~27.8 h with one peer down, and a port scan or fd spike cannot kill a node | — (ST2 runs in parallel and also edits `native/startup.rs`, in a different function; a rebase reconciles) | Q2 probe written up; native soak of more than 10,000 connect attempts fails on the base and passes; restart uniqueness; injected accept errors; two-node native reconnect past the old boundary; listener health and exhaustion reach `NodeObservation`, Pressure events and `metrics`; no counter class node-fatal; fmt, four strict Clippy configurations and matched fmt/Clippy; transport, peers, connect, startup, runtime-peer, logical_voter_native and counter_service suites in default and all-features | LB |
+| Current NT2: roster, budget and cache reclaim | Audit N2, RT3, N4, N5: re-provisioning a node or churning members never kills survivors; also the NT1 leftover: a test for the completion-branch `generations_exhausted` flag at `runtime/peers.rs` (reviewer P3 on PR 13) | NT1 (same files) | U6 probe as fail@main; churn soak; completion-branch flag test | LB |
+| Then DR1: Counter session ledger | Audit S1, RT2 for Counter through the generic `SessionLedger` | ST2 merged | 200,000-write soak fails on the base; restart and exactly-once tests | LB |
+
+### Inventory (rows owned by NT1, and the leftovers it hands on)
+
+Dispositions per plan §1.2: W = widened with recorded arithmetic (100 years at
+the maximum rate), F = fail closed per connection or lookup, never node-fatal.
+LBZ completes this table for every audit row.
+
+| Row | Site | Disposition | Slice | Evidence |
+| --- | --- | --- | --- | --- |
+| N1 | `native/startup.rs` per-process range; `transport/peers.rs` `due_connections` | W: u64 per store session; ≥ 8,900 years at 65,536 peers × 1 ms; spent space issues no ticket and no error | NT1 | native soak, restart replay, roster soak, `spent_generation_space_issues_no_ticket_and_no_error` |
+| N1 (round 2) | `transport/peers.rs` `due_connections` deadline `now + connect_timeout_ms` | W: no ticket and no error, reported by `generations_exhausted()`; 2^64 ms ≈ 5.8 × 10^8 years of uptime | NT1 | `an_attempt_deadline_past_the_clock_issues_no_ticket_and_no_error` |
+| N3 | `native/connect.rs` `accept()` | F per connection or bounded backoff (10 ms to 1 s); counts and pause surfaced in `NodeObservation`, Pressure and `metrics`; counters saturate (diagnostic, ≥ 58,000 years at 10^7/s) | NT1 | `accept_tests`, `injected_emfile_reaches_counters_events_and_connector_status` |
+| N6 | `native/remote_discovery/reconnect.rs` | W: ≥ 584 million years at the 1 ms retry | NT1 | `retry_continues_past_the_old_reserved_range` |
+| P3-6 | `runtime/peers.rs` `routes_generation` | Removed (no counter) | NT1 | existing reconciliation tests |
+| P3-16 (discovery source) | `bin/support/peer_discovery.rs` generations and attempt deadline | F per lookup (`DiscoveryError::Exhausted`): on a dial `submit` (round 3) and on a waiting lookup the peer driver counts a connection failure, the roster backs off and `generations_exhausted` reports it; not node-fatal. W: ≈ 5.8 × 10^7 years at 10^4 handshakes/s | NT1 | `a_spent_source_refuses_lookups_without_failing_the_node` (source); `an_exhausted_discovery_source_fails_the_dial_without_failing_the_node` (real native node and driver) |
+| P3-16 (other sites) | counter, directory and transfer client-session sequences | W: ≥ 5.8 × 10^9 years (plan Q12) | LBZ | recorded at inventory close |
+| Q8a | certificate `notAfter` on loaded operator material | Warn at a quarter of the remaining validity; recovery stays credential reload | NT4 | planned |
+| Q8b | TCP half-open session after a remote `kill -9` | Measure detection time and bound it (keepalive or idle expiry) | NT4 | planned |
+
+**NT4 (new, after NT3): certificate validity warning and half-open
+measurement.** Purpose: the two Q8 leftovers from NT1, so a node never fails
+silently on an expiring credential or a peer that vanished without a FIN.
+Dependencies: NT1 (connection status reporting), NT3 (principal rebind). Checks:
+a simulated-time test of the quarter-validity warning reaching `metrics`, and a
+recorded half-open measurement with its bound. Advances LB.
+
+### NT1 schema plan (before editing, 19 October 2026)
+
+**Q2 probe (option A or B).** Every `SecureSessionGeneration` consumer was read:
+- Wire: the TLS hello (`native/tls.rs` `encode_hello`) carries node, store and
+  store session but **no generation**, so a peer never learns our generation.
+  The relay frame codec (`relay/network/frame/codec/fields.rs` `session()`)
+  carries the u64 generation **together with both full `StoreBinding`s**
+  (identity, incarnation, store session), so its key is already
+  `(session, generation)`.
+- Ordered comparisons: `native/connect.rs:260`, `native/dial.rs:158`,
+  `native/quic_connect.rs:191` require a strictly increasing generation per
+  peer inside one connector object, which lives for one process (one store
+  session) and starts at 0. `remote_discovery/client.rs:113` and
+  `remote_manifest/client.rs:131` compare `binding.local` (which includes the
+  store session) before the generation. `transport/peers.rs` `attach` requires
+  `b.local == self.local` and an exact ticket.
+- Persistence: none. The `logical_voter` origin codec persists storage-worker
+  and client-router generations, not `SecureSessionGeneration`.
+
+Nothing compares generations across store sessions, and nothing stores one in a
+field narrower than u64. **Option A**: no wire or format change.
+
+**N1 data/API shape.**
+- `PeerRosterConfig` drops `last_generation`. `first_generation` stays as the
+  start of the roster's sequence (1 for a fresh session; a replacement roster in
+  the same session starts at `reclaim_generation()`). The roster issues
+  `first ..= u64::MAX`.
+- `native/startup.rs` stops deriving `session * 10000 .. +9999`; it passes
+  `first_generation = 1`. The domain is the store session.
+- At `u64::MAX` the roster issues no ticket: `due_connections` returns an empty
+  list (not `Err(Exhausted)`), `next_deadline` stays silent for due peers, and
+  `generations_exhausted()` reports it. The driver therefore never maps it to
+  `NodeError::Peer`. Other peers' existing transports keep working.
+- **Uniqueness across restart.** `StoreSession` is persisted in the WAL manifest
+  and incremented by one at every recovery before service starts
+  (`native/log_store.rs:243-250`). Every ticket and binding embeds
+  `local.store.session`, so `(session, generation)` never repeats even though
+  each session restarts at generation 1. Test: two opens of the same store show
+  a strictly larger session and that no `ConnectTicket` or `SessionBinding`
+  of the first session equals one of the second; a stale first-session ticket
+  is refused by the second roster.
+- **Arithmetic.** Roster limits allow at most 65,536 peers and
+  `retry_min_ms >= 1`. Take one attempt per peer per 10 ms across 65,536 peers:
+  6.55 × 10^6 attempts/s; 2^64 / 6.55 × 10^6 = 2.8 × 10^12 s ≈ 89,000 years.
+  Even at the configuration floor (one attempt per peer per 1 ms) it is
+  ≈ 8,900 years, and at 10^7 attempts/s (beyond any host's TLS rate) ≈ 58,000
+  years. The default configuration (1,024 peers, 100 ms minimum retry) gives
+  2^64 / 10,240 ≈ 5.7 × 10^7 years.
+
+**N6.** `SourceReconnectConfig` drops `first_generation` and `last_generation`.
+The reconnecting discovery issues `binding.generation + 1 ..= u64::MAX` from the
+current source session (the same domain rule: generations are scoped by
+`binding.local.store.session`). Exhaustion after 2^64 attempts (`retry_ms >= 1`:
+≥ 584 million years) keeps the existing typed `SourceReconnectStatus::Exhausted`.
+
+**N3 listener.** A pure `classify_accept(&io::Error) -> AcceptAction`:
+- `Idle`: `WouldBlock` (unchanged idle-phase skip).
+- `Retry` (skip this connection, keep accepting within the call budget):
+  `EINTR`, `ECONNABORTED`, `ECONNRESET`, `EPERM`, `ETIMEDOUT`, and the Linux
+  pending-network errors `accept(2)` says to treat like `EAGAIN` (`EPROTO`,
+  `ENETDOWN`, `ENOPROTOOPT`, `EHOSTDOWN`, `ENONET`, `EHOSTUNREACH`,
+  `EOPNOTSUPP`, `ENETUNREACH`).
+- `Backoff`: `EMFILE`, `ENFILE`, `ENOBUFS`, `ENOMEM` and any unrecognised error.
+  The connector stops accepting until `now + delay`, delay doubling from 10 ms
+  to 1,000 ms, reset by the next successful accept or `WouldBlock`. While
+  backing off, the listener fd is left out of `readiness_fds` (so a readable
+  backlog cannot spin the host) and `next_deadline` includes the retry time.
+- `Fatal` (listener gone or misused; a bug, not an environmental event):
+  `EBADF`, `EINVAL`, `ENOTSOCK`, `EFAULT`. Unchanged `ConnectError::Io`.
+- Observability: `NativePeerConnector::accept_status()` returns
+  `AcceptStatus { transient_errors, last_error, last_os_error, retry_at }`
+  (`transient_errors` saturates: diagnostic only, 58,000 years at 10^7/s).
+  Round 2 adds `backoffs`, moves the type to `crate::connect` and surfaces it
+  to operators (see the round 2 plan below).
+- Test seam: a `#[cfg(test)]` queue of injected `io::Error`s consulted before
+  `listener.accept()`; release builds are unchanged.
+
+**Silent-stuck P3 forms.**
+- P3-6 (`runtime/peers.rs:461,544` `routes_generation += 1`): the counter only
+  invalidates the cached "steady" reconciliation. Replace it with clearing that
+  cache (`steady = None`) wherever `admission_routes` changes; no counter
+  remains, so nothing can overflow.
+- P3-16 (`bin/support/peer_discovery.rs:113-117` `unwrap_or(0)`): the next
+  generation becomes `Option<SecureSessionGeneration>`; when it is spent,
+  `poll_discovery` returns a typed `DiscoveryError::Exhausted` (new,
+  non-retryable) instead of silently stopping. Corrected in round 2: that error
+  was node-fatal, so `resolve` now returns it per lookup instead; and the floor
+  is not a 100 ms retry, because after an attach and a failure there is no
+  delay, so it is one TCP+TLS handshake per attempt (≈ 5.8 × 10^7 years at
+  10^4 handshakes/s).
+
+**Ownership, failure and cleanup.** No new owner or thread. Accept backoff is
+volatile connector state; close/drain semantics are unchanged (the backoff
+deadline is not reported once closed). No durable state changes.
+
+**Acceptance checks.**
+1. Native soak (`tests/startup/connection_generations.rs`): one store opened
+   through `NativeStartup`, its only peer down, simulated time stepping past
+   the 10 s connect timeout and 10 s retry cap; 12,000 attempts with the node
+   `Running` after every poll. Recorded as failing on the base.
+2. Restart uniqueness (same file).
+3. Two-node native reconnect over the TR1b port pool after 10,001 attempts.
+4. Roster unit soak (`tests/peers.rs`): 1,000,000 failed attempts across three
+   peers plus a fourth peer flapping every simulated minute for 30 simulated
+   days; generations strictly increasing; exhaustion at `u64::MAX` issues no
+   ticket and no error.
+5. Injected accept errors of every class (`native/connect.rs` unit tests);
+   classifier table test.
+6. Discovery source exhaustion is typed; routes-generation counter removed.
+
+### NT1 implemented (evidence, 19 October 2026)
+
+Base: `origin/main` 345054e5 (3d552e2e plus TR4). Audit rows closed: N1, N3,
+N6, P3-6, and the P3-16 discovery-source form. Option A (Q2): no wire or
+storage format change.
+
+**Fail@main, recorded on the base** (new tests compiled against unmodified
+`src/`; log `target/nt1-logs/base-startup-cg.log`, deleted with `target/`):
+- `native_node_survives_more_connect_attempts_than_the_old_per_process_range`
+  and `native_pair_reconnects_with_a_generation_past_the_old_range` both panic
+  with `node left service after 10000 attempts (last generation Some(19999)):
+  Peer(Roster(Exhausted))`: store session 1 owned `10000 ..= 19999`, attempt
+  10,001 failed the roster, the driver failed and the node entered recovery.
+- `connect_generations_are_unique_across_store_session_restarts` fails on its
+  new-design assertion only (`left: 10000, right: 20000`): on the base,
+  restarts used disjoint ranges; its uniqueness checks passed there too.
+
+**After** (same tests, this branch; simulated time, no wall-clock in the soaks):
+- The native soak opens one store through `NativeStartup`, its only peer down,
+  and steps simulated time in 10 s increments (connect timeout and retry cap):
+  12,000 attempts, about 2.8 simulated days, the node `Running` after every poll,
+  generations 1 ..= 12,000 strictly increasing.
+- Restart uniqueness: three opens of one store give sessions 1 < 2 < 3; each
+  restarts at generation 1; all 150 `(session, generation)` pairs and tickets
+  are distinct; no first-session ticket equals a later one.
+- Two native nodes over the TR1b port pool: 10,002 accept attempts on the
+  accepting node, then the stopped peer starts and a real TCP/TLS session is
+  attached with a generation above 10,000; the accepting node is elected and
+  both apply the committed entry.
+- Roster soak (`tests/peers.rs`): 1,000,000 failed attempts across three peers
+  plus a fourth peer connected for a simulated minute and dropped, repeatedly,
+  for 30 simulated days (about 38,200 flaps at the 7.8 s backoff cap): every
+  ticket's generation is the previous plus one, nothing grows, no error. 0.75 s.
+- `spent_generation_space_issues_no_ticket_and_no_error`: from `u64::MAX`, one
+  ticket is issued, then `due_connections` returns `Ok([])`, the transport still
+  attaches and `generations_exhausted()` is set.
+- Listener (`native/connect.rs` unit tests, injected `io::Error`s): the
+  classifier table; `ECONNABORTED`, `EINTR`, `EPROTO`, `ECONNRESET` in one poll
+  leave the listener accepting a real connection afterwards (on the base the
+  first `ECONNABORTED` returned `ConnectError::Io`, which `runtime/peers.rs`
+  turned into node recovery); `EMFILE`/`ENFILE`/`ENOBUFS` back off 10, 20, 40 ms
+  and so on to 1 s, keep the listener out of the wait set, report the retry
+  time in `next_deadline`, then accept a real connection and reset the delay;
+  `EBADF` is still reported as `ConnectError::Io`.
+- N6: `retry_continues_past_the_old_reserved_range` (10,002 reconnect attempts,
+  generations 2 ..= 10,003, still backing off) and
+  `spent_generation_space_reports_exhausted_without_a_deadline`.
+- P3-16: `source_generations_end_in_a_typed_refusal_not_a_silent_stop`
+  (`voteboat-counter` unit test).
+
+**Design differences from the architect plan.**
+- `PeerRosterConfig` keeps `first_generation` (drops only `last_generation`):
+  the drained-roster handoff (`reclaim_generation`) needs a start point, and the
+  exhaustion test needs to start near `u64::MAX`.
+- A spent generation space is reported by `generations_exhausted()` instead of
+  a new `PeerState::Exhausted`: the roster's sequence is shared by all peers, and
+  the observable effect (no further attempt, no error) is the same.
+- P3-6: instead of `checked_add`, the `routes_generation` counter is removed;
+  replacing the route plan clears the cached steady reconciliation directly, so
+  nothing remains that can overflow.
+- `SourceReconnectConfig` drops both generation fields and derives its start
+  from the current source binding.
+- New read-only accessors for status: `NativePeerConnector::accept_status`,
+  `NativeServiceConnector::accept_status`, `RotatingPeerConnector::inner` and
+  `PeerDriver::connector`.
+
+**Public API changes.** `PeerRosterConfig::last_generation` removed;
+`PeerRoster::generations_exhausted` added; `due_connections` no longer returns
+`Exhausted` for a spent space; `SourceReconnectConfig::{first,last}_generation`
+removed; `DiscoveryError::Exhausted` added; `AcceptAction`, `classify_accept`
+and `AcceptStatus` added. No format change; no migration.
+
+**Pack amendment (§1.7, ch05 "Peer transport").** The pack does not specify a
+generation range (only this repository's PEER_ROSTER, NODE, DISCOVERY, DIALING,
+PEER_DRIVER, PEER_MEMBERSHIP and QUIC_TRANSPORT notes did; all updated).
+Realised here: connect generations are full-width per store session; listener
+errors are per-connection; a transport event is never node-fatal except a
+listener that is gone. The pack is unchanged.
+
+**CPU per write.** Static changed-file list on the poll path:
+`transport/peers.rs` (`next_deadline_filtered` compares `sequence` with
+`u64::MAX` instead of a stored bound), `runtime/peers.rs` (one integer compare
+removed from the steady check), `native/connect.rs` (one `Option` test before
+each accept phase; one filter in `readiness_fds`). Nothing runs per write. The
+matched framework links none of these (no roster, driver, connector or node in
+`benchmarks/matched/src`), so framework cells are unaffected by construction.
+Native durable A/B pairs (`svc.sh`/`nat.sh`) run on the remote Mac and were not
+run under this task's host rules (Linux cores 0-3 only).
+
+**Validation (this branch, Linux, cores 0-3, each binary run directly and
+sequentially).** `cargo +stable fmt --all -- --check`; strict Clippy default,
+all-features, no-default-features and native-only; matched fmt and Clippy: zero
+diagnostics. `node validation/check-inventory.mjs` passes. All-features: lib 485,
+`voteboat-counter` 53, transport 37, peers 20, connect 21, dial 6, discovery 9,
+remote_discovery 29, startup 63, effect_owner 210, peer_rotation 7,
+quic_connect 15, striped_node 2, native_member_startup 50, learners 24,
+member_recovery 44, logical_voter_native 42, counter_service 203, routed 192,
+logical_nested_native 15, logical_activation_nested 17: all pass. Default
+features: lib 483, `voteboat-counter` 50, transport 37, peers 20, connect 21,
+dial 6, discovery 9, remote_discovery 29, startup 48, effect_owner 210,
+peer_rotation 5, striped_node 1, learners 23, member_recovery 43,
+logical_voter_native 25, counter_service 144: all pass. Mutation check: putting
+back the base rule (any accept error but `WouldBlock`/`EINTR` is fatal) fails 3
+of the 5 listener tests.
+
+**Q8 record (certificate validity).** The three service binaries generate no
+certificates: they load operator-supplied DER material, so `notAfter` is the
+operator's choice, and the existing credential reload (`credential_worker`,
+peer rotation) replaces it without data loss. The test fixtures
+(`tests/fixtures/tls`, `tests/fixtures/four-node-tls`) are valid from
+2020-01-01 to 2050-01-01 (checked with `openssl x509 -enddate`). A handshake
+failure after expiry stays a per-peer connect failure, which after this slice no
+longer exhausts anything. Still open (not in NT1; owned by NT4 in the
+inventory): a warning at a quarter of the remaining validity, and the TCP
+half-open measurement after a remote `kill -9`.
+
+### NT1 round 2 schema plan (before editing, 19 October 2026)
+
+Reviews of bdd204e7: Sol approved with two P3s; Opus requested changes (one P2,
+ten P3s). Each finding maps to one change below.
+
+**Listener health reaches the operator (Opus P2).** No silent stuck state.
+- Data: `AcceptStatus` moves to `crate::connect` (re-exported from
+  `native::connect`) and gains `backoffs: u64` (saturating count of backoffs
+  entered). `PeerConnector::accept_status(&self) -> Option<AcceptStatus>`,
+  default `None`; the native TCP connector returns `Some`, and every wrapper
+  (`DiscoveryConnector`, `RotatingPeerConnector`, all `NativeServiceConnector`
+  variants including `Discovered`) delegates to its inner connector.
+- Transitions: the peer driver remembers the last cumulative error and backoff
+  counts and reports the per-poll increase in `PeerDriverProgress`
+  (`accept_errors`, `accept_backoffs`), plus the current `accept_paused` and
+  roster `generations_exhausted` flags. A count that goes down (a different
+  inner connector) counts from zero again.
+- Output: `NodeCounters` gains the two counts (summed); `NodeObservation` and
+  `CounterSnapshot` gain `network: NetworkHealth { accept_paused,
+  generations_exhausted }` (latest sample). `EventKind::Pressure` gains the two
+  counts and the exhaustion flag; the reporter emits Pressure when a count is
+  nonzero or when exhaustion is first seen (not on every poll, so it cannot
+  flood the bounded event ring). The binary's `metrics` reply adds the counts
+  and flags, and its peer section reads the live connector status directly.
+- Failure/cleanup: read-only; no new owner, allocation per poll or authority.
+- Check: an injected `EMFILE` in a real native connector wrapped as
+  `Discovered` is visible through `accept_status`; a driver whose connector
+  reports it produces the progress counts, a Pressure event and the metrics
+  fields.
+
+**No counter class is node-fatal (Opus 2, 9).**
+- Discovery source: a spent generation space, or an attempt deadline past
+  `u64::MAX` ms, starts no attempt and returns `Ok` from `poll_discovery`;
+  `resolve` returns the typed, non-retryable `DiscoveryError::Exhausted`, which
+  the discovery connector turns into a per-attempt `ConnectError::Discovery`
+  failure. Round 2 made only the waiting-lookup path per attempt: a dial's
+  `submit` resolves synchronously, and the driver still treated that rejection
+  as node-fatal. Round 3 (below) makes both paths count a connection failure
+  while the roster backs off. Not pending, no
+  deadline, so no busy loop. Floor correction: after an attach and a failure
+  there is no delay, so one attempt per TCP+TLS handshake; at 10^4/s,
+  2^64 attempts take ≈ 5.8 × 10^7 years.
+- Roster: `due_connections` returns `Ok([])` instead of `Err(Exhausted)` when
+  `now + connect_timeout_ms` overflows; `generations_exhausted()` also covers
+  that case, so `next_deadline` stays quiet. Reached only after ≈ 5.8 × 10^8
+  years of millisecond uptime.
+
+**Accept classifier (Opus 8).** `ENOSR`, `ESOCKTNOSUPPORT`, `EPROTONOSUPPORT`
+move to Retry (Linux `accept(2)` lists them as per-connection errors).
+
+**Tests (Opus 4, 5, 6; Sol 2).**
+- The native soak's `run_until` is bounded by `3 × count` polls.
+- No wall-clock assertion remains in `tests/startup/connection_generations.rs`:
+  the pair test steps protocol time by 1 ms per round (bounded in protocol
+  time), and worker joins use a 600 s real-time hang guard that only turns a
+  deadlock into a failure.
+- Replacement rosters in `logical_nested_native` and `logical_activation_nested`
+  close the predecessor and start at its `reclaim_generation()`.
+- Replay: old-session tickets and completions (equal and higher numeric
+  generation) are refused by a recovered roster (`tests/peers.rs`) and a
+  recovered connector (`native/connect.rs`); stale relay captures by a
+  recovered helper's path check (`native/relay/network/plan`); and the startup
+  test covers interrupted recovery: a crash after the session write (the next
+  open skips that session) and a crash before it (the same unexposed number is
+  proposed again, and the abandoned attempt exposed nothing).
+
+**Docs (Opus 3, 7, 10; Sol 1).** CONNECTIONS and PEER_DRIVER describe the
+serialized drained handoff instead of disjoint ranges; DIALING states
+uniqueness per owner lineage with full-binding equality; PEER_ROSTER leads with
+the worst case (≈ 8,900 years at the 1 ms floor); the `AcceptStatus` field list
+is complete; the Q8 leftovers get an owning slice (NT4) in an inventory table.
+
+### NT1 round 2 implemented (evidence, 19 October 2026)
+
+| Finding | Change | Test |
+| --- | --- | --- |
+| Opus P2 listener health never surfaced | `PeerConnector::accept_status` (delegated by every wrapper, including `Discovered`); driver progress `accept_errors`, `accept_backoffs`, `accept_paused`, `generations_exhausted`; `NodeCounters`, `NetworkHealth`, `EventKind::Pressure`; `metrics` prints them and the live `peer_accept_*` fields | `native::connect::health_tests::injected_emfile_reaches_counters_events_and_connector_status` (real native node, `Discovered` connector, simulated time); `reporter_emits_listener_pressure_and_reports_exhaustion_once`; `listener_pressure_reaches_metrics_and_events`; `peer_metrics` maximum-reply test |
+| Opus 2 discovery source `Exhausted` node-fatal | `begin` takes no generation and returns nothing; `resolve` returns `Exhausted` per lookup once the source cannot reconnect; not pending, no deadline | `a_spent_source_refuses_lookups_without_failing_the_node` (spent space and clock limit, plus a fresh-source control); `source_attempts_end_at_the_generation_space_and_the_clock` |
+| Opus 9 roster deadline overflow node-fatal | `due_connections` returns `Ok([])`; `generations_exhausted()` covers it | `an_attempt_deadline_past_the_clock_issues_no_ticket_and_no_error`; the existing `construction_exhaustion_and_rejection_preserve_resources` asserted the old `Err(Exhausted)` at `MonoTime(u64::MAX)` and now asserts `Ok([])` plus the flag |
+| Opus 8 three more errnos | `ENOSR`, `ESOCKTNOSUPPORT`, `EPROTONOSUPPORT` → Retry | classifier table |
+| Opus 4 soak could hang | `run_until` fails after `3 × count` polls without a new expiry | the three connection-generation tests |
+| Opus 5 wall-clock limits | Pair test steps 1 ms of protocol time per round (60 s protocol liveness bound); worker joins use a 600 s hang guard only | same |
+| Opus 6 replacement rosters at 1 | `close()` then `reclaim_generation()` in `logical_nested_native` and `logical_activation_nested` | both binaries, both feature sets |
+| Sol 2 replay and interrupted recovery | Live recovered roster refuses old tickets with equal (1) and higher (50,000) generations; crash after the session write skips that session; crash before it (`JournalIo` whose publication fails) exposes nothing and the next open reuses the unexposed number | `connect_generations_are_unique_across_store_session_restarts`; `a_recovered_roster_refuses_tickets_and_completions_of_the_previous_session`; `a_recovered_connector_refuses_tickets_of_the_previous_session`; `a_recovered_helper_refuses_captures_of_its_previous_session` |
+| Docs (Opus 3, 7, 10; Sol 1) | CONNECTIONS, PEER_DRIVER, DIALING, PEER_ROSTER, the `AcceptStatus` list and the source floor corrected; inventory table with NT4 | `node validation/check-inventory.mjs` |
+
+Mutation check: making `NativeServiceConnector::accept_status` return `None`
+for `Discovered` again fails the end-to-end test (`accept_errors` and
+`accept_backoffs` stay `(0, 0)`); restored before commit.
+
+**Public API changes (round 2).** `AcceptStatus` moves to `crate::connect`
+(still re-exported from `native::connect`) and gains `backoffs`;
+`PeerConnector::accept_status` added with a `None` default; the inherent
+`NativePeerConnector::accept_status`, `NativeServiceConnector::accept_status`
+and `RotatingPeerConnector::inner` are replaced by the trait method;
+`PeerDriverProgress`, `NodeCounters`, `NodeObservation`, `CounterSnapshot`
+and `EventKind::Pressure` gain fields; `NetworkHealth` added;
+`generations_exhausted()` also covers the deadline overflow. No format change;
+no migration. CPU: per poll, one `accept_status` copy and two subtractions in
+the driver; nothing per write.
+
+**Validation (Linux, cores 0-3, nice 19, `-j 2`, each binary run directly and
+sequentially).** fmt; strict Clippy default, all-features, no-default-features
+and native-only; matched fmt and Clippy: zero diagnostics.
+`validation/check-inventory.mjs` passes. All-features: lib 488 (1 ignored),
+`voteboat-counter` 55, transport 37, peers 22, connect 21, dial 6, discovery 9,
+observability 11, remote_discovery 29, startup 63, effect_owner 210,
+logical_voter_native 42, logical_nested_native 15, logical_activation_nested 17,
+counter_service 203. Default features: lib 486 (1 ignored), `voteboat-counter`
+52, transport 37, peers 22, connect 21, dial 6, discovery 9, observability 11,
+remote_discovery 29, startup 48, effect_owner 210, logical_voter_native 25,
+logical_nested_native 13, logical_activation_nested 11, counter_service 144.
+All pass. Not run: macOS (the classifier's errno constants come from `libc`
+for both targets), native durable A/B (no write-path change).
+
+### NT1 round 3 schema plan (before editing, 19 October 2026)
+
+Both round-2 reviews approved with one P3 in common: a discovery source's
+`DiscoveryError::Exhausted` was still node-fatal on the dial path. Opus also
+asked for listener health in the directory and transfer `status` replies, and
+for one definition of "paused".
+
+- Data/API: `PeerDriver` keeps `discovery_exhausted: bool`.
+  `PeerDriverProgress::generations_exhausted` becomes "roster generations
+  spent, or a discovery source refused a lookup as `Exhausted`".
+  New read-only accessors `PeerDriver::accept_paused()` and
+  `PeerDriver::generations_exhausted()` return what the last poll reported.
+  `AcceptStatus::paused(now)` is the single pause definition
+  (`retry_at` set and `now < retry_at`).
+- Transitions: on a `submit` rejection, `connect_failed` already ran. A reason
+  of `Discovery(Exhausted)` is now counted in `connection_failures` like a
+  retryable discovery error, and sets the flag. An `Err` completion with that
+  reason also sets it. The flag never clears within a driver, because the
+  source's counter never resets within its session.
+- Ownership and cleanup: no new owner or allocation. The flag is not carried
+  through recovery handoff; a new driver sets it again on its first refusal.
+- Output: a shared `bin/support/accept_health.rs` formatter writes the six
+  `peer_accept_*`/`peer_generations_exhausted` fields. The counter's `metrics`
+  reply and the directory and transfer `status` replies use it.
+- Checks: a real native node whose dial goes through an exhausted source must
+  fail on a45e541d and pass after the fix. The directory and transfer `status`
+  replies carry the fields (TCP listener = 1, QUIC = 0).
+
+### NT1 round 3 implemented (evidence, 19 October 2026)
+
+| Finding | Change | Test |
+| --- | --- | --- |
+| Sol 1 / Opus 1: discovery `Exhausted` node-fatal on the dial `submit` path | Driver rejection branch counts `Discovery(Exhausted)` as a connection failure (roster backs off) and reports it through `generations_exhausted` (progress, `NetworkHealth`, Pressure, `metrics`); completion path sets the same flag | `native::connect::health_tests::an_exhausted_discovery_source_fails_the_dial_without_failing_the_node`: real two-voter native node, `Discovered` connector, simulated time. Fails on a45e541d with `Peer(Connect(Discovery(Exhausted)))` from `node.poll`; passes after the fix |
+| Opus 2: no listener health in `voteboat-directory`/`voteboat-transfer` | Their `status` replies append the shared `AcceptHealth` fields | `directory_publication_remote_reads_and_checkpoint_recovery_{tcp,quic}`; `tcp_retirement_recovers_unread_proposal_and_original_release_from_wal`; `quic_retirement_recovers_unread_proposal_and_retired_checkpoint` |
+| Opus 3: two "paused" definitions | `AcceptStatus::paused(now)`, used by the driver; `metrics` reads `PeerDriver::accept_paused()` | `peer_metrics` maximum-reply test; `injected_emfile_reaches_counters_events_and_connector_status` |
+
+**Public API changes (round 3).** `AcceptStatus::paused`,
+`PeerDriver::accept_paused` and `PeerDriver::generations_exhausted` are added.
+`PeerDriverProgress::generations_exhausted` also covers a discovery source
+refused as `Exhausted`. The directory and transfer `status` lines gain six
+trailing key=value fields. Nothing else changes: no format, no migration, and
+no per-write CPU.
+
+**Validation (Linux, cores 0-3, nice 19, `-j 2`, sequential).** fmt; strict
+Clippy default, all-features, no-default-features and native-only; matched fmt
+and Clippy (the pre-push hook run directly): zero diagnostics.
+`validation/check-inventory.mjs` passes. All-features: lib 489 (1 ignored),
+`voteboat-counter` 55, `voteboat-directory` 12, `voteboat-transfer` 7, connect
+21, effect_owner 210, logical_voter_native 42, observability 11, peers 22,
+remote_discovery 29, startup 63, counter_service 203, directory_service 22,
+transfer_service 33. Default features: lib 487 (1 ignored), `voteboat-counter`
+52, `voteboat-directory` 12, `voteboat-transfer` 7, connect 21, effect_owner
+210, logical_voter_native 25, observability 11, peers 22, remote_discovery 29,
+startup 48, counter_service 144, directory_service 17, transfer_service 24.
+All pass. Not run: macOS, and native durable A/B (no write-path change).
+
+### NT1 round 4 (evidence, 19 October 2026)
+
+**Reported regression.** The default-feature `counter_service` test
+`unavailable_quic_selection_rejects_before_creating_a_store` failed at line
+1692: `voteboat-counter serve … --transport quic` started a QUIC node and
+created its store.
+
+**Root cause: a shared build artifact, not branch code.** NT1 does not touch
+transport selection. `parse_protocol` in `src/bin/counter_service.rs` is
+unchanged from main, and so are its `cfg(feature = "quic")` arms and the
+`Cargo.toml` features. A clean default-feature build of b4f6a7fc refuses with
+`QUIC support requires building with --features quic`, exits 1 and creates
+nothing. In that build `counter_service` passes 144/144, including this test.
+The failure reproduces exactly at line 1692 when the default-feature test
+executable (`target/debug/deps/counter_service-*`) runs after an
+`--all-features` build has rewritten `target/debug/voteboat-counter`. Test
+binaries call `CARGO_BIN_EXE_voteboat-counter`, a fixed path that each feature
+configuration overwrites. This is the AGENTS.md hazard: run feature
+configurations sequentially or give each its own target directory.
+
+**Hardening (same contract in all three binaries).** `voteboat-directory` and
+`voteboat-transfer` already refused `quic` without the feature, before any
+store exists, but only said `unsupported transport`. Both now give the counter
+binary's `--features quic` hint. The transfer binary checks the transport before
+it loads the profile, through a `protocol` helper. New default-feature tests:
+`directory_service::unavailable_quic_selection_rejects_before_creating_a_store`
+and
+`transfer_service::profiles::unavailable_quic_selection_rejects_before_opening_replica_files`.
+
+**Validation (Linux, cores 0-3, nice 19, `-j 2`, one configuration at a
+time).** Default features: counter_service 144, directory_service 18,
+transfer_service 25. All-features: counter_service 203, directory_service 22,
+transfer_service 33. All pass. fmt, plus strict Clippy in the default,
+all-features, no-default-features and native-only configurations: zero
+diagnostics. The pre-push hook adds matched fmt and Clippy.
+
 ## Logical-voter reliability track (opened 18 October 2026)
 
 Goal: logical parents and their backing children run indefinitely with bounded
@@ -2734,7 +5894,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | T0 Recovery always works | A crash at any point never prevents restart and never loses acknowledged state | Exhaustive damaged-tail recovery for native log and vote stores; acknowledged-prefix damage still detected |
 | T2 Cheaper durable barrier | Fewer physical syncs per group commit on CoW and non-CoW volumes | Only with a complete recovery/damage proof and no relaxation of acknowledged state; Btrfs, ext4/XFS, APFS |
 | T3 Wider group commit | Barrier cost amortized over everything queued | Native loaded writes/s and p99 improve with lower CPU/original; unchanged durability contract |
-| T4 Per-original CPU | Framework CPU/original materially below the main baseline (old-rule, pre-H2 targets: 248 ns bulk / 14.6 µs singleton; to be re-measured under H2 when main is re-baselined) | Profile-selected removals of per-original allocation/handoff with no semantic change |
+| T4 Per-original CPU | Framework CPU/original materially below the H2 main baseline; reference values are re-measured on main after each merge (post-V3 merge of 19 October 2026: to be re-baselined; the accepted singleton trade is recorded in the PR 10 row) | Profile-selected removals of per-original allocation/handoff with no semantic change; V3f is done in PR 24 ([merge record](#v3f-merge-record-pr-24)); T4 remains open |
 | Q1 Reliable suites on any host (user, 18 October 2026) | Every suite passes on any hardware, from a Raspberry Pi to large servers and GitHub's 3–4 core runners | No outcome depends on wall-clock speed, core count, disk latency or scheduling; no assertion weakened, no test ignored or retried, no library capacity changed; Platform feedback green |
 
 ### Mini plan
@@ -2751,7 +5911,19 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | In progress H1: review round 3, preserve the benchmark instrument | Keep only the worker flag; reject both shared-client overhead candidates because they change server work | V1 / PR 1 (`622bc411`); pinned matched workspace; quiet-Mac 30-pair buffer attribution result | All matched source byte-identical to flag-only `297aec15`; raw evidence preserved; matched tests; both fmt checks and five strict Clippy configurations; independent review of the reduced scope | T4 |
 | Done V1: core-canonical volatile log (merged 041fc3fb; Mac −18.8% bulk, −16.3% singleton CPU/write) | In-process embeddings kept a second canonical log copy in the provider and a cloned copy in the core's pending plan; the profile puts the store mirror at 10.9% (singleton) and 8.8% (bulk) of framework CPU and three of five per-write entry clones in the pending copies. A distinct non-durable `VolatileLog` lets the core own the only copy | — (design: `target/claude/research-r1/architect-plan.md`) | Twin volatile/durable equivalence, compaction/snapshot-install, fencing/recovery and mode-refusal tests in all three configurations; harness suites; fmt + five strict Clippy runs; runner ABAB pairs on both framework cells (pending) | T4 |
 | Done V2: scalar commit-advance plan and smaller `Pending` (merged 19 October 2026, PR 3 head 3a5c1cd4; Mac singleton −4.1%, old rule) | Commit-only rounds (~2.3 of 5.3 persistence rounds per singleton original) only advance the commit index, yet each built, validated, stored and compared a full `LogUpdate`/`OwnedAppend` plan inside a 1,728-byte `Pending`; a core-only scalar `CommitAdvance` plan and boxed cold parts cut `Pending` to 1,088 B | V1 (merged 041fc3fb) | Both reviews approved; suites on 3a5c1cd4: default 2,451 (one load-sensitive `native_relay` flake, parent and PR 10/10 on rerun), all-features 2,766, no-default 1,245, native-only 1,806, matched 71, `logical_activation_nested` solo 3×8/8; fmt + five strict Clippy clean; runner pairs round 1 ACCEPT | T4 |
-| Following V3b-s, then V3a/V3b re-measured on V2 | V3b-s removes width-1 per-round overhead, which H2's narrower one-worker passes weight about 20% more. V3a (PR 6, entry staging) and V3b (`cpu/shared-batches`, shared immutable batches removing the remaining in-process per-peer clones) are rebased on V2 and re-measured against the H2 main baseline | H2 merged and main re-baselined; V2 merged | Framework pairs on all four cells against the H2 baseline; compaction/snapshot suites | T4 |
+| Done V3a (merged 19 October 2026 in PR 10): direct entry staging (PR 6 content, carried by PR 10; PR 6 closes when PR 10 merges) | Proposals are built twice: the host stages a `Vec<Proposal>` and `propose_batch` scans it twice and collects a second `Vec<LogEntry>` (3.3% of bulk process CPU, plus the host's staging Vec). A bounded `ProposalBatch` builder creates final-shaped entries once and does its budget accounting while inserting; `Raft::propose_entries` stamps index/term in place and hands the same Vec to the existing planner | V1 (design: `target/claude/research-r1/architect-plan-pr3x.md` §§1, 2.2, 3.1, 3.12) | Builder/legacy equivalence at widths 1/2/max, cross-core and old-term builders, failed-push and drop cleanup, allocation-survival, last-index boundary and legacy-boundary tests; harness collection on the builder with unchanged receipt/attribution counts; fmt + strict Clippy (four configurations and the matched workspace); runner pairs on both framework cells (pending) | T4 |
+| Done V3b (merged 19 October 2026 in PR 10): shared frozen batches with validation reuse (`cpu/shared-batches` content, carried by PR 10) | The batch V3a stages becomes one immutable shared batch (`Arc` backing plus facts computed once) carried by `Suffix`, `Rpc::Append`, the pending plan and a chunked canonical `EntryLog`; planning, follower validation, fan-out selection, ingress costing and install use the cached facts, removing the per-peer `to_vec`, the install/compaction record moves and the repeated per-entry validation/accounting walks (profile-r2-pr1 §§3, 5: ~19% of bulk process CPU, overlapping classes) | V3a (PR 6 branch `cpu/entry-staging`; design `architect-plan-pr3x.md` §§2.3–2.8, 3, 4) | Facts-versus-scan oracle over subranges and multi-span joins; fast/slow validator equivalence and the old rejection conditions; prefix selection oracle against the old loop; overlap content checks across distinct allocations; old RPCs keep their contents after truncate/compaction; retained charge equals a fresh oracle; wire/WAL byte goldens captured before encoder edits; durable, native, compaction and snapshot suites unchanged in meaning; harness width/persist/send parity; fmt + four strict Clippy + matched; indicative composed pairs (≥4% bulk gate is the runner's) | T4 |
+| Done V3b-s (merged 19 October 2026 in PR 10): width-1 per-round overhead of shared batches (`cpu/shared-batches-s`, on V3a and V3b, merged with main b72d1ee3 so V2 is composed) | V3b's shared batches cost singletons +6.3% driver instructions and +4–5% whole-process CPU per write (research `target/claude/research-r3/v3b-regression.md`), all in per-round code paths, copies and inlining around one-entry batches. Remove that overhead without losing V3b's −13% bulk gain: one-piece fast paths for owned batches and the last log piece, general paths out of line, no install-chain inline hints, and 24-byte pieces so `Suffix`/`LogUpdate` return to main's size | V3a (PR 6), V3b (`cpu/shared-batches` 91ab285d), H2 merged (main 65fe6701) | Driver width-1 instructions and time vs main and V3b at widths 1/231/515; quiet-Mac 5 pairs × 4 cells vs main 65fe6701 and vs V3b merged with main; singleton attribution floor (leader persists 264,195, width 1); oracle tests for every owned fast path; facts-vs-scan, selection, validator and charge oracles unchanged; fmt, four strict root Clippy builds and the matched workspace | T4 |
+| Current: PR 10 round 4, envelope boundary test, enrollment outbound check and record corrections (branch `cpu/shared-batches-s`) | Both round-3 reviews approve on correctness. Opus requires one test-only addition before merge: no test pins the `size_of::<Message>()` term of `SOLE_MESSAGE_ENVELOPE` (dropping it survives every test). Also: snapshot enrollment does not run the outbound derivation before creating files, so an unholdable `max_batch_bytes` creates a store every later start refuses; and wording corrections (message vs batch charge, public startup error stage, the "every Append" shorthand, the logical-voter queue envelope). No allowance or performance change | PR 10 round 3 (head 85e5d98a) and both round-3 reviews | Boundary test fails under M3 (envelope without the message term) and M2 (without the 23 B term) and passes on the fix; enrollment test refuses with `outbound limits` and creates no file (fails without the call); fmt, four strict root Clippy builds and the matched workspace; `--lib`, `raft`, `startup`, `wire` in default and all features; matched tests | T4 |
+| Done in review: PR 10 round 3, outbound admission of kept backing bytes (head 85e5d98a; both reviews approve on correctness) | Both round-2 reviews requested changes on one P1: round 2's allowance was measured against the selector's wire estimate (`37 + payload`), not the outbound charge (`size_of::<Message>()`, the 256 B batch header, 64 B records and retained payloads), so near the byte limit a kept recovered backing pushed an Append over the default 1 MiB budget that main's plain copy fits, and the follower never caught up. Measure the allowance against the outbound charge, derive the native outbound budget from `max_batch_bytes`, and correct the sharing claims in comments and this record. No singleton CPU work: that trade is with the user | PR 10 round 2 (head 46e1ffb4) and both round-2 reviews | The restart test with 131 × 7,900, 138 × 7,500 and 172 × 6,000 B and Sol's 68 × 15,350 B recipe (each fails on 46e1ffb4); hidden-charge property against the outbound envelope; recovered-backing sweep; exact/one-under budget checks on every admitted Append; startup derivation test; fmt, four strict root Clippy builds and the matched workspace; default and all-features suites; quiet-Mac 5 pairs × 4 cells against b72d1ee3 | T4 |
+| Done in review: PR 10 round 2, review fixes and singleton overhead (head 46e1ffb4) | Both reviews requested changes: a narrow Append from a wide shared backing was charged the whole backing, so entries recovered from a checkpoint could exceed every outbound budget and never replicate (P1, narrowed by round 2 and closed by round 3); the wire decoder froze 16+ mixed entries with an uncharged index (P2); an empty view charged an owned batch by capacity (P2); and both singleton cells stayed above +1% against main. Bound what an Append pins, charge the decoded index before allocating it, charge empty-view appends as the log holds them, and remove what singleton overhead the library and PR 10's own harness edits still add | PR 10 round 1 (head 6fecd1fb) and both reviews | Recover-then-replicate test under default limits (fails before the fix); narrow-message and hidden-charge bound tests; wire budget at exact/one-below for widths 15/16 uniform/mixed and shared source subranges; empty-view charge test; restored spare-capacity checks; asserted composed sizes; fmt, four strict root Clippy builds and the matched workspace; default and all-features suites; driver widths 1/231/515 on Linux (exact x86 counts) and the Mac; quiet-Mac 5 pairs × 4 cells against b72d1ee3; attribution controls | T4 |
+| Done: runner re-measured the composed V2+V3a+V3b+V3b-s head (65bb5041 vs main b72d1ee3, quiet Mac, H2 rule, 5 pairs: bulk-16 −12.1%, bulk-1 −13.8%, single-16 +2.0%, single-1 +2.2%; singleton regression accepted by the user on 19 October 2026) | The stack now carries V2 (merged main b72d1ee3); the runner measures all four cells of PR 10's head against the H2 main baseline. The remaining singleton excess (V3a staging, a harness effect-loop copy that V3b's types trigger) is re-profiled on the composed tree before any further slice | V2 merged; PR 10 merged with main | Framework pairs on all four cells against the H2 baseline; compaction/snapshot suites | T4 |
+| Done V3c profile: whole-cost profile of the merged V2+V3 tree (`target/claude/research-r4/v3c-profile.md`) | Choose the next whole cost class from a fresh profile instead of adding helpers | V3 merged (`d379783d`) | Re-baseline recorded below; ranked slices with arithmetic | T4 |
+| Done V3c: host-owned effect sink and `ProposalBatch::push` fix (merged 20 October 2026 in PR 16, head 36de6dd0; code head 783265a4; quiet Mac vs `d379783d`, 5 pairs: bulk-16 −1.4%, single-16 −4.7%, bulk-1 −2.1%, single-1 −9.5% CPU per write; driver width 1 −13.2%, allocations 30 → 15 per write) | Every core call returns a fresh `Vec<Effect>` built from nested per-function Vecs, and the matched actor grows and frees a `VecDeque` per call: at width 1 about 30 allocations per write, 9 of them effect vectors (profile §4), ≈ 628 ns/write of allocator time in single-1. The host owns one reusable queue that the core fills in place (`step_into`, `propose_entries_into`, `persist_volatile_into`); the Vec APIs become wrappers. Ride-along: `push` built and dropped an `Exhausted` error on every success (bulk ≈ 1.4%) | Profile above; V3 merged | Effect-sequence oracle (Vec vs sink forms over the twin histories, FIFO insertion of committed intervals); rollback with sentinel effects on refused steps, stale tokens and fenced cores; reused queue keeps its capacity and allocation with no stale effects over 1,000 width-1 rounds; existing effect-order, twin, golden and facts oracles unchanged; driver widths 1/231/515 with allocation counts; quiet-Mac 5 pairs × 4 cells against `d379783d`; attribution controls; fmt, four strict root Clippy builds and the matched workspace. Review round 2 (tests and docs only): granted-vote sentinel and election-reset comparison, each proved by mutating the two queue reads; wrapped-queue late exhaustion; durable, transfer, stale-append, learner-configuration and retirement-reply sink oracles | T4 |
+| Done V3d: per-step recomputation (merged 20 October 2026 in PR 18, head 1fb878da; code head 08ebc5c3, round 2 code head 0ea00498, round 3 code 4ba17fbf; quiet Mac vs `bc8fafb6`, 3 × 5 pairs: single-16 −3.0%, single-1 −1.8 to −3.5%, bulk-16 and bulk-1 flat; driver width 1 −13.0%, instructions −14.4%) | `effect_reservation` rebuilt and compared `LogMetadata` twice per harness step, and every plan and install rebuilt or compared it again (profile slice 2). The core's log changes only at install, so its summary is now kept valid there by type (`SummarizedLog`), plans from its own view skip the comparison, and an install version token skips the predecessor check while nothing changed; a plain log's replica count no longer walks the membership | V3c (same `raft.rs` chain) | Implemented evidence in the V3d sections below: summary/version tracking tests over every mutating path (fail without the bump or refresh), reservation test, unchanged transition/twin/snapshot/truncation/facts/golden tests, fixed-schedule counts and reservation checksums identical, per-site samply attribution, three gate runs, attribution controls, fmt + four strict Clippy builds + matched workspace. Review round 2 (Opus P3s): the install skip is bound to the stamp (log identity and version) of the view the plan came from, so a plan moved to another core is refused in debug and release; moved-version checked install tested; the skip still taken on ordinary appends and commit rounds (test counter); mutation edits recorded exactly; width-1 driver within noise (3 pairs: +0.2% ns, +0.17% instructions). Review round 3 (Sol): 16 B stamps (u64 identity issued once, u64 version, ≈ 584 years each at 10^9/s) that never repeat and fail closed to checked installs, with `observability::unidentified_logs()`; allocator- and version-bound tests in debug and release; nine named mutations; `Pending` 1,088 → 1,104 B; width-1 driver −0.2% ns, +0.25% instructions; single-1 vs `bc8fafb6` still −1.8% (5 pairs) | T4 |
+| Done V3e: per-peer replication slots (merged 20 October 2026 in PR 21, head 5a316689; code head 713ead7c; quiet Mac vs `e7520ce1`, 3 × 5 pairs: single-16 −0.5 to −1.9%, bulk-16 and bulk-1 flat, single-1 +1.5 to +2.1% from a park threshold in the one-worker harness (control below); driver width 1 −12.5%, instructions −8.9%) | Outstanding replication per peer in a fixed slot instead of a `BTreeMap` emptied and refilled each round; a cached peer order and stack-buffered quorum frontier instead of per-broadcast `Vec`s (profile slice 3: single-1 −2.3 to −3.1%, single-16 −1.3 to −1.8%, bulk ~0) | V3d (same `raft.rs` chain) | Slot and frontier oracles against the map form over membership-change, retirement, lagging and truncation histories; no slot for a departed peer; same-id replacement; named mutations; driver 1/231/515 with per-site attribution; quiet-Mac gate against `e7520ce1`; spin control for single-1; fmt, strict Clippy, suites ("V3e implemented" below) | T4 |
+| Done V3f: in-place install (merged 21 October 2026 in PR 24, final head deaf8121, code head e3471f31; [merge record](#v3f-merge-record-pr-24); quiet Mac vs `379668af`: driver width 1 −3.2% ns and −5.1% instructions, width 231 −1.2%; four cells flat within noise over 3 × 5 pairs, single-1 guard not adverse; install-side memmove 179 → 19 ns per write at width 1) | Install the pending transition through `&mut` and clear it after success instead of moving `Pending` (1,104 B), `OwnedNextLog` (672 B) and large `Result`s by value (profile slice 4: single-1 −1.9 to −2.5%; V3d's in-place summary write is the first piece). Base width-1 driver profile on `379668af`: library memmove 266.6 ns per write at the install and staging sites | V3d (merged); V3e peer slots merged on main; combined source checked below | A failed install (predecessor mismatch, foreign stamp, cold-plan refusal) leaves `Pending` intact at the failure and the core fences as today, in debug and `--release`; success clears the slot (debug assertion, mutation proof); twin, completion, volatile/durable and V3d stamp tests unchanged; size bounds unchanged; per-site memmove before/after; driver 1/231/515; four-cell gate against `379668af`; attribution controls; fmt, strict Clippy, suites ("V3f schema plan" below) | T4 |
+| Following H-a: harness reply index | Bulk cells: the matched harness's `PendingReplies` (SipHash `HashMap<u128,_>`) remove + insert is about 23 ns of 214 per write, harness not library work (profile H-a: bulk −7 to −10%) | Separate harness PR on main with an H2-style fairness review, main re-baselined after; independent of V3e/V3f | Reply-order and fairness tests; OpenRaft engine untouched; quiet-Mac pairs with attribution parity | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
 | Done C15: batched admission uses the pending bound | Same fast path for ready batches | C14 | Linux/Mac pairs; suites | T4 |
 | Done C14: proposal validation from a pending bound | Admission no longer scans every pending command when the count already settles it | — | Linux/Mac pairs; unit test; suites | T4 |
@@ -2763,7 +5935,8 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done C17: gather window and wait cap as service options | Operators choose the CPU/latency point (200 µs default; 400 µs −20% CPU for disk-bound deployments) | C13 | counter/directory/transfer suites | T4 |
 | Done C18: per-round host costs re-profiled | Fresh profile and syscall counts at head; dedup hash map and quiet-socket read skipping measured and rejected; staged-batch deadline scan bounded | E1 | Five tmpfs pairs each; syscall shim counts; library, peers, runtime, owner, transport suites; fmt + strict Clippy | T4 |
 | Parked D1a: a leader append overlaps a commit-only persistence | Measured +12–30% at window 1,024 and +18% at 2,048 on APFS, CPU neutral, but one run in nine stalled; branch removed, patch and local tag kept outside the tree | C6, E1 | Stall reproduced and fixed with a test before any re-apply; three-configuration suites; APFS pairs | T3 |
-| Later P3: shared Append entries | `Rpc::Append` copies entries per peer (~5%); 81 construction sites | — | Framework and native pairs | T4 |
+| Superseded P3: shared Append entries (delivered by V3b in PR 10) | `Rpc::Append` copied entries per peer (~5%). V3b's frozen batches of 16 or more entries are shared by Appends from proposal to follower wherever the outbound byte headroom allows (near `max_batch_bytes`, or when a slice's hidden bytes exceed the allowance, the Append copies its entries; PR 10 round 3); narrower batches are still copied per peer, by design (V3b record) | — | Covered by PR 10's checks and measurements | T4 |
+| Later E3: main's plain Append at the byte limit can exceed `max_batch_bytes` (pre-existing on main; recorded by PR 10 rounds 3–4, not fixed there) | The selector estimates `37 + payload` per entry, below a plain copy's `64 + retained payload`, so main's own Append can exceed `max_batch_bytes` by up to 256 + 50 B per entry (64 × 16,343 B: 1,051,392 B + 256 against 1,048,576; Opus's arithmetic, not run on main), and the native queue refuses it on every retry. The receiver charges a received Append the same way against `max_event_bytes`, so the fix must change the sender selection and the receiver event budget together | PR 10 merged (its allowance is zero in this band, so its charge equals main's) | A restart/replication test at 64 × 16,343 B that fails on main and passes; selection and event budget agree on the charge; wire bytes unchanged | T4 |
 | Later M1: macOS kqueue readiness | `poll(2)` is ~19% of Mac host CPU under load | E1 | Mac pairs | T4 |
 | Later C10: remaining per-poll fixed costs | Idle profile after C9: connector poll/accept, TLS reads of idle sockets, scheduler map scans, connection-union recheck per step | C9 | Same idle/loaded CPU pairs | T4 |
 | Done C6: a poll never truncates a ready visit | The default replica step budget (128) silently cut every 256-original visit in half, capping each leader barrier at 128 originals; defaults now let one barrier carry a whole 1,024-original visit | C3a/C3b | Mac APFS loaded pairs, 31:1 skew, window 1, RAM-disk CPU/original; three-configuration suite; fmt + strict Clippy | T3 |
@@ -2777,6 +5950,961 @@ implemented or benchmarked; unsafe variants are not offered as options.
 Completed in this track: R1 (damaged unacknowledged tails), C3a (visits wider than
 64 carry whole batches). Profiling method: an in-process `SIGPROF` sampler in
 untracked scratch copies (no kernel policy change), folded stacks read as text.
+
+#### PR 10 round 4 schema plan: envelope boundary test and enrollment check (19 October 2026)
+
+- Shape: no allowance, data or API change. One boundary test in
+  `src/log/entries/tests.rs` pins the outbound envelope; snapshot enrollment
+  (`enroll_snapshot_with_log_limits`) calls `startup_outbound_limits` right
+  after validating the WAL limits, before any other check or file.
+- State, ownership and cleanup: none new. Enrollment refuses earlier with the
+  same typed error the storage-selection path uses; the application is not
+  touched and no directory is created, so a retry with valid limits is
+  unaffected.
+- Acceptance: the boundary test fails under M3 (envelope without
+  `size_of::<Message>()`) and M2 (copy bound without the 23 B), and passes on
+  the fix; the enrollment test fails without the call (stage `enrollment`) and
+  passes with it; the record corrections listed below.
+
+#### PR 10 round 4 implemented (19 October 2026)
+
+| Finding | Change | Test | Result |
+| --- | --- | --- | --- |
+| P2 (Opus): no test pins the `size_of::<Message>()` term of `SOLE_MESSAGE_ENVELOPE`; M3 survived every test | — (test only) | `hidden_bytes_are_kept_exactly_up_to_the_outbound_envelope`: one uniform 40 × 1,000 B backing, 20 visible entries (plain 21,600 B, hidden 21,600 B); at `edge = 512 + copy_max + hidden` (copy bound written out with 64 B records and 23 B) the Append stays shared with `512 + charge ≤ edge`; every budget in [edge − 512, edge] keeps no hidden byte unless `512 + charge ≤ budget`, and the replication path holds the same charge; at edge − 1 it is a plain copy | M3: fails, `43596: 43200 (plain 21600)` (the first of Opus's 116 bad budgets); M2: fails, `43392: 43200 (plain 21600)`; reverted: passes |
+| P3-b (Opus): enrollment created a store that every later start refuses when `max_batch_bytes` is above about 1 GiB − 4 MiB | `enroll_snapshot_with_log_limits` calls `startup_outbound_limits` before any file | `invalid_selected_enrollment_limits_leave_original_application_and_files_untouched` also enrolls with 1 GiB batch/WAL limits: stage `outbound limits`, application unchanged, no directory | Without the call: fails (stage `enrollment`); with it: passes |
+| P3 (Sol): wording | `tests/raft.rs` says message charge 987,904 → 1,049,632 B, batch charge 988,160 → 1,049,888 B; `startup_outbound_limits` doc names the plain-copy edge; public startup error stage qualified here (1 GiB reports `native startup: InvalidLimits`) | — | — |
+| P3-a (Opus): logical-voter envelope | Stated exactly ("Message budgets" below) | — | — |
+| Main edge tracking (Opus) | Mini-plan row "Later E3" | — | — |
+| Measurement record | The orchestrator's round-3 pairs recorded beside the builder's (round 3 table) | — | Singleton targets unmet; decision with the user |
+
+Checks on this tree (Linux, cores 14–15, `-j 2`): root fmt; strict Clippy
+default, all features, no default features and native only, zero
+diagnostics; matched fmt and strict all-target Clippy, zero diagnostics.
+Default: `--lib` 490, `raft` 81, `startup` 45, `wire` 20. All features:
+`--lib` 492, `raft` 81, `startup` 60, `wire` 20. Matched 75/75. Not run: the
+other root suites, remote CI and performance (no code path changed outside
+enrollment's added check).
+
+#### PR 10 round 3 schema plan: outbound admission of kept backing bytes (19 October 2026)
+
+- Shape. `EntryBatch::for_message(max_batch_bytes)` keeps its piece-by-piece
+  keep-or-copy rule; only the allowance changes. Its byte term is measured
+  against what the outbound queue charges the message sent alone:
+  `max_batch_bytes − SOLE_MESSAGE_ENVELOPE − (len × (size_of::<LogEntry>() +
+  RETAINED_EXTRA_MAX) + payload)`, saturating at zero. `SOLE_MESSAGE_ENVELOPE`
+  (`outbound.rs`) is `size_of::<Message>()` plus `BATCH_HEADER_BYTES`, the
+  constant `batch_cost` itself now uses; `RETAINED_EXTRA_MAX`
+  (`command_bytes.rs`) is the most a command's retained charge exceeds its
+  length (23 B on 64-bit). The bound uses the cached payload total, so no
+  per-entry scan is added on the bulk path.
+- Ownership and state: none new. The visible entries, wire bytes and
+  protocol are unchanged; only which pieces an Append keeps shared changes.
+- Precondition: outbound `batch_bytes ≥ max_batch_bytes`. Native startup
+  (`startup_outbound_limits`, also called by the storage-selection check
+  and, from round 4, by snapshot enrollment, before any file is created) sets `batch_bytes` to `max_batch_bytes` when it
+  exceeds the 1 MiB default and raises the peer and node byte budgets to hold
+  one such data batch beside their control reserves. Failure: a value no
+  outbound budget can hold is refused before storage is opened. The helper's
+  error is a typed `outbound limits`; public startup checks the worker limits
+  first, so at 1 GiB it reports `native startup: InvalidLimits` (Sol, round 3)
+  and the `outbound limits` stage is reached only when those pass.
+- Restart/partial progress: a restarted leader's retained log is one backing,
+  and every retry recomputes the same selection and allowance. Under the
+  precondition no Append whose plain copy main would send is refused, on the
+  first send or on any retry.
+- Acceptance: the regressions below fail on 46e1ffb4 and pass here; every
+  admitted non-empty Append in the restart tests is admitted at exactly its
+  charge and refused one byte under; fmt and strict Clippy; suites; the
+  quiet-Mac four cells keep the bulk gain within 1 point.
+
+#### PR 10 round 3 implemented (19 October 2026)
+
+| Finding | Change | Test | Result on 46e1ffb4 → this round |
+| --- | --- | --- | --- |
+| P1 (both reviewers): the allowance used the selector's wire estimate, so a kept backing could raise an Append from main's plain charge to over 1 MiB (Opus: 131 × 7,900 B, 510,976 → 1,049,160 B; Sol: 68 × 15,350 B, 987,904 → 1,049,632 B); native requeues the refused message and the selection is deterministic, so the follower never catches up | Allowance measured against the outbound envelope (above); `batch_cost` uses the shared header constant | `recovered_checkpoint_entries_replicate_and_commit_under_default_outbound_budget` now also runs 131 × 7,900, 138 × 7,500 and 172 × 6,000 B and charges each message with `batch_cost` as the native queue does | Each new shape: refused 1, follower 3 stuck at index 1, commit 129 (last 133 / 140 / 174) → refused 0, commit = last, follower 3's log equals the leader's |
+| P1, Sol's recipe | — | `recovered_uncommitted_commands_near_the_byte_limit_replicate_and_commit`: 68 term-1 commands of 15,350 B written from index 1 on node 1 (uncommitted), checkpoint, power loss, recovery, campaign with both followers empty. Through proposals this harness puts the first election's Noop at index 1, so the recovered backing is mixed and the old rule already copied (68 × 15,350 passes there); the direct writes reproduce Sol's uniform backing | Refused 2 (both followers) → refused 0, commit = last = 69, both followers equal the leader |
+| P1, property | — | `messages_keep_at_most_the_bounded_hidden_charge` asserts `hidden == 0 || 512 + charge ≤ budget` with each budget used as both `max_batch_bytes` and the outbound budget; new `recovered_backings_never_push_an_append_over_the_outbound_budget` sweeps a Noop-then-uniform recovered backing (2,000–16,000 B commands, six counts at and past the byte limit, two offsets) and still requires some Appends to stay shared | Old: fails at `0 7 1024 40000` (hidden 448 B with a 65,984 B charge, above a budget main's own copy already exceeds) and at 119 × 8,700 B (1,048,264 B kept, plain 562,176 B) → pass |
+| P1, budget boundaries | Native startup derives the outbound limits (above) | Every admitted non-empty Append in both restart tests is admitted with `batch_bytes` equal to its charge and refused one byte under; `outbound_batches_carry_every_selected_append` (defaults unchanged up to 1 MiB; 1 MiB + 1, 8 MiB, 33,587,200 B and 256 MiB derive a budget that admits exactly one such data batch; the helper refuses 1 GiB with `outbound limits`, which public startup reports earlier as `native startup: InvalidLimits`); `retained_charges_exceed_lengths_by_at_most_the_stated_bound` | Pass (new) |
+| P3 (both): sharing claims | `MESSAGE_HIDDEN_MAX` and `SPARE_MAX` comments, the `for_message` comment, the superseded-P3 row, the round-2 plan and the "Message budgets" paragraph qualified by the headroom condition; the round-2 P1 row says narrowed, not fixed; the runner's result recorded; the singleton targets marked unmet with the decision with the user | — | — |
+
+Quiet Mac, whole process, 5 interleaved pairs (`fwmac.sh b72d1ee3 2b6221e2
+5`, CPU ns/write medians, Mac load 0.38 at start; 2b6221e2 is this round's
+code, later commits are records only):
+
+| Cell | main b72d1ee3 | 2b6221e2 | change | pairs | round 3 orchestrator (5/5 pairs) | round 2 builder / runner |
+| --- | ---: | ---: | ---: | --- | ---: | ---: |
+| bulk-16 | 248 | 217 | −12.5% | 0.88 0.88 0.88 0.88 0.87 | −12.1% | −12.9% / −12.4% |
+| single-16 | 22,228 | 22,622 | +1.8% | 1.01 1.02 1.00 1.03 1.04 | +2.0% | +0.7% / +1.5% |
+| bulk-1 | 215 | 191 | −11.2% | 0.89 0.86 0.88 0.88 0.89 | −13.8% | −12.0% / −12.0% |
+| single-1 | 12,795 | 12,812 | +0.1% | 0.98 1.00 1.01 1.02 1.05 | +2.2% | +2.3% / +2.2% |
+
+The orchestrator's independent round-3 measurement (same four cells, 5
+interleaved pairs each, reported as 5/5 pairs per cell) agrees with the
+builder's on both bulk cells and puts both singleton cells at +2%: the
+singleton targets remain **unmet; decision with the user**.
+
+Both bulk cells stay within 1 point of round 2 (bulk-1 moves 0.8 points, inside
+the −12.0% to −13.3% range of round 2's four sessions). Bulk Appends are
+count-limited: with small commands the outbound term of the allowance is
+about 0.9 MiB, far above the `MESSAGE_HIDDEN_MAX + 2 × plain` term that
+decides them, so the fix changes which pieces they keep only near the byte
+limit. The singleton code is unchanged since round 2, so the singleton cells
+(+1.8% / +0.1% here) are session spread around the recorded +1% to +2%; the
+singleton targets stay unmet with the decision with the user.
+
+Checks on this tree (Linux, cores 14–15, `-j 2`): `cargo +stable fmt --all --
+--check`; strict Clippy default, all features, no default features and native
+only, zero diagnostics (also via the pre-push hook); matched fmt and strict
+all-target Clippy, zero diagnostics. Default: `--lib` 489, `raft` 81, `wire` 20, `volatile` 7,
+`log_owned` 5, `log_store` 19, `native_relay` 13, `startup` 45. All features:
+`--lib` 491, `raft` 81, `wire` 20, `volatile` 7, `log_owned` 5, `log_store`
+19, `native_relay` 22, `startup` 60. Matched tests 75/75. Not run: the other
+root suites and remote CI.
+
+#### PR 10 round 2 schema plan: review fixes and singleton overhead (19 October 2026)
+
+- Message charge (P1). Shape: `EntryBatch::for_message(max_batch_bytes)`,
+  applied where a leader builds an Append (`EntryLog::replication_range` and
+  the retry's `shared_range`). It keeps shared pieces in order while what they
+  keep alive beyond plain copies of their visible entries totals at most
+  `MESSAGE_HIDDEN_MAX` (32 KiB) plus twice the plain copy of the visible
+  entries, and at most the selection budget the visible entries leave unused;
+  any other piece is copied (16 or more entries into an exact frozen backing
+  of their own when its index still fits, otherwise a plain vector). Per
+  piece the hidden bytes are exact for a whole backing and for alike entries,
+  otherwise bounded above from payload lengths.
+  No state transition, wire or protocol change: the visible entries are the
+  original selection. Failure: none new (a copy allocates as main always
+  did). Freezing keeps at most `SPARE_MAX` (4 KiB) of spare capacity, so a
+  whole frozen proposal of up to 1,024 entries is shared wherever the byte
+  headroom allows (round 3: near the byte limit it is copied).
+- Decoded index (P2, Sol). One `IndexNeed` accumulator decides the index
+  freezing allocates; the wire decoder admits those bytes in its budget before
+  allocating the index, and the encoder charges the same bytes for the visible
+  entries.
+- Empty-view charge (P2, Opus). `LogView::appended_charge` on a view with no
+  entries charges the batch as a log holds it (`EntryBatch::log_charge`).
+- Singleton overhead. A width-1 pass in the harness proposes with
+  `Event::Propose` as main's harness did; empty batches answer the receive and
+  costing queries inline.
+- Acceptance: the tests in the table below; driver widths 1/231/515; quiet-Mac
+  four cells against b72d1ee3; attribution controls. Restart/partial-progress
+  case: a leader restarted from a checkpoint holds its whole retained log as
+  one backing; messages from it are copies until compaction trims it.
+
+#### PR 10 round 2 implemented (19 October 2026)
+
+| Finding | Change | Test | Measurement |
+| --- | --- | --- | --- |
+| P1 (Opus): a 1-entry Append from a recovered 16,384 × 8 B backing cost 1,441,792 B against 88 B visible and the 1 MiB outbound budget, so recovered entries could never reach a follower | Narrowed, not fixed (both round-2 reviews; closed in round 3 above): `EntryBatch::for_message` on selection and retry, with the allowance measured against the selector's wire estimate; a copied wide piece is frozen into its own exact backing; frozen backings keep ≤ 4 KiB spare; checkpoint/WAL decode allocates exactly | `recovered_checkpoint_entries_replicate_and_commit_under_default_outbound_budget` (`tests/raft.rs`; 16,256 × 8 B and 1,000 × 1 KiB, checkpoint, power loss, restart, partition so the restarted leader needs the empty follower; refused Appends counted; fails without the fix: "16256 × 8: Appends refused"); `a_narrow_message_from_a_wide_backing_is_charged_like_a_plain_copy`; `messages_keep_at_most_the_bounded_hidden_charge` (random mixed/uniform/truncated backings, every 7th offset, four entry and byte limits); `hidden_charges_are_exact_where_claimed_and_never_low` | Linux driver widths 231/515: 1,658.3 → 1,657.1 and 1,529.8 → 1,531.2 x86 instructions per write (round 1 → final round 2); quiet-Mac bulk cells keep round 1's gain (below) |
+| P2 (Sol): a mixed 16-entry Append decoded under a 1,472 B budget retained 1,880 B (uncharged 408 B index) | `IndexNeed` shared by freezing and the codec; decoder admits the index before allocating it; encoder charges it | `decoded_memory_budget_charges_the_index_of_the_decoded_entries_exactly` (`tests/wire.rs`; widths 15/16 uniform and mixed, a uniform and a mixed subrange of a mixed source; decode and encode succeed at the retained charge and fail one byte below; fails without the fix at 1,879 B) | Wire bytes unchanged (byte goldens pass) |
+| P2 (Opus): appending to an empty view charged an owned batch by capacity (536 B vs 88 B) | `LogView::appended_charge` uses `EntryBatch::log_charge`; comments in `raft.rs`, `view.rs` and this record corrected | `appending_to_an_empty_log_charges_what_the_installed_log_holds` (widths 1, 3, 16 with spare capacity; summary equals a fresh recount and the log's charge) | — |
+| Singleton cost (both reviewers) | Harness: a pass of one original with nothing queued uses `Event::Propose` (main's harness path), wider passes use the builder; empty batches answer `len`/`last`/`payload_bytes`/validators/`has_configuration`/charge inline | `width_one_passes_use_the_propose_event_and_staging_matches_it`, `a_lone_original_with_queued_work_is_staged_with_it` (matched 75/75) | Linux driver width 1: 53,253 → 52,914 (harness), 52,958 → 52,794 (empty paths, same session) x86 instructions per round; main 51,356–51,405 |
+| P3 | `composed_type_sizes` asserts 64-bit bounds; spare-capacity checks restored (`volatile_tests` allocated == len; `plan_copy` input with 100 spare slots kept by the input, copy exact; narrow owned input keeps its allocation); `EntryBatch::slice(k..k)` holds no backing; count of entries tests corrected; "Later P3" row marked superseded; V3b section labelled historical | `freezing_keeps_at_most_spare_max_and_owned_batches_keep_their_capacity`, `empty_slices_keep_no_backing_alive`, the restored assertions | — |
+
+Message budgets and shared batches (the rule since round 3; round 2's
+allowance used the selector's wire estimate and is superseded). A shared piece
+keeps its whole backing alive, so every charge of a batch counts the whole
+backing. A leader-built Append keeps its shared pieces only while what they
+keep alive beyond plain copies of their visible entries (the hidden bytes,
+exact for whole backings and uniform content, bounded above otherwise)
+totals at most the allowance
+
+`min(MESSAGE_HIDDEN_MAX + 2 × (64 × len + payload),
+max_batch_bytes − SOLE_MESSAGE_ENVELOPE − (len × (64 + 23) + payload))`,
+
+saturating at zero, where `SOLE_MESSAGE_ENVELOPE` is what `batch_cost`
+charges a message submitted alone beyond its retained content
+(`size_of::<Message>()`, 256 B, plus the 256 B batch header) and 23 B
+(`RETAINED_EXTRA_MAX`) is the most a command's retained charge exceeds its
+length, so `len × (64 + 23) + payload` bounds a plain copy's retained charge
+from above. Any other piece is copied: into an exact frozen backing when its
+index still fits what is left of the allowance, otherwise a plain vector.
+Consequences: (1) an Append that keeps any hidden byte has a native
+`batch_cost` of at most `max_batch_bytes`; (2) an Append that keeps none is
+charged exactly as a plain vector of its visible entries, as on main; (3) its
+retained charge is at most three times main's for the same visible entries
+plus 32 KiB, and within the per-message bound the core reserves
+(`reserve_effects`). Near the byte limit the allowance is small or zero, so
+there even a whole frozen proposal is copied, and a narrow slice of a wide
+backing is copied only when its hidden bytes exceed the allowance (a narrow
+slice whose hidden rest fits is kept). Precondition:
+outbound `batch_bytes ≥ max_batch_bytes`. Native startup derives it
+(`startup_outbound_limits`: `batch_bytes = max(1 MiB, max_batch_bytes)`, and
+the peer and node byte budgets raised to hold one such data batch beside
+their control reserve; a `max_batch_bytes` no outbound budget can hold,
+above about 1 GiB − 4 MiB, is refused before any file is created, by
+startup and by snapshot enrollment; defaults up to 1 MiB are unchanged). The
+derivation's own error is `outbound limits`, but public startup checks the
+worker limits first, so a 1 GiB `max_batch_bytes` surfaces there as
+`native startup: InvalidLimits`; the `outbound limits` stage is reached only
+when the worker limits pass. Under it the native queue (one message per batch)
+refuses an Append only when it would refuse main's plain copy of the same
+entries. A caller-configured queue with its own envelope is not derived here.
+The logical-voter network queue (`LogicalNetworkQueue::cost`) charges each
+send `message_cost` plus the provenance's retained bytes (which already hold
+the decoded capsule message and its encoded command bytes) plus
+`size_of::<AuthorizedLogicalSend>()` plus 512 B, so it requires
+`batch_bytes ≥ max_batch_bytes − 256 + provenance retained bytes +
+size_of::<AuthorizedLogicalSend>() + 512`. Under `LogicalLimits::default()`
+the 128 KiB `max_capsule_bytes` keeps every such Append well within the 1 MiB
+default (worst case about 840 KB, Opus's round-3 arithmetic; not run). Wire-decoded
+Appends hold exactly their visible entries plus, for 16 or more mixed
+entries, the charged index; hidden bytes never reach a receiver.
+
+Pre-existing on main, out of scope: the selector's `37 + payload` per entry
+is below a plain copy's `64 + retained payload`, so main's own Append at the
+byte limit can exceed `max_batch_bytes` by up to 256 + 50 B per entry (64 ×
+16,343 B: 1,051,392 B + 256 against 1,048,576; computed by Opus, not run on
+main). The derivation does not close it: the receiver charges a received
+Append the same way against `max_event_bytes`, so closing it needs a sender
+and receiver budget change, not this precondition. In that band this branch
+keeps no hidden bytes (the allowance is zero), so its charge equals main's.
+Tracked as mini-plan row "Later E3".
+
+Round 2 history: a
+strict 32 KiB allowance was measured first and rejected: the harness proposes
+batches of thousands of entries while an Append carries at most 1,024, so
+most bulk Appends hold part of a wider backing; it copied most of them (scratch
+count at 16 workers: 2,070 copied pieces against 367 Appends kept whole) and
+cut the quiet-Mac bulk-16 gain from −12.8% to −9.2%. Copies held as plain
+vectors were also rejected: a lagging follower then gathered large owned
+pieces that every compaction shifts, and two of four bulk-1 attribution runs
+showed one follower at a third of its persists with sends per original
+doubled; frozen copies restore round 1's behaviour (four runs). The
+canonical log still charges a partly trimmed shared piece its whole backing
+(conservative); a recovered log's backing was counted when the owner limits
+were derived at startup.
+
+Linux driver (`R3_DRIVE`, single thread, cores 14–15; exact user-mode x86
+instructions from a `perf_event_open` counter around two runs of different
+lengths, so set-up and warm-up cancel; scratch build, not committed):
+
+| Width | main b72d1ee3 | round 1 6fecd1fb | round 2 head |
+| ---: | ---: | ---: | ---: |
+| 1 (per round) | 51,352–51,405 | 53,283 (+3.8%) | 52,794–52,871 (+2.8–3.0%) |
+| 231 (per write) | 2,023.6–2,025.0 | 1,658.3 (−18.1%) | 1,657.1 (−18.2%) |
+| 515 (per write) | 1,907.9–1,909.4 | 1,529.8 (−19.9%) | 1,531.2 (−19.8%) |
+
+Repeated two-run measurements of one binary vary by up to about ±70
+instructions per round between sessions; same-session pairs are compared.
+
+Mac driver (3 interleaved pairs, medians, `/usr/bin/time -l` instructions per
+write including set-up; `dmac.sh`):
+
+| Width | main | ae409c3b | 3d913c8b | main ns/write | ae409c3b | 3d913c8b |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 56,974–56,990 | 59,402 (+4.3%) | 59,256 (+4.0%) | 3,950–3,957 | 4,088 (+3.3%) | 4,062 (+2.8%) |
+| 231 | 2,516.5 | 2,062.3 (−18.1%) | 2,059.2 (−18.2%) | 130.7 | 101.1 (−22.0%) | 100.8 (−22.9%) |
+| 515 | 2,817.1 | 2,243.7 (−20.4%) | 2,242.8 (−20.4%) | 119.3 | 93.1 (−21.8%) | 93.4 (−21.7%) |
+
+Mac driver at the final head 2c6f46f5 (3 pairs): width 1 59,213 vs 56,972
+instructions per write (+3.9%), 4,019 vs 3,949 ns (+1.8%); width 231 2,058.7 vs
+2,516.3 (−18.2%), 100.3 vs 129.8 ns (−22.7%); width 515 2,240.8 vs 2,817.2
+(−20.5%), 93.1 vs 119.0 ns (−21.8%).
+
+Quiet Mac, whole process, 5 interleaved pairs (`fwmac.sh b72d1ee3 <head> 5`,
+CPU ns/write medians; Mac load 0.3–1.9 at start):
+
+| Cell | main b72d1ee3 | round 1 6fecd1fb | 6721cf4a | 0000b6f0 | final 2c6f46f5 | final pairs | runner, 46e1ffb4 |
+| --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
+| bulk-16 | 249 | 218 (−12.8%) | 226 (−9.2%) | 218 (−12.4%) | 217 (−12.9%) | 0.86 0.88 0.88 0.87 0.88 | −12.4% |
+| single-16 | 22,414 | 22,867 (+2.6%) | 22,723 (+2.3%) | 22,524 (+1.9%) | 22,575 (+0.7%) | 0.99 1.00 1.00 1.07 1.02 | +1.5% |
+| bulk-1 | 216 | 189 (−12.9%) | 189 (−13.3%) | 188 (−13.0%) | 190 (−12.0%) | 0.88 0.86 0.87 0.91 0.86 | −12.0% |
+| single-1 | 12,580 | 13,185 (+1.1%) | 12,848 (+1.4%) | 12,925 (+3.1%) | 12,864 (+2.3%) | 1.01 1.01 1.06 1.01 1.02 | +2.2% |
+
+Each column's change is against its own session's main medians (round 1 from
+the runner's `fwmac-pr10-6fecd1fb.txt`). 6721cf4a had the strict 32 KiB
+allowance; 0000b6f0 the scaled allowance with owned copies; 2c6f46f5 adds
+frozen copies. The last column is the independent runner's own session on
+46e1ffb4 (docs only after 2c6f46f5) against b72d1ee3, beside the builder's
+2c6f46f5 gate. The singleton cells carry no Append copies (width 1 is never
+shared), so their spread across the last three sessions (single-1 +1.4% to
++3.1% for the same singleton code) is session noise around about +2%.
+
+Attribution controls at the final head (one `--attribution true` run per cell
+and revision; bulk-1 at 0000b6f0, 9607ae03 and 6fecd1fb in the text below):
+
+| Cell | Revision | Leader proposals | Max width | Mean width | Leader persists | Follower persists | Persists/original | Sends/original | Phase failures |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| single | main | 132,096 | 1 | 1.00 | **264,195** | 241,422 / 249,912 | 5.719545 | 7.440452 | 0 |
+| single | 2c6f46f5 | 132,096 | 1 | 1.00 | **264,195** | 242,522 / 249,106 | 5.721771 | 7.444904 | 0 |
+| single1 | main | 132,096 | 1 | 1.00 | **264,195** | 247,358 / 258,434 | 5.828996 | 7.659369 | 0 |
+| single1 | 2c6f46f5 | 132,096 | 1 | 1.00 | **264,195** | 247,453 / 259,811 | 5.840139 | 7.681656 | 0 |
+| bulk | main | 7,813 | 2,328 | 511.80 | 12,824 | 5,607 / 5,415 | 0.005963 | 0.007711 | 0 |
+| bulk | 2c6f46f5 | 8,844 | 1,868 | 452.14 | 14,476 | 5,836 / 5,895 | 0.006554 | 0.006932 | 0 |
+| bulk1 | main | 15,231 | 1,964 | 262.54 | 20,180 | 5,786 / 5,526 | 0.007876 | 0.007042 | 0 |
+| bulk1 | 2c6f46f5 | 15,583 | 1,588 | 256.61 | 20,541 | 5,779 / 5,552 | 0.007971 | 0.007643 | 0 |
+
+The singleton floor holds exactly (leader persists 264,195, width 1, 132,096
+proposals); singleton follower persists and per-original counts are within
+0.4% of main. Bulk follows round 1: faster replication gives narrower,
+more numerous leader proposals (bulk-16 8,844 vs 7,813), so persists per
+original rise and sends per original fall at 16 workers, as V3b-s recorded
+(8,934 proposals, 0.006671 / 0.006922). Bulk-1 at 0000b6f0 (owned copies)
+showed one follower at 2,025–2,696 persists with sends per original
+0.0133–0.0147 in two of four runs; round 1 (6fecd1fb, four runs: follower
+persists ≥ 4,598, sends 0.0074–0.0078) and the frozen-copy commit (9607ae03,
+four runs: ≥ 5,168, 0.0076–0.0078) never did, so that mode was a round-2
+effect and is gone.
+
+Targets: bulk cells within 1 point of round 1's gain (met: −12.9% / −12.0%
+against −12.8% / −12.9%; runner −12.4% / −12.0%). Unmet; decision with the
+user (no acceptance recorded yet): single-1 ≤ +1.0% (+2.3% in the final gate,
+runner +2.2%, +1.4% to +3.1% across three sessions), driver width-1
+instructions ≤ +2% (Mac +3.9%, Linux +3.0%). Single-16 is +0.7% in the final
+gate (runner +1.5%; +1.9% and +2.3% in the two earlier sessions).
+
+Remaining singleton gap, measured cause. Exact per-operation counters in a
+scratch driver (a counter read around each harness → core call; x86, main →
+round 2 before the empty-batch paths, instructions per round): followers' core
+work +706 (+266/+224 on the entry-carrying Append, +108/+108 on the empty
+commit notification, of which the empty paths since removed about 110),
+every effects pass +135 to +265 (+825 in all; the library work inside it,
+`persist_volatile` with install and fan-out, is about +180), the leader's
+propose path +362, and the harness's own pre-step checks −180. Library-level
+counters split the core work into small per-call dispatch costs: owned
+planning (`plan_owned`) about +100 per call (metadata validation, the
+eligibility check, the appended charge), the install about +30, the new-entry
+check about +45, each fan-out selection about +40. Instruction sampling
+attributes the effects-pass excess to the harness loop itself: each popped
+264-byte `Effect` is copied twice and each sent `Message` twice more, which
+main's build does not do (V3b-s recorded the same). Restoring main's harness
+shape for applying committed intervals did not change it, and handling each
+effect in one non-inlined call removed only about 160 instructions on this
+branch and was neutral on main, so no harness PR (H3) is proposed; the
+harness loop is unchanged here as the brief requires. In round 2 terms: about
+half of the remaining x86 width-1 excess is library dispatch spread over many
+calls (none above ~100 instructions), about half the harness copies.
+Slice-specialised validator loops and inlining the owned configuration scan
+were measured within noise (±40) and not kept.
+
+Checks on the round-2 tree (Linux, cores 14–15): `cargo +stable fmt --all --
+--check`; strict Clippy default, all features, no default features and native
+only, zero diagnostics; matched fmt and strict all-target Clippy, zero
+diagnostics. Default: `--lib` 486, `volatile` 7, `snapshot` 27, `raft` 80,
+`log_store` 19, `log_owned` 5, `worker` 9, `wire` 20, `native_relay` 13 (also
+after the final commit). All features: `--lib` 488, `native_relay` 22 and the same counts for the others.
+Matched tests 75/75. Not run: the full root suites and remote CI.
+
+#### V3 stack composed with V2: main b72d1ee3 merged into PR 10 (19 October 2026)
+
+`cpu/shared-batches-s` (V3a + V3b + V3b-s, head b8e16221) merged with main
+b72d1ee3, which carries V2 (PR 3). A merge, not a rebase, so the stack's
+commits and PR 10's history stay intact. Implemented evidence only; the
+runner measures the merged head.
+
+Conflicts and resolutions (both sides' semantics kept):
+
+- `src/log/transition/incoming.rs`: V2's shape throughout (`OwnedAppend {
+  predecessor, summary, suffix }`, `CommitAdvance`, `plan_commit`,
+  `matches_plain`, boxed `OwnedChange::Other.next`), with the stack's three
+  changes applied to it: `OwnedAppend::new` takes the `LogView` so
+  `append_summary(view, ..)` can charge an adjoining piece exactly (also in
+  `plan_commit`, with no suffix); `normalize_append` is gone because the
+  plan moves the update's batch without reallocating it (a narrow owned
+  batch keeps its spare capacity, which plans and messages charge and the
+  installed log does not; since round 2 a frozen batch keeps at most 4 KiB
+  of it, charged); `install_append` uses `EntryLog::append`.
+- `src/raft.rs` `persist_update`: V2's structure (`persist` routes commit-only
+  rounds to `persist_commit`/`plan_commit`; appends reach `plan_owned` or
+  `plan_copy` and `stage_pending`); the stack's only change there was a
+  comment, kept on the volatile branch. Appends therefore take V3a/V3b's
+  staged shared-batch path; commit-only rounds take V2's scalar plan.
+- `src/raft/volatile_tests.rs` and `src/raft/owned_append_tests.rs`: V2's
+  borrowing `next.suffix()` / `pending.suffix()` accessor with the stack's
+  sharing assertions (`backing_count`, `first_backing_ptr` against
+  `is_shared`).
+- Not textual conflicts but required to compile: V2's new tests used `Vec`
+  entry fields; `Suffix.entries` literals take `.into()`, `committed()` maps
+  `EntryRange::len`, and the commit-only round's "entries not moved / interval
+  borrowed" check uses `std::ptr::eq` on indexed entries (the stack's idiom)
+  instead of `as_ptr`.
+- Mini plan: V2 Done; V3a, V3b and V3b-s "In review as one stack, PR 10".
+
+Sizes on x86_64, debug test builds (`composed_type_sizes` on the merged tree,
+same in default and all-features; the V3b-s column from the same print in an
+uncommitted test on b8e16221; the V2 column from V2's record):
+
+| Type | V2 (main b72d1ee3) | V3b-s (b8e16221, no V2) | Merged |
+| --- | ---: | ---: | ---: |
+| `Pending` | 1,088 | 1,728 | 1,088 |
+| `OwnedNextLog` | 672 | 912 | 672 |
+| `OwnedChange` | 672 | 912 | 672 |
+| `OwnedAppend` | 672 (computed) | 880 (holds a whole `LogUpdate`) | 672 |
+| `LogUpdate` | 240 | 240 | 240 |
+| `Suffix` | 32 | 32 | 32 |
+| `EntryBatch` | 24 (`Vec`) | 24 | 24 |
+| `GroupLog` | 384 | 432 | 432 |
+
+`GroupLog` keeps V3b-s's cached tail (+48 B); it lives inside `Raft` and is
+not moved per round, and is outside `Pending`, so V2's bounds still hold.
+
+Checks on the merged tree (Linux, cores 14–15): `cargo +stable fmt --all --
+--check`; strict Clippy default, all features, no default features and native
+only, zero diagnostics; matched fmt and strict all-target Clippy, zero
+diagnostics. Default: `--lib` 480, `volatile` 7, `snapshot` 27, `raft` 79,
+`log_store` 19, `log_owned` 5, `worker` 9. All features: `--lib` 482 and the
+same counts for the other six. Run by name in both configurations: V2's
+scalar-vs-`plan_owned` oracles (`scalar_commit_plan_matches_the_owned_empty_append`,
+`scalar_commit_plan_matches_on_configured_and_compacted_logs`), all seven
+`commit_advance_tests`, the thirteen `log::entries::tests` (V3b's eleven and V3b-s's two: facts-vs-scan,
+selection, validator, charge and vector-model oracles) and the
+`entry_encodings_are_byte_identical_for_every_partition` wire/WAL/checkpoint
+goldens. Matched tests 74/74. Not run: the full root suites and remote CI.
+
+#### V3b-s schema plan: width-1 per-round overhead of shared batches (19 October 2026)
+
+Shape: no public API or wire change. Inside `src/log/entries*`, every hot
+accessor keeps the case singleton rounds hit (one owned piece, or the last
+piece of the canonical log) small and inlinable and calls an out-of-line
+function for the general case. A shared piece stores its range as `u32`
+(a backing wider than `u32::MAX` entries stays owned and is scanned), so a
+piece is 24 bytes, and `EntryBatch` reads its length from its pieces instead of
+storing it. State transitions, ownership and cleanup are unchanged: a fast path
+computes the same value from the same entries (never assumes validity) and the
+general path is the previous code. Failure paths: the original validators and
+selection loops still run on owned content; facts are still used only when the
+summary exists. Acceptance: driver width-1 instructions and time against main
+and V3b, bulk driver widths unchanged, the four quiet-Mac cells against main and
+against V3b merged with main, the singleton attribution floor, oracle tests for
+each fast path, and the existing facts/selection/validator/charge oracles.
+
+#### V3b-s implemented: width-1 per-round overhead of shared batches
+
+Base: `cpu/shared-batches` 91ab285d merged with main 65fe6701 (H2) as
+`bc7393de`; stacked on V3a (PR 6) and V3b; not rebased on V2 (PR 3, merged
+during this slice). Eight measured commits:
+
+| Step | Change | x86 instructions / singleton round |
+| --- | --- | ---: |
+| main 65fe6701 | — | 55,804 |
+| V3a 30ffd5e9 (for reference) | — | 56,692 |
+| V3b (`bc7393de`) | — | 59,626 |
+| 1 | Tail from the appended entries; `get`/`borrowed`/`replication_range` answer from the last piece; owned selection with the original loop; validators skip `summary()` for an owned batch and loop over slices | 58,963 |
+| 2 | One walk for an owned message charge (`retained_bytes_and_data`); owned appended charge; owned pieces gather before the adjoin check | 58,743 |
+| 3 | No `#[inline]` hints on the owned install chain (`prepare_install`/`install`/`install_append`) | 58,485 |
+| 4 | One-piece paths inlinable, general paths out of line (`EntryBatch` first/last/get/has_configuration/payload_bytes/validators/`From`, `EntryLog` get/borrowed/append/appended_charge/replication_range, freezing) | 58,068 |
+| 5 | `first_new_entry` returns at once when the first entry is new | 58,049 |
+| 6 | 24-byte pieces, length-free `EntryBatch` | 58,346 |
+| 7 | Inline the owned charge loop | 58,272 |
+| 8 | Tests (no code change) | 58,278 |
+
+x86 counts come from a scratch perf-counter build of the driver on Linux cores
+14–15 (user-mode instructions per round after warm-up; deterministic to a few
+instructions, not committed). Step 6 adds instructions on x86 but removes about
+2% of Mac driver cycles (16,018 → 15,705 per write), so it is kept. Forcing
+`#[inline(always)]` on the wrappers was measured at +107 and not kept.
+
+Mac driver (`R3_DRIVE`, single thread, 3 interleaved pairs, medians;
+instructions from `/usr/bin/time -l`):
+
+| Width | main instr/write | V3b | V3b-s | main ns/write | V3b | V3b-s |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 67,831 | 72,064 (+6.2%) | 71,058 (+4.8%) | 4,963.9 | 5,040.0 (+1.5%) | 4,959.6 (−0.1%) |
+| 231 | 2,385.7 | 1,951.3 (−18.2%) | 1,952.7 (−18.1%) | 134.8 | 105.0 (−22.1%) | 104.8 (−22.3%) |
+| 515 | 2,519.0 | 1,998.4 (−20.7%) | 1,994.9 (−20.8%) | 121.8 | 94.4 (−22.5%) | 94.3 (−22.6%) |
+
+Width-1 cycles per write: main 15,656, V3b 15,893 (+1.5%), V3b-s 15,633 (−0.1%).
+
+Quiet Mac, whole process, 5 interleaved pairs (`fwmac.sh`, CPU ns/write medians):
+
+| Cell | main 65fe6701 | V3b-s | ratio | pairs |
+| --- | ---: | ---: | ---: | --- |
+| bulk-16 | 251 | 218 | 0.869 | 0.86 0.86 0.87 0.87 0.88 |
+| single-16 | 23,529 | 23,742 | 1.009 | 1.02 1.00 1.03 1.01 1.01 |
+| bulk-1 | 219 | 193 | 0.881 | 0.85 0.86 0.89 0.89 0.88 |
+| single-1 | 13,373 | 13,927 | 1.041 | 1.02 1.03 1.06 1.04 1.04 |
+
+| Cell | V3b (`bc7393de`) | V3b-s | ratio | pairs |
+| --- | ---: | ---: | ---: | --- |
+| bulk-16 | 218 | 217 | 0.995 | 0.95 1.00 1.00 0.99 1.00 |
+| single-16 | 24,198 | 23,961 | 0.990 | 0.99 0.99 0.99 0.98 0.99 |
+| bulk-1 | 190 | 190 | 1.000 | 0.97 1.01 1.01 1.02 1.02 |
+| single-1 | 13,974 | 13,852 | 0.991 | 0.99 0.99 0.99 0.99 0.99 |
+
+An earlier session of step 6 against main gave single-16 +1.5% and single-1
++3.2% (bulk −14.2%, bulk-1 −12.4%). Single-1 user/system split (4 runs each,
+`/usr/bin/time -l`; the V3b-s binary here is the driver-patched build, whose
+patch is inactive without `R3_DRIVE`): main 9,606 / 3,759 ns, V3b-s 10,015 / 3,871 ns, V3b
+10,164 / 3,927 ns per write; process instructions per write 115,267 / 117,848
+/ 119,038. In the hot driver loop the remaining extra instructions retire at
+high IPC and cost no time; in the real one-worker process they cost cycles in
+proportion, in user and system time alike (wake and park patterns follow).
+
+Attribution controls (one `--attribution true` run per cell and revision):
+
+| Cell | Revision | Leader proposals | Max width | Mean width | Leader persists | Follower persists | Persists/original | Sends/original | Phase failures |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| single | main | 132,096 | 1 | 1.00 | **264,195** | 241,141 / 248,906 | 5.709802 | 7.421027 | 0 |
+| single | V3b | 132,096 | 1 | 1.00 | **264,195** | 237,915 / 249,659 | 5.691081 | 7.383585 | 0 |
+| single | V3b-s | 132,096 | 1 | 1.00 | **264,195** | 238,126 / 248,852 | 5.686569 | 7.374576 | 0 |
+| single1 | main | 132,096 | 1 | 1.00 | **264,195** | 245,991 / 260,922 | 5.837482 | 7.676341 | 0 |
+| single1 | V3b | 132,096 | 1 | 1.00 | **264,195** | 249,355 / 260,922 | 5.862948 | 7.727304 | 0 |
+| single1 | V3b-s | 132,096 | 1 | 1.00 | **264,195** | 247,320 / 260,381 | 5.843447 | 7.688333 | 0 |
+| bulk | main | 7,872 | 2,376 | 583.78 | 12,931 | 5,635 / 5,363 | 0.005984 | 0.007623 | 0 |
+| bulk | V3b | 8,886 | 1,804 | 508.48 | 14,921 | 5,855 / 5,991 | 0.006694 | 0.006917 | 0 |
+| bulk | V3b-s | 8,934 | 1,788 | 505.40 | 14,865 | 5,836 / 5,975 | 0.006671 | 0.006922 | 0 |
+| bulk1 | main | 13,828 | 1,660 | 312.22 | 18,778 | 5,784 / 5,558 | 0.007532 | 0.007053 | 0 |
+| bulk1 | V3b | 19,957 | 1,548 | 211.15 | 24,916 | 5,657 / 5,664 | 0.009062 | 0.007879 | 0 |
+| bulk1 | V3b-s | 17,110 | 1,444 | 248.52 | 22,071 | 5,479 / 5,787 | 0.008337 | 0.007800 | 0 |
+
+The singleton floor holds exactly (leader persists 264,195, width 1, 132,096
+proposals) on all three revisions. Singleton follower persists are within
+1.3% of main and persists/original and sends/original within 0.7%, as for V3b:
+a follower's commit-only round depends on whether the next append carries the
+commit first, which follows timing, not the library rule. Bulk counters move between single runs with batching timing (the bulk-1
+leader rounds differ by 14% between V3b and V3b-s in one run each; the paired
+CPU cells above show no bulk change). Every run completed all originals with
+equal frontiers (132,097 singleton, 3,998,721 bulk).
+
+Sizes (bytes): `EntryBatch` 40 → 24 (main's `Vec` 24), `Span` 32 → 24,
+`Suffix` 48 → 32 (main 32), `LogUpdate` 256 → 240 (main 240); `Effect` 272 and
+`Message` 256 unchanged. `GroupLog` stays 432 (main 384): it lives inside
+`Raft` and is not moved per round, and the cached tail and length it carries
+are read on almost every step.
+
+Targets, honestly: the driver's width-1 time now equals main (−0.1%) and
+single-16 is within +1% (+0.9%); bulk keeps V3b's gain. Not met: driver width-1
+instructions are +4.8% (target +1%) and single-1 is +3–4% against main. Of the
+remaining x86 excess (2,474 instructions per singleton round), V3a's staging
+path accounts for 888 (`ProposalBatch` creation, `push`, `validate_entry_batch`
+and the harness `include`). Most of the rest is a harness code-generation
+artifact that V3b's types trigger: in the matched actor's `effects` loop each
+popped 272-byte `Effect` is copied twice instead of once and each sent
+`Message` twice more (four 256-byte copies per send instead of two). V3a's
+build does not do this; inline hints on the harness `apply_entries` or
+`persist`, a slice-based apply path and the size change above did not remove
+it, so it is recorded rather than worked around in the harness. The remainder
+is 12–30 instructions per call in validators, charges, install and the
+committed range (`CompletionEffects` now borrows a 56-byte `EntryRange`).
+Instruction-sampled profiling was tried and dropped: interrupt skid on this AMD
+host piles samples after syscalls.
+
+Checks run: `cargo +stable fmt --all -- --check`; strict Clippy (default,
+`--all-features`, `--no-default-features`, `--no-default-features --features
+native`) at zero diagnostics; matched workspace fmt and strict all-target Clippy;
+`cargo test --lib` (469 default, 471 all features, including 13 entries tests:
+two new ones check small owned batches of every width, valid and with each
+defect, against the original validators and fact scans, the one-walk message
+charge against its two queries, and a log whose last piece is gathered owned
+entries against the vector model, every borrowed interval and the original
+selection loop with `max_entries` 0..1024); `--test volatile` 7, `--test
+snapshot` 27, `--test raft` 79, `--test log_store` 19, `--test log_owned` 5 in
+both the default and all-features configurations; matched tests 74/74. Not run:
+the full root suites (orchestrator after review) and remote CI.
+
+#### V3b implemented: shared frozen batches with validation reuse (measurement pending (runner))
+
+Historical record, written before V3b-s and PR 10 round 2. Superseded there:
+the sizes (`EntryBatch` 40 → 24, `Suffix` 48 → 32, `LogUpdate` back to 240),
+the inline hints on the install chain (removed in V3b-s step 3), the charge
+of a shared piece inside a message (bounded by `EntryBatch::for_message` in
+round 2) and the spare capacity a frozen backing keeps (at most 4 KiB since
+round 2). The rest describes the current design.
+
+Design: `target/claude/research-r1/architect-plan-pr3x.md` §2.3 (3x-B) with
+the parts of §§2.4–2.8, 3 and 4 that apply. Base: PR 6 (`cpu/entry-staging`)
+at 1403cfd2 (V3a round 2) on main 30a1f6c5; V2 is not composed. Implemented
+evidence only; the runner's paired measurements have not been taken.
+
+Shape, as planned below, with these differences:
+
+- `src/log/entries.rs` (+ `facts`, `canonical`, `range`, `iter`): pieces are
+  either a shared range of an `Arc` backing or, for batches narrower than
+  `SHARE_MIN` = 16 entries, an owned vector. Below that width a shared
+  backing's fixed cost (allocation, reference counts, descriptors, freeing at
+  compaction) was measured above its per-entry saving: in a single-thread
+  three-core driver the library cost per write was +24% at width 1 with every
+  batch shared, about parity with the threshold, and −43% at width 390.
+  Owned pieces are copied when sent and scanned by the original loops, as
+  before V3b; adjacent owned pieces in a canonical log gather into one
+  vector, like the flat log.
+- Facts are a uniform metrics value, or a prefix-sum index for mixed
+  backings (O(1) exact subrange totals); maxima are backing-wide and only
+  accept a range, otherwise the visible entries are checked. No segment tree.
+- `EntryRange` (borrowed canonical interval) and `StateMachine::apply_entries`
+  (provided; default one `apply_batch` call on `contiguous()`); `as_slice`,
+  `slices`, `EntryIter`, `EntrySlices`; `edit` on both containers (explicit
+  copy, edit, refreeze); `EntryLog::{push, pop, append, append_log,
+  truncate, trim_prefix, clear, extend, extend_from_slice}`. Mutations of a
+  log change descriptors or owned vectors only; no shared backing is ever
+  mutated.
+- Retained charges: a shared piece charges its whole backing (allocated
+  capacity, every payload, the metrics index); an owned piece in a canonical
+  log charges logically (length and payloads, as the flat log did), and in a
+  message or update its allocated capacity (as `message_cost` and the worker
+  did). `LogSummary` uses the same rules incrementally (append coalescing,
+  whole-piece release on trim) and equals a fresh recount.
+- Wire decode does not reject intrinsically malformed batches earlier than
+  before (plan §2.5's `from_decoded`): error timing is unchanged, and the
+  core's validators run the original loops on unsealed content.
+- `GroupLog::term_at`/`last_index`/`last_term` read a cached tail; lookups
+  probe the last pieces before a binary search.
+- V3a round 2's `plan_owned_leader` folds into `plan_owned`: no plan
+  reallocates frozen entries.
+- Code generation: `install_pending` takes the pending plan with `let … else`
+  and the owned install wrappers are `#[inline]` with the whole-log
+  replacement out of line, which removed the extra by-value copies of
+  `Pending` (1.7 KiB) and `OwnedNextLog` (~0.9 KiB) that the larger install
+  path had introduced.
+
+Public breakage: `GroupLog.entries: EntryLog`, `Suffix.entries` and
+`Rpc::Append.entries: EntryBatch`; `CompletionEffects::committed` /
+`into_parts` and `Raft::replay_committed` return `EntryRange`;
+`Membership::replay`/`replay_from` take any `IntoIterator<Item = &LogEntry>`
+(slices still work). `Vec` literals migrate with `.into()`; indexing by
+range and in-place mutation of these fields end.
+
+Harness: VoteBoat's `Noop` overrides `apply_entries` (same per-entry checks
+and results, one call per interval) and the actor applies a borrowed
+committed interval through it; the FIFO `Effect::Committed` path is
+unchanged. The collection loop, width ceiling, deferral rule and reply order
+are untouched; OpenRaft is untouched. The empty-envelope `LogUpdate` size
+grows by 32 bytes, which the computed `selected_log_batch_bytes` follows.
+
+Tests added: `src/log/entries/tests.rs` (+ `oracle.rs`, the original loops
+kept verbatim): facts against a full scan for every subrange; joined pieces
+and broken joins; malformed content validated entry by entry; fan-out
+selection against the original loop over mixed pieces, every offset, four
+count ceilings and seven byte budgets; log operations against a `Vec` model
+(400 random steps); appended/trimmed charges against fresh recounts;
+overlay join charges against the materialized log; holders keeping their
+contents across truncate/trim/edit; logical equality across partitions;
+borrowed intervals. `tests/wire/entry_goldens.rs`: wire (commands,
+configurations), WAL and checkpoint bytes equal hex captured at 2b1bf078
+before encoder edits, for owned, shared-subrange and two-backing partitions.
+`src/raft/volatile_tests.rs`: `wide_batches_share_one_backing_from_proposal_to_every_follower`
+(widths 15/16/64 across a three-core volatile cluster). Existing pointer
+tests now assert sharing for wide batches and copies for narrow ones.
+
+Indicative measurement (builder, this loaded Linux host, 18 October 2026;
+not the runner's gate). Release binaries built from `git archive` copies of
+main 30a1f6c5 and da68b760; `run.py BIN …`, three interleaved AB/BA pairs per
+cell, whole-process CPU per completed write, load average 25–36 throughout
+(per-run uptime in `target/v3b/indicative-da68b760.txt`):
+
+| Cell | main ns/write (median) | V3b ns/write (median) | Change | Pairs better |
+| --- | ---: | ---: | ---: | ---: |
+| bulk 4096/4, 16 workers | 279 | 238 | −14.7% | 3/3 |
+| bulk 4096/4, 1 worker | 272 | 227 | −16.5% | 3/3 |
+| singleton 1/1, 16 workers | 11,477 | 11,711 | +2.0% | 0/3 |
+| singleton 1/1, 1 worker | 9,368 | 9,999 | +6.7% | 0/3 |
+
+Against V3a (1403cfd2, six pairs, load 30–34): bulk −9.5% (16 workers) and
+−14.8% (1 worker), 6/6 each; singleton +3.2% and +3.7%, 1/6 and 0/6.
+Attribution controls: the leader persists exactly 264,195 times with
+proposal width 1 on main, V3a and V3b at 1 and 16 workers (two or three runs
+each); follower persists and leader sends vary by about ±1% in both
+directions between runs, as in PR 6.
+
+Library-only driver (`target/v3b/driver`: three volatile cores stepped in
+one thread, thread CPU time, minimum of five repetitions, interleaved
+rounds). Ratio V3b/main of the per-write library cost: width 1 ≈ 1.00 with
+the default release profile and ≈ 1.05 with the harness profile (thin LTO,
+one codegen unit); width 4 ≈ 1.05; width 16 ≈ 0.97; width 32 ≈ 0.83; width
+64 ≈ 0.80; width 390 ≈ 0.57. The singleton remainder is spread over the
+completion path (a 1.7 KiB `Pending` and a 0.9 KiB `OwnedNextLog` are still
+moved by value per persistence round, as on main, and their copies shift
+with code generation), piece dispatch, and frees; sampled profiles (an
+in-process SIGPROF sampler in the scratch driver, because perf events are
+not available to this user) show no single site above ~1% of samples. V2's
+smaller `Pending` targets the same copies.
+
+Checks: recorded below when the sequential suites finish.
+
+#### V3b schema plan: shared frozen batches with validation reuse (planned)
+
+Design: `target/claude/research-r1/architect-plan-pr3x.md` §2.3 (3x-B) and the
+parts of §§2.4–2.8, 3 and 4 that apply. Base: PR 6 (`cpu/entry-staging`,
+V3a) on main 30a1f6c5; V2 is not composed. Planned work, not evidence.
+
+Data/API shape (new `src/log/entries.rs`, re-exported from `voteboat::log`):
+
+- Private `BatchData { entries: Box<[LogEntry]>, facts }` behind an `Arc`,
+  immutable after construction. Facts are computed by one inspecting pass at
+  freeze: whether the backing is *sealed* (indices consecutive from the first,
+  every term positive and nondecreasing), the full backing charge
+  (`len × size_of::<LogEntry>()` plus every retained payload), and the
+  per-entry metrics needed by receivers: payload bytes, non-noop and
+  configuration presence, maximum payload and maximum activated
+  configuration. A backing whose entries all have the same metrics stores
+  them once (*uniform*: every singleton and the empty-command bulk workload);
+  a mixed backing stores prefix sums so any subrange's payload total and
+  presence counts are exact in O(1); its maxima are backing-wide and are used
+  only to *accept* a subrange quickly; otherwise the exact visible-range scan
+  runs. Arithmetic overflow leaves the facts absent and the old loops run.
+- `pub struct EntryBatch` — an ordered list of exact ranges of backings
+  (`Empty`, one span, or many), its visible length and the combined range
+  facts (absent unless every span is sealed and each join is index+1 with a
+  nondecreasing term). Read-only: `len`, `is_empty`, `first`, `last`, `get`,
+  `iter`, `slices`, `slice(range)`, `contiguous() -> Cow<[LogEntry]>`,
+  `to_vec`, `retained_bytes`; `Index<usize>`, logical `Eq`/`Debug`,
+  `Clone` (refcounts only), `Default`, `From<Vec<LogEntry>>`,
+  `FromIterator<LogEntry>`, `PartialEq<Vec<LogEntry>>`. No mutable access, no
+  Arc accessor, no caller-supplied facts; an edit is `to_vec` → edit →
+  `into()`, which re-inspects.
+- `pub struct EntryLog` — the canonical log as cumulative-indexed chunks of
+  spans, same read-only queries plus `range(range)` (iterator),
+  `shared_range(range) -> EntryBatch`, and crate-private `append`,
+  `truncate`, `trim_prefix`, `clear`, which change descriptors only. Adjacent
+  views of the same backing coalesce. `retained_bytes` is the cached sum of
+  each chunk's full backing charge.
+- `EntryRange<'a>` — a borrowed canonical interval (`iter`, `slices`,
+  `contiguous`, `to_vec`, `len`) returned by `CompletionEffects::committed`
+  / `into_parts` and `Raft::replay_committed`.
+- `StateMachine::apply_entries(&mut self, EntryRange<'_>)` — new provided
+  method with the default `apply_batch(&entries.contiguous())`: one
+  application call per completion, as before; an implementation may iterate
+  the segments without materializing them.
+
+Public breakage: `GroupLog.entries: EntryLog`, `Suffix.entries: EntryBatch`,
+`Rpc::Append.entries: EntryBatch`; Vec literals migrate with `.into()`, slice
+indexing by range and in-place mutation of these fields end. The
+`CompletionEffects` and `replay_committed` return types change to
+`EntryRange`. `LearnerRepair.entries`, `Effect::Committed`, `Proposal`,
+`propose_batch`, `Event::Propose`, `ProposalBatch` and `propose_entries` keep
+their shapes.
+
+State transitions and ownership: `propose_entries` stamps index/term (V3a)
+and freezes the Vec into one backing; the pending plan owns that batch; the
+volatile install appends its descriptor to the canonical log; `append_for`
+and retries select the identical maximal prefix (the old `37 + payload` and
+256-byte allowance, same equality boundary) from facts and send
+`shared_range` clones; a follower slices the received batch at its first new
+entry, plans it against its own log and installs descriptors. Durable cores
+still emit `Effect::Persist(update)`; the core's own copy is a refcount clone.
+Compaction removes whole chunks and rebases a partial first chunk. Facts are
+intrinsic only: every receiver still checks its own predecessor, terms
+against its hard/message term, limits, commit, revision, ballot, membership,
+configuration scope and overlap contents; equality of separately allocated
+entries is a content comparison (same backing and position is a shortcut,
+never consensus evidence).
+
+Failure/cleanup: freezing never fails (unsealed content takes the old
+validators and is rejected or accepted on its merits); refused plans drop
+their clones; canonical logs change only at install, after every fallible
+check; fencing drops the pending batch; the last owner's drop frees a backing.
+An old RPC or pending plan keeps its immutable contents after a local
+truncate or compaction. A partial chunk pins its whole backing, and is
+charged for it.
+
+Wire and WAL: encoders iterate visible entries; tags, counts, order, fields,
+checksums and versions are unchanged. Decoders build a Vec and freeze it;
+malformed content is still rejected where it was before.
+
+Harness: only VoteBoat's adapter changes: `Noop` iterates
+`apply_entries` segments with the same per-entry checks, `apply_entries` is
+called where the borrowed interval was applied, and `message_cost` keeps its
+call site. The collection loop, width ceiling, deferral rule and reply order
+are untouched, so persists and sends per original are unchanged; OpenRaft is
+untouched.
+
+Acceptance checks: listed in the mini-plan row; plus no `unsafe`, no new
+crate, no lint change, and new tests independent of time, cores and ports.
+
+#### V3a implemented: direct entry staging (measurement pending (runner))
+
+Design: `target/claude/research-r1/architect-plan-pr3x.md` §§1, 2.2 (3x-A).
+Base: main 041fc3fb (PR 1 merged); PR base main. Written against PR 1 head
+84bd1804 and reapplied unchanged on main. V2 (PR 3, `cpu/scalar-commit`) is
+separate and not composed here. Round 1 touched only the re-export line of
+`src/raft.rs`; review round 2 (below) also changes the volatile branch of
+`persist_update`, which PR 3 rewrites. Implemented evidence only; the runner's
+paired measurements have not been taken.
+
+Shape: `raft::ProposalBatch` (`src/raft/proposals/batch.rs`) with
+`Raft::proposal_batch(capacity)`, `push(operation, bytes)`, `len`,
+`is_empty`, `iter` (read-only `(OperationId, &[u8])`, in order) and
+`retained_bytes`, plus `Raft::propose_entries(batch)`, as planned below. The
+push computes everything alive at once before the payload copy: the entry
+allocation (old and new buffers while growing), staged shared bytes, the
+incoming Vec capacity and its shared copy. Growth doubles from the current
+capacity, capped at the count limit and, for a multi-entry batch, clamped so
+that peak fits `max_batch_bytes`; a push that cannot fit even one more slot is
+refused. `propose_entries` checks, in order: `begin_step` (fence, pending
+dependency), role/transfer, count and allocated capacity, retained entries
+(two or more), checked index range, largest command, recorded peak (two or
+more); then it stamps index/term in place and calls the unchanged
+`persist_proposal_entries`. A width-1 batch differs from `Event::Propose` only
+when the index range and the command length both fail (index first here), or
+when another core's builder allocated more than this core's proposal count
+ceiling (refused here; `Event::Propose` has no count check).
+`propose_batch`, `Event::Propose`, their checks and tests are unchanged.
+
+Deviations from the design's §2.2 sketch: `retained_bytes` returns `usize`,
+not `Option<usize>`, because every term is already bounded by checked
+arithmetic in `push` (capacity ≤ the count ceiling, shared bytes ≤ a checked
+peak), so it cannot overflow; `iter` is an addition, read-only, so the harness
+tests can inspect staged originals without mutable or entry access.
+
+Harness: `Actor::collect` creates `proposal_batch(min(first width, original
+ceiling))` (an oversized request still reaches the old shape error), keeps the
+merge loop, peer-queue condition, deferral and reply insert order, pushes each
+original after its reply insert, reserves `retained_bytes()` and submits every
+width through `propose_entries`; the width-1 `Event::Propose` branch is gone.
+Payload conversion moves from `Phase::Core` into `Phase::HostAdmission`
+(empty in the scored workload). Persist and send counts per original are
+unchanged: one persistence request per collected batch, as before. OpenRaft is
+untouched; at the equivalent point its client builds a `Vec<ClientRequest>`
+for `client_write_many` and its core builds each `Entry` once. `EmptyEnvelope`
+and the selected `LogLimits` are unchanged; the builder's peak for a full
+envelope is smaller than the legacy Proposal-plus-entry charge it sizes.
+
+Tests: `src/raft/proposals/tests/entries.rs` — legacy equivalence at widths
+1 (`Event::Propose`), 2 and 64 (effects, entries, completion effects, state,
+summary, retained bytes); the same fence/dependency/role/transfer guards and
+empty refusal; cross-core rechecks of command length (single and multi),
+count, allocated capacity, retained entries and exact peak boundary; an
+older-term/index builder stamped with the current term and next index; a
+refused push keeps earlier entries and accounting, a dropped batch leaves no
+pending state; the single-entry ceiling versus the multi-entry peak and its
+exact boundary; clamped growth (4 → 7, then refusal) and doubling to 64; the
+builder allocation is the persisted suffix; the legacy peak boundary
+unchanged. `src/raft/volatile_tests.rs`:
+`entry_batches_reach_the_volatile_plan_in_their_own_allocation` (the builder
+buffer reaches `Pending` by pointer; round 2 keeps spare capacity too). Harness:
+`width_one_staged_submission_matches_the_old_propose_event`; collection,
+reply and completion tests now stage a `ProposalBatch` (staged contents read
+through `iter`). `docs/component-contracts.json` lists the new operations.
+
+Checks run on the builder's loaded machine (18 October 2026, load 37–114),
+on main 041fc3fb plus this slice: `cargo +stable fmt --all -- --check`, the
+matched workspace's fmt check, strict Clippy with default features, all
+features, no default features and native only, and the matched workspace's
+all-target Clippy (the tracked pre-push hook), all zero diagnostics. Suites,
+run sequentially: default features `cargo +stable test --locked --offline`
+passed (126 test targets including doc-tests, 2,454 tests, 0 failed, 0
+ignored; `representative_relay_model` alone took 4,914 s). The all-feature,
+no-default-feature and matched-workspace suites were still running when this
+slice was first published; their results follow in a later commit.
+
+#### V3a review round 2 (18 October 2026)
+
+Schema plan: no API change. (1) Stamping: `validate_entry_batch` already
+checks `first + (len - 1)`; the loop now assigns `first + offset` for each
+entry, so it never computes an index past the last entry. Before, the
+unbounded `(first..)` iterator advanced past the last entry and overflowed
+(a panic in checked builds) when the batch ended at `u64::MAX`. (2) Volatile
+leader appends: `persist_update` plans `After::LeaderAppend` updates with
+`OwnedNextLog::plan_owned_leader`, which is `plan_owned` without the
+spare-capacity shrink. The builder's capacity is already in its recorded peak
+and in the host's `effect_reservation(retained_bytes())`, and install moves
+the entries out of that buffer, so the shrink only added a reallocation (and
+a short old-plus-new overlap) outside both. Other owned inputs (follower
+appends, native and owned providers) are still normalized; the durable path
+(`plan_copy`) is unchanged. Plans, tokens and installed state equal the legacy
+collected batch. (3) A `reserve_exact` that returns more than the checked
+`next` capacity now restores the old capacity and refuses, so the batch stays
+usable (std does not over-allocate today). Failure and cleanup paths are
+unchanged otherwise: a refused batch leaves no pending state.
+
+Evidence for (2) from the recorded H1 Mac report
+(`benchmarks/matched/validation/performance/h1/round2/flag-only.json`, 4,096
+clients × batch 4, main before this PR): under this PR's growth rule (start at
+the first request's width, then double), 7,060 of 8,253 collected batches
+(85.5%; 93.5% of originals) have a width outside 4 × 2^k, so the shrink ran in
+most scored bulk batches. Common widths were 16, 12, 20, 8, 24, 28. The
+singleton cell (1 client × batch 1) is always width 1 (132,096 of 132,096
+batches in the slice 414 Mac and Linux reports), so the singleton is tight and
+unaffected. Changing the harness to size batches exactly was rejected: it
+would change the merge loop's per-request work and so its realized widths
+(the H1 lesson).
+
+Found and not fixed here: once an entry at index `u64::MAX` is durable,
+`append_for` computes `last_index() + 1` and overflows (`src/raft.rs`), on the
+legacy and new paths alike. The boundary test therefore compares admission
+only at that index.
+
+Tests: `entry_batches_match_legacy_proposals_at_the_last_representable_indexes`
+(widths 1, 2, 64; first index `u64::MAX - width + 1` succeeds and ends at
+`u64::MAX`, `u64::MAX - width + 2` refuses with `Exhausted` and no pending
+state, both equal to `Event::Propose`/`propose_batch`; width 1's second case
+cannot be recovered and is asserted as `InvalidRecovery`), and GPT-6.1-Sol's
+two probes as `a_singleton_entry_batch_stages_at_the_last_representable_index`
+and `…_just_before_the_last_representable_index`. All three fail on the old
+loop. The volatile allocation test adds the bulk shape (4 → 8 → 16 for 12
+originals): pointer and capacity survive, and token, state and retained bytes
+equal the legacy batch's. `only_leader_appends_keep_spare_capacity_in_the_volatile_plan`
+pins the scope. Reverting only the planner selection fails the allocation
+test.
+
+Production lines changed in round 2: `src/raft/proposals/batch.rs` stamping
+loop and the growth branch of `push` (hot path: every proposal, and each
+growth step); `src/raft.rs` volatile `persist_update` planner selection and
+`src/log/transition/incoming.rs` `plan_owned_leader`/`plan_owned_with` (hot
+path: every volatile persistence). The 2b1bf078 measurement needs a rerun.
+
+Checks (this Linux machine, loaded): `cargo +stable fmt --all -- --check`
+and the matched fmt check pass; strict Clippy with default features, all
+features, no default features and native only, and the matched all-target
+Clippy, all zero diagnostics; `cargo +stable test --locked --offline --lib --
+proposals` 33 passed (35 with the two volatile allocation tests);
+`--test volatile` 7 passed; the matched workspace suite 72 passed. Full
+default-feature suite (`cargo +stable test --locked --offline --no-fail-fast`
+at 1403cfd2, load average 16–18): 124 result lines, 2,458 tests, 2,457 passed,
+1 failed, 0 ignored. The failure was
+`lanes::tests::uneven_three_lane_workload_keeps_exact_global_counts` in
+`--example native_benchmark`, with "Address already in use (os error 98)"
+while other worktrees ran network tests on the same host. That example uses
+neither `propose_entries` nor the volatile planner, and rerun alone it passed
+48 of 48. The cause is an existing race, not fixed here:
+`examples/benchmark/shared.rs` probes a free port with `bind("127.0.0.1:0")`,
+drops it, and rebinds that address later, so another process can take it. All-feature and no-default-feature suites are left to the suite
+runner.
+
+#### V3a schema plan: direct entry staging (planned)
+
+Design: `target/claude/research-r1/architect-plan-pr3x.md` §1 "Finite split"
+and §2.2 (3x-A only). Planned work, not evidence.
+
+Data/API shape. `raft::ProposalBatch` (re-exported beside `Proposal`) owns a
+private `Vec<LogEntry>` whose entries already hold their final
+`EntryPayload::Command { operation, bytes: CommandBytes }` with placeholder
+index and term zero, a copy of the creating core's `max_proposal_entries`,
+`max_command_bytes` and `max_batch_bytes`, the shared payload charge, the
+largest command length and the recorded staging peak. No `Clone`, no mutable
+or caller-indexed entry access, no public constructor besides
+`Raft::proposal_batch(&self, capacity)`. `push(operation, bytes)` inserts one
+original; `len`, `is_empty` and `retained_bytes` (Vec header + allocated entry
+capacity + shared payload charge) are read-only. `Raft::propose_entries(batch)`
+admits it; `propose_batch` and `Event::Propose` are unchanged.
+
+State transitions. Builder: empty → n entries by `push`; a refused push
+leaves the earlier entries and accounting unchanged and drops its argument.
+Before converting a payload it checks count, command length, growth and the
+simultaneous peak (entry allocation(s), existing shared payloads, the incoming
+raw Vec capacity and the prospective shared allocation), with checked
+arithmetic. Growth is capped doubling through `reserve_exact`, clamped to the
+proposal count and, once the batch is multi-entry, to the byte budget. The
+first entry follows the legacy single-proposal ceiling (command length only);
+the second and later pushes require every recorded peak ≤ `max_batch_bytes`.
+Core: `propose_entries` runs `begin_step`, the proposal role/transfer checks,
+then against the receiving core's own limits: nonempty count and capacity ≤
+`max_proposal_entries`; for two or more entries the retained-entry budget, the
+recorded peak ≤ `max_batch_bytes`; largest command ≤ `max_command_bytes`;
+checked first/last index. It then writes `index = first + offset` and the
+current hard term into each entry in place and passes the same Vec to
+`persist_proposal_entries` (owned planning in volatile mode, the existing copy
+in durable mode). The builder's snapshot is an allocation guard, never
+admission authority: a builder from another or older core is rechecked and
+stamped with this core's term and next index.
+
+Ownership and cleanup. The host owns the builder until `propose_entries`; the
+core then owns the Vec through the existing `Pending`. A dropped builder,
+partial collection or refused admission leaves no pending plan and releases
+its allocations by ordinary drop.
+
+Harness. `Actor::collect` builds a `ProposalBatch` with the same merge loop,
+peer-queue condition, original ceiling, deferral rule and pending reply insert
+order, reserves `retained_bytes()` (the actual owned input) and submits every
+width through `propose_entries`. The OpenRaft adapter is untouched; at the
+equivalent point its client hands `ClientRequest`s to `client_write_many` and
+its core builds each `Entry` once.
+
+Acceptance: §3.1 and §3.12 tests; legacy proposal tests unchanged; four strict
+Clippy configurations, fmt, and the matched workspace fmt/Clippy at zero
+diagnostics; default, all-feature, no-default-feature and matched suites.
 
 #### H2 schema plan: ready-snapshot collection (18 October 2026)
 
@@ -2867,6 +6995,1585 @@ These are the T4 reference values from here on; every later framework gate
 compares base and candidate under this rule in the same session. Earlier
 absolute 1-worker bulk numbers and earlier VoteBoat-versus-OpenRaft ratios are
 old-rule and not comparable.
+
+#### Re-baseline after the V3 merge (19 October 2026, `d379783d`)
+
+Quiet-Mac baseline of main `d379783d` (V2 + V3a + V3b + V3b-s) under the H2
+rule, both engines, five runs per cell, whole-process CPU per completed write
+(`target/claude/tools/baseline-mac.sh`, raw lines in
+`target/claude/research-r4/baseline-h2-d379783d.txt`):
+
+| Cell | VoteBoat ns/write | OpenRaft ns/write | VB/OR | vs `8b3c1e6c` baseline |
+| --- | ---: | ---: | ---: | ---: |
+| bulk 4096/4, 16 workers | 223 | 976 | 0.228 | −10.4% |
+| singleton 1/1, 16 workers | 22,575 | 82,693 | 0.273 | −3.5% |
+| bulk 4096/4, 1 worker | 189 | 670 | 0.282 | −13.7% |
+| singleton 1/1, 1 worker | 12,951 | 30,348 | 0.427 | −4.1% |
+
+These are the T4 reference values from here on. Profile and next slices:
+`target/claude/research-r4/v3c-profile.md` (library share ≈ 21% of single-1 and
+10–15% of bulk CPU; the rest is harness reply handling and thread wake/park).
+
+#### V3c schema plan: host-owned effect sink (19 October 2026)
+
+Brief: `target/claude/research-r4/v3c-profile.md` §6. Branch `cpu/effect-sink`
+from `11adcb33` (main after the `d379783d` re-baseline).
+
+- **Public API (additive).** `Raft::step_into(event, &mut VecDeque<Effect>)`
+  and `Raft::propose_entries_into(batch, &mut VecDeque<Effect>)` return
+  `Result<(), RaftError>` and append this call's effects, in today's order, to
+  the back of the queue. `persist_volatile_into(raft, log, persist, out)`
+  appends the following effects and returns the committed interval
+  (`Option<EntryRange<'a>>`), which precedes them. A host whose queue already
+  held work before the call keeps FIFO by inserting
+  `Effect::Committed(range.to_vec())` at the pre-call length (the rule the
+  harness already applied through `into_owned`). `step`, `propose_entries`,
+  `propose_batch` and `persist_volatile` stay, as wrappers over a fresh queue
+  (`Vec::from(VecDeque)` reuses the allocation when the head never moved).
+- **Ownership.** The host owns the queue and its capacity; the core keeps no
+  reference after a call. Effects already in the queue are never read or
+  changed by the core.
+- **State transitions and failure.** Unchanged: the same functions run in the
+  same order. Each `_into` records `mark = out.len()` and truncates to it on any
+  `Err`, so a refused or failed call leaves exactly the caller's earlier effects,
+  as the Vec form returns none. `persist_volatile_into` still fences the core
+  (`storage_failed`) on any error. Granted-vote memory scans only this call's
+  effects (`out.range(mark..)`), as it scanned only the call's Vec.
+- **Internal chain.** The hot path writes to the queue instead of returning
+  nested Vecs: `stage_pending`, `persist_update`, `persist_commit`, `persist`,
+  `persist_proposal_entries`, `propose`, `maybe_commit`, `broadcast`,
+  `broadcast_append_progress`/`_commit_progress`/`_ready_peers`/`_after_admission`,
+  `after_durable`, `install_pending`, `finish_volatile`, `receive`,
+  `receive_inner`, `receive_append`, `receive_appended`, `finish_step`. Each
+  keeps a Vec-returning wrapper for its cold callers; cold paths (votes,
+  snapshots, configuration, repair, reads) keep returning Vecs that are
+  appended with `extend`.
+- **Harness.** The VoteBoat actor gains one `queue: VecDeque<Effect>`. `step`
+  and `requests` call the `_into` forms into it; the drain takes the queue, pops
+  until empty (persist completions append to the same queue, with the FIFO
+  rule above), clears it on error and puts it back, so steady state allocates
+  no effect storage. Collection, batching, reply delivery and the OpenRaft
+  engine are untouched.
+- **Native runtime.** Its `Stepped.result` hands an owned `Vec<Effect>` to the
+  caller, which the effect owner turns into its per-visit queue without a copy;
+  moving it onto the sink changes that public visit contract and is not
+  measured by the T4 cells, so it stays on the Vec wrappers in this slice.
+- **Ride-along (separate commit).** `ProposalBatch::push` and `next_capacity`
+  construct `RaftError::Exhausted` only on the failure branch
+  (`ok_or_else(exhausted)` with a `#[cold] fn exhausted`, replacing
+  `ok_or(RaftError::Exhausted)` at the same sites in the same order), so the
+  success path builds and drops no error. Same refusals and messages.
+- **Acceptance.** Oracle: the volatile twin histories (`history`,
+  `snapshot_history`) run through the Vec forms and through the sink forms with
+  one reused queue per replica; traces, states, roles and applied values equal.
+  Rollback: sentinel-prefilled queues survive NotLeader/Busy/Fenced steps,
+  refused batches and stale tokens unchanged, with the same core state as the
+  Vec path. Survival: after warm-up, 1,000 width-1 rounds keep each queue's
+  capacity and allocation, and every drain leaves it empty. Driver allocations
+  per write at width 1 fall from 30 to the count recorded below; the four-cell
+  gate and attribution controls as in the brief.
+
+#### V3c implemented: host-owned effect sink (19 October 2026)
+
+Commits `7ca201d2` (effect sink, matched actor, oracle tests) and `783265a4`
+(`ProposalBatch::push` ride-along) on `cpu/effect-sink`, as planned above.
+
+- **Public API change (additive; nothing removed).** `Raft::step_into(event,
+  &mut VecDeque<Effect>) -> Result<(), RaftError>`,
+  `Raft::propose_entries_into(batch, &mut VecDeque<Effect>) -> Result<(),
+  RaftError>` and `raft::persist_volatile_into(raft, log, persist, out) ->
+  Result<Option<EntryRange<'a>>, RaftError>`. `step`, `propose_entries`,
+  `propose_batch` and `persist_volatile` keep their signatures and effect
+  sequences and now wrap the sink forms over a fresh `VecDeque`. Their returned
+  capacity changed (found in review round 2): a one-effect result now has
+  capacity 4, std's minimum non-empty `VecDeque`, where `main`'s
+  `stage_pending` returned `vec![effect]` with capacity 1. `size_of::<Effect>()`
+  is 272 B, so such a step allocates 1,088 B instead of 272 B.
+- **Durable completions: no sink form.** There is no `persist_effect_into`.
+  `persist_effect`, `persist_effect_borrowed` and `Raft::complete` still build
+  a new `Vec` of following effects per completion. Each durable completion
+  already pays a store submission and barrier, the native runtime keeps its
+  owned per-visit effects, and no T4 cell drives a durable completion, so a
+  sink form would be an unmeasured API. Durable hosts get `step_into` and
+  `propose_entries_into`; their completions still allocate.
+- **Matched harness.** The VoteBoat actor change is effect plumbing only: one
+  owned `queue`, the `_into` calls, an in-place drain, and the committed
+  interval inserted at the pre-call length when earlier work is queued (the
+  order `into_owned` produced). Collection, batching, reply delivery,
+  attribution phases and the OpenRaft engine are unchanged.
+- **Native runtime: not moved (difference from the brief).** `Stepped.result`
+  is a public owned `Vec<Effect>`, and the effect owner charges each visit's
+  queue against its memory reservation by capacity and drops the queue when a
+  visit drains (`effects = VecDeque::new()`). Reusing one queue across visits
+  changes that budget contract and the public visit API, and no T4 cell
+  measures it. It keeps the Vec wrappers, which already gain the removed
+  nested Vecs (one top-level allocation per step remains). A later slice can
+  move it with a reservation review. Because of the capacity change above, the
+  effect owner's charge for a one-effect step (`effect_bytes`: capacity × 4 ×
+  272 B, plus payloads) rises from 1,088 B to 4,352 B. That is inside the
+  reservation slack (`reserve_effects` alone has a fixed 65,536 B term, plus
+  `(peers + 2) × 2` message terms), and the `effect_owner` and runtime suites
+  pass, but the native path's CPU and memory effect of the larger allocation
+  is not measured.
+- **Tests.** `tests/volatile.rs`: `sink_forms_match_vec_forms_over_the_twin_histories`
+  (both twin scripts through `step`/`propose_batch`, through
+  `propose_entries`, and through the sink forms with two sentinel effects
+  queued ahead of every call; equal traces, states, roles, fences and
+  applications; committed intervals inserted behind queued work),
+  `refused_sink_calls_keep_earlier_effects_and_match_the_vec_forms`
+  (NotLeader, Busy, stale token and fenced core leave exactly the sentinels and
+  the Vec path's state) and
+  `reused_sink_queues_keep_their_allocation_and_hold_nothing_between_calls`
+  (1,000 width-1 rounds after warm-up: same capacity and buffer, empty after
+  each drain). Existing effect-order, volatile/durable twin, byte-golden and
+  facts-vs-scan tests are unchanged and pass. `ProposalBatch` refusal tests
+  return the same errors.
+
+Deterministic driver (`R3_DRIVE`, one thread, `research-r4/tools-r4/drive.py`;
+the counter build adds `counters.py` with its receive-step hook moved to the
+new `drain` call), quiet Mac, 3 interleaved pairs, medians:
+
+| Width | ns/write | instructions/write | cycles/write | allocations/write (bytes) |
+| ---: | ---: | ---: | ---: | ---: |
+| 1 | 4,064.5 → 3,527.4 (−13.2%) | 59,448 → 52,467 (−11.7%) | 12,784 → 11,121 (−13.0%) | 30.03 (12,138 B) → 15.03 (715 B); reallocs 1.00 → 0 |
+| 231 | 101.4 → 95.3 (−6.0%) | 1,906.2 → 1,796.8 (−5.7%) | 380.2 → 356.9 (−6.1%) | 1.398 (198 B) → 1.332 (149 B) |
+| 515 | 92.5 → 89.3 (−3.5%) | 1,981.4 → 1,877.3 (−5.3%) | 393.9 → 384.2 (−2.5%) | 1.334 (171 B) → 1.305 (149 B) |
+
+Width 1 met the expected ≈ −14% within noise. The profile's stretch target of
+≤ 8 allocations per write was not reached: the 15 left are messages, entry
+batches, the client's request and reply, and replication bookkeeping
+(V3e's per-round `BTreeMap`), not effect storage.
+
+Gate: `target/claude/tools/fwmac.sh d379783d 783265a4 5` (quiet Mac, five
+interleaved pairs, whole-process CPU per completed write):
+
+| Cell | `d379783d` ns/write | V3c ns/write | Change | Pair ratios | Expected |
+| --- | ---: | ---: | ---: | --- | ---: |
+| bulk 4096/4, 16 workers | 217 | 214 | −1.4% | 0.97 0.99 1.02 0.98 0.99 | −1.0 to −1.4% (+ push −1.4 to −1.9%) |
+| singleton 1/1, 16 workers | 22,670 | 21,613 | −4.7% | 0.95 0.95 0.95 0.95 0.98 | −2.2 to −2.8% |
+| bulk 4096/4, 1 worker | 190 | 186 | −2.1% | 0.97 0.98 0.99 0.97 1.02 | −1.2 to −1.4% (+ push −1.3 to −2.0%) |
+| singleton 1/1, 1 worker | 12,910 | 11,687 | −9.5% | 0.93 0.91 0.89 0.90 0.91 | −3.9 to −4.9% |
+
+Rates rose 2.7%, 5.6%, 1.5% and 16.7%. Singleton cells beat their estimate
+(the profile counted only allocator time; the removed moves, frees and the
+harness's per-call deque also count). Bulk gains are at or below the summed
+estimate; their pairs keep one sign in 4 of 5.
+
+Attribution controls (`--attribution true`, one run per cell per revision;
+bulk-1 and bulk-16 repeated 3 more times each; 0 phase failures and equal
+final frontiers everywhere):
+
+| Cell | Leader persists | Leader batches (max width) | Follower persists | Follower sends |
+| --- | --- | --- | --- | --- |
+| single-16 | 264,195 → 264,195 | 132,096 → 132,096 (1 → 1) | 242,925 / 248,595 → 241,159 / 248,409 | 242,967 / 248,648 → 241,197 / 248,462 |
+| single-1 | 264,195 → 264,195 | 132,096 → 132,096 (1 → 1) | 241,911 / 259,484 → 244,897 / 257,858 | 241,946 / 259,541 → 244,932 / 257,915 |
+| bulk-16 (4 runs) | 14,477–14,673 → 14,737–15,005 | 8,696–8,784 → 8,817–9,230 | ≈ 5,790–5,980 each, both | ≈ 6,800–7,050 each, both |
+| bulk-1 (4 runs) | 20,164–23,244 → 27,272–28,922 | 15,232–18,254 → 22,265–23,964 | 1,875–5,930 → 5,427–5,916 | 6,695–21,612 → 6,556–9,425 |
+
+- Singleton: leader persists exactly 264,195 at width 1 in both revisions.
+  Follower totals differ by −0.4% (16 workers) and +0.3% (1 worker); single-1's
+  first follower moves +1.2% while the other moves −0.6%. The split between
+  followers is scheduling (the earlier profile's base run had 244,562 for that
+  follower, 1.1% from this base run), not a change in work.
+- Bulk-16: leader batches +2 to +5%, persists +2%, followers unchanged; within
+  the ±15% single-run spread.
+- Bulk-1: outside the ±15% spread. The candidate's leader forms about 38% more,
+  narrower proposal batches (mean width ≈ 170 vs ≈ 235) and persists about 30%
+  more often. With one shared server worker, a cheaper core call returns the
+  leader to collection sooner, so fewer requests wait per batch; the collection
+  code and its limits are unchanged. Followers do the same work (the base's
+  bimodal 1.9k/21k follower runs are scheduling). This mechanism is an
+  explanation, not a measurement: the table shows the narrower batches, not
+  their cause. As both reviewers judged, −2.1% is the end-to-end CPU result for
+  this dynamically batched workload, not an isolated per-round library saving;
+  the extra leader rounds do not by themselves show that it understates the
+  saving, because follower and message scheduling also change. Both bulk cells
+  landed below their summed estimates (bulk-16 −1.4% against −2.4 to −3.3%;
+  bulk-1 −2.1% against −2.5 to −3.4%). The fixed-width driver (−5.7%
+  instructions per write at width 231, −5.3% at 515) is the separate evidence
+  for a per-round core saving.
+
+Checks (Linux, cores 0–3): `cargo +stable fmt --all -- --check` and matched fmt;
+strict Clippy with default, `--all-features`, `--no-default-features` and
+`--no-default-features --features native`, and the matched workspace, zero
+diagnostics; `cargo test --lib --test volatile --test snapshot --test raft
+--test log_owned --test worker --test runtime` in default (525 lib + 189) and
+all features (527 lib + 189), one configuration at a time; matched tests 75/75
+(default and all features).
+
+#### V3c merge record (20 October 2026, PR 16 → main `c00f882e`)
+
+Reviews: GPT-6.1-Sol approve (round 1, confirmed round 2); Claude Opus 5.5
+request-changes round 1 for one test gap (queue-read regression), approve
+round 2. Exclusive suites on head `36de6dd0` (`target/claude/tools/suites.sh`,
+exclusive checkout, logs `target/claude/research-r4/pr16-suites/`): checks 7/7
+clean; default 2,551 passed / 1 failed; no-default 1,324 / 0; all-features
+2,857 / 0 plus `representative_relay_model` 9 / 0 run alone; native-only
+1,897 / 0; matched 75 / 0.
+
+The one default-suite failure is `fixture_isolation::adoption_keeps_the_unused_half_and_reclaim_proves_release`
+("127.0.0.1:61001 not released by its owner: Address already in use"), a port-lease
+fixture self-test in a file PR 16 does not touch. Three solo reruns of the same
+binary passed 8/8 each. The probable cause is orchestration, not the product: the
+shared lease namespace `/tmp/voteboat-test-ports` was deleted by a scratch sweep
+while suites were running, which splits the namespace so two processes can hold
+one port. The sweep tooling now excludes that directory; if the failure recurs
+with the directory intact it becomes a test-reliability item (the lease pool
+hands every process the same first ports above the ephemeral range).
+
+#### V3c round 2: review tests and docs (19 October 2026)
+
+Reviews on PR 16 (head `8686c38a`): GPT-6.1-Sol approved with suggested
+permanent regressions; Claude Opus 5.5 requested one test (P2-1) and docs and
+coverage items (P3). Neither found a code defect. This round changes tests,
+comments and docs only; no production statement changed.
+
+Schema plan. No data/API shape, state or ownership change. Tests compare a
+sink-form core with a Vec-form twin on the same inputs: equal effects after
+the caller's retained ones, equal state and counters (`request_sequence`,
+`election_reset`, granted-vote memory, leader contact, replication cursors),
+and on error equal fencing with the queue truncated to exactly its earlier
+effects. `request_sequence` is private, so the exhaustion cases are unit tests
+in `src/raft/volatile_tests.rs`; one test helper (`membership_tests::reply`)
+became `pub(super)`.
+
+| Finding | Test | Proof it detects the defect |
+| --- | --- | --- |
+| Opus P2-1: the two queue reads (`remember_granted_vote(out.range(mark..))` in `install_pending_into` and `receive_into`) were untested: sentinels held no grant and `assert_same` ignored the election timer | `tests/volatile.rs`: `sentinels()` now includes a granted `Voted`; `assert_same` compares `election_reset_sequence()` | `receive_into` read changed to `out.iter()`: `sink_forms_match_vec_forms…` 23 vs 7, `refused_sink_calls…` 12 vs 2, new durable oracle 27 vs 11, `sink_receipt_never_remembers…` fails. `install_pending_into` read changed: 19 vs 7, 7 vs 2, `sink_volatile_completion…` fails. All pass on the restored code |
+| Sol (a): wrapped deque, late exhaustion on heartbeat | `sink_heartbeat_on_a_wrapped_queue_matches_vec_form_through_late_exhaustion`: two granted votes at the end of an 8-slot ring; success output wraps to the start (checked by `as_slices`, capacity unchanged); at `request_sequence = u64::MAX − 1` the first append is built (`request_sequence` reaches `u64::MAX`) and the second exhausts: same `Exhausted`, queue holds exactly the prefix, same state and counters | Fails if a partial append survives or if either form diverges |
+| Sol (b): late exhaustion in volatile completion | `sink_volatile_completion_never_reads_earlier_votes_and_fences_like_vec_form`: success with grants queued (same following effects, no remembered grant, no reset), then the same late exhaustion after a proposal: both fence, no following output, same completed state (entry 2 installed), sink queue back to its prefix | `install_pending_into` mutant fails it (granted reply set, reset 1 vs 0) |
+| Sol (c): authenticated `Appended` with old grants queued | `sink_receipt_never_remembers_or_resets_for_earlier_queued_votes` (unit), plus the sentinel change above (integration) | `receive_into` mutant fails both |
+| Sol (d), Opus P3-2 durable cores | `durable_sink_forms_match_vec_forms_through_histories_and_a_learner_configuration`: durable replicas with configuration replication, Sink vs Entries vs Vec, each of `history`, `snapshot_history` and `transfer_history` followed by a committed learner configuration; full traces, states, roles, fences, election resets and applications equal | `receive_into` mutant: 27 vs 11. The `install_pending_into` read is unreachable with retained effects here: durable completions have no sink form |
+| Opus P3-2 transfer ordering and lower-term refusal | `transfer_history` (volatile and durable oracles): transfer to a lagging target, whose `TimeoutNow` comes from `drive_transfer` after the body of the leader's receive step; then an earlier term's `Append` delivered to a follower of the new term, refused with `Appended { success: false }` | Trace equality over these steps |
+| Opus P3-2 retirement-commit reply | `retiring_leader_announces_only_after_final_durability…` now runs `receive_retirement_notice` for the Vec form and for a sink form with an earlier granted vote queued, on twin receivers, and compares their state and counters | `receive_into` mutant: the reset assertion fails |
+| Opus P3-1, P3-4, P3-5, durable note | Docs above (capacity 1 → 4 and the 1,088 → 4,352 B charge; `ok_or_else` with a cold function; durable completions have no sink form), rustdoc on `Raft::step` and `persist_effect_borrowed`, matched actor comment ("empty between successful calls"; every `record_proposals` failure ends the actor) | Not applicable |
+
+These oracles compare the sink forms with the Vec forms, which wrap the same
+implementation: they detect a sink call that reads, keeps or reorders the
+caller's effects, not a defect shared by both forms. The existing
+effect-order, twin, golden and facts tests remain the evidence for the shared
+code. The mutation runs used temporary edits to `src/raft.rs` that were
+restored before commit.
+
+Checks (Linux, cores 10–15, `-j 4`): `cargo +stable fmt --all -- --check` and
+matched fmt; strict Clippy with default, `--all-features`,
+`--no-default-features` and `--no-default-features --features native`, and
+the matched workspace, zero diagnostics; default `--lib --test volatile --test
+raft --test snapshot --test log_owned --test worker --test runtime` (528 lib,
+1 ignored, + 11/81/27/5/9/57); all features, the same plus `--test
+effect_owner` (530 lib, 1 ignored, + 11/81/27/5/9/57/210), one configuration
+at a time; matched tests 75/75 in default and all features.
+
+#### V3d schema plan: per-step recomputation (20 October 2026)
+
+Brief: `target/claude/research-r4/v3c-profile.md` §§3–5 (slice 2). Branch
+`cpu/per-step-recomputation` from main `bc8fafb6` (V3c merged).
+
+The core keeps `log_summary` beside its canonical log (`durable`) and, before
+trusting it, rebuilds `LogMetadata::from_log(&durable)` and compares all 13
+fields: twice per harness step in `effect_reservation` (`rollback_replicas`,
+`retained_log_bytes`), once per plan in `LogView::new`, again in
+`validate_base` / `plan_commit` (`summary.matches_metadata(view.metadata())`)
+and once per install in `check_install(LogMetadata::from_log(current))`.
+Profile cost at driver width 1: 166 ns + about 130 ns per write.
+
+Every mutation site of the core's log, read in `bc8fafb6`:
+
+| Site | Mutates | Summary today |
+| --- | --- | --- |
+| `recover_checked` (all `recover_*`, `recover_volatile`, the snapshot `recover_*_replica` paths) | constructs `durable` | `LogSummary::from_validated` |
+| `install_pending_into` → `OwnedNextLog::install(&mut durable)` | every log change: proposals, appends, truncation, ballots, commit-only rounds, configuration, compaction, snapshot install; volatile and durable completions | assigned from `install`'s returned summary; on `Err` nothing is mutated (prepare precedes mutation) and the core fences |
+| Unit tests (`commit_advance_tests`, `append_prefix_tests`, `send_window/tests`, `membership_tests`, `proposals/tests`) | direct field edits | left stale |
+
+No other code takes `&mut durable` (grep of `src/`; the compiler enforces it
+after step 2). The transition views are immutable borrows of the log. So the
+cached summary cannot go stale in production, and each `matches` call above is
+a defensive recheck of an invariant, not a decision.
+
+Step 1 (low risk, separate commit): one `matches` per reservation call,
+shared by `rollback_replicas` and `retained_log_bytes`. Same results.
+
+Step 2 (if the driver supports it): make the invariant structural.
+
+- **Data shape.** `Raft.durable: SummarizedLog { log: GroupLog, summary:
+  LogSummary, version: u64 }` in `src/log/transition/summarized.rs`, fields
+  private to that module. `Deref<Target = GroupLog>` keeps every read; there is
+  no `DerefMut`, so a mutation outside the module does not compile.
+  Accessors: `summary()`, `version()`, `view()`; mutation only through
+  `install(next, planned) -> Result<(), StorageError>` and, under
+  `cfg(test)`, `edit(f)` (applies `f`, rebuilds the summary, bumps the version).
+- **Views.** `view()` builds a `LogView` whose metadata is copied from the
+  summary (no `from_log`) and which remembers the summary it came from.
+  `validate_base`, `plan_commit` and `NextLog::plan` accept the pair when the
+  summary passed is that same summary (`std::ptr::eq`, sound because the view
+  borrows it immutably for its whole life) and otherwise compare the 13 fields
+  as today. Overlay and `LogView::new` views (native store, owned provider,
+  tests) carry no summary and keep the field comparison.
+- **Install token.** `Pending` records `planned = durable.version()` in
+  `stage_pending_into`, which every core plan reaches straight from
+  `durable.view()` with no log mutation between. `install` takes the fast path
+  only when `planned == version`: the plan's predecessor is then the metadata
+  the view copied from the summary, which equals the unchanged log's
+  `from_log`, so `check_install` is skipped for ordinary appends and commit
+  advances (cold `Other` plans keep their full checks). On a mismatch it runs
+  the full `OwnedNextLog::install` exactly as today, so the token only ever
+  skips a comparison whose result it already knows. The version uses
+  `wrapping_add` (no lifetime bound): equality without mutation is the only
+  production case, and a wrap would need 2^64 installs between one plan and its
+  install, where there are none. (Superseded: round 2 bound the skip to a
+  stamp, and round 3 made the stamp never repeat; see "V3d review round 3".)
+- **Reads.** `rollback_replicas`, `retained_log_bytes`,
+  `connections_are_bootstrap`, `connection_replicas` and
+  `checkpoint_membership` read the summary directly; the stale-summary
+  fallbacks (unreachable, see the table) are removed.
+- **Debug checks.** `summary()`, `view()` and `install` `debug_assert` that the
+  cached metadata equals a fresh `LogMetadata::from_log`, and the fast install
+  path `debug_assert`s the skipped `check_install`. They are O(1) in the log
+  length; the full `LogSummary::from_validated` comparison (O(entries)) is in
+  the new test, not on every access.
+- **Failure and cleanup.** An install error mutates nothing and leaves summary
+  and version unchanged; the core fences as today. The test `edit` bumps the
+  version, so `commit_advance_tests`' edit between staging and install still
+  takes the full check and is still rejected.
+- **Out of scope.** The native log store (`native/log_store/accepted.rs`) and
+  the owned provider (`log/owned.rs`) keep their own summaries and full
+  comparisons: no T4 cell runs them.
+- **Public API.** None.
+- **Acceptance.** Existing log-transition, volatile/durable twin, snapshot,
+  conflict-truncation, facts-versus-scan and byte-golden tests unchanged; a new
+  test drives cores through every public mutating path (campaign, proposals,
+  volatile and durable completions, follower append and conflict truncation,
+  commit-only rounds, configuration, compaction, snapshot install) and after
+  every call checks the summary equals `LogSummary::from_validated` and the
+  version changed exactly when the log changed; it must fail with the
+  install's version bump or summary refresh removed. Driver widths 1/231/515
+  (3 pairs) base vs step 1 vs step 2; per-site ns from driver-width-1 samply
+  folds; the four-cell gate (`fwmac.sh bc8fafb6 <head> 5`); attribution
+  controls once; fmt, four strict Clippy builds, matched fmt/Clippy, suites.
+
+Step 3 (added after the step-2 width-1 profile, planned before editing). The
+profile left two recomputations on the same path: `rollback_replicas` still
+walked the membership's replica maps on every reservation (88 ns per write at
+width 1), and the fast install returned the 336-byte summary through a
+`Result` and copied it again (`Result::branch` 27 ns, memmove 20 ns).
+
+- **Replica count.** A plain summary means no configuration entry and no
+  snapshot membership, so the accepted membership is the bootstrap electorate.
+  Count the bootstrap voters, widened only by a pending full plan's
+  membership; `debug_assert` that the accepted membership has exactly the
+  bootstrap's replica count. Same value as `max(voters, membership().replicas()
+  .count())` in every state the assertion admits.
+- **In-place summary.** `install_unchanged(current, &mut summary)` writes the
+  installed log's summary into the summarized log; on error it is unchanged.
+- **Acceptance.** A plain leader reserves for its 3 bootstrap voters, then for
+  the 5 replicas of a pending learner configuration before it is durable, and
+  after; the test fails if the pending branch is dropped. The membership,
+  configuration, learner, recovery and startup suites run with the assertion.
+
+#### V3d implemented: per-step recomputation (20 October 2026)
+
+Commits on `cpu/per-step-recomputation` (from main `bc8fafb6`): `19878ee5`
+(step 1, call merge, with the schema plan above), `e4ef9694` (step 2,
+summarized log and install version token) and `08ebc5c3` (step 3, plain
+replica count and in-place summary). Measured code head: `08ebc5c3`.
+
+- **Public API: no change.** `Raft::effect_reservation`,
+  `event_effect_reservation` and every other public signature are unchanged.
+  Internal: `Raft.durable` is a `SummarizedLog` (the `log_summary` field is
+  gone), `Pending` gained `planned: u64` (still 1,088 B: it fits in padding),
+  `LogView` gained an `Option<&LogSummary>` (336 B) (round 2 replaces both:
+  `Pending.planned: Option<LogStamp>`, 8 B, still 1,088 B, and a view
+  carrying its summary and stamp, 352 B), and
+  `OwnedNextLog::install_unchanged` is visible only inside
+  `log::transition`.
+- **Guarantee kept, mechanism changed.** A transition is still planned and
+  installed only against the exact current log. Before, each use rechecked it
+  (`from_log` plus a 13-field comparison); now the type makes the log and its
+  summary change together, and debug builds still check it on every access.
+  The checks that guard other callers keep their comparisons: views not built
+  from the summary, the native log store and the owned provider, and every
+  install whose version changed since its plan.
+- **Differences from the plan.** Step 3 was added after the step-2 profile
+  (addendum above). The test-only `edit` replaced five direct field edits in
+  unit tests (same edits, same assertions). `stale_summary_cannot_admit_an_ordinary_transition`
+  could no longer plant a stale summary in the core (there is no field to
+  write); it now passes a summary of another revision, with the core's own
+  view and with a rebuilt view, to `plan_owned`, `plan_copy` and
+  `plan_commit`, and checks each refuses with `stale log summary` and that the
+  same update plans with the log's own summary. That is the refusal the old
+  test reached through `propose_batch`.
+- **Tests.** `src/raft/summarized_log_tests.rs`:
+  `summary_and_version_follow_every_volatile_log_change_including_conflict_truncation`
+  (three-replica volatile cluster: `step(Propose)`, `propose_batch`,
+  `propose_entries`, follower appends, volatile completions, commit-only
+  rounds, an orphan entry on the old leader, an election and the new leader's
+  conflicting append that truncates it),
+  `summary_and_version_follow_durable_configuration_compaction_and_snapshot_install`
+  (durable learner configuration, completions, commits, proposals,
+  `begin_compact`, and a lagging follower's snapshot receive, store, install
+  and apply) and
+  `plain_log_reservation_counts_the_bootstrap_voters_and_a_pending_configuration`.
+  The first two check after every core call that the cached summary equals
+  `LogSummary::from_validated` of the log (all fields, not only metadata) and
+  that the version moved exactly when the log changed. Mutation runs
+  (temporary edits, restored before commit): without the pending-membership
+  branch the reservation test fails. The version-bump and summary-refresh
+  mutations are recorded with their exact edits and counts in review round 2
+  below; round 1's "137 lib tests fail without the summary refresh" did not
+  name its edit, is not reproduced, and is replaced by those figures.
+  Existing log-transition, volatile/durable twin, sink, snapshot,
+  conflict-truncation, facts-versus-scan and byte-golden tests are unchanged
+  and pass.
+
+Deterministic driver (`R3_DRIVE`, one thread, `research-r4/tools-r4/drive.py`),
+quiet Mac, 3 interleaved rounds of all four builds, medians (second of two
+runs; the first, base vs steps 1–2 only, agreed within 0.5 points):
+
+| Width | `bc8fafb6` ns/write | step 1 | step 2 | step 3 (`08ebc5c3`) | instructions/write | cycles/write |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 3,481.9 | 3,415.2 (−1.9%) | 3,140.3 (−9.8%) | 3,030.4 (−13.0%) | 52,436 → 44,906 (−14.4%) | 10,935 → 9,530 (−12.9%) |
+| 231 | 95.7 | 94.8 (−0.9%) | 94.3 (−1.5%) | 93.9 (−1.9%) | 1,795.8 → 1,759.0 (−2.0%) | 358.4 → 349.8 (−2.4%) |
+| 515 | 89.0 | 88.5 (−0.6%) | 88.1 (−1.0%) | 87.6 (−1.6%) | 1,876.7 → 1,857.1 (−1.0%) | 377.7 → 374.5 (−0.8%) |
+
+Every pair kept one sign at width 1 (step 3: 0.87 0.84 0.87).
+
+Fixed-schedule counts (a scratch counter patch on the driver, no allocator):
+per write at widths 1, 231 and 515, rounds, receive steps, persistence
+tokens, sends and reservation calls are identical in base and head (width 1:
+1 / 8.0004 / 6 / 8.0004 / 9.001), and so is a checksum of every reservation
+value the harness requested (`648bf973…`, `544bc328…`, `1229a85c…`). The core
+does the same work and reserves the same bytes.
+
+Per-site attribution: samply at 8 kHz on the width-1 driver, 2 runs per build,
+`expand_mac.py` folds, CPU-weighted ns per write (sampled totals are about 10%
+above the unprofiled times):
+
+| Site | `bc8fafb6` incl / self | `08ebc5c3` incl / self | Saved (incl) |
+| --- | ---: | ---: | ---: |
+| `Raft::effect_reservation` | 339.2 / 0 | 33.0 / 0 | 306 |
+| ↳ two `LogSummary::matches` per call (`from_log` + `eq`) | 233.8 / 0 | 0 / 0 | 234 |
+| ↳ `rollback_replicas` replica walk (`replicas().count()`) | 60.1 (step-2 profile: 87.8) | 0 (12.2 function self left) | 60–88 |
+| `OwnedNextLog::prepare_install` (`check_install` 80.2, its `from_log`) | 170.5 / 72.2 | — | |
+| `SummarizedLog::install` (of which the append and header install 92.0) | — | 140.0 / 34.4 | 31 vs `prepare_install` |
+| `Raft::install_pending_into` | 932.1 / 201.0 | 715.2 / 207.2 | 217 |
+| `LogView::new` (`from_log`) | 24.0 / 8.3 | 0 | 24 |
+| `validate_base` | 46.6 / 7.9 | 15.5 / 5.5 | 31 |
+| `OwnedNextLog::plan_commit` | 55.4 / 20.1 | 31.3 / 8.5 | 24 |
+| `LogMetadata::from_log` (all callers) | 97.1 / 69.3 | 0 | 97 |
+| `LogMetadata` `eq`/`ne` (all callers) | 233.7 / 162.6 | 0 | 234 |
+| All sampled | 3,904 | 3,285 | 619 (−15.9%) |
+
+The removed classes: per-step `LogMetadata` rebuilds and 13-field comparisons
+(about 330 ns: every `from_log` and `eq` sample is gone), the replica-count
+walk (60–88 ns), and the install's summary moves (about 30 ns). The profile's
+estimate (166 + 130 ns) was taken on `d379783d`, before V3c, at the frames it
+named; this run's inclusive costs on `bc8fafb6` are larger.
+
+Gate: `target/claude/tools/fwmac.sh bc8fafb6 08ebc5c3 5`, quiet Mac (load
+1.3–2.3, no other benchmark process), whole-process CPU per completed write.
+Run three times because the first run's single-1 had an inverted pair and
+the second run's bulk-1 a 1.22 pair:
+
+| Cell | Run 1 | Run 2 | Run 3 | 15-pair median ratio | Expected |
+| --- | --- | --- | --- | ---: | ---: |
+| bulk 4096/4, 16 workers | 216 → 211 (−2.3%) | 213 → 214 (+0.5%) | 214 → 214 (0.0%) | 1.00 | ~0 |
+| singleton 1/1, 16 workers | 21,709 → 21,053 (−3.0%) | 21,840 → 21,165 (−3.1%) | 21,777 → 21,128 (−3.0%) | 0.97 | −1.3 to −2.0% |
+| bulk 4096/4, 1 worker | 188 → 185 (−1.6%) | 188 → 194 (+3.2%) | 188 → 188 (0.0%) | 1.01 | ~0 |
+| singleton 1/1, 1 worker | 11,593 → 11,381 (−1.8%) | 11,848 → 11,435 (−3.5%) | 11,699 → 11,330 (−3.2%) | 0.98 | −2.4 to −3.5% |
+
+Pair ratios, run 1 / 2 / 3: bulk-16 `1.00 1.00 0.98 0.98 0.98` / `0.98 1.02
+0.99 1.02 1.00` / `0.96 1.01 1.00 1.01 0.99`; single-16 `0.97 0.98 0.95 0.96
+0.97` / `1.02 0.98 0.93 0.94 0.98` / `0.97 0.98 0.96 0.97 0.98`; bulk-1 `1.01
+1.04 0.98 1.00 0.98` / `1.22 1.03 0.99 1.03 1.04` / `1.01 0.91 1.02 1.01
+1.02`; single-1 `0.98 0.96 0.98 1.04 0.99` / `0.99 0.97 0.96 0.93 1.00` /
+`0.99 0.87 0.98 1.04 0.97`. Both singleton cells improve in all three runs;
+single-16 beat its estimate, single-1 met it. The bulk cells are flat within
+noise, as expected: a bulk round reserves and installs once per few hundred
+writes, and the fixed-width driver's −1.6 to −1.9% is the per-round evidence.
+
+Attribution controls (`--attribution true`; one run per cell per revision,
+bulk-1 and single-1 three more each; 0 phase failures and equal final
+frontiers everywhere):
+
+| Cell | Leader persists | Leader batches (max width) | Follower persists (sum) | Follower sends (sum) |
+| --- | --- | --- | --- | --- |
+| single-16 | 264,195 → 264,195 | 132,096 → 132,096 (1 → 1) | 487,479 → 489,037 | 487,583 → 489,128 |
+| single-1 (4 runs) | 264,195 → 264,195 | 132,096 → 132,096 (1 → 1) | 501,672–502,383 → 491,873–494,594 | the same ± 92 |
+| bulk-16 | 14,671 → 15,021 | 8,806 → 8,881 (1,856 → 2,172) | 11,792 → 11,869 | 13,901 → 13,887 |
+| bulk-1 (4 runs) | 24,632–27,890 → 24,527–30,788 | 19,673–22,935 → 19,561–25,817 | 11,331–11,344 → 10,955–11,342 | 15,720–16,097 → 15,362–16,020 |
+
+- Singleton: the leader persists exactly 264,195 at width 1 in both. Single-16
+  followers move +0.3%. Single-1 followers make 1.9% fewer persistence rounds
+  (and replies) in every head run; the base runs agree within 0.15% and with
+  the V3c runs (501,395 and 503,404). The fixed-schedule counts above are
+  identical, so this is scheduling on the shared worker (a follower that
+  processes faster coalesces more commit notices into the next append), not a
+  change in what the core decides. It is part of single-1's result: about
+  0.07 fewer follower rounds per write, at the profile's roughly 1.1 µs per
+  single-1 core step for the follower's persist and the leader's receipt, is
+  up to about 1.3 points of the −1.8 to −3.5%. Single-16 (−3.0%, followers +0.3%) has no such shift.
+- Bulk-16: leader batches +0.9% and persists +2.4%, followers unchanged; within
+  the ±15% single-run spread.
+- Bulk-1: the leader's batch count varies by 17% across the base's runs and
+  32% across the head's; the head's range is wider (two runs at about 25.7k batches, mean width 155,
+  against the base's highest 22.9k), as in V3c: a cheaper core call returns
+  the one shared worker to collection sooner. Followers and sends are
+  unchanged. The cell's CPU is flat across 15 pairs (median ratio 1.01, runs
+  −1.6 / +3.2 / 0.0%).
+
+Checks (Linux, cores 4–9, `-j 4`): `cargo +stable fmt --all -- --check` and
+matched fmt; strict Clippy with default, `--all-features`,
+`--no-default-features` and `--no-default-features --features native`, and
+the matched workspace, zero diagnostics; default `--lib --test volatile --test
+snapshot --test raft --test log_owned --test worker --test runtime --test
+effect_owner` (540 lib, 1 ignored, + 11/27/81/5/9/57/210) and all features
+(542 lib, 1 ignored, + the same), one configuration at a time; with all
+features also `authorization`, `ballots`, `configuration_capacity`,
+`drain_membership`, `learner_enrollment`, `maintenance`, `learners`,
+`log_reclaim`, `log_store`, `membership`, `member_recovery`, `placement`,
+`placement_planning`, `peers`, `shared_barrier`, `native_member_startup`,
+`startup`, `retirement`, `leadership_maintenance` and `log_staging`, all
+passing; matched tests 75/75 in default and all features. Pre-push hook
+enabled and passing on every push.
+
+#### V3d review round 2: install skip bound to the planning view (20 October 2026)
+
+Both reviews approved round 1 (GPT-6.1-Sol, Claude Opus 5.5). This round folds
+Opus's three P3s. Code commit `0ea00498` on `cpu/per-step-recomputation`.
+
+Schema plan (sketched before editing).
+
+- **Finding (P3-1).** `stage_pending_into` recorded `durable.version()` at
+  staging, not the version of the view the plan was made from, and the
+  version did not name the log. A future staging path that planned from an
+  overlay view, or a `Pending` moved to another core at an equal version,
+  would install without its predecessor comparison in release (debug
+  asserts caught it).
+- **Data shape.** `LogStamp { log: NonZeroU32, version: u32 }` in
+  `log::transition::summarized`: `log` is drawn once per `SummarizedLog`
+  construction from a process-wide relaxed `AtomicU32`, never per write;
+  `version` wraps on every install (and test `edit`). `SummarizedLog::view()`
+  puts its current stamp in the view (`LogView.summary: Option<(&LogSummary,
+  LogStamp)>`, `LogView::stamp()`); overlay and `LogView::new` views have
+  none. Each of the three staging sites (`persist_commit_into` and both
+  `persist_update_into` branches) takes `view.stamp()` from the view it
+  planned from and passes it to `stage_pending_into(next, planned, ..)`, which
+  stores it in `Pending.planned: Option<LogStamp>`.
+- **Install.** `SummarizedLog::install(next, planned)` takes the skip
+  (`install_unchanged`) only when `planned == Some(self.stamp)`: same log,
+  unchanged since the view. Anything else (another core's log, a moved
+  version, no stamp) runs the full checked `OwnedNextLog::install`, which
+  installs a plan whose predecessor still matches and refuses any other
+  with `StorageError::Rejected`; the core then fences as before. On error
+  nothing changes.
+- **Why not in the plan.** Recording the stamp inside `OwnedAppend` and
+  `CommitAdvance` would bind it to the plan itself, but `OwnedAppend` is
+  exactly 672 B with 16 B alignment, so any field takes `OwnedNextLog` to
+  688 B and `Pending` to 1,104 B, over the `pending_and_plan_sizes` bounds
+  (measured; the bounds are kept). `Pending` has exactly 8 B of padding,
+  where `planned: u64` was, so the stamp is 8 B and lives there.
+- **Lifetime.** Only equality is used, and no wrap can make a wrong plan
+  match: a staged plan is installed or dropped before its log's next install
+  (one `Pending`, consumed by the only mutator), so its stamp is the current
+  one or names an earlier version of the same log by one change; the 32-bit
+  version wraps after 2^32 installs, never inside that window. Log
+  identities repeat after 2^32 constructions in one process; that matters
+  only for a plan moved between cores, which the core cannot do, so the
+  identity is a second guard. Nothing fails or slows down when either wraps.
+  (Superseded by round 3: GPT-6.1-Sol showed that the wrapping identity
+  gives constructions 2^32 and 2^32 + 1 the same stamp, so the guard was
+  not unconditional. Stamps are now 16 B, never repeat, and fail closed;
+  see "V3d review round 3".)
+- **Restart.** A recovered core gets a fresh identity at version 0 and no
+  pending plan.
+- **Acceptance.** A plan moved to another core at the same version is
+  refused in debug and release; a plan whose version moved takes the
+  checked install and installs; ordinary appends and commit-only rounds
+  make no checked install; the existing tracking, size, twin and
+  commit-advance tests are unchanged; the width-1 driver is within noise.
+
+Implemented evidence.
+
+- **Tests** (`src/raft/summarized_log_tests.rs`, with a thread-local
+  `cfg(test)` counter of checked installs, `checked_installs`):
+  - `ordinary_appends_and_commit_rounds_install_without_a_predecessor_comparison`:
+    a volatile follower append and a commit-only round (`is_commit()`
+    asserted), then durable proposals, their completion and a commit round.
+    No checked install.
+  - `a_plan_whose_log_version_moved_takes_the_checked_install_and_installs`:
+    a staged append, then a test `edit` that moves the version without
+    changing the log. Exactly one checked install, the append installs, the
+    summary is fresh. No earlier test covered this success path.
+  - `a_plan_moved_to_another_core_at_the_same_version_is_refused` (Opus's
+    case): a 1-entry follower's staged append moved into a recovered
+    4-entry core, both at version 0. `install_pending_into` returns
+    `Storage(Rejected("transition plan predecessor or update mismatch"))`,
+    one checked install, the core is fenced with no pending plan, and its
+    log and summary are unchanged. Passes with `cargo test --release`.
+- **Mutations** (temporary edits on the round-2 code, restored; lib tests in
+  debug, 543 tests):
+  - compare only the version in `SummarizedLog::install`
+    (`summarized.rs:94`: `planned.map(|p| p.version) ==
+    Some(self.stamp.version)`): the transplant test fails in debug (the
+    skipped check's `debug_assert`, `incoming.rs:274`) and in release (the
+    refusal assertion): the identity is what catches it.
+  - never skip (`summarized.rs:94`: `if false && ..`): the ordinary-path
+    test fails in debug and release.
+  - remove both summary writes in `OwnedNextLog::install_unchanged`
+    (`incoming.rs:275` and `:279`, `*summary = install_append(..)` →
+    `let _ = install_append(..)`; Opus's round-1 edit): 157 fail, 386 pass
+    (Opus counted 155 of 540 on round 1).
+  - remove only the append arm's write (`incoming.rs:275`): 101 fail.
+  - remove the checked path's summary write (`summarized.rs:99`,
+    `self.summary = next.install(..)?` → `next.install(..)?`): 1 fails, the
+    new moved-version test. Nothing caught this before round 2.
+  - remove the version bump in `SummarizedLog::install`
+    (`summarized.rs:101`, `self.stamp.version =
+    self.stamp.version.wrapping_add(1);` deleted): the two tracking tests
+    fail, 541 pass.
+- **Sizes.** `Pending` 1,088 B and `Option<Pending>` 1,088 B (unchanged);
+  `OwnedNextLog` 672 B (unchanged); `LogView` 336 → 352 B;
+  `Option<LogStamp>` 8 B.
+- **Per-write path.** Each plan's view stores one 8-byte stamp (the view is
+  16 B larger), `Pending` stores that stamp where it stored the version,
+  and the install compares 8 bytes where it compared a `u64`. No
+  allocation, atomic or extra metadata comparison per write.
+
+Deterministic driver at width 1 (`R3_DRIVE=200000,1,1`, `drive.py` on
+`08ebc5c3` and `0ea00498`, quiet Mac, load 2.0–2.3, no other benchmark
+process, 3 interleaved pairs):
+
+| Pair | `08ebc5c3` ns/write | `0ea00498` ns/write | Ratio | Instructions/write | Cycles/write |
+| ---: | ---: | ---: | ---: | --- | --- |
+| 1 | 2,997.2 | 2,997.7 | 1.000 | 44,821 → 44,903 | 9,431 → 9,415 |
+| 2 | 3,012.3 | 3,039.6 | 1.009 | 44,812 → 44,898 | 9,449 → 9,538 |
+| 3 | 3,021.4 | 3,019.6 | 0.999 | 44,888 → 44,877 | 9,476 → 9,466 |
+
+Medians: 3,012.3 → 3,019.6 ns (+0.2%), 44,821 → 44,898 instructions
+(+0.17%, about 13 per persistence round at 6 rounds per write; the ranges
+overlap), 9,449 → 9,466 cycles (+0.2%). Within noise; the four-cell gate was
+not rerun.
+
+Checks (Linux, cores 4–9, `-j 4`): `cargo +stable fmt --all -- --check` and
+matched fmt; strict Clippy with default, `--all-features`,
+`--no-default-features` and `--no-default-features --features native`, and
+the matched workspace, zero diagnostics; default `--lib --test volatile --test
+raft --test snapshot --test log_owned --test worker --test runtime` (543 lib,
+1 ignored, + 11/81/27/5/9/57) and all features (545 lib, 1 ignored, + the
+same), one configuration at a time; `--release --lib summarized_log_tests`
+6/6 in default and all features; matched tests 75/75 in default and all
+features.
+
+
+#### V3d merge record (20 October 2026, PR 18 → main `e7520ce1`)
+
+Reviews: GPT-6.1-Sol approve round 1, changes-required round 2 (wrapping stamp
+allocator), approve round 3; Claude Opus 5.5 approve rounds 1–3 (round-1 P3
+folded in round 2). Exclusive suites on head `1fb878da`
+(`target/claude/research-r4/pr18-suites/`): checks 7/7 clean; default
+2,585 / 0; no-default 1,330 / 0 plus `representative_relay_model` 9 / 0 alone;
+all-features 2,887 / 1 plus the relay model 9 / 0 alone; native-only
+1,914 / 0; matched 75 / 0. The one all-features failure is
+`native_relay::recovery::quic_relay_native_checkpoint_and_wal_reopen_preserve_dedup_and_incarnations`
+with `NativeStartupRejected { stage: "filesystem/listener", detail: "AddrInUse" }`
+under five concurrent suites on the host; the same binary passed 22/22 in three
+solo reruns, the file is untouched by this PR, and the class (busy-host port
+collision at listener startup) is the known relay-fixture item on the
+test-reliability list.
+
+#### V3d review round 3: stamps that never repeat (20 October 2026)
+
+Round 2 was approved by Claude Opus 5.5 and returned CHANGES REQUIRED by
+GPT-6.1-Sol (review 5580603002). The orchestrator applies the project's
+lifetime rule: a guard meant to be unconditional must not rest on a wrapping
+counter, and every bound must either last at least 100 years at the highest
+sustainable rate (arithmetic recorded) or fail closed without losing the fast
+path for ordinary operation.
+
+Schema plan (sketched before editing).
+
+- **Finding.** `LogStamp { log: NonZeroU32, version: u32 }`. The relaxed
+  `NEXT_LOG.fetch_add(1)` wraps and `unwrap_or(NonZeroU32::MIN)` maps 0 to 1,
+  so constructions 2^32 and 2^32 + 1 both get identity 1 at version 0: two
+  consecutively rebuilt cores can carry equal stamps, and a foreign plan
+  between them would skip its predecessor check in release. The `u32`
+  version wraps after 2^32 installs (about 1.2 h at 10^6 installs/s). Today
+  that is safe only because the core's plan is private and consumed by its
+  own install, which is the restriction the stamp was added to back up.
+- **Choice: option (a), a 16-byte stamp.** `LogStamp { log: NonZeroU64,
+  version: u64 }`. (b) was rejected: a version half that lasts 100 years at
+  10^7 installs/s needs 55 bits (10^7 × 3.156 × 10^9 s ≈ 3.2 × 10^16 >
+  2^54), leaving at most 9 identity bits (512 constructions), which a
+  logical-voter parent activating children would exhaust at once, losing
+  the fast path. (c) was rejected: the log lives inline in `Raft`, which
+  moves, so its address is not an identity.
+- **Identity allocator.** A process-wide `LogIdentities { next: AtomicU64,
+  refused: AtomicU64 }`, starting at 1. `issue()` is
+  `next.fetch_update(Relaxed, Relaxed, |n| n.checked_add(1))`: it returns the
+  old value, so identities 1 ..= 2^64 − 2 are each issued exactly once, and
+  once `next` reaches `u64::MAX` every later call is refused, permanently;
+  the counter never wraps. A refused construction gets no stamp
+  (`SummarizedLog.stamp: Option<LogStamp>` is `None`) and adds one to
+  `refused` (saturating; only on the refused path).
+  Bound: 2^64 − 2 ≈ 1.8 × 10^19 identities; at 10^9 constructions/s (each
+  construction builds a `GroupLog` and a `Raft`, microseconds, so the real
+  rate is orders of magnitude lower) that is 1.8 × 10^10 s ≈ 584 years. One
+  relaxed CAS per constructed log, never per write.
+- **Version.** `u64`, `checked_add(1)` per install and per test `edit`. At
+  10^9 installs/s on one log, 2^64 − 1 installs take ≈ 584 years. If it ever
+  overflowed, the log draws a fresh identity at version 0 (cold path): a
+  plan stamped with the old identity cannot match a never-reissued
+  identity, so the fast path continues. If no identity is left the log has
+  no stamp. The version never wraps and never saturates.
+- **Fail closed.** A log without a stamp gives views without a stamp, so its
+  plans carry `None`, and `SummarizedLog::install` skips only when
+  `planned` is `Some` and equal to the log's own `Some` stamp
+  (`planned.is_some_and(|p| self.stamp == Some(p))`, so two unstamped logs
+  never match). An unstamped log installs every plan through the full
+  checked path forever, with unchanged results. Neither limit is reachable
+  in 100 years at the rates above.
+- **Observation.** `voteboat::observability::unidentified_logs() -> u64`:
+  the process-wide count of logs that got no identity (zero in any real
+  process). A typed counter, not a log line; read it to see that a process
+  has fallen back to checked installs.
+- **Sizes.** `Pending` is 16-byte aligned and has no padding (measured
+  layout: `next` 672 @0, `after` 16 @672, `reply` 256 @688, `ticket` 128
+  @944, `membership` 8 @1072, `planned` 8 @1080; sum 1,088). An
+  `Option<LogStamp>` of 16 B therefore takes `Pending` and `Option<Pending>`
+  to 1,104 B; `OwnedNextLog` stays 672 B. `PENDING_BYTES` goes 1,088 →
+  1,104. Why the budgets tolerate it: the raft `Pending` lives inline once
+  per core (`Raft.pending: Option<Pending>`); no runtime reservation charges
+  `size_of` of it (the runtime's `size_of::<Pending>()` terms in
+  `administration.rs`, `ingress.rs`, `clients.rs` and `read_requests.rs` are
+  their own request types), and the effect owner charges effect queues and
+  payloads, not core size. The 16 B is one more 16-byte copy when a plan is
+  staged and installed. `LogView`'s stamp slot becomes `Option<LogStamp>`
+  (expected +8 B; measured: unchanged, see below).
+- **Per-write path.** The stamp store and the install compare widen from 8 B
+  to 16 B, plus an `Option` test on the stamp at install. No atomic,
+  allocation or metadata comparison per write.
+- **Restart and partial progress.** Unchanged: stamps and plans are not
+  persisted; a recovered core draws a new identity at version 0 and has no
+  pending plan. A refused install changes nothing and the core fences as
+  before.
+- **Test hooks (`cfg(test)` only).** A thread-local allocator override,
+  `with_log_identities(next, f)`, runs `f` with this thread's constructions
+  drawn from a private `LogIdentities` starting at `next` (the same `issue`
+  code), and returns its refused count, so a test reaches the boundary
+  without constructing 2^64 logs and without touching other tests' threads.
+  `SummarizedLog::set_version` places a log's version (for the overflow
+  test); `stamp()` replaces the test accessor `version()`.
+- **Acceptance.**
+  - Allocator boundary, debug and `--release`: with the allocator at
+    2^64 − 2, the next construction gets the last identity, the following
+    ones get none (refused count 2), and a plan moved from the last
+    identified core to an unidentified one, and between two unidentified
+    cores, is refused with `Rejected`, the target fenced and unchanged; an
+    unidentified core's own ordinary appends install through the checked
+    path and succeed.
+  - Version overflow, debug and `--release`: at `u64::MAX − 1`, two
+    installs take the fast path; the second draws a fresh identity at
+    version 0 and the next append is fast again; a plan staged at
+    `u64::MAX` whose log then moved takes the checked path; with the
+    allocator exhausted, the overflowing log becomes unstamped and every
+    later install is checked and succeeds.
+  - Kept: ordinary-skip, moved-version and moved-plan tests, the two
+    tracking tests, `composed_type_sizes`; `pending_and_plan_sizes` with
+    the 1,104 B bound.
+  - Mutations re-run with named edits: wrapping allocator, version-only
+    compare, `None == None` match, never skip, summary writes, version bump.
+  - Width-1 driver vs `0ea00498` (3 pairs) and, since `Pending` grows, the
+    single-1 cell 5 pairs vs `bc8fafb6`.
+
+Implemented evidence (code commit `4ba17fbf`; the Mac builds below were made
+from `a5937602`, the same tree before its commit message was reworded).
+
+- **Code.** `src/log/transition/summarized.rs`: `LogStamp { log: NonZeroU64,
+  version: u64 }`; `LogIdentities { next, refused }` with the checked
+  `fetch_update` issue and a saturating refused count; `SummarizedLog.stamp:
+  Option<LogStamp>`; `install` skips only on `planned.is_some_and(|planned|
+  self.stamp == Some(planned))`; `advance()` (`checked_add`, cold `renew()`
+  to a fresh identity or `None`). `view.rs`: the view's stamp slot is
+  `Option<LogStamp>` and `LogView::stamp()` flattens it. `observability.rs`:
+  `pub fn unidentified_logs() -> u64`. `raft.rs` is unchanged: the three
+  staging sites already pass `view.stamp()`.
+- **Sizes** (x86_64, measured by a temporary print, removed):
+  `Option<LogStamp>` 16 B; `Pending` 1,088 → 1,104 B; `Option<Pending>`
+  1,088 → 1,104 B (niche kept); `OwnedNextLog` 672 B and `LogView` 352 B
+  unchanged (the wider slot fits `LogView`'s padding).
+  `pending_and_plan_sizes` bound `PENDING_BYTES` 1,088 → 1,104 with the
+  reason in a comment; `PLAN_BYTES` and `composed_type_sizes` unchanged.
+- **Tests.**
+  - `summarized::tests` (allocator, no logs built):
+    `identities_are_issued_once_in_order_from_one` (1, 2, 3);
+    `identities_stop_at_the_bound_and_never_wrap` (from 2^64 − 3: issues
+    2^64 − 3 and 2^64 − 2, then refuses three times, refused count 3,
+    `next` stays `u64::MAX`); `the_refused_count_saturates`.
+  - `a_plan_moved_at_the_identity_bound_is_refused` (thread-local
+    allocator from 2^64 − 3): two consecutive cores get the last two
+    identities (distinct), the identified core keeps the fast path, three
+    recovered cores and one new core get no stamp (refused count 4); the
+    last identified core's plan moved to an unidentified core, and a plan
+    moved between two unidentified cores, are each refused with
+    `Rejected`, one checked install each, the target fenced with no
+    pending dependency and its log and summary unchanged; the new
+    unidentified core's own append and commit round take two checked
+    installs and install.
+  - `the_version_bound_keeps_the_fast_path_or_fails_closed`: at
+    `u64::MAX − 1` an append (→ `u64::MAX`) and a commit round (→ fresh
+    identity, version 0) and the next append are all fast; a plan staged
+    at `u64::MAX`, then a test `edit` across the bound, takes one checked
+    install and installs; with the allocator exhausted, the install at
+    `u64::MAX` is fast and leaves the log unstamped (refused count 1),
+    then an append and a commit round take two checked installs and
+    install, unfenced, summary fresh.
+  - Kept unchanged apart from the accessor (`version()` → `stamp()`,
+    compared as stamps): the two tracking tests, ordinary-skip,
+    moved-version and moved-plan (same version) tests.
+  - Debug and `cargo test --release --lib summarized`, default and all
+    features: 11/11.
+- **Mutations** (temporary edits on `4ba17fbf`'s tree, restored by checkout; lib
+  tests, 549 in debug default features):
+
+  | Edit | Debug | Release (`summarized`) |
+  | --- | --- | --- |
+  | M1 round-2-style wrapping allocator: `issue` returns `Some(NonZeroU64::new(self.next.fetch_add(1, Relaxed)).unwrap_or(NonZeroU64::MIN))` | 4 fail: both bound allocator tests, the identity-bound and version-bound tests | same 4 fail |
+  | M2 compare only the version: `self.stamp.map(\|s\| s.version) == Some(planned.version)` | 1 fails: moved plan at the same version (skipped check's `debug_assert`) | 1 fails (refusal assertion) |
+  | M3 let two unstamped logs match: `if planned == self.stamp` | 2 fail: identity-bound (unidentified → unidentified transplant) and version-bound (fail-closed count) | same 2 fail (refusal assertion; count) |
+  | M4 never skip: `if false && ..` | 3 fail: ordinary-skip, identity-bound, version-bound | not run |
+  | M5 wrap the version without renewing: `stamp.version = stamp.version.wrapping_add(1)` | 1 fails: version-bound (same identity after the bound) | not run |
+  | M6 no version bump in `install` (`self.advance();` deleted) | 3 fail: both tracking tests, version-bound | not run |
+  | M7 both `install_unchanged` summary writes (`incoming.rs:275,279`, `*summary = install_append(..)` → `let _ = ..`) | 159 fail (round 2: 157; the two new tests also install) | not run |
+  | M8 append arm only (`incoming.rs:275`) | 103 fail (round 2: 101) | not run |
+  | M9 checked path's summary write (`self.summary = next.install(..)?` → `next.install(..)?`) | 3 fail: moved-version, identity-bound, version-bound | not run |
+
+- **Per-write path.** The staged stamp and the install compare are 16 B
+  instead of 8 B, plus the `Option` test and a `checked_add` at install;
+  `Pending` is 16 B larger. No atomic, allocation or metadata comparison per
+  write.
+
+Deterministic driver at width 1 (`R3_DRIVE=200000,1,1`, `drive.py`, builds of
+`0ea00498` and `a5937602`, quiet Mac, load 1.9, no other benchmark process,
+3 interleaved pairs, instructions and cycles from `/usr/bin/time -l`):
+
+| Pair | `0ea00498` ns/write | `a5937602` ns/write | Ratio | Instructions/write | Cycles/write |
+| ---: | ---: | ---: | ---: | --- | --- |
+| 1 | 3,032.9 | 3,029.8 | 0.999 | 44,919 → 45,050 | 9,606 → 9,614 |
+| 2 | 3,025.3 | 3,026.5 | 1.000 | 44,915 → 45,028 | 9,512 → 9,509 |
+| 3 | 3,031.6 | 3,022.3 | 0.997 | 44,897 → 45,027 | 9,523 → 9,493 |
+
+Medians: 3,031.6 → 3,026.5 ns (−0.2%), 44,915 → 45,028 instructions
+(+0.25%, about 19 per persistence round at 6 rounds per write; every pair
+higher), 9,523 → 9,509 cycles (−0.1%). Time within noise.
+
+Because `Pending` grew, the single-1 cell against `bc8fafb6` (`run.py`, 1
+client, batch 1, 131,072 writes, `--server-workers 1`, whole-process CPU
+ns per write, 5 interleaved pairs, same session):
+
+| Pair | `bc8fafb6` | `a5937602` | Ratio |
+| ---: | ---: | ---: | ---: |
+| 1 | 11,758 | 11,521 | 0.980 |
+| 2 | 11,474 | 11,382 | 0.992 |
+| 3 | 11,594 | 11,352 | 0.979 |
+| 4 | 11,800 | 11,592 | 0.982 |
+| 5 | 11,594 | 11,362 | 0.980 |
+
+Median 11,594 → 11,382 (−1.8%; median pair ratio 0.980). Round 1's single-1
+result (−1.8 to −3.5%, 15-pair median ratio 0.98) stands, so the four-cell
+result stands; the other three cells were not rerun (Sol's round-2 review:
+not required for a construction-side change and a per-write delta within
+noise).
+
+Checks (Linux, cores 4–9, `-j 4`): `cargo +stable fmt --all -- --check` and
+matched fmt; strict Clippy with default, `--all-features`,
+`--no-default-features` and `--no-default-features --features native`, and
+the matched workspace, zero diagnostics; default `--lib --test volatile --test
+raft --test snapshot --test log_owned --test worker --test runtime` (548 lib,
+1 ignored, + 11/81/27/5/9/57) and all features (550 lib, 1 ignored, + the
+same), one configuration at a time; `--release --lib summarized` 11/11 in
+default and all features; matched tests 75/75 in default and all features.
+
+#### V3e merge record and the single-1 judging rule (20 October 2026, PR 21 → main `3b00d02c`)
+
+Reviews: GPT-6.1-Sol approve; Claude Opus 5.5 approve (joint → final and
+same-id truncation adversarial tests; the election reset proven necessary by
+mutation in debug and release). Exclusive suites on head `5a316689`
+(`target/claude/research-r4/pr21-suites/`): checks 7/7 clean; default
+2,601 / 0; no-default 1,337 / 0 plus `representative_relay_model` 9 / 0 alone;
+all-features 2,904 / 0 plus the relay model 9 / 0 alone; native-only
+1,922 / 0; matched 75 / 0.
+
+The single-1 cell measured +1.5 to +2.1% while the driver measured −12.5% and
+instructions fell. Both reviewers judged the control build (head plus a busy
+loop adding back the removed time, which ran single-1 faster than both head and
+base) valid evidence that this cell is sensitive to the one-worker co-location
+wake/park pattern (system CPU +8%, context switches +7–10%, user time −2%),
+not to library CPU. The user accepted the result on 20 October 2026 and the
+rule adopted from here on for singleton slices is: judge by the fixed-schedule
+driver, single-16 and both bulk cells; single-1 remains a guard where a
+regression counts only when no such control explains it. The instrument fix
+(client on its own thread, or server-only CPU) is a separate harness item.
+Folded at merge from the reviews: a debug assertion that only a leader
+refreshes the cached peer order, and the `peer_slots` module doc on same-id
+truncation.
+
+#### V3e schema plan: per-peer replication slots (20 October 2026)
+
+Brief: `target/claude/research-r4/v3c-profile.md` §§3–5 (slice 3). Branch
+`cpu/peer-slots` from main `12fb21de` (V3d merged at `e7520ce1`; the docs
+commit on top changes no code). Gate base: `e7520ce1`.
+
+Profile cost (`d379783d`, driver width 1 and single-1 running view): the
+leader's outstanding-request map empties and refills every round.
+`retire_replication` → `BTreeMap::remove` 137–152 ns (the last remove frees
+the root node, 75), `append_for` / `receive_appended` insert and get about
+55–60, the per-broadcast `peers()` `Vec` 87–100 (collect 88, drop 11) and
+`quorum::frontier`'s `Vec` collect, sort and free 74–137: about 421 ns per
+single-1 write, 70–95% recoverable.
+
+Mutation sites, read in `12fb21de`:
+
+| Structure | Writers | Readers |
+| --- | --- | --- |
+| `requests: BTreeMap<NodeId, Replication>` | insert: `append_for` (two arms), `replicate_admitted`; remove: `retire_replication` (`receive_appended`, `receive_snapshot_ack`, `receive_compacted`); clear: `clear_replication_requests` (term changes in `receive*`, `campaign`, `configuration_changed`, `become_leader`, step-down after retirement, `After::Compact`, `After::CheckpointCompact`, batched repair promotion, storage failure) | `append_for`, `receive_appended`, `receive_snapshot_ack`, `receive_compacted`, `early_peer`, `original_replication`, `is_empty_alias`, `broadcast_after_admission_into`, `broadcast_ready_peers_into`, `snapshot_send`, `RequestWindow::current_replication` |
+| `admitted_ranges`, `empty_append_aliases` (same keys, native early path) | insert: `replicate_admitted`; remove: `retire_replication`, `consume_empty_alias`, `receive_compacted`; clear: `clear_replication_requests` | `early_peer`, `admitted_entry`, `original_replication`, `is_empty_alias`, `broadcast_after_admission_into` |
+| `peers()` (fresh `Vec` per call) | — | hot: `broadcast_into`, `broadcast_ready_peers_into`, `broadcast_after_admission_into`; cold: `voting_peers`, `initialize_replication`, `retirement_announcements` |
+| `quorum::frontier` (recursive `Vec` per branch) | — | `maybe_commit_into` via `Membership::frontier`; public `Policy::frontier` / `JointPolicy::frontier` |
+
+Every configuration change runs `configuration_changed`, which clears all
+three request maps; so does every leadership change. A membership change
+therefore never carries an outstanding replication across: there is nothing
+to remap, and the slot table is rebuilt from empty, exactly like the maps.
+
+- **Data shape.** `src/raft/peer_slots.rs`: `PeerSlots<T: Copy>` with
+  `slots: Vec<(NodeId, Option<T>)>` sorted by `NodeId` and an `occupied`
+  count. Map-shaped API so every caller and test keeps its form: `get`,
+  `insert`, `remove`, `clear`, `contains_key`, `len`, `is_empty`, `iter`
+  (occupied slots in `NodeId` order, the `BTreeMap` order) and `Index`.
+  `requests`, `admitted_ranges` and `empty_append_aliases` become
+  `PeerSlots<_>`; `repair_requests` (candidate only, cold) stays a map.
+- **Slot invariant.** Keys are unique and sorted; `occupied` equals the
+  number of `Some` values; a key exists only for a peer inserted since the
+  last `clear`. `get`/`len`/`iter` see exactly the `Some` entries, so every
+  read returns what the map returned.
+- **Transitions.** `insert`: binary search; a found slot is overwritten in
+  place, a new key is inserted at its sorted position (no allocation once
+  the capacity has been reached). `remove`: the value is taken and the key
+  kept (a tombstone), so the next round's `insert` for that peer is an
+  in-place write: this is the per-round path, with no allocation or free.
+  `clear`: truncates every key (keeping the capacity).
+- **Lifetime bound.** Production inserts are only for peers of the
+  configuration that `initialize_replication` set up (`append_for` indexes
+  `next_index[&peer]`, `replicate_admitted` requires `early_peer`), and every
+  configuration or leadership change clears. So the key count is at most the
+  current membership's replica count, and no slot survives a departed peer;
+  the capacity is at most the largest replica set since the core started,
+  which `Configuration::new` bounds (`max_voters` plus learners). No
+  counter or lifetime budget.
+- **Peer order.** `peer_order: Vec<NodeId>` with `peer_order_for:
+  Option<ConfigurationId>`: `refresh_peer_order` rebuilds it in place
+  (same `replicas()` order, self excluded) when `membership().id()` differs,
+  and `configuration_changed` and `become_leader` reset it. The three hot
+  broadcasts iterate it by index (they do not change membership). A leader's
+  accepted membership changes only through its own strictly increasing
+  configuration ids, so the id identifies the replica set; debug builds
+  `debug_assert_eq!` the cache against a fresh `peers()` on every use.
+  Bounded by the replica count. Cold callers keep `peers()`.
+- **Frontier.** `quorum::frontier` fills a stack buffer (`[u64; 16]` per
+  majority branch, `[(u64, u64); 16]` per weighted branch) when the branch
+  has at most 16 children and a `Vec` otherwise, then sorts exactly as today.
+  Depth is bounded by `Limits::max_depth`, so the stack use is at most 33
+  levels × 256 B. Same values, same signature. Debug builds compare every
+  result with the old `Vec` implementation (kept under
+  `cfg(debug_assertions)`).
+- **Map oracle.** In debug builds `PeerSlots` also keeps the old
+  `BTreeMap<NodeId, T>` and checks every operation's result and the whole
+  occupied view against it, so every debug test (unit and integration) runs
+  the slot form and the map form side by side.
+- **Failure and cleanup.** No new error. `insert` cannot fail (`Vec::insert`
+  aborts only on allocation failure, as `BTreeMap::insert` did).
+- **Public API.** None. `Replication`, `AdmittedRange` and
+  `EmptyAppendAlias` gain `Debug, PartialEq, Eq` derives (crate-private).
+- **Acceptance.** Existing replication, frontier and commit tests unchanged.
+  New `src/raft/peer_slots_tests.rs`: (1) leader histories with a learner
+  join and a joint change mid-flight (requests outstanding to departing and
+  arriving peers), retirement of the leader, a lagging follower (refusals
+  and next-index backoff), and conflict truncation on a deposed leader that
+  is re-elected; at every step the commit decision equals the one recomputed
+  from the old map frontier, the slot view equals the map oracle, and the
+  slot keys are a subset of the current membership's peers (no departed
+  peer, key count ≤ replica count); (2) a randomized `PeerSlots` versus
+  `BTreeMap` operation history; (3) a randomized frontier comparison over
+  majority and weighted trees with branches of 1–40 children (both the
+  stack and the `Vec` buffers). Named mutation runs with counts. Driver
+  widths 1/231/515 (3 pairs) base vs head with samply per-site attribution
+  at width 1; the four-cell gate (`fwmac.sh e7520ce1 <head> 5`);
+  attribution controls once; fmt, four strict Clippy builds, matched
+  fmt/Clippy, suites.
+
+#### V3e implemented: per-peer replication slots (20 October 2026)
+
+Commits on `cpu/peer-slots` (from main `12fb21de`): `899072f6` (slots, peer
+order, frontier, oracles, tests, with the schema plan above), `0f281be2`
+(full slot view compiled only for the oracle and tests; release builds warned
+about dead code), `c030e952` (peer-order reset only at election, same-id
+replacement test) and `713ead7c` (reference frontier kept for release-mode
+tests). Final code head: `713ead7c`. The driver, profiles, two gate runs,
+the control and the attribution runs used `899072f6`; the third gate run used
+`713ead7c`. Between the two the hot path is unchanged: the later commits
+remove one store from `configuration_changed`, add a `cfg` to a function
+release builds never call, and change tests.
+
+- **Public API: no change.** Internal: `Raft.requests`, `admitted_ranges` and
+  `empty_append_aliases` are `PeerSlots<_>` (`src/raft/peer_slots.rs`);
+  `Raft` gained `peer_order: Vec<NodeId>` and `peer_order_for:
+  Option<ConfigurationId>`; `Replication`, `AdmittedRange` and
+  `EmptyAppendAlias` derive `Debug, Eq, PartialEq`; `quorum::frontier` keeps
+  its signature. No caller or existing test changed its form; one
+  `RequestWindow::current_replication` match was split because the two
+  request tables now have different types.
+- **Guarantees kept.** Every read of the three tables returns what the map
+  returned (occupied slots, in `NodeId` order); the frontier is the same
+  value; the hot broadcasts address the same peers in the same order. Debug
+  builds check all three on every call: the slots against a shadow
+  `BTreeMap`, the frontier against the old `Vec` code, the cached order
+  against a fresh `peers()`.
+- **Lifetime statement.** A slot key exists only for a peer inserted since
+  the table's last `clear`, and production inserts only address peers of the
+  installed configuration (`append_for` indexes `next_index[&peer]`,
+  `replicate_admitted` requires `early_peer`). Every configuration change,
+  term change and election clears the tables. So each table holds at most the
+  installed membership's replica count of keys and never a departed peer's;
+  its capacity is at most the largest replica set since recovery, which
+  `Configuration::new` bounds. The peer order is at most the replica count,
+  rebuilt in place. No counter, budget or lifetime limit.
+- **Differences from the plan.**
+  - Peer-order reset. The plan reset the cache in `configuration_changed`
+    and `become_leader`. Mutation M3 (no reset in `configuration_changed`)
+    survived every test: the id check already covers every change a leader
+    can make, and only a leader reads the cache. The case that needs a reset
+    is a reused id. A configuration id is unique along one log, not across a
+    truncation: a follower's uncommitted entry can be replaced, in one
+    install, by another leader's entry with the same id and other replicas,
+    and install (equal ids) resets nothing. The election reset covers it; the
+    other reset was removed (`c030e952`) and the new
+    `peer_order_follows_a_same_id_configuration_replaced_by_truncation` test
+    reproduces the case on durable member cores and fails without the
+    election reset.
+  - The slot-key bound is against the *installed* membership: while a
+    configuration is pending, the slots (like the maps) still hold the old
+    peers until it installs.
+- **Tests** (`src/raft/peer_slots.rs`, `src/raft/peer_slots_tests.rs`,
+  `src/quorum.rs`):
+  - `slots_match_the_map_over_a_random_operation_history` (20,000 seeded
+    insert/remove/clear/get steps against a `BTreeMap`; keys at most the 9
+    peers; capacity stops growing) and
+    `a_retired_slot_is_rewritten_in_place_without_allocating` (1,000 rounds,
+    buffer pointer unchanged).
+  - `buffered_frontier_matches_the_vec_form_on_random_trees` (400 seeded
+    majority and weighted trees with root widths up to 40, so both the stack
+    buffer and the `Vec` run; absent voters and ties).
+  - `slot_and_map_forms_decide_the_same_commits_through_joint_change_and_retirement`:
+    a real durable leader with a follower model that delivers out of order and
+    loses half of the lagging peer's messages (retries, refusals, next-index
+    backoff); a learner join and a joint change accepted while requests are
+    outstanding, Final, and retirement (the leader stops being a voter, steps
+    down and keeps no slot). After every core call: no slot outside the
+    installed membership, a leader's cached order equals `peers()`, every
+    planned commit equals the old map-form frontier (66 decisions) and no
+    quiescent leader misses a commit the map form would make (745 checks);
+    in debug builds it also counts 999 slot-oracle and 464 frontier-oracle
+    comparisons.
+  - `no_slot_is_retained_for_a_departed_peer`: learner 5 leaves while a
+    request to it is outstanding; its late reply is refused and creates no
+    slot; afterwards no table holds 5 and each holds at most 3 keys.
+  - `slots_follow_conflict_truncation_and_re_election_of_a_deposed_leader`
+    (real volatile cores: an orphan entry, a new leader's truncating append,
+    then the old leader re-elected) and the same-id test above.
+  - Existing replication, frontier, commit, membership and joint tests are
+    unchanged and pass with the debug oracles active (unit and integration).
+- **Mutations** (temporary edits on the final tree, restored by checkout;
+  debug: all 557 lib tests; release: the `peer_slots` and `quorum::tests`
+  filters, 7 tests, oracles compiled out):
+
+  | Edit | Debug lib | Release (explicit assertions only) |
+  | --- | --- | --- |
+  | M1 `remove` keeps the value (`.1.take()` → `.1`) | 44 fail | 6 of 7 fail |
+  | M2 `clear` keeps keys (values set to `None`, keys kept) | 6 fail (all slot tests; departed peer) | 6 of 7 fail |
+  | M3 no reset in `configuration_changed` | survived; the reset was redundant and is removed | — |
+  | M4 no reset in `become_leader` | 1 fails (same-id replacement) | 1 fails |
+  | M5 majority median off by one (`(len − 1) / 2`, buffered form) | 3 fail | 1 fails (random trees) |
+  | M6 weighted threshold `>` → `>=` (buffered form) | 8 fail | 1 fails |
+  | M7 `occupied` not decremented on remove | 44 fail | 6 of 7 fail |
+  | M8 wide branches lose children (`Vec` buffer cut to 16) | 1 fails (random trees) | 1 fails |
+  | M9 unsorted insert (`push` instead of the sorted position) | 4 fail | 1 fails |
+
+Deterministic driver (`R3_DRIVE`, `research-r4/tools-r4/drive.py` on both
+trees, one thread), quiet Mac (load 1.9), 3 interleaved pairs, medians:
+
+| Width | `e7520ce1` ns/write | `899072f6` ns/write | Pair ratios | Instructions/write | Cycles/write |
+| ---: | ---: | ---: | --- | --- | --- |
+| 1 | 3,018.3 | 2,641.1 (−12.5%) | 0.88 0.88 0.88 | 44,997 → 40,980 (−8.9%) | 9,530 → 8,379 (−12.1%) |
+| 231 | 94.3 | 90.7 (−3.8%) | 0.96 0.96 0.97 | 1,758.7 → 1,733.1 (−1.5%) | 355.1 → 343.2 (−3.4%) |
+| 515 | 87.8 | 86.6 (−1.4%) | 0.99 0.98 0.97 | 1,857.7 → 1,841.4 (−0.9%) | 378.9 → 373.7 (−1.4%) |
+
+Per-site attribution: samply at 8 kHz on the width-1 driver
+(`R3_DRIVE=300000,1,1`), 2 runs per build, `expand_mac.py` folds,
+CPU-weighted ns per write (sampled totals run about 20% above unprofiled):
+
+| Site | `e7520ce1` incl / self | `899072f6` incl / self | Saved (incl) |
+| --- | ---: | ---: | ---: |
+| `retire_replication` (`BTreeMap::remove` 160.5, root free) | 163.4 / 163.4 | 7.6 / 1.1 | 156 |
+| `Raft::peers` (per-broadcast `Vec`) | 76.3 / 73.4 | 0 | 76 |
+| `refresh_peer_order` | 0 | 4.9 / 3.8 | −5 |
+| `quorum::frontier` (`Vec` collect, sort, free) | 135.1 / 123.6 | 74.9 / 64.1 | 60 |
+| `append_for` (map insert) | 134.6 / 82.9 | 92.8 / 27.6 | 42 |
+| `BTreeMap` insert, all callers | 53.8 | 26.5 | 27 |
+| `BTreeMap` get/index, all callers (`progress`, `next_index` remain) | 148.8 | 119.4 | 29 |
+| `PeerSlots`, all operations | 0 | 27.9 | −28 |
+| `receive_appended_into` | 446.1 / 76.0 | 224.9 / 67.8 | 221 |
+| `broadcast_ready_peers_into` | 256.9 / 65.8 | 135.8 / 47.3 | 121 |
+| `maybe_commit_into` | 201.0 / 11.5 | 135.6 / 11.1 | 65 |
+| All sampled | 3,502 | 2,853 | 649 |
+
+The named classes (map remove and its free, the peer `Vec`, the frontier
+`Vec`, map inserts) are about 330 ns of the 377 ns unprofiled saving; the
+slots cost 28 ns. Measured against the profile's estimate (421 ns on
+`d379783d`, 70–95% recoverable): the width-1 saving is within it.
+
+Gate: `target/claude/tools/fwmac.sh e7520ce1 <head> 5`, quiet Mac (load
+0.4–2.0, no other benchmark process), whole-process CPU per completed write:
+
+| Cell | Run 1 (`899072f6`) | Run 2 (`899072f6`) | Run 3 (`713ead7c`) | 15-pair median ratio | Expected |
+| --- | --- | --- | --- | ---: | ---: |
+| bulk 4096/4, 16 workers | 212 → 212 (0.0%) | 214 → 212 (−0.9%) | 211 → 215 (+1.9%) | 1.00 | ~0 |
+| singleton 1/1, 16 workers | 20,708 → 20,614 (−0.5%) | 20,913 → 20,509 (−1.9%) | 21,128 → 20,893 (−1.1%) | 0.99 | −1.3 to −1.8% |
+| bulk 4096/4, 1 worker | 187 → 189 (+1.1%) | 191 → 185 (−3.1%) | 189 → 188 (−0.5%) | 1.01 | ~0 |
+| singleton 1/1, 1 worker | 11,447 → 11,618 (+1.5%) | 11,407 → 11,647 (+2.1%) | 11,380 → 11,614 (+2.1%) | 1.02 | −2.3 to −3.1% |
+
+Pair ratios, run 1 / 2 / 3: bulk-16 `0.99 1.00 1.00 1.00 1.00` / `0.98 1.00
+0.98 1.00 1.01` / `1.01 1.05 0.95 1.02 1.00`; single-16 `1.00 0.99 1.00 0.98
+0.98` / `0.97 0.99 1.00 0.98 0.94` / `1.01 1.04 0.85 0.98 0.99`; bulk-1
+`1.05 1.02 1.03 1.01 1.01` / `0.87 1.00 1.02 0.97 0.96` / `1.01 0.99 0.99
+0.93 1.05`; single-1 `1.01 1.02 1.02 1.00 1.01` / `1.01 1.02 1.02 1.05 0.97`
+/ `1.04 0.98 1.02 1.00 1.03`. Single-1 throughput falls 3.6–4.0% in every
+run.
+
+**Single-1 is slower although the head does less work.** The single-1
+profile (samply, 2 runs per build) still shows the saving at the same sites
+(`retire_replication` −104, `peers` −74, `frontier` −66, `append_for` −35 ns
+per write, slots +22), but more time in tokio's select/notify/oneshot paths
+and the scheduler, and `time -l` over 3 runs per build shows:
+
+| Workers | User s | Sys s | Involuntary context switches per write | Instructions per write |
+| ---: | --- | --- | --- | --- |
+| 1 | 1.00–1.02 → 0.98–1.00 | 0.46–0.48 → 0.50–0.53 | 1.55–1.57 → 1.66–1.73 | 90,611–90,841 → 89,046–90,320 |
+| 16 | 1.48–1.53 → 1.42–1.43 | 1.22–1.30 → 1.25–1.27 | 3.29–3.31 → 3.28–3.30 | 119,351–120,077 → 115,634–115,961 (−3.4%) |
+
+Control (the user-visible test of the cause): a scratch head with a busy
+loop in `retire_replication`, iteration count from `V3E_SPIN`, calibrated on
+the width-1 driver (0: 2,653 ns; 100: 2,996 ns; 200: 3,522 ns; base 3,006 ns),
+so 100 iterations add back about the time the slots removed. Five
+interleaved rounds of `run.py` (same session):
+
+| Build | single-1 ns/write | single-1 rate/s | single-16 ns/write |
+| --- | ---: | ---: | ---: |
+| `e7520ce1` | 11,352 | 103,208 | 20,921 |
+| `899072f6` | 11,609 (+2.3%; pairs 1.00 1.03 1.03 1.02 1.03) | 98,329 | 20,740 (−0.9%) |
+| `899072f6` + 100-iteration spin | 11,281 (−0.6%; pairs 1.00 1.00 1.01 0.97 0.99) | 104,449 | 20,656 (−1.3%) |
+
+Adding back the removed time makes single-1 cheaper than the head and as fast
+as the base. So single-1's +1.5 to +2.1% is not library work: with one server
+worker shared by the three actors and one client thread, the server now
+finishes a write's tail work (follower acknowledgements and commit notices,
+where these savings are) before the client's next request arrives, parks,
+and pays a kernel wake on both sides (+7 to +10% context switches, +8% system
+time). The spin build is not a candidate; it exists only to show the cause.
+Single-16 (several workers) has no such shift and improves. Any later slice
+that shortens the same tail (V3f) can meet the same threshold in this cell.
+
+Attribution controls (`--attribution true`; one run per cell per revision,
+bulk-1 three runs; equal final frontiers, all writes completed, 0 phase
+failures everywhere):
+
+| Cell | Leader persists | Leader batches (max width) | Follower persists (sum) | Follower sends (sum) |
+| --- | --- | --- | --- | --- |
+| single-1 | 264,195 → 264,195 | 132,096 → 132,096 (1 → 1) | 488,337 → 488,606 (+0.06%) | 488,426 → 488,696 |
+| bulk-16 | 14,870 → 15,277 | 8,950 → 9,397 (1,952 → 2,188) | 11,795 → 11,831 | 13,882 → 13,896 |
+| bulk-1 (3 runs) | 26,337–28,479 → 25,650–30,130 | 21,316–23,438 → 20,698–25,084 | 11,284–11,368 → 11,110–11,167 | 15,823–15,843 → 15,495–15,844 |
+
+- Singleton: the leader persists exactly 264,195 at width 1 in both.
+  Followers are unchanged in this run; an earlier single-1 run of each build
+  gave 492,455 → 482,295 (−2.1%), so their count varies by about 2% between
+  runs in both builds and does not explain the cell's direction.
+- Bulk-16: leader batches +5% and persists +2.7%, followers unchanged;
+  within the ±15% single-run spread.
+- Bulk-1: the base's and the head's batch counts overlap (21.3k–23.4k and
+  20.7k–25.1k), followers within 1.5%: the one-worker spread seen in V3c and
+  V3d.
+
+Checks (Linux, cores 4–9, `-j 4`): `cargo +stable fmt --all -- --check` and
+matched fmt; strict Clippy with default, `--all-features`,
+`--no-default-features` and `--no-default-features --features native`, and
+the matched workspace, zero diagnostics (pre-push hook, enabled, on every
+push); a release build of the library with no warnings; default `--lib
+--test volatile --test raft --test snapshot --test membership --test learners
+--test retirement --test learner_enrollment --test member_recovery --test
+log_owned --test worker --test runtime --test effect_owner` (556 lib, 1
+ignored, + 11/81/27/32/23/7/5/43/5/9/57/210) and all features (558 lib, 1
+ignored, + 11/81/27/32/24/7/5/44/5/9/57/210), one configuration at a time;
+`--release --lib -- peer_slots quorum::tests` 7/7; matched tests 75/75 in
+default and all features.
+
+Next candidates found here (not done): `progress` and `next_index` are still
+maps (`BTreeMap` get/index 119 ns per write at width 1); moving them into the
+slots would remove most of it. The single-1 park threshold above is a
+harness topology item for the orchestrator.
+
+#### V3f merge record (PR 24)
+
+Merged 21 October 2026 as `1e56e9f5` from final PR head
+`deaf8121e700bc1c2f6f86440d2699c560da7114`. Both reviewers approved
+`7845992b` (production code `e3471f31`):
+[GPT-6.1-Sol, review 5587412347](https://github.com/KarlLivesey/VoteBoat/pull/24#pullrequestreview-5587412347)
+and [Claude Opus 5.5, review 5587699240](https://github.com/KarlLivesey/VoteBoat/pull/24#pullrequestreview-5587699240).
+Their APPROVE verdicts are posted as comments because GitHub disallows
+self-approval. Round 2 folds the reviewer-supplied Compact/Delta refusal
+and spent-plan regressions plus documentation corrections; production code
+is unchanged from the reviewed head.
+
+Full exclusive-checkout gate on `deaf8121` (Linux, cores 4–9): default
+2,603 / 0; all-features 2,906 / 0 plus relay 9 / 0 (2,915 total);
+no-default-features 1,337 / 0 plus relay 9 / 0 (1,346 total);
+native-only 1,924 / 0; matched 75 / 0. Every expected executable has its
+own passing result: 124 default, 124 all-feature, 118 no-default, 120
+native-only and one matched executable. No filters were applied; the
+existing ignored library test remains in each root configuration.
+The original pre-fold default run was 2,601 / 0; the final-head rerun adds
+exactly the two library regressions and keeps every other target's count.
+Root fmt, four strict all-target Clippy configurations and matched
+fmt/Clippy passed (7/7, zero diagnostics). The split runner omits
+doctests, so `cargo +stable test --doc --locked --offline` was run
+separately with `--all-features` and `--no-default-features` after the
+sequence completed: both passed with zero doctest cases. Default and
+native full Cargo runs include their doctest result. Logs and per-binary
+audits are local in the main checkout at
+`target/claude/research-r4/pr24-suites/` (`gate-audit.json`);
+`test-default-final.log` preserves the final-head run separately.
+
+The code merged automatically with V3e. All three documentation conflicts
+retain both slices' complete sections, main's Done V3e row and its
+single-1 judging rule. On merged source `1e56e9f5`, default library
+564 / 0 and all-feature library 566 / 0 passed, each with volatile 11 / 0,
+Raft 81 / 0 and snapshot 27 / 0 (683 and 685 total); matched passed
+75 / 0. The enabled tracked pre-push hook also passed all seven checks
+on the merged source with zero diagnostics. Feature configurations ran
+sequentially in the owned checkout; later builds used
+`CARGO_INCREMENTAL=0` to bound compiler cache growth.
+
+P3 disposition: round 2 corrects `install_pending_plan`'s return type to
+`RaftError` and the peer-slots documentation conflict count to three.
+This merge record corrects the driver pair-consistency and bulk run-median
+wording and explicitly records the unattributed ~75 ns sampling gap below.
+The optional release-mode Busy refusal and installer-body consolidation
+remain deferred. T4 remains open: V3f is complete as a measured
+library/driver improvement, with no demonstrated whole-process cell gain.
+
+#### V3f schema plan: in-place install (20 October 2026)
+
+Brief: `target/claude/research-r4/v3c-profile.md` §3 (class "Pending /
+OwnedNextLog / Result by-value moves", ~350 ns at driver width 1 on
+`d379783d`) and §5 item 4. Branch `cpu/in-place-install` from main `379668af`
+(V3d and EO1 merged; V3e's peer slots in review on `cpu/peer-slots`, not
+included: this slice touches only the install path).
+
+Base profile (`379668af`, width-1 driver, samply 8 kHz, 2 runs, sampled
+3,519 ns per write against 3,734–3,786 measured), memmove self time by
+nearest library owner frame, ns per write: `install_pending_into` 124.5,
+`stage_pending_into` 60.3, `OwnedNextLog::install_unchanged` 31.2,
+`SummarizedLog::install` 23.3, `persist_update_into` 15.9, `OwnedAppend::new`
+11.4 (266.6 in all); `Result::branch` self 37.2 (all callers).
+
+By-value moves on the install path today (each run on every persistence
+round; six rounds per write at width 1):
+
+| # | Site | Moved | After this slice |
+| ---: | --- | --- | --- |
+| 1 | `install_pending_into`: `self.pending.take()` | the whole `Pending` (1,104 B) out of the core onto the stack | `self.pending.as_mut()`: the plan is installed where it lies |
+| 2 | `self.durable.install(p.next, p.planned)` | `OwnedNextLog` (672 B) into `SummarizedLog::install` | `&mut p.next` |
+| 3 | `install_unchanged(self, ..)` / `install(self, ..)` (`match self.0`) | the `OwnedAppend` / `CommitAdvance` out of the plan | `match &mut self.0`; only the suffix (32 B) is taken, and only after every check passed |
+| 4 | `install_append(current, suffix, summary) -> LogSummary`, then `*summary = …` | the planned `LogSummary` (336 B) in by value and out by value | one copy, from the plan into the log's summary |
+| 5 | checked path: `prepare_install(self) -> Result<PreparedOwnedLog, _>`, `.install(self) -> LogSummary`, `Result<LogSummary, _>` back to `SummarizedLog::install` | the plan into a large `Result`, out again, and the summary through a second `Result` | checks by reference, then install; the in-place call returns `Result<(), StorageError>` |
+| 6 | `after_durable(p.after, p.reply, ..)` | `After` (16 B) and `Option<Message>` (256 B) out of the stack copy | taken from the slot (`mem::replace`, `Option::take`); same sizes |
+
+Kept by value: `OwnedNextLog::install` / `prepare_install` and
+`PreparedOwnedLog` for the owned provider (`log/owned.rs`) and the
+transition tests, and the native store's `into_change` path (no T4 cell runs
+them). Their checks and errors are the same functions the in-place path
+calls.
+
+- **Data/API shape (all crate-private).**
+  - `OwnedNextLog::install_in_place(&mut self, current: &mut GroupLog,
+    summary: &mut LogSummary, unchanged: bool) -> Result<(), StorageError>`
+    replaces `install_unchanged`. `unchanged` is the V3d stamp decision: an
+    append or commit advance skips its predecessor comparison only then
+    (debug builds still assert it); otherwise, and for every cold `Other`
+    plan, the full check runs first. Every check precedes the first
+    mutation of `current`, `summary` or the plan.
+  - `NextLog::check_install(&self, current, update)` (the body of today's
+    `prepare_install`, which now calls it) and
+    `NextLog::install_in_place(&mut self, current, update) ->
+    Result<LogSummary, StorageError>` for the cold plans: a `Full` plan
+    swaps its planned log into `current` (the old log stays in the spent
+    plan and is dropped when the slot is cleared, a few instructions later);
+    a delta takes its suffix; a compaction trims as before.
+  - `SummarizedLog::install(&mut self, next: &mut OwnedNextLog, planned:
+    Option<LogStamp>)`: the stamp rule is unchanged (skip only when
+    `planned` is `Some` and equal to the log's own stamp; the stamp still
+    travels in `Pending.planned`). On error nothing changes: log, summary,
+    stamp and the plan.
+  - `Raft::install_pending_plan(&mut self) -> Result<Installed,
+    RaftError>` is the only caller. It installs `self.pending`'s plan in
+    place; on `Ok` it takes `membership`, `after` and `reply` out (a
+    16-byte-aligned 8 + 16 + 256 B, the parts the core still uses) and sets
+    the slot to `None`; on `Err` it returns before touching the slot.
+    `install_pending_into` calls it and, on `Err`, calls `storage_failed()`
+    exactly as today.
+  - `Pending` and `OwnedNextLog` keep their fields and sizes (1,104 B and
+    672 B): no size-bound change.
+- **State transitions of the pending slot.** Empty → Staged
+  (`stage_pending_into`) → install attempt. Failure: the plan is intact in
+  the slot when the install returns; `storage_failed()` then fences the
+  core and empties the slot, as today (so a failed install still leaves no
+  pending dependency, and the existing V3d tests are unchanged). Success:
+  the plan is spent (its suffix now belongs to the log, a `Full` plan holds
+  the old log) and the slot is emptied before any fallible step
+  (`configuration_changed`, retirement announcements, `after_durable`) and
+  before anything can stage again: the same point at which `take()` emptied
+  it before.
+- **What guards "cleared only after success".** Structure: the clear is on
+  the `Ok` arm of `install_pending_plan` only, and the install returns its
+  error before any mutation. A debug assertion in `stage_pending_into` that
+  the slot is empty: a spent plan left behind, or a live plan overwritten,
+  trips it on the next round in every debug test. Tests: below.
+- **Failure and cleanup.** Every install error kind keeps today's result:
+  the same `RaftError::Storage(StorageError::Rejected(..))`, the core fenced,
+  no pending dependency, log and summary unchanged.
+- **Restart and partial progress.** Unchanged: plans and stamps are not
+  persisted; a recovered core has no pending plan. A spent plan exists only
+  inside `install_pending_plan`.
+- **Public API.** None.
+- **Acceptance.**
+  - New tests (debug and `--release`), each failure kind through
+    `install_pending_plan` and then through the public completion path:
+    (1) predecessor mismatch: an append and a commit advance staged, the log
+    then changed behind them (test `edit`), so the stamp moved and the
+    checked compare refuses; (2) foreign stamp: a plan moved to another core
+    at the same version, refused by the checked compare; (3) cold-plan
+    refusal: a full plan (configuration entry) whose `NextLog` check refuses
+    after the log changed (the store-validation path the owned provider also
+    uses). Each checks that the returned error is today's, that `Pending`
+    is intact (same update, metadata, suffix, ticket, `After`, reply, stamp
+    and membership), and that the log, summary and stamp are unchanged; then
+    that the public path returns the same error and leaves the core fenced
+    with no pending dependency. A success test: after an install the slot is
+    empty and the installed log equals the oracle.
+  - Mutation proofs: without the clear on success, the success test fails
+    (and the stage assertion fires across the suite); with the suffix taken
+    before the check, the intact test fails.
+  - Unchanged: twin, completion, volatile/durable, sink and V3d stamp tests;
+    `pending_and_plan_sizes`.
+  - Measurement: per-site memmove before/after from width-1 driver samply
+    folds (2 runs per build); driver widths 1/231/515 (3 pairs); the gate
+    `fwmac.sh 379668af <head> 5`; attribution controls once (singleton
+    leader persists exactly 264,195 at width 1; bulk followers side by side).
+    Single-1 judging rule (PR 21's reviewers): judge by the driver, single-16
+    and both bulk cells; single-1 is a guard, and an adverse move counts only
+    if a control (head plus a busy loop adding back the removed time) does
+    not explain it; if it moves adversely, run that control once.
+  - Checks: fmt, the four strict Clippy builds, matched fmt/Clippy; `--lib`
+    (debug, and `--release` for the install tests), `volatile`, `raft`,
+    `snapshot`, `log_owned`, `worker`, `runtime`, `effect_owner`, matched
+    tests, in default and all features, one configuration at a time.
+- **Step 2 (staging side), only if the step-1 profile supports it.** The
+  staging moves (`stage_pending_into` 60.3, `persist_update_into` 15.9,
+  `Result::branch` on the plan) are a separate step, planned as an addendum
+  here before editing, after the step-1 profile shows what is left.
+
+#### V3f implemented: in-place install (20 October 2026)
+
+Commits on `cpu/in-place-install` (from main `379668af`): `7b1a3038` (the
+schema plan above), `f4803a4d` (step 1: in-place install, clear after
+success, staging assertion, tests) and `e3471f31` (`Installed` declared
+beside `Pending`, so the code merges with V3e without a conflict; comment
+wording). Code head: `e3471f31`. The driver and the profiles used
+`f4803a4d`; `e3471f31` changes only a declaration's position and a comment.
+
+- **Public API: no change.** Internal: `OwnedNextLog::install_in_place`
+  replaces `install_unchanged`; `NextLog::check_install` and
+  `NextLog::install_in_place` (cold plans), `CompactDelta::install_ref`;
+  `SummarizedLog::install` takes `&mut OwnedNextLog`;
+  `Raft::install_pending_plan` and the `Installed` parts struct. The
+  by-value `OwnedNextLog::install` is now test-only (the owned provider uses
+  `prepare_install`, unchanged). `Pending` 1,104 B and `OwnedNextLog` 672 B
+  are unchanged; `pending_and_plan_sizes` is unchanged and passes.
+- **Guarantees kept.** Every install still checks exactly what it checked:
+  the V3d stamp rule decides the skip (`planned` must be `Some` and equal to
+  the log's own stamp; the stamp still travels in `Pending.planned`), and
+  every other install, and every cold plan, runs the same comparisons with
+  the same errors. All checks precede the first change, so a refused install
+  changes nothing, the plan included; the core then fences through the same
+  `storage_failed()` call as before, which empties the slot as before. The
+  existing V3d tests that assert "fenced, no pending dependency, log
+  unchanged" after a refused install are unchanged and pass.
+- **Difference from the plan.** Step 2 (staging) was not done. The step-1
+  profile leaves `stage_pending_into` at 65.0 ns memmove per write (its
+  `self.pending = Some(Pending { .. })` line: the 672 B plan argument and
+  the 256 B reply written into the slot; the x86 code writes them straight
+  into the slot, no stack temporary) and `persist_update_into` 14.1 ns (the
+  `?` on `plan_owned`'s `Result`). Removing the plan copy would need the
+  plan built inside the slot expression, that is a second, core-only,
+  two-phase planning API beside `plan_owned` / `plan_commit` / `plan_copy`,
+  for at most about 45 ns per write at width 1 (about 1.5% of the driver,
+  0.4% of a singleton write). Not worth a second planning path; recorded as
+  a candidate.
+- **Tests** (`src/raft/install_in_place_tests.rs`, debug and `--release`,
+  default and all features):
+  `a_failed_install_after_a_predecessor_mismatch_leaves_the_plan_intact`
+  (a follower append with its reply, and a commit advance, each staged and
+  then the log changed behind it),
+  `a_failed_install_of_a_foreign_plan_leaves_the_plan_intact` (a plan moved
+  to another core at the same version),
+  `a_failed_install_of_a_refused_full_plan_leaves_the_plan_intact` (a durable
+  leader's configuration entry, a full plan with a membership and an
+  admitted ticket, refused by the `NextLog` check) and
+  `a_successful_install_empties_the_slot`. Each failure test checks, after
+  `install_pending_plan`: today's error (`Storage(Rejected("transition plan
+  predecessor or update mismatch"))`), the pending transition intact (its
+  update, metadata, kind, full log, membership, ticket, `After`, reply and
+  stamp), the log, summary and stamp unchanged, the core not yet fenced; then
+  the public completion (`persist_volatile`, `complete`, or the completions'
+  install for the moved plan): the same error, fenced, no pending
+  dependency, log unchanged.
+- **Mutations** (temporary edits, restored by checkout):
+
+  | Edit | Result |
+  | --- | --- |
+  | M1 no `self.pending = None` after a successful install | debug lib: 146 of 555 fail (113 by the staging assertion); release `install_in_place`: the success test fails |
+  | M2 the append's suffix taken before its check | 2 of 4 install tests fail (predecessor mismatch, foreign plan) |
+  | M3 a full plan swapped into the log before its check | 2 of 4 fail (refused full plan; the success test's configuration) |
+  | M4 a commit advance's summary written before its check | 1 of 4 fails (predecessor mismatch) |
+
+Deterministic driver (`R3_DRIVE`, `research-r4/tools-r4/drive.py` on both
+trees, one thread), quiet Mac (load 1.1–1.3), 3 interleaved pairs, medians:
+
+| Width | `379668af` ns/write | `f4803a4d` ns/write | Pair ratios | Instructions/write | Cycles/write |
+| ---: | ---: | ---: | --- | --- | --- |
+| 1 | 3,010.7 | 2,914.6 (−3.2%) | 0.97 0.98 0.96 | 45,021.5 → 42,745.5 (−5.1%) | 9,496.8 → 9,139.1 (−3.8%) |
+| 231 | 93.1 | 92.0 (−1.2%) | 1.01 0.99 0.98 | 1,758.9 → 1,746.4 (−0.7%) | 349.2 → 344.9 (−1.2%) |
+| 515 | 87.5 | 87.3 (−0.2%) | 0.99 1.00 1.00 | 1,855.3 → 1,850.7 (−0.2%) | 373.9 → 372.3 (−0.4%) |
+
+Per-site attribution: samply at 8 kHz on the width-1 driver
+(`R3_DRIVE=300000,1,1`), 2 runs per build, `expand_mac.py` folds,
+CPU-weighted ns per write (sampled totals 3,519 → 3,427):
+
+| Site | `379668af` | `f4803a4d` | Change |
+| --- | ---: | ---: | ---: |
+| memmove in `install_pending_into` (`take()` 69.7 at the `Pending` take, 47.7 at the plan move into `install`) | 124.5 | 0 | −124.5 |
+| memmove in `install_unchanged` → `install_in_place` (the plan moved in; now only the 336 B summary written to the log) | 31.2 | 19.4 | −11.8 |
+| memmove in `SummarizedLog::install` (the plan moved on) | 23.3 | 0 | −23.3 |
+| memmove, install side in all | 179.0 | 19.4 | −159.6 |
+| new: dropping the spent plan at the clear (`Option<Pending>` drop glue) and taking the reply (`Option::take`) | — | 27.2 + 15.8 | +43.0 |
+| memmove in `stage_pending_into` / `persist_update_into` / `OwnedAppend::new` (not changed) | 60.3 / 15.9 / 11.4 | 65.0 / 14.1 / 12.1 | ~0 |
+| `install_pending_into` inclusive / self | 773.2 / 31.5 | 604.1 / 27.3 | −169.1 |
+| `SummarizedLog::install` inclusive | 132.1 | 90.3 | −41.8 |
+| `finish_volatile_into` inclusive | 782.1 | 615.2 | −166.9 |
+| All sampled | 3,519 | 3,427 | −92 |
+
+The 166.9 ns reduction in `finish_volatile_into` inclusive time exceeds
+the 92 ns whole-sample reduction by about 75 ns. That change elsewhere is
+unattributed; the two 8 kHz sample runs do not identify a cause.
+
+The profile's estimate for this slice was the library memmove at these
+sites, 250–330 ns of 356 on `d379783d` (single-1 running view); on
+`379668af` the install side was 179 ns of memmove at width 1 and 160 of it
+is gone. The staging side (about 90 ns) is the part left (above).
+
+Gate: `target/claude/tools/fwmac.sh 379668af 98e77aef 5` (`98e77aef` is the
+first pushed head; its code is `e3471f31`), quiet Mac (load 0.4–2.9, no
+other benchmark process), whole-process CPU per completed write, run three
+times:
+
+| Cell | Run 1 | Run 2 | Run 3 | 15-pair median ratio | Expected |
+| --- | --- | --- | --- | ---: | ---: |
+| bulk 4096/4, 16 workers | 212 → 217 (+2.4%) | 212 → 213 (+0.5%) | 213 → 213 (0.0%) | 1.00 | ~0 |
+| singleton 1/1, 16 workers | 21,057 → 20,970 (−0.4%) | 21,251 → 21,123 (−0.6%) | 21,113 → 21,176 (+0.3%) | 1.00 | about −0.5% (below) |
+| bulk 4096/4, 1 worker | 185 → 188 (+1.6%) | 189 → 187 (−1.1%) | 186 → 190 (+2.2%) | 1.01 | ~0 |
+| singleton 1/1, 1 worker | 11,446 → 11,273 (−1.5%) | 11,359 → 11,395 (+0.3%) | 11,391 → 11,380 (−0.1%) | 1.00 | about −0.9% (below) |
+
+Pair ratios, run 1 / 2 / 3: bulk-16 `0.98 1.02 0.99 1.01 1.02` / `0.99 1.01
+1.00 1.00 1.05` / `1.05 1.00 1.00 0.99 1.00`; single-16 `1.00 1.00 0.98 1.01
+1.00` / `0.99 0.97 0.99 1.00 1.06` / `1.02 1.00 1.00 1.00 0.99`; bulk-1 `1.01
+0.97 1.01 1.02 1.03` / `0.98 1.01 0.99 1.02 0.90` / `1.02 1.02 1.02 1.02
+0.97`; single-1 `0.99 0.98 0.99 0.98 0.97` / `1.02 1.00 1.00 1.00 0.99` /
+`1.00 1.00 0.99 1.00 1.00`.
+
+Judgement (PR 21's rule: the driver, single-16 and both bulk cells decide;
+single-1 is a guard). The driver medians improve at widths 1 and 231
+(−3.2% and −1.2%); width 231 includes one adverse pair (ratios
+1.01 / 0.99 / 0.98). The four cells are flat within noise (15-pair median
+ratios 1.00 / 1.00 / 1.01 / 1.00). That is the expected size: the install
+saving is about 100–170 ns per write at six persistence rounds (width 1),
+about 0.5% of a single-16 write (21.1 µs) and 0.9% of a single-1 write
+(11.4 µs), below these cells' run-to-run spread (single-16 pairs 0.97–1.06).
+A bulk round installs once per few hundred writes (under 0.5 ns per write),
+so these bulk medians stay within the observed run-to-run spread.
+Individual pair ratios have both signs in both bulk cells; bulk-16 run
+medians are all nonnegative, while bulk-1 run medians have both signs.
+The per-round evidence is the fixed-width driver. Single-1 did not move
+adversely (−1.5 / +0.3 / −0.1%,
+median ratio 1.00), so the busy-loop control was not needed and not run.
+
+Attribution controls (`--attribution true`, one run per cell per revision,
+`379668af` → `98e77aef`; 0 phase failures, all 131,072 / 3,997,696 writes
+completed, equal final frontiers 132,097 / 3,998,721 everywhere):
+
+| Cell | Leader persists | Leader admissions | Follower persists (sum) | Follower sends (sum) |
+| --- | --- | --- | --- | --- |
+| single-16 | 264,195 → 264,195 | 132,096 → 132,096 | 487,524 → 488,940 (+0.3%) | 487,611 → 489,029 |
+| single-1 | 264,195 → 264,195 | 132,096 → 132,096 | 496,937 → 503,071 (+1.2%) | 497,027 → 503,161 |
+| bulk-16 | 14,651 → 14,587 | 8,856 → 8,810 | 11,758 → 11,759 | 13,942 → 13,918 |
+| bulk-1 | 24,667 → 27,135 | 19,715 → 22,137 | 11,295 → 11,307 | 15,757 → 15,702 |
+
+- Singleton: the leader persists exactly 264,195 at width 1 in both. The
+  single-1 followers' +1.2% is inside the ~2% run-to-run spread V3d and V3e
+  recorded for this count in both builds.
+- Bulk: followers and sends are side by side (within 0.4%). The bulk-1
+  leader's admission count moves +12%, inside the 17–32% spread of this
+  one-worker cell recorded in V3c, V3d and V3e.
+
+Checks (Linux, cores 4–9, `-j 4`): `cargo +stable fmt --all -- --check` and
+matched fmt; strict Clippy with default, `--all-features`,
+`--no-default-features` and `--no-default-features --features native`, and
+the matched workspace, zero diagnostics (pre-push hook, enabled, passed on
+every push); default `--lib --test volatile --test raft --test snapshot
+--test log_owned --test worker --test runtime --test effect_owner` (555 lib,
+1 ignored, + 11/81/27/5/9/57/211) and all features (557 lib, 1 ignored, +
+the same), one configuration at a time; with all features also `log_store`
+19, `membership` 32, `learners` 24, `retirement` 7, `member_recovery` 44;
+`--release --lib -- install_in_place summarized commit_advance completion`
+40/40 in default and all features; matched tests 75/75 in default and all
+features.
+
+V3e conflict check (`git merge --no-commit --no-ff origin/cpu/peer-slots` at
+`5a316689` in this worktree, then `git merge --abort`): the code merges
+without conflict (`src/raft.rs` auto-merges once `Installed` sits beside
+`Pending`; the first check, with it beside `Replication`, conflicted on
+V3e's derive line), and the merged tree passes `--lib` 562/562 (1 ignored,
+both slices' tests and V3e's debug oracles), `volatile` 11, `raft` 81 and
+`snapshot` 27. `docs/IMPLEMENTATION.md` conflicts in three places, all
+"take both": the adjacent V3e/V3f mini-plan rows, and both slices' sections
+inserted before "H2 round 2".
 
 #### H2 round 2: review fixes (19 October 2026)
 

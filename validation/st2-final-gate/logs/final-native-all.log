@@ -1,0 +1,53 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling voteboat v0.1.0 (/home/karllivesey/.t3/worktrees/VoteBoat/t3-aeca292e)
+    Finished `test` profile [unoptimized] target(s) in 2.95s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-a647f3ef0d23c1ec)
+
+running 17 tests
+test lanes::tests::assignments_preserve_totals_and_never_overlap ... ok
+test offered::cluster::tests::cluster_node_child ... ok
+test lanes::tests::partial_replica_startup_joins_previously_opened_nodes ... ok
+test lanes::tests::failed_lane_aborts_prepared_lanes_and_joins_hosts ... ok
+test offered::cluster::tests::node_arguments_are_checked_before_anything_is_created ... ok
+protocol=TcpTls assembly=static_lanes replicas=3 lanes=3 groups=5 host_owner_threads=3 wal_workers=9 snapshot_workers=9 peer_endpoints=9 tcp_dial_workers=9 payload_bytes=8 recovered_value=75 warmup=64 operations=11 window=7 sum_lane_max_inflight=7 elapsed_ns=188579362 elapsed_s=0.188579 applied_ops_s=58.331 p99_ns=122001539 p99_us=122001.539 recovery_retries=0 retry_verified=true workers_joined=true host_threads_joined=true heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000
+test lanes::tests::uneven_three_lane_workload_keeps_exact_global_counts ... ok
+protocol=TcpTls assembly=static_lanes replicas=3 lanes=2 groups=4 host_owner_threads=2 wal_workers=6 snapshot_workers=6 peer_endpoints=6 tcp_dial_workers=6 payload_bytes=8 recovered_value=72 warmup=64 operations=8 window=4 sum_lane_max_inflight=4 elapsed_ns=118412592 elapsed_s=0.118413 applied_ops_s=67.560 p99_ns=59540945 p99_us=59540.945 recovery_retries=0 retry_verified=true workers_joined=true host_threads_joined=true heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000
+test lanes::tests::tcp_two_lanes_share_groups_and_recover ... ok
+shared recovery fixture port namespace: /tmp/voteboat-test-ports
+maintenance recovery files: /home/karllivesey/.t3/worktrees/VoteBoat/t3-aeca292e/target/scratch/voteboat-shared-repair-4083172-Quic-1792529012711068316
+protocol=Quic assembly=static_lanes replicas=3 lanes=2 groups=4 host_owner_threads=2 wal_workers=6 snapshot_workers=6 peer_endpoints=6 tcp_dial_workers=0 payload_bytes=8 recovered_value=72 warmup=64 operations=8 window=4 sum_lane_max_inflight=4 elapsed_ns=118308487 elapsed_s=0.118308 applied_ops_s=67.620 p99_ns=74619921 p99_us=74619.921 recovery_retries=0 retry_verified=true workers_joined=true host_threads_joined=true heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000
+test lanes::tests::quic_two_lanes_share_groups_and_recover ... ok
+shared recovery fixture port namespace: /tmp/voteboat-test-ports
+maintenance recovery files: /home/karllivesey/.t3/worktrees/VoteBoat/t3-aeca292e/target/scratch/voteboat-shared-repair-4083172-TcpTls-1792529013194319391
+test offered::cluster::tests::a_node_whose_port_is_taken_is_reported_as_a_collision ... ok
+inherited WAL lock control: path=/home/karllivesey/.t3/worktrees/VoteBoat/t3-aeca292e/target/scratch/voteboat-lane-lock-control-4083172/LOCK child_pid=4083673
+test test_process::inherited_descriptor_control_and_spawn_exclusion ... ok
+test offered::cluster::tests::node_1_stops_within_one_round_when_stdin_closes_in_the_offered_phase ... ok
+protocol=Quic phase=initial-write
+test offered::cluster::tests::every_node_takes_its_documented_exit_when_the_parent_is_gone ... ok
+protocol=Quic phase=survivor-write
+protocol=Quic phase=automatic-checkpoint
+protocol=TcpTls phase=initial-write
+protocol=TcpTls phase=survivor-write
+protocol=TcpTls phase=automatic-checkpoint
+protocol=TcpTls phase=reopen
+test offered::cluster::tests::cluster_script_self_test_passes ... ok
+protocol=TcpTls phase=arm-recovery
+recovery armed: accepted_requests=1 stale_snapshot_installs=0 foreground_campaign_pending=true
+test offered::cluster::tests::three_process_tcp_cluster_completes_an_offered_run_with_consistent_counters ... ok
+test offered::cluster::tests::three_process_quic_cluster_completes_an_offered_run_with_consistent_counters ... ok
+held_recovery=1 foreground_index=5 checkpointed=true post_checkpoint_reclaim=true
+covered automatic checkpoint: original=ScheduledCheckpoint { admission: AdmissionTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(6), incarnation: GroupIncarnation(1) }, sequence: 6 }, target_index: 2, executed: false } step=OwnerStep { admission: Some(AdmissionTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(6), incarnation: GroupIncarnation(1) }, sequence: 6 }), proposed: None, visit: VisitTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(6), incarnation: GroupIncarnation(1) }, sequence: 2099 }, operation: None, read: None, error: Some(NotApplied) } durable_base=3 commit=3
+protocol=TcpTls groups=8 snapshot_installs=12 peak_recovery=1 reclaimed_bytes=16862 snapshot_send_refusals=0
+test shared::recovery::maintenance::tcp_automatic_maintenance_progresses_with_held_snapshot_recovery ... ok
+protocol=Quic phase=reopen
+protocol=Quic phase=arm-recovery
+recovery armed: accepted_requests=1 stale_snapshot_installs=0 foreground_campaign_pending=true
+held_recovery=1 foreground_index=5 checkpointed=true post_checkpoint_reclaim=true
+covered automatic checkpoint: original=ScheduledCheckpoint { admission: AdmissionTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(4), incarnation: GroupIncarnation(1) }, sequence: 3 }, target_index: 2, executed: false } step=OwnerStep { admission: Some(AdmissionTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(4), incarnation: GroupIncarnation(1) }, sequence: 3 }), proposed: None, visit: VisitTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(4), incarnation: GroupIncarnation(1) }, sequence: 16425 }, operation: None, read: None, error: Some(NotApplied) } durable_base=3 commit=3
+protocol=Quic groups=8 snapshot_installs=10 peak_recovery=1 reclaimed_bytes=15427 snapshot_send_refusals=23
+test shared::recovery::maintenance::quic_automatic_maintenance_progresses_with_held_snapshot_recovery ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 48 filtered out; finished in 13.68s
+

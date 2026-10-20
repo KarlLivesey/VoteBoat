@@ -387,7 +387,7 @@ fn already_admitted_append_cannot_overtake_retained_original_vote_capsule() {
         Rpc::Append {
             previous_index: 0,
             previous_term: 0,
-            entries: vec![entry.clone()],
+            entries: vec![entry.clone()].into(),
             leader_commit: 1,
         },
         2,

@@ -310,6 +310,7 @@ fn history(quic: bool) {
         assert!(Instant::now() < deadline);
         std::thread::sleep(Duration::from_millis(5));
     }
+    listener_health(&c.ok(leader, &["status"]), quic);
     c.stop();
     for id in 1..=3 {
         c.start(id, "recover");
@@ -339,6 +340,87 @@ fn history(quic: bool) {
         error.contains("InvalidCheckpoint") || error.contains("InvalidCommand"),
         "wrong refusal: {error}"
     );
+}
+/// ST2: checkpoints and WAL reclaim are on by default and visible; an
+/// unacknowledged opt-out or a conflicting selection is refused before any
+/// storage exists.
+#[test]
+fn maintenance_defaults_are_visible_and_selection_is_validated_before_storage() {
+    let mut c = Cluster::new(false);
+    let leader = initialize(&mut c);
+    let text = c.ok(leader, &["maintenance"]);
+    for field in [
+        "retention=maintained",
+        "enabled=true",
+        "checkpoint_enabled=true",
+        "checkpoint_entries=8192",
+        "high_water=false",
+        "wal_parked=0",
+        // ST2 round 3 (I7).
+        "retained_budget=16384",
+        "retained_capacity=16640",
+        "entry_high_water=false",
+        "checkpoint_failures=0",
+        "wal_refused_proposals=0",
+        "wal_held_ms=0",
+        "step_downs=0",
+        "last_step_down=none",
+        // ST2 round 4 (R4-1).
+        "wal_noop_refused=0",
+        "noop_refusals=0",
+        "wal_noop_starved=false",
+    ] {
+        assert!(text.contains(field), "{field}: {text}");
+    }
+    let log = fs::read_to_string(c.root.join(format!("{leader}.log"))).unwrap();
+    assert!(
+        log.contains("maintenance retention=maintained checkpoint_entries=8192"),
+        "{log}"
+    );
+    c.stop();
+    let ack = "I-accept-a-bounded-log";
+    for (args, message) in [
+        (vec!["--no-maintenance", "yes"], "Pass --no-maintenance"),
+        (
+            vec!["--no-maintenance", ack, "--checkpoint-entries", "5"],
+            "cannot be combined",
+        ),
+        (vec!["--checkpoint-entries", "8193"], "at most 8192"),
+        // ST2 round 3 (I6).
+        (vec!["--wal-reclaim-ms", "86400001"], "at most 86400000"),
+        (
+            vec!["--no-maintenance", ack, "--wal-reclaim-min-bytes", "0"],
+            "cannot be combined",
+        ),
+    ] {
+        let out = c.server(9, "create").args(&args).fixture_output().unwrap();
+        assert!(!out.status.success(), "{args:?}");
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert!(stderr.contains(message), "{args:?}: {stderr}");
+        assert!(!c.root.join("9").exists(), "{args:?}");
+    }
+}
+/// `status` carries the peer listener and generation health (NT1 round 3).
+/// Only QUIC has no TCP listener to report.
+fn listener_health(status: &str, quic: bool) {
+    let field = |key: &str| {
+        status
+            .split_whitespace()
+            .find_map(|w| w.strip_prefix(key)?.strip_prefix('='))
+            .unwrap_or_else(|| panic!("{key} missing: {status}"))
+            .parse::<u64>()
+            .unwrap_or_else(|e| panic!("{key}: {e}: {status}"))
+    };
+    assert_eq!(field("peer_accept_listener"), u64::from(!quic), "{status}");
+    assert_eq!(field("peer_generations_exhausted"), 0, "{status}");
+    for key in [
+        "peer_accept_errors",
+        "peer_accept_backoffs",
+        "peer_accept_paused",
+        "peer_accept_last_os_error",
+    ] {
+        field(key);
+    }
 }
 #[test]
 fn directory_publication_remote_reads_and_checkpoint_recovery_tcp() {
@@ -408,6 +490,19 @@ fn invalid_metadata_plan_is_rejected_before_storage_or_tls() {
         assert!(String::from_utf8_lossy(&out.stderr).contains(reason));
         assert!(!c.root.join("1").exists());
     }
+}
+#[cfg(not(feature = "quic"))]
+#[test]
+fn unavailable_quic_selection_rejects_before_creating_a_store() {
+    let c = Cluster::new(false);
+    let out = c
+        .server(1, "create")
+        .args(["--transport", "quic"])
+        .fixture_output()
+        .unwrap();
+    assert!(!out.status.success());
+    assert!(String::from_utf8_lossy(&out.stderr).contains("--features quic"));
+    assert!(!c.root.join("1").exists());
 }
 
 #[path = "directory_service/initialization.rs"]

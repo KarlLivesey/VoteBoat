@@ -187,13 +187,17 @@ impl Connection {
                     .owner
                     .core(c.group)
                     .ok_or("missing authority")?;
-                self.reply(format!(
+                let mut reply = format!(
                     "OK role={:?} term={} committed={} checkpoint_index={} pending_reads={} evidence=local",
                     core.role(),
                     core.state().hard_state.term,
                     core.state().commit_index,core.state().base_index(),pending_reads
-                ));
+                );
+                super::accept_health::AcceptHealth::capture(owner.node().peers())
+                    .append(&mut reply);
+                self.reply(reply);
             }
+            ["maintenance"] => self.reply(super::setup::maintenance_status(owner.node(), c.group)),
             ["initialize"] => self.submit(owner, c, c.bootstrap)?,
             ["publish", operation] => {
                 self.submit(owner, c, super::directory_plan::op(operation)?)?
@@ -260,6 +264,10 @@ impl Connection {
                         receipt.outcome,
                         receipt.duplicate
                     ),
+                    // Retryable backpressure, nothing proposed (ST2 round 3).
+                    ClientOutcome::NotProposed(voteboat::raft::RaftError::StoragePressure) => {
+                        "ERR StoragePressure".into()
+                    }
                     other => format!("UNKNOWN {other:?}; retry original plan operation"),
                 });
             }

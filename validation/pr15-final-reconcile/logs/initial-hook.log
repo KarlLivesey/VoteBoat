@@ -1,0 +1,274 @@
+Checking formatting and strict Clippy before push...
+   Compiling libc v0.2.190
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.14
+    Checking cfg-if v1.0.5
+   Compiling memchr v2.8.3
+   Compiling cc v1.6.0
+   Compiling protobuf v2.28.0
+   Compiling proc-macro2 v1.0.107
+   Compiling aho-corasick v1.1.5
+   Compiling unicode-ident v1.0.26
+    Checking untrusted v0.9.0
+   Compiling regex-syntax v0.8.11
+    Checking getrandom v0.2.17
+    Checking zeroize v1.9.1
+   Compiling bytes v1.12.1
+   Compiling ring v0.17.14
+   Compiling quote v1.0.47
+   Compiling regex-automata v0.4.18
+    Checking rustls-pki-types v1.15.1
+   Compiling rustls v0.23.45
+   Compiling zerocopy v0.8.62
+   Compiling regex v1.13.1
+   Compiling bitflags v1.3.2
+    Checking once_cell v1.21.4
+   Compiling protobuf-codegen v2.28.0
+    Checking rustls-webpki v0.103.15
+   Compiling voteboat v0.1.0 (/home/karllivesey/.t3/worktrees/VoteBoat/t3-9e098eb7)
+    Checking subtle v2.6.1
+   Compiling syn v2.0.119
+   Compiling protobuf-build v0.14.1
+   Compiling raft-proto v0.7.0
+    Checking rand_core v0.6.4
+   Compiling slog v2.7.0
+   Compiling thiserror v1.0.69
+   Compiling thiserror-impl v1.0.69
+    Checking byteorder v1.5.0
+    Checking fxhash v0.2.1
+   Compiling getset v0.1.7
+    Checking ppv-lite86 v0.2.21
+    Checking rand_chacha v0.3.1
+    Checking rand v0.8.8
+    Checking raft v0.7.0
+error[E0308]: mismatched types
+   --> src/logical_voter/application/tests/bootstrap_binding.rs:221:30
+    |
+221 |                     entries: vec![assignment],
+    |                              ^^^^^^^^^^^^^^^^ expected `EntryBatch`, found `Vec<LogEntry>`
+    |
+    = note: expected struct `log::entries::EntryBatch`
+               found struct `std::vec::Vec<log::LogEntry>`
+help: call `Into::into` on this expression to convert `std::vec::Vec<log::LogEntry>` into `log::entries::EntryBatch`
+    |
+221 |                     entries: vec![assignment].into(),
+    |                                              +++++++
+
+error[E0308]: mismatched types
+   --> src/logical_voter/application/tests/bootstrap_binding.rs:338:25
+    |
+338 |         app.apply_batch(child.learner.replay_committed()).unwrap();
+    |             ----------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `&[LogEntry]`, found `EntryRange<'_>`
+    |             |
+    |             arguments to this method are incorrect
+    |
+    = note: expected reference `&[log::LogEntry]`
+                  found struct `log::entries::range::EntryRange<'_>`
+note: method defined here
+   --> src/application.rs:270:8
+    |
+270 |     fn apply_batch(&mut self, entries: &[LogEntry])
+    |        ^^^^^^^^^^^            -------
+
+error[E0308]: mismatched types
+   --> src/logical_voter/application/tests/bootstrap_binding.rs:369:55
+    |
+369 |     let committed = &child.learner.replay_committed()[2..];
+    |                                                       ^^^ expected `usize`, found `RangeFrom<{integer}>`
+    |
+    = note: expected type `usize`
+             found struct `std::ops::RangeFrom<{integer}>`
+
+error[E0599]: no method named `len` found for reference `&log::LogEntry` in the current scope
+   --> src/logical_voter/application/tests/bootstrap_binding.rs:370:26
+    |
+370 |     assert_eq!(committed.len(), 1);
+    |                          ^^^ method not found in `&log::LogEntry`
+    |
+    = help: items from traits can only be used if the trait is implemented and in scope
+    = note: the following traits define an item `len`, perhaps you need to implement one of them:
+            candidate #1: `runtime::ReadyScheduler`
+            candidate #2: `runtime::TimerService`
+            candidate #3: `ring::hkdf::KeyType`
+            candidate #4: `std::iter::ExactSizeIterator`
+
+error[E0308]: mismatched types
+   --> src/logical_voter/application/tests/bootstrap_binding.rs:371:38
+    |
+371 |     let receipts = bound.apply_batch(committed).unwrap();
+    |                          ----------- ^^^^^^^^^ expected `&[LogEntry]`, found `&LogEntry`
+    |                          |
+    |                          arguments to this method are incorrect
+    |
+    = note: expected reference `&[log::LogEntry]`
+               found reference `&log::LogEntry`
+note: method defined here
+   --> src/application.rs:270:8
+    |
+270 |     fn apply_batch(&mut self, entries: &[LogEntry])
+    |        ^^^^^^^^^^^            -------
+
+error[E0308]: mismatched types
+   --> src/logical_voter/application/tests/bootstrap_binding.rs:375:27
+    |
+375 |         other.apply_batch(committed).map(|_| ()),
+    |               ----------- ^^^^^^^^^ expected `&[LogEntry]`, found `&LogEntry`
+    |               |
+    |               arguments to this method are incorrect
+    |
+    = note: expected reference `&[log::LogEntry]`
+               found reference `&log::LogEntry`
+note: method defined here
+   --> src/application.rs:270:8
+    |
+270 |     fn apply_batch(&mut self, entries: &[LogEntry])
+    |        ^^^^^^^^^^^            -------
+
+error[E0308]: mismatched types
+   --> tests/learners/bootstrap_bindings.rs:130:25
+    |
+130 |         app.apply_batch(learner.replay_committed()).unwrap();
+    |             ----------- ^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `&[LogEntry]`, found `EntryRange<'_>`
+    |             |
+    |             arguments to this method are incorrect
+    |
+    = note: expected reference `&[voteboat::log::LogEntry]`
+                  found struct `voteboat::log::EntryRange<'_>`
+note: method defined here
+   --> src/application.rs:270:8
+    |
+270 |     fn apply_batch(&mut self, entries: &[LogEntry])
+    |        ^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/learners/bootstrap_bindings.rs:162:45
+    |
+162 |     let entry = &learner.replay_committed()[2..];
+    |                                             ^^^ expected `usize`, found `RangeFrom<{integer}>`
+    |
+    = note: expected type `usize`
+             found struct `std::ops::RangeFrom<{integer}>`
+
+error[E0599]: no method named `len` found for reference `&voteboat::log::LogEntry` in the current scope
+   --> tests/learners/bootstrap_bindings.rs:163:22
+    |
+163 |     assert_eq!(entry.len(), 1);
+    |                      ^^^ method not found in `&voteboat::log::LogEntry`
+
+error[E0308]: mismatched types
+   --> tests/learners/bootstrap_bindings.rs:164:36
+    |
+164 |     let receipts = two.apply_batch(entry).unwrap();
+    |                        ----------- ^^^^^ expected `&[LogEntry]`, found `&LogEntry`
+    |                        |
+    |                        arguments to this method are incorrect
+    |
+    = note: expected reference `&[voteboat::log::LogEntry]`
+               found reference `&voteboat::log::LogEntry`
+note: method defined here
+   --> src/application.rs:270:8
+    |
+270 |     fn apply_batch(&mut self, entries: &[LogEntry])
+    |        ^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/learners/bootstrap_bindings.rs:166:25
+    |
+166 |         one.apply_batch(entry).map(|_| ()),
+    |             ----------- ^^^^^ expected `&[LogEntry]`, found `&LogEntry`
+    |             |
+    |             arguments to this method are incorrect
+    |
+    = note: expected reference `&[voteboat::log::LogEntry]`
+               found reference `&voteboat::log::LogEntry`
+note: method defined here
+   --> src/application.rs:270:8
+    |
+270 |     fn apply_batch(&mut self, entries: &[LogEntry])
+    |        ^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/learners/bootstrap_bindings.rs:324:25
+    |
+324 |         app.apply_batch(learner.replay_committed()).unwrap();
+    |             ----------- ^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `&[LogEntry]`, found `EntryRange<'_>`
+    |             |
+    |             arguments to this method are incorrect
+    |
+    = note: expected reference `&[voteboat::log::LogEntry]`
+                  found struct `voteboat::log::EntryRange<'_>`
+note: method defined here
+   --> src/application.rs:270:8
+    |
+270 |     fn apply_batch(&mut self, entries: &[LogEntry])
+    |        ^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/learners/readiness_plans.rs:45:21
+    |
+ 45 |     app.apply_batch(learner.replay_committed()).unwrap();
+    |         ----------- ^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `&[LogEntry]`, found `EntryRange<'_>`
+    |         |
+    |         arguments to this method are incorrect
+    |
+    = note: expected reference `&[voteboat::log::LogEntry]`
+                  found struct `voteboat::log::EntryRange<'_>`
+note: method defined here
+   --> src/application.rs:270:8
+    |
+270 |     fn apply_batch(&mut self, entries: &[LogEntry])
+    |        ^^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> tests/learners.rs:1533:23
+     |
+1533 |     other.apply_batch(learner.replay_committed()).unwrap();
+     |           ----------- ^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `&[LogEntry]`, found `EntryRange<'_>`
+     |           |
+     |           arguments to this method are incorrect
+     |
+     = note: expected reference `&[voteboat::log::LogEntry]`
+                   found struct `voteboat::log::EntryRange<'_>`
+note: method defined here
+    --> src/application.rs:270:8
+     |
+ 270 |     fn apply_batch(&mut self, entries: &[LogEntry])
+     |        ^^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> tests/learners.rs:1571:25
+     |
+1571 |         app.apply_batch(learner.replay_committed()).unwrap();
+     |             ----------- ^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `&[LogEntry]`, found `EntryRange<'_>`
+     |             |
+     |             arguments to this method are incorrect
+     |
+     = note: expected reference `&[voteboat::log::LogEntry]`
+                   found struct `voteboat::log::EntryRange<'_>`
+note: method defined here
+    --> src/application.rs:270:8
+     |
+ 270 |     fn apply_batch(&mut self, entries: &[LogEntry])
+     |        ^^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> tests/learners.rs:1708:21
+     |
+1708 |     app.apply_batch(learner.replay_committed()).unwrap();
+     |         ----------- ^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `&[LogEntry]`, found `EntryRange<'_>`
+     |         |
+     |         arguments to this method are incorrect
+     |
+     = note: expected reference `&[voteboat::log::LogEntry]`
+                   found struct `voteboat::log::EntryRange<'_>`
+note: method defined here
+    --> src/application.rs:270:8
+     |
+ 270 |     fn apply_batch(&mut self, entries: &[LogEntry])
+     |        ^^^^^^^^^^^
+
+Some errors have detailed explanations: E0308, E0599.
+For more information about an error, try `rustc --explain E0308`.
+error: could not compile `voteboat` (test "learners") due to 10 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `voteboat` (lib test) due to 6 previous errors

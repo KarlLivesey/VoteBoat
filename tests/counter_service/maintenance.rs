@@ -43,6 +43,9 @@ fn history(quic: bool) {
     let mut c = Cluster::new();
     c.quic = quic;
     c.wal_reclaim_ms = Some(20);
+    // Rewrite at every deadline (the default needs 4 MiB reclaimable), so
+    // each new worker sequence is a physical rewrite.
+    c.wal_reclaim_min_bytes = Some(0);
     for id in 1..=3 {
         c.start(id, "create");
     }
@@ -82,12 +85,8 @@ fn wait_maintenance(c: &Cluster, id: usize, after: u64) -> u64 {
                 text.contains("enabled=true") && text.contains("completion_error=None"),
                 "{text}"
             );
-            let sequence = text
-                .split_whitespace()
-                .find_map(|s| s.strip_prefix("last_sequence="))
-                .unwrap()
-                .parse::<u64>()
-                .unwrap();
+            assert!(text.contains("skipped=0 "), "{text}");
+            let sequence = field(&text, "last_sequence=");
             if sequence > after {
                 return sequence;
             }
@@ -185,4 +184,141 @@ fn invalid_checkpoint_schedule_precedes_resource_creation() {
         assert!(!target.exists());
     }
     fs::remove_dir_all(&c.root).unwrap();
+}
+
+/// ST2: with no flags the service checkpoints and reclaims by default, and the
+/// explicit opt-out is recorded at startup and in the status.
+#[test]
+fn maintenance_defaults_and_opt_out_are_operator_visible() {
+    let mut c = Cluster::new();
+    c.start(1, "create");
+    let text = wait_status(&c, 1);
+    for field in [
+        "retention=maintained",
+        "enabled=true",
+        "checkpoint_enabled=true",
+        "checkpoint_entries=8192",
+        "failures=0",
+        "wal_capacity=66060288",
+        "high_water=false",
+        "refused_proposals=0",
+        "wal_parked=0",
+        "retained_budget=16384",
+        "retained_capacity=16640",
+        "entry_high_water=false",
+        "checkpoint_failures=0",
+        "wal_refused_proposals=0",
+        "wal_held_ms=0",
+        "step_downs=0",
+        "last_step_down=none",
+        // ST2 round 4 (R4-1).
+        "wal_noop_refused=0",
+        "noop_refusals=0",
+        "wal_noop_starved=false",
+    ] {
+        assert!(text.contains(field), "{field}: {text}");
+    }
+    // The default schedule runs: with too little to reclaim each 1 s deadline
+    // moves on (`skipped`) instead of rewriting.
+    let deadline = Instant::now() + Duration::from_secs(10);
+    while field(&wait_status(&c, 1), "skipped=") == 0 {
+        assert!(Instant::now() < deadline, "default schedule never ran");
+        std::thread::sleep(Duration::from_millis(50));
+    }
+    c.stop();
+    let log = c.service_log(1);
+    assert!(
+        log.contains("maintenance retention=maintained checkpoint_entries=8192 checkpoint_scan_ms=10 wal_reclaim_ms=1000 wal_retry_ms=100 wal_reclaim_min_bytes=4194304"),
+        "{log}"
+    );
+    c.no_maintenance = true;
+    c.start(1, "recover");
+    let text = wait_status(&c, 1);
+    for field in [
+        "retention=lifetime-bounded",
+        "enabled=false",
+        "checkpoint_enabled=false",
+    ] {
+        assert!(text.contains(field), "{field}: {text}");
+    }
+    c.stop();
+    let log = c.service_log(1);
+    assert!(
+        log.contains("maintenance retention=lifetime-bounded checkpoint_entries=off checkpoint_scan_ms=off wal_reclaim_ms=off wal_retry_ms=off wal_reclaim_min_bytes=off"),
+        "{log}"
+    );
+    fs::remove_dir_all(&c.root).unwrap();
+}
+fn wait_status(c: &Cluster, id: usize) -> String {
+    let deadline = Instant::now() + Duration::from_secs(10);
+    loop {
+        let out = c.request(id, &["maintenance"]);
+        if out.status.success() {
+            return String::from_utf8_lossy(&out.stdout).into_owned();
+        }
+        assert!(
+            Instant::now() < deadline,
+            "maintenance status unavailable: {}",
+            c.service_log(id)
+        );
+        std::thread::sleep(Duration::from_millis(10));
+    }
+}
+/// U5: a maintenance selection that would be refused or ignored once serving
+/// is refused at startup, before any file or listener exists.
+#[test]
+fn maintenance_selection_is_validated_before_files_or_listeners() {
+    let c = Cluster::new();
+    let target = c.root.join("invalid-maintenance");
+    let ack = "I-accept-a-bounded-log";
+    for (args, message) in [
+        (
+            vec!["--no-maintenance", "yes"],
+            "Pass --no-maintenance I-accept-a-bounded-log",
+        ),
+        (
+            vec!["--no-maintenance", "i-accept-a-bounded-log"],
+            "Pass --no-maintenance",
+        ),
+        (
+            vec!["--no-maintenance", ack, "--checkpoint-entries", "5"],
+            "cannot be combined",
+        ),
+        (
+            vec!["--no-maintenance", ack, "--wal-reclaim-ms", "5"],
+            "cannot be combined",
+        ),
+        (
+            vec!["--no-maintenance", ack, "--no-maintenance", ack],
+            "duplicate",
+        ),
+        (vec!["--checkpoint-entries", "8193"], "at most 8192"),
+        // ST2 round 3 (I6): an interval that could overflow the deadline.
+        (vec!["--wal-reclaim-ms", "86400001"], "at most 86400000"),
+        (
+            vec!["--no-maintenance", ack, "--wal-reclaim-min-bytes", "0"],
+            "cannot be combined",
+        ),
+        (vec!["--wal-reclaim-min-bytes", "-1"], "InvalidDigit"),
+    ] {
+        let out = run(Command::new(BIN)
+            .args(["serve", "create"])
+            .arg(&target)
+            .arg("1")
+            .arg(c.base.to_string())
+            .arg("missing-tls")
+            .args(&args));
+        assert!(!out.status.success(), "{args:?}");
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert!(stderr.contains(message), "{args:?}: {stderr}");
+        assert!(!target.exists(), "{args:?}");
+    }
+    fs::remove_dir_all(&c.root).unwrap();
+}
+fn field(text: &str, name: &str) -> u64 {
+    text.split_whitespace()
+        .find_map(|s| s.strip_prefix(name))
+        .unwrap_or_else(|| panic!("{name} missing: {text}"))
+        .parse()
+        .unwrap()
 }

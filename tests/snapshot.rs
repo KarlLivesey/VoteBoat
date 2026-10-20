@@ -62,7 +62,8 @@ fn committed_core() -> Raft {
                 command(2, 2, 3),
                 command(3, 1, 7),
                 command(4, 3, -2),
-            ],
+            ]
+            .into(),
         }),
     );
     if let LogMutation::Update(u) = &mut mutation {
@@ -165,7 +166,7 @@ fn checkpoint_plus_tail_preserves_dedup_and_host_application_schema() {
     let core = committed_core();
     let mut application = HostApplication(Counter::new(20).unwrap());
     application
-        .apply_batch(&core.replay_committed()[..2])
+        .apply_batch(&core.replay_committed().contiguous()[..2])
         .unwrap();
     let mut snapshots = HostSnapshots::new();
     let receipt = checkpoint_application(&core, &application, &mut snapshots).unwrap();
@@ -187,7 +188,8 @@ fn checkpoint_plus_tail_preserves_dedup_and_host_application_schema() {
 fn invalid_snapshot_binding_boundary_schema_or_tail_never_partly_restores() {
     let core = committed_core();
     let mut app = Counter::new(20).unwrap();
-    app.apply_batch(&core.replay_committed()[..2]).unwrap();
+    app.apply_batch(&core.replay_committed().contiguous()[..2])
+        .unwrap();
     let mut snapshots = HostSnapshots::new();
     checkpoint_application(&core, &app, &mut snapshots).unwrap();
     for mutation in 0..6 {
@@ -213,10 +215,12 @@ fn invalid_snapshot_binding_boundary_schema_or_tail_never_partly_restores() {
     assert!(restore_application(&core, &mut capacity, &mut snapshots).is_err());
     assert_eq!(capacity.applied_index(), 0);
     let mut invalid_state = core.state().clone();
-    invalid_state.entries[3].payload = EntryPayload::Command {
-        operation: OperationId::new(3).unwrap(),
-        bytes: vec![0].into(),
-    };
+    invalid_state.entries.edit(|entries| {
+        entries[3].payload = EntryPayload::Command {
+            operation: OperationId::new(3).unwrap(),
+            bytes: vec![0].into(),
+        }
+    });
     let bad_tail = Raft::recover(
         node(1),
         core.storage_binding(),
@@ -525,7 +529,8 @@ mod native {
             std::env::temp_dir().join(format!("voteboat-snapshot-{}", std::process::id()));
         let core = committed_core();
         let mut app = Counter::new(20).unwrap();
-        app.apply_batch(&core.replay_committed()[..2]).unwrap();
+        app.apply_batch(&core.replay_committed().contiguous()[..2])
+            .unwrap();
         let mut store = NativeSnapshotStore::create(
             FileSnapshotIo::create(&directory).unwrap(),
             snapshot_identity(),
@@ -727,7 +732,7 @@ mod native {
                 2,
                 Some(Suffix {
                     from: 1,
-                    entries: vec![command(1, 1, 7), command(2, 2, 3)],
+                    entries: vec![command(1, 1, 7), command(2, 2, 3)].into(),
                 }),
             )],
         );
@@ -742,7 +747,7 @@ mod native {
                 5,
                 Some(Suffix {
                     from: 5,
-                    entries: vec![command(5, 1, 7)],
+                    entries: vec![command(5, 1, 7)].into(),
                 }),
             )],
         );
@@ -753,7 +758,9 @@ mod native {
             log.limits(),
         )
         .unwrap();
-        let retry = app.apply_batch(&core.replay_committed()[4..]).unwrap();
+        let retry = app
+            .apply_batch(&core.replay_committed().contiguous()[4..])
+            .unwrap();
         assert!(retry[0].duplicate);
         assert_eq!(retry[0].outcome, CounterOutcome::Value(7));
         assert_eq!(app.read_applied(5), Ok(8));
@@ -781,7 +788,8 @@ mod native {
             )
             .unwrap();
             let mut app = Counter::new(20).unwrap();
-            app.apply_batch(core.replay_committed()).unwrap();
+            app.apply_batch(&core.replay_committed().contiguous())
+                .unwrap();
             let io = MemoryIo::default();
             let mut snapshots = create(io.clone());
             checkpoint_application(&core, &app, &mut snapshots).unwrap();
@@ -794,7 +802,7 @@ mod native {
                     4,
                     Some(Suffix {
                         from: 3,
-                        entries: vec![command(3, 1, 7), command(4, 3, -2)],
+                        entries: vec![command(3, 1, 7), command(4, 3, -2)].into(),
                     }),
                 )],
             );
@@ -805,7 +813,9 @@ mod native {
                 log.limits(),
             )
             .unwrap();
-            let receipts = app.apply_batch(&core.replay_committed()[2..]).unwrap();
+            let receipts = app
+                .apply_batch(&core.replay_committed().contiguous()[2..])
+                .unwrap();
             assert!(receipts[0].duplicate);
             assert_eq!(app.read_applied(4), Ok(8));
             io.0.borrow_mut().failure = failure;
@@ -1674,7 +1684,8 @@ fn restore_refuses_altered_membership_even_with_same_reference_configuration_id(
     use voteboat::membership::Membership;
     let core = committed_core();
     let mut app = Counter::new(10).unwrap();
-    app.apply_batch(core.replay_committed()).unwrap();
+    app.apply_batch(&core.replay_committed().contiguous())
+        .unwrap();
     let mut snapshots = HostSnapshots::new();
     let receipt = checkpoint_application(&core, &app, &mut snapshots).unwrap();
     let snapshot = snapshots.current.as_mut().unwrap();

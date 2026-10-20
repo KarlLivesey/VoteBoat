@@ -480,7 +480,7 @@ fn native_locator_journal_cuts_recover_old_or_complete_foreign_manifest() {
                     2,
                     Some(Suffix {
                         from: 1,
-                        entries: entries[..2].to_vec(),
+                        entries: entries[..2].to_vec().into(),
                     }),
                 )],
             );
@@ -493,7 +493,7 @@ fn native_locator_journal_cuts_recover_old_or_complete_foreign_manifest() {
             3,
             Some(Suffix {
                 from: 3,
-                entries: entries[2..].to_vec(),
+                entries: entries[2..].to_vec().into(),
             }),
         );
         let frame = NativeLogCodec

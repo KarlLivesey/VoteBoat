@@ -1127,50 +1127,260 @@ old-view-voter trust checks; disk formats are unchanged. Existing interruption
 histories were rerun with TCP and QUIC wire7 peers. Forced network execution of
 the new final-checkpoint path remains a separate acceptance history.
 
-## Optional automatic WAL reclamation
+## Store maintenance (on by default)
 
-Append `--wal-reclaim-ms 60000` to a serve/recover command to request periodic
-physical reclamation every minute. Omit it to retain manual operation. A positive
-interval is required; each node schedules its own selected worker. Inspect the
-local, volatile result with:
+Since ST2 (19 October 2026) every service binary (`voteboat-counter`,
+`voteboat-directory`, `voteboat-transfer`) and every library node checkpoints
+and reclaims its WAL by default. Without maintenance each group stopped
+accepting writes at 16,384 retained entries or 64 MiB of WAL, and a full WAL
+failed the node.
+
+Defaults, derived from the store limits:
+
+- **Checkpoints.** A group is checkpointed once its applied log is half the
+  retained-entry limit (8,192 entries) beyond its durable snapshot base. The
+  scan runs every 10 ms, examines at most 64 groups and allows at most 4
+  automatic requests. The count includes noops and configuration entries.
+- **WAL reclaim.** Every 1000 ms the live image is rewritten if at least
+  `min_reclaim_bytes` (a sixteenth of the WAL ceiling, 4 MiB) is reclaimable; otherwise the
+  deadline moves on one interval (counted in `skipped`). Any refusal or failed
+  completion retries after 100 ms.
+- **Occupancy.** When the WAL reaches half its usable capacity
+  (`max_wal_bytes − control_reserve_bytes`), checkpoints run for every group
+  with applied entries beyond its base, and a rewrite runs as soon as at least an
+  eighth of the capacity is reclaimable. Large commands therefore cannot fill the
+  WAL before 8,192 entries accumulate.
+- **High water (backpressure).** When the WAL reaches 75% of its usable
+  capacity, or the WAL thread holds a write that does not fit yet, the node
+  enters the high-water state. New writes are refused with the retryable error
+  `ERR StoragePressure` (Rust: `ClientError::StoragePressure`) before they
+  reach the log; nothing was admitted, so the client retries after a backoff.
+  Checkpoints run for every group and a rewrite runs as soon as a sixteenth of
+  the ceiling (4 MiB) is reclaimable. Writes resume once occupancy is below 50%
+  and nothing is held. The state is checked once per node poll; a write that
+  arrives before the poll sees the WAL cross the mark is still checked against
+  the bytes (next bullet). A write that has reached the log is never refused
+  for capacity: one that does not fit yet is held on the WAL thread and
+  written after the next rewrite. Heartbeats, votes, terms, commit records and
+  checkpoints are never refused; the leader keeps its role. The high-water
+  state refuses only client writes: a follower keeps following the leader
+  (heartbeats, term and commit) and takes every append whose new entries fit
+  the WAL account below (data under the 75% mark, noop-only appends under
+  the mark plus the control reserve), whatever its occupancy; one that does
+  not fit is declined without a reply and the leader resends the range. If the
+  leader's entries conflict with the follower's own uncommitted suffix (a
+  deposed leader), the follower still truncates that suffix (a small control
+  record), which is what frees its space; it then takes the resent entries
+  once they fit, without a snapshot, even on an idle group. A full WAL no
+  longer fails the node.
+- **Admission accounting.** Each node also counts the WAL bytes of every
+  write it has handed to the log but not yet written. A write that would take
+  the WAL past the 75% mark once those land is refused `StoragePressure` when
+  it reaches its group (counted in `wal_refused_proposals`), and a follower
+  declines such an append (`wal_declined_appends`), so the WAL thread never
+  has to hold a write (`wal_parked` stays 0 in normal running).
+- **Retained entries (backpressure).** Each group's log holds at most
+  16,384 data entries (`max_entries_per_group`). When a group's retained
+  entries reach 75% of that (12,288) its new writes are refused with the same
+  retryable `ERR StoragePressure`, until a checkpoint brings it below 50%
+  (8,192); `entry_high_water`, `entry_high_water_groups` and
+  `refused_entry_proposals` show it. A checkpoint becomes due at once (at any
+  applied entry beyond the base) while a group is in that state. A leader
+  that defers a due checkpoint because a replica has not acknowledged the
+  applied index (to avoid sending it a full snapshot) does so only below
+  10,240 retained entries and for at most 250 ms; a replica that is down
+  therefore does not stop checkpoints. `replica_stall` names the replica that
+  has gone longest without acknowledging new entries, in heartbeat rounds.
+- **Leader noop reserve.** Above the 16,384 data entries each log keeps
+  room for 256 more (a sixty-fourth) that only a newly elected leader's
+  first entry may use. A leader elected over a full log of uncommitted
+  older-term entries (for example after it was partitioned from the other
+  replicas while clients kept writing to it) can therefore always append
+  that entry, which is what lets it commit the older entries; the group then
+  checkpoints and accepts writes again. If the reserve is also used up (only
+  possible after hundreds of consecutive failed leader terms) and nothing
+  can be checkpointed, the leader steps down (`step_downs`,
+  `last_step_down=RetainedEntryCapacity@TERM`) and skips its next two
+  campaign attempts, so a replica with a shorter log is elected. The hold-off
+  counts attempts, not time, and also skips an explicit, operator or
+  leadership-transfer campaign on that replica: one such `Campaign` can be a
+  no-op while the hold-off lasts. If every replica is in that state, a library
+  host recovers by restarting with a larger `max_entries_per_group`. A store
+  with more than 16,384 retained entries (possible only through the reserve)
+  is refused by older binaries.
+- **WAL noop reserve.** A newly elected leader's first entry (a noop) and
+  follower appends carrying only such noops are live entries a rewrite must
+  keep, so they are admitted against the node's WAL account like writes, but
+  may use the control reserve above the 75% mark (1 MiB by default), shared
+  by all groups. A follower append is checked on exactly the new entries it
+  would write (entries the replica already holds are not counted): data under
+  the mark, noop-only appends under the mark plus the reserve. So no
+  transition the account admits takes the live WAL after a rewrite past the
+  mark plus the reserve, and every write already accepted fits after one
+  rewrite. This covers admission only: a store reopened with a live log
+  already past that point (for example with smaller limits) is not refused at
+  startup; it shows the typed refusals below, and recovery with unchanged
+  limits is not promised. Growth from a snapshot install's anchor is argued
+  (at most one configuration per group), not tested.
+  A replica whose WAL has no room for one more noop does not campaign
+  (`noop_refusals`), steps down if it wins (`last_step_down=WalCapacity@TERM`),
+  and declines noop-only appends (`wal_noop_refused` counts all three). While
+  that lasts maintenance rewrites whenever the WAL has grown since the last
+  rewrite (`wal_noop_starved`), at most once per retry interval and also at
+  scheduled deadlines, so dead vote and commit records alone cannot keep a
+  group without a leader. If the live log itself fills it (only after many
+  elections whose leaders never learned an acknowledgement), the replica
+  stays in this typed state, writing nothing; recover by reopening the
+  unchanged store with a larger `max_wal_bytes`. A replica of a group whose
+  other voters have room is not stuck: they elect, and their commits let it
+  apply, checkpoint and rewrite. If a quorum lacks room (both followers of a
+  three-replica group), the leader keeps its role and term without stepping
+  down and commits nothing; on the leader `replica_stall` names a follower
+  and its rounds keep growing. On each stuck follower, per resend:
+  - new entries carrying data that do not fit under the 75% mark:
+    `declined_appends` and `wal_declined_appends` grow, `high_water=true`,
+    `wal_noop_refused` does not move;
+  - new entries that are only noops and do not fit under the mark plus the
+    reserve: `declined_appends`, `wal_declined_appends` and `wal_noop_refused`
+    all grow, `high_water=true` and `wal_noop_starved=true`;
+  - new entries past the group's retained-entry capacity:
+    only `declined_appends` grows (`retained_entries` is near
+    `retained_capacity`); `wal_declined_appends` and `wal_noop_refused` do not
+    move.
+
+  `declined_appends` is per group; the `wal_*` counters are per node. Recover
+  with the same operator step on the full replicas (a larger `max_wal_bytes`,
+  or a larger `max_entries_per_group` for the last case); the group commits
+  once they have room again.
+- **Configuration checks.** Startup refuses store limits under which a write
+  could never fit: the WAL space above the 75% mark must hold the largest
+  batch plus the control reserve (`MaintenanceError::WalHeadroomTooSmall`):
+  with the default mark, `max_wal_bytes` must be at least
+  `4 × (max_batch_bytes + control_reserve_bytes) + control_reserve_bytes`
+  (the defaults, 1 MiB batches, a 1 MiB reserve and a 64 MiB WAL, leave
+  15.75 MiB for 2 MiB), and a log worker refuses a batch limit larger than the usable WAL
+  (`WorkerError::InvalidLimits`). Maintenance intervals above 24 hours are
+  refused (`InvalidLimits`, or a startup error for `--wal-reclaim-ms`), so a
+  huge interval cannot overflow the next deadline. This is not a proof that
+  every deadline addition succeeds: the protocol clock is a `u64` millisecond
+  count, and within 24 hours of its end (about 584 million years after the
+  clock's origin) the next deadline is `None` and the schedule stops, as the
+  recorded clock-horizon contract states (tested by
+  `deadline_exhaustion_stops_instead_of_wrapping_or_spinning`).
+- **Stall map.** `replica_stall` tracks only the group's current replicas:
+  the leader clears it at every membership change, so removed replicas are
+  never kept or reported.
+
+Overrides, accepted by `serve` in all three binaries:
 
 ```sh
-target/debug/voteboat-counter client 43000 1 maintenance
+--checkpoint-entries N     # 1..=8192: checkpoint threshold in applied entries
+--wal-reclaim-ms MS        # 1..=86400000: rewrite interval (retry is min(MS, 100))
+--wal-reclaim-min-bytes N  # reclaimable bytes needed for a scheduled rewrite (default 4 MiB; 0 = every interval)
 ```
 
-The latest completion reports the worker sequence and before/after byte counts;
-it is not a quorum receipt. One job runs at a time, overload retries after the
-interval, and shutdown drains admitted work. The native worker bounds each
-replacement image by its configured WAL ceiling. This rewrites the live image
-and can delay foreground work on that worker; it is not incremental cleaning.
-Reclamation cannot remove the live log suffix or advance the durable application
-boundary by itself. Use manual `client ... checkpoint` or the automatic policy
-below to authorize checkpoint progression.
+Opt-out, accepted only with the exact acknowledgement:
 
-Rust hosts use `Node::configure_wal_maintenance(Some(WalMaintenancePolicy {
-interval_ms, retry_ms, max_bytes }))` and inspect `Node::wal_maintenance()`.
-`PersistenceWorker::reclaim_limit()` advertises support; default host providers
-decline it. Poll with monotonic host time as usual; no extra thread or clock is
-created. Manual `reclaim` results stay in `poll_reclaim`, while scheduled results
-replace only the latest maintenance diagnostic. Disabling/changing the policy
-requires its admitted job to finish. On restart, configure a new schedule after
-normal durable recovery.
+```sh
+--no-maintenance I-accept-a-bounded-log
+```
 
-## Automatic checkpoints
+It disables both and cannot be combined with any override. Each group then
+stops accepting writes at its store limits: a write at the retained-entry
+limit is refused `ERR StoragePressure`, which stays until an operator
+checkpoint (`client ... checkpoint`) frees space. A leader elected at the entry
+limit appends its first entry from the reserve and commits. Once the reserve
+is used up there are two cases. If a checkpoint up to the commit index could
+free room (part of the retained log is committed), the leader stays leader
+without its first entry (`leader_noop_pending=true`), refusing proposals and
+reads typed, until an operator checkpoint frees space; it then appends the
+entry. If the uncommitted part of its log alone fills the capacity, no
+checkpoint can help: it steps down at once (`last_step_down=RetainedEntryCapacity`,
+counted in `step_downs`) and skips its next two campaign attempts, so a
+replica with a shorter log can win and commit. Any other value, a duplicate
+flag, or a threshold above half the retained-entry limit is refused before any
+file or listener is created. Supply the same flags again on recovery.
 
-Append `--checkpoint-entries 1024` to a serve/recover command to checkpoint when
-the applied log is at least 1024 entries beyond its durable snapshot base. The
-count includes noops and applied configuration entries. The service checks every
-100ms, examines at most64 groups and allows at most4 automatic requests. It uses
-the same application, snapshot worker, retention and WAL path as manual
-checkpoints. Combine with `--wal-reclaim-ms 60000` for physical reclamation.
-Both policies are opt-in and should be supplied again on recovery.
+Startup prints the selection, for example:
 
-`client ... maintenance` reports `checkpoint_enabled`, `checkpoint_pending` and
-`checkpoint_base` for the local replica. The base is durable local state, not a
-quorum acknowledgement. Admission is not completion. Pending/busy groups are
-skipped and missed scan intervals coalesce. Shutdown stops new scans and drains
-already accepted requests.
+```text
+maintenance retention=maintained checkpoint_entries=8192 checkpoint_scan_ms=10 wal_reclaim_ms=1000 wal_retry_ms=100 wal_reclaim_min_bytes=4194304
+maintenance retention=lifetime-bounded checkpoint_entries=off checkpoint_scan_ms=off wal_reclaim_ms=off wal_retry_ms=off wal_reclaim_min_bytes=off
+```
+
+`client ... maintenance` (all three binaries; Inspect permission) reports the
+local, volatile state of one group:
+
+| Field | Meaning |
+| --- | --- |
+| `retention` | `maintained` or `lifetime-bounded` |
+| `enabled`, `pending`, `next_ms` | WAL schedule installed, a rewrite in flight, next interval deadline |
+| `last_sequence` | worker sequence of the latest rewrite completion |
+| `wal_bytes`, `wal_capacity` | published WAL occupancy and usable capacity |
+| `last_reclaim_ms`, `before_bytes`, `after_bytes` | latest successful rewrite |
+| `failures` | refusals and failed completions since the last success |
+| `skipped` | interval deadlines passed with too little to reclaim |
+| `admission_error`, `completion_error` | latest typed refusal or failure |
+| `checkpoint_enabled`, `checkpoint_entries`, `checkpoint_pending` | checkpoint schedule and in-flight requests |
+| `checkpoint_last`, `checkpoint_admission_error` | latest checkpoint result and refusal |
+| `leader_noop_pending` | a leader elected with the noop reserve used up has not appended its first entry yet |
+| `high_water` | the node refuses new writes with `StoragePressure` (WAL at or above 75%, a write held, or a write refused by admission accounting) |
+| `high_water_entries` | times the high-water state began since startup |
+| `refused_proposals` | writes refused with `StoragePressure` at submission since startup (WAL and retained-entry gates) |
+| `wal_parked` | bytes of admitted writes the WAL thread holds until a rewrite makes room (0 normally) |
+| `retained_entries` | this group's retained log entries (beyond its checkpoint base) |
+| `retained_budget`, `retained_capacity` | its data budget (16,384) and that plus the leader noop reserve (16,640) |
+| `entry_high_water`, `entry_high_water_groups` | this group, and how many groups, refuse writes at the retained-entry gate |
+| `refused_entry_proposals` | writes refused at the retained-entry gate (included in `refused_proposals`) |
+| `checkpoint_failures` | rejected checkpoints and checkpoint admission refusals since startup (each retried) |
+| `wal_pending_bytes` | WAL bytes of writes handed to the log and not yet written |
+| `wal_refused_proposals`, `wal_declined_appends` | writes refused, and follower appends declined, by admission accounting |
+| `wal_held_ms` | how long the oldest write held by the WAL thread has waited (0 when none) |
+| `declined_appends` | appends whose new entries this replica declined (no room in the WAL account, or past the retained-entry capacity) |
+| `replica_stall` | as leader, `NODE:ROUNDS` for the replica longest without acknowledging new entries, or `none` |
+| `step_downs`, `last_step_down` | capacity step-downs of this replica and the last one (`RetainedEntryCapacity@TERM` or `WalCapacity@TERM`) |
+| `wal_noop_refused` | noop transitions the node's WAL account refused since startup (campaigns not started, step-downs, declined noop-only appends; all groups) |
+| `noop_refusals` | campaigns this replica did not start, and leader roles it gave up, because no noop fitted the WAL |
+| `wal_noop_starved` | a noop was refused since the last successful rewrite: a rewrite runs whenever the WAL has grown |
+| `checkpoint_base` | durable local snapshot base (kept last) |
+
+None of these is a quorum receipt. Maintenance never switches itself off: every
+refusal or failed completion is retried and counted in `failures`. A fatal
+storage error (`Uncertain`, `Corrupt`, `Fenced`) still stops the node for
+recovery, as any WAL fault does. A rewrite rewrites the live image and can delay
+foreground work on that worker; it is not incremental cleaning. It cannot remove
+the live log suffix; checkpoints authorize that.
+
+Rust hosts get the same defaults from `NodeLimits::default()`
+(`retention: RetentionMode::Maintained`). Construction is refused with
+`NodeError::Maintenance(MaintenanceError::CheckpointsUnavailable)` when a group
+has no checkpoint-capable snapshot worker; such a host selects
+`RetentionMode::LifetimeBounded` explicitly. `Node::configure_checkpoints` and
+`Node::configure_wal_maintenance` replace the defaults (a WAL policy with
+`min_reclaim_bytes: 0` rewrites at every deadline); passing `None` on a
+maintained node returns `MaintenanceError::DisableRequiresLifetimeBounded`. A
+WAL policy's `max_bytes` must equal `PersistenceWorker::reclaim_limit()`, and a
+checkpoint threshold above half the retained-entry limit returns
+`MaintenanceError::CheckpointThresholdUnreachable`. Inspect
+`Node::wal_maintenance()`, `Node::checkpoints()`, `Node::wal_usage()` and
+`Node::retention()`. Manual `reclaim` results stay in `poll_reclaim`; a manual
+request while an automatic rewrite is in flight is refused as `Overloaded`.
+`WalMaintenancePolicy::high_water_percent` (75) and `low_water_percent` (50)
+set the backpressure marks (`0 < low < high <= 100`, else `InvalidLimits`);
+`WalMaintenanceStatus::{high_water, high_water_entries, refused_proposals}`
+and `WalUsage::parked` report it. With the explicit opt-out the same default
+marks apply, so a lifetime-bounded node refuses writes typed at 75% instead of
+failing when its WAL fills. The core refuses data at the retained-entry
+budget with `RaftError::StoragePressure` (a client sees
+`ClientOutcome::NotProposed(RaftError::StoragePressure)` if the write was
+already submitted), and `Raft::{capacity_step_downs, declined_appends,
+entry_budget_refusals, replica_stall, wal_noop_refusals}`,
+`WalMaintenanceStatus::noop_starved` and `node.local().owner.wal_account()`
+(including `noop_refused`) expose the counters above. A `NativeLogWorker`
+owned directly (without a node) completes a batch that still does not fit
+right after a successful rewrite with the non-fatal
+`StorageError::Rejected("WAL live image leaves no room")`; a node's WAL
+account keeps that from happening there.
 
 Rust hosts can choose `CheckpointPolicy { min_entries, interval_ms, scan_groups,
 max_in_flight }` through `Node::configure_checkpoints`. Inspect tracked admissions

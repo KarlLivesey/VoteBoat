@@ -23,12 +23,18 @@ use std::collections::BTreeMap;
 
 mod command_bytes;
 mod comparison;
+mod entries;
 mod owned;
 pub(crate) mod transition;
 mod volatile;
 pub use command_bytes::CommandBytes;
+pub(crate) use command_bytes::RETAINED_EXTRA_MAX;
 pub(crate) use comparison::CheckpointComparison;
 pub use comparison::{CheckpointLineage, CheckpointLog};
+pub(crate) use entries::IndexNeed;
+#[cfg(test)]
+pub(crate) use entries::SHARE_MIN;
+pub use entries::{EntryBatch, EntryIter, EntryLog, EntryRange, EntrySlices};
 pub use owned::OwnedLogState;
 pub use volatile::VolatileLog;
 
@@ -151,7 +157,8 @@ pub struct GroupLog {
     pub commit_index: u64,
     pub snapshot: Option<SnapshotRef>,
     pub snapshot_membership: Option<Box<crate::membership::Membership>>,
-    pub entries: Vec<LogEntry>,
+    /// Retained entries as shared immutable pieces; see [`EntryLog`].
+    pub entries: EntryLog,
 }
 impl GroupLog {
     /// Structural recovery validation of a historical promise, not proof that
@@ -188,7 +195,7 @@ impl GroupLog {
             self.snapshot_membership.as_deref(),
             self.base_index(),
             self.entries
-                .get(..count)
+                .range(0..count)
                 .ok_or(crate::membership::MembershipError::InvalidHistory)?,
             self.commit_index.min(index),
         )
@@ -208,14 +215,25 @@ impl GroupLog {
         self.snapshot.map_or(0, |s| s.term)
     }
     pub fn last_index(&self) -> u64 {
-        self.entries.last().map_or(self.base_index(), |e| e.index)
+        self.entries
+            .last_index_term()
+            .map_or(self.base_index(), |(index, _)| index)
     }
     pub fn last_term(&self) -> u64 {
-        self.entries.last().map_or(self.base_term(), |e| e.term)
+        self.entries
+            .last_index_term()
+            .map_or(self.base_term(), |(_, term)| term)
     }
     pub fn term_at(&self, index: u64) -> Option<u64> {
         if index == self.base_index() {
             Some(self.base_term())
+        } else if let Some((_, term)) = self.entries.last_index_term().filter(|(last, _)| {
+            // The tail answers only when it is also the entry at that ordinal
+            // position, exactly as `entry_at` would find it.
+            *last == index
+                && index.checked_sub(self.base_index()) == Some(self.entries.len() as u64)
+        }) {
+            Some(term)
         } else {
             self.entry_at(index).map(|e| e.term)
         }
@@ -230,7 +248,7 @@ impl GroupLog {
 pub struct Suffix {
     /// First index removed/replaced; last_index+1 is a pure append.
     pub from: u64,
-    pub entries: Vec<LogEntry>,
+    pub entries: EntryBatch,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LogUpdate {
@@ -245,6 +263,40 @@ pub struct LogUpdate {
     /// Configuration bound to that same durable snapshot. None denotes the
     /// original bootstrap only, and cannot discard committed configuration work.
     pub snapshot_membership: Option<Box<crate::membership::Membership>>,
+}
+/// Upper bound of the WAL bytes one update adds beyond its entries: batch
+/// framing, the update header (group, revision, hard state, commit), a
+/// snapshot reference and the suffix header. ST2 round 3 (I5); checked against
+/// the native codec in its tests.
+pub const UPDATE_WAL_OVERHEAD: usize = 512;
+/// Upper bound of one entry's encoded fields besides its payload: index,
+/// term, payload tag, operation and length.
+pub const ENTRY_WAL_OVERHEAD: usize = 64;
+/// Upper bound of the WAL bytes one entry with `payload` bytes adds.
+pub fn entry_wal_bound(payload: usize) -> usize {
+    ENTRY_WAL_OVERHEAD.saturating_add(payload)
+}
+/// WAL bound of a leader's current-term noop transition (one update with one
+/// noop entry): what the shard's account must still hold under the
+/// high-water mark plus the control reserve before a core may campaign or
+/// place its noop (ST2 round 4, R4-1).
+pub const NOOP_WAL_BOUND: usize = UPDATE_WAL_OVERHEAD + ENTRY_WAL_OVERHEAD;
+impl LogUpdate {
+    /// Upper bound of this update's WAL encoding, for exact in-flight
+    /// accounting against the WAL high-water mark. Not durability evidence.
+    pub fn wal_bound(&self) -> usize {
+        let mut bytes = UPDATE_WAL_OVERHEAD.saturating_add(
+            self.snapshot_membership
+                .as_ref()
+                .map_or(0, |m| m.retained_bytes()),
+        );
+        if let Some(suffix) = &self.suffix {
+            for entry in &suffix.entries {
+                bytes = bytes.saturating_add(entry_wal_bound(entry.payload_bytes()));
+            }
+        }
+        bytes
+    }
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LogMutation {
@@ -276,6 +328,32 @@ pub struct LogReclaimed {
     pub after_bytes: usize,
 }
 
+/// Physical log occupancy against the bytes applications may use
+/// (`max_wal_bytes − control_reserve_bytes`). Scheduling input and operator
+/// diagnostics only: never durability evidence.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct WalUsage {
+    pub bytes: usize,
+    pub capacity: usize,
+    /// Owner-side cost of batches the WAL thread holds because their encoding
+    /// does not fit yet. They are written after the next successful rewrite;
+    /// nonzero means the node is in the WAL high-water state.
+    pub parked: usize,
+}
+
+/// A refusal from [`LogStore::append_batch_within_capacity`].
+#[derive(Debug)]
+pub enum AppendRefused {
+    /// The encoded batch does not fit the physical log's remaining capacity
+    /// for its class (data, or control within the reserve). Nothing was
+    /// written and no store state changed; the unchanged mutations are
+    /// returned so the caller can retry after a rewrite. Never a
+    /// `StorageError`, so it cannot fail a core.
+    Full(Vec<LogMutation>),
+    /// Any other refusal, exactly as `append_batch` reports it.
+    Failed(StorageError),
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct LogLimits {
     pub max_groups: usize,
@@ -305,10 +383,25 @@ impl Default for LogLimits {
     }
 }
 impl LogLimits {
+    /// Entries beyond `max_entries_per_group` that only a leader's own
+    /// current-term noop may occupy (ST2 round 3, I1): a leader elected over a
+    /// log at the data budget can always append the entry that lets it commit
+    /// the old-term suffix. 256 at the default budget.
+    pub fn leader_noop_reserve(self) -> usize {
+        (self.max_entries_per_group / 64).max(4)
+    }
+    /// Retained entries a group's log may hold: the data budget
+    /// `max_entries_per_group` (proposals, configuration entries and replicated
+    /// data are admitted only below it) plus [`Self::leader_noop_reserve`].
+    /// The store, recovery and decoding bound.
+    pub fn retained_entry_capacity(self) -> usize {
+        self.max_entries_per_group
+            .saturating_add(self.leader_noop_reserve())
+    }
     pub fn validate(self) -> Result<Self, StorageError> {
         if self.max_groups == 0
             || self.max_entries_per_group == 0
-            || self.max_entries_per_group > u32::MAX as usize
+            || self.retained_entry_capacity() > u32::MAX as usize
             || self.max_command_bytes == 0
             || self.max_snapshot_bytes == 0
             || self.max_snapshot_bytes > 256 * 1024 * 1024
@@ -363,9 +456,24 @@ pub trait LogStore {
     }
     fn append_batch(&mut self, mutations: Vec<LogMutation>)
         -> Result<Vec<LogTicket>, StorageError>;
+    /// `append_batch`, except that a batch refused only because the physical
+    /// log is full comes back unchanged as [`AppendRefused::Full`], with no
+    /// state changed. Stores without a bounded physical log never refuse for
+    /// capacity (the default delegates to `append_batch`).
+    fn append_batch_within_capacity(
+        &mut self,
+        mutations: Vec<LogMutation>,
+    ) -> Result<Vec<LogTicket>, AppendRefused> {
+        self.append_batch(mutations).map_err(AppendRefused::Failed)
+    }
     fn barrier(&mut self, dependencies: &[LogTicket]) -> Result<DurableLog, StorageError>;
     fn supports_reclaim(&self) -> bool {
         false
+    }
+    /// Current physical log occupancy when the store keeps a bounded physical
+    /// log that `reclaim` rewrites; None otherwise. Must be cheap.
+    fn physical_usage(&self) -> Option<WalUsage> {
+        None
     }
     /// Optional physical maintenance. Preserve every current durable group,
     /// including its snapshot reference and full surviving suffix. Logical
@@ -534,7 +642,7 @@ fn stage_create(b: &Bootstrap) -> Result<GroupLog, StorageError> {
         ballot_origin: None,
         commit_index: 0,
         snapshot: None,
-        entries: Vec::new(),
+        entries: EntryLog::default(),
     })
 }
 fn validate_ballot_fields(
@@ -632,12 +740,7 @@ fn apply_update(
     current.hard_state = update.hard_state;
     current.ballot_origin = ballot_origin;
     current.commit_index = update.commit_index;
-    if current.snapshot_membership.is_some()
-        || current
-            .entries
-            .iter()
-            .any(|e| matches!(e.payload, EntryPayload::Configuration(_)))
-    {
+    if current.snapshot_membership.is_some() || current.entries.has_configuration() {
         current
             .membership()
             .map_err(|_| StorageError::Rejected("invalid configuration journal"))?;
@@ -722,7 +825,7 @@ fn apply_snapshot(
     if matching {
         let removed = usize::try_from(reference.index - current.base_index())
             .map_err(|_| StorageError::Rejected("snapshot index overflow"))?;
-        current.entries.drain(..removed);
+        current.entries.trim_prefix(removed);
     } else {
         current.entries.clear();
     }
@@ -756,7 +859,7 @@ fn apply_suffix(
     }
     let start = usize::try_from(suffix.from - current.base_index() - 1)
         .map_err(|_| StorageError::Rejected("index overflow"))?;
-    if suffix.entries.len() > limits.max_entries_per_group.saturating_sub(start) {
+    if suffix.entries.len() > limits.retained_entry_capacity().saturating_sub(start) {
         return Err(StorageError::Rejected("group entry limit"));
     }
     validate_suffix_entries(
@@ -774,26 +877,24 @@ fn apply_suffix(
             .ok_or(StorageError::Rejected("generation exhausted"))?;
     }
     current.entries.truncate(start);
-    current.entries.extend(suffix.entries.iter().cloned());
+    current.entries.append(suffix.entries.clone());
     Ok(())
 }
 
 fn validate_suffix_entries(
     suffix: &Suffix,
-    mut previous_term: u64,
+    previous_term: u64,
     hard_term: u64,
     limits: LogLimits,
 ) -> Result<(), StorageError> {
-    for (offset, entry) in suffix.entries.iter().enumerate() {
-        if suffix.from.checked_add(offset as u64) != Some(entry.index)
-            || entry.term == 0
-            || entry.term < previous_term
-            || entry.term > hard_term
-            || entry.payload_bytes() > limits.max_command_bytes
-        {
-            return Err(StorageError::Rejected("entry index/term/payload invalid"));
-        }
-        previous_term = entry.term;
+    if suffix.entries.valid_suffix(
+        suffix.from,
+        previous_term,
+        hard_term,
+        limits.max_command_bytes,
+    ) {
+        Ok(())
+    } else {
+        Err(StorageError::Rejected("entry index/term/payload invalid"))
     }
-    Ok(())
 }

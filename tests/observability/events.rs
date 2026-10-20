@@ -303,3 +303,76 @@ fn reporter_bounds_kinds_and_refusal_preserves_state_change_for_retry() {
         5
     );
 }
+
+/// Test-only sink that keeps every recorded kind.
+struct Collect {
+    binding: EventBinding,
+    kinds: Vec<EventKind>,
+}
+impl EventObserver for Collect {
+    fn binding(&self) -> EventBinding {
+        self.binding
+    }
+    fn limits(&self) -> EventLimits {
+        limits()
+    }
+    fn record_bounded(&mut self, event: OperationalEvent) -> Result<EventCursor, EventError> {
+        self.kinds.push(event.kind);
+        Ok(EventCursor {
+            binding: self.binding,
+            sequence: self.kinds.len() as u64,
+        })
+    }
+    fn read_events(&self, _: Option<EventCursor>, _: usize) -> Result<EventPage, EventError> {
+        Err(EventError::Closed)
+    }
+    fn close(&mut self) {}
+}
+/// NT1 round 2: listener errors, backoffs and a spent connection-attempt
+/// space are Pressure events. Exhaustion is permanent, so it is reported
+/// once rather than on every poll, and again only after it clears.
+#[test]
+fn reporter_emits_listener_pressure_and_reports_exhaustion_once() {
+    let b = binding(1);
+    let mut sink = Collect {
+        binding: b,
+        kinds: Vec::new(),
+    };
+    let mut reporter = EventReporter::new(b);
+    let mut quiet = sample(b.owner, 1, 0);
+    reporter.record_sample(&mut sink, quiet).unwrap(); // Initial state.
+    let mut accept = quiet;
+    accept.sampled_at = MonoTime(2);
+    accept.counters.accept_errors = 1;
+    accept.counters.accept_backoffs = 1;
+    accept.network.accept_paused = true;
+    assert_eq!(
+        reporter.record_sample(&mut sink, accept).unwrap().recorded,
+        1
+    );
+    let mut exhausted = quiet;
+    exhausted.network.generations_exhausted = true;
+    for time in 3..6 {
+        exhausted.sampled_at = MonoTime(time);
+        reporter.record_sample(&mut sink, exhausted).unwrap();
+    }
+    quiet.sampled_at = MonoTime(6);
+    reporter.record_sample(&mut sink, quiet).unwrap();
+    exhausted.sampled_at = MonoTime(7);
+    reporter.record_sample(&mut sink, exhausted).unwrap();
+    let event = |accept: u64, exhausted: bool| EventKind::Pressure {
+        ingress_blocked: 0,
+        snapshot_refusals: 0,
+        connection_failures: 0,
+        accept_errors: accept,
+        accept_backoffs: accept,
+        generations_exhausted: exhausted,
+    };
+    let pressure = sink
+        .kinds
+        .iter()
+        .filter(|k| matches!(k, EventKind::Pressure { .. }))
+        .copied()
+        .collect::<Vec<_>>();
+    assert_eq!(pressure, [event(1, false), event(0, true), event(0, true)]);
+}

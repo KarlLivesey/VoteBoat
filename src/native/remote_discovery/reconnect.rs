@@ -22,12 +22,9 @@ use std::net::SocketAddr;
 #[derive(Clone, Copy, Debug)]
 pub struct SourceReconnectConfig {
     /// Explicit numeric source address; this connector must not resolve itself.
+    /// Reconnect generations continue after the current source session's
+    /// generation through `u64::MAX`, within the local store session.
     pub endpoint: SocketAddr,
-    /// Dedicated host-reserved range in the same recovered local store session.
-    pub first_generation: SecureSessionGeneration,
-    /// Inclusive bound. Exhaustion stops retries; the host chooses a new range
-    /// on reconstruction, without reusing any generation in this store session.
-    pub last_generation: SecureSessionGeneration,
     /// Delay between failed attempts, from 1 through 60,000 milliseconds.
     pub retry_ms: u64,
 }
@@ -94,9 +91,7 @@ impl<C: PeerConnector<Endpoint = SocketAddr>> ReconnectingPeerDiscovery<C> {
                 .limits()
                 .validate()
                 .map_err(|_| DiscoveryError::InvalidLimits)?;
-            if config.first_generation <= binding.generation
-                || config.last_generation < config.first_generation
-                || config.retry_ms == 0
+            if config.retry_ms == 0
                 || config.retry_ms > 60_000
                 || config.endpoint.port() == 0
                 || config.endpoint.ip().is_unspecified()
@@ -132,7 +127,12 @@ impl<C: PeerConnector<Endpoint = SocketAddr>> ReconnectingPeerDiscovery<C> {
             connector,
             limits,
             config,
-            next: Some(config.first_generation),
+            // 2^64 attempts at the 1 ms minimum retry take 584 million years.
+            next: binding
+                .generation
+                .get()
+                .checked_add(1)
+                .and_then(SecureSessionGeneration::new),
             retry_at: now,
             pending: None,
             last_error: None,
@@ -202,14 +202,10 @@ impl<C: PeerConnector<Endpoint = SocketAddr>> ReconnectingPeerDiscovery<C> {
         let Some(generation) = self.next else {
             return Ok(());
         };
-        self.next = if generation < self.config.last_generation {
-            generation
-                .get()
-                .checked_add(1)
-                .and_then(SecureSessionGeneration::new)
-        } else {
-            None
-        };
+        self.next = generation
+            .get()
+            .checked_add(1)
+            .and_then(SecureSessionGeneration::new);
         let Some(end) = self.now.0.checked_add(self.limits.timeout_ms) else {
             self.next = None;
             self.retry(ConnectError::InvalidRequest);

@@ -65,7 +65,10 @@ pub(super) fn control_frame(bytes: &[u8], limits: LogLimits) -> io::Result<Vec<u
             return Err(invalid("striped checkpoint trailing bytes"));
         }
         for group in groups.values_mut() {
-            strip(&mut group.entries);
+            // Explicit copy, edit and refreeze; the decoded source is unchanged.
+            let mut entries = group.entries.to_vec();
+            strip(&mut entries);
+            group.entries = entries.into();
         }
         NativeLogCodec
             .encode_checkpoint(sequence, &groups, limits, limits.max_wal_bytes)
@@ -77,7 +80,9 @@ pub(super) fn control_frame(bytes: &[u8], limits: LogLimits) -> io::Result<Vec<u
         for mutation in &mut mutations {
             if let LogMutation::Update(update) = mutation {
                 if let Some(suffix) = &mut update.suffix {
-                    strip(&mut suffix.entries);
+                    let mut entries = suffix.entries.to_vec();
+                    strip(&mut entries);
+                    suffix.entries = entries.into();
                 }
             }
         }

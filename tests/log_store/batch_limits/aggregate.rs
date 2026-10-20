@@ -39,7 +39,8 @@ fn exact_persist(effects: Vec<Effect>) -> LogUpdate {
 }
 fn replay_counter(core: &Raft) -> Counter {
     let mut app = Counter::new(ORIGINALS as usize + 1).unwrap();
-    app.apply_batch(core.replay_committed()).unwrap();
+    app.apply_batch(&core.replay_committed().contiguous())
+        .unwrap();
     app
 }
 fn retry_after_recovery(mut store: NativeLogStore<ModelIo>, retained: bool) {
@@ -56,7 +57,7 @@ fn retry_after_recovery(mut store: NativeLogStore<ModelIo>, retained: bool) {
     let mut applied = app.applied_index();
     let effects = core.step(Event::Campaign).unwrap();
     settle(&mut core, &mut store, effects);
-    let replay = core.replay_committed();
+    let replay = core.replay_committed().contiguous();
     app.apply_batch(&replay[replay.partition_point(|entry| entry.index <= applied)..])
         .unwrap();
     applied = app.applied_index();
@@ -67,7 +68,7 @@ fn retry_after_recovery(mut store: NativeLogStore<ModelIo>, retained: bool) {
         })
         .unwrap();
     settle(&mut core, &mut store, effects);
-    let replay = core.replay_committed();
+    let replay = core.replay_committed().contiguous();
     let receipts = app
         .apply_batch(&replay[replay.partition_point(|entry| entry.index <= applied)..])
         .unwrap();

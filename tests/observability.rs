@@ -37,6 +37,7 @@ fn empty(owner: RuntimeOwner) -> CounterSnapshot {
         sampled_at: None,
         state: None,
         counters: NodeCounters::default(),
+        network: NetworkHealth::default(),
         closed: false,
     }
 }
@@ -56,6 +57,8 @@ fn counters(n: u64) -> NodeCounters {
         peer_received: n,
         ingress_blocked: n,
         connection_failures: n,
+        accept_errors: n,
+        accept_backoffs: n,
     }
 }
 fn sample(owner: RuntimeOwner, time: u64, n: u64) -> NodeObservation {
@@ -64,6 +67,7 @@ fn sample(owner: RuntimeOwner, time: u64, n: u64) -> NodeObservation {
         sampled_at: MonoTime(time),
         state: NodeState::Running,
         counters: counters(n),
+        network: NetworkHealth::default(),
     }
 }
 // An independently owned host resource with two scoped views and no native types.
@@ -200,6 +204,10 @@ fn capture_counts_returned_work_and_never_fabricates_progress_for_failed_polls()
             received: 7,
             ingress_blocked: 8,
             connection_failures: 9,
+            accept_errors: 10,
+            accept_backoffs: 11,
+            accept_paused: true,
+            generations_exhausted: true,
             ..Default::default()
         }),
     });
@@ -220,7 +228,16 @@ fn capture_counts_returned_work_and_never_fabricates_progress_for_failed_polls()
             peer_sends: 6,
             peer_received: 7,
             ingress_blocked: 8,
-            connection_failures: 9
+            connection_failures: 9,
+            accept_errors: 10,
+            accept_backoffs: 11,
+        }
+    );
+    assert_eq!(
+        sample.network,
+        NetworkHealth {
+            accept_paused: true,
+            generations_exhausted: true,
         }
     );
     assert!(progress.is_ok());

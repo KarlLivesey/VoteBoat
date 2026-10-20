@@ -19,6 +19,18 @@ fn empty_values_normalize_without_backing_or_charge() {
     }
 }
 #[test]
+fn retained_charges_exceed_lengths_by_at_most_the_stated_bound() {
+    let mut reached = false;
+    for len in 1..=256 {
+        let extra = CommandBytes::from(vec![0; len]).retained_bytes() - len;
+        assert!(extra <= RETAINED_EXTRA_MAX, "{len}");
+        reached |= extra == RETAINED_EXTRA_MAX;
+    }
+    assert!(reached);
+    #[cfg(target_pointer_width = "64")]
+    assert_eq!(RETAINED_EXTRA_MAX, 23);
+}
+#[test]
 fn shared_content_survives_other_owners_and_mutable_copies_are_independent() {
     let value = CommandBytes::from(vec![1, 2, 3]);
     let shared = value.clone();

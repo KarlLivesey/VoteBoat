@@ -389,12 +389,12 @@ fn perform<S: SnapshotRetention>(
             if sealed.ticket != ticket {
                 return Err(StorageError::StaleTicket);
             }
-            let receipt = store.publish(sealed)?;
+            let receipt = store.publish_for_log(sealed)?;
             if receipt.sealed != sealed || receipt.metadata != snapshot.metadata {
                 return Err(StorageError::StaleTicket);
             }
             let reference = receipt.reference();
-            store.pin_for_log(reference)?;
+            // The one exact check of the published image against the input.
             let verified = store.load_pinned(reference)?;
             if verified != snapshot || snapshot_image_bytes(&verified).is_none_or(|n| n > allowance)
             {
@@ -421,13 +421,18 @@ fn perform<S: SnapshotRetention>(
             })
         }
         SnapshotJob::Reconcile { reference } => {
-            let snapshot = store.load_pinned(reference)?;
-            if !reference.matches(&snapshot)
-                || snapshot_image_bytes(&snapshot).is_none_or(|n| n > allowance)
-            {
-                return Err(StorageError::Corrupt(
-                    "checkpoint retention verification/budget",
-                ));
+            // An image this session published was compared byte for byte by
+            // the Publish job and is still pinned: re-reading it checks
+            // nothing new. Other references (recovery, installs) are loaded.
+            if !store.verified_this_session(reference) {
+                let snapshot = store.load_pinned(reference)?;
+                if !reference.matches(&snapshot)
+                    || snapshot_image_bytes(&snapshot).is_none_or(|n| n > allowance)
+                {
+                    return Err(StorageError::Corrupt(
+                        "checkpoint retention verification/budget",
+                    ));
+                }
             }
             store.reconcile_log(Some(reference))?;
             Ok(SnapshotOutput::Reconciled(reference))

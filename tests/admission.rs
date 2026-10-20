@@ -103,7 +103,7 @@ mod native {
                 Rpc::Append {
                     previous_index: 0,
                     previous_term: 0,
-                    entries: vec![entry(1, 1, 7)],
+                    entries: vec![entry(1, 1, 7)].into(),
                     leader_commit: 0,
                 }
             } else {

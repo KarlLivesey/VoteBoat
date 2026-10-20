@@ -38,10 +38,12 @@ pub struct PeerRosterLimits {
 pub struct PeerRosterConfig {
     pub local: LocalIdentity,
     pub outbound: OutboundBinding,
-    /// First of a host-reserved, non-overlapping generation range within the
-    /// recovered local store session. Never reuse a range for another roster.
+    /// First generation this roster issues within the recovered local store
+    /// session: 1 for a fresh session, or `reclaim_generation()` of a drained
+    /// predecessor in the same session. The roster issues every value from
+    /// here through `u64::MAX`; the store session is the domain, so a restart
+    /// starts again at 1 without reusing any `(session, generation)` pair.
     pub first_generation: SecureSessionGeneration,
-    pub last_generation: SecureSessionGeneration,
     pub wire_version: u16,
     pub limits: PeerRosterLimits,
     pub transport_limits: TransportLimits,
@@ -154,8 +156,8 @@ pub struct PeerRoster<P: PeerTransport> {
     peers: BTreeMap<NodeId, Peer<P>>,
     connect_cursor: Option<NodeId>,
     poll_cursor: Option<NodeId>,
+    /// Last issued generation; `u64::MAX` means the session's space is spent.
     sequence: u64,
-    last_generation: u64,
     now: MonoTime,
     closed: bool,
     fenced: bool,
@@ -179,7 +181,6 @@ impl<P: PeerTransport> PeerRoster<P> {
             local,
             outbound,
             first_generation,
-            last_generation,
             wire_version,
             limits,
             transport_limits,
@@ -196,7 +197,6 @@ impl<P: PeerTransport> PeerRoster<P> {
             return Err(PeerRosterError::WrongBinding);
         }
         if limits.peers == 0
-            || last_generation < first_generation
             || limits.peers > 65536
             || authorized.len() > limits.peers
             || authorized.contains_key(&local.node)
@@ -244,7 +244,6 @@ impl<P: PeerTransport> PeerRoster<P> {
             connect_cursor: None,
             poll_cursor: None,
             sequence: first_generation.get() - 1,
-            last_generation: last_generation.get(),
             now,
             closed: false,
             fenced: false,
@@ -511,7 +510,7 @@ impl<P: PeerTransport> PeerRoster<P> {
         }
         let u = self.usage();
         let available = u.connecting < self.limits.connecting
-            && self.sequence < self.last_generation
+            && !self.generations_exhausted()
             && self.per_connection <= self.limits.connection_bytes - u.reserved_bytes;
         self.peers
             .values()
@@ -562,16 +561,29 @@ impl<P: PeerTransport> PeerRoster<P> {
         })
     }
     /// After complete shutdown, hand off the next unused generation to a
-    /// replacement roster. Concurrent rosters need disjoint host-reserved ranges.
+    /// replacement roster in the same store session.
     pub fn reclaim_generation(&self) -> Result<SecureSessionGeneration, PeerRosterError> {
         if !self.is_drained() {
             return Err(PeerRosterError::Overloaded);
         }
         self.sequence
             .checked_add(1)
-            .filter(|n| *n <= self.last_generation)
             .and_then(SecureSessionGeneration::new)
             .ok_or(PeerRosterError::Exhausted)
+    }
+    /// Whether this roster can issue no further connection attempt: every
+    /// generation of the store session has been issued, or an attempt
+    /// deadline would pass `u64::MAX` ms. Not reachable in practice (2^64
+    /// attempts, or 5.8e8 years of uptime; see docs/PEER_ROSTER.md). When
+    /// set, no peer gets a new attempt and nothing fails: established
+    /// transports keep working, and a restart opens a fresh store session.
+    pub fn generations_exhausted(&self) -> bool {
+        self.sequence == u64::MAX
+            || self
+                .now
+                .0
+                .checked_add(self.limits.connect_timeout_ms)
+                .is_none()
     }
     fn time(&mut self, now: MonoTime) -> Result<(), PeerRosterError> {
         if now < self.now {
@@ -621,13 +633,13 @@ impl<P: PeerTransport> PeerRoster<P> {
         if limit == 0 || self.peers.is_empty() {
             return Ok(Vec::new());
         }
-        // Preflight exhaustion before creating any ticket that a returned error
-        // could hide from its owner.
-        let expires = MonoTime(
-            now.0
-                .checked_add(self.limits.connect_timeout_ms)
-                .ok_or(PeerRosterError::Exhausted)?,
-        );
+        // An attempt deadline past `u64::MAX` ms (about 5.8e8 years of
+        // uptime) is the same per-peer condition as a spent generation space:
+        // no ticket and no error, reported by `generations_exhausted`.
+        let Some(expires) = now.0.checked_add(self.limits.connect_timeout_ms) else {
+            return Ok(Vec::new());
+        };
+        let expires = MonoTime(expires);
         let mut usage = self.usage();
         let mut tickets = Vec::new();
         for id in self.keys_after(self.connect_cursor, limit) {
@@ -646,14 +658,9 @@ impl<P: PeerTransport> PeerRoster<P> {
             {
                 break;
             }
-            let Some(sequence) = self
-                .sequence
-                .checked_add(1)
-                .filter(|n| *n <= self.last_generation)
-            else {
-                if tickets.is_empty() {
-                    return Err(PeerRosterError::Exhausted);
-                }
+            // A spent generation space is a per-peer condition, never an
+            // error: the peers simply get no further attempt.
+            let Some(sequence) = self.sequence.checked_add(1) else {
                 break;
             };
             let ticket = ConnectTicket {

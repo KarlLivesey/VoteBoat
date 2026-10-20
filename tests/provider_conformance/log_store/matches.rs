@@ -7,16 +7,18 @@ pub(super) fn exact(store: &impl LogStore, state: &GroupLog) {
     let actual_group = state.bootstrap.group;
     assert_eq!(store.matches_state(actual_group, state), Ok(true));
     let mut capacity = state.clone();
-    capacity.entries.reserve(100);
-    for entry in &mut capacity.entries {
-        if let EntryPayload::Command { bytes, .. } = &mut entry.payload {
-            let charge = bytes.retained_bytes();
-            let mut replacement = bytes.to_vec();
-            replacement.reserve(100);
-            *bytes = replacement.into();
-            assert_eq!(bytes.retained_bytes(), charge);
+    capacity.entries.edit(|entries| {
+        entries.reserve(100);
+        for entry in entries {
+            if let EntryPayload::Command { bytes, .. } = &mut entry.payload {
+                let charge = bytes.retained_bytes();
+                let mut replacement = bytes.to_vec();
+                replacement.reserve(100);
+                *bytes = replacement.into();
+                assert_eq!(bytes.retained_bytes(), charge);
+            }
         }
-    }
+    });
     assert_eq!(store.matches_state(actual_group, &capacity), Ok(true));
     let changes: &[fn(&mut GroupLog)] = &[
         |s| s.bootstrap.group.id = GroupId::new(99).unwrap(),
@@ -43,22 +45,29 @@ pub(super) fn exact(store: &impl LogStore, state: &GroupLog) {
                 Some(Box::new(Membership::replay(&s.bootstrap, &[], 0).unwrap()))
         },
         |s| s.entries.pop().map(|_| ()).unwrap(),
-        |s| s.entries[0].index += 1,
-        |s| s.entries[0].term += 1,
-        |s| s.entries[0].payload = EntryPayload::Noop,
+        |s| s.entries.edit(|entries| entries[0].index += 1),
+        |s| s.entries.edit(|entries| entries[0].term += 1),
         |s| {
-            if let EntryPayload::Command { operation, .. } = &mut s.entries[0].payload {
-                *operation = OperationId::new(99).unwrap();
-            }
+            s.entries
+                .edit(|entries| entries[0].payload = EntryPayload::Noop)
         },
         |s| {
-            if let EntryPayload::Command { bytes, .. } = &mut s.entries[0].payload {
-                let mut replacement = bytes.to_vec();
-                replacement[0] ^= 1;
-                *bytes = replacement.into();
-            }
+            s.entries.edit(|entries| {
+                if let EntryPayload::Command { operation, .. } = &mut entries[0].payload {
+                    *operation = OperationId::new(99).unwrap();
+                }
+            })
         },
-        |s| s.entries.swap(0, 1),
+        |s| {
+            s.entries.edit(|entries| {
+                if let EntryPayload::Command { bytes, .. } = &mut entries[0].payload {
+                    let mut replacement = bytes.to_vec();
+                    replacement[0] ^= 1;
+                    *bytes = replacement.into();
+                }
+            })
+        },
+        |s| s.entries.edit(|entries| entries.swap(0, 1)),
     ];
     for (index, change) in changes.iter().enumerate() {
         let mut different = state.clone();
@@ -95,7 +104,7 @@ fn default_is_object_safe_and_preserves_complete_snapshot_and_configuration_equa
     let mut store = HostLogStore::new(1);
     append(&mut store, vec![LogMutation::Create(bootstrap(1, 3))]);
     let mut state = store.state(group(1)).unwrap();
-    state.entries = vec![entry(1, 1, 7), entry(2, 1, 8)];
+    state.entries = vec![entry(1, 1, 7), entry(2, 1, 8)].into();
     state.snapshot = Some(reference(&state));
     state.snapshot_membership = Some(Box::new(
         Membership::replay(&state.bootstrap, &[], 0).unwrap(),
@@ -154,10 +163,12 @@ fn configuration_fields(store: &dyn LogStore, state: &GroupLog) {
     ];
     for change in changes {
         let mut altered = state.clone();
-        let EntryPayload::Configuration(record) = &mut altered.entries[2].payload else {
-            unreachable!()
-        };
-        change(record);
+        altered.entries.edit(|entries| {
+            let EntryPayload::Configuration(record) = &mut entries[2].payload else {
+                unreachable!()
+            };
+            change(record);
+        });
         assert_eq!(store.matches_state(group(1), &altered), Ok(false));
     }
     assert_eq!(

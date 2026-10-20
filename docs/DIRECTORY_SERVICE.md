@@ -110,6 +110,12 @@ ten-second deadline and one outstanding request. The owner drains accepted
 reads and their underlying Node credits after disconnect before accepting a
 new command. The `manifest read accepted` diagnostic identifies that boundary.
 
+Every reply from the authority also carries its listener health as
+`peer_accept_listener`, `peer_accept_errors`, `peer_accept_backoffs`,
+`peer_accept_paused`, `peer_accept_last_os_error` and
+`peer_generations_exhausted` (see `docs/CONNECTIONS.md`): an authority that has
+stopped accepting peers or issuing connection attempts is never silent about it.
+
 ## Resolve a hierarchy
 
 Provide command endpoints and pinned TLS names for each metadata authority:
@@ -193,3 +199,23 @@ open. The full P0–P7 roadmap is not complete.
 plan and prints its scopes, placement and payload bounds without submitting it.
 See [the profile and Rust contract](TRANSFER_PREVIEW.md). It does not recover
 live data or begin a transfer; operator lifecycle execution remains separate.
+
+## Store maintenance and write backpressure
+
+`voteboat-directory` uses the same storage maintenance as the counter service
+(see [Store maintenance](COUNTER_SERVICE.md#store-maintenance-on-by-default)):
+checkpoints and WAL reclaim are on by default, `--checkpoint-entries`,
+`--wal-reclaim-ms`, `--wal-reclaim-min-bytes` and
+`--no-maintenance I-accept-a-bounded-log` are accepted
+by `serve`, and `client ... maintenance` reports the same fields. When the WAL
+passes its high-water mark (75% of usable capacity, or a write is held until a
+rewrite) a new proposal is answered `ERR StoragePressure`: nothing was
+admitted, and the operation can be retried unchanged after a backoff. The
+`maintenance` fields `high_water`, `high_water_entries`, `refused_proposals`
+and `wal_parked` show the state. A full WAL does not fail the node. The
+same retryable `ERR StoragePressure` answers a new proposal while the group's
+retained log is at 75% of its 16,384-entry budget, until a checkpoint brings
+it below 50% (`entry_high_water`, `refused_entry_proposals`), and a leader
+elected over a full log always has room for its first entry; the other
+round-3 fields (`retained_entries`, `checkpoint_failures`, `replica_stall`,
+`step_downs` and the rest) are described with the counter service.

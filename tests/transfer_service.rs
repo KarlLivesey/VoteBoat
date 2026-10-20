@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 #![cfg(feature = "tls")]
+#[path = "support/ports.rs"]
+#[allow(dead_code)] // This service uses the shared fixture's offset layout.
+mod ports;
 #[path = "transfer_source/fixtures.rs"]
 mod source_fixture;
 use std::{
     fs,
-    net::{TcpListener, UdpSocket},
     path::PathBuf,
     process::{Child, Command, Output, Stdio},
-    sync::{
-        atomic::{AtomicU16, Ordering},
-        Mutex, MutexGuard,
-    },
+    sync::{Mutex, MutexGuard},
     time::{Duration, Instant},
 };
 #[path = "transfer_service/cuts.rs"]
@@ -40,7 +39,6 @@ mod startup_discovery;
 #[path = "transfer_service/startup_recovery.rs"]
 mod startup_recovery;
 const BIN: &str = env!("CARGO_BIN_EXE_voteboat-transfer");
-static NEXT: AtomicU16 = AtomicU16::new(14000);
 // A concurrent fork can briefly inherit another fixture's reserved listeners.
 // Coordinate reservations and process creation, never child execution/waiting.
 static RESERVATION_SPAWN: Mutex<()> = Mutex::new(());
@@ -66,6 +64,24 @@ struct Cluster {
     peer_credentials: bool,
     retirement: bool,
     children: Vec<(u128, u16, Child)>,
+    _ports: ports::PortLease,
+}
+fn listener_offsets() -> Vec<u16> {
+    (0..4)
+        .flat_map(|slot| (1..=3).flat_map(move |node| [slot * 128 + node, slot * 128 + 100 + node]))
+        .collect()
+}
+
+#[test]
+fn listener_layout_rejects_the_exhausted_allocator_boundary_without_wrapping() {
+    let offsets = listener_offsets();
+    assert_eq!(offsets.len(), 24);
+    let max_base = u16::MAX - offsets.iter().max().unwrap();
+    let last = ports::offset_ports(max_base, &offsets).unwrap();
+    assert_eq!(last.iter().max(), Some(&u16::MAX));
+    assert!(ports::offset_ports(max_base + 1, &offsets).is_none());
+    // The old NEXT ladder reaches this base after fifty 1024-port advances.
+    assert!(ports::offset_ports(65200, &offsets).is_none());
 }
 impl Cluster {
     fn new(quic: bool) -> Self {
@@ -79,31 +95,7 @@ impl Cluster {
     }
     fn with_options(quic: bool, retirement: bool, merge: bool, peer_credentials: bool) -> Self {
         let reservation = fixture_gate();
-        let (base, held, udp) = loop {
-            let base = NEXT.fetch_add(1024, Ordering::Relaxed);
-            let mut held = Vec::new();
-            let mut udp = Vec::new();
-            let mut valid = true;
-            for slot in 0..4 {
-                for node in 1..=3 {
-                    for port in [base + slot * 128 + node, base + slot * 128 + 100 + node] {
-                        match (
-                            TcpListener::bind(("127.0.0.1", port)),
-                            UdpSocket::bind(("127.0.0.1", port)),
-                        ) {
-                            (Ok(t), Ok(u)) => {
-                                held.push(t);
-                                udp.push(u);
-                            }
-                            _ => valid = false,
-                        }
-                    }
-                }
-            }
-            if valid {
-                break (base, held, udp);
-            }
-        };
+        let (base, mut ports) = ports::PortLease::acquire_offsets(&listener_offsets());
         let root = std::env::temp_dir().join(format!(
             "voteboat-transfer-service-{}-{base}",
             std::process::id()
@@ -156,8 +148,7 @@ impl Cluster {
             }
             fs::write(root.join(format!("endpoints{select}")), endpoints).unwrap();
         }
-        drop(held);
-        drop(udp);
+        ports.handoff();
         drop(reservation);
         let mut rig = Self {
             root,
@@ -167,6 +158,7 @@ impl Cluster {
             peer_credentials,
             retirement,
             children: Vec::new(),
+            _ports: ports,
         };
         if peer_credentials {
             peer_credentials::select(&rig, 1, &rig.tls());
@@ -325,6 +317,35 @@ fn history(quic: bool) {
     finish(rig);
 }
 fn initialize(rig: &Cluster) {
+    // ST2: every transfer group checkpoints and reclaims by default.
+    let text = rig.ok(1, &["maintenance"]);
+    for field in [
+        "retention=maintained",
+        "enabled=true",
+        "checkpoint_entries=8192",
+        "high_water=false",
+        "wal_parked=0",
+        // ST2 round 3 (I7).
+        "retained_budget=16384",
+        "retained_capacity=16640",
+        "entry_high_water=false",
+        "checkpoint_failures=0",
+        "wal_refused_proposals=0",
+        "wal_held_ms=0",
+        "step_downs=0",
+        "last_step_down=none",
+        // ST2 round 4 (R4-1).
+        "wal_noop_refused=0",
+        "noop_refusals=0",
+        "wal_noop_starved=false",
+    ] {
+        assert!(text.contains(field), "{field}: {text}");
+    }
+    let log = fs::read_to_string(rig.root.join("20-1.log")).unwrap();
+    assert!(
+        log.contains("maintenance retention=maintained checkpoint_entries=8192"),
+        "{log}"
+    );
     initialization::command(rig, 1, "initialize");
     initialization::command(rig, 1, "grant");
     initialization::command(rig, 20, "initialize");
@@ -359,6 +380,48 @@ fn finish(mut rig: Cluster) {
     let root = rig.root.clone();
     drop(rig);
     fs::remove_dir_all(root).unwrap();
+}
+/// ST2 / U5: a maintenance selection that would be refused or ignored once
+/// serving is refused before any file exists.
+#[test]
+fn maintenance_selection_is_validated_before_storage() {
+    let root = std::env::temp_dir().join(format!(
+        "voteboat-transfer-maintenance-{}",
+        std::process::id()
+    ));
+    let ack = "I-accept-a-bounded-log";
+    for (args, message) in [
+        (vec!["--no-maintenance", "yes"], "Pass --no-maintenance"),
+        (
+            vec!["--no-maintenance", ack, "--wal-reclaim-ms", "5"],
+            "cannot be combined",
+        ),
+        (vec!["--checkpoint-entries", "8193"], "at most 8192"),
+        // ST2 round 3 (I6).
+        (vec!["--wal-reclaim-ms", "86400001"], "at most 86400000"),
+        (
+            vec!["--no-maintenance", ack, "--wal-reclaim-min-bytes", "0"],
+            "cannot be combined",
+        ),
+    ] {
+        let out = run(Command::new(BIN)
+            .args(["serve", "create"])
+            .arg(&root)
+            .args([
+                "1",
+                "20000",
+                "missing-tls",
+                "missing-profile",
+                "1",
+                "missing-access",
+                "tcp",
+            ])
+            .args(&args));
+        assert!(!out.status.success(), "{args:?}");
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert!(stderr.contains(message), "{args:?}: {stderr}");
+        assert!(!root.exists(), "{args:?}");
+    }
 }
 #[test]
 fn tcp_authenticated_operator_starts_a_split_and_children_survive_parent_shutdown() {

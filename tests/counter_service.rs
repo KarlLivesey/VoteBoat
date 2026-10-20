@@ -174,7 +174,9 @@ struct Cluster {
     udp_sockets: Vec<UdpSocket>,
     quic: bool,
     wal_reclaim_ms: Option<u64>,
+    wal_reclaim_min_bytes: Option<u64>,
     checkpoint_entries: Option<u64>,
+    no_maintenance: bool,
     leadership_maintenance: bool,
     node_drain: bool,
     membership_drain: Option<(usize, PathBuf)>,
@@ -222,7 +224,9 @@ impl Cluster {
             udp_sockets,
             quic: false,
             wal_reclaim_ms: None,
+            wal_reclaim_min_bytes: None,
             checkpoint_entries: None,
+            no_maintenance: false,
             leadership_maintenance: false,
             node_drain: false,
             membership_drain: None,
@@ -279,6 +283,11 @@ impl Cluster {
         if let Some(interval) = self.wal_reclaim_ms {
             command.arg("--wal-reclaim-ms").arg(interval.to_string());
         }
+        if let Some(bytes) = self.wal_reclaim_min_bytes {
+            command
+                .arg("--wal-reclaim-min-bytes")
+                .arg(bytes.to_string());
+        }
         if self.leadership_maintenance {
             command.args(["--leadership-maintenance", "enabled"]);
         }
@@ -292,6 +301,9 @@ impl Cluster {
         }
         if let Some(entries) = self.checkpoint_entries {
             command.arg("--checkpoint-entries").arg(entries.to_string());
+        }
+        if self.no_maintenance {
+            command.args(["--no-maintenance", "I-accept-a-bounded-log"]);
         }
         if let Some(path) = &self.admin_plan {
             command
@@ -590,7 +602,7 @@ fn seed_member_service(root: &std::path::Path, final_view: bool, include_learner
                 term: 1,
                 payload: EntryPayload::Configuration(Box::new(r.clone())),
             })
-            .collect::<Vec<_>>();
+            .collect::<EntryBatch>();
         let tickets = log
             .append_batch(vec![LogMutation::Update(LogUpdate {
                 group,
@@ -923,7 +935,8 @@ fn checkpoint_source(root: &std::path::Path, id: u64, operation: u128, delta: i6
                         operation: Counter::operation(1, operation as u64).unwrap(),
                         bytes: Counter::command(0, delta).into(),
                     },
-                }],
+                }]
+                .into(),
             }),
             snapshot: None,
             snapshot_membership: None,
@@ -1180,7 +1193,8 @@ fn enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_cre
                                 expected: ConfigurationId::new(3).unwrap(),
                                 change: ConfigurationChange::Learners(next),
                             })),
-                        }],
+                        }]
+                        .into(),
                     }),
                     snapshot: None,
                     snapshot_membership: None,
@@ -2837,7 +2851,8 @@ fn seed_fourth_learner(cluster: &Cluster, fourth: voteboat::identity::StoreIdent
                                 expected: ConfigurationId::new(3).unwrap(),
                                 change: ConfigurationChange::Learners(next),
                             })),
-                        }],
+                        }]
+                        .into(),
                     }),
                     snapshot: None,
                     snapshot_membership: None,

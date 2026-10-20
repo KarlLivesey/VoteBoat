@@ -1,0 +1,39 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/.t3/worktrees/VoteBoat/t3-aeca292e)
+   Compiling once_cell v1.21.4
+   Compiling rustls v0.23.45
+    Finished `test` profile [unoptimized] target(s) in 12.55s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-e480d7f4eb11c147)
+
+running 15 tests
+test lanes::tests::assignments_preserve_totals_and_never_overlap ... ok
+test offered::cluster::tests::a_build_without_quic_refuses_it_before_creating_anything ... ok
+test offered::cluster::tests::cluster_node_child ... ok
+test lanes::tests::partial_replica_startup_joins_previously_opened_nodes ... ok
+test offered::cluster::tests::node_arguments_are_checked_before_anything_is_created ... ok
+test lanes::tests::failed_lane_aborts_prepared_lanes_and_joins_hosts ... ok
+shared recovery fixture port namespace: /tmp/voteboat-test-ports
+maintenance recovery files: /home/karllivesey/.t3/worktrees/VoteBoat/t3-aeca292e/target/scratch/voteboat-shared-repair-4084154-TcpTls-1792529049344988366
+protocol=TcpTls assembly=static_lanes replicas=3 lanes=3 groups=5 host_owner_threads=3 wal_workers=9 snapshot_workers=9 peer_endpoints=9 tcp_dial_workers=9 payload_bytes=8 recovered_value=75 warmup=64 operations=11 window=7 sum_lane_max_inflight=7 elapsed_ns=148629729 elapsed_s=0.148630 applied_ops_s=74.009 p99_ns=81348661 p99_us=81348.661 recovery_retries=0 retry_verified=true workers_joined=true host_threads_joined=true heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000
+test lanes::tests::uneven_three_lane_workload_keeps_exact_global_counts ... ok
+protocol=TcpTls assembly=static_lanes replicas=3 lanes=2 groups=4 host_owner_threads=2 wal_workers=6 snapshot_workers=6 peer_endpoints=6 tcp_dial_workers=6 payload_bytes=8 recovered_value=72 warmup=64 operations=8 window=4 sum_lane_max_inflight=4 elapsed_ns=137692439 elapsed_s=0.137692 applied_ops_s=58.101 p99_ns=72927862 p99_us=72927.862 recovery_retries=0 retry_verified=true workers_joined=true host_threads_joined=true heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000
+test lanes::tests::tcp_two_lanes_share_groups_and_recover ... ok
+inherited WAL lock control: path=/home/karllivesey/.t3/worktrees/VoteBoat/t3-aeca292e/target/scratch/voteboat-lane-lock-control-4084154/LOCK child_pid=4084343
+test offered::cluster::tests::a_node_whose_port_is_taken_is_reported_as_a_collision ... ok
+test test_process::inherited_descriptor_control_and_spawn_exclusion ... ok
+protocol=TcpTls phase=initial-write
+test offered::cluster::tests::node_1_stops_within_one_round_when_stdin_closes_in_the_offered_phase ... ok
+test offered::cluster::tests::every_node_takes_its_documented_exit_when_the_parent_is_gone ... ok
+protocol=TcpTls phase=survivor-write
+protocol=TcpTls phase=automatic-checkpoint
+protocol=TcpTls phase=reopen
+protocol=TcpTls phase=arm-recovery
+recovery armed: accepted_requests=1 stale_snapshot_installs=0 foreground_campaign_pending=true
+test offered::cluster::tests::cluster_script_self_test_passes ... ok
+held_recovery=1 foreground_index=5 checkpointed=true post_checkpoint_reclaim=true
+covered automatic checkpoint: original=ScheduledCheckpoint { admission: AdmissionTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(5), incarnation: GroupIncarnation(1) }, sequence: 4 }, target_index: 2, executed: false } step=OwnerStep { admission: Some(AdmissionTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(5), incarnation: GroupIncarnation(1) }, sequence: 4 }), proposed: None, visit: VisitTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(5), incarnation: GroupIncarnation(1) }, sequence: 15395 }, operation: None, read: None, error: Some(NotApplied) } durable_base=3 commit=3
+test offered::cluster::tests::three_process_tcp_cluster_completes_an_offered_run_with_consistent_counters ... ok
+protocol=TcpTls groups=8 snapshot_installs=11 peak_recovery=1 reclaimed_bytes=16138 snapshot_send_refusals=0
+test shared::recovery::maintenance::tcp_automatic_maintenance_progresses_with_held_snapshot_recovery ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 42 filtered out; finished in 6.50s
+

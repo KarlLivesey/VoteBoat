@@ -182,16 +182,18 @@ fn messages(required: &ConfigurationWireRequirements<'_>) -> [Message; 3] {
         rpc: Rpc::Append {
             previous_index: required.index - 1,
             previous_term: if required.index == 1 { 0 } else { 7 },
-            entries: vec![entry],
+            entries: vec![entry].into(),
             leader_commit: required.committed_index,
         },
     };
     let mut command = append.clone();
     if let Rpc::Append { entries, .. } = &mut command.rpc {
-        entries[0].payload = EntryPayload::Command {
-            operation: required.record.operation,
-            bytes: vec![0; required.application.command_bytes].into(),
-        };
+        entries.edit(|entries| {
+            entries[0].payload = EntryPayload::Command {
+                operation: required.record.operation,
+                bytes: vec![0; required.application.command_bytes].into(),
+            }
+        });
     }
     let mut snapshot = append.clone();
     snapshot.configuration = next.id();

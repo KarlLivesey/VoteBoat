@@ -172,7 +172,8 @@ fn full_image_framing_refuses_growth_even_when_parent_codec_fits() {
                 index: 1,
                 term: 1,
                 payload: EntryPayload::Noop,
-            }],
+            }]
+            .into(),
         }),
         snapshot: None,
         snapshot_membership: None,

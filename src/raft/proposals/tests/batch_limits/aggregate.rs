@@ -57,38 +57,37 @@ fn aggregate_count_does_not_override_allocated_staging_retained_or_command_budge
         core.limits = aggregate_log_limits();
         core.configure_batch_limits(aggregate_limits()).unwrap();
         let mut input: Vec<_> = (1..=16384).map(empty).collect();
-        let error = match scenario {
+        let error: RaftError = match scenario {
             0 => {
                 input.push(empty(16385));
-                "proposal count budget"
+                StorageError::Rejected("proposal count budget").into()
             }
             1 => {
                 input = Vec::with_capacity(16385);
                 input.push(empty(1));
-                "proposal allocation count budget"
+                StorageError::Rejected("proposal allocation count budget").into()
             }
             2 => {
                 core.limits.max_batch_bytes = LogLimits::default().max_batch_bytes;
-                "proposal batch owned staging budget"
+                StorageError::Rejected("proposal batch owned staging budget").into()
             }
             3 => {
+                // The retained-entry data budget is typed backpressure (ST2
+                // round 3, I2), still checked in the same order.
                 core.limits.max_entries_per_group = 16384;
-                "proposal retained entry budget"
+                RaftError::StoragePressure
             }
             4 => {
                 input.last_mut().unwrap().bytes = vec![0; core.limits.max_command_bytes + 1];
-                "command byte budget"
+                StorageError::Rejected("command byte budget").into()
             }
             _ => {
                 input.last_mut().unwrap().bytes = Vec::with_capacity(core.limits.max_batch_bytes);
-                "proposal batch owned staging budget"
+                StorageError::Rejected("proposal batch owned staging budget").into()
             }
         };
         let before = core.state().clone();
-        assert_eq!(
-            core.propose_batch(input),
-            Err(StorageError::Rejected(error).into())
-        );
+        assert_eq!(core.propose_batch(input), Err(error));
         assert_eq!(core.state(), &before);
         assert!(!core.has_pending_dependency());
     }

@@ -1,0 +1,5 @@
+node 1 failed: warmup admission refused: Application(InvalidCommand)
+
+thread 'offered::cluster::tests::cluster_node_child' (116081) panicked at examples/benchmark/cluster.rs:718:40:
+called `Result::unwrap()` on an `Err` value: "warmup admission refused: Application(InvalidCommand)"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

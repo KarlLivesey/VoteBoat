@@ -78,7 +78,7 @@ fn shard(profile: CapacityProfile) -> TimedShard<FairScheduler, DeadlineQueue, J
         commit_index: 0,
         snapshot: None,
         snapshot_membership: None,
-        entries: Vec::new(),
+        entries: Vec::new().into(),
     };
     let core = Raft::recover(node(1), binding, state, LogLimits::default()).unwrap();
     shared::timed_shard_profile(vec![core], owner, 1, 1, &Instant::now(), 16, profile)

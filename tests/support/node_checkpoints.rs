@@ -54,11 +54,20 @@ fn base(n: &Boat, g: u128) -> u64 {
     n.local().owner.core(group(g)).unwrap().state().base_index()
 }
 #[test]
-fn policy_is_opt_in_and_validated_without_work() {
+fn policy_is_on_by_default_and_validated_without_work() {
     let mut n = written();
     tick(&mut n, 100);
     assert_eq!(base(&n, 1), 0);
-    assert_eq!(n.checkpoints(), &CheckpointStatus::default());
+    let default = CheckpointPolicy::for_limits(LogLimits::default());
+    assert_eq!(default.min_entries, 8192);
+    assert_eq!(n.checkpoints().policy, Some(default));
+    assert_eq!(
+        n.configure_checkpoints(None),
+        Err(NodeError::Maintenance(
+            MaintenanceError::DisableRequiresLifetimeBounded
+        ))
+    );
+    assert_eq!(n.checkpoints().policy, Some(default));
     n.configure_checkpoints(Some(policy())).unwrap();
     let before = n.checkpoints().clone();
     for p in [
@@ -97,6 +106,32 @@ fn policy_is_opt_in_and_validated_without_work() {
         );
         assert_eq!(n.checkpoints(), &before);
     }
+    // U5: a threshold the retained-entry limit could reach first is refused
+    // at configuration, never discovered at the cap.
+    assert_eq!(
+        n.configure_checkpoints(Some(CheckpointPolicy {
+            min_entries: 8193,
+            ..policy()
+        })),
+        Err(NodeError::Maintenance(
+            MaintenanceError::CheckpointThresholdUnreachable {
+                min_entries: 8193,
+                max_entries_per_group: 16384,
+            }
+        ))
+    );
+    assert_eq!(n.checkpoints(), &before);
+    n.configure_checkpoints(Some(CheckpointPolicy {
+        min_entries: 8192,
+        ..policy()
+    }))
+    .unwrap();
+}
+#[test]
+fn opt_out_installs_nothing_and_a_node_that_cannot_checkpoint_must_choose_it() {
+    let mut n = bounded(parts(1, false));
+    assert_eq!(n.checkpoints(), &CheckpointStatus::default());
+    n.configure_checkpoints(Some(policy())).unwrap();
     n.configure_checkpoints(None).unwrap();
     tick(&mut n, 200);
     assert_eq!(base(&n, 1), 0);
@@ -112,7 +147,15 @@ fn policy_is_opt_in_and_validated_without_work() {
         } else {
             p.local.snapshots = None;
         }
-        let mut n = boat(p);
+        let rejected = match Boat::from_parts(p, NodeLimits::default(), MonoTime(0)) {
+            Err(r) => r,
+            Ok(_) => panic!("a node that cannot checkpoint must opt out explicitly"),
+        };
+        assert_eq!(
+            rejected.reason,
+            NodeError::Maintenance(MaintenanceError::CheckpointsUnavailable)
+        );
+        let mut n = bounded(*rejected.parts);
         assert_eq!(
             n.configure_checkpoints(Some(policy())),
             Err(NodeError::MissingSnapshots)

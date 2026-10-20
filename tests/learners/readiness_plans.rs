@@ -42,7 +42,7 @@ fn command(index: u64, operation: OperationId, bytes: Vec<u8>) -> LogEntry {
 fn caught_up<A: CheckpointStateMachine>(mut app: A) -> A {
     let mut log = HostLogStore::new(4);
     let (_, learner, _, _) = readiness_cluster(&mut log);
-    app.apply_batch(learner.replay_committed()).unwrap();
+    app.apply_entries(learner.replay_committed()).unwrap();
     assert_eq!(app.applied_index(), 2);
     app
 }

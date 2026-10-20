@@ -24,8 +24,11 @@ impl GrantedVoteReply {
 
 impl Raft {
     /// Remember only the original response actually emitted by this core.
-    pub(super) fn remember_granted_vote(&mut self, effects: &[Effect]) -> bool {
-        let grant = effects.iter().find_map(|effect| match effect {
+    pub(super) fn remember_granted_vote<'a>(
+        &mut self,
+        effects: impl IntoIterator<Item = &'a Effect>,
+    ) -> bool {
+        let grant = effects.into_iter().find_map(|effect| match effect {
             Effect::Send(message) if matches!(message.rpc, Rpc::Voted { granted: true }) => {
                 Some(GrantedVoteReply::from_message(message))
             }

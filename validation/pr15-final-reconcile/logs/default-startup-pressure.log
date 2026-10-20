@@ -1,0 +1,15 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/startup.rs (target/debug/deps/startup-b02a36d975d641a0)
+
+running 4 tests
+R4-1 node: noops=277544 filled=4718461 term=277544 refusals=14 account_noop_refused=14 rewrites=1 max_parked=0 status_starved=true simulated_ms=3000
+test backpressure::live_noops_past_the_reserve_refuse_elections_typed_until_a_larger_wal_is_opened ... ok
+ST2b follower pressure: writes=20480 leader_refused=0 follower_high_water_ms=2624 released_ms=3624 peak_wal=49540651 max_parked=0 cap=67108864 leader_last=20481 follower_commit=20481 term=1 simulated_ms=4389
+test backpressure::follower_with_a_slow_rewrite_declines_new_data_instead_of_failing ... ok
+ST2 absent follower: writes=49152 refused=0 max_retained=9726 budget=16384 checkpoints=5 bases=[0, 9723, 18218, 26742, 35260, 43798] stall=Some((NodeId(3), 686)) simulated_ms=34436
+test backpressure::absent_follower_does_not_stop_the_leader_checkpointing ... ok
+ST2b native burst: writes=24576 bytes=100663296 refused=10943 refused_at_step=64 first_refusal_ms=Some(8377) released_ms=9377 last_refusal_ms=Some(9471) peak_wal_while_held=49540973 peak_wal=49540973 cap=67108864 usable=66060288 high_water_entries=1 last_reclaim=Some((MonoTime(13995), LogReclaimed { before_bytes: 33030992, after_bytes: 370 })) simulated_ms=17960
+test backpressure::write_burst_past_a_slow_rewrite_is_backpressure_not_a_node_failure ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 52 filtered out; finished in 39.48s
+

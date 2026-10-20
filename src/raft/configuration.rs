@@ -102,6 +102,7 @@ impl Raft {
         if proposal.readiness.len() > crate::quorum::Limits::default().max_voters {
             return Err(StorageError::Rejected("promotion proof budget").into());
         }
+        self.check_data_budget(1)?;
         let index = self
             .durable
             .last_index()
@@ -158,7 +159,7 @@ impl Raft {
             self.durable.commit_index,
             Some(Suffix {
                 from: index,
-                entries: vec![entry],
+                entries: vec![entry].into(),
             }),
             After::LeaderAppend,
             None,

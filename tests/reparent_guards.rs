@@ -619,7 +619,7 @@ fn native_guard_and_cancel_frames_recover_original_locks_or_complete_cancellatio
                 boundary,
                 Some(Suffix {
                     from: boundary,
-                    entries: vec![entries[boundary as usize - 1].clone()],
+                    entries: (vec![entries[boundary as usize - 1].clone()]).into(),
                 }),
             );
             let frame = NativeLogCodec
@@ -896,7 +896,7 @@ fn seed_reparent_log(
             boundary - 1,
             Some(Suffix {
                 from: 1,
-                entries: entries[..boundary as usize - 1].to_vec(),
+                entries: (entries[..boundary as usize - 1].to_vec()).into(),
             }),
         )],
     );

@@ -83,7 +83,7 @@ fn complete_unacknowledged_suffix_is_recovered_and_only_incomplete_tail_is_disca
             2,
             Some(Suffix {
                 from: 2,
-                entries: vec![entry(2, 2, 73)],
+                entries: vec![entry(2, 2, 73)].into(),
             }),
         )])
         .unwrap();

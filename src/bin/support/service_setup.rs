@@ -187,60 +187,9 @@ pub fn host_wake() -> Arc<voteboat::native::readiness::HostWake> {
     })
     .clone()
 }
-/// Longest a host loop waits with nothing announced; bounds host-side timers
-/// such as credential reloads and administrative deadlines.
-pub const HOST_MAX_WAIT: std::time::Duration = std::time::Duration::from_millis(10);
-/// Gather window before a round that already has queued work.
-pub const HOST_GATHER: std::time::Duration = std::time::Duration::from_micros(200);
-/// Host-loop readiness state: the wake every worker signals, the reusable
-/// descriptor buffer and the wait itself.
-pub struct HostWait {
-    wake: Arc<voteboat::native::readiness::HostWake>,
-    readiness: voteboat::native::readiness::Readiness,
-    fds: Vec<voteboat::worker::ReadinessFd>,
-    gather: std::time::Duration,
-    max_wait: std::time::Duration,
-}
-impl HostWait {
-    pub fn new() -> Self {
-        Self::with(HOST_GATHER, HOST_MAX_WAIT)
-    }
-    /// A host loop with its own gather window (the CPU/latency knob: longer
-    /// gathers mean fewer, fuller rounds) and wait cap (the bound on
-    /// host-side timers such as credential reloads).
-    pub fn with(gather: std::time::Duration, max_wait: std::time::Duration) -> Self {
-        Self {
-            wake: host_wake(),
-            readiness: voteboat::native::readiness::Readiness::default(),
-            fds: Vec::new(),
-            gather,
-            max_wait,
-        }
-    }
-    /// Wait for a socket named by `collect`, a worker wake or `deadline`
-    /// instead of polling at a fixed cadence; polling remains the only source
-    /// of progress, so a missed or spurious report costs latency only.
-    pub fn wait(
-        &mut self,
-        collect: impl FnOnce(&mut Vec<voteboat::worker::ReadinessFd>),
-        deadline: Option<MonoTime>,
-        time: MonoTime,
-    ) -> std::io::Result<()> {
-        self.fds.clear();
-        collect(&mut self.fds);
-        self.fds.push(self.wake.fd());
-        let limit = deadline
-            .map(|d| std::time::Duration::from_millis(d.0.saturating_sub(time.0)))
-            .map_or(self.max_wait, |d| d.min(self.max_wait));
-        if self.fds.iter().any(|f| f.immediate) {
-            std::thread::park_timeout(self.gather);
-        } else {
-            self.readiness.wait(&self.fds, limit)?;
-        }
-        self.wake.drain();
-        Ok(())
-    }
-}
+/// The host wait policy now lives in the library, so the services and the
+/// benchmark's cluster mode share it; it waits on [`host_wake`].
+pub use voteboat::native::readiness::HostWait;
 pub fn open_application_with_rotation<A>(
     mut config: NativeMemberStartup,
     protocol: NativePeerProtocol,
@@ -410,4 +359,242 @@ fn load_deployment(
         return Err("local node missing from deployment".into());
     }
     Ok(())
+}
+/// The acknowledgement `--no-maintenance` requires; any other value is refused.
+pub const NO_MAINTENANCE_ACK: &str = "I-accept-a-bounded-log";
+/// Store maintenance choices shared by the three service binaries. Defaults
+/// (no flags) keep automatic checkpoints and WAL reclaim on.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct MaintenanceOptions {
+    pub checkpoint_entries: Option<u64>,
+    pub wal_reclaim_ms: Option<u64>,
+    /// Bytes that must be reclaimable for an interval deadline to rewrite
+    /// the WAL (default the ceiling / 16, 4 MiB); zero rewrites at every one.
+    pub wal_reclaim_min_bytes: Option<usize>,
+    pub lifetime_bounded: bool,
+}
+impl MaintenanceOptions {
+    pub fn is_flag(flag: &str) -> bool {
+        matches!(
+            flag,
+            "--checkpoint-entries"
+                | "--wal-reclaim-ms"
+                | "--wal-reclaim-min-bytes"
+                | "--no-maintenance"
+        )
+    }
+    /// Record one flag pair. Each flag may appear once.
+    pub fn parse(&mut self, flag: &str, value: &str) -> Result<(), Failure> {
+        let positive = |name: &str| -> Result<u64, Failure> {
+            match value.parse::<u64>()? {
+                0 => Err(format!("{name} must be positive").into()),
+                n => Ok(n),
+            }
+        };
+        match flag {
+            "--checkpoint-entries" if self.checkpoint_entries.is_none() => {
+                self.checkpoint_entries = Some(positive("checkpoint entry threshold")?);
+            }
+            "--wal-reclaim-ms" if self.wal_reclaim_ms.is_none() => {
+                self.wal_reclaim_ms = Some(positive("WAL reclaim interval")?);
+            }
+            "--wal-reclaim-min-bytes" if self.wal_reclaim_min_bytes.is_none() => {
+                self.wal_reclaim_min_bytes = Some(value.parse::<usize>()?);
+            }
+            "--no-maintenance" if !self.lifetime_bounded => {
+                if value != NO_MAINTENANCE_ACK {
+                    return Err(format!(
+                        "--no-maintenance disables checkpoints and WAL reclaim; every group then stops accepting writes at its store limits. Pass --no-maintenance {NO_MAINTENANCE_ACK} to accept that"
+                    )
+                    .into());
+                }
+                self.lifetime_bounded = true;
+            }
+            _ => return Err("duplicate or unsupported maintenance option".into()),
+        }
+        Ok(())
+    }
+    /// Refuse, before any file is opened, a selection that would fail or be
+    /// ignored once serving.
+    pub fn validate(&self) -> Result<(), Failure> {
+        if self.lifetime_bounded
+            && (self.checkpoint_entries.is_some()
+                || self.wal_reclaim_ms.is_some()
+                || self.wal_reclaim_min_bytes.is_some())
+        {
+            return Err(
+                "--no-maintenance cannot be combined with --checkpoint-entries, --wal-reclaim-ms or --wal-reclaim-min-bytes"
+                    .into(),
+            );
+        }
+        if self
+            .wal_reclaim_ms
+            .is_some_and(|ms| ms > voteboat::runtime::MAX_SCHEDULE_MS)
+        {
+            return Err(format!(
+                "--wal-reclaim-ms must be at most {} (24 hours) so the schedule cannot overflow",
+                voteboat::runtime::MAX_SCHEDULE_MS
+            )
+            .into());
+        }
+        let max = LogLimits::default().max_entries_per_group / 2;
+        if self.checkpoint_entries.is_some_and(|n| n > max as u64) {
+            return Err(format!(
+                "--checkpoint-entries must be at most {max} (half the retained-entry limit) so a checkpoint can start before the limit"
+            )
+            .into());
+        }
+        Ok(())
+    }
+    /// Select the retention mode before the node is constructed.
+    pub fn select(&self, limits: &mut NodeLimits) {
+        limits.retention = if self.lifetime_bounded {
+            RetentionMode::LifetimeBounded
+        } else {
+            RetentionMode::Maintained
+        };
+    }
+    /// Replace default policies with explicit overrides after construction.
+    pub fn apply<A>(&self, node: &mut NativeNode<A, NativeServiceConnector>) -> Result<(), Failure>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
+        if let Some(min_entries) = self.checkpoint_entries {
+            let policy = node
+                .checkpoints()
+                .policy
+                .ok_or("automatic checkpoints unavailable")?;
+            checked(node.configure_checkpoints(Some(CheckpointPolicy {
+                min_entries,
+                ..policy
+            })))?;
+        }
+        if self.wal_reclaim_ms.is_some() || self.wal_reclaim_min_bytes.is_some() {
+            let policy = node
+                .wal_maintenance()
+                .policy
+                .ok_or("WAL reclaim unavailable")?;
+            let interval_ms = self.wal_reclaim_ms.unwrap_or(policy.interval_ms);
+            checked(
+                node.configure_wal_maintenance(Some(WalMaintenancePolicy {
+                    interval_ms,
+                    retry_ms: interval_ms.min(policy.retry_ms),
+                    min_reclaim_bytes: self
+                        .wal_reclaim_min_bytes
+                        .unwrap_or(policy.min_reclaim_bytes),
+                    ..policy
+                })),
+            )?;
+        }
+        Ok(())
+    }
+}
+/// One startup line recording the retention mode and active policies.
+pub fn maintenance_startup<A>(node: &NativeNode<A, NativeServiceConnector>) -> String
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    let checkpoint = node.checkpoints().policy;
+    let wal = node.wal_maintenance().policy;
+    format!(
+        "maintenance retention={} checkpoint_entries={} checkpoint_scan_ms={} wal_reclaim_ms={} wal_retry_ms={} wal_reclaim_min_bytes={}",
+        retention_name(node.retention()),
+        checkpoint.map_or("off".into(), |p| p.min_entries.to_string()),
+        checkpoint.map_or("off".into(), |p| p.interval_ms.to_string()),
+        wal.map_or("off".into(), |p| p.interval_ms.to_string()),
+        wal.map_or("off".into(), |p| p.retry_ms.to_string()),
+        wal.map_or("off".into(), |p| p.min_reclaim_bytes.to_string()),
+    )
+}
+fn retention_name(mode: RetentionMode) -> &'static str {
+    match mode {
+        RetentionMode::Maintained => "maintained",
+        RetentionMode::LifetimeBounded => "lifetime-bounded",
+    }
+}
+/// Operator-visible maintenance state for one group: retention mode,
+/// checkpoint policy, last result and base, WAL occupancy, last reclaim, last
+/// error and consecutive failures. Local observation, not quorum evidence.
+pub fn maintenance_status<A>(
+    node: &NativeNode<A, NativeServiceConnector>,
+    group: GroupIdentity,
+) -> String
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    let wal = node.wal_maintenance();
+    let checkpoints = node.checkpoints();
+    let usage = node.wal_usage();
+    let reclaimed = wal.last_reclaimed;
+    let completion_error = wal
+        .last_completion
+        .as_ref()
+        .and_then(|e| e.result.as_ref().err());
+    let checkpoint_result = match &checkpoints.last_result {
+        None => "none".to_owned(),
+        Some(CheckpointResult::Completed { index, .. }) => format!("completed@{index}"),
+        Some(CheckpointResult::Rejected { error, .. }) => format!("rejected:{error:?}"),
+    };
+    let core = node.local().owner.core(group);
+    let limits = core.map(|c| c.log_limits()).unwrap_or_default();
+    let account = node.local().owner.wal_account();
+    let (step_downs, last_step_down) = core.map_or((0, None), |c| c.capacity_step_downs());
+    let stall = core.and_then(|c| c.replica_stall());
+    format!(
+        "OK retention={} enabled={} pending={} next_ms={:?} last_sequence={} wal_bytes={} wal_capacity={} last_reclaim_ms={:?} before_bytes={} after_bytes={} failures={} skipped={} admission_error={:?} completion_error={:?} checkpoint_enabled={} checkpoint_entries={} checkpoint_pending={} checkpoint_last={} checkpoint_admission_error={:?} leader_noop_pending={} high_water={} high_water_entries={} refused_proposals={} wal_parked={} retained_entries={} retained_budget={} retained_capacity={} entry_high_water={} entry_high_water_groups={} refused_entry_proposals={} checkpoint_failures={} wal_pending_bytes={} wal_refused_proposals={} wal_declined_appends={} wal_held_ms={} declined_appends={} replica_stall={} step_downs={} last_step_down={} wal_noop_refused={} noop_refusals={} wal_noop_starved={} checkpoint_base={}",
+        retention_name(node.retention()),
+        wal.policy.is_some(),
+        wal.pending.is_some(),
+        wal.next_deadline.map(|d| d.0),
+        wal.last_completion.as_ref().map_or(0, |e| e.request.sequence),
+        usage.map_or(0, |u| u.bytes),
+        usage.map_or(0, |u| u.capacity),
+        reclaimed.map(|(t, _)| t.0),
+        reclaimed.map_or(0, |(_, r)| r.before_bytes),
+        reclaimed.map_or(0, |(_, r)| r.after_bytes),
+        wal.consecutive_failures,
+        wal.skipped,
+        wal.last_admission_error,
+        completion_error,
+        checkpoints.policy.is_some(),
+        checkpoints.policy.map_or(0, |p| p.min_entries),
+        checkpoints.pending.len(),
+        checkpoint_result,
+        checkpoints.last_admission_error.as_ref().map(|(_, e)| e),
+        node.local()
+            .owner
+            .core(group)
+            .is_some_and(|c| c.leader_noop_pending()),
+        wal.high_water,
+        wal.high_water_entries,
+        wal.refused_proposals,
+        usage.map_or(0, |u| u.parked),
+        core.map_or(0, |c| c.state().entries.len()),
+        limits.max_entries_per_group,
+        limits.retained_entry_capacity(),
+        wal.entry_high_water.contains(&group),
+        wal.entry_high_water.len(),
+        wal.refused_entry_proposals,
+        checkpoints.failures,
+        account.pending,
+        account.refused,
+        account.declined,
+        wal.held_since
+            .map_or(0, |since| node.poll_time().0.saturating_sub(since.0)),
+        core.map_or(0, |c| c.declined_appends()),
+        stall.map_or("none".to_owned(), |(peer, rounds)| format!("{}:{rounds}", peer.get())),
+        step_downs,
+        last_step_down.map_or("none".to_owned(), |d| format!("{:?}@{}", d.reason, d.term)),
+        account.noop_refused,
+        core.map_or(0, |c| c.wal_noop_refusals()),
+        wal.noop_starved,
+        // Kept last: existing operator tooling reads it as the final field.
+        node.local()
+            .owner
+            .core(group)
+            .map_or(0, |c| c.state().base_index()),
+    )
 }

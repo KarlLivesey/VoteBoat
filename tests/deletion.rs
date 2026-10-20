@@ -456,7 +456,7 @@ fn seed_deletion_log(
             prefix.len() as u64,
             Some(Suffix {
                 from: 1,
-                entries: prefix.to_vec(),
+                entries: prefix.to_vec().into(),
             }),
         )],
     );
@@ -514,7 +514,7 @@ fn deletion_native_intent_and_tombstone_frame_cuts_recover_exact_original_state(
             boundary as u64,
             Some(Suffix {
                 from: boundary as u64,
-                entries: vec![prefix_all[boundary - 1].clone()],
+                entries: vec![prefix_all[boundary - 1].clone()].into(),
             }),
         );
         let frame = NativeLogCodec

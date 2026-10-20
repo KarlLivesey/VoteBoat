@@ -91,7 +91,7 @@ fn compacted_log_conformance<S: LogStore>(mut store: S) {
             3,
             Some(Suffix {
                 from: 3,
-                entries: vec![]
+                entries: vec![].into()
             })
         )])
         .is_err());
@@ -103,7 +103,7 @@ fn compacted_log_conformance<S: LogStore>(mut store: S) {
             3,
             Some(Suffix {
                 from: 4,
-                entries: vec![entry(4, 2, 9)],
+                entries: vec![entry(4, 2, 9)].into(),
             }),
         )],
     );
@@ -174,7 +174,7 @@ fn conformance<S: LogStore>(mut store: S) {
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 10), entry(2, 1, 20)],
+                entries: vec![entry(1, 1, 10), entry(2, 1, 20)].into(),
             }),
         )],
     );
@@ -198,7 +198,7 @@ fn conformance<S: LogStore>(mut store: S) {
             1,
             Some(Suffix {
                 from: 2,
-                entries: vec![entry(2, 2, 30), entry(3, 2, 40)],
+                entries: vec![entry(2, 2, 30), entry(3, 2, 40)].into(),
             }),
         )],
     );
@@ -220,7 +220,7 @@ fn conformance<S: LogStore>(mut store: S) {
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![],
+                entries: vec![].into(),
             }),
         ),
         update(&new, 2, 0, None),
@@ -232,7 +232,7 @@ fn conformance<S: LogStore>(mut store: S) {
             1,
             Some(Suffix {
                 from: 5,
-                entries: vec![],
+                entries: vec![].into(),
             }),
         ),
         update(&old, 2, 1, None),
@@ -271,7 +271,7 @@ fn restart_recovers_policy_identity_hard_state_suffix_and_commit() {
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 1), entry(2, 2, 2)],
+                entries: vec![entry(1, 1, 1), entry(2, 2, 2)].into(),
             }),
         )],
     );
@@ -284,7 +284,7 @@ fn restart_recovers_policy_identity_hard_state_suffix_and_commit() {
             1,
             Some(Suffix {
                 from: 2,
-                entries: vec![entry(2, 3, 3)],
+                entries: vec![entry(2, 3, 3)].into(),
             }),
         )],
     );
@@ -309,7 +309,7 @@ fn suffix_fence_invalidates_uncompleted_old_generation() {
             0,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 1)],
+                entries: vec![entry(1, 1, 1)].into(),
             }),
         )])
         .unwrap();
@@ -327,7 +327,7 @@ fn suffix_fence_invalidates_uncompleted_old_generation() {
         commit_index: 0,
         suffix: Some(Suffix {
             from: 1,
-            entries: vec![entry(1, 2, 2)],
+            entries: vec![entry(1, 2, 2)].into(),
         }),
     });
     let new = store.append_batch(vec![replacement]).unwrap();
@@ -349,7 +349,7 @@ fn every_interrupted_replacement_is_atomic_and_never_loses_committed_prefix() {
             1,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 1), entry(2, 1, 2)],
+                entries: vec![entry(1, 1, 1), entry(2, 1, 2)].into(),
             }),
         )],
     );
@@ -363,7 +363,7 @@ fn every_interrupted_replacement_is_atomic_and_never_loses_committed_prefix() {
             1,
             Some(Suffix {
                 from: 2,
-                entries: vec![entry(2, 2, 3), entry(3, 2, 4)],
+                entries: vec![entry(2, 2, 3), entry(3, 2, 4)].into(),
             }),
         )])
         .unwrap();
@@ -412,7 +412,7 @@ fn failed_sync_or_publication_fences_without_acknowledging_the_transition() {
             0,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 1)],
+                entries: vec![entry(1, 1, 1)].into(),
             }),
         )]) {
             Err(StorageError::Uncertain(_)) => (),
@@ -496,7 +496,7 @@ fn valid_checksums_cannot_hide_unbounded_policy_or_command_lengths() {
         commit_index: 0,
         suffix: Some(Suffix {
             from: 1,
-            entries: vec![entry(1, 1, 1)],
+            entries: vec![entry(1, 1, 1)].into(),
         }),
     });
     let mut bytes = NativeLogCodec.encode_batch(2, &[mutation], limits).unwrap();
@@ -530,7 +530,7 @@ fn user_commands_leave_control_reserve_and_admission_is_bounded() {
             0,
             Some(Suffix {
                 from: 1,
-                entries: vec![entry(1, 1, 1)],
+                entries: vec![entry(1, 1, 1)].into(),
             }),
         )],
     );
@@ -544,7 +544,7 @@ fn user_commands_leave_control_reserve_and_admission_is_bounded() {
             0,
             Some(Suffix {
                 from,
-                entries: vec![entry(from, 1, 2)],
+                entries: vec![entry(from, 1, 2)].into(),
             }),
         )]) {
             Ok(tickets) => {
@@ -554,6 +554,65 @@ fn user_commands_leave_control_reserve_and_admission_is_bounded() {
             other => panic!("unexpected admission result {other:?}"),
         }
     }
+    let s = store.state(group(1)).unwrap();
+    append(&mut store, vec![update(&s, 2, 0, None)]);
+    assert_eq!(store.state(group(1)).unwrap().hard_state.term, 2);
+}
+/// ST2b: a data batch that does not fit comes back unchanged with nothing
+/// written (no WAL bytes, sequence, accepted state or durable state change),
+/// while control records still use the reserve. `append_batch` keeps its
+/// typed refusal for callers that do not retry.
+#[test]
+fn a_full_wal_hands_the_batch_back_unchanged() {
+    let limits = LogLimits {
+        max_wal_bytes: 1200,
+        control_reserve_bytes: 600,
+        max_batch_bytes: 512,
+        max_command_bytes: 128,
+        max_batch_units: 1,
+        max_pending_units: 1,
+        ..LogLimits::default()
+    };
+    let device = ModelIo::default();
+    let mut store = NativeLogStore::create(ModelIo(device.0.clone()), identity(1), limits).unwrap();
+    append(&mut store, vec![LogMutation::Create(bootstrap(1, 3))]);
+    let refused = loop {
+        let s = store.state(group(1)).unwrap();
+        let from = s.last_index() + 1;
+        assert!(from < 20, "application writes never reached their limit");
+        let batch = vec![update(
+            &s,
+            1,
+            0,
+            Some(Suffix {
+                from,
+                entries: vec![entry(from, 1, 2)].into(),
+            }),
+        )];
+        let before = (
+            device.0.borrow().log.clone(),
+            store.physical_usage(),
+            store.state(group(1)).unwrap(),
+        );
+        match store.append_batch_within_capacity(batch.clone()) {
+            Ok(tickets) => {
+                store.barrier(&tickets).unwrap();
+            }
+            Err(AppendRefused::Full(returned)) => {
+                assert_eq!(returned, batch);
+                assert_eq!(device.0.borrow().log, before.0);
+                assert_eq!(store.physical_usage(), before.1);
+                assert_eq!(store.state(group(1)).unwrap(), before.2);
+                break batch;
+            }
+            Err(AppendRefused::Failed(e)) => panic!("unexpected refusal {e:?}"),
+        }
+    };
+    assert!(matches!(
+        store.append_batch(refused),
+        Err(StorageError::Rejected("WAL capacity/control reserve"))
+    ));
+    // The refusal consumed nothing: the next sequence still appends control.
     let s = store.state(group(1)).unwrap();
     append(&mut store, vec![update(&s, 2, 0, None)]);
     assert_eq!(store.state(group(1)).unwrap().hard_state.term, 2);

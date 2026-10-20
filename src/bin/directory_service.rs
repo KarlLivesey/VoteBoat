@@ -13,6 +13,8 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Native replicated metadata authority with explicit trusted initial grants.
+#[path = "support/accept_health.rs"]
+mod accept_health;
 #[path = "support/authority_endpoints.rs"]
 mod authority_endpoints;
 #[path = "support/command_client.rs"]
@@ -39,6 +41,8 @@ mod peer_credentials;
 mod policy_input;
 #[path = "support/preview_input.rs"]
 mod preview_input;
+#[path = "support/quic_hint.rs"]
+mod quic_hint;
 #[path = "support/route_client.rs"]
 mod route_client;
 #[path = "support/route_discovery.rs"]
@@ -66,7 +70,7 @@ use voteboat::{
     runtime::*,
 };
 type Node = NativeNode<Directory, NativeServiceConnector>;
-const HELP: &str = "voteboat-directory split-preview PROFILE\nvoteboat-directory plan AUTHORITY INCARNATION RESPONSIBILITY INCARNATION EXECUTION_GROUP INCARNATION\nvoteboat-directory serve create|recover DIRECTORY NODE BASE TLS PLAN ACCESS [--command-listen ADDRESS] [--peers FILE | --deployment FILE] [--transport tcp|quic] [--timing-profile throughput|edge|legacy] [--peer-credentials FILE]\nvoteboat-directory client BASE NODE TLS PRINCIPAL status|initialize|publish OPERATION|checkpoint|quit|reload-peers REQUEST EXPECTED NEXT|peer-credential-status REQUEST|reload-access REQUEST EXPECTED NEXT|credential-status REQUEST [--command-peers FILE]\nvoteboat-directory lookup BASE NODE|auto TLS PRINCIPAL GROUP INCARNATION RESPONSIBILITY INCARNATION [--command-peers FILE]\nvoteboat-directory route TLS PRINCIPAL AUTHORITY INCARNATION RESPONSIBILITY INCARNATION KEY_BYTE AUTHORITIES_FILE [--max-hops N] [--min-epoch N] [--min-generation N]";
+const HELP: &str = "voteboat-directory split-preview PROFILE\nvoteboat-directory plan AUTHORITY INCARNATION RESPONSIBILITY INCARNATION EXECUTION_GROUP INCARNATION\nvoteboat-directory serve create|recover DIRECTORY NODE BASE TLS PLAN ACCESS [--command-listen ADDRESS] [--peers FILE | --deployment FILE] [--transport tcp|quic] [--timing-profile throughput|edge|legacy] [--peer-credentials FILE] [--checkpoint-entries N] [--wal-reclaim-ms MS] [--wal-reclaim-min-bytes N] [--no-maintenance I-accept-a-bounded-log]\nvoteboat-directory client BASE NODE TLS PRINCIPAL status|maintenance|initialize|publish OPERATION|checkpoint|quit|reload-peers REQUEST EXPECTED NEXT|peer-credential-status REQUEST|reload-access REQUEST EXPECTED NEXT|credential-status REQUEST [--command-peers FILE]\nvoteboat-directory lookup BASE NODE|auto TLS PRINCIPAL GROUP INCARNATION RESPONSIBILITY INCARNATION [--command-peers FILE]\nvoteboat-directory route TLS PRINCIPAL AUTHORITY INCARNATION RESPONSIBILITY INCARNATION KEY_BYTE AUTHORITIES_FILE [--max-hops N] [--min-epoch N] [--min-generation N]";
 fn ids(base: &str, id: &str) -> Result<(u16, u64), Failure> {
     let base: u16 = base.parse()?;
     let id: u64 = id.parse()?;
@@ -85,6 +89,7 @@ struct Options {
     peer_credentials: Option<PathBuf>,
     protocol: NativePeerProtocol,
     timing_profile: voteboat::native::startup::NativeTimingProfile,
+    maintenance: setup::MaintenanceOptions,
 }
 fn options(args: &[String]) -> Result<Options, Failure> {
     let mut o = Options {
@@ -94,6 +99,7 @@ fn options(args: &[String]) -> Result<Options, Failure> {
         peer_credentials: None,
         protocol: NativePeerProtocol::TcpTls,
         timing_profile: Default::default(),
+        maintenance: Default::default(),
     };
     let mut transport = false;
     let mut profile_selected = false;
@@ -120,8 +126,13 @@ fn options(args: &[String]) -> Result<Options, Failure> {
                     "tcp" => NativePeerProtocol::TcpTls,
                     #[cfg(feature = "quic")]
                     "quic" => NativePeerProtocol::Quic,
+                    #[cfg(not(feature = "quic"))]
+                    "quic" => return Err(quic_hint::QuicNotBuilt.into()),
                     _ => return Err("unsupported transport".into()),
                 };
+            }
+            flag if setup::MaintenanceOptions::is_flag(flag) => {
+                o.maintenance.parse(flag, &pair[1])?
             }
             _ => return Err("unknown or duplicate option".into()),
         }
@@ -129,6 +140,7 @@ fn options(args: &[String]) -> Result<Options, Failure> {
     if o.peers.is_some() && o.deployment.is_some() {
         return Err("select peers or deployment".into());
     }
+    o.maintenance.validate()?;
     Ok(o)
 }
 fn serve(args: &[String]) -> Result<(), Failure> {
@@ -160,6 +172,7 @@ fn serve(args: &[String]) -> Result<(), Failure> {
         },
     )?;
     config.startup.bootstrap.group = plan.authority;
+    options.maintenance.select(&mut config.startup.limits);
     let wire = config.startup.tls.wire_version();
     let peers = options
         .peer_credentials
@@ -185,7 +198,7 @@ fn serve(args: &[String]) -> Result<(), Failure> {
     let address = command_endpoints::listener(options.listen, true, base, id)?;
     let listener = TcpListener::bind(address)?;
     listener.set_nonblocking(true)?;
-    let node = match &peers {
+    let mut node = match &peers {
         Some(p) => setup::open_application_with_rotation(
             config,
             options.protocol,
@@ -202,6 +215,8 @@ fn serve(args: &[String]) -> Result<(), Failure> {
             plan.app.clone(),
         )?,
     };
+    options.maintenance.apply(&mut node)?;
+    println!("{}", setup::maintenance_startup(&node));
     println!("credential_digest={digest:02x?}");
     run(node, plan, listener, access, peers, id)
 }
@@ -223,7 +238,7 @@ fn run(
     let mut sequence = 0u64;
     let mut quit = false;
     let mut shutdown = None;
-    let mut host = service_setup::HostWait::new();
+    let mut host = service_setup::HostWait::new(service_setup::host_wake());
     println!(
         "ready directory node={id} authority={:?} command={}",
         plan.authority,

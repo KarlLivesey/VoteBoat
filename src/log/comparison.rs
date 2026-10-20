@@ -134,9 +134,12 @@ impl CheckpointComparison {
         let length = state.entries.len();
         let (begin, end) = skipped.unwrap_or((length, length));
         for range in [0..begin, end..length] {
-            for (left, right) in state.entries[range.clone()]
-                .iter()
-                .zip(&expected.state().entries[range])
+            for (left, right) in state
+                .entries
+                .range(range.clone())
+                .into_iter()
+                .flatten()
+                .zip(expected.state().entries.range(range).into_iter().flatten())
             {
                 #[cfg(test)]
                 {

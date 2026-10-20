@@ -17,6 +17,8 @@ use super::*;
 #[path = "maintenance.rs"]
 mod maintenance;
 use maintenance::Maintenance;
+#[path = "cluster.rs"]
+pub(super) mod cluster;
 pub(super) use maintenance::{config as maintenance_config, Config as MaintenanceConfig};
 
 pub(super) fn validate(count: usize, rate: usize) -> Result<(), Failure> {
@@ -513,28 +515,28 @@ pub(super) fn run<L: LogStore + Send + 'static>(
     let joined = close(replicas, clock);
     checked_stage(root, "verification", verified, joined)?;
     observe::capture(&mut storage, "after_create_join", &traces);
-    eprintln!("phase=recovery-verification mode=offered");
-    let (mut replicas, recovered_traces) = open_cluster(NativeOpenMode::Recover)?;
-    let recovered_bases = maintenance.bases(&replicas);
-    let recovered = verify_offered_recovery(
-        &mut replicas,
-        clock,
-        groups,
-        &maintenance,
-        RecoveryCheck {
+    let retries = if serving_only(" mode=offered") {
+        0
+    } else {
+        eprintln!("phase=recovery-verification mode=offered");
+        let (mut replicas, recovered_traces) = open_cluster(NativeOpenMode::Recover)?;
+        let recovered_bases = maintenance.bases(&replicas);
+        let check = RecoveryCheck {
             warmup: &warmup,
             ledger: &ledger,
             expected: &expected,
             compacted_bases: &compacted_bases,
             last: &last,
-        },
-    );
-    let joined = close(replicas, clock);
-    let retries = checked_stage(root, "recovery", recovered, joined)?;
-    if maintenance_config.is_some() {
-        write_bases(root, &compacted_bases, &recovered_bases)?;
-    }
-    observe::capture(&mut storage, "after_recover_join", &recovered_traces);
+        };
+        let recovered = verify_offered_recovery(&mut replicas, clock, groups, &maintenance, check);
+        let joined = close(replicas, clock);
+        let retries = checked_stage(root, "recovery", recovered, joined)?;
+        if maintenance_config.is_some() {
+            write_bases(root, &compacted_bases, &recovered_bases)?;
+        }
+        observe::capture(&mut storage, "after_recover_join", &recovered_traces);
+        retries
+    };
     config.publication.write_storage(root, &storage)?;
     report_offered(
         &config,

@@ -98,7 +98,7 @@ fn data(from: u64, to: u64, sequence: u128) -> Message {
     data.rpc = Rpc::Append {
         previous_index: 0,
         previous_term: 0,
-        entries: vec![support::entry(1, 1, 7)],
+        entries: vec![support::entry(1, 1, 7)].into(),
         leader_commit: 0,
     };
     data

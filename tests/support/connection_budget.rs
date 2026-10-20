@@ -67,7 +67,8 @@ fn incoming(group_id: u128, peer: u64, physical: u128) -> Event {
                     expected: ConfigurationId::new(1).unwrap(),
                     change: ConfigurationChange::Learners(next),
                 })),
-            }],
+            }]
+            .into(),
         },
     })
 }
@@ -311,13 +312,13 @@ fn stopping_a_group_returns_queued_reservation_and_registration_cannot_overbook_
 
 fn local_configuration(group_id: u128, peer: u64, physical: u128) -> Event {
     let Event::Receive(Message {
-        rpc: Rpc::Append { mut entries, .. },
+        rpc: Rpc::Append { entries, .. },
         ..
     }) = incoming(group_id, peer, physical)
     else {
         unreachable!()
     };
-    let EntryPayload::Configuration(record) = entries.remove(0).payload else {
+    let EntryPayload::Configuration(record) = entries[0].clone().payload else {
         unreachable!()
     };
     Event::Configure(Box::new(ConfigurationProposal {

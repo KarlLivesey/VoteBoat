@@ -19,7 +19,7 @@ impl Raft {
                     &sent,
                     *previous_index,
                     *previous_term,
-                    entries,
+                    entries.iter(),
                     self.batch_limits.max_replication_entries,
                 ) =>
             {
@@ -50,7 +50,14 @@ impl Raft {
                     self.repair_joint(m.to, Some(m.configuration)).ok()??;
                 if sent.snapshot.is_some()
                     || **joint != expected
-                    || !self.range_matches(m.to, sent, *previous_index, *previous_term, entries, 64)
+                    || !self.range_matches(
+                        m.to,
+                        sent,
+                        *previous_index,
+                        *previous_term,
+                        entries.iter(),
+                        64,
+                    )
                     || sent.end > joint.index
                 {
                     return None;
@@ -84,20 +91,20 @@ impl Raft {
             _ => None,
         }
     }
-    fn range_matches(
+    fn range_matches<'e>(
         &self,
         peer: NodeId,
         sent: &Replication,
         previous: u64,
         term: u64,
-        entries: &[LogEntry],
+        entries: impl DoubleEndedIterator<Item = &'e LogEntry> + ExactSizeIterator + Clone,
         max_entries: usize,
     ) -> bool {
         previous.checked_add(1) == Some(sent.start)
             && self.durable.term_at(previous) == Some(term)
-            && entries.last().map_or(previous, |e| e.index) == sent.end
+            && entries.clone().next_back().map_or(previous, |e| e.index) == sent.end
             && entries.len() <= max_entries
-            && entries.iter().enumerate().all(|(offset, e)| {
+            && entries.enumerate().all(|(offset, e)| {
                 previous.checked_add(offset as u64 + 1) == Some(e.index)
                     && self
                         .durable
@@ -123,15 +130,16 @@ fn same_request(sent: &Replication, m: &Message) -> bool {
 }
 impl RequestWindow {
     pub(super) fn current_replication(&self, core: &Raft) -> bool {
-        let (map, historical) = match self.boundary {
-            Boundary::Append { .. } | Boundary::Snapshot(_) => (&core.requests, false),
-            Boundary::Repair { .. } | Boundary::RepairSnapshot(_) => (&core.repair_requests, true),
+        let (sent, historical) = match self.boundary {
+            Boundary::Append { .. } | Boundary::Snapshot(_) => (
+                core.original_replication(self.recipient.node, self.context, self.configuration),
+                false,
+            ),
+            Boundary::Repair { .. } | Boundary::RepairSnapshot(_) => (
+                core.repair_requests.get(&self.recipient.node).copied(),
+                true,
+            ),
             _ => return false,
-        };
-        let sent = if historical {
-            map.get(&self.recipient.node).copied()
-        } else {
-            core.original_replication(self.recipient.node, self.context, self.configuration)
         };
         let Some(sent) = sent else {
             return false;

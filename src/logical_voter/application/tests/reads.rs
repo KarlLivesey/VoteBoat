@@ -35,7 +35,8 @@ fn read_bound_is_stable_across_growth_and_actual_allocations_are_charged() {
                         operation: OperationId::new(101).unwrap(),
                         bytes: vec![1; 1024].into(),
                     },
-                }],
+                }]
+                .into(),
             }),
         ),
     );

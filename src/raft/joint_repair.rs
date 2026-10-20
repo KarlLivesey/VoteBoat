@@ -67,6 +67,7 @@ impl Raft {
             bytes = total;
         }
         entries.reverse();
+        let entries = EntryBatch::from(entries);
         let Some(first) = entries.first() else {
             return Ok(Vec::new());
         };
@@ -193,7 +194,8 @@ impl Raft {
             if *previous_index < self.durable.base_index() {
                 *previous_index = self.durable.base_index();
                 *previous_term = self.durable.base_term();
-                entries.retain(|e| e.index > self.durable.base_index());
+                let base = self.durable.base_index();
+                *entries = entries.iter().filter(|e| e.index > base).cloned().collect();
             }
         }
     }
