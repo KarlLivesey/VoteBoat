@@ -57,8 +57,10 @@ impl Raft {
                 },
             })
             .collect();
-        let effects = self.persist_proposal_entries(first, entries)?;
-        self.finish_step(effects)
+        let mut effects = VecDeque::new();
+        self.persist_proposal_entries_into(first, entries, &mut effects)?;
+        self.finish_step_into(&mut effects)?;
+        Ok(effects.into())
     }
 
     pub(super) fn begin_step(&mut self) -> Result<(), RaftError> {
@@ -73,19 +75,16 @@ impl Raft {
         Ok(())
     }
 
-    pub(super) fn finish_step(
-        &mut self,
-        mut effects: Vec<Effect>,
-    ) -> Result<Vec<Effect>, RaftError> {
-        effects.extend(self.drive_transfer()?);
-        Ok(effects)
+    pub(super) fn finish_step_into(&mut self, out: &mut VecDeque<Effect>) -> Result<(), RaftError> {
+        out.append_result(self.drive_transfer())
     }
 
-    pub(super) fn propose(
+    pub(super) fn propose_into(
         &mut self,
         operation: OperationId,
         bytes: Vec<u8>,
-    ) -> Result<Vec<Effect>, RaftError> {
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
         self.check_proposal_role()?;
         if bytes.len() > self.limits.max_command_bytes {
             return Err(StorageError::Rejected("command byte budget").into());
@@ -103,7 +102,7 @@ impl Raft {
                 bytes: bytes.into(),
             },
         };
-        self.persist_proposal_entries(index, vec![entry])
+        self.persist_proposal_entries_into(index, vec![entry], out)
     }
 
     fn validate_proposal_batch(
@@ -185,12 +184,13 @@ impl Raft {
         }
         Ok(())
     }
-    fn persist_proposal_entries(
+    fn persist_proposal_entries_into(
         &mut self,
         first: u64,
         entries: Vec<LogEntry>,
-    ) -> Result<Vec<Effect>, RaftError> {
-        self.persist(
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
+        self.persist_into(
             self.durable.hard_state,
             self.durable.commit_index,
             // Freezing measures the batch's intrinsic facts once; planning,
@@ -201,6 +201,7 @@ impl Raft {
             }),
             After::LeaderAppend,
             None,
+            out,
         )
     }
     fn check_proposal_role(&self) -> Result<(), RaftError> {

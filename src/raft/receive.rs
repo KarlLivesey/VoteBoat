@@ -17,17 +17,28 @@ use super::*;
 
 impl Raft {
     pub(super) fn receive_inner(&mut self, m: Message) -> Result<Vec<Effect>, RaftError> {
+        let mut effects = VecDeque::new();
+        self.receive_inner_into(m, &mut effects)?;
+        Ok(effects.into())
+    }
+    /// Appends this message's effects to `out`; the hot replication arms
+    /// write in place, colder ones append their owned effects.
+    pub(super) fn receive_inner_into(
+        &mut self,
+        m: Message,
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
         if matches!(
             m.rpc,
             Rpc::LearnerReadinessRequest(_) | Rpc::LearnerReadinessReply { .. }
         ) {
-            return self.receive_readiness(m);
+            return out.append_result(self.receive_readiness(m));
         }
         if matches!(
             m.rpc,
             Rpc::AuthorityRequest { .. } | Rpc::AuthorityReply { .. }
         ) {
-            return self.receive_authority(m);
+            return out.append_result(self.receive_authority(m));
         }
         if let Some(index) = self.retirement_commit(&m) {
             let reply = self.reply(
@@ -38,15 +49,17 @@ impl Raft {
                 },
             );
             return if index > self.durable.commit_index {
-                self.persist(
+                self.persist_into(
                     self.durable.hard_state,
                     index,
                     None,
                     After::Reply,
                     Some(reply),
+                    out,
                 )
             } else {
-                Ok(vec![Effect::Send(reply)])
+                out.push_back(Effect::Send(reply));
+                Ok(())
             };
         }
         self.authenticated_message_source(&m)?;
@@ -54,7 +67,7 @@ impl Raft {
             index, log_term, ..
         } = m.rpc
         {
-            return self.receive_timeout_now(&m, index, log_term);
+            return out.append_result(self.receive_timeout_now(&m, index, log_term));
         }
         let old = self.durable.hard_state;
         let hard = if m.term > old.term {
@@ -72,7 +85,7 @@ impl Raft {
             self.clear_replication_requests();
             self.repair_requests.clear();
         }
-        match &m.rpc {
+        let effects = match &m.rpc {
             Rpc::TimeoutNow { .. } => unreachable!(),
             Rpc::LearnerRepair { .. }
             | Rpc::LearnerRepaired { .. }
@@ -87,17 +100,18 @@ impl Raft {
                 last_term,
             } => self.receive_vote(&m, hard, *last_index, *last_term),
             Rpc::Voted { granted } => self.receive_voted(&m, hard, *granted),
-            Rpc::Append { .. } => self.receive_append(m, hard),
+            Rpc::Append { .. } => return self.receive_append_into(m, hard, out),
             Rpc::Appended {
                 success,
                 matching_index,
-            } => self.receive_appended(&m, hard, *success, *matching_index),
+            } => return self.receive_appended_into(&m, hard, *success, *matching_index, out),
             Rpc::ReadProbe => self.receive_read_probe(&m, hard),
             Rpc::ReadAck => self.receive_read_ack(&m, hard),
             Rpc::Snapshot { .. } => self.receive_snapshot(m, hard),
             Rpc::SnapshotAck { index } => self.receive_snapshot_ack(&m, hard, *index),
             Rpc::Compacted { index, term } => self.receive_compacted(&m, hard, *index, *term),
-        }
+        };
+        out.append_result(effects)
     }
     pub(super) fn validate_replica_message(&self, m: &Message) -> Result<(), RaftError> {
         // Replication and vote requests from an exact locally authorized voter
@@ -220,11 +234,12 @@ impl Raft {
             Ok(Vec::new())
         }
     }
-    fn receive_append(
+    fn receive_append_into(
         &mut self,
         mut m: Message,
         hard: HardState,
-    ) -> Result<Vec<Effect>, RaftError> {
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
         let Rpc::Append {
             previous_index,
             previous_term,
@@ -245,13 +260,14 @@ impl Raft {
             return Err(RaftError::InvalidMessage);
         }
         if m.term < old.term {
-            return Ok(vec![Effect::Send(self.reply(
+            out.push_back(Effect::Send(self.reply(
                 &m,
                 Rpc::Appended {
                     success: false,
                     matching_index: self.durable.last_index(),
                 },
-            ))]);
+            )));
+            return Ok(());
         }
         self.role = Role::Follower;
         self.clear_reads();
@@ -284,15 +300,17 @@ impl Raft {
             );
             reply.term = hard.term;
             return if hard != old {
-                self.persist(
+                self.persist_into(
                     hard,
                     self.durable.commit_index,
                     None,
                     After::Reply,
                     Some(reply),
+                    out,
                 )
             } else {
-                Ok(vec![Effect::Send(reply)])
+                out.push_back(Effect::Send(reply));
+                Ok(())
             };
         }
         let suffix_offset = self.first_new_entry(entries)?;
@@ -314,9 +332,10 @@ impl Raft {
             Self::take_append_suffix(entries, offset)
         });
         if hard != old || suffix.is_some() || commit != self.durable.commit_index {
-            self.persist(hard, commit, suffix, After::Reply, Some(reply))
+            self.persist_into(hard, commit, suffix, After::Reply, Some(reply), out)
         } else {
-            Ok(vec![Effect::Send(reply)])
+            out.push_back(Effect::Send(reply));
+            Ok(())
         }
     }
     /// Offset of the first entry not already held. Same-term overlap is
@@ -360,31 +379,39 @@ impl Raft {
         Suffix { from, entries }
     }
 
-    fn receive_appended(
+    fn receive_appended_into(
         &mut self,
         m: &Message,
         hard: HardState,
         success: bool,
         matching_index: u64,
-    ) -> Result<Vec<Effect>, RaftError> {
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
         let old = self.durable.hard_state;
         if hard != old {
-            return self.persist(hard, self.durable.commit_index, None, After::Reply, None);
+            return self.persist_into(
+                hard,
+                self.durable.commit_index,
+                None,
+                After::Reply,
+                None,
+                out,
+            );
         }
         if self.role != Role::Leader || m.term != old.term {
-            return Ok(Vec::new());
+            return Ok(());
         }
         if self.is_empty_alias(m) {
-            return self.consume_empty_alias(m, success, matching_index);
+            return out.append_result(self.consume_empty_alias(m, success, matching_index));
         }
         let Some(sent) = self.requests.get(&m.from).copied() else {
-            return Ok(Vec::new());
+            return Ok(());
         };
         if sent.context != m.context || sent.configuration != m.configuration {
-            return Ok(Vec::new());
+            return Ok(());
         }
         if sent.snapshot.is_some() {
-            return Ok(Vec::new());
+            return Ok(());
         }
         self.retire_replication(m.from);
         if success {
@@ -394,22 +421,23 @@ impl Raft {
             let prefix = self.progress[&m.from].max(matching_index);
             self.progress.insert(m.from, prefix);
             self.next_index.insert(m.from, prefix + 1);
-            let mut effects = self.maybe_commit()?;
+            self.maybe_commit_into(out)?;
             if self.pending.is_none()
                 && (prefix < self.durable.last_index()
                     || (self.progress_sends_enabled()
                         && sent.commit_at_start < self.durable.commit_index))
             {
-                effects.push(self.append_for(m.from)?);
+                out.push_back(self.append_for(m.from)?);
             }
-            Ok(effects)
+            Ok(())
         } else {
             let next = self.next_index[&m.from]
                 .saturating_sub(1)
                 .min(matching_index.saturating_add(1))
                 .max(1);
             self.next_index.insert(m.from, next);
-            Ok(vec![self.append_for(m.from)?])
+            out.push_back(self.append_for(m.from)?);
+            Ok(())
         }
     }
     fn receive_read_probe(

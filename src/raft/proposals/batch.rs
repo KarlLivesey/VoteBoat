@@ -47,20 +47,20 @@ impl ProposalBatch {
         if length > self.max_command_bytes {
             return Err(StorageError::Rejected("command byte budget").into());
         }
-        let shared = CommandBytes::retained_bytes_for_len(length).ok_or(RaftError::Exhausted)?;
+        let shared = CommandBytes::retained_bytes_for_len(length).ok_or_else(exhausted)?;
         // Everything alive at once while this original converts, besides the
         // entry allocation: the Vec header, staged shared bytes and the input.
         let held = self
             .shared
             .checked_add(HEADER)
             .and_then(|n| n.checked_add(bytes.capacity()))
-            .ok_or(RaftError::Exhausted)?;
+            .ok_or_else(exhausted)?;
         let capacity = self.entries.capacity();
         let (grown, peak) = if len < capacity {
             let peak = entry_bytes(capacity)
                 .and_then(|n| n.checked_add(held))
                 .and_then(|n| n.checked_add(shared))
-                .ok_or(RaftError::Exhausted)?;
+                .ok_or_else(exhausted)?;
             (None, peak)
         } else {
             let next = self.next_capacity(held, shared)?;
@@ -71,7 +71,7 @@ impl ProposalBatch {
             let peak = growing
                 .zip(converting)
                 .map(|(a, b)| a.max(b))
-                .ok_or(RaftError::Exhausted)?;
+                .ok_or_else(exhausted)?;
             (Some(next), peak)
         };
         let peak = peak.max(self.peak);
@@ -145,7 +145,7 @@ impl ProposalBatch {
         let fixed = entry_bytes(capacity)
             .map(|n| n.max(shared))
             .and_then(|n| n.checked_add(held))
-            .ok_or(RaftError::Exhausted)?;
+            .ok_or_else(exhausted)?;
         let fits = self.max_batch_bytes.saturating_sub(fixed) / ENTRY;
         let next = doubled.min(fits);
         if next <= len {
@@ -153,6 +153,13 @@ impl ProposalBatch {
         }
         Ok(next)
     }
+}
+
+/// Built only when a check fails, so a successful push creates and drops no
+/// error value.
+#[cold]
+fn exhausted() -> RaftError {
+    RaftError::Exhausted
 }
 
 fn entry_bytes(count: usize) -> Option<usize> {
@@ -198,6 +205,33 @@ impl Raft {
     /// `propose_batch`. A refused batch leaves no pending log state.
     /// Success returns a persistence request, not commitment or application.
     pub fn propose_entries(&mut self, batch: ProposalBatch) -> Result<Vec<Effect>, RaftError> {
+        let mut effects = VecDeque::new();
+        self.propose_entries_into(batch, &mut effects)?;
+        Ok(effects.into())
+    }
+
+    /// [`Self::propose_entries`] into a host-owned queue: the effects are
+    /// appended, in the same order, after any effects `out` already holds,
+    /// which are never read or changed. A refused batch leaves `out` exactly
+    /// as it was and no pending log state.
+    pub fn propose_entries_into(
+        &mut self,
+        batch: ProposalBatch,
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
+        let mark = out.len();
+        let result = self.stage_entry_batch(batch, out);
+        if result.is_err() {
+            out.truncate(mark);
+        }
+        result
+    }
+
+    fn stage_entry_batch(
+        &mut self,
+        batch: ProposalBatch,
+        out: &mut VecDeque<Effect>,
+    ) -> Result<(), RaftError> {
         self.begin_step()?;
         self.check_proposal_role()?;
         let first = self.validate_entry_batch(&batch)?;
@@ -209,8 +243,8 @@ impl Raft {
             entry.index = first + offset as u64;
             entry.term = term;
         }
-        let effects = self.persist_proposal_entries(first, entries)?;
-        self.finish_step(effects)
+        self.persist_proposal_entries_into(first, entries, out)?;
+        self.finish_step_into(out)
     }
 
     fn validate_entry_batch(&self, batch: &ProposalBatch) -> Result<u64, RaftError> {
