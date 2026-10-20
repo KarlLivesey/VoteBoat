@@ -825,6 +825,134 @@ touches the per-write path.
    built and compared only on the membership/readiness paths, and the decoder
    runs only on restore; the Counter apply and admission paths are unchanged.
 
+#### DR1 round 4 implemented (20 October 2026, PR 15)
+
+Implemented as planned above; deviations are noted inline.
+
+- **Composed schemas (Sol P2-1).** `application::layered_schema(tag, inner) =
+  tag << 60 | inner`, defined only for a non-zero inner schema below 2^60.
+  `maintenance_schema(f, inner)` is that with `f` in `1..=4`
+  (`MAX_MAINTENANCE_FORMAT` 15 → 4); `logical_activation_schema(inner)` is
+  that with tag 8 (`LOGICAL_ACTIVATION_LAYER`) and now returns `Option`. The
+  activation wrapper fixes its schema at construction (a new `schema` field,
+  also carried by its control profile). Nesting any composed wrapper inside
+  another (`Activation<Activation<_>>`, `Activation<Maintenance<_>>`,
+  `Maintenance<Activation<_>>`, `Maintenance<Maintenance<_>>`) returns
+  `Err(UnsupportedSchema)` from the constructor. Tests:
+  `p2_nested_activation_identity_cancels` (Sol's case, now refused at
+  construction; the single wrapper and the plain Counter still refuse each
+  other's declarations) and
+  `composed_schemas_are_distinct_and_composed_applications_do_not_nest` (five
+  Counter limit sets × {plain, maintenance 1..=4, activation}: 30 distinct
+  schemas; no composed schema is an accepted inner one; the three cross
+  nestings refused), both in `src/logical_voter/activation/tests/partition.rs`.
+  `v2-profile.bin` regenerated: only its application schema field (bytes
+  160..168) changed; the other three activation goldens and the enrollment
+  goldens are byte-identical.
+- **Readiness inner profile (Sol P2-2).** `raft::InnerProfile`: a `Copy`
+  fixed array of at most `MAX_INNER_PROFILE_LAYERS` = 7 schemas plus a length,
+  outermost first, with an overflow marker for deeper generic stacks; no
+  hashing. `ReadinessRequirements::inner_profile` carries it. Wrappers set it
+  with `InnerProfile::wrapping(inner requirements)` (Maintenance, activation,
+  `TransferSource`, `ScopedTransferSource`, `CreatedNamespace`,
+  `RetirementGuard`) or `InnerProfile::of(&inner)` (Routed, `TransferTarget`,
+  which take the inner application's declared requirements, or its
+  checkpoint schema if it declares none); `RoutedControlReads` forwards; every
+  leaf declares `InnerProfile::LEAF` (30 literal sites, mechanical). The
+  default `validate_deployment_requirements` and the Counter's
+  `validate_readiness_requirements` refuse `UnsupportedSchema` unless the
+  profiles are equal, and the default also refuses an overflowed one. The
+  learner readiness wire frame (tags 12/13) carries a count byte and the
+  schemas; the decoder refuses a count above 7 or a zero schema, the encoder
+  an overflowed profile (docs/WIRE_FORMAT.md). No persisted format holds
+  requirements. The committed bootstrap binding is unchanged (defence in
+  depth). Tests: `startup_binding_does_not_refuse_skew_at_readiness`
+  (tests/routed.rs; Sol's pair now refuses each other, and the binding still
+  stops a forced bootstrap with `InvalidCommand`, applied 0),
+  `readiness_declares_and_compares_the_whole_inner_stack`
+  (tests/transfer_source.rs; profile `[ROUTED, BUCKET_COUNTER]`, four skewed
+  profiles refused), `inner_profiles_are_exact_bounded_and_refuse_overflow`
+  (tests/application/profiles.rs), and the readiness wire test now round-trips
+  two- and seven-layer profiles and refuses depth 8 and a zero schema.
+  Correction recorded in the round-3 text: Routed's in-tree inner applications
+  include `Counter` (tests/routed.rs), not only `BucketCounter`.
+- **Restore arithmetic (Sol P2-3).** `decode_session` checks `id == 0 ||
+  id >= next_session` before computing the history bound, so `id + 1` cannot
+  overflow. Audit of every `+`, `−`, `*` on a decoded value in the ledger
+  decoder and the Counter restore: `allocations` uses `checked_sub`;
+  `registered_by + count` is saturating; `sequence − floor` runs only after
+  `sequence > previous ≥ floor` (commented); `next_session − 1` and
+  `next_session − first` run only after `decode` refused `next_session <
+  first` (commented); the closure bound's `id − first` is now saturating;
+  `entries_fit` uses checked adds; `Lru` and `decode_registration` compare
+  only; the Counter restore and outcome decode have no arithmetic. Tests:
+  `restore_invalid_max_session_id_must_not_panic` (bare ledger, first and
+  second session IDs, plus u64::MAX at every aligned offset at applied 0, 4
+  and u64::MAX: refused or decoded, never a panic) and
+  `restore_counter_invalid_max_session_id_must_not_panic` (Counter bytes
+  68..76).
+- **Unreachable states (Sol P3).** (a) The newest allocated session is never
+  a nonce-less unused session (a nonce is dropped only by a later
+  registration, which allocates a newer ID). The plan's per-session counting
+  form reduces to exactly this given the existing ordering rule, so only the
+  newest-session check is implemented. (b) A session's last use is at least
+  its earliest registration index plus its retained receipt count (0 for the
+  built-in session). Sibling: allocations + retained receipts + closure
+  record ≤ applied (`entries_fit`). These remain structural checks, not a
+  reachability proof. Tests: `restore_refuses_a_newest_session_without_its_nonce`
+  (Sol's state at applied 1, 2 and 9; the reachable `Rg = 1` drop chain still
+  restores), `restore_refuses_more_executions_than_entries` (Sol's state; four
+  executions plus one allocation packed into three entries refused, restores
+  at five).
+
+**Before/after.** Temporary probe target (`tests/zz_r4_probes.rs`, not
+committed): the six `tests/application/finality.rs` tests with offsets from
+`LEDGER_HEADER_BYTES`, Sol's used-index-0 round-2 probe, four round-3 probes
+(Maintenance S=2/S=3, activation windows 16/32, mark 100 at applied 0, unused
+session without nonce at Rg = S = 3) and five round-4 probes, built with
+120e9cab's, ece18fc4's, 3a824ff5's and this branch's `src/` in this worktree.
+
+| Probe | 120e9cab | ece18fc4 | 3a824ff5 | Branch |
+| --- | --- | --- | --- | --- |
+| Round-2 finality (4) and used index 0 | fail (`Ok(48)`, floors accepted, limits accepted, index 0 accepted) | pass | pass | pass |
+| Round-3 probes (P1 mark after closure + 4) | fail | fail (`schemas 0x3 / 0x3`, mark 100 accepted, …) | pass | pass |
+| P2-1 nested activation | constructed (plain refuses) | constructed (plain refuses) | constructed, schema `0x3000005` = plain, plain accepts: `Ok(())` | `Err(UnsupportedSchema)` at construction |
+| P2-2 Routed `Counter::new(4)` / `new(7)` | schemas 1/1, declaration `Ok(())`, bootstrap `InvalidCommand` | same | same | `Err(UnsupportedSchema)` |
+| P2-3 Counter first session ID = u64::MAX | `InvalidCheckpoint` | `InvalidCheckpoint` | panic, `attempt to add with overflow` (retention.rs:728) | `InvalidCheckpoint` |
+| P2-3 second session ID = u64::MAX | (layout differs; probe precondition fails) | `InvalidCheckpoint` | panic (retention.rs:728) | `InvalidCheckpoint` |
+| P3 (a) newest session without nonce, Rg = 1 | accepted | accepted | accepted | `InvalidCheckpoint` |
+| P3 (b) two executions by index 1 | accepted | accepted | accepted | `InvalidCheckpoint` |
+
+Totals: 120e9cab 1/16 pass; ece18fc4 7/16; 3a824ff5 10/16 (the six failures
+are exactly the round-4 findings); branch 16/16.
+
+**Formats.** Readiness wire frame gains the inner profile (no new format
+number; unpublished, a mixed-revision frame fails with a typed decode error).
+Activation schema `8 << 60 | inner` (`v2-profile.bin` regenerated);
+maintenance formats limited to 1..=4 (the service uses 3). No checkpoint or
+log format changes.
+
+**CPU.** Not re-measured. The inner profile is built and compared only on the
+membership/readiness and wire readiness paths; the activation schema is now
+read from a field instead of recomputed; the new restore checks run only on
+restore. The Counter admission and apply paths and the per-write wire frames
+are unchanged.
+
+**Checks (Linux, cores 0–3, nice 19, `-j 2`).** fmt; strict Clippy default,
+all-features, no-default-features, native-only: zero. All-features: lib 508
+(+1 ignored; includes the activation and enrollment format goldens),
+application 33, counter_service 205, effect_owner 210, leadership_maintenance
+12, learners 26, routed 193, logical_activation_application 7,
+provider_conformance 42, lifetime_apply_never_errs (U2) 4, raft 79, wire 18,
+transfer_source 8, and the targets whose readiness literals changed: startup
+60, native_member_startup 50, volatile 7, logical_relay_native 2,
+configuration_capacity 5, logical_activation_driver 35,
+logical_activation_nested 17, logical_voter_application 8. Default: lib 506
+(+1 ignored), application 33, counter_service 146, effect_owner 210,
+leadership_maintenance 12, learners 25, routed 111, logical_activation_application
+7, provider_conformance 42, lifetime_apply_never_errs 4, raft 79, wire 18,
+transfer_source 8. Matched workspace: by the pre-push hook.
+
 ## Logical-voter reliability track (opened 18 October 2026)
 
 Goal: logical parents and their backing children run indefinitely with bounded
