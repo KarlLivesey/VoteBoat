@@ -20,10 +20,14 @@ design pack is unchanged.
 | --- | --- | --- | --- | --- |
 | Done N0: three-process cluster harness (merged 20 October 2026 in PR 17, head 73605e48; rounds 1–4 and baseline below) | The instrument: per-process CPU and round/frame counters for a real three-process cluster on the production host wait, and the baseline every later slice is measured against | — | `native_benchmark node` mode; `HostWait` moved into `native::readiness` as a pure move; `benchmarks/tools/cluster.py`; deterministic three-process test on OS-selected ports; script self-test; fmt, four strict Clippy builds, matched fmt/Clippy; startup, service and cluster suites in default and all-features; N0 baseline table on the quiet Mac | NW1 |
 | Current N1: same-poll send flush | Remove the two-round effect-to-wire lag (plan §5) | N0 baseline | Plan §5.3 tests and §5.4 gate | NW1 |
-| Current N1b: commit notices ride on data | Stop sending a caught-up voter an Append whose only news is a newer commit index; the commit rides on the next data Append or heartbeat. Removes one follower Append cycle (two frames and one follower WAL barrier) per leader commit at idle and light load, and N1's extra follower barriers (research `n1b-batching.md`) | N0 harness; main `12fb21de`; independent of N1 (PR 19 rebases on it) | Step 0 counter diagnostic passes the stop rule; deterministic core tests (no commit-only Append to a caught-up voter, commit on next data Append, commit within one heartbeat, every exempt mode unchanged, existing commit oracles) with two mutations; fmt, four strict Clippy builds, matched fmt/Clippy; suites in default and all-features; five N0 cells and `nat.sh` vs main (no regression), then N1b+N1 vs main against the gate | NW1 |
+| Stopped N1b: commit notices ride on data (step 0 tripped the stop rule, 20 October 2026; diagnostic counters only, no library change) | Was: stop sending a caught-up voter an Append whose only news is a newer commit index. Step 0 shows commit-only follower persists explain under 1% of N1's extra follower barriers in `nat.sh` and ~0 in the TCP 15k cluster cell (evidence below), so it cannot restore N1's batching | N0 harness; main `12fb21de` | Done: benchmark-only counters (`zero_command_units`, `log_persists`, `commit_only_persists`, `entryless_frames`), stop-rule evidence, fallback brief below; fmt, four strict Clippy builds, matched fmt/Clippy, example and script tests | NW1 |
+| Proposed N1c: bounded Append linger (fallback L; needs a user decision on its latency cost) | Restore follower Append size under N1 (follower commands per barrier 52 → 26 in `nat.sh`) by holding a small data Append to a ready follower for at most 1 ms | N1b step 0 evidence; N1 (PR 19) | Brief below: quorum-aware variant first; deterministic simulated-time tests; same gate as N1b plus p50/p99 deltas | NW1 |
 | Then N2: per-peer frame coalescing | One frame per peer per round across groups | N1; a G=4 cell on the N0 harness (see N0 limits) | Plan §4 row 2 | NW1 |
 
 ### N1b schema plan (before editing, 20 October 2026)
+
+Outcome: stopped at step 0 by the stop rule (evidence below). Only the step-0
+counters were built; the library parts of this plan were not.
 
 Research: `target/claude/research-r4/n1b-batching.md` (main checkout,
 untracked), option F; GPT-6.1-Sol's PR 19 review, "Batching recommendation".
@@ -134,6 +138,111 @@ Built on main `12fb21de` as its own PR; N1 (PR 19) rebases on it afterwards.
   cells × 5 ABBA rounds on the quiet Mac, `nat.sh` 5 pairs on Linux (cores
   10–15). Then N1b + PR 19's code (local throwaway branch, not pushed) against
   the same base for the gate.
+
+### N1b step 0 evidence: stop rule tripped (20 October 2026)
+
+Binaries: A = main `12fb21de` + the step-0 counters (`e9ad393b`, example code
+only, so its library is main's); B = PR 19 head `ff9faec8` + the same counter
+files (local measurement branch, not pushed). Release, `--all-features`.
+
+**Linux `nat.sh` loop** (single process, WAL on tmpfs, 15,000/s, 2 pairs,
+`taskset -c 10-15 nice -n 19`; host load average 10.4 from other users on cores
+0–9, so the CPU figures are noisy; the counts are not). Per 16,000 offers
+(16,064 commands with warmup); r1 is the leader, r2 and r3 the followers.
+
+| Pair | Build | Follower barriers r2 / r3 | Follower zero-command units r2 / r3 | Follower commands per barrier | Leader barriers | Leader zero-command units | Leader commands per data unit | Marginal µs/write | p99 ms |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | A | 306 / 305 | 7 / 6 | 52.5 | 1,053 | 345 | 22.7 | 12.23 | 15.0 |
+| 1 | B | 613 / 610 | 7 / 7 | 26.2 | 1,273 | 632 | 25.1 | 14.32 | 7.4 |
+| 2 | A | 360 / 361 | 4 / 7 | 44.6 | 1,189 | 396 | 20.3 | 12.47 | 9.5 |
+| 2 | B | 637 / 639 | 5 / 11 | 25.2 | 1,307 | 651 | 24.5 | 14.09 | 6.3 |
+
+- Extra follower barriers (B − A, per follower): +306 and +278. Extra follower
+  zero-command units: +0.5 and +2.5, i.e. **0.2% and 0.9%** of the extra
+  barriers. The stop rule needs at least 50%: **stop**.
+- What did change: each follower Append carries half the commands (52 → 26).
+  The leader's own append batches did not shrink (22.7 → 25.1 commands per
+  leader data persist). On main a follower Append covered ~2.3 leader append
+  batches (306 follower barriers against 708 leader data persists); under N1
+  it covers ~1.0 (613 against 641). The follower is ready at almost every
+  leader batch, so every leader batch costs a follower cycle. The leader's
+  commit persists rise with it (345 → 632, about one per follower ack that
+  advances the commit). This is the research's H′ (smaller data Appends), not H
+  (commit-only cycles).
+- CPU, same direction as the research run: marginal 12.23 → 14.32 and
+  12.47 → 14.09 µs/write (×1.17, ×1.13, loaded host).
+
+**Mac cluster, N0 harness** (quiet M2 Max, `/Volumes/vbram`, load < 1.0 before
+each cell). Raw lines (both hosts, including the Linux `nat.sh` output as
+`step0-linux-nat.txt`): Mac `/tmp/voteboat-claude-loop/n1b-diag-main-e9ad393b/results/`.
+Per run, followers n2 / n3; `pb` persistence batches, `cop` commit-only
+persists.
+
+| Cell | Round | A follower pb | B follower pb | A follower cop | B follower cop |
+| --- | --- | --- | --- | --- | --- |
+| TCP 15,000/s, 16,000 offers | 0 | 235 / 232 | 240 / 237 | 4 / 4 | 7 / 5 |
+| TCP 15,000/s, 16,000 offers | 1 | 157 / 158 | 203 / 200 | 5 / 4 | 5 / 4 |
+| TCP 15,000/s, 2,000 offers | 0 | 41 / 40 | 48 / 46 | 4 / 2 | 3 / 2 |
+| TCP 15,000/s, 2,000 offers | 1 | 29 / 30 | 47 / 45 | 3 / 3 | 3 / 2 |
+| TCP 1,000/s, 16,000 offers (1 round) | 0 | 3,107 / 3,109 | 3,228 / 3,235 | 19 / 20 | 35 / 42 |
+| Idle TCP 20/s, 600 offers (1 round) | 0 | 1,205 / 1,204 | 1,205 / 1,204 | 602 / 601 | 602 / 601 |
+
+- TCP 15k: B − A follower persists +5 to +46 per run; commit-only persists
+  −1 to +3. Commit-only notices explain ~0 of N1's extra follower persists here
+  too. (Marginal CPU in these 2 rounds: A 35.72, B 27.41 µs/write, ×0.77; the
+  15k regime is bimodal on this Mac, see the N1 record.)
+- TCP 1,000/s: commit-only persists explain 16 of +121 and 22 of +126 extra
+  follower persists (13–17%), also under half.
+- Idle 20/s: every write costs each follower exactly one commit-only persist
+  (602 per 600 writes) and two entryless frames (1,194: the commit-only Append
+  and a heartbeat), in A and B alike. Option F would save one follower Append
+  cycle per write here, and almost nothing at 1,000/s or above.
+- `entryless_frames` is meaningful on followers only: on the leader every
+  received frame is an `Appended` ack.
+
+**Decision.** Per the brief's stop rule, the library change (F) was not built.
+F alone is an idle-only saving (one follower cycle per write at 20/s, ≤ 0.003
+per write at 1,000/s) and does not address N1's durable-save regression; it is
+parked, not rejected for idle.
+
+### N1c fallback brief: bounded Append linger (option L; proposed, not built)
+
+- **Problem (measured above).** Under N1 a follower is ready at almost every
+  leader append batch, so follower Appends halve in size and follower cycles
+  (two frames, one follower WAL barrier, one leader commit persist) double. On
+  Linux tmpfs a follower cycle costs ~25 µs of CPU across the three replicas
+  (research §1.1).
+- **Mechanism.** When a peer is ready and the next data Append would carry
+  fewer entries than a batch target (the previous Append's size to that peer,
+  or a fixed target), hold it until the first of: the next leader append
+  persist completes (more entries to carry), a deadline of at most 1 ms, or a
+  heartbeat. Ordering, the durability gate and one Append in flight are
+  unchanged: the linger only decides when to emit.
+- **Latency cost.** Commit needs the leader plus one follower ack, so lingering
+  both followers adds up to the linger to every commit. Restoring ~37
+  commands per Append at 15,000/s needs the follower round trip to rise from
+  ~1.5 ms to ~2.5 ms: about +1 ms on client p50 and p99 (N1's `nat.sh` p99
+  ~5–7 ms → ~6–8 ms, about main's; cluster p99 12–25 ms → +4–8%, which can
+  breach "p99 ≤ main + 5%").
+  At 1,000/s a fixed linger adds latency for little saving, so the target must
+  follow the load.
+- **Variant to try first: quorum-aware linger.** With three voters only one
+  follower ack is needed to commit. Send eagerly to the follower that acked
+  most recently and linger only the other. Commit latency stays as it is while
+  the eager follower is healthy; the lingering follower batches about twice as
+  much, which removes roughly half of the extra follower cycles at no latency
+  cost. The deadline bounds the case where the eager follower stalls.
+- **Needs.** A deadline in the core: either a new timer kind through
+  `TimedShard`, or a count-based rule bounded by the heartbeat. No wire, WAL or
+  transport change. Deterministic simulated-time tests: a small Append is held
+  and released by the next leader batch; released by the deadline with no more
+  data; never held past the heartbeat; the eager follower is never held.
+- **Gate.** The N1b gate (five N0 cells per-round median ≤ 1.02 against main;
+  `nat.sh` per-pair median ≤ 1.00 with ≥ 3 of 5 ≤ 1.00; follower barriers per
+  write ≤ main's; TCP 1,000/s ≤ 0.93 × main; QUIC 15k ≤ 0.88 × main; busy
+  cores ≤ main + 2%; p99 ≤ main + 5%), reported with p50 as well. Stop rule: if
+  `nat.sh` follower commands per barrier do not return to ≥ 40 within a 1 ms
+  linger, or p99 exceeds main + 5%, reject L and keep N1 as measured.
 
 ### N0 schema plan (before editing, 19 October 2026)
 
