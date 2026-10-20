@@ -24,7 +24,9 @@ pub(crate) use compact::CompactDelta;
 #[cfg(feature = "native")]
 pub(crate) use incoming::{OwnedAppend, OwnedChange};
 pub(crate) use incoming::{OwnedNextLog, PreparedOwnedLog};
-pub(crate) use summarized::SummarizedLog;
+#[cfg(test)]
+pub(crate) use summarized::checked_installs;
+pub(crate) use summarized::{LogStamp, SummarizedLog};
 pub(crate) use view::{LogMetadata, LogView};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

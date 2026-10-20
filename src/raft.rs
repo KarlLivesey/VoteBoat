@@ -15,9 +15,9 @@
 //! Deterministic static-configuration Raft. Host drives elections and delivery.
 //! Every persistence-dependent send/application notification waits for its exact
 //! store/group/revision/generation ticket. No transport or clock is constructed.
+use crate::log::transition::{LogStamp, OwnedNextLog, SummarizedLog};
 #[cfg(test)]
 use crate::log::transition::{LogSummary, LogView};
-use crate::log::transition::{OwnedNextLog, SummarizedLog};
 use crate::{
     contracts::{HardState, StorageError},
     identity::*,
@@ -354,8 +354,9 @@ struct Pending {
     ticket: Option<LogTicket>,
     after: After,
     reply: Option<Message>,
-    // `durable.version()` when `next` was planned from `durable.view()`.
-    planned: u64,
+    // The stamp of the view `next` was planned from; the install skips the
+    // predecessor comparison only if it is still the log's current one.
+    planned: Option<LogStamp>,
 }
 #[derive(Clone, Copy)]
 struct Replication {
@@ -1478,12 +1479,10 @@ impl Raft {
         reply: Option<Message>,
         out: &mut VecDeque<Effect>,
     ) -> Result<(), RaftError> {
-        let next = OwnedNextLog::plan_commit(
-            &self.durable.view(),
-            self.durable.summary(),
-            commit_index,
-            self.limits,
-        )?;
+        let view = self.durable.view();
+        let next =
+            OwnedNextLog::plan_commit(&view, self.durable.summary(), commit_index, self.limits)?;
+        let planned = view.stamp();
         let update = if self.volatile {
             None
         } else {
@@ -1497,7 +1496,7 @@ impl Raft {
                 snapshot: None,
             })
         };
-        self.stage_pending_into(next, update, after, reply, out)
+        self.stage_pending_into(next, planned, update, after, reply, out)
     }
     fn persist_update(
         &mut self,
@@ -1523,28 +1522,27 @@ impl Raft {
             // narrow owned batch keeps any spare capacity (the plan charges
             // it, the installed log charges the visible entries); a wide
             // batch was frozen, releasing spare capacity beyond 4 KiB.
-            let next = OwnedNextLog::plan_owned(
-                &self.durable.view(),
-                self.durable.summary(),
-                update,
-                self.limits,
-            )?;
-            self.stage_pending_into(next, None, after, reply, out)
+            let view = self.durable.view();
+            let next =
+                OwnedNextLog::plan_owned(&view, self.durable.summary(), update, self.limits)?;
+            let planned = view.stamp();
+            self.stage_pending_into(next, planned, None, after, reply, out)
         } else {
-            let next = OwnedNextLog::plan_copy(
-                &self.durable.view(),
-                self.durable.summary(),
-                &update,
-                self.limits,
-            )?;
-            self.stage_pending_into(next, Some(update), after, reply, out)
+            let view = self.durable.view();
+            let next =
+                OwnedNextLog::plan_copy(&view, self.durable.summary(), &update, self.limits)?;
+            let planned = view.stamp();
+            self.stage_pending_into(next, planned, Some(update), after, reply, out)
         }
     }
-    /// Make `next` the single pending transition. `update` is the durable
-    /// store's exact input; without one the core is volatile and emits a token.
+    /// Make `next` the single pending transition. `planned` is the stamp of
+    /// the view `next` was planned from (`LogView::stamp`). `update` is the
+    /// durable store's exact input; without one the core is volatile and
+    /// emits a token.
     fn stage_pending_into(
         &mut self,
         next: OwnedNextLog,
+        planned: Option<LogStamp>,
         update: Option<LogUpdate>,
         after: After,
         reply: Option<Message>,
@@ -1589,7 +1587,7 @@ impl Raft {
             ticket: None,
             after,
             reply,
-            planned: self.durable.version(),
+            planned,
         });
         out.push_back(effect);
         Ok(())

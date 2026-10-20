@@ -12,7 +12,7 @@ use volatile_tests::volatile_cluster;
 /// What one core call may change.
 struct Before {
     state: GroupLog,
-    version: u64,
+    version: u32,
 }
 fn before(core: &Raft) -> Before {
     Before {
@@ -279,4 +279,140 @@ fn plain_log_reservation_counts_the_bootstrap_voters_and_a_pending_configuration
     durable(&mut leader, effects);
     assert!(!leader.durable.summary().is_plain());
     assert_eq!(leader.rollback_replicas(), 5);
+}
+
+/// A volatile follower whose log holds only the bootstrap entry.
+fn volatile_follower() -> (Raft, VolatileLog) {
+    let mut core = core();
+    core.volatile = true;
+    core.incarnation = Raft::next_volatile_incarnation().unwrap();
+    core.role = Role::Follower;
+    let log = VolatileLog::new(core.binding, core.limits).unwrap();
+    (core, log)
+}
+fn command(index: u64) -> LogEntry {
+    LogEntry {
+        index,
+        term: 1,
+        payload: EntryPayload::Command {
+            operation: OperationId::new(u128::from(index)).unwrap(),
+            bytes: vec![index as u8].into(),
+        },
+    }
+}
+fn token(effects: &[Effect]) -> VolatilePersist {
+    let [Effect::PersistVolatile(token)] = effects else {
+        panic!("one payload-free persistence token, got {effects:?}")
+    };
+    *token
+}
+/// Stage a follower append of `from..=to` (commit unchanged).
+fn stage_append(core: &mut Raft, from: u64, to: u64) -> VolatilePersist {
+    let commit = core.state().commit_index;
+    let effects = core
+        .persist(
+            core.state().hard_state,
+            commit,
+            Some(Suffix {
+                from,
+                entries: (from..=to).map(command).collect::<Vec<_>>().into(),
+            }),
+            After::Reply,
+            None,
+        )
+        .unwrap();
+    assert!(!core.pending.as_ref().unwrap().next.is_commit());
+    token(&effects)
+}
+
+#[test]
+fn ordinary_appends_and_commit_rounds_install_without_a_predecessor_comparison() {
+    use crate::log::transition::checked_installs::count;
+    // Volatile: a follower append, then a commit-only round.
+    let (mut replica, log) = volatile_follower();
+    let start = count();
+    let persist = stage_append(&mut replica, 2, 3);
+    persist_volatile(&mut replica, &log, persist).unwrap();
+    let effects = replica
+        .persist(replica.state().hard_state, 3, None, After::Commit, None)
+        .unwrap();
+    assert!(replica.pending.as_ref().unwrap().next.is_commit());
+    persist_volatile(&mut replica, &log, token(&effects)).unwrap();
+    assert_eq!(
+        (replica.state().last_index(), replica.state().commit_index),
+        (3, 3)
+    );
+    // Durable: proposals, their completion and a commit round.
+    let mut leader = core();
+    let effects = leader
+        .propose_batch(
+            (1..=2)
+                .map(|n| Proposal {
+                    operation: OperationId::new(n).unwrap(),
+                    bytes: vec![n as u8],
+                })
+                .collect(),
+        )
+        .unwrap();
+    durable(&mut leader, effects);
+    committed_fixture(&mut leader, 3);
+    assert_eq!(leader.state().commit_index, 3);
+    assert_eq!(count(), start, "an unchanged log was compared again");
+}
+
+#[test]
+fn a_plan_whose_log_version_moved_takes_the_checked_install_and_installs() {
+    use crate::log::transition::checked_installs::count;
+    let (mut replica, log) = volatile_follower();
+    let persist = stage_append(&mut replica, 2, 3);
+    // Moves the version without changing the log: the plan still fits, but
+    // the install can no longer know that without comparing.
+    let version = replica.durable.version();
+    replica.durable.edit(|_| ());
+    assert_ne!(replica.durable.version(), version);
+    let start = count();
+    persist_volatile(&mut replica, &log, persist).unwrap();
+    assert_eq!(count(), start + 1);
+    assert!(!replica.is_fenced());
+    assert_eq!(replica.state().last_index(), 3);
+    assert_eq!(replica.state().entries[1], command(2));
+    assert_eq!(replica.state().entries[2], command(3));
+    assert_eq!(
+        *replica.durable.summary(),
+        LogSummary::from_validated(replica.state())
+    );
+}
+
+/// The core cannot move a plan to another core; if one ever did, the install
+/// must check it in every build, not trust the equal version (here the check
+/// refuses it: the other log is longer).
+#[test]
+fn a_plan_moved_to_another_core_at_the_same_version_is_refused() {
+    use crate::log::transition::checked_installs::count;
+    let (mut short, _) = volatile_follower();
+    stage_append(&mut short, 2, 3);
+    // Another core at the same version (0, freshly recovered) with a longer log.
+    let (mut grown, grown_log) = volatile_follower();
+    let persist = stage_append(&mut grown, 2, 4);
+    persist_volatile(&mut grown, &grown_log, persist).unwrap();
+    let mut other = Raft::recover_volatile(grown.node, &grown_log, grown.state().clone()).unwrap();
+    assert_eq!((short.durable.version(), other.durable.version()), (0, 0));
+    let before = other.state().clone();
+    other.pending = short.pending.take();
+    let start = count();
+    let mut out = VecDeque::new();
+    assert!(matches!(
+        other.install_pending_into(&mut out),
+        Err(RaftError::Storage(StorageError::Rejected(
+            "transition plan predecessor or update mismatch"
+        )))
+    ));
+    assert_eq!(count(), start + 1);
+    assert!(other.is_fenced());
+    assert!(!other.has_pending_dependency());
+    assert_eq!(other.state(), &before);
+    assert_eq!(
+        *other.durable.summary(),
+        LogSummary::from_validated(other.state())
+    );
 }
