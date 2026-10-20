@@ -373,6 +373,21 @@ library edit is `host_wait.rs` `deny(unsafe_code)` → `forbid(unsafe_code)`.
   transfer_service 33, native_benchmark example 63 passed. `native,tls`: 9,
   48, 144, 18, 25, 55 passed. Cluster tests (7) 10 runs in a row in each
   configuration after the abort change: 10/10 and 10/10, no port retries.
+- **Instrument unchanged (quiet Mac M2 Max, 20 October 2026).** The only
+  change to what a node does once open is node 1's per-round check in armed
+  phases (one `SeqCst` store and one load; followers and the drain add
+  nothing). TCP 15,000/s, offers 2,000 and 16,000, release `--all-features`
+  builds of `d0f7a7a7` (A, the baseline binary) and `9e96f1e2` (B), RAM-disk
+  directories, 6 rounds in ABBA order (even, so the order balances), started
+  at load 0.31 / 0.96 (1 / 5 min): 24/24 runs valid, Σ CPU =
+  `RUSAGE_CHILDREN` delta on every run. B/A marginal ratio median 0.989
+  (pairs 0.984, 1.047, 0.994, 0.814, 1.011, 0.900). Marginal µs/write per
+  round, A: 23.02, 22.58, 22.46, 39.73, 43.42, 49.82; B: 22.65, 23.63, 22.32,
+  32.35, 43.88, 44.82. Rounds 0–2 reproduce the published 23.01 µs for both
+  binaries; rounds 3–5 drifted up for both alike (host noise, not the change).
+  CPU/write at 16,000 offers: A 31.7, B 28.8 (medians, drift included). An
+  earlier 5-round run started while the 5-minute load was still 2.4 after the
+  build gave B/A 0.998 and is not used. The baseline table is unchanged.
 - **Unrelated flake (not fixed here; file untouched).**
   `shared::drain::quic_mixed_voter_and_learner_assignments_resume_together`
   (all features), 20 solo runs on cores 10–15 with other agents' suites
