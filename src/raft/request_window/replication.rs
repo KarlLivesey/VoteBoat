@@ -130,15 +130,16 @@ fn same_request(sent: &Replication, m: &Message) -> bool {
 }
 impl RequestWindow {
     pub(super) fn current_replication(&self, core: &Raft) -> bool {
-        let (map, historical) = match self.boundary {
-            Boundary::Append { .. } | Boundary::Snapshot(_) => (&core.requests, false),
-            Boundary::Repair { .. } | Boundary::RepairSnapshot(_) => (&core.repair_requests, true),
+        let (sent, historical) = match self.boundary {
+            Boundary::Append { .. } | Boundary::Snapshot(_) => (
+                core.original_replication(self.recipient.node, self.context, self.configuration),
+                false,
+            ),
+            Boundary::Repair { .. } | Boundary::RepairSnapshot(_) => (
+                core.repair_requests.get(&self.recipient.node).copied(),
+                true,
+            ),
             _ => return false,
-        };
-        let sent = if historical {
-            map.get(&self.recipient.node).copied()
-        } else {
-            core.original_replication(self.recipient.node, self.context, self.configuration)
         };
         let Some(sent) = sent else {
             return false;

@@ -1741,7 +1741,7 @@ implemented or benchmarked; unsafe variants are not offered as options.
 | Done V3c profile: whole-cost profile of the merged V2+V3 tree (`target/claude/research-r4/v3c-profile.md`) | Choose the next whole cost class from a fresh profile instead of adding helpers | V3 merged (`d379783d`) | Re-baseline recorded below; ranked slices with arithmetic | T4 |
 | Done V3c: host-owned effect sink and `ProposalBatch::push` fix (merged 20 October 2026 in PR 16, head 36de6dd0; code head 783265a4; quiet Mac vs `d379783d`, 5 pairs: bulk-16 −1.4%, single-16 −4.7%, bulk-1 −2.1%, single-1 −9.5% CPU per write; driver width 1 −13.2%, allocations 30 → 15 per write) | Every core call returns a fresh `Vec<Effect>` built from nested per-function Vecs, and the matched actor grows and frees a `VecDeque` per call: at width 1 about 30 allocations per write, 9 of them effect vectors (profile §4), ≈ 628 ns/write of allocator time in single-1. The host owns one reusable queue that the core fills in place (`step_into`, `propose_entries_into`, `persist_volatile_into`); the Vec APIs become wrappers. Ride-along: `push` built and dropped an `Exhausted` error on every success (bulk ≈ 1.4%) | Profile above; V3 merged | Effect-sequence oracle (Vec vs sink forms over the twin histories, FIFO insertion of committed intervals); rollback with sentinel effects on refused steps, stale tokens and fenced cores; reused queue keeps its capacity and allocation with no stale effects over 1,000 width-1 rounds; existing effect-order, twin, golden and facts oracles unchanged; driver widths 1/231/515 with allocation counts; quiet-Mac 5 pairs × 4 cells against `d379783d`; attribution controls; fmt, four strict root Clippy builds and the matched workspace. Review round 2 (tests and docs only): granted-vote sentinel and election-reset comparison, each proved by mutating the two queue reads; wrapped-queue late exhaustion; durable, transfer, stale-append, learner-configuration and retirement-reply sink oracles | T4 |
 | Done V3d: per-step recomputation (merged 20 October 2026 in PR 18, head 1fb878da; code head 08ebc5c3, round 2 code head 0ea00498, round 3 code 4ba17fbf; quiet Mac vs `bc8fafb6`, 3 × 5 pairs: single-16 −3.0%, single-1 −1.8 to −3.5%, bulk-16 and bulk-1 flat; driver width 1 −13.0%, instructions −14.4%) | `effect_reservation` rebuilt and compared `LogMetadata` twice per harness step, and every plan and install rebuilt or compared it again (profile slice 2). The core's log changes only at install, so its summary is now kept valid there by type (`SummarizedLog`), plans from its own view skip the comparison, and an install version token skips the predecessor check while nothing changed; a plain log's replica count no longer walks the membership | V3c (same `raft.rs` chain) | Implemented evidence in the V3d sections below: summary/version tracking tests over every mutating path (fail without the bump or refresh), reservation test, unchanged transition/twin/snapshot/truncation/facts/golden tests, fixed-schedule counts and reservation checksums identical, per-site samply attribution, three gate runs, attribution controls, fmt + four strict Clippy builds + matched workspace. Review round 2 (Opus P3s): the install skip is bound to the stamp (log identity and version) of the view the plan came from, so a plan moved to another core is refused in debug and release; moved-version checked install tested; the skip still taken on ordinary appends and commit rounds (test counter); mutation edits recorded exactly; width-1 driver within noise (3 pairs: +0.2% ns, +0.17% instructions). Review round 3 (Sol): 16 B stamps (u64 identity issued once, u64 version, ≈ 584 years each at 10^9/s) that never repeat and fail closed to checked installs, with `observability::unidentified_logs()`; allocator- and version-bound tests in debug and release; nine named mutations; `Pending` 1,088 → 1,104 B; width-1 driver −0.2% ns, +0.25% instructions; single-1 vs `bc8fafb6` still −1.8% (5 pairs) | T4 |
-| Current V3e: peer slots | Outstanding replication per peer in a fixed slot instead of a `BTreeMap` emptied and refilled each round; stack-bounded `peers()` and quorum frontier (profile slice 3: single-1 −2.3 to −3.1%) | V3d (same `raft.rs` chain) | Replication/frontier oracles; quiet-Mac pairs against the V3d merge | T4 |
+| Current V3e: peer slots (branch `cpu/peer-slots`; schema plan "V3e schema plan" below) | Outstanding replication per peer in a fixed slot instead of a `BTreeMap` emptied and refilled each round; a cached peer order and stack-buffered quorum frontier instead of per-broadcast `Vec`s (profile slice 3: single-1 −2.3 to −3.1%, single-16 −1.3 to −1.8%, bulk ~0) | V3d (same `raft.rs` chain) | Slot and frontier oracles against the map form over membership-change, retirement, lagging and truncation histories; no slot for a departed peer; named mutations; driver 1/231/515 with per-site attribution; quiet-Mac gate against `e7520ce1`; fmt, strict Clippy, suites | T4 |
 | Next V3f: in-place install | Install the pending transition through `&mut` and clear it after success instead of moving `Pending` (1,088 B), `OwnedNextLog` and large `Result`s by value (profile slice 4: single-1 −1.9 to −2.5%; V3d's in-place summary write is the first piece) | V3e | A failed install keeps the pending transition intact and fences as today; twin and completion oracles; quiet-Mac pairs | T4 |
 | Following H-a: harness reply index | Bulk cells: the matched harness's `PendingReplies` (SipHash `HashMap<u128,_>`) remove + insert is about 23 ns of 214 per write, harness not library work (profile H-a: bulk −7 to −10%) | Separate harness PR on main with an H2-style fairness review, main re-baselined after; independent of V3e/V3f | Reply-order and fairness tests; OpenRaft engine untouched; quiet-Mac pairs with attribution parity | T4 |
 | Done E1: event-driven host waiting | Fixed-cadence polling dominated CPU at realistic loads; wait on socket readiness, worker wakes and timer deadlines instead | C9 | Linux/Mac idle and loaded CPU pairs; lost-wake stress test; affected suites; fmt + strict Clippy | T4 |
@@ -3712,6 +3712,100 @@ raft --test snapshot --test log_owned --test worker --test runtime` (548 lib,
 1 ignored, + 11/81/27/5/9/57) and all features (550 lib, 1 ignored, + the
 same), one configuration at a time; `--release --lib summarized` 11/11 in
 default and all features; matched tests 75/75 in default and all features.
+
+#### V3e schema plan: per-peer replication slots (20 October 2026)
+
+Brief: `target/claude/research-r4/v3c-profile.md` §§3–5 (slice 3). Branch
+`cpu/peer-slots` from main `12fb21de` (V3d merged at `e7520ce1`; the docs
+commit on top changes no code). Gate base: `e7520ce1`.
+
+Profile cost (`d379783d`, driver width 1 and single-1 running view): the
+leader's outstanding-request map empties and refills every round.
+`retire_replication` → `BTreeMap::remove` 137–152 ns (the last remove frees
+the root node, 75), `append_for` / `receive_appended` insert and get about
+55–60, the per-broadcast `peers()` `Vec` 87–100 (collect 88, drop 11) and
+`quorum::frontier`'s `Vec` collect, sort and free 74–137: about 421 ns per
+single-1 write, 70–95% recoverable.
+
+Mutation sites, read in `12fb21de`:
+
+| Structure | Writers | Readers |
+| --- | --- | --- |
+| `requests: BTreeMap<NodeId, Replication>` | insert: `append_for` (two arms), `replicate_admitted`; remove: `retire_replication` (`receive_appended`, `receive_snapshot_ack`, `receive_compacted`); clear: `clear_replication_requests` (term changes in `receive*`, `campaign`, `configuration_changed`, `become_leader`, step-down after retirement, `After::Compact`, `After::CheckpointCompact`, batched repair promotion, storage failure) | `append_for`, `receive_appended`, `receive_snapshot_ack`, `receive_compacted`, `early_peer`, `original_replication`, `is_empty_alias`, `broadcast_after_admission_into`, `broadcast_ready_peers_into`, `snapshot_send`, `RequestWindow::current_replication` |
+| `admitted_ranges`, `empty_append_aliases` (same keys, native early path) | insert: `replicate_admitted`; remove: `retire_replication`, `consume_empty_alias`, `receive_compacted`; clear: `clear_replication_requests` | `early_peer`, `admitted_entry`, `original_replication`, `is_empty_alias`, `broadcast_after_admission_into` |
+| `peers()` (fresh `Vec` per call) | — | hot: `broadcast_into`, `broadcast_ready_peers_into`, `broadcast_after_admission_into`; cold: `voting_peers`, `initialize_replication`, `retirement_announcements` |
+| `quorum::frontier` (recursive `Vec` per branch) | — | `maybe_commit_into` via `Membership::frontier`; public `Policy::frontier` / `JointPolicy::frontier` |
+
+Every configuration change runs `configuration_changed`, which clears all
+three request maps; so does every leadership change. A membership change
+therefore never carries an outstanding replication across: there is nothing
+to remap, and the slot table is rebuilt from empty, exactly like the maps.
+
+- **Data shape.** `src/raft/peer_slots.rs`: `PeerSlots<T: Copy>` with
+  `slots: Vec<(NodeId, Option<T>)>` sorted by `NodeId` and an `occupied`
+  count. Map-shaped API so every caller and test keeps its form: `get`,
+  `insert`, `remove`, `clear`, `contains_key`, `len`, `is_empty`, `iter`
+  (occupied slots in `NodeId` order, the `BTreeMap` order) and `Index`.
+  `requests`, `admitted_ranges` and `empty_append_aliases` become
+  `PeerSlots<_>`; `repair_requests` (candidate only, cold) stays a map.
+- **Slot invariant.** Keys are unique and sorted; `occupied` equals the
+  number of `Some` values; a key exists only for a peer inserted since the
+  last `clear`. `get`/`len`/`iter` see exactly the `Some` entries, so every
+  read returns what the map returned.
+- **Transitions.** `insert`: binary search; a found slot is overwritten in
+  place, a new key is inserted at its sorted position (no allocation once
+  the capacity has been reached). `remove`: the value is taken and the key
+  kept (a tombstone), so the next round's `insert` for that peer is an
+  in-place write: this is the per-round path, with no allocation or free.
+  `clear`: truncates every key (keeping the capacity).
+- **Lifetime bound.** Production inserts are only for peers of the
+  configuration that `initialize_replication` set up (`append_for` indexes
+  `next_index[&peer]`, `replicate_admitted` requires `early_peer`), and every
+  configuration or leadership change clears. So the key count is at most the
+  current membership's replica count, and no slot survives a departed peer;
+  the capacity is at most the largest replica set since the core started,
+  which `Configuration::new` bounds (`max_voters` plus learners). No
+  counter or lifetime budget.
+- **Peer order.** `peer_order: Vec<NodeId>` with `peer_order_for:
+  Option<ConfigurationId>`: `refresh_peer_order` rebuilds it in place
+  (same `replicas()` order, self excluded) when `membership().id()` differs,
+  and `configuration_changed` and `become_leader` reset it. The three hot
+  broadcasts iterate it by index (they do not change membership). A leader's
+  accepted membership changes only through its own strictly increasing
+  configuration ids, so the id identifies the replica set; debug builds
+  `debug_assert_eq!` the cache against a fresh `peers()` on every use.
+  Bounded by the replica count. Cold callers keep `peers()`.
+- **Frontier.** `quorum::frontier` fills a stack buffer (`[u64; 16]` per
+  majority branch, `[(u64, u64); 16]` per weighted branch) when the branch
+  has at most 16 children and a `Vec` otherwise, then sorts exactly as today.
+  Depth is bounded by `Limits::max_depth`, so the stack use is at most 33
+  levels × 256 B. Same values, same signature. Debug builds compare every
+  result with the old `Vec` implementation (kept under
+  `cfg(debug_assertions)`).
+- **Map oracle.** In debug builds `PeerSlots` also keeps the old
+  `BTreeMap<NodeId, T>` and checks every operation's result and the whole
+  occupied view against it, so every debug test (unit and integration) runs
+  the slot form and the map form side by side.
+- **Failure and cleanup.** No new error. `insert` cannot fail (`Vec::insert`
+  aborts only on allocation failure, as `BTreeMap::insert` did).
+- **Public API.** None. `Replication`, `AdmittedRange` and
+  `EmptyAppendAlias` gain `Debug, PartialEq, Eq` derives (crate-private).
+- **Acceptance.** Existing replication, frontier and commit tests unchanged.
+  New `src/raft/peer_slots_tests.rs`: (1) leader histories with a learner
+  join and a joint change mid-flight (requests outstanding to departing and
+  arriving peers), retirement of the leader, a lagging follower (refusals
+  and next-index backoff), and conflict truncation on a deposed leader that
+  is re-elected; at every step the commit decision equals the one recomputed
+  from the old map frontier, the slot view equals the map oracle, and the
+  slot keys are a subset of the current membership's peers (no departed
+  peer, key count ≤ replica count); (2) a randomized `PeerSlots` versus
+  `BTreeMap` operation history; (3) a randomized frontier comparison over
+  majority and weighted trees with branches of 1–40 children (both the
+  stack and the `Vec` buffers). Named mutation runs with counts. Driver
+  widths 1/231/515 (3 pairs) base vs head with samply per-site attribution
+  at width 1; the four-cell gate (`fwmac.sh e7520ce1 <head> 5`);
+  attribution controls once; fmt, four strict Clippy builds, matched
+  fmt/Clippy, suites.
 
 #### H2 round 2: review fixes (19 October 2026)
 
