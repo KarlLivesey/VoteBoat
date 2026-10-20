@@ -1740,6 +1740,23 @@ fn pump_auto<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy
     }
     panic!("automatic timer history failed to converge");
 }
+/// Propose the first write at 100 ms; every node applies it within the hold
+/// bound (a follower the quorum did not need may get it that much later).
+/// Returns the millisecond by which it has.
+fn replicate_first_write<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
+    nodes: &mut [AutoNode<L, Q, T, E>],
+    leader: usize,
+    delayed: &mut Vec<Message>,
+) -> u64 {
+    nodes[leader].runtime.admit(group(1), proposal(1)).unwrap();
+    pump_auto(nodes, MonoTime(100), None, delayed);
+    let held = 100 + timer_config().append_hold_ms;
+    pump_auto(nodes, MonoTime(held), None, delayed);
+    for n in nodes.iter() {
+        assert_eq!(n.apps[&group(1)].read_applied(2), Ok(7));
+    }
+    held
+}
 fn partition_auto_leader<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
     nodes: &mut [AutoNode<L, Q, T, E>],
     delayed: &mut Vec<Message>,
@@ -1769,14 +1786,7 @@ fn partition_auto_leader<L: LogStore, Q: ReadyScheduler, T: TimerService, E: Ele
         .state()
         .hard_state
         .term;
-    nodes[leader].runtime.admit(group(1), proposal(1)).unwrap();
-    pump_auto(nodes, MonoTime(100), None, delayed);
-    // A follower the quorum did not need gets the write within the hold bound.
-    let held = 100 + timer_config().append_hold_ms;
-    pump_auto(nodes, MonoTime(held), None, delayed);
-    for n in nodes.iter() {
-        assert_eq!(n.apps[&group(1)].read_applied(2), Ok(7));
-    }
+    let held = replicate_first_write(nodes, leader, delayed);
     for ms in held + 1..=250 {
         pump_auto(nodes, MonoTime(ms), Some(leader), delayed);
     }
