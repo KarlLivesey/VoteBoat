@@ -1460,6 +1460,85 @@ Still open from rounds 2–4: snapshot-store barrier fsync (device
 identification); a leader clears in-flight replication requests at
 compaction; pre-vote/check-quorum not added.
 
+#### ST2 round 6 schema plan (written before editing, 20 October 2026)
+
+Claude Opus 5.5's round-5 review (5580087074) requests changes for one P2 and
+three P3s; every earlier finding from both reviewers is confirmed resolved.
+Binding rules unchanged.
+
+**R6-1 (Opus P2-1): followers decline data on the 50% latch, not on bytes.**
+Cause: `decline_new_data` (`src/raft/receive.rs`) declines every new suffix
+carrying data while `storage_pressure` is set, and the node sets it on every
+core for the whole high-water state (entered at 75%, a held batch, a starved
+noop or any refusal/decline; left only below 50% with nothing held). Since
+round 3 the follower also has the exact byte check (`bound <= room.data`), so
+the latch adds no safety and only refuses data that fits: a new leader whose
+noop sits after an old-term tail that two latched followers (occupancy 50–75%,
+uncommitted) lack never commits, and `wal_declined_appends` /
+`wal_noop_refused` stay 0.
+- *Shape.* Where the host gives a WAL room (`wal_room.is_some()`, which a
+  node always does: the high-water state needs a published usage, and the
+  same usage gives the budget), a follower decides on bytes alone: the
+  validated new suffix's bound must fit `room.data` if it carries data,
+  `room.noop` if noop-only. `storage_pressure` is consulted only without a
+  room (a host that gives the latch and no byte account, as the core-only
+  tests do). The 75%/50% hysteresis stays for client admission
+  (`Node::propose`), unchanged. No new state, no new counter.
+- *State transitions.* Unchanged otherwise: a declined append keeps leader
+  contact, term and verified-prefix commit, truncates a conflicting suffix
+  with a control record, sends no reply. The retained-entry check is
+  unchanged.
+- *Proof.* `L <= H + R` follows from the account alone (data `<= H`, noops
+  `<= H + R`, both on the validated new suffix); the latch never entered it.
+- *Acceptance.* Opus's reproduction as a permanent test in
+  `capacity_tests.rs` (three cores, node 1 holds 100 term-1 entries, nodes 2
+  and 3 hold 90; both followers latched with ample room; node 1 campaigns):
+  the leader must commit within `PROGRESS_ROUNDS` (fails on 1a90d7fc: commit
+  0 after 400 rounds) with no decline counted; the one-follower control
+  commits in round 1 on both revisions. A second test pins which counters
+  move in each stuck-quorum case (data short under `H`, noop-only short
+  under `H + R`, retained-entry capacity), so the operator docs can name
+  them exactly.
+
+**R6-2 (Opus P3-1, P3-2): record corrections.** The round-5 evidence row
+says the room is set before every step and completion; it is set only before
+received messages. The round-5 "before" note says the new tests use only API
+cd90fb7a has; `wal_admission_tests.rs` calls `Raft::wal_declined_appends()`
+(new in round 5), so name the one assertion dropped for the old-revision run.
+
+**R6-3 (Opus P3-3): the two unmeasured CPU candidates.**
+- (a) `Node::propose_maintenance` copies the shard's `WalAccount`, reruns
+  `note_budget_refusals` and `update_high_water(wal_usage())` (two relaxed
+  atomic loads and two percentage computations) on every proposal, which
+  `poll` already does once per poll. Change: admission reads the latch the
+  last poll computed (`maintenance.high_water`). Same admission guarantee:
+  the byte bound is enforced at the shard step for every proposal
+  (`WalAccount::over` → `NotProposed(StoragePressure)`, the same retryable
+  `ERR StoragePressure` in all three binaries); the latch may lag the WAL
+  thread's publication by at most one poll, so a proposal that arrives in
+  that window is refused at its step instead of at admission (counted in
+  `wal_refused_proposals` instead of `refused_proposals`). Nothing admitted is
+  dropped; the WAL thread never holds more than before.
+- (b) `Shard::step_next_checked` bookkeeping without a bounded-WAL budget.
+  Checked before editing: neither measured path runs it with `budget ==
+  None`. The framework (`benchmarks/matched`) drives `Raft` cores directly,
+  not the `Shard`; a native serving node always has a budget
+  (`NativeLogStore::physical_usage` is always `Some`). Skipping it would also
+  need a reset path for cores whose budget disappears (their
+  `wal_noop_room` / `wal_room` inputs would otherwise go stale) and a
+  recount of `pending` when a budget appears. So (b) cannot move either
+  number put to the user and adds a state transition; it is not done, and the
+  record says why.
+- *Measured* on the quiet Mac: ST2 serving-only CPU/write against the
+  same-CRC base (rebuilt by cherry-pick: 4920534e + `ba372cb4`, `5c9b6906`,
+  `4be97a91` + `cf3de849`), at least 7 pairs, and the framework single-1 cell
+  (5 pairs) against the merge base 4920534e; plus 1a90d7fc → final for the
+  round's own effect.
+
+**R6-4: docs.** `COUNTER_SERVICE.md` high-water and noop-reserve bullets:
+followers take data that fits under the mark whatever the latch; the stuck
+quorum cases and exactly which counters move in each; node and core comments.
+
 #### Design-pack amendment realised by ST2 (pack preserved)
 
 | Pack text | Amendment |
